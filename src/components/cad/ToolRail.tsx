@@ -41,7 +41,7 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRail
                 >
                   {active && <span className="absolute -left-1.5 h-5 w-0.5 rounded-r bg-primary" />}
                   <Icon className="size-[18px]" strokeWidth={1.65} />
-                  {!collapsed && <span className="absolute bottom-0.5 text-[12px] font-medium uppercase">{tool.label}</span>}
+                  {!collapsed && <span className="absolute bottom-0.5 text-[10px] font-medium uppercase">{tool.label}</span>}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right" className="border border-border bg-popover text-popover-foreground">
