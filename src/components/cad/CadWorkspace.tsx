@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
+import { DemandMenu } from "./DemandMenu";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
