@@ -1,4 +1,4 @@
-import { Bot, Box, Check, ChevronDown, Grid3X3, LayoutGrid, Menu, Mic, PanelRightOpen, Redo2, Rotate3D, Save, Settings, Undo2 } from "lucide-react";
+import { Bot, Box, Check, ChevronDown, Grid3X3, LayoutGrid, Menu, Mic, PanelRightOpen, PanelTop, Redo2, Rotate3D, Save, Settings, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -27,6 +27,7 @@ type TopToolbarProps = {
   grid: boolean;
   snap: boolean;
   navigatorOpen: boolean;
+  demandOpen: boolean;
   onMode: (mode: ViewMode) => void;
   onLayout: (layout: ViewportLayout) => void;
   onGrid: () => void;
