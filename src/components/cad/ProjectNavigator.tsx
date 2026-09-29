@@ -52,7 +52,7 @@ function TreeItem({ node, depth, active, onSelect }: { node: TreeNode; depth: nu
   return (
     <div>
       <div
-        className={cn("group flex h-7 items-center gap-1 rounded-sm pr-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground", active === node.id && "bg-primary/12 text-primary")}
+        className={cn("group flex h-7 items-center gap-1 rounded-sm pr-1 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground", active === node.id && "bg-primary/12 text-primary")}
         style={{ paddingLeft: `${6 + depth * 13}px` }}
       >
         {hasChildren ? (
@@ -60,7 +60,7 @@ function TreeItem({ node, depth, active, onSelect }: { node: TreeNode; depth: nu
             {open ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
           </Button>
         ) : <span className="w-5" />}
-        <Button variant="ghost" className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[11px] font-normal hover:bg-transparent" onClick={() => onSelect(node.id, node.label)}>
+        <Button variant="ghost" className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent" onClick={() => onSelect(node.id, node.label)}>
           <Icon className="size-3.5 shrink-0 opacity-70" />
           <span className="truncate">{node.label}</span>
         </Button>
@@ -81,7 +81,7 @@ export function ProjectNavigator({ active, onSelect, onClose }: ProjectNavigator
     <aside className="glass-panel-strong flex h-full min-w-0 flex-col overflow-hidden rounded-lg" aria-label="Project navigator">
       <header className="flex h-10 items-center justify-between border-b border-border px-3">
         <div>
-          <p className="font-display text-[10px] font-semibold uppercase text-primary">Navigator</p>
+          <p className="font-display text-[12px] font-semibold uppercase text-primary">Navigator</p>
           <p className="text-xs font-medium text-foreground">Project browser</p>
         </div>
         <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onClose} aria-label="Close project navigator"><PanelRightClose className="size-4" /></Button>
@@ -89,7 +89,7 @@ export function ProjectNavigator({ active, onSelect, onClose }: ProjectNavigator
       <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
         {tree.map((node) => <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />)}
       </ScrollArea>
-      <div className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
+      <div className="border-t border-border px-3 py-2 text-[12px] text-muted-foreground">
         <div className="flex justify-between"><span>Model elements</span><span className="font-mono text-foreground">1,248</span></div>
         <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted"><div className="h-full w-2/3 bg-primary/70" /></div>
       </div>
