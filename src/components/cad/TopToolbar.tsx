@@ -1,4 +1,5 @@
 import { Bot, Box, Check, ChevronDown, Grid3X3, LayoutGrid, Menu, Mic, PanelRightOpen, PanelTop, Redo2, Rotate3D, Save, Settings, Undo2 } from "lucide-react";
+import novikovLogo from "@/assets/novikov-logo.png";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -47,7 +48,7 @@ export function TopToolbar(props: TopToolbarProps) {
     <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
       <div className="flex h-11 min-w-0 items-center gap-2 px-2.5">
         <div className="flex min-w-[190px] items-center gap-2 border-r border-border pr-3">
-          <div className="novikov-mark flex size-7 items-center justify-center rounded-md text-primary-foreground" />
+          <img src={novikovLogo} alt="NOVIKOV Logo" width={1024} height={1024} className="size-7 shrink-0 rounded-md object-contain" />
           <div className="min-w-0"><div className="font-display text-[11px] font-semibold text-foreground">NOVIKOV <span className="font-normal text-primary">CAD</span></div><div className="truncate text-[9px] text-muted-foreground">Haus am See · 01</div></div>
         </div>
         <nav className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex" aria-label="Application menu">
