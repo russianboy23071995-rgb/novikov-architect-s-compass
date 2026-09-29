@@ -26,6 +26,7 @@ export function CadWorkspace() {
   const [activeViewport, setActiveViewport] = useState(0);
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
+  const [demandOpen, setDemandOpen] = useState(true);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -60,7 +61,8 @@ export function CadWorkspace() {
   return (
     <TooltipProvider>
       <main className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground">
-        {!fullscreen && <TopToolbar tool={tool} mode={mode} layout={layout} grid={grid} snap={snap} navigatorOpen={navigatorOpen} onMode={setMode} onLayout={(next) => { setLayout(next); setActiveViewport(0); }} onGrid={() => setGrid((value) => !value)} onSnap={() => setSnap((value) => !value)} onNavigator={() => setNavigatorOpen((value) => !value)} onAction={showNotice} />}
+        {!fullscreen && <TopToolbar tool={tool} mode={mode} layout={layout} grid={grid} snap={snap} navigatorOpen={navigatorOpen} demandOpen={demandOpen} onMode={setMode} onLayout={(next) => { setLayout(next); setActiveViewport(0); }} onGrid={() => setGrid((value) => !value)} onSnap={() => setSnap((value) => !value)} onNavigator={() => setNavigatorOpen((value) => !value)} onDemand={() => setDemandOpen((value) => !value)} onAction={showNotice} />}
+        {!fullscreen && <DemandMenu open={demandOpen} />}
         <div className="relative flex min-h-0 flex-1 gap-2">
           {!fullscreen && <ToolRail activeTool={tool} collapsed={railCollapsed} onSelect={selectTool} onToggle={() => setRailCollapsed((value) => !value)} />}
           <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
