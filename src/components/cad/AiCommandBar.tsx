@@ -36,7 +36,7 @@ export function AiCommandBar({ context, onExecute }: AiCommandBarProps) {
 
   if (state === "listening") {
     return (
-      <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-lg border border-primary/35 px-3 py-3">
+      <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-primary/30 px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-9 items-center gap-[3px] px-1" aria-hidden="true">
             {bars.map((height, index) => <span key={index} className="wave-bar w-0.5 rounded-full bg-primary" style={{ height, animationDelay: `${index * 55}ms` }} />)}
@@ -51,7 +51,7 @@ export function AiCommandBar({ context, onExecute }: AiCommandBarProps) {
 
   if (state === "preview") {
     return (
-      <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(560px,calc(100%-32px))] -translate-x-1/2 rounded-lg border border-primary/35 p-3">
+      <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(560px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-primary/30 p-3">
         <div className="flex items-start gap-3">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary"><Bot className="size-4" /></div>
           <div className="min-w-0 flex-1">
@@ -74,7 +74,7 @@ export function AiCommandBar({ context, onExecute }: AiCommandBarProps) {
   }
 
   return (
-    <form className="command-glass absolute bottom-5 left-1/2 z-30 flex w-[min(620px,calc(100%-32px))] -translate-x-1/2 items-center gap-1 rounded-lg border border-border p-1.5" onSubmit={(event) => { event.preventDefault(); interpret(); }}>
+    <form className="command-glass absolute bottom-5 left-1/2 z-30 flex w-[min(620px,calc(100%-32px))] -translate-x-1/2 items-center gap-1 rounded-xl border border-border p-1.5" onSubmit={(event) => { event.preventDefault(); interpret(); }}>
       <div className="flex size-8 shrink-0 items-center justify-center text-primary"><Bot className="size-[18px]" /></div>
       <div className="min-w-0 flex-1">
         <span className="block truncate px-2 text-[9px] text-muted-foreground">Context: {context}</span>

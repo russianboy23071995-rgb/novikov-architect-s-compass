@@ -20,7 +20,7 @@ type ToolRailProps = {
 
 export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRailProps) {
   return (
-    <aside className={cn("glass-panel z-20 flex h-full shrink-0 flex-col border-r border-border transition-[width] duration-200", collapsed ? "w-12" : "w-[76px]")} aria-label="CAD tools">
+    <aside className={cn("glass-panel-strong z-20 flex h-full shrink-0 flex-col overflow-hidden rounded-lg transition-[width] duration-200", collapsed ? "w-12" : "w-[76px]")} aria-label="CAD tools">
       <div className="flex flex-1 flex-col items-center gap-1.5 px-1.5 pt-2">
         {tools.map((tool) => {
           const Icon = tool.icon;
@@ -35,8 +35,8 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRail
                   aria-pressed={active}
                   onClick={() => onSelect(tool.id)}
                   className={cn(
-                    "relative h-11 w-11 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground",
-                    active && "bg-primary/15 text-primary hover:bg-primary/20 hover:text-primary",
+                    "relative h-11 w-11 rounded-md border border-transparent text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-foreground",
+                    active && "border-primary/30 bg-primary/12 text-primary shadow-[inset_0_1px_0_var(--glass-highlight),0_0_18px_color-mix(in_oklab,var(--primary)_12%,transparent)] hover:bg-primary/18 hover:text-primary",
                   )}
                 >
                   {active && <span className="absolute -left-1.5 h-5 w-0.5 rounded-r bg-primary" />}

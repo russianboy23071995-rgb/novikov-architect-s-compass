@@ -42,11 +42,11 @@ function IconControl({ label, children, onClick, active }: { label: string; chil
 export function TopToolbar(props: TopToolbarProps) {
   const current = toolOptions[props.tool];
   return (
-    <header className="glass-panel z-40 shrink-0 border-b border-border">
-      <div className="flex h-10 min-w-0 items-center gap-2 px-2">
+    <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
+      <div className="flex h-11 min-w-0 items-center gap-2 px-2.5">
         <div className="flex min-w-[190px] items-center gap-2 border-r border-border pr-3">
-          <div className="novikov-mark flex size-7 items-center justify-center rounded-sm text-[11px] font-bold text-primary-foreground">N</div>
-          <div className="min-w-0"><div className="text-[11px] font-bold text-foreground">NOVIKOV <span className="font-normal text-muted-foreground">CAD</span></div><div className="truncate text-[9px] text-muted-foreground">Haus am See · 01</div></div>
+          <div className="novikov-mark flex size-7 items-center justify-center rounded-md text-primary-foreground" />
+          <div className="min-w-0"><div className="font-display text-[11px] font-semibold text-foreground">NOVIKOV <span className="font-normal text-primary">CAD</span></div><div className="truncate text-[9px] text-muted-foreground">Haus am See · 01</div></div>
         </div>
         <nav className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex" aria-label="Application menu">
           {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => <Button key={item} variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-normal text-muted-foreground" onClick={() => props.onAction(`${item} menu`)}>{item}</Button>)}
@@ -61,7 +61,7 @@ export function TopToolbar(props: TopToolbarProps) {
           {current.options.map((option) => <Button key={option} variant="outline" size="sm" className="h-6 max-w-36 rounded px-2 text-[9px] font-normal text-muted-foreground" onClick={() => props.onAction(option)}>{option}<ChevronDown className="size-2.5" /></Button>)}
         </div>
         <div className="ml-auto flex items-center gap-0.5">
-          <div className="flex h-8 items-center rounded border border-border bg-background/40 p-0.5">
+          <div className="flex h-8 items-center rounded-md border border-border bg-background/30 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-xl">
             {(["2D", "3D"] as ViewMode[]).map((mode) => <Button key={mode} variant="ghost" size="sm" onClick={() => props.onMode(mode)} className={cn("h-6 rounded-sm px-2 text-[9px]", props.mode === mode && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground")}>{mode === "2D" ? <Grid3X3 /> : <Box />}{mode}</Button>)}
           </div>
           <DropdownMenu>
