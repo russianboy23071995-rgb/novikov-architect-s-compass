@@ -40,4 +40,4 @@ JSON includes `schemaVersion: 1` and `unit: "m"`. Loading validates structure, I
 
 Run `npm test` with Node >=22.6 (native TypeScript stripping); no additional test dependency is needed. `npm run build` builds the existing application.
 
-The agreed NOVIKOV CAD roadmap is: component model (this step), connection to the existing UI, real 3D geometry with openings, IFC exchange, then AI and voice commands. The reference case is a 3.00 m long, 0.36 m thick, 2.80 m high wall with a centred 1.20 m wide, 1.35 m high window and a 0.90 m sill. The next small step is to connect this model to the wall tool and existing view.
+The agreed NOVIKOV CAD roadmap is: component model, connection to the existing UI, real 3D geometry with openings, IFC exchange, then AI and voice commands. The reference case is a 3.00 m long, 0.36 m thick, 2.80 m high wall with a centred 1.20 m wide, 1.35 m high window and a 0.90 m sill. The model is now connected to the wall tool, plan view and properties inspector; see [BIM UI integration](../../components/cad/BIM_UI.md). The next step is real 3D geometry with openings.
