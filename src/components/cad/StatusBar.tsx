@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export function StatusBar({ grid, snap, ortho, selection, onGrid, onSnap, onOrtho }: { grid: boolean; snap: boolean; ortho: boolean; selection: number; onGrid: () => void; onSnap: () => void; onOrtho: () => void }) {
   const toggleClass = (active: boolean) => cn("h-6 rounded-sm px-2 text-[9px] font-normal text-muted-foreground hover:text-foreground", active && "bg-primary/12 text-primary");
-  return <footer className="glass-panel z-40 flex h-7 shrink-0 items-center gap-1 overflow-hidden border-t border-border px-2">
+  return <footer className="glass-panel z-40 flex h-7 shrink-0 items-center gap-1 overflow-hidden rounded-md px-2">
     <div className="hidden min-w-[265px] items-center gap-2 font-mono text-[9px] text-muted-foreground sm:flex"><CrosshairDot /><span>X&nbsp; 12.450</span><span>Y&nbsp; 8.320</span><span>Z&nbsp; 0.000</span></div>
     <div className="h-3 w-px bg-border" /><span className="px-1 text-[9px] text-muted-foreground">mm</span><span className="px-1 font-mono text-[9px] text-muted-foreground">1:100</span><div className="h-3 w-px bg-border" />
     <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}><Grid3X3 /> Grid 100</Button>

@@ -78,10 +78,10 @@ type ProjectNavigatorProps = {
 
 export function ProjectNavigator({ active, onSelect, onClose }: ProjectNavigatorProps) {
   return (
-    <aside className="glass-panel flex h-full min-w-0 flex-col border-l border-border" aria-label="Project navigator">
+    <aside className="glass-panel-strong flex h-full min-w-0 flex-col overflow-hidden rounded-lg" aria-label="Project navigator">
       <header className="flex h-10 items-center justify-between border-b border-border px-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase text-muted-foreground">Navigator</p>
+          <p className="font-display text-[10px] font-semibold uppercase text-primary">Navigator</p>
           <p className="text-xs font-medium text-foreground">Project browser</p>
         </div>
         <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onClose} aria-label="Close project navigator"><PanelRightClose className="size-4" /></Button>

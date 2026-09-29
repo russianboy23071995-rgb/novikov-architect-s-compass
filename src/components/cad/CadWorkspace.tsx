@@ -58,13 +58,13 @@ export function CadWorkspace() {
 
   return (
     <TooltipProvider>
-      <main className="cad-shell flex h-dvh min-h-[560px] flex-col overflow-hidden bg-background text-foreground">
+      <main className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground">
         {!fullscreen && <TopToolbar tool={tool} mode={mode} layout={layout} grid={grid} snap={snap} navigatorOpen={navigatorOpen} onMode={setMode} onLayout={(next) => { setLayout(next); setActiveViewport(0); }} onGrid={() => setGrid((value) => !value)} onSnap={() => setSnap((value) => !value)} onNavigator={() => setNavigatorOpen((value) => !value)} onAction={showNotice} />}
-        <div className="relative flex min-h-0 flex-1">
+        <div className="relative flex min-h-0 flex-1 gap-2">
           {!fullscreen && <ToolRail activeTool={tool} collapsed={railCollapsed} onSelect={selectTool} onToggle={() => setRailCollapsed((value) => !value)} />}
           <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
             <ResizablePanel id="workspace" minSize="55%" defaultSize={navigatorOpen && !fullscreen ? "79%" : "100%"}>
-              <div className="relative h-full min-w-0 bg-workspace">
+              <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager layout={layout} mode={mode} grid={grid} active={activeViewport} onActive={setActiveViewport} onFullscreen={() => setFullscreen((value) => !value)} />
                 <AiCommandBar context={context} onExecute={showNotice} />
                 <div className="pointer-events-none absolute left-3 top-12 z-30 rounded border border-border bg-popover/70 px-2 py-1 font-mono text-[9px] text-muted-foreground opacity-0 backdrop-blur transition-opacity data-[visible=true]:opacity-100" data-visible={notice !== "Ready"}>{notice}</div>
@@ -72,7 +72,7 @@ export function CadWorkspace() {
                 {!navigatorOpen && !fullscreen && <Button variant="outline" size="icon" className="absolute right-3 top-3 z-30 size-8 bg-popover/75" onClick={() => setNavigatorOpen(true)} aria-label="Open project navigator"><PanelRightOpen /></Button>}
               </div>
             </ResizablePanel>
-            {navigatorOpen && !fullscreen && <><ResizableHandle withHandle className="bg-border/70 hover:bg-primary/50" /><ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%"><ProjectNavigator active={activeTree} onClose={() => setNavigatorOpen(false)} onSelect={(id, label) => { setActiveTree(id); setContext(label.includes("Level") ? label : `Selection: ${label}`); showNotice(`${label} selected`); }} /></ResizablePanel></>}
+            {navigatorOpen && !fullscreen && <><ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" /><ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%"><ProjectNavigator active={activeTree} onClose={() => setNavigatorOpen(false)} onSelect={(id, label) => { setActiveTree(id); setContext(label.includes("Level") ? label : `Selection: ${label}`); showNotice(`${label} selected`); }} /></ResizablePanel></>}
           </ResizablePanelGroup>
         </div>
         {!fullscreen && <StatusBar grid={grid} snap={snap} ortho={ortho} selection={tool === "select" ? 3 : 0} onGrid={() => setGrid((value) => !value)} onSnap={() => setSnap((value) => !value)} onOrtho={() => setOrtho((value) => !value)} />}
