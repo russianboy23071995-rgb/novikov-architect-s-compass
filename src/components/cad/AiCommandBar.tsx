@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Bot, Check, Command, Mic, Pencil, X } from "lucide-react";
+import { ArrowUp, Check, Command, Mic, Pencil, X } from "lucide-react";
+import novikovLogo from "@/assets/novikov-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -53,7 +54,7 @@ export function AiCommandBar({ context, onExecute }: AiCommandBarProps) {
     return (
       <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(560px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-primary/30 p-3">
         <div className="flex items-start gap-3">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary"><Bot className="size-4" /></div>
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10"><img src={novikovLogo} alt="NOVIKOV AI" width={1024} height={1024} loading="lazy" className="size-5 object-contain" /></div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase text-primary">AI interpreted command</p>
             <div className="mt-1 flex items-baseline justify-between gap-3"><h3 className="text-sm font-semibold text-foreground">Create Wall</h3><span className="truncate text-[10px] text-muted-foreground">{context}</span></div>
@@ -75,7 +76,7 @@ export function AiCommandBar({ context, onExecute }: AiCommandBarProps) {
 
   return (
     <form className="command-glass absolute bottom-5 left-1/2 z-30 flex w-[min(620px,calc(100%-32px))] -translate-x-1/2 items-center gap-1 rounded-xl border border-border p-1.5" onSubmit={(event) => { event.preventDefault(); interpret(); }}>
-      <div className="flex size-8 shrink-0 items-center justify-center text-primary"><Bot className="size-[18px]" /></div>
+      <div className="flex size-8 shrink-0 items-center justify-center"><img src={novikovLogo} alt="NOVIKOV AI" width={1024} height={1024} loading="lazy" className="size-[18px] object-contain" /></div>
       <div className="min-w-0 flex-1">
         <span className="block truncate px-2 text-[9px] text-muted-foreground">Context: {context}</span>
         <Input ref={inputRef} value={command} onChange={(event) => setCommand(event.target.value)} placeholder="Ask NOVIKOV or enter a command…" aria-label="AI command" className="h-6 border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0" />
