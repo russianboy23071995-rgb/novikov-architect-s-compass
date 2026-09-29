@@ -33,6 +33,7 @@ type TopToolbarProps = {
   onGrid: () => void;
   onSnap: () => void;
   onNavigator: () => void;
+  onDemand: () => void;
   onAction: (text: string) => void;
 };
 
@@ -76,6 +77,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="NOVIKOV AI" onClick={() => props.onAction("AI ready")}><Bot /></IconControl>
           <IconControl label="Voice command" onClick={() => props.onAction("Use the microphone in the command bar")}><Mic /></IconControl>
           <IconControl label="Project navigator" active={props.navigatorOpen} onClick={props.onNavigator}><PanelRightOpen /></IconControl>
+          <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}><PanelTop /></IconControl>
           <IconControl label="Settings" onClick={() => props.onAction("Settings")}><Settings /></IconControl>
           <Button variant="ghost" size="icon" className="size-8" aria-label="User profile"><span className="flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-[9px] font-semibold text-primary">CN</span></Button>
           <Button variant="ghost" size="icon" className="size-8 xl:hidden" aria-label="Menu"><Menu /></Button>
