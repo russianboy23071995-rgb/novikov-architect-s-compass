@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { BimSolidView } from "./BimSolidView";
+import { initialCamera } from "@/lib/bim/geometry";
 import { Box, Crosshair, Expand, Focus, Hand, Minus, Orbit, Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,10 +22,12 @@ function MiniControl({
   label,
   children,
   onClick,
+  disabled = false,
 }: {
   label: string;
   children: React.ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Tooltip delayDuration={300}>
@@ -31,6 +36,7 @@ function MiniControl({
           variant="ghost"
           size="icon"
           onClick={onClick}
+          disabled={disabled}
           className="size-7 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label={label}
         >
@@ -51,7 +57,12 @@ export function CadViewport({
   onFullscreen,
   ...model
 }: CadViewportProps) {
-  const label = mode === "3D" && index === 0 ? "Schematic perspective" : "Level 01 · Plan";
+  const is3D = mode === "3D" && index === 0;
+  const [camera, setCamera] = useState(initialCamera);
+  const [pan, setPan] = useState(false);
+  const zoom = (factor: number) =>
+    setCamera((value) => ({ ...value, zoom: Math.max(0.2, Math.min(5, value.zoom * factor)) }));
+  const label = is3D ? "3D model · Orthographic" : "Level 01 · Plan";
   return (
     <section
       className={cn(
@@ -63,13 +74,18 @@ export function CadViewport({
       aria-label={`${label} viewport`}
     >
       <div className={cn("absolute inset-0", grid && "cad-grid")} />
-      <div
-        className={cn(
-          "absolute inset-x-4 bottom-24 top-16",
-          mode === "3D" && index === 0 && "[transform:rotateX(56deg)_rotateZ(-28deg)]",
+      <div className="absolute inset-x-4 bottom-24 top-16">
+        {is3D ? (
+          <BimSolidView
+            project={model.project}
+            selection={model.selection}
+            camera={camera}
+            onCamera={setCamera}
+            pan={pan}
+          />
+        ) : (
+          <BimPlan {...model} />
         )}
-      >
-        <BimPlan {...model} />
       </div>
       <p className="pointer-events-none absolute left-3 top-12 text-[11px] text-muted-foreground">
         {model.drawing
@@ -79,7 +95,9 @@ export function CadViewport({
               ? "Click start point · Snap 0.10 m"
               : "Click start point · Snap off"
           : mode === "3D" && index === 0
-            ? "Schematic plan preview · 3D solids follow in the next step"
+            ? pan
+              ? "Drag to pan · Wheel to zoom · Select elements in Navigator"
+              : "Drag to orbit · Wheel to zoom · Select elements in Navigator"
             : "Select a wall or window · Dimensions in metres"}
       </p>
       <div className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 px-2 py-1 text-[9px] text-muted-foreground shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
@@ -89,19 +107,23 @@ export function CadViewport({
         {mode === "3D" && index === 0 ? "3D" : "2D"} · {label}
       </div>
       <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
-        <MiniControl label="Pan">
+        <MiniControl label="Pan" disabled={!is3D} onClick={() => setPan(true)}>
           <Hand />
         </MiniControl>
-        <MiniControl label="Orbit">
+        <MiniControl label="Orbit" disabled={!is3D} onClick={() => setPan(false)}>
           <Orbit />
         </MiniControl>
-        <MiniControl label="Zoom in">
+        <MiniControl label="Zoom in" disabled={!is3D} onClick={() => zoom(1.2)}>
           <Plus />
         </MiniControl>
-        <MiniControl label="Zoom out">
+        <MiniControl label="Zoom out" disabled={!is3D} onClick={() => zoom(1 / 1.2)}>
           <Minus />
         </MiniControl>
-        <MiniControl label="Fit view">
+        <MiniControl
+          label="Fit view"
+          disabled={!is3D}
+          onClick={() => setCamera((value) => ({ ...value, zoom: 1, panX: 0, panY: 0 }))}
+        >
           <Focus />
         </MiniControl>
         <MiniControl label="Fullscreen" onClick={onFullscreen}>
@@ -126,7 +148,7 @@ export function CadViewport({
       </div>
       <div className="absolute bottom-2 left-3 flex items-center gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md">
         <Crosshair className="size-3 text-primary" />
-        <span>{mode === "3D" && index === 0 ? "3D Perspective" : label}</span>
+        <span>{mode === "3D" && index === 0 ? "3D Orthographic" : label}</span>
         <span>·</span>
         <span>Level 01</span>
         <span>·</span>
@@ -137,6 +159,11 @@ export function CadViewport({
         size="icon"
         className="absolute bottom-2 right-3 size-7 bg-popover/65 text-muted-foreground"
         aria-label="Reset view"
+        disabled={!is3D}
+        onClick={() => {
+          setCamera(initialCamera);
+          setPan(false);
+        }}
       >
         <RotateCcw />
       </Button>
