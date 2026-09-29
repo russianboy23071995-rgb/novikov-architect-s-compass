@@ -38,6 +38,14 @@ export function CadWorkspace() {
     return () => window.removeEventListener("keydown", handler);
   }, [fullscreen]);
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 760px)");
+    if (media.matches) {
+      setNavigatorOpen(false);
+      setRailCollapsed(true);
+    }
+  }, []);
+
   const showNotice = (message: string) => {
     setNotice(message);
     window.setTimeout(() => setNotice("Ready"), 1800);
@@ -45,7 +53,7 @@ export function CadWorkspace() {
 
   const selectTool = (next: ToolId) => {
     setTool(next);
-    setContext(next === "select" ? "Level 01" : `${next[0].toUpperCase()}${next.slice(1)} tool`);
+    setContext(next === "select" ? "Level 01" : `${next.charAt(0).toUpperCase()}${next.slice(1)} tool`);
   };
 
   return (
