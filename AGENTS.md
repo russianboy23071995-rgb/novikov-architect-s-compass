@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture decisions
+- Keep NOVIKOV CAD prototype interaction state local to `CadWorkspace` and child components because this phase is frontend-only without persistence.
+- Define CAD tools and viewport layouts as typed data so future tool and BIM additions do not require restructuring the shell.
