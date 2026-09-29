@@ -49,10 +49,10 @@ export function TopToolbar(props: TopToolbarProps) {
       <div className="flex h-11 min-w-0 items-center gap-2 px-2.5">
         <div className="flex min-w-[190px] items-center gap-2 border-r border-border pr-3">
           <img src={novikovLogo} alt="NOVIKOV Logo" width={1024} height={1024} className="size-7 shrink-0 rounded-md object-contain" />
-          <div className="min-w-0"><div className="font-display text-[11px] font-semibold text-foreground">NOVIKOV <span className="font-normal text-primary">CAD</span></div><div className="truncate text-[9px] text-muted-foreground">Haus am See · 01</div></div>
+          <div className="min-w-0"><div className="font-display text-[13px] font-semibold text-foreground">NOVIKOV <span className="font-normal text-primary">CAD</span></div><div className="truncate text-[11px] text-muted-foreground">Haus am See · 01</div></div>
         </div>
         <nav className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex" aria-label="Application menu">
-          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => <Button key={item} variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-normal text-muted-foreground" onClick={() => props.onAction(`${item} menu`)}>{item}</Button>)}
+          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => <Button key={item} variant="ghost" size="sm" className="h-7 px-2 text-[12px] font-normal text-muted-foreground" onClick={() => props.onAction(`${item} menu`)}>{item}</Button>)}
         </nav>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
           <IconControl label="Undo" onClick={() => props.onAction("Undo")}><Undo2 /></IconControl>
@@ -60,12 +60,12 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Save project" onClick={() => props.onAction("Project saved")}><Save /></IconControl>
         </div>
         <div className="hidden min-w-0 flex-1 items-center gap-1 lg:flex">
-          <span className="shrink-0 px-2 text-[10px] font-semibold text-foreground">{current.title}</span>
-          {current.options.map((option) => <Button key={option} variant="outline" size="sm" className="h-6 max-w-36 rounded px-2 text-[9px] font-normal text-muted-foreground" onClick={() => props.onAction(option)}>{option}<ChevronDown className="size-2.5" /></Button>)}
+          <span className="shrink-0 px-2 text-[12px] font-semibold text-foreground">{current.title}</span>
+          {current.options.map((option) => <Button key={option} variant="outline" size="sm" className="h-6 max-w-36 rounded px-2 text-[11px] font-normal text-muted-foreground" onClick={() => props.onAction(option)}>{option}<ChevronDown className="size-2.5" /></Button>)}
         </div>
         <div className="ml-auto flex items-center gap-0.5">
           <div className="flex h-8 items-center rounded-md border border-border bg-background/30 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-xl">
-            {(["2D", "3D"] as ViewMode[]).map((mode) => <Button key={mode} variant="ghost" size="sm" onClick={() => props.onMode(mode)} className={cn("h-6 rounded-sm px-2 text-[9px]", props.mode === mode && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground")}>{mode === "2D" ? <Grid3X3 /> : <Box />}{mode}</Button>)}
+            {(["2D", "3D"] as ViewMode[]).map((mode) => <Button key={mode} variant="ghost" size="sm" onClick={() => props.onMode(mode)} className={cn("h-6 rounded-sm px-2 text-[11px]", props.mode === mode && "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground")}>{mode === "2D" ? <Grid3X3 /> : <Box />}{mode}</Button>)}
           </div>
           <DropdownMenu>
             <Tooltip delayDuration={300}><TooltipTrigger asChild><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-8 text-muted-foreground" aria-label="Viewport layout"><LayoutGrid /></Button></DropdownMenuTrigger></TooltipTrigger><TooltipContent>Viewport layout</TooltipContent></Tooltip>
@@ -73,14 +73,14 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenu>
           <IconControl label="Orbit view" onClick={() => props.onAction("Orbit mode")}><Rotate3D /></IconControl>
           <IconControl label="Grid" active={props.grid} onClick={props.onGrid}><Grid3X3 /></IconControl>
-          <Button variant="ghost" size="sm" className={cn("h-8 px-2 text-[9px] text-muted-foreground", props.snap && "bg-primary/15 text-primary")} onClick={props.onSnap}>SNAP</Button>
+          <Button variant="ghost" size="sm" className={cn("h-8 px-2 text-[11px] text-muted-foreground", props.snap && "bg-primary/15 text-primary")} onClick={props.onSnap}>SNAP</Button>
           <div className="mx-1 h-5 w-px bg-border" />
           <IconControl label="NOVIKOV AI" onClick={() => props.onAction("AI ready")}><Bot /></IconControl>
           <IconControl label="Voice command" onClick={() => props.onAction("Use the microphone in the command bar")}><Mic /></IconControl>
           <IconControl label="Project navigator" active={props.navigatorOpen} onClick={props.onNavigator}><PanelRightOpen /></IconControl>
           <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}><PanelTop /></IconControl>
           <IconControl label="Settings" onClick={() => props.onAction("Settings")}><Settings /></IconControl>
-          <Button variant="ghost" size="icon" className="size-8" aria-label="User profile"><span className="flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-[9px] font-semibold text-primary">CN</span></Button>
+          <Button variant="ghost" size="icon" className="size-8" aria-label="User profile"><span className="flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-[11px] font-semibold text-primary">CN</span></Button>
           <Button variant="ghost" size="icon" className="size-8 xl:hidden" aria-label="Menu"><Menu /></Button>
         </div>
       </div>
