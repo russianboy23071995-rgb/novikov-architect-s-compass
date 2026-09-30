@@ -31,8 +31,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Select a wall, window or line to edit its properties. Use Wall or Line and click points to
-        draw.
+        Wand, Fenster oder Linie auswählen, um die Eigenschaften hier zu bearbeiten.
       </p>
     );
   const fields = wall
@@ -58,15 +57,13 @@ export function BimInspector({ project, selection, onChange }: Props) {
     }
   };
   return (
-    <section className="border-t border-border p-3" aria-label="Element properties">
-      <h2 className="mb-1 text-sm font-semibold">
-        {wall ? "Wall properties" : "Window properties"}
-      </h2>
-      <p className="mb-3 break-all font-mono text-[10px] text-muted-foreground">
+    <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Element properties">
+      <h2 className="text-sm font-semibold">{wall ? "Wall properties" : "Window properties"}</h2>
+      <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">
         {wall?.id ?? opening?.id}
       </p>
       {opening && (
-        <p className="mb-2 break-all text-xs text-muted-foreground">Wall: {opening.wallId}</p>
+        <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
       <form
         onSubmit={(event) => {
@@ -92,7 +89,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
             onChange(changed, selection);
           });
         }}
-        className="space-y-2"
+        className="flex flex-wrap items-end gap-2"
       >
         {fields.map(([name, label, value]) => (
           <label key={name} className="block text-xs">
@@ -103,11 +100,11 @@ export function BimInspector({ project, selection, onChange }: Props) {
               step="any"
               required
               defaultValue={value}
-              className="mt-1 h-8"
+              className="mt-1 h-8 w-28"
             />
           </label>
         ))}
-        <Button type="submit" size="sm" className="w-full">
+        <Button type="submit" size="sm" className="shrink-0">
           Apply dimensions
         </Button>
       </form>
@@ -115,7 +112,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
         <Button
           variant="outline"
           size="sm"
-          className="mt-2 w-full"
+          className="shrink-0"
           onClick={() =>
             run(() => {
               const id = `window-${crypto.randomUUID()}`;
@@ -141,7 +138,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
           {error}
         </p>
       )}
-      <p className="mt-3 text-[10px] text-muted-foreground">
+      <p className="text-[10px] text-muted-foreground">
         Dimensions in metres. Use Save project to keep applied changes as JSON.
       </p>
     </section>

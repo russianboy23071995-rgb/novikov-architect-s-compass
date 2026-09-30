@@ -5,6 +5,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { DemandMenu } from "./DemandMenu";
+import { BimInspector } from "./BimInspector";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
@@ -62,7 +63,8 @@ export function CadWorkspace() {
   const [activeViewport, setActiveViewport] = useState(0);
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
-  const [demandOpen, setDemandOpen] = useState(true);
+  const [demandOpen, setDemandOpen] = useState(false);
+  const propertiesRef = useRef<HTMLElement>(null);
   const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
@@ -130,7 +132,6 @@ export function CadWorkspace() {
     setWallStart(null);
     setLinePoints([]);
     setModelError("");
-    if (next) setNavigatorOpen(true);
   };
 
   const changeProject = (next: Project, selected: Selection) => {
@@ -358,41 +359,53 @@ export function CadWorkspace() {
             onPosition={setDemandPosition}
             onInfo={() => {
               setFullscreen(false);
-              setNavigatorOpen(true);
+              propertiesRef.current?.focus();
             }}
           />
         )}
-        {tool === "line" && mode === "2D" && (
-          <section
-            aria-label="Linienwerkzeug"
-            className="glass-panel-strong flex flex-wrap items-end gap-3 rounded-lg px-3 py-2"
-          >
-            <label className="text-xs">
-              Zeichenmodus
-              <select
-                aria-label="Zeichenmodus"
-                className="block rounded border bg-background p-1"
-                value={lineKind}
-                onChange={(e) => {
-                  setLineKind(e.target.value as "line" | "polyline");
-                  setLinePoints([]);
-                  setModelError("");
-                }}
-              >
-                <option value="line">Linie</option>
-                <option value="polyline">Polylinie</option>
-              </select>
-            </label>
-            <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
-            <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
-            {lineKind === "polyline" && (
-              <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
-            )}
-            <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
-              Zeichnen abbrechen
-            </Button>
-          </section>
-        )}
+        <section
+          ref={propertiesRef}
+          tabIndex={-1}
+          aria-label="Werkzeugeigenschaften"
+          className="glass-panel-strong shrink-0 max-h-[35vh] overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <h2 className="mb-1 text-xs font-semibold">Werkzeugeigenschaften</h2>
+          {tool === "line" && mode === "2D" ? (
+            <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
+              <label className="text-xs">
+                Zeichenmodus
+                <select
+                  aria-label="Zeichenmodus"
+                  className="block rounded border bg-background p-1"
+                  value={lineKind}
+                  onChange={(e) => {
+                    setLineKind(e.target.value as "line" | "polyline");
+                    setLinePoints([]);
+                    setModelError("");
+                  }}
+                >
+                  <option value="line">Linie</option>
+                  <option value="polyline">Polylinie</option>
+                </select>
+              </label>
+              <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
+              <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
+              {lineKind === "polyline" && (
+                <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+                Zeichnen abbrechen
+              </Button>
+            </section>
+          ) : (
+            <BimInspector
+              key={JSON.stringify([selection, project])}
+              project={project}
+              selection={selection}
+              onChange={changeProject}
+            />
+          )}
+        </section>
         <div className="relative flex min-h-0 flex-1 gap-2">
           {!fullscreen && (
             <ToolRail
@@ -487,8 +500,6 @@ export function CadWorkspace() {
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
                     project={project}
-                    selection={selection}
-                    onChange={changeProject}
                     active={selection?.id ?? project.storey.id}
                     onClose={() => setNavigatorOpen(false)}
                     onSelect={(id) => {

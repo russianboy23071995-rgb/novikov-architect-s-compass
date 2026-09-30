@@ -53,7 +53,7 @@ export function DemandMenu({
       role="region"
       aria-label="Elementmenü"
       data-testid="demand-menu"
-      className="glass-panel-strong fixed z-50 w-60 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-2 text-xs shadow-lg"
+      className="glass-panel-strong fixed z-50 w-44 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-2 text-xs shadow-lg"
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)" }}
     >
       <button
@@ -109,10 +109,9 @@ export function DemandMenu({
       >
         ⠿ {summary.title}
       </button>
-      <p className="break-all font-mono">{selection.id}</p>
-      <p className="my-2">{summary.details}</p>
+
       <button type="button" onClick={onInfo} className="rounded border px-3 py-1 hover:bg-muted">
-        Info anzeigen
+        Werkzeugeigenschaften
       </button>
     </div>
   );

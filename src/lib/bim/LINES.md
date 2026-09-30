@@ -17,3 +17,7 @@ Die Linien sind reine 2D-Zeichenelemente und erscheinen nicht als 3D-Körper. De
 ## Prüfung
 
 Neun zusätzliche Tests decken Geometrie/Stile, Polylinienlänge, ungültige Punkte, globale IDs, alte/neue JSON-Dateien, Undo/Redo, Ansichtsausdehnung und Snap/Ortho, Abbruchdarstellung sowie den Ausschluss aus 3D/IFC und Wandbefehlen ab. Insgesamt 81 Tests, TypeScript, gezieltes ESLint und Produktionsbuild.
+
+## Werkzeugeigenschaften
+
+Die Linienvoreinstellungen sowie die Eigenschaften einer angeklickten Linie stehen jetzt in der festen Leiste **Werkzeugeigenschaften** unter der Hauptmenüleiste. Farbe, Strichstärke und Strichart dort einstellen und **Linienstil übernehmen** wählen. Dezimalkomma und Dezimalpunkt werden akzeptiert (z.B. 0,70 oder 0.70 mm); unvollständige oder ungültige Werte verändern das Modell nicht. Der Navigator dient nur der Auswahl/Projektstruktur. Das schwebende Elementmenü ist standardmäßig ausgeblendet und optional über die Toolbar verfügbar.

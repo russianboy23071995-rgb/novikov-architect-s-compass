@@ -1,5 +1,12 @@
 import type { DrawingLine } from "./model.ts";
 export type LineAppearance = Pick<DrawingLine, "color" | "penWidth" | "style">;
+/** Accept German decimal input without normalizing the text while typing. */
+export function parsePenWidth(text: string): number {
+  const normalized = text.trim().replace(",", ".");
+  if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(normalized)) return NaN;
+  const value = Number(normalized);
+  return value >= 0.05 && value <= 2 ? value : NaN;
+}
 export const defaultLineAppearance: LineAppearance = {
   color: "#334155",
   penWidth: 0.25,

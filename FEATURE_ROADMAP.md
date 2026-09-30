@@ -37,6 +37,25 @@ Ein ausgewähltes Element soll in der 3D-Ansicht durch eine dezente Umrandung ei
 
 Für F11 und F12 ist in diesem Schritt nur die Aufnahme in die To-do-Liste gewünscht, keine sofortige Implementierung.
 
+### F13 Hilfliniensystem — offen, für einen geeigneten späteren Schritt
+
+Die vollständige nachgereichte Spezifikation einschließlich aller acht Akzeptanztests ist in [F13_HILFLINIENSYSTEM.md](F13_HILFLINIENSYSTEM.md) abgelegt. Ziel ist ein eigenständiges intelligentes Raster-, Fang- und Tracking-System mit einem Bediengefühl wie in etablierten Architektur-CAD-Systemen. Status: geplant, noch nicht implementiert.
+
+- Geometrische Fangpunkte erkennen: Start-/End-/Eck-/Mittel-/Segmentmittelpunkte, Schnittpunkte, Kreis-/Bogenmittelpunkte, Tangential-/Lotpunkte, Punkte auf Kanten, Raster- und benutzerdefinierte Referenzpunkte.
+- Referenzpunkte ohne Klick durch Hover und konfigurierbare Verweildauer aktivieren (beispielsweise 300–500 ms). Mehrere Referenzen gleichzeitig halten und ihre Hilfslinienschnittpunkte exakt berechnen, etwa horizontal von A und vertikal von B.
+- Temporäre horizontale, vertikale, parallele, lotrechte und kollineare Führungen, Verlängerungen, Fluchten, Achsen, Winkel, Tangenten und Abstandsbezüge anbieten. Mausbewegung erkennt die Absicht; das berechnete Ergebnis muss mathematisch exakt sein.
+- Kandidaten nach Abstand, Winkelabweichung, Bewegungsrichtung, zuletzt aktivierten Referenzen, Geometrienähe, Relevanz und Werkzeug priorisieren. Konfigurierbare Fangprioritäten, Toleranzen und Hysterese mit größerem Release-Radius verhindern Springen und Flackern.
+- Winkeltracking mit 0°, 30°, 45°, 60°, 90°, 120°, 135°, 150°, 180° und 270°; beliebige Intervalle und benutzerdefinierte Winkel unterstützen.
+- Klare, dezente Symbole für erkannte/aktivierte Punkte, Hilfslinien, bevorzugte Beziehungen und resultierende Fang-/Schnittpunkte. Nur relevante Hilfen anzeigen; temporäre Hilfen bleiben visuell von Modellgeometrie unterscheidbar. Die Kontrolle bleibt beim Benutzer.
+- Zentrale, werkzeugunabhängige Snap-/Tracking-Engine mit getrennter Geometriesuche, Kandidatenerkennung, Referenzverwaltung, Constraints, Winkeltracking, Bewertung, Darstellung und Einstellungen. Ausgabe unter anderem Roh-/Fangposition, Fangtyp, Quell-Element-/Punkt-ID, Referenz, Constraint, Winkel, Abstand, Priorität und visuelle Hilfen; keine endgültige Modellgeometrie erzeugen.
+- Räumlicher Index und lokale Abfragen statt vollständiger Modellsuche bei jeder Mausbewegung. Pixelbasierte Fangtoleranzen bleiben zoomunabhängig; Modellpositionen bleiben exakt.
+- Explizite Zustände von IDLE bis SNAP_LOCKED und Regeln zum Entfernen temporärer Referenzen bei Abschluss, Escape, Werkzeugwechsel, explizitem Löschen, Timeout oder Referenzlimit. Zentrale Schalter und Einstellungen für Fangarten, Tracking, Radien, Hoverzeit, Sichtbarkeit, Winkeltoleranz, eigene Winkel und maximale Referenzanzahl.
+- Erweiterbarkeit für 3D-, Ebenen-/Flächenfang, BIM-Achsraster, temporäre Maßketten, Abstandstracking, Bogenverlängerungen, Tangentialkonstruktionen, Wandachsen, Geschoss-/Höhenbezüge, Z-Tracking und Fangfilter vorsehen.
+
+Geeignete Umsetzung: zunächst vorhandene Geometrie-, Pointer-, Viewport-, Werkzeug- und Rendering-Systeme analysieren und wiederverwenden. Danach reale Engine und Zustandslogik entwickeln und testen, erst anschließend visuelles Feedback anbinden. Die 2D-Grundlage bei der weiteren Präzisionsbearbeitung (F03/F04) einplanen; Kreis-/Bogen- und 3D-Funktionen mit den jeweils benötigten Geometrien stufenweise ergänzen. Keine parallelen Ersatzsysteme oder Mock-Geometrie. Diese Einordnung ist eine Entwicklungsplanung, keine Einschränkung der vollständigen Anforderungen.
+
+Abnahme umfasst mindestens Hover-Aktivierung an einer Wandecke, Schnittpunkt zweier Referenzen, exakte Parallel-/Lot-/45°-Konstruktion, stabile Auswahl konkurrierender Fangpunkte, gleichbleibende Bildschirmtoleranz bei Zoom sowie flüssige Bedienung großer Modelle. Einzelne Teilimplementierungen nicht als vollständigen Abschluss von F13 markieren.
+
 ## Bedienungsnachtrag
 
 Polylinien werden auf Nutzerwunsch per Doppelklick am letzten Punkt abgeschlossen; der Abschlussbutton entfällt. Enter ist die Tastaturalternative. Das beendet den Linienzug, schließt ihn aber nicht automatisch zu einer Fläche.
@@ -44,3 +63,13 @@ Polylinien werden auf Nutzerwunsch per Doppelklick am letzten Punkt abgeschlosse
 F02: Das Elementmenü folgt der gemeinsamen Auswahl in Grundriss, 3D und Navigator, bleibt bei Eigenschaftenänderungen an seiner verschobenen Position und verschwindet bei Abwahl/Zeichnen. Die Toolbar kann es ausblenden. Info öffnet die vorhandenen Eigenschaften. Die Menüposition ist nur Sitzungszustand.
 
 Prüfung dieses Schritts: 84 automatisierte Tests bestanden; TypeScript, gezieltes ESLint und Produktionsbuild erfolgreich. Browserprüfung: Doppelklick auf neuen Endpunkt ergibt drei Punkte ohne Duplikat; Abschluss mit nur einem Punkt bleibt ohne Modelländerung; Enter-Alternative; Undo/Redo als eine Änderung; Menü für Wand/Fenster/Polylinie, Verschieben mit Maus und Pfeiltasten, Info öffnet Navigator auch aus Vollbild; 3D-Wandklick liefert dieselbe ID; Maßänderung aktualisiert Info ohne Menüversatz. Fenster werden in 3D weiterhin über den Navigator ausgewählt. F03 Bewegen/Strecken sowie F11/F12 bleiben offen.
+
+## Aktualisierung: Werkzeugeigenschaften und Linienbedienung
+
+Auf Nutzerwunsch gibt es unter der Hauptmenüleiste eine zweite, feste Leiste **Werkzeugeigenschaften**. Alle bestehenden Eigenschaften ausgewählter Wände, Fenster, Linien und Polylinien werden dort bearbeitet; auch die Voreinstellungen des Linienwerkzeugs liegen dort. Der Navigator enthält nur noch die Projektstruktur. Die Leiste bleibt bei geschlossenem Navigator und im Vollbild zugänglich und kann bei wenig Platz umbrechen bzw. scrollen. Künftige Elementtypen sollen ihre Eigenschaften ebenfalls dort bereitstellen.
+
+Dies aktualisiert F02/F03: Das schwebende Elementmenü ist standardmäßig aus und bleibt über die Toolbar optional erreichbar. Es enthält keine duplizierten Maße mehr; sein Eigenschaften-Verweis fokussiert die obere Leiste. Die automatische große Einblendung bei Auswahl entfällt. Geometrisches Bewegen/Strecken bleibt offen.
+
+Linienauswahl: Der zusätzliche Browser-Fokusrahmen des SVG-Treffpfads wird unterdrückt; eine dezente Auswahlmarkierung bleibt erhalten. Strichstärken lassen sich mit Dezimalkomma oder Dezimalpunkt eingeben, ohne Zwischenwerte beim Tippen umzuschreiben. Ungültige/unvollständige Werte werden beim Übernehmen abgewiesen. Farbe, Strichstärke und Strichart werden gemeinsam übernommen und bleiben über Undo/Redo und JSON erhalten.
+
+Validierung: 86 automatisierte Tests bestanden, TypeScript, gezieltes ESLint und Produktionsbuild erfolgreich. Browserprüfung: Linienauswahl ohne automatisches Menü und ohne SVG-Fokusrahmen; Farbe/Strichstärke/Strichart gemeinsam übernommen; Komma-/Punkteingaben; ungültiger Zwischenwert abgewiesen; Undo/Redo; Wand-/Fensteränderung oben; Eigenschaften bei geschlossenem Navigator und im Vollbild; optionaler Menüverweis fokussiert die Leiste.

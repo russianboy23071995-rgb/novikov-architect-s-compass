@@ -8,7 +8,7 @@ import {
   deserializeProject,
 } from "./model.ts";
 import type { DrawingLine } from "./model.ts";
-import { defaultLineAppearance, lineLength, linePath } from "./lines.ts";
+import { defaultLineAppearance, lineLength, linePath, parsePenWidth } from "./lines.ts";
 import {
   createHistory,
   commitProject,
@@ -161,4 +161,31 @@ test("2D lines do not become 3D solids or IFC walls and cannot receive wall comm
     () => previewCommand(next, { kind: "line", id: line.id }, "Wandlänge 6 m"),
     /Wand auswählen/,
   );
+});
+
+test("pen width accepts German commas and decimal points, rejecting partial or invalid input", () => {
+  for (const text of ["0,05", "0.05", ",05", ".05"]) assert.equal(parsePenWidth(text), 0.05);
+  assert.equal(parsePenWidth(" 0,70 "), 0.7);
+  assert.equal(parsePenWidth("2"), 2);
+  for (const text of ["", " ", "0,", "1.", "0", "-1", "2,01", "0,7mm", "1,2.3", "Infinity", "NaN"])
+    assert.ok(Number.isNaN(parsePenWidth(text)), text);
+});
+test("all line style edits can be committed together without changing geometry and survive undo and JSON", () => {
+  const p = addLine(createExampleProject(), line);
+  const changed = updateLine(p, line.id, {
+    color: "#dc2626",
+    penWidth: parsePenWidth("0,70"),
+    style: "dashed",
+  });
+  const restored = deserializeProject(serializeProject(changed));
+  assert.deepEqual(restored.storey.lines![0], {
+    ...line,
+    color: "#dc2626",
+    penWidth: 0.7,
+    style: "dashed",
+  });
+  const history = commitProject(createHistory(p), changed);
+  assert.deepEqual(undoProject(history).present, p);
+  assert.deepEqual(redoProject(undoProject(history)).present, changed);
+  assert.throws(() => updateLine(changed, line.id, { penWidth: parsePenWidth("0,") }));
 });

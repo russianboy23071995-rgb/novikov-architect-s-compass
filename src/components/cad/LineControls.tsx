@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { updateLine } from "@/lib/bim/model";
 import type { DrawingLine, Project } from "@/lib/bim/model";
 import type { LineAppearance } from "@/lib/bim/lines";
-import { lineLength } from "@/lib/bim/lines";
+import { lineLength, parsePenWidth } from "@/lib/bim/lines";
 import type { Selection } from "./bim-view";
 
 export function LineStyleFields({
@@ -13,6 +13,9 @@ export function LineStyleFields({
   value: LineAppearance;
   onChange: (value: LineAppearance) => void;
 }) {
+  const [widthText, setWidthText] = useState(() =>
+    Number.isFinite(value.penWidth) ? String(value.penWidth).replace(".", ",") : "",
+  );
   return (
     <div className="flex flex-wrap items-end gap-2 text-xs">
       <label>
@@ -45,12 +48,14 @@ export function LineStyleFields({
         <input
           aria-label="Strichstärke (mm)"
           className="block w-20 rounded border bg-background p-1"
-          type="number"
-          min="0.05"
-          max="2"
-          step="0.05"
-          value={Number.isNaN(value.penWidth) ? "" : value.penWidth}
-          onChange={(e) => onChange({ ...value, penWidth: e.target.valueAsNumber })}
+          type="text"
+          inputMode="decimal"
+
+          value={widthText}
+          onChange={(e) => {
+            setWidthText(e.target.value);
+            onChange({ ...value, penWidth: parsePenWidth(e.target.value) });
+          }}
         />
       </label>
       <label>
@@ -85,15 +90,17 @@ export function LineInspector({
   });
   const [error, setError] = useState("");
   return (
-    <section className="border-t p-3" aria-label="Linieneigenschaften">
+    <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Linieneigenschaften">
       <h2 className="text-sm font-semibold">{line.kind === "line" ? "Linie" : "Polylinie"}</h2>
-      <p className="my-2 break-all text-[10px]">{line.id}</p>
-      <p className="mb-2 text-xs">
+      <p title={line.id} className="max-w-48 truncate text-[10px]">
+        {line.id}
+      </p>
+      <p className="text-xs">
         {lineLength(line).toFixed(2)} m · {line.points.length} Punkte · nur 2D
       </p>
       <LineStyleFields value={value} onChange={setValue} />
       <Button
-        className="mt-3"
+        className="shrink-0"
         size="sm"
         onClick={() => {
           try {

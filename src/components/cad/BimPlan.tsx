@@ -154,7 +154,7 @@ export function BimPlan({
               fill="none"
               stroke="#38bdf8"
               strokeOpacity={0.4}
-              strokeWidth={8}
+              strokeWidth={5}
               vectorEffect="non-scaling-stroke"
               pointerEvents="none"
             />
@@ -175,7 +175,7 @@ export function BimPlan({
             stroke="transparent"
             strokeWidth={12}
             vectorEffect="non-scaling-stroke"
-            className="cursor-pointer focus:stroke-sky-300/40"
+            className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
           />
         </g>
       ))}

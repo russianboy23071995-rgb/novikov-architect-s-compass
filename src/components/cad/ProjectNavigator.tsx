@@ -16,8 +16,6 @@ import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
 import type { Project } from "@/lib/bim/model";
 import { wallLength } from "@/lib/bim/model";
-import { BimInspector } from "./BimInspector";
-import type { Selection } from "./bim-view";
 
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;
@@ -88,21 +86,13 @@ function TreeItem({
 
 type ProjectNavigatorProps = {
   project: Project;
-  selection: Selection;
-  onChange: (project: Project, selection: Selection) => void;
+
   active: string;
   onSelect: (id: string, label: string) => void;
   onClose: () => void;
 };
 
-export function ProjectNavigator({
-  active,
-  onSelect,
-  onClose,
-  project,
-  selection,
-  onChange,
-}: ProjectNavigatorProps) {
+export function ProjectNavigator({ active, onSelect, onClose, project }: ProjectNavigatorProps) {
   const modelTree: TreeNode[] = [
     {
       id: project.id,
@@ -160,12 +150,6 @@ export function ProjectNavigator({
         {modelTree.map((node) => (
           <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
         ))}
-        <BimInspector
-          key={JSON.stringify([selection, project])}
-          project={project}
-          selection={selection}
-          onChange={onChange}
-        />
       </ScrollArea>
       <div className="border-t border-border px-3 py-2 text-[12px] text-muted-foreground">
         <div className="flex justify-between">
