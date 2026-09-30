@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -10,7 +10,23 @@ import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
-import { addWall } from "@/lib/bim/model";
+import { addWall, serializeProject } from "@/lib/bim/model";
+import {
+  commitProject,
+  createHistory,
+  undoProject,
+  redoProject,
+  readProjectFile,
+  PROJECT_FILE_LIMIT,
+} from "@/lib/bim/history";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { exportIfc } from "@/lib/bim/ifc";
 import { applyCommand } from "@/lib/bim/commands";
 import type { Point, Project } from "@/lib/bim/model";
@@ -27,7 +43,11 @@ export function CadWorkspace() {
   const [ortho, setOrtho] = useState(false);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
-  const [project, setProject] = useState(createExampleProject);
+  const [history, setHistory] = useState(() => createHistory(createExampleProject()));
+  const project = history.present;
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
+  const [readingFile, setReadingFile] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [modelError, setModelError] = useState("");
@@ -97,9 +117,56 @@ export function CadWorkspace() {
   };
 
   const changeProject = (next: Project, selected: Selection) => {
-    setProject(next);
+    setHistory((current) => commitProject(current, next));
     selectElement(selected);
     showNotice("Model updated");
+  };
+
+  const navigateHistory = (direction: "undo" | "redo") => {
+    setHistory(direction === "undo" ? undoProject : redoProject);
+    selectElement(null);
+    setExportMessage("");
+  };
+
+  const saveProject = () => {
+    try {
+      const url = URL.createObjectURL(
+        new Blob([serializeProject(project)], { type: "application/json" }),
+      );
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "novikov-project.json";
+      document.body.appendChild(anchor);
+      try {
+        anchor.click();
+      } finally {
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      setExportMessage(
+        "Projektdatei erstellt · Download angefordert. Noch nicht übernommene Eingaben sind nicht enthalten.",
+      );
+      setModelError("");
+    } catch {
+      setModelError("Projekt konnte nicht exportiert werden. Das Modell bleibt erhalten.");
+    }
+  };
+
+  const openProjectFile = async (file: File) => {
+    if (readingFile) return;
+    setReadingFile(true);
+    setModelError("");
+    try {
+      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist größer als 10 MB.");
+      const next = readProjectFile(await file.text());
+      setPendingFile({ project: next, name: file.name });
+    } catch (error) {
+      setModelError(
+        error instanceof Error ? error.message : "Projektdatei konnte nicht gelesen werden.",
+      );
+    } finally {
+      setReadingFile(false);
+    }
   };
 
   const drawPoint = (point: Point) => {
@@ -148,6 +215,52 @@ export function CadWorkspace() {
   return (
     <TooltipProvider>
       <main className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".json,application/json"
+          aria-label="Projektdatei auswählen"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void openProjectFile(file);
+          }}
+        />
+        <Dialog
+          open={Boolean(pendingFile)}
+          onOpenChange={(open) => {
+            if (!open) setPendingFile(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Projektdatei laden?</DialogTitle>
+              <DialogDescription>
+                {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
+                {pendingFile?.project.storey.windows.length} Fenster. Ersetzt das aktuelle Modell.
+                Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
+                Formulareingaben werden verworfen.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPendingFile(null)}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => {
+                  if (pendingFile) {
+                    changeProject(pendingFile.project, null);
+                    setExportMessage("Projektdatei geladen.");
+                    setPendingFile(null);
+                  }
+                }}
+              >
+                Projekt laden
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         {!fullscreen && (
           <TopToolbar
             tool={tool}
@@ -173,6 +286,14 @@ export function CadWorkspace() {
             onAction={showNotice}
             onExportIfc={downloadIfc}
             exportingIfc={exportingIfc}
+            onSave={saveProject}
+            onOpen={() => {
+              if (!readingFile) fileInput.current?.click();
+            }}
+            onUndo={() => navigateHistory("undo")}
+            onRedo={() => navigateHistory("redo")}
+            canUndo={history.past.length > 0}
+            canRedo={history.future.length > 0}
           />
         )}
         {!fullscreen && <DemandMenu open={demandOpen} />}

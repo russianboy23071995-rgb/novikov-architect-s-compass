@@ -37,7 +37,7 @@ The eight fixtures cover the reference model, changed wall dimensions, diagonal/
 
 ## Scope and next step
 
-This is the first export-only step in the agreed IFC exchange stage. Windows have semantic dimensions and openings but no fabricated frame/glass body. Walls are independent solids without wall-junction unions. No IFC import, georeferencing, material specification, quantity takeoff or model-view certification is claimed. Session reload still resets the UI model; the IFC file is not a substitute for editable project save/load.
+This is the first export-only step in the agreed IFC exchange stage. Windows have semantic dimensions and openings but no fabricated frame/glass body. Walls are independent solids without wall-junction unions. No IFC import, georeferencing, material specification, quantity takeoff or model-view certification is claimed. Session reload still resets the UI model; use JSON project save/load to preserve editable work. IFC remains the exchange format.
 
 Before moving to AI/voice execution, review an exported model in the intended receiving CAD/BIM application. Import/round-trip support should be a separate, scoped step if required.
 

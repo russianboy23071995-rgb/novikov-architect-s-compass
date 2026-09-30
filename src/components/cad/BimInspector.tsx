@@ -136,7 +136,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
         </p>
       )}
       <p className="mt-3 text-[10px] text-muted-foreground">
-        Dimensions in metres. Changes are kept for this session.
+        Dimensions in metres. Use Save project to keep applied changes as JSON.
       </p>
     </section>
   );

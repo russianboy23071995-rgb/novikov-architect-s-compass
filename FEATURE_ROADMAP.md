@@ -4,7 +4,7 @@ Quelle: Nutzeranlage **0.Where it all Begins..docx**, am 30.09.2026 direkt aus d
 
 ## Aktuelle Grundlage
 
-Parametrischer Wand-/Fensterkern, gemeinsame 2D-/3D-Ansichten, IFC4-Export und lokale Textbefehle sind implementiert. Der Nutzer bestätigt erfolgreichen IFC-Import in Archicad. Optionale Spracheingabe ist implementiert; echter Mikrofon-/Diensttest steht aus. Änderungen leben weiterhin in der Sitzung. Vor umfangreichen Zeichenarbeiten sind Projekt-Speichern/Laden und Undo/Redo sinnvolle Grundlagen.
+Parametrischer Wand-/Fensterkern, gemeinsame 2D-/3D-Ansichten, IFC4-Export und lokale Textbefehle sind implementiert. Der Nutzer bestätigt erfolgreichen IFC-Import in Archicad. Optionale Spracheingabe ist implementiert; beim Praxistest meldet der Nutzer Erkennungsfehler (siehe F11). Projekt-Speichern/Laden als JSON und Undo/Redo (bis 100 Modelländerungen) sind nun implementiert. Kein Autosave; die Historie bleibt auf die Sitzung begrenzt. Diese Grundlage geht den weiteren Zeichenwerkzeugen voraus.
 
 Der Nutzerwunsch **anklicken → eindeutiger Befehlsbezug** gilt dauerhaft über stabile Bauteil-IDs. In diesem Schritt ergänzt die direkte Wandwahl im 3D die Auswahl im Grundriss/Navigator. Fenster bleiben in 3D über den Navigator auswählbar, da sie bisher nur Öffnungen ohne Rahmen/Glas sind.
 
@@ -24,3 +24,15 @@ Der Nutzerwunsch **anklicken → eindeutiger Befehlsbezug** gilt dauerhaft über
 | F10 | 2D-Schraffurwerkzeug für Design/Verzierung; Farbe optional, Kontur optional, frei wählbare Deckkraft, Muster statt Farbe, z.B. Mauerwerk                                                                                                | Nach 2D-Polygon-/Polyliniengrundlage; Fläche, Stil und Transformation getrennt modellieren                                 |
 
 Diese Einordnung richtet sich nach technischen Abhängigkeiten. Die genaue Umsetzung erfolgt weiterhin in kleinen überprüfbaren Pull Requests. Rechtliche Berechnungsregeln sind hier nur als gewünschter Umfang erfasst, noch nicht implementiert oder bestätigt.
+
+## Ergänzungen aus dem Entwicklungschat vom 30.09.2026
+
+### F11 Spracherkennung robuster machen — offen, ausdrücklich für später
+
+Der Nutzer hat das Mikrofon praktisch getestet: „Wandlänge auf sechs Meter“ wurde nicht korrekt erkannt; nach seiner Beobachtung wurde unter anderem nur „Wand“ verstanden. Die genaue Ursache (Transkription, Normalisierung oder Befehlsauswertung) ist noch nicht untersucht. Bei der späteren Verbesserung diese Stufen getrennt prüfen und den genannten Satz als Praxistest aufnehmen. Fehlerhafte oder unvollständige Erkennung darf keine ungewollte Modelländerung auslösen. Der Bezug auf die angeklickte stabile Element-ID bleibt erhalten.
+
+### F12 Dezente Auswahlumrandung für alle Elementtypen — offen, ausdrücklich für später
+
+Ein ausgewähltes Element soll in der 3D-Ansicht durch eine dezente Umrandung eindeutig erkennbar sein. Eine reine Farbänderung reicht dem Nutzer nicht aus. Die Auswahlvisualisierung als gemeinsame Funktion für alle aktuellen und künftigen Elementtypen planen: Linien, Fenster, Türen, Treppen, Wände, Decken und weitere Elemente. Jeden neuen Elementtyp an dieses gemeinsame Auswahlkonzept anbinden; die konkrete Darstellung an seine Geometrie anpassen. Auswahlwechsel und Abwahl müssen die Markierung entsprechend aktualisieren. Diese Anforderung bedeutet nicht, dass derzeit nur in 2D vorgesehene Elemente bereits in 3D dargestellt werden müssen.
+
+Für F11 und F12 ist in diesem Schritt nur die Aufnahme in die To-do-Liste gewünscht, keine sofortige Implementierung.

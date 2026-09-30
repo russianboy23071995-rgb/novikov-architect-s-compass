@@ -1,6 +1,6 @@
 # BIM UI integration
 
-The model and current selection live in `CadWorkspace`. All viewports, the navigator and the inspector receive this same project snapshot. Changes go through the validated BIM commands; form errors do not replace the current project. No backend or persistence is introduced.
+The model and current selection live in `CadWorkspace`. All viewports, the navigator and the inspector receive this same project snapshot. Changes go through the validated BIM commands; form errors do not replace the current project. Explicit JSON save/load and in-session model history are available; no backend or autosave is introduced.
 
 ## Try it
 
@@ -16,10 +16,10 @@ The model and current selection live in `CadWorkspace`. All viewports, the navig
 
 ## Verification
 
-- `npm test`: 64 tests: 16 model tests, 5 UI-helper tests, 10 IFC export tests, 9 command tests, 8 speech-adapter tests, 7 3D-picking tests, and 9 solid-geometry/camera tests covering volume, surface orientation, through openings, changed dimensions, diagonal walls, overlapping openings and camera projection.
+- `npm test`: 72 tests: 16 model tests, 5 UI-helper tests, 10 IFC export tests, 9 command tests, 8 speech-adapter tests, 7 3D-picking tests, 8 project-file/history tests, and 9 solid-geometry/camera tests covering volume, surface orientation, through openings, changed dimensions, diagonal walls, overlapping openings and camera projection.
 - `tsc --noEmit`, targeted ESLint and the production build.
 - Browser checks: wall extension and rejected shortening, window editing and rejected oversize, two-click wall creation, window creation, zero-length rejection, Escape cancellation, shared updates in split views, real 3D openings, height/sill edits and camera controls. No browser console errors during these checks.
 
-Changes remain in memory until reload. The file and undo/redo controls are still prototype controls; Save reports that file saving is not connected. Automatic fitting is not a physical print scale. Window overlaps are not checked by the current core; multiple windows can be selected individually in the navigator. The IFC toolbar button exports the current model for exchange; IFC import and free-form AI interpretation remain later work. Local text commands now edit selected elements through a validated preview; see [model commands](../../lib/bim/COMMANDS.md). See [IFC export](../../lib/bim/IFC.md).
+Use Save project to download editable JSON and Open project to restore it. Undo/Redo retains up to 100 model changes in the session. Reload starts the example again; there is no autosave. See [project files](../../lib/bim/PROJECT_FILES.md). Automatic fitting is not a physical print scale. Window overlaps are not checked by the current core; multiple windows can be selected individually in the navigator. The IFC toolbar button exports the current model for exchange; IFC import and free-form AI interpretation remain later work. Local text commands now edit selected elements through a validated preview; see [model commands](../../lib/bim/COMMANDS.md). See [IFC export](../../lib/bim/IFC.md).
 
 The 3D viewport requires WebGL; if it is unavailable, an error explains how to use 2D instead. GPU buffers and programs are released on unmount; context restoration rebuilds the renderer. Walls remain separate solids (no wall-junction union), and windows are openings without frames or glass. The grid is a screen-space guide. 3D wall selection uses the rendered triangles and nearest depth, preserving through openings. Window selection remains through the navigator.

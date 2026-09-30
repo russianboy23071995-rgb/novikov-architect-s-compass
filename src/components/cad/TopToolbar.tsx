@@ -13,6 +13,7 @@ import {
   Rotate3D,
   Save,
   Download,
+  FolderOpen,
   Settings,
   Undo2,
 } from "lucide-react";
@@ -62,6 +63,12 @@ type TopToolbarProps = {
   onAction: (text: string) => void;
   onExportIfc: () => void;
   exportingIfc: boolean;
+  onSave: () => void;
+  onOpen: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 };
 
 function IconControl({
@@ -69,11 +76,13 @@ function IconControl({
   children,
   onClick,
   active,
+  disabled,
 }: {
   label: string;
   children: React.ReactNode;
   onClick?: () => void;
   active?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <Tooltip delayDuration={300}>
@@ -84,6 +93,7 @@ function IconControl({
           aria-label={label}
           aria-pressed={active}
           onClick={onClick}
+          disabled={disabled}
           className={cn(
             "size-8 rounded text-muted-foreground hover:bg-accent hover:text-foreground",
             active && "bg-primary/15 text-primary",
@@ -134,17 +144,17 @@ export function TopToolbar(props: TopToolbarProps) {
           ))}
         </nav>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
-          <IconControl label="Undo" onClick={() => props.onAction("Undo")}>
+          <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
             <Undo2 />
           </IconControl>
-          <IconControl label="Redo" onClick={() => props.onAction("Redo")}>
+          <IconControl label="Redo" onClick={props.onRedo} disabled={!props.canRedo}>
             <Redo2 />
           </IconControl>
-          <IconControl
-            label="Save project"
-            onClick={() => props.onAction("Session only · file saving is not connected yet")}
-          >
+          <IconControl label="Save project" onClick={props.onSave}>
             <Save />
+          </IconControl>
+          <IconControl label="Open project" onClick={props.onOpen}>
+            <FolderOpen />
           </IconControl>
           <Button
             variant="ghost"
