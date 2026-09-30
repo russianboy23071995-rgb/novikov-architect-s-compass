@@ -244,12 +244,17 @@ export function TopToolbar(props: TopToolbarProps) {
             SNAP
           </Button>
           <div className="mx-1 h-5 w-px bg-border" />
-          <IconControl label="NOVIKOV AI" onClick={() => props.onAction("AI ready")}>
+          <IconControl
+            label="NOVIKOV AI"
+            onClick={() => props.onAction("Lokale Modellbefehle: unten eingeben und prüfen")}
+          >
             <Bot />
           </IconControl>
           <IconControl
             label="Voice command"
-            onClick={() => props.onAction("Use the microphone in the command bar")}
+            onClick={() =>
+              props.onAction("Spracheingabe ist noch nicht verfügbar; bitte Textbefehl verwenden")
+            }
           >
             <Mic />
           </IconControl>

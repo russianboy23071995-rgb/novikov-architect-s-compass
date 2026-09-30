@@ -12,6 +12,7 @@ import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
 import { addWall } from "@/lib/bim/model";
 import { exportIfc } from "@/lib/bim/ifc";
+import { applyCommand } from "@/lib/bim/commands";
 import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
@@ -32,7 +33,7 @@ export function CadWorkspace() {
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
   const [exportMessage, setExportMessage] = useState("");
-  const [context, setContext] = useState("Level 01");
+
   const [activeViewport, setActiveViewport] = useState(0);
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
@@ -85,9 +86,6 @@ export function CadWorkspace() {
     setWallStart(null);
     setModelError("");
     if (next === "wall") setMode("2D");
-    setContext(
-      next === "select" ? "Level 01" : `${next.charAt(0).toUpperCase()}${next.slice(1)} tool`,
-    );
   };
 
   const selectElement = (next: Selection) => {
@@ -96,7 +94,6 @@ export function CadWorkspace() {
     setWallStart(null);
     setModelError("");
     if (next) setNavigatorOpen(true);
-    setContext(next ? `${next.kind}: ${next.id}` : "Level 01");
   };
 
   const changeProject = (next: Project, selected: Selection) => {
@@ -227,7 +224,13 @@ export function CadWorkspace() {
                     {exportMessage}
                   </p>
                 )}
-                <AiCommandBar context={context} onExecute={showNotice} />
+                <AiCommandBar
+                  project={project}
+                  selection={selection}
+                  onExecute={(preview) =>
+                    changeProject(applyCommand(project, selection, preview), selection)
+                  }
+                />
                 <div
                   className="pointer-events-none absolute left-3 top-12 z-30 rounded border border-border bg-popover/70 px-2 py-1 font-mono text-[9px] text-muted-foreground opacity-0 backdrop-blur transition-opacity data-[visible=true]:opacity-100"
                   data-visible={notice !== "Ready"}
