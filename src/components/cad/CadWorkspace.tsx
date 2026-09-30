@@ -63,6 +63,8 @@ export function CadWorkspace() {
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   const [demandOpen, setDemandOpen] = useState(true);
+  const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
+  const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -118,7 +120,11 @@ export function CadWorkspace() {
     if (next === "wall" || next === "line") setMode("2D");
   };
 
-  const selectElement = (next: Selection) => {
+  const selectElement = (next: Selection, anchor?: Point) => {
+    if (next && (anchor || next.id !== selection?.id)) {
+      const point = anchor ?? lastPointer.current;
+      setDemandPosition({ x: point.x + 16, y: point.y + 16 });
+    }
     setSelection(next);
     setTool("select");
     setWallStart(null);
@@ -255,7 +261,12 @@ export function CadWorkspace() {
 
   return (
     <TooltipProvider>
-      <main className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground">
+      <main
+        onPointerDownCapture={(event) => {
+          lastPointer.current = { x: event.clientX, y: event.clientY };
+        }}
+        className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground"
+      >
         <input
           ref={fileInput}
           type="file"
@@ -339,7 +350,18 @@ export function CadWorkspace() {
             canRedo={history.future.length > 0}
           />
         )}
-        {!fullscreen && <DemandMenu open={demandOpen} />}
+        {demandOpen && tool === "select" && selection && (
+          <DemandMenu
+            project={project}
+            selection={selection}
+            position={demandPosition}
+            onPosition={setDemandPosition}
+            onInfo={() => {
+              setFullscreen(false);
+              setNavigatorOpen(true);
+            }}
+          />
+        )}
         {tool === "line" && mode === "2D" && (
           <section
             aria-label="Linienwerkzeug"
@@ -364,9 +386,7 @@ export function CadWorkspace() {
             <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
             <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
             {lineKind === "polyline" && (
-              <Button size="sm" disabled={linePoints.length < 2} onClick={() => finishLine()}>
-                Polylinie abschließen
-              </Button>
+              <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
             )}
             <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
               Zeichnen abbrechen
@@ -399,6 +419,9 @@ export function CadWorkspace() {
                   ortho={ortho}
                   onSelect={selectElement}
                   onPoint={drawPoint}
+                  {...(tool === "line" && lineKind === "polyline"
+                    ? { onFinish: () => finishLine() }
+                    : {})}
                   layout={layout}
                   mode={mode}
                   grid={grid}

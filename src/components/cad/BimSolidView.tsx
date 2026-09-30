@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildSolid, projectPoint } from "@/lib/bim/geometry";
 import type { Camera, Solid } from "@/lib/bim/geometry";
-import type { Project } from "@/lib/bim/model";
+import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { isSelectionClick, pickWall } from "@/lib/bim/picking";
 
@@ -93,7 +93,7 @@ export function BimSolidView({
   camera: Camera;
   onCamera: (camera: Camera) => void;
   pan: boolean;
-  onSelect: (selection: Selection) => void;
+  onSelect: (selection: Selection, anchor?: Point) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
@@ -224,7 +224,7 @@ export function BimSolidView({
               (2 * (event.clientX - bounds.left)) / bounds.width - 1,
               1 - (2 * (event.clientY - bounds.top)) / bounds.height,
             );
-            onSelect(id ? { kind: "wall", id } : null);
+            onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
           }
           if (event.currentTarget.hasPointerCapture(event.pointerId))
             event.currentTarget.releasePointerCapture(event.pointerId);

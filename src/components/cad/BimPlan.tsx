@@ -13,8 +13,9 @@ export type BimPlanProps = {
   draftPoints?: Point[];
   snap: boolean;
   ortho: boolean;
-  onSelect: (selection: Selection) => void;
+  onSelect: (selection: Selection, anchor?: Point) => void;
   onPoint: (point: Point) => void;
+  onFinish?: () => void;
 };
 
 export function BimPlan({
@@ -27,6 +28,7 @@ export function BimPlan({
   ortho,
   onSelect,
   onPoint,
+  onFinish,
 }: BimPlanProps) {
   const [hover, setHover] = useState<Point | null>(null);
   const pointFromEvent = (event: React.MouseEvent<SVGSVGElement>) => {
@@ -43,7 +45,7 @@ export function BimPlan({
     onClick: (event: React.MouseEvent) => {
       if (!drawing) {
         event.stopPropagation();
-        onSelect({ kind, id });
+        onSelect({ kind, id }, { x: event.clientX, y: event.clientY });
       }
     },
     onKeyDown: (event: React.KeyboardEvent) => {
@@ -66,9 +68,22 @@ export function BimPlan({
       onClick={(event) => {
         if (drawing) {
           event.currentTarget.focus();
+          if (onFinish && event.detail > 1) return;
           const point = pointFromEvent(event);
           if (point) onPoint(point);
         } else if (event.target === event.currentTarget) onSelect(null);
+      }}
+      onDoubleClick={(event) => {
+        if (drawing && onFinish) {
+          event.preventDefault();
+          onFinish();
+        }
+      }}
+      onKeyDown={(event) => {
+        if (drawing && onFinish && event.key === "Enter") {
+          event.preventDefault();
+          onFinish();
+        }
       }}
     >
       {project.storey.walls.map((wall) => {

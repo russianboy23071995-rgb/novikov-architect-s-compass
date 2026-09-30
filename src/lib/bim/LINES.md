@@ -3,7 +3,7 @@
 Das Werkzeug **Line** (Taste L außerhalb von Eingabefeldern) wechselt in den 2D-Grundriss. In der eigenen Werkzeugzeile zuerst **Linie** oder **Polylinie** sowie Farbe, Strichstärke und Strichart wählen.
 
 - Linie: Anfangs- und Endpunkt anklicken; danach ist das neue Element ausgewählt.
-- Polylinie: beliebig weitere, unterschiedliche Punkte anklicken; **Polylinie abschließen** übernimmt alle Punkte als ein Element. Mindestens zwei Punkte, höchstens 10.000 Punkte.
+- Polylinie: beliebig weitere, unterschiedliche Punkte anklicken; **Doppelklick am letzten Punkt** übernimmt alle Punkte als ein Element, ohne den Endpunkt doppelt einzufügen. Alternativ Enter bei fokussierter Zeichenfläche. Der Abschlussbutton entfällt. Ein geschlossener Umriss entsteht nur, wenn der letzte Punkt dem Anfangspunkt entspricht. Mindestens zwei Punkte, höchstens 10.000 Punkte.
 - **Esc**, **Zeichnen abbrechen**, Werkzeug-/Ansichtswechsel oder Undo/Redo verwerfen einen unfertigen Entwurf. Ein Wechsel zwischen Linie und Polylinie verwirft ebenfalls den Entwurf.
 - Snap (0,10 m) und Ortho gelten wie beim Wandzeichnen; Ortho bezieht sich jeweils auf den letzten Punkt.
 - Klick auf den Linienzug oder Auswahl im Navigator zeigt ID, Länge, Punktanzahl und editierbaren Stil. Farbe aus der Palette, Strichstärke 0,05–2 mm und Durchgezogen/Gestrichelt/Abbruchlinie sind verfügbar. **Linienstil übernehmen** bestätigt die Änderung.

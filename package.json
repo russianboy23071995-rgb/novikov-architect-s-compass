@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test src/lib/bim/model.test.ts src/lib/bim/geometry.test.ts src/lib/bim/ifc.test.ts src/lib/bim/commands.test.ts src/lib/bim/voice.test.ts src/lib/bim/picking.test.ts src/lib/bim/history.test.ts src/lib/bim/lines.test.ts src/components/cad/bim-view.test.ts",
+    "test": "node --experimental-strip-types --test src/lib/bim/model.test.ts src/lib/bim/geometry.test.ts src/lib/bim/ifc.test.ts src/lib/bim/commands.test.ts src/lib/bim/voice.test.ts src/lib/bim/picking.test.ts src/lib/bim/history.test.ts src/lib/bim/lines.test.ts src/components/cad/bim-view.test.ts src/components/cad/demand-menu.test.ts",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
