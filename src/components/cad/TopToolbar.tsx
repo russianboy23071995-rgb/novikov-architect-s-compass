@@ -12,6 +12,7 @@ import {
   Redo2,
   Rotate3D,
   Save,
+  Download,
   Settings,
   Undo2,
 } from "lucide-react";
@@ -59,6 +60,8 @@ type TopToolbarProps = {
   onNavigator: () => void;
   onDemand: () => void;
   onAction: (text: string) => void;
+  onExportIfc: () => void;
+  exportingIfc: boolean;
 };
 
 function IconControl({
@@ -143,8 +146,19 @@ export function TopToolbar(props: TopToolbarProps) {
           >
             <Save />
           </IconControl>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1 px-2 text-[11px]"
+            onClick={props.onExportIfc}
+            disabled={props.exportingIfc}
+            aria-label="Export IFC"
+          >
+            <Download className="size-4" />
+            {props.exportingIfc ? "Exporting…" : "IFC"}
+          </Button>
         </div>
-        <div className="hidden min-w-0 flex-1 items-center gap-1 lg:flex">
+        <div className="hidden min-w-0 flex-1 items-center gap-1 2xl:flex">
           <span className="shrink-0 px-2 text-[12px] font-semibold text-foreground">
             {current.title}
           </span>

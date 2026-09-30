@@ -11,6 +11,7 @@ import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
 import { addWall } from "@/lib/bim/model";
+import { exportIfc } from "@/lib/bim/ifc";
 import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
@@ -29,6 +30,8 @@ export function CadWorkspace() {
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [modelError, setModelError] = useState("");
+  const [exportingIfc, setExportingIfc] = useState(false);
+  const [exportMessage, setExportMessage] = useState("");
   const [context, setContext] = useState("Level 01");
   const [activeViewport, setActiveViewport] = useState(0);
   const [notice, setNotice] = useState("Ready");
@@ -119,6 +122,32 @@ export function CadWorkspace() {
     }
   };
 
+  const downloadIfc = async () => {
+    if (exportingIfc) return;
+    setExportingIfc(true);
+    setExportMessage("");
+    setModelError("");
+    try {
+      const content = await exportIfc(project);
+      const url = URL.createObjectURL(new Blob([content], { type: "application/x-step" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "novikov-project.ifc";
+      document.body.appendChild(anchor);
+      try {
+        anchor.click();
+      } finally {
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      setExportMessage("IFC export ready · download requested");
+    } catch {
+      setModelError("IFC export failed. The model is unchanged; please try again.");
+    } finally {
+      setExportingIfc(false);
+    }
+  };
+
   return (
     <TooltipProvider>
       <main className="cad-shell flex h-dvh min-h-[560px] flex-col gap-2 overflow-hidden p-2 text-foreground">
@@ -145,6 +174,8 @@ export function CadWorkspace() {
             onNavigator={() => setNavigatorOpen((value) => !value)}
             onDemand={() => setDemandOpen((value) => !value)}
             onAction={showNotice}
+            onExportIfc={downloadIfc}
+            exportingIfc={exportingIfc}
           />
         )}
         {!fullscreen && <DemandMenu open={demandOpen} />}
@@ -186,6 +217,14 @@ export function CadWorkspace() {
                     className="absolute left-3 top-20 z-30 max-w-sm rounded bg-popover p-2 text-xs text-destructive"
                   >
                     {modelError}
+                  </p>
+                )}
+                {exportMessage && (
+                  <p
+                    role="status"
+                    className="absolute bottom-20 left-3 z-30 rounded bg-popover px-2 py-1 text-xs text-foreground"
+                  >
+                    {exportMessage}
                   </p>
                 )}
                 <AiCommandBar context={context} onExecute={showNotice} />
