@@ -253,7 +253,9 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl
             label="Voice command"
             onClick={() =>
-              props.onAction("Spracheingabe ist noch nicht verfügbar; bitte Textbefehl verwenden")
+              props.onAction(
+                "Bauteil auswählen und Mikrofon in der Befehlsleiste starten, sofern vom Browser unterstützt",
+              )
             }
           >
             <Mic />

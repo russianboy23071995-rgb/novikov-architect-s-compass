@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Check, Mic, X } from "lucide-react";
 import novikovLogo from "@/assets/novikov-logo.png";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { previewCommand } from "@/lib/bim/commands";
 import type { CommandPreview, CommandSelection } from "@/lib/bim/commands";
 import type { Project } from "@/lib/bim/model";
+import { normalizeSpeech, recognitionConstructor, startVoice } from "@/lib/bim/voice";
 
 type Props = {
   project: Project;
@@ -18,6 +19,47 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
   const [preview, setPreview] = useState<CommandPreview | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
+  const [listening, setListening] = useState(false);
+  const cancelVoice = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    setVoiceAvailable(Boolean(recognitionConstructor(window)));
+  }, []);
+  useEffect(
+    () => () => {
+      cancelVoice.current?.();
+      cancelVoice.current = null;
+    },
+    [project, selection?.kind, selection?.id],
+  );
+  const listen = () => {
+    if (listening) {
+      cancelVoice.current?.();
+      setMessage("Aufnahme abgebrochen.");
+      return;
+    }
+    const RecognitionClass = recognitionConstructor(window);
+    if (!RecognitionClass || !selection) return;
+    reset();
+    setListening(true);
+    setMessage(`Aufnahme für ${selection.id} …`);
+    cancelVoice.current = startVoice(RecognitionClass, {
+      end: () => {
+        setListening(false);
+        setMessage("");
+      },
+      error: setError,
+      result: (transcript) => {
+        const text = normalizeSpeech(transcript);
+        setCommand(text);
+        try {
+          setPreview(previewCommand(project, selection, text));
+        } catch (error) {
+          setError(error instanceof Error ? error.message : "Befehl nicht erkannt.");
+        }
+      },
+    });
+  };
   const reset = () => {
     setPreview(null);
     setError("");
@@ -46,6 +88,7 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
             Lokale Modellbefehle · {selection?.id ?? "Kein Bauteil ausgewählt"}
           </span>
           <Input
+            disabled={listening}
             value={command}
             onChange={(event) => {
               setCommand(event.target.value);
@@ -60,19 +103,37 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
           type="button"
           variant="ghost"
           size="icon"
-          disabled
-          aria-label="Spracheingabe noch nicht verfügbar"
-          title="Spracheingabe folgt in einem späteren Schritt"
+          disabled={!voiceAvailable || !selection}
+          onClick={listen}
+          aria-label={listening ? "Aufnahme abbrechen" : "Spracheingabe starten"}
+          aria-pressed={listening}
+          title={
+            !voiceAvailable
+              ? "Browser unterstützt keine Spracherkennung"
+              : !selection
+                ? "Zuerst Bauteil auswählen"
+                : "Sprachbefehl für ausgewähltes Bauteil"
+          }
         >
           <Mic />
         </Button>
-        <Button type="submit" size="icon" disabled={!command.trim()} aria-label="Befehl prüfen">
+        <Button
+          type="submit"
+          size="icon"
+          disabled={listening || !command.trim()}
+          aria-label="Befehl prüfen"
+        >
           <ArrowUp />
         </Button>
       </form>
       <p className="mt-1 text-[10px] text-muted-foreground">
         Wandlänge, Wandhöhe, Wandstärke, Fensterbreite, Fensterhöhe, Brüstungshöhe auf Zahl m/cm/mm
         · Fenster zentrieren
+      </p>
+      <p className="mt-1 text-[10px] text-muted-foreground">
+        {voiceAvailable
+          ? "Mikrofon startet nur per Klick. Der Browser kann Audio an seinen Spracherkennungsdienst senden. Auswahlwechsel beendet die Aufnahme."
+          : "Spracherkennung in diesem Browser nicht verfügbar. Textbefehle bleiben nutzbar."}
       </p>
       {error && (
         <p role="alert" className="mt-2 text-xs text-destructive">
