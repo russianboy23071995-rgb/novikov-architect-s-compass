@@ -10,7 +10,7 @@ import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
-import { addWall, serializeProject } from "@/lib/bim/model";
+import { addWall, addLine, serializeProject } from "@/lib/bim/model";
 import {
   commitProject,
   createHistory,
@@ -33,6 +33,8 @@ import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
 import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
+import { defaultLineAppearance } from "@/lib/bim/lines";
+import { LineStyleFields } from "./LineControls";
 
 export function CadWorkspace() {
   const [tool, setTool] = useState<ToolId>("select");
@@ -50,6 +52,9 @@ export function CadWorkspace() {
   const [readingFile, setReadingFile] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
   const [wallStart, setWallStart] = useState<Point | null>(null);
+  const [linePoints, setLinePoints] = useState<Point[]>([]);
+  const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
+  const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
   const [exportMessage, setExportMessage] = useState("");
@@ -73,12 +78,15 @@ export function CadWorkspace() {
       const next = map[event.key.toLowerCase()];
       if (next) {
         setTool(next);
+        if (next === "line") setSelection(null);
         setWallStart(null);
+        setLinePoints([]);
         setModelError("");
-        if (next === "wall") setMode("2D");
+        if (next === "wall" || next === "line") setMode("2D");
       }
       if (event.key === "Escape") {
         setWallStart(null);
+        setLinePoints([]);
         setTool("select");
         setModelError("");
         if (fullscreen) setFullscreen(false);
@@ -103,15 +111,18 @@ export function CadWorkspace() {
 
   const selectTool = (next: ToolId) => {
     setTool(next);
+    if (next === "line") setSelection(null);
     setWallStart(null);
+    setLinePoints([]);
     setModelError("");
-    if (next === "wall") setMode("2D");
+    if (next === "wall" || next === "line") setMode("2D");
   };
 
   const selectElement = (next: Selection) => {
     setSelection(next);
     setTool("select");
     setWallStart(null);
+    setLinePoints([]);
     setModelError("");
     if (next) setNavigatorOpen(true);
   };
@@ -169,8 +180,33 @@ export function CadWorkspace() {
     }
   };
 
+  const finishLine = (points = linePoints) => {
+    try {
+      const id = `line-${crypto.randomUUID()}`;
+      changeProject(addLine(project, { id, kind: lineKind, points, ...lineAppearance }), {
+        kind: "line",
+        id,
+      });
+    } catch {
+      setModelError(
+        "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+      );
+    }
+  };
+
   const drawPoint = (point: Point) => {
     setModelError("");
+    if (tool === "line") {
+      const previous = linePoints.at(-1);
+      if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
+        setModelError("Nächsten Punkt an einer anderen Position wählen.");
+        return;
+      }
+      const next = [...linePoints, point];
+      if (lineKind === "line" && next.length === 2) finishLine(next);
+      else setLinePoints(next);
+      return;
+    }
     if (!wallStart) {
       setWallStart(point);
       return;
@@ -204,7 +240,12 @@ export function CadWorkspace() {
         anchor.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
-      setExportMessage("IFC export ready · download requested");
+      setExportMessage(
+        "IFC export ready · download requested" +
+          (project.storey.lines?.length
+            ? " · 2D-Linien sind nur in der JSON-Projektdatei enthalten."
+            : ""),
+      );
     } catch {
       setModelError("IFC export failed. The model is unchanged; please try again.");
     } finally {
@@ -238,8 +279,9 @@ export function CadWorkspace() {
               <DialogTitle>Projektdatei laden?</DialogTitle>
               <DialogDescription>
                 {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
-                {pendingFile?.project.storey.windows.length} Fenster. Ersetzt das aktuelle Modell.
-                Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
+                {pendingFile?.project.storey.windows.length} Fenster ·{" "}
+                {pendingFile?.project.storey.lines?.length ?? 0} Linien. Ersetzt das aktuelle
+                Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
                 Formulareingaben werden verworfen.
               </DialogDescription>
             </DialogHeader>
@@ -273,6 +315,7 @@ export function CadWorkspace() {
             onMode={(next) => {
               setMode(next);
               setWallStart(null);
+              setLinePoints([]);
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
@@ -297,6 +340,39 @@ export function CadWorkspace() {
           />
         )}
         {!fullscreen && <DemandMenu open={demandOpen} />}
+        {tool === "line" && mode === "2D" && (
+          <section
+            aria-label="Linienwerkzeug"
+            className="glass-panel-strong flex flex-wrap items-end gap-3 rounded-lg px-3 py-2"
+          >
+            <label className="text-xs">
+              Zeichenmodus
+              <select
+                aria-label="Zeichenmodus"
+                className="block rounded border bg-background p-1"
+                value={lineKind}
+                onChange={(e) => {
+                  setLineKind(e.target.value as "line" | "polyline");
+                  setLinePoints([]);
+                  setModelError("");
+                }}
+              >
+                <option value="line">Linie</option>
+                <option value="polyline">Polylinie</option>
+              </select>
+            </label>
+            <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
+            <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
+            {lineKind === "polyline" && (
+              <Button size="sm" disabled={linePoints.length < 2} onClick={() => finishLine()}>
+                Polylinie abschließen
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+              Zeichnen abbrechen
+            </Button>
+          </section>
+        )}
         <div className="relative flex min-h-0 flex-1 gap-2">
           {!fullscreen && (
             <ToolRail
@@ -316,8 +392,9 @@ export function CadWorkspace() {
                 <ViewportManager
                   project={project}
                   selection={selection}
-                  drawing={tool === "wall" && mode === "2D"}
-                  start={wallStart}
+                  drawing={(tool === "wall" || tool === "line") && mode === "2D"}
+                  start={tool === "line" ? (linePoints.at(-1) ?? null) : wallStart}
+                  draftPoints={tool === "line" ? linePoints : []}
                   snap={snap}
                   ortho={ortho}
                   onSelect={selectElement}
@@ -396,6 +473,8 @@ export function CadWorkspace() {
                         selectElement({ kind: "wall", id });
                       else if (project.storey.windows.some((opening) => opening.id === id))
                         selectElement({ kind: "window", id });
+                      else if (project.storey.lines?.some((line) => line.id === id))
+                        selectElement({ kind: "line", id });
                       else selectElement(null);
                     }}
                   />

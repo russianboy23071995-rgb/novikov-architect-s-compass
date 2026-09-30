@@ -3,6 +3,17 @@ import { z } from "zod";
 const id = z.string().trim().min(1);
 const positive = z.number().finite().positive();
 const pointSchema = z.object({ x: z.number().finite(), y: z.number().finite() }).strict();
+const lineSchema = z
+  .object({
+    id,
+    kind: z.enum(["line", "polyline"]),
+    points: z.array(pointSchema).min(2).max(10000),
+    color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+    // Pen width is a display attribute in millimetres; geometry remains metres.
+    penWidth: z.number().finite().min(0.05).max(2),
+    style: z.enum(["solid", "dashed", "break"]),
+  })
+  .strict();
 const wallSchema = z
   .object({
     id,
@@ -28,7 +39,14 @@ const projectSchema = z
     schemaVersion: z.literal(1),
     unit: z.literal("m"),
     id,
-    storey: z.object({ id, walls: z.array(wallSchema), windows: z.array(windowSchema) }).strict(),
+    storey: z
+      .object({
+        id,
+        walls: z.array(wallSchema),
+        windows: z.array(windowSchema),
+        lines: z.array(lineSchema).optional(),
+      })
+      .strict(),
   })
   .strict();
 
@@ -37,6 +55,7 @@ export type Wall = z.infer<typeof wallSchema>;
 export type BimWindow = z.infer<typeof windowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
+export type DrawingLine = z.infer<typeof lineSchema>;
 
 export function wallLength(wall: Wall): number {
   return Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
@@ -51,9 +70,24 @@ export function validateProject(value: unknown): Project {
     project.storey,
     ...project.storey.walls,
     ...project.storey.windows,
+    ...(project.storey.lines ?? []),
   ]) {
     if (ids.has(entity.id)) throw new Error(`Duplicate ID: ${entity.id}`);
     ids.add(entity.id);
+  }
+  for (const line of project.storey.lines ?? []) {
+    if (line.kind === "line" && line.points.length !== 2)
+      throw new Error("A line needs exactly two points");
+    let total = 0;
+    for (let i = 1; i < line.points.length; i++) {
+      const a = line.points[i - 1]!,
+        b = line.points[i]!;
+      const length = Math.hypot(b.x - a.x, b.y - a.y);
+      if (!Number.isFinite(length) || length <= 0)
+        throw new Error("Line segments must have finite positive length");
+      total += length;
+    }
+    if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {
@@ -157,4 +191,29 @@ export function serializeProject(project: Project): string {
 
 export function deserializeProject(json: string): Project {
   return validateProject(JSON.parse(json));
+}
+
+export function addLine(project: Project, line: DrawingLine): Project {
+  return validateProject({
+    ...project,
+    storey: { ...project.storey, lines: [...(project.storey.lines ?? []), line] },
+  });
+}
+
+export function updateLine(
+  project: Project,
+  lineId: string,
+  changes: Partial<Omit<DrawingLine, "id">>,
+): Project {
+  if (!project.storey.lines?.some((line) => line.id === lineId))
+    throw new Error(`Unknown line: ${lineId}`);
+  return validateProject({
+    ...project,
+    storey: {
+      ...project.storey,
+      lines: project.storey.lines.map((line) =>
+        line.id === lineId ? { ...line, ...changes, id: line.id } : line,
+      ),
+    },
+  });
 }

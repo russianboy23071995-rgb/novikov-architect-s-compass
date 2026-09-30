@@ -3,12 +3,14 @@ import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
 import { drawingPoint, planBounds } from "./bim-view";
 import type { Selection } from "./bim-view";
+import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   project: Project;
   selection: Selection;
   drawing: boolean;
   start: Point | null;
+  draftPoints?: Point[];
   snap: boolean;
   ortho: boolean;
   onSelect: (selection: Selection) => void;
@@ -20,6 +22,7 @@ export function BimPlan({
   selection,
   drawing,
   start,
+  draftPoints = [],
   snap,
   ortho,
   onSelect,
@@ -32,7 +35,7 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return drawingPoint({ x: point.x, y: -point.y }, start, snap, ortho);
   };
-  const selectProps = (kind: "wall" | "window", id: string) => ({
+  const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
@@ -53,6 +56,7 @@ export function BimPlan({
   return (
     <svg
       aria-label="BIM floor plan"
+      tabIndex={0}
       viewBox={planBounds(project)}
       className={`h-full w-full ${drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
@@ -61,6 +65,7 @@ export function BimPlan({
       onPointerLeave={() => setHover(null)}
       onClick={(event) => {
         if (drawing) {
+          event.currentTarget.focus();
           const point = pointFromEvent(event);
           if (point) onPoint(point);
         } else if (event.target === event.currentTarget) onSelect(null);
@@ -126,6 +131,48 @@ export function BimPlan({
           </g>
         );
       })}
+      {(project.storey.lines ?? []).map((line) => (
+        <g key={line.id}>
+          {selection?.id === line.id && (
+            <path
+              d={linePath(line)}
+              fill="none"
+              stroke="#38bdf8"
+              strokeOpacity={0.4}
+              strokeWidth={8}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+          <path
+            d={linePath(line)}
+            fill="none"
+            stroke={line.color}
+            strokeWidth={(line.penWidth * 96) / 25.4}
+            strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
+            vectorEffect="non-scaling-stroke"
+            pointerEvents="none"
+          />
+          <path
+            {...selectProps("line", line.id)}
+            d={linePath(line)}
+            fill="none"
+            stroke="transparent"
+            strokeWidth={12}
+            vectorEffect="non-scaling-stroke"
+            className="cursor-pointer focus:stroke-sky-300/40"
+          />
+        </g>
+      ))}
+      {drawing && draftPoints.length > 0 && (
+        <polyline
+          points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}
+          fill="none"
+          stroke="var(--primary)"
+          strokeWidth={0.025}
+          pointerEvents="none"
+        />
+      )}
       {drawing && start && (
         <g pointerEvents="none">
           <circle cx={start.x} cy={-start.y} r={0.05} fill="var(--primary)" />

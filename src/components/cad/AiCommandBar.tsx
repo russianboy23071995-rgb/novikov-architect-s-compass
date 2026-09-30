@@ -103,7 +103,7 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
           type="button"
           variant="ghost"
           size="icon"
-          disabled={!voiceAvailable || !selection}
+          disabled={!voiceAvailable || !selection || selection.kind === "line"}
           onClick={listen}
           aria-label={listening ? "Aufnahme abbrechen" : "Spracheingabe starten"}
           aria-pressed={listening}
@@ -135,6 +135,11 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
           ? "Mikrofon startet nur per Klick. Der Browser kann Audio an seinen Spracherkennungsdienst senden. Auswahlwechsel beendet die Aufnahme."
           : "Spracherkennung in diesem Browser nicht verfügbar. Textbefehle bleiben nutzbar."}
       </p>
+      {selection?.kind === "line" && (
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Linienstile über die Eigenschaften ändern; Linienbefehle folgen später.
+        </p>
+      )}
       {error && (
         <p role="alert" className="mt-2 text-xs text-destructive">
           {error}

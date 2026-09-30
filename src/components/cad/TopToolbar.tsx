@@ -43,7 +43,7 @@ const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
   select: { title: "Select", options: ["Window selection", "Filter"] },
   wall: { title: "Wall", options: ["New wall: 0.36 m", "Height 2.80 m", "Click two points"] },
   slab: { title: "Slab", options: ["Thickness 220 mm", "Level 01", "Concrete"] },
-  line: { title: "Line", options: ["Layer A-WALL", "Continuous", "0.25 mm"] },
+  line: { title: "Line", options: ["Nur 2D", "Linienstil unter der Werkzeugleiste"] },
 };
 
 type TopToolbarProps = {

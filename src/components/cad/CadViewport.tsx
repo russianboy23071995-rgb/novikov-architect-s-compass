@@ -99,7 +99,7 @@ export function CadViewport({
             ? pan
               ? "Click wall to select · Drag to pan · Wheel to zoom"
               : "Click wall to select · Drag to orbit · Wheel to zoom"
-            : "Select a wall or window · Dimensions in metres"}
+            : "Select wall, window or line · Dimensions in metres"}
       </p>
       <div className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 px-2 py-1 text-[9px] text-muted-foreground shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
         <span

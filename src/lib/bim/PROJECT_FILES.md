@@ -1,6 +1,6 @@
 # Projektdateien und Änderungshistorie
 
-**Save project** lädt das aktuelle validierte Modell als `novikov-project.json` herunter. Die Datei enthält Version 1, Meter als Einheit, Projekt/Geschoss und alle Wand-/Fensterparameter samt stabilen IDs. Nicht übernommene Formulareingaben, Auswahl, Kamera und Undo-Historie sind nicht enthalten. Die Anwendung meldet den angeforderten Download, nicht einen bestätigten Schreibvorgang auf der Festplatte.
+**Save project** lädt das aktuelle validierte Modell als `novikov-project.json` herunter. Die Datei enthält Version 1, Meter als Einheit, Projekt/Geschoss und alle Wand-/Fensterparameter sowie optionale 2D-Linien/Polylinien einschließlich Stil und stabilen IDs. Nicht übernommene Formulareingaben, Auswahl, Kamera und Undo-Historie sind nicht enthalten. Die Anwendung meldet den angeforderten Download, nicht einen bestätigten Schreibvorgang auf der Festplatte.
 
 **Open project** öffnet eine JSON-Datei bis 10 MB. Erst nach vollständiger Validierung zeigt ein Dialog Dateiname und Bauteilanzahlen. **Projekt laden** ersetzt das Modell; **Abbrechen** behält es. Fehlerhafte Dateien, falsche Versionen/Einheiten und ungültige Geometrie werden abgewiesen. IFC-Dateien sind Austauschdateien und können hier nicht geladen werden.
 

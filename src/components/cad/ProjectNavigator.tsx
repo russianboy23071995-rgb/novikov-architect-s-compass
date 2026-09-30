@@ -113,18 +113,25 @@ export function ProjectNavigator({
           id: project.storey.id,
           label: "Level 01",
           kind: "group",
-          children: project.storey.walls.map((wall, index) => ({
-            id: wall.id,
-            label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
-            kind: "group",
-            children: project.storey.windows
-              .filter((opening) => opening.wallId === wall.id)
-              .map((opening, index) => ({
-                id: opening.id,
-                label: `Window ${index + 1} · ${opening.width.toFixed(2)} m`,
-                kind: "item",
-              })),
-          })),
+          children: [
+            ...project.storey.walls.map((wall, index): TreeNode => ({
+              id: wall.id,
+              label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
+              kind: "group",
+              children: project.storey.windows
+                .filter((opening) => opening.wallId === wall.id)
+                .map((opening, index) => ({
+                  id: opening.id,
+                  label: `Window ${index + 1} · ${opening.width.toFixed(2)} m`,
+                  kind: "item",
+                })),
+            })),
+            ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
+              id: line.id,
+              label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
+              kind: "item",
+            })),
+          ],
         },
       ],
     },
@@ -164,7 +171,9 @@ export function ProjectNavigator({
         <div className="flex justify-between">
           <span>Model elements</span>
           <span className="font-mono text-foreground">
-            {project.storey.walls.length + project.storey.windows.length}
+            {project.storey.walls.length +
+              project.storey.windows.length +
+              (project.storey.lines?.length ?? 0)}
           </span>
         </div>
         <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">

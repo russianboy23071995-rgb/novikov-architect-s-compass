@@ -5,6 +5,7 @@ import { addWindow, updateWall, updateWindow, wallLength } from "@/lib/bim/model
 import type { Project } from "@/lib/bim/model";
 import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
+import { LineInspector } from "./LineControls";
 
 type Props = {
   project: Project;
@@ -14,6 +15,11 @@ type Props = {
 
 export function BimInspector({ project, selection, onChange }: Props) {
   const [error, setError] = useState("");
+  const line =
+    selection?.kind === "line"
+      ? project.storey.lines?.find((item) => item.id === selection.id)
+      : undefined;
+  if (line) return <LineInspector project={project} line={line} onChange={onChange} />;
   const wall =
     selection?.kind === "wall"
       ? project.storey.walls.find((item) => item.id === selection.id)
@@ -25,7 +31,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Select a wall or window to edit its dimensions. Use the Wall tool and click two points to
+        Select a wall, window or line to edit its properties. Use Wall or Line and click points to
         draw.
       </p>
     );
