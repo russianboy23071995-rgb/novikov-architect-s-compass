@@ -3,6 +3,7 @@ import { buildSolid, projectPoint } from "@/lib/bim/geometry";
 import type { Camera, Solid } from "@/lib/bim/geometry";
 import type { Project } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
+import { isSelectionClick, pickWall } from "@/lib/bim/picking";
 
 function createRenderer(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
@@ -85,16 +86,24 @@ export function BimSolidView({
   camera,
   onCamera,
   pan,
+  onSelect,
 }: {
   project: Project;
   selection: Selection;
   camera: Camera;
   onCamera: (camera: Camera) => void;
   pan: boolean;
+  onSelect: (selection: Selection) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
-  const drag = useRef<{ x: number; y: number; camera: Camera } | null>(null);
+  const drag = useRef<{
+    x: number;
+    y: number;
+    camera: Camera;
+    pointerId: number;
+    moved: boolean;
+  } | null>(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
   const solid = useMemo(() => buildSolid(project), [project]);
@@ -141,7 +150,7 @@ export function BimSolidView({
         aria-label="3D walls with window openings"
         role="img"
         tabIndex={0}
-        title="Drag to orbit or pan. Arrow keys rotate, +/− zoom. Select elements in Navigator."
+        title="Click a wall to select it; click empty space to clear selection. Drag to orbit or pan. Arrow keys rotate, +/− zoom. Select windows in Navigator."
         className="h-full w-full touch-none cursor-grab active:cursor-grabbing"
         onKeyDown={(event) => {
           const delta = 0.12;
@@ -163,12 +172,24 @@ export function BimSolidView({
           }
         }}
         onPointerDown={(event) => {
-          if (event.button !== 0) return;
+          if (event.button !== 0 || drag.current) return;
           event.currentTarget.setPointerCapture(event.pointerId);
-          drag.current = { x: event.clientX, y: event.clientY, camera };
+          drag.current = {
+            x: event.clientX,
+            y: event.clientY,
+            camera,
+            pointerId: event.pointerId,
+            moved: false,
+          };
         }}
         onPointerMove={(event) => {
-          if (!drag.current) return;
+          if (!drag.current || drag.current.pointerId !== event.pointerId) return;
+          if (
+            !drag.current.moved &&
+            isSelectionClick(drag.current.x, drag.current.y, event.clientX, event.clientY)
+          )
+            return;
+          drag.current.moved = true;
           const dx = event.clientX - drag.current.x,
             dy = event.clientY - drag.current.y,
             base = drag.current.camera;
@@ -186,8 +207,27 @@ export function BimSolidView({
                 },
           );
         }}
-        onPointerUp={() => {
+        onPointerUp={(event) => {
+          const gesture = drag.current;
+          if (!gesture || gesture.pointerId !== event.pointerId) return;
           drag.current = null;
+          if (
+            !gesture.moved &&
+            isSelectionClick(gesture.x, gesture.y, event.clientX, event.clientY) &&
+            !error
+          ) {
+            const bounds = event.currentTarget.getBoundingClientRect();
+            const id = pickWall(
+              solid,
+              camera,
+              bounds.width / bounds.height,
+              (2 * (event.clientX - bounds.left)) / bounds.width - 1,
+              1 - (2 * (event.clientY - bounds.top)) / bounds.height,
+            );
+            onSelect(id ? { kind: "wall", id } : null);
+          }
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onLostPointerCapture={() => {
           drag.current = null;

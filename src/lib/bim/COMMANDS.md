@@ -34,7 +34,6 @@ Die Browser-API SpeechRecognition/webkitSpeechRecognition ist optional und nicht
 
 Erkanntes Deutsch wird begrenzt normalisiert: Meter/Zentimeter/Millimeter, einfache Zahlwörter null bis zwölf und Dezimalkomma. Komplexe Zahlwörter und freie Formulierungen bleiben außerhalb dieses Schritts. Fehlerhaften Text vor der erneuten Prüfung korrigieren.
 
-57 Tests bestehen, darunter acht zusätzliche Tests mit einem simulierten Erkennungsadapter für Endergebnis, Abbruch, verspätete Antworten, Berechtigungs-/Netzwerkfehler, Zeitlimit und eindeutige Auswahl bei 301 Wänden. Das ersetzt keinen erfolgreichen Test mit realem Mikrofon und Browserdienst. Direkte Auswahl in 3D bleibt ein nächster Schritt; derzeit dort den Navigator verwenden.
+57 Tests bestehen, darunter acht zusätzliche Tests mit einem simulierten Erkennungsadapter für Endergebnis, Abbruch, verspätete Antworten, Berechtigungs-/Netzwerkfehler, Zeitlimit und eindeutige Auswahl bei 301 Wänden. Das ersetzt keinen erfolgreichen Test mit realem Mikrofon und Browserdienst. Wände können inzwischen auch direkt in 3D ausgewählt werden; für Fenster dort den Navigator verwenden.
 
 Browserprüfung dieses Schritts: Nach vollständigem Laden erkennt der integrierte Testbrowser die SpeechRecognition-API. Der Mikrofonknopf und der sichtbare Hinweis wurden geprüft; ein Textbefehl auf das ausgewählte Fenster änderte dessen Breite von 1,20 auf 1,40 m. Ein Live-Mikrofontest in einem unterstützten Browser steht aus.
-
