@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import type { Selection } from "./bim-view.ts";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
+import type { EditAction } from "@/lib/bim/direct-edit";
 
 export function DemandMenu({
   project,
@@ -9,12 +10,16 @@ export function DemandMenu({
   position,
   onPosition,
   onInfo,
+  pointIndex,
+  onAction,
 }: {
   project: Project;
   selection: NonNullable<Selection>;
   position: Point;
   onPosition: (point: Point) => void;
   onInfo: () => void;
+  pointIndex: number | null;
+  onAction: (action: EditAction) => void;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; pointer: Point; origin: Point } | null>(null);
@@ -108,11 +113,70 @@ export function DemandMenu({
         }}
       >
         ⠿ {summary.title}
+        {pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
-      <button type="button" onClick={onInfo} className="rounded border px-3 py-1 hover:bg-muted">
-        Werkzeugeigenschaften
-      </button>
+      <div className="grid gap-1">
+        {selection.kind !== "window" && pointIndex !== null && (
+          <>
+            <button
+              type="button"
+              className="rounded border p-1 text-left hover:bg-muted"
+              onClick={() => onAction("point")}
+            >
+              Punkt frei bewegen
+            </button>
+            <button
+              type="button"
+              className="rounded border p-1 text-left hover:bg-muted"
+              onClick={() => onAction("stretch")}
+            >
+              Punkt in Flucht strecken
+            </button>
+          </>
+        )}
+        {selection.kind !== "window" && (
+          <button
+            type="button"
+            className="rounded border p-1 text-left hover:bg-muted"
+            onClick={() => onAction("move")}
+          >
+            Element frei bewegen
+          </button>
+        )}
+        <button
+          type="button"
+          className="rounded border p-1 text-left hover:bg-muted"
+          onClick={() => onAction("axis")}
+        >
+          {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
+        </button>
+        {selection.kind !== "window" && (
+          <>
+            <button
+              type="button"
+              className="rounded border p-1 text-left hover:bg-muted"
+              onClick={() => onAction("x")}
+            >
+              Element auf X-Achse
+            </button>
+            <button
+              type="button"
+              className="rounded border p-1 text-left hover:bg-muted"
+              onClick={() => onAction("y")}
+            >
+              Element auf Y-Achse
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={onInfo}
+          className="rounded border p-1 text-left hover:bg-muted"
+        >
+          Werkzeugeigenschaften
+        </button>
+      </div>
     </div>
   );
 }

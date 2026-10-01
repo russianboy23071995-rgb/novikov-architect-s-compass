@@ -6,7 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import { TransformControls } from "./TransformControls";
+import { editAnchor } from "@/lib/bim/direct-edit";
+import type { EditSession, EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
@@ -65,6 +66,11 @@ export function CadWorkspace() {
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   const [demandOpen, setDemandOpen] = useState(false);
+  const [editSession, setEditSession] = useState<EditSession | null>(null);
+  const [pickedPoint, setPickedPoint] = useState<{ index: number | null; anchor: Point | null }>({
+    index: null,
+    anchor: null,
+  });
   const propertiesRef = useRef<HTMLElement>(null);
   const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
@@ -82,6 +88,7 @@ export function CadWorkspace() {
       const map: Record<string, ToolId> = { v: "select", w: "wall", s: "slab", l: "line" };
       const next = map[event.key.toLowerCase()];
       if (next) {
+        setEditSession(null);
         setTool(next);
         if (next === "line") setSelection(null);
         setWallStart(null);
@@ -90,6 +97,8 @@ export function CadWorkspace() {
         if (next === "wall" || next === "line") setMode("2D");
       }
       if (event.key === "Escape") {
+        setEditSession(null);
+        setDemandOpen(false);
         setWallStart(null);
         setLinePoints([]);
         setTool("select");
@@ -115,6 +124,7 @@ export function CadWorkspace() {
   };
 
   const selectTool = (next: ToolId) => {
+    setEditSession(null);
     setTool(next);
     if (next === "line") setSelection(null);
     setWallStart(null);
@@ -123,7 +133,10 @@ export function CadWorkspace() {
     if (next === "wall" || next === "line") setMode("2D");
   };
 
-  const selectElement = (next: Selection, anchor?: Point) => {
+  const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
+    setEditSession(null);
+    setPickedPoint({ index: index ?? null, anchor: modelPoint ?? null });
+    setDemandOpen(Boolean(next));
     if (next && (anchor || next.id !== selection?.id)) {
       const point = anchor ?? lastPointer.current;
       setDemandPosition({ x: point.x + 16, y: point.y + 16 });
@@ -132,6 +145,14 @@ export function CadWorkspace() {
     setTool("select");
     setWallStart(null);
     setLinePoints([]);
+    setModelError("");
+  };
+
+  const startEdit = (action: EditAction) => {
+    if (!selection) return;
+    const anchor = pickedPoint.anchor ?? editAnchor(project, selection);
+    setEditSession({ base: project, target: selection, index: pickedPoint.index, anchor, action });
+    setMode("2D");
     setModelError("");
   };
 
@@ -326,12 +347,14 @@ export function CadWorkspace() {
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
             onMode={(next) => {
+              setEditSession(null);
               setMode(next);
               setWallStart(null);
               setLinePoints([]);
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
+              setEditSession(null);
               setLayout(next);
               setActiveViewport(0);
             }}
@@ -352,12 +375,14 @@ export function CadWorkspace() {
             canRedo={history.future.length > 0}
           />
         )}
-        {demandOpen && tool === "select" && selection && (
+        {demandOpen && tool === "select" && selection && !editSession && (
           <DemandMenu
             project={project}
             selection={selection}
             position={demandPosition}
             onPosition={setDemandPosition}
+            pointIndex={pickedPoint.index}
+            onAction={startEdit}
             onInfo={() => {
               setFullscreen(false);
               propertiesRef.current?.focus();
@@ -406,14 +431,6 @@ export function CadWorkspace() {
               onChange={changeProject}
             />
           )}
-          {selection && tool === "select" && (
-            <TransformControls
-              key={JSON.stringify(["transform", selection, project])}
-              project={project}
-              selection={selection}
-              onChange={changeProject}
-            />
-          )}
         </section>
         <div className="relative flex min-h-0 flex-1 gap-2">
           {!fullscreen && (
@@ -441,6 +458,8 @@ export function CadWorkspace() {
                   ortho={ortho}
                   onSelect={selectElement}
                   onPoint={drawPoint}
+                  editSession={editSession?.base === project ? editSession : null}
+                  onEditCommit={(next) => changeProject(next, selection)}
                   {...(tool === "line" && lineKind === "polyline"
                     ? { onFinish: () => finishLine() }
                     : {})}
@@ -451,6 +470,17 @@ export function CadWorkspace() {
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
+                {editSession && (
+                  <div
+                    role="status"
+                    className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
+                  >
+                    Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
+                    <button className="ml-2 underline" onClick={() => setEditSession(null)}>
+                      Abbrechen
+                    </button>
+                  </div>
+                )}
                 {modelError && (
                   <p
                     role="alert"
