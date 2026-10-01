@@ -1,6 +1,6 @@
 # Fortlaufende Funktionsliste NOVIKOV CAD
 
-Quelle: Nutzeranlage **0.Where it all Begins..docx**, am 30.09.2026 direkt aus dem verknüpften Chat **CAD Bauplan erstellen** gelesen. Die Anlage wird vom Nutzer fortgeschrieben. Neue Fassungen bei weiteren Hinweisen erneut lesen, abgleichen und diese Liste aktualisieren. Einträge sind freigegebene Wünsche zur passenden Entwicklungsphase, keine Behauptung bereits fertiger Funktionen.
+Quelle: Nutzeranlage **0.Where it all Begins..docx**, erstmals am 30.09.2026 aus dem verknüpften Chat **CAD Bauplan erstellen** gelesen; neueste bereitgestellte Fassung am 01.10.2026 direkt aus der Word-Datei abgeglichen. Die Anlage wird vom Nutzer fortgeschrieben. Neue Fassungen bei weiteren Hinweisen erneut lesen, abgleichen und diese Liste aktualisieren. Einträge sind freigegebene Wünsche zur passenden Entwicklungsphase, keine Behauptung bereits fertiger Funktionen.
 
 ## Aktuelle Grundlage
 
@@ -14,7 +14,7 @@ Der Nutzerwunsch **anklicken → eindeutiger Befehlsbezug** gilt dauerhaft über
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F01 | Linienwerkzeug Punkt zu Punkt, nur 2D; Voreinstellung Linie oder Polylinie; Farbpalette, Strichstärke, Strichart einschließlich gestrichelt und Abbruchlinie                                                                            | Umgesetzt: 2D-Linie/Polylinie, Palette, Stiftbreite, Durchgezogen/Gestrichelt/Abbruchlinie, Auswahl, JSON und Undo/Redo; siehe src/lib/bim/LINES.md |
 | F02 | On-Demand-Menü nahe Cursor beim Auswählen eines erzeugten 2D-/3D-/sonstigen Elements; verschiebbar und solange Auswahl besteht sichtbar                                                                                                 | Umgesetzt: Menü nahe Auswahlklick, mit Maus/Pfeiltasten verschiebbar, an Fensterränder begrenzt; stabile ID, Maße und Info für Wand/Fenster/Linie   |
-| F03 | On-Demand-Aktionen: gewählten Punkt verschieben, bewegen, Info anzeigen und Strecken entlang vorhandener Flucht, etwa lange Rechteck-/Schraffurseite                                                                                    | Teilweise umgesetzt: Info und numerisches Bewegen/Punktversetzen/Endpunktstrecken; direkte Mausgriffe, Vorschau und Seitenstreckung bleiben offen   |
+| F03 | On-Demand-Aktionen: gewählten Punkt verschieben, bewegen, Info anzeigen und Strecken entlang vorhandener Flucht, etwa lange Rechteck-/Schraffurseite                                                                                    | Teilweise umgesetzt: direkte Punktgriffe, On-Demand-Bewegen/Strecken und Mausvorschau; ganze Seiten zurückgestellt, siehe STABILIZATION.md          |
 | F04 | Maßstableiste unter Canvas mit Änderungsmöglichkeit                                                                                                                                                                                     | 2D-Kamera und definierter Modell-/Darstellungsmaßstab; Bildschirmzoom von Druckmaßstab unterscheiden                                                |
 | F05 | Skalierwerkzeug für hochgeladene PDFs und weitere Referenzzeichnungen: Zeichnung wählen, Anfang/Ende einer bekannten Strecke markieren, neue Länge im On-Demand-Menü oder per Sprache angeben; gesamte Zeichnung proportional skalieren | Referenzimport, 2D-Auswahl und Transformationen; Dateitypen stufenweise festlegen                                                                   |
 | F06 | Raumwerkzeug für geschlossene und teilweise umschlossene Wandflächen; eindeutige IDs ab R-001, Name, Fläche                                                                                                                             | Raumgrenzen/-topologie, bei offenen Grenzen nachvollziehbare Ergänzung; vorher Raum-/Geschossmodell ausbauen                                        |
@@ -104,3 +104,53 @@ Validierung: 104 automatisierte Tests einschließlich acht neuer Prüfungen für
 ## Priorität geändert: Gesamtstand stabilisieren (01.10.2026)
 
 Vor weiteren Funktionen den vollständigen Wand-Fenster-Ablauf prüfen. Ergebnisse und verbindlicher Ausgangscommit stehen in STABILIZATION.md. Segmentgriffe sind separat gesichert und zurückgestellt. Danach Präzisionszeichnen/F13 auf einer definierten 2D-Kamera ausbauen; Räume, Wandverbindungen, Höhen und Wohnflächen folgen nach verlässlicher Grundrissgrundlage. Geprüfte Änderungen zuerst als PR, kein automatisches Zusammenführen oder Release.
+
+## Abgleich der aktualisierten Nutzerliste vom 01.10.2026
+
+Quelle: die in diesem Chat bereitgestellte aktuelle Datei **0.Where it all Begins..docx**. Die Word-Quelldatei bleibt unverändert. Die vorhandenen Wünsche zu Wohnflächen/Report (F08/F09), On-Demand-Menü und Strecken (F02/F03), Maßstableiste (F04), Referenzskalierung (F05), Linien (F01), Räumen/Höhen (F06/F07) und Schraffuren (F10) sind weiterhin enthalten. Die zuvor im Entwicklungschat ergänzten F11–F13 bleiben bestehen, auch wenn sie nicht vollständig in dieser Word-Liste wiederholt werden.
+
+### Grid Funktion – unvollständige Ergänzung zu F13
+
+Abschnitt 1.5 enthält nur den Satzanfang „Eine Gridfunktion, welche sich an vorhandene“. Keine fehlende Fortsetzung ergänzen oder als beschlossen behandeln. Bis zur nächsten vollständigen Fassung gilt die bereits abgelegte Spezifikation F13_HILFLINIENSYSTEM.md als Grundlage des geplanten Raster-/Fang-/Tracking-Systems. Der Satzanfang ist keine neue, unabhängig implementierbare Anforderung und ersetzt F13 nicht.
+
+### F14 Ebenensystem – neu, geplant
+
+Jedes Element erhält eine Ebenenzuordnung. Die Formulierung „eigene Ebene“ wird im Zusammenhang mit den genannten Standardebenen als genau eine zugeordnete Ebene je Element verstanden; mehrere Elemente können derselben Ebene angehören.
+
+Vorgesehene Standardebenen:
+
+- Außenwand
+- Innenwand
+- Dach
+- Decke
+- Fenster
+- Tür
+- Möblierung
+- Geländer
+- Gelände
+- 2D-Zeichnungen
+- Neutrale Ebene
+- Bemaßung
+
+Wände werden standardmäßig **Außenwand** zugeordnet. 2D-Linien, Rechtecke und Zeichnungen werden standardmäßig **2D-Zeichnungen** zugeordnet. Elemente lassen sich nachträglich beliebig anderen Ebenen zuweisen. Für weitere Elementtypen sind passende Standardzuordnungen bei deren Einführung festzulegen; die Ebenenliste bedeutet nicht, dass diese Bauteilwerkzeuge bereits existieren.
+
+Im Hauptmenü kommt **Organisation → Ebene** hinzu. Der Eintrag öffnet ein eigenes Fenster mit der Ebenenübersicht sowie Bedienelementen zum Erstellen neuer und Bearbeiten vorhandener Ebenen. Zusätzlich erscheint in der Menüleiste ein kompakter Ebenenumschalter, über den ausgewählte Ebenen ein- und ausgeblendet werden können. Die Ebenenzuordnung des ausgewählten Elements gehört entsprechend der bestehenden Bedienentscheidung in Werkzeugeigenschaften.
+
+Technische Einordnung für die spätere Umsetzung:
+
+- Stabile Ebenen-IDs und Referenzen im gemeinsamen Projektmodell; Migration bisheriger JSON-Dateien mit den genannten Standardzuordnungen.
+- Ebenenänderungen und Zuordnung in bestehendes Undo/Redo und Speichern/Laden integrieren.
+- Sichtbarkeit in 2D und 3D konsistent anwenden. Versteckte Elemente dürfen nicht versehentlich über Trefferprüfung oder Fangpunkte bearbeitet werden; Auswahl- und Befehlsbezug weiterhin über stabile IDs.
+- Regeln für Umbenennen, doppelte Namen, Löschen belegter Ebenen und Sichtbarkeit gehosteter Fenster gesondert festlegen. Ein Löschen von Ebenen ist in der Anlage noch nicht ausdrücklich gefordert.
+- Exportumfang und IFC-Zuordnung bei Implementierung ausdrücklich definieren; das Ausblenden in der Ansicht darf nicht stillschweigend als Ausschluss vom Export interpretiert werden.
+
+Abnahme: Standardzuordnung neuer Wände/Linien, neue Ebene anlegen und bearbeiten, Element neu zuordnen, Sichtbarkeit für mehrere Ebenen umschalten, gemeinsame 2D-/3D-Darstellung sowie Undo/Redo und JSON einschließlich älterer Projektdateien prüfen.
+
+### Weiterhin vorgesehene Reihenfolge
+
+1. Den geprüften Gesamtstand aus PR #14 geordnet synchronisieren und zur Übernahme vorbereiten; keine weitere Funktion vor einem reproduzierbaren Arbeitsstand.
+2. Definierte 2D-Kamera mit Zoom/Pan und Maßstableiste (F04), darauf aufbauend Fangpunkte, Hilfslinien, Winkel, Parallelen und Lotrechte (F13).
+3. Ebenengrundlage F14 vor deutlich größeren Projekten und weiteren Bauteilarten ergänzen; bei Fangfiltern die spätere Ebenensichtbarkeit von Beginn an berücksichtigen. Zurückgestellte Seitenbearbeitung anschließend auf dieser Grundlage fortsetzen.
+4. Referenzimport/-skalierung und Schraffuren passend zu ihren Grundlagen; Raumwerkzeug und Wohnflächen erst nach verlässlichen geschlossenen Grundrissen, Wandverbindungen und Höhen.
+
+F11 und F12 bleiben erfasste offene Verbesserungen. Diese Reihenfolge ist die aktuelle technische Planung, keine Einschränkung der Nutzeranforderungen. In diesem Abgleich wurde ausschließlich das Protokoll aktualisiert; F14 und der unvollständige Grid-Nachtrag sind nicht implementiert.
