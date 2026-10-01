@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
+import { TransformControls } from "./TransformControls";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
@@ -400,6 +401,14 @@ export function CadWorkspace() {
           ) : (
             <BimInspector
               key={JSON.stringify([selection, project])}
+              project={project}
+              selection={selection}
+              onChange={changeProject}
+            />
+          )}
+          {selection && tool === "select" && (
+            <TransformControls
+              key={JSON.stringify(["transform", selection, project])}
               project={project}
               selection={selection}
               onChange={changeProject}
