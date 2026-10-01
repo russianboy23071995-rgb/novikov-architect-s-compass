@@ -154,3 +154,7 @@ Abnahme: Standardzuordnung neuer Wände/Linien, neue Ebene anlegen und bearbeite
 4. Referenzimport/-skalierung und Schraffuren passend zu ihren Grundlagen; Raumwerkzeug und Wohnflächen erst nach verlässlichen geschlossenen Grundrissen, Wandverbindungen und Höhen.
 
 F11 und F12 bleiben erfasste offene Verbesserungen. Diese Reihenfolge ist die aktuelle technische Planung, keine Einschränkung der Nutzeranforderungen. In diesem Abgleich wurde ausschließlich das Protokoll aktualisiert; F14 und der unvollständige Grid-Nachtrag sind nicht implementiert.
+
+## Verbindlicher Etappenplan vom 01.10.2026
+
+Der neue Nutzerplan in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) bestimmt ab jetzt die Reihenfolge: Gesamtstand stabilisieren → präzises Zeichnen/Fanghilfen → Wandanschlüsse/Öffnungen → Geschosse/Decken → Räume/geometrische Flächen → Dächer/Höhen/Wohnflächen. Er ersetzt die frühere Reihenfolge dieses Protokolls. F01–F14 bleiben als Detailanforderungen erhalten. Jede Etappe wird in kleine, geprüfte PRs mit praktischer Abnahmeanleitung aufgeteilt; NOVIKOV Glass Flow bleibt erhalten.

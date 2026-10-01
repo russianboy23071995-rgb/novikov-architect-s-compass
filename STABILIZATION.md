@@ -32,3 +32,7 @@ Browser-Downloadereignis der Automatisierung lief in einen Timeout, obwohl die D
 - Lokale Git-Historie hinkt dem per Connector veröffentlichten Stand hinterher; verbindlich ist der GitHub-Commit des Prüf-PR. Keine Historie umgeschrieben.
 
 Keine Zusammenführung nach main und keine stabile Release-Version während dieser Prüfung. Die ursprüngliche Vorgabe, Pull Requests nur zur Prüfung zu erstellen, bleibt gültig.
+
+## Ergänzung zum neuen Etappenplan
+
+Der durchgehende automatisierte Test enthält jetzt zusätzlich die tatsächlich von der Mausbedienung verwendete Aktion editAtPointer: 6-m-Wand von (2,3) nach (4,2) verschieben, gehostetes Fenster entlang der Wand um 0,60 m versetzen, beide Änderungen einzeln mit Undo/Redo prüfen, JSON wiederherstellen und IFC erzeugen. Prüft stabile IDs/Host, Fensterposition 0,6, 3D-Grenzen und Volumen sowie die IFC-Wandplatzierung (4,2,0). Der bisherige Browsernachweis bleibt auf den oben dokumentierten Ablauf beschränkt; die kombinierte Verschiebeabnahme ist noch offen. Daher Etappe 1 noch nicht pauschal als vollständig abgeschlossen markieren. Neue verbindliche Reihenfolge: DEVELOPMENT_PLAN.md.

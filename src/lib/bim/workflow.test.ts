@@ -16,6 +16,8 @@ import {
   readProjectFile,
 } from "./history.ts";
 import { exportIfc } from "./ifc.ts";
+import { editAtPointer } from "./direct-edit.ts";
+import { buildSolid } from "./geometry.ts";
 
 test("complete wall-window workflow retains dimensions, host and IDs through undo, file reload and IFC", async () => {
   let history = createHistory(createProject("workflow", "ground"));
@@ -48,11 +50,57 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
   history = undoProject(history);
   assert.equal(serializeProject(history.present), before);
   history = redoProject(history);
+  const beforeMove = history.present;
+  history = commitProject(
+    history,
+    editAtPointer(
+      {
+        base: beforeMove,
+        target: { kind: "wall", id: "wall" },
+        action: "move",
+        index: null,
+        anchor: { x: 2, y: 3 },
+      },
+      beforeMove,
+      { x: 4, y: 2 },
+    ),
+  );
+  const moved = history.present;
+  assert.deepEqual(moved.storey.walls[0]!.start, { x: 4, y: 2 });
+  assert.deepEqual(moved.storey.walls[0]!.end, { x: 10, y: 2 });
+  assert.deepEqual(moved.storey.windows, beforeMove.storey.windows);
+  history = commitProject(
+    history,
+    editAtPointer(
+      {
+        base: moved,
+        target: { kind: "window", id: "window" },
+        action: "axis",
+        index: null,
+        anchor: { x: 7, y: 2 },
+      },
+      moved,
+      { x: 7.6, y: 2 },
+    ),
+  );
+  assert.ok(Math.abs(history.present.storey.windows[0]!.position - 0.6) < 1e-12);
+  const afterMoves = history.present;
+  history = undoProject(history);
+  assert.deepEqual(history.present, moved);
+  history = undoProject(history);
+  assert.deepEqual(history.present, beforeMove);
+  history = redoProject(redoProject(history));
+  assert.deepEqual(history.present, afterMoves);
   const saved = serializeProject(history.present);
   const restored = readProjectFile(saved);
   assert.deepEqual(restored, history.present);
-  assert.equal(restored.storey.windows[0]!.position, 0.5);
+  assert.ok(Math.abs(restored.storey.windows[0]!.position - 0.6) < 1e-12);
   assert.equal(restored.storey.windows[0]!.wallId, "wall");
+  const solid = buildSolid(restored);
+  assert.deepEqual(solid.min, [4, 1.82, 0]);
+  assert.deepEqual(solid.max, [10, 2.18, 2.8]);
+  assert.ok(Math.abs(solid.volume - (6 * 2.8 - 1.2 * 1.35) * 0.36) < 1e-10);
+  assert.deepEqual(solid, buildSolid(afterMoves));
   const date = new Date("2026-10-01T12:00:00Z");
   const ifc = await exportIfc(restored, date);
   assert.equal(ifc, await exportIfc(history.present, date));
@@ -65,5 +113,5 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
   ])
     assert.equal(ifc.split("\n").filter((row) => row.includes(`=${entity}(`)).length, 1);
   assert.ok(ifc.includes("IFCLENGTHMEASURE(6.)"));
-  assert.ok(ifc.includes("IFCRATIOMEASURE(0.5)"));
+  assert.ok(ifc.includes("IFCCARTESIANPOINT((4.,2.,0.))"));
 });
