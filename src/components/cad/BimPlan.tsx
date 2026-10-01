@@ -137,8 +137,6 @@ export function BimPlan({
       onPointerMove={(event) => {
         if (drawing) setHover(pointFromEvent(event));
         if (editSession) {
-          if (editDown.current !== editSession) return;
-          editDown.current = null;
           const point = editPoint(event);
           if (point) setEditPointer({ session: editSession, point });
         }
@@ -146,6 +144,8 @@ export function BimPlan({
       onPointerLeave={() => setHover(null)}
       onClick={(event) => {
         if (editSession) {
+          if (editDown.current !== editSession) return;
+          editDown.current = null;
           const point = editPoint(event);
           if (point) {
             setEditPointer({ session: editSession, point });

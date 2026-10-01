@@ -100,3 +100,7 @@ Im Grundriss erscheinen an ausgewählten Wänden Eckgriffe und an Linien/Polylin
 Die Vorschau verwendet stets den Ausgangszustand und erzeugt erst beim Zielklick eine Undo/Redo-Änderung. Escape, Abbrechen und Werkzeugwechsel verwerfen sie. Ungültige Ziele werden markiert und nicht übernommen; insbesondere bleiben Fenstergrenzen geprüft. Auswahl über 3D oder Navigator verwendet dieselben IDs; eine Bearbeitungsaktion wechselt zum Grundriss. Räumliches Ziehen in 3D, ganze Flächenseiten und F13 bleiben offen.
 
 Validierung: 104 automatisierte Tests einschließlich acht neuer Prüfungen für Punktbewegung, Achsprojektion, Vorschau, veralteten Modellzustand, geschlossene Linien und Fensterbindung. Browserprüfung: Strecken von 3,00 auf 3,80 m, Vorschau ohne vorzeitige Übernahme, Escape sowie Undo/Redo.
+
+## Priorität geändert: Gesamtstand stabilisieren (01.10.2026)
+
+Vor weiteren Funktionen den vollständigen Wand-Fenster-Ablauf prüfen. Ergebnisse und verbindlicher Ausgangscommit stehen in STABILIZATION.md. Segmentgriffe sind separat gesichert und zurückgestellt. Danach Präzisionszeichnen/F13 auf einer definierten 2D-Kamera ausbauen; Räume, Wandverbindungen, Höhen und Wohnflächen folgen nach verlässlicher Grundrissgrundlage. Geprüfte Änderungen zuerst als PR, kein automatisches Zusammenführen oder Release.
