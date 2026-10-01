@@ -13,9 +13,16 @@
 
 ## Architecture decisions
 
-- Keep NOVIKOV CAD prototype interaction state local to `CadWorkspace` and child components because this phase is frontend-only. Explicit local JSON project files and bounded in-session undo/redo are supported; no backend or automatic persistence.
+- `ARCHITECTURE.md` is the architectural source of truth for NOVIKOV CAD. Read it before architecture-sensitive implementation work and follow its dependency rules, migration policy and layer responsibilities.
+- `DEVELOPMENT_PLAN.md` defines the current implementation sequence. Feature-specific specifications such as `F13_HILFLINIENSYSTEM.md` define detailed behaviour but must not override the architectural boundaries in `ARCHITECTURE.md` unless an explicit architecture decision updates that document.
+- Preserve the validated Stage-1 workflow and migrate incrementally. Do not perform broad rewrites merely to match the target folder structure.
+- `src/lib/bim` is a transitional location for the existing BIM vertical slice, not the permanent home for every CAD subsystem. Generic geometry, snapping, guides, constraints, tool runtime, transactions and similar reusable infrastructure must be placed according to `ARCHITECTURE.md` instead of automatically being added under `src/lib/bim`.
+- `CadWorkspace` may coordinate layout and ephemeral presentation state, but it must not continue growing into the permanent owner of project/domain logic. Authoritative project state, committed selection, edit history and model-changing operations belong behind application/domain boundaries as described in `ARCHITECTURE.md`.
 - Define CAD tools and viewport layouts as typed data so future tool and BIM additions do not require restructuring the shell.
-- Selected-element context is authoritative for all future text, AI and voice commands: clicking a component binds commands to its stable ID, never its list position or a guessed nearby element. Show the target, pin it for each voice session and reject stale context when selection/model changes. Direct 3D wall selection, 2D and Navigator selection feed the shared context.
-
-- Consult FEATURE_ROADMAP.md for the user-maintained feature attachment and its implementation dependencies. Re-read new attachment versions when the user reports updates.
+- Selected-element context is authoritative for text, AI and voice commands: clicking a component binds commands to its stable ID, never its list position or a guessed nearby element. Show the target, pin it for each voice session and reject stale context when selection/model changes. Direct 3D wall selection, 2D and Navigator selection feed the shared context.
+- All model-changing interaction paths — mouse tools, properties, direct edit, text commands, AI and voice — must converge on shared validated application/model operations rather than implementing separate mutation logic.
+- 2D, 3D, properties, project files and IFC must derive from the same authoritative model state. Do not introduce parallel editable representations of the same project entities.
+- Rendering data is derived and disposable. React components, SVG/WebGL/CSS representations and renderer meshes must never become the authoritative BIM model.
+- Reuse generic geometry and constraint services across tools. Do not implement separate snapping, projection, intersection or inference logic independently inside Wall, Line, Slab or future tools.
+- Consult `FEATURE_ROADMAP.md` for the user-maintained feature attachment and its implementation dependencies. Re-read new attachment versions when the user reports updates.
 - Put all selected-element properties in the fixed Werkzeugeigenschaften bar below the main toolbar. The Navigator is for project structure/selection. Open contextual movement actions automatically near the pointer on element/point selection and avoid duplicating property fields there; new element types must use the shared properties bar.
