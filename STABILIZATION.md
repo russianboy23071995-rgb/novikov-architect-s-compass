@@ -36,3 +36,18 @@ Keine Zusammenführung nach main und keine stabile Release-Version während dies
 ## Ergänzung zum neuen Etappenplan
 
 Der durchgehende automatisierte Test enthält jetzt zusätzlich die tatsächlich von der Mausbedienung verwendete Aktion editAtPointer: 6-m-Wand von (2,3) nach (4,2) verschieben, gehostetes Fenster entlang der Wand um 0,60 m versetzen, beide Änderungen einzeln mit Undo/Redo prüfen, JSON wiederherstellen und IFC erzeugen. Prüft stabile IDs/Host, Fensterposition 0,6, 3D-Grenzen und Volumen sowie die IFC-Wandplatzierung (4,2,0). Der bisherige Browsernachweis bleibt auf den oben dokumentierten Ablauf beschränkt; die kombinierte Verschiebeabnahme ist noch offen. Daher Etappe 1 noch nicht pauschal als vollständig abgeschlossen markieren. Neue verbindliche Reihenfolge: DEVELOPMENT_PLAN.md.
+
+## Abschluss Etappe 1 am 01.10.2026
+
+Die zuvor offenen Abschlussbedingungen sind erledigt. Lokaler Branch test/stage-one-movement-workflow wurde nach Sicherung des alten Arbeitsverzeichnisses auf den veröffentlichten Commit 4294424b20841d1920ee7f24937b23746e2968ab synchronisiert. Die alten und neuen Dateien wurden vor dem Wechsel abgeglichen; der alte Stand bleibt als Git-Stash gesichert. Git-Fetch gelang mit dem OpenSSL-Backend bei unveränderter Zertifikatsprüfung. Keine veröffentlichte Historie geändert.
+
+Praktische kombinierte Abnahme auf diesem Stand:
+
+1. Neue Wand gezeichnet und zentriertes Fenster eingesetzt; Wand auf 6 m verlängert.
+2. Ganze Wand über Eckgriff → Element frei bewegen versetzt: Start (0,8; -0,08), Ende (6,8; -0,08); Stärke 0,36 und Höhe 2,80 m erhalten. Fenster folgte seiner Wand.
+3. Fenster über Fenster entlang Wand versetzt, relative Position 0,5824773835896755.
+4. Undo stellte zunächst die Fenstermitte, danach den ursprünglichen Wandstart (-0,5; 1,1) wieder her. Zweimal Redo stellte beide Verschiebungen wieder her.
+5. Projekt tatsächlich heruntergeladen, Fensterbewegung rückgängig gemacht, gespeicherte Datei geladen: ursprünglicher Versatz wieder sichtbar. JSON enthält dieselben IDs und Hostbeziehung.
+6. IFC tatsächlich heruntergeladen: Wandplatzierung (0,8; -0,07999999999999985; 0), Länge 6 m und Fensterposition stimmen mit JSON und Grundriss überein. 3D zeigt denselben geänderten Modellstand. Die lange Dezimaldarstellung ist die interne Gleitkommadarstellung des geprüften Mauswertes.
+
+Damit ist Etappe 1 technisch abgenommen und als Entwicklungsstand gesichert. Die Grenzen oben bleiben gültig. Freigabe/Übernahme nach main ist eine separate Prüfung; kein Merge und keine stabile Release-Veröffentlichung erfolgt. Nächster kleiner Schritt ist die 2D-Kamera-/Maßstabsgrundlage innerhalb Etappe 2, anschließend Endpunkt-/Mittelpunkt-/Schnittpunktfang.

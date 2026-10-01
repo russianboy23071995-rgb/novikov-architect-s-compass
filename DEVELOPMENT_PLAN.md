@@ -42,3 +42,7 @@ Einfache Dachschrägen und lichte Höhen zwischen fertigem Fußboden und begrenz
 Für jeden Teil-Schritt: aktuellen Code und Abhängigkeiten prüfen; kleinen Umfang festlegen; implementieren und passende Tests ausführen; praktische Abnahmeanleitung liefern; Ergebnis und Einschränkungen dokumentieren. NOVIKOV Glass Flow erhalten und Bedienabläufe mit bestehenden Werkzeugen abstimmen. Entwicklungszweige und Pull Requests verwenden; Übernahme nach main erst nach Prüfung.
 
 Nächste Abnahme für Etappe 1: neue 3-m-Wand mit mittigem 1,20-m-Fenster erstellen, auf 6 m verlängern, ganze Wand über On-Demand-Menü verschieben, Fenster entlang der Wand verschieben, beide Schritte einzeln rückgängig/wiederherstellen, speichern, Maße verändern, gespeichertes Projekt laden und IFC exportieren. Grundriss/3D/Hostzuordnung und Exportplatzierung abgleichen. Automatisierte Prüfung ersetzt diese abschließende Bedienabnahme nicht.
+
+### Abschlussnachtrag Etappe 1
+
+Git-Synchronisierung und kombinierte praktische Verschiebeabnahme sind am 01.10.2026 abgeschlossen; Nachweis in STABILIZATION.md. Etappe 1 ist damit technisch geprüft, die Übernahme nach main bleibt der PR-Prüfung vorbehalten. Die frühere Aufzählung offener Abschlussbedingungen beschreibt den Stand vor diesem Nachtrag. Etappe 2 kann auf dem gesicherten Gesamtstand beginnen.
