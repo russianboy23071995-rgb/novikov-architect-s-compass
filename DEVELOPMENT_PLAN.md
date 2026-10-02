@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Guide-Etappe 0 abgeschlossen – 02.10.2026
+
+Die aktuelle Bestandsaufnahme und vollständige Matrix für Guide-F01–F29 stehen in [GUIDE_BASELINE.md](GUIDE_BASELINE.md). Geprüft wurde Commit 635cde4 mit dem integrierten Funktionsstand aus PR #17 und Guide aus PR #18. 110 Tests, TypeScript und Build bestehen. Vollständiges Lint schlägt mit 7.891 Formatierungsfehlern und sechs Warnungen fehl; ohne Formatierungsregel null Fehler, sechs Warnungen. Keine CAD-Verhaltensänderung in dieser Etappe.
+
+Nächster einzelner Auftrag: Guide-Etappe 1a, gemeinsame Application-Orchestrierung der vorhandenen freien Elementbewegung (Start, Vorschau, Bestätigung, Abbruch und genau ein Undo-Schritt). Zuständigkeiten und konkrete Abnahmekriterien in GUIDE_BASELINE.md. Bestehende Modell-/Transformations-/History-Funktionen weiterverwenden. Erst danach gemeinsamer Endpunktfang, anschließend weitere Fangarten als getrennte Schritte.
+
+Die folgenden Einträge zur noch offenen Bestandsaufnahme beschreiben den Zustand vor diesem Abschlussnachtrag.
+
 ## Aktive Planungsgrundlage ab 02.10.2026
 
 DEVELOPMENT_GUIDE.md enthält den vollständig und unverändert abgelegten neuen Nutzerleitfaden. Er ersetzt die Anlage „0.Where it all Begins“ und die bisherige Etappenreihenfolge als aktive Planungsgrundlage. ARCHITECTURE.md bleibt für Architekturgrenzen maßgeblich. Die nachfolgenden älteren Etappen und Abschlussnachträge bleiben als Nachweise erhalten; ihre Nummern sind historisch und dürfen nicht mit Guide-Etappen 0–12 oder Guide-F01–F29 verwechselt werden.
