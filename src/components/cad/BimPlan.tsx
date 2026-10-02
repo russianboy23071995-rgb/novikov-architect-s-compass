@@ -114,7 +114,7 @@ export function BimPlan({
     try {
       preview = previewEdit(editSession, project, selection, editPointer.point);
     } catch {
-      editError = "Ung�ltiges Ziel: Geometrie und Fenstergrenzen pr�fen.";
+      editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
   }
   const shown = preview ?? project;

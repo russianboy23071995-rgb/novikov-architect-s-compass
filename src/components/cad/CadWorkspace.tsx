@@ -189,7 +189,7 @@ export function CadWorkspace() {
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
       setExportMessage(
-        "Projektdatei erstellt � Download angefordert. Noch nicht �bernommene Eingaben sind nicht enthalten.",
+        "Projektdatei erstellt · Download angefordert. Noch nicht übernommene Eingaben sind nicht enthalten.",
       );
       setModelError("");
     } catch {
@@ -202,7 +202,7 @@ export function CadWorkspace() {
     setReadingFile(true);
     setModelError("");
     try {
-      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist gr��er als 10 MB.");
+      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist größer als 10 MB.");
       const next = readProjectFile(await file.text());
       setPendingFile({ project: next, name: file.name });
     } catch (error) {
@@ -223,7 +223,7 @@ export function CadWorkspace() {
       });
     } catch {
       setModelError(
-        "Linie ben�tigt unterschiedliche Punkte und eine Strichst�rke von 0,05 bis 2 mm.",
+        "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
     }
   };
@@ -233,7 +233,7 @@ export function CadWorkspace() {
     if (tool === "line") {
       const previous = linePoints.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
-        setModelError("N�chsten Punkt an einer anderen Position w�hlen.");
+        setModelError("Nächsten Punkt an einer anderen Position wählen.");
         return;
       }
       const next = [...linePoints, point];
@@ -275,9 +275,9 @@ export function CadWorkspace() {
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
       setExportMessage(
-        "IFC export ready � download requested" +
+        "IFC export ready · download requested" +
           (project.storey.lines?.length
-            ? " � 2D-Linien sind nur in der JSON-Projektdatei enthalten."
+            ? " · 2D-Linien sind nur in der JSON-Projektdatei enthalten."
             : ""),
       );
     } catch {
@@ -299,7 +299,7 @@ export function CadWorkspace() {
           ref={fileInput}
           type="file"
           accept=".json,application/json"
-          aria-label="Projektdatei ausw�hlen"
+          aria-label="Projektdatei auswählen"
           className="hidden"
           onChange={(event) => {
             const file = event.target.files?.[0];
@@ -317,10 +317,10 @@ export function CadWorkspace() {
             <DialogHeader>
               <DialogTitle>Projektdatei laden?</DialogTitle>
               <DialogDescription>
-                {pendingFile?.name} � {pendingFile?.project.storey.walls.length} W�nde �{" "}
-                {pendingFile?.project.storey.windows.length} Fenster �{" "}
+                {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
+                {pendingFile?.project.storey.windows.length} Fenster ·{" "}
                 {pendingFile?.project.storey.lines?.length ?? 0} Linien. Ersetzt das aktuelle
-                Modell. Mit Undo kannst du zum vorherigen Modell zur�ckkehren. Nicht �bernommene
+                Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
                 Formulareingaben werden verworfen.
               </DialogDescription>
             </DialogHeader>
@@ -420,9 +420,9 @@ export function CadWorkspace() {
                 </select>
               </label>
               <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
-              <span className="text-xs">{linePoints.length} Punkte � Esc verwirft</span>
+              <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
               {lineKind === "polyline" && (
-                <span className="text-xs">Doppelklick zum Abschlie�en � alternativ Enter</span>
+                <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
               )}
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
                 Zeichnen abbrechen
@@ -483,7 +483,7 @@ export function CadWorkspace() {
                     role="status"
                     className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
                   >
-                    Vorschau � Zielpunkt anklicken � Esc bricht ab{" "}
+                    Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
                     <button
                       className="ml-2 underline"
                       onClick={() => dispatchEditing({ type: "cancel" })}
