@@ -1,4 +1,6 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { querySnap } from "@/constraints/snapping/engine";
+import { projectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
@@ -13,6 +15,7 @@ export type BimPlanProps = {
   project: Project;
   selection: Selection;
   drawing: boolean;
+  endpointSnap?: boolean;
   start: Point | null;
   draftPoints?: Point[];
   snap: boolean;
@@ -28,6 +31,7 @@ export function BimPlan({
   project,
   selection,
   drawing,
+  endpointSnap = false,
   start,
   draftPoints = [],
   snap,
@@ -77,6 +81,20 @@ export function BimPlan({
   }, [camera, viewSize, onCamera]);
   const editDown = useRef<EditSession | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
+  useEffect(() => setHover(null), [drawing, endpointSnap, camera]);
+  const references = useMemo(() => projectSnapReferences(project), [project]);
+  const resolveDrawing = (point: Point) =>
+    endpointSnap
+      ? querySnap(point, {
+          references,
+          pixelsPerMetre: camera.pixelsPerMetre,
+          enabled: snap,
+          endpointRadiusPx: 10,
+          gridSpacing: 0.1,
+          orthoOrigin: ortho ? start : null,
+        })
+      : { point: drawingPoint(point, start, snap, ortho), candidate: null };
+  const resolvedHover = hover ? resolveDrawing(hover) : null;
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,
   );
@@ -96,7 +114,7 @@ export function BimPlan({
     try {
       preview = previewEdit(editSession, project, selection, editPointer.point);
     } catch {
-      editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
+      editError = "Ung�ltiges Ziel: Geometrie und Fenstergrenzen pr�fen.";
     }
   }
   const shown = preview ?? project;
@@ -134,7 +152,7 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return drawingPoint({ x: point.x, y: -point.y }, start, snap, ortho);
+    return resolveDrawing({ x: point.x, y: -point.y }).point;
   };
   const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
     role: "button",
@@ -213,7 +231,7 @@ export function BimPlan({
           return;
         }
         if (pan) return;
-        if (drawing) setHover(pointFromEvent(event));
+        if (drawing) setHover(rawPoint(event));
         if (editSession) {
           const point = editPoint(event);
           if (point) setEditPointer({ session: editSession, point });
@@ -447,17 +465,42 @@ export function BimPlan({
       {drawing && start && (
         <g pointerEvents="none">
           <circle cx={start.x} cy={-start.y} r={0.05} fill="var(--primary)" />
-          {hover && (
+          {resolvedHover && (
             <line
               x1={start.x}
               y1={-start.y}
-              x2={hover.x}
-              y2={-hover.y}
+              x2={resolvedHover.point.x}
+              y2={-resolvedHover.point.y}
               stroke="var(--primary)"
               strokeWidth={0.025}
               strokeDasharray="0.1 0.05"
             />
           )}
+        </g>
+      )}
+      {drawing && !pan && resolvedHover?.candidate && (
+        <g
+          pointerEvents="none"
+          aria-label={`Fanghilfe ${resolvedHover.candidate.kind === "endpoint" ? "Endpunkt" : "Raster"}`}
+        >
+          <rect
+            x={resolvedHover.point.x - 5 / camera.pixelsPerMetre}
+            y={-resolvedHover.point.y - 5 / camera.pixelsPerMetre}
+            width={10 / camera.pixelsPerMetre}
+            height={10 / camera.pixelsPerMetre}
+            fill="none"
+            stroke="#0284c7"
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
+          />
+          <text
+            x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
+            y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
+            fontSize={12 / camera.pixelsPerMetre}
+            fill="#0284c7"
+          >
+            {resolvedHover.candidate.kind === "endpoint" ? "Endpunkt" : "Raster"}
+          </text>
         </g>
       )}
     </svg>
