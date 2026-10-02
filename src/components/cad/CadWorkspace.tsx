@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -6,22 +6,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import { editAnchor } from "@/lib/bim/direct-edit";
-import type { EditSession, EditAction } from "@/lib/bim/direct-edit";
+import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
+import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
 import { addWall, addLine, serializeProject } from "@/lib/bim/model";
-import {
-  commitProject,
-  createHistory,
-  undoProject,
-  redoProject,
-  readProjectFile,
-  PROJECT_FILE_LIMIT,
-} from "@/lib/bim/history";
+import { readProjectFile, PROJECT_FILE_LIMIT } from "@/lib/bim/history";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +41,10 @@ export function CadWorkspace() {
   const [ortho, setOrtho] = useState(false);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
-  const [history, setHistory] = useState(() => createHistory(createExampleProject()));
+  const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
+    createEditingState(createExampleProject()),
+  );
+  const { history, session: editSession } = editing;
   const project = history.present;
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
@@ -66,7 +62,6 @@ export function CadWorkspace() {
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   const [demandOpen, setDemandOpen] = useState(false);
-  const [editSession, setEditSession] = useState<EditSession | null>(null);
   const [pickedPoint, setPickedPoint] = useState<{ index: number | null; anchor: Point | null }>({
     index: null,
     anchor: null,
@@ -74,6 +69,11 @@ export function CadWorkspace() {
   const propertiesRef = useRef<HTMLElement>(null);
   const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
+
+  useEffect(() => {
+    // The next gesture must anchor to the updated model, not the previous click.
+    setPickedPoint({ index: null, anchor: null });
+  }, [project]);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -88,7 +88,7 @@ export function CadWorkspace() {
       const map: Record<string, ToolId> = { v: "select", w: "wall", s: "slab", l: "line" };
       const next = map[event.key.toLowerCase()];
       if (next) {
-        setEditSession(null);
+        dispatchEditing({ type: "cancel" });
         setTool(next);
         if (next === "line") setSelection(null);
         setWallStart(null);
@@ -97,7 +97,7 @@ export function CadWorkspace() {
         if (next === "wall" || next === "line") setMode("2D");
       }
       if (event.key === "Escape") {
-        setEditSession(null);
+        dispatchEditing({ type: "cancel" });
         setDemandOpen(false);
         setWallStart(null);
         setLinePoints([]);
@@ -124,7 +124,7 @@ export function CadWorkspace() {
   };
 
   const selectTool = (next: ToolId) => {
-    setEditSession(null);
+    dispatchEditing({ type: "cancel" });
     setTool(next);
     if (next === "line") setSelection(null);
     setWallStart(null);
@@ -134,7 +134,7 @@ export function CadWorkspace() {
   };
 
   const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
-    setEditSession(null);
+    dispatchEditing({ type: "cancel" });
     setPickedPoint({ index: index ?? null, anchor: modelPoint ?? null });
     setDemandOpen(Boolean(next));
     if (next && (anchor || next.id !== selection?.id)) {
@@ -150,20 +150,25 @@ export function CadWorkspace() {
 
   const startEdit = (action: EditAction) => {
     if (!selection) return;
-    const anchor = pickedPoint.anchor ?? editAnchor(project, selection);
-    setEditSession({ base: project, target: selection, index: pickedPoint.index, anchor, action });
+    dispatchEditing({
+      type: "begin",
+      target: selection,
+      action,
+      index: pickedPoint.index,
+      ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
+    });
     setMode("2D");
     setModelError("");
   };
 
   const changeProject = (next: Project, selected: Selection) => {
-    setHistory((current) => commitProject(current, next));
+    dispatchEditing({ type: "project", project: next });
     selectElement(selected);
     showNotice("Model updated");
   };
 
   const navigateHistory = (direction: "undo" | "redo") => {
-    setHistory(direction === "undo" ? undoProject : redoProject);
+    dispatchEditing({ type: direction });
     selectElement(null);
     setExportMessage("");
   };
@@ -347,14 +352,14 @@ export function CadWorkspace() {
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
             onMode={(next) => {
-              setEditSession(null);
+              dispatchEditing({ type: "cancel" });
               setMode(next);
               setWallStart(null);
               setLinePoints([]);
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
-              setEditSession(null);
+              dispatchEditing({ type: "cancel" });
               setLayout(next);
               setActiveViewport(0);
             }}
@@ -459,7 +464,9 @@ export function CadWorkspace() {
                   onSelect={selectElement}
                   onPoint={drawPoint}
                   editSession={editSession?.base === project ? editSession : null}
-                  onEditCommit={(next) => changeProject(next, selection)}
+                  onEditCommit={(session, point) =>
+                    dispatchEditing({ type: "confirm", session, selection, point })
+                  }
                   {...(tool === "line" && lineKind === "polyline"
                     ? { onFinish: () => finishLine() }
                     : {})}
@@ -476,17 +483,20 @@ export function CadWorkspace() {
                     className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
                   >
                     Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
-                    <button className="ml-2 underline" onClick={() => setEditSession(null)}>
+                    <button
+                      className="ml-2 underline"
+                      onClick={() => dispatchEditing({ type: "cancel" })}
+                    >
                       Abbrechen
                     </button>
                   </div>
                 )}
-                {modelError && (
+                {(modelError || editing.error) && (
                   <p
                     role="alert"
                     className="absolute left-3 top-20 z-30 max-w-sm rounded bg-popover p-2 text-xs text-destructive"
                   >
-                    {modelError}
+                    {modelError || editing.error}
                   </p>
                 )}
                 {exportMessage && (

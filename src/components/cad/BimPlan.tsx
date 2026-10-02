@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
-import { editAtPointer } from "@/lib/bim/direct-edit";
+import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
@@ -19,7 +19,7 @@ export type BimPlanProps = {
   ortho: boolean;
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
   editSession?: EditSession | null;
-  onEditCommit?: (project: Project) => void;
+  onEditCommit?: (session: EditSession, point: Point) => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
 };
@@ -94,7 +94,7 @@ export function BimPlan({
   let editError = "";
   if (editSession && editPointer?.session === editSession) {
     try {
-      preview = editAtPointer(editSession, project, editPointer.point);
+      preview = previewEdit(editSession, project, selection, editPointer.point);
     } catch {
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
@@ -228,7 +228,7 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              onEditCommit?.(editAtPointer(editSession, project, point));
+              onEditCommit?.(editSession, point);
             } catch {
               /* Invalid preview stays editable. */
             }

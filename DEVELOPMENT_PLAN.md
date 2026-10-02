@@ -1,5 +1,15 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Guide-Etappe 1a abgeschlossen – 02.10.2026
+
+Der neue Application-Controller unter `src/application/direct-edit/controller.ts` koordiniert Start, Bestätigung, Abbruch und Snapshot-History. Die reine Vorschaufunktion verwendet weiterhin die vorhandene Direct-Edit-/Transformationslogik. `CadWorkspace` dispatcht Ereignisse; `BimPlan` meldet Sitzung und Zielpunkt statt selbst einen fertigen Modellzustand zu bestätigen. Bestehende Achs-/Punktaktionen nutzen denselben Lebenszyklus, ohne neue Geometrie. Eigenschaften, Zeichnen, Textbefehle und Laden behalten ihre bisherigen validierten Operationen und geben Ergebnisse an denselben History-Pfad weiter. Es gibt weiterhin genau ein Project.
+
+Nachweise: 118 Tests bestanden, davon acht neue Application-Tests zu Vorschauen, Abbruch, veraltetem Kontext, ungültigen Zielen, No-op/Redo, Linienbewegung, Dateirundlauf, 3D und IFC. TypeScript, gezieltes ESLint der geänderten Dateien und Build erfolgreich. Browser: Vorschau/Abbruch ohne Undo, Wandbewegung mit einem Undo-Schritt, Redo, Linienbewegung und 3D-Wechsel; keine Konsolenfehler. Nach einer Modelländerung wird der alte angeklickte Bewegungsanker verworfen. Eine allgemeine automatische Importgrenzen-Prüfung ist noch nicht implementiert; das neue Modul wurde auf ausschließlich modell-/historybezogene Imports ohne React/DOM geprüft.
+
+Praktische Abnahme: Wand mit Fenster auswählen, „Element frei bewegen“, Vorschau bewegen und Escape drücken. Erneut starten und Ziel anklicken. Einmal Undo muss die Bewegung vollständig zurücknehmen; Redo stellt sie wieder her. Danach denselben Ablauf mit einer Linie prüfen. Maße und Fensterzuordnung bleiben erhalten.
+
+Nächster kleiner Wartungsschritt: Formatierung und Zeilenenden in einem separaten PR bereinigen, bevor weitere Fangfunktionen hinzukommen. LF-Regel für Git/Formatter abstimmen, nur Formatänderungen durchführen, vollständiges Lint sowie Tests/Build prüfen. Die 7.891 Formatfehler und sechs Warnungen aus der Bestandsaufnahme sind historische Ausgangswerte; die Gesamtbereinigung wurde hier nicht behauptet. Danach Guide-Etappe 2: zuerst gemeinsamer Endpunktfang für einen bestehenden Zeichenablauf, anschließend das zweite Werkzeug und weitere Fangarten. Kein freier KI-Parser, neue Elementtypen oder Ersatz für Snapshot-History in diesem Schritt.
+
 ## Guide-Etappe 0 abgeschlossen – 02.10.2026
 
 Die aktuelle Bestandsaufnahme und vollständige Matrix für Guide-F01–F29 stehen in [GUIDE_BASELINE.md](GUIDE_BASELINE.md). Geprüft wurde Commit 635cde4 mit dem integrierten Funktionsstand aus PR #17 und Guide aus PR #18. 110 Tests, TypeScript und Build bestehen. Vollständiges Lint schlägt mit 7.891 Formatierungsfehlern und sechs Warnungen fehl; ohne Formatierungsregel null Fehler, sechs Warnungen. Keine CAD-Verhaltensänderung in dieser Etappe.
