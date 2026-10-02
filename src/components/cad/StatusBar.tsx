@@ -32,7 +32,6 @@ export function StatusBar({
       </div>
       <div className="h-3 w-px bg-border" />
       <span className="px-1 text-[11px] text-muted-foreground">m</span>
-      <span className="px-1 font-mono text-[11px] text-muted-foreground">Fit</span>
       <div className="h-3 w-px bg-border" />
       <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}>
         <Grid3X3 /> Grid

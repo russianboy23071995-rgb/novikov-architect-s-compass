@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
+import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { editAtPointer } from "@/lib/bim/direct-edit";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
-import { drawingPoint, planBounds } from "./bim-view";
+import { drawingPoint } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
@@ -35,8 +37,44 @@ export function BimPlan({
   onFinish,
   editSession,
   onEditCommit,
-}: BimPlanProps) {
+  camera,
+  viewSize,
+  onCamera,
+  pan,
+  grid,
+}: BimPlanProps & {
+  camera: PlanCamera;
+  viewSize: ViewSize;
+  onCamera: (camera: PlanCamera) => void;
+  pan: boolean;
+  grid: boolean;
+}) {
   const svg = useRef<SVGSVGElement>(null);
+  const gridId = useId();
+  const gridStep = planScaleBar(camera.pixelsPerMetre).metres;
+  const navigation = useRef<{ pointerId: number; x: number; y: number; camera: PlanCamera } | null>(
+    null,
+  );
+  const navigationClick = useRef(false);
+  useEffect(() => {
+    const element = svg.current;
+    if (!element) return;
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault();
+      if (navigation.current) return;
+      const bounds = element.getBoundingClientRect();
+      const delta =
+        event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewSize.height : 1);
+      onCamera(
+        zoomPlan(camera, viewSize, Math.exp(-Math.max(-300, Math.min(300, delta)) * 0.002), {
+          x: event.clientX - bounds.x,
+          y: event.clientY - bounds.y,
+        }),
+      );
+    };
+    element.addEventListener("wheel", wheel, { passive: false });
+    return () => element.removeEventListener("wheel", wheel);
+  }, [camera, viewSize, onCamera]);
   const editDown = useRef<EditSession | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
@@ -126,15 +164,55 @@ export function BimPlan({
       ref={svg}
       aria-label="BIM floor plan"
       tabIndex={0}
-      viewBox={planBounds(project)}
-      onPointerDown={() => {
+      viewBox={planViewBox(camera, viewSize)}
+      preserveAspectRatio="none"
+      onPointerDown={(event) => {
+        navigationClick.current = event.button === 1 || (pan && event.button === 0);
+        if (navigationClick.current) {
+          event.preventDefault();
+          event.currentTarget.focus();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          navigation.current = {
+            pointerId: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+            camera,
+          };
+          editDown.current = null;
+          return;
+        }
         editDown.current = editSession ?? null;
       }}
+      onPointerUp={(event) => {
+        if (navigation.current?.pointerId === event.pointerId) {
+          navigation.current = null;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      }}
+      onLostPointerCapture={() => {
+        navigation.current = null;
+      }}
       onPointerCancel={() => {
+        navigation.current = null;
         editDown.current = null;
       }}
-      className={`h-full w-full ${drawing ? "cursor-crosshair" : ""}`}
+      onClickCapture={(event) => {
+        if (navigationClick.current || pan) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+      onAuxClick={(event) => event.preventDefault()}
+      className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
+        const active = navigation.current;
+        if (active && active.pointerId === event.pointerId) {
+          onCamera(
+            panPlan(active.camera, { x: event.clientX - active.x, y: event.clientY - active.y }),
+          );
+          return;
+        }
+        if (pan) return;
         if (drawing) setHover(pointFromEvent(event));
         if (editSession) {
           const point = editPoint(event);
@@ -165,18 +243,43 @@ export function BimPlan({
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {
+        if (pan || navigationClick.current) return;
         if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
         }
       }}
       onKeyDown={(event) => {
+        if (event.key === "Escape") navigation.current = null;
+        if (pan) return;
         if (drawing && onFinish && event.key === "Enter") {
           event.preventDefault();
           onFinish();
         }
       }}
     >
+      {grid && (
+        <g pointerEvents="none">
+          <defs>
+            <pattern id={gridId} width={gridStep} height={gridStep} patternUnits="userSpaceOnUse">
+              <path
+                d={`M ${gridStep} 0 L 0 0 0 ${gridStep}`}
+                fill="none"
+                stroke="var(--muted-foreground)"
+                strokeOpacity={0.15}
+                strokeWidth={1 / camera.pixelsPerMetre}
+              />
+            </pattern>
+          </defs>
+          <rect
+            x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+            y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+            width={viewSize.width / camera.pixelsPerMetre}
+            height={viewSize.height / camera.pixelsPerMetre}
+            fill={`url(#${gridId})`}
+          />
+        </g>
+      )}
       {shown.storey.walls.map((wall) => {
         const length = wallLength(wall);
         const angle =
@@ -278,7 +381,7 @@ export function BimPlan({
             key={label}
             cx={point.x}
             cy={-point.y}
-            r={0.055}
+            r={5 / camera.pixelsPerMetre}
             fill="white"
             stroke="#0284c7"
             strokeWidth={2}
