@@ -1,8 +1,16 @@
 import type { Point2 } from "../../geometry/primitives/point.ts";
+import { projectDirection, angle45Direction } from "../../geometry/projections/direction.ts";
 
-export type SnapReference = { point: Point2; entityId: string; feature: string };
+export type SnapReference = {
+  point: Point2;
+  entityId: string;
+  feature: string;
+  directions?: readonly Point2[];
+};
 export type SnapCandidate = {
-  kind: "endpoint" | "grid" | "horizontal" | "vertical";
+  kind: "endpoint" | "grid" | "horizontal" | "vertical" | "extension" | "perpendicular" | "angle";
+  guideOrigin?: Point2;
+  angleDegrees?: number;
   worldPoint: Point2;
   distanceOnScreen: number;
   sourceEntityId: string | null;
@@ -17,6 +25,7 @@ export type SnapContext = {
   gridSpacing: number | null;
   orthoOrigin: Point2 | null;
   activeReference?: SnapReference | null;
+  angleOrigin?: Point2 | null;
 };
 
 /** Plan coordinates in metres, screen distances in CSS pixels. No model mutations. */
@@ -40,6 +49,27 @@ export function querySnap(
   )
     throw new Error("Invalid snap context");
   const origin = context.orthoOrigin;
+  // Explicit Shift constraint takes precedence over automatic snapping and Ortho.
+  if (context.angleOrigin) {
+    if (![context.angleOrigin.x, context.angleOrigin.y].every(Number.isFinite))
+      throw new Error("Invalid angle origin");
+    const angle = angle45Direction(cursor, context.angleOrigin);
+    const point = projectDirection(cursor, context.angleOrigin, angle.direction)!;
+    return {
+      point,
+      candidate: {
+        kind: "angle",
+        worldPoint: point,
+        guideOrigin: context.angleOrigin,
+        angleDegrees: angle.degrees,
+        distanceOnScreen:
+          Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
+        sourceEntityId: null,
+        sourceFeature: "shift-45",
+        priority: -1,
+      },
+    };
+  }
   const horizontal = origin
     ? Math.abs(cursor.x - origin.x) >= Math.abs(cursor.y - origin.y)
     : false;
@@ -92,31 +122,51 @@ export function querySnap(
     )
   ) {
     const p = reference.point;
-    const dx = Math.abs(cursor.x - p.x) * context.pixelsPerMetre;
-    const dy = Math.abs(cursor.y - p.y) * context.pixelsPerMetre;
-    const kind = dy <= dx ? "horizontal" : "vertical";
-    const distance = Math.min(dx, dy);
-    const point = kind === "horizontal" ? { x: cursor.x, y: p.y } : { x: p.x, y: cursor.y };
-    const constrained = constrain(point);
+    const source = context.references.find(
+      (r) => r.entityId === reference.entityId && r.feature === reference.feature,
+    )!;
+    const directions: { kind: SnapCandidate["kind"]; vector: Point2 }[] = [
+      ...(source.directions ?? []).flatMap((vector) => [
+        { kind: "extension" as const, vector },
+        { kind: "perpendicular" as const, vector: { x: -vector.y, y: vector.x } },
+      ]),
+      { kind: "horizontal", vector: { x: 1, y: 0 } },
+      { kind: "vertical", vector: { x: 0, y: 1 } },
+      { kind: "angle", vector: { x: 1, y: 1 } },
+      { kind: "angle", vector: { x: 1, y: -1 } },
+    ];
+    const guides: SnapCandidate[] = [];
     if (
-      distance <= context.endpointRadiusPx &&
-      Math.max(dx, dy) > context.endpointRadiusPx &&
-      point.x === constrained.x &&
-      point.y === constrained.y
-    ) {
-      return {
-        point,
-        candidate: {
-          kind,
-          worldPoint: point,
-          distanceOnScreen: distance,
-          sourceEntityId: reference.entityId,
-          sourceFeature: reference.feature,
-          priority: 1,
-        },
-      };
-    }
+      Math.hypot(cursor.x - p.x, cursor.y - p.y) * context.pixelsPerMetre >
+      context.endpointRadiusPx
+    )
+      for (const { kind, vector } of directions) {
+        const point = projectDirection(cursor, p, vector);
+        if (!point) continue;
+        const constrained = constrain(point);
+        const distance =
+          Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre;
+        if (
+          distance <= context.endpointRadiusPx &&
+          point.x === constrained.x &&
+          point.y === constrained.y
+        )
+          guides.push({
+            kind,
+            worldPoint: point,
+            guideOrigin: p,
+            distanceOnScreen: distance,
+            sourceEntityId: source.entityId,
+            sourceFeature: source.feature,
+            priority: 1,
+            ...(kind === "angle" ? { angleDegrees: angle45Direction(point, p).degrees } : {}),
+          });
+      }
+    guides.sort((a, b) => a.distanceOnScreen - b.distanceOnScreen);
+    const guide = guides[0];
+    if (guide) return { point: guide.worldPoint, candidate: guide };
   }
+
   if (context.gridSpacing !== null) {
     const spacing = context.gridSpacing;
     const grid = {

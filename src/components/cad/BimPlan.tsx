@@ -84,6 +84,21 @@ export function BimPlan({
   }, [camera, viewSize, onCamera]);
   const editDown = useRef<EditSession | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
+  const [shiftHeld, setShiftHeld] = useState(false);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Shift") setShiftHeld(event.type === "keydown");
+    };
+    const clear = () => setShiftHeld(false);
+    window.addEventListener("keydown", key);
+    window.addEventListener("keyup", key);
+    window.addEventListener("blur", clear);
+    return () => {
+      window.removeEventListener("keydown", key);
+      window.removeEventListener("keyup", key);
+      window.removeEventListener("blur", clear);
+    };
+  }, []);
   useEffect(() => setHover(null), [drawing, endpointSnap, camera]);
   const references = useMemo(() => projectSnapReferences(project), [project]);
   const trackingContext = useMemo(
@@ -97,7 +112,7 @@ export function BimPlan({
     [drawing, endpointSnap, snap, pan, references, camera, viewSize],
   );
   const activeReference = useHoverReference(hover, trackingContext, hoverDwellMs);
-  const resolveDrawing = (point: Point) =>
+  const resolveDrawing = (point: Point, shift = shiftHeld) =>
     endpointSnap
       ? querySnap(point, {
           references,
@@ -107,6 +122,7 @@ export function BimPlan({
           gridSpacing: 0.1,
           orthoOrigin: ortho ? start : null,
           activeReference,
+          angleOrigin: shift ? (start ?? activeReference?.point ?? null) : null,
         })
       : { point: drawingPoint(point, start, snap, ortho), candidate: null };
   const resolvedHover = hover ? resolveDrawing(hover) : null;
@@ -115,6 +131,9 @@ export function BimPlan({
     grid: "Raster",
     horizontal: "Horizontal",
     vertical: "Vertikal",
+    extension: "Verlängerung",
+    perpendicular: "Lotrecht",
+    angle: `${resolvedHover?.candidate?.angleDegrees ?? 45}°`,
   };
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,
@@ -173,7 +192,7 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return resolveDrawing({ x: point.x, y: -point.y }).point;
+    return resolveDrawing({ x: point.x, y: -point.y }, event.shiftKey).point;
   };
   const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
     role: "button",
@@ -244,6 +263,7 @@ export function BimPlan({
       onAuxClick={(event) => event.preventDefault()}
       className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
+        setShiftHeld(event.shiftKey);
         const active = navigation.current;
         if (active && active.pointerId === event.pointerId) {
           onCamera(
@@ -488,7 +508,15 @@ export function BimPlan({
       )}
       {drawing && start && (
         <g pointerEvents="none">
-          <circle cx={start.x} cy={-start.y} r={0.05} fill="var(--primary)" />
+          <circle
+            cx={start.x}
+            cy={-start.y}
+            r={6 / camera.pixelsPerMetre}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+          />
           {resolvedHover && (
             <line
               x1={start.x}
@@ -513,12 +541,16 @@ export function BimPlan({
             strokeWidth={2}
             vectorEffect="non-scaling-stroke"
           />
-          {(resolvedHover?.candidate?.kind === "horizontal" ||
-            resolvedHover?.candidate?.kind === "vertical") && (
+        </g>
+      )}
+      {drawing && !pan && (
+        <g pointerEvents="none">
+          {" "}
+          {resolvedHover?.candidate?.guideOrigin && (
             <line
               aria-label="Temporäre Hilfslinie"
-              x1={activeReference.point.x}
-              y1={-activeReference.point.y}
+              x1={resolvedHover.candidate.guideOrigin.x}
+              y1={-resolvedHover.candidate.guideOrigin.y}
               x2={resolvedHover.point.x}
               y2={-resolvedHover.point.y}
               stroke="#b45309"
@@ -534,11 +566,10 @@ export function BimPlan({
           pointerEvents="none"
           aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
         >
-          <rect
-            x={resolvedHover.point.x - 5 / camera.pixelsPerMetre}
-            y={-resolvedHover.point.y - 5 / camera.pixelsPerMetre}
-            width={10 / camera.pixelsPerMetre}
-            height={10 / camera.pixelsPerMetre}
+          <circle
+            cx={resolvedHover.point.x}
+            cy={-resolvedHover.point.y}
+            r={4 / camera.pixelsPerMetre}
             fill="none"
             stroke="#0284c7"
             strokeWidth={2}

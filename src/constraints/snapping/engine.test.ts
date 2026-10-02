@@ -12,6 +12,7 @@ import {
   readProjectFile,
 } from "../../lib/bim/history.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { projectDirection } from "../../geometry/projections/direction.ts";
 import { advanceHoverReference, emptyHoverReference } from "../inference/hover-reference.ts";
 
 const context: SnapContext = {
@@ -22,6 +23,60 @@ const context: SnapContext = {
   gridSpacing: 0.1,
   orthoOrigin: null,
 };
+
+test("Shift locks all eight directions even with grid disabled, and release restores free snapping", () => {
+  const origin = { x: 0.037, y: 0.013 };
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * Math.PI) / 4 + 0.1;
+    const cursor = { x: origin.x + 3 * Math.cos(angle), y: origin.y + 3 * Math.sin(angle) };
+    const result = querySnap(cursor, { ...context, enabled: false, angleOrigin: origin });
+    assert.equal(result.candidate?.angleDegrees, i * 45);
+    const dx = result.point.x - origin.x,
+      dy = result.point.y - origin.y;
+    assert.ok(
+      Math.abs(dx * Math.sin((i * Math.PI) / 4) - dy * Math.cos((i * Math.PI) / 4)) < 1e-12,
+    );
+    assert.deepEqual(querySnap(cursor, { ...context, enabled: false }).point, cursor);
+  }
+  assert.equal(projectDirection(origin, origin, { x: 0, y: 0 }), null);
+});
+
+test("oblique edge guides project exactly onto extension and perpendicular", () => {
+  const ref = {
+    point: { x: 0, y: 0 },
+    entityId: "edge",
+    feature: "end",
+    directions: [{ x: 3, y: 2 }],
+  };
+  const c = { ...context, references: [ref], activeReference: ref };
+  const extension = querySnap({ x: 6.01, y: 4 }, c);
+  assert.equal(extension.candidate?.kind, "extension");
+  assert.ok(Math.abs(extension.point.x * 2 - extension.point.y * 3) < 1e-12);
+  const perpendicular = querySnap({ x: -4, y: 6.01 }, c);
+  assert.equal(perpendicular.candidate?.kind, "perpendicular");
+  assert.ok(Math.abs(perpendicular.point.x * 3 + perpendicular.point.y * 2) < 1e-12);
+  assert.equal(querySnap({ x: 3.01, y: 3 }, c).candidate?.kind, "angle");
+  assert.equal(querySnap({ x: 3, y: 1 }, c).candidate?.kind, "grid");
+});
+
+test("wall corners are derived references and carry edge direction", () => {
+  const p = addWall(createProject("p", "s"), {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const refs = projectSnapReferences(p);
+  assert.equal(refs.length, 6);
+  const corner = refs.find((r) => r.feature === "corner-1-1")!;
+  assert.deepEqual(corner.point, { x: 3, y: 0.18 });
+  assert.equal(
+    querySnap({ x: 3.01, y: 0.18 }, { ...context, references: refs }).candidate?.sourceFeature,
+    corner.feature,
+  );
+  assert.deepEqual(corner.directions, [{ x: 3, y: 0 }]);
+});
 
 test("hover requires continuous dwell and replaces only after a new full dwell", () => {
   const a = context.references[0]!;
@@ -203,6 +258,6 @@ test("model adapter and snapped line workflow preserve exact point, ID, undo and
     readProjectFile(serializeProject(redoProject(undoProject(committed)).present)),
     committed.present,
   );
-  assert.equal(projectSnapReferences(committed.present).length, 4);
+  assert.equal(projectSnapReferences(committed.present).length, 8);
   assert.equal(serializeProject(project), before);
 });

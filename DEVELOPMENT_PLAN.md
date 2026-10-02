@@ -1,5 +1,17 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Guide-Etappe 3b: Ringe, Ecken und Richtungsführung - 03.10.2026
+
+Erkannte Fangpunkte und gesetzte Startpunkte werden als ungefüllte Ringe dargestellt. Die sofortige Erkennung (blau) bleibt von der Hover-Aktivierung nach standardmäßig 400 ms (orange) getrennt. Wandaußenecken sind jetzt zusätzliche abgeleitete Referenzen. Die vorhandene Wartezeit-Einstellung bleibt erhalten.
+
+Die gemeinsame Geometrieprojektion liefert Richtungsführungen: Verlängerung/Flucht und Lotrechte aus angrenzenden Liniensegmenten bzw. Wandachsen sowie automatische Diagonalen. Nur Kandidaten innerhalb des Bildschirmradius werden angeboten; der nächste gewinnt, bei Gleichstand die feste Erzeugungsreihenfolge. „Verlängerung“ bezeichnet hier die gesamte Geradenflucht, auch in Gegenrichtung. Shift erzwingt ohne Radiusbeschränkung 0/45/90/.../315 Grad; Bezug ist der gesetzte Startpunkt, davor eine aktivierte Referenz. Shift hat Vorrang vor Ortho und automatischem Raster, auch bei deaktiviertem Snap. Loslassen gibt den normalen Fang frei. Klick und Vorschau nutzen dieselbe Berechnung. Hilfslinien bleiben temporär.
+
+Prüfung: 132 Tests bestanden; neu geprüft sind acht Shift-Richtungen, Loslassen, entartete Richtung, exakte Projektion an schrägen Kanten und Wandaußenecken. TypeScript und Build erfolgreich; ESLint null Fehler, sechs bekannte Warnungen. Browser: Soforterkennung vor Aktivierung, ungefüllter aktiver Ring, mit Shift exakt bestätigtes 45-Grad-Segment, Loslassen und Escape geprüft. Screenshot lokal: outputs/directional-guides.png.
+
+Abnahme: Linienwerkzeug wählen, an einer Wandecke verweilen, dann nahe einer Flucht/Diagonalen wegbewegen. Startpunkt klicken und Shift halten: unabhängig vom Raster rastet die Richtung in 45-Grad-Schritten ein. Shift loslassen und Escape testen.
+
+Grenzen: erster Verbraucher bleibt Linie/Polylinie; keine Mehrfachreferenzen, Nachbarparallel-Erkennung, Hysterese oder 3D. Am Polylinienvertex werden die benachbarten gespeicherten Segmente ausgewertet. Nächster Schritt: Wandzeichnen an dieselbe geprüfte Fang-/Hover-/Shift-API anschließen und Wand-Fenster-Workflow mit Undo/Redo und Dateirundlauf prüfen.
+
 ## Vorgezogene Guide-Etappe 3a: Hover-Referenz und Achsführungen - 02.10.2026
 
 Auf ausdrücklichen Nutzerwunsch wird vor dem zweiten Werkzeug zunächst das gewünschte Zeigerverhalten umgesetzt: Endpunkt ohne Klick 400 ms halten, als temporäre Referenz aktivieren und anschließend nur die zum Zeiger passende horizontale oder vertikale Hilfslinie anbieten. Die Verweildauer ist in den Werkzeugeigenschaften auf 200/400/600/1000 ms einstellbar (Sitzungseinstellung, nicht Projektinhalt).
