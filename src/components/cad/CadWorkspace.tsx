@@ -39,6 +39,7 @@ export function CadWorkspace() {
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [ortho, setOrtho] = useState(false);
+  const [hoverDwellMs, setHoverDwellMs] = useState(400);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
@@ -420,6 +421,20 @@ export function CadWorkspace() {
                 </select>
               </label>
               <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
+              <label className="text-xs">
+                Hover-Referenz
+                <select
+                  aria-label="Hover-Verweildauer"
+                  className="block rounded border bg-background p-1"
+                  value={hoverDwellMs}
+                  onChange={(e) => setHoverDwellMs(Number(e.target.value))}
+                >
+                  <option value={200}>0,2 Sekunden</option>
+                  <option value={400}>0,4 Sekunden</option>
+                  <option value={600}>0,6 Sekunden</option>
+                  <option value={1000}>1 Sekunde</option>
+                </select>
+              </label>
               <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
               {lineKind === "polyline" && (
                 <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
@@ -458,6 +473,7 @@ export function CadWorkspace() {
                   selection={selection}
                   drawing={(tool === "wall" || tool === "line") && mode === "2D"}
                   endpointSnap={tool === "line"}
+                  hoverDwellMs={hoverDwellMs}
                   start={tool === "line" ? (linePoints.at(-1) ?? null) : wallStart}
                   draftPoints={tool === "line" ? linePoints : []}
                   snap={snap}

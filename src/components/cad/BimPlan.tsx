@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { querySnap } from "@/constraints/snapping/engine";
+import { useHoverReference } from "./useHoverReference";
 import { projectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
@@ -16,6 +17,7 @@ export type BimPlanProps = {
   selection: Selection;
   drawing: boolean;
   endpointSnap?: boolean;
+  hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
   snap: boolean;
@@ -32,6 +34,7 @@ export function BimPlan({
   selection,
   drawing,
   endpointSnap = false,
+  hoverDwellMs = 400,
   start,
   draftPoints = [],
   snap,
@@ -83,6 +86,17 @@ export function BimPlan({
   const [hover, setHover] = useState<Point | null>(null);
   useEffect(() => setHover(null), [drawing, endpointSnap, camera]);
   const references = useMemo(() => projectSnapReferences(project), [project]);
+  const trackingContext = useMemo(
+    () => ({
+      enabled: drawing && endpointSnap && snap && !pan,
+      references,
+      pixelsPerMetre: camera.pixelsPerMetre,
+      camera,
+      viewSize,
+    }),
+    [drawing, endpointSnap, snap, pan, references, camera, viewSize],
+  );
+  const activeReference = useHoverReference(hover, trackingContext, hoverDwellMs);
   const resolveDrawing = (point: Point) =>
     endpointSnap
       ? querySnap(point, {
@@ -92,9 +106,16 @@ export function BimPlan({
           endpointRadiusPx: 10,
           gridSpacing: 0.1,
           orthoOrigin: ortho ? start : null,
+          activeReference,
         })
       : { point: drawingPoint(point, start, snap, ortho), candidate: null };
   const resolvedHover = hover ? resolveDrawing(hover) : null;
+  const snapLabels = {
+    endpoint: "Endpunkt",
+    grid: "Raster",
+    horizontal: "Horizontal",
+    vertical: "Vertikal",
+  };
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,
   );
@@ -268,7 +289,10 @@ export function BimPlan({
         }
       }}
       onKeyDown={(event) => {
-        if (event.key === "Escape") navigation.current = null;
+        if (event.key === "Escape") {
+          navigation.current = null;
+          setHover(null);
+        }
         if (pan) return;
         if (drawing && onFinish && event.key === "Enter") {
           event.preventDefault();
@@ -478,10 +502,37 @@ export function BimPlan({
           )}
         </g>
       )}
+      {drawing && !pan && activeReference && (
+        <g pointerEvents="none" aria-label="Aktive Hover-Referenz">
+          <circle
+            cx={activeReference.point.x}
+            cy={-activeReference.point.y}
+            r={6 / camera.pixelsPerMetre}
+            fill="none"
+            stroke="#b45309"
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
+          />
+          {(resolvedHover?.candidate?.kind === "horizontal" ||
+            resolvedHover?.candidate?.kind === "vertical") && (
+            <line
+              aria-label="Temporäre Hilfslinie"
+              x1={activeReference.point.x}
+              y1={-activeReference.point.y}
+              x2={resolvedHover.point.x}
+              y2={-resolvedHover.point.y}
+              stroke="#b45309"
+              strokeWidth={1}
+              strokeDasharray="6 4"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+        </g>
+      )}
       {drawing && !pan && resolvedHover?.candidate && (
         <g
           pointerEvents="none"
-          aria-label={`Fanghilfe ${resolvedHover.candidate.kind === "endpoint" ? "Endpunkt" : "Raster"}`}
+          aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
         >
           <rect
             x={resolvedHover.point.x - 5 / camera.pixelsPerMetre}
@@ -499,7 +550,7 @@ export function BimPlan({
             fontSize={12 / camera.pixelsPerMetre}
             fill="#0284c7"
           >
-            {resolvedHover.candidate.kind === "endpoint" ? "Endpunkt" : "Raster"}
+            {snapLabels[resolvedHover.candidate.kind]}
           </text>
         </g>
       )}

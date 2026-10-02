@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Vorgezogene Guide-Etappe 3a: Hover-Referenz und Achsführungen - 02.10.2026
+
+Auf ausdrücklichen Nutzerwunsch wird vor dem zweiten Werkzeug zunächst das gewünschte Zeigerverhalten umgesetzt: Endpunkt ohne Klick 400 ms halten, als temporäre Referenz aktivieren und anschließend nur die zum Zeiger passende horizontale oder vertikale Hilfslinie anbieten. Die Verweildauer ist in den Werkzeugeigenschaften auf 200/400/600/1000 ms einstellbar (Sitzungseinstellung, nicht Projektinhalt).
+
+`constraints/inference/hover-reference.ts` verwaltet die einzelne Referenz mit expliziter Zeitquelle. Die gemeinsame SnapEngine priorisiert Endpunkt vor Führung vor Raster. Der React-Adapter liefert Zeiger und Timer; die Ansicht zeigt einen Referenzring, eine gestrichelte Hilfslinie und die wirksame Fangart. Die Führung projiziert mathematisch exakt auf die Bezugsachse, innerhalb von 10 CSS-Pixeln. Eine neue Referenz ersetzt die bisherige erst nach voller Verweildauer. Escape, Verlassen der Zeichenfläche, Werkzeug-/Kamera-/Modellwechsel und deaktiviertes Snap verwerfen temporären Kontext. Es entstehen weder Modellelemente noch Undo-Einträge durch Hover.
+
+Nachweise: 129 Tests bestanden, darunter fünf neue Tests zu kontinuierlichem Hover, Unterbrechung, Referenzwechsel, einstellbarer Wartezeit, Zoom, Prioritäten, Ortho-Konflikten, veralteten Quellen und Dateirundlauf mit Undo/Redo. TypeScript und Produktionsbuild erfolgreich; ESLint null Fehler und sechs bekannte React-Refresh-Warnungen. Browser: ruhiges Hover aktiviert ohne Klick; horizontale und vertikale Führung erscheinen entsprechend der Zeigerposition; bestätigter Linienpunkt liegt exakt auf der Bezugsachse; Undo/Redo und Escape geprüft. Screenshot: outputs/hover-guide.png im lokalen Arbeitsverzeichnis.
+
+Abnahme: Linienwerkzeug wählen, Snap einschalten, am Achsende einer Wand oder an einem Linienpunkt kurz verweilen. Der orange Ring zeigt die aktive Referenz. Zeiger seitlich oder nach oben bewegen: Nur die passende gestrichelte Führung erscheint. Punkt setzen, Linie abschließen, Undo/Redo testen. Escape räumt die Referenz auf.
+
+Grenzen: erster Verbraucher weiterhin Linie/Polylinie in 2D; maximal eine Referenz, nur Achsführungen, keine dauerhaften Hilfsobjekte. Noch keine Richtungsableitung aus Kanten, Mehrfachreferenzen, Hysterese, Parallel-/Lot-/Winkelbezüge, 3D oder räumlicher Index. Die ursprüngliche vollständige Hilfslinienspezifikation bleibt offen. Die Engine analysiert derzeit vorhandene Wandachsenden und Linienvertices; weitere Elementtypen benötigen Modelladapter.
+
+Nächster Teilauftrag: Richtungsreferenzen vorhandener gerader Linien/Wandachsen ergänzen und daraus Verlängerung, Lotrechte und 45°-Führung priorisiert ableiten. Danach dieselbe geprüfte API im Wandzeichnen einsetzen. Keine werkzeugspezifische Fangberechnung duplizieren.
+
 ## Guide-Etappe 2a: gemeinsame Fanggrundlage - 02.10.2026
 
 Die reine Engine `src/constraints/snapping/engine.ts` liefert Modellpunkte und Fangkandidaten mit Art, Quelle, Bildschirmabstand und Priorität. Der Application-Adapter `src/application/snapping/project-references.ts` leitet Wandachsenden und vorhandene Linien-/Polylinienpunkte aus dem einzigen Project ab. React stellt nur Ansichtskontext und Anzeige bereit. Als erster Verbraucher nutzt das Linienwerkzeug (einschließlich Polylinien) diese API. Endpunkte innerhalb von 10 CSS-Pixeln haben Vorrang vor dem bisherigen 0,10-m-Raster; gleiche Kandidaten werden deterministisch entschieden. Ortho darf keinen projizierten Punkt als echten Endpunkt ausgeben. Marker und Beschriftung zeigen den wirksamen Fang. Kamera-/Werkzeugwechsel verwerfen veraltete Hoverpositionen.

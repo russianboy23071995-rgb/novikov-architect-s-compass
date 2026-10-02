@@ -12,6 +12,7 @@ import {
   readProjectFile,
 } from "../../lib/bim/history.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { advanceHoverReference, emptyHoverReference } from "../inference/hover-reference.ts";
 
 const context: SnapContext = {
   references: [{ point: { x: 1.037, y: 2.013 }, entityId: "wall", feature: "axis-end" }],
@@ -21,6 +22,102 @@ const context: SnapContext = {
   gridSpacing: 0.1,
   orthoOrigin: null,
 };
+
+test("hover requires continuous dwell and replaces only after a new full dwell", () => {
+  const a = context.references[0]!;
+  const b = { ...a, entityId: "other" };
+  let state = advanceHoverReference(emptyHoverReference(), a, 0, 400);
+  state = advanceHoverReference(state, a, 399, 400);
+  assert.equal(state.active, null);
+  state = advanceHoverReference(state, null, 399, 400);
+  state = advanceHoverReference(state, a, 400, 400);
+  assert.equal(state.active, null);
+  state = advanceHoverReference(state, a, 800, 400);
+  assert.deepEqual(state.active, a);
+  state = advanceHoverReference(state, b, 900, 400);
+  assert.deepEqual(state.active, a);
+  state = advanceHoverReference(state, b, 1300, 400);
+  assert.deepEqual(state.active, b);
+  assert.deepEqual(advanceHoverReference(state, null, 1400, 400).active, b);
+  assert.equal(emptyHoverReference().active, null);
+  assert.throws(() => advanceHoverReference(state, a, NaN, 400));
+  assert.throws(() => advanceHoverReference(state, a, 1500, -1));
+});
+
+test("configured dwell and moved reference restart acquisition", () => {
+  const a = context.references[0]!;
+  let state = advanceHoverReference(emptyHoverReference(), a, 100, 600);
+  state = advanceHoverReference(state, a, 699, 600);
+  assert.equal(state.active, null);
+  const moved = { ...a, point: { x: 4, y: 5 } };
+  state = advanceHoverReference(state, moved, 700, 600);
+  assert.equal(state.active, null);
+  assert.deepEqual(advanceHoverReference(state, moved, 1300, 600).active, moved);
+});
+
+test("only the cursor-relevant axis guides snap, before grid, across zoom levels", () => {
+  const a = context.references[0]!;
+  for (const pixelsPerMetre of [10, 100, 1000]) {
+    const c = { ...context, pixelsPerMetre, activeReference: a };
+    const h = querySnap(
+      { x: a.point.x + 100 / pixelsPerMetre, y: a.point.y + 6 / pixelsPerMetre },
+      c,
+    );
+    assert.equal(h.candidate?.kind, "horizontal");
+    assert.equal(h.point.y, a.point.y);
+    const v = querySnap(
+      { x: a.point.x + 6 / pixelsPerMetre, y: a.point.y + 100 / pixelsPerMetre },
+      c,
+    );
+    assert.equal(v.candidate?.kind, "vertical");
+    assert.equal(v.point.x, a.point.x);
+    assert.equal(
+      querySnap({ x: a.point.x + 100 / pixelsPerMetre, y: a.point.y + 11 / pixelsPerMetre }, c)
+        .candidate?.kind,
+      "grid",
+    );
+    assert.equal(querySnap(a.point, c).candidate?.kind, "endpoint");
+  }
+});
+
+test("guides reject stale references, disabled snapping and incompatible Ortho", () => {
+  const a = context.references[0]!;
+  const cursor = { x: 4, y: a.point.y + 0.02 };
+  assert.equal(querySnap(cursor, context).candidate?.kind, "grid");
+  assert.equal(
+    querySnap(cursor, { ...context, activeReference: a, references: [] }).candidate?.kind,
+    "grid",
+  );
+  assert.equal(
+    querySnap(cursor, { ...context, activeReference: a, enabled: false }).candidate,
+    null,
+  );
+  assert.notEqual(
+    querySnap(cursor, { ...context, activeReference: a, orthoOrigin: { x: 0, y: 2.1 } }).candidate
+      ?.kind,
+    "horizontal",
+  );
+});
+
+test("guide-derived model coordinates survive commit, undo, redo and JSON", () => {
+  const project = createProject("guides", "storey");
+  const a = context.references[0]!;
+  const result = querySnap({ x: 4, y: a.point.y + 0.02 }, { ...context, activeReference: a });
+  const history = commitProject(
+    createHistory(project),
+    addLine(project, {
+      id: "guided-line",
+      kind: "line",
+      points: [{ x: 0, y: 0 }, result.point],
+      ...defaultLineAppearance,
+    }),
+  );
+  assert.equal(history.past.length, 1);
+  assert.deepEqual(undoProject(history).present, project);
+  const restored = readProjectFile(serializeProject(redoProject(undoProject(history)).present));
+  assert.equal(restored.storey.lines![0]!.points[1]!.y, a.point.y);
+  assert.equal(JSON.stringify(restored).includes("activeReference"), false);
+});
 
 test("endpoint wins over grid and retains exact non-grid coordinates", () => {
   const before = JSON.stringify(context);

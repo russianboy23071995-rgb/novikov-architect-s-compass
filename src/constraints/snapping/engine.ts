@@ -2,7 +2,7 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 
 export type SnapReference = { point: Point2; entityId: string; feature: string };
 export type SnapCandidate = {
-  kind: "endpoint" | "grid";
+  kind: "endpoint" | "grid" | "horizontal" | "vertical";
   worldPoint: Point2;
   distanceOnScreen: number;
   sourceEntityId: string | null;
@@ -16,6 +16,7 @@ export type SnapContext = {
   endpointRadiusPx: number;
   gridSpacing: number | null;
   orthoOrigin: Point2 | null;
+  activeReference?: SnapReference | null;
 };
 
 /** Plan coordinates in metres, screen distances in CSS pixels. No model mutations. */
@@ -78,6 +79,44 @@ export function querySnap(
   );
   const endpoint = candidates[0];
   if (endpoint) return { point: endpoint.worldPoint, candidate: endpoint };
+  const reference = context.activeReference;
+  // Reject stale references; model changes must never leave a guide at an old position.
+  if (
+    reference &&
+    context.references.some(
+      (r) =>
+        r.entityId === reference.entityId &&
+        r.feature === reference.feature &&
+        r.point.x === reference.point.x &&
+        r.point.y === reference.point.y,
+    )
+  ) {
+    const p = reference.point;
+    const dx = Math.abs(cursor.x - p.x) * context.pixelsPerMetre;
+    const dy = Math.abs(cursor.y - p.y) * context.pixelsPerMetre;
+    const kind = dy <= dx ? "horizontal" : "vertical";
+    const distance = Math.min(dx, dy);
+    const point = kind === "horizontal" ? { x: cursor.x, y: p.y } : { x: p.x, y: cursor.y };
+    const constrained = constrain(point);
+    if (
+      distance <= context.endpointRadiusPx &&
+      Math.max(dx, dy) > context.endpointRadiusPx &&
+      point.x === constrained.x &&
+      point.y === constrained.y
+    ) {
+      return {
+        point,
+        candidate: {
+          kind,
+          worldPoint: point,
+          distanceOnScreen: distance,
+          sourceEntityId: reference.entityId,
+          sourceFeature: reference.feature,
+          priority: 1,
+        },
+      };
+    }
+  }
   if (context.gridSpacing !== null) {
     const spacing = context.gridSpacing;
     const grid = {
@@ -96,7 +135,7 @@ export function querySnap(
                 Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
               sourceEntityId: null,
               sourceFeature: "grid",
-              priority: 1,
+              priority: 2,
             }
           : null,
     };
