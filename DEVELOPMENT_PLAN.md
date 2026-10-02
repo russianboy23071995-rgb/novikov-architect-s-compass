@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktive Planungsgrundlage ab 02.10.2026
+
+DEVELOPMENT_GUIDE.md enthält den vollständig und unverändert abgelegten neuen Nutzerleitfaden. Er ersetzt die Anlage „0.Where it all Begins“ und die bisherige Etappenreihenfolge als aktive Planungsgrundlage. ARCHITECTURE.md bleibt für Architekturgrenzen maßgeblich. Die nachfolgenden älteren Etappen und Abschlussnachträge bleiben als Nachweise erhalten; ihre Nummern sind historisch und dürfen nicht mit Guide-Etappen 0–12 oder Guide-F01–F29 verwechselt werden.
+
+Aktueller gesicherter Funktionsstand: feat/plan-camera, Commit 2bca281, PR #17 (offen). 110 Tests, TypeScript, gezieltes ESLint, Build und dokumentierte Browserprüfung bestanden. Dies ersetzt noch nicht die vollständige Anforderungszuordnung nach Guide-Etappe 0. Der vorgezogene Bildschirmmaßstab deckt einen Teil von Guide-Etappe 7/F10 ab; Referenzimport, Kalibrierung und Ausgabemaßstab fehlen weiterhin.
+
+Nächster begrenzter Auftrag: Guide-Etappe 0. Aktuellen Code und Prüfungen abgleichen; Matrix für Guide-F01–F29 mit Status, zuständigem Modul und konkretem Nachweis erstellen; vorhandene Funktionen von Teilumsetzungen und fehlenden Funktionen trennen. Insbesondere prüfen, ob vor Endpunktfang ein kleiner gemeinsamer Application-Schritt nötig ist. Keine neue CAD-Funktion in dieser Bestandsaufnahme. Abnahme: alle 29 Wünsche zugeordnet, offene Prüfungen benannt und genau ein ausführbarer Folgeauftrag mit Abnahmekriterien festgelegt.
+
+Übergreifende Gesprächswünsche bleiben bestehen: sichtbare Auswahlumrandung für alle künftigen Elementtypen, Verbesserung der Spracherkennung, Eigenschaften oben und Bewegungsaktionen am Zeiger. Sie werden bei Etappe 0 gesondert zugeordnet. Die ältere Detailspezifikation F13_HILFLINIENSYSTEM.md gehört zu Guide-F14. Vorgeschlagene 600 ms Hover und 10 px Fangradius sind vorläufige, konfigurierbare Werte.
+
+Dieser Dokumentationsschritt archiviert und verankert den Guide; Etappe 0 ist noch nicht abgeschlossen. Danach jeweils ein kleiner Benutzerablauf mit Tests, praktischer Abnahme und aktualisiertem Plan. Bereits geprüfte Funktionen werden wiederverwendet. Keine Änderungen am Architekturvertrag oder am CAD-Verhalten.
+
+## Historischer Entwicklungsplan und Nachweise
+
 Verbindliche Reihenfolge aus dem Nutzerauftrag vom 01.10.2026. Dieser Plan ersetzt die bisherige technische Reihenfolge in FEATURE_ROADMAP.md; die dort erfassten Einzelanforderungen F01–F14 bleiben erhalten. Bereits funktionierende Modell-, UI-, History- und Exportfunktionen werden weiterverwendet. Pro Änderung eine überschaubare, prüfbare Teil-Etappe.
 
 ## Etappe 1 Gesamtstand prüfen und stabilisieren

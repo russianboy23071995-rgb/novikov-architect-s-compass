@@ -1,8 +1,10 @@
-# Fortlaufende Funktionsliste NOVIKOV CAD
+# Historische Funktionsliste NOVIKOV CAD
 
-Quelle: Nutzeranlage **0.Where it all Begins..docx**, erstmals am 30.09.2026 aus dem verknüpften Chat **CAD Bauplan erstellen** gelesen; neueste bereitgestellte Fassung am 01.10.2026 direkt aus der Word-Datei abgeglichen. Die Anlage wird vom Nutzer fortgeschrieben. Neue Fassungen bei weiteren Hinweisen erneut lesen, abgleichen und diese Liste aktualisieren. Einträge sind freigegebene Wünsche zur passenden Entwicklungsphase, keine Behauptung bereits fertiger Funktionen.
+Quelle: Nutzeranlage **0.Where it all Begins..docx**, erstmals am 30.09.2026 aus dem verknüpften Chat **CAD Bauplan erstellen** gelesen; neueste bereitgestellte Fassung am 01.10.2026 direkt aus der Word-Datei abgeglichen. Diese Quelle wurde am 02.10.2026 durch DEVELOPMENT_GUIDE.md ersetzt. Die alte Anlage wird nicht mehr als Arbeitsgrundlage verwendet. Einträge sind freigegebene Wünsche zur passenden Entwicklungsphase, keine Behauptung bereits fertiger Funktionen.
 
-## Aktuelle Grundlage
+> Historischer Stand: Alte F01–F14-IDs sind nicht die F01–F29-IDs des neuen Guides. Insbesondere historisch F13 (Hilfliniensystem) entspricht Guide F14; F13_HILFLINIENSYSTEM.md bleibt ergänzende Detailspezifikation, soweit mit Guide und Architektur vereinbar. Aktuelle Reihenfolge und Fortschritt: DEVELOPMENT_PLAN.md.
+
+## Bisherige Grundlage
 
 Parametrischer Wand-/Fensterkern, gemeinsame 2D-/3D-Ansichten, IFC4-Export und lokale Textbefehle sind implementiert. Der Nutzer bestätigt erfolgreichen IFC-Import in Archicad. Optionale Spracheingabe ist implementiert; beim Praxistest meldet der Nutzer Erkennungsfehler (siehe F11). Projekt-Speichern/Laden als JSON und Undo/Redo (bis 100 Modelländerungen) sind nun implementiert. Kein Autosave; die Historie bleibt auf die Sitzung begrenzt. Diese Grundlage geht den weiteren Zeichenwerkzeugen voraus.
 
