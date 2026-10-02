@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Formatbereinigung abgeschlossen – 02.10.2026
+
+`.gitattributes` legt für automatisch erkannte Textdateien LF im Checkout fest; `.prettierrc` verlangt ausdrücklich LF. Die lokalen UTF-8-Textdateien wurden ohne Änderung ihrer Inhalte von CRLF auf LF normalisiert. Prettier hat die noch abweichende Formatierung in ToolRail, den beiden Routendateien und styles.css vereinheitlicht. Binärdateien bleiben unverändert. Keine CAD-Funktion oder Fanglogik wurde geändert.
+
+Prüfung: vollständiges ESLint erfolgreich mit null Fehlern, auch erneut nach dem Produktionsbuild. 118 Tests, TypeScript und Build erfolgreich; keine CRLF-/gemischten Textdateien mehr im geprüften Checkout. Sechs bestehende `react-refresh/only-export-components`-Warnungen bleiben in badge, button, form, navigation-menu, sidebar und toggle sichtbar. Sie betreffen gemischte Komponenten-/Hilfsexporte, keine Formatfehler; ihre strukturelle Bereinigung ist nicht Teil dieses Format-PRs. Keine Lint-Regel wurde abgeschaltet.
+
+Nächster Funktionsauftrag ist Guide-Etappe 2: eine gemeinsame, erweiterbare Raster- und Punktfang-Engine unter constraints/snapping, mit generischer Geometrie und Modelladaptern. Endpunktfang ist ihre erste Fangart, keine separat in Werkzeugen implementierte Logik. Ein expliziter Ansichtskontext liefert bildschirmbezogene Fangabstände; Ergebnisse bleiben Modellkoordinaten. Zunächst einen vollständigen Zeichenablauf integrieren, anschließend das zweite Werkzeug über dieselbe API. Raster, Mittelpunkt, Schnittpunkt und später Referenzen/Guides verwenden die gemeinsame Kandidaten-/Prioritätsstruktur. Leistungsoptimierungen folgen gemessenen Engpässen; beliebig große Projekte sind damit noch nicht nachgewiesen.
+
 ## Guide-Etappe 1a abgeschlossen – 02.10.2026
 
 Der neue Application-Controller unter `src/application/direct-edit/controller.ts` koordiniert Start, Bestätigung, Abbruch und Snapshot-History. Die reine Vorschaufunktion verwendet weiterhin die vorhandene Direct-Edit-/Transformationslogik. `CadWorkspace` dispatcht Ereignisse; `BimPlan` meldet Sitzung und Zielpunkt statt selbst einen fertigen Modellzustand zu bestätigen. Bestehende Achs-/Punktaktionen nutzen denselben Lebenszyklus, ohne neue Geometrie. Eigenschaften, Zeichnen, Textbefehle und Laden behalten ihre bisherigen validierten Operationen und geben Ergebnisse an denselben History-Pfad weiter. Es gibt weiterhin genau ein Project.
