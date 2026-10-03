@@ -480,6 +480,21 @@ Nachweise: 215 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Einschränkung: Punktaufnahme und einige bestehende Viewport-/History-Anbindungen sind noch Legacy-Koordination; der gesamte zukünftige CAD-Werkzeugrahmen ist damit nicht fertig. Die aktuell angeschlossene Eingabe-/Bestätigungslogik läuft jedoch über einen gemeinsamen Vertrag. 3D-Arbeitsebenen, neue Bauteile und Polylinienpräzision wurden nicht zusätzlich implementiert.
 
-### Genau ein ausführbarer Folgeauftrag: Polylinie als Vertragsnachweis
+### Abgeschlossener Folgeauftrag: Polylinie als Vertragsnachweis
 
 Die vorhandene Polylinie als weiteren Verbraucher des gemeinsamen Interaktionsvertrags anbinden. Pro Segment den aktuellen Punkt als Ursprung bereitstellen; dieselbe Eingabe, Tab, Fangengine und Bestätigung unverändert nutzen. Doppelklick beendet weiterhin die Polylinie, ein Undo-Schritt für den Gesamtabschluss bleibt erhalten. Prüfen, dass dazu keine zusätzliche Feld-/Tab-/Hover-Steuerung oder neue Werkzeugabfrage im gemeinsamen Interaktionskern nötig ist. Neue Punktaufnahme, Abschluss und Abbruch mit numerischen Segmenten praktisch testen; keine Wandkettenentscheidung vorwegnehmen.
+
+
+### Abschluss: Polylinie verwendet unveränderten Interaktionskern — 03.10.2026
+
+Auf feat/polyline-shared-interaction, basierend auf offenem PR #45; keine Merge-Freigabe angenommen. Für die Polylinie wird nun der jeweils letzte Entwurfspunkt als Ursprung an den vorhandenen drawingInteraction-Adapter übergeben. ToolInteraction, useToolInteraction, PrecisionInput, Tab-/Hover-/Parallelsteuerung wurden nicht verändert. Nach jedem numerisch bestätigten Segment ist der nächste Ursprung aktiv und die Eingabe leer. Bis zum Abschluss bleibt die Polylinie ein Entwurf.
+
+Enter im Eingabefeld ergänzt einen Punkt. Doppelklick beziehungsweise Enter im Grundriss schließt wie bisher die gesamte Polylinie ab. Ungültige explizite Eingaben sperren auch den Gesamtabschluss, statt stillschweigend verworfen zu werden. Escape/Abbrechen verwirft den ganzen Entwurf; bestätigte Elemente bleiben erhalten.
+
+Nachweise: 217 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Vertragsprüfungen für mehrere numerische Segmente mit wechselndem Ursprung, leere nächste Eingabe, ungültige/Nullwerte, kein Modell/History vor Abschluss, genau einen Commit und Undo/Redo sowie Abbruch. Browser: 3 m rechts und 2 m oben erzeugen Entwurf mit drei Punkten, Doppelklick am Endpunkt ergibt eine 5-m-Polylinie. Ein Undo entfernt sie, Redo stellt sie wieder her. Weiterer Entwurf mit 566° sperrt Übernehmen und Doppelklickabschluss; Escape verwirft nur diesen Entwurf.
+
+Abnahme: Linie → Zeichenmodus Polylinie → Startpunkt → Maus nach rechts → Tab → 3 → Enter. Winkel 90 und Länge 2 → Enter. Am letzten Punkt doppelklicken, dann Undo/Redo prüfen. Bei der nächsten Polylinie ungültigen Winkel und Escape prüfen.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsamen Fangkontext an den Werkzeugvertrag anbinden
+
+Den noch in BimPlan zwischen Zeichnen und Direct Edit verzweigten Aufbau von Ursprung, ausgeschlossenen Quellen und Fangabfrage hinter den vorhandenen Werkzeugvertrag führen. Bestehende querySnap/resolveEditSnap-Services weiterverwenden. Nachweis für Punkt-/Elementbewegung, feste Achsen, Fensterbindung und Zeichnen; Referenzen müssen Zoom überstehen und bei Kontextwechsel korrekt enden. Keine neue Fangmathematik oder UI-Funktion, kein neues Bauteil. Dies vervollständigt gezielt die gemeinsame Anbindung anstelle weiterer werkzeugweiser Sonderfälle.

@@ -60,8 +60,7 @@ export function CadWorkspace() {
   const [linePoints, setLinePoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
-  const lineOrigin =
-    tool === "line" && lineKind === "line" && linePoints.length === 1 ? linePoints[0] : null;
+  const lineOrigin = tool === "line" ? (linePoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : lineOrigin;
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
@@ -480,7 +479,10 @@ export function CadWorkspace() {
               </label>
               <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
               {lineKind === "polyline" && (
-                <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
+                <span className="text-xs">
+                  Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im Grundriss:
+                  Abschluss
+                </span>
               )}
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
                 Zeichnen abbrechen
