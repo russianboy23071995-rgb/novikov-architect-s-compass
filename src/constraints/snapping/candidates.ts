@@ -125,8 +125,8 @@ function intersectionCandidates(
   for (const a of active)
     for (const b of active) {
       if (a === b) continue;
-      const ga = cursorGuide(cursor, a.source),
-        gb = cursorGuide(cursor, b.source);
+      const ga = cursorGuide(cursor, a.source, context.guideDirections),
+        gb = cursorGuide(cursor, b.source, context.guideDirections);
       // Preserve horizontal/vertical origin roles; other pairs use stable source order.
       const hv = ga.direction.y === 0 && gb.direction.x === 0;
       const vh = ga.direction.x === 0 && gb.direction.y === 0;

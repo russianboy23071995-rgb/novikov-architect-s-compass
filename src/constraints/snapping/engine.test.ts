@@ -620,7 +620,9 @@ test("interrupted release preserves other references and restarts its dwell", ()
 });
 
 import { intersectLines } from "../../geometry/intersections/lines.ts";
-import { cursorGuide } from "../guides/directions.ts";
+import { cursorGuide, advanceGuideDirections } from "../guides/directions.ts";
+import { resolveEditSnap } from "../../application/direct-edit/snapping.ts";
+import { createEditingState, editingReducer } from "../../application/direct-edit/controller.ts";
 import {
   acquisitionReference,
   withConstructionReferences,
@@ -791,4 +793,120 @@ test("constructed references flatten dependencies and reject moved, missing or e
     ).candidate,
     null,
   );
+});
+
+const angularCursor = (degrees: number, radius = 3) => ({
+  x: radius * Math.cos((degrees * Math.PI) / 180),
+  y: radius * Math.sin((degrees * Math.PI) / 180),
+});
+
+test("direction hysteresis resists boundary jitter, switches deliberately and wraps through zero", () => {
+  const source = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  for (const origin of [0, 45, 90, 135, 180, 225, 270, 315]) {
+    let state = advanceGuideDirections(angularCursor(origin), [source]);
+    for (const offset of [22.4, 22.6, 24, 22.4, 27.4]) {
+      state = advanceGuideDirections(angularCursor(origin + offset), [source], state);
+      assert.equal(state[0]!.degrees, origin);
+    }
+    state = advanceGuideDirections(angularCursor(origin + 27.6), [source], state);
+    assert.equal(state[0]!.degrees, (origin + 45) % 360);
+    state = advanceGuideDirections(angularCursor(origin + 22.4), [source], state);
+    assert.equal(state[0]!.degrees, (origin + 45) % 360);
+    state = advanceGuideDirections(angularCursor(origin + 17.4), [source], state);
+    assert.equal(state[0]!.degrees, origin);
+    assert.equal(advanceGuideDirections(source.point, [source], state)[0]!.degrees, origin);
+  }
+});
+
+test("direction memory is independent per source and resets on removal, changed identity or position", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 4, y: 0 } };
+  const old = advanceGuideDirections({ x: 2, y: 2 }, [a, b]);
+  assert.deepEqual(
+    old.map((g) => g.degrees),
+    [45, 135],
+  );
+  assert.deepEqual(
+    advanceGuideDirections({ x: 2, y: 2 }, [b, a], old).map((g) => g.degrees),
+    [135, 45],
+  );
+  const held = advanceGuideDirections(angularCursor(0), [a]);
+  assert.equal(advanceGuideDirections(angularCursor(24), [a], held)[0]!.degrees, 0);
+  for (const changed of [
+    { ...a, entityId: "new" },
+    { ...a, feature: "new" },
+    { ...a, point: { x: 1e-10, y: 0 } },
+  ])
+    assert.equal(advanceGuideDirections(angularCursor(24), [changed], held)[0]!.degrees, 45);
+  const reset = advanceGuideDirections(angularCursor(24), [], held);
+  assert.deepEqual(reset, []);
+  assert.equal(advanceGuideDirections(angularCursor(24), [a], reset)[0]!.degrees, 45);
+});
+
+test("intersection and overlay share held directions without expanding radius or overriding Shift", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 0.18, y: -1 } };
+  const cursor = angularCursor(24, 0.2);
+  const guideDirections = advanceGuideDirections({ x: 0.18, y: 0 }, [a, b]);
+  const c = {
+    ...context,
+    references: [a, b],
+    activeReferences: [a, b],
+    guideDirections,
+    gridSpacing: null,
+    pixelsPerMetre: 100,
+  };
+  assert.equal(cursorGuide(cursor, a, guideDirections).degrees, 0);
+  assert.deepEqual(querySnap(cursor, c).point, { x: 0.18, y: 0 });
+  assert.equal(querySnap(cursor, c).candidate?.kind, "intersection");
+  assert.notEqual(querySnap(cursor, { ...c, pixelsPerMetre: 400 }).candidate?.kind, "intersection");
+  assert.equal(querySnap(cursor, { ...c, angleOrigin: a.point }).candidate?.angleDegrees, 45);
+  assert.equal(querySnap(cursor, { ...c, enabled: false }).candidate, null);
+  assert.deepEqual(querySnap(cursor, { ...c, orthoOrigin: a.point }).point, { x: 0.18, y: 0 });
+});
+
+test("free direct edit consumes stabilized intersections with one reversible model commit", () => {
+  const project = addLine(createProject("p", "s"), {
+    id: "line",
+    kind: "line",
+    points: [
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const target = { kind: "line" as const, id: "line" };
+  const state = editingReducer(createEditingState(project), {
+    type: "begin",
+    target,
+    action: "move",
+    index: null,
+  });
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 0.18, y: -1 } };
+  const c = {
+    ...context,
+    references: [a, b],
+    activeReferences: [a, b],
+    guideDirections: advanceGuideDirections({ x: 0.18, y: 0 }, [a, b]),
+    pixelsPerMetre: 100,
+    gridSpacing: null,
+  };
+  const resolved = resolveEditSnap(state.session!, angularCursor(24, 0.2), c);
+  assert.deepEqual(resolved.point, { x: 0.18, y: 0 });
+  const committed = editingReducer(state, {
+    type: "confirm",
+    session: state.session!,
+    selection: target,
+    point: resolved.point,
+  });
+  assert.equal(committed.error, "");
+  assert.equal(committed.history.past.length, 1);
+  assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, project);
+  const redone = editingReducer(editingReducer(committed, { type: "undo" }), { type: "redo" });
+  assert.deepEqual(
+    readProjectFile(serializeProject(redone.history.present)),
+    committed.history.present,
+  );
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
 });

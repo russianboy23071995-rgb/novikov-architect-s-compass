@@ -2,6 +2,7 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 import { projectDirection, angle45Direction } from "../../geometry/projections/direction.ts";
 import { collectSnapCandidates, gridSnap } from "./candidates.ts";
 import { compareSnapCandidates } from "./ranking.ts";
+import type { GuideDirection } from "../guides/directions.ts";
 
 export type SnapReference = {
   point: Point2;
@@ -39,6 +40,7 @@ export type SnapContext = {
   orthoOrigin: Point2 | null;
   activeReference?: SnapReference | null;
   activeReferences?: readonly SnapReference[];
+  guideDirections?: readonly GuideDirection[];
   angleOrigin?: Point2 | null;
 };
 

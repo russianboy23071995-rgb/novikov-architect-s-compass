@@ -11,14 +11,20 @@ import type { HoverReferenceState } from "@/constraints/inference/hover-referenc
 import { querySnap } from "@/constraints/snapping/engine";
 import type { SnapReference } from "@/constraints/snapping/engine";
 import type { Point2 } from "@/geometry/primitives/point";
+import { advanceGuideDirections } from "@/constraints/guides/directions";
+import type { GuideDirection } from "@/constraints/guides/directions";
 
 /** React supplies pointer/time events; acquisition decisions live in the pure inference module. */
 export function useHoverReference(
   cursor: Point2 | null,
   context: { enabled: boolean; references: readonly SnapReference[]; pixelsPerMetre: number },
   dwellMs: number,
-): readonly SnapReference[] {
-  const state = useRef<{ context: typeof context; value: HoverReferenceState } | null>(null);
+) {
+  const state = useRef<{
+    context: typeof context;
+    value: HoverReferenceState;
+    guides: GuideDirection[];
+  } | null>(null);
   const [snapshot, setSnapshot] = useState<typeof state.current>(null);
   useEffect(() => {
     if (!context.enabled || !cursor) {
@@ -29,10 +35,16 @@ export function useHoverReference(
     const current =
       state.current?.context === context ? state.current.value : emptyHoverReference();
     const sources = withConstructionReferences(context.references, current.references);
+    const guides = advanceGuideDirections(
+      cursor,
+      current.references,
+      state.current?.context === context ? state.current.guides : [],
+    );
     const candidate = querySnap(cursor, {
       ...context,
       references: sources,
       activeReferences: current.references,
+      guideDirections: guides,
       endpointRadiusPx: 10,
       gridSpacing: null,
       orthoOrigin: null,
@@ -41,9 +53,11 @@ export function useHoverReference(
     const update = () => {
       const before =
         state.current?.context === context ? state.current.value : emptyHoverReference();
+      const value = advanceHoverReference(before, reference, performance.now(), dwellMs);
       const next = {
         context,
-        value: advanceHoverReference(before, reference, performance.now(), dwellMs),
+        value,
+        guides: advanceGuideDirections(cursor, value.references, guides),
       };
       state.current = next;
       setSnapshot(next);
@@ -57,7 +71,16 @@ export function useHoverReference(
     );
     return () => window.clearTimeout(timer);
   }, [cursor, context, dwellMs]);
-  return context.enabled && cursor && snapshot?.context === context
-    ? snapshot.value.references
-    : [];
+  const references =
+    context.enabled && cursor && snapshot?.context === context ? snapshot.value.references : [];
+  return {
+    references,
+    guideDirections: cursor
+      ? advanceGuideDirections(
+          cursor,
+          references,
+          snapshot?.context === context ? snapshot.guides : [],
+        )
+      : [],
+  };
 }

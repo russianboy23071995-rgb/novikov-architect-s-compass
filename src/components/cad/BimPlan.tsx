@@ -118,7 +118,11 @@ export function BimPlan({
     }),
     [endpointSnap, snap, pan, references, camera, viewSize],
   );
-  const activeReferences = useHoverReference(hover, trackingContext, hoverDwellMs);
+  const { references: activeReferences, guideDirections } = useHoverReference(
+    hover,
+    trackingContext,
+    hoverDwellMs,
+  );
   const activeReference = activeReferences.at(-1) ?? null;
   const resolveDrawing = (point: Point, shift = shiftHeld) =>
     endpointSnap
@@ -131,6 +135,7 @@ export function BimPlan({
           orthoOrigin: ortho ? start : null,
           activeReference,
           activeReferences,
+          guideDirections,
           angleOrigin: shift ? (start ?? activeReference?.point ?? null) : null,
         })
       : { point: drawingPoint(point, start, snap, ortho), candidate: null };
@@ -144,6 +149,7 @@ export function BimPlan({
       orthoOrigin: ortho ? editSession!.anchor : null,
       activeReference,
       activeReferences,
+      guideDirections,
       angleOrigin: shift ? editSession!.anchor : null,
     });
   const resolvedHover = hover ? (editSession ? resolveEdit(hover) : resolveDrawing(hover)) : null;
@@ -559,7 +565,7 @@ export function BimPlan({
         snap &&
         hover &&
         activeReferences.map((reference) => {
-          const guide = cursorGuide(hover, reference);
+          const guide = cursorGuide(hover, reference, guideDirections);
           const extension =
             40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
           return (

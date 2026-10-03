@@ -48,11 +48,23 @@ Abnahme: Snap einschalten. Bei einer horizontalen 3-m-Wand beide Achsenden nache
 
 Grenzen: weiterhin höchstens vier aktive temporäre Referenzen; keine dauerhaften Punktbauteile, kein History-/Projektdateieintrag für Hover. Verlassen der Zeichenfläche, Kamera-/Modell-/Sitzungswechsel verwerfen Referenzen wie bisher. Beliebig schräge Verlängerung/Lot-Schnittpunkte, echte Segmentschnitt- und Mittelpunktfangarten sowie aktive 3D-Arbeitsebenen bleiben Backlog; bestehende einzelne Verlängerungs-/Lotführungen bleiben verfügbar. Kein Anspruch auf vollständige Guide-F14-Umsetzung.
 
-### Genau ein ausführbarer Folgeauftrag: Richtungswechsel der 45°-Hilfslinien stabilisieren
+### Abschluss: stabile Richtungswechsel der 45°-Hilfslinien — 03.10.2026
 
-Eine kleine gemeinsame Hysterese für die mausgeführte Richtungswahl ergänzen, damit Führungen nahe den Winkelgrenzen nicht zwischen zwei Richtungen flackern. Vorher aktuellen Pointer-/Referenzzustand prüfen; Entscheidung und Rücksetzung in constraints halten, Darstellung und Schnittpunktberechnung müssen dieselbe stabilisierte Richtung verwenden. Kein eigener Zustand je Zeichenwerkzeug und keine Änderung an Modell/History.
+PR #32 wurde mit ausdrücklicher Nutzerfreigabe als normaler Merge 8770895 in seinen bisherigen Zielzweig feat/hover-reference-toggle übernommen. main bleibt unverändert. Dieser Folgeschritt baut auf diesem Merge auf.
 
-Abnahme: Bewegungen beidseits einer Winkelgrenze, bewusster Richtungswechsel, mehrere aktive Referenzen, Quellenwechsel, Escape, Snap aus sowie Kamera-/Modellwechsel testen; Referenz-Verweildauer, Fangpriorität, Shift und Ortho erhalten. Browserabnahme beim Zeichnen und Direct Edit, Tests/TypeScript/Lint/Build. Andere Fangarten bleiben spätere getrennte Aufträge.
+constraints/guides/directions.ts führt eine reine Zustandsfortschreibung je aktiver Quelle ein. Vorläufiger technischer Bedienwert: 5° Hysterese zusätzlich zur halben 45°-Stufe. Eine horizontale Führung wechselt somit erst über 27,5° nach diagonal; zurück wechselt sie unter 17,5°. Die Winkelberechnung behandelt den Übergang 360°/0° korrekt; direkt auf dem Referenzpunkt bleibt die Richtung erhalten. Quellenidentität umfasst ID, Feature und exakte Position; entfernte Quellen verlieren ihren Richtungsverlauf.
+
+useHoverReference hält den flüchtigen Verlauf im vorhandenen Ansichtskontext. Escape/Verlassen, Snap aus, Kamera-/Modell-/Sitzungswechsel verwerfen ihn zusammen mit den Referenzen. BimPlan-Darstellung, Hover-Schnittpunkterwerb und querySnap erhalten dieselben Richtungsdaten; Direct Edit reicht den gemeinsamen Kontext durch. Die Stabilisierung betrifft die mausgeführten 45°-Hilfslinien und ihre Schnittpunkte, nicht die explizite Shift-Richtung oder die Rangfolge sonstiger Fangarten. Keine Modell-, History-, IFC- oder Dateiformatänderung.
+
+Prüfung: 168 Tests bestanden (vier neue Fälle: alle acht Winkelgrenzen mit Hin-/Rückweg, getrennte Quellen und Identitätswechsel, Anzeige/Schnittpunkt/Radius/Shift/Ortho sowie Direct-Edit-Commit/Undo/Redo/JSON). TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser beim Linienzeichnen und freien Linienbewegen: 20° → 24° bleibt horizontal, 28° wechselt auf 45°; Rückweg über 22° bleibt diagonal, 17° schaltet zurück. Zwei Referenzen erzeugen weiterhin den nach 600 ms erworbenen dritten Hilfspunkt. Freie Linienbewegung auf (1,5; 1,5) bestätigt, Undo/Redo geprüft. Escape, Modell-Commit, Kamerawechsel und Snap aus räumen Führungen auf. Screenshot: outputs/guide-hysteresis-direct-edit.png.
+
+Praktische Abnahme: Wandachsende 0,6 s aktivieren; Zeiger zunächst ungefähr 20° oberhalb der Horizontalen halten und langsam über 22,5° bewegen. Kleine Bewegungen sollen die Führung nicht umschalten; erst ungefähr 28° bewirken den Wechsel. Zurück unter ungefähr 17° wechseln. Beim freien Bewegen einer Linie mit externem Wandpunkt wiederholen und per Escape abbrechen. Der 5°-Startwert kann nach Bedienfeedback angepasst werden; keine behauptete vollständige Hysterese für sämtliche Fangarten.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsamer Mittelpunktfang
+
+An vorhandenen geraden Linien-/Polyliniensegmenten und Wandachsen echte Mittelpunkte ableiten. Zuerst Adapter, Quellenidentität und Ausschlüsse im Direct Edit prüfen, anschließend eine eindeutig markierte Mittelpunkt-Fangart mit expliziter Priorität ergänzen. Mittelpunkte sollen denselben Bildschirmradius und die bestehende 600-ms-Hover-Aktivierung/-Lösung nutzen und ebenfalls Hilfslinien erzeugen. Geometrie/Constraints bleiben gemeinsam; kein eigener Mittelpunktcode je Werkzeug und keine Modelländerung durch Hover.
+
+Abnahme: horizontale/schräge und kurze Segmente, Wandachse, Polylinie, mehrere Zoomstufen, konkurrierende Endpunkte, verschobene/gelöschte Quellen und eigene Editquellen testen. Linie am Mittelpunkt zeichnen und per Direct Edit dorthin bewegen, Vorschau/Commit/Undo/Redo/JSON vergleichen; Tests/TypeScript/Lint/Build und Browserabnahme. Echte Segmentschnittpunkte, weitere Winkelfamilien, Layer und 3D bleiben separate spätere Aufträge.
 
 ## Historische Fortschrittsnachweise
 
