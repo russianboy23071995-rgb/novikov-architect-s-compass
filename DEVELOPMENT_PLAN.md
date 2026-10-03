@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Architekturreview: Direct Edit an gemeinsame Fang-Engine angebunden - 03.10.2026
+
+Zweiter begrenzter Korrekturschritt nach numerischen Toleranzen (PR #27). Der Application-Adapter `application/direct-edit/snapping.ts` verbindet vorhandene EditSession-Aktionen mit der gemeinsamen SnapEngine. BimPlan verwendet dieselbe Auflösung für Live-Vorschau und Bestätigung, einschließlich aktueller Shift-Taste. Die Vorschau bleibt abgeleitet; nur Bestätigung erzeugt einen validierten Undo-Schritt. Die Quellen stammen aus dem ursprünglichen Modell, niemals aus der Vorschau.
+
+Freies Bewegen und Punktbearbeitung erhalten Endpunktfang, Raster, Ortho, Shift in 45-Grad-Schritten und aktivierte Hover-Hilfslinien. Die bestehenden silbergrauen Referenzringe und Führungen erscheinen auch während Direct Edit. Alle Referenzen des bearbeiteten Elements werden ausgeschlossen; bei Fenstern zusätzlich die Trägerwand. Explizite X-/Y-/Elementachsen, Strecken und die Fensterachse haben Vorrang vor Shift/Ortho. Auf solchen Achsen werden nur kompatible Referenzpunkte verwendet; ein seitlich projizierter Fangpunkt wird niemals als exakter Endpunkt/Schnittpunkt/Raster beschriftet.
+
+Abnahme: Snap einschalten, eine Linie zeichnen. Wandecke auswählen, im Elementmenü „Punkt frei bewegen“ wählen und an einem fremden Linienendpunkt verweilen. Endpunktmarker erscheint sofort, Referenzring nach 0,4 s. Daneben zeigt die passende temporäre Hilfslinie. Ziel anklicken, Undo und Redo ausprobieren. Shift bei freier Bearbeitung halten; Escape muss die Vorschau verwerfen.
+
+Prüfung: 149 automatisierte Tests, TypeScript, vollständiges ESLint und Produktionsbuild. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Neue Fälle prüfen freie Wandbewegung und Punktänderung, exakte externe Endpunkte, Zoomradius, Snap aus, Shift, Achspriorität, Hover-Führung, geschlossene Polylinien, Fenstergrenzen und Strecken mit Griffversatz. JSON, Undo/Redo und bestehende IFC-Tests bleiben enthalten. Browser: Endpunkt außerhalb des Rasters exakt erkannt, Ring/Hilfslinie beim Bearbeiten sichtbar, Vorschau und Bestätigung geometrisch identisch, Undo auf 3 m und Redo auf 4,131980263614846 m geprüft. Screenshot lokal: outputs/direct-edit-snap-preview.png.
+
+Grenzen: 2D; keine neuen Fangarten oder räumlichen Indizes. Auch unbewegte Punkte desselben Elements bleiben vorerst ausgeschlossen. Bei festgelegten Achsen werden Führungen aus seitlich liegenden Referenzen noch nicht mit der Bewegungsachse geschnitten. Bestehende Wandgriffe verschieben den Achsendpunkt um das Griffdelta; eine beim Drehen neu berechnete Außenkante ist damit kein geometrisch fixierter Eckkontakt. Dieser bestehende Griffversatz ist gesondert vor Wandanschlüssen zu präzisieren. Keine Änderung an Dateiformat, IFC oder Modellvalidierung.
+
+Nächster Schritt: Kandidatenerzeugung und Rangfolge in der gemeinsamen Engine ohne rekursive Gesamtabfragen trennen und Gleichstände ausdrücklich regeln; danach allgemeine Richtungsschnittpunkte und Hysterese.
+
 ## Architekturreview: numerische Fangtoleranzen - 03.10.2026
 
 Grundlage: [Architekturreview und Funktionslandkarte](NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md), als Nutzerquelle abgelegt. Abgleich mit main dd3e358 nach Übernahme des Gesamtstands aus PR #26. Der Architekturvertrag bleibt maßgeblich. Dieser Schritt bearbeitet ausschließlich den ersten Korrekturauftrag; zusätzliche Fangarten sind zurückgestellt.
@@ -13,6 +27,7 @@ Nachweise: 140 Tests bestanden (fünf neue Tests mit mehreren Fällen), TypeScri
 Kurzer Bedienversuch: Linie mit aktivem Ortho an einem vorhandenen Endpunkt beginnen/enden lassen und bei unterschiedlichen Zoomstufen wiederholen. Echte seitlich versetzte Punkte dürfen nicht als Endpunkt auf der Ortho-Achse erscheinen. Der konkrete Unterschied von 0.3 zu 0.1+0.2 ist im automatisierten Regressionstest zuverlässiger prüfbar als per Maus.
 
 Getrennte Folgeaufträge in dieser Reihenfolge:
+
 1. Direct Edit mit geeignetem Ausschluss eigener Quellen an die gemeinsame Engine anbinden; Vorschau und Klick müssen denselben Punkt liefern, Wand-/Fenstervalidierung beibehalten.
 2. Kandidatenerzeugung und Rangfolge ohne rekursive Gesamtabfragen trennen; Gleichstände über ausdrückliche Quellen-/Aktivierungsregeln entscheiden.
 3. Allgemeine Richtungsschnittpunkte und Hysterese ergänzen.
