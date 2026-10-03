@@ -606,6 +606,23 @@ projectSnapPrimitives trennt die vorhandene primitive Ableitung von der globalen
 
 232 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Differentialtests zu Vollaufbereitung: deterministische Zufallsgeometrie, lange Kreuzungen, Berührung/Überlappung, schräge/fast parallele/kurze Segmente, große Koordinaten, mehrere Maßstäbe, Nullradius und numerische Boxgrenzen. Quellenidentität, Ausschlüsse, gefrorene Daten, Undo/Redo/Laden und entfernte Lookups geprüft. Benchmark mit 100/1000/5000 Elementen erfolgreich; Methodik/Rohwerte in docs/performance/LOCAL_SOURCES.md. 5000 Elemente: Indexaufbau Median 121,75 ms, lokale Suche 0,0143 ms mit einem lokalen Paar. Keine Aussage zur vollständigen Fangabfrage oder Browser-Framerate; UI nicht umgeschaltet.
 
-### Genau ein ausführbarer Folgeauftrag: lokalen Dienst gemeinsam an Fang und Hover anbinden
+### Abgeschlossener Folgeauftrag: lokalen Dienst gemeinsam an Fang und Hover anbinden
 
 ToolSnapPolicy/SnapContext, Kandidaten- und Hoverpfad gemeinsam auf lokalen Suchdienst umstellen. Entfernte aktive Quellen über vollständigen Lookup validieren; dynamische Trefferlisten dürfen Hover-Sitzungen nicht zurücksetzen. Quellenausschlüsse und konstruierte Schnittreferenzen einschließlich Acquisition erhalten. Zeichnen, Idle-Hover und Direct Edit über denselben Einstieg; keine globale Kreuzungsaufbereitung im neuen Produktionspfad. Tests für sofortigen Fang/600-ms-Erwerb, entfernte Führungen, Zoom, feste Achsen, Snap aus, Modellwechsel und Abbruch; praktische Abnahme und Messung der vollständigen Abfrage.
+
+
+### Abschluss: lokale Suche im gemeinsamen Produktionspfad — 04.10.2026
+
+PR #55 nach Freigabe normal in seinen Zielzweig docs/local-snap-query-plan übernommen (d3aa81e); main und ältere offene PRs unverändert. Neuer Branch feat/local-snap-integration. BimPlan bindet einen modell- und werkzeuggebundenen Suchadapter ein. Zeichnen, Idle-Hover und Direct Edit verwenden denselben Einstieg; die Produktionsansicht erzeugt keine globale Schnittpunktliste mehr. Kandidatenrangfolge und exakte Geometrie bleiben bestehen. Entfernte aktive Referenzen und konstruierte Schnittpunkte werden anhand ihrer vollständigen Modellquellen validiert. Die stabile Adapteridentität trennt Hover-Sitzungen von wechselnden lokalen Trefferlisten; Zoom erhält Referenzen.
+
+235 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Neue Vergleiche prüfen den lokalen gegen den vollständigen Resolver mit Bearbeitungsachsen, Zeichnen, Shift/Ortho/Snap aus, entfernten Führungen und veralteten Quellen. Ein echter Segmentschnittpunkt wird sofort gefangen und erst nach 600 ms zur Referenz. Vollständige Abfragemessung mit 100/1000/5000 Elementen in docs/performance/LOCAL_INTEGRATION.md, getrennt vom Indexaufbau.
+
+Browserabnahme im separaten Tab: Idle-Hover aktiviert Referenz; freie Wandaußenecke besitzt sofort Ursprung. Zwei Linienenden erfassen erzeugt drei Ringe; ihr Hilfslinienschnitt (5;2) wird vierte Referenz. Alle vier bleiben beim Zoom erhalten. Bestätigte Ecke (5;2), Undo (3;0,18), Abbruch eines neuen Entwurfs unverändert, Redo (5;2), jeweils Rundung < 1e-14 m. Nutzerprojekt im ursprünglichen Tab unverändert.
+
+Praktischer Test: Wandecke frei bewegen, zwei externe Linienenden jeweils 0,6 s erfassen, zum gemeinsamen Hilfslinienschnitt fahren, zoomen, bestätigen und Undo/Redo prüfen. Dieselben Referenzen auch ohne Zeichenwerkzeug aktivieren.
+
+Grenzen: sehr dichte lokale Geometrie weiterhin quadratischer Paaraufwand; Index nach echter Modelländerung vollständig neu. Keine Erweiterung auf 3D-Arbeitsebenen in diesem Schritt.
+
+### Genau ein ausführbarer Folgeauftrag: dichte lokale Geometrie absichern
+
+Den integrierten Fangpfad mit langen schrägen, dicht überlappenden Segmentboxen und mehreren aktiven Referenzen differential gegen den Vollpfad prüfen und messen. Lokale Kandidatenzahlen/Paarzahlen sowie Median/P95 dokumentieren; Quellenausschlüsse für bewegte Fenster samt Host und konstruierte Referenzen nach Modellwechsel ausdrücklich abdecken. Keine neue Fangart, keine Ergebnisobergrenze und kein Indexumbau ohne gemessenen Engpass.
