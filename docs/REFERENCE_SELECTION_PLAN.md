@@ -60,3 +60,7 @@ Gemeinsame Dichteschranke mit sichtbarem Viewportstatus implementieren, zunächs
 Abnahmetests für dieses Paket: 32/33 und 24/25 Grenzfälle; genau 250 ms Wiederaufnahme; keine Paarfunktion im pausierten Pfad; End-/Mittelpunkt und entfernte Führungen bleiben verfügbar; Eigen-/Hostausschluss vor Zählung; identischer Fang unterhalb der Schranke; Zoom erhält Referenzen; Snap aus, Abbruch und Modellwechsel; Zeichnen/Direct Edit/Hover ohne Umgehung; sichtbarer Status stimmt mit tatsächlich ausgeführter Suche überein. Keine allgemeine Performancezusage.
 
 Spätere Auswahltests: Klick bestätigt niemals Modellaktion, Arbeitskopie/Cancel und frühere Auswahl, Polylinienpunktwechsel, mehrdeutiges Picking, Punktkapazität, Idle-Sitzung, Modal/Tab/Escape, veraltete Bestätigung. Keine vollständige Auswahlimplementierung im ersten Paket.
+
+## Umsetzungsstand 04.10.2026
+
+Erstes Paket umgesetzt: gemeinsame Dichteschranke und sichtbarer Status. Startwerte 32/24/250 ms durch Grenztests und Messung geprüft; siehe performance/SNAP_DENSITY.md. Auswahl-Picking weiterhin Vorschlag. Nächstes Paket: temporäre Segmentauswahl gemäß DEVELOPMENT_PLAN; Punktübernahme separat.

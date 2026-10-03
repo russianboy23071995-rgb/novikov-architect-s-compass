@@ -1,3 +1,4 @@
+import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -125,12 +126,21 @@ export function BimPlan({
     () => createToolSourceQuery(modelSources, snapping),
     [modelSources, snapping],
   );
+  const density = useSnapDensity(
+    sourceQuery,
+    pan ? null : hover,
+    camera.pixelsPerMetre,
+    endpointSnap && snap,
+    referenceReset,
+    camera,
+  );
   const references = pinnedReferences;
   const trackingContext = useMemo(
     () => ({
       enabled: endpointSnap && snap && !pan,
       references,
       sourceQuery,
+      intersectionsPaused: density.paused,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
@@ -143,6 +153,7 @@ export function BimPlan({
       pan,
       references,
       sourceQuery,
+      density.paused,
       camera,
       viewSize,
       referenceReset,
@@ -162,6 +173,7 @@ export function BimPlan({
       {
         references,
         sourceQuery,
+        intersectionsPaused: density.paused,
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
@@ -733,6 +745,27 @@ export function BimPlan({
             </text>
           </g>
         )}
+      {density.paused && (
+        <foreignObject
+          transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + 12 / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + 12 / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
+          width={Math.max(1, viewSize.width - 24)}
+          height={50}
+          pointerEvents="none"
+        >
+          <div
+            role="status"
+            style={{
+              fontSize: 12,
+              lineHeight: 1.4,
+              padding: 4,
+              borderRadius: 4,
+            }}
+            className="bg-background/90 text-foreground"
+          >
+            Viele Fangziele – automatische Schnittpunkte pausiert. Ansicht vergrößern.
+          </div>
+        </foreignObject>
+      )}
     </svg>
   );
 }

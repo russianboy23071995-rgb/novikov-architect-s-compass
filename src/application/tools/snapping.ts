@@ -1,3 +1,5 @@
+import { completeLocalQuery } from "../snapping/local-sources.ts";
+import { DENSE_SEGMENT_LIMIT } from "../snapping/density.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
@@ -9,15 +11,22 @@ import { referenceKey } from "../../constraints/inference/construction-reference
 export function createToolSourceQuery(
   model: LocalSnapSources,
   policy: ToolSnapPolicy | null,
-): SnapSourceQuery {
+  intersectionLimit = DENSE_SEGMENT_LIMIT,
+) {
   const allowed = (r: SnapReference) => !policy || policy.sources([r]).length > 0;
   const leaf = (r: SnapReference) => {
     if (policy && referenceKey(r) === referenceKey(policy.origin)) return policy.origin;
     const source = model.lookup(referenceKey(r));
     return source && allowed(source) ? source : undefined;
   };
-  return (cursor, scale, radius, active) => {
-    const local = model.query(cursor, scale, radius, allowed);
+  const inspect = (cursor: Point2, scale: number, radius: number) =>
+    model.queryPrimitives(cursor, scale, radius, allowed);
+  const query: SnapSourceQuery = (cursor, scale, radius, active, paused = false) => {
+    const primitives = inspect(cursor, scale, radius);
+    const local = completeLocalQuery(
+      primitives,
+      paused || primitives.segments.length > intersectionLimit,
+    );
     const refs = new Map(
       [...local.references, ...local.segments.map((s) => s.source)].map((r) => [
         referenceKey(r),
@@ -39,6 +48,7 @@ export function createToolSourceQuery(
     }
     return [...refs.values()];
   };
+  return Object.assign(query, { inspect });
 }
 export type ToolSnapPolicy = {
   origin: SnapReference;
