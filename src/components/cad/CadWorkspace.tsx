@@ -1,3 +1,4 @@
+import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ export function CadWorkspace() {
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [ortho, setOrtho] = useState(false);
-  const [hoverDwellMs, setHoverDwellMs] = useState(400);
+  const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>

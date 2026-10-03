@@ -1,5 +1,17 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bedienkorrektur: Hover 600 ms und Referenzen lösen — 03.10.2026
+
+Nutzerkorrektur zu N08/Guide-F14: Standard-Verweildauer jetzt zentral 600 ms, sowohl im Workspace als auch im BimPlan-Fallback. Die vorhandene Einstellung bleibt verfügbar und gilt symmetrisch für Aktivieren und Lösen. Historische 400-ms-Angaben beschreiben frühere Stände.
+
+Ein erneuter Besuch einer bereits aktiven Referenz entfernt nur diese nach vollständiger Verweildauer. Ein Besuch schaltet höchstens einmal: kontinuierliches Hover oder kleine Bewegungen innerhalb desselben Fangpunkts aktivieren/entfernen nicht wiederholt. Erst Verlassen des Punktes oder Wechsel auf eine andere Quelle ermöglicht einen neuen Vorgang. Unterbrochene Verweildauer beginnt neu; andere Referenzen und ihre Aktivierungsreihenfolge bleiben erhalten. Gelöste Punkte erzeugen keine temporären Führungen mehr; normaler Endpunktfang bleibt möglich. Kein History-/Projektdateieintrag für Hover.
+
+Geändert: constraints/inference/hover-reference.ts, Standardwerte in CadWorkspace/BimPlan, Regressionstests und dieses Protokoll. 158 Tests bestanden, TypeScript/Build erfolgreich; ESLint null Fehler/sechs bekannte Warnungen. Tests: vor 600 ms kein Umschalten, genau einmal bei Erreichen, dauerhaftes Hover, Unterbrechung, Wiederaktivierung und Erhalt anderer Referenzen. Browser: Standard 0,6 s sichtbar; Ring aktiviert, durch erneuten Besuch gelöst, bei weiterem Hover weiter gelöst.
+
+Abnahme: Snap einschalten, Punkt 0,6 s anhovern → silbergrauer Ring. Zeiger weg und wieder 0,6 s darüber → Ring weg. Dort verbleiben → bleibt gelöst. Nach erneutem Verlassen wieder aktivierbar. In einer bereits offenen Sitzung kann die bisherige Zeiteinstellung erhalten bleiben; im Linienwerkzeug auf 0,6 s stellen, ohne das Projekt neu zu laden.
+
+Nächster Auftrag bleibt der unten definierte Schnittpunkt zweier aktiver Richtungsführungen; kein weiterer paralleler Auftrag.
+
 ## Aktiver Planungsstand — Funktionsumfang 03.10.2026
 
 Der Nutzerentwurf [Funktionsarchitektur](NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md) erweitert den bisherigen Guide. [FUNCTION_REQUIREMENTS_2026-10-03.md](FUNCTION_REQUIREMENTS_2026-10-03.md) ordnet alle N01–N60 dem Code, alten Anforderungen und Abhängigkeiten zu. ARCHITECTURE.md §29–30 dokumentiert die begrenzten verbindlichen Ergänzungen; weitere Datenfelder/Typdiagramme bleiben Vorschläge. Die PDF selbst wurde nicht separat gelesen. Bisherige Guide-F01–F29 und Gesprächswünsche bleiben erhalten.

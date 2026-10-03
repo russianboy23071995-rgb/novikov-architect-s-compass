@@ -115,7 +115,7 @@ const context: SnapContext = {
   orthoOrigin: null,
 };
 
-test("hover retains four distinct references and refreshes duplicates without growing", () => {
+test("hover retains four distinct references and toggles a revisited reference off", () => {
   let state = emptyHoverReference();
   for (let i = 0; i < 5; i++) {
     const ref = { point: { x: i, y: i }, entityId: `r${i}`, feature: "end" };
@@ -128,9 +128,9 @@ test("hover retains four distinct references and refreshes duplicates without gr
   );
   state = advanceHoverReference(state, state.references[0]!, 6000, 400);
   state = advanceHoverReference(state, state.references[0]!, 6400, 400);
-  assert.equal(state.references.length, 4);
-  assert.equal(state.active?.entityId, "r1");
-  assert.equal(advanceHoverReference(state, null, 6500, 400).references.length, 4);
+  assert.equal(state.references.length, 3);
+  assert.equal(state.active?.entityId, "r4");
+  assert.equal(advanceHoverReference(state, null, 6500, 400).references.length, 3);
   assert.equal(emptyHoverReference().references.length, 0);
 });
 
@@ -568,4 +568,53 @@ test("newer guides cannot defeat closer guides or higher priority endpoints", ()
       "endpoint",
     );
   }
+});
+
+test("600 ms hover toggles once per visit, requires a fresh dwell and can reactivate", () => {
+  const ref = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  let s = advanceHoverReference(emptyHoverReference(), ref, 0, 600);
+  s = advanceHoverReference(s, ref, 599, 600);
+  assert.equal(s.references.length, 0);
+  s = advanceHoverReference(s, ref, 600, 600);
+  assert.equal(s.references.length, 1);
+  assert.equal(s.pending, null);
+  s = advanceHoverReference(s, { ...ref }, 5000, 600);
+  assert.equal(s.references.length, 1);
+  s = advanceHoverReference(s, null, 5100, 600);
+  s = advanceHoverReference(s, ref, 5200, 600);
+  s = advanceHoverReference(s, ref, 5799, 600);
+  assert.equal(s.references.length, 1);
+  s = advanceHoverReference(s, ref, 5800, 600);
+  assert.equal(s.references.length, 0);
+  assert.equal(s.active, null);
+  s = advanceHoverReference(s, ref, 9000, 600);
+  assert.equal(s.references.length, 0);
+  s = advanceHoverReference(s, null, 9100, 600);
+  s = advanceHoverReference(s, ref, 9200, 600);
+  s = advanceHoverReference(s, ref, 9800, 600);
+  assert.equal(s.references.length, 1);
+});
+
+test("interrupted release preserves other references and restarts its dwell", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 3, y: 2 } };
+  let s = advanceHoverReference(emptyHoverReference(), a, 0, 600);
+  s = advanceHoverReference(s, a, 600, 600);
+  s = advanceHoverReference(s, b, 700, 600);
+  s = advanceHoverReference(s, b, 1300, 600);
+  s = advanceHoverReference(s, a, 1400, 600);
+  s = advanceHoverReference(s, null, 1999, 600);
+  s = advanceHoverReference(s, a, 2000, 600);
+  s = advanceHoverReference(s, a, 2599, 600);
+  assert.equal(s.references.length, 2);
+  s = advanceHoverReference(s, a, 2600, 600);
+  assert.deepEqual(s.references, [b]);
+  const c = {
+    ...context,
+    references: [a, b],
+    activeReferences: s.references,
+    activeReference: s.active,
+    gridSpacing: null,
+  };
+  assert.notEqual(querySnap({ x: 3, y: 0 }, c).candidate?.kind, "intersection");
 });

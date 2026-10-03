@@ -1,3 +1,4 @@
+import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { querySnap } from "@/constraints/snapping/engine";
 import { useHoverReference } from "./useHoverReference";
@@ -35,7 +36,7 @@ export function BimPlan({
   selection,
   drawing,
   endpointSnap = false,
-  hoverDwellMs = 400,
+  hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
   snap,
