@@ -904,3 +904,14 @@ PrecisionInput centrally handles Tab during an active interaction: from the view
 ## Shared drawing application boundary (2026-10-03)
 
 Drawing actions for straight walls and lines/polylines now converge on application/drawing/actions.ts. It validates the pinned model context and delegates creation to existing addWall/addLine domain operations. Mouse and numeric confirmation use the same action and history path. previewDrawingInput shares the polar text adapter; the former line-input export remains compatible. CadWorkspace still coordinates pointer collection and presentation, but no longer calls addWall/addLine directly. Defaults for a drawn wall remain 0.36 m thickness and 2.80 m height. Drawing preview is a 2D axis guide; the confirmed wall supplies the existing 3D rendering.
+
+
+## Shared tool interaction lifecycle — implemented refactor (2026-10-03)
+
+Binding contract: application/tools/interaction.ts defines ToolInteraction with a stable identity, origin, input constraints, click intent, preview, validation, commit and cancellation. It has no React or element-type dependency. evaluateInteraction evaluates without mutation; confirmInteraction revalidates before invoking a model action.
+
+application/tools/adapters.ts adapts existing Direct Edit and Drawing actions to this contract. Fixed axes, window constraints and the distinction between point and element mutation belong here or in the existing validated model actions. They must not be reimplemented in the input component or viewport click handler.
+
+useToolInteraction runs one shared draft/preview/pick/confirm/cancel lifecycle. InteractionInput binds it to the single PrecisionInput, including shared Tab behaviour. CadWorkspace selects an adapter and connects existing project/history actions; it no longer owns the tool-specific numeric preview switch or form confirmation branches. BimPlan forwards picked targets without deciding which edit action locks a direction. Existing shared snapping, hover references, origins and geometric projection services remain in place.
+
+Migration limits: legacy point collection for drawing and rendering/edit-session plumbing still exist. This change does not claim a complete universal tool framework or a 3D work-plane runtime. Future input consumers implement the small adapter contract; adding one must not require copied Tab, hover, polar-input or form-confirmation logic.
