@@ -1,5 +1,6 @@
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { projectDirection, angle45Direction } from "../../geometry/projections/direction.ts";
+import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
 
 export type SnapReference = {
   point: Point2;
@@ -90,8 +91,9 @@ export function querySnap(
   for (const reference of context.references) {
     const p = reference.point;
     if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
-    // An endpoint must satisfy Ortho exactly; never label a projected point as an endpoint.
-    if (origin && (horizontal ? p.y !== origin.y : p.x !== origin.x)) continue;
+    // Allow numerical roundoff only; retain the exact endpoint, never its Ortho projection.
+    if (origin && !coordinatesCompatible(horizontal ? p.y : p.x, horizontal ? origin.y : origin.x))
+      continue;
     const distance = Math.hypot(p.x - cursor.x, p.y - cursor.y) * context.pixelsPerMetre;
     if (distance <= context.endpointRadiusPx)
       candidates.push({
@@ -146,11 +148,7 @@ export function querySnap(
         const constrained = constrain(point);
         const distance =
           Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre;
-        if (
-          distance <= context.endpointRadiusPx &&
-          point.x === constrained.x &&
-          point.y === constrained.y
-        )
+        if (distance <= context.endpointRadiusPx && pointsCompatible(point, constrained))
           guides.push({
             kind: "intersection",
             worldPoint: point,
@@ -207,11 +205,7 @@ export function querySnap(
         const constrained = constrain(point);
         const distance =
           Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre;
-        if (
-          distance <= context.endpointRadiusPx &&
-          point.x === constrained.x &&
-          point.y === constrained.y
-        )
+        if (distance <= context.endpointRadiusPx && pointsCompatible(point, constrained))
           guides.push({
             kind,
             worldPoint: point,
@@ -234,21 +228,23 @@ export function querySnap(
       x: Math.round(cursor.x / spacing) * spacing,
       y: Math.round(cursor.y / spacing) * spacing,
     };
-    const point = constrain(grid);
+    const constrained = constrain(grid);
+    const compatible = pointsCompatible(grid, constrained);
+    // A grid marker must report the actual grid point, not a slightly projected copy.
+    const point = compatible ? grid : constrained;
     return {
       point,
-      candidate:
-        point.x === grid.x && point.y === grid.y
-          ? {
-              kind: "grid",
-              worldPoint: point,
-              distanceOnScreen:
-                Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
-              sourceEntityId: null,
-              sourceFeature: "grid",
-              priority: 2,
-            }
-          : null,
+      candidate: compatible
+        ? {
+            kind: "grid",
+            worldPoint: point,
+            distanceOnScreen:
+              Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
+            sourceEntityId: null,
+            sourceFeature: "grid",
+            priority: 2,
+          }
+        : null,
     };
   }
   return { point: constrain(cursor), candidate: null };

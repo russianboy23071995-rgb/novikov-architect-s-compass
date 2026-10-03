@@ -1,6 +1,97 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { querySnap } from "./engine.ts";
+import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
+
+test("numerical compatibility is finite, bounded and independent of screen scale", () => {
+  assert.equal(coordinatesCompatible(0.3, 0.1 + 0.2), true);
+  assert.equal(coordinatesCompatible(0, 5e-10), true);
+  assert.equal(coordinatesCompatible(0, 2e-9), false);
+  assert.equal(coordinatesCompatible(1e7, 1e7 + 1e-8), true);
+  assert.equal(coordinatesCompatible(1e7, 1e7 + 0.00001), false);
+  assert.equal(coordinatesCompatible(1e12, 1e12 + 0.001), false);
+  for (const invalid of [NaN, Infinity, -Infinity])
+    assert.equal(coordinatesCompatible(invalid, invalid), false);
+  assert.equal(pointsCompatible({ x: 1, y: 2 }, { x: 1, y: 2.001 }), false);
+});
+
+test("Ortho endpoint compatibility covers both axes, large offsets and zoom without enlarging snap radius", () => {
+  for (const offset of [0, 1e7, -1e7])
+    for (const pixelsPerMetre of [10, 100, 1000])
+      for (const vertical of [false, true]) {
+        const exact = offset + 0.3;
+        const computed = offset + 0.1 + 0.2;
+        const point = vertical ? { x: exact, y: offset + 3 } : { x: offset + 3, y: exact };
+        const origin = vertical ? { x: computed, y: offset } : { x: offset, y: computed };
+        const refs = [{ point, entityId: "ref", feature: "end" }];
+        const c = {
+          ...context,
+          references: refs,
+          pixelsPerMetre,
+          orthoOrigin: origin,
+          gridSpacing: null,
+        };
+        const inside = vertical
+          ? { x: exact, y: point.y + 9 / pixelsPerMetre }
+          : { x: point.x + 9 / pixelsPerMetre, y: exact };
+        assert.deepEqual(querySnap(inside, c).point, point);
+        assert.equal(querySnap(inside, c).candidate?.kind, "endpoint");
+        const outside = vertical
+          ? { x: exact, y: point.y + 11 / pixelsPerMetre }
+          : { x: point.x + 11 / pixelsPerMetre, y: exact };
+        assert.equal(querySnap(outside, c).candidate, null);
+        const offAxis = vertical
+          ? { x: computed + 0.00001, y: offset }
+          : { x: offset, y: computed + 0.00001 };
+        assert.equal(querySnap(inside, { ...c, orthoOrigin: offAxis }).candidate, null);
+      }
+});
+
+test("guide, intersection and grid retain their exact source coordinates under Ortho roundoff", () => {
+  const a = { point: { x: 0, y: 0.3 }, entityId: "a", feature: "end" };
+  const b = { point: { x: 3, y: 4 }, entityId: "b", feature: "end" };
+  const c = { ...context, references: [a, b], orthoOrigin: { x: -1, y: 0.1 + 0.2 } };
+  const guide = querySnap({ x: 2, y: 0.31 }, { ...c, activeReference: a });
+  assert.equal(guide.candidate?.kind, "horizontal");
+  assert.equal(guide.point.y, a.point.y);
+  const intersection = querySnap({ x: 3.01, y: 0.31 }, { ...c, activeReferences: [a, b] });
+  assert.equal(intersection.candidate?.kind, "intersection");
+  assert.deepEqual(intersection.point, { x: 3, y: 0.3 });
+  const grid = querySnap(
+    { x: 2, y: 0.31 },
+    { ...context, references: [], orthoOrigin: { x: 0, y: 0.3 } },
+  );
+  assert.equal(grid.candidate?.kind, "grid");
+  assert.equal(grid.point.y, 3 * 0.1);
+});
+
+test("tiny source moves still invalidate hover references despite geometric compatibility", () => {
+  const old = { point: { x: 0, y: 0.3 }, entityId: "a", feature: "end" };
+  const moved = { ...old, point: { x: 0, y: 0.3 + 1e-10 } };
+  assert.equal(pointsCompatible(old.point, moved.point), true);
+  const c = { ...context, references: [moved], gridSpacing: null };
+  assert.equal(querySnap({ x: 3, y: 0.3 }, { ...c, activeReference: old }).candidate, null);
+  assert.equal(querySnap({ x: 3, y: 0.3 }, { ...c, activeReferences: [old] }).candidate, null);
+  const pending = advanceHoverReference(emptyHoverReference(), old, 0, 400);
+  assert.equal(advanceHoverReference(pending, moved, 400, 400).active, null);
+});
+
+test("Ortho accepts 0.3 endpoint against 0.1 + 0.2 without changing source coordinates", () => {
+  const endpoint = { x: 3, y: 0.3 };
+  const result = querySnap(
+    { x: 3.01, y: 0.3 },
+    {
+      references: [{ point: endpoint, entityId: "roundoff", feature: "end" }],
+      pixelsPerMetre: 100,
+      enabled: true,
+      endpointRadiusPx: 10,
+      gridSpacing: null,
+      orthoOrigin: { x: 0, y: 0.1 + 0.2 },
+    },
+  );
+  assert.equal(result.candidate?.kind, "endpoint");
+  assert.deepEqual(result.point, endpoint);
+});
 import type { SnapContext } from "./engine.ts";
 import { projectSnapReferences } from "../../application/snapping/project-references.ts";
 import { createProject, addWall, addLine, serializeProject } from "../../lib/bim/model.ts";

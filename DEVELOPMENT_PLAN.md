@@ -1,5 +1,23 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Architekturreview: numerische Fangtoleranzen - 03.10.2026
+
+Grundlage: [Architekturreview und Funktionslandkarte](NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md), als Nutzerquelle abgelegt. Abgleich mit main dd3e358 nach Übernahme des Gesamtstands aus PR #26. Der Architekturvertrag bleibt maßgeblich. Dieser Schritt bearbeitet ausschließlich den ersten Korrekturauftrag; zusätzliche Fangarten sind zurückgestellt.
+
+Fehler zuerst als Regression reproduziert: Endpunkt y=0.3 wird bei Ortho-Ursprung y=0.1+0.2 nicht erkannt. Der Test schlägt am unveränderten Stand fehl und besteht nach Korrektur. `geometry/tolerances/model.ts` definiert eine numerische Modellkompatibilität in Metern: Minimum 1e-9 m, bis zu acht maschinelle Rundungseinheiten relativ zur Koordinatengröße, gedeckelt auf 1e-6 m. Das ist keine Bauausführungs- oder Importtoleranz. Bei extremen Koordinaten über dieser Genauigkeitsgrenze sind lokale Koordinaten nötig; die Toleranz wächst nicht unbegrenzt. Nichtendliche Werte sind inkompatibel. Der Bildschirm-Fangradius bleibt unverändert in CSS-Pixeln.
+
+Endpunkt-/Guide-/Schnittpunkt-Kompatibilität mit Ortho und die Rasterkennzeichnung verwenden diese gemeinsame Regel. Akzeptierte Kandidaten behalten ihre originalen Modell-/Konstruktionskoordinaten statt eine projizierte Kopie als Endpunkt oder Raster auszugeben. Quellen-IDs, Feature-Identität, Hover-Zeitlogik und Positionsvergleiche zur Invalidierung bleiben ausdrücklich exakt. Projektänderungen setzen den UI-Kontext weiterhin zurück. Kein Dateiformatwechsel, keine Änderung an Prioritäten, Shift oder History.
+
+Nachweise: 140 Tests bestanden (fünf neue Tests mit mehreren Fällen), TypeScript, vollständiges ESLint und Produktionsbuild erfolgreich. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Tests prüfen beide Achsen, ±10 Millionen Meter, 10/100/1000 px/m, echte Abweichungen, nichtendliche Werte, Toleranzdeckel, exakte Kandidatenkoordinaten und weiterhin ungültige veraltete Hover-Referenzen trotz minimaler Verschiebung. Vorhandene Shift-, Mehrfachreferenz-, Undo/Redo-, JSON- und IFC-Tests bleiben grün. Keine erneute Browserprüfung in diesem rein numerischen Schritt; Bedienoberfläche unverändert.
+
+Kurzer Bedienversuch: Linie mit aktivem Ortho an einem vorhandenen Endpunkt beginnen/enden lassen und bei unterschiedlichen Zoomstufen wiederholen. Echte seitlich versetzte Punkte dürfen nicht als Endpunkt auf der Ortho-Achse erscheinen. Der konkrete Unterschied von 0.3 zu 0.1+0.2 ist im automatisierten Regressionstest zuverlässiger prüfbar als per Maus.
+
+Getrennte Folgeaufträge in dieser Reihenfolge:
+1. Direct Edit mit geeignetem Ausschluss eigener Quellen an die gemeinsame Engine anbinden; Vorschau und Klick müssen denselben Punkt liefern, Wand-/Fenstervalidierung beibehalten.
+2. Kandidatenerzeugung und Rangfolge ohne rekursive Gesamtabfragen trennen; Gleichstände über ausdrückliche Quellen-/Aktivierungsregeln entscheiden.
+3. Allgemeine Richtungsschnittpunkte und Hysterese ergänzen.
+4. Architekturgrenzen automatisiert absichern und große Modelle messen, bevor Leistungszusagen gemacht werden.
+
 ## Guide-Etappe 3c: werkzeugfreies Hover und mehrere Referenzen - 03.10.2026
 
 Hover-Erkennung und Hilfslinien funktionieren jetzt auch im Auswahlmodus, ohne Zeichenwerkzeug. Der aktive ungefüllte Referenzring hat 10,5 statt 6 CSS-Pixel Radius (+75 Prozent); Ring und Hilfslinien verwenden Silber-Grau (#929aa3). Die bestehenden blauen Fanghinweise bleiben zur Unterscheidung erhalten. Das Wandzeichnen nutzt nun dieselbe Fang-/Hover-/Shift-API wie Linie/Polylinie; direkte Bearbeitung bleibt separat.
