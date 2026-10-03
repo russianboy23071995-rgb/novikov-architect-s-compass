@@ -556,6 +556,17 @@ Kein zusätzlicher Anwendungsfehler gefunden, keine Codeänderung. Bestehende 22
 
 Abnahme: Eine Linie neben der Wand zeichnen, Wandecke frei bewegen und Endpunkt/Mittelpunkt anfahren. Beide Linienenden jeweils 0,6 s erfassen, diagonale Hilfslinien zum gemeinsamen Schnittpunkt führen, zoomen und bestätigen. Undo/Redo und Abbrechen prüfen.
 
-### Genau ein ausführbarer Folgeauftrag: Lastmessung der gemeinsamen Fangengine
+### Abgeschlossener Folgeauftrag: Lastmessung der gemeinsamen Fangengine
 
 Reproduzierbare Testprojekte mit 100, 1000 und 5000 geraden Elementen erzeugen. Auf dokumentierter Laufzeit/Hardware getrennt Aufbau der Modellreferenzen und reine Fangabfrage für Zeichnen/Direct Edit messen, einschließlich aktiver Hilfsreferenzen und Modellwechsel. Warm-up, Wiederholungen und Median/P95 dokumentieren; Zeiten nicht als allgemeine Leistungszusage oder vollständige Browser-Framerate ausgeben. Vorhandene Dienste unverändert messen, keine vorsorgliche Index-/Cache-Neuentwicklung. Einen nachgewiesenen Engpass oder das Ausbleiben eines solchen festhalten und daraus den nächsten begrenzten Auftrag ableiten.
+
+
+### Abschluss: Fang-Baseline — 03.10.2026
+
+Reproduzierbarer Messlauf mit 100/1000/5000 Elementen abgeschlossen. Skript scripts/benchmark-snapping.mjs; Verfahren, Hardware, Ergebnisse und Einschränkungen unter docs/performance/SNAP_BASELINE.md, Rohwerte in der benachbarten JSON-Datei. Referenzzahlen und Modellwechsel geprüft; ESLint für das Messskript und git diff --check erfolgreich. Anwendungscode unverändert, daher bestehende 225 Tests und Build-Nachweise nicht erneut ausgeführt. PR #51 bleibt zur Dokumentationsprüfung offen; dieser Schritt baut darauf auf.
+
+Bei 5000 Elementen: Aufbau Median 3403 ms, Neuaufbau nach Modellwechsel 4094 ms; Zeichnen/Direct Edit mit vier Referenzen 35,67/39,79 ms pro Abfrage. Keine Browser-Framerate-Aussage. Vollständige Segmentpaarprüfung als klar begrenzter erster Engpass identifiziert; keine Optimierung in diesem Messauftrag.
+
+### Genau ein ausführbarer Folgeauftrag: räumliche Vorauswahl für Segmentschnittpunkte
+
+Die vollständige Paarprüfung in segmentIntersectionReferences durch eine konservative räumliche Vorauswahl ergänzen, die sichere Nichttreffer aussortiert. Exakte Schnittprüfung, Toleranzen, stabile Ergebnisreihenfolge und Quellenabhängigkeiten bewahren. Differentialtests gegen die bisherige Vollprüfung einschließlich Rand-/Entartungsfällen und Quellenausschlüssen, anschließend identische Baseline wiederholen. Keine gleichzeitige Pointer-Fangoptimierung oder neue Werkzeuge. Grenzen bei dicht überlappenden Segmenten dokumentieren.
