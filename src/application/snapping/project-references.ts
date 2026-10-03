@@ -18,6 +18,7 @@ function midpointReference(
           point,
           entityId,
           kind: "midpoint",
+          segment: { start: { ...a }, end: { ...b } },
           // Include the source segment snapshot: a rotation about its centre must invalidate tracking too.
           feature: `${feature}:${JSON.stringify([a.x, a.y, b.x, b.y])}`,
           directions: [{ x: b.x - a.x, y: b.y - a.y }],

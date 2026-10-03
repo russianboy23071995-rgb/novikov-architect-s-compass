@@ -916,3 +916,24 @@ test("window movement pins its chosen point while retaining host direction and e
   assert.ok(Math.abs(preview.storey.windows[0]!.position - 1.7 / 3) < 1e-9);
   assert.equal(preview.storey.windows[0]!.wallId, "wall");
 });
+
+test("polar point input retains opposite wall endpoint and commits one undo step", () => {
+  const state = editingReducer(initial(), {
+    type: "begin",
+    target: wall,
+    action: "point",
+    index: 1,
+    anchor: { x: 3, y: 0.18 },
+  });
+  const result = previewMovementInput(state.session!, state.history.present, wall, "90", "1", null);
+  assert.deepEqual(result.project.storey.walls[0]!.start, { x: 0, y: 0 });
+  assert.deepEqual(result.project.storey.walls[0]!.end, { x: 3, y: 1 });
+  const next = editingReducer(state, {
+    type: "confirm",
+    session: state.session!,
+    selection: wall,
+    point: result.point,
+  });
+  assert.equal(next.history.past.length, 1);
+  assert.deepEqual(editingReducer(next, { type: "undo" }).history.present, state.history.present);
+});

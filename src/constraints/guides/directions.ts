@@ -5,7 +5,7 @@ import { sameReference } from "../inference/hover-reference.ts";
 
 /** Interaction margin, never a larger geometric snap radius. */
 export const GUIDE_DIRECTION_HYSTERESIS_DEGREES = 5;
-type GuideKind = "extension" | "perpendicular" | "horizontal" | "vertical" | "angle";
+type GuideKind = "parallel" | "extension" | "perpendicular" | "horizontal" | "vertical" | "angle";
 export type GuideDirection = {
   source: SnapReference;
   degrees: number;
@@ -14,6 +14,7 @@ export type GuideDirection = {
 };
 const difference = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180);
 const order: Record<GuideKind, number> = {
+  parallel: 0,
   extension: 0,
   perpendicular: 1,
   horizontal: 2,
@@ -34,6 +35,8 @@ export function cursorGuide(
     const degrees = ((Math.atan2(direction.y, direction.x) * 180) / Math.PI + 360) % 360;
     choices.push({ source, direction, degrees, kind });
   };
+  for (const d of source.parallelDirections ?? [])
+    for (const sign of [1, -1]) offer({ x: d.x * sign, y: d.y * sign }, "parallel");
   for (const d of source.directions ?? [])
     for (const sign of [1, -1]) {
       offer({ x: d.x * sign, y: d.y * sign }, "extension");

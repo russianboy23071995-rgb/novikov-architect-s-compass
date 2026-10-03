@@ -26,7 +26,13 @@ function activeSources(context: SnapContext): ActiveSource[] {
     if (!r || !finite(r)) return;
     const id = key(r),
       source = sources.get(id);
-    if (source) active.set(id, { source, activation });
+    if (source)
+      active.set(id, {
+        source: r.parallelDirections
+          ? { ...source, parallelDirections: r.parallelDirections }
+          : source,
+        activation,
+      });
   });
   return [...active.values()];
 }

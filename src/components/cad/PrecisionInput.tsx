@@ -12,8 +12,9 @@ export function PrecisionInput({
   angleHint,
   lengthHint,
   axisLabel,
-  mouseHint = "Mausrichtung · Klick fixiert · 90° oben",
+  mouseHint = "Mausrichtung · Tab: Länge ↔ Winkel",
   onChange,
+  onCaptureDirection,
   onConfirm,
   onCancel,
   error,
@@ -29,16 +30,38 @@ export function PrecisionInput({
   axisLabel: string | null;
   mouseHint?: string;
   onChange: (angle: string, length: string) => void;
+  onCaptureDirection: () => void;
   onConfirm: () => void;
   onCancel: () => void;
   error: string;
   canConfirm: boolean;
 }) {
+  const angleField = useRef<HTMLInputElement>(null);
   const lengthField = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (focusLengthToken) lengthField.current?.focus();
   }, [focusLengthToken]);
   const panel = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const tab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || event.ctrlKey || event.metaKey || event.altKey) return;
+      const active = document.activeElement;
+      if (
+        active instanceof Element &&
+        active.matches("input, textarea, select, [contenteditable=true]") &&
+        !panel.current?.contains(active)
+      )
+        return;
+      event.preventDefault();
+      const inside = active === lengthField.current || active === angleField.current;
+      if (!inside && !angle.trim() && !axisLabel) onCaptureDirection();
+      const target = active === lengthField.current ? angleField.current : lengthField.current;
+      target?.focus();
+      target?.select();
+    };
+    window.addEventListener("keydown", tab, true);
+    return () => window.removeEventListener("keydown", tab, true);
+  }, [angle, axisLabel, onCaptureDirection]);
   const drag = useRef<{ pointer: Point2; origin: Point2; id: number } | null>(null);
   const [bounds, setBounds] = useState({
     width: 1024,
@@ -142,6 +165,7 @@ export function PrecisionInput({
         <label>
           Winkel °
           <input
+            ref={angleField}
             aria-label="Bewegungswinkel (Grad)"
             className={field}
             inputMode="decimal"

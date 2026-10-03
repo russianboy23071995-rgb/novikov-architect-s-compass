@@ -122,15 +122,20 @@ export function BimPlan({
     };
   }, []);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
+  const drawingOrigin = drawing && onDrawingAim ? start : null;
   const pinnedReferences = useMemo(() => {
     const origin = editSession ? editOriginReference(editSession) : null;
-    return origin ? [origin] : [];
-  }, [editSession]);
+    return origin
+      ? [origin]
+      : drawingOrigin
+        ? [{ entityId: "@drawing-origin", feature: "start", point: drawingOrigin }]
+        : [];
+  }, [editSession, drawingOrigin]);
   const references = useMemo(() => {
     const sources = projectSnapReferences(project);
     return editSession
       ? [...editSnapReferences(editSession, sources), ...pinnedReferences]
-      : sources;
+      : [...sources, ...pinnedReferences];
   }, [project, editSession, pinnedReferences]);
   const trackingContext = useMemo(
     () => ({
@@ -193,6 +198,7 @@ export function BimPlan({
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
+    parallel: "Parallel",
     endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
       ? "Hilfspunkt"
       : "Endpunkt",
@@ -653,6 +659,19 @@ export function BimPlan({
             pointerEvents="none"
             aria-label="Aktive Hover-Referenz"
           >
+            {reference.segment && (
+              <line
+                aria-label="Erfasste Linienreferenz"
+                x1={reference.segment.start.x}
+                y1={-reference.segment.start.y}
+                x2={reference.segment.end.x}
+                y2={-reference.segment.end.y}
+                stroke="#929aa3"
+                strokeWidth={3}
+                strokeDasharray="6 4"
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             <circle
               cx={reference.point.x}
               cy={-reference.point.y}
