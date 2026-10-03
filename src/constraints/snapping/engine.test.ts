@@ -618,3 +618,177 @@ test("interrupted release preserves other references and restarts its dwell", ()
   };
   assert.notEqual(querySnap({ x: 3, y: 0 }, c).candidate?.kind, "intersection");
 });
+
+import { intersectLines } from "../../geometry/intersections/lines.ts";
+import { cursorGuide } from "../guides/directions.ts";
+import {
+  acquisitionReference,
+  withConstructionReferences,
+} from "../inference/construction-reference.ts";
+
+test("drawing at a constructed point commits only model geometry and round-trips through undo and JSON", () => {
+  const project = addWall(createProject("p", "s"), {
+    id: "wall",
+    start: { x: 0, y: 0 },
+    end: { x: 4, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const references = projectSnapReferences(project);
+  const activeReferences = references.filter(
+    (r) => r.entityId === "wall" && (r.feature === "axis-start" || r.feature === "axis-end"),
+  );
+  assert.equal(activeReferences.length, 2);
+  const c = { ...context, references, activeReferences, gridSpacing: null };
+  const ref = acquisitionReference(querySnap({ x: 2, y: 2 }, c).candidate, references)!;
+  assert.ok(ref?.dependencies);
+  const start = querySnap(
+    { x: 2.01, y: 2.01 },
+    { ...c, activeReferences: [...activeReferences, ref] },
+  ).point;
+  assert.deepEqual(start, { x: 2, y: 2 });
+  const history = commitProject(
+    createHistory(project),
+    addLine(project, {
+      id: "constructed-line",
+      kind: "line",
+      points: [start, { x: 3, y: 3 }],
+      ...defaultLineAppearance,
+    }),
+  );
+  assert.equal(history.past.length, 1);
+  assert.deepEqual(undoProject(history).present, project);
+  const json = serializeProject(redoProject(undoProject(history)).present);
+  assert.equal(json.includes("@construction"), false);
+  assert.deepEqual(readProjectFile(json), history.present);
+});
+
+test("line intersection rejects ambiguous or unstable directions and solves oblique lines", () => {
+  assert.deepEqual(
+    intersectLines({ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 4, y: 0 }, { x: -1, y: 1 }),
+    { x: 2, y: 2 },
+  );
+  for (const direction of [
+    { x: 1, y: 0 },
+    { x: 1, y: 1e-12 },
+    { x: 0, y: 0 },
+    { x: NaN, y: 1 },
+  ])
+    assert.equal(intersectLines({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 0 }, direction), null);
+  assert.equal(
+    intersectLines({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 2 }, { x: 2, y: 0 }),
+    null,
+  );
+});
+
+test("every active source uses its nearest cursor-following 45-degree direction", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 4, y: 0 } };
+  assert.equal(cursorGuide({ x: 2, y: 2 }, a).degrees, 45);
+  assert.equal(cursorGuide({ x: 2, y: 2 }, b).degrees, 135);
+  assert.equal(cursorGuide({ x: 5, y: 0.1 }, a).degrees, 0);
+  assert.equal(cursorGuide({ x: 0.1, y: -5 }, a).degrees, 270);
+});
+
+test("diagonal guide intersection is exact, screen bounded, constrained and retains both sources", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 4, y: 0 } };
+  for (const pixelsPerMetre of [25, 100, 400]) {
+    const c = {
+      ...context,
+      references: [a, b],
+      activeReferences: [a, b],
+      pixelsPerMetre,
+      gridSpacing: null,
+    };
+    const r = querySnap({ x: 2 + 5 / pixelsPerMetre, y: 2 }, c);
+    assert.equal(r.candidate?.kind, "intersection");
+    assert.deepEqual(r.point, { x: 2, y: 2 });
+    assert.equal(r.candidate?.sourceReferences?.length, 2);
+    assert.notEqual(
+      querySnap({ x: 2 + 11 / pixelsPerMetre, y: 2 }, c).candidate?.kind,
+      "intersection",
+    );
+    assert.notEqual(
+      querySnap({ x: 2, y: 2 }, { ...c, orthoOrigin: { x: 0, y: 0 } }).candidate?.kind,
+      "intersection",
+    );
+    assert.equal(querySnap({ x: 2, y: 2 }, { ...c, enabled: false }).candidate, null);
+    assert.equal(
+      querySnap({ x: 2, y: 2 }, { ...c, angleOrigin: { x: 0, y: 0 } }).candidate?.sourceFeature,
+      "shift-45",
+    );
+    const end = { entityId: "end", feature: "point", point: { x: 2, y: 2 } };
+    assert.equal(
+      querySnap({ x: 2, y: 2 }, { ...c, references: [a, b, end] }).candidate?.kind,
+      "endpoint",
+    );
+  }
+});
+
+test("constructed intersection activates at 600ms, generates further guides and toggles off", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 4, y: 0 } };
+  const c = { ...context, references: [a, b], activeReferences: [a, b], gridSpacing: null };
+  const ref = acquisitionReference(querySnap({ x: 2, y: 2 }, c).candidate, [a, b])!;
+  assert.ok(ref.dependencies);
+  let state: ReturnType<typeof emptyHoverReference> = {
+    ...emptyHoverReference(),
+    references: [a, b],
+    active: b,
+  };
+  state = advanceHoverReference(state, ref, 0, 600);
+  assert.equal(advanceHoverReference(state, ref, 599, 600).references.length, 2);
+  state = advanceHoverReference(state, ref, 600, 600);
+  assert.equal(state.references.length, 3);
+  assert.equal(advanceHoverReference(state, ref, 2000, 600).references.length, 3);
+  const sources = withConstructionReferences([a, b], state.references);
+  assert.equal(
+    acquisitionReference(
+      querySnap(ref.point, { ...c, activeReferences: state.references }).candidate,
+      sources,
+    )?.feature,
+    ref.feature,
+  );
+  const guide = querySnap({ x: 7, y: 2.01 }, { ...c, activeReferences: [ref] });
+  assert.equal(guide.candidate?.kind, "horizontal");
+  assert.deepEqual(guide.candidate?.guideOrigin, ref.point);
+  state = advanceHoverReference(state, null, 2100, 600);
+  state = advanceHoverReference(state, ref, 2200, 600);
+  state = advanceHoverReference(state, ref, 2800, 600);
+  assert.deepEqual(state.references, [a, b]);
+  assert.equal(withConstructionReferences([a, b], state.references).length, 2);
+});
+
+test("constructed references flatten dependencies and reject moved, missing or excluded sources", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 4, y: 0 } };
+  const c = { entityId: "c", feature: "end", point: { x: 6, y: 2 } };
+  const first = acquisitionReference(
+    querySnap({ x: 2, y: 2 }, { ...context, references: [a, b], activeReferences: [a, b] })
+      .candidate,
+    [a, b],
+  )!;
+  const second = acquisitionReference(
+    querySnap({ x: 4, y: 4 }, { ...context, references: [a, b, c], activeReferences: [first, c] })
+      .candidate,
+    [a, b, c, first],
+  )!;
+  assert.deepEqual(
+    second.dependencies?.map((d) => d.entityId),
+    ["a", "b", "c"],
+  );
+  assert.equal(withConstructionReferences([a, b, c], [second]).length, 4);
+  assert.equal(
+    withConstructionReferences([a, { ...b, point: { x: 4 + 1e-10, y: 0 } }, c], [second]).length,
+    3,
+  );
+  assert.equal(withConstructionReferences([a, c], [second]).length, 2);
+  assert.equal(
+    querySnap(
+      { x: 4, y: 4 },
+      { ...context, references: [a, c], activeReferences: [second], gridSpacing: null },
+    ).candidate,
+    null,
+  );
+});

@@ -1,3 +1,7 @@
+import {
+  acquisitionReference,
+  withConstructionReferences,
+} from "@/constraints/inference/construction-reference";
 import { useEffect, useRef, useState } from "react";
 import {
   advanceHoverReference,
@@ -22,19 +26,18 @@ export function useHoverReference(
       setSnapshot(null);
       return;
     }
+    const current =
+      state.current?.context === context ? state.current.value : emptyHoverReference();
+    const sources = withConstructionReferences(context.references, current.references);
     const candidate = querySnap(cursor, {
       ...context,
+      references: sources,
+      activeReferences: current.references,
       endpointRadiusPx: 10,
       gridSpacing: null,
       orthoOrigin: null,
     }).candidate;
-    const reference = candidate
-      ? {
-          point: candidate.worldPoint,
-          entityId: candidate.sourceEntityId!,
-          feature: candidate.sourceFeature,
-        }
-      : null;
+    const reference = acquisitionReference(candidate, sources);
     const update = () => {
       const before =
         state.current?.context === context ? state.current.value : emptyHoverReference();

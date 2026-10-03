@@ -8,6 +8,7 @@ export type SnapReference = {
   entityId: string;
   feature: string;
   directions?: readonly Point2[];
+  dependencies?: readonly SnapReference[];
 };
 export type SnapCandidate = {
   kind:
@@ -19,6 +20,7 @@ export type SnapCandidate = {
     | "perpendicular"
     | "angle"
     | "intersection";
+  sourceReferences?: readonly SnapReference[];
   secondaryGuideOrigin?: Point2;
   guideOrigin?: Point2;
   angleDegrees?: number;
