@@ -1,26 +1,22 @@
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { querySnap } from "@/constraints/snapping/engine";
+import { prepareToolReferences, resolveToolSnap } from "@/application/tools/snapping";
+import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
 import { projectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
-import {
-  editSnapReferences,
-  resolveEditSnap,
-  editOriginReference,
-} from "@/application/direct-edit/snapping";
 import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
-import { drawingPoint } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   project: Project;
+  snapping?: ToolSnapPolicy | null;
   selection: Selection;
   drawing: boolean;
   endpointSnap?: boolean;
@@ -43,6 +39,7 @@ export type BimPlanProps = {
 
 export function BimPlan({
   project,
+  snapping = null,
   selection,
   drawing,
   endpointSnap = false,
@@ -122,21 +119,11 @@ export function BimPlan({
     };
   }, []);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
-  const drawingOrigin = drawing && onDrawingAim ? start : null;
-  const pinnedReferences = useMemo(() => {
-    const origin = editSession ? editOriginReference(editSession) : null;
-    return origin
-      ? [origin]
-      : drawingOrigin
-        ? [{ entityId: "@drawing-origin", feature: "start", point: drawingOrigin }]
-        : [];
-  }, [editSession, drawingOrigin]);
-  const references = useMemo(() => {
-    const sources = projectSnapReferences(project);
-    return editSession
-      ? [...editSnapReferences(editSession, sources), ...pinnedReferences]
-      : [...sources, ...pinnedReferences];
-  }, [project, editSession, pinnedReferences]);
+  const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
+  const references = useMemo(
+    () => prepareToolReferences(snapping, projectSnapReferences(project)),
+    [project, snapping],
+  );
   const trackingContext = useMemo(
     () => ({
       enabled: endpointSnap && snap && !pan,
@@ -155,34 +142,22 @@ export function BimPlan({
     guideCursor,
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
-  const resolveDrawing = (point: Point, shift = shiftHeld) =>
-    endpointSnap
-      ? querySnap(point, {
-          references,
-          pixelsPerMetre: camera.pixelsPerMetre,
-          enabled: snap,
-          endpointRadiusPx: 10,
-          gridSpacing: 0.1,
-          orthoOrigin: ortho ? start : null,
-          activeReference,
-          activeReferences,
-          guideDirections,
-          angleOrigin: shift ? (start ?? activeReference?.point ?? null) : null,
-        })
-      : { point: drawingPoint(point, start, snap, ortho), candidate: null };
-  const resolveEdit = (point: Point, shift = shiftHeld) =>
-    resolveEditSnap(editSession!, point, {
-      references,
-      pixelsPerMetre: camera.pixelsPerMetre,
-      enabled: snap,
-      endpointRadiusPx: 10,
-      gridSpacing: 0.1,
-      orthoOrigin: ortho ? editSession!.anchor : null,
-      activeReference,
-      activeReferences,
-      guideDirections,
-      angleOrigin: shift ? editSession!.anchor : null,
-    });
+  const resolvePointer = (point: Point, shift = shiftHeld) =>
+    resolveToolSnap(
+      snapping,
+      point,
+      {
+        references,
+        pixelsPerMetre: camera.pixelsPerMetre,
+        enabled: snap,
+        endpointRadiusPx: 10,
+        gridSpacing: 0.1,
+        activeReference,
+        activeReferences,
+        guideDirections,
+      },
+      { ortho, shift, featureSnap: endpointSnap },
+    );
   const resolvedHover =
     drawingTarget !== undefined
       ? drawingTarget
@@ -191,9 +166,7 @@ export function BimPlan({
       : numericTarget !== undefined
         ? null
         : hover
-          ? editSession
-            ? resolveEdit(hover)
-            : resolveDrawing(hover)
+          ? resolvePointer(hover)
           : null;
   const snapLabels = {
     midpoint: "Mittelpunkt",
@@ -226,7 +199,7 @@ export function BimPlan({
         ? { point: numericTarget, candidate: null }
         : null
       : editSession && editPointer?.session === editSession
-        ? resolveEdit(editPointer.point)
+        ? resolvePointer(editPointer.point)
         : null;
   let preview: Project | null = null;
   let editError = "";
@@ -272,7 +245,7 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return resolveDrawing({ x: point.x, y: -point.y }, event.shiftKey).point;
+    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
   };
   const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
     role: "button",
@@ -355,12 +328,12 @@ export function BimPlan({
         if (endpointSnap || editSession) setHover(rawPoint(event));
         const drawingPoint = rawPoint(event);
         if (drawing && drawingPoint)
-          onDrawingAim?.(resolveDrawing(drawingPoint, event.shiftKey).point);
+          onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
           const point = rawPoint(event);
           if (point) {
             setEditPointer({ session: editSession, point });
-            onEditAim?.(editSession, resolveEdit(point, event.shiftKey).point);
+            onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
           }
         }
       }}
@@ -377,7 +350,7 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const target = resolveEdit(point, event.shiftKey).point;
+              const target = resolvePointer(point, event.shiftKey).point;
               if (onEditDirection) onEditDirection(editSession, target);
               else onEditCommit?.(editSession, target);
             } catch {

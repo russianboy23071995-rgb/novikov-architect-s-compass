@@ -495,6 +495,21 @@ Nachweise: 217 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Abnahme: Linie → Zeichenmodus Polylinie → Startpunkt → Maus nach rechts → Tab → 3 → Enter. Winkel 90 und Länge 2 → Enter. Am letzten Punkt doppelklicken, dann Undo/Redo prüfen. Bei der nächsten Polylinie ungültigen Winkel und Escape prüfen.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsamen Fangkontext an den Werkzeugvertrag anbinden
+### Abgeschlossener Folgeauftrag: gemeinsamen Fangkontext an den Werkzeugvertrag anbinden
 
 Den noch in BimPlan zwischen Zeichnen und Direct Edit verzweigten Aufbau von Ursprung, ausgeschlossenen Quellen und Fangabfrage hinter den vorhandenen Werkzeugvertrag führen. Bestehende querySnap/resolveEditSnap-Services weiterverwenden. Nachweis für Punkt-/Elementbewegung, feste Achsen, Fensterbindung und Zeichnen; Referenzen müssen Zoom überstehen und bei Kontextwechsel korrekt enden. Keine neue Fangmathematik oder UI-Funktion, kein neues Bauteil. Dies vervollständigt gezielt die gemeinsame Anbindung anstelle weiterer werkzeugweiser Sonderfälle.
+
+
+### Abschluss: ein Fangkontext für Zeichnen und Bewegung — 03.10.2026
+
+Auf refactor/shared-snap-context, basierend auf offenem PR #46. ToolInteraction enthält jetzt verpflichtend die Fangrichtlinie aus Ursprung, Quellenfilter und Resolver. Application-Funktionen prepareToolReferences/resolveToolSnap bilden den gemeinsamen Einstieg. BimPlan liefert Maus, Maßstab, Modifier und aktive Referenzen, ohne getrennte Zeichen-/Edit-Fangkontexte oder eigene Auswahl der auszuschließenden Elemente. Bestehende querySnap/resolveEditSnap bleiben zuständig für Geometrie und Achs-/Hostbindung.
+
+Die Richtlinie bleibt für dieselbe unveränderliche Sitzung beziehungsweise denselben Entwurfspunkt identisch. Zoom, Kamerabewegung und Eingabetext erzeugen daher keinen neuen Referenzsatz; neuer Ursprung/Sitzung oder neues Projekt erzeugen den passenden Kontext. Ableitungen liegen in schwachen Caches und enthalten keine eigenständige bearbeitbare Modellkopie.
+
+Nachweise: 220 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Neue Tests vergleichen alle Editaktionen an Wand/Linie sowie Fensterbewegung mit dem bisherigen Resolver, einschließlich Eigenmodell-/Host-Ausschluss, Snap aus, Shift und Ortho. Weitere Prüfungen für stabile Richtlinienidentität, Sitzungswechsel, Zeichnen und Idle-Fang. Browser: Wandecke zeigt sofort Ursprung und Lot-Hilfe; Zoom und Zahleneingabe erhalten den Ring, Escape entfernt ihn. Neuer Linienursprung aktiv, 45°/2 m erfolgreich bestätigt. Anschließende externe Linienreferenz auch nach Zoom erhalten.
+
+Abnahme: Wandecke → Punkt frei bewegen → Maus nach oben → Zoom → Tab/Länge → Escape. Ursprung und Hilfslinie dürfen nicht durch Zoom verschwinden, müssen nach Abbruch verschwinden. Danach Linie zeichnen und fremde Referenz verfolgen.
+
+### Genau ein ausführbarer Folgeauftrag: Sitzungswechsel bei History und Projektladen absichern
+
+Den gemeinsamen Interaktions-/Fangkontext bei Undo/Redo und Projektwechsel während einer laufenden numerischen oder mausgeführten Aktion prüfen. Alte Ursprünge, fixierte Werte und Referenzen dürfen weder in das neue Projekt gelangen noch einen alten Entwurf bestätigen. Fehlverhalten gezielt korrigieren; bestehende Modellaktionen und Projektdateien beibehalten. Regressionen und praktische Abnahme mit Bewegung und Polylinienentwurf; keine neue Bauteilfunktion.
