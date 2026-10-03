@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bedienkorrektur: Referenzen beim Zoomen erhalten — 03.10.2026
+
+Aktive Hilfspunkte einschließlich konstruierter Schnittpunkte und ihre Richtungsführungen bleiben bei Kamera-/Zoomänderungen erhalten. Auch das Verlassen der Zeichenfläche zum Bedienen der Zoomtasten löscht sie nicht. Die Referenzen bleiben in Modellkoordinaten; Fangabstand und Ringdarstellung werden weiterhin aus dem aktuellen Bildschirmmaßstab berechnet. Eine laufende Hover-Verweildauer wird bei Navigation abgebrochen und beginnt beim nächsten Besuch neu. Escape, Ausschalten des Fangens und ein geänderter Modell-/Bearbeitungskontext verwerfen weiterhin die Referenzen. Keine Modellaktion oder Änderung an History, JSON oder IFC.
+
+Nachweis: 187 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler und 6 bekannte Warnungen. Zwei neue Regressionstests prüfen Sitzungsidentität über Zoomstufen, explizite Invalidierung sowie unterbrochene Verweildauer ohne Verlust aktiver Punkte oder unbeabsichtigtes Umschalten. Browser: Referenzen (0;0), (3;0) und konstruierter Schnitt (1,5;1,5) bleiben mit drei Führungen beim Hinein-/Herauszoomen unverändert; Undo bleibt leer. Escape entfernt anschließend alle Referenzen und Führungen.
+
+Praktische Abnahme: Punktfang einschalten, zwei Punkte jeweils 0,6 s anhovern und daraus einen Schnittpunkt aktivieren. Mit Mausrad oder Plus/Minus zoomen: Markierungen müssen erhalten bleiben. Escape löst sie gezielt. Dieser Nachtrag ersetzt frühere Protokollaussagen, nach denen Zoom Referenzen verwirft. Die Korrektur ergänzt PR #36; Nutzerfreigabe für PR #35/#36 gilt nach erfolgreicher Prüfung. Der einzige nächste Entwicklungsauftrag bleibt der unten beschriebene Schnitt externer Hilflinien mit festen Direct-Edit-Achsen.
+
 ## Bedienkorrektur: Hover 600 ms und Referenzen lösen — 03.10.2026
 
 Nutzerkorrektur zu N08/Guide-F14: Standard-Verweildauer jetzt zentral 600 ms, sowohl im Workspace als auch im BimPlan-Fallback. Die vorhandene Einstellung bleibt verfügbar und gilt symmetrisch für Aktivieren und Lösen. Historische 400-ms-Angaben beschreiben frühere Stände.
