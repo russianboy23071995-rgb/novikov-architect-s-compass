@@ -665,6 +665,17 @@ Repository-Benchmark einschließlich Projektvalidator erneut ausgeführt; LOCAL_
 
 Nutzerwunsch zur optionalen Referenzauswahl aufgenommen: docs/REFERENCE_SELECTION_PLAN.md. Frühere Profilierung zurückgestellt; keine Auslöseschwelle oder Bedienänderung implementiert.
 
-### Genau ein ausführbarer Folgeauftrag: Vertrag für optionale Referenzauswahl festlegen
+### Abgeschlossener Folgeauftrag: Vertrag für optionale Referenzauswahl festlegen
 
 Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands- und Quellenvertrag sowie eine begründete vorläufige Auslöseschwelle mit Hysterese vorschlagen. Verhalten ohne Auswahl, bei Abbruch, Idle-Hover und Modellwechsel festlegen. Endpunkt-/Mittelpunktfang, aktive Führungen und feste Achsen erhalten. Ein kleines Umsetzungspaket mit Tests ableiten; noch keine automatische Einschränkung oder Dialoge implementieren.
+
+
+### Abschluss: Referenzauswahl-Vertrag — 04.10.2026
+
+docs/REFERENCE_SELECTION_PLAN.md gegen lokale Quellen, ToolInteraction, Hover und Pointer-/Keyboardpfad abgeglichen. Vorgeschlagene Einstiegsschwelle >32 Segmente, Rückkehr <=24 für 250 ms; vorläufig und im Umsetzungsschritt zu messen. 600 ms Hover bleibt unabhängig. Auswahl filtert ausschließlich Segmentpaare, erhält normale Punktziele und aktive Führungen. Arbeitskopie/Abbruch, Mehrdeutigkeit, Polyline-Vorgangsidentität und Idle-Sitzung beschrieben. Keine Nutzerentscheidung über konkrete Zahlen behauptet.
+
+Nur Dokumentation verändert; kein neuer Test-/Build-/Browserlauf nötig. Bestehende 244 Tests und Abnahme aus PR #58 beziehen sich auf unveränderten Anwendungscode. PR #58 und #57 weiterhin offen; kein Merge in diesem Planungsauftrag.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Dichteschranke mit sichtbarem Status
+
+Primitive lokale Kandidatensuche und Paarbildung trennen. Gemeinsamen reinen Dichtecontroller mit vorläufigen Schwellen >32/<=24 und 250-ms-Rückkehr erstellen; Zeit injizieren. Strukturierter Pausenstatus für Zeichnen, Direct Edit und Hover, keine ungeschützte Zweitabfrage. End-/Mittelpunkte, aktive Führungen, Host-/Eigenausschlüsse und Achsen erhalten. Viewporthinweis ohne funktionslosen Auswahlbutton; Auswahl-Picking folgt als separates Paket. Grenz-/Lebenszyklustests und Messung mit 24/32/33/48 Segmenten gemäß Vertrag; Build/Lint/TypeScript und praktische Prüfung.
