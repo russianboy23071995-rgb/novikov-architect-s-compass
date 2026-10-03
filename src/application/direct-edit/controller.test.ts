@@ -927,7 +927,10 @@ test("polar point input retains opposite wall endpoint and commits one undo step
   });
   const result = previewMovementInput(state.session!, state.history.present, wall, "90", "1", null);
   assert.deepEqual(result.project.storey.walls[0]!.start, { x: 0, y: 0 });
-  assert.deepEqual(result.project.storey.walls[0]!.end, { x: 3, y: 1 });
+  const end = result.project.storey.walls[0]!.end;
+  const length = Math.hypot(end.x, end.y);
+  assert.ok(Math.abs(end.x - (end.y / length) * 0.18 - 3) < 1e-10);
+  assert.ok(Math.abs(end.y + (end.x / length) * 0.18 - 1.18) < 1e-10);
   const next = editingReducer(state, {
     type: "confirm",
     session: state.session!,
