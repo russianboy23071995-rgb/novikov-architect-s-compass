@@ -510,6 +510,21 @@ Nachweise: 220 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Abnahme: Wandecke → Punkt frei bewegen → Maus nach oben → Zoom → Tab/Länge → Escape. Ursprung und Hilfslinie dürfen nicht durch Zoom verschwinden, müssen nach Abbruch verschwinden. Danach Linie zeichnen und fremde Referenz verfolgen.
 
-### Genau ein ausführbarer Folgeauftrag: Sitzungswechsel bei History und Projektladen absichern
+### Abgeschlossener Folgeauftrag: Sitzungswechsel bei History und Projektladen absichern
 
 Den gemeinsamen Interaktions-/Fangkontext bei Undo/Redo und Projektwechsel während einer laufenden numerischen oder mausgeführten Aktion prüfen. Alte Ursprünge, fixierte Werte und Referenzen dürfen weder in das neue Projekt gelangen noch einen alten Entwurf bestätigen. Fehlverhalten gezielt korrigieren; bestehende Modellaktionen und Projektdateien beibehalten. Regressionen und praktische Abnahme mit Bewegung und Polylinienentwurf; keine neue Bauteilfunktion.
+
+
+### Abschluss: History-/Projektwechsel und modale Tastaturzuständigkeit — 03.10.2026
+
+Auf fix/interaction-project-transitions, basierend auf offenem PR #47. Die bestehende gemeinsame Reset-/History-Steuerung entfernt laufende Bearbeitungen bei Undo/Redo und bestätigtem Laden bereits korrekt. Ein reproduzierter Fehler lag in der Tastatursteuerung: Tab des Hilfseingabefensters griff im Hintergrund des Ladedialogs ein; dessen Fokus blieb auf Abbrechen statt auf Projekt laden zu wechseln.
+
+Korrektur im gemeinsamen PrecisionInput: modaler Dialog/Alertdialog außerhalb des eigenen Panels behält Tab. Auch globale Workspace-Werkzeugkürzel ignorieren modale Inhalte. Keine separate Lösung für einzelne Werkzeuge. Abgebrochene Ladebestätigung erhält den bisherigen Entwurf; bestätigtes Laden verwirft ihn.
+
+Nachweise: 222 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Neue Regressionen für Undo/Redo/Projektwechsel mit altem Edit-Token, auch nach Rückkehr zum ursprünglichen Modell; niemals Mutation durch alte Bestätigung. Alte Polylinienentwürfe werden im neuen Projekt abgewiesen. Browser: Punktbewegung 90°/1 m → Ladebestätigung abbrechen erhält Felder. Erneut laden → Tab fokussiert Projekt laden → Enter lädt 5-m-Wand mit gleicher Wand-ID; keine alten Felder/Ringe. Undo zeigt ursprüngliche 3-m-Wand ohne Bearbeitung, Redo 5 m. Polylinienentwurf wird bei Undo vollständig verworfen, neue Sitzung hat leere Felder. Laden während weiterem Polylinienentwurf (auch identisches Projekt) entfernt Entwurf, Ring und Eingabefenster; keine zusätzliche Linie.
+
+Abnahme: laufende Punktbewegung oder Polylinie beginnen → Projektdatei öffnen → Tab/Abbrechen prüfen; danach erneut öffnen und Tab/Enter laden. Undo/Redo darf nur bestätigte Modelle zurückbringen, keine alten Entwürfe.
+
+### Genau ein ausführbarer Folgeauftrag: offene PR-Kette geordnet zur Übernahme vorbereiten
+
+Die aufeinander aufbauenden PRs ab #41 einschließlich dieses Stabilisierungsschritts auf Zielzweige, Abhängigkeiten und offenen Prüfstatus kontrollieren. Einen verständlichen Übernahmeplan mit finalem Entwicklungsstand und verbleibenden Einschränkungen erstellen. Bereits vorhandene Testnachweise zuordnen; zusätzliche Prüfung nur bei neuen Abweichungen. Keine neuen Funktionen und kein automatischer Merge ohne ausdrückliche Nutzerfreigabe für die betreffenden PRs.

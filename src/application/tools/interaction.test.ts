@@ -203,3 +203,66 @@ test("cancelling a polyline draft leaves no model element or history entry", () 
   assert.equal(state.history.past.length, 0);
   assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
 });
+
+test("history and project replacement invalidate the old edit session, even after undo to its original model", () => {
+  const base = addWall(createProject("original", "storey"), {
+    id: "wall",
+    start: origin,
+    end: { x: 3, y: 0 },
+    ...defaultDrawingWall,
+  });
+  const target = { kind: "wall" as const, id: "wall" };
+  let state = editingReducer(createEditingState(base), {
+    type: "project",
+    project: updateWall(base, "wall", { height: 3 }),
+  });
+  state = editingReducer(state, { type: "begin", target, action: "point", index: 1 });
+  const oldSession = state.session!;
+  const replacement = addWall(createProject("replacement", "storey"), {
+    id: "wall",
+    start: origin,
+    end: { x: 5, y: 0 },
+    ...defaultDrawingWall,
+  });
+  for (const event of [
+    { type: "undo" as const },
+    { type: "redo" as const },
+    { type: "project" as const, project: replacement },
+    { type: "undo" as const },
+  ]) {
+    state = editingReducer(state, event);
+    assert.equal(state.session, null);
+    const before = state.history;
+    const attempted = editingReducer(state, {
+      type: "confirm",
+      session: oldSession,
+      selection: target,
+      point: { x: 4, y: 1 },
+    });
+    assert.equal(attempted.history, before);
+    assert.match(attempted.error, /nicht mehr aktiv/);
+  }
+});
+test("new project rejects old polyline draft while replacement undo restores only committed model", () => {
+  const base = createProject("original", "s");
+  const loaded = createProject("loaded", "s");
+  const points = [origin, { x: 2, y: 0 }, { x: 2, y: 2 }];
+  assert.throws(
+    () =>
+      createDrawing(base, loaded, "old-poly", {
+        kind: "line",
+        lineKind: "polyline",
+        points,
+        appearance: defaultLineAppearance,
+      }),
+    /Modell/,
+  );
+  let state = createEditingState(base);
+  state = editingReducer(state, { type: "project", project: loaded });
+  state = editingReducer(state, { type: "undo" });
+  assert.deepEqual(state.history.present, base);
+  assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+  assert.equal(state.session, null);
+  state = editingReducer(state, { type: "redo" });
+  assert.deepEqual(state.history.present, loaded);
+});

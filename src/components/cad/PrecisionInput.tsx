@@ -46,6 +46,13 @@ export function PrecisionInput({
     const tab = (event: KeyboardEvent) => {
       if (event.key !== "Tab" || event.ctrlKey || event.metaKey || event.altKey) return;
       const active = document.activeElement;
+      // Modal workflows own the keyboard while the drawing/edit draft remains suspended.
+      if (
+        active instanceof Element &&
+        active.closest('[role="dialog"], [role="alertdialog"]') &&
+        !panel.current?.contains(active)
+      )
+        return;
       if (
         active instanceof Element &&
         active.matches("input, textarea, select, [contenteditable=true]") &&
