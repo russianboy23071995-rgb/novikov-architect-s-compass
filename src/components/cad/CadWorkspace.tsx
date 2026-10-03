@@ -516,6 +516,7 @@ export function CadWorkspace() {
                 <ViewportManager
                   project={project}
                   selection={selection}
+                  snapping={interaction.adapter?.snapping ?? null}
                   drawing={(tool === "wall" || tool === "line") && mode === "2D"}
                   endpointSnap={tool === "line" || tool === "select" || tool === "wall"}
                   hoverDwellMs={hoverDwellMs}

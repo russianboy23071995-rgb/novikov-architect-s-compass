@@ -4,6 +4,26 @@ import type { Point, Project } from "../../lib/bim/model.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
 import { previewEdit } from "../direct-edit/controller.ts";
 import { previewDrawingInput } from "../drawing/actions.ts";
+import { drawingSnapPolicy } from "./snapping.ts";
+import type { ToolSnapPolicy } from "./snapping.ts";
+import {
+  editOriginReference,
+  editSnapReferences,
+  resolveEditSnap,
+} from "../direct-edit/snapping.ts";
+const editPolicies = new WeakMap<EditSession, ToolSnapPolicy>();
+function editSnapPolicy(session: EditSession): ToolSnapPolicy {
+  let policy = editPolicies.get(session);
+  if (!policy) {
+    policy = {
+      origin: editOriginReference(session),
+      sources: (refs) => editSnapReferences(session, refs),
+      resolve: (point, context) => resolveEditSnap(session, point, context),
+    };
+    editPolicies.set(session, policy);
+  }
+  return policy;
+}
 export function editInteraction(
   session: EditSession,
   current: Project,
@@ -15,6 +35,7 @@ export function editInteraction(
   const polar = ["move", "point"].includes(session.action) && session.target.kind !== "window";
   return {
     identity: session,
+    snapping: editSnapPolicy(session),
     origin: session.anchor,
     input: axis
       ? { axisLabel: axis.label, degrees: axis.degrees }
@@ -40,6 +61,7 @@ export function drawingInteraction(
 ): ToolInteraction {
   return {
     identity: origin,
+    snapping: drawingSnapPolicy(origin),
     origin,
     input: { axisLabel: null, degrees: null },
     click: "confirm",
