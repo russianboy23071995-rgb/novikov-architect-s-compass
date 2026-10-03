@@ -416,7 +416,7 @@ test("model adapter and snapped line workflow preserve exact point, ID, undo and
     readProjectFile(serializeProject(redoProject(undoProject(committed)).present)),
     committed.present,
   );
-  assert.equal(projectSnapReferences(committed.present).length, 10);
+  assert.equal(projectSnapReferences(committed.present).length, 11);
   assert.equal(serializeProject(project), before);
 });
 

@@ -74,11 +74,29 @@ Nachweise: 173 Tests bestanden, darunter fünf neue Gruppen in constraints/snapp
 
 Abnahme: Snap aktivieren und die Mitte der Wandachse oder eines Liniensegments anfahren. Dreieck/Mittelpunkt prüfen; 0,6 s verweilen, dann seitlich wegbewegen und Hilfslinie beobachten. Zurückkehren und 0,6 s warten löst die Referenz. Eine Linie dort beginnen oder eine andere Linie über das On-Demand-Menü dorthin bewegen; Undo/Redo prüfen. Bei kurzen Linien hineinzoomen, falls der Endpunkt Vorrang erhält.
 
-### Genau ein ausführbarer Folgeauftrag: echte Segmentschnittpunkte
+### Abschluss: echte Segmentschnittpunkte — 03.10.2026
 
-Schnittpunkte vorhandener gerader Linien-/Polyliniensegmente und Wandachsen in der gemeinsamen Geometrie-/Snap-Schicht ergänzen. Vorab Quellenadapter und Direct-Edit-Ausschlüsse für beide beteiligten Elemente prüfen. Nur eindeutige Punkte innerhalb beider Segmentgrenzen anbieten; parallele, kollineare oder überlappende Strecken nicht als beliebigen Einzelpunkt interpretieren. Von temporären Hilflinienschnitten unterscheidbar bleiben, beide Quellen exakt invalidieren und die bestehenden Hover-/Fangregeln nutzen.
+PR #34 wurde mit ausdrücklicher Nutzerfreigabe als normaler Merge 96c33de in seinen bisherigen Zielzweig feat/guide-direction-hysteresis übernommen. main bleibt unverändert. Der neue Schritt baut auf diesem Merge auf.
 
-Abnahme: horizontale/schräge Kreuzungen, Endberührung, außerhalb liegende Geradenschnitte, Überlappung, kurze/entartete Segmente und mehrere Zoomstufen. Eigene/ausgeschlossene Quellen und verschobene Elemente berücksichtigen. Zeichnen und Direct Edit am Schnittpunkt mit Vorschau/Commit/Undo/Redo/JSON, Browserabnahme sowie Tests/TypeScript/Lint/Build. Keine neuen Bauteile, Layer oder 3D-Arbeitsebene in diesem Auftrag.
+geometry/intersections/segments.ts prüft eindeutige Schnitte innerhalb beider endlicher Segmente mit der zentralen numerischen Toleranz. Degenerierte/nichtendliche Strecken, bloße Geradenverlängerungen und Überlappungen erzeugen keinen Fangpunkt; eindeutige Endberührungen bleiben möglich. constraints/snapping/segment-references.ts bildet Quellenpaare deterministisch. Der Projektadapter stellt Wandachsen und vorhandene Linien-/Polyliniensegmente bereit, einschließlich Selbstkreuzungen einer Polylinie. Keine Wandflächenverschneidung oder Änderung des BIM-Modells.
+
+Beide Segmentquellen bleiben als exakte Geometrie-Snapshots erhalten. Das erlaubt Invalidierung nach Verschieben/Drehen/Strecken sowie Ausschluss jeder Kreuzung, an der ein bearbeitetes Element oder dessen Fensterhost beteiligt ist. Ableitung erfolgt bei verändertem Modell über den bestehenden memoisierten Adapter, nicht pro Mausbewegung. Aktuell paarweiser Vergleich O(n²), noch kein räumlicher Index oder Leistungsnachweis für Großprojekte.
+
+Neue Fangart segment-intersection mit Beschriftung „Segmentschnittpunkt“, getrennt vom temporären Hilflinienschnitt. Rangfolge: Endpunkt 0, Mittelpunkt 0,25, Segmentschnitt 0,375, Hilflinienschnitt 0,5, einzelne Führungen und Raster. 10 CSS-Pixel, Shift/Ortho und Editachsen behalten ihren Vertrag. Der gleiche Punkt kann nach 600 ms als Hilfsreferenz aktiviert und bei erneutem Besuch gelöst werden; alle Verbraucher nutzen weiterhin querySnap. Projektformat, History und IFC unverändert.
+
+Nachweise: 180 Tests bestanden, darunter sieben neue Gruppen zu endlichen/überlappenden/entarteten Segmenten, kurzen und schrägen Kreuzungen, Endkontakt, Polylinien-Selbstkreuzung, deterministischen Quellen, Zoom/Priorität/Constraints, 600-ms-Hover, beidseitigen Edit-/Host-Ausschlüssen sowie Zeichnen/Preview/Commit/Undo/Redo/JSON. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Linie kreuzt Wandachse bei (0,7; 0), Segmentschnitt erkannt, Referenz aktiviert/gelöst, neue Linie startet exakt am Schnitt, Direct Edit einer dritten Linie fängt denselben externen Schnitt; Undo/Redo geprüft. Screenshot: outputs/segment-intersection-hover.png.
+
+Abnahme: Eine Linie quer durch eine Wandachse zeichnen, abseits von End- und Mittelpunkten. Kreuzung anfahren: „Segmentschnittpunkt“. 0,6 s verweilen und Hilfslinien verfolgen; erneut besuchen und lösen. Eine weitere Linie an diesem Punkt beginnen oder eine dritte Linie dorthin bewegen; Undo/Redo prüfen. Beim Bewegen einer der beiden Ausgangslinien darf deren alter Schnittpunkt nicht als externer Fangpunkt angeboten werden.
+
+### Aufgenommen für später: N45 Wandachse
+
+Nutzerpräzisierung: Die derzeit zentrierte Wandachse bei ausgewählter Wand sichtbar machen und später verschiebbar machen. In FUNCTION_REQUIREMENTS_2026-10-03.md bei N45 ergänzt, kein Doppelauftrag. Vor Wandanschlüssen passend einordnen. Ob die physische Wandlage erhalten oder mitverschoben wird, bleibt bis zur fachlichen Klärung offen; hier keine Implementierung.
+
+### Genau ein ausführbarer Folgeauftrag: Schnittpunkte schräger Verlängerungs- und Lotführungen
+
+Die bereits vorhandenen einzelnen Verlängerungs-/Lotführungen auf gemeinsame Schnittpunktkandidaten erweitern, auch wenn sie außerhalb der 45°-Schritte liegen. Zuerst die bestehende Richtungswahl und Hysterese prüfen; nur mausrelevante Richtungen darstellen und deren gemeinsame Entscheidung für Darstellung, Erwerb und Fang verwenden. Beide Quellen erhalten, vorhandene Prioritäten und echte Segmentschnitte nicht verdrängen. Keine neue Werkzeuglogik und kein Modell-/Dateiformatwechsel.
+
+Abnahme: analytisch bekannte Kreuzung zweier schräger Verlängerungen und Verlängerung/Lot, parallele/kollineare Fälle, mehrere Zoomstufen, konkurrierende 45°-Führungen, veränderte Quellen, Shift/Ortho und Direct-Edit-Ausschlüsse. Im Browser Linie am Hilflinienschnitt zeichnen bzw. dorthin bewegen, Abbruch/Undo/Redo prüfen. Tests/TypeScript/Lint/Build. Wandachsenbearbeitung, Layer und 3D bleiben spätere getrennte Aufträge.
 
 ## Historische Fortschrittsnachweise
 

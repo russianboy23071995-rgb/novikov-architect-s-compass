@@ -17,7 +17,11 @@ export function editSnapReferences(
     session.target.kind === "window"
       ? session.base.storey.windows.find((w) => w.id === session.target.id)?.wallId
       : null;
-  return references.filter((r) => r.entityId !== session.target.id && r.entityId !== host);
+  return references.filter((r) =>
+    [r, ...(r.dependencies ?? [])].every(
+      (source) => source.entityId !== session.target.id && source.entityId !== host,
+    ),
+  );
 }
 
 function editDirection(session: EditSession): Point2 | null {

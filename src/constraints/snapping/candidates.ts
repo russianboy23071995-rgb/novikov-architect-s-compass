@@ -60,7 +60,8 @@ function pointCandidates(
           sourceEntityId: source.entityId,
           sourceFeature: source.feature,
           ...(source.dependencies ? { sourceReferences: [source] } : {}),
-          priority: source.kind === "midpoint" ? 0.25 : 0,
+          priority:
+            source.kind === "segment-intersection" ? 0.375 : source.kind === "midpoint" ? 0.25 : 0,
         },
         [{ source, activation: activations.get(key(source)) ?? -1 }],
       ),
