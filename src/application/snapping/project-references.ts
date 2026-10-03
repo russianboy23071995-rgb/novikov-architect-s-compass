@@ -5,6 +5,18 @@ import { segmentMidpoint } from "../../geometry/primitives/segment.ts";
 import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 
+// Project snapshots are immutable. Weak keys do not retain discarded projects/history.
+// Keep tool filtering and temporary construction origins out of this model-only cache.
+const referenceCache = new WeakMap<Project, readonly SnapReference[]>();
+export function getProjectSnapReferences(project: Project): readonly SnapReference[] {
+  let references = referenceCache.get(project);
+  if (!references) {
+    references = Object.freeze(projectSnapReferences(project));
+    referenceCache.set(project, references);
+  }
+  return references;
+}
+
 function midpointReference(
   entityId: string,
   feature: string,

@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { prepareToolReferences, resolveToolSnap } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
-import { projectSnapReferences } from "@/application/snapping/project-references";
+import { getProjectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
@@ -120,9 +120,10 @@ export function BimPlan({
   }, []);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
+  const modelReferences = useMemo(() => getProjectSnapReferences(project), [project]);
   const references = useMemo(
-    () => prepareToolReferences(snapping, projectSnapReferences(project)),
-    [project, snapping],
+    () => prepareToolReferences(snapping, modelReferences),
+    [modelReferences, snapping],
   );
   const trackingContext = useMemo(
     () => ({

@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { prepareToolReferences, resolveToolSnap, drawingSnapPolicy } from "./snapping.ts";
 import { editInteraction } from "./adapters.ts";
 import { resolveEditSnap } from "../direct-edit/snapping.ts";
-import { projectSnapReferences } from "../snapping/project-references.ts";
+import { projectSnapReferences, getProjectSnapReferences } from "../snapping/project-references.ts";
+import { updateWall, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { addWall, addWindow, addLine, createProject } from "../../lib/bim/model.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
@@ -30,6 +32,53 @@ const base = addLine(
   },
 );
 const noop = () => {};
+
+test("model references survive tool and polyline-origin changes without retaining tool exclusions", () => {
+  const sources = getProjectSnapReferences(base);
+  for (const point of [
+    { x: 0, y: 0 },
+    { x: 2, y: 3 },
+    { x: -1, y: 4 },
+  ]) {
+    const refs = prepareToolReferences(drawingSnapPolicy(point), getProjectSnapReferences(base));
+    assert.equal(getProjectSnapReferences(base), sources);
+    assert.equal(refs.at(-1)!.point, point);
+    assert.ok(refs.some((r) => r.entityId === "w"));
+  }
+  const session = {
+    base,
+    target: { kind: "wall" as const, id: "w" },
+    action: "point" as const,
+    index: 1,
+    anchor: { x: 3, y: 0 },
+  };
+  const edit = editInteraction(session, base, session.target, noop, noop).snapping;
+  assert.ok(!prepareToolReferences(edit, sources).some((r) => r.entityId === "w"));
+  assert.ok(
+    prepareToolReferences(null, getProjectSnapReferences(base)).some((r) => r.entityId === "w"),
+  );
+  assert.ok(
+    !sources.some((r) => r.entityId === "@edit-origin" || r.entityId === "@drawing-origin"),
+  );
+});
+
+test("model revision, undo/redo and loaded same-ID projects use matching reference snapshots", () => {
+  const history = createHistory(base);
+  const original = history.present;
+  const before = getProjectSnapReferences(original);
+  const changed = updateWall(original, "w", { end: { x: 6, y: 2 } });
+  const next = commitProject(history, changed);
+  const after = getProjectSnapReferences(next.present);
+  assert.notEqual(after, before);
+  assert.deepEqual(after, projectSnapReferences(next.present));
+  assert.deepEqual(before, projectSnapReferences(original));
+  const undone = undoProject(next);
+  assert.equal(getProjectSnapReferences(undone.present), before);
+  assert.equal(getProjectSnapReferences(redoProject(undone).present), after);
+  const loaded = deserializeProject(serializeProject(changed));
+  assert.notEqual(getProjectSnapReferences(loaded), after);
+  assert.deepEqual(getProjectSnapReferences(loaded), projectSnapReferences(loaded));
+});
 test("one snap entry preserves every edit constraint including hosted windows", () => {
   for (const target of [
     { kind: "wall", id: "w" },
