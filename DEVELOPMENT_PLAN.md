@@ -623,6 +623,21 @@ Praktischer Test: Wandecke frei bewegen, zwei externe Linienenden jeweils 0,6 s 
 
 Grenzen: sehr dichte lokale Geometrie weiterhin quadratischer Paaraufwand; Index nach echter Modelländerung vollständig neu. Keine Erweiterung auf 3D-Arbeitsebenen in diesem Schritt.
 
-### Genau ein ausführbarer Folgeauftrag: dichte lokale Geometrie absichern
+### Abgeschlossener Folgeauftrag: dichte lokale Geometrie absichern
 
 Den integrierten Fangpfad mit langen schrägen, dicht überlappenden Segmentboxen und mehreren aktiven Referenzen differential gegen den Vollpfad prüfen und messen. Lokale Kandidatenzahlen/Paarzahlen sowie Median/P95 dokumentieren; Quellenausschlüsse für bewegte Fenster samt Host und konstruierte Referenzen nach Modellwechsel ausdrücklich abdecken. Keine neue Fangart, keine Ergebnisobergrenze und kein Indexumbau ohne gemessenen Engpass.
+
+
+### Abschluss: dichte lokale Geometrie — 04.10.2026
+
+PR #56 nach ausdrücklicher Freigabe normal in docs/local-snap-query-plan übernommen (01ca349); main bleibt unverändert. Branch test/dense-local-snapping ergänzt Regressionen und reproduzierbare Lastmessung, keine Änderung des Anwendungscodes. ARCHITECTURE.md korrigiert den nach PR #56 veralteten Integrationsstatus.
+
+238 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Dichte schräge Quellen und lokale Kreuzungen bei mehreren Zoomstufen stimmen mit dem vollständigen Resolver überein. Bewegte Fenster schließen eigene und Hostquellen vor Schnittbildung sowie bei aktiven Führungen aus. Konstruierte Referenzen werden nach Änderung einer Blattquelle verworfen; nur der passende Undo-Snapshot ist wieder gültig. Dies reaktiviert keine UI-Sitzung nach Undo.
+
+Messung: docs/performance/DENSE_SNAPPING.md und zugehörige Rohwerte. 500 schräge parallele Linien ohne lokalen Treffer: 124750 Paarprüfungen, Median 32,01 ms. 500 Linien mit sehr vielen echten lokalen Kreuzungen: Median 1001,86 ms. Synthetische Stressfälle, keine typische Projekt- oder Browser-Framerate-Aussage. Produktionscode identisch mit PR #56, daher dessen praktische Abnahme weiter gültig; keine neue Browserprüfung behauptet.
+
+Praktischer Abnahmetest: Fenster auf seiner Wand bewegen; die eigene Wand darf kein externes Fangziel werden. Zwei externe Punkte als Referenzen aktivieren, deren Hilfslinienschnitt erfassen, eine zugrunde liegende Linie ändern und eine neue Bewegung beginnen: alte Hilfspunkte dürfen nicht weiterwirken.
+
+### Genau ein ausführbarer Folgeauftrag: falsche lokale Segmenttreffer vor Paarbildung reduzieren
+
+Zwischen AABB-Abfrage und lokaler Schnittberechnung einen konservativen geometrischen Segmentnähefilter ergänzen. Vollständige Originalsegmente für exakte Geometrie und Quellenidentität erhalten; numerisch akzeptierte Kontakte und Fangradiusgrenzen durch Differentialtests absichern. Benchmark für Boxüberlappung und echte dichte Kreuzungen unverändert wiederholen. Keine Ergebnisobergrenze, keine neue Fangart, kein Indexumbau. Verbleibende Kosten echter dichter Kreuzungen separat ausweisen; diese werden durch einen Nähefilter allein nicht gelöst.

@@ -11,7 +11,13 @@ import { acquisitionReference } from "../../constraints/inference/construction-r
 import { editInteraction } from "./adapters.ts";
 import { resolveEditSnap } from "../direct-edit/snapping.ts";
 import { projectSnapReferences, getProjectSnapReferences } from "../snapping/project-references.ts";
-import { updateWall, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import {
+  validateProject,
+  updateLine,
+  updateWall,
+  serializeProject,
+  deserializeProject,
+} from "../../lib/bim/model.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { addWall, addWindow, addLine, createProject } from "../../lib/bim/model.ts";
@@ -341,4 +347,157 @@ test("drawing and idle hover use same resolver with Shift origin and Snap off re
     featureSnap: true,
   });
   assert.deepEqual(idle.point, origin);
+});
+
+test("dense diagonal boxes and crossings preserve full resolver ranking at multiple scales", () => {
+  for (const crossing of [false, true]) {
+    const project = validateProject({
+      ...base,
+      storey: {
+        ...base.storey,
+        lines: Array.from({ length: 80 }, (_, i) => {
+          const slope = crossing ? 0.2 + i * 0.02 : 1;
+          const offset = crossing ? 0.001 * (i % 7) : 2 + i * 0.1;
+          return {
+            id: "dense-" + i,
+            kind: "line",
+            points: [
+              { x: -100, y: -100 * slope + offset },
+              { x: 100, y: 100 * slope + offset },
+            ],
+            ...defaultLineAppearance,
+          };
+        }),
+      },
+    });
+    const model = getLocalSnapSources(project);
+    const full = projectSnapReferences(project);
+    const policy = drawingSnapPolicy({ x: -2, y: -2 });
+    const references = prepareToolReferences(policy, full);
+    const sourceQuery = createToolSourceQuery(model, policy);
+    const activeReferences = [
+      policy.origin,
+      ...full.filter((r) => r.kind === "midpoint").slice(1, 4),
+    ];
+    for (const pixelsPerMetre of [25, 100, 500])
+      for (const cursor of [
+        { x: 0.013, y: 0.009 },
+        { x: 1, y: 1 },
+        { x: 50, y: 50 },
+        { x: -99.99, y: -99.98 },
+      ]) {
+        const context = {
+          references,
+          activeReferences,
+          enabled: true,
+          pixelsPerMetre,
+          endpointRadiusPx: 10,
+          gridSpacing: null,
+        };
+        assert.deepEqual(
+          resolveToolSnap(
+            policy,
+            cursor,
+            { ...context, references: [], sourceQuery },
+            { ortho: false, shift: false, featureSnap: true },
+          ),
+          resolveToolSnap(policy, cursor, context, {
+            ortho: false,
+            shift: false,
+            featureSnap: true,
+          }),
+        );
+      }
+    const local = model.query({ x: 0, y: 0 }, 100, 10, (r) => r.entityId.startsWith("dense-"));
+    assert.equal(local.segments.length, 80);
+    assert.equal(local.segmentPairs, 3160);
+    if (!crossing) assert.equal(local.references.length, 0);
+  }
+});
+
+test("moving window excludes host and itself before intersections and active guides", () => {
+  const project = addLine(base, {
+    id: "through-host",
+    kind: "line",
+    points: [
+      { x: 0, y: -2 },
+      { x: 0, y: 2 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const session = editingReducer(createEditingState(project), {
+    type: "begin",
+    target: { kind: "window", id: "o" },
+    action: "move",
+    index: null,
+  }).session!;
+  const policy = editInteraction(session, project, session.target, noop, noop).snapping;
+  const full = projectSnapReferences(project);
+  const sourceQuery = createToolSourceQuery(getLocalSnapSources(project), policy);
+  const forbidden = full.filter((r) => r.entityId === "w" || r.entityId === "o");
+  for (const cursor of [
+    { x: 0, y: 0 },
+    { x: 1.5, y: 0 },
+    { x: 3, y: 0 },
+    { x: 100, y: 0.01 },
+  ]) {
+    const actualSources = sourceQuery(cursor, 100, 10, forbidden);
+    assert.ok(
+      actualSources.every((r) =>
+        [r, ...(r.dependencies ?? [])].every((d) => d.entityId !== "w" && d.entityId !== "o"),
+      ),
+    );
+    const context = {
+      references: prepareToolReferences(policy, full),
+      activeReferences: forbidden,
+      pixelsPerMetre: 100,
+      enabled: true,
+      endpointRadiusPx: 10,
+      gridSpacing: null,
+    };
+    assert.deepEqual(
+      resolveToolSnap(
+        policy,
+        cursor,
+        { ...context, references: [], sourceQuery },
+        { ortho: false, shift: false, featureSnap: true },
+      ),
+      resolveToolSnap(policy, cursor, context, { ortho: false, shift: false, featureSnap: true }),
+    );
+  }
+});
+
+test("constructed reference drops after a source moves; matching undo snapshot restores eligibility", () => {
+  const full = projectSnapReferences(base);
+  const leaves = full.filter((r) => r.entityId === "l" && !r.kind).slice(0, 2);
+  assert.equal(leaves.length, 2);
+  const constructed = acquisitionReference(
+    {
+      kind: "intersection",
+      worldPoint: { x: 10, y: 10 },
+      distanceOnScreen: 0,
+      sourceEntityId: "l",
+      sourceFeature: "test",
+      sourceReferences: leaves,
+      priority: 0,
+    },
+    full,
+  )!;
+  assert.ok(constructed?.dependencies?.length);
+  const cursor = { x: 100, y: 100 };
+  const contains = (project: typeof base) =>
+    createToolSourceQuery(getLocalSnapSources(project), null)(cursor, 100, 10, [constructed]).some(
+      (r) => r.entityId === constructed.entityId && r.feature === constructed.feature,
+    );
+  assert.ok(contains(base));
+  const changed = updateLine(base, "l", {
+    points: [
+      { x: 5, y: 0 },
+      { x: 7, y: 2 },
+    ],
+  });
+  assert.equal(contains(changed), false);
+  const history = commitProject(createHistory(base), changed);
+  assert.ok(contains(undoProject(history).present));
+  assert.equal(contains(redoProject(undoProject(history)).present), false);
 });
