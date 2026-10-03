@@ -24,6 +24,73 @@ const context: SnapContext = {
   orthoOrigin: null,
 };
 
+test("hover retains four distinct references and refreshes duplicates without growing", () => {
+  let state = emptyHoverReference();
+  for (let i = 0; i < 5; i++) {
+    const ref = { point: { x: i, y: i }, entityId: `r${i}`, feature: "end" };
+    state = advanceHoverReference(state, ref, i * 1000, 400);
+    state = advanceHoverReference(state, ref, i * 1000 + 400, 400);
+  }
+  assert.deepEqual(
+    state.references.map((r) => r.entityId),
+    ["r1", "r2", "r3", "r4"],
+  );
+  state = advanceHoverReference(state, state.references[0]!, 6000, 400);
+  state = advanceHoverReference(state, state.references[0]!, 6400, 400);
+  assert.equal(state.references.length, 4);
+  assert.equal(state.active?.entityId, "r1");
+  assert.equal(advanceHoverReference(state, null, 6500, 400).references.length, 4);
+  assert.equal(emptyHoverReference().references.length, 0);
+});
+
+test("two references yield exact axis intersection with two origins across zoom levels", () => {
+  const refs = [
+    { point: { x: 0.037, y: 1.013 }, entityId: "a", feature: "end" },
+    { point: { x: 3.027, y: 4.019 }, entityId: "b", feature: "end" },
+  ];
+  for (const pixelsPerMetre of [10, 100, 1000]) {
+    const result = querySnap(
+      { x: 3.027 + 3 / pixelsPerMetre, y: 1.013 + 4 / pixelsPerMetre },
+      { ...context, pixelsPerMetre, references: refs, activeReferences: refs },
+    );
+    assert.equal(result.candidate?.kind, "intersection");
+    assert.deepEqual(result.point, { x: 3.027, y: 1.013 });
+    assert.deepEqual(result.candidate?.guideOrigin, refs[0]!.point);
+    assert.deepEqual(result.candidate?.secondaryGuideOrigin, refs[1]!.point);
+  }
+  const stale = querySnap(
+    { x: 3.027, y: 1.013 },
+    { ...context, references: [refs[0]!], activeReferences: refs },
+  );
+  assert.notEqual(stale.candidate?.kind, "intersection");
+});
+
+test("wall creation consumes shared guide intersection with one undo and JSON roundtrip", () => {
+  const refs = [
+    { point: { x: 0, y: 1.013 }, entityId: "a", feature: "end" },
+    { point: { x: 3.027, y: 4 }, entityId: "b", feature: "end" },
+  ];
+  const end = querySnap(
+    { x: 3.03, y: 1.02 },
+    { ...context, references: refs, activeReferences: refs },
+  ).point;
+  const project = createProject("p", "s");
+  const history = commitProject(
+    createHistory(project),
+    addWall(project, {
+      id: "guided-wall",
+      start: { x: 0, y: 0 },
+      end,
+      thickness: 0.36,
+      height: 2.8,
+    }),
+  );
+  assert.equal(history.past.length, 1);
+  assert.deepEqual(undoProject(history).present, project);
+  const loaded = readProjectFile(serializeProject(redoProject(undoProject(history)).present));
+  assert.deepEqual(loaded.storey.walls[0]!.end, { x: 3.027, y: 1.013 });
+});
+
 test("Shift locks all eight directions even with grid disabled, and release restores free snapping", () => {
   const origin = { x: 0.037, y: 0.013 };
   for (let i = 0; i < 8; i++) {

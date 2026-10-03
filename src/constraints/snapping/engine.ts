@@ -8,7 +8,16 @@ export type SnapReference = {
   directions?: readonly Point2[];
 };
 export type SnapCandidate = {
-  kind: "endpoint" | "grid" | "horizontal" | "vertical" | "extension" | "perpendicular" | "angle";
+  kind:
+    | "endpoint"
+    | "grid"
+    | "horizontal"
+    | "vertical"
+    | "extension"
+    | "perpendicular"
+    | "angle"
+    | "intersection";
+  secondaryGuideOrigin?: Point2;
   guideOrigin?: Point2;
   angleDegrees?: number;
   worldPoint: Point2;
@@ -25,6 +34,7 @@ export type SnapContext = {
   gridSpacing: number | null;
   orthoOrigin: Point2 | null;
   activeReference?: SnapReference | null;
+  activeReferences?: readonly SnapReference[];
   angleOrigin?: Point2 | null;
 };
 
@@ -109,6 +119,57 @@ export function querySnap(
   );
   const endpoint = candidates[0];
   if (endpoint) return { point: endpoint.worldPoint, candidate: endpoint };
+  if (context.activeReferences?.length) {
+    const active = context.activeReferences.filter((a) =>
+      context.references.some(
+        (r) =>
+          r.entityId === a.entityId &&
+          r.feature === a.feature &&
+          r.point.x === a.point.x &&
+          r.point.y === a.point.y,
+      ),
+    );
+    const guides: SnapCandidate[] = [];
+    for (const reference of active) {
+      const result = querySnap(cursor, {
+        ...context,
+        activeReferences: [],
+        activeReference: reference,
+      });
+      if (result.candidate?.guideOrigin) guides.push(result.candidate);
+    }
+    // Horizontal from A and vertical from B, without persisting construction geometry.
+    for (const a of active)
+      for (const b of active) {
+        if (a === b) continue;
+        const point = { x: b.point.x, y: a.point.y };
+        const constrained = constrain(point);
+        const distance =
+          Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre;
+        if (
+          distance <= context.endpointRadiusPx &&
+          point.x === constrained.x &&
+          point.y === constrained.y
+        )
+          guides.push({
+            kind: "intersection",
+            worldPoint: point,
+            guideOrigin: a.point,
+            secondaryGuideOrigin: b.point,
+            distanceOnScreen: distance,
+            priority: 0.5,
+            sourceEntityId: a.entityId,
+            sourceFeature: `${a.feature}/${b.entityId}/${b.feature}`,
+          });
+      }
+    guides.sort(
+      (a, b) =>
+        a.priority - b.priority ||
+        a.distanceOnScreen - b.distanceOnScreen ||
+        a.sourceFeature.localeCompare(b.sourceFeature),
+    );
+    if (guides[0]) return { point: guides[0].worldPoint, candidate: guides[0] };
+  }
   const reference = context.activeReference;
   // Reject stale references; model changes must never leave a guide at an old position.
   if (

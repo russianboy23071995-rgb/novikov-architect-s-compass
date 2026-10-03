@@ -472,7 +472,7 @@ export function CadWorkspace() {
                   project={project}
                   selection={selection}
                   drawing={(tool === "wall" || tool === "line") && mode === "2D"}
-                  endpointSnap={tool === "line"}
+                  endpointSnap={tool === "line" || tool === "select" || tool === "wall"}
                   hoverDwellMs={hoverDwellMs}
                   start={tool === "line" ? (linePoints.at(-1) ?? null) : wallStart}
                   draftPoints={tool === "line" ? linePoints : []}

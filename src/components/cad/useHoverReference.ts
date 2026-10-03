@@ -13,7 +13,7 @@ export function useHoverReference(
   cursor: Point2 | null,
   context: { enabled: boolean; references: readonly SnapReference[]; pixelsPerMetre: number },
   dwellMs: number,
-): SnapReference | null {
+): readonly SnapReference[] {
   const state = useRef<{ context: typeof context; value: HoverReferenceState } | null>(null);
   const [snapshot, setSnapshot] = useState<typeof state.current>(null);
   useEffect(() => {
@@ -54,5 +54,7 @@ export function useHoverReference(
     );
     return () => window.clearTimeout(timer);
   }, [cursor, context, dwellMs]);
-  return context.enabled && cursor && snapshot?.context === context ? snapshot.value.active : null;
+  return context.enabled && cursor && snapshot?.context === context
+    ? snapshot.value.references
+    : [];
 }

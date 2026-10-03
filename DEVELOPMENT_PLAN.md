@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Guide-Etappe 3c: werkzeugfreies Hover und mehrere Referenzen - 03.10.2026
+
+Hover-Erkennung und Hilfslinien funktionieren jetzt auch im Auswahlmodus, ohne Zeichenwerkzeug. Der aktive ungefüllte Referenzring hat 10,5 statt 6 CSS-Pixel Radius (+75 Prozent); Ring und Hilfslinien verwenden Silber-Grau (#929aa3). Die bestehenden blauen Fanghinweise bleiben zur Unterscheidung erhalten. Das Wandzeichnen nutzt nun dieselbe Fang-/Hover-/Shift-API wie Linie/Polylinie; direkte Bearbeitung bleibt separat.
+
+Bis zu vier durch Verweilen aktivierte Referenzen bleiben innerhalb der Zeichenfläche erhalten. Ein fünfter verdrängt den ältesten; erneutes Aktivieren aktualisiert die Reihenfolge ohne Duplikat. Neben den einzelnen Richtungsführungen unterstützt die Engine als erste gemeinsame Konstruktion Horizontal-von-A/Vertikal-von-B. Ein naher Schnittpunkt gewinnt vor Einzelführungen und wird mit beiden Herkunftslinien dargestellt. Tatsächliche Endpunkte behalten Vorrang. Alle Referenzen werden gegen den aktuellen Modellstand geprüft.
+
+Prüfung: 135 Tests bestanden, TypeScript und Build erfolgreich, ESLint null Fehler und sechs bekannte Warnungen. Neue Tests behandeln Referenzlimit, Duplikate, exakte Schnittpunkte bei verschiedenen Zoomstufen, veraltete Quellen sowie Wandaktion mit einem Undo-Schritt und JSON-Rundlauf. Browser: Hover im Auswahlmodus ohne History-Eintrag; zwei Referenzen, gemeinsamer Schnittpunkt und beide Hilfslinien; Wand mit gemeinsamem Shift-Fang exakt 45 Grad, Undo/Redo. Globales Escape räumt Referenzen auch ohne Canvas-Fokus auf (nach frischem Laden geprüft). Lokaler Screenshot: outputs/multi-reference-guides.png.
+
+Abnahme: Im Auswahlmodus zwei räumlich versetzte Endpunkte jeweils etwa 0,4 s anhovern, ohne zwischendurch die Zeichenfläche zu verlassen. Anschließend auf die horizontale Flucht des einen und vertikale Flucht des anderen bewegen: „Schnittpunkt“ mit zwei gestrichelten Linien erscheint. Escape löscht alle Referenzen. Wandwerkzeug wählen und Fang/Shift wie beim Linienwerkzeug testen.
+
+Grenzen: temporäres Fixieren, keine gespeicherten Hilfsobjekte. Verlassen der Zeichenfläche, Kamera-/Modelländerung, Snap aus und direkte Bearbeitung löschen den Kontext; nicht als dauerhafte Pins interpretieren. Auswahlmodus erzeugt keine Bauteile. Gemeinsame Schnittpunkte bisher nur horizontal/vertikal; Schnittpunkte beliebiger Richtungsführungen, Hysterese, Ebenenfilter und 3D folgen separat. Die Mehrfachabfrage ist auf vier Referenzen begrenzt; keine neue Leistungsaussage für große Modelle.
+
+Nächster kleiner Schritt: Schnittpunkte beliebiger aktiver Richtungsführungen (Verlängerung, Lot und Winkel) geometrisch verallgemeinern und die Auswahl konkurrierender Führungen mit Hysterese stabilisieren.
+
 ## Guide-Etappe 3b: Ringe, Ecken und Richtungsführung - 03.10.2026
 
 Erkannte Fangpunkte und gesetzte Startpunkte werden als ungefüllte Ringe dargestellt. Die sofortige Erkennung (blau) bleibt von der Hover-Aktivierung nach standardmäßig 400 ms (orange) getrennt. Wandaußenecken sind jetzt zusätzliche abgeleitete Referenzen. Die vorhandene Wartezeit-Einstellung bleibt erhalten.

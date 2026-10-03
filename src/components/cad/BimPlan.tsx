@@ -88,6 +88,7 @@ export function BimPlan({
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
+      if (event.key === "Escape" && event.type === "keydown") setHover(null);
     };
     const clear = () => setShiftHeld(false);
     window.addEventListener("keydown", key);
@@ -99,19 +100,20 @@ export function BimPlan({
       window.removeEventListener("blur", clear);
     };
   }, []);
-  useEffect(() => setHover(null), [drawing, endpointSnap, camera]);
+  useEffect(() => setHover(null), [endpointSnap, camera]);
   const references = useMemo(() => projectSnapReferences(project), [project]);
   const trackingContext = useMemo(
     () => ({
-      enabled: drawing && endpointSnap && snap && !pan,
+      enabled: endpointSnap && snap && !pan && !editSession,
       references,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
     }),
-    [drawing, endpointSnap, snap, pan, references, camera, viewSize],
+    [endpointSnap, snap, pan, editSession, references, camera, viewSize],
   );
-  const activeReference = useHoverReference(hover, trackingContext, hoverDwellMs);
+  const activeReferences = useHoverReference(hover, trackingContext, hoverDwellMs);
+  const activeReference = activeReferences.at(-1) ?? null;
   const resolveDrawing = (point: Point, shift = shiftHeld) =>
     endpointSnap
       ? querySnap(point, {
@@ -122,6 +124,7 @@ export function BimPlan({
           gridSpacing: 0.1,
           orthoOrigin: ortho ? start : null,
           activeReference,
+          activeReferences,
           angleOrigin: shift ? (start ?? activeReference?.point ?? null) : null,
         })
       : { point: drawingPoint(point, start, snap, ortho), candidate: null };
@@ -134,6 +137,7 @@ export function BimPlan({
     extension: "Verlängerung",
     perpendicular: "Lotrecht",
     angle: `${resolvedHover?.candidate?.angleDegrees ?? 45}°`,
+    intersection: "Schnittpunkt",
   };
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,
@@ -272,7 +276,7 @@ export function BimPlan({
           return;
         }
         if (pan) return;
-        if (drawing) setHover(rawPoint(event));
+        if (endpointSnap && !editSession) setHover(rawPoint(event));
         if (editSession) {
           const point = editPoint(event);
           if (point) setEditPointer({ session: editSession, point });
@@ -530,20 +534,25 @@ export function BimPlan({
           )}
         </g>
       )}
-      {drawing && !pan && activeReference && (
-        <g pointerEvents="none" aria-label="Aktive Hover-Referenz">
-          <circle
-            cx={activeReference.point.x}
-            cy={-activeReference.point.y}
-            r={6 / camera.pixelsPerMetre}
-            fill="none"
-            stroke="#b45309"
-            strokeWidth={2}
-            vectorEffect="non-scaling-stroke"
-          />
-        </g>
-      )}
-      {drawing && !pan && (
+      {!pan &&
+        activeReferences.map((reference) => (
+          <g
+            key={`${reference.entityId}/${reference.feature}`}
+            pointerEvents="none"
+            aria-label="Aktive Hover-Referenz"
+          >
+            <circle
+              cx={reference.point.x}
+              cy={-reference.point.y}
+              r={10.5 / camera.pixelsPerMetre}
+              fill="none"
+              stroke="#929aa3"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
+        ))}
+      {!pan && endpointSnap && !editSession && (
         <g pointerEvents="none">
           {" "}
           {resolvedHover?.candidate?.guideOrigin && (
@@ -553,7 +562,20 @@ export function BimPlan({
               y1={-resolvedHover.candidate.guideOrigin.y}
               x2={resolvedHover.point.x}
               y2={-resolvedHover.point.y}
-              stroke="#b45309"
+              stroke="#929aa3"
+              strokeWidth={1}
+              strokeDasharray="6 4"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+          {resolvedHover?.candidate?.secondaryGuideOrigin && (
+            <line
+              aria-label="Zweite temporäre Hilfslinie"
+              x1={resolvedHover.candidate.secondaryGuideOrigin.x}
+              y1={-resolvedHover.candidate.secondaryGuideOrigin.y}
+              x2={resolvedHover.point.x}
+              y2={-resolvedHover.point.y}
+              stroke="#929aa3"
               strokeWidth={1}
               strokeDasharray="6 4"
               vectorEffect="non-scaling-stroke"
@@ -561,30 +583,34 @@ export function BimPlan({
           )}
         </g>
       )}
-      {drawing && !pan && resolvedHover?.candidate && (
-        <g
-          pointerEvents="none"
-          aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
-        >
-          <circle
-            cx={resolvedHover.point.x}
-            cy={-resolvedHover.point.y}
-            r={4 / camera.pixelsPerMetre}
-            fill="none"
-            stroke="#0284c7"
-            strokeWidth={2}
-            vectorEffect="non-scaling-stroke"
-          />
-          <text
-            x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
-            y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
-            fontSize={12 / camera.pixelsPerMetre}
-            fill="#0284c7"
+      {!pan &&
+        endpointSnap &&
+        !editSession &&
+        resolvedHover?.candidate &&
+        (drawing || resolvedHover.candidate.kind !== "grid") && (
+          <g
+            pointerEvents="none"
+            aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
           >
-            {snapLabels[resolvedHover.candidate.kind]}
-          </text>
-        </g>
-      )}
+            <circle
+              cx={resolvedHover.point.x}
+              cy={-resolvedHover.point.y}
+              r={4 / camera.pixelsPerMetre}
+              fill="none"
+              stroke="#0284c7"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+            />
+            <text
+              x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
+              y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
+              fontSize={12 / camera.pixelsPerMetre}
+              fill="#0284c7"
+            >
+              {snapLabels[resolvedHover.candidate.kind]}
+            </text>
+          </g>
+        )}
     </svg>
   );
 }
