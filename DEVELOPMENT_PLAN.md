@@ -525,6 +525,22 @@ Nachweise: 222 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Abnahme: laufende Punktbewegung oder Polylinie beginnen → Projektdatei öffnen → Tab/Abbrechen prüfen; danach erneut öffnen und Tab/Enter laden. Undo/Redo darf nur bestätigte Modelle zurückbringen, keine alten Entwürfe.
 
-### Genau ein ausführbarer Folgeauftrag: offene PR-Kette geordnet zur Übernahme vorbereiten
+### Abgeschlossener Folgeauftrag: offene PR-Kette geordnet zur Übernahme vorbereiten
 
 Die aufeinander aufbauenden PRs ab #41 einschließlich dieses Stabilisierungsschritts auf Zielzweige, Abhängigkeiten und offenen Prüfstatus kontrollieren. Einen verständlichen Übernahmeplan mit finalem Entwicklungsstand und verbleibenden Einschränkungen erstellen. Bereits vorhandene Testnachweise zuordnen; zusätzliche Prüfung nur bei neuen Abweichungen. Keine neuen Funktionen und kein automatischer Merge ohne ausdrückliche Nutzerfreigabe für die betreffenden PRs.
+
+### Abschluss: konsolidierter Hauptzweig und exakte Wandaußenecke — 03.10.2026
+
+PR #49 wurde nach Nutzerfreigabe normal nach main übernommen (44fc036); PR #27 damit übernommen, #28/#30/#31/#33 als inhaltlich enthalten geschlossen. Die veröffentlichte Historie bleibt erhalten.
+
+Auf fix/wall-corner-target wird die bekannte Eckabweichung korrigiert. Ein vor der Änderung fehlschlagender Test zeigt: Der bisherige Achsendpunktversatz trifft bei Drehung nicht die ausgewählte Außenecke. Jetzt bestimmt eine fachunabhängige Geometriefunktion den Segmentendpunkt aus festem Gegenpunkt, Ziel und vorzeichenbehaftetem seitlichem Abstand. Der vorhandene Direct-Edit-Adapter erkennt die beiden Eckgriffe am gewählten Wandende und verwendet diese Berechnung ausschließlich bei freier Punktbewegung. Derselbe Weg gilt für Maus und Hilfseingabe; keine zusätzliche Fang-, Tab- oder UI-Logik.
+
+Fest bleiben der gegenüberliegende Achsendpunkt, Stärke, Höhe und relative Fensterpositionen. Nicht beide gegenüberliegenden Außenecken: Sie drehen sich geometrisch um den festen Achsendpunkt. Ziele innerhalb oder auf dem Kreis mit Radius halber Wandstärke um den festen Endpunkt sind nicht als positive Wandlänge erreichbar und werden abgewiesen. Bestehende Fenster- und Modellvalidierung bleibt nachgeschaltet. Achspunktbewegung, Strecken und ganze Elementbewegung behalten ihre Regeln. Keine Entscheidung zum späteren Wechsel der Wandachsenlage oder zu Wandanschlüssen.
+
+Nachweis: 225 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Alle vier Ecken auf gedrehten und umgekehrten Wänden, unveränderte Vorschau am Ursprung, unerreichbare Ziele, Fensterkonflikte, Maus-/Zahlenparität, ein Commit, Undo/Redo, Abbruch, 3D-Eckkoordinaten und JSON-Rundlauf geprüft. Browser: Ende links bei (3; 0,18), Punkt frei bewegen, 90°/1 m ergibt physische Ecke (3; 1,18), Undo (3; 0,18), Redo (3; 1,18). Bestehender Fenster-Mittelpunkt bleibt 0,5.
+
+Abnahme: Beispielwand auswählen → Wandecke Ende links → Punkt frei bewegen → Winkel 90 und Länge 1 → Übernehmen. Die Ecke bewegt sich senkrecht um einen Meter; die Achse darf sich dafür seitlich anpassen. Undo/Redo prüfen. Anschließend einen externen Fangpunkt als Ziel verwenden und die Übereinstimmung der Ecke kontrollieren.
+
+### Genau ein ausführbarer Folgeauftrag: Eckkontakt mit externen Fangzielen praktisch absichern
+
+Die korrigierte freie Wandecke mit Endpunkt-, Mittelpunkt- und Hilfslinienschnittpunktfang im Browser prüfen, jeweils Vorschau/Commit, Zoom, Abbruch und Undo vergleichen. Die bereits gemeinsame Engine verwenden, keine weitere Fangart oder Wandverbindung ergänzen. Bei Abweichungen gezielt den bestehenden Adapter korrigieren; danach die Abnahme und verbleibende Grenzen dokumentieren.
