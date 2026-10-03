@@ -11,14 +11,18 @@ import { BimInspector } from "./BimInspector";
 import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
 import { numericMoveAxis, previewMovementInput } from "@/application/direct-edit/numeric";
 import { usePrecisionDraft } from "./usePrecisionDraft";
-import { previewLineInput } from "@/application/drawing/line-input";
+import {
+  previewDrawingInput,
+  createDrawing,
+  defaultDrawingWall,
+} from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
-import { addWall, addLine, serializeProject } from "@/lib/bim/model";
+import { serializeProject } from "@/lib/bim/model";
 import { readProjectFile, PROJECT_FILE_LIMIT } from "@/lib/bim/history";
 import {
   Dialog,
@@ -59,14 +63,15 @@ export function CadWorkspace() {
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [linePoints, setLinePoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
-  const [lineBase, setLineBase] = useState<Project | null>(null);
+  const [drawingBase, setDrawingBase] = useState<Project | null>(null);
   const lineOrigin =
     tool === "line" && lineKind === "line" && linePoints.length === 1 ? linePoints[0] : null;
-  const inputDraft = usePrecisionDraft(editSession ?? lineOrigin ?? null);
+  const drawingOrigin = tool === "wall" ? wallStart : lineOrigin;
+  const inputDraft = usePrecisionDraft(editSession ?? drawingOrigin ?? null);
   const aim = inputDraft.aim;
   const numericAxis = editSession ? numericMoveAxis(editSession) : null;
   const supportsInput =
-    !!lineOrigin ||
+    !!drawingOrigin ||
     (!!editSession &&
       ((["move", "point"].includes(editSession.action) && editSession.target.kind !== "window") ||
         !!numericAxis));
@@ -83,10 +88,10 @@ export function CadWorkspace() {
             inputDraft.length,
             aim,
           )
-        : previewLineInput(
-            lineBase!,
+        : previewDrawingInput(
+            drawingBase!,
             project,
-            lineOrigin!,
+            drawingOrigin!,
             aim,
             inputDraft.angle,
             inputDraft.length,
@@ -261,10 +266,18 @@ export function CadWorkspace() {
   const finishLine = (points = linePoints) => {
     try {
       const id = `line-${crypto.randomUUID()}`;
-      changeProject(addLine(project, { id, kind: lineKind, points, ...lineAppearance }), {
-        kind: "line",
-        id,
-      });
+      changeProject(
+        createDrawing(drawingBase!, project, id, {
+          kind: "line",
+          lineKind,
+          points,
+          appearance: lineAppearance,
+        }),
+        {
+          kind: "line",
+          id,
+        },
+      );
     } catch {
       setModelError(
         "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
@@ -276,9 +289,9 @@ export function CadWorkspace() {
     setModelError("");
     if (tool === "line") {
       if (linePoints.length === 0) {
-        setLineBase(project);
+        setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
-      } else if (lineBase !== project) {
+      } else if (drawingBase !== project) {
         setModelError("Das Modell wurde geändert. Linie erneut beginnen.");
         return;
       }
@@ -293,17 +306,24 @@ export function CadWorkspace() {
       return;
     }
     if (!wallStart) {
+      setDrawingBase(project);
+      setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
       setWallStart(point);
       return;
     }
     try {
       const id = `wall-${crypto.randomUUID()}`;
       changeProject(
-        addWall(project, { id, start: wallStart, end: point, thickness: 0.36, height: 2.8 }),
+        createDrawing(drawingBase!, project, id, {
+          kind: "wall",
+          start: wallStart,
+          end: point,
+          ...defaultDrawingWall,
+        }),
         { kind: "wall", id },
       );
-    } catch {
-      setModelError("Choose a different end point: a wall must have a positive length.");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
     }
   };
 
@@ -532,8 +552,8 @@ export function CadWorkspace() {
                   onPoint={drawPoint}
                   editSession={editSession?.base === project ? editSession : null}
                   numericTarget={editSession && numericPreview ? numericPreview.point : undefined}
-                  drawingTarget={lineOrigin && numericPreview ? numericPreview.point : undefined}
-                  onDrawingAim={lineOrigin ? inputDraft.move : undefined}
+                  drawingTarget={drawingOrigin && numericPreview ? numericPreview.point : undefined}
+                  onDrawingAim={drawingOrigin ? inputDraft.move : undefined}
                   onEditAim={(_session, point) => inputDraft.move(point)}
                   onEditDirection={(session, point) => inputDraft.fix(session.anchor, point)}
                   onEditCommit={(session, point) =>
@@ -569,7 +589,7 @@ export function CadWorkspace() {
                         : "Maus"
                     }
                     axisLabel={numericAxis?.label ?? null}
-                    {...(lineOrigin ? { mouseHint: "Mausziel · Tab: Länge ↔ Winkel" } : {})}
+                    {...(drawingOrigin ? { mouseHint: "Mausziel · Tab: Länge ↔ Winkel" } : {})}
                     error={hasInput ? (inputPreview?.error ?? "") : ""}
                     canConfirm={!!inputPreview?.point}
                     onChange={inputDraft.change}
@@ -590,6 +610,7 @@ export function CadWorkspace() {
                     onCancel={() => {
                       dispatchEditing({ type: "cancel" });
                       setLinePoints([]);
+                      setWallStart(null);
                     }}
                   />
                 ) : editSession ? (

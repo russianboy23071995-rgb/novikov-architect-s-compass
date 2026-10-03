@@ -424,7 +424,7 @@ Nachweise: 204 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Praktische Abnahme: Linie wählen → ersten Punkt setzen → Winkel 45 und Länge 2 eingeben → Vorschau prüfen → Enter → Undo/Redo. Danach 566° beziehungsweise Länge 0 und Escape testen. Polylinien und andere Zeichenwerkzeuge sind noch nicht angeschlossen.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand
+### Abgeschlossener Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand
 
 Den geprüften Eingabebaustein nach dem ersten Wandpunkt verwenden. Vorher die gemeinsame Zeichenkoordination für Linie/Wand begrenzt hinter einen Application-Adapter ziehen, damit CadWorkspace keine zweite Eingabelogik erhält. Bestehendes addWall, Fangengine und History wiederverwenden. Vorschau und Commit mit 3,00 m Länge, 0,36 m Stärke und 2,80 m Höhe prüfen, einschließlich Winkel, Null-Länge, Abbruch, Undo/Redo, JSON und 2D/3D. Keine Wandketten, Anschlüsse oder Änderung der Wandachsenlage N45 in diesem Teilauftrag.
 
@@ -451,3 +451,18 @@ Tab wird im gemeinsamen PrecisionInput behandelt: Maus führt Richtung → Tab f
 Nachweis: 209 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Tests: 599/600-ms-Grenze, stabiles Segment bei kleiner Mausbewegung, einmalige Aktivierung und erneutes Lösen, bildschirmbezogener Abstand bei mehreren Zoomstufen, Segmentgrenzen, schräge Parallele an anderem Ursprung, Snap aus/Quelle entfernt sowie numerische Punktbewegung mit unverändertem Gegenpunkt und Undo. Browser: schräge 30°-Linie durch Hover erfasst; beim Linienzeichnen Parallele mit eindeutiger Fangmeldung am neuen Ursprung. Tab übernimmt 30° und fokussiert Länge. Freie Wandeckbewegung: Tab Länge bei 90°, Tab Winkel, Tab Länge; 1 m/Enter verändert nur den gewählten Endpunkt, Undo stellt die 3-m-Wand wieder her. Escape geprüft.
 
 Abnahme: schräge Linie zeichnen → neue Linie beginnen oder Bewegung starten → über ein fremdes Liniensegment 0,6 s verweilen → vom Ursprung ungefähr parallel führen → Parallel-Hilfe prüfen → Tab → Länge eingeben → Tab → Winkel prüfen/ändern → Enter. Bei Achsbewegung muss der Winkel fest bleiben. Der nächste begrenzte Folgeauftrag bleibt gemeinsame Hilfseingabe beim Zeichnen gerader Wände.
+
+
+### Abschluss: gemeinsame Hilfseingabe für gerade Wände — 03.10.2026
+
+Auf feat/shared-wall-precision, basierend auf dem noch offenen PR #43. PR #41–43 bleiben ohne neue Freigabe offen. Nach dem ersten Wandpunkt erscheint dasselbe PrecisionInput wie bei Linie/Bewegung. Ursprung, Parallelreferenzen, Tab Länge/Winkel, feste Zahlen, Maus, Enter und Abbruch werden gemeinsam verwendet. Wandstärke 0,36 m und Höhe 2,80 m bleiben die bisherigen Zeichenstandardwerte; nachher über Eigenschaften änderbar.
+
+Die Application-Aktion createDrawing bündelt Wand-/Linien-/Polylinienerzeugung, prüft veralteten Modellkontext und verwendet bestehende addWall/addLine-Validierung. Die UI koordiniert weiter Punktaufnahme und Commit, enthält aber keine separaten Bauteilerzeugungsaufrufe mehr. previewDrawingInput ersetzt den linienspezifischen Eingabeadapter bei kompatiblem altem Export. Kein zusätzliches Eingabefenster oder Winkelalgorithmus.
+
+Nachweise: 212 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Tests für exakte Wand 3,00 × 0,36 × 2,80 m, 3D-Grenzen, Vorschau ohne Mutation, einen Commit/Undo/Redo/JSON, Null-Länge, falsche Winkel/Maße, stale Modell und erhaltene Linien-/Polylinienstile. Browser: Ursprung (0;1), Richtung mit Tab übernommen, 0°/3,00 m bleibt bei Mausbewegung exakt; 0 m und 566° sperren Übernahme. Bestätigte Eigenschaften 3/0,36/2,8; Undo entfernt, Redo stellt Wand wieder her. Neue Sitzung hat leere Felder; Abbrechen entfernt Hilfseingabe ohne Wand. Anschließende 3D-Darstellung visuell geprüft. Vorschau beim Zeichnen bleibt eine 2D-Achslinie; kein neuer 3D-Zeichenvorschaumodus.
+
+Abnahme: Wandwerkzeug → Startpunkt → Maus nach rechts → Tab → 3,00 → Enter. Eigenschaften und 3D prüfen, Undo/Redo. Neuer Startpunkt, 0 beziehungsweise 566° testen und Escape/Abbrechen. Keine Wandketten, Anschlüsse oder Änderungen der Wandachsenlage.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe für Polyliniensegmente
+
+Die vorhandene Eingabe nach jedem gesetzten Polylinienpunkt an dessen Ursprung binden. Enter fügt den numerisch bestimmten nächsten Punkt hinzu; Doppelklick schließt weiterhin die gesamte Polylinie ab. Die bisherige eine History-Aktion pro abgeschlossener Polylinie erhalten. Tab, Parallelführung, Abbruch, ungültige/Null-Segmente, Abschluss und Undo/Redo prüfen. Keine Wandketten-Undo-Entscheidung vorwegnehmen und keine zweite Eingabe-/Fanglogik.
