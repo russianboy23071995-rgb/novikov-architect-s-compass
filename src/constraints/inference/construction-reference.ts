@@ -24,7 +24,11 @@ export function acquisitionReference(
   sources: readonly SnapReference[],
 ): SnapReference | null {
   if (!candidate) return null;
-  if (candidate.kind === "endpoint" || candidate.kind === "midpoint")
+  if (
+    candidate.kind === "endpoint" ||
+    candidate.kind === "midpoint" ||
+    candidate.kind === "segment-intersection"
+  )
     return (
       sources.find(
         (r) =>

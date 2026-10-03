@@ -128,3 +128,8 @@ Für jede neue geprüfte Aktion gehören Ziel-/Parametervertrag, Validierung, Vo
 ## Einziger aktiver Folgeauftrag
 
 Siehe den vollständigen Auftrag am Anfang von [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md): gemeinsame Fang-Kandidatenerzeugung und Rangfolge ohne rekursive Gesamtabfragen. Alle anderen Einträge dieser Matrix sind Abhängigkeiten/Backlog, keine parallel freigegebenen Implementierungsaufträge.
+
+
+### Ergänzung zu N45 – Nutzerwunsch 03.10.2026
+
+Die derzeit zentrierte Wandachse soll bei ausgewählter Wand sichtbar und später verschiebbar sein. Dies ergänzt N45, kein zusätzlicher paralleler Auftrag. Zum passenden Zeitpunkt vor Wandanschlüssen umsetzen; vorher klären, ob eine Achsenverschiebung die physische Wandlage erhält oder verändert. Keine Entscheidung dazu vorwegnehmen.

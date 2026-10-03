@@ -5,7 +5,7 @@ import { compareSnapCandidates } from "./ranking.ts";
 import type { GuideDirection } from "../guides/directions.ts";
 
 export type SnapReference = {
-  kind?: "midpoint";
+  kind?: "midpoint" | "segment-intersection";
   point: Point2;
   entityId: string;
   feature: string;
@@ -16,6 +16,7 @@ export type SnapCandidate = {
   kind:
     | "endpoint"
     | "midpoint"
+    | "segment-intersection"
     | "grid"
     | "horizontal"
     | "vertical"

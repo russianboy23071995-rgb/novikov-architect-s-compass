@@ -2,6 +2,8 @@ import type { Project } from "../../lib/bim/model.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { segmentMidpoint } from "../../geometry/primitives/segment.ts";
+import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
+import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 
 function midpointReference(
   entityId: string,
@@ -26,7 +28,13 @@ function midpointReference(
 
 /** Disposable references derived from the authoritative model. Wall endpoints mean axis ends. */
 export function projectSnapReferences(project: Project): SnapReference[] {
-  return [
+  const segments: SnapSegment[] = [];
+  const midpoint = (id: string, feature: string, start: Point2, end: Point2) => {
+    const refs = midpointReference(id, feature, start, end);
+    if (refs[0]) segments.push({ start, end, source: refs[0] });
+    return refs;
+  };
+  const references: SnapReference[] = [
     ...project.storey.walls.flatMap((wall) => {
       const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
       const length = Math.hypot(d.x, d.y);
@@ -49,7 +57,7 @@ export function projectSnapReferences(project: Project): SnapReference[] {
             directions: [d],
           })),
         ]),
-        ...midpointReference(wall.id, "axis-midpoint", wall.start, wall.end),
+        ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
     }),
     ...(project.storey.lines ?? []).flatMap((line) => [
@@ -64,8 +72,9 @@ export function projectSnapReferences(project: Project): SnapReference[] {
       ...line.points
         .slice(1)
         .flatMap((point, index) =>
-          midpointReference(line.id, `segment-${index}-midpoint`, line.points[index]!, point),
+          midpoint(line.id, `segment-${index}-midpoint`, line.points[index]!, point),
         ),
     ]),
   ];
+  return [...references, ...segmentIntersectionReferences(segments)];
 }

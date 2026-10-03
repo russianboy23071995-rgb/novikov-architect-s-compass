@@ -155,6 +155,7 @@ export function BimPlan({
   const resolvedHover = hover ? (editSession ? resolveEdit(hover) : resolveDrawing(hover)) : null;
   const snapLabels = {
     midpoint: "Mittelpunkt",
+    "segment-intersection": "Segmentschnittpunkt",
     endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
       ? "Hilfspunkt"
       : "Endpunkt",

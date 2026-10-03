@@ -11,6 +11,7 @@ export type RankedSnap = {
 const kindOrder: Record<SnapCandidate["kind"], number> = {
   endpoint: 0,
   midpoint: 0.5,
+  "segment-intersection": 0.75,
   intersection: 1,
   extension: 2,
   perpendicular: 3,
