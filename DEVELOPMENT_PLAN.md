@@ -638,6 +638,18 @@ Messung: docs/performance/DENSE_SNAPPING.md und zugehörige Rohwerte. 500 schrä
 
 Praktischer Abnahmetest: Fenster auf seiner Wand bewegen; die eigene Wand darf kein externes Fangziel werden. Zwei externe Punkte als Referenzen aktivieren, deren Hilfslinienschnitt erfassen, eine zugrunde liegende Linie ändern und eine neue Bewegung beginnen: alte Hilfspunkte dürfen nicht weiterwirken.
 
-### Genau ein ausführbarer Folgeauftrag: falsche lokale Segmenttreffer vor Paarbildung reduzieren
+### Umgesetzter Folgeauftrag, vollständige Projektabnahme offen: falsche lokale Segmenttreffer vor Paarbildung reduzieren
 
 Zwischen AABB-Abfrage und lokaler Schnittberechnung einen konservativen geometrischen Segmentnähefilter ergänzen. Vollständige Originalsegmente für exakte Geometrie und Quellenidentität erhalten; numerisch akzeptierte Kontakte und Fangradiusgrenzen durch Differentialtests absichern. Benchmark für Boxüberlappung und echte dichte Kreuzungen unverändert wiederholen. Keine Ergebnisobergrenze, keine neue Fangart, kein Indexumbau. Verbleibende Kosten echter dichter Kreuzungen separat ausweisen; diese werden durch einen Nähefilter allein nicht gelöst.
+
+
+### Umsetzung: geometrische lokale Segmentvorauswahl — 03.10.2026
+
+Konservativer Segment-/Suchquadrat-Test in geometry/intersections/segment-box.ts; local-sources wendet ihn nach Boxsuche und Werkzeugfilter vor Paarbildung an. Originalsegmente und vollständiger Quellenlookup bleiben erhalten. Sechs neue Tests sowie 41 vorhandene reine Engine-Testfälle isoliert bestanden. Die vollständige Projekttestsuite, TypeScript, Build, Lint und Browserabnahme sind in dieser Umgebung mangels installierter Abhängigkeiten offen; kein produktionsreifer Abschluss behauptet. Draft auf Basis von PR #57, kein Merge.
+
+Isolierter Vergleich gleicher Messgeometrie ohne Fixture-Validator: 500 falsche Boxüberlappungen ergeben 0 statt 124750 Paare, Median 0,30 statt 20,38 ms. Echte dichte Kreuzungen behalten 124750 Paare und kosten 911,68 ms; dieser Engpass bleibt bestehen. Verfahren, Grenzen und Rohwerte: docs/performance/LOCAL_PROXIMITY.md.
+
+### Genau ein ausführbarer Folgeauftrag: Segmentvorauswahl vollständig abnehmen
+
+Draft in der vollständigen Projektumgebung mit npm test, TypeScript, Build und Lint prüfen. Zeichnen, Segment-Hover, Zoom und Direct Edit praktisch abnehmen; Fangradiusgrenzen und entfernte aktive Referenzen erhalten. Gegebenenfalls gezielt korrigieren. Keine weitere Fangfunktion oder Merge ohne Nutzerfreigabe. Nach erfolgreicher Abnahme den echten dichten Kreuzungsfall getrennt nach Paarberechnung, Quellenaufbau und Kandidatenbewertung profilieren; daraus den nächsten begrenzten Optimierungsauftrag ableiten.
+
