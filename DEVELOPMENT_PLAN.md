@@ -114,7 +114,7 @@ Nachweise: 185 Tests bestanden, darunter fünf neue Gruppen für Verlängerung/V
 
 Abnahme: Zwei schräge Linien zeichnen, deren Verlängerungen sich treffen. Beide zugewandten Enden je 0,6 s aktivieren und den Zeiger zur erwarteten Kreuzung führen. Die silbergrauen Führungen folgen den Kanten; der Schnitt wird zum Hilfspunkt. Dort zeichnen oder ein anderes Element dorthin bewegen. Parallel liegende Führungen sollen keinen erfundenen Schnittpunkt anzeigen.
 
-### Genau ein ausführbarer Folgeauftrag: Hilfslinienschnitt mit fester Direct-Edit-Achse
+### Abgeschlossener Auftragsumfang: Hilfslinienschnitt mit fester Direct-Edit-Achse
 
 Die bisher dokumentierte Lücke bei achsengebundener Bearbeitung schließen: externe Hilfsreferenzen dürfen seitlich der erlaubten Bewegungsachse liegen, wenn ihre mausrelevante Führung diese Achse schneidet. Den Schnitt gemeinsam und eindeutig berechnen, die feste X-/Y-/Elementachse weiterhin strikt einhalten und keine bloß projizierten Endpunkte als echte Fangpunkte beschriften. Zuerst vorhandenen Filter und Kandidatenvertrag prüfen; keine separate SnapEngine im Werkzeug.
 
@@ -331,3 +331,22 @@ Prüfung: 110 Tests bestanden (105 bestehende, 5 Kamera-Tests), TypeScript, gezi
 Praktische Abnahme: 2D öffnen, über einer Wandecke mit dem Mausrad zoomen; die Ecke bleibt unter dem Zeiger. Pan aktivieren und ziehen, danach Escape drücken. Maße müssen gleich bleiben. Fit view zeigt das ganze Modell. 100 px/m wählen und zeichnen/bearbeiten; anschließend Undo/Redo prüfen.
 
 Grenzen: px/m ist ein Bildschirmmaßstab, kein Druckmaßstab. Rasterdarstellung ist adaptiv; das bisherige optionale Rasterfangen bleibt ausdrücklich bei 0,10 m. Kameras werden nicht in Projektdateien gespeichert und beim Wechsel des Viewport-Layouts neu initialisiert. Geometrisches Fangen, Referenzaktivierung und Hilfslinien sind noch offen. Nächster Schritt: gemeinsame Endpunkt-/Mittelpunkt-/Schnittpunkt-Kandidaten unter constraints/snapping gemäß ARCHITECTURE.md und F13.
+
+
+### Abschluss: externe Hilfslinien schneiden feste Bearbeitungsachsen — 03.10.2026
+
+PR #35 und #36 wurden nach Nutzerfreigabe normal in ihre bisherigen Zielzweige übernommen (ee49f05 und d4a27ce). Dieser Schritt baut auf d4a27ce auf dem Zweig feat/direct-edit-axis-guides auf.
+
+SnapContext erhält eine optionale feste Achse. Die gemeinsame Kandidatenpipeline schneidet jede aktive, validierte externe Führung mit dieser Achse. Der Direct-Edit-Adapter entfernt nur eigene/Host-Quellen, statt alle seitlich liegenden Quellen auszuschließen. Endpunkte und bestehende Schnittpunkte werden weiterhin auf echte Achsenkompatibilität geprüft; keine Projektion wird als Endpunkt bezeichnet. Feste Achsen haben Vorrang vor Shift/Ortho. Parallele/kollineare Führungen erzeugen keinen eindeutigen Achsenschnitt. Abstand bleibt 10 CSS-Pixel vom Mauszeiger, nicht von dessen Projektion.
+
+Neue Anzeige: Achsenschnittpunkt mit externer Führung und zweiter Führung ab dem Bearbeitungsanker. Rang 0,5 wie Hilflinienschnitt, nach echten End-/Mittel-/Segmentschnittpunkten; bestehende Rangregel entscheidet Gleichstände deterministisch. Achsenschnitte sind sitzungsgebundene Fangziele und werden nicht als frei weiterverwendbare Hover-Referenz gespeichert. Keine Modell-, JSON-, IFC- oder AI-Modelllogikänderung. Bestehende validierte Aktionen und stabiler Zielkontext bleiben maßgeblich.
+
+Nachweis: 191 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Testgruppen decken X/Y/schräge Achsen, Zoom/Radius, Quelleninvalidierung, Parallelität/Kollinearität, Endpunktpriorität, ungültige Achsen, eigene/Host-/abhängige Quellen, Fensterposition, veraltete Sitzung, Preview/Commit/Undo/Redo/JSON ab. Browser: Linie (0;1)–(1;1) auf X bewegen, Wandachsende (3;0) 600 ms aktivieren; sichtbarer Achsenschnitt bei (3;1), Vorschau und Commit ergeben (3;1)–(4;1). Undo/Redo und Escape ohne Modelländerung geprüft. Y/schräge Achsen und Fensterhost sind automatisiert geprüft.
+
+Abnahme: Punktfang und Snap einschalten. Linie oberhalb einer Wand zeichnen, auswählen, im On-Demand-Menü Element auf X-Achse wählen. Ein externes Wandachsende 0,6 s anhovern, danach die Maus zur Kreuzung seiner Lotführung mit der Bewegungslinie führen. Achsenschnittpunkt anzeigen lassen, bestätigen und Undo/Redo testen. Alternativ Escape zum Abbrechen.
+
+### Genau ein ausführbarer Folgeauftrag: präzise Strecke bei achsengebundener Bewegung eingeben
+
+Die vorhandene X-/Y-/Elementachsen-Bearbeitung um eine numerische Streckeneingabe in Metern ergänzen. Zuerst bestehende Eingabe-/Einheitenparser prüfen und wiederverwenden; Eingabe und Maus müssen denselben gepinnten EditSession-Kontext und denselben Vorschau-/Bestätigungspfad nutzen. Vorzeichen relativ zur eindeutig angezeigten Achsenrichtung erklären. Keine neue Bewegungslogik in der UI, keine eigenständige AI-Aktion. Zunächst nur ganze Elemente auf X/Y/Elementachse, kein Skalieren, keine Wandachsenverlagerung N45.
+
+Abnahme: positive/negative Strecke, Dezimalkomma, ungültiger Wert, veralteter Kontext, Escape, Vorschau/Commit, genau ein Undo/Redo und JSON. Fangen darf die ausdrücklich eingegebene Strecke nicht nachträglich verändern. Tests, TypeScript, Lint, Build und praktische Browserabnahme dokumentieren.

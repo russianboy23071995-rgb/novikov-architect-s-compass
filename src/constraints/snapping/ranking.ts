@@ -13,6 +13,7 @@ const kindOrder: Record<SnapCandidate["kind"], number> = {
   midpoint: 0.5,
   "segment-intersection": 0.75,
   intersection: 1,
+  "axis-intersection": 1.5,
   extension: 2,
   perpendicular: 3,
   horizontal: 4,

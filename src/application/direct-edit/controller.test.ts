@@ -498,3 +498,46 @@ test("stretch keeps the selected grip offset and rejects shortening beyond windo
     ),
   );
 });
+
+test("window host axis accepts external guides but excludes host and dependent sources", () => {
+  const target = { kind: "window" as const, id: "window" };
+  const state = editingReducer(initial(), { type: "begin", target, action: "move", index: null });
+  const external = { entityId: "external", feature: "end", point: { x: 1.8, y: 1 } };
+  const context = {
+    ...snapContext(state),
+    references: [external],
+    activeReferences: [external],
+    gridSpacing: null,
+  };
+  const result = resolveEditSnap(state.session!, { x: 1.82, y: 0.02 }, context);
+  assert.equal(result.candidate?.kind, "axis-intersection");
+  assert.ok(
+    Math.abs(
+      previewEdit(state.session!, state.history.present, target, result.point).storey.windows[0]!
+        .position - 0.6,
+    ) < 1e-12,
+  );
+  const host = { ...external, entityId: "wall" };
+  const dependent = { ...external, entityId: "@construction", dependencies: [host] };
+  for (const source of [host, dependent])
+    assert.equal(
+      resolveEditSnap(
+        state.session!,
+        { x: 1.8, y: 0 },
+        { ...context, references: [source], activeReferences: [source] },
+      ).candidate,
+      null,
+    );
+  const stale = editingReducer(state, {
+    type: "project",
+    project: updateWall(state.history.present, "wall", { height: 3 }),
+  });
+  const rejected = editingReducer(stale, {
+    type: "confirm",
+    session: state.session!,
+    selection: target,
+    point: result.point,
+  });
+  assert.equal(rejected.history, stale.history);
+  assert.notEqual(rejected.error, "");
+});
