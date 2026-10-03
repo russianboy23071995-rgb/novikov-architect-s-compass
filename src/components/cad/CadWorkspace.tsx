@@ -68,7 +68,8 @@ export function CadWorkspace() {
   const supportsInput =
     !!lineOrigin ||
     (!!editSession &&
-      ((editSession.action === "move" && editSession.target.kind !== "window") || !!numericAxis));
+      ((["move", "point"].includes(editSession.action) && editSession.target.kind !== "window") ||
+        !!numericAxis));
   const hasInput = inputDraft.hasInput;
   const inputPreview = (() => {
     if (!supportsInput || (!hasInput && !aim)) return null;
@@ -568,10 +569,14 @@ export function CadWorkspace() {
                         : "Maus"
                     }
                     axisLabel={numericAxis?.label ?? null}
-                    {...(lineOrigin ? { mouseHint: "Mausziel · Klick zeichnet · 90° oben" } : {})}
+                    {...(lineOrigin ? { mouseHint: "Mausziel · Tab: Länge ↔ Winkel" } : {})}
                     error={hasInput ? (inputPreview?.error ?? "") : ""}
                     canConfirm={!!inputPreview?.point}
                     onChange={inputDraft.change}
+                    onCaptureDirection={() => {
+                      if (inputPreview && "degrees" in inputPreview)
+                        inputDraft.change(String(inputPreview.degrees), inputDraft.length);
+                    }}
                     onConfirm={() => {
                       if (inputPreview?.point && !editSession) drawPoint(inputPreview.point);
                       else if (inputPreview?.point && editSession)

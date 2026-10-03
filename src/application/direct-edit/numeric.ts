@@ -57,7 +57,7 @@ export function previewMovementInput(
   lengthText: string,
   aim: Point | null,
 ) {
-  if (session.action !== "move") {
+  if (session.action !== "move" && session.action !== "point") {
     const axis = numericMoveAxis(session);
     if (!axis) throw new Error("Keine numerische Bewegungsachse verfügbar.");
     const result = previewNumericMove(session, project, selection, lengthText);

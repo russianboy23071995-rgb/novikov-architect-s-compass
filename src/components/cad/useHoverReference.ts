@@ -1,3 +1,4 @@
+import { hoveredSegment, withParallelDirections } from "@/constraints/inference/segment-hover";
 import {
   acquisitionReference,
   withConstructionReferences,
@@ -46,7 +47,10 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       return;
     }
     const current = state.current!.value;
-    const active = [...(context.pinnedReferences ?? []), ...current.references];
+    const active = withParallelDirections([
+      ...(context.pinnedReferences ?? []),
+      ...current.references,
+    ]);
     const sources = withConstructionReferences(context.references, active);
     const guides = advanceGuideDirections(
       cursor,
@@ -62,7 +66,12 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       gridSpacing: null,
       orthoOrigin: null,
     }).candidate;
-    const acquired = acquisitionReference(candidate, sources);
+    const exact =
+      candidate && ["endpoint", "midpoint", "segment-intersection"].includes(candidate.kind);
+    const acquired = exact
+      ? acquisitionReference(candidate, sources)
+      : (hoveredSegment(cursor, context.references, context.pixelsPerMetre) ??
+        acquisitionReference(candidate, sources));
     const reference =
       acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))
         ? acquired
@@ -77,7 +86,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
         value,
         guides: advanceGuideDirections(
           cursor,
-          [...(context.pinnedReferences ?? []), ...value.references],
+          withParallelDirections([...(context.pinnedReferences ?? []), ...value.references]),
           guides,
         ),
       };
@@ -95,7 +104,10 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
   }, [cursor, context, dwellMs]);
   const compatible = snapshot && sameHoverSession(snapshot.context, context);
   const references = context.enabled
-    ? [...(context.pinnedReferences ?? []), ...(compatible ? snapshot.value.references : [])]
+    ? withParallelDirections([
+        ...(context.pinnedReferences ?? []),
+        ...(compatible ? snapshot.value.references : []),
+      ])
     : [];
   const guideCursor = compatible ? (cursor ?? snapshot.cursor) : null;
   return {
