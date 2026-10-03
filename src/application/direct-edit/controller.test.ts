@@ -697,3 +697,36 @@ test("free polar input validates text and stale contexts while fixed axes remain
   );
   assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
 });
+
+import { editOriginReference } from "./snapping.ts";
+test("free movement origin drives shared guides without restoring excluded model points", () => {
+  const state = begin(),
+    session = state.session!;
+  const origin = editOriginReference(session)!;
+  const refs = [
+    ...editSnapReferences(session, projectSnapReferences(state.history.present)),
+    origin,
+  ];
+  assert.equal(
+    refs.some((r) => r.entityId === "wall"),
+    false,
+  );
+  const result = resolveEditSnap(
+    session,
+    { x: 0.02, y: 2 },
+    { ...snapContext(state), references: refs, activeReferences: [origin], gridSpacing: null },
+  );
+  assert.equal(result.candidate?.guideOrigin?.x, session.anchor.x);
+  assert.deepEqual(result.point, { x: 0, y: 2 });
+  assert.equal(editOriginReference({ ...session, action: "x" }), null);
+  for (const angle of ["566", "360,01", "-1"])
+    assert.throws(
+      () => previewMovementInput(session, state.history.present, wall, angle, "2", null),
+      /0°.*360°/,
+    );
+  for (const angle of ["0", "360"])
+    assert.deepEqual(
+      previewMovementInput(session, state.history.present, wall, angle, "2", null).point,
+      { x: 2, y: 0 },
+    );
+});

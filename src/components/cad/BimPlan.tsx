@@ -6,7 +6,11 @@ import { useHoverReference } from "./useHoverReference";
 import { projectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
-import { editSnapReferences, resolveEditSnap } from "@/application/direct-edit/snapping";
+import {
+  editSnapReferences,
+  resolveEditSnap,
+  editOriginReference,
+} from "@/application/direct-edit/snapping";
 import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import { wallLength } from "@/lib/bim/model";
@@ -114,10 +118,16 @@ export function BimPlan({
     };
   }, []);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
+  const pinnedReferences = useMemo(() => {
+    const origin = editSession ? editOriginReference(editSession) : null;
+    return origin ? [origin] : [];
+  }, [editSession]);
   const references = useMemo(() => {
     const sources = projectSnapReferences(project);
-    return editSession ? editSnapReferences(editSession, sources) : sources;
-  }, [project, editSession]);
+    return editSession
+      ? [...editSnapReferences(editSession, sources), ...pinnedReferences]
+      : sources;
+  }, [project, editSession, pinnedReferences]);
   const trackingContext = useMemo(
     () => ({
       enabled: endpointSnap && snap && !pan,
@@ -126,8 +136,9 @@ export function BimPlan({
       camera,
       viewSize,
       resetKey: referenceReset,
+      pinnedReferences,
     }),
-    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset],
+    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset, pinnedReferences],
   );
   const {
     references: activeReferences,

@@ -1078,7 +1078,7 @@ test("polar input uses pinned origins, exact cardinal angles and independent loc
   assert.deepEqual(resolvePolarInput(origin, { x: 3, y: 7 }, null, 2).point, { x: 3, y: 6 });
   for (const aim of [{ x: 20, y: -5 }, { x: -2, y: 10 }, null])
     assert.deepEqual(resolvePolarInput(origin, aim, 90, 2).point, { x: 3, y: 6 });
-  assert.deepEqual(resolvePolarInput(origin, null, 450, -2).point, { x: 3, y: 2 });
+  assert.deepEqual(resolvePolarInput(origin, null, 90, -2).point, { x: 3, y: 2 });
   assert.deepEqual(resolvePolarInput(origin, null, 360, 1).point, { x: 4, y: 4 });
   assert.deepEqual(resolvePolarInput(origin, { x: 6, y: 8 }, null, 10).point, { x: 9, y: 12 });
   assert.deepEqual(resolvePolarInput(origin, { x: 8, y: 8 }, 90, null).point, { x: 3, y: 8 });

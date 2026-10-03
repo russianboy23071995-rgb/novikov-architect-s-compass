@@ -7,6 +7,7 @@ export type HoverContext = {
   references: readonly SnapReference[];
   pixelsPerMetre: number;
   resetKey?: number;
+  pinnedReferences?: readonly SnapReference[];
 };
 
 /** View navigation changes screen scale, not the identity of model-space references. */

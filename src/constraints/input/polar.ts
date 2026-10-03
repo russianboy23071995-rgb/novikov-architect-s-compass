@@ -17,6 +17,8 @@ export function resolvePolarInput(
     ].every(Number.isFinite)
   )
     throw new Error("Ungültiger Winkel oder Abstand.");
+  if (angle !== null && (angle < 0 || angle > 360))
+    throw new Error("Winkel muss zwischen 0° und 360° liegen.");
   const dx = aim ? aim.x - origin.x : 0,
     dy = aim ? aim.y - origin.y : 0;
   if (angle === null && (!aim || Math.hypot(dx, dy) === 0))
