@@ -730,3 +730,108 @@ test("free movement origin drives shared guides without restoring excluded model
       { x: 2, y: 0 },
     );
 });
+
+test("numeric stretch preserves wall corner offset and validates window and neighbour limits", () => {
+  const state = editingReducer(initial(), {
+    type: "begin",
+    target: wall,
+    action: "stretch",
+    index: 1,
+    anchor: { x: 3, y: 0.18 },
+  });
+  const session = state.session!;
+  const result = previewMovementInput(session, state.history.present, wall, "", "1,25", null);
+  assert.deepEqual(result.point, { x: 4.25, y: 0.18 });
+  assert.deepEqual(result.project.storey.walls[0]!.end, { x: 4.25, y: 0 });
+  assert.deepEqual(result.project.storey.walls[0]!.start, { x: 0, y: 0 });
+  assert.equal(result.project.storey.windows[0]!.position, 0.5);
+  const committed = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: wall,
+    point: result.point,
+  });
+  assert.deepEqual(committed.history.present, result.project);
+  assert.equal(committed.history.past.length, 1);
+  assert.deepEqual(
+    editingReducer(committed, { type: "undo" }).history.present,
+    state.history.present,
+  );
+  assert.deepEqual(
+    editingReducer(editingReducer(committed, { type: "undo" }), { type: "redo" }).history.present,
+    result.project,
+  );
+  assert.deepEqual(readProjectFile(serializeProject(result.project)), result.project);
+  for (const text of ["-2", "-3", "-4", "abc"])
+    assert.throws(() => previewMovementInput(session, state.history.present, wall, "", text, null));
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+  assert.equal(numericMoveAxis({ ...session, index: null }), null);
+  assert.throws(() => previewMovementInput(session, state.history.present, null, "", "1", null));
+  assert.throws(() =>
+    previewMovementInput(
+      session,
+      updateWall(state.history.present, "wall", { height: 3 }),
+      wall,
+      "",
+      "1",
+      null,
+    ),
+  );
+});
+
+test("oblique numeric stretch moves only selected line or wall end in either signed direction", () => {
+  for (const kind of ["line", "wall"] as const)
+    for (const index of [0, 1])
+      for (const distance of [2.5, -2.5]) {
+        let project = createProject("p", "s");
+        project =
+          kind === "line"
+            ? addLine(project, {
+                id: "e",
+                kind: "line",
+                points: [
+                  { x: 0, y: 0 },
+                  { x: 3, y: 4 },
+                ],
+                ...defaultLineAppearance,
+              })
+            : addWall(project, {
+                id: "e",
+                start: { x: 0, y: 0 },
+                end: { x: 3, y: 4 },
+                thickness: 0.36,
+                height: 2.8,
+              });
+        const target = { kind, id: "e" };
+        const state = editingReducer(createEditingState(project), {
+          type: "begin",
+          target,
+          action: "stretch",
+          index,
+          anchor: index === 0 ? { x: 0, y: 0 } : { x: 3, y: 4 },
+        });
+        const result = previewMovementInput(
+          state.session!,
+          state.history.present,
+          target,
+          "",
+          String(distance),
+          null,
+        );
+        const points =
+          kind === "line"
+            ? result.project.storey.lines![0]!.points
+            : [result.project.storey.walls[0]!.start, result.project.storey.walls[0]!.end];
+        const sign = index === 0 ? -1 : 1;
+        assert.ok(
+          Math.abs(points[index]!.x - (index === 0 ? 0 : 3) - sign * distance * 0.6) < 1e-12,
+        );
+        assert.ok(
+          Math.abs(points[index]!.y - (index === 0 ? 0 : 4) - sign * distance * 0.8) < 1e-12,
+        );
+        assert.deepEqual(
+          points[index === 0 ? 1 : 0],
+          index === 0 ? { x: 3, y: 4 } : { x: 0, y: 0 },
+        );
+      }
+});

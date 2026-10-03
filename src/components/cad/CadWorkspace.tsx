@@ -200,7 +200,7 @@ export function CadWorkspace() {
       index: pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
-    setMode("2D");
+    if (layout === "single") setMode("2D");
     setModelError("");
   };
 
