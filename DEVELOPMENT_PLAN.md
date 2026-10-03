@@ -582,6 +582,19 @@ Nachweise: 227 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehle
 
 Abnahme: Polylinie mit mehreren Punkten zeichnen und zwischen Zeichnen sowie freier Wandbewegung wechseln; Ursprung und Quellenausschlüsse müssen jeweils zum aktuellen Werkzeug passen. Nach Modelländerung/Undo/Redo dürfen nur aktuelle Fangpunkte angeboten werden.
 
-### Genau ein ausführbarer Folgeauftrag: räumliche Vorauswahl für Segmentschnittpunkte
+### Ersetzter Folgeauftrag: globale räumliche Vorauswahl für Segmentschnittpunkte
 
 Nun Schritt 2 umsetzen: konservative räumliche Vorauswahl in segmentIntersectionReferences, unveränderte exakte Prüfung und stabile Reihenfolge. Differentialtests gegen Vollprüfung einschließlich numerischer Grenzfälle; gleiche kalte Baseline wiederholen. Die bereits eingeführte Modellwiederverwendung erhalten und keine weitere Pointer-Fangoptimierung hinzufügen.
+
+
+### Planung: lokale Fangabfrage statt globaler Schnittpunktaufbereitung — 04.10.2026
+
+Nutzerpräzisierung gegen project-references, candidates, ToolSnapPolicy, Hover und Konstruktion abgeglichen. docs/LOCAL_SNAP_QUERY_PLAN.md beschreibt Zuständigkeiten, Vertrag, Index-Lebenszyklus, getrennte entfernte Referenzen, Migration und Testmatrix. Kein Anwendungscode in diesem Planungsschritt geändert. Die globale Paar-Vorauswahl aus älteren Abschnitten und dem Baseline-Bericht ist als nächster Auftrag ersetzt, nicht zusätzlich auszuführen.
+
+Wichtige Abhängigkeiten: activeSources/withConstructionReferences dürfen entfernte Blätter nicht anhand lokaler Treffer invalidieren; sameHoverSession darf nicht an der wechselnden lokalen Ergebnisliste hängen; Hover-Segmenttracking muss denselben Suchdienst verwenden. Index in Modellkoordinaten, CSS-Radius pro Abfrage; ursprüngliche Segmente bleiben unbeschnitten. Sofortiger Fang und 600-ms-Erwerb bleiben getrennt.
+
+Verbindliche Zielregeln in ARCHITECTURE.md ergänzt; AABB-Baum, API-Namen und anfänglicher vollständiger Primitivindex-Neuaufbau als Vorschlag gekennzeichnet. Keine inkrementellen Modellupdates auf Vorrat. Der zuvor blockierte Wiederverwendungsschritt wurde unverändert als PR #53 veröffentlicht; #51–53 weiterhin ohne Merge. Nachweis dieses Schritts: Code-/Dokumentabgleich und git diff --check; keine neuen Test-/Build-Läufe für reine Dokumentation. Bestehende 227 Tests beziehen sich auf PR #53.
+
+### Genau ein ausführbarer Folgeauftrag: lokalen Quellensuchdienst nachweisen
+
+Primitive Modellquellen ohne globale Kreuzungen ableiten; räumlichen Index mit vollständigem Quellen-Lookup und lokaler Punkt-/Segmentabfrage in CSS-Radius aufbauen. Lokale Schnittreferenzen mit bisheriger Geometrie, Identität und Blattabhängigkeiten berechnen. Differentialtests zum Vollaufbau innerhalb des Suchradius, einschließlich langer Segmente und numerischer Grenzen; reproduzierbare Messung mit 100/1000/5000 Elementen. Noch keine UI-/Hover-Umschaltung, keine neue Fangart und keine leeren Klassen. Der funktionierende Suchdienst liefert den Nachweis für die anschließende gemeinsame Integration gemäß docs/LOCAL_SNAP_QUERY_PLAN.md.
