@@ -836,8 +836,97 @@ If a requested implementation conflicts with this architecture, do not silently 
 
 ---
 
+# 29. Views, Drawing Documents and Layouts — decision 2026-10-03
+
+**Binding architecture decision, not implemented functionality.** Adopted for the user's documentation task of 2026-10-03. The companion function architecture remains a proposal except for the rules explicitly adopted here. No new schema, class hierarchy, rendering engine or database is mandated by these names.
+
+- **ModelView** defines a model-derived floor plan, section, elevation or 3D view, with stable identity and explicit definition (e.g. storey or section plane). It references the authoritative project; it owns no duplicate building elements.
+- **DrawingDocument** references a ModelView by ID and owns saved crop, output scale, visibility/style overrides and document-scoped additions. Its building projection is regenerated from the current model. A frozen export is an output artifact, never an independently editable building copy. Missing source references must be surfaced, not silently replaced.
+- **Annotation scope** must be explicit and validated: a storey-scoped 2D addition, a particular ModelView, a DrawingDocument or a Layout. The owner is identified by stable ID; no implicit propagation between scopes. Dimensions may reference stable model features independently of their display scope; deletion or topology change must expose unresolved references. Existing storey lines retain their current scope during migration. Text and hatch schema details remain proposals.
+- **Layout / MasterLayout** describe paper composition and reusable page format/title-block definitions. A layout placement (working name LayoutViewport) references a DrawingDocument and stores placement/crop/output-scale settings; it does not embed its elements. Deleting a referenced master/document requires explicit dependency handling. Paper units and output scale are distinct from model metres and screen pixels.
+- **ViewportBinding** routes one on-screen pane to a ModelView, DrawingDocument or Layout through a typed ID reference. Each pane has an independent camera/navigation context; focus determines the receiving pane. Project, committed selection and application actions remain shared. Screen panes and paper LayoutViewports are different concepts. Persistence of pane arrangements is not decided here.
+
+Responsibility boundaries: saved view/document/annotation/layout definitions belong to the domain; validated changes, reference resolution, capabilities and history to application; projections and drawing to rendering/geometry; file migration and output to interop. Proposed folders such as domain/views and domain/documents are responsibility labels, not a requirement to create empty modules.
+
+Saved definitions and annotations may initially share the versioned Project file and existing snapshot history. Hover, temporary guides and open menus remain ephemeral. Model actions and document actions are distinct typed operations through the same validated application/history boundary; no second BIM history or state store is introduced by a canvas pane. New persistent types require reference validation, migration from schemaVersion 1, round-trip and undo tests before release. Navigation alone must not produce model history entries.
+
+# 30. Editing, Layers, Heights and Input Contracts — decision 2026-10-03
+
+**Binding technical rules for future implementations:**
+
+1. Plan, section, elevation and 3D hits resolve to a stable source element ID and supported feature plus view/work-plane context. They invoke the same validated application action. A generated section edge is not automatically an editable wall vertex. Document-decoration mode must be distinguishable from model editing; changing a view override never changes a material or component.
+2. **Layer** is organisation/visibility; **AssemblyLayer** is a material/construction stratum within an assembly. Their IDs, operations and meanings must remain distinct. Elements may reference both. Display overrides cannot alter assembly thickness. Standard organisational layers from the previous guide remain requirements; additions do not rename them implicitly.
+3. **Height binding** distinguishes fixed dimensions from storey-bound lower/upper references with offsets. Storey changes affect bound components, not fixed-height components by accident. Derived height must not become an independently editable duplicate. Validate dependent openings and other affected elements atomically before committing. Existing numeric wall heights migrate without silently acquiring storey bindings. Exact schema, defaults and user choices for new components remain open.
+4. Each new checked model or document action must expose a typed parameter/target contract for mouse, properties, shortcuts and AI/Text/Voice adapters. Context includes stable target IDs, target kind/scope, originating view/work plane when relevant, and a model/document revision or equivalent snapshot identity. Preview and apply reject changed targets or stale context. Ambiguity is clarified, never resolved by guessing another nearby element. Creation uses explicit container/host IDs; it cannot require a pre-existing created-element ID.
+5. Action acceptance includes adapter tests for the supported text intent and simulated voice transcript, invalid parameters and stale context; real speech-recognition quality is a separate test. An unsupported intent is reported explicitly. Neither AI nor speech components contain geometry, validation or independent model mutation.
+
+**Binding user restriction and required application guard for N25:** proportional scaling is allowed only for genuine 2D entities and imported PDF references. BIM/3D objects (including walls, windows, doors, slabs and roofs) remain forbidden even when rendered in a 2D view or DrawingDocument. The future scaling action must resolve authoritative target types/capabilities and validate _every_ target before preview or commit. If any target is forbidden or unresolved, reject the entire selection without partial changes or a history entry. Hiding a toolbar command is insufficient; direct action calls, AI/Text/Voice and imported/reloaded references must pass the same guard. Validate finite positive lengths, nonzero measurement baseline, anchor and target revision. Uniform scale and an explicit anchor form the proposed calibration contract; text/style scaling semantics need separate definition.
+
+No scaling action exists in the inspected code. This documentation records its mandatory implementation gate; it does not claim executable enforcement has been added. Required acceptance cases: permitted drawing line/PDF; BIM wall selected in plan and section rejected; mixed line/wall selection rejected atomically; stale target rejected; valid operation preserves IDs and supports one undo/redo and JSON round-trip. Bitmap import remains an older retained wish; it does not gain scaling permission under the new restriction.
+
+**Open user meanings — no default invented:** D versus Ctrl+D; whether a wall-axis switch preserves physical wall position or the drawn reference axis; the 3D export format/contents; undo grouping for wall chains. These block only their respective implementation. Detailed field names, folder layout, PDF decomposition approach, solid-library choice, per-annotation styling and layout-template linkage mechanics remain proposals until separately decided.
+
+---
+
 # Architectural Principle
 
 NOVIKOV CAD is not built as a collection of UI features.
 
 It is built as a reliable modeling platform whose UI, AI, rendering and interoperability layers all operate on the same validated architectural model.
+
+
+## Shared precision input — implemented boundary (2026-10-03)
+
+Decision: polar tool input is shared across direct edit and straight-line drawing.
+`PrecisionInput` owns presentation only. `usePrecisionDraft` owns transient angle/length, mouse aim and focus for a stable interaction identity; a new identity starts with empty inputs. `application/input/precision.ts` parses text through the core unit parser and delegates target calculation to `constraints/input/polar.ts`. These shared services contain no BIM mutation or renderer dependencies.
+
+Tool adapters supply origin and current aim, validate tool-specific constraints and confirm through existing model/application actions. Line drawing rejects zero length and changed model context; direct edit retains its pinned selection, axis and opening constraints. Numeric targets take precedence over mouse snapping. There is one helper component and one draft hook, not a copied form/state machine per tool. The existing workspace coordinates these consumers; migration of its remaining legacy drawing orchestration is incremental. AI/Text/Voice must use the same validated actions, not React draft state or separate model logic.
+
+Currently connected: element/point movement, point stretching, single straight-line drawing and straight-wall drawing. Polyline segments also consume this contract; other tools remain future precision-input consumers.
+
+
+## Universal movement origin — binding interaction rule (2026-10-03)
+
+Every interactive movement starts with a pinned construction reference at the chosen point, immediately and without hover dwell. This applies to point movement, whole-element movement, stretching and axis-constrained movement, including hosted elements. Future slabs, roofs, stairs, furniture and other elements must use the same interaction/constraint pipeline; origin activation is not an optional per-tool feature.
+
+The origin stays at the original model-space position during preview and zoom. Shared inference supplies cursor-dependent guides, additional hover references and intersections. Do not display every possible guide simultaneously. Explicit axis/host constraints and model validation still take precedence; a window remains on its wall. User-controlled Snap disable remains respected. Completion/cancellation removes the session origin without committing construction geometry. Future 3D movements must supply the active work-plane context to this same system.
+
+Implementation: application/direct-edit/snapping.ts supplies the session origin for all current EditActions and targets. BimPlan/useHoverReference already consume it through the shared pinned-reference contract. New element adapters supply anchor and geometric directions, not copied inference code.
+
+
+## Segment tracking and shared precision keyboard interaction (2026-10-03)
+
+Tracked straight segments use the same transient hover state, 600 ms acquisition/removal and screen-space tolerance as point references. Project adapters expose segment snapshots; the generic inference service identifies a hovered segment. A stable segment midpoint identifies the reference while the cursor moves along its interior. Exact point candidates take precedence. Its direction becomes a parallel option through active construction origins. Overlay and snap resolver use the same guide-direction service; no per-tool parallel logic. Existing source exclusion, geometric constraints, reference limits and model/zoom invalidation rules continue to apply.
+
+PrecisionInput centrally handles Tab during an active interaction: from the viewport into length, then angle, then length. On first entry the current mouse direction is captured at full precision through the input adapter, not from the rounded display hint. Enter confirms, Escape cancels. Unrelated text fields keep their normal keyboard behaviour. Explicit axis constraints retain a read-only angle. All future consumers must use this shared keyboard contract. Free point movement now consumes the same polar adapter as whole-element movement.
+
+
+## Shared drawing application boundary (2026-10-03)
+
+Drawing actions for straight walls and lines/polylines now converge on application/drawing/actions.ts. It validates the pinned model context and delegates creation to existing addWall/addLine domain operations. Mouse and numeric confirmation use the same action and history path. previewDrawingInput shares the polar text adapter; the former line-input export remains compatible. CadWorkspace still coordinates pointer collection and presentation, but no longer calls addWall/addLine directly. Defaults for a drawn wall remain 0.36 m thickness and 2.80 m height. Drawing preview is a 2D axis guide; the confirmed wall supplies the existing 3D rendering.
+
+
+## Shared tool interaction lifecycle — implemented refactor (2026-10-03)
+
+Binding contract: application/tools/interaction.ts defines ToolInteraction with a stable identity, origin, input constraints, click intent, preview, validation, commit and cancellation. It has no React or element-type dependency. evaluateInteraction evaluates without mutation; confirmInteraction revalidates before invoking a model action.
+
+application/tools/adapters.ts adapts existing Direct Edit and Drawing actions to this contract. Fixed axes, window constraints and the distinction between point and element mutation belong here or in the existing validated model actions. They must not be reimplemented in the input component or viewport click handler.
+
+useToolInteraction runs one shared draft/preview/pick/confirm/cancel lifecycle. InteractionInput binds it to the single PrecisionInput, including shared Tab behaviour. CadWorkspace selects an adapter and connects existing project/history actions; it no longer owns the tool-specific numeric preview switch or form confirmation branches. BimPlan forwards picked targets without deciding which edit action locks a direction. Existing shared snapping, hover references, origins and geometric projection services remain in place.
+
+Migration limits: legacy point collection for drawing and rendering/edit-session plumbing still exist. This change does not claim a complete universal tool framework or a 3D work-plane runtime. Future input consumers implement the small adapter contract; adding one must not require copied Tab, hover, polar-input or form-confirmation logic.
+
+
+Polyline reuse verified (2026-10-03): each last draft vertex supplies the existing drawingInteraction identity/origin. The same runtime, PrecisionInput, Tab and snapping services are unchanged. Numeric confirmation adds a draft vertex; completion uses one createDrawing/history commit. Invalid explicit input must not be silently discarded by double-click/viewport Enter completion.
+
+
+## Shared tool snapping context — implemented boundary (2026-10-03)
+
+ToolInteraction now requires a ToolSnapPolicy: pinned origin, allowed-source filtering and the existing resolver. prepareToolReferences and resolveToolSnap form one application entry for idle hover, drawing and Direct Edit. The viewport supplies screen scale, cursor, modifiers and active references; it no longer constructs separate drawing/edit snap contexts or knows edit source-exclusion rules.
+
+Drawing delegates to querySnap; Edit delegates to resolveEditSnap with its axis/host restrictions. These implementations retain their existing geometric responsibilities. No new snap mathematics. Policies are derived, weakly cached by immutable draft-point/edit-session identity so React rerenders and zoom do not discard reference identity; a new interaction obtains a new policy. Project changes still rebuild source snapshots. Render-only edit preview plumbing remains in the viewport.
+
+
+## Modal keyboard ownership and interaction transitions (2026-10-03)
+
+Modal dialogs own Tab and application shortcuts while open. PrecisionInput must not intercept navigation outside its own panel inside a dialog/alertdialog; workspace tool shortcuts likewise yield to modal content. Cancelling project-file confirmation preserves the suspended draft. Confirmed project replacement and history navigation clear edit/drawing context through the existing shared reset; Undo restores committed model state, never an old interaction session. Session identity checks reject delayed confirmations even after returning to an earlier model snapshot.

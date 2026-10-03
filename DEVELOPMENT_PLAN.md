@@ -1,5 +1,186 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bedienkorrektur: Referenzen beim Zoomen erhalten — 03.10.2026
+
+Aktive Hilfspunkte einschließlich konstruierter Schnittpunkte und ihre Richtungsführungen bleiben bei Kamera-/Zoomänderungen erhalten. Auch das Verlassen der Zeichenfläche zum Bedienen der Zoomtasten löscht sie nicht. Die Referenzen bleiben in Modellkoordinaten; Fangabstand und Ringdarstellung werden weiterhin aus dem aktuellen Bildschirmmaßstab berechnet. Eine laufende Hover-Verweildauer wird bei Navigation abgebrochen und beginnt beim nächsten Besuch neu. Escape, Ausschalten des Fangens und ein geänderter Modell-/Bearbeitungskontext verwerfen weiterhin die Referenzen. Keine Modellaktion oder Änderung an History, JSON oder IFC.
+
+Nachweis: 187 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler und 6 bekannte Warnungen. Zwei neue Regressionstests prüfen Sitzungsidentität über Zoomstufen, explizite Invalidierung sowie unterbrochene Verweildauer ohne Verlust aktiver Punkte oder unbeabsichtigtes Umschalten. Browser: Referenzen (0;0), (3;0) und konstruierter Schnitt (1,5;1,5) bleiben mit drei Führungen beim Hinein-/Herauszoomen unverändert; Undo bleibt leer. Escape entfernt anschließend alle Referenzen und Führungen.
+
+Praktische Abnahme: Punktfang einschalten, zwei Punkte jeweils 0,6 s anhovern und daraus einen Schnittpunkt aktivieren. Mit Mausrad oder Plus/Minus zoomen: Markierungen müssen erhalten bleiben. Escape löst sie gezielt. Dieser Nachtrag ersetzt frühere Protokollaussagen, nach denen Zoom Referenzen verwirft. Die Korrektur ergänzt PR #36; Nutzerfreigabe für PR #35/#36 gilt nach erfolgreicher Prüfung. Der einzige nächste Entwicklungsauftrag bleibt der unten beschriebene Schnitt externer Hilflinien mit festen Direct-Edit-Achsen.
+
+## Bedienkorrektur: Hover 600 ms und Referenzen lösen — 03.10.2026
+
+Nutzerkorrektur zu N08/Guide-F14: Standard-Verweildauer jetzt zentral 600 ms, sowohl im Workspace als auch im BimPlan-Fallback. Die vorhandene Einstellung bleibt verfügbar und gilt symmetrisch für Aktivieren und Lösen. Historische 400-ms-Angaben beschreiben frühere Stände.
+
+Ein erneuter Besuch einer bereits aktiven Referenz entfernt nur diese nach vollständiger Verweildauer. Ein Besuch schaltet höchstens einmal: kontinuierliches Hover oder kleine Bewegungen innerhalb desselben Fangpunkts aktivieren/entfernen nicht wiederholt. Erst Verlassen des Punktes oder Wechsel auf eine andere Quelle ermöglicht einen neuen Vorgang. Unterbrochene Verweildauer beginnt neu; andere Referenzen und ihre Aktivierungsreihenfolge bleiben erhalten. Gelöste Punkte erzeugen keine temporären Führungen mehr; normaler Endpunktfang bleibt möglich. Kein History-/Projektdateieintrag für Hover.
+
+Geändert: constraints/inference/hover-reference.ts, Standardwerte in CadWorkspace/BimPlan, Regressionstests und dieses Protokoll. 158 Tests bestanden, TypeScript/Build erfolgreich; ESLint null Fehler/sechs bekannte Warnungen. Tests: vor 600 ms kein Umschalten, genau einmal bei Erreichen, dauerhaftes Hover, Unterbrechung, Wiederaktivierung und Erhalt anderer Referenzen. Browser: Standard 0,6 s sichtbar; Ring aktiviert, durch erneuten Besuch gelöst, bei weiterem Hover weiter gelöst.
+
+Abnahme: Snap einschalten, Punkt 0,6 s anhovern → silbergrauer Ring. Zeiger weg und wieder 0,6 s darüber → Ring weg. Dort verbleiben → bleibt gelöst. Nach erneutem Verlassen wieder aktivierbar. In einer bereits offenen Sitzung kann die bisherige Zeiteinstellung erhalten bleiben; im Linienwerkzeug auf 0,6 s stellen, ohne das Projekt neu zu laden.
+
+Dieser frühere Folgeauftrag wurde durch die unten dokumentierte Nutzerpräzisierung auf mausgeführte 45°-Schnittpunkte eingegrenzt und umgesetzt.
+
+## Aktiver Planungsstand — Funktionsumfang 03.10.2026
+
+Der Nutzerentwurf [Funktionsarchitektur](NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md) erweitert den bisherigen Guide. [FUNCTION_REQUIREMENTS_2026-10-03.md](FUNCTION_REQUIREMENTS_2026-10-03.md) ordnet alle N01–N60 dem Code, alten Anforderungen und Abhängigkeiten zu. ARCHITECTURE.md §29–30 dokumentiert die begrenzten verbindlichen Ergänzungen; weitere Datenfelder/Typdiagramme bleiben Vorschläge. Die PDF selbst wurde nicht separat gelesen. Bisherige Guide-F01–F29 und Gesprächswünsche bleiben erhalten.
+
+Geprüfter Code: 3bbe2dd auf feat/direct-edit-shared-snap, zwei Commits seit Review-main dd3e358. Numerische Fangtoleranz (ef3241d, PR #27) und gemeinsame Direct-Edit-Fangauflösung (3bbe2dd, PR #28) sind umgesetzt und brauchen keinen erneuten Implementierungsauftrag. 149 Tests im Dokumentationsauftrag erneut bestanden. Keine Quellcodeänderung, neue Bauteile, Dateimigration, PDF-Zerlegung oder Layoutimplementierung. Frühere Build-/Lint-/Browsernachweise bleiben als solche datiert erhalten.
+
+**Dieser Abschnitt ist die einzige aktive Auftragsreihenfolge.** Sämtliche darunterstehenden „nächster Schritt“-Formulierungen und Auftragslisten sind historische Protokolle ihrer jeweiligen Stände, keine zusätzlichen aktuellen Folgeaufträge. Die Pakete A–L des Entwurfs und die N-Matrix sind Backlog und Abhängigkeiten.
+
+### Abschluss: gemeinsame Fang-Kandidaten und Rangfolge — 03.10.2026
+
+PR #29 wurde mit Nutzerfreigabe als normaler Merge 655c5f1 in feat/direct-edit-shared-snap übernommen. PR #27/#28 bleiben offen; main wurde nicht geändert. Dieser Funktionsschritt basiert auf dem freigegebenen Dokumentationsstand.
+
+constraints/snapping/candidates.ts erzeugt Endpunkte, Richtungsführungen und vorhandene HV-Schnittpunkte ohne rekursive querySnap-Abfragen. Aktive Referenzen werden einmal gegen den aktuellen Quellenstand exakt validiert und dedupliziert. Eine nichtleere activeReferences-Liste ist maßgeblich; activeReference bleibt der Legacy-Fallback ohne Liste. Modelladapter und öffentliche querySnap-Signatur bleiben unverändert. Raster bleibt der bisherige Fallback; explizites Shift wird vor automatischen Kandidaten aufgelöst.
+
+ranking.ts definiert die technische Rangentscheidung: Priorität → Bildschirmabstand → neueste Aktivierung (bei Schnittpunkten beide Aktivierungsränge absteigend) → vollständige geordnete Quellen-Tupel → Fangart → projizierte X-/Y-Koordinaten → Winkel. Artgleichstände: Verlängerung vor Lotrecht vor Horizontal vor Vertikal vor Winkel. Zeichenketten werden ohne Locale verglichen. Bei ansonsten identischen Ergebnissen ist die Reihenfolge ohne fachliche Bedeutung.
+
+Bewusste Änderungen bei Gleichstand: neu aktivierte Quelle gewinnt statt impliziter Erzeugungsfolge bzw. bisherigem sourceFeature.localeCompare. Endpunkte berücksichtigen ebenfalls Aktivierung vor Quellen-ID. Richtungsreihenfolge im Modelladapter entscheidet nicht mehr über gleichwertige Richtungen. Höherer Vorrang und geringerer Abstand gewinnen weiterhin vor Aktualität. Schnittpunkte behalten beide Herkunftspositionen; intern werden beide Quellen getrennt verglichen statt verkettete Strings als Identität zu benutzen.
+
+Prüfung: 156 Tests bestanden, darunter sieben neue Tests. Drei neue Regressionsfälle schlugen am alten Stand fehl (neuere Guide-Quelle, Endpunkt-Aktivierung und beide Schnittpunktquellen). Weitere Fälle prüfen Duplikate/stale Quellen, vollständige Identität trotz Trennzeichen, Richtungsreihenfolge und Priorität/Abstand bei 25/100/400 px/m. Bestehende Toleranz-, Direct-Edit-, JSON-/History-, Voice-/Stale-Context- und IFC-Tests bleiben grün. TypeScript und Build erfolgreich, ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Keine UI-, Modell- oder Dateiformatänderung, keine Leistungszusage.
+
+Browser: Zwei Wandachsenden in Reihenfolge aktiviert; beim Linienzeichnen und freien Linienbewegen stammt die Verlängerung vom neueren Punkt. Vorschau/Commit identisch, Undo/Redo geprüft. Wechsel von rund 105 auf 50 px/m verwirft Referenzen, exakter Endpunkt wird innerhalb von 10 CSS-Pixeln erkannt; Escape verwirft die Bearbeitung. Screenshot lokal: outputs/snap-ranking-direct-edit.png.
+
+Abnahme: Snap einschalten, zwei Endpunkte derselben horizontalen Wand nacheinander je 0,4 s anhovern. Weiter entlang der gemeinsamen Flucht zeigen: Die Hilfslinie beginnt am zuletzt aktivierten Punkt. Beim Linienzeichnen und im Menü „Element frei bewegen“ wiederholen, bestätigen und Undo/Redo prüfen.
+
+### Abschluss: mausgeführte 45°-Hilfslinien und konstruierte Referenzen — 03.10.2026
+
+Die Nutzerpräzisierung ersetzt den zuvor breiter geplanten Geradenschnitt-Auftrag: Von jedem aktiven Hilfspunkt wird die zur Maus nächstgelegene 45°-Schrittrichtung angezeigt, silbergrau gestrichelt und über die Mausprojektion hinaus verlängert. Nichtparallele Führungen bilden innerhalb von 10 CSS-Pixeln einen Schnittpunktkandidaten. Nach standardmäßig 600 ms wird dieser als zusätzlicher Hilfspunkt aktiviert, erzeugt selbst Führungen und lässt sich bei erneutem Besuch nach derselben Verweildauer lösen. Der Ablauf funktioniert auch ohne Zeichenwerkzeug. Echte Endpunkte behalten Vorrang; explizites Shift/Ortho und die gemeinsame Kandidatenrangfolge bleiben erhalten.
+
+Gemeinsame Mathematik in geometry/intersections/lines.ts mit dimensionsloser Paralleltoleranz in geometry/tolerances/direction.ts; Richtungswahl in constraints/guides/directions.ts; temporäre Konstruktion und exakte Quellenprüfung in constraints/inference/construction-reference.ts. BimPlan zeichnet nur abgeleitete Führungen; useHoverReference liefert Maus/Zeit. Linie, Wand und Direct Edit verwenden weiterhin querySnap. Konstruierte Referenzen speichern ihre ursprünglichen Modellquellen flach, sodass verkettete Hilfspunkte keine rekursiven Modellkopien bilden. Verschobene/entfernte Quellen werden verworfen. Keine neue Modellaktion, keine Dateimigration oder separate AI-Logik.
+
+Prüfung: 164 Tests bestanden, darunter sechs neue Fälle zu schrägem Schnitt, parallelen/kollinearen/ungültigen Richtungen, nächster 45°-Richtung, 25/100/400 px/m, Prioritäten und Constraints, 599/600-ms-Aktivierung/Lösen, verketteten/veralteten Quellen sowie Zeichnen mit genau einem Undo-Schritt und JSON-Rundlauf ohne Hilfspunkte. TypeScript und Build erfolgreich, ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: zwei Wandachsenden aktiviert, diagonaler Schnitt als dritter Ring markiert, weitere Führung vom neuen Punkt, erneutes Lösen geprüft. Linie beginnt exakt bei (1,5 m; 1,5 m); Undo entfernt, Redo stellt sie wieder her. Screenshot: outputs/guide-intersection-hover.png.
+
+Abnahme: Snap einschalten. Bei einer horizontalen 3-m-Wand beide Achsenden nacheinander je 0,6 s anhovern. Zeiger etwa 1,5 m oberhalb der Wandmitte halten: zwei diagonale Führungen kreuzen sich, danach erscheint der dritte Referenzring. Wegbewegen und neue Führungen vom Hilfspunkt prüfen; zurückkehren und 0,6 s warten löst ihn. Dasselbe beim Linienzeichnen testen und Linie mit Undo/Redo prüfen.
+
+Grenzen: weiterhin höchstens vier aktive temporäre Referenzen; keine dauerhaften Punktbauteile, kein History-/Projektdateieintrag für Hover. Verlassen der Zeichenfläche, Kamera-/Modell-/Sitzungswechsel verwerfen Referenzen wie bisher. Beliebig schräge Verlängerung/Lot-Schnittpunkte, echte Segmentschnitt- und Mittelpunktfangarten sowie aktive 3D-Arbeitsebenen bleiben Backlog; bestehende einzelne Verlängerungs-/Lotführungen bleiben verfügbar. Kein Anspruch auf vollständige Guide-F14-Umsetzung.
+
+### Abschluss: stabile Richtungswechsel der 45°-Hilfslinien — 03.10.2026
+
+PR #32 wurde mit ausdrücklicher Nutzerfreigabe als normaler Merge 8770895 in seinen bisherigen Zielzweig feat/hover-reference-toggle übernommen. main bleibt unverändert. Dieser Folgeschritt baut auf diesem Merge auf.
+
+constraints/guides/directions.ts führt eine reine Zustandsfortschreibung je aktiver Quelle ein. Vorläufiger technischer Bedienwert: 5° Hysterese zusätzlich zur halben 45°-Stufe. Eine horizontale Führung wechselt somit erst über 27,5° nach diagonal; zurück wechselt sie unter 17,5°. Die Winkelberechnung behandelt den Übergang 360°/0° korrekt; direkt auf dem Referenzpunkt bleibt die Richtung erhalten. Quellenidentität umfasst ID, Feature und exakte Position; entfernte Quellen verlieren ihren Richtungsverlauf.
+
+useHoverReference hält den flüchtigen Verlauf im vorhandenen Ansichtskontext. Escape/Verlassen, Snap aus, Kamera-/Modell-/Sitzungswechsel verwerfen ihn zusammen mit den Referenzen. BimPlan-Darstellung, Hover-Schnittpunkterwerb und querySnap erhalten dieselben Richtungsdaten; Direct Edit reicht den gemeinsamen Kontext durch. Die Stabilisierung betrifft die mausgeführten 45°-Hilfslinien und ihre Schnittpunkte, nicht die explizite Shift-Richtung oder die Rangfolge sonstiger Fangarten. Keine Modell-, History-, IFC- oder Dateiformatänderung.
+
+Prüfung: 168 Tests bestanden (vier neue Fälle: alle acht Winkelgrenzen mit Hin-/Rückweg, getrennte Quellen und Identitätswechsel, Anzeige/Schnittpunkt/Radius/Shift/Ortho sowie Direct-Edit-Commit/Undo/Redo/JSON). TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser beim Linienzeichnen und freien Linienbewegen: 20° → 24° bleibt horizontal, 28° wechselt auf 45°; Rückweg über 22° bleibt diagonal, 17° schaltet zurück. Zwei Referenzen erzeugen weiterhin den nach 600 ms erworbenen dritten Hilfspunkt. Freie Linienbewegung auf (1,5; 1,5) bestätigt, Undo/Redo geprüft. Escape, Modell-Commit, Kamerawechsel und Snap aus räumen Führungen auf. Screenshot: outputs/guide-hysteresis-direct-edit.png.
+
+Praktische Abnahme: Wandachsende 0,6 s aktivieren; Zeiger zunächst ungefähr 20° oberhalb der Horizontalen halten und langsam über 22,5° bewegen. Kleine Bewegungen sollen die Führung nicht umschalten; erst ungefähr 28° bewirken den Wechsel. Zurück unter ungefähr 17° wechseln. Beim freien Bewegen einer Linie mit externem Wandpunkt wiederholen und per Escape abbrechen. Der 5°-Startwert kann nach Bedienfeedback angepasst werden; keine behauptete vollständige Hysterese für sämtliche Fangarten.
+
+### Abschluss: gemeinsamer Mittelpunktfang — 03.10.2026
+
+Aufbauend auf PR #33 / 3fad40a; PR #33 bleibt offen und wurde durch den Fortsetzungsauftrag nicht automatisch zusammengeführt. Neue Implementierung auf feat/shared-midpoint-snap.
+
+Geometrie berechnet den Mittelpunkt eines endlichen, nicht entarteten Segments. Der gemeinsame Projektadapter liefert einen Mittelpunkt je Wandachse und je vorhandenem Linien-/Polyliniensegment; keine künstliche Schließkante und keine zusätzlichen Wandflächen-Mittelpunkte. Identität: stabile Element-ID plus Segmentbezeichnung und Endpunkt-Snapshot. Damit wird auch eine Drehung oder Streckung um denselben Mittelpunkt als veränderte Quelle erkannt. Diese Referenzen sind abgeleitet und nicht im Projekt gespeichert.
+
+SnapCandidate kennt jetzt midpoint. Explizite Rangregel: Endpunkt (0) vor Mittelpunkt (0,25) vor Hilflinienschnitt (0,5), dann einzelne Führungen und Raster. Innerhalb einer Fangart gelten weiterhin Abstand, Aktivierungsreihenfolge und deterministische Quellenordnung. Der Radius bleibt 10 CSS-Pixel; bei sehr kurzen Segmenten kann ein naher Endpunkt den Mittelpunkt überstimmen, bis ausreichend hineingezoomt wird. Shift/Ortho und explizite Editachsen behalten Vorrang.
+
+Die gemeinsame Hover-Verwaltung aktiviert und löst Mittelpunkte nach derselben eingestellten Zeit, standardmäßig 600 ms. Sie liefern Verlängerungs-, Lot- und mausgeführte 45°-Hilfslinien samt Schnittpunkten. BimPlan kennzeichnet Mittelpunktfang mit ungefülltem Dreieck und Beschriftung; der aktive Referenzring bleibt erhalten. Keine zusätzliche Werkzeuglogik, Modellaktion, Dateimigration oder AI-Modelllogik. Eigene Elemente und Fensterhosts bleiben im Direct Edit ausgeschlossen.
+
+Nachweise: 173 Tests bestanden, darunter fünf neue Gruppen in constraints/snapping/midpoint.test.ts (Geometrie/ungültige Werte, Adapter/Segmentidentität, Zoom/Priorität/Constraints, Hover/Guides, Zeichnen/Direct Edit/Undo/JSON). Zwei bestehende Adapter-Anzahltests wurden um die zusätzlichen Mittelpunkte aktualisiert. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Marker ohne Zeichenwerkzeug, 600-ms-Aktivierung, Lotführung und erneutes Lösen; Linie beginnt exakt bei (1,5; 0) an der 3-m-Wand, Undo/Redo geprüft. Freie Linienbewegung fängt externen Wandmittelpunkt und lässt sich rückgängig machen/wiederherstellen. Screenshot: outputs/midpoint-hover.png.
+
+Abnahme: Snap aktivieren und die Mitte der Wandachse oder eines Liniensegments anfahren. Dreieck/Mittelpunkt prüfen; 0,6 s verweilen, dann seitlich wegbewegen und Hilfslinie beobachten. Zurückkehren und 0,6 s warten löst die Referenz. Eine Linie dort beginnen oder eine andere Linie über das On-Demand-Menü dorthin bewegen; Undo/Redo prüfen. Bei kurzen Linien hineinzoomen, falls der Endpunkt Vorrang erhält.
+
+### Abschluss: echte Segmentschnittpunkte — 03.10.2026
+
+PR #34 wurde mit ausdrücklicher Nutzerfreigabe als normaler Merge 96c33de in seinen bisherigen Zielzweig feat/guide-direction-hysteresis übernommen. main bleibt unverändert. Der neue Schritt baut auf diesem Merge auf.
+
+geometry/intersections/segments.ts prüft eindeutige Schnitte innerhalb beider endlicher Segmente mit der zentralen numerischen Toleranz. Degenerierte/nichtendliche Strecken, bloße Geradenverlängerungen und Überlappungen erzeugen keinen Fangpunkt; eindeutige Endberührungen bleiben möglich. constraints/snapping/segment-references.ts bildet Quellenpaare deterministisch. Der Projektadapter stellt Wandachsen und vorhandene Linien-/Polyliniensegmente bereit, einschließlich Selbstkreuzungen einer Polylinie. Keine Wandflächenverschneidung oder Änderung des BIM-Modells.
+
+Beide Segmentquellen bleiben als exakte Geometrie-Snapshots erhalten. Das erlaubt Invalidierung nach Verschieben/Drehen/Strecken sowie Ausschluss jeder Kreuzung, an der ein bearbeitetes Element oder dessen Fensterhost beteiligt ist. Ableitung erfolgt bei verändertem Modell über den bestehenden memoisierten Adapter, nicht pro Mausbewegung. Aktuell paarweiser Vergleich O(n²), noch kein räumlicher Index oder Leistungsnachweis für Großprojekte.
+
+Neue Fangart segment-intersection mit Beschriftung „Segmentschnittpunkt“, getrennt vom temporären Hilflinienschnitt. Rangfolge: Endpunkt 0, Mittelpunkt 0,25, Segmentschnitt 0,375, Hilflinienschnitt 0,5, einzelne Führungen und Raster. 10 CSS-Pixel, Shift/Ortho und Editachsen behalten ihren Vertrag. Der gleiche Punkt kann nach 600 ms als Hilfsreferenz aktiviert und bei erneutem Besuch gelöst werden; alle Verbraucher nutzen weiterhin querySnap. Projektformat, History und IFC unverändert.
+
+Nachweise: 180 Tests bestanden, darunter sieben neue Gruppen zu endlichen/überlappenden/entarteten Segmenten, kurzen und schrägen Kreuzungen, Endkontakt, Polylinien-Selbstkreuzung, deterministischen Quellen, Zoom/Priorität/Constraints, 600-ms-Hover, beidseitigen Edit-/Host-Ausschlüssen sowie Zeichnen/Preview/Commit/Undo/Redo/JSON. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Linie kreuzt Wandachse bei (0,7; 0), Segmentschnitt erkannt, Referenz aktiviert/gelöst, neue Linie startet exakt am Schnitt, Direct Edit einer dritten Linie fängt denselben externen Schnitt; Undo/Redo geprüft. Screenshot: outputs/segment-intersection-hover.png.
+
+Abnahme: Eine Linie quer durch eine Wandachse zeichnen, abseits von End- und Mittelpunkten. Kreuzung anfahren: „Segmentschnittpunkt“. 0,6 s verweilen und Hilfslinien verfolgen; erneut besuchen und lösen. Eine weitere Linie an diesem Punkt beginnen oder eine dritte Linie dorthin bewegen; Undo/Redo prüfen. Beim Bewegen einer der beiden Ausgangslinien darf deren alter Schnittpunkt nicht als externer Fangpunkt angeboten werden.
+
+### Aufgenommen für später: N45 Wandachse
+
+Nutzerpräzisierung: Die derzeit zentrierte Wandachse bei ausgewählter Wand sichtbar machen und später verschiebbar machen. In FUNCTION_REQUIREMENTS_2026-10-03.md bei N45 ergänzt, kein Doppelauftrag. Vor Wandanschlüssen passend einordnen. Ob die physische Wandlage erhalten oder mitverschoben wird, bleibt bis zur fachlichen Klärung offen; hier keine Implementierung.
+
+### Abschluss: schräge Verlängerungs- und Lot-Hilflinienschnitte — 03.10.2026
+
+Aufbauend auf 4c542ea / PR #35, der weiterhin offen bleibt. Neue Umsetzung auf feat/oblique-guide-intersections. Kein Merge durch den allgemeinen Fortsetzungsauftrag.
+
+Die gemeinsame Richtungswahl in constraints/guides/directions.ts berücksichtigt jetzt jede gültige Kantenrichtung, deren Gegenrichtung und Lotrichtungen sowie die bestehenden acht 45°-Richtungen. Pro aktiver Quelle wird genau eine mausrelevante Richtung gewählt. Bei gleichem Winkel entscheidet Verlängerung vor Lot, Horizontal, Vertikal und Winkel; anschließend der Richtungswinkel. Null-/nichtendliche Vektoren werden verworfen. Alte Richtungen bleiben nur erhalten, solange sie weiterhin aus der aktuellen Quellgeometrie stammen.
+
+Darstellung, einzelne Führung, Schnittpunktbildung und Hover-Erwerb konsumieren dieselbe Wahl. Damit entstehen auch Schnitte außerhalb des 45°-Rasters, etwa zweier schräger Verlängerungen oder Verlängerung/Lot. Anders als bisher werden einzelne Führungen nicht zusätzlich unabhängig aus allen Richtungen bewertet. Explizite Shift-Winkel bleiben unverändert, genauso Punktprioritäten, Fangradius, Ortho und Direct-Edit-Ausschlüsse.
+
+Hysterese: weiterhin maximal 5° zusätzliche Winkelreserve an einer Richtungsgrenze. Bei eng benachbarten Kandidaten reduziert sich diese auf 20 Prozent ihres Winkelabstands, damit flache schräge Kanten gegenüber der Horizontalen erreichbar bleiben. Vorläufiger technischer Bedienwert; kein numerisches Geometrie-Epsilon. Bestehender 45°-Grenztest 27,5°/17,5° bleibt gültig. Keine Modellaktion, Dateimigration, IFC- oder AI-Änderung.
+
+Nachweise: 185 Tests bestanden, darunter fünf neue Gruppen für Verlängerung/Verlängerung und Verlängerung/Lot, Zoom/Fangradius, parallele/kollineare Fälle, Vektorreihenfolge/ungültige Richtungen, flache Winkel/Quellenwechsel, Prioritäten/Constraints, Hover-Lebenszyklus und Direct-Edit-Preview/Commit/Undo/Redo/JSON. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Linien (0;0,5)–(1;1) und (4;0,5)–(3;1) liefern außerhalb ihrer Strecken einen Hilflinienschnitt bei (2;1,5); beide sichtbaren Führungen sind Verlängerungen. Nach 600 ms dritter Hilfspunkt, neue Linie startet exakt dort, Undo/Redo geprüft. Freie Bewegung einer dritten Linie fängt denselben Schnitt mit Undo/Redo. Screenshot: outputs/oblique-guide-intersection.png.
+
+Abnahme: Zwei schräge Linien zeichnen, deren Verlängerungen sich treffen. Beide zugewandten Enden je 0,6 s aktivieren und den Zeiger zur erwarteten Kreuzung führen. Die silbergrauen Führungen folgen den Kanten; der Schnitt wird zum Hilfspunkt. Dort zeichnen oder ein anderes Element dorthin bewegen. Parallel liegende Führungen sollen keinen erfundenen Schnittpunkt anzeigen.
+
+### Abgeschlossener Auftragsumfang: Hilfslinienschnitt mit fester Direct-Edit-Achse
+
+Die bisher dokumentierte Lücke bei achsengebundener Bearbeitung schließen: externe Hilfsreferenzen dürfen seitlich der erlaubten Bewegungsachse liegen, wenn ihre mausrelevante Führung diese Achse schneidet. Den Schnitt gemeinsam und eindeutig berechnen, die feste X-/Y-/Elementachse weiterhin strikt einhalten und keine bloß projizierten Endpunkte als echte Fangpunkte beschriften. Zuerst vorhandenen Filter und Kandidatenvertrag prüfen; keine separate SnapEngine im Werkzeug.
+
+Abnahme: X-/Y-/schräge Elementachse, passende externe Verlängerung/Lotführung, parallele/kollineare Fälle, eigene und Fensterhost-Quellen ausgeschlossen, veralteter Kontext, unterschiedliche Zoomstufen. Preview und Bestätigung müssen identische Ziele liefern, ein Undo/Redo und JSON bleiben korrekt. Browserabnahme einschließlich Escape sowie Tests/TypeScript/Lint/Build. Wandachse N45 bleibt ein späterer fachlich zu klärender Auftrag.
+
+## Historische Fortschrittsnachweise
+
+### Abgeschlossener Auftrag: gemeinsame Fang-Kandidaten und Rangfolge
+
+**Ziel:** Die bestehenden Linie-/Wand-/Auswahl-/Direct-Edit-Verbraucher erhalten dieselbe nachvollziehbare Fangentscheidung aus einer nichtrekursiven Kandidatenpipeline. Keine neuen Fangarten oder UI-Werkzeuge.
+
+**Ausgangsbefund:** constraints/snapping/engine.ts ruft querySnap für jede aktive Referenz erneut auf. Endpunkte, einzelne Führungen und Mehrfachreferenzen verwenden unterschiedliche Tie-Breaker; letztere nutzen sourceFeature.localeCompare ohne vollständige Quellenidentität. Toleranzregeln und Direct-Edit-Ausschlüsse sind bereits abgesichert.
+
+**Begrenzter Umfang:**
+
+1. Bestehende Erzeugung für Endpunkte, Richtungsführungen, horizontale/vertikale Referenzschnittpunkte und Raster intern trennen. Referenzvalidierung einmal pro Anfrage; keine rekursive querySnap-Gesamtabfrage. Public API und Modelladapter erhalten, keine vorsorglichen Klassen/Registries.
+2. Eine reine, explizite Rangfunktion verwenden. Bestehender Vorrang bleibt: ausdrücklicher Shift-Constraint; dann kompatibler Endpunkt, bestehender HV-Guide-Schnittpunkt, einzelne Führung, Raster-Fallback. Ortho-Kompatibilität und tatsächliche Quellenkoordinaten erhalten. Abstand in CSS-Pixeln vergleichen.
+3. Technischer Umsetzungsvorschlag für bisher uneinheitliche Gleichstände: bei gleichem Rang/Abstand neuere aktive Referenz bevorzugen, danach vollständige stabile Quellenidentität (entityId, feature; bei Schnittpunkten beide Quellen), schließlich ausdrücklich dokumentierte Fangart-/Richtungsreihenfolge. Keine Locale-Abhängigkeit und keine unbeabsichtigte Abhängigkeit von der Reihenfolge der Modellquellen. Dies ist eine technische Rangregel, keine behauptete Nutzerentscheidung; im Änderungsprotokoll die bisher anders entschiedenen Fälle benennen.
+4. Bestehende Consumer weiterverwenden. Direct-Edit-Ausschluss eigener Quellen/Host und explizite Achspriorität erhalten; keine eigenständige zweite Rangfunktion im Editadapter.
+
+**Nicht enthalten:** Mittelpunkt-/allgemeiner Segmentschnittfang, beliebige Guide-Schnittpunkte, Hysterese, räumlicher Index, 3D-Arbeitsebenen, Lösung des Wandeck-Griffversatzes, Layer, Skalieraktion, neue Bauteile oder Layouteditor. Diese bleiben dokumentiertes Backlog, nicht Teil dieses Auftrags.
+
+**Abnahme:**
+
+- Bestehende 149 Tests bleiben grün; zusätzliche Tests für konkurrierende Quellen mit gleichem Feature-Namen, vertauschte Quellreihenfolge, bewusste Aktivierungsreihenfolge und mehrere gleiche Führungen.
+- Toleranzfall 0.3 gegen 0.1+0.2, große Offsets, mehrere Zoomstufen, echte seitliche Abweichung und exakte Invalidierung veralteter Quellen bleiben korrekt. Zwei Quellen eines Schnittpunkts bleiben zur Anzeige verfügbar.
+- Snap aus, Shift/Ortho, vier Referenzen, Escape/Kontextwechsel und Raster-Fallback behalten ihren geprüften Vertrag. Wand/Linie/Direct Edit liefern bei identischem Kontext identische Zielkoordinaten.
+- Anwendungstests bestätigen Vorschau/Klick, eigene Quellenausschlüsse, ungültiges Ziel ohne Commit, ein Undo/Redo und JSON; vorhandene Stage-1-/IFC-Regressionen bestehen.
+- TypeScript, vollständiges ESLint und Build ausführen; bekannte Warnungen getrennt berichten. Praktisch zwei externe Referenzen aktivieren, konkurrierende Hilfslinien beim Linienzeichnen und freien Bewegen testen, zoomen, bestätigen/Undo und abbrechen. Keinen neuen Performanceanspruch ohne Messung.
+- Kein neuer Modellbefehl entsteht: vorhandene AI/Text/Voice-Verträge und Stale-Context-Tests erhalten; ein zusätzlicher Sprachparser ist hier nicht erforderlich.
+
+**Lieferung:** ein kleiner prüfbarer Entwicklungszweig/PR, dokumentierte Rangregel und Bedienabnahme. Kein Merge ohne Prüfung. Dokumentationsstand baut auf PR #28 auf; Abhängigkeiten in Reihenfolge prüfen statt ältere Änderungen erneut zu implementieren.
+
+## Architekturreview: Direct Edit an gemeinsame Fang-Engine angebunden - 03.10.2026
+
+Zweiter begrenzter Korrekturschritt nach numerischen Toleranzen (PR #27). Der Application-Adapter `application/direct-edit/snapping.ts` verbindet vorhandene EditSession-Aktionen mit der gemeinsamen SnapEngine. BimPlan verwendet dieselbe Auflösung für Live-Vorschau und Bestätigung, einschließlich aktueller Shift-Taste. Die Vorschau bleibt abgeleitet; nur Bestätigung erzeugt einen validierten Undo-Schritt. Die Quellen stammen aus dem ursprünglichen Modell, niemals aus der Vorschau.
+
+Freies Bewegen und Punktbearbeitung erhalten Endpunktfang, Raster, Ortho, Shift in 45-Grad-Schritten und aktivierte Hover-Hilfslinien. Die bestehenden silbergrauen Referenzringe und Führungen erscheinen auch während Direct Edit. Alle Referenzen des bearbeiteten Elements werden ausgeschlossen; bei Fenstern zusätzlich die Trägerwand. Explizite X-/Y-/Elementachsen, Strecken und die Fensterachse haben Vorrang vor Shift/Ortho. Auf solchen Achsen werden nur kompatible Referenzpunkte verwendet; ein seitlich projizierter Fangpunkt wird niemals als exakter Endpunkt/Schnittpunkt/Raster beschriftet.
+
+Abnahme: Snap einschalten, eine Linie zeichnen. Wandecke auswählen, im Elementmenü „Punkt frei bewegen“ wählen und an einem fremden Linienendpunkt verweilen. Endpunktmarker erscheint sofort, Referenzring nach 0,4 s. Daneben zeigt die passende temporäre Hilfslinie. Ziel anklicken, Undo und Redo ausprobieren. Shift bei freier Bearbeitung halten; Escape muss die Vorschau verwerfen.
+
+Prüfung: 149 automatisierte Tests, TypeScript, vollständiges ESLint und Produktionsbuild. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Neue Fälle prüfen freie Wandbewegung und Punktänderung, exakte externe Endpunkte, Zoomradius, Snap aus, Shift, Achspriorität, Hover-Führung, geschlossene Polylinien, Fenstergrenzen und Strecken mit Griffversatz. JSON, Undo/Redo und bestehende IFC-Tests bleiben enthalten. Browser: Endpunkt außerhalb des Rasters exakt erkannt, Ring/Hilfslinie beim Bearbeiten sichtbar, Vorschau und Bestätigung geometrisch identisch, Undo auf 3 m und Redo auf 4,131980263614846 m geprüft. Screenshot lokal: outputs/direct-edit-snap-preview.png.
+
+Grenzen: 2D; keine neuen Fangarten oder räumlichen Indizes. Auch unbewegte Punkte desselben Elements bleiben vorerst ausgeschlossen. Bei festgelegten Achsen werden Führungen aus seitlich liegenden Referenzen noch nicht mit der Bewegungsachse geschnitten. Bestehende Wandgriffe verschieben den Achsendpunkt um das Griffdelta; eine beim Drehen neu berechnete Außenkante ist damit kein geometrisch fixierter Eckkontakt. Dieser bestehende Griffversatz ist gesondert vor Wandanschlüssen zu präzisieren. Keine Änderung an Dateiformat, IFC oder Modellvalidierung.
+
+Nächster Schritt: Kandidatenerzeugung und Rangfolge in der gemeinsamen Engine ohne rekursive Gesamtabfragen trennen und Gleichstände ausdrücklich regeln; danach allgemeine Richtungsschnittpunkte und Hysterese.
+
+## Architekturreview: numerische Fangtoleranzen - 03.10.2026
+
+Grundlage: [Architekturreview und Funktionslandkarte](NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md), als Nutzerquelle abgelegt. Abgleich mit main dd3e358 nach Übernahme des Gesamtstands aus PR #26. Der Architekturvertrag bleibt maßgeblich. Dieser Schritt bearbeitet ausschließlich den ersten Korrekturauftrag; zusätzliche Fangarten sind zurückgestellt.
+
+Fehler zuerst als Regression reproduziert: Endpunkt y=0.3 wird bei Ortho-Ursprung y=0.1+0.2 nicht erkannt. Der Test schlägt am unveränderten Stand fehl und besteht nach Korrektur. `geometry/tolerances/model.ts` definiert eine numerische Modellkompatibilität in Metern: Minimum 1e-9 m, bis zu acht maschinelle Rundungseinheiten relativ zur Koordinatengröße, gedeckelt auf 1e-6 m. Das ist keine Bauausführungs- oder Importtoleranz. Bei extremen Koordinaten über dieser Genauigkeitsgrenze sind lokale Koordinaten nötig; die Toleranz wächst nicht unbegrenzt. Nichtendliche Werte sind inkompatibel. Der Bildschirm-Fangradius bleibt unverändert in CSS-Pixeln.
+
+Endpunkt-/Guide-/Schnittpunkt-Kompatibilität mit Ortho und die Rasterkennzeichnung verwenden diese gemeinsame Regel. Akzeptierte Kandidaten behalten ihre originalen Modell-/Konstruktionskoordinaten statt eine projizierte Kopie als Endpunkt oder Raster auszugeben. Quellen-IDs, Feature-Identität, Hover-Zeitlogik und Positionsvergleiche zur Invalidierung bleiben ausdrücklich exakt. Projektänderungen setzen den UI-Kontext weiterhin zurück. Kein Dateiformatwechsel, keine Änderung an Prioritäten, Shift oder History.
+
+Nachweise: 140 Tests bestanden (fünf neue Tests mit mehreren Fällen), TypeScript, vollständiges ESLint und Produktionsbuild erfolgreich. Lint: null Fehler, sechs bekannte React-Refresh-Warnungen. Tests prüfen beide Achsen, ±10 Millionen Meter, 10/100/1000 px/m, echte Abweichungen, nichtendliche Werte, Toleranzdeckel, exakte Kandidatenkoordinaten und weiterhin ungültige veraltete Hover-Referenzen trotz minimaler Verschiebung. Vorhandene Shift-, Mehrfachreferenz-, Undo/Redo-, JSON- und IFC-Tests bleiben grün. Keine erneute Browserprüfung in diesem rein numerischen Schritt; Bedienoberfläche unverändert.
+
+Kurzer Bedienversuch: Linie mit aktivem Ortho an einem vorhandenen Endpunkt beginnen/enden lassen und bei unterschiedlichen Zoomstufen wiederholen. Echte seitlich versetzte Punkte dürfen nicht als Endpunkt auf der Ortho-Achse erscheinen. Der konkrete Unterschied von 0.3 zu 0.1+0.2 ist im automatisierten Regressionstest zuverlässiger prüfbar als per Maus.
+
+Getrennte Folgeaufträge in dieser Reihenfolge:
+
+1. Direct Edit mit geeignetem Ausschluss eigener Quellen an die gemeinsame Engine anbinden; Vorschau und Klick müssen denselben Punkt liefern, Wand-/Fenstervalidierung beibehalten.
+2. Kandidatenerzeugung und Rangfolge ohne rekursive Gesamtabfragen trennen; Gleichstände über ausdrückliche Quellen-/Aktivierungsregeln entscheiden.
+3. Allgemeine Richtungsschnittpunkte und Hysterese ergänzen.
+4. Architekturgrenzen automatisiert absichern und große Modelle messen, bevor Leistungszusagen gemacht werden.
+
 ## Guide-Etappe 3c: werkzeugfreies Hover und mehrere Referenzen - 03.10.2026
 
 Hover-Erkennung und Hilfslinien funktionieren jetzt auch im Auswahlmodus, ohne Zeichenwerkzeug. Der aktive ungefüllte Referenzring hat 10,5 statt 6 CSS-Pixel Radius (+75 Prozent); Ring und Hilfslinien verwenden Silber-Grau (#929aa3). Die bestehenden blauen Fanghinweise bleiben zur Unterscheidung erhalten. Das Wandzeichnen nutzt nun dieselbe Fang-/Hover-/Shift-API wie Linie/Polylinie; direkte Bearbeitung bleibt separat.
@@ -150,3 +331,200 @@ Prüfung: 110 Tests bestanden (105 bestehende, 5 Kamera-Tests), TypeScript, gezi
 Praktische Abnahme: 2D öffnen, über einer Wandecke mit dem Mausrad zoomen; die Ecke bleibt unter dem Zeiger. Pan aktivieren und ziehen, danach Escape drücken. Maße müssen gleich bleiben. Fit view zeigt das ganze Modell. 100 px/m wählen und zeichnen/bearbeiten; anschließend Undo/Redo prüfen.
 
 Grenzen: px/m ist ein Bildschirmmaßstab, kein Druckmaßstab. Rasterdarstellung ist adaptiv; das bisherige optionale Rasterfangen bleibt ausdrücklich bei 0,10 m. Kameras werden nicht in Projektdateien gespeichert und beim Wechsel des Viewport-Layouts neu initialisiert. Geometrisches Fangen, Referenzaktivierung und Hilfslinien sind noch offen. Nächster Schritt: gemeinsame Endpunkt-/Mittelpunkt-/Schnittpunkt-Kandidaten unter constraints/snapping gemäß ARCHITECTURE.md und F13.
+
+
+### Abschluss: externe Hilfslinien schneiden feste Bearbeitungsachsen — 03.10.2026
+
+PR #35 und #36 wurden nach Nutzerfreigabe normal in ihre bisherigen Zielzweige übernommen (ee49f05 und d4a27ce). Dieser Schritt baut auf d4a27ce auf dem Zweig feat/direct-edit-axis-guides auf.
+
+SnapContext erhält eine optionale feste Achse. Die gemeinsame Kandidatenpipeline schneidet jede aktive, validierte externe Führung mit dieser Achse. Der Direct-Edit-Adapter entfernt nur eigene/Host-Quellen, statt alle seitlich liegenden Quellen auszuschließen. Endpunkte und bestehende Schnittpunkte werden weiterhin auf echte Achsenkompatibilität geprüft; keine Projektion wird als Endpunkt bezeichnet. Feste Achsen haben Vorrang vor Shift/Ortho. Parallele/kollineare Führungen erzeugen keinen eindeutigen Achsenschnitt. Abstand bleibt 10 CSS-Pixel vom Mauszeiger, nicht von dessen Projektion.
+
+Neue Anzeige: Achsenschnittpunkt mit externer Führung und zweiter Führung ab dem Bearbeitungsanker. Rang 0,5 wie Hilflinienschnitt, nach echten End-/Mittel-/Segmentschnittpunkten; bestehende Rangregel entscheidet Gleichstände deterministisch. Achsenschnitte sind sitzungsgebundene Fangziele und werden nicht als frei weiterverwendbare Hover-Referenz gespeichert. Keine Modell-, JSON-, IFC- oder AI-Modelllogikänderung. Bestehende validierte Aktionen und stabiler Zielkontext bleiben maßgeblich.
+
+Nachweis: 191 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Testgruppen decken X/Y/schräge Achsen, Zoom/Radius, Quelleninvalidierung, Parallelität/Kollinearität, Endpunktpriorität, ungültige Achsen, eigene/Host-/abhängige Quellen, Fensterposition, veraltete Sitzung, Preview/Commit/Undo/Redo/JSON ab. Browser: Linie (0;1)–(1;1) auf X bewegen, Wandachsende (3;0) 600 ms aktivieren; sichtbarer Achsenschnitt bei (3;1), Vorschau und Commit ergeben (3;1)–(4;1). Undo/Redo und Escape ohne Modelländerung geprüft. Y/schräge Achsen und Fensterhost sind automatisiert geprüft.
+
+Abnahme: Punktfang und Snap einschalten. Linie oberhalb einer Wand zeichnen, auswählen, im On-Demand-Menü Element auf X-Achse wählen. Ein externes Wandachsende 0,6 s anhovern, danach die Maus zur Kreuzung seiner Lotführung mit der Bewegungslinie führen. Achsenschnittpunkt anzeigen lassen, bestätigen und Undo/Redo testen. Alternativ Escape zum Abbrechen.
+
+### Abgeschlossener Auftragsumfang: präzise Strecke bei achsengebundener Bewegung eingeben
+
+Die vorhandene X-/Y-/Elementachsen-Bearbeitung um eine numerische Streckeneingabe in Metern ergänzen. Zuerst bestehende Eingabe-/Einheitenparser prüfen und wiederverwenden; Eingabe und Maus müssen denselben gepinnten EditSession-Kontext und denselben Vorschau-/Bestätigungspfad nutzen. Vorzeichen relativ zur eindeutig angezeigten Achsenrichtung erklären. Keine neue Bewegungslogik in der UI, keine eigenständige AI-Aktion. Zunächst nur ganze Elemente auf X/Y/Elementachse, kein Skalieren, keine Wandachsenverlagerung N45.
+
+Abnahme: positive/negative Strecke, Dezimalkomma, ungültiger Wert, veralteter Kontext, Escape, Vorschau/Commit, genau ein Undo/Redo und JSON. Fangen darf die ausdrücklich eingegebene Strecke nicht nachträglich verändern. Tests, TypeScript, Lint, Build und praktische Browserabnahme dokumentieren.
+
+
+### Abschluss: numerische Strecken für ganze Elemente — 03.10.2026
+
+PR #37 wurde nach ausdrücklicher Nutzerfreigabe normal als 47b24ca in feat/shared-segment-intersections übernommen. Umsetzung auf feat/numeric-axis-move.
+
+Nach Element auf X-/Y-Achse oder Element entlang Achse erscheint Strecke (m) in der bestehenden Bearbeitungseinblendung. Der vorhandene parseMetres-Parser akzeptiert Dezimalpunkt/-komma sowie Vorzeichen. X/Y zeigen positive Weltachsen; die Elementachse zeigt ausdrücklich die Richtung zwischen den nummerierten Punkten (beim ersten Griff Punkt 2 → 1). Negative Werte laufen entgegengesetzt. Der eingegebene Wert ist eine relative Strecke vom gepinnten Bearbeitungsanker, keine Zielkoordinate. Keine Einheitensuffixe oder Rechenausdrücke in diesem Schritt.
+
+application/direct-edit/numeric.ts übersetzt nur die Strecke in einen Punkt und verwendet previewEdit; Bestätigung verwendet unverändert editingReducer/confirm. Vorschau bleibt abgeleitet, History/Datei/IFC lesen weiterhin das bestätigte Projekt. BimPlan und die 3D-Ansicht zeigen denselben numerischen Entwurf. Solange Text eingegeben ist, kann Mausbewegung, Raster oder Punktfang die Zahl nicht überschreiben; bestätigt wird mit Enter oder Strecke übernehmen. Leeren/Maussteuerung kehrt zur Maus zurück. Fehler sperren Bestätigung, Escape auch im Eingabefeld bricht ab. Entwurf ist an dieselbe EditSession gebunden; neue Sitzung übernimmt keinen alten Wert. Punkt-/Streckgriffe und Fenster sind vorerst ausgeschlossen. Keine zweite AI-Modelllogik, kein Dateiformatwechsel.
+
+Nachweis: 194 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Neue Gruppen prüfen X/Y/Elementachse, positive/negative/Nullwerte, Dezimalkomma, normierte schräge Richtung, ungültige Texte, stale Auswahl/Modell, Vorschau/Commit/Undo/Redo/JSON. Browser: +1,25 m auf X bleibt vor Bestätigung ohne Undo-Eintrag, bestätigte Lage identisch; Undo/Redo korrekt. Ungültiger Text sperrt Übernehmen. -0,375 m auf Y bleibt trotz Mausbewegung exakt; Escape im Feld stellt den bestätigten Stand wieder her. 3D-Vorschau durch gemeinsamen previewEdit-Aufruf angebunden, separat noch nicht praktisch abgenommen.
+
+Abnahme: Wand auswählen, Element auf X-Achse wählen, 1,25 in Strecke (m) eingeben und Vorschau betrachten. Enter oder Übernehmen, danach Undo/Redo. Mit negativem Wert, ungültigem Text und Escape wiederholen. Elementachse zeigt ihre positive Richtung ausdrücklich an.
+
+### Zurückgestellter Auftrag zugunsten Nutzerkorrektur: numerisches Strecken eines ausgewählten Punktgriffs
+
+Die vorhandene Aktion Punkt in Flucht strecken um dieselbe Meter-Eingabe erweitern. Positive Strecke verlängert vom Nachbarpunkt weg, negative verkürzt. Bestehenden Griffversatz, Nachbarüberquerung und Fenstergrenzen respektieren; keine Änderung der Wandachsenlage N45. Die numerische Vorschau und Bestätigung müssen dieselben gepinnten Bearbeitungsaktionen nutzen. Tests für schräge Linien/Wände, ungültiges Verkürzen, Kontextwechsel und Undo/Redo sowie praktische Abnahme einschließlich 3D-Zahlenvorschau. Fensterbewegung und freie Punktbewegung bleiben außerhalb dieses Teilauftrags.
+
+
+### Abschluss: kompaktes Hilfseingabefenster der Rasterengine — 03.10.2026
+
+Nutzerkorrektur hat Vorrang vor dem zuvor geplanten Streckgriff: großes festes Streckenfeld durch ein kompaktes Hilfseingabefenster nahe der Auswahl ersetzen und freies Bewegen mit Winkel/Länge unterstützen. Umsetzung auf feat/compact-polar-input, aufbauend auf PR #38 / 86b5839. PR #38 bleibt offen; keine zusätzliche Merge-Freigabe angenommen.
+
+PrecisionInput ist eine wiederverwendbare, modellfreie UI-Komponente (230 px breit, im normalen Zustand etwa 140 px hoch), mit verschiebbarem Kopf und Bildschirmbegrenzung wie beim On-Demand-Menü. Startposition ist die vorhandene Auswahl-/Menüposition. Zwei nebeneinanderliegende Felder: Winkel in Grad und Länge in Metern. Der gewählte Modellpunkt bleibt der gepinnte Ursprung. Winkelkonvention: 0° rechts/+X, 90° oben/+Y, gegen den Uhrzeigersinn. Die Maus liefert über den gemeinsamen Direct-Edit-Fangresolver eine Richtung; dessen Shift-/Ortho-/Referenzregeln bleiben erhalten.
+
+Freies Bewegen hat jetzt einen ausdrücklichen Richtungswahl-Schritt: erster Klick fixiert die Richtung, erzeugt noch keinen History-Eintrag und fokussiert das Längenfeld. Winkel kann stattdessen direkt eingetragen werden. Leerer Winkel folgt der Maus, gesetzter Winkel bleibt fix; leere Länge folgt der Mausprojektion auf die feste Richtung, gesetzte Länge bleibt exakt. Maus setzt beide Eingaben zurück. Enter/Übernehmen bestätigt, Escape/Abbrechen verwirft. Negative Länge bewegt in Gegenrichtung. Dezimalkomma/-punkt werden akzeptiert, ungültige Werte sperren Bestätigung. Bei festem Winkel und leerer Länge bleibt Rückwärtsbewegung vor dem Ursprung bei Länge null; eine negative Länge kann ausdrücklich eingegeben werden.
+
+constraints/input/polar.ts bildet als gemeinsame, React-/BIM-freie Eingabelogik den Zielpunkt aus Ursprung/Richtung/Länge. application/direct-edit/numeric.ts validiert Texte und Kontext und verwendet weiterhin previewEdit/confirm. BimPlan liefert Mausziele, das Fenster verändert kein Modell selbst. X/Y/Elementachsen bleiben Alternativen und verwenden dasselbe Fenster mit angezeigtem, nicht editierbarem Winkel. Zunächst ganze Wände/Linien; Fenster, Zeichnen und Punktstrecken noch nicht an dieses Fenster angebunden. Bestehender 3D-Vorschauadapter wird weiterverwendet; freie Richtungswahl startet in 2D. Kein Projektformat-/IFC-Wechsel, keine zweite AI-Modelllogik.
+
+Nachweise: 198 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Testgruppen: gepinnter Ursprung, Kardinal-/schräge Winkel, unabhängige Eingaben, negative Länge, fehlende/ungültige Werte, Klick auf Wandecke, unveränderte Wandmaße, stabile Auswahl/Modellprüfung und ein Undo/Redo/JSON-Rundlauf. Browser: Ecke (3;0,18), Maus nach oben, Klick fixiert 90° und fokussiert Länge; 1,25 m verschiebt die ganze Wand exakt auf y=1,25. Kein History-Eintrag vor Bestätigung, Undo/Redo geprüft. Direkte Eingabe 0°/2 m bleibt bei Mausbewegung unverändert; ungültiger Winkel sperrt Bestätigung; Escape erhält bestätigten Stand. Fenster nahe der Auswahl und per Tastatur am Kopf verschoben. Keine separate praktische 3D-Abnahme in diesem Schritt.
+
+### Abgeschlossener Auftragsumfang: Hilfseingabe für Punkt in Flucht strecken
+
+Dasselbe kompakte Fenster an die bestehende Streckgriff-Aktion anbinden. Die gewählte Fluchtrichtung bleibt fest; positive Länge verlängert, negative verkürzt. Griffversatz, Nachbarüberquerung und Fenstergrenzen müssen unverändert über die gemeinsame Modellaktion validiert werden. Tests für schräge Wände/Linien, unzulässiges Verkürzen, stale Kontext, Escape/Undo/Redo und praktische Prüfung auch der abgeleiteten 3D-Zahlenvorschau. Kein separates Eingabefenster pro Werkzeug; Zeichnen und Fensterbewegung bleiben spätere Verbraucher.
+
+
+### Bedienkorrektur: Hilfslinien im freien Bewegen und Winkelgrenzen — 03.10.2026
+
+Ergänzung zu PR #39: Der gepinnte Bewegungsursprung ist während Element frei bewegen automatisch eine sitzungsgebundene Referenz der gemeinsamen Engine, mit Kantenrichtung und Lot sowie den bestehenden Winkelführungen. Er bleibt während der Eingabe aktiv; weitere externe Quellen können weiterhin per Hover erworben werden. Eigene Modellgeometrie bleibt vom Fang ausgeschlossen, nur der explizite Ursprung ist als temporäre Konstruktion zugelassen. Der Ursprung ist nicht per Hover lösbar und beansprucht keinen der vier externen Hoverplätze; Ende/Abbruch der Sitzung entfernt ihn. Snap aus deaktiviert weiterhin das Fangen. Keine Geometriekopie, kein Dateiformateintrag.
+
+Winkeleingaben außerhalb 0° bis einschließlich 360° werden jetzt in der gemeinsamen polaren Eingabelogik abgelehnt, nicht mehr modulo umgerechnet. 360° entspricht 0°; negative Bewegungsstrecken bleiben erlaubt. Ungültiger Text bleibt zur Korrektur im Feld, erzeugt eine Fehlermeldung und sperrt Übernehmen.
+
+Nachweise: 199 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Regression prüft Ursprung als Führungsquelle bei weiter ausgeschlossenem Eigenmodell und Grenzen -1/360,01/566 versus 0/360. Browser: ausgewählte Ecke (3;0,18) erzeugt sofort eine Lot-Hilfslinie während freier Bewegung; diese bleibt bei der Winkeleingabe sichtbar. 566° sperrt Bestätigung, 90° mit Länge 2 m zeigt korrekte Vorschau. Abbrechen entfernt temporären Ursprung und Hilfslinie. Der nächste begrenzte Folgeauftrag bleibt Hilfseingabe für Punkt in Flucht strecken.
+
+
+### Abschluss: numerisches Strecken mit gemeinsamer Hilfseingabe — 03.10.2026
+
+PR #38 und #39 wurden nach Nutzerfreigabe in Reihenfolge normal in ihre bisherigen Zielzweige übernommen (5681992 und 16beed6). Neuer Zweig feat/numeric-point-stretch basiert auf 16beed6. main bleibt unverändert.
+
+Punkt in Flucht strecken verwendet jetzt dasselbe kompakte Hilfseingabefenster wie die Bewegung. Winkel ist an die vorhandene Fluchtrichtung gebunden; positive Meter verlängern vom Nachbarpunkt weg, negative verkürzen. Der angeklickte Wandeck-Griff bleibt Ursprung, einschließlich seines Versatzes zur Wandachse. Die Application-Eingabe erweitert nur die zugelassenen Aktionen und verwendet weiterhin previewEdit/confirm; kein zusätzlicher Transformationscode, kein neues Fenster. Vorhandene Grenzen für Nachbarüberquerung und Fensterbreite bleiben wirksam. Kontextwechsel und ungültige Eingabe verhindern Übernahme.
+
+In geteilten Ansichten bleibt eine vorhandene 3D-Ansicht beim Start der 2D-Bearbeitung erhalten. Damit sind dieselben numerischen Entwürfe gleichzeitig in Grundriss und 3D sichtbar; in Einzelansicht wird weiterhin zur 2D-Bearbeitung gewechselt. Eigenschaften/Navigator zeigen bis zur Bestätigung den gespeicherten Stand.
+
+Nachweise: 201 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Zwei neue Testgruppen prüfen positive/negative Strecken an beiden Enden schräger Linien/Wände, unveränderten Gegenpunkt, Griffversatz, Fenstergrenzen, Nachbarüberquerung, fehlenden Griff, stale Modell/Auswahl, einen Commit/Undo/Redo/JSON sowie Abbruch. Browser: 3-m-Wand über Endgriff um 1,25 m auf 4,25 m verlängert, Vorschau in 2D und 3D visuell geprüft; Eigenschaften vor Commit weiter 3 m. Ungültige Verkürzung -2 m bei vorhandenem 1,20-m-Fenster gesperrt. Commit 4,25 m, Undo 3 m, Redo 4,25 m. Anschließend -0,5 m ergibt 3,75-m-Vorschau, Escape stellt 4,25 m wieder her. Die noch ausstehende praktische 3D-Zahlenvorschauabnahme ist damit erledigt.
+
+Abnahme: Wandecke oder Linienpunkt anklicken → Punkt in Flucht strecken → 1,25 eingeben → Vorschau prüfen und übernehmen. Mit negativer Strecke verkürzen; unzulässige Werte dürfen nicht übernommen werden. Für gleichzeitige 3D-Prüfung vorher Zwei Ansichten und 3D aktivieren, dann den Griff im Grundriss wählen.
+
+### Abgeschlossener Auftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Linie
+
+Das vorhandene Hilfseingabefenster nach Setzen des ersten Linienpunkts aktivieren. Ursprung bleibt der erste Punkt; Maus/Fangengine bestimmen die Richtung oder Winkel/Länge werden ausdrücklich eingegeben. Gemeinsame polare Eingabe und vorhandene validierte Linienerzeugung verwenden; keine zweite Zeichenlogik. Zunächst einzelne gerade Linien, keine Polylinien oder weiteren Bauteile. Prüfen: Maus versus fixierte Werte, 0–360°, ungültige/Null-Länge, Escape ohne Bauteil, ein Commit/Undo/Redo und JSON; praktische Browserabnahme. Wandachsenlage N45 und Fensterbewegung bleiben spätere Aufgaben.
+
+
+### Abschluss: gemeinsame Eingabe statt Werkzeugkopien — 03.10.2026
+
+PR #40 wurde nach Nutzerfreigabe normal in feat/numeric-axis-move übernommen (053b631). Der neue Zweig feat/shared-line-precision basiert darauf; main unverändert.
+
+Nach dem ersten Punkt einer geraden Linie erscheint das vorhandene Hilfseingabefenster nahe dem Punkt. Zwei Klicks zeichnen weiterhin mit der Maus; alternativ Winkel/Länge eingeben und Enter/Übernehmen verwenden. Fixierte Werte haben Vorrang vor Mausfang. Maus leert beide Felder. 0–360°, Dezimalkomma und negative gerichtete Längen verwenden dieselbe polare Auswertung wie Bewegung. Null-Länge, ungültige Werte und geänderter Modellkontext verhindern Übernahme. Escape/Abbrechen verwirft den Entwurf.
+
+Architektur: Ein PrecisionInput und ein usePrecisionDraft für alle angeschlossenen Aktionen. application/input/precision.ts verbindet den zentralen Textparser mit constraints/input/polar.ts; application/drawing/line-input.ts prüft die Zeichengrenzen. Bestehendes addLine und gemeinsame History übernehmen das Modell. Keine zweite Linienerzeugung, keine neue Projektstruktur. Der bisherige Parserexport bleibt kompatibel. Noch bestehende Zeichenkoordination in CadWorkspace wird schrittweise migriert.
+
+Nachweise: 204 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Neue Tests prüfen gemeinsame Auswertung, exakte Werte trotz anderer Mauslage, Mauswinkel, Dezimalkomma, 360°, negative Länge, ungültige Winkel/Zahlen, Null-Länge, stale Modell und einen Commit/Undo/Redo/JSON-Rundlauf. Browser: Linie ab (0;1) mit 0°/1,25 m bleibt bei Mausbewegung exakt; 566° und Null-Länge sperren Übernahme. Commit erzeugt genau eine Linie, Undo entfernt und Redo stellt sie wieder her. Neue Zeichensitzung und Wechsel zu freier Wandbewegung starten mit leeren Feldern. Escape erzeugt keine zusätzliche Linie. Freie Wandbewegung fixiert per Klick weiterhin 90°, fokussiert Länge und zeigt Ursprungshilfslinie.
+
+Praktische Abnahme: Linie wählen → ersten Punkt setzen → Winkel 45 und Länge 2 eingeben → Vorschau prüfen → Enter → Undo/Redo. Danach 566° beziehungsweise Länge 0 und Escape testen. Polylinien und andere Zeichenwerkzeuge sind noch nicht angeschlossen.
+
+### Abgeschlossener Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand
+
+Den geprüften Eingabebaustein nach dem ersten Wandpunkt verwenden. Vorher die gemeinsame Zeichenkoordination für Linie/Wand begrenzt hinter einen Application-Adapter ziehen, damit CadWorkspace keine zweite Eingabelogik erhält. Bestehendes addWall, Fangengine und History wiederverwenden. Vorschau und Commit mit 3,00 m Länge, 0,36 m Stärke und 2,80 m Höhe prüfen, einschließlich Winkel, Null-Länge, Abbruch, Undo/Redo, JSON und 2D/3D. Keine Wandketten, Anschlüsse oder Änderung der Wandachsenlage N45 in diesem Teilauftrag.
+
+
+### Nutzerkorrektur: sofortiger Konstruktionsursprung bei jeder Bewegung — 03.10.2026
+
+Vorrangige Korrektur auf fix/shared-movement-origin, aufbauend auf dem noch offenen PR #41. Ursache: editOriginReference war nur für Element frei bewegen zugelassen; die übrigen Aktionen verwendeten zwar den Resolver, erhielten aber keinen sofort gepinnten Ursprung. Diese Aktions-/Fensterausnahme ist zentral entfernt. Punkt frei bewegen, Strecken, X/Y/Elementachse und Fensterbewegung erhalten jetzt denselben unmittelbaren Ursprung. Fenster behalten die Wandrichtung, feste Achsen bleiben verbindlich und Eigenmodell/Host bleiben von externen Fangquellen ausgeschlossen.
+
+Verbindlicher Zukunftswunsch in ARCHITECTURE.md und AGENTS.md: jede Bewegung jedes späteren Elements (auch Decken, Dächer, Treppen, Möbel) startet über denselben Konstruktionsursprung und die gemeinsame Engine. Keine zusätzliche 0,6-s-Wartezeit für den bereits ausgewählten Ursprung; weitere Referenzen behalten die Hover-Regeln. 3D-Arbeitsebenen und noch nicht vorhandene Bauteile sind damit Anforderungen, keine bereits implementierten Funktionen.
+
+Nachweise: 206 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Regressionen prüfen alle sechs Aktionen für Wand und Linie, gewählten Eckversatz, Eigenmodell-Ausschluss, freie Hilfslinie, Achsbindung, Abbruch ohne History sowie Fensterursprung/Hostbindung. Browser: Wandecke → Punkt frei bewegen zeigt sofort den Referenzring bei (3;0,18), danach senkrechte Referenzhilfslinie zur Maus. Zoom erhält den Ring, Escape entfernt ihn.
+
+Abnahme: Wandecke oder Linienpunkt anklicken → Punkt frei bewegen → Maus nach oben oder diagonal führen. Ursprung muss sofort als Ring sichtbar sein, die Hilfslinien folgen der Maus. Zoom und Abbruch prüfen. Dasselbe bei Strecken und Achsbewegung wiederholen. Der einzige nächste ausführbare Folgeauftrag bleibt die oben beschriebene gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand.
+
+
+### Nutzererweiterung: Linien verfolgen und Tab-Hilfseingabe — 03.10.2026
+
+Umsetzung auf feat/parallel-hover-tab-input, aufbauend auf dem offenen PR #42. Gerade Linien-/Polyliniensegmente und Wandachsen können entlang ihres Inneren nach 0,6 s als Richtungsreferenz erfasst werden. Die Mitte markiert die stabile Segmentreferenz, die erfasste Linie ist zusätzlich gestrichelt hervorgehoben. Erneutes Verlassen/Anhovern und 0,6 s löst sie wie andere Referenzen. End-/Mittel-/Schnittpunkte behalten Fangvorrang, maximal vier externe Quellen bleiben bestehen.
+
+Die erfassten Richtungen stehen an aktiven Bezugspunkten, insbesondere Bewegungs- und Linienzeichenursprüngen, als Parallelen bereit. Hilfslinie und Fangmeldung Parallel verwenden denselben Resolver. Segmenterfassung sitzt in constraints/inference/segment-hover.ts, Segmentdaten im vorhandenen Projektadapter, Darstellung/Timer in den gemeinsamen Komponenten. Kein dauerhafter Modelleingriff.
+
+Tab wird im gemeinsamen PrecisionInput behandelt: Maus führt Richtung → Tab fokussiert Länge und übernimmt die ungerundete Richtung → Tab Winkel → Tab Länge. Enter bestätigt, Escape verwirft; andere Textfelder bleiben unbeeinflusst, Achswinkel bleiben schreibgeschützt. Punkt frei bewegen verwendet nun ebenfalls die gemeinsame Winkel-/Längeneingabe; seine bisherige Mausbestätigung bleibt verfügbar.
+
+Nachweis: 209 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Tests: 599/600-ms-Grenze, stabiles Segment bei kleiner Mausbewegung, einmalige Aktivierung und erneutes Lösen, bildschirmbezogener Abstand bei mehreren Zoomstufen, Segmentgrenzen, schräge Parallele an anderem Ursprung, Snap aus/Quelle entfernt sowie numerische Punktbewegung mit unverändertem Gegenpunkt und Undo. Browser: schräge 30°-Linie durch Hover erfasst; beim Linienzeichnen Parallele mit eindeutiger Fangmeldung am neuen Ursprung. Tab übernimmt 30° und fokussiert Länge. Freie Wandeckbewegung: Tab Länge bei 90°, Tab Winkel, Tab Länge; 1 m/Enter verändert nur den gewählten Endpunkt, Undo stellt die 3-m-Wand wieder her. Escape geprüft.
+
+Abnahme: schräge Linie zeichnen → neue Linie beginnen oder Bewegung starten → über ein fremdes Liniensegment 0,6 s verweilen → vom Ursprung ungefähr parallel führen → Parallel-Hilfe prüfen → Tab → Länge eingeben → Tab → Winkel prüfen/ändern → Enter. Bei Achsbewegung muss der Winkel fest bleiben. Der nächste begrenzte Folgeauftrag bleibt gemeinsame Hilfseingabe beim Zeichnen gerader Wände.
+
+
+### Abschluss: gemeinsame Hilfseingabe für gerade Wände — 03.10.2026
+
+Auf feat/shared-wall-precision, basierend auf dem noch offenen PR #43. PR #41–43 bleiben ohne neue Freigabe offen. Nach dem ersten Wandpunkt erscheint dasselbe PrecisionInput wie bei Linie/Bewegung. Ursprung, Parallelreferenzen, Tab Länge/Winkel, feste Zahlen, Maus, Enter und Abbruch werden gemeinsam verwendet. Wandstärke 0,36 m und Höhe 2,80 m bleiben die bisherigen Zeichenstandardwerte; nachher über Eigenschaften änderbar.
+
+Die Application-Aktion createDrawing bündelt Wand-/Linien-/Polylinienerzeugung, prüft veralteten Modellkontext und verwendet bestehende addWall/addLine-Validierung. Die UI koordiniert weiter Punktaufnahme und Commit, enthält aber keine separaten Bauteilerzeugungsaufrufe mehr. previewDrawingInput ersetzt den linienspezifischen Eingabeadapter bei kompatiblem altem Export. Kein zusätzliches Eingabefenster oder Winkelalgorithmus.
+
+Nachweise: 212 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Tests für exakte Wand 3,00 × 0,36 × 2,80 m, 3D-Grenzen, Vorschau ohne Mutation, einen Commit/Undo/Redo/JSON, Null-Länge, falsche Winkel/Maße, stale Modell und erhaltene Linien-/Polylinienstile. Browser: Ursprung (0;1), Richtung mit Tab übernommen, 0°/3,00 m bleibt bei Mausbewegung exakt; 0 m und 566° sperren Übernahme. Bestätigte Eigenschaften 3/0,36/2,8; Undo entfernt, Redo stellt Wand wieder her. Neue Sitzung hat leere Felder; Abbrechen entfernt Hilfseingabe ohne Wand. Anschließende 3D-Darstellung visuell geprüft. Vorschau beim Zeichnen bleibt eine 2D-Achslinie; kein neuer 3D-Zeichenvorschaumodus.
+
+Abnahme: Wandwerkzeug → Startpunkt → Maus nach rechts → Tab → 3,00 → Enter. Eigenschaften und 3D prüfen, Undo/Redo. Neuer Startpunkt, 0 beziehungsweise 566° testen und Escape/Abbrechen. Keine Wandketten, Anschlüsse oder Änderungen der Wandachsenlage.
+
+### Zurückgestellt zugunsten Architekturkorrektur: gemeinsame Hilfseingabe für Polyliniensegmente
+
+Die vorhandene Eingabe nach jedem gesetzten Polylinienpunkt an dessen Ursprung binden. Enter fügt den numerisch bestimmten nächsten Punkt hinzu; Doppelklick schließt weiterhin die gesamte Polylinie ab. Die bisherige eine History-Aktion pro abgeschlossener Polylinie erhalten. Tab, Parallelführung, Abbruch, ungültige/Null-Segmente, Abschluss und Undo/Redo prüfen. Keine Wandketten-Undo-Entscheidung vorwegnehmen und keine zweite Eingabe-/Fanglogik.
+
+
+### Abschluss: gemeinsame Interaktionssteuerung statt weiterer UI-Sonderfälle — 03.10.2026
+
+Nutzerfreigabe betrifft den begrenzten Architekturumbau. Keine Freigabe für Merge der offenen PRs #41–44 abgeleitet. Umsetzung auf refactor/shared-tool-interaction, aufbauend auf PR #44.
+
+Bestandsaufnahme: Fang-/Hilfslinienservices, Polarberechnung und PrecisionInput waren bereits gemeinsam. CadWorkspace enthielt aber die Auswahl der numerischen Bearbeitungsart, Fehlerbehandlung und getrennte Zeichen-/Edit-Bestätigung direkt. BimPlan entschied zusätzlich anhand der konkreten EditAction über Richtungswahl.
+
+Jetzt: ToolInteraction als typisierter Application-Vertrag, zwei kleine Adapter für vorhandene Edit-/Zeichenaktionen, eine gemeinsame Auswertung und erneute Validierung vor Commit. useToolInteraction steuert Entwurf, Vorschau, Mauswahl, Richtungsfixierung, Bestätigen und Abbrechen; InteractionInput bindet einmalig die vorhandene Tab-/Feldbedienung an. Der Workspace reicht Ursprung/Kontext und Modellaktionen weiter. Escape/Werkzeug-/Auswahlwechsel verwenden denselben Reset für Bearbeitung und Zeichenpunkte. Der Viewport trifft keine EditAction-spezifische Richtungswahl mehr. Kein neuer Fangalgorithmus und keine parallele Modellhaltung.
+
+Nachweise: 215 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Vertragsprüfungen führen Wand-/Linienerzeugung sowie alle sechs Editaktionen an Wand/Linie über denselben Ablauf; Vorschau ohne History, ein Commit und Undo, ungültige/stale Bestätigung ohne Mutation. Browserregression: Wand 3 m per Tab, Elementbewegung mit Klick-Richtung 90° und 0,5 m, Punktbewegung 90°/1 m, ungültiges Strecken -2 m mit Fenster gesperrt, Escape, neue Linie mit leeren Feldern, 2-m-Linie und Undo/Redo.
+
+Einschränkung: Punktaufnahme und einige bestehende Viewport-/History-Anbindungen sind noch Legacy-Koordination; der gesamte zukünftige CAD-Werkzeugrahmen ist damit nicht fertig. Die aktuell angeschlossene Eingabe-/Bestätigungslogik läuft jedoch über einen gemeinsamen Vertrag. 3D-Arbeitsebenen, neue Bauteile und Polylinienpräzision wurden nicht zusätzlich implementiert.
+
+### Abgeschlossener Folgeauftrag: Polylinie als Vertragsnachweis
+
+Die vorhandene Polylinie als weiteren Verbraucher des gemeinsamen Interaktionsvertrags anbinden. Pro Segment den aktuellen Punkt als Ursprung bereitstellen; dieselbe Eingabe, Tab, Fangengine und Bestätigung unverändert nutzen. Doppelklick beendet weiterhin die Polylinie, ein Undo-Schritt für den Gesamtabschluss bleibt erhalten. Prüfen, dass dazu keine zusätzliche Feld-/Tab-/Hover-Steuerung oder neue Werkzeugabfrage im gemeinsamen Interaktionskern nötig ist. Neue Punktaufnahme, Abschluss und Abbruch mit numerischen Segmenten praktisch testen; keine Wandkettenentscheidung vorwegnehmen.
+
+
+### Abschluss: Polylinie verwendet unveränderten Interaktionskern — 03.10.2026
+
+Auf feat/polyline-shared-interaction, basierend auf offenem PR #45; keine Merge-Freigabe angenommen. Für die Polylinie wird nun der jeweils letzte Entwurfspunkt als Ursprung an den vorhandenen drawingInteraction-Adapter übergeben. ToolInteraction, useToolInteraction, PrecisionInput, Tab-/Hover-/Parallelsteuerung wurden nicht verändert. Nach jedem numerisch bestätigten Segment ist der nächste Ursprung aktiv und die Eingabe leer. Bis zum Abschluss bleibt die Polylinie ein Entwurf.
+
+Enter im Eingabefeld ergänzt einen Punkt. Doppelklick beziehungsweise Enter im Grundriss schließt wie bisher die gesamte Polylinie ab. Ungültige explizite Eingaben sperren auch den Gesamtabschluss, statt stillschweigend verworfen zu werden. Escape/Abbrechen verwirft den ganzen Entwurf; bestätigte Elemente bleiben erhalten.
+
+Nachweise: 217 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Vertragsprüfungen für mehrere numerische Segmente mit wechselndem Ursprung, leere nächste Eingabe, ungültige/Nullwerte, kein Modell/History vor Abschluss, genau einen Commit und Undo/Redo sowie Abbruch. Browser: 3 m rechts und 2 m oben erzeugen Entwurf mit drei Punkten, Doppelklick am Endpunkt ergibt eine 5-m-Polylinie. Ein Undo entfernt sie, Redo stellt sie wieder her. Weiterer Entwurf mit 566° sperrt Übernehmen und Doppelklickabschluss; Escape verwirft nur diesen Entwurf.
+
+Abnahme: Linie → Zeichenmodus Polylinie → Startpunkt → Maus nach rechts → Tab → 3 → Enter. Winkel 90 und Länge 2 → Enter. Am letzten Punkt doppelklicken, dann Undo/Redo prüfen. Bei der nächsten Polylinie ungültigen Winkel und Escape prüfen.
+
+### Abgeschlossener Folgeauftrag: gemeinsamen Fangkontext an den Werkzeugvertrag anbinden
+
+Den noch in BimPlan zwischen Zeichnen und Direct Edit verzweigten Aufbau von Ursprung, ausgeschlossenen Quellen und Fangabfrage hinter den vorhandenen Werkzeugvertrag führen. Bestehende querySnap/resolveEditSnap-Services weiterverwenden. Nachweis für Punkt-/Elementbewegung, feste Achsen, Fensterbindung und Zeichnen; Referenzen müssen Zoom überstehen und bei Kontextwechsel korrekt enden. Keine neue Fangmathematik oder UI-Funktion, kein neues Bauteil. Dies vervollständigt gezielt die gemeinsame Anbindung anstelle weiterer werkzeugweiser Sonderfälle.
+
+
+### Abschluss: ein Fangkontext für Zeichnen und Bewegung — 03.10.2026
+
+Auf refactor/shared-snap-context, basierend auf offenem PR #46. ToolInteraction enthält jetzt verpflichtend die Fangrichtlinie aus Ursprung, Quellenfilter und Resolver. Application-Funktionen prepareToolReferences/resolveToolSnap bilden den gemeinsamen Einstieg. BimPlan liefert Maus, Maßstab, Modifier und aktive Referenzen, ohne getrennte Zeichen-/Edit-Fangkontexte oder eigene Auswahl der auszuschließenden Elemente. Bestehende querySnap/resolveEditSnap bleiben zuständig für Geometrie und Achs-/Hostbindung.
+
+Die Richtlinie bleibt für dieselbe unveränderliche Sitzung beziehungsweise denselben Entwurfspunkt identisch. Zoom, Kamerabewegung und Eingabetext erzeugen daher keinen neuen Referenzsatz; neuer Ursprung/Sitzung oder neues Projekt erzeugen den passenden Kontext. Ableitungen liegen in schwachen Caches und enthalten keine eigenständige bearbeitbare Modellkopie.
+
+Nachweise: 220 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Neue Tests vergleichen alle Editaktionen an Wand/Linie sowie Fensterbewegung mit dem bisherigen Resolver, einschließlich Eigenmodell-/Host-Ausschluss, Snap aus, Shift und Ortho. Weitere Prüfungen für stabile Richtlinienidentität, Sitzungswechsel, Zeichnen und Idle-Fang. Browser: Wandecke zeigt sofort Ursprung und Lot-Hilfe; Zoom und Zahleneingabe erhalten den Ring, Escape entfernt ihn. Neuer Linienursprung aktiv, 45°/2 m erfolgreich bestätigt. Anschließende externe Linienreferenz auch nach Zoom erhalten.
+
+Abnahme: Wandecke → Punkt frei bewegen → Maus nach oben → Zoom → Tab/Länge → Escape. Ursprung und Hilfslinie dürfen nicht durch Zoom verschwinden, müssen nach Abbruch verschwinden. Danach Linie zeichnen und fremde Referenz verfolgen.
+
+### Abgeschlossener Folgeauftrag: Sitzungswechsel bei History und Projektladen absichern
+
+Den gemeinsamen Interaktions-/Fangkontext bei Undo/Redo und Projektwechsel während einer laufenden numerischen oder mausgeführten Aktion prüfen. Alte Ursprünge, fixierte Werte und Referenzen dürfen weder in das neue Projekt gelangen noch einen alten Entwurf bestätigen. Fehlverhalten gezielt korrigieren; bestehende Modellaktionen und Projektdateien beibehalten. Regressionen und praktische Abnahme mit Bewegung und Polylinienentwurf; keine neue Bauteilfunktion.
+
+
+### Abschluss: History-/Projektwechsel und modale Tastaturzuständigkeit — 03.10.2026
+
+Auf fix/interaction-project-transitions, basierend auf offenem PR #47. Die bestehende gemeinsame Reset-/History-Steuerung entfernt laufende Bearbeitungen bei Undo/Redo und bestätigtem Laden bereits korrekt. Ein reproduzierter Fehler lag in der Tastatursteuerung: Tab des Hilfseingabefensters griff im Hintergrund des Ladedialogs ein; dessen Fokus blieb auf Abbrechen statt auf Projekt laden zu wechseln.
+
+Korrektur im gemeinsamen PrecisionInput: modaler Dialog/Alertdialog außerhalb des eigenen Panels behält Tab. Auch globale Workspace-Werkzeugkürzel ignorieren modale Inhalte. Keine separate Lösung für einzelne Werkzeuge. Abgebrochene Ladebestätigung erhält den bisherigen Entwurf; bestätigtes Laden verwirft ihn.
+
+Nachweise: 222 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Neue Regressionen für Undo/Redo/Projektwechsel mit altem Edit-Token, auch nach Rückkehr zum ursprünglichen Modell; niemals Mutation durch alte Bestätigung. Alte Polylinienentwürfe werden im neuen Projekt abgewiesen. Browser: Punktbewegung 90°/1 m → Ladebestätigung abbrechen erhält Felder. Erneut laden → Tab fokussiert Projekt laden → Enter lädt 5-m-Wand mit gleicher Wand-ID; keine alten Felder/Ringe. Undo zeigt ursprüngliche 3-m-Wand ohne Bearbeitung, Redo 5 m. Polylinienentwurf wird bei Undo vollständig verworfen, neue Sitzung hat leere Felder. Laden während weiterem Polylinienentwurf (auch identisches Projekt) entfernt Entwurf, Ring und Eingabefenster; keine zusätzliche Linie.
+
+Abnahme: laufende Punktbewegung oder Polylinie beginnen → Projektdatei öffnen → Tab/Abbrechen prüfen; danach erneut öffnen und Tab/Enter laden. Undo/Redo darf nur bestätigte Modelle zurückbringen, keine alten Entwürfe.
+
+### Genau ein ausführbarer Folgeauftrag: offene PR-Kette geordnet zur Übernahme vorbereiten
+
+Die aufeinander aufbauenden PRs ab #41 einschließlich dieses Stabilisierungsschritts auf Zielzweige, Abhängigkeiten und offenen Prüfstatus kontrollieren. Einen verständlichen Übernahmeplan mit finalem Entwicklungsstand und verbleibenden Einschränkungen erstellen. Bereits vorhandene Testnachweise zuordnen; zusätzliche Prüfung nur bei neuen Abweichungen. Keine neuen Funktionen und kein automatischer Merge ohne ausdrückliche Nutzerfreigabe für die betreffenden PRs.

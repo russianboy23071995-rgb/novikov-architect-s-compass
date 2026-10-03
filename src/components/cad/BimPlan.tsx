@@ -1,5 +1,8 @@
+import { cursorGuide } from "@/constraints/guides/directions";
+import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { querySnap } from "@/constraints/snapping/engine";
+import { prepareToolReferences, resolveToolSnap } from "@/application/tools/snapping";
+import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
 import { projectSnapReferences } from "@/application/snapping/project-references";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
@@ -8,12 +11,12 @@ import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
-import { drawingPoint } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   project: Project;
+  snapping?: ToolSnapPolicy | null;
   selection: Selection;
   drawing: boolean;
   endpointSnap?: boolean;
@@ -24,6 +27,11 @@ export type BimPlanProps = {
   ortho: boolean;
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
   editSession?: EditSession | null;
+  numericTarget?: Point | null | undefined;
+  drawingTarget?: Point | null | undefined;
+  onDrawingAim?: ((point: Point) => void) | undefined;
+  onEditAim?: (session: EditSession, point: Point) => void;
+  onEditDirection?: (session: EditSession, point: Point) => void;
   onEditCommit?: (session: EditSession, point: Point) => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
@@ -31,10 +39,11 @@ export type BimPlanProps = {
 
 export function BimPlan({
   project,
+  snapping = null,
   selection,
   drawing,
   endpointSnap = false,
-  hoverDwellMs = 400,
+  hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
   snap,
@@ -44,6 +53,11 @@ export function BimPlan({
   onFinish,
   editSession,
   onEditCommit,
+  numericTarget,
+  drawingTarget,
+  onDrawingAim,
+  onEditAim,
+  onEditDirection,
   camera,
   viewSize,
   onCamera,
@@ -84,11 +98,15 @@ export function BimPlan({
   }, [camera, viewSize, onCamera]);
   const editDown = useRef<EditSession | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
+  const [referenceReset, setReferenceReset] = useState(0);
   const [shiftHeld, setShiftHeld] = useState(false);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
-      if (event.key === "Escape" && event.type === "keydown") setHover(null);
+      if (event.key === "Escape" && event.type === "keydown") {
+        setHover(null);
+        setReferenceReset((value) => value + 1);
+      }
     };
     const clear = () => setShiftHeld(false);
     window.addEventListener("keydown", key);
@@ -100,37 +118,63 @@ export function BimPlan({
       window.removeEventListener("blur", clear);
     };
   }, []);
-  useEffect(() => setHover(null), [endpointSnap, camera]);
-  const references = useMemo(() => projectSnapReferences(project), [project]);
+  useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
+  const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
+  const references = useMemo(
+    () => prepareToolReferences(snapping, projectSnapReferences(project)),
+    [project, snapping],
+  );
   const trackingContext = useMemo(
     () => ({
-      enabled: endpointSnap && snap && !pan && !editSession,
+      enabled: endpointSnap && snap && !pan,
       references,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
+      resetKey: referenceReset,
+      pinnedReferences,
     }),
-    [endpointSnap, snap, pan, editSession, references, camera, viewSize],
+    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset, pinnedReferences],
   );
-  const activeReferences = useHoverReference(hover, trackingContext, hoverDwellMs);
+  const {
+    references: activeReferences,
+    guideDirections,
+    guideCursor,
+  } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
-  const resolveDrawing = (point: Point, shift = shiftHeld) =>
-    endpointSnap
-      ? querySnap(point, {
-          references,
-          pixelsPerMetre: camera.pixelsPerMetre,
-          enabled: snap,
-          endpointRadiusPx: 10,
-          gridSpacing: 0.1,
-          orthoOrigin: ortho ? start : null,
-          activeReference,
-          activeReferences,
-          angleOrigin: shift ? (start ?? activeReference?.point ?? null) : null,
-        })
-      : { point: drawingPoint(point, start, snap, ortho), candidate: null };
-  const resolvedHover = hover ? resolveDrawing(hover) : null;
+  const resolvePointer = (point: Point, shift = shiftHeld) =>
+    resolveToolSnap(
+      snapping,
+      point,
+      {
+        references,
+        pixelsPerMetre: camera.pixelsPerMetre,
+        enabled: snap,
+        endpointRadiusPx: 10,
+        gridSpacing: 0.1,
+        activeReference,
+        activeReferences,
+        guideDirections,
+      },
+      { ortho, shift, featureSnap: endpointSnap },
+    );
+  const resolvedHover =
+    drawingTarget !== undefined
+      ? drawingTarget
+        ? { point: drawingTarget, candidate: null }
+        : null
+      : numericTarget !== undefined
+        ? null
+        : hover
+          ? resolvePointer(hover)
+          : null;
   const snapLabels = {
-    endpoint: "Endpunkt",
+    midpoint: "Mittelpunkt",
+    "segment-intersection": "Segmentschnittpunkt",
+    parallel: "Parallel",
+    endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
+      ? "Hilfspunkt"
+      : "Endpunkt",
     grid: "Raster",
     horizontal: "Horizontal",
     vertical: "Vertikal",
@@ -138,6 +182,7 @@ export function BimPlan({
     perpendicular: "Lotrecht",
     angle: `${resolvedHover?.candidate?.angleDegrees ?? 45}°`,
     intersection: "Schnittpunkt",
+    "axis-intersection": "Achsenschnittpunkt",
   };
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,
@@ -148,15 +193,19 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: point.x, y: -point.y };
   };
-  const editPoint = (event: { clientX: number; clientY: number }) => {
-    const point = rawPoint(event);
-    return point ? drawingPoint(point, editSession?.anchor ?? null, snap, ortho) : null;
-  };
+  const resolvedEdit =
+    numericTarget !== undefined
+      ? numericTarget
+        ? { point: numericTarget, candidate: null }
+        : null
+      : editSession && editPointer?.session === editSession
+        ? resolvePointer(editPointer.point)
+        : null;
   let preview: Project | null = null;
   let editError = "";
-  if (editSession && editPointer?.session === editSession) {
+  if (editSession && resolvedEdit) {
     try {
-      preview = previewEdit(editSession, project, selection, editPointer.point);
+      preview = previewEdit(editSession, project, selection, resolvedEdit.point);
     } catch {
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
@@ -196,7 +245,7 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return resolveDrawing({ x: point.x, y: -point.y }, event.shiftKey).point;
+    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
   };
   const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
     role: "button",
@@ -276,22 +325,34 @@ export function BimPlan({
           return;
         }
         if (pan) return;
-        if (endpointSnap && !editSession) setHover(rawPoint(event));
+        if (endpointSnap || editSession) setHover(rawPoint(event));
+        const drawingPoint = rawPoint(event);
+        if (drawing && drawingPoint)
+          onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
-          const point = editPoint(event);
-          if (point) setEditPointer({ session: editSession, point });
+          const point = rawPoint(event);
+          if (point) {
+            setEditPointer({ session: editSession, point });
+            onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
+          }
         }
       }}
-      onPointerLeave={() => setHover(null)}
+      onPointerLeave={() => {
+        setHover(null);
+        setEditPointer(null);
+      }}
       onClick={(event) => {
         if (editSession) {
+          if (numericTarget !== undefined) return;
           if (editDown.current !== editSession) return;
           editDown.current = null;
-          const point = editPoint(event);
+          const point = rawPoint(event);
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              onEditCommit?.(editSession, point);
+              const target = resolvePointer(point, event.shiftKey).point;
+              if (onEditDirection) onEditDirection(editSession, target);
+              else onEditCommit?.(editSession, target);
             } catch {
               /* Invalid preview stays editable. */
             }
@@ -301,13 +362,13 @@ export function BimPlan({
         if (drawing) {
           event.currentTarget.focus();
           if (onFinish && event.detail > 1) return;
-          const point = pointFromEvent(event);
+          const point = drawingTarget !== undefined ? drawingTarget : pointFromEvent(event);
           if (point) onPoint(point);
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {
         if (pan || navigationClick.current) return;
-        if (drawing && onFinish) {
+        if (drawing && onFinish && drawingTarget !== null) {
           event.preventDefault();
           onFinish();
         }
@@ -318,7 +379,7 @@ export function BimPlan({
           setHover(null);
         }
         if (pan) return;
-        if (drawing && onFinish && event.key === "Enter") {
+        if (drawing && onFinish && drawingTarget !== null && event.key === "Enter") {
           event.preventDefault();
           onFinish();
         }
@@ -470,29 +531,29 @@ export function BimPlan({
             }}
           />
         ))}
-      {editSession && editPointer?.session === editSession && (
+      {editSession && resolvedEdit && (
         <g pointerEvents="none">
           <line
             x1={editSession.anchor.x}
             y1={-editSession.anchor.y}
-            x2={editPointer.point.x}
-            y2={-editPointer.point.y}
+            x2={resolvedEdit.point.x}
+            y2={-resolvedEdit.point.y}
             stroke={editError ? "#dc2626" : "#0284c7"}
             strokeWidth={1}
             vectorEffect="non-scaling-stroke"
             strokeDasharray="5 4"
           />
           <circle
-            cx={editPointer.point.x}
-            cy={-editPointer.point.y}
+            cx={resolvedEdit.point.x}
+            cy={-resolvedEdit.point.y}
             r={0.055}
             fill={editError ? "#dc2626" : "#0284c7"}
           />
           {editError && (
             <text
               role="alert"
-              x={editPointer.point.x}
-              y={-editPointer.point.y - 0.15}
+              x={resolvedEdit.point.x}
+              y={-resolvedEdit.point.y - 0.15}
               fontSize={0.13}
               fill="#dc2626"
             >
@@ -535,12 +596,50 @@ export function BimPlan({
         </g>
       )}
       {!pan &&
+        snap &&
+        guideCursor &&
+        activeReferences.map((reference) => {
+          const guide = cursorGuide(guideCursor, reference, guideDirections);
+          const extension =
+            40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
+          return (
+            <line
+              key={JSON.stringify([reference.entityId, reference.feature])}
+              aria-label="Referenzhilfslinie"
+              data-guide-kind={guide.kind}
+              pointerEvents="none"
+              x1={guide.origin.x}
+              y1={-guide.origin.y}
+              x2={guide.point.x + extension * guide.direction.x}
+              y2={-guide.point.y - extension * guide.direction.y}
+              stroke="#929aa3"
+              strokeWidth={1}
+              strokeOpacity={0.7}
+              strokeDasharray="6 4"
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
+      {!pan &&
         activeReferences.map((reference) => (
           <g
             key={`${reference.entityId}/${reference.feature}`}
             pointerEvents="none"
             aria-label="Aktive Hover-Referenz"
           >
+            {reference.segment && (
+              <line
+                aria-label="Erfasste Linienreferenz"
+                x1={reference.segment.start.x}
+                y1={-reference.segment.start.y}
+                x2={reference.segment.end.x}
+                y2={-reference.segment.end.y}
+                stroke="#929aa3"
+                strokeWidth={3}
+                strokeDasharray="6 4"
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             <circle
               cx={reference.point.x}
               cy={-reference.point.y}
@@ -552,7 +651,7 @@ export function BimPlan({
             />
           </g>
         ))}
-      {!pan && endpointSnap && !editSession && (
+      {!pan && endpointSnap && (
         <g pointerEvents="none">
           {" "}
           {resolvedHover?.candidate?.guideOrigin && (
@@ -585,22 +684,31 @@ export function BimPlan({
       )}
       {!pan &&
         endpointSnap &&
-        !editSession &&
         resolvedHover?.candidate &&
         (drawing || resolvedHover.candidate.kind !== "grid") && (
           <g
             pointerEvents="none"
             aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
           >
-            <circle
-              cx={resolvedHover.point.x}
-              cy={-resolvedHover.point.y}
-              r={4 / camera.pixelsPerMetre}
-              fill="none"
-              stroke="#0284c7"
-              strokeWidth={2}
-              vectorEffect="non-scaling-stroke"
-            />
+            {resolvedHover.candidate.kind === "midpoint" ? (
+              <path
+                d={`M ${resolvedHover.point.x} ${-resolvedHover.point.y - 5 / camera.pixelsPerMetre} l ${5 / camera.pixelsPerMetre} ${9 / camera.pixelsPerMetre} h ${-10 / camera.pixelsPerMetre} Z`}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : (
+              <circle
+                cx={resolvedHover.point.x}
+                cy={-resolvedHover.point.y}
+                r={4 / camera.pixelsPerMetre}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             <text
               x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
               y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}

@@ -1,19 +1,24 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
+import { InteractionInput } from "./InteractionInput";
+import { useToolInteraction } from "./useToolInteraction";
+import { editInteraction, drawingInteraction } from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
+import { createDrawing, defaultDrawingWall } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
-import { addWall, addLine, serializeProject } from "@/lib/bim/model";
+import { serializeProject } from "@/lib/bim/model";
 import { readProjectFile, PROJECT_FILE_LIMIT } from "@/lib/bim/history";
 import {
   Dialog,
@@ -39,7 +44,7 @@ export function CadWorkspace() {
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [ortho, setOrtho] = useState(false);
-  const [hoverDwellMs, setHoverDwellMs] = useState(400);
+  const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
@@ -54,6 +59,9 @@ export function CadWorkspace() {
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [linePoints, setLinePoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
+  const [drawingBase, setDrawingBase] = useState<Project | null>(null);
+  const lineOrigin = tool === "line" ? (linePoints.at(-1) ?? null) : null;
+  const drawingOrigin = tool === "wall" ? wallStart : lineOrigin;
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
@@ -71,6 +79,12 @@ export function CadWorkspace() {
   const [demandPosition, setDemandPosition] = useState<Point>({ x: 160, y: 180 });
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
+  const cancelInteraction = useCallback(() => {
+    dispatchEditing({ type: "cancel" });
+    setWallStart(null);
+    setLinePoints([]);
+  }, []);
+
   useEffect(() => {
     // The next gesture must anchor to the updated model, not the previous click.
     setPickedPoint({ index: null, anchor: null });
@@ -80,7 +94,9 @@ export function CadWorkspace() {
     const handler = (event: KeyboardEvent) => {
       if (
         event.target instanceof Element &&
-        (event.target.closest("input, textarea, select, [contenteditable=true]") ||
+        (event.target.closest(
+          'input, textarea, select, [contenteditable=true], [role="dialog"], [role="alertdialog"]',
+        ) ||
           event.ctrlKey ||
           event.metaKey ||
           event.altKey)
@@ -89,19 +105,15 @@ export function CadWorkspace() {
       const map: Record<string, ToolId> = { v: "select", w: "wall", s: "slab", l: "line" };
       const next = map[event.key.toLowerCase()];
       if (next) {
-        dispatchEditing({ type: "cancel" });
+        cancelInteraction();
         setTool(next);
         if (next === "line") setSelection(null);
-        setWallStart(null);
-        setLinePoints([]);
         setModelError("");
         if (next === "wall" || next === "line") setMode("2D");
       }
       if (event.key === "Escape") {
-        dispatchEditing({ type: "cancel" });
+        cancelInteraction();
         setDemandOpen(false);
-        setWallStart(null);
-        setLinePoints([]);
         setTool("select");
         setModelError("");
         if (fullscreen) setFullscreen(false);
@@ -109,7 +121,7 @@ export function CadWorkspace() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen]);
+  }, [fullscreen, cancelInteraction]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -125,17 +137,15 @@ export function CadWorkspace() {
   };
 
   const selectTool = (next: ToolId) => {
-    dispatchEditing({ type: "cancel" });
+    cancelInteraction();
     setTool(next);
     if (next === "line") setSelection(null);
-    setWallStart(null);
-    setLinePoints([]);
     setModelError("");
     if (next === "wall" || next === "line") setMode("2D");
   };
 
   const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
-    dispatchEditing({ type: "cancel" });
+    cancelInteraction();
     setPickedPoint({ index: index ?? null, anchor: modelPoint ?? null });
     setDemandOpen(Boolean(next));
     if (next && (anchor || next.id !== selection?.id)) {
@@ -144,8 +154,6 @@ export function CadWorkspace() {
     }
     setSelection(next);
     setTool("select");
-    setWallStart(null);
-    setLinePoints([]);
     setModelError("");
   };
 
@@ -158,7 +166,7 @@ export function CadWorkspace() {
       index: pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
-    setMode("2D");
+    if (layout === "single") setMode("2D");
     setModelError("");
   };
 
@@ -218,10 +226,18 @@ export function CadWorkspace() {
   const finishLine = (points = linePoints) => {
     try {
       const id = `line-${crypto.randomUUID()}`;
-      changeProject(addLine(project, { id, kind: lineKind, points, ...lineAppearance }), {
-        kind: "line",
-        id,
-      });
+      changeProject(
+        createDrawing(drawingBase!, project, id, {
+          kind: "line",
+          lineKind,
+          points,
+          appearance: lineAppearance,
+        }),
+        {
+          kind: "line",
+          id,
+        },
+      );
     } catch {
       setModelError(
         "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
@@ -232,6 +248,13 @@ export function CadWorkspace() {
   const drawPoint = (point: Point) => {
     setModelError("");
     if (tool === "line") {
+      if (linePoints.length === 0) {
+        setDrawingBase(project);
+        setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
+      } else if (drawingBase !== project) {
+        setModelError("Das Modell wurde geändert. Linie erneut beginnen.");
+        return;
+      }
       const previous = linePoints.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
         setModelError("Nächsten Punkt an einer anderen Position wählen.");
@@ -243,19 +266,40 @@ export function CadWorkspace() {
       return;
     }
     if (!wallStart) {
+      setDrawingBase(project);
+      setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
       setWallStart(point);
       return;
     }
     try {
       const id = `wall-${crypto.randomUUID()}`;
       changeProject(
-        addWall(project, { id, start: wallStart, end: point, thickness: 0.36, height: 2.8 }),
+        createDrawing(drawingBase!, project, id, {
+          kind: "wall",
+          start: wallStart,
+          end: point,
+          ...defaultDrawingWall,
+        }),
         { kind: "wall", id },
       );
-    } catch {
-      setModelError("Choose a different end point: a wall must have a positive length.");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
     }
   };
+
+  const interaction = useToolInteraction(
+    editSession
+      ? editInteraction(
+          editSession,
+          project,
+          selection,
+          (point) => dispatchEditing({ type: "confirm", session: editSession, selection, point }),
+          cancelInteraction,
+        )
+      : drawingOrigin && drawingBase
+        ? drawingInteraction(drawingBase, project, drawingOrigin, drawPoint, cancelInteraction)
+        : null,
+  );
 
   const downloadIfc = async () => {
     if (exportingIfc) return;
@@ -437,7 +481,10 @@ export function CadWorkspace() {
               </label>
               <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
               {lineKind === "polyline" && (
-                <span className="text-xs">Doppelklick zum Abschließen · alternativ Enter</span>
+                <span className="text-xs">
+                  Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im Grundriss:
+                  Abschluss
+                </span>
               )}
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
                 Zeichnen abbrechen
@@ -471,6 +518,7 @@ export function CadWorkspace() {
                 <ViewportManager
                   project={project}
                   selection={selection}
+                  snapping={interaction.adapter?.snapping ?? null}
                   drawing={(tool === "wall" || tool === "line") && mode === "2D"}
                   endpointSnap={tool === "line" || tool === "select" || tool === "wall"}
                   hoverDwellMs={hoverDwellMs}
@@ -479,11 +527,16 @@ export function CadWorkspace() {
                   snap={snap}
                   ortho={ortho}
                   onSelect={selectElement}
-                  onPoint={drawPoint}
-                  editSession={editSession?.base === project ? editSession : null}
-                  onEditCommit={(session, point) =>
-                    dispatchEditing({ type: "confirm", session, selection, point })
+                  onPoint={(point) =>
+                    interaction.adapter ? interaction.pick(point) : drawPoint(point)
                   }
+                  editSession={editSession?.base === project ? editSession : null}
+                  numericTarget={editSession ? interaction.target : undefined}
+                  drawingTarget={drawingOrigin ? interaction.target : undefined}
+                  onDrawingAim={drawingOrigin ? interaction.draft.move : undefined}
+                  onEditAim={(_session, point) => interaction.draft.move(point)}
+                  onEditDirection={(_session, point) => interaction.pick(point)}
+                  onEditCommit={(_session, point) => interaction.pick(point)}
                   {...(tool === "line" && lineKind === "polyline"
                     ? { onFinish: () => finishLine() }
                     : {})}
@@ -494,20 +547,11 @@ export function CadWorkspace() {
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
-                {editSession && (
-                  <div
-                    role="status"
-                    className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
-                  >
-                    Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
-                    <button
-                      className="ml-2 underline"
-                      onClick={() => dispatchEditing({ type: "cancel" })}
-                    >
-                      Abbrechen
-                    </button>
-                  </div>
-                )}
+                <InteractionInput
+                  interaction={interaction}
+                  position={demandPosition}
+                  onPosition={setDemandPosition}
+                />
                 {(modelError || editing.error) && (
                   <p
                     role="alert"
