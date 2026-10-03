@@ -925,3 +925,8 @@ Polyline reuse verified (2026-10-03): each last draft vertex supplies the existi
 ToolInteraction now requires a ToolSnapPolicy: pinned origin, allowed-source filtering and the existing resolver. prepareToolReferences and resolveToolSnap form one application entry for idle hover, drawing and Direct Edit. The viewport supplies screen scale, cursor, modifiers and active references; it no longer constructs separate drawing/edit snap contexts or knows edit source-exclusion rules.
 
 Drawing delegates to querySnap; Edit delegates to resolveEditSnap with its axis/host restrictions. These implementations retain their existing geometric responsibilities. No new snap mathematics. Policies are derived, weakly cached by immutable draft-point/edit-session identity so React rerenders and zoom do not discard reference identity; a new interaction obtains a new policy. Project changes still rebuild source snapshots. Render-only edit preview plumbing remains in the viewport.
+
+
+## Modal keyboard ownership and interaction transitions (2026-10-03)
+
+Modal dialogs own Tab and application shortcuts while open. PrecisionInput must not intercept navigation outside its own panel inside a dialog/alertdialog; workspace tool shortcuts likewise yield to modal content. Cancelling project-file confirmation preserves the suspended draft. Confirmed project replacement and history navigation clear edit/drawing context through the existing shared reset; Undo restores committed model state, never an old interaction session. Session identity checks reject delayed confirmations even after returning to an earlier model snapshot.

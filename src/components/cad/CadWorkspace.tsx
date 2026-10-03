@@ -94,7 +94,9 @@ export function CadWorkspace() {
     const handler = (event: KeyboardEvent) => {
       if (
         event.target instanceof Element &&
-        (event.target.closest("input, textarea, select, [contenteditable=true]") ||
+        (event.target.closest(
+          'input, textarea, select, [contenteditable=true], [role="dialog"], [role="alertdialog"]',
+        ) ||
           event.ctrlKey ||
           event.metaKey ||
           event.altKey)
