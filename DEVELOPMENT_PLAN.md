@@ -649,7 +649,22 @@ Konservativer Segment-/Suchquadrat-Test in geometry/intersections/segment-box.ts
 
 Isolierter Vergleich gleicher Messgeometrie ohne Fixture-Validator: 500 falsche Boxüberlappungen ergeben 0 statt 124750 Paare, Median 0,30 statt 20,38 ms. Echte dichte Kreuzungen behalten 124750 Paare und kosten 911,68 ms; dieser Engpass bleibt bestehen. Verfahren, Grenzen und Rohwerte: docs/performance/LOCAL_PROXIMITY.md.
 
-### Genau ein ausführbarer Folgeauftrag: Segmentvorauswahl vollständig abnehmen
+### Abgeschlossener Folgeauftrag: Segmentvorauswahl vollständig abnehmen
 
 Draft in der vollständigen Projektumgebung mit npm test, TypeScript, Build und Lint prüfen. Zeichnen, Segment-Hover, Zoom und Direct Edit praktisch abnehmen; Fangradiusgrenzen und entfernte aktive Referenzen erhalten. Gegebenenfalls gezielt korrigieren. Keine weitere Fangfunktion oder Merge ohne Nutzerfreigabe. Nach erfolgreicher Abnahme den echten dichten Kreuzungsfall getrennt nach Paarberechnung, Quellenaufbau und Kandidatenbewertung profilieren; daraus den nächsten begrenzten Optimierungsauftrag ableiten.
 
+
+
+### Abschluss: Projektabnahme PR #58 — 04.10.2026
+
+Testfixture mit festen Koordinatentupeln typisiert; alter Dichtetest erwartet für entfernte Diagonalen null Segmente/Paare. Echte Kreuzungen und Differentialvergleich bleiben geprüft. Formatierung korrigiert. 244 Tests, TypeScript, Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen.
+
+Browser im separaten Tab: Segmentinneres als Referenz erfasst, freie Wandecke mit Ursprung, zwei entfernte Endpunkte und Hilfslinienschnitt (5;2) erfasst. Vier Referenzen nach Zoom erhalten; exakter Eckcommit mit Rundung <1e-14 m. Linie vom Endpunkt (4;1) zum Mittelpunkt (5;1) gezeichnet, Länge 1,00 m. Nutzerprojekt im ursprünglichen Tab unverändert. Praktischer Test: diese Folge wiederholen und Fangmeldungen kontrollieren.
+
+Repository-Benchmark einschließlich Projektvalidator erneut ausgeführt; LOCAL_PROXIMITY.validated.json. 500 entfernte Diagonalen: 0 Paare, Median 0,337 ms; echte dichte Kreuzungen: 124750 Paare, Median 1242,13 ms, weiterhin ungelöst. Keine direkte Beschleunigungsbehauptung gegenüber isolierter Fremdmessung.
+
+Nutzerwunsch zur optionalen Referenzauswahl aufgenommen: docs/REFERENCE_SELECTION_PLAN.md. Frühere Profilierung zurückgestellt; keine Auslöseschwelle oder Bedienänderung implementiert.
+
+### Genau ein ausführbarer Folgeauftrag: Vertrag für optionale Referenzauswahl festlegen
+
+Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands- und Quellenvertrag sowie eine begründete vorläufige Auslöseschwelle mit Hysterese vorschlagen. Verhalten ohne Auswahl, bei Abbruch, Idle-Hover und Modellwechsel festlegen. Endpunkt-/Mittelpunktfang, aktive Führungen und feste Achsen erhalten. Ein kleines Umsetzungspaket mit Tests ableiten; noch keine automatische Einschränkung oder Dialoge implementieren.

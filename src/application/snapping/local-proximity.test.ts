@@ -11,7 +11,7 @@ import {
   resolveToolSnap,
 } from "../tools/snapping.ts";
 
-function fixture(pairs: number[][]): Project {
+function fixture(pairs: [number, number, number, number][]): Project {
   return {
     schemaVersion: 1,
     unit: "m",
@@ -23,7 +23,10 @@ function fixture(pairs: number[][]): Project {
       lines: pairs.map(([x, y, a, b], i) => ({
         id: `l${i}`,
         kind: "line",
-        points: [{ x, y }, { x: a, y: b }],
+        points: [
+          { x, y },
+          { x: a, y: b },
+        ],
         color: "#334155",
         penWidth: 0.25,
         style: "solid",
@@ -57,9 +60,7 @@ test("segment square test preserves corner contacts, reversals and degeneracy", 
 });
 
 test("dense real crossings retain every source identity and full original segment", () => {
-  const project = fixture(
-    Array.from({ length: 80 }, (_, i) => [-100, -20 - i, 100, 20 + i]),
-  );
+  const project = fixture(Array.from({ length: 80 }, (_, i) => [-100, -20 - i, 100, 20 + i]));
   const local = createLocalSnapSources(project).query({ x: 0, y: 0 }, 100, 0);
   assert.equal(local.segments.length, 80);
   assert.equal(local.segmentPairs, (80 * 79) / 2);
@@ -79,13 +80,19 @@ test("tolerance contacts, radius boundaries and large offsets match full enumera
       [offset - 100, offset + 100, offset + 100, offset - 100],
       [offset + 1, offset + 1, offset + 2, offset + 2],
     ]);
-    const full = projectSnapReferences(project), index = createLocalSnapSources(project);
+    const full = projectSnapReferences(project),
+      index = createLocalSnapSources(project);
     for (const scale of [0.5, 100, 10000])
-      for (const cursor of [{ x: offset, y: offset }, { x: offset + 1 + 5e-10, y: offset }])
+      for (const cursor of [
+        { x: offset, y: offset },
+        { x: offset + 1 + 5e-10, y: offset },
+      ])
         for (const radius of [0, 10, 100]) {
           assert.deepEqual(
             index.query(cursor, scale, radius).references,
-            full.filter((r) => Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * scale <= radius),
+            full.filter(
+              (r) => Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * scale <= radius,
+            ),
           );
         }
   }
@@ -94,15 +101,23 @@ test("tolerance contacts, radius boundaries and large offsets match full enumera
 test("deterministic random queries and exclusions preserve exact reference order", () => {
   let seed = 76139;
   const random = () => ((seed = (1664525 * seed + 1013904223) >>> 0) / 2 ** 32) * 200 - 100;
-  const project = fixture(Array.from({ length: 100 }, () => [random(), random(), random(), random()]));
-  const full = projectSnapReferences(project), index = createLocalSnapSources(project);
+  const project = fixture(
+    Array.from({ length: 100 }, () => [random(), random(), random(), random()]),
+  );
+  const full = projectSnapReferences(project),
+    index = createLocalSnapSources(project);
   for (let i = 0; i < 250; i++) {
-    const cursor = { x: random(), y: random() }, scale = [0.5, 100, 10000][i % 3]!;
+    const cursor = { x: random(), y: random() },
+      scale = [0.5, 100, 10000][i % 3]!;
     const allowed = (r: { entityId: string }) => r.entityId !== `l${i % 100}`;
     assert.deepEqual(
       index.query(cursor, scale, 10, allowed).references,
-      full.filter((r) => allowed(r) && (r.dependencies ?? []).every(allowed) &&
-        Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * scale <= 10),
+      full.filter(
+        (r) =>
+          allowed(r) &&
+          (r.dependencies ?? []).every(allowed) &&
+          Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * scale <= 10,
+      ),
     );
   }
   for (const reference of full.filter((r) => r.kind === "segment-intersection").slice(0, 100)) {
@@ -120,17 +135,44 @@ test("complete resolver preserves remote active guides after local segment rejec
     [-1, -1, 1, 1],
     [-1, 1, 1, -1],
   ]);
-  const index = createLocalSnapSources(project), policy = drawingSnapPolicy({ x: -2, y: -2 });
-  const activeReferences = [policy.origin, ...projectSnapPrimitives(project).references.filter((r) => r.kind === "midpoint").slice(0, 2)];
+  const index = createLocalSnapSources(project),
+    policy = drawingSnapPolicy({ x: -2, y: -2 });
+  const activeReferences = [
+    policy.origin,
+    ...projectSnapPrimitives(project)
+      .references.filter((r) => r.kind === "midpoint")
+      .slice(0, 2),
+  ];
   const sourceQuery = createToolSourceQuery(index, policy);
-  const context = { references: [], sourceQuery, activeReferences, pixelsPerMetre: 100, enabled: true, endpointRadiusPx: 10, gridSpacing: null };
-  for (const cursor of [{ x: 0.013, y: 0.009 }, { x: 4, y: 6 }, { x: 8, y: 10 }])
+  const context = {
+    references: [],
+    sourceQuery,
+    activeReferences,
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  for (const cursor of [
+    { x: 0.013, y: 0.009 },
+    { x: 4, y: 6 },
+    { x: 8, y: 10 },
+  ])
     for (const ortho of [false, true])
       for (const shift of [false, true]) {
         const options = { ortho, shift, featureSnap: true };
         assert.deepEqual(
           resolveToolSnap(policy, cursor, context, options),
-          resolveToolSnap(policy, cursor, { ...context, sourceQuery: undefined, references: prepareToolReferences(policy, projectSnapReferences(project)) }, options),
+          resolveToolSnap(
+            policy,
+            cursor,
+            {
+              ...context,
+              sourceQuery: undefined,
+              references: prepareToolReferences(policy, projectSnapReferences(project)),
+            },
+            options,
+          ),
         );
       }
 });

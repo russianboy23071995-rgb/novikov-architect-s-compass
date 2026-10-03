@@ -66,3 +66,9 @@ dies benötigt vorher einen Vertrag für feste Achsen, Ortho, Aktivierungsrang,
 Gleichstände, Hover-Erwerb und Quellenausschlüsse. Keine beliebige Obergrenze
 oder Zusammenfassung gleich gelegener Quellen. Differentialtests müssen die
 identische Siegerreferenz samt ursprünglichen Blattabhängigkeiten nachweisen.
+
+## Nachprüfung in vollständiger Projektumgebung — 04.10.2026
+
+244 Tests, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Testfixture typisiert, alte Erwartung an Box-Nichttreffer angepasst und Formatierung korrigiert. Browserprüfung von Segment-Hover, entfernten Referenzen, Zoom, freier Wandecke und Zeichnen erfolgreich; Ablauf in DEVELOPMENT_PLAN.md.
+
+[Neuer Lauf mit Projektvalidator](LOCAL_PROXIMITY.validated.json): 500 entfernte Diagonalen 0 Paare, Median 0,337 ms/P95 0,599 ms; 500 echte Kreuzungen 124750 Paare, Median 1242,13 ms/P95 1446,90 ms. Keine Browser-Framerate-Aussage. Profilierung oben zugunsten des Nutzerwunschs zur optionalen Referenzauswahl vorerst zurückgestellt; siehe ../REFERENCE_SELECTION_PLAN.md.
