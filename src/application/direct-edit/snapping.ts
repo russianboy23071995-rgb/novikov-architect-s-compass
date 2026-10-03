@@ -40,16 +40,29 @@ export function editDirection(session: EditSession): Point2 | null {
 }
 
 /** Session-only construction origin; excluded model geometry is never reintroduced. */
-export function editOriginReference(session: EditSession): SnapReference | null {
-  if (session.action !== "move" || session.target.kind === "window") return null;
-  const points = editablePoints(session.base, { kind: session.target.kind, id: session.target.id });
-  const i = session.index ?? 0;
-  const neighbour = points[i === 0 ? 1 : i - 1]!;
+export function editOriginReference(session: EditSession): SnapReference {
+  // Every movement owns the same pinned origin. Element adapters supply only directions.
+  const fixedDirection = editDirection(session);
+  let direction = fixedDirection;
+  if (!direction && session.target.kind !== "window") {
+    const points = editablePoints(session.base, {
+      kind: session.target.kind,
+      id: session.target.id,
+    });
+    const i = session.index ?? 0;
+    const neighbour = points[i === 0 ? 1 : i - 1]!;
+    direction = { x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y };
+  }
   return {
     entityId: "@edit-origin",
-    feature: JSON.stringify([session.target.kind, session.target.id, session.action, i]),
+    feature: JSON.stringify([
+      session.target.kind,
+      session.target.id,
+      session.action,
+      session.index,
+    ]),
     point: { ...session.anchor },
-    directions: [{ x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y }],
+    directions: direction ? [direction] : [],
   };
 }
 

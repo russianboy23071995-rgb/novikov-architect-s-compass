@@ -718,7 +718,7 @@ test("free movement origin drives shared guides without restoring excluded model
   );
   assert.equal(result.candidate?.guideOrigin?.x, session.anchor.x);
   assert.deepEqual(result.point, { x: 0, y: 2 });
-  assert.equal(editOriginReference({ ...session, action: "x" }), null);
+  assert.deepEqual(editOriginReference({ ...session, action: "x" }).point, session.anchor);
   for (const angle of ["566", "360,01", "-1"])
     assert.throws(
       () => previewMovementInput(session, state.history.present, wall, angle, "2", null),
@@ -834,4 +834,85 @@ test("oblique numeric stretch moves only selected line or wall end in either sig
           index === 0 ? { x: 3, y: 4 } : { x: 0, y: 0 },
         );
       }
+});
+
+test("every direct-edit action immediately pins its selected point, including wall corners and line vertices", () => {
+  const base = addLine(initial().history.present, {
+    id: "line",
+    kind: "line",
+    points: [
+      { x: 0, y: 0 },
+      { x: 3, y: 0 },
+    ],
+    ...defaultLineAppearance,
+  });
+  for (const kind of ["wall", "line"] as const) {
+    for (const action of ["point", "stretch", "move", "axis", "x", "y"] as const) {
+      const state = editingReducer(createEditingState(base), {
+        type: "begin",
+        target: { kind, id: kind },
+        action,
+        index: 1,
+        anchor: { x: 3, y: 0.18 },
+      });
+      assert.equal(state.error, "");
+      const session = state.session!,
+        origin = editOriginReference(session);
+      assert.deepEqual(origin.point, { x: 3, y: 0.18 });
+      assert.notEqual(origin.point, session.anchor);
+      assert.ok(origin.directions?.length);
+      const refs = [
+        ...editSnapReferences(session, projectSnapReferences(state.history.present)),
+        origin,
+      ];
+      assert.equal(
+        refs.some((r) => r.entityId === kind),
+        false,
+      );
+      const result = resolveEditSnap(
+        session,
+        { x: 3.02, y: 1.18 },
+        { ...snapContext(state), references: refs, activeReferences: [origin], gridSpacing: null },
+      );
+      if (action === "point" || action === "move") {
+        assert.deepEqual(result.point, { x: 3, y: 1.18 });
+        assert.deepEqual(result.candidate?.guideOrigin, origin.point);
+      }
+      if (action === "x" || action === "axis" || action === "stretch")
+        assert.equal(result.point.y, origin.point.y);
+      if (action === "y") assert.equal(result.point.x, origin.point.x);
+      assert.equal(editingReducer(state, { type: "cancel" }).session, null);
+      assert.equal(state.history.past.length, 0);
+    }
+  }
+});
+test("window movement pins its chosen point while retaining host direction and exclusions", () => {
+  const state = editingReducer(initial(), {
+    type: "begin",
+    target: { kind: "window", id: "window" },
+    action: "move",
+    index: null,
+    anchor: { x: 1.5, y: 0.18 },
+  });
+  const session = state.session!,
+    origin = editOriginReference(session);
+  assert.deepEqual(origin.point, session.anchor);
+  assert.deepEqual(origin.directions, [{ x: 3, y: 0 }]);
+  const refs = [
+    ...editSnapReferences(session, projectSnapReferences(state.history.present)),
+    origin,
+  ];
+  assert.equal(
+    refs.some((r) => r.entityId === "wall" || r.entityId === "window"),
+    false,
+  );
+  const result = resolveEditSnap(
+    session,
+    { x: 1.7, y: 2 },
+    { ...snapContext(state), references: refs, activeReferences: [origin], gridSpacing: null },
+  );
+  assert.equal(result.point.y, 0.18);
+  const preview = previewEdit(session, state.history.present, session.target, result.point);
+  assert.ok(Math.abs(preview.storey.windows[0]!.position - 1.7 / 3) < 1e-9);
+  assert.equal(preview.storey.windows[0]!.wallId, "wall");
 });

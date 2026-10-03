@@ -427,3 +427,14 @@ Praktische Abnahme: Linie wählen → ersten Punkt setzen → Winkel 45 und Län
 ### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand
 
 Den geprüften Eingabebaustein nach dem ersten Wandpunkt verwenden. Vorher die gemeinsame Zeichenkoordination für Linie/Wand begrenzt hinter einen Application-Adapter ziehen, damit CadWorkspace keine zweite Eingabelogik erhält. Bestehendes addWall, Fangengine und History wiederverwenden. Vorschau und Commit mit 3,00 m Länge, 0,36 m Stärke und 2,80 m Höhe prüfen, einschließlich Winkel, Null-Länge, Abbruch, Undo/Redo, JSON und 2D/3D. Keine Wandketten, Anschlüsse oder Änderung der Wandachsenlage N45 in diesem Teilauftrag.
+
+
+### Nutzerkorrektur: sofortiger Konstruktionsursprung bei jeder Bewegung — 03.10.2026
+
+Vorrangige Korrektur auf fix/shared-movement-origin, aufbauend auf dem noch offenen PR #41. Ursache: editOriginReference war nur für Element frei bewegen zugelassen; die übrigen Aktionen verwendeten zwar den Resolver, erhielten aber keinen sofort gepinnten Ursprung. Diese Aktions-/Fensterausnahme ist zentral entfernt. Punkt frei bewegen, Strecken, X/Y/Elementachse und Fensterbewegung erhalten jetzt denselben unmittelbaren Ursprung. Fenster behalten die Wandrichtung, feste Achsen bleiben verbindlich und Eigenmodell/Host bleiben von externen Fangquellen ausgeschlossen.
+
+Verbindlicher Zukunftswunsch in ARCHITECTURE.md und AGENTS.md: jede Bewegung jedes späteren Elements (auch Decken, Dächer, Treppen, Möbel) startet über denselben Konstruktionsursprung und die gemeinsame Engine. Keine zusätzliche 0,6-s-Wartezeit für den bereits ausgewählten Ursprung; weitere Referenzen behalten die Hover-Regeln. 3D-Arbeitsebenen und noch nicht vorhandene Bauteile sind damit Anforderungen, keine bereits implementierten Funktionen.
+
+Nachweise: 206 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Regressionen prüfen alle sechs Aktionen für Wand und Linie, gewählten Eckversatz, Eigenmodell-Ausschluss, freie Hilfslinie, Achsbindung, Abbruch ohne History sowie Fensterursprung/Hostbindung. Browser: Wandecke → Punkt frei bewegen zeigt sofort den Referenzring bei (3;0,18), danach senkrechte Referenzhilfslinie zur Maus. Zoom erhält den Ring, Escape entfernt ihn.
+
+Abnahme: Wandecke oder Linienpunkt anklicken → Punkt frei bewegen → Maus nach oben oder diagonal führen. Ursprung muss sofort als Ring sichtbar sein, die Hilfslinien folgen der Maus. Zoom und Abbruch prüfen. Dasselbe bei Strecken und Achsbewegung wiederholen. Der einzige nächste ausführbare Folgeauftrag bleibt die oben beschriebene gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand.

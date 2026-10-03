@@ -883,3 +883,12 @@ Decision: polar tool input is shared across direct edit and straight-line drawin
 Tool adapters supply origin and current aim, validate tool-specific constraints and confirm through existing model/application actions. Line drawing rejects zero length and changed model context; direct edit retains its pinned selection, axis and opening constraints. Numeric targets take precedence over mouse snapping. There is one helper component and one draft hook, not a copied form/state machine per tool. The existing workspace coordinates these consumers; migration of its remaining legacy drawing orchestration is incremental. AI/Text/Voice must use the same validated actions, not React draft state or separate model logic.
 
 Currently connected: element movement, point stretching and single straight-line drawing. Polylines, wall drawing and other tools are future adapters, not claimed as implemented.
+
+
+## Universal movement origin — binding interaction rule (2026-10-03)
+
+Every interactive movement starts with a pinned construction reference at the chosen point, immediately and without hover dwell. This applies to point movement, whole-element movement, stretching and axis-constrained movement, including hosted elements. Future slabs, roofs, stairs, furniture and other elements must use the same interaction/constraint pipeline; origin activation is not an optional per-tool feature.
+
+The origin stays at the original model-space position during preview and zoom. Shared inference supplies cursor-dependent guides, additional hover references and intersections. Do not display every possible guide simultaneously. Explicit axis/host constraints and model validation still take precedence; a window remains on its wall. User-controlled Snap disable remains respected. Completion/cancellation removes the session origin without committing construction geometry. Future 3D movements must supply the active work-plane context to this same system.
+
+Implementation: application/direct-edit/snapping.ts supplies the session origin for all current EditActions and targets. BimPlan/useHoverReference already consume it through the shared pinned-reference contract. New element adapters supply anchor and geometric directions, not copied inference code.
