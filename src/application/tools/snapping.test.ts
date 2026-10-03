@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareToolReferences, resolveToolSnap, drawingSnapPolicy } from "./snapping.ts";
+import { createToolSourceQuery } from "./snapping.ts";
+import { getLocalSnapSources } from "../snapping/local-sources.ts";
+import {
+  advanceHoverReference,
+  emptyHoverReference,
+} from "../../constraints/inference/hover-reference.ts";
+import { acquisitionReference } from "../../constraints/inference/construction-reference.ts";
 import { editInteraction } from "./adapters.ts";
 import { resolveEditSnap } from "../direct-edit/snapping.ts";
 import { projectSnapReferences, getProjectSnapReferences } from "../snapping/project-references.ts";
@@ -32,6 +39,145 @@ const base = addLine(
   },
 );
 const noop = () => {};
+
+test("local shared resolver matches full source path for all edit axes, drawing and modifiers", () => {
+  for (const action of ["point", "move", "stretch", "axis", "x", "y"] as const) {
+    const session = {
+      base,
+      target: { kind: "wall" as const, id: "w" },
+      action,
+      index: 1,
+      anchor: { x: 3, y: 0 },
+    };
+    for (const policy of [
+      null,
+      drawingSnapPolicy({ x: 0, y: 0 }),
+      editInteraction(session, base, session.target, noop, noop).snapping,
+    ]) {
+      const refs = prepareToolReferences(policy, projectSnapReferences(base));
+      const sourceQuery = createToolSourceQuery(getLocalSnapSources(base), policy);
+      const active = refs.filter((r) => r.entityId === "l").slice(0, 2);
+      for (const cursor of [
+        { x: 5.02, y: 0.01 },
+        { x: 5.5, y: 1 },
+        { x: 6, y: 2 },
+        { x: 10, y: 2.01 },
+      ])
+        for (const enabled of [true, false])
+          for (const ortho of [true, false])
+            for (const shift of [true, false])
+              for (const featureSnap of [true, false]) {
+                const context = {
+                  references: refs,
+                  pixelsPerMetre: 100,
+                  endpointRadiusPx: 10,
+                  gridSpacing: 0.1,
+                  enabled,
+                  activeReferences: active,
+                };
+                const options = { ortho, shift, featureSnap };
+                assert.deepEqual(
+                  resolveToolSnap(
+                    policy,
+                    cursor,
+                    { ...context, references: [], sourceQuery },
+                    options,
+                  ),
+                  resolveToolSnap(policy, cursor, context, options),
+                );
+              }
+    }
+  }
+});
+
+test("remote guides survive local query motion and zoom; stale sources are rejected", () => {
+  const refs = projectSnapReferences(base);
+  const active = refs.filter((r) => r.entityId === "l").slice(0, 2);
+  const sourceQuery = createToolSourceQuery(getLocalSnapSources(base), null);
+  const context = {
+    references: [],
+    sourceQuery,
+    pixelsPerMetre: 100,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+    enabled: true,
+    activeReferences: active,
+  };
+  const options = { ortho: false, shift: false, featureSnap: true };
+  const result = resolveToolSnap(null, { x: 100, y: 2.01 }, context, options);
+  assert.ok(result.candidate);
+  assert.deepEqual(
+    result,
+    resolveToolSnap(
+      null,
+      { x: 100, y: 2.01 },
+      { ...context, references: refs, sourceQuery: undefined },
+      options,
+    ),
+  );
+  const identity = {
+    references: context.references,
+    sourceQuery,
+    enabled: true,
+    pixelsPerMetre: 100,
+  };
+  assert.ok(sameHoverSession(identity, { ...identity, pixelsPerMetre: 500 }));
+  assert.ok(
+    !sameHoverSession(identity, {
+      ...identity,
+      sourceQuery: createToolSourceQuery(
+        getLocalSnapSources(deserializeProject(serializeProject(base))),
+        null,
+      ),
+    }),
+  );
+  const stale = { ...active[0]!, point: { x: active[0]!.point.x + 1, y: 0 } };
+  assert.equal(
+    resolveToolSnap(null, { x: 100, y: 0.01 }, { ...context, activeReferences: [stale] }, options)
+      .candidate,
+    null,
+  );
+});
+
+test("local segment intersection is immediate and can be acquired at exactly 600ms", () => {
+  const project = addLine(base, {
+    id: "cross",
+    kind: "line",
+    points: [
+      { x: 4, y: 0.8 },
+      { x: 8, y: 0.8 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const sourceQuery = createToolSourceQuery(getLocalSnapSources(project), null);
+  const point = { x: 5.4, y: 0.8 };
+  const sources = sourceQuery(point, 100, 10, []);
+  const result = resolveToolSnap(
+    null,
+    point,
+    {
+      references: [],
+      sourceQuery,
+      pixelsPerMetre: 100,
+      endpointRadiusPx: 10,
+      gridSpacing: null,
+      enabled: true,
+    },
+    { ortho: false, shift: false, featureSnap: true },
+  );
+  assert.equal(result.candidate?.kind, "segment-intersection");
+  const ref = acquisitionReference(result.candidate, sources)!;
+  assert.ok(ref);
+  const pending = advanceHoverReference(emptyHoverReference(), ref, 0, 600);
+  assert.equal(advanceHoverReference(pending, ref, 599, 600).references.length, 0);
+  const acquired = advanceHoverReference(pending, ref, 600, 600);
+  assert.equal(acquired.references.length, 1);
+  assert.ok(
+    sourceQuery({ x: 100, y: 100 }, 100, 10, acquired.references).some(
+      (r) => r.entityId === ref.entityId && r.feature === ref.feature,
+    ),
+  );
+});
 
 test("model references survive tool and polyline-origin changes without retaining tool exclusions", () => {
   const sources = getProjectSnapReferences(base);

@@ -1,8 +1,9 @@
-import type { SnapReference } from "../snapping/engine.ts";
+import type { SnapReference, SnapSourceQuery } from "../snapping/engine.ts";
 
 export const DEFAULT_HOVER_DWELL_MS = 600;
 
 export type HoverContext = {
+  sourceQuery?: SnapSourceQuery;
   enabled: boolean;
   references: readonly SnapReference[];
   pixelsPerMetre: number;
@@ -12,7 +13,13 @@ export type HoverContext = {
 
 /** View navigation changes screen scale, not the identity of model-space references. */
 export function sameHoverSession(a: HoverContext, b: HoverContext): boolean {
-  return a.enabled && b.enabled && a.references === b.references && a.resetKey === b.resetKey;
+  return (
+    a.enabled &&
+    b.enabled &&
+    a.references === b.references &&
+    a.sourceQuery === b.sourceQuery &&
+    a.resetKey === b.resetKey
+  );
 }
 
 /** Navigation cannot complete a dwell or toggle a reference. Leaving allows a fresh visit. */

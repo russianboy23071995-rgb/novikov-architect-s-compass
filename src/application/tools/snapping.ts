@@ -1,6 +1,45 @@
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
+import type { LocalSnapSources } from "../snapping/local-sources.ts";
+import type { SnapSourceQuery } from "../../constraints/snapping/engine.ts";
+import { referenceKey } from "../../constraints/inference/construction-reference.ts";
+
+/** Bound to model and policy, never to camera or the changing local result array. */
+export function createToolSourceQuery(
+  model: LocalSnapSources,
+  policy: ToolSnapPolicy | null,
+): SnapSourceQuery {
+  const allowed = (r: SnapReference) => !policy || policy.sources([r]).length > 0;
+  const leaf = (r: SnapReference) => {
+    if (policy && referenceKey(r) === referenceKey(policy.origin)) return policy.origin;
+    const source = model.lookup(referenceKey(r));
+    return source && allowed(source) ? source : undefined;
+  };
+  return (cursor, scale, radius, active) => {
+    const local = model.query(cursor, scale, radius, allowed);
+    const refs = new Map(
+      [...local.references, ...local.segments.map((s) => s.source)].map((r) => [
+        referenceKey(r),
+        r,
+      ]),
+    );
+    if (policy) refs.set(referenceKey(policy.origin), policy.origin);
+    for (const r of active) {
+      if (!allowed(r)) continue;
+      const leaves = r.dependencies?.length ? r.dependencies : [r];
+      const resolved = leaves.map(leaf);
+      if (resolved.some((s) => !s)) continue;
+      for (const source of resolved) refs.set(referenceKey(source!), source!);
+      const source = r.dependencies?.length ? r : resolved[0]!;
+      refs.set(
+        referenceKey(r),
+        r.parallelDirections ? { ...source, parallelDirections: r.parallelDirections } : source,
+      );
+    }
+    return [...refs.values()];
+  };
+}
 export type ToolSnapPolicy = {
   origin: SnapReference;
   sources: (references: readonly SnapReference[]) => SnapReference[];
@@ -23,6 +62,7 @@ export function resolveToolSnap(
   const origin = policy?.origin.point ?? null;
   const request: SnapContext = {
     ...context,
+    sourceQuery: options.featureSnap ? context.sourceQuery : undefined,
     references: options.featureSnap ? context.references : [],
     activeReferences: options.featureSnap ? (context.activeReferences ?? []) : [],
     activeReference: options.featureSnap ? (active ?? null) : null,

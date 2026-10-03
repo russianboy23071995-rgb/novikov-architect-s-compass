@@ -33,3 +33,6 @@ Kein Browser-Framerate-, Hover-Timer-, Rendering-, Commit-/History- oder Speiche
 ## Nächster begrenzter Auftrag
 
 In segmentIntersectionReferences eine geometrisch konservative räumliche Vorauswahl für Segmentpaare ergänzen. Bestehende intersectSegments-Prüfung, numerische Toleranzen, stabile Reihenfolge, Quellenabhängigkeiten und Quellenausschlüsse beibehalten. Gegen die bisherige vollständige Paarprüfung mit schrägen, berührenden, überlappenden und beinahe parallelen Segmenten vergleichen; dieselbe Baseline wiederholen. Keine gleichzeitige Änderung der laufenden Fangabfrage oder History. Falls viele Segmente tatsächlich überlappen, bleibt quadratischer Aufwand möglich und muss dokumentiert bleiben.
+
+
+Update 04.10.2026: The next-task recommendation above is superseded by docs/LOCAL_SNAP_QUERY_PLAN.md. Keep this report as the measured historical baseline; the new target is local geometry queries plus separately validated active references, not a faster global intersection precomputation.
