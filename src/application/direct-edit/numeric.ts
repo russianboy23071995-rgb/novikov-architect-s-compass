@@ -1,7 +1,8 @@
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
 import type { EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
-import { parseMetres } from "../../lib/bim/transforms.ts";
+import { parseMetres } from "../../core/units/metres.ts";
+import { precisionTarget } from "../input/precision.ts";
 import { editDirection } from "./snapping.ts";
 import { previewEdit } from "./controller.ts";
 
@@ -64,18 +65,7 @@ export function previewMovementInput(
     return { ...result, degrees, metres: parseMetres(lengthText) };
   }
   if (session.target.kind === "window") throw new Error("Fenster bleiben an ihre Wand gebunden.");
-  const parse = (text: string, label: string) => {
-    if (!text.trim()) return null;
-    const value = parseMetres(text);
-    if (!Number.isFinite(value)) throw new Error(label + " muss eine endliche Zahl sein.");
-    return value;
-  };
-  const result = resolvePolarInput(
-    session.anchor,
-    aim,
-    parse(angleText, "Winkel"),
-    parse(lengthText, "Länge"),
-  );
+  const result = precisionTarget(session.anchor, aim, angleText, lengthText);
   return { ...result, project: previewEdit(session, project, selection, result.point) };
 }
 
