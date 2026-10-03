@@ -1,5 +1,7 @@
 import type { Point, Project } from "./model.ts";
 import { wallLength } from "./model.ts";
+import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
+import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import {
   editablePoints,
   moveElement,
@@ -64,6 +66,25 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
   if (action === "y") delta.x = 0;
   if (action === "point" || action === "stretch") {
     if (index === null) throw new Error("Zuerst einen Punktgriff anklicken.");
+    if (target.kind === "wall" && action === "point") {
+      const wall = base.storey.walls.find((item) => item.id === target.id)!;
+      const length = Math.hypot(vector.x, vector.y);
+      for (const side of [-1, 1]) {
+        const offset = (side * wall.thickness) / 2;
+        const corner = {
+          x: points[i]!.x - (vector.y / length) * offset,
+          y: points[i]!.y + (vector.x / length) * offset,
+        };
+        if (pointsCompatible(anchor, corner)) {
+          // Preserve an unchanged gesture exactly, including large-coordinate models.
+          const position =
+            delta.x === 0 && delta.y === 0
+              ? points[i]!
+              : endpointAtOffsetTarget(next, pointer, offset);
+          return moveElementPoint(base, entity, i, position);
+        }
+      }
+    }
     return moveElementPoint(base, entity, i, {
       x: points[i]!.x + delta.x,
       y: points[i]!.y + delta.y,
