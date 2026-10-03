@@ -541,6 +541,21 @@ Nachweis: 225 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler
 
 Abnahme: Beispielwand auswählen → Wandecke Ende links → Punkt frei bewegen → Winkel 90 und Länge 1 → Übernehmen. Die Ecke bewegt sich senkrecht um einen Meter; die Achse darf sich dafür seitlich anpassen. Undo/Redo prüfen. Anschließend einen externen Fangpunkt als Ziel verwenden und die Übereinstimmung der Ecke kontrollieren.
 
-### Genau ein ausführbarer Folgeauftrag: Eckkontakt mit externen Fangzielen praktisch absichern
+### Abgeschlossener Folgeauftrag: Eckkontakt mit externen Fangzielen praktisch absichern
 
 Die korrigierte freie Wandecke mit Endpunkt-, Mittelpunkt- und Hilfslinienschnittpunktfang im Browser prüfen, jeweils Vorschau/Commit, Zoom, Abbruch und Undo vergleichen. Die bereits gemeinsame Engine verwenden, keine weitere Fangart oder Wandverbindung ergänzen. Bei Abweichungen gezielt den bestehenden Adapter korrigieren; danach die Abnahme und verbleibende Grenzen dokumentieren.
+
+
+### Abschluss: externe Fangziele an Wandaußenecke — 03.10.2026
+
+PR #50 nach ausdrücklicher Freigabe normal nach main übernommen (91e4095). Separater Browser-Testtab, Nutzerprojekt unverändert. Testdatei: Wand (0;0)–(3;0), Stärke 0,36 m, externe Linie (4;1)–(6;1).
+
+Endpunkt: Fangmeldung Endpunkt, bestätigte Außenecke (4;1); Undo (3;0,18), Redo (4;1). Mittelpunkt: Fangmeldung Mittelpunkt vor und nach Zoom, bestätigte Ecke (5;1). Hilfslinien: beide Linienenden nach 600 ms erfasst, zwei diagonale Führungen bilden Schnittpunkt (5;2), sichtbare Schnittpunktmeldung und passende Wandvorschau. Nach Verweilen wird der Schnittpunkt selbst zur Referenz; vier Ringe einschließlich Ursprung bleiben nach Zoom erhalten. Bestätigung ergibt Ecke (5;2) bis auf Gleitkommarundung < 1e-14 m. Weiterer Bewegungsentwurf zum Endpunkt und Abbrechen erhält (5;2); Undo ergibt ursprüngliche Ecke, Redo wieder (5;2). Keine Browser-Konsolenfehler.
+
+Kein zusätzlicher Anwendungsfehler gefunden, keine Codeänderung. Bestehende 225 Tests, TypeScript-/Build-Nachweise und 6 bekannte Lint-Warnungen gelten für den unveränderten Anwendungscode; keine Wiederholung dieser Prüfungen im reinen Abnahmeschritt. Browsernachweise ergänzen die automatisierten Geometrie-/History-Prüfungen aus PR #50. Kein Nachweis für 3D-Arbeitsebenen oder Wandanschlüsse.
+
+Abnahme: Eine Linie neben der Wand zeichnen, Wandecke frei bewegen und Endpunkt/Mittelpunkt anfahren. Beide Linienenden jeweils 0,6 s erfassen, diagonale Hilfslinien zum gemeinsamen Schnittpunkt führen, zoomen und bestätigen. Undo/Redo und Abbrechen prüfen.
+
+### Genau ein ausführbarer Folgeauftrag: Lastmessung der gemeinsamen Fangengine
+
+Reproduzierbare Testprojekte mit 100, 1000 und 5000 geraden Elementen erzeugen. Auf dokumentierter Laufzeit/Hardware getrennt Aufbau der Modellreferenzen und reine Fangabfrage für Zeichnen/Direct Edit messen, einschließlich aktiver Hilfsreferenzen und Modellwechsel. Warm-up, Wiederholungen und Median/P95 dokumentieren; Zeiten nicht als allgemeine Leistungszusage oder vollständige Browser-Framerate ausgeben. Vorhandene Dienste unverändert messen, keine vorsorgliche Index-/Cache-Neuentwicklung. Einen nachgewiesenen Engpass oder das Ausbleiben eines solchen festhalten und daraus den nächsten begrenzten Auftrag ableiten.
