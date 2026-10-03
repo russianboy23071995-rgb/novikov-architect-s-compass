@@ -10,7 +10,7 @@ Geändert: constraints/inference/hover-reference.ts, Standardwerte in CadWorkspa
 
 Abnahme: Snap einschalten, Punkt 0,6 s anhovern → silbergrauer Ring. Zeiger weg und wieder 0,6 s darüber → Ring weg. Dort verbleiben → bleibt gelöst. Nach erneutem Verlassen wieder aktivierbar. In einer bereits offenen Sitzung kann die bisherige Zeiteinstellung erhalten bleiben; im Linienwerkzeug auf 0,6 s stellen, ohne das Projekt neu zu laden.
 
-Nächster Auftrag bleibt der unten definierte Schnittpunkt zweier aktiver Richtungsführungen; kein weiterer paralleler Auftrag.
+Dieser frühere Folgeauftrag wurde durch die unten dokumentierte Nutzerpräzisierung auf mausgeführte 45°-Schnittpunkte eingegrenzt und umgesetzt.
 
 ## Aktiver Planungsstand — Funktionsumfang 03.10.2026
 
@@ -36,13 +36,23 @@ Browser: Zwei Wandachsenden in Reihenfolge aktiviert; beim Linienzeichnen und fr
 
 Abnahme: Snap einschalten, zwei Endpunkte derselben horizontalen Wand nacheinander je 0,4 s anhovern. Weiter entlang der gemeinsamen Flucht zeigen: Die Hilfslinie beginnt am zuletzt aktivierten Punkt. Beim Linienzeichnen und im Menü „Element frei bewegen“ wiederholen, bestätigen und Undo/Redo prüfen.
 
-### Genau ein ausführbarer Folgeauftrag: Schnittpunkt zweier aktiver Richtungsführungen
+### Abschluss: mausgeführte 45°-Hilfslinien und konstruierte Referenzen — 03.10.2026
 
-Bestehende HV-Guide-Schnittpunkte auf Schnittpunkte zweier aktiver nichtparalleler Richtungsführungen erweitern. Generische Geradenschnitt-Mathematik gehört nach geometry/intersections; Constraints erzeugt Kandidaten und verwendet die jetzt gemeinsame Rangfunktion. Linie, Wand und Direct Edit konsumieren unverändert querySnap. Beide Quellen und Herkunftslinien erhalten; tatsächliche Endpunkte behalten Vorrang.
+Die Nutzerpräzisierung ersetzt den zuvor breiter geplanten Geradenschnitt-Auftrag: Von jedem aktiven Hilfspunkt wird die zur Maus nächstgelegene 45°-Schrittrichtung angezeigt, silbergrau gestrichelt und über die Mausprojektion hinaus verlängert. Nichtparallele Führungen bilden innerhalb von 10 CSS-Pixeln einen Schnittpunktkandidaten. Nach standardmäßig 600 ms wird dieser als zusätzlicher Hilfspunkt aktiviert, erzeugt selbst Führungen und lässt sich bei erneutem Besuch nach derselben Verweildauer lösen. Der Ablauf funktioniert auch ohne Zeichenwerkzeug. Echte Endpunkte behalten Vorrang; explizites Shift/Ortho und die gemeinsame Kandidatenrangfolge bleiben erhalten.
 
-Abnahme: analytisch bekannte Kreuzung zweier schräger Verlängerungen sowie Verlängerung/Lot, verschiedene Zoomstufen, nahezu parallele/kollineare Richtungen und ungültige Quellen; keine erfundenen Schnittpunkte bei uneindeutiger Schnittmenge. Ortho-/Shift-Vertrag, veralteter Kontext und Direct-Edit-Achsenbeschränkung müssen erhalten bleiben. Ein bestätigter Zeichen-/Editvorgang, Undo/Redo und JSON sowie bestehende Tests, TypeScript, Lint und Build prüfen. Praktisch zwei schräge Referenzen aktivieren und an ihrem Schnittpunkt zeichnen bzw. bewegen.
+Gemeinsame Mathematik in geometry/intersections/lines.ts mit dimensionsloser Paralleltoleranz in geometry/tolerances/direction.ts; Richtungswahl in constraints/guides/directions.ts; temporäre Konstruktion und exakte Quellenprüfung in constraints/inference/construction-reference.ts. BimPlan zeichnet nur abgeleitete Führungen; useHoverReference liefert Maus/Zeit. Linie, Wand und Direct Edit verwenden weiterhin querySnap. Konstruierte Referenzen speichern ihre ursprünglichen Modellquellen flach, sodass verkettete Hilfspunkte keine rekursiven Modellkopien bilden. Verschobene/entfernte Quellen werden verworfen. Keine neue Modellaktion, keine Dateimigration oder separate AI-Logik.
 
-Nicht enthalten: Hysterese, echte Segmentschnitt-/Mittelpunkt-Fangarten, Layer, neue Bauteile, Skalieren, 3D oder Änderung der Wandgriffgeometrie. Nach diesem einen Auftrag neu bewerten; derzeit keine weiteren parallelen Aufträge.
+Prüfung: 164 Tests bestanden, darunter sechs neue Fälle zu schrägem Schnitt, parallelen/kollinearen/ungültigen Richtungen, nächster 45°-Richtung, 25/100/400 px/m, Prioritäten und Constraints, 599/600-ms-Aktivierung/Lösen, verketteten/veralteten Quellen sowie Zeichnen mit genau einem Undo-Schritt und JSON-Rundlauf ohne Hilfspunkte. TypeScript und Build erfolgreich, ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: zwei Wandachsenden aktiviert, diagonaler Schnitt als dritter Ring markiert, weitere Führung vom neuen Punkt, erneutes Lösen geprüft. Linie beginnt exakt bei (1,5 m; 1,5 m); Undo entfernt, Redo stellt sie wieder her. Screenshot: outputs/guide-intersection-hover.png.
+
+Abnahme: Snap einschalten. Bei einer horizontalen 3-m-Wand beide Achsenden nacheinander je 0,6 s anhovern. Zeiger etwa 1,5 m oberhalb der Wandmitte halten: zwei diagonale Führungen kreuzen sich, danach erscheint der dritte Referenzring. Wegbewegen und neue Führungen vom Hilfspunkt prüfen; zurückkehren und 0,6 s warten löst ihn. Dasselbe beim Linienzeichnen testen und Linie mit Undo/Redo prüfen.
+
+Grenzen: weiterhin höchstens vier aktive temporäre Referenzen; keine dauerhaften Punktbauteile, kein History-/Projektdateieintrag für Hover. Verlassen der Zeichenfläche, Kamera-/Modell-/Sitzungswechsel verwerfen Referenzen wie bisher. Beliebig schräge Verlängerung/Lot-Schnittpunkte, echte Segmentschnitt- und Mittelpunktfangarten sowie aktive 3D-Arbeitsebenen bleiben Backlog; bestehende einzelne Verlängerungs-/Lotführungen bleiben verfügbar. Kein Anspruch auf vollständige Guide-F14-Umsetzung.
+
+### Genau ein ausführbarer Folgeauftrag: Richtungswechsel der 45°-Hilfslinien stabilisieren
+
+Eine kleine gemeinsame Hysterese für die mausgeführte Richtungswahl ergänzen, damit Führungen nahe den Winkelgrenzen nicht zwischen zwei Richtungen flackern. Vorher aktuellen Pointer-/Referenzzustand prüfen; Entscheidung und Rücksetzung in constraints halten, Darstellung und Schnittpunktberechnung müssen dieselbe stabilisierte Richtung verwenden. Kein eigener Zustand je Zeichenwerkzeug und keine Änderung an Modell/History.
+
+Abnahme: Bewegungen beidseits einer Winkelgrenze, bewusster Richtungswechsel, mehrere aktive Referenzen, Quellenwechsel, Escape, Snap aus sowie Kamera-/Modellwechsel testen; Referenz-Verweildauer, Fangpriorität, Shift und Ortho erhalten. Browserabnahme beim Zeichnen und Direct Edit, Tests/TypeScript/Lint/Build. Andere Fangarten bleiben spätere getrennte Aufträge.
 
 ## Historische Fortschrittsnachweise
 

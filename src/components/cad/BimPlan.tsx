@@ -1,3 +1,4 @@
+import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { querySnap } from "@/constraints/snapping/engine";
@@ -147,7 +148,9 @@ export function BimPlan({
     });
   const resolvedHover = hover ? (editSession ? resolveEdit(hover) : resolveDrawing(hover)) : null;
   const snapLabels = {
-    endpoint: "Endpunkt",
+    endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
+      ? "Hilfspunkt"
+      : "Endpunkt",
     grid: "Raster",
     horizontal: "Horizontal",
     vertical: "Vertikal",
@@ -552,6 +555,30 @@ export function BimPlan({
           )}
         </g>
       )}
+      {!pan &&
+        snap &&
+        hover &&
+        activeReferences.map((reference) => {
+          const guide = cursorGuide(hover, reference);
+          const extension =
+            40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
+          return (
+            <line
+              key={JSON.stringify([reference.entityId, reference.feature])}
+              aria-label="45°-Referenzhilfslinie"
+              pointerEvents="none"
+              x1={guide.origin.x}
+              y1={-guide.origin.y}
+              x2={guide.point.x + extension * guide.direction.x}
+              y2={-guide.point.y - extension * guide.direction.y}
+              stroke="#929aa3"
+              strokeWidth={1}
+              strokeOpacity={0.7}
+              strokeDasharray="6 4"
+              vectorEffect="non-scaling-stroke"
+            />
+          );
+        })}
       {!pan &&
         activeReferences.map((reference) => (
           <g

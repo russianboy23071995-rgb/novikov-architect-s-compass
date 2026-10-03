@@ -1,3 +1,6 @@
+import { intersectLines } from "../../geometry/intersections/lines.ts";
+import { cursorGuide } from "../guides/directions.ts";
+import { withConstructionReferences } from "../inference/construction-reference.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { projectDirection, angle45Direction } from "../../geometry/projections/direction.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
@@ -56,6 +59,7 @@ function endpointCandidates(
           distanceOnScreen: d,
           sourceEntityId: source.entityId,
           sourceFeature: source.feature,
+          ...(source.dependencies ? { sourceReferences: [source] } : {}),
           priority: 0,
         },
         [{ source, activation: activations.get(key(source)) ?? -1 }],
@@ -121,7 +125,14 @@ function intersectionCandidates(
   for (const a of active)
     for (const b of active) {
       if (a === b) continue;
-      const point = { x: b.source.point.x, y: a.source.point.y };
+      const ga = cursorGuide(cursor, a.source),
+        gb = cursorGuide(cursor, b.source);
+      // Preserve horizontal/vertical origin roles; other pairs use stable source order.
+      const hv = ga.direction.y === 0 && gb.direction.x === 0;
+      const vh = ga.direction.x === 0 && gb.direction.y === 0;
+      if (vh || (!hv && key(a.source) > key(b.source))) continue;
+      const point = intersectLines(ga.origin, ga.direction, gb.origin, gb.direction);
+      if (!point) continue;
       if (!pointsCompatible(point, constrain(point))) continue;
       const d = distance(point, cursor, context);
       if (d > context.endpointRadiusPx) continue;
@@ -129,6 +140,7 @@ function intersectionCandidates(
         ranked(
           {
             kind: "intersection",
+            sourceReferences: [a.source, b.source],
             worldPoint: point,
             guideOrigin: a.source.point,
             secondaryGuideOrigin: b.source.point,
@@ -150,6 +162,13 @@ export function collectSnapCandidates(
   context: SnapContext,
   constrain: Constrain,
 ): RankedSnap[] {
+  context = {
+    ...context,
+    references: withConstructionReferences(
+      context.references,
+      context.activeReferences ?? (context.activeReference ? [context.activeReference] : []),
+    ),
+  };
   const active = activeSources(context);
   return [
     ...endpointCandidates(cursor, context, constrain, active),
