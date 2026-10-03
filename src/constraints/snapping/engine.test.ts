@@ -419,3 +419,153 @@ test("model adapter and snapped line workflow preserve exact point, ID, undo and
   assert.equal(projectSnapReferences(committed.present).length, 8);
   assert.equal(serializeProject(project), before);
 });
+
+test("equidistant guides prefer the newest activated reference, independent of model source order", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: -0.0625 } };
+  const z = { entityId: "z", feature: "end", point: { x: 0, y: 0.0625 } };
+  for (const references of [
+    [a, z],
+    [z, a],
+  ]) {
+    const c = { ...context, references, gridSpacing: null };
+    assert.equal(
+      querySnap({ x: 4, y: 0 }, { ...c, activeReferences: [a, z] }).candidate?.sourceEntityId,
+      "z",
+    );
+    assert.equal(
+      querySnap({ x: 4, y: 0 }, { ...c, activeReferences: [z, a] }).candidate?.sourceEntityId,
+      "a",
+    );
+  }
+});
+
+test("endpoint ties use activation before full stable source identity", () => {
+  const a = { entityId: "a", feature: "end", point: { x: -0.0625, y: 0 } };
+  const z = { entityId: "z", feature: "end", point: { x: 0.0625, y: 0 } };
+  for (const references of [
+    [a, z],
+    [z, a],
+  ]) {
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...context, references }).candidate?.sourceEntityId,
+      "a",
+    );
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...context, references, activeReferences: [a, z] }).candidate
+        ?.sourceEntityId,
+      "z",
+    );
+  }
+});
+
+test("intersection ties account for both activated sources and preserve both origins", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const c = { entityId: "c", feature: "end", point: { x: 4, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 2, y: 3 } };
+  for (const references of [
+    [a, b, c],
+    [c, b, a],
+  ]) {
+    const result = querySnap(
+      { x: 2, y: 0 },
+      { ...context, references, activeReferences: [a, c, b] },
+    );
+    assert.equal(result.candidate?.kind, "intersection");
+    assert.deepEqual(result.candidate?.guideOrigin, c.point);
+    assert.deepEqual(result.candidate?.secondaryGuideOrigin, b.point);
+  }
+});
+
+test("duplicate or stale active references cannot generate a self intersection", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const duplicate = { ...a, point: { ...a.point } };
+  const stale = { ...a, point: { x: 0, y: 1e-10 } };
+  const result = querySnap(
+    { x: 2, y: 0.01 },
+    { ...context, references: [a], activeReferences: [a, duplicate, stale] },
+  );
+  assert.equal(result.candidate?.kind, "horizontal");
+  assert.deepEqual(result.candidate?.guideOrigin, a.point);
+});
+
+import { compareSnapCandidates } from "./ranking.ts";
+import type { RankedSnap } from "./ranking.ts";
+
+test("rank compares full source tuples including both intersection roles, without slash collisions", () => {
+  const candidate = {
+    kind: "intersection" as const,
+    worldPoint: { x: 2, y: 0 },
+    priority: 0.5,
+    distanceOnScreen: 0,
+    sourceEntityId: "first",
+    sourceFeature: "same",
+  };
+  const a: RankedSnap = {
+    candidate,
+    activations: [2, 1],
+    sources: [
+      ["first", "end"],
+      ["a", "b/c"],
+    ],
+  };
+  const b: RankedSnap = {
+    candidate,
+    activations: [2, 1],
+    sources: [
+      ["first", "end"],
+      ["a/b", "c"],
+    ],
+  };
+  assert.ok(compareSnapCandidates(a, b) < 0);
+  assert.ok(compareSnapCandidates(b, a) > 0);
+});
+
+test("equal direction candidates have explicit kind then coordinate order", () => {
+  const reference = { entityId: "wall", feature: "end", point: { x: 0, y: 0 } };
+  const base = { ...context, references: [reference], activeReference: reference };
+  for (const directions of [
+    [
+      { x: 1, y: 0 },
+      { x: 0, y: 1 },
+    ],
+    [
+      { x: 0, y: 1 },
+      { x: 1, y: 0 },
+    ],
+  ]) {
+    const source = { ...reference, directions };
+    const result = querySnap({ x: 3, y: 0 }, { ...base, references: [source] });
+    assert.equal(result.candidate?.kind, "extension");
+    assert.deepEqual(result.point, { x: 3, y: 0 });
+  }
+  const candidate = {
+    kind: "extension" as const,
+    worldPoint: { x: 1, y: 2 },
+    priority: 1,
+    distanceOnScreen: 5,
+    sourceEntityId: "a",
+    sourceFeature: "end",
+  };
+  const a: RankedSnap = { candidate, activations: [1], sources: [["a", "end"]] };
+  const b: RankedSnap = { ...a, candidate: { ...candidate, worldPoint: { x: 2, y: 1 } } };
+  assert.ok(compareSnapCandidates(a, b) < 0);
+});
+
+test("newer guides cannot defeat closer guides or higher priority endpoints", () => {
+  for (const pixelsPerMetre of [25, 100, 400]) {
+    const old = { entityId: "old", feature: "end", point: { x: 0, y: 0 } };
+    const newer = { entityId: "new", feature: "end", point: { x: 0, y: 8 / pixelsPerMetre } };
+    const c = {
+      ...context,
+      pixelsPerMetre,
+      references: [old, newer],
+      activeReferences: [old, newer],
+    };
+    assert.equal(querySnap({ x: 4, y: 1 / pixelsPerMetre }, c).candidate?.sourceEntityId, "old");
+    const endpoint = { entityId: "endpoint", feature: "end", point: { x: 4.01, y: 0 } };
+    assert.equal(
+      querySnap({ x: 4, y: 0 }, { ...c, references: [old, newer, endpoint] }).candidate?.kind,
+      "endpoint",
+    );
+  }
+});

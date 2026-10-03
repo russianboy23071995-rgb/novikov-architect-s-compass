@@ -8,7 +8,33 @@ Geprüfter Code: 3bbe2dd auf feat/direct-edit-shared-snap, zwei Commits seit Rev
 
 **Dieser Abschnitt ist die einzige aktive Auftragsreihenfolge.** Sämtliche darunterstehenden „nächster Schritt“-Formulierungen und Auftragslisten sind historische Protokolle ihrer jeweiligen Stände, keine zusätzlichen aktuellen Folgeaufträge. Die Pakete A–L des Entwurfs und die N-Matrix sind Backlog und Abhängigkeiten.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Fang-Kandidaten und Rangfolge
+### Abschluss: gemeinsame Fang-Kandidaten und Rangfolge — 03.10.2026
+
+PR #29 wurde mit Nutzerfreigabe als normaler Merge 655c5f1 in feat/direct-edit-shared-snap übernommen. PR #27/#28 bleiben offen; main wurde nicht geändert. Dieser Funktionsschritt basiert auf dem freigegebenen Dokumentationsstand.
+
+constraints/snapping/candidates.ts erzeugt Endpunkte, Richtungsführungen und vorhandene HV-Schnittpunkte ohne rekursive querySnap-Abfragen. Aktive Referenzen werden einmal gegen den aktuellen Quellenstand exakt validiert und dedupliziert. Eine nichtleere activeReferences-Liste ist maßgeblich; activeReference bleibt der Legacy-Fallback ohne Liste. Modelladapter und öffentliche querySnap-Signatur bleiben unverändert. Raster bleibt der bisherige Fallback; explizites Shift wird vor automatischen Kandidaten aufgelöst.
+
+ranking.ts definiert die technische Rangentscheidung: Priorität → Bildschirmabstand → neueste Aktivierung (bei Schnittpunkten beide Aktivierungsränge absteigend) → vollständige geordnete Quellen-Tupel → Fangart → projizierte X-/Y-Koordinaten → Winkel. Artgleichstände: Verlängerung vor Lotrecht vor Horizontal vor Vertikal vor Winkel. Zeichenketten werden ohne Locale verglichen. Bei ansonsten identischen Ergebnissen ist die Reihenfolge ohne fachliche Bedeutung.
+
+Bewusste Änderungen bei Gleichstand: neu aktivierte Quelle gewinnt statt impliziter Erzeugungsfolge bzw. bisherigem sourceFeature.localeCompare. Endpunkte berücksichtigen ebenfalls Aktivierung vor Quellen-ID. Richtungsreihenfolge im Modelladapter entscheidet nicht mehr über gleichwertige Richtungen. Höherer Vorrang und geringerer Abstand gewinnen weiterhin vor Aktualität. Schnittpunkte behalten beide Herkunftspositionen; intern werden beide Quellen getrennt verglichen statt verkettete Strings als Identität zu benutzen.
+
+Prüfung: 156 Tests bestanden, darunter sieben neue Tests. Drei neue Regressionsfälle schlugen am alten Stand fehl (neuere Guide-Quelle, Endpunkt-Aktivierung und beide Schnittpunktquellen). Weitere Fälle prüfen Duplikate/stale Quellen, vollständige Identität trotz Trennzeichen, Richtungsreihenfolge und Priorität/Abstand bei 25/100/400 px/m. Bestehende Toleranz-, Direct-Edit-, JSON-/History-, Voice-/Stale-Context- und IFC-Tests bleiben grün. TypeScript und Build erfolgreich, ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Keine UI-, Modell- oder Dateiformatänderung, keine Leistungszusage.
+
+Browser: Zwei Wandachsenden in Reihenfolge aktiviert; beim Linienzeichnen und freien Linienbewegen stammt die Verlängerung vom neueren Punkt. Vorschau/Commit identisch, Undo/Redo geprüft. Wechsel von rund 105 auf 50 px/m verwirft Referenzen, exakter Endpunkt wird innerhalb von 10 CSS-Pixeln erkannt; Escape verwirft die Bearbeitung. Screenshot lokal: outputs/snap-ranking-direct-edit.png.
+
+Abnahme: Snap einschalten, zwei Endpunkte derselben horizontalen Wand nacheinander je 0,4 s anhovern. Weiter entlang der gemeinsamen Flucht zeigen: Die Hilfslinie beginnt am zuletzt aktivierten Punkt. Beim Linienzeichnen und im Menü „Element frei bewegen“ wiederholen, bestätigen und Undo/Redo prüfen.
+
+### Genau ein ausführbarer Folgeauftrag: Schnittpunkt zweier aktiver Richtungsführungen
+
+Bestehende HV-Guide-Schnittpunkte auf Schnittpunkte zweier aktiver nichtparalleler Richtungsführungen erweitern. Generische Geradenschnitt-Mathematik gehört nach geometry/intersections; Constraints erzeugt Kandidaten und verwendet die jetzt gemeinsame Rangfunktion. Linie, Wand und Direct Edit konsumieren unverändert querySnap. Beide Quellen und Herkunftslinien erhalten; tatsächliche Endpunkte behalten Vorrang.
+
+Abnahme: analytisch bekannte Kreuzung zweier schräger Verlängerungen sowie Verlängerung/Lot, verschiedene Zoomstufen, nahezu parallele/kollineare Richtungen und ungültige Quellen; keine erfundenen Schnittpunkte bei uneindeutiger Schnittmenge. Ortho-/Shift-Vertrag, veralteter Kontext und Direct-Edit-Achsenbeschränkung müssen erhalten bleiben. Ein bestätigter Zeichen-/Editvorgang, Undo/Redo und JSON sowie bestehende Tests, TypeScript, Lint und Build prüfen. Praktisch zwei schräge Referenzen aktivieren und an ihrem Schnittpunkt zeichnen bzw. bewegen.
+
+Nicht enthalten: Hysterese, echte Segmentschnitt-/Mittelpunkt-Fangarten, Layer, neue Bauteile, Skalieren, 3D oder Änderung der Wandgriffgeometrie. Nach diesem einen Auftrag neu bewerten; derzeit keine weiteren parallelen Aufträge.
+
+## Historische Fortschrittsnachweise
+
+### Abgeschlossener Auftrag: gemeinsame Fang-Kandidaten und Rangfolge
 
 **Ziel:** Die bestehenden Linie-/Wand-/Auswahl-/Direct-Edit-Verbraucher erhalten dieselbe nachvollziehbare Fangentscheidung aus einer nichtrekursiven Kandidatenpipeline. Keine neuen Fangarten oder UI-Werkzeuge.
 
@@ -33,8 +59,6 @@ Geprüfter Code: 3bbe2dd auf feat/direct-edit-shared-snap, zwei Commits seit Rev
 - Kein neuer Modellbefehl entsteht: vorhandene AI/Text/Voice-Verträge und Stale-Context-Tests erhalten; ein zusätzlicher Sprachparser ist hier nicht erforderlich.
 
 **Lieferung:** ein kleiner prüfbarer Entwicklungszweig/PR, dokumentierte Rangregel und Bedienabnahme. Kein Merge ohne Prüfung. Dokumentationsstand baut auf PR #28 auf; Abhängigkeiten in Reihenfolge prüfen statt ältere Änderungen erneut zu implementieren.
-
-## Historische Fortschrittsnachweise
 
 ## Architekturreview: Direct Edit an gemeinsame Fang-Engine angebunden - 03.10.2026
 
