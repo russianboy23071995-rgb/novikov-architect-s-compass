@@ -1,0 +1,95 @@
+import type { Project } from "../../lib/bim/model.ts";
+import type { Point2 } from "../../geometry/primitives/point.ts";
+import type { SnapReference } from "../../constraints/snapping/engine.ts";
+import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
+import { MAX_MODEL_TOLERANCE_METRES } from "../../geometry/tolerances/model.ts";
+import { referenceKey } from "../../constraints/inference/construction-reference.ts";
+import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
+import { projectSnapPrimitives } from "./project-references.ts";
+
+function freezeData(value: object): void {
+  for (const nested of Object.values(value))
+    if (nested && typeof nested === "object") freezeData(nested);
+  Object.freeze(value);
+}
+
+/** Cold build contains primitive sources only, never all model intersections. */
+export function createLocalSnapSources(project: Project) {
+  const { references, segments } = projectSnapPrimitives(project);
+  freezeData(references);
+  freezeData(segments);
+  const lookup = new Map(references.map((r) => [referenceKey(r), r]));
+  const points = createBoxIndex(
+    references.map((r, value) => ({
+      value,
+      box: { minX: r.point.x, maxX: r.point.x, minY: r.point.y, maxY: r.point.y },
+    })),
+  );
+  const lines = createBoxIndex(
+    segments.map((s, value) => ({
+      value,
+      box: {
+        minX: Math.min(s.start.x, s.end.x),
+        maxX: Math.max(s.start.x, s.end.x),
+        minY: Math.min(s.start.y, s.end.y),
+        maxY: Math.max(s.start.y, s.end.y),
+      },
+    })),
+  );
+  return Object.freeze({
+    sourceCount: references.length,
+    segmentCount: segments.length,
+    lookup: (key: string) => lookup.get(key),
+    query(
+      cursor: Point2,
+      pixelsPerMetre: number,
+      radiusPx: number,
+      allowed: (source: SnapReference) => boolean = () => true,
+    ) {
+      if (
+        ![cursor.x, cursor.y, pixelsPerMetre, radiusPx].every(Number.isFinite) ||
+        pixelsPerMetre <= 0 ||
+        radiusPx < 0
+      )
+        throw new Error("Invalid local snap query");
+      const radius = radiusPx / pixelsPerMetre;
+      // Conservative padding covers every tolerance accepted by intersectSegments.
+      const padded = radius + MAX_MODEL_TOLERANCE_METRES;
+      const box = {
+        minX: cursor.x - padded,
+        maxX: cursor.x + padded,
+        minY: cursor.y - padded,
+        maxY: cursor.y + padded,
+      };
+      const near = (r: SnapReference) =>
+        Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * pixelsPerMetre <= radiusPx;
+      const localPoints = points
+        .query(box)
+        .sort((a, b) => a - b)
+        .map((i) => references[i]!)
+        .filter((r) => allowed(r) && near(r));
+      // Keep original extents. False-positive boxes are safe; clipping would alter semantics.
+      const localSegments = lines
+        .query(box)
+        .sort((a, b) => a - b)
+        .map((i) => segments[i]!)
+        .filter((s) => allowed(s.source));
+      const intersections = segmentIntersectionReferences(localSegments).filter(near);
+      return {
+        references: [...localPoints, ...intersections],
+        segments: localSegments,
+        segmentPairs: (localSegments.length * (localSegments.length - 1)) / 2,
+      };
+    },
+  });
+}
+export type LocalSnapSources = ReturnType<typeof createLocalSnapSources>;
+const cache = new WeakMap<Project, LocalSnapSources>();
+export function getLocalSnapSources(project: Project): LocalSnapSources {
+  let sources = cache.get(project);
+  if (!sources) {
+    sources = createLocalSnapSources(project);
+    cache.set(project, sources);
+  }
+  return sources;
+}

@@ -41,10 +41,16 @@ function midpointReference(
 
 /** Disposable references derived from the authoritative model. Wall endpoints mean axis ends. */
 export function projectSnapReferences(project: Project): SnapReference[] {
+  const { references, segments } = projectSnapPrimitives(project);
+  return [...references, ...segmentIntersectionReferences(segments)];
+}
+
+/** No intersection enumeration; shared primitive adapter for old and local query paths. */
+export function projectSnapPrimitives(project: Project) {
   const segments: SnapSegment[] = [];
   const midpoint = (id: string, feature: string, start: Point2, end: Point2) => {
     const refs = midpointReference(id, feature, start, end);
-    if (refs[0]) segments.push({ start, end, source: refs[0] });
+    if (refs[0]) segments.push({ start: { ...start }, end: { ...end }, source: refs[0] });
     return refs;
   };
   const references: SnapReference[] = [
@@ -89,5 +95,5 @@ export function projectSnapReferences(project: Project): SnapReference[] {
         ),
     ]),
   ];
-  return [...references, ...segmentIntersectionReferences(segments)];
+  return { references, segments };
 }
