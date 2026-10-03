@@ -39,6 +39,20 @@ export function editDirection(session: EditSession): Point2 | null {
   return { x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y };
 }
 
+/** Session-only construction origin; excluded model geometry is never reintroduced. */
+export function editOriginReference(session: EditSession): SnapReference | null {
+  if (session.action !== "move" || session.target.kind === "window") return null;
+  const points = editablePoints(session.base, { kind: session.target.kind, id: session.target.id });
+  const i = session.index ?? 0;
+  const neighbour = points[i === 0 ? 1 : i - 1]!;
+  return {
+    entityId: "@edit-origin",
+    feature: JSON.stringify([session.target.kind, session.target.id, session.action, i]),
+    point: { ...session.anchor },
+    directions: [{ x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y }],
+  };
+}
+
 /** Shared resolver for preview and commit. Explicit edit axes win over Shift/Ortho.
  * Do not label a projected off-axis source as an exact endpoint or intersection.
  */

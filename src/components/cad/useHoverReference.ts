@@ -8,6 +8,7 @@ import {
   emptyHoverReference,
   sameHoverSession,
   suspendHoverReference,
+  sameReference,
 } from "@/constraints/inference/hover-reference";
 import type { HoverReferenceState } from "@/constraints/inference/hover-reference";
 import type { HoverContext } from "@/constraints/inference/hover-reference";
@@ -45,22 +46,27 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       return;
     }
     const current = state.current!.value;
-    const sources = withConstructionReferences(context.references, current.references);
+    const active = [...(context.pinnedReferences ?? []), ...current.references];
+    const sources = withConstructionReferences(context.references, active);
     const guides = advanceGuideDirections(
       cursor,
-      current.references,
+      active,
       state.current?.context === context ? state.current.guides : [],
     );
     const candidate = querySnap(cursor, {
       ...context,
       references: sources,
-      activeReferences: current.references,
+      activeReferences: active,
       guideDirections: guides,
       endpointRadiusPx: 10,
       gridSpacing: null,
       orthoOrigin: null,
     }).candidate;
-    const reference = acquisitionReference(candidate, sources);
+    const acquired = acquisitionReference(candidate, sources);
+    const reference =
+      acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))
+        ? acquired
+        : null;
     const update = () => {
       const before =
         state.current?.context === context ? state.current.value : emptyHoverReference();
@@ -69,7 +75,11 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
         context,
         cursor,
         value,
-        guides: advanceGuideDirections(cursor, value.references, guides),
+        guides: advanceGuideDirections(
+          cursor,
+          [...(context.pinnedReferences ?? []), ...value.references],
+          guides,
+        ),
       };
       state.current = next;
       setSnapshot(next);
@@ -84,7 +94,9 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     return () => window.clearTimeout(timer);
   }, [cursor, context, dwellMs]);
   const compatible = snapshot && sameHoverSession(snapshot.context, context);
-  const references = compatible ? snapshot.value.references : [];
+  const references = context.enabled
+    ? [...(context.pinnedReferences ?? []), ...(compatible ? snapshot.value.references : [])]
+    : [];
   const guideCursor = compatible ? (cursor ?? snapshot.cursor) : null;
   return {
     references,

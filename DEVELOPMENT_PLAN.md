@@ -364,6 +364,32 @@ Nachweis: 194 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler
 
 Abnahme: Wand auswählen, Element auf X-Achse wählen, 1,25 in Strecke (m) eingeben und Vorschau betrachten. Enter oder Übernehmen, danach Undo/Redo. Mit negativem Wert, ungültigem Text und Escape wiederholen. Elementachse zeigt ihre positive Richtung ausdrücklich an.
 
-### Genau ein ausführbarer Folgeauftrag: numerisches Strecken eines ausgewählten Punktgriffs
+### Zurückgestellter Auftrag zugunsten Nutzerkorrektur: numerisches Strecken eines ausgewählten Punktgriffs
 
 Die vorhandene Aktion Punkt in Flucht strecken um dieselbe Meter-Eingabe erweitern. Positive Strecke verlängert vom Nachbarpunkt weg, negative verkürzt. Bestehenden Griffversatz, Nachbarüberquerung und Fenstergrenzen respektieren; keine Änderung der Wandachsenlage N45. Die numerische Vorschau und Bestätigung müssen dieselben gepinnten Bearbeitungsaktionen nutzen. Tests für schräge Linien/Wände, ungültiges Verkürzen, Kontextwechsel und Undo/Redo sowie praktische Abnahme einschließlich 3D-Zahlenvorschau. Fensterbewegung und freie Punktbewegung bleiben außerhalb dieses Teilauftrags.
+
+
+### Abschluss: kompaktes Hilfseingabefenster der Rasterengine — 03.10.2026
+
+Nutzerkorrektur hat Vorrang vor dem zuvor geplanten Streckgriff: großes festes Streckenfeld durch ein kompaktes Hilfseingabefenster nahe der Auswahl ersetzen und freies Bewegen mit Winkel/Länge unterstützen. Umsetzung auf feat/compact-polar-input, aufbauend auf PR #38 / 86b5839. PR #38 bleibt offen; keine zusätzliche Merge-Freigabe angenommen.
+
+PrecisionInput ist eine wiederverwendbare, modellfreie UI-Komponente (230 px breit, im normalen Zustand etwa 140 px hoch), mit verschiebbarem Kopf und Bildschirmbegrenzung wie beim On-Demand-Menü. Startposition ist die vorhandene Auswahl-/Menüposition. Zwei nebeneinanderliegende Felder: Winkel in Grad und Länge in Metern. Der gewählte Modellpunkt bleibt der gepinnte Ursprung. Winkelkonvention: 0° rechts/+X, 90° oben/+Y, gegen den Uhrzeigersinn. Die Maus liefert über den gemeinsamen Direct-Edit-Fangresolver eine Richtung; dessen Shift-/Ortho-/Referenzregeln bleiben erhalten.
+
+Freies Bewegen hat jetzt einen ausdrücklichen Richtungswahl-Schritt: erster Klick fixiert die Richtung, erzeugt noch keinen History-Eintrag und fokussiert das Längenfeld. Winkel kann stattdessen direkt eingetragen werden. Leerer Winkel folgt der Maus, gesetzter Winkel bleibt fix; leere Länge folgt der Mausprojektion auf die feste Richtung, gesetzte Länge bleibt exakt. Maus setzt beide Eingaben zurück. Enter/Übernehmen bestätigt, Escape/Abbrechen verwirft. Negative Länge bewegt in Gegenrichtung. Dezimalkomma/-punkt werden akzeptiert, ungültige Werte sperren Bestätigung. Bei festem Winkel und leerer Länge bleibt Rückwärtsbewegung vor dem Ursprung bei Länge null; eine negative Länge kann ausdrücklich eingegeben werden.
+
+constraints/input/polar.ts bildet als gemeinsame, React-/BIM-freie Eingabelogik den Zielpunkt aus Ursprung/Richtung/Länge. application/direct-edit/numeric.ts validiert Texte und Kontext und verwendet weiterhin previewEdit/confirm. BimPlan liefert Mausziele, das Fenster verändert kein Modell selbst. X/Y/Elementachsen bleiben Alternativen und verwenden dasselbe Fenster mit angezeigtem, nicht editierbarem Winkel. Zunächst ganze Wände/Linien; Fenster, Zeichnen und Punktstrecken noch nicht an dieses Fenster angebunden. Bestehender 3D-Vorschauadapter wird weiterverwendet; freie Richtungswahl startet in 2D. Kein Projektformat-/IFC-Wechsel, keine zweite AI-Modelllogik.
+
+Nachweise: 198 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Testgruppen: gepinnter Ursprung, Kardinal-/schräge Winkel, unabhängige Eingaben, negative Länge, fehlende/ungültige Werte, Klick auf Wandecke, unveränderte Wandmaße, stabile Auswahl/Modellprüfung und ein Undo/Redo/JSON-Rundlauf. Browser: Ecke (3;0,18), Maus nach oben, Klick fixiert 90° und fokussiert Länge; 1,25 m verschiebt die ganze Wand exakt auf y=1,25. Kein History-Eintrag vor Bestätigung, Undo/Redo geprüft. Direkte Eingabe 0°/2 m bleibt bei Mausbewegung unverändert; ungültiger Winkel sperrt Bestätigung; Escape erhält bestätigten Stand. Fenster nahe der Auswahl und per Tastatur am Kopf verschoben. Keine separate praktische 3D-Abnahme in diesem Schritt.
+
+### Genau ein ausführbarer Folgeauftrag: Hilfseingabe für Punkt in Flucht strecken
+
+Dasselbe kompakte Fenster an die bestehende Streckgriff-Aktion anbinden. Die gewählte Fluchtrichtung bleibt fest; positive Länge verlängert, negative verkürzt. Griffversatz, Nachbarüberquerung und Fenstergrenzen müssen unverändert über die gemeinsame Modellaktion validiert werden. Tests für schräge Wände/Linien, unzulässiges Verkürzen, stale Kontext, Escape/Undo/Redo und praktische Prüfung auch der abgeleiteten 3D-Zahlenvorschau. Kein separates Eingabefenster pro Werkzeug; Zeichnen und Fensterbewegung bleiben spätere Verbraucher.
+
+
+### Bedienkorrektur: Hilfslinien im freien Bewegen und Winkelgrenzen — 03.10.2026
+
+Ergänzung zu PR #39: Der gepinnte Bewegungsursprung ist während Element frei bewegen automatisch eine sitzungsgebundene Referenz der gemeinsamen Engine, mit Kantenrichtung und Lot sowie den bestehenden Winkelführungen. Er bleibt während der Eingabe aktiv; weitere externe Quellen können weiterhin per Hover erworben werden. Eigene Modellgeometrie bleibt vom Fang ausgeschlossen, nur der explizite Ursprung ist als temporäre Konstruktion zugelassen. Der Ursprung ist nicht per Hover lösbar und beansprucht keinen der vier externen Hoverplätze; Ende/Abbruch der Sitzung entfernt ihn. Snap aus deaktiviert weiterhin das Fangen. Keine Geometriekopie, kein Dateiformateintrag.
+
+Winkeleingaben außerhalb 0° bis einschließlich 360° werden jetzt in der gemeinsamen polaren Eingabelogik abgelehnt, nicht mehr modulo umgerechnet. 360° entspricht 0°; negative Bewegungsstrecken bleiben erlaubt. Ungültiger Text bleibt zur Korrektur im Feld, erzeugt eine Fehlermeldung und sperrt Übernehmen.
+
+Nachweise: 199 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Regression prüft Ursprung als Führungsquelle bei weiter ausgeschlossenem Eigenmodell und Grenzen -1/360,01/566 versus 0/360. Browser: ausgewählte Ecke (3;0,18) erzeugt sofort eine Lot-Hilfslinie während freier Bewegung; diese bleibt bei der Winkeleingabe sichtbar. 566° sperrt Bestätigung, 90° mit Länge 2 m zeigt korrekte Vorschau. Abbrechen entfernt temporären Ursprung und Hilfslinie. Der nächste begrenzte Folgeauftrag bleibt Hilfseingabe für Punkt in Flucht strecken.
