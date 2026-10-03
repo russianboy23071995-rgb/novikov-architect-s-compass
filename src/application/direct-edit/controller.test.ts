@@ -627,3 +627,73 @@ test("oblique numeric movement uses normalized pinned direction with exact signe
     { x: 4.5, y: 6 },
   ]);
 });
+
+import { movementDirection, previewMovementInput } from "./numeric.ts";
+test("free polar move preserves clicked corner origin, dimensions and one reversible commit", () => {
+  const state = editingReducer(initial(), {
+    type: "begin",
+    target: wall,
+    action: "move",
+    index: 1,
+    anchor: { x: 3, y: 0.18 },
+  });
+  const session = state.session!;
+  const aim = { x: 3, y: 2.18 };
+  assert.equal(movementDirection(session, aim), 90);
+  const result = previewMovementInput(session, state.history.present, wall, "90", "1,25", aim);
+  assert.deepEqual(result.point, { x: 3, y: 1.43 });
+  const moved = result.project.storey.walls[0]!;
+  assert.deepEqual(moved.start, { x: 0, y: 1.25 });
+  assert.deepEqual(moved.end, { x: 3, y: 1.25 });
+  assert.equal(moved.thickness, 0.36);
+  const committed = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: wall,
+    point: result.point,
+  });
+  assert.deepEqual(committed.history.present, result.project);
+  assert.equal(committed.history.past.length, 1);
+  assert.deepEqual(
+    editingReducer(committed, { type: "undo" }).history.present,
+    state.history.present,
+  );
+  assert.deepEqual(
+    editingReducer(editingReducer(committed, { type: "undo" }), { type: "redo" }).history.present,
+    result.project,
+  );
+  assert.deepEqual(readProjectFile(serializeProject(result.project)), result.project);
+});
+test("free polar input validates text and stale contexts while fixed axes remain alternatives", () => {
+  const state = begin(),
+    session = state.session!;
+  for (const [angle, length] of [
+    ["abc", "2"],
+    ["90", "bad"],
+    ["1e99", "2"],
+  ])
+    assert.throws(() =>
+      previewMovementInput(session, state.history.present, wall, angle!, length!, null),
+    );
+  assert.throws(() => previewMovementInput(session, state.history.present, null, "90", "2", null));
+  assert.throws(() =>
+    previewMovementInput(
+      session,
+      updateWall(state.history.present, "wall", { height: 3 }),
+      wall,
+      "90",
+      "2",
+      null,
+    ),
+  );
+  assert.deepEqual(
+    previewMovementInput(session, state.history.present, wall, "", "2", { x: 0, y: 3 }).point,
+    { x: 0, y: 2 },
+  );
+  const axis = editingReducer(initial(), { type: "begin", target: wall, action: "x", index: null });
+  assert.deepEqual(
+    previewMovementInput(axis.session!, axis.history.present, wall, "90", "2", null).point,
+    { x: 2, y: 0 },
+  );
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+});

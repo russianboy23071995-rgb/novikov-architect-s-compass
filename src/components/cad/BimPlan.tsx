@@ -28,6 +28,8 @@ export type BimPlanProps = {
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
+  onEditAim?: (session: EditSession, point: Point) => void;
+  onEditDirection?: (session: EditSession, point: Point) => void;
   onEditCommit?: (session: EditSession, point: Point) => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
@@ -49,6 +51,8 @@ export function BimPlan({
   editSession,
   onEditCommit,
   numericTarget,
+  onEditAim,
+  onEditDirection,
   camera,
   viewSize,
   onCamera,
@@ -326,7 +330,10 @@ export function BimPlan({
         if (endpointSnap || editSession) setHover(rawPoint(event));
         if (editSession) {
           const point = rawPoint(event);
-          if (point) setEditPointer({ session: editSession, point });
+          if (point) {
+            setEditPointer({ session: editSession, point });
+            onEditAim?.(editSession, resolveEdit(point, event.shiftKey).point);
+          }
         }
       }}
       onPointerLeave={() => {
@@ -342,7 +349,14 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              onEditCommit?.(editSession, resolveEdit(point, event.shiftKey).point);
+              const target = resolveEdit(point, event.shiftKey).point;
+              if (
+                editSession.action === "move" &&
+                editSession.target.kind !== "window" &&
+                onEditDirection
+              )
+                onEditDirection(editSession, target);
+              else onEditCommit?.(editSession, target);
             } catch {
               /* Invalid preview stays editable. */
             }

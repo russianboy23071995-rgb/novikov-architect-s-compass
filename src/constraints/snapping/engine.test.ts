@@ -1071,3 +1071,24 @@ test("axis guide edit uses one preview/commit target with undo, JSON and self-so
     null,
   );
 });
+
+import { resolvePolarInput } from "../input/polar.ts";
+test("polar input uses pinned origins, exact cardinal angles and independent locks", () => {
+  const origin = { x: 3, y: 4 };
+  assert.deepEqual(resolvePolarInput(origin, { x: 3, y: 7 }, null, 2).point, { x: 3, y: 6 });
+  for (const aim of [{ x: 20, y: -5 }, { x: -2, y: 10 }, null])
+    assert.deepEqual(resolvePolarInput(origin, aim, 90, 2).point, { x: 3, y: 6 });
+  assert.deepEqual(resolvePolarInput(origin, null, 450, -2).point, { x: 3, y: 2 });
+  assert.deepEqual(resolvePolarInput(origin, null, 360, 1).point, { x: 4, y: 4 });
+  assert.deepEqual(resolvePolarInput(origin, { x: 6, y: 8 }, null, 10).point, { x: 9, y: 12 });
+  assert.deepEqual(resolvePolarInput(origin, { x: 8, y: 8 }, 90, null).point, { x: 3, y: 8 });
+});
+test("polar input rejects missing direction or length and nonfinite parameters", () => {
+  assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, null, 2));
+  assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, { x: 0, y: 0 }, null, 2));
+  assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, 90, null));
+  for (const n of [NaN, Infinity, -Infinity]) {
+    assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, n, 2));
+    assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, 90, n));
+  }
+});
