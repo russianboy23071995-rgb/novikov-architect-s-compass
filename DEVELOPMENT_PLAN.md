@@ -595,6 +595,17 @@ Wichtige Abhängigkeiten: activeSources/withConstructionReferences dürfen entfe
 
 Verbindliche Zielregeln in ARCHITECTURE.md ergänzt; AABB-Baum, API-Namen und anfänglicher vollständiger Primitivindex-Neuaufbau als Vorschlag gekennzeichnet. Keine inkrementellen Modellupdates auf Vorrat. Der zuvor blockierte Wiederverwendungsschritt wurde unverändert als PR #53 veröffentlicht; #51–53 weiterhin ohne Merge. Nachweis dieses Schritts: Code-/Dokumentabgleich und git diff --check; keine neuen Test-/Build-Läufe für reine Dokumentation. Bestehende 227 Tests beziehen sich auf PR #53.
 
-### Genau ein ausführbarer Folgeauftrag: lokalen Quellensuchdienst nachweisen
+### Abgeschlossener Folgeauftrag: lokalen Quellensuchdienst nachweisen
 
 Primitive Modellquellen ohne globale Kreuzungen ableiten; räumlichen Index mit vollständigem Quellen-Lookup und lokaler Punkt-/Segmentabfrage in CSS-Radius aufbauen. Lokale Schnittreferenzen mit bisheriger Geometrie, Identität und Blattabhängigkeiten berechnen. Differentialtests zum Vollaufbau innerhalb des Suchradius, einschließlich langer Segmente und numerischer Grenzen; reproduzierbare Messung mit 100/1000/5000 Elementen. Noch keine UI-/Hover-Umschaltung, keine neue Fangart und keine leeren Klassen. Der funktionierende Suchdienst liefert den Nachweis für die anschließende gemeinsame Integration gemäß docs/LOCAL_SNAP_QUERY_PLAN.md.
+
+
+### Abschluss: lokaler Quellensuchdienst — 04.10.2026
+
+projectSnapPrimitives trennt die vorhandene primitive Ableitung von der globalen Schnittpunktliste. Alter Produktionspfad unverändert. Neuer Dienst application/snapping/local-sources.ts verwendet einen statischen AABB-Baum in geometry/spatial/box-index.ts mit opaken Quellenschlüsseln, unveränderlichen Quellen und vollständigem Lookup. Separate Punkt-/Segmentabfragen, konservative Toleranzpolsterung und lokale Schnittberechnung über den bestehenden Dienst. Lange Segmente bleiben vollständig; Ausgabe in alter Quellenreihenfolge. Quellenausschluss wirkt vor Paarbildung. Cache je unveränderlichem Project; kein globales Schnittpunktverzeichnis.
+
+232 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Differentialtests zu Vollaufbereitung: deterministische Zufallsgeometrie, lange Kreuzungen, Berührung/Überlappung, schräge/fast parallele/kurze Segmente, große Koordinaten, mehrere Maßstäbe, Nullradius und numerische Boxgrenzen. Quellenidentität, Ausschlüsse, gefrorene Daten, Undo/Redo/Laden und entfernte Lookups geprüft. Benchmark mit 100/1000/5000 Elementen erfolgreich; Methodik/Rohwerte in docs/performance/LOCAL_SOURCES.md. 5000 Elemente: Indexaufbau Median 121,75 ms, lokale Suche 0,0143 ms mit einem lokalen Paar. Keine Aussage zur vollständigen Fangabfrage oder Browser-Framerate; UI nicht umgeschaltet.
+
+### Genau ein ausführbarer Folgeauftrag: lokalen Dienst gemeinsam an Fang und Hover anbinden
+
+ToolSnapPolicy/SnapContext, Kandidaten- und Hoverpfad gemeinsam auf lokalen Suchdienst umstellen. Entfernte aktive Quellen über vollständigen Lookup validieren; dynamische Trefferlisten dürfen Hover-Sitzungen nicht zurücksetzen. Quellenausschlüsse und konstruierte Schnittreferenzen einschließlich Acquisition erhalten. Zeichnen, Idle-Hover und Direct Edit über denselben Einstieg; keine globale Kreuzungsaufbereitung im neuen Produktionspfad. Tests für sofortigen Fang/600-ms-Erwerb, entfernte Führungen, Zoom, feste Achsen, Snap aus, Modellwechsel und Abbruch; praktische Abnahme und Messung der vollständigen Abfrage.
