@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bedienkorrektur: Referenzen beim Zoomen erhalten — 03.10.2026
+
+Aktive Hilfspunkte einschließlich konstruierter Schnittpunkte und ihre Richtungsführungen bleiben bei Kamera-/Zoomänderungen erhalten. Auch das Verlassen der Zeichenfläche zum Bedienen der Zoomtasten löscht sie nicht. Die Referenzen bleiben in Modellkoordinaten; Fangabstand und Ringdarstellung werden weiterhin aus dem aktuellen Bildschirmmaßstab berechnet. Eine laufende Hover-Verweildauer wird bei Navigation abgebrochen und beginnt beim nächsten Besuch neu. Escape, Ausschalten des Fangens und ein geänderter Modell-/Bearbeitungskontext verwerfen weiterhin die Referenzen. Keine Modellaktion oder Änderung an History, JSON oder IFC.
+
+Nachweis: 187 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler und 6 bekannte Warnungen. Zwei neue Regressionstests prüfen Sitzungsidentität über Zoomstufen, explizite Invalidierung sowie unterbrochene Verweildauer ohne Verlust aktiver Punkte oder unbeabsichtigtes Umschalten. Browser: Referenzen (0;0), (3;0) und konstruierter Schnitt (1,5;1,5) bleiben mit drei Führungen beim Hinein-/Herauszoomen unverändert; Undo bleibt leer. Escape entfernt anschließend alle Referenzen und Führungen.
+
+Praktische Abnahme: Punktfang einschalten, zwei Punkte jeweils 0,6 s anhovern und daraus einen Schnittpunkt aktivieren. Mit Mausrad oder Plus/Minus zoomen: Markierungen müssen erhalten bleiben. Escape löst sie gezielt. Dieser Nachtrag ersetzt frühere Protokollaussagen, nach denen Zoom Referenzen verwirft. Die Korrektur ergänzt PR #36; Nutzerfreigabe für PR #35/#36 gilt nach erfolgreicher Prüfung. Der einzige nächste Entwicklungsauftrag bleibt der unten beschriebene Schnitt externer Hilflinien mit festen Direct-Edit-Achsen.
+
 ## Bedienkorrektur: Hover 600 ms und Referenzen lösen — 03.10.2026
 
 Nutzerkorrektur zu N08/Guide-F14: Standard-Verweildauer jetzt zentral 600 ms, sowohl im Workspace als auch im BimPlan-Fallback. Die vorhandene Einstellung bleibt verfügbar und gilt symmetrisch für Aktivieren und Lösen. Historische 400-ms-Angaben beschreiben frühere Stände.
@@ -92,11 +100,25 @@ Abnahme: Eine Linie quer durch eine Wandachse zeichnen, abseits von End- und Mit
 
 Nutzerpräzisierung: Die derzeit zentrierte Wandachse bei ausgewählter Wand sichtbar machen und später verschiebbar machen. In FUNCTION_REQUIREMENTS_2026-10-03.md bei N45 ergänzt, kein Doppelauftrag. Vor Wandanschlüssen passend einordnen. Ob die physische Wandlage erhalten oder mitverschoben wird, bleibt bis zur fachlichen Klärung offen; hier keine Implementierung.
 
-### Genau ein ausführbarer Folgeauftrag: Schnittpunkte schräger Verlängerungs- und Lotführungen
+### Abschluss: schräge Verlängerungs- und Lot-Hilflinienschnitte — 03.10.2026
 
-Die bereits vorhandenen einzelnen Verlängerungs-/Lotführungen auf gemeinsame Schnittpunktkandidaten erweitern, auch wenn sie außerhalb der 45°-Schritte liegen. Zuerst die bestehende Richtungswahl und Hysterese prüfen; nur mausrelevante Richtungen darstellen und deren gemeinsame Entscheidung für Darstellung, Erwerb und Fang verwenden. Beide Quellen erhalten, vorhandene Prioritäten und echte Segmentschnitte nicht verdrängen. Keine neue Werkzeuglogik und kein Modell-/Dateiformatwechsel.
+Aufbauend auf 4c542ea / PR #35, der weiterhin offen bleibt. Neue Umsetzung auf feat/oblique-guide-intersections. Kein Merge durch den allgemeinen Fortsetzungsauftrag.
 
-Abnahme: analytisch bekannte Kreuzung zweier schräger Verlängerungen und Verlängerung/Lot, parallele/kollineare Fälle, mehrere Zoomstufen, konkurrierende 45°-Führungen, veränderte Quellen, Shift/Ortho und Direct-Edit-Ausschlüsse. Im Browser Linie am Hilflinienschnitt zeichnen bzw. dorthin bewegen, Abbruch/Undo/Redo prüfen. Tests/TypeScript/Lint/Build. Wandachsenbearbeitung, Layer und 3D bleiben spätere getrennte Aufträge.
+Die gemeinsame Richtungswahl in constraints/guides/directions.ts berücksichtigt jetzt jede gültige Kantenrichtung, deren Gegenrichtung und Lotrichtungen sowie die bestehenden acht 45°-Richtungen. Pro aktiver Quelle wird genau eine mausrelevante Richtung gewählt. Bei gleichem Winkel entscheidet Verlängerung vor Lot, Horizontal, Vertikal und Winkel; anschließend der Richtungswinkel. Null-/nichtendliche Vektoren werden verworfen. Alte Richtungen bleiben nur erhalten, solange sie weiterhin aus der aktuellen Quellgeometrie stammen.
+
+Darstellung, einzelne Führung, Schnittpunktbildung und Hover-Erwerb konsumieren dieselbe Wahl. Damit entstehen auch Schnitte außerhalb des 45°-Rasters, etwa zweier schräger Verlängerungen oder Verlängerung/Lot. Anders als bisher werden einzelne Führungen nicht zusätzlich unabhängig aus allen Richtungen bewertet. Explizite Shift-Winkel bleiben unverändert, genauso Punktprioritäten, Fangradius, Ortho und Direct-Edit-Ausschlüsse.
+
+Hysterese: weiterhin maximal 5° zusätzliche Winkelreserve an einer Richtungsgrenze. Bei eng benachbarten Kandidaten reduziert sich diese auf 20 Prozent ihres Winkelabstands, damit flache schräge Kanten gegenüber der Horizontalen erreichbar bleiben. Vorläufiger technischer Bedienwert; kein numerisches Geometrie-Epsilon. Bestehender 45°-Grenztest 27,5°/17,5° bleibt gültig. Keine Modellaktion, Dateimigration, IFC- oder AI-Änderung.
+
+Nachweise: 185 Tests bestanden, darunter fünf neue Gruppen für Verlängerung/Verlängerung und Verlängerung/Lot, Zoom/Fangradius, parallele/kollineare Fälle, Vektorreihenfolge/ungültige Richtungen, flache Winkel/Quellenwechsel, Prioritäten/Constraints, Hover-Lebenszyklus und Direct-Edit-Preview/Commit/Undo/Redo/JSON. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Linien (0;0,5)–(1;1) und (4;0,5)–(3;1) liefern außerhalb ihrer Strecken einen Hilflinienschnitt bei (2;1,5); beide sichtbaren Führungen sind Verlängerungen. Nach 600 ms dritter Hilfspunkt, neue Linie startet exakt dort, Undo/Redo geprüft. Freie Bewegung einer dritten Linie fängt denselben Schnitt mit Undo/Redo. Screenshot: outputs/oblique-guide-intersection.png.
+
+Abnahme: Zwei schräge Linien zeichnen, deren Verlängerungen sich treffen. Beide zugewandten Enden je 0,6 s aktivieren und den Zeiger zur erwarteten Kreuzung führen. Die silbergrauen Führungen folgen den Kanten; der Schnitt wird zum Hilfspunkt. Dort zeichnen oder ein anderes Element dorthin bewegen. Parallel liegende Führungen sollen keinen erfundenen Schnittpunkt anzeigen.
+
+### Genau ein ausführbarer Folgeauftrag: Hilfslinienschnitt mit fester Direct-Edit-Achse
+
+Die bisher dokumentierte Lücke bei achsengebundener Bearbeitung schließen: externe Hilfsreferenzen dürfen seitlich der erlaubten Bewegungsachse liegen, wenn ihre mausrelevante Führung diese Achse schneidet. Den Schnitt gemeinsam und eindeutig berechnen, die feste X-/Y-/Elementachse weiterhin strikt einhalten und keine bloß projizierten Endpunkte als echte Fangpunkte beschriften. Zuerst vorhandenen Filter und Kandidatenvertrag prüfen; keine separate SnapEngine im Werkzeug.
+
+Abnahme: X-/Y-/schräge Elementachse, passende externe Verlängerung/Lotführung, parallele/kollineare Fälle, eigene und Fensterhost-Quellen ausgeschlossen, veralteter Kontext, unterschiedliche Zoomstufen. Preview und Bestätigung müssen identische Ziele liefern, ein Undo/Redo und JSON bleiben korrekt. Browserabnahme einschließlich Escape sowie Tests/TypeScript/Lint/Build. Wandachse N45 bleibt ein späterer fachlich zu klärender Auftrag.
 
 ## Historische Fortschrittsnachweise
 

@@ -87,11 +87,15 @@ export function BimPlan({
   }, [camera, viewSize, onCamera]);
   const editDown = useRef<EditSession | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
+  const [referenceReset, setReferenceReset] = useState(0);
   const [shiftHeld, setShiftHeld] = useState(false);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
-      if (event.key === "Escape" && event.type === "keydown") setHover(null);
+      if (event.key === "Escape" && event.type === "keydown") {
+        setHover(null);
+        setReferenceReset((value) => value + 1);
+      }
     };
     const clear = () => setShiftHeld(false);
     window.addEventListener("keydown", key);
@@ -115,14 +119,15 @@ export function BimPlan({
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
+      resetKey: referenceReset,
     }),
-    [endpointSnap, snap, pan, references, camera, viewSize],
+    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset],
   );
-  const { references: activeReferences, guideDirections } = useHoverReference(
-    hover,
-    trackingContext,
-    hoverDwellMs,
-  );
+  const {
+    references: activeReferences,
+    guideDirections,
+    guideCursor,
+  } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
   const resolveDrawing = (point: Point, shift = shiftHeld) =>
     endpointSnap
@@ -565,15 +570,16 @@ export function BimPlan({
       )}
       {!pan &&
         snap &&
-        hover &&
+        guideCursor &&
         activeReferences.map((reference) => {
-          const guide = cursorGuide(hover, reference, guideDirections);
+          const guide = cursorGuide(guideCursor, reference, guideDirections);
           const extension =
             40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
           return (
             <line
               key={JSON.stringify([reference.entityId, reference.feature])}
-              aria-label="45°-Referenzhilfslinie"
+              aria-label="Referenzhilfslinie"
+              data-guide-kind={guide.kind}
               pointerEvents="none"
               x1={guide.origin.x}
               y1={-guide.origin.y}

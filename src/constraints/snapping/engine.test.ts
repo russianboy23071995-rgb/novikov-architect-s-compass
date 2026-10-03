@@ -105,6 +105,36 @@ import {
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
 import { advanceHoverReference, emptyHoverReference } from "../inference/hover-reference.ts";
+import { sameHoverSession, suspendHoverReference } from "../inference/hover-reference.ts";
+
+test("zoom preserves reference session while model, disable and explicit reset invalidate it", () => {
+  const references = [{ entityId: "a", feature: "end", point: { x: 0, y: 0 } }];
+  const before = { enabled: true, references, pixelsPerMetre: 100, resetKey: 0 };
+  for (const pixelsPerMetre of [25, 200, 500])
+    assert.equal(sameHoverSession(before, { ...before, pixelsPerMetre }), true);
+  assert.equal(sameHoverSession(before, { ...before, references: [...references] }), false);
+  assert.equal(sameHoverSession(before, { ...before, enabled: false }), false);
+  assert.equal(sameHoverSession(before, { ...before, resetKey: 1 }), false);
+});
+
+test("navigation cancels pending dwell without losing active points or toggling consumed points", () => {
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 0 } };
+  const b = { entityId: "b", feature: "end", point: { x: 3, y: 0 } };
+  let state = advanceHoverReference(emptyHoverReference(), a, 0, 600);
+  state = advanceHoverReference(state, a, 600, 600);
+  const zoomed = suspendHoverReference(state, false);
+  assert.deepEqual(zoomed.references, [a]);
+  assert.equal(advanceHoverReference(zoomed, a, 5000, 600).references.length, 1);
+  state = advanceHoverReference(state, b, 700, 600);
+  const interrupted = suspendHoverReference(state, true);
+  assert.equal(interrupted.pending, null);
+  assert.deepEqual(interrupted.references, [a]);
+  const fresh = advanceHoverReference(interrupted, b, 5000, 600);
+  assert.equal(advanceHoverReference(fresh, b, 5599, 600).references.length, 1);
+  assert.equal(advanceHoverReference(fresh, b, 5600, 600).references.length, 2);
+  const release = advanceHoverReference(suspendHoverReference(zoomed, true), a, 6000, 600);
+  assert.equal(advanceHoverReference(release, a, 6600, 600).references.length, 0);
+});
 
 const context: SnapContext = {
   references: [{ point: { x: 1.037, y: 2.013 }, entityId: "wall", feature: "axis-end" }],
