@@ -573,7 +573,8 @@ export function BimPlan({
           return (
             <line
               key={JSON.stringify([reference.entityId, reference.feature])}
-              aria-label="45°-Referenzhilfslinie"
+              aria-label="Referenzhilfslinie"
+              data-guide-kind={guide.kind}
               pointerEvents="none"
               x1={guide.origin.x}
               y1={-guide.origin.y}

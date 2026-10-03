@@ -81,17 +81,8 @@ function guideCandidates(
     const source = ref.source,
       p = source.point;
     if (distance(cursor, p, context) <= context.endpointRadiusPx) continue;
-    const directions: { kind: SnapCandidate["kind"]; vector: Point2 }[] = [
-      ...(source.directions ?? []).flatMap((vector) => [
-        { kind: "extension" as const, vector },
-        { kind: "perpendicular" as const, vector: { x: -vector.y, y: vector.x } },
-      ]),
-      { kind: "horizontal", vector: { x: 1, y: 0 } },
-      { kind: "vertical", vector: { x: 0, y: 1 } },
-      { kind: "angle", vector: { x: 1, y: 1 } },
-      { kind: "angle", vector: { x: 1, y: -1 } },
-    ];
-    for (const { kind, vector } of directions) {
+    const guide = cursorGuide(cursor, source, context.guideDirections);
+    for (const { kind, direction: vector } of [guide]) {
       const point = projectDirection(cursor, p, vector);
       if (!point || !pointsCompatible(point, constrain(point))) continue;
       const d = distance(point, cursor, context);
