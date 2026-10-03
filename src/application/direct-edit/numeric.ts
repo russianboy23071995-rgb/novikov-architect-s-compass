@@ -7,17 +7,21 @@ import { previewEdit } from "./controller.ts";
 
 /** Input adapter: resolves metres to the same pinned pointer target as mouse editing. */
 export function numericMoveAxis(session: EditSession) {
-  if (session.target.kind === "window" || !["x", "y", "axis"].includes(session.action)) return null;
+  if (session.target.kind === "window" || !["x", "y", "axis", "stretch"].includes(session.action))
+    return null;
+  if (session.action === "stretch" && session.index === null) return null;
   const direction = editDirection(session)!;
   const length = Math.hypot(direction.x, direction.y);
   if (!Number.isFinite(length) || length === 0) return null;
   const i = session.index ?? 0;
   const label =
-    session.action === "x"
-      ? "+X (rechts)"
-      : session.action === "y"
-        ? "+Y (oben)"
-        : "+ Richtung Punkt " + (i === 0 ? 2 : i) + " → " + (i + 1);
+    session.action === "stretch"
+      ? "+ verlängert · − verkürzt"
+      : session.action === "x"
+        ? "+X (rechts)"
+        : session.action === "y"
+          ? "+Y (oben)"
+          : "+ Richtung Punkt " + (i === 0 ? 2 : i) + " → " + (i + 1);
   return {
     direction: { x: direction.x / length, y: direction.y / length },
     label,
@@ -33,7 +37,7 @@ export function previewNumericMove(
 ) {
   const axis = numericMoveAxis(session);
   if (!axis)
-    throw new Error("Streckeneingabe ist nur für ganze Elemente auf X/Y/Elementachse verfügbar.");
+    throw new Error("Streckeneingabe benötigt eine Bewegungsachse oder einen Streckgriff.");
   const metres = parseMetres(text);
   if (!Number.isFinite(metres))
     throw new Error("Bitte eine endliche Strecke in Metern eingeben, z. B. -1,25.");

@@ -381,7 +381,7 @@ constraints/input/polar.ts bildet als gemeinsame, React-/BIM-freie Eingabelogik 
 
 Nachweise: 198 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Testgruppen: gepinnter Ursprung, Kardinal-/schräge Winkel, unabhängige Eingaben, negative Länge, fehlende/ungültige Werte, Klick auf Wandecke, unveränderte Wandmaße, stabile Auswahl/Modellprüfung und ein Undo/Redo/JSON-Rundlauf. Browser: Ecke (3;0,18), Maus nach oben, Klick fixiert 90° und fokussiert Länge; 1,25 m verschiebt die ganze Wand exakt auf y=1,25. Kein History-Eintrag vor Bestätigung, Undo/Redo geprüft. Direkte Eingabe 0°/2 m bleibt bei Mausbewegung unverändert; ungültiger Winkel sperrt Bestätigung; Escape erhält bestätigten Stand. Fenster nahe der Auswahl und per Tastatur am Kopf verschoben. Keine separate praktische 3D-Abnahme in diesem Schritt.
 
-### Genau ein ausführbarer Folgeauftrag: Hilfseingabe für Punkt in Flucht strecken
+### Abgeschlossener Auftragsumfang: Hilfseingabe für Punkt in Flucht strecken
 
 Dasselbe kompakte Fenster an die bestehende Streckgriff-Aktion anbinden. Die gewählte Fluchtrichtung bleibt fest; positive Länge verlängert, negative verkürzt. Griffversatz, Nachbarüberquerung und Fenstergrenzen müssen unverändert über die gemeinsame Modellaktion validiert werden. Tests für schräge Wände/Linien, unzulässiges Verkürzen, stale Kontext, Escape/Undo/Redo und praktische Prüfung auch der abgeleiteten 3D-Zahlenvorschau. Kein separates Eingabefenster pro Werkzeug; Zeichnen und Fensterbewegung bleiben spätere Verbraucher.
 
@@ -393,3 +393,20 @@ Ergänzung zu PR #39: Der gepinnte Bewegungsursprung ist während Element frei b
 Winkeleingaben außerhalb 0° bis einschließlich 360° werden jetzt in der gemeinsamen polaren Eingabelogik abgelehnt, nicht mehr modulo umgerechnet. 360° entspricht 0°; negative Bewegungsstrecken bleiben erlaubt. Ungültiger Text bleibt zur Korrektur im Feld, erzeugt eine Fehlermeldung und sperrt Übernehmen.
 
 Nachweise: 199 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Regression prüft Ursprung als Führungsquelle bei weiter ausgeschlossenem Eigenmodell und Grenzen -1/360,01/566 versus 0/360. Browser: ausgewählte Ecke (3;0,18) erzeugt sofort eine Lot-Hilfslinie während freier Bewegung; diese bleibt bei der Winkeleingabe sichtbar. 566° sperrt Bestätigung, 90° mit Länge 2 m zeigt korrekte Vorschau. Abbrechen entfernt temporären Ursprung und Hilfslinie. Der nächste begrenzte Folgeauftrag bleibt Hilfseingabe für Punkt in Flucht strecken.
+
+
+### Abschluss: numerisches Strecken mit gemeinsamer Hilfseingabe — 03.10.2026
+
+PR #38 und #39 wurden nach Nutzerfreigabe in Reihenfolge normal in ihre bisherigen Zielzweige übernommen (5681992 und 16beed6). Neuer Zweig feat/numeric-point-stretch basiert auf 16beed6. main bleibt unverändert.
+
+Punkt in Flucht strecken verwendet jetzt dasselbe kompakte Hilfseingabefenster wie die Bewegung. Winkel ist an die vorhandene Fluchtrichtung gebunden; positive Meter verlängern vom Nachbarpunkt weg, negative verkürzen. Der angeklickte Wandeck-Griff bleibt Ursprung, einschließlich seines Versatzes zur Wandachse. Die Application-Eingabe erweitert nur die zugelassenen Aktionen und verwendet weiterhin previewEdit/confirm; kein zusätzlicher Transformationscode, kein neues Fenster. Vorhandene Grenzen für Nachbarüberquerung und Fensterbreite bleiben wirksam. Kontextwechsel und ungültige Eingabe verhindern Übernahme.
+
+In geteilten Ansichten bleibt eine vorhandene 3D-Ansicht beim Start der 2D-Bearbeitung erhalten. Damit sind dieselben numerischen Entwürfe gleichzeitig in Grundriss und 3D sichtbar; in Einzelansicht wird weiterhin zur 2D-Bearbeitung gewechselt. Eigenschaften/Navigator zeigen bis zur Bestätigung den gespeicherten Stand.
+
+Nachweise: 201 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Zwei neue Testgruppen prüfen positive/negative Strecken an beiden Enden schräger Linien/Wände, unveränderten Gegenpunkt, Griffversatz, Fenstergrenzen, Nachbarüberquerung, fehlenden Griff, stale Modell/Auswahl, einen Commit/Undo/Redo/JSON sowie Abbruch. Browser: 3-m-Wand über Endgriff um 1,25 m auf 4,25 m verlängert, Vorschau in 2D und 3D visuell geprüft; Eigenschaften vor Commit weiter 3 m. Ungültige Verkürzung -2 m bei vorhandenem 1,20-m-Fenster gesperrt. Commit 4,25 m, Undo 3 m, Redo 4,25 m. Anschließend -0,5 m ergibt 3,75-m-Vorschau, Escape stellt 4,25 m wieder her. Die noch ausstehende praktische 3D-Zahlenvorschauabnahme ist damit erledigt.
+
+Abnahme: Wandecke oder Linienpunkt anklicken → Punkt in Flucht strecken → 1,25 eingeben → Vorschau prüfen und übernehmen. Mit negativer Strecke verkürzen; unzulässige Werte dürfen nicht übernommen werden. Für gleichzeitige 3D-Prüfung vorher Zwei Ansichten und 3D aktivieren, dann den Griff im Grundriss wählen.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Linie
+
+Das vorhandene Hilfseingabefenster nach Setzen des ersten Linienpunkts aktivieren. Ursprung bleibt der erste Punkt; Maus/Fangengine bestimmen die Richtung oder Winkel/Länge werden ausdrücklich eingegeben. Gemeinsame polare Eingabe und vorhandene validierte Linienerzeugung verwenden; keine zweite Zeichenlogik. Zunächst einzelne gerade Linien, keine Polylinien oder weiteren Bauteile. Prüfen: Maus versus fixierte Werte, 0–360°, ungültige/Null-Länge, Escape ohne Bauteil, ein Commit/Undo/Redo und JSON; praktische Browserabnahme. Wandachsenlage N45 und Fensterbewegung bleiben spätere Aufgaben.
