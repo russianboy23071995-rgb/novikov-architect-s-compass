@@ -882,7 +882,7 @@ Decision: polar tool input is shared across direct edit and straight-line drawin
 
 Tool adapters supply origin and current aim, validate tool-specific constraints and confirm through existing model/application actions. Line drawing rejects zero length and changed model context; direct edit retains its pinned selection, axis and opening constraints. Numeric targets take precedence over mouse snapping. There is one helper component and one draft hook, not a copied form/state machine per tool. The existing workspace coordinates these consumers; migration of its remaining legacy drawing orchestration is incremental. AI/Text/Voice must use the same validated actions, not React draft state or separate model logic.
 
-Currently connected: element movement, point stretching and single straight-line drawing. Polylines, wall drawing and other tools are future adapters, not claimed as implemented.
+Currently connected: element/point movement, point stretching, single straight-line drawing and straight-wall drawing. Polylines and other tools remain future precision-input consumers.
 
 
 ## Universal movement origin — binding interaction rule (2026-10-03)
@@ -899,3 +899,8 @@ Implementation: application/direct-edit/snapping.ts supplies the session origin 
 Tracked straight segments use the same transient hover state, 600 ms acquisition/removal and screen-space tolerance as point references. Project adapters expose segment snapshots; the generic inference service identifies a hovered segment. A stable segment midpoint identifies the reference while the cursor moves along its interior. Exact point candidates take precedence. Its direction becomes a parallel option through active construction origins. Overlay and snap resolver use the same guide-direction service; no per-tool parallel logic. Existing source exclusion, geometric constraints, reference limits and model/zoom invalidation rules continue to apply.
 
 PrecisionInput centrally handles Tab during an active interaction: from the viewport into length, then angle, then length. On first entry the current mouse direction is captured at full precision through the input adapter, not from the rounded display hint. Enter confirms, Escape cancels. Unrelated text fields keep their normal keyboard behaviour. Explicit axis constraints retain a read-only angle. All future consumers must use this shared keyboard contract. Free point movement now consumes the same polar adapter as whole-element movement.
+
+
+## Shared drawing application boundary (2026-10-03)
+
+Drawing actions for straight walls and lines/polylines now converge on application/drawing/actions.ts. It validates the pinned model context and delegates creation to existing addWall/addLine domain operations. Mouse and numeric confirmation use the same action and history path. previewDrawingInput shares the polar text adapter; the former line-input export remains compatible. CadWorkspace still coordinates pointer collection and presentation, but no longer calls addWall/addLine directly. Defaults for a drawn wall remain 0.36 m thickness and 2.80 m height. Drawing preview is a 2D axis guide; the confirmed wall supplies the existing 3D rendering.
