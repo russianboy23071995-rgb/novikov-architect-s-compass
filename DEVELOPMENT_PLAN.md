@@ -567,6 +567,21 @@ Reproduzierbarer Messlauf mit 100/1000/5000 Elementen abgeschlossen. Skript scri
 
 Bei 5000 Elementen: Aufbau Median 3403 ms, Neuaufbau nach Modellwechsel 4094 ms; Zeichnen/Direct Edit mit vier Referenzen 35,67/39,79 ms pro Abfrage. Keine Browser-Framerate-Aussage. Vollständige Segmentpaarprüfung als klar begrenzter erster Engpass identifiziert; keine Optimierung in diesem Messauftrag.
 
-### Genau ein ausführbarer Folgeauftrag: räumliche Vorauswahl für Segmentschnittpunkte
+### Nach vorgezogenem Wiederverwendungsschritt fortzuführen: räumliche Vorauswahl für Segmentschnittpunkte
 
 Die vollständige Paarprüfung in segmentIntersectionReferences durch eine konservative räumliche Vorauswahl ergänzen, die sichere Nichttreffer aussortiert. Exakte Schnittprüfung, Toleranzen, stabile Ergebnisreihenfolge und Quellenabhängigkeiten bewahren. Differentialtests gegen die bisherige Vollprüfung einschließlich Rand-/Entartungsfällen und Quellenausschlüssen, anschließend identische Baseline wiederholen. Keine gleichzeitige Pointer-Fangoptimierung oder neue Werkzeuge. Grenzen bei dicht überlappenden Segmenten dokumentieren.
+
+
+### Abschluss: Modellreferenzen unabhängig vom Werkzeug wiederverwenden — 04.10.2026
+
+Auf Nutzerwunsch vor die räumliche Vorauswahl gezogen: getProjectSnapReferences speichert den abgeleiteten Referenzsatz in einer WeakMap je unveränderlichem Project-Snapshot. IDs oder Werkzeugnamen sind kein Cache-Schlüssel. Neue Modellobjekte, auch geladene Projekte mit gleichen IDs, erzeugen einen neuen Satz. Solange History einen alten Snapshot hält, können Undo/Redo dessen passenden Satz wiederverwenden; verworfene Projekte werden vom Cache nicht künstlich gehalten. Keine persistente zweite Modellhaltung. Voraussetzung bleibt der bestehende unveränderliche Modellvertrag; In-place-Mutationen werden nicht unterstützt.
+
+BimPlan trennt die modellgebundene Aufbereitung von prepareToolReferences. Neue Direct-Edit-Sitzungen und Polylinienursprünge wenden nur die aktuellen Werkzeugregeln an. Temporäre Ursprünge und Quellenausschlüsse werden niemals im Modellcache gespeichert. Derselbe Modellstand kann auch von mehreren Viewports wiederverwendet werden. Die reine projectSnapReferences-Funktion bleibt für kalte Aufbereitung und Vergleichsmessungen unverändert.
+
+Nachweise: 227 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen; git diff --check erfolgreich. Neue Regressionen prüfen identische Modellreferenzen bei wechselnden Zeichenursprüngen, wechselnde Eigenquellenausschlüsse, unveränderten Ursprungssatz, Modelländerung, Undo/Redo und neu geladene gleich-ID-Projekte gegen die ungecachte Aufbereitung. Kein neuer Browser-Latenznachweis, keine neue Zahlenbehauptung für den Cache. Erstaufbau, echte Modelländerungen und die laufende lineare Fangabfrage bleiben unverändert teuer.
+
+Abnahme: Polylinie mit mehreren Punkten zeichnen und zwischen Zeichnen sowie freier Wandbewegung wechseln; Ursprung und Quellenausschlüsse müssen jeweils zum aktuellen Werkzeug passen. Nach Modelländerung/Undo/Redo dürfen nur aktuelle Fangpunkte angeboten werden.
+
+### Genau ein ausführbarer Folgeauftrag: räumliche Vorauswahl für Segmentschnittpunkte
+
+Nun Schritt 2 umsetzen: konservative räumliche Vorauswahl in segmentIntersectionReferences, unveränderte exakte Prüfung und stabile Reihenfolge. Differentialtests gegen Vollprüfung einschließlich numerischer Grenzfälle; gleiche kalte Baseline wiederholen. Die bereits eingeführte Modellwiederverwendung erhalten und keine weitere Pointer-Fangoptimierung hinzufügen.

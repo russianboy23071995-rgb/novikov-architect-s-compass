@@ -930,3 +930,8 @@ Drawing delegates to querySnap; Edit delegates to resolveEditSnap with its axis/
 ## Modal keyboard ownership and interaction transitions (2026-10-03)
 
 Modal dialogs own Tab and application shortcuts while open. PrecisionInput must not intercept navigation outside its own panel inside a dialog/alertdialog; workspace tool shortcuts likewise yield to modal content. Cancelling project-file confirmation preserves the suspended draft. Confirmed project replacement and history navigation clear edit/drawing context through the existing shared reset; Undo restores committed model state, never an old interaction session. Session identity checks reject delayed confirmations even after returning to an earlier model snapshot.
+
+
+## Model-only snapping reference reuse (2026-10-04)
+
+getProjectSnapReferences caches derived references by immutable Project object identity using weak keys. Tool policy, pointer, camera and construction origins are not part of that model cache. BimPlan obtains model references separately from prepareToolReferences so a new drawing origin or edit session only reapplies source filtering and its pinned origin. Changed/reloaded project objects build fresh references, regardless of reused entity IDs; Undo/Redo may reuse the matching historical snapshot. In-place model mutation is outside the immutable project contract. Cache entries are disposable, never serialized or authoritative. The uncached projectSnapReferences builder remains available for baseline/differential checks. This does not optimize first builds or pointer candidate scanning.
