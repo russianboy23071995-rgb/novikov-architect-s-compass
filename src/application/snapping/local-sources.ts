@@ -2,6 +2,7 @@ import type { Project } from "../../lib/bim/model.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
+import { segmentMayMeetBox } from "../../geometry/intersections/segment-box.ts";
 import { MAX_MODEL_TOLERANCE_METRES } from "../../geometry/tolerances/model.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
@@ -68,17 +69,19 @@ export function createLocalSnapSources(project: Project) {
         .sort((a, b) => a - b)
         .map((i) => references[i]!)
         .filter((r) => allowed(r) && near(r));
-      // Keep original extents. False-positive boxes are safe; clipping would alter semantics.
+      // Refine overlapping bounds against the actual segment before pairing.
+      // Use the padded square conservatively, not a tighter unpadded circle.
+      // Keep full extents for exact intersection and hover/source identities.
       const localSegments = lines
         .query(box)
         .sort((a, b) => a - b)
         .map((i) => segments[i]!)
-        .filter((s) => allowed(s.source));
+        .filter((s) => allowed(s.source) && segmentMayMeetBox(s.start, s.end, box));
       const intersections = segmentIntersectionReferences(localSegments).filter(near);
       return {
         references: [...localPoints, ...intersections],
         segments: localSegments,
-        segmentPairs: (localSegments.length * (localSegments.length - 1)) / 2,
+        segmentPairs: (localSegments.length * Math.max(0, localSegments.length - 1)) / 2,
       };
     },
   });

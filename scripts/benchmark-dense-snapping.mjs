@@ -84,8 +84,9 @@ for (const crossing of [false, true])
     const options = { ortho: false, shift: false, featureSnap: true };
     const cursor = { x: 0.013, y: 0.009 };
     const stats = model.query(cursor, 100, 10);
-    assert.equal(stats.segments.length, count);
-    assert.equal(stats.segmentPairs, (count * (count - 1)) / 2);
+    const expectedSegments = crossing ? count : 0;
+    assert.equal(stats.segments.length, expectedSegments);
+    assert.equal(stats.segmentPairs, (expectedSegments * Math.max(0, expectedSegments - 1)) / 2);
     const full = prepareToolReferences(policy, projectSnapReferences(project));
     assert.deepEqual(
       resolveToolSnap(policy, cursor, context, options),
