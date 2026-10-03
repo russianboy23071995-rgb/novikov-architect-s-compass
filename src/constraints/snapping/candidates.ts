@@ -148,6 +148,41 @@ function intersectionCandidates(
   return result;
 }
 
+/** Intersect external guides with an explicit editing axis, never project a source point. */
+function axisIntersectionCandidates(
+  cursor: Point2,
+  context: SnapContext,
+  active: readonly ActiveSource[],
+): RankedSnap[] {
+  const axis = context.fixedAxis;
+  if (!axis) return [];
+  const result: RankedSnap[] = [];
+  for (const ref of active) {
+    const guide = cursorGuide(cursor, ref.source, context.guideDirections);
+    const point = intersectLines(axis.origin, axis.direction, guide.origin, guide.direction);
+    if (!point) continue;
+    const d = distance(point, cursor, context);
+    if (d > context.endpointRadiusPx) continue;
+    result.push(
+      ranked(
+        {
+          kind: "axis-intersection",
+          worldPoint: point,
+          distanceOnScreen: d,
+          guideOrigin: guide.origin,
+          secondaryGuideOrigin: axis.origin,
+          sourceReferences: [ref.source],
+          sourceEntityId: ref.source.entityId,
+          sourceFeature: ref.source.feature,
+          priority: 0.5,
+        },
+        [ref],
+      ),
+    );
+  }
+  return result;
+}
+
 /** Generate all existing non-grid candidates; never recursively query the engine. */
 export function collectSnapCandidates(
   cursor: Point2,
@@ -164,6 +199,7 @@ export function collectSnapCandidates(
   const active = activeSources(context);
   return [
     ...pointCandidates(cursor, context, constrain, active),
+    ...axisIntersectionCandidates(cursor, context, active),
     ...guideCandidates(cursor, context, constrain, active),
     ...intersectionCandidates(cursor, context, constrain, active),
   ];

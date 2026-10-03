@@ -23,7 +23,8 @@ export type SnapCandidate = {
     | "extension"
     | "perpendicular"
     | "angle"
-    | "intersection";
+    | "intersection"
+    | "axis-intersection";
   sourceReferences?: readonly SnapReference[];
   secondaryGuideOrigin?: Point2;
   guideOrigin?: Point2;
@@ -45,6 +46,7 @@ export type SnapContext = {
   activeReferences?: readonly SnapReference[];
   guideDirections?: readonly GuideDirection[];
   angleOrigin?: Point2 | null;
+  fixedAxis?: { origin: Point2; direction: Point2 } | null;
 };
 
 /** Plan coordinates in metres, screen distances in CSS pixels. No model mutations. */
@@ -67,9 +69,16 @@ export function querySnap(
       (!Number.isFinite(context.gridSpacing) || context.gridSpacing <= 0))
   )
     throw new Error("Invalid snap context");
+  const axis = context.fixedAxis;
+  if (
+    axis &&
+    (![axis.origin.x, axis.origin.y].every(Number.isFinite) ||
+      !projectDirection(cursor, axis.origin, axis.direction))
+  )
+    throw new Error("Invalid fixed snap axis");
   const origin = context.orthoOrigin;
   // Explicit Shift constraint takes precedence over automatic snapping and Ortho.
-  if (context.angleOrigin) {
+  if (context.angleOrigin && !axis) {
     if (![context.angleOrigin.x, context.angleOrigin.y].every(Number.isFinite))
       throw new Error("Invalid angle origin");
     const angle = angle45Direction(cursor, context.angleOrigin);
@@ -93,7 +102,13 @@ export function querySnap(
     ? Math.abs(cursor.x - origin.x) >= Math.abs(cursor.y - origin.y)
     : false;
   const constrain = (p: Point2): Point2 =>
-    origin ? (horizontal ? { x: p.x, y: origin.y } : { x: origin.x, y: p.y }) : { ...p };
+    axis
+      ? projectDirection(p, axis.origin, axis.direction)!
+      : origin
+        ? horizontal
+          ? { x: p.x, y: origin.y }
+          : { x: origin.x, y: p.y }
+        : { ...p };
   if (!context.enabled) return { point: constrain(cursor), candidate: null };
   const candidates = collectSnapCandidates(cursor, context, constrain);
   candidates.sort(compareSnapCandidates);

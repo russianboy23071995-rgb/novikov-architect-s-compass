@@ -45,12 +45,11 @@ function editDirection(session: EditSession): Point2 | null {
 export function resolveEditSnap(session: EditSession, cursor: Point2, context: SnapContext) {
   const direction = editDirection(session);
   const project = (p: Point2) => (direction ? projectDirection(p, session.anchor, direction)! : p);
-  const references = editSnapReferences(session, context.references).filter(
-    (r) => !direction || pointsCompatible(r.point, project(r.point)),
-  );
+  const references = editSnapReferences(session, context.references);
   const result = querySnap(cursor, {
     ...context,
     references,
+    fixedAxis: direction ? { origin: session.anchor, direction } : null,
     orthoOrigin: direction ? null : context.orthoOrigin,
     angleOrigin: direction ? null : (context.angleOrigin ?? null),
   });

@@ -171,6 +171,7 @@ export function BimPlan({
     perpendicular: "Lotrecht",
     angle: `${resolvedHover?.candidate?.angleDegrees ?? 45}°`,
     intersection: "Schnittpunkt",
+    "axis-intersection": "Achsenschnittpunkt",
   };
   const [editPointer, setEditPointer] = useState<{ session: EditSession; point: Point } | null>(
     null,

@@ -1,3 +1,4 @@
+import { previewEdit } from "../../application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { querySnap } from "./engine.ts";
@@ -939,4 +940,134 @@ test("free direct edit consumes stabilized intersections with one reversible mod
     committed.history.present,
   );
   assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+});
+
+test("fixed axes intersect external guides across zoom without projecting endpoints", () => {
+  for (const direction of [
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 2, y: 1 },
+  ]) {
+    const target = { x: direction.x * 3, y: direction.y * 3 };
+    const a = {
+      entityId: "external",
+      feature: "end",
+      point: { x: target.x - direction.y, y: target.y + direction.x },
+      directions: [direction],
+    };
+    for (const pixelsPerMetre of [25, 100, 400]) {
+      const c = {
+        ...context,
+        references: [a],
+        activeReferences: [a],
+        pixelsPerMetre,
+        gridSpacing: null,
+        fixedAxis: { origin: { x: 0, y: 0 }, direction },
+      };
+      const cursor = { x: target.x + 1 / pixelsPerMetre, y: target.y + 1 / pixelsPerMetre };
+      const result = querySnap(cursor, c);
+      assert.equal(result.candidate?.kind, "axis-intersection");
+      assert.ok(pointsCompatible(result.point, target));
+      assert.deepEqual(result.candidate?.sourceReferences, [a]);
+      assert.equal(querySnap(a.point, { ...c, activeReferences: [] }).candidate, null);
+      assert.equal(querySnap(cursor, { ...c, enabled: false }).candidate, null);
+      assert.ok(
+        pointsCompatible(
+          querySnap(cursor, { ...c, angleOrigin: { x: 10, y: 10 }, orthoOrigin: { x: 10, y: 10 } })
+            .point,
+          target,
+        ),
+      );
+      assert.notEqual(
+        querySnap({ x: target.x + 20 / pixelsPerMetre, y: target.y + 20 / pixelsPerMetre }, c)
+          .candidate?.kind,
+        "axis-intersection",
+      );
+      assert.notEqual(
+        querySnap(cursor, {
+          ...c,
+          references: [{ ...a, point: { x: a.point.x + 1e-10, y: a.point.y } }],
+        }).candidate?.kind,
+        "axis-intersection",
+      );
+    }
+  }
+});
+
+test("axis intersections reject parallel and collinear guides, prefer real endpoints and validate axes", () => {
+  const a = { entityId: "external", feature: "end", point: { x: 0, y: 1 } };
+  const axis = { origin: { x: 0, y: 0 }, direction: { x: 1, y: 0 } };
+  const c = {
+    ...context,
+    references: [a],
+    activeReferences: [a],
+    gridSpacing: null,
+    fixedAxis: axis,
+  };
+  assert.notEqual(querySnap({ x: 100, y: 0 }, c).candidate?.kind, "axis-intersection");
+  const b = { ...a, point: { x: 0, y: 0 } };
+  assert.notEqual(
+    querySnap({ x: 100, y: 0 }, { ...c, references: [b], activeReferences: [b] }).candidate?.kind,
+    "axis-intersection",
+  );
+  const endpoint = { entityId: "actual", feature: "end", point: { x: 0, y: 0 } };
+  assert.equal(
+    querySnap({ x: 0.01, y: 0 }, { ...c, references: [a, endpoint] }).candidate?.kind,
+    "endpoint",
+  );
+  for (const fixedAxis of [
+    { ...axis, direction: { x: 0, y: 0 } },
+    { ...axis, origin: { x: NaN, y: 0 } },
+  ])
+    assert.throws(() => querySnap({ x: 0, y: 0 }, { ...c, fixedAxis }));
+});
+
+test("axis guide edit uses one preview/commit target with undo, JSON and self-source exclusion", () => {
+  const project = addLine(createProject("p", "s"), {
+    id: "line",
+    kind: "line",
+    points: [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const target = { kind: "line" as const, id: "line" };
+  const state = editingReducer(createEditingState(project), {
+    type: "begin",
+    target,
+    action: "x",
+    index: null,
+    anchor: { x: 0, y: 0 },
+  });
+  const a = { entityId: "external", feature: "end", point: { x: 3, y: 2 } };
+  const c = { ...context, references: [a], activeReferences: [a], gridSpacing: null };
+  const result = resolveEditSnap(state.session!, { x: 3.01, y: 0.01 }, c);
+  assert.equal(result.candidate?.kind, "axis-intersection");
+  assert.deepEqual(result.point, { x: 3, y: 0 });
+  const preview = previewEdit(state.session!, state.history.present, target, result.point);
+  const committed = editingReducer(state, {
+    type: "confirm",
+    session: state.session!,
+    selection: target,
+    point: result.point,
+  });
+  assert.deepEqual(committed.history.present, preview);
+  assert.equal(committed.history.past.length, 1);
+  assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, project);
+  assert.deepEqual(
+    editingReducer(editingReducer(committed, { type: "undo" }), { type: "redo" }).history.present,
+    preview,
+  );
+  assert.deepEqual(readProjectFile(serializeProject(preview)), preview);
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+  const own = { ...a, entityId: "line" };
+  assert.equal(
+    resolveEditSnap(
+      state.session!,
+      { x: 3, y: 0 },
+      { ...c, references: [own], activeReferences: [own] },
+    ).candidate,
+    null,
+  );
 });
