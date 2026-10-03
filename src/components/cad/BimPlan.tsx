@@ -395,7 +395,7 @@ export function BimPlan({
       }}
       onDoubleClick={(event) => {
         if (pan || navigationClick.current) return;
-        if (drawing && onFinish) {
+        if (drawing && onFinish && drawingTarget !== null) {
           event.preventDefault();
           onFinish();
         }
@@ -406,7 +406,7 @@ export function BimPlan({
           setHover(null);
         }
         if (pan) return;
-        if (drawing && onFinish && event.key === "Enter") {
+        if (drawing && onFinish && drawingTarget !== null && event.key === "Enter") {
           event.preventDefault();
           onFinish();
         }

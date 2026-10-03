@@ -142,3 +142,64 @@ test("invalid or stale confirmation never reaches mutation callback", () => {
   assert.throws(() => confirmInteraction(edit, { x: 1, y: 0 }), /Auswahl/);
   assert.equal(calls, 0);
 });
+
+test("successive polyline segments reuse drawing interaction without commits until one final action", () => {
+  const base = createProject("p", "s");
+  let state = createEditingState(base);
+  const points = [{ x: 0, y: 0 }];
+  for (const [angle, length, expected] of [
+    ["0", "3", { x: 3, y: 0 }],
+    ["90", "2", { x: 3, y: 2 }],
+    ["180", "1", { x: 2, y: 2 }],
+  ] as const) {
+    const start = points.at(-1)!;
+    const tool = drawingInteraction(
+      base,
+      base,
+      start,
+      (point) => points.push(point),
+      () => {
+        points.length = 0;
+      },
+    );
+    assert.equal(tool.identity, start);
+    assert.equal(evaluateInteraction(tool, "", "", null).value, null);
+    assert.equal(evaluateInteraction(tool, "0", "0", null).value, null);
+    assert.equal(evaluateInteraction(tool, "566", "1", null).value, null);
+    const result = evaluateInteraction(tool, angle, length, null);
+    assert.deepEqual(result.value?.point, expected);
+    confirmInteraction(tool, result.value!.point);
+    assert.equal(state.history.past.length, 0);
+    assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+  }
+  const next = createDrawing(base, base, "poly", {
+    kind: "line",
+    lineKind: "polyline",
+    points,
+    appearance: defaultLineAppearance,
+  });
+  state = editingReducer(state, { type: "project", project: next });
+  assert.equal(state.history.past.length, 1);
+  assert.equal(state.history.present.storey.lines![0]!.points.length, 4);
+  assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, base);
+  const restored = editingReducer(editingReducer(state, { type: "undo" }), { type: "redo" });
+  assert.deepEqual(restored.history.present, next);
+});
+test("cancelling a polyline draft leaves no model element or history entry", () => {
+  const base = createProject("p", "s"),
+    state = createEditingState(base);
+  let points = [origin, { x: 2, y: 0 }];
+  const tool = drawingInteraction(
+    base,
+    base,
+    points.at(-1)!,
+    (point) => points.push(point),
+    () => {
+      points = [];
+    },
+  );
+  tool.cancel();
+  assert.equal(points.length, 0);
+  assert.equal(state.history.past.length, 0);
+  assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+});
