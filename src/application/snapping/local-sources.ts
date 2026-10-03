@@ -1,3 +1,10 @@
+import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
+type LocalPrimitives = {
+  references: SnapReference[];
+  segments: SnapSegment[];
+  segmentPairs: number;
+  near: (r: SnapReference) => boolean;
+};
 import type { Project } from "../../lib/bim/model.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
@@ -38,10 +45,18 @@ export function createLocalSnapSources(project: Project) {
     })),
   );
   return Object.freeze({
+    query(
+      cursor: Point2,
+      scale: number,
+      radius: number,
+      allowed: (source: SnapReference) => boolean = () => true,
+    ) {
+      return completeLocalQuery(this.queryPrimitives(cursor, scale, radius, allowed));
+    },
     sourceCount: references.length,
     segmentCount: segments.length,
     lookup: (key: string) => lookup.get(key),
-    query(
+    queryPrimitives(
       cursor: Point2,
       pixelsPerMetre: number,
       radiusPx: number,
@@ -77,9 +92,10 @@ export function createLocalSnapSources(project: Project) {
         .sort((a, b) => a - b)
         .map((i) => segments[i]!)
         .filter((s) => allowed(s.source) && segmentMayMeetBox(s.start, s.end, box));
-      const intersections = segmentIntersectionReferences(localSegments).filter(near);
+
       return {
-        references: [...localPoints, ...intersections],
+        references: localPoints,
+        near,
         segments: localSegments,
         segmentPairs: (localSegments.length * Math.max(0, localSegments.length - 1)) / 2,
       };
@@ -95,4 +111,16 @@ export function getLocalSnapSources(project: Project): LocalSnapSources {
     cache.set(project, sources);
   }
   return sources;
+}
+
+export function completeLocalQuery(local: LocalPrimitives, paused = false) {
+  return {
+    references: [
+      ...local.references,
+      ...(paused ? [] : segmentIntersectionReferences(local.segments).filter(local.near)),
+    ],
+    segments: local.segments,
+    segmentPairs: paused ? 0 : local.segmentPairs,
+    intersectionsPaused: paused,
+  };
 }

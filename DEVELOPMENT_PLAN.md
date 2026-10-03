@@ -676,6 +676,21 @@ docs/REFERENCE_SELECTION_PLAN.md gegen lokale Quellen, ToolInteraction, Hover un
 
 Nur Dokumentation verändert; kein neuer Test-/Build-/Browserlauf nötig. Bestehende 244 Tests und Abnahme aus PR #58 beziehen sich auf unveränderten Anwendungscode. PR #58 und #57 weiterhin offen; kein Merge in diesem Planungsauftrag.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Dichteschranke mit sichtbarem Status
+### Abgeschlossener Folgeauftrag: gemeinsame Dichteschranke mit sichtbarem Status
 
 Primitive lokale Kandidatensuche und Paarbildung trennen. Gemeinsamen reinen Dichtecontroller mit vorläufigen Schwellen >32/<=24 und 250-ms-Rückkehr erstellen; Zeit injizieren. Strukturierter Pausenstatus für Zeichnen, Direct Edit und Hover, keine ungeschützte Zweitabfrage. End-/Mittelpunkte, aktive Führungen, Host-/Eigenausschlüsse und Achsen erhalten. Viewporthinweis ohne funktionslosen Auswahlbutton; Auswahl-Picking folgt als separates Paket. Grenz-/Lebenszyklustests und Messung mit 24/32/33/48 Segmenten gemäß Vertrag; Build/Lint/TypeScript und praktische Prüfung.
+
+
+### Abschluss: gemeinsame Dichteschranke — 04.10.2026
+
+Primitive Suche von Paarbildung getrennt. createToolSourceQuery bewacht standardmäßig alle Produktionsabfragen (>32 Segmente); reiner Application-Controller steuert Rückkehr bei <=24 für 250 ms, React liefert Zeit/Ereignisse. Gemeinsamer Pausenparameter für Hover und Pointerresolver. End-/Mittelpunkte, Raster und aktive entfernte Referenzen bleiben verfügbar. Lesbarer Viewportstatus ohne Popup oder funktionslosen Auswahlbutton.
+
+247 Tests, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bestehende Warnungen. Grenz-, Ausschluss-, Referenz- und Vergleichstests bestanden. Browser mit 48 Kreuzungen: Idle-Hover, Zeichnen, freie Wandbewegung, erhaltener Mittelpunktfang, Referenz nach Zoom, Wiederaufnahme außerhalb und Linienabschluss erfolgreich. Messung: docs/performance/SNAP_DENSITY.md. 32 Segmente Median 2,373 ms, 33 Segmente pausiert 0,261 ms; keine Framerate-Zusage.
+
+Praktischer Test: viele Linien kreuzen lassen, Maus darüber bewegen. Hinweis erscheint ohne Dialog; Mittelpunkt bleibt fangbar. Auf weniger dichte Stelle fahren, kurze Wiederaufnahme abwarten. Beim Zeichnen und Bearbeiten wiederholen; Zoom erhält Referenzen.
+
+Grenzen: dichte automatische lokale Schnittpunkte bewusst pausiert, manuelle Referenzauswahl fehlt noch. Primitive Suche und Punktranking bleiben mengenabhängig. Keine 3D-Arbeitsebene. PRs #57–59 weiterhin offen.
+
+### Genau ein ausführbarer Folgeauftrag: temporäre Segmentauswahl gemeinsam integrieren
+
+Optionale Auswahl gerader Segmentquellen für einen laufenden Vorgang implementieren: gemeinsamer Application-Zustand mit Arbeitskopie/Übernehmen/Abbruch, Vorgangsidentität über Polylinienpunkte hinweg und Auswahlfilter vor Paarbildung. Canvas-Auswahl suspendiert Modellbestätigungen, bietet Mehrdeutigkeitsliste und dezente Abblendung. Aufheben, Idle-Lebenszyklus, Zoom, Modellwechsel und aktive Referenzen gemäß docs/REFERENCE_SELECTION_PLAN.md testen. Zunächst Segmentauswahl; explizite Punktübernahme folgt separat. Keine per-Werkzeug-Fangkopien.

@@ -53,7 +53,13 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     ]);
     const sources = withConstructionReferences(
       context.sourceQuery
-        ? context.sourceQuery(cursor, context.pixelsPerMetre, 10, active)
+        ? context.sourceQuery(
+            cursor,
+            context.pixelsPerMetre,
+            10,
+            active,
+            context.intersectionsPaused,
+          )
         : context.references,
       active,
     );
