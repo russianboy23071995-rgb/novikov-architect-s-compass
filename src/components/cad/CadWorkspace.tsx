@@ -8,6 +8,8 @@ import { AiCommandBar } from "./AiCommandBar";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
+import { numericMoveAxis, previewNumericMove } from "@/application/direct-edit/numeric";
+import type { EditSession } from "@/lib/bim/direct-edit";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
@@ -52,6 +54,19 @@ export function CadWorkspace() {
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
+  const [numericDraft, setNumericDraft] = useState<{ session: EditSession; text: string } | null>(
+    null,
+  );
+  const numericText = editSession && numericDraft?.session === editSession ? numericDraft.text : "";
+  const numericAxis = editSession ? numericMoveAxis(editSession) : null;
+  const numericPreview = (() => {
+    if (!editSession || !numericText.trim()) return null;
+    try {
+      return { ...previewNumericMove(editSession, project, selection, numericText), error: "" };
+    } catch (error) {
+      return { point: null, error: error instanceof Error ? error.message : "Ungültige Strecke." };
+    }
+  })();
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [linePoints, setLinePoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
@@ -482,6 +497,7 @@ export function CadWorkspace() {
                   onSelect={selectElement}
                   onPoint={drawPoint}
                   editSession={editSession?.base === project ? editSession : null}
+                  numericTarget={numericPreview ? numericPreview.point : undefined}
                   onEditCommit={(session, point) =>
                     dispatchEditing({ type: "confirm", session, selection, point })
                   }
@@ -500,7 +516,70 @@ export function CadWorkspace() {
                     role="status"
                     className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
                   >
-                    Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
+                    {numericAxis ? (
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          if (numericPreview?.point)
+                            dispatchEditing({
+                              type: "confirm",
+                              session: editSession,
+                              selection,
+                              point: numericPreview.point,
+                            });
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Escape") {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            dispatchEditing({ type: "cancel" });
+                          }
+                        }}
+                      >
+                        <label className="block">
+                          Strecke (m)
+                          <input
+                            aria-label="Verschiebestrecke (m)"
+                            className="ml-2 w-28 rounded border bg-background px-2 py-1"
+                            type="text"
+                            inputMode="decimal"
+                            value={numericText}
+                            onChange={(event) =>
+                              setNumericDraft({ session: editSession, text: event.target.value })
+                            }
+                          />
+                        </label>
+                        <p>{numericAxis.label} · negatives Vorzeichen = Gegenrichtung</p>
+                        <p>
+                          {numericText.trim()
+                            ? "Zahlenvorschau · Enter oder Übernehmen bestätigt"
+                            : "Zielpunkt anklicken oder Strecke eingeben · Esc bricht ab"}
+                        </p>
+                        {numericPreview?.error && (
+                          <p role="alert" className="text-destructive">
+                            {numericPreview.error}
+                          </p>
+                        )}
+                        <button
+                          type="submit"
+                          className="mt-1 rounded border px-2 py-1 disabled:opacity-40"
+                          disabled={!numericPreview?.point}
+                        >
+                          Strecke übernehmen
+                        </button>
+                        {numericText && (
+                          <button
+                            type="button"
+                            className="ml-2 underline"
+                            onClick={() => setNumericDraft(null)}
+                          >
+                            Maussteuerung
+                          </button>
+                        )}
+                      </form>
+                    ) : (
+                      "Vorschau · Zielpunkt anklicken · Esc bricht ab"
+                    )}
                     <button
                       className="ml-2 underline"
                       onClick={() => dispatchEditing({ type: "cancel" })}

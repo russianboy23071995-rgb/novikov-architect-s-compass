@@ -541,3 +541,89 @@ test("window host axis accepts external guides but excludes host and dependent s
   assert.equal(rejected.history, stale.history);
   assert.notEqual(rejected.error, "");
 });
+
+import { numericMoveAxis, previewNumericMove } from "./numeric.ts";
+
+test("numeric X/Y/element moves accept signed comma metres and share preview, commit, undo and JSON", () => {
+  for (const action of ["x", "y", "axis"] as const)
+    for (const text of ["1,25", "-1.25", "+0,5", "0"]) {
+      const state = editingReducer(initial(), { type: "begin", target: wall, action, index: null });
+      const session = state.session!;
+      const result = previewNumericMove(session, state.history.present, wall, text);
+      const committed = editingReducer(state, {
+        type: "confirm",
+        session,
+        selection: wall,
+        point: result.point,
+      });
+      assert.deepEqual(committed.history.present, result.project);
+      const amount = Number(text.replace(",", "."));
+      const moved = result.project.storey.walls[0]!;
+      assert.equal(moved.start.x, action === "y" ? 0 : action === "axis" ? -amount || 0 : amount);
+      assert.equal(moved.start.y, action === "y" ? amount : 0);
+      assert.deepEqual(
+        editingReducer(committed, { type: "undo" }).history.present,
+        state.history.present,
+      );
+      assert.deepEqual(readProjectFile(serializeProject(result.project)), result.project);
+      if (amount !== 0) {
+        assert.equal(committed.history.past.length, 1);
+        assert.deepEqual(
+          editingReducer(editingReducer(committed, { type: "undo" }), { type: "redo" }).history
+            .present,
+          result.project,
+        );
+      }
+    }
+});
+
+test("numeric movement rejects invalid values and stale selection/model without a transaction", () => {
+  const state = editingReducer(initial(), {
+    type: "begin",
+    target: wall,
+    action: "x",
+    index: null,
+  });
+  for (const text of ["", "abc", "1,2,3", "Infinity", "1e999", "2 m"])
+    assert.throws(() => previewNumericMove(state.session!, state.history.present, wall, text));
+  assert.throws(() => previewNumericMove(state.session!, state.history.present, null, "1"));
+  assert.throws(() =>
+    previewNumericMove(
+      state.session!,
+      updateWall(state.history.present, "wall", { height: 3 }),
+      wall,
+      "1",
+    ),
+  );
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+  assert.equal(numericMoveAxis({ ...state.session!, action: "point" }), null);
+  assert.throws(() =>
+    previewNumericMove({ ...state.session!, action: "move" }, state.history.present, wall, "1"),
+  );
+});
+
+test("oblique numeric movement uses normalized pinned direction with exact signed distance", () => {
+  const project = addLine(initial().history.present, {
+    id: "diagonal",
+    kind: "line",
+    points: [
+      { x: 0, y: 0 },
+      { x: 3, y: 4 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const target = { kind: "line" as const, id: "diagonal" };
+  const state = editingReducer(createEditingState(project), {
+    type: "begin",
+    target,
+    action: "axis",
+    index: null,
+  });
+  const result = previewNumericMove(state.session!, state.history.present, target, "-2,5");
+  assert.deepEqual(result.point, { x: 1.5, y: 2 });
+  assert.match(numericMoveAxis(state.session!)!.label, /2 → 1/);
+  assert.deepEqual(result.project.storey.lines![0]!.points, [
+    { x: 1.5, y: 2 },
+    { x: 4.5, y: 6 },
+  ]);
+});
