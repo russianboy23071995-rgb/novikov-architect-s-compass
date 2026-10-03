@@ -9,12 +9,9 @@ import { PrecisionInput } from "./PrecisionInput";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
-import {
-  numericMoveAxis,
-  previewMovementInput,
-  movementDirection,
-} from "@/application/direct-edit/numeric";
-import type { EditSession } from "@/lib/bim/direct-edit";
+import { numericMoveAxis, previewMovementInput } from "@/application/direct-edit/numeric";
+import { usePrecisionDraft } from "./usePrecisionDraft";
+import { previewLineInput } from "@/application/drawing/line-input";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
@@ -59,43 +56,46 @@ export function CadWorkspace() {
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
-  const [numericDraft, setNumericDraft] = useState<{
-    session: EditSession;
-    angle: string;
-    length: string;
-  } | null>(null);
-  const [lockedAim, setLockedAim] = useState<{ session: EditSession; point: Point } | null>(null);
-  const [moveAim, setMoveAim] = useState<{ session: EditSession; point: Point } | null>(null);
-  const inputDraft =
-    editSession && numericDraft?.session === editSession ? numericDraft : { angle: "", length: "" };
-  const aim = editSession && moveAim?.session === editSession ? moveAim.point : null;
+  const [wallStart, setWallStart] = useState<Point | null>(null);
+  const [linePoints, setLinePoints] = useState<Point[]>([]);
+  const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
+  const [lineBase, setLineBase] = useState<Project | null>(null);
+  const lineOrigin =
+    tool === "line" && lineKind === "line" && linePoints.length === 1 ? linePoints[0] : null;
+  const inputDraft = usePrecisionDraft(editSession ?? lineOrigin ?? null);
+  const aim = inputDraft.aim;
   const numericAxis = editSession ? numericMoveAxis(editSession) : null;
   const supportsInput =
-    !!editSession &&
-    ((editSession.action === "move" && editSession.target.kind !== "window") || !!numericAxis);
-  const hasInput = !!(inputDraft.angle.trim() || inputDraft.length.trim());
+    !!lineOrigin ||
+    (!!editSession &&
+      ((editSession.action === "move" && editSession.target.kind !== "window") || !!numericAxis));
+  const hasInput = inputDraft.hasInput;
   const inputPreview = (() => {
-    if (!editSession || !supportsInput || (!hasInput && !aim)) return null;
+    if (!supportsInput || (!hasInput && !aim)) return null;
     try {
-      return {
-        ...previewMovementInput(
-          editSession,
-          project,
-          selection,
-          inputDraft.angle,
-          inputDraft.length,
-          aim,
-        ),
-        error: "",
-      };
+      const result = editSession
+        ? previewMovementInput(
+            editSession,
+            project,
+            selection,
+            inputDraft.angle,
+            inputDraft.length,
+            aim,
+          )
+        : previewLineInput(
+            lineBase!,
+            project,
+            lineOrigin!,
+            aim,
+            inputDraft.angle,
+            inputDraft.length,
+          );
+      return { ...result, error: "" };
     } catch (error) {
       return { point: null, error: error instanceof Error ? error.message : "Ungültige Eingabe." };
     }
   })();
   const numericPreview = hasInput ? inputPreview : null;
-  const [wallStart, setWallStart] = useState<Point | null>(null);
-  const [linePoints, setLinePoints] = useState<Point[]>([]);
-  const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
@@ -274,6 +274,13 @@ export function CadWorkspace() {
   const drawPoint = (point: Point) => {
     setModelError("");
     if (tool === "line") {
+      if (linePoints.length === 0) {
+        setLineBase(project);
+        setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
+      } else if (lineBase !== project) {
+        setModelError("Das Modell wurde geändert. Linie erneut beginnen.");
+        return;
+      }
       const previous = linePoints.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
         setModelError("Nächsten Punkt an einer anderen Position wählen.");
@@ -523,18 +530,11 @@ export function CadWorkspace() {
                   onSelect={selectElement}
                   onPoint={drawPoint}
                   editSession={editSession?.base === project ? editSession : null}
-                  numericTarget={numericPreview ? numericPreview.point : undefined}
-                  onEditAim={(session, point) => setMoveAim({ session, point })}
-                  onEditDirection={(session, point) => {
-                    try {
-                      const degrees = movementDirection(session, point);
-                      setMoveAim({ session, point });
-                      setLockedAim({ session, point });
-                      setNumericDraft({ session, angle: String(degrees), length: "" });
-                    } catch {
-                      /* A zero-length direction remains unset. */
-                    }
-                  }}
+                  numericTarget={editSession && numericPreview ? numericPreview.point : undefined}
+                  drawingTarget={lineOrigin && numericPreview ? numericPreview.point : undefined}
+                  onDrawingAim={lineOrigin ? inputDraft.move : undefined}
+                  onEditAim={(_session, point) => inputDraft.move(point)}
+                  onEditDirection={(session, point) => inputDraft.fix(session.anchor, point)}
                   onEditCommit={(session, point) =>
                     dispatchEditing({ type: "confirm", session, selection, point })
                   }
@@ -548,52 +548,54 @@ export function CadWorkspace() {
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
-                {editSession &&
-                  (supportsInput ? (
-                    <PrecisionInput
-                      focusLengthToken={lockedAim?.session === editSession ? lockedAim.point : null}
-                      position={demandPosition}
-                      onPosition={setDemandPosition}
-                      angle={inputDraft.angle}
-                      length={inputDraft.length}
-                      angleHint={
-                        numericAxis
-                          ? String(Number(numericAxis.degrees.toFixed(2)))
-                          : inputPreview && "degrees" in inputPreview
-                            ? String(Number(inputPreview.degrees.toFixed(2)))
-                            : "Maus"
-                      }
-                      lengthHint={
-                        inputPreview && "metres" in inputPreview
-                          ? String(Number(inputPreview.metres.toFixed(3)))
+                {supportsInput ? (
+                  <PrecisionInput
+                    focusLengthToken={inputDraft.focus}
+                    position={demandPosition}
+                    onPosition={setDemandPosition}
+                    angle={inputDraft.angle}
+                    length={inputDraft.length}
+                    angleHint={
+                      numericAxis
+                        ? String(Number(numericAxis.degrees.toFixed(2)))
+                        : inputPreview && "degrees" in inputPreview
+                          ? String(Number(inputPreview.degrees.toFixed(2)))
                           : "Maus"
-                      }
-                      axisLabel={numericAxis?.label ?? null}
-                      error={hasInput ? (inputPreview?.error ?? "") : ""}
-                      canConfirm={!!inputPreview?.point}
-                      onChange={(angle, length) =>
-                        setNumericDraft({ session: editSession, angle, length })
-                      }
-                      onConfirm={() => {
-                        if (inputPreview?.point)
-                          dispatchEditing({
-                            type: "confirm",
-                            session: editSession,
-                            selection,
-                            point: inputPreview.point,
-                          });
-                      }}
-                      onCancel={() => dispatchEditing({ type: "cancel" })}
-                    />
-                  ) : (
-                    <div
-                      role="status"
-                      className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
-                    >
-                      Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
-                      <button onClick={() => dispatchEditing({ type: "cancel" })}>Abbrechen</button>
-                    </div>
-                  ))}
+                    }
+                    lengthHint={
+                      inputPreview && "metres" in inputPreview
+                        ? String(Number(inputPreview.metres.toFixed(3)))
+                        : "Maus"
+                    }
+                    axisLabel={numericAxis?.label ?? null}
+                    {...(lineOrigin ? { mouseHint: "Mausziel · Klick zeichnet · 90° oben" } : {})}
+                    error={hasInput ? (inputPreview?.error ?? "") : ""}
+                    canConfirm={!!inputPreview?.point}
+                    onChange={inputDraft.change}
+                    onConfirm={() => {
+                      if (inputPreview?.point && !editSession) drawPoint(inputPreview.point);
+                      else if (inputPreview?.point && editSession)
+                        dispatchEditing({
+                          type: "confirm",
+                          session: editSession,
+                          selection,
+                          point: inputPreview.point,
+                        });
+                    }}
+                    onCancel={() => {
+                      dispatchEditing({ type: "cancel" });
+                      setLinePoints([]);
+                    }}
+                  />
+                ) : editSession ? (
+                  <div
+                    role="status"
+                    className="absolute left-3 top-20 z-30 rounded bg-popover px-3 py-2 text-xs shadow"
+                  >
+                    Vorschau · Zielpunkt anklicken · Esc bricht ab{" "}
+                    <button onClick={() => dispatchEditing({ type: "cancel" })}>Abbrechen</button>
+                  </div>
+                ) : null}
                 {(modelError || editing.error) && (
                   <p
                     role="alert"

@@ -873,3 +873,13 @@ No scaling action exists in the inspected code. This documentation records its m
 NOVIKOV CAD is not built as a collection of UI features.
 
 It is built as a reliable modeling platform whose UI, AI, rendering and interoperability layers all operate on the same validated architectural model.
+
+
+## Shared precision input — implemented boundary (2026-10-03)
+
+Decision: polar tool input is shared across direct edit and straight-line drawing.
+`PrecisionInput` owns presentation only. `usePrecisionDraft` owns transient angle/length, mouse aim and focus for a stable interaction identity; a new identity starts with empty inputs. `application/input/precision.ts` parses text through the core unit parser and delegates target calculation to `constraints/input/polar.ts`. These shared services contain no BIM mutation or renderer dependencies.
+
+Tool adapters supply origin and current aim, validate tool-specific constraints and confirm through existing model/application actions. Line drawing rejects zero length and changed model context; direct edit retains its pinned selection, axis and opening constraints. Numeric targets take precedence over mouse snapping. There is one helper component and one draft hook, not a copied form/state machine per tool. The existing workspace coordinates these consumers; migration of its remaining legacy drawing orchestration is incremental. AI/Text/Voice must use the same validated actions, not React draft state or separate model logic.
+
+Currently connected: element movement, point stretching and single straight-line drawing. Polylines, wall drawing and other tools are future adapters, not claimed as implemented.

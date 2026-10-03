@@ -407,6 +407,23 @@ Nachweise: 201 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Abnahme: Wandecke oder Linienpunkt anklicken → Punkt in Flucht strecken → 1,25 eingeben → Vorschau prüfen und übernehmen. Mit negativer Strecke verkürzen; unzulässige Werte dürfen nicht übernommen werden. Für gleichzeitige 3D-Prüfung vorher Zwei Ansichten und 3D aktivieren, dann den Griff im Grundriss wählen.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Linie
+### Abgeschlossener Auftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Linie
 
 Das vorhandene Hilfseingabefenster nach Setzen des ersten Linienpunkts aktivieren. Ursprung bleibt der erste Punkt; Maus/Fangengine bestimmen die Richtung oder Winkel/Länge werden ausdrücklich eingegeben. Gemeinsame polare Eingabe und vorhandene validierte Linienerzeugung verwenden; keine zweite Zeichenlogik. Zunächst einzelne gerade Linien, keine Polylinien oder weiteren Bauteile. Prüfen: Maus versus fixierte Werte, 0–360°, ungültige/Null-Länge, Escape ohne Bauteil, ein Commit/Undo/Redo und JSON; praktische Browserabnahme. Wandachsenlage N45 und Fensterbewegung bleiben spätere Aufgaben.
+
+
+### Abschluss: gemeinsame Eingabe statt Werkzeugkopien — 03.10.2026
+
+PR #40 wurde nach Nutzerfreigabe normal in feat/numeric-axis-move übernommen (053b631). Der neue Zweig feat/shared-line-precision basiert darauf; main unverändert.
+
+Nach dem ersten Punkt einer geraden Linie erscheint das vorhandene Hilfseingabefenster nahe dem Punkt. Zwei Klicks zeichnen weiterhin mit der Maus; alternativ Winkel/Länge eingeben und Enter/Übernehmen verwenden. Fixierte Werte haben Vorrang vor Mausfang. Maus leert beide Felder. 0–360°, Dezimalkomma und negative gerichtete Längen verwenden dieselbe polare Auswertung wie Bewegung. Null-Länge, ungültige Werte und geänderter Modellkontext verhindern Übernahme. Escape/Abbrechen verwirft den Entwurf.
+
+Architektur: Ein PrecisionInput und ein usePrecisionDraft für alle angeschlossenen Aktionen. application/input/precision.ts verbindet den zentralen Textparser mit constraints/input/polar.ts; application/drawing/line-input.ts prüft die Zeichengrenzen. Bestehendes addLine und gemeinsame History übernehmen das Modell. Keine zweite Linienerzeugung, keine neue Projektstruktur. Der bisherige Parserexport bleibt kompatibel. Noch bestehende Zeichenkoordination in CadWorkspace wird schrittweise migriert.
+
+Nachweise: 204 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Neue Tests prüfen gemeinsame Auswertung, exakte Werte trotz anderer Mauslage, Mauswinkel, Dezimalkomma, 360°, negative Länge, ungültige Winkel/Zahlen, Null-Länge, stale Modell und einen Commit/Undo/Redo/JSON-Rundlauf. Browser: Linie ab (0;1) mit 0°/1,25 m bleibt bei Mausbewegung exakt; 566° und Null-Länge sperren Übernahme. Commit erzeugt genau eine Linie, Undo entfernt und Redo stellt sie wieder her. Neue Zeichensitzung und Wechsel zu freier Wandbewegung starten mit leeren Feldern. Escape erzeugt keine zusätzliche Linie. Freie Wandbewegung fixiert per Klick weiterhin 90°, fokussiert Länge und zeigt Ursprungshilfslinie.
+
+Praktische Abnahme: Linie wählen → ersten Punkt setzen → Winkel 45 und Länge 2 eingeben → Vorschau prüfen → Enter → Undo/Redo. Danach 566° beziehungsweise Länge 0 und Escape testen. Polylinien und andere Zeichenwerkzeuge sind noch nicht angeschlossen.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe beim Zeichnen einer geraden Wand
+
+Den geprüften Eingabebaustein nach dem ersten Wandpunkt verwenden. Vorher die gemeinsame Zeichenkoordination für Linie/Wand begrenzt hinter einen Application-Adapter ziehen, damit CadWorkspace keine zweite Eingabelogik erhält. Bestehendes addWall, Fangengine und History wiederverwenden. Vorschau und Commit mit 3,00 m Länge, 0,36 m Stärke und 2,80 m Höhe prüfen, einschließlich Winkel, Null-Länge, Abbruch, Undo/Redo, JSON und 2D/3D. Keine Wandketten, Anschlüsse oder Änderung der Wandachsenlage N45 in diesem Teilauftrag.

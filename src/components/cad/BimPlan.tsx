@@ -32,6 +32,8 @@ export type BimPlanProps = {
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
+  drawingTarget?: Point | null | undefined;
+  onDrawingAim?: ((point: Point) => void) | undefined;
   onEditAim?: (session: EditSession, point: Point) => void;
   onEditDirection?: (session: EditSession, point: Point) => void;
   onEditCommit?: (session: EditSession, point: Point) => void;
@@ -55,6 +57,8 @@ export function BimPlan({
   editSession,
   onEditCommit,
   numericTarget,
+  drawingTarget,
+  onDrawingAim,
   onEditAim,
   onEditDirection,
   camera,
@@ -175,13 +179,17 @@ export function BimPlan({
       angleOrigin: shift ? editSession!.anchor : null,
     });
   const resolvedHover =
-    numericTarget !== undefined
-      ? null
-      : hover
-        ? editSession
-          ? resolveEdit(hover)
-          : resolveDrawing(hover)
-        : null;
+    drawingTarget !== undefined
+      ? drawingTarget
+        ? { point: drawingTarget, candidate: null }
+        : null
+      : numericTarget !== undefined
+        ? null
+        : hover
+          ? editSession
+            ? resolveEdit(hover)
+            : resolveDrawing(hover)
+          : null;
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -339,6 +347,9 @@ export function BimPlan({
         }
         if (pan) return;
         if (endpointSnap || editSession) setHover(rawPoint(event));
+        const drawingPoint = rawPoint(event);
+        if (drawing && drawingPoint)
+          onDrawingAim?.(resolveDrawing(drawingPoint, event.shiftKey).point);
         if (editSession) {
           const point = rawPoint(event);
           if (point) {
@@ -377,7 +388,7 @@ export function BimPlan({
         if (drawing) {
           event.currentTarget.focus();
           if (onFinish && event.detail > 1) return;
-          const point = pointFromEvent(event);
+          const point = drawingTarget !== undefined ? drawingTarget : pointFromEvent(event);
           if (point) onPoint(point);
         } else if (event.target === event.currentTarget) onSelect(null);
       }}

@@ -12,6 +12,7 @@ export function PrecisionInput({
   angleHint,
   lengthHint,
   axisLabel,
+  mouseHint = "Mausrichtung · Klick fixiert · 90° oben",
   onChange,
   onConfirm,
   onCancel,
@@ -26,6 +27,7 @@ export function PrecisionInput({
   angleHint: string;
   lengthHint: string;
   axisLabel: string | null;
+  mouseHint?: string;
   onChange: (angle: string, length: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
@@ -164,10 +166,7 @@ export function PrecisionInput({
         </label>
       </div>
       <p className="my-1 text-muted-foreground">
-        {axisLabel ??
-          (angle.trim()
-            ? "Winkel fixiert · leeren löst"
-            : "Mausrichtung · Klick fixiert · 90° oben")}
+        {axisLabel ?? (angle.trim() ? "Winkel fixiert · leeren löst" : mouseHint)}
       </p>
       {error && (
         <p role="alert" className="mb-1 text-destructive">
