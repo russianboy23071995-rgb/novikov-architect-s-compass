@@ -1,3 +1,4 @@
+import { previewEdit } from "@/application/direct-edit/controller";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -119,7 +120,21 @@ export function CadViewport({
       <div ref={surface} className="absolute inset-x-4 bottom-24 top-16">
         {is3D ? (
           <BimSolidView
-            project={model.project}
+            project={(() => {
+              if (model.editSession && model.numericTarget) {
+                try {
+                  return previewEdit(
+                    model.editSession,
+                    model.project,
+                    model.selection,
+                    model.numericTarget,
+                  );
+                } catch {
+                  /* Invalid drafts show the committed model. */
+                }
+              }
+              return model.project;
+            })()}
             selection={model.selection}
             camera={camera}
             onCamera={setCamera}

@@ -24,7 +24,7 @@ export function editSnapReferences(
   );
 }
 
-function editDirection(session: EditSession): Point2 | null {
+export function editDirection(session: EditSession): Point2 | null {
   if (session.target.kind === "window") {
     const window = session.base.storey.windows.find((w) => w.id === session.target.id)!;
     const wall = session.base.storey.walls.find((w) => w.id === window.wallId)!;

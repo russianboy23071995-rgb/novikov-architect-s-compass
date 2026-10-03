@@ -345,8 +345,25 @@ Nachweis: 191 Tests bestanden, TypeScript und Produktionsbuild erfolgreich; ESLi
 
 Abnahme: Punktfang und Snap einschalten. Linie oberhalb einer Wand zeichnen, auswählen, im On-Demand-Menü Element auf X-Achse wählen. Ein externes Wandachsende 0,6 s anhovern, danach die Maus zur Kreuzung seiner Lotführung mit der Bewegungslinie führen. Achsenschnittpunkt anzeigen lassen, bestätigen und Undo/Redo testen. Alternativ Escape zum Abbrechen.
 
-### Genau ein ausführbarer Folgeauftrag: präzise Strecke bei achsengebundener Bewegung eingeben
+### Abgeschlossener Auftragsumfang: präzise Strecke bei achsengebundener Bewegung eingeben
 
 Die vorhandene X-/Y-/Elementachsen-Bearbeitung um eine numerische Streckeneingabe in Metern ergänzen. Zuerst bestehende Eingabe-/Einheitenparser prüfen und wiederverwenden; Eingabe und Maus müssen denselben gepinnten EditSession-Kontext und denselben Vorschau-/Bestätigungspfad nutzen. Vorzeichen relativ zur eindeutig angezeigten Achsenrichtung erklären. Keine neue Bewegungslogik in der UI, keine eigenständige AI-Aktion. Zunächst nur ganze Elemente auf X/Y/Elementachse, kein Skalieren, keine Wandachsenverlagerung N45.
 
 Abnahme: positive/negative Strecke, Dezimalkomma, ungültiger Wert, veralteter Kontext, Escape, Vorschau/Commit, genau ein Undo/Redo und JSON. Fangen darf die ausdrücklich eingegebene Strecke nicht nachträglich verändern. Tests, TypeScript, Lint, Build und praktische Browserabnahme dokumentieren.
+
+
+### Abschluss: numerische Strecken für ganze Elemente — 03.10.2026
+
+PR #37 wurde nach ausdrücklicher Nutzerfreigabe normal als 47b24ca in feat/shared-segment-intersections übernommen. Umsetzung auf feat/numeric-axis-move.
+
+Nach Element auf X-/Y-Achse oder Element entlang Achse erscheint Strecke (m) in der bestehenden Bearbeitungseinblendung. Der vorhandene parseMetres-Parser akzeptiert Dezimalpunkt/-komma sowie Vorzeichen. X/Y zeigen positive Weltachsen; die Elementachse zeigt ausdrücklich die Richtung zwischen den nummerierten Punkten (beim ersten Griff Punkt 2 → 1). Negative Werte laufen entgegengesetzt. Der eingegebene Wert ist eine relative Strecke vom gepinnten Bearbeitungsanker, keine Zielkoordinate. Keine Einheitensuffixe oder Rechenausdrücke in diesem Schritt.
+
+application/direct-edit/numeric.ts übersetzt nur die Strecke in einen Punkt und verwendet previewEdit; Bestätigung verwendet unverändert editingReducer/confirm. Vorschau bleibt abgeleitet, History/Datei/IFC lesen weiterhin das bestätigte Projekt. BimPlan und die 3D-Ansicht zeigen denselben numerischen Entwurf. Solange Text eingegeben ist, kann Mausbewegung, Raster oder Punktfang die Zahl nicht überschreiben; bestätigt wird mit Enter oder Strecke übernehmen. Leeren/Maussteuerung kehrt zur Maus zurück. Fehler sperren Bestätigung, Escape auch im Eingabefeld bricht ab. Entwurf ist an dieselbe EditSession gebunden; neue Sitzung übernimmt keinen alten Wert. Punkt-/Streckgriffe und Fenster sind vorerst ausgeschlossen. Keine zweite AI-Modelllogik, kein Dateiformatwechsel.
+
+Nachweis: 194 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Neue Gruppen prüfen X/Y/Elementachse, positive/negative/Nullwerte, Dezimalkomma, normierte schräge Richtung, ungültige Texte, stale Auswahl/Modell, Vorschau/Commit/Undo/Redo/JSON. Browser: +1,25 m auf X bleibt vor Bestätigung ohne Undo-Eintrag, bestätigte Lage identisch; Undo/Redo korrekt. Ungültiger Text sperrt Übernehmen. -0,375 m auf Y bleibt trotz Mausbewegung exakt; Escape im Feld stellt den bestätigten Stand wieder her. 3D-Vorschau durch gemeinsamen previewEdit-Aufruf angebunden, separat noch nicht praktisch abgenommen.
+
+Abnahme: Wand auswählen, Element auf X-Achse wählen, 1,25 in Strecke (m) eingeben und Vorschau betrachten. Enter oder Übernehmen, danach Undo/Redo. Mit negativem Wert, ungültigem Text und Escape wiederholen. Elementachse zeigt ihre positive Richtung ausdrücklich an.
+
+### Genau ein ausführbarer Folgeauftrag: numerisches Strecken eines ausgewählten Punktgriffs
+
+Die vorhandene Aktion Punkt in Flucht strecken um dieselbe Meter-Eingabe erweitern. Positive Strecke verlängert vom Nachbarpunkt weg, negative verkürzt. Bestehenden Griffversatz, Nachbarüberquerung und Fenstergrenzen respektieren; keine Änderung der Wandachsenlage N45. Die numerische Vorschau und Bestätigung müssen dieselben gepinnten Bearbeitungsaktionen nutzen. Tests für schräge Linien/Wände, ungültiges Verkürzen, Kontextwechsel und Undo/Redo sowie praktische Abnahme einschließlich 3D-Zahlenvorschau. Fensterbewegung und freie Punktbewegung bleiben außerhalb dieses Teilauftrags.

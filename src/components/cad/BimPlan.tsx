@@ -27,6 +27,7 @@ export type BimPlanProps = {
   ortho: boolean;
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
   editSession?: EditSession | null;
+  numericTarget?: Point | null | undefined;
   onEditCommit?: (session: EditSession, point: Point) => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
@@ -47,6 +48,7 @@ export function BimPlan({
   onFinish,
   editSession,
   onEditCommit,
+  numericTarget,
   camera,
   viewSize,
   onCamera,
@@ -157,7 +159,14 @@ export function BimPlan({
       guideDirections,
       angleOrigin: shift ? editSession!.anchor : null,
     });
-  const resolvedHover = hover ? (editSession ? resolveEdit(hover) : resolveDrawing(hover)) : null;
+  const resolvedHover =
+    numericTarget !== undefined
+      ? null
+      : hover
+        ? editSession
+          ? resolveEdit(hover)
+          : resolveDrawing(hover)
+        : null;
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -183,7 +192,13 @@ export function BimPlan({
     return { x: point.x, y: -point.y };
   };
   const resolvedEdit =
-    editSession && editPointer?.session === editSession ? resolveEdit(editPointer.point) : null;
+    numericTarget !== undefined
+      ? numericTarget
+        ? { point: numericTarget, candidate: null }
+        : null
+      : editSession && editPointer?.session === editSession
+        ? resolveEdit(editPointer.point)
+        : null;
   let preview: Project | null = null;
   let editError = "";
   if (editSession && resolvedEdit) {
@@ -320,6 +335,7 @@ export function BimPlan({
       }}
       onClick={(event) => {
         if (editSession) {
+          if (numericTarget !== undefined) return;
           if (editDown.current !== editSession) return;
           editDown.current = null;
           const point = rawPoint(event);
