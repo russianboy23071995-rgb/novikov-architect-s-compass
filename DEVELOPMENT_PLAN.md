@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktiver Planungsstand — Funktionsumfang 03.10.2026
+
+Der Nutzerentwurf [Funktionsarchitektur](NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md) erweitert den bisherigen Guide. [FUNCTION_REQUIREMENTS_2026-10-03.md](FUNCTION_REQUIREMENTS_2026-10-03.md) ordnet alle N01–N60 dem Code, alten Anforderungen und Abhängigkeiten zu. ARCHITECTURE.md §29–30 dokumentiert die begrenzten verbindlichen Ergänzungen; weitere Datenfelder/Typdiagramme bleiben Vorschläge. Die PDF selbst wurde nicht separat gelesen. Bisherige Guide-F01–F29 und Gesprächswünsche bleiben erhalten.
+
+Geprüfter Code: 3bbe2dd auf feat/direct-edit-shared-snap, zwei Commits seit Review-main dd3e358. Numerische Fangtoleranz (ef3241d, PR #27) und gemeinsame Direct-Edit-Fangauflösung (3bbe2dd, PR #28) sind umgesetzt und brauchen keinen erneuten Implementierungsauftrag. 149 Tests im Dokumentationsauftrag erneut bestanden. Keine Quellcodeänderung, neue Bauteile, Dateimigration, PDF-Zerlegung oder Layoutimplementierung. Frühere Build-/Lint-/Browsernachweise bleiben als solche datiert erhalten.
+
+**Dieser Abschnitt ist die einzige aktive Auftragsreihenfolge.** Sämtliche darunterstehenden „nächster Schritt“-Formulierungen und Auftragslisten sind historische Protokolle ihrer jeweiligen Stände, keine zusätzlichen aktuellen Folgeaufträge. Die Pakete A–L des Entwurfs und die N-Matrix sind Backlog und Abhängigkeiten.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Fang-Kandidaten und Rangfolge
+
+**Ziel:** Die bestehenden Linie-/Wand-/Auswahl-/Direct-Edit-Verbraucher erhalten dieselbe nachvollziehbare Fangentscheidung aus einer nichtrekursiven Kandidatenpipeline. Keine neuen Fangarten oder UI-Werkzeuge.
+
+**Ausgangsbefund:** constraints/snapping/engine.ts ruft querySnap für jede aktive Referenz erneut auf. Endpunkte, einzelne Führungen und Mehrfachreferenzen verwenden unterschiedliche Tie-Breaker; letztere nutzen sourceFeature.localeCompare ohne vollständige Quellenidentität. Toleranzregeln und Direct-Edit-Ausschlüsse sind bereits abgesichert.
+
+**Begrenzter Umfang:**
+
+1. Bestehende Erzeugung für Endpunkte, Richtungsführungen, horizontale/vertikale Referenzschnittpunkte und Raster intern trennen. Referenzvalidierung einmal pro Anfrage; keine rekursive querySnap-Gesamtabfrage. Public API und Modelladapter erhalten, keine vorsorglichen Klassen/Registries.
+2. Eine reine, explizite Rangfunktion verwenden. Bestehender Vorrang bleibt: ausdrücklicher Shift-Constraint; dann kompatibler Endpunkt, bestehender HV-Guide-Schnittpunkt, einzelne Führung, Raster-Fallback. Ortho-Kompatibilität und tatsächliche Quellenkoordinaten erhalten. Abstand in CSS-Pixeln vergleichen.
+3. Technischer Umsetzungsvorschlag für bisher uneinheitliche Gleichstände: bei gleichem Rang/Abstand neuere aktive Referenz bevorzugen, danach vollständige stabile Quellenidentität (entityId, feature; bei Schnittpunkten beide Quellen), schließlich ausdrücklich dokumentierte Fangart-/Richtungsreihenfolge. Keine Locale-Abhängigkeit und keine unbeabsichtigte Abhängigkeit von der Reihenfolge der Modellquellen. Dies ist eine technische Rangregel, keine behauptete Nutzerentscheidung; im Änderungsprotokoll die bisher anders entschiedenen Fälle benennen.
+4. Bestehende Consumer weiterverwenden. Direct-Edit-Ausschluss eigener Quellen/Host und explizite Achspriorität erhalten; keine eigenständige zweite Rangfunktion im Editadapter.
+
+**Nicht enthalten:** Mittelpunkt-/allgemeiner Segmentschnittfang, beliebige Guide-Schnittpunkte, Hysterese, räumlicher Index, 3D-Arbeitsebenen, Lösung des Wandeck-Griffversatzes, Layer, Skalieraktion, neue Bauteile oder Layouteditor. Diese bleiben dokumentiertes Backlog, nicht Teil dieses Auftrags.
+
+**Abnahme:**
+
+- Bestehende 149 Tests bleiben grün; zusätzliche Tests für konkurrierende Quellen mit gleichem Feature-Namen, vertauschte Quellreihenfolge, bewusste Aktivierungsreihenfolge und mehrere gleiche Führungen.
+- Toleranzfall 0.3 gegen 0.1+0.2, große Offsets, mehrere Zoomstufen, echte seitliche Abweichung und exakte Invalidierung veralteter Quellen bleiben korrekt. Zwei Quellen eines Schnittpunkts bleiben zur Anzeige verfügbar.
+- Snap aus, Shift/Ortho, vier Referenzen, Escape/Kontextwechsel und Raster-Fallback behalten ihren geprüften Vertrag. Wand/Linie/Direct Edit liefern bei identischem Kontext identische Zielkoordinaten.
+- Anwendungstests bestätigen Vorschau/Klick, eigene Quellenausschlüsse, ungültiges Ziel ohne Commit, ein Undo/Redo und JSON; vorhandene Stage-1-/IFC-Regressionen bestehen.
+- TypeScript, vollständiges ESLint und Build ausführen; bekannte Warnungen getrennt berichten. Praktisch zwei externe Referenzen aktivieren, konkurrierende Hilfslinien beim Linienzeichnen und freien Bewegen testen, zoomen, bestätigen/Undo und abbrechen. Keinen neuen Performanceanspruch ohne Messung.
+- Kein neuer Modellbefehl entsteht: vorhandene AI/Text/Voice-Verträge und Stale-Context-Tests erhalten; ein zusätzlicher Sprachparser ist hier nicht erforderlich.
+
+**Lieferung:** ein kleiner prüfbarer Entwicklungszweig/PR, dokumentierte Rangregel und Bedienabnahme. Kein Merge ohne Prüfung. Dokumentationsstand baut auf PR #28 auf; Abhängigkeiten in Reihenfolge prüfen statt ältere Änderungen erneut zu implementieren.
+
+## Historische Fortschrittsnachweise
+
 ## Architekturreview: Direct Edit an gemeinsame Fang-Engine angebunden - 03.10.2026
 
 Zweiter begrenzter Korrekturschritt nach numerischen Toleranzen (PR #27). Der Application-Adapter `application/direct-edit/snapping.ts` verbindet vorhandene EditSession-Aktionen mit der gemeinsamen SnapEngine. BimPlan verwendet dieselbe Auflösung für Live-Vorschau und Bestätigung, einschließlich aktueller Shift-Taste. Die Vorschau bleibt abgeleitet; nur Bestätigung erzeugt einen validierten Undo-Schritt. Die Quellen stammen aus dem ursprünglichen Modell, niemals aus der Vorschau.
