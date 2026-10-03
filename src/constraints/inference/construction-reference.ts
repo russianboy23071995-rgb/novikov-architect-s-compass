@@ -24,7 +24,7 @@ export function acquisitionReference(
   sources: readonly SnapReference[],
 ): SnapReference | null {
   if (!candidate) return null;
-  if (candidate.kind === "endpoint")
+  if (candidate.kind === "endpoint" || candidate.kind === "midpoint")
     return (
       sources.find(
         (r) =>

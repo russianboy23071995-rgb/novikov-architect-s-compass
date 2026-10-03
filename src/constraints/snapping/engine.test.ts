@@ -226,7 +226,7 @@ test("wall corners are derived references and carry edge direction", () => {
     height: 2.8,
   });
   const refs = projectSnapReferences(p);
-  assert.equal(refs.length, 6);
+  assert.equal(refs.length, 7);
   const corner = refs.find((r) => r.feature === "corner-1-1")!;
   assert.deepEqual(corner.point, { x: 3, y: 0.18 });
   assert.equal(
@@ -416,7 +416,7 @@ test("model adapter and snapped line workflow preserve exact point, ID, undo and
     readProjectFile(serializeProject(redoProject(undoProject(committed)).present)),
     committed.present,
   );
-  assert.equal(projectSnapReferences(committed.present).length, 8);
+  assert.equal(projectSnapReferences(committed.present).length, 10);
   assert.equal(serializeProject(project), before);
 });
 

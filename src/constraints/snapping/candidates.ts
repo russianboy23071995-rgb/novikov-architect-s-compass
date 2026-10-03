@@ -39,7 +39,7 @@ function ranked(candidate: SnapCandidate, sources: readonly ActiveSource[]): Ran
   };
 }
 
-function endpointCandidates(
+function pointCandidates(
   cursor: Point2,
   context: SnapContext,
   constrain: Constrain,
@@ -54,13 +54,13 @@ function endpointCandidates(
     result.push(
       ranked(
         {
-          kind: "endpoint",
+          kind: source.kind ?? "endpoint",
           worldPoint: { ...source.point },
           distanceOnScreen: d,
           sourceEntityId: source.entityId,
           sourceFeature: source.feature,
           ...(source.dependencies ? { sourceReferences: [source] } : {}),
-          priority: 0,
+          priority: source.kind === "midpoint" ? 0.25 : 0,
         },
         [{ source, activation: activations.get(key(source)) ?? -1 }],
       ),
@@ -171,7 +171,7 @@ export function collectSnapCandidates(
   };
   const active = activeSources(context);
   return [
-    ...endpointCandidates(cursor, context, constrain, active),
+    ...pointCandidates(cursor, context, constrain, active),
     ...guideCandidates(cursor, context, constrain, active),
     ...intersectionCandidates(cursor, context, constrain, active),
   ];

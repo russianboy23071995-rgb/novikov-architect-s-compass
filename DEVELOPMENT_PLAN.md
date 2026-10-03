@@ -60,11 +60,25 @@ Prüfung: 168 Tests bestanden (vier neue Fälle: alle acht Winkelgrenzen mit Hin
 
 Praktische Abnahme: Wandachsende 0,6 s aktivieren; Zeiger zunächst ungefähr 20° oberhalb der Horizontalen halten und langsam über 22,5° bewegen. Kleine Bewegungen sollen die Führung nicht umschalten; erst ungefähr 28° bewirken den Wechsel. Zurück unter ungefähr 17° wechseln. Beim freien Bewegen einer Linie mit externem Wandpunkt wiederholen und per Escape abbrechen. Der 5°-Startwert kann nach Bedienfeedback angepasst werden; keine behauptete vollständige Hysterese für sämtliche Fangarten.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsamer Mittelpunktfang
+### Abschluss: gemeinsamer Mittelpunktfang — 03.10.2026
 
-An vorhandenen geraden Linien-/Polyliniensegmenten und Wandachsen echte Mittelpunkte ableiten. Zuerst Adapter, Quellenidentität und Ausschlüsse im Direct Edit prüfen, anschließend eine eindeutig markierte Mittelpunkt-Fangart mit expliziter Priorität ergänzen. Mittelpunkte sollen denselben Bildschirmradius und die bestehende 600-ms-Hover-Aktivierung/-Lösung nutzen und ebenfalls Hilfslinien erzeugen. Geometrie/Constraints bleiben gemeinsam; kein eigener Mittelpunktcode je Werkzeug und keine Modelländerung durch Hover.
+Aufbauend auf PR #33 / 3fad40a; PR #33 bleibt offen und wurde durch den Fortsetzungsauftrag nicht automatisch zusammengeführt. Neue Implementierung auf feat/shared-midpoint-snap.
 
-Abnahme: horizontale/schräge und kurze Segmente, Wandachse, Polylinie, mehrere Zoomstufen, konkurrierende Endpunkte, verschobene/gelöschte Quellen und eigene Editquellen testen. Linie am Mittelpunkt zeichnen und per Direct Edit dorthin bewegen, Vorschau/Commit/Undo/Redo/JSON vergleichen; Tests/TypeScript/Lint/Build und Browserabnahme. Echte Segmentschnittpunkte, weitere Winkelfamilien, Layer und 3D bleiben separate spätere Aufträge.
+Geometrie berechnet den Mittelpunkt eines endlichen, nicht entarteten Segments. Der gemeinsame Projektadapter liefert einen Mittelpunkt je Wandachse und je vorhandenem Linien-/Polyliniensegment; keine künstliche Schließkante und keine zusätzlichen Wandflächen-Mittelpunkte. Identität: stabile Element-ID plus Segmentbezeichnung und Endpunkt-Snapshot. Damit wird auch eine Drehung oder Streckung um denselben Mittelpunkt als veränderte Quelle erkannt. Diese Referenzen sind abgeleitet und nicht im Projekt gespeichert.
+
+SnapCandidate kennt jetzt midpoint. Explizite Rangregel: Endpunkt (0) vor Mittelpunkt (0,25) vor Hilflinienschnitt (0,5), dann einzelne Führungen und Raster. Innerhalb einer Fangart gelten weiterhin Abstand, Aktivierungsreihenfolge und deterministische Quellenordnung. Der Radius bleibt 10 CSS-Pixel; bei sehr kurzen Segmenten kann ein naher Endpunkt den Mittelpunkt überstimmen, bis ausreichend hineingezoomt wird. Shift/Ortho und explizite Editachsen behalten Vorrang.
+
+Die gemeinsame Hover-Verwaltung aktiviert und löst Mittelpunkte nach derselben eingestellten Zeit, standardmäßig 600 ms. Sie liefern Verlängerungs-, Lot- und mausgeführte 45°-Hilfslinien samt Schnittpunkten. BimPlan kennzeichnet Mittelpunktfang mit ungefülltem Dreieck und Beschriftung; der aktive Referenzring bleibt erhalten. Keine zusätzliche Werkzeuglogik, Modellaktion, Dateimigration oder AI-Modelllogik. Eigene Elemente und Fensterhosts bleiben im Direct Edit ausgeschlossen.
+
+Nachweise: 173 Tests bestanden, darunter fünf neue Gruppen in constraints/snapping/midpoint.test.ts (Geometrie/ungültige Werte, Adapter/Segmentidentität, Zoom/Priorität/Constraints, Hover/Guides, Zeichnen/Direct Edit/Undo/JSON). Zwei bestehende Adapter-Anzahltests wurden um die zusätzlichen Mittelpunkte aktualisiert. TypeScript und Build erfolgreich; ESLint null Fehler/sechs bekannte React-Refresh-Warnungen. Browser: Marker ohne Zeichenwerkzeug, 600-ms-Aktivierung, Lotführung und erneutes Lösen; Linie beginnt exakt bei (1,5; 0) an der 3-m-Wand, Undo/Redo geprüft. Freie Linienbewegung fängt externen Wandmittelpunkt und lässt sich rückgängig machen/wiederherstellen. Screenshot: outputs/midpoint-hover.png.
+
+Abnahme: Snap aktivieren und die Mitte der Wandachse oder eines Liniensegments anfahren. Dreieck/Mittelpunkt prüfen; 0,6 s verweilen, dann seitlich wegbewegen und Hilfslinie beobachten. Zurückkehren und 0,6 s warten löst die Referenz. Eine Linie dort beginnen oder eine andere Linie über das On-Demand-Menü dorthin bewegen; Undo/Redo prüfen. Bei kurzen Linien hineinzoomen, falls der Endpunkt Vorrang erhält.
+
+### Genau ein ausführbarer Folgeauftrag: echte Segmentschnittpunkte
+
+Schnittpunkte vorhandener gerader Linien-/Polyliniensegmente und Wandachsen in der gemeinsamen Geometrie-/Snap-Schicht ergänzen. Vorab Quellenadapter und Direct-Edit-Ausschlüsse für beide beteiligten Elemente prüfen. Nur eindeutige Punkte innerhalb beider Segmentgrenzen anbieten; parallele, kollineare oder überlappende Strecken nicht als beliebigen Einzelpunkt interpretieren. Von temporären Hilflinienschnitten unterscheidbar bleiben, beide Quellen exakt invalidieren und die bestehenden Hover-/Fangregeln nutzen.
+
+Abnahme: horizontale/schräge Kreuzungen, Endberührung, außerhalb liegende Geradenschnitte, Überlappung, kurze/entartete Segmente und mehrere Zoomstufen. Eigene/ausgeschlossene Quellen und verschobene Elemente berücksichtigen. Zeichnen und Direct Edit am Schnittpunkt mit Vorschau/Commit/Undo/Redo/JSON, Browserabnahme sowie Tests/TypeScript/Lint/Build. Keine neuen Bauteile, Layer oder 3D-Arbeitsebene in diesem Auftrag.
 
 ## Historische Fortschrittsnachweise
 

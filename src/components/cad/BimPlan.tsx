@@ -154,6 +154,7 @@ export function BimPlan({
     });
   const resolvedHover = hover ? (editSession ? resolveEdit(hover) : resolveDrawing(hover)) : null;
   const snapLabels = {
+    midpoint: "Mittelpunkt",
     endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
       ? "Hilfspunkt"
       : "Endpunkt",
@@ -642,15 +643,25 @@ export function BimPlan({
             pointerEvents="none"
             aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
           >
-            <circle
-              cx={resolvedHover.point.x}
-              cy={-resolvedHover.point.y}
-              r={4 / camera.pixelsPerMetre}
-              fill="none"
-              stroke="#0284c7"
-              strokeWidth={2}
-              vectorEffect="non-scaling-stroke"
-            />
+            {resolvedHover.candidate.kind === "midpoint" ? (
+              <path
+                d={`M ${resolvedHover.point.x} ${-resolvedHover.point.y - 5 / camera.pixelsPerMetre} l ${5 / camera.pixelsPerMetre} ${9 / camera.pixelsPerMetre} h ${-10 / camera.pixelsPerMetre} Z`}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : (
+              <circle
+                cx={resolvedHover.point.x}
+                cy={-resolvedHover.point.y}
+                r={4 / camera.pixelsPerMetre}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             <text
               x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
               y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
