@@ -378,12 +378,7 @@ export function BimPlan({
             setEditPointer({ session: editSession, point });
             try {
               const target = resolveEdit(point, event.shiftKey).point;
-              if (
-                editSession.action === "move" &&
-                editSession.target.kind !== "window" &&
-                onEditDirection
-              )
-                onEditDirection(editSession, target);
+              if (onEditDirection) onEditDirection(editSession, target);
               else onEditCommit?.(editSession, target);
             } catch {
               /* Invalid preview stays editable. */

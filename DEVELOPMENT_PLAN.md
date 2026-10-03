@@ -463,6 +463,23 @@ Nachweise: 212 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 
 
 Abnahme: Wandwerkzeug → Startpunkt → Maus nach rechts → Tab → 3,00 → Enter. Eigenschaften und 3D prüfen, Undo/Redo. Neuer Startpunkt, 0 beziehungsweise 566° testen und Escape/Abbrechen. Keine Wandketten, Anschlüsse oder Änderungen der Wandachsenlage.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Hilfseingabe für Polyliniensegmente
+### Zurückgestellt zugunsten Architekturkorrektur: gemeinsame Hilfseingabe für Polyliniensegmente
 
 Die vorhandene Eingabe nach jedem gesetzten Polylinienpunkt an dessen Ursprung binden. Enter fügt den numerisch bestimmten nächsten Punkt hinzu; Doppelklick schließt weiterhin die gesamte Polylinie ab. Die bisherige eine History-Aktion pro abgeschlossener Polylinie erhalten. Tab, Parallelführung, Abbruch, ungültige/Null-Segmente, Abschluss und Undo/Redo prüfen. Keine Wandketten-Undo-Entscheidung vorwegnehmen und keine zweite Eingabe-/Fanglogik.
+
+
+### Abschluss: gemeinsame Interaktionssteuerung statt weiterer UI-Sonderfälle — 03.10.2026
+
+Nutzerfreigabe betrifft den begrenzten Architekturumbau. Keine Freigabe für Merge der offenen PRs #41–44 abgeleitet. Umsetzung auf refactor/shared-tool-interaction, aufbauend auf PR #44.
+
+Bestandsaufnahme: Fang-/Hilfslinienservices, Polarberechnung und PrecisionInput waren bereits gemeinsam. CadWorkspace enthielt aber die Auswahl der numerischen Bearbeitungsart, Fehlerbehandlung und getrennte Zeichen-/Edit-Bestätigung direkt. BimPlan entschied zusätzlich anhand der konkreten EditAction über Richtungswahl.
+
+Jetzt: ToolInteraction als typisierter Application-Vertrag, zwei kleine Adapter für vorhandene Edit-/Zeichenaktionen, eine gemeinsame Auswertung und erneute Validierung vor Commit. useToolInteraction steuert Entwurf, Vorschau, Mauswahl, Richtungsfixierung, Bestätigen und Abbrechen; InteractionInput bindet einmalig die vorhandene Tab-/Feldbedienung an. Der Workspace reicht Ursprung/Kontext und Modellaktionen weiter. Escape/Werkzeug-/Auswahlwechsel verwenden denselben Reset für Bearbeitung und Zeichenpunkte. Der Viewport trifft keine EditAction-spezifische Richtungswahl mehr. Kein neuer Fangalgorithmus und keine parallele Modellhaltung.
+
+Nachweise: 215 Tests bestanden, TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bestehende Warnungen. Neue Vertragsprüfungen führen Wand-/Linienerzeugung sowie alle sechs Editaktionen an Wand/Linie über denselben Ablauf; Vorschau ohne History, ein Commit und Undo, ungültige/stale Bestätigung ohne Mutation. Browserregression: Wand 3 m per Tab, Elementbewegung mit Klick-Richtung 90° und 0,5 m, Punktbewegung 90°/1 m, ungültiges Strecken -2 m mit Fenster gesperrt, Escape, neue Linie mit leeren Feldern, 2-m-Linie und Undo/Redo.
+
+Einschränkung: Punktaufnahme und einige bestehende Viewport-/History-Anbindungen sind noch Legacy-Koordination; der gesamte zukünftige CAD-Werkzeugrahmen ist damit nicht fertig. Die aktuell angeschlossene Eingabe-/Bestätigungslogik läuft jedoch über einen gemeinsamen Vertrag. 3D-Arbeitsebenen, neue Bauteile und Polylinienpräzision wurden nicht zusätzlich implementiert.
+
+### Genau ein ausführbarer Folgeauftrag: Polylinie als Vertragsnachweis
+
+Die vorhandene Polylinie als weiteren Verbraucher des gemeinsamen Interaktionsvertrags anbinden. Pro Segment den aktuellen Punkt als Ursprung bereitstellen; dieselbe Eingabe, Tab, Fangengine und Bestätigung unverändert nutzen. Doppelklick beendet weiterhin die Polylinie, ein Undo-Schritt für den Gesamtabschluss bleibt erhalten. Prüfen, dass dazu keine zusätzliche Feld-/Tab-/Hover-Steuerung oder neue Werkzeugabfrage im gemeinsamen Interaktionskern nötig ist. Neue Punktaufnahme, Abschluss und Abbruch mit numerischen Segmenten praktisch testen; keine Wandkettenentscheidung vorwegnehmen.
