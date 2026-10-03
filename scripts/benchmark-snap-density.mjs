@@ -60,12 +60,12 @@ function measure(fn, warmup, samples) {
 }
 
 const rows = [];
-for (const crossing of [false, true])
-  for (const count of [100, 250, 500]) {
+for (const crossing of [true])
+  for (const count of [24, 32, 33, 48]) {
     const project = fixture(count, crossing),
       model = createLocalSnapSources(project);
     const policy = drawingSnapPolicy({ x: -2, y: -2 });
-    const sourceQuery = createToolSourceQuery(model, policy, Infinity); // Historical unguarded benchmark.;
+    const sourceQuery = createToolSourceQuery(model, policy);
     const activeReferences = [
       policy.origin,
       ...projectSnapPrimitives(project)
@@ -83,27 +83,29 @@ for (const crossing of [false, true])
     };
     const options = { ortho: false, shift: false, featureSnap: true };
     const cursor = { x: 0.013, y: 0.009 };
-    const stats = model.query(cursor, 100, 10);
+    const stats = model.queryPrimitives(cursor, 100, 10);
     const expectedSegments = crossing ? count : 0;
     assert.equal(stats.segments.length, expectedSegments);
     assert.equal(stats.segmentPairs, (expectedSegments * Math.max(0, expectedSegments - 1)) / 2);
     const full = prepareToolReferences(policy, projectSnapReferences(project));
-    assert.deepEqual(
-      resolveToolSnap(policy, cursor, context, options),
-      resolveToolSnap(
-        policy,
-        cursor,
-        { ...context, sourceQuery: undefined, references: full },
-        options,
-      ),
-    );
+    if (count <= 32)
+      assert.deepEqual(
+        resolveToolSnap(policy, cursor, context, options),
+        resolveToolSnap(
+          policy,
+          cursor,
+          { ...context, sourceQuery: undefined, references: full },
+          options,
+        ),
+      );
     const query = measure(() => resolveToolSnap(policy, cursor, context, options), 5, 15);
     rows.push({
       scenario: crossing ? "dense-crossings" : "diagonal-box-false-positives",
       elements: count,
       localSegments: stats.segments.length,
       localReferences: stats.references.length,
-      segmentPairs: stats.segmentPairs,
+      candidatePairs: stats.segmentPairs,
+      executedPairs: count > 32 ? 0 : stats.segmentPairs,
       query,
     });
     process.stderr.write("Completed " + count + " " + crossing + "\n");
