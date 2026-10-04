@@ -9,6 +9,7 @@ import type {
 } from "../../geometry/projections/orthographic.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { Box2 } from "../../geometry/spatial/box-index.ts";
+import { createAffineScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export type ProjectionResult<T> =
   { status: "ok"; value: T } | { status: "invalid-input" | "ill-conditioned" | "precision-loss" };
@@ -146,12 +147,19 @@ export function createHorizontalWorkplaneProjection(
       maxY: Math.max(...points.map((p) => p.y)) + padding,
     });
   };
+  let metric;
+  try {
+    metric = createAffineScreenMetric(raw[0]!, raw[1]!, raw[2]!, raw[3]!);
+  } catch {
+    return { status: "ill-conditioned" as const };
+  }
   return {
     status: "ok" as const,
     value: Object.freeze({
       frame,
       height,
       condition,
+      metric,
       toScreen: (point: Point2) => css(point.x, point.y),
       toPlane,
       queryBounds,

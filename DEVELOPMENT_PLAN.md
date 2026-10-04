@@ -773,6 +773,20 @@ Praktische Abnahme: 3D öffnen, im Navigator Fenster wählen, sichtbare Wandflä
 
 Grenzen: nur orthographische horizontale Ebene; numerische Fehlerschätzung ist keine formale Intervallgarantie und umfasst keine Eingabegeräte-/Quellfehler. Noch keine anisotrope Fangmetrik im gemeinsamen Resolver. Gesten, verdeckte Ziele und sichtbare Ebenenanker bleiben offen.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame affine Bildschirmmetrik für lokale Vorauswahl
+### Abgeschlossener Folgeauftrag: gemeinsame affine Bildschirmmetrik für lokale Vorauswahl
 
 Einen fachunabhängigen numerischen Vertrag für affine Ebenen-zu-CSS-Metrik ergänzen und die gemeinsame lokale Punkt-/Segment-Vorauswahl darauf umstellen: konservative Suchbox, exakter CSS-Punkt-/Segmentabstand vor Dichtezählung und Paarbildung. Den heutigen isotropen 2D-Faktor über denselben Vertrag mit unveränderten Ergebnissen abbilden. Schrägansicht, lange Segmente, Fangradiusgrenzen und Dichtezählung testen; bestehende 2D-Tests und Build erhalten. Noch keine 3D-UI aktivieren: Ranking, Führungen, Hover und manuelles Picking benötigen danach denselben Vertrag, bevor ein vollständiger 3D-Fangpfad freigeschaltet wird. Keine per-Werkzeug-Metrik und keine globale Schnittpunktliste.
+
+### Abschluss: affine Metrik für lokale Vorauswahl — 04.10.2026
+
+PR #65 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (5778f4c), main unverändert. Neuer Zweig feat/local-affine-screen-metric. Ein gemeinsamer Geometry-Baustein liefert CSS-Punktabstände, inverse Suchboxen und Segmentnähe. Der horizontale Arbeitsebenenadapter stellt die Metrik aus denselben Projektionsableitungen bereit. Die gemeinsame lokale Quellensuche verwendet sie bereits für alle bisherigen numerischen 2D-Aufrufe über einen isotropen Adapter; keine Werkzeugkopien.
+
+Segmentverfeinerung erfolgt vor Dichtezählung und Schnittpunktpaaren. Lang gezogene Segmente bleiben vollständig, tolerierte Kontakte bleiben erhalten. Gewollte Änderung: Segmente ausschließlich in den Ecken des bisherigen Suchquadrats, aber außerhalb des CSS-Fangkreises, zählen nicht mehr unnötig zur Dichte. Exakte akzeptierte Punktziele behalten den bisherigen Radius und ihre Reihenfolge. Keine Änderung von Modell, Undo, Dateien oder IFC.
+
+269 Tests bestanden; TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Fünf neue Tests mit Parameterreihen: affine Abfragen gegen vollständige Enumeration einschließlich Rotation/Scherung/Verkürzung, 40 falsche Dichtekandidaten ausgeschlossen bei zwei erhaltenen langen Kreuzungslinien, numerische API/Adapter-Parität und ungültige Metriken, echte CSS-Abstände aus der Arbeitsebene und inverse Suchgrenzen, Tangenten/Toleranzkontakte/Kreisecken. Bestehende lokale Differenzialtests einschließlich großer Offsets und entfernter aktiver Referenzen bestanden. Kein neuer manueller Browsernachweis in diesem Paket; keine Leistungszusage für beliebige Projektdichten.
+
+Praktische Abnahme: zwei lange Linien kreuzen lassen, Linienwerkzeug nahe der Kreuzung bewegen, Schnittpunkt und End-/Mittelpunkte prüfen. Eine Referenz 0,6 Sekunden aktivieren, zoomen und weiterzeichnen; aktive Hilfslinie soll erhalten bleiben. Bei dichter Geometrie dürfen nur nahe Linien zur Dichteschranke beitragen. Schrägansicht ist mathematisch getestet, aber noch keine aktivierte 3D-Fangbedienung.
+
+### Genau ein ausführbarer Folgeauftrag: Punkt-Ranking im gemeinsamen Fangresolver
+
+Den bestehenden Resolver-Vertrag für Punktkandidaten um dieselbe ScreenMetric erweitern und End-/Mittel-/Schnittpunkt-Abstände samt Rangfolge darüber bewerten. Gemeinsamen Application-Quellenadapter konsistent mit derselben Metrik versorgen; bisherige numerische 2D-Aufrufe kompatibel erhalten. Affine Kandidaten am Radiusrand, konkurrierende Ziele, deterministische Gleichstände und 2D-Differenzialfälle testen. Noch keine 3D-UI aktivieren und fachliche Modellwinkel/-längen nicht in Bildschirmwinkel umdeuten. Führung/Segment-Hover/manuelles Picking bleiben ausdrücklich weitere Anschlussstellen vor Freischaltung des vollständigen 3D-Pfads.
