@@ -1,5 +1,26 @@
 # NOVIKOV CAD Architecture Contract
 
+## Layer persistence boundary — decision 2026-10-04
+
+The bounded [layer contract](docs/LAYER_CONTRACT.md) records the inspected schema-1
+baseline, retained requirements and the next migration task. No layer code exists
+at this decision point. Organisation layers have stable project-wide IDs; element
+membership must resolve to those IDs and must not be inferred from mutable names.
+Layer membership does not change AssemblyLayer, annotation scope, host relations,
+height binding or editing capabilities. File migration validates old input before
+conversion and the current model afterwards; runtime validation must not silently
+migrate snapshots during editing. Preserve existing element IDs and geometry.
+
+Future layer visibility is one application-level eligibility policy consumed by
+rendering, picking and local snapping, including active reference dependencies.
+Apply it before local intersection enumeration. Model-only geometry caches remain
+derived; view-specific eligibility must not leak between panes or outlive a changed
+visibility context. Visibility never changes wall openings or the export scope.
+Global versus per-view visibility, persistence of that preference and host/window
+display combinations remain open product decisions. The schema-2 field proposal
+and window default in the linked contract are implementation proposals, not claims
+of user decisions or implemented behaviour.
+
 ## Incremental integration: 3D wall movement on z=0 — 2026-10-04
 
 The first 3D move adapter uses the existing EditSession, editInteraction, ToolSnapPolicy, previewEdit and editingReducer. It introduces no model mutation, numeric-input lifecycle, dwell timer or geometry solver of its own. useSolidInference connects the horizontal workplane to the same resolveToolSnap/useHoverReference path for passive preview and movement; SolidSnapPreview only presents the result.
