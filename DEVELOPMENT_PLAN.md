@@ -939,6 +939,24 @@ Abnahme: 3D und Snap einschalten. Untere sichtbare Wandecke anklicken → Elemen
 
 Grenzen: nur ganze Waende auf z=0; weitere Bearbeitungen nutzen vorerst den bisherigen 2D-Weg. Stationaere Wanddreiecke bilden die Sichtbarkeitsbasis, keine weiteren Materialtypen. Sehr weit ausserhalb des festgehaltenen Kamerarahmens liegende Vorschau kann abgeschnitten werden; der Modellwert wird dadurch nicht beschnitten. Keine umfassende Mehrviewport-/Grossprojekt-/WebGL-Verlust-Abnahme. AI/Text/Voice behalten die gemeinsame validierte Application-Grenze; neue Sprachformulierungen fuer diesen Bedienablauf sind nicht enthalten.
 
-### Genau ein ausfuehrbarer Folgeauftrag: 3D-Wandecke ueber gemeinsamen Direct Edit bewegen
+### Abgeschlossener Folgeauftrag: 3D-Wandecke ueber gemeinsamen Direct Edit bewegen
 
 Den sichtbaren Fusspunkt mit stabilem Wand-Endindex an den bestehenden Punkt-frei-bewegen-Adapter anbinden. Vorhandene Eckoffset-/Wandstaerken-Regel, gepinnten Ursprung, useSolidInference und ToolInteraction wiederverwenden. Wandlaenge aendern, Fenstergrenzen validieren, Vorschau/Abbruch/Uebernahme/Undo/Redo und 2D/3D/Datei/IFC-Konsistenz pruefen. Ganze Wandverschiebung unveraendert bewahren. Nur vorhandene gerade Waende und z=0; keine freie Z-Bewegung, neuen Bauteile oder getrennte Fang-/Eingabelogik.
+
+### Abschluss: einzelne Wandecke in 3D bewegen — 04.10.2026
+
+PR #77 nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (2fd9582). Zweig feat/3d-wall-corner-edit; main unveraendert. Der vorhandene Quellenadapter ordnet Achsenden und alle vier unteren Wandecken dem stabilen Endindex 0/1 zu. Mittelpunkte und unbekannte Features bleiben ohne Punktgriff. Ein Klick uebergibt Wand-ID, Endindex und tatsaechlichen Eckpunkt an dieselbe Auswahl wie im Grundriss; das vorhandene On-Demand-Menue bietet dadurch Punkt frei bewegen an.
+
+Der bestehende 3D-Bearbeitungspfad laesst jetzt auch die gemeinsame point-Aktion zu. Rasterengine, Hover-Timer, Eingabefenster, Tab und Eckkorrektur bleiben unveraendert; keine neue Modellmutation. Das gegenueberliegende Achsende bleibt fest, Staerke und Hoehe bleiben erhalten. Im Punktmodus bestaetigt ein Zielklick direkt; Element frei bewegen behaelt seinen bisherigen Richtungsklick. Fenster behalten ihren relativen Wandbezug; unzulaessige Verkuerzungen werden abgewiesen.
+
+310 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Tests mit Parameterreihen: Quellen-/Endindex-Zuordnung bei gedrehten und umgekehrten Waenden inklusive Mittelpunkten; alle vier Eckpunkte durch gemeinsame polare Eingabe, gepinnten Ursprung, reale 3D-Eckgeometrie, unveraendertes Gegenende, JSON/IFC sowie Undo/Redo; unmoegliche/ungueltige Ziele und Fensterkonflikt mit anschliessender Korrektur im selben Vorgang. Vorhandene Ganzwandverschiebungstests bestehen.
+
+Browser mit vorhandenem Nutzerprojekt: sichtbare Ecke zeigt Wand/Punkt 2 und Punkt frei bewegen. Sofortiger Ursprungsring, Hilfslinie bei Mausbewegung, Tab zur Laenge und Winkel sowie Abbruch geprueft. 180 Grad/2,5m wuerde die 3m-Wand fuer das Fenster zu kurz machen: vorhandene Modellfehlermeldung erscheint, Uebernehmen ist deaktiviert. Anschliessend auf 0 Grad/1m korrigiert und per Zielklick uebernommen. Grundrisswand ist 4m lang; Fensterbreite 1,2m und lokale Position 1,4m bestaetigen mittigen Sitz. Undo zeigt 3m, Redo 4m; 3D-Screenshot outputs/3d-wall-corner.jpg ausserhalb des Repositories. Testaenderung zum Schluss per Undo zurueckgenommen, Nutzerprojekt erhalten.
+
+Abnahme: sichtbare untere Wandecke anklicken → Punkt frei bewegen → Maus bewegen oder Tab fuer Laenge/Winkel → Ziel anklicken oder Uebernehmen. Ganze Wand bleibt ueber Element frei bewegen verfuegbar. Bei einer waagerechten 3m-Wand am Endpunkt 0 Grad/1m testen; Fenster bleibt mittig. Undo/Redo und Abbruch pruefen.
+
+Grenzen: nur vorhandene gerade Waende auf z=0. Flucht-/Achsenaktionen wechseln vorerst weiterhin in den bisherigen 2D-Ablauf. Keine obere Wandecke, freie Z-Bewegung oder Wandanschlussregeln. Modellfehlermeldungen sind teilweise weiterhin Englisch. Kein neuer Grossprojekt-, Mehrviewport- oder WebGL-Kontextverlust-Nachweis. Neue AI-/Sprachformulierungen sind nicht Teil dieses Adapterschritts; dieselben validierten Modellaktionen bleiben die gemeinsame Grenze.
+
+### Genau ein ausfuehrbarer Folgeauftrag: bestehende Flucht-/Achsenaktionen in 3D anschliessen
+
+Die vorhandenen Wandaktionen Punkt in Flucht strecken sowie Element entlang Achse/X/Y auf z=0 ueber denselben 3D-Bearbeitungspfad freischalten. Einen expliziten Fusspunkt als Ursprung verlangen, Punktaktionen an gueltigen Endindex binden. Gemeinsame editDirection-/fixedAxis-/ToolInteraction-Regeln und Eingabefenster unveraendert wiederverwenden. Richtungsprioritaet gegen Shift/Ortho, Abbruch, ungueltige Verkuerzung, Pan versus Bestaetigung und einen Undo-Schritt pruefen. Keine zweite Achsenberechnung, keine neue Bauteilart und keine freie Z-Bewegung.

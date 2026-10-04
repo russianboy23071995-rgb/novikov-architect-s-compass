@@ -15,7 +15,13 @@ import { editInteraction } from "../../application/tools/adapters.ts";
 import { evaluateInteraction, confirmInteraction } from "../../application/tools/interaction.ts";
 import { resolveToolSnap } from "../../application/tools/snapping.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
-import { exportIfc } from "../../lib/bim/ifc.ts";
+import { exportIfc, stepReal } from "../../lib/bim/ifc.ts";
+import { updateWall, wallLength } from "../../lib/bim/model.ts";
+import {
+  projectSnapPrimitives,
+  wallEndpointIndex,
+} from "../../application/snapping/project-references.ts";
+import { createWallPointCandidates } from "./wall-point-candidates.ts";
 
 const project = createExampleProject();
 const projection = createProjectionState(
@@ -34,6 +40,163 @@ const start = () =>
     anchor: { x: 3, y: -0.18 },
   });
 const noop = () => {};
+
+test("3D picking maps axis ends and all physical corners to their stable wall endpoint", () => {
+  for (const angle of [0, 0.7, Math.PI, -1.9]) {
+    const rotated = updateWall(project, "wall-1", {
+      end: { x: 3 * Math.cos(angle), y: 3 * Math.sin(angle) },
+    });
+    const view = createProjectionState(
+      createProjectionFrame(buildSolid(rotated)),
+      { ...initialCamera, yaw: angle, pitch: 0.6 },
+      projection.viewport,
+      projection.backbuffer,
+    )!;
+    const plane = view.workplane(0);
+    assert.equal(plane.status, "ok");
+    if (plane.status !== "ok") throw Error("plane");
+    const adapter = createWallPointCandidates(rotated, view);
+    for (const ref of projectSnapPrimitives(rotated).references) {
+      const screen = plane.value.toScreen(ref.point);
+      if (screen.status !== "ok") throw Error("screen");
+      const found = adapter.query(rotated, view, screen.value, 10);
+      if (found.status !== "ok") throw Error("query");
+      const candidate = found.candidates.find((c) => c.sourceFeature === ref.feature)!;
+      assert.ok(candidate);
+      const expected =
+        ref.kind === "midpoint"
+          ? null
+          : ref.feature.startsWith("corner-0-") || ref.feature === "axis-start"
+            ? 0
+            : 1;
+      assert.equal(candidate.pointIndex, expected);
+      assert.deepEqual(candidate.worldPoint, ref.point);
+      assert.equal(candidate.sourceEntityId, "wall-1");
+    }
+  }
+  for (const feature of ["corner-2-1", "vertex-0", "intersection", "", "corner-0-1:stale"])
+    assert.equal(wallEndpointIndex(feature), null);
+});
+
+test("picked 3D corners reuse polar input, offset geometry, pinned inference and one transaction", async () => {
+  for (const feature of ["corner-0--1", "corner-0-1", "corner-1--1", "corner-1-1"]) {
+    let state = createEditingState(project);
+    const base = state.history.present;
+    const ref = projectSnapPrimitives(base).references.find((r) => r.feature === feature)!;
+    const index = wallEndpointIndex(ref.feature)!;
+    state = editingReducer(state, {
+      type: "begin",
+      target: selection,
+      action: "point",
+      index,
+      anchor: ref.point,
+    });
+    const session = state.session!;
+    const tool = editInteraction(
+      session,
+      base,
+      selection,
+      (point) => {
+        state = editingReducer(state, { type: "confirm", session, selection, point });
+      },
+      noop,
+    );
+    assert.equal(tool.click, "confirm");
+    const context = createWallPreviewContext(
+      base,
+      projection,
+      true,
+      0,
+      tool.snapping,
+      selection.id,
+    ).context;
+    assert.deepEqual(context.pinnedReferences, [tool.snapping.origin]);
+    assert.deepEqual(tool.snapping.origin.point, ref.point);
+    assert.ok(
+      context.sourceQuery!(ref.point, 1, 1000, [tool.snapping.origin]).every(
+        (r) => r.entityId !== "wall-1",
+      ),
+    );
+    // A sideways target exercises the corner-offset rule, not just an axial length change.
+    const value = evaluateInteraction(tool, "90", "1", null).value!;
+    assert.ok(value);
+    const preview = previewEdit(session, base, selection, value.point);
+    assert.equal(state.history.present, base);
+    assert.equal(state.history.past.length, 0);
+    assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+    confirmInteraction(tool, value.point);
+    assert.equal(state.history.past.length, 1);
+    const edited = state.history.present;
+    assert.deepEqual(edited, preview);
+    const wall = edited.storey.walls[0]!;
+    assert.deepEqual(
+      index === 0 ? wall.end : wall.start,
+      index === 0 ? base.storey.walls[0]!.end : base.storey.walls[0]!.start,
+    );
+    assert.equal(wall.thickness, 0.36);
+    assert.equal(wall.height, 2.8);
+    assert.deepEqual(edited.storey.windows, base.storey.windows);
+    const physicalCorner = projectSnapPrimitives(edited).references.find(
+      (r) => r.feature === feature,
+    )!.point;
+    assert.ok(
+      Math.hypot(physicalCorner.x - value.point.x, physicalCorner.y - value.point.y) < 1e-9,
+    );
+    assert.ok(
+      buildSolid(edited).faces.some((f) =>
+        f.vertices.some(
+          (v) => v[2] === 0 && Math.hypot(v[0] - value.point.x, v[1] - value.point.y) < 1e-9,
+        ),
+      ),
+    );
+    assert.deepEqual(deserializeProject(serializeProject(edited)), edited);
+    const ifc = await exportIfc(edited, new Date("2026-10-04T12:00:00Z"));
+    assert.ok(ifc.includes(`IFCLENGTHMEASURE(${stepReal(wallLength(wall))})`));
+    assert.ok(
+      ifc.includes(`IFCCARTESIANPOINT((${stepReal(wall.start.x)},${stepReal(wall.start.y)},0.))`),
+    );
+    assert.ok(ifc.includes("IFCRATIOMEASURE(0.5)"));
+    const undone = editingReducer(state, { type: "undo" });
+    assert.deepEqual(undone.history.present, base);
+    assert.deepEqual(editingReducer(undone, { type: "redo" }).history.present, edited);
+  }
+});
+
+test("3D corner rejects impossible targets and too-short walls without losing the active edit", () => {
+  let state = createEditingState(project);
+  const base = state.history.present;
+  state = editingReducer(state, {
+    type: "begin",
+    target: selection,
+    action: "point",
+    index: 1,
+    anchor: { x: 3, y: -0.18 },
+  });
+  const session = state.session!;
+  const tool = editInteraction(
+    session,
+    base,
+    selection,
+    (point) => {
+      state = editingReducer(state, { type: "confirm", session, selection, point });
+    },
+    noop,
+  );
+  for (const point of [
+    { x: 0, y: 0 },
+    { x: 0.5, y: -0.18 },
+    { x: Infinity, y: 0 },
+  ]) {
+    assert.throws(() => confirmInteraction(tool, point));
+    assert.equal(state.history.present, base);
+    assert.equal(state.session, session);
+    assert.equal(state.history.past.length, 0);
+  }
+  assert.equal(evaluateInteraction(tool, "180", "2.5", null).value, null);
+  confirmInteraction(tool, { x: 4, y: -0.18 });
+  assert.equal(wallLength(state.history.present.storey.walls[0]!), 4);
+  assert.equal(state.history.past.length, 1);
+});
 
 test("3D footpoint movement pins a common origin and excludes the moving wall from targets", () => {
   const state = start(),

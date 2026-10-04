@@ -154,7 +154,8 @@ export function BimSolidView({
   );
   const moving =
     editSession?.target.kind === "wall" &&
-    editSession.action === "move" &&
+    (editSession.action === "move" ||
+      (editSession.action === "point" && (editSession.index === 0 || editSession.index === 1))) &&
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
@@ -284,7 +285,9 @@ export function BimSolidView({
         tabIndex={0}
         title={
           moving
-            ? "Wand auf z=0 bewegen. Klick fixiert Richtung; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
+            ? editSession.action === "point"
+              ? "Wandecke auf z=0 bewegen. Klick übernimmt Ziel; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
+              : "Wand auf z=0 bewegen. Klick fixiert Richtung; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
             : "Sichtbaren Wandfußpunkt als Bewegungsursprung anklicken. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
         }
         className={`relative z-10 h-full w-full touch-none ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
@@ -437,7 +440,7 @@ export function BimSolidView({
               onSelect(
                 { kind: "wall", id: anchor.sourceEntityId },
                 { x: event.clientX, y: event.clientY },
-                undefined,
+                anchor.pointIndex ?? undefined,
                 anchor.worldPoint,
               );
               if (canvas.hasPointerCapture(event.pointerId))

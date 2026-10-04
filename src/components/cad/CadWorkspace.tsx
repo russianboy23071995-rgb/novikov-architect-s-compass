@@ -170,11 +170,16 @@ export function CadWorkspace() {
     setDemandOpen(false);
     if (!selection) return;
     const inSolid = mode === "3D" && activeViewport === 0;
-    const solidMove = inSolid && selection.kind === "wall" && action === "move";
+    const solidMove =
+      inSolid && selection.kind === "wall" && (action === "move" || action === "point");
     if (solidMove && !pickedPoint.anchor) {
       showNotice(
         "Zuerst einen sichtbaren Wandfußpunkt anklicken, dann Element frei bewegen wählen.",
       );
+      return;
+    }
+    if (solidMove && action === "point" && pickedPoint.index !== 0 && pickedPoint.index !== 1) {
+      showNotice("Zuerst einen sichtbaren Wandendpunkt oder eine untere Wandecke anklicken.");
       return;
     }
     dispatchEditing({
