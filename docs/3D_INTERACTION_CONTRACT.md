@@ -43,3 +43,9 @@ Abnahme: ungerade CSS-Größen, DPR 1/1,25/2, Hoch-/Querformat, Pan/Zoom/Orbit u
 ## Spätere Freischaltungskriterien
 
 Vor 3D-Bearbeitung zusätzlich prüfen: sichtbare Quellen und Overlay, expliziter Ursprung, gemeinsame Quellenfilter, 600-ms-Erwerb/Lösen, Referenzerhalt bei Kameraänderung, ungültige Inverse, Modal-/Escape-Priorität und eine bestätigte Aktion mit Undo/Redo. Diese Liste ist kein paralleler Folgeauftrag; die Reihenfolge wird nach dem Projektionspaket neu abgeglichen.
+
+## Preview decision accepted and implemented (2026-10-04)
+
+After PR #74 the user explicitly instructed continuation of the presented proposal. For the first read-only preview: Snap enables visible z=0 wall footpoints even without a drawing tool; immediate hollow silver-grey ring, shared 600ms acquire/toggle; hidden targets are not acquired; navigation suspends acquisition and retains references; existing wall click and left-drag orbit/pan remain. Escape clears the preview. This resolves those preview decisions only. Future model-movement gestures and a hidden-reference mode are not implicitly approved.
+
+Projection state, visibility and local candidates described above are implemented by PRs #72-74. The first visible preview now uses them and the shared hover state machine. No full 3D editing or generated guide-intersection acquisition is claimed.

@@ -143,6 +143,7 @@ export function CadViewport({
             selection={model.selection}
             camera={camera}
             onCamera={setCamera}
+            snap={model.snap}
             pan={pan}
             onSelect={model.onSelect}
           />

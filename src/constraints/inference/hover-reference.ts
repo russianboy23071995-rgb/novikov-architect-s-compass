@@ -6,6 +6,8 @@ export const HOVER_REFERENCE_CAPACITY = 4;
 const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
 export type HoverContext = {
+  /** View adapter may restrict acquisition without changing shared timing/state rules. */
+  acceptReference?: (reference: SnapReference) => boolean;
   metric?: ScreenMetric;
   sessionKey?: object | undefined;
   suspended?: boolean;
