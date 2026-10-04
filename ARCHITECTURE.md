@@ -18,6 +18,14 @@ The existing stretch/axis/x/y actions now enter the same 3D workplane interactio
 
 ## Status
 
+### Implemented: 3D wall foot-edge references — 2026-10-04
+
+The existing primitive spatial index now lives in constraints/snapping/local-source-index.ts, accepting geometric references and segments. application/snapping/local-sources.ts retains its compatible project adapter and WeakMap cache. The query, proximity refinement and intersection completion algorithms are unchanged; there is no separate 3D spatial search.
+
+rendering/viewport/wall-foot-sources.ts derives actual z=0 boundary edges through the existing mesh selection-edge extractor, keyed by wall ID and segment geometry and cached per immutable project. Floor-reaching openings therefore leave gaps. Coplanar face partitions can split a continuous foot edge into several reference segments; merging these is not claimed here. wall-preview-context combines locally indexed edges with its existing point sources and remote active dependencies. It excludes the moving wall and requires both the closest hovered point and segment midpoint to be visible. This conservative policy can reject a partly visible segment whose midpoint is hidden. Hidden portions cannot activate it through remote dependencies, which are offered as point-only sources outside an eligible local segment query.
+
+The shared hoveredSegment/useHoverReference path owns 600ms activation, revisit removal, capacity and navigation suspension. Parallel directions and guides use the existing shared functions. SolidSnapPreview adds a dashed hover edge and stronger active edge behind wall pixels; the existing midpoint ring remains. No model or history action is introduced. Current scope is lower material edges on z=0, not wall axes, top edges or arbitrary 3D workplanes. Future adapters supply sources to these same services.
+
 ### Implemented: independent preview depth extent — 2026-10-04
 
 ProjectionFrame now optionally carries depthRadius independently of its image-fitting radius. Omitting it preserves the original projection. The geometry helper projectionDepthRadius encloses displayed bounds around the fixed frame centre in camera-independent power-of-two tiers; XY scale and pan are untouched. Both orthographic depth and horizontal depth derivatives use the same extent. ProjectionState validates and snapshots it, and the workplane adapter preserves it.

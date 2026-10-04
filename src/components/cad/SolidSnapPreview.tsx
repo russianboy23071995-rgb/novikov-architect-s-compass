@@ -28,6 +28,14 @@ export function SolidSnapPreview({
   };
   const visible = (r: SnapReference) => context.acceptReference!(r);
   const markers = hover.references.filter(visible);
+  const trackedEdges = markers.filter((r) => r.segment);
+  const edgeMarkers =
+    inference.edge &&
+    !trackedEdges.some(
+      (r) => r.feature === inference.edge!.feature && r.entityId === inference.edge!.entityId,
+    )
+      ? [...trackedEdges, inference.edge]
+      : trackedEdges;
   const span = Math.hypot(width, height);
   return (
     <>
@@ -38,6 +46,24 @@ export function SolidSnapPreview({
         width={width}
         height={height}
       >
+        {edgeMarkers.map((r) => {
+          const a = screen(r.segment!.start),
+            b = screen(r.segment!.end);
+          const active = trackedEdges.includes(r);
+          return a && b ? (
+            <line
+              key={`${r.entityId}:${r.feature}`}
+              data-edge-reference={active ? "active" : "hover"}
+              x1={a.x}
+              y1={a.y}
+              x2={b.x}
+              y2={b.y}
+              stroke="#aeb5bd"
+              strokeWidth={active ? 3 : 2}
+              strokeDasharray={active ? undefined : "4 3"}
+            />
+          ) : null;
+        })}
         {hover.guideDirections.map((g, i) => {
           const a = screen(g.source.point),
             b = screen({
