@@ -42,8 +42,10 @@ import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { LineStyleFields } from "./LineControls";
 import { LayerProperties } from "./LayerProperties";
+import { LayerManager } from "./LayerManager";
 
 export function CadWorkspace() {
+  const [layersOpen, setLayersOpen] = useState(false);
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
   const [layout, setLayout] = useState<ViewportLayout>("single");
@@ -418,6 +420,12 @@ export function CadWorkspace() {
         </Dialog>
         {!fullscreen && (
           <TopToolbar
+            onLayers={() => {
+              cancelInteraction();
+              setDemandOpen(false);
+              setModelError("");
+              setLayersOpen(true);
+            }}
             tool={tool}
             mode={mode}
             layout={layout}
@@ -454,6 +462,13 @@ export function CadWorkspace() {
             canRedo={history.future.length > 0}
           />
         )}
+        <LayerManager
+          project={project}
+          open={layersOpen}
+          onOpenChange={setLayersOpen}
+          error={editing.error}
+          onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
+        />
         {demandOpen &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selection && !editSession)) && (

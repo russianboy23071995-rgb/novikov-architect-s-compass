@@ -3,7 +3,8 @@ import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-e
 import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
-import { commitLayerAssignment } from "../layers/actions.ts";
+import { commitLayerAssignment, commitLayerManagement } from "../layers/actions.ts";
+import type { ManageLayerRequest } from "../layers/actions.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
@@ -28,6 +29,7 @@ export type EditingEvent =
   | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
   | { type: "cancel" }
   | { type: "project"; project: Project }
+  | { type: "manage-layer"; base: Project; request: ManageLayerRequest }
   | {
       type: "assign-layer";
       base: Project;
@@ -59,6 +61,12 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "manage-layer":
+        return {
+          history: commitLayerManagement(state.history, event.base, event.request),
+          session: null,
+          error: "",
+        };
       case "assign-layer": {
         if (
           event.selection?.id !== event.target.id ||

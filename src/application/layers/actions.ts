@@ -10,6 +10,48 @@ export type AssignLayerRequest = {
   layerId: string;
 };
 
+export type ManageLayerRequest =
+  { kind: "create"; id: string; name: string } | { kind: "rename"; id: string; name: string };
+
+/** Display-name uniqueness is an action rule, not a new file-schema restriction. */
+export function previewLayerManagement(
+  base: Project,
+  current: Project,
+  request: ManageLayerRequest,
+): Project {
+  if (base !== current) throw new Error("Das Projekt wurde geändert. Vorgang erneut beginnen.");
+  const project = validateProject(current);
+  const name = request.name.trim();
+  if (!name) throw new Error("Bitte einen Ebenennamen eingeben.");
+  const existing = project.layers.find((layer) => layer.id === request.id);
+  if (request.kind === "rename" && !existing) throw new Error("Die Ebene existiert nicht mehr.");
+  if (request.kind === "rename" && existing!.name === name) return current;
+  const comparable = (value: string) => value.normalize("NFC").toLowerCase();
+  if (
+    project.layers.some(
+      (layer) =>
+        (request.kind === "create" || layer.id !== request.id) &&
+        comparable(layer.name) === comparable(name),
+    )
+  )
+    throw new Error("Dieser Ebenenname ist bereits vergeben.");
+  return validateProject({
+    ...project,
+    layers:
+      request.kind === "create"
+        ? [...project.layers, { id: request.id, name }]
+        : project.layers.map((layer) => (layer.id === request.id ? { ...layer, name } : layer)),
+  });
+}
+
+export function commitLayerManagement(
+  history: ProjectHistory,
+  base: Project,
+  request: ManageLayerRequest,
+): ProjectHistory {
+  return commitProject(history, previewLayerManagement(base, history.present, request));
+}
+
 export function previewLayerAssignment(
   base: Project,
   current: Project,

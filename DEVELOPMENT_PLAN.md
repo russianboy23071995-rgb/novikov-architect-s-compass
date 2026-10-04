@@ -1077,6 +1077,20 @@ PR #86 nach Freigabe normal integriert (a57e41c); main unveraendert. feat/layer-
 
 Abnahme: Element anklicken → oben Ebene waehlen → Undo/Redo (danach Element wieder auswaehlen). Bei Fenster/Linie wiederholen. Eine Bewegung beginnen und Ebene wechseln: nur die Zuordnung wird gespeichert, keine Vorschauverschiebung. Ebenen wirken weiterhin nur organisatorisch; Ausblenden ist noch nicht implementiert.
 
-### Genau ein ausfuehrbarer Folgeauftrag: Ebenen erstellen und umbenennen
+### Abgeschlossener Folgeauftrag: Ebenen erstellen und umbenennen
 
 Organisation > Ebenen als kleines Glass-Flow-Fenster mit vorhandenen Ebenen und Aktionen Erstellen/Umbenennen ergaenzen. Validierte gemeinsame Application-Aktionen mit stabilen IDs, Projektkontext und bestehender History; keine Umbenennung durch Ersetzen von IDs. Namen trimmen und leere Namen ablehnen; Umgang mit doppelten Anzeigenamen vor Umsetzung explizit festlegen, ohne bestehende gueltige Dateien unbemerkt umzuschreiben. Erzeugungsvorgaben bleiben ID-basiert. Neuanlage/Umbenennung, Undo/Redo, Dateirundlauf und sofortige Aktualisierung des gemeinsamen Ebenenselektors pruefen. Keine Ebenenloeschung oder Sichtbarkeitsregeln in diesem Schritt; keine neue Bauteilart.
+
+### Ergebnis: Ebenenverwaltung — 04.10.2026
+
+PR #88 normal integriert (64ff290), main unveraendert. feat/layer-manager ergaenzt Organisation > Ebenen mit Erstellen und Umbenennen. Das Menue ist auch ausserhalb der nur fuer grosse Bildschirme eingeblendeten allgemeinen Menueleiste angeordnet. LayerManager liefert Namen, stabile ID und gepinnten Projektstand an dieselbe Application-Grenze. previewLayerManagement/commitLayerManagement validieren und verwenden die vorhandene History; der Controller beendet geometrische Vorschauen ohne deren Uebernahme. Oeffnen beendet laufende Zeichen-/Bearbeitungsgesten. Das Fenster meldet unmittelbar uebernommene Aktionen ausdruecklich; Schliessen verwirft nur noch nicht abgesendete Eingaben.
+
+Festgelegte technische Namensregel: aussen trimmen, leere Namen ablehnen, neue Namenskollisionen nach NFC-Normalisierung und Kleinschreibung ablehnen. Bereits gespeicherte doppelte Namen bleiben gueltig; unveraendertes Umbenennen bleibt ein No-op. In der Verwaltung werden nur bei identischen Anzeigenamen IDs zur Unterscheidung ergaenzt. Keine Schemaaenderung, Loeschung, Sichtbarkeit oder stillschweigende Neuzuordnung. Auch Standardebenen sind umbenennbar, ihre Erzeugungsvorgaben bleiben an IDs gebunden.
+
+Nachweis: 341 Tests bestanden, TypeScript und Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Neue Tests pruefen Erstellen/Zuordnen/Umbenennen samt Undo/Redo/Dateirundlauf, No-op, erhaltene Defaults, invalide Namen und IDs, stale Kontext und bestehende gleichnamige Ebenen. Browser in separatem Tab: Bestand erstellt, ' außenwand ' abgelehnt, Bestand zu Altbau umbenannt, Wand zugeordnet, belegte Ebene zu Bestandswand umbenannt. Selektor zeigt neuen Namen bei identischer ID; Undo liefert Altbau, Redo Bestandswand. Glass-Flow-Fenster visuell geprueft. Dateidialog und macOS nicht neu abgenommen.
+
+Abnahme: Organisation > Ebenen → eigene Ebene erstellen → schliessen → Wand auswaehlen und zuordnen → zugeordnete Ebene umbenennen. Im Selektor muss der neue Name erscheinen; Undo/Redo bleibt nutzbar. Noch keine Sichtbarkeitswirkung erwarten.
+
+### Genau ein ausfuehrbarer Folgeauftrag: gemeinsame Ebenensichtbarkeit konkretisieren
+
+Vor der Implementierung den gemeinsamen Filtervertrag fuer Darstellung, Picking und lokale Fangquellen einschliesslich aktiver Referenzen ausarbeiten. Nutzerentscheidung zu globaler versus ansichtsbezogener Sichtbarkeit einholen; Persistenz und Host-/Fensterdarstellung ausdruecklich klaeren. Laufende Bearbeitung/aktuelle Auswahl bei Ausblenden sowie Export unabhaengig von Bildschirmfiltern festlegen. Bestehende ModelView-/ViewportBinding-Zielarchitektur beachten, keinen zweiten Modellzustand und keine werkzeugspezifischen Filter bauen. Genau einen begrenzten Implementierungsauftrag mit Abnahmekriterien ableiten; bis zur Entscheidung keine versteckte Default-Sichtbarkeitsregel implementieren. Ebenenloeschung bleibt spaeterer Auftrag.
