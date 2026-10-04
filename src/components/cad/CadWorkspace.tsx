@@ -169,6 +169,14 @@ export function CadWorkspace() {
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection) return;
+    const inSolid = mode === "3D" && activeViewport === 0;
+    const solidMove = inSolid && selection.kind === "wall" && action === "move";
+    if (solidMove && !pickedPoint.anchor) {
+      showNotice(
+        "Zuerst einen sichtbaren Wandfußpunkt anklicken, dann Element frei bewegen wählen.",
+      );
+      return;
+    }
     dispatchEditing({
       type: "begin",
       target: selection,
@@ -176,7 +184,7 @@ export function CadWorkspace() {
       index: pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
-    if (layout === "single") setMode("2D");
+    if (layout === "single" && !solidMove) setMode("2D");
     setModelError("");
   };
 

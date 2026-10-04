@@ -1,4 +1,3 @@
-import { previewEdit } from "@/application/direct-edit/controller";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -74,6 +73,7 @@ export function CadViewport({
   const [planPan, setPlanPan] = useState(false);
   useEffect(() => {
     setPlanPan(false);
+    setPan(false);
   }, [model.drawing, model.editSession]);
   useEffect(() => {
     const element = surface.current;
@@ -125,21 +125,8 @@ export function CadViewport({
       <div ref={surface} className="absolute inset-x-4 bottom-24 top-16">
         {is3D ? (
           <BimSolidView
-            project={(() => {
-              if (model.editSession && model.numericTarget) {
-                try {
-                  return previewEdit(
-                    model.editSession,
-                    model.project,
-                    model.selection,
-                    model.numericTarget,
-                  );
-                } catch {
-                  /* Invalid drafts show the committed model. */
-                }
-              }
-              return model.project;
-            })()}
+            {...model}
+            interactive={active}
             selection={model.selection}
             camera={camera}
             onCamera={setCamera}
@@ -169,9 +156,13 @@ export function CadViewport({
               ? "Click start point · Snap 0.10 m"
               : "Click start point · Snap off"
           : mode === "3D" && index === 0
-            ? pan
-              ? "Click wall to select · Drag to pan · Wheel to zoom"
-              : "Click wall to select · Drag to orbit · Wheel to zoom"
+            ? model.editSession
+              ? pan
+                ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
+                : "Wand auf z=0 bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
+              : pan
+                ? "Click wall to select · Drag to pan · Wheel to zoom"
+                : "Click wall to select · Drag to orbit · Wheel to zoom"
             : planPan
               ? "Ziehen verschiebt die Ansicht · Mausrad zoomt · Esc beendet Pan"
               : "Mausrad: Zoom · Mittlere Maustaste: Ansicht verschieben · Maße in Metern"}
@@ -186,11 +177,15 @@ export function CadViewport({
         <MiniControl
           label="Pan"
           pressed={is3D ? pan : planPan}
-          onClick={() => (is3D ? setPan(true) : setPlanPan((value) => !value))}
+          onClick={() => (is3D ? setPan((value) => !value) : setPlanPan((value) => !value))}
         >
           <Hand />
         </MiniControl>
-        <MiniControl label="Orbit" disabled={!is3D} onClick={() => setPan(false)}>
+        <MiniControl
+          label="Orbit"
+          disabled={!is3D || !!model.editSession}
+          onClick={() => setPan(false)}
+        >
           <Orbit />
         </MiniControl>
         <MiniControl label="Zoom in" onClick={() => zoom(1.2)}>

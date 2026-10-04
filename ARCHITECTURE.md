@@ -1,5 +1,13 @@
 # NOVIKOV CAD Architecture Contract
 
+## Incremental integration: 3D wall movement on z=0 — 2026-10-04
+
+The first 3D move adapter uses the existing EditSession, editInteraction, ToolSnapPolicy, previewEdit and editingReducer. It introduces no model mutation, numeric-input lifecycle, dwell timer or geometry solver of its own. useSolidInference connects the horizontal workplane to the same resolveToolSnap/useHoverReference path for passive preview and movement; SolidSnapPreview only presents the result.
+
+An explicitly clicked visible wall footpoint supplies the model-space origin and stable wall ID. A wall-surface or Navigator selection without that point cannot silently start a 3D move at a guessed origin. Other actions retain the existing 2D entry. The shared policy immediately pins the origin and excludes moving geometry from targets. During a move, visibility tests use stationary wall material; moving preview material is not an occluder of its target sources. This is a bounded interaction rule, not general X-ray selection.
+
+Projection fitting uses the committed model, never the moving preview. Camera/viewport changes rebuild the shared projection independently of geometry preview. A left click during movement fixes direction or confirms through ToolInteraction; it cannot also navigate. Explicit Pan suspends pointer targeting and never confirms on release. Wheel and keyboard camera navigation remain available. Invalid/stale projection blocks pointer targeting. Model/selection validation and one-step Undo/Redo remain application responsibilities. Free Z movement, point deformation and further element adapters are not included in this step.
+
 ## Status
 
 This document is the architectural source of truth for NOVIKOV CAD.
