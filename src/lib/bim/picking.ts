@@ -1,4 +1,7 @@
-import { projectPoint } from "./geometry.ts";
+import {
+  createProjectionFrame,
+  projectOrthographic,
+} from "../../geometry/projections/orthographic.ts";
 import type { Camera, Solid, Vec3 } from "./geometry.ts";
 
 /** Match the rendered triangles and depth test; holes contain no pickable faces. */
@@ -11,10 +14,11 @@ export function pickWall(
 ): string | null {
   if (![aspect, x, y].every(Number.isFinite) || aspect <= 0 || Math.abs(x) > 1 || Math.abs(y) > 1)
     return null;
+  const frame = createProjectionFrame(solid);
   let depth = Infinity;
   let selected: string | null = null;
   for (const face of solid.faces) {
-    const points = face.vertices.map((point) => projectPoint(point, solid, camera, aspect));
+    const points = face.vertices.map((point) => projectOrthographic(point, frame, camera, aspect));
     for (const indices of [
       [0, 1, 2],
       [0, 2, 3],

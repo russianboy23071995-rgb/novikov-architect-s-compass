@@ -1,3 +1,8 @@
+import {
+  createProjectionFrame,
+  projectOrthographic,
+} from "../../geometry/projections/orthographic.ts";
+import type { OrthographicCamera } from "../../geometry/projections/orthographic.ts";
 import { validateProject, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
 
@@ -137,26 +142,10 @@ export function buildSolid(input: Project): Solid {
   return solid;
 }
 
-export type Camera = { yaw: number; pitch: number; zoom: number; panX: number; panY: number };
+export type Camera = OrthographicCamera;
 export const initialCamera: Camera = { yaw: -0.45, pitch: 0.3, zoom: 1, panX: 0, panY: 0 };
 
 /** Orthographic camera in a Z-up world; depth is preserved for WebGL occlusion. */
 export function projectPoint(point: Vec3, solid: Solid, camera: Camera, aspect: number): Vec3 {
-  const x = point[0] - (solid.min[0] + solid.max[0]) / 2;
-  const y = point[1] - (solid.min[1] + solid.max[1]) / 2;
-  const z = point[2] - (solid.min[2] + solid.max[2]) / 2;
-  const c = Math.cos(camera.yaw),
-    s = Math.sin(camera.yaw),
-    cp = Math.cos(camera.pitch),
-    sp = Math.sin(camera.pitch);
-  const radius = Math.max(
-    0.1,
-    Math.hypot(...(solid.max.map((v, i) => v - solid.min[i]!) as Vec3)) / 2,
-  );
-  const scale = (0.85 * camera.zoom) / radius;
-  return [
-    ((c * x + s * y) * scale) / Math.max(1, aspect) + camera.panX,
-    (-s * sp * x + c * sp * y + cp * z) * scale * Math.min(1, aspect) + camera.panY,
-    -(s * cp * x - c * cp * y + sp * z) / (radius * 2),
-  ];
+  return projectOrthographic(point, createProjectionFrame(solid), camera, aspect);
 }

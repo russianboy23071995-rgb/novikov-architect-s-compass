@@ -757,6 +757,22 @@ Wichtiger Befund: schräge Ebenenansicht hat richtungsabhängige Pixelmaßstäbe
 
 Nur drei Markdown-Dateien geändert. Keine neuen Laufzeitfunktionen; keine neue Build-/Browserabnahme behauptet. Die 257 Tests/Build-/TypeScript-Ergebnisse aus PR #63 gelten für unveränderten Anwendungscode. Dokumentpfade, Änderungsumfang und Whitespace geprüft. Offene Bedienfragen: Ebene/Anker sichtbar machen, verdeckte Referenzen, Kamera-Gesten und Schwelle schlechter Konditionierung. Diese blockieren die reine mathematische Grundlage nicht.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame orthographische Projektion und Ebeneninverse
+### Abgeschlossener Folgeauftrag: gemeinsame orthographische Projektion und Ebeneninverse
 
 Vorhandene Vorwärtsprojektion in einen numerischen Baustein unter geometry/projections überführen und projectPoint kompatibel darauf delegieren. Rendering-Adapter für horizontale Ebene mit gemeinsamem Rahmen/Aspect/CSS-Rechteck, Inverse und strukturiertem Ungültigkeitsstatus ergänzen. Numerische Fehlerschranke begründen. Vorwärts-/Roundtrip-/Suchgrenzen-/Singularitätsfälle gemäß Abschnitt 8 von docs/3D_WORKPLANE_PLAN.md sowie bestehende Geometrie/Picking, gesamte Tests, TypeScript, Build und Lint prüfen; unveränderte 3D-Darstellung/Auswahl praktisch abnehmen. Kein Fang-Overlay, keine neue 3D-Modellaktion und keine separate Fangengine.
+
+### Abschluss: gemeinsame orthographische Projektion — 04.10.2026
+
+PR #63 normal nach feat/reference-segment-selection übernommen (1a8378e), PR #64 normal nach fix/reference-selection-lifecycle (3fe01da). main unverändert. Neuer Entwicklungszweig feat/orthographic-workplane-projection auf diesem Gesamtstand.
+
+Gemeinsamer Projektionsbaustein unter geometry/projections; Renderer, Picking und kompatible projectPoint verwenden dieselbe Formel. Horizontaler Rendering-Adapter bindet unveränderliche Parameter, rechnet Client-CSS-Koordinaten zurück und liefert konservative lokale Suchgrenzen. Ungültige oder numerisch unzuverlässige Ergebnisse werden ausdrücklich abgelehnt. Kein neuer Modellzustand, keine Kopie der Fangengine und noch kein 3D-Fang-Overlay.
+
+264 Tests bestanden (sieben neue Tests mit Parameterreihen): exakte alte Vorwärts-/Tiefenwerte, Roundtrips bei wechselnder Kamera/Zoom/Pan/Aspect/Höhe, CSS-/Backbuffer-Verhältnisse, Singularität/NaN/Überlauf, konservative Suchgrenzen, Snapshot-Isolation und große Weltkoordinaten. TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Browser: Wand mit offener Fensteröffnung sichtbar, Wechsel von Navigator-Fensterauswahl zu Wand durch 3D-Klick korrekt, Kamera-Taste/Zoom bedienbar, Wandselektion beim Wechsel nach 2D erhalten. Keine vollständige 3D-Gestenmatrix behauptet.
+
+Praktische Abnahme: 3D öffnen, im Navigator Fenster wählen, sichtbare Wandfläche anklicken; Werkzeugeigenschaften müssen wall-1 mit 3,00/0,36/2,80 m zeigen. Ansicht drehen/zoomen und nach 2D wechseln; Auswahl und Maße bleiben erhalten. Die Inverse ist zunächst eine getestete Infrastruktur ohne neue Bedienoberfläche.
+
+Grenzen: nur orthographische horizontale Ebene; numerische Fehlerschätzung ist keine formale Intervallgarantie und umfasst keine Eingabegeräte-/Quellfehler. Noch keine anisotrope Fangmetrik im gemeinsamen Resolver. Gesten, verdeckte Ziele und sichtbare Ebenenanker bleiben offen.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame affine Bildschirmmetrik für lokale Vorauswahl
+
+Einen fachunabhängigen numerischen Vertrag für affine Ebenen-zu-CSS-Metrik ergänzen und die gemeinsame lokale Punkt-/Segment-Vorauswahl darauf umstellen: konservative Suchbox, exakter CSS-Punkt-/Segmentabstand vor Dichtezählung und Paarbildung. Den heutigen isotropen 2D-Faktor über denselben Vertrag mit unveränderten Ergebnissen abbilden. Schrägansicht, lange Segmente, Fangradiusgrenzen und Dichtezählung testen; bestehende 2D-Tests und Build erhalten. Noch keine 3D-UI aktivieren: Ranking, Führungen, Hover und manuelles Picking benötigen danach denselben Vertrag, bevor ein vollständiger 3D-Fangpfad freigeschaltet wird. Keine per-Werkzeug-Metrik und keine globale Schnittpunktliste.

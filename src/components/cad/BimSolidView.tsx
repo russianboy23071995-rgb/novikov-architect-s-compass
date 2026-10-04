@@ -1,5 +1,6 @@
+import { createProjectionFrame, projectOrthographic } from "@/geometry/projections/orthographic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildSolid, projectPoint } from "@/lib/bim/geometry";
+import { buildSolid } from "@/lib/bim/geometry";
 import type { Camera, Solid } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
@@ -54,6 +55,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.useProgram(program);
       const data: number[] = [];
+      const frame = createProjectionFrame(solid);
       for (const face of solid.faces) {
         const light =
           0.5 +
@@ -61,7 +63,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
         const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
         for (const index of [0, 1, 2, 0, 2, 3])
           data.push(
-            ...projectPoint(face.vertices[index]!, solid, camera, width / height),
+            ...projectOrthographic(face.vertices[index]!, frame, camera, width / height),
             ...tint.map((v) => v * light),
           );
       }

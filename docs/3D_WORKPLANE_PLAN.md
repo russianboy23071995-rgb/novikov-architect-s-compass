@@ -95,7 +95,7 @@ Heute nutzt die 3D-Navigation Linksziehen und PointerUp zur Wandselektion. Die s
 
 Diese Fragen blockieren das nächste reine Projektionspaket nicht. Sie müssen vor Freischaltung der entsprechenden 3D-Modellbedienung geklärt sein.
 
-## 8. Genau ein ausführbares Umsetzungspaket
+## 8. Abgeschlossenes Umsetzungspaket
 
 **Orthographische Vorwärts-/Rückprojektion für eine horizontale Ebene als gemeinsame, getestete Grundlage.**
 
@@ -106,3 +106,11 @@ Diese Fragen blockieren das nächste reine Projektionspaket nicht. Sie müssen v
 - Noch keine neue 3D-Modellaktion, kein Fang-Overlay und keine Erweiterung aller Fangmetriken in diesem Paket. Der Vorwärtsbaustein wird bereits produktiv vom existierenden Renderer verwendet; die geprüfte Inverse ist die konkrete Grundlage für die spätere gemeinsame Metrik-Anbindung.
 
 Planungsabnahme: Keine Änderung unter `src` oder am Dateiformat; vorhandene 2D-/3D-Abläufe bleiben unverändert. Dokumentation und Pfade prüfen. Die 257 bestandenen Tests beziehen sich auf PR #63, nicht auf neu implementierte 3D-Funktionen.
+
+## 9. Implementierungsnachweis — 04.10.2026
+
+Abschnitt 8 ist umgesetzt: `geometry/projections/orthographic.ts` ist die gemeinsame Vorwärtsrechnung; `rendering/viewport/horizontal-workplane.ts` bindet den horizontalen Adapter. Renderer und Picking erzeugen den Rahmen einmal pro Aufruf. Der Adapter kopiert Kamera/Rechteck und friert seinen Rahmen ein; Vorschauen können ihn nicht nachträglich verändern. Ein späterer Verbraucher muss denselben festgehaltenen Rahmen und den tatsächlichen Renderer-Aspect liefern. Es gibt noch keinen 3D-Interaktionsverbraucher.
+
+Die normalisierte 2x2-Matrix verhindert unnötigen Determinantenüberlauf. Das Verhältnis der Singulärwerte darf höchstens 1e6 sein; seitlicher Blick wird abgelehnt. Pro Rückrechnung wird zusätzlich 32 * Maschinen-Epsilon * (CSS-Größenordnung * Unendlichnorm der Inversen + Welt-Größenordnung) als konservative Rundungsreserve geschätzt. Sie berücksichtigt die Größen der Subtraktionen und die Verstärkung durch die Inverse; Ergebnisse über 1e-6 m werden abgelehnt. Der Sicherheitsfaktor deckt die kurze arithmetische Rechenkette in den getesteten Bereichen ab, ist aber kein formaler Intervallbeweis für beliebige IEEE-754-Eingaben. Gerätegenauigkeit, CSS-Quantisierung und ungenaue Quelldaten sind ausdrücklich nicht enthalten. Diese Grenze ist kein Fangradius und verändert keine Modellvalidierung.
+
+Die vier inversen Ecken des CSS-Suchquadrats bilden dessen affines Parallelogramm. Seine um die Rundungsreserve erweiterte AABB ist nur Kandidaten-Vorauswahl; genaue Abstände müssen anschließend in CSS geprüft werden. Tests decken Randpunkte, negative Koordinaten, verschiedene Kameras, Zoom/Pan, CSS-Backbuffer-Rundung, h=0/h=3,2, Snapshot-Isolation und bewusst abgelehnte Extremwerte ab. 264 Tests/TypeScript/Build erfolgreich, ESLint ohne Fehler (sechs bekannte Warnungen); Browserprüfung der bisherigen Wanddarstellung und Auswahl bestanden. Der einzige aktive Folgeauftrag steht in DEVELOPMENT_PLAN.md.
