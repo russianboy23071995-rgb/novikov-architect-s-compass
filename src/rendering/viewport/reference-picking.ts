@@ -1,3 +1,4 @@
+import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
@@ -30,4 +31,25 @@ export function pickReferenceSegments(
         a.distance - b.distance || referenceKey(a.source).localeCompare(referenceKey(b.source)),
     )
     .map((s) => s.source);
+}
+
+/** Point picking stays local and does not calculate segment intersections. */
+export function pickReferencePoints(
+  references: readonly SnapReference[],
+  point: Point2,
+  scale: number,
+  radius = 10,
+) {
+  return references
+    .filter((r) => r.kind !== "segment-intersection")
+    .map((source) => ({
+      source,
+      distance: Math.hypot(source.point.x - point.x, source.point.y - point.y) * scale,
+    }))
+    .filter((hit) => hit.distance <= radius)
+    .sort(
+      (a, b) =>
+        a.distance - b.distance || referenceKey(a.source).localeCompare(referenceKey(b.source)),
+    )
+    .map((hit) => hit.source);
 }
