@@ -1,4 +1,4 @@
-import type { SnapReference, SnapSourceQuery } from "../snapping/engine.ts";
+import type { SnapReference, SnapSourceQuery, SnapCandidate } from "../snapping/engine.ts";
 import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export const DEFAULT_HOVER_DWELL_MS = 600;
@@ -6,6 +6,7 @@ export const HOVER_REFERENCE_CAPACITY = 4;
 const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
 export type HoverContext = {
+  acceptCandidate?: (candidate: SnapCandidate) => boolean;
   /** View adapter may restrict acquisition without changing shared timing/state rules. */
   acceptReference?: (reference: SnapReference) => boolean;
   metric?: ScreenMetric;

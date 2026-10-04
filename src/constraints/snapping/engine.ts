@@ -50,6 +50,8 @@ export type SnapSourceQuery = (
   metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
+  /** Optional view eligibility for ranked geometry candidates; explicit constraints stay unchanged. */
+  acceptCandidate?: (candidate: SnapCandidate) => boolean;
   /** Shared candidate distances/projection; explicit picking migration remains pending. */
   metric?: ScreenMetric;
   intersectionsPaused?: boolean;
@@ -145,7 +147,9 @@ export function querySnap(
         context.metric,
       ),
     };
-  const candidates = collectSnapCandidates(cursor, context, constrain);
+  const candidates = collectSnapCandidates(cursor, context, constrain).filter(
+    ({ candidate }) => !context.acceptCandidate || context.acceptCandidate(candidate),
+  );
   candidates.sort(compareSnapCandidates);
   const candidate = candidates[0]?.candidate;
   return candidate

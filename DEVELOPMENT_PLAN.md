@@ -908,3 +908,19 @@ Grenzen: nur reale Wand-Fusspunkte auf z=0, keine Bauteilbewegung oder automatis
 ### Genau ein Folgeauftrag: gemeinsame Hilflinienschnittpunkte in der 3D-Vorschau
 
 Erzeugte Schnittpunkte aktiver Hilfslinien auf z=0 ueber die vorhandene gemeinsame Kandidaten-/Inference-Logik fuer Vorschau und 600ms-Erwerb anbinden. Die Eligibility-Regel soll echte Modellquellen und gueltige Konstruktionen unterscheiden, ihre Abhaengigkeiten erhalten und verdeckte/ungueltige Punkte ablehnen. Keine zweite Schnittpunktberechnung, kein Werkzeugwechsel-Code, keine Modellbewegung. Zwei Referenzen, erzeugten Schnittpunkt, erneutes Loesen, Navigationserhalt und Modellinvalidierung automatisch und im Browser pruefen.
+
+### Abschluss: Bodenorientierung und 3D-Hilflinienschnittpunkte - 04.10.2026
+
+PR #75 nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (7053d33). Zweig feat/3d-floor-and-guide-intersections. Zusaetzlicher Nutzerwunsch: leicht sichtbare reine Orientierungsflaeche auf z=0. Diese wird aus erweiterten Wandgrenzen abgeleitet und mit demselben Projektionsstand gezeichnet, unabhaengig vom Snap-Schalter. Sie bleibt ausserhalb von Modell, Auswahl, Fangquellen, Kamerarahmen und IFC.
+
+Gemeinsame querySnap-/Inference-Logik liefert nun auch die Vorschau und den 600ms-Erwerb konstruierter Hilflinienschnittpunkte. Entfernte aktive Urspruenge und ihre unveraenderten Originalquellen werden der lokalen Abfrage zur Validierung beigegeben; keine globale Paarbildung. Verdeckte geometrische Kandidaten werden vor der Rangfolge ausgeschlossen. Erzeugte Punkte behalten flache Quellenabhaengigkeiten und werden bei Modellwechsel ungueltig.
+
+303 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Tests: entfernte Quellen/Schnittpunkt/Erwerb/erneutes Loesen, Kameraerhalt versus geaenderte/fehlende Abhaengigkeiten und Verdeckung, Sichtbarkeitsfilter vor Rangfolge, dekorative z=0-Projektion ohne Modell-/Rahmenaenderung. Browser mit zwei vorhandenen Waenden: Boden sichtbar, zwei Ecken aktiviert, Schnittpunkt als dritte Referenz aktiviert, erneut geloest und wieder aktiviert; Zoom erhaelt drei Referenzen. Vorhandenes Nutzerprojekt nicht ersetzt. Nach Hot-Reload einmal 2D/3D gewechselt, um die WebGL-Ansicht neu aufzubauen. Screenshot outputs/3d-floor-intersections.jpg ausserhalb des Repositories.
+
+Abnahme: In 3D Bodenflaeche ansehen. Snap aktivieren, zwei sichtbare untere Wandecken je 0,6s anhovern. Maus vor die Wand bewegen, bis die Hilflinien kreuzen; ueber dem Schnittpunkt 0,6s verweilen. Dritter Ring erscheint. Verlassen und erneut verweilen loest ihn; Zoom behaelt die Referenzen. Die Bodenflaeche wird weder ausgewaehlt noch exportiert.
+
+Grenzen: weiterhin keine Bauteilbewegung in 3D, keine neuen Bauteiltypen oder Oberpunkte; z=0, maximal vier gemeinsame Referenzen. Sichtbarkeit weiterhin gegen Wanddreiecke, dekorative Boden-/Linien-SVGs liegen hinter Wandpixeln. Kein Grossprojekt-Leistungsnachweis oder vollstaendiger Mehrviewport-Test.
+
+### Genau ein Folgeauftrag: erste 3D-Wandverschiebung auf z=0
+
+Vorhandene Aktion Element frei bewegen fuer eine ausgewaehlte Wand mit explizit gewaehltem sichtbarem Fusspunkt als Ursprung an den gemeinsamen ToolInteraction-/Direct-Edit-Pfad anschliessen. Vorschau, Hilfsreferenzen, Winkel/Laenge und Tab aus den gemeinsamen Bausteinen verwenden; keine eigenen Modellmutationen oder Timer. Projektionsrahmen fuer den Vorgang festhalten. Bestehendes Orbit/Pan nur ausserhalb der aktiven Zielbestaetigung oder ueber expliziten Navigationsmodus; keine Doppelbestaetigung. Einen Vorgang mit Abbruch, validierter Uebernahme, Undo/Redo und konsistenter 2D/3D-Darstellung testen. Keine freie Z-Bewegung oder weiteren Bauteile in diesem Schritt.
