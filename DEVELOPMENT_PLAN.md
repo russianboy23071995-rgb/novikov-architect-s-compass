@@ -1023,10 +1023,22 @@ Abnahme: SNAP einschalten, in 3D ueber einem sichtbaren Abschnitt der unteren Wa
 
 Grenzen: nur z=0-Materialkanten, keine oberen Kanten oder freie Z-Fuehrung. Segmentmittelpunkt muss zusaetzlich zum Hoverpunkt sichtbar sein; teilweise verdeckte Kanten koennen daher konservativ entfallen. Mesh-Unterteilungen an Oeffnungen koennen mehrere kollineare Referenzabschnitte ergeben. Keine allgemeine Sichtbarkeitszerlegung oder Grossprojekt-/Mehr-GPU-Messung. Temporäre Referenzen werden nicht gespeichert oder exportiert.
 
+### Gepruefter Folgeauftrag mit offener manueller Dateidialog-Abnahme: gemeinsamer 2D-/3D-Bearbeitungsablauf
+
+Einen kleinen Grundriss mit zwei unterschiedlich gerichteten Waenden und Fenster durchgaengig pruefen: 3D-Fusskante als Referenz aktivieren, andere Wand mit gepinntem Ursprung parallel bewegen, Tab-Masseingabe, Abbruch und bestaetigte Aenderung, Undo/Redo, 2D-/3D-Abgleich, Projektdatei wieder oeffnen und IFC exportieren. Gefundene Fehler zuerst im gemeinsamen Pfad beheben und einen reproduzierbaren Abnahmenachweis dokumentieren. Keine neue Bauteilart oder weitere 3D-Fangmodi in diesem Auftrag.
+
+### Ergebnis: gemeinsamer Parallelbewegungs-Ablauf — 04.10.2026
+
+PR #82 normal in fix/reference-selection-lifecycle zusammengefuehrt (26ff206). Zweig test/3d-parallel-workflow. Kein neuer Modellfehler nachgewiesen; keine Produktionslogik geaendert. Durchgaengiger Regressionstest verbindet lokale Fusskantenabfrage, 600ms-Aktivierung, schräge Parallelfuehrung, numerische 2,5m-Eingabe, Vorschau/Abbruch, Validierung, einen Undo-Schritt, Redo, JSON-Laden, gleiche Solid-Geometrie und korrekte IFC-Positionen/Elementzahlen. Gesamtsuite 327 Tests, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen.
+
+Browserabnahme in separatem Test-Tab: zweite schräge Wand gezeichnet, Fensterwand an ihrer Kante parallel bewegt, Tab fixiert 342,897271 Grad, 1m eingegeben und uebernommen. Grundrissversatz (0,955779; -0,294086)m entspricht der Richtung; Referenzwand unveraendert. Undo auf Ursprung und Redo auf exakt dieselben SVG-Wandtransformationen bestaetigt. Abbruch und Ansichtswechsel geprueft, Export-Schaltflaechen ausgeloest.
+
+Offen bleibt die manuelle Abnahme von tatsaechlichem Browserdownload und erneutem Oeffnen derselben Datei: die vorhandene Browsersteuerung kann keinen Datei-Upload, native Desktopautomatisierung ist fuer diese App nicht zulaessig. Kein pauschaler Vollabnahme-Status. Dateirundlauf und IFC-Inhalt sind automatisiert nachgewiesen. Konkrete Anleitung und weitere Grenzen stehen in docs/acceptance/2026-10-04-parallel-workflow.md. Bestehende Hover-Unterbrechung bei Tiefenstufenwechsel und Sichtbarkeitsgrenzen nicht als neue Fehler umgedeutet.
+
 ### Zukünftiger Anforderungskatalog: AI im CAD — 04.10.2026
 
 Der Nutzer hat CAD_BIM_2026_AI_Strategie.pdf als Zukunftsvision bereitgestellt. Original: docs/ai/CAD_BIM_2026_AI_Strategie.pdf; für Codex lesbarer Katalog mit AI01–AI35: docs/ai/AI_FUTURE_VISION.md. Enthält Modellabfragen, kontrollierte Änderungen, Qualitätsprüfung, generative Planung und spätere Fachanalysen. Kein AI-Feature in diesem Dokumentationsschritt implementiert. Architekturvertrag und aktueller nächster Auftrag bleiben maßgeblich. Die spätere AI-Reihenfolge lautet Lesen → Prüfen → Ändern → Entwerfen; Einordnung in den Gesamtplan folgt erst mit den erforderlichen Modell-/Werkzeuggrundlagen.
 
-### Genau ein ausfuehrbarer Folgeauftrag: gemeinsamen 2D-/3D-Bearbeitungsablauf abnehmen
+### Genau ein ausfuehrbarer Folgeauftrag: Ebenenvertrag und Dateimigration vorbereiten
 
-Einen kleinen Grundriss mit zwei unterschiedlich gerichteten Waenden und Fenster durchgaengig pruefen: 3D-Fusskante als Referenz aktivieren, andere Wand mit gepinntem Ursprung parallel bewegen, Tab-Masseingabe, Abbruch und bestaetigte Aenderung, Undo/Redo, 2D-/3D-Abgleich, Projektdatei wieder oeffnen und IFC exportieren. Gefundene Fehler zuerst im gemeinsamen Pfad beheben und einen reproduzierbaren Abnahmenachweis dokumentieren. Keine neue Bauteilart oder weitere 3D-Fangmodi in diesem Auftrag.
+Gemaess Entwicklungsleitfaden Etappe 4 die Ebenengrundlage vor weiteren Bauteilen abgleichen: bestehende Anforderungen und N01–N60, Layer versus AssemblyLayer, stabile layerId-Zuordnung fuer Waende/Fenster/Linien, alte Projektdateien und gemeinsame Sichtbarkeits-/Fangfilter. Einen begrenzten technischen Vertrag und genau einen anschliessenden Implementierungsauftrag dokumentieren. Noch offene Produktentscheidungen (insbesondere ansichtsbezogene versus globale Sichtbarkeit) ausdruecklich markieren, keine Nutzerentscheidung erfinden. Keine leeren Klassen oder Schemaaenderung in diesem Planungsauftrag. Die offene manuelle Dateidialog-Abnahme bleibt im Abnahmebericht stehen.
