@@ -1,37 +1,19 @@
-import { useMemo } from "react";
-import type { Project, Point } from "@/lib/bim/model";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
-import { createWallPreviewContext } from "@/rendering/viewport/wall-preview-context";
-import { useHoverReference } from "./useHoverReference";
-import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-
+import type { Point } from "@/lib/bim/model";
 import type { SnapReference } from "@/constraints/snapping/engine";
-import { querySnap } from "@/constraints/snapping/engine";
+import type { useSolidInference } from "./useSolidInference";
 
-/** Presentation adapter only: shared source search, ranking, dwell and guide directions. */
+/** Presentation only; passive hover and edits share the viewport inference adapter. */
 export function SolidSnapPreview({
-  project,
   projection,
-  client,
   enabled,
-  resetKey,
+  inference,
 }: {
-  project: Project;
   projection: ProjectionState | null;
-  client: Point | null;
   enabled: boolean;
-  resetKey: number;
+  inference: ReturnType<typeof useSolidInference>;
 }) {
-  const { plane, context } = useMemo(
-    () => createWallPreviewContext(project, projection, enabled, resetKey),
-    [project, projection, enabled, resetKey],
-  );
-  const cursor = useMemo(() => {
-    if (!client || plane?.status !== "ok") return null;
-    const inverse = plane.value.toPlane(client);
-    return inverse.status === "ok" ? inverse.value.point : null;
-  }, [client, plane]);
-  const hover = useHoverReference(cursor, context, DEFAULT_HOVER_DWELL_MS);
+  const { plane, context, hover, candidate } = inference;
   if (!enabled || !projection) return null;
   if (plane?.status !== "ok")
     return (
@@ -39,18 +21,6 @@ export function SolidSnapPreview({
         Arbeitsebene aus diesem Blick nicht eindeutig
       </p>
     );
-  const resolved = cursor
-    ? querySnap(cursor, {
-        ...context,
-        activeReferences: hover.references.filter((r) => context.acceptReference!(r)),
-        guideDirections: hover.guideDirections,
-        endpointRadiusPx: 10,
-        gridSpacing: null,
-        orthoOrigin: null,
-      }).candidate
-    : null;
-  const candidate =
-    resolved && ["endpoint", "midpoint", "intersection"].includes(resolved.kind) ? resolved : null;
   const { width, height, left, top } = projection.viewport;
   const screen = (point: Point) => {
     const value = plane.value.toScreen(point);

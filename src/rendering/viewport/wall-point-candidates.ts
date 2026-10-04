@@ -10,8 +10,16 @@ import { classifyAnchorVisibility } from "./anchor-visibility.ts";
 /** Read-only adapter for existing wall axis/corner/midpoint sources on z=0.
  * Project snapshots must be immutable, as in the shared application source cache.
  * Recreate after model/projection changes; no hidden-target selection policy here. */
-export function createWallPointCandidates(project: Project, projection: ProjectionState) {
-  const solid = buildSolid(project);
+export function createWallPointCandidates(
+  project: Project,
+  projection: ProjectionState,
+  movingWallId?: string,
+) {
+  const baseSolid = buildSolid(project);
+  // A moving preview is neither a target nor an occluder of its stationary sources.
+  const solid = movingWallId
+    ? { ...baseSolid, faces: baseSolid.faces.filter((f) => f.wallId !== movingWallId) }
+    : baseSolid;
   const sources = getLocalSnapSources(project);
   const walls = new Set(project.storey.walls.map((wall) => wall.id));
   const plane = projection.workplane(0);

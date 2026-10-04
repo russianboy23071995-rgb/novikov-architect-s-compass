@@ -8,6 +8,7 @@ import {
 import { getLocalSnapSources } from "../../application/snapping/local-sources.ts";
 import type { HoverContext } from "../../constraints/inference/hover-reference.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
+import type { ToolSnapPolicy } from "../../application/tools/snapping.ts";
 
 /** Visible-only footpoint policy, separate from the shared acquisition state machine. */
 export function createWallPreviewContext(
@@ -15,8 +16,10 @@ export function createWallPreviewContext(
   projection: ProjectionState | null,
   enabled: boolean,
   resetKey: number,
+  policy: ToolSnapPolicy | null = null,
+  movingWallId?: string,
 ) {
-  const adapter = projection ? createWallPointCandidates(project, projection) : null;
+  const adapter = projection ? createWallPointCandidates(project, projection, movingWallId) : null;
   const plane = projection?.workplane(0);
   const sources = getLocalSnapSources(project);
   const wallIds = new Set(project.storey.walls.map((w) => w.id));
@@ -25,8 +28,14 @@ export function createWallPreviewContext(
     delete result.segment;
     return result;
   };
+  const isOrigin = (r: SnapReference) =>
+    !!policy && referenceKey(r) === referenceKey(policy.origin);
   const original = (r: SnapReference) =>
-    !r.dependencies && wallIds.has(r.entityId) ? sources.lookup(referenceKey(r)) : undefined;
+    isOrigin(r)
+      ? policy!.origin
+      : !r.dependencies && wallIds.has(r.entityId) && (!policy || policy.sources([r]).length > 0)
+        ? sources.lookup(referenceKey(r))
+        : undefined;
   const valid = (r: SnapReference): boolean =>
     r.dependencies
       ? r.entityId === "@construction" &&
@@ -45,7 +54,7 @@ export function createWallPreviewContext(
     const result = adapter.query(project, projection, screen.value, radius);
     if (result.status !== "ok") return [];
     const local = result.candidates
-      .filter((c) => c.visibility === "visible")
+      .filter((c) => c.visibility === "visible" && valid(c.reference))
       .map((c) => pointOnly(c.reference));
     // Remote active origins and flattened dependencies validate construction references.
     // They are not limited to the local cursor radius; view filtering happens before ranking.
@@ -55,12 +64,17 @@ export function createWallPreviewContext(
       .map(original)
       .filter((r) => r !== undefined)
       .map(pointOnly);
-    const base = [...new Map([...local, ...leaves].map((r) => [referenceKey(r), r])).values()];
+    const base = [
+      ...new Map(
+        [...local, ...leaves, ...(policy ? [policy.origin] : [])].map((r) => [referenceKey(r), r]),
+      ).values(),
+    ];
     return withConstructionReferences(base, active.filter(valid));
   };
   const context: HoverContext = {
     enabled,
-    sessionKey: project,
+    sessionKey: policy ?? project,
+    pinnedReferences: policy ? [policy.origin] : [],
     resetKey,
     references: [],
     pixelsPerMetre: 1,
@@ -68,7 +82,8 @@ export function createWallPreviewContext(
     suspended: !projection || plane?.status !== "ok",
     sourceQuery,
     acceptReference: (reference) =>
-      valid(reference) && adapter?.visibilityAt(reference.point) === "visible",
+      isOrigin(reference) ||
+      (valid(reference) && adapter?.visibilityAt(reference.point) === "visible"),
     acceptCandidate: (candidate) => adapter?.visibilityAt(candidate.worldPoint) === "visible",
   };
   return { adapter, plane, context };

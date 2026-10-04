@@ -921,6 +921,24 @@ Abnahme: In 3D Bodenflaeche ansehen. Snap aktivieren, zwei sichtbare untere Wand
 
 Grenzen: weiterhin keine Bauteilbewegung in 3D, keine neuen Bauteiltypen oder Oberpunkte; z=0, maximal vier gemeinsame Referenzen. Sichtbarkeit weiterhin gegen Wanddreiecke, dekorative Boden-/Linien-SVGs liegen hinter Wandpixeln. Kein Grossprojekt-Leistungsnachweis oder vollstaendiger Mehrviewport-Test.
 
-### Genau ein Folgeauftrag: erste 3D-Wandverschiebung auf z=0
+### Abgeschlossener Folgeauftrag: erste 3D-Wandverschiebung auf z=0
 
 Vorhandene Aktion Element frei bewegen fuer eine ausgewaehlte Wand mit explizit gewaehltem sichtbarem Fusspunkt als Ursprung an den gemeinsamen ToolInteraction-/Direct-Edit-Pfad anschliessen. Vorschau, Hilfsreferenzen, Winkel/Laenge und Tab aus den gemeinsamen Bausteinen verwenden; keine eigenen Modellmutationen oder Timer. Projektionsrahmen fuer den Vorgang festhalten. Bestehendes Orbit/Pan nur ausserhalb der aktiven Zielbestaetigung oder ueber expliziten Navigationsmodus; keine Doppelbestaetigung. Einen Vorgang mit Abbruch, validierter Uebernahme, Undo/Redo und konsistenter 2D/3D-Darstellung testen. Keine freie Z-Bewegung oder weiteren Bauteile in diesem Schritt.
+
+### Abschluss: gemeinsame Wandverschiebung in 3D — 04.10.2026
+
+PR #76 nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (cb0194a). Neuer Zweig feat/3d-wall-free-move; main unveraendert. Sichtbaren Wandfusspunkt anklicken, dann Element frei bewegen: z=0-Inverse liefert Mausziele an die vorhandene ToolInteraction. Ursprung sofort gepinnt, gemeinsame Hilfslinien, Shift-Winkel, Winkel/Laenge und Tab; keine zweite Modellaktion, Fangberechnung oder Hover-Zeitsteuerung. Vorherige reine Vorschau als useSolidInference wiederverwendet. Bewegte Wand wird als Ziel und Verdeckung ausgeschlossen, stationaere Wandquellen bleiben geprueft.
+
+Rahmen und Bodenorientierung stammen aus dem unveraenderten Modell und springen waehrend der Vorschau nicht mit. Erst ein bestaetigter Vorgang veraendert Modell/History. Richtungsklick fixiert wie in 2D die Richtung und fokussiert Laenge. Mit Eingabe bestaetigen Zielklick, Enter oder Uebernehmen. Pan ein/aus ist waehrend der Bewegung explizite Navigation; kein gleichzeitiger Modellklick. Orbit per Ziehen bleibt ausserhalb des Vorgangs, Tastaturrotation und Zoom bleiben moeglich. Wandflaeche/Navigator ohne gewaehlten Fusspunkt fuehren zu einem Hinweis statt geratenem Ursprung.
+
+307 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Integrationstests pruefen Ursprung und Selbstfang-Ausschluss, Shift und Snap-off, validierte Vorschau/Abbruch/90-Grad-1m-Bewegung, Fensterbezug, z=0/2,8m-Solidhoehe, JSON-Rundlauf, IFC-Position, Undo/Redo, veralteten Modell-/Auswahlkontext, Navigationsidentitaet, ungueltige Inverse und stationaere Quellen hinter bewegtem Material.
+
+Browser: bestehendes Nutzerprojekt mit drei Waenden und einem Fenster erhalten. Sichtbaren Fusspunkt gewaehlt, Hilfslinie und bewegte Vorschau gesehen; Tab wechselt Laenge/Winkel, 566 Grad deaktiviert Uebernahme. Abbruch geprueft. Pan-Klick und Pan-Ziehen bestaetigen nicht; Zoom behaelt Ursprung. Numerisch 90 Grad/1m uebernommen, Grundrissposition translate(0 -1) gegen Ausgang translate(0 0) verglichen; Undo/Redo korrekt. Zweite Bewegung per Zielklick bestaetigt. Testbewegungen per Undo zurueckgenommen. Screenshot outputs/3d-wall-move.jpg ausserhalb des Repositories.
+
+Abnahme: 3D und Snap einschalten. Untere sichtbare Wandecke anklicken → Element frei bewegen → Maus ins freie Canvas bewegen. Ursprung und Hilfslinie erscheinen, Wand folgt als Vorschau. Tab → Laenge 1 → Tab → Winkel 90 → Uebernehmen. 2D, Undo und Redo pruefen. Zweiten Vorgang mit Esc abbrechen; Pan aktivieren/ziehen/deaktivieren und auf unveraenderten Modellzustand achten.
+
+Grenzen: nur ganze Waende auf z=0; weitere Bearbeitungen nutzen vorerst den bisherigen 2D-Weg. Stationaere Wanddreiecke bilden die Sichtbarkeitsbasis, keine weiteren Materialtypen. Sehr weit ausserhalb des festgehaltenen Kamerarahmens liegende Vorschau kann abgeschnitten werden; der Modellwert wird dadurch nicht beschnitten. Keine umfassende Mehrviewport-/Grossprojekt-/WebGL-Verlust-Abnahme. AI/Text/Voice behalten die gemeinsame validierte Application-Grenze; neue Sprachformulierungen fuer diesen Bedienablauf sind nicht enthalten.
+
+### Genau ein ausfuehrbarer Folgeauftrag: 3D-Wandecke ueber gemeinsamen Direct Edit bewegen
+
+Den sichtbaren Fusspunkt mit stabilem Wand-Endindex an den bestehenden Punkt-frei-bewegen-Adapter anbinden. Vorhandene Eckoffset-/Wandstaerken-Regel, gepinnten Ursprung, useSolidInference und ToolInteraction wiederverwenden. Wandlaenge aendern, Fenstergrenzen validieren, Vorschau/Abbruch/Uebernahme/Undo/Redo und 2D/3D/Datei/IFC-Konsistenz pruefen. Ganze Wandverschiebung unveraendert bewahren. Nur vorhandene gerade Waende und z=0; keine freie Z-Bewegung, neuen Bauteile oder getrennte Fang-/Eingabelogik.
