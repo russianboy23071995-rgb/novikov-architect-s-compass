@@ -989,6 +989,22 @@ Abnahme: In 3D eine Wand anklicken. Aussenkanten und Fensterlaibung zeigen eine 
 
 Grenzen: erster Adapter fuer Waende. Fenster sind weiterhin Oeffnungen, keine eigenen ausgewaehlten 3D-Koerper. Andere Bauteilarten folgen mit ihrer Geometrie; keine leeren Adapter. Kantenableitung verlangt konforme Flaechen mit identischen gemeinsamen Koordinaten; keine allgemeine T-Junction-Reparatur oder Topologieheilung. Sehr nahe Oberflaechen unterhalb des kleinen NDC-Bias koennen visuell zusammenfallen. Keine Grossprojekt- oder Mehr-GPU-Leistungsmessung. Bestehende Projektions-/Clipping-Grenzen bleiben offen.
 
-### Genau ein ausfuehrbarer Folgeauftrag: 3D-Tiefen-Clipping bei Bearbeitung absichern
+### Abgeschlossener Folgeauftrag: 3D-Tiefen-Clipping bei Bearbeitung absichern
 
 Die bekannte Begrenzung des Projektionsrahmens bei weit reichenden Wandvorschauen anhand eines reproduzierbaren Falls pruefen. Falls Geometrie innerhalb des sichtbaren XY-Bereichs wegen des Tiefenbereichs abgeschnitten wird, die gemeinsame ProjectionState-/Projektionsdefinition begrenzt korrigieren: Bildausschnitt waehrend Bearbeitung stabil halten, aber dargestellte Tiefe, Picking und Sichtbarkeit konsistent fuehren. Tests fuer lange/verschobene Wand, Kameradrehung, Vorschau/Abbruch und Auswahl ergaenzen. Keine neue Kameraart, kein automatisches Zoomen waehrend Mausbewegung und keine zweite Projektionslogik. Ergebnis und verbleibende Grenzen dokumentieren.
+
+### Abschluss: unabhaengiger Tiefenbereich fuer 3D-Vorschauen — 04.10.2026
+
+PR #79 (b1cdc93) und #80 (3541754) nach Freigabe normal in fix/reference-selection-lifecycle zusammengefuehrt; PR #80 zuvor von seinem Entwicklungsbasiszweig auf den Integrationszweig umgestellt. main bleibt unveraendert. Neuer Arbeitszweig fix/3d-preview-depth.
+
+Fehler nachgewiesen: bei flacher Kamera liegt eine um 20m verschobene Wand noch innerhalb des XY-Bildes, aber ausserhalb der bisherigen NDC-Tiefe; dadurch verschwinden Darstellung und Picking. ProjectionFrame hat jetzt einen optionalen separaten depthRadius. Ein gemeinsamer Geometriehelfer erweitert nur den Tiefenbereich in Zweierpotenz-Stufen um die dargestellten Grenzen. XY-Massstab, Bildzentrum und Pan bleiben gleich. Projektion, Ableitungen, Workplane, Picking, Sichtbarkeit und Auswahlkontur verwenden denselben Rahmen. Die gemeinsame BimSolidView-Projektion umfasst Ausgangsmodell und Vorschau; kein zweiter Solver oder Kamerapfad, keine Modellmutation.
+
+322 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Tests pruefen den konkreten 20m-Fehler inklusive Picking/Sichtbarkeit, lange 60m-Vorschau bei verschiedenen Kamerawinkeln, unveraenderte XY-/inverse Koordinaten, Referenzsession und Abbruch sowie validierte immutable Tiefenwerte und stabile Stufen. Browser: aktuelles Nutzerprojekt mit einer 3,66585m-Wand und Fenster erhalten. Nach flacher Kamerastellung Element auf Y-Achse mit 20m als Vorschau getestet: Wand, Oeffnung und Umrandung bleiben vollstaendig sichtbar, Bildrahmen bleibt ruhig. Abgebrochen, keine Testbewegung uebernommen, Kamera zurueckgesetzt. Screenshot outputs/3d-preview-depth.jpg ausserhalb des Repositories.
+
+Abnahme: Ansicht flach drehen, sichtbaren Wandfusspunkt anklicken, Element auf Y-Achse waehlen und eine grosse Strecke als Vorschau eingeben. Solange die Wand innerhalb des Bildausschnitts liegt, darf sie nicht allein aufgrund ihrer Tiefe verschwinden. Abbrechen stellt die Ausgangsdarstellung wieder her. Normales Verlassen des Bildrandes bleibt erwartetes Clipping.
+
+Grenzen: GPU-Tiefengenauigkeit bleibt endlich; bei sehr grossen Entfernungen koennen eng benachbarte Flaechen durch NDC-Toleranz/Umrandungsbias optisch zusammenfallen. Kein Grosskoordinaten-Umbau und keine neue Kameraart. Beim Wechsel einer Tiefenstufe kann eine laufende Hover-Verweildauer unterbrochen werden; aktivierte Referenzen und gepinnter Ursprung bleiben erhalten. Automatisierte Pruefung verschiedener Kameras, keine Mehr-GPU-Abnahme.
+
+### Genau ein ausfuehrbarer Folgeauftrag: 3D-Wandfusskanten als Richtungsreferenzen
+
+Die vorhandene gemeinsame Segment-Hover-/Parallelfuehrung an sichtbare Wandfusskanten auf z=0 anschliessen. Zunaechst nur diese vorhandenen Quellen: 600ms aktivieren beziehungsweise beim erneuten Verweilen loesen, Richtungen durch die gemeinsame Engine verwenden. Sichtbarkeit, lokale Kandidatensuche, Bewegungsausschluss, Ursprungsreferenz und Navigation beibehalten. Keine zweite Segmenterkennung, keine oberen Kanten/Z-Fuehrung und keine neue Modellaktion. Sichtbare versus verdeckte Kante, Aktivieren/Loesen, passive Ansicht und laufende Wandbewegung pruefen.

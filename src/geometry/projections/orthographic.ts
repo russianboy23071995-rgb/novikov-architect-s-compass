@@ -7,7 +7,26 @@ export type OrthographicCamera = {
   panY: number;
 };
 export type ProjectionBounds = { min: Vector3; max: Vector3 };
-export type ProjectionFrame = { readonly center: Vector3; readonly radius: number };
+export type ProjectionFrame = {
+  readonly center: Vector3;
+  readonly radius: number;
+  /** Independent clipping extent; omitted preserves the original projection. */
+  readonly depthRadius?: number;
+};
+
+/** Camera-independent depth envelope around a pinned image frame. Power-of-two
+ * tiers avoid changing projection identity for every small preview movement.
+ * The enclosing sphere stays within half of the NDC depth range at any yaw/pitch.
+ */
+export function projectionDepthRadius(frame: ProjectionFrame, bounds: ProjectionBounds): number {
+  const distance = Math.hypot(
+    ...frame.center.map((c, i) =>
+      Math.max(Math.abs(bounds.min[i]! - c), Math.abs(bounds.max[i]! - c)),
+    ),
+  );
+  const base = frame.depthRadius ?? frame.radius;
+  return base * 2 ** Math.max(0, Math.ceil(Math.log2(distance / base)));
+}
 
 /** Snapshot of model-independent bounds. Callers validate external numeric inputs. */
 export function createProjectionFrame(bounds: ProjectionBounds): ProjectionFrame {
@@ -41,7 +60,7 @@ export function projectOrthographic(
   return [
     ((c * x + s * y) * scale) / wide + camera.panX,
     (-s * sp * x + c * sp * y + cp * z) * scale * tall + camera.panY,
-    -(s * cp * x - c * cp * y + sp * z) / (frame.radius * 2),
+    -(s * cp * x - c * cp * y + sp * z) / ((frame.depthRadius ?? frame.radius) * 2),
   ];
 }
 /** Analytic XY derivatives avoid subtracting projected points with large translations. */
@@ -52,7 +71,15 @@ export function horizontalProjectionAxes(
 ) {
   const { c, s, cp, sp, scale, wide, tall } = factors(frame, camera, aspect);
   return {
-    u: [(c * scale) / wide, -s * sp * scale * tall, (-s * cp) / (frame.radius * 2)] as Vector3,
-    v: [(s * scale) / wide, c * sp * scale * tall, (c * cp) / (frame.radius * 2)] as Vector3,
+    u: [
+      (c * scale) / wide,
+      -s * sp * scale * tall,
+      (-s * cp) / ((frame.depthRadius ?? frame.radius) * 2),
+    ] as Vector3,
+    v: [
+      (s * scale) / wide,
+      c * sp * scale * tall,
+      (c * cp) / ((frame.depthRadius ?? frame.radius) * 2),
+    ] as Vector3,
   };
 }

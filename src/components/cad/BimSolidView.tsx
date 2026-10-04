@@ -1,4 +1,4 @@
-import { createProjectionFrame } from "@/geometry/projections/orthographic";
+import { createProjectionFrame, projectionDepthRadius } from "@/geometry/projections/orthographic";
 import type { ProjectionFrame } from "@/geometry/projections/orthographic";
 import {
   backbufferSize,
@@ -159,7 +159,7 @@ export function BimSolidView({
   } | null>(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
-  const [previewProjection, setPreviewProjection] = useState<ProjectionState | null>(null);
+  const [viewProjection, setViewProjection] = useState<ProjectionState | null>(null);
   const [previewClient, setPreviewClient] = useState<(Point & { shift: boolean }) | null>(null);
   const [previewReset, setPreviewReset] = useState(0);
   const [aim, setAim] = useState<{ session: typeof editSession; point: Point } | null>(null);
@@ -184,6 +184,24 @@ export function BimSolidView({
     }
     return baseSolid;
   }, [baseSolid, editSession, target, project, selection]);
+  const depthRadius = Math.max(
+    projectionDepthRadius(frame, baseSolid),
+    projectionDepthRadius(frame, solid),
+  );
+  // Only depth changes with the preview. Keep image fitting, pointer coordinates
+  // and active construction references stable; all consumers share this snapshot.
+  const previewProjection = useMemo(
+    () =>
+      viewProjection
+        ? createProjectionState(
+            { ...viewProjection.frame, depthRadius },
+            viewProjection.camera,
+            viewProjection.viewport,
+            viewProjection.backbuffer,
+          )
+        : null,
+    [viewProjection, depthRadius],
+  );
   const outline = useMemo(
     () =>
       selection?.kind === "wall"
@@ -216,7 +234,7 @@ export function BimSolidView({
     const lost = (event: Event) => {
       event.preventDefault();
       displayed.current = null;
-      setPreviewProjection(null);
+      setViewProjection(null);
       setPreviewClient(null);
       drag.current = null;
       renderer.current = null;
@@ -227,7 +245,7 @@ export function BimSolidView({
     observer.observe(canvas);
     const invalidate = () => {
       displayed.current = null;
-      setPreviewProjection(null);
+      setViewProjection(null);
       setPreviewClient(null);
       setRevision((n) => n + 1);
     };
@@ -265,7 +283,7 @@ export function BimSolidView({
       backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
     );
     setPreviewClient(null);
-    setPreviewProjection(renderer.current ? projection : null);
+    setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
   useEffect(() => {
     const selectedWall =
