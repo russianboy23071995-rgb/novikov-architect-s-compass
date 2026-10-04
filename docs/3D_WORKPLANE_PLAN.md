@@ -1,5 +1,7 @@
 # Aktive horizontale 3D-Arbeitsebene — Arbeitsvertrag
 
+Aktualisierung nach PR #70: Die historische Bestandsaufnahme unten beschreibt den Ausgangsstand. Projektion und ScreenMetric-Anschlüsse sind inzwischen umgesetzt. Aktueller Integrationsbefund, offene Produktvorschläge und genau nächstes Paket: [3D_INTERACTION_CONTRACT.md](3D_INTERACTION_CONTRACT.md). Die historische Tabelle ist keine Liste weiterhin fehlender Metrikfunktionen.
+
 Stand: 04.10.2026. Codebasis: `acc5c44` (PR #63, noch offen).
 Dieser Auftrag verändert ausschließlich Dokumentation. Die nachfolgend vorgeschlagenen Schnittstellen und Bedienregeln sind nicht implementiert und keine vom Nutzer bereits entschiedenen Produktdetails.
 

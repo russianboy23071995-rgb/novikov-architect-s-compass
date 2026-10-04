@@ -841,6 +841,18 @@ Browser: Wandecke im Punktmodus übernommen, Zoom erhält Referenz; zweite Punkt
 
 Praktische Abnahme: On-Demand-Menü → Referenzen auswählen → Punkte → Wandecke → Übernehmen. Zoom und neue Auswahl mit Abbruch prüfen. Danach Linienmodus auf der Wandachse wählen; übernommener Filter und Hilfspunkt sollen beim Zoom bestehen bleiben.
 
-### Genau ein ausführbarer Folgeauftrag: 3D-Bedienvertrag vor Freischaltung konkretisieren
+### Abgeschlossener Folgeauftrag: 3D-Bedienvertrag vor Freischaltung konkretisieren
 
 Die abgeschlossenen Metrikanschlüsse gegen den tatsächlichen 3D-Viewport prüfen und einen begrenzten Integrationsplan für die horizontale Arbeitsebene z=0 erstellen. Sichtbare Ebenenanker, verdeckte Ziele, Zuordnung von Auswahl-/Zeichen-/Orbit-Gesten und Umgang mit ungültiger Inverse konkret gegenüberstellen. Technisch verbindliche Regeln von noch offenen Nutzerentscheidungen trennen; keine Gesten-/X-Ray-Entscheidung erfinden. Genau einen kleinen anschließenden Umsetzungsschritt mit Abnahmekriterien festlegen. Keine Modellaktion oder neue 3D-Fangbedienung in diesem Planungsauftrag aktivieren.
+
+### Abschluss: konkreter 3D-Bedienentwurf — 04.10.2026
+
+PR #70 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (509d133), main unverändert. Neuer Dokumentationszweig docs/3d-interaction-contract. BimSolidView, CadViewport, CadWorkspace, pickWall und bisheriger Arbeitsebenenplan geprüft. Renderer verwendet gerundeten Backbuffer-Aspect, Auswahl CSS-Aspect; dies ist eine nachgewiesene Codeabweichung, noch kein reproduzierter Fehlklick. Wand-ID und Client-Menüanker sind kein geometrischer Ursprung. Vorschau kann heute Solid-Grenzen und damit den Rahmen verändern.
+
+docs/3D_INTERACTION_CONTRACT.md enthält Bedienalternativen für sichtbare Anker, verdeckte Quellen, Orbit versus Werkzeugklick und ungültige Inverse. Empfehlungen sind ausdrücklich keine bereits getroffenen Nutzerentscheidungen. Gemeinsame Modellaktionen, metrische Koordinaten, expliziter Ursprung und gleiche Projektionsparameter bleiben verbindlich. Historischen Arbeitsebenenplan als solchen gekennzeichnet; keine Metrikfunktion erneut geplant.
+
+Nur vier Dokumente geändert; Pfade und Whitespace geprüft. Keine Laufzeitänderung, kein neuer Build oder Browsertest. Die zuletzt bestandenen 282 Tests/Build-/TypeScript-Prüfungen gehören zum unveränderten Anwendungsstand aus PR #70.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsamer 3D-Projektionsstand
+
+Das im Bedienvertrag beschriebene Projektionspaket umsetzen: Rahmen, Kamera, CSS-Rechteck und Render-Aspect als gemeinsamen unveränderlichen Stand für BimSolidView, Wand-Picking und Ebeneninverse verbinden. Resize/DPR/Kamerawechsel konsistent behandeln, alte Treffer bei ungültigem Stand verhindern, bestehendes pickWall kompatibel halten. Ungerade Größen, DPR, Öffnungen, Navigation und Snapshot-Isolation automatisiert und Wand-Auswahl praktisch prüfen; gesamte Tests/TypeScript/Build/Lint. Keine neue Gestenbelegung, Fangoberfläche oder Modellaktion. Dieser technische Schritt ist unabhängig von den noch offenen Sichtbarkeits-/Gestenentscheidungen.
