@@ -10,6 +10,7 @@ import {
   createEditingState,
   editingReducer,
   previewEdit,
+  supportsWallWorkplaneEdit,
 } from "../../application/direct-edit/controller.ts";
 import { editInteraction } from "../../application/tools/adapters.ts";
 import { evaluateInteraction, confirmInteraction } from "../../application/tools/interaction.ts";
@@ -22,6 +23,7 @@ import {
   wallEndpointIndex,
 } from "../../application/snapping/project-references.ts";
 import { createWallPointCandidates } from "./wall-point-candidates.ts";
+import { numericMoveAxis } from "../../application/direct-edit/numeric.ts";
 
 const project = createExampleProject();
 const projection = createProjectionState(
@@ -40,6 +42,175 @@ const start = () =>
     anchor: { x: 3, y: -0.18 },
   });
 const noop = () => {};
+
+test("workplane capabilities keep point/stretch tied to endpoints and exclude other elements", () => {
+  for (const action of ["move", "point", "stretch", "axis", "x", "y"] as const) {
+    for (const kind of ["wall", "window", "line"] as const) {
+      for (const index of [null, 0, 1, 2, -1]) {
+        assert.equal(
+          supportsWallWorkplaneEdit({ kind, id: "id" }, action, index),
+          kind === "wall" && (!["point", "stretch"].includes(action) || index === 0 || index === 1),
+        );
+      }
+    }
+  }
+});
+
+test("3D axis/stretch use the existing fixed direction ahead of Shift/Ortho and numeric input", async () => {
+  for (const action of ["axis", "x", "y", "stretch"] as const)
+    for (const angle of [0.7, Math.PI])
+      for (const index of [0, 1])
+        for (const metres of [0.75, -0.5]) {
+          let state = createEditingState(
+            updateWall(project, "wall-1", {
+              end: { x: 3 * Math.cos(angle), y: 3 * Math.sin(angle) },
+            }),
+          );
+          const base = state.history.present;
+          const ref = projectSnapPrimitives(base).references.find(
+            (r) => r.feature === `corner-${index}--1`,
+          )!;
+          state = editingReducer(state, {
+            type: "begin",
+            target: selection,
+            action,
+            index,
+            anchor: ref.point,
+          });
+          const session = state.session!;
+          const tool = editInteraction(
+            session,
+            base,
+            selection,
+            (point) => {
+              state = editingReducer(state, { type: "confirm", session, selection, point });
+            },
+            noop,
+          );
+          const axis = numericMoveAxis(session)!;
+          assert.ok(axis);
+          assert.equal(tool.click, "confirm");
+          assert.equal(tool.input!.axisLabel, axis.label);
+          const context = createWallPreviewContext(
+            base,
+            projection,
+            true,
+            0,
+            tool.snapping,
+            selection.id,
+          ).context;
+          assert.deepEqual(context.pinnedReferences![0]!.point, ref.point);
+          const expected = {
+            x: ref.point.x + axis.direction.x * metres,
+            y: ref.point.y + axis.direction.y * metres,
+          };
+          // Cursor intentionally off the fixed axis; modifiers must not change that axis.
+          const cursor = {
+            x: expected.x - axis.direction.y * 0.17,
+            y: expected.y + axis.direction.x * 0.17,
+          };
+          for (const enabled of [true, false]) {
+            const result = resolveToolSnap(
+              tool.snapping,
+              cursor,
+              {
+                ...context,
+                enabled,
+                activeReferences: [tool.snapping.origin],
+                endpointRadiusPx: 10,
+                gridSpacing: null,
+              },
+              { ortho: true, shift: true, featureSnap: enabled },
+            );
+            assert.ok(Math.hypot(result.point.x - expected.x, result.point.y - expected.y) < 1e-9);
+          }
+          const input = evaluateInteraction(tool, "123", String(metres), cursor).value!;
+          assert.ok(input);
+          assert.equal(input.degrees, axis.degrees);
+          const preview = previewEdit(session, base, selection, input.point);
+          assert.equal(state.history.past.length, 0);
+          assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+          confirmInteraction(tool, input.point);
+          assert.deepEqual(state.history.present, preview);
+          assert.equal(state.history.past.length, 1);
+          const changed = state.history.present,
+            wall = changed.storey.walls[0]!,
+            before = base.storey.walls[0]!;
+          if (action === "stretch") {
+            assert.deepEqual(
+              index === 0 ? wall.end : wall.start,
+              index === 0 ? before.end : before.start,
+            );
+            assert.ok(Math.abs(wallLength(wall) - (3 + metres)) < 1e-9);
+          } else {
+            for (const p of ["start", "end"] as const) {
+              assert.ok(
+                Math.hypot(
+                  wall[p].x - before[p].x - metres * axis.direction.x,
+                  wall[p].y - before[p].y - metres * axis.direction.y,
+                ) < 1e-9,
+              );
+            }
+          }
+          assert.equal(wall.thickness, 0.36);
+          assert.equal(wall.height, 2.8);
+          assert.deepEqual(changed.storey.windows, base.storey.windows);
+          assert.deepEqual(deserializeProject(serializeProject(changed)), changed);
+          const undone = editingReducer(state, { type: "undo" });
+          assert.deepEqual(undone.history.present, base);
+          assert.deepEqual(editingReducer(undone, { type: "redo" }).history.present, changed);
+          const ifc = await exportIfc(changed, new Date("2026-10-04T12:00:00Z"));
+          assert.ok(ifc.includes(`IFCLENGTHMEASURE(${stepReal(wallLength(wall))})`));
+          assert.ok(
+            ifc.includes(
+              `IFCCARTESIANPOINT((${stepReal(wall.start.x)},${stepReal(wall.start.y)},0.))`,
+            ),
+          );
+        }
+});
+
+test("3D stretch rejects window conflict and crossing the opposite end without an undo entry", () => {
+  for (const index of [0, 1]) {
+    let state = createEditingState(project);
+    const base = state.history.present;
+    const ref = projectSnapPrimitives(base).references.find(
+      (r) => r.feature === `corner-${index}--1`,
+    )!;
+    state = editingReducer(state, {
+      type: "begin",
+      target: selection,
+      action: "stretch",
+      index,
+      anchor: ref.point,
+    });
+    const session = state.session!;
+    const tool = editInteraction(
+      session,
+      base,
+      selection,
+      (point) => {
+        state = editingReducer(state, { type: "confirm", session, selection, point });
+      },
+      noop,
+    );
+    for (const length of ["-2.5", "-3", "-4", "Infinity"]) {
+      assert.equal(evaluateInteraction(tool, "", length, null).value, null);
+      assert.equal(state.history.present, base);
+      assert.equal(state.history.past.length, 0);
+    }
+    const axis = numericMoveAxis(session)!;
+    assert.throws(() =>
+      confirmInteraction(tool, {
+        x: ref.point.x - axis.direction.x * 2.5,
+        y: ref.point.y - axis.direction.y * 2.5,
+      }),
+    );
+    assert.equal(state.session, session);
+    confirmInteraction(tool, evaluateInteraction(tool, "", "1", null).value!.point);
+    assert.equal(wallLength(state.history.present.storey.walls[0]!), 4);
+    assert.equal(state.history.past.length, 1);
+  }
+});
 
 test("3D picking maps axis ends and all physical corners to their stable wall endpoint", () => {
   for (const angle of [0, 0.7, Math.PI, -1.9]) {

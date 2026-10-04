@@ -161,7 +161,9 @@ export function CadViewport({
                 ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
                 : model.editSession.action === "point"
                   ? "Wandecke auf z=0 bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
-                  : "Wand auf z=0 bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
+                  : model.editSession.action === "move"
+                    ? "Wand auf z=0 bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
+                    : "Feste Achse auf z=0 · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
               : pan
                 ? "Click wall to select · Drag to pan · Wheel to zoom"
                 : "Click wall to select · Drag to orbit · Wheel to zoom"

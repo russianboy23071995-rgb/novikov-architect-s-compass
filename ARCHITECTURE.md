@@ -12,6 +12,10 @@ Projection fitting uses the committed model, never the moving preview. Camera/vi
 
 The wall-source adapter now resolves its known axis-end/corner feature identity to endpoint index 0 or 1. A midpoint or unknown feature has no endpoint index and must not become a point-edit grip. The clicked physical model-space corner remains the anchor; it is not replaced by the wall axis. BimSolidView forwards the stable wall ID, endpoint index and anchor to the existing selection/Direct Edit contract. The `point` action consumes the same workplane inference, projection frame and ToolInteraction as whole-wall movement; its existing click contract confirms the target directly. Corner offset correction, retained wall thickness/opposite endpoint, hosted opening validation and history stay in the existing shared application/model operations. Other constrained actions still use their previous 2D entry until explicitly integrated.
 
+## Extension: constrained wall edits on z=0 — 2026-10-04
+
+The existing stretch/axis/x/y actions now enter the same 3D workplane interaction as move/point. `supportsWallWorkplaneEdit` is the single application capability check used at entry and by the viewport: only walls, and point/stretch require endpoint index 0 or 1. An explicitly selected footpoint is required for every entry. No axis solver or numeric widget was added. `editDirection`, `resolveEditSnap`/fixedAxis and numericMoveAxis remain authoritative for direction and signed distance; explicit axes take precedence over Shift/Ortho and remain constraints with Snap disabled. Stretch retains the opposite endpoint and checks hosted openings, while axis/x/y translate the whole wall. Existing Pan/confirmation isolation and transaction history are reused.
+
 ## Status
 
 This document is the architectural source of truth for NOVIKOV CAD.
