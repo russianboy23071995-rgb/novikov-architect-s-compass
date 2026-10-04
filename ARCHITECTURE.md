@@ -1000,3 +1000,7 @@ Direction selection/hysteresis, explicit Shift/Ortho and fixed-axis constraints 
 HoverContext optionally carries ScreenMetric. The shared React event adapter forwards it to source lookup, point/guide resolution and segment hover; it is not part of model/reference session identity. ScreenMetric.projectSegment returns the closest bounded point, the unclamped line parameter and CSS distance. Segment hover preserves the existing interior-only rule (parameter 0..1); endpoint acquisition retains priority. The isotropic implementation preserves the previous parameter and residual-distance arithmetic.
 
 Dwell, toggle-on-revisit, suspension, capacity and pinned-reference rules remain in the existing inference state machine. No per-tool hover state or alternate reference store is introduced. This supersedes the hover-metric limitation above; explicit reference picking and later 3D UI/visibility/navigation integration remain pending.
+
+## Explicit reference picking metric (2026-10-04)
+
+The existing rendering/viewport reference pickers accept ScreenMetric or the compatible isotropic numeric scale. Point distances and bounded segment projection use the same geometry service as snapping/hover. Explicit segment picking includes endpoint caps and degenerate point segments, whereas hover retains its interior-only rule. Non-finite hits are excluded. Existing distance/source-key ordering and selection transactions are preserved. The UI still supplies its 2D scale; affine capability does not enable 3D interaction or decide occlusion/navigation policy.

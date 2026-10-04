@@ -827,6 +827,20 @@ PR #68 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (
 
 Praktisch prüfen: über einer Linienmitte 0,6 Sekunden verweilen, wegbewegen und erneut 0,6 Sekunden verweilen: Referenz wird gelöst. Während der ersten Wartezeit zu einer anderen Linie wechseln: dort beginnt die Wartezeit neu. Aktivierte Punkte durch Zoom erhalten, nach Modelländerung alte Referenzen verwerfen. Gewählten Bewegungsursprung nicht durch Hover entfernen.
 
-### Genau ein ausführbarer Folgeauftrag: explizites Referenz-Picking mit gemeinsamer Metrik
+### Abgeschlossener Folgeauftrag: explizites Referenz-Picking mit gemeinsamer Metrik
 
 Punkt-/Segment-Picking im bestehenden manuellen Referenzauswahlmodus auf ScreenMetric umstellen, einschließlich CSS-Radius, nächstem Segmentpunkt und stabiler Mehrdeutigkeitsliste. Bestehende isotrope 2D-Aufrufe kompatibel halten. Auswahl/Übernehmen/Abbruch, Quellenfilter vor Paarbildung, affine Trefferreihenfolge und Radiusgrenzen testen; den gemeinsamen 2D-Ablauf einschließlich Hover/Zoom praktisch im Browser abnehmen. Keine zweite Auswahloberfläche und noch keine 3D-Freischaltung; offene Sichtbarkeits-/Gestenentscheidungen anschließend gesondert prüfen.
+
+### Abschluss: gemeinsame Metrik für Referenz-Picking — 04.10.2026
+
+PR #69 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (d30022d), main unverändert. Zweig feat/reference-picking-screen-metric. Beide bestehenden Referenz-Picker akzeptieren ScreenMetric oder numerischen 2D-Maßstab. Segment-Picking nutzt die gemeinsame begrenzte Projektion, einschließlich Endpunktnähe und degenerierter Punktsegmente. Mehrdeutigkeitsreihenfolge nach Abstand/Quellschlüssel bleibt erhalten. Keine neue Auswahloberfläche oder Modelländerung.
+
+282 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Zwei neue Tests mit Parameterreihen: affine Punkt-/Segmenttreffer und Reihenfolge, Radiusrand, Endpunktbegrenzung, Gleichstände, degenerierte Segmente und ungültige Treffer sowie isotrope API-Parität über Zoomstufen. Bestehende Auswahl-/Abbruch- und Quellenfilter-vor-Paarbildung-Tests bestehen.
+
+Browser: Wandecke im Punktmodus übernommen, Zoom erhält Referenz; zweite Punkt-Arbeitskopie abgebrochen, erste Referenz bleibt. Erneutes Hover löst den Punkt, nach Verlassen und neuem Hover wird er wieder aktiv. Wandachse im Linienmodus gewählt und übernommen; Zoom erhält einen Linienfilter und aktiven Hilfspunkt. Screenshot outputs/reference-picking.jpg außerhalb des Repositories. Keine genaue Browser-Zeitmessung der 600 ms, diese bleibt automatisiert geprüft; keine vollständige Mehrviewport-/Direct-Edit-Matrix.
+
+Praktische Abnahme: On-Demand-Menü → Referenzen auswählen → Punkte → Wandecke → Übernehmen. Zoom und neue Auswahl mit Abbruch prüfen. Danach Linienmodus auf der Wandachse wählen; übernommener Filter und Hilfspunkt sollen beim Zoom bestehen bleiben.
+
+### Genau ein ausführbarer Folgeauftrag: 3D-Bedienvertrag vor Freischaltung konkretisieren
+
+Die abgeschlossenen Metrikanschlüsse gegen den tatsächlichen 3D-Viewport prüfen und einen begrenzten Integrationsplan für die horizontale Arbeitsebene z=0 erstellen. Sichtbare Ebenenanker, verdeckte Ziele, Zuordnung von Auswahl-/Zeichen-/Orbit-Gesten und Umgang mit ungültiger Inverse konkret gegenüberstellen. Technisch verbindliche Regeln von noch offenen Nutzerentscheidungen trennen; keine Gesten-/X-Ray-Entscheidung erfinden. Genau einen kleinen anschließenden Umsetzungsschritt mit Abnahmekriterien festlegen. Keine Modellaktion oder neue 3D-Fangbedienung in diesem Planungsauftrag aktivieren.

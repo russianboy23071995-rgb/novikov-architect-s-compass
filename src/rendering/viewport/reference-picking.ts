@@ -2,30 +2,26 @@ import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
+import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 /** Hit original segment extents, never SVG DOM order or nearest midpoint alone. */
 export function pickReferenceSegments(
   segments: readonly SnapSegment[],
   point: Point2,
-  scale: number,
+  scale: number | ScreenMetric,
   radius = 10,
 ) {
+  const metric = typeof scale === "number" ? createIsotropicScreenMetric(scale) : scale;
   return segments
     .map((s) => {
-      const dx = s.end.x - s.start.x,
-        dy = s.end.y - s.start.y;
-      const length = dx * dx + dy * dy;
-      const t = length
-        ? Math.max(
-            0,
-            Math.min(1, ((point.x - s.start.x) * dx + (point.y - s.start.y) * dy) / length),
-          )
-        : 0;
+      const hit = metric.projectSegment(point, s.start, s.end);
+      const degenerate = s.start.x === s.end.x && s.start.y === s.end.y;
       return {
         source: s.source,
-        distance: Math.hypot(point.x - s.start.x - t * dx, point.y - s.start.y - t * dy) * scale,
+        distance: hit?.distance ?? (degenerate ? metric.distance(point, s.start) : Infinity),
       };
     })
-    .filter((s) => s.distance <= radius)
+    .filter((s) => Number.isFinite(s.distance) && s.distance >= 0 && s.distance <= radius)
     .sort(
       (a, b) =>
         a.distance - b.distance || referenceKey(a.source).localeCompare(referenceKey(b.source)),
@@ -37,16 +33,17 @@ export function pickReferenceSegments(
 export function pickReferencePoints(
   references: readonly SnapReference[],
   point: Point2,
-  scale: number,
+  scale: number | ScreenMetric,
   radius = 10,
 ) {
+  const metric = typeof scale === "number" ? createIsotropicScreenMetric(scale) : scale;
   return references
     .filter((r) => r.kind !== "segment-intersection")
     .map((source) => ({
       source,
-      distance: Math.hypot(source.point.x - point.x, source.point.y - point.y) * scale,
+      distance: metric.distance(source.point, point),
     }))
-    .filter((hit) => hit.distance <= radius)
+    .filter((hit) => Number.isFinite(hit.distance) && hit.distance >= 0 && hit.distance <= radius)
     .sort(
       (a, b) =>
         a.distance - b.distance || referenceKey(a.source).localeCompare(referenceKey(b.source)),
