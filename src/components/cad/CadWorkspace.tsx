@@ -1,5 +1,6 @@
+import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -62,12 +63,18 @@ export function CadWorkspace() {
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
   const lineOrigin = tool === "line" ? (linePoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : lineOrigin;
+  const [activeViewport, setActiveViewport] = useState(0);
+  const [referenceEpoch, setReferenceEpoch] = useState(0);
+  const referenceScope = useMemo(
+    () => ({ project, editSession, tool, lineKind, mode, referenceEpoch, activeViewport }),
+    [project, editSession, tool, lineKind, mode, referenceEpoch, activeViewport],
+  );
+  const referenceSelection = useReferenceSelection(project, referenceScope);
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
   const [exportMessage, setExportMessage] = useState("");
 
-  const [activeViewport, setActiveViewport] = useState(0);
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   const [demandOpen, setDemandOpen] = useState(false);
@@ -80,6 +87,7 @@ export function CadWorkspace() {
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
   const cancelInteraction = useCallback(() => {
+    setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallStart(null);
     setLinePoints([]);
@@ -92,6 +100,7 @@ export function CadWorkspace() {
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
+      if (referenceSelection.selecting) return;
       if (
         event.target instanceof Element &&
         (event.target.closest(
@@ -121,7 +130,7 @@ export function CadWorkspace() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen, cancelInteraction]);
+  }, [fullscreen, cancelInteraction, referenceSelection.selecting]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -171,6 +180,7 @@ export function CadWorkspace() {
   };
 
   const changeProject = (next: Project, selected: Selection) => {
+    if (referenceSelection.selecting) return;
     dispatchEditing({ type: "project", project: next });
     selectElement(selected);
     showNotice("Model updated");
@@ -299,6 +309,7 @@ export function CadWorkspace() {
       : drawingOrigin && drawingBase
         ? drawingInteraction(drawingBase, project, drawingOrigin, drawPoint, cancelInteraction)
         : null,
+    referenceSelection.selecting,
   );
 
   const downloadIfc = async () => {
@@ -517,6 +528,7 @@ export function CadWorkspace() {
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
                   project={project}
+                  referenceSelection={referenceSelection}
                   selection={selection}
                   snapping={interaction.adapter?.snapping ?? null}
                   drawing={(tool === "wall" || tool === "line") && mode === "2D"}
@@ -528,7 +540,11 @@ export function CadWorkspace() {
                   ortho={ortho}
                   onSelect={selectElement}
                   onPoint={(point) =>
-                    interaction.adapter ? interaction.pick(point) : drawPoint(point)
+                    referenceSelection.selecting
+                      ? undefined
+                      : interaction.adapter
+                        ? interaction.pick(point)
+                        : drawPoint(point)
                   }
                   editSession={editSession?.base === project ? editSession : null}
                   numericTarget={editSession ? interaction.target : undefined}
@@ -538,7 +554,11 @@ export function CadWorkspace() {
                   onEditDirection={(_session, point) => interaction.pick(point)}
                   onEditCommit={(_session, point) => interaction.pick(point)}
                   {...(tool === "line" && lineKind === "polyline"
-                    ? { onFinish: () => finishLine() }
+                    ? {
+                        onFinish: () => {
+                          if (!referenceSelection.selecting) finishLine();
+                        },
+                      }
                     : {})}
                   layout={layout}
                   mode={mode}
@@ -568,13 +588,15 @@ export function CadWorkspace() {
                     {exportMessage}
                   </p>
                 )}
-                <AiCommandBar
-                  project={project}
-                  selection={selection}
-                  onExecute={(preview) =>
-                    changeProject(applyCommand(project, selection, preview), selection)
-                  }
-                />
+                {!referenceSelection.selecting && (
+                  <AiCommandBar
+                    project={project}
+                    selection={selection}
+                    onExecute={(preview) =>
+                      changeProject(applyCommand(project, selection, preview), selection)
+                    }
+                  />
+                )}
                 <div
                   className="pointer-events-none absolute left-3 top-12 z-30 rounded border border-border bg-popover/70 px-2 py-1 font-mono text-[9px] text-muted-foreground opacity-0 backdrop-blur transition-opacity data-[visible=true]:opacity-100"
                   data-visible={notice !== "Ready"}

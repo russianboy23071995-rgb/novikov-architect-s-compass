@@ -691,6 +691,21 @@ Praktischer Test: viele Linien kreuzen lassen, Maus darüber bewegen. Hinweis er
 
 Grenzen: dichte automatische lokale Schnittpunkte bewusst pausiert, manuelle Referenzauswahl fehlt noch. Primitive Suche und Punktranking bleiben mengenabhängig. Keine 3D-Arbeitsebene. PRs #57–59 weiterhin offen.
 
-### Genau ein ausführbarer Folgeauftrag: temporäre Segmentauswahl gemeinsam integrieren
+### Abgeschlossener Folgeauftrag: temporäre Segmentauswahl gemeinsam integrieren
 
 Optionale Auswahl gerader Segmentquellen für einen laufenden Vorgang implementieren: gemeinsamer Application-Zustand mit Arbeitskopie/Übernehmen/Abbruch, Vorgangsidentität über Polylinienpunkte hinweg und Auswahlfilter vor Paarbildung. Canvas-Auswahl suspendiert Modellbestätigungen, bietet Mehrdeutigkeitsliste und dezente Abblendung. Aufheben, Idle-Lebenszyklus, Zoom, Modellwechsel und aktive Referenzen gemäß docs/REFERENCE_SELECTION_PLAN.md testen. Zunächst Segmentauswahl; explizite Punktübernahme folgt separat. Keine per-Werkzeug-Fangkopien.
+
+
+### Abschluss: temporäre Segmentauswahl — 04.10.2026
+
+PR #60 nach Freigabe normal in docs/reference-selection-contract übernommen (9daa725); main unverändert. Gemeinsamer Application-Reducer verwaltet Arbeitskopie, Übernehmen, Abbruch und Aufheben. Ein Filter begrenzt Segmentpaare vor der Dichteprüfung; End-/Mittelpunkte und aktive entfernte Führungen bleiben verfügbar. Deterministisches Picking unterscheidet Polylinienteilsegmente. Mehrdeutigkeit wird in einer Liste nahe dem Zeiger aufgelöst; Canvas wird dezent abgeblendet. ToolInteraction pausiert Bestätigungen und numerische Eingabe während der Auswahl. Kein zusätzlicher Modellzustand und keine per-Werkzeug-Fangkopie.
+
+250 Tests bestanden; TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Neue Tests prüfen Auswahl/Abbruch, Quellenfilter vor Paarbildung (zwei Segmente: ein Paar), erhaltene Punktziele/aktive Quellen und deterministisches Picking. Browser: 48 überlappende Linien, zwei Referenzen auswählen/übernehmen, Arbeitskopie abbrechen und Filter aufheben; Auswahl bleibt beim Zoom und über drei Polylinienpunkte erhalten. Zeichenvorgang abbrechen setzt Filter zurück. Freie Wandbewegung: Hilfseingabe wird während der Auswahl ausgeblendet und nach Abbruch wiederhergestellt. Keine unbeabsichtigte Modellbestätigung beim Picking.
+
+Praktischer Test: Referenzen auswählen anklicken, zwei Linien im Canvas wählen (bei Überlagerung Trefferliste nutzen), übernehmen. Danach weiterzeichnen/verschieben und zoomen. Auswahl erneut öffnen und abbrechen: vorherige Auswahl bleibt. Auswahl aufheben stellt automatische Suche einschließlich Dichteschranke wieder her.
+
+Grenzen: zunächst gerade Segmentquellen in 2D; explizite Punktübernahme fehlt. Quellschlüssel gelten für den aktuellen Modellsnapshot und werden nach Modell-/Vorgangswechsel verworfen. Komplette Modal-/Tastaturmatrix noch nicht browserautomatisiert. Ältere gestapelte PRs bleiben offen.
+
+### Genau ein ausführbarer Folgeauftrag: gezielte Punktreferenzen im gemeinsamen Auswahlmodus
+
+Punktübernahme für vorhandene End-/Mittelpunkte in denselben temporären Auswahlablauf integrieren. Vorhandenen Hover-Referenzvertrag einschließlich Kapazität, Ursprungsschutz und Verdrängung verwenden; vor Übernahme anzeigen, welche Referenz ersetzt würde. Segmentfilter und explizite Hilfsreferenzen getrennt halten, kein zweiter unbegrenzter Referenzspeicher. Arbeitskopie/Abbruch, Modellwechsel, Zoom und gemeinsame Nutzung bei Zeichnen/Direct Edit testen; Tab/Escape und modale Priorität praktisch mitprüfen. Keine neue Fangart oder 3D-Arbeitsebene.

@@ -1,3 +1,7 @@
+import type { ReferenceSelectionBinding } from "./useReferenceSelection";
+import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
+import { pickReferenceSegments } from "@/rendering/viewport/reference-picking";
+import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
@@ -16,6 +20,7 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  referenceSelection?: ReferenceSelectionBinding;
   project: Project;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
@@ -39,6 +44,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  referenceSelection,
   project,
   snapping = null,
   selection,
@@ -71,6 +77,8 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
+  const selecting = referenceSelection?.selecting ?? false;
+  const selectedSegments = referenceSelection?.selected ?? null;
   const svg = useRef<SVGSVGElement>(null);
   const gridId = useId();
   const gridStep = planScaleBar(camera.pixelsPerMetre).metres;
@@ -103,6 +111,7 @@ export function BimPlan({
   const [shiftHeld, setShiftHeld] = useState(false);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
+      if (selecting) return;
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
       if (event.key === "Escape" && event.type === "keydown") {
         setHover(null);
@@ -118,7 +127,7 @@ export function BimPlan({
       window.removeEventListener("keyup", key);
       window.removeEventListener("blur", clear);
     };
-  }, []);
+  }, [selecting]);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
@@ -133,6 +142,7 @@ export function BimPlan({
     endpointSnap && snap,
     referenceReset,
     camera,
+    selectedSegments,
   );
   const references = pinnedReferences;
   const trackingContext = useMemo(
@@ -141,6 +151,8 @@ export function BimPlan({
       references,
       sourceQuery,
       intersectionsPaused: density.paused,
+      selectedSegments,
+      suspended: selecting,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
@@ -154,6 +166,8 @@ export function BimPlan({
       references,
       sourceQuery,
       density.paused,
+      selectedSegments,
+      selecting,
       camera,
       viewSize,
       referenceReset,
@@ -174,6 +188,7 @@ export function BimPlan({
         references,
         sourceQuery,
         intersectionsPaused: density.paused,
+        selectedSegments,
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
@@ -296,6 +311,25 @@ export function BimPlan({
       }
     },
   });
+  const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  const panelX = listPosition
+    ? Math.max(
+        12,
+        Math.min(
+          viewSize.width - 452,
+          (listPosition.x - camera.center.x) * camera.pixelsPerMetre + viewSize.width / 2 + 12,
+        ),
+      )
+    : 12;
+  const panelY = listPosition
+    ? Math.max(
+        12,
+        Math.min(
+          viewSize.height - 272,
+          (-listPosition.y + camera.center.y) * camera.pixelsPerMetre + viewSize.height / 2 + 12,
+        ),
+      )
+    : 12;
   return (
     <svg
       ref={svg}
@@ -334,6 +368,21 @@ export function BimPlan({
         editDown.current = null;
       }}
       onClickCapture={(event) => {
+        if ((event.target as Element).closest("[data-reference-panel]")) return;
+        if (selecting && referenceSelection && !navigationClick.current && !pan) {
+          event.preventDefault();
+          event.stopPropagation();
+          const point = rawPoint(event);
+          if (!point) return;
+          const hits = pickReferenceSegments(
+            sourceQuery.inspect(point, camera.pixelsPerMetre, 10).segments,
+            point,
+            camera.pixelsPerMetre,
+          );
+          if (hits.length === 1) referenceSelection.toggle(hits[0]!);
+          else referenceSelection.hitsAt(hits, point);
+          return;
+        }
         if (navigationClick.current || pan) {
           event.preventDefault();
           event.stopPropagation();
@@ -350,7 +399,7 @@ export function BimPlan({
           );
           return;
         }
-        if (pan) return;
+        if (pan || selecting) return;
         if (endpointSnap || editSession) setHover(rawPoint(event));
         const drawingPoint = rawPoint(event);
         if (drawing && drawingPoint)
@@ -364,6 +413,7 @@ export function BimPlan({
         }
       }}
       onPointerLeave={() => {
+        if (selecting) return;
         setHover(null);
         setEditPointer(null);
       }}
@@ -393,13 +443,14 @@ export function BimPlan({
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {
-        if (pan || navigationClick.current) return;
+        if (selecting || pan || navigationClick.current) return;
         if (drawing && onFinish && drawingTarget !== null) {
           event.preventDefault();
           onFinish();
         }
       }}
       onKeyDown={(event) => {
+        if (selecting) return;
         if (event.key === "Escape") {
           navigation.current = null;
           setHover(null);
@@ -745,25 +796,53 @@ export function BimPlan({
             </text>
           </g>
         )}
-      {density.paused && (
+      {selecting && (
+        <g pointerEvents="none">
+          <rect
+            x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+            y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+            width={viewSize.width / camera.pixelsPerMetre}
+            height={viewSize.height / camera.pixelsPerMetre}
+            fill="var(--background)"
+            opacity={0.65}
+          />
+          {modelSources.allSegments
+            .filter(
+              (s) =>
+                referenceSelection?.state.draft?.includes(segmentKey(s.source)) ||
+                (referenceSelection?.hot &&
+                  segmentKey(referenceSelection.hot) === segmentKey(s.source)),
+            )
+            .map((s) => (
+              <line
+                key={segmentKey(s.source)}
+                x1={s.start.x}
+                y1={-s.start.y}
+                x2={s.end.x}
+                y2={-s.end.y}
+                stroke="#64748b"
+                strokeWidth={3 / camera.pixelsPerMetre}
+              />
+            ))}
+        </g>
+      )}
+      {referenceSelection && (selecting || (endpointSnap && snap)) && (
         <foreignObject
-          transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + 12 / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + 12 / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
-          width={Math.max(1, viewSize.width - 24)}
-          height={50}
-          pointerEvents="none"
+          transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
+          width={Math.min(440, viewSize.width - 24)}
+          height={selecting ? 260 : 90}
         >
-          <div
-            role="status"
-            style={{
-              fontSize: 12,
-              lineHeight: 1.4,
-              padding: 4,
-              borderRadius: 4,
+          <ReferenceSelectionPanel
+            binding={referenceSelection}
+            paused={density.paused}
+            label={(r) => {
+              const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
+              const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+              return wi >= 0
+                ? `Wand ${wi + 1} · Achse`
+                : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
             }}
-            className="bg-background/90 text-foreground"
-          >
-            Viele Fangziele – automatische Schnittpunkte pausiert. Ansicht vergrößern.
-          </div>
+          />
         </foreignObject>
       )}
     </svg>
