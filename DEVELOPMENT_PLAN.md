@@ -1023,6 +1023,10 @@ Abnahme: SNAP einschalten, in 3D ueber einem sichtbaren Abschnitt der unteren Wa
 
 Grenzen: nur z=0-Materialkanten, keine oberen Kanten oder freie Z-Fuehrung. Segmentmittelpunkt muss zusaetzlich zum Hoverpunkt sichtbar sein; teilweise verdeckte Kanten koennen daher konservativ entfallen. Mesh-Unterteilungen an Oeffnungen koennen mehrere kollineare Referenzabschnitte ergeben. Keine allgemeine Sichtbarkeitszerlegung oder Grossprojekt-/Mehr-GPU-Messung. Temporäre Referenzen werden nicht gespeichert oder exportiert.
 
+### Zukünftiger Anforderungskatalog: AI im CAD — 04.10.2026
+
+Der Nutzer hat CAD_BIM_2026_AI_Strategie.pdf als Zukunftsvision bereitgestellt. Original: docs/ai/CAD_BIM_2026_AI_Strategie.pdf; für Codex lesbarer Katalog mit AI01–AI35: docs/ai/AI_FUTURE_VISION.md. Enthält Modellabfragen, kontrollierte Änderungen, Qualitätsprüfung, generative Planung und spätere Fachanalysen. Kein AI-Feature in diesem Dokumentationsschritt implementiert. Architekturvertrag und aktueller nächster Auftrag bleiben maßgeblich. Die spätere AI-Reihenfolge lautet Lesen → Prüfen → Ändern → Entwerfen; Einordnung in den Gesamtplan folgt erst mit den erforderlichen Modell-/Werkzeuggrundlagen.
+
 ### Genau ein ausfuehrbarer Folgeauftrag: gemeinsamen 2D-/3D-Bearbeitungsablauf abnehmen
 
 Einen kleinen Grundriss mit zwei unterschiedlich gerichteten Waenden und Fenster durchgaengig pruefen: 3D-Fusskante als Referenz aktivieren, andere Wand mit gepinntem Ursprung parallel bewegen, Tab-Masseingabe, Abbruch und bestaetigte Aenderung, Undo/Redo, 2D-/3D-Abgleich, Projektdatei wieder oeffnen und IFC exportieren. Gefundene Fehler zuerst im gemeinsamen Pfad beheben und einen reproduzierbaren Abnahmenachweis dokumentieren. Keine neue Bauteilart oder weitere 3D-Fangmodi in diesem Auftrag.
