@@ -18,6 +18,12 @@ The existing stretch/axis/x/y actions now enter the same 3D workplane interactio
 
 ## Status
 
+### Implemented: independent preview depth extent — 2026-10-04
+
+ProjectionFrame now optionally carries depthRadius independently of its image-fitting radius. Omitting it preserves the original projection. The geometry helper projectionDepthRadius encloses displayed bounds around the fixed frame centre in camera-independent power-of-two tiers; XY scale and pan are untouched. Both orthographic depth and horizontal depth derivatives use the same extent. ProjectionState validates and snapshots it, and the workplane adapter preserves it.
+
+BimSolidView derives one displayed ProjectionState from its camera/viewport snapshot and the depth envelope of both committed and preview geometry. Rendering, outline, picking, visibility and inference all consume this same projection/frame. Changing depth alone does not clear the pointer or active references; tier changes may suspend pending hover acquisition just like other projection changes. The image frame remains pinned to the committed model during preview. Normal viewport-edge clipping remains intentional. Finite GPU depth precision, the existing NDC visibility tolerance and outline bias limit distinguishability of extremely close surfaces in very large extents; this is not a large-coordinate precision overhaul.
+
 ### Implemented: shared 3D selection edges — 2026-10-04
 
 `rendering/viewport/selection-outline.ts` derives boundary and crease segments from the selected entity's displayed polygon faces. It is independent of domain IDs and React; BimSolidView supplies the faces of the current selected wall, including edit preview geometry. No persisted selection or model copy is introduced. Equal-coordinate shared edges with matching unit normals are omitted, removing cell seams and triangle diagonals while retaining opening reveals. The input contract is a conforming mesh with identical shared vertex coordinates, as produced by buildSolid; future nonconforming adapters must subdivide T-junctions first.

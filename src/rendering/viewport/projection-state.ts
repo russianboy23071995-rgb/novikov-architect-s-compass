@@ -26,12 +26,14 @@ export function createProjectionState(
     ![
       ...inputFrame.center,
       inputFrame.radius,
+      inputFrame.depthRadius ?? inputFrame.radius,
       ...Object.values(inputCamera),
       ...Object.values(inputViewport),
       buffer.width,
       buffer.height,
     ].every(Number.isFinite) ||
     inputFrame.radius <= 0 ||
+    (inputFrame.depthRadius ?? inputFrame.radius) <= 0 ||
     inputCamera.zoom <= 0 ||
     inputViewport.width <= 0 ||
     inputViewport.height <= 0 ||
@@ -44,6 +46,7 @@ export function createProjectionState(
   const frame: ProjectionFrame = Object.freeze({
     center: Object.freeze([...inputFrame.center]) as Vector3,
     radius: inputFrame.radius,
+    ...(inputFrame.depthRadius !== undefined ? { depthRadius: inputFrame.depthRadius } : {}),
   });
   const camera = Object.freeze({ ...inputCamera }),
     viewport = Object.freeze({ ...inputViewport }),

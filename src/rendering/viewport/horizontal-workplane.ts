@@ -53,11 +53,13 @@ export function createHorizontalWorkplaneFromFrame(
   const frame: ProjectionFrame = Object.freeze({
     center: Object.freeze([...inputFrame.center]) as ProjectionFrame["center"],
     radius: inputFrame.radius,
+    ...(inputFrame.depthRadius !== undefined ? { depthRadius: inputFrame.depthRadius } : {}),
   });
   if (
     !finite(
       ...frame.center,
       frame.radius,
+      frame.depthRadius ?? frame.radius,
       camera.yaw,
       camera.pitch,
       camera.zoom,
@@ -71,6 +73,7 @@ export function createHorizontalWorkplaneFromFrame(
       height,
     ) ||
     frame.radius <= 0 ||
+    (frame.depthRadius ?? frame.radius) <= 0 ||
     camera.zoom <= 0 ||
     viewport.width <= 0 ||
     viewport.height <= 0 ||
