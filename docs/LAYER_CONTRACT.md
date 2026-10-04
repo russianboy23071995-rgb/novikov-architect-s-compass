@@ -1,5 +1,29 @@
 # Ebenenvertrag und Dateimigration
 
+## Umsetzung vom 04.10.2026
+
+Der nachfolgende Planungsstand bleibt als Herleitung erhalten. Schema 2 ist jetzt
+implementiert: Project.layers, layerId je Wand/Fenster/Linie und zusätzlich
+defaultLayerIds mit wall/window/line. Diese expliziten ID-Verweise verhindern,
+dass Umbenennen oder kollisionsbedingt abweichende IDs Erzeugungsvorgaben brechen.
+Schema und Validierung liegen in domain/project/schema.ts, Standardebenen in
+domain/layers/model.ts, Migration in interop/project-file/load.ts, Zuordnung in
+application/layers/actions.ts. Bestehende Modell-Exporte bleiben kompatibel.
+
+335 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Acht neue Tests decken Migration mit/ohne Linien, ID-Kollisionen,
+defekte Alt-/Neudateien, zentrale Erzeugungsvorgaben, atomare Zuordnung,
+veraltete Ziele, Undo/Redo, JSON und unveränderte Geometrie/IFC ab. Historische
+Test-Fixtures wurden auf das aktuelle Schema angepasst; die Laufzeitvalidierung
+akzeptiert keine alten Snapshots. Keine Sichtbarkeits-/UI-Funktion hinzugefügt.
+
+Praktisch prüfen: alte Version-1-Projektdatei öffnen, Maße und Positionen in 2D/3D
+vergleichen, als neue Datei speichern und wieder öffnen. Die neue Datei enthält
+schemaVersion 2, Ebenen und Zuordnungen. Ältere Programmversionen lesen Schema 2
+nicht. Die native Dateidialog-Abnahme wurde hier nicht erneut durchgeführt;
+der automatisierte Dateirundlauf ist bestanden. Der aktive nächste Auftrag steht
+am Ende von DEVELOPMENT_PLAN.md.
+
 Stand: 04.10.2026; geprüfte Basis 26987d1 (Integrationszweig nach PR #83).
 Dieser Auftrag ist Planung. Schema, Bedienung und Produktionscode bleiben unverändert.
 

@@ -1,3 +1,4 @@
+import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { advanceSnapDensity, emptySnapDensity } from "./density.ts";
@@ -24,7 +25,8 @@ test("density boundaries, hysteresis, interruption and exact return deadline", (
 });
 function fixture(n: number) {
   return validateProject({
-    schemaVersion: 1,
+    schemaVersion: 2,
+    ...createStandardLayers([]),
     unit: "m",
     id: "dense",
     storey: {
@@ -33,6 +35,7 @@ function fixture(n: number) {
       windows: [],
       lines: Array.from({ length: n }, (_, i) => ({
         id: "l" + i,
+        layerId: "layer:drawing",
         kind: "line",
         points: [
           { x: -10, y: -1 - i * 0.1 },

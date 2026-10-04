@@ -1,3 +1,4 @@
+import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -14,17 +15,26 @@ import { createHistory, commitProject, undoProject, redoProject } from "../../li
 
 function fixture(pairs: number[][]) {
   return validateProject({
-    schemaVersion: 1,
+    schemaVersion: 2,
+    ...createStandardLayers([]),
     unit: "m",
     id: "p",
     storey: {
       id: "s",
       walls: [
-        { id: "w", start: { x: -3, y: -3 }, end: { x: -1, y: -3 }, height: 2.8, thickness: 0.36 },
+        {
+          id: "w",
+          layerId: "layer:exterior-wall",
+          start: { x: -3, y: -3 },
+          end: { x: -1, y: -3 },
+          height: 2.8,
+          thickness: 0.36,
+        },
       ],
       windows: [],
       lines: pairs.map(([x, y, a, b], i) => ({
         id: `l${i}`,
+        layerId: "layer:drawing",
         kind: "line",
         points: [
           { x, y },
