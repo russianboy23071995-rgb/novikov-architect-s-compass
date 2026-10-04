@@ -10,6 +10,8 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
 import { segmentMayMeetBox } from "../../geometry/intersections/segment-box.ts";
+import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 import { MAX_MODEL_TOLERANCE_METRES } from "../../geometry/tolerances/model.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
@@ -47,7 +49,7 @@ export function createLocalSnapSources(project: Project) {
   return Object.freeze({
     query(
       cursor: Point2,
-      scale: number,
+      scale: number | ScreenMetric,
       radius: number,
       allowed: (source: SnapReference) => boolean = () => true,
     ) {
@@ -59,40 +61,37 @@ export function createLocalSnapSources(project: Project) {
     lookup: (key: string) => lookup.get(key),
     queryPrimitives(
       cursor: Point2,
-      pixelsPerMetre: number,
+      pixelsPerMetre: number | ScreenMetric,
       radiusPx: number,
       allowed: (source: SnapReference) => boolean = () => true,
     ) {
-      if (
-        ![cursor.x, cursor.y, pixelsPerMetre, radiusPx].every(Number.isFinite) ||
-        pixelsPerMetre <= 0 ||
-        radiusPx < 0
-      )
+      if (![cursor.x, cursor.y, radiusPx].every(Number.isFinite) || radiusPx < 0)
         throw new Error("Invalid local snap query");
-      const radius = radiusPx / pixelsPerMetre;
+      const metric =
+        typeof pixelsPerMetre === "number"
+          ? createIsotropicScreenMetric(pixelsPerMetre)
+          : pixelsPerMetre;
       // Conservative padding covers every tolerance accepted by intersectSegments.
-      const padded = radius + MAX_MODEL_TOLERANCE_METRES;
-      const box = {
-        minX: cursor.x - padded,
-        maxX: cursor.x + padded,
-        minY: cursor.y - padded,
-        maxY: cursor.y + padded,
-      };
-      const near = (r: SnapReference) =>
-        Math.hypot(r.point.x - cursor.x, r.point.y - cursor.y) * pixelsPerMetre <= radiusPx;
+      const box = metric.queryBounds(cursor, radiusPx, MAX_MODEL_TOLERANCE_METRES);
+      const near = (r: SnapReference) => metric.distance(r.point, cursor) <= radiusPx;
       const localPoints = points
         .query(box)
         .sort((a, b) => a - b)
         .map((i) => references[i]!)
         .filter((r) => allowed(r) && near(r));
       // Refine overlapping bounds against the actual segment before pairing.
-      // Use the padded square conservatively, not a tighter unpadded circle.
+      // CSS refinement includes model-tolerance and roundoff padding.
       // Keep full extents for exact intersection and hover/source identities.
       const localSegments = lines
         .query(box)
         .sort((a, b) => a - b)
         .map((i) => segments[i]!)
-        .filter((s) => allowed(s.source) && segmentMayMeetBox(s.start, s.end, box));
+        .filter(
+          (s) =>
+            allowed(s.source) &&
+            segmentMayMeetBox(s.start, s.end, box) &&
+            metric.segmentNear(cursor, s.start, s.end, radiusPx, MAX_MODEL_TOLERANCE_METRES),
+        );
 
       return {
         references: localPoints,
