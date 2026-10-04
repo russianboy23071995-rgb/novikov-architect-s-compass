@@ -6,6 +6,7 @@ import {
 import type {
   OrthographicCamera,
   ProjectionBounds,
+  ProjectionFrame,
 } from "../../geometry/projections/orthographic.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { Box2 } from "../../geometry/spatial/box-index.ts";
@@ -30,13 +31,31 @@ export function createHorizontalWorkplaneProjection(
   renderAspect: number,
   height = 0,
 ) {
+  if (bounds.min.some((v, i) => v > bounds.max[i]!)) return { status: "invalid-input" as const };
+  return createHorizontalWorkplaneFromFrame(
+    createProjectionFrame(bounds),
+    inputCamera,
+    inputViewport,
+    renderAspect,
+    height,
+  );
+}
+
+export function createHorizontalWorkplaneFromFrame(
+  inputFrame: ProjectionFrame,
+  inputCamera: OrthographicCamera,
+  inputViewport: CssViewport,
+  renderAspect: number,
+  height = 0,
+) {
   const camera = { ...inputCamera },
     viewport = { ...inputViewport };
-  const frame = createProjectionFrame(bounds);
+  const frame: ProjectionFrame = Object.freeze({
+    center: Object.freeze([...inputFrame.center]) as ProjectionFrame["center"],
+    radius: inputFrame.radius,
+  });
   if (
     !finite(
-      ...bounds.min,
-      ...bounds.max,
       ...frame.center,
       frame.radius,
       camera.yaw,
@@ -51,7 +70,7 @@ export function createHorizontalWorkplaneProjection(
       renderAspect,
       height,
     ) ||
-    bounds.min.some((v, i) => v > bounds.max[i]!) ||
+    frame.radius <= 0 ||
     camera.zoom <= 0 ||
     viewport.width <= 0 ||
     viewport.height <= 0 ||

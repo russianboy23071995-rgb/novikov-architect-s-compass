@@ -856,3 +856,15 @@ Nur vier Dokumente geändert; Pfade und Whitespace geprüft. Keine Laufzeitände
 ### Genau ein ausführbarer Folgeauftrag: gemeinsamer 3D-Projektionsstand
 
 Das im Bedienvertrag beschriebene Projektionspaket umsetzen: Rahmen, Kamera, CSS-Rechteck und Render-Aspect als gemeinsamen unveränderlichen Stand für BimSolidView, Wand-Picking und Ebeneninverse verbinden. Resize/DPR/Kamerawechsel konsistent behandeln, alte Treffer bei ungültigem Stand verhindern, bestehendes pickWall kompatibel halten. Ungerade Größen, DPR, Öffnungen, Navigation und Snapshot-Isolation automatisiert und Wand-Auswahl praktisch prüfen; gesamte Tests/TypeScript/Build/Lint. Keine neue Gestenbelegung, Fangoberfläche oder Modellaktion. Dieser technische Schritt ist unabhängig von den noch offenen Sichtbarkeits-/Gestenentscheidungen.
+
+### Abschluss: gemeinsamer 3D-Projektionsstand — 04.10.2026
+
+Zweig feat/shared-3d-projection-state baut auf dem weiterhin offenen Planungs-PR #71 auf. Darstellung, Wand-Picking und Ebeneninverse verwenden denselben unveränderlichen Projektionsstand mit tatsächlichem gerundetem Backbuffer-Aspect. Kamera, CSS-Rechteck und Pixeldichte werden beim Treffen gegen den dargestellten Stand geprüft; veraltete Treffer lösen eine Neuzeichnung aus. Bestehendes pickWall bleibt kompatibel. Optionaler expliziter Rahmen ist verfügbar, aber noch nicht aus Bearbeitungsvorgängen angebunden. Keine neue Fangoberfläche, Modellaktion oder Gestenregel.
+
+285 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Tests mit Parameterreihen prüfen ungerade Hoch-/Querformate, DPR 1/1,25/2, Wand versus Fensteröffnung, gemeinsame Ebeneninverse, Snapshot-Isolation, ungültige und veraltete Zustände sowie explizit festgehaltene Rahmen bei Vorschaugeometrie. Browser: Öffnung löscht Auswahl, Wandfläche wählt wall-1; erneut erfolgreich nach Tastaturrotation, Zoom und Resize durch Schließen des Navigators. Screenshot outputs/projection-state.jpg außerhalb des Repositories. Physischer Monitor-DPR-Wechsel und WebGL-Kontextverlust wurden nicht manuell provoziert; keine vollständige 3D-Bearbeitungsabnahme.
+
+Praktisch prüfen: 3D öffnen, durch die Fensteröffnung und danach auf Wandmaterial klicken. Drehen, zoomen, Navigator schließen und die beiden Klicks wiederholen. Die Eigenschaften müssen ausschließlich beim Wandtreffer wall-1 zeigen.
+
+### Genau ein ausführbarer Folgeauftrag: geometrische Sichtbarkeitsklassifikation
+
+Einen gemeinsamen Rendering-Dienst ergänzen, der einen projizierten 3D-Anker anhand desselben Projektionsstands und der dargestellten Wanddreiecke als sichtbar, verdeckt oder außerhalb klassifiziert. Bestehende Tiefen-/Dreiecksmathematik wiederverwenden oder eng begrenzt extrahieren; keine zweite Picking-Engine. Öffnungen, überdeckende Wände, Rand-/Tiefentoleranzen, Kamerabewegung und ungültige Projektionen testen. Nur technische Klassifikation, keine automatische Referenzaktivierung, X-Ray-Entscheidung oder neue Gesten. Produktregeln für verdeckte Ziele und Orbit/Werkzeugklick bleiben ausdrücklich offen.

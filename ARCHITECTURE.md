@@ -1008,3 +1008,9 @@ The existing rendering/viewport reference pickers accept ScreenMetric or the com
 ## 3D interaction integration plan (2026-10-04)
 
 [docs/3D_INTERACTION_CONTRACT.md](docs/3D_INTERACTION_CONTRACT.md) records the current viewport audit and separates binding technical requirements from proposed product behavior. Element ID, client-space menu anchor and geometric movement origin are distinct. The next implementation binds rendering, wall picking and plane inversion to one immutable projection state; it does not authorize a gesture change or hidden-target acquisition. Current CSS versus rounded-backbuffer aspect usage differs at the call sites and must be unified. Proposed plane presentation, visibility and gesture policies require explicit resolution before their UI implementation.
+
+## Shared displayed projection state (2026-10-04)
+
+Implemented in rendering/viewport/projection-state.ts: an immutable copy of frame, camera, CSS viewport and actual rounded backbuffer size supplies projection, client-to-NDC conversion and horizontal workplane inversion. BimSolidView rendering and wall picking consume the same displayed snapshot. Camera/layout/DPR changes invalidate stale selection; resize, scroll and resolution changes request redraw. Existing pickWall remains compatible through pickWallInProjection. An optional explicit frame supports later operation-pinned framing; current editing callers do not yet pin it.
+
+This completes the projection-state implementation above, without enabling 3D snapping or deciding gestures/occlusion. Rendering remains derived state. Visibility classification is a separate rendering concern; product policy must not be hidden in geometry or duplicated per tool.
