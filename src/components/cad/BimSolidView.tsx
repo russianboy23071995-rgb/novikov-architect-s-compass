@@ -12,6 +12,7 @@ import type { Camera, Solid } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+import { SolidSnapPreview } from "./SolidSnapPreview";
 
 const viewportOf = (canvas: HTMLCanvasElement) => {
   const { left, top, width, height } = canvas.getBoundingClientRect();
@@ -97,6 +98,7 @@ export function BimSolidView({
   pan,
   onSelect,
   projectionFrame,
+  snap = false,
 }: {
   project: Project;
   selection: Selection;
@@ -105,6 +107,7 @@ export function BimSolidView({
   pan: boolean;
   onSelect: (selection: Selection, anchor?: Point) => void;
   projectionFrame?: ProjectionFrame;
+  snap?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
@@ -118,6 +121,9 @@ export function BimSolidView({
   } | null>(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
+  const [previewProjection, setPreviewProjection] = useState<ProjectionState | null>(null);
+  const [previewClient, setPreviewClient] = useState<Point | null>(null);
+  const [previewReset, setPreviewReset] = useState(0);
   const solid = useMemo(() => buildSolid(project), [project]);
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -133,6 +139,8 @@ export function BimSolidView({
     const lost = (event: Event) => {
       event.preventDefault();
       displayed.current = null;
+      setPreviewProjection(null);
+      setPreviewClient(null);
       drag.current = null;
       renderer.current = null;
       setError("Graphics context lost. Waiting for restoration; the model is retained.");
@@ -142,6 +150,8 @@ export function BimSolidView({
     observer.observe(canvas);
     const invalidate = () => {
       displayed.current = null;
+      setPreviewProjection(null);
+      setPreviewClient(null);
       setRevision((n) => n + 1);
     };
     let resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
@@ -185,22 +195,36 @@ export function BimSolidView({
       renderer.current.draw(solid, projection, selectedWall);
       displayed.current = { solid, projection };
     }
+    setPreviewClient(null);
+    setPreviewProjection(renderer.current ? projection : null);
   }, [solid, camera, selection, project, revision, projectionFrame]);
   return (
     <>
+      <SolidSnapPreview
+        project={project}
+        projection={previewProjection}
+        client={previewClient}
+        enabled={snap && !error}
+        resetKey={previewReset}
+      />
       <canvas
         ref={canvasRef}
         aria-label="3D walls with window openings"
         role="img"
         tabIndex={0}
         title="Click a wall to select it; click empty space to clear selection. Drag to orbit or pan. Arrow keys rotate, +/− zoom. Select windows in Navigator."
-        className="h-full w-full touch-none cursor-grab active:cursor-grabbing"
+        className="relative z-10 h-full w-full touch-none cursor-grab active:cursor-grabbing"
         onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setPreviewClient(null);
+            setPreviewReset((n) => n + 1);
+          }
           const delta = 0.12;
           if (
             ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-", "="].includes(event.key)
           ) {
             event.preventDefault();
+            setPreviewClient(null);
             if (event.key === "ArrowLeft") onCamera({ ...camera, yaw: camera.yaw - delta });
             if (event.key === "ArrowRight") onCamera({ ...camera, yaw: camera.yaw + delta });
             if (event.key === "ArrowUp")
@@ -215,6 +239,7 @@ export function BimSolidView({
           }
         }}
         onPointerDown={(event) => {
+          setPreviewClient(null);
           if (event.button !== 0 || drag.current) return;
           event.currentTarget.setPointerCapture(event.pointerId);
           drag.current = {
@@ -226,6 +251,23 @@ export function BimSolidView({
           };
         }}
         onPointerMove={(event) => {
+          if (!drag.current) {
+            const current = displayed.current;
+            const canvas = event.currentTarget;
+            if (
+              current &&
+              current.solid === solid &&
+              projectionStateMatches(
+                current.projection,
+                camera,
+                viewportOf(canvas),
+                backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+              )
+            ) {
+              setPreviewClient({ x: event.clientX, y: event.clientY });
+            } else setPreviewClient(null);
+            return;
+          }
           if (!drag.current || drag.current.pointerId !== event.pointerId) return;
           if (
             !drag.current.moved &&
@@ -294,17 +336,22 @@ export function BimSolidView({
             event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onLostPointerCapture={() => {
+          setPreviewClient(null);
           drag.current = null;
         }}
         onPointerCancel={() => {
+          setPreviewClient(null);
           drag.current = null;
         }}
-        onWheel={(event) =>
+        onPointerLeave={() => setPreviewClient(null)}
+        onBlur={() => setPreviewClient(null)}
+        onWheel={(event) => {
+          setPreviewClient(null);
           onCamera({
             ...camera,
             zoom: Math.max(0.2, Math.min(5, camera.zoom * Math.exp(-event.deltaY * 0.001))),
-          })
-        }
+          });
+        }}
       />
       {error && (
         <p

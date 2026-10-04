@@ -51,7 +51,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     const active = withParallelDirections([
       ...(context.pinnedReferences ?? []),
       ...current.references,
-    ]);
+    ]).filter((r) => !context.acceptReference || context.acceptReference(r));
     const sources = withConstructionReferences(
       context.sourceQuery
         ? context.sourceQuery(
@@ -88,7 +88,9 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       : (hoveredSegment(cursor, sources, context.metric ?? context.pixelsPerMetre) ??
         acquisitionReference(candidate, sources));
     const reference =
-      acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))
+      acquired &&
+      (!context.acceptReference || context.acceptReference(acquired)) &&
+      !context.pinnedReferences?.some((r) => sameReference(r, acquired))
         ? acquired
         : null;
     const update = () => {

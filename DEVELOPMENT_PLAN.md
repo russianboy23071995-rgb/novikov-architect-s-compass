@@ -894,3 +894,17 @@ Praktisch ist noch kein neuer 3D-Fang sichtbar; die neue Abfrage wird automatisi
 ### Genau ein Folgeauftrag: 3D-Vorschau-Bedienregeln konkret freigeben
 
 Vor dem Anschluss an Mausereignisse die offenen Regeln aus docs/3D_INTERACTION_CONTRACT.md als kurze konkrete Entscheidungsvorlage fuer eine rein lesende 3D-Fangvorschau vorlegen: Umgang mit verdeckten Zielen, Aktivierung der Vorschau und Vorrang von Orbit gegenueber Hover/Referenzerwerb. Bestehende 600-ms-Regel, silbergraue Ringe und gemeinsame Engine bewahren. Nutzerentscheidung einholen, ohne aus PR-Freigaben eine neue Gesten- oder X-Ray-Regel abzuleiten. Erst danach die begrenzte Vorschau integrieren; noch keine Modellbewegung.
+
+### Abschluss: sichtbare 3D-Fangvorschau - 04.10.2026
+
+PR #74 wurde nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (1b5ff15). Nach konkreter Bedienvorlage hat der Nutzer mit "Fahre fort" die vorgeschlagenen Vorschau-Regeln bestaetigt. Zweig feat/3d-snap-preview. Gemeinsamer Snap-Schalter aktiviert die Vorschau auch ohne Zeichenwerkzeug. Sichtbare Wand-Fusspunkte zeigen sofort einen hohlen silbergrauen 10,5-CSS-Pixel-Ring; 600ms aktivieren eine Referenz, erneuter Besuch loest sie. Mehrere Referenzen und mausgerichtete Hilfslinien verwenden vorhandene Hover-/Richtungslogik.
+
+299 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Integrationstests der reinen Adapter-/Zustandsbausteine pruefen sichtbare versus verdeckte/rechnerisch erzeugte Quellen, 600ms-Toggle/Suspension und Sitzungsidentitaet bei Kamera, Modell, Escape und Snap. Browser: sofortiger Ring, Erwerb und erneutes Loesen, zwei Referenzen, Erhalt bei Zoom/Tastaturrotation/Maus-Orbit; Modellhoehe aendern und Undo invalidieren Referenzen; Escape leert, Snap-off blendet aus. Keine millisekundengenaue Browsertimermessung. Screenshot outputs/3d-snap-preview.jpg ausserhalb des Repositories.
+
+Abnahme: 3D und Snap aktivieren. Sichtbare untere Wandecke ohne Klick anhovern und 0,6s verweilen; wegbewegen, Hilfslinie sehen. Zweite Ecke aktivieren, zoomen und drehen. Zum Loesen erneut auf einen aktivierten Punkt verweilen. Escape leert die Referenzen. Wandklick bleibt Auswahl, Ziehen dreht die Kamera.
+
+Grenzen: nur reale Wand-Fusspunkte auf z=0, keine Bauteilbewegung oder automatisch erfassbaren Hilflinienschnittpunkte. Guide-SVG liegt konservativ hinter Wandpixeln; kein allgemeines tiefengeprueftes 3D-Linienrendering. Referenzen sind ans lokale 3D-Viewport-Leben gebunden, nicht an einen Wechsel zwischen 2D und 3D. Keine Grossprojekt-/Kontextverlust-Abnahme; bisheriger linearer Tiefentest bleibt.
+
+### Genau ein Folgeauftrag: gemeinsame Hilflinienschnittpunkte in der 3D-Vorschau
+
+Erzeugte Schnittpunkte aktiver Hilfslinien auf z=0 ueber die vorhandene gemeinsame Kandidaten-/Inference-Logik fuer Vorschau und 600ms-Erwerb anbinden. Die Eligibility-Regel soll echte Modellquellen und gueltige Konstruktionen unterscheiden, ihre Abhaengigkeiten erhalten und verdeckte/ungueltige Punkte ablehnen. Keine zweite Schnittpunktberechnung, kein Werkzeugwechsel-Code, keine Modellbewegung. Zwei Referenzen, erzeugten Schnittpunkt, erneutes Loesen, Navigationserhalt und Modellinvalidierung automatisch und im Browser pruefen.

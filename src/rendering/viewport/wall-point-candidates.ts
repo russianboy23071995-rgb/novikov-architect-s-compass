@@ -50,6 +50,9 @@ export function createWallPointCandidates(project: Project, projection: Projecti
         status: "ok" as const,
         candidates: ranked.map(({ candidate }) => ({
           ...candidate,
+          reference: references.find(
+            (r) => r.entityId === candidate.sourceEntityId && r.feature === candidate.sourceFeature,
+          )!,
           sourceId: JSON.stringify([candidate.sourceEntityId, candidate.sourceFeature]),
           modelPoint: [candidate.worldPoint.x, candidate.worldPoint.y, 0] as const,
           visibility: classifyAnchorVisibility(solid, projection, [
