@@ -1035,6 +1035,10 @@ Browserabnahme in separatem Test-Tab: zweite schräge Wand gezeichnet, Fensterwa
 
 Offen bleibt die manuelle Abnahme von tatsaechlichem Browserdownload und erneutem Oeffnen derselben Datei: die vorhandene Browsersteuerung kann keinen Datei-Upload, native Desktopautomatisierung ist fuer diese App nicht zulaessig. Kein pauschaler Vollabnahme-Status. Dateirundlauf und IFC-Inhalt sind automatisiert nachgewiesen. Konkrete Anleitung und weitere Grenzen stehen in docs/acceptance/2026-10-04-parallel-workflow.md. Bestehende Hover-Unterbrechung bei Tiefenstufenwechsel und Sichtbarkeitsgrenzen nicht als neue Fehler umgedeutet.
 
+### Zukünftiger Anforderungskatalog: AI im CAD — 04.10.2026
+
+Der Nutzer hat CAD_BIM_2026_AI_Strategie.pdf als Zukunftsvision bereitgestellt. Original: docs/ai/CAD_BIM_2026_AI_Strategie.pdf; für Codex lesbarer Katalog mit AI01–AI35: docs/ai/AI_FUTURE_VISION.md. Enthält Modellabfragen, kontrollierte Änderungen, Qualitätsprüfung, generative Planung und spätere Fachanalysen. Kein AI-Feature in diesem Dokumentationsschritt implementiert. Architekturvertrag und aktueller nächster Auftrag bleiben maßgeblich. Die spätere AI-Reihenfolge lautet Lesen → Prüfen → Ändern → Entwerfen; Einordnung in den Gesamtplan folgt erst mit den erforderlichen Modell-/Werkzeuggrundlagen.
+
 ### Abgeschlossener Planungsauftrag: Ebenenvertrag und Dateimigration vorbereiten
 
 Gemaess Entwicklungsleitfaden Etappe 4 die Ebenengrundlage vor weiteren Bauteilen abgleichen: bestehende Anforderungen und N01–N60, Layer versus AssemblyLayer, stabile layerId-Zuordnung fuer Waende/Fenster/Linien, alte Projektdateien und gemeinsame Sichtbarkeits-/Fangfilter. Einen begrenzten technischen Vertrag und genau einen anschliessenden Implementierungsauftrag dokumentieren. Noch offene Produktentscheidungen (insbesondere ansichtsbezogene versus globale Sichtbarkeit) ausdruecklich markieren, keine Nutzerentscheidung erfinden. Keine leeren Klassen oder Schemaaenderung in diesem Planungsauftrag. Die offene manuelle Dateidialog-Abnahme bleibt im Abnahmebericht stehen.
