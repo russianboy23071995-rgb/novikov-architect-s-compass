@@ -1004,3 +1004,7 @@ Dwell, toggle-on-revisit, suspension, capacity and pinned-reference rules remain
 ## Explicit reference picking metric (2026-10-04)
 
 The existing rendering/viewport reference pickers accept ScreenMetric or the compatible isotropic numeric scale. Point distances and bounded segment projection use the same geometry service as snapping/hover. Explicit segment picking includes endpoint caps and degenerate point segments, whereas hover retains its interior-only rule. Non-finite hits are excluded. Existing distance/source-key ordering and selection transactions are preserved. The UI still supplies its 2D scale; affine capability does not enable 3D interaction or decide occlusion/navigation policy.
+
+## 3D interaction integration plan (2026-10-04)
+
+[docs/3D_INTERACTION_CONTRACT.md](docs/3D_INTERACTION_CONTRACT.md) records the current viewport audit and separates binding technical requirements from proposed product behavior. Element ID, client-space menu anchor and geometric movement origin are distinct. The next implementation binds rendering, wall picking and plane inversion to one immutable projection state; it does not authorize a gesture change or hidden-target acquisition. Current CSS versus rounded-backbuffer aspect usage differs at the call sites and must be unified. Proposed plane presentation, visibility and gesture policies require explicit resolution before their UI implementation.
