@@ -11,7 +11,7 @@ export function InteractionInput({
   onPosition: (point: Point2) => void;
 }) {
   const { adapter, draft, preview } = interaction;
-  if (!adapter) return null;
+  if (!adapter || interaction.suspended) return null;
   if (!adapter.input)
     return (
       <div

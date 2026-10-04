@@ -4,12 +4,12 @@ import { evaluateInteraction, confirmInteraction } from "@/application/tools/int
 import type { ToolInteraction } from "@/application/tools/interaction";
 import type { Point2 } from "@/geometry/primitives/point";
 /** One lifecycle for every adapter: input, preview, click, confirmation and cancellation. */
-export function useToolInteraction(adapter: ToolInteraction | null) {
+export function useToolInteraction(adapter: ToolInteraction | null, suspended = false) {
   const draft = usePrecisionDraft(adapter?.identity ?? null);
   const [failure, setFailure] = useState<{ identity: object; message: string } | null>(null);
   const preview = evaluateInteraction(adapter, draft.angle, draft.length, draft.aim);
   const confirm = (point?: Point2) => {
-    if (!adapter) return;
+    if (!adapter || suspended) return;
     const target = point ?? preview.value?.point;
     if (!target) return;
     try {
@@ -29,7 +29,13 @@ export function useToolInteraction(adapter: ToolInteraction | null) {
   };
   return {
     adapter,
-    draft,
+    suspended,
+    draft: {
+      ...draft,
+      move: (point: Point2) => {
+        if (!suspended) draft.move(point);
+      },
+    },
     preview,
     target: draft.hasInput ? (preview.value?.point ?? null) : undefined,
     error:

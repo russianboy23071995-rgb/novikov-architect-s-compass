@@ -64,3 +64,8 @@ Spätere Auswahltests: Klick bestätigt niemals Modellaktion, Arbeitskopie/Cance
 ## Umsetzungsstand 04.10.2026
 
 Erstes Paket umgesetzt: gemeinsame Dichteschranke und sichtbarer Status. Startwerte 32/24/250 ms durch Grenztests und Messung geprüft; siehe performance/SNAP_DENSITY.md. Auswahl-Picking weiterhin Vorschlag. Nächstes Paket: temporäre Segmentauswahl gemäß DEVELOPMENT_PLAN; Punktübernahme separat.
+
+
+### Zweites Paket umgesetzt: Segmentauswahl
+
+Temporärer Application-Zustand und Segmentfilter sind integriert. Rendering liefert deterministische Treffer, React bindet Auswahlpanel und suspendiert die gemeinsame ToolInteraction. Bestätigte Auswahl überlebt Zoom und Polylinienpunkte, endet bei Modell-/Vorgangswechsel. Segmentidentitäten sind an den aktuellen Modellsnapshot gebunden, keine persistierten Bauteil-IDs. End-/Mittelpunkte und aktive Referenzen bleiben vom Paarfilter unberührt. 250 Tests sowie Browserabnahme gemäß DEVELOPMENT_PLAN. Explizite Punktübernahme und ihre Kapazitätsanzeige bleiben der nächste begrenzte Auftrag.

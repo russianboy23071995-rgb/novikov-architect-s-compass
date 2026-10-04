@@ -36,7 +36,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     const compatible = state.current && sameHoverSession(state.current.context, context);
     if (!compatible)
       state.current = { context, value: emptyHoverReference(), guides: [], cursor: null };
-    if (!cursor || (compatible && state.current!.context !== context)) {
+    if (context.suspended || !cursor || (compatible && state.current!.context !== context)) {
       const next = {
         ...state.current!,
         context,
@@ -59,6 +59,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
             10,
             active,
             context.intersectionsPaused,
+            context.selectedSegments,
           )
         : context.references,
       active,
@@ -121,7 +122,11 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
         ...(compatible ? snapshot.value.references : []),
       ])
     : [];
-  const guideCursor = compatible ? (cursor ?? snapshot.cursor) : null;
+  const guideCursor = compatible
+    ? context.suspended
+      ? snapshot.cursor
+      : (cursor ?? snapshot.cursor)
+    : null;
   return {
     references,
     guideCursor,

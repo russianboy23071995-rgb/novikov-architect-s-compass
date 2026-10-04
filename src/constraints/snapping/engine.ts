@@ -44,9 +44,11 @@ export type SnapSourceQuery = (
   radiusPx: number,
   active: readonly SnapReference[],
   intersectionsPaused?: boolean,
+  selectedSegments?: ReadonlySet<string> | null,
 ) => readonly SnapReference[];
 export type SnapContext = {
   intersectionsPaused?: boolean;
+  selectedSegments?: ReadonlySet<string> | null;
   sourceQuery?: SnapSourceQuery | undefined;
   references: readonly SnapReference[];
   pixelsPerMetre: number;
@@ -131,6 +133,7 @@ export function querySnap(
         context.endpointRadiusPx,
         context.activeReferences ?? (context.activeReference ? [context.activeReference] : []),
         context.intersectionsPaused,
+        context.selectedSegments,
       ),
     };
   const candidates = collectSnapCandidates(cursor, context, constrain);

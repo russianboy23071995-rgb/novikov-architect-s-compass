@@ -18,13 +18,15 @@ export function useSnapDensity(
   enabled: boolean,
   reset: number,
   camera: object,
+  selected?: ReadonlySet<string> | null,
 ) {
   const count = useMemo(
-    () => (enabled && cursor ? query.inspect(cursor, scale, 10).segments.length : null),
-    [query, cursor, scale, enabled],
+    () => (enabled && cursor ? query.inspect(cursor, scale, 10, selected).segments.length : null),
+    [query, cursor, scale, enabled, selected],
   );
   const [snapshot, setSnapshot] = useState<{
     query: Query;
+    selected: typeof selected;
     reset: number;
     camera: object;
     state: SnapDensity;
@@ -33,11 +35,12 @@ export function useSnapDensity(
   useEffect(() => {
     const snapshot = eventState.current;
     const now = performance.now();
-    const compatible = snapshot?.query === query && snapshot.reset === reset;
+    const compatible =
+      snapshot?.query === query && snapshot.reset === reset && snapshot.selected === selected;
     let previous = compatible ? snapshot.state : emptySnapDensity();
     if (compatible && snapshot.camera !== camera) previous = { ...previous, lowSince: null };
     const state = enabled ? advanceSnapDensity(previous, count, now) : emptySnapDensity();
-    const next = { query, reset, camera, state };
+    const next = { query, reset, camera, state, selected };
     eventState.current = next;
     setSnapshot(next);
     if (state.lowSince === null) return;
@@ -50,8 +53,9 @@ export function useSnapDensity(
       Math.max(0, DENSE_RESUME_MS - (now - state.lowSince)) + 1,
     );
     return () => window.clearTimeout(timer);
-  }, [query, cursor, count, enabled, reset, camera]);
-  const compatible = snapshot?.query === query && snapshot.reset === reset;
+  }, [query, cursor, count, enabled, reset, camera, selected]);
+  const compatible =
+    snapshot?.query === query && snapshot.reset === reset && snapshot.selected === selected;
   return {
     count: count ?? 0,
     paused:
