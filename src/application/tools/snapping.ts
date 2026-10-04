@@ -1,3 +1,4 @@
+import { segmentKey } from "../snapping/reference-selection.ts";
 import { completeLocalQuery } from "../snapping/local-sources.ts";
 import { DENSE_SEGMENT_LIMIT } from "../snapping/density.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
@@ -19,10 +20,31 @@ export function createToolSourceQuery(
     const source = model.lookup(referenceKey(r));
     return source && allowed(source) ? source : undefined;
   };
-  const inspect = (cursor: Point2, scale: number, radius: number) =>
-    model.queryPrimitives(cursor, scale, radius, allowed);
-  const query: SnapSourceQuery = (cursor, scale, radius, active, paused = false) => {
-    const primitives = inspect(cursor, scale, radius);
+  const inspect = (
+    cursor: Point2,
+    scale: number,
+    radius: number,
+    selected?: ReadonlySet<string> | null,
+  ) => {
+    const local = model.queryPrimitives(cursor, scale, radius, allowed);
+    const segments = selected
+      ? local.segments.filter((s) => selected.has(segmentKey(s.source)))
+      : local.segments;
+    return {
+      ...local,
+      segments,
+      segmentPairs: (segments.length * Math.max(0, segments.length - 1)) / 2,
+    };
+  };
+  const query: SnapSourceQuery = (
+    cursor,
+    scale,
+    radius,
+    active,
+    paused = false,
+    selected = null,
+  ) => {
+    const primitives = inspect(cursor, scale, radius, selected);
     const local = completeLocalQuery(
       primitives,
       paused || primitives.segments.length > intersectionLimit,

@@ -53,6 +53,7 @@ export function createLocalSnapSources(project: Project) {
     ) {
       return completeLocalQuery(this.queryPrimitives(cursor, scale, radius, allowed));
     },
+    allSegments: segments as readonly SnapSegment[],
     sourceCount: references.length,
     segmentCount: segments.length,
     lookup: (key: string) => lookup.get(key),
