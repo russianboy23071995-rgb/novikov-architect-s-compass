@@ -23,6 +23,31 @@ import { createEditingState, editingReducer } from "../direct-edit/controller.ts
 import { addWall, addWindow, addLine, createProject } from "../../lib/bim/model.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
+import { createAffineScreenMetric } from "../../geometry/projections/screen-metric.ts";
+
+test("shared source query and point ranking use the same affine metric", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const sourceQuery = createToolSourceQuery(getLocalSnapSources(base), null);
+  const c = {
+    references: projectSnapReferences(base),
+    pixelsPerMetre: 100,
+    metric,
+    endpointRadiusPx: 10,
+    enabled: true,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: false, featureSnap: true };
+  for (const cursor of [
+    { x: 5, y: 5 },
+    { x: 6, y: 9 },
+    { x: 0, y: 4 },
+  ]) {
+    const local = resolveToolSnap(null, cursor, { ...c, sourceQuery }, options);
+    assert.deepEqual(local, resolveToolSnap(null, cursor, c, options));
+    assert.ok(local.candidate);
+    assert.ok(local.candidate.distanceOnScreen <= 10);
+  }
+});
 const base = addLine(
   addWindow(
     addWall(createProject("p", "s"), {

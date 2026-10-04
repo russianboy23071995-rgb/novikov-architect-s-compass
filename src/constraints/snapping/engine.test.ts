@@ -2,6 +2,82 @@ import { previewEdit } from "../../application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { querySnap } from "./engine.ts";
+import {
+  createAffineScreenMetric,
+  createIsotropicScreenMetric,
+} from "../../geometry/projections/screen-metric.ts";
+
+test("affine point ranking follows CSS distance rather than model distance", () => {
+  const references = [
+    { entityId: "x", feature: "end", point: { x: 0.09, y: 0 } },
+    { entityId: "y", feature: "end", point: { x: 0, y: 4 } },
+  ];
+  const c = {
+    ...context,
+    references,
+    gridSpacing: null,
+    metric: createAffineScreenMetric(100, 0, 0, 1),
+  };
+  assert.equal(querySnap({ x: 0, y: 0 }, c).candidate?.sourceEntityId, "y");
+  assert.equal(querySnap({ x: 0, y: 0 }, c).candidate?.distanceOnScreen, 4);
+  for (const kind of [undefined, "midpoint", "segment-intersection"] as const) {
+    const r = {
+      entityId: "edge",
+      feature: "point",
+      ...(kind ? { kind } : {}),
+      point: { x: 0, y: 10 },
+    };
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...c, references: [r] }).candidate?.sourceEntityId,
+      "edge",
+    );
+    assert.equal(querySnap({ x: 0, y: -0.0001 }, { ...c, references: [r] }).candidate, null);
+  }
+});
+
+test("affine ranking preserves priorities and deterministic ties across source order", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 5 } };
+  const b = { entityId: "b", feature: "end", point: { x: 0, y: -5 } };
+  const middle = {
+    entityId: "m",
+    feature: "middle",
+    kind: "midpoint" as const,
+    point: { x: 0, y: 0.1 },
+  };
+  for (const references of [
+    [a, b, middle],
+    [middle, b, a],
+  ])
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...context, metric, references }).candidate?.sourceEntityId,
+      "a",
+    );
+});
+
+test("explicit isotropic metric keeps existing resolver results across scales and constraints", () => {
+  for (const pixelsPerMetre of [0.5, 100, 10000])
+    for (const cursor of [
+      { x: 0.05, y: 0.03 },
+      { x: 2, y: 1 },
+      { x: -1, y: 0 },
+    ])
+      for (const orthoOrigin of [null, { x: 0, y: 0 }]) {
+        const c = {
+          ...context,
+          pixelsPerMetre,
+          orthoOrigin,
+          references: [
+            { entityId: "a", feature: "end", point: { x: 0, y: 0 } },
+            { entityId: "b", feature: "end", point: { x: 2, y: 1 } },
+          ],
+        };
+        assert.deepEqual(
+          querySnap(cursor, { ...c, metric: createIsotropicScreenMetric(pixelsPerMetre) }),
+          querySnap(cursor, c),
+        );
+      }
+});
 import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
 
 test("numerical compatibility is finite, bounded and independent of screen scale", () => {
