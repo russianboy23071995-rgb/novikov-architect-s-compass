@@ -15,6 +15,97 @@ import {
 import { resolveEditSnap } from "../../application/direct-edit/snapping.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
+import {
+  createAffineScreenMetric,
+  createIsotropicScreenMetric,
+} from "../../geometry/projections/screen-metric.ts";
+import { projectDirection } from "../../geometry/projections/direction.ts";
+
+test("affine line projection minimizes CSS distance and rejects invalid directions", () => {
+  for (const matrix of [
+    [100, 0, 0, 1],
+    [20, 30, -2, 4],
+    [-3, 2, 7, 1],
+  ]) {
+    const [a, b, c, d] = matrix as [number, number, number, number];
+    const metric = createAffineScreenMetric(a, b, c, d),
+      p = { x: 2, y: 1 },
+      o = { x: 0, y: 0 },
+      direction = { x: 1, y: 1 };
+    const q = metric.projectLine(p, o, direction)!;
+    assert.ok(q);
+    assert.equal(q.x, q.y);
+    const dot =
+      (a * (p.x - q.x) + b * (p.y - q.y)) * (a + b) + (c * (p.x - q.x) + d * (p.y - q.y)) * (c + d);
+    assert.ok(Math.abs(dot) < 1e-9);
+    for (const t of [-1, -0.01, 0.01, 1])
+      assert.ok(metric.distance(p, q) <= metric.distance(p, { x: q.x + t, y: q.y + t }));
+    assert.deepEqual(metric.projectLine(p, o, { x: -1, y: -1 }), q);
+    assert.equal(metric.projectLine(p, o, { x: 0, y: 0 }), null);
+    assert.equal(metric.projectLine({ x: NaN, y: 0 }, o, direction), null);
+  }
+});
+
+test("shared guide projection uses CSS while direction and Shift remain model based", () => {
+  const ref = { entityId: "r", feature: "end", point: { x: 0, y: 0 } };
+  const metric = createAffineScreenMetric(100, 0, 0, 1),
+    cursor = { x: 2, y: 1.8 };
+  const c = { ...context, references: [ref], activeReferences: [ref], metric };
+  const result = querySnap(cursor, c);
+  assert.equal(result.candidate?.kind, "angle");
+  assert.equal(result.candidate?.angleDegrees, 45);
+  assert.deepEqual(result.point, metric.projectLine(cursor, ref.point, { x: 1, y: 1 }));
+  assert.equal(result.candidate?.distanceOnScreen, metric.distance(cursor, result.point));
+  const shift = querySnap(cursor, { ...c, angleOrigin: ref.point });
+  assert.deepEqual(shift.point, projectDirection(cursor, ref.point, { x: 1, y: 1 }));
+  assert.equal(shift.candidate?.angleDegrees, 45);
+  assert.equal(shift.candidate?.distanceOnScreen, metric.distance(cursor, shift.point));
+});
+
+test("guide intersections and remote competing guides use CSS radius and stable rank", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const hit = querySnap({ x: 2, y: 1.1 }, { ...context, metric });
+  assert.equal(hit.candidate?.kind, "intersection");
+  assert.ok(pointsCompatible(hit.point, target));
+  assert.ok(Math.abs(hit.candidate!.distanceOnScreen - 0.1) < 1e-12);
+  const refs = [
+    { entityId: "near", feature: "end", point: { x: -100, y: 0 } },
+    { entityId: "far", feature: "end", point: { x: -100, y: 2 } },
+  ];
+  for (const references of [refs, [...refs].reverse()]) {
+    const c = { ...context, metric, references, activeReferences: refs };
+    assert.equal(querySnap({ x: 10, y: 0.8 }, c).candidate?.sourceEntityId, "near");
+    const single = { ...c, references: [refs[0]!], activeReferences: [refs[0]!] };
+    assert.equal(querySnap({ x: 10, y: 10 }, single).candidate?.kind, "horizontal");
+    assert.equal(querySnap({ x: 10, y: 10.001 }, single).candidate, null);
+    const axis = querySnap(
+      { x: 10, y: 0.8 },
+      { ...single, fixedAxis: { origin: { x: 10, y: 0 }, direction: { x: 0, y: 1 } } },
+    );
+    assert.equal(axis.candidate?.kind, "axis-intersection");
+    assert.deepEqual(axis.point, { x: 10, y: 0 });
+  }
+});
+
+test("isotropic guide projection preserves old arithmetic and complete resolver results", () => {
+  for (const scale of [0.5, 100, 10000]) {
+    const metric = createIsotropicScreenMetric(scale);
+    for (const cursor of [
+      { x: 2, y: 1.01 },
+      { x: 3, y: 0.02 },
+      { x: -4, y: -2.1 },
+    ]) {
+      assert.deepEqual(
+        metric.projectLine(cursor, a.point, { x: 2, y: 1 }),
+        projectDirection(cursor, a.point, { x: 2, y: 1 }),
+      );
+      assert.deepEqual(
+        querySnap(cursor, { ...context, pixelsPerMetre: scale, metric }),
+        querySnap(cursor, { ...context, pixelsPerMetre: scale }),
+      );
+    }
+  }
+});
 const a: SnapReference = {
   entityId: "a",
   feature: "end",
