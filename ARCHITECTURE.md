@@ -994,3 +994,9 @@ This supersedes the point-ranking limitation above only. Guide generation/projec
 ScreenMetric.projectLine computes the nearest point on an infinite model line by CSS distance. The affine implementation normalizes direction and matrix before projection; invalid or non-finite projections return null. Its isotropic adapter delegates to existing projectDirection to preserve 2D arithmetic. Shared guide candidates use this projection; candidate distances including guide/axis intersections, grid and Shift labels use the same metric.
 
 Direction selection/hysteresis, explicit Shift/Ortho and fixed-axis constraints remain model-space operations. Intersections remain exact model geometry. A candidate must still satisfy the model constraint; projection does not move or duplicate its source. This supersedes the guide-distance/projection limitation above. Hover, acquisition and explicit reference picking still require metric integration before 3D interaction can be enabled.
+
+## Shared hover metric (2026-10-04)
+
+HoverContext optionally carries ScreenMetric. The shared React event adapter forwards it to source lookup, point/guide resolution and segment hover; it is not part of model/reference session identity. ScreenMetric.projectSegment returns the closest bounded point, the unclamped line parameter and CSS distance. Segment hover preserves the existing interior-only rule (parameter 0..1); endpoint acquisition retains priority. The isotropic implementation preserves the previous parameter and residual-distance arithmetic.
+
+Dwell, toggle-on-revisit, suspension, capacity and pinned-reference rules remain in the existing inference state machine. No per-tool hover state or alternate reference store is introduced. This supersedes the hover-metric limitation above; explicit reference picking and later 3D UI/visibility/navigation integration remain pending.

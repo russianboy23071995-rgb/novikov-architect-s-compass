@@ -61,6 +61,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
             active,
             context.intersectionsPaused,
             context.selectedSegments,
+            context.metric,
           )
         : context.references,
       active,
@@ -84,7 +85,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       candidate && ["endpoint", "midpoint", "segment-intersection"].includes(candidate.kind);
     const acquired = exact
       ? acquisitionReference(candidate, sources)
-      : (hoveredSegment(cursor, sources, context.pixelsPerMetre) ??
+      : (hoveredSegment(cursor, sources, context.metric ?? context.pixelsPerMetre) ??
         acquisitionReference(candidate, sources));
     const reference =
       acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))

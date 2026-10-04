@@ -1,10 +1,12 @@
 import type { SnapReference, SnapSourceQuery } from "../snapping/engine.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export const DEFAULT_HOVER_DWELL_MS = 600;
 export const HOVER_REFERENCE_CAPACITY = 4;
 const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
 export type HoverContext = {
+  metric?: ScreenMetric;
   sessionKey?: object | undefined;
   suspended?: boolean;
   selectedSegments?: ReadonlySet<string> | null;

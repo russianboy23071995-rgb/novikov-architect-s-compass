@@ -21,6 +21,16 @@ export function createAffineScreenMetric(a: number, b: number, c: number, d: num
     return { x: a * x + b * y, y: c * x + d * y };
   };
   return Object.freeze({
+    projectSegment(p: Point2, start: Point2, end: Point2) {
+      const dx = end.x - start.x,
+        dy = end.y - start.y;
+      const point = this.projectLine(p, start, { x: dx, y: dy });
+      if (!point) return null;
+      const t = Math.abs(dx) >= Math.abs(dy) ? (point.x - start.x) / dx : (point.y - start.y) / dy;
+      if (!Number.isFinite(t)) return null;
+      const closest = t < 0 ? { ...start } : t > 1 ? { ...end } : point;
+      return { point: closest, t, distance: this.distance(p, closest) };
+    },
     /** Nearest point on an infinite model line in CSS distance, not a model-angle constraint. */
     projectLine(p: Point2, origin: Point2, direction: Point2): Point2 | null {
       if (![p.x, p.y, origin.x, origin.y, direction.x, direction.y].every(Number.isFinite))
@@ -92,6 +102,20 @@ export function createIsotropicScreenMetric(scale: number): ScreenMetric {
   if (!Number.isFinite(scale) || scale <= 0) throw new Error("Invalid screen metric");
   return Object.freeze({
     ...createAffineScreenMetric(scale, 0, 0, scale),
+    projectSegment(p: Point2, start: Point2, end: Point2) {
+      const dx = end.x - start.x,
+        dy = end.y - start.y,
+        ll = dx * dx + dy * dy;
+      if (!ll || !Number.isFinite(ll)) return null;
+      const t = ((p.x - start.x) * dx + (p.y - start.y) * dy) / ll;
+      if (!Number.isFinite(t)) return null;
+      const clamped = Math.max(0, Math.min(1, t));
+      return {
+        point: { x: start.x + clamped * dx, y: start.y + clamped * dy },
+        t,
+        distance: Math.hypot(p.x - start.x - clamped * dx, p.y - start.y - clamped * dy) * scale,
+      };
+    },
     projectLine: (p: Point2, origin: Point2, direction: Point2) => {
       if (![p.x, p.y, origin.x, origin.y].every(Number.isFinite)) return null;
       const point = projectDirection(p, origin, direction);

@@ -815,6 +815,18 @@ Richtungswahl und Hysterese bleiben in Modellwinkeln. Shift, Ortho und explizite
 
 Praktische Abnahme: Hilfspunkt nach 0,6 Sekunden aktivieren, einer horizontalen oder diagonalen Hilfslinie folgen, zweiten Hilfspunkt aktivieren und gemeinsamen Schnitt fangen. Shift halten und freie Wandbewegung mit fester Achse prüfen. Die bisherige 2D-Bedienung soll gleich bleiben; affine Projektion ist zunächst automatisiert abgesichert.
 
-### Genau ein ausführbarer Folgeauftrag: Hover-Erwerb mit gemeinsamer Bildschirmmetrik
+### Abgeschlossener Folgeauftrag: Hover-Erwerb mit gemeinsamer Bildschirmmetrik
 
 Punkt- und Segment-Hover im gemeinsamen Inference-/Application-Pfad an ScreenMetric anschließen, einschließlich CSS-Abstand und nächstem Punkt auf einem endlichen Segment. 600-ms-Erwerb/Entfernen, Kapazität, Ursprungsschutz, Zoom-Erhalt und Modellinvalidierung bewahren. Affine Segmentnähe, Endpunktbegrenzung, Dwell-Wechsel und isotrope 2D-Parität testen. Keine neue Oberfläche und keine 3D-Freischaltung; explizites Referenz-Picking bleibt danach als eigener begrenzter Anschluss offen.
+
+### Abschluss: gemeinsame Hover-Metrik — 04.10.2026
+
+PR #68 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (9039325), main unverändert. Zweig feat/shared-hover-screen-metric. HoverContext reicht dieselbe optionale ScreenMetric an lokale Quellenabfrage, Punkt-/Führungskandidaten und Linien-Hover durch. Endliche Segmentprojektion im Geometry-Baustein liefert begrenzten Punkt, unbeschränkten Parameter und CSS-Abstand. Der bestehende Linien-Hover bleibt auf Parameter 0..1 begrenzt; Verlängerungen aktivieren keine Linienreferenz, Punktziele haben weiterhin Vorrang.
+
+280 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Tests mit Parameterreihen prüfen affine Nähe, Endpunktbegrenzung und degenerierte Segmente; 600-ms-Aktivierung/Entfernung, Dwell-Neustart beim Quellenwechsel, Suspension/Erhalt, Ursprungsschutz und Metrikwechsel versus Modellwechsel; exakte bisherige isotrope Parameter-/Abstandsrechnung einschließlich großer Koordinaten. Bestehende Kapazitäts-, Sitzungs- und Resolverprüfungen bestehen. Kein neuer manueller Browsernachweis oder automatisierter React-Timertest; keine 3D-Bedienung freigeschaltet.
+
+Praktisch prüfen: über einer Linienmitte 0,6 Sekunden verweilen, wegbewegen und erneut 0,6 Sekunden verweilen: Referenz wird gelöst. Während der ersten Wartezeit zu einer anderen Linie wechseln: dort beginnt die Wartezeit neu. Aktivierte Punkte durch Zoom erhalten, nach Modelländerung alte Referenzen verwerfen. Gewählten Bewegungsursprung nicht durch Hover entfernen.
+
+### Genau ein ausführbarer Folgeauftrag: explizites Referenz-Picking mit gemeinsamer Metrik
+
+Punkt-/Segment-Picking im bestehenden manuellen Referenzauswahlmodus auf ScreenMetric umstellen, einschließlich CSS-Radius, nächstem Segmentpunkt und stabiler Mehrdeutigkeitsliste. Bestehende isotrope 2D-Aufrufe kompatibel halten. Auswahl/Übernehmen/Abbruch, Quellenfilter vor Paarbildung, affine Trefferreihenfolge und Radiusgrenzen testen; den gemeinsamen 2D-Ablauf einschließlich Hover/Zoom praktisch im Browser abnehmen. Keine zweite Auswahloberfläche und noch keine 3D-Freischaltung; offene Sichtbarkeits-/Gestenentscheidungen anschließend gesondert prüfen.
