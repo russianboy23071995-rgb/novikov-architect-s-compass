@@ -48,10 +48,11 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       return;
     }
     const current = state.current!.value;
-    const active = withParallelDirections([
-      ...(context.pinnedReferences ?? []),
-      ...current.references,
-    ]).filter((r) => !context.acceptReference || context.acceptReference(r));
+    const active = withParallelDirections(
+      [...(context.pinnedReferences ?? []), ...current.references].filter(
+        (r) => !context.acceptReference || context.acceptReference(r),
+      ),
+    );
     const sources = withConstructionReferences(
       context.sourceQuery
         ? context.sourceQuery(

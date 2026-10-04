@@ -7,6 +7,7 @@ import { resolveToolSnap } from "@/application/tools/snapping";
 import { advanceGuideDirections } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useHoverReference } from "./useHoverReference";
+import { hoveredSegment, withParallelDirections } from "@/constraints/inference/segment-hover";
 
 /** One viewport adapter for passive inference and tool targeting on the same workplane. */
 export function useSolidInference(
@@ -30,11 +31,21 @@ export function useSolidInference(
     return inverse.status === "ok" ? inverse.value.point : null;
   }, [client, plane]);
   const hover = useHoverReference(cursor, context, DEFAULT_HOVER_DWELL_MS);
+  const active = withParallelDirections(
+    hover.references.filter((r) => context.acceptReference!(r)),
+  );
+  const edge =
+    cursor && context.metric
+      ? hoveredSegment(
+          cursor,
+          context.sourceQuery!(cursor, 1, 10, hover.references),
+          context.metric,
+        )
+      : null;
   const resolve = (position: Point, shift = false) => {
     if (plane?.status !== "ok") return null;
     const inverse = plane.value.toPlane(position);
     if (inverse.status !== "ok") return null;
-    const active = hover.references.filter((r) => context.acceptReference!(r));
     return resolveToolSnap(
       policy,
       inverse.value.point,
@@ -52,7 +63,13 @@ export function useSolidInference(
     plane,
     context,
     adapter,
-    hover,
+    edge,
+    hover: {
+      ...hover,
+      guideDirections: hover.guideCursor
+        ? advanceGuideDirections(hover.guideCursor, active, hover.guideDirections)
+        : [],
+    },
     resolve,
     candidate: client ? (resolve(client, shift)?.candidate ?? null) : null,
   };

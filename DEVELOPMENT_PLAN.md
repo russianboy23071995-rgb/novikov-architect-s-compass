@@ -1005,6 +1005,24 @@ Abnahme: Ansicht flach drehen, sichtbaren Wandfusspunkt anklicken, Element auf Y
 
 Grenzen: GPU-Tiefengenauigkeit bleibt endlich; bei sehr grossen Entfernungen koennen eng benachbarte Flaechen durch NDC-Toleranz/Umrandungsbias optisch zusammenfallen. Kein Grosskoordinaten-Umbau und keine neue Kameraart. Beim Wechsel einer Tiefenstufe kann eine laufende Hover-Verweildauer unterbrochen werden; aktivierte Referenzen und gepinnter Ursprung bleiben erhalten. Automatisierte Pruefung verschiedener Kameras, keine Mehr-GPU-Abnahme.
 
-### Genau ein ausfuehrbarer Folgeauftrag: 3D-Wandfusskanten als Richtungsreferenzen
+### Abgeschlossener Folgeauftrag: 3D-Wandfusskanten als Richtungsreferenzen
 
 Die vorhandene gemeinsame Segment-Hover-/Parallelfuehrung an sichtbare Wandfusskanten auf z=0 anschliessen. Zunaechst nur diese vorhandenen Quellen: 600ms aktivieren beziehungsweise beim erneuten Verweilen loesen, Richtungen durch die gemeinsame Engine verwenden. Sichtbarkeit, lokale Kandidatensuche, Bewegungsausschluss, Ursprungsreferenz und Navigation beibehalten. Keine zweite Segmenterkennung, keine oberen Kanten/Z-Fuehrung und keine neue Modellaktion. Sichtbare versus verdeckte Kante, Aktivieren/Loesen, passive Ansicht und laufende Wandbewegung pruefen.
+
+### Abschluss: 3D-Wandfusskanten verfolgen — 04.10.2026
+
+PR #81 nach Freigabe normal in fix/reference-selection-lifecycle uebernommen (6b8a5ac); main unveraendert. Zweig feat/3d-edge-references. Bestehenden lokalen Quellenindex ohne Algorithmusaenderung nach constraints/snapping/local-source-index.ts herausgezogen; bisheriger Application-Adapter samt Projektcache und Exporten bleibt kompatibel. Rendering-Adapter liefert reale untere Materialkanten aus derselben Kantenableitung wie die Auswahlumrandung. Kein zweiter Indexalgorithmus, Hover-Timer oder Richtungsloeser.
+
+Sichtbare lokale Kanten verwenden die gemeinsame 600ms-Aktivierung und erneutes Verweilen zum Loesen. Gestrichelte Kantenanzeige beim Hover, staerkere aktive Kante und bestehender hohler Ring am Referenzmittelpunkt. Parallelrichtungen stehen auch am gepinnten Ursprung einer laufenden Wandbewegung bereit; bewegte Wand wird als Quelle ausgeschlossen. Kameranavigation behaelt aktivierte Referenzen. Quellen gehen erst durch die Sichtbarkeitspruefung; Richtungen ausgeblendeter Referenzen werden in der aktuellen Ansicht nicht weiter angeboten.
+
+326 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Neue Tests: Cache/Materialkanten und bodentiefe Oeffnung, lokale CSS-Abfrage bei Zoom, verborgene und bewegte Kanten, unveraenderte Punkterkennung, 599/600ms-Aktivierung plus Wiederholungsloesung und Navigationssession, schräge Parallelrichtung am Bewegungsursprung samt fernen Referenzquellen. Die vorhandenen lokalen Index-/Dichte-/Schnittpunkttests bestehen nach der Extraktion weiter.
+
+Browserabnahme am angezeigten Beispielprojekt (3m-Wand, Fenster): passive untere Kante aktiviert, aktive SVG-Kantenmarkierung und Status 1 bestaetigt; wegbewegen und erneut verweilen loest sie (Status 0). Erneut aktiviert, Zoom-out behaelt Referenz und Hilfslinie. Screenshot outputs/3d-edge-reference.jpg ausserhalb des Repositories. Esc raeumt auf. Keine Modellaktion waehrend dieser Browserabnahme. Die laufende Bearbeitung mit einer zweiten schraegen Wand wurde automatisiert auf Adapter-/Engine-Ebene geprueft; ein vollstaendiger Browserdurchlauf folgt im naechsten Auftrag.
+
+Abnahme: SNAP einschalten, in 3D ueber einem sichtbaren Abschnitt der unteren Wandkante verweilen. Nach 0,6s bleibt sie als Richtungsreferenz markiert. Maus weg und erneut 0,6s auf denselben Abschnitt halten zum Loesen. Zoomen darf die Referenz nicht entfernen. Bei einer Wandbewegung eine andere Wand als Referenz verwenden.
+
+Grenzen: nur z=0-Materialkanten, keine oberen Kanten oder freie Z-Fuehrung. Segmentmittelpunkt muss zusaetzlich zum Hoverpunkt sichtbar sein; teilweise verdeckte Kanten koennen daher konservativ entfallen. Mesh-Unterteilungen an Oeffnungen koennen mehrere kollineare Referenzabschnitte ergeben. Keine allgemeine Sichtbarkeitszerlegung oder Grossprojekt-/Mehr-GPU-Messung. Temporäre Referenzen werden nicht gespeichert oder exportiert.
+
+### Genau ein ausfuehrbarer Folgeauftrag: gemeinsamen 2D-/3D-Bearbeitungsablauf abnehmen
+
+Einen kleinen Grundriss mit zwei unterschiedlich gerichteten Waenden und Fenster durchgaengig pruefen: 3D-Fusskante als Referenz aktivieren, andere Wand mit gepinntem Ursprung parallel bewegen, Tab-Masseingabe, Abbruch und bestaetigte Aenderung, Undo/Redo, 2D-/3D-Abgleich, Projektdatei wieder oeffnen und IFC exportieren. Gefundene Fehler zuerst im gemeinsamen Pfad beheben und einen reproduzierbaren Abnahmenachweis dokumentieren. Keine neue Bauteilart oder weitere 3D-Fangmodi in diesem Auftrag.
