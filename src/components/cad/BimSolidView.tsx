@@ -1,10 +1,22 @@
-import { createProjectionFrame, projectOrthographic } from "@/geometry/projections/orthographic";
+import { createProjectionFrame } from "@/geometry/projections/orthographic";
+import type { ProjectionFrame } from "@/geometry/projections/orthographic";
+import {
+  backbufferSize,
+  createProjectionState,
+  projectionStateMatches,
+} from "@/rendering/viewport/projection-state";
+import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildSolid } from "@/lib/bim/geometry";
 import type { Camera, Solid } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
-import { isSelectionClick, pickWall } from "@/lib/bim/picking";
+import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+
+const viewportOf = (canvas: HTMLCanvasElement) => {
+  const { left, top, width, height } = canvas.getBoundingClientRect();
+  return { left, top, width, height };
+};
 
 function createRenderer(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
@@ -42,9 +54,8 @@ function createRenderer(canvas: HTMLCanvasElement) {
   const position = gl.getAttribLocation(program, "position"),
     color = gl.getAttribLocation(program, "color");
   return {
-    draw(solid: Solid, camera: Camera, selectedWall: string | undefined) {
-      const width = Math.max(1, Math.round(canvas.clientWidth * Math.min(devicePixelRatio, 2)));
-      const height = Math.max(1, Math.round(canvas.clientHeight * Math.min(devicePixelRatio, 2)));
+    draw(solid: Solid, projection: ProjectionState, selectedWall: string | undefined) {
+      const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -55,17 +66,13 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.useProgram(program);
       const data: number[] = [];
-      const frame = createProjectionFrame(solid);
       for (const face of solid.faces) {
         const light =
           0.5 +
           0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
         const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
         for (const index of [0, 1, 2, 0, 2, 3])
-          data.push(
-            ...projectOrthographic(face.vertices[index]!, frame, camera, width / height),
-            ...tint.map((v) => v * light),
-          );
+          data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
       }
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
@@ -89,6 +96,7 @@ export function BimSolidView({
   onCamera,
   pan,
   onSelect,
+  projectionFrame,
 }: {
   project: Project;
   selection: Selection;
@@ -96,9 +104,11 @@ export function BimSolidView({
   onCamera: (camera: Camera) => void;
   pan: boolean;
   onSelect: (selection: Selection, anchor?: Point) => void;
+  projectionFrame?: ProjectionFrame;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
+  const displayed = useRef<{ solid: Solid; projection: ProjectionState } | null>(null);
   const drag = useRef<{
     x: number;
     y: number;
@@ -122,16 +132,36 @@ export function BimSolidView({
     };
     const lost = (event: Event) => {
       event.preventDefault();
+      displayed.current = null;
+      drag.current = null;
       renderer.current = null;
       setError("Graphics context lost. Waiting for restoration; the model is retained.");
     };
     setup();
     const observer = new ResizeObserver(() => setRevision((n) => n + 1));
     observer.observe(canvas);
+    const invalidate = () => {
+      displayed.current = null;
+      setRevision((n) => n + 1);
+    };
+    let resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+    const dprChanged = () => {
+      resolution.removeEventListener("change", dprChanged);
+      resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+      resolution.addEventListener("change", dprChanged);
+      invalidate();
+    };
+    resolution.addEventListener("change", dprChanged);
+    window.addEventListener("resize", invalidate);
+    window.addEventListener("scroll", invalidate, true);
     canvas.addEventListener("webglcontextlost", lost);
     canvas.addEventListener("webglcontextrestored", setup);
     return () => {
       observer.disconnect();
+      resolution.removeEventListener("change", dprChanged);
+      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("scroll", invalidate, true);
+      displayed.current = null;
       renderer.current?.dispose();
       renderer.current = null;
       canvas.removeEventListener("webglcontextlost", lost);
@@ -143,8 +173,19 @@ export function BimSolidView({
       selection?.kind === "wall"
         ? selection.id
         : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
-    renderer.current?.draw(solid, camera, selectedWall);
-  }, [solid, camera, selection, project, revision]);
+    displayed.current = null;
+    const canvas = canvasRef.current!;
+    const projection = createProjectionState(
+      projectionFrame ?? createProjectionFrame(solid),
+      camera,
+      viewportOf(canvas),
+      backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+    );
+    if (renderer.current && projection) {
+      renderer.current.draw(solid, projection, selectedWall);
+      displayed.current = { solid, projection };
+    }
+  }, [solid, camera, selection, project, revision, projectionFrame]);
   return (
     <>
       <canvas
@@ -218,13 +259,34 @@ export function BimSolidView({
             isSelectionClick(gesture.x, gesture.y, event.clientX, event.clientY) &&
             !error
           ) {
-            const bounds = event.currentTarget.getBoundingClientRect();
-            const id = pickWall(
+            const canvas = event.currentTarget;
+            const current = displayed.current;
+            if (
+              !current ||
+              current.solid !== solid ||
+              !projectionStateMatches(
+                current.projection,
+                camera,
+                viewportOf(canvas),
+                backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+              ) ||
+              canvas.width !== current.projection.backbuffer.width ||
+              canvas.height !== current.projection.backbuffer.height
+            ) {
+              if (canvas.hasPointerCapture(event.pointerId))
+                canvas.releasePointerCapture(event.pointerId);
+              setRevision((n) => n + 1);
+              return;
+            }
+            const projection = current.projection;
+            const point = projection.toNdc({ x: event.clientX, y: event.clientY });
+            const id = pickWallInProjection(
               solid,
-              camera,
-              bounds.width / bounds.height,
-              (2 * (event.clientX - bounds.left)) / bounds.width - 1,
-              1 - (2 * (event.clientY - bounds.top)) / bounds.height,
+              projection.frame,
+              projection.camera,
+              projection.aspect,
+              point.x,
+              point.y,
             );
             onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
           }
