@@ -12,6 +12,55 @@ import { createToolSourceQuery } from "../tools/snapping.ts";
 import { pickReferenceSegments } from "../../rendering/viewport/reference-picking.ts";
 import { validateProject } from "../../lib/bim/model.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
+import {
+  createAffineScreenMetric,
+  createIsotropicScreenMetric,
+} from "../../geometry/projections/screen-metric.ts";
+
+test("affine reference picking ranks CSS hits, clips endpoints and preserves ties", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 4 } };
+  const b = { entityId: "b", feature: "end", point: { x: 0.09, y: 0 } };
+  assert.deepEqual(pickReferencePoints([b, a], { x: 0, y: 0 }, metric), [a, b]);
+  assert.deepEqual(pickReferencePoints([a], { x: 0, y: 14 }, metric), [a]);
+  assert.deepEqual(pickReferencePoints([a], { x: 0, y: 14.001 }, metric), []);
+  const segment = { start: { x: 0, y: 0 }, end: { x: 2, y: 2 }, source: a };
+  assert.deepEqual(pickReferenceSegments([segment], { x: 1, y: 1.5 }, metric), [a]);
+  assert.deepEqual(pickReferenceSegments([segment], { x: 2.01, y: 2.01 }, metric), [a]);
+  assert.deepEqual(pickReferenceSegments([segment], { x: 3, y: 3 }, metric), []);
+  const twin = { ...segment, source: b };
+  assert.deepEqual(
+    pickReferenceSegments([twin, segment], { x: 1, y: 1 }, metric),
+    pickReferenceSegments([segment, twin], { x: 1, y: 1 }, metric),
+  );
+  assert.deepEqual(
+    pickReferenceSegments([{ start: a.point, end: a.point, source: a }], a.point, metric),
+    [a],
+  );
+});
+
+test("explicit isotropic picking matches numeric API across zoom and excludes invalid hits", () => {
+  const local = createLocalSnapSources(fixture());
+  for (const scale of [0.5, 100, 10000]) {
+    const metric = createIsotropicScreenMetric(scale);
+    for (const point of [
+      { x: 0, y: 0 },
+      { x: 10, y: 1 },
+      { x: -9, y: 0.1 },
+    ]) {
+      assert.deepEqual(
+        pickReferenceSegments(local.allSegments, point, metric),
+        pickReferenceSegments(local.allSegments, point, scale),
+      );
+      const refs = local.queryPrimitives(point, scale, 10).references;
+      assert.deepEqual(
+        pickReferencePoints(refs, point, metric),
+        pickReferencePoints(refs, point, scale),
+      );
+    }
+  }
+  assert.deepEqual(pickReferenceSegments(local.allSegments, { x: NaN, y: 0 }, 100), []);
+});
 
 test("reference selection draft, cancel, validation and clear never change committed selection early", () => {
   let s = reduceReferenceSelection(emptyReferenceSelection(), { type: "begin" });
