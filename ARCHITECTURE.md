@@ -959,3 +959,10 @@ The shared selection UI holds only a temporary point draft. Committed points ent
 ## Reference-session lifecycle (2026-10-04)
 
 The viewport supplies the shared operation scope to hover inference. Its identity changes on model/history, operation, layout or active viewport changes; a drawing origin change within the same polyline is not a new session. Consumers without an explicit scope retain the existing source-query identity comparison. Pan suspends dwell acquisition without deleting acquired points. Only the active viewport handles selection and hover; activating another viewport consumes the activation click rather than committing a model action. Modal keyboard events do not reset viewport references.
+
+
+## Horizontal 3D work-plane planning boundary (2026-10-04)
+
+Existing binding rules remain: one authoritative model, one shared snapping/inference pipeline, stable selected-entity context and the same validated application actions for mouse, numeric input and AI/Text/Voice. Work-plane coordinates and overlays are derived interaction data; no renderer mesh or second model becomes authoritative.
+
+The working proposal in [docs/3D_WORKPLANE_PLAN.md](docs/3D_WORKPLANE_PLAN.md) starts with the XY plane at z=0, matching the current model. It requires a shared orthographic forward/inverse projection and later a shared CSS-screen metric for foreshortened views; a single pixels-per-metre factor is insufficient. A plane/model operation scope is distinct from camera navigation. Gesture allocation, occlusion policy and numerical conditioning thresholds are explicitly proposals/open issues, not implemented or user-approved product decisions. The next package is only projection extraction and tested inversion, preserving current rendering and picking; no new 3D editing UI or model mutation is authorized by this planning document.

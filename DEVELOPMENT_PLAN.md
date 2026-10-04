@@ -744,6 +744,19 @@ Reproduzierbarer Testgrundriss: docs/fixtures/reference-selection.json (eine Wan
 
 Grenzen: Stichproben in zwei 2D-Ansichten, keine vollständige Browsermatrix aller Layouts oder 3D-Arbeitsebenen. Keine Leistungszusage für beliebige Projektdichte. Layout-/Viewportwechsel beenden temporäre Referenzsitzung bewusst, Navigation innerhalb derselben Ansicht erhält sie.
 
-### Genau ein ausführbarer Folgeauftrag: Vertrag für eine aktive 3D-Arbeitsebene planen
+### Abgeschlossener Folgeauftrag: Vertrag für eine aktive 3D-Arbeitsebene planen
 
 Vorhandene 3D-Kamera, Picking und gemeinsame ToolInteraction gegen den 2D-Fangpfad prüfen. Einen begrenzten technischen Vertrag für eine horizontale aktive Arbeitsebene mit Welt-/Ebenenkoordinaten, CSS-Fangradius, stabiler Zielauswahl und derselben Application-Aktion dokumentieren. Ebenenwechsel, Ursprung, Referenzen und Abbruch festlegen; Vorschläge von bestehenden Entscheidungen trennen. Noch keine neue Fangengine, keine beliebigen Dach-/Schnittebenen und keine neuen Bauteile implementieren. Daraus genau ein kleines Umsetzungspaket ableiten.
+
+
+### Abschluss: Vertrag für horizontale 3D-Arbeitsebene — 04.10.2026
+
+Dokumentationsauftrag auf acc5c44 (PR #63 weiterhin offen, kein Merge). Vorhandene orthographische Kamera, Solid-/Wand-Picking, gemeinsame ToolInteraction, skalare Fangmetrik und Moduswechsel im Workspace untersucht. docs/3D_WORKPLANE_PLAN.md trennt Codebefund, verbindliche bestehende Grenzen und Vorschläge. Startvorschlag z=0 passt zum aktuellen XY-Modell; keine erfundene Geschosshöhe oder freie Z-Bewegung. Eine Wand-ID aus pickWall ist noch kein geometrischer Bewegungsursprung.
+
+Wichtiger Befund: schräge Ebenenansicht hat richtungsabhängige Pixelmaßstäbe. Exakte CSS-Metrik, konservative lokale Vorauswahl und gleiche Projektionsparameter für Renderer/Inverse sind nötig. Bei pitch=0 kollabiert die horizontale Ebene; ungültige Inverse darf keinen Zielpunkt bestätigen. Vorschau darf ihren eigenen Projektionsrahmen nicht verschieben. Lesende Rechnung mit vorhandener projectPoint und Testgrundriss bestätigt unterschiedliche Einheitsachsen (112,61/63,13 CSS-Pixel bei pitch=0,3; 800x600) und Singularität bei pitch=0.
+
+Nur drei Markdown-Dateien geändert. Keine neuen Laufzeitfunktionen; keine neue Build-/Browserabnahme behauptet. Die 257 Tests/Build-/TypeScript-Ergebnisse aus PR #63 gelten für unveränderten Anwendungscode. Dokumentpfade, Änderungsumfang und Whitespace geprüft. Offene Bedienfragen: Ebene/Anker sichtbar machen, verdeckte Referenzen, Kamera-Gesten und Schwelle schlechter Konditionierung. Diese blockieren die reine mathematische Grundlage nicht.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame orthographische Projektion und Ebeneninverse
+
+Vorhandene Vorwärtsprojektion in einen numerischen Baustein unter geometry/projections überführen und projectPoint kompatibel darauf delegieren. Rendering-Adapter für horizontale Ebene mit gemeinsamem Rahmen/Aspect/CSS-Rechteck, Inverse und strukturiertem Ungültigkeitsstatus ergänzen. Numerische Fehlerschranke begründen. Vorwärts-/Roundtrip-/Suchgrenzen-/Singularitätsfälle gemäß Abschnitt 8 von docs/3D_WORKPLANE_PLAN.md sowie bestehende Geometrie/Picking, gesamte Tests, TypeScript, Build und Lint prüfen; unveränderte 3D-Darstellung/Auswahl praktisch abnehmen. Kein Fang-Overlay, keine neue 3D-Modellaktion und keine separate Fangengine.
