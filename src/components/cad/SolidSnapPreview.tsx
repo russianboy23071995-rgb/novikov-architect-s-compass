@@ -6,6 +6,7 @@ import { useHoverReference } from "./useHoverReference";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 
 import type { SnapReference } from "@/constraints/snapping/engine";
+import { querySnap } from "@/constraints/snapping/engine";
 
 /** Presentation adapter only: shared source search, ranking, dwell and guide directions. */
 export function SolidSnapPreview({
@@ -21,7 +22,7 @@ export function SolidSnapPreview({
   enabled: boolean;
   resetKey: number;
 }) {
-  const { adapter, plane, context } = useMemo(
+  const { plane, context } = useMemo(
     () => createWallPreviewContext(project, projection, enabled, resetKey),
     [project, projection, enabled, resetKey],
   );
@@ -38,11 +39,18 @@ export function SolidSnapPreview({
         Arbeitsebene aus diesem Blick nicht eindeutig
       </p>
     );
-  const result = client && adapter?.query(project, projection, client, 10);
+  const resolved = cursor
+    ? querySnap(cursor, {
+        ...context,
+        activeReferences: hover.references.filter((r) => context.acceptReference!(r)),
+        guideDirections: hover.guideDirections,
+        endpointRadiusPx: 10,
+        gridSpacing: null,
+        orthoOrigin: null,
+      }).candidate
+    : null;
   const candidate =
-    result && result.status === "ok"
-      ? result.candidates.find((c) => c.visibility === "visible")
-      : undefined;
+    resolved && ["endpoint", "midpoint", "intersection"].includes(resolved.kind) ? resolved : null;
   const { width, height, left, top } = projection.viewport;
   const screen = (point: Point) => {
     const value = plane.value.toScreen(point);

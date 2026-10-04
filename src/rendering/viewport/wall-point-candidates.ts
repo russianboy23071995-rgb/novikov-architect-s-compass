@@ -16,6 +16,8 @@ export function createWallPointCandidates(project: Project, projection: Projecti
   const walls = new Set(project.storey.walls.map((wall) => wall.id));
   const plane = projection.workplane(0);
   return Object.freeze({
+    visibilityAt: (point: Point2) =>
+      classifyAnchorVisibility(solid, projection, [point.x, point.y, 0]),
     query(
       currentProject: Project,
       currentProjection: ProjectionState,

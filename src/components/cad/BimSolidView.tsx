@@ -13,6 +13,7 @@ import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
+import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 
 const viewportOf = (canvas: HTMLCanvasElement) => {
   const { left, top, width, height } = canvas.getBoundingClientRect();
@@ -200,6 +201,21 @@ export function BimSolidView({
   }, [solid, camera, selection, project, revision, projectionFrame]);
   return (
     <>
+      {previewProjection && !error && (
+        <svg
+          aria-label="Orientierungsebene z=0"
+          className="pointer-events-none absolute inset-0"
+          width={previewProjection.viewport.width}
+          height={previewProjection.viewport.height}
+        >
+          <polygon
+            points={orientationFloor(solid, previewProjection) ?? ""}
+            fill="rgba(120, 134, 145, 0.14)"
+            stroke="rgba(120, 134, 145, 0.3)"
+            strokeWidth={1}
+          />
+        </svg>
+      )}
       <SolidSnapPreview
         project={project}
         projection={previewProjection}
