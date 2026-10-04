@@ -41,6 +41,7 @@ import type { Selection } from "./bim-view";
 import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { LineStyleFields } from "./LineControls";
+import { LayerProperties } from "./LayerProperties";
 
 export function CadWorkspace() {
   const [tool, setTool] = useState<ToolId>("select");
@@ -61,6 +62,8 @@ export function CadWorkspace() {
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
   const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
+  const currentSelection = useRef(selection);
+  currentSelection.current = selection;
   const [wallStart, setWallStart] = useState<Point | null>(null);
   const [linePoints, setLinePoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
@@ -482,6 +485,26 @@ export function CadWorkspace() {
           className="glass-panel-strong shrink-0 max-h-[35vh] overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <h2 className="mb-1 text-xs font-semibold">Werkzeugeigenschaften</h2>
+          {tool === "select" && (
+            <LayerProperties
+              key={`layer:${JSON.stringify([selection, project])}`}
+              project={project}
+              selection={selection}
+              disabled={referenceSelection.selecting}
+              onAssign={(base, target, layerId) => {
+                if (referenceSelection.selecting) return;
+                dispatchEditing({
+                  type: "assign-layer",
+                  base,
+                  target,
+                  selection: currentSelection.current,
+                  layerId,
+                });
+                setDemandOpen(false);
+                setModelError("");
+              }}
+            />
+          )}
           {tool === "line" && mode === "2D" ? (
             <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
               <label className="text-xs">

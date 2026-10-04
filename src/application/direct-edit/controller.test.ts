@@ -940,3 +940,88 @@ test("polar point input retains opposite wall endpoint and commits one undo step
   assert.equal(next.history.past.length, 1);
   assert.deepEqual(editingReducer(next, { type: "undo" }).history.present, state.history.present);
 });
+
+test("layer property assignment discards movement preview and produces one reversible membership change", () => {
+  const state = begin(),
+    base = state.history.present;
+  const event = {
+    type: "assign-layer" as const,
+    base,
+    target: wall,
+    selection: wall,
+    layerId: base.defaultLayerIds.line,
+  };
+  previewEdit(state.session!, base, wall, { x: 10, y: 10 });
+  const next = editingReducer(state, event);
+  assert.equal(next.error, "");
+  assert.equal(next.session, null);
+  assert.equal(next.history.past.length, 1);
+  assert.deepEqual(next.history.present.storey.walls[0]!.start, base.storey.walls[0]!.start);
+  assert.equal(next.history.present.storey.walls[0]!.layerId, event.layerId);
+  assert.deepEqual(readProjectFile(serializeProject(next.history.present)), next.history.present);
+  const undo = editingReducer(next, { type: "undo" });
+  assert.deepEqual(undo.history.present, base);
+  assert.deepEqual(editingReducer(undo, { type: "redo" }).history.present, next.history.present);
+  const noop = editingReducer(next, { ...event, base: next.history.present });
+  assert.equal(noop.history, next.history);
+});
+
+test("layer properties reject changed selection, stale model and invalid typed targets", () => {
+  const state = begin(),
+    base = state.history.present;
+  const event = {
+    type: "assign-layer" as const,
+    base,
+    target: wall,
+    selection: wall,
+    layerId: base.defaultLayerIds.line,
+  };
+  const cases = [
+    { ...event, selection: null },
+    { ...event, selection: { kind: "window" as const, id: "window" } },
+    { ...event, base: structuredClone(base) },
+    {
+      ...event,
+      target: { kind: "window" as const, id: "wall" },
+      selection: { kind: "window" as const, id: "wall" },
+    },
+    { ...event, layerId: "missing" },
+  ];
+  for (const invalid of cases) {
+    const next = editingReducer(state, invalid);
+    assert.notEqual(next.error, "");
+    assert.equal(next.history, state.history);
+    assert.equal(next.session, state.session);
+  }
+});
+
+test("window and line properties share the same layer transition without changing their host or geometry", () => {
+  const original = initial().history.present;
+  const state = createEditingState(
+    addLine(original, {
+      id: "line",
+      kind: "line",
+      points: [
+        { x: 0, y: 1 },
+        { x: 2, y: 1 },
+      ],
+      ...defaultLineAppearance,
+    }),
+  );
+  for (const target of [
+    { kind: "window" as const, id: "window" },
+    { kind: "line" as const, id: "line" },
+  ]) {
+    const next = editingReducer(state, {
+      type: "assign-layer",
+      base: state.history.present,
+      target,
+      selection: target,
+      layerId: original.defaultLayerIds.wall,
+    });
+    assert.equal(next.error, "");
+    assert.equal(next.history.past.length, 1);
+    assert.equal(next.history.present.storey.windows[0]!.wallId, "wall");
+    assert.deepEqual(buildSolid(next.history.present), buildSolid(state.history.present));
+  }
+});
