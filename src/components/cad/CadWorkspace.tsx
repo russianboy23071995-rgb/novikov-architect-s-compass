@@ -167,6 +167,7 @@ export function CadWorkspace() {
   };
 
   const startEdit = (action: EditAction) => {
+    setDemandOpen(false);
     if (!selection) return;
     dispatchEditing({
       type: "begin",

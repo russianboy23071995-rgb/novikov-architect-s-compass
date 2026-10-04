@@ -1,3 +1,5 @@
+import { querySnap } from "../../constraints/snapping/engine.ts";
+import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -88,4 +90,78 @@ test("ambiguous picking uses actual segments and deterministic order, with per-s
     pickReferenceSegments(segments, { x: 15, y: 1 }, 100)[0]?.feature,
     "segment-1-midpoint:[10,1,20,1]",
   );
+});
+import {
+  emptyHoverReference,
+  previewPointReferences,
+  advanceHoverReference,
+  HOVER_REFERENCE_CAPACITY,
+} from "../../constraints/inference/hover-reference.ts";
+import { pickReferencePoints } from "../../rendering/viewport/reference-picking.ts";
+const pointRef = (n: number) => ({ entityId: "p" + n, feature: "endpoint", point: { x: n, y: 0 } });
+test("explicit points preview exact oldest replacement without mutation; hover shares capacity", () => {
+  let state = emptyHoverReference();
+  for (let n = 0; n < 4; n++) state = advanceHoverReference(state, pointRef(n), n, 0);
+  const original = structuredClone(state);
+  const preview = previewPointReferences(state, [pointRef(4), pointRef(5)])!;
+  assert.deepEqual(state, original);
+  assert.deepEqual(
+    preview.replaced.map((r) => r.entityId),
+    ["p0", "p1"],
+  );
+  assert.deepEqual(
+    preview.value.references.map((r) => r.entityId),
+    ["p2", "p3", "p4", "p5"],
+  );
+  const hover = advanceHoverReference(preview.value, pointRef(6), 100, 0);
+  assert.equal(hover.references.length, HOVER_REFERENCE_CAPACITY);
+  assert.deepEqual(
+    hover.references.map((r) => r.entityId),
+    ["p3", "p4", "p5", "p6"],
+  );
+});
+test("explicit points protect pinned origin, deduplicate and reject overflow atomically", () => {
+  const state = emptyHoverReference();
+  const origin = pointRef(0);
+  const preview = previewPointReferences(state, [origin, pointRef(1), pointRef(1)], [origin])!;
+  assert.deepEqual(preview.value.references, [pointRef(1)]);
+  assert.equal(
+    previewPointReferences(
+      state,
+      Array.from({ length: 5 }, (_, i) => pointRef(i)),
+    ),
+    null,
+  );
+  assert.deepEqual(state, emptyHoverReference());
+  const existing = { ...state, references: [pointRef(1), pointRef(2), pointRef(3), pointRef(4)] };
+  assert.deepEqual(previewPointReferences(existing, [pointRef(1), pointRef(5)])!.replaced, [
+    pointRef(2),
+  ]);
+});
+test("point picking uses CSS distance, exact source identity, and excludes computed intersections", () => {
+  const p = pointRef(0),
+    midpoint = { ...pointRef(1), kind: "midpoint" as const };
+  const refs = [p, midpoint, { ...pointRef(2), kind: "segment-intersection" as const }];
+  assert.deepEqual(pickReferencePoints(refs, { x: 0.09, y: 0 }, 100), [p]);
+  assert.deepEqual(pickReferencePoints(refs, { x: 0.11, y: 0 }, 100), []);
+  assert.deepEqual(pickReferencePoints(refs, { x: 1, y: 0 }, 100), [midpoint]);
+  assert.deepEqual(pickReferencePoints(refs, { x: 2, y: 0 }, 100), []);
+  assert.deepEqual(pickReferencePoints(refs, { x: 0.18, y: 0 }, 50), [p]);
+});
+test("point candidates obey host exclusions and snapshot invalidation without pair calculation", () => {
+  const model = createLocalSnapSources(fixture());
+  const query = createToolSourceQuery(model, {
+    origin: pointRef(999),
+    sources: (rs) => rs.filter((r) => r.entityId !== "l0"),
+    resolve: querySnap,
+  });
+  const local = query.inspect({ x: 0, y: 0 }, 100, 10);
+  assert.ok(
+    pickReferencePoints(local.references, { x: 0, y: 0 }, 100).every((r) => r.entityId !== "l0"),
+  );
+  const old = local.references[0]!;
+  const changed = fixture();
+  changed.storey.lines![1]!.points[0]!.x += 1;
+  const next = createLocalSnapSources(changed);
+  assert.equal(next.lookup(referenceKey(old)), undefined);
 });

@@ -6,6 +6,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import {
   advanceHoverReference,
+  previewPointReferences,
   emptyHoverReference,
   sameHoverSession,
   suspendHoverReference,
@@ -127,7 +128,30 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       ? snapshot.cursor
       : (cursor ?? snapshot.cursor)
     : null;
+  const previewPoints = (
+    requested: readonly import("@/constraints/snapping/engine").SnapReference[],
+  ) =>
+    previewPointReferences(
+      compatible ? snapshot.value : emptyHoverReference(),
+      requested,
+      context.pinnedReferences,
+    );
+  const acquirePoints = (
+    requested: readonly import("@/constraints/snapping/engine").SnapReference[],
+  ) => {
+    if (!context.enabled || !context.suspended) return false;
+    const current = state.current;
+    if (!current || !sameHoverSession(current.context, context)) return false;
+    const result = previewPointReferences(current.value, requested, context.pinnedReferences);
+    if (!result) return false;
+    const next = { ...current, context, value: result.value };
+    state.current = next;
+    setSnapshot(next);
+    return true;
+  };
   return {
+    previewPoints,
+    acquirePoints,
     references,
     guideCursor,
     guideDirections: guideCursor

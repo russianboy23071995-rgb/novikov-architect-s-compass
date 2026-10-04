@@ -706,7 +706,7 @@ Praktischer Test: Referenzen auswählen anklicken, zwei Linien im Canvas wählen
 
 Grenzen: zunächst gerade Segmentquellen in 2D; explizite Punktübernahme fehlt. Quellschlüssel gelten für den aktuellen Modellsnapshot und werden nach Modell-/Vorgangswechsel verworfen. Komplette Modal-/Tastaturmatrix noch nicht browserautomatisiert. Ältere gestapelte PRs bleiben offen.
 
-### Genau ein ausführbarer Folgeauftrag: gezielte Punktreferenzen im gemeinsamen Auswahlmodus
+### Abgeschlossener Folgeauftrag: gezielte Punktreferenzen im gemeinsamen Auswahlmodus
 
 Punktübernahme für vorhandene End-/Mittelpunkte in denselben temporären Auswahlablauf integrieren. Vorhandenen Hover-Referenzvertrag einschließlich Kapazität, Ursprungsschutz und Verdrängung verwenden; vor Übernahme anzeigen, welche Referenz ersetzt würde. Segmentfilter und explizite Hilfsreferenzen getrennt halten, kein zweiter unbegrenzter Referenzspeicher. Arbeitskopie/Abbruch, Modellwechsel, Zoom und gemeinsame Nutzung bei Zeichnen/Direct Edit testen; Tab/Escape und modale Priorität praktisch mitprüfen. Keine neue Fangart oder 3D-Arbeitsebene.
 
@@ -715,3 +715,18 @@ Punktübernahme für vorhandene End-/Mittelpunkte in denselben temporären Auswa
 Im normalen Fangbetrieb kein dauerhaftes Panel. Bei pausierter dichter Suche Hinweis mit Einstieg; bestätigte Auswahl kompakt als Anzahl mit Ändern/Aufheben. Manueller Einstieg über das gemeinsame On-Demand-Menü auch ohne Elementauswahl und im Zeichen-/Bearbeitungsvorgang. Auswahlmodus bleibt auch bei Snap aus bedienbar. Keine Änderung der Fangberechnung oder 600-ms-Regel.
 
 250 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen nach Korrektur einer verbliebenen Formatierung in snapping.ts. Browser: normales Panel verborgen, Einstieg im Elementmenü und Linienwerkzeug, Abbruch blendet Panel wieder aus. Nächster Auftrag bleibt gezielte Punktübernahme gemäß obigem Folgeauftrag. Ergänzung im offenen PR #61, kein Merge.
+
+
+### Abschluss: gezielte Punktreferenzen — 04.10.2026
+
+Der gemeinsame Auswahlmodus bietet Linien/Punkte. Vorhandene End-, Eck- und Mittelpunkte werden lokal ohne Paarberechnung getroffen und über dieselbe Hover-Referenzverwaltung übernommen. Vorschau und Übernahme verwenden denselben reinen Kapazitätsdienst; maximal vier zusätzliche Referenzen, separater geschützter Bewegungsursprung. Doppelte Quellen werden dedupliziert; bei mehr als vier Punkten bleibt Übernehmen gesperrt. Vorherige Referenzen werden erst bei Übernahme ersetzt, mit konkreter Vorschau. Punktübernahme ändert weder Segmentfilter noch Modell/Undo. Kein zweiter dauerhafter Referenzspeicher und keine per-Werkzeug-Implementierung.
+
+254 Tests, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Neue Tests: Vorschau ohne Mutation, konkrete Verdrängung, gemeinsame Hover-Kapazität, Ursprungsschutz, Duplikate/Überlauf, CSS-Picking, Quellenfilter und veralteter Snapshot. Browser: vier Wandecken übernehmen, Zoom erhält vier Ringe; fünfter Punkt zeigt die zu ersetzende Ecke; Abbruch/Escape erhält vier, Enter übernimmt. Fünf gleichzeitig gewählte Punkte sperren Übernahme. Direct Edit: eigene Wand bleibt als externe Quelle ausgeschlossen, Ursprung bleibt, Tab navigiert Auswahlpanel, Escape stellt Hilfseingabe wieder her. Dabei gefundene Menüüberlagerung korrigiert: On-Demand-Menü über Hilfseingabe, beim Start einer Bewegung geschlossen.
+
+Praktischer Test: On-Demand-Menü → Referenzen auswählen → Punkte → End-/Mittelpunkte anklicken → Referenzen übernehmen. Vier Punkte erfassen, danach einen neuen Punkt wählen und Ersetzungsvorschau prüfen; alternativ abbrechen. Zoom und freie Bewegung wiederholen.
+
+Grenzen: bestehende 2D-Modellpunkte; keine explizite Übernahme berechneter Schnittpunkte, diese bleiben per Hover verfügbar. Punkt-Arbeitskopie gilt jeweils für eine Übernahme. Vollständige Modal-/Mehrviewport-Matrix bleibt offen. PR #61 nicht zusammengeführt. Shell-Fetch derzeit ohne Netzwerkverbindung; Veröffentlichung über GitHub-Connector, vorhandene lokale Änderungen erhalten.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Referenzauswahl im vollständigen Ablauf stabilisieren
+
+Segmentfilter und Punktübernahme gemeinsam bei Zeichnen und Direct Edit prüfen: entfernte Hilfslinien, mehrdeutige Punktquellen, Escape/Tab mit offenen Dialogen, Snap aus/ein sowie Modelländerung/Undo/Redo und Viewportwechsel. Nur nachgewiesene Fehler beheben, Lebenszyklus automatisiert absichern und Einschränkungen aktualisieren. Keine neue Fangart, keine 3D-Arbeitsebene und keine weitere Auswahloberfläche.

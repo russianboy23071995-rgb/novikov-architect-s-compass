@@ -1,6 +1,7 @@
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
-import { pickReferenceSegments } from "@/rendering/viewport/reference-picking";
+import { referenceKey } from "@/constraints/inference/construction-reference";
+import { pickReferencePoints, pickReferenceSegments } from "@/rendering/viewport/reference-picking";
 import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
@@ -178,6 +179,8 @@ export function BimPlan({
     references: activeReferences,
     guideDirections,
     guideCursor,
+    previewPoints,
+    acquirePoints,
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
   const resolvePointer = (point: Point, shift = shiftHeld) =>
@@ -374,11 +377,11 @@ export function BimPlan({
           event.stopPropagation();
           const point = rawPoint(event);
           if (!point) return;
-          const hits = pickReferenceSegments(
-            sourceQuery.inspect(point, camera.pixelsPerMetre, 10).segments,
-            point,
-            camera.pixelsPerMetre,
-          );
+          const local = sourceQuery.inspect(point, camera.pixelsPerMetre, 10);
+          const hits =
+            referenceSelection.mode === "points"
+              ? pickReferencePoints(local.references, point, camera.pixelsPerMetre)
+              : pickReferenceSegments(local.segments, point, camera.pixelsPerMetre);
           if (hits.length === 1) referenceSelection.toggle(hits[0]!);
           else referenceSelection.hitsAt(hits, point);
           return;
@@ -806,6 +809,18 @@ export function BimPlan({
             fill="var(--background)"
             opacity={0.65}
           />
+          {referenceSelection?.mode === "points" &&
+            referenceSelection.points.map((r) => (
+              <circle
+                key={referenceKey(r)}
+                cx={r.point.x}
+                cy={-r.point.y}
+                r={8 / camera.pixelsPerMetre}
+                fill="none"
+                stroke="#64748b"
+                strokeWidth={2 / camera.pixelsPerMetre}
+              />
+            ))}
           {modelSources.allSegments
             .filter(
               (s) =>
@@ -831,14 +846,27 @@ export function BimPlan({
           <foreignObject
             transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
             width={Math.min(440, viewSize.width - 24)}
-            height={selecting ? 260 : 90}
+            height={selecting ? 340 : 90}
           >
             <ReferenceSelectionPanel
               binding={referenceSelection}
+              pointsEnabled={trackingContext.enabled}
+              pointPreview={previewPoints(referenceSelection.points)}
+              onApplyPoints={() => {
+                const points = referenceSelection.points;
+                const valid = points.every(
+                  (r) =>
+                    modelSources.lookup(referenceKey(r)) &&
+                    (!snapping || snapping.sources([r]).length > 0),
+                );
+                if (valid && acquirePoints(points)) referenceSelection.cancel();
+              }}
               paused={endpointSnap && snap && density.paused}
               label={(r) => {
                 const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
                 const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+                if (referenceSelection.mode === "points")
+                  return `${wi >= 0 ? `Wand ${wi + 1}` : li >= 0 ? `Linie ${li + 1}` : "Hilfsreferenz"} · ${r.kind === "midpoint" ? "Mittelpunkt" : "Punkt"} (${r.point.x.toFixed(2)}; ${r.point.y.toFixed(2)})`;
                 return wi >= 0
                   ? `Wand ${wi + 1} · Achse`
                   : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
