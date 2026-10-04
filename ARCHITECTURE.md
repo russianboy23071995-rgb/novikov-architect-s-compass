@@ -982,3 +982,9 @@ This adapter has no interaction consumer yet. Supporting a mathematical height d
 `application/snapping/local-sources.ts` accepts either this metric or the compatible numeric 2D scale. Numeric callers use the same service through an isotropic adapter, preserving point-distance arithmetic. Candidate segments pass AABB, segment-box and CSS-distance checks before density counting or pair construction. Model-tolerance and roundoff padding retain uncertain contacts for existing exact intersection validation; they do not widen final point acceptance. Unlike the former square-only test, segments near square corners but outside the CSS radius no longer contribute false density. Source identities, full extents, snapshot caching and remote reference lookup remain intact.
 
 The rest of the resolver still uses its existing 2D metric. The affine query API is not a complete 3D snapping path and must not be used to enable that UI yet. Ranking, guide projection, hover and explicit reference picking must converge on this contract in subsequent bounded changes.
+
+## Shared point ranking metric (2026-10-04)
+
+SnapContext now optionally carries ScreenMetric. querySnap supplies the isotropic adapter for legacy numeric callers and forwards the same instance to the shared source query. The Application adapter uses it for local filtering and density; point candidates use it for radius acceptance and distance ranking. Existing priority, activation and stable source tie-break rules remain unchanged. Non-finite point distances are rejected.
+
+This supersedes the point-ranking limitation above only. Guide generation/projection, guide distances, Shift/Ortho direction selection, hover and explicit picking retain their current model/2D contracts. Affine point support alone must not enable a mixed-metric 3D interaction. Model angles and lengths remain model quantities.

@@ -787,6 +787,20 @@ Segmentverfeinerung erfolgt vor Dichtezählung und Schnittpunktpaaren. Lang gezo
 
 Praktische Abnahme: zwei lange Linien kreuzen lassen, Linienwerkzeug nahe der Kreuzung bewegen, Schnittpunkt und End-/Mittelpunkte prüfen. Eine Referenz 0,6 Sekunden aktivieren, zoomen und weiterzeichnen; aktive Hilfslinie soll erhalten bleiben. Bei dichter Geometrie dürfen nur nahe Linien zur Dichteschranke beitragen. Schrägansicht ist mathematisch getestet, aber noch keine aktivierte 3D-Fangbedienung.
 
-### Genau ein ausführbarer Folgeauftrag: Punkt-Ranking im gemeinsamen Fangresolver
+### Abgeschlossener Folgeauftrag: Punkt-Ranking im gemeinsamen Fangresolver
 
 Den bestehenden Resolver-Vertrag für Punktkandidaten um dieselbe ScreenMetric erweitern und End-/Mittel-/Schnittpunkt-Abstände samt Rangfolge darüber bewerten. Gemeinsamen Application-Quellenadapter konsistent mit derselben Metrik versorgen; bisherige numerische 2D-Aufrufe kompatibel erhalten. Affine Kandidaten am Radiusrand, konkurrierende Ziele, deterministische Gleichstände und 2D-Differenzialfälle testen. Noch keine 3D-UI aktivieren und fachliche Modellwinkel/-längen nicht in Bildschirmwinkel umdeuten. Führung/Segment-Hover/manuelles Picking bleiben ausdrücklich weitere Anschlussstellen vor Freischaltung des vollständigen 3D-Pfads.
+
+### Abschluss: gemeinsames Punkt-Ranking — 04.10.2026
+
+PR #66 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (803d07f), main unverändert. Zweig feat/shared-point-screen-ranking. SnapContext nimmt dieselbe optionale ScreenMetric entgegen; bisherige numerische Aufrufe erhalten den isotropen Adapter. Die Metrik wird pro Abfrage an den gemeinsamen Application-Quellenadapter weitergereicht und sowohl lokal als auch zur Punktbewertung verwendet. Keine neue Engine je Werkzeug und keine Änderung der Quellensitzungsidentität.
+
+End-, Mittel- und Segment-Schnittpunkte werden am CSS-Radius bewertet; innerhalb derselben Priorität entscheidet CSS-Abstand. Bestehende Prioritäten und stabile Gleichstandsauflösung bleiben erhalten. Nicht endliche/negative Abstände werden verworfen. Keine Modell-/Datei-/History-Änderung, keine neue 3D-Bedienung.
+
+273 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Tests mit Parameterreihen: konkurrierende affine Ziele, Radiusrand für alle drei Punktarten, Priorität und Gleichstand bei umgekehrter Quellenreihenfolge, isotrope Parität bei Maßstäben/Ortho sowie Application-Ende-zu-Ende-Vergleich lokale/vollständige Quellen. Kein neuer manueller Browsernachweis; bestehende 3D-Fangbedienung weiterhin nicht freigeschaltet.
+
+Praktischer Abnahmetest: im Grundriss nahe benachbarten End-/Mittelpunkten zeichnen; Fangziel und Markierung müssen zusammenpassen. Zoomen, erneut fangen und die Zeichnung abbrechen. Automatische Tests prüfen zusätzlich die noch nicht interaktiv verfügbare schräge Bildschirmmetrik.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsame Führungsprojektion in Bildschirmmetrik
+
+Eine numerische Projektion auf eine Modellgerade nach minimalem CSS-Abstand in ScreenMetric ergänzen. Gemeinsame Führungs-Kandidaten und deren Abstände darüber führen, einschließlich berechneter Führungsschnittpunkte. Modellrichtungen, Shift-/Ortho-Vorgaben, Winkel/Längen und fachliche Achsenzwänge bewahren; keine Bildschirmwinkel als Modellwinkel behandeln. Isotrope 2D-Parität, affine Lotprojektion, konkurrierende Führungen, entfernte aktive Referenzen und Radiusgrenzen testen. Keine 3D-UI aktivieren; Hover und explizites Picking bleiben danach offene Anschlüsse.

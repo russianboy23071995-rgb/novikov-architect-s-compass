@@ -3,6 +3,8 @@ import { projectDirection, angle45Direction } from "../../geometry/projections/d
 import { collectSnapCandidates, gridSnap } from "./candidates.ts";
 import { compareSnapCandidates } from "./ranking.ts";
 import type { GuideDirection } from "../guides/directions.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
+import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export type SnapReference = {
   segment?: { start: Point2; end: Point2 };
@@ -45,8 +47,11 @@ export type SnapSourceQuery = (
   active: readonly SnapReference[],
   intersectionsPaused?: boolean,
   selectedSegments?: ReadonlySet<string> | null,
+  metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
+  /** Point ranking/local query only; guide projection and hover migration remain pending. */
+  metric?: ScreenMetric;
   intersectionsPaused?: boolean;
   selectedSegments?: ReadonlySet<string> | null;
   sourceQuery?: SnapSourceQuery | undefined;
@@ -83,6 +88,10 @@ export function querySnap(
       (!Number.isFinite(context.gridSpacing) || context.gridSpacing <= 0))
   )
     throw new Error("Invalid snap context");
+  context = {
+    ...context,
+    metric: context.metric ?? createIsotropicScreenMetric(context.pixelsPerMetre),
+  };
   const axis = context.fixedAxis;
   if (
     axis &&
@@ -134,6 +143,7 @@ export function querySnap(
         context.activeReferences ?? (context.activeReference ? [context.activeReference] : []),
         context.intersectionsPaused,
         context.selectedSegments,
+        context.metric,
       ),
     };
   const candidates = collectSnapCandidates(cursor, context, constrain);

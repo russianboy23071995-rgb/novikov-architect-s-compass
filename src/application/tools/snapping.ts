@@ -7,6 +7,7 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { LocalSnapSources } from "../snapping/local-sources.ts";
 import type { SnapSourceQuery } from "../../constraints/snapping/engine.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 /** Bound to model and policy, never to camera or the changing local result array. */
 export function createToolSourceQuery(
@@ -22,7 +23,7 @@ export function createToolSourceQuery(
   };
   const inspect = (
     cursor: Point2,
-    scale: number,
+    scale: number | ScreenMetric,
     radius: number,
     selected?: ReadonlySet<string> | null,
   ) => {
@@ -43,8 +44,9 @@ export function createToolSourceQuery(
     active,
     paused = false,
     selected = null,
+    metric,
   ) => {
-    const primitives = inspect(cursor, scale, radius, selected);
+    const primitives = inspect(cursor, metric ?? scale, radius, selected);
     const local = completeLocalQuery(
       primitives,
       paused || primitives.segments.length > intersectionLimit,

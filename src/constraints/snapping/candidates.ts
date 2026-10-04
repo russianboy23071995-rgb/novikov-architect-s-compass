@@ -55,8 +55,10 @@ function pointCandidates(
   const result: RankedSnap[] = [];
   for (const source of context.references) {
     if (!finite(source) || !pointsCompatible(source.point, constrain(source.point))) continue;
-    const d = distance(source.point, cursor, context);
-    if (d > context.endpointRadiusPx) continue;
+    const d = context.metric
+      ? context.metric.distance(source.point, cursor)
+      : distance(source.point, cursor, context);
+    if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
     result.push(
       ranked(
         {
