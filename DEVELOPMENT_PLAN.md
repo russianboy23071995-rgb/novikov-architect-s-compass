@@ -957,6 +957,24 @@ Abnahme: sichtbare untere Wandecke anklicken → Punkt frei bewegen → Maus bew
 
 Grenzen: nur vorhandene gerade Waende auf z=0. Flucht-/Achsenaktionen wechseln vorerst weiterhin in den bisherigen 2D-Ablauf. Keine obere Wandecke, freie Z-Bewegung oder Wandanschlussregeln. Modellfehlermeldungen sind teilweise weiterhin Englisch. Kein neuer Grossprojekt-, Mehrviewport- oder WebGL-Kontextverlust-Nachweis. Neue AI-/Sprachformulierungen sind nicht Teil dieses Adapterschritts; dieselben validierten Modellaktionen bleiben die gemeinsame Grenze.
 
-### Genau ein ausfuehrbarer Folgeauftrag: bestehende Flucht-/Achsenaktionen in 3D anschliessen
+### Abgeschlossener Folgeauftrag: bestehende Flucht-/Achsenaktionen in 3D anschliessen
 
 Die vorhandenen Wandaktionen Punkt in Flucht strecken sowie Element entlang Achse/X/Y auf z=0 ueber denselben 3D-Bearbeitungspfad freischalten. Einen expliziten Fusspunkt als Ursprung verlangen, Punktaktionen an gueltigen Endindex binden. Gemeinsame editDirection-/fixedAxis-/ToolInteraction-Regeln und Eingabefenster unveraendert wiederverwenden. Richtungsprioritaet gegen Shift/Ortho, Abbruch, ungueltige Verkuerzung, Pan versus Bestaetigung und einen Undo-Schritt pruefen. Keine zweite Achsenberechnung, keine neue Bauteilart und keine freie Z-Bewegung.
+
+### Abschluss: Flucht und Achsen in 3D — 04.10.2026
+
+PR #78 nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (e3ecc38). Zweig feat/3d-wall-axis-edits; main unveraendert. Die vier bestehenden Aktionen stretch/axis/x/y bleiben jetzt in 3D auf z=0. Expliziter Fusspunkt bleibt Pflicht; Punkt/Flucht benoetigen Endindex 0/1. Gemeinsame Capability-Pruefung in application/direct-edit/controller verhindert auseinanderlaufende Freischaltung zwischen Workspace und Viewport. Kein neuer Solver, Hover-Timer, Eingabedialog oder Modellpfad.
+
+Vorhandene feste Achse hat Vorrang vor Shift und Ortho, auch bei ausgeschaltetem Snap. Das bestehende Eingabefenster zeigt den gesperrten Winkel und erlaubt eine vorzeichenbehaftete Strecke. Fluchtstreckung behaelt das Gegenende; Achse/X/Y verschieben die ganze Wand. Alle verwenden denselben Ursprung, Quellenfilter, Vorschau-, Pan-, Bestaetigungs- und Undo-Pfad.
+
+313 Tests bestanden; TypeScript und Produktionsbuild erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Tests mit Parameterreihen pruefen Capability-Grenzen, 32 Kombinationen aus vier Aktionen, schraegen/umgekehrten Waenden, beiden Enden und positiven/negativen Strecken, jeweils mit Shift/Ortho und Snap an/aus. Numerik und Mausziel stimmen ueberein; Vorschau/Abbruch, fixe Gegenpunkte, Fensterbezug, JSON/IFC und ein Undo-Schritt mit Redo geprueft. Ungueltige Strecken, Ueberkreuzen des Gegenendes und Fensterkonflikte erzeugen keine History; Korrektur bleibt moeglich.
+
+Browser: bestehendes Nutzerprojekt mit drei Waenden und einem Fenster behalten. An Wand 1 Punkt in Flucht strecken gestartet, Ursprung und feste Eingabe in 3D sichtbar; -2,5m wird wegen Fensterkonflikt abgewiesen. Auf +1m korrigiert; Pan-Klick bestaetigt nicht. Uebernahme 3→4m, Undo 3m, Redo 4m und abschliessendes Undo geprueft. X-Achse mit -0,5m, Y-Achse mit +0,5m sowie Wandachse mit +0,5m als Vorschau geprueft und abgebrochen; Winkel 0/90/180 Grad jeweils gesperrt, Hilfslinie und Ursprung vorhanden. Screenshot outputs/3d-wall-axis.jpg ausserhalb des Repositories. Keine Testbewegung bleibt im Modell.
+
+Abnahme: sichtbaren unteren Wandendpunkt anklicken → Punkt in Flucht strecken → Tab → 1 eingeben → Uebernehmen. -0,5 verkuerzt. Fuer eine reine Verschiebung Element entlang Achse oder Element auf X-/Y-Achse waehlen. Winkel bleibt dabei gesperrt; negative Strecken kehren die Richtung um. Pan, Esc und Undo pruefen.
+
+Grenzen: weiterhin nur gerade Waende auf z=0. Keine freie Z-Bewegung, Wandanschlussregeln oder weitere Elementtypen. Rein mausgefuehrte Achsenbewegung zeigt die Vorschaugeometrie; der numerische Streckenplatzhalter bleibt ohne Eingabe noch Maus (bestehendes gemeinsames Verhalten). Modellfehler sind teilweise Englisch. Keine umfassende Mehrviewport-/Grossprojekt-/Kontextverlust-Abnahme; bisherige Rahmen-/Clipping-Grenzen bleiben dokumentiert.
+
+### Genau ein ausfuehrbarer Folgeauftrag: gemeinsame 3D-Auswahlumrandung fuer Waende
+
+Den bereits aufgenommenen Nutzerwunsch einer dezenten sichtbaren Auswahlumrandung als kleinen Rendering-Schritt umsetzen. Gemeinsame, aus der dargestellten Geometrie abgeleitete Kanten-/Auswahlrepraesentation beginnen und zunaechst an vorhandene Waende mit Oeffnungen anschliessen; keine zweite Auswahl oder Modellkopie. Innenliegende Tessellationskanten nicht als Bauteilkanten anzeigen, bestehenden Projektionsstand und Sichtbarkeit verwenden. Auswahlwechsel, Oeffnungen, Vorschau, Kameranavigation und Modellwechsel pruefen. Architektur fuer spaetere Elementadapter offenhalten, ohne leere Klassen oder alle zukuenftigen Bauteile vorwegzunehmen. Keine neuen Modellaktionen.

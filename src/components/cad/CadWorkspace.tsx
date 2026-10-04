@@ -11,7 +11,11 @@ import { useToolInteraction } from "./useToolInteraction";
 import { editInteraction, drawingInteraction } from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import { createEditingState, editingReducer } from "@/application/direct-edit/controller";
+import {
+  createEditingState,
+  editingReducer,
+  supportsWallWorkplaneEdit,
+} from "@/application/direct-edit/controller";
 import { createDrawing, defaultDrawingWall } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
@@ -170,15 +174,12 @@ export function CadWorkspace() {
     setDemandOpen(false);
     if (!selection) return;
     const inSolid = mode === "3D" && activeViewport === 0;
-    const solidMove =
-      inSolid && selection.kind === "wall" && (action === "move" || action === "point");
+    const solidMove = inSolid && selection.kind === "wall";
     if (solidMove && !pickedPoint.anchor) {
-      showNotice(
-        "Zuerst einen sichtbaren Wandfußpunkt anklicken, dann Element frei bewegen wählen.",
-      );
+      showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
     }
-    if (solidMove && action === "point" && pickedPoint.index !== 0 && pickedPoint.index !== 1) {
+    if (solidMove && !supportsWallWorkplaneEdit(selection, action, pickedPoint.index)) {
       showNotice("Zuerst einen sichtbaren Wandendpunkt oder eine untere Wandecke anklicken.");
       return;
     }

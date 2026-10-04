@@ -10,6 +10,17 @@ export type EditingState = {
   error: string;
 };
 
+/** Current horizontal 3D edit capabilities; geometry/axis rules remain in the shared adapters. */
+export function supportsWallWorkplaneEdit(
+  target: EditTarget,
+  action: EditAction,
+  index: number | null,
+): boolean {
+  if (target.kind !== "wall") return false;
+  if (action === "point" || action === "stretch") return index === 0 || index === 1;
+  return ["move", "axis", "x", "y"].includes(action);
+}
+
 export type EditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
