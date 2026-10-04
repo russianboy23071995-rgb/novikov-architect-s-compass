@@ -988,3 +988,9 @@ The rest of the resolver still uses its existing 2D metric. The affine query API
 SnapContext now optionally carries ScreenMetric. querySnap supplies the isotropic adapter for legacy numeric callers and forwards the same instance to the shared source query. The Application adapter uses it for local filtering and density; point candidates use it for radius acceptance and distance ranking. Existing priority, activation and stable source tie-break rules remain unchanged. Non-finite point distances are rejected.
 
 This supersedes the point-ranking limitation above only. Guide generation/projection, guide distances, Shift/Ortho direction selection, hover and explicit picking retain their current model/2D contracts. Affine point support alone must not enable a mixed-metric 3D interaction. Model angles and lengths remain model quantities.
+
+## Shared guide projection metric (2026-10-04)
+
+ScreenMetric.projectLine computes the nearest point on an infinite model line by CSS distance. The affine implementation normalizes direction and matrix before projection; invalid or non-finite projections return null. Its isotropic adapter delegates to existing projectDirection to preserve 2D arithmetic. Shared guide candidates use this projection; candidate distances including guide/axis intersections, grid and Shift labels use the same metric.
+
+Direction selection/hysteresis, explicit Shift/Ortho and fixed-axis constraints remain model-space operations. Intersections remain exact model geometry. A candidate must still satisfy the model constraint; projection does not move or duplicate its source. This supersedes the guide-distance/projection limitation above. Hover, acquisition and explicit reference picking still require metric integration before 3D interaction can be enabled.

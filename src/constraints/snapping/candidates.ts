@@ -12,7 +12,7 @@ type Constrain = (point: Point2) => Point2;
 const key = (r: SnapReference) => JSON.stringify([r.entityId, r.feature, r.point.x, r.point.y]);
 const finite = (r: SnapReference) => Number.isFinite(r.point.x) && Number.isFinite(r.point.y);
 const distance = (a: Point2, b: Point2, c: SnapContext) =>
-  Math.hypot(a.x - b.x, a.y - b.y) * c.pixelsPerMetre;
+  c.metric ? c.metric.distance(a, b) : Math.hypot(a.x - b.x, a.y - b.y) * c.pixelsPerMetre;
 
 /** One exact source-validation pass. Coordinates here identify a snapshot, not tolerance. */
 function activeSources(context: SnapContext): ActiveSource[] {
@@ -55,9 +55,7 @@ function pointCandidates(
   const result: RankedSnap[] = [];
   for (const source of context.references) {
     if (!finite(source) || !pointsCompatible(source.point, constrain(source.point))) continue;
-    const d = context.metric
-      ? context.metric.distance(source.point, cursor)
-      : distance(source.point, cursor, context);
+    const d = distance(source.point, cursor, context);
     if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
     result.push(
       ranked(
@@ -91,10 +89,12 @@ function guideCandidates(
     if (distance(cursor, p, context) <= context.endpointRadiusPx) continue;
     const guide = cursorGuide(cursor, source, context.guideDirections);
     for (const { kind, direction: vector } of [guide]) {
-      const point = projectDirection(cursor, p, vector);
+      const point = context.metric
+        ? context.metric.projectLine(cursor, p, vector)
+        : projectDirection(cursor, p, vector);
       if (!point || !pointsCompatible(point, constrain(point))) continue;
       const d = distance(point, cursor, context);
-      if (d > context.endpointRadiusPx) continue;
+      if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
       result.push(
         ranked(
           {
@@ -135,7 +135,7 @@ function intersectionCandidates(
       if (!point) continue;
       if (!pointsCompatible(point, constrain(point))) continue;
       const d = distance(point, cursor, context);
-      if (d > context.endpointRadiusPx) continue;
+      if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
       result.push(
         ranked(
           {
@@ -170,7 +170,7 @@ function axisIntersectionCandidates(
     const point = intersectLines(axis.origin, axis.direction, guide.origin, guide.direction);
     if (!point) continue;
     const d = distance(point, cursor, context);
-    if (d > context.endpointRadiusPx) continue;
+    if (!Number.isFinite(d) || d < 0 || d > context.endpointRadiusPx) continue;
     result.push(
       ranked(
         {

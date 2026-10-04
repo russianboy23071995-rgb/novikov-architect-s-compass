@@ -50,7 +50,7 @@ export type SnapSourceQuery = (
   metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
-  /** Point ranking/local query only; guide projection and hover migration remain pending. */
+  /** Shared candidate distances/projection; hover and explicit picking migration remain pending. */
   metric?: ScreenMetric;
   intersectionsPaused?: boolean;
   selectedSegments?: ReadonlySet<string> | null;
@@ -113,8 +113,7 @@ export function querySnap(
         worldPoint: point,
         guideOrigin: context.angleOrigin,
         angleDegrees: angle.degrees,
-        distanceOnScreen:
-          Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
+        distanceOnScreen: context.metric!.distance(point, cursor),
         sourceEntityId: null,
         sourceFeature: "shift-45",
         priority: -1,

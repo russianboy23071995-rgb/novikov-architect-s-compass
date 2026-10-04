@@ -801,6 +801,20 @@ End-, Mittel- und Segment-Schnittpunkte werden am CSS-Radius bewertet; innerhalb
 
 Praktischer Abnahmetest: im Grundriss nahe benachbarten End-/Mittelpunkten zeichnen; Fangziel und Markierung müssen zusammenpassen. Zoomen, erneut fangen und die Zeichnung abbrechen. Automatische Tests prüfen zusätzlich die noch nicht interaktiv verfügbare schräge Bildschirmmetrik.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Führungsprojektion in Bildschirmmetrik
+### Abgeschlossener Folgeauftrag: gemeinsame Führungsprojektion in Bildschirmmetrik
 
 Eine numerische Projektion auf eine Modellgerade nach minimalem CSS-Abstand in ScreenMetric ergänzen. Gemeinsame Führungs-Kandidaten und deren Abstände darüber führen, einschließlich berechneter Führungsschnittpunkte. Modellrichtungen, Shift-/Ortho-Vorgaben, Winkel/Längen und fachliche Achsenzwänge bewahren; keine Bildschirmwinkel als Modellwinkel behandeln. Isotrope 2D-Parität, affine Lotprojektion, konkurrierende Führungen, entfernte aktive Referenzen und Radiusgrenzen testen. Keine 3D-UI aktivieren; Hover und explizites Picking bleiben danach offene Anschlüsse.
+
+### Abschluss: gemeinsame Führungsprojektion — 04.10.2026
+
+PR #67 nach Freigabe normal nach fix/reference-selection-lifecycle übernommen (b67294b), main unverändert. Zweig feat/shared-guide-screen-projection. ScreenMetric projiziert auf Modellgeraden nach minimalem CSS-Abstand. Gemeinsame Führungskandidaten verwenden diesen Baustein; Führungs-/Achsschnittpunkte sowie Grid-/Shift-Abstandsangaben verwenden dieselbe Metrik. Keine Logik je Werkzeug und keine Modellmutation.
+
+Richtungswahl und Hysterese bleiben in Modellwinkeln. Shift, Ortho und explizite Achsen behalten ihre Modellprojektion und fachlichen Zwänge. Der isotrope Adapter verwendet die bisherige projectDirection-Rechnung exakt. Ungültige Projektionen und nicht endliche Kandidatenabstände werden abgelehnt.
+
+277 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Vier neue Tests mit Parameterreihen: analytische CSS-Lotbedingung und Minimalabstand bei Verkürzung/Scherung/Rotation, ungültige Richtungen, gemeinsamer Führungsresolver versus Shift-Modellprojektion, Führungsschnittpunkte/entfernte konkurrierende Quellen/Radiusrand/Achsschnitt sowie isotrope Rechenparität. Bestehende Interaktions- und Differenzialtests bestehen. Kein neuer manueller Browsernachweis; keine 3D-Fangbedienung freigeschaltet.
+
+Praktische Abnahme: Hilfspunkt nach 0,6 Sekunden aktivieren, einer horizontalen oder diagonalen Hilfslinie folgen, zweiten Hilfspunkt aktivieren und gemeinsamen Schnitt fangen. Shift halten und freie Wandbewegung mit fester Achse prüfen. Die bisherige 2D-Bedienung soll gleich bleiben; affine Projektion ist zunächst automatisiert abgesichert.
+
+### Genau ein ausführbarer Folgeauftrag: Hover-Erwerb mit gemeinsamer Bildschirmmetrik
+
+Punkt- und Segment-Hover im gemeinsamen Inference-/Application-Pfad an ScreenMetric anschließen, einschließlich CSS-Abstand und nächstem Punkt auf einem endlichen Segment. 600-ms-Erwerb/Entfernen, Kapazität, Ursprungsschutz, Zoom-Erhalt und Modellinvalidierung bewahren. Affine Segmentnähe, Endpunktbegrenzung, Dwell-Wechsel und isotrope 2D-Parität testen. Keine neue Oberfläche und keine 3D-Freischaltung; explizites Referenz-Picking bleibt danach als eigener begrenzter Anschluss offen.

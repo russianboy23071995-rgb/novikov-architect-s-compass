@@ -1,4 +1,5 @@
 import type { Point2 } from "../primitives/point.ts";
+import { projectDirection } from "./direction.ts";
 
 /** Linear part of an affine plane-to-CSS map. Translation cancels in distances. */
 export function createAffineScreenMetric(a: number, b: number, c: number, d: number) {
@@ -20,6 +21,27 @@ export function createAffineScreenMetric(a: number, b: number, c: number, d: num
     return { x: a * x + b * y, y: c * x + d * y };
   };
   return Object.freeze({
+    /** Nearest point on an infinite model line in CSS distance, not a model-angle constraint. */
+    projectLine(p: Point2, origin: Point2, direction: Point2): Point2 | null {
+      if (![p.x, p.y, origin.x, origin.y, direction.x, direction.y].every(Number.isFinite))
+        return null;
+      const size = Math.max(Math.abs(direction.x), Math.abs(direction.y));
+      if (!size) return null;
+      const x = direction.x / size,
+        y = direction.y / size;
+      // Normalize the matrix to avoid squaring large pixel scales.
+      const sx = (a / scale) * x + (b / scale) * y;
+      const sy = (c / scale) * x + (d / scale) * y;
+      const length = Math.hypot(sx, sy);
+      if (!length || !Number.isFinite(length)) return null;
+      const dx = p.x - origin.x,
+        dy = p.y - origin.y;
+      const px = (a / scale) * dx + (b / scale) * dy;
+      const py = (c / scale) * dx + (d / scale) * dy;
+      const t = (px * (sx / length) + py * (sy / length)) / length;
+      const point = { x: origin.x + t * x, y: origin.y + t * y };
+      return Number.isFinite(point.x) && Number.isFinite(point.y) ? point : null;
+    },
     distance(p: Point2, q: Point2) {
       const v = delta(p, q);
       return Math.hypot(v.x, v.y);
@@ -70,6 +92,11 @@ export function createIsotropicScreenMetric(scale: number): ScreenMetric {
   if (!Number.isFinite(scale) || scale <= 0) throw new Error("Invalid screen metric");
   return Object.freeze({
     ...createAffineScreenMetric(scale, 0, 0, scale),
+    projectLine: (p: Point2, origin: Point2, direction: Point2) => {
+      if (![p.x, p.y, origin.x, origin.y].every(Number.isFinite)) return null;
+      const point = projectDirection(p, origin, direction);
+      return point && Number.isFinite(point.x) && Number.isFinite(point.y) ? point : null;
+    },
     distance: (p: Point2, q: Point2) => Math.hypot(p.x - q.x, p.y - q.y) * scale,
   });
 }
