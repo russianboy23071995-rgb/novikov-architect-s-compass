@@ -65,13 +65,13 @@ export function ReferenceSelectionPanel({
       {!binding.selecting ? (
         <div className="flex gap-2 items-center">
           <button className={button} onClick={binding.begin}>
-            Referenzen auswählen
+            {binding.selected ? "Ändern" : "Referenzen auswählen"}
           </button>
           {binding.selected && (
             <>
-              <span role="status">{binding.selected.size} Referenzsegmente aktiv</span>
+              <span role="status">{binding.selected.size} Referenzen</span>
               <button className={button} onClick={binding.clear}>
-                Auswahl aufheben
+                Aufheben
               </button>
             </>
           )}

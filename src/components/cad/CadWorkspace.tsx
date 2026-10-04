@@ -436,20 +436,30 @@ export function CadWorkspace() {
             canRedo={history.future.length > 0}
           />
         )}
-        {demandOpen && tool === "select" && selection && !editSession && (
-          <DemandMenu
-            project={project}
-            selection={selection}
-            position={demandPosition}
-            onPosition={setDemandPosition}
-            pointIndex={pickedPoint.index}
-            onAction={startEdit}
-            onInfo={() => {
-              setFullscreen(false);
-              propertiesRef.current?.focus();
-            }}
-          />
-        )}
+        {demandOpen &&
+          !referenceSelection.selecting &&
+          (mode === "2D" || (tool === "select" && selection && !editSession)) && (
+            <DemandMenu
+              project={project}
+              selection={tool === "select" && !editSession ? selection : null}
+              position={demandPosition}
+              onPosition={setDemandPosition}
+              pointIndex={pickedPoint.index}
+              onReferences={
+                mode === "2D"
+                  ? () => {
+                      setDemandOpen(false);
+                      referenceSelection.begin();
+                    }
+                  : undefined
+              }
+              onAction={startEdit}
+              onInfo={() => {
+                setFullscreen(false);
+                propertiesRef.current?.focus();
+              }}
+            />
+          )}
         <section
           ref={propertiesRef}
           tabIndex={-1}

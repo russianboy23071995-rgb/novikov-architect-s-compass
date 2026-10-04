@@ -709,3 +709,9 @@ Grenzen: zunächst gerade Segmentquellen in 2D; explizite Punktübernahme fehlt.
 ### Genau ein ausführbarer Folgeauftrag: gezielte Punktreferenzen im gemeinsamen Auswahlmodus
 
 Punktübernahme für vorhandene End-/Mittelpunkte in denselben temporären Auswahlablauf integrieren. Vorhandenen Hover-Referenzvertrag einschließlich Kapazität, Ursprungsschutz und Verdrängung verwenden; vor Übernahme anzeigen, welche Referenz ersetzt würde. Segmentfilter und explizite Hilfsreferenzen getrennt halten, kein zweiter unbegrenzter Referenzspeicher. Arbeitskopie/Abbruch, Modellwechsel, Zoom und gemeinsame Nutzung bei Zeichnen/Direct Edit testen; Tab/Escape und modale Priorität praktisch mitprüfen. Keine neue Fangart oder 3D-Arbeitsebene.
+
+### Anzeige der Referenzauswahl bereinigt — 04.10.2026
+
+Im normalen Fangbetrieb kein dauerhaftes Panel. Bei pausierter dichter Suche Hinweis mit Einstieg; bestätigte Auswahl kompakt als Anzahl mit Ändern/Aufheben. Manueller Einstieg über das gemeinsame On-Demand-Menü auch ohne Elementauswahl und im Zeichen-/Bearbeitungsvorgang. Auswahlmodus bleibt auch bei Snap aus bedienbar. Keine Änderung der Fangberechnung oder 600-ms-Regel.
+
+250 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen nach Korrektur einer verbliebenen Formatierung in snapping.ts. Browser: normales Panel verborgen, Einstieg im Elementmenü und Linienwerkzeug, Abbruch blendet Panel wieder aus. Nächster Auftrag bleibt gezielte Punktübernahme gemäß obigem Folgeauftrag. Ergänzung im offenen PR #61, kein Merge.

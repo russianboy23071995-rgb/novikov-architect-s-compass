@@ -826,25 +826,26 @@ export function BimPlan({
             ))}
         </g>
       )}
-      {referenceSelection && (selecting || (endpointSnap && snap)) && (
-        <foreignObject
-          transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
-          width={Math.min(440, viewSize.width - 24)}
-          height={selecting ? 260 : 90}
-        >
-          <ReferenceSelectionPanel
-            binding={referenceSelection}
-            paused={density.paused}
-            label={(r) => {
-              const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
-              const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
-              return wi >= 0
-                ? `Wand ${wi + 1} · Achse`
-                : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
-            }}
-          />
-        </foreignObject>
-      )}
+      {referenceSelection &&
+        (selecting || referenceSelection.selected || (endpointSnap && snap && density.paused)) && (
+          <foreignObject
+            transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
+            width={Math.min(440, viewSize.width - 24)}
+            height={selecting ? 260 : 90}
+          >
+            <ReferenceSelectionPanel
+              binding={referenceSelection}
+              paused={endpointSnap && snap && density.paused}
+              label={(r) => {
+                const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
+                const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+                return wi >= 0
+                  ? `Wand ${wi + 1} · Achse`
+                  : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
+              }}
+            />
+          </foreignObject>
+        )}
     </svg>
   );
 }

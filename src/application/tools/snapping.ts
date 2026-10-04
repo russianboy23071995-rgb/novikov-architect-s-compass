@@ -30,7 +30,11 @@ export function createToolSourceQuery(
     const segments = selected
       ? local.segments.filter((s) => selected.has(segmentKey(s.source)))
       : local.segments;
-    return { ...local, segments, segmentPairs: (segments.length * Math.max(0, segments.length - 1)) / 2 };
+    return {
+      ...local,
+      segments,
+      segmentPairs: (segments.length * Math.max(0, segments.length - 1)) / 2,
+    };
   };
   const query: SnapSourceQuery = (
     cursor,
