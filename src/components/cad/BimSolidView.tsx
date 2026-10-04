@@ -14,6 +14,8 @@ import type { Selection } from "./bim-view";
 import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
+import { selectionEdges, outlineTriangles } from "@/rendering/viewport/selection-outline";
+import type { OutlineEdge } from "@/rendering/viewport/selection-outline";
 import { useSolidInference } from "./useSolidInference";
 import { previewEdit, supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
 import type { BimPlanProps } from "./BimPlan";
@@ -59,7 +61,12 @@ function createRenderer(canvas: HTMLCanvasElement) {
   const position = gl.getAttribLocation(program, "position"),
     color = gl.getAttribLocation(program, "color");
   return {
-    draw(solid: Solid, projection: ProjectionState, selectedWall: string | undefined) {
+    draw(
+      solid: Solid,
+      projection: ProjectionState,
+      selectedWall: string | undefined,
+      outline: OutlineEdge[],
+    ) {
       const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
@@ -86,6 +93,15 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.enableVertexAttribArray(color);
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
       gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
+      const border = outlineTriangles(outline, projection);
+      if (border.length) {
+        gl.depthMask(false);
+        gl.depthFunc(gl.LEQUAL);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(border), gl.DYNAMIC_DRAW);
+        gl.drawArrays(gl.TRIANGLES, 0, border.length / 6);
+        gl.depthMask(true);
+        gl.depthFunc(gl.LESS);
+      }
     },
     dispose() {
       gl.deleteBuffer(buffer);
@@ -168,6 +184,13 @@ export function BimSolidView({
     }
     return baseSolid;
   }, [baseSolid, editSession, target, project, selection]);
+  const outline = useMemo(
+    () =>
+      selection?.kind === "wall"
+        ? selectionEdges(solid.faces.filter((face) => face.wallId === selection.id))
+        : [],
+    [solid, selection],
+  );
   const inference = useSolidInference(
     project,
     previewProjection,
@@ -251,10 +274,10 @@ export function BimSolidView({
         : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
     displayed.current = null;
     if (renderer.current && previewProjection) {
-      renderer.current.draw(solid, previewProjection, selectedWall);
+      renderer.current.draw(solid, previewProjection, selectedWall, outline);
       displayed.current = { solid, projection: previewProjection };
     }
-  }, [solid, previewProjection, selection, project, revision]);
+  }, [solid, previewProjection, selection, project, revision, outline]);
   return (
     <>
       {previewProjection && !error && (

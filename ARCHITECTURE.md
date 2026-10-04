@@ -18,6 +18,12 @@ The existing stretch/axis/x/y actions now enter the same 3D workplane interactio
 
 ## Status
 
+### Implemented: shared 3D selection edges — 2026-10-04
+
+`rendering/viewport/selection-outline.ts` derives boundary and crease segments from the selected entity's displayed polygon faces. It is independent of domain IDs and React; BimSolidView supplies the faces of the current selected wall, including edit preview geometry. No persisted selection or model copy is introduced. Equal-coordinate shared edges with matching unit normals are omitted, removing cell seams and triangle diagonals while retaining opening reveals. The input contract is a conforming mesh with identical shared vertex coordinates, as produced by buildSolid; future nonconforming adapters must subdivide T-junctions first.
+
+Edges are cached by displayed geometry/selection and projected through the existing ProjectionState. CSS-width triangle ribbons (1.5px) use the same WebGL depth buffer as walls, with depth writes disabled and a 1e-6 NDC depth bias to avoid coincidence flicker. Hidden segments remain occluded; this is not X-ray selection. Depth bias is a rendering tolerance, not a model or snap tolerance. Current styling is a subtle light grey-blue border accompanying existing selection tint. Only an actual wall selection gets the border; selecting a window does not falsely outline its entire host as the selected object. Other element types need their displayed-face adapter when implemented, not separate outline algorithms. No large-scene, nonconforming-mesh or general solid topology support is claimed.
+
 This document is the architectural source of truth for NOVIKOV CAD.
 
 It describes the target structure for the application as it grows from the current Stage-1 BIM/CAD vertical slice into a complex, reliable and maintainable professional CAD/BIM system.
