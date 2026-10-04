@@ -882,3 +882,15 @@ Praktische Regression: in 3D Wandmaterial auswählen, durch Fensteröffnung klic
 ### Genau ein ausführbarer Folgeauftrag: gemeinsamer 3D-Kandidatenadapter
 
 Eine rein lesende Abfrage für bekannte Modell-Fußpunkte auf der horizontalen Arbeitsebene z=0 an den vorhandenen lokalen Quellen-/ScreenMetric-Pfad und die neue Sichtbarkeitsklassifikation anschließen. Projektion, Solid und Quellen müssen zum selben Modell-/Ansichtsstand gehören; bei ungültiger Inverse ausdrücklich pausieren. Ergebnisse mit stabiler Quellen-ID, Modellpunkt, CSS-Abstand und Sichtbarkeitsstatus liefern, ohne verdeckte Punkte stillschweigend zu aktivieren oder zu verwerfen. Gemeinsame Radius-/Prioritätsregeln wiederverwenden, keine neue Fang-Engine. Sichtbare/verdeckte/außerhalb liegende Kandidaten, Öffnungen, Zoom und Modellwechsel testen. Keine UI-/Gestenfreischaltung; deren offene Produktentscheidungen bleiben vor der anschließenden Oberfläche zu klären.
+
+### Abschluss: gemeinsamer 3D-Kandidatenadapter - 04.10.2026
+
+PR #73 nach Freigabe normal nach fix/reference-selection-lifecycle uebernommen (f029919). Neuer Zweig feat/3d-point-candidates; main unveraendert. Rein lesender Rendering-Adapter verbindet z=0-Inverse, lokale Modellquellen, bestehende Kandidatenbewertung und Sichtbarkeit. Keine zweite Fang-Engine. Wand-Achsenden, Ecken und Achsmittelpunkte liefern stabile Quellenidentitaet, Modellpunkt in Metern, CSS-Abstand und Sichtbarkeitsstatus. Veraltete Modell-/Projektionsidentitaeten und ungueltige Inverse pausieren die Abfrage.
+
+296 Tests bestanden, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Fuenf neue Tests pruefen lokale/vollstaendige Ranking-Paritaet bei Zoom, Quellenidentitaet und Radius, Modell-/Kamerawechsel, ungueltige Eingaben und seitliche Ebene, sichtbare/verdeckte/ausserhalb liegende Kandidaten sowie einen Fusspunkt durch eine Fensteroeffnung und nach deren Schliessen. Kein neuer Browsertest: dieser Adapter ist noch nicht an Mausereignisse angeschlossen. Vorhandene UI und Modellaktionen bleiben erhalten.
+
+Praktisch ist noch kein neuer 3D-Fang sichtbar; die neue Abfrage wird automatisiert geprueft. Grenzen: nur bekannte Wand-Fusspunkte, keine Fensteranker, Linienannotation, Schnittpunktbildung oder aktiven Hilfslinien in diesem Adapter. Geometrische Sichtbarkeit gegen Wandflaechen, linearer Flachendurchlauf je Kandidat; keine Zusage fuer grosse Szenen.
+
+### Genau ein Folgeauftrag: 3D-Vorschau-Bedienregeln konkret freigeben
+
+Vor dem Anschluss an Mausereignisse die offenen Regeln aus docs/3D_INTERACTION_CONTRACT.md als kurze konkrete Entscheidungsvorlage fuer eine rein lesende 3D-Fangvorschau vorlegen: Umgang mit verdeckten Zielen, Aktivierung der Vorschau und Vorrang von Orbit gegenueber Hover/Referenzerwerb. Bestehende 600-ms-Regel, silbergraue Ringe und gemeinsame Engine bewahren. Nutzerentscheidung einholen, ohne aus PR-Freigaben eine neue Gesten- oder X-Ray-Regel abzuleiten. Erst danach die begrenzte Vorschau integrieren; noch keine Modellbewegung.
