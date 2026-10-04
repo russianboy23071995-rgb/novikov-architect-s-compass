@@ -50,7 +50,7 @@ export type SnapSourceQuery = (
   metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
-  /** Shared candidate distances/projection; hover and explicit picking migration remain pending. */
+  /** Shared candidate distances/projection; explicit picking migration remains pending. */
   metric?: ScreenMetric;
   intersectionsPaused?: boolean;
   selectedSegments?: ReadonlySet<string> | null;
