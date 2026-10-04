@@ -110,7 +110,12 @@ export function CadViewport({
         active &&
           "border-primary/40 shadow-[inset_0_0_36px_color-mix(in_oklab,var(--primary)_5%,transparent)]",
       )}
-      onClick={onActivate}
+      onClickCapture={(event) => {
+        if (!active) {
+          onActivate();
+          event.stopPropagation();
+        }
+      }}
       onKeyDownCapture={(event) => {
         if (event.key === "Escape") setPlanPan(false);
       }}
@@ -144,6 +149,9 @@ export function CadViewport({
         ) : (
           <BimPlan
             {...model}
+            referenceSelection={active ? model.referenceSelection : undefined}
+            referenceScope={model.referenceSelection?.scope}
+            interactive={active}
             camera={plan}
             viewSize={size}
             onCamera={setPlanCamera}

@@ -165,3 +165,56 @@ test("point candidates obey host exclusions and snapshot invalidation without pa
   const next = createLocalSnapSources(changed);
   assert.equal(next.lookup(referenceKey(old)), undefined);
 });
+import { suspendHoverReference } from "../../constraints/inference/hover-reference.ts";
+import { drawingSnapPolicy } from "../tools/snapping.ts";
+test("one drawing session preserves references across origin and source-adapter changes", () => {
+  const model = createLocalSnapSources(fixture());
+  const sessionKey = {};
+  const first = drawingSnapPolicy({ x: 0, y: 0 }),
+    next = drawingSnapPolicy({ x: 1, y: 1 });
+  const a = {
+    enabled: true,
+    references: [first.origin],
+    sourceQuery: createToolSourceQuery(model, first),
+    pixelsPerMetre: 100,
+    sessionKey,
+  };
+  const b = { ...a, references: [next.origin], sourceQuery: createToolSourceQuery(model, next) };
+  assert.ok(sameHoverSession(a, b));
+  const acquired = previewPointReferences(emptyHoverReference(), [
+    model.allSegments[0]!.source,
+  ])!.value;
+  assert.equal(suspendHoverReference(acquired, true).references, acquired.references);
+  assert.ok(
+    b
+      .sourceQuery({ x: 100, y: 100 }, 100, 10, acquired.references)
+      .some((r) => r.entityId === acquired.references[0]!.entityId),
+  );
+});
+test("viewport, model/history and operation scopes cannot revive old reference sessions", () => {
+  const initial = {
+    enabled: true,
+    references: [],
+    pixelsPerMetre: 100,
+    sessionKey: {},
+    resetKey: 0,
+  };
+  for (const reason of ["viewport", "layout", "model", "undo", "redo", "cancel"]) {
+    assert.equal(sameHoverSession(initial, { ...initial, sessionKey: { reason } }), false);
+  }
+  assert.equal(sameHoverSession(initial, { ...initial, enabled: false }), false);
+  assert.equal(sameHoverSession(initial, { ...initial, resetKey: 1 }), false);
+  assert.ok(sameHoverSession(initial, { ...initial, pixelsPerMetre: 500, suspended: true }));
+});
+test("pan suspension retains acquired points but cancels pending dwell", () => {
+  const active = previewPointReferences(emptyHoverReference(), [pointRef(1)])!.value;
+  const pending = advanceHoverReference(active, pointRef(2), 100, 600);
+  const suspended = suspendHoverReference(pending, true);
+  assert.deepEqual(suspended.references, [pointRef(1)]);
+  assert.equal(suspended.pending, null);
+  assert.equal(suspended.consumed, null);
+  const resumed = advanceHoverReference(suspended, pointRef(2), 1000, 600);
+  assert.equal(resumed.references.length, 1);
+  assert.equal(advanceHoverReference(resumed, pointRef(2), 1599, 600).references.length, 1);
+  assert.equal(advanceHoverReference(resumed, pointRef(2), 1600, 600).references.length, 2);
+});

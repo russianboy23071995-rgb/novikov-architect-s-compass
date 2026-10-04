@@ -5,6 +5,7 @@ export const HOVER_REFERENCE_CAPACITY = 4;
 const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
 export type HoverContext = {
+  sessionKey?: object | undefined;
   suspended?: boolean;
   selectedSegments?: ReadonlySet<string> | null;
   intersectionsPaused?: boolean;
@@ -21,8 +22,9 @@ export function sameHoverSession(a: HoverContext, b: HoverContext): boolean {
   return (
     a.enabled &&
     b.enabled &&
-    a.references === b.references &&
-    a.sourceQuery === b.sourceQuery &&
+    (a.sessionKey || b.sessionKey
+      ? a.sessionKey === b.sessionKey
+      : a.references === b.references && a.sourceQuery === b.sourceQuery) &&
     a.resetKey === b.resetKey
   );
 }

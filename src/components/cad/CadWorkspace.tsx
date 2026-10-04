@@ -66,8 +66,8 @@ export function CadWorkspace() {
   const [activeViewport, setActiveViewport] = useState(0);
   const [referenceEpoch, setReferenceEpoch] = useState(0);
   const referenceScope = useMemo(
-    () => ({ project, editSession, tool, lineKind, mode, referenceEpoch, activeViewport }),
-    [project, editSession, tool, lineKind, mode, referenceEpoch, activeViewport],
+    () => ({ project, editSession, tool, lineKind, mode, layout, referenceEpoch, activeViewport }),
+    [project, editSession, tool, lineKind, mode, layout, referenceEpoch, activeViewport],
   );
   const referenceSelection = useReferenceSelection(project, referenceScope);
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);

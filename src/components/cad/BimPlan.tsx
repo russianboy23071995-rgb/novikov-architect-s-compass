@@ -21,7 +21,9 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
-  referenceSelection?: ReferenceSelectionBinding;
+  referenceSelection?: ReferenceSelectionBinding | undefined;
+  referenceScope?: object | undefined;
+  interactive?: boolean;
   project: Project;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
@@ -46,6 +48,8 @@ export type BimPlanProps = {
 
 export function BimPlan({
   referenceSelection,
+  referenceScope,
+  interactive = true,
   project,
   snapping = null,
   selection,
@@ -112,7 +116,12 @@ export function BimPlan({
   const [shiftHeld, setShiftHeld] = useState(false);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      if (selecting) return;
+      if (selecting || !interactive) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[role="dialog"],[role="alertdialog"]')
+      )
+        return;
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
       if (event.key === "Escape" && event.type === "keydown") {
         setHover(null);
@@ -128,7 +137,7 @@ export function BimPlan({
       window.removeEventListener("keyup", key);
       window.removeEventListener("blur", clear);
     };
-  }, [selecting]);
+  }, [selecting, interactive]);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
@@ -140,7 +149,7 @@ export function BimPlan({
     sourceQuery,
     pan ? null : hover,
     camera.pixelsPerMetre,
-    endpointSnap && snap,
+    endpointSnap && snap && interactive,
     referenceReset,
     camera,
     selectedSegments,
@@ -148,12 +157,13 @@ export function BimPlan({
   const references = pinnedReferences;
   const trackingContext = useMemo(
     () => ({
-      enabled: endpointSnap && snap && !pan,
+      enabled: endpointSnap && snap && interactive,
+      sessionKey: referenceScope,
       references,
       sourceQuery,
       intersectionsPaused: density.paused,
       selectedSegments,
-      suspended: selecting,
+      suspended: selecting || pan,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
@@ -163,6 +173,8 @@ export function BimPlan({
     [
       endpointSnap,
       snap,
+      interactive,
+      referenceScope,
       pan,
       references,
       sourceQuery,
@@ -394,6 +406,7 @@ export function BimPlan({
       onAuxClick={(event) => event.preventDefault()}
       className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
+        if (!interactive) return;
         setShiftHeld(event.shiftKey);
         const active = navigation.current;
         if (active && active.pointerId === event.pointerId) {
