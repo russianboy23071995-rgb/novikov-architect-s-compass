@@ -8,6 +8,13 @@ import type { SnapSegment } from "../../constraints/snapping/segment-references.
 // Project snapshots are immutable. Weak keys do not retain discarded projects/history.
 // Keep tool filtering and temporary construction origins out of this model-only cache.
 const referenceCache = new WeakMap<Project, readonly SnapReference[]>();
+/** Interpret only the wall endpoint features emitted below; midpoints are not editable grips. */
+export function wallEndpointIndex(feature: string): 0 | 1 | null {
+  if (["axis-start", "corner-0--1", "corner-0-1"].includes(feature)) return 0;
+  if (["axis-end", "corner-1--1", "corner-1-1"].includes(feature)) return 1;
+  return null;
+}
+
 export function getProjectSnapReferences(project: Project): readonly SnapReference[] {
   let references = referenceCache.get(project);
   if (!references) {

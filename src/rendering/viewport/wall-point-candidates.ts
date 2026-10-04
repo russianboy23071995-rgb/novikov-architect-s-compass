@@ -6,6 +6,7 @@ import { compareSnapCandidates } from "../../constraints/snapping/ranking.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import { classifyAnchorVisibility } from "./anchor-visibility.ts";
+import { wallEndpointIndex } from "../../application/snapping/project-references.ts";
 
 /** Read-only adapter for existing wall axis/corner/midpoint sources on z=0.
  * Project snapshots must be immutable, as in the shared application source cache.
@@ -64,6 +65,7 @@ export function createWallPointCandidates(
             (r) => r.entityId === candidate.sourceEntityId && r.feature === candidate.sourceFeature,
           )!,
           sourceId: JSON.stringify([candidate.sourceEntityId, candidate.sourceFeature]),
+          pointIndex: wallEndpointIndex(candidate.sourceFeature ?? ""),
           modelPoint: [candidate.worldPoint.x, candidate.worldPoint.y, 0] as const,
           visibility: classifyAnchorVisibility(solid, projection, [
             candidate.worldPoint.x,
