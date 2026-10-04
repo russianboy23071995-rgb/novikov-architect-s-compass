@@ -3,6 +3,8 @@ import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-e
 import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
+import { commitLayerAssignment } from "../layers/actions.ts";
+import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
   history: ProjectHistory;
@@ -26,6 +28,13 @@ export type EditingEvent =
   | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
   | { type: "cancel" }
   | { type: "project"; project: Project }
+  | {
+      type: "assign-layer";
+      base: Project;
+      target: EditTarget;
+      selection: EditTarget | null;
+      layerId: string;
+    }
   | { type: "undo" | "redo" };
 
 export function createEditingState(project: Project): EditingState {
@@ -50,6 +59,21 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "assign-layer": {
+        if (
+          event.selection?.id !== event.target.id ||
+          event.selection.kind !== event.target.kind ||
+          !selectedLayerElement(state.history.present, event.target)
+        )
+          throw new Error("Die Auswahl wurde geändert. Ebenenzuordnung erneut beginnen.");
+        const history = commitLayerAssignment(state.history, event.base, {
+          projectId: event.base.id,
+          elementIds: [event.target.id],
+          layerId: event.layerId,
+        });
+        // Discard a pending geometric preview; never commit it together with membership.
+        return { history, session: null, error: "" };
+      }
       case "begin": {
         const fallback = editAnchor(state.history.present, event.target);
         const session: EditSession = {
