@@ -868,3 +868,17 @@ Praktisch prüfen: 3D öffnen, durch die Fensteröffnung und danach auf Wandmate
 ### Genau ein ausführbarer Folgeauftrag: geometrische Sichtbarkeitsklassifikation
 
 Einen gemeinsamen Rendering-Dienst ergänzen, der einen projizierten 3D-Anker anhand desselben Projektionsstands und der dargestellten Wanddreiecke als sichtbar, verdeckt oder außerhalb klassifiziert. Bestehende Tiefen-/Dreiecksmathematik wiederverwenden oder eng begrenzt extrahieren; keine zweite Picking-Engine. Öffnungen, überdeckende Wände, Rand-/Tiefentoleranzen, Kamerabewegung und ungültige Projektionen testen. Nur technische Klassifikation, keine automatische Referenzaktivierung, X-Ray-Entscheidung oder neue Gesten. Produktregeln für verdeckte Ziele und Orbit/Werkzeugklick bleiben ausdrücklich offen.
+
+### Abschluss: geometrische Sichtbarkeitsklassifikation — 04.10.2026
+
+PR #71 (4222ac3) und #72 (d85acf2) nach ausdrücklicher Freigabe per normalem Merge nach fix/reference-selection-lifecycle übernommen. PR #72 zuvor auf diesen gemeinsamen Zweig umgestellt, damit seine Umsetzung dort ankommt. main unverändert. Neuer Zweig feat/3d-anchor-visibility.
+
+Gemeinsame Tiefenabfrage aus dem Wand-Picker extrahiert: Geometry berechnet Dreieckstiefe, Rendering ordnet Wandflächen und den bestehenden Projektionsstand zu. Die neue Ankerprüfung unterscheidet sichtbar, verdeckt, außerhalb und ungültig. Fensteröffnungen und dahinterstehende Wände werden geometrisch berücksichtigt; kein zweiter Picker, keine neuen Modellaktionen, keine Änderung von Hover/Gesten oder Sichtbarkeitspolitik.
+
+291 Tests bestanden; TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen. Sechs neue Tests mit Parameterreihen für Oberfläche/vor/hinter Wand, Öffnungen, mehrere Wände/Reihenfolge, Kamerawechsel/Pan/Zoom, DPR/Hoch-/Querformat, Tiefentoleranz, Clip-Grenzen, degenerierte Dreiecke und ungültige Daten. Bestehende Picking- und Gesamtworkflowtests bestehen. Kein neuer Browsernachweis; keine sichtbare Ankeroberfläche implementiert. Der Browsernachweis aus PR #72 bleibt historischer Nachweis dieses vorherigen Standes.
+
+Praktische Regression: in 3D Wandmaterial auswählen, durch Fensteröffnung klicken und nach Drehen erneut auswählen. Die neue Sichtbarkeitsfunktion selbst ist derzeit durch die automatisierten Tests prüfbar. Grenzen: kontinuierliche Dreiecksgeometrie statt GPU-Pixeltest; linearer Flächendurchlauf pro Abfrage; nur vorhandene Wandflächen als Verdeckung. Kein vollständiger 3D-Fang oder 3D-Direct-Edit freigeschaltet.
+
+### Genau ein ausführbarer Folgeauftrag: gemeinsamer 3D-Kandidatenadapter
+
+Eine rein lesende Abfrage für bekannte Modell-Fußpunkte auf der horizontalen Arbeitsebene z=0 an den vorhandenen lokalen Quellen-/ScreenMetric-Pfad und die neue Sichtbarkeitsklassifikation anschließen. Projektion, Solid und Quellen müssen zum selben Modell-/Ansichtsstand gehören; bei ungültiger Inverse ausdrücklich pausieren. Ergebnisse mit stabiler Quellen-ID, Modellpunkt, CSS-Abstand und Sichtbarkeitsstatus liefern, ohne verdeckte Punkte stillschweigend zu aktivieren oder zu verwerfen. Gemeinsame Radius-/Prioritätsregeln wiederverwenden, keine neue Fang-Engine. Sichtbare/verdeckte/außerhalb liegende Kandidaten, Öffnungen, Zoom und Modellwechsel testen. Keine UI-/Gestenfreischaltung; deren offene Produktentscheidungen bleiben vor der anschließenden Oberfläche zu klären.
