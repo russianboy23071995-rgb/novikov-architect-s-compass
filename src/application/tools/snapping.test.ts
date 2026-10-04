@@ -385,6 +385,7 @@ test("dense diagonal boxes and crossings preserve full resolver ranking at multi
           const offset = crossing ? 0.001 * (i % 7) : 2 + i * 0.1;
           return {
             id: "dense-" + i,
+            layerId: base.defaultLayerIds.line,
             kind: "line",
             points: [
               { x: -100, y: -100 * slope + offset },

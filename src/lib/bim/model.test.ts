@@ -15,6 +15,7 @@ import type { Wall, BimWindow } from "./model.ts";
 
 const wall: Wall = {
   id: "wall-1",
+  layerId: "layer:exterior-wall",
   start: { x: 0, y: 0 },
   end: { x: 3, y: 0 },
   thickness: 0.36,
@@ -22,6 +23,7 @@ const wall: Wall = {
 };
 const opening: BimWindow = {
   id: "window-1",
+  layerId: "layer:window",
   wallId: wall.id,
   width: 1.2,
   height: 1.35,
@@ -155,7 +157,7 @@ test("rejects malformed JSON, unsupported versions/units and corrupt saved model
     "null",
     "[]",
     "{}",
-    JSON.stringify({ ...fixture(), schemaVersion: 2 }),
+    JSON.stringify({ ...fixture(), schemaVersion: 99 }),
     JSON.stringify({ ...fixture(), unit: "mm" }),
   ])
     assert.throws(() => deserializeProject(json));

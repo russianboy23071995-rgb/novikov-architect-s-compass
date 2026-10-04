@@ -1,3 +1,4 @@
+import { createStandardLayers } from "../../domain/layers/model.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import test from "node:test";
@@ -81,7 +82,8 @@ test("reference selection draft, cancel, validation and clear never change commi
 });
 function fixture() {
   return validateProject({
-    schemaVersion: 1,
+    schemaVersion: 2,
+    ...createStandardLayers([]),
     unit: "m",
     id: "refs",
     storey: {
@@ -90,6 +92,7 @@ function fixture() {
       windows: [],
       lines: Array.from({ length: 48 }, (_, i) => ({
         id: "l" + i,
+        layerId: "layer:drawing",
         kind: "polyline",
         points: [
           { x: -10, y: -i - 1 },

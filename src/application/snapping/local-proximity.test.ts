@@ -1,3 +1,4 @@
+import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import type { Project } from "../../lib/bim/model.ts";
@@ -19,7 +20,8 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    ...createStandardLayers([]),
     unit: "m",
     id: "proximity",
     storey: {
@@ -28,6 +30,7 @@ function fixture(pairs: [number, number, number, number][]): Project {
       windows: [],
       lines: pairs.map(([x, y, a, b], i) => ({
         id: `l${i}`,
+        layerId: "layer:drawing",
         kind: "line",
         points: [
           { x, y },

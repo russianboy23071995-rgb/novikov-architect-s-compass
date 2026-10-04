@@ -1,5 +1,29 @@
 # NOVIKOV CAD Architecture Contract
 
+## Implemented: layer data and schema-1 migration — 2026-10-04
+
+The canonical runtime is now schema 2. domain/project/schema.ts owns current and
+legacy validation with shared geometry/identity invariants; domain/layers/model.ts
+owns the standard layer catalogue. Project stores layers, explicit defaultLayerIds
+for wall/window/line creation, and a required layerId on each existing element.
+Default IDs, rather than editable names or array positions, drive creation.
+interop/project-file/load.ts validates schema 1 before deterministic migration and
+validates schema 2 afterwards; current files are never silently repaired. The old
+lib/bim/model exports remain a compatibility facade, without a dependency cycle.
+
+application/layers/actions.ts provides previewLayerAssignment and
+commitLayerAssignment for stable element IDs and a pinned project snapshot.
+Missing targets, stale context and invalid layers reject the entire request;
+successful changes use existing snapshot history and no-ops keep history unchanged.
+Existing creation paths receive defaults at addWall/addWindow/addLine, not in each
+tool. This step adds no visibility filter, layer management UI or language parser.
+Future UI/Text/Voice adapters must use these actions. Organisation has no effect
+on wall material, hosted openings, coordinates or current IFC output.
+
+The schema-2 addition defaultLayerIds makes defaults survive renaming and
+migration-ID collisions. Windows default to the separate Fenster layer; no host
+membership inheritance is introduced. Visibility decisions below remain open.
+
 ## Layer persistence boundary — decision 2026-10-04
 
 The bounded [layer contract](docs/LAYER_CONTRACT.md) records the inspected schema-1
