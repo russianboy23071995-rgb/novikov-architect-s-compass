@@ -727,6 +727,23 @@ Praktischer Test: On-Demand-Menü → Referenzen auswählen → Punkte → End-/
 
 Grenzen: bestehende 2D-Modellpunkte; keine explizite Übernahme berechneter Schnittpunkte, diese bleiben per Hover verfügbar. Punkt-Arbeitskopie gilt jeweils für eine Übernahme. Vollständige Modal-/Mehrviewport-Matrix bleibt offen. PR #61 nicht zusammengeführt. Shell-Fetch derzeit ohne Netzwerkverbindung; Veröffentlichung über GitHub-Connector, vorhandene lokale Änderungen erhalten.
 
-### Genau ein ausführbarer Folgeauftrag: gemeinsame Referenzauswahl im vollständigen Ablauf stabilisieren
+### Abgeschlossener Folgeauftrag: gemeinsame Referenzauswahl im vollständigen Ablauf stabilisieren
 
 Segmentfilter und Punktübernahme gemeinsam bei Zeichnen und Direct Edit prüfen: entfernte Hilfslinien, mehrdeutige Punktquellen, Escape/Tab mit offenen Dialogen, Snap aus/ein sowie Modelländerung/Undo/Redo und Viewportwechsel. Nur nachgewiesene Fehler beheben, Lebenszyklus automatisiert absichern und Einschränkungen aktualisieren. Keine neue Fangart, keine 3D-Arbeitsebene und keine weitere Auswahloberfläche.
+
+
+### Abschluss: gemeinsamer Referenz-Lebenszyklus — 04.10.2026
+
+PR #61 normal nach docs/reference-selection-contract übernommen (dc1b1f5), PR #62 normal nach feat/reference-segment-selection (714f8d7). main und frühere gestapelte PRs unverändert. Netzwerkfreigabe ermöglicht lokalen Fetch; zuvor publizierte Änderungen exakt abgeglichen, Sicherungsstash erhalten, Arbeitszweig fix/reference-selection-lifecycle auf geprüftem Gesamtstand.
+
+Reproduzierte Fehler: Pan schaltete Hover aus und löschte Punkte dauerhaft; in zwei Ansichten erschienen zwei Auswahlpanels; Escape im Dateidialog löschte bestätigte Referenzen. Korrekturen: Navigation suspendiert Erwerb statt Sitzung zu löschen, nur aktive Ansicht führt Picking/Hover/Auswahl aus, Dialogtasten gelangen nicht in den globalen Grundriss-Reset. Erster Klick in eine inaktive Ansicht aktiviert sie ohne Modellbestätigung. Gemeinsame Vorgangsidentität einschließlich Layout/Viewport hält Hover-Punkte auch beim nächsten Polylinienursprung; Modell-, History-, Werkzeug- und Ansichtswechsel invalidieren sie. Keine separate Fangengine.
+
+257 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Drei neue Regressionen: wechselnder Zeichenursprung bei unverändertem Vorgang, explizite Sitzungsgrenzen, Pan-Dwell-Unterbrechung ohne Referenzverlust. Browser: Pan aus/Zoom erhält Punkte (während Pan sind Marker wie bisher ausgeblendet); zwei Ansichten zeigen genau ein Panel, Wechsel beendet Auswahl. Zwei Linien plus mehrdeutiger Punkt gewählt; Trefferliste durch erstes Escape geschlossen, Filter und Punkt über nächsten Polylinienpunkt erhalten; Hilfslinienschnitt fangbar. Dialog-Escape erhält nach Korrektur bestätigten Hilfspunkt. Snap aus löscht zusätzliche Punkte, Snap ein zeigt nur den geschützten Ursprung. Polylinie per Undo entfernt/Redo wiederhergestellt ohne alte Filter; Wand mit denselben Referenzarten um 1,00 m in Y verschoben, Transformation von (-2;-2) nach (-2;-1), Undo/Redo exakt.
+
+Reproduzierbarer Testgrundriss: docs/fixtures/reference-selection.json (eine Wand, drei Linien, gemeinsame Endpunkte). Anleitung: importieren, Linienfilter setzen, im Punktmodus gemeinsamen Endpunkt auflösen, übernehmen. Polylinie beginnen/fortsetzen oder Wand frei bewegen, Pan/Zoom und Undo/Redo prüfen. Danach geteilte Ansicht und Dateidialog-Escape prüfen.
+
+Grenzen: Stichproben in zwei 2D-Ansichten, keine vollständige Browsermatrix aller Layouts oder 3D-Arbeitsebenen. Keine Leistungszusage für beliebige Projektdichte. Layout-/Viewportwechsel beenden temporäre Referenzsitzung bewusst, Navigation innerhalb derselben Ansicht erhält sie.
+
+### Genau ein ausführbarer Folgeauftrag: Vertrag für eine aktive 3D-Arbeitsebene planen
+
+Vorhandene 3D-Kamera, Picking und gemeinsame ToolInteraction gegen den 2D-Fangpfad prüfen. Einen begrenzten technischen Vertrag für eine horizontale aktive Arbeitsebene mit Welt-/Ebenenkoordinaten, CSS-Fangradius, stabiler Zielauswahl und derselben Application-Aktion dokumentieren. Ebenenwechsel, Ursprung, Referenzen und Abbruch festlegen; Vorschläge von bestehenden Entscheidungen trennen. Noch keine neue Fangengine, keine beliebigen Dach-/Schnittebenen und keine neuen Bauteile implementieren. Daraus genau ein kleines Umsetzungspaket ableiten.

@@ -954,3 +954,8 @@ The pure service now exists in application/snapping/local-sources.ts: primitive 
 ## Explicit point-reference acquisition (2026-10-04)
 
 The shared selection UI holds only a temporary point draft. Committed points enter the existing hover reference state through the pure previewPointReferences service, sharing its four-reference capacity and separate pinned movement origin. Preview reports the exact replacements before commit; overflow is rejected rather than silently truncating selected points. Point acquisition leaves the segment-pair filter and authoritative project/history unchanged. Rendering picks local model endpoints/corners/midpoints; the viewport validates snapshot sources and tool exclusions before handing them to inference. No per-tool acquisition logic or second persistent reference collection.
+
+
+## Reference-session lifecycle (2026-10-04)
+
+The viewport supplies the shared operation scope to hover inference. Its identity changes on model/history, operation, layout or active viewport changes; a drawing origin change within the same polyline is not a new session. Consumers without an explicit scope retain the existing source-query identity comparison. Pan suspends dwell acquisition without deleting acquired points. Only the active viewport handles selection and hover; activating another viewport consumes the activation click rather than committing a model action. Modal keyboard events do not reset viewport references.
