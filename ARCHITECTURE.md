@@ -1125,3 +1125,15 @@ The user requested a subtle decorative floor at z=0. orientation-floor.ts projec
 The 3D preview now uses querySnap for immediate markers as well as the shared hover acquisition path. wall-preview-context supplies remote active origins and flattened original dependencies alongside local sources, using the existing model source lookup and withConstructionReferences. Construction points must have current wall-source dependencies and visible finite z=0 positions. Optional SnapContext.acceptCandidate filters ranked geometric candidates before ranking, so hidden targets cannot mask valid alternatives. Explicit axis/Shift and grid fallback behavior are unchanged; this preview does not use those modes.
 
 No new intersection algorithm or timer is introduced. Shared acquisitionReference, reference capacity, 600ms toggle and model-session invalidation remain authoritative. Decorative SVG floor and guide layers are conservative behind-wall overlays, not general depth-tested scene surfaces. Existing limitations for 3D movement and non-wall sources remain.
+
+## Platform targets and delivery decision (2026-10-04)
+
+User decision: NOVIKOV CAD shall support Windows and macOS. Whether the product is delivered through a browser, as an installable desktop application, or through both remains open. No desktop framework or distribution channel has been selected. These targets are requirements, not a claim that the current application has been accepted on both platforms.
+
+The authoritative project format, geometry/domain logic and shared validated Application actions shall be reusable across delivery forms. Filesystem access, storage, native dialogs and operating-system integration belong to explicit adapters at the appropriate application/interop/platform boundary. Browser or desktop dependencies must not leak into the CAD kernel or domain. Reuse and extract existing boundaries incrementally; this decision does not require empty interfaces, a parallel model, or an immediate rewrite.
+
+Input adapters must account for Windows Ctrl and macOS Command conventions, mouse and trackpad use. Exact gestures remain subject to the shared interaction contract. Rendering and dependency choices must be evaluated for both target platforms; code-level portability alone is not a performance or compatibility acceptance test.
+
+Minimum OS/browser versions, supported browsers and hardware, CPU architectures, offline behavior, installation, signing, distribution and updates will be defined for the concrete delivery package. Essential acceptance scenarios shall include editing a representative larger project, saving/loading and export on Windows and macOS; offline acceptance is required only after its scope is decided. Browser/desktop prototypes and measured file, input and graphics behavior should inform the later delivery decision.
+
+This platform requirement does not replace the current bounded task in DEVELOPMENT_PLAN.md or authorize implementation of packaging, a desktop shell, or a new storage service.
