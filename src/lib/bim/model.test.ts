@@ -78,7 +78,12 @@ test("updates wall dimensions and window parameters without changing IDs", () =>
     sillHeight: 1,
     position: 0.6,
   });
-  const other = addWall(changed, { ...wall, id: "wall-2" });
+  const other = addWall(changed, {
+    ...wall,
+    id: "wall-2",
+    start: { x: 10, y: 0 },
+    end: { x: 13, y: 0 },
+  });
   assert.equal(
     updateWindow(other, opening.id, { wallId: "wall-2" }).storey.windows[0]!.wallId,
     "wall-2",

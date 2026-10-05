@@ -1,5 +1,43 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: automatischer rechtwinkliger Wandanschluss — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR119 nach Freigabe normal in fix/reference-selection-lifecycle uebernommen
+(fd8951c). Neuer Zweig: feat/automatic-wall-corners.
+
+Neue oder bewegte Achsenden verbinden sich bei exakt gleichem Punkt ohne
+zusaetzliche Menuebestaetigung. Erster Umfang: rechte Winkel, gleiche Hoehe und
+Staerke. Automatische Beziehung in Schema 6; vorherige Dateien werden mit leerer
+Anschlussliste geladen, ohne alte Koerper umzubauen. Beide Enden einer Wand
+koennen angeschlossen sein; geschlossener Vier-Wand-Grundriss geprueft.
+Grundriss, 3D, Fangkonturen und regulaerer IFC-Export verwenden dieselbe Geometrie.
+
+Nutzerentscheidungen bestaetigt: Fenster duerfen den Anschlussabschluss nicht
+beruehren; Einzelwand wegbewegen loest den Anschluss und stellt gerade Enden
+wieder her. Bewegung und Anschlussaenderung ergeben einen Undo-Schritt.
+Mehrfachknoten, falsche Winkel/Dimensionen oder Oeffnungskollisionen werden
+abgewiesen; T-Kontakte und blosse Koerperueberlappung sind noch keine Anschluesse.
+Keine gemeinsame automatische Hoehen-/Staerkenpropagation. Gemeinsame Ecke
+als Gruppe bewegen bleibt separat; aktuelle Griffe bearbeiten die gewaehlte Wand.
+
+458 Tests bestanden; TypeScript/Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browser: getrennte Waende um 1 m zusammenbewegen, Grundriss/3D mit
+Fenstern, Undo/Redo, wegbewegen und Anschluss per Undo wiederherstellen.
+IfcOpenShell 0.8.5 bestaetigt zwei regulaere Exporte (Ecke und geschlossener
+Grundriss): IFC4/EXPRESS, Beziehungen, Platzierung und Nettovolumina bestanden.
+Neue Archicad-Abnahme bleibt vom bereits bestaetigten expliziten Test getrennt.
+Reproduktion: scripts/generate-automatic-corner-fixtures.mjs und
+scripts/validate-ifc.py; siehe docs/AUTOMATIC_WALL_CONNECTIONS.md.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Fortlaufendes Zeichnen einer Wandkette
+ueber dieselbe Application-Erstellung und Fang-/Hilfseingabe integrieren. Nach
+jedem gesetzten Abschnitt wird dessen Achsende der naechste Ursprung, ohne
+erneuten Werkzeugstart. Nutzerentscheidung: Undo nimmt die gesamte Wandkette
+zurueck. Daher ein gemeinsamer Commit bei Abschluss; Klicks davor bleiben
+Vorschau. Abschluss/Abbruch mit den vorhandenen Werkzeugen abstimmen. Keine
+zweite Anschlusslogik, keine T-Knoten oder beliebigen Winkel in dieser Etappe.
+
 ## Aktueller Stand: Wandachse als Bediengrundlage — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege. Der

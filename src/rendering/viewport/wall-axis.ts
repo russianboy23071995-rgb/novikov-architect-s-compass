@@ -13,7 +13,7 @@ export function wallAxisAnchor(wall: Wall, point: { x: number; y: number }) {
 }
 
 /** Axis endpoints take precedence over coincident physical corner grips. */
-export function wallPlanHandles(wall: Wall) {
+export function wallPlanHandles(wall: Wall, connected = false) {
   const ends = [wall.start, wall.end];
   const handles = ends.map((point, index) => ({
     point,
@@ -21,6 +21,7 @@ export function wallPlanHandles(wall: Wall) {
     label: `Wandachse ${index === 0 ? "Anfang" : "Ende"}`,
     axis: true,
   }));
+  if (connected) return handles;
   const body = wallBody(wall);
   ends.forEach((_point, index) =>
     [-1, 1].forEach((side) => {

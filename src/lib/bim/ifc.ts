@@ -1,8 +1,15 @@
+import { validateProject } from "../../domain/project/schema.ts";
+import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { writeIfc } from "../../interop/ifc/writer.ts";
 export { ifcGuid, stepString, stepReal } from "../../interop/ifc/writer.ts";
 
-/** Existing project export: independent rectangular wall bodies, unchanged. */
+/** Uses the same domain profiles as plan and solid rendering. */
 export async function exportIfc(input: Project, timestamp = new Date()): Promise<string> {
-  return writeIfc(input, timestamp);
+  const project = validateProject(input);
+  return writeIfc(
+    project,
+    timestamp,
+    new Map(connectedWallSolids(project).map((w) => [w.wallId, w.localProfile])),
+  );
 }

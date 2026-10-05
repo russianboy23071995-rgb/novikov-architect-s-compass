@@ -57,15 +57,21 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     try {
       command();
       setError("");
-    } catch {
+    } catch (failure) {
       setError(
-        "Cannot apply: use positive dimensions and keep the complete window inside its wall. Position must be between 0 and 1; sill height may be zero.",
+        failure instanceof Error && failure.name !== "ZodError"
+          ? failure.message
+          : "Cannot apply: use positive dimensions and keep the complete window inside its wall. Position must be between 0 and 1; sill height may be zero.",
       );
     }
   };
   return (
     <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Element properties">
       <h2 className="text-sm font-semibold">{wall ? "Wall properties" : "Window properties"}</h2>
+      {wall &&
+        project.storey.wallJoins.some(
+          (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
+        ) && <span className="text-xs text-muted-foreground">Wandanschluss aktiv</span>}
       <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">
         {wall?.id ?? opening?.id}
       </p>

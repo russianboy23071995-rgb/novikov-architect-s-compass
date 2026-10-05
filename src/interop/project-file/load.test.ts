@@ -53,7 +53,7 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 5);
+    assert.equal(migrated.schemaVersion, 6);
     assert.deepEqual(
       migrated.storey.walls.map(strip),
       input.storey.walls.map((w) => ({ ...w, bodyOffset: 0 })),
@@ -186,7 +186,13 @@ test("all creation paths use the same stable defaults even after a layer rename"
   assert.equal(p.storey.windows[0]!.layerId, p.defaultLayerIds.window);
   assert.equal(p.storey.lines![0]!.layerId, p.defaultLayerIds.line);
   const other = p.layers.find((l) => l.name === "Innenwand")!.id;
-  const wall = { ...p.storey.walls[0]!, id: "w2", layerId: other };
+  const wall = {
+    ...p.storey.walls[0]!,
+    id: "w2",
+    start: { x: 10, y: 0 },
+    end: { x: 13, y: 0 },
+    layerId: other,
+  };
   assert.equal(addWall(p, wall).storey.walls[1]!.layerId, other);
   assert.throws(() => addWall(p, { ...wall, layerId: "missing" }));
   assert.throws(() => addLine(p, { ...p.storey.lines![0]!, id: "l2", layerId: "missing" }));

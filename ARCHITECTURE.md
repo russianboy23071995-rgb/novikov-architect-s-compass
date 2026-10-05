@@ -1,5 +1,37 @@
 # NOVIKOV CAD Architecture Contract
 
+## Automatic persisted right-angle wall connections — 2026-10-05
+
+Schema 6 requires storey.wallJoins, each relating two stable wall IDs and endpoint
+indices. V1–V5 migration initializes no joins: old touching geometry is preserved.
+No separate editable miter geometry is stored. Shared addWall/updateWall reconcile
+new or moved endpoints before returning a validated snapshot. An unchanged old
+endpoint does not acquire a new connection merely because another property or
+the opposite endpoint changes. End coordinates must match exactly (the shared
+snap engine supplies exact targets); model tolerance is not an identity radius.
+Candidate lookup scans only the changed wall's ends, not all wall pairs.
+
+User decisions now confirmed: openings must not touch the joined end boundary;
+moving a wall away removes the relation and restores straight ends on both sides.
+The movement and relation change share one history commit. Connected walls with
+unequal height/thickness, non-right angles, multiple ends at a node or invalid
+opening/profile geometry reject atomically. A T contact is not an endpoint join.
+Editing one connected wall's height/thickness may therefore require detachment
+first; propagation to a whole group remains future work.
+
+Domain connections.ts composes both end contours per wall and validates openings.
+It shares contour-solid.ts with the earlier explicit-pair path. Immutable project
+identity caches disposable derived solids. Plan profiles, 3D material/picking,
+snap corners and ordinary IFC export consume these results before visibility
+filtering. Joined physical corners are snap references, not independent endpoint
+grips; authoritative axis grips remain editable through existing EditSessions.
+Persisted file relations undergo the same geometry validation. No UI-only joins.
+The previous temporary dialog remains diagnostic, not a commit requirement.
+
+Next wall-chain transaction decision: the user explicitly chose Undo for the
+entire chain, not the last segment. Implement a shared draft and one atomic
+completion commit in the next step; chain drawing is not yet implemented.
+
 ## Revised wall-axis interaction decision — 2026-10-05
 
 The new user direction supersedes explicit-menu-only connections: snapping wall

@@ -1,3 +1,4 @@
+import { connectedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
 import { hatchSchema } from "../elements/hatch/model.ts";
@@ -75,10 +76,28 @@ const projectV4Schema = projectV3Schema.extend({
   storey: projectV3Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
 });
 const offsetWallSchema = currentWallSchema.extend({ bodyOffset: z.number().finite() });
-const projectSchema = projectV4Schema.extend({
+const projectV5Schema = projectV4Schema.extend({
   schemaVersion: z.literal(5),
   storey: projectV4Schema.shape.storey.extend({ walls: z.array(offsetWallSchema) }),
 });
+const wallEndSchema = z
+  .object({ wallId: id, endpoint: z.union([z.literal(0), z.literal(1)]) })
+  .strict();
+const projectSchema = projectV5Schema.extend({
+  schemaVersion: z.literal(6),
+  storey: projectV5Schema.shape.storey.extend({
+    wallJoins: z.array(z.object({ first: wallEndSchema, second: wallEndSchema }).strict()),
+  }),
+});
+type ProjectV5 = z.infer<typeof projectV5Schema>;
+export function validateProjectV5(value: unknown): ProjectV5 {
+  const project = projectV5Schema.parse(value);
+  validateGeometry(project);
+  validateLayers(project);
+  validateVisibility(project);
+  return project;
+}
+
 type ProjectV4 = z.infer<typeof projectV4Schema>;
 export function validateProjectV4(value: unknown): ProjectV4 {
   const project = projectV4Schema.parse(value);
@@ -124,11 +143,12 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
   validateGeometry(project);
+  connectedWallSolids(project);
   validateLayers(project);
   validateVisibility(project);
   return project;
 }
-function validateVisibility(project: Project | ProjectV4 | ProjectV3): void {
+function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3): void {
   const hidden = project.bimVisibility.hiddenLayerIds;
   if (
     new Set(hidden).size !== hidden.length ||
@@ -136,7 +156,7 @@ function validateVisibility(project: Project | ProjectV4 | ProjectV3): void {
   )
     throw new Error("Invalid hidden layer IDs");
 }
-function validateLayers(project: Project | ProjectV4 | ProjectV2 | ProjectV3): void {
+function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3): void {
   const layerIds = new Set(project.layers.map((layer) => layer.id));
   for (const layerId of Object.values(project.defaultLayerIds)) {
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
@@ -145,14 +165,16 @@ function validateLayers(project: Project | ProjectV4 | ProjectV2 | ProjectV3): v
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 ? project.storey.hatches : []),
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 6
+      ? project.storey.hatches
+      : []),
   ]) {
     if (!layerIds.has(element.layerId)) throw new Error("Unknown layer: " + element.layerId);
   }
 }
 
 function validateGeometry(
-  project: LegacyProject | ProjectV4 | ProjectV2 | ProjectV3 | Project,
+  project: LegacyProject | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3 | Project,
 ): void {
   const ids = new Set<string>();
   for (const entity of [
@@ -162,7 +184,9 @@ function validateGeometry(
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 ? project.storey.hatches : []),
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 6
+      ? project.storey.hatches
+      : []),
   ]) {
     if (ids.has(entity.id)) throw new Error(`Duplicate ID: ${entity.id}`);
     ids.add(entity.id);
@@ -181,7 +205,8 @@ function validateGeometry(
     }
     if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
-  if (project.schemaVersion === 5) for (const wall of project.storey.walls) wallBody(wall);
+  if (project.schemaVersion === 5 || project.schemaVersion === 6)
+    for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {
     const length = wallLength(wall);

@@ -27,6 +27,7 @@ for (const a of [-0.18, 0, 0.18])
         bodyOffset: b,
       },
     );
+    p.storey.wallJoins = []; // This fixture explicitly tests temporary pair geometry.
     for (const id of ["A", "B"])
       p = addWindow(p, {
         id: "window-" + id,

@@ -1,3 +1,4 @@
+import { connectedWallSolids } from "@/domain/elements/wall/connections";
 import { wallBody } from "@/domain/elements/wall/body";
 import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
 import type { CornerPreview } from "@/application/walls/corner-preview";
@@ -378,11 +379,20 @@ export function BimPlan({
     }
   }
   const shown = preview ?? project;
+  const connected = connectedWallSolids(shown);
   const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
-    if (wall) handles.push(...wallPlanHandles(wall));
+    if (wall)
+      handles.push(
+        ...wallPlanHandles(
+          wall,
+          project.storey.wallJoins.some(
+            (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
+          ),
+        ),
+      );
   } else if (selection?.kind === "hatch") {
     project.storey.hatches
       .find((h) => h.id === selection.id)
@@ -680,7 +690,8 @@ export function BimPlan({
               {...selectProps("wall", wall.id)}
               points={(
                 (cornerPreview?.base === shown &&
-                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) || [
+                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
+                connected.find((w) => w.wallId === wall.id)?.localProfile || [
                   { x: 0, y: -wall.thickness / 2 },
                   { x: length, y: -wall.thickness / 2 },
                   { x: length, y: wall.thickness / 2 },

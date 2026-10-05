@@ -1,3 +1,4 @@
+import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
@@ -55,6 +56,7 @@ export function projectSnapReferences(project: Project): SnapReference[] {
 
 /** No intersection enumeration; shared primitive adapter for old and local query paths. */
 export function projectSnapPrimitives(project: Project) {
+  const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w.contour]));
   const segments: SnapSegment[] = [];
   const midpoint = (id: string, feature: string, start: Point2, end: Point2) => {
     const refs = midpointReference(id, feature, start, end);
@@ -74,9 +76,13 @@ export function projectSnapPrimitives(project: Project) {
             directions: [d],
           },
           ...[-1, 1].map((side) => ({
-            point: body.corner(index, side),
+            point:
+              joined.get(wall.id)?.[index === 0 ? (side === -1 ? 0 : 3) : side === -1 ? 1 : 2] ??
+              body.corner(index, side),
             entityId: wall.id,
-            feature: `corner-${index}-${side}`,
+            feature: joined.has(wall.id)
+              ? `join-corner-${index}-${side}`
+              : `corner-${index}-${side}`,
             directions: [d],
           })),
         ]),

@@ -1,3 +1,4 @@
+import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import {
   createProjectionFrame,
@@ -8,7 +9,7 @@ import { validateProject, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
 
 export type Vec3 = [number, number, number];
-export type Face = { wallId: string; vertices: [Vec3, Vec3, Vec3, Vec3]; normal: Vec3 };
+export type Face = { wallId: string; vertices: Vec3[]; normal: Vec3 };
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 
 /** Partition the wall plane at opening edges, then extrude only occupied cells.
@@ -23,7 +24,20 @@ export function buildSolid(input: Project): Solid {
     min: [Infinity, Infinity, Infinity],
     max: [-Infinity, -Infinity, -Infinity],
   };
+  const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w]));
   for (const wall of project.storey.walls) {
+    const connection = joined.get(wall.id);
+    if (connection) {
+      solid.faces.push(...connection.faces);
+      solid.volume += connection.volume;
+      for (const face of connection.faces)
+        for (const p of face.vertices)
+          for (const axis of [0, 1, 2] as const) {
+            solid.min[axis] = Math.min(solid.min[axis], p[axis]);
+            solid.max[axis] = Math.max(solid.max[axis], p[axis]);
+          }
+      continue;
+    }
     const length = wallLength(wall);
     const body = wallBody(wall);
     const ux = (wall.end.x - wall.start.x) / length;

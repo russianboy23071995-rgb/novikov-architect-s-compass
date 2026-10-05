@@ -191,3 +191,10 @@ Koerper bewegt sich relativ zur festen Zeichenachse. Vorschau-Namen muessen den
 Navigatornamen entsprechen, keine unverstaendlichen ID-Listen.
 Achsenbedienung ist umgesetzt; automatische Anschluesse/Ketten bleiben naechste
 Etappen. Historische Aussenachsen werden nicht stillschweigend umpositioniert.
+
+Fortschritt 05.10.2026: automatische rechtwinklige Achsendverbindungen gleicher
+Hoehe/Staerke sind im normalen Modell integriert, mit Speichern/Undo/IFC.
+Nutzer bestaetigt: Fenster duerfen den Anschlussabschluss nicht beruehren;
+Einzelwand wegbewegen loest und erzeugt wieder gerade Enden. Noch keine T-Knoten
+oder beliebigen Winkel. Wandketten folgen; Undo soll ausdruecklich die gesamte
+Kette rueckgaengig machen. Siehe docs/AUTOMATIC_WALL_CONNECTIONS.md.
