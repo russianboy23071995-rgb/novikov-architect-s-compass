@@ -1,3 +1,4 @@
+import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
@@ -89,6 +90,7 @@ export function CadWorkspace({
   const [readingFile, setReadingFile] = useState(false);
   const [requestedSelection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
   const selection = visibleLayerTarget(project, visibility, requestedSelection);
+  const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
   useEffect(() => {
     if (requestedSelection && !selection) setSelection(null);
   }, [requestedSelection, selection]);
@@ -537,6 +539,12 @@ export function CadWorkspace({
             }}
             onUndo={() => navigateHistory("undo")}
             onRedo={() => navigateHistory("redo")}
+            selectedLayer={project.layers.find((l) => l.id === selectedLayerId) ?? null}
+            onLayerVisibility={(action) =>
+              dispatchEditing({ type: "visibility", base: project, action })
+            }
+            canUndoVisibility={Boolean(editing.visibilityHistory?.past.length)}
+            canRedoVisibility={Boolean(editing.visibilityHistory?.future.length)}
             canUndo={history.past.length > 0}
             canRedo={history.future.length > 0}
           />
