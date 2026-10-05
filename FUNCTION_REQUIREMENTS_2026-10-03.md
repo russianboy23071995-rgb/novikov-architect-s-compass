@@ -152,3 +152,8 @@ N44-Geometrie: abgeleitete 3D-Eckkoerper mit voll enthaltenen rechteckigen
 Fensteroeffnungen und korrektem Vereinigungsabzug implementiert (corner-solid.ts).
 Keine produktive Verbindung, Renderer- oder IFC-Anbindung; Kontaktregeln bleiben
 offen. Bestehende nicht verbundene Waende unveraendert.
+
+N44/IFC: isolierter Export eines expliziten temporaeren Wandpaars aus denselben
+fachlichen Profilen umgesetzt; zwoelf Faelle unabhaengig mit IfcOpenShell geprueft.
+Noch keine produktiven Verbindungen, keine neue Modellkopie und kein neuer
+normaler UI-Export. Archicad-Abnahme: docs/CORNER_IFC_ACCEPTANCE.md.

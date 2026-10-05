@@ -264,3 +264,12 @@ oder repariert. 433 Tests bestanden; Mesh-Volumen und geschlossene Kanteninziden
 unabhaengig geprueft. TypeScript/Build erfolgreich; Lint 0 Fehler/6 Warnungen.
 Naechster Auftrag: isolierter IFC-Abnahmenachweis derselben fachlichen Geometrie,
 wie oben in DEVELOPMENT_PLAN.md festgelegt.
+
+## Isolierter IFC-Abnahmenachweis — 05.10.2026
+
+Der explizite Testexport in interop/ifc/corner.ts verwendet die lokalen Konturen
+von corner-solid.ts und den gemeinsamen IFC-Writer. Zwoelf Testdateien bestanden
+IfcOpenShell-Pruefung inklusive Nettovolumen. Noch keine produktive Verbindung;
+Archicad-Import dieses Testmodells bleibt separat zu bestaetigen.
+Anleitung und Grenzen: [IFC-Eckabnahme](CORNER_IFC_ACCEPTANCE.md).
+Der aktuelle einzelne Folgeauftrag steht oben in DEVELOPMENT_PLAN.md.

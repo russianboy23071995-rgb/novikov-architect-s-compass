@@ -65,7 +65,13 @@ export function deriveCornerSolids(input: Project, first: CornerTarget, second: 
     }));
     if (!faces.every((f) => f.vertices.flat().every(Number.isFinite)))
       throw new Error("Wandkörperkoordinaten nicht darstellbar.");
-    return { wallId: wall.id, contour: contour.points, faces, volume: solid.volume };
+    return {
+      wallId: wall.id,
+      contour: contour.points,
+      localProfile: profile,
+      faces,
+      volume: solid.volume,
+    };
   });
   const volume = walls.reduce((sum, w) => sum + w.volume, 0);
   if (!Number.isFinite(volume)) throw new Error("Anschlussvolumen nicht darstellbar.");

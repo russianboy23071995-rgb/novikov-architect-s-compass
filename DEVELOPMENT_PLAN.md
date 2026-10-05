@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: IFC-Eckabnahme vorbereitet — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #115 nach Nutzerfreigabe normal gemergt (ed2f92e). Entwicklungszweig:
+feat/corner-ifc-fixture gegen fix/reference-selection-lifecycle.
+
+Der gemeinsame STEP-Writer liegt jetzt in interop/ifc; der bestehende Einstieg
+lib/bim/ifc.ts bleibt kompatibel. Ein separater Testadapter exportiert ein explizites
+Wandpaar mit den lokalen Bruttokonturen derselben corner-solid-Ableitung.
+Keine zweite Gehrungslogik, Modellkopie oder automatische Verbindung.
+Oeffnungen bleiben echte IfcRelVoidsElement-Abzuege; IDs bleiben stabil.
+Andere Waende und der regulaere UI-Export verwenden weiterhin Rechteckprofile.
+
+Nachweis: 437 Tests, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen.
+IfcOpenShell 0.8.5 validierte 12 neue Eckfaelle und 8 bisherige Referenzfaelle
+inklusive EXPRESS, Placement, Profilen, Beziehungen und Nettovolumen. Der normale
+Beispielexport ist bytegleich zum Stand vor der Writer-Verlagerung. Vier neue
+Tests sichern Identitaet, Snapshot-Isolation, gezielte Profilauswahl und Fehlerfaelle.
+Generator/Abnahmeanleitung: docs/CORNER_IFC_ACCEPTANCE.md. Import dieses neuen
+Modells in Archicad bleibt unbestaetigt und ist als praktische Abnahme offen.
+
+Die Fragen zur exakten Oeffnungsberuehrung und zur Endkappe nach dem Loesen bleiben
+offen. Eine allgemeine Freigabe ersetzt keine konkrete Antwort. Dieser Schritt
+schaltet keine produktive Verbindung frei und veraendert keine Bedienablaeufe.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Eine gemeinsame temporaere Anschluss-
+vorschau fuer ein ausdruecklich ausgewaehltes rechtwinkliges Wandpaar in Grundriss
+und 3D integrieren. Selection/Preview in Application halten; Renderer konsumieren
+die vorhandenen Konturen und polygonalen Flaechen derselben Ableitung. Vorschau
+muss die beiden normalen Wandkoerper ersetzen statt doppelt anzeigen, Fenster
+beibehalten, Modellwechsel validieren und per Escape abbrechen. Keine Speicherung,
+History-Buchung oder verbindliche Aktion „Ecke verbinden“, solange die offenen
+Anschlussregeln nicht entschieden und die Exportabnahme nicht dokumentiert sind.
+Tests fuer gleiche Ziele/Geometrie in beiden Ansichten, Abbruch und unzulaessige
+Paare; vorhandene normale Werkzeuge und Export beibehalten.
+
 ## Aktueller Stand: Eckkoerper mit Fensteroeffnungen abgeleitet — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -30,7 +66,7 @@ Kontakt-/Fehlermeldungen und Oeffnungen am Fuss/Kopf. git diff --check bestanden
 Keine neue UI-, Schema-, History-, Rendering- oder IFC-Anbindung. Keine sichtbare
 Aenderung im Browser; praktische Anschlussabnahme bleibt nach Integration offen.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Einen begrenzten IFC-Adapter fuer die
+**Historischer, inzwischen umgesetzter Folgeauftrag:** Einen begrenzten IFC-Adapter fuer die
 explizit gepruefte Eckgeometrie ergaenzen und die Exportgleichheit nachweisen.
 Normgerechte Profil-/Oeffnungsrepraesentation anhand primaerer IFC-Dokumentation
 pruefen; die bestehenden fachlichen Konturen und Oeffnungsparameter verwenden,

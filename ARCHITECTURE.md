@@ -1504,3 +1504,18 @@ Only contained openings are supported in this path. Rejection of touching is an
 implementation boundary, not a settled product rule. Existing buildSolid and
 normal project export are unchanged. Future renderer/IFC adapters must consume
 this shared domain derivation rather than calculate separate joins.
+
+## Shared IFC writer and isolated corner acceptance — 2026-10-05
+
+The STEP writer now lives in interop/ifc/writer.ts. lib/bim/ifc.ts retains its public
+API and invokes it without profile overrides; ordinary UI export behaviour is
+unchanged. No renderer data is accepted as export authority.
+interop/ifc/corner.ts is an isolated acceptance path for an explicit temporary
+pair. It validates a snapshot and consumes the exact local gross profiles from
+domain/elements/wall/corner-solid.ts; the writer emits closed polygon sweeps and
+uses the existing semantic opening/fill relationships from that same snapshot.
+No alternate miter calculation or persisted join is introduced. Unknown or
+invalid profiles fail before asynchronous identity generation. IDs retain the
+existing project/kind/source-ID namespace. The acceptance path rejects currently
+unsupported end-contact openings without deciding the future product policy.
+See docs/CORNER_IFC_ACCEPTANCE.md for independent validation and import limits.
