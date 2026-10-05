@@ -1,5 +1,47 @@
 # NOVIKOV CAD Architecture Contract
 
+## Revised wall-axis interaction decision — 2026-10-05
+
+The new user direction supersedes explicit-menu-only connections: snapping wall
+axes together is to connect their bodies automatically. Continuous wall chains
+are the subsequent drawing goal. The pair-preview dialog is a diagnostic aid,
+not the required future modelling workflow. Automatic joins and chain drawing
+are not implemented by this axis correction.
+
+Application createDrawing places new wall bodies left of the directed axis
+(bodyOffset = thickness/2): the axis is the right edge. Existing placements stay
+unchanged. Low-level addWall retains its centred compatibility default. New
+explicit placements are limited to half-width by Domain axis-position; thickness
+changes retain relative axis placement through shared updateWall. Historical V5
+files with outside axes still load without relocating bodies/windows; new axis
+placements cannot reproduce them. An explicit legacy conversion is future work.
+
+Selected axes share a turquoise overlay in plan/solid. Plan axis clicks project
+to the exact axis; endpoint handles use existing EditSessions and universal
+construction origins. Coincident corners cannot hide axis handles. No duplicate
+snapping/movement logic. Changing body offset keeps the axis fixed and moves the
+body, consistent with the previous user decision.
+
+## Explicit temporary corner preview — 2026-10-05
+
+Application walls/corner-preview owns validation and the snapshot-bound derived
+result for one explicitly chosen pair of wall ends. It invokes the existing
+domain corner-solid service. Changing the source project invalidates the result;
+there is no automatic pair search, mutation, history entry or persisted join.
+The UI dialog selects stable wall IDs/endpoints and presents existing plan and
+solid viewports. Closing/Escape discards the preview. Ordinary model views and
+the normal IFC export remain unchanged.
+
+The plan consumes the exact derived local profiles. The solid display adapter
+replaces the two original wall surfaces with domain-derived opening-cut faces;
+unrelated walls remain intact. Display faces may be convex planar polygons.
+Rendering and depth picking share Geometry's triangle-fan iterator so neither
+silently drops vertices after the fourth. This is not a general triangulator
+for concave polygons. Renderer meshes never become model or export authority.
+Currently unsupported corner-opening contacts remain a limitation, not a new
+product policy. Persistent connections await the outstanding end-contact and
+detachment decisions documented in docs/WALL_CORNER_PLAN.md.
+
 ## Implemented BIM visibility and independent palette history — 2026-10-05
 
 This section supersedes the preparation-only status below. Existing plan/solid

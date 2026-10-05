@@ -28,6 +28,7 @@ import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
+import { CornerPreviewDialog } from "./CornerPreviewDialog";
 import { serializeProject } from "@/lib/bim/model";
 import { readProjectFile, PROJECT_FILE_LIMIT } from "@/lib/bim/history";
 import {
@@ -63,6 +64,7 @@ export function CadWorkspace({
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
+  const [cornerWall, setCornerWall] = useState<string | null>(null);
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
     createEditingState(createExampleProject()),
   );
@@ -635,33 +637,57 @@ export function CadWorkspace({
               }}
             />
           )}
+        {cornerWall && (
+          <CornerPreviewDialog
+            project={project}
+            firstId={cornerWall}
+            visibility={visibility}
+            onClose={() => setCornerWall(null)}
+          />
+        )}
         <section
           ref={propertiesRef}
           tabIndex={-1}
           aria-label="Werkzeugeigenschaften"
           className="glass-panel-strong h-[130px] shrink-0 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <h2 className="mb-1 text-xs font-semibold">Werkzeugeigenschaften</h2>
-          {tool === "select" && (
-            <LayerProperties
-              key={`layer:${JSON.stringify([selection, project])}`}
-              project={project}
-              selection={selection}
-              disabled={referenceSelection.selecting}
-              onAssign={(base, target, layerId) => {
-                if (referenceSelection.selecting) return;
-                dispatchEditing({
-                  type: "assign-layer",
-                  base,
-                  target,
-                  selection: currentSelection.current,
-                  layerId,
-                });
-                setDemandOpen(false);
-                setModelError("");
-              }}
-            />
-          )}
+          <div className="mb-1 flex items-center gap-3">
+            <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
+            {tool === "select" && selection?.kind === "wall" && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={referenceSelection.selecting}
+                onClick={() => {
+                  cancelInteraction();
+                  setDemandOpen(false);
+                  setCornerWall(selection.id);
+                }}
+              >
+                Wandanschluss vorschauen
+              </Button>
+            )}
+            {tool === "select" && (
+              <LayerProperties
+                key={`layer:${JSON.stringify([selection, project])}`}
+                project={project}
+                selection={selection}
+                disabled={referenceSelection.selecting}
+                onAssign={(base, target, layerId) => {
+                  if (referenceSelection.selecting) return;
+                  dispatchEditing({
+                    type: "assign-layer",
+                    base,
+                    target,
+                    selection: currentSelection.current,
+                    layerId,
+                  });
+                  setDemandOpen(false);
+                  setModelError("");
+                }}
+              />
+            )}
+          </div>
           {tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
               <HatchFillFields value={hatchFill} onChange={setHatchFill} />

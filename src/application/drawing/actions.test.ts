@@ -16,8 +16,8 @@ test("shared drawing creates exact wall dimensions with one history step and mat
   assert.equal(base.storey.walls.length, 0);
   assert.equal(wallLength(preview.storey.walls[0]!), 3);
   const solid = buildSolid(preview);
-  assert.deepEqual(solid.min, [0, -0.18, 0]);
-  assert.deepEqual(solid.max, [3, 0.18, 2.8]);
+  assert.deepEqual(solid.min, [0, 0, 0]);
+  assert.deepEqual(solid.max, [3, 0.36, 2.8]);
   let state = createEditingState(base);
   assert.equal(editingReducer(state, { type: "cancel" }).history.past.length, 0);
   state = editingReducer(state, { type: "project", project: preview });

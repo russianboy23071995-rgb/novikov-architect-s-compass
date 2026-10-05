@@ -1,5 +1,71 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Wandachse als Bediengrundlage — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege. Der
+Schraffur-Eigenschaftenschritt bleibt vorgemerkt. Neue Nutzerentscheidung:
+Achsenden zusammenfuehren soll automatisch Wandkoerper verbinden; anschliessend
+Waende wie eine Polylinie durchzeichnen. "Bewusst Ecke verbinden" ist ersetzt.
+
+Umgesetzt: neue gezeichnete Waende mit rechter Kantenachse (Koerper links in
+Zeichenrichtung), tuerkise Auswahlachse in 2D/3D, auswaehlbare Achse und eigene
+Achsgriffe im Grundriss. Gemeinsame Bewegung/Rasterengine/Hilfseingabe bleiben.
+Achslage rechte Kante/Mitte/linke Kante in Eigenschaften; neue Versatzwerte
+maximal halbe Staerke. Staerkenwechsel erhaelt relative Achslage. Bestehende
+Waende werden nicht verschoben; alte V5-Dateien mit Aussenachsen bleiben
+unveraendert ladbar. Die Vorschau zeigt Wall-Nummern wie der Navigator.
+
+451 Tests bestanden; TypeScript/Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browser: Kantenlage, Achsgriff -> Punkt frei bewegen -> 1 m bei 0 Grad
+-> Wand von 3 auf 4 m -> Undo; Versatz 0,6 m abgewiesen; neue Wand mit
+Kantenachse gezeichnet. Feste 130px-Eigenschaftenleiste bleibt erhalten.
+Noch keine automatische Verbindung und kein Kettenzeichnen. PR119 wird mit
+dieser Korrektur aktualisiert, nicht ungefragt zusammengefuehrt.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Automatischen rechtwinkligen Anschluss
+zweier gleich hoher/starker Waende beim exakten Zusammenfuehren ihrer Achsenden
+in gemeinsame Erstell-/Bearbeitungsaktionen integrieren. Identische Domain-
+Konturen fuer 2D/3D/IFC, Bindung/Speicherung und Undo/Redo pruefen. Ungueltige
+Oeffnungskollisionen im bestehenden Vorschaupfad melden. Keine zusaetzliche
+Menuebestaetigung. Achsendkontakt von T-Knoten, Koerperueberlappung und mehreren
+Kandidaten unterscheiden. Offene Oeffnungsberuehrungs-/Loeseregeln vor den
+betroffenen Commit-Regeln klaeren, nicht erfinden. Kettenzeichnen folgt danach.
+
+## Aktueller Stand: gemeinsame Wandanschlussvorschau — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #118 wurde nach Nutzerfreigabe normal in fix/reference-selection-lifecycle
+gemergt (2b487df). Neuer Branch: feat/wall-corner-preview.
+
+Eine ausgewaehlte Wand bietet unter Werkzeugeigenschaften die Aktion
+"Wandanschluss vorschauen". Zweite Wand und beide Achsenden werden bewusst
+gewaehlt. Die temporaere Vorschau zeigt Grundriss und 3D nebeneinander aus
+denselben vorhandenen Domain-Konturen/Fensteroeffnungen. Originalkoerper werden
+ersetzt, nicht ueberlagert. Keine Modellmutation, History oder neue Projektversion.
+Escape/Schliessen verwirft; andere Wandenden loeschen das bisherige Ergebnis;
+unpassende Paare und geaenderte Modellbindung werden abgewiesen.
+
+Nachweis: 449 Tests bestanden; TypeScript und Build erfolgreich. ESLint:
+0 Fehler, 6 bekannte Warnungen. Browser: zwei rechtwinklige 3-m-Waende mit
+Fenstern in beiden Ansichten, unpassendes Achsende mit Fehlermeldung und Escape
+zur unveraenderten Hauptansicht geprueft. Archicad-Abnahme des isolierten
+Eckexports ist bereits vom Nutzer bestaetigt. Noch keine produktive Verbindung,
+kein Anschluss-Commit und keine Aenderung am normalen IFC-Export.
+
+Neue Nutzerwuensche bleiben erhalten in FUNCTION_REQUIREMENTS_2026-10-03.md:
+Schraffur-Hintergrundfarbe, waehlbare Konturlinie mit eigener Farbe (Linienarten
+spaeter), Offset geschlossener Polygone/Kreise und spaetere Kopie per Hotkey.
+Offset-Abstand versus Skalierungsfaktor ist noch zu klaeren; BIM-Skalierung
+bleibt ausgeschlossen. Offene Wandanschlussregeln wurden erneut angefragt.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Schraffur-Konturdarstellung als kleinen
+Eigenschaftenschritt umsetzen: optionale Konturlinie mit eigener Linienfarbe,
+ueber gemeinsame validierte Application-Aktion, Eigenschaftenleiste, Undo/Redo
+und Projektdatei mit Altdateikompatibilitaet. Bestehende Konturgriffe/Fangpunkte
+bleiben unabhaengig von der sichtbaren Linie nutzbar. Keine Linienarten, keine
+Offset-Geometrie und keine separate AI-Modelllogik in diesem Schritt.
+Die dauerhafte Wandverbindung bleibt bis zur Klaerung ihrer Regeln vorgemerkt.
+
 ## Aktueller Stand: direkte Seitengriffe — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.

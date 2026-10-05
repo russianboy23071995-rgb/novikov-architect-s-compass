@@ -23,7 +23,7 @@ const projection = createProjectionState(frame, initialCamera, viewport, {
 const axis = (p = project, view = projection) => selectedWallAxis(p, selection, () => true, view)!;
 
 test("3D axis stays on drawing endpoints despite signed body offset; selection and visibility gate it", () => {
-  for (const offset of [-0.6, 0, 0.18, 0.6]) {
+  for (const offset of [-0.18, 0, 0.09, 0.18]) {
     const p = updateWall(project, selection.id, { bodyOffset: offset });
     assert.deepEqual(axis(p), axis());
   }

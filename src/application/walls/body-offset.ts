@@ -1,4 +1,5 @@
 import { updateWall } from "../../lib/bim/model.ts";
+import { assertAxisInside } from "../../domain/elements/wall/axis-position.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
@@ -21,6 +22,7 @@ export function previewWallOffset(
     throw new Error("Der Wandversatz muss eine endliche Meterzahl sein.");
   const wall = current.storey.walls.find((w) => w.id === request.wallId);
   if (!wall) throw new Error("Wand nicht gefunden.");
+  assertAxisInside(wall.thickness, request.offset);
   return wall.bodyOffset === request.offset
     ? current
     : updateWall(current, wall.id, { bodyOffset: request.offset });

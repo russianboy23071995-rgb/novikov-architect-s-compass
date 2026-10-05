@@ -1,4 +1,6 @@
 import { wallBody } from "@/domain/elements/wall/body";
+import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
+import type { CornerPreview } from "@/application/walls/corner-preview";
 import { anchorDragTarget, type AnchorDrag } from "@/rendering/viewport/anchor-drag";
 import {
   defaultGridSettings,
@@ -44,6 +46,7 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  cornerPreview?: CornerPreview;
   referenceSelection?: ReferenceSelectionBinding | undefined;
   referenceScope?: object | undefined;
   interactive?: boolean;
@@ -81,6 +84,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  cornerPreview,
   referenceSelection,
   referenceScope,
   interactive = true,
@@ -375,21 +379,10 @@ export function BimPlan({
   }
   const shown = preview ?? project;
   const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
-  const handles: { point: Point; index: number; label: string }[] = [];
+  const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
-    if (wall) {
-      const body = wallBody(wall);
-      [wall.start, wall.end].forEach((_point, index) =>
-        [-1, 1].forEach((side) =>
-          handles.push({
-            point: body.corner(index, side),
-            index,
-            label: `Wandecke ${index === 0 ? "Anfang" : "Ende"} ${side === 1 ? "links" : "rechts"}`,
-          }),
-        ),
-      );
-    }
+    if (wall) handles.push(...wallPlanHandles(wall));
   } else if (selection?.kind === "hatch") {
     project.storey.hatches
       .find((h) => h.id === selection.id)
@@ -683,12 +676,19 @@ export function BimPlan({
             key={wall.id}
             transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
           >
-            <rect
+            <polygon
               {...selectProps("wall", wall.id)}
-              x={0}
-              y={-wall.thickness / 2}
-              width={length}
-              height={wall.thickness}
+              points={(
+                (cornerPreview?.base === shown &&
+                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) || [
+                  { x: 0, y: -wall.thickness / 2 },
+                  { x: length, y: -wall.thickness / 2 },
+                  { x: length, y: wall.thickness / 2 },
+                  { x: 0, y: wall.thickness / 2 },
+                ]
+              )
+                .map((p) => `${p.x},${-p.y}`)
+                .join(" ")}
               fill={selection?.id === wall.id ? "var(--primary)" : "var(--muted-foreground)"}
               fillOpacity={0.55}
               stroke="var(--primary)"
@@ -749,20 +749,43 @@ export function BimPlan({
         plan.walls
           .filter((wall) => wall.id === selection.id)
           .map((wall) => (
-            <line
-              key={`axis-${wall.id}`}
-              role="img"
-              aria-label={`Wandachse ${wall.id}`}
-              x1={wall.start.x}
-              y1={-wall.start.y}
-              x2={wall.end.x}
-              y2={-wall.end.y}
-              stroke="#0284c7"
-              strokeWidth={1.25}
-              strokeDasharray="7 4"
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
+            <g key={`axis-${wall.id}`}>
+              <line
+                role="img"
+                aria-label={`Wandachse ${wall.id}`}
+                x1={wall.start.x}
+                y1={-wall.start.y}
+                x2={wall.end.x}
+                y2={-wall.end.y}
+                stroke={WALL_AXIS_COLOR}
+                strokeWidth={2.5}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+              <line
+                {...selectProps("wall", wall.id)}
+                aria-label="Wandachse auswählen"
+                x1={wall.start.x}
+                y1={-wall.start.y}
+                x2={wall.end.x}
+                y2={-wall.end.y}
+                stroke="transparent"
+                strokeWidth={12}
+                vectorEffect="non-scaling-stroke"
+                className="cursor-pointer"
+                onClick={(event) => {
+                  if (drawing || editSession) return;
+                  event.stopPropagation();
+                  const raw = rawPoint(event);
+                  onSelect(
+                    { kind: "wall", id: wall.id },
+                    { x: event.clientX, y: event.clientY },
+                    undefined,
+                    raw ? wallAxisAnchor(wall, raw) : wall.start,
+                  );
+                }}
+              />
+            </g>
           ))}
       {plan.lines.map((line) => (
         <g key={line.id}>
@@ -876,14 +899,14 @@ export function BimPlan({
       {!drawing &&
         !editSession &&
         selection &&
-        handles.map(({ point, index, label }) => (
+        handles.map(({ point, index, label, axis }) => (
           <circle
             key={label}
             cx={point.x}
             cy={-point.y}
             r={5 / camera.pixelsPerMetre}
-            fill="white"
-            stroke="#0284c7"
+            fill={axis ? WALL_AXIS_COLOR : "white"}
+            stroke={axis ? WALL_AXIS_COLOR : "#0284c7"}
             strokeWidth={2}
             vectorEffect="non-scaling-stroke"
             role="button"

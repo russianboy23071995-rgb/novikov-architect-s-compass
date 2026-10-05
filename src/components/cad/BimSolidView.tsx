@@ -1,4 +1,6 @@
-import { selectedWallAxis } from "@/rendering/viewport/wall-axis";
+import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
+import { faceTriangles } from "@/geometry/solids/face-triangles";
+import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
 import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
 import { visibleSurfaces } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
@@ -88,8 +90,9 @@ function createRenderer(canvas: HTMLCanvasElement) {
           0.5 +
           0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
         const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
-        for (const index of [0, 1, 2, 0, 2, 3])
-          data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
+        for (const triangle of faceTriangles(face.vertices.length))
+          for (const index of triangle)
+            data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
       }
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
@@ -116,6 +119,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
 }
 
 export function BimSolidView({
+  cornerPreview,
   project,
   visibility,
   selection: requestedSelection,
@@ -153,6 +157,7 @@ export function BimSolidView({
   | "onEditCommit"
   | "interactive"
   | "visibility"
+  | "cornerPreview"
 >) {
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
@@ -181,7 +186,12 @@ export function BimSolidView({
   const [previewClient, setPreviewClient] = useState<(Point & { shift: boolean }) | null>(null);
   const [previewReset, setPreviewReset] = useState(0);
   const [aim, setAim] = useState<{ session: typeof editSession; point: Point } | null>(null);
-  const baseSolid = useMemo(() => buildSolid(project), [project]);
+  const baseSolid = useMemo(() => {
+    const base = buildSolid(project);
+    return cornerPreview?.base === project
+      ? cornerPreviewSurfaces(project, base, cornerPreview)
+      : base;
+  }, [project, cornerPreview]);
   const frame = useMemo(
     () => projectionFrame ?? createProjectionFrame(baseSolid),
     [baseSolid, projectionFrame],
@@ -569,9 +579,8 @@ export function BimSolidView({
             y1={axis.start.y}
             x2={axis.end.x}
             y2={axis.end.y}
-            stroke="#64748b"
-            strokeWidth={1.5}
-            strokeDasharray="7 4"
+            stroke={WALL_AXIS_COLOR}
+            strokeWidth={2.5}
           />
         </svg>
       )}

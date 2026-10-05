@@ -1,4 +1,5 @@
 import { wallBody } from "../../domain/elements/wall/body.ts";
+import { assertAxisInside, offsetAtThickness } from "../../domain/elements/wall/axis-position.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project, Wall, BimWindow, DrawingLine, Point } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
@@ -23,6 +24,7 @@ export function addWall(
   project: Project,
   wall: Creation<Omit<Wall, "bodyOffset">> & { bodyOffset?: number },
 ): Project {
+  assertAxisInside(wall.thickness, wall.bodyOffset ?? 0);
   return validateProject({
     ...project,
     storey: {
@@ -40,14 +42,23 @@ export function updateWall(
   wallId: string,
   changes: Partial<Omit<Wall, "id">>,
 ): Project {
-  if (!project.storey.walls.some((wall) => wall.id === wallId))
-    throw new Error(`Unknown wall: ${wallId}`);
+  const previous = project.storey.walls.find((wall) => wall.id === wallId);
+  if (!previous) throw new Error(`Unknown wall: ${wallId}`);
+  const bodyOffset =
+    changes.bodyOffset ??
+    (changes.thickness !== undefined && changes.thickness !== previous.thickness
+      ? offsetAtThickness(previous, changes.thickness)
+      : previous.bodyOffset);
+  // Historical V5 files may contain outside axes: loading/moving preserves them.
+  // Every new axis placement or thickness change must satisfy the new rule.
+  if (changes.bodyOffset !== undefined || changes.thickness !== undefined)
+    assertAxisInside(changes.thickness ?? previous.thickness, bodyOffset);
   return validateProject({
     ...project,
     storey: {
       ...project.storey,
       walls: project.storey.walls.map((wall) =>
-        wall.id === wallId ? { ...wall, ...changes, id: wall.id } : wall,
+        wall.id === wallId ? { ...wall, ...changes, bodyOffset, id: wall.id } : wall,
       ),
     },
   });

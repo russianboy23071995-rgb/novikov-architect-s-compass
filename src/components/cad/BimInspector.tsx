@@ -116,6 +116,45 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
         </Button>
       </form>
       {wall && (
+        <label
+          className="text-xs"
+          title="Links/rechts in Zeichenrichtung. Die Achse bleibt fest; der Wandkörper folgt."
+        >
+          Achslage
+          <select
+            aria-label="Wandachslage"
+            className="ml-2 h-8 rounded border bg-background px-2"
+            value={
+              wall.bodyOffset === wall.thickness / 2
+                ? "right"
+                : wall.bodyOffset === -wall.thickness / 2
+                  ? "left"
+                  : wall.bodyOffset === 0
+                    ? "centre"
+                    : "custom"
+            }
+            onChange={(event) =>
+              onWallOffset(
+                project,
+                wall.id,
+                event.target.value === "right"
+                  ? wall.thickness / 2
+                  : event.target.value === "left"
+                    ? -wall.thickness / 2
+                    : 0,
+              )
+            }
+          >
+            <option value="right">Rechte Kante</option>
+            <option value="centre">Mitte</option>
+            <option value="left">Linke Kante</option>
+            <option value="custom" disabled>
+              Individuell
+            </option>
+          </select>
+        </label>
+      )}
+      {wall && (
         <form
           className="flex items-end gap-2"
           aria-label="Wandkörperversatz"
@@ -137,7 +176,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
             className="text-xs"
             title="Positiv links in Richtung vom Achsanfang zum Achsende. Die Zeichenachse bleibt fest."
           >
-            Körperversatz (m)
+            Körperversatz (±{wall.thickness / 2} m)
             <Input
               aria-label="Wandkörperversatz (m)"
               name="offset"

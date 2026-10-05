@@ -161,3 +161,33 @@ normaler UI-Export. Archicad-Abnahme: docs/CORNER_IFC_ACCEPTANCE.md.
 N44-Abnahme 05.10.2026: Nutzer bestaetigt den Archicad-Import des expliziten
 Eckmodells einschliesslich Fenster und rechtwinkligem Anschluss als korrekt.
 Persistente Verbindung und offene Endkappen-/Beruehrungsregeln bleiben separat.
+
+## Ergaenzungen aus Nutzerfreigabe 05.10.2026
+
+- Schraffuren: erweiterte Hintergrundfarbe; Kontur als waehlbare Linie mit eigener
+  Linienfarbe. Linienarten ausdruecklich erst spaeter. Gemeinsame Eigenschaften-
+  und Appearance-Aktionen verwenden; UI, Projektdatei und Auswahl abstimmen.
+  Die genaue Bedeutung/Bedienung der erweiterten Hintergrundfarbe bleibt vor
+  Umsetzung zu konkretisieren; vorhandene Fuellfarbe/Deckkraft weiterverwenden.
+- On-Demand-Menue fuer geschlossene Polygone und kuenftige Kreise: Offset zum
+  Vergroessern/Verkleinern derselben Form. Spaeter auch eine Kopie per Hotkey;
+  kein konkreter Hotkey entschieden. Abstandsoffset versus einheitlicher
+  Skalierungsfaktor ist vor Implementierung ausdruecklich zu unterscheiden.
+  Konkave Konturen, Kollaps und Selbstueberschneidungen ueber gemeinsame Geometrie
+  behandeln. Keine Ausweitung der Skalierung auf BIM-/3D-Bauteile.
+
+Einordnung: kleine Folgeetappen im Bereich 2D-Darstellung und Konturbearbeitung
+nach der laufenden Wandanschlussvorschau; keine Umsetzung dieser Wuensche in
+PR zur Anschlussvorschau, keine Verdraengung aelterer Anforderungen.
+
+## Korrektur Wandachsen und Anschluesse — 05.10.2026
+
+Nutzer ersetzt die bisherige Menuepflicht: Achsen zusammenfuehren soll automatisch
+Wandkoerper verbinden. Spaeter fortlaufende Wandkette wie eine Polylinie zeichnen.
+Neue Wandachsen standardmaessig auf einer Kante, wahlweise mittig oder innerhalb
+der Wandbreite; keine neuen Aussenachsen. Ausgewaehlte Achse helltuerkis sichtbar
+und als Bewegungsreferenz nutzbar. Bestehende Koerperversatzentscheidung bleibt:
+Koerper bewegt sich relativ zur festen Zeichenachse. Vorschau-Namen muessen den
+Navigatornamen entsprechen, keine unverstaendlichen ID-Listen.
+Achsenbedienung ist umgesetzt; automatische Anschluesse/Ketten bleiben naechste
+Etappen. Historische Aussenachsen werden nicht stillschweigend umpositioniert.
