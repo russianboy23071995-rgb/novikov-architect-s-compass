@@ -153,7 +153,7 @@ export function CadViewport({
           ? model.start
             ? "Click end point · Esc cancels"
             : model.snap
-              ? "Click start point · Snap 0.10 m"
+              ? "Click start point · SNAP an"
               : "Click start point · Snap off"
           : mode === "3D" && index === 0
             ? model.editSession

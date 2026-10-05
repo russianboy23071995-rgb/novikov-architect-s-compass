@@ -1338,3 +1338,15 @@ Nutzer priorisiert Seitenstrecken direkt durch Klick auf eine Aussenlinie. Gemei
 Abnahme: Aussenkante einer Schraffur oder geschlossenen Polylinie direkt anklicken, Seite strecken waehlen, senkrecht ziehen oder Mass eingeben. Die blauen Doppelpfeile bleiben alternative Griffe. Offene Polylinien erhalten keine geschlossene Konturbearbeitung.
 
 Genau ein naechster Auftrag: den weiterhin nicht reproduzierten weiss-schwarzen Kreis mit dem ausloesenden Bedienablauf eingrenzen und beheben; anschliessend zentrale Rastersteuerung fortsetzen.
+
+### Gemeinsame Rastersteuerung — 05.10.2026
+
+PRs #101–#104 sind mit normalen Merge-Commits in fix/reference-selection-lifecycle integriert (302b74d). Der gemeldete weiss-schwarze Kreis tritt laut Nutzer nicht mehr auf; keine weitere spekulative Korrektur. Neuer Zweig feat/shared-grid-controls.
+
+Die Statusleiste bietet Rasterfang an/aus und eine positive Schrittweite in Metern, inklusive Dezimalkomma. SNAP bleibt der gemeinsame Hauptschalter; Rasterfang aus erhaelt geometrischen Punktfang und Hilfsreferenzen. Die sichtbare Rasterdarstellung bleibt unabhaengig und zoomadaptiv. Ein gemeinsames Application-Einstellungsobjekt speist den bestehenden Resolver fuer alle 2D-Zeichen-/Bearbeitungsaktionen und bestehende 3D-Wandbewegungen auf der horizontalen Arbeitsebene. Keine individuelle Werkzeug-Rundung. Explizite Shift-/Achsenregeln und exakte Massvorgaben behalten ihre bisherigen Prioritaeten; Raster bleibt nachrangiger Fallback. Passives 3D-Hovern erhaelt keinen Rastermarker.
+
+Einstellungen sind sitzungsbezogen, keine Modell-/Dateiformat- oder Undo-Aenderung. Ungueltige Eingaben behalten die letzte gueltige Schrittweite. 401 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Neue Tests: Dezimalkomma, positive Werte, ungueltige Eingaben, gemeinsamer Zeichen-/Bewegungsresolver mit zwei Schrittweiten, Raster aus bei weiterhin aktivem Endpunktfang, Hauptschalter aus. Browser: 0 abgewiesen, 0,25 uebernommen, Rastermarker beim Linienwerkzeug auf 25-cm-Koordinate, nach Ausschalten verschwunden. Screenshot outputs/grid-controls.png. 3D-Anbindung typgeprueft, in diesem Auftrag nicht manuell im Browser abgenommen.
+
+Abnahme: unten 0,25 m einstellen, Linie beginnen und Ziel bewegen. Rasterfang aus: freie Zielposition, vorhandene Endpunkte bleiben fangbar. Eine Schraffurecke bewegen und dasselbe Verhalten pruefen. SNAP aus deaktiviert den Fang insgesamt; sichtbares Raster separat ueber Grid schalten. Schrittweite gilt bis zum Neuladen.
+
+Genau ein naechster Auftrag: gemeinsame Rastersteuerung im kompletten Schraffur-/Polygon-Seitenstreckablauf und bei 3D-Wandbewegung praktisch abnehmen, inklusive Zoom, Abbruch und Undo; daraus belegte Fehler vor Beginn der Wandanschluesse korrigieren.

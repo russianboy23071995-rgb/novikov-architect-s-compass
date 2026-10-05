@@ -1,3 +1,8 @@
+import {
+  defaultGridSettings,
+  gridSpacing,
+  type GridSettings,
+} from "@/application/snapping/grid-settings";
 import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
@@ -50,6 +55,7 @@ export type BimPlanProps = {
   start: Point | null;
   draftPoints?: Point[];
   draftFill?: Hatch["fill"] | undefined;
+  gridSettings?: GridSettings;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -85,6 +91,7 @@ export function BimPlan({
   draftPoints = [],
   draftFill,
   snap,
+  gridSettings = defaultGridSettings,
   ortho,
   onSelect,
   onPoint,
@@ -250,7 +257,7 @@ export function BimPlan({
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
-        gridSpacing: 0.1,
+        gridSpacing: gridSpacing(gridSettings),
         activeReference,
         activeReferences,
         guideDirections,
