@@ -28,28 +28,35 @@ Entfernte aktive Referenzen und alle Quellen erzeugter Konstruktionspunkte
 ebenfalls filtern: verborgene Quellen liefern keine Fluchten/Schnittpunkte.
 3D-Verdeckung bleibt eine zusaetzliche Rendering-Pruefung.
 
-## Offene Produktvorschlaege — keine Nutzerentscheidungen
+## Bestaetigte Nutzerentscheidungen — 05.10.2026
 
-1. Sichtbarkeit je gespeicherter ModelView statt global. Zwei Pane-Bindings
-   derselben ModelView teilen deren Filter; verschiedene ModelViews sind getrennt.
+1. Zwei getrennte Sichtbarkeitsbereiche: BIM-Projekt und Ausschnitte/Abbilder.
+   Das rohe Modell und seine Arbeitsansichten, Schnitte und Grundrisse teilen
+   den BIM-Projektfilter. Ausschnitte (DrawingDocuments) erhalten eigenstaendige
+   Filter. Der BIM-Filter ist KEINE vorgelagerte Sperre fuer Ausschnitte: eine
+   dort ausgeblendete Ebene kann im Ausschnitt/Layoutbuch sichtbar bleiben.
+   Layoutdarstellungen beziehen den Filter ihres gebundenen Ausschnitts.
 2. Sichtbarkeit im Projekt speichern; alte Dateien zeigen alle Ebenen.
    Explizite Migration statt stiller Erweiterung des strikten Schema 2.
 3. Verborgene Ziele abwaehlen und betroffene Vorschau abbrechen; keine unsichtbare
    Bestaetigung. Navigator darf verborgene Ziele nicht still zur Bearbeitung waehlen.
 4. Fenster nur bei sichtbarer Fensterebene UND sichtbarer Host-Wand darstellen.
-5. Gespeicherte Sichtbarkeitsaenderungen mit Undo/Redo; IFC bleibt vollstaendig.
+5. IFC bleibt vollstaendig, unabhaengig von beiden Sichtbarkeitsbereichen.
 
-Global/ansichtsbezogen sowie Speicherung, Host und Abbruch wurden dem Nutzer
-zur Auswahl vorgelegt. Ohne Antwort gelten sie nicht als beschlossen. Undo-Regel
-vor UI-Implementierung ebenfalls klaeren. Bei globaler Entscheidung denselben
-Kontextvertrag mit gemeinsamem Filter verwenden. ModelView/ViewportBinding aus
-ARCHITECTURE.md beachten, keinen kompletten Layouteditor vorziehen.
+Diese Regeln ersetzen den urspruenglichen Vorschlag einer getrennten Sichtbarkeit
+je ModelView. Ein Ausschnitt bleibt ein Verweis auf das gemeinsame Modell, keine
+Bauteilkopie. ModelView/ViewportBinding aus ARCHITECTURE.md beachten.
+Noch offen: Startfilter eines neu erstellten Ausschnitts und Undo-Verhalten der
+Sichtbarkeitsaenderung. Vorschlag: Startkopie des BIM-Filters, danach unabhaengig;
+gespeicherte Ansichtsaktion mit Undo/Redo. Nicht als Nutzerentscheidung behandeln.
 
 ## Genau ein naechster begrenzter Auftrag
 
-Nach Klaerung der Produktregeln eine reine gemeinsame Eligibility-Policy in
+Eine reine gemeinsame Eligibility-Policy gemaess bestaetigten Produktregeln in
 application/layers implementieren und testen. Eingaben: vollstaendiges Project,
 expliziter unveraenderlicher Sichtbarkeitskontext und stabile Element-ID.
+Der Kontext unterscheidet BIM-Projekt und DrawingDocument-ID; ein Ausschnitt
+wird direkt mit seinem eigenen Filter ausgewertet, ohne AND mit dem BIM-Filter.
 Ausgabe: Teilnahmeentscheidung und Grund. Fehlende/veraltete Ziele ablehnen.
 Wand, Fenster und Linie samt Host-Regel abdecken. Keine React-Abhaengigkeit und
 keine separate AI-Modelllogik; spaetere Adapter pinnen Projekt, Ansicht und Ziel.

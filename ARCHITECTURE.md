@@ -1,5 +1,23 @@
 # NOVIKOV CAD Architecture Contract
 
+## Layer visibility scopes — user decision 2026-10-05
+
+The BIM project and its derived working plans, sections, elevations and 3D views
+share one layer visibility context. DrawingDocuments (Ausschnitte/Abbilder) have
+independent layer visibility contexts. A layout rendering of a DrawingDocument
+uses that document's context. BIM-project visibility is not an upstream mask:
+a layer hidden in the working model can remain visible in a DrawingDocument.
+All contexts reference the same authoritative elements; no building copies.
+
+Persist these settings in the project. Hidden elements are ineligible for normal
+picking and snapping; hiding an edit target cancels its pending edit without
+committing the preview. Window display requires both its own layer and its host
+wall to be visible in the effective context. Real wall openings and the complete
+IFC export remain unchanged. One Application eligibility policy serves all views
+and tools. This resolves the earlier open scope, persistence and host questions.
+Initial filters for newly created DrawingDocuments and visibility undo semantics
+remain open. See docs/LAYER_VISIBILITY_PLAN.md; no visibility implementation yet.
+
 ## Implemented: layer data and schema-1 migration — 2026-10-04
 
 The canonical runtime is now schema 2. domain/project/schema.ts owns current and
