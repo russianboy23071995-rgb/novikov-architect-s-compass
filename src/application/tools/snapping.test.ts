@@ -374,7 +374,7 @@ test("dense diagonal boxes and crossings preserve full resolver ranking at multi
     const full = projectSnapReferences(project);
     const policy = drawingSnapPolicy({ x: -2, y: -2 });
     const references = prepareToolReferences(policy, full);
-    const sourceQuery = createToolSourceQuery(model, policy);
+    const sourceQuery = createToolSourceQuery(model, policy, Infinity); // Differential oracle without density guard.
     const activeReferences = [
       policy.origin,
       ...full.filter((r) => r.kind === "midpoint").slice(1, 4),

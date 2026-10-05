@@ -3,6 +3,9 @@ import type { SnapReference, SnapSourceQuery } from "../snapping/engine.ts";
 export const DEFAULT_HOVER_DWELL_MS = 600;
 
 export type HoverContext = {
+  suspended?: boolean;
+  selectedSegments?: ReadonlySet<string> | null;
+  intersectionsPaused?: boolean;
   sourceQuery?: SnapSourceQuery;
   enabled: boolean;
   references: readonly SnapReference[];

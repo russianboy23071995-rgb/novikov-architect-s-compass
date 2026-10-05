@@ -665,6 +665,53 @@ Repository-Benchmark einschließlich Projektvalidator erneut ausgeführt; LOCAL_
 
 Nutzerwunsch zur optionalen Referenzauswahl aufgenommen: docs/REFERENCE_SELECTION_PLAN.md. Frühere Profilierung zurückgestellt; keine Auslöseschwelle oder Bedienänderung implementiert.
 
-### Genau ein ausführbarer Folgeauftrag: Vertrag für optionale Referenzauswahl festlegen
+### Abgeschlossener Folgeauftrag: Vertrag für optionale Referenzauswahl festlegen
 
 Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands- und Quellenvertrag sowie eine begründete vorläufige Auslöseschwelle mit Hysterese vorschlagen. Verhalten ohne Auswahl, bei Abbruch, Idle-Hover und Modellwechsel festlegen. Endpunkt-/Mittelpunktfang, aktive Führungen und feste Achsen erhalten. Ein kleines Umsetzungspaket mit Tests ableiten; noch keine automatische Einschränkung oder Dialoge implementieren.
+
+
+### Abschluss: Referenzauswahl-Vertrag — 04.10.2026
+
+docs/REFERENCE_SELECTION_PLAN.md gegen lokale Quellen, ToolInteraction, Hover und Pointer-/Keyboardpfad abgeglichen. Vorgeschlagene Einstiegsschwelle >32 Segmente, Rückkehr <=24 für 250 ms; vorläufig und im Umsetzungsschritt zu messen. 600 ms Hover bleibt unabhängig. Auswahl filtert ausschließlich Segmentpaare, erhält normale Punktziele und aktive Führungen. Arbeitskopie/Abbruch, Mehrdeutigkeit, Polyline-Vorgangsidentität und Idle-Sitzung beschrieben. Keine Nutzerentscheidung über konkrete Zahlen behauptet.
+
+Nur Dokumentation verändert; kein neuer Test-/Build-/Browserlauf nötig. Bestehende 244 Tests und Abnahme aus PR #58 beziehen sich auf unveränderten Anwendungscode. PR #58 und #57 weiterhin offen; kein Merge in diesem Planungsauftrag.
+
+### Abgeschlossener Folgeauftrag: gemeinsame Dichteschranke mit sichtbarem Status
+
+Primitive lokale Kandidatensuche und Paarbildung trennen. Gemeinsamen reinen Dichtecontroller mit vorläufigen Schwellen >32/<=24 und 250-ms-Rückkehr erstellen; Zeit injizieren. Strukturierter Pausenstatus für Zeichnen, Direct Edit und Hover, keine ungeschützte Zweitabfrage. End-/Mittelpunkte, aktive Führungen, Host-/Eigenausschlüsse und Achsen erhalten. Viewporthinweis ohne funktionslosen Auswahlbutton; Auswahl-Picking folgt als separates Paket. Grenz-/Lebenszyklustests und Messung mit 24/32/33/48 Segmenten gemäß Vertrag; Build/Lint/TypeScript und praktische Prüfung.
+
+
+### Abschluss: gemeinsame Dichteschranke — 04.10.2026
+
+Primitive Suche von Paarbildung getrennt. createToolSourceQuery bewacht standardmäßig alle Produktionsabfragen (>32 Segmente); reiner Application-Controller steuert Rückkehr bei <=24 für 250 ms, React liefert Zeit/Ereignisse. Gemeinsamer Pausenparameter für Hover und Pointerresolver. End-/Mittelpunkte, Raster und aktive entfernte Referenzen bleiben verfügbar. Lesbarer Viewportstatus ohne Popup oder funktionslosen Auswahlbutton.
+
+247 Tests, TypeScript und Build erfolgreich; ESLint 0 Fehler/6 bestehende Warnungen. Grenz-, Ausschluss-, Referenz- und Vergleichstests bestanden. Browser mit 48 Kreuzungen: Idle-Hover, Zeichnen, freie Wandbewegung, erhaltener Mittelpunktfang, Referenz nach Zoom, Wiederaufnahme außerhalb und Linienabschluss erfolgreich. Messung: docs/performance/SNAP_DENSITY.md. 32 Segmente Median 2,373 ms, 33 Segmente pausiert 0,261 ms; keine Framerate-Zusage.
+
+Praktischer Test: viele Linien kreuzen lassen, Maus darüber bewegen. Hinweis erscheint ohne Dialog; Mittelpunkt bleibt fangbar. Auf weniger dichte Stelle fahren, kurze Wiederaufnahme abwarten. Beim Zeichnen und Bearbeiten wiederholen; Zoom erhält Referenzen.
+
+Grenzen: dichte automatische lokale Schnittpunkte bewusst pausiert, manuelle Referenzauswahl fehlt noch. Primitive Suche und Punktranking bleiben mengenabhängig. Keine 3D-Arbeitsebene. PRs #57–59 weiterhin offen.
+
+### Abgeschlossener Folgeauftrag: temporäre Segmentauswahl gemeinsam integrieren
+
+Optionale Auswahl gerader Segmentquellen für einen laufenden Vorgang implementieren: gemeinsamer Application-Zustand mit Arbeitskopie/Übernehmen/Abbruch, Vorgangsidentität über Polylinienpunkte hinweg und Auswahlfilter vor Paarbildung. Canvas-Auswahl suspendiert Modellbestätigungen, bietet Mehrdeutigkeitsliste und dezente Abblendung. Aufheben, Idle-Lebenszyklus, Zoom, Modellwechsel und aktive Referenzen gemäß docs/REFERENCE_SELECTION_PLAN.md testen. Zunächst Segmentauswahl; explizite Punktübernahme folgt separat. Keine per-Werkzeug-Fangkopien.
+
+
+### Abschluss: temporäre Segmentauswahl — 04.10.2026
+
+PR #60 nach Freigabe normal in docs/reference-selection-contract übernommen (9daa725); main unverändert. Gemeinsamer Application-Reducer verwaltet Arbeitskopie, Übernehmen, Abbruch und Aufheben. Ein Filter begrenzt Segmentpaare vor der Dichteprüfung; End-/Mittelpunkte und aktive entfernte Führungen bleiben verfügbar. Deterministisches Picking unterscheidet Polylinienteilsegmente. Mehrdeutigkeit wird in einer Liste nahe dem Zeiger aufgelöst; Canvas wird dezent abgeblendet. ToolInteraction pausiert Bestätigungen und numerische Eingabe während der Auswahl. Kein zusätzlicher Modellzustand und keine per-Werkzeug-Fangkopie.
+
+250 Tests bestanden; TypeScript und Build erfolgreich, ESLint 0 Fehler/6 bekannte React-Refresh-Warnungen. Neue Tests prüfen Auswahl/Abbruch, Quellenfilter vor Paarbildung (zwei Segmente: ein Paar), erhaltene Punktziele/aktive Quellen und deterministisches Picking. Browser: 48 überlappende Linien, zwei Referenzen auswählen/übernehmen, Arbeitskopie abbrechen und Filter aufheben; Auswahl bleibt beim Zoom und über drei Polylinienpunkte erhalten. Zeichenvorgang abbrechen setzt Filter zurück. Freie Wandbewegung: Hilfseingabe wird während der Auswahl ausgeblendet und nach Abbruch wiederhergestellt. Keine unbeabsichtigte Modellbestätigung beim Picking.
+
+Praktischer Test: Referenzen auswählen anklicken, zwei Linien im Canvas wählen (bei Überlagerung Trefferliste nutzen), übernehmen. Danach weiterzeichnen/verschieben und zoomen. Auswahl erneut öffnen und abbrechen: vorherige Auswahl bleibt. Auswahl aufheben stellt automatische Suche einschließlich Dichteschranke wieder her.
+
+Grenzen: zunächst gerade Segmentquellen in 2D; explizite Punktübernahme fehlt. Quellschlüssel gelten für den aktuellen Modellsnapshot und werden nach Modell-/Vorgangswechsel verworfen. Komplette Modal-/Tastaturmatrix noch nicht browserautomatisiert. Ältere gestapelte PRs bleiben offen.
+
+### Genau ein ausführbarer Folgeauftrag: gezielte Punktreferenzen im gemeinsamen Auswahlmodus
+
+Punktübernahme für vorhandene End-/Mittelpunkte in denselben temporären Auswahlablauf integrieren. Vorhandenen Hover-Referenzvertrag einschließlich Kapazität, Ursprungsschutz und Verdrängung verwenden; vor Übernahme anzeigen, welche Referenz ersetzt würde. Segmentfilter und explizite Hilfsreferenzen getrennt halten, kein zweiter unbegrenzter Referenzspeicher. Arbeitskopie/Abbruch, Modellwechsel, Zoom und gemeinsame Nutzung bei Zeichnen/Direct Edit testen; Tab/Escape und modale Priorität praktisch mitprüfen. Keine neue Fangart oder 3D-Arbeitsebene.
+
+### Anzeige der Referenzauswahl bereinigt — 04.10.2026
+
+Im normalen Fangbetrieb kein dauerhaftes Panel. Bei pausierter dichter Suche Hinweis mit Einstieg; bestätigte Auswahl kompakt als Anzahl mit Ändern/Aufheben. Manueller Einstieg über das gemeinsame On-Demand-Menü auch ohne Elementauswahl und im Zeichen-/Bearbeitungsvorgang. Auswahlmodus bleibt auch bei Snap aus bedienbar. Keine Änderung der Fangberechnung oder 600-ms-Regel.
+
+250 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler/6 bekannte Warnungen nach Korrektur einer verbliebenen Formatierung in snapping.ts. Browser: normales Panel verborgen, Einstieg im Elementmenü und Linienwerkzeug, Abbruch blendet Panel wieder aus. Nächster Auftrag bleibt gezielte Punktübernahme gemäß obigem Folgeauftrag. Ergänzung im offenen PR #61, kein Merge.
