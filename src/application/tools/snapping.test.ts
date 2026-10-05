@@ -2,6 +2,110 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareToolReferences, resolveToolSnap, drawingSnapPolicy } from "./snapping.ts";
 import { createToolSourceQuery } from "./snapping.ts";
+import { createVisibleToolSourceQuery } from "./snapping.ts";
+import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
+import { referenceKey } from "../../constraints/inference/construction-reference.ts";
+
+test("visibility filters before density/pairs and preserves all-visible compatibility", () => {
+  const p = addLine(base, {
+    id: "cross",
+    kind: "line",
+    points: [
+      { x: 0, y: -1 },
+      { x: 3, y: 1 },
+    ],
+    ...defaultLineAppearance,
+  });
+  const all = createLayerVisibilityPolicy(p, {
+    scope: { kind: "drawing-document", documentId: "d" },
+    hiddenLayerIds: [],
+  });
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.defaultLayerIds.line],
+  });
+  const full = createVisibleToolSourceQuery(p, all, all.context, null, 1);
+  const filtered = createVisibleToolSourceQuery(p, hidden, hidden.context, null, 1);
+  const cursor = { x: 1.5, y: 0 };
+  assert.equal(full.inspect(cursor, 100, 10).segmentPairs, 1);
+  assert.equal(filtered.inspect(cursor, 100, 10).segmentPairs, 0);
+  assert.equal(filtered.inspect(cursor, 100, 10).segments.length, 1);
+  assert.ok(filtered(cursor, 100, 10, []).every((r) => r.entityId === "w"));
+  const legacy = createToolSourceQuery(getLocalSnapSources(p), null);
+  const visible = createVisibleToolSourceQuery(p, all, all.context, null);
+  assert.deepEqual(visible(cursor, 100, 10, []), legacy(cursor, 100, 10, []));
+  assert.ok(visible(cursor, 100, 10, []).some((r) => r.kind === "segment-intersection"));
+  assert.equal(getLocalSnapSources(p), getLocalSnapSources(p));
+});
+
+test("hidden remote tracked segments and dependent construction points cannot provide guides", () => {
+  const index = getLocalSnapSources(base);
+  const refs = index.query({ x: 5, y: 0 }, 100, 10).references;
+  const endpoint = refs.find((r) => r.entityId === "l" && r.feature === "vertex-0")!;
+  const segment = index.allSegments.find((s) => s.source.entityId === "l")!.source;
+  const construction = {
+    entityId: "@construction",
+    feature: "test",
+    point: { x: 10, y: 10 },
+    dependencies: [endpoint, segment],
+  };
+  const tracked = { ...segment, parallelDirections: [{ x: 1, y: 2 }] };
+  const all = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  const hidden = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [base.defaultLayerIds.line],
+  });
+  const visibleQuery = createVisibleToolSourceQuery(base, all, all.context, null);
+  const hiddenQuery = createVisibleToolSourceQuery(base, hidden, hidden.context, null);
+  const active = [endpoint, tracked, construction];
+  const cursor = { x: 100, y: 100 };
+  const visible = visibleQuery(cursor, 100, 10, active);
+  for (const r of active) assert.ok(visible.some((s) => referenceKey(s) === referenceKey(r)));
+  assert.deepEqual(hiddenQuery(cursor, 100, 10, active), []);
+  const result = resolveToolSnap(
+    null,
+    { x: 5, y: 30 },
+    {
+      references: [],
+      sourceQuery: hiddenQuery,
+      activeReferences: [endpoint],
+      pixelsPerMetre: 100,
+      endpointRadiusPx: 10,
+      enabled: true,
+      gridSpacing: null,
+    },
+    { ortho: false, shift: false, featureSnap: true },
+  );
+  assert.equal(result.candidate, null);
+});
+
+test("context mismatch and stale models fail closed, including pinned origins", () => {
+  const all = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  const other = createLayerVisibilityPolicy(base, {
+    scope: { kind: "drawing-document", documentId: "d" },
+    hiddenLayerIds: [],
+  });
+  const drawing = drawingSnapPolicy({ x: 20, y: 20 });
+  for (const query of [
+    createVisibleToolSourceQuery(base, all, other.context, drawing),
+    createVisibleToolSourceQuery(updateWall(base, "w", { height: 3 }), all, all.context, drawing),
+  ]) {
+    assert.equal(query.inspect({ x: 0, y: 0 }, 100, 10).segments.length, 0);
+    assert.deepEqual(query({ x: 0, y: 0 }, 100, 10, [drawing.origin]), []);
+  }
+  const valid = createVisibleToolSourceQuery(base, all, all.context, drawing);
+  assert.ok(
+    valid({ x: 100, y: 100 }, 100, 10, [drawing.origin]).some(
+      (r) => referenceKey(r) === referenceKey(drawing.origin),
+    ),
+  );
+});
 import { getLocalSnapSources } from "../snapping/local-sources.ts";
 import {
   advanceHoverReference,

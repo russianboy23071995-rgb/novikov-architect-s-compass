@@ -1,5 +1,22 @@
 # NOVIKOV CAD Architecture Contract
 
+## Layer-aware local source queries — 2026-10-05
+
+application/tools/snapping.ts now offers createVisibleToolSourceQuery bound to
+Project, the shared visibility policy/context and the existing tool policy.
+It reuses the cached primitive index. Eligibility applies before density and
+intersection enumeration and to remote active sources and flattened dependencies.
+Derived reference IDs are not treated as model element IDs. The exact pinned
+interaction origin remains available independently of excluded model targets;
+stale project/context bindings suppress even that origin. Consumers must replace
+the query on model/filter changes, never on zoom. Existing callers without an
+eligibility binding retain their all-visible behavior.
+
+This is the source-query integration only. UI still supplies no persisted filter.
+Controller cancellation on hidden edit targets, explicit Shift origins, renderer,
+3D foot-edge sources and explicit reference pickers need the same context before
+exposing a visibility switch. Do not claim complete viewport visibility yet.
+
 ## Implemented layer eligibility policy — 2026-10-05
 
 application/layers/visibility.ts supplies a pure snapshot-bound policy for current
