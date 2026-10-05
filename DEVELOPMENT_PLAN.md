@@ -1350,3 +1350,15 @@ Einstellungen sind sitzungsbezogen, keine Modell-/Dateiformat- oder Undo-Aenderu
 Abnahme: unten 0,25 m einstellen, Linie beginnen und Ziel bewegen. Rasterfang aus: freie Zielposition, vorhandene Endpunkte bleiben fangbar. Eine Schraffurecke bewegen und dasselbe Verhalten pruefen. SNAP aus deaktiviert den Fang insgesamt; sichtbares Raster separat ueber Grid schalten. Schrittweite gilt bis zum Neuladen.
 
 Genau ein naechster Auftrag: gemeinsame Rastersteuerung im kompletten Schraffur-/Polygon-Seitenstreckablauf und bei 3D-Wandbewegung praktisch abnehmen, inklusive Zoom, Abbruch und Undo; daraus belegte Fehler vor Beginn der Wandanschluesse korrigieren.
+
+### Rastersteuerung: praktische Abnahme — 05.10.2026
+
+PR #105 nach Freigabe unveraendert normal in fix/reference-selection-lifecycle gemergt (bf44929). Abnahme in separatem Browser-Tab mit definiertem Testmodell; Nutzer-Tab und Modell nicht ersetzt. Keine Aenderung der Produktlogik erforderlich.
+
+Browser mit 0.25 m: Schraffurseite von x=-1 auf x=3.5 gestreckt, Vorschau und Commit gleich, Undo exakt zur Ausgangskontur, Redo exakt zur Zielkontur. Zoom waehrend Vorschau geprueft. Geschlossene Polylinie ebenfalls auf x=3.5 in Vorschau gestreckt; Abbrechen erhaelt x=4. 3D: sichtbaren Wandfusspunkt gewaehlt, frei bewegt, Zoomvorschau und Uebernehmen geprueft. Im Grundriss ergibt sich Wandversatz (5.75,-2.68); gewaehlt war eine um 0.18 m gegen die Wandachse versetzte Ecke, deren Rasterziel (5.75,-2.5) ist. Undo/Redo reproduzieren Ausgangs-/Zielzustand exakt. Separater 3D-Abbruch laesst Wand bei (0,0). Screenshot outputs/grid-3d-acceptance.png. Raster ist weiterhin Fallback: eine aktive Hilfslinie kann ungerasterte Laengen liefern; explizite Shift-/Achsenregeln bleiben vorrangig.
+
+Automatischer Regressionstest fuer beide Konturarten und die Wand mit versetztem Ursprung, drei Bildschirmmassstaeben/affiner Metrik, Zielkoordinaten, unveraenderter Basis bei Vorschau/Abbruch, einem History-Schritt, Undo/Redo und JSON-Roundtrip. 402 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Keine Behauptung einer vollstaendigen Abnahme beliebiger 3D-Arbeitsebenen oder anderer 3D-Bauteile.
+
+Abnahme fuer Nutzer: 0.25 m einstellen, Schraffurseite strecken, Vorschau bestaetigen, Undo/Redo. In 3D sichtbare Wandecke am Boden klicken, Element frei bewegen, Ziel ansteuern und Uebernehmen. Raster bezieht sich auf den ausgewaehlten Eckpunkt. Bei aktiver Hilfslinie deren Prioritaet beachten.
+
+Genau ein naechster Auftrag: den ersten Eckanschluss zweier gerader Waende anhand vorhandener Modell-/Geometrie-/IFC-Pfade planen und eine begrenzte gemeinsame Anschlussregel samt Tests festlegen; offene Regeln fuer Achswechsel und unterschiedliche Staerken explizit lassen, bevor Anschlussgeometrie implementiert wird.
