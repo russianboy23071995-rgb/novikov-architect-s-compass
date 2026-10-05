@@ -1374,3 +1374,41 @@ BimPlan now overlays the selected visible wall's start/end centre axis from its
 current validated display/preview snapshot. The dashed line has screen-constant
 stroke and ignores pointer events. It introduces no model entity, snap source or
 mutation. Axis offsets, 3D axis display and wall-join decisions remain open.
+
+## Wall axis offset: binding user decision — 2026-10-05
+
+The user explicitly chose: the wall body moves relative to the drawing axis.
+This supersedes earlier statements that the choice was still open. start/end
+remain the drawing-axis endpoints when changing the offset; the physical wall,
+its openings and hosted windows translate perpendicular to that axis together.
+Axis length, thickness, height, IDs and relative opening positions are preserved.
+This is not whole-element translation and does not approve automatic wall joins.
+
+Technical convention for the forthcoming implementation: a signed metre offset
+measures the body centre from the drawing axis, positive to the left looking
+from start toward end. With unit tangent (ux,uy), left normal is (-uy,ux), body
+centre = axis point + offset * normal and sides lie at offset +/- thickness/2.
+A default zero offset preserves the current centred wall. This sign convention
+is an implementation convention, not an additional claimed user preference.
+
+Implement body coordinates once in a domain wall-geometry adapter backed by
+existing generic geometry. Keep axis coordinates distinct from body coordinates.
+Plan geometry, bounds, 3D solids, openings, hit testing, corner grips and snapping,
+windowCentre/edit anchors and IFC must consume that same derivation. The selected
+axis overlay continues to display start/end. Do not create another editable Wall
+or store renderer/IFC geometry as authoritative data.
+
+A snapshot-bound Application action must validate a finite offset and all derived
+coordinates, return a disposable preview, reject stale target/context, and commit
+one undo step. Properties and future mouse/Text/Voice/AI adapters must call it.
+Reject non-finite/overflow geometry; do not silently clamp or round the value.
+Changing the offset itself leaves the axis fixed. Other endpoint edits retain the
+stored signed offset relative to the resulting direction; reversing direction
+and deliberately keeping the body fixed is not introduced as a new command.
+
+Persist the offset with an explicit new project schema version and validated
+migration of older files to zero; no permissive runtime default for malformed
+new-version snapshots. Layer and visibility semantics stay unchanged. The next
+implementation must cover all consumers before exposing the numeric field.
+3D axis overlay, interactive offset dragging, side presets, wall joins and
+material-layer priorities remain separate work.

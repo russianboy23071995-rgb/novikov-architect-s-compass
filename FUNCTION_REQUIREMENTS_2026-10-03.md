@@ -115,7 +115,7 @@ Zusätzlich erhalten:
 | Punkt             | Offen; keine angenommene Entscheidung                                                            | Vor Umsetzung nötig                       |
 | ----------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | D / Strg+D        | Beide als Drehen genannt; Unterschied unbekannt, kein erfundenes Kopieren+Drehen                 | N54/N55                                   |
-| Wandachsenwechsel | Physische Wandlage erhalten oder Wand relativ zur Zeichenachse bewegen?                          | N45/N42/N44                               |
+| Wandachsenwechsel | Entschieden 05.10.2026: Wandkörper bewegt sich relativ zur festen Zeichenachse.                          | N45/N42/N44                               |
 | 3D-Export         | Format, Geometrie-/Material-/Metadatenumfang, Einheiten/Koordinaten                              | N02; IFC ersetzt diese Entscheidung nicht |
 | Wandketten-Undo   | Ein Schritt pro Segment oder gesamte Kette; Verhalten bei abgebrochener Kette                    | N43                                       |
 | Weitere Details   | Textskalierung/Stilgrößen, Pipettenfarbquelle, Schemafelder, Template-Vererbung, Pane-Persistenz | Jeweilige N25/N49/N52/N59/N60             |
@@ -132,4 +132,4 @@ Siehe den vollständigen Auftrag am Anfang von [DEVELOPMENT_PLAN.md](DEVELOPMENT
 
 ### Ergänzung zu N45 – Nutzerwunsch 03.10.2026
 
-Die derzeit zentrierte Wandachse soll bei ausgewählter Wand sichtbar und später verschiebbar sein. Dies ergänzt N45, kein zusätzlicher paralleler Auftrag. Zum passenden Zeitpunkt vor Wandanschlüssen umsetzen; vorher klären, ob eine Achsenverschiebung die physische Wandlage erhält oder verändert. Keine Entscheidung dazu vorwegnehmen.
+Die derzeit zentrierte Wandachse soll bei ausgewählter Wand sichtbar und später verschiebbar sein. Dies ergänzt N45, kein zusätzlicher paralleler Auftrag. Vor Wandanschlüssen umsetzen. Entscheidung vom 05.10.2026: Die Zeichenachse bleibt fest; der Wandkörper bewegt sich relativ dazu. Die zentrierte Achse ist seit PR #108 bei Auswahl im Grundriss sichtbar; der Körperversatz ist noch nicht implementiert.

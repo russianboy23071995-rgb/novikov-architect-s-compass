@@ -1,5 +1,45 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Auftrag: Wandkoerperversatz zur festen Zeichenachse — 05.10.2026
+
+Diese Sektion ersetzt die historischen Folgeauftraege weiter unten.
+Nutzerentscheidung: Der Wandkoerper bewegt sich relativ zur Zeichenachse.
+PR #108 nach Freigabe normal gemergt (a963eca). Sichtbare Achse ist vorhanden;
+Versatz noch nicht implementiert. Entscheidung in ARCHITECTURE.md und N45 erfasst.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Fuer eine ausgewaehlte gerade Wand einen
+numerischen, vorzeichenbehafteten Koerperversatz in Metern als gemeinsame
+validierte Application-Aktion implementieren, einschliesslich aller Verbraucher.
+
+- Bestehende start/end als feste Zeichenachse erhalten. Technische Konvention:
+  positiv links in Zeichnungsrichtung, null bleibt zentriert. Keine Laengen-,
+  Hoehen- oder Staerkenaenderung durch diese Aktion.
+- Koerper-/Seitenkoordinaten einmal fachlich ableiten. BimPlan, planBounds,
+  buildSolid, Projekt-Fangquellen, Eckgriffe/Direct Edit, windowCentre/Fensteranker
+  und IFC auf dieselbe Ableitung umstellen. Fenster/Oeffnungen folgen dem Koerper,
+  relative Laengsposition und IDs bleiben erhalten. Achsoverlay bleibt auf start/end.
+- Snapshot-/Ziel-ID-gepruefte Vorschau, Abbruch, Commit und ein Undo-Schritt;
+  ungueltige oder ueberlaufende Werte abweisen. Numerisches Feld in der bestehenden
+  Werkzeugeigenschaftenleiste. Keine individuelle Mutation in UI oder AI.
+- Neue Formatversion mit strikter Validierung und expliziter Migration alter
+  Projektdateien zu Versatz null. Bestehende Modelle unveraendert laden.
+- Tests: horizontale, vertikale und schraege Waende, beide Vorzeichen, null,
+  Fenster, Sichtbarkeit, ungueltige Werte/stale context, Undo/Redo, JSON und IFC.
+  Fuer Wand (0,0)–(3,0), Staerke 0.36, Hoehe 2.80 und Versatz +0.18 liegen die
+  Seiten bei y=0 und y=0.36; die Achse bleibt y=0. Zentriertes Fenster hat
+  Koerpermitte (1.5,0.18), unveraenderte Breite und relative Position 0.5.
+- Browser-Abnahme in 2D und 3D, Build/Tests, exportierte Platzierung pruefen.
+  Neuer Archicad-Import ist eine separate praktische Nutzerabnahme, nicht allein
+  durch Exporttests bewiesen. IFC-Repraesentation muss keinen Anschluss vorwegnehmen.
+
+Nicht enthalten: Ziehen des Versatzes, Achslagen-Presets, 3D-Achsoverlay,
+automatische Eck-/T-Verbindungen oder neue Sprachgrammatik. Der gemeinsame
+Aktionsvertrag muss fuer spaetere Text-/Voice-/AI-Adapter verwendbar bleiben.
+
+Dieser Entscheidungsauftrag aendert nur Dokumentation; Links/Quellpfade und
+`git diff --check` werden geprueft. Laufzeitcode unveraendert, zuletzt 402 Tests
+und Build erfolgreich; keine unveraenderten Pruefungen erneut ausfuehren.
+
 ## Bedienkorrektur: Referenzen beim Zoomen erhalten — 03.10.2026
 
 Aktive Hilfspunkte einschließlich konstruierter Schnittpunkte und ihre Richtungsführungen bleiben bei Kamera-/Zoomänderungen erhalten. Auch das Verlassen der Zeichenfläche zum Bedienen der Zoomtasten löscht sie nicht. Die Referenzen bleiben in Modellkoordinaten; Fangabstand und Ringdarstellung werden weiterhin aus dem aktuellen Bildschirmmaßstab berechnet. Eine laufende Hover-Verweildauer wird bei Navigation abgebrochen und beginnt beim nächsten Besuch neu. Escape, Ausschalten des Fangens und ein geänderter Modell-/Bearbeitungskontext verwerfen weiterhin die Referenzen. Keine Modellaktion oder Änderung an History, JSON oder IFC.
