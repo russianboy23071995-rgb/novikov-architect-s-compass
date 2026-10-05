@@ -1344,3 +1344,15 @@ Side grips are blue double arrows offset inward according to winding, oriented
 normal to the edge. Their size is screen-based with a short-edge bound. The moving
 target marker is now 5 CSS pixels instead of 0.055 model metres. The reported
 intermittent white/black circle has not been reproduced and remains unconfirmed.
+
+## Shared session grid preferences — 2026-10-05
+
+application/snapping/grid-settings.ts defines the shared enabled/spacing preference
+and validates positive finite metre input. CadWorkspace owns this transient UI
+preference only; it is not Project state, serialized data or model history.
+GridControls edits it once. Plan drawing/direct edit and existing horizontal-plane
+3D wall editing feed the same spacing/null value to the established resolver.
+SNAP remains the master switch. Disabling only grid fallback preserves feature
+snapping and inference; visible zoom-adaptive grid display is independent.
+Explicit numeric targets and existing axis/Shift precedence remain unchanged.
+No per-tool rounding, new model actions or alternative snapping engine is added.

@@ -22,6 +22,7 @@ export function useSolidInference(
   ortho: boolean,
   shift: boolean,
   visibility?: LayerVisibilityPolicy,
+  gridSpacing: number | null = null,
 ) {
   const sessionKey = useMemo(
     () => ({ policy, project, visibility }),
@@ -74,7 +75,7 @@ export function useSolidInference(
         activeReferences: active,
         guideDirections: advanceGuideDirections(inverse.value.point, active, hover.guideDirections),
         endpointRadiusPx: 10,
-        gridSpacing: null,
+        gridSpacing,
       },
       { ortho, shift, featureSnap: enabled },
     );

@@ -631,3 +631,54 @@ test("constructed reference drops after a source moves; matching undo snapshot r
   assert.ok(contains(undoProject(history).present));
   assert.equal(contains(redoProject(undoProject(history)).present), false);
 });
+
+import { parseGridSpacing, gridSpacing } from "../snapping/grid-settings.ts";
+test("grid spacing accepts metre decimals and rejects invalid input", () => {
+  assert.equal(parseGridSpacing("0,25"), 0.25);
+  assert.equal(parseGridSpacing(" .05 "), 0.05);
+  for (const text of ["", "0", "-1", "NaN", "Infinity", "1,2,3", "0x10", "1m"])
+    assert.throws(() => parseGridSpacing(text));
+  for (const spacing of [0, -1, NaN, Infinity])
+    assert.throws(() => gridSpacing({ enabled: true, spacing }));
+});
+test("shared grid settings affect drawing and movement without disabling feature snapping", () => {
+  const session = {
+    base,
+    target: { kind: "wall" as const, id: "w" },
+    action: "move" as const,
+    index: 1,
+    anchor: { x: 3, y: 0 },
+  };
+  const cursor = { x: 10.13, y: 8.37 };
+  for (const policy of [
+    drawingSnapPolicy({ x: 0, y: 0 }),
+    editInteraction(session, base, session.target, noop, noop).snapping,
+  ]) {
+    for (const spacing of [0.25, 0.5]) {
+      const context = {
+        references: [],
+        pixelsPerMetre: 100,
+        endpointRadiusPx: 10,
+        enabled: true,
+        gridSpacing: gridSpacing({ enabled: true, spacing }),
+      };
+      const options = { ortho: false, shift: false, featureSnap: true };
+      const snapped = resolveToolSnap(policy, cursor, context, options);
+      assert.deepEqual(snapped.point, {
+        x: Math.round(cursor.x / spacing) * spacing,
+        y: Math.round(cursor.y / spacing) * spacing,
+      });
+      assert.equal(snapped.candidate?.kind, "grid");
+      assert.deepEqual(
+        resolveToolSnap(policy, cursor, { ...context, enabled: false }, options).point,
+        cursor,
+      );
+      const free = { ...context, gridSpacing: gridSpacing({ enabled: false, spacing }) };
+      assert.deepEqual(resolveToolSnap(policy, cursor, free, options).point, cursor);
+      const endpoint = { entityId: "other", feature: "end", point: { x: 10.15, y: 8.4 } };
+      const exact = resolveToolSnap(policy, cursor, { ...free, references: [endpoint] }, options);
+      assert.equal(exact.candidate?.kind, "endpoint");
+      assert.deepEqual(exact.point, endpoint.point);
+    }
+  }
+});

@@ -1,3 +1,4 @@
+import { defaultGridSettings } from "@/application/snapping/grid-settings";
 import { HatchFillFields } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
@@ -57,6 +58,7 @@ export function CadWorkspace({
   const [layout, setLayout] = useState<ViewportLayout>("single");
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
+  const [gridSettings, setGridSettings] = useState(defaultGridSettings);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
   const [railCollapsed, setRailCollapsed] = useState(false);
@@ -751,6 +753,7 @@ export function CadWorkspace({
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                   draftPoints={pathDrawing ? pathPoints : []}
                   draftFill={tool === "hatch" ? hatchFill : undefined}
+                  gridSettings={gridSettings}
                   snap={snap}
                   ortho={ortho}
                   onSelect={selectElement}
@@ -868,6 +871,8 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
+            gridSettings={gridSettings}
+            onGridSettings={setGridSettings}
             grid={grid}
             snap={snap}
             ortho={ortho}

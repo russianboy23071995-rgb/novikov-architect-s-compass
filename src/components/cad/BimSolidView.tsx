@@ -1,3 +1,4 @@
+import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
 import { visibleSurfaces } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
 import type { DisplaySurfaces } from "@/rendering/viewport/layer-display";
@@ -123,6 +124,7 @@ export function BimSolidView({
   onSelect,
   projectionFrame,
   snap = false,
+  gridSettings = defaultGridSettings,
   editSession: requestedEditSession,
   numericTarget,
   snapping: requestedSnapping = null,
@@ -141,6 +143,7 @@ export function BimSolidView({
   snap?: boolean;
 } & Pick<
   BimPlanProps,
+  | "gridSettings"
   | "editSession"
   | "numericTarget"
   | "snapping"
@@ -238,6 +241,7 @@ export function BimSolidView({
     ortho,
     previewClient?.shift ?? false,
     visibility,
+    moving ? gridSpacing(gridSettings) : null,
   );
   useEffect(() => {
     const canvas = canvasRef.current!;
