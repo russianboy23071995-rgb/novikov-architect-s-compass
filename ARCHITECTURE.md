@@ -1245,3 +1245,22 @@ protection and eligibility include hatches. Rendering, picking, snapping and
 interactive tool adapters are pending, so no canvas capability is claimed here.
 IFC remains the existing building export; 2D hatches are stored in project JSON,
 not converted into BIM solids. Existing BIM scaling prohibition remains unchanged.
+
+## Implemented: initial 2D hatch canvas adapter — 2026-10-05
+
+The Hatch tool shares the existing multi-point drawing state, drawingInteraction,
+precision input and local source query. createDrawing delegates hatch creation to
+previewHatch; only the drawing adapter removes an explicit repeated closing point.
+Domain validation remains strict. Double-click/Enter finish the accumulated points;
+Escape discards the draft. Closure must remain possible after the final click resets
+the numeric preview to a zero-length segment; validity belongs to the creation action.
+
+Selection now uses application/selection/ElementTarget, separately from the narrower
+Direct Edit capability. Hatch selection exposes fill and layer properties, not
+unsupported movement grips/actions. Commands keep the actual selected hatch ID but
+reject unsupported wall/window commands; no target fallback or AI mutation path.
+Hatch vertices and all closed edges feed the same primitive index and layer-filtered
+query. Plan bounds, display lists and Navigator include hatches. SVG fill is drawn
+behind walls/lines, with a thin selection border; 3D geometry/IFC remain unchanged.
+The current UI offers solid fill only. Patterns, contour pens, holes and hatch
+Direct Edit remain pending. Automated checks do not constitute browser acceptance.

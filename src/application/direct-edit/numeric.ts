@@ -1,5 +1,6 @@
+import type { ElementTarget } from "../selection/target.ts";
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
-import type { EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import { precisionTarget } from "../input/precision.ts";
@@ -33,7 +34,7 @@ export function numericMoveAxis(session: EditSession) {
 export function previewNumericMove(
   session: EditSession,
   project: Project,
-  selection: EditTarget | null,
+  selection: ElementTarget | null,
   text: string,
 ) {
   const axis = numericMoveAxis(session);
@@ -52,7 +53,7 @@ export function previewNumericMove(
 export function previewMovementInput(
   session: EditSession,
   project: Project,
-  selection: EditTarget | null,
+  selection: ElementTarget | null,
   angleText: string,
   lengthText: string,
   aim: Point | null,

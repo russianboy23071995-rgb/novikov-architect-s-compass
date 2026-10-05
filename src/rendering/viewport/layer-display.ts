@@ -16,6 +16,7 @@ export function visiblePlanGeometry(project: Project, allows: (id: string) => bo
   const wallIds = new Set(walls.map((w) => w.id));
   return {
     walls,
+    hatches: project.storey.hatches.filter((h) => allows(h.id)),
     windows: project.storey.windows.filter((w) => allows(w.id)),
     lines: (project.storey.lines ?? []).filter((l) => allows(l.id)),
     openings: project.storey.windows.filter((w) => wallIds.has(w.wallId)),

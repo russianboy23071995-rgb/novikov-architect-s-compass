@@ -1,3 +1,4 @@
+import type { Hatch } from "@/domain/elements/hatch/model";
 import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
@@ -40,6 +41,7 @@ export type BimPlanProps = {
   hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
+  draftFill?: Hatch["fill"] | undefined;
   snap: boolean;
   ortho: boolean;
   onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
@@ -67,6 +69,7 @@ export function BimPlan({
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
+  draftFill,
   snap,
   ortho,
   onSelect,
@@ -330,7 +333,7 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
   };
-  const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
+  const selectProps = (kind: "wall" | "window" | "line" | "hatch", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
@@ -487,7 +490,7 @@ export function BimPlan({
       }}
       onDoubleClick={(event) => {
         if (selecting || pan || navigationClick.current) return;
-        if (drawing && onFinish && drawingTarget !== null) {
+        if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
         }
@@ -499,7 +502,7 @@ export function BimPlan({
           setHover(null);
         }
         if (pan) return;
-        if (drawing && onFinish && drawingTarget !== null && event.key === "Enter") {
+        if (drawing && onFinish && event.key === "Enter") {
           event.preventDefault();
           onFinish();
         }
@@ -527,6 +530,20 @@ export function BimPlan({
           />
         </g>
       )}
+      {plan.hatches.map((hatch) => (
+        <polygon
+          key={hatch.id}
+          {...selectProps("hatch", hatch.id)}
+          points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+          fill={hatch.fill.color}
+          fillOpacity={hatch.fill.opacity}
+          stroke={selection?.id === hatch.id ? "#cbd5e1" : "transparent"}
+          strokeWidth={2}
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="all"
+          className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+        />
+      ))}
       {plan.walls.map((wall) => {
         const length = wallLength(wall);
         const angle =
@@ -692,6 +709,20 @@ export function BimPlan({
             </text>
           )}
         </g>
+      )}
+      {drawing && draftFill && draftPoints.length >= 2 && (
+        <polygon
+          points={[...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
+            .map((p) => `${p.x},${-p.y}`)
+            .join(" ")}
+          fill={draftFill.color}
+          fillOpacity={draftFill.opacity}
+          stroke="var(--primary)"
+          strokeWidth={1}
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="none"
+        />
       )}
       {drawing && draftPoints.length > 0 && (
         <polyline

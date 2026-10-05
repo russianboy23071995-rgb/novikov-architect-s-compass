@@ -1,3 +1,4 @@
+import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,11 @@ type Props = {
 
 export function BimInspector({ project, selection, onChange }: Props) {
   const [error, setError] = useState("");
+  const hatch =
+    selection?.kind === "hatch"
+      ? project.storey.hatches.find((h) => h.id === selection.id)
+      : undefined;
+  if (hatch) return <HatchInspector project={project} hatch={hatch} onChange={onChange} />;
   const line =
     selection?.kind === "line"
       ? project.storey.lines?.find((item) => item.id === selection.id)
@@ -31,7 +37,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster oder Linie auswählen, um die Eigenschaften hier zu bearbeiten.
+        Wand, Fenster, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
       </p>
     );
   const fields = wall

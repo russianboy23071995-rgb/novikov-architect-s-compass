@@ -1,3 +1,4 @@
+import type { ElementTarget } from "../selection/target.ts";
 import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
 import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
@@ -29,15 +30,15 @@ export function supportsWallWorkplaneEdit(
 
 type ModelEditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
-  | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
+  | { type: "confirm"; session: EditSession; selection: ElementTarget | null; point: Point }
   | { type: "cancel" }
   | { type: "project"; project: Project }
   | { type: "manage-layer"; base: Project; request: ManageLayerRequest }
   | {
       type: "assign-layer";
       base: Project;
-      target: EditTarget;
-      selection: EditTarget | null;
+      target: ElementTarget;
+      selection: ElementTarget | null;
       layerId: string;
     }
   | { type: "undo" | "redo" };
@@ -50,7 +51,7 @@ export function createEditingState(project: Project): EditingState {
 export function previewEdit(
   session: EditSession,
   project: Project,
-  selection: EditTarget | null,
+  selection: ElementTarget | null,
   point: Point,
 ): Project {
   if (selection?.id !== session.target.id || selection?.kind !== session.target.kind)
