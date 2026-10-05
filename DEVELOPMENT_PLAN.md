@@ -1,5 +1,37 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Eckanschluesse mit Wandversatz geplant — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #111 nach Nutzerfreigabe normal gemergt (39b5b81). Dokumentationszweig:
+docs/wall-corner-offset-review, Basis fix/reference-selection-lifecycle.
+
+[Wand-Eckanschlussentwurf](docs/WALL_CORNER_PLAN.md) mit Schema 5, gemeinsamer
+Koerperableitung und korrigierten Einzelwand-Eckgriffen abgeglichen. Neun Beispiele
+fuer Versatz 0 und +/-0,18 bei Staerke 0,36 beschreiben konkrete Gehrungskoordinaten
+und Sollmengen. Rechenbeispiele mit bestehender Polygonvalidierung, Flaechenformeln
+und getrennten Innenflaechen geprueft; Quellpfade und git diff --check geprueft.
+Keine Laufzeitaenderung; bestehende 409 Tests/Build-Nachweise aus PR #111 unveraendert.
+
+Verbindliche Nutzerantworten: bewusst „Ecke verbinden“; Einzelwandbewegung loest
+Verbindung automatisch. Lösen und Bewegen als ein validierter Undo-Schritt planen.
+Gemeinsame Eckbearbeitung, Endkappen beim Loesen und Oeffnungs-Endzonen bleiben
+getrennte offene Fragen; keine automatische Verbindung allein durch Fang/Naehe.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Reine fachliche Konturableitung fuer
+zwei rechtwinklige Waende gleicher Staerke/Hoehe mit gemeinsamem Achsendpunkt
+und |Offset| <= halber Staerke implementieren. Vorhandene Geometrie-/Validierungs-
+funktionen verwenden. Keine UI-, Projektformat-, Renderer- oder IFC-Anbindung.
+Tests mit den neun Tabellenfaellen, Rotation/Translation, Reihenfolge, umgekehrten
+Achsen mit negierten Offsets und ungueltigen/zu kurzen Geometrien. Endpunktpaare
+explizit uebergeben, keine automatische Nachbarsuche. Ergebnis nur abgeleitete
+Konturen je stabiler Wand-ID; Eingaben unveraendert. Erst ein spaeterer gemeinsamer
+Integrationsschritt darf diese Konturen produktiv anzeigen/exportieren.
+
+Praktische Abnahme dieses Planungsschritts: Beispiele und Bedienentscheidungen
+im verlinkten Dokument pruefen; in der Anwendung existiert noch kein Eckanschluss.
+
+
 ## Aktueller Stand: ausgewaehlte Wandachse in 3D — 05.10.2026
 
 Dieser Abschnitt ersetzt alle darunterstehenden Folgeauftraege.
@@ -25,7 +57,7 @@ Abnahme: Wand in 3D auswaehlen, Koerperversatz 0,6 eingeben und uebernehmen.
 Gestrichelte Achse bleibt an der Zeichenposition. Zoom/Drehen und Ebene aus/ein
 pruefen. Bei zentrierter Wand bleibt die Bezugsachse trotz Koerper sichtbar.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Den begrenzten Wand-Eckanschlussentwurf
+**Historischer, inzwischen abgeschlossener Folgeauftrag:** Den begrenzten Wand-Eckanschlussentwurf
 in docs/WALL_CORNER_PLAN.md gegen den jetzt implementierten Koerperversatz pruefen.
 Fuer zwei rechtwinklige gerade Waende gleicher Staerke konkrete Anschlussbeispiele
 mit Versatz 0 und +/- halber Staerke beschreiben; offene Nutzerentscheidungen zu

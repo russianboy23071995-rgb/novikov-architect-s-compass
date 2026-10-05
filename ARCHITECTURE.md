@@ -1441,3 +1441,15 @@ source. The dashed SVG is a deliberate through-body construction overlay, with
 CSS-pixel stroke and pointer-events:none; it does not participate in hit testing.
 Committed visibility eligibility gates the preview axis just like surfaces.
 This completes the basic N45 selected-axis display in plan and 3D.
+
+## Wall join intent: binding user decisions — 2026-10-05
+
+The user chose explicit creation through "Ecke verbinden"; shared endpoints or
+snap proximity alone do not create joins. Moving an individual connected wall
+automatically detaches its joins, without requiring a preceding manual detach.
+Application preview/commit must treat detachment and movement atomically, with
+one undo step and no mutation on cancellation or invalid input. No join is
+implemented yet. Shared-corner editing, endpoint/property edits and cap geometry
+after detachment remain separate unresolved behaviours. See docs/WALL_CORNER_PLAN.md
+for offset examples and the bounded pure contour-derivation proposal. Persisted
+join relations are a technical proposal, not an existing schema capability.
