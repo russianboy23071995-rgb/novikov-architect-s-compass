@@ -1,5 +1,36 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Wandachse als Bediengrundlage — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege. Der
+Schraffur-Eigenschaftenschritt bleibt vorgemerkt. Neue Nutzerentscheidung:
+Achsenden zusammenfuehren soll automatisch Wandkoerper verbinden; anschliessend
+Waende wie eine Polylinie durchzeichnen. "Bewusst Ecke verbinden" ist ersetzt.
+
+Umgesetzt: neue gezeichnete Waende mit rechter Kantenachse (Koerper links in
+Zeichenrichtung), tuerkise Auswahlachse in 2D/3D, auswaehlbare Achse und eigene
+Achsgriffe im Grundriss. Gemeinsame Bewegung/Rasterengine/Hilfseingabe bleiben.
+Achslage rechte Kante/Mitte/linke Kante in Eigenschaften; neue Versatzwerte
+maximal halbe Staerke. Staerkenwechsel erhaelt relative Achslage. Bestehende
+Waende werden nicht verschoben; alte V5-Dateien mit Aussenachsen bleiben
+unveraendert ladbar. Die Vorschau zeigt Wall-Nummern wie der Navigator.
+
+451 Tests bestanden; TypeScript/Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browser: Kantenlage, Achsgriff -> Punkt frei bewegen -> 1 m bei 0 Grad
+-> Wand von 3 auf 4 m -> Undo; Versatz 0,6 m abgewiesen; neue Wand mit
+Kantenachse gezeichnet. Feste 130px-Eigenschaftenleiste bleibt erhalten.
+Noch keine automatische Verbindung und kein Kettenzeichnen. PR119 wird mit
+dieser Korrektur aktualisiert, nicht ungefragt zusammengefuehrt.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Automatischen rechtwinkligen Anschluss
+zweier gleich hoher/starker Waende beim exakten Zusammenfuehren ihrer Achsenden
+in gemeinsame Erstell-/Bearbeitungsaktionen integrieren. Identische Domain-
+Konturen fuer 2D/3D/IFC, Bindung/Speicherung und Undo/Redo pruefen. Ungueltige
+Oeffnungskollisionen im bestehenden Vorschaupfad melden. Keine zusaetzliche
+Menuebestaetigung. Achsendkontakt von T-Knoten, Koerperueberlappung und mehreren
+Kandidaten unterscheiden. Offene Oeffnungsberuehrungs-/Loeseregeln vor den
+betroffenen Commit-Regeln klaeren, nicht erfinden. Kettenzeichnen folgt danach.
+
 ## Aktueller Stand: gemeinsame Wandanschlussvorschau — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.

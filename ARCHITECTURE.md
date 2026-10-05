@@ -1,5 +1,27 @@
 # NOVIKOV CAD Architecture Contract
 
+## Revised wall-axis interaction decision — 2026-10-05
+
+The new user direction supersedes explicit-menu-only connections: snapping wall
+axes together is to connect their bodies automatically. Continuous wall chains
+are the subsequent drawing goal. The pair-preview dialog is a diagnostic aid,
+not the required future modelling workflow. Automatic joins and chain drawing
+are not implemented by this axis correction.
+
+Application createDrawing places new wall bodies left of the directed axis
+(bodyOffset = thickness/2): the axis is the right edge. Existing placements stay
+unchanged. Low-level addWall retains its centred compatibility default. New
+explicit placements are limited to half-width by Domain axis-position; thickness
+changes retain relative axis placement through shared updateWall. Historical V5
+files with outside axes still load without relocating bodies/windows; new axis
+placements cannot reproduce them. An explicit legacy conversion is future work.
+
+Selected axes share a turquoise overlay in plan/solid. Plan axis clicks project
+to the exact axis; endpoint handles use existing EditSessions and universal
+construction origins. Coincident corners cannot hide axis handles. No duplicate
+snapping/movement logic. Changing body offset keeps the axis fixed and moves the
+body, consistent with the previous user decision.
+
 ## Explicit temporary corner preview — 2026-10-05
 
 Application walls/corner-preview owns validation and the snapshot-bound derived

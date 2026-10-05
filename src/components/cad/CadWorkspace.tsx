@@ -667,27 +667,27 @@ export function CadWorkspace({
                 Wandanschluss vorschauen
               </Button>
             )}
+            {tool === "select" && (
+              <LayerProperties
+                key={`layer:${JSON.stringify([selection, project])}`}
+                project={project}
+                selection={selection}
+                disabled={referenceSelection.selecting}
+                onAssign={(base, target, layerId) => {
+                  if (referenceSelection.selecting) return;
+                  dispatchEditing({
+                    type: "assign-layer",
+                    base,
+                    target,
+                    selection: currentSelection.current,
+                    layerId,
+                  });
+                  setDemandOpen(false);
+                  setModelError("");
+                }}
+              />
+            )}
           </div>
-          {tool === "select" && (
-            <LayerProperties
-              key={`layer:${JSON.stringify([selection, project])}`}
-              project={project}
-              selection={selection}
-              disabled={referenceSelection.selecting}
-              onAssign={(base, target, layerId) => {
-                if (referenceSelection.selecting) return;
-                dispatchEditing({
-                  type: "assign-layer",
-                  base,
-                  target,
-                  selection: currentSelection.current,
-                  layerId,
-                });
-                setDemandOpen(false);
-                setModelError("");
-              }}
-            />
-          )}
           {tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
               <HatchFillFields value={hatchFill} onChange={setHatchFill} />

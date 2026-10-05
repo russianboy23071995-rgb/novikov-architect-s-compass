@@ -179,3 +179,15 @@ Persistente Verbindung und offene Endkappen-/Beruehrungsregeln bleiben separat.
 Einordnung: kleine Folgeetappen im Bereich 2D-Darstellung und Konturbearbeitung
 nach der laufenden Wandanschlussvorschau; keine Umsetzung dieser Wuensche in
 PR zur Anschlussvorschau, keine Verdraengung aelterer Anforderungen.
+
+## Korrektur Wandachsen und Anschluesse — 05.10.2026
+
+Nutzer ersetzt die bisherige Menuepflicht: Achsen zusammenfuehren soll automatisch
+Wandkoerper verbinden. Spaeter fortlaufende Wandkette wie eine Polylinie zeichnen.
+Neue Wandachsen standardmaessig auf einer Kante, wahlweise mittig oder innerhalb
+der Wandbreite; keine neuen Aussenachsen. Ausgewaehlte Achse helltuerkis sichtbar
+und als Bewegungsreferenz nutzbar. Bestehende Koerperversatzentscheidung bleibt:
+Koerper bewegt sich relativ zur festen Zeichenachse. Vorschau-Namen muessen den
+Navigatornamen entsprechen, keine unverstaendlichen ID-Listen.
+Achsenbedienung ist umgesetzt; automatische Anschluesse/Ketten bleiben naechste
+Etappen. Historische Aussenachsen werden nicht stillschweigend umpositioniert.

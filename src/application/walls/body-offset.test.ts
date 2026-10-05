@@ -19,13 +19,62 @@ import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
 import { createLayerDisplay } from "../../rendering/viewport/layer-display.ts";
+import { wallPlanHandles, wallAxisAnchor } from "../../rendering/viewport/wall-axis.ts";
+import { createDrawing, defaultDrawingWall } from "../drawing/actions.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 const request = (offset: number) => ({ projectId: "project-1", wallId: "wall-1", offset });
 const close = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-9, `${a} != ${b}`);
 
+test("new drawing uses a boundary axis; axis grips move exact endpoints through shared edits", () => {
+  const original = createExampleProject();
+  const base = createDrawing(original, original, "edge-wall", {
+    kind: "wall",
+    start: { x: 5, y: 1 },
+    end: { x: 8, y: 1 },
+    ...defaultDrawingWall,
+  });
+  const wall = base.storey.walls.at(-1)!;
+  assert.equal(wall.bodyOffset, wall.thickness / 2);
+  assert.deepEqual(wallBody(wall).corner(0, -1), wall.start);
+  const handles = wallPlanHandles(wall);
+  assert.equal(handles.length, 4);
+  assert.equal(handles.filter((h) => h.axis).length, 2);
+  assert.deepEqual(wallAxisAnchor(wall, { x: 6, y: 1.01 }), { x: 6, y: 1 });
+  const moved = editAtPointer(
+    { base, target: { kind: "wall", id: wall.id }, action: "point", index: 1, anchor: wall.end },
+    base,
+    { x: 9, y: 3 },
+  );
+  assert.deepEqual(moved.storey.walls.at(-1)!.end, { x: 9, y: 3 });
+  assert.deepEqual(moved.storey.walls.at(-1)!.start, wall.start);
+  assert.equal(moved.storey.walls.at(-1)!.bodyOffset, 0.18);
+  assert.deepEqual(deserializeProject(serializeProject(moved)), moved);
+});
+
+test("axis placement cannot leave wall; changing thickness retains edge or relative interior placement", () => {
+  const base = createExampleProject();
+  for (const offset of [-0.180001, 0.180001, 0.6, -0.6]) {
+    assert.throws(() => previewWallOffset(base, base, target, request(offset)), /Wandachse/);
+    assert.throws(() => updateWall(base, target.id, { bodyOffset: offset }), /Wandachse/);
+  }
+  for (const offset of [-0.18, -0.09, 0, 0.09, 0.18]) {
+    const positioned = updateWall(base, target.id, { bodyOffset: offset });
+    const thinner = updateWall(positioned, target.id, { thickness: 0.12 });
+    const wall = thinner.storey.walls[0]!;
+    close(wall.bodyOffset, offset / 3);
+    assert.deepEqual(wall.start, positioned.storey.walls[0]!.start);
+    assert.deepEqual(wall.end, positioned.storey.walls[0]!.end);
+  }
+  // Previously valid files must not move physical geometry silently on load.
+  const legacy = structuredClone(base);
+  legacy.storey.walls[0]!.bodyOffset = 0.6;
+  assert.deepEqual(deserializeProject(serializeProject(legacy)), legacy);
+  assert.throws(() => previewWallOffset(legacy, legacy, target, request(0.6)), /Wandachse/);
+});
+
 test("wall offset keeps drawing axis and hosted window parameters, moves body and corner sources in every orientation", () => {
   for (const angle of [0, Math.PI / 2, 0.73, Math.PI])
-    for (const offset of [-0.4, 0, 0.18, 0.6]) {
+    for (const offset of [-0.18, 0, 0.09, 0.18]) {
       const base = updateWall(createExampleProject(), "wall-1", {
         end: { x: 3 * Math.cos(angle), y: 3 * Math.sin(angle) },
       });
@@ -100,7 +149,7 @@ test("offset action is atomic, rejects stale context and non-finite/overflow val
 });
 
 test("offset corners remain exact direct-edit targets for both endpoints and both sides", () => {
-  for (const offset of [-0.4, 0.18, 0.6])
+  for (const offset of [-0.18, 0, 0.18])
     for (const index of [0, 1])
       for (const side of [-1, 1]) {
         const initial = createExampleProject();

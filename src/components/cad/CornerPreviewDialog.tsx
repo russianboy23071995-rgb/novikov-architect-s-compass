@@ -43,7 +43,9 @@ export function CornerPreviewDialog({
           Modelländerung; Escape schließt.
         </DialogDescription>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span>Erste Wand: {firstId}</span>
+          <span>
+            Erste Wand: Wall {project.storey.walls.findIndex((w) => w.id === firstId) + 1}
+          </span>
           <label>
             Erstes Achsende{" "}
             <select
@@ -73,7 +75,7 @@ export function CornerPreviewDialog({
                 .filter((w) => w.id !== firstId && isLayerVisible(project, visibility, w.id))
                 .map((w) => (
                   <option key={w.id} value={w.id}>
-                    {w.id}
+                    Wall {project.storey.walls.findIndex((wall) => wall.id === w.id) + 1}
                   </option>
                 ))}
             </select>

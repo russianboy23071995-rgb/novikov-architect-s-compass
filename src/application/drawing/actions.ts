@@ -58,6 +58,7 @@ export function createDrawing(
         start: request.start,
         end: request.end,
         thickness: request.thickness,
+        bodyOffset: request.thickness / 2,
         height: request.height,
       })
     : addLine(current, {

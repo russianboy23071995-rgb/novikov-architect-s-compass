@@ -1,4 +1,4 @@
-import { selectedWallAxis } from "@/rendering/viewport/wall-axis";
+import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { faceTriangles } from "@/geometry/solids/face-triangles";
 import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
 import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
@@ -579,9 +579,8 @@ export function BimSolidView({
             y1={axis.start.y}
             x2={axis.end.x}
             y2={axis.end.y}
-            stroke="#64748b"
-            strokeWidth={1.5}
-            strokeDasharray="7 4"
+            stroke={WALL_AXIS_COLOR}
+            strokeWidth={2.5}
           />
         </svg>
       )}
