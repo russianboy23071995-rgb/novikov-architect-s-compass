@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Implemented layer eligibility policy — 2026-10-05
+
+application/layers/visibility.ts supplies a pure snapshot-bound policy for current
+walls, windows and lines. Its frozen context has an explicit bim-project or
+drawing-document scope and independent hidden layer IDs. Drawing filters never
+intersect a BIM working filter. A hidden host makes its window ineligible.
+The policy validates once, builds ID maps once and returns a reason for each
+decision; mismatched Project or context identity and unknown targets fail closed.
+Callers must use immutable Project snapshots and rebuild on model/filter changes.
+The document ID is a binding token, not a claim that schema 2 contains documents:
+future binding adapters must validate document existence. No UI, persisted filter,
+export filtering or per-tool implementation is introduced in this slice.
+
 ## Layer visibility scopes — user decision 2026-10-05
 
 The BIM project and its derived working plans, sections, elevations and 3D views
