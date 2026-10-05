@@ -1,15 +1,9 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { Project } from "@/lib/bim/model";
+import { layerDeletionBlock } from "@/application/layers/actions";
 import type { ManageLayerRequest } from "@/application/layers/actions";
+import { clampMenuPosition } from "./demand-menu";
 
 type Props = {
   project: Project;
@@ -18,85 +12,220 @@ type Props = {
   error: string;
   onManage: (base: Project, request: ManageLayerRequest) => void;
 };
-
-function LayerForms({ project, onManage }: Pick<Props, "project" | "onManage">) {
-  const [selectedId, setSelectedId] = useState(project.layers[0]!.id);
-  const selected = project.layers.find((layer) => layer.id === selectedId)!;
-  const nameCounts = new Map<string, number>();
-  for (const layer of project.layers)
-    nameCounts.set(layer.name, (nameCounts.get(layer.name) ?? 0) + 1);
+function LayerRow({
+  project,
+  id,
+  selected,
+  autoFocus,
+  onSelect,
+  onManage,
+}: {
+  project: Project;
+  id: string;
+  selected: boolean;
+  autoFocus: boolean;
+  onSelect: () => void;
+  onManage: Props["onManage"];
+}) {
+  const layer = project.layers.find((l) => l.id === id)!;
+  const base = useRef(project);
+  const cancelled = useRef(false);
   return (
-    <div className="space-y-5">
-      <form
-        className="flex items-end gap-2"
-        onSubmit={(event) => {
+    <input
+      aria-label={"Ebenenname " + layer.name}
+      defaultValue={layer.name}
+      autoFocus={autoFocus}
+      className={
+        "w-full rounded border px-3 py-2 text-sm " +
+        (selected
+          ? "border-primary bg-accent"
+          : "border-transparent bg-transparent hover:bg-accent/50")
+      }
+      onFocus={(event) => {
+        base.current = project;
+        cancelled.current = false;
+        onSelect();
+        if (autoFocus) event.currentTarget.select();
+      }}
+      onBlur={(event) => {
+        if (!cancelled.current && event.currentTarget.value !== layer.name)
+          onManage(base.current, { kind: "rename", id, name: event.currentTarget.value });
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
           event.preventDefault();
-          const name = String(new FormData(event.currentTarget).get("name") ?? "");
-          onManage(project, { kind: "create", id: `layer-${crypto.randomUUID()}`, name });
-        }}
-      >
-        <label className="min-w-0 flex-1 text-xs">
-          Neue Ebene
-          <Input name="name" aria-label="Name der neuen Ebene" placeholder="z. B. Bestand" />
-        </label>
-        <Button type="submit">Erstellen</Button>
-      </form>
-      <label className="block text-xs">
-        Vorhandene Ebene
-        <select
-          aria-label="Ebene zum Umbenennen"
-          className="mt-1 w-full rounded border border-border bg-background p-2"
-          value={selectedId}
-          onChange={(event) => setSelectedId(event.target.value)}
-        >
-          {project.layers.map((layer) => (
-            <option value={layer.id} key={layer.id}>
-              {layer.name}
-              {nameCounts.get(layer.name)! > 1 ? ` · ${layer.id}` : ""}
-            </option>
-          ))}
-        </select>
-      </label>
-      <form
-        key={selectedId}
-        className="flex items-end gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const name = String(new FormData(event.currentTarget).get("name") ?? "");
-          onManage(project, { kind: "rename", id: selectedId, name });
-        }}
-      >
-        <label className="min-w-0 flex-1 text-xs">
-          Ebenenname
-          <Input name="name" aria-label="Neuer Name der Ebene" defaultValue={selected.name} />
-        </label>
-        <Button type="submit">Umbenennen</Button>
-      </form>
-    </div>
+          event.currentTarget.blur();
+        }
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          cancelled.current = true;
+          event.currentTarget.value = layer.name;
+          event.currentTarget.blur();
+        }
+      }}
+    />
   );
 }
-
 export function LayerManager({ project, open, onOpenChange, error, onManage }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
+  const [position, setPosition] = useState({ x: 120, y: 140 });
+  const [bounds, setBounds] = useState({
+    width: 1024,
+    height: 768,
+    menuWidth: 720,
+    menuHeight: 560,
+  });
+  useEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const r = panel.current?.getBoundingClientRect();
+      setBounds({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        menuWidth: r?.width ?? 720,
+        menuHeight: r?.height ?? 560,
+      });
+    };
+    const observer = new ResizeObserver(measure);
+    if (panel.current) observer.observe(panel.current);
+    window.addEventListener("resize", measure);
+    measure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [open]);
+  if (!open) return null;
+  const visible = clampMenuPosition(position, bounds);
+  const reason =
+    selectedId && project.layers.some((layer) => layer.id === selectedId)
+      ? layerDeletionBlock(project, selectedId)
+      : "Zum Löschen eine Ebene auswählen.";
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-panel-strong max-h-[85vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>Ebenen verwalten</DialogTitle>
-          <DialogDescription>
-            Organisationsebenen erstellen und umbenennen. Änderungen werden sofort übernommen und
-            lassen sich nach dem Schließen mit Undo zurücknehmen.
-          </DialogDescription>
-        </DialogHeader>
-        <LayerForms key={JSON.stringify(project)} project={project} onManage={onManage} />
+    <div
+      ref={panel}
+      role="dialog"
+      aria-label="Ebenen"
+      aria-modal="false"
+      className="glass-panel-strong fixed z-50 flex h-[560px] max-h-[calc(100dvh-16px)] w-[720px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-xl border shadow-2xl"
+      style={{ left: visible.x, top: visible.y }}
+    >
+      <header className="flex shrink-0 items-center border-b p-2">
+        <button
+          type="button"
+          aria-label="Ebenenfenster verschieben"
+          title="Ziehen oder mit Pfeiltasten verschieben"
+          className="flex-1 cursor-move touch-none rounded px-3 py-2 text-left font-semibold"
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            event.currentTarget.setPointerCapture(event.pointerId);
+            drag.current = { x: event.clientX, y: event.clientY, left: visible.x, top: visible.y };
+          }}
+          onPointerMove={(event) => {
+            if (drag.current)
+              setPosition(
+                clampMenuPosition(
+                  {
+                    x: drag.current.left + event.clientX - drag.current.x,
+                    y: drag.current.top + event.clientY - drag.current.y,
+                  },
+                  bounds,
+                ),
+              );
+          }}
+          onPointerUp={() => {
+            drag.current = null;
+          }}
+          onPointerCancel={() => {
+            drag.current = null;
+          }}
+          onLostPointerCapture={() => {
+            drag.current = null;
+          }}
+          onKeyDown={(event) => {
+            const offset = {
+              ArrowLeft: [-10, 0],
+              ArrowRight: [10, 0],
+              ArrowUp: [0, -10],
+              ArrowDown: [0, 10],
+            }[event.key];
+            if (offset) {
+              event.preventDefault();
+              event.stopPropagation();
+              setPosition(
+                clampMenuPosition({ x: visible.x + offset[0]!, y: visible.y + offset[1]! }, bounds),
+              );
+            }
+          }}
+        >
+          ⠿ Ebenen
+        </button>
+        <button
+          type="button"
+          aria-label="Ebenen schließen"
+          className="rounded px-3 py-2 hover:bg-accent"
+          onClick={() => onOpenChange(false)}
+        >
+          ✕
+        </button>
+      </header>
+      <p className="shrink-0 px-4 py-3 text-xs text-muted-foreground">
+        Namen anklicken zum Bearbeiten · Enter oder Feld verlassen übernimmt · Escape verwirft die
+        Eingabe
+      </p>
+      <div aria-label="Vorhandene Ebenen" className="min-h-0 flex-1 overflow-y-auto px-4 py-1">
+        {project.layers.map((layer) => (
+          <LayerRow
+            key={layer.id + ":" + layer.name}
+            project={project}
+            id={layer.id}
+            selected={selectedId === layer.id}
+            autoFocus={focusId === layer.id}
+            onSelect={() => setSelectedId(layer.id)}
+            onManage={onManage}
+          />
+        ))}
+      </div>
+      <footer className="shrink-0 space-y-2 border-t p-4">
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         )}
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          Schließen
-        </Button>
-      </DialogContent>
-    </Dialog>
+        <p className="min-h-4 text-xs text-muted-foreground">
+          {reason ?? "Diese leere, eigene Ebene kann gelöscht werden."}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              let name = "Neue Ebene",
+                i = 2;
+              const names = new Set(
+                project.layers.map((l) => l.name.normalize("NFC").toLowerCase()),
+              );
+              while (names.has(name.toLowerCase())) name = "Neue Ebene " + i++;
+              const id = "layer-" + crypto.randomUUID();
+              setSelectedId(id);
+              setFocusId(id);
+              onManage(project, { kind: "create", id, name });
+            }}
+          >
+            Ebene Hinzufügen
+          </Button>
+          <Button
+            variant="outline"
+            disabled={Boolean(reason)}
+            onClick={() => {
+              if (selectedId) onManage(project, { kind: "delete", id: selectedId });
+            }}
+          >
+            Ebene löschen
+          </Button>
+        </div>
+      </footer>
+    </div>
   );
 }

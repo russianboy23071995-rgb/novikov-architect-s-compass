@@ -1,3 +1,4 @@
+import { createProject } from "../../lib/bim/model.ts";
 import { commitLayerManagement } from "./actions.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -157,4 +158,77 @@ test("existing duplicate display names remain loadable and can be disambiguated 
   });
   assert.equal(next.present.layers[0]!.name, "Bestand");
   assert.equal(next.present.layers[1]!.name, "Bestand innen");
+});
+
+test("only empty custom layers can be deleted; undo and file roundtrip preserve protection", () => {
+  const h = fixture(),
+    base = h.present;
+  const created = commitLayerManagement(h, base, {
+    kind: "create",
+    id: "custom-empty",
+    name: "Leer",
+  });
+  const removed = commitLayerManagement(created, created.present, {
+    kind: "delete",
+    id: "custom-empty",
+  });
+  assert.equal(
+    removed.present.layers.some((l) => l.id === "custom-empty"),
+    false,
+  );
+  assert.deepEqual(undoProject(removed).present, created.present);
+  assert.deepEqual(redoProject(undoProject(removed)).present, removed.present);
+  assert.deepEqual(readProjectFile(serializeProject(removed.present)), removed.present);
+  for (const layer of base.layers)
+    assert.throws(
+      () => commitLayerManagement(h, base, { kind: "delete", id: layer.id }),
+      /Standardebenen/,
+    );
+  const renamed = commitLayerManagement(h, base, {
+    kind: "rename",
+    id: "layer:roof",
+    name: "Anderer Dachname",
+  });
+  const loaded = createHistory(readProjectFile(serializeProject(renamed.present)));
+  assert.throws(
+    () => commitLayerManagement(loaded, loaded.present, { kind: "delete", id: "layer:roof" }),
+    /Standardebenen/,
+  );
+  for (const id of ["wall-1", "window-1", "line-1"]) {
+    const assigned = commitLayerAssignment(created, created.present, {
+      projectId: base.id,
+      elementIds: [id],
+      layerId: "custom-empty",
+    });
+    assert.throws(
+      () =>
+        commitLayerManagement(assigned, assigned.present, { kind: "delete", id: "custom-empty" }),
+      /enthält Elemente/,
+    );
+    assert.equal(
+      assigned.present.layers.some((l) => l.id === "custom-empty"),
+      true,
+    );
+  }
+  assert.throws(
+    () => commitLayerManagement(created, base, { kind: "delete", id: "custom-empty" }),
+    /geändert/,
+  );
+  assert.throws(() => commitLayerManagement(h, base, { kind: "delete", id: "missing" }));
+});
+
+test("migration-suffixed standard identities remain protected and reserved", () => {
+  const p = createProject("layer:roof", "storey");
+  const h = createHistory(p);
+  const roof = p.layers.find((l) => l.name === "Dach")!;
+  assert.equal(roof.id, "layer:roof:1");
+  assert.throws(
+    () => commitLayerManagement(h, h.present, { kind: "delete", id: roof.id }),
+    /Standardebenen/,
+  );
+  assert.throws(
+    () =>
+      commitLayerManagement(h, h.present, { kind: "create", id: "layer:roof:9", name: "Eigen" }),
+    /reserviert/,
+  );
 });
