@@ -1,7 +1,11 @@
 import type { Point2 } from "../primitives/point.ts";
 import { intersectSegments } from "../intersections/segments.ts";
 import { projectDirection } from "../projections/direction.ts";
-import { coordinatesCompatible, pointsCompatible } from "../tolerances/model.ts";
+import {
+  coordinatesCompatible,
+  pointsCompatible,
+  MAX_MODEL_TOLERANCE_METRES,
+} from "../tolerances/model.ts";
 
 export type PolygonValidation =
   | { valid: true; signedArea: number; winding: "clockwise" | "counterclockwise" }
@@ -39,6 +43,51 @@ function onSegment(point: Point2, a: Point2, b: Point2): boolean {
  * at action boundaries, not pointer-time snapping. Unrepresentable arithmetic fails closed.
  */
 export function validateSimplePolygon(vertices: readonly Point2[]): PolygonValidation {
+  return validatePolygon(vertices, allEdgePairs(vertices.length));
+}
+
+function* allEdgePairs(count: number): Generator<readonly [number, number]> {
+  for (let i = 0; i < count; i++) for (let j = i + 1; j < count; j++) yield [i, j];
+}
+
+/** Only pairs incident to a changed vertex can gain a new contact. O(k*n). */
+export function changedEdgePairs(count: number, changedVertices: readonly number[]) {
+  const edges = new Set(changedVertices.flatMap((i) => [i, (i + count - 1) % count]));
+  const pairs: [number, number][] = [];
+  for (const i of edges)
+    for (let j = 0; j < count; j++) {
+      if (i === j || (edges.has(j) && j < i)) continue;
+      pairs.push(i < j ? [i, j] : [j, i]);
+    }
+  return pairs.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
+
+/** Owns a validated immutable baseline; callers cannot skip arbitrary contacts. */
+export function preparePolygonVertexEdit(input: readonly Point2[], indices: readonly number[]) {
+  const base = input.map((p) => ({ ...p }));
+  const before = validateSimplePolygon(base);
+  if (!before.valid) throw new Error("Ungültige Ausgangskontur.");
+  if (indices.some((i) => !Number.isInteger(i) || i < 0 || i >= base.length))
+    throw new Error("Ungültiger Konturpunkt.");
+  const changed = new Set(indices),
+    pairs = changedEdgePairs(base.length, indices);
+  return {
+    signedArea: before.signedArea,
+    validate(vertices: readonly Point2[]): PolygonValidation {
+      if (
+        vertices.length !== base.length ||
+        vertices.some((p, i) => !changed.has(i) && (p.x !== base[i]!.x || p.y !== base[i]!.y))
+      )
+        throw new Error("Unveränderliche Konturpunkte wurden geändert.");
+      return validatePolygon(vertices, pairs);
+    },
+  };
+}
+
+function validatePolygon(
+  vertices: readonly Point2[],
+  pairs: Iterable<readonly [number, number]>,
+): PolygonValidation {
   const fail = (
     reason: Extract<PolygonValidation, { valid: false }>["reason"],
     ...indices: number[]
@@ -69,26 +118,46 @@ export function validateSimplePolygon(vertices: readonly Point2[]): PolygonValid
   }
   if (!Number.isFinite(twiceArea)) return fail("numeric-range");
 
-  for (let i = 0; i < count; i++) {
+  // Conservative broad phase only. Both segments can accept a contact within
+  // the model tolerance, so retain pairs within twice its maximum. Never use
+  // a screen-space snap distance or change the exact narrow-phase predicates.
+  const bounds = vertices.map((a, i) => {
+    const b = vertices[(i + 1) % count]!;
+    return {
+      minX: Math.min(a.x, b.x),
+      maxX: Math.max(a.x, b.x),
+      minY: Math.min(a.y, b.y),
+      maxY: Math.max(a.y, b.y),
+    };
+  });
+  const margin = 2 * MAX_MODEL_TOLERANCE_METRES;
+  for (const [i, j] of pairs) {
+    const first = bounds[i]!,
+      second = bounds[j]!;
+    if (
+      first.minX - second.maxX > margin ||
+      second.minX - first.maxX > margin ||
+      first.minY - second.maxY > margin ||
+      second.minY - first.maxY > margin
+    )
+      continue;
     const a = vertices[i]!,
       b = vertices[(i + 1) % count]!;
-    for (let j = i + 1; j < count; j++) {
-      const c = vertices[j]!,
-        d = vertices[(j + 1) % count]!;
-      if (j === i + 1) {
-        // The shared vertex is allowed, backtracking along either edge is not.
-        if (onSegment(a, c, d) || onSegment(d, a, b)) return fail("edge-contact", i, j);
-      } else if (i === 0 && j === count - 1) {
-        if (onSegment(b, c, d) || onSegment(c, a, b)) return fail("edge-contact", i, j);
-      } else if (
-        intersectSegments(a, b, c, d) ||
-        onSegment(a, c, d) ||
-        onSegment(b, c, d) ||
-        onSegment(c, a, b) ||
-        onSegment(d, a, b)
-      ) {
-        return fail("edge-contact", i, j);
-      }
+    const c = vertices[j]!,
+      d = vertices[(j + 1) % count]!;
+    if (j === i + 1) {
+      // The shared vertex is allowed, backtracking along either edge is not.
+      if (onSegment(a, c, d) || onSegment(d, a, b)) return fail("edge-contact", i, j);
+    } else if (i === 0 && j === count - 1) {
+      if (onSegment(b, c, d) || onSegment(c, a, b)) return fail("edge-contact", i, j);
+    } else if (
+      intersectSegments(a, b, c, d) ||
+      onSegment(a, c, d) ||
+      onSegment(b, c, d) ||
+      onSegment(c, a, b) ||
+      onSegment(d, a, b)
+    ) {
+      return fail("edge-contact", i, j);
     }
   }
   // Collinear/near-collinear edges are rejected above using model tolerances.

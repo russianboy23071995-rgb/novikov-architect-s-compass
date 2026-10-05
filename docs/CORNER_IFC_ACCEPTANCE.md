@@ -67,3 +67,10 @@ IFC4-Grundlage: [IfcArbitraryClosedProfileDef](https://standards.buildingsmart.o
 fuer geschlossene 2D-Profile; [IfcRelVoidsElement](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/schema/ifcproductextension/lexical/ifcrelvoidselement.htm)
 fuer den Abzug der mit einem Host verknuepften Oeffnung. Die Pruefung ist keine
 Zertifizierung und ersetzt den konkreten Importtest nicht.
+
+## Nutzerabnahme Archicad — 05.10.2026
+
+Der Nutzer bestaetigt den Import des bereitgestellten Eckmodells als vollstaendig
+korrekt: Fenster und rechtwinkliger Wandanschluss stimmen. Damit ist die oben
+als ausstehend bezeichnete praktische Abnahme dieses Testmodells abgeschlossen.
+Dies ist die Nutzerabnahme, kein durch Codex selbst ausgefuehrter Archicad-Test.

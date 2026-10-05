@@ -157,3 +157,7 @@ N44/IFC: isolierter Export eines expliziten temporaeren Wandpaars aus denselben
 fachlichen Profilen umgesetzt; zwoelf Faelle unabhaengig mit IfcOpenShell geprueft.
 Noch keine produktiven Verbindungen, keine neue Modellkopie und kein neuer
 normaler UI-Export. Archicad-Abnahme: docs/CORNER_IFC_ACCEPTANCE.md.
+
+N44-Abnahme 05.10.2026: Nutzer bestaetigt den Archicad-Import des expliziten
+Eckmodells einschliesslich Fenster und rechtwinkligem Anschluss als korrekt.
+Persistente Verbindung und offene Endkappen-/Beruehrungsregeln bleiben separat.

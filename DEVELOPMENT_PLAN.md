@@ -1,5 +1,43 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Seitenstrecken beschleunigt — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+Auf ausdruecklichen Nutzerauftrag wurde die Performancekorrektur der Kontur-
+begrenzung vor die Anschlussvorschau gezogen. Branch:
+fix/contour-edge-preview-performance auf feat/corner-ifc-fixture (PR #116).
+Keine Zusammenfuehrung von PR #116 in diesem Schritt.
+
+prepareContourEdge validiert/kopiert die Ausgangskontur einmal pro Session.
+Nur Kontakte der drei veraenderten Kanten werden erneut untersucht; dieselben
+Praedikate wie bei der Vollpruefung, konservativer Rechteck-Vorfilter mit
+Modell-Metertoleranz. Application teilt Vorbereitung und letztes Ergebnis zwischen
+Fang, Zahleneingabe und Vorschau. Vollstaendige Kontur-/Projektvalidierung bleibt
+in den bestehenden Vorschau- und Commit-Adaptern aktiv. Kein neues UI oder Schema.
+
+Nachweis: 444 Tests bestanden, TypeScript/Build erfolgreich; Lint 0 Fehler und
+6 bekannte Warnungen. 2.000 Validierungen und 120 Begrenzungen im lokalen
+Vergleich exakt wie vor der Aenderung. 500-Punkte-Cap nun etwa 3,7-8,9 ms nach
+Vorbereitung; gemessene Application-Vorschau 28-36 ms. Vorher bis zu 6,3 Sekunden
+allein fuer den Cap. Kein Browser-FPS-Nachweis; grosse Projekte und Renderkosten
+bleiben separat. Details, reproduzierbarer Benchmark und Abnahmeablauf:
+docs/CONTOUR_EDGE_PERFORMANCE.md. Praktische Browserabnahme steht noch aus.
+
+Der Nutzer bestaetigt am 05.10.2026 den erfolgreichen Archicad-Import des neuen
+IFC-Eckmodells einschliesslich Fenster und rechtwinkligem Wandanschluss.
+Diese konkrete Exportabnahme ist damit abgeschlossen. Regeln zur genauen
+Oeffnungsberuehrung und zu Endkappen nach dem Loesen bleiben weiterhin offen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Die gemeinsame temporaere Anschluss-
+vorschau fuer ein ausdruecklich ausgewaehltes rechtwinkliges Wandpaar in Grundriss
+und 3D integrieren. Application haelt Selection/Preview; Renderer verwenden die
+vorhandenen Konturen und polygonalen Flaechen derselben Ableitung. Beide normalen
+Wandkoerper durch Vorschau ersetzen statt doppelt anzeigen, Fenster beibehalten,
+Modellwechsel validieren und mit Escape abbrechen. Noch keine Speicherung,
+History-Buchung oder produktive Aktion „Ecke verbinden“, solange die offenen
+Anschlussregeln nicht entschieden sind. Tests fuer gemeinsame Ziele/Geometrie,
+Abbruch und unzulaessige Paare; normale Werkzeuge und Export beibehalten.
+
 ## Aktueller Stand: IFC-Eckabnahme vorbereitet — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -25,7 +63,7 @@ Die Fragen zur exakten Oeffnungsberuehrung und zur Endkappe nach dem Loesen blei
 offen. Eine allgemeine Freigabe ersetzt keine konkrete Antwort. Dieser Schritt
 schaltet keine produktive Verbindung frei und veraendert keine Bedienablaeufe.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Eine gemeinsame temporaere Anschluss-
+**Historischer, nach Performancekorrektur fortgefuehrter Folgeauftrag:** Eine gemeinsame temporaere Anschluss-
 vorschau fuer ein ausdruecklich ausgewaehltes rechtwinkliges Wandpaar in Grundriss
 und 3D integrieren. Selection/Preview in Application halten; Renderer konsumieren
 die vorhandenen Konturen und polygonalen Flaechen derselben Ableitung. Vorschau
