@@ -1,3 +1,4 @@
+import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/lib/bim/model";
@@ -7,6 +8,9 @@ import { clampMenuPosition } from "./demand-menu";
 
 type Props = {
   project: Project;
+  onVisibility: (base: Project, action: VisibilityAction) => void;
+  canUndoVisibility: boolean;
+  canRedoVisibility: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   error: string;
@@ -66,7 +70,16 @@ function LayerRow({
     />
   );
 }
-export function LayerManager({ project, open, onOpenChange, error, onManage }: Props) {
+export function LayerManager({
+  project,
+  open,
+  onOpenChange,
+  error,
+  onManage,
+  onVisibility,
+  canUndoVisibility,
+  canRedoVisibility,
+}: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -173,23 +186,55 @@ export function LayerManager({ project, open, onOpenChange, error, onManage }: P
         </button>
       </header>
       <p className="shrink-0 px-4 py-3 text-xs text-muted-foreground">
-        Namen anklicken zum Bearbeiten · Enter oder Feld verlassen übernimmt · Escape verwirft die
-        Eingabe
+        Häkchen: im BIM-Projekt sichtbar. Namen anklicken zum Bearbeiten · Enter oder Feld verlassen
+        übernimmt · Escape verwirft die Eingabe
       </p>
       <div aria-label="Vorhandene Ebenen" className="min-h-0 flex-1 overflow-y-auto px-4 py-1">
         {project.layers.map((layer) => (
-          <LayerRow
-            key={layer.id + ":" + layer.name}
-            project={project}
-            id={layer.id}
-            selected={selectedId === layer.id}
-            autoFocus={focusId === layer.id}
-            onSelect={() => setSelectedId(layer.id)}
-            onManage={onManage}
-          />
+          <div key={layer.id} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              aria-label={"Ebene sichtbar: " + layer.name}
+              checked={!project.bimVisibility.hiddenLayerIds.includes(layer.id)}
+              onChange={(event) =>
+                onVisibility(project, {
+                  kind: "set",
+                  layerId: layer.id,
+                  visible: event.currentTarget.checked,
+                })
+              }
+            />
+            <LayerRow
+              key={layer.id + ":" + layer.name}
+              project={project}
+              id={layer.id}
+              selected={selectedId === layer.id}
+              autoFocus={focusId === layer.id}
+              onSelect={() => setSelectedId(layer.id)}
+              onManage={onManage}
+            />
+          </div>
         ))}
       </div>
       <footer className="shrink-0 space-y-2 border-t p-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!canUndoVisibility}
+            onClick={() => onVisibility(project, { kind: "undo" })}
+          >
+            Sichtbarkeit rückgängig
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!canRedoVisibility}
+            onClick={() => onVisibility(project, { kind: "redo" })}
+          >
+            Sichtbarkeit wiederholen
+          </Button>
+        </div>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}

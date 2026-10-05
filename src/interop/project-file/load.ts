@@ -1,12 +1,22 @@
-import { validateLegacyProject, validateProject } from "../../domain/project/schema.ts";
+import {
+  validateLegacyProject,
+  validateProject,
+  validateProjectV2,
+} from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 2. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 3. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
-  if (value.schemaVersion === 2) return validateProject(value);
+  if (value.schemaVersion === 3) return validateProject(value);
+  if (value.schemaVersion === 2)
+    return validateProject({
+      ...validateProjectV2(value),
+      schemaVersion: 3,
+      bimVisibility: { hiddenLayerIds: [] },
+    });
   if (value.schemaVersion !== 1) throw new Error("Unsupported project version");
   const old = validateLegacyProject(value);
   const defaults = createStandardLayers([
@@ -18,7 +28,8 @@ export function loadProjectData(value: unknown): Project {
   ]);
   return validateProject({
     ...old,
-    schemaVersion: 2,
+    schemaVersion: 3,
+    bimVisibility: { hiddenLayerIds: [] },
     ...defaults,
     storey: {
       ...old.storey,

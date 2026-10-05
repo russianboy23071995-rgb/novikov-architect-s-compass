@@ -30,6 +30,9 @@ export function previewLayerManagement(
     return validateProject({
       ...project,
       layers: project.layers.filter((layer) => layer.id !== request.id),
+      bimVisibility: {
+        hiddenLayerIds: project.bimVisibility.hiddenLayerIds.filter((id) => id !== request.id),
+      },
     });
   }
   if (request.kind === "create" && isStandardLayerId(request.id.trim()))

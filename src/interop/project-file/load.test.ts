@@ -53,7 +53,7 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 2);
+    assert.equal(migrated.schemaVersion, 3);
     assert.deepEqual(migrated.storey.walls.map(strip), input.storey.walls);
     assert.deepEqual(migrated.storey.windows.map(strip), input.storey.windows);
     assert.deepEqual(migrated.storey.lines?.map(strip), input.storey.lines);
@@ -111,7 +111,7 @@ test("legacy validation rejects corruption before adding defaults", () => {
   assert.throws(() => readProjectFile("{"));
 });
 
-test("schema 2 never repairs missing memberships, unknown defaults or duplicate identities", () => {
+test("current schema never repairs missing memberships, unknown defaults or duplicate identities", () => {
   const p = loadProjectData(legacy());
   const edits = [
     (q: typeof p) => {

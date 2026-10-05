@@ -1,3 +1,5 @@
+import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
+import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
 import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
 import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
 import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
@@ -9,6 +11,7 @@ import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
   history: ProjectHistory;
+  visibilityHistory?: VisibilityHistory;
   session: EditSession | null;
   error: string;
 };
@@ -24,7 +27,7 @@ export function supportsWallWorkplaneEdit(
   return ["move", "axis", "x", "y"].includes(action);
 }
 
-export type EditingEvent =
+type ModelEditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
   | { type: "cancel" }
@@ -56,7 +59,7 @@ export function previewEdit(
 }
 
 /** Pure application transition. React only dispatches user intent. */
-export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+function reduceModelEdit(state: EditingState, event: ModelEditingEvent): EditingState {
   if (event.type === "cancel")
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
@@ -120,6 +123,43 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
     return {
       ...state,
       error: error instanceof Error ? error.message : "Bearbeitung konnte nicht übernommen werden.",
+    };
+  }
+}
+
+export type EditingEvent =
+  | ModelEditingEvent
+  | { type: "visibility"; base: Project; action: VisibilityAction }
+  | { type: "load-project"; project: Project };
+export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  if (event.type === "load-project")
+    return {
+      ...reduceModelEdit(state, { type: "project", project: event.project }),
+      visibilityHistory: emptyVisibilityHistory(),
+    };
+  if (event.type !== "visibility")
+    return {
+      ...reduceModelEdit(state, event),
+      ...(state.visibilityHistory ? { visibilityHistory: state.visibilityHistory } : {}),
+    };
+  try {
+    const next = changeLayerVisibility(
+      event.base,
+      state.history.present,
+      state.visibilityHistory ?? emptyVisibilityHistory(),
+      event.action,
+    );
+    if (next.project === state.history.present) return state;
+    return {
+      history: { ...state.history, present: next.project },
+      visibilityHistory: next.history,
+      session: null,
+      error: "",
+    };
+  } catch (error) {
+    return {
+      ...state,
+      error: error instanceof Error ? error.message : "Sichtbarkeit konnte nicht geändert werden.",
     };
   }
 }
