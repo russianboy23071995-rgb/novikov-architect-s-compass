@@ -1289,3 +1289,58 @@ silently projected and relabelled as exact. Explicit host/edit axes still win.
 Without an eligible exact point, preserve continuous model-space projection onto
 the Shift direction (no extra grid jump or screen-metric guide projection).
 The same engine serves drawing and editing; no per-tool solver or timer changes.
+
+## Hatch direct edit through shared movement pipeline — 2026-10-05
+
+Hatch targets now participate in EditSession/ToolInteraction. The selected vertex
+is the pinned construction origin; the existing inference, precision input,
+preview/commit and history paths remain shared with walls and lines. Whole-element
+move, X/Y and axis translation preserve every vertex offset. Point and stretch
+change only the selected vertex, validated by previewHatch and the simple polygon
+validator. Self-intersection and collapsed contours cannot commit.
+
+The existing transformation implementation moved to application/direct-edit/transforms.ts;
+lib/bim/transforms.ts is a compatibility re-export, not a second implementation.
+Hatch changes use the same Application hatch update action as properties. No new
+schema, independent snap engine, AI mutation path or 3D hatch editing is introduced.
+Axis/stretch reuse the existing neighbouring-point convention: vertex 0 uses
+vertex 1, other vertices use their predecessor. The numeric helper names the
+chosen point direction. Stretch means one point along that edge direction, not
+parallel displacement of a whole contour edge. Whole-edge offset remains pending.
+
+## Closed contour edge editing — 2026-10-05
+
+Schraffuren and explicitly closed polylines share insert/edge EditActions. A
+separate ephemeral edgeIndex in UI selection prevents mistaking a side grip for
+a vertex; EditSession.index identifies the chosen edge for these two actions.
+Square midpoint grips expose the actions with keyboard and pointer support.
+Insert (Knicken) adds a vertex after the chosen edge's start at the pointer or
+precision-input target; the existing point action can edit it subsequently.
+Edge (Seite strecken) constrains movement to the edge normal, shifts its supporting
+line and intersects it with both neighbouring supporting lines. Rectangle angles
+are preserved. Collinear neighbours without a unique intersection are rejected,
+as are collapse, self-intersection and reversed winding. No implicit repair or
+vertex removal. Geometry is in geometry/polygons/edit-edge; Application adapts
+implicit hatch closure and repeated-endpoint polyline closure and commits through
+existing EditSession history. No independent snap/input engine or BIM scaling.
+
+## Valid stretch interval and bounded marker size — 2026-10-05
+
+Seitenstrecken now caps at the first invalid geometry boundary instead of dropping
+the preview. geometry capContourEdge constructs linear vertex motion, collects
+segment-contact orientation/coincidence events, checks them in order, and refines
+the first invalid interval to its valid side with a numerical margin. It does not
+jump across an invalid interval to another valid polygon. Degenerate adjacency
+with no unique intersection retains the original contour. Non-finite requests and
+invalid initial contours still fail. Domain editContourEdge stays strict.
+
+Application boundedEdgeTarget is shared by snapping, numeric input and final
+preview/commit. Capped targets discard an incompatible snap label. Numeric input
+reports the resulting signed length and a geometric-limit notice through the
+shared input presentation contract. No invalid polygon is stored at the limit;
+this is a numerically valid approach to contact, not topology repair or edge deletion.
+
+Side grips are blue double arrows offset inward according to winding, oriented
+normal to the edge. Their size is screen-based with a short-edge bound. The moving
+target marker is now 5 CSS pixels instead of 0.055 model metres. The reported
+intermittent white/black circle has not been reproduced and remains unconfirmed.
