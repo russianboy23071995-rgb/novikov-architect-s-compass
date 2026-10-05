@@ -43,6 +43,9 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   return Object.freeze({
     context,
+    isCurrent(current: Project, currentContext: LayerVisibilityContext) {
+      return current === base && currentContext === context;
+    },
     evaluate(
       current: Project,
       currentContext: LayerVisibilityContext,

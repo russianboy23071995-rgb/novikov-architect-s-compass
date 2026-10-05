@@ -8,14 +8,48 @@ import type { LocalSnapSources } from "../snapping/local-sources.ts";
 import type { SnapSourceQuery } from "../../constraints/snapping/engine.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import type { LayerVisibilityContext, createLayerVisibilityPolicy } from "../layers/visibility.ts";
+import { getLocalSnapSources } from "../snapping/local-sources.ts";
+
+type SourceEligibility = {
+  isCurrent: () => boolean;
+  allowsEntity: (id: string) => boolean;
+};
+
+/** Bind one immutable model/filter pair; rebuild when either changes, not on zoom.
+ * Reuses the model-only spatial index for independent BIM and drawing contexts.
+ */
+export function createVisibleToolSourceQuery(
+  project: Project,
+  visibility: ReturnType<typeof createLayerVisibilityPolicy>,
+  context: LayerVisibilityContext,
+  policy: ToolSnapPolicy | null,
+  intersectionLimit = DENSE_SEGMENT_LIMIT,
+) {
+  return createToolSourceQuery(getLocalSnapSources(project), policy, intersectionLimit, {
+    isCurrent: () => visibility.isCurrent(project, context),
+    allowsEntity: (id) => visibility.evaluate(project, context, id).eligible,
+  });
+}
 
 /** Bound to model and policy, never to camera or the changing local result array. */
 export function createToolSourceQuery(
   model: LocalSnapSources,
   policy: ToolSnapPolicy | null,
   intersectionLimit = DENSE_SEGMENT_LIMIT,
+  eligibility?: SourceEligibility,
 ) {
-  const allowed = (r: SnapReference) => !policy || policy.sources([r]).length > 0;
+  const current = () => !eligibility || eligibility.isCurrent();
+  const isOrigin = (r: SnapReference) => policy && referenceKey(r) === referenceKey(policy.origin);
+  const visible = (r: SnapReference): boolean =>
+    !eligibility || Boolean(isOrigin(r)) || eligibility.allowsEntity(r.entityId);
+  const allowed = (r: SnapReference) =>
+    current() &&
+    (!policy || policy.sources([r]).length > 0) &&
+    (r.dependencies?.length
+      ? r.dependencies.every((d) => !d.dependencies && visible(d))
+      : visible(r));
   const leaf = (r: SnapReference) => {
     if (policy && referenceKey(r) === referenceKey(policy.origin)) return policy.origin;
     const source = model.lookup(referenceKey(r));
@@ -46,6 +80,7 @@ export function createToolSourceQuery(
     selected = null,
     metric,
   ) => {
+    if (!current()) return [];
     const primitives = inspect(cursor, metric ?? scale, radius, selected);
     const local = completeLocalQuery(
       primitives,
