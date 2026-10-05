@@ -457,8 +457,8 @@ export function CadWorkspace({
       }
       setExportMessage(
         "IFC export ready · download requested" +
-          (project.storey.lines?.length
-            ? " · 2D-Linien sind nur in der JSON-Projektdatei enthalten."
+          (project.storey.lines?.length || project.storey.hatches.length
+            ? " · 2D-Linien und Schraffuren sind nur in der JSON-Projektdatei enthalten."
             : ""),
       );
     } catch {
@@ -500,7 +500,8 @@ export function CadWorkspace({
               <DialogDescription>
                 {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
                 {pendingFile?.project.storey.windows.length} Fenster ·{" "}
-                {pendingFile?.project.storey.lines?.length ?? 0} Linien. Ersetzt das aktuelle
+                {pendingFile?.project.storey.lines?.length ?? 0} Linien ·{" "}
+                {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren. Ersetzt das aktuelle
                 Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
                 Formulareingaben werden verworfen.
               </DialogDescription>

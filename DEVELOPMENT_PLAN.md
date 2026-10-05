@@ -1274,3 +1274,15 @@ Offene Nachweise: Automatisches fill am nativen Farbfeld zeigt #4f86c6 im Eingab
 Keine Laufzeitdateien geaendert, keine neuen Build-/Testlaeufe erforderlich. Die 391 automatisierten Tests bleiben der vorherige Nachweis, kein neu ausgefuehrter Lauf. Teilabnahme ersetzt die beiden offenen Bediennachweise nicht.
 
 Genau ein naechster begrenzter Auftrag: Farbuebernahme und Download/Wiederoeffnen im Browser isoliert klaeren und nur nachgewiesene App-Fehler beheben. Danach ist die gemeinsame Rastersteuerung der vorgemerkte Komfortschritt.
+
+### Abschluss der offenen Farb- und Dateipruefung — 05.10.2026
+
+Die tatsaechlich heruntergeladene Datei Downloads/novikov-project (6).json enthaelt exakt die Testschraffur hatch-8a53cfd4-25fc-4e45-82d5-b8de74042be8, vier Eckpunkte, Ebene layer:drawing und Deckkraft 0.6. Der vorherige Download-Timeout betraf die Rueckmeldung der Automation; er ist kein nachgewiesener Speicherfehler. Datei ueber Open project und den echten Filechooser geladen: ID, Kontur, Farbe #94a3b8 und Deckkraft 0.6 im dargestellten SVG erhalten. Modell-Undo nach Laden stellt den vorherigen Stand mit #7c9e1f wieder her.
+
+Auch die Farbuebernahme ist praktisch bestaetigt: der zwischenzeitlich im Farbfeld gewaehlte Wert #7c9e1f wurde per Uebernehmen zur SVG-Fuellfarbe. Die vorherige fill-Automation fuer das native Farbfeld ist kein belastbarer Nachweis eines App-Fehlers; kein Eingabehandler wurde auf Verdacht geaendert. Die manuelle Auswahl des Farbtons selbst wurde nicht vom Agenten automatisiert nachgewiesen.
+
+Kleine nachgewiesene Anzeige-Luecken in CadWorkspace.tsx korrigiert: Ladebestaetigung zaehlt nun Schraffuren; IFC-Erfolgshinweis erwaehnt bei vorhandenen Linien oder Schraffuren, dass beide 2D-Elementarten nur in der JSON-Projektdatei enthalten sind. Keine Aenderung des Modell-/Exportformats. Ladehinweis erneut im Browser verifiziert (1 Schraffur); danach Dialog abgebrochen, um das aktuelle Modell zu behalten. Screenshot outputs/hatch-load-verified.png.
+
+391 Tests erneut bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Bisherige Nachweise zum Shift-Rechteck, Doppelklick, Deckkraft-History und Ebenenverlauf gelten weiterhin. Kein umfassender Nachweis fuer alle Schraffur-, Polygon- oder Exportfaelle behauptet.
+
+Genau ein naechster begrenzter Auftrag: zentrale Rasterfang-Einstellungen fuer die bestehende gemeinsame 2D-Zeichen-/Bearbeitungspipeline implementieren. Rasterfang separat vom geometrischen Punktfang schalten und positive endliche Schrittweite in Metern eingeben; aktuelle Schrittweite anzeigen, Hintergrundraster davon unterscheiden. Vorlaeufig sitzungsbezogen ohne Dateiformatwechsel; Speicherung als Benutzer-/Projekteinstellung bleibt spaeter zu entscheiden. Bestehende gemeinsame Engine, Shift-Vorrang, Punktprioritaeten und Referenzerhalt verwenden und mit zwei verschiedenen Werkzeugen pruefen. Keine Rasterlogik pro Werkzeug duplizieren.
