@@ -409,8 +409,8 @@ test("dense diagonal boxes and crossings preserve full resolver ranking at multi
         );
       }
     const local = model.query({ x: 0, y: 0 }, 100, 10, (r) => r.entityId.startsWith("dense-"));
-    assert.equal(local.segments.length, 80);
-    assert.equal(local.segmentPairs, 3160);
+    assert.equal(local.segments.length, crossing ? 80 : 0);
+    assert.equal(local.segmentPairs, crossing ? 3160 : 0);
     if (!crossing) assert.equal(local.references.length, 0);
   }
 });
