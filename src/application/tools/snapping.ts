@@ -107,7 +107,11 @@ export function createToolSourceQuery(
     }
     return [...refs.values()];
   };
-  return Object.assign(query, { inspect });
+  return Object.assign(query, {
+    inspect,
+    accepts: (r: SnapReference) =>
+      allowed(r) && (r.dependencies?.length ? r.dependencies : [r]).every((d) => !!leaf(d)),
+  });
 }
 export type ToolSnapPolicy = {
   origin: SnapReference;

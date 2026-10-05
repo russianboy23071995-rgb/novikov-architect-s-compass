@@ -9,6 +9,25 @@ import type { Solid } from "../../lib/bim/geometry.ts";
 /** Display surfaces deliberately have no volume: quantities belong to the complete model. */
 export type DisplaySurfaces = Pick<Solid, "faces" | "min" | "max">;
 
+/** Shared renderer filters also accept disposable edit-preview geometry.
+ * Eligibility always stays bound to the committed project, never the preview. */
+export function visiblePlanGeometry(project: Project, allows: (id: string) => boolean) {
+  const walls = project.storey.walls.filter((w) => allows(w.id));
+  const wallIds = new Set(walls.map((w) => w.id));
+  return {
+    walls,
+    windows: project.storey.windows.filter((w) => allows(w.id)),
+    lines: (project.storey.lines ?? []).filter((l) => allows(l.id)),
+    openings: project.storey.windows.filter((w) => wallIds.has(w.wallId)),
+  };
+}
+export function visibleSurfaces(
+  solid: DisplaySurfaces,
+  allows: (id: string) => boolean,
+): DisplaySurfaces {
+  return { faces: solid.faces.filter((f) => allows(f.wallId)), min: solid.min, max: solid.max };
+}
+
 /** One disposable display snapshot for plan primitives, normal picking and solid occlusion.
  * No filtered Project is created. Callers must rebuild on model/context changes.
  * Bounds remain those of the full model so hiding a layer does not refit the camera.
@@ -20,22 +39,10 @@ export function createLayerDisplay(
 ) {
   if (!policy.isCurrent(project, context)) throw new Error("Stale display visibility context");
   const allows = (id: string) => policy.evaluate(project, context, id).eligible;
-  const walls = project.storey.walls.filter((wall) => allows(wall.id));
-  const wallIds = new Set(walls.map((wall) => wall.id));
-  const solid = buildSolid(project); // all real openings are subtracted before display filtering
-  const surfaces: DisplaySurfaces = {
-    faces: solid.faces.filter((face) => wallIds.has(face.wallId)),
-    min: solid.min,
-    max: solid.max,
-  };
+  const plan = visiblePlanGeometry(project, allows);
+  const surfaces = visibleSurfaces(buildSolid(project), allows);
   return {
-    plan: {
-      walls,
-      windows: project.storey.windows.filter((window) => allows(window.id)),
-      lines: (project.storey.lines ?? []).filter((line) => allows(line.id)),
-      // Physical voids in visible walls survive hidden window symbols; these are not pick targets.
-      openings: project.storey.windows.filter((window) => wallIds.has(window.wallId)),
-    },
+    plan,
     surfaces,
     /** Use for DOM/keyboard hits too; an old element event must not revive a hidden target. */
     canPick(current: Project, currentContext: LayerVisibilityContext, id: string) {

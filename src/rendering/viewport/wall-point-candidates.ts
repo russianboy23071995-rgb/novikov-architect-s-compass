@@ -1,3 +1,6 @@
+import { visibleSurfaces } from "./layer-display.ts";
+import { isLayerVisible } from "../../application/layers/visibility.ts";
+import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { getLocalSnapSources } from "../../application/snapping/local-sources.ts";
@@ -15,14 +18,20 @@ export function createWallPointCandidates(
   project: Project,
   projection: ProjectionState,
   movingWallId?: string,
+  visibility?: LayerVisibilityPolicy,
 ) {
-  const baseSolid = buildSolid(project);
+  const complete = buildSolid(project);
+  const baseSolid = visibleSurfaces(complete, (id) => isLayerVisible(project, visibility, id));
   // A moving preview is neither a target nor an occluder of its stationary sources.
   const solid = movingWallId
     ? { ...baseSolid, faces: baseSolid.faces.filter((f) => f.wallId !== movingWallId) }
     : baseSolid;
   const sources = getLocalSnapSources(project);
-  const walls = new Set(project.storey.walls.map((wall) => wall.id));
+  const walls = new Set(
+    project.storey.walls
+      .filter((w) => w.id !== movingWallId && isLayerVisible(project, visibility, w.id))
+      .map((wall) => wall.id),
+  );
   const plane = projection.workplane(0);
   return Object.freeze({
     visibilityAt: (point: Point2) =>
@@ -33,7 +42,11 @@ export function createWallPointCandidates(
       client: Point2,
       radiusPx: number,
     ) {
-      if (currentProject !== project || currentProjection !== projection)
+      if (
+        currentProject !== project ||
+        currentProjection !== projection ||
+        (visibility && !visibility.isCurrent(project, visibility.context))
+      )
         return { status: "paused" as const, reason: "stale-snapshot" };
       if (![client.x, client.y, radiusPx].every(Number.isFinite) || radiusPx < 0)
         return { status: "paused" as const, reason: "invalid-input" };

@@ -1,3 +1,9 @@
+import {
+  ALL_LAYERS_VISIBLE,
+  createLayerVisibilityPolicy,
+  visibleLayerTarget,
+} from "@/application/layers/visibility";
+import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -44,7 +50,9 @@ import { LineStyleFields } from "./LineControls";
 import { LayerProperties } from "./LayerProperties";
 import { LayerManager } from "./LayerManager";
 
-export function CadWorkspace() {
+export function CadWorkspace({
+  layerVisibility = ALL_LAYERS_VISIBLE,
+}: { layerVisibility?: LayerVisibilityContext } = {}) {
   const [layersOpen, setLayersOpen] = useState(false);
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
@@ -58,12 +66,29 @@ export function CadWorkspace() {
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
     createEditingState(createExampleProject()),
   );
-  const { history, session: editSession } = editing;
+  const { history, session: pendingSession } = editing;
   const project = history.present;
+  const visibility = useMemo(
+    () => createLayerVisibilityPolicy(project, layerVisibility),
+    [project, layerVisibility],
+  );
+  const visibilityNow = useRef({ project, visibility });
+  visibilityNow.current = { project, visibility };
+  const editSession =
+    pendingSession && visibleLayerTarget(project, visibility, pendingSession.target)
+      ? pendingSession
+      : null;
+  useEffect(() => {
+    if (pendingSession && !editSession) dispatchEditing({ type: "cancel" });
+  }, [pendingSession, editSession]);
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
-  const [selection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
+  const [requestedSelection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
+  const selection = visibleLayerTarget(project, visibility, requestedSelection);
+  useEffect(() => {
+    if (requestedSelection && !selection) setSelection(null);
+  }, [requestedSelection, selection]);
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
   const [wallStart, setWallStart] = useState<Point | null>(null);
@@ -75,10 +100,30 @@ export function CadWorkspace() {
   const [activeViewport, setActiveViewport] = useState(0);
   const [referenceEpoch, setReferenceEpoch] = useState(0);
   const referenceScope = useMemo(
-    () => ({ project, editSession, tool, lineKind, mode, layout, referenceEpoch, activeViewport }),
-    [project, editSession, tool, lineKind, mode, layout, referenceEpoch, activeViewport],
+    () => ({
+      project,
+      visibility,
+      editSession,
+      tool,
+      lineKind,
+      mode,
+      layout,
+      referenceEpoch,
+      activeViewport,
+    }),
+    [
+      project,
+      visibility,
+      editSession,
+      tool,
+      lineKind,
+      mode,
+      layout,
+      referenceEpoch,
+      activeViewport,
+    ],
   );
-  const referenceSelection = useReferenceSelection(project, referenceScope);
+  const referenceSelection = useReferenceSelection(project, referenceScope, visibility);
   const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
@@ -162,7 +207,7 @@ export function CadWorkspace() {
     if (next === "wall" || next === "line") setMode("2D");
   };
 
-  const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
+  const showSelection = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
     cancelInteraction();
     setPickedPoint({ index: index ?? null, anchor: modelPoint ?? null });
     setDemandOpen(Boolean(next));
@@ -173,6 +218,15 @@ export function CadWorkspace() {
     setSelection(next);
     setTool("select");
     setModelError("");
+  };
+
+  const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
+    if (
+      next &&
+      !visibleLayerTarget(visibilityNow.current.project, visibilityNow.current.visibility, next)
+    )
+      return;
+    showSelection(next, anchor, index, modelPoint);
   };
 
   const startEdit = (action: EditAction) => {
@@ -202,7 +256,7 @@ export function CadWorkspace() {
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
     dispatchEditing({ type: "project", project: next });
-    selectElement(selected);
+    showSelection(selected);
     showNotice("Model updated");
   };
 
@@ -323,7 +377,15 @@ export function CadWorkspace() {
           editSession,
           project,
           selection,
-          (point) => dispatchEditing({ type: "confirm", session: editSession, selection, point }),
+          (point) => {
+            const current = visibilityNow.current;
+            if (
+              current.visibility !== visibility ||
+              !visibleLayerTarget(current.project, current.visibility, editSession.target)
+            )
+              return;
+            dispatchEditing({ type: "confirm", session: editSession, selection, point });
+          },
           cancelInteraction,
         )
       : drawingOrigin && drawingBase
@@ -591,6 +653,7 @@ export function CadWorkspace() {
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
                   project={project}
+                  visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
                   snapping={interaction.adapter?.snapping ?? null}

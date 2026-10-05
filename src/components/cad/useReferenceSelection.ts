@@ -1,3 +1,5 @@
+import { isLayerVisible } from "@/application/layers/visibility";
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { sameReference } from "@/constraints/inference/hover-reference";
 import type { Point2 } from "@/geometry/primitives/point";
 import { useMemo, useState } from "react";
@@ -13,7 +15,11 @@ import type {
 import { getLocalSnapSources } from "@/application/snapping/local-sources";
 import type { Project } from "@/lib/bim/model";
 import type { SnapReference } from "@/constraints/snapping/engine";
-export function useReferenceSelection(project: Project, scope: object) {
+export function useReferenceSelection(
+  project: Project,
+  scope: object,
+  visibility?: LayerVisibilityPolicy,
+) {
   const [stored, setStored] = useState<{
     scope: object;
     mode: "segments" | "points";
@@ -69,6 +75,7 @@ export function useReferenceSelection(project: Project, scope: object) {
     cancel: () => send({ type: "cancel" }),
     clear: () => send({ type: "clear" }),
     toggle: (r: SnapReference) => {
+      if (!isLayerVisible(project, visibility, r.entityId)) return;
       if (current?.mode !== "points") {
         send({ type: "toggle", key: segmentKey(r) });
         return;
@@ -92,7 +99,11 @@ export function useReferenceSelection(project: Project, scope: object) {
     apply: () =>
       send({
         type: "apply",
-        allowed: new Set(getLocalSnapSources(project).allSegments.map((s) => segmentKey(s.source))),
+        allowed: new Set(
+          getLocalSnapSources(project)
+            .allSegments.filter((s) => isLayerVisible(project, visibility, s.source.entityId))
+            .map((s) => segmentKey(s.source)),
+        ),
       }),
   };
 }

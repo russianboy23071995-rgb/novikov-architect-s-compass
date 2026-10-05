@@ -1,3 +1,5 @@
+import { isLayerVisible } from "../../application/layers/visibility.ts";
+import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project, Point } from "../../lib/bim/model.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import { createWallPointCandidates } from "./wall-point-candidates.ts";
@@ -19,12 +21,17 @@ export function createWallPreviewContext(
   resetKey: number,
   policy: ToolSnapPolicy | null = null,
   movingWallId?: string,
+  visibility?: LayerVisibilityPolicy,
 ) {
-  const adapter = projection ? createWallPointCandidates(project, projection, movingWallId) : null;
+  const adapter = projection
+    ? createWallPointCandidates(project, projection, movingWallId, visibility)
+    : null;
   const plane = projection?.workplane(0);
   const sources = getLocalSnapSources(project);
   const edges = getWallFootSources(project);
-  const wallIds = new Set(project.storey.walls.map((w) => w.id));
+  const wallIds = new Set(
+    project.storey.walls.filter((w) => isLayerVisible(project, visibility, w.id)).map((w) => w.id),
+  );
   const pointOnly = (source: SnapReference) => {
     const result = { ...source };
     delete result.segment;
@@ -50,7 +57,13 @@ export function createWallPreviewContext(
     radius: number,
     active: readonly SnapReference[] = [],
   ): SnapReference[] => {
-    if (!projection || !adapter || plane?.status !== "ok") return [];
+    if (
+      (visibility && !visibility.isCurrent(project, visibility.context)) ||
+      !projection ||
+      !adapter ||
+      plane?.status !== "ok"
+    )
+      return [];
     const screen = plane.value.toScreen(cursor);
     if (screen.status !== "ok") return [];
     const result = adapter.query(project, projection, screen.value, radius);
