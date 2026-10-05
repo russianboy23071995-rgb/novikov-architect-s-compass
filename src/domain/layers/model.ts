@@ -22,6 +22,15 @@ const standards = [
   ["text", "Textelemente"],
 ] as const;
 
+/** Reserved stable namespace, including deterministic collision suffixes from migration. */
+export function isStandardLayerId(id: string): boolean {
+  return standards.some(
+    ([key]) =>
+      id === `layer:${key}` ||
+      (id.startsWith(`layer:${key}:`) && /^[1-9]\d*$/.test(id.slice(`layer:${key}:`.length))),
+  );
+}
+
 /** Shared by new projects and migration. Never infer defaults from editable names. */
 export function createStandardLayers(occupiedIds: Iterable<string>) {
   const occupied = new Set(occupiedIds);

@@ -69,6 +69,7 @@ type TopToolbarProps = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onLayers: () => void;
 };
 
 function IconControl({
@@ -143,6 +144,16 @@ export function TopToolbar(props: TopToolbarProps) {
             </Button>
           ))}
         </nav>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="shrink-0 text-xs">
+              Organisation
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
           <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
             <Undo2 />
