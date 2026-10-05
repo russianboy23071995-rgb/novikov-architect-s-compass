@@ -264,7 +264,7 @@ export function CadWorkspace({
 
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "hatch") return;
+    if (!selection) return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove = inSolid && selection.kind === "wall";
     if (solidMove && !pickedPoint.anchor) {

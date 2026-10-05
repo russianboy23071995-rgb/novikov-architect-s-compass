@@ -9,7 +9,7 @@ import {
   moveWindowAlongWall,
 } from "./transforms.ts";
 export type EditAction = "point" | "stretch" | "move" | "axis" | "x" | "y";
-export type EditTarget = { kind: "wall" | "line" | "window"; id: string };
+export type EditTarget = { kind: "wall" | "line" | "window" | "hatch"; id: string };
 export type EditSession = {
   base: Project;
   target: EditTarget;

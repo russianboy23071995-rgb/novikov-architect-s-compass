@@ -1289,3 +1289,21 @@ silently projected and relabelled as exact. Explicit host/edit axes still win.
 Without an eligible exact point, preserve continuous model-space projection onto
 the Shift direction (no extra grid jump or screen-metric guide projection).
 The same engine serves drawing and editing; no per-tool solver or timer changes.
+
+## Hatch direct edit through shared movement pipeline — 2026-10-05
+
+Hatch targets now participate in EditSession/ToolInteraction. The selected vertex
+is the pinned construction origin; the existing inference, precision input,
+preview/commit and history paths remain shared with walls and lines. Whole-element
+move, X/Y and axis translation preserve every vertex offset. Point and stretch
+change only the selected vertex, validated by previewHatch and the simple polygon
+validator. Self-intersection and collapsed contours cannot commit.
+
+The existing transformation implementation moved to application/direct-edit/transforms.ts;
+lib/bim/transforms.ts is a compatibility re-export, not a second implementation.
+Hatch changes use the same Application hatch update action as properties. No new
+schema, independent snap engine, AI mutation path or 3D hatch editing is introduced.
+Axis/stretch reuse the existing neighbouring-point convention: vertex 0 uses
+vertex 1, other vertices use their predecessor. The numeric helper names the
+chosen point direction. Stretch means one point along that edge direction, not
+parallel displacement of a whole contour edge. Whole-edge offset remains pending.

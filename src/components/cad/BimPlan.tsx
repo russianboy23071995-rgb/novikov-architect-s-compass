@@ -321,6 +321,12 @@ export function BimPlan({
         ),
       );
     }
+  } else if (selection?.kind === "hatch") {
+    project.storey.hatches
+      .find((h) => h.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
+      );
   } else if (selection?.kind === "line") {
     const line = project.storey.lines?.find((item) => item.id === selection.id);
     line?.points.forEach((point, index) => {

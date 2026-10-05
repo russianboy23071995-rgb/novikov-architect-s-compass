@@ -122,3 +122,110 @@ test("hatch selection supports layer assignment and plan extents without becomin
   assert.equal(planBounds(p), "-1.5 -3.5 6 5");
   assert.throws(() => previewCommand(p, target, "Wandlänge auf 6 m"));
 });
+
+import { editAtPointer } from "../../lib/bim/direct-edit.ts";
+import type { EditAction } from "../../lib/bim/direct-edit.ts";
+import { editInteraction } from "../tools/adapters.ts";
+import { editDirection } from "../direct-edit/snapping.ts";
+
+test("hatch direct edit shares all six actions, every vertex, pinned origin and model history", () => {
+  const base = createProject("p", "s");
+  const p = createDrawing(base, base, "h", request);
+  const target = { kind: "hatch" as const, id: "h" };
+  for (const index of [0, 1, 2, 3])
+    for (const action of ["point", "move", "stretch", "axis", "x", "y"] as EditAction[]) {
+      const anchor = points[index]!;
+      const state = editingReducer(createEditingState(p), {
+        type: "begin",
+        target,
+        action,
+        index,
+        anchor,
+      });
+      assert.equal(state.error, "");
+      const session = state.session!;
+      const adapter = editInteraction(
+        session,
+        session.base,
+        target,
+        () => {},
+        () => {},
+      );
+      assert.deepEqual(adapter.snapping!.origin.point, anchor);
+      const numeric = adapter.preview(
+        action === "move" || action === "point" ? "30" : "",
+        "0.1",
+        null,
+      );
+      adapter.validate(numeric.point);
+      const next = editAtPointer(session, session.base, numeric.point);
+      const result = next.storey.hatches[0]!;
+      const delta = { x: numeric.point.x - anchor.x, y: numeric.point.y - anchor.y };
+      result.points.forEach((point, i) => {
+        const moves = (action !== "point" && action !== "stretch") || i === index;
+        assert.ok(Math.abs(point.x - points[i]!.x - (moves ? delta.x : 0)) < 1e-10);
+        assert.ok(Math.abs(point.y - points[i]!.y - (moves ? delta.y : 0)) < 1e-10);
+      });
+      assert.deepEqual(result.fill, p.storey.hatches[0]!.fill);
+      assert.equal(result.layerId, p.storey.hatches[0]!.layerId);
+      assert.equal(result.id, "h");
+      assert.deepEqual(p.storey.hatches[0]!.points, points);
+      const committed = editingReducer(state, {
+        type: "confirm",
+        session,
+        selection: target,
+        point: numeric.point,
+      });
+      assert.equal(committed.history.past.length, 1);
+      const undone = editingReducer(committed, { type: "undo" });
+      assert.deepEqual(undone.history.present, p);
+      assert.deepEqual(editingReducer(undone, { type: "redo" }).history.present, next);
+      assert.deepEqual(readProjectFile(serializeProject(next)), next);
+      if (action === "axis" || action === "stretch") assert.ok(editDirection(session));
+    }
+});
+
+test("hatch corner rejects crossed or collapsed contours, stale context and invalid grips atomically", () => {
+  const base = createProject("p", "s"),
+    p = createDrawing(base, base, "h", request);
+  const target = { kind: "hatch" as const, id: "h" };
+  const state = editingReducer(createEditingState(p), {
+    type: "begin",
+    target,
+    action: "point",
+    index: 1,
+    anchor: points[1]!,
+  });
+  for (const point of [{ x: -1, y: 1 }, points[0]!, { x: NaN, y: 0 }]) {
+    assert.throws(() => editAtPointer(state.session!, state.session!.base, point));
+    const rejected = editingReducer(state, {
+      type: "confirm",
+      session: state.session!,
+      selection: target,
+      point,
+    });
+    assert.equal(rejected.history.present, state.history.present);
+    assert.equal(rejected.history.past.length, 0);
+    assert.ok(rejected.error);
+  }
+  assert.throws(() => editAtPointer(state.session!, structuredClone(p), { x: 4, y: 0 }));
+  const changed = editInteraction(
+    state.session!,
+    p,
+    { kind: "hatch", id: "other" },
+    () => {},
+    () => {},
+  );
+  assert.throws(() => changed.validate({ x: 4, y: 0 }));
+  for (const index of [-1, 4, 0.5, null]) {
+    const invalid = editingReducer(createEditingState(p), {
+      type: "begin",
+      target,
+      action: "point",
+      index,
+    });
+    assert.equal(invalid.session, null);
+    assert.ok(invalid.error);
+  }
+  assert.equal(editingReducer(state, { type: "cancel" }).history.present, state.history.present);
+});

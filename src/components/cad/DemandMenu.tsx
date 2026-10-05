@@ -130,7 +130,7 @@ export function DemandMenu({
         )}
         {selection && summary && (
           <>
-            {selection.kind !== "hatch" && selection.kind !== "window" && pointIndex !== null && (
+            {selection.kind !== "window" && pointIndex !== null && (
               <>
                 <button
                   type="button"
@@ -148,7 +148,7 @@ export function DemandMenu({
                 </button>
               </>
             )}
-            {selection.kind !== "hatch" && selection.kind !== "window" && (
+            {selection.kind !== "window" && (
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"
@@ -157,7 +157,7 @@ export function DemandMenu({
                 Element frei bewegen
               </button>
             )}
-            {selection.kind !== "hatch" && (
+            {
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"
@@ -165,8 +165,8 @@ export function DemandMenu({
               >
                 {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
               </button>
-            )}
-            {selection.kind !== "hatch" && selection.kind !== "window" && (
+            }
+            {selection.kind !== "window" && (
               <>
                 <button
                   type="button"

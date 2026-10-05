@@ -1,5 +1,5 @@
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import { editablePoints } from "../../lib/bim/transforms.ts";
+import { editablePoints } from "./transforms.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
