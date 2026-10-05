@@ -1,5 +1,48 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Fensteroeffnungen an Eckkonturen geprueft — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #113 nach Freigabe normal gemergt (2819867). Entwicklungszweig:
+feat/corner-opening-check gegen fix/reference-selection-lifecycle.
+
+inspectCornerOpenings validiert ein Projekt und leitet Eckkontur sowie volle
+Oeffnungsgrundflaechen aus demselben Snapshot ab. Bericht je stabiler Fenster-/Wand-ID:
+contained, touching oder outside sowie vorzeichenbehaftete Abstaende in Metern
+zu jeder Begrenzung. Die seitlichen Durchbrueche gehoeren zur Fenstergeometrie;
+sie zaehlen allein nicht als Endberuehrung. Gehrung und entferntes Wandende werden
+getrennt ausgewiesen. Negative Abstaende bedeuten Ueberschreitung, innerhalb der
+numerischen Modell-Metertoleranz wird touching gemeldet. Kein Mindestabstand.
+
+Neue Dateien: domain/elements/wall/corner-openings.ts und dessen Tests sowie
+geometry/projections/half-plane.ts. Keine Modellmutation, Sichtbarkeitsfilter,
+Fensterueberlappungsregel, Verbindungsspeicherung oder UI-/IFC-Anbindung.
+Andere Wandhosts werden nicht bewertet. Projektvalidierung bleibt vorgeschaltet;
+ein ungueltiger Parameter ist kein normaler Kollisionsbefund.
+
+Pruefung: 426 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler
+und 6 bekannte Warnungen. Sechs neue Tests decken mittige Fenster, neun Offsetpaare
+auf beiden Hosts, Beruehrung/kleinen Abstand/Ueberschreitung, entferntes Wandende,
+Rotation/Spiegelung/Translation/Achsumkehr, Sichtbarkeit, Snapshotwechsel und
+ungueltige Eingaben ab. git diff --check bestanden. Keine neue Browserfunktion;
+praktische Abnahme der Anschlussbedienung bleibt bis zur Integration ausstehend.
+
+Angefragte Produktentscheidungen fuer die spaetere Aktion: Beruehrung einer
+Oeffnung an der Gehrung zulassen oder zunaechst abweisen; nach automatischem Loesen
+wieder gerade Abschluesse oder Gehrungsform erhalten. Solange keine Antwort
+vorliegt, bleiben dies offene Fragen, keine Zustimmung durch Schweigen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Die gemeinsame Ableitung von 3D-Flaechen
+und Volumen aus den geprueften Anschlusskonturen ergaenzen, einschliesslich voll
+enthaltener rechteckiger Fensteroeffnungen. Bestehende nicht verbundene Waende
+unveraendert behandeln. Reine abgeleitete Geometrie ohne Schema-/UI-Freischaltung;
+Abstand/Behandlung beruehrender Oeffnungen nicht eigenmaechtig entscheiden.
+Nachweise: 2,80-m-Extrusion der neun Konturfaelle, geschlossene Aussenhuelle je
+Wand-ID, keine internen Zellnaehte, Oeffnungsabzug nur einmal und gleiche Flaechen-
+/Volumenwerte bei Richtungswechsel. Ergebnis muss spaeter fuer Renderer/Picking
+und IFC aus derselben fachlichen Quelle verwendbar sein. Keine zweite Modellkopie.
+
+
 ## Aktueller Stand: reine Wand-Eckkonturen umgesetzt — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -23,7 +66,7 @@ nicht Teil dieser Bruttokonturen. Keine neue sichtbare Funktion im Browser.
 Praktische Abnahme aktuell anhand der dokumentierten Koordinaten und Testresultate,
 nicht durch Aneinanderschieben zweier Waende in der Anwendung.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Eine reine Domain-Pruefung der vorhandenen
+**Historischer, inzwischen umgesetzter Folgeauftrag:** Eine reine Domain-Pruefung der vorhandenen
 Fensteroeffnungen gegen diese abgeleiteten Anschlusskonturen ergaenzen. Vollstaendige
 Oeffnungsgrundflaeche mit Wandstaerke, bodyOffset und relativer Position aus denselben
 Modellparametern ableiten; voll enthaltene Oeffnungen versus Schnitt mit der schraegen

@@ -225,3 +225,23 @@ TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Diese Zahlen
 ersetzen nicht die noch fehlende 2D-/3D-/IFC-Abnahme einer produktiven Verbindung.
 Der einzige aktive Folgeauftrag steht oben in DEVELOPMENT_PLAN.md: geometrischer
 Oeffnungsbefund gegen die abgeleiteten Konturen.
+
+## Geometrischer Oeffnungsbefund implementiert — 05.10.2026
+
+inspectCornerOpenings (corner-openings.ts) klassifiziert volle Fenstergrundflaechen
+gegen die Gehrung und weitere Konturbegrenzungen. Ergebnis pro Fenster mit ID,
+Footprint und Abstand je Begrenzung: contained/touching/outside. Kein boolescher
+Produktentscheid; eine spaetere Application-Aktion muss daraus ihre Zulassung
+ableiten. Seitlicher Durchbruch allein zaehlt nicht als Endberuehrung.
+
+Beispiel ohne Versatz: Wand A (0;0) bis (3;0), Staerke 0,36. Fensterbreite 1,20,
+Mitte bei 1,50: contained. Mitte bei 2,22: touching, weil eine Ecke x=2,82
+erreicht. Mitte bei 2,30: outside, obwohl der Fenstermittelpunkt noch im Wandkoerper
+liegt. Bei Fensterbeginn x=0 wird Beruehrung am entfernten Ende separat gemeldet.
+Numerische Toleranz ist kein zusaetzlicher fachlicher Mindestabstand.
+
+426 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler/6 Warnungen.
+Keine gespeicherte Verbindung und keine sichtbare Anschlussfunktion. Offen bzw.
+im Nutzerchat angefragt: genaue Beruehrung zulassen; gerade oder erhaltene schraege
+Endkappen beim automatischen Loesen. Der naechste geometrische Schritt steht oben
+in DEVELOPMENT_PLAN.md.

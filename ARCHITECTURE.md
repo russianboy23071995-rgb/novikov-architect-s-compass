@@ -1468,3 +1468,19 @@ uses the existing metre tolerance, not screen snapping. Right-angle dot-product
 tolerance is dimensionless 1e-10. Invalid/too-short geometry throws; no clamping.
 Contours have positive winding and local computed area; converted world geometry
 is validated too. No runtime consumers, schema changes or UI command yet.
+
+## Corner opening inspection — 2026-10-05
+
+inspectCornerOpenings in domain/elements/wall validates one Project, resolves two
+explicit wall/endpoint targets, and derives gross contours plus full-thickness
+window footprints from that snapshot. No external/stale contour is accepted.
+Generic measureHalfPlane in geometry/projections returns a signed metre clearance
+and inside/touching/outside using the existing model tolerance. It knows no BIM.
+The domain report retains window/wall IDs and separate side/far-end/join findings.
+Normal contact with the two longitudinal sides is expected for a through-opening;
+it alone does not cause the aggregate touching status. Any outside half-plane
+wins; otherwise join/far-end contact yields touching, else contained. Convexity
+comes from the current validated right-angle corner derivation.
+No clearance margin, window-overlap policy, join eligibility decision, visibility
+filter, mutation or rendering/export integration is introduced. The report does
+not approve boundary-touching windows as a product rule.
