@@ -1,19 +1,20 @@
 # Erster Wand-Eckanschluss: Arbeitsentwurf
 
 Stand: 05.10.2026. Codebasis: Integrationszweig `fix/reference-selection-lifecycle`,
-Commit `e65105a` nach Merge von PR #106. Dieser Auftrag plant; er implementiert
-keine Anschlussgeometrie und entscheidet keine offenen Nutzerfragen.
+Commit `39b5b81` nach Merge von PR #111. Dieser Auftrag aktualisiert die Planung;
+Anschlussgeometrie ist weiterhin nicht implementiert. Die unten datierten
+Nutzerentscheidungen sind verbindlich; technische Vorschlaege bleiben getrennt.
 
 ## Nachgewiesener Stand
 
 | Bereich | Vorhandener Pfad | Bedeutung fuer Anschluesse |
 | --- | --- | --- |
-| Parameter und Validierung | `src/domain/project/schema.ts` | Wand hat Achsanfang/-ende, Staerke, Hoehe und Ebene; keine Anschlussrelation, kein Achsversatz. Schema 4. |
+| Parameter und Validierung | `src/domain/project/schema.ts` | Wand hat Achsanfang/-ende, Staerke, Hoehe, Ebene und bodyOffset. Schema 5; keine Anschlussrelation. |
 | Aenderungen | `src/lib/bim/model.ts`, `src/application/direct-edit/transforms.ts` | Validierte immutable Snapshots. Ganzelementbewegung erhaelt relative Fensterpositionen. Einzelne Wand wird geaendert; Nachbarwand folgt nicht automatisch. |
 | Grundriss | `src/components/cad/BimPlan.tsx`, `src/rendering/viewport/layer-display.ts` | Rotiertes Rechteck pro Wand, getrennte Fensterdarstellung. Keine gemeinsame Anschlusskontur. |
 | 3D | `src/lib/bim/geometry.ts` | `buildSolid` erzeugt je Wand belegte Zellen um Oeffnungen. Keine wanduebergreifende Vereinigung; ueberlappende Wandvolumen werden mehrfach summiert. |
 | IFC | `src/lib/bim/ifc.ts` | Eigenes rechteckiges Extrusionsprofil je Wand, separate Oeffnung/Voids. Eine reine 3D-Korrektur wuerde IFC nicht mitkorrigieren. |
-| Fang und Griffe | `src/application/snapping/project-references.ts`, `src/rendering/viewport/wall-foot-sources.ts` | Achsenden/Mitte und um halbe Staerke versetzte Ecken; reale 3D-Fusskanten aus Flächen. Nach Anschlussaenderung gemeinsam aktualisieren. |
+| Fang und Griffe | `src/application/snapping/project-references.ts`, `src/rendering/viewport/wall-foot-sources.ts` | Achsenden/Mitte bleiben fest; Koerperecken aus domain/elements/wall/body.ts enthalten bodyOffset +/- halbe Staerke; reale 3D-Fusskanten aus Flaechen. Nach Anschlussaenderung gemeinsam aktualisieren. |
 | History/Datei | `src/lib/bim/history.ts`, `src/interop/project-file/load.ts` | Validierte Snapshots, Migration. Dauerhafte Anschlussdaten benoetigen eine ausdrueckliche Schemaentscheidung. |
 
 Fenster passen heute in die Achslaenge und Wandhoehe. Ueberlappende Fenster werden
@@ -60,7 +61,7 @@ an Primaerquellen pruefen und mit dem bestehenden Archicad-Import abnehmen.
 Die aktuelle Rechteck-Exportfunktion nicht als ausreichenden Nachweis ansehen.
 
 Vorlaeufig vom ersten Versuch ausschliessen: T-/Mehrfachknoten, spitze Winkel,
-verschiedene Staerken/Hoehen, Schichtaufbau, versetzte Achsen und Oeffnungen in der
+verschiedene Staerken/Hoehen, Schichtaufbau, nicht gemeinsame Achsenden und Oeffnungen in der
 veraenderten Endzone. Solche Faelle muessen erkennbar unbehandelt bleiben; keine
 heimliche Reparatur oder Loeschung. Keine neuen pauschalen Randabstaende erfinden.
 
@@ -69,16 +70,17 @@ heimliche Reparatur oder Loeschung. Keine neuen pauschalen Randabstaende erfinde
 | Frage | Noch festzulegen |
 | --- | --- |
 | Achsenwechsel N45 | Entschieden 05.10.2026: Zeichenachse bleibt fest, Wandkoerper wird quer dazu versetzt. |
-| Anschlussabsicht | Automatisch bei gemeinsamem Ende oder ausdruecklich erzeugte Verbindung? Abgeleitete Nachbarschaft oder gespeicherte Relation? |
-| Verbundene Bearbeitung | Folgt der Nachbar beim Bewegen einer Ecke, loest sich der Anschluss oder wird die Aktion begrenzt? Keine implizite Verknuepfung. |
+| Anschlussabsicht | Entschieden 05.10.2026: bewusst mit „Ecke verbinden“. Gespeicherte Relation ist technischer Vorschlag, noch nicht implementiert. |
+| Verbundene Bearbeitung | Entschieden 05.10.2026: Einzelwandbewegung loest Verbindung automatisch. Verhalten einer explizit gemeinsam bearbeiteten Ecke bleibt separat festzulegen. |
 | Unterschiedliche Staerken | Gehrung, durchlaufende Wand oder andere fachliche Prioritaet; Ebenen sind keine AssemblyLayer. |
-| Wandgriff bei Drehung | Bisher wird die Achse um das Griffdelta geaendert; die danach neu berechnete Aussenkante muss nicht exakt am Ziel liegen. Vor Anschlussbearbeitung klären. |
+| Wandgriff bei Drehung | Fuer unabhaengige Waende korrigiert: endpointAtOffsetTarget trifft die Koerperecke auch mit bodyOffset (PR #110, Regressionstest). Ein kuenftiger Gehrungsgriff ist noch kein vorhandener Einzelwandgriff. |
 | Oeffnungs-Endzone | Welche Oeffnungen sind dort zulaessig, wie wird eine kollidierende Aenderung behandelt? |
 
 ## Geplante Anschluss-Abnahmekriterien
 
 Bei spaeterer Umsetzung: obiges 3.00/0.36/2.80-m-Beispiel sowie vertauschte
-Wandreihenfolge und umgekehrte Achsrichtungen liefern dieselbe physische Kontur;
+Wandreihenfolge liefern dieselbe physische Kontur. Bei umgekehrter Achsrichtung
+muss auch das Offsetvorzeichen wechseln, um dieselbe physische Wand zu vergleichen;
 keine Luecke, keine doppelt belegte Eckflaeche. Gemeinsame Konturgrenzen stimmen in
 2D/3D/IFC ueberein. Laengen-/Staerkenaenderung, Undo/Redo, Speichern/Laden,
 Sichtbarkeitsfilter und veralteter Zielkontext werden geprueft. Fenster ausserhalb
@@ -104,3 +106,104 @@ sichtbar, ohne die offenen Anschlussentscheidungen vorwegzunehmen.
 
 
 Numerischer Wandkoerperversatz ist durchgaengig implementiert; Anschlussfragen bleiben offen. Der einzige aktive Folgeauftrag steht am Anfang von DEVELOPMENT_PLAN.md (Anschlussentwurf gegen Koerperversatz pruefen).
+
+## Abgleich mit Koerperversatz und Nutzerentscheidungen — 05.10.2026
+
+### Verbindliche Bedienentscheidungen
+
+1. Eine Verbindung wird bewusst ueber **Ecke verbinden** erzeugt. Gleiche Endpunkte,
+   Hover, Fang oder reine Naehe erzeugen keine Anschlussrelation.
+2. Eine **Einzelwandbewegung loest ihre Verbindung automatisch**. Sie verlangt
+   keinen vorgeschalteten Befehl „Verbindung loesen“. Die andere Wand wird dadurch
+   nicht automatisch mitbewegt. Der Vorschlag „erst manuell loesen“ ist verworfen.
+3. Bestehende Entscheidung N45 bleibt: Offsetaenderung haelt die Zeichenachse fest.
+
+Technische Konsequenz fuer eine spaetere Application-Aktion: Loesen aller
+betroffenen Relationen und Verschieben gehoeren in denselben validierten
+Vorschau-/Commit-Snapshot und einen Undo-Schritt. Escape/ungueltiges Ziel laesst
+Relationen und Geometrie unveraendert; Undo stellt auch die Verbindungen wieder her.
+Kein vorzeitiges Loesen beim blossen Beginn der Mausgeste. Stabile Wand-IDs und
+Fensterbindungen bleiben bestehen. Text/Voice/AI muessen dieselbe Aktion aufrufen.
+
+Nicht durch diese Antwort entschieden: gemeinsamer Eckgriff, Aendern eines einzelnen
+Achs-Endpunkts, Laengen-/Staerken-/Offsetaenderung verbundener Waende, Loeschen sowie
+Form der verbleibenden Endkappen beim Loesen. Rechteckige Einzelwandkappen koennen
+beim Loesen auch den sichtbaren Abschluss der unbewegten Wand veraendern. Das muss
+in der spaeteren Vorschau erkennbar sein, bevor diese Aktion produktiv wird.
+
+### Rechenbeispiel: tatsaechliche Seiten statt gemeinsamer Achspunkt
+
+Alle Masse in Metern, ohne Fenster. A: (0;0) nach (3;0), B: (3;0) nach (3;3),
+beide 0,36 stark und 2,80 hoch. Der Achsknoten C=(3;0) bleibt immer fest.
+a ist bodyOffset von A, b von B, h=0,18. Positive Offsets liegen links der
+jeweiligen Zeichenrichtung: A nach oben, B nach links.
+
+Die Seiten von A liegen bei y=a-h und y=a+h, die von B bei x=3-b-h und x=3-b+h.
+Der vorgeschlagene Gehrungsabschnitt verbindet:
+
+- innere Ecke I=(3-b-h; a+h), Schnitt der inneren Seiten;
+- aeussere Ecke O=(3-b+h; a-h), Schnitt der aeusseren Seiten.
+
+I und O werden aus unendlich verlaengerten Seiten bestimmt, nicht aus den heutigen
+endlichen Rechteckkanten. Die benoetigte Verlaengerung/Verkuerzung der Wandkoerper
+wird erst durch die ausdrueckliche Verbindung zugelassen. start/end bleiben C bzw.
+die entfernten Endpunkte; Achslaenge und Koerperseitenlaengen sind unterschiedlich.
+
+| a | b | I | O | Summe Grundflaechen m² |
+| --- | --- | --- | --- | --- |
+| -0.18 | -0.18 | (3.00; 0.00) | (3.36; -0.36) | 2.2896 |
+| -0.18 | 0.00 | (2.82; 0.00) | (3.18; -0.36) | 2.2248 |
+| -0.18 | 0.18 | (2.64; 0.00) | (3.00; -0.36) | 2.1600 |
+| 0.00 | -0.18 | (3.00; 0.18) | (3.36; -0.18) | 2.2248 |
+| 0.00 | 0.00 | (2.82; 0.18) | (3.18; -0.18) | 2.1600 |
+| 0.00 | 0.18 | (2.64; 0.18) | (3.00; -0.18) | 2.0952 |
+| 0.18 | -0.18 | (3.00; 0.36) | (3.36; 0.00) | 2.1600 |
+| 0.18 | 0.00 | (2.82; 0.36) | (3.18; 0.00) | 2.0952 |
+| 0.18 | 0.18 | (2.64; 0.36) | (3.00; 0.00) | 2.0304 |
+
+Vorgeschlagene Konturen (gegen Uhrzeigersinn):
+A=[(0;a-h), O, I, (0;a+h)], B=[O, (3-b+h;3), (3-b-h;3), I].
+Ihre Innenflaechen liegen auf entgegengesetzten Seiten derselben Naht O–I.
+Flaeche A=0,36*(3-b), B=0,36*(3-a); Volumen ohne Fenster=Summe*2,80.
+Die Mengen sind Sollwerte fuer diese kuenftigen Konturen, keine Messung der
+aktuellen ungejointen Rechteckkoerper. Eine reine Vereinigung der bisherigen
+Rechtecke reicht nicht: Je nach Offset muss die Ecke Material ergaenzen.
+
+### Begrenzung und Datenfluss des naechsten Geometrieschritts (Vorschlag)
+
+- Genau zwei Waende, gleiche Staerke/Hoehe, gemeinsamer Achs-Endpunkt, 90 Grad.
+  Fuer den ersten Schritt |bodyOffset| <= halbe Staerke; Null und gemischte
+  Vorzeichen explizit testen. Andere Offsets bleiben im bestehenden Modell erlaubt,
+  sind lediglich noch nicht fuer diesen vorgeschlagenen Anschluss unterstuetzt.
+- Endpunktindizes stabil adressieren, nicht die Array-Reihenfolge als Identitaet
+  verwenden. In lokale einlaufende/auslaufende Richtungen normalisieren; beim
+  Richtungswechsel Vorzeichen und linke/rechte Seite korrekt umordnen.
+- Domain kennt Wandparameter/Anschlussabsicht und liefert valide Konturen je ID.
+  Geometry liefert nur Linien-/Polygonmathematik. Keine Renderer-Sonderkorrektur.
+- Technischer Vorschlag: spaeter explizite Relation mit Wand-IDs und Endpunktindizes
+  persistieren, statt Verbindung nach jedem Modellwechsel aus Naehe zu erraten.
+  Konkretes Schema erst mit der Application-Aktion festlegen; jetzt Schema 5 behalten.
+- Zuerst reine Konturableitung ohne Produktiv-Anbindung. Anschliessend muessen
+  Grundriss, Solid/Mengen, Picking/Fang, Griffe und IFC gemeinsam angebunden werden,
+  bevor „Ecke verbinden“ im UI aktiviert wird. Oeffnungsprofile duerfen nicht
+  unveraendert in bereits weggeschnittenes Material reichen.
+
+### Ergaenzte Abnahme und verbleibende Fragen
+
+Geometrienachweis fuer den Folgeauftrag: neun Tabellenfaelle, Rotation/Translation,
+vertauschte Wandreihenfolge und richtungsumgekehrte Eingaben mit negiertem Offset.
+Einfache positive Konturen, gleiche Naht, disjunkte Innenflaechen, korrekte Mengen,
+keine Aenderung von IDs/start/end/Offset. Zu kurze Waende oder degenerierte Konturen
+muessen scheitern, nicht geklemmt oder automatisch repariert werden. T-/Mehrfach-
+knoten, ungleiche Staerken/Hoehen und Oeffnungen im Anschlussbereich bleiben offen.
+
+Vor UI-Anbindung festzulegen: gemeinsame Eckbearbeitung und Endkappen beim Loesen;
+Oeffnungs-Endzonen und zulassige Aenderungen verbundener Waende. Die aktuelle
+Fenster-Achslaengenpruefung beweist keinen Abstand zur schraegen Endbegrenzung.
+
+Planungsnachweis am 05.10.2026: Alle neun Rechenbeispiele per Node und vorhandenem
+validateSimplePolygon geprueft, Flaechenformeln und entgegengesetzte Seiten der Naht
+bestaetigt. Lokales Pruefskript outputs/corner-offset-check.mjs ausserhalb des Repos.
+Das ist noch kein Test einer Anschlussimplementierung. Keine Laufzeitdatei geaendert;
+409 Tests/TypeScript/Build und Lint 0 Fehler/6 Warnungen bleiben der Nachweis aus
+PR #111, nicht erneut ausgefuehrte Pruefungen dieses Dokumentationsauftrags.
