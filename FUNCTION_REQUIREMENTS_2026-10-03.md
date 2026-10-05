@@ -143,3 +143,7 @@ und offene Endkappen-/Eckgriff-/Öffnungsfragen: [Wand-Eckanschlussentwurf](docs
 N44-Geometriegrundlage umgesetzt: domain/elements/wall/corner.ts mit 11 neuen Tests.
 Bruttokonturen ohne Öffnungen, UI, persistente Relation oder IFC-Anbindung;
 automatische Verbindung bleibt ausgeschlossen.
+
+N44/Oeffnungsabhaengigkeit: geometrischer Fensterbefund gegen Eckkonturen umgesetzt
+(corner-openings.ts), ohne Zulassungsregel fuer Beruehrung, neue Randabstaende oder
+UI-Anbindung. Bestehende Fenster bleiben unveraendert.
