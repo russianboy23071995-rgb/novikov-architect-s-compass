@@ -33,7 +33,8 @@ export function editInteraction(
   cancel: () => void,
 ): ToolInteraction {
   const axis = numericMoveAxis(session);
-  const polar = ["move", "point"].includes(session.action) && session.target.kind !== "window";
+  const polar =
+    ["move", "point", "insert"].includes(session.action) && session.target.kind !== "window";
   return {
     identity: session,
     snapping: editSnapPolicy(session),

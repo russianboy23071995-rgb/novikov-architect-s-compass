@@ -1,3 +1,5 @@
+import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
+import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
@@ -6,7 +8,11 @@ import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
-import { pickReferencePoints, pickReferenceSegments } from "@/rendering/viewport/reference-picking";
+import {
+  pickContourEdge,
+  pickReferencePoints,
+  pickReferenceSegments,
+} from "@/rendering/viewport/reference-picking";
 import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
@@ -46,7 +52,13 @@ export type BimPlanProps = {
   draftFill?: Hatch["fill"] | undefined;
   snap: boolean;
   ortho: boolean;
-  onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
+  onSelect: (
+    selection: Selection,
+    anchor?: Point,
+    index?: number,
+    modelPoint?: Point,
+    edgeIndex?: number,
+  ) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
   drawingTarget?: Point | null | undefined;
@@ -354,11 +366,15 @@ export function BimPlan({
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
+        const point = rawPoint(event);
+        const ring = closedContour(project, { kind, id });
+        const edge = point && ring ? pickContourEdge(ring, point, camera.pixelsPerMetre) : null;
         onSelect(
           { kind, id },
           { x: event.clientX, y: event.clientY },
           undefined,
-          rawPoint(event) ?? undefined,
+          edge?.point ?? point ?? undefined,
+          edge?.index,
         );
       }
     },
@@ -544,18 +560,29 @@ export function BimPlan({
         </g>
       )}
       {plan.hatches.map((hatch) => (
-        <polygon
-          key={hatch.id}
-          {...selectProps("hatch", hatch.id)}
-          points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-          fill={hatch.fill.color}
-          fillOpacity={hatch.fill.opacity}
-          stroke={selection?.id === hatch.id ? "#cbd5e1" : "transparent"}
-          strokeWidth={2}
-          vectorEffect="non-scaling-stroke"
-          pointerEvents="all"
-          className="cursor-pointer outline-none focus-visible:stroke-sky-300"
-        />
+        <g key={hatch.id}>
+          <polygon
+            {...selectProps("hatch", hatch.id)}
+            points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+            fill={hatch.fill.color}
+            fillOpacity={hatch.fill.opacity}
+            stroke="transparent"
+            strokeWidth={12}
+            vectorEffect="non-scaling-stroke"
+            pointerEvents="all"
+            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+          />
+          {selection?.id === hatch.id && (
+            <polygon
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke="#cbd5e1"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+        </g>
       ))}
       {plan.walls.map((wall) => {
         const length = wallLength(wall);
@@ -664,6 +691,55 @@ export function BimPlan({
       {!drawing &&
         !editSession &&
         selection &&
+        closedContour(project, selection)?.map((a, edgeIndex, ring) => {
+          const b = ring[(edgeIndex + 1) % ring.length]!;
+          const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          const shape = validateSimplePolygon(ring);
+          const length = Math.hypot(b.x - a.x, b.y - a.y);
+          const sign = shape.valid && shape.signedArea > 0 ? 1 : -1;
+          const nx = (-(b.y - a.y) / length) * sign,
+            ny = ((b.x - a.x) / length) * sign;
+          const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
+          const cx = point.x + nx * 12 * size,
+            cy = point.y + ny * 12 * size;
+          const arrow = (along: number, across: number) =>
+            `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
+          return (
+            <path
+              key={`edge-${edgeIndex}`}
+              d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
+              fill="none"
+              stroke="#0284c7"
+              strokeWidth={2}
+              className="cursor-pointer outline-none focus-visible:stroke-blue-800"
+              vectorEffect="non-scaling-stroke"
+              role="button"
+              tabIndex={0}
+              aria-label={`Konturseite ${edgeIndex + 1}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelect(
+                  selection,
+                  { x: event.clientX, y: event.clientY },
+                  undefined,
+                  point,
+                  edgeIndex,
+                );
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  onSelect(selection, { x: bounds.x, y: bounds.y }, undefined, point, edgeIndex);
+                }
+              }}
+            />
+          );
+        })}
+      {!drawing &&
+        !editSession &&
+        selection &&
         handles.map(({ point, index, label }) => (
           <circle
             key={label}
@@ -707,7 +783,7 @@ export function BimPlan({
           <circle
             cx={resolvedEdit.point.x}
             cy={-resolvedEdit.point.y}
-            r={0.055}
+            r={5 / camera.pixelsPerMetre}
             fill={editError ? "#dc2626" : "#0284c7"}
           />
           {editError && (

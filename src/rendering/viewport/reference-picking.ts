@@ -4,6 +4,28 @@ import type { SnapSegment } from "../../constraints/snapping/segment-references.
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
 import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
+
+/** Pick a closed contour boundary with a zoom-independent CSS-pixel tolerance. */
+export function pickContourEdge(
+  ring: readonly Point2[],
+  point: Point2,
+  pixelsPerMetre: number,
+  radius = 6,
+) {
+  const metric = createIsotropicScreenMetric(pixelsPerMetre);
+  return (
+    ring
+      .map((start, index) => {
+        const hit = metric.projectSegment(point, start, ring[(index + 1) % ring.length]!);
+        return hit ? { ...hit, index } : null;
+      })
+      .filter(
+        (hit): hit is NonNullable<typeof hit> =>
+          hit !== null && Number.isFinite(hit.distance) && hit.distance <= radius,
+      )
+      .sort((a, b) => a.distance - b.distance || a.index - b.index)[0] ?? null
+  );
+}
 /** Hit original segment extents, never SVG DOM order or nearest midpoint alone. */
 export function pickReferenceSegments(
   segments: readonly SnapSegment[],

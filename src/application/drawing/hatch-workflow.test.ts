@@ -229,3 +229,253 @@ test("hatch corner rejects crossed or collapsed contours, stale context and inva
   }
   assert.equal(editingReducer(state, { type: "cancel" }).history.present, state.history.present);
 });
+
+import { closedContour } from "../direct-edit/contour.ts";
+import { editContourEdge, contourEdge } from "../../geometry/polygons/edit-edge.ts";
+import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+
+test("closed contour edge edits share transactions for hatches and explicitly closed polylines", () => {
+  for (const kind of ["hatch", "polyline"] as const)
+    for (const index of [0, 1, 2, 3])
+      for (const action of ["insert", "edge"] as const) {
+        const base = createProject("p", "s");
+        const created = createDrawing(
+          base,
+          base,
+          "contour",
+          kind === "hatch"
+            ? request
+            : {
+                kind: "line",
+                lineKind: "polyline",
+                points: [...points, points[0]!],
+                appearance: defaultLineAppearance,
+              },
+        );
+        const target = {
+          kind: kind === "hatch" ? ("hatch" as const) : ("line" as const),
+          id: "contour",
+        };
+        const a = points[index]!,
+          b = points[(index + 1) % 4]!,
+          anchor = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        const state = editingReducer(createEditingState(created), {
+          type: "begin",
+          target,
+          action,
+          index,
+          anchor,
+        });
+        assert.equal(state.error, "");
+        assert.equal(state.history.past.length, 0);
+        const session = state.session!,
+          normal = contourEdge(points, index).normal;
+        const pointer = { x: anchor.x + normal.x * 0.2, y: anchor.y + normal.y * 0.2 };
+        const adapter = editInteraction(
+          session,
+          session.base,
+          target,
+          () => {},
+          () => {},
+        );
+        assert.deepEqual(adapter.snapping!.origin.point, anchor);
+        adapter.validate(pointer);
+        const changed = editingReducer(state, {
+          type: "confirm",
+          session,
+          selection: target,
+          point: pointer,
+        });
+        assert.equal(changed.error, "");
+        const ring = closedContour(changed.history.present, target)!;
+        assert.equal(ring.length, action === "insert" ? 5 : 4);
+        if (action === "insert") assert.deepEqual(ring[index + 1], pointer);
+        else {
+          assert.ok(Math.abs(ring[index]!.x - a.x - normal.x * 0.2) < 1e-10);
+          assert.ok(Math.abs(ring[index]!.y - a.y - normal.y * 0.2) < 1e-10);
+        }
+        assert.equal(changed.history.past.length, 1);
+        assert.deepEqual(editingReducer(changed, { type: "undo" }).history.present, created);
+        assert.deepEqual(
+          readProjectFile(serializeProject(changed.history.present)),
+          changed.history.present,
+        );
+      }
+});
+
+test("parallel edge offset handles rotations, concavity and rejects collapse or ambiguous neighbours", () => {
+  for (const degrees of [0, 27, 90])
+    for (const reversed of [false, true]) {
+      const theta = (degrees * Math.PI) / 180;
+      const ring = (reversed ? [...points].reverse() : points).map((p) => ({
+        x: p.x * Math.cos(theta) - p.y * Math.sin(theta),
+        y: p.x * Math.sin(theta) + p.y * Math.cos(theta),
+      }));
+      for (let i = 0; i < 4; i++) {
+        const { a, b, normal } = contourEdge(ring, i),
+          anchor = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        const result = editContourEdge(ring, i, "edge", anchor, {
+          x: anchor.x + normal.x * 0.1,
+          y: anchor.y + normal.y * 0.1,
+        });
+        assert.equal(result.length, 4);
+        assert.ok(
+          Math.abs(
+            (result[(i + 1) % 4]!.x - result[i]!.x) * (b.y - a.y) -
+              (result[(i + 1) % 4]!.y - result[i]!.y) * (b.x - a.x),
+          ) < 1e-9,
+        );
+      }
+    }
+  assert.throws(() => editContourEdge(points, 0, "edge", { x: 1.5, y: 0 }, { x: 1.5, y: 2 }));
+  assert.throws(() => editContourEdge(points, 0, "edge", { x: 1.5, y: 0 }, { x: 1.5, y: 3 }));
+  assert.throws(() => editContourEdge(points, 0, "insert", { x: 1.5, y: 0 }, { x: 1.5, y: 3 }));
+  assert.throws(() => editContourEdge(points, 4, "insert", { x: 0, y: 0 }, { x: 1, y: 1 }));
+  assert.throws(() => editContourEdge(points, 0, "insert", { x: 1.5, y: 0 }, points[0]!));
+  const concave = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+    { x: 2, y: 1 },
+    { x: 0, y: 3 },
+  ];
+  assert.equal(editContourEdge(concave, 0, "edge", { x: 2, y: 0 }, { x: 2, y: -1 }).length, 5);
+  const collinear = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 3, y: 0 },
+    { x: 3, y: 2 },
+    { x: 0, y: 2 },
+  ];
+  assert.throws(() => editContourEdge(collinear, 0, "edge", { x: 0.5, y: 0 }, { x: 0.5, y: 1 }));
+});
+
+test("edge actions reject open/BIM targets and stale transactions without committing", () => {
+  const p = createProject("p", "s");
+  const open = createDrawing(p, p, "open", {
+    kind: "line",
+    lineKind: "polyline",
+    points,
+    appearance: defaultLineAppearance,
+  });
+  assert.equal(closedContour(open, { kind: "line", id: "open" }), null);
+  const refused = editingReducer(createEditingState(open), {
+    type: "begin",
+    target: { kind: "line", id: "open" },
+    action: "edge",
+    index: 0,
+    anchor: { x: 1.5, y: 0 },
+  });
+  assert.equal(refused.session, null);
+  assert.ok(refused.error);
+  const created = createDrawing(p, p, "h", request),
+    target = { kind: "hatch" as const, id: "h" };
+  const state = editingReducer(createEditingState(created), {
+      type: "begin",
+      target,
+      action: "edge",
+      index: 0,
+      anchor: { x: 1.5, y: 0 },
+    }),
+    session = state.session!;
+  const adapter = editInteraction(
+    session,
+    session.base,
+    target,
+    () => {},
+    () => {},
+  );
+  const numeric = adapter.preview("", "-0.25", null);
+  assert.deepEqual(numeric.point, { x: 1.5, y: -0.25 });
+  assert.deepEqual(editAtPointer(session, session.base, session.anchor), session.base);
+  assert.throws(() => editAtPointer(session, structuredClone(session.base), numeric.point));
+  const cancelled = editingReducer(state, { type: "cancel" });
+  const rejected = editingReducer(cancelled, {
+    type: "confirm",
+    session,
+    selection: target,
+    point: numeric.point,
+  });
+  assert.equal(rejected.history.past.length, 0);
+  assert.equal(rejected.history.present, state.history.present);
+  assert.ok(rejected.error);
+  const invalid = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: target,
+    point: { x: 1.5, y: 4 },
+  });
+  assert.equal(invalid.history.past.length, 1);
+  assert.equal(invalid.error, "");
+});
+
+import { capContourEdge } from "../../geometry/polygons/edit-edge.ts";
+import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
+test("edge cap stops acute triangles and rectangles at the last valid contour and returns freely", () => {
+  for (const ring of [
+    points,
+    [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 2, y: 3 },
+    ],
+    [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 0.01, y: 0.1 },
+    ],
+  ]) {
+    for (const reverse of [false, true]) {
+      const contour = reverse ? [ring[1]!, ring[0]!, ...ring.slice(2).reverse()] : ring;
+      const a = contour[0]!,
+        b = contour[1]!,
+        anchor = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const far = { x: anchor.x, y: 10 };
+      const capped = capContourEdge(contour, 0, anchor, far);
+      assert.ok(capped.y > 0 && capped.y < Math.max(...contour.map((p) => p.y)));
+      const valid = editContourEdge(contour, 0, "edge", anchor, capped);
+      assert.equal(validateSimplePolygon(valid).valid, true);
+      assert.deepEqual(capContourEdge(contour, 0, anchor, capped), capped);
+      const back = { x: anchor.x, y: 0.01 };
+      const limited = capContourEdge(contour, 0, anchor, back);
+      assert.ok(Math.abs(limited.y - back.y) < 1e-12);
+    }
+  }
+  assert.throws(() => capContourEdge(points, 0, { x: 1, y: 0 }, { x: Infinity, y: 0 }));
+});
+
+test("numeric preview and commit agree at a stretch cap with undo and a valid file roundtrip", () => {
+  const base = createProject("p", "s"),
+    p = createDrawing(base, base, "h", request),
+    target = { kind: "hatch" as const, id: "h" };
+  const state = editingReducer(createEditingState(p), {
+      type: "begin",
+      target,
+      action: "edge",
+      index: 0,
+      anchor: { x: 1.5, y: 0 },
+    }),
+    session = state.session!;
+  const adapter = editInteraction(
+    session,
+    session.base,
+    target,
+    () => {},
+    () => {},
+  );
+  const preview = adapter.preview("", "10", null);
+  assert.ok(preview.point.y > 1.9 && preview.point.y < 2);
+  const confirmed = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: target,
+    point: preview.point,
+  });
+  assert.equal(confirmed.error, "");
+  assert.deepEqual(confirmed.history.present, editAtPointer(session, session.base, preview.point));
+  assert.deepEqual(
+    readProjectFile(serializeProject(confirmed.history.present)),
+    confirmed.history.present,
+  );
+  assert.deepEqual(editingReducer(confirmed, { type: "undo" }).history.present, p);
+});
