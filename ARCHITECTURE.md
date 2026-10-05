@@ -1484,3 +1484,23 @@ comes from the current validated right-angle corner derivation.
 No clearance margin, window-overlap policy, join eligibility decision, visibility
 filter, mutation or rendering/export integration is introduced. The report does
 not approve boundary-touching windows as a product rule.
+
+## Derived corner solids — 2026-10-05
+
+geometry/solids/profile-openings.ts extrudes convex CCW profiles along Z with
+rectangular X/Z through-openings. X/Z partitioning subtracts opening unions once;
+only boundary faces are emitted. Coplanar external faces may remain subdivided.
+Slab intersections use original edges for identical shared vertices. Directed
+edge incidence is checked; non-manifold opening contacts and numerically
+inseparable cuts fail closed instead of silently dropping material. Faces have
+variable polygon vertex counts, not the legacy renderer's fixed quad contract.
+
+domain/elements/wall/corner-solid.ts validates and derives an explicit pair from
+one Project using existing contours/opening inspection. It returns disposable
+per-wall geometry and volumes, without changing Project, visibility or history.
+Local parametric side/cap coordinates are restored within model tolerance after
+world/local conversion; authoritative model parameters are never changed.
+Only contained openings are supported in this path. Rejection of touching is an
+implementation boundary, not a settled product rule. Existing buildSolid and
+normal project export are unchanged. Future renderer/IFC adapters must consume
+this shared domain derivation rather than calculate separate joins.

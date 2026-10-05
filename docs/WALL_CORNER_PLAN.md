@@ -245,3 +245,22 @@ Keine gespeicherte Verbindung und keine sichtbare Anschlussfunktion. Offen bzw.
 im Nutzerchat angefragt: genaue Beruehrung zulassen; gerade oder erhaltene schraege
 Endkappen beim automatischen Loesen. Der naechste geometrische Schritt steht oben
 in DEVELOPMENT_PLAN.md.
+
+## Abgeleitete 3D-Eckkoerper — 05.10.2026
+
+corner-solid.ts und geometry/solids/profile-openings.ts extrudieren die geprueften
+Konturen mit voll enthaltenen Fensteroeffnungen. Pro Wand stabile ID, Kontur,
+polygonale Flaechen mit Normalen und Volumen. Ueberlappende Oeffnungen werden als
+Vereinigung abgezogen; keine innenliegenden Zelltrennflaechen. Eigene Wandkoerper
+behalten ihre jeweilige geschlossene Stirnflaeche an der gemeinsamen Gehrungsnaht.
+Diese beiden Grenzflaechen bedeuten kein doppelt belegtes Volumen.
+
+Nicht enthalten: UI-Aktion, persistente Verbindung, Anwendung auf normale
+Darstellung oder IFC. Endberuehrende und ueberstehende Oeffnungen sind noch nicht
+unterstuetzt. Kantenkontakte zwischen Oeffnungen, die eine unregulaere Huelle
+erzeugen, werden ebenfalls gemeldet; bestehende Modellvalidierung bleibt gleich.
+Sehr nahe, numerisch nicht getrennt darstellbare Zellgrenzen werden nicht vereint
+oder repariert. 433 Tests bestanden; Mesh-Volumen und geschlossene Kanteninzidenz
+unabhaengig geprueft. TypeScript/Build erfolgreich; Lint 0 Fehler/6 Warnungen.
+Naechster Auftrag: isolierter IFC-Abnahmenachweis derselben fachlichen Geometrie,
+wie oben in DEVELOPMENT_PLAN.md festgelegt.

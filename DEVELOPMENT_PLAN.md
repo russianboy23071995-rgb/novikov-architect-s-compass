@@ -1,5 +1,47 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Eckkoerper mit Fensteroeffnungen abgeleitet — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #114 nach Nutzerfreigabe normal gemergt (bae0024). Entwicklungszweig:
+feat/corner-solid-geometry gegen fix/reference-selection-lifecycle.
+
+geometry/solids/profile-openings.ts extrudiert ein konvexes Profil und zieht die
+Vereinigung rechteckiger, durch die volle Staerke gehender Oeffnungen ab.
+Interne Zellflaechen werden nicht ausgegeben; coplanare Aussenflaechen duerfen
+unterteilt bleiben. Gemeinsame Schnittpunkte entstehen direkt aus Originalkanten,
+damit benachbarte Zellen identische Eckkoordinaten verwenden. Jede gerichtete
+Flaechenkante muss genau ein entgegengesetztes Gegenstueck besitzen; unregulaere
+Oeffnungskontakte und numerisch nicht trennbare Grenzen werden abgewiesen.
+
+domain/elements/wall/corner-solid.ts verwendet denselben validierten Projektstand,
+Eckkonturen und Oeffnungsbefund. Liefert je Wand-ID Kontur, orientierte polygonale
+Flaechen und Volumen sowie Gesamtvolumen des Paars. Nur contained-Oeffnungen sind
+hier unterstuetzt; touching/outside liefern eine ausdrueckliche Meldung. Dies ist
+keine neue Produktentscheidung zur Anschlusszulaessigkeit. Offene Regeln zu
+Beruehrung und Endkappen beim Loesen bleiben offen; „Freigabe und go“ beantwortet
+nicht die zuvor gestellten Auswahlfragen.
+
+Nachweis: 433 Tests bestanden, TypeScript/Build erfolgreich; ESLint 0 Fehler und
+6 bekannte Warnungen. Sieben neue Tests: neun Versatzfaelle, geschlossene Huelle,
+unabhaengiges vorzeichenbehaftetes Mesh-Volumen, Fensterlaibungen, ueberlappende/
+doppelte Oeffnungen, Drehung/Translation/Achsumkehr, unveraenderte andere Waende,
+Kontakt-/Fehlermeldungen und Oeffnungen am Fuss/Kopf. git diff --check bestanden.
+Keine neue UI-, Schema-, History-, Rendering- oder IFC-Anbindung. Keine sichtbare
+Aenderung im Browser; praktische Anschlussabnahme bleibt nach Integration offen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Einen begrenzten IFC-Adapter fuer die
+explizit gepruefte Eckgeometrie ergaenzen und die Exportgleichheit nachweisen.
+Normgerechte Profil-/Oeffnungsrepraesentation anhand primaerer IFC-Dokumentation
+pruefen; die bestehenden fachlichen Konturen und Oeffnungsparameter verwenden,
+keine eigene Gehrungsberechnung. Zunaechst nur isolierter Exportpfad fuer benannte
+Testpaare, keine automatische Verbindung und keine Umstellung des regulaeren
+Projekt-Exports. Bestehender Export bleibt unveraendert. Tests fuer Placement,
+Stabilitaet der IDs, Profile und reale Oeffnungen; kleines IFC-Abnahmemodell fuer
+Archicad bereitstellen. Importerfolg muss separat bestaetigt werden. Erst danach
+folgt die gemeinsame produktive Integration einschliesslich offener Bedienregeln.
+
+
 ## Aktueller Stand: Fensteroeffnungen an Eckkonturen geprueft — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -32,7 +74,7 @@ Oeffnung an der Gehrung zulassen oder zunaechst abweisen; nach automatischem Loe
 wieder gerade Abschluesse oder Gehrungsform erhalten. Solange keine Antwort
 vorliegt, bleiben dies offene Fragen, keine Zustimmung durch Schweigen.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Die gemeinsame Ableitung von 3D-Flaechen
+**Historischer, inzwischen umgesetzter Folgeauftrag:** Die gemeinsame Ableitung von 3D-Flaechen
 und Volumen aus den geprueften Anschlusskonturen ergaenzen, einschliesslich voll
 enthaltener rechteckiger Fensteroeffnungen. Bestehende nicht verbundene Waende
 unveraendert behandeln. Reine abgeleitete Geometrie ohne Schema-/UI-Freischaltung;

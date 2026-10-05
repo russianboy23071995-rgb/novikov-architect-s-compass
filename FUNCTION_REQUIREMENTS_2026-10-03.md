@@ -147,3 +147,8 @@ automatische Verbindung bleibt ausgeschlossen.
 N44/Oeffnungsabhaengigkeit: geometrischer Fensterbefund gegen Eckkonturen umgesetzt
 (corner-openings.ts), ohne Zulassungsregel fuer Beruehrung, neue Randabstaende oder
 UI-Anbindung. Bestehende Fenster bleiben unveraendert.
+
+N44-Geometrie: abgeleitete 3D-Eckkoerper mit voll enthaltenen rechteckigen
+Fensteroeffnungen und korrektem Vereinigungsabzug implementiert (corner-solid.ts).
+Keine produktive Verbindung, Renderer- oder IFC-Anbindung; Kontaktregeln bleiben
+offen. Bestehende nicht verbundene Waende unveraendert.
