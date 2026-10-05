@@ -1,3 +1,5 @@
+import { closedContour } from "./contour.ts";
+import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import { editablePoints } from "./transforms.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
@@ -29,6 +31,11 @@ export function editDirection(session: EditSession): Point2 | null {
     const window = session.base.storey.windows.find((w) => w.id === session.target.id)!;
     const wall = session.base.storey.walls.find((w) => w.id === window.wallId)!;
     return { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
+  }
+  if (session.action === "edge") {
+    const ring = closedContour(session.base, session.target);
+    if (!ring || session.index === null) throw new Error("Keine Konturkante gewählt.");
+    return contourEdge(ring, session.index).normal;
   }
   if (session.action === "x") return { x: 1, y: 0 };
   if (session.action === "y") return { x: 0, y: 1 };

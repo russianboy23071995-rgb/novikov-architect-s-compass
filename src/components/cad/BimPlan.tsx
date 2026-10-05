@@ -1,3 +1,4 @@
+import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
@@ -46,7 +47,13 @@ export type BimPlanProps = {
   draftFill?: Hatch["fill"] | undefined;
   snap: boolean;
   ortho: boolean;
-  onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
+  onSelect: (
+    selection: Selection,
+    anchor?: Point,
+    index?: number,
+    modelPoint?: Point,
+    edgeIndex?: number,
+  ) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
   drawingTarget?: Point | null | undefined;
@@ -661,6 +668,47 @@ export function BimPlan({
           />
         </g>
       ))}
+      {!drawing &&
+        !editSession &&
+        selection &&
+        closedContour(project, selection)?.map((a, edgeIndex, ring) => {
+          const b = ring[(edgeIndex + 1) % ring.length]!;
+          const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          return (
+            <rect
+              key={`edge-${edgeIndex}`}
+              x={point.x - 4 / camera.pixelsPerMetre}
+              y={-point.y - 4 / camera.pixelsPerMetre}
+              width={8 / camera.pixelsPerMetre}
+              height={8 / camera.pixelsPerMetre}
+              fill="white"
+              stroke="#929aa3"
+              strokeWidth={1.5}
+              vectorEffect="non-scaling-stroke"
+              role="button"
+              tabIndex={0}
+              aria-label={`Konturseite ${edgeIndex + 1}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelect(
+                  selection,
+                  { x: event.clientX, y: event.clientY },
+                  undefined,
+                  point,
+                  edgeIndex,
+                );
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  onSelect(selection, { x: bounds.x, y: bounds.y }, undefined, point, edgeIndex);
+                }
+              }}
+            />
+          );
+        })}
       {!drawing &&
         !editSession &&
         selection &&

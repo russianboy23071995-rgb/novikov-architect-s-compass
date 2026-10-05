@@ -11,6 +11,7 @@ export function DemandMenu({
   onPosition,
   onInfo,
   pointIndex,
+  edgeIndex,
   onAction,
   onReferences,
 }: {
@@ -20,6 +21,7 @@ export function DemandMenu({
   onPosition: (point: Point) => void;
   onInfo: () => void;
   pointIndex: number | null;
+  edgeIndex?: number | null;
   onAction: (action: EditAction) => void;
   onReferences?: (() => void) | undefined;
 }) {
@@ -115,6 +117,7 @@ export function DemandMenu({
         }}
       >
         ⠿ {summary?.title ?? "Fanghilfen"}
+        {summary && edgeIndex != null ? ` · Seite ${edgeIndex + 1}` : ""}
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
@@ -130,6 +133,24 @@ export function DemandMenu({
         )}
         {selection && summary && (
           <>
+            {edgeIndex != null && (
+              <>
+                <button
+                  type="button"
+                  className="rounded border p-1 text-left hover:bg-muted"
+                  onClick={() => onAction("insert")}
+                >
+                  Knicken
+                </button>
+                <button
+                  type="button"
+                  className="rounded border p-1 text-left hover:bg-muted"
+                  onClick={() => onAction("edge")}
+                >
+                  Seite strecken
+                </button>
+              </>
+            )}
             {selection.kind !== "window" && pointIndex !== null && (
               <>
                 <button
@@ -157,7 +178,7 @@ export function DemandMenu({
                 Element frei bewegen
               </button>
             )}
-            {
+            {edgeIndex == null && (
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"
@@ -165,7 +186,7 @@ export function DemandMenu({
               >
                 {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
               </button>
-            }
+            )}
             {selection.kind !== "window" && (
               <>
                 <button

@@ -140,7 +140,11 @@ export function CadWorkspace({
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   const [demandOpen, setDemandOpen] = useState(false);
-  const [pickedPoint, setPickedPoint] = useState<{ index: number | null; anchor: Point | null }>({
+  const [pickedPoint, setPickedPoint] = useState<{
+    index: number | null;
+    anchor: Point | null;
+    edgeIndex?: number | null;
+  }>({
     index: null,
     anchor: null,
   });
@@ -240,9 +244,19 @@ export function CadWorkspace({
     if (next === "wall" || next === "line" || next === "hatch") setMode("2D");
   };
 
-  const showSelection = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
+  const showSelection = (
+    next: Selection,
+    anchor?: Point,
+    index?: number,
+    modelPoint?: Point,
+    edgeIndex?: number,
+  ) => {
     cancelInteraction();
-    setPickedPoint({ index: index ?? null, anchor: modelPoint ?? null });
+    setPickedPoint({
+      index: index ?? null,
+      anchor: modelPoint ?? null,
+      edgeIndex: edgeIndex ?? null,
+    });
     setDemandOpen(Boolean(next));
     if (next && (anchor || next.id !== selection?.id)) {
       const point = anchor ?? lastPointer.current;
@@ -253,13 +267,19 @@ export function CadWorkspace({
     setModelError("");
   };
 
-  const selectElement = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
+  const selectElement = (
+    next: Selection,
+    anchor?: Point,
+    index?: number,
+    modelPoint?: Point,
+    edgeIndex?: number,
+  ) => {
     if (
       next &&
       !visibleLayerTarget(visibilityNow.current.project, visibilityNow.current.visibility, next)
     )
       return;
-    showSelection(next, anchor, index, modelPoint);
+    showSelection(next, anchor, index, modelPoint, edgeIndex);
   };
 
   const startEdit = (action: EditAction) => {
@@ -279,7 +299,10 @@ export function CadWorkspace({
       type: "begin",
       target: selection,
       action,
-      index: pickedPoint.index,
+      index:
+        action === "edge" || action === "insert"
+          ? (pickedPoint.edgeIndex ?? null)
+          : pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
     if (layout === "single" && !solidMove) setMode("2D");
@@ -594,6 +617,7 @@ export function CadWorkspace({
               position={demandPosition}
               onPosition={setDemandPosition}
               pointIndex={pickedPoint.index}
+              edgeIndex={pickedPoint.edgeIndex ?? null}
               onReferences={
                 mode === "2D"
                   ? () => {

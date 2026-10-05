@@ -1300,3 +1300,17 @@ Richtungsregel wie bei bisherigen Linien: Punkt 1 verwendet Punkt 2 als Nachbarn
 Praktischer Abnahmetest: Schraffur anklicken, beliebige Ecke waehlen, Punkt frei bewegen starten. Hilfsursprung muss sofort erscheinen; per Maus oder Winkel/Laenge verschieben. Danach Element frei bewegen von einer anderen Ecke starten; alle Punkte muessen denselben Versatz erhalten. X/Y und Achse testen, Undo nutzen. Ecke durch die gegenueberliegende Kante ziehen: keine ungueltige Kontur uebernehmen.
 
 Genau ein naechster Auftrag: die bereits vorgemerkte gemeinsame Rastersteuerung mit unabhaengigem Rasterfang und positiver Schrittweite sitzungsbezogen implementieren und fuer Zeichen- sowie Bewegungsaktionen pruefen. Schraffur-Kantenoffset, Muster und Sprachbefehle bleiben weitere Anforderungen.
+
+### Knicken und Seitenstrecken fuer geschlossene Konturen — 05.10.2026
+
+Nutzer priorisiert zwei Kantenaktionen fuer Schraffuren und geschlossene Polygone. Neuer Zweig feat/closed-contour-edges baut auf PR #101 auf; keine Freigabe fuer #101 in dieser Nachricht angenommen. Geschlossene Polygone entsprechen aktuell gespeicherten Schraffuren oder explizit geschlossenen Polylinien.
+
+Quadratische Griffpunkte in jeder Seitenmitte oeffnen das On-Demand-Menue mit Knicken und Seite strecken. Knicken fuegt einen Punkt zwischen die beiden Kantenecken ein; Maus oder gemeinsame Winkel-/Laengeneingabe bestimmt dessen Ziel, danach normale Eckbearbeitung. Seite strecken bindet an die Kantennormale, versetzt die Seite parallel und schneidet sie mit beiden Nachbarkanten. Rechtecke bleiben dadurch rechtwinklig. Kantenwahl wird getrennt von der Eckwahl gehalten; der alte unspezifische Achsbefehl wird im Kantenkontext nicht angeboten. Ganzelement- und X/Y-Bewegung bleiben verfuegbar.
+
+Gemeinsame Geometrie- und Application-Adapter, bestehende Ursprungsreferenz, Fangengine, Hilfseingabe, Abbruch und History. Keine automatische Aufloesung kollinearer Nachbarkanten: bei fehlendem eindeutigen Schnitt wird die Bearbeitung abgewiesen. Kollabierte/gekreuzte Konturen und Richtungsumkehr werden nicht uebernommen. Kein Lochsystem, offene Polylinien, BIM-Kanten oder Skalierung in diesem Auftrag.
+
+396 Tests bestanden; TypeScript, Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Drei neue Tests mit Unterfaellen pruefen beide Elementarten, jede Rechteckkante, Einfuegen, Versatz, Rotationen, beide Umlaufrichtungen, Konkavitaet, degenerierte Nachbarn, ungueltige Ergebnisse, numerischen Versatz, Snapshot-/Abbruchschutz, History und JSON. Browser: vier Seitengriffe und kontextuelle Aktionen, Seitenbewegung und neuer fuenfter Punkt bestaetigt, Undo/Redo ausgefuehrt. Screenshot outputs/contour-edge-edit.png. Rotations-/Konkavitaetsfaelle automatisiert, nicht alle manuell geprueft.
+
+Abnahme: Rechteckschraffur oder geschlossene Polylinie waehlen, quadratischen Seitengriff klicken. Seite strecken starten und senkrecht ziehen oder Laenge eingeben; Rechteck muss breiter/schmaler bleiben. Andere Seite waehlen, Knicken und Ziel setzen; ein neuer Punkt entsteht. Undo muss genau die letzte Aktion zuruecknehmen. Kantenkollaps darf nicht gespeichert werden.
+
+Genau ein naechster Auftrag: zentrale Rastersteuerung mit einstellbarer positiver Schrittweite und unabhaengig schaltbarem Rasterfang sitzungsbezogen ergaenzen; fuer Zeichnen, Eckbewegung und Seitenstrecken gemeinsam pruefen.

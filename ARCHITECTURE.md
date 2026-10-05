@@ -1307,3 +1307,19 @@ Axis/stretch reuse the existing neighbouring-point convention: vertex 0 uses
 vertex 1, other vertices use their predecessor. The numeric helper names the
 chosen point direction. Stretch means one point along that edge direction, not
 parallel displacement of a whole contour edge. Whole-edge offset remains pending.
+
+## Closed contour edge editing — 2026-10-05
+
+Schraffuren and explicitly closed polylines share insert/edge EditActions. A
+separate ephemeral edgeIndex in UI selection prevents mistaking a side grip for
+a vertex; EditSession.index identifies the chosen edge for these two actions.
+Square midpoint grips expose the actions with keyboard and pointer support.
+Insert (Knicken) adds a vertex after the chosen edge's start at the pointer or
+precision-input target; the existing point action can edit it subsequently.
+Edge (Seite strecken) constrains movement to the edge normal, shifts its supporting
+line and intersects it with both neighbouring supporting lines. Rectangle angles
+are preserved. Collinear neighbours without a unique intersection are rejected,
+as are collapse, self-intersection and reversed winding. No implicit repair or
+vertex removal. Geometry is in geometry/polygons/edit-edge; Application adapts
+implicit hatch closure and repeated-endpoint polyline closure and commits through
+existing EditSession history. No independent snap/input engine or BIM scaling.

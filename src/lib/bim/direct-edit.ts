@@ -1,3 +1,4 @@
+import { previewContourEdge } from "../../application/direct-edit/contour.ts";
 import type { Point, Project } from "./model.ts";
 import { wallLength } from "./model.ts";
 import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
@@ -8,7 +9,7 @@ import {
   moveElementPoint,
   moveWindowAlongWall,
 } from "./transforms.ts";
-export type EditAction = "point" | "stretch" | "move" | "axis" | "x" | "y";
+export type EditAction = "point" | "stretch" | "move" | "axis" | "x" | "y" | "insert" | "edge";
 export type EditTarget = { kind: "wall" | "line" | "window" | "hatch"; id: string };
 export type EditSession = {
   base: Project;
@@ -34,6 +35,8 @@ export function editAnchor(project: Project, target: EditTarget): Point {
 export function editAtPointer(session: EditSession, current: Project, pointer: Point): Project {
   if (current !== session.base)
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
+  if (session.action === "insert" || session.action === "edge")
+    return previewContourEdge(session, pointer);
   const { base, target, index, action, anchor } = session;
   const delta = { x: pointer.x - anchor.x, y: pointer.y - anchor.y };
   if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
