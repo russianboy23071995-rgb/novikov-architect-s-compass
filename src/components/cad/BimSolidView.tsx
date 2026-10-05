@@ -1,3 +1,6 @@
+import { visibleSurfaces } from "@/rendering/viewport/layer-display";
+import { isLayerVisible } from "@/application/layers/visibility";
+import type { DisplaySurfaces } from "@/rendering/viewport/layer-display";
 import { createProjectionFrame, projectionDepthRadius } from "@/geometry/projections/orthographic";
 import type { ProjectionFrame } from "@/geometry/projections/orthographic";
 import {
@@ -8,7 +11,7 @@ import {
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildSolid } from "@/lib/bim/geometry";
-import type { Camera, Solid } from "@/lib/bim/geometry";
+import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
@@ -62,7 +65,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
     color = gl.getAttribLocation(program, "color");
   return {
     draw(
-      solid: Solid,
+      solid: DisplaySurfaces,
       projection: ProjectionState,
       selectedWall: string | undefined,
       outline: OutlineEdge[],
@@ -112,16 +115,17 @@ function createRenderer(canvas: HTMLCanvasElement) {
 
 export function BimSolidView({
   project,
-  selection,
+  visibility,
+  selection: requestedSelection,
   camera,
   onCamera,
   pan,
   onSelect,
   projectionFrame,
   snap = false,
-  editSession,
+  editSession: requestedEditSession,
   numericTarget,
-  snapping = null,
+  snapping: requestedSnapping = null,
   ortho = false,
   onEditAim,
   onEditCommit,
@@ -144,10 +148,20 @@ export function BimSolidView({
   | "onEditAim"
   | "onEditCommit"
   | "interactive"
+  | "visibility"
 >) {
+  const editSession =
+    requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
+      ? requestedEditSession
+      : null;
+  const snapping = requestedEditSession && !editSession ? null : requestedSnapping;
+  const selection =
+    requestedSelection && isLayerVisible(project, visibility, requestedSelection.id)
+      ? requestedSelection
+      : null;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
-  const displayed = useRef<{ solid: Solid; projection: ProjectionState } | null>(null);
+  const displayed = useRef<{ solid: DisplaySurfaces; projection: ProjectionState } | null>(null);
   const drag = useRef<{
     x: number;
     y: number;
@@ -174,7 +188,7 @@ export function BimSolidView({
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
-  const solid = useMemo(() => {
+  const previewSolid = useMemo(() => {
     if (editSession && target) {
       try {
         return buildSolid(previewEdit(editSession, project, selection, target));
@@ -184,6 +198,10 @@ export function BimSolidView({
     }
     return baseSolid;
   }, [baseSolid, editSession, target, project, selection]);
+  const solid = useMemo(
+    () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
+    [previewSolid, project, visibility],
+  );
   const depthRadius = Math.max(
     projectionDepthRadius(frame, baseSolid),
     projectionDepthRadius(frame, solid),
@@ -219,6 +237,7 @@ export function BimSolidView({
     moving ? editSession.target.id : undefined,
     ortho,
     previewClient?.shift ?? false,
+    visibility,
   );
   useEffect(() => {
     const canvas = canvasRef.current!;

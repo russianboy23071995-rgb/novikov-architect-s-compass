@@ -122,10 +122,12 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
   }, [cursor, context, dwellMs]);
   const compatible = snapshot && sameHoverSession(snapshot.context, context);
   const references = context.enabled
-    ? withParallelDirections([
-        ...(context.pinnedReferences ?? []),
-        ...(compatible ? snapshot.value.references : []),
-      ])
+    ? withParallelDirections(
+        [
+          ...(context.pinnedReferences ?? []),
+          ...(compatible ? snapshot.value.references : []),
+        ].filter((r) => !context.acceptReference || context.acceptReference(r)),
+      )
     : [];
   const guideCursor = compatible
     ? context.suspended
@@ -143,7 +145,12 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
   const acquirePoints = (
     requested: readonly import("@/constraints/snapping/engine").SnapReference[],
   ) => {
-    if (!context.enabled || !context.suspended) return false;
+    if (
+      !context.enabled ||
+      !context.suspended ||
+      requested.some((r) => context.acceptReference && !context.acceptReference(r))
+    )
+      return false;
     const current = state.current;
     if (!current || !sameHoverSession(current.context, context)) return false;
     const result = previewPointReferences(current.value, requested, context.pinnedReferences);

@@ -69,3 +69,9 @@ Paarzahlen, entfernte Guides, Abbruch, Undo, Dateimigration und zwei Ansichten p
 
 Pruefung dieses Entwurfs: Codepfade und Filtereinstieg gelesen, Architekturgrenzen
 abgeglichen. Keine neuen Tests oder Browserabnahme behauptet.
+
+## Integrationsstand 05.10.2026
+
+Die vorbereitenden Auftraege sind in PR #91–#93 umgesetzt und integriert. Auf feat/viewport-layer-visibility konsumieren nun bestehende 2D-/3D-Adapter, lokale Fangabfrage, 3D-Fussquellen und explizite Referenzwahl die gemeinsame Policy. CadWorkspace nimmt einen optionalen unveraenderlichen layerVisibility-Kontext entgegen; Standard bleibt all-visible. Modell und IFC bleiben vollstaendig. Verborgene Auswahl/Bearbeitung wird verworfen, aktive Referenzen werden vor Shift-Richtungsauswahl geprueft. Vorschaugeometrie nutzt dieselben Rendererfilter. Dies ist noch kein gespeichertes Sichtbarkeitsfeature.
+
+358 automatisierte Tests bestanden; TypeScript/Build erfolgreich. Visuelle Browserabnahme wegen Lade-Timeouts offen. Naechster begrenzter Auftrag ist die BIM-Bedienung samt Dateimigration gemaess DEVELOPMENT_PLAN.md; vorher Undo-Semantik klaeren und Browserabnahme nachholen. Startfilter neuer Ausschnitte bleibt offen. Die vorherige Rubrik "Genau ein naechster begrenzter Auftrag" dokumentiert den inzwischen abgeschlossenen ersten Policy-Schritt.

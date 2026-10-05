@@ -1,3 +1,4 @@
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useMemo } from "react";
 import type { Project, Point } from "@/lib/bim/model";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
@@ -20,11 +21,30 @@ export function useSolidInference(
   movingWallId: string | undefined,
   ortho: boolean,
   shift: boolean,
+  visibility?: LayerVisibilityPolicy,
 ) {
-  const { plane, context, adapter } = useMemo(
-    () => createWallPreviewContext(project, projection, enabled, resetKey, policy, movingWallId),
-    [project, projection, enabled, resetKey, policy, movingWallId],
+  const sessionKey = useMemo(
+    () => ({ policy, project, visibility }),
+    [policy, project, visibility],
   );
+  const {
+    plane,
+    context: baseContext,
+    adapter,
+  } = useMemo(
+    () =>
+      createWallPreviewContext(
+        project,
+        projection,
+        enabled,
+        resetKey,
+        policy,
+        movingWallId,
+        visibility,
+      ),
+    [project, projection, enabled, resetKey, policy, movingWallId, visibility],
+  );
+  const context = useMemo(() => ({ ...baseContext, sessionKey }), [baseContext, sessionKey]);
   const cursor = useMemo(() => {
     if (!client || plane?.status !== "ok") return null;
     const inverse = plane.value.toPlane(client);
@@ -66,6 +86,7 @@ export function useSolidInference(
     edge,
     hover: {
       ...hover,
+      references: active,
       guideDirections: hover.guideCursor
         ? advanceGuideDirections(hover.guideCursor, active, hover.guideDirections)
         : [],

@@ -1,3 +1,6 @@
+import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
+import { isLayerVisible } from "@/application/layers/visibility";
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
@@ -7,7 +10,11 @@ import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { createToolSourceQuery, resolveToolSnap } from "@/application/tools/snapping";
+import {
+  createToolSourceQuery,
+  createVisibleToolSourceQuery,
+  resolveToolSnap,
+} from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
 import { getLocalSnapSources } from "@/application/snapping/local-sources";
@@ -25,6 +32,7 @@ export type BimPlanProps = {
   referenceScope?: object | undefined;
   interactive?: boolean;
   project: Project;
+  visibility?: LayerVisibilityPolicy;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
   drawing: boolean;
@@ -51,8 +59,9 @@ export function BimPlan({
   referenceScope,
   interactive = true,
   project,
-  snapping = null,
-  selection,
+  visibility,
+  snapping: requestedSnapping = null,
+  selection: requestedSelection,
   drawing,
   endpointSnap = false,
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
@@ -63,7 +72,7 @@ export function BimPlan({
   onSelect,
   onPoint,
   onFinish,
-  editSession,
+  editSession: requestedEditSession,
   onEditCommit,
   numericTarget,
   drawingTarget,
@@ -82,6 +91,19 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
+  const editSession =
+    requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
+      ? requestedEditSession
+      : null;
+  const snapping = requestedEditSession && !editSession ? null : requestedSnapping;
+  const selection =
+    requestedSelection && isLayerVisible(project, visibility, requestedSelection.id)
+      ? requestedSelection
+      : null;
+  const visibilitySession = useMemo(
+    () => ({ referenceScope, visibility, project, snapping }),
+    [referenceScope, visibility, project, snapping],
+  );
   const selecting = referenceSelection?.selecting ?? false;
   const selectedSegments = referenceSelection?.selected ?? null;
   const svg = useRef<SVGSVGElement>(null);
@@ -142,8 +164,11 @@ export function BimPlan({
   const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
   const sourceQuery = useMemo(
-    () => createToolSourceQuery(modelSources, snapping),
-    [modelSources, snapping],
+    () =>
+      visibility
+        ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
+        : createToolSourceQuery(modelSources, snapping),
+    [modelSources, snapping, project, visibility],
   );
   const density = useSnapDensity(
     sourceQuery,
@@ -158,7 +183,8 @@ export function BimPlan({
   const trackingContext = useMemo(
     () => ({
       enabled: endpointSnap && snap && interactive,
-      sessionKey: referenceScope,
+      sessionKey: visibilitySession,
+      acceptReference: sourceQuery.accepts,
       references,
       sourceQuery,
       intersectionsPaused: density.paused,
@@ -174,7 +200,7 @@ export function BimPlan({
       endpointSnap,
       snap,
       interactive,
-      referenceScope,
+      visibilitySession,
       pan,
       references,
       sourceQuery,
@@ -267,6 +293,7 @@ export function BimPlan({
     }
   }
   const shown = preview ?? project;
+  const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
   const handles: { point: Point; index: number; label: string }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
@@ -500,7 +527,7 @@ export function BimPlan({
           />
         </g>
       )}
-      {shown.storey.walls.map((wall) => {
+      {plan.walls.map((wall) => {
         const length = wallLength(wall);
         const angle =
           (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
@@ -531,22 +558,33 @@ export function BimPlan({
             >
               {length.toFixed(2)} m
             </text>
-            {shown.storey.windows
+            {plan.openings
               .filter((opening) => opening.wallId === wall.id)
               .map((opening) => (
                 <g key={opening.id}>
                   <rect
-                    {...selectProps("window", opening.id)}
+                    {...(isLayerVisible(project, visibility, opening.id)
+                      ? selectProps("window", opening.id)
+                      : {})}
                     x={opening.position * length - opening.width / 2}
                     y={-wall.thickness / 2}
                     width={opening.width}
                     height={wall.thickness}
                     fill="var(--background)"
-                    stroke={selection?.id === opening.id ? "var(--foreground)" : "var(--primary)"}
+                    stroke={
+                      !isLayerVisible(project, visibility, opening.id)
+                        ? "none"
+                        : selection?.id === opening.id
+                          ? "var(--foreground)"
+                          : "var(--primary)"
+                    }
                     strokeWidth={selection?.id === opening.id ? 0.04 : 0.025}
                     className="outline-none focus:stroke-foreground"
                   />
                   <line
+                    visibility={
+                      isLayerVisible(project, visibility, opening.id) ? "visible" : "hidden"
+                    }
                     x1={opening.position * length - opening.width / 2}
                     x2={opening.position * length + opening.width / 2}
                     y1={0}
@@ -560,7 +598,7 @@ export function BimPlan({
           </g>
         );
       })}
-      {(shown.storey.lines ?? []).map((line) => (
+      {plan.lines.map((line) => (
         <g key={line.id}>
           {selection?.id === line.id && (
             <path
@@ -823,18 +861,21 @@ export function BimPlan({
             opacity={0.65}
           />
           {referenceSelection?.mode === "points" &&
-            referenceSelection.points.map((r) => (
-              <circle
-                key={referenceKey(r)}
-                cx={r.point.x}
-                cy={-r.point.y}
-                r={8 / camera.pixelsPerMetre}
-                fill="none"
-                stroke="#64748b"
-                strokeWidth={2 / camera.pixelsPerMetre}
-              />
-            ))}
+            referenceSelection.points
+              .filter((r) => isLayerVisible(project, visibility, r.entityId))
+              .map((r) => (
+                <circle
+                  key={referenceKey(r)}
+                  cx={r.point.x}
+                  cy={-r.point.y}
+                  r={8 / camera.pixelsPerMetre}
+                  fill="none"
+                  stroke="#64748b"
+                  strokeWidth={2 / camera.pixelsPerMetre}
+                />
+              ))}
           {modelSources.allSegments
+            .filter((s) => isLayerVisible(project, visibility, s.source.entityId))
             .filter(
               (s) =>
                 referenceSelection?.state.draft?.includes(segmentKey(s.source)) ||
@@ -869,6 +910,7 @@ export function BimPlan({
                 const points = referenceSelection.points;
                 const valid = points.every(
                   (r) =>
+                    isLayerVisible(project, visibility, r.entityId) &&
                     modelSources.lookup(referenceKey(r)) &&
                     (!snapping || snapping.sources([r]).length > 0),
                 );

@@ -11,6 +11,21 @@ export type LayerVisibilityContext = Readonly<{
   scope: LayerVisibilityScope;
   hiddenLayerIds: readonly string[];
 }>;
+export type LayerVisibilityPolicy = ReturnType<typeof createLayerVisibilityPolicy>;
+
+export const ALL_LAYERS_VISIBLE: LayerVisibilityContext = Object.freeze({
+  scope: Object.freeze({ kind: "bim-project" as const }),
+  hiddenLayerIds: Object.freeze([]),
+});
+
+/** Shared gate for viewport targets; omitted policy preserves legacy all-visible callers. */
+export function isLayerVisible(
+  project: Project,
+  policy: LayerVisibilityPolicy | undefined,
+  id: string,
+) {
+  return !policy || policy.evaluate(project, policy.context, id).eligible;
+}
 export type LayerEligibility =
   | { eligible: true; reason: "visible" }
   | {
@@ -61,4 +76,13 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
       return { eligible: true, reason: "visible" };
     },
   });
+}
+
+/** Drop presentation targets immediately, before any effect or late pointer callback runs. */
+export function visibleLayerTarget<T extends { id: string }>(
+  project: Project,
+  policy: LayerVisibilityPolicy | undefined,
+  target: T | null | undefined,
+): T | null {
+  return target && isLayerVisible(project, policy, target.id) ? target : null;
 }
