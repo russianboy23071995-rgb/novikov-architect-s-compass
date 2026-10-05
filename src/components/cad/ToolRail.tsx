@@ -1,5 +1,6 @@
 import {
   BoxSelect,
+  PaintBucket,
   MousePointer2,
   PenLine,
   Pentagon,
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 import type { CadTool, ToolId } from "./cad-types";
 
 const tools: CadTool[] = [
+  { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
   { id: "slab", label: "Slab", shortcut: "S", icon: Pentagon },

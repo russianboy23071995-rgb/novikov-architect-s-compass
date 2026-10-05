@@ -1245,3 +1245,47 @@ protection and eligibility include hatches. Rendering, picking, snapping and
 interactive tool adapters are pending, so no canvas capability is claimed here.
 IFC remains the existing building export; 2D hatches are stored in project JSON,
 not converted into BIM solids. Existing BIM scaling prohibition remains unchanged.
+
+## Implemented: initial 2D hatch canvas adapter — 2026-10-05
+
+The Hatch tool shares the existing multi-point drawing state, drawingInteraction,
+precision input and local source query. createDrawing delegates hatch creation to
+previewHatch; only the drawing adapter removes an explicit repeated closing point.
+Domain validation remains strict. Double-click/Enter finish the accumulated points;
+Escape discards the draft. Closure must remain possible after the final click resets
+the numeric preview to a zero-length segment; validity belongs to the creation action.
+
+Selection now uses application/selection/ElementTarget, separately from the narrower
+Direct Edit capability. Hatch selection exposes fill and layer properties, not
+unsupported movement grips/actions. Commands keep the actual selected hatch ID but
+reject unsupported wall/window commands; no target fallback or AI mutation path.
+Hatch vertices and all closed edges feed the same primitive index and layer-filtered
+query. Plan bounds, display lists and Navigator include hatches. SVG fill is drawn
+behind walls/lines, with a thin selection border; 3D geometry/IFC remain unchanged.
+The current UI offers solid fill only. Patterns, contour pens, holes and hatch
+Direct Edit remain pending. Automated checks do not constitute browser acceptance.
+
+## Drawing contour construction references — 2026-10-05
+
+ToolSnapPolicy may provide pinnedReferences in addition to its primary origin.
+The shared drawing adapter supplies at most the first and current draft vertices,
+with first/last edge directions. Immutable path identity keeps this policy stable
+across camera navigation. These are interaction references, not model entities;
+local source lookup accepts exact current pinned references and validates derived
+dependencies against them. Existing cursor-guided intersections perform closure
+inference for all path consumers; there is no rectangle-specific geometry solver.
+The primary origin still controls numeric/Ortho/Shift input. Explicit Shift keeps
+its existing priority; ordinary hover dwell remains unchanged. Removing the tool
+policy removes its transient sources. No domain/schema/history data is introduced.
+
+## Shift direction with exact feature snapping — user correction 2026-10-05
+
+This supersedes the earlier statement that Shift bypasses automatic point snapping.
+Shift fixes the nearest 45-degree direction from the interaction origin. It now
+uses the existing fixed-axis candidate pipeline to accept exact endpoints,
+midpoints, segment intersections and guide/axis intersections on that direction
+within the normal CSS-pixel radius. Off-axis point candidates are rejected, never
+silently projected and relabelled as exact. Explicit host/edit axes still win.
+Without an eligible exact point, preserve continuous model-space projection onto
+the Shift direction (no extra grid jump or screen-metric guide projection).
+The same engine serves drawing and editing; no per-tool solver or timer changes.

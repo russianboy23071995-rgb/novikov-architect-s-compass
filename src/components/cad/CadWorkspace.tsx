@@ -1,3 +1,4 @@
+import { HatchFillFields } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
@@ -19,7 +20,7 @@ import {
   editingReducer,
   supportsWallWorkplaneEdit,
 } from "@/application/direct-edit/controller";
-import { createDrawing, defaultDrawingWall } from "@/application/drawing/actions";
+import { createDrawing, defaultDrawingWall, defaultHatchFill } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
@@ -97,11 +98,13 @@ export function CadWorkspace({
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
   const [wallStart, setWallStart] = useState<Point | null>(null);
-  const [linePoints, setLinePoints] = useState<Point[]>([]);
+  const [pathPoints, setPathPoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
-  const lineOrigin = tool === "line" ? (linePoints.at(-1) ?? null) : null;
-  const drawingOrigin = tool === "wall" ? wallStart : lineOrigin;
+  const pathDrawing = tool === "line" || tool === "hatch";
+  const [hatchFill, setHatchFill] = useState(defaultHatchFill);
+  const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
+  const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
   const [activeViewport, setActiveViewport] = useState(0);
   const [referenceEpoch, setReferenceEpoch] = useState(0);
   const referenceScope = useMemo(
@@ -149,7 +152,7 @@ export function CadWorkspace({
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallStart(null);
-    setLinePoints([]);
+    setPathPoints([]);
   }, []);
 
   const navigateHistory = useCallback(
@@ -189,14 +192,20 @@ export function CadWorkspace({
         }
         return;
       }
-      const map: Record<string, ToolId> = { v: "select", w: "wall", s: "slab", l: "line" };
+      const map: Record<string, ToolId> = {
+        v: "select",
+        w: "wall",
+        s: "slab",
+        l: "line",
+        h: "hatch",
+      };
       const next = map[event.key.toLowerCase()];
       if (next) {
         cancelInteraction();
         setTool(next);
-        if (next === "line") setSelection(null);
+        if (next === "line" || next === "hatch") setSelection(null);
         setModelError("");
-        if (next === "wall" || next === "line") setMode("2D");
+        if (next === "wall" || next === "line" || next === "hatch") setMode("2D");
       }
       if (event.key === "Escape") {
         cancelInteraction();
@@ -226,9 +235,9 @@ export function CadWorkspace({
   const selectTool = (next: ToolId) => {
     cancelInteraction();
     setTool(next);
-    if (next === "line") setSelection(null);
+    if (next === "line" || next === "hatch") setSelection(null);
     setModelError("");
-    if (next === "wall" || next === "line") setMode("2D");
+    if (next === "wall" || next === "line" || next === "hatch") setMode("2D");
   };
 
   const showSelection = (next: Selection, anchor?: Point, index?: number, modelPoint?: Point) => {
@@ -255,7 +264,7 @@ export function CadWorkspace({
 
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection) return;
+    if (!selection || selection.kind === "hatch") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove = inSolid && selection.kind === "wall";
     if (solidMove && !pickedPoint.anchor) {
@@ -325,46 +334,55 @@ export function CadWorkspace({
     }
   };
 
-  const finishLine = (points = linePoints) => {
+  const finishPath = (points = pathPoints) => {
     try {
-      const id = `line-${crypto.randomUUID()}`;
+      const id = `${tool === "hatch" ? "hatch" : "line"}-${crypto.randomUUID()}`;
       changeProject(
-        createDrawing(drawingBase!, project, id, {
-          kind: "line",
-          lineKind,
-          points,
-          appearance: lineAppearance,
-        }),
+        createDrawing(
+          drawingBase!,
+          project,
+          id,
+          tool === "hatch"
+            ? { kind: "hatch", points, fill: hatchFill }
+            : {
+                kind: "line",
+                lineKind,
+                points,
+                appearance: lineAppearance,
+              },
+        ),
         {
-          kind: "line",
+          kind: tool === "hatch" ? "hatch" : "line",
           id,
         },
       );
     } catch {
       setModelError(
-        "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+        tool === "hatch"
+          ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
+          : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
     }
   };
 
   const drawPoint = (point: Point) => {
     setModelError("");
-    if (tool === "line") {
-      if (linePoints.length === 0) {
+    if (pathDrawing) {
+      if (pathPoints.length === 0) {
         setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
       } else if (drawingBase !== project) {
-        setModelError("Das Modell wurde geändert. Linie erneut beginnen.");
+        setModelError("Das Modell wurde geändert. Zeichnen erneut beginnen.");
         return;
       }
-      const previous = linePoints.at(-1);
+      const previous = pathPoints.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
         setModelError("Nächsten Punkt an einer anderen Position wählen.");
         return;
       }
-      const next = [...linePoints, point];
-      if (lineKind === "line" && next.length === 2) finishLine(next);
-      else setLinePoints(next);
+      const next = [...pathPoints, point];
+      if (tool === "line" && lineKind === "line" && next.length === 2) finishPath(next);
+      else setPathPoints(next);
       return;
     }
     if (!wallStart) {
@@ -407,7 +425,14 @@ export function CadWorkspace({
           cancelInteraction,
         )
       : drawingOrigin && drawingBase
-        ? drawingInteraction(drawingBase, project, drawingOrigin, drawPoint, cancelInteraction)
+        ? drawingInteraction(
+            drawingBase,
+            project,
+            drawingOrigin,
+            drawPoint,
+            cancelInteraction,
+            pathDrawing ? pathPoints : undefined,
+          )
         : null,
     referenceSelection.selecting,
   );
@@ -518,7 +543,7 @@ export function CadWorkspace({
               dispatchEditing({ type: "cancel" });
               setMode(next);
               setWallStart(null);
-              setLinePoints([]);
+              setPathPoints([]);
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
@@ -610,7 +635,17 @@ export function CadWorkspace({
               }}
             />
           )}
-          {tool === "line" && mode === "2D" ? (
+          {tool === "hatch" && mode === "2D" ? (
+            <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
+              <HatchFillFields value={hatchFill} onChange={setHatchFill} />
+              <span className="text-xs">
+                {pathPoints.length} Punkte · Doppelklick schließt · Esc verwirft
+              </span>
+              <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+                Zeichnen abbrechen
+              </Button>
+            </section>
+          ) : tool === "line" && mode === "2D" ? (
             <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
               <label className="text-xs">
                 Zeichenmodus
@@ -620,7 +655,7 @@ export function CadWorkspace({
                   value={lineKind}
                   onChange={(e) => {
                     setLineKind(e.target.value as "line" | "polyline");
-                    setLinePoints([]);
+                    setPathPoints([]);
                     setModelError("");
                   }}
                 >
@@ -643,7 +678,7 @@ export function CadWorkspace({
                   <option value={1000}>1 Sekunde</option>
                 </select>
               </label>
-              <span className="text-xs">{linePoints.length} Punkte · Esc verwirft</span>
+              <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
               {lineKind === "polyline" && (
                 <span className="text-xs">
                   Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im Grundriss:
@@ -685,11 +720,12 @@ export function CadWorkspace({
                   referenceSelection={referenceSelection}
                   selection={selection}
                   snapping={interaction.adapter?.snapping ?? null}
-                  drawing={(tool === "wall" || tool === "line") && mode === "2D"}
-                  endpointSnap={tool === "line" || tool === "select" || tool === "wall"}
+                  drawing={(tool === "wall" || pathDrawing) && mode === "2D"}
+                  endpointSnap={pathDrawing || tool === "select" || tool === "wall"}
                   hoverDwellMs={hoverDwellMs}
-                  start={tool === "line" ? (linePoints.at(-1) ?? null) : wallStart}
-                  draftPoints={tool === "line" ? linePoints : []}
+                  start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
+                  draftPoints={pathDrawing ? pathPoints : []}
+                  draftFill={tool === "hatch" ? hatchFill : undefined}
                   snap={snap}
                   ortho={ortho}
                   onSelect={selectElement}
@@ -707,10 +743,10 @@ export function CadWorkspace({
                   onEditAim={(_session, point) => interaction.draft.move(point)}
                   onEditDirection={(_session, point) => interaction.pick(point)}
                   onEditCommit={(_session, point) => interaction.pick(point)}
-                  {...(tool === "line" && lineKind === "polyline"
+                  {...((tool === "line" && lineKind === "polyline") || tool === "hatch"
                     ? {
                         onFinish: () => {
-                          if (!referenceSelection.selecting) finishLine();
+                          if (!referenceSelection.selecting) finishPath();
                         },
                       }
                     : {})}
@@ -793,6 +829,8 @@ export function CadWorkspace({
                         selectElement({ kind: "wall", id });
                       else if (project.storey.windows.some((opening) => opening.id === id))
                         selectElement({ kind: "window", id });
+                      else if (project.storey.hatches.some((hatch) => hatch.id === id))
+                        selectElement({ kind: "hatch", id });
                       else if (project.storey.lines?.some((line) => line.id === id))
                         selectElement({ kind: "line", id });
                       else selectElement(null);

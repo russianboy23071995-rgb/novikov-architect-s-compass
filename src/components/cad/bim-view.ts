@@ -1,7 +1,7 @@
 import { addWall, addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project, Wall } from "../../lib/bim/model.ts";
 
-export type Selection = { kind: "wall" | "window" | "line"; id: string } | null;
+export type Selection = import("../../application/selection/target.ts").ElementTarget | null;
 
 export function createExampleProject(): Project {
   return addWindow(
@@ -44,7 +44,12 @@ export function drawingPoint(
 
 /** SVG uses downward-positive Y; model coordinates use upward-positive Y. */
 export function planBounds(project: Project): string {
-  if (!project.storey.walls.length && !project.storey.lines?.length) return "-2 -3 8 6";
+  if (
+    !project.storey.walls.length &&
+    !project.storey.lines?.length &&
+    !project.storey.hatches.length
+  )
+    return "-2 -3 8 6";
   const extents = project.storey.walls.flatMap((wall) =>
     [wall.start, wall.end].map((point) => ({
       left: point.x - wall.thickness / 2,
@@ -53,7 +58,7 @@ export function planBounds(project: Project): string {
       bottom: -point.y + wall.thickness / 2,
     })),
   );
-  for (const line of project.storey.lines ?? [])
+  for (const line of [...(project.storey.lines ?? []), ...project.storey.hatches])
     for (const point of line.points)
       extents.push({ left: point.x, right: point.x, top: -point.y, bottom: -point.y });
   const left = Math.min(...extents.map((p) => p.left)) - 1.5;

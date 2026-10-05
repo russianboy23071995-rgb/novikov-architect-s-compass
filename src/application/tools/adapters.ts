@@ -1,5 +1,6 @@
+import type { ElementTarget } from "../selection/target.ts";
 import type { ToolInteraction } from "./interaction.ts";
-import type { EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
 import { previewEdit } from "../direct-edit/controller.ts";
@@ -27,7 +28,7 @@ function editSnapPolicy(session: EditSession): ToolSnapPolicy {
 export function editInteraction(
   session: EditSession,
   current: Project,
-  selection: EditTarget | null,
+  selection: ElementTarget | null,
   commit: (point: Point) => void,
   cancel: () => void,
 ): ToolInteraction {
@@ -58,10 +59,11 @@ export function drawingInteraction(
   origin: Point,
   commit: (point: Point) => void,
   cancel: () => void,
+  path?: readonly Point[],
 ): ToolInteraction {
   return {
     identity: origin,
-    snapping: drawingSnapPolicy(origin),
+    snapping: drawingSnapPolicy(origin, path),
     origin,
     input: { axisLabel: null, degrees: null },
     click: "confirm",

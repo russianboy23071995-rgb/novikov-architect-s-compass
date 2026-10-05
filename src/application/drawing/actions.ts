@@ -1,9 +1,23 @@
+import { previewHatch } from "../hatches/actions.ts";
+import type { Hatch } from "../../domain/elements/hatch/model.ts";
+import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { addLine, addWall } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
 import { precisionTarget } from "../input/precision.ts";
 export const defaultDrawingWall = { thickness: 0.36, height: 2.8 } as const;
+export const defaultHatchFill: Hatch["fill"] = { color: "#94a3b8", opacity: 0.35 };
+
+/** Drawing may explicitly return to its first point; the domain ring closes implicitly. */
+export function closedDrawingContour(points: readonly Point[]): Point[] {
+  const end =
+    points.length > 1 && pointsCompatible(points[0]!, points.at(-1)!)
+      ? points.length - 1
+      : points.length;
+  return points.slice(0, end).map((p) => ({ ...p }));
+}
 export type DrawingRequest =
+  | { kind: "hatch"; points: Point[]; fill: Hatch["fill"] }
   | { kind: "wall"; start: Point; end: Point; thickness: number; height: number }
   | { kind: "line"; points: Point[]; lineKind: "line" | "polyline"; appearance: LineAppearance };
 export function assertDrawingContext(base: Project, current: Project) {
@@ -32,6 +46,12 @@ export function createDrawing(
   request: DrawingRequest,
 ): Project {
   assertDrawingContext(base, current);
+  if (request.kind === "hatch")
+    return previewHatch(base, current, {
+      projectId: current.id,
+      kind: "create",
+      hatch: { id, points: closedDrawingContour(request.points), fill: request.fill },
+    });
   return request.kind === "wall"
     ? addWall(current, {
         id,

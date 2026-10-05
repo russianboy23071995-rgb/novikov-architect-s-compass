@@ -1,7 +1,7 @@
 import { serializeProject, updateWall, updateWindow, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
 
-export type CommandSelection = { kind: "wall" | "window" | "line"; id: string } | null;
+export type CommandSelection = import("../../application/selection/target.ts").ElementTarget | null;
 export type CommandPreview = {
   source: string;
   target: NonNullable<CommandSelection>;

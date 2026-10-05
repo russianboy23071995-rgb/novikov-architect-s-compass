@@ -86,6 +86,21 @@ export function projectSnapPrimitives(project: Project) {
         ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
     }),
+    ...project.storey.hatches.flatMap((hatch) =>
+      hatch.points.flatMap((point, index) => {
+        const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;
+        const after = hatch.points[(index + 1) % hatch.points.length]!;
+        return [
+          {
+            point: { ...point },
+            entityId: hatch.id,
+            feature: `vertex-${index}`,
+            directions: [before, after].map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
+          },
+          ...midpoint(hatch.id, `segment-${index}-midpoint`, point, after),
+        ];
+      }),
+    ),
     ...(project.storey.lines ?? []).flatMap((line) => [
       ...line.points.map((point, index) => ({
         point: { ...point },
