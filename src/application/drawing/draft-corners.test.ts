@@ -139,6 +139,43 @@ test("ordinary hover still needs 600ms; Snap off and distant cursor do not force
   assert.deepEqual(resolve(cursor, 100, false).point, cursor);
   assert.ok(!pointsCompatible(resolve({ x: 0.5, y: 2.5 }, 100).point, { x: 0, y: 2 }));
   const shift = resolve(cursor, 100, true, true);
-  assert.equal(shift.candidate?.kind, "angle");
-  assert.ok(pointsCompatible(shift.point, { x: cursor.x, y: 2 }));
+  assert.ok(["intersection", "axis-intersection"].includes(shift.candidate!.kind));
+  assert.ok(pointsCompatible(shift.point, { x: 0, y: 2 }));
+});
+
+test("Shift closes rectangles exactly throughout the snap circle for both drawing consumers", () => {
+  for (const degrees of [0, 45, 90, 180, -45])
+    for (const scale of [20, 100, 600]) {
+      const t = transform(degrees),
+        draft = path.map(t),
+        desired = t({ x: 0, y: 2 });
+      const { resolve } = setup(draft);
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4;
+        const cursor = {
+          x: desired.x + (4 * Math.cos(angle)) / scale,
+          y: desired.y + (4 * Math.sin(angle)) / scale,
+        };
+        const snapped = resolve(cursor, scale, true, true);
+        assert.ok(pointsCompatible(snapped.point, desired), `${degrees}/${scale}/${i}`);
+        assert.ok(["intersection", "axis-intersection"].includes(snapped.candidate!.kind));
+        for (const kind of ["line", "hatch"] as const) {
+          const points = [...draft, snapped.point];
+          const next = createDrawing(
+            p,
+            p,
+            "shape",
+            kind === "hatch"
+              ? { kind, points, fill: defaultHatchFill }
+              : { kind, points, lineKind: "polyline", appearance: defaultLineAppearance },
+          );
+          const saved =
+            kind === "hatch" ? next.storey.hatches[0]!.points : next.storey.lines![0]!.points;
+          const a = saved[2]!,
+            b = saved[3]!,
+            c = saved[0]!;
+          assert.ok(Math.abs((a.x - b.x) * (c.x - b.x) + (a.y - b.y) * (c.y - b.y)) < 1e-9);
+        }
+      }
+    }
 });

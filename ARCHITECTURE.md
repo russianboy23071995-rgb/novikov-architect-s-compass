@@ -1277,3 +1277,15 @@ inference for all path consumers; there is no rectangle-specific geometry solver
 The primary origin still controls numeric/Ortho/Shift input. Explicit Shift keeps
 its existing priority; ordinary hover dwell remains unchanged. Removing the tool
 policy removes its transient sources. No domain/schema/history data is introduced.
+
+## Shift direction with exact feature snapping — user correction 2026-10-05
+
+This supersedes the earlier statement that Shift bypasses automatic point snapping.
+Shift fixes the nearest 45-degree direction from the interaction origin. It now
+uses the existing fixed-axis candidate pipeline to accept exact endpoints,
+midpoints, segment intersections and guide/axis intersections on that direction
+within the normal CSS-pixel radius. Off-axis point candidates are rejected, never
+silently projected and relabelled as exact. Explicit host/edit axes still win.
+Without an eligible exact point, preserve continuous model-space projection onto
+the Shift direction (no extra grid jump or screen-metric guide projection).
+The same engine serves drawing and editing; no per-tool solver or timer changes.

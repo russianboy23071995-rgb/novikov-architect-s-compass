@@ -110,8 +110,8 @@ test("midpoints use CSS radius, endpoint priority and the existing Shift/Ortho c
       null,
     );
     assert.equal(
-      querySnap({ x: 1.5, y: 0 }, { ...c, angleOrigin: { x: 0, y: 0 } }).candidate?.sourceFeature,
-      "shift-45",
+      querySnap({ x: 1.5, y: 0 }, { ...c, angleOrigin: { x: 0, y: 0 } }).candidate?.kind,
+      "midpoint",
     );
     const endpoint = {
       entityId: "end",

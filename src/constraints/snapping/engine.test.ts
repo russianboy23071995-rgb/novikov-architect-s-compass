@@ -823,10 +823,10 @@ test("diagonal guide intersection is exact, screen bounded, constrained and reta
       "intersection",
     );
     assert.equal(querySnap({ x: 2, y: 2 }, { ...c, enabled: false }).candidate, null);
-    assert.equal(
-      querySnap({ x: 2, y: 2 }, { ...c, angleOrigin: { x: 0, y: 0 } }).candidate?.sourceFeature,
-      "shift-45",
-    );
+    assert.deepEqual(querySnap({ x: 2, y: 2 }, { ...c, angleOrigin: { x: 0, y: 0 } }).point, {
+      x: 2,
+      y: 2,
+    });
     const end = { entityId: "end", feature: "point", point: { x: 2, y: 2 } };
     assert.equal(
       querySnap({ x: 2, y: 2 }, { ...c, references: [a, b, end] }).candidate?.kind,
@@ -967,7 +967,8 @@ test("intersection and overlay share held directions without expanding radius or
   assert.deepEqual(querySnap(cursor, c).point, { x: 0.18, y: 0 });
   assert.equal(querySnap(cursor, c).candidate?.kind, "intersection");
   assert.notEqual(querySnap(cursor, { ...c, pixelsPerMetre: 400 }).candidate?.kind, "intersection");
-  assert.equal(querySnap(cursor, { ...c, angleOrigin: a.point }).candidate?.angleDegrees, 45);
+  const shift = querySnap(cursor, { ...c, angleOrigin: a.point });
+  assert.ok(Math.abs(shift.point.x - a.point.x - (shift.point.y - a.point.y)) < 1e-9);
   assert.equal(querySnap(cursor, { ...c, enabled: false }).candidate, null);
   assert.deepEqual(querySnap(cursor, { ...c, orthoOrigin: a.point }).point, { x: 0.18, y: 0 });
 });
@@ -1167,4 +1168,35 @@ test("polar input rejects missing direction or length and nonfinite parameters",
     assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, n, 2));
     assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, 90, n));
   }
+});
+
+test("Shift accepts only exact on-axis points and preserves continuous fallback without grid jumps", () => {
+  const origin = { x: 0, y: 0 },
+    cursor = { x: 2.023, y: 0.041 };
+  const ref = (x: number, y: number) => ({ entityId: "target", feature: "point", point: { x, y } });
+  const c: SnapContext = {
+    references: [],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: 0.1,
+    orthoOrigin: null,
+    angleOrigin: origin,
+  };
+  const exact = querySnap(cursor, { ...c, references: [ref(2, 0)] });
+  assert.deepEqual(exact.point, { x: 2, y: 0 });
+  assert.equal(exact.candidate?.kind, "endpoint");
+  for (const references of [[], [ref(2, 0.02)], [ref(2.2, 0)]]) {
+    const free = querySnap(cursor, { ...c, references });
+    assert.deepEqual(free.point, { x: cursor.x, y: 0 });
+    assert.equal(free.candidate?.sourceFeature, "shift-45");
+  }
+  assert.deepEqual(querySnap(cursor, { ...c, references: [ref(2, 0)], enabled: false }).point, {
+    x: cursor.x,
+    y: 0,
+  });
+  assert.deepEqual(
+    querySnap(cursor, { ...c, references: [ref(2, 0)], acceptCandidate: () => false }).point,
+    { x: cursor.x, y: 0 },
+  );
 });

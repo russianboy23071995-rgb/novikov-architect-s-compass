@@ -94,7 +94,8 @@ export function querySnap(
     ...context,
     metric: context.metric ?? createIsotropicScreenMetric(context.pixelsPerMetre),
   };
-  const axis = context.fixedAxis;
+  let axis = context.fixedAxis;
+  let shiftFallback: ReturnType<typeof querySnap> | null = null;
   if (
     axis &&
     (![axis.origin.x, axis.origin.y].every(Number.isFinite) ||
@@ -102,13 +103,13 @@ export function querySnap(
   )
     throw new Error("Invalid fixed snap axis");
   const origin = context.orthoOrigin;
-  // Explicit Shift constraint takes precedence over automatic snapping and Ortho.
+  // Shift fixes direction; exact compatible targets may still snap along that axis.
   if (context.angleOrigin && !axis) {
     if (![context.angleOrigin.x, context.angleOrigin.y].every(Number.isFinite))
       throw new Error("Invalid angle origin");
     const angle = angle45Direction(cursor, context.angleOrigin);
     const point = projectDirection(cursor, context.angleOrigin, angle.direction)!;
-    return {
+    shiftFallback = {
       point,
       candidate: {
         kind: "angle",
@@ -121,6 +122,8 @@ export function querySnap(
         priority: -1,
       },
     };
+    axis = { origin: context.angleOrigin, direction: angle.direction };
+    context = { ...context, fixedAxis: axis };
   }
   const horizontal = origin
     ? Math.abs(cursor.x - origin.x) >= Math.abs(cursor.y - origin.y)
@@ -133,7 +136,7 @@ export function querySnap(
           ? { x: p.x, y: origin.y }
           : { x: origin.x, y: p.y }
         : { ...p };
-  if (!context.enabled) return { point: constrain(cursor), candidate: null };
+  if (!context.enabled) return shiftFallback ?? { point: constrain(cursor), candidate: null };
   if (context.sourceQuery)
     context = {
       ...context,
@@ -148,11 +151,20 @@ export function querySnap(
       ),
     };
   const candidates = collectSnapCandidates(cursor, context, constrain).filter(
-    ({ candidate }) => !context.acceptCandidate || context.acceptCandidate(candidate),
+    ({ candidate }) =>
+      (!shiftFallback ||
+        [
+          "endpoint",
+          "midpoint",
+          "segment-intersection",
+          "intersection",
+          "axis-intersection",
+        ].includes(candidate.kind)) &&
+      (!context.acceptCandidate || context.acceptCandidate(candidate)),
   );
   candidates.sort(compareSnapCandidates);
   const candidate = candidates[0]?.candidate;
   return candidate
     ? { point: candidate.worldPoint, candidate }
-    : gridSnap(cursor, context, constrain);
+    : (shiftFallback ?? gridSnap(cursor, context, constrain));
 }
