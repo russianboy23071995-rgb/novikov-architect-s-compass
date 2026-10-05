@@ -1362,3 +1362,13 @@ Automatischer Regressionstest fuer beide Konturarten und die Wand mit versetztem
 Abnahme fuer Nutzer: 0.25 m einstellen, Schraffurseite strecken, Vorschau bestaetigen, Undo/Redo. In 3D sichtbare Wandecke am Boden klicken, Element frei bewegen, Ziel ansteuern und Uebernehmen. Raster bezieht sich auf den ausgewaehlten Eckpunkt. Bei aktiver Hilfslinie deren Prioritaet beachten.
 
 Genau ein naechster Auftrag: den ersten Eckanschluss zweier gerader Waende anhand vorhandener Modell-/Geometrie-/IFC-Pfade planen und eine begrenzte gemeinsame Anschlussregel samt Tests festlegen; offene Regeln fuer Achswechsel und unterschiedliche Staerken explizit lassen, bevor Anschlussgeometrie implementiert wird.
+
+### Wand-Eckanschluss: Bestandsaufnahme und Arbeitsentwurf — 05.10.2026
+
+PR #106 nach Freigabe normal gemergt (e65105a). Reiner Planungsauftrag auf docs/wall-corner-plan, keine Produktlogik geaendert. docs/WALL_CORNER_PLAN.md ordnet Schema/Modellaktionen, Grundriss, 3D-Zellen, IFC-Rechteckprofile, Fangquellen und History zu. Heutige Waende haben keine Anschlussrelation; getrennte Ableitungen duerfen keine widerspruechlichen Anschlusskoerper erhalten.
+
+Vorschlag fuer spaeter: rechtwinklige Zwei-Wand-Ecke mit gleicher Staerke/Hoehe und ohne Oeffnung in der Endzone, gemeinsame Gehrungsgrenze, stabile Wand-IDs. Vorschlag ausdruecklich getrennt von verbindlichen Architekturregeln. Achswechsel, Anschlussabsicht/Persistenz, Mitbewegen von Nachbarn, ungleiche Staerken, Griffversatz bei Drehung und Oeffnungs-Endzone bleiben offen. Keine Nutzerentscheidung erfunden. Akzeptanzfaelle fuer 2D/3D/IFC, Reihenfolge/Richtung, History/Datei und Sichtbarkeit dokumentiert.
+
+Pruefung: referenzierte Quelldateien und lokale Markdown-Links vorhanden, git diff --check sauber. Keine neuen Laufzeittests oder Buildwiederholung fuer reine Dokumentation; unveraenderte Codebasis zuletzt 402 bestandene Tests und erfolgreicher Build. Keine Anschlussfunktion als implementiert bezeichnet.
+
+Genau ein naechster Auftrag: die bestehende zentrierte Achse der ausgewaehlten Wand im 2D-Grundriss als dezente pointer-transparente gestrichelte Linie darstellen, mit Vorschau-, Zoom- und Sichtbarkeitspruefung. Keine Achsverschiebung oder Anschluesse. Dies setzt die explizite N45-Voraussetzung vor Wandanschluessen um; Details und Abnahme in docs/WALL_CORNER_PLAN.md.
