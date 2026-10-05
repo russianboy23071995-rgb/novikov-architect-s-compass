@@ -36,7 +36,7 @@ mit bereits implementierter Oeffnungsvalidierung verwechseln.
 - Maus, Eigenschaften und spaetere Text-/Voice-/AI-Adapter verwenden dieselben
   validierten Aktionen mit stabilen Ziel-IDs und Snapshot-Pruefung.
 - N45 bleibt erhalten: ausgewaehlte Wandachse zuerst sichtbar machen, spaeter
-  verschiebbar. Das Verhalten des Achsenwechsels ist weiterhin unentschieden.
+  verschiebbar. Entscheidung 05.10.2026: Beim Versatz bleibt die Zeichenachse fest, der Wandkoerper bewegt sich relativ dazu; Implementierung steht aus.
 
 ## Vorschlag fuer den ersten Anschlussversuch – noch keine Produktentscheidung
 
@@ -68,7 +68,7 @@ heimliche Reparatur oder Loeschung. Keine neuen pauschalen Randabstaende erfinde
 
 | Frage | Noch festzulegen |
 | --- | --- |
-| Achsenwechsel N45 | Wandkoerper bleibt stehen und Referenzachse wandert, oder Wand wandert relativ zur Zeichenachse? |
+| Achsenwechsel N45 | Entschieden 05.10.2026: Zeichenachse bleibt fest, Wandkoerper wird quer dazu versetzt. |
 | Anschlussabsicht | Automatisch bei gemeinsamem Ende oder ausdruecklich erzeugte Verbindung? Abgeleitete Nachbarschaft oder gespeicherte Relation? |
 | Verbundene Bearbeitung | Folgt der Nachbar beim Bewegen einer Ecke, loest sich der Anschluss oder wird die Aktion begrenzt? Keine implizite Verknuepfung. |
 | Unterschiedliche Staerken | Gehrung, durchlaufende Wand oder andere fachliche Prioritaet; Ebenen sind keine AssemblyLayer. |
@@ -86,7 +86,7 @@ der Anschlusszone behalten ID und relative Position. Degenerierte/mehrdeutige
 Faelle werden nachvollziehbar gemeldet. IFC-Abnahme erfordert neuen Importtest;
 der bisher erfolgreiche Rechteckimport belegt keine Gehrung.
 
-## Genau ein ausfuehrbarer Folgeauftrag
+## Historischer Folgeauftrag – mit PR #108 umgesetzt
 
 **Zentrierte Wandachse bei Auswahl im 2D-Grundriss sichtbar machen.**
 
@@ -101,3 +101,6 @@ Abbruch und Undo; Achse liegt sichtbar mittig. Modell/JSON/IFC bleiben unveraend
 3D-Achsdarstellung bleibt Teil von N45 fuer einen spaeteren abgegrenzten Schritt.
 Dieser Einstieg erfuellt eine explizite Nutzeranforderung und macht die Bezugsgeometrie
 sichtbar, ohne die offenen Anschlussentscheidungen vorwegzunehmen.
+
+
+Aktiver Folgeauftrag nach Nutzerentscheidung: numerischen Wandkoerperversatz als gemeinsame validierte Aktion durchgaengig fuer Modell, 2D, 3D, Fang, History/Datei und IFC implementieren. Details am Anfang von DEVELOPMENT_PLAN.md. Die uebrigen Anschlussfragen bleiben offen.
