@@ -1,3 +1,4 @@
+import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
@@ -31,6 +32,12 @@ export function supportsWallWorkplaneEdit(
 type ModelEditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | { type: "confirm"; session: EditSession; selection: ElementTarget | null; point: Point }
+  | {
+      type: "wall-offset";
+      base: Project;
+      selection: ElementTarget | null;
+      request: WallOffsetRequest;
+    }
   | { type: "cancel" }
   | { type: "project"; project: Project }
   | { type: "manage-layer"; base: Project; request: ManageLayerRequest }
@@ -65,6 +72,12 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "wall-offset":
+        return {
+          history: commitWallOffset(state.history, event.base, event.selection, event.request),
+          session: null,
+          error: "",
+        };
       case "manage-layer":
         return {
           history: commitLayerManagement(state.history, event.base, event.request),

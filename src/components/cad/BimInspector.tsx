@@ -12,9 +12,10 @@ type Props = {
   project: Project;
   selection: Selection;
   onChange: (project: Project, selection: Selection) => void;
+  onWallOffset: (base: Project, wallId: string, offset: number) => void;
 };
 
-export function BimInspector({ project, selection, onChange }: Props) {
+export function BimInspector({ project, selection, onChange, onWallOffset }: Props) {
   const [error, setError] = useState("");
   const hatch =
     selection?.kind === "hatch"
@@ -114,6 +115,46 @@ export function BimInspector({ project, selection, onChange }: Props) {
           Apply dimensions
         </Button>
       </form>
+      {wall && (
+        <form
+          className="flex items-end gap-2"
+          aria-label="Wandkörperversatz"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const raw = String(new FormData(event.currentTarget).get("offset") ?? "")
+              .trim()
+              .replace(",", ".");
+            const offset = raw === "" ? NaN : Number(raw);
+            if (!Number.isFinite(offset)) {
+              setError("Bitte einen endlichen Wandversatz in Metern eingeben.");
+              return;
+            }
+            setError("");
+            onWallOffset(project, wall.id, offset);
+          }}
+        >
+          <label
+            className="text-xs"
+            title="Positiv links in Richtung vom Achsanfang zum Achsende. Die Zeichenachse bleibt fest."
+          >
+            Körperversatz (m)
+            <Input
+              aria-label="Wandkörperversatz (m)"
+              name="offset"
+              inputMode="decimal"
+              required
+              defaultValue={wall.bodyOffset}
+              className="mt-1 h-8 w-24"
+            />
+          </label>
+          <Button type="submit" size="sm">
+            Versatz übernehmen
+          </Button>
+          <Button type="reset" variant="ghost" size="sm" onClick={() => setError("")}>
+            Verwerfen
+          </Button>
+        </form>
+      )}
       {wall && (
         <Button
           variant="outline"

@@ -1,3 +1,4 @@
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import { addWall, addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project, Wall } from "../../lib/bim/model.ts";
 
@@ -51,7 +52,7 @@ export function planBounds(project: Project): string {
   )
     return "-2 -3 8 6";
   const extents = project.storey.walls.flatMap((wall) =>
-    [wall.start, wall.end].map((point) => ({
+    [wallBody(wall).start, wallBody(wall).end, wall.start, wall.end].map((point) => ({
       left: point.x - wall.thickness / 2,
       right: point.x + wall.thickness / 2,
       top: -point.y - wall.thickness / 2,

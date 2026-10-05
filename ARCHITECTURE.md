@@ -1412,3 +1412,20 @@ new-version snapshots. Layer and visibility semantics stay unchanged. The next
 implementation must cover all consumers before exposing the numeric field.
 3D axis overlay, interactive offset dragging, side presets, wall joins and
 material-layer priorities remain separate work.
+
+## Implemented wall-body offset and schema 5 — 2026-10-05
+
+The preceding offset decision is implemented. Wall.bodyOffset is required and
+finite in runtime schema 5. Project-file loading strictly validates legacy versions
+and migrates them to zero offset; creation defaults only new wall inputs to zero.
+domain/elements/wall/body.ts derives physical centres/corners once, including
+finite-coordinate checks. Plan, bounds, solids, snapping, corner editing, window
+anchors and IFC use this derivation; the selected plan axis retains start/end.
+Application previewWallOffset/commitWallOffset enforce current snapshot and stable
+project/wall selection, with one model-history commit and no-op preservation.
+The properties form keeps draft text locally until explicit acceptance; cancellation
+discards text, not a model change. The Application preview is disposable, not yet a
+live viewport preview from the form. Future Text/Voice/AI adapters reuse this action.
+Hosted openings retain longitudinal position and move with the physical body.
+IFC placement uses physical body coordinates and records BodyOffset as a property.
+No join semantics or 3D axis overlay are introduced in this step.

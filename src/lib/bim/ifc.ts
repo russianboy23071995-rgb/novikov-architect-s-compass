@@ -1,3 +1,4 @@
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
 
@@ -131,10 +132,11 @@ export async function exportIfc(input: Project, timestamp = new Date()): Promise
   const elements: string[] = [];
   for (const wall of project.storey.walls) {
     const length = wallLength(wall);
+    const bodyPosition = wallBody(wall);
     const wallPlacement = placement(
       storeyPlacement,
-      wall.start.x,
-      wall.start.y,
+      bodyPosition.start.x,
+      bodyPosition.start.y,
       0,
       (wall.end.x - wall.start.x) / length,
       (wall.end.y - wall.start.y) / length,
@@ -148,6 +150,7 @@ export async function exportIfc(input: Project, timestamp = new Date()): Promise
       ["Length", `IFCLENGTHMEASURE(${real(length)})`],
       ["Thickness", `IFCLENGTHMEASURE(${real(wall.thickness)})`],
       ["Height", `IFCLENGTHMEASURE(${real(wall.height)})`],
+      ["BodyOffset", `IFCLENGTHMEASURE(${real(wall.bodyOffset)})`],
     ]);
     for (const window of project.storey.windows.filter((item) => item.wallId === wall.id)) {
       const openingPlacement = placement(

@@ -14,6 +14,7 @@ import {
 import type { Wall, BimWindow } from "./model.ts";
 
 const wall: Wall = {
+  bodyOffset: 0,
   id: "wall-1",
   layerId: "layer:exterior-wall",
   start: { x: 0, y: 0 },

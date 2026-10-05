@@ -152,12 +152,12 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   const v3 = {
     ...p,
     schemaVersion: 3,
-    storey,
+    storey: { ...storey, walls: storey.walls.map(({ bodyOffset, ...wall }) => wall) },
     bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.wall] },
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 4);
+  assert.equal(migrated.schemaVersion, 5);
   assert.deepEqual(migrated.storey, { ...storey, hatches: [] });
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
