@@ -75,6 +75,8 @@ type TopToolbarProps = {
   canUndo: boolean;
   canRedo: boolean;
   onLayers: () => void;
+  canUndoVisibility: boolean;
+  canRedoVisibility: boolean;
   selectedLayer: { id: string; name: string } | null;
   onLayerVisibility: (action: VisibilityAction) => void;
 };
@@ -248,6 +250,21 @@ export function TopToolbar(props: TopToolbarProps) {
             onClick={() => props.onLayerVisibility({ kind: "invert" })}
           >
             <Contrast />
+          </IconControl>
+          <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+          <IconControl
+            label="Ebenensichtbarkeit rückgängig"
+            disabled={!props.canUndoVisibility}
+            onClick={() => props.onLayerVisibility({ kind: "undo" })}
+          >
+            <Undo2 />
+          </IconControl>
+          <IconControl
+            label="Ebenensichtbarkeit wiederholen"
+            disabled={!props.canRedoVisibility}
+            onClick={() => props.onLayerVisibility({ kind: "redo" })}
+          >
+            <Redo2 />
           </IconControl>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-0.5">

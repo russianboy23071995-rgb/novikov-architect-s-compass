@@ -1172,3 +1172,13 @@ Alle vier Aktionen laufen durch changeLayerVisibility und den bestehenden Applic
 Praktischer Test: Wand anklicken, Ebenenname oben pruefen, Auge-aus druecken; danach Palette-Undo. Wand erneut waehlen und "Alle anderen" testen. "Alle" blendet den gesamten Katalog aus, "Umkehren" zeigt alles wieder an. Jede Aktion muss in der Ebenenpalette mit einem Undo-Schritt zuruecknehmbar sein; globales Modell-Undo darf die Filter nicht aendern.
 
 Genau ein naechster Auftrag: die offene praktische Gesamtabnahme von Ebenenpalette und Ebenenumschalter samt 2D/3D, Fang/Auswahl, getrennten Verlaeufen und Speichern/Laden durchfuehren und gefundene Integrationsfehler beheben.
+
+### Freigabe und Ergaenzung: Verlaufspfeile am Ebenenumschalter — 05.10.2026
+
+Nutzerfreigabe fuer die Ebenen-Thematik einschliesslich PR #95/#96 nach Ergaenzung kleiner Undo-/Redo-Pfeile. Die beiden Piktogramme stehen direkt neben den vier Ebenenaktionen, mit Tooltips und deaktiviertem Zustand ohne passenden Verlaufsschritt. Sie nutzen exakt dieselbe VisibilityAction und dieselben History-Flags wie die Palette; keine zweite History und kein Modell-Undo. Ergaenzung in PR #96, anschliessend normale Integration von #95 und #96 freigegeben; main bleibt unveraendert.
+
+365 Tests, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Keine redundanten neuen Tests fuer die reine zweite UI-Anbindung. Praktische Browserpruefung erneut versucht: Navigation auch in einem neuen Tab mit Timeout, daher weiterhin kein visueller Nachweis. Nutzerfreigabe und automatisierte Nachweise ersetzen diesen offenen Nachweis nicht; Browserproblem separat offen halten.
+
+Weiterer Codeabgleich gemaess Guide Etappe 5: Linienattribute und Polylinien sind vorhanden (application/drawing/actions.ts, lib/bim/lines.ts). Ein gespeichertes Schraffurelement und eine gemeinsame Polygon-Validierung sind noch nicht vorhanden. Schraffuren muessen dieselbe Ebenen-/Sichtbarkeits-, Auswahl-, Zeichen-, Direct-Edit- und History-Infrastruktur verwenden; keine eigene Fangengine.
+
+Genau ein naechster begrenzter Auftrag: gemeinsame fachneutrale Pruefung einfacher geschlossener 2D-Polygonkonturen in geometry implementieren und testen, als Voraussetzung fuer Schraffuren. Endliche Koordinaten, mindestens drei verschiedene Eckpunkte, Nullkanten, Nullflaeche und Selbstschnitte/ueberlappende Kanten abdecken; gueltige konkave Konturen und beide Umlaufrichtungen zulassen. Vorhandene Geometrieprimitiven wiederverwenden. Noch kein Dateiformatwechsel, Mustereditor oder neuer Elementtyp in diesem Grundlagenauftrag. Anschliessend kann das erste gespeicherte Schraffurelement auf dieser geprueften Kontur aufbauen.

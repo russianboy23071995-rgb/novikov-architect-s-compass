@@ -543,6 +543,8 @@ export function CadWorkspace({
             onLayerVisibility={(action) =>
               dispatchEditing({ type: "visibility", base: project, action })
             }
+            canUndoVisibility={Boolean(editing.visibilityHistory?.past.length)}
+            canRedoVisibility={Boolean(editing.visibilityHistory?.future.length)}
             canUndo={history.past.length > 0}
             canRedo={history.future.length > 0}
           />
