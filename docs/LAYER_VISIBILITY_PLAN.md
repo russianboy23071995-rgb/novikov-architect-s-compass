@@ -75,3 +75,9 @@ abgeglichen. Keine neuen Tests oder Browserabnahme behauptet.
 Die vorbereitenden Auftraege sind in PR #91–#93 umgesetzt und integriert. Auf feat/viewport-layer-visibility konsumieren nun bestehende 2D-/3D-Adapter, lokale Fangabfrage, 3D-Fussquellen und explizite Referenzwahl die gemeinsame Policy. CadWorkspace nimmt einen optionalen unveraenderlichen layerVisibility-Kontext entgegen; Standard bleibt all-visible. Modell und IFC bleiben vollstaendig. Verborgene Auswahl/Bearbeitung wird verworfen, aktive Referenzen werden vor Shift-Richtungsauswahl geprueft. Vorschaugeometrie nutzt dieselben Rendererfilter. Dies ist noch kein gespeichertes Sichtbarkeitsfeature.
 
 358 automatisierte Tests bestanden; TypeScript/Build erfolgreich. Visuelle Browserabnahme wegen Lade-Timeouts offen. Naechster begrenzter Auftrag ist die BIM-Bedienung samt Dateimigration gemaess DEVELOPMENT_PLAN.md; vorher Undo-Semantik klaeren und Browserabnahme nachholen. Startfilter neuer Ausschnitte bleibt offen. Die vorherige Rubrik "Genau ein naechster begrenzter Auftrag" dokumentiert den inzwischen abgeschlossenen ersten Policy-Schritt.
+
+## Nutzerentscheidung und Umsetzung: getrennte Verlaeufe — 05.10.2026
+
+Der Nutzer hat entschieden: globales Undo/Redo betrifft nur Modellveraenderungen; die Ebenenpalette bietet eigenes Undo/Redo fuer Sichtbarkeit. Schema 3 speichert den aktuellen BIM-Filter, nicht die sitzungsbezogenen Verlaufseintraege. V1/V2 werden strikt migriert und starten all-visible. Der Startfilter zukuenftiger Ausschnitte ist weiterhin offen.
+
+Die Palette nutzt die gemeinsame Application-Aktion; der Renderer erhaelt den gespeicherten Filter. 363 Tests bestanden; Browserabnahme ist wegen Verbindungs-Timeouts noch offen. Der einzige naechste Auftrag ist die praktische Gesamtabnahme gemaess letztem Abschnitt in DEVELOPMENT_PLAN.md. Fruehere Rubriken mit Folgeauftraegen sind historische Zwischenstaende.

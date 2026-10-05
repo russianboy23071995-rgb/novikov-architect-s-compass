@@ -1,5 +1,29 @@
 # NOVIKOV CAD Architecture Contract
 
+## Implemented BIM visibility and independent palette history — 2026-10-05
+
+This section supersedes the preparation-only status below. Existing plan/solid
+viewports consume the shared visibility policy for geometry, picking, snapping,
+active references and 3D occlusion. The BIM palette now supplies the persisted
+working filter; explicit DrawingDocument contexts remain independent.
+
+User decision: global undo/redo changes model data only. Visibility has separate
+undo/redo buttons and a bounded session history in the Application controller.
+Application layer visibility actions replace the current setting without adding
+a geometry-history entry or clearing model redo. Model undo/redo carries the live
+filter forward and removes IDs absent from the restored layer catalogue. Palette
+history never creates layers. A restored layer absent from the live filter is
+visible. Loading resets palette history; pending geometry previews are discarded.
+
+Canonical runtime/file schema is 3, with required bimVisibility.hiddenLayerIds.
+The file adapter strictly validates V1/V2 before explicit all-visible migration;
+runtime validation does not migrate or silently repair snapshots. Save preserves
+the current filter; history stacks are not serialized. Full geometry, real wall
+openings and IFC scope remain independent of display filtering. New drawing
+filter initialization is still undecided. Browser acceptance remains outstanding;
+automated migration/history/rendering checks do not substitute for it.
+
+
 ## Prepared layer display snapshot — 2026-10-05
 
 rendering/viewport/layer-display.ts derives plan wall/window/line lists and wall

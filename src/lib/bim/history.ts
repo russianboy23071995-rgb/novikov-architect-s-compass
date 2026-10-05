@@ -9,6 +9,10 @@ export function createHistory(project: Project): ProjectHistory {
 export function commitProject(history: ProjectHistory, project: Project): ProjectHistory {
   const next = validateProject(project);
   if (serializeProject(next) === serializeProject(history.present)) return history;
+  const { bimVisibility: previousVisibility, ...previousModel } = history.present;
+  const { bimVisibility: nextVisibility, ...nextModel } = next;
+  if (JSON.stringify(previousModel) === JSON.stringify(nextModel))
+    return { ...history, present: next };
   return {
     past: [...history.past, history.present].slice(-HISTORY_LIMIT),
     present: next,
@@ -20,7 +24,7 @@ export function undoProject(history: ProjectHistory): ProjectHistory {
   return previous
     ? {
         past: history.past.slice(0, -1),
-        present: previous,
+        present: retainVisibility(previous, history.present),
         future: [history.present, ...history.future],
       }
     : history;
@@ -30,7 +34,7 @@ export function redoProject(history: ProjectHistory): ProjectHistory {
   return next
     ? {
         past: [...history.past, history.present].slice(-HISTORY_LIMIT),
-        present: next,
+        present: retainVisibility(next, history.present),
         future: history.future.slice(1),
       }
     : history;
@@ -42,7 +46,16 @@ export function readProjectFile(text: string): Project {
     return deserializeProject(text);
   } catch {
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 oder 2, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1, 2 oder 3, Meter) mit gültigen Bauteilen.",
     );
   }
+}
+
+/** Model undo never rewinds the independent palette settings. Deleted IDs cannot survive. */
+function retainVisibility(snapshot: Project, current: Project): Project {
+  const ids = new Set(snapshot.layers.map((l) => l.id));
+  const hiddenLayerIds = current.bimVisibility.hiddenLayerIds.filter((id) => ids.has(id));
+  if (JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds))
+    return snapshot;
+  return { ...snapshot, bimVisibility: { hiddenLayerIds } };
 }

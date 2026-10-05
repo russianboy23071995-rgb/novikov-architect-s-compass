@@ -1,8 +1,4 @@
-import {
-  ALL_LAYERS_VISIBLE,
-  createLayerVisibilityPolicy,
-  visibleLayerTarget,
-} from "@/application/layers/visibility";
+import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
@@ -51,7 +47,7 @@ import { LayerProperties } from "./LayerProperties";
 import { LayerManager } from "./LayerManager";
 
 export function CadWorkspace({
-  layerVisibility = ALL_LAYERS_VISIBLE,
+  layerVisibility,
 }: { layerVisibility?: LayerVisibilityContext } = {}) {
   const [layersOpen, setLayersOpen] = useState(false);
   const [tool, setTool] = useState<ToolId>("select");
@@ -69,7 +65,14 @@ export function CadWorkspace({
   const { history, session: pendingSession } = editing;
   const project = history.present;
   const visibility = useMemo(
-    () => createLayerVisibilityPolicy(project, layerVisibility),
+    () =>
+      createLayerVisibilityPolicy(
+        project,
+        layerVisibility ?? {
+          scope: { kind: "bim-project" },
+          hiddenLayerIds: project.bimVisibility.hiddenLayerIds,
+        },
+      ),
     [project, layerVisibility],
   );
   const visibilityNow = useRef({ project, visibility });
@@ -147,6 +150,19 @@ export function CadWorkspace({
     setLinePoints([]);
   }, []);
 
+  const navigateHistory = useCallback(
+    (direction: "undo" | "redo") => {
+      dispatchEditing({ type: direction });
+      cancelInteraction();
+      setSelection(null);
+      setDemandOpen(false);
+      setTool("select");
+      setModelError("");
+      setExportMessage("");
+    },
+    [cancelInteraction],
+  );
+
   useEffect(() => {
     // The next gesture must anchor to the updated model, not the previous click.
     setPickedPoint({ index: null, anchor: null });
@@ -160,11 +176,17 @@ export function CadWorkspace({
         (event.target.closest(
           'input, textarea, select, [contenteditable=true], [role="dialog"], [role="alertdialog"]',
         ) ||
-          event.ctrlKey ||
-          event.metaKey ||
           event.altKey)
       )
         return;
+      if (event.ctrlKey || event.metaKey) {
+        const key = event.key.toLowerCase();
+        if (key === "z" || key === "y") {
+          event.preventDefault();
+          if (!event.repeat) navigateHistory(key === "y" || event.shiftKey ? "redo" : "undo");
+        }
+        return;
+      }
       const map: Record<string, ToolId> = { v: "select", w: "wall", s: "slab", l: "line" };
       const next = map[event.key.toLowerCase()];
       if (next) {
@@ -184,7 +206,7 @@ export function CadWorkspace({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen, cancelInteraction, referenceSelection.selecting]);
+  }, [fullscreen, cancelInteraction, referenceSelection.selecting, navigateHistory]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -258,12 +280,6 @@ export function CadWorkspace({
     dispatchEditing({ type: "project", project: next });
     showSelection(selected);
     showNotice("Model updated");
-  };
-
-  const navigateHistory = (direction: "undo" | "redo") => {
-    dispatchEditing({ type: direction });
-    selectElement(null);
-    setExportMessage("");
   };
 
   const saveProject = () => {
@@ -469,7 +485,8 @@ export function CadWorkspace({
               <Button
                 onClick={() => {
                   if (pendingFile) {
-                    changeProject(pendingFile.project, null);
+                    dispatchEditing({ type: "load-project", project: pendingFile.project });
+                    showSelection(null);
                     setExportMessage("Projektdatei geladen.");
                     setPendingFile(null);
                   }
@@ -526,6 +543,9 @@ export function CadWorkspace({
         )}
         <LayerManager
           project={project}
+          onVisibility={(base, action) => dispatchEditing({ type: "visibility", base, action })}
+          canUndoVisibility={Boolean(editing.visibilityHistory?.past.length)}
+          canRedoVisibility={Boolean(editing.visibilityHistory?.future.length)}
           open={layersOpen}
           onOpenChange={setLayersOpen}
           error={editing.error}
