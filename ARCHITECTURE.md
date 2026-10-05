@@ -1356,3 +1356,14 @@ SNAP remains the master switch. Disabling only grid fallback preserves feature
 snapping and inference; visible zoom-adaptive grid display is independent.
 Explicit numeric targets and existing axis/Shift precedence remain unchanged.
 No per-tool rounding, new model actions or alternative snapping engine is added.
+
+## Wall corner planning boundary — 2026-10-05
+
+The implementation remains independent centred wall bodies without join relations.
+The inspected paths, limited equal-thickness right-angle miter proposal and open
+product decisions are recorded in [docs/WALL_CORNER_PLAN.md](docs/WALL_CORNER_PLAN.md).
+That proposal is not an implemented or approved automatic join policy. Existing
+single-model, shared-action, derived-geometry and visibility boundaries apply.
+Do not correct only the renderer while retaining independent rectangular IFC bodies.
+The next bounded task displays the selected wall's existing centre axis in 2D;
+it does not introduce axis offsets, join persistence or connected-wall movement.
