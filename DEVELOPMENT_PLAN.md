@@ -1372,3 +1372,13 @@ Vorschlag fuer spaeter: rechtwinklige Zwei-Wand-Ecke mit gleicher Staerke/Hoehe 
 Pruefung: referenzierte Quelldateien und lokale Markdown-Links vorhanden, git diff --check sauber. Keine neuen Laufzeittests oder Buildwiederholung fuer reine Dokumentation; unveraenderte Codebasis zuletzt 402 bestandene Tests und erfolgreicher Build. Keine Anschlussfunktion als implementiert bezeichnet.
 
 Genau ein naechster Auftrag: die bestehende zentrierte Achse der ausgewaehlten Wand im 2D-Grundriss als dezente pointer-transparente gestrichelte Linie darstellen, mit Vorschau-, Zoom- und Sichtbarkeitspruefung. Keine Achsverschiebung oder Anschluesse. Dies setzt die explizite N45-Voraussetzung vor Wandanschluessen um; Details und Abnahme in docs/WALL_CORNER_PLAN.md.
+
+### Sichtbare Wandachse im Grundriss — 05.10.2026
+
+PR #107 nach Freigabe normal in den Integrationszweig gemergt (ea8db92). BimPlan zeigt fuer die ausgewaehlte sichtbare Wand eine blaue gestrichelte Mittellinie direkt aus start/end der angezeigten, gegebenenfalls gueltigen Vorschaugeometrie. Strichstaerke 1.25 CSS-Pixel mit non-scaling-stroke, pointer-events none; bestehende Eckgriffe bleiben bedienbar. Keine Modellkopie, neue Fangquelle, Aktion, Schema- oder IFC-Aenderung. 3D-Achse und Achsversatz bleiben offen.
+
+402 bestehende Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Keine spiegelnde neue Logikpruefung fuer rein abgeleitete SVG-Linie. Browser: horizontale Achse (0,0)–(3,0), konstante Strichstaerke nach Zoom, keine Achse bei Fensterauswahl, schräge Vorschau/Commit mit identischen Endkoordinaten und Wandrotation, Abbruch wieder horizontal. Undo hebt bestehend die Auswahl auf; nach erneuter Wandwahl ist die urspruengliche Achse sichtbar. Ausgeblendete Wand hat keine Achslinie, nach Sichtbarkeits-Undo und Auswahl ist sie wieder sichtbar. Screenshot outputs/selected-wall-axis.png. Diese Pruefung bestaetigt keine neue Griff-/Drehregel; das dokumentierte bestehende Griffverhalten bleibt bestehen.
+
+Abnahme: Wand im Grundriss anklicken, mittige gestrichelte Achse sehen, zoomen, Wandecke bewegen und abbrechen. Fenster waehlen oder Wandebene ausblenden: Achse verschwindet. Modell und Export enthalten weiterhin nur dieselbe Wand.
+
+Genau ein naechster Auftrag: die offene N45-Bedienentscheidung fuer Achsversatz mit dem Nutzer klaeren und als verbindliche Regel dokumentieren (Wandkoerper bleibt stehen oder bewegt sich relativ zur Zeichenachse); darauf basierend einen begrenzten gemeinsamen Application-Auftrag definieren. Bis zur Entscheidung keinen Achsversatz oder automatischen Anschluss implementieren.
