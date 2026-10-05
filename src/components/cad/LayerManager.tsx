@@ -36,7 +36,7 @@ function LayerRow({
       defaultValue={layer.name}
       autoFocus={autoFocus}
       className={
-        "w-full rounded border px-3 py-2 text-sm " +
+        "block w-full rounded border px-2 py-1 text-xs " +
         (selected
           ? "border-primary bg-accent"
           : "border-transparent bg-transparent hover:bg-accent/50")
@@ -75,7 +75,7 @@ export function LayerManager({ project, open, onOpenChange, error, onManage }: P
   const [bounds, setBounds] = useState({
     width: 1024,
     height: 768,
-    menuWidth: 720,
+    menuWidth: 520,
     menuHeight: 560,
   });
   useEffect(() => {
@@ -85,7 +85,7 @@ export function LayerManager({ project, open, onOpenChange, error, onManage }: P
       setBounds({
         width: window.innerWidth,
         height: window.innerHeight,
-        menuWidth: r?.width ?? 720,
+        menuWidth: r?.width ?? 520,
         menuHeight: r?.height ?? 560,
       });
     };
@@ -110,7 +110,7 @@ export function LayerManager({ project, open, onOpenChange, error, onManage }: P
       role="dialog"
       aria-label="Ebenen"
       aria-modal="false"
-      className="glass-panel-strong fixed z-50 flex h-[560px] max-h-[calc(100dvh-16px)] w-[720px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-xl border shadow-2xl"
+      className="glass-panel-strong fixed z-50 flex h-[560px] max-h-[calc(100dvh-16px)] w-[520px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-xl border shadow-2xl"
       style={{ left: visible.x, top: visible.y }}
     >
       <header className="flex shrink-0 items-center border-b p-2">
@@ -223,6 +223,9 @@ export function LayerManager({ project, open, onOpenChange, error, onManage }: P
             }}
           >
             Ebene löschen
+          </Button>
+          <Button variant="outline" className="ml-auto" onClick={() => onOpenChange(false)}>
+            Schließen
           </Button>
         </div>
       </footer>

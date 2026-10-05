@@ -497,7 +497,7 @@ export function CadWorkspace() {
           ref={propertiesRef}
           tabIndex={-1}
           aria-label="Werkzeugeigenschaften"
-          className="glass-panel-strong shrink-0 max-h-[35vh] overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="glass-panel-strong h-[130px] shrink-0 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <h2 className="mb-1 text-xs font-semibold">Werkzeugeigenschaften</h2>
           {tool === "select" && (
