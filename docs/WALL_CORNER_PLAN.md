@@ -207,3 +207,21 @@ bestaetigt. Lokales Pruefskript outputs/corner-offset-check.mjs ausserhalb des R
 Das ist noch kein Test einer Anschlussimplementierung. Keine Laufzeitdatei geaendert;
 409 Tests/TypeScript/Build und Lint 0 Fehler/6 Warnungen bleiben der Nachweis aus
 PR #111, nicht erneut ausgefuehrte Pruefungen dieses Dokumentationsauftrags.
+
+## Umsetzung des reinen Geometrieschritts — 05.10.2026
+
+deriveRightAngleCorner in src/domain/elements/wall/corner.ts setzt die oben
+beschriebene Bruttokonturableitung um. Zwei explizite Wand-/Endpunktreferenzen
+liefern nach Wand-ID sortierte Konturen (positive Umlaufrichtung), Flaechen und
+eine gemeinsame Naht. Keine Eingabemutation, Verbindungsspeicherung, Oeffnungs-
+behandlung oder Anzeige. Gleiche Parameter, rechter Winkel, gueltige Endpunkte,
+Offsetgrenze und ausreichend lange Wandseiten werden validiert. Rechenfehler
+oder entartete Konturen werden abgewiesen; keine automatische Reparatur.
+
+11 neue Tests bestaetigen neun Tabellenfaelle, Eingabe-Unveraenderlichkeit,
+getrennte Innenflaechen, Reihenfolge und 216 Kombinationen aus Offset, Endpunkt-
+umkehr, Rotation, Spiegelung und Translation. Gesamt 420 Tests bestanden,
+TypeScript/Build erfolgreich, ESLint 0 Fehler/6 bekannte Warnungen. Diese Zahlen
+ersetzen nicht die noch fehlende 2D-/3D-/IFC-Abnahme einer produktiven Verbindung.
+Der einzige aktive Folgeauftrag steht oben in DEVELOPMENT_PLAN.md: geometrischer
+Oeffnungsbefund gegen die abgeleiteten Konturen.
