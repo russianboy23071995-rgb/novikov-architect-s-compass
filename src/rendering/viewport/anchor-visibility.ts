@@ -10,7 +10,7 @@ export type AnchorVisibility = "visible" | "occluded" | "outside" | "invalid";
 /** Classify against the solid belonging to the displayed snapshot.
  * Does not acquire references or determine whether hidden targets may be offered. */
 export function classifyAnchorVisibility(
-  solid: Solid,
+  solid: Pick<Solid, "faces">,
   projection: ProjectionState | null,
   anchor: Vector3,
 ): AnchorVisibility {

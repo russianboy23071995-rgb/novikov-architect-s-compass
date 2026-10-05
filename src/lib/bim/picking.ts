@@ -2,13 +2,14 @@ import {
   createProjectionFrame,
   projectOrthographic,
 } from "../../geometry/projections/orthographic.ts";
-import type { Camera, Solid } from "./geometry.ts";
+import type { Camera } from "./geometry.ts";
+import type { DisplaySurfaces } from "../../rendering/viewport/layer-display.ts";
 import { nearestWallSurface } from "../../rendering/viewport/wall-depth.ts";
 import type { ProjectionFrame } from "../../geometry/projections/orthographic.ts";
 
 /** Match the rendered triangles and depth test; holes contain no pickable faces. */
 export function pickWall(
-  solid: Solid,
+  solid: DisplaySurfaces,
   camera: Camera,
   aspect: number,
   x: number,
@@ -18,7 +19,7 @@ export function pickWall(
 }
 
 export function pickWallInProjection(
-  solid: Solid,
+  solid: DisplaySurfaces,
   frame: ProjectionFrame,
   camera: Camera,
   aspect: number,
