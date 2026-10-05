@@ -71,3 +71,6 @@ sehr viele Ereignisse und Rendering bleiben moegliche Kosten. Vollpruefung ist
 weiterhin im Worst Case quadratisch; auch die Ereignis-/Probenzahl kann mit der
 Kontur wachsen. Dieser Schritt verspricht keine allgemeine Echtzeitgarantie
 fuer die maximal erlaubten 10.000 Punkte.
+
+Praktische Nutzerabnahme am 05.10.2026: Performancekorrektur hat funktioniert,
+Freigabe erteilt. PR #117 ist in den Integrationszweig uebernommen.

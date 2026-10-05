@@ -1,4 +1,5 @@
 import { wallBody } from "@/domain/elements/wall/body";
+import { anchorDragTarget, type AnchorDrag } from "@/rendering/viewport/anchor-drag";
 import {
   defaultGridSettings,
   gridSpacing,
@@ -23,7 +24,7 @@ import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
@@ -73,6 +74,8 @@ export type BimPlanProps = {
   onEditAim?: (session: EditSession, point: Point) => void;
   onEditDirection?: (session: EditSession, point: Point) => void;
   onEditCommit?: (session: EditSession, point: Point) => void;
+  onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
+  onEditCancel?: () => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
 };
@@ -99,6 +102,8 @@ export function BimPlan({
   onFinish,
   editSession: requestedEditSession,
   onEditCommit,
+  onContourStretch,
+  onEditCancel,
   numericTarget,
   drawingTarget,
   onDrawingAim,
@@ -132,6 +137,35 @@ export function BimPlan({
   const selecting = referenceSelection?.selecting ?? false;
   const selectedSegments = referenceSelection?.selected ?? null;
   const svg = useRef<SVGSVGElement>(null);
+  const gripDrag = useRef<{
+    gesture: AnchorDrag;
+    base: Project;
+    target: NonNullable<Selection>;
+    index: number;
+  } | null>(null);
+  const gripClick = useRef(false);
+  const matchingGrip = useCallback(() => {
+    const drag = gripDrag.current;
+    return (
+      drag &&
+      editSession &&
+      editSession.base === drag.base &&
+      editSession.target.id === drag.target.id &&
+      editSession.target.kind === drag.target.kind &&
+      editSession.action === "edge" &&
+      editSession.index === drag.index &&
+      editSession.anchor.x === drag.gesture.origin.x &&
+      editSession.anchor.y === drag.gesture.origin.y
+    );
+  }, [editSession]);
+  useEffect(() => {
+    // Escape, model/visibility/selection changes invalidate a captured gesture.
+    if (gripDrag.current && !matchingGrip()) {
+      const id = gripDrag.current.gesture.pointerId;
+      gripDrag.current = null;
+      if (svg.current?.hasPointerCapture(id)) svg.current.releasePointerCapture(id);
+    }
+  }, [editSession, project, selection, matchingGrip]);
   const gridId = useId();
   const gridStep = planScaleBar(camera.pixelsPerMetre).metres;
   const navigation = useRef<{ pointerId: number; x: number; y: number; camera: PlanCamera } | null>(
@@ -305,6 +339,23 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: point.x, y: -point.y };
   };
+  const draggedPoint = (event: { pointerId: number; clientX: number; clientY: number }) => {
+    const point = rawPoint(event),
+      drag = gripDrag.current;
+    return point && drag && matchingGrip()
+      ? anchorDragTarget(drag.gesture, event.pointerId, point, {
+          x: event.clientX,
+          y: event.clientY,
+        })
+      : null;
+  };
+  const selectedRing =
+    selection && !drawing && !editSession ? closedContour(project, selection) : null;
+  // Winding is shared by all grips; never revalidate the whole ring per side.
+  const selectedShape = useMemo(
+    () => (selectedRing ? validateSimplePolygon(selectedRing) : null),
+    [selectedRing],
+  );
   const resolvedEdit =
     numericTarget !== undefined
       ? numericTarget
@@ -435,6 +486,23 @@ export function BimPlan({
         editDown.current = editSession ?? null;
       }}
       onPointerUp={(event) => {
+        const drag = gripDrag.current;
+        if (drag?.gesture.pointerId === event.pointerId) {
+          const result = draggedPoint(event);
+          gripDrag.current = null;
+          gripClick.current = true;
+          editDown.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          if (result?.moved && editSession) {
+            try {
+              onEditCommit?.(editSession, resolvePointer(result.point, event.shiftKey).point);
+            } catch {
+              /* Keep the shared edit session available for correction. */
+            }
+          }
+          return;
+        }
         if (navigation.current?.pointerId === event.pointerId) {
           navigation.current = null;
           event.currentTarget.releasePointerCapture(event.pointerId);
@@ -442,12 +510,26 @@ export function BimPlan({
       }}
       onLostPointerCapture={() => {
         navigation.current = null;
+        if (gripDrag.current) {
+          gripDrag.current = null;
+          onEditCancel?.();
+        }
       }}
       onPointerCancel={() => {
         navigation.current = null;
         editDown.current = null;
+        if (gripDrag.current) {
+          gripDrag.current = null;
+          onEditCancel?.();
+        }
       }}
       onClickCapture={(event) => {
+        if (gripClick.current) {
+          gripClick.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         if ((event.target as Element).closest("[data-reference-panel]")) return;
         if (selecting && referenceSelection && !navigationClick.current && !pan) {
           event.preventDefault();
@@ -481,12 +563,13 @@ export function BimPlan({
           return;
         }
         if (pan || selecting) return;
-        if (endpointSnap || editSession) setHover(rawPoint(event));
-        const drawingPoint = rawPoint(event);
+        if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
+        const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
+        if (endpointSnap || editSession) setHover(drawingPoint);
         if (drawing && drawingPoint)
           onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
-          const point = rawPoint(event);
+          const point = drawingPoint;
           if (point) {
             setEditPointer({ session: editSession, point });
             onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
@@ -717,12 +800,11 @@ export function BimPlan({
       {!drawing &&
         !editSession &&
         selection &&
-        closedContour(project, selection)?.map((a, edgeIndex, ring) => {
+        selectedRing?.map((a, edgeIndex, ring) => {
           const b = ring[(edgeIndex + 1) % ring.length]!;
           const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-          const shape = validateSimplePolygon(ring);
           const length = Math.hypot(b.x - a.x, b.y - a.y);
-          const sign = shape.valid && shape.signedArea > 0 ? 1 : -1;
+          const sign = selectedShape?.valid && selectedShape.signedArea > 0 ? 1 : -1;
           const nx = (-(b.y - a.y) / length) * sign,
             ny = ((b.x - a.x) / length) * sign;
           const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
@@ -731,36 +813,64 @@ export function BimPlan({
           const arrow = (along: number, across: number) =>
             `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
           return (
-            <path
+            <g
               key={`edge-${edgeIndex}`}
-              d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
-              fill="none"
-              stroke="#0284c7"
-              strokeWidth={2}
-              className="cursor-pointer outline-none focus-visible:stroke-blue-800"
-              vectorEffect="non-scaling-stroke"
               role="button"
               tabIndex={0}
-              aria-label={`Konturseite ${edgeIndex + 1}`}
-              onClick={(event) => {
+              aria-label={`Konturseite ${edgeIndex + 1} strecken`}
+              className="cursor-grab outline-none focus-visible:stroke-blue-800"
+              onPointerDown={(event) => {
+                if (event.button !== 0 || pan || selecting || !interactive || !onContourStretch)
+                  return;
+                const start = rawPoint(event);
+                if (!start || !svg.current) return;
+                event.preventDefault();
                 event.stopPropagation();
-                onSelect(
-                  selection,
-                  { x: event.clientX, y: event.clientY },
-                  undefined,
-                  point,
-                  edgeIndex,
-                );
+                svg.current.focus();
+                gripClick.current = false;
+                navigationClick.current = false;
+                gripDrag.current = {
+                  base: project,
+                  target: selection,
+                  index: edgeIndex,
+                  gesture: {
+                    pointerId: event.pointerId,
+                    origin: point,
+                    pointerStart: start,
+                    screenStart: { x: event.clientX, y: event.clientY },
+                  },
+                };
+                svg.current.setPointerCapture(event.pointerId);
+                onContourStretch(selection, edgeIndex, point);
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
               }}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
+                if (
+                  (event.key === "Enter" || event.key === " ") &&
+                  interactive &&
+                  !pan &&
+                  !selecting
+                ) {
                   event.preventDefault();
                   event.stopPropagation();
-                  const bounds = event.currentTarget.getBoundingClientRect();
-                  onSelect(selection, { x: bounds.x, y: bounds.y }, undefined, point, edgeIndex);
+                  onContourStretch?.(selection, edgeIndex, point);
                 }
               }}
-            />
+            >
+              <circle cx={cx} cy={-cy} r={10 / camera.pixelsPerMetre} fill="transparent" />
+              <path
+                d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                className="cursor-pointer outline-none focus-visible:stroke-blue-800"
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            </g>
           );
         })}
       {!drawing &&

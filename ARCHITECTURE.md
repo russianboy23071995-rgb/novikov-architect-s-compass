@@ -1540,3 +1540,15 @@ A cancelled or replaced session is not reused by subsequent operations.
 Full contour/project validation still runs through the existing preview/commit
 adapters. No trusted-preview bypass, schema change or relaxed commit validation.
 See docs/CONTOUR_EDGE_PERFORMANCE.md for timings and remaining limits.
+
+## Direct contour grip input — 2026-10-05
+
+Blue edge arrows are an input shortcut to the existing edge EditSession, not a
+second stretch implementation. BimPlan captures the pointer on the stable SVG;
+rendering/viewport/anchor-drag.ts translates pointer displacement to the pinned
+model anchor and applies a 3px screen drag threshold. It has no model mutation.
+CadWorkspace forwards a begin intent to the existing editing reducer. Snap,
+precision input, cap and commit continue through the shared edit interaction.
+Pointer-up suppresses its following click; simple click/keyboard activation
+leaves the standard edit active. Capture loss/cancel aborts; session/model binding
+prevents stale drags. Other on-demand edge and insertion actions remain available.

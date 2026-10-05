@@ -1,5 +1,42 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: direkte Seitengriffe — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+Der Nutzer hat die Performancekorrektur praktisch bestaetigt und freigegeben.
+PR #116 und #117 wurden normal in fix/reference-selection-lifecycle gemergt
+(572c388 / 4bd900e). Neuer Branch: feat/direct-contour-grips.
+
+Blaue Doppelpfeile geschlossener Polygonlinien und Schraffuren starten direkt
+bestehendes Seitenstrecken: linke Taste halten, ziehen, loslassen. Anfassen des
+innenliegenden Pfeils bewahrt den exakten Seitenmittelpunkt als Ursprung;
+kein Sprung um den grafischen Pfeilversatz. Ein Klick ohne Ziehen oder Enter/
+Leertaste startet die normale klick-/zahlenbasierte Streckaktion. Escape bricht ab.
+Pointer Capture bleibt am SVG, auch wenn der Pfeil waehrend der Vorschau entfällt.
+Fremde Zeiger werden ignoriert; Pointer-Abbruch/verlorene Capture sowie unpassende
+Modell-/Sessionbindung verwerfen die Geste. Mouseup unterdrueckt den nachfolgenden
+Click, damit kein zweiter Commit entsteht. Fang, Cap, numerische Eingabe und
+Commit/Undo laufen durch bestehende gemeinsame Application-Aktionen.
+
+Die Konturorientierung wird fuer die Pfeildarstellung einmal je Ring/Render
+geprueft statt erneut pro Seite. Kein neues Bauteilmodell oder Dateiformat.
+446 Tests bestanden; TypeScript/Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browserabnahme in separatem Testtab: Schraffur ziehen ohne Sprung,
+ein Undo/Redo, geschlossene Polygonlinie ziehen und ein Undo, Enter-Start sowie
+Klick-Start mit Hilfseingabe und Escape ohne Modellveraenderung. Automatische
+Tests sichern Zeiger-ID, bildschirmbezogene 3px-Ziehschwelle und Ankerkorrektur.
+Ein ueberlagerndes On-Demand-Menue kann einen Griff weiterhin verdecken; es bleibt
+verschiebbar und ueber den Menuebutton schliessbar. Kein neuer Tastatur-Hotkey.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Gemeinsame temporaere Anschlussvorschau
+fuer ein bewusst ausgewaehltes rechtwinkliges Wandpaar in Grundriss und 3D.
+Application haelt Auswahl/Vorschau, Renderer verwenden dieselben vorhandenen
+Konturen und Flaechen. Normale Wandkoerper ersetzen statt doppelt anzeigen,
+Fenster beibehalten, Modellwechsel pruefen und Escape unterstuetzen. Keine
+Speicherung/History-Buchung oder produktive Verbindung, solange Regeln zu
+Oeffnungsberuehrung und Endkappen nach dem Loesen nicht entschieden sind.
+Der IFC-Testimport ist vom Nutzer bestaetigt.
+
 ## Aktueller Stand: Seitenstrecken beschleunigt — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -28,7 +65,7 @@ IFC-Eckmodells einschliesslich Fenster und rechtwinkligem Wandanschluss.
 Diese konkrete Exportabnahme ist damit abgeschlossen. Regeln zur genauen
 Oeffnungsberuehrung und zu Endkappen nach dem Loesen bleiben weiterhin offen.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Die gemeinsame temporaere Anschluss-
+**Historischer, nach Seitengriffen fortgefuehrter Folgeauftrag:** Die gemeinsame temporaere Anschluss-
 vorschau fuer ein ausdruecklich ausgewaehltes rechtwinkliges Wandpaar in Grundriss
 und 3D integrieren. Application haelt Selection/Preview; Renderer verwenden die
 vorhandenen Konturen und polygonalen Flaechen derselben Ableitung. Beide normalen

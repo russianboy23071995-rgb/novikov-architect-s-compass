@@ -765,6 +765,24 @@ export function CadWorkspace({
                   snap={snap}
                   ortho={ortho}
                   onSelect={selectElement}
+                  onContourStretch={(target, index, anchor) => {
+                    if (
+                      referenceSelection.selecting ||
+                      !visibleLayerTarget(
+                        visibilityNow.current.project,
+                        visibilityNow.current.visibility,
+                        target,
+                      )
+                    )
+                      return;
+                    cancelInteraction();
+                    setSelection(target);
+                    setTool("select");
+                    setDemandOpen(false);
+                    setModelError("");
+                    dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
+                  }}
+                  onEditCancel={() => dispatchEditing({ type: "cancel" })}
                   onPoint={(point) =>
                     referenceSelection.selecting
                       ? undefined
