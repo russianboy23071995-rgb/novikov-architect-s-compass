@@ -1453,3 +1453,18 @@ implemented yet. Shared-corner editing, endpoint/property edits and cap geometry
 after detachment remain separate unresolved behaviours. See docs/WALL_CORNER_PLAN.md
 for offset examples and the bounded pure contour-derivation proposal. Persisted
 join relations are a technical proposal, not an existing schema capability.
+
+## Pure right-angle wall corner contours — 2026-10-05
+
+domain/elements/wall/corner.ts derives gross contours and a shared seam from an
+explicit pair of wall endpoint references. It has no project/selection ownership,
+opening processing, persistence or automatic neighbour detection. Membership,
+other joins and opening eligibility remain caller responsibilities for future
+Application integration. Stable-ID ordering makes pair order deterministic;
+endpoint directions and offset signs are normalized locally without mutation.
+wallBody and existing generic line intersection/polygon validation are reused.
+Equal thickness/height are exact parameter requirements; endpoint compatibility
+uses the existing metre tolerance, not screen snapping. Right-angle dot-product
+tolerance is dimensionless 1e-10. Invalid/too-short geometry throws; no clamping.
+Contours have positive winding and local computed area; converted world geometry
+is validated too. No runtime consumers, schema changes or UI command yet.

@@ -1,5 +1,39 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: reine Wand-Eckkonturen umgesetzt — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #112 mit Nutzerfreigabe normal gemergt (b39ae9b). Implementierung auf
+feat/wall-corner-contours gegen fix/reference-selection-lifecycle.
+
+domain/elements/wall/corner.ts liefert fuer ein ausdruecklich angegebenes Paar
+von Wand-ID/Endpunkt zwei Bruttokonturen mit Flaechen und gemeinsamer Gehrungsnaht.
+Gleiche Staerke/Hoehe, kompatibler gemeinsamer Achsendpunkt, rechter Winkel und
+|bodyOffset| <= halber Staerke sind erforderlich. Inputs bleiben unveraendert.
+Lokale Berechnung verwendet wallBody, intersectLines, validateSimplePolygon und
+bestehende Modell-Metertoleranzen; Rechtwinkligkeit hat eine separate dimensionslose
+Skalarprodukt-Toleranz von 1e-10. Keine Nachbarsuche oder automatische Verbindung.
+Konturen werden gegen entartete Flaechen und zu kurze Waende geprueft.
+
+Nachweis: 420 Tests bestanden (11 neue Tests, darunter neun Tabellenfaelle und
+216 Richtungs-/Rotations-/Spiegelungsvarianten). TypeScript und Build erfolgreich;
+ESLint 0 Fehler/6 bestehende Warnungen; git diff --check bestanden.
+Keine UI-, Projektformat-, History-, Rendering- oder IFC-Anbindung; Fenster sind
+nicht Teil dieser Bruttokonturen. Keine neue sichtbare Funktion im Browser.
+Praktische Abnahme aktuell anhand der dokumentierten Koordinaten und Testresultate,
+nicht durch Aneinanderschieben zweier Waende in der Anwendung.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Eine reine Domain-Pruefung der vorhandenen
+Fensteroeffnungen gegen diese abgeleiteten Anschlusskonturen ergaenzen. Vollstaendige
+Oeffnungsgrundflaeche mit Wandstaerke, bodyOffset und relativer Position aus denselben
+Modellparametern ableiten; voll enthaltene Oeffnungen versus Schnitt mit der schraegen
+Endbegrenzung nachvollziehbar melden. Keine pauschalen Randabstaende erfinden, keine
+Fenster verschieben oder loeschen. Tests: mittiges Fenster, Kollision, Beruehrung,
+beide Vorzeichen, umgekehrte Achsrichtung. Ergebnis ist ein geometrischer Befund;
+die Produktentscheidung fuer Beruehrung/Endzonen und Anschlussbearbeitung bleibt
+offen. Noch keine UI-Freischaltung oder persistenten Anschlussdaten.
+
+
 ## Aktueller Stand: Eckanschluesse mit Wandversatz geplant — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
@@ -18,7 +52,7 @@ Verbindung automatisch. Lösen und Bewegen als ein validierter Undo-Schritt plan
 Gemeinsame Eckbearbeitung, Endkappen beim Loesen und Oeffnungs-Endzonen bleiben
 getrennte offene Fragen; keine automatische Verbindung allein durch Fang/Naehe.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Reine fachliche Konturableitung fuer
+**Historischer, inzwischen umgesetzter Folgeauftrag:** Reine fachliche Konturableitung fuer
 zwei rechtwinklige Waende gleicher Staerke/Hoehe mit gemeinsamem Achsendpunkt
 und |Offset| <= halber Staerke implementieren. Vorhandene Geometrie-/Validierungs-
 funktionen verwenden. Keine UI-, Projektformat-, Renderer- oder IFC-Anbindung.
