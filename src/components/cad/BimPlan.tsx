@@ -8,7 +8,11 @@ import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
-import { pickReferencePoints, pickReferenceSegments } from "@/rendering/viewport/reference-picking";
+import {
+  pickContourEdge,
+  pickReferencePoints,
+  pickReferenceSegments,
+} from "@/rendering/viewport/reference-picking";
 import { segmentKey } from "@/application/snapping/reference-selection";
 import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
@@ -362,11 +366,15 @@ export function BimPlan({
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
+        const point = rawPoint(event);
+        const ring = closedContour(project, { kind, id });
+        const edge = point && ring ? pickContourEdge(ring, point, camera.pixelsPerMetre) : null;
         onSelect(
           { kind, id },
           { x: event.clientX, y: event.clientY },
           undefined,
-          rawPoint(event) ?? undefined,
+          edge?.point ?? point ?? undefined,
+          edge?.index,
         );
       }
     },
@@ -552,18 +560,29 @@ export function BimPlan({
         </g>
       )}
       {plan.hatches.map((hatch) => (
-        <polygon
-          key={hatch.id}
-          {...selectProps("hatch", hatch.id)}
-          points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-          fill={hatch.fill.color}
-          fillOpacity={hatch.fill.opacity}
-          stroke={selection?.id === hatch.id ? "#cbd5e1" : "transparent"}
-          strokeWidth={2}
-          vectorEffect="non-scaling-stroke"
-          pointerEvents="all"
-          className="cursor-pointer outline-none focus-visible:stroke-sky-300"
-        />
+        <g key={hatch.id}>
+          <polygon
+            {...selectProps("hatch", hatch.id)}
+            points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+            fill={hatch.fill.color}
+            fillOpacity={hatch.fill.opacity}
+            stroke="transparent"
+            strokeWidth={12}
+            vectorEffect="non-scaling-stroke"
+            pointerEvents="all"
+            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+          />
+          {selection?.id === hatch.id && (
+            <polygon
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke="#cbd5e1"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+        </g>
       ))}
       {plan.walls.map((wall) => {
         const length = wallLength(wall);

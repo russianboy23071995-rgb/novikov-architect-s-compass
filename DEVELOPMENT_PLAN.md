@@ -1328,3 +1328,13 @@ Mausfang, numerische Vorschau und Commit verwenden boundedEdgeTarget. Begrenzte 
 Abnahme: Seite einer spitz zulaufenden Schraffur oder geschlossenen Polylinie strecken, ueber den Kollapspunkt hinaus und wieder zurueck bewegen. Vorschau darf nicht verschwinden; numerische Ueberschreitung zeigt die Grenze, Bestaetigung bleibt gueltig und per Undo reversibel. Zoom pruefen: der blaue Zielmarker bleibt gleich gross.
 
 Genau ein naechster Auftrag: den weiterhin unbestaetigten weiss-schwarzen Kreis anhand des konkreten ausloesenden Bedienablaufs reproduzieren und die Ursache beheben; danach zur vorgemerkten zentralen Rastersteuerung zurueckkehren.
+
+### Direkte Konturkanten-Auswahl — 05.10.2026
+
+Nutzer priorisiert Seitenstrecken direkt durch Klick auf eine Aussenlinie. Gemeinsames screen-space Picking fuer Schraffuren und geschlossene Polylinien: naechste Konturkante innerhalb 6 CSS-Pixeln, inklusive Schlusskante; Ursprung ist die Projektion des Klicks auf genau diese Seite. Bestehendes On-Demand-Menue, EditSession und validierte Seitenstreck-/Knicken-Aktionen werden weiterverwendet. Schraffuren erhalten einen unsichtbaren 12-Pixel-Klickrand, sichtbare Auswahlkontur bleibt 2 Pixel. Flaechenklick bleibt Elementauswahl, Eckgriffe behalten Vorrang. Keine eigene Fang- oder Modelllogik.
+
+399 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Neuer Test prueft Projektion, Schlusskante, Toleranz bei drei Zoomstufen und Nichttreffer im Inneren. Browser: abseits der Seitengriffe Schraffur-Aussenkante (auch knapp ausserhalb) und Polylinienkante angeklickt, korrekte Seitennummer und Seitenstrecken aktiviert; Vorschauen abgebrochen, Nutzergeometrie unveraendert. Flaechenklick zeigt weiterhin Ganzelement-Menue. Screenshot outputs/direct-edge-picking.png.
+
+Abnahme: Aussenkante einer Schraffur oder geschlossenen Polylinie direkt anklicken, Seite strecken waehlen, senkrecht ziehen oder Mass eingeben. Die blauen Doppelpfeile bleiben alternative Griffe. Offene Polylinien erhalten keine geschlossene Konturbearbeitung.
+
+Genau ein naechster Auftrag: den weiterhin nicht reproduzierten weiss-schwarzen Kreis mit dem ausloesenden Bedienablauf eingrenzen und beheben; anschliessend zentrale Rastersteuerung fortsetzen.
