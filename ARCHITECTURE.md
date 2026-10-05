@@ -1519,3 +1519,24 @@ invalid profiles fail before asynchronous identity generation. IDs retain the
 existing project/kind/source-ID namespace. The acceptance path rejects currently
 unsupported end-contact openings without deciding the future product policy.
 See docs/CORNER_IFC_ACCEPTANCE.md for independent validation and import limits.
+
+## Incremental closed-contour side stretching — 2026-10-05
+
+Geometry preparePolygonVertexEdit owns a copied, fully validated baseline and
+permits edits only to declared vertices. It checks all scalar/area conditions
+and all edge pairs incident to those vertices with the same contact predicates
+as full validation. Undeclared changes or a different vertex count are rejected.
+For two adjacent vertices only three edges change: 3*n-6 pairs, not n*(n-1)/2.
+A conservative bounding-box rejection retains gaps within twice the maximum
+model tolerance; it does not replace contact tests or introduce screen tolerance.
+
+prepareContourEdge reuses this preparation across pointer targets. Orientation
+roots, event order, first-valid-interval restriction, collapse rules and numerical
+margin remain intact. Preparation and derived results never mutate model geometry.
+Application owns a WeakMap per immutable EditSession, guards its base/target/index/
+anchor binding and reuses the last raw or bounded target result. Mouse snapping,
+numeric preview and contour preview share this resolver. No tool-specific copy.
+A cancelled or replaced session is not reused by subsequent operations.
+Full contour/project validation still runs through the existing preview/commit
+adapters. No trusted-preview bypass, schema change or relaxed commit validation.
+See docs/CONTOUR_EDGE_PERFORMANCE.md for timings and remaining limits.
