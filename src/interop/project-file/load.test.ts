@@ -53,7 +53,7 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 3);
+    assert.equal(migrated.schemaVersion, 4);
     assert.deepEqual(migrated.storey.walls.map(strip), input.storey.walls);
     assert.deepEqual(migrated.storey.windows.map(strip), input.storey.windows);
     assert.deepEqual(migrated.storey.lines?.map(strip), input.storey.lines);

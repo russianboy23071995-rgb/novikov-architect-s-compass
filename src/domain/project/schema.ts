@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hatchSchema } from "../elements/hatch/model.ts";
 import { layerSchema, defaultLayerIdsSchema } from "../layers/model.ts";
 
 const id = z.string().trim().min(1);
@@ -64,10 +65,22 @@ const projectV2Schema = legacyProjectSchema.extend({
     lines: z.array(currentLineSchema).optional(),
   }),
 });
-const projectSchema = projectV2Schema.extend({
+const projectV3Schema = projectV2Schema.extend({
   schemaVersion: z.literal(3),
   bimVisibility: z.object({ hiddenLayerIds: z.array(id) }).strict(),
 });
+const projectSchema = projectV3Schema.extend({
+  schemaVersion: z.literal(4),
+  storey: projectV3Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+});
+type ProjectV3 = z.infer<typeof projectV3Schema>;
+export function validateProjectV3(value: unknown): ProjectV3 {
+  const project = projectV3Schema.parse(value);
+  validateGeometry(project);
+  validateLayers(project);
+  validateVisibility(project);
+  return project;
+}
 type ProjectV2 = z.infer<typeof projectV2Schema>;
 export function validateProjectV2(value: unknown): ProjectV2 {
   const project = projectV2Schema.parse(value);
@@ -98,15 +111,18 @@ export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
   validateGeometry(project);
   validateLayers(project);
+  validateVisibility(project);
+  return project;
+}
+function validateVisibility(project: Project | ProjectV3): void {
   const hidden = project.bimVisibility.hiddenLayerIds;
   if (
     new Set(hidden).size !== hidden.length ||
     hidden.some((id) => !project.layers.some((l) => l.id === id))
   )
     throw new Error("Invalid hidden layer IDs");
-  return project;
 }
-function validateLayers(project: Project | ProjectV2): void {
+function validateLayers(project: Project | ProjectV2 | ProjectV3): void {
   const layerIds = new Set(project.layers.map((layer) => layer.id));
   for (const layerId of Object.values(project.defaultLayerIds)) {
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
@@ -115,12 +131,13 @@ function validateLayers(project: Project | ProjectV2): void {
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
+    ...(project.schemaVersion === 4 ? project.storey.hatches : []),
   ]) {
     if (!layerIds.has(element.layerId)) throw new Error("Unknown layer: " + element.layerId);
   }
 }
 
-function validateGeometry(project: LegacyProject | ProjectV2 | Project): void {
+function validateGeometry(project: LegacyProject | ProjectV2 | ProjectV3 | Project): void {
   const ids = new Set<string>();
   for (const entity of [
     project,
@@ -129,6 +146,7 @@ function validateGeometry(project: LegacyProject | ProjectV2 | Project): void {
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
+    ...(project.schemaVersion === 4 ? project.storey.hatches : []),
   ]) {
     if (ids.has(entity.id)) throw new Error(`Duplicate ID: ${entity.id}`);
     ids.add(entity.id);

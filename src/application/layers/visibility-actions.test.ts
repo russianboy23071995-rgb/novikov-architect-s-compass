@@ -79,10 +79,11 @@ test("visibility cancels a pending preview and rejects its late commit; model an
 
 test("strict version-2 migration preserves geometry and membership and defaults visibility to all-visible", () => {
   const { bimVisibility, ...data } = createExampleProject();
-  const v2 = { ...data, schemaVersion: 2 };
+  const { hatches, ...oldStorey } = data.storey;
+  const v2 = { ...data, storey: oldStorey, schemaVersion: 2 };
   const migrated = loadProjectData(v2);
-  assert.equal(migrated.schemaVersion, 3);
-  assert.deepEqual(migrated.storey, v2.storey);
+  assert.equal(migrated.schemaVersion, 4);
+  assert.deepEqual(migrated.storey, { ...v2.storey, hatches: [] });
   assert.deepEqual(migrated.bimVisibility, { hiddenLayerIds: [] });
   assert.equal(v2.schemaVersion, 2);
   assert.throws(() => loadProjectData({ ...v2, bimVisibility }));

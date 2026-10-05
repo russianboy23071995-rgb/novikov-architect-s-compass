@@ -1224,3 +1224,24 @@ Input adapters must account for Windows Ctrl and macOS Command conventions, mous
 Minimum OS/browser versions, supported browsers and hardware, CPU architectures, offline behavior, installation, signing, distribution and updates will be defined for the concrete delivery package. Essential acceptance scenarios shall include editing a representative larger project, saving/loading and export on Windows and macOS; offline acceptance is required only after its scope is decided. Browser/desktop prototypes and measured file, input and graphics behavior should inform the later delivery decision.
 
 This platform requirement does not replace the current bounded task in DEVELOPMENT_PLAN.md or authorize implementation of packaging, a desktop shell, or a new storage service.
+
+## Implemented: first stored 2D hatch slice — 2026-10-05
+
+Canonical runtime/file schema is now 4. storey.hatches is required (empty for old
+projects). Each hatch has a stable project-wide ID, kind hatch, layerId, one simple
+implicitly closed ring in model-space metres, and a solid fill with RGB hex color
+and opacity 0..1. domain/elements/hatch uses the shared geometry polygon validator.
+No holes, repeated closing vertex, BIM volume, pattern or contour-pen definition
+is included yet. Optional fill/outline and configurable patterns remain requirements.
+The initial ownership is the existing storey's model-space 2D drawing scope;
+DrawingDocument-local annotations are not implicitly introduced.
+
+The file adapter validates V1/V2/V3 before explicit migration to V4; it preserves
+existing IDs, geometry and V3 visibility. Runtime validation never migrates.
+application/hatches supplies snapshot-bound create/update preview and commits
+through existing model history. UI and future AI/Text/Voice adapters must use
+these same actions and stable targets. Shared layer assignment, occupied-layer
+protection and eligibility include hatches. Rendering, picking, snapping and
+interactive tool adapters are pending, so no canvas capability is claimed here.
+IFC remains the existing building export; 2D hatches are stored in project JSON,
+not converted into BIM solids. Existing BIM scaling prohibition remains unchanged.

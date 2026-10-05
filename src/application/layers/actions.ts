@@ -66,9 +66,12 @@ export function layerDeletionBlock(project: Project, id: string): string | null 
   if (isStandardLayerId(id) || Object.values(project.defaultLayerIds).includes(id))
     return "Standardebenen können nicht gelöscht werden.";
   if (
-    [...project.storey.walls, ...project.storey.windows, ...(project.storey.lines ?? [])].some(
-      (element) => element.layerId === id,
-    )
+    [
+      ...project.storey.walls,
+      ...project.storey.windows,
+      ...(project.storey.lines ?? []),
+      ...project.storey.hatches,
+    ].some((element) => element.layerId === id)
   )
     return "Diese Ebene enthält Elemente und kann nicht gelöscht werden.";
   return null;
@@ -98,6 +101,7 @@ export function previewLayerAssignment(
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
+    ...project.storey.hatches,
   ];
   const knownIds = new Set(elements.map((e) => e.id));
   if ([...targets].some((id) => !knownIds.has(id)))
@@ -109,6 +113,7 @@ export function previewLayerAssignment(
     ...project,
     storey: {
       ...project.storey,
+      hatches: project.storey.hatches.map(assign),
       walls: project.storey.walls.map(assign),
       windows: project.storey.windows.map(assign),
       ...(project.storey.lines === undefined ? {} : { lines: project.storey.lines.map(assign) }),

@@ -51,9 +51,12 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
   });
   // Build once per snapshot/context, not by scanning all elements on every pointer move.
   const elements = new Map(
-    [...project.storey.walls, ...project.storey.windows, ...(project.storey.lines ?? [])].map(
-      (element) => [element.id, element] as const,
-    ),
+    [
+      ...project.storey.walls,
+      ...project.storey.windows,
+      ...(project.storey.lines ?? []),
+      ...project.storey.hatches,
+    ].map((element) => [element.id, element] as const),
   );
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   return Object.freeze({
