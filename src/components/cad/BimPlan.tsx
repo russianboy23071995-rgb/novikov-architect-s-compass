@@ -1,3 +1,4 @@
+import { wallBody } from "@/domain/elements/wall/body";
 import {
   defaultGridSettings,
   gridSpacing,
@@ -327,13 +328,11 @@ export function BimPlan({
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
     if (wall) {
-      const length = wallLength(wall);
-      const nx = ((-(wall.end.y - wall.start.y) / length) * wall.thickness) / 2;
-      const ny = (((wall.end.x - wall.start.x) / length) * wall.thickness) / 2;
-      [wall.start, wall.end].forEach((point, index) =>
+      const body = wallBody(wall);
+      [wall.start, wall.end].forEach((_point, index) =>
         [-1, 1].forEach((side) =>
           handles.push({
-            point: { x: point.x + side * nx, y: point.y + side * ny },
+            point: body.corner(index, side),
             index,
             label: `Wandecke ${index === 0 ? "Anfang" : "Ende"} ${side === 1 ? "links" : "rechts"}`,
           }),
@@ -593,12 +592,13 @@ export function BimPlan({
       ))}
       {plan.walls.map((wall) => {
         const length = wallLength(wall);
+        const body = wallBody(wall);
         const angle =
           (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
         return (
           <g
             key={wall.id}
-            transform={`translate(${wall.start.x} ${-wall.start.y}) rotate(${angle})`}
+            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
           >
             <rect
               {...selectProps("wall", wall.id)}

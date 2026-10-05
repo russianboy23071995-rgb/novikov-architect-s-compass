@@ -25,7 +25,7 @@ test("density boundaries, hysteresis, interruption and exact return deadline", (
 });
 function fixture(n: number) {
   return validateProject({
-    schemaVersion: 4,
+    schemaVersion: 5,
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([]),
     unit: "m",

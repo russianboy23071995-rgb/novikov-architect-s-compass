@@ -1,3 +1,4 @@
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project, Wall, BimWindow, DrawingLine, Point } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
@@ -8,7 +9,7 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 4,
+    schemaVersion: 5,
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),
     unit: "m",
@@ -18,12 +19,18 @@ export function createProject(projectId: string, storeyId: string): Project {
 }
 
 /** Commands return new validated snapshots; the input is never mutated, even on failure. */
-export function addWall(project: Project, wall: Creation<Wall>): Project {
+export function addWall(
+  project: Project,
+  wall: Creation<Omit<Wall, "bodyOffset">> & { bodyOffset?: number },
+): Project {
   return validateProject({
     ...project,
     storey: {
       ...project.storey,
-      walls: [...project.storey.walls, { layerId: project.defaultLayerIds.wall, ...wall }],
+      walls: [
+        ...project.storey.walls,
+        { layerId: project.defaultLayerIds.wall, bodyOffset: 0, ...wall },
+      ],
     },
   });
 }
@@ -79,9 +86,10 @@ export function windowCentre(project: Project, windowId: string): Point {
   const opening = validated.storey.windows.find((item) => item.id === windowId);
   if (!opening) throw new Error(`Unknown window: ${windowId}`);
   const wall = validated.storey.walls.find((item) => item.id === opening.wallId)!;
+  const body = wallBody(wall);
   return {
-    x: wall.start.x + (wall.end.x - wall.start.x) * opening.position,
-    y: wall.start.y + (wall.end.y - wall.start.y) * opening.position,
+    x: body.start.x + (wall.end.x - wall.start.x) * opening.position,
+    y: body.start.y + (wall.end.y - wall.start.y) * opening.position,
   };
 }
 

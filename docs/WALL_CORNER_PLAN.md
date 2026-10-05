@@ -36,7 +36,7 @@ mit bereits implementierter Oeffnungsvalidierung verwechseln.
 - Maus, Eigenschaften und spaetere Text-/Voice-/AI-Adapter verwenden dieselben
   validierten Aktionen mit stabilen Ziel-IDs und Snapshot-Pruefung.
 - N45 bleibt erhalten: ausgewaehlte Wandachse zuerst sichtbar machen, spaeter
-  verschiebbar. Entscheidung 05.10.2026: Beim Versatz bleibt die Zeichenachse fest, der Wandkoerper bewegt sich relativ dazu; Implementierung steht aus.
+  verschiebbar. Entscheidung 05.10.2026: Beim Versatz bleibt die Zeichenachse fest, der Wandkoerper bewegt sich relativ dazu; Numerischer Versatz inzwischen implementiert (Schema 5).
 
 ## Vorschlag fuer den ersten Anschlussversuch – noch keine Produktentscheidung
 
@@ -103,4 +103,4 @@ Dieser Einstieg erfuellt eine explizite Nutzeranforderung und macht die Bezugsge
 sichtbar, ohne die offenen Anschlussentscheidungen vorwegzunehmen.
 
 
-Aktiver Folgeauftrag nach Nutzerentscheidung: numerischen Wandkoerperversatz als gemeinsame validierte Aktion durchgaengig fuer Modell, 2D, 3D, Fang, History/Datei und IFC implementieren. Details am Anfang von DEVELOPMENT_PLAN.md. Die uebrigen Anschlussfragen bleiben offen.
+Numerischer Wandkoerperversatz ist durchgaengig implementiert; Anschlussfragen bleiben offen. Der einzige aktive Folgeauftrag steht am Anfang von DEVELOPMENT_PLAN.md (ausgewaehlte Wandachse in 3D).

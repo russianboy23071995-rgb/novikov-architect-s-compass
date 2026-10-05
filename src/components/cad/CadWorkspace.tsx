@@ -722,6 +722,14 @@ export function CadWorkspace({
               project={project}
               selection={selection}
               onChange={changeProject}
+              onWallOffset={(base, wallId, offset) =>
+                dispatchEditing({
+                  type: "wall-offset",
+                  base,
+                  selection,
+                  request: { projectId: base.id, wallId, offset },
+                })
+              }
             />
           )}
         </section>

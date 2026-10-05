@@ -1,3 +1,4 @@
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
@@ -63,11 +64,7 @@ export function projectSnapPrimitives(project: Project) {
   const references: SnapReference[] = [
     ...project.storey.walls.flatMap((wall) => {
       const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
-      const length = Math.hypot(d.x, d.y);
-      const normal = {
-        x: ((-d.y / length) * wall.thickness) / 2,
-        y: ((d.x / length) * wall.thickness) / 2,
-      };
+      const body = wallBody(wall);
       return [
         ...[wall.start, wall.end].flatMap((point, index) => [
           {
@@ -77,7 +74,7 @@ export function projectSnapPrimitives(project: Project) {
             directions: [d],
           },
           ...[-1, 1].map((side) => ({
-            point: { x: point.x + side * normal.x, y: point.y + side * normal.y },
+            point: body.corner(index, side),
             entityId: wall.id,
             feature: `corner-${index}-${side}`,
             directions: [d],

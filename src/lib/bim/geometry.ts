@@ -1,3 +1,4 @@
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import {
   createProjectionFrame,
   projectOrthographic,
@@ -24,6 +25,7 @@ export function buildSolid(input: Project): Solid {
   };
   for (const wall of project.storey.walls) {
     const length = wallLength(wall);
+    const body = wallBody(wall);
     const ux = (wall.end.x - wall.start.x) / length;
     const uy = (wall.end.y - wall.start.y) / length;
     const openings = project.storey.windows
@@ -48,8 +50,8 @@ export function buildSolid(input: Project): Solid {
       ),
     );
     const world = ([x, y, z]: Vec3): Vec3 => [
-      wall.start.x + ux * x - uy * y,
-      wall.start.y + uy * x + ux * y,
+      body.start.x + ux * x - uy * y,
+      body.start.y + uy * x + ux * y,
       z,
     ];
     const face = (points: [Vec3, Vec3, Vec3, Vec3], normal: Vec3) => {
