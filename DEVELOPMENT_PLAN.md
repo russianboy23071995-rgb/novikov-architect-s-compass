@@ -1101,8 +1101,14 @@ Nachweis: 343 Tests bestanden, inklusive Loeschen/Undo/Redo/Dateirundlauf, beleg
 
 Abnahme: Organisation > Ebenen, Fenster am Titel ziehen, Namen anklicken und Enter druecken. Eigene leere Ebene erstellen und loeschen; bei Standardebenen und einer einer Wand zugeordneten Ebene muss Loeschen deaktiviert sein. Undo stellt eine geloeschte Ebene wieder her.
 
-### Genau ein ausfuehrbarer Folgeauftrag: gemeinsame Ebenensichtbarkeit konkretisieren
+### Planungsauftrag: gemeinsame Ebenensichtbarkeit konkretisieren
 
 UI-Nachbesserung 05.10.2026 (PR #89): Ebenenfenster auf 520 Pixel Breite reduziert, Listenschrift 12 Pixel und kleinere Zeilenabstaende; expliziter Schliessen-Button im Fussbereich. Werkzeugeigenschaften zentral auf 130 Pixel Hoehe fixiert (zuvor gemessene Wandauswahl), mit internem Scrollen bei groesserem Inhalt. Browsermessung bestaetigt 130 Pixel fuer Wand, Fenster und leere Auswahl; Schliessen und kompakte Darstellung geprueft. TypeScript und Build erfolgreich. Reine Darstellungsaenderung, keine Modellaktionen geaendert.
 
 Vor der Implementierung den gemeinsamen Filtervertrag fuer Darstellung, Picking und lokale Fangquellen einschliesslich aktiver Referenzen ausarbeiten. Nutzerentscheidung zu globaler versus ansichtsbezogener Sichtbarkeit einholen; Persistenz und Host-/Fensterdarstellung ausdruecklich klaeren. Laufende Bearbeitung/aktuelle Auswahl bei Ausblenden sowie Export unabhaengig von Bildschirmfiltern festlegen. Bestehende ModelView-/ViewportBinding-Zielarchitektur beachten, keinen zweiten Modellzustand und keine werkzeugspezifischen Filter bauen. Genau einen begrenzten Implementierungsauftrag mit Abnahmekriterien ableiten; bis zur Entscheidung keine versteckte Default-Sichtbarkeitsregel implementieren.
+
+### Planungsstand nach PR #89 — 05.10.2026
+
+PR #89 nach Nutzerfreigabe normal zusammengefuehrt (48a896f), main unveraendert. docs/LAYER_VISIBILITY_PLAN.md dokumentiert Codeabgleich und vorhandenen allowed-Filter vor lokalen Paarvergleichen. Nutzerentscheidung: BIM-Projekt samt Arbeitsansichten teilt einen Filter; Ausschnitte/Abbilder haben unabhaengige Filter, die auch im Layoutbuch gelten. Kein vorgeschalteter BIM-Filter fuer Ausschnitte. Speicherung, Ausschluss vom Picking/Fang, Abbruch verborgener Bearbeitungsziele, Host-/Fensterregel und vollstaendiger IFC-Export bestaetigt. ARCHITECTURE.md aktualisiert. Startfilter neuer Ausschnitte und Undo-Semantik bleiben offen. Produktionscode unveraendert, Dokumentationsdiff geprueft.
+
+Genau ein Folgeauftrag: die reine gemeinsame Eligibility-Policy fuer Wand/Fenster/Linie mit explizitem BIM-/DrawingDocument-Kontext implementieren und gemaess docs/LAYER_VISIBILITY_PLAN.md testen. Insbesondere dieselbe Ebene im BIM-Kontext verborgen und im Ausschnitt sichtbar pruefen. Noch keine UI-/Dateiformat-/Layout-Erweiterung in diesem ersten Auftrag.
