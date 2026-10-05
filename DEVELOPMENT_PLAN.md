@@ -1314,3 +1314,27 @@ Gemeinsame Geometrie- und Application-Adapter, bestehende Ursprungsreferenz, Fan
 Abnahme: Rechteckschraffur oder geschlossene Polylinie waehlen, quadratischen Seitengriff klicken. Seite strecken starten und senkrecht ziehen oder Laenge eingeben; Rechteck muss breiter/schmaler bleiben. Andere Seite waehlen, Knicken und Ziel setzen; ein neuer Punkt entsteht. Undo muss genau die letzte Aktion zuruecknehmen. Kantenkollaps darf nicht gespeichert werden.
 
 Genau ein naechster Auftrag: zentrale Rastersteuerung mit einstellbarer positiver Schrittweite und unabhaengig schaltbarem Rasterfang sitzungsbezogen ergaenzen; fuer Zeichnen, Eckbewegung und Seitenstrecken gemeinsam pruefen.
+
+### Seitenpfeile und geometrische Begrenzung beim Strecken — 05.10.2026
+
+Nutzerkorrektur auf PR #102: blaue Doppelpfeile nach innen versetzt statt weisser Rechteckgriffe; Senkrechtrichtung zur Seite und Umlaufrichtung beruecksichtigt. Neuer Zweig fix/contour-stretch-cap auf #102, kein Merge der offenen PRs ohne Freigabe.
+
+Seitenbewegung wird an der ersten ungueltigen Stelle begrenzt. Gemeinsame geometrische Ereignissuche entlang der Bewegung (Segmentkontakte, Kollinearitaet, Kollaps), danach Intervallverfeinerung auf die numerisch gueltige Seite. Keine Reparatur/Loeschung von Eckpunkten und kein Sprung durch eine ungueltige Zwischenkontur. Spitze Dreiecke und Rechtecke behalten die letzte gueltige Vorschau. Zurueckziehen bleibt moeglich. Bei kollinearen Nachbarkanten ohne eindeutigen Schnitt bleibt die Ausgangskontur. Ungueltige Ausgangsgeometrie und nicht endliche Eingaben bleiben Fehler.
+
+Mausfang, numerische Vorschau und Commit verwenden boundedEdgeTarget. Begrenzte Ziele verlieren unzutreffende Fangbezeichnungen. Die numerische Hilfseingabe zeigt Geometrische Grenze und den tatsaechlichen Versatz. Groesse des Bewegungsmarkers von 0.055 m auf 5 Bildschirmpixel korrigiert; Seitengriffe erhalten eigenen dezenten Tastaturfokus. Der vom Nutzer beobachtete grosse weiss-schwarze Kreis wurde NICHT reproduziert; diese Marker-Korrektur ist keine gesicherte Ursachenbehauptung.
+
+398 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Neue Tests fuer Spitze, sehr schmales Dreieck, Rechteck, beide Umlaufrichtungen, Grenzgueltigkeit/Idempotenz, Rueckzug, nicht endliche Eingabe und numerische Vorschau/Commit/Undo/JSON. Ein bisheriger Ablehnungstest wurde auf die neue explizite Cap-Regel angepasst; strenge Geometriepruefung bleibt separat bestehen. Browser: blaue Innenpfeile sichtbar; 100-m-Eingabe an Nutzer-Testkontur auf ca. 0.3437 m begrenzt, gueltige Vorschau blieb sichtbar, danach abgebrochen um das Modell zu erhalten. Screenshot outputs/stretch-cap-preview.png. Keine Leistungsgarantie fuer sehr grosse Konturen; Ereignissuche und wiederholte Polygonvalidierung sind noch nicht auf grosse Ringe benchmarked.
+
+Abnahme: Seite einer spitz zulaufenden Schraffur oder geschlossenen Polylinie strecken, ueber den Kollapspunkt hinaus und wieder zurueck bewegen. Vorschau darf nicht verschwinden; numerische Ueberschreitung zeigt die Grenze, Bestaetigung bleibt gueltig und per Undo reversibel. Zoom pruefen: der blaue Zielmarker bleibt gleich gross.
+
+Genau ein naechster Auftrag: den weiterhin unbestaetigten weiss-schwarzen Kreis anhand des konkreten ausloesenden Bedienablaufs reproduzieren und die Ursache beheben; danach zur vorgemerkten zentralen Rastersteuerung zurueckkehren.
+
+### Direkte Konturkanten-Auswahl — 05.10.2026
+
+Nutzer priorisiert Seitenstrecken direkt durch Klick auf eine Aussenlinie. Gemeinsames screen-space Picking fuer Schraffuren und geschlossene Polylinien: naechste Konturkante innerhalb 6 CSS-Pixeln, inklusive Schlusskante; Ursprung ist die Projektion des Klicks auf genau diese Seite. Bestehendes On-Demand-Menue, EditSession und validierte Seitenstreck-/Knicken-Aktionen werden weiterverwendet. Schraffuren erhalten einen unsichtbaren 12-Pixel-Klickrand, sichtbare Auswahlkontur bleibt 2 Pixel. Flaechenklick bleibt Elementauswahl, Eckgriffe behalten Vorrang. Keine eigene Fang- oder Modelllogik.
+
+399 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte Warnungen. Neuer Test prueft Projektion, Schlusskante, Toleranz bei drei Zoomstufen und Nichttreffer im Inneren. Browser: abseits der Seitengriffe Schraffur-Aussenkante (auch knapp ausserhalb) und Polylinienkante angeklickt, korrekte Seitennummer und Seitenstrecken aktiviert; Vorschauen abgebrochen, Nutzergeometrie unveraendert. Flaechenklick zeigt weiterhin Ganzelement-Menue. Screenshot outputs/direct-edge-picking.png.
+
+Abnahme: Aussenkante einer Schraffur oder geschlossenen Polylinie direkt anklicken, Seite strecken waehlen, senkrecht ziehen oder Mass eingeben. Die blauen Doppelpfeile bleiben alternative Griffe. Offene Polylinien erhalten keine geschlossene Konturbearbeitung.
+
+Genau ein naechster Auftrag: den weiterhin nicht reproduzierten weiss-schwarzen Kreis mit dem ausloesenden Bedienablauf eingrenzen und beheben; anschliessend zentrale Rastersteuerung fortsetzen.

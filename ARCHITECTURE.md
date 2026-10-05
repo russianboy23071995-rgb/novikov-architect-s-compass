@@ -1323,3 +1323,24 @@ as are collapse, self-intersection and reversed winding. No implicit repair or
 vertex removal. Geometry is in geometry/polygons/edit-edge; Application adapts
 implicit hatch closure and repeated-endpoint polyline closure and commits through
 existing EditSession history. No independent snap/input engine or BIM scaling.
+
+## Valid stretch interval and bounded marker size — 2026-10-05
+
+Seitenstrecken now caps at the first invalid geometry boundary instead of dropping
+the preview. geometry capContourEdge constructs linear vertex motion, collects
+segment-contact orientation/coincidence events, checks them in order, and refines
+the first invalid interval to its valid side with a numerical margin. It does not
+jump across an invalid interval to another valid polygon. Degenerate adjacency
+with no unique intersection retains the original contour. Non-finite requests and
+invalid initial contours still fail. Domain editContourEdge stays strict.
+
+Application boundedEdgeTarget is shared by snapping, numeric input and final
+preview/commit. Capped targets discard an incompatible snap label. Numeric input
+reports the resulting signed length and a geometric-limit notice through the
+shared input presentation contract. No invalid polygon is stored at the limit;
+this is a numerically valid approach to contact, not topology repair or edge deletion.
+
+Side grips are blue double arrows offset inward according to winding, oriented
+normal to the edge. Their size is screen-based with a short-edge bound. The moving
+target marker is now 5 CSS pixels instead of 0.055 model metres. The reported
+intermittent white/black circle has not been reproduced and remains unconfirmed.

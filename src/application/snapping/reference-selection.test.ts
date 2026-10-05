@@ -272,3 +272,23 @@ test("pan suspension retains acquired points but cancels pending dwell", () => {
   assert.equal(advanceHoverReference(resumed, pointRef(2), 1599, 600).references.length, 1);
   assert.equal(advanceHoverReference(resumed, pointRef(2), 1600, 600).references.length, 2);
 });
+
+// Boundary selection uses the same screen metric for hatches and closed polylines.
+test("closed contour edge picking uses pixel tolerance, exact projection and closing edge", async () => {
+  const { pickContourEdge } = await import("../../rendering/viewport/reference-picking.ts");
+  const ring = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+    { x: 0, y: 3 },
+  ];
+  for (const zoom of [10, 100, 1000]) {
+    const hit = pickContourEdge(ring, { x: 1, y: -5 / zoom }, zoom);
+    assert.equal(hit?.index, 0);
+    assert.deepEqual(hit?.point, { x: 1, y: 0 });
+    assert.equal(pickContourEdge(ring, { x: 1, y: -7 / zoom }, zoom), null);
+    assert.equal(pickContourEdge(ring, { x: -5 / zoom, y: 1 }, zoom)?.index, 3);
+    assert.equal(pickContourEdge(ring, { x: 2, y: 1.5 }, zoom), null);
+  }
+  assert.equal(pickContourEdge([], { x: 0, y: 0 }, 100), null);
+});

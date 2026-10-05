@@ -1,4 +1,4 @@
-import { closedContour } from "./contour.ts";
+import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import { editablePoints } from "./transforms.ts";
@@ -87,6 +87,6 @@ export function resolveEditSnap(session: EditSession, cursor: Point2, context: S
     orthoOrigin: direction ? null : context.orthoOrigin,
     angleOrigin: direction ? null : (context.angleOrigin ?? null),
   });
-  const point = project(result.point);
+  const point = boundedEdgeTarget(session, project(result.point));
   return pointsCompatible(result.point, point) ? result : { point, candidate: null };
 }
