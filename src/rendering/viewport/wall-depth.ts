@@ -4,7 +4,7 @@ import { triangleDepth } from "../../geometry/projections/triangle-depth.ts";
 
 /** Shared nearest wall surface for picking and anchor visibility. Smaller NDC z is nearer. */
 export function nearestWallSurface(
-  solid: Solid,
+  solid: Pick<Solid, "faces">,
   project: (point: Vector3) => Vector3,
   x: number,
   y: number,

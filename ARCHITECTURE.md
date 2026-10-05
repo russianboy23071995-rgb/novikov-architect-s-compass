@@ -1,5 +1,20 @@
 # NOVIKOV CAD Architecture Contract
 
+## Prepared layer display snapshot — 2026-10-05
+
+rendering/viewport/layer-display.ts derives plan wall/window/line lists and wall
+surfaces through the shared eligibility policy. Physical plan openings are a
+separate, non-pickable list, independent of window-symbol visibility. Full model
+geometry is built before filtering faces. DisplaySurfaces deliberately excludes
+quantity/volume data and retains complete-model bounds to avoid implicit refitting.
+The existing wall picker and occlusion classifier accept those surfaces, so the
+same displayed faces determine both hits and depth. canPick guards delayed plan
+events against changed project/context identities. No second Project is created.
+
+This adapter is tested but not yet consumed by BimPlan/BimSolidView. Viewport
+binding, gesture cancellation and the remaining source/picking consumers must be
+integrated before visibility switches are exposed. No UI or file format change.
+
 ## Layer-aware local source queries — 2026-10-05
 
 application/tools/snapping.ts now offers createVisibleToolSourceQuery bound to
