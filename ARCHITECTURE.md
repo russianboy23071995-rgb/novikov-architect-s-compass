@@ -1264,3 +1264,16 @@ query. Plan bounds, display lists and Navigator include hatches. SVG fill is dra
 behind walls/lines, with a thin selection border; 3D geometry/IFC remain unchanged.
 The current UI offers solid fill only. Patterns, contour pens, holes and hatch
 Direct Edit remain pending. Automated checks do not constitute browser acceptance.
+
+## Drawing contour construction references — 2026-10-05
+
+ToolSnapPolicy may provide pinnedReferences in addition to its primary origin.
+The shared drawing adapter supplies at most the first and current draft vertices,
+with first/last edge directions. Immutable path identity keeps this policy stable
+across camera navigation. These are interaction references, not model entities;
+local source lookup accepts exact current pinned references and validates derived
+dependencies against them. Existing cursor-guided intersections perform closure
+inference for all path consumers; there is no rectangle-specific geometry solver.
+The primary origin still controls numeric/Ortho/Shift input. Explicit Shift keeps
+its existing priority; ordinary hover dwell remains unchanged. Removing the tool
+policy removes its transient sources. No domain/schema/history data is introduced.

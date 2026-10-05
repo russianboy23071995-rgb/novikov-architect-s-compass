@@ -41,9 +41,10 @@ export function createToolSourceQuery(
   eligibility?: SourceEligibility,
 ) {
   const current = () => !eligibility || eligibility.isCurrent();
-  const isOrigin = (r: SnapReference) => policy && referenceKey(r) === referenceKey(policy.origin);
+  const pinned = new Map(toolPinnedReferences(policy).map((r) => [referenceKey(r), r]));
+  const isPinned = (r: SnapReference) => pinned.has(referenceKey(r));
   const visible = (r: SnapReference): boolean =>
-    !eligibility || Boolean(isOrigin(r)) || eligibility.allowsEntity(r.entityId);
+    !eligibility || isPinned(r) || eligibility.allowsEntity(r.entityId);
   const allowed = (r: SnapReference) =>
     current() &&
     (!policy || policy.sources([r]).length > 0) &&
@@ -51,7 +52,8 @@ export function createToolSourceQuery(
       ? r.dependencies.every((d) => !d.dependencies && visible(d))
       : visible(r));
   const leaf = (r: SnapReference) => {
-    if (policy && referenceKey(r) === referenceKey(policy.origin)) return policy.origin;
+    const draft = pinned.get(referenceKey(r));
+    if (draft) return draft;
     const source = model.lookup(referenceKey(r));
     return source && allowed(source) ? source : undefined;
   };
@@ -92,7 +94,7 @@ export function createToolSourceQuery(
         r,
       ]),
     );
-    if (policy) refs.set(referenceKey(policy.origin), policy.origin);
+    for (const r of pinned.values()) refs.set(referenceKey(r), r);
     for (const r of active) {
       if (!allowed(r)) continue;
       const leaves = r.dependencies?.length ? r.dependencies : [r];
@@ -115,15 +117,20 @@ export function createToolSourceQuery(
 }
 export type ToolSnapPolicy = {
   origin: SnapReference;
+  /** Fixed transient references supplied by the current interaction, never model entities. */
+  pinnedReferences?: readonly SnapReference[];
   sources: (references: readonly SnapReference[]) => SnapReference[];
   resolve: typeof querySnap;
 };
+export function toolPinnedReferences(policy: ToolSnapPolicy | null): readonly SnapReference[] {
+  return policy ? (policy.pinnedReferences ?? [policy.origin]) : [];
+}
 /** Stable policy identity keeps model-space references alive during view navigation. */
 export function prepareToolReferences(
   policy: ToolSnapPolicy | null,
   sources: readonly SnapReference[],
 ) {
-  return policy ? [...policy.sources(sources), policy.origin] : [...sources];
+  return policy ? [...policy.sources(sources), ...toolPinnedReferences(policy)] : [...sources];
 }
 export function resolveToolSnap(
   policy: ToolSnapPolicy | null,
@@ -144,17 +151,39 @@ export function resolveToolSnap(
   };
   return (policy?.resolve ?? querySnap)(cursor, request);
 }
-export function drawingSnapPolicy(origin: Point2): ToolSnapPolicy {
-  let policy = drawingPolicies.get(origin);
+export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): ToolSnapPolicy {
+  const key = path ?? origin;
+  let policy = drawingPolicies.get(key);
   if (!policy) {
     policy = {
       origin: { entityId: "@drawing-origin", feature: "start", point: origin },
       sources: (refs) => [...refs],
       resolve: querySnap,
     };
-    drawingPolicies.set(origin, policy);
+    if (path && path.length >= 2) {
+      const first = path[0]!,
+        second = path[1]!,
+        previous = path.at(-2)!;
+      const incoming = { x: origin.x - previous.x, y: origin.y - previous.y };
+      const outgoing = { x: second.x - first.x, y: second.y - first.y };
+      policy.origin = {
+        ...policy.origin,
+        directions: [incoming],
+        feature: JSON.stringify(["current", incoming.x, incoming.y]),
+      };
+      policy.pinnedReferences = [
+        {
+          entityId: "@drawing-start",
+          feature: JSON.stringify(["first", outgoing.x, outgoing.y]),
+          point: { ...first },
+          directions: [outgoing],
+        },
+        policy.origin,
+      ];
+    }
+    drawingPolicies.set(key, policy);
   }
   return policy;
 }
 // Draft points are immutable interaction identities, just like pinned edit sessions.
-const drawingPolicies = new WeakMap<Point2, ToolSnapPolicy>();
+const drawingPolicies = new WeakMap<object, ToolSnapPolicy>();

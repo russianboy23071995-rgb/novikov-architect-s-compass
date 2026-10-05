@@ -425,7 +425,14 @@ export function CadWorkspace({
           cancelInteraction,
         )
       : drawingOrigin && drawingBase
-        ? drawingInteraction(drawingBase, project, drawingOrigin, drawPoint, cancelInteraction)
+        ? drawingInteraction(
+            drawingBase,
+            project,
+            drawingOrigin,
+            drawPoint,
+            cancelInteraction,
+            pathDrawing ? pathPoints : undefined,
+          )
         : null,
     referenceSelection.selecting,
   );

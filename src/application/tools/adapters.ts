@@ -59,10 +59,11 @@ export function drawingInteraction(
   origin: Point,
   commit: (point: Point) => void,
   cancel: () => void,
+  path?: readonly Point[],
 ): ToolInteraction {
   return {
     identity: origin,
-    snapping: drawingSnapPolicy(origin),
+    snapping: drawingSnapPolicy(origin, path),
     origin,
     input: { axisLabel: null, degrees: null },
     click: "confirm",

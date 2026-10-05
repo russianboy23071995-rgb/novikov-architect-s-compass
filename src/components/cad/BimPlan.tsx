@@ -1,3 +1,4 @@
+import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
@@ -15,6 +16,7 @@ import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
   resolveToolSnap,
+  toolPinnedReferences,
 } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
@@ -164,7 +166,7 @@ export function BimPlan({
     };
   }, [selecting, interactive]);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
-  const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
+  const pinnedReferences = useMemo(() => toolPinnedReferences(snapping), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
   const sourceQuery = useMemo(
     () =>
@@ -243,16 +245,21 @@ export function BimPlan({
       },
       { ortho, shift, featureSnap: endpointSnap },
     );
+  const pointerSnap = hover ? resolvePointer(hover) : null;
   const resolvedHover =
     drawingTarget !== undefined
       ? drawingTarget
-        ? { point: drawingTarget, candidate: null }
+        ? {
+            point: drawingTarget,
+            candidate:
+              pointerSnap && pointsCompatible(pointerSnap.point, drawingTarget)
+                ? pointerSnap.candidate
+                : null,
+          }
         : null
       : numericTarget !== undefined
         ? null
-        : hover
-          ? resolvePointer(hover)
-          : null;
+        : pointerSnap;
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
