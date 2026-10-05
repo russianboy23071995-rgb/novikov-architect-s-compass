@@ -51,7 +51,12 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       ...(context.pinnedReferences ?? []),
       ...current.references,
     ]);
-    const sources = withConstructionReferences(context.references, active);
+    const sources = withConstructionReferences(
+      context.sourceQuery
+        ? context.sourceQuery(cursor, context.pixelsPerMetre, 10, active)
+        : context.references,
+      active,
+    );
     const guides = advanceGuideDirections(
       cursor,
       active,
@@ -59,6 +64,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     );
     const candidate = querySnap(cursor, {
       ...context,
+      sourceQuery: undefined,
       references: sources,
       activeReferences: active,
       guideDirections: guides,
@@ -70,7 +76,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       candidate && ["endpoint", "midpoint", "segment-intersection"].includes(candidate.kind);
     const acquired = exact
       ? acquisitionReference(candidate, sources)
-      : (hoveredSegment(cursor, context.references, context.pixelsPerMetre) ??
+      : (hoveredSegment(cursor, sources, context.pixelsPerMetre) ??
         acquisitionReference(candidate, sources));
     const reference =
       acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))

@@ -38,7 +38,14 @@ export type SnapCandidate = {
   sourceFeature: string;
   priority: number;
 };
+export type SnapSourceQuery = (
+  cursor: Point2,
+  pixelsPerMetre: number,
+  radiusPx: number,
+  active: readonly SnapReference[],
+) => readonly SnapReference[];
 export type SnapContext = {
+  sourceQuery?: SnapSourceQuery | undefined;
   references: readonly SnapReference[];
   pixelsPerMetre: number;
   enabled: boolean;
@@ -113,6 +120,16 @@ export function querySnap(
           : { x: origin.x, y: p.y }
         : { ...p };
   if (!context.enabled) return { point: constrain(cursor), candidate: null };
+  if (context.sourceQuery)
+    context = {
+      ...context,
+      references: context.sourceQuery(
+        cursor,
+        context.pixelsPerMetre,
+        context.endpointRadiusPx,
+        context.activeReferences ?? (context.activeReference ? [context.activeReference] : []),
+      ),
+    };
   const candidates = collectSnapCandidates(cursor, context, constrain);
   candidates.sort(compareSnapCandidates);
   const candidate = candidates[0]?.candidate;

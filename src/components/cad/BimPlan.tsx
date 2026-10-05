@@ -1,10 +1,10 @@
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { prepareToolReferences, resolveToolSnap } from "@/application/tools/snapping";
+import { createToolSourceQuery, resolveToolSnap } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
-import { getProjectSnapReferences } from "@/application/snapping/project-references";
+import { getLocalSnapSources } from "@/application/snapping/local-sources";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
@@ -120,22 +120,34 @@ export function BimPlan({
   }, []);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
-  const modelReferences = useMemo(() => getProjectSnapReferences(project), [project]);
-  const references = useMemo(
-    () => prepareToolReferences(snapping, modelReferences),
-    [modelReferences, snapping],
+  const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
+  const sourceQuery = useMemo(
+    () => createToolSourceQuery(modelSources, snapping),
+    [modelSources, snapping],
   );
+  const references = pinnedReferences;
   const trackingContext = useMemo(
     () => ({
       enabled: endpointSnap && snap && !pan,
       references,
+      sourceQuery,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
       resetKey: referenceReset,
       pinnedReferences,
     }),
-    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset, pinnedReferences],
+    [
+      endpointSnap,
+      snap,
+      pan,
+      references,
+      sourceQuery,
+      camera,
+      viewSize,
+      referenceReset,
+      pinnedReferences,
+    ],
   );
   const {
     references: activeReferences,
@@ -149,6 +161,7 @@ export function BimPlan({
       point,
       {
         references,
+        sourceQuery,
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
