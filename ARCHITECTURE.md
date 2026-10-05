@@ -1429,3 +1429,15 @@ live viewport preview from the form. Future Text/Voice/AI adapters reuse this ac
 Hosted openings retain longitudinal position and move with the physical body.
 IFC placement uses physical body coordinates and records BodyOffset as a property.
 No join semantics or 3D axis overlay are introduced in this step.
+
+## Selected wall axis in 3D — 2026-10-05
+
+BimSolidView now retains the validated display Project snapshot before deriving
+its solid. Both physical geometry and the selected axis consume this snapshot,
+including direct-edit previews and fallback after invalid input. wall-axis.ts in
+rendering/viewport projects start/end at current wall-foot height z=0 through the
+same ProjectionState. No body-centre substitution, editable copy or new snap
+source. The dashed SVG is a deliberate through-body construction overlay, with
+CSS-pixel stroke and pointer-events:none; it does not participate in hit testing.
+Committed visibility eligibility gates the preview axis just like surfaces.
+This completes the basic N45 selected-axis display in plan and 3D.

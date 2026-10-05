@@ -1,3 +1,4 @@
+import { selectedWallAxis } from "@/rendering/viewport/wall-axis";
 import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
 import { visibleSurfaces } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
@@ -191,16 +192,20 @@ export function BimSolidView({
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
-  const previewSolid = useMemo(() => {
+  const previewProject = useMemo(() => {
     if (editSession && target) {
       try {
-        return buildSolid(previewEdit(editSession, project, selection, target));
+        return previewEdit(editSession, project, selection, target);
       } catch {
         /* Keep committed model on invalid input. */
       }
     }
-    return baseSolid;
-  }, [baseSolid, editSession, target, project, selection]);
+    return project;
+  }, [editSession, target, project, selection]);
+  const previewSolid = useMemo(
+    () => (previewProject === project ? baseSolid : buildSolid(previewProject)),
+    [previewProject, project, baseSolid],
+  );
   const solid = useMemo(
     () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
     [previewSolid, project, visibility],
@@ -223,6 +228,15 @@ export function BimSolidView({
         : null,
     [viewProjection, depthRadius],
   );
+  const axis =
+    previewProjection && !error
+      ? selectedWallAxis(
+          previewProject,
+          selection,
+          (id) => isLayerVisible(project, visibility, id),
+          previewProjection,
+        )
+      : null;
   const outline = useMemo(
     () =>
       selection?.kind === "wall"
@@ -542,6 +556,25 @@ export function BimSolidView({
           });
         }}
       />
+      {axis && previewProjection && (
+        <svg
+          aria-label={`Wandachse 3D ${axis.wallId}`}
+          role="img"
+          className="pointer-events-none absolute inset-0 z-10"
+          width={previewProjection.viewport.width}
+          height={previewProjection.viewport.height}
+        >
+          <line
+            x1={axis.start.x}
+            y1={axis.start.y}
+            x2={axis.end.x}
+            y2={axis.end.y}
+            stroke="#64748b"
+            strokeWidth={1.5}
+            strokeDasharray="7 4"
+          />
+        </svg>
+      )}
       {error && (
         <p
           role="alert"

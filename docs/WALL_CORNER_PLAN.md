@@ -98,9 +98,9 @@ keine Eckgriffe. Keine Achsverschiebung, neue Menueaktion oder Anschlussgeometri
 
 Pruefung: horizontale/schraege Wand, Auswahlwechsel, Zoom, Ausblenden, Vorschau,
 Abbruch und Undo; Achse liegt sichtbar mittig. Modell/JSON/IFC bleiben unveraendert.
-3D-Achsdarstellung bleibt Teil von N45 fuer einen spaeteren abgegrenzten Schritt.
+3D-Achsdarstellung ist inzwischen umgesetzt (N45).
 Dieser Einstieg erfuellt eine explizite Nutzeranforderung und macht die Bezugsgeometrie
 sichtbar, ohne die offenen Anschlussentscheidungen vorwegzunehmen.
 
 
-Numerischer Wandkoerperversatz ist durchgaengig implementiert; Anschlussfragen bleiben offen. Der einzige aktive Folgeauftrag steht am Anfang von DEVELOPMENT_PLAN.md (ausgewaehlte Wandachse in 3D).
+Numerischer Wandkoerperversatz ist durchgaengig implementiert; Anschlussfragen bleiben offen. Der einzige aktive Folgeauftrag steht am Anfang von DEVELOPMENT_PLAN.md (Anschlussentwurf gegen Koerperversatz pruefen).

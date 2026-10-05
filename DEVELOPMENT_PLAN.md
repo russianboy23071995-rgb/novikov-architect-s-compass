@@ -1,5 +1,39 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: ausgewaehlte Wandachse in 3D — 05.10.2026
+
+Dieser Abschnitt ersetzt alle darunterstehenden Folgeauftraege.
+PR #110 nach Nutzerfreigabe normal gemergt (a8d25a3); Entwicklung auf
+feat/selected-wall-axis-3d gegen fix/reference-selection-lifecycle.
+
+BimSolidView leitet Koerper und Achse aus demselben validierten previewProject ab.
+rendering/viewport/wall-axis.ts projiziert die start/end-Zeichenachse auf der
+aktuellen Wandfussebene z=0 mit der bereits verwendeten Kamera. Das gestrichelte
+SVG-Overlay ist absichtlich durch den Koerper sichtbar, hat 1,5 CSS-Pixel Breite
+und faengt keine Eingaben ab. Nur die ausgewaehlte sichtbare Wand hat eine Achse;
+Fensterauswahl, fehlendes Ziel, verborgene Ebene oder Grafikfehler blenden sie aus.
+Kein Modell-/Dateiformat-/IFC-/Fangquellenwechsel.
+
+Nachweis: 409 Tests bestanden, TypeScript und Build erfolgreich, ESLint 0 Fehler
+und 6 bekannte Warnungen. Neue Tests pruefen beide Versatzrichtungen, Kamera/Zoom,
+DPR, Sichtbarkeit/Auswahl sowie gemeinsame Vorschau, Abbruch, Commit und Undo/Redo.
+Browser: Achse bei 0 und 0,6 m Versatz, Zoom, pointer-events:none, Fensterauswahl,
+Ebene aus/ein und 3D-Screenshot geprueft. Nutzerprojekt nicht veraendert; separater
+Testtab. Artefakt: outputs/selected-wall-axis-3d.png ausserhalb des Repositories.
+
+Abnahme: Wand in 3D auswaehlen, Koerperversatz 0,6 eingeben und uebernehmen.
+Gestrichelte Achse bleibt an der Zeichenposition. Zoom/Drehen und Ebene aus/ein
+pruefen. Bei zentrierter Wand bleibt die Bezugsachse trotz Koerper sichtbar.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Den begrenzten Wand-Eckanschlussentwurf
+in docs/WALL_CORNER_PLAN.md gegen den jetzt implementierten Koerperversatz pruefen.
+Fuer zwei rechtwinklige gerade Waende gleicher Staerke konkrete Anschlussbeispiele
+mit Versatz 0 und +/- halber Staerke beschreiben; offene Nutzerentscheidungen zu
+expliziter/automatischer Verbindung und gemeinsamem Bearbeiten klar vorlegen.
+Zunaechst Planung und Abnahmekriterien, keine implizite automatische Verbindung,
+T-Verbindung, Materialprioritaet oder unabgestimmte Modellmutation implementieren.
+
+
 ## Aktueller Stand: Wandkoerperversatz umgesetzt — 05.10.2026
 
 Diese Sektion ersetzt die historischen Folgeauftraege weiter unten.
@@ -34,7 +68,7 @@ Abnahme: Wand auswaehlen, Koerperversatz 0,18 eingeben, uebernehmen. Bei 0,36 m
 Staerke liegt eine Wandseite auf der festen Achse; Fenster folgt. -0,18 verschiebt
 zur anderen Seite. Undo/Redo, speichern/laden und IFC-Import ausprobieren.
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Die ausgewaehlte sichtbare Wandachse
+**Historischer, inzwischen umgesetzter Folgeauftrag:** Die ausgewaehlte sichtbare Wandachse
 auch in 3D als dezente, bildschirmbezogene Linie darstellen. Vorhandene start/end
 auf Geschosshoehe aus dem aktuellen validierten Vorschau-/Anzeigesnapshot
 ableiten; keine zweite Geometriequelle, Modellmutation oder neue Fangquelle.
