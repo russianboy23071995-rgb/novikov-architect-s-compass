@@ -405,6 +405,77 @@ test("edge actions reject open/BIM targets and stale transactions without commit
     selection: target,
     point: { x: 1.5, y: 4 },
   });
-  assert.equal(invalid.history.past.length, 0);
-  assert.ok(invalid.error);
+  assert.equal(invalid.history.past.length, 1);
+  assert.equal(invalid.error, "");
+});
+
+import { capContourEdge } from "../../geometry/polygons/edit-edge.ts";
+import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
+test("edge cap stops acute triangles and rectangles at the last valid contour and returns freely", () => {
+  for (const ring of [
+    points,
+    [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 2, y: 3 },
+    ],
+    [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 0.01, y: 0.1 },
+    ],
+  ]) {
+    for (const reverse of [false, true]) {
+      const contour = reverse ? [ring[1]!, ring[0]!, ...ring.slice(2).reverse()] : ring;
+      const a = contour[0]!,
+        b = contour[1]!,
+        anchor = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const far = { x: anchor.x, y: 10 };
+      const capped = capContourEdge(contour, 0, anchor, far);
+      assert.ok(capped.y > 0 && capped.y < Math.max(...contour.map((p) => p.y)));
+      const valid = editContourEdge(contour, 0, "edge", anchor, capped);
+      assert.equal(validateSimplePolygon(valid).valid, true);
+      assert.deepEqual(capContourEdge(contour, 0, anchor, capped), capped);
+      const back = { x: anchor.x, y: 0.01 };
+      const limited = capContourEdge(contour, 0, anchor, back);
+      assert.ok(Math.abs(limited.y - back.y) < 1e-12);
+    }
+  }
+  assert.throws(() => capContourEdge(points, 0, { x: 1, y: 0 }, { x: Infinity, y: 0 }));
+});
+
+test("numeric preview and commit agree at a stretch cap with undo and a valid file roundtrip", () => {
+  const base = createProject("p", "s"),
+    p = createDrawing(base, base, "h", request),
+    target = { kind: "hatch" as const, id: "h" };
+  const state = editingReducer(createEditingState(p), {
+      type: "begin",
+      target,
+      action: "edge",
+      index: 0,
+      anchor: { x: 1.5, y: 0 },
+    }),
+    session = state.session!;
+  const adapter = editInteraction(
+    session,
+    session.base,
+    target,
+    () => {},
+    () => {},
+  );
+  const preview = adapter.preview("", "10", null);
+  assert.ok(preview.point.y > 1.9 && preview.point.y < 2);
+  const confirmed = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: target,
+    point: preview.point,
+  });
+  assert.equal(confirmed.error, "");
+  assert.deepEqual(confirmed.history.present, editAtPointer(session, session.base, preview.point));
+  assert.deepEqual(
+    readProjectFile(serializeProject(confirmed.history.present)),
+    confirmed.history.present,
+  );
+  assert.deepEqual(editingReducer(confirmed, { type: "undo" }).history.present, p);
 });

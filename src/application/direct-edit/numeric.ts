@@ -1,3 +1,4 @@
+import { boundedEdgeTarget } from "./contour.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
@@ -48,10 +49,10 @@ export function previewNumericMove(
   const metres = parseMetres(text);
   if (!Number.isFinite(metres))
     throw new Error("Bitte eine endliche Strecke in Metern eingeben, z. B. -1,25.");
-  const point = {
+  const point = boundedEdgeTarget(session, {
     x: session.anchor.x + metres * axis.direction.x,
     y: session.anchor.y + metres * axis.direction.y,
-  };
+  });
   return { point, project: previewEdit(session, project, selection, point) };
 }
 
@@ -68,7 +69,16 @@ export function previewMovementInput(
     if (!axis) throw new Error("Keine numerische Bewegungsachse verfügbar.");
     const result = previewNumericMove(session, project, selection, lengthText);
     const degrees = resolvePolarInput({ x: 0, y: 0 }, axis.direction, null, 0).degrees;
-    return { ...result, degrees, metres: parseMetres(lengthText) };
+    const metres =
+      (result.point.x - session.anchor.x) * axis.direction.x +
+      (result.point.y - session.anchor.y) * axis.direction.y;
+    const capped = session.action === "edge" && Math.abs(metres - parseMetres(lengthText)) > 1e-9;
+    return {
+      ...result,
+      degrees,
+      metres,
+      ...(capped ? { notice: `Geometrische Grenze · ${metres.toFixed(4)} m` } : {}),
+    };
   }
   if (session.target.kind === "window") throw new Error("Fenster bleiben an ihre Wand gebunden.");
   const result = precisionTarget(session.anchor, aim, angleText, lengthText);

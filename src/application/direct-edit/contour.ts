@@ -3,7 +3,7 @@ import { updateLine } from "../../lib/bim/model.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { previewHatch } from "../hatches/actions.ts";
-import { editContourEdge } from "../../geometry/polygons/edit-edge.ts";
+import { editContourEdge, capContourEdge } from "../../geometry/polygons/edit-edge.ts";
 export function closedContour(project: Project, target: ElementTarget) {
   if (target.kind === "hatch")
     return project.storey.hatches.find((h) => h.id === target.id)?.points ?? null;
@@ -26,7 +26,7 @@ export function previewContourEdge(
     session.index,
     session.action as "insert" | "edge",
     session.anchor,
-    pointer,
+    boundedEdgeTarget(session, pointer),
   );
   if (session.target.kind === "hatch")
     return previewHatch(session.base, session.base, {
@@ -36,4 +36,11 @@ export function previewContourEdge(
       changes: { points },
     });
   return updateLine(session.base, session.target.id, { points: [...points, { ...points[0]! }] });
+}
+
+export function boundedEdgeTarget(session: EditSession, target: { x: number; y: number }) {
+  if (session.action !== "edge") return target;
+  const ring = closedContour(session.base, session.target);
+  if (!ring || session.index === null) throw new Error("Keine Konturkante gewählt.");
+  return capContourEdge(ring, session.index, session.anchor, target);
 }

@@ -1,6 +1,6 @@
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { ToolSnapPolicy } from "./snapping.ts";
-export type PrecisionValues = { point: Point2; degrees: number; metres: number };
+export type PrecisionValues = { point: Point2; degrees: number; metres: number; notice?: string };
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
   identity: object;

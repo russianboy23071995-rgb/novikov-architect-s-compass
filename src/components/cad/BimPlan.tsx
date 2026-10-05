@@ -1,3 +1,4 @@
+import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
@@ -674,16 +675,24 @@ export function BimPlan({
         closedContour(project, selection)?.map((a, edgeIndex, ring) => {
           const b = ring[(edgeIndex + 1) % ring.length]!;
           const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          const shape = validateSimplePolygon(ring);
+          const length = Math.hypot(b.x - a.x, b.y - a.y);
+          const sign = shape.valid && shape.signedArea > 0 ? 1 : -1;
+          const nx = (-(b.y - a.y) / length) * sign,
+            ny = ((b.x - a.x) / length) * sign;
+          const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
+          const cx = point.x + nx * 12 * size,
+            cy = point.y + ny * 12 * size;
+          const arrow = (along: number, across: number) =>
+            `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
           return (
-            <rect
+            <path
               key={`edge-${edgeIndex}`}
-              x={point.x - 4 / camera.pixelsPerMetre}
-              y={-point.y - 4 / camera.pixelsPerMetre}
-              width={8 / camera.pixelsPerMetre}
-              height={8 / camera.pixelsPerMetre}
-              fill="white"
-              stroke="#929aa3"
-              strokeWidth={1.5}
+              d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
+              fill="none"
+              stroke="#0284c7"
+              strokeWidth={2}
+              className="cursor-pointer outline-none focus-visible:stroke-blue-800"
               vectorEffect="non-scaling-stroke"
               role="button"
               tabIndex={0}
@@ -755,7 +764,7 @@ export function BimPlan({
           <circle
             cx={resolvedEdit.point.x}
             cy={-resolvedEdit.point.y}
-            r={0.055}
+            r={5 / camera.pixelsPerMetre}
             fill={editError ? "#dc2626" : "#0284c7"}
           />
           {editError && (
