@@ -662,6 +662,25 @@ export function BimPlan({
           </g>
         );
       })}
+      {selection?.kind === "wall" &&
+        plan.walls
+          .filter((wall) => wall.id === selection.id)
+          .map((wall) => (
+            <line
+              key={`axis-${wall.id}`}
+              role="img"
+              aria-label={`Wandachse ${wall.id}`}
+              x1={wall.start.x}
+              y1={-wall.start.y}
+              x2={wall.end.x}
+              y2={-wall.end.y}
+              stroke="#0284c7"
+              strokeWidth={1.25}
+              strokeDasharray="7 4"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          ))}
       {plan.lines.map((line) => (
         <g key={line.id}>
           {selection?.id === line.id && (

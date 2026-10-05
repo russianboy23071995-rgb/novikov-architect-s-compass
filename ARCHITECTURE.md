@@ -1367,3 +1367,10 @@ single-model, shared-action, derived-geometry and visibility boundaries apply.
 Do not correct only the renderer while retaining independent rectangular IFC bodies.
 The next bounded task displays the selected wall's existing centre axis in 2D;
 it does not introduce axis offsets, join persistence or connected-wall movement.
+
+## Selected wall axis in plan — 2026-10-05
+
+BimPlan now overlays the selected visible wall's start/end centre axis from its
+current validated display/preview snapshot. The dashed line has screen-constant
+stroke and ignores pointer events. It introduces no model entity, snap source or
+mutation. Axis offsets, 3D axis display and wall-join decisions remain open.
