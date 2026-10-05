@@ -1,5 +1,25 @@
 # NOVIKOV CAD Architecture Contract
 
+## Explicit temporary corner preview — 2026-10-05
+
+Application walls/corner-preview owns validation and the snapshot-bound derived
+result for one explicitly chosen pair of wall ends. It invokes the existing
+domain corner-solid service. Changing the source project invalidates the result;
+there is no automatic pair search, mutation, history entry or persisted join.
+The UI dialog selects stable wall IDs/endpoints and presents existing plan and
+solid viewports. Closing/Escape discards the preview. Ordinary model views and
+the normal IFC export remain unchanged.
+
+The plan consumes the exact derived local profiles. The solid display adapter
+replaces the two original wall surfaces with domain-derived opening-cut faces;
+unrelated walls remain intact. Display faces may be convex planar polygons.
+Rendering and depth picking share Geometry's triangle-fan iterator so neither
+silently drops vertices after the fourth. This is not a general triangulator
+for concave polygons. Renderer meshes never become model or export authority.
+Currently unsupported corner-opening contacts remain a limitation, not a new
+product policy. Persistent connections await the outstanding end-contact and
+detachment decisions documented in docs/WALL_CORNER_PLAN.md.
+
 ## Implemented BIM visibility and independent palette history — 2026-10-05
 
 This section supersedes the preparation-only status below. Existing plan/solid

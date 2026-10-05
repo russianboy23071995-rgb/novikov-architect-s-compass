@@ -1,10 +1,11 @@
-import type { Solid } from "../../lib/bim/geometry.ts";
+import type { DisplaySurfaces } from "./layer-display.ts";
+import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import { triangleDepth } from "../../geometry/projections/triangle-depth.ts";
 
 /** Shared nearest wall surface for picking and anchor visibility. Smaller NDC z is nearer. */
 export function nearestWallSurface(
-  solid: Pick<Solid, "faces">,
+  solid: Pick<DisplaySurfaces, "faces">,
   project: (point: Vector3) => Vector3,
   x: number,
   y: number,
@@ -13,10 +14,7 @@ export function nearestWallSurface(
   let nearest: { wallId: string; depth: number } | null = null;
   for (const face of solid.faces) {
     const points = face.vertices.map(project);
-    for (const [a, b, c] of [
-      [0, 1, 2],
-      [0, 2, 3],
-    ]) {
+    for (const [a, b, c] of faceTriangles(points.length)) {
       const depth = triangleDepth(points[a!]!, points[b!]!, points[c!]!, x, y);
       if (depth !== null && (!nearest || depth < nearest.depth))
         nearest = { wallId: face.wallId, depth };

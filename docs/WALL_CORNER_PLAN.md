@@ -273,3 +273,19 @@ IfcOpenShell-Pruefung inklusive Nettovolumen. Noch keine produktive Verbindung;
 Archicad-Import dieses Testmodells bleibt separat zu bestaetigen.
 Anleitung und Grenzen: [IFC-Eckabnahme](CORNER_IFC_ACCEPTANCE.md).
 Der aktuelle einzelne Folgeauftrag steht oben in DEVELOPMENT_PLAN.md.
+
+## Gemeinsame temporaere Vorschau — 05.10.2026
+
+Der Nutzer hat den Archicad-Import einschliesslich Fenster und rechtwinkligem
+Anschluss bestaetigt. Die explizite Paargeometrie ist jetzt ueber
+Werkzeugeigenschaften > Wandanschluss vorschauen in 2D und 3D pruefbar.
+Beide Ansichten verwenden die gleichen Domain-Ergebnisse; keine zweite
+Gehrungsberechnung. Fenster bleiben ausgeschnitten. Escape/Schliessen verwirft,
+falsche Achsenden ergeben eine Meldung, Modellwechsel invalidiert die Vorschau.
+449 Tests, TypeScript und Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+Browserpruefung mit zwei 3-m-Waenden und je einem Fenster bestanden.
+
+Noch keine gespeicherte Verbindung oder Aenderung des normalen IFC-Exports.
+Exakte Oeffnungsberuehrung sowie gerade oder erhaltene schraege Endkappen beim
+automatischen Loesen bleiben offene Nutzerentscheidungen; erneut angefragt.
+Die momentane Ablehnung beruehrender Oeffnungen ist eine technische Grenze.

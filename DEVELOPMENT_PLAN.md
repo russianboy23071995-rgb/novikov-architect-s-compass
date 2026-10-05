@@ -1,5 +1,40 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: gemeinsame Wandanschlussvorschau — 05.10.2026
+
+Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
+PR #118 wurde nach Nutzerfreigabe normal in fix/reference-selection-lifecycle
+gemergt (2b487df). Neuer Branch: feat/wall-corner-preview.
+
+Eine ausgewaehlte Wand bietet unter Werkzeugeigenschaften die Aktion
+"Wandanschluss vorschauen". Zweite Wand und beide Achsenden werden bewusst
+gewaehlt. Die temporaere Vorschau zeigt Grundriss und 3D nebeneinander aus
+denselben vorhandenen Domain-Konturen/Fensteroeffnungen. Originalkoerper werden
+ersetzt, nicht ueberlagert. Keine Modellmutation, History oder neue Projektversion.
+Escape/Schliessen verwirft; andere Wandenden loeschen das bisherige Ergebnis;
+unpassende Paare und geaenderte Modellbindung werden abgewiesen.
+
+Nachweis: 449 Tests bestanden; TypeScript und Build erfolgreich. ESLint:
+0 Fehler, 6 bekannte Warnungen. Browser: zwei rechtwinklige 3-m-Waende mit
+Fenstern in beiden Ansichten, unpassendes Achsende mit Fehlermeldung und Escape
+zur unveraenderten Hauptansicht geprueft. Archicad-Abnahme des isolierten
+Eckexports ist bereits vom Nutzer bestaetigt. Noch keine produktive Verbindung,
+kein Anschluss-Commit und keine Aenderung am normalen IFC-Export.
+
+Neue Nutzerwuensche bleiben erhalten in FUNCTION_REQUIREMENTS_2026-10-03.md:
+Schraffur-Hintergrundfarbe, waehlbare Konturlinie mit eigener Farbe (Linienarten
+spaeter), Offset geschlossener Polygone/Kreise und spaetere Kopie per Hotkey.
+Offset-Abstand versus Skalierungsfaktor ist noch zu klaeren; BIM-Skalierung
+bleibt ausgeschlossen. Offene Wandanschlussregeln wurden erneut angefragt.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Schraffur-Konturdarstellung als kleinen
+Eigenschaftenschritt umsetzen: optionale Konturlinie mit eigener Linienfarbe,
+ueber gemeinsame validierte Application-Aktion, Eigenschaftenleiste, Undo/Redo
+und Projektdatei mit Altdateikompatibilitaet. Bestehende Konturgriffe/Fangpunkte
+bleiben unabhaengig von der sichtbaren Linie nutzbar. Keine Linienarten, keine
+Offset-Geometrie und keine separate AI-Modelllogik in diesem Schritt.
+Die dauerhafte Wandverbindung bleibt bis zur Klaerung ihrer Regeln vorgemerkt.
+
 ## Aktueller Stand: direkte Seitengriffe — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.

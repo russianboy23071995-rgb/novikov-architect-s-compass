@@ -7,7 +7,13 @@ import { buildSolid } from "../../lib/bim/geometry.ts";
 import type { Solid } from "../../lib/bim/geometry.ts";
 
 /** Display surfaces deliberately have no volume: quantities belong to the complete model. */
-export type DisplaySurfaces = Pick<Solid, "faces" | "min" | "max">;
+export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
+  faces: {
+    wallId: string;
+    vertices: [number, number, number][];
+    normal: [number, number, number];
+  }[];
+};
 
 /** Shared renderer filters also accept disposable edit-preview geometry.
  * Eligibility always stays bound to the committed project, never the preview. */

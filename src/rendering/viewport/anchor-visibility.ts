@@ -1,5 +1,5 @@
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
-import type { Solid } from "../../lib/bim/geometry.ts";
+import type { DisplaySurfaces } from "./layer-display.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import { nearestWallSurface } from "./wall-depth.ts";
 
@@ -10,7 +10,7 @@ export type AnchorVisibility = "visible" | "occluded" | "outside" | "invalid";
 /** Classify against the solid belonging to the displayed snapshot.
  * Does not acquire references or determine whether hidden targets may be offered. */
 export function classifyAnchorVisibility(
-  solid: Pick<Solid, "faces">,
+  solid: Pick<DisplaySurfaces, "faces">,
   projection: ProjectionState | null,
   anchor: Vector3,
 ): AnchorVisibility {
