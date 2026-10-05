@@ -682,3 +682,92 @@ test("shared grid settings affect drawing and movement without disabling feature
     }
   }
 });
+
+test("grid targets survive contour/wall preview, history and zoom metrics", async () => {
+  const { createDrawing, defaultHatchFill } = await import("../drawing/actions.ts");
+  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  const ring = [
+    { x: -3, y: 2 },
+    { x: -1, y: 2 },
+    { x: -1, y: 1 },
+    { x: -3, y: 1 },
+  ];
+  const hatch = createDrawing(base, base, "h-grid", {
+    kind: "hatch",
+    points: ring,
+    fill: defaultHatchFill,
+  });
+  const polygon = addLine(base, {
+    id: "p-grid",
+    kind: "polyline",
+    points: [...ring, ring[0]!],
+    ...defaultLineAppearance,
+  });
+  for (const session of [
+    {
+      base: hatch,
+      target: { kind: "hatch" as const, id: "h-grid" },
+      action: "edge" as const,
+      index: 1,
+      anchor: { x: -1, y: 1.5 },
+    },
+    {
+      base: polygon,
+      target: { kind: "line" as const, id: "p-grid" },
+      action: "edge" as const,
+      index: 1,
+      anchor: { x: -1, y: 1.5 },
+    },
+    {
+      base,
+      target: { kind: "wall" as const, id: "w" },
+      action: "move" as const,
+      index: 0,
+      anchor: { x: 0, y: 0.18 },
+    },
+  ]) {
+    for (const zoom of [25, 100, 500]) {
+      const policy = editInteraction(session, session.base, session.target, noop, noop).snapping;
+      const result = resolveToolSnap(
+        policy,
+        { x: 3.38, y: -2.42 },
+        {
+          references: [],
+          enabled: true,
+          pixelsPerMetre: zoom,
+          endpointRadiusPx: 10,
+          metric: createAffineScreenMetric(zoom, zoom / 3, 0, zoom / 2),
+          gridSpacing: gridSpacing({ enabled: true, spacing: 0.25 }),
+        },
+        { ortho: false, shift: false, featureSnap: true },
+      );
+      assert.deepEqual(
+        result.point,
+        session.action === "edge" ? { x: 3.5, y: 1.5 } : { x: 3.5, y: -2.5 },
+      );
+      const initial = serializeProject(session.base);
+      const preview = editAtPointer(session, session.base, result.point);
+      assert.equal(serializeProject(session.base), initial, "preview/cancel leaves base untouched");
+      if (session.target.kind === "wall") {
+        assert.equal(
+          preview.storey.walls[0]!.start.y,
+          -2.68,
+          "chosen corner is on grid, axis remains offset by half thickness",
+        );
+        assert.deepEqual(preview.storey.windows, session.base.storey.windows);
+      } else {
+        const points =
+          session.target.kind === "hatch"
+            ? preview.storey.hatches[0]!.points
+            : preview.storey.lines!.find((l) => l.id === "p-grid")!.points;
+        assert.equal(points[1]!.x, 3.5);
+        assert.equal(points[2]!.x, 3.5);
+      }
+      const history = commitProject(createHistory(session.base), preview);
+      assert.equal(history.past.length, 1);
+      assert.equal(serializeProject(undoProject(history).present), initial);
+      assert.deepEqual(redoProject(undoProject(history)).present, preview);
+      assert.deepEqual(deserializeProject(serializeProject(preview)), preview);
+    }
+  }
+});
