@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Browser-/IFC-Abnahme Zwei-Ecken-T - 06.10.2026
+
+PR158 freigegeben und in main d2d3af9 integriert. Reproduzierbarer Generator
+scripts/generate-two-corner-t-fixtures.mjs und Abnahmeprotokoll
+ docs/walls/TWO_CORNER_T_ACCEPTANCE.md ergänzt. Browser: automatisches Zeichnen
+auf Hauptwand mit zwei Ecken, Fenster entlang Host über T bewegen, Undo/Redo und
+3D geprüft. IFC unabhängig mit IfcOpenShell: Schema fehlerfrei, fünf Wände,
+ein Fenster, Soll-/Ist-Wandvolumen 21,41136 m³. Archicad-Abnahme ausstehend.
+Browser-Download-Event nicht bestätigt (Timeout); Details und Dateiabgrenzung im
+Abnahmeprotokoll. Keine Änderungen am Anwendungscode dieses Schritts.
+
+Genau ein Folgeauftrag: Projekt-Speichern und Wiederöffnen im Browser einschließlich
+Download-Rückmeldung gezielt prüfen, um die verbleibende Abnahmelücke zu schließen.
+
+
 ## T-Hauptwand mit zwei rechtwinkligen Eckanschlüssen - 06.10.2026
 
 Die bisherige Anzahl-Sperre in validateCornerTContact ist durch Prüfung jedes
