@@ -556,6 +556,8 @@ export function BimSolidView({
                 { x: event.clientX, y: event.clientY },
                 anchor.pointIndex ?? undefined,
                 anchor.worldPoint,
+                undefined,
+                event.ctrlKey || event.metaKey,
               );
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);
@@ -570,7 +572,14 @@ export function BimSolidView({
               point.x,
               point.y,
             );
-            onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
+            onSelect(
+              id ? { kind: "wall", id } : null,
+              { x: event.clientX, y: event.clientY },
+              undefined,
+              undefined,
+              undefined,
+              event.ctrlKey || event.metaKey,
+            );
           }
           if (event.currentTarget.hasPointerCapture(event.pointerId))
             event.currentTarget.releasePointerCapture(event.pointerId);

@@ -166,8 +166,8 @@ export function CadViewport({
                     ? "Wand auf z=0 bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
                     : "Feste Achse auf z=0 · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
               : pan
-                ? "Click wall to select · Drag to pan · Wheel to zoom"
-                : "Click wall to select · Drag to orbit · Wheel to zoom"
+                ? "Klick: Wand wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Pan"
+                : "Klick: Wand wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Orbit"
             : planPan
               ? "Ziehen verschiebt die Ansicht · Mausrad zoomt · Esc beendet Pan"
               : "Mausrad: Zoom · Mittlere Maustaste: Ansicht verschieben · Maße in Metern"}

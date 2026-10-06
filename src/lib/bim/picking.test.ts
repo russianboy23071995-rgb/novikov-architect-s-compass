@@ -4,7 +4,10 @@ import { pickWall, isSelectionClick } from "./picking.ts";
 import { buildSolid, initialCamera, projectPoint } from "./geometry.ts";
 import { addWall, updateWall } from "./model.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
+import {
+  createProjectionFrame,
+  projectOrthographic,
+} from "../../geometry/projections/orthographic.ts";
 import {
   createProjectionState,
   backbufferSize,
@@ -213,4 +216,51 @@ test("outside canvas, empty background and degenerate faces do not select", () =
 test("small pointer jitter is a click, dragging is not", () => {
   assert.equal(isSelectionClick(10, 10, 12, 12), true);
   assert.equal(isSelectionClick(10, 10, 15, 10), false);
+});
+
+test("3D visible wall hits feed the same mixed selection; hidden hits are rejected and do not occlude", async () => {
+  const { selectTargets, eligibleSelection } = await import("../../application/selection/state.ts");
+  const { createLayerVisibilityPolicy } = await import("../../application/layers/visibility.ts");
+  const { createLayerDisplay } = await import("../../rendering/viewport/layer-display.ts");
+  const base = createExampleProject();
+  const p = addWall(base, {
+    ...base.storey.walls[0]!,
+    id: "back",
+    layerId: base.defaultLayerIds.line,
+    start: { x: 0, y: 2 },
+    end: { x: 3, y: 2 },
+  });
+  const v = createLayerVisibilityPolicy(p, { scope: { kind: "bim-project" }, hiddenLayerIds: [] });
+  const display = createLayerDisplay(p, v, v.context);
+  const hit = (point: [number, number, number]) => {
+    const [x, y] = projectOrthographic(point, createProjectionFrame(display.surfaces), front, 1);
+    const id = pickWall(display.surfaces, front, 1, x, y)!;
+    return { kind: "wall" as const, id };
+  };
+  const near = hit([0.3, 0, 1.5]),
+    behind = hit([1.5, 0, 1.5]);
+  assert.equal(near.id, "wall-1");
+  assert.equal(behind.id, "back");
+  let selected = selectTargets([{ kind: "window", id: "window-1" }], [near], "toggle");
+  selected = selectTargets(selected, [behind], "toggle");
+  assert.equal(eligibleSelection(p, v, selected).length, 3);
+  selected = selectTargets(selected, [near], "toggle");
+  assert.deepEqual(
+    selected.map((t) => t.id),
+    ["window-1", "back"],
+  );
+  assert.deepEqual(selectTargets(selected, [near]), [near]);
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.storey.walls[0]!.layerId],
+  });
+  const hiddenDisplay = createLayerDisplay(p, hidden, hidden.context);
+  const [x, y] = projectOrthographic(
+    [0.3, 0, 1.5],
+    createProjectionFrame(hiddenDisplay.surfaces),
+    front,
+    1,
+  );
+  assert.equal(pickWall(hiddenDisplay.surfaces, front, 1, x, y), "back");
+  assert.deepEqual(eligibleSelection(p, hidden, [near, behind]), [behind]);
 });
