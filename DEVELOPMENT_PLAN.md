@@ -1,5 +1,26 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerkorrektur: allgemeine Auswahl vor Gruppenbewegung — 06.10.2026
+
+Die zuvor geplante Wand-Mehrfachauswahl wird ersetzt: ein gemeinsamer,
+werkzeugunabhaengiger Auswahlbaustein fuer ALLE Elementtypen, bereits im ersten
+2D-Schritt fuer Waende, Fenster, Linien/Polylinien und Schraffuren zusammen.
+Verbindlich: Klick, Strg-Klick und aufgezogener Auswahlrahmen; nur sichtbare und
+aktive Ebenen. Auswahlbarkeit ist unabhaengig von Bewegungsfaehigkeiten.
+
+[Ueberarbeiteter Plan](docs/walls/SELECTION_MOVE_PLAN.md) trennt zentrale Auswahl-
+und Ebenenregeln von typbezogener Treffergeometrie. Die Bedeutung "aktive Ebenen"
+ist beim Nutzer angefragt: bisher existiert nur Sichtbarkeit, kein Sperrstatus.
+Rahmen-Randfaelle, Toggle und konkurrierende Zeichen-/Auswahlgesten bleiben als
+Vorschlaege bzw. offene Details ausgewiesen. Keine Nutzerentscheidung erfunden.
+
+Genau ein Folgeauftrag: Nach Klaerung der Ebenensemantik allgemeinen 2D-Auswahl-
+baustein samt Klick/Strg-Klick/Rahmen fuer alle vorhandenen Elementtypen umsetzen
+und pruefen. Gruppenverschiebung folgt als Verbraucher dieser Auswahl, nicht als
+wandbezogene Parallelstruktur. Noch keine Laufzeitaenderung; nur Planungsdokumente.
+Dieser Abschnitt und der ueberarbeitete Plan ersetzen die aelteren Folgeauftraege.
+
+
 ## Mehrfachauswahl und Gruppenbewegung: Bestandspruefung — 06.10.2026
 
 PR145 nach Freigabe normal in main gemergt (c8a205c). Aktuell gibt es nur

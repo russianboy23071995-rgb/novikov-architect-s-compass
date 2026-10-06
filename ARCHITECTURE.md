@@ -1,5 +1,26 @@
 # NOVIKOV CAD Architecture Contract
 
+## Shared selection requirement — 2026-10-06
+
+User requirement: selection is a tool-independent Application capability for all
+current and future element types, including mixed sets. Support click, Ctrl-click
+and rectangular marquee; consider only visible and active layers. The meaning of
+active is pending clarification: current layers have ID/name and separate visibility,
+not a lock/activation property. Do not silently invent that state.
+
+Application owns one typed stable-ID selection set and eligibility rules. Viewport
+adapters supply projected hit geometry; common picking/marquee logic and pointer
+handling are reused, not reimplemented per tool. Selection capability is independent
+of movement support. Actions validate the full pinned target set; never silently
+act on just its first member. Properties, Navigator, On-Demand and AI/Text/Voice
+consume the same context. A selected host does not implicitly select its windows;
+future transformations must account for dependencies without double movement.
+
+First delivery is shared 2D selection for every existing type, before group movement.
+No new runtime capability is claimed by this contract. See the revised
+[selection plan](docs/walls/SELECTION_MOVE_PLAN.md) for proposals and open details.
+
+
 ## Corner plus T: bounded composition — 2026-10-06
 
 A host may combine exactly one right-angle corner with remote perpendicular T

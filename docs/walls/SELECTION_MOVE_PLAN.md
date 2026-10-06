@@ -1,15 +1,28 @@
-# Gemeinsame Verschiebung ausgewaehlter Waende
+# Gemeinsamer Auswahlbaustein und spaetere Gruppenbewegung
 
 Stand 06.10.2026, gepruefte Basis main c8a205c (PR145 integriert).
-Dieser Auftrag ist Bestandspruefung und Planung; keine neue Laufzeitfunktion.
+Nutzerkorrektur ersetzt den vorherigen wandbezogenen Umsetzungsumfang von PR146.
+Nur Planung: Die Implementierung ist bis zur korrigierten Planung angehalten.
 
-## Verbindlicher Nutzerwunsch
+## Verbindliche Anforderungen
 
-Keine eigene Aktion zum gemeinsamen Ziehen eines Eckpunkts. Der Nutzer waehlt
-beide betroffenen Waende und bewegt die ganzen Elemente gemeinsam. Nicht
-gewaehlte Nachbarn werden nicht implizit mitgezogen. Gemeinsamer Ursprung,
-Rasterengine, Shift-Richtungssperre, Tab-Laenge/Winkel, Klick-Platzierung und
-atomare Modell-History gelten wie bei bisherigen Bewegungen.
+Die Auswahl ist ein gemeinsamer, werkzeugunabhaengiger Application-Baustein fuer
+alle heutigen und zukuenftigen Elementtypen. Schon der erste 2D-Schritt umfasst
+Waende, Fenster, Linien/offene und geschlossene Polylinien sowie Schraffuren,
+einschliesslich gemischter Auswahlen. Spaetere Decken, Daecher, Treppen, Moebel usw.
+liefern passende Treffergeometrie und Faehigkeiten, keine eigene Auswahlengine.
+
+- Klick: einzelnes Element auswaehlen.
+- Strg + Klick: Mehrfachauswahl. Cmd als macOS-Entsprechung bleibt ein Vorschlag.
+- Mit der Maus einen rechteckigen Rahmen ziehen: enthaltene Elemente auswaehlen.
+  Auswahl nur auf sichtbaren und aktiven Ebenen.
+- Keine eigene Aktion zum gemeinsamen Ziehen eines Eckpunkts. Spaeter stattdessen
+  betroffene ganze Elemente gemeinsam auswaehlen und verschieben.
+
+Die Auswahl darf nicht davon abhaengen, ob ein Element eine Bewegungsaktion
+unterstuetzt. Eine gemischte Auswahl darf nicht still auf bewegliche Ziele oder
+auf das erste Element reduziert werden. Auswahl und Modellbearbeitung sind
+getrennte Faehigkeiten; Aktionen validieren ihre gesamte Zielmenge.
 
 ## Nachgewiesener Stand
 
@@ -31,63 +44,81 @@ unveraendert. Somit darf Gruppenbewegung nicht als Schleife ueber Einzelbewegung
 implementiert werden: Zwischenzustaende loesen interne Beziehungen.
 58 bestehende Tests fuer Direct Edit, ToolInteraction und Ecke/T bestanden.
 
-## Begrenzter Umsetzungsvorschlag
+## Zustaendigkeiten und Wiederverwendung
 
-Erste vertikale Scheibe: zwei oder mehr sichtbare Waende in 2D auswaehlen und
-als ganze Elemente frei verschieben. Keine Rechteck-/Lassoauswahl, Rotation,
-Skalierung, gemischte Elementmengen oder neue 3D-Gesten in dieser Scheibe.
-Die Auswahlstruktur bleibt typisiert mit ElementTarget-IDs fuer spaetere Adapter.
+`application/selection` verwaltet die einzige Auswahlmenge aus stabilen typisierten
+Element-IDs: Ersetzen, Ergaenzen, Entfernen, Leeren, Aktualitaet und Berechtigung.
+Canvas, Navigator, Eigenschaften, On-Demand-Menue und Text/Voice beziehen ihren
+Zielkontext daraus. Keine einzelnen Auswahlzustandsautomaten je Zeichenwerkzeug.
+Auswahl ist sitzungsbezogen und keine Modellkopie oder Modell-Undo-Aktion.
 
-Bedienvorschlag, noch keine vom Nutzer festgelegte Tastengeste: Strg-Klick unter
-Windows bzw. Cmd-Klick unter macOS fuegt eine Wand hinzu oder entfernt sie;
-ein normaler Klick ersetzt die Auswahl. Shift bleibt der Richtungsfuehrung.
-Ein angeklickter Punkt der Auswahl liefert den gemeinsamen Ursprung. Das vorhandene
-On-Demand-Menue startet die gemeinsame freie Bewegung; alle gewaehlten Waende
-zeigen dieselbe Vorschau. Bei mehreren Zielen keine irrefuehrenden Einzelwand-
-Eigenschaften oder Einzelwand-Sprachbefehle anbieten.
+Rendering/Picking liefert Treffer mit derselben Projektion wie die sichtbare
+Geometrie. Typadapter liefern lediglich Element-ID, Treffer-/Konturgeometrie und
+unterstuetzte Aktionen. Fachunabhaengige Rahmen-/Geometriepruefung gehoert nach
+Geometry/Rendering, nicht in Wall/Line/Hatch oder CadWorkspace. Ein gemeinsamer
+Pointer-Ablauf steuert Klick, Modifier und Rahmenvorschau.
 
-Geometrie-/Beziehungsvorschlag:
-- Alle ausgewaehlten Achsenden im selben neuen Snapshot um denselben Vektor
-  verschieben und erst den Gesamtzustand validieren. Keine rekursiven Einzelaktionen.
-- Eck- und T-Relationen mit beiden Waenden in der Auswahl erhalten; Beziehungen
-  mit nur einem ausgewaehlten Partner loesen. Andere Relationen unveraendert lassen.
-- Fenster bleiben ihrer Wand zugeordnet und folgen ueber ihre relative Position;
-  nicht als zweites Bewegungsziel behandeln. Nicht ausgewaehlte Waende bleiben stehen.
-- Im ersten Schritt keine neuen Anschluesse durch Gruppenplatzierung entdecken.
-  Das ist eine bewusste Umfangsgrenze, keine Aenderung des Einzelwand-Anschlussfangs.
-- Nullbewegung erzeugt weder Relationsverlust noch einen Undo-Eintrag.
-- Basisprojekt und gesamte Zielmenge an die Session binden. Modell-/Auswahlwechsel,
-  geloeschte oder ausgeblendete Ziele machen die Session ungueltig. Preview/Cancel
-  veraendern nichts; Commit validiert erneut und schreibt genau einen History-Schritt.
+Die bestehende LayerVisibilityPolicy bildet die gemeinsame Sichtbarkeitspruefung.
+Ein Fenster mit unsichtbarer Hostwand bleibt ausgeschlossen. Berechtigung wird
+vor Trefferauswahl und erneut bei Uebernahme geprueft. Versteckte/geloeschte Ziele
+werden aus der Auswahl entfernt; betroffene aktive Bearbeitung wird abgebrochen.
+Der Begriff aktive Ebene ist noch zu klaeren (siehe unten), nicht still mit einer
+einzigen Zeichenebene oder einer noch nicht vorhandenen Sperre gleichsetzen.
 
-Application besitzt Auswahluebergaenge und Batch-Aktion; Domain validiert den
-finalen Snapshot. Renderer zeigen abgeleitete Auswahl/Vorschau. ToolInteraction,
-useToolInteraction und InteractionInput bleiben der gemeinsame Interaktionsweg;
-keine neue Winkel-, Tab-, Shift- oder Rasterlogik im Workspace. AI/Text/Voice
-nutzen spaeter dieselbe Aktion mit gepinnter Zielmenge; bis dahin Gruppenbefehle
-verstaendlich ablehnen, niemals still die erste Wand als Ziel verwenden.
+Werkzeugunabhaengigkeit bedeutet gemeinsame Infrastruktur. Sie definiert noch
+nicht, ob ein laufender Zeichenvorgang durch Klick/Rahmen abgebrochen, pausiert
+oder weitergefuehrt wird. Auswahl-/Zeichen-/Pan-Ereignisse duerfen nicht gleichzeitig
+wirken; diese Eingaberegel vor der Anbindung festlegen. Bestehende Shift-Fuehrung
+und mittlere Maustaste fuer Pan erhalten.
 
-## Akzeptanz fuer den Folgeauftrag
+## Noch offene Details und Vorschlaege
 
-1. Verbundenes L und getrennte Waende gemeinsam verschieben: gleicher Vektor,
-   Laengen/Achsversatz unveraendert, innere Ecke bleibt erhalten.
-2. Host und Nebenwand gemeinsam: T bleibt erhalten. Nur ein Partner ausgewaehlt:
-   Verbindung geloest, nicht ausgewaehlte Geometrie unveraendert. H/E gemeinsam,
-   N nicht: Ecke bleibt, T loest sich. H/E/N gemeinsam: beide Relationen bleiben.
-3. Fenster folgen genau einmal; JSON-Roundtrip, 2D/3D und IFC stimmen ueberein.
-4. Maus-Klick und numerische Laenge/Winkel verwenden dieselbe Translation;
-   Ursprung sofort aktiv, Shift bleibt fest, Tab wechselt Eingabefeld, Zoom erhaelt
-   Referenzen, bewegte Elemente und davon abhaengige Fangquellen ausgeschlossen.
-5. Preview/Abbruch/Nullbewegung unveraendert; Undo/Redo jeweils ganze Bewegung.
-   Stale-Kontext, unbekannte/mehrfache IDs, unsichtbare Ziele und unendliche Werte
-   validieren; keine Teilmutation und keine stille Teilmenge bewegen.
-6. Alte Einzelwahl, Einzelelementbewegung, Sichtbarkeit, Eigenschaften und
-   Text-/Voice-Zielkontext bleiben korrekt; Mehrfachwahl zeigt eindeutige Anzahl.
+- Aktive Ebenen: Das aktuelle layerSchema enthaelt nur ID/Name; Sichtbarkeit liegt
+  separat in bimVisibility.hiddenLayerIds. Kein Aktiv-/Sperrstatus existiert.
+  Nutzerfrage offen: nur eingeblendete Ebenen oder zusaetzlich auswaehlbar/gesperrt?
+- Rahmen: Aus "alles was darin ist" wird als Vorschlag vollstaendige geometrische
+  Einschliessung abgeleitet, nicht bloss Bounding-Box-Ueberlappung. Teilberuehrung
+  und eine richtungsabhaengige Crossing-Auswahl sind nicht beschlossen.
+- Strg-Klick auf bereits ausgewaehltes Ziel: Entfernen als Vorschlag. Einfacher
+  Klick ersetzt die Menge; Klick ins Leere leert sie. Rahmen ersetzt standardmaessig
+  die Auswahl; additive Rahmenauswahl ist noch keine Nutzerentscheidung.
+- Reihenfolge der Treffer bei Ueberlagerung sowie 3D-Verdeckung und 3D-Rahmen sind
+  explizit fuer die spaetere Viewport-Anbindung festzulegen. Der erste Schritt ist
+  2D; der Auswahlzustand bleibt ansichts- und werkzeugunabhaengig.
+
+## Akzeptanz des gemeinsamen Auswahlbausteins
+
+1. Einzelklick, Strg-Klick und Rahmen funktionieren mit jedem bestehenden Typ und
+   gemischten Mengen; Identitaeten sind stabil, mehrfach getroffene IDs nur einmal.
+2. Sichtbare/aktive und ausgeblendete/inaktive Ebenen im selben Rahmen: nur erlaubte
+   Elemente; ausgeblendete Hostwand schliesst Fenster aus. Statuswechsel bereinigt
+   Auswahl und verwirft betroffene Bearbeitung ohne Modellmutation.
+3. Rahmenrichtung, Zoom/Pan/Projektion, Randfaelle, kleine/duenne Elemente, offene
+   Linien und geschlossene Flaechen pruefen. Auswahlvorschau und uebernommene Menge
+   identisch; Abbruch/Escape hinterlaesst keine halbe Auswahltransaktion.
+4. Auswahlmarkierung und Anzahl stimmen in Canvas/Navigator/Eigenschaften ueberein.
+   Gruppenaktionen nie still auf erstes Ziel reduzieren; keine irrefuehrenden
+   Einzelwerte oder Sprachbefehle bei mehreren Zielen.
+5. Neue Elementtypen integrieren sich ueber Treffer-/Faehigkeitsadapter; zentrale
+   Modifier-, Rahmen- und Ebenenregeln werden nicht pro Werkzeug kopiert.
+6. Bestehendes Zeichnen, On-Demand, Fang-/Shift-/Tab-Verhalten sowie Modell-History
+   bleiben unveraendert. Auswahl setzt keine Geometrie und erzeugt keinen Modell-Undo.
+
+## Spaeterer Verbraucher: Gruppenverschiebung
+
+Erst nach diesem Auswahlbaustein folgt die gemeinsame Bewegung. ToolInteraction,
+useToolInteraction, InteractionInput und Rasterengine bleiben gemeinsam. Alle
+Ziele werden in einem Snapshot verschoben und zusammen validiert, nicht in einer
+Schleife ueber Einzelbewegungen. Vorschlag: interne Wandanschluesse erhalten,
+externe loesen, Fenster auf bewegten Hosts genau einmal mitfuehren. Ein gemeinsamer
+Ursprung, Preview/Cancel, gepinnte Zielmenge und ein Undo-Schritt. Regeln fuer
+beliebige gemischte Mengen separat pruefen; Auswahlbarkeit verspricht keine noch
+nicht implementierte Gruppenaktion. Keine BIM-Skalierung.
 
 ## Genau ein Folgeauftrag
 
-Die beschriebene 2D-Wand-Mehrfachauswahl samt atomarer freier Gruppenverschiebung
-als durchgaengigen Ablauf implementieren und die Akzeptanzfaelle pruefen. Dabei
-vorhandene Interaktionsinfrastruktur nutzen, Anschlusserhalt im Gesamtzustand
-validieren und die vorgeschlagenen Bedienregeln bei der Umsetzung sichtbar machen.
-Keine gemeinsame Eckpunktaktion und keine parallele Fang-/Eingabeengine.
+Nach Klaerung der offenen Ebenensemantik den gemeinsamen 2D-Auswahlbaustein fuer
+alle vorhandenen Elementtypen mit Klick, Strg-Klick und Rahmen implementieren.
+Application-Auswahlmenge, gemeinsame Trefferberechtigung, Renderer-Adapter und
+UI-Zielkontext integrieren und die obigen Akzeptanzfaelle pruefen. Noch keine
+Gruppenbewegung oder gemeinsame Eckpunktaktion implementieren.
