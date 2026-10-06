@@ -1,3 +1,8 @@
+import {
+  windowSelectionSurfaces,
+  windowSelectionEdges,
+  pickSolidElement,
+} from "@/rendering/viewport/window-selection";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { faceTriangles } from "@/geometry/solids/face-triangles";
@@ -19,7 +24,7 @@ import { buildSolid } from "@/lib/bim/geometry";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
-import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges, outlineTriangles } from "@/rendering/viewport/selection-outline";
@@ -74,6 +79,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
       projection: ProjectionState,
       selectedWalls: ReadonlySet<string>,
       outline: OutlineEdge[],
+      windowOutline: OutlineEdge[],
     ) {
       const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
@@ -102,7 +108,10 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.enableVertexAttribArray(color);
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
       gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
-      const border = outlineTriangles(outline, projection);
+      const border = [
+        ...outlineTriangles(outline, projection),
+        ...outlineTriangles(windowOutline, projection, 2, [0.25, 0.8, 0.87]),
+      ];
       if (border.length) {
         gl.depthMask(false);
         gl.depthFunc(gl.LEQUAL);
@@ -265,12 +274,29 @@ export function BimSolidView({
       ),
     [selections, selection, project, visibility],
   );
+  const windowSurfaces = useMemo(
+    () => windowSelectionSurfaces(previewProject, (id) => isLayerVisible(project, visibility, id)),
+    [previewProject, project, visibility],
+  );
+  const selectedWindows = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "window")
+          .map((t) => t.id),
+      ),
+    [selections, selection],
+  );
   const outline = useMemo(
     () =>
       [...selectedWalls].flatMap((id) =>
         selectionEdges(solid.faces.filter((face) => face.wallId === id)),
       ),
     [solid, selectedWalls],
+  );
+  const windowOutline = useMemo(
+    () => windowSelectionEdges(windowSurfaces, selectedWindows),
+    [windowSurfaces, selectedWindows],
   );
   const inference = useSolidInference(
     project,
@@ -356,10 +382,10 @@ export function BimSolidView({
   useEffect(() => {
     displayed.current = null;
     if (renderer.current && previewProjection) {
-      renderer.current.draw(solid, previewProjection, selectedWalls, outline);
+      renderer.current.draw(solid, previewProjection, selectedWalls, outline, windowOutline);
       displayed.current = { solid, projection: previewProjection };
     }
-  }, [solid, previewProjection, selectedWalls, revision, outline]);
+  }, [solid, previewProjection, selectedWalls, revision, outline, windowOutline]);
   return (
     <>
       {previewProjection && !error && (
@@ -564,16 +590,15 @@ export function BimSolidView({
               return;
             }
             const point = projection.toNdc({ x: event.clientX, y: event.clientY });
-            const id = pickWallInProjection(
+            const hit = pickSolidElement(
               solid,
-              projection.frame,
-              projection.camera,
-              projection.aspect,
+              windowSurfaces,
+              projection.project,
               point.x,
               point.y,
             );
             onSelect(
-              id ? { kind: "wall", id } : null,
+              hit,
               { x: event.clientX, y: event.clientY },
               undefined,
               undefined,

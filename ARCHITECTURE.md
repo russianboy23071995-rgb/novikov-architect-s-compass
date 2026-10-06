@@ -31,7 +31,13 @@ change cancel the frame; selection creates no model history.
 3D wall surface and foot-anchor clicks now forward Ctrl/Cmd to the same selection
 transition as the plan. Existing depth/visibility and drag-vs-click gates remain.
 Selected wall outlines share the central set; no separate 3D selection store.
-This delivery adds no 3D marquee, window hit geometry or group-movement gesture.
+`rendering/viewport/window-selection.ts` derives opening hit rectangles on the
+physical wall centre plane and outlines on both opening rims. These are disposable
+selection geometry, not glazing or exported model material. Windows and wall
+surfaces compete in the same projected depth space; hidden windows/hosts are
+excluded. A visible opening now targets its window instead of a wall behind it.
+The adapter returns the same typed targets for plain and Ctrl/Cmd selection.
+No 3D marquee or group-movement gesture is added.
 Implemented consumer: `application/selection/move.ts` pins a complete typed target
 set and base project, translates one proposed snapshot, then validates it once per
 proposal. Internal corner/T relations survive; relations crossing the selected-wall

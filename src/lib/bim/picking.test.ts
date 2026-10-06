@@ -264,3 +264,90 @@ test("3D visible wall hits feed the same mixed selection; hidden hits are reject
   assert.equal(pickWall(hiddenDisplay.surfaces, front, 1, x, y), "back");
   assert.deepEqual(eligibleSelection(p, hidden, [near, behind]), [behind]);
 });
+
+test("3D opening selects its window before rear walls; foreground material wins", async () => {
+  const { windowSelectionSurfaces, pickSolidElement } =
+    await import("../../rendering/viewport/window-selection.ts");
+  const base = createExampleProject();
+  const p = addWall(base, {
+    ...base.storey.walls[0]!,
+    id: "rear",
+    start: { x: 0, y: 2 },
+    end: { x: 3, y: 2 },
+  });
+  const solid = buildSolid(p);
+  const project = (point: readonly [number, number, number]) =>
+    projectOrthographic(point, createProjectionFrame(solid), front, 1);
+  const [x, y] = project([1.5, 0, 1.5]);
+  const windows = windowSelectionSurfaces(p, () => true);
+  assert.deepEqual(pickSolidElement(solid, windows, project, x, y), {
+    kind: "window",
+    id: "window-1",
+  });
+  assert.deepEqual(
+    pickSolidElement(
+      solid,
+      windowSelectionSurfaces(p, (id) => id !== "window-1"),
+      project,
+      x,
+      y,
+    ),
+    { kind: "wall", id: "rear" },
+  );
+  const covered = addWall(p, {
+    ...base.storey.walls[0]!,
+    id: "front",
+    start: { x: 0, y: -2 },
+    end: { x: 3, y: -2 },
+  });
+  assert.deepEqual(pickSolidElement(buildSolid(covered), windows, project, x, y), {
+    kind: "wall",
+    id: "front",
+  });
+  assert.equal(pickSolidElement(solid, windows, project, NaN, 0), null);
+});
+
+test("window hit geometry respects physical body offset, dimensions and hidden host", async () => {
+  const { windowSelectionSurfaces, windowSelectionEdges } =
+    await import("../../rendering/viewport/window-selection.ts");
+  const p = updateWall(createExampleProject(), "wall-1", { bodyOffset: 0.18 });
+  const windows = windowSelectionSurfaces(p, () => true);
+  assert.equal(windows.length, 1);
+  for (const point of windows[0]!.vertices) assert.equal(point[1], 0.18);
+  assert.deepEqual(
+    windowSelectionSurfaces(p, (id) => id !== "wall-1"),
+    [],
+  );
+  assert.equal(windowSelectionEdges(windows, new Set()).length, 0);
+  const edges = windowSelectionEdges(windows, new Set(["window-1"]));
+  assert.equal(edges.length, 8);
+  assert.ok(Math.abs(edges[0]![1][0] - edges[0]![0][0] - 1.2) < 1e-12);
+  assert.ok(Math.abs(edges[1]![1][2] - edges[1]![0][2] - p.storey.windows[0]!.height) < 1e-12);
+});
+
+test("window selection follows orbit, zoom, pan and mixed selection transitions", async () => {
+  const { windowSelectionSurfaces, pickSolidElement } =
+    await import("../../rendering/viewport/window-selection.ts");
+  const { selectTargets } = await import("../../application/selection/state.ts");
+  const p = createExampleProject(),
+    solid = buildSolid(p);
+  const windows = windowSelectionSurfaces(p, () => true);
+  const opening = p.storey.windows[0]!;
+  const center: [number, number, number] = [
+    1.5,
+    p.storey.walls[0]!.bodyOffset,
+    opening.sillHeight + opening.height / 2,
+  ];
+  for (const yaw of [0, Math.PI, 0.2])
+    for (const aspect of [0.8, 1.7]) {
+      const camera = { ...front, yaw, pitch: 0.1, zoom: 1.1, panX: 0.05 };
+      const project = (point: readonly [number, number, number]) =>
+        projectOrthographic(point, createProjectionFrame(solid), camera, aspect);
+      const [x, y] = project(center);
+      const hit = pickSolidElement(solid, windows, project, x, y)!;
+      assert.deepEqual(hit, { kind: "window", id: opening.id });
+      const mixed = selectTargets([{ kind: "wall", id: "wall-1" }], [hit], "toggle");
+      assert.equal(mixed.length, 2);
+      assert.deepEqual(selectTargets(mixed, [hit], "toggle"), [{ kind: "wall", id: "wall-1" }]);
+    }
+});

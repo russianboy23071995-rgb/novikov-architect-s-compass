@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Fenster direkt in 3D auswaehlen - 06.10.2026
+
+PR151 nach Freigabe normal in main integriert (41c1623). Der neue Rendereradapter
+window-selection liefert stabile Fensterziele an dieselbe zentrale Auswahl wie
+Wand, Grundriss und Navigator. Klick in die sichtbare Oeffnung waehlt das Fenster;
+Strg/Cmd ergaenzt/entfernt es. Opaque Vordergrundwaende gewinnen den Tiefentest.
+Versteckte Fenster/Hostwaende liefern keine Ziele. Fenster erhalten eine dezente
+tuerkise Umrandung an beiden Oeffnungsraendern mit GPU-Tiefentest; keine Glasflaeche,
+keine Modellkopie, keine Aenderung an Projektformat, Mengen oder IFC.
+
+Nachweis: 572 Tests, TypeScript und Build erfolgreich; Lint ohne Fehler, sechs
+bekannte Warnungen. Neue Tests fuer Fenster vor Rueckwand, Vordergrundverdeckung,
+versteckte Fenster/Hosts, Koerperversatz, Oeffnungsmasse, beidseitige Kontur,
+Kamerabewegung und gemischte Auswahl. Browser: Oeffnung geklickt, Fenstereigenschaften
+und Navigator synchron; Strg-Klick ergaenzt Fenster zur Wand (2 Ziele). Screenshot
+outputs/window-selection-3d.png. Bestehende Bewegung wechselt im Einzelviewport
+weiter zum Grundriss. Kein neues 3D-Bewegungswerkzeug oder Rahmen in diesem Schritt.
+Deckungsgleiche ueberlappende Fenster bleiben im Navigator einzeln waehlbar;
+kein neues Auswahldurchschalten im Canvas.
+
+Abnahme: 3D aktivieren, in die Fensteroeffnung klicken, Kontur und Eigenschaften
+pruefen. Wand waehlen und Strg/Cmd-Klick auf die Oeffnung: beide ausgewaehlt.
+
+Fensterwerkzeug bewertet: Einfuegen existiert bisher als "Add centred window" in
+den Wandeigenschaften (validiertes addWindow mit History), nicht als Platzierungs-
+werkzeug in der Werkzeugleiste. Ein begrenztes Werkzeug ist jetzt sinnvoll.
+Genau ein Folgeauftrag: Fenster im Grundriss per eigenem Werkzeug an einer sichtbaren
+Hostwand platzieren, mit Positionsvorschau, Klickbestaetigung und Escape-Abbruch.
+Bestehende Massvorgaben/Validierung, ToolInteraction, Fang-/Hostachsenregeln und
+History wiederverwenden; Eigenschaften, Text/Voice und Dateien behalten dieselben
+Modellaktionen. Kein Rahmen-/Glasdetailmodell oder neue 3D-Platzierung.
+
+
 ## Gemeinsame Wand-Mehrfachauswahl in 3D - 06.10.2026
 
 PR150 normal nach Freigabe in main integriert (f496af0). Branch
