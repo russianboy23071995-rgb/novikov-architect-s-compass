@@ -69,7 +69,19 @@ export function drawingWallVisibility(
   const newWalls = new Map(
     draft.storey.walls.filter((w) => !existing.has(w.id)).map((w) => [w.id, w]),
   );
+  const existingWindows = new Set(base.storey.windows.map((w) => w.id));
+  const newWindows = new Map(
+    draft.storey.windows.filter((w) => !existingWindows.has(w.id)).map((w) => [w.id, w]),
+  );
   return (id: string) => {
+    const opening = newWindows.get(id);
+    if (opening)
+      return (
+        isLayerVisible(base, policy, opening.wallId) &&
+        (!policy ||
+          (policy.isCurrent(base, policy.context) &&
+            !policy.context.hiddenLayerIds.includes(opening.layerId)))
+      );
     const wall = newWalls.get(id);
     if (!wall) return isLayerVisible(base, policy, id);
     return (

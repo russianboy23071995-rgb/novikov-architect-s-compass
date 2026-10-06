@@ -1,3 +1,4 @@
+import { defaultDrawingWindow } from "@/application/drawing/window-placement";
 import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -212,9 +213,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
                 addWindow(project, {
                   id,
                   wallId: wall.id,
-                  width: 1.2,
-                  height: 1.35,
-                  sillHeight: 0.9,
+                  ...defaultDrawingWindow,
                   position: 0.5,
                 }),
                 { kind: "window", id },

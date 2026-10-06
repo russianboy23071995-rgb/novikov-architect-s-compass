@@ -1,5 +1,44 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Fensterwerkzeug im Grundriss - 06.10.2026
+
+PR152 nach Freigabe normal in main integriert (c2b9897). Eigenes Fensterwerkzeug
+in der Werkzeugleiste: sichtbare Wand anfahren, vorhandene Fangengine mit
+Hostlaengsachse nutzen, Vorschau sehen, per Klick ein Fenster einsetzen. Danach
+Select und direkt die neuen Fenstereigenschaften. Esc/Abbrechen verwirft ohne
+Modellaenderung. Start aus 3D wechselt zum Grundriss.
+
+Application window-placement + React-Bindung useWindowPlacement nutzen
+ToolInteraction/useToolInteraction und vorhandene Canvas-placement-Schnittstelle.
+Keine eigene Hover-/Tastatur-/Rasterengine. Vorschau/Commit pruefen Basis und
+Sichtbarkeit; addWindow prueft Masse und bestehende Anschlussregeln. Neue IDs
+werden nach Commit gegen das neue Modell ausgewaehlt (gemeinsame Auswahlkorrektur,
+auch fuer bisheriges Einfuegen ueber Inspector). Preview-Fenster erben echte
+Ebenensichtbarkeit. Vorgabemasse werden mit dem bisherigen Inspector geteilt.
+
+Nachweis: 575 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests fuer unveraenderte Basis waehrend Vorschau,
+Abbruch, einen History-Schritt, Undo/Redo, JSON/Solid, Sichtbarkeit, veraltete
+Kontexte, ungueltige Ziele, diagonale/versetzte Waende und Hostachse ohne Snap.
+Browser: 6-m-Wand, Fenster per Klick bei relativer Position 0.2; Navigator und
+Eigenschaften markieren sofort das neue Fenster. Undo entfernt nur dieses Fenster,
+Redo stellt es wieder her; erneuter Werkzeugaufruf + Escape erzeugt kein weiteres.
+Screenshot outputs/window-placement.png.
+
+Abnahme: Fensterwerkzeug waehlen, innerhalb einer ausreichend langen Wand anfahren
+und klicken. Maße anschliessend oben anpassen, Undo/Redo testen. An Wandenden oder
+zu kurzen/niedrigen Waenden bleibt die vorhandene Validierung massgeblich.
+Grenzen: ein Fenster je Werkzeugaufruf; feste Vorgaben 1.20 x 1.35 m, Bruestung
+0.90 m. Bei ueberlagerten Waenden wird der naechste Koerpermittelstrang gewaehlt,
+bei Gleichstand stabile ID-Reihenfolge; keine neue Host-Auswahlliste. Bestehende
+Regeln fuer ueberlappende Fenster bleiben. Keine neue 3D-Platzierung/Glasdetails.
+
+Genau ein Folgeauftrag: Fenstermasse vor dem Platzieren in Werkzeugeigenschaften
+einstellbar machen (Breite, Hoehe, Bruestung) und dieselben Werte durch Vorschau,
+Validierung und Commit fuehren. Geaenderte Vorgaben duerfen keine alte Vorschau
+bestaetigen; bestehende Fenster bleiben unveraendert.
+
+
 ## Fenster direkt in 3D auswaehlen - 06.10.2026
 
 PR151 nach Freigabe normal in main integriert (41c1623). Der neue Rendereradapter

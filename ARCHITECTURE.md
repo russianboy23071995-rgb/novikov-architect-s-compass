@@ -1,5 +1,21 @@
 # NOVIKOV CAD Architecture Contract
 
+## Window placement adapter — 2026-10-06
+
+`application/drawing/window-placement.ts` derives host/relative position from a
+visible physical wall body and uses existing `addWindow` validation for preview
+and commit. `useWindowPlacement` binds immutable project/visibility and a stable
+new ID; `useToolInteraction` and the generic plan placement binding own interaction.
+The shared snap resolver receives the host's physical longitudinal axis. This
+creation starts without a pinned movement origin or polar input; ToolInteraction
+accepts an unanchored ToolSnapPolicy, while movement adapters explicitly retain
+AnchoredToolInteraction. Existing movement-origin requirements are unchanged.
+Draft window rendering uses its actual layer and host visibility, never a fake
+committed entity. New selection requests accompanying a model commit are validated
+against that new snapshot; ordinary clicks still validate the current snapshot.
+No project schema change. Initial placement uses the existing 1.20 x 1.35 m window
+with 0.90 m sill; one click commits once, Escape discards. Properties remain shared.
+
 ## Shared selection requirement — 2026-10-06
 
 User requirement: selection is a tool-independent Application capability for all

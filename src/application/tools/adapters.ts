@@ -2,7 +2,7 @@ import { previewWallChain, type WallChain } from "../drawing/wall-chain.ts";
 import { findTAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
-import type { ToolInteraction } from "./interaction.ts";
+import type { AnchoredToolInteraction } from "./interaction.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
@@ -34,7 +34,7 @@ export function editInteraction(
   selection: ElementTarget | null,
   commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
-): ToolInteraction {
+): AnchoredToolInteraction {
   const axis = numericMoveAxis(session);
   const polar =
     ["move", "point", "insert"].includes(session.action) && session.target.kind !== "window";
@@ -65,7 +65,7 @@ export function drawingInteraction(
   cancel: () => void,
   path?: readonly Point[],
   wall?: WallChain,
-): ToolInteraction {
+): AnchoredToolInteraction {
   return {
     ...(wall
       ? {
