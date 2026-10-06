@@ -86,7 +86,7 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     schemaVersion: 2,
   };
   const migrated = loadProjectData(v2);
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.storey, { ...oldStorey, hatches: [], wallJoins: [] });
   assert.deepEqual(migrated.bimVisibility, { hiddenLayerIds: [] });
   assert.equal(v2.schemaVersion, 2);

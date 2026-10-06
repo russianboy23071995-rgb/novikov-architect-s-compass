@@ -1,5 +1,25 @@
 # NOVIKOV CAD Architecture Contract
 
+## Hatch appearance and schema 7 — 2026-10-06
+
+Hatches retain their existing foreground fill/opacity and gain required background
+and contour paints, each with a visible flag and a six-digit hex colour. The
+background is opaque behind the fill; 100% foreground opacity covers it. The
+contour is currently a solid 1 CSS-pixel display line, independent of zoom and
+selection highlighting. These are appearance attributes, not additional line
+entities. Existing contour picking, snapping and direct editing stay shared,
+including when paints are hidden. IFC still exports BIM geometry only.
+
+Interop strictly validates V1–V6 before migration to schema 7. Legacy paints are
+initialized hidden (white background, slate contour), preserving old appearance.
+No silent runtime defaults: schema-7 snapshots require both valid paints. The
+legacy V6 validator checks its original strict shape and reuses current wall-join
+validation on a disposable converted view. Creation defaults live in Domain;
+Application previewHatch/commitHatch owns updates by stable project/hatch ID,
+with stale-context validation and one normal model-history commit. Future
+text/voice adapters must call this same action; no separate appearance mutation.
+The fixed properties bar edits all three paints; no pattern engine is implied.
+
 ## Automatic persisted right-angle wall connections — 2026-10-05
 
 Schema 6 requires storey.wallJoins, each relating two stable wall IDs and endpoint
