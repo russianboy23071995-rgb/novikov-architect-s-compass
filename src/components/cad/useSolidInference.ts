@@ -76,6 +76,7 @@ export function useSolidInference(
         activeReferences: active,
         guideDirections: advanceGuideDirections(inverse.value.point, active, hover.guideDirections),
         endpointRadiusPx: 10,
+        includeInteractionTargets: !!policy,
         gridSpacing,
       },
       { ortho, shift, featureSnap: enabled },

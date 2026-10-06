@@ -63,6 +63,18 @@ export function tAxisReference(
       ((point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y)) /
       ((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
     if (t <= 0 || t >= 1) continue;
+    if (
+      context.acceptCandidate &&
+      !context.acceptCandidate({
+        kind: "endpoint",
+        worldPoint: point,
+        sourceEntityId: source.entityId,
+        sourceFeature: "t-axis",
+        distanceOnScreen: metric.distance(cursor, point),
+        priority: 0,
+      })
+    )
+      continue;
     targets.set(source.entityId, { entityId: source.entityId, feature: "t-axis", point });
   }
   return targets.size === 1 ? [...targets.values()][0]! : null;

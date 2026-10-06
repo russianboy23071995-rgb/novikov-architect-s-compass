@@ -1,3 +1,7 @@
+import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
+import { createProjectionState } from "../../rendering/viewport/projection-state.ts";
+import { createWallPreviewContext } from "../../rendering/viewport/wall-preview-context.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
 import { createEditingState, editingReducer, previewEdit } from "../direct-edit/controller.ts";
 import { editInteraction } from "../tools/adapters.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
@@ -384,4 +388,73 @@ test("off-midpoint T snap supports edge axes and respects held direction", () =>
     assert.notEqual(constrained.candidate?.sourceFeature, "t-axis");
     assert.equal(constrained.point.y, -0.7);
   }
+});
+
+test("3D workplane transports the same T target through preview, commit and undo", () => {
+  for (const zoom of [0.6, 1, 2]) {
+    const a = aiming(updateWall(pair(0.18), "incoming", { end: { x: 3, y: -0.7 } }));
+    const projection = createProjectionState(
+      createProjectionFrame(buildSolid(a.session.base)),
+      { ...initialCamera, yaw: 0, pitch: 0.5, zoom },
+      { left: 0, top: 0, width: 800, height: 600 },
+      { width: 800, height: 600 },
+    )!;
+    const { context } = createWallPreviewContext(
+      a.session.base,
+      projection,
+      true,
+      0,
+      a.adapter.snapping,
+      "incoming",
+    );
+    const snap = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3.001, y: -0.001 },
+      { ...context, endpointRadiusPx: 10, gridSpacing: null, includeInteractionTargets: true },
+      snapOptions,
+    );
+    assert.equal(snap.candidate?.sourceFeature, "t-axis");
+    assert.deepEqual(snap.point, { x: 3, y: 0 });
+    const preview = previewEdit(a.session, a.session.base, a.target, snap.point, snap.candidate);
+    confirmInteraction(a.adapter, snap.point, snap.candidate);
+    assert.deepEqual(a.state().history.present, preview);
+    assert.equal(preview.storey.wallTJunctions.length, 1);
+    assert.equal(a.state().history.past.length, 1);
+    assert.deepEqual(undoProject(a.state().history).present, a.session.base);
+    assert.deepEqual(redoProject(undoProject(a.state().history)).present, preview);
+  }
+});
+
+test("3D T acquisition rejects hidden axes and unavailable workplanes", () => {
+  const a = aiming(updateWall(pair(0.18), "incoming", { end: { x: 3, y: -0.7 } }));
+  for (const camera of [
+    null,
+    { ...initialCamera, yaw: Math.PI, pitch: 0.5 },
+    { ...initialCamera, yaw: 0, pitch: 0 },
+  ]) {
+    const projection =
+      camera &&
+      createProjectionState(
+        createProjectionFrame(buildSolid(a.session.base)),
+        camera,
+        { left: 0, top: 0, width: 800, height: 600 },
+        { width: 800, height: 600 },
+      );
+    const { context } = createWallPreviewContext(
+      a.session.base,
+      projection,
+      true,
+      0,
+      a.adapter.snapping,
+      "incoming",
+    );
+    const snap = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 0 },
+      { ...context, endpointRadiusPx: 10, gridSpacing: null, includeInteractionTargets: true },
+      snapOptions,
+    );
+    assert.notEqual(snap.candidate?.sourceFeature, "t-axis");
+  }
+  assert.equal(a.state().history.past.length, 0);
 });

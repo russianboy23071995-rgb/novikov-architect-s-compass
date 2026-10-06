@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-Fang in der 3D-Endpunktbearbeitung — 06.10.2026
+
+PR137 freigegeben und in den Gesamtzweig fix/reference-selection-lifecycle
+übernommen (d909b54). Der bestehende 3D-Arbeitsebenenpfad trägt nun denselben
+T-Fangkandidaten wie 2D bis zu previewEdit und dem gemeinsamen Commit.
+Die lokale Quellabfrage ergänzt sichtbare Wandachsen; die Application prüft
+zusätzlich den exakten T-Zielpunkt auf Sichtbarkeit. Keine eigene 3D-T-Geometrie.
+Das Fanglabel zeigt T-Anschluss. Numerische Ziele übernehmen keinen alten
+Mauskandidaten; Kamerawechsel, Abbruch und Fokusverlust verwerfen die Mausvorschau.
+
+511 Tests bestanden, TypeScript und Build erfolgreich, Lint 0 Fehler/6 bekannte
+FastRefresh-Warnungen. Neue projektionsgestützte Tests: drei Zoomstufen,
+Vorschau/Commit, ein Undo/Redo, verdeckte Achsen und fehlende/degenerierte
+Arbeitsebenen. Browser: sichtbaren Achsendpunkt der 2,30-m-Nebenwand wählen,
+Punkt frei bewegen, Klick am Hauptachsenziel ergibt 3,00 m; Undo 2,30 m,
+Redo 3,00 m. Keine Browserfehler. Der Browser meldet den JSON-Download als
+angefordert; die Download-Automation konnte die Datei nicht übernehmen.
+Gespeicherte Relationen und Roundtrip sind durch die gemeinsamen Tests geprüft.
+
+Abnahme: zwei isolierte rechtwinklige Wände gleicher Stärke/Höhe verwenden.
+In 3D die Kantenachse zur Kamera drehen, sichtbaren Achsendpunkt anklicken →
+Punkt frei bewegen → Hauptachse am Lotfußpunkt anfahren → T-Anschluss → Klick.
+Undo/Redo prüfen. Mittige oder rückseitige, vom Wandkörper verdeckte Achsen
+werden weiterhin nicht durch den Körper hindurch gefangen; dafür Ansicht drehen
+oder Grundriss verwenden. Beschränkungen auf isolierte rechtwinklige T-Paare,
+z=0 und die vorhandenen Öffnungsregeln bleiben bestehen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss anbinden. Gemeinsame lokale Achsabfrage
+und validierte T-Verbindungsaktion wiederverwenden; nur eindeutige isolierte
+rechtwinklige Paare. Vorschau, Abbruch, Öffnungsprüfung und das vereinbarte Undo
+der gesamten Wandkette absichern. Keine Mehrfach-Ts oder T/Eck-Kombinationen.
+
 ## Aktueller Stand: automatischer T-Fang beim 2D-Endpunktbewegen — 06.10.2026
 
 PR134 und PR135 freigegeben/zusammengeführt. Der gestapelte PR135 wurde über

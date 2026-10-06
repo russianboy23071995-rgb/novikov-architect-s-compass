@@ -1,3 +1,4 @@
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { faceTriangles } from "@/geometry/solids/face-triangles";
 import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
@@ -185,7 +186,11 @@ export function BimSolidView({
   const [viewProjection, setViewProjection] = useState<ProjectionState | null>(null);
   const [previewClient, setPreviewClient] = useState<(Point & { shift: boolean }) | null>(null);
   const [previewReset, setPreviewReset] = useState(0);
-  const [aim, setAim] = useState<{ session: typeof editSession; point: Point } | null>(null);
+  const [aim, setAim] = useState<{
+    session: typeof editSession;
+    point: Point;
+    candidate: SnapCandidate | null;
+  } | null>(null);
   const baseSolid = useMemo(() => {
     const base = buildSolid(project);
     return cornerPreview?.base === project
@@ -202,16 +207,18 @@ export function BimSolidView({
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
+  const targetCandidate =
+    numericTarget === undefined && aim?.session === editSession ? aim?.candidate : undefined;
   const previewProject = useMemo(() => {
     if (editSession && target) {
       try {
-        return previewEdit(editSession, project, selection, target);
+        return previewEdit(editSession, project, selection, target, targetCandidate);
       } catch {
         /* Keep committed model on invalid input. */
       }
     }
     return project;
-  }, [editSession, target, project, selection]);
+  }, [editSession, target, targetCandidate, project, selection]);
   const previewSolid = useMemo(
     () => (previewProject === project ? baseSolid : buildSolid(previewProject)),
     [previewProject, project, baseSolid],
@@ -283,6 +290,7 @@ export function BimSolidView({
       displayed.current = null;
       setViewProjection(null);
       setPreviewClient(null);
+      setAim(null);
       drag.current = null;
       renderer.current = null;
       setError("Graphics context lost. Waiting for restoration; the model is retained.");
@@ -294,6 +302,7 @@ export function BimSolidView({
       displayed.current = null;
       setViewProjection(null);
       setPreviewClient(null);
+      setAim(null);
       setRevision((n) => n + 1);
     };
     let resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
@@ -330,6 +339,7 @@ export function BimSolidView({
       backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
     );
     setPreviewClient(null);
+    setAim(null);
     setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
   useEffect(() => {
@@ -381,6 +391,7 @@ export function BimSolidView({
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             setPreviewClient(null);
+            setAim(null);
             setPreviewReset((n) => n + 1);
           }
           const delta = 0.12;
@@ -389,6 +400,7 @@ export function BimSolidView({
           ) {
             event.preventDefault();
             setPreviewClient(null);
+            setAim(null);
             if (event.key === "ArrowLeft") onCamera({ ...camera, yaw: camera.yaw - delta });
             if (event.key === "ArrowRight") onCamera({ ...camera, yaw: camera.yaw + delta });
             if (event.key === "ArrowUp")
@@ -404,6 +416,7 @@ export function BimSolidView({
         }}
         onPointerDown={(event) => {
           setPreviewClient(null);
+          setAim(null);
           if (event.button !== 0 || drag.current || !interactive) return;
           event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -439,11 +452,18 @@ export function BimSolidView({
                   event.shiftKey,
                 );
                 if (result) {
-                  setAim({ session: editSession, point: result.point });
+                  setAim({
+                    session: editSession,
+                    point: result.point,
+                    candidate: result.candidate,
+                  });
                   onEditAim?.(editSession, result.point);
                 }
               }
-            } else setPreviewClient(null);
+            } else {
+              setPreviewClient(null);
+              setAim(null);
+            }
             return;
           }
           if (!drag.current || drag.current.pointerId !== event.pointerId) return;
@@ -507,7 +527,7 @@ export function BimSolidView({
                   { x: event.clientX, y: event.clientY },
                   event.shiftKey,
                 );
-                if (result) onEditCommit?.(editSession, result.point);
+                if (result) onEditCommit?.(editSession, result.point, result.candidate);
               }
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);
@@ -550,16 +570,25 @@ export function BimSolidView({
         }}
         onLostPointerCapture={() => {
           setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
         onPointerCancel={() => {
           setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
-        onPointerLeave={() => setPreviewClient(null)}
-        onBlur={() => setPreviewClient(null)}
+        onPointerLeave={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
+        onBlur={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
         onWheel={(event) => {
           setPreviewClient(null);
+          setAim(null);
           onCamera({
             ...camera,
             zoom: Math.max(0.2, Math.min(5, camera.zoom * Math.exp(-event.deltaY * 0.001))),

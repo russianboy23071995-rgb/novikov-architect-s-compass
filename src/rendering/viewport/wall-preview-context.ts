@@ -71,14 +71,24 @@ export function createWallPreviewContext(
     const local = result.candidates
       .filter((c) => c.visibility === "visible" && valid(c.reference))
       .map((c) => pointOnly(c.reference));
-    const segments = edges
-      .queryPrimitives(
+    const axes = policy
+      ? sources.queryPrimitives(
+          cursor,
+          plane.value.metric,
+          radius,
+          (r) => r.entityId !== movingWallId && r.feature.startsWith("axis-midpoint:") && valid(r),
+        ).segments
+      : [];
+    const segments = [
+      ...axes,
+      ...edges.queryPrimitives(
         cursor,
         plane.value.metric,
         radius,
         (r) => r.entityId !== movingWallId && valid(r),
-      )
-      .segments.map((s) => s.source)
+      ).segments,
+    ]
+      .map((s) => s.source)
       .filter((r) => {
         const hit = plane.value.metric.projectSegment(cursor, r.segment!.start, r.segment!.end);
         if (!hit || hit.t < 0 || hit.t > 1) return false;
