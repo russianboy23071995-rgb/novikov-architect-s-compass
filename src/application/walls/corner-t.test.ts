@@ -146,7 +146,7 @@ test("T near inner miter, touching corner partner, and excluded topologies fail 
     end: { x: 16, y: -17 },
     ...dimensions,
   });
-  assert.throws(() => previewTConnection(two, two, request), /nur einen Eck/);
+  assert.equal(previewTConnection(two, two, request).storey.wallJoins.length, 2);
   const incomingCorner = addWall(before, {
     id: "E3",
     start: { x: 13, y: -23 },
@@ -251,4 +251,52 @@ test("existing single endpoint edit detaches the corner; partner is not moved im
     next.storey.walls.find((w) => w.id === "E"),
     p.storey.walls.find((w) => w.id === "E"),
   );
+});
+
+for (const offset of [-0.18, 0, 0.18])
+  for (const side of [-1, 1])
+    for (const angle of [0, 0.63])
+      test(`two corner host retains both contours and T: ${offset}, ${side}, ${angle}`, () => {
+        const { p } = fixture(offset, side, angle);
+        const at = (x: number, y: number) => ({
+          x: 10 + x * Math.cos(angle) - y * Math.sin(angle),
+          y: -20 + x * Math.sin(angle) + y * Math.cos(angle),
+        });
+        const second = {
+          id: "E2",
+          start: at(6, 0),
+          end: at(6, 3),
+          ...dimensions,
+          bodyOffset: offset,
+        };
+        const combined = addWall(p, second);
+        const { before } = fixture(offset, side, angle);
+        const cornersFirst = addWall(before, second);
+        const connected = previewTConnection(cornersFirst, cornersFirst, request);
+        assert.equal(combined.storey.wallJoins.length, 2);
+        assert.deepEqual(connectedWallContours(combined), connectedWallContours(connected));
+        for (const id of ["H", "E", "E2"])
+          assert.deepEqual(
+            connectedWallContours(connected).get(id),
+            connectedWallContours(cornersFirst).get(id),
+          );
+        assert.deepEqual(deserializeProject(serializeProject(combined)), combined);
+        const h = commitProject(createHistory(p), combined);
+        assert.deepEqual(undoProject(h).present, p);
+        assert.deepEqual(redoProject(undoProject(h)).present, combined);
+      });
+
+test("second corner partner collisions reject atomically", () => {
+  const { before } = fixture(0.18, 1);
+  const base = addWall(before, {
+    id: "E2",
+    start: { x: 16, y: -20 },
+    end: { x: 16, y: -17 },
+    ...dimensions,
+  });
+  // Move the incoming wall close to the second corner, not the first.
+  const near = updateWall(base, "N", { start: { x: 15.5, y: -17 }, end: { x: 15.5, y: -20 } });
+  const snapshot = serializeProject(near);
+  assert.throws(() => previewTConnection(near, near, request), /Eck/);
+  assert.equal(serializeProject(near), snapshot);
 });

@@ -326,19 +326,17 @@ test("window tool in connected plan preserves preview, edits, history, reload an
       { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
       { id: "east", start: { x: 6, y: 0 }, end: { x: 6, y: 4 } },
       { id: "north", start: { x: 6, y: 4 }, end: { x: 0, y: 4 } },
-      ...(closed
-        ? [{ id: "west", start: { x: 0, y: 4 }, end: { x: 0, y: 0 } }]
-        : [{ id: "partition", start: { x: 3, y: 2 }, end: { x: 3, y: 0 } }]),
+      ...(closed ? [{ id: "west", start: { x: 0, y: 4 }, end: { x: 0, y: 0 } }] : []),
+      { id: "partition", start: { x: 3, y: 2 }, end: { x: 3, y: 0 } },
     ])
       base = addWall(base, { ...wall, thickness: 0.36, height: 2.8 });
-    if (!closed)
-      base = previewTConnection(base, base, {
-        projectId: base.id,
-        kind: "connect",
-        relation: { hostWallId: "host", incoming: { wallId: "partition", endpoint: 1 } },
-      });
+    base = previewTConnection(base, base, {
+      projectId: base.id,
+      kind: "connect",
+      relation: { hostWallId: "host", incoming: { wallId: "partition", endpoint: 1 } },
+    });
     assert.equal(base.storey.wallJoins.length, closed ? 4 : 2);
-    assert.equal(base.storey.wallTJunctions.length, closed ? 0 : 1);
+    assert.equal(base.storey.wallTJunctions.length, 1);
     let state = createEditingState(base);
     base = state.history.present;
     const visibility = createLayerVisibilityPolicy(base, {
@@ -385,7 +383,7 @@ test("window tool in connected plan preserves preview, edits, history, reload an
     const date = new Date("2026-10-06T12:00:00Z");
     const ifc = await exportIfc(restored, date);
     assert.equal(ifc, await exportIfc(moved, date));
-    assert.equal((ifc.match(/=IFCWALL\(/g) || []).length, 4);
+    assert.equal((ifc.match(/=IFCWALL\(/g) || []).length, closed ? 5 : 4);
     assert.equal((ifc.match(/=IFCWINDOW\(/g) || []).length, 1);
     assert.equal((ifc.match(/=IFCRELVOIDSELEMENT\(/g) || []).length, 1);
     assert.equal((ifc.match(/=IFCRELFILLSELEMENT\(/g) || []).length, 1);

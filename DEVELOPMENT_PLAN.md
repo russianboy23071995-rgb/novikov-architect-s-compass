@@ -1,5 +1,33 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## T-Hauptwand mit zwei rechtwinkligen Eckanschlüssen - 06.10.2026
+
+Die bisherige Anzahl-Sperre in validateCornerTContact ist durch Prüfung jedes
+Eckpartners ersetzt. Kontakt muss weiterhin vollständig auf einer ungestörten
+Längsseite der zusammengesetzten Kontur liegen. Die Nebenwand darf keinen der
+beiden Partner berühren/überschneiden. Gemeinsame Kontur-, Solid-, Fenster- und
+IFC-Funktionen bleiben unverändert; keine Sonderlogik im UI.
+
+Nachweis: 593 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Neue Matrix: drei Achslagen, beide T-Seiten, global gedreht
+und ungedreht, Ecke vor/nach T, unveränderte Eckkonturen, History und JSON.
+Kollision am zweiten Eckpartner wird atomar abgewiesen. Fenster-Integration jetzt
+auch im geschlossenen Rechteck mit T: Platzierung, Maßänderung, Bewegung durch T,
+Undo/Redo, Speichern/Laden, identischer Solid/IFC mit aktuellen Fenstermaßen.
+Kein neuer Archicad- oder interaktiver Browser-Abnahmetest in diesem Schritt.
+
+Abnahme: Rechteck als Wandkette zeichnen, zusätzliche Wand mittig auf die Achse
+einer Rechteckseite führen. T-Anschluss soll ohne bisherige Anzahl-Meldung entstehen.
+Fenster auf Hauptwand einsetzen und über den T-Anschluss verschieben; speichern,
+neu laden und IFC prüfen. Grenzfall nahe Ecke muss weiterhin abgewiesen werden.
+Weiter ausgeschlossen: schräge Ecke in Kombination mit T, eigene Ecke der Nebenwand,
+Kontakt mit Eckbereich sowie bisher gesperrte Mehrfachtopologien. Schema bleibt 8;
+ältere Builds können diese neue Kombination weiterhin ablehnen.
+
+Genau ein Folgeauftrag: Automatischen Zeichen-/Direct-Edit-Ablauf für diesen neuen
+Zwei-Ecken-T-Fall im Browser prüfen und eine IFC-Abnahmedatei für Archicad bereitstellen.
+
+
 ## Fenster-Integrationsprüfung und Lovable-Abgleich - 06.10.2026
 
 PR155 ausdrücklich freigegeben und normal nach main integriert (c3e3c0a).
