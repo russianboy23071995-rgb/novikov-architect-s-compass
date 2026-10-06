@@ -791,6 +791,9 @@ export function CadWorkspace({
               value={windowTool.dimensions}
               onChange={windowTool.setDimensions}
               error={windowTool.error}
+              precision={windowTool.precision}
+              onPrecision={windowTool.setPrecision}
+              pickingHost={windowTool.pickingHost}
             />
           ) : tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
@@ -893,7 +896,14 @@ export function CadWorkspace({
                           target: interaction.target,
                           previewProject: windowPlacement.previewProject,
                           aim: interaction.draft.move,
-                          pick: interaction.pick,
+                          pick: (point, candidate) => {
+                            interaction.pick(point, candidate);
+                            if (windowTool.pickingHost)
+                              setDemandPosition({
+                                x: lastPointer.current.x + 16,
+                                y: lastPointer.current.y + 16,
+                              });
+                          },
                         }
                       : groupMove.active
                         ? {

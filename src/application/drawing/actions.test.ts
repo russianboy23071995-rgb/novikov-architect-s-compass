@@ -252,3 +252,55 @@ test("dimension revisions invalidate old previews and new values reach the same 
   assert.throws(() => adapter().previewProject!(point));
   assert.deepEqual(committed, next);
 });
+
+test("pinned window host uses exact signed distance and retains its explicit host", async () => {
+  const { windowPlacementInteraction, windowPlacementHost } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { confirmInteraction } = await import("../tools/interaction.ts");
+  for (const end of [
+    { x: 6, y: 0 },
+    { x: 0, y: 6 },
+    { x: -6, y: 0 },
+    { x: 4.8, y: 3.6 },
+  ]) {
+    const empty = createProject("p", "s");
+    const base = createDrawing(empty, empty, "host", {
+      kind: "wall",
+      start: { x: 0, y: 0 },
+      end,
+      ...defaultDrawingWall,
+    });
+    const visibility = createLayerVisibilityPolicy(base, {
+      scope: { kind: "bim-project" },
+      hiddenLayerIds: [],
+    });
+    let committed = base;
+    const tool = windowPlacementInteraction(
+      base,
+      visibility,
+      "win",
+      () => ({ project: base, visibility }),
+      (next) => {
+        committed = next;
+      },
+      () => {},
+      undefined,
+      "host",
+    );
+    const result = tool.preview("566", "2,00", { x: 99, y: 99 });
+    const preview = tool.previewProject!(result.point);
+    assert.ok(Math.abs(preview.storey.windows[0]!.position - 1 / 3) < 1e-12);
+    assert.equal(preview.storey.windows[0]!.wallId, "host");
+    assert.equal(base.storey.windows.length, 0);
+    assert.equal(tool.input!.axisLabel, "Fenstermitte ab Wandanfang");
+    for (const invalid of ["-1", "0", "7", "NaN"])
+      assert.throws(() => tool.preview("", invalid, null));
+    confirmInteraction(tool, result.point);
+    assert.deepEqual(committed, preview);
+    const origin = tool.snapping.origin!.point;
+    assert.equal(
+      windowPlacementHost(base, visibility, { x: origin.x + end.x / 2, y: origin.y + end.y / 2 }),
+      "host",
+    );
+  }
+});

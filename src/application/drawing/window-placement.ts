@@ -1,3 +1,4 @@
+import { precisionTarget } from "../input/precision.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import { addWindow, wallLength } from "../../lib/bim/model.ts";
@@ -45,6 +46,16 @@ function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, poi
   return hosts[0];
 }
 
+export function windowPlacementHost(
+  project: Project,
+  visibility: LayerVisibilityPolicy,
+  point: Point,
+): string {
+  const host = findWindowHost(project, visibility, point);
+  if (!host) throw new Error("Eine sichtbare Wand anklicken.");
+  return host.wall.id;
+}
+
 /** Host projection is shared by preview and commit; no mutation or UI state. */
 export function placeWindow(
   base: Project,
@@ -53,11 +64,26 @@ export function placeWindow(
   id: string,
   point: Point,
   dimensions: WindowDimensions = defaultDrawingWindow,
+  hostId?: string,
 ): Project {
   if (base !== current || !visibility.isCurrent(current, visibility.context))
     throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
   if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
-  const host = findWindowHost(current, visibility, point);
+  const wall = hostId
+    ? current.storey.walls.find((w) => w.id === hostId && isLayerVisible(current, visibility, w.id))
+    : null;
+  if (hostId && !wall) throw new Error("Gewählte Wand ist nicht mehr verfügbar.");
+  const body = wall ? wallBody(wall) : null;
+  const host =
+    wall && body
+      ? {
+          wall,
+          position:
+            ((point.x - body.start.x) * (wall.end.x - wall.start.x) +
+              (point.y - body.start.y) * (wall.end.y - wall.start.y)) /
+            wallLength(wall) ** 2,
+        }
+      : findWindowHost(current, visibility, point);
   if (!host) throw new Error("Zum Platzieren eine sichtbare Wand anfahren.");
   if (visibility.context.hiddenLayerIds.includes(current.defaultLayerIds.window))
     throw new Error("Die Fensterebene ist ausgeblendet. Bitte zuerst einblenden.");
@@ -79,7 +105,15 @@ export function windowPlacementInteraction(
   commit: (next: Project, id: string) => void,
   cancel: () => void,
   settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
+  hostId?: string,
 ): ToolInteraction {
+  const wall = hostId ? base.storey.walls.find((w) => w.id === hostId) : null;
+  if (hostId && !wall) throw new Error("Gewählte Wand fehlt.");
+  const body = wall ? wallBody(wall) : null;
+  const direction = wall ? { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y } : null;
+  const degrees = direction
+    ? ((Math.atan2(direction.y, direction.x) * 180) / Math.PI + 360) % 360
+    : null;
   const preview = (point: Point) => {
     const now = current();
     if (now.visibility !== visibility)
@@ -87,18 +121,26 @@ export function windowPlacementInteraction(
     if (settings && settings.currentDraft() !== settings.draft)
       throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
     const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
-    return placeWindow(base, now.project, visibility, id, point, dimensions);
+    return placeWindow(base, now.project, visibility, id, point, dimensions, hostId);
   };
   return {
     identity: {},
-    origin: { x: 0, y: 0 },
-    input: null,
+    origin: body?.start ?? { x: 0, y: 0 },
+    input: body ? { axisLabel: "Fenstermitte ab Wandanfang", degrees } : null,
     click: "confirm",
     snapping: {
-      origin: null,
+      origin:
+        body && direction
+          ? {
+              entityId: "@window-placement-origin",
+              feature: hostId!,
+              point: body.start,
+              directions: [direction],
+            }
+          : null,
       sources: (refs) => [...refs],
       resolve: (cursor, context) => {
-        const host = findWindowHost(base, visibility, cursor);
+        const host = wall ? { wall } : findWindowHost(base, visibility, cursor);
         if (!host) return querySnap(cursor, context);
         const body = wallBody(host.wall);
         return querySnap(cursor, {
@@ -112,8 +154,11 @@ export function windowPlacementInteraction(
         });
       },
     },
-    preview: () => {
-      throw new Error("Fensterposition per Maus wählen.");
+    preview: (_angle, length, aim) => {
+      if (!body || degrees === null) throw new Error("Fensterposition per Maus wählen.");
+      const result = precisionTarget(body.start, aim, String(degrees), length);
+      preview(result.point);
+      return result;
     },
     previewProject: preview,
     validate: (point) => {

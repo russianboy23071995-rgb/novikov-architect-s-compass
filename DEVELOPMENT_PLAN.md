@@ -1,5 +1,36 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Präzise Fensterposition - 06.10.2026
+
+PR154 nach Freigabe normal in main integriert (9a4df17). Optionaler Modus
+„Position per Maß“ in Werkzeugeigenschaften: zuerst sichtbare Wand anklicken,
+danach im gemeinsamen Hilfseingabefenster den Abstand der Fenstermitte vom
+Wandanfang eingeben. Die Hostwand bleibt fest, der Winkel ist vorgegeben.
+Normale Ein-Klick-Platzierung bleibt verfügbar. Wandwahl erzeugt keine History;
+Bestätigung verwendet dieselbe validierte addWindow-Aktion wie die Vorschau.
+Keine eigene Fenster-Tab-Steuerung oder zweite Maßeingabe implementiert.
+
+Geändert: Application window-placement samt actions.test; UI-Bindung
+useWindowPlacement, WindowPlacementFields und kleine Koordination in CadWorkspace;
+Architektur und dieses Protokoll.
+Nachweis: 578 Tests bestanden; TypeScript und Build bestanden; Lint ohne Fehler,
+6 bekannte Fast-Refresh-Warnungen. Test für vier Wandrichtungen, exakten Abstand,
+ungültige Abstände, unveränderte Basis und identischen Vorschau-/Commit-Zustand.
+Browser: 6-m-Wand, Position per Maß, Wandwahl ohne Bauteilerzeugung, Tab, 1,50 m,
+Enter -> neues Fenster mit Position 0,25. Undo entfernt es, Redo stellt es wieder her.
+Screenshot: outputs/window-position.png.
+
+Abnahme: Fensterwerkzeug -> Position per Maß -> Wand anklicken -> Tab -> Abstand
+(z. B. 1,50) -> Enter. Eigenschaften prüfen; danach Undo/Redo. Grenzen: Grundriss,
+Abstand zur Fenstermitte, bestehende Host-/Öffnungsgrenzen bleiben verbindlich.
+Maße und Präzisionsmodus sind Sitzungsvorgaben; keine neue Dateiformatversion.
+
+Genau ein Folgeauftrag: Den vollständigen Fensterwerkzeug-Ablauf in einem kleinen
+verbundenen Grundriss als Integrationsprüfung absichern: Platzierung und Änderung,
+Undo/Redo, Speichern/Laden und IFC müssen denselben Fenster-/Hostzustand behalten.
+Gefundene Fehler begrenzt korrigieren, bevor weitere Bauteilwerkzeuge folgen.
+
+
 ## UI-Korrektur zu PR154 - 06.10.2026
 
 Nach Nutzerhinweis den gesamten werkzeugabhaengigen Optionsbereich aus der oberen
