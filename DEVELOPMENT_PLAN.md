@@ -1,5 +1,48 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Gemeinsame freie Gruppenbewegung implementiert - 06.10.2026
+
+PR147 nach Freigabe normal in main zusammengefuehrt (14c887d). Der Folgebranch
+feat/shared-selection-move ergaenzt einen Verbraucher der gemeinsamen Auswahl:
+application/selection/move.ts berechnet einen vollstaendigen, validierten Snapshot.
+Keine Schleife ueber Einzelwandbewegungen, keine zweite Raster- oder Eingabeengine.
+
+On-Demand: Auswahl frei bewegen -> Ursprung im Grundriss anklicken -> Ziel anklicken
+oder Tab fuer Laenge/Winkel und Uebernehmen. Der Ursprung wird sofort als gemeinsame
+Hilfsreferenz gepinnt; Shift-/Fang-/Hover-Regeln bleiben im vorhandenen System.
+Waende, Linien/Polylinien und Schraffuren koennen gemeinsam verschoben werden.
+Fenster folgen ihrer Hostwand genau einmal, auch wenn sie mitausgewaehlt wurden.
+Interne Ecke-/T-Beziehungen bleiben, Beziehungen zu stehenbleibenden Waenden werden
+entfernt. Es entstehen keine neuen automatischen Anschluesse beim Gruppenplatzieren.
+Fenster ohne mitgewaehlte Hostwand lehnen die ganze freie Bewegung verstaendlich ab;
+ihre bestehende Einzelbewegung entlang der Wand bleibt. Keine stille Teilmenge.
+
+Gepinnte Auswahl/Basis/Sichtbarkeit werden erneut geprueft. Modell-, Auswahl- oder
+Sichtbarkeitswechsel invalidieren den Vorgang; Escape, Abbrechen, Werkzeug-/Ansichts-
+oder Layoutwechsel verwerfen die Vorschau. Ein Commit, ein Modell-Undo; Nullbewegung
+legt keinen History-Eintrag an. Kein Dateiformatwechsel, keine BIM-Skalierung.
+Bedienung in 2D; noch keine 3D-Gruppenbewegung und keine Text-/Voice-Gruppenbefehle.
+Keine neue grosse Performance-Messreihe fuer diese Aktion behauptet.
+
+Nachweis: 556 Tests bestanden (5 neue Tests fuer gemischte Translation, interne/
+externe Beziehungen, Host-Fenster, stale/ungueltige/versteckte Ziele, Fangquellen,
+Maus-/Zahlenaktionsgleichheit, Nullbewegung, Undo/Redo, JSON/3D/IFC-Konsistenz).
+TypeScript und Produktionsbuild mit deklarierten Abhaengigkeiten erfolgreich;
+Lint 0 Fehler, 6 bekannte Fast-Refresh-Warnungen. Browser: Wand/Fenster per Klick
+platziert; 5 gemischte Elemente per Rahmen, Ursprung gepinnt, Tab zuerst Laenge,
+danach Winkel, 2 m bei 90 Grad mit Vorschau uebernommen, einmal Undo/Redo; Abbrechen
+nach Zahlenvorschau laesst Modell und Redo erhalten. Pruefbild outputs/shared-selection-move.png.
+
+Abnahme: Mit Strg-Klick oder Rahmen mehrere Elemente waehlen. Auswahl frei bewegen,
+Ursprung anklicken, mit der Maus verschieben und per Klick platzieren. Alternativ
+Tab, Laenge 2, Tab, Winkel 90, Uebernehmen. Strg+Z nimmt die ganze Bewegung zurueck.
+Bei verbundenen Waenden beide Partner waehlen: interne Verbindung bleibt bestehen.
+
+Genau ein Folgeauftrag: Dieselbe gepruefte Gruppenbewegung als Textbefehlsadapter
+anbinden, mit Vorschau und ausdruecklicher Uebernahme, gepinnter vollstaendiger
+Zielmenge und Ablehnung bei Kontextwechsel. Keine separate AI-Modelllogik; bestehende
+Einzelbefehle erhalten. Sprachtranskripte duerfen spaeter denselben Adapter verwenden.
+
 ## Gemeinsame 2D-Auswahl implementiert — 06.10.2026
 
 PR146 freigegeben und normal in main gemergt (c771846). Auf feat/shared-selection

@@ -29,8 +29,20 @@ Select mode, after 3 CSS pixels of movement. Drawing, editing, reference selecti
 and navigation retain precedence. Escape/pointer cancellation/model or visibility
 change cancel the frame; selection creates no model history.
 3D renders outlines for selected walls but adds no marquee or multi-picking gesture.
-Group movement remains the next consumer, not implemented here. See the updated
-[selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
+Implemented consumer: `application/selection/move.ts` pins a complete typed target
+set and base project, translates one proposed snapshot, then validates it once per
+proposal. Internal corner/T relations survive; relations crossing the selected-wall
+boundary detach. Host windows retain relative parameters and follow exactly once.
+A selected window without its host rejects the complete free translation. No new
+joins are inferred, no scaling or file-schema change is introduced.
+`useSelectionMove` binds the session and checks current context again at commit.
+`ToolInteraction`, shared polar input and snap policies own precision and inference;
+the viewport's generic placement binding only supplies pointer intent and displays
+the returned preview. Exclude moving entities and hosted windows from snap sources,
+pin the chosen origin immediately. Context changes and cancellation discard the
+preview; commit creates one model history entry. First delivery is 2D. Text/Voice
+must consume this same validated action with pinned whole-selection context, never
+fall back to a single target. See the [selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
 
 
 ## Corner plus T: bounded composition — 2026-10-06

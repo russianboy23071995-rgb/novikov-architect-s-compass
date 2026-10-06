@@ -71,10 +71,11 @@ export function CadViewport({
   const [size, setSize] = useState({ width: 800, height: 400 });
   const [planCamera, setPlanCamera] = useState<PlanCamera | null>(null);
   const [planPan, setPlanPan] = useState(false);
+  const placing = Boolean(model.placement);
   useEffect(() => {
     setPlanPan(false);
     setPan(false);
-  }, [model.drawing, model.editSession]);
+  }, [model.drawing, model.editSession, placing]);
   useEffect(() => {
     const element = surface.current;
     if (!element) return;

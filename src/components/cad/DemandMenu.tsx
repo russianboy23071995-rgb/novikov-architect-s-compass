@@ -15,7 +15,11 @@ export function DemandMenu({
   edgeIndex,
   onAction,
   onReferences,
+  onMoveSelection,
+  selectionCount = 0,
 }: {
+  onMoveSelection?: (() => void) | undefined;
+  selectionCount?: number;
   project: Project;
   selection: Selection;
   position: Point;
@@ -55,7 +59,7 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
-  if (!summary && !onReferences) return null;
+  if (!summary && !onReferences && !onMoveSelection) return null;
   return (
     <div
       ref={panel}
@@ -117,12 +121,21 @@ export function DemandMenu({
           );
         }}
       >
-        ⠿ {summary?.title ?? "Fanghilfen"}
+        ⠿ {selectionCount > 1 ? `${selectionCount} Elemente` : (summary?.title ?? "Fanghilfen")}
         {summary && edgeIndex != null ? ` · Seite ${edgeIndex + 1}` : ""}
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
       <div className="grid gap-1">
+        {onMoveSelection && (
+          <button
+            type="button"
+            className="rounded border p-1 text-left hover:bg-muted"
+            onClick={onMoveSelection}
+          >
+            Auswahl frei bewegen
+          </button>
+        )}
         {onReferences && (
           <button
             type="button"
