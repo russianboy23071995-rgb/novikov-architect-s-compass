@@ -1,3 +1,4 @@
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { useShiftSnapLock } from "./useShiftSnapLock";
 import { connectedWallSolids } from "@/domain/elements/wall/connections";
 import { wallBody } from "@/domain/elements/wall/body";
@@ -77,8 +78,8 @@ export type BimPlanProps = {
   drawingTarget?: Point | null | undefined;
   onDrawingAim?: ((point: Point) => void) | undefined;
   onEditAim?: (session: EditSession, point: Point) => void;
-  onEditDirection?: (session: EditSession, point: Point) => void;
-  onEditCommit?: (session: EditSession, point: Point) => void;
+  onEditDirection?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
+  onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
   onEditCancel?: () => void;
   onPoint: (point: Point) => void;
@@ -300,6 +301,7 @@ export function BimPlan({
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
+        includeInteractionTargets: true,
         gridSpacing: gridSpacing(gridSettings),
         activeReference,
         activeReferences,
@@ -376,7 +378,13 @@ export function BimPlan({
   let editError = "";
   if (editSession && resolvedEdit) {
     try {
-      preview = previewEdit(editSession, project, selection, resolvedEdit.point);
+      preview = previewEdit(
+        editSession,
+        project,
+        selection,
+        resolvedEdit.point,
+        resolvedEdit.candidate,
+      );
     } catch {
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
@@ -502,7 +510,8 @@ export function BimPlan({
             event.currentTarget.releasePointerCapture(event.pointerId);
           if (result?.moved && editSession) {
             try {
-              onEditCommit?.(editSession, resolvePointer(result.point, event.shiftKey).point);
+              const snapped = resolvePointer(result.point, event.shiftKey);
+              onEditCommit?.(editSession, snapped.point, snapped.candidate);
             } catch {
               /* Keep the shared edit session available for correction. */
             }
@@ -596,9 +605,10 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const target = resolvePointer(point, event.shiftKey).point;
-              if (onEditDirection) onEditDirection(editSession, target);
-              else onEditCommit?.(editSession, target);
+              const snapped = resolvePointer(point, event.shiftKey);
+              const target = snapped.point;
+              if (onEditDirection) onEditDirection(editSession, target, snapped.candidate);
+              else onEditCommit?.(editSession, target, snapped.candidate);
             } catch {
               /* Invalid preview stays editable. */
             }
@@ -1131,7 +1141,7 @@ export function BimPlan({
         (drawing || resolvedHover.candidate.kind !== "grid") && (
           <g
             pointerEvents="none"
-            aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
+            aria-label={`Fanghilfe ${resolvedHover.candidate.sourceFeature === "t-axis" ? "T-Anschluss" : snapLabels[resolvedHover.candidate.kind]}`}
           >
             {resolvedHover.candidate.kind === "midpoint" ? (
               <path
@@ -1158,7 +1168,9 @@ export function BimPlan({
               fontSize={12 / camera.pixelsPerMetre}
               fill="#0284c7"
             >
-              {snapLabels[resolvedHover.candidate.kind]}
+              {resolvedHover.candidate.sourceFeature === "t-axis"
+                ? "T-Anschluss"
+                : snapLabels[resolvedHover.candidate.kind]}
             </text>
           </g>
         )}

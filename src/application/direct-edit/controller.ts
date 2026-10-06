@@ -1,3 +1,5 @@
+import { connectSnappedT } from "../walls/t-axis-snap.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
@@ -31,7 +33,13 @@ export function supportsWallWorkplaneEdit(
 
 type ModelEditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
-  | { type: "confirm"; session: EditSession; selection: ElementTarget | null; point: Point }
+  | {
+      type: "confirm";
+      session: EditSession;
+      selection: ElementTarget | null;
+      point: Point;
+      candidate?: SnapCandidate | null | undefined;
+    }
   | {
       type: "wall-offset";
       base: Project;
@@ -60,10 +68,11 @@ export function previewEdit(
   project: Project,
   selection: ElementTarget | null,
   point: Point,
+  candidate?: SnapCandidate | null,
 ): Project {
   if (selection?.id !== session.target.id || selection?.kind !== session.target.kind)
     throw new Error("Die Auswahl wurde geändert. Bearbeitung erneut starten.");
-  return editAtPointer(session, project, point);
+  return connectSnappedT(session, editAtPointer(session, project, point), point, candidate);
 }
 
 /** Pure application transition. React only dispatches user intent. */
@@ -120,6 +129,7 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
           state.history.present,
           event.selection,
           event.point,
+          event.candidate,
         );
         return { history: commitProject(state.history, next), session: null, error: "" };
       }

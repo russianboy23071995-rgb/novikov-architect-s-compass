@@ -1,3 +1,9 @@
+import { createEditingState, editingReducer, previewEdit } from "../direct-edit/controller.ts";
+import { editInteraction } from "../tools/adapters.ts";
+import { confirmInteraction } from "../tools/interaction.ts";
+import { resolveToolSnap, createToolSourceQuery } from "../tools/snapping.ts";
+import { getLocalSnapSources } from "../snapping/local-sources.ts";
+import { segmentKey } from "../snapping/reference-selection.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -201,3 +207,181 @@ for (const offset of [-0.18, 0, 0.18])
       assert.deepEqual(deserializeProject(serializeProject(p)), p);
       assert.equal(connectedWallSolids(p).length, 2);
     });
+
+function aiming(project = pair()) {
+  const target = { kind: "wall" as const, id: "incoming" };
+  let state = editingReducer(createEditingState(project), {
+    type: "begin",
+    target,
+    action: "point",
+    index: 1,
+    anchor: project.storey.walls[1]!.end,
+  });
+  const session = state.session!;
+  const adapter = editInteraction(
+    session,
+    state.history.present,
+    target,
+    (point, candidate) => {
+      state = editingReducer(state, {
+        type: "confirm",
+        session,
+        selection: target,
+        point,
+        candidate,
+      });
+    },
+    () => {
+      state = editingReducer(state, { type: "cancel" });
+    },
+  );
+  const context = {
+    references: [],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+    sourceQuery: createToolSourceQuery(getLocalSnapSources(session.base), adapter.snapping),
+    includeInteractionTargets: true,
+  };
+  return { adapter, session, target, context, state: () => state };
+}
+const snapOptions = { ortho: false, shift: false, featureSnap: true };
+
+test("local axis snap carries stable host through preview and shared commit as one undo", () => {
+  const a = aiming(updateWall(pair(), "incoming", { end: { x: 3, y: -0.7 } }));
+  const result = resolveToolSnap(a.adapter.snapping, { x: 3.03, y: -0.04 }, a.context, snapOptions);
+  assert.equal(result.candidate?.sourceFeature, "t-axis");
+  assert.equal(result.candidate?.sourceEntityId, "host");
+  assert.deepEqual(result.point, { x: 3, y: 0 });
+  const preview = previewEdit(a.session, a.session.base, a.target, result.point, result.candidate);
+  assert.equal(preview.storey.wallTJunctions.length, 1);
+  assert.equal(a.state().history.present.storey.wallTJunctions.length, 0);
+  confirmInteraction(a.adapter, result.point, result.candidate);
+  assert.deepEqual(a.state().history.present, preview);
+  assert.equal(a.state().history.past.length, 1);
+  assert.deepEqual(undoProject(a.state().history).present, a.session.base);
+  assert.deepEqual(redoProject(undoProject(a.state().history)).present, preview);
+});
+
+test("T source query honours screen radius, reference restrictions and Snap off", () => {
+  const a = aiming();
+  for (const scale of [40, 100, 400]) {
+    const near = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 9 / scale },
+      { ...a.context, pixelsPerMetre: scale },
+      snapOptions,
+    );
+    assert.equal(near.candidate?.sourceFeature, "t-axis");
+    const far = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 11 / scale },
+      { ...a.context, pixelsPerMetre: scale },
+      snapOptions,
+    );
+    assert.notEqual(far.candidate?.sourceFeature, "t-axis");
+  }
+  assert.notEqual(
+    resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, {
+      ...snapOptions,
+      featureSnap: false,
+    }).candidate?.sourceFeature,
+    "t-axis",
+  );
+  assert.notEqual(
+    resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 0 },
+      { ...a.context, selectedSegments: new Set<string>() },
+      snapOptions,
+    ).candidate?.sourceFeature,
+    "t-axis",
+  );
+  assert.notEqual(
+    resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 0 },
+      { ...a.context, includeInteractionTargets: false },
+      snapOptions,
+    ).candidate?.sourceFeature,
+    "t-axis",
+  );
+});
+
+test("ambiguous local hosts never choose by list order; reference selection disambiguates", () => {
+  const project = addWall(pair(), {
+    id: "other-host",
+    start: { x: 1, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const a = aiming(project);
+  assert.notEqual(
+    resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, snapOptions).candidate
+      ?.sourceFeature,
+    "t-axis",
+  );
+  const source = getLocalSnapSources(a.session.base).allSegments.find(
+    (s) => s.source.entityId === "host",
+  )!.source;
+  const result = resolveToolSnap(
+    a.adapter.snapping,
+    { x: 3, y: 0 },
+    { ...a.context, selectedSegments: new Set([segmentKey(source)]) },
+    snapOptions,
+  );
+  assert.equal(result.candidate?.sourceEntityId, "host");
+  assert.equal(result.candidate?.sourceFeature, "t-axis");
+});
+
+test("plain numeric target never discovers a T; invalid or stale snapped commit leaves model unchanged", () => {
+  const a = aiming();
+  const result = resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, snapOptions);
+  assert.equal(
+    previewEdit(a.session, a.session.base, a.target, result.point).storey.wallTJunctions.length,
+    0,
+  );
+  const changed = updateWall(a.session.base, "host", { height: 3 });
+  assert.throws(() => previewEdit(a.session, changed, a.target, result.point, result.candidate));
+  const invalid = aiming(updateWall(pair(), "host", { height: 3 }));
+  const snap = resolveToolSnap(
+    invalid.adapter.snapping,
+    { x: 3, y: 0 },
+    invalid.context,
+    snapOptions,
+  );
+  assert.throws(() => confirmInteraction(invalid.adapter, snap.point, snap.candidate));
+  assert.equal(invalid.state().history.past.length, 0);
+  a.adapter.cancel();
+  assert.equal(a.state().session, null);
+  assert.equal(a.state().history.past.length, 0);
+});
+
+test("off-midpoint T snap supports edge axes and respects held direction", () => {
+  for (const offset of [-0.18, 0, 0.18]) {
+    const p = updateWall(pair(offset), "incoming", {
+      start: { x: 2, y: -3 },
+      end: { x: 2, y: -0.7 },
+    });
+    const a = aiming(p);
+    const hit = resolveToolSnap(a.adapter.snapping, { x: 2.03, y: 0.02 }, a.context, snapOptions);
+    assert.equal(hit.candidate?.sourceFeature, "t-axis");
+    assert.deepEqual(hit.point, { x: 2, y: 0 });
+    confirmInteraction(a.adapter, hit.point, hit.candidate);
+    assert.equal(a.state().history.present.storey.wallTJunctions.length, 1);
+    const constrained = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 2.03, y: 0.02 },
+      {
+        ...a.context,
+        angleDirection: { x: 1, y: 0 },
+        angleLockOrigin: a.session.anchor,
+      },
+      { ...snapOptions, shift: true },
+    );
+    assert.notEqual(constrained.candidate?.sourceFeature, "t-axis");
+    assert.equal(constrained.point.y, -0.7);
+  }
+});

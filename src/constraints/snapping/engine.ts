@@ -50,6 +50,8 @@ export type SnapSourceQuery = (
   metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
+  /** Viewport capability for additional application-supplied targets with commit intent. */
+  includeInteractionTargets?: boolean;
   /** Optional view eligibility for ranked geometry candidates; explicit constraints stay unchanged. */
   acceptCandidate?: (candidate: SnapCandidate) => boolean;
   /** Shared candidate distances/projection; explicit picking migration remains pending. */
