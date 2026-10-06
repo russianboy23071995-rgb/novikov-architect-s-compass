@@ -1,5 +1,31 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-Kern ohne Projektvalidierungsrekursion — 06.10.2026
+
+PR132 freigegeben und übernommen (fced2cd). Domain t-pair enthält die bestehende
+Geometrie-/Fenster-/Körperableitung ohne Laufzeitabhängigkeit zur Projektprüfung.
+resolveIsolatedTPair validiert/kopiert an öffentlichen Grenzen weiterhin den
+vollständigen Modellstand, löst IDs auf und prüft die Isolationsbedingung.
+Vorschau und IFC-Abnahmeexport delegieren unverändert an denselben Kern.
+
+488 Tests bestanden; TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Neue Tests sichern Verwendung ohne Project, unveränderbare Eingaben,
+Kopplung an den validierten Snapshot, Berührung/Überschneidung und Zurückweisung
+ungültiger vollständiger Projekte auch außerhalb des gewählten Paares.
+Drei neu erzeugte IFC-Dateien bytegenau identisch zur vorherigen Abnahmebasis;
+IfcOpenShell 0.8.5 bestätigt erneut Struktur, Profile, Zuordnungen und Volumina.
+Keine UI-/Schemaänderung, keine erneute Browserprüfung erforderlich. Praktische
+Abnahme weiterhin über die vorhandene T-Vorschau/IFC-Testdateien möglich.
+
+**Genau ein ausführbarer Folgeauftrag:** Die gespeicherte isolierte rechtwinklige
+T-Relation in Schema 8 einschließlich strikter Altdatei-Migration und gemeinsamer
+Application-Aktionen integrieren. Kern aus t-pair aus der Projektprüfung ohne
+Rekursion nutzen; Plan/3D/normaler IFC-Export lesen dieselben Konturen. Speichern/
+Laden, Undo/Redo und vereinbartes Lösen bei Einzelwandbewegung bzw. Wegfall des
+festen Anschlusses prüfen. Keine Mehrfachanschlüsse oder neue automatische
+Fangsuche; zunächst explizite stabile Ziel-IDs in der Application-Aktion.
+
+
 ## Aktueller Stand: Dauerhafte T-Bezüge geplant — 06.10.2026
 
 PR131 freigegeben und übernommen (0939d01). Nutzerentscheidung: Hauptwandende

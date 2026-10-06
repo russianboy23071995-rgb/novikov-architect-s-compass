@@ -8,6 +8,46 @@ import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
 import { nearestWallSurface } from "../../rendering/viewport/wall-depth.ts";
 import { inspectTOpenings } from "../../domain/elements/wall/t-openings.ts";
 import { deriveTPreview } from "./t-preview.ts";
+import { deriveTPairSolids, inspectTPair } from "../../domain/elements/wall/t-pair.ts";
+import { resolveIsolatedTPair } from "../../domain/elements/wall/t-openings.ts";
+
+test("resolved T kernel needs no Project and matches the validated entry without mutating inputs", () => {
+  const project = addWindow(tFixture(), {
+    id: "w",
+    wallId: "incoming",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 2.32 / 3,
+  });
+  const target = { wallId: "incoming", endpoint: 1 as const };
+  const expected = deriveTPreview(project, "host", target);
+  const pair = resolveIsolatedTPair(project, "host", target);
+  for (const wall of [pair.host, pair.incoming.wall]) {
+    Object.freeze(wall.start);
+    Object.freeze(wall.end);
+    Object.freeze(wall);
+  }
+  pair.windows.forEach(Object.freeze);
+  Object.freeze(pair.windows);
+  project.storey.walls[0]!.height = 7;
+  project.storey.windows[0]!.width = 0.5;
+  assert.deepEqual(deriveTPairSolids(pair.host, pair.incoming, pair.windows), expected);
+  assert.equal(
+    inspectTPair(pair.host, pair.incoming, pair.windows).openings[0]!.status,
+    "touching",
+  );
+  const overlapping = pair.windows.map((w) => ({ ...w, position: 2.33 / 3 }));
+  assert.throws(() => deriveTPairSolids(pair.host, pair.incoming, overlapping), /überschneidet/);
+});
+
+test("public T entries still reject malformed full snapshots beyond the selected pair", () => {
+  const p = tFixture();
+  p.storey.walls[2]!.height = -1;
+  assert.throws(() => deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }));
+  assert.throws(() => inspectTOpenings(p, "host", { wallId: "incoming", endpoint: 1 }));
+  assert.throws(() => resolveIsolatedTPair(p, "host", { wallId: "incoming", endpoint: 1 }));
+});
 
 test("T windows may touch either contact, but crossing it rejects without mutation", () => {
   for (const wallId of ["host", "incoming"])
