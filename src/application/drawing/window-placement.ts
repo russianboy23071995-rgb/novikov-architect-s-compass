@@ -1,3 +1,4 @@
+import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { precisionTarget } from "../input/precision.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
@@ -38,8 +39,14 @@ function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, poi
         ((projected.x - body.start.x) * direction.x + (projected.y - body.start.y) * direction.y) /
         (length * length);
       const distance = Math.hypot(point.x - projected.x, point.y - projected.y);
-      return position >= 0 && position <= 1 && distance <= wall.thickness / 2 + 1e-9
-        ? [{ wall, position, distance }]
+      return distance <= wall.thickness / 2 + 1e-9
+        ? [
+            {
+              wall,
+              position,
+              distance: Math.hypot(distance, Math.max(0, -position, position - 1) * length),
+            },
+          ]
         : [];
     })
     .sort((a, b) => a.distance - b.distance || a.wall.id.localeCompare(b.wall.id));
@@ -90,7 +97,7 @@ export function placeWindow(
   return addWindow(current, {
     id,
     wallId: host.wall.id,
-    position: host.position,
+    position: boundedWindowPosition(current, host.wall, dimensions.width, host.position),
     ...dimensions,
   });
 }

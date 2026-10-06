@@ -141,7 +141,6 @@ test("window placement rejects hidden hosts/layers, stale context and invalid ge
     createLayerVisibilityPolicy(base, { scope: { kind: "bim-project" }, hiddenLayerIds });
   const visible = policy([]);
   for (const point of [
-    { x: 0, y: 0.18 },
     { x: 5, y: 3 },
     { x: NaN, y: 0 },
   ])
@@ -293,8 +292,16 @@ test("pinned window host uses exact signed distance and retains its explicit hos
     assert.equal(preview.storey.windows[0]!.wallId, "host");
     assert.equal(base.storey.windows.length, 0);
     assert.equal(tool.input!.axisLabel, "Fenstermitte ab Wandanfang");
-    for (const invalid of ["-1", "0", "7", "NaN"])
-      assert.throws(() => tool.preview("", invalid, null));
+    for (const invalid of ["NaN"]) assert.throws(() => tool.preview("", invalid, null));
+    for (const [input, expected] of [
+      ["-100", 0.1],
+      ["100", 0.9],
+    ] as const) {
+      const capped = tool.preview("", input, null);
+      assert.ok(
+        Math.abs(tool.previewProject!(capped.point).storey.windows[0]!.position - expected) < 1e-9,
+      );
+    }
     confirmInteraction(tool, result.point);
     assert.deepEqual(committed, preview);
     const origin = tool.snapping.origin!.point;

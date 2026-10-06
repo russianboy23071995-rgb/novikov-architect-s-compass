@@ -885,16 +885,6 @@ export function BimPlan({
                 pointerEvents="none"
               />
             )}
-            <text
-              x={length / 2}
-              y={-wall.thickness / 2 - 0.16}
-              textAnchor="middle"
-              fontSize={0.14}
-              fill="var(--foreground)"
-              pointerEvents="none"
-            >
-              {length.toFixed(2)} m
-            </text>
             {plan.openings
               .filter((opening) => opening.wallId === wall.id)
               .map((opening) => (
@@ -912,11 +902,11 @@ export function BimPlan({
                       !allowsShown(opening.id)
                         ? "none"
                         : selectedIds.has(opening.id)
-                          ? "var(--foreground)"
+                          ? WALL_AXIS_COLOR
                           : "var(--primary)"
                     }
-                    strokeWidth={selectedIds.has(opening.id) ? 0.04 : 0.025}
-                    className="outline-none focus:stroke-foreground"
+                    strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
+                    className="outline-none"
                   />
                   <line
                     visibility={allowsShown(opening.id) ? "visible" : "hidden"}
@@ -925,7 +915,7 @@ export function BimPlan({
                     y1={0}
                     y2={0}
                     stroke="var(--primary)"
-                    strokeWidth={0.02}
+                    strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
                     pointerEvents="none"
                   />
                 </g>

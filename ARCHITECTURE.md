@@ -34,6 +34,12 @@ is fixed/read-only. Existing precisionTarget, snapping, Tab and confirmation are
 reused. Host choice, project/visibility and dimension revisions reject stale
 callbacks. Only final placement creates history; Escape discards the session.
 
+Window centre bounds are derived once per action by the shared domain wall/window-range
+function, used by both placement and movement. Pointer/precision targets beyond
+those bounds are capped before validated addWindow/updateWindow. Bounds include
+corner seams with numerical clearance and deliberately ignore T junctions. Invalid
+sizes and unavailable hosts remain errors; model validation is not relaxed.
+
 ## Shared selection requirement — 2026-10-06
 
 User requirement: selection is a tool-independent Application capability for all

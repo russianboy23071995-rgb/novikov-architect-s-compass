@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Fensterbegrenzung und Darstellung - 06.10.2026
+
+Korrektur zu PR155: Einsetzen und Verschieben begrenzen die Fenstermitte auf den
+zulässigen Bereich der Hostwand, auch bei einem Mausziel jenseits des Wandendes.
+Die gemeinsame Domain-Funktion window-range berechnet den Bereich aus Fensterbreite,
+Wandlänge und gegebenenfalls Gehrungsenden. T-Anschlüsse bleiben ohne Sperrwirkung.
+Keine wiederholte Ganzmodell-Suche nach einem Grenzpunkt. Vorschau und Commit
+verwenden dieselbe Begrenzung; nicht endliche Maße und zu große Fenster bleiben Fehler.
+An Gehrungen bleibt ein numerischer Sicherheitsabstand zur strikt ausgeschlossenen
+Berührung. Die eigentliche Modellvalidierung bleibt unverändert verbindlich.
+
+Grundriss: ausgewählte Fenster erhalten die gemeinsame türkise Auswahlfarbe;
+Kontur und Mittellinie verwenden die vorhandene zoomunabhängige Wandkonturstärke.
+Automatische Wandlängenbeschriftung entfernt. Eigene Fenstermodelle sind ausdrücklich
+für später vorgemerkt; Mess- und Bemaßungswerkzeuge folgen separat.
+
+Nachweis: 579 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Tests für beide Grenzen, vier Richtungen, beide verbundenen
+Wandenden, unveränderte Basis und Bestätigung am Cap. Browser: bestehendes Fenster
+entlang Wand verschoben, Klick weit hinter Wandende -> Position ca. 0,8 ohne Fehler;
+türkise Kontur sichtbar, automatische Wandmaßzahl entfernt. Screenshot window-cap.png.
+Genau ein Folgeauftrag bleibt die unten beschriebene Fenster-Integrationsprüfung
+im verbundenen Grundriss einschließlich Projektdatei und IFC.
+
+
 ## Präzise Fensterposition - 06.10.2026
 
 PR154 nach Freigabe normal in main integriert (9a4df17). Optionaler Modus
