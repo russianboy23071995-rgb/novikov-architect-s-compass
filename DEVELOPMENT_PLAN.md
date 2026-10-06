@@ -1,5 +1,14 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerbeschriftung: Wandachslagen — 06.10.2026
+
+Achslagen heißen Außen (bisher rechte Kante), Mitte und Innen (bisher linke
+Kante). Neue gezeichnete Wände und Wandketten verwenden bereits den Versatz
++Stärke/2 und damit standardmäßig Außen. Bestehende Wände und Projektdateien
+behalten ihre gespeicherte Achslage. Keine automatische Ermittlung einer
+Gebäudeaußenseite; die Benennung bezeichnet die bisherigen gerichteten Varianten.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
 ## Nutzerkorrektur: Fenster über T-Anschlüsse und Canvas-Darstellung — 06.10.2026
 
 Fenster bleiben laut Klarstellung auf ihrer ursprünglichen Wand und werden von

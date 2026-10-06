@@ -124,7 +124,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       {wall && (
         <label
           className="text-xs"
-          title="Links/rechts in Zeichenrichtung. Die Achse bleibt fest; der Wandkörper folgt."
+          title="Außen oder innen an der Wandkante, alternativ mittig. Die Achse bleibt fest; der Wandkörper folgt."
         >
           Achslage
           <select
@@ -151,9 +151,9 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               )
             }
           >
-            <option value="right">Rechte Kante</option>
+            <option value="right">Außen</option>
             <option value="centre">Mitte</option>
-            <option value="left">Linke Kante</option>
+            <option value="left">Innen</option>
             <option value="custom" disabled>
               Individuell
             </option>
