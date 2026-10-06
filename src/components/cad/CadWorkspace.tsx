@@ -1,3 +1,4 @@
+import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
 import { selectionIndex, type SelectionSet } from "@/application/selection/state";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
@@ -112,6 +113,11 @@ export function CadWorkspace({
     choose,
     setSelection,
   } = useElementSelection(project, visibility);
+  const groupMove = useSelectionMove(project, selections, visibility, (next) =>
+    dispatchEditing({ type: "project", project: next }),
+  );
+  const cancelGroup = useRef(groupMove.cancel);
+  cancelGroup.current = groupMove.cancel;
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
@@ -173,6 +179,7 @@ export function CadWorkspace({
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
   const cancelInteraction = useCallback(() => {
+    cancelGroup.current();
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
@@ -303,7 +310,9 @@ export function CadWorkspace({
     if (toggle && next) {
       cancelInteraction();
       choose([next], true);
-      setDemandOpen(false);
+      setDemandOpen(true);
+      const point = anchor ?? lastPointer.current;
+      setDemandPosition({ x: point.x + 16, y: point.y + 16 });
       setPickedPoint({ index: null, anchor: null, edgeIndex: null });
       setTool("select");
     } else showSelection(next, anchor, index, modelPoint, edgeIndex);
@@ -312,7 +321,8 @@ export function CadWorkspace({
   const selectMany = (targets: SelectionSet) => {
     cancelInteraction();
     choose(targets);
-    setDemandOpen(false);
+    setDemandOpen(targets.length > 0);
+    setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
     setPickedPoint({ index: null, anchor: null, edgeIndex: null });
     setTool("select");
   };
@@ -470,33 +480,40 @@ export function CadWorkspace({
   };
 
   const interaction = useToolInteraction(
-    editSession
-      ? editInteraction(
-          editSession,
-          project,
-          selection,
-          (point, candidate) => {
-            const current = visibilityNow.current;
-            if (
-              current.visibility !== visibility ||
-              !visibleLayerTarget(current.project, current.visibility, editSession.target)
-            )
-              return;
-            dispatchEditing({ type: "confirm", session: editSession, selection, point, candidate });
-          },
-          cancelInteraction,
-        )
-      : drawingOrigin && drawingBase
-        ? drawingInteraction(
-            drawingBase,
+    groupMove.adapter ??
+      (editSession
+        ? editInteraction(
+            editSession,
             project,
-            drawingOrigin,
-            drawPoint,
+            selection,
+            (point, candidate) => {
+              const current = visibilityNow.current;
+              if (
+                current.visibility !== visibility ||
+                !visibleLayerTarget(current.project, current.visibility, editSession.target)
+              )
+                return;
+              dispatchEditing({
+                type: "confirm",
+                session: editSession,
+                selection,
+                point,
+                candidate,
+              });
+            },
             cancelInteraction,
-            tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
-            tool === "wall" ? (activeChain ?? undefined) : undefined,
           )
-        : null,
+        : drawingOrigin && drawingBase
+          ? drawingInteraction(
+              drawingBase,
+              project,
+              drawingOrigin,
+              drawPoint,
+              cancelInteraction,
+              tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
+              tool === "wall" ? (activeChain ?? undefined) : undefined,
+            )
+          : null),
     referenceSelection.selecting,
   );
 
@@ -611,6 +628,7 @@ export function CadWorkspace({
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
             onMode={(next) => {
+              groupMove.cancel();
               dispatchEditing({ type: "cancel" });
               setMode(next);
               setWallChain(null);
@@ -618,6 +636,7 @@ export function CadWorkspace({
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
+              groupMove.cancel();
               dispatchEditing({ type: "cancel" });
               setLayout(next);
               setActiveViewport(0);
@@ -664,10 +683,29 @@ export function CadWorkspace({
           onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
         />
         {demandOpen &&
+          !groupMove.active &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selection && !editSession)) && (
             <DemandMenu
               project={project}
+              selectionCount={selections.length}
+              onMoveSelection={
+                selections.length > 1
+                  ? () => {
+                      cancelInteraction();
+                      try {
+                        groupMove.begin();
+                        setDemandOpen(false);
+                        setMode("2D");
+                        setModelError("");
+                      } catch (error) {
+                        setModelError(
+                          error instanceof Error ? error.message : "Bewegung nicht möglich.",
+                        );
+                      }
+                    }
+                  : undefined
+              }
               selection={tool === "select" && !editSession ? selection : null}
               position={demandPosition}
               onPosition={setDemandPosition}
@@ -795,8 +833,8 @@ export function CadWorkspace({
             </section>
           ) : selections.length > 1 ? (
             <p className="p-3 text-xs text-muted-foreground" role="status">
-              {selections.length} Elemente ausgewählt. Gemeinsame Bearbeitung folgt; Einzelaktionen
-              sind deaktiviert.
+              {selections.length} Elemente ausgewählt. Im Elementmenü „Auswahl frei bewegen“ wählen,
+              dann Ursprung und Ziel anklicken.
             </p>
           ) : (
             <BimInspector
@@ -832,6 +870,24 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  placement={
+                    groupMove.active
+                      ? {
+                          target: interaction.target,
+                          previewProject: groupMove.adapter?.previewProject,
+                          aim: interaction.draft.move,
+                          pick: groupMove.pickingOrigin
+                            ? (point) => {
+                                groupMove.pickOrigin(point);
+                                setDemandPosition({
+                                  x: lastPointer.current.x + 16,
+                                  y: lastPointer.current.y + 16,
+                                });
+                              }
+                            : interaction.pick,
+                        }
+                      : undefined
+                  }
                   project={project}
                   drawingPreview={activeChain?.preview}
                   drawingProjectAt={drawingOrigin ? interaction.adapter?.previewProject : undefined}
@@ -907,6 +963,16 @@ export function CadWorkspace({
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
+                {groupMove.active && (
+                  <p
+                    role="status"
+                    className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                  >
+                    {groupMove.pickingOrigin
+                      ? "Bewegungsursprung im Grundriss anklicken"
+                      : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
+                  </p>
+                )}
                 {tool === "wall" && (
                   <p
                     role="status"

@@ -7,7 +7,12 @@ Typen. Aktuelle Nachweise und Folgeauftrag stehen oben im DEVELOPMENT_PLAN.
 Die Bestandsaufnahme unten beschreibt die Ausgangsbasis vor diesem Schritt.
 Bedienregeln umgesetzt: Ctrl/Cmd toggelt, normaler Klick ersetzt, Leerklick leert;
 Rahmen auf freier Flaeche im Auswahlmodus schliesst vollstaendige Konturen ein.
-Noch keine Gruppenbewegung und keine neue 3D-Auswahlgeste.
+Update 06.10.2026: PR147 integriert. Gemeinsame freie Gruppenbewegung im Grundriss
+implementiert; aktueller Nachweis und genau ein Folgeauftrag oben im DEVELOPMENT_PLAN.
+Interne Ecken/Ts erhalten, externe loesen, Hostfenster folgen einmal. Fenster ohne
+Host in der Auswahl werden fuer freie Gruppenbewegung abgewiesen. Maus und Zahlen
+verwenden dieselbe Action/ToolInteraction. Ursprung ausdruecklich per Canvas-Klick.
+Keine neue 3D-Auswahlgeste. Die nachstehenden Vorstudien bleiben als Historie erhalten.
 
 ## Verbindliche Anforderungen
 

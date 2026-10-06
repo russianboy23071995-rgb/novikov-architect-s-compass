@@ -54,6 +54,14 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  placement?:
+    | {
+        target: Point | null | undefined;
+        previewProject?: ToolInteraction["previewProject"];
+        aim: (point: Point) => void;
+        pick: (point: Point, candidate?: SnapCandidate | null) => void;
+      }
+    | undefined;
   drawingPreview?: Project | undefined;
   drawingProjectAt?: ToolInteraction["previewProject"];
   cornerPreview?: CornerPreview;
@@ -98,6 +106,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  placement,
   drawingPreview,
   drawingProjectAt,
   cornerPreview,
@@ -326,16 +335,20 @@ export function BimPlan({
     );
   const pointerSnap = hover ? resolvePointer(hover) : null;
   const resolvedHover =
-    drawingTarget !== undefined
-      ? drawingTarget
-        ? {
-            point: drawingTarget,
-            candidate: null,
-          }
+    placement?.target !== undefined
+      ? placement.target
+        ? { point: placement.target, candidate: null }
         : null
-      : numericTarget !== undefined
-        ? null
-        : pointerSnap;
+      : drawingTarget !== undefined
+        ? drawingTarget
+          ? {
+              point: drawingTarget,
+              candidate: null,
+            }
+          : null
+        : numericTarget !== undefined
+          ? null
+          : pointerSnap;
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -421,7 +434,23 @@ export function BimPlan({
       };
     }
   }, [drawing, drawingProjectAt, drawingPoint, drawingCandidate, start]);
-  const shown = preview ?? drawingResult.project ?? (drawing ? drawingPreview : null) ?? project;
+  let placementProject: Project | null = null;
+  if (placement?.previewProject) {
+    const point = placement.target === undefined ? pointerSnap?.point : placement.target;
+    if (point) {
+      try {
+        placementProject = placement.previewProject(point, pointerSnap?.candidate);
+      } catch (error) {
+        editError = error instanceof Error ? error.message : "Ungültiges Ziel.";
+      }
+    }
+  }
+  const shown =
+    placementProject ??
+    preview ??
+    drawingResult.project ??
+    (drawing ? drawingPreview : null) ??
+    project;
   const allowsShown = useMemo(
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
@@ -516,7 +545,7 @@ export function BimPlan({
     [project, visibility],
   );
   const marquee = useSelectionMarquee(
-    interactive && !drawing && !editSession && !selecting && !pan,
+    interactive && !placement && !drawing && !editSession && !selecting && !pan,
     visibility ?? project,
     shapes,
     onSelectMany,
@@ -631,6 +660,15 @@ export function BimPlan({
           else referenceSelection.hitsAt(hits, point);
           return;
         }
+        if (placement && interactive && !navigationClick.current && !pan) {
+          event.preventDefault();
+          event.stopPropagation();
+          const resolved = pointFromEvent(event);
+          const point = placement.target === undefined ? resolved?.point : placement.target;
+          if (point)
+            placement.pick(point, placement.target === undefined ? resolved?.candidate : null);
+          return;
+        }
         if (navigationClick.current || pan) {
           event.preventDefault();
           event.stopPropagation();
@@ -652,6 +690,8 @@ export function BimPlan({
         if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
         const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
         if (endpointSnap || editSession) setHover(drawingPoint);
+        if (placement && drawingPoint)
+          placement.aim(resolvePointer(drawingPoint, event.shiftKey).point);
         if (drawing && drawingPoint)
           onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
@@ -1150,7 +1190,7 @@ export function BimPlan({
           pointerEvents="none"
         />
       )}
-      {drawingResult.error && resolvedHover && (
+      {(drawingResult.error || (placement && editError)) && resolvedHover && (
         <text
           role="alert"
           x={resolvedHover.point.x}
@@ -1159,7 +1199,7 @@ export function BimPlan({
           fill="#dc2626"
           pointerEvents="none"
         >
-          {drawingResult.error}
+          {drawingResult.error || editError}
         </text>
       )}
       {drawing && start && (
