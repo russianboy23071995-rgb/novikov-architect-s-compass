@@ -30,11 +30,19 @@ Lokale Pruefdateien: outputs/corner-t-demo.json und outputs/corner-t-demo.ifc.
 Planungskorrektur: Die im Vorplan angenommene gemeinsame Eckpunktaktion existiert
 noch nicht. Heutiges Bewegen eines einzelnen Achsendpunkts loest die Ecke, wenn
 die Endpunkte auseinandergehen; ein Regressionstest dokumentiert diesen Bestand.
-Genau ein Folgeauftrag: Gemeinsames Bewegen einer verbundenen Wandecke als atomare
-Application-Aktion in den vorhandenen Direct-Edit-/Raster-/Hilfseingabe-Ablauf
-integrieren. Beide Endpunkte folgen; betroffene T-Verbindungen und Fenster werden
-vor der Uebernahme gemeinsam validiert, unzulaessige Ziele atomar abgewiesen.
-Gesamtwandbewegung loest Verbindungen weiterhin wie vom Nutzer festgelegt.
+Nutzerentscheidung 06.10.2026: Eine eigene gemeinsame Eckpunktbewegung wird
+nicht benoetigt und ist als Folgeauftrag gestrichen. Stattdessen waehlt der
+Nutzer beide betroffenen Waende aus und verschiebt diese gemeinsam als ganze
+Elemente. Daraus folgt kein automatisches Mitziehen einer nicht ausgewaehlten Wand.
+
+Genau ein Folgeauftrag: Den vorhandenen Stand der Mehrfachauswahl und gemeinsamen
+Elementverschiebung pruefen und einen begrenzten Umsetzungsschritt fuer zwei
+zusammen ausgewaehlte Waende festlegen. Gemeinsamen Bewegungsursprung, Rasterengine,
+Hilfseingabe, Vorschau und einen Undo-Schritt wiederverwenden; Verhalten interner
+Verbindungen und Anschluesse zu nicht ausgewaehlten Waenden ausdruecklich pruefen.
+Noch keine Gruppenbewegung als implementiert oder abgenommen ausweisen.
+Diese Korrektur aendert nur die Planung, nicht die Laufzeitlogik von PR145.
+
 
 
 ## Ecke und T: begrenzter Umsetzungsplan — 06.10.2026

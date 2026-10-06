@@ -18,9 +18,13 @@ fit an older implementation. Existing schema-8 files remain valid.
 
 Correction to the planning assumption: current single-endpoint edits detach an
 end join when endpoints cease to coincide; no shared corner-move action exists.
-Joint corner movement is the next bounded Application task, not a capability
-of this implementation. Individual whole-wall translation retains its existing
-automatic-detachment rule. See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
+User decision (2026-10-06): a dedicated joint corner-move action is not wanted.
+The intended workflow is to select both affected walls and translate the selected
+whole elements together. Do not implicitly move an unselected neighbour.
+Selection-set translation must reuse the shared interaction pipeline and atomic
+history; its implementation and connection handling still require verification.
+Individual whole-wall translation retains its existing automatic-detachment rule.
+See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
 
 
 ## Derived wall drawing preview — 2026-10-06

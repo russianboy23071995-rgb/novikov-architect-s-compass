@@ -9,10 +9,13 @@ Kontaktgrenzen und Eckpartner werden anhand der erhaltenen Kontur geprueft.
 Schema 8 bleibt bestehen, da keine Datenfelder oder deren Interpretation wechseln;
 aeltere Builds lehnen die neu erlaubte Kombination ab statt Relationen zu verlieren.
 
-Korrektur der Bestandsannahme: Eine gemeinsame Eckpunktbewegung ist noch nicht
-implementiert. Einzelendpunktbewegung kann die Ecke loesen. Diese Luecke ist der
-naechste Auftrag im DEVELOPMENT_PLAN; keine gemeinsame Bewegung als bestanden
-behaupten. Nachweise und Abnahme stehen dort im obersten Abschnitt.
+Nutzerentscheidung 06.10.2026, ersetzt den bisherigen Folgeauftrag: Keine eigene
+Aktion zum gemeinsamen Verschieben eines Eckpunkts entwickeln. Der Nutzer will
+beide betroffenen Waende auswaehlen und gemeinsam als ganze Elemente bewegen.
+Mehrfachauswahl und Gruppenbewegung werden als naechster begrenzter Auftrag
+zunaechst gegen den vorhandenen Stand geprueft. Einzelendpunktbewegung kann
+weiterhin die Ecke loesen. Historische Aussagen unten zur gemeinsamen Eckaktion
+sind damit ueberholt. Nachweise zur Ecke-T-Kombination stehen im DEVELOPMENT_PLAN.
 
 ## Historischer Planungsstand
 
