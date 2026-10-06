@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Temporary T preview adapter — 2026-10-06
+
+Application walls/t-preview resolves stable IDs in a validated Project, rejects
+windows and persisted joins on either target, then consumes the pure T geometry
+and shared wallContourSolid. The existing corner preview reducer binds the
+result to the source snapshot and clears on target/type changes. The diagnostic
+dialog offers a T mode using navigator wall labels, with the selected first wall
+as host. Existing plan profiles and solid preview surfaces display the pair.
+No duplicated geometry or persistent T relation. Closing is discard-only; save,
+history and IFC continue to use the unchanged authoritative Project. Host window
+clearance and anchor/movement policies are still proposals, not implemented rules.
+
+
 ## Isolated right-angle T geometry — 2026-10-06
 
 Domain `elements/wall/t-junction.ts` now derives gross contours and a contact
