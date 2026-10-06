@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Fenster-Integrationsprüfung und Lovable-Abgleich - 06.10.2026
+
+PR155 ausdrücklich freigegeben und normal nach main integriert (c3e3c0a).
+Neuer Integrationstest in application/drawing/actions.test.ts prüft zwei vorhandene
+Abläufe: geschlossener Vierwand-Grundriss und offene Kontur mit Eck-/T-Verbindung.
+Fenster präzise platzieren, Vorschau ohne Mutation, einmal bestätigen, Maße ändern,
+auf derselben Wand über T hinweg verschieben, Undo/Redo, JSON speichern/laden,
+identischer 3D-Solid und identischer IFC-Export nach Reload. IFC enthält erwartete
+Wände, Fenster, Öffnungs-/Füllbeziehungen sowie aktuelle Maße und Position.
+580 Tests bestanden, TypeScript und Build erfolgreich, gezielter Lint erfolgreich.
+Keine neue Modellfunktion oder UI in diesem Prüfschritt.
+
+Offene Grenze ausdrücklich nachgewiesen: T-Hauptwand mit zwei Eckanschlüssen
+wird derzeit von validateCornerTContact abgewiesen. Deshalb ist ein geschlossener
+Grundriss mit zusätzlichem T an dieser Wand noch nicht freigegeben. Die unterstützten
+Varianten werden getrennt geprüft; keine Lockerung der Validierung auf Verdacht.
+
+Praktische Abnahme: Vier Wände zum Rechteck verbinden, Fenster per Maß einsetzen,
+Breite ändern, entlang Hostwand bewegen, Undo/Redo, speichern und wieder öffnen,
+IFC exportieren und extern prüfen. Archicad wurde in diesem Schritt nicht ausgeführt.
+
+Lovable: origin/Anpassungen_UI bei eab4092 hat 6 eigene Commits und ihm fehlen 37
+Commits aus origin/main c3e3c0a. WindowPlacementFields/useWindowPlacement fehlen dort.
+Der tatsächlich in Lovable gewählte Zweig ist nicht unabhängig verifiziert; wenn es
+weiter Anpassungen_UI ist, erklärt dessen Stand die fehlenden Fenster. Branch-spezifische
+Synchronisation ist kein fehlender Fenster-PR-Merge. UI-Änderungen nicht überschreiben.
+
+Genau ein Folgeauftrag: main geordnet in einen Integrationszweig auf Basis von
+Anpassungen_UI übernehmen, vorhandene UI-Änderungen erhalten, Konflikte fachlich lösen,
+Build/Tests prüfen und PR gegen Anpassungen_UI zur Synchronisierung vorlegen.
+Danach bleibt die oben dokumentierte Ecke/T-Einschränkung im fachlichen Backlog.
+
+
 ## Canvas-Fokus und Zoomanzeige - 06.10.2026
 
 Schwarzen Browser-Fokusrahmen bei Mausklick auf 2D-/3D-Canvas entfernt; Tastaturfokus
