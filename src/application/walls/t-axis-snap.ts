@@ -1,3 +1,4 @@
+import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type {
@@ -33,7 +34,22 @@ export function tAxisReference(
   context: SnapContext,
 ): SnapReference | null {
   const incoming = tAxisEndpoint(session);
-  if (!incoming || !context.enabled || !context.includeInteractionTargets) return null;
+  if (!incoming) return null;
+  return findTAxisReference(
+    incoming.endpoint === 0 ? incoming.wall.end : incoming.wall.start,
+    incoming.wall.id,
+    cursor,
+    context,
+  );
+}
+
+export function findTAxisReference(
+  fixed: Point,
+  excludedId: string | null,
+  cursor: Point,
+  context: SnapContext,
+): SnapReference | null {
+  if (!context.enabled || !context.includeInteractionTargets) return null;
   const sources = context.sourceQuery
     ? context.sourceQuery(
         cursor,
@@ -46,13 +62,12 @@ export function tAxisReference(
       )
     : context.references;
   const metric = context.metric ?? createIsotropicScreenMetric(context.pixelsPerMetre);
-  const fixed = incoming.endpoint === 0 ? incoming.wall.end : incoming.wall.start;
   const targets = new Map<string, SnapReference>();
   for (const source of sources) {
     if (
       !source.feature.startsWith("axis-midpoint:") ||
       !source.segment ||
-      source.entityId === incoming.wall.id ||
+      source.entityId === excludedId ||
       (context.selectedSegments && !context.selectedSegments.has(segmentKey(source)))
     )
       continue;
@@ -91,12 +106,32 @@ export function connectSnappedT(
   const incoming = tAxisEndpoint(session);
   if (!incoming || !candidate.sourceEntityId || !pointsCompatible(candidate.worldPoint, point))
     throw new Error("T-Fangziel ist nicht mehr gültig.");
-  const moved = proposed.storey.walls.find((w) => w.id === incoming.wall.id)!;
-  if (!pointsCompatible(incoming.endpoint === 0 ? moved.start : moved.end, point))
+  return connectWallAtTAxis(
+    proposed,
+    incoming.wall.id,
+    incoming.endpoint as 0 | 1,
+    point,
+    candidate,
+  );
+}
+
+export function connectWallAtTAxis(
+  proposed: Project,
+  wallId: string,
+  endpoint: 0 | 1,
+  point: Point,
+  candidate?: SnapCandidate | null,
+) {
+  if (candidate?.sourceFeature !== "t-axis") return proposed;
+  if (!candidate.sourceEntityId || !pointsCompatible(candidate.worldPoint, point))
+    throw new Error("T-Fangziel ist nicht mehr g\u00fcltig.");
+  const moved = proposed.storey.walls.find((w) => w.id === wallId);
+  if (!moved) throw new Error("Wand nicht gefunden.");
+  if (!pointsCompatible(endpoint === 0 ? moved.start : moved.end, point))
     throw new Error("T-Fangziel passt nicht zur Wandachse.");
   const relation = {
     hostWallId: candidate.sourceEntityId,
-    incoming: { wallId: incoming.wall.id, endpoint: incoming.endpoint as 0 | 1 },
+    incoming: { wallId, endpoint },
   };
   if (
     proposed.storey.wallTJunctions.some(
@@ -112,4 +147,30 @@ export function connectSnappedT(
     kind: "connect",
     relation,
   });
+}
+
+/** Shared candidate transport for drawing and direct editing. */
+export function queryTAxisSnap(
+  cursor: Point,
+  context: SnapContext,
+  reference: SnapReference | null,
+) {
+  const sourceQuery = context.sourceQuery;
+  const result = querySnap(cursor, {
+    ...context,
+    references: reference ? [...context.references, reference] : context.references,
+    sourceQuery:
+      sourceQuery && reference ? (...args) => [...sourceQuery(...args), reference] : sourceQuery,
+  });
+  if (reference && pointsCompatible(result.point, reference.point))
+    result.candidate = {
+      kind: "endpoint",
+      worldPoint: reference.point,
+      sourceEntityId: reference.entityId,
+      sourceFeature: "t-axis",
+      sourceReferences: [reference],
+      distanceOnScreen: 0,
+      priority: 0,
+    };
+  return result;
 }

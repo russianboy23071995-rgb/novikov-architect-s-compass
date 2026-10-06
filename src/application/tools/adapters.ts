@@ -1,3 +1,5 @@
+import { appendWallChain, type WallChain } from "../drawing/wall-chain.ts";
+import { findTAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { ToolInteraction } from "./interaction.ts";
@@ -62,18 +64,39 @@ export function drawingInteraction(
   commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
   path?: readonly Point[],
+  wall?: WallChain,
 ): ToolInteraction {
   return {
     identity: origin,
-    snapping: drawingSnapPolicy(origin, path),
+    snapping: wall ? wallDrawingPolicy(origin, path) : drawingSnapPolicy(origin, path),
     origin,
     input: { axisLabel: null, degrees: null },
     click: "confirm",
     preview: (angle, length, aim) => previewDrawingInput(base, current, origin, aim, angle, length),
-    validate: (point) => {
+    validate: (point, candidate) => {
       previewDrawingInput(base, current, origin, point, "", "");
+      if (wall) {
+        let id = "@wall-preview";
+        while (wall.preview.storey.walls.some((w) => w.id === id)) id += "-";
+        appendWallChain(wall, current, id, point, candidate);
+      }
     },
     commit,
     cancel,
   };
+}
+
+const wallPolicies = new WeakMap<object, ToolSnapPolicy>();
+function wallDrawingPolicy(origin: Point, path?: readonly Point[]): ToolSnapPolicy {
+  const key = path ?? origin;
+  let policy = wallPolicies.get(key);
+  if (!policy) {
+    policy = {
+      ...drawingSnapPolicy(origin, path),
+      resolve: (cursor, context) =>
+        queryTAxisSnap(cursor, context, findTAxisReference(origin, null, cursor, context)),
+    };
+    wallPolicies.set(key, policy);
+  }
+  return policy;
 }

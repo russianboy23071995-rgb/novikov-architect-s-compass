@@ -84,7 +84,7 @@ export type BimPlanProps = {
   onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
   onEditCancel?: () => void;
-  onPoint: (point: Point) => void;
+  onPoint: (point: Point, candidate?: SnapCandidate | null) => void;
   onFinish?: () => void;
 };
 
@@ -442,7 +442,7 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
+    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey);
   };
   const selectProps = (kind: "wall" | "window" | "line" | "hatch", id: string) => ({
     role: "button",
@@ -633,8 +633,9 @@ export function BimPlan({
         if (drawing) {
           event.currentTarget.focus();
           if (onFinish && event.detail > 1) return;
-          const point = drawingTarget !== undefined ? drawingTarget : pointFromEvent(event);
-          if (point) onPoint(point);
+          const snap = pointFromEvent(event);
+          const point = drawingTarget !== undefined ? drawingTarget : snap?.point;
+          if (point) onPoint(point, drawingTarget !== undefined ? null : snap?.candidate);
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {

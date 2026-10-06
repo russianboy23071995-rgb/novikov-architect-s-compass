@@ -1,3 +1,4 @@
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
@@ -402,7 +403,7 @@ export function CadWorkspace({
     }
   };
 
-  const drawPoint = (point: Point) => {
+  const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
     if (pathDrawing) {
       if (pathPoints.length === 0) {
@@ -428,7 +429,9 @@ export function CadWorkspace({
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
         setWallChain(beginWallChain(project, point));
       } else {
-        setWallChain(appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point));
+        setWallChain(
+          appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point, candidate),
+        );
       }
     } catch (error) {
       setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
@@ -470,6 +473,7 @@ export function CadWorkspace({
             drawPoint,
             cancelInteraction,
             tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
+            tool === "wall" ? (activeChain ?? undefined) : undefined,
           )
         : null,
     referenceSelection.selecting,
@@ -829,12 +833,12 @@ export function CadWorkspace({
                     dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
                   }}
                   onEditCancel={() => dispatchEditing({ type: "cancel" })}
-                  onPoint={(point) =>
+                  onPoint={(point, candidate) =>
                     referenceSelection.selecting
                       ? undefined
                       : interaction.adapter
-                        ? interaction.pick(point)
-                        : drawPoint(point)
+                        ? interaction.pick(point, candidate)
+                        : drawPoint(point, candidate)
                   }
                   editSession={editSession?.base === project ? editSession : null}
                   numericTarget={editSession ? interaction.target : undefined}
