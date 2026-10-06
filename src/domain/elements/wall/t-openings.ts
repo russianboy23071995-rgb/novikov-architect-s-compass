@@ -9,6 +9,10 @@ export function resolveIsolatedTPair(input: Project, hostId: string, incoming: C
   const wall = project.storey.walls.find((w) => w.id === incoming.wallId);
   if (!host || !wall) throw new Error("Beide Wände müssen im aktuellen Modell vorhanden sein.");
   const ids = new Set([hostId, wall.id]);
+  if (
+    project.storey.wallTJunctions.some((j) => ids.has(j.hostWallId) || ids.has(j.incoming.wallId))
+  )
+    throw new Error("Wände sind bereits durch einen T-Anschluss verbunden.");
   if (project.storey.wallJoins.some((j) => ids.has(j.first.wallId) || ids.has(j.second.wallId)))
     throw new Error("T-Vorschau unterstützt zunächst nur Wände ohne weitere Anschlüsse.");
   return { host, incoming: { wall, endpoint: incoming.endpoint }, windows: project.storey.windows };

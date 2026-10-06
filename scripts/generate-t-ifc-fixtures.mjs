@@ -3,6 +3,10 @@ import { join } from "node:path";
 import { addWall, addWindow, createProject, serializeProject } from "../src/lib/bim/model.ts";
 import { deriveTSolids } from "../src/domain/elements/wall/t-solid.ts";
 import { exportTJunctionIfc } from "../src/interop/ifc/t-junction.ts";
+import { previewTConnection } from "../src/application/walls/t-connections.ts";
+import { connectedWallSolids } from "../src/domain/elements/wall/connections.ts";
+import { exportIfc } from "../src/lib/bim/ifc.ts";
+const persistent = process.argv.includes("--persistent");
 const directory = process.argv[2];
 if (!directory) throw new Error("Output directory required");
 await mkdir(directory, { recursive: true });
@@ -35,15 +39,25 @@ for (const name of ["t-free", "t-touch", "t-touch-rotated"]) {
       wall.end = transform(wall.end);
     }
   }
-  const solids = deriveTSolids(p, "host", { wallId: "incoming", endpoint: 1 });
+  if (persistent)
+    p = previewTConnection(p, p, {
+      projectId: p.id,
+      kind: "connect",
+      relation: { hostWallId: "host", incoming: { wallId: "incoming", endpoint: 1 } },
+    });
+  const solids = persistent
+    ? { walls: connectedWallSolids(p) }
+    : deriveTSolids(p, "host", { wallId: "incoming", endpoint: 1 });
   await writeFile(
     join(directory, `${name}.ifc`),
-    await exportTJunctionIfc(
-      p,
-      "host",
-      { wallId: "incoming", endpoint: 1 },
-      new Date("2026-10-06T12:00:00Z"),
-    ),
+    persistent
+      ? await exportIfc(p, new Date("2026-10-06T12:00:00Z"))
+      : await exportTJunctionIfc(
+          p,
+          "host",
+          { wallId: "incoming", endpoint: 1 },
+          new Date("2026-10-06T12:00:00Z"),
+        ),
   );
   await writeFile(join(directory, `${name}.project.json`), serializeProject(p));
   await writeFile(
@@ -61,4 +75,8 @@ for (const name of ["t-free", "t-touch", "t-touch-rotated"]) {
     ),
   );
 }
-console.log("Generated three isolated T acceptance exports; project files contain no T relation.");
+console.log(
+  persistent
+    ? "Generated three persisted T projects and regular IFC exports."
+    : "Generated three isolated T acceptance exports; project files contain no T relation.",
+);

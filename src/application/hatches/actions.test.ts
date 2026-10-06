@@ -148,7 +148,7 @@ test("schema 4 roundtrip preserves hatches and BIM; IFC intentionally remains bu
 
 test("strict V3 migration preserves visibility and model IDs and never repairs invalid legacy input", () => {
   const p = createExampleProject();
-  const { hatches, wallJoins, ...storey } = p.storey;
+  const { hatches, wallTJunctions, wallJoins, ...storey } = p.storey;
   const v3 = {
     ...p,
     schemaVersion: 3,
@@ -157,8 +157,8 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 7);
-  assert.deepEqual(migrated.storey, { ...storey, hatches: [], wallJoins: [] });
+  assert.equal(migrated.schemaVersion, 8);
+  assert.deepEqual(migrated.storey, { ...storey, hatches: [], wallJoins: [], wallTJunctions: [] });
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
   assert.throws(() => validateProject(v3));
@@ -224,6 +224,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
   for (const version of [4, 5, 6]) {
     const old = JSON.parse(JSON.stringify(current));
     old.schemaVersion = version;
+    delete old.storey.wallTJunctions;
     old.storey.hatches.forEach((h: Record<string, unknown>) => {
       delete h["background"];
       delete h["contour"];
@@ -235,7 +236,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       });
     const before = JSON.stringify(old);
     const loaded = loadProjectData(old);
-    assert.equal(loaded.schemaVersion, 7);
+    assert.equal(loaded.schemaVersion, 8);
     assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
     assert.equal(JSON.stringify(old), before);
     old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };

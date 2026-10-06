@@ -1,3 +1,4 @@
+import { tConnectionContours } from "./t-relations.ts";
 import type { Project, Wall } from "../../project/schema.ts";
 import { deriveWallCorner } from "./corner.ts";
 import { wallBody } from "./body.ts";
@@ -13,7 +14,12 @@ const same = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   a.x === b.x && a.y === b.y;
 
 /** Model endpoints must coincide exactly; the screen snap radius never creates a join. */
-export function reconcileWallJoins(project: Project, changedId: string, previous?: Wall): Project {
+export function reconcileWallJoins(
+  project: Project,
+  changedId: string,
+  previous?: Wall,
+  excludedPartners: readonly string[] = [],
+): Project {
   const changed = project.storey.walls.find((w) => w.id === changedId)!;
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   const joins = project.storey.wallJoins.filter((join) => {
@@ -26,7 +32,7 @@ export function reconcileWallJoins(project: Project, changedId: string, previous
     const p = point(changed, endpoint);
     if (previous && same(p, point(previous, endpoint))) continue;
     const candidates = project.storey.walls
-      .filter((w) => w.id !== changedId)
+      .filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
       .flatMap((w) =>
         ([0, 1] as const)
           .filter((e) => same(p, point(w, e)))
@@ -116,6 +122,7 @@ export function connectedWallContours(project: Project) {
       }
     }
   }
+  for (const [id, ring] of tConnectionContours(project)) contours.set(id, ring);
   return contours;
 }
 

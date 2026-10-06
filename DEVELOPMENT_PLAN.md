@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: gespeicherte T-Verbindungen — 06.10.2026
+
+PR133 freigegeben und übernommen (f0583c8). Schema 8 speichert isolierte
+rechtwinklige T-Paare mit stabilen Wand-IDs und Nebenendpunkt. Strikte Migration
+V1–V7 ergänzt keine automatisch erkannten Beziehungen. Gemeinsame Application-
+Aktionen verbinden/lösen mit Vorschau, Quellstandprüfung und einem Undo-Schritt.
+Plan, 3D und normaler IFC-Export verwenden dieselbe Domain-Konturprüfung.
+
+Einzelwandbewegung löst ohne Mitnahme; Hauptwand-Endänderung behält den festen
+Nebenpunkt bei. Verlässt dieser das Achsinnere, wird gelöst, ohne automatische
+Umdeutung zum Eckanschluss. Verbleibende unzulässige Kontaktbreite wird atomar
+abgewiesen. T-Fenster dürfen berühren, nicht überschneiden, auch auf unsichtbaren
+Ebenen. Mehrfach-Ts und T/Eck-Kombinationen bleiben ausgeschlossen.
+
+Nachweise: 500 Tests bestanden (12 neue Integrationstests); TypeScript und Build
+erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Drei reguläre IFC-Exporte mit
+IfcOpenShell 0.8.5 unabhängig auf IFC4/EXPRESS, Profile, Zuordnungen, Platzierung
+und Nettovolumen geprüft. Browser: Schema-8-Datei geladen, 3D sichtbar, Save und
+normaler IFC-Button melden erfolgreiche Erstellung/Downloadanforderung. Der
+Browser-Automation lieferte keinen Downloadpfad; ein tatsächlicher Download-
+Dateirundlauf ist damit nicht nachgewiesen. JSON-Rundlauf automatisiert geprüft.
+Praktischer Test und Grenzen: docs/PERSISTENT_T_RELATIONS.md.
+
+**Genau ein ausführbarer Folgeauftrag:** Den gemeinsamen 2D-Endpunktbewegungs-
+Pfad an die gespeicherte T-Aktion anbinden: Ein ausdrücklich gefangener,
+eindeutiger Hauptachsenpunkt liefert Host-ID und Nebenendpunkt für atomare
+Vorschau/Bestätigung. Bestehende Fang-/Referenzauswahl und Ursprungshilfen nutzen,
+keine globale Wandpaarsuche oder neue Einzelwerkzeuglogik. Mehrdeutigkeit,
+Abbruch, veralteten Kontext, Undo und normales Wegbewegen testen. Wandketten-
+Integration und Mehrfachanschlüsse sind nicht Teil dieses nächsten Schritts.
+
+Die folgenden Einträge sind historischer Fortschritt, keine parallelen Aufträge.
+
 ## Aktueller Stand: T-Kern ohne Projektvalidierungsrekursion — 06.10.2026
 
 PR132 freigegeben und übernommen (fced2cd). Domain t-pair enthält die bestehende
