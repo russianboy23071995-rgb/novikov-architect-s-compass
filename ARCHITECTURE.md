@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Persistent T contract preparation — 2026-10-06
+
+User confirmed: changing one host endpoint keeps the incoming endpoint at its
+world position; when that point leaves the host interior, detach without moving
+the incoming wall. Individual element movement detaches, without propagation.
+[Persistent T contract](docs/PERSISTENT_T_RELATIONS.md) defines the bounded
+implementation plan: IDs/end index identify the anchor; do not store redundant
+coordinates or a proportional anchor. Schema 8 is planned, not implemented.
+Separate validated public entry points from pure internal derivation before
+connecting T solids to validateProject, avoiding recursive validation. Movement
+intent must be explicit; coordinate differences alone are not the action type.
+
+
 ## Isolated T IFC acceptance — 2026-10-06
 
 Domain t-solid now owns the validated T pair's opening-aware solids. Application

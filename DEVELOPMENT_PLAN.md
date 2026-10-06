@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Dauerhafte T-Bezüge geplant — 06.10.2026
+
+PR131 freigegeben und übernommen (0939d01). Nutzerentscheidung: Hauptwandende
+verlängern/verkürzen lässt den T-Anker an seiner bisherigen Weltposition;
+bei Wegfall aus der Hauptwand löst sich die Verbindung. Einzelwandbewegung
+löst weiterhin ohne Mitnahme. Entscheidung im Architekturvertrag festgehalten.
+
+[Dauerhafte T-Verbindungen](docs/PERSISTENT_T_RELATIONS.md) ordnet Schema-8-
+Migration, stabile Bezüge ohne redundanten Anker, gemeinsame Konturverbraucher,
+Fenster, Bearbeitungsabsicht und Undo/Redo zu. Wichtigster Codebefund:
+inspectTOpenings -> validateProject -> connectedWallSolids würde bei direkter
+Integration rekursiv. Vorher den reinen Kern vom validierenden Einstieg trennen.
+
+Nur Dokumentation geändert. Quellpfade/Verbraucher, Links und diff --check geprüft;
+keine neuen Build-/Testläufe. Letzter Code-Nachweis bleibt 486 Tests sowie drei
+unabhängig bestandene IFC-Prüfungen. Archicad-Abnahme der T-Dateien noch offen.
+Im Programm ist weiterhin nur die temporäre T-Vorschau vorhanden.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Geometrie-/Öffnungskern von der
+Projektvalidierung trennen, damit gespeicherte Beziehungen später ohne Rekursion
+geprüft werden. Öffentliche Vorschau/Abnahmeexport strikt validieren; denselben
+Kern verwenden und bestehende Geometrie-, Fenster- und IFC-Tests erhalten.
+Noch keine Schemaänderung, automatische T-Erkennung oder neue Bedienregel.
+
+
 ## Aktueller Stand: T-IFC-Abnahmeexport geprüft — 06.10.2026
 
 PR130 freigegeben und übernommen (b76ab5a). Separater Export exportTJunctionIfc
