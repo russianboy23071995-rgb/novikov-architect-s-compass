@@ -1,3 +1,4 @@
+import { wallPlanOutlines } from "@/rendering/viewport/wall-plan-outline";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { useShiftSnapLock } from "./useShiftSnapLock";
 import { connectedWallSolids } from "@/domain/elements/wall/connections";
@@ -392,6 +393,18 @@ export function BimPlan({
   const shown = preview ?? (drawing ? drawingPreview : null) ?? project;
   const connected = connectedWallSolids(shown);
   const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
+  const outlines = useMemo(
+    () =>
+      wallPlanOutlines(
+        shown,
+        new Set(
+          shown.storey.walls
+            .filter((w) => isLayerVisible(project, visibility, w.id))
+            .map((w) => w.id),
+        ),
+      ),
+    [shown, project, visibility],
+  );
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
@@ -732,12 +745,31 @@ export function BimPlan({
               )
                 .map((p) => `${p.x},${-p.y}`)
                 .join(" ")}
-              fill={selection?.id === wall.id ? "var(--primary)" : "var(--muted-foreground)"}
+              fill="var(--muted-foreground)"
               fillOpacity={0.55}
-              stroke="var(--primary)"
+              stroke={cornerPreview?.base === shown ? "var(--primary)" : "none"}
               strokeWidth={0.018}
-              className="outline-none focus:stroke-foreground"
+              className="outline-none focus-visible:stroke-sky-300"
             />
+            {cornerPreview?.base !== shown && (
+              <path
+                aria-label={`Wandkontur ${wall.id}`}
+                d={(outlines.get(wall.id) ?? [])
+                  .map((edge) => {
+                    const local = (p: Point) => {
+                      const dx = p.x - body.start.x,
+                        dy = p.y - body.start.y;
+                      return `${dx * body.normal.y - dy * body.normal.x},${-(dx * body.normal.x + dy * body.normal.y)}`;
+                    };
+                    return `M${local(edge.start)} L${local(edge.end)}`;
+                  })
+                  .join(" ")}
+                fill="none"
+                stroke={selection?.id === wall.id ? WALL_AXIS_COLOR : "var(--primary)"}
+                strokeWidth={selection?.id === wall.id ? 0.025 : 0.018}
+                pointerEvents="none"
+              />
+            )}
             <text
               x={length / 2}
               y={-wall.thickness / 2 - 0.16}

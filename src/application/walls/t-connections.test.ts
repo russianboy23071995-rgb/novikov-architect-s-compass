@@ -1,3 +1,5 @@
+import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
+import { deriveTPreview } from "./t-preview.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "../../rendering/viewport/projection-state.ts";
 import { createWallPreviewContext } from "../../rendering/viewport/wall-preview-context.ts";
@@ -134,7 +136,7 @@ test("whole wall translation detaches even when translated host still contains a
   );
 });
 
-test("invalid persisted identities, duplicate/shared relations and competing corners fail atomically", () => {
+test("invalid persisted identities, duplicate incoming relations and competing corners fail atomically", () => {
   const p = connected(),
     before = serializeProject(p);
   for (const r of [
@@ -161,11 +163,12 @@ test("invalid persisted identities, duplicate/shared relations and competing cor
     thickness: 0.36,
     height: 2.8,
   });
-  assert.throws(() =>
+  assert.equal(
     previewTConnection(third, third, {
       ...request,
       relation: { ...relation, incoming: { wallId: "third", endpoint: 1 } },
-    }),
+    }).storey.wallTJunctions.length,
+    2,
   );
   for (const changes of [{ thickness: 0.4 }, { height: 3 }, { bodyOffset: 0.5 }])
     assert.throws(() => updateWall(p, "host", changes));
@@ -457,4 +460,149 @@ test("3D T acquisition rejects hidden axes and unavailable workplanes", () => {
     assert.notEqual(snap.candidate?.sourceFeature, "t-axis");
   }
   assert.equal(a.state().history.past.length, 0);
+});
+
+test("multiple T branches share a host from both sides and retain independent history/IFC", async () => {
+  for (const offset of [-0.18, 0, 0.18]) {
+    let p = pair(offset);
+    p = previewTConnection(p, p, request);
+    for (const [id, x, y] of [
+      ["second", 4, -3],
+      ["opposite", 3, 3],
+    ] as const) {
+      p = addWall(p, {
+        id,
+        start: { x, y },
+        end: { x, y: 0 },
+        thickness: 0.36,
+        height: 2.8,
+        bodyOffset: offset,
+      });
+      assert.ok(deriveTPreview(p, "host", { wallId: id, endpoint: 1 }));
+      p = previewTConnection(p, p, {
+        ...request,
+        relation: { hostWallId: "host", incoming: { wallId: id, endpoint: 1 } },
+      });
+    }
+    assert.equal(p.storey.wallTJunctions.length, 3);
+    assert.equal(connectedWallContours(p).size, 4);
+    assert.equal(connectedWallSolids(p).length, 4);
+    assert.deepEqual(deserializeProject(serializeProject(p)), p);
+    assert.equal(((await exportIfc(p)).match(/=IFCWALL\(/g) ?? []).length, 4);
+    const h = commitProject(
+      createHistory(p),
+      moveElement(p, { kind: "wall", id: "second" }, { x: 0.5, y: 0 }),
+    );
+    assert.equal(h.present.storey.wallTJunctions.length, 2);
+    assert.deepEqual(undoProject(h).present, p);
+    assert.equal(updateWall(p, "host", { end: { x: 3.5, y: 0 } }).storey.wallTJunctions.length, 2);
+    const overlap = addWall(p, {
+      id: "overlap",
+      start: { x: 3.1, y: -3 },
+      end: { x: 3.1, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+      bodyOffset: offset,
+    });
+    assert.throws(
+      () =>
+        previewTConnection(overlap, overlap, {
+          ...request,
+          relation: { hostWallId: "host", incoming: { wallId: "overlap", endpoint: 1 } },
+        }),
+      /überschneiden/,
+    );
+  }
+});
+
+test("plan removes only persisted visible contact seams and restores caps when partner hidden", () => {
+  const p = connected();
+  const visible = new Set(["host", "incoming"]);
+  const outlines = wallPlanOutlines(p, visible);
+  const perimeter = (map: ReturnType<typeof wallPlanOutlines>) =>
+    [...map.values()]
+      .flat()
+      .reduce((sum, e) => sum + Math.hypot(e.end.x - e.start.x, e.end.y - e.start.y), 0);
+  // Host 6 x .36 and incoming 2.82 x .36, minus the shared .36 contact twice.
+  assert.ok(Math.abs(perimeter(outlines) - (2 * (6 + 0.36) + 2 * (2.82 + 0.36) - 0.72)) < 1e-9);
+  assert.equal(outlines.get("incoming")!.length, 3);
+  assert.equal(wallPlanOutlines(p, new Set(["incoming"])).get("incoming")!.length, 4);
+  assert.equal(wallPlanOutlines(pair(), visible).get("incoming")!.length, 4);
+  const snapshot = serializeProject(p);
+  wallPlanOutlines(p, visible);
+  assert.equal(serializeProject(p), snapshot);
+});
+
+test("opposite T endpoint snap does not create a spurious corner", () => {
+  let p = pair(0.18);
+  p = previewTConnection(p, p, request);
+  p = addWall(p, {
+    id: "opposite",
+    start: { x: 3, y: 3 },
+    end: { x: 3, y: 0.7 },
+    thickness: 0.36,
+    height: 2.8,
+    bodyOffset: 0.18,
+  });
+  const state = editingReducer(createEditingState(p), {
+    type: "begin",
+    target: { kind: "wall", id: "opposite" },
+    action: "point",
+    index: 1,
+    anchor: { x: 3, y: 0.7 },
+  });
+  const session = state.session!;
+  const next = previewEdit(
+    session,
+    session.base,
+    { kind: "wall", id: "opposite" },
+    { x: 3, y: 0 },
+    {
+      kind: "endpoint",
+      worldPoint: { x: 3, y: 0 },
+      sourceEntityId: "host",
+      sourceFeature: "t-axis",
+      distanceOnScreen: 0,
+      priority: 0,
+    },
+  );
+  assert.equal(next.storey.wallTJunctions.length, 2);
+  assert.equal(next.storey.wallJoins.length, 0);
+});
+
+test("joined corner outline and rotated distant T remove their contact only", () => {
+  let p = addWall(createProject("corner", "s"), {
+    id: "a",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  p = addWall(p, {
+    id: "b",
+    start: { x: 3, y: 0 },
+    end: { x: 3, y: 3 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const outlines = wallPlanOutlines(p, new Set(["a", "b"]));
+  assert.equal(outlines.get("a")!.length, 3);
+  assert.equal(outlines.get("b")!.length, 3);
+  const base = connected();
+  const transform = (p: { x: number; y: number }) => ({
+    x: 1000000 + Math.cos(0.7) * p.x - Math.sin(0.7) * p.y,
+    y: -1000000 + Math.sin(0.7) * p.x + Math.cos(0.7) * p.y,
+  });
+  const rotated = validateProject({
+    ...base,
+    storey: {
+      ...base.storey,
+      walls: base.storey.walls.map((w) => ({
+        ...w,
+        start: transform(w.start),
+        end: transform(w.end),
+      })),
+    },
+  });
+  assert.equal(wallPlanOutlines(rotated, new Set(["host", "incoming"])).get("incoming")!.length, 3);
 });

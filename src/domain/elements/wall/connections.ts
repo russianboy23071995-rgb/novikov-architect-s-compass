@@ -35,7 +35,14 @@ export function reconcileWallJoins(
       .filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
       .flatMap((w) =>
         ([0, 1] as const)
-          .filter((e) => same(p, point(w, e)))
+          // A stored T endpoint belongs to its host, not to an automatic corner.
+          .filter(
+            (e) =>
+              same(p, point(w, e)) &&
+              !project.storey.wallTJunctions.some(
+                (t) => t.incoming.wallId === w.id && t.incoming.endpoint === e,
+              ),
+          )
           .map((e) => ({ wallId: w.id, endpoint: e })),
       );
     if (candidates.length > 1)

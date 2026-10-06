@@ -1,5 +1,42 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerkorrektur: gemeinsame Grundfläche und mehrere T-Anschlüsse — 06.10.2026
+
+Ergänzung zum offenen PR138 (noch nicht zusammengeführt): bestätigte Eck- und
+T-Verbindungen erscheinen im Grundriss ohne innere Kontaktlinie mit einheitlicher
+Flächenfarbe. Auswahl bleibt über türkisfarbene Achse und Außenkontur sichtbar.
+Nur gespeicherte Verbindungen entfernen Linien; bloßes Überlagern erzeugt keine
+visuelle Anschlussbestätigung. Ausgeblendete Partner lassen den Abschluss der
+verbleibenden Wand wieder sichtbar werden. Bauteile bleiben einzeln auswählbar.
+
+Die gemeldete Meldung war die bisherige Beschränkung auf ein T-Paar pro Wand.
+Nun sind mehrere rechtwinklige Nebenwände an einer Hauptwand auf beiden Seiten
+zulässig, auch gegenüberliegend am selben Achspunkt. Zusätzlich echten Fehler
+korrigiert: automatische Eckenerkennung darf einen belegten T-Endpunkt nicht
+als Eckpartner behandeln. Gleichseitige Kontaktüberlappungen werden abgewiesen.
+Fensterprüfung, gemeinsame Konturen für 2D/3D/IFC und Einzelbewegung mit gezieltem
+Lösen bleiben erhalten. Nebenwände dürfen noch nicht zugleich Hauptwände oder
+beidseitig angeschlossen sein; Ecke/T-Kombinationen und verschiedene Querschnitte
+bleiben ausgeschlossen und erhalten spezifische Fehlermeldungen.
+
+515 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Neue Prüfungen: mehrere Ts bei linker/mittiger/rechter Achse,
+Gegenseite, falsche Eckenerkennung, Überschneidung, Kürzen, gezieltes Lösen,
+Undo, JSON/IFC, entfernte rotierte Konturen und ausgeblendete Partner.
+Browser: zwei Ts geladen, dritten gegenüberliegenden Anschluss per Punkt frei
+bewegen hergestellt, Trennlinie entfällt; Undo/Redo geprüft; keine Konsolenfehler.
+Screenshot lokal: outputs/multi-t-footprint.png. 3D bleibt aus denselben
+Bauteilkörpern abgeleitet; diese Darstellungsänderung betrifft den Grundriss.
+
+Abnahme: Hauptwand mit rechter Kante, mehrere Nebenwände von beiden Seiten
+ankoppeln. Nach Klick entfernt sich die Kontaktlinie; bei Undo erscheint sie
+wieder. Auswahl einzelner Wände und Fenster sowie Ausblenden prüfen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss über die gemeinsame Application-Aktion
+anbinden; Mehrfach-T-Regeln wiederverwenden und Undo der gesamten Wandkette
+beibehalten. Keine zusätzliche Anschlussgeometrie im Werkzeug.
+
 ## Aktueller Stand: T-Fang in der 3D-Endpunktbearbeitung — 06.10.2026
 
 PR137 freigegeben und in den Gesamtzweig fix/reference-selection-lifecycle

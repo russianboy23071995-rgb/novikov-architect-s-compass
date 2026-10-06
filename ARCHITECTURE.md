@@ -1,5 +1,29 @@
 # NOVIKOV CAD Architecture Contract
 
+## Shared-host T relations and joined plan outlines — 2026-10-06
+
+Binding decision following the user's multi-side T workflow: a host may have
+multiple right-angle incoming walls on either side, including opposite branches
+at the same axis point. This supersedes the disjoint-pair restriction below.
+An incoming wall may have only one T relation and may not also act as a host.
+Corner/T combinations and differing cross-sections remain unsupported. Same-side
+contact intervals must not overlap; all window/contact checks remain mandatory.
+Schema 8 fields are unchanged; validation accepts this broader topology. Existing
+files retain their exact relations. Earlier builds may reject new multi-T files.
+An endpoint already participating in a T is excluded from automatic corner
+acquisition, preventing a false corner between opposite incoming branches.
+
+Rendering wallPlanOutlines removes coincident contact strokes only between
+persisted, visible partners using the authoritative derived contours. It does
+not discover relations from proximity or merge BIM entities. Hiding a partner
+restores the remaining wall's cap. Fill is uniform; selection uses the existing
+axis plus exposed contour. Separate hit geometry, stable IDs and IFC entities
+remain intact. This is a ground-plan display rule, not a solid boolean union.
+The existing temporary pair-preview overlay remains separately outlined.
+
+The 3D workplane adapter now passes the shared T candidate through preview and
+commit, superseding the earlier unimplemented 3D carrier status below.
+
 ## Explicit axis snap intent in 2D endpoint editing — 2026-10-06
 
 Application t-axis-snap derives an endpoint target from nearby eligible axis
