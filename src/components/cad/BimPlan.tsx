@@ -1,3 +1,6 @@
+import { useSelectionMarquee } from "./useSelectionMarquee";
+import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import type { SelectionSet } from "@/application/selection/state";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
 import { wallPlanOutlines } from "@/rendering/viewport/wall-plan-outline";
@@ -61,6 +64,8 @@ export type BimPlanProps = {
   visibility?: LayerVisibilityPolicy;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
+  selections?: SelectionSet;
+  onSelectMany?: (targets: SelectionSet) => void;
   drawing: boolean;
   endpointSnap?: boolean;
   hoverDwellMs?: number;
@@ -77,6 +82,7 @@ export type BimPlanProps = {
     index?: number,
     modelPoint?: Point,
     edgeIndex?: number,
+    toggle?: boolean,
   ) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
@@ -102,6 +108,8 @@ export function BimPlan({
   visibility,
   snapping: requestedSnapping = null,
   selection: requestedSelection,
+  selections,
+  onSelectMany,
   drawing,
   endpointSnap = false,
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
@@ -469,7 +477,7 @@ export function BimPlan({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
-    "aria-pressed": selection?.id === id,
+    "aria-pressed": selectedIds.has(id),
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
@@ -482,17 +490,37 @@ export function BimPlan({
           undefined,
           edge?.point ?? point ?? undefined,
           edge?.index,
+          event.ctrlKey || event.metaKey,
         );
       }
     },
     onKeyDown: (event: React.KeyboardEvent) => {
       if (!drawing && !editSession && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
-        onSelect({ kind, id });
+        onSelect(
+          { kind, id },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          event.ctrlKey || event.metaKey,
+        );
       }
     },
   });
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  const selectedIds = new Set((selections ?? (selection ? [selection] : [])).map((t) => t.id));
+  const shapes = useMemo(
+    () =>
+      planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
+    [project, visibility],
+  );
+  const marquee = useSelectionMarquee(
+    interactive && !drawing && !editSession && !selecting && !pan,
+    visibility ?? project,
+    shapes,
+    onSelectMany,
+  );
   const panelX = listPosition
     ? Math.max(
         12,
@@ -518,6 +546,9 @@ export function BimPlan({
       tabIndex={0}
       viewBox={planViewBox(camera, viewSize)}
       preserveAspectRatio="none"
+      onPointerDownCapture={marquee.down}
+      onPointerMoveCapture={marquee.move}
+      onPointerUpCapture={marquee.up}
       onPointerDown={(event) => {
         navigationClick.current = event.button === 1 || (pan && event.button === 0);
         if (navigationClick.current) {
@@ -560,6 +591,7 @@ export function BimPlan({
         }
       }}
       onLostPointerCapture={() => {
+        marquee.cancel();
         navigation.current = null;
         if (gripDrag.current) {
           gripDrag.current = null;
@@ -567,6 +599,7 @@ export function BimPlan({
         }
       }}
       onPointerCancel={() => {
+        marquee.cancel();
         navigation.current = null;
         editDown.current = null;
         if (gripDrag.current) {
@@ -575,6 +608,8 @@ export function BimPlan({
         }
       }}
       onClickCapture={(event) => {
+        marquee.click(event);
+        if (event.defaultPrevented) return;
         if (gripClick.current) {
           gripClick.current = false;
           event.preventDefault();
@@ -669,6 +704,7 @@ export function BimPlan({
       onKeyDown={(event) => {
         if (selecting) return;
         if (event.key === "Escape") {
+          marquee.cancel();
           navigation.current = null;
           setHover(null);
         }
@@ -700,6 +736,21 @@ export function BimPlan({
             fill={`url(#${gridId})`}
           />
         </g>
+      )}
+      {marquee.box && (
+        <rect
+          aria-label="Auswahlrahmen"
+          pointerEvents="none"
+          x={Math.min(marquee.box.a.x, marquee.box.b.x)}
+          y={-Math.max(marquee.box.a.y, marquee.box.b.y)}
+          width={Math.abs(marquee.box.a.x - marquee.box.b.x)}
+          height={Math.abs(marquee.box.a.y - marquee.box.b.y)}
+          fill="#38bdf8"
+          fillOpacity={0.08}
+          stroke="#38bdf8"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
       )}
       {plan.hatches.map((hatch) => (
         <g key={hatch.id}>
@@ -733,7 +784,7 @@ export function BimPlan({
               pointerEvents="none"
             />
           )}
-          {selection?.id === hatch.id && (
+          {selectedIds.has(hatch.id) && (
             <polygon
               points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
               fill="none"
@@ -789,7 +840,7 @@ export function BimPlan({
                   })
                   .join(" ")}
                 fill="none"
-                stroke={selection?.id === wall.id ? "#94a3b8" : "var(--primary)"}
+                stroke={selectedIds.has(wall.id) ? "#94a3b8" : "var(--primary)"}
                 strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
                 pointerEvents="none"
               />
@@ -820,11 +871,11 @@ export function BimPlan({
                     stroke={
                       !isLayerVisible(project, visibility, opening.id)
                         ? "none"
-                        : selection?.id === opening.id
+                        : selectedIds.has(opening.id)
                           ? "var(--foreground)"
                           : "var(--primary)"
                     }
-                    strokeWidth={selection?.id === opening.id ? 0.04 : 0.025}
+                    strokeWidth={selectedIds.has(opening.id) ? 0.04 : 0.025}
                     className="outline-none focus:stroke-foreground"
                   />
                   <line
@@ -881,14 +932,33 @@ export function BimPlan({
                     { x: event.clientX, y: event.clientY },
                     undefined,
                     raw ? wallAxisAnchor(wall, raw) : wall.start,
+                    undefined,
+                    event.ctrlKey || event.metaKey,
                   );
                 }}
               />
             </g>
           ))}
+      {!selection &&
+        plan.walls
+          .filter((w) => selectedIds.has(w.id))
+          .map((w) => (
+            <line
+              key={`selected-axis:${w.id}`}
+              aria-label={`Wandachse ${w.id}`}
+              x1={w.start.x}
+              y1={-w.start.y}
+              x2={w.end.x}
+              y2={-w.end.y}
+              stroke={WALL_AXIS_COLOR}
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          ))}
       {plan.lines.map((line) => (
         <g key={line.id}>
-          {selection?.id === line.id && (
+          {selectedIds.has(line.id) && (
             <path
               d={linePath(line)}
               fill="none"

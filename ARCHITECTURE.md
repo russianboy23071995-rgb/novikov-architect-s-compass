@@ -16,9 +16,21 @@ act on just its first member. Properties, Navigator, On-Demand and AI/Text/Voice
 consume the same context. A selected host does not implicitly select its windows;
 future transformations must account for dependencies without double movement.
 
-First delivery is shared 2D selection for every existing type, before group movement.
-No new runtime capability is claimed by this contract. See the revised
-[selection plan](docs/walls/SELECTION_MOVE_PLAN.md) for proposals and open details.
+Implemented first delivery: shared 2D selection for walls, windows, lines/polylines
+and hatches, including mixed sets. `application/selection/state.ts` owns typed-ID
+transitions, eligibility and the model-bound index. `useElementSelection` binds
+that state to React; renderers and Navigator consume it. Only a singleton supplies
+a legacy action/AI target. No first-item fallback for mixed sets.
+`planSelectionShapes` supplies disposable contours; `enclosedTargets` applies full
+rectangle containment to all vertices (including boundary), independently of type.
+`useSelectionMarquee` owns the pointer gesture. Click replaces, Ctrl/Cmd-click
+toggles, empty click clears; a frame replaces. Start the frame on empty canvas in
+Select mode, after 3 CSS pixels of movement. Drawing, editing, reference selection
+and navigation retain precedence. Escape/pointer cancellation/model or visibility
+change cancel the frame; selection creates no model history.
+3D renders outlines for selected walls but adds no marquee or multi-picking gesture.
+Group movement remains the next consumer, not implemented here. See the updated
+[selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
 
 
 ## Corner plus T: bounded composition — 2026-10-06

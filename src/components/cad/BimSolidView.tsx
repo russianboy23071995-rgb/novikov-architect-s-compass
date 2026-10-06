@@ -72,7 +72,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
     draw(
       solid: DisplaySurfaces,
       projection: ProjectionState,
-      selectedWall: string | undefined,
+      selectedWalls: ReadonlySet<string>,
       outline: OutlineEdge[],
     ) {
       const { width, height } = projection.backbuffer;
@@ -90,7 +90,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
         const light =
           0.5 +
           0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-        const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
+        const tint = selectedWalls.has(face.wallId) ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
         for (const triangle of faceTriangles(face.vertices.length))
           for (const index of triangle)
             data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
@@ -124,6 +124,7 @@ export function BimSolidView({
   project,
   visibility,
   selection: requestedSelection,
+  selections,
   camera,
   onCamera,
   pan,
@@ -149,6 +150,7 @@ export function BimSolidView({
   snap?: boolean;
 } & Pick<
   BimPlanProps,
+  | "selections"
   | "gridSettings"
   | "editSession"
   | "numericTarget"
@@ -254,12 +256,21 @@ export function BimSolidView({
           previewProjection,
         )
       : null;
+  const selectedWalls = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "wall" && isLayerVisible(project, visibility, t.id))
+          .map((t) => t.id),
+      ),
+    [selections, selection, project, visibility],
+  );
   const outline = useMemo(
     () =>
-      selection?.kind === "wall"
-        ? selectionEdges(solid.faces.filter((face) => face.wallId === selection.id))
-        : [],
-    [solid, selection],
+      [...selectedWalls].flatMap((id) =>
+        selectionEdges(solid.faces.filter((face) => face.wallId === id)),
+      ),
+    [solid, selectedWalls],
   );
   const inference = useSolidInference(
     project,
@@ -343,16 +354,12 @@ export function BimSolidView({
     setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
   useEffect(() => {
-    const selectedWall =
-      selection?.kind === "wall"
-        ? selection.id
-        : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
     displayed.current = null;
     if (renderer.current && previewProjection) {
-      renderer.current.draw(solid, previewProjection, selectedWall, outline);
+      renderer.current.draw(solid, previewProjection, selectedWalls, outline);
       displayed.current = { solid, projection: previewProjection };
     }
-  }, [solid, previewProjection, selection, project, revision, outline]);
+  }, [solid, previewProjection, selectedWalls, revision, outline]);
   return (
     <>
       {previewProjection && !error && (

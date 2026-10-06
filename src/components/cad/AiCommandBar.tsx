@@ -11,10 +11,16 @@ import { normalizeSpeech, recognitionConstructor, startVoice } from "@/lib/bim/v
 type Props = {
   project: Project;
   selection: CommandSelection;
+  selectionCount?: number;
   onExecute: (preview: CommandPreview) => void;
 };
 
-export function AiCommandBar({ project, selection, onExecute }: Props) {
+export function AiCommandBar({
+  project,
+  selection,
+  onExecute,
+  selectionCount = selection ? 1 : 0,
+}: Props) {
   const [command, setCommand] = useState("");
   const [preview, setPreview] = useState<CommandPreview | null>(null);
   const [error, setError] = useState("");
@@ -85,7 +91,10 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
         <img src={novikovLogo} alt="NOVIKOV" className="size-6 object-contain" />
         <div className="min-w-0 flex-1">
           <span className="block truncate px-2 text-[9px] text-muted-foreground">
-            Lokale Modellbefehle · {selection?.id ?? "Kein Bauteil ausgewählt"}
+            Lokale Modellbefehle ·{" "}
+            {selectionCount > 1
+              ? `${selectionCount} Elemente ausgewählt – Gruppenbefehle folgen`
+              : (selection?.id ?? "Kein Bauteil ausgewählt")}
           </span>
           <Input
             disabled={listening}
