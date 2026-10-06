@@ -1,5 +1,24 @@
 # Eck- und T-Anschluss an derselben Hauptwand
 
+## Umsetzungshinweis — 06.10.2026
+
+Der nachfolgende Text bleibt als freigegebener Planungsnachweis erhalten.
+Der entfernte T-Zulauf an einem Host mit genau einer rechtwinkligen Ecke ist
+jetzt implementiert; die fruehere pauschale Sperre gilt dafuer nicht mehr.
+Kontaktgrenzen und Eckpartner werden anhand der erhaltenen Kontur geprueft.
+Schema 8 bleibt bestehen, da keine Datenfelder oder deren Interpretation wechseln;
+aeltere Builds lehnen die neu erlaubte Kombination ab statt Relationen zu verlieren.
+
+Nutzerentscheidung 06.10.2026, ersetzt den bisherigen Folgeauftrag: Keine eigene
+Aktion zum gemeinsamen Verschieben eines Eckpunkts entwickeln. Der Nutzer will
+beide betroffenen Waende auswaehlen und gemeinsam als ganze Elemente bewegen.
+Mehrfachauswahl und Gruppenbewegung werden als naechster begrenzter Auftrag
+zunaechst gegen den vorhandenen Stand geprueft. Einzelendpunktbewegung kann
+weiterhin die Ecke loesen. Historische Aussagen unten zur gemeinsamen Eckaktion
+sind damit ueberholt. Nachweise zur Ecke-T-Kombination stehen im DEVELOPMENT_PLAN.
+
+## Historischer Planungsstand
+
 Stand: 06.10.2026. Planungsstand nach PR143, Basis main 3340195.
 Dieser Auftrag implementiert keine neue Anschlussgeometrie. Die aktuelle Sperre bleibt bestehen.
 

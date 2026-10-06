@@ -1,5 +1,50 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Ecke und entfernter T-Anschluss umgesetzt — 06.10.2026
+
+PR144 wurde freigegeben und in main zusammengefuehrt (7ef1b05). Umsetzung auf
+feat/corner-t-host: Hauptwand mit genau einer rechtwinkligen Ecke und entferntem
+rechtwinkligem T-Zulauf. Die Eckkontur bleibt erhalten; voller T-Kontakt muss
+innerhalb des geraden Seitenstuecks liegen. Beruehrung/Ueberlappung des Eckpartners
+wird abgewiesen. Vorhandene Aktionen, Vorschau, 3D und IFC nutzen dieselbe Domain-
+Ableitung. Fenster duerfen T-Kontakte ueberqueren, nicht den Eckabschluss.
+
+Schema 8 bleibt unveraendert; alte Programme koennen neue Kombinationsdateien
+abweisen. Keine stille Reparatur beim Laden. Zweite Host-Ecke, schrager Eckwinkel
+mit T und eine Ecke an der T-Nebenwand bleiben ausgeschlossen. Reine Eckketten
+und reine Mehrfach-Ts behalten ihr Verhalten.
+
+Pruefung: 546 Tests, TypeScript und Produktionsbuild erfolgreich; Lint 0 Fehler,
+6 bekannte Warnungen. 19 neue Tests: Anschlussreihenfolge, beide Seiten, Drehung,
+Achsversatz, anderes Host-Ende, Kontaktgrenzen, unzulaessige Topologien, Fenster,
+Vorschau/Commit, History, JSON/IFC und Sichtbarkeitskonturen. Browser: Pruefdatei
+mit drei Waenden und Fenster geladen, Grundriss und 3D visuell geprueft.
+IFC generiert und Regressionen bestanden; externer Archicad-Import dieses neuen
+Pruefmodells steht dem Nutzer zur Abnahme offen.
+
+Abnahme: L-foermige Wandkette zeichnen und abschliessen. Entfernt von der Ecke
+eine Nebenwand rechtwinklig auf die Hauptachse fangen und abschliessen. Ecke und
+T in 2D/3D ansehen, Fenster ueber T bewegen, Undo/Redo, speichern und laden.
+Lokale Pruefdateien: outputs/corner-t-demo.json und outputs/corner-t-demo.ifc.
+
+Planungskorrektur: Die im Vorplan angenommene gemeinsame Eckpunktaktion existiert
+noch nicht. Heutiges Bewegen eines einzelnen Achsendpunkts loest die Ecke, wenn
+die Endpunkte auseinandergehen; ein Regressionstest dokumentiert diesen Bestand.
+Nutzerentscheidung 06.10.2026: Eine eigene gemeinsame Eckpunktbewegung wird
+nicht benoetigt und ist als Folgeauftrag gestrichen. Stattdessen waehlt der
+Nutzer beide betroffenen Waende aus und verschiebt diese gemeinsam als ganze
+Elemente. Daraus folgt kein automatisches Mitziehen einer nicht ausgewaehlten Wand.
+
+Genau ein Folgeauftrag: Den vorhandenen Stand der Mehrfachauswahl und gemeinsamen
+Elementverschiebung pruefen und einen begrenzten Umsetzungsschritt fuer zwei
+zusammen ausgewaehlte Waende festlegen. Gemeinsamen Bewegungsursprung, Rasterengine,
+Hilfseingabe, Vorschau und einen Undo-Schritt wiederverwenden; Verhalten interner
+Verbindungen und Anschluesse zu nicht ausgewaehlten Waenden ausdruecklich pruefen.
+Noch keine Gruppenbewegung als implementiert oder abgenommen ausweisen.
+Diese Korrektur aendert nur die Planung, nicht die Laufzeitlogik von PR145.
+
+
+
 ## Ecke und T: begrenzter Umsetzungsplan — 06.10.2026
 
 PR143 ist freigegeben und in main. Der Plan in

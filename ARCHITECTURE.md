@@ -1,14 +1,30 @@
 # NOVIKOV CAD Architecture Contract
 
-## Corner plus T: planning only — 2026-10-06
+## Corner plus T: bounded composition — 2026-10-06
 
-[Combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md) records the verified
-current exclusion and the bounded proposal for a distant perpendicular T on a
-host with one right-angle corner. It does not lift the runtime restriction.
-The T host rectangle currently overwrites a prior corner contour if the guard
-is removed: composition must preserve the corner and validate contact against
-the actual remaining side. Existing corner-window restrictions and the allowed
-T-window crossing must remain distinct. No schema-version decision is made here.
+A host may combine exactly one right-angle corner with remote perpendicular T
+contacts. The incoming wall must have no corner and cannot also be a host or
+have a second T. Existing equal cross-section and T-overlap checks still apply.
+`connectedWallContours` retains composed corner profiles. `validateCornerTContact`
+checks the full contact against the actual remaining longitudinal side and rejects
+contact with the corner partner. No fixed clearance margin is introduced.
+Corner-window validation runs before T opening clipping; crossing a T does not
+permit crossing a miter. All interaction and export paths share this derivation.
+
+Schema 8 is retained: relation fields, units, identity and interpretation are
+unchanged; this extends admissible topology. Older builds reject mixed files
+under their stricter validation. Loading never deletes relations to make them
+fit an older implementation. Existing schema-8 files remain valid.
+
+Correction to the planning assumption: current single-endpoint edits detach an
+end join when endpoints cease to coincide; no shared corner-move action exists.
+User decision (2026-10-06): a dedicated joint corner-move action is not wanted.
+The intended workflow is to select both affected walls and translate the selected
+whole elements together. Do not implicitly move an unselected neighbour.
+Selection-set translation must reuse the shared interaction pipeline and atomic
+history; its implementation and connection handling still require verification.
+Individual whole-wall translation retains its existing automatic-detachment rule.
+See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
 
 
 ## Derived wall drawing preview — 2026-10-06
