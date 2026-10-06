@@ -147,7 +147,10 @@ export function resolveToolSnap(
     activeReferences: options.featureSnap ? (context.activeReferences ?? []) : [],
     activeReference: options.featureSnap ? (active ?? null) : null,
     orthoOrigin: options.ortho ? origin : null,
-    angleOrigin: options.shift && options.featureSnap ? (origin ?? active?.point ?? null) : null,
+    angleOrigin:
+      options.shift && options.featureSnap
+        ? (context.angleLockOrigin ?? origin ?? active?.point ?? null)
+        : null,
   };
   return (policy?.resolve ?? querySnap)(cursor, request);
 }
