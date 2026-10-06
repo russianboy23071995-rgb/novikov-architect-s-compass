@@ -139,12 +139,12 @@ export function AiCommandBar({ project, selection, onExecute }: Props) {
       </p>
       {selection?.kind === "hatch" && (
         <p className="px-2 text-xs text-muted-foreground">
-          Schraffurfüllung über die Eigenschaften ändern; Schraffurbefehle folgen später.
+          Offset um 5 cm · Offset um -5 cm · Füllung über die Eigenschaften ändern.
         </p>
       )}
       {selection?.kind === "line" && (
         <p className="mt-1 text-[10px] text-muted-foreground">
-          Linienstile über die Eigenschaften ändern; Linienbefehle folgen später.
+          Geschlossene Polylinie: Offset um 5 cm · negativ nach innen. Stile über Eigenschaften.
         </p>
       )}
       {error && (
