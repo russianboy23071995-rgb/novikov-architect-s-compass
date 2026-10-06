@@ -1,3 +1,5 @@
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
+import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { assertDrawingContext, createDrawing, defaultDrawingWall } from "./actions.ts";
 
@@ -20,14 +22,25 @@ export function appendWallChain(
   current: Project,
   id: string,
   point: Point,
+  candidate?: SnapCandidate | null,
 ): WallChain {
   assertDrawingContext(chain.base, current);
-  const preview = createDrawing(chain.preview, chain.preview, id, {
+  if (
+    chain.wallIds.length &&
+    chain.preview.storey.wallTJunctions.some(
+      (r) => r.incoming.wallId === chain.wallIds.at(-1) && r.incoming.endpoint === 1,
+    )
+  )
+    throw new Error(
+      "Wandkette am T-Anschluss abschlie\u00dfen. Ecke und T sind noch nicht kombinierbar.",
+    );
+  const created = createDrawing(chain.preview, chain.preview, id, {
     kind: "wall",
     start: chain.points.at(-1)!,
     end: point,
     ...defaultDrawingWall,
   });
+  const preview = connectWallAtTAxis(created, id, 1, point, candidate);
   return {
     ...chain,
     preview,

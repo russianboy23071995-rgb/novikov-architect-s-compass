@@ -1,5 +1,36 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Branch-Uebergang abgeschlossen — 06.10.2026
+
+PR140 ist in main, PR141 hat Anpassungen_UI aktualisiert. PR139 wird mit
+einem normalen Merge auf main als Zielbasis umgestellt; beide historischen
+Planungsabschnitte bleiben erhalten. Die folgenden Infrastrukturauftraege
+zur erstmaligen Synchronisation sind damit erledigt. Fachlicher Folgeauftrag
+bleibt der T-Anschluss beim Start eines neuen Wandabschnitts.
+
+## T-Fang beim Zeichnen — 06.10.2026
+
+PR138 wurde nach Freigabe zusammengefuehrt. Neue Wandabschnitte koennen mit
+dem gemeinsamen T-Achsfang an einer vorhandenen Hauptwand enden. Klick setzt
+den Abschnitt, Enter/Doppelklick schliesst die Transaktion ab. Die ganze Kette
+bleibt ein Undo-Schritt. Keine Verbindung allein aus numerischen Koordinaten.
+Snap aus, Mehrdeutigkeit und feste Richtung bleiben massgebend. Am T muss die
+Kette abgeschlossen werden; Ecke/T bleibt ausgeschlossen. Vor dem Klick zeigt
+die Vorschau weiterhin die Zeichenachse mit Fangziel, keinen neuen Wandkoerper.
+
+Pruefung: 521 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler
+und 6 bekannte Warnungen. Browser: neue Nebenwand auf Hauptachse gezeichnet,
+T-Fang angezeigt, mit Enter abgeschlossen, Undo/Redo erfolgreich. JSON/IFC und
+Abbruch/Stale-Kontext sind in den Regressionstests enthalten.
+
+Abnahme: Wall waehlen, Start neben vorhandener Wand setzen, rechtwinklig zur
+Hauptachse ziehen, bei T-Anschluss klicken und Enter. Undo entfernt die neue
+Wand mit Anschluss; Redo stellt beides wieder her.
+
+**Genau ein Folgeauftrag:** T-Anschluss auch beim Start eines neuen Wandabschnitts
+auf einer vorhandenen Hauptachse anbinden; dieselbe Application-Aktion,
+Fangprioritaet und atomare Wandketten-History verwenden.
+
 ## Gemeinsame Branch-Basis vorbereiten — 06.10.2026
 
 Ziel: main wird der gemeinsame gepruefte Gesamtstand. Lovable arbeitet auf

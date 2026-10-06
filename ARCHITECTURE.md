@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## Drawing endpoint T intent — 2026-10-06
+
+Wall drawing reuses Application findTAxisReference/queryTAxisSnap and
+connectWallAtTAxis with direct editing. The plan carries the exact candidate
+through ToolInteraction validation and appendWallChain. Numeric input discards
+mouse intent. Only finishWallChain commits history; cancel discards the draft.
+The current slice ends a new segment on an existing visible host axis. A chain
+ending at a T must be finished before drawing again; corner/T combinations
+remain unsupported. Starting on a host axis does not yet create a T relation.
+
+
 ## T contacts do not constrain hosted window movement — 2026-10-06
 
 Binding user clarification: windows stay on their original wall and ignore T
