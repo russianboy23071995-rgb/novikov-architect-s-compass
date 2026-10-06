@@ -3,6 +3,10 @@
 Stand 06.10.2026, geprüft gegen 0939d01 (PR131).
 Noch keine persistente T-Verbindung implementiert.
 
+Fortschritt 06.10.2026: Die am Ende geplante Kerntrennung ist umgesetzt.
+`t-pair.ts` arbeitet ohne Projektvalidierung, die öffentlichen Einstiege prüfen
+weiterhin den vollständigen Snapshot. Aktueller Folgeauftrag: DEVELOPMENT_PLAN.md.
+
 ## Bestätigte Bedienregeln
 
 - Automatische Achsenanschlüsse sind das Ziel; das Diagnosefenster ist kein

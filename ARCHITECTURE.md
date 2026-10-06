@@ -1,5 +1,19 @@
 # NOVIKOV CAD Architecture Contract
 
+## Recursion-free T pair kernel — 2026-10-06
+
+Domain t-pair owns inspection and solid derivation from resolved Wall parameters,
+endpoint index and schema-valid windows from one snapshot. It has no runtime
+Project/schema validation dependency. Internal project validation may call this
+kernel after structural/identity checks; it must enforce relation eligibility.
+Public resolveIsolatedTPair validates/copies the full Project and resolves stable
+IDs and the current isolated-pair restriction. inspectTOpenings and deriveTSolids
+use this boundary then delegate to the same kernel. No caller-provided stale
+contours and no second geometry implementation. Application preview and isolated
+IFC export retain their existing public interfaces and strict validation.
+Schema remains 7; persistence/automatic T relations are not implemented here.
+
+
 ## Persistent T contract preparation — 2026-10-06
 
 User confirmed: changing one host endpoint keeps the incoming endpoint at its
