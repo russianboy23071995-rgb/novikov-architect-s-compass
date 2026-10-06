@@ -55,8 +55,13 @@ checks context again and reruns the validated action rather than trusting editab
 preview geometry. Singleton legacy commands use the same context gate; mixed sets
 never fall back to their first element. Pure vector translation uses a neutral
 coordinate origin, not an inferred element anchor. This does not alter the pinned
-origin rule for interactive pointer movement. Group microphone delivery remains a
-separate adapter step; it must use this action and explicit acceptance.
+origin rule for interactive pointer movement. `selection-voice.ts` now binds browser recognition to an immutable context revision
+containing the complete selection, project and visibility policy. UI cleanup aborts
+on revision changes; callback-time revision checks reject late results before
+cleanup as well. Returning to the same IDs is still a new revision. Recognition
+only supplies normalized text and the shared command preview, never a commit.
+Invalid transcripts remain editable; explicit acceptance retains action validation.
+The existing browser recognition lifecycle supplies timeout, cancellation and errors.
 
 ## Corner plus T: bounded composition — 2026-10-06
 

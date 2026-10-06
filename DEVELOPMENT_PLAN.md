@@ -1,5 +1,46 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Gruppen-Spracheingabe angebunden - 06.10.2026
+
+PR149 nach Freigabe normal in main integriert (854b804). Branch
+feat/selection-voice-command ergaenzt die Aufnahme fuer jede sichtbare Auswahl,
+auch gemischte Gruppen sowie einzelne Linien und Schraffuren. Aufnahme nur auf
+Mikrofonklick. Beispiel: Auswahl um zwei Meter bei neunzig Grad verschieben.
+
+application/commands/selection-voice.ts bindet eine Aufnahme an eine Kontextrevision
+mit Projekt, vollstaendigen typisierten Ziel-IDs und Sichtbarkeit. React beendet
+sie bei Kontextwechsel oder Unmount. Zusaetzlich prueft der Adapter den aktuellen
+Kontext vor der Ergebnisverarbeitung: auch vor Effect-Cleanup eintreffende spaete
+Ergebnisse werden verworfen. Zurueckwechseln zur gleichen Auswahl erzeugt eine
+neue Revision. Kein Rueckfall auf das erste Element und kein automatischer Commit.
+
+Finale Transkripte werden begrenzt normalisiert und vom bestehenden Textadapter
+geprueft; ungueltige Transkripte bleiben im Eingabefeld korrigierbar. Bekannte
+Winkelwoerter 45/90/180/270/360 ergaenzen die bestehende Zahlen-/Einheitenliste;
+keine allgemeine Freitextinterpretation. Einzelbefehle bleiben verfuegbar.
+Vorschau, Zielanzeige, Uebernahme und Undo bleiben dieselben wie beim Text.
+Browser ohne SpeechRecognition behalten Textbedienung. Bestehende 20-Sekunden-
+Grenze und Meldungen fuer Mikrofon-/Netzwerkfehler werden wiederverwendet.
+
+Nachweis: 568 Tests bestanden, 6 neue fuer Gruppen-/Textgleichheit ohne Mutation,
+Kontextwechsel vor Cleanup, spaete Callbacks, Abbruch, Fehler, korrigierbares
+Transkript und Winkelwoerter. Bestehende Voice-Tests pruefen Einzelbefehle,
+Berechtigungsfehler und Timeout. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser: 2 Elemente per Rahmen, Mikrofon fuer
+die gesamte Auswahl aktiv, Textfallback sichtbar. Screenshot outputs/selection-voice.png.
+Keine echte Mikrofonaufnahme oder Erkennungsqualitaet mit Nutzerhardware behauptet;
+Transkripte und Fehler wurden mit simulierter Recognition geprueft.
+
+Abnahme: Wand und Fenster gemeinsam markieren, Mikrofon starten und den Beispiel-
+satz sprechen. Transkript und Ziele pruefen, dann Uebernehmen; Strg+Z nimmt die
+Bewegung zurueck. Zweite Aufnahme starten und Auswahl wechseln: kein spaetes
+Ergebnis darf eine alte Vorschau erzeugen. Bei Browserproblemen Text verwenden.
+
+Genau ein Folgeauftrag: Die gemeinsame Mehrfachauswahl in der 3D-Ansicht fuer
+bereits vorhandene Wandtreffer per Strg/Cmd-Klick anbinden. Zentralen Auswahlzustand
+und Sichtbarkeitsregeln wiederverwenden; keine eigene 3D-Auswahlmenge, kein neues
+Gruppen-Bewegungswerkzeug und keine 3D-Rahmenauswahl in diesem Teilschritt.
+
 ## Gruppenbewegung per Textbefehl - 06.10.2026
 
 PR148 nach Freigabe normal in main integriert (200735a). Folgebranch
