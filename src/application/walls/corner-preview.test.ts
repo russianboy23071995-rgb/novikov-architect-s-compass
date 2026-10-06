@@ -6,6 +6,105 @@ import { buildSolid } from "../../lib/bim/geometry.ts";
 import { cornerPreviewSurfaces } from "../../rendering/viewport/corner-preview.ts";
 import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
 import { nearestWallSurface } from "../../rendering/viewport/wall-depth.ts";
+import { inspectTOpenings } from "../../domain/elements/wall/t-openings.ts";
+import { deriveTPreview } from "./t-preview.ts";
+
+test("T windows may touch either contact, but crossing it rejects without mutation", () => {
+  for (const wallId of ["host", "incoming"])
+    for (const [centre, expected] of [
+      [2.31, "free"],
+      [2.32, "touching"],
+      [2.33, "overlapping"],
+    ] as const) {
+      const p = addWindow(tFixture(), {
+        id: "w",
+        wallId,
+        width: 1,
+        height: 1,
+        sillHeight: 0.9,
+        position: centre / (wallId === "host" ? 6 : 3),
+      });
+      const before = structuredClone(p);
+      assert.equal(
+        inspectTOpenings(p, "host", { wallId: "incoming", endpoint: 1 }).openings[0]!.status,
+        expected,
+      );
+      if (expected === "overlapping")
+        assert.throws(
+          () => deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }),
+          /überschneidet/,
+        );
+      else
+        assert.ok(
+          Math.abs(
+            deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }).volume - 8.53056,
+          ) < 1e-8,
+        );
+      assert.deepEqual(p, before);
+    }
+  for (const [centre, expected] of [
+    [3.69, "free"],
+    [3.68, "touching"],
+    [3.67, "overlapping"],
+    [3.7, "free"],
+  ] as const) {
+    // Right contact edge is 3.18; a 1 m window touching it has centre 3.68.
+    const p = addWindow(tFixture(), {
+      id: "w",
+      wallId: "host",
+      width: 1,
+      height: 1,
+      sillHeight: 0.9,
+      position: centre / 6,
+    });
+    assert.equal(
+      inspectTOpenings(p, "host", { wallId: "incoming", endpoint: 1 }).openings[0]!.status,
+      expected,
+    );
+  }
+});
+
+test("T windows reuse shared cut solids, independently of visibility and axis direction", () => {
+  let original = addWindow(tFixture(), {
+    id: "h",
+    wallId: "host",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 2.32 / 6,
+  });
+  original = addWindow(original, {
+    id: "i",
+    wallId: "incoming",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 2.32 / 3,
+  });
+  for (const reverse of [false, true])
+    for (const angle of [0, 0.7]) {
+      const p = structuredClone(original);
+      const tr = (q: { x: number; y: number }) => ({
+        x: 1000 + q.x * Math.cos(angle) - q.y * Math.sin(angle),
+        y: -2000 + q.x * Math.sin(angle) + q.y * Math.cos(angle),
+      });
+      for (const wall of p.storey.walls) {
+        const start = wall.start,
+          end = wall.end;
+        wall.start = tr(reverse ? end : start);
+        wall.end = tr(reverse ? start : end);
+        if (reverse) wall.bodyOffset = -wall.bodyOffset;
+      }
+      if (reverse) for (const w of p.storey.windows) w.position = 1 - w.position;
+      p.bimVisibility.hiddenLayerIds = [p.defaultLayerIds.window];
+      const target = { wallId: "incoming", endpoint: (reverse ? 0 : 1) as 0 | 1 };
+      const report = inspectTOpenings(p, "host", target);
+      assert.ok(report.openings.every((o) => o.status === "touching"));
+      const preview = deriveTPreview(p, "host", target);
+      assert.ok(Math.abs(preview.volume - 8.17056) < 1e-8);
+      assert.ok(preview.walls.every((w) => w.faces.length > 6));
+    }
+});
 
 function tFixture() {
   let p = createProject("t", "s");
@@ -17,6 +116,34 @@ function tFixture() {
     p = addWall(p, { ...w, thickness: 0.36, height: 2.8, bodyOffset: 0 });
   return p;
 }
+
+test("T clearance uses actual contact width for shifted axes and either approach side", () => {
+  for (const sign of [-1, 1])
+    for (const hostOffset of [-0.18, 0, 0.18])
+      for (const incomingOffset of [-0.18, 0, 0.18]) {
+        const p = tFixture();
+        p.storey.walls[0]!.bodyOffset = hostOffset;
+        p.storey.walls[1]!.bodyOffset = incomingOffset;
+        p.storey.walls[1]!.start.y = sign * 3;
+        // Incoming normal points right when approaching from above, left from below.
+        const contactLeft = 3 + sign * incomingOffset - 0.18;
+        for (const delta of [-0.01, 0, 0.01]) {
+          const project = addWindow(p, {
+            id: "h",
+            wallId: "host",
+            width: 1,
+            height: 1,
+            sillHeight: 0.9,
+            position: (contactLeft - 0.5 + delta) / 6,
+          });
+          const report = inspectTOpenings(project, "host", { wallId: "incoming", endpoint: 1 });
+          assert.equal(
+            report.openings[0]!.status,
+            delta < 0 ? "free" : delta === 0 ? "touching" : "overlapping",
+          );
+        }
+      }
+});
 test("T preview shares profiles/surfaces, preserves unrelated geometry and never changes the project", () => {
   const project = tFixture(),
     before = structuredClone(project);
@@ -54,7 +181,7 @@ test("T preview shares profiles/surfaces, preserves unrelated geometry and never
   assert.ok(invalid.error);
 });
 
-test("T preview rejects windows, existing joins and missing or duplicate targets", () => {
+test("T preview allows windows away from contact, rejects joins and invalid targets", () => {
   const base = tFixture();
   for (const wallId of ["host", "incoming"]) {
     const project = addWindow(base, {
@@ -63,14 +190,14 @@ test("T preview rejects windows, existing joins and missing or duplicate targets
       width: 1,
       height: 1,
       sillHeight: 0.9,
-      position: 0.5,
+      position: wallId === "host" ? 0.2 : 0.5,
     });
     const result = cornerPreviewReducer(
       { preview: null, error: "" },
       { type: "t-preview", project, hostId: "host", incoming: { wallId: "incoming", endpoint: 1 } },
     );
-    assert.equal(result.preview, null);
-    assert.match(result.error, /ohne Fenster/);
+    assert.ok(result.preview);
+    assert.equal(result.error, "");
   }
   const joined = addWall(base, {
     id: "corner",

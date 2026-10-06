@@ -1,5 +1,35 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-Vorschau mit Fenstern — 06.10.2026
+
+PR129 freigegeben und übernommen (fb0f21e). Nutzer erlaubt Fenster gegen Wände;
+umgesetzt als Berührung erlaubt, Überschneidung verboten im isolierten T-Fall.
+Die Eckanschlussregel bleibt unverändert. Domain t-openings prüft Hauptfenster
+gegen die Kontaktbreite, Nebenfenster gegen den gekürzten Körper. Application
+nutzt den Bericht und die gemeinsame Öffnungsextrusion. Rundung an lokalen
+Kappengrenzen wird in abgeleiteter Geometrie innerhalb Modell-Toleranz vereinheitlicht.
+
+484 Tests bestanden; TypeScript und Build erfolgreich; Lint keine Fehler,
+sechs bekannte Warnungen. Neue Fälle: beide Kontaktränder, frei/berührend/
+überschneidend, Achslagen und Anschlussseiten, Endpunktumkehr, Rotation,
+Translation, unsichtbare Fenster, unveränderte Eingaben und Netto 8,17056 m³.
+Browser: zwei 1x1-m-Fenster berühren den T-Kontakt, 2D/3D zeigt Ausschnitte,
+Vorschau meldet 8,1706 m³ ohne Fehler. Keine persistente Verbindung oder
+geändertes Speichern/IFC. Fenster über bestehende weitere Anschlüsse bleiben
+außerhalb dieser Vorschau. Keine neuen Befehle; Text/Voice bleiben Adapter.
+
+Abnahme: Hauptwand auswählen -> Wandanschluss vorschauen -> T-Anschluss,
+Nebenwand/Ende wählen. Ein Fenster darf bis an den Kontakt reichen; 1 cm darüber
+hinaus ergibt eine Überschneidungsmeldung. Testdatei mit beiden Kontakten liegt
+in outputs/t-windows-touch.project.json. Die Vorschau verändert das Modell nicht.
+
+**Genau ein ausführbarer Folgeauftrag:** Das isolierte T-Paar einschließlich
+freier und berührender Fenster über den vorhandenen gemeinsamen IFC-Writer als
+separaten Abnahmeexport prüfen. Keine Änderung des regulären Projektexports oder
+persistente T-Verbindung. Profile, Öffnungen, Platzierungen und Nettovolumina
+unabhängig mit IfcOpenShell prüfen und eine Archicad-Testdatei bereitstellen.
+
+
 ## Aktueller Stand: T-Fensterprüfung konkretisiert — 06.10.2026
 
 PR128 freigegeben und übernommen (860abc1). Der Folgeauftrag ist als
