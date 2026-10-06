@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Branch-Uebergang abgeschlossen — 06.10.2026
+
+PR140 ist in main, PR141 hat Anpassungen_UI aktualisiert. PR139 wird mit
+einem normalen Merge auf main als Zielbasis umgestellt; beide historischen
+Planungsabschnitte bleiben erhalten. Die folgenden Infrastrukturauftraege
+zur erstmaligen Synchronisation sind damit erledigt. Fachlicher Folgeauftrag
+bleibt der T-Anschluss beim Start eines neuen Wandabschnitts.
+
 ## T-Fang beim Zeichnen — 06.10.2026
 
 PR138 wurde nach Freigabe zusammengefuehrt. Neue Wandabschnitte koennen mit
@@ -22,6 +30,32 @@ Wand mit Anschluss; Redo stellt beides wieder her.
 **Genau ein Folgeauftrag:** T-Anschluss auch beim Start eines neuen Wandabschnitts
 auf einer vorhandenen Hauptachse anbinden; dieselbe Application-Aktion,
 Fangprioritaet und atomare Wandketten-History verwenden.
+
+## Gemeinsame Branch-Basis vorbereiten — 06.10.2026
+
+Ziel: main wird der gemeinsame gepruefte Gesamtstand. Lovable arbeitet auf
+Anpassungen_UI; Codex nutzt kleine Aufgabenbranches aus main. Beide Richtungen
+werden per geprueftem PR nach main uebernommen. Danach main regelmaessig in
+Anpassungen_UI mergen, ohne Rebase/Force-Push. Keine zweite dauerhafte finale
+Codex-Version. Parallel moeglichst keine Aenderungen derselben UI-Komponente.
+
+Der Uebergangsbranch integration/current-cad-main verbindet main d2ffebb mit
+dem freigegebenen Integrationsstand 04ba5b5 (bis PR138) konfliktfrei. Main-eigene
+Lovable-Konfigurationsaenderungen bleiben erhalten. PR139 und PR124 bleiben
+separate offene Aufgaben; ihre Freigabe wird hier nicht vorausgesetzt.
+Ergaenzende Pruefung erfolgt in isolierter Kopie mit bun install --frozen-lockfile
+und der deklarierten Lovable-Konfiguration 2.25.2. Keine Aenderung der laufenden
+lokalen node_modules. UI-Zweig-Regeln: Piktogramme, Farben und Abstaende an
+bestehenden Komponenten anpassen; Handler, Modellaktionen, stabile IDs,
+Fanglogik und Eingabe-Lifecycle erhalten. Keine automatische Neugenerierung
+von Werkzeugleisten oder Dependency-Updates fuer reine Gestaltungsaufgaben.
+Anpassungen_UI bleibt unveraendert; dort laufende Arbeit wird nicht ueberschrieben.
+
+Genau ein naechster Infrastrukturauftrag: Nach Pruefung und Freigabe dieses
+Integrations-PR main aktualisieren und den dann aktuellen main-Stand in
+Anpassungen_UI ueber einen separaten geprueften Merge uebernehmen. Dabei dessen
+eigene Dependency-Updates und Praesentationsregeln erhalten und testen. Danach
+PR139 auf die gemeinsame Basis umstellen und die fachliche Reihenfolge fortsetzen.
 
 
 ## Nutzerbeschriftung: Wandachslagen — 06.10.2026
@@ -2460,3 +2494,5 @@ Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
 Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
+
+Nachweis zum Branch-Uebergang: Frozen-Lockfile-Installation erfolgreich; 517 Tests, TypeScript und Produktionsbuild mit Lovable-Konfiguration 2.25.2 bestanden.
