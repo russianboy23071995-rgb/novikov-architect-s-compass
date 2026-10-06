@@ -1,3 +1,4 @@
+import { closedContour } from "@/application/direct-edit/contour";
 import { useEffect, useRef, useState } from "react";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import type { Selection } from "./bim-view.ts";
@@ -133,6 +134,15 @@ export function DemandMenu({
         )}
         {selection && summary && (
           <>
+            {closedContour(project, selection) && (
+              <button
+                type="button"
+                className="rounded border p-1 text-left hover:bg-muted"
+                onClick={() => onAction("offset")}
+              >
+                Kontur versetzen (Offset)
+              </button>
+            )}
             {edgeIndex != null && (
               <>
                 <button

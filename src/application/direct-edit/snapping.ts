@@ -1,3 +1,4 @@
+import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
@@ -27,6 +28,7 @@ export function editSnapReferences(
 }
 
 export function editDirection(session: EditSession): Point2 | null {
+  if (session.action === "offset") return offsetDirection(session);
   if (session.target.kind === "window") {
     const window = session.base.storey.windows.find((w) => w.id === session.target.id)!;
     const wall = session.base.storey.walls.find((w) => w.id === window.wallId)!;

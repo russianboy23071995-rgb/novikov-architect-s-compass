@@ -217,3 +217,11 @@ Kontur ist Teil der Schraffurdarstellung, keine doppelte Liniengeometrie.
 Linienarten bleiben fuer spaeter. Offset fuer geschlossene Polygone/Kreise und
 spaeterer Kopie-Hotkey bleiben erhalten; naechster Teil beginnt mit konvexen
 2D-Polygonen. Kein Skalieren von BIM-Bauteilen als Ersatz fuer Offset.
+
+
+### Umsetzung 06.10.2026: Offset
+
+On-Demand-Offset fuer einfache konvexe Schraffuren und geschlossene Polylinien
+ist umgesetzt, mit gemeinsamem Fang-/Hilfseingabepfad und Undo/Redo. Alle Seiten
+werden parallel versetzt, nicht skaliert. Konkave Formen, Kreise und spaeterer
+Kopie-Hotkey bleiben erhaltene offene Anforderungen. BIM bleibt ausgeschlossen.

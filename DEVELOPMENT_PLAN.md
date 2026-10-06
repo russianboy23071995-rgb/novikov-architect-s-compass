@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Offset fuer konvexe 2D-Konturen — 06.10.2026
+
+Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.
+PR122 nach Freigabe in fix/reference-selection-lifecycle uebernommen (ccc7121).
+Zweig feat/contour-offset: On-Demand-Aktion "Kontur versetzen (Offset)" fuer
+Schraffuren und geschlossene Polylinien. Alle Seiten erhalten denselben Abstand;
+positiv nach aussen, negativ nach innen. Mausprojektion, fixierter Ursprung,
+Rasterengine und numerische Eingabe verwenden den gemeinsamen Interaktionspfad.
+Gewaehlte Seite bestimmt die Normale; ohne Seitenwahl gilt die erste Seite.
+
+470 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Tests: konstante Parallelabstaende, beide Umlaufrichtungen, grosse
+Koordinaten, Innenoffset/Kollaps, konkave/gekreuzte Formen, spitzes Dreieck,
+BIM-/offene-Linien-Ausschluss, feste IDs/Stile, veralteter Kontext, Dateirundlauf,
+Vorschau, Abbruch und Undo/Redo fuer beide Elementarten. Browser: 2x2-m-Schraffur,
++0,5 m Vorschau/Commit, Undo/Redo, -0,5 m mit Dezimalkomma, Abbruch; -1 m wird
+als Kollaps abgewiesen. Keine Dateiformataenderung, weiterhin Schema 7.
+
+Grenzen: nur einfache konvexe Konturen; kein automatisches Entfernen kollabierter
+Seiten, keine konkaven Offset-Ergebnisse, Kreise oder Kopie-Hotkeys. Ungueltige
+Ziele werden abgewiesen und koennen korrigiert werden. Auswahl/Styles bleiben
+beim Offset erhalten. Vorbereitung wird pro Sitzung wiederverwendet; die
+vorhandene Domain-Snapshotvalidierung bleibt aktiv (kein Grossmodell-Benchmark).
+
+Abnahme: Schraffur/geschlossenes Polygon auswaehlen -> Kontur versetzen (Offset)
+-> 0,5 bzw. -0,5 m eingeben -> Uebernehmen -> Undo/Redo. An einem Rechteck muessen
+alle vier Seiten denselben Abstand erhalten; ein zu grosser Innenwert darf
+nicht uebernommen werden.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Einen lokalen Textbefehl fuer den nun
+geprueften 2D-Kontur-Offset an den bestehenden Copilot anbinden. Auswahl-ID und
+Modellstand pinnen, Vorschau/Bestaetigung/Undo ueber denselben Application-Pfad;
+keine separate AI-Geometrie. Konkave Formen, Kreise und Kopie-Hotkey bleiben
+vorgemerkt. Sprachparser-Ausbau folgt erst nach geprueftem Textadapter.
+
+
 ## Aktueller Stand: Schraffur-Hintergrund und Kontur — 06.10.2026
 
 Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.
