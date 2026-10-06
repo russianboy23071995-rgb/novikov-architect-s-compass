@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Einstellbare Fenstermaße vor Platzierung - 06.10.2026
+
+PR153 nach Freigabe normal in main integriert (3c19cc6). Das Fensterwerkzeug zeigt
+Breite, Höhe und Brüstungshöhe in der festen Werkzeugeigenschaftenleiste. Eingaben
+in Metern mit Komma/Punkt werden über den gemeinsamen Einheitenparser gelesen.
+Leere, nicht endliche, negative oder unzulässige Nullwerte sperren die Platzierung;
+zusätzlich gelten alle bisherigen Host-/Fenstergrenzen aus addWindow.
+
+WindowPlacementFields ist Darstellung, useWindowPlacement hält den Sitzungsentwurf,
+Application parst und führt Vorschau/Validierung/Commit mit denselben Maßen aus.
+Eine neue Entwurfsrevision invalidiert alte Vorschau- und Commit-Callbacks, auch
+vor dem nächsten Effect-Cleanup. Kein Rückfall auf vorherige gültige Maße. Werte
+bleiben bei Werkzeugwechsel während der Sitzung erhalten; bestehende Fenster,
+Projektformat, History und IFC werden durch Eingaben allein nicht geändert.
+
+Nachweis: 577 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests für Komma/Punkt, leere/ungültige Maße, zulässige
+Brüstung 0, veraltete Vorschau nach Maßänderung, übereinstimmenden Commit und
+Hostgrenzen. Browser: leere Breite + Wandklick erzeugt kein Fenster; danach
+0,80 × 1,10 m mit Brüstung 0,70 m eingesetzt, Eigenschaften stimmen überein.
+Erneuter Werkzeugaufruf behält alle drei Werte. Screenshot outputs/window-dimensions.png.
+
+Abnahme: Fensterwerkzeug, Maße oben ändern, Wand anfahren und klicken. Neue Maße
+in Eigenschaften prüfen. Breite löschen: Meldung erscheint, Klick setzt nichts.
+Grenzen: Maße sind Sitzungsvorgaben, nicht über Neustart gespeichert. Position
+weiter per Maus/Fang; keine neue 3D-Platzierung.
+
+Genau ein Folgeauftrag: Präzise Fensterposition vor Platzierung über die gemeinsame
+Hilfseingabe ergänzen: fest gewählte Hostwand und Abstand der Fenstermitte vom
+Wandachsenanfang. Bestehende ToolInteraction-/Tab-/Hostachsenregeln wiederverwenden;
+Mausplatzierung, Abbruch, Maßänderung und Undo müssen denselben Ablauf behalten.
+
+
 ## Fensterwerkzeug im Grundriss - 06.10.2026
 
 PR152 nach Freigabe normal in main integriert (c2b9897). Eigenes Fensterwerkzeug
