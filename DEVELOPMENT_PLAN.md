@@ -1,5 +1,120 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerbeschriftung: Wandachslagen — 06.10.2026
+
+Achslagen heißen Außen (bisher rechte Kante), Mitte und Innen (bisher linke
+Kante). Neue gezeichnete Wände und Wandketten verwenden bereits den Versatz
++Stärke/2 und damit standardmäßig Außen. Bestehende Wände und Projektdateien
+behalten ihre gespeicherte Achslage. Keine automatische Ermittlung einer
+Gebäudeaußenseite; die Benennung bezeichnet die bisherigen gerichteten Varianten.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
+## Nutzerkorrektur: Fenster über T-Anschlüsse und Canvas-Darstellung — 06.10.2026
+
+Fenster bleiben laut Klarstellung auf ihrer ursprünglichen Wand und werden von
+T-Anschlüssen nicht mehr blockiert. Dies ersetzt die frühere T-Überlappungssperre.
+Die ursprünglichen Wandgrenzen und Fenstermaße bleiben maßgebend; Ecken sind
+nicht Teil dieser Änderung. Die Öffnung schneidet nur die eigene Wand, keine
+Nebenwand. Bei überquertem beschnittenem Nebenwandabschluss begrenzt der gemeinsame
+Extrusionskern den Ausschnitt auf das reale Wandprofil. 3D und IFC verwenden die
+eigene Wandzuordnung; Anschlussrelationen bleiben unverändert.
+
+View → Canvas-Darstellung → Wand bietet 0,5–2 CSS-Pixel Konturstärke (Standard 1).
+Settings öffnet denselben Dialog, auch bei ausgeblendetem Desktop-Menü. Alle
+Grundrissfenster übernehmen den Wert, der beim Zoomen konstant bleibt und lokal
+im Browser gespeichert wird. Kein Modell-Undo, kein Projektformatwechsel. Achse
+bleibt türkis/2,5 Pixel, Auswahlkontur neutral. Baukörpermaße bleiben unverändert.
+
+517 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Tests für Bewegung über zwei Ts, Host-ID, Undo, Volumen, JSON/IFC und
+beschnittenes Nebenwandprofil. Browser: Fenster aus Zwischenraum auf erstes T,
+danach auf zweites T gesetzt, Undo/Redo; Konturwahl 1,5 Pixel bei Zoomwechsel und
+Neuladen geprüft, anschließend Standard 1 Pixel wieder eingestellt.
+Praktische Abnahme: Fenster → Fenster entlang Wand → über beide Ts bewegen;
+View → Canvas-Darstellung → Konturstärke ändern und zoomen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss neuer Wandabschnitte
+an die gemeinsame Application-Aktion anbinden und Undo der ganzen Wandkette
+beibehalten. Offener PR138 enthält die Korrekturen; noch keine Zusammenführung.
+
+## Auswahlkorrektur: Steuerungsachse hervorheben — 06.10.2026
+
+Die ausgewählte Wandkontur ist jetzt dezent blaugrau mit 1,25 CSS-Pixeln,
+unabhängig vom Zoom. Die maßgebende Achse bleibt türkis und 2,5 Pixel stark;
+ihre Griffpunkte bleiben ebenfalls türkis. Gemeinsame Grundflächen und
+entfernte Kontaktlinien bleiben erhalten. Ergänzung zum offenen PR138.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
+## Nutzerkorrektur: gemeinsame Grundfläche und mehrere T-Anschlüsse — 06.10.2026
+
+Ergänzung zum offenen PR138 (noch nicht zusammengeführt): bestätigte Eck- und
+T-Verbindungen erscheinen im Grundriss ohne innere Kontaktlinie mit einheitlicher
+Flächenfarbe. Auswahl bleibt über türkisfarbene Achse und Außenkontur sichtbar.
+Nur gespeicherte Verbindungen entfernen Linien; bloßes Überlagern erzeugt keine
+visuelle Anschlussbestätigung. Ausgeblendete Partner lassen den Abschluss der
+verbleibenden Wand wieder sichtbar werden. Bauteile bleiben einzeln auswählbar.
+
+Die gemeldete Meldung war die bisherige Beschränkung auf ein T-Paar pro Wand.
+Nun sind mehrere rechtwinklige Nebenwände an einer Hauptwand auf beiden Seiten
+zulässig, auch gegenüberliegend am selben Achspunkt. Zusätzlich echten Fehler
+korrigiert: automatische Eckenerkennung darf einen belegten T-Endpunkt nicht
+als Eckpartner behandeln. Gleichseitige Kontaktüberlappungen werden abgewiesen.
+Fensterprüfung, gemeinsame Konturen für 2D/3D/IFC und Einzelbewegung mit gezieltem
+Lösen bleiben erhalten. Nebenwände dürfen noch nicht zugleich Hauptwände oder
+beidseitig angeschlossen sein; Ecke/T-Kombinationen und verschiedene Querschnitte
+bleiben ausgeschlossen und erhalten spezifische Fehlermeldungen.
+
+515 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Neue Prüfungen: mehrere Ts bei linker/mittiger/rechter Achse,
+Gegenseite, falsche Eckenerkennung, Überschneidung, Kürzen, gezieltes Lösen,
+Undo, JSON/IFC, entfernte rotierte Konturen und ausgeblendete Partner.
+Browser: zwei Ts geladen, dritten gegenüberliegenden Anschluss per Punkt frei
+bewegen hergestellt, Trennlinie entfällt; Undo/Redo geprüft; keine Konsolenfehler.
+Screenshot lokal: outputs/multi-t-footprint.png. 3D bleibt aus denselben
+Bauteilkörpern abgeleitet; diese Darstellungsänderung betrifft den Grundriss.
+
+Abnahme: Hauptwand mit rechter Kante, mehrere Nebenwände von beiden Seiten
+ankoppeln. Nach Klick entfernt sich die Kontaktlinie; bei Undo erscheint sie
+wieder. Auswahl einzelner Wände und Fenster sowie Ausblenden prüfen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss über die gemeinsame Application-Aktion
+anbinden; Mehrfach-T-Regeln wiederverwenden und Undo der gesamten Wandkette
+beibehalten. Keine zusätzliche Anschlussgeometrie im Werkzeug.
+
+## Aktueller Stand: T-Fang in der 3D-Endpunktbearbeitung — 06.10.2026
+
+PR137 freigegeben und in den Gesamtzweig fix/reference-selection-lifecycle
+übernommen (d909b54). Der bestehende 3D-Arbeitsebenenpfad trägt nun denselben
+T-Fangkandidaten wie 2D bis zu previewEdit und dem gemeinsamen Commit.
+Die lokale Quellabfrage ergänzt sichtbare Wandachsen; die Application prüft
+zusätzlich den exakten T-Zielpunkt auf Sichtbarkeit. Keine eigene 3D-T-Geometrie.
+Das Fanglabel zeigt T-Anschluss. Numerische Ziele übernehmen keinen alten
+Mauskandidaten; Kamerawechsel, Abbruch und Fokusverlust verwerfen die Mausvorschau.
+
+511 Tests bestanden, TypeScript und Build erfolgreich, Lint 0 Fehler/6 bekannte
+FastRefresh-Warnungen. Neue projektionsgestützte Tests: drei Zoomstufen,
+Vorschau/Commit, ein Undo/Redo, verdeckte Achsen und fehlende/degenerierte
+Arbeitsebenen. Browser: sichtbaren Achsendpunkt der 2,30-m-Nebenwand wählen,
+Punkt frei bewegen, Klick am Hauptachsenziel ergibt 3,00 m; Undo 2,30 m,
+Redo 3,00 m. Keine Browserfehler. Der Browser meldet den JSON-Download als
+angefordert; die Download-Automation konnte die Datei nicht übernehmen.
+Gespeicherte Relationen und Roundtrip sind durch die gemeinsamen Tests geprüft.
+
+Abnahme: zwei isolierte rechtwinklige Wände gleicher Stärke/Höhe verwenden.
+In 3D die Kantenachse zur Kamera drehen, sichtbaren Achsendpunkt anklicken →
+Punkt frei bewegen → Hauptachse am Lotfußpunkt anfahren → T-Anschluss → Klick.
+Undo/Redo prüfen. Mittige oder rückseitige, vom Wandkörper verdeckte Achsen
+werden weiterhin nicht durch den Körper hindurch gefangen; dafür Ansicht drehen
+oder Grundriss verwenden. Beschränkungen auf isolierte rechtwinklige T-Paare,
+z=0 und die vorhandenen Öffnungsregeln bleiben bestehen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss anbinden. Gemeinsame lokale Achsabfrage
+und validierte T-Verbindungsaktion wiederverwenden; nur eindeutige isolierte
+rechtwinklige Paare. Vorschau, Abbruch, Öffnungsprüfung und das vereinbarte Undo
+der gesamten Wandkette absichern. Keine Mehrfach-Ts oder T/Eck-Kombinationen.
+
 ## Aktueller Stand: automatischer T-Fang beim 2D-Endpunktbewegen — 06.10.2026
 
 PR134 und PR135 freigegeben/zusammengeführt. Der gestapelte PR135 wurde über

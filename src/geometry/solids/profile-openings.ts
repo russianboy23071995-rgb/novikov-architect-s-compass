@@ -15,6 +15,7 @@ export function extrudeProfileWithOpenings(
   profile: readonly Point2[],
   height: number,
   openings: readonly ThroughOpening[],
+  clipOpeningsToProfile = false,
 ) {
   const valid = validateSimplePolygon(profile);
   if (!valid.valid || valid.signedArea <= 0 || !Number.isFinite(height) || height <= 0)
@@ -44,8 +45,9 @@ export function extrudeProfileWithOpenings(
     ];
     for (let i = 0; i < profile.length; i++)
       if (
+        !clipOpeningsToProfile &&
         measureHalfPlane(footprint, profile[i]!, profile[(i + 1) % profile.length]!).relation ===
-        "outside"
+          "outside"
       )
         throw new Error("Durchgangsöffnung liegt außerhalb des Profils.");
   }
@@ -58,7 +60,14 @@ export function extrudeProfileWithOpenings(
     }
     return result;
   };
-  const xs = cuts([...profile.map((p) => p.x), ...openings.flatMap((o) => [o.left, o.right])]);
+  const xmin = Math.min(...profile.map((p) => p.x)),
+    xmax = Math.max(...profile.map((p) => p.x));
+  const xs = cuts([
+    ...profile.map((p) => p.x),
+    ...openings
+      .flatMap((o) => [o.left, o.right])
+      .filter((x) => !clipOpeningsToProfile || (x > xmin && x < xmax)),
+  ]);
   const zs = cuts([0, height, ...openings.flatMap((o) => [o.bottom, o.top])]);
   // Intersections always use the ORIGINAL edge: neighbouring slabs therefore
   // share bit-identical vertices instead of accumulating clipping roundoff.

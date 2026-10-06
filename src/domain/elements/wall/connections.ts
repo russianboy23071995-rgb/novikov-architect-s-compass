@@ -35,7 +35,14 @@ export function reconcileWallJoins(
       .filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
       .flatMap((w) =>
         ([0, 1] as const)
-          .filter((e) => same(p, point(w, e)))
+          // A stored T endpoint belongs to its host, not to an automatic corner.
+          .filter(
+            (e) =>
+              same(p, point(w, e)) &&
+              !project.storey.wallTJunctions.some(
+                (t) => t.incoming.wallId === w.id && t.incoming.endpoint === e,
+              ),
+          )
           .map((e) => ({ wallId: w.id, endpoint: e })),
       );
     if (candidates.length > 1)
@@ -133,7 +140,16 @@ export function connectedWallSolids(project: Project) {
   const contours = connectedWallContours(project);
   const result = project.storey.walls
     .filter((w) => contours.has(w.id))
-    .map((w) => wallContourSolid(w, contours.get(w.id)!, project.storey.windows));
+    .map((w) =>
+      wallContourSolid(
+        w,
+        contours.get(w.id)!,
+        project.storey.windows,
+        project.storey.wallTJunctions.some(
+          (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
+        ),
+      ),
+    );
   solidCache.set(project, result);
   return result;
 }

@@ -53,6 +53,7 @@ const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
 };
 
 type TopToolbarProps = {
+  onCanvasDisplay: () => void;
   tool: ToolId;
   mode: ViewMode;
   layout: ViewportLayout;
@@ -142,17 +143,36 @@ export function TopToolbar(props: TopToolbarProps) {
           className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex"
           aria-label="Application menu"
         >
-          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => (
-            <Button
-              key={item}
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
-              onClick={() => props.onAction(`${item} menu`)}
-            >
-              {item}
-            </Button>
-          ))}
+          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
+            item === "View" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    View
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>
+                    Canvas-Darstellung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                key={item}
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                onClick={() => props.onAction(`${item} menu`)}
+              >
+                {item}
+              </Button>
+            ),
+          )}
         </nav>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -363,7 +383,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}>
             <PanelTop />
           </IconControl>
-          <IconControl label="Settings" onClick={() => props.onAction("Settings")}>
+          <IconControl label="Settings" onClick={props.onCanvasDisplay}>
             <Settings />
           </IconControl>
           <Button variant="ghost" size="icon" className="size-8" aria-label="User profile">

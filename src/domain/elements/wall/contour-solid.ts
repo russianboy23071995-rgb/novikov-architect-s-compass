@@ -7,7 +7,12 @@ import {
 } from "../../../geometry/solids/profile-openings.ts";
 import { coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
 
-export function wallContourSolid(wall: Wall, points: Point2[], windows: BimWindow[]) {
+export function wallContourSolid(
+  wall: Wall,
+  points: Point2[],
+  windows: BimWindow[],
+  clipOpeningsToProfile = false,
+) {
   const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
   const ux = (wall.end.x - wall.start.x) / length,
     uy = (wall.end.y - wall.start.y) / length;
@@ -47,7 +52,7 @@ export function wallContourSolid(wall: Wall, points: Point2[], windows: BimWindo
       bottom: w.sillHeight,
       top: w.sillHeight + w.height,
     }));
-  const solid = extrudeProfileWithOpenings(profile, wall.height, openings);
+  const solid = extrudeProfileWithOpenings(profile, wall.height, openings, clipOpeningsToProfile);
   const world = ([x, y, z]: Vertex3): Vertex3 => [
     body.start.x + ux * x - uy * y,
     body.start.y + uy * x + ux * y,

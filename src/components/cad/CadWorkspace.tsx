@@ -1,3 +1,5 @@
+import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
+import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings } from "@/application/snapping/grid-settings";
@@ -61,6 +63,8 @@ export function CadWorkspace({
   const [layout, setLayout] = useState<ViewportLayout>("single");
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
+  const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
+  const { wallWidth, setWallWidth } = useCanvasDisplaySettings();
   const [gridSettings, setGridSettings] = useState(defaultGridSettings);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
@@ -504,6 +508,12 @@ export function CadWorkspace({
 
   return (
     <TooltipProvider>
+      <CanvasDisplaySettings
+        open={displaySettingsOpen}
+        onOpenChange={setDisplaySettingsOpen}
+        wallWidth={wallWidth}
+        onWallWidth={setWallWidth}
+      />
       <main
         onPointerDownCapture={(event) => {
           lastPointer.current = { x: event.clientX, y: event.clientY };
@@ -561,6 +571,7 @@ export function CadWorkspace({
         </Dialog>
         {!fullscreen && (
           <TopToolbar
+            onCanvasDisplay={() => setDisplaySettingsOpen(true)}
             onLayers={() => {
               cancelInteraction();
               setDemandOpen(false);
@@ -795,6 +806,7 @@ export function CadWorkspace({
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                   draftPoints={pathDrawing ? pathPoints : []}
                   draftFill={tool === "hatch" ? hatchFill : undefined}
+                  wallOutlineWidth={wallWidth}
                   gridSettings={gridSettings}
                   snap={snap}
                   ortho={ortho}

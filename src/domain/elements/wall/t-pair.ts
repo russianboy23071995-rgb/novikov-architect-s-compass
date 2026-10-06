@@ -66,16 +66,11 @@ export function inspectTPair(host: Wall, incoming: TPairEnd, windows: readonly B
 
 /** Same pair inspection and solids for project validation, previews and export. */
 export function deriveTPairSolids(host: Wall, incoming: TPairEnd, windows: readonly BimWindow[]) {
-  const { geometry, openings } = inspectTPair(host, incoming, windows);
-  const blocked = openings.find((o) => o.status === "overlapping");
-  if (blocked) {
-    const number = windows.findIndex((w) => w.id === blocked.windowId) + 1;
-    throw new Error(`Fenster ${number} überschneidet den T-Anschluss. Berührung ist erlaubt.`);
-  }
+  const { geometry } = inspectTPair(host, incoming, windows);
   const wall = incoming.wall;
   const walls = [
-    wallContourSolid(host, geometry.host.points, [...windows]),
-    wallContourSolid(wall, geometry.incoming.points, [...windows]),
+    wallContourSolid(host, geometry.host.points, [...windows], true),
+    wallContourSolid(wall, geometry.incoming.points, [...windows], true),
   ];
   const volume = walls.reduce((sum, w) => sum + w.volume, 0);
   if (!Number.isFinite(volume)) throw new Error("Anschlussvolumen nicht darstellbar.");

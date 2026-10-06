@@ -136,6 +136,7 @@ export function SolidSnapPreview({
         className="pointer-events-none absolute bottom-2 left-2 z-20 rounded bg-background/80 px-2 py-1 text-xs"
       >
         XY · z=0 · {hover.references.length} Hilfsreferenzen
+        {candidate?.sourceFeature === "t-axis" && " · T-Anschluss"}
       </p>
     </>
   );

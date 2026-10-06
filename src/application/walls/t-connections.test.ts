@@ -1,3 +1,9 @@
+import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
+import { deriveTPreview } from "./t-preview.ts";
+import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
+import { createProjectionState } from "../../rendering/viewport/projection-state.ts";
+import { createWallPreviewContext } from "../../rendering/viewport/wall-preview-context.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
 import { createEditingState, editingReducer, previewEdit } from "../direct-edit/controller.ts";
 import { editInteraction } from "../tools/adapters.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
@@ -17,7 +23,7 @@ import {
   deserializeProject,
 } from "../../lib/bim/model.ts";
 import { previewTConnection, commitTConnection } from "./t-connections.ts";
-import { moveElement } from "../direct-edit/transforms.ts";
+import { moveElement, moveWindowAlongWall } from "../direct-edit/transforms.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import {
   connectedWallContours,
@@ -130,7 +136,7 @@ test("whole wall translation detaches even when translated host still contains a
   );
 });
 
-test("invalid persisted identities, duplicate/shared relations and competing corners fail atomically", () => {
+test("invalid persisted identities, duplicate incoming relations and competing corners fail atomically", () => {
   const p = connected(),
     before = serializeProject(p);
   for (const r of [
@@ -157,18 +163,19 @@ test("invalid persisted identities, duplicate/shared relations and competing cor
     thickness: 0.36,
     height: 2.8,
   });
-  assert.throws(() =>
+  assert.equal(
     previewTConnection(third, third, {
       ...request,
       relation: { ...relation, incoming: { wallId: "third", endpoint: 1 } },
-    }),
+    }).storey.wallTJunctions.length,
+    2,
   );
   for (const changes of [{ thickness: 0.4 }, { height: 3 }, { bodyOffset: 0.5 }])
     assert.throws(() => updateWall(p, "host", changes));
   assert.equal(serializeProject(p), before);
 });
 
-test("touching T windows work in normal solid/IFC and roundtrip; overlap rejected even when hidden", async () => {
+test("T windows may cross contacts, including hidden windows, in solid/IFC and roundtrip", async () => {
   let p = connected();
   for (const [wallId, length] of [
     ["host", 6],
@@ -192,8 +199,8 @@ test("touching T windows work in normal solid/IFC and roundtrip; overlap rejecte
   assert.equal(await exportIfc(restored, date), await exportIfc(p, date));
   p = validateProject({ ...p, bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.window] } });
   for (const id of ["window-incoming"])
-    assert.throws(() => updateWindow(p, id, { position: 0.8 }), /überschneidet|fit/);
-  assert.throws(() => updateWindow(p, "window-host", { position: 0.5 }), /überschneidet/);
+    assert.ok(buildSolid(updateWindow(p, id, { position: 0.8 })).volume > buildSolid(p).volume);
+  assert.equal(updateWindow(p, "window-host", { position: 0.5 }).storey.windows[0]!.position, 0.5);
 });
 
 for (const offset of [-0.18, 0, 0.18])
@@ -384,4 +391,267 @@ test("off-midpoint T snap supports edge axes and respects held direction", () =>
     assert.notEqual(constrained.candidate?.sourceFeature, "t-axis");
     assert.equal(constrained.point.y, -0.7);
   }
+});
+
+test("3D workplane transports the same T target through preview, commit and undo", () => {
+  for (const zoom of [0.6, 1, 2]) {
+    const a = aiming(updateWall(pair(0.18), "incoming", { end: { x: 3, y: -0.7 } }));
+    const projection = createProjectionState(
+      createProjectionFrame(buildSolid(a.session.base)),
+      { ...initialCamera, yaw: 0, pitch: 0.5, zoom },
+      { left: 0, top: 0, width: 800, height: 600 },
+      { width: 800, height: 600 },
+    )!;
+    const { context } = createWallPreviewContext(
+      a.session.base,
+      projection,
+      true,
+      0,
+      a.adapter.snapping,
+      "incoming",
+    );
+    const snap = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3.001, y: -0.001 },
+      { ...context, endpointRadiusPx: 10, gridSpacing: null, includeInteractionTargets: true },
+      snapOptions,
+    );
+    assert.equal(snap.candidate?.sourceFeature, "t-axis");
+    assert.deepEqual(snap.point, { x: 3, y: 0 });
+    const preview = previewEdit(a.session, a.session.base, a.target, snap.point, snap.candidate);
+    confirmInteraction(a.adapter, snap.point, snap.candidate);
+    assert.deepEqual(a.state().history.present, preview);
+    assert.equal(preview.storey.wallTJunctions.length, 1);
+    assert.equal(a.state().history.past.length, 1);
+    assert.deepEqual(undoProject(a.state().history).present, a.session.base);
+    assert.deepEqual(redoProject(undoProject(a.state().history)).present, preview);
+  }
+});
+
+test("3D T acquisition rejects hidden axes and unavailable workplanes", () => {
+  const a = aiming(updateWall(pair(0.18), "incoming", { end: { x: 3, y: -0.7 } }));
+  for (const camera of [
+    null,
+    { ...initialCamera, yaw: Math.PI, pitch: 0.5 },
+    { ...initialCamera, yaw: 0, pitch: 0 },
+  ]) {
+    const projection =
+      camera &&
+      createProjectionState(
+        createProjectionFrame(buildSolid(a.session.base)),
+        camera,
+        { left: 0, top: 0, width: 800, height: 600 },
+        { width: 800, height: 600 },
+      );
+    const { context } = createWallPreviewContext(
+      a.session.base,
+      projection,
+      true,
+      0,
+      a.adapter.snapping,
+      "incoming",
+    );
+    const snap = resolveToolSnap(
+      a.adapter.snapping,
+      { x: 3, y: 0 },
+      { ...context, endpointRadiusPx: 10, gridSpacing: null, includeInteractionTargets: true },
+      snapOptions,
+    );
+    assert.notEqual(snap.candidate?.sourceFeature, "t-axis");
+  }
+  assert.equal(a.state().history.past.length, 0);
+});
+
+test("multiple T branches share a host from both sides and retain independent history/IFC", async () => {
+  for (const offset of [-0.18, 0, 0.18]) {
+    let p = pair(offset);
+    p = previewTConnection(p, p, request);
+    for (const [id, x, y] of [
+      ["second", 4, -3],
+      ["opposite", 3, 3],
+    ] as const) {
+      p = addWall(p, {
+        id,
+        start: { x, y },
+        end: { x, y: 0 },
+        thickness: 0.36,
+        height: 2.8,
+        bodyOffset: offset,
+      });
+      assert.ok(deriveTPreview(p, "host", { wallId: id, endpoint: 1 }));
+      p = previewTConnection(p, p, {
+        ...request,
+        relation: { hostWallId: "host", incoming: { wallId: id, endpoint: 1 } },
+      });
+    }
+    assert.equal(p.storey.wallTJunctions.length, 3);
+    assert.equal(connectedWallContours(p).size, 4);
+    assert.equal(connectedWallSolids(p).length, 4);
+    assert.deepEqual(deserializeProject(serializeProject(p)), p);
+    assert.equal(((await exportIfc(p)).match(/=IFCWALL\(/g) ?? []).length, 4);
+    const h = commitProject(
+      createHistory(p),
+      moveElement(p, { kind: "wall", id: "second" }, { x: 0.5, y: 0 }),
+    );
+    assert.equal(h.present.storey.wallTJunctions.length, 2);
+    assert.deepEqual(undoProject(h).present, p);
+    assert.equal(updateWall(p, "host", { end: { x: 3.5, y: 0 } }).storey.wallTJunctions.length, 2);
+    const overlap = addWall(p, {
+      id: "overlap",
+      start: { x: 3.1, y: -3 },
+      end: { x: 3.1, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+      bodyOffset: offset,
+    });
+    assert.throws(
+      () =>
+        previewTConnection(overlap, overlap, {
+          ...request,
+          relation: { hostWallId: "host", incoming: { wallId: "overlap", endpoint: 1 } },
+        }),
+      /überschneiden/,
+    );
+  }
+});
+
+test("plan removes only persisted visible contact seams and restores caps when partner hidden", () => {
+  const p = connected();
+  const visible = new Set(["host", "incoming"]);
+  const outlines = wallPlanOutlines(p, visible);
+  const perimeter = (map: ReturnType<typeof wallPlanOutlines>) =>
+    [...map.values()]
+      .flat()
+      .reduce((sum, e) => sum + Math.hypot(e.end.x - e.start.x, e.end.y - e.start.y), 0);
+  // Host 6 x .36 and incoming 2.82 x .36, minus the shared .36 contact twice.
+  assert.ok(Math.abs(perimeter(outlines) - (2 * (6 + 0.36) + 2 * (2.82 + 0.36) - 0.72)) < 1e-9);
+  assert.equal(outlines.get("incoming")!.length, 3);
+  assert.equal(wallPlanOutlines(p, new Set(["incoming"])).get("incoming")!.length, 4);
+  assert.equal(wallPlanOutlines(pair(), visible).get("incoming")!.length, 4);
+  const snapshot = serializeProject(p);
+  wallPlanOutlines(p, visible);
+  assert.equal(serializeProject(p), snapshot);
+});
+
+test("opposite T endpoint snap does not create a spurious corner", () => {
+  let p = pair(0.18);
+  p = previewTConnection(p, p, request);
+  p = addWall(p, {
+    id: "opposite",
+    start: { x: 3, y: 3 },
+    end: { x: 3, y: 0.7 },
+    thickness: 0.36,
+    height: 2.8,
+    bodyOffset: 0.18,
+  });
+  const state = editingReducer(createEditingState(p), {
+    type: "begin",
+    target: { kind: "wall", id: "opposite" },
+    action: "point",
+    index: 1,
+    anchor: { x: 3, y: 0.7 },
+  });
+  const session = state.session!;
+  const next = previewEdit(
+    session,
+    session.base,
+    { kind: "wall", id: "opposite" },
+    { x: 3, y: 0 },
+    {
+      kind: "endpoint",
+      worldPoint: { x: 3, y: 0 },
+      sourceEntityId: "host",
+      sourceFeature: "t-axis",
+      distanceOnScreen: 0,
+      priority: 0,
+    },
+  );
+  assert.equal(next.storey.wallTJunctions.length, 2);
+  assert.equal(next.storey.wallJoins.length, 0);
+});
+
+test("joined corner outline and rotated distant T remove their contact only", () => {
+  let p = addWall(createProject("corner", "s"), {
+    id: "a",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  p = addWall(p, {
+    id: "b",
+    start: { x: 3, y: 0 },
+    end: { x: 3, y: 3 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const outlines = wallPlanOutlines(p, new Set(["a", "b"]));
+  assert.equal(outlines.get("a")!.length, 3);
+  assert.equal(outlines.get("b")!.length, 3);
+  const base = connected();
+  const transform = (p: { x: number; y: number }) => ({
+    x: 1000000 + Math.cos(0.7) * p.x - Math.sin(0.7) * p.y,
+    y: -1000000 + Math.sin(0.7) * p.x + Math.cos(0.7) * p.y,
+  });
+  const rotated = validateProject({
+    ...base,
+    storey: {
+      ...base.storey,
+      walls: base.storey.walls.map((w) => ({
+        ...w,
+        start: transform(w.start),
+        end: transform(w.end),
+      })),
+    },
+  });
+  assert.equal(wallPlanOutlines(rotated, new Set(["host", "incoming"])).get("incoming")!.length, 3);
+});
+
+test("host window travels across both T contacts with stable identity, undo and IFC", async () => {
+  let p = connected();
+  p = addWall(p, {
+    id: "second",
+    start: { x: 4.5, y: -3 },
+    end: { x: 4.5, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  p = previewTConnection(p, p, {
+    ...request,
+    relation: { hostWallId: "host", incoming: { wallId: "second", endpoint: 1 } },
+  });
+  p = addWindow(p, {
+    id: "travelling",
+    wallId: "host",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 0.2,
+  });
+  const baseVolume = buildSolid(p).volume;
+  for (const position of [0.3, 0.5, 0.6, 0.75, 0.9]) {
+    const moved = moveWindowAlongWall(p, "travelling", (position - 0.2) * 6);
+    assert.equal(moved.storey.windows[0]!.wallId, "host");
+    assert.ok(Math.abs(moved.storey.windows[0]!.position - position) < 1e-10);
+    assert.ok(Math.abs(buildSolid(moved).volume - baseVolume) < 1e-8);
+    assert.equal(moved.storey.wallTJunctions.length, 2);
+    assert.deepEqual(deserializeProject(serializeProject(moved)), moved);
+    assert.ok((await exportIfc(moved)).includes("IFCWINDOW("));
+    assert.deepEqual(undoProject(commitProject(createHistory(p), moved)).present, p);
+  }
+});
+
+test("incoming window may cross trimmed T cap while its cut is clipped to its own wall", () => {
+  let p = connected();
+  p = addWindow(p, {
+    id: "near-cap",
+    wallId: "incoming",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 2.5 / 3,
+  });
+  const incoming = connectedWallSolids(p).find((w) => w.wallId === "incoming")!;
+  assert.ok(Math.abs(incoming.volume - (2.82 * 0.36 * 2.8 - 0.82 * 0.36)) < 1e-8);
+  assert.deepEqual(deserializeProject(serializeProject(p)), p);
 });

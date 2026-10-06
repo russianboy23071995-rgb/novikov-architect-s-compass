@@ -1,5 +1,51 @@
 # NOVIKOV CAD Architecture Contract
 
+## T contacts do not constrain hosted window movement — 2026-10-06
+
+Binding user clarification: windows stay on their original wall and ignore T
+contacts while moving. This supersedes the earlier overlap prohibition for T
+openings only. Original wall-axis extent, dimensions and opening-overlap rules
+remain; corner rules are unchanged. Moving a window neither transfers its host
+nor cuts a neighbouring wall. Geometric contact reports remain diagnostic.
+
+T wall solids opt into clipping the rectangular opening to the owning wall's
+derived footprint. The shared extrusion kernel bounds its slices to that profile;
+closed-shell validation remains active. This includes a window crossing a trimmed
+incoming cap. IFC retains its existing owning-wall void relationship, so no
+neighbouring element is silently modified. Model actions, preview, persistence
+and normal export accept the same window positions.
+
+Canvas wall contour width is a presentation preference in CSS pixels (0.5–2,
+default 1), shared by all plan viewports. UI hook owns guarded browser storage;
+it is neither project data nor model history. View → Canvas-Darstellung and the
+Settings control open the same dialog. Turquoise axis stays at 2.5 CSS pixels;
+selected wall outline stays neutral. This supersedes the fixed 1.25 px selection
+width below; physical wall thickness and export geometry are unaffected.
+
+## Shared-host T relations and joined plan outlines — 2026-10-06
+
+Binding decision following the user's multi-side T workflow: a host may have
+multiple right-angle incoming walls on either side, including opposite branches
+at the same axis point. This supersedes the disjoint-pair restriction below.
+An incoming wall may have only one T relation and may not also act as a host.
+Corner/T combinations and differing cross-sections remain unsupported. Same-side
+contact intervals must not overlap; all window/contact checks remain mandatory.
+Schema 8 fields are unchanged; validation accepts this broader topology. Existing
+files retain their exact relations. Earlier builds may reject new multi-T files.
+An endpoint already participating in a T is excluded from automatic corner
+acquisition, preventing a false corner between opposite incoming branches.
+
+Rendering wallPlanOutlines removes coincident contact strokes only between
+persisted, visible partners using the authoritative derived contours. It does
+not discover relations from proximity or merge BIM entities. Hiding a partner
+restores the remaining wall's cap. Fill is uniform; selection uses a subtle neutral exposed contour (1.25 CSS px).
+Turquoise is reserved for the authoritative drawing axis and its handles (2.5 CSS px axis). Separate hit geometry, stable IDs and IFC entities
+remain intact. This is a ground-plan display rule, not a solid boolean union.
+The existing temporary pair-preview overlay remains separately outlined.
+
+The 3D workplane adapter now passes the shared T candidate through preview and
+commit, superseding the earlier unimplemented 3D carrier status below.
+
 ## Explicit axis snap intent in 2D endpoint editing — 2026-10-06
 
 Application t-axis-snap derives an endpoint target from nearby eligible axis
