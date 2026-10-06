@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-Fensterprüfung konkretisiert — 06.10.2026
+
+PR128 freigegeben und übernommen (860abc1). Der Folgeauftrag ist als
+[Prüfentwurf](docs/T_WINDOW_VALIDATION.md) ausgearbeitet: Nebenfenster gegen
+gekürzte Kontur, Hauptfenster gegen die vollständige Kontaktbreite prüfen.
+Gemeinsame Modell-Toleranzen, Konturen und Extrusion weiterverwenden. Explizite
+Randindizes unterscheiden sich von der normalisierten Eckgehrung.
+
+Die Frage Berührung erlauben/verbieten wurde an den Nutzer gestellt und ist noch
+offen. Empfehlung bleibt Nichtkontakt ohne zusätzlichen Zentimeterabstand.
+Kein neues Laufzeitverhalten, weiterhin fensterlose T-Vorschau. Die Entscheidung
+wird nicht aus einer allgemeinen PR-Freigabe als bestätigt abgeleitet.
+
+Geprüft: Quellmodule, Randindizes und analytische Beispiele; Referenz-Netto bei
+zwei freien 1x1-m-Fenstern ist 8,17056 m³. Dokumentlinks und diff --check geprüft.
+Keine neuen Tests/Builds für die reine Dokumentation; letzter Code-Nachweis aus
+PR128 bleibt 481 bestandene Tests, TypeScript/Build und Browserprüfung.
+
+**Genau ein ausführbarer Folgeauftrag:** Nach dokumentierter Antwort die
+Domain-Fensterprüfung gemäß docs/T_WINDOW_VALIDATION.md implementieren und an
+die temporäre T-Vorschau anbinden. Freie/berührende/überlappende Fenster beider
+Wände, Achslagen, Modellstandbindung und Nettovolumen prüfen. Keine Persistenz
+oder automatische T-Verknüpfung. Bis zur Antwort keine Berührungsregel umsetzen.
+
+
 ## Aktueller Stand: Temporäre T-Anschlussvorschau — 06.10.2026
 
 PR127 freigegeben und übernommen (fadbf33). feat/t-wall-preview ergänzt das
