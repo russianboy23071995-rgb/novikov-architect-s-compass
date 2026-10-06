@@ -1,5 +1,40 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Offset-Cap, Klickplatzierung und Textadapter — 06.10.2026
+
+Dieser Abschnitt ersetzt die historischen Folgeauftraege und Ablehnungsregeln.
+PR123 mit angeforderter Korrektur freigegeben/uebernommen (1a1608b): Innenoffset
+behaelt mindestens 1 % der urspruenglichen Laenge jeder Seite; die zuerst
+kollabierende Seite begrenzt den Offset. Bei numerisch sehr kleinen Formen kann
+die Grenze frueher greifen. Maus/Zahl/Commit nutzen identische Begrenzung, die
+Vorschau bleibt bestehen. Konkave Ausgangsformen bleiben zunaechst unsupported.
+Freies Bewegen platziert jetzt sofort per Klick, statt nur den Winkel zu fixieren.
+Tab wechselt weiterhin zuerst zur Laenge, danach zum Winkel. Gemeinsamer Adapter.
+
+Neuer Zweig feat/offset-text-command: lokaler Befehl "Offset um -5 cm" bzw.
+"Offset 0,05 m" fuer die ausgewaehlte Schraffur/geschlossene Polylinie. Strikter
+Parser mit m/cm/mm, Vorzeichen und Dezimalkomma. Keine Zielvermutung; Vorschau
+bindet Modellstand und Auswahl-ID. Gemeinsame Direct-Edit-Aktion berechnet den
+Offset inklusive Cap, die Zusammenfassung nennt den tatsaechlichen und bei
+Begrenzung den angeforderten Abstand. Bestaetigung ueber bestehende History.
+Kein externes AI-Modell, keine neue Spracherkennungslogik, keine zweite Geometrie.
+
+472 Tests bestanden, TypeScript und Build erfolgreich; Lint nur sechs bekannte
+Warnungen. Browser: 10-cm-Schraffur trotz -100-m-Eingabe ohne Fehler auf 1 mm
+begrenzt; ein Mausklick beendet freie Bewegung; Tab Laenge/Winkel geprueft;
+Textoffset -100 cm zeigt -0,0495 m, Uebernahme und Undo erfolgreich.
+
+Abnahme: kleines Rechteck -> Offset stark nach innen ziehen/eingeben: Vorschau
+bleibt am Cap. Element frei bewegen -> Mausziel klicken: sofort platziert.
+Textfeld mit ausgewaehlter Schraffur: "Offset um -100 cm" -> Befehl pruefen ->
+begrenzten Abstand lesen -> Uebernehmen -> Undo. Keine Dateiformataenderung.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Den lokalen Offset-Textadapter fuer die
+bestehende Spracherkennung freischalten, einschliesslich deutscher Zahlwoerter,
+"nach innen/nach aussen", gepinntem Auswahlkontext und Bestaetigung. Erkennung
+normalisiert ausschliesslich in die gepruefte Grammatik; keine neue Modelllogik.
+Konkave Konturen, Kreise, Linienarten und Kopie-Hotkeys bleiben vorgemerkt.
+
 ## Aktueller Stand: Offset fuer konvexe 2D-Konturen — 06.10.2026
 
 Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.

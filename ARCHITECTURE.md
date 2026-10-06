@@ -1690,3 +1690,14 @@ Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
 Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
+
+
+## Local offset text adapter — 2026-10-06
+
+Application drawing/offset-command strictly parses signed Offset [um] number
+m/cm/mm and targets only the selected closed 2D contour. It invokes the existing
+Direct Edit numeric preview, including the prepared inward cap. The existing
+command envelope pins serialized source and stable selection for confirmation;
+UI displays requested versus actual distance when capped. No separate geometry,
+AI service, new persistence or speech grammar is introduced. UI hints distinguish
+supported offset commands from future style commands.
