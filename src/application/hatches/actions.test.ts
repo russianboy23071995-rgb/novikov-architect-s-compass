@@ -157,7 +157,7 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.storey, { ...storey, hatches: [], wallJoins: [] });
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
@@ -165,4 +165,80 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   assert.throws(() => loadProjectData({ ...v3, bimVisibility: { hiddenLayerIds: ["unknown"] } }));
   assert.throws(() => loadProjectData({ ...v3, storey: { ...storey, hatches: [hatch()] } }));
   assert.throws(() => validateProject({ ...p, storey }));
+});
+
+test("hatch background and contour are atomic, independently switchable and retained by files and history", async () => {
+  const initial = createHistory(create(createExampleProject()));
+  const base = initial.present;
+  const changes = {
+    background: { visible: true, color: "#ffffff" },
+    contour: { visible: true, color: "#123456" },
+  };
+  const request = { projectId: base.id, kind: "update" as const, id: "hatch-1", changes };
+  const changed = commitHatch(initial, base, request);
+  assert.equal(changed.past.length, 1);
+  assert.deepEqual(changed.present.storey.hatches[0]!.fill, base.storey.hatches[0]!.fill);
+  assert.deepEqual(changed.present.storey.hatches[0]!.points, base.storey.hatches[0]!.points);
+  assert.deepEqual(readProjectFile(serializeProject(changed.present)), changed.present);
+  assert.deepEqual(undoProject(changed).present, base);
+  assert.deepEqual(redoProject(undoProject(changed)).present, changed.present);
+  const hidden = previewHatch(changed.present, changed.present, {
+    ...request,
+    changes: { contour: { ...changes.contour, visible: false } },
+  });
+  assert.deepEqual(hidden.storey.hatches[0]!.background, changes.background);
+  assert.equal(hidden.storey.hatches[0]!.contour.color, "#123456");
+  const date = new Date("2026-10-06T12:00:00Z");
+  assert.equal(await exportIfc(base, date), await exportIfc(changed.present, date));
+});
+
+test("malformed appearance cannot commit or load, including hidden paints and missing schema-7 fields", () => {
+  const base = create(createExampleProject());
+  for (const key of ["background", "contour"] as const) {
+    for (const paint of [
+      { visible: true, color: "red" },
+      { visible: false, color: "#ffff" },
+      { visible: "yes", color: "#ffffff" },
+      { visible: true, color: "#ffffff", extra: 1 },
+    ]) {
+      assert.throws(() =>
+        previewHatch(base, base, {
+          projectId: base.id,
+          kind: "update",
+          id: "hatch-1",
+          changes: { [key]: paint },
+        } as Parameters<typeof previewHatch>[2]),
+      );
+      const file = structuredClone(base);
+      Object.assign(file.storey.hatches[0]!, { [key]: paint });
+      assert.throws(() => loadProjectData(file));
+    }
+    const file = structuredClone(base);
+    Reflect.deleteProperty(file.storey.hatches[0]!, key);
+    assert.throws(() => loadProjectData(file));
+  }
+});
+
+test("V4-V6 hatch migration preserves old fill, contours, layers and appearance without permissive legacy parsing", () => {
+  const current = create(createExampleProject());
+  for (const version of [4, 5, 6]) {
+    const old = JSON.parse(JSON.stringify(current));
+    old.schemaVersion = version;
+    old.storey.hatches.forEach((h: Record<string, unknown>) => {
+      delete h["background"];
+      delete h["contour"];
+    });
+    if (version < 6) delete old.storey.wallJoins;
+    if (version < 5)
+      old.storey.walls.forEach((w: Record<string, unknown>) => {
+        delete w["bodyOffset"];
+      });
+    const before = JSON.stringify(old);
+    const loaded = loadProjectData(old);
+    assert.equal(loaded.schemaVersion, 7);
+    assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
+    assert.equal(JSON.stringify(old), before);
+    old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };
+    assert.throws(() => loadProjectData(old));
+  }
 });

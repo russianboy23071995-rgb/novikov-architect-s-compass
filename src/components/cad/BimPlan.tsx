@@ -655,6 +655,14 @@ export function BimPlan({
       )}
       {plan.hatches.map((hatch) => (
         <g key={hatch.id}>
+          {hatch.background.visible && (
+            <polygon
+              aria-label="Schraffurhintergrund"
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill={hatch.background.color}
+              pointerEvents="none"
+            />
+          )}
           <polygon
             {...selectProps("hatch", hatch.id)}
             points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
@@ -666,6 +674,17 @@ export function BimPlan({
             pointerEvents="all"
             className="cursor-pointer outline-none focus-visible:stroke-sky-300"
           />
+          {hatch.contour.visible && (
+            <polygon
+              aria-label="Schraffurkontur"
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke={hatch.contour.color}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
           {selection?.id === hatch.id && (
             <polygon
               points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}

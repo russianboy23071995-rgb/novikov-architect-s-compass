@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Schraffur-Hintergrund und Kontur — 06.10.2026
+
+Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.
+PR121 nach Freigabe in fix/reference-selection-lifecycle uebernommen (29512a4).
+Zweig feat/hatch-appearance: Schraffureigenschaften bieten getrennt schaltbaren
+Hintergrund und Kontur mit eigener Farbe. Hintergrund liegt hinter der bestehenden
+Fuellung; 100 % Fuelldeckkraft verdeckt ihn. Kontur vorerst durchgezogen und
+1 CSS-Pixel breit; Auswahlmarkierung und Trefferflaeche bleiben davon unabhaengig.
+Keine neuen Linienobjekte, Linienarten oder Musterdefinitionen.
+
+Schema 7 speichert beide Farben/Schalter explizit. V1–V6 werden streng validiert
+und migriert; bei vorhandenen Schraffuren starten beide neuen Darstellungen aus,
+damit alte Dateien unveraendert aussehen. Die gemeinsame Application-Aktion
+uebernimmt Aenderungen mit einem Undo-Schritt; IFC bleibt unveraendert.
+
+465 Tests bestanden; TypeScript/Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Neue Tests: unabhaengige Farben/Schalter, Datei-Rundlauf, Undo/Redo,
+IFC-Unveraendertheit, ungueltige/versteckte Farben, fehlende Pflichtfelder und
+V4–V6-Migration mit strikter Ablehnung falsch versionierter neuer Attribute.
+Browser: Rechteckschraffur gezeichnet; Hintergrund/Kontur aktiviert, Farben
+geaendert, tatsaechliche SVG-Farben kontrolliert, Undo/Redo geprueft. Farbeingaben
+reagieren jetzt auch auf input-Ereignisse (im Test gefundene Uebernahmeluecke).
+
+Abnahme: Schraffur auswaehlen -> Hintergrund/Kontur einschalten -> Farben
+waehlen -> Uebernehmen. Mit 35 % Deckkraft ist der Hintergrund sichtbar; mit
+0 % bleibt nur Hintergrund/Kontur. Undo nimmt die Eigenschaften gemeinsam zurueck.
+Neue Projektdateien benoetigen diesen Stand oder neuer; alte Versionen koennen
+das neue Format nicht lesen. Aeltere Projektdateien bleiben importierbar.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Gemeinsame Offset-Aktion fuer einfache
+konvexe geschlossene 2D-Konturen (Schraffur/geschlossene Polylinie) als begrenzte
+vertikale Etappe mit On-Demand-Menue, signiertem Abstand, Vorschau, Validierung
+und Undo integrieren. Ungueltige/zusammenfallende oder konkave Ergebnisse zuerst
+klar abweisen; keine stillen Reparaturen. BIM bleibt ausgeschlossen. Kreis-
+Unterstuetzung, komplexe Konturen und Kopie-Hotkey bleiben vorgemerkt.
+
 ## Aktueller Stand: fortlaufende Wandkette — 06.10.2026
 
 Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.

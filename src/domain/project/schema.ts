@@ -1,7 +1,7 @@
 import { connectedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
-import { hatchSchema } from "../elements/hatch/model.ts";
+import { hatchSchema, legacyHatchSchema, defaultHatchAppearance } from "../elements/hatch/model.ts";
 import { layerSchema, defaultLayerIdsSchema } from "../layers/model.ts";
 
 const id = z.string().trim().min(1);
@@ -73,7 +73,7 @@ const projectV3Schema = projectV2Schema.extend({
 });
 const projectV4Schema = projectV3Schema.extend({
   schemaVersion: z.literal(4),
-  storey: projectV3Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+  storey: projectV3Schema.shape.storey.extend({ hatches: z.array(legacyHatchSchema) }),
 });
 const offsetWallSchema = currentWallSchema.extend({ bodyOffset: z.number().finite() });
 const projectV5Schema = projectV4Schema.extend({
@@ -83,12 +83,30 @@ const projectV5Schema = projectV4Schema.extend({
 const wallEndSchema = z
   .object({ wallId: id, endpoint: z.union([z.literal(0), z.literal(1)]) })
   .strict();
-const projectSchema = projectV5Schema.extend({
+const projectV6Schema = projectV5Schema.extend({
   schemaVersion: z.literal(6),
   storey: projectV5Schema.shape.storey.extend({
     wallJoins: z.array(z.object({ first: wallEndSchema, second: wallEndSchema }).strict()),
   }),
 });
+const projectSchema = projectV6Schema.extend({
+  schemaVersion: z.literal(7),
+  storey: projectV6Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+});
+type ProjectV6 = z.infer<typeof projectV6Schema>;
+export function validateProjectV6(value: unknown): ProjectV6 {
+  const project = projectV6Schema.parse(value);
+  // Reuse current relation validation on a disposable explicitly converted view.
+  validateProject({
+    ...project,
+    schemaVersion: 7,
+    storey: {
+      ...project.storey,
+      hatches: project.storey.hatches.map((h) => ({ ...h, ...defaultHatchAppearance })),
+    },
+  });
+  return project;
+}
 type ProjectV5 = z.infer<typeof projectV5Schema>;
 export function validateProjectV5(value: unknown): ProjectV5 {
   const project = projectV5Schema.parse(value);
@@ -165,7 +183,7 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 6
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
       ? project.storey.hatches
       : []),
   ]) {
@@ -184,7 +202,7 @@ function validateGeometry(
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 6
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
       ? project.storey.hatches
       : []),
   ]) {
@@ -205,7 +223,7 @@ function validateGeometry(
     }
     if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 6)
+  if (project.schemaVersion === 5 || project.schemaVersion === 7)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

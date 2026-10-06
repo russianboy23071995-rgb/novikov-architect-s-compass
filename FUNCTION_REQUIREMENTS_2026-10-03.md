@@ -207,3 +207,13 @@ Rasterengine und Winkel-/Laengeneingabe bleiben gemeinsam. Enter im Canvas
 oder Doppelklick schliesst ab; Escape verwirft. Bestehende Anschlussgrenzen
 bleiben. Schraffur-Hintergrund/Konturfarbe folgt als begrenzter Schritt;
 Linienarten und Offset bleiben fuer spaeter vorgemerkt.
+
+
+### Umsetzung 06.10.2026: Schraffur-Hintergrund und Konturfarbe
+
+Separater Hintergrund und sichtbare Kontur mit eigener Farbe sind in den
+Werkzeugeigenschaften umgesetzt, einschliesslich Dateimigration und Undo/Redo.
+Kontur ist Teil der Schraffurdarstellung, keine doppelte Liniengeometrie.
+Linienarten bleiben fuer spaeter. Offset fuer geschlossene Polygone/Kreise und
+spaeterer Kopie-Hotkey bleiben erhalten; naechster Teil beginnt mit konvexen
+2D-Polygonen. Kein Skalieren von BIM-Bauteilen als Ersatz fuer Offset.
