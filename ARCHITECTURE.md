@@ -1,5 +1,17 @@
 # NOVIKOV CAD Architecture Contract
 
+## Isolated T IFC acceptance — 2026-10-06
+
+Domain t-solid now owns the validated T pair's opening-aware solids. Application
+re-exports it for the existing snapshot-bound preview; interop/ifc/t-junction
+uses it directly and passes local profiles to the existing writer. No Interop
+import from Application and no duplicate clearance or extrusion implementation.
+This is an explicit acceptance export, not a change to the normal export button.
+No stored T relation or schema migration. The fixture generator supplies free,
+touching and rotated cases with independent analytic net-volume expectations.
+See docs/T_IFC_ACCEPTANCE.md for regeneration and external acceptance.
+
+
 ## T-preview opening contact — 2026-10-06
 
 User permits windows to run against a wall. The isolated T-preview interprets

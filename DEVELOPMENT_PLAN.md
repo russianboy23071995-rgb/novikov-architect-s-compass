@@ -1,5 +1,35 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-IFC-Abnahmeexport geprüft — 06.10.2026
+
+PR130 freigegeben und übernommen (b76ab5a). Separater Export exportTJunctionIfc
+nutzt gemeinsamen IFC-Writer und Domain t-solid. Die bestehende Vorschau nutzt
+denselben Helfer; keine zweite Validierung/Geometrie. Normaler IFC-Export und
+Projektformat unverändert. T-Verbindungen bleiben temporär.
+
+486 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Neue IFC-Tests sichern Öffnungen, stabile IDs, unveränderte Eingaben,
+unveränderten regulären Export, Snapshot vor async Hashing und Ablehnung
+ungültiger/überschneidender Ziele. IfcOpenShell 0.8.5 validiert t-free,
+t-touch und t-touch-rotated mit IFC4/EXPRESS, Hierarchie, Fensterzuordnung,
+Profilen, Platzierung und analytischen Netto-Volumina. Summe jeweils 8,17056 m³.
+Keine erneute Browserprüfung nötig: keine UI-Änderung; die geprüften Domain-
+Konturen aus der vorherigen Browservorschau werden wiederverwendet.
+
+Archicad-Abnahme noch offen. Testdateien in outputs/t-ifc-acceptance;
+Anleitung und Reproduktion in [T-IFC-Abnahme](docs/T_IFC_ACCEPTANCE.md).
+Zuerst t-touch.ifc prüfen: zwei Wände und zwei Fenster, beide Öffnungen bündig
+am Anschluss, Hauptwand ungeteilt und kein überschneidendes Wandvolumen.
+Nicht mit dem regulären Export der Ausgangs-Projektdatei verwechseln.
+
+**Genau ein ausführbarer Folgeauftrag:** Die dauerhafte T-Relation anhand der
+vorhandenen Endpunktbezüge und Migration planen und das Verhalten beim
+Verschieben/Verlängern der Hauptwand mit dem Nutzer festlegen. Bestehende Regel
+für Einzelwandbewegung (lösen) berücksichtigen; keine relative Ankerbewegung
+oder Mitnahme unbestätigt einführen. Danach einen begrenzten Persistenzauftrag
+festhalten. Text/Voice bleiben Adapter gemeinsamer geprüfter Aktionen.
+
+
 ## Aktueller Stand: T-Vorschau mit Fenstern — 06.10.2026
 
 PR129 freigegeben und übernommen (fb0f21e). Nutzer erlaubt Fenster gegen Wände;

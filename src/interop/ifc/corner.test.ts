@@ -4,6 +4,7 @@ import { addWall, addWindow, createProject } from "../../lib/bim/model.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { exportCornerIfc } from "./corner.ts";
 import { writeIfc } from "./writer.ts";
+import { exportTJunctionIfc } from "./t-junction.ts";
 const date = new Date("2026-10-05T00:00:00Z");
 const targets = [
   { wallId: "A", endpoint: 1 as const },
@@ -30,6 +31,57 @@ function fixture() {
 const rows = (s: string, type: string) => s.split("\n").filter((l) => l.includes(`=${type}(`));
 const identities = (s: string) =>
   [...s.matchAll(/^#\d+=IFC\w+\('([0-3][0-9A-Za-z_$]{21})'/gm)].map((m) => m[1]).sort();
+
+function tFixture() {
+  let p = createProject("t", "s");
+  for (const w of [
+    { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    { id: "incoming", start: { x: 3, y: -3 }, end: { x: 3, y: 0 } },
+    { id: "other", start: { x: 10, y: 0 }, end: { x: 14, y: 0 } },
+  ])
+    p = addWall(p, { ...w, thickness: 0.36, height: 2.8, bodyOffset: 0 });
+  for (const [wallId, length] of [
+    ["host", 6],
+    ["incoming", 3],
+  ] as const)
+    p = addWindow(p, {
+      id: `window-${wallId}`,
+      wallId,
+      width: 1,
+      height: 1,
+      sillHeight: 0.9,
+      position: 2.32 / length,
+    });
+  return p;
+}
+
+test("isolated T IFC shares identities, cuts both touching windows and leaves ordinary export unchanged", async () => {
+  const p = tFixture(),
+    before = structuredClone(p);
+  const normal = await exportIfc(p, date);
+  const result = await exportTJunctionIfc(p, "host", { wallId: "incoming", endpoint: 1 }, date);
+  assert.equal(rows(result, "IFCARBITRARYCLOSEDPROFILEDEF").length, 2);
+  assert.equal(rows(result, "IFCRECTANGLEPROFILEDEF").length, 3);
+  assert.equal(rows(result, "IFCRELVOIDSELEMENT").length, 2);
+  assert.equal(rows(result, "IFCRELFILLSELEMENT").length, 2);
+  assert.deepEqual(identities(result), identities(normal));
+  assert.deepEqual(p, before);
+  assert.equal(await exportIfc(p, date), normal);
+  assert.equal(p.storey.wallJoins.length, 0);
+});
+
+test("T acceptance export snapshots inputs and rejects overlap without fallback", async () => {
+  const p = tFixture(),
+    d = new Date(date),
+    target = { wallId: "incoming", endpoint: 1 as const };
+  const expected = await exportTJunctionIfc(p, "host", target, d);
+  const pending = exportTJunctionIfc(p, "host", target, d);
+  p.storey.windows[0]!.position = 0.5;
+  d.setFullYear(2040);
+  assert.equal(await pending, expected);
+  await assert.rejects(exportTJunctionIfc(p, "host", target, date), /überschneidet/);
+  await assert.rejects(exportTJunctionIfc(tFixture(), "missing", target, date));
+});
 test("explicit corner uses two closed profiles; unrelated wall and opening stay rectangular", async () => {
   const p = fixture(),
     before = structuredClone(p),
