@@ -1,3 +1,4 @@
+import { boundedOffsetTarget } from "./offset.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import { updateLine } from "../../lib/bim/model.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
@@ -51,6 +52,7 @@ const edgePreparations = new WeakMap<
 >();
 
 export function boundedEdgeTarget(session: EditSession, target: { x: number; y: number }) {
+  if (session.action === "offset") return boundedOffsetTarget(session, target);
   if (session.action !== "edge") return target;
   const key = JSON.stringify([
     session.target.kind,

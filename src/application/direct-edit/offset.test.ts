@@ -42,9 +42,9 @@ test("parallel offset keeps a constant perpendicular distance in either winding,
   );
 });
 
-test("collapse, inversion, concavity, crossings and non-finite offsets reject without poisoning preparation", () => {
+test("non-finite/unsupported contours reject; inward collapse is capped without poisoning preparation", () => {
   const prepared = prepareConvexOffset(ring);
-  for (const d of [-1, -2, -100, NaN, Infinity]) assert.throws(() => prepared.at(d));
+  for (const d of [NaN, Infinity]) assert.throws(() => prepared.at(d));
   assert.deepEqual(prepared.at(0), ring);
   for (const points of [
     ring.slice(0, 2),
@@ -64,7 +64,7 @@ test("collapse, inversion, concavity, crossings and non-finite offsets reject wi
     { x: 6, y: 0 },
     { x: 0, y: 2 },
   ]);
-  assert.throws(() => triangle.at(-1));
+  assert.equal(triangle.at(-1).length, 3);
   assert.equal(triangle.at(0.1).length, 3);
 });
 
@@ -106,7 +106,7 @@ for (const kind of ["hatch", "line"] as const)
     const result = previewNumericMove(session, editing.history.present, target, "0,5");
     assert.deepEqual(result.point, { x: 2, y: -0.5 });
     assert.equal(editing.history.past.length, 0);
-    assert.throws(() => previewNumericMove(session, editing.history.present, target, "-1"));
+    assert.ok(previewNumericMove(session, editing.history.present, target, "-1").project);
     assert.throws(() => previewEdit(session, editing.history.present, null, result.point));
     assert.throws(() =>
       previewEdit(
@@ -171,5 +171,20 @@ test("application rejects BIM and open lines, even with forged offset intent", (
     assert.equal(state.session, null);
     assert.ok(state.error);
     assert.equal(state.history.past.length, 0);
+  }
+});
+
+test("inward cap retains 1% for tiny rectangles, both windings and repeated targets", () => {
+  for (const scale of [1, 0.001, 0.00001]) {
+    for (const reverse of [false, true]) {
+      const points = ring.map((p) => ({ x: p.x * scale, y: p.y * scale }));
+      const prepared = prepareConvexOffset(reverse ? points.reverse() : points);
+      assert.ok(Math.abs(prepared.clamp(-100) + 0.99 * scale) < 1e-12);
+      const capped = prepared.at(-100);
+      const height = Math.max(...capped.map((p) => p.y)) - Math.min(...capped.map((p) => p.y));
+      assert.ok(Math.abs(height - 0.02 * scale) < 1e-12);
+      assert.deepEqual(prepared.at(-1000), capped);
+      assert.deepEqual(prepared.at(0), points);
+    }
   }
 });

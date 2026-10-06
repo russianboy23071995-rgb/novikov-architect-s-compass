@@ -34,3 +34,11 @@ export function previewContourOffset(session: EditSession, pointer: Point) {
       })
     : updateLine(session.base, session.target.id, { points: [...points, { ...points[0]! }] });
 }
+
+export function boundedOffsetTarget(session: EditSession, pointer: Point): Point {
+  const normal = offsetDirection(session);
+  const distance =
+    (pointer.x - session.anchor.x) * normal.x + (pointer.y - session.anchor.y) * normal.y;
+  const bounded = prepared(session).clamp(distance);
+  return { x: session.anchor.x + bounded * normal.x, y: session.anchor.y + bounded * normal.y };
+}

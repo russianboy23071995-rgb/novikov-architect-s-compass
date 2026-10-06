@@ -1676,3 +1676,17 @@ precision input, cap and commit continue through the shared edit interaction.
 Pointer-up suppresses its following click; simple click/keyboard activation
 leaves the standard edit active. Capture loss/cancel aborts; session/model binding
 prevents stale drags. Other on-demand edge and insertion actions remain available.
+
+
+## Korrektur nach Nutzerabnahme — 06.10.2026
+
+Innenoffset wird jetzt auf mindestens 1 % Restlaenge jeder urspruenglichen Seite
+begrenzt. Die zuerst kollabierende Seite bestimmt den Abstand; numerische
+Gueltigkeitsgrenzen koennen frueher stoppen. Die Grenze wird einmal vorbereitet,
+Mausziel, Zahleneingabe und Bestaetigung verwenden denselben Cap. Vorschau bleibt
+stehen und zeigt den tatsaechlichen Abstand statt eines ungueltigen Ziels.
+Ungeeignete Ausgangskonturen und nicht-endliche Eingaben bleiben Fehler.
+Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
+Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
+471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
+kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.

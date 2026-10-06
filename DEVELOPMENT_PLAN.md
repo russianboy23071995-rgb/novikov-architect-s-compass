@@ -1933,3 +1933,17 @@ PR #107 nach Freigabe normal in den Integrationszweig gemergt (ea8db92). BimPlan
 Abnahme: Wand im Grundriss anklicken, mittige gestrichelte Achse sehen, zoomen, Wandecke bewegen und abbrechen. Fenster waehlen oder Wandebene ausblenden: Achse verschwindet. Modell und Export enthalten weiterhin nur dieselbe Wand.
 
 Genau ein naechster Auftrag: die offene N45-Bedienentscheidung fuer Achsversatz mit dem Nutzer klaeren und als verbindliche Regel dokumentieren (Wandkoerper bleibt stehen oder bewegt sich relativ zur Zeichenachse); darauf basierend einen begrenzten gemeinsamen Application-Auftrag definieren. Bis zur Entscheidung keinen Achsversatz oder automatischen Anschluss implementieren.
+
+
+## Korrektur nach Nutzerabnahme — 06.10.2026
+
+Innenoffset wird jetzt auf mindestens 1 % Restlaenge jeder urspruenglichen Seite
+begrenzt. Die zuerst kollabierende Seite bestimmt den Abstand; numerische
+Gueltigkeitsgrenzen koennen frueher stoppen. Die Grenze wird einmal vorbereitet,
+Mausziel, Zahleneingabe und Bestaetigung verwenden denselben Cap. Vorschau bleibt
+stehen und zeigt den tatsaechlichen Abstand statt eines ungueltigen Ziels.
+Ungeeignete Ausgangskonturen und nicht-endliche Eingaben bleiben Fehler.
+Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
+Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
+471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
+kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.

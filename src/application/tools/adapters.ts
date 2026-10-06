@@ -44,7 +44,7 @@ export function editInteraction(
       : polar
         ? { axisLabel: null, degrees: null }
         : null,
-    click: session.action === "move" && polar ? "direction" : "confirm",
+    click: "confirm",
     preview: (angle, length, aim) =>
       previewMovementInput(session, current, selection, angle, length, aim),
     validate: (point) => {

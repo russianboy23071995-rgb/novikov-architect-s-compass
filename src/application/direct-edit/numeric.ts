@@ -74,7 +74,9 @@ export function previewMovementInput(
     const metres =
       (result.point.x - session.anchor.x) * axis.direction.x +
       (result.point.y - session.anchor.y) * axis.direction.y;
-    const capped = session.action === "edge" && Math.abs(metres - parseMetres(lengthText)) > 1e-9;
+    const capped =
+      ["edge", "offset"].includes(session.action) &&
+      Math.abs(metres - parseMetres(lengthText)) > 1e-9;
     return {
       ...result,
       degrees,
