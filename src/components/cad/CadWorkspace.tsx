@@ -804,6 +804,7 @@ export function CadWorkspace({
                 <ViewportManager
                   project={project}
                   drawingPreview={activeChain?.preview}
+                  drawingProjectAt={drawingOrigin ? interaction.adapter?.previewProject : undefined}
                   visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}

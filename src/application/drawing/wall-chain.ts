@@ -75,3 +75,23 @@ export function finishWallChain(chain: WallChain, current: Project): Project {
   if (!chain.wallIds.length) throw new Error("Mindestens einen Wandabschnitt zeichnen.");
   return chain.preview;
 }
+
+/** Derived model only: uses exactly the same validation as placing the next segment. */
+export function previewWallChain(
+  chain: WallChain,
+  current: Project,
+  point: Point,
+  candidate?: SnapCandidate | null,
+): Project {
+  let id = "@wall-preview";
+  const ids = new Set(
+    [
+      ...chain.preview.storey.walls,
+      ...chain.preview.storey.windows,
+      ...(chain.preview.storey.lines ?? []),
+      ...chain.preview.storey.hatches,
+    ].map((e) => e.id),
+  );
+  while (ids.has(id)) id += "-";
+  return appendWallChain(chain, current, id, point, candidate).preview;
+}

@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Derived wall drawing preview — 2026-10-06
+
+ToolInteraction may expose previewProject for a disposable model snapshot. The
+wall adapter uses previewWallChain/appendWallChain for both that snapshot and
+confirmation validation. BimPlan only renders the returned model or reports the
+Application error. Numeric targets carry no hover candidate, matching commit.
+Draft wall visibility follows its assigned layer; committed picking, snap sources
+and history remain bound to the authoritative project. New draft IDs are never
+added to that project. Invalid targets retain already accepted draft segments,
+show the precise validation error and do not display an invalid body. The current
+slice is the 2D plan; shared 3D drawing preview is not introduced here.
+
+
 ## Starting a wall on a host axis — 2026-10-06
 
 The initial wall snap policy uses the shared local T-axis resolver, projecting

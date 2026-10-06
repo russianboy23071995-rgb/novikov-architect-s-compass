@@ -1,3 +1,5 @@
+import type { ToolInteraction } from "@/application/tools/interaction";
+import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
 import { wallPlanOutlines } from "@/rendering/viewport/wall-plan-outline";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { useShiftSnapLock } from "./useShiftSnapLock";
@@ -50,6 +52,7 @@ import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   drawingPreview?: Project | undefined;
+  drawingProjectAt?: ToolInteraction["previewProject"];
   cornerPreview?: CornerPreview;
   referenceSelection?: ReferenceSelectionBinding | undefined;
   referenceScope?: object | undefined;
@@ -90,6 +93,7 @@ export type BimPlanProps = {
 
 export function BimPlan({
   drawingPreview,
+  drawingProjectAt,
   cornerPreview,
   referenceSelection,
   referenceScope,
@@ -318,10 +322,7 @@ export function BimPlan({
       ? drawingTarget
         ? {
             point: drawingTarget,
-            candidate:
-              pointerSnap && pointsCompatible(pointerSnap.point, drawingTarget)
-                ? pointerSnap.candidate
-                : null,
+            candidate: null,
           }
         : null
       : numericTarget !== undefined
@@ -392,20 +393,40 @@ export function BimPlan({
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
   }
-  const shown = preview ?? (drawing ? drawingPreview : null) ?? project;
+  const drawingPoint = resolvedHover?.point;
+  const drawingCandidate = resolvedHover?.candidate;
+  const drawingResult = useMemo(() => {
+    if (
+      !drawing ||
+      !drawingProjectAt ||
+      !drawingPoint ||
+      !start ||
+      pointsCompatible(start, drawingPoint)
+    )
+      return { project: null, error: "" };
+    try {
+      return { project: drawingProjectAt(drawingPoint, drawingCandidate), error: "" };
+    } catch (error) {
+      return {
+        project: null,
+        error: error instanceof Error ? error.message : "Ungueltiges Wandziel.",
+      };
+    }
+  }, [drawing, drawingProjectAt, drawingPoint, drawingCandidate, start]);
+  const shown = preview ?? drawingResult.project ?? (drawing ? drawingPreview : null) ?? project;
+  const allowsShown = useMemo(
+    () => drawingWallVisibility(project, shown, visibility),
+    [project, shown, visibility],
+  );
   const connected = connectedWallSolids(shown);
-  const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
+  const plan = visiblePlanGeometry(shown, allowsShown);
   const outlines = useMemo(
     () =>
       wallPlanOutlines(
         shown,
-        new Set(
-          shown.storey.walls
-            .filter((w) => isLayerVisible(project, visibility, w.id))
-            .map((w) => w.id),
-        ),
+        new Set(shown.storey.walls.filter((w) => allowsShown(w.id)).map((w) => w.id)),
       ),
-    [shown, project, visibility],
+    [shown, allowsShown],
   );
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
@@ -1058,6 +1079,18 @@ export function BimPlan({
           strokeWidth={0.025}
           pointerEvents="none"
         />
+      )}
+      {drawingResult.error && resolvedHover && (
+        <text
+          role="alert"
+          x={resolvedHover.point.x}
+          y={-resolvedHover.point.y - 18 / camera.pixelsPerMetre}
+          fontSize={12 / camera.pixelsPerMetre}
+          fill="#dc2626"
+          pointerEvents="none"
+        >
+          {drawingResult.error}
+        </text>
       )}
       {drawing && start && (
         <g pointerEvents="none">

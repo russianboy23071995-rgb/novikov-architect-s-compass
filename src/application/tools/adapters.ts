@@ -1,4 +1,4 @@
-import { appendWallChain, type WallChain } from "../drawing/wall-chain.ts";
+import { previewWallChain, type WallChain } from "../drawing/wall-chain.ts";
 import { findTAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
@@ -67,6 +67,12 @@ export function drawingInteraction(
   wall?: WallChain,
 ): ToolInteraction {
   return {
+    ...(wall
+      ? {
+          previewProject: (point: Point, candidate?: SnapCandidate | null) =>
+            previewWallChain(wall, current, point, candidate),
+        }
+      : {}),
     identity: origin,
     snapping: wall ? wallDrawingPolicy(origin, path) : drawingSnapPolicy(origin, path),
     origin,
@@ -75,11 +81,7 @@ export function drawingInteraction(
     preview: (angle, length, aim) => previewDrawingInput(base, current, origin, aim, angle, length),
     validate: (point, candidate) => {
       previewDrawingInput(base, current, origin, point, "", "");
-      if (wall) {
-        let id = "@wall-preview";
-        while (wall.preview.storey.walls.some((w) => w.id === id)) id += "-";
-        appendWallChain(wall, current, id, point, candidate);
-      }
+      if (wall) previewWallChain(wall, current, point, candidate);
     },
     commit,
     cancel,
