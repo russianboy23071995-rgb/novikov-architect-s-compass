@@ -28,11 +28,22 @@ export function wallContourSolid(wall: Wall, points: Point2[], windows: BimWindo
           : y,
     };
   });
+  // A transverse cap can acquire two slightly different local X values during
+  // rotation/translation. Canonicalize only numerically compatible coordinates.
+  const xs: number[] = [];
+  for (const point of profile) {
+    const existing = xs.find((x) => coordinatesCompatible(x, point.x));
+    if (existing === undefined) xs.push(point.x);
+    else point.x = existing;
+  }
+  // Reconcile opening edges with profile vertices after world/local roundoff.
+  // Derived coordinates only; do not create a microscopic extrusion cell at contact.
+  const profileX = (x: number) => profile.find((p) => coordinatesCompatible(p.x, x))?.x ?? x;
   const openings = windows
     .filter((w) => w.wallId === wall.id)
     .map((w) => ({
-      left: w.position * length - w.width / 2,
-      right: w.position * length + w.width / 2,
+      left: profileX(w.position * length - w.width / 2),
+      right: profileX(w.position * length + w.width / 2),
       bottom: w.sillHeight,
       top: w.sillHeight + w.height,
     }));

@@ -1,5 +1,23 @@
 # NOVIKOV CAD Architecture Contract
 
+## T-preview opening contact — 2026-10-06
+
+User permits windows to run against a wall. The isolated T-preview interprets
+this as touching allowed, positive overlap rejected, without extra clearance.
+Existing corner-join rules are unchanged. Domain t-openings derives one snapshot's
+T geometry and reports free/touching/overlapping for each target window. Host
+windows are checked against the entire projected contact interval; incoming
+windows against the trimmed contour and correct endpoint cap. Visibility never
+exempts an opening. Application consumes the report and shared cut solids.
+
+contour-solid reconciles numerically compatible local profile X coordinates and
+opening bounds after world/local conversion, preventing spurious tiny extrusion
+cells at a transverse cap. This affects derived geometry only, within existing
+model tolerances. No project mutation or persisted opening resize. T relations
+remain temporary; save/ordinary IFC still use the unchanged model. Further joins
+on either wall remain unsupported by the diagnostic T path.
+
+
 ## Temporary T preview adapter — 2026-10-06
 
 Application walls/t-preview resolves stable IDs in a validated Project, rejects

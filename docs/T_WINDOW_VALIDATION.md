@@ -1,15 +1,14 @@
 # Fensterprüfung am isolierten T-Anschluss
 
 Stand: 06.10.2026, Integrationscommit 860abc1 (PR128).
-Planungsstand; die Vorschau weist Fenster bis zur Umsetzung weiterhin ab.
+Umgesetzt: T-Vorschau unterstützt freie und berührende Fenster.
 
 ## Regelentscheidung
 
-Noch offen: Darf ein Fenster die Kontaktfläche berühren? Der Nutzer wurde dazu
-in diesem Auftrag gefragt. Empfehlung: Berührung und Überschneidung verhindern,
-aber keinen zusätzlichen Mindestabstand in Zentimetern verlangen. Die Antwort
-muss vor Umsetzung eingetragen werden; diese Empfehlung ist keine Nutzerentscheidung.
-Die bestehende Regel für Eckanschlüsse bleibt unverändert.
+Nutzerentscheidung 06.10.2026: "Ja, Fenster dürfen erstmal gegen eine Wand laufen."
+Für die isolierte T-Vorschau umgesetzt als: Berührung erlaubt, echte
+Überschneidung weiterhin unzulässig. Kein zusätzlicher Zentimeterabstand.
+Die bisherige strikte Regel für Eckanschlüsse wird dadurch nicht verändert.
 
 ## Gemeinsame Implementierung
 
@@ -72,9 +71,10 @@ Abschluss der Nebenwand: y=-0,18 bzw. Achsabstand 2,82 m vom Nebenwandanfang.
 - Eingang unverändert bei Ablehnung, veralteter Modellstand, Zielwechsel,
   Abbruch und bestehende rechte/schräge Eckvorschauen als Regressionen prüfen.
 
-## Begrenzter Folgeauftrag
+## Umgesetzter Prüfauftrag
 
-Nach dokumentierter Antwort zur Berührung den gemeinsamen Domain-Prüfbericht
+Nach dokumentierter Antwort wurde der gemeinsame Domain-Prüfbericht umgesetzt.
+Historischer Auftrag: Domain-Prüfbericht
 implementieren und in die temporäre T-Vorschau integrieren. Obige Grenzfälle und
 analytisches Nettovolumen testen, Browservorschau mit Fenstern prüfen. Keine
 Persistenz, automatischen T-Verbindungen oder neue Sprachmutation hinzufügen.
