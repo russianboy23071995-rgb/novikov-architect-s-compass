@@ -135,3 +135,9 @@ Prüfe analytisches Volumen, beide Seiten/Achslagen/Orientierungen sowie ungült
 und kurze Eingaben. Keine Persistenz, automatischen Verbindungen, UI oder neuen
 Befehle in diesem Teilauftrag. Seine Prüfung benötigt keine Entscheidung über
 das noch offene Verhalten beim späteren Verschieben der Hauptwand.
+
+## Konkretisierung der Öffnungsprüfung — 06.10.2026
+
+Siehe [T-Fensterprüfung](T_WINDOW_VALIDATION.md) für zuständige Module,
+Kontaktintervalle und konkrete Grenztests. Die Berührungsregel ist angefragt,
+noch nicht bestätigt; automatische T-Verbindungen bleiben unverändert offen.
