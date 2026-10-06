@@ -1,3 +1,6 @@
+import type { ToolSnapPolicy } from "./snapping.ts";
+import { querySnap } from "../../constraints/snapping/engine.ts";
+import { createShiftSnapLock } from "./shift-lock.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareToolReferences, resolveToolSnap, drawingSnapPolicy } from "./snapping.ts";
@@ -770,4 +773,116 @@ test("grid targets survive contour/wall preview, history and zoom metrics", asyn
       assert.deepEqual(deserializeProject(serializeProject(preview)), preview);
     }
   }
+});
+
+test("held Shift retains angle across distant sectors, release recalibrates and instances reset", () => {
+  const lock = createShiftSnapLock();
+  const policy = drawingSnapPolicy({ x: 0, y: 0 });
+  const context = {
+    references: [],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: true, featureSnap: true };
+  assert.deepEqual(lock.resolve(policy, { x: 3, y: 0.1 }, context, options).point, { x: 3, y: 0 });
+  for (const cursor of [
+    { x: 2, y: 100 },
+    { x: -5, y: -100 },
+    { x: 0, y: 10 },
+  ])
+    assert.equal(lock.resolve(policy, cursor, context, options).point.y, 0);
+  lock.release();
+  assert.deepEqual(lock.resolve(policy, { x: 0.1, y: 4 }, context, options).point, { x: 0, y: 4 });
+  assert.equal(lock.resolve(policy, { x: 100, y: 2 }, context, options).point.x, 0);
+  const diagonal = createShiftSnapLock().resolve(policy, { x: 3, y: 3 }, context, options).point;
+  assert.ok(Math.abs(diagonal.x - 3) < 1e-12 && diagonal.x === diagonal.y);
+  lock.resolve(policy, { x: 2, y: 0 }, context, { ...options, shift: false });
+  lock.press();
+  assert.equal(lock.resolve(policy, { x: 4, y: 20 }, context, options).point.y, 0);
+});
+
+test("held Shift preserves an oblique construction extension and exact on-axis targets", () => {
+  const lock = createShiftSnapLock();
+  const policy = drawingSnapPolicy({ x: 0, y: 0 });
+  const reference = { ...policy.origin, directions: [{ x: 2, y: 1 }] };
+  const context = {
+    references: [reference],
+    activeReferences: [reference],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: true, featureSnap: true };
+  const initial = lock.resolve(policy, { x: 2, y: 1 }, context, options);
+  assert.ok(Math.abs(initial.point.x - 2 * initial.point.y) < 1e-9);
+  const far = lock.resolve(policy, { x: -20, y: 100 }, context, options);
+  assert.ok(Math.abs(far.point.x - 2 * far.point.y) < 1e-9);
+  const exact = lock.resolve(
+    policy,
+    { x: 4.03, y: 2.02 },
+    {
+      ...context,
+      references: [
+        ...context.references,
+        { entityId: "target", feature: "end", point: { x: 4, y: 2 } },
+      ],
+    },
+    options,
+  );
+  assert.deepEqual(exact.point, { x: 4, y: 2 });
+  assert.equal(exact.candidate?.kind, "endpoint");
+});
+
+test("Shift at the origin waits for a direction; disabled snapping drops the held axis", () => {
+  const lock = createShiftSnapLock();
+  const policy = drawingSnapPolicy({ x: 0, y: 0 });
+  const context = {
+    references: [],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: true, featureSnap: true };
+  lock.resolve(policy, { x: 0, y: 0 }, context, options);
+  assert.equal(lock.resolve(policy, { x: 0, y: 3 }, context, options).point.x, 0);
+  lock.resolve(policy, { x: 5, y: 0 }, context, { ...options, featureSnap: false });
+  assert.equal(lock.resolve(policy, { x: 5, y: 0 }, context, options).point.y, 0);
+});
+
+test("held idle origin survives changed references and camera scale; explicit tool axes win", () => {
+  const lock = createShiftSnapLock();
+  const origin = { entityId: "a", feature: "end", point: { x: 0, y: 1 } };
+  const context = {
+    references: [],
+    activeReferences: [origin],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: null,
+  };
+  const options = { ortho: false, shift: true, featureSnap: true };
+  lock.resolve(null, { x: 3, y: 1 }, context, options);
+  const result = lock.resolve(
+    null,
+    { x: 30, y: 80 },
+    { ...context, pixelsPerMetre: 400, activeReferences: [{ ...origin, point: { x: 20, y: 20 } }] },
+    options,
+  );
+  assert.deepEqual(result.point, { x: 30, y: 1 });
+  const axisPolicy = {
+    ...drawingSnapPolicy({ x: 0, y: 0 }),
+    resolve: (cursor, ctx) =>
+      querySnap(cursor, {
+        ...ctx,
+        fixedAxis: { origin: { x: 0, y: 0 }, direction: { x: 0, y: 1 } },
+      }),
+  } satisfies ToolSnapPolicy;
+  assert.equal(
+    createShiftSnapLock().resolve(axisPolicy, { x: 10, y: 2 }, context, options).point.x,
+    0,
+  );
 });

@@ -4,7 +4,7 @@ import type { Project, Point } from "@/lib/bim/model";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { createWallPreviewContext } from "@/rendering/viewport/wall-preview-context";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
-import { resolveToolSnap } from "@/application/tools/snapping";
+import { useShiftSnapLock } from "./useShiftSnapLock";
 import { advanceGuideDirections } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
 import { useHoverReference } from "./useHoverReference";
@@ -63,11 +63,12 @@ export function useSolidInference(
           context.metric,
         )
       : null;
+  const resolveLockedSnap = useShiftSnapLock(sessionKey, resetKey);
   const resolve = (position: Point, shift = false) => {
     if (plane?.status !== "ok") return null;
     const inverse = plane.value.toPlane(position);
     if (inverse.status !== "ok") return null;
-    return resolveToolSnap(
+    return resolveLockedSnap(
       policy,
       inverse.value.point,
       {

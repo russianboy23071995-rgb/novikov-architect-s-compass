@@ -1,5 +1,17 @@
 # NOVIKOV CAD Architecture Contract
 
+## Held Shift direction — 2026-10-06
+
+Shift now latches the acquired construction direction for the current interaction,
+not the nearest angle on every pointer movement. Application createShiftSnapLock
+owns the transient origin/direction; useShiftSnapLock supplies shared keyboard
+press/release/blur lifecycle for plan and 3D workplane adapters. Existing explicit
+edit axes and host restrictions still win. Recognised oblique guides can be held;
+otherwise the first direction uses the existing 45-degree acquisition. Exact
+compatible snap targets remain eligible along the held axis. Releasing Shift
+permits recalibration; a new interaction/reset discards the latch; view zoom does
+not. This state is neither project data nor model history.
+
 ## Persisted isolated T relations, schema 8 — 2026-10-06
 
 Current contract supersedes the historical schema-7/persistence status below.
