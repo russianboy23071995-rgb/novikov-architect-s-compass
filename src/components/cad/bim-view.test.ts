@@ -8,6 +8,7 @@ test("UI example uses the agreed wall/window dimensions and stable initial IDs",
   assert.equal(project.storey.walls[0]!.thickness, 0.36);
   assert.deepEqual(project.storey.windows[0], {
     id: "window-1",
+    layerId: project.defaultLayerIds.window,
     wallId: "wall-1",
     width: 1.2,
     height: 1.35,

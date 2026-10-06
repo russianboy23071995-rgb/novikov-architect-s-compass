@@ -122,8 +122,8 @@ test("segment intersection snapping obeys screen radius, endpoint/midpoint prior
     assert.equal(querySnap(p(1, 0), { ...c, enabled: false }).candidate, null);
     assert.equal(querySnap(p(1, 0), { ...c, orthoOrigin: p(0, 0.02) }).candidate, null);
     assert.equal(
-      querySnap(p(1, 0), { ...c, angleOrigin: p(0, 0) }).candidate?.sourceFeature,
-      "shift-45",
+      querySnap(p(1, 0), { ...c, angleOrigin: p(0, 0) }).candidate?.kind,
+      "segment-intersection",
     );
     for (const kind of [undefined, "midpoint"] as const) {
       const ref = {

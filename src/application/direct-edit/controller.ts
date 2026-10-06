@@ -1,20 +1,61 @@
+import { connectSnappedT } from "../walls/t-axis-snap.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
+import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
+import type { ElementTarget } from "../selection/target.ts";
+import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
+import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
 import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
 import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
 import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
+import { commitLayerAssignment, commitLayerManagement } from "../layers/actions.ts";
+import type { ManageLayerRequest } from "../layers/actions.ts";
+import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
   history: ProjectHistory;
+  visibilityHistory?: VisibilityHistory;
   session: EditSession | null;
   error: string;
 };
 
-export type EditingEvent =
+/** Current horizontal 3D edit capabilities; geometry/axis rules remain in the shared adapters. */
+export function supportsWallWorkplaneEdit(
+  target: EditTarget,
+  action: EditAction,
+  index: number | null,
+): boolean {
+  if (target.kind !== "wall") return false;
+  if (action === "point" || action === "stretch") return index === 0 || index === 1;
+  return ["move", "axis", "x", "y"].includes(action);
+}
+
+type ModelEditingEvent =
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
-  | { type: "confirm"; session: EditSession; selection: EditTarget | null; point: Point }
+  | {
+      type: "confirm";
+      session: EditSession;
+      selection: ElementTarget | null;
+      point: Point;
+      candidate?: SnapCandidate | null | undefined;
+    }
+  | {
+      type: "wall-offset";
+      base: Project;
+      selection: ElementTarget | null;
+      request: WallOffsetRequest;
+    }
   | { type: "cancel" }
   | { type: "project"; project: Project }
+  | { type: "manage-layer"; base: Project; request: ManageLayerRequest }
+  | {
+      type: "assign-layer";
+      base: Project;
+      target: ElementTarget;
+      selection: ElementTarget | null;
+      layerId: string;
+    }
   | { type: "undo" | "redo" };
 
 export function createEditingState(project: Project): EditingState {
@@ -25,20 +66,48 @@ export function createEditingState(project: Project): EditingState {
 export function previewEdit(
   session: EditSession,
   project: Project,
-  selection: EditTarget | null,
+  selection: ElementTarget | null,
   point: Point,
+  candidate?: SnapCandidate | null,
 ): Project {
   if (selection?.id !== session.target.id || selection?.kind !== session.target.kind)
     throw new Error("Die Auswahl wurde geändert. Bearbeitung erneut starten.");
-  return editAtPointer(session, project, point);
+  return connectSnappedT(session, editAtPointer(session, project, point), point, candidate);
 }
 
 /** Pure application transition. React only dispatches user intent. */
-export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+function reduceModelEdit(state: EditingState, event: ModelEditingEvent): EditingState {
   if (event.type === "cancel")
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "wall-offset":
+        return {
+          history: commitWallOffset(state.history, event.base, event.selection, event.request),
+          session: null,
+          error: "",
+        };
+      case "manage-layer":
+        return {
+          history: commitLayerManagement(state.history, event.base, event.request),
+          session: null,
+          error: "",
+        };
+      case "assign-layer": {
+        if (
+          event.selection?.id !== event.target.id ||
+          event.selection.kind !== event.target.kind ||
+          !selectedLayerElement(state.history.present, event.target)
+        )
+          throw new Error("Die Auswahl wurde geändert. Ebenenzuordnung erneut beginnen.");
+        const history = commitLayerAssignment(state.history, event.base, {
+          projectId: event.base.id,
+          elementIds: [event.target.id],
+          layerId: event.layerId,
+        });
+        // Discard a pending geometric preview; never commit it together with membership.
+        return { history, session: null, error: "" };
+      }
       case "begin": {
         const fallback = editAnchor(state.history.present, event.target);
         const session: EditSession = {
@@ -60,6 +129,7 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
           state.history.present,
           event.selection,
           event.point,
+          event.candidate,
         );
         return { history: commitProject(state.history, next), session: null, error: "" };
       }
@@ -77,6 +147,43 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
     return {
       ...state,
       error: error instanceof Error ? error.message : "Bearbeitung konnte nicht übernommen werden.",
+    };
+  }
+}
+
+export type EditingEvent =
+  | ModelEditingEvent
+  | { type: "visibility"; base: Project; action: VisibilityAction }
+  | { type: "load-project"; project: Project };
+export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  if (event.type === "load-project")
+    return {
+      ...reduceModelEdit(state, { type: "project", project: event.project }),
+      visibilityHistory: emptyVisibilityHistory(),
+    };
+  if (event.type !== "visibility")
+    return {
+      ...reduceModelEdit(state, event),
+      ...(state.visibilityHistory ? { visibilityHistory: state.visibilityHistory } : {}),
+    };
+  try {
+    const next = changeLayerVisibility(
+      event.base,
+      state.history.present,
+      state.visibilityHistory ?? emptyVisibilityHistory(),
+      event.action,
+    );
+    if (next.project === state.history.present) return state;
+    return {
+      history: { ...state.history, present: next.project },
+      visibilityHistory: next.history,
+      session: null,
+      error: "",
+    };
+  } catch (error) {
+    return {
+      ...state,
+      error: error instanceof Error ? error.message : "Sichtbarkeit konnte nicht geändert werden.",
     };
   }
 }

@@ -14,7 +14,9 @@ import {
 import type { Wall, BimWindow } from "./model.ts";
 
 const wall: Wall = {
+  bodyOffset: 0,
   id: "wall-1",
+  layerId: "layer:exterior-wall",
   start: { x: 0, y: 0 },
   end: { x: 3, y: 0 },
   thickness: 0.36,
@@ -22,6 +24,7 @@ const wall: Wall = {
 };
 const opening: BimWindow = {
   id: "window-1",
+  layerId: "layer:window",
   wallId: wall.id,
   width: 1.2,
   height: 1.35,
@@ -75,7 +78,12 @@ test("updates wall dimensions and window parameters without changing IDs", () =>
     sillHeight: 1,
     position: 0.6,
   });
-  const other = addWall(changed, { ...wall, id: "wall-2" });
+  const other = addWall(changed, {
+    ...wall,
+    id: "wall-2",
+    start: { x: 10, y: 0 },
+    end: { x: 13, y: 0 },
+  });
   assert.equal(
     updateWindow(other, opening.id, { wallId: "wall-2" }).storey.windows[0]!.wallId,
     "wall-2",
@@ -155,7 +163,7 @@ test("rejects malformed JSON, unsupported versions/units and corrupt saved model
     "null",
     "[]",
     "{}",
-    JSON.stringify({ ...fixture(), schemaVersion: 2 }),
+    JSON.stringify({ ...fixture(), schemaVersion: 99 }),
     JSON.stringify({ ...fixture(), unit: "mm" }),
   ])
     assert.throws(() => deserializeProject(json));

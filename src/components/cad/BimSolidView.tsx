@@ -1,9 +1,37 @@
+import type { SnapCandidate } from "@/constraints/snapping/engine";
+import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
+import { faceTriangles } from "@/geometry/solids/face-triangles";
+import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
+import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
+import { visibleSurfaces } from "@/rendering/viewport/layer-display";
+import { isLayerVisible } from "@/application/layers/visibility";
+import type { DisplaySurfaces } from "@/rendering/viewport/layer-display";
+import { createProjectionFrame, projectionDepthRadius } from "@/geometry/projections/orthographic";
+import type { ProjectionFrame } from "@/geometry/projections/orthographic";
+import {
+  backbufferSize,
+  createProjectionState,
+  projectionStateMatches,
+} from "@/rendering/viewport/projection-state";
+import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildSolid, projectPoint } from "@/lib/bim/geometry";
-import type { Camera, Solid } from "@/lib/bim/geometry";
+import { buildSolid } from "@/lib/bim/geometry";
+import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
-import { isSelectionClick, pickWall } from "@/lib/bim/picking";
+import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+import { SolidSnapPreview } from "./SolidSnapPreview";
+import { orientationFloor } from "@/rendering/viewport/orientation-floor";
+import { selectionEdges, outlineTriangles } from "@/rendering/viewport/selection-outline";
+import type { OutlineEdge } from "@/rendering/viewport/selection-outline";
+import { useSolidInference } from "./useSolidInference";
+import { previewEdit, supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
+import type { BimPlanProps } from "./BimPlan";
+
+const viewportOf = (canvas: HTMLCanvasElement) => {
+  const { left, top, width, height } = canvas.getBoundingClientRect();
+  return { left, top, width, height };
+};
 
 function createRenderer(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
@@ -41,9 +69,13 @@ function createRenderer(canvas: HTMLCanvasElement) {
   const position = gl.getAttribLocation(program, "position"),
     color = gl.getAttribLocation(program, "color");
   return {
-    draw(solid: Solid, camera: Camera, selectedWall: string | undefined) {
-      const width = Math.max(1, Math.round(canvas.clientWidth * Math.min(devicePixelRatio, 2)));
-      const height = Math.max(1, Math.round(canvas.clientHeight * Math.min(devicePixelRatio, 2)));
+    draw(
+      solid: DisplaySurfaces,
+      projection: ProjectionState,
+      selectedWall: string | undefined,
+      outline: OutlineEdge[],
+    ) {
+      const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -59,11 +91,9 @@ function createRenderer(canvas: HTMLCanvasElement) {
           0.5 +
           0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
         const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
-        for (const index of [0, 1, 2, 0, 2, 3])
-          data.push(
-            ...projectPoint(face.vertices[index]!, solid, camera, width / height),
-            ...tint.map((v) => v * light),
-          );
+        for (const triangle of faceTriangles(face.vertices.length))
+          for (const index of triangle)
+            data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
       }
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
@@ -72,6 +102,15 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.enableVertexAttribArray(color);
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
       gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
+      const border = outlineTriangles(outline, projection);
+      if (border.length) {
+        gl.depthMask(false);
+        gl.depthFunc(gl.LEQUAL);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(border), gl.DYNAMIC_DRAW);
+        gl.drawArrays(gl.TRIANGLES, 0, border.length / 6);
+        gl.depthMask(true);
+        gl.depthFunc(gl.LESS);
+      }
     },
     dispose() {
       gl.deleteBuffer(buffer);
@@ -81,32 +120,160 @@ function createRenderer(canvas: HTMLCanvasElement) {
 }
 
 export function BimSolidView({
+  cornerPreview,
   project,
-  selection,
+  visibility,
+  selection: requestedSelection,
   camera,
   onCamera,
   pan,
   onSelect,
+  projectionFrame,
+  snap = false,
+  gridSettings = defaultGridSettings,
+  editSession: requestedEditSession,
+  numericTarget,
+  snapping: requestedSnapping = null,
+  ortho = false,
+  onEditAim,
+  onEditCommit,
+  interactive = true,
 }: {
   project: Project;
   selection: Selection;
   camera: Camera;
   onCamera: (camera: Camera) => void;
   pan: boolean;
-  onSelect: (selection: Selection, anchor?: Point) => void;
-}) {
+  onSelect: BimPlanProps["onSelect"];
+  projectionFrame?: ProjectionFrame;
+  snap?: boolean;
+} & Pick<
+  BimPlanProps,
+  | "gridSettings"
+  | "editSession"
+  | "numericTarget"
+  | "snapping"
+  | "ortho"
+  | "onEditAim"
+  | "onEditCommit"
+  | "interactive"
+  | "visibility"
+  | "cornerPreview"
+>) {
+  const editSession =
+    requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
+      ? requestedEditSession
+      : null;
+  const snapping = requestedEditSession && !editSession ? null : requestedSnapping;
+  const selection =
+    requestedSelection && isLayerVisible(project, visibility, requestedSelection.id)
+      ? requestedSelection
+      : null;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRef<ReturnType<typeof createRenderer> | null>(null);
+  const displayed = useRef<{ solid: DisplaySurfaces; projection: ProjectionState } | null>(null);
   const drag = useRef<{
     x: number;
     y: number;
     camera: Camera;
     pointerId: number;
     moved: boolean;
+    editing: typeof editSession;
+    navigation: boolean;
   } | null>(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
-  const solid = useMemo(() => buildSolid(project), [project]);
+  const [viewProjection, setViewProjection] = useState<ProjectionState | null>(null);
+  const [previewClient, setPreviewClient] = useState<(Point & { shift: boolean }) | null>(null);
+  const [previewReset, setPreviewReset] = useState(0);
+  const [aim, setAim] = useState<{
+    session: typeof editSession;
+    point: Point;
+    candidate: SnapCandidate | null;
+  } | null>(null);
+  const baseSolid = useMemo(() => {
+    const base = buildSolid(project);
+    return cornerPreview?.base === project
+      ? cornerPreviewSurfaces(project, base, cornerPreview)
+      : base;
+  }, [project, cornerPreview]);
+  const frame = useMemo(
+    () => projectionFrame ?? createProjectionFrame(baseSolid),
+    [baseSolid, projectionFrame],
+  );
+  const moving =
+    editSession?.target.kind === "wall" &&
+    supportsWallWorkplaneEdit(editSession.target, editSession.action, editSession.index) &&
+    editSession.base === project;
+  const target =
+    numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
+  const targetCandidate =
+    numericTarget === undefined && aim?.session === editSession ? aim?.candidate : undefined;
+  const previewProject = useMemo(() => {
+    if (editSession && target) {
+      try {
+        return previewEdit(editSession, project, selection, target, targetCandidate);
+      } catch {
+        /* Keep committed model on invalid input. */
+      }
+    }
+    return project;
+  }, [editSession, target, targetCandidate, project, selection]);
+  const previewSolid = useMemo(
+    () => (previewProject === project ? baseSolid : buildSolid(previewProject)),
+    [previewProject, project, baseSolid],
+  );
+  const solid = useMemo(
+    () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
+    [previewSolid, project, visibility],
+  );
+  const depthRadius = Math.max(
+    projectionDepthRadius(frame, baseSolid),
+    projectionDepthRadius(frame, solid),
+  );
+  // Only depth changes with the preview. Keep image fitting, pointer coordinates
+  // and active construction references stable; all consumers share this snapshot.
+  const previewProjection = useMemo(
+    () =>
+      viewProjection
+        ? createProjectionState(
+            { ...viewProjection.frame, depthRadius },
+            viewProjection.camera,
+            viewProjection.viewport,
+            viewProjection.backbuffer,
+          )
+        : null,
+    [viewProjection, depthRadius],
+  );
+  const axis =
+    previewProjection && !error
+      ? selectedWallAxis(
+          previewProject,
+          selection,
+          (id) => isLayerVisible(project, visibility, id),
+          previewProjection,
+        )
+      : null;
+  const outline = useMemo(
+    () =>
+      selection?.kind === "wall"
+        ? selectionEdges(solid.faces.filter((face) => face.wallId === selection.id))
+        : [],
+    [solid, selection],
+  );
+  const inference = useSolidInference(
+    project,
+    previewProjection,
+    previewClient,
+    snap && !error && interactive,
+    previewReset,
+    moving ? snapping : null,
+    moving ? editSession.target.id : undefined,
+    ortho,
+    previewClient?.shift ?? false,
+    visibility,
+    moving ? gridSpacing(gridSettings) : null,
+  );
   useEffect(() => {
     const canvas = canvasRef.current!;
     const setup = () => {
@@ -120,16 +287,42 @@ export function BimSolidView({
     };
     const lost = (event: Event) => {
       event.preventDefault();
+      displayed.current = null;
+      setViewProjection(null);
+      setPreviewClient(null);
+      setAim(null);
+      drag.current = null;
       renderer.current = null;
       setError("Graphics context lost. Waiting for restoration; the model is retained.");
     };
     setup();
     const observer = new ResizeObserver(() => setRevision((n) => n + 1));
     observer.observe(canvas);
+    const invalidate = () => {
+      displayed.current = null;
+      setViewProjection(null);
+      setPreviewClient(null);
+      setAim(null);
+      setRevision((n) => n + 1);
+    };
+    let resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+    const dprChanged = () => {
+      resolution.removeEventListener("change", dprChanged);
+      resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
+      resolution.addEventListener("change", dprChanged);
+      invalidate();
+    };
+    resolution.addEventListener("change", dprChanged);
+    window.addEventListener("resize", invalidate);
+    window.addEventListener("scroll", invalidate, true);
     canvas.addEventListener("webglcontextlost", lost);
     canvas.addEventListener("webglcontextrestored", setup);
     return () => {
       observer.disconnect();
+      resolution.removeEventListener("change", dprChanged);
+      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("scroll", invalidate, true);
+      displayed.current = null;
       renderer.current?.dispose();
       renderer.current = null;
       canvas.removeEventListener("webglcontextlost", lost);
@@ -137,27 +330,77 @@ export function BimSolidView({
     };
   }, []);
   useEffect(() => {
+    displayed.current = null;
+    const canvas = canvasRef.current!;
+    const projection = createProjectionState(
+      frame,
+      camera,
+      viewportOf(canvas),
+      backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+    );
+    setPreviewClient(null);
+    setAim(null);
+    setViewProjection(renderer.current ? projection : null);
+  }, [frame, camera, revision]);
+  useEffect(() => {
     const selectedWall =
       selection?.kind === "wall"
         ? selection.id
         : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
-    renderer.current?.draw(solid, camera, selectedWall);
-  }, [solid, camera, selection, project, revision]);
+    displayed.current = null;
+    if (renderer.current && previewProjection) {
+      renderer.current.draw(solid, previewProjection, selectedWall, outline);
+      displayed.current = { solid, projection: previewProjection };
+    }
+  }, [solid, previewProjection, selection, project, revision, outline]);
   return (
     <>
+      {previewProjection && !error && (
+        <svg
+          aria-label="Orientierungsebene z=0"
+          className="pointer-events-none absolute inset-0"
+          width={previewProjection.viewport.width}
+          height={previewProjection.viewport.height}
+        >
+          <polygon
+            points={orientationFloor(baseSolid, previewProjection) ?? ""}
+            fill="rgba(120, 134, 145, 0.14)"
+            stroke="rgba(120, 134, 145, 0.3)"
+            strokeWidth={1}
+          />
+        </svg>
+      )}
+      <SolidSnapPreview
+        projection={previewProjection}
+        enabled={snap && !error && interactive}
+        inference={inference}
+      />
       <canvas
         ref={canvasRef}
         aria-label="3D walls with window openings"
         role="img"
         tabIndex={0}
-        title="Click a wall to select it; click empty space to clear selection. Drag to orbit or pan. Arrow keys rotate, +/− zoom. Select windows in Navigator."
-        className="h-full w-full touch-none cursor-grab active:cursor-grabbing"
+        title={
+          moving
+            ? editSession.action === "move"
+              ? "Wand auf z=0 bewegen. Klick fixiert Richtung; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
+              : "Auf z=0 bearbeiten. Klick übernimmt Ziel; Tab für Maße. Pan schaltet auf Navigation; Esc bricht ab."
+            : "Sichtbaren Wandfußpunkt als Bewegungsursprung anklicken. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
+        }
+        className={`relative z-10 h-full w-full touch-none ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setPreviewClient(null);
+            setAim(null);
+            setPreviewReset((n) => n + 1);
+          }
           const delta = 0.12;
           if (
             ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-", "="].includes(event.key)
           ) {
             event.preventDefault();
+            setPreviewClient(null);
+            setAim(null);
             if (event.key === "ArrowLeft") onCamera({ ...camera, yaw: camera.yaw - delta });
             if (event.key === "ArrowRight") onCamera({ ...camera, yaw: camera.yaw + delta });
             if (event.key === "ArrowUp")
@@ -172,7 +415,10 @@ export function BimSolidView({
           }
         }}
         onPointerDown={(event) => {
-          if (event.button !== 0 || drag.current) return;
+          setPreviewClient(null);
+          setAim(null);
+          if (event.button !== 0 || drag.current || !interactive) return;
+          event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
           drag.current = {
             x: event.clientX,
@@ -180,9 +426,46 @@ export function BimSolidView({
             camera,
             pointerId: event.pointerId,
             moved: false,
+            editing: editSession,
+            navigation: !moving || pan,
           };
         }}
         onPointerMove={(event) => {
+          if (!interactive) return;
+          if (!drag.current || !drag.current.navigation) {
+            const current = displayed.current;
+            const canvas = event.currentTarget;
+            if (
+              current &&
+              current.solid === solid &&
+              projectionStateMatches(
+                current.projection,
+                camera,
+                viewportOf(canvas),
+                backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+              )
+            ) {
+              setPreviewClient({ x: event.clientX, y: event.clientY, shift: event.shiftKey });
+              if (moving && !pan) {
+                const result = inference.resolve(
+                  { x: event.clientX, y: event.clientY },
+                  event.shiftKey,
+                );
+                if (result) {
+                  setAim({
+                    session: editSession,
+                    point: result.point,
+                    candidate: result.candidate,
+                  });
+                  onEditAim?.(editSession, result.point);
+                }
+              }
+            } else {
+              setPreviewClient(null);
+              setAim(null);
+            }
+            return;
+          }
           if (!drag.current || drag.current.pointerId !== event.pointerId) return;
           if (
             !drag.current.moved &&
@@ -211,18 +494,74 @@ export function BimSolidView({
           const gesture = drag.current;
           if (!gesture || gesture.pointerId !== event.pointerId) return;
           drag.current = null;
+          if (gesture.editing !== editSession || !interactive) return;
           if (
             !gesture.moved &&
             isSelectionClick(gesture.x, gesture.y, event.clientX, event.clientY) &&
             !error
           ) {
-            const bounds = event.currentTarget.getBoundingClientRect();
-            const id = pickWall(
+            const canvas = event.currentTarget;
+            const current = displayed.current;
+            if (
+              !current ||
+              current.solid !== solid ||
+              !projectionStateMatches(
+                current.projection,
+                camera,
+                viewportOf(canvas),
+                backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
+              ) ||
+              canvas.width !== current.projection.backbuffer.width ||
+              canvas.height !== current.projection.backbuffer.height
+            ) {
+              if (canvas.hasPointerCapture(event.pointerId))
+                canvas.releasePointerCapture(event.pointerId);
+              setRevision((n) => n + 1);
+              return;
+            }
+            const projection = current.projection;
+            if (editSession) {
+              // Navigation is never also a target click. Invalid inverse never confirms.
+              if (moving && !gesture.navigation) {
+                const result = inference.resolve(
+                  { x: event.clientX, y: event.clientY },
+                  event.shiftKey,
+                );
+                if (result) onEditCommit?.(editSession, result.point, result.candidate);
+              }
+              if (canvas.hasPointerCapture(event.pointerId))
+                canvas.releasePointerCapture(event.pointerId);
+              return;
+            }
+            const foot = inference.adapter?.query(
+              project,
+              projection,
+              { x: event.clientX, y: event.clientY },
+              10,
+            );
+            const anchor =
+              foot?.status === "ok"
+                ? foot.candidates.find((c) => c.visibility === "visible")
+                : null;
+            if (anchor?.sourceEntityId) {
+              onSelect(
+                { kind: "wall", id: anchor.sourceEntityId },
+                { x: event.clientX, y: event.clientY },
+                anchor.pointIndex ?? undefined,
+                anchor.worldPoint,
+              );
+              if (canvas.hasPointerCapture(event.pointerId))
+                canvas.releasePointerCapture(event.pointerId);
+              return;
+            }
+            const point = projection.toNdc({ x: event.clientX, y: event.clientY });
+            const id = pickWallInProjection(
               solid,
-              camera,
-              bounds.width / bounds.height,
-              (2 * (event.clientX - bounds.left)) / bounds.width - 1,
-              1 - (2 * (event.clientY - bounds.top)) / bounds.height,
+              projection.frame,
+              projection.camera,
+              projection.aspect,
+              point.x,
+              point.y,
             );
             onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
           }
@@ -230,18 +569,50 @@ export function BimSolidView({
             event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onLostPointerCapture={() => {
+          setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
         onPointerCancel={() => {
+          setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
-        onWheel={(event) =>
+        onPointerLeave={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
+        onBlur={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
+        onWheel={(event) => {
+          setPreviewClient(null);
+          setAim(null);
           onCamera({
             ...camera,
             zoom: Math.max(0.2, Math.min(5, camera.zoom * Math.exp(-event.deltaY * 0.001))),
-          })
-        }
+          });
+        }}
       />
+      {axis && previewProjection && (
+        <svg
+          aria-label={`Wandachse 3D ${axis.wallId}`}
+          role="img"
+          className="pointer-events-none absolute inset-0 z-10"
+          width={previewProjection.viewport.width}
+          height={previewProjection.viewport.height}
+        >
+          <line
+            x1={axis.start.x}
+            y1={axis.start.y}
+            x2={axis.end.x}
+            y2={axis.end.y}
+            stroke={WALL_AXIS_COLOR}
+            strokeWidth={2.5}
+          />
+        </svg>
+      )}
       {error && (
         <p
           role="alert"

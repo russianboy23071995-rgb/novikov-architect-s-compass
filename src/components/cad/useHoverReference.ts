@@ -6,6 +6,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import {
   advanceHoverReference,
+  previewPointReferences,
   emptyHoverReference,
   sameHoverSession,
   suspendHoverReference,
@@ -36,7 +37,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     const compatible = state.current && sameHoverSession(state.current.context, context);
     if (!compatible)
       state.current = { context, value: emptyHoverReference(), guides: [], cursor: null };
-    if (!cursor || (compatible && state.current!.context !== context)) {
+    if (context.suspended || !cursor || (compatible && state.current!.context !== context)) {
       const next = {
         ...state.current!,
         context,
@@ -47,11 +48,25 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       return;
     }
     const current = state.current!.value;
-    const active = withParallelDirections([
-      ...(context.pinnedReferences ?? []),
-      ...current.references,
-    ]);
-    const sources = withConstructionReferences(context.references, active);
+    const active = withParallelDirections(
+      [...(context.pinnedReferences ?? []), ...current.references].filter(
+        (r) => !context.acceptReference || context.acceptReference(r),
+      ),
+    );
+    const sources = withConstructionReferences(
+      context.sourceQuery
+        ? context.sourceQuery(
+            cursor,
+            context.pixelsPerMetre,
+            10,
+            active,
+            context.intersectionsPaused,
+            context.selectedSegments,
+            context.metric,
+          )
+        : context.references,
+      active,
+    );
     const guides = advanceGuideDirections(
       cursor,
       active,
@@ -59,6 +74,7 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
     );
     const candidate = querySnap(cursor, {
       ...context,
+      sourceQuery: undefined,
       references: sources,
       activeReferences: active,
       guideDirections: guides,
@@ -70,10 +86,12 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
       candidate && ["endpoint", "midpoint", "segment-intersection"].includes(candidate.kind);
     const acquired = exact
       ? acquisitionReference(candidate, sources)
-      : (hoveredSegment(cursor, context.references, context.pixelsPerMetre) ??
+      : (hoveredSegment(cursor, sources, context.metric ?? context.pixelsPerMetre) ??
         acquisitionReference(candidate, sources));
     const reference =
-      acquired && !context.pinnedReferences?.some((r) => sameReference(r, acquired))
+      acquired &&
+      (!context.acceptReference || context.acceptReference(acquired)) &&
+      !context.pinnedReferences?.some((r) => sameReference(r, acquired))
         ? acquired
         : null;
     const update = () => {
@@ -104,13 +122,47 @@ export function useHoverReference(cursor: Point2 | null, context: HoverContext, 
   }, [cursor, context, dwellMs]);
   const compatible = snapshot && sameHoverSession(snapshot.context, context);
   const references = context.enabled
-    ? withParallelDirections([
-        ...(context.pinnedReferences ?? []),
-        ...(compatible ? snapshot.value.references : []),
-      ])
+    ? withParallelDirections(
+        [
+          ...(context.pinnedReferences ?? []),
+          ...(compatible ? snapshot.value.references : []),
+        ].filter((r) => !context.acceptReference || context.acceptReference(r)),
+      )
     : [];
-  const guideCursor = compatible ? (cursor ?? snapshot.cursor) : null;
+  const guideCursor = compatible
+    ? context.suspended
+      ? snapshot.cursor
+      : (cursor ?? snapshot.cursor)
+    : null;
+  const previewPoints = (
+    requested: readonly import("@/constraints/snapping/engine").SnapReference[],
+  ) =>
+    previewPointReferences(
+      compatible ? snapshot.value : emptyHoverReference(),
+      requested,
+      context.pinnedReferences,
+    );
+  const acquirePoints = (
+    requested: readonly import("@/constraints/snapping/engine").SnapReference[],
+  ) => {
+    if (
+      !context.enabled ||
+      !context.suspended ||
+      requested.some((r) => context.acceptReference && !context.acceptReference(r))
+    )
+      return false;
+    const current = state.current;
+    if (!current || !sameHoverSession(current.context, context)) return false;
+    const result = previewPointReferences(current.value, requested, context.pinnedReferences);
+    if (!result) return false;
+    const next = { ...current, context, value: result.value };
+    state.current = next;
+    setSnapshot(next);
+    return true;
+  };
   return {
+    previewPoints,
+    acquirePoints,
     references,
     guideCursor,
     guideDirections: guideCursor

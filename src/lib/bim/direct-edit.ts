@@ -1,5 +1,8 @@
+import { previewContourOffset } from "../../application/direct-edit/offset.ts";
+import { wallBody } from "../../domain/elements/wall/body.ts";
+import { previewContourEdge } from "../../application/direct-edit/contour.ts";
 import type { Point, Project } from "./model.ts";
-import { wallLength } from "./model.ts";
+import { wallLength, windowCentre } from "./model.ts";
 import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import {
@@ -8,8 +11,9 @@ import {
   moveElementPoint,
   moveWindowAlongWall,
 } from "./transforms.ts";
-export type EditAction = "point" | "stretch" | "move" | "axis" | "x" | "y";
-export type EditTarget = { kind: "wall" | "line" | "window"; id: string };
+export type EditAction =
+  "point" | "stretch" | "move" | "axis" | "x" | "y" | "insert" | "edge" | "offset";
+export type EditTarget = { kind: "wall" | "line" | "window" | "hatch"; id: string };
 export type EditSession = {
   base: Project;
   target: EditTarget;
@@ -24,16 +28,16 @@ export function editAnchor(project: Project, target: EditTarget): Point {
   const opening = project.storey.windows.find((item) => item.id === target.id);
   const wall = project.storey.walls.find((item) => item.id === opening?.wallId);
   if (!opening || !wall) throw new Error("Fenster nicht gefunden.");
-  return {
-    x: wall.start.x + (wall.end.x - wall.start.x) * opening.position,
-    y: wall.start.y + (wall.end.y - wall.start.y) * opening.position,
-  };
+  return windowCentre(project, opening.id);
 }
 
 /** Always derive the preview from the pinned original, never from the preceding preview. */
 export function editAtPointer(session: EditSession, current: Project, pointer: Point): Project {
   if (current !== session.base)
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
+  if (session.action === "offset") return previewContourOffset(session, pointer);
+  if (session.action === "insert" || session.action === "edge")
+    return previewContourEdge(session, pointer);
   const { base, target, index, action, anchor } = session;
   const delta = { x: pointer.x - anchor.x, y: pointer.y - anchor.y };
   if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
@@ -70,7 +74,7 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
       const wall = base.storey.walls.find((item) => item.id === target.id)!;
       const length = Math.hypot(vector.x, vector.y);
       for (const side of [-1, 1]) {
-        const offset = (side * wall.thickness) / 2;
+        const offset = wallBody(wall).sideOffset(side) * (i === 0 ? -1 : 1);
         const corner = {
           x: points[i]!.x - (vector.y / length) * offset,
           y: points[i]!.y + (vector.x / length) * offset,

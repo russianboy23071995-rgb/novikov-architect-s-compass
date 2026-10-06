@@ -22,6 +22,7 @@ import { exportIfc } from "./ifc.ts";
 import { previewCommand } from "./commands.ts";
 const line: DrawingLine = {
   id: "line-1",
+  layerId: "layer:drawing",
   kind: "line",
   points: [
     { x: 0, y: 0 },
