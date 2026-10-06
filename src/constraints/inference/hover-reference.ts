@@ -1,8 +1,20 @@
-import type { SnapReference } from "../snapping/engine.ts";
+import type { SnapReference, SnapSourceQuery, SnapCandidate } from "../snapping/engine.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export const DEFAULT_HOVER_DWELL_MS = 600;
+export const HOVER_REFERENCE_CAPACITY = 4;
+const retainNewest = (refs: SnapReference[]) => refs.slice(-HOVER_REFERENCE_CAPACITY);
 
 export type HoverContext = {
+  acceptCandidate?: (candidate: SnapCandidate) => boolean;
+  /** View adapter may restrict acquisition without changing shared timing/state rules. */
+  acceptReference?: (reference: SnapReference) => boolean;
+  metric?: ScreenMetric;
+  sessionKey?: object | undefined;
+  suspended?: boolean;
+  selectedSegments?: ReadonlySet<string> | null;
+  intersectionsPaused?: boolean;
+  sourceQuery?: SnapSourceQuery;
   enabled: boolean;
   references: readonly SnapReference[];
   pixelsPerMetre: number;
@@ -12,7 +24,14 @@ export type HoverContext = {
 
 /** View navigation changes screen scale, not the identity of model-space references. */
 export function sameHoverSession(a: HoverContext, b: HoverContext): boolean {
-  return a.enabled && b.enabled && a.references === b.references && a.resetKey === b.resetKey;
+  return (
+    a.enabled &&
+    b.enabled &&
+    (a.sessionKey || b.sessionKey
+      ? a.sessionKey === b.sessionKey
+      : a.references === b.references && a.sourceQuery === b.sourceQuery) &&
+    a.resetKey === b.resetKey
+  );
 }
 
 /** Navigation cannot complete a dwell or toggle a reference. Leaving allows a fresh visit. */
@@ -69,11 +88,39 @@ export function advanceHoverReference(
   const references =
     remaining.length < state.references.length
       ? remaining
-      : [...remaining, pending.reference].slice(-4);
+      : retainNewest([...remaining, pending.reference]);
   return {
     pending: null,
     consumed: pending.reference,
     active: references.at(-1) ?? null,
     references,
+  };
+}
+
+/** Preview and commit share acquisition rules; explicitly requested points are never silently dropped. */
+export function previewPointReferences(
+  state: HoverReferenceState,
+  requested: readonly SnapReference[],
+  pinned: readonly SnapReference[] = [],
+) {
+  const unique = requested.filter(
+    (r, i) =>
+      !pinned.some((p) => sameReference(p, r)) &&
+      requested.findIndex((p) => sameReference(p, r)) === i,
+  );
+  if (unique.length > HOVER_REFERENCE_CAPACITY) return null;
+  const references = retainNewest([
+    ...state.references.filter((r) => !unique.some((p) => sameReference(p, r))),
+    ...unique,
+  ]);
+  return {
+    value: {
+      ...state,
+      references,
+      active: references.at(-1) ?? null,
+      pending: null,
+      consumed: null,
+    },
+    replaced: state.references.filter((r) => !references.some((p) => sameReference(p, r))),
   };
 }

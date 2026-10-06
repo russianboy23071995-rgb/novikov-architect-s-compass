@@ -1,10 +1,44 @@
+import { wallPlanOutlines } from "@/rendering/viewport/wall-plan-outline";
+import type { SnapCandidate } from "@/constraints/snapping/engine";
+import { useShiftSnapLock } from "./useShiftSnapLock";
+import { connectedWallSolids } from "@/domain/elements/wall/connections";
+import { wallBody } from "@/domain/elements/wall/body";
+import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
+import type { CornerPreview } from "@/application/walls/corner-preview";
+import { anchorDragTarget, type AnchorDrag } from "@/rendering/viewport/anchor-drag";
+import {
+  defaultGridSettings,
+  gridSpacing,
+  type GridSettings,
+} from "@/application/snapping/grid-settings";
+import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
+import { closedContour } from "@/application/direct-edit/contour";
+import { pointsCompatible } from "@/geometry/tolerances/model";
+import type { Hatch } from "@/domain/elements/hatch/model";
+import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
+import { isLayerVisible } from "@/application/layers/visibility";
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
+import type { ReferenceSelectionBinding } from "./useReferenceSelection";
+import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
+import { referenceKey } from "@/constraints/inference/construction-reference";
+import {
+  pickContourEdge,
+  pickReferencePoints,
+  pickReferenceSegments,
+} from "@/rendering/viewport/reference-picking";
+import { segmentKey } from "@/application/snapping/reference-selection";
+import { useSnapDensity } from "./useSnapDensity";
 import { cursorGuide } from "@/constraints/guides/directions";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { prepareToolReferences, resolveToolSnap } from "@/application/tools/snapping";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  createToolSourceQuery,
+  createVisibleToolSourceQuery,
+  toolPinnedReferences,
+} from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
 import { useHoverReference } from "./useHoverReference";
-import { projectSnapReferences } from "@/application/snapping/project-references";
+import { getLocalSnapSources } from "@/application/snapping/local-sources";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
@@ -15,7 +49,13 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  drawingPreview?: Project | undefined;
+  cornerPreview?: CornerPreview;
+  referenceSelection?: ReferenceSelectionBinding | undefined;
+  referenceScope?: object | undefined;
+  interactive?: boolean;
   project: Project;
+  visibility?: LayerVisibilityPolicy;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
   drawing: boolean;
@@ -23,36 +63,58 @@ export type BimPlanProps = {
   hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
+  draftFill?: Hatch["fill"] | undefined;
+  gridSettings?: GridSettings;
+  wallOutlineWidth?: number;
   snap: boolean;
   ortho: boolean;
-  onSelect: (selection: Selection, anchor?: Point, index?: number, modelPoint?: Point) => void;
+  onSelect: (
+    selection: Selection,
+    anchor?: Point,
+    index?: number,
+    modelPoint?: Point,
+    edgeIndex?: number,
+  ) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
   drawingTarget?: Point | null | undefined;
   onDrawingAim?: ((point: Point) => void) | undefined;
   onEditAim?: (session: EditSession, point: Point) => void;
-  onEditDirection?: (session: EditSession, point: Point) => void;
-  onEditCommit?: (session: EditSession, point: Point) => void;
+  onEditDirection?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
+  onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
+  onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
+  onEditCancel?: () => void;
   onPoint: (point: Point) => void;
   onFinish?: () => void;
 };
 
 export function BimPlan({
+  drawingPreview,
+  cornerPreview,
+  referenceSelection,
+  referenceScope,
+  interactive = true,
   project,
-  snapping = null,
-  selection,
+  visibility,
+  snapping: requestedSnapping = null,
+  selection: requestedSelection,
   drawing,
   endpointSnap = false,
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
+  draftFill,
   snap,
+  gridSettings = defaultGridSettings,
+  wallOutlineWidth = 1,
   ortho,
   onSelect,
   onPoint,
   onFinish,
-  editSession,
+  editSession: requestedEditSession,
   onEditCommit,
+  onContourStretch,
+  onEditCancel,
   numericTarget,
   drawingTarget,
   onDrawingAim,
@@ -70,7 +132,51 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
+  const editSession =
+    requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
+      ? requestedEditSession
+      : null;
+  const snapping = requestedEditSession && !editSession ? null : requestedSnapping;
+  const selection =
+    requestedSelection && isLayerVisible(project, visibility, requestedSelection.id)
+      ? requestedSelection
+      : null;
+  const visibilitySession = useMemo(
+    () => ({ referenceScope, visibility, project, snapping }),
+    [referenceScope, visibility, project, snapping],
+  );
+  const selecting = referenceSelection?.selecting ?? false;
+  const selectedSegments = referenceSelection?.selected ?? null;
   const svg = useRef<SVGSVGElement>(null);
+  const gripDrag = useRef<{
+    gesture: AnchorDrag;
+    base: Project;
+    target: NonNullable<Selection>;
+    index: number;
+  } | null>(null);
+  const gripClick = useRef(false);
+  const matchingGrip = useCallback(() => {
+    const drag = gripDrag.current;
+    return (
+      drag &&
+      editSession &&
+      editSession.base === drag.base &&
+      editSession.target.id === drag.target.id &&
+      editSession.target.kind === drag.target.kind &&
+      editSession.action === "edge" &&
+      editSession.index === drag.index &&
+      editSession.anchor.x === drag.gesture.origin.x &&
+      editSession.anchor.y === drag.gesture.origin.y
+    );
+  }, [editSession]);
+  useEffect(() => {
+    // Escape, model/visibility/selection changes invalidate a captured gesture.
+    if (gripDrag.current && !matchingGrip()) {
+      const id = gripDrag.current.gesture.pointerId;
+      gripDrag.current = null;
+      if (svg.current?.hasPointerCapture(id)) svg.current.releasePointerCapture(id);
+    }
+  }, [editSession, project, selection, matchingGrip]);
   const gridId = useId();
   const gridStep = planScaleBar(camera.pixelsPerMetre).metres;
   const navigation = useRef<{ pointerId: number; x: number; y: number; camera: PlanCamera } | null>(
@@ -102,6 +208,12 @@ export function BimPlan({
   const [shiftHeld, setShiftHeld] = useState(false);
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
+      if (selecting || !interactive) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[role="dialog"],[role="alertdialog"]')
+      )
+        return;
       if (event.key === "Shift") setShiftHeld(event.type === "keydown");
       if (event.key === "Escape" && event.type === "keydown") {
         setHover(null);
@@ -117,57 +229,104 @@ export function BimPlan({
       window.removeEventListener("keyup", key);
       window.removeEventListener("blur", clear);
     };
-  }, []);
+  }, [selecting, interactive]);
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
-  const pinnedReferences = useMemo(() => (snapping ? [snapping.origin] : []), [snapping]);
-  const references = useMemo(
-    () => prepareToolReferences(snapping, projectSnapReferences(project)),
-    [project, snapping],
+  const pinnedReferences = useMemo(() => toolPinnedReferences(snapping), [snapping]);
+  const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
+  const sourceQuery = useMemo(
+    () =>
+      visibility
+        ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
+        : createToolSourceQuery(modelSources, snapping),
+    [modelSources, snapping, project, visibility],
   );
+  const density = useSnapDensity(
+    sourceQuery,
+    pan ? null : hover,
+    camera.pixelsPerMetre,
+    endpointSnap && snap && interactive,
+    referenceReset,
+    camera,
+    selectedSegments,
+  );
+  const references = pinnedReferences;
   const trackingContext = useMemo(
     () => ({
-      enabled: endpointSnap && snap && !pan,
+      enabled: endpointSnap && snap && interactive,
+      sessionKey: visibilitySession,
+      acceptReference: sourceQuery.accepts,
       references,
+      sourceQuery,
+      intersectionsPaused: density.paused,
+      selectedSegments,
+      suspended: selecting || pan,
       pixelsPerMetre: camera.pixelsPerMetre,
       camera,
       viewSize,
       resetKey: referenceReset,
       pinnedReferences,
     }),
-    [endpointSnap, snap, pan, references, camera, viewSize, referenceReset, pinnedReferences],
+    [
+      endpointSnap,
+      snap,
+      interactive,
+      visibilitySession,
+      pan,
+      references,
+      sourceQuery,
+      density.paused,
+      selectedSegments,
+      selecting,
+      camera,
+      viewSize,
+      referenceReset,
+      pinnedReferences,
+    ],
   );
   const {
     references: activeReferences,
     guideDirections,
     guideCursor,
+    previewPoints,
+    acquirePoints,
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
+  const resolveLockedSnap = useShiftSnapLock(visibilitySession, referenceReset);
   const resolvePointer = (point: Point, shift = shiftHeld) =>
-    resolveToolSnap(
+    resolveLockedSnap(
       snapping,
       point,
       {
         references,
+        sourceQuery,
+        intersectionsPaused: density.paused,
+        selectedSegments,
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
-        gridSpacing: 0.1,
+        includeInteractionTargets: true,
+        gridSpacing: gridSpacing(gridSettings),
         activeReference,
         activeReferences,
         guideDirections,
       },
       { ortho, shift, featureSnap: endpointSnap },
     );
+  const pointerSnap = hover ? resolvePointer(hover) : null;
   const resolvedHover =
     drawingTarget !== undefined
       ? drawingTarget
-        ? { point: drawingTarget, candidate: null }
+        ? {
+            point: drawingTarget,
+            candidate:
+              pointerSnap && pointsCompatible(pointerSnap.point, drawingTarget)
+                ? pointerSnap.candidate
+                : null,
+          }
         : null
       : numericTarget !== undefined
         ? null
-        : hover
-          ? resolvePointer(hover)
-          : null;
+        : pointerSnap;
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -193,6 +352,23 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: point.x, y: -point.y };
   };
+  const draggedPoint = (event: { pointerId: number; clientX: number; clientY: number }) => {
+    const point = rawPoint(event),
+      drag = gripDrag.current;
+    return point && drag && matchingGrip()
+      ? anchorDragTarget(drag.gesture, event.pointerId, point, {
+          x: event.clientX,
+          y: event.clientY,
+        })
+      : null;
+  };
+  const selectedRing =
+    selection && !drawing && !editSession ? closedContour(project, selection) : null;
+  // Winding is shared by all grips; never revalidate the whole ring per side.
+  const selectedShape = useMemo(
+    () => (selectedRing ? validateSimplePolygon(selectedRing) : null),
+    [selectedRing],
+  );
   const resolvedEdit =
     numericTarget !== undefined
       ? numericTarget
@@ -205,29 +381,50 @@ export function BimPlan({
   let editError = "";
   if (editSession && resolvedEdit) {
     try {
-      preview = previewEdit(editSession, project, selection, resolvedEdit.point);
+      preview = previewEdit(
+        editSession,
+        project,
+        selection,
+        resolvedEdit.point,
+        resolvedEdit.candidate,
+      );
     } catch {
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
   }
-  const shown = preview ?? project;
-  const handles: { point: Point; index: number; label: string }[] = [];
+  const shown = preview ?? (drawing ? drawingPreview : null) ?? project;
+  const connected = connectedWallSolids(shown);
+  const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
+  const outlines = useMemo(
+    () =>
+      wallPlanOutlines(
+        shown,
+        new Set(
+          shown.storey.walls
+            .filter((w) => isLayerVisible(project, visibility, w.id))
+            .map((w) => w.id),
+        ),
+      ),
+    [shown, project, visibility],
+  );
+  const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
-    if (wall) {
-      const length = wallLength(wall);
-      const nx = ((-(wall.end.y - wall.start.y) / length) * wall.thickness) / 2;
-      const ny = (((wall.end.x - wall.start.x) / length) * wall.thickness) / 2;
-      [wall.start, wall.end].forEach((point, index) =>
-        [-1, 1].forEach((side) =>
-          handles.push({
-            point: { x: point.x + side * nx, y: point.y + side * ny },
-            index,
-            label: `Wandecke ${index === 0 ? "Anfang" : "Ende"} ${side === 1 ? "links" : "rechts"}`,
-          }),
+    if (wall)
+      handles.push(
+        ...wallPlanHandles(
+          wall,
+          project.storey.wallJoins.some(
+            (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
+          ),
         ),
       );
-    }
+  } else if (selection?.kind === "hatch") {
+    project.storey.hatches
+      .find((h) => h.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
+      );
   } else if (selection?.kind === "line") {
     const line = project.storey.lines?.find((item) => item.id === selection.id);
     line?.points.forEach((point, index) => {
@@ -247,7 +444,7 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
   };
-  const selectProps = (kind: "wall" | "window" | "line", id: string) => ({
+  const selectProps = (kind: "wall" | "window" | "line" | "hatch", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
@@ -255,11 +452,15 @@ export function BimPlan({
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
+        const point = rawPoint(event);
+        const ring = closedContour(project, { kind, id });
+        const edge = point && ring ? pickContourEdge(ring, point, camera.pixelsPerMetre) : null;
         onSelect(
           { kind, id },
           { x: event.clientX, y: event.clientY },
           undefined,
-          rawPoint(event) ?? undefined,
+          edge?.point ?? point ?? undefined,
+          edge?.index,
         );
       }
     },
@@ -270,6 +471,25 @@ export function BimPlan({
       }
     },
   });
+  const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  const panelX = listPosition
+    ? Math.max(
+        12,
+        Math.min(
+          viewSize.width - 452,
+          (listPosition.x - camera.center.x) * camera.pixelsPerMetre + viewSize.width / 2 + 12,
+        ),
+      )
+    : 12;
+  const panelY = listPosition
+    ? Math.max(
+        12,
+        Math.min(
+          viewSize.height - 272,
+          (-listPosition.y + camera.center.y) * camera.pixelsPerMetre + viewSize.height / 2 + 12,
+        ),
+      )
+    : 12;
   return (
     <svg
       ref={svg}
@@ -295,6 +515,24 @@ export function BimPlan({
         editDown.current = editSession ?? null;
       }}
       onPointerUp={(event) => {
+        const drag = gripDrag.current;
+        if (drag?.gesture.pointerId === event.pointerId) {
+          const result = draggedPoint(event);
+          gripDrag.current = null;
+          gripClick.current = true;
+          editDown.current = null;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          if (result?.moved && editSession) {
+            try {
+              const snapped = resolvePointer(result.point, event.shiftKey);
+              onEditCommit?.(editSession, snapped.point, snapped.candidate);
+            } catch {
+              /* Keep the shared edit session available for correction. */
+            }
+          }
+          return;
+        }
         if (navigation.current?.pointerId === event.pointerId) {
           navigation.current = null;
           event.currentTarget.releasePointerCapture(event.pointerId);
@@ -302,12 +540,41 @@ export function BimPlan({
       }}
       onLostPointerCapture={() => {
         navigation.current = null;
+        if (gripDrag.current) {
+          gripDrag.current = null;
+          onEditCancel?.();
+        }
       }}
       onPointerCancel={() => {
         navigation.current = null;
         editDown.current = null;
+        if (gripDrag.current) {
+          gripDrag.current = null;
+          onEditCancel?.();
+        }
       }}
       onClickCapture={(event) => {
+        if (gripClick.current) {
+          gripClick.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        if ((event.target as Element).closest("[data-reference-panel]")) return;
+        if (selecting && referenceSelection && !navigationClick.current && !pan) {
+          event.preventDefault();
+          event.stopPropagation();
+          const point = rawPoint(event);
+          if (!point) return;
+          const local = sourceQuery.inspect(point, camera.pixelsPerMetre, 10);
+          const hits =
+            referenceSelection.mode === "points"
+              ? pickReferencePoints(local.references, point, camera.pixelsPerMetre)
+              : pickReferenceSegments(local.segments, point, camera.pixelsPerMetre);
+          if (hits.length === 1) referenceSelection.toggle(hits[0]!);
+          else referenceSelection.hitsAt(hits, point);
+          return;
+        }
         if (navigationClick.current || pan) {
           event.preventDefault();
           event.stopPropagation();
@@ -316,6 +583,7 @@ export function BimPlan({
       onAuxClick={(event) => event.preventDefault()}
       className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
+        if (!interactive) return;
         setShiftHeld(event.shiftKey);
         const active = navigation.current;
         if (active && active.pointerId === event.pointerId) {
@@ -324,13 +592,14 @@ export function BimPlan({
           );
           return;
         }
-        if (pan) return;
-        if (endpointSnap || editSession) setHover(rawPoint(event));
-        const drawingPoint = rawPoint(event);
+        if (pan || selecting) return;
+        if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
+        const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
+        if (endpointSnap || editSession) setHover(drawingPoint);
         if (drawing && drawingPoint)
           onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
-          const point = rawPoint(event);
+          const point = drawingPoint;
           if (point) {
             setEditPointer({ session: editSession, point });
             onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
@@ -338,6 +607,7 @@ export function BimPlan({
         }
       }}
       onPointerLeave={() => {
+        if (selecting) return;
         setHover(null);
         setEditPointer(null);
       }}
@@ -350,9 +620,10 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const target = resolvePointer(point, event.shiftKey).point;
-              if (onEditDirection) onEditDirection(editSession, target);
-              else onEditCommit?.(editSession, target);
+              const snapped = resolvePointer(point, event.shiftKey);
+              const target = snapped.point;
+              if (onEditDirection) onEditDirection(editSession, target, snapped.candidate);
+              else onEditCommit?.(editSession, target, snapped.candidate);
             } catch {
               /* Invalid preview stays editable. */
             }
@@ -367,19 +638,20 @@ export function BimPlan({
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {
-        if (pan || navigationClick.current) return;
-        if (drawing && onFinish && drawingTarget !== null) {
+        if (selecting || pan || navigationClick.current) return;
+        if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
         }
       }}
       onKeyDown={(event) => {
+        if (selecting) return;
         if (event.key === "Escape") {
           navigation.current = null;
           setHover(null);
         }
         if (pan) return;
-        if (drawing && onFinish && drawingTarget !== null && event.key === "Enter") {
+        if (drawing && onFinish && event.key === "Enter") {
           event.preventDefault();
           onFinish();
         }
@@ -407,27 +679,99 @@ export function BimPlan({
           />
         </g>
       )}
-      {shown.storey.walls.map((wall) => {
+      {plan.hatches.map((hatch) => (
+        <g key={hatch.id}>
+          {hatch.background.visible && (
+            <polygon
+              aria-label="Schraffurhintergrund"
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill={hatch.background.color}
+              pointerEvents="none"
+            />
+          )}
+          <polygon
+            {...selectProps("hatch", hatch.id)}
+            points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+            fill={hatch.fill.color}
+            fillOpacity={hatch.fill.opacity}
+            stroke="transparent"
+            strokeWidth={12}
+            vectorEffect="non-scaling-stroke"
+            pointerEvents="all"
+            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+          />
+          {hatch.contour.visible && (
+            <polygon
+              aria-label="Schraffurkontur"
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke={hatch.contour.color}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+          {selection?.id === hatch.id && (
+            <polygon
+              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="none"
+              stroke="#cbd5e1"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+        </g>
+      ))}
+      {plan.walls.map((wall) => {
         const length = wallLength(wall);
+        const body = wallBody(wall);
         const angle =
           (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
         return (
           <g
             key={wall.id}
-            transform={`translate(${wall.start.x} ${-wall.start.y}) rotate(${angle})`}
+            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
           >
-            <rect
+            <polygon
               {...selectProps("wall", wall.id)}
-              x={0}
-              y={-wall.thickness / 2}
-              width={length}
-              height={wall.thickness}
-              fill={selection?.id === wall.id ? "var(--primary)" : "var(--muted-foreground)"}
+              points={(
+                (cornerPreview?.base === shown &&
+                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
+                connected.find((w) => w.wallId === wall.id)?.localProfile || [
+                  { x: 0, y: -wall.thickness / 2 },
+                  { x: length, y: -wall.thickness / 2 },
+                  { x: length, y: wall.thickness / 2 },
+                  { x: 0, y: wall.thickness / 2 },
+                ]
+              )
+                .map((p) => `${p.x},${-p.y}`)
+                .join(" ")}
+              fill="var(--muted-foreground)"
               fillOpacity={0.55}
-              stroke="var(--primary)"
-              strokeWidth={0.018}
-              className="outline-none focus:stroke-foreground"
+              stroke={cornerPreview?.base === shown ? "var(--primary)" : "none"}
+              strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
+              className="outline-none focus-visible:stroke-sky-300"
             />
+            {cornerPreview?.base !== shown && (
+              <path
+                aria-label={`Wandkontur ${wall.id}`}
+                d={(outlines.get(wall.id) ?? [])
+                  .map((edge) => {
+                    const local = (p: Point) => {
+                      const dx = p.x - body.start.x,
+                        dy = p.y - body.start.y;
+                      return `${dx * body.normal.y - dy * body.normal.x},${-(dx * body.normal.x + dy * body.normal.y)}`;
+                    };
+                    return `M${local(edge.start)} L${local(edge.end)}`;
+                  })
+                  .join(" ")}
+                fill="none"
+                stroke={selection?.id === wall.id ? "#94a3b8" : "var(--primary)"}
+                strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
+                pointerEvents="none"
+              />
+            )}
             <text
               x={length / 2}
               y={-wall.thickness / 2 - 0.16}
@@ -438,22 +782,33 @@ export function BimPlan({
             >
               {length.toFixed(2)} m
             </text>
-            {shown.storey.windows
+            {plan.openings
               .filter((opening) => opening.wallId === wall.id)
               .map((opening) => (
                 <g key={opening.id}>
                   <rect
-                    {...selectProps("window", opening.id)}
+                    {...(isLayerVisible(project, visibility, opening.id)
+                      ? selectProps("window", opening.id)
+                      : {})}
                     x={opening.position * length - opening.width / 2}
                     y={-wall.thickness / 2}
                     width={opening.width}
                     height={wall.thickness}
                     fill="var(--background)"
-                    stroke={selection?.id === opening.id ? "var(--foreground)" : "var(--primary)"}
+                    stroke={
+                      !isLayerVisible(project, visibility, opening.id)
+                        ? "none"
+                        : selection?.id === opening.id
+                          ? "var(--foreground)"
+                          : "var(--primary)"
+                    }
                     strokeWidth={selection?.id === opening.id ? 0.04 : 0.025}
                     className="outline-none focus:stroke-foreground"
                   />
                   <line
+                    visibility={
+                      isLayerVisible(project, visibility, opening.id) ? "visible" : "hidden"
+                    }
                     x1={opening.position * length - opening.width / 2}
                     x2={opening.position * length + opening.width / 2}
                     y1={0}
@@ -467,7 +822,49 @@ export function BimPlan({
           </g>
         );
       })}
-      {(shown.storey.lines ?? []).map((line) => (
+      {selection?.kind === "wall" &&
+        plan.walls
+          .filter((wall) => wall.id === selection.id)
+          .map((wall) => (
+            <g key={`axis-${wall.id}`}>
+              <line
+                role="img"
+                aria-label={`Wandachse ${wall.id}`}
+                x1={wall.start.x}
+                y1={-wall.start.y}
+                x2={wall.end.x}
+                y2={-wall.end.y}
+                stroke={WALL_AXIS_COLOR}
+                strokeWidth={2.5}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+              <line
+                {...selectProps("wall", wall.id)}
+                aria-label="Wandachse auswählen"
+                x1={wall.start.x}
+                y1={-wall.start.y}
+                x2={wall.end.x}
+                y2={-wall.end.y}
+                stroke="transparent"
+                strokeWidth={12}
+                vectorEffect="non-scaling-stroke"
+                className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
+                onClick={(event) => {
+                  if (drawing || editSession) return;
+                  event.stopPropagation();
+                  const raw = rawPoint(event);
+                  onSelect(
+                    { kind: "wall", id: wall.id },
+                    { x: event.clientX, y: event.clientY },
+                    undefined,
+                    raw ? wallAxisAnchor(wall, raw) : wall.start,
+                  );
+                }}
+              />
+            </g>
+          ))}
+      {plan.lines.map((line) => (
         <g key={line.id}>
           {selection?.id === line.id && (
             <path
@@ -503,14 +900,90 @@ export function BimPlan({
       {!drawing &&
         !editSession &&
         selection &&
-        handles.map(({ point, index, label }) => (
+        selectedRing?.map((a, edgeIndex, ring) => {
+          const b = ring[(edgeIndex + 1) % ring.length]!;
+          const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          const length = Math.hypot(b.x - a.x, b.y - a.y);
+          const sign = selectedShape?.valid && selectedShape.signedArea > 0 ? 1 : -1;
+          const nx = (-(b.y - a.y) / length) * sign,
+            ny = ((b.x - a.x) / length) * sign;
+          const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
+          const cx = point.x + nx * 12 * size,
+            cy = point.y + ny * 12 * size;
+          const arrow = (along: number, across: number) =>
+            `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
+          return (
+            <g
+              key={`edge-${edgeIndex}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`Konturseite ${edgeIndex + 1} strecken`}
+              className="cursor-grab outline-none focus-visible:stroke-blue-800"
+              onPointerDown={(event) => {
+                if (event.button !== 0 || pan || selecting || !interactive || !onContourStretch)
+                  return;
+                const start = rawPoint(event);
+                if (!start || !svg.current) return;
+                event.preventDefault();
+                event.stopPropagation();
+                svg.current.focus();
+                gripClick.current = false;
+                navigationClick.current = false;
+                gripDrag.current = {
+                  base: project,
+                  target: selection,
+                  index: edgeIndex,
+                  gesture: {
+                    pointerId: event.pointerId,
+                    origin: point,
+                    pointerStart: start,
+                    screenStart: { x: event.clientX, y: event.clientY },
+                  },
+                };
+                svg.current.setPointerCapture(event.pointerId);
+                onContourStretch(selection, edgeIndex, point);
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onKeyDown={(event) => {
+                if (
+                  (event.key === "Enter" || event.key === " ") &&
+                  interactive &&
+                  !pan &&
+                  !selecting
+                ) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onContourStretch?.(selection, edgeIndex, point);
+                }
+              }}
+            >
+              <circle cx={cx} cy={-cy} r={10 / camera.pixelsPerMetre} fill="transparent" />
+              <path
+                d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
+                fill="none"
+                stroke="#0284c7"
+                strokeWidth={2}
+                className="cursor-pointer outline-none focus-visible:stroke-blue-800"
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            </g>
+          );
+        })}
+      {!drawing &&
+        !editSession &&
+        selection &&
+        handles.map(({ point, index, label, axis }) => (
           <circle
             key={label}
             cx={point.x}
             cy={-point.y}
             r={5 / camera.pixelsPerMetre}
-            fill="white"
-            stroke="#0284c7"
+            fill={axis ? WALL_AXIS_COLOR : "white"}
+            stroke={axis ? WALL_AXIS_COLOR : "#0284c7"}
             strokeWidth={2}
             vectorEffect="non-scaling-stroke"
             role="button"
@@ -546,7 +1019,7 @@ export function BimPlan({
           <circle
             cx={resolvedEdit.point.x}
             cy={-resolvedEdit.point.y}
-            r={0.055}
+            r={5 / camera.pixelsPerMetre}
             fill={editError ? "#dc2626" : "#0284c7"}
           />
           {editError && (
@@ -561,6 +1034,20 @@ export function BimPlan({
             </text>
           )}
         </g>
+      )}
+      {drawing && draftFill && draftPoints.length >= 2 && (
+        <polygon
+          points={[...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
+            .map((p) => `${p.x},${-p.y}`)
+            .join(" ")}
+          fill={draftFill.color}
+          fillOpacity={draftFill.opacity}
+          stroke="var(--primary)"
+          strokeWidth={1}
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="none"
+        />
       )}
       {drawing && draftPoints.length > 0 && (
         <polyline
@@ -688,7 +1175,7 @@ export function BimPlan({
         (drawing || resolvedHover.candidate.kind !== "grid") && (
           <g
             pointerEvents="none"
-            aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
+            aria-label={`Fanghilfe ${resolvedHover.candidate.sourceFeature === "t-axis" ? "T-Anschluss" : snapLabels[resolvedHover.candidate.kind]}`}
           >
             {resolvedHover.candidate.kind === "midpoint" ? (
               <path
@@ -715,9 +1202,90 @@ export function BimPlan({
               fontSize={12 / camera.pixelsPerMetre}
               fill="#0284c7"
             >
-              {snapLabels[resolvedHover.candidate.kind]}
+              {resolvedHover.candidate.sourceFeature === "t-axis"
+                ? "T-Anschluss"
+                : snapLabels[resolvedHover.candidate.kind]}
             </text>
           </g>
+        )}
+      {selecting && (
+        <g pointerEvents="none">
+          <rect
+            x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+            y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+            width={viewSize.width / camera.pixelsPerMetre}
+            height={viewSize.height / camera.pixelsPerMetre}
+            fill="var(--background)"
+            opacity={0.65}
+          />
+          {referenceSelection?.mode === "points" &&
+            referenceSelection.points
+              .filter((r) => isLayerVisible(project, visibility, r.entityId))
+              .map((r) => (
+                <circle
+                  key={referenceKey(r)}
+                  cx={r.point.x}
+                  cy={-r.point.y}
+                  r={8 / camera.pixelsPerMetre}
+                  fill="none"
+                  stroke="#64748b"
+                  strokeWidth={2 / camera.pixelsPerMetre}
+                />
+              ))}
+          {modelSources.allSegments
+            .filter((s) => isLayerVisible(project, visibility, s.source.entityId))
+            .filter(
+              (s) =>
+                referenceSelection?.state.draft?.includes(segmentKey(s.source)) ||
+                (referenceSelection?.hot &&
+                  segmentKey(referenceSelection.hot) === segmentKey(s.source)),
+            )
+            .map((s) => (
+              <line
+                key={segmentKey(s.source)}
+                x1={s.start.x}
+                y1={-s.start.y}
+                x2={s.end.x}
+                y2={-s.end.y}
+                stroke="#64748b"
+                strokeWidth={3 / camera.pixelsPerMetre}
+              />
+            ))}
+        </g>
+      )}
+      {referenceSelection &&
+        (selecting || referenceSelection.selected || (endpointSnap && snap && density.paused)) && (
+          <foreignObject
+            transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
+            width={Math.min(440, viewSize.width - 24)}
+            height={selecting ? 340 : 90}
+          >
+            <ReferenceSelectionPanel
+              binding={referenceSelection}
+              pointsEnabled={trackingContext.enabled}
+              pointPreview={previewPoints(referenceSelection.points)}
+              onApplyPoints={() => {
+                const points = referenceSelection.points;
+                const valid = points.every(
+                  (r) =>
+                    isLayerVisible(project, visibility, r.entityId) &&
+                    modelSources.lookup(referenceKey(r)) &&
+                    (!snapping || snapping.sources([r]).length > 0),
+                );
+                if (valid && acquirePoints(points)) referenceSelection.cancel();
+              }}
+              paused={endpointSnap && snap && density.paused}
+              label={(r) => {
+                const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
+                const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+                if (referenceSelection.mode === "points")
+                  return `${wi >= 0 ? `Wand ${wi + 1}` : li >= 0 ? `Linie ${li + 1}` : "Hilfsreferenz"} · ${r.kind === "midpoint" ? "Mittelpunkt" : "Punkt"} (${r.point.x.toFixed(2)}; ${r.point.y.toFixed(2)})`;
+                return wi >= 0
+                  ? `Wand ${wi + 1} · Achse`
+                  : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
+              }}
+            />
+          </foreignObject>
         )}
     </svg>
   );

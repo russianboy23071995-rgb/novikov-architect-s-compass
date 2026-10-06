@@ -101,7 +101,7 @@ export function PrecisionInput({
     <form
       ref={panel}
       aria-label="Hilfseingabefenster"
-      className="glass-panel-strong fixed z-50 w-[230px] max-w-[calc(100vw-16px)] rounded-lg border p-2 text-[11px] shadow-lg"
+      className="glass-panel-strong fixed z-40 w-[230px] max-w-[calc(100vw-16px)] rounded-lg border p-2 text-[11px] shadow-lg"
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)", overflow: "auto" }}
       onSubmit={(e) => {
         e.preventDefault();

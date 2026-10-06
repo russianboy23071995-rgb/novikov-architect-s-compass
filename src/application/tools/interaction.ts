@@ -1,6 +1,7 @@
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { ToolSnapPolicy } from "./snapping.ts";
-export type PrecisionValues = { point: Point2; degrees: number; metres: number };
+export type PrecisionValues = { point: Point2; degrees: number; metres: number; notice?: string };
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
   identity: object;
@@ -9,8 +10,8 @@ export type ToolInteraction = {
   input: { axisLabel: string | null; degrees: number | null } | null;
   click: "confirm" | "direction";
   preview: (angle: string, length: string, aim: Point2 | null) => PrecisionValues;
-  validate: (point: Point2) => void;
-  commit: (point: Point2) => void;
+  validate: (point: Point2, candidate?: SnapCandidate | null) => void;
+  commit: (point: Point2, candidate?: SnapCandidate | null) => void;
   cancel: () => void;
 };
 export type InteractionPreview = { value: PrecisionValues | null; error: string };
@@ -28,7 +29,11 @@ export function evaluateInteraction(
   }
 }
 /** Both mouse and numeric confirmation revalidate; preview alone never commits. */
-export function confirmInteraction(tool: ToolInteraction, point: Point2): void {
-  tool.validate(point);
-  tool.commit(point);
+export function confirmInteraction(
+  tool: ToolInteraction,
+  point: Point2,
+  candidate?: SnapCandidate | null,
+): void {
+  tool.validate(point, candidate);
+  tool.commit(point, candidate);
 }

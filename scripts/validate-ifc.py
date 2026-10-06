@@ -1,7 +1,8 @@
 """Independent schema, relationship and geometry checks (IfcOpenShell 0.8.5).
 
 Usage: python scripts/validate-ifc.py <fixture-directory>
-Generate fixtures first with scripts/generate-ifc-fixtures.mjs.
+Generate fixtures first with scripts/generate-ifc-fixtures.mjs or
+scripts/generate-corner-ifc-fixtures.mjs. Requires ifcopenshell==0.8.5 and pytest.
 """
 import json
 import math
@@ -51,15 +52,33 @@ def validate(path):
         entity = next(w for w in model.by_type("IfcWall") if ifcopenshell.util.element.get_pset(w, "NOVIKOV_BIM", "SourceId") == wall["id"])
         assert entity.ContainedInStructure[0].RelatingStructure == storey
         matrix = ifcopenshell.util.placement.get_local_placement(entity.ObjectPlacement)
-        close(matrix[0, 3], wall["start"]["x"])
-        close(matrix[1, 3], wall["start"]["y"])
+
         length = math.hypot(wall["end"]["x"]-wall["start"]["x"], wall["end"]["y"]-wall["start"]["y"])
+        ux = (wall["end"]["x"]-wall["start"]["x"])/length
+        uy = (wall["end"]["y"]-wall["start"]["y"])/length
+        offset = wall.get("bodyOffset", 0)
+        close(matrix[0, 3], wall["start"]["x"] - uy * offset)
+        close(matrix[1, 3], wall["start"]["y"] + ux * offset)
         close(matrix[0, 0], (wall["end"]["x"]-wall["start"]["x"])/length)
         close(matrix[1, 0], (wall["end"]["y"]-wall["start"]["y"])/length)
         body = entity.Representation.Representations[0].Items[0]
         close(body.Depth, wall["height"])
-        close(body.SweptArea.XDim, length)
-        close(body.SweptArea.YDim, wall["thickness"])
+        profile = expected.get("profiles", {}).get(wall["id"])
+        if profile is not None:
+            assert body.SweptArea.is_a("IfcArbitraryClosedProfileDef")
+            points = body.SweptArea.OuterCurve.Points
+            assert points[0] == points[-1], "Profile must explicitly close"
+            assert len(points) == len(profile) + 1
+            for point, target in zip(points, profile):
+                close(point.Coordinates[0], target["x"])
+                close(point.Coordinates[1], target["y"])
+            for point, target in zip(points, expected["contours"][wall["id"]]):
+                x, y = point.Coordinates
+                close(matrix[0, 3] + ux*x - uy*y, target["x"])
+                close(matrix[1, 3] + uy*x + ux*y, target["y"])
+        else:
+            close(body.SweptArea.XDim, length)
+            close(body.SweptArea.YDim, wall["thickness"])
         shape = ifcopenshell.geom.create_shape(settings, entity)
         close(ifcopenshell.util.shape.get_volume(shape.geometry), expected["volumes"][wall["id"]])
     for window in project["storey"]["windows"]:
@@ -77,8 +96,8 @@ def validate(path):
         length = math.hypot(wall["end"]["x"]-wall["start"]["x"], wall["end"]["y"]-wall["start"]["y"])
         along = window["position"] * length - window["width"]/2
         matrix = ifcopenshell.util.placement.get_local_placement(entity.ObjectPlacement)
-        close(matrix[0, 3], wall["start"]["x"] + along * (wall["end"]["x"]-wall["start"]["x"])/length)
-        close(matrix[1, 3], wall["start"]["y"] + along * (wall["end"]["y"]-wall["start"]["y"])/length)
+        close(matrix[0, 3], wall["start"]["x"] + along * (wall["end"]["x"]-wall["start"]["x"])/length - wall.get("bodyOffset", 0)*(wall["end"]["y"]-wall["start"]["y"])/length)
+        close(matrix[1, 3], wall["start"]["y"] + along * (wall["end"]["y"]-wall["start"]["y"])/length + wall.get("bodyOffset", 0)*(wall["end"]["x"]-wall["start"]["x"])/length)
         close(matrix[2, 3], window["sillHeight"])
     assert ifcopenshell.util.element.get_pset(model.by_type("IfcProject")[0], "NOVIKOV_BIM", "SourceId") == project["id"]
     print(f"PASS {path.name}: IFC4 schema/EXPRESS, hierarchy, relationships, placement and net wall volumes")

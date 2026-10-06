@@ -84,7 +84,7 @@ test("shared interaction preserves point/element and constrained-action semantic
           state = editingReducer(state, { type: "cancel" });
         },
       );
-      assert.equal(adapter.click, action === "move" ? "direction" : "confirm");
+      assert.equal(adapter.click, "confirm");
       const preview = evaluateInteraction(adapter, "90", "1", null);
       assert.ok(preview.value, preview.error);
       assert.equal(state.history.past.length, 0);

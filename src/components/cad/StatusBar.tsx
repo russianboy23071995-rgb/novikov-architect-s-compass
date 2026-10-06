@@ -1,9 +1,13 @@
+import { GridControls } from "./GridControls";
+import type { GridSettings } from "@/application/snapping/grid-settings";
 import { CircleDot, Grid3X3, Magnet, MoveHorizontal, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function StatusBar({
   grid,
+  gridSettings,
+  onGridSettings,
   snap,
   ortho,
   selection,
@@ -11,6 +15,8 @@ export function StatusBar({
   onSnap,
   onOrtho,
 }: {
+  gridSettings: GridSettings;
+  onGridSettings: (value: GridSettings) => void;
   grid: boolean;
   snap: boolean;
   ortho: boolean;
@@ -37,8 +43,9 @@ export function StatusBar({
         <Grid3X3 /> Grid
       </Button>
       <Button variant="ghost" className={toggleClass(snap)} onClick={onSnap}>
-        <Magnet /> Snap 0.10 m
+        <Magnet /> SNAP
       </Button>
+      <GridControls value={gridSettings} onChange={onGridSettings} />
       <Button variant="ghost" className={toggleClass(ortho)} onClick={onOrtho}>
         <MoveHorizontal /> Ortho
       </Button>
