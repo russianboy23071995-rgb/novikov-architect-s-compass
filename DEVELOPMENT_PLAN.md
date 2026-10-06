@@ -1,5 +1,16 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## UI-Korrektur zu PR154 - 06.10.2026
+
+Nach Nutzerhinweis den gesamten werkzeugabhaengigen Optionsbereich aus der oberen
+Menueleiste entfernt (Fenster, Wand, Linie, Schraffur, Auswahl, Decke). Eigenschaften
+und Werkzeugeinstellungen gehoeren ausschliesslich in Werkzeugeigenschaften.
+Die alte statische Optionsliste samt Tool-Prop ist entfernt; globale Projekt-,
+Ansichts- und Ebenensteuerung bleibt. Keine Modell-/Bedienlogik hinzugefuegt.
+TypeScript, Build und gezielter Lint bestanden. Browser: Fensterwerkzeug zeigt
+Maße nur in Werkzeugeigenschaften; der obere Optionsbereich ist entfernt.
+Folgeauftrag bleibt die unten dokumentierte praezise Fensterposition.
+
 ## Einstellbare Fenstermaße vor Platzierung - 06.10.2026
 
 PR153 nach Freigabe normal in main integriert (3c19cc6). Das Fensterwerkzeug zeigt

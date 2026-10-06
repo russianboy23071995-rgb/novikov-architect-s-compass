@@ -1,5 +1,9 @@
 # NOVIKOV CAD Architecture Contract
 
+Tool-specific settings, properties and option hints belong exclusively in the
+Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
+active-tool option model; global project/view/layer controls remain there.
+
 ## Window placement adapter — 2026-10-06
 
 `application/drawing/window-placement.ts` derives host/relative position from a

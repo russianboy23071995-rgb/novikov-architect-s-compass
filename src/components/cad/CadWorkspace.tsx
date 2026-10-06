@@ -638,7 +638,6 @@ export function CadWorkspace({
               setModelError("");
               setLayersOpen(true);
             }}
-            tool={tool}
             mode={mode}
             layout={layout}
             grid={grid}
@@ -663,15 +662,7 @@ export function CadWorkspace({
             onSnap={() => setSnap((value) => !value)}
             onNavigator={() => setNavigatorOpen((value) => !value)}
             onDemand={() => setDemandOpen((value) => !value)}
-            onAction={(action) => {
-              if (action === "Window selection") {
-                cancelInteraction();
-                setTool("select");
-                showNotice(
-                  "Auf freier Canvas-Flaeche einen Rahmen ziehen. Strg-Klick erweitert die Auswahl.",
-                );
-              } else showNotice(action);
-            }}
+            onAction={showNotice}
             onExportIfc={downloadIfc}
             exportingIfc={exportingIfc}
             onSave={saveProject}
