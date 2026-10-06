@@ -1,5 +1,34 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Gemeinsame Wand-Mehrfachauswahl in 3D - 06.10.2026
+
+PR150 normal nach Freigabe in main integriert (f496af0). Branch
+feat/solid-multi-selection reicht Strg/Cmd bei vorhandenen Wandflaechen- und
+Wandfusspunkt-Treffern an denselben onSelect-Vertrag wie im Grundriss weiter.
+Kein neuer Auswahlzustand und keine eigene Toggle-Logik im Renderer. Einfacher
+Klick ersetzt, Strg/Cmd-Klick ergaenzt/entfernt; Leerklick leert weiterhin.
+Vorhandene Tiefen-/Sichtbarkeitspruefung, Drag-Abgrenzung und Bearbeitung bleiben.
+Navigator, Status, Grundriss sowie Text/Voice sehen dieselbe Auswahl. Mehrere
+gewaehlte Waende behalten ihre bestehenden 3D-Umrandungen. Der Hinweis in den
+Werkzeugeigenschaften verweist fuer Gruppenbewegung auf Grundriss/Modellbefehl.
+
+Nachweis: 569 Tests bestanden, darunter neuer Integrationstest fuer Wandtreffer,
+gemischte zentrale Auswahl, Toggle/Ersetzen, ausgeblendete Ziele und dahinter
+liegende sichtbare Waende. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser mit corner-t-demo: E per Klick,
+N per Strg-Klick hinzu, per Cmd-Klick entfernt, erneut hinzu und in 2D dieselben
+zwei Waende ausgewaehlt. Screenshot outputs/solid-multi-selection.png.
+
+Abnahme: In 3D zwei sichtbare Wandflaechen nacheinander anklicken, bei der zweiten
+Strg (macOS Cmd) halten. Beide sind markiert, Anzahl 2. Erneuter Modifier-Klick
+entfernt die Wand. Wechsel auf 2D erhaelt die Auswahl; dort Gruppenbewegung nutzen.
+Grenzen: Vorhandenes 3D-Picking trifft Waende. Fenster/2D-Elemente erhalten hier
+keine neue Treffergeometrie; keine 3D-Rahmenauswahl oder neue 3D-Gruppenbewegung.
+
+Genau ein Folgeauftrag: Fenster-Picking und eindeutige Fensterauswahlmarkierung
+in 3D als weiteren Adapter an die gemeinsame Auswahl anbinden; Oeffnungen,
+Verdeckung und versteckte Hostwaende pruefen. Keine zweite Auswahlengine.
+
 ## Gruppen-Spracheingabe angebunden - 06.10.2026
 
 PR149 nach Freigabe normal in main integriert (854b804). Branch

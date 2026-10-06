@@ -28,7 +28,10 @@ toggles, empty click clears; a frame replaces. Start the frame on empty canvas i
 Select mode, after 3 CSS pixels of movement. Drawing, editing, reference selection
 and navigation retain precedence. Escape/pointer cancellation/model or visibility
 change cancel the frame; selection creates no model history.
-3D renders outlines for selected walls but adds no marquee or multi-picking gesture.
+3D wall surface and foot-anchor clicks now forward Ctrl/Cmd to the same selection
+transition as the plan. Existing depth/visibility and drag-vs-click gates remain.
+Selected wall outlines share the central set; no separate 3D selection store.
+This delivery adds no 3D marquee, window hit geometry or group-movement gesture.
 Implemented consumer: `application/selection/move.ts` pins a complete typed target
 set and base project, translates one proposed snapshot, then validates it once per
 proposal. Internal corner/T relations survive; relations crossing the selected-wall

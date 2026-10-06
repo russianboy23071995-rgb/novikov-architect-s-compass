@@ -833,8 +833,10 @@ export function CadWorkspace({
             </section>
           ) : selections.length > 1 ? (
             <p className="p-3 text-xs text-muted-foreground" role="status">
-              {selections.length} Elemente ausgewählt. Im Elementmenü „Auswahl frei bewegen“ wählen,
-              dann Ursprung und Ziel anklicken.
+              {selections.length} Elemente ausgewählt.{" "}
+              {mode === "3D"
+                ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
+                : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
             </p>
           ) : (
             <BimInspector
