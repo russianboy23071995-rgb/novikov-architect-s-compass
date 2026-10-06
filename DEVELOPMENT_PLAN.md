@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Mehrfachauswahl und Gruppenbewegung: Bestandspruefung — 06.10.2026
+
+PR145 nach Freigabe normal in main gemergt (c8a205c). Aktuell gibt es nur
+Einzelauswahl und Einzelbewegung. Window selection / Filter zeigen Hinweise,
+keine Auswahlmenge. Ein Modellversuch zeigt: sequenzielles Verschieben von H/E/N
+erhaelt die Ecke, verliert aber den internen T-Anschluss. Gruppenbewegung braucht
+also eine gemeinsame Snapshot-Aktion statt wiederholter Einzelbewegungen.
+
+[Plan und Akzeptanzfaelle](docs/walls/SELECTION_MOVE_PLAN.md) dokumentieren die
+betroffenen Module, Wiederverwendung von ToolInteraction/Raster/Hilfseingabe,
+Fensterzuordnung, interne/externe Verbindungen und vorgeschlagene additive Auswahl.
+Bediengesten und Details sind als Vorschlag gekennzeichnet. Keine Laufzeit- oder
+UI-Aenderung, keine neue Gruppenfunktion als fertig behauptet.
+
+58 bestehende Direct-Edit-/ToolInteraction-/Ecke-T-Tests bestanden; diff --check
+sauber. Kein erneuter Build fuer Dokumentation; PR145-Code zuletzt mit 546 Tests,
+TypeScript und Produktionsbuild erfolgreich geprueft.
+
+Genau ein Folgeauftrag: 2D-Wand-Mehrfachauswahl und atomare freie Gruppenbewegung
+gemaess Plan als durchgaengigen Ablauf implementieren: interne Anschluesse erhalten,
+externe loesen, gemeinsame Vorschau/Fang-/Zahleneingabe und ein Undo-Schritt.
+Keine eigene gemeinsame Eckpunktbewegung. Dieser Abschnitt ersetzt die bisherigen
+Folgeauftraege; aeltere Abschnitte bleiben als Verlauf erhalten.
+
+
 ## Ecke und entfernter T-Anschluss umgesetzt — 06.10.2026
 
 PR144 wurde freigegeben und in main zusammengefuehrt (7ef1b05). Umsetzung auf
