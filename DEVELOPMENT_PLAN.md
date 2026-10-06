@@ -12,10 +12,12 @@ Der Uebergangsbranch integration/current-cad-main verbindet main d2ffebb mit
 dem freigegebenen Integrationsstand 04ba5b5 (bis PR138) konfliktfrei. Main-eigene
 Lovable-Konfigurationsaenderungen bleiben erhalten. PR139 und PR124 bleiben
 separate offene Aufgaben; ihre Freigabe wird hier nicht vorausgesetzt.
-Lokale Pruefung: 517 Tests, TypeScript und Build erfolgreich; Lint 0 Fehler/6
-bekannte Warnungen. Einschraenkung: vorhandene node_modules verwenden Lovable
-Config 2.25.1, main fordert 2.25.2. Ein frischer Installations-/Buildnachweis
-fuer die deklarierte Version steht aus; Integrations-PR bleibt deshalb Entwurf.
+Ergaenzende Pruefung erfolgt in isolierter Kopie mit bun install --frozen-lockfile
+und der deklarierten Lovable-Konfiguration 2.25.2. Keine Aenderung der laufenden
+lokalen node_modules. UI-Zweig-Regeln: Piktogramme, Farben und Abstaende an
+bestehenden Komponenten anpassen; Handler, Modellaktionen, stabile IDs,
+Fanglogik und Eingabe-Lifecycle erhalten. Keine automatische Neugenerierung
+von Werkzeugleisten oder Dependency-Updates fuer reine Gestaltungsaufgaben.
 Anpassungen_UI bleibt unveraendert; dort laufende Arbeit wird nicht ueberschrieben.
 
 Genau ein naechster Infrastrukturauftrag: Nach Pruefung und Freigabe dieses
@@ -2461,3 +2463,5 @@ Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
 Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
+
+Nachweis zum Branch-Uebergang: Frozen-Lockfile-Installation erfolgreich; 517 Tests, TypeScript und Produktionsbuild mit Lovable-Konfiguration 2.25.2 bestanden.
