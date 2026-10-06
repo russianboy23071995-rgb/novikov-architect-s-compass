@@ -7,7 +7,6 @@ import {
   Bot,
   Box,
   Check,
-  ChevronDown,
   Grid3X3,
   LayoutGrid,
   Menu,
@@ -34,7 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
+import type { ViewMode, ViewportLayout } from "./cad-types";
 
 const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "single", label: "Single View", cells: "▣" },
@@ -44,18 +43,8 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "four", label: "4 Views", cells: "田" },
 ];
 
-const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
-  window: { title: "Fenster", options: ["Wand anfahren und klicken", "Esc: Abbruch"] },
-  hatch: { title: "Schraffur", options: ["Nur 2D", "Doppelklick schließt die Kontur"] },
-  select: { title: "Select", options: ["Window selection", "Filter"] },
-  wall: { title: "Wall", options: ["New wall: 0.36 m", "Height 2.80 m", "Click two points"] },
-  slab: { title: "Slab", options: ["Thickness 220 mm", "Level 01", "Concrete"] },
-  line: { title: "Line", options: ["Nur 2D", "Linienstil unter der Werkzeugleiste"] },
-};
-
 type TopToolbarProps = {
   onCanvasDisplay: () => void;
-  tool: ToolId;
   mode: ViewMode;
   layout: ViewportLayout;
   grid: boolean;
@@ -121,7 +110,6 @@ function IconControl({
 }
 
 export function TopToolbar(props: TopToolbarProps) {
-  const current = toolOptions[props.tool];
   return (
     <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
       <div className="flex h-11 min-w-0 items-center gap-2 overflow-x-auto px-2.5">
@@ -209,23 +197,6 @@ export function TopToolbar(props: TopToolbarProps) {
             <Download className="size-4" />
             {props.exportingIfc ? "Exporting…" : "IFC"}
           </Button>
-        </div>
-        <div className="hidden min-w-0 flex-1 items-center gap-1 2xl:flex">
-          <span className="shrink-0 px-2 text-[12px] font-semibold text-foreground">
-            {current.title}
-          </span>
-          {current.options.map((option) => (
-            <Button
-              key={option}
-              variant="outline"
-              size="sm"
-              className="h-6 max-w-36 rounded px-2 text-[11px] font-normal text-muted-foreground"
-              onClick={() => props.onAction(option)}
-            >
-              {option}
-              <ChevronDown className="size-2.5" />
-            </Button>
-          ))}
         </div>
         <div
           role="group"

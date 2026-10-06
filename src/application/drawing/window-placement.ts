@@ -1,3 +1,4 @@
+import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import { addWindow, wallLength } from "../../lib/bim/model.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -8,6 +9,21 @@ import type { ToolInteraction } from "../tools/interaction.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 
 export const defaultDrawingWindow = { width: 1.2, height: 1.35, sillHeight: 0.9 } as const;
+
+export type WindowDimensions = { width: number; height: number; sillHeight: number };
+export type WindowDimensionDraft = Readonly<Record<keyof WindowDimensions, string>>;
+export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimensions {
+  const width = parseMetres(draft.width),
+    height = parseMetres(draft.height),
+    sillHeight = parseMetres(draft.sillHeight);
+  if (!Number.isFinite(width) || width <= 0)
+    throw new Error("Breite muss größer als null sein (Meter).");
+  if (!Number.isFinite(height) || height <= 0)
+    throw new Error("Höhe muss größer als null sein (Meter).");
+  if (!Number.isFinite(sillHeight) || sillHeight < 0)
+    throw new Error("Brüstungshöhe muss mindestens null sein (Meter).");
+  return { width, height, sillHeight };
+}
 
 function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
   const hosts = project.storey.walls
@@ -36,6 +52,7 @@ export function placeWindow(
   visibility: LayerVisibilityPolicy,
   id: string,
   point: Point,
+  dimensions: WindowDimensions = defaultDrawingWindow,
 ): Project {
   if (base !== current || !visibility.isCurrent(current, visibility.context))
     throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
@@ -48,7 +65,7 @@ export function placeWindow(
     id,
     wallId: host.wall.id,
     position: host.position,
-    ...defaultDrawingWindow,
+    ...dimensions,
   });
 }
 
@@ -61,12 +78,16 @@ export function windowPlacementInteraction(
   current: () => { project: Project; visibility: LayerVisibilityPolicy },
   commit: (next: Project, id: string) => void,
   cancel: () => void,
+  settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
 ): ToolInteraction {
   const preview = (point: Point) => {
     const now = current();
     if (now.visibility !== visibility)
       throw new Error("Sichtbarkeit geändert. Werkzeug erneut starten.");
-    return placeWindow(base, now.project, visibility, id, point);
+    if (settings && settings.currentDraft() !== settings.draft)
+      throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
+    const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
+    return placeWindow(base, now.project, visibility, id, point, dimensions);
   };
   return {
     identity: {},

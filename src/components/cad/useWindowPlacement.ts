@@ -1,5 +1,10 @@
-import { useMemo, useRef } from "react";
-import { windowPlacementInteraction } from "@/application/drawing/window-placement";
+import { useMemo, useRef, useState } from "react";
+import {
+  windowPlacementInteraction,
+  defaultDrawingWindow,
+  parseWindowDimensions,
+  type WindowDimensionDraft,
+} from "@/application/drawing/window-placement";
 import type { Project } from "@/domain/project/schema";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 
@@ -11,9 +16,20 @@ export function useWindowPlacement(
   commit: (next: Project, id: string) => void,
   cancel: () => void,
 ) {
-  const latest = useRef({ project, visibility, commit, cancel, active });
-  latest.current = { project, visibility, commit, cancel, active };
-  return useMemo(
+  const [dimensions, setDimensions] = useState<WindowDimensionDraft>(() => ({
+    width: String(defaultDrawingWindow.width),
+    height: String(defaultDrawingWindow.height),
+    sillHeight: String(defaultDrawingWindow.sillHeight),
+  }));
+  let error = "";
+  try {
+    parseWindowDimensions(dimensions);
+  } catch (reason) {
+    error = reason instanceof Error ? reason.message : "Ungültige Maße.";
+  }
+  const latest = useRef({ project, visibility, commit, cancel, active, dimensions });
+  latest.current = { project, visibility, commit, cancel, active, dimensions };
+  const adapter = useMemo(
     () =>
       active
         ? windowPlacementInteraction(
@@ -26,8 +42,10 @@ export function useWindowPlacement(
             },
             (next, id) => latest.current.commit(next, id),
             () => latest.current.cancel(),
+            { draft: dimensions, currentDraft: () => latest.current.dimensions },
           )
         : null,
-    [active, project, visibility],
+    [active, project, visibility, dimensions],
   );
+  return { adapter, dimensions, setDimensions, error };
 }

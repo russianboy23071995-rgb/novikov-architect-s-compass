@@ -188,3 +188,67 @@ test("window placement follows diagonal physical wall instead of drawing axis", 
   });
   assert.ok(Math.abs(next.storey.windows[0]!.position - 0.6) < 1e-12);
 });
+
+test("window dimensions parse comma decimals and reject incomplete or invalid measures", async () => {
+  const { parseWindowDimensions } = await import("./window-placement.ts");
+  const draft = { width: "0,8", height: "1.1", sillHeight: "0" };
+  assert.deepEqual(parseWindowDimensions(draft), { width: 0.8, height: 1.1, sillHeight: 0 });
+  for (const key of ["width", "height", "sillHeight"] as const)
+    for (const invalid of ["", "-1", "NaN", "Infinity", "1,", "abc"])
+      assert.throws(() => parseWindowDimensions({ ...draft, [key]: invalid }));
+  for (const key of ["width", "height"] as const)
+    assert.throws(() => parseWindowDimensions({ ...draft, [key]: "0" }));
+});
+
+test("dimension revisions invalidate old previews and new values reach the same creation action", async () => {
+  const { windowPlacementInteraction } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { confirmInteraction } = await import("../tools/interaction.ts");
+  const empty = createProject("p", "s");
+  const base = createDrawing(empty, empty, "wall", {
+    kind: "wall",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    ...defaultDrawingWall,
+  });
+  const visibility = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  let draft = { width: "0,8", height: "1,1", sillHeight: "0,7" };
+  let committed = base;
+  const adapter = () =>
+    windowPlacementInteraction(
+      base,
+      visibility,
+      "new-window",
+      () => ({ project: base, visibility }),
+      (next) => {
+        committed = next;
+      },
+      () => {},
+      { draft, currentDraft: () => draft },
+    );
+  const old = adapter(),
+    point = { x: 1.5, y: 0.18 };
+  const preview = old.previewProject!(point);
+  assert.equal(preview.storey.windows[0]!.width, 0.8);
+  assert.equal(base.storey.windows.length, 0);
+  draft = { ...draft, width: "1,0" };
+  assert.throws(() => confirmInteraction(old, point), /Fenstermaße/);
+  assert.equal(committed, base);
+  const current = adapter();
+  const next = current.previewProject!(point);
+  confirmInteraction(current, point);
+  assert.deepEqual(committed, next);
+  assert.equal(committed.storey.windows[0]!.width, 1);
+  assert.equal(committed.storey.windows[0]!.height, 1.1);
+  assert.equal(committed.storey.windows[0]!.sillHeight, 0.7);
+  draft = { ...draft, width: "4" };
+  assert.throws(() => confirmInteraction(adapter(), point));
+  draft = { ...draft, width: "1", height: "3" };
+  assert.throws(() => confirmInteraction(adapter(), point));
+  draft = { ...draft, height: "" };
+  assert.throws(() => adapter().previewProject!(point));
+  assert.deepEqual(committed, next);
+});

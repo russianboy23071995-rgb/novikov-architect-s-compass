@@ -1,5 +1,9 @@
 # NOVIKOV CAD Architecture Contract
 
+Tool-specific settings, properties and option hints belong exclusively in the
+Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
+active-tool option model; global project/view/layer controls remain there.
+
 ## Window placement adapter — 2026-10-06
 
 `application/drawing/window-placement.ts` derives host/relative position from a
@@ -14,7 +18,13 @@ Draft window rendering uses its actual layer and host visibility, never a fake
 committed entity. New selection requests accompanying a model commit are validated
 against that new snapshot; ordinary clicks still validate the current snapshot.
 No project schema change. Initial placement uses the existing 1.20 x 1.35 m window
-with 0.90 m sill; one click commits once, Escape discards. Properties remain shared.
+with 0.90 m sill as defaults; one click commits once, Escape discards. Properties remain shared.
+The placement hook retains editable width/height/sill text for the current workspace
+session. Application parses metre values (decimal comma or point) and applies the
+same dimensions through preview and addWindow. Each immutable draft revision binds
+a new interaction; old preview/commit callbacks reject a changed revision. Invalid
+or incomplete fields cannot fall back to earlier valid dimensions. These tool
+preferences do not mutate existing entities or create model history/file fields.
 
 ## Shared selection requirement — 2026-10-06
 

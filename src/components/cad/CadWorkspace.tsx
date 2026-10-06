@@ -1,3 +1,4 @@
+import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
@@ -484,7 +485,7 @@ export function CadWorkspace({
     }
   };
 
-  const windowPlacement = useWindowPlacement(
+  const windowTool = useWindowPlacement(
     tool === "window",
     project,
     visibility,
@@ -494,6 +495,7 @@ export function CadWorkspace({
     },
     () => selectTool("select"),
   );
+  const windowPlacement = windowTool.adapter;
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
@@ -636,7 +638,6 @@ export function CadWorkspace({
               setModelError("");
               setLayersOpen(true);
             }}
-            tool={tool}
             mode={mode}
             layout={layout}
             grid={grid}
@@ -661,15 +662,7 @@ export function CadWorkspace({
             onSnap={() => setSnap((value) => !value)}
             onNavigator={() => setNavigatorOpen((value) => !value)}
             onDemand={() => setDemandOpen((value) => !value)}
-            onAction={(action) => {
-              if (action === "Window selection") {
-                cancelInteraction();
-                setTool("select");
-                showNotice(
-                  "Auf freier Canvas-Flaeche einen Rahmen ziehen. Strg-Klick erweitert die Auswahl.",
-                );
-              } else showNotice(action);
-            }}
+            onAction={showNotice}
             onExportIfc={downloadIfc}
             exportingIfc={exportingIfc}
             onSave={saveProject}
@@ -794,10 +787,11 @@ export function CadWorkspace({
             )}
           </div>
           {tool === "window" ? (
-            <p className="p-3 text-xs text-muted-foreground">
-              Fenster: sichtbare Wand anfahren, Vorschau prüfen und klicken. Esc bricht ab. Vorgabe
-              1,20 × 1,35 m · Brüstung 0,90 m. Maße nach dem Einsetzen hier ändern.
-            </p>
+            <WindowPlacementFields
+              value={windowTool.dimensions}
+              onChange={windowTool.setDimensions}
+              error={windowTool.error}
+            />
           ) : tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
               <HatchFillFields value={hatchFill} onChange={setHatchFill} />
