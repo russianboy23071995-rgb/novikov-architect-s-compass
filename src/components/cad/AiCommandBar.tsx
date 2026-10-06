@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Check, Mic, X } from "lucide-react";
 import novikovLogo from "@/assets/novikov-logo.png";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import {
 import { singleTarget, type SelectionSet } from "@/application/selection/state";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { Project } from "@/lib/bim/model";
-import { normalizeSpeech, recognitionConstructor, startVoice } from "@/lib/bim/voice";
+import { recognitionConstructor } from "@/lib/bim/voice";
+import { startSelectionVoice } from "@/application/commands/selection-voice";
 
 type Props = {
   project: Project;
@@ -36,6 +37,12 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const [listening, setListening] = useState(false);
   const cancelVoice = useRef<(() => void) | null>(null);
+  const voiceContext = useMemo(
+    () => ({ project, targets, visibility }),
+    [project, targets, visibility],
+  );
+  const latestContext = useRef(voiceContext);
+  latestContext.current = voiceContext;
   useEffect(() => {
     setVoiceAvailable(Boolean(recognitionConstructor(window)));
   }, []);
@@ -44,7 +51,7 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
       cancelVoice.current?.();
       cancelVoice.current = null;
     },
-    [project, targets, visibility],
+    [voiceContext],
   );
   const listen = () => {
     if (listening) {
@@ -53,26 +60,30 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
       return;
     }
     const RecognitionClass = recognitionConstructor(window);
-    if (!RecognitionClass || !selection) return;
+    if (!RecognitionClass || !targets.length) return;
     reset();
     setListening(true);
-    setMessage(`Aufnahme für ${selection.id} …`);
-    cancelVoice.current = startVoice(RecognitionClass, {
-      end: () => {
-        setListening(false);
-        setMessage("");
-      },
-      error: setError,
-      result: (transcript) => {
-        const text = normalizeSpeech(transcript);
-        setCommand(text);
-        try {
-          setPreview(previewSelectionCommand(project, targets, visibility, text));
-        } catch (error) {
-          setError(error instanceof Error ? error.message : "Befehl nicht erkannt.");
-        }
-      },
-    });
+    setMessage(`Aufnahme für ${targets.length} ausgewählte Elemente …`);
+    try {
+      cancelVoice.current = startSelectionVoice(
+        RecognitionClass,
+        voiceContext,
+        () => latestContext.current,
+        {
+          end: () => {
+            setListening(false);
+            setMessage("");
+          },
+          error: setError,
+          transcript: setCommand,
+          preview: setPreview,
+        },
+      );
+    } catch (error) {
+      setListening(false);
+      setMessage("");
+      setError(error instanceof Error ? error.message : "Aufnahme nicht möglich.");
+    }
   };
   const reset = () => {
     setPreview(null);
@@ -123,20 +134,16 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
           type="button"
           variant="ghost"
           size="icon"
-          disabled={
-            !voiceAvailable || !selection || selection.kind === "line" || selection.kind === "hatch"
-          }
+          disabled={!voiceAvailable || !targets.length}
           onClick={listen}
           aria-label={listening ? "Aufnahme abbrechen" : "Spracheingabe starten"}
           aria-pressed={listening}
           title={
             !voiceAvailable
               ? "Browser unterstützt keine Spracherkennung"
-              : selectionCount > 1
-                ? "Gruppenbefehle vorerst per Text eingeben"
-                : !selection
-                  ? "Zuerst Bauteil auswählen"
-                  : "Sprachbefehl für ausgewähltes Bauteil"
+              : !targets.length
+                ? "Zuerst Elemente auswählen"
+                : "Sprachbefehl für die gesamte Auswahl"
           }
         >
           <Mic />
@@ -161,12 +168,12 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
       </p>
       {selection?.kind === "hatch" && (
         <p className="px-2 text-xs text-muted-foreground">
-          Schraffurfüllung über die Eigenschaften ändern; Schraffurbefehle folgen später.
+          Schraffurfüllung über die Eigenschaften ändern; Befehle zur Füllung folgen später.
         </p>
       )}
       {selection?.kind === "line" && (
         <p className="mt-1 text-[10px] text-muted-foreground">
-          Linienstile über die Eigenschaften ändern; Linienbefehle folgen später.
+          Linienstile über die Eigenschaften ändern; Stilbefehle folgen später.
         </p>
       )}
       {error && (
