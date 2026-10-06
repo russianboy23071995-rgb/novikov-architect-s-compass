@@ -45,6 +45,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
+  window: { title: "Fenster", options: ["Wand anfahren und klicken", "Esc: Abbruch"] },
   hatch: { title: "Schraffur", options: ["Nur 2D", "Doppelklick schließt die Kontur"] },
   select: { title: "Select", options: ["Window selection", "Filter"] },
   wall: { title: "Wall", options: ["New wall: 0.36 m", "Height 2.80 m", "Click two points"] },

@@ -3,7 +3,7 @@ import { eligibleSelection, targetKey, type SelectionSet } from "./state.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { drawingSnapPolicy, type AnchoredSnapPolicy } from "../tools/snapping.ts";
 import { precisionTarget } from "../input/precision.ts";
-import type { ToolInteraction } from "../tools/interaction.ts";
+import type { AnchoredToolInteraction } from "../tools/interaction.ts";
 
 export type SelectionMove = {
   base: Project;
@@ -105,7 +105,7 @@ export function selectionMoveInteraction(
   visibility: LayerVisibilityPolicy,
   commit: (project: Project) => void,
   cancel: () => void,
-): ToolInteraction {
+): AnchoredToolInteraction {
   const previewProject = (point: Point) =>
     previewSelectionMove(session, current, targets, point, visibility);
   return {

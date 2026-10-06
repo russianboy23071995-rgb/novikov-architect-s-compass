@@ -909,7 +909,7 @@ export function BimPlan({
                     height={wall.thickness}
                     fill="var(--background)"
                     stroke={
-                      !isLayerVisible(project, visibility, opening.id)
+                      !allowsShown(opening.id)
                         ? "none"
                         : selectedIds.has(opening.id)
                           ? "var(--foreground)"
@@ -919,9 +919,7 @@ export function BimPlan({
                     className="outline-none focus:stroke-foreground"
                   />
                   <line
-                    visibility={
-                      isLayerVisible(project, visibility, opening.id) ? "visible" : "hidden"
-                    }
+                    visibility={allowsShown(opening.id) ? "visible" : "hidden"}
                     x1={opening.position * length - opening.width / 2}
                     x2={opening.position * length + opening.width / 2}
                     y1={0}

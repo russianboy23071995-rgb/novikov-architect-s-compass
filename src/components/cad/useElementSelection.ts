@@ -1,3 +1,4 @@
+import { createLayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   eligibleSelection,
@@ -32,5 +33,11 @@ export function useElementSelection(project: Project, visibility: LayerVisibilit
     (target: SelectionSet[number] | null) => choose(target ? [target] : []),
     [choose],
   );
-  return { targets, selection: singleTarget(targets), choose, setSelection };
+  // Model commit and selection request are batched. Validate a newly created ID
+  // against the committed snapshot, not the previous render's model.
+  const selectCommitted = (next: Project, target: SelectionSet[number] | null) => {
+    const policy = createLayerVisibilityPolicy(next, visibility.context);
+    setRequested(eligibleSelection(next, policy, target ? [target] : []));
+  };
+  return { targets, selection: singleTarget(targets), choose, setSelection, selectCommitted };
 }

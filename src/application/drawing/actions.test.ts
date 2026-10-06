@@ -63,3 +63,128 @@ test("shared creation retains line and polyline appearance and validates stale r
     assert.throws(() => createDrawing(base, next, "l2", request), /Modell/);
   }
 });
+
+test("window placement previews without mutation and commits one undoable serializable opening", async () => {
+  const { placeWindow, windowPlacementInteraction } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { confirmInteraction } = await import("../tools/interaction.ts");
+  const { drawingWallVisibility } = await import("../../rendering/viewport/layer-display.ts");
+  const empty = createProject("p", "s");
+  const base = createDrawing(empty, empty, "wall", {
+    kind: "wall",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    ...defaultDrawingWall,
+  });
+  const visibility = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  let state = createEditingState(base),
+    cancelled = false;
+  const tool = windowPlacementInteraction(
+    base,
+    visibility,
+    "win",
+    () => ({ project: base, visibility }),
+    (next) => {
+      state = editingReducer(state, { type: "project", project: next });
+    },
+    () => {
+      cancelled = true;
+    },
+  );
+  const point = { x: 1.5, y: 0.18 };
+  const preview = tool.previewProject!(point);
+  assert.equal(base.storey.windows.length, 0);
+  assert.equal(state.history.past.length, 0);
+  assert.equal(preview.storey.windows[0]!.position, 0.5);
+  assert.equal(drawingWallVisibility(base, preview, visibility)("win"), true);
+  assert.equal(tool.snapping.origin, null);
+  const snap = tool.snapping.resolve(
+    { x: 1.5, y: 0.3 },
+    {
+      references: [],
+      pixelsPerMetre: 100,
+      enabled: false,
+      endpointRadiusPx: 10,
+      gridSpacing: null,
+      orthoOrigin: null,
+    },
+  );
+  assert.ok(Math.abs(snap.point.y - 0.18) < 1e-12);
+  tool.cancel();
+  assert.equal(cancelled, true);
+  assert.equal(state.history.past.length, 0);
+  confirmInteraction(tool, point);
+  assert.equal(state.history.past.length, 1);
+  assert.deepEqual(state.history.present, placeWindow(base, base, visibility, "win", point));
+  assert.deepEqual(readProjectFile(serializeProject(state.history.present)), state.history.present);
+  assert.ok(buildSolid(state.history.present).volume < buildSolid(base).volume);
+  state = editingReducer(state, { type: "undo" });
+  assert.deepEqual(state.history.present, base);
+  state = editingReducer(state, { type: "redo" });
+  assert.deepEqual(state.history.present, preview);
+});
+
+test("window placement rejects hidden hosts/layers, stale context and invalid geometry", async () => {
+  const { placeWindow, windowPlacementInteraction } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const empty = createProject("p", "s");
+  const base = createDrawing(empty, empty, "wall", {
+    kind: "wall",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    ...defaultDrawingWall,
+  });
+  const policy = (hiddenLayerIds: string[]) =>
+    createLayerVisibilityPolicy(base, { scope: { kind: "bim-project" }, hiddenLayerIds });
+  const visible = policy([]);
+  for (const point of [
+    { x: 0, y: 0.18 },
+    { x: 5, y: 3 },
+    { x: NaN, y: 0 },
+  ])
+    assert.throws(() => placeWindow(base, base, visible, "win", point));
+  assert.throws(() =>
+    placeWindow(base, base, policy([base.storey.walls[0]!.layerId]), "win", { x: 1.5, y: 0.18 }),
+  );
+  assert.throws(() =>
+    placeWindow(base, base, policy([base.defaultLayerIds.window]), "win", { x: 1.5, y: 0.18 }),
+  );
+  assert.throws(() => placeWindow(base, empty, visible, "win", { x: 1.5, y: 0.18 }), /aktuell/);
+  let commits = 0;
+  const adapter = windowPlacementInteraction(
+    base,
+    visible,
+    "win",
+    () => ({ project: base, visibility: policy([]) }),
+    () => commits++,
+    () => {},
+  );
+  assert.throws(() => adapter.commit({ x: 1.5, y: 0.18 }), /Sichtbarkeit/);
+  assert.equal(commits, 0);
+});
+
+test("window placement follows diagonal physical wall instead of drawing axis", async () => {
+  const { placeWindow } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { wallBody } = await import("../../domain/elements/wall/body.ts");
+  const empty = createProject("p", "s");
+  const base = createDrawing(empty, empty, "wall", {
+    kind: "wall",
+    start: { x: 2, y: 4 },
+    end: { x: 5, y: 7 },
+    ...defaultDrawingWall,
+  });
+  const body = wallBody(base.storey.walls[0]!);
+  const visibility = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  const next = placeWindow(base, base, visibility, "win", {
+    x: body.start.x + 0.6 * (body.end.x - body.start.x),
+    y: body.start.y + 0.6 * (body.end.y - body.start.y),
+  });
+  assert.ok(Math.abs(next.storey.windows[0]!.position - 0.6) < 1e-12);
+});
