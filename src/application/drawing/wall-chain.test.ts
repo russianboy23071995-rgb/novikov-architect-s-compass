@@ -232,3 +232,72 @@ test("continuing a T-connected draft into an unsupported corner leaves the accep
   assert.throws(() => appendWallChain(draft, base, "next", { x: 5, y: 0 }));
   assert.equal(serializeProject(draft.preview), saved);
 });
+
+import { wallStartSnapPolicy } from "../tools/adapters.ts";
+import { toolPinnedReferences } from "../tools/snapping.ts";
+
+test("T start snaps locally without pinning a fake origin and commits with one undo", async () => {
+  const { base, context } = tDrawing();
+  assert.deepEqual(toolPinnedReferences(wallStartSnapPolicy), []);
+  const snap = wallStartSnapPolicy.resolve({ x: 2.4, y: 0.03 }, context);
+  assert.deepEqual(snap.point, { x: 2.4, y: 0 });
+  assert.equal(snap.candidate?.sourceFeature, "t-axis");
+  const chain = beginWallChain(base, snap.point, snap.candidate);
+  assert.equal(chain.preview, base);
+  const draft = appendWallChain(chain, base, "branch", { x: 2.4, y: -2 });
+  const p = finishWallChain(draft, base);
+  assert.deepEqual(p.storey.wallTJunctions, [
+    { hostWallId: "host", incoming: { wallId: "branch", endpoint: 0 } },
+  ]);
+  assert.deepEqual(deserializeProject(serializeProject(p)), p);
+  assert.ok(buildSolid(p).volume > 0);
+  assert.match(await exportIfc(p), /IFCWALL/);
+  const history = commitProject(createHistory(base), p);
+  assert.equal(history.past.length, 1);
+  assert.deepEqual(undoProject(history).present, base);
+  assert.deepEqual(redoProject(undoProject(history)).present, p);
+  assert.throws(() => appendWallChain(draft, base, "corner", { x: 4, y: -2 }), /T-Anschluss/);
+});
+
+test("T start validates both sides, rejects oblique and stale targets without mutation", () => {
+  const { base, context } = tDrawing();
+  const snap = wallStartSnapPolicy.resolve({ x: 2.4, y: 0 }, context);
+  const chain = beginWallChain(base, snap.point, snap.candidate);
+  assert.equal(
+    appendWallChain(chain, base, "upper", { x: 2.4, y: 2 }).preview.storey.wallTJunctions.length,
+    1,
+  );
+  assert.throws(() => appendWallChain(chain, base, "oblique", { x: 4, y: 2 }));
+  assert.equal(chain.preview, base);
+  assert.throws(() => beginWallChain(base, { x: 1, y: 1 }, snap.candidate));
+  assert.throws(() =>
+    appendWallChain(chain, deserializeProject(serializeProject(base)), "stale", { x: 2.4, y: 2 }),
+  );
+  assert.equal(
+    appendWallChain(beginWallChain(base, snap.point), base, "plain", { x: 2.4, y: 2 }).preview
+      .storey.wallTJunctions.length,
+    0,
+  );
+});
+
+test("T start respects source visibility, ambiguity, snap off and strict host interior", () => {
+  const { context } = tDrawing();
+  for (const request of [
+    { ...context, enabled: false },
+    { ...context, references: [] },
+    { ...context, includeInteractionTargets: false },
+    {
+      ...context,
+      references: [...context.references, { ...context.references[0]!, entityId: "other" }],
+    },
+    { ...context, selectedSegments: new Set<string>() },
+  ])
+    assert.notEqual(
+      wallStartSnapPolicy.resolve({ x: 2.4, y: 0.03 }, request).candidate?.sourceFeature,
+      "t-axis",
+    );
+  assert.notEqual(
+    wallStartSnapPolicy.resolve({ x: 0, y: 0 }, context).candidate?.sourceFeature,
+    "t-axis",
+  );
+});

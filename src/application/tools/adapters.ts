@@ -9,14 +9,14 @@ import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts
 import { previewEdit } from "../direct-edit/controller.ts";
 import { previewDrawingInput } from "../drawing/actions.ts";
 import { drawingSnapPolicy } from "./snapping.ts";
-import type { ToolSnapPolicy } from "./snapping.ts";
+import type { ToolSnapPolicy, AnchoredSnapPolicy } from "./snapping.ts";
 import {
   editOriginReference,
   editSnapReferences,
   resolveEditSnap,
 } from "../direct-edit/snapping.ts";
-const editPolicies = new WeakMap<EditSession, ToolSnapPolicy>();
-function editSnapPolicy(session: EditSession): ToolSnapPolicy {
+const editPolicies = new WeakMap<EditSession, AnchoredSnapPolicy>();
+function editSnapPolicy(session: EditSession): AnchoredSnapPolicy {
   let policy = editPolicies.get(session);
   if (!policy) {
     policy = {
@@ -86,8 +86,16 @@ export function drawingInteraction(
   };
 }
 
-const wallPolicies = new WeakMap<object, ToolSnapPolicy>();
-function wallDrawingPolicy(origin: Point, path?: readonly Point[]): ToolSnapPolicy {
+/** Before the first click there is no construction origin to pin. */
+export const wallStartSnapPolicy: ToolSnapPolicy = {
+  origin: null,
+  sources: (refs) => [...refs],
+  resolve: (cursor, context) =>
+    queryTAxisSnap(cursor, context, findTAxisReference(cursor, null, cursor, context)),
+};
+
+const wallPolicies = new WeakMap<object, AnchoredSnapPolicy>();
+function wallDrawingPolicy(origin: Point, path?: readonly Point[]): AnchoredSnapPolicy {
   const key = path ?? origin;
   let policy = wallPolicies.get(key);
   if (!policy) {

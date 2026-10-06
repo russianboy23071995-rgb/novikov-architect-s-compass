@@ -392,7 +392,7 @@ test("one snap entry preserves every edit constraint including hosted windows", 
           refs.some((r) => r.entityId === "w"),
           false,
         );
-      assert.deepEqual(policy.origin.point, session.anchor);
+      assert.deepEqual(policy.origin!.point, session.anchor);
       for (const enabled of [true, false])
         for (const shift of [true, false]) {
           const context = {
