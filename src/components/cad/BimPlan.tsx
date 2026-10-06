@@ -1,3 +1,4 @@
+import { useShiftSnapLock } from "./useShiftSnapLock";
 import { connectedWallSolids } from "@/domain/elements/wall/connections";
 import { wallBody } from "@/domain/elements/wall/body";
 import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
@@ -31,7 +32,6 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
-  resolveToolSnap,
   toolPinnedReferences,
 } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
@@ -287,8 +287,9 @@ export function BimPlan({
     acquirePoints,
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
+  const resolveLockedSnap = useShiftSnapLock(visibilitySession, referenceReset);
   const resolvePointer = (point: Point, shift = shiftHeld) =>
-    resolveToolSnap(
+    resolveLockedSnap(
       snapping,
       point,
       {
@@ -804,7 +805,7 @@ export function BimPlan({
                 stroke="transparent"
                 strokeWidth={12}
                 vectorEffect="non-scaling-stroke"
-                className="cursor-pointer"
+                className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
                 onClick={(event) => {
                   if (drawing || editSession) return;
                   event.stopPropagation();

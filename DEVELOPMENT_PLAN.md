@@ -1,5 +1,39 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerkorrektur: Shift-Flucht halten und SVG-Fokus — 06.10.2026
+
+Gemeinsame Richtungssperre für Grundriss und 3D-Arbeitsebene: Shift erfasst die
+aktuelle Hilfsrichtung (sonst 45°-Raster), hält Ursprung/Richtung unabhängig von
+weiterer Mausbewegung und gibt sie beim Loslassen frei. Tastaturwiederholung
+kalibriert nicht neu; neue Sitzung/Escape/Blur beendet den Zustand. Vorhandene
+explizite Bewegungsachsen bleiben vorrangig; exakt passende Fangpunkte weiterhin
+entlang der festgehaltenen Richtung erreichbar. Keine separate Werkzeuglogik.
+
+Schwarz-weißen Kreis reproduziert: Punkt frei bewegen → Shift + Linksklick auf
+Wandachse. document.activeElement war die Achsen-SVG-Linie mit Browser-outline
+"auto 5px", im Modellraum riesig dargestellt. Achsen-Trefferlinie erhält dieselbe
+outline-none/focus-visible-Farbmarkierung wie andere Trefferpfade. Identischer
+Browserablauf danach ohne Artefakt; Fokus bleibt für Tastaturbedienung erhalten.
+
+504 Tests bestanden, TypeScript/Build bestanden, keine neuen Lint-Warnungen
+(6 bekannte FastRefresh-Warnungen). Neue Tests: Winkelhaltung über weit entfernte
+Maussektoren, Freigabe/Neukalibrierung, schiefe Flucht, exakter Zielfang, Nullweg,
+wechselnde Referenzen, Zoom sowie Vorrang expliziter Achsen.
+
+T-Prüfung: Testprojekt mit gespeicherter Relation liefert im Browser korrekt
+6-m-Hauptprofil und 2,82-m-Nebenprofil bei 3-m-Achse, ohne Überlappung. Einfaches
+Zusammenschieben erzeugt weiterhin keine Relation; das ist die bekannte offene
+Anbindung, keine bestätigte Fehlberechnung einer gespeicherten Verbindung.
+Der konkrete Nutzerprojektstand wurde nicht überschrieben oder als Datei geprüft.
+
+Abnahme: Wandendpunkt → Punkt frei bewegen → in Flucht zielen → Shift halten →
+Maus weit quer bewegen → Linksklick. Die Richtung bleibt fest; kein schwarzer
+Kreis. Shift loslassen, neue Richtung wählen und erneut halten. Auch Linie testen.
+
+**Nächster begrenzter Auftrag:** Automatische T-Verbindung am eindeutigen
+Hauptachsenfang im gemeinsamen 2D-Endpunktbewegungspfad (Details im vorherigen
+Eintrag). PR134 bleibt Grundlage; diese Korrektur ist darauf aufgesetzt.
+
 ## Aktueller Stand: gespeicherte T-Verbindungen — 06.10.2026
 
 PR133 freigegeben und übernommen (f0583c8). Schema 8 speichert isolierte
