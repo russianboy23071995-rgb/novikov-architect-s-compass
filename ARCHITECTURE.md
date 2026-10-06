@@ -1,5 +1,21 @@
 # NOVIKOV CAD Architecture Contract
 
+## Isolated right-angle T geometry — 2026-10-06
+
+Domain `elements/wall/t-junction.ts` now derives gross contours and a contact
+segment for an explicit host/incoming pair. The host body remains unbroken;
+the incoming cap meets the facing host side. Equal heights/thicknesses and an
+interior axis contact are required. Existing wallBody, line intersection and
+polygon/tolerance services are reused in a local coordinate frame. Numerical
+compatibility is not authorization to auto-connect nearby model entities.
+
+This pure helper knows no Project, windows, other joins, persistence or UI.
+Callers must verify those preconditions separately. It never mutates axes or
+adds a relation. Contact width touching a host end, insufficient incoming length,
+non-right angles and invalid inputs reject. Existing automatic endpoint joins
+remain unchanged. No schema migration, new command or duplicated renderer path.
+The planned anchor/host-movement policies remain open.
+
 ## T-wall connection planning boundary — 2026-10-06
 
 [The bounded T-connection draft](docs/T_WALL_CONNECTION_PLAN.md) records the
