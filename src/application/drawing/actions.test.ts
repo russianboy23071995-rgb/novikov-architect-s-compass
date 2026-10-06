@@ -311,3 +311,86 @@ test("pinned window host uses exact signed distance and retains its explicit hos
     );
   }
 });
+
+test("window tool in connected plan preserves preview, edits, history, reload and IFC", async () => {
+  const { addWall, updateWindow } = await import("../../lib/bim/model.ts");
+  const { windowPlacementInteraction } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { confirmInteraction } = await import("../tools/interaction.ts");
+  const { moveWindowAlongWall } = await import("../direct-edit/transforms.ts");
+  const { previewTConnection } = await import("../walls/t-connections.ts");
+  const { exportIfc } = await import("../../lib/bim/ifc.ts");
+  for (const closed of [false, true]) {
+    let base = createProject("connected-windows", "level");
+    for (const wall of [
+      { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+      { id: "east", start: { x: 6, y: 0 }, end: { x: 6, y: 4 } },
+      { id: "north", start: { x: 6, y: 4 }, end: { x: 0, y: 4 } },
+      ...(closed
+        ? [{ id: "west", start: { x: 0, y: 4 }, end: { x: 0, y: 0 } }]
+        : [{ id: "partition", start: { x: 3, y: 2 }, end: { x: 3, y: 0 } }]),
+    ])
+      base = addWall(base, { ...wall, thickness: 0.36, height: 2.8 });
+    if (!closed)
+      base = previewTConnection(base, base, {
+        projectId: base.id,
+        kind: "connect",
+        relation: { hostWallId: "host", incoming: { wallId: "partition", endpoint: 1 } },
+      });
+    assert.equal(base.storey.wallJoins.length, closed ? 4 : 2);
+    assert.equal(base.storey.wallTJunctions.length, closed ? 0 : 1);
+    let state = createEditingState(base);
+    base = state.history.present;
+    const visibility = createLayerVisibilityPolicy(base, {
+      scope: { kind: "bim-project" },
+      hiddenLayerIds: [],
+    });
+    const tool = windowPlacementInteraction(
+      base,
+      visibility,
+      "placed",
+      () => ({ project: state.history.present, visibility }),
+      (next) => {
+        state = editingReducer(state, { type: "project", project: next });
+      },
+      () => {},
+      undefined,
+      "host",
+    );
+    const point = tool.preview("", "1.5", null).point;
+    const preview = tool.previewProject!(point);
+    assert.equal(state.history.past.length, 0);
+    assert.equal(base.storey.windows.length, 0);
+    confirmInteraction(tool, point);
+    assert.deepEqual(state.history.present, preview);
+    assert.equal(state.history.past.length, 1);
+    const resized = updateWindow(state.history.present, "placed", {
+      width: 1,
+      height: 1.1,
+      sillHeight: 0.8,
+    });
+    state = editingReducer(state, { type: "project", project: resized });
+    // Pass straight through the T contact on the original host.
+    const moved = moveWindowAlongWall(state.history.present, "placed", 3);
+    state = editingReducer(state, { type: "project", project: moved });
+    assert.equal(state.history.past.length, 3);
+    assert.equal(moved.storey.windows[0]!.position, 0.75);
+    state = editingReducer(state, { type: "undo" });
+    assert.deepEqual(state.history.present, resized);
+    state = editingReducer(state, { type: "redo" });
+    assert.deepEqual(state.history.present, moved);
+    const restored = readProjectFile(serializeProject(state.history.present));
+    assert.deepEqual(restored, moved);
+    assert.deepEqual(buildSolid(restored), buildSolid(moved));
+    const date = new Date("2026-10-06T12:00:00Z");
+    const ifc = await exportIfc(restored, date);
+    assert.equal(ifc, await exportIfc(moved, date));
+    assert.equal((ifc.match(/=IFCWALL\(/g) || []).length, 4);
+    assert.equal((ifc.match(/=IFCWINDOW\(/g) || []).length, 1);
+    assert.equal((ifc.match(/=IFCRELVOIDSELEMENT\(/g) || []).length, 1);
+    assert.equal((ifc.match(/=IFCRELFILLSELEMENT\(/g) || []).length, 1);
+    assert.match(ifc, /1\.1,1\.,\.WINDOW\.,\.NOTDEFINED\./);
+    assert.ok(ifc.includes("IFCRATIOMEASURE(0.75)"));
+    assert.ok(ifc.includes("IFCLENGTHMEASURE(0.8)"));
+  }
+});
