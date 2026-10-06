@@ -1,5 +1,38 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Temporäre T-Anschlussvorschau — 06.10.2026
+
+PR127 freigegeben und übernommen (fadbf33). feat/t-wall-preview ergänzt das
+bestehende Diagnosefenster um den Anschlusstyp Rechtwinkliger T-Anschluss.
+Ausgewählte Wand ist Hauptwand, zweite Wand/Endindex werden explizit gewählt.
+Namen entsprechen dem Navigator; intern bleiben stabile IDs maßgeblich.
+Application t-preview prüft Projektzugehörigkeit und lehnt Fenster sowie weitere
+persistierte Anschlüsse an beiden Wänden zunächst verständlich ab. Domain liefert
+Geometrie; bestehende Extrusion, Preview-Reducer und Renderer werden wiederverwendet.
+Kein zusätzlicher Modellzustand, keine Dateiänderung, kein Commit/Undo-Schritt.
+Auswahlwechsel leert die Vorschau; geänderter Modellstand macht sie ungültig.
+
+481 Tests bestanden; TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Fast-Refresh-Warnungen. Neue Tests: gemeinsamer Kontur-/Flächenpfad, Volumen,
+unveränderte Fremdwände/Projekt, Abbruch/veralteter Stand, falsche/fehlende Ziele,
+Fenster und bestehende Anschlüsse. Browser mit 6-m-Hauptwand und 3-m-Nebenwand:
+T in 2D/3D sichtbar, 8,8906 m³ angezeigt; Endpunktwechsel entfernt Vorschau,
+Anfang statt Ende zeigt verständlichen Fehler; Schließen geprüft.
+
+Abnahme: zwei isolierte fensterlose Wände gleicher Stärke/Höhe; Nebenachse endet
+rechtwinklig im Inneren der Hauptachse. Hauptwand auswählen -> Wandanschluss
+vorschauen -> Rechtwinkliger T-Anschluss -> ankommende Wand und ihr Anschlussende
+wählen -> Vorschau anzeigen. Es ist nur eine Diagnose, kein automatischer
+Anschluss: Speichern und IFC exportieren weiterhin das unveränderte Modell.
+
+**Genau ein ausführbarer Folgeauftrag:** Die Fensterregeln für T-Anschlüsse am
+Beispiel beider Wände konkretisieren und die noch offene Nichtkontaktregel an
+der Hauptwand mit dem Nutzer klären. Bestehende Öffnungsprüfung und erforderliche
+Grenztests zuordnen; danach einen begrenzten Implementierungsauftrag festhalten.
+Anker-/Hauptwandbewegung bleibt vor Persistenz gesondert zu entscheiden.
+Text/Voice weiterhin als Adapter geprüfter gemeinsamer Aktionen berücksichtigen.
+
+
 ## Aktueller Stand: Reine T-Anschlussgeometrie — 06.10.2026
 
 PR126 nach Freigabe übernommen (4dbca2a). Auf feat/t-wall-geometry ist der
