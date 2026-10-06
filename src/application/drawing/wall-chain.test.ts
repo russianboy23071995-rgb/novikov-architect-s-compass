@@ -301,3 +301,37 @@ test("T start respects source visibility, ambiguity, snap off and strict host in
     "t-axis",
   );
 });
+
+import { previewWallChain } from "./wall-chain.ts";
+
+test("wall body preview and placement produce identical T geometry without changing the draft", () => {
+  const { base, chain, adapter, context } = tDrawing();
+  const snap = adapter.snapping.resolve({ x: 3, y: 0 }, context);
+  const before = serializeProject(base);
+  const preview = adapter.previewProject!(snap.point, snap.candidate);
+  const id = preview.storey.walls.find((w) => w.id !== "host")!.id;
+  const placed = appendWallChain(chain, base, id, snap.point, snap.candidate).preview;
+  assert.deepEqual(preview, placed);
+  assert.equal(preview.storey.wallTJunctions.length, 1);
+  assert.equal(serializeProject(base), before);
+  assert.equal(chain.wallIds.length, 0);
+  assert.throws(() => adapter.previewProject!({ x: 4, y: 1 }, snap.candidate));
+  assert.throws(() => adapter.validate({ x: 4, y: 1 }, snap.candidate));
+  assert.equal(adapter.previewProject!(snap.point, null).storey.wallTJunctions.length, 0);
+});
+
+test("start T preview validates numeric directions and preserves the accepted segment on rejection", () => {
+  const { base, context } = tDrawing();
+  const snap = wallStartSnapPolicy.resolve({ x: 2, y: 0 }, context);
+  const chain = beginWallChain(base, snap.point, snap.candidate);
+  const preview = previewWallChain(chain, base, { x: 2, y: 2 });
+  assert.equal(preview.storey.wallTJunctions[0]!.incoming.endpoint, 0);
+  assert.throws(() => previewWallChain(chain, base, { x: 3, y: 2 }));
+  assert.equal(chain.preview, base);
+  const accepted = appendWallChain(chain, base, "new", { x: 2, y: 2 });
+  assert.throws(() => previewWallChain(accepted, base, { x: 4, y: 2 }));
+  assert.equal(accepted.preview.storey.walls.length, 2);
+  assert.throws(() =>
+    previewWallChain(chain, deserializeProject(serializeProject(base)), { x: 2, y: 2 }),
+  );
+});

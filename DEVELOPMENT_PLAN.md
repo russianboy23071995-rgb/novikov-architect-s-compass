@@ -1,5 +1,27 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Wandkoerper-Vorschau beim Zeichnen — 06.10.2026
+
+PR142 wurde freigegeben und in main zusammengefuehrt. Der neue Schritt zeigt
+im Grundriss bereits vor der Bestaetigung den validierten Wandkoerper samt
+T-Abschluss. Vorschau und Platzierung verwenden dieselbe Application-Aktion.
+Numerische Ziele uebernehmen keine zufaellige Hover-Verbindung. Entwurfswaende
+sind entsprechend ihrer Ebene sichtbar; Fangquellen und History bleiben am
+gespeicherten Modell. Unzulaessige Ziele zeigen den konkreten Fehler, behalten
+bereits gesetzte Entwurfsabschnitte und erzeugen keinen ungueltigen Koerper.
+
+527 Tests bestanden. Browser: T-Start, numerisch 270 Grad/1 m mit Koerpervorschau,
+250 Grad mit Rechtwinkelfehler, Korrektur und Abbruch ohne Modell-/Undo-Aenderung.
+Abnahme: Wand auf Hauptachse beginnen, Richtung und Laenge waehlen; Koerper
+vor Bestaetigung ansehen. Schraeges Ziel zeigt Fehler. Esc verwirft den Entwurf.
+Grenzen: 2D-Vorschau; bisherige T-/Eckregeln bleiben erhalten.
+
+Genau ein Folgeauftrag: Kombination aus Eck- und T-Anschluss an derselben
+Hauptwand anhand eines kleinen Testgrundrisses fachlich und geometrisch
+abgrenzen und einen begrenzten Umsetzungsplan mit Akzeptanzfaellen festhalten.
+Noch keine pauschale Freigabe beliebiger Anschlussnetze.
+
+
 ## Wandstart mit T-Anschluss — 06.10.2026
 
 PR139 ist nach Freigabe in main. Neuer Aufgabenbranch aus main: Start einer
