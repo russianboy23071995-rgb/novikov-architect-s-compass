@@ -140,7 +140,16 @@ export function connectedWallSolids(project: Project) {
   const contours = connectedWallContours(project);
   const result = project.storey.walls
     .filter((w) => contours.has(w.id))
-    .map((w) => wallContourSolid(w, contours.get(w.id)!, project.storey.windows));
+    .map((w) =>
+      wallContourSolid(
+        w,
+        contours.get(w.id)!,
+        project.storey.windows,
+        project.storey.wallTJunctions.some(
+          (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
+        ),
+      ),
+    );
   solidCache.set(project, result);
   return result;
 }

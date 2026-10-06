@@ -1,5 +1,33 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerkorrektur: Fenster über T-Anschlüsse und Canvas-Darstellung — 06.10.2026
+
+Fenster bleiben laut Klarstellung auf ihrer ursprünglichen Wand und werden von
+T-Anschlüssen nicht mehr blockiert. Dies ersetzt die frühere T-Überlappungssperre.
+Die ursprünglichen Wandgrenzen und Fenstermaße bleiben maßgebend; Ecken sind
+nicht Teil dieser Änderung. Die Öffnung schneidet nur die eigene Wand, keine
+Nebenwand. Bei überquertem beschnittenem Nebenwandabschluss begrenzt der gemeinsame
+Extrusionskern den Ausschnitt auf das reale Wandprofil. 3D und IFC verwenden die
+eigene Wandzuordnung; Anschlussrelationen bleiben unverändert.
+
+View → Canvas-Darstellung → Wand bietet 0,5–2 CSS-Pixel Konturstärke (Standard 1).
+Settings öffnet denselben Dialog, auch bei ausgeblendetem Desktop-Menü. Alle
+Grundrissfenster übernehmen den Wert, der beim Zoomen konstant bleibt und lokal
+im Browser gespeichert wird. Kein Modell-Undo, kein Projektformatwechsel. Achse
+bleibt türkis/2,5 Pixel, Auswahlkontur neutral. Baukörpermaße bleiben unverändert.
+
+517 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Tests für Bewegung über zwei Ts, Host-ID, Undo, Volumen, JSON/IFC und
+beschnittenes Nebenwandprofil. Browser: Fenster aus Zwischenraum auf erstes T,
+danach auf zweites T gesetzt, Undo/Redo; Konturwahl 1,5 Pixel bei Zoomwechsel und
+Neuladen geprüft, anschließend Standard 1 Pixel wieder eingestellt.
+Praktische Abnahme: Fenster → Fenster entlang Wand → über beide Ts bewegen;
+View → Canvas-Darstellung → Konturstärke ändern und zoomen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss neuer Wandabschnitte
+an die gemeinsame Application-Aktion anbinden und Undo der ganzen Wandkette
+beibehalten. Offener PR138 enthält die Korrekturen; noch keine Zusammenführung.
+
 ## Auswahlkorrektur: Steuerungsachse hervorheben — 06.10.2026
 
 Die ausgewählte Wandkontur ist jetzt dezent blaugrau mit 1,25 CSS-Pixeln,

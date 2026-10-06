@@ -65,6 +65,7 @@ export type BimPlanProps = {
   draftPoints?: Point[];
   draftFill?: Hatch["fill"] | undefined;
   gridSettings?: GridSettings;
+  wallOutlineWidth?: number;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -105,6 +106,7 @@ export function BimPlan({
   draftFill,
   snap,
   gridSettings = defaultGridSettings,
+  wallOutlineWidth = 1,
   ortho,
   onSelect,
   onPoint,
@@ -748,7 +750,7 @@ export function BimPlan({
               fill="var(--muted-foreground)"
               fillOpacity={0.55}
               stroke={cornerPreview?.base === shown ? "var(--primary)" : "none"}
-              strokeWidth={0.018}
+              strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
               className="outline-none focus-visible:stroke-sky-300"
             />
             {cornerPreview?.base !== shown && (
@@ -766,7 +768,7 @@ export function BimPlan({
                   .join(" ")}
                 fill="none"
                 stroke={selection?.id === wall.id ? "#94a3b8" : "var(--primary)"}
-                strokeWidth={selection?.id === wall.id ? 1.25 / camera.pixelsPerMetre : 0.018}
+                strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
                 pointerEvents="none"
               />
             )}

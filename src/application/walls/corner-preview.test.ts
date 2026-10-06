@@ -38,7 +38,7 @@ test("resolved T kernel needs no Project and matches the validated entry without
     "touching",
   );
   const overlapping = pair.windows.map((w) => ({ ...w, position: 2.33 / 3 }));
-  assert.throws(() => deriveTPairSolids(pair.host, pair.incoming, overlapping), /überschneidet/);
+  assert.ok(deriveTPairSolids(pair.host, pair.incoming, overlapping).volume > expected.volume);
 });
 
 test("public T entries still reject malformed full snapshots beyond the selected pair", () => {
@@ -49,7 +49,7 @@ test("public T entries still reject malformed full snapshots beyond the selected
   assert.throws(() => resolveIsolatedTPair(p, "host", { wallId: "incoming", endpoint: 1 }));
 });
 
-test("T windows may touch either contact, but crossing it rejects without mutation", () => {
+test("T windows may cross either contact without mutation; cuts are clipped to the owning wall", () => {
   for (const wallId of ["host", "incoming"])
     for (const [centre, expected] of [
       [2.31, "free"],
@@ -69,17 +69,9 @@ test("T windows may touch either contact, but crossing it rejects without mutati
         inspectTOpenings(p, "host", { wallId: "incoming", endpoint: 1 }).openings[0]!.status,
         expected,
       );
-      if (expected === "overlapping")
-        assert.throws(
-          () => deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }),
-          /überschneidet/,
-        );
-      else
-        assert.ok(
-          Math.abs(
-            deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }).volume - 8.53056,
-          ) < 1e-8,
-        );
+      const volume = deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }).volume;
+      if (expected === "overlapping" && wallId === "incoming") assert.ok(volume > 8.53056);
+      else assert.ok(Math.abs(volume - 8.53056) < 1e-8);
       assert.deepEqual(p, before);
     }
   for (const [centre, expected] of [

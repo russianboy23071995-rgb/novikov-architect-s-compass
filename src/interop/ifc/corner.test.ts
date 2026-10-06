@@ -70,7 +70,7 @@ test("isolated T IFC shares identities, cuts both touching windows and leaves or
   assert.equal(p.storey.wallJoins.length, 0);
 });
 
-test("T acceptance export snapshots inputs and rejects overlap without fallback", async () => {
+test("T acceptance export snapshots inputs and permits crossing contacts", async () => {
   const p = tFixture(),
     d = new Date(date),
     target = { wallId: "incoming", endpoint: 1 as const };
@@ -79,7 +79,7 @@ test("T acceptance export snapshots inputs and rejects overlap without fallback"
   p.storey.windows[0]!.position = 0.5;
   d.setFullYear(2040);
   assert.equal(await pending, expected);
-  await assert.rejects(exportTJunctionIfc(p, "host", target, date), /überschneidet/);
+  assert.ok((await exportTJunctionIfc(p, "host", target, date)).includes("IFCWINDOW("));
   await assert.rejects(exportTJunctionIfc(tFixture(), "missing", target, date));
 });
 test("explicit corner uses two closed profiles; unrelated wall and opening stay rectangular", async () => {

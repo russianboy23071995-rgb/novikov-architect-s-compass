@@ -23,7 +23,7 @@ import {
   deserializeProject,
 } from "../../lib/bim/model.ts";
 import { previewTConnection, commitTConnection } from "./t-connections.ts";
-import { moveElement } from "../direct-edit/transforms.ts";
+import { moveElement, moveWindowAlongWall } from "../direct-edit/transforms.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import {
   connectedWallContours,
@@ -175,7 +175,7 @@ test("invalid persisted identities, duplicate incoming relations and competing c
   assert.equal(serializeProject(p), before);
 });
 
-test("touching T windows work in normal solid/IFC and roundtrip; overlap rejected even when hidden", async () => {
+test("T windows may cross contacts, including hidden windows, in solid/IFC and roundtrip", async () => {
   let p = connected();
   for (const [wallId, length] of [
     ["host", 6],
@@ -199,8 +199,8 @@ test("touching T windows work in normal solid/IFC and roundtrip; overlap rejecte
   assert.equal(await exportIfc(restored, date), await exportIfc(p, date));
   p = validateProject({ ...p, bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.window] } });
   for (const id of ["window-incoming"])
-    assert.throws(() => updateWindow(p, id, { position: 0.8 }), /überschneidet|fit/);
-  assert.throws(() => updateWindow(p, "window-host", { position: 0.5 }), /überschneidet/);
+    assert.ok(buildSolid(updateWindow(p, id, { position: 0.8 })).volume > buildSolid(p).volume);
+  assert.equal(updateWindow(p, "window-host", { position: 0.5 }).storey.windows[0]!.position, 0.5);
 });
 
 for (const offset of [-0.18, 0, 0.18])
@@ -605,4 +605,53 @@ test("joined corner outline and rotated distant T remove their contact only", ()
     },
   });
   assert.equal(wallPlanOutlines(rotated, new Set(["host", "incoming"])).get("incoming")!.length, 3);
+});
+
+test("host window travels across both T contacts with stable identity, undo and IFC", async () => {
+  let p = connected();
+  p = addWall(p, {
+    id: "second",
+    start: { x: 4.5, y: -3 },
+    end: { x: 4.5, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  p = previewTConnection(p, p, {
+    ...request,
+    relation: { hostWallId: "host", incoming: { wallId: "second", endpoint: 1 } },
+  });
+  p = addWindow(p, {
+    id: "travelling",
+    wallId: "host",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 0.2,
+  });
+  const baseVolume = buildSolid(p).volume;
+  for (const position of [0.3, 0.5, 0.6, 0.75, 0.9]) {
+    const moved = moveWindowAlongWall(p, "travelling", (position - 0.2) * 6);
+    assert.equal(moved.storey.windows[0]!.wallId, "host");
+    assert.ok(Math.abs(moved.storey.windows[0]!.position - position) < 1e-10);
+    assert.ok(Math.abs(buildSolid(moved).volume - baseVolume) < 1e-8);
+    assert.equal(moved.storey.wallTJunctions.length, 2);
+    assert.deepEqual(deserializeProject(serializeProject(moved)), moved);
+    assert.ok((await exportIfc(moved)).includes("IFCWINDOW("));
+    assert.deepEqual(undoProject(commitProject(createHistory(p), moved)).present, p);
+  }
+});
+
+test("incoming window may cross trimmed T cap while its cut is clipped to its own wall", () => {
+  let p = connected();
+  p = addWindow(p, {
+    id: "near-cap",
+    wallId: "incoming",
+    width: 1,
+    height: 1,
+    sillHeight: 0.9,
+    position: 2.5 / 3,
+  });
+  const incoming = connectedWallSolids(p).find((w) => w.wallId === "incoming")!;
+  assert.ok(Math.abs(incoming.volume - (2.82 * 0.36 * 2.8 - 0.82 * 0.36)) < 1e-8);
+  assert.deepEqual(deserializeProject(serializeProject(p)), p);
 });

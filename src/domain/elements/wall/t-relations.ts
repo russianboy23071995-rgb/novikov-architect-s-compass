@@ -33,8 +33,6 @@ export function tConnectionContours(project: Project) {
       { wall: incoming, endpoint: relation.incoming.endpoint },
       project.storey.windows,
     );
-    if (result.openings.some((o) => o.status === "overlapping"))
-      throw new Error("Fenster überschneidet den T-Anschluss. Berührung ist erlaubt.");
     const dx = host.end.x - host.start.x,
       dy = host.end.y - host.start.y;
     const length = Math.hypot(dx, dy);
