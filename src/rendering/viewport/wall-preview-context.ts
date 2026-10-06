@@ -38,10 +38,10 @@ export function createWallPreviewContext(
     return result;
   };
   const isOrigin = (r: SnapReference) =>
-    !!policy && referenceKey(r) === referenceKey(policy.origin);
+    !!policy?.origin && referenceKey(r) === referenceKey(policy.origin);
   const original = (r: SnapReference) =>
     isOrigin(r)
-      ? policy!.origin
+      ? (policy!.origin ?? undefined)
       : !r.dependencies && wallIds.has(r.entityId) && (!policy || policy.sources([r]).length > 0)
         ? (sources.lookup(referenceKey(r)) ?? edges.lookup(referenceKey(r)))
         : undefined;
@@ -111,7 +111,7 @@ export function createWallPreviewContext(
       .map(pointOnly);
     const base = [
       ...new Map(
-        [...leaves, ...local, ...segments, ...(policy ? [policy.origin] : [])].map((r) => [
+        [...leaves, ...local, ...segments, ...(policy?.origin ? [policy.origin] : [])].map((r) => [
           referenceKey(r),
           r,
         ]),
@@ -122,7 +122,7 @@ export function createWallPreviewContext(
   const context: HoverContext = {
     enabled,
     sessionKey: policy ?? project,
-    pinnedReferences: policy ? [policy.origin] : [],
+    pinnedReferences: policy?.origin ? [policy.origin] : [],
     resetKey,
     references: [],
     pixelsPerMetre: 1,

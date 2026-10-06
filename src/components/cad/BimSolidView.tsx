@@ -1,3 +1,8 @@
+import {
+  windowSelectionSurfaces,
+  windowSelectionEdges,
+  pickSolidElement,
+} from "@/rendering/viewport/window-selection";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { faceTriangles } from "@/geometry/solids/face-triangles";
@@ -19,7 +24,7 @@ import { buildSolid } from "@/lib/bim/geometry";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
-import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges, outlineTriangles } from "@/rendering/viewport/selection-outline";
@@ -72,8 +77,9 @@ function createRenderer(canvas: HTMLCanvasElement) {
     draw(
       solid: DisplaySurfaces,
       projection: ProjectionState,
-      selectedWall: string | undefined,
+      selectedWalls: ReadonlySet<string>,
       outline: OutlineEdge[],
+      windowOutline: OutlineEdge[],
     ) {
       const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
@@ -90,7 +96,7 @@ function createRenderer(canvas: HTMLCanvasElement) {
         const light =
           0.5 +
           0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-        const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
+        const tint = selectedWalls.has(face.wallId) ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
         for (const triangle of faceTriangles(face.vertices.length))
           for (const index of triangle)
             data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
@@ -102,7 +108,10 @@ function createRenderer(canvas: HTMLCanvasElement) {
       gl.enableVertexAttribArray(color);
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
       gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
-      const border = outlineTriangles(outline, projection);
+      const border = [
+        ...outlineTriangles(outline, projection),
+        ...outlineTriangles(windowOutline, projection, 2, [0.25, 0.8, 0.87]),
+      ];
       if (border.length) {
         gl.depthMask(false);
         gl.depthFunc(gl.LEQUAL);
@@ -124,6 +133,7 @@ export function BimSolidView({
   project,
   visibility,
   selection: requestedSelection,
+  selections,
   camera,
   onCamera,
   pan,
@@ -149,6 +159,7 @@ export function BimSolidView({
   snap?: boolean;
 } & Pick<
   BimPlanProps,
+  | "selections"
   | "gridSettings"
   | "editSession"
   | "numericTarget"
@@ -254,12 +265,38 @@ export function BimSolidView({
           previewProjection,
         )
       : null;
+  const selectedWalls = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "wall" && isLayerVisible(project, visibility, t.id))
+          .map((t) => t.id),
+      ),
+    [selections, selection, project, visibility],
+  );
+  const windowSurfaces = useMemo(
+    () => windowSelectionSurfaces(previewProject, (id) => isLayerVisible(project, visibility, id)),
+    [previewProject, project, visibility],
+  );
+  const selectedWindows = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "window")
+          .map((t) => t.id),
+      ),
+    [selections, selection],
+  );
   const outline = useMemo(
     () =>
-      selection?.kind === "wall"
-        ? selectionEdges(solid.faces.filter((face) => face.wallId === selection.id))
-        : [],
-    [solid, selection],
+      [...selectedWalls].flatMap((id) =>
+        selectionEdges(solid.faces.filter((face) => face.wallId === id)),
+      ),
+    [solid, selectedWalls],
+  );
+  const windowOutline = useMemo(
+    () => windowSelectionEdges(windowSurfaces, selectedWindows),
+    [windowSurfaces, selectedWindows],
   );
   const inference = useSolidInference(
     project,
@@ -343,16 +380,12 @@ export function BimSolidView({
     setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
   useEffect(() => {
-    const selectedWall =
-      selection?.kind === "wall"
-        ? selection.id
-        : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
     displayed.current = null;
     if (renderer.current && previewProjection) {
-      renderer.current.draw(solid, previewProjection, selectedWall, outline);
+      renderer.current.draw(solid, previewProjection, selectedWalls, outline, windowOutline);
       displayed.current = { solid, projection: previewProjection };
     }
-  }, [solid, previewProjection, selection, project, revision, outline]);
+  }, [solid, previewProjection, selectedWalls, revision, outline, windowOutline]);
   return (
     <>
       {previewProjection && !error && (
@@ -387,7 +420,7 @@ export function BimSolidView({
               : "Auf z=0 bearbeiten. Klick übernimmt Ziel; Tab für Maße. Pan schaltet auf Navigation; Esc bricht ab."
             : "Sichtbaren Wandfußpunkt als Bewegungsursprung anklicken. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
         }
-        className={`relative z-10 h-full w-full touch-none ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
+        className={`relative z-10 h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             setPreviewClient(null);
@@ -549,21 +582,29 @@ export function BimSolidView({
                 { x: event.clientX, y: event.clientY },
                 anchor.pointIndex ?? undefined,
                 anchor.worldPoint,
+                undefined,
+                event.ctrlKey || event.metaKey,
               );
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);
               return;
             }
             const point = projection.toNdc({ x: event.clientX, y: event.clientY });
-            const id = pickWallInProjection(
+            const hit = pickSolidElement(
               solid,
-              projection.frame,
-              projection.camera,
-              projection.aspect,
+              windowSurfaces,
+              projection.project,
               point.x,
               point.y,
             );
-            onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
+            onSelect(
+              hit,
+              { x: event.clientX, y: event.clientY },
+              undefined,
+              undefined,
+              undefined,
+              event.ctrlKey || event.metaKey,
+            );
           }
           if (event.currentTarget.hasPointerCapture(event.pointerId))
             event.currentTarget.releasePointerCapture(event.pointerId);

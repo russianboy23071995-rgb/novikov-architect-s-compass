@@ -116,14 +116,14 @@ export function createToolSourceQuery(
   });
 }
 export type ToolSnapPolicy = {
-  origin: SnapReference;
+  origin: SnapReference | null;
   /** Fixed transient references supplied by the current interaction, never model entities. */
   pinnedReferences?: readonly SnapReference[];
   sources: (references: readonly SnapReference[]) => SnapReference[];
   resolve: typeof querySnap;
 };
 export function toolPinnedReferences(policy: ToolSnapPolicy | null): readonly SnapReference[] {
-  return policy ? (policy.pinnedReferences ?? [policy.origin]) : [];
+  return policy ? (policy.pinnedReferences ?? (policy.origin ? [policy.origin] : [])) : [];
 }
 /** Stable policy identity keeps model-space references alive during view navigation. */
 export function prepareToolReferences(
@@ -139,7 +139,7 @@ export function resolveToolSnap(
   options: { ortho: boolean; shift: boolean; featureSnap: boolean },
 ) {
   const active = context.activeReferences?.at(-1) ?? context.activeReference;
-  const origin = policy?.origin.point ?? null;
+  const origin = policy?.origin?.point ?? null;
   const request: SnapContext = {
     ...context,
     sourceQuery: options.featureSnap ? context.sourceQuery : undefined,
@@ -154,7 +154,8 @@ export function resolveToolSnap(
   };
   return (policy?.resolve ?? querySnap)(cursor, request);
 }
-export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): ToolSnapPolicy {
+export type AnchoredSnapPolicy = ToolSnapPolicy & { origin: SnapReference };
+export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): AnchoredSnapPolicy {
   const key = path ?? origin;
   let policy = drawingPolicies.get(key);
   if (!policy) {
@@ -170,7 +171,7 @@ export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): Too
       const incoming = { x: origin.x - previous.x, y: origin.y - previous.y };
       const outgoing = { x: second.x - first.x, y: second.y - first.y };
       policy.origin = {
-        ...policy.origin,
+        ...policy.origin!,
         directions: [incoming],
         feature: JSON.stringify(["current", incoming.x, incoming.y]),
       };
@@ -181,7 +182,7 @@ export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): Too
           point: { ...first },
           directions: [outgoing],
         },
-        policy.origin,
+        policy.origin!,
       ];
     }
     drawingPolicies.set(key, policy);
@@ -189,4 +190,4 @@ export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): Too
   return policy;
 }
 // Draft points are immutable interaction identities, just like pinned edit sessions.
-const drawingPolicies = new WeakMap<object, ToolSnapPolicy>();
+const drawingPolicies = new WeakMap<object, AnchoredSnapPolicy>();
