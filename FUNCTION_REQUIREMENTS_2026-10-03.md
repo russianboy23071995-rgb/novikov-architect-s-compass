@@ -198,3 +198,12 @@ Nutzer bestaetigt: Fenster duerfen den Anschlussabschluss nicht beruehren;
 Einzelwand wegbewegen loest und erzeugt wieder gerade Enden. Noch keine T-Knoten
 oder beliebigen Winkel. Wandketten folgen; Undo soll ausdruecklich die gesamte
 Kette rueckgaengig machen. Siehe docs/AUTOMATIC_WALL_CONNECTIONS.md.
+
+### Umsetzung 06.10.2026: Wandkette
+
+Fortlaufende rechtwinklige Wandabschnitte bilden einen gemeinsamen Entwurf.
+Undo/Redo betrifft die gesamte abgeschlossene Kette (Nutzerentscheidung).
+Rasterengine und Winkel-/Laengeneingabe bleiben gemeinsam. Enter im Canvas
+oder Doppelklick schliesst ab; Escape verwirft. Bestehende Anschlussgrenzen
+bleiben. Schraffur-Hintergrund/Konturfarbe folgt als begrenzter Schritt;
+Linienarten und Offset bleiben fuer spaeter vorgemerkt.

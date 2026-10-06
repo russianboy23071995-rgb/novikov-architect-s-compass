@@ -1,3 +1,5 @@
+import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
+import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings } from "@/application/snapping/grid-settings";
 import { HatchFillFields } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
@@ -21,7 +23,7 @@ import {
   editingReducer,
   supportsWallWorkplaneEdit,
 } from "@/application/direct-edit/controller";
-import { createDrawing, defaultDrawingWall, defaultHatchFill } from "@/application/drawing/actions";
+import { createDrawing, defaultHatchFill } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
@@ -101,7 +103,9 @@ export function CadWorkspace({
   }, [requestedSelection, selection]);
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
-  const [wallStart, setWallStart] = useState<Point | null>(null);
+  const [wallChain, setWallChain] = useState<WallChain | null>(null);
+  const activeChain = wallChain?.base === project ? wallChain : null;
+  const wallStart = activeChain?.points.at(-1) ?? null;
   const [pathPoints, setPathPoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
@@ -159,7 +163,7 @@ export function CadWorkspace({
   const cancelInteraction = useCallback(() => {
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
-    setWallStart(null);
+    setWallChain(null);
     setPathPoints([]);
   }, []);
 
@@ -412,25 +416,26 @@ export function CadWorkspace({
       else setPathPoints(next);
       return;
     }
-    if (!wallStart) {
-      setDrawingBase(project);
-      setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
-      setWallStart(point);
-      return;
-    }
     try {
-      const id = `wall-${crypto.randomUUID()}`;
-      changeProject(
-        createDrawing(drawingBase!, project, id, {
-          kind: "wall",
-          start: wallStart,
-          end: point,
-          ...defaultDrawingWall,
-        }),
-        { kind: "wall", id },
-      );
+      if (!activeChain) {
+        setDrawingBase(project);
+        setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
+        setWallChain(beginWallChain(project, point));
+      } else {
+        setWallChain(appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point));
+      }
     } catch (error) {
       setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
+    }
+  };
+
+  const finishChain = () => {
+    if (!activeChain) return;
+    try {
+      const next = finishWallChain(activeChain, project);
+      changeProject(next, { kind: "wall", id: activeChain.wallIds.at(-1)! });
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Ungültige Wandkette.");
     }
   };
 
@@ -458,7 +463,7 @@ export function CadWorkspace({
             drawingOrigin,
             drawPoint,
             cancelInteraction,
-            pathDrawing ? pathPoints : undefined,
+            tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
           )
         : null,
     referenceSelection.selecting,
@@ -570,7 +575,7 @@ export function CadWorkspace({
             onMode={(next) => {
               dispatchEditing({ type: "cancel" });
               setMode(next);
-              setWallStart(null);
+              setWallChain(null);
               setPathPoints([]);
               if (next === "3D") setTool("select");
             }}
@@ -777,6 +782,7 @@ export function CadWorkspace({
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
                   project={project}
+                  drawingPreview={activeChain?.preview}
                   visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
@@ -823,10 +829,15 @@ export function CadWorkspace({
                   onEditAim={(_session, point) => interaction.draft.move(point)}
                   onEditDirection={(_session, point) => interaction.pick(point)}
                   onEditCommit={(_session, point) => interaction.pick(point)}
-                  {...((tool === "line" && lineKind === "polyline") || tool === "hatch"
+                  {...(tool === "wall" ||
+                  (tool === "line" && lineKind === "polyline") ||
+                  tool === "hatch"
                     ? {
                         onFinish: () => {
-                          if (!referenceSelection.selecting) finishPath();
+                          if (!referenceSelection.selecting) {
+                            if (tool === "wall") finishChain();
+                            else finishPath();
+                          }
                         },
                       }
                     : {})}
@@ -837,6 +848,14 @@ export function CadWorkspace({
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
+                {tool === "wall" && (
+                  <p
+                    role="status"
+                    className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                  >
+                    Wandkette: Klick setzt Abschnitt · Doppelklick/Enter beendet · Esc verwirft
+                  </p>
+                )}
                 <InteractionInput
                   interaction={interaction}
                   position={demandPosition}

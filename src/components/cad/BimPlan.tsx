@@ -47,6 +47,7 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  drawingPreview?: Project | undefined;
   cornerPreview?: CornerPreview;
   referenceSelection?: ReferenceSelectionBinding | undefined;
   referenceScope?: object | undefined;
@@ -85,6 +86,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  drawingPreview,
   cornerPreview,
   referenceSelection,
   referenceScope,
@@ -378,7 +380,7 @@ export function BimPlan({
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
   }
-  const shown = preview ?? project;
+  const shown = preview ?? (drawing ? drawingPreview : null) ?? project;
   const connected = connectedWallSolids(shown);
   const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
