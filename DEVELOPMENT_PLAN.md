@@ -1,5 +1,25 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Canvas-Fokus und Zoomanzeige - 06.10.2026
+
+Schwarzen Browser-Fokusrahmen bei Mausklick auf 2D-/3D-Canvas entfernt; Tastaturfokus
+bleibt funktional und erhält eine dezente focus-visible-Markierung. Links von Grid
+zeigt eine Prozent-Auswahl den Zoom des aktiven Viewports und setzt dessen bestehende
+Kamera. Ein UI-Portal erhält die Kamera-Verantwortung im CadViewport; kein paralleler
+Zoomzustand im Projekt oder Workspace. Mehrfachansichten veröffentlichen nur die
+aktive Steuerung. 2D-Bezug: 100 Prozent = 100 CSS-Pixel/m; 3D: bisherige Standardansicht.
+Diese Bildschirmwerte sind ausdrücklich kein Druckmaßstab. Mausrad/Fit/Ansichtswechsel
+aktualisieren dieselbe Kamera und damit die Anzeige.
+
+Geändert: BimPlan, BimSolidView, CadViewport, CadWorkspace, StatusBar und Protokoll.
+Browser: 200 Prozent setzt 200 px/m, Canvas-Klick fokussiert ohne outline,
+3D-Wechsel zeigt 100 Prozent. TypeScript, Build und Lint erfolgreich (bekannte Warnungen).
+PR155 bleibt offen: automatischer Approval-Review hat den Merge trotz allgemeiner
+Freigabe abgelehnt; UI-Korrektur als zusätzlicher Commit im bestehenden PR.
+Genau ein Folgeauftrag bleibt Fenster-Integration im verbundenen Grundriss
+mit Speichern/Laden und IFC; keine weitere neue Werkzeugfunktion in diesem Schritt.
+
+
 ## Fensterbegrenzung und Darstellung - 06.10.2026
 
 Korrektur zu PR155: Einsetzen und Verschieben begrenzen die Fenstermitte auf den

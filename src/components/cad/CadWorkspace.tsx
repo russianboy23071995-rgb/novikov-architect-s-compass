@@ -71,6 +71,7 @@ export function CadWorkspace({
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
   const [layout, setLayout] = useState<ViewportLayout>("single");
+  const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
@@ -890,6 +891,7 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  zoomSlot={zoomSlot}
                   placement={
                     windowPlacement
                       ? {
@@ -1107,6 +1109,7 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
+            zoomSlot={setZoomSlot}
             gridSettings={gridSettings}
             onGridSettings={setGridSettings}
             grid={grid}

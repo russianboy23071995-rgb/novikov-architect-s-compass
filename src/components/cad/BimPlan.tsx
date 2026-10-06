@@ -675,7 +675,7 @@ export function BimPlan({
         }
       }}
       onAuxClick={(event) => event.preventDefault()}
-      className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
+      className={`h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
         if (!interactive) return;
         setShiftHeld(event.shiftKey);

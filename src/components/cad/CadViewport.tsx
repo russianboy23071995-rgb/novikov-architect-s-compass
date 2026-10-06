@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -13,6 +14,7 @@ import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 
 type CadViewportProps = BimPlanProps & {
+  zoomSlot?: HTMLElement | null;
   index: number;
   mode: ViewMode;
   grid: boolean;
@@ -55,6 +57,7 @@ function MiniControl({
 }
 
 export function CadViewport({
+  zoomSlot,
   index,
   mode,
   grid,
@@ -103,6 +106,29 @@ export function CadViewport({
     is3D
       ? setCamera((value) => ({ ...value, zoom: Math.max(0.2, Math.min(5, value.zoom * factor)) }))
       : setPlanCamera(zoomPlan(plan, size, factor));
+  const zoomPercent = is3D ? camera.zoom * 100 : plan.pixelsPerMetre;
+  const zoomControl = (
+    <select
+      aria-label="Ansichtszoom"
+      title={
+        is3D
+          ? "3D: 100 % entspricht der Standardansicht"
+          : "2D: 100 % = 100 CSS-Pixel pro Meter; kein Druckmaßstab"
+      }
+      value={String(zoomPercent)}
+      className="h-6 rounded border border-border bg-popover px-1 text-[11px] text-foreground"
+      onChange={(event) => zoom(Number(event.target.value) / zoomPercent)}
+    >
+      <option value={String(zoomPercent)}>{Number(zoomPercent.toFixed(1))} %</option>
+      {[25, 50, 75, 100, 150, 200, 400, 500]
+        .filter((value) => value !== zoomPercent)
+        .map((value) => (
+          <option key={value} value={String(value)}>
+            {value} %
+          </option>
+        ))}
+    </select>
+  );
   const label = is3D ? "3D model · Orthographic" : "Level 01 · Plan";
   return (
     <section
@@ -222,6 +248,7 @@ export function CadViewport({
         <span className="text-axis-x">X</span>
         <span className="-ml-10 -translate-y-5 text-axis-z">{is3D ? "Z" : "Y"}</span>
       </div>
+      {active && zoomSlot && createPortal(zoomControl, zoomSlot)}
       <div
         className={cn(
           "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
@@ -301,6 +328,7 @@ export function ViewportManager({
   onFullscreen,
   ...model
 }: BimPlanProps & {
+  zoomSlot?: HTMLElement | null;
   layout: ViewportLayout;
   mode: ViewMode;
   grid: boolean;
