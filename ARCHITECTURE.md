@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## Corner plus T: planning only — 2026-10-06
+
+[Combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md) records the verified
+current exclusion and the bounded proposal for a distant perpendicular T on a
+host with one right-angle corner. It does not lift the runtime restriction.
+The T host rectangle currently overwrites a prior corner contour if the guard
+is removed: composition must preserve the corner and validate contact against
+the actual remaining side. Existing corner-window restrictions and the allowed
+T-window crossing must remain distinct. No schema-version decision is made here.
+
+
 ## Derived wall drawing preview — 2026-10-06
 
 ToolInteraction may expose previewProject for a disposable model snapshot. The
