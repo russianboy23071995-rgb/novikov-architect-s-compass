@@ -447,14 +447,14 @@ export function CadWorkspace({
           editSession,
           project,
           selection,
-          (point) => {
+          (point, candidate) => {
             const current = visibilityNow.current;
             if (
               current.visibility !== visibility ||
               !visibleLayerTarget(current.project, current.visibility, editSession.target)
             )
               return;
-            dispatchEditing({ type: "confirm", session: editSession, selection, point });
+            dispatchEditing({ type: "confirm", session: editSession, selection, point, candidate });
           },
           cancelInteraction,
         )
@@ -829,8 +829,10 @@ export function CadWorkspace({
                   drawingTarget={drawingOrigin ? interaction.target : undefined}
                   onDrawingAim={drawingOrigin ? interaction.draft.move : undefined}
                   onEditAim={(_session, point) => interaction.draft.move(point)}
-                  onEditDirection={(_session, point) => interaction.pick(point)}
-                  onEditCommit={(_session, point) => interaction.pick(point)}
+                  onEditDirection={(_session, point, candidate) =>
+                    interaction.pick(point, candidate)
+                  }
+                  onEditCommit={(_session, point, candidate) => interaction.pick(point, candidate)}
                   {...(tool === "wall" ||
                   (tool === "line" && lineKind === "polyline") ||
                   tool === "hatch"

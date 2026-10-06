@@ -1,3 +1,4 @@
+import { tAxisReference } from "../walls/t-axis-snap.ts";
 import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
@@ -82,13 +83,28 @@ export function resolveEditSnap(session: EditSession, cursor: Point2, context: S
   const direction = editDirection(session);
   const project = (p: Point2) => (direction ? projectDirection(p, session.anchor, direction)! : p);
   const references = editSnapReferences(session, context.references);
+  const tReference = tAxisReference(session, cursor, context);
+  const sourceQuery = context.sourceQuery;
   const result = querySnap(cursor, {
     ...context,
-    references,
+    references: tReference ? [...references, tReference] : references,
+    sourceQuery:
+      sourceQuery && tReference ? (...args) => [...sourceQuery(...args), tReference] : sourceQuery,
     fixedAxis: direction ? { origin: session.anchor, direction } : null,
     orthoOrigin: direction ? null : context.orthoOrigin,
     angleOrigin: direction ? null : (context.angleOrigin ?? null),
   });
+  if (tReference && pointsCompatible(result.point, tReference.point)) {
+    result.candidate = {
+      kind: "endpoint",
+      worldPoint: tReference.point,
+      sourceEntityId: tReference.entityId,
+      sourceFeature: "t-axis",
+      sourceReferences: [tReference],
+      distanceOnScreen: 0,
+      priority: 0,
+    };
+  }
   const point = boundedEdgeTarget(session, project(result.point));
   return pointsCompatible(result.point, point) ? result : { point, candidate: null };
 }

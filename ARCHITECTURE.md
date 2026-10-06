@@ -1,5 +1,24 @@
 # NOVIKOV CAD Architecture Contract
 
+## Explicit axis snap intent in 2D endpoint editing — 2026-10-06
+
+Application t-axis-snap derives an endpoint target from nearby eligible axis
+segments supplied by the shared source query. It projects the fixed opposite
+endpoint onto the host axis for the supported right-angle T; the target must be
+inside the segment and within the CSS snap radius. Ambiguous hosts produce no
+connection intent; existing reference selection can restrict sources. No global
+wall-pair search, no inference of a connection from a numeric coordinate alone.
+Only axis-endpoint point/stretch interactions participate in this first slice.
+
+ToolInteraction carries an optional SnapCandidate through shared validation and
+commit. previewEdit combines the endpoint edit with the existing T Application
+action, with the same pinned session/model and one history commit. Plan preview
+and mouse confirmation pass the same candidate; numeric overrides discard it.
+Explicit axes/held Shift remain authoritative. Viewport capability
+includeInteractionTargets keeps 3D unmodified until its target transport is
+integrated; it is a generic carrier, not geometry logic in the renderer.
+The existing isolated/equal-cross-section/right-angle relation limits still apply.
+
 ## Held Shift direction — 2026-10-06
 
 Shift now latches the acquired construction direction for the current interaction,

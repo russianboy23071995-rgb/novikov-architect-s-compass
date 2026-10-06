@@ -1,3 +1,4 @@
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { ToolInteraction } from "./interaction.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
@@ -29,7 +30,7 @@ export function editInteraction(
   session: EditSession,
   current: Project,
   selection: ElementTarget | null,
-  commit: (point: Point) => void,
+  commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
 ): ToolInteraction {
   const axis = numericMoveAxis(session);
@@ -47,8 +48,8 @@ export function editInteraction(
     click: "confirm",
     preview: (angle, length, aim) =>
       previewMovementInput(session, current, selection, angle, length, aim),
-    validate: (point) => {
-      previewEdit(session, current, selection, point);
+    validate: (point, candidate) => {
+      previewEdit(session, current, selection, point, candidate);
     },
     commit,
     cancel,
@@ -58,7 +59,7 @@ export function drawingInteraction(
   base: Project,
   current: Project,
   origin: Point,
-  commit: (point: Point) => void,
+  commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
   path?: readonly Point[],
 ): ToolInteraction {

@@ -140,8 +140,19 @@ keine Behauptung eines geprüften Browser-Download-Dateirundlaufs. Dieser ist
 als manueller Abnahmeschritt offen, JSON-Rundlauf ist durch Tests abgesichert.
 Archicad-Abnahme dieser regulären T-Dateien bleibt ebenfalls offen.
 
+## Anbindung an Achsenfang
+
+Der gemeinsame 2D-Endpunktpfad ist jetzt angebunden: eindeutiger lokaler
+Achsenfang übergibt Hauptwand-ID und Ziel an Vorschau/Commit. Bewegung und
+T-Relation werden gemeinsam übernommen. Numerische Ziele ohne Fangabsicht
+und ganze Elementbewegungen erzeugen keine neue Verbindung. Mehrdeutige Hosts
+lassen sich über die vorhandene Referenzauswahl eingrenzen. Browsernachweis:
+2,30-m-Nebenwand auf Hauptachse gesetzt, 3,00-m-Achse / 2,82-m-Körperprofil,
+Undo/Redo und 3D korrekt. 509 Tests bestanden.
+
 ## Nächster Auftrag
 
-Einziger aktiver Folgeauftrag ist die Anbindung der gemeinsamen 2D-Endpunkt-
-bewegung an eindeutigen Achsenfang und die gespeicherte T-Aktion, wie im aktuellen
-DEVELOPMENT_PLAN beschrieben. Keine neue Pflichtbedienung im Diagnosefenster.
+Den vorhandenen 3D-Arbeitsebenen-Endpunktpfad an denselben Kandidatentransport
+anbinden; gemeinsame Application-Aktion wiederverwenden. Aktueller Detailauftrag
+steht in DEVELOPMENT_PLAN.md. Keine zweite Geometrie und keine Pflichtbedienung
+im Diagnosefenster.

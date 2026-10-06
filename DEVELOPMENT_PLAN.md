@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: automatischer T-Fang beim 2D-Endpunktbewegen — 06.10.2026
+
+PR134 und PR135 freigegeben/zusammengeführt. Der gestapelte PR135 wurde über
+Integrations-PR136 ohne zusätzliche Codeänderungen in den Gesamtzweig übernommen
+(1663005). Neuer Schritt: Punkt frei bewegen oder Punkt in Flucht strecken kann
+am eindeutig gefangenen Hauptachsenpunkt eine dauerhafte T-Verbindung erzeugen.
+Die Vorschau zeigt den beschnittenen Körper; Klick übernimmt Bewegung und
+Relation als einen Undo-Schritt. Fanglabel: T-Anschluss.
+
+Application t-axis-snap nutzt die lokale sichtbare Quellabfrage, Bildschirmradius
+und vorhandene Referenzauswahl. Der rechtwinklige Fußpunkt des gegenüberliegenden
+Nebenendes wird geprüft. Mehrere mögliche Hosts ergeben keine automatische
+Verbindung; Referenzen auswählen begrenzt die Quellen. Kein globales Durchsuchen
+aller Wandpaare und keine automatische Verbindung bei bloßer numerischer Eingabe.
+Gemeinsamer ToolInteraction-Pfad trägt den Kandidaten zu Vorschau/Commit, ohne
+Werkzeug-/Renderer-Modelllogik. Ganze Elementbewegung erzeugt keine Verbindung.
+
+509 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browser: unverbundene 2,30-m-Nebenwand per Achsendpunkt auf Hauptachse
+gesetzt; 3,00-m-Achse und korrektes 2,82-m-Körperprofil. Undo wieder 2,30 m,
+Redo wieder verbundenes Profil; 3D-Darstellung geprüft. Neue Tests sichern
+Vorschau/Commit, ein Undo, Pixelradius, Snap aus, Referenzfilter, Mehrdeutigkeit,
+veralteten Kontext, atomare Fehler, schräge Sperrrichtung und Kantenachsen.
+
+Praktische Abnahme: zwei isolierte, rechtwinklig zueinander stehende Wände gleicher
+Stärke/Höhe. Nebenwand auswählen → Wandachse Ende/Anfang → Punkt frei bewegen →
+in Nähe des Lotfußpunktes auf der Hauptachse zeigen → T-Anschluss → Linksklick.
+Undo/Redo sowie 3D prüfen. Optional Testdatei outputs/t-axis-start.project.json
+(lokal, nicht Teil des Repositories). Noch keine T/Eck-Kombination, mehrere Ts
+pro Wand, Zeichnen neuer Wände oder automatische T-Erzeugung in 3D.
+
+**Genau ein ausführbarer Folgeauftrag:** Den vorhandenen 3D-Arbeitsebenen-
+Endpunktpfad an denselben Kandidatentransport anschließen. Dieselbe Application-
+Fang-/Verbindungsaktion verwenden; Vorschau/Klick/Abbruch und Kamerawechsel
+prüfen. Keine zweite T-Geometrie oder eigene 3D-Modellaktion erstellen.
+
 ## Nutzerkorrektur: Shift-Flucht halten und SVG-Fokus — 06.10.2026
 
 Gemeinsame Richtungssperre für Grundriss und 3D-Arbeitsebene: Shift erfasst die
