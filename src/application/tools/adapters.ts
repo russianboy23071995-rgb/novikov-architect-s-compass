@@ -1,5 +1,7 @@
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
+import type { ElementTarget } from "../selection/target.ts";
 import type { ToolInteraction } from "./interaction.ts";
-import type { EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
 import { previewEdit } from "../direct-edit/controller.ts";
@@ -27,12 +29,13 @@ function editSnapPolicy(session: EditSession): ToolSnapPolicy {
 export function editInteraction(
   session: EditSession,
   current: Project,
-  selection: EditTarget | null,
-  commit: (point: Point) => void,
+  selection: ElementTarget | null,
+  commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
 ): ToolInteraction {
   const axis = numericMoveAxis(session);
-  const polar = ["move", "point"].includes(session.action) && session.target.kind !== "window";
+  const polar =
+    ["move", "point", "insert"].includes(session.action) && session.target.kind !== "window";
   return {
     identity: session,
     snapping: editSnapPolicy(session),
@@ -42,11 +45,11 @@ export function editInteraction(
       : polar
         ? { axisLabel: null, degrees: null }
         : null,
-    click: session.action === "move" && polar ? "direction" : "confirm",
+    click: "confirm",
     preview: (angle, length, aim) =>
       previewMovementInput(session, current, selection, angle, length, aim),
-    validate: (point) => {
-      previewEdit(session, current, selection, point);
+    validate: (point, candidate) => {
+      previewEdit(session, current, selection, point, candidate);
     },
     commit,
     cancel,
@@ -56,12 +59,13 @@ export function drawingInteraction(
   base: Project,
   current: Project,
   origin: Point,
-  commit: (point: Point) => void,
+  commit: (point: Point, candidate?: SnapCandidate | null) => void,
   cancel: () => void,
+  path?: readonly Point[],
 ): ToolInteraction {
   return {
     identity: origin,
-    snapping: drawingSnapPolicy(origin),
+    snapping: drawingSnapPolicy(origin, path),
     origin,
     input: { axisLabel: null, degrees: null },
     click: "confirm",

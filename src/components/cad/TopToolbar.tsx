@@ -1,4 +1,9 @@
+import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import {
+  EyeOff,
+  Focus,
+  Layers2,
+  Contrast,
   Bot,
   Box,
   Check,
@@ -40,6 +45,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
+  hatch: { title: "Schraffur", options: ["Nur 2D", "Doppelklick schließt die Kontur"] },
   select: { title: "Select", options: ["Window selection", "Filter"] },
   wall: { title: "Wall", options: ["New wall: 0.36 m", "Height 2.80 m", "Click two points"] },
   slab: { title: "Slab", options: ["Thickness 220 mm", "Level 01", "Concrete"] },
@@ -47,6 +53,7 @@ const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
 };
 
 type TopToolbarProps = {
+  onCanvasDisplay: () => void;
   tool: ToolId;
   mode: ViewMode;
   layout: ViewportLayout;
@@ -69,6 +76,11 @@ type TopToolbarProps = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onLayers: () => void;
+  canUndoVisibility: boolean;
+  canRedoVisibility: boolean;
+  selectedLayer: { id: string; name: string } | null;
+  onLayerVisibility: (action: VisibilityAction) => void;
 };
 
 function IconControl({
@@ -111,7 +123,7 @@ export function TopToolbar(props: TopToolbarProps) {
   const current = toolOptions[props.tool];
   return (
     <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
-      <div className="flex h-11 min-w-0 items-center gap-2 px-2.5">
+      <div className="flex h-11 min-w-0 items-center gap-2 overflow-x-auto px-2.5">
         <div className="flex min-w-[190px] items-center gap-2 border-r border-border pr-3">
           <img
             src={novikovLogo}
@@ -131,18 +143,47 @@ export function TopToolbar(props: TopToolbarProps) {
           className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex"
           aria-label="Application menu"
         >
-          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => (
-            <Button
-              key={item}
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
-              onClick={() => props.onAction(`${item} menu`)}
-            >
-              {item}
-            </Button>
-          ))}
+          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
+            item === "View" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    View
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>
+                    Canvas-Darstellung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                key={item}
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                onClick={() => props.onAction(`${item} menu`)}
+              >
+                {item}
+              </Button>
+            ),
+          )}
         </nav>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="shrink-0 text-xs">
+              Organisation
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
           <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
             <Undo2 />
@@ -185,7 +226,69 @@ export function TopToolbar(props: TopToolbarProps) {
             </Button>
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-0.5">
+        <div
+          role="group"
+          aria-label="Ebenenumschalter"
+          className="flex shrink-0 items-center gap-0.5 border-x border-border px-2"
+        >
+          <div className="mr-1 max-w-24 text-[10px] leading-tight">
+            <span className="block font-semibold">Ebenen</span>
+            <span
+              className="block truncate text-muted-foreground"
+              title={props.selectedLayer?.name}
+            >
+              {props.selectedLayer?.name ?? "Keine Auswahl"}
+            </span>
+          </div>
+          <IconControl
+            label="Ausgewählte Ebene unsichtbar stellen"
+            disabled={!props.selectedLayer}
+            onClick={() =>
+              props.selectedLayer &&
+              props.onLayerVisibility({ kind: "hide-selected", layerId: props.selectedLayer.id })
+            }
+          >
+            <EyeOff />
+          </IconControl>
+          <IconControl
+            label="Alle anderen Ebenen unsichtbar stellen"
+            disabled={!props.selectedLayer}
+            onClick={() =>
+              props.selectedLayer &&
+              props.onLayerVisibility({ kind: "hide-others", layerId: props.selectedLayer.id })
+            }
+          >
+            <Focus />
+          </IconControl>
+          <IconControl
+            label="Alle Ebenen unsichtbar stellen"
+            onClick={() => props.onLayerVisibility({ kind: "hide-all" })}
+          >
+            <Layers2 />
+          </IconControl>
+          <IconControl
+            label="Ebenensichtbarkeit umkehren"
+            onClick={() => props.onLayerVisibility({ kind: "invert" })}
+          >
+            <Contrast />
+          </IconControl>
+          <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+          <IconControl
+            label="Ebenensichtbarkeit rückgängig"
+            disabled={!props.canUndoVisibility}
+            onClick={() => props.onLayerVisibility({ kind: "undo" })}
+          >
+            <Undo2 />
+          </IconControl>
+          <IconControl
+            label="Ebenensichtbarkeit wiederholen"
+            disabled={!props.canRedoVisibility}
+            onClick={() => props.onLayerVisibility({ kind: "redo" })}
+          >
+            <Redo2 />
+          </IconControl>
+        </div>
+        <div className="ml-auto flex shrink-0 items-center gap-0.5">
           <div className="flex h-8 items-center rounded-md border border-border bg-background/30 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-xl">
             {(["2D", "3D"] as ViewMode[]).map((mode) => (
               <Button
@@ -280,7 +383,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}>
             <PanelTop />
           </IconControl>
-          <IconControl label="Settings" onClick={() => props.onAction("Settings")}>
+          <IconControl label="Settings" onClick={props.onCanvasDisplay}>
             <Settings />
           </IconControl>
           <Button variant="ghost" size="icon" className="size-8" aria-label="User profile">

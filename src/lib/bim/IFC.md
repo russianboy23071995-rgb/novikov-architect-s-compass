@@ -42,3 +42,10 @@ This is the first export-only step in the agreed IFC exchange stage. Windows hav
 Before moving to AI/voice execution, review an exported model in the intended receiving CAD/BIM application. Import/round-trip support should be a separate, scoped step if required.
 
 References: [buildingSMART IFC4 IfcWindow](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/schema/ifcsharedbldgelements/lexical/ifcwindow.htm), [IfcOpeningElement](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/schema/ifcproductextension/lexical/ifcopeningelement.htm), [IfcGloballyUniqueId](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/schema/ifcutilityresource/lexical/ifcgloballyuniqueid.htm), [IfcOpenShell validation](https://docs.ifcopenshell.org/autoapi/ifcopenshell/validate/index.html).
+
+## Shared writer and corner acceptance
+
+The implementation lives in `src/interop/ifc/writer.ts`; `exportIfc` remains the
+compatible ordinary rectangular-wall export. The separate explicit-pair acceptance
+adapter is documented in [Corner IFC acceptance](../../../docs/CORNER_IFC_ACCEPTANCE.md).
+It does not enable connected wall geometry in ordinary UI exports.

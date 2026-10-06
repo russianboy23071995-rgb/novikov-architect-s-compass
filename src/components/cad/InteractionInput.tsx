@@ -11,7 +11,7 @@ export function InteractionInput({
   onPosition: (point: Point2) => void;
 }) {
   const { adapter, draft, preview } = interaction;
-  if (!adapter) return null;
+  if (!adapter || interaction.suspended) return null;
   if (!adapter.input)
     return (
       <div
@@ -33,7 +33,7 @@ export function InteractionInput({
       length={draft.length}
       angleHint={degrees === undefined ? "Maus" : String(Number(degrees.toFixed(2)))}
       lengthHint={preview.value ? String(Number(preview.value.metres.toFixed(3))) : "Maus"}
-      axisLabel={adapter.input.axisLabel}
+      axisLabel={preview.value?.notice ?? adapter.input.axisLabel}
       mouseHint={
         adapter.click === "direction"
           ? "Mausrichtung · Tab: Länge ↔ Winkel"

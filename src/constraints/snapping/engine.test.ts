@@ -2,6 +2,82 @@ import { previewEdit } from "../../application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { querySnap } from "./engine.ts";
+import {
+  createAffineScreenMetric,
+  createIsotropicScreenMetric,
+} from "../../geometry/projections/screen-metric.ts";
+
+test("affine point ranking follows CSS distance rather than model distance", () => {
+  const references = [
+    { entityId: "x", feature: "end", point: { x: 0.09, y: 0 } },
+    { entityId: "y", feature: "end", point: { x: 0, y: 4 } },
+  ];
+  const c = {
+    ...context,
+    references,
+    gridSpacing: null,
+    metric: createAffineScreenMetric(100, 0, 0, 1),
+  };
+  assert.equal(querySnap({ x: 0, y: 0 }, c).candidate?.sourceEntityId, "y");
+  assert.equal(querySnap({ x: 0, y: 0 }, c).candidate?.distanceOnScreen, 4);
+  for (const kind of [undefined, "midpoint", "segment-intersection"] as const) {
+    const r = {
+      entityId: "edge",
+      feature: "point",
+      ...(kind ? { kind } : {}),
+      point: { x: 0, y: 10 },
+    };
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...c, references: [r] }).candidate?.sourceEntityId,
+      "edge",
+    );
+    assert.equal(querySnap({ x: 0, y: -0.0001 }, { ...c, references: [r] }).candidate, null);
+  }
+});
+
+test("affine ranking preserves priorities and deterministic ties across source order", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const a = { entityId: "a", feature: "end", point: { x: 0, y: 5 } };
+  const b = { entityId: "b", feature: "end", point: { x: 0, y: -5 } };
+  const middle = {
+    entityId: "m",
+    feature: "middle",
+    kind: "midpoint" as const,
+    point: { x: 0, y: 0.1 },
+  };
+  for (const references of [
+    [a, b, middle],
+    [middle, b, a],
+  ])
+    assert.equal(
+      querySnap({ x: 0, y: 0 }, { ...context, metric, references }).candidate?.sourceEntityId,
+      "a",
+    );
+});
+
+test("explicit isotropic metric keeps existing resolver results across scales and constraints", () => {
+  for (const pixelsPerMetre of [0.5, 100, 10000])
+    for (const cursor of [
+      { x: 0.05, y: 0.03 },
+      { x: 2, y: 1 },
+      { x: -1, y: 0 },
+    ])
+      for (const orthoOrigin of [null, { x: 0, y: 0 }]) {
+        const c = {
+          ...context,
+          pixelsPerMetre,
+          orthoOrigin,
+          references: [
+            { entityId: "a", feature: "end", point: { x: 0, y: 0 } },
+            { entityId: "b", feature: "end", point: { x: 2, y: 1 } },
+          ],
+        };
+        assert.deepEqual(
+          querySnap(cursor, { ...c, metric: createIsotropicScreenMetric(pixelsPerMetre) }),
+          querySnap(cursor, c),
+        );
+      }
+});
 import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
 
 test("numerical compatibility is finite, bounded and independent of screen scale", () => {
@@ -747,10 +823,10 @@ test("diagonal guide intersection is exact, screen bounded, constrained and reta
       "intersection",
     );
     assert.equal(querySnap({ x: 2, y: 2 }, { ...c, enabled: false }).candidate, null);
-    assert.equal(
-      querySnap({ x: 2, y: 2 }, { ...c, angleOrigin: { x: 0, y: 0 } }).candidate?.sourceFeature,
-      "shift-45",
-    );
+    assert.deepEqual(querySnap({ x: 2, y: 2 }, { ...c, angleOrigin: { x: 0, y: 0 } }).point, {
+      x: 2,
+      y: 2,
+    });
     const end = { entityId: "end", feature: "point", point: { x: 2, y: 2 } };
     assert.equal(
       querySnap({ x: 2, y: 2 }, { ...c, references: [a, b, end] }).candidate?.kind,
@@ -891,7 +967,8 @@ test("intersection and overlay share held directions without expanding radius or
   assert.deepEqual(querySnap(cursor, c).point, { x: 0.18, y: 0 });
   assert.equal(querySnap(cursor, c).candidate?.kind, "intersection");
   assert.notEqual(querySnap(cursor, { ...c, pixelsPerMetre: 400 }).candidate?.kind, "intersection");
-  assert.equal(querySnap(cursor, { ...c, angleOrigin: a.point }).candidate?.angleDegrees, 45);
+  const shift = querySnap(cursor, { ...c, angleOrigin: a.point });
+  assert.ok(Math.abs(shift.point.x - a.point.x - (shift.point.y - a.point.y)) < 1e-9);
   assert.equal(querySnap(cursor, { ...c, enabled: false }).candidate, null);
   assert.deepEqual(querySnap(cursor, { ...c, orthoOrigin: a.point }).point, { x: 0.18, y: 0 });
 });
@@ -1091,4 +1168,35 @@ test("polar input rejects missing direction or length and nonfinite parameters",
     assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, n, 2));
     assert.throws(() => resolvePolarInput({ x: 0, y: 0 }, null, 90, n));
   }
+});
+
+test("Shift accepts only exact on-axis points and preserves continuous fallback without grid jumps", () => {
+  const origin = { x: 0, y: 0 },
+    cursor = { x: 2.023, y: 0.041 };
+  const ref = (x: number, y: number) => ({ entityId: "target", feature: "point", point: { x, y } });
+  const c: SnapContext = {
+    references: [],
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    gridSpacing: 0.1,
+    orthoOrigin: null,
+    angleOrigin: origin,
+  };
+  const exact = querySnap(cursor, { ...c, references: [ref(2, 0)] });
+  assert.deepEqual(exact.point, { x: 2, y: 0 });
+  assert.equal(exact.candidate?.kind, "endpoint");
+  for (const references of [[], [ref(2, 0.02)], [ref(2.2, 0)]]) {
+    const free = querySnap(cursor, { ...c, references });
+    assert.deepEqual(free.point, { x: cursor.x, y: 0 });
+    assert.equal(free.candidate?.sourceFeature, "shift-45");
+  }
+  assert.deepEqual(querySnap(cursor, { ...c, references: [ref(2, 0)], enabled: false }).point, {
+    x: cursor.x,
+    y: 0,
+  });
+  assert.deepEqual(
+    querySnap(cursor, { ...c, references: [ref(2, 0)], acceptCandidate: () => false }).point,
+    { x: cursor.x, y: 0 },
+  );
 });

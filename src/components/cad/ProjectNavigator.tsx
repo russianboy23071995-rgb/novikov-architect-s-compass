@@ -116,6 +116,11 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
                   kind: "item",
                 })),
             })),
+            ...project.storey.hatches.map((hatch, index): TreeNode => ({
+              id: hatch.id,
+              label: `Schraffur ${index + 1}`,
+              kind: "item",
+            })),
             ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
               id: line.id,
               label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
@@ -157,6 +162,7 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
           <span className="font-mono text-foreground">
             {project.storey.walls.length +
               project.storey.windows.length +
+              project.storey.hatches.length +
               (project.storey.lines?.length ?? 0)}
           </span>
         </div>

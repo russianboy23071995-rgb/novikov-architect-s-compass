@@ -1,3 +1,4 @@
+import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +12,16 @@ type Props = {
   project: Project;
   selection: Selection;
   onChange: (project: Project, selection: Selection) => void;
+  onWallOffset: (base: Project, wallId: string, offset: number) => void;
 };
 
-export function BimInspector({ project, selection, onChange }: Props) {
+export function BimInspector({ project, selection, onChange, onWallOffset }: Props) {
   const [error, setError] = useState("");
+  const hatch =
+    selection?.kind === "hatch"
+      ? project.storey.hatches.find((h) => h.id === selection.id)
+      : undefined;
+  if (hatch) return <HatchInspector project={project} hatch={hatch} onChange={onChange} />;
   const line =
     selection?.kind === "line"
       ? project.storey.lines?.find((item) => item.id === selection.id)
@@ -31,7 +38,7 @@ export function BimInspector({ project, selection, onChange }: Props) {
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster oder Linie auswählen, um die Eigenschaften hier zu bearbeiten.
+        Wand, Fenster, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
       </p>
     );
   const fields = wall
@@ -50,15 +57,21 @@ export function BimInspector({ project, selection, onChange }: Props) {
     try {
       command();
       setError("");
-    } catch {
+    } catch (failure) {
       setError(
-        "Cannot apply: use positive dimensions and keep the complete window inside its wall. Position must be between 0 and 1; sill height may be zero.",
+        failure instanceof Error && failure.name !== "ZodError"
+          ? failure.message
+          : "Cannot apply: use positive dimensions and keep the complete window inside its wall. Position must be between 0 and 1; sill height may be zero.",
       );
     }
   };
   return (
     <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Element properties">
       <h2 className="text-sm font-semibold">{wall ? "Wall properties" : "Window properties"}</h2>
+      {wall &&
+        project.storey.wallJoins.some(
+          (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
+        ) && <span className="text-xs text-muted-foreground">Wandanschluss aktiv</span>}
       <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">
         {wall?.id ?? opening?.id}
       </p>
@@ -108,6 +121,85 @@ export function BimInspector({ project, selection, onChange }: Props) {
           Apply dimensions
         </Button>
       </form>
+      {wall && (
+        <label
+          className="text-xs"
+          title="Außen oder innen an der Wandkante, alternativ mittig. Die Achse bleibt fest; der Wandkörper folgt."
+        >
+          Achslage
+          <select
+            aria-label="Wandachslage"
+            className="ml-2 h-8 rounded border bg-background px-2"
+            value={
+              wall.bodyOffset === wall.thickness / 2
+                ? "right"
+                : wall.bodyOffset === -wall.thickness / 2
+                  ? "left"
+                  : wall.bodyOffset === 0
+                    ? "centre"
+                    : "custom"
+            }
+            onChange={(event) =>
+              onWallOffset(
+                project,
+                wall.id,
+                event.target.value === "right"
+                  ? wall.thickness / 2
+                  : event.target.value === "left"
+                    ? -wall.thickness / 2
+                    : 0,
+              )
+            }
+          >
+            <option value="right">Außen</option>
+            <option value="centre">Mitte</option>
+            <option value="left">Innen</option>
+            <option value="custom" disabled>
+              Individuell
+            </option>
+          </select>
+        </label>
+      )}
+      {wall && (
+        <form
+          className="flex items-end gap-2"
+          aria-label="Wandkörperversatz"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const raw = String(new FormData(event.currentTarget).get("offset") ?? "")
+              .trim()
+              .replace(",", ".");
+            const offset = raw === "" ? NaN : Number(raw);
+            if (!Number.isFinite(offset)) {
+              setError("Bitte einen endlichen Wandversatz in Metern eingeben.");
+              return;
+            }
+            setError("");
+            onWallOffset(project, wall.id, offset);
+          }}
+        >
+          <label
+            className="text-xs"
+            title="Positiv links in Richtung vom Achsanfang zum Achsende. Die Zeichenachse bleibt fest."
+          >
+            Körperversatz (±{wall.thickness / 2} m)
+            <Input
+              aria-label="Wandkörperversatz (m)"
+              name="offset"
+              inputMode="decimal"
+              required
+              defaultValue={wall.bodyOffset}
+              className="mt-1 h-8 w-24"
+            />
+          </label>
+          <Button type="submit" size="sm">
+            Versatz übernehmen
+          </Button>
+          <Button type="reset" variant="ghost" size="sm" onClick={() => setError("")}>
+            Verwerfen
+          </Button>
+        </form>
+      )}
       {wall && (
         <Button
           variant="outline"
