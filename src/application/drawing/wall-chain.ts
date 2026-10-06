@@ -49,7 +49,7 @@ export function appendWallChain(
     chain.preview.storey.wallTJunctions.some((r) => r.incoming.wallId === chain.wallIds.at(-1))
   )
     throw new Error(
-      "Wandkette am T-Anschluss abschlie\u00dfen. Ecke und T sind noch nicht kombinierbar.",
+      "Wandkette am T-Anschluss abschlie\u00dfen. Eine T-Nebenwand darf noch keinen eigenen Eckanschluss haben.",
     );
   const created = createDrawing(chain.preview, chain.preview, id, {
     kind: "wall",

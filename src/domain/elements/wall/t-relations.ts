@@ -1,11 +1,15 @@
-import type { Project } from "../../project/schema.ts";
+import { validateCornerTContact } from "./corner-t-contact.ts";
+import type { Point, Project } from "../../project/schema.ts";
 import { inspectTPair } from "./t-pair.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
 
 export type TJunction = Project["storey"]["wallTJunctions"][number];
 
 /** Strict persisted relationships: loading never repairs or discovers neighbours. */
-export function tConnectionContours(project: Project) {
+export function tConnectionContours(
+  project: Project,
+  cornerContours: ReadonlyMap<string, Point[]>,
+) {
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   const cornerWalls = new Set(
     project.storey.wallJoins.flatMap((j) => [j.first.wallId, j.second.wallId]),
@@ -19,10 +23,8 @@ export function tConnectionContours(project: Project) {
       incoming = walls.get(relation.incoming.wallId);
     if (!host || !incoming || host.id === incoming.id)
       throw new Error("Ungültige T-Verbindung: Wände fehlen oder sind identisch.");
-    if (cornerWalls.has(host.id) || cornerWalls.has(incoming.id))
-      throw new Error(
-        "Eine beteiligte Wand besitzt einen Eckanschluss. Kombinationen aus Ecke und T sind noch nicht unterstützt.",
-      );
+    if (cornerWalls.has(incoming.id))
+      throw new Error("Die T-Nebenwand darf vorerst keinen eigenen Eckanschluss besitzen.");
     if (incomingIds.has(incoming.id) || hostIds.has(incoming.id))
       throw new Error(
         "Eine Nebenwand darf vorerst nur einen T-Anschluss haben und nicht zugleich Hauptwand sein.",
@@ -32,6 +34,13 @@ export function tConnectionContours(project: Project) {
       host,
       { wall: incoming, endpoint: relation.incoming.endpoint },
       project.storey.windows,
+    );
+    validateCornerTContact(
+      project,
+      host,
+      result.geometry.incoming.points,
+      result.geometry.contact,
+      cornerContours,
     );
     const dx = host.end.x - host.start.x,
       dy = host.end.y - host.start.y;
@@ -53,7 +62,7 @@ export function tConnectionContours(project: Project) {
       throw new Error("T-Anschlüsse auf derselben Wandseite dürfen sich nicht überschneiden.");
     previous.push(contact);
     contacts.set(host.id, previous);
-    contours.set(host.id, result.geometry.host.points);
+    contours.set(host.id, cornerContours.get(host.id) ?? result.geometry.host.points);
     contours.set(incoming.id, result.geometry.incoming.points);
   }
   return contours;
