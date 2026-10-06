@@ -1,7 +1,12 @@
 # T-Wandanschluss: begrenzter Arbeitsentwurf
 
 Stand 06.10.2026, geprüft gegen Integrationscommit 41f17ba (PR125).
-Dies ist ein Planungsauftrag, keine implementierte T-Verbindung.
+Dies ist ein Arbeitsentwurf, keine implementierte persistente T-Verbindung.
+
+Fortschritt 06.10.2026: Der zuletzt beschriebene reine Geometriehelfer ist in
+`src/domain/elements/wall/t-junction.ts` implementiert und getestet. Die übrigen
+Vorschläge bleiben unverändert offen. Der aktuelle Folgeauftrag steht im
+DEVELOPMENT_PLAN.md; die folgende Planung bleibt als fachlicher Kontext erhalten.
 
 ## Bestand und verbindliche Grundlagen
 

@@ -1,5 +1,36 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Reine T-Anschlussgeometrie — 06.10.2026
+
+PR126 nach Freigabe übernommen (4dbca2a). Auf feat/t-wall-geometry ist der
+geplante reine Domain-Helfer deriveRightAngleTJunction implementiert. Er erhält
+zwei explizite Wandparameter/Endindex und liefert Hauptkontur, gekürzte
+Nebenkontur und Kontaktsegment. Hauptwand-ID und alle Achsen bleiben unverändert.
+Wiederverwendung von Wandkörper-, Schnittpunkt-, Toleranz- und Polygonfunktionen.
+Noch keine Projektverknüpfung oder neue Bedienfunktion.
+
+479 Tests bestanden; TypeScript und Build erfolgreich. Lint ohne Fehler mit
+sechs bekannten Fast-Refresh-Warnungen. Vier neue Tests mit Varianten prüfen:
+analytisches Volumen 8,89056 m³ einschließlich bestehender Extrusion, unveränderte
+Eingaben/IDs, beide Anschlussseiten, drei Achslagen, Endpunktumkehr, Rotation,
+Spiegelung, große Koordinaten, Kontakt ohne Überlappung und ungültige Maße,
+Winkel, Achspunkte sowie zu kurze Wände und Endrandkontakte.
+
+Grenze: ausschließlich isoliertes rechtwinkliges Paar gleicher Stärke/Höhe,
+Bruttogeometrie ohne Fenster und ohne weitere Anschlüsse. Der spätere Aufrufer
+muss diese Projektbedingungen prüfen. Kein T-IFC-Export oder T-Canvas-Abnahmetest
+in dieser Etappe; vorhandene Produktabläufe sind unverändert. Automatisierter
+Abnahmetest: src/domain/elements/wall/t-junction.test.ts ausführen. Schema bleibt 7.
+
+**Genau ein ausführbarer Folgeauftrag:** Eine modellstandgebundene temporäre
+Application-Vorschau für das isolierte T-Paar an das bestehende Diagnosefenster
+anbinden. Ziele über stabile IDs und verständliche Wandnamen wählen; Wände mit
+Fenstern oder weiteren Verbindungen zunächst ausdrücklich abweisen. Gemeinsame
+Konturen für 2D/3D verwenden, Wechsel/Abbruch ohne Modellmutation. Keine
+Persistenz oder automatischen T-Verbindungen, keine Entscheidung über
+Hauptwandbewegung vorwegnehmen. Text/Voice folgen weiter den geprüften Aktionen.
+
+
 ## Aktueller Stand: T-Anschluss geplant — 06.10.2026
 
 PR125 nach Nutzerfreigabe unverändert zusammengeführt (41f17ba). Der geprüfte
