@@ -4,9 +4,9 @@
 
 User requirement: selection is a tool-independent Application capability for all
 current and future element types, including mixed sets. Support click, Ctrl-click
-and rectangular marquee; consider only visible and active layers. The meaning of
-active is pending clarification: current layers have ID/name and separate visibility,
-not a lock/activation property. Do not silently invent that state.
+and rectangular marquee. User clarification: active means visible; all shown layers
+are eligible. Reuse existing visibility policy, including hidden-host exclusion for
+windows. Do not introduce a separate activation/lock state for this requirement.
 
 Application owns one typed stable-ID selection set and eligibility rules. Viewport
 adapters supply projected hit geometry; common picking/marquee logic and pointer

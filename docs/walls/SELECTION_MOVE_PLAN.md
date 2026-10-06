@@ -15,7 +15,8 @@ liefern passende Treffergeometrie und Faehigkeiten, keine eigene Auswahlengine.
 - Klick: einzelnes Element auswaehlen.
 - Strg + Klick: Mehrfachauswahl. Cmd als macOS-Entsprechung bleibt ein Vorschlag.
 - Mit der Maus einen rechteckigen Rahmen ziehen: enthaltene Elemente auswaehlen.
-  Auswahl nur auf sichtbaren und aktiven Ebenen.
+  Auswahl auf allen eingeblendeten Ebenen. Nutzerklaerung: aktiv bedeutet hier
+  eingeblendet; kein zusaetzlicher Aktiv-/Sperrstatus.
 - Keine eigene Aktion zum gemeinsamen Ziehen eines Eckpunkts. Spaeter stattdessen
   betroffene ganze Elemente gemeinsam auswaehlen und verschieben.
 
@@ -62,8 +63,8 @@ Die bestehende LayerVisibilityPolicy bildet die gemeinsame Sichtbarkeitspruefung
 Ein Fenster mit unsichtbarer Hostwand bleibt ausgeschlossen. Berechtigung wird
 vor Trefferauswahl und erneut bei Uebernahme geprueft. Versteckte/geloeschte Ziele
 werden aus der Auswahl entfernt; betroffene aktive Bearbeitung wird abgebrochen.
-Der Begriff aktive Ebene ist noch zu klaeren (siehe unten), nicht still mit einer
-einzigen Zeichenebene oder einer noch nicht vorhandenen Sperre gleichsetzen.
+Die Nutzerklaerung setzt aktive Ebenen mit eingeblendeten Ebenen gleich; nicht
+auf eine einzige Zeichenebene beschraenken und keinen Sperrstatus hinzufuegen.
 
 Werkzeugunabhaengigkeit bedeutet gemeinsame Infrastruktur. Sie definiert noch
 nicht, ob ein laufender Zeichenvorgang durch Klick/Rahmen abgebrochen, pausiert
@@ -73,9 +74,8 @@ und mittlere Maustaste fuer Pan erhalten.
 
 ## Noch offene Details und Vorschlaege
 
-- Aktive Ebenen: Das aktuelle layerSchema enthaelt nur ID/Name; Sichtbarkeit liegt
-  separat in bimVisibility.hiddenLayerIds. Kein Aktiv-/Sperrstatus existiert.
-  Nutzerfrage offen: nur eingeblendete Ebenen oder zusaetzlich auswaehlbar/gesperrt?
+- Ebenensemantik ist geklaert: alle eingeblendeten Ebenen. Bestehende
+  bimVisibility.hiddenLayerIds und LayerVisibilityPolicy wiederverwenden.
 - Rahmen: Aus "alles was darin ist" wird als Vorschlag vollstaendige geometrische
   Einschliessung abgeleitet, nicht bloss Bounding-Box-Ueberlappung. Teilberuehrung
   und eine richtungsabhaengige Crossing-Auswahl sind nicht beschlossen.
@@ -117,7 +117,7 @@ nicht implementierte Gruppenaktion. Keine BIM-Skalierung.
 
 ## Genau ein Folgeauftrag
 
-Nach Klaerung der offenen Ebenensemantik den gemeinsamen 2D-Auswahlbaustein fuer
+Den gemeinsamen 2D-Auswahlbaustein fuer
 alle vorhandenen Elementtypen mit Klick, Strg-Klick und Rahmen implementieren.
 Application-Auswahlmenge, gemeinsame Trefferberechtigung, Renderer-Adapter und
 UI-Zielkontext integrieren und die obigen Akzeptanzfaelle pruefen. Noch keine

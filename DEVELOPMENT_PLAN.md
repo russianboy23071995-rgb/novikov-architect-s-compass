@@ -9,12 +9,12 @@ Verbindlich: Klick, Strg-Klick und aufgezogener Auswahlrahmen; nur sichtbare und
 aktive Ebenen. Auswahlbarkeit ist unabhaengig von Bewegungsfaehigkeiten.
 
 [Ueberarbeiteter Plan](docs/walls/SELECTION_MOVE_PLAN.md) trennt zentrale Auswahl-
-und Ebenenregeln von typbezogener Treffergeometrie. Die Bedeutung "aktive Ebenen"
-ist beim Nutzer angefragt: bisher existiert nur Sichtbarkeit, kein Sperrstatus.
+und Ebenenregeln von typbezogener Treffergeometrie. Nutzerklaerung: "aktive Ebenen"
+bedeutet alle eingeblendeten Ebenen; kein zusaetzlicher Sperrstatus.
 Rahmen-Randfaelle, Toggle und konkurrierende Zeichen-/Auswahlgesten bleiben als
 Vorschlaege bzw. offene Details ausgewiesen. Keine Nutzerentscheidung erfunden.
 
-Genau ein Folgeauftrag: Nach Klaerung der Ebenensemantik allgemeinen 2D-Auswahl-
+Genau ein Folgeauftrag: Allgemeinen 2D-Auswahl-
 baustein samt Klick/Strg-Klick/Rahmen fuer alle vorhandenen Elementtypen umsetzen
 und pruefen. Gruppenverschiebung folgt als Verbraucher dieser Auswahl, nicht als
 wandbezogene Parallelstruktur. Noch keine Laufzeitaenderung; nur Planungsdokumente.
