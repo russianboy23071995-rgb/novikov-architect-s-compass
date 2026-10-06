@@ -52,7 +52,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { exportIfc } from "@/lib/bim/ifc";
-import { applyCommand } from "@/lib/bim/commands";
+import { applySelectionCommand } from "@/application/commands/selection-command";
 import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
@@ -1004,12 +1004,16 @@ export function CadWorkspace({
                 )}
                 {!referenceSelection.selecting && (
                   <AiCommandBar
-                    selectionCount={selections.length}
+                    onFocus={() => setDemandOpen(false)}
+                    targets={selections}
+                    visibility={visibility}
                     project={project}
-                    selection={selection}
-                    onExecute={(preview) =>
-                      changeProject(applyCommand(project, selection, preview), selection)
-                    }
+                    onExecute={(preview) => {
+                      const next = applySelectionCommand(project, selections, visibility, preview);
+                      cancelInteraction();
+                      setDemandOpen(false);
+                      dispatchEditing({ type: "project", project: next });
+                    }}
                   />
                 )}
                 <div

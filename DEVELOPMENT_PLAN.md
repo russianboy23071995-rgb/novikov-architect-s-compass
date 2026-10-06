@@ -1,5 +1,46 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Gruppenbewegung per Textbefehl - 06.10.2026
+
+PR148 nach Freigabe normal in main integriert (200735a). Folgebranch
+feat/selection-text-command bindet die bestehende freie Gruppenbewegung an lokale
+Textbefehle an. Beispiel: Auswahl um 2 m bei 90 Grad verschieben. Meter, cm und mm,
+Dezimalkomma/-punkt sowie Grad/Gradzeichen werden erkannt. Winkel 0 bis 360 Grad;
+0 Grad = +X, 90 Grad = +Y. Positive Laenge erforderlich. Keine geratenen Ziele,
+keine verketteten Teilbefehle und keine freie Sprachinterpretation.
+
+application/commands/selection-command.ts verwendet beginSelectionMove und
+previewSelectionMove sowie die gemeinsame Polarberechnung. Fuer diese reine
+Translation ist (0,0) nur der Ursprung des Verschiebungsvektors, kein geratenes
+Bauteilziel und kein neuer interaktiver Fangpunkt. Bestehende Einzelbefehle werden
+weitergereicht, aber nie auf das erste Mitglied einer Mehrfachauswahl reduziert.
+
+Die textuelle Befehlsvorschau zeigt Anzahl, Richtung/Laenge, mitgefuehrte Fenster,
+geloeste externe Wandanschluesse und eine aufklappbare Liste typisierter Ziel-IDs.
+Das Modell bleibt bis Uebernehmen unveraendert; noch keine geometrische Canvas-
+Befehlsvorschau. Uebernahme prueft den gepinnten Modell-/Auswahl-/Sichtbarkeitskontext
+und berechnet ueber dieselbe validierte Aktion neu. Kontextwechsel verwirft die
+angezeigte Vorschau. Ein Undo-Schritt, gemeinsame Auswahl bleibt nach Uebernahme.
+Das On-Demand-Menue schliesst beim Fokus auf die Befehlseingabe.
+
+Nachweis: 562 Tests bestanden, davon 6 neue fuer gemischte Ziele, Einheiten,
+Maus-/Textgleichheit, Auswirkungen auf Beziehungen/Fenster, stale/verborgene Ziele,
+ungueltige Grammatik/Winkel, Einzelbefehle und Undo/Redo. TypeScript und
+Produktionsbuild erfolgreich, Lint 0 Fehler/6 bekannte Fast-Refresh-Warnungen.
+Browser: 5 Ziele per Rahmen, Textvorschau ohne Geometrieaenderung, Ziel-IDs sichtbar,
+Uebernahme um 2 m in +Y, ein Undo/Redo; anschliessender Strg-Auswahlwechsel entfernt
+die Vorschau. Screenshot outputs/selection-text-command.png.
+
+Abnahme: Mehrere Elemente markieren, unten den Beispielbefehl eingeben, Befehl
+pruefen. Ziele aufklappen, Uebernehmen, Strg+Z. Neue Vorschau erstellen und Auswahl
+wechseln: die alte Vorschau darf nicht mehr uebernommen werden. Fenster ohne ihre
+Hostwand werden fuer die freie Gruppenbewegung weiterhin als ganze Aktion abgewiesen.
+
+Genau ein Folgeauftrag: Gruppen-Sprachtranskripte an denselben Textadapter anbinden.
+Aufnahme an die vollstaendige Auswahl und Modell-/Sichtbarkeitsrevision binden,
+bei Wechsel abbrechen, spaete Ergebnisse verwerfen und niemals automatisch
+uebernehmen. Vorhandene Einzel-Sprachbefehle erhalten; keine zweite Modelllogik.
+
 ## Gemeinsame freie Gruppenbewegung implementiert - 06.10.2026
 
 PR147 nach Freigabe normal in main zusammengefuehrt (14c887d). Der Folgebranch
