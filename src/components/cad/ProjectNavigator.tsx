@@ -33,8 +33,8 @@ function TreeItem({
 }: {
   node: TreeNode;
   depth: number;
-  active: string;
-  onSelect: (id: string, label: string) => void;
+  active: readonly string[];
+  onSelect: (id: string, label: string, toggle?: boolean) => void;
 }) {
   const [open, setOpen] = useState(!["saved-views", "sheets"].includes(node.id));
   const hasChildren = Boolean(node.children?.length);
@@ -44,7 +44,7 @@ function TreeItem({
       <div
         className={cn(
           "group flex h-7 items-center gap-1 rounded-sm pr-1 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
-          active === node.id && "bg-primary/12 text-primary",
+          active.includes(node.id) && "bg-primary/12 text-primary",
         )}
         style={{ paddingLeft: `${6 + depth * 13}px` }}
       >
@@ -64,7 +64,8 @@ function TreeItem({
         <Button
           variant="ghost"
           className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent"
-          onClick={() => onSelect(node.id, node.label)}
+          aria-pressed={active.includes(node.id)}
+          onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
           <Icon className="size-3.5 shrink-0 opacity-70" />
           <span className="truncate">{node.label}</span>
@@ -87,8 +88,8 @@ function TreeItem({
 type ProjectNavigatorProps = {
   project: Project;
 
-  active: string;
-  onSelect: (id: string, label: string) => void;
+  active: readonly string[];
+  onSelect: (id: string, label: string, toggle?: boolean) => void;
   onClose: () => void;
 };
 

@@ -1,3 +1,5 @@
+import { useElementSelection } from "./useElementSelection";
+import { selectionIndex, type SelectionSet } from "@/application/selection/state";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
@@ -104,12 +106,13 @@ export function CadWorkspace({
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
-  const [requestedSelection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
-  const selection = visibleLayerTarget(project, visibility, requestedSelection);
+  const {
+    targets: selections,
+    selection,
+    choose,
+    setSelection,
+  } = useElementSelection(project, visibility);
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
-  useEffect(() => {
-    if (requestedSelection && !selection) setSelection(null);
-  }, [requestedSelection, selection]);
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
   const [wallChain, setWallChain] = useState<WallChain | null>(null);
@@ -186,7 +189,7 @@ export function CadWorkspace({
       setModelError("");
       setExportMessage("");
     },
-    [cancelInteraction],
+    [cancelInteraction, setSelection],
   );
 
   useEffect(() => {
@@ -238,7 +241,7 @@ export function CadWorkspace({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen, cancelInteraction, referenceSelection.selecting, navigateHistory]);
+  }, [fullscreen, cancelInteraction, referenceSelection.selecting, navigateHistory, setSelection]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -290,15 +293,29 @@ export function CadWorkspace({
     index?: number,
     modelPoint?: Point,
     edgeIndex?: number,
+    toggle = false,
   ) => {
     if (
       next &&
       !visibleLayerTarget(visibilityNow.current.project, visibilityNow.current.visibility, next)
     )
       return;
-    showSelection(next, anchor, index, modelPoint, edgeIndex);
+    if (toggle && next) {
+      cancelInteraction();
+      choose([next], true);
+      setDemandOpen(false);
+      setPickedPoint({ index: null, anchor: null, edgeIndex: null });
+      setTool("select");
+    } else showSelection(next, anchor, index, modelPoint, edgeIndex);
   };
 
+  const selectMany = (targets: SelectionSet) => {
+    cancelInteraction();
+    choose(targets);
+    setDemandOpen(false);
+    setPickedPoint({ index: null, anchor: null, edgeIndex: null });
+    setTool("select");
+  };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection) return;
@@ -609,7 +626,15 @@ export function CadWorkspace({
             onSnap={() => setSnap((value) => !value)}
             onNavigator={() => setNavigatorOpen((value) => !value)}
             onDemand={() => setDemandOpen((value) => !value)}
-            onAction={showNotice}
+            onAction={(action) => {
+              if (action === "Window selection") {
+                cancelInteraction();
+                setTool("select");
+                showNotice(
+                  "Auf freier Canvas-Flaeche einen Rahmen ziehen. Strg-Klick erweitert die Auswahl.",
+                );
+              } else showNotice(action);
+            }}
             onExportIfc={downloadIfc}
             exportingIfc={exportingIfc}
             onSave={saveProject}
@@ -768,6 +793,11 @@ export function CadWorkspace({
                 Zeichnen abbrechen
               </Button>
             </section>
+          ) : selections.length > 1 ? (
+            <p className="p-3 text-xs text-muted-foreground" role="status">
+              {selections.length} Elemente ausgewählt. Gemeinsame Bearbeitung folgt; Einzelaktionen
+              sind deaktiviert.
+            </p>
           ) : (
             <BimInspector
               key={JSON.stringify([selection, project])}
@@ -808,6 +838,8 @@ export function CadWorkspace({
                   visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
+                  selections={selections}
+                  onSelectMany={selectMany}
                   snapping={
                     interaction.adapter?.snapping ?? (tool === "wall" ? wallStartSnapPolicy : null)
                   }
@@ -906,6 +938,7 @@ export function CadWorkspace({
                 )}
                 {!referenceSelection.selecting && (
                   <AiCommandBar
+                    selectionCount={selections.length}
                     project={project}
                     selection={selection}
                     onExecute={(preview) =>
@@ -948,18 +981,17 @@ export function CadWorkspace({
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
                     project={project}
-                    active={selection?.id ?? project.storey.id}
+                    active={selections.length ? selections.map((t) => t.id) : [project.storey.id]}
                     onClose={() => setNavigatorOpen(false)}
-                    onSelect={(id) => {
-                      if (project.storey.walls.some((wall) => wall.id === id))
-                        selectElement({ kind: "wall", id });
-                      else if (project.storey.windows.some((opening) => opening.id === id))
-                        selectElement({ kind: "window", id });
-                      else if (project.storey.hatches.some((hatch) => hatch.id === id))
-                        selectElement({ kind: "hatch", id });
-                      else if (project.storey.lines?.some((line) => line.id === id))
-                        selectElement({ kind: "line", id });
-                      else selectElement(null);
+                    onSelect={(id, _label, toggle) => {
+                      selectElement(
+                        selectionIndex(project).get(id) ?? null,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        toggle,
+                      );
                     }}
                   />
                 </ResizablePanel>
@@ -974,7 +1006,7 @@ export function CadWorkspace({
             grid={grid}
             snap={snap}
             ortho={ortho}
-            selection={selection ? 1 : 0}
+            selection={selections.length}
             onGrid={() => setGrid((value) => !value)}
             onSnap={() => setSnap((value) => !value)}
             onOrtho={() => setOrtho((value) => !value)}

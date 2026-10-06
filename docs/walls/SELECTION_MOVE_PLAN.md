@@ -2,7 +2,12 @@
 
 Stand 06.10.2026, gepruefte Basis main c8a205c (PR145 integriert).
 Nutzerkorrektur ersetzt den vorherigen wandbezogenen Umsetzungsumfang von PR146.
-Nur Planung: Die Implementierung ist bis zur korrigierten Planung angehalten.
+Umgesetzt auf feat/shared-selection: allgemeine 2D-Auswahl fuer alle vorhandenen
+Typen. Aktuelle Nachweise und Folgeauftrag stehen oben im DEVELOPMENT_PLAN.
+Die Bestandsaufnahme unten beschreibt die Ausgangsbasis vor diesem Schritt.
+Bedienregeln umgesetzt: Ctrl/Cmd toggelt, normaler Klick ersetzt, Leerklick leert;
+Rahmen auf freier Flaeche im Auswahlmodus schliesst vollstaendige Konturen ein.
+Noch keine Gruppenbewegung und keine neue 3D-Auswahlgeste.
 
 ## Verbindliche Anforderungen
 
@@ -115,10 +120,8 @@ Ursprung, Preview/Cancel, gepinnte Zielmenge und ein Undo-Schritt. Regeln fuer
 beliebige gemischte Mengen separat pruefen; Auswahlbarkeit verspricht keine noch
 nicht implementierte Gruppenaktion. Keine BIM-Skalierung.
 
-## Genau ein Folgeauftrag
+## Folgeauftrag nach Umsetzung der Auswahl
 
-Den gemeinsamen 2D-Auswahlbaustein fuer
-alle vorhandenen Elementtypen mit Klick, Strg-Klick und Rahmen implementieren.
-Application-Auswahlmenge, gemeinsame Trefferberechtigung, Renderer-Adapter und
-UI-Zielkontext integrieren und die obigen Akzeptanzfaelle pruefen. Noch keine
-Gruppenbewegung oder gemeinsame Eckpunktaktion implementieren.
+Gemeinsame freie Verschiebung als Verbraucher der zentralen Auswahlmenge gemaess
+dem aktuellen DEVELOPMENT_PLAN umsetzen. Die Auswahl bleibt typunabhaengig;
+Bewegungsfaehigkeiten und Host-Abhaengigkeiten werden von Aktionen validiert.

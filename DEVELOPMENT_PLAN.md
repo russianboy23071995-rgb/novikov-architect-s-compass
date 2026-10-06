@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Gemeinsame 2D-Auswahl implementiert — 06.10.2026
+
+PR146 freigegeben und normal in main gemergt (c771846). Auf feat/shared-selection
+verwaltet ein gemeinsamer Application-Baustein typisierte Zielmengen fuer Waende,
+Fenster, Linien/Polylinien und Schraffuren, auch gemischt. Navigator und Canvas
+verwenden dieselbe Auswahl. Sichtbarkeit inklusive versteckter Hostwaende gilt
+zentral; keine neue Ebenensperre. Nur genau ein Ziel schaltet Einzelaktionen frei.
+
+Klick ersetzt, Strg/Cmd-Klick schaltet Zugehoerigkeit um, Leerklick leert. Rahmen
+auf freier Flaeche im Auswahlmodus starten: vollstaendig eingeschlossene Geometrie
+inklusive Rand, beide Ziehrichtungen gleich. Mindestbewegung 3 CSS-Pixel. Zeichnen,
+Bearbeiten, Referenzwahl und Pan behalten ihre Gesten. Escape/Pointer-Abbruch oder
+Modell-/Sichtbarkeitswechsel verwerfen den Rahmen. Kein Modell-/Dateiformatwechsel
+und kein Auswahl-Undo. Wandachsen bleiben hervorgehoben; 3D zeigt gewaehlte Waende,
+aber noch keine neue 3D-Mehrfachklick-/Rahmenbedienung. Gruppenbewegung bleibt aus.
+
+Pruefung: 551 Tests bestanden; TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Neue Regressionen pruefen alle Typen, gemischte
+Toggle-/Ersetzen-Auswahl, Einzelaktionssperre, Ebenen/Hostsichtbarkeit, ungueltige
+IDs, Rahmenrichtung/Rand/Teiltreffer, Achsversatz und Eckkontur. Browser: 5 Elemente
+per Rahmen, Schraffur per Strg-Klick entfernt, Fenster per Einzelklick gewaehlt,
+Fensterebene ausgeblendet und Rahmen in Gegenrichtung waehlt nur 4. Nach Sichtbar-
+machen und Zoom wieder 5; Navigator und Anzahl stimmen. Keine neue Modellbewegung
+als getestet behauptet. Pruefmodell outputs/selection-demo.json, Bild shared-selection.png.
+
+Abnahme: Select waehlen, auf freie Canvas-Flaeche klicken und Rahmen um verschiedene
+Elemente ziehen. Strg-Klick auf Schraffur entfernt/ergaenzt sie. Einzelklick zeigt
+dessen Eigenschaften. Ebene ausblenden: ihre Elemente werden nicht mitgewaehlt.
+
+Genau ein Folgeauftrag: Die gemeinsame freie Verschiebung als Verbraucher der
+Auswahlmenge an vorhandene ToolInteraction/Raster-/Hilfseingabe anbinden. Gesamten
+Snapshot atomar validieren, interne Wandanschluesse erhalten, externe loesen und
+Host/Fenster-Abhaengigkeiten ohne doppelte Bewegung pruefen. Nicht unterstuetzte
+Mischungen ausdruecklich ablehnen, keine stille Teilmenge bewegen. Ein Undo-Schritt.
+
+
 ## Nutzerkorrektur: allgemeine Auswahl vor Gruppenbewegung — 06.10.2026
 
 Die zuvor geplante Wand-Mehrfachauswahl wird ersetzt: ein gemeinsamer,
