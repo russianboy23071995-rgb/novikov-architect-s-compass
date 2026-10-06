@@ -15,7 +15,16 @@ const RIGHT_ANGLE_DOT_TOLERANCE = 1e-10; // Dimensionless; not a distance or sna
  * Explicit endpoint pair; no neighbour search, mutations or automatic join creation.
  * Callers must separately validate project membership, openings and other joins.
  */
+export function deriveWallCorner(first: CornerEnd, second: CornerEnd) {
+  return deriveCorner(first, second, false);
+}
+
+/** Retained strict contract for the historical right-angle diagnostic. */
 export function deriveRightAngleCorner(first: CornerEnd, second: CornerEnd) {
+  return deriveCorner(first, second, true);
+}
+
+function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boolean) {
   const ends = [first, second].sort((a, b) => (a.wall.id < b.wall.id ? -1 : 1));
   if (!first.wall.id.trim() || !second.wall.id.trim() || first.wall.id === second.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
@@ -62,8 +71,9 @@ export function deriveRightAngleCorner(first: CornerEnd, second: CornerEnd) {
   const u = prepare(a),
     v = prepare(b);
   if (
+    rightAngleOnly &&
     Math.abs(u.direction.x * v.direction.x + u.direction.y * v.direction.y) >
-    RIGHT_ANGLE_DOT_TOLERANCE
+      RIGHT_ANGLE_DOT_TOLERANCE
   )
     throw new Error("Dieser Eckanschluss benötigt einen rechten Winkel.");
   // Both axes point away from the node. Left of one meets right of the other.

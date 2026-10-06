@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deriveRightAngleCorner, type CornerEnd } from "./corner.ts";
+import { deriveRightAngleCorner, deriveWallCorner, type CornerEnd } from "./corner.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 
 const pair = (a = 0, b = 0): [CornerEnd, CornerEnd] => [
@@ -28,6 +28,60 @@ const pair = (a = 0, b = 0): [CornerEnd, CornerEnd] => [
   },
 ];
 const close = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
+
+test("oblique miters share a seam without overlap for either turn, offsets and endpoint directions", () => {
+  for (const degrees of [30, 45, 60, 120, 135, 150, -30, -60, -135])
+    for (const offsetA of [-0.18, 0, 0.18])
+      for (const offsetB of [-0.18, 0, 0.18]) {
+        const original = pair(offsetA, offsetB);
+        const angle = (degrees * Math.PI) / 180;
+        original[1].wall.end = { x: 3 + 3 * Math.cos(angle), y: 3 * Math.sin(angle) };
+        const expected = deriveWallCorner(...original);
+        const [s, t] = expected.seam;
+        const side = (p: { x: number; y: number }) =>
+          (t!.x - s!.x) * (p.y - s!.y) - (t!.y - s!.y) * (p.x - s!.x);
+        const farSides = expected.walls.map((w) => [side(w.points[1]!), side(w.points[2]!)]);
+        assert.ok(farSides.every(([a, b]) => a! * b! > 0));
+        assert.ok(farSides[0]![0]! * farSides[1]![0]! < 0);
+        for (const mask of [0, 1, 2, 3]) {
+          const ends = original.map((e, i) =>
+            mask & (1 << i)
+              ? {
+                  endpoint: (1 - e.endpoint) as 0 | 1,
+                  wall: {
+                    ...e.wall,
+                    start: e.wall.end,
+                    end: e.wall.start,
+                    bodyOffset: -e.wall.bodyOffset,
+                  },
+                }
+              : e,
+          ) as [CornerEnd, CornerEnd];
+          const result = deriveWallCorner(...ends);
+          samePoints(result.seam, expected.seam);
+          for (let i = 0; i < 2; i++) {
+            samePoints(result.walls[i]!.points, expected.walls[i]!.points);
+            close(result.walls[i]!.area, expected.walls[i]!.area);
+          }
+          assert.deepEqual(deriveWallCorner(ends[1], ends[0]), result);
+        }
+      }
+});
+
+test("oblique corner rejects collinear, near-parallel and too-short walls", () => {
+  for (const end of [
+    { x: 6, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 1e-13 },
+    { x: 2.99, y: 0.01 },
+  ]) {
+    const ends = pair(0.18, 0.18);
+    ends[1].wall.end = end;
+    const before = structuredClone(ends);
+    assert.throws(() => deriveWallCorner(...ends));
+    assert.deepEqual(ends, before);
+  }
+});
 const samePoints = (a: { x: number; y: number }[], b: { x: number; y: number }[]) => {
   assert.equal(a.length, b.length);
   for (const p of a) assert.ok(b.some((q) => Math.hypot(p.x - q.x, p.y - q.y) < 1e-8));

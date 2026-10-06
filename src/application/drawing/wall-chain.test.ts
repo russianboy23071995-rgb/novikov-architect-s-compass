@@ -5,6 +5,28 @@ import { createProject, serializeProject, deserializeProject } from "../../lib/b
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { drawingInteraction } from "../tools/adapters.ts";
+import { buildSolid } from "../../lib/bim/geometry.ts";
+
+test("closed triangular wall chain composes two oblique ends per wall and undoes as a whole", () => {
+  const base = createProject("triangle", "s");
+  let chain = beginWallChain(base, { x: 0, y: 0 });
+  for (const [i, point] of [
+    { x: 4, y: 0 },
+    { x: 2, y: 3 },
+    { x: 0, y: 0 },
+  ].entries())
+    chain = appendWallChain(chain, base, `wall-${i}`, point);
+  const p = finishWallChain(chain, base);
+  assert.equal(p.storey.wallJoins.length, 3);
+  const inradius = 12 / (4 + 2 * Math.sqrt(13));
+  const expected = 6 * (1 - (1 - 0.36 / inradius) ** 2) * 2.8;
+  assert.ok(Math.abs(buildSolid(p).volume - expected) < 1e-8);
+  assert.deepEqual(deserializeProject(serializeProject(p)), p);
+  const history = commitProject(createHistory(base), p);
+  assert.equal(history.past.length, 1);
+  assert.deepEqual(undoProject(history).present, base);
+  assert.deepEqual(redoProject(undoProject(history)).present, p);
+});
 
 test("closed wall chain is one atomic history action, persisted with stable IDs and all joins", async () => {
   const history = createHistory(createProject("p", "s")),
@@ -44,7 +66,7 @@ test("invalid continuation preserves valid draft and allows correction; abandone
   const snapshot = serializeProject(first.preview);
   for (const point of [
     { x: 3, y: 0 },
-    { x: 4, y: 1 },
+    { x: 4, y: 0 },
     { x: NaN, y: 0 },
   ])
     assert.throws(() => appendWallChain(first, base, "b", point));
