@@ -1,5 +1,16 @@
 # Erster Wand-Eckanschluss: Arbeitsentwurf
 
+## Aktueller verbindlicher Stand — 05.10.2026
+
+Die folgenden historischen Abschnitte sind durch automatische rechtwinklige
+Anschluesse (Schema 6) ergaenzt/ersetzt: gleiche Achsenden beim Erstellen oder
+Bewegen verbinden ohne Menuebestaetigung. Nutzer hat Oeffnungsberuehrung am
+Anschluss abgelehnt und gerade Enden beim automatischen Loesen bestaetigt.
+Regulaere 2D/3D-/IFC-Ausgabe, History und Dateimigration sind integriert.
+Details/Grenzen: [Automatische Wandanschluesse](AUTOMATIC_WALL_CONNECTIONS.md).
+Naechster Schritt ist Wandkettenzeichnen; Undo soll laut Nutzerentscheidung die
+gesamte Kette zuruecknehmen. Die alte explizite Menuepflicht gilt nicht mehr.
+
 Stand: 05.10.2026. Codebasis: Integrationszweig `fix/reference-selection-lifecycle`,
 Commit `39b5b81` nach Merge von PR #111. Dieser Auftrag aktualisiert die Planung;
 Anschlussgeometrie ist weiterhin nicht implementiert. Die unten datierten

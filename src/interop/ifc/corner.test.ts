@@ -17,6 +17,7 @@ function fixture() {
     { id: "C", start: { x: 8, y: 0 }, end: { x: 11, y: 0 } },
   ])
     p = addWall(p, { ...wall, thickness: 0.36, height: 2.8 });
+  p.storey.wallJoins = []; // Explicit acceptance path, independent from automatic joins.
   return addWindow(p, {
     id: "window",
     wallId: "A",

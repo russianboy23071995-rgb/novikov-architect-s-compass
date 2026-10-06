@@ -8,8 +8,8 @@ const targets: [CornerTarget, CornerTarget] = [
   { wallId: "A", endpoint: 1 },
   { wallId: "B", endpoint: 0 },
 ];
-const project = (a = 0, b = 0) =>
-  addWall(
+const project = (a = 0, b = 0) => {
+  const result = addWall(
     addWall(createProject("p", "s"), {
       id: "A",
       start: { x: 0, y: 0 },
@@ -27,6 +27,10 @@ const project = (a = 0, b = 0) =>
       bodyOffset: b,
     },
   );
+  // This suite inspects an explicit pair without a persisted connection.
+  result.storey.wallJoins = [];
+  return result;
+};
 const opening = (id: string, wallId: string, position: number) => ({
   id,
   wallId,

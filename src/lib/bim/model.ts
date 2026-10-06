@@ -1,3 +1,4 @@
+import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { assertAxisInside, offsetAtThickness } from "../../domain/elements/wall/axis-position.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
@@ -10,12 +11,12 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 5,
+    schemaVersion: 6,
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),
     unit: "m",
     id: projectId,
-    storey: { id: storeyId, walls: [], windows: [], hatches: [] },
+    storey: { id: storeyId, walls: [], windows: [], hatches: [], wallJoins: [] },
   });
 }
 
@@ -25,16 +26,21 @@ export function addWall(
   wall: Creation<Omit<Wall, "bodyOffset">> & { bodyOffset?: number },
 ): Project {
   assertAxisInside(wall.thickness, wall.bodyOffset ?? 0);
-  return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      walls: [
-        ...project.storey.walls,
-        { layerId: project.defaultLayerIds.wall, bodyOffset: 0, ...wall },
-      ],
-    },
-  });
+  return validateProject(
+    reconcileWallJoins(
+      {
+        ...project,
+        storey: {
+          ...project.storey,
+          walls: [
+            ...project.storey.walls,
+            { layerId: project.defaultLayerIds.wall, bodyOffset: 0, ...wall },
+          ],
+        },
+      },
+      wall.id,
+    ),
+  );
 }
 
 export function updateWall(
@@ -53,7 +59,7 @@ export function updateWall(
   // Every new axis placement or thickness change must satisfy the new rule.
   if (changes.bodyOffset !== undefined || changes.thickness !== undefined)
     assertAxisInside(changes.thickness ?? previous.thickness, bodyOffset);
-  return validateProject({
+  const proposed: Project = {
     ...project,
     storey: {
       ...project.storey,
@@ -61,7 +67,13 @@ export function updateWall(
         wall.id === wallId ? { ...wall, ...changes, bodyOffset, id: wall.id } : wall,
       ),
     },
+  };
+  const axisChanged = ["start", "end"].some((k) => {
+    const name = k as "start" | "end";
+    const p = changes[name];
+    return p && (p.x !== previous[name].x || p.y !== previous[name].y);
   });
+  return validateProject(axisChanged ? reconcileWallJoins(proposed, wallId, previous) : proposed);
 }
 
 export function addWindow(project: Project, opening: Creation<BimWindow>): Project {

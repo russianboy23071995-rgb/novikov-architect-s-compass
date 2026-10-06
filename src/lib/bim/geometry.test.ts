@@ -19,8 +19,12 @@ const dot = (a: Vec3, b: Vec3) => a.reduce((sum, v, i) => sum + v * b[i]!, 0);
 const subtract = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 function meshVolume(solid: Solid) {
   return solid.faces.reduce((sum, face) => {
-    const [a, b, c, d] = face.vertices;
-    return sum + dot(a, cross(b, c)) / 6 + dot(a, cross(c, d)) / 6;
+    return (
+      sum +
+      face.vertices
+        .slice(1, -1)
+        .reduce((v, b, i) => v + dot(face.vertices[0]!, cross(b, face.vertices[i + 2]!)) / 6, 0)
+    );
   }, 0);
 }
 function blocksOpening(solid: Solid, x: number, z: number) {
@@ -43,7 +47,7 @@ test("solid wall has six correctly oriented faces, physical bounds and volume", 
   close(meshVolume(solid), solid.volume);
   for (const face of solid.faces) {
     const [a, b, c] = face.vertices;
-    assert.ok(dot(cross(subtract(b, a), subtract(c, a)), face.normal) > 0);
+    assert.ok(dot(cross(subtract(b!, a!), subtract(c!, a!)), face.normal) > 0);
   }
 });
 

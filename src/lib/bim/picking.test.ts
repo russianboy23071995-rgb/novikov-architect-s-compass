@@ -198,7 +198,7 @@ test("outside canvas, empty background and degenerate faces do not select", () =
         faces: [
           {
             ...face,
-            vertices: [face.vertices[0], face.vertices[0], face.vertices[0], face.vertices[0]],
+            vertices: [face.vertices[0]!, face.vertices[0]!, face.vertices[0]!, face.vertices[0]!],
           },
         ],
       },

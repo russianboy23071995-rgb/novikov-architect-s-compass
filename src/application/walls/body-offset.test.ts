@@ -166,10 +166,11 @@ test("offset corners remain exact direct-edit targets for both endpoints and bot
 
 test("strict V4 migration adds zero only at file boundary; V5 requires offset", () => {
   const current = createExampleProject();
+  const { wallJoins, ...oldStorey } = current.storey;
   const old = {
     ...current,
     schemaVersion: 4,
-    storey: { ...current.storey, walls: current.storey.walls.map(({ bodyOffset, ...w }) => w) },
+    storey: { ...oldStorey, walls: current.storey.walls.map(({ bodyOffset, ...w }) => w) },
   };
   assert.deepEqual(loadProjectData(old), current);
   assert.throws(() => validateProject(old));

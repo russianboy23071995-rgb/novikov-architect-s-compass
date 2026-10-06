@@ -4,18 +4,23 @@ import {
   validateProjectV2,
   validateProjectV3,
   validateProjectV4,
+  validateProjectV5,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 5. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 6. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
-  if (value.schemaVersion === 5) return validateProject(value);
+  if (value.schemaVersion === 6) return validateProject(value);
+  if (value.schemaVersion === 5) {
+    const old = validateProjectV5(value);
+    return validateProject({ ...old, schemaVersion: 6, storey: { ...old.storey, wallJoins: [] } });
+  }
   if (value.schemaVersion === 4) {
     const old = validateProjectV4(value);
-    return validateProject({
+    return loadProjectData({
       ...old,
       schemaVersion: 5,
       storey: { ...old.storey, walls: old.storey.walls.map((w) => ({ ...w, bodyOffset: 0 })) },

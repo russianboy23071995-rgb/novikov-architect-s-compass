@@ -148,7 +148,7 @@ test("schema 4 roundtrip preserves hatches and BIM; IFC intentionally remains bu
 
 test("strict V3 migration preserves visibility and model IDs and never repairs invalid legacy input", () => {
   const p = createExampleProject();
-  const { hatches, ...storey } = p.storey;
+  const { hatches, wallJoins, ...storey } = p.storey;
   const v3 = {
     ...p,
     schemaVersion: 3,
@@ -157,8 +157,8 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 5);
-  assert.deepEqual(migrated.storey, { ...storey, hatches: [] });
+  assert.equal(migrated.schemaVersion, 6);
+  assert.deepEqual(migrated.storey, { ...storey, hatches: [], wallJoins: [] });
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
   assert.throws(() => validateProject(v3));
