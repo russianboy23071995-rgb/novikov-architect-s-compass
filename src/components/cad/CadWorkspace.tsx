@@ -18,7 +18,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { InteractionInput } from "./InteractionInput";
 import { useToolInteraction } from "./useToolInteraction";
-import { editInteraction, drawingInteraction } from "@/application/tools/adapters";
+import {
+  editInteraction,
+  drawingInteraction,
+  wallStartSnapPolicy,
+} from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import {
@@ -427,7 +431,7 @@ export function CadWorkspace({
       if (!activeChain) {
         setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
-        setWallChain(beginWallChain(project, point));
+        setWallChain(beginWallChain(project, point, candidate));
       } else {
         setWallChain(
           appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point, candidate),
@@ -803,7 +807,9 @@ export function CadWorkspace({
                   visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
-                  snapping={interaction.adapter?.snapping ?? null}
+                  snapping={
+                    interaction.adapter?.snapping ?? (tool === "wall" ? wallStartSnapPolicy : null)
+                  }
                   drawing={(tool === "wall" || pathDrawing) && mode === "2D"}
                   endpointSnap={pathDrawing || tool === "select" || tool === "wall"}
                   hoverDwellMs={hoverDwellMs}

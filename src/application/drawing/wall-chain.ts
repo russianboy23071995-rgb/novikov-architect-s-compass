@@ -9,12 +9,31 @@ export type WallChain = {
   preview: Project;
   points: Point[];
   wallIds: string[];
+  startCandidate: SnapCandidate | null;
 };
 
-export function beginWallChain(base: Project, origin: Point): WallChain {
+export function beginWallChain(
+  base: Project,
+  origin: Point,
+  candidate?: SnapCandidate | null,
+): WallChain {
   if (!Number.isFinite(origin.x) || !Number.isFinite(origin.y))
     throw new Error("Ungültiger Ursprung.");
-  return { base, preview: base, points: [{ ...origin }], wallIds: [] };
+  const startCandidate =
+    candidate?.sourceFeature === "t-axis"
+      ? {
+          ...candidate,
+          worldPoint: { ...candidate.worldPoint },
+        }
+      : null;
+  if (
+    startCandidate &&
+    (startCandidate.worldPoint.x !== origin.x ||
+      startCandidate.worldPoint.y !== origin.y ||
+      !base.storey.walls.some((w) => w.id === startCandidate.sourceEntityId))
+  )
+    throw new Error("T-Startziel ist nicht mehr korrekt.");
+  return { base, preview: base, points: [{ ...origin }], wallIds: [], startCandidate };
 }
 
 export function appendWallChain(
@@ -27,9 +46,7 @@ export function appendWallChain(
   assertDrawingContext(chain.base, current);
   if (
     chain.wallIds.length &&
-    chain.preview.storey.wallTJunctions.some(
-      (r) => r.incoming.wallId === chain.wallIds.at(-1) && r.incoming.endpoint === 1,
-    )
+    chain.preview.storey.wallTJunctions.some((r) => r.incoming.wallId === chain.wallIds.at(-1))
   )
     throw new Error(
       "Wandkette am T-Anschluss abschlie\u00dfen. Ecke und T sind noch nicht kombinierbar.",
@@ -40,7 +57,11 @@ export function appendWallChain(
     end: point,
     ...defaultDrawingWall,
   });
-  const preview = connectWallAtTAxis(created, id, 1, point, candidate);
+  const connectedStart =
+    chain.wallIds.length === 0
+      ? connectWallAtTAxis(created, id, 0, chain.points[0]!, chain.startCandidate)
+      : created;
+  const preview = connectWallAtTAxis(connectedStart, id, 1, point, candidate);
   return {
     ...chain,
     preview,

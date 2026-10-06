@@ -1,5 +1,29 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Wandstart mit T-Anschluss — 06.10.2026
+
+PR139 ist nach Freigabe in main. Neuer Aufgabenbranch aus main: Start einer
+Nebenwand auf einer bestehenden Hauptachse mit explizitem lokalem T-Fang.
+Der erste Klick merkt den Anschluss vor; der Abschnitt wird mit der gemeinsamen
+Application-Aktion validiert. Erst Enter/Doppelklick uebernimmt die Transaktion.
+Abbruch, veralteter Kontext, Snap aus und mehrdeutige Quellen erzeugen keinen
+ungewollten Anschluss. Keine automatische Verbindung nur aus Koordinaten.
+Rechtwinkel, gleiche Querschnitte und bisherige Topologiegrenzen bleiben.
+
+524 Tests bestanden; TypeScript/Build mit main-Abhaengigkeiten erfolgreich,
+Lint 0 Fehler und 6 bekannte Warnungen. Browser: Start auf Achse, rechtwinkliger Abschnitt, Enter,
+Undo/Redo erfolgreich. Regressionen pruefen beide Seiten, JSON/IFC, Abbruch,
+Schraegstellung, Quellenauswahl und striktes Achseninneres.
+Abnahme: Wall waehlen, auf Hauptachse bei T-Anschluss klicken, rechtwinklig
+herauszeichnen (bei Bedarf Shift), Endpunkt setzen, Enter. Undo entfernt
+Nebenwand und Verbindung gemeinsam. Ein T-Abschnitt beendet die Kette.
+
+Genau ein Folgeauftrag: Die Vorschau beim Wandzeichnen um den abgeleiteten
+Wandkoerper samt T-Abschluss ergaenzen; dieselbe Application-Validierung wie
+beim Klick nutzen und Fehler vor der Uebernahme anzeigen. Keine Erweiterung
+der erlaubten Anschlussgeometrien in diesem Vorschau-Schritt.
+
+
 ## Branch-Uebergang abgeschlossen — 06.10.2026
 
 PR140 ist in main, PR141 hat Anpassungen_UI aktualisiert. PR139 wird mit

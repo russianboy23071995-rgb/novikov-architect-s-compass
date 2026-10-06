@@ -1,5 +1,19 @@
 # NOVIKOV CAD Architecture Contract
 
+## Starting a wall on a host axis — 2026-10-06
+
+The initial wall snap policy uses the shared local T-axis resolver, projecting
+the cursor onto a visible host interior. Ambiguous hosts do not create intent.
+ToolSnapPolicy permits no origin before acquisition; AnchoredSnapPolicy remains
+mandatory for active ToolInteraction. No synthetic construction origin is pinned.
+beginWallChain pins the explicit start candidate in the ephemeral transaction.
+appendWallChain connects endpoint 0 through connectWallAtTAxis; finish alone
+commits history. Cancellation discards intent. Coordinate-only starts do not
+create relations. Existing right-angle/cross-section/topology rules validate
+mouse and numeric targets. A T-connected segment cannot continue into a corner.
+This supersedes the unsupported start status in the historical section below.
+
+
 ## Drawing endpoint T intent — 2026-10-06
 
 Wall drawing reuses Application findTAxisReference/queryTAxisSnap and

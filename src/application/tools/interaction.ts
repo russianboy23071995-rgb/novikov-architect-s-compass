@@ -1,11 +1,11 @@
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
-import type { ToolSnapPolicy } from "./snapping.ts";
+import type { AnchoredSnapPolicy } from "./snapping.ts";
 export type PrecisionValues = { point: Point2; degrees: number; metres: number; notice?: string };
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
   identity: object;
-  snapping: ToolSnapPolicy;
+  snapping: AnchoredSnapPolicy;
   origin: Point2;
   input: { axisLabel: string | null; degrees: number | null } | null;
   click: "confirm" | "direction";
