@@ -1,5 +1,25 @@
 # NOVIKOV CAD Architecture Contract
 
+## Convex 2D contour offset — 2026-10-06
+
+Geometry prepareConvexOffset owns parallel edge offsets for either winding.
+Positive distances are outward, negative inward. Initial simple/convex checks
+and miter vectors are prepared once per immutable EditSession; queries traverse
+vertices/edges and reject the first collapsed/reversed side rather than silently
+changing topology. Domain validation still checks the resulting snapshot.
+Concave rings and numerically extreme acute corners are explicitly unsupported.
+
+Application direct-edit/offset accepts only closed 2D lines and hatches, using
+closedContour as its capability gate. BIM is rejected here even in plan views.
+Existing editInteraction, origin, snap resolver and signed axis input serve both
+kinds; no copied form, mouse handler or snapping engine. The selected side (or
+first side when selected as an element) supplies the outward normal; the chosen
+point remains the pinned origin. Shared previewEdit checks model/selection;
+existing confirmation creates one history entry. Cancellation never changes the
+model. Style, layer and stable ID are preserved; file schema remains 7. Future
+text/voice adapters use these same actions. Offset is not uniform scaling.
+
+
 ## Hatch appearance and schema 7 — 2026-10-06
 
 Hatches retain their existing foreground fill/opacity and gain required background
@@ -1656,3 +1676,17 @@ precision input, cap and commit continue through the shared edit interaction.
 Pointer-up suppresses its following click; simple click/keyboard activation
 leaves the standard edit active. Capture loss/cancel aborts; session/model binding
 prevents stale drags. Other on-demand edge and insertion actions remain available.
+
+
+## Korrektur nach Nutzerabnahme — 06.10.2026
+
+Innenoffset wird jetzt auf mindestens 1 % Restlaenge jeder urspruenglichen Seite
+begrenzt. Die zuerst kollabierende Seite bestimmt den Abstand; numerische
+Gueltigkeitsgrenzen koennen frueher stoppen. Die Grenze wird einmal vorbereitet,
+Mausziel, Zahleneingabe und Bestaetigung verwenden denselben Cap. Vorschau bleibt
+stehen und zeigt den tatsaechlichen Abstand statt eines ungueltigen Ziels.
+Ungeeignete Ausgangskonturen und nicht-endliche Eingaben bleiben Fehler.
+Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
+Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
+471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
+kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.

@@ -12,7 +12,7 @@ import { previewEdit } from "./controller.ts";
 export function numericMoveAxis(session: EditSession) {
   if (
     session.target.kind === "window" ||
-    !["x", "y", "axis", "stretch", "edge"].includes(session.action)
+    !["x", "y", "axis", "stretch", "edge", "offset"].includes(session.action)
   )
     return null;
   if (session.action === "stretch" && session.index === null) return null;
@@ -21,15 +21,17 @@ export function numericMoveAxis(session: EditSession) {
   if (!Number.isFinite(length) || length === 0) return null;
   const i = session.index ?? 0;
   const label =
-    session.action === "edge"
-      ? "Versatz senkrecht zur Seite"
-      : session.action === "stretch"
-        ? "+ verlängert · − verkürzt"
-        : session.action === "x"
-          ? "+X (rechts)"
-          : session.action === "y"
-            ? "+Y (oben)"
-            : "+ Richtung Punkt " + (i === 0 ? 2 : i) + " → " + (i + 1);
+    session.action === "offset"
+      ? "+ nach außen · − nach innen"
+      : session.action === "edge"
+        ? "Versatz senkrecht zur Seite"
+        : session.action === "stretch"
+          ? "+ verlängert · − verkürzt"
+          : session.action === "x"
+            ? "+X (rechts)"
+            : session.action === "y"
+              ? "+Y (oben)"
+              : "+ Richtung Punkt " + (i === 0 ? 2 : i) + " → " + (i + 1);
   return {
     direction: { x: direction.x / length, y: direction.y / length },
     label,
@@ -72,7 +74,9 @@ export function previewMovementInput(
     const metres =
       (result.point.x - session.anchor.x) * axis.direction.x +
       (result.point.y - session.anchor.y) * axis.direction.y;
-    const capped = session.action === "edge" && Math.abs(metres - parseMetres(lengthText)) > 1e-9;
+    const capped =
+      ["edge", "offset"].includes(session.action) &&
+      Math.abs(metres - parseMetres(lengthText)) > 1e-9;
     return {
       ...result,
       degrees,

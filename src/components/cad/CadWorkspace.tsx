@@ -308,9 +308,11 @@ export function CadWorkspace({
       target: selection,
       action,
       index:
-        action === "edge" || action === "insert"
-          ? (pickedPoint.edgeIndex ?? null)
-          : pickedPoint.index,
+        action === "offset"
+          ? (pickedPoint.edgeIndex ?? pickedPoint.index ?? 0)
+          : action === "edge" || action === "insert"
+            ? (pickedPoint.edgeIndex ?? null)
+            : pickedPoint.index,
       ...(pickedPoint.anchor ? { anchor: pickedPoint.anchor } : {}),
     });
     if (layout === "single" && !solidMove) setMode("2D");
