@@ -1,10 +1,9 @@
-import { tAxisReference } from "../walls/t-axis-snap.ts";
+import { tAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import { editablePoints } from "./transforms.ts";
-import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
@@ -84,27 +83,17 @@ export function resolveEditSnap(session: EditSession, cursor: Point2, context: S
   const project = (p: Point2) => (direction ? projectDirection(p, session.anchor, direction)! : p);
   const references = editSnapReferences(session, context.references);
   const tReference = tAxisReference(session, cursor, context);
-  const sourceQuery = context.sourceQuery;
-  const result = querySnap(cursor, {
-    ...context,
-    references: tReference ? [...references, tReference] : references,
-    sourceQuery:
-      sourceQuery && tReference ? (...args) => [...sourceQuery(...args), tReference] : sourceQuery,
-    fixedAxis: direction ? { origin: session.anchor, direction } : null,
-    orthoOrigin: direction ? null : context.orthoOrigin,
-    angleOrigin: direction ? null : (context.angleOrigin ?? null),
-  });
-  if (tReference && pointsCompatible(result.point, tReference.point)) {
-    result.candidate = {
-      kind: "endpoint",
-      worldPoint: tReference.point,
-      sourceEntityId: tReference.entityId,
-      sourceFeature: "t-axis",
-      sourceReferences: [tReference],
-      distanceOnScreen: 0,
-      priority: 0,
-    };
-  }
+  const result = queryTAxisSnap(
+    cursor,
+    {
+      ...context,
+      references,
+      fixedAxis: direction ? { origin: session.anchor, direction } : null,
+      orthoOrigin: direction ? null : context.orthoOrigin,
+      angleOrigin: direction ? null : (context.angleOrigin ?? null),
+    },
+    tReference,
+  );
   const point = boundedEdgeTarget(session, project(result.point));
   return pointsCompatible(result.point, point) ? result : { point, candidate: null };
 }

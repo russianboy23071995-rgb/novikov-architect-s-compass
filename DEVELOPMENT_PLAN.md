@@ -1,5 +1,630 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Lovable-UI-Synchronisierung - 06.10.2026
+
+PR156 nach Freigabe normal in main integriert (815685d). Integrationszweig
+integration/ui-sync-windows basiert auf Anpassungen_UI eab4092 und übernimmt main
+mit einem normalen Merge ohne History-Neuschreiben. Automatische Zusammenführung
+konfliktfrei. Die sechs eigenen UI-Commits bleiben Vorfahren des Ergebnisses.
+Erhalten: UI-Arbeitsregel in AGENTS, TanStack-Versionen samt bun.lock und unknown-
+Fehlertyp im Root-Error-Handler. Fensterwerkzeug, Mehrfachauswahl, Zoom und aktuelle
+Modell-/Fangfunktionen stammen unverändert aus dem geprüften main.
+
+Prüfung erfolgt isoliert mit bun install --frozen-lockfile und den Abhängigkeiten
+dieses kombinierten Zweigs: 580 Tests, TypeScript und Build bestanden; Lint ohne
+Fehler bei 6 bekannten Fast-Refresh-Warnungen. Lovable muss auf Anpassungen_UI eingestellt sein;
+der tatsächliche Sync-/Preview-Zustand in Lovable ist hier nicht einsehbar.
+Abnahme dort: Git-Verbindung auf Anpassungen_UI prüfen, aktuellen Stand laden,
+Fensterwerkzeug links und Zoomauswahl unten kontrollieren. Danach rein visuelle
+Änderungen an Symbolen/Abständen gemäß AGENTS vornehmen.
+
+Genau ein Folgeauftrag: Die bekannte Beschränkung für T-Hauptwände mit zwei
+Eckanschlüssen im Geometriekern untersuchen und einen begrenzten, durch Tests
+abgesicherten Erweiterungsschritt festlegen; vorhandene Fensterfreiheit erhalten.
+
+
+## Fenster-Integrationsprüfung und Lovable-Abgleich - 06.10.2026
+
+PR155 ausdrücklich freigegeben und normal nach main integriert (c3e3c0a).
+Neuer Integrationstest in application/drawing/actions.test.ts prüft zwei vorhandene
+Abläufe: geschlossener Vierwand-Grundriss und offene Kontur mit Eck-/T-Verbindung.
+Fenster präzise platzieren, Vorschau ohne Mutation, einmal bestätigen, Maße ändern,
+auf derselben Wand über T hinweg verschieben, Undo/Redo, JSON speichern/laden,
+identischer 3D-Solid und identischer IFC-Export nach Reload. IFC enthält erwartete
+Wände, Fenster, Öffnungs-/Füllbeziehungen sowie aktuelle Maße und Position.
+580 Tests bestanden, TypeScript und Build erfolgreich, gezielter Lint erfolgreich.
+Keine neue Modellfunktion oder UI in diesem Prüfschritt.
+
+Offene Grenze ausdrücklich nachgewiesen: T-Hauptwand mit zwei Eckanschlüssen
+wird derzeit von validateCornerTContact abgewiesen. Deshalb ist ein geschlossener
+Grundriss mit zusätzlichem T an dieser Wand noch nicht freigegeben. Die unterstützten
+Varianten werden getrennt geprüft; keine Lockerung der Validierung auf Verdacht.
+
+Praktische Abnahme: Vier Wände zum Rechteck verbinden, Fenster per Maß einsetzen,
+Breite ändern, entlang Hostwand bewegen, Undo/Redo, speichern und wieder öffnen,
+IFC exportieren und extern prüfen. Archicad wurde in diesem Schritt nicht ausgeführt.
+
+Lovable: origin/Anpassungen_UI bei eab4092 hat 6 eigene Commits und ihm fehlen 37
+Commits aus origin/main c3e3c0a. WindowPlacementFields/useWindowPlacement fehlen dort.
+Der tatsächlich in Lovable gewählte Zweig ist nicht unabhängig verifiziert; wenn es
+weiter Anpassungen_UI ist, erklärt dessen Stand die fehlenden Fenster. Branch-spezifische
+Synchronisation ist kein fehlender Fenster-PR-Merge. UI-Änderungen nicht überschreiben.
+
+Genau ein Folgeauftrag: main geordnet in einen Integrationszweig auf Basis von
+Anpassungen_UI übernehmen, vorhandene UI-Änderungen erhalten, Konflikte fachlich lösen,
+Build/Tests prüfen und PR gegen Anpassungen_UI zur Synchronisierung vorlegen.
+Danach bleibt die oben dokumentierte Ecke/T-Einschränkung im fachlichen Backlog.
+
+
+## Canvas-Fokus und Zoomanzeige - 06.10.2026
+
+Schwarzen Browser-Fokusrahmen bei Mausklick auf 2D-/3D-Canvas entfernt; Tastaturfokus
+bleibt funktional und erhält eine dezente focus-visible-Markierung. Links von Grid
+zeigt eine Prozent-Auswahl den Zoom des aktiven Viewports und setzt dessen bestehende
+Kamera. Ein UI-Portal erhält die Kamera-Verantwortung im CadViewport; kein paralleler
+Zoomzustand im Projekt oder Workspace. Mehrfachansichten veröffentlichen nur die
+aktive Steuerung. 2D-Bezug: 100 Prozent = 100 CSS-Pixel/m; 3D: bisherige Standardansicht.
+Diese Bildschirmwerte sind ausdrücklich kein Druckmaßstab. Mausrad/Fit/Ansichtswechsel
+aktualisieren dieselbe Kamera und damit die Anzeige.
+
+Geändert: BimPlan, BimSolidView, CadViewport, CadWorkspace, StatusBar und Protokoll.
+Browser: 200 Prozent setzt 200 px/m, Canvas-Klick fokussiert ohne outline,
+3D-Wechsel zeigt 100 Prozent. TypeScript, Build und Lint erfolgreich (bekannte Warnungen).
+PR155 bleibt offen: automatischer Approval-Review hat den Merge trotz allgemeiner
+Freigabe abgelehnt; UI-Korrektur als zusätzlicher Commit im bestehenden PR.
+Genau ein Folgeauftrag bleibt Fenster-Integration im verbundenen Grundriss
+mit Speichern/Laden und IFC; keine weitere neue Werkzeugfunktion in diesem Schritt.
+
+
+## Fensterbegrenzung und Darstellung - 06.10.2026
+
+Korrektur zu PR155: Einsetzen und Verschieben begrenzen die Fenstermitte auf den
+zulässigen Bereich der Hostwand, auch bei einem Mausziel jenseits des Wandendes.
+Die gemeinsame Domain-Funktion window-range berechnet den Bereich aus Fensterbreite,
+Wandlänge und gegebenenfalls Gehrungsenden. T-Anschlüsse bleiben ohne Sperrwirkung.
+Keine wiederholte Ganzmodell-Suche nach einem Grenzpunkt. Vorschau und Commit
+verwenden dieselbe Begrenzung; nicht endliche Maße und zu große Fenster bleiben Fehler.
+An Gehrungen bleibt ein numerischer Sicherheitsabstand zur strikt ausgeschlossenen
+Berührung. Die eigentliche Modellvalidierung bleibt unverändert verbindlich.
+
+Grundriss: ausgewählte Fenster erhalten die gemeinsame türkise Auswahlfarbe;
+Kontur und Mittellinie verwenden die vorhandene zoomunabhängige Wandkonturstärke.
+Automatische Wandlängenbeschriftung entfernt. Eigene Fenstermodelle sind ausdrücklich
+für später vorgemerkt; Mess- und Bemaßungswerkzeuge folgen separat.
+
+Nachweis: 579 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Tests für beide Grenzen, vier Richtungen, beide verbundenen
+Wandenden, unveränderte Basis und Bestätigung am Cap. Browser: bestehendes Fenster
+entlang Wand verschoben, Klick weit hinter Wandende -> Position ca. 0,8 ohne Fehler;
+türkise Kontur sichtbar, automatische Wandmaßzahl entfernt. Screenshot window-cap.png.
+Genau ein Folgeauftrag bleibt die unten beschriebene Fenster-Integrationsprüfung
+im verbundenen Grundriss einschließlich Projektdatei und IFC.
+
+
+## Präzise Fensterposition - 06.10.2026
+
+PR154 nach Freigabe normal in main integriert (9a4df17). Optionaler Modus
+„Position per Maß“ in Werkzeugeigenschaften: zuerst sichtbare Wand anklicken,
+danach im gemeinsamen Hilfseingabefenster den Abstand der Fenstermitte vom
+Wandanfang eingeben. Die Hostwand bleibt fest, der Winkel ist vorgegeben.
+Normale Ein-Klick-Platzierung bleibt verfügbar. Wandwahl erzeugt keine History;
+Bestätigung verwendet dieselbe validierte addWindow-Aktion wie die Vorschau.
+Keine eigene Fenster-Tab-Steuerung oder zweite Maßeingabe implementiert.
+
+Geändert: Application window-placement samt actions.test; UI-Bindung
+useWindowPlacement, WindowPlacementFields und kleine Koordination in CadWorkspace;
+Architektur und dieses Protokoll.
+Nachweis: 578 Tests bestanden; TypeScript und Build bestanden; Lint ohne Fehler,
+6 bekannte Fast-Refresh-Warnungen. Test für vier Wandrichtungen, exakten Abstand,
+ungültige Abstände, unveränderte Basis und identischen Vorschau-/Commit-Zustand.
+Browser: 6-m-Wand, Position per Maß, Wandwahl ohne Bauteilerzeugung, Tab, 1,50 m,
+Enter -> neues Fenster mit Position 0,25. Undo entfernt es, Redo stellt es wieder her.
+Screenshot: outputs/window-position.png.
+
+Abnahme: Fensterwerkzeug -> Position per Maß -> Wand anklicken -> Tab -> Abstand
+(z. B. 1,50) -> Enter. Eigenschaften prüfen; danach Undo/Redo. Grenzen: Grundriss,
+Abstand zur Fenstermitte, bestehende Host-/Öffnungsgrenzen bleiben verbindlich.
+Maße und Präzisionsmodus sind Sitzungsvorgaben; keine neue Dateiformatversion.
+
+Genau ein Folgeauftrag: Den vollständigen Fensterwerkzeug-Ablauf in einem kleinen
+verbundenen Grundriss als Integrationsprüfung absichern: Platzierung und Änderung,
+Undo/Redo, Speichern/Laden und IFC müssen denselben Fenster-/Hostzustand behalten.
+Gefundene Fehler begrenzt korrigieren, bevor weitere Bauteilwerkzeuge folgen.
+
+
+## UI-Korrektur zu PR154 - 06.10.2026
+
+Nach Nutzerhinweis den gesamten werkzeugabhaengigen Optionsbereich aus der oberen
+Menueleiste entfernt (Fenster, Wand, Linie, Schraffur, Auswahl, Decke). Eigenschaften
+und Werkzeugeinstellungen gehoeren ausschliesslich in Werkzeugeigenschaften.
+Die alte statische Optionsliste samt Tool-Prop ist entfernt; globale Projekt-,
+Ansichts- und Ebenensteuerung bleibt. Keine Modell-/Bedienlogik hinzugefuegt.
+TypeScript, Build und gezielter Lint bestanden. Browser: Fensterwerkzeug zeigt
+Maße nur in Werkzeugeigenschaften; der obere Optionsbereich ist entfernt.
+Folgeauftrag bleibt die unten dokumentierte praezise Fensterposition.
+
+## Einstellbare Fenstermaße vor Platzierung - 06.10.2026
+
+PR153 nach Freigabe normal in main integriert (3c19cc6). Das Fensterwerkzeug zeigt
+Breite, Höhe und Brüstungshöhe in der festen Werkzeugeigenschaftenleiste. Eingaben
+in Metern mit Komma/Punkt werden über den gemeinsamen Einheitenparser gelesen.
+Leere, nicht endliche, negative oder unzulässige Nullwerte sperren die Platzierung;
+zusätzlich gelten alle bisherigen Host-/Fenstergrenzen aus addWindow.
+
+WindowPlacementFields ist Darstellung, useWindowPlacement hält den Sitzungsentwurf,
+Application parst und führt Vorschau/Validierung/Commit mit denselben Maßen aus.
+Eine neue Entwurfsrevision invalidiert alte Vorschau- und Commit-Callbacks, auch
+vor dem nächsten Effect-Cleanup. Kein Rückfall auf vorherige gültige Maße. Werte
+bleiben bei Werkzeugwechsel während der Sitzung erhalten; bestehende Fenster,
+Projektformat, History und IFC werden durch Eingaben allein nicht geändert.
+
+Nachweis: 577 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests für Komma/Punkt, leere/ungültige Maße, zulässige
+Brüstung 0, veraltete Vorschau nach Maßänderung, übereinstimmenden Commit und
+Hostgrenzen. Browser: leere Breite + Wandklick erzeugt kein Fenster; danach
+0,80 × 1,10 m mit Brüstung 0,70 m eingesetzt, Eigenschaften stimmen überein.
+Erneuter Werkzeugaufruf behält alle drei Werte. Screenshot outputs/window-dimensions.png.
+
+Abnahme: Fensterwerkzeug, Maße oben ändern, Wand anfahren und klicken. Neue Maße
+in Eigenschaften prüfen. Breite löschen: Meldung erscheint, Klick setzt nichts.
+Grenzen: Maße sind Sitzungsvorgaben, nicht über Neustart gespeichert. Position
+weiter per Maus/Fang; keine neue 3D-Platzierung.
+
+Genau ein Folgeauftrag: Präzise Fensterposition vor Platzierung über die gemeinsame
+Hilfseingabe ergänzen: fest gewählte Hostwand und Abstand der Fenstermitte vom
+Wandachsenanfang. Bestehende ToolInteraction-/Tab-/Hostachsenregeln wiederverwenden;
+Mausplatzierung, Abbruch, Maßänderung und Undo müssen denselben Ablauf behalten.
+
+
+## Fensterwerkzeug im Grundriss - 06.10.2026
+
+PR152 nach Freigabe normal in main integriert (c2b9897). Eigenes Fensterwerkzeug
+in der Werkzeugleiste: sichtbare Wand anfahren, vorhandene Fangengine mit
+Hostlaengsachse nutzen, Vorschau sehen, per Klick ein Fenster einsetzen. Danach
+Select und direkt die neuen Fenstereigenschaften. Esc/Abbrechen verwirft ohne
+Modellaenderung. Start aus 3D wechselt zum Grundriss.
+
+Application window-placement + React-Bindung useWindowPlacement nutzen
+ToolInteraction/useToolInteraction und vorhandene Canvas-placement-Schnittstelle.
+Keine eigene Hover-/Tastatur-/Rasterengine. Vorschau/Commit pruefen Basis und
+Sichtbarkeit; addWindow prueft Masse und bestehende Anschlussregeln. Neue IDs
+werden nach Commit gegen das neue Modell ausgewaehlt (gemeinsame Auswahlkorrektur,
+auch fuer bisheriges Einfuegen ueber Inspector). Preview-Fenster erben echte
+Ebenensichtbarkeit. Vorgabemasse werden mit dem bisherigen Inspector geteilt.
+
+Nachweis: 575 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests fuer unveraenderte Basis waehrend Vorschau,
+Abbruch, einen History-Schritt, Undo/Redo, JSON/Solid, Sichtbarkeit, veraltete
+Kontexte, ungueltige Ziele, diagonale/versetzte Waende und Hostachse ohne Snap.
+Browser: 6-m-Wand, Fenster per Klick bei relativer Position 0.2; Navigator und
+Eigenschaften markieren sofort das neue Fenster. Undo entfernt nur dieses Fenster,
+Redo stellt es wieder her; erneuter Werkzeugaufruf + Escape erzeugt kein weiteres.
+Screenshot outputs/window-placement.png.
+
+Abnahme: Fensterwerkzeug waehlen, innerhalb einer ausreichend langen Wand anfahren
+und klicken. Maße anschliessend oben anpassen, Undo/Redo testen. An Wandenden oder
+zu kurzen/niedrigen Waenden bleibt die vorhandene Validierung massgeblich.
+Grenzen: ein Fenster je Werkzeugaufruf; feste Vorgaben 1.20 x 1.35 m, Bruestung
+0.90 m. Bei ueberlagerten Waenden wird der naechste Koerpermittelstrang gewaehlt,
+bei Gleichstand stabile ID-Reihenfolge; keine neue Host-Auswahlliste. Bestehende
+Regeln fuer ueberlappende Fenster bleiben. Keine neue 3D-Platzierung/Glasdetails.
+
+Genau ein Folgeauftrag: Fenstermasse vor dem Platzieren in Werkzeugeigenschaften
+einstellbar machen (Breite, Hoehe, Bruestung) und dieselben Werte durch Vorschau,
+Validierung und Commit fuehren. Geaenderte Vorgaben duerfen keine alte Vorschau
+bestaetigen; bestehende Fenster bleiben unveraendert.
+
+
+## Fenster direkt in 3D auswaehlen - 06.10.2026
+
+PR151 nach Freigabe normal in main integriert (41c1623). Der neue Rendereradapter
+window-selection liefert stabile Fensterziele an dieselbe zentrale Auswahl wie
+Wand, Grundriss und Navigator. Klick in die sichtbare Oeffnung waehlt das Fenster;
+Strg/Cmd ergaenzt/entfernt es. Opaque Vordergrundwaende gewinnen den Tiefentest.
+Versteckte Fenster/Hostwaende liefern keine Ziele. Fenster erhalten eine dezente
+tuerkise Umrandung an beiden Oeffnungsraendern mit GPU-Tiefentest; keine Glasflaeche,
+keine Modellkopie, keine Aenderung an Projektformat, Mengen oder IFC.
+
+Nachweis: 572 Tests, TypeScript und Build erfolgreich; Lint ohne Fehler, sechs
+bekannte Warnungen. Neue Tests fuer Fenster vor Rueckwand, Vordergrundverdeckung,
+versteckte Fenster/Hosts, Koerperversatz, Oeffnungsmasse, beidseitige Kontur,
+Kamerabewegung und gemischte Auswahl. Browser: Oeffnung geklickt, Fenstereigenschaften
+und Navigator synchron; Strg-Klick ergaenzt Fenster zur Wand (2 Ziele). Screenshot
+outputs/window-selection-3d.png. Bestehende Bewegung wechselt im Einzelviewport
+weiter zum Grundriss. Kein neues 3D-Bewegungswerkzeug oder Rahmen in diesem Schritt.
+Deckungsgleiche ueberlappende Fenster bleiben im Navigator einzeln waehlbar;
+kein neues Auswahldurchschalten im Canvas.
+
+Abnahme: 3D aktivieren, in die Fensteroeffnung klicken, Kontur und Eigenschaften
+pruefen. Wand waehlen und Strg/Cmd-Klick auf die Oeffnung: beide ausgewaehlt.
+
+Fensterwerkzeug bewertet: Einfuegen existiert bisher als "Add centred window" in
+den Wandeigenschaften (validiertes addWindow mit History), nicht als Platzierungs-
+werkzeug in der Werkzeugleiste. Ein begrenztes Werkzeug ist jetzt sinnvoll.
+Genau ein Folgeauftrag: Fenster im Grundriss per eigenem Werkzeug an einer sichtbaren
+Hostwand platzieren, mit Positionsvorschau, Klickbestaetigung und Escape-Abbruch.
+Bestehende Massvorgaben/Validierung, ToolInteraction, Fang-/Hostachsenregeln und
+History wiederverwenden; Eigenschaften, Text/Voice und Dateien behalten dieselben
+Modellaktionen. Kein Rahmen-/Glasdetailmodell oder neue 3D-Platzierung.
+
+
+## Gemeinsame Wand-Mehrfachauswahl in 3D - 06.10.2026
+
+PR150 normal nach Freigabe in main integriert (f496af0). Branch
+feat/solid-multi-selection reicht Strg/Cmd bei vorhandenen Wandflaechen- und
+Wandfusspunkt-Treffern an denselben onSelect-Vertrag wie im Grundriss weiter.
+Kein neuer Auswahlzustand und keine eigene Toggle-Logik im Renderer. Einfacher
+Klick ersetzt, Strg/Cmd-Klick ergaenzt/entfernt; Leerklick leert weiterhin.
+Vorhandene Tiefen-/Sichtbarkeitspruefung, Drag-Abgrenzung und Bearbeitung bleiben.
+Navigator, Status, Grundriss sowie Text/Voice sehen dieselbe Auswahl. Mehrere
+gewaehlte Waende behalten ihre bestehenden 3D-Umrandungen. Der Hinweis in den
+Werkzeugeigenschaften verweist fuer Gruppenbewegung auf Grundriss/Modellbefehl.
+
+Nachweis: 569 Tests bestanden, darunter neuer Integrationstest fuer Wandtreffer,
+gemischte zentrale Auswahl, Toggle/Ersetzen, ausgeblendete Ziele und dahinter
+liegende sichtbare Waende. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser mit corner-t-demo: E per Klick,
+N per Strg-Klick hinzu, per Cmd-Klick entfernt, erneut hinzu und in 2D dieselben
+zwei Waende ausgewaehlt. Screenshot outputs/solid-multi-selection.png.
+
+Abnahme: In 3D zwei sichtbare Wandflaechen nacheinander anklicken, bei der zweiten
+Strg (macOS Cmd) halten. Beide sind markiert, Anzahl 2. Erneuter Modifier-Klick
+entfernt die Wand. Wechsel auf 2D erhaelt die Auswahl; dort Gruppenbewegung nutzen.
+Grenzen: Vorhandenes 3D-Picking trifft Waende. Fenster/2D-Elemente erhalten hier
+keine neue Treffergeometrie; keine 3D-Rahmenauswahl oder neue 3D-Gruppenbewegung.
+
+Genau ein Folgeauftrag: Fenster-Picking und eindeutige Fensterauswahlmarkierung
+in 3D als weiteren Adapter an die gemeinsame Auswahl anbinden; Oeffnungen,
+Verdeckung und versteckte Hostwaende pruefen. Keine zweite Auswahlengine.
+
+## Gruppen-Spracheingabe angebunden - 06.10.2026
+
+PR149 nach Freigabe normal in main integriert (854b804). Branch
+feat/selection-voice-command ergaenzt die Aufnahme fuer jede sichtbare Auswahl,
+auch gemischte Gruppen sowie einzelne Linien und Schraffuren. Aufnahme nur auf
+Mikrofonklick. Beispiel: Auswahl um zwei Meter bei neunzig Grad verschieben.
+
+application/commands/selection-voice.ts bindet eine Aufnahme an eine Kontextrevision
+mit Projekt, vollstaendigen typisierten Ziel-IDs und Sichtbarkeit. React beendet
+sie bei Kontextwechsel oder Unmount. Zusaetzlich prueft der Adapter den aktuellen
+Kontext vor der Ergebnisverarbeitung: auch vor Effect-Cleanup eintreffende spaete
+Ergebnisse werden verworfen. Zurueckwechseln zur gleichen Auswahl erzeugt eine
+neue Revision. Kein Rueckfall auf das erste Element und kein automatischer Commit.
+
+Finale Transkripte werden begrenzt normalisiert und vom bestehenden Textadapter
+geprueft; ungueltige Transkripte bleiben im Eingabefeld korrigierbar. Bekannte
+Winkelwoerter 45/90/180/270/360 ergaenzen die bestehende Zahlen-/Einheitenliste;
+keine allgemeine Freitextinterpretation. Einzelbefehle bleiben verfuegbar.
+Vorschau, Zielanzeige, Uebernahme und Undo bleiben dieselben wie beim Text.
+Browser ohne SpeechRecognition behalten Textbedienung. Bestehende 20-Sekunden-
+Grenze und Meldungen fuer Mikrofon-/Netzwerkfehler werden wiederverwendet.
+
+Nachweis: 568 Tests bestanden, 6 neue fuer Gruppen-/Textgleichheit ohne Mutation,
+Kontextwechsel vor Cleanup, spaete Callbacks, Abbruch, Fehler, korrigierbares
+Transkript und Winkelwoerter. Bestehende Voice-Tests pruefen Einzelbefehle,
+Berechtigungsfehler und Timeout. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser: 2 Elemente per Rahmen, Mikrofon fuer
+die gesamte Auswahl aktiv, Textfallback sichtbar. Screenshot outputs/selection-voice.png.
+Keine echte Mikrofonaufnahme oder Erkennungsqualitaet mit Nutzerhardware behauptet;
+Transkripte und Fehler wurden mit simulierter Recognition geprueft.
+
+Abnahme: Wand und Fenster gemeinsam markieren, Mikrofon starten und den Beispiel-
+satz sprechen. Transkript und Ziele pruefen, dann Uebernehmen; Strg+Z nimmt die
+Bewegung zurueck. Zweite Aufnahme starten und Auswahl wechseln: kein spaetes
+Ergebnis darf eine alte Vorschau erzeugen. Bei Browserproblemen Text verwenden.
+
+Genau ein Folgeauftrag: Die gemeinsame Mehrfachauswahl in der 3D-Ansicht fuer
+bereits vorhandene Wandtreffer per Strg/Cmd-Klick anbinden. Zentralen Auswahlzustand
+und Sichtbarkeitsregeln wiederverwenden; keine eigene 3D-Auswahlmenge, kein neues
+Gruppen-Bewegungswerkzeug und keine 3D-Rahmenauswahl in diesem Teilschritt.
+
+## Gruppenbewegung per Textbefehl - 06.10.2026
+
+PR148 nach Freigabe normal in main integriert (200735a). Folgebranch
+feat/selection-text-command bindet die bestehende freie Gruppenbewegung an lokale
+Textbefehle an. Beispiel: Auswahl um 2 m bei 90 Grad verschieben. Meter, cm und mm,
+Dezimalkomma/-punkt sowie Grad/Gradzeichen werden erkannt. Winkel 0 bis 360 Grad;
+0 Grad = +X, 90 Grad = +Y. Positive Laenge erforderlich. Keine geratenen Ziele,
+keine verketteten Teilbefehle und keine freie Sprachinterpretation.
+
+application/commands/selection-command.ts verwendet beginSelectionMove und
+previewSelectionMove sowie die gemeinsame Polarberechnung. Fuer diese reine
+Translation ist (0,0) nur der Ursprung des Verschiebungsvektors, kein geratenes
+Bauteilziel und kein neuer interaktiver Fangpunkt. Bestehende Einzelbefehle werden
+weitergereicht, aber nie auf das erste Mitglied einer Mehrfachauswahl reduziert.
+
+Die textuelle Befehlsvorschau zeigt Anzahl, Richtung/Laenge, mitgefuehrte Fenster,
+geloeste externe Wandanschluesse und eine aufklappbare Liste typisierter Ziel-IDs.
+Das Modell bleibt bis Uebernehmen unveraendert; noch keine geometrische Canvas-
+Befehlsvorschau. Uebernahme prueft den gepinnten Modell-/Auswahl-/Sichtbarkeitskontext
+und berechnet ueber dieselbe validierte Aktion neu. Kontextwechsel verwirft die
+angezeigte Vorschau. Ein Undo-Schritt, gemeinsame Auswahl bleibt nach Uebernahme.
+Das On-Demand-Menue schliesst beim Fokus auf die Befehlseingabe.
+
+Nachweis: 562 Tests bestanden, davon 6 neue fuer gemischte Ziele, Einheiten,
+Maus-/Textgleichheit, Auswirkungen auf Beziehungen/Fenster, stale/verborgene Ziele,
+ungueltige Grammatik/Winkel, Einzelbefehle und Undo/Redo. TypeScript und
+Produktionsbuild erfolgreich, Lint 0 Fehler/6 bekannte Fast-Refresh-Warnungen.
+Browser: 5 Ziele per Rahmen, Textvorschau ohne Geometrieaenderung, Ziel-IDs sichtbar,
+Uebernahme um 2 m in +Y, ein Undo/Redo; anschliessender Strg-Auswahlwechsel entfernt
+die Vorschau. Screenshot outputs/selection-text-command.png.
+
+Abnahme: Mehrere Elemente markieren, unten den Beispielbefehl eingeben, Befehl
+pruefen. Ziele aufklappen, Uebernehmen, Strg+Z. Neue Vorschau erstellen und Auswahl
+wechseln: die alte Vorschau darf nicht mehr uebernommen werden. Fenster ohne ihre
+Hostwand werden fuer die freie Gruppenbewegung weiterhin als ganze Aktion abgewiesen.
+
+Genau ein Folgeauftrag: Gruppen-Sprachtranskripte an denselben Textadapter anbinden.
+Aufnahme an die vollstaendige Auswahl und Modell-/Sichtbarkeitsrevision binden,
+bei Wechsel abbrechen, spaete Ergebnisse verwerfen und niemals automatisch
+uebernehmen. Vorhandene Einzel-Sprachbefehle erhalten; keine zweite Modelllogik.
+
+## Gemeinsame freie Gruppenbewegung implementiert - 06.10.2026
+
+PR147 nach Freigabe normal in main zusammengefuehrt (14c887d). Der Folgebranch
+feat/shared-selection-move ergaenzt einen Verbraucher der gemeinsamen Auswahl:
+application/selection/move.ts berechnet einen vollstaendigen, validierten Snapshot.
+Keine Schleife ueber Einzelwandbewegungen, keine zweite Raster- oder Eingabeengine.
+
+On-Demand: Auswahl frei bewegen -> Ursprung im Grundriss anklicken -> Ziel anklicken
+oder Tab fuer Laenge/Winkel und Uebernehmen. Der Ursprung wird sofort als gemeinsame
+Hilfsreferenz gepinnt; Shift-/Fang-/Hover-Regeln bleiben im vorhandenen System.
+Waende, Linien/Polylinien und Schraffuren koennen gemeinsam verschoben werden.
+Fenster folgen ihrer Hostwand genau einmal, auch wenn sie mitausgewaehlt wurden.
+Interne Ecke-/T-Beziehungen bleiben, Beziehungen zu stehenbleibenden Waenden werden
+entfernt. Es entstehen keine neuen automatischen Anschluesse beim Gruppenplatzieren.
+Fenster ohne mitgewaehlte Hostwand lehnen die ganze freie Bewegung verstaendlich ab;
+ihre bestehende Einzelbewegung entlang der Wand bleibt. Keine stille Teilmenge.
+
+Gepinnte Auswahl/Basis/Sichtbarkeit werden erneut geprueft. Modell-, Auswahl- oder
+Sichtbarkeitswechsel invalidieren den Vorgang; Escape, Abbrechen, Werkzeug-/Ansichts-
+oder Layoutwechsel verwerfen die Vorschau. Ein Commit, ein Modell-Undo; Nullbewegung
+legt keinen History-Eintrag an. Kein Dateiformatwechsel, keine BIM-Skalierung.
+Bedienung in 2D; noch keine 3D-Gruppenbewegung und keine Text-/Voice-Gruppenbefehle.
+Keine neue grosse Performance-Messreihe fuer diese Aktion behauptet.
+
+Nachweis: 556 Tests bestanden (5 neue Tests fuer gemischte Translation, interne/
+externe Beziehungen, Host-Fenster, stale/ungueltige/versteckte Ziele, Fangquellen,
+Maus-/Zahlenaktionsgleichheit, Nullbewegung, Undo/Redo, JSON/3D/IFC-Konsistenz).
+TypeScript und Produktionsbuild mit deklarierten Abhaengigkeiten erfolgreich;
+Lint 0 Fehler, 6 bekannte Fast-Refresh-Warnungen. Browser: Wand/Fenster per Klick
+platziert; 5 gemischte Elemente per Rahmen, Ursprung gepinnt, Tab zuerst Laenge,
+danach Winkel, 2 m bei 90 Grad mit Vorschau uebernommen, einmal Undo/Redo; Abbrechen
+nach Zahlenvorschau laesst Modell und Redo erhalten. Pruefbild outputs/shared-selection-move.png.
+
+Abnahme: Mit Strg-Klick oder Rahmen mehrere Elemente waehlen. Auswahl frei bewegen,
+Ursprung anklicken, mit der Maus verschieben und per Klick platzieren. Alternativ
+Tab, Laenge 2, Tab, Winkel 90, Uebernehmen. Strg+Z nimmt die ganze Bewegung zurueck.
+Bei verbundenen Waenden beide Partner waehlen: interne Verbindung bleibt bestehen.
+
+Genau ein Folgeauftrag: Dieselbe gepruefte Gruppenbewegung als Textbefehlsadapter
+anbinden, mit Vorschau und ausdruecklicher Uebernahme, gepinnter vollstaendiger
+Zielmenge und Ablehnung bei Kontextwechsel. Keine separate AI-Modelllogik; bestehende
+Einzelbefehle erhalten. Sprachtranskripte duerfen spaeter denselben Adapter verwenden.
+
+## Gemeinsame 2D-Auswahl implementiert — 06.10.2026
+
+PR146 freigegeben und normal in main gemergt (c771846). Auf feat/shared-selection
+verwaltet ein gemeinsamer Application-Baustein typisierte Zielmengen fuer Waende,
+Fenster, Linien/Polylinien und Schraffuren, auch gemischt. Navigator und Canvas
+verwenden dieselbe Auswahl. Sichtbarkeit inklusive versteckter Hostwaende gilt
+zentral; keine neue Ebenensperre. Nur genau ein Ziel schaltet Einzelaktionen frei.
+
+Klick ersetzt, Strg/Cmd-Klick schaltet Zugehoerigkeit um, Leerklick leert. Rahmen
+auf freier Flaeche im Auswahlmodus starten: vollstaendig eingeschlossene Geometrie
+inklusive Rand, beide Ziehrichtungen gleich. Mindestbewegung 3 CSS-Pixel. Zeichnen,
+Bearbeiten, Referenzwahl und Pan behalten ihre Gesten. Escape/Pointer-Abbruch oder
+Modell-/Sichtbarkeitswechsel verwerfen den Rahmen. Kein Modell-/Dateiformatwechsel
+und kein Auswahl-Undo. Wandachsen bleiben hervorgehoben; 3D zeigt gewaehlte Waende,
+aber noch keine neue 3D-Mehrfachklick-/Rahmenbedienung. Gruppenbewegung bleibt aus.
+
+Pruefung: 551 Tests bestanden; TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Neue Regressionen pruefen alle Typen, gemischte
+Toggle-/Ersetzen-Auswahl, Einzelaktionssperre, Ebenen/Hostsichtbarkeit, ungueltige
+IDs, Rahmenrichtung/Rand/Teiltreffer, Achsversatz und Eckkontur. Browser: 5 Elemente
+per Rahmen, Schraffur per Strg-Klick entfernt, Fenster per Einzelklick gewaehlt,
+Fensterebene ausgeblendet und Rahmen in Gegenrichtung waehlt nur 4. Nach Sichtbar-
+machen und Zoom wieder 5; Navigator und Anzahl stimmen. Keine neue Modellbewegung
+als getestet behauptet. Pruefmodell outputs/selection-demo.json, Bild shared-selection.png.
+
+Abnahme: Select waehlen, auf freie Canvas-Flaeche klicken und Rahmen um verschiedene
+Elemente ziehen. Strg-Klick auf Schraffur entfernt/ergaenzt sie. Einzelklick zeigt
+dessen Eigenschaften. Ebene ausblenden: ihre Elemente werden nicht mitgewaehlt.
+
+Genau ein Folgeauftrag: Die gemeinsame freie Verschiebung als Verbraucher der
+Auswahlmenge an vorhandene ToolInteraction/Raster-/Hilfseingabe anbinden. Gesamten
+Snapshot atomar validieren, interne Wandanschluesse erhalten, externe loesen und
+Host/Fenster-Abhaengigkeiten ohne doppelte Bewegung pruefen. Nicht unterstuetzte
+Mischungen ausdruecklich ablehnen, keine stille Teilmenge bewegen. Ein Undo-Schritt.
+
+
+## Nutzerkorrektur: allgemeine Auswahl vor Gruppenbewegung — 06.10.2026
+
+Die zuvor geplante Wand-Mehrfachauswahl wird ersetzt: ein gemeinsamer,
+werkzeugunabhaengiger Auswahlbaustein fuer ALLE Elementtypen, bereits im ersten
+2D-Schritt fuer Waende, Fenster, Linien/Polylinien und Schraffuren zusammen.
+Verbindlich: Klick, Strg-Klick und aufgezogener Auswahlrahmen; nur sichtbare und
+aktive Ebenen. Auswahlbarkeit ist unabhaengig von Bewegungsfaehigkeiten.
+
+[Ueberarbeiteter Plan](docs/walls/SELECTION_MOVE_PLAN.md) trennt zentrale Auswahl-
+und Ebenenregeln von typbezogener Treffergeometrie. Nutzerklaerung: "aktive Ebenen"
+bedeutet alle eingeblendeten Ebenen; kein zusaetzlicher Sperrstatus.
+Rahmen-Randfaelle, Toggle und konkurrierende Zeichen-/Auswahlgesten bleiben als
+Vorschlaege bzw. offene Details ausgewiesen. Keine Nutzerentscheidung erfunden.
+
+Genau ein Folgeauftrag: Allgemeinen 2D-Auswahl-
+baustein samt Klick/Strg-Klick/Rahmen fuer alle vorhandenen Elementtypen umsetzen
+und pruefen. Gruppenverschiebung folgt als Verbraucher dieser Auswahl, nicht als
+wandbezogene Parallelstruktur. Noch keine Laufzeitaenderung; nur Planungsdokumente.
+Dieser Abschnitt und der ueberarbeitete Plan ersetzen die aelteren Folgeauftraege.
+
+
+## Mehrfachauswahl und Gruppenbewegung: Bestandspruefung — 06.10.2026
+
+PR145 nach Freigabe normal in main gemergt (c8a205c). Aktuell gibt es nur
+Einzelauswahl und Einzelbewegung. Window selection / Filter zeigen Hinweise,
+keine Auswahlmenge. Ein Modellversuch zeigt: sequenzielles Verschieben von H/E/N
+erhaelt die Ecke, verliert aber den internen T-Anschluss. Gruppenbewegung braucht
+also eine gemeinsame Snapshot-Aktion statt wiederholter Einzelbewegungen.
+
+[Plan und Akzeptanzfaelle](docs/walls/SELECTION_MOVE_PLAN.md) dokumentieren die
+betroffenen Module, Wiederverwendung von ToolInteraction/Raster/Hilfseingabe,
+Fensterzuordnung, interne/externe Verbindungen und vorgeschlagene additive Auswahl.
+Bediengesten und Details sind als Vorschlag gekennzeichnet. Keine Laufzeit- oder
+UI-Aenderung, keine neue Gruppenfunktion als fertig behauptet.
+
+58 bestehende Direct-Edit-/ToolInteraction-/Ecke-T-Tests bestanden; diff --check
+sauber. Kein erneuter Build fuer Dokumentation; PR145-Code zuletzt mit 546 Tests,
+TypeScript und Produktionsbuild erfolgreich geprueft.
+
+Genau ein Folgeauftrag: 2D-Wand-Mehrfachauswahl und atomare freie Gruppenbewegung
+gemaess Plan als durchgaengigen Ablauf implementieren: interne Anschluesse erhalten,
+externe loesen, gemeinsame Vorschau/Fang-/Zahleneingabe und ein Undo-Schritt.
+Keine eigene gemeinsame Eckpunktbewegung. Dieser Abschnitt ersetzt die bisherigen
+Folgeauftraege; aeltere Abschnitte bleiben als Verlauf erhalten.
+
+
+## Ecke und entfernter T-Anschluss umgesetzt — 06.10.2026
+
+PR144 wurde freigegeben und in main zusammengefuehrt (7ef1b05). Umsetzung auf
+feat/corner-t-host: Hauptwand mit genau einer rechtwinkligen Ecke und entferntem
+rechtwinkligem T-Zulauf. Die Eckkontur bleibt erhalten; voller T-Kontakt muss
+innerhalb des geraden Seitenstuecks liegen. Beruehrung/Ueberlappung des Eckpartners
+wird abgewiesen. Vorhandene Aktionen, Vorschau, 3D und IFC nutzen dieselbe Domain-
+Ableitung. Fenster duerfen T-Kontakte ueberqueren, nicht den Eckabschluss.
+
+Schema 8 bleibt unveraendert; alte Programme koennen neue Kombinationsdateien
+abweisen. Keine stille Reparatur beim Laden. Zweite Host-Ecke, schrager Eckwinkel
+mit T und eine Ecke an der T-Nebenwand bleiben ausgeschlossen. Reine Eckketten
+und reine Mehrfach-Ts behalten ihr Verhalten.
+
+Pruefung: 546 Tests, TypeScript und Produktionsbuild erfolgreich; Lint 0 Fehler,
+6 bekannte Warnungen. 19 neue Tests: Anschlussreihenfolge, beide Seiten, Drehung,
+Achsversatz, anderes Host-Ende, Kontaktgrenzen, unzulaessige Topologien, Fenster,
+Vorschau/Commit, History, JSON/IFC und Sichtbarkeitskonturen. Browser: Pruefdatei
+mit drei Waenden und Fenster geladen, Grundriss und 3D visuell geprueft.
+IFC generiert und Regressionen bestanden; externer Archicad-Import dieses neuen
+Pruefmodells steht dem Nutzer zur Abnahme offen.
+
+Abnahme: L-foermige Wandkette zeichnen und abschliessen. Entfernt von der Ecke
+eine Nebenwand rechtwinklig auf die Hauptachse fangen und abschliessen. Ecke und
+T in 2D/3D ansehen, Fenster ueber T bewegen, Undo/Redo, speichern und laden.
+Lokale Pruefdateien: outputs/corner-t-demo.json und outputs/corner-t-demo.ifc.
+
+Planungskorrektur: Die im Vorplan angenommene gemeinsame Eckpunktaktion existiert
+noch nicht. Heutiges Bewegen eines einzelnen Achsendpunkts loest die Ecke, wenn
+die Endpunkte auseinandergehen; ein Regressionstest dokumentiert diesen Bestand.
+Nutzerentscheidung 06.10.2026: Eine eigene gemeinsame Eckpunktbewegung wird
+nicht benoetigt und ist als Folgeauftrag gestrichen. Stattdessen waehlt der
+Nutzer beide betroffenen Waende aus und verschiebt diese gemeinsam als ganze
+Elemente. Daraus folgt kein automatisches Mitziehen einer nicht ausgewaehlten Wand.
+
+Genau ein Folgeauftrag: Den vorhandenen Stand der Mehrfachauswahl und gemeinsamen
+Elementverschiebung pruefen und einen begrenzten Umsetzungsschritt fuer zwei
+zusammen ausgewaehlte Waende festlegen. Gemeinsamen Bewegungsursprung, Rasterengine,
+Hilfseingabe, Vorschau und einen Undo-Schritt wiederverwenden; Verhalten interner
+Verbindungen und Anschluesse zu nicht ausgewaehlten Waenden ausdruecklich pruefen.
+Noch keine Gruppenbewegung als implementiert oder abgenommen ausweisen.
+Diese Korrektur aendert nur die Planung, nicht die Laufzeitlogik von PR145.
+
+
+
+## Ecke und T: begrenzter Umsetzungsplan — 06.10.2026
+
+PR143 ist freigegeben und in main. Der Plan in
+[docs/walls/CORNER_T_COMBINATION_PLAN.md](docs/walls/CORNER_T_COMBINATION_PLAN.md)
+ordnet den aktuellen Code, einen Drei-Wand-Pruefaufbau und Akzeptanzfaelle zu.
+Ein lesender Modellversuch bestaetigt die atomare Ablehnung der Kombination.
+Wichtigster Befund: Das T-Hostrechteck wuerde eine vorhandene Eckkontur ersetzen;
+die Sperre darf nicht einfach entfernt werden. Keine Laufzeit-/UI-Aenderung.
+
+Genau ein Folgeauftrag: Entfernten rechtwinkligen T-Zulauf an einer Hauptwand
+mit genau einem rechtwinkligen Eckanschluss gemaess diesem Plan implementieren
+und validieren. Erst danach weitere Topologien. Aeltere Folgeauftraege bleiben
+als Verlauf erhalten; dieser Abschnitt definiert den aktuellen naechsten Schritt.
+
+Pruefung: 47 vorhandene Anschluss-/Wandketten-Tests bestanden; diff --check
+sauber. Kein neuer Build erforderlich, da ausschliesslich Markdown geaendert.
+
+
+
+## Wandkoerper-Vorschau beim Zeichnen — 06.10.2026
+
+PR142 wurde freigegeben und in main zusammengefuehrt. Der neue Schritt zeigt
+im Grundriss bereits vor der Bestaetigung den validierten Wandkoerper samt
+T-Abschluss. Vorschau und Platzierung verwenden dieselbe Application-Aktion.
+Numerische Ziele uebernehmen keine zufaellige Hover-Verbindung. Entwurfswaende
+sind entsprechend ihrer Ebene sichtbar; Fangquellen und History bleiben am
+gespeicherten Modell. Unzulaessige Ziele zeigen den konkreten Fehler, behalten
+bereits gesetzte Entwurfsabschnitte und erzeugen keinen ungueltigen Koerper.
+
+527 Tests bestanden. Browser: T-Start, numerisch 270 Grad/1 m mit Koerpervorschau,
+250 Grad mit Rechtwinkelfehler, Korrektur und Abbruch ohne Modell-/Undo-Aenderung.
+Abnahme: Wand auf Hauptachse beginnen, Richtung und Laenge waehlen; Koerper
+vor Bestaetigung ansehen. Schraeges Ziel zeigt Fehler. Esc verwirft den Entwurf.
+Grenzen: 2D-Vorschau; bisherige T-/Eckregeln bleiben erhalten.
+
+Genau ein Folgeauftrag: Kombination aus Eck- und T-Anschluss an derselben
+Hauptwand anhand eines kleinen Testgrundrisses fachlich und geometrisch
+abgrenzen und einen begrenzten Umsetzungsplan mit Akzeptanzfaellen festhalten.
+Noch keine pauschale Freigabe beliebiger Anschlussnetze.
+
+
+## Wandstart mit T-Anschluss — 06.10.2026
+
+PR139 ist nach Freigabe in main. Neuer Aufgabenbranch aus main: Start einer
+Nebenwand auf einer bestehenden Hauptachse mit explizitem lokalem T-Fang.
+Der erste Klick merkt den Anschluss vor; der Abschnitt wird mit der gemeinsamen
+Application-Aktion validiert. Erst Enter/Doppelklick uebernimmt die Transaktion.
+Abbruch, veralteter Kontext, Snap aus und mehrdeutige Quellen erzeugen keinen
+ungewollten Anschluss. Keine automatische Verbindung nur aus Koordinaten.
+Rechtwinkel, gleiche Querschnitte und bisherige Topologiegrenzen bleiben.
+
+524 Tests bestanden; TypeScript/Build mit main-Abhaengigkeiten erfolgreich,
+Lint 0 Fehler und 6 bekannte Warnungen. Browser: Start auf Achse, rechtwinkliger Abschnitt, Enter,
+Undo/Redo erfolgreich. Regressionen pruefen beide Seiten, JSON/IFC, Abbruch,
+Schraegstellung, Quellenauswahl und striktes Achseninneres.
+Abnahme: Wall waehlen, auf Hauptachse bei T-Anschluss klicken, rechtwinklig
+herauszeichnen (bei Bedarf Shift), Endpunkt setzen, Enter. Undo entfernt
+Nebenwand und Verbindung gemeinsam. Ein T-Abschnitt beendet die Kette.
+
+Genau ein Folgeauftrag: Die Vorschau beim Wandzeichnen um den abgeleiteten
+Wandkoerper samt T-Abschluss ergaenzen; dieselbe Application-Validierung wie
+beim Klick nutzen und Fehler vor der Uebernahme anzeigen. Keine Erweiterung
+der erlaubten Anschlussgeometrien in diesem Vorschau-Schritt.
+
+
+## Branch-Uebergang abgeschlossen — 06.10.2026
+
+PR140 ist in main, PR141 hat Anpassungen_UI aktualisiert. PR139 wird mit
+einem normalen Merge auf main als Zielbasis umgestellt; beide historischen
+Planungsabschnitte bleiben erhalten. Die folgenden Infrastrukturauftraege
+zur erstmaligen Synchronisation sind damit erledigt. Fachlicher Folgeauftrag
+bleibt der T-Anschluss beim Start eines neuen Wandabschnitts.
+
+## T-Fang beim Zeichnen — 06.10.2026
+
+PR138 wurde nach Freigabe zusammengefuehrt. Neue Wandabschnitte koennen mit
+dem gemeinsamen T-Achsfang an einer vorhandenen Hauptwand enden. Klick setzt
+den Abschnitt, Enter/Doppelklick schliesst die Transaktion ab. Die ganze Kette
+bleibt ein Undo-Schritt. Keine Verbindung allein aus numerischen Koordinaten.
+Snap aus, Mehrdeutigkeit und feste Richtung bleiben massgebend. Am T muss die
+Kette abgeschlossen werden; Ecke/T bleibt ausgeschlossen. Vor dem Klick zeigt
+die Vorschau weiterhin die Zeichenachse mit Fangziel, keinen neuen Wandkoerper.
+
+Pruefung: 521 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler
+und 6 bekannte Warnungen. Browser: neue Nebenwand auf Hauptachse gezeichnet,
+T-Fang angezeigt, mit Enter abgeschlossen, Undo/Redo erfolgreich. JSON/IFC und
+Abbruch/Stale-Kontext sind in den Regressionstests enthalten.
+
+Abnahme: Wall waehlen, Start neben vorhandener Wand setzen, rechtwinklig zur
+Hauptachse ziehen, bei T-Anschluss klicken und Enter. Undo entfernt die neue
+Wand mit Anschluss; Redo stellt beides wieder her.
+
+**Genau ein Folgeauftrag:** T-Anschluss auch beim Start eines neuen Wandabschnitts
+auf einer vorhandenen Hauptachse anbinden; dieselbe Application-Aktion,
+Fangprioritaet und atomare Wandketten-History verwenden.
+
 ## Gemeinsame Branch-Basis vorbereiten — 06.10.2026
 
 Ziel: main wird der gemeinsame gepruefte Gesamtstand. Lovable arbeitet auf

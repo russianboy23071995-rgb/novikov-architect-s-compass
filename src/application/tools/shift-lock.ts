@@ -11,7 +11,7 @@ export function createShiftSnapLock() {
     last = args;
     const [policy, cursor, context, options] = args;
     const active = context.activeReferences?.at(-1) ?? context.activeReference;
-    const origin = policy?.origin.point ?? active?.point;
+    const origin = policy?.origin?.point ?? active?.point;
     if (!options.shift || !options.featureSnap || !context.enabled) held = null;
     else if (!held && origin) {
       if (cursor.x === origin.x && cursor.y === origin.y) return resolveToolSnap(...args);

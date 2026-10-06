@@ -1,3 +1,4 @@
+import { isLayerVisible, type LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type {
   createLayerVisibilityPolicy,
@@ -55,5 +56,38 @@ export function createLayerDisplay(
     canPick(current: Project, currentContext: LayerVisibilityContext, id: string) {
       return policy.evaluate(current, currentContext, id).eligible;
     },
+  };
+}
+
+/** New draft walls are display-only and inherit their actual layer, not committed picking eligibility. */
+export function drawingWallVisibility(
+  base: Project,
+  draft: Project,
+  policy?: LayerVisibilityPolicy,
+) {
+  const existing = new Set(base.storey.walls.map((w) => w.id));
+  const newWalls = new Map(
+    draft.storey.walls.filter((w) => !existing.has(w.id)).map((w) => [w.id, w]),
+  );
+  const existingWindows = new Set(base.storey.windows.map((w) => w.id));
+  const newWindows = new Map(
+    draft.storey.windows.filter((w) => !existingWindows.has(w.id)).map((w) => [w.id, w]),
+  );
+  return (id: string) => {
+    const opening = newWindows.get(id);
+    if (opening)
+      return (
+        isLayerVisible(base, policy, opening.wallId) &&
+        (!policy ||
+          (policy.isCurrent(base, policy.context) &&
+            !policy.context.hiddenLayerIds.includes(opening.layerId)))
+      );
+    const wall = newWalls.get(id);
+    if (!wall) return isLayerVisible(base, policy, id);
+    return (
+      !policy ||
+      (policy.isCurrent(base, policy.context) &&
+        !policy.context.hiddenLayerIds.includes(wall.layerId))
+    );
   };
 }

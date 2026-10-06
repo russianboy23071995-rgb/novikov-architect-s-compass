@@ -142,3 +142,32 @@ test("stale display construction and delayed hit events cannot revive hidden tar
   assert.equal(display.canPick(p, hidden.context, "wall-1"), false);
   assert.equal(display.canPick(p, all.context, "missing"), false);
 });
+
+import { drawingWallVisibility, visiblePlanGeometry } from "./layer-display.ts";
+test("draft walls inherit layer display without becoming committed pick targets", () => {
+  const base = createExampleProject();
+  const draft = addWall(base, {
+    id: "draft",
+    start: { x: 0, y: 2 },
+    end: { x: 3, y: 2 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const visible = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  assert.equal(visible.evaluate(base, visible.context, "draft").eligible, false);
+  assert.ok(
+    visiblePlanGeometry(draft, drawingWallVisibility(base, draft, visible)).walls.some(
+      (w) => w.id === "draft",
+    ),
+  );
+  const hidden = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [base.defaultLayerIds.wall],
+  });
+  assert.equal(drawingWallVisibility(base, draft, hidden)("draft"), false);
+  assert.equal(drawingWallVisibility(draft, draft, visible)("draft"), false);
+  assert.equal(drawingWallVisibility(base, draft, visible)("missing"), false);
+});

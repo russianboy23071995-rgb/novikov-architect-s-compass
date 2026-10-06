@@ -129,7 +129,7 @@ export function connectedWallContours(project: Project) {
       }
     }
   }
-  for (const [id, ring] of tConnectionContours(project)) contours.set(id, ring);
+  for (const [id, ring] of tConnectionContours(project, contours)) contours.set(id, ring);
   return contours;
 }
 

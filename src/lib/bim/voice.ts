@@ -105,13 +105,19 @@ export function normalizeSpeech(text: string): string {
     zehn: "10",
     elf: "11",
     zwölf: "12",
+    fünfundvierzig: "45",
+    neunzig: "90",
+    hundertachtzig: "180",
+    einhundertachtzig: "180",
+    zweihundertsiebzig: "270",
+    dreihundertsechzig: "360",
   };
   return text
     .trim()
     .toLocaleLowerCase("de")
     .replace(/[.!?]$/u, "")
     .replace(
-      /\b(null|eins|ein|eine|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf)\b/gu,
+      /\b(null|eins|ein|eine|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf|fünfundvierzig|neunzig|hundertachtzig|einhundertachtzig|zweihundertsiebzig|dreihundertsechzig)\b/gu,
       (word) => numbers[word]!,
     )
     .replace(/(\d+)\s+komma\s+(\d+)/gu, "$1,$2")

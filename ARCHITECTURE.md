@@ -1,5 +1,182 @@
 # NOVIKOV CAD Architecture Contract
 
+Tool-specific settings, properties and option hints belong exclusively in the
+Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
+active-tool option model; global project/view/layer controls remain there.
+
+## Window placement adapter — 2026-10-06
+
+`application/drawing/window-placement.ts` derives host/relative position from a
+visible physical wall body and uses existing `addWindow` validation for preview
+and commit. `useWindowPlacement` binds immutable project/visibility and a stable
+new ID; `useToolInteraction` and the generic plan placement binding own interaction.
+The shared snap resolver receives the host's physical longitudinal axis. This
+creation starts without a pinned movement origin or polar input; ToolInteraction
+accepts an unanchored ToolSnapPolicy, while movement adapters explicitly retain
+AnchoredToolInteraction. Existing movement-origin requirements are unchanged.
+Draft window rendering uses its actual layer and host visibility, never a fake
+committed entity. New selection requests accompanying a model commit are validated
+against that new snapshot; ordinary clicks still validate the current snapshot.
+No project schema change. Initial placement uses the existing 1.20 x 1.35 m window
+with 0.90 m sill as defaults; one click commits once, Escape discards. Properties remain shared.
+The placement hook retains editable width/height/sill text for the current workspace
+session. Application parses metre values (decimal comma or point) and applies the
+same dimensions through preview and addWindow. Each immutable draft revision binds
+a new interaction; old preview/commit callbacks reject a changed revision. Invalid
+or incomplete fields cannot fall back to earlier valid dimensions. These tool
+preferences do not mutate existing entities or create model history/file fields.
+
+Optional precise placement first pins a visible wall ID without a model commit.
+The same adapter then anchors the shared precision input at the physical wall
+body start; longitudinal distance locates the window centre relative to the wall
+axis start (the lateral body offset does not change that distance). Wall direction
+is fixed/read-only. Existing precisionTarget, snapping, Tab and confirmation are
+reused. Host choice, project/visibility and dimension revisions reject stale
+callbacks. Only final placement creates history; Escape discards the session.
+
+Window centre bounds are derived once per action by the shared domain wall/window-range
+function, used by both placement and movement. Pointer/precision targets beyond
+those bounds are capped before validated addWindow/updateWindow. Bounds include
+corner seams with numerical clearance and deliberately ignore T junctions. Invalid
+sizes and unavailable hosts remain errors; model validation is not relaxed.
+
+## Shared selection requirement — 2026-10-06
+
+User requirement: selection is a tool-independent Application capability for all
+current and future element types, including mixed sets. Support click, Ctrl-click
+and rectangular marquee. User clarification: active means visible; all shown layers
+are eligible. Reuse existing visibility policy, including hidden-host exclusion for
+windows. Do not introduce a separate activation/lock state for this requirement.
+
+Application owns one typed stable-ID selection set and eligibility rules. Viewport
+adapters supply projected hit geometry; common picking/marquee logic and pointer
+handling are reused, not reimplemented per tool. Selection capability is independent
+of movement support. Actions validate the full pinned target set; never silently
+act on just its first member. Properties, Navigator, On-Demand and AI/Text/Voice
+consume the same context. A selected host does not implicitly select its windows;
+future transformations must account for dependencies without double movement.
+
+Implemented first delivery: shared 2D selection for walls, windows, lines/polylines
+and hatches, including mixed sets. `application/selection/state.ts` owns typed-ID
+transitions, eligibility and the model-bound index. `useElementSelection` binds
+that state to React; renderers and Navigator consume it. Only a singleton supplies
+a legacy action/AI target. No first-item fallback for mixed sets.
+`planSelectionShapes` supplies disposable contours; `enclosedTargets` applies full
+rectangle containment to all vertices (including boundary), independently of type.
+`useSelectionMarquee` owns the pointer gesture. Click replaces, Ctrl/Cmd-click
+toggles, empty click clears; a frame replaces. Start the frame on empty canvas in
+Select mode, after 3 CSS pixels of movement. Drawing, editing, reference selection
+and navigation retain precedence. Escape/pointer cancellation/model or visibility
+change cancel the frame; selection creates no model history.
+3D wall surface and foot-anchor clicks now forward Ctrl/Cmd to the same selection
+transition as the plan. Existing depth/visibility and drag-vs-click gates remain.
+Selected wall outlines share the central set; no separate 3D selection store.
+`rendering/viewport/window-selection.ts` derives opening hit rectangles on the
+physical wall centre plane and outlines on both opening rims. These are disposable
+selection geometry, not glazing or exported model material. Windows and wall
+surfaces compete in the same projected depth space; hidden windows/hosts are
+excluded. A visible opening now targets its window instead of a wall behind it.
+The adapter returns the same typed targets for plain and Ctrl/Cmd selection.
+No 3D marquee or group-movement gesture is added.
+Implemented consumer: `application/selection/move.ts` pins a complete typed target
+set and base project, translates one proposed snapshot, then validates it once per
+proposal. Internal corner/T relations survive; relations crossing the selected-wall
+boundary detach. Host windows retain relative parameters and follow exactly once.
+A selected window without its host rejects the complete free translation. No new
+joins are inferred, no scaling or file-schema change is introduced.
+`useSelectionMove` binds the session and checks current context again at commit.
+`ToolInteraction`, shared polar input and snap policies own precision and inference;
+the viewport's generic placement binding only supplies pointer intent and displays
+the returned preview. Exclude moving entities and hosted windows from snap sources,
+pin the chosen origin immediately. Context changes and cancellation discard the
+preview; commit creates one model history entry. First delivery is 2D. Text/Voice
+must consume this same validated action with pinned whole-selection context, never
+fall back to a single target. See the [selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
+
+
+### Local selection-command adapter - 2026-10-06
+
+`application/commands/selection-command.ts` adapts a bounded translation grammar
+to the shared selection-movement action and polar service. The UI supplies the full
+typed selection, immutable base and visibility policy. Textual previews disclose
+all targets and relationship effects; they never mutate the model. Acceptance
+checks context again and reruns the validated action rather than trusting editable
+preview geometry. Singleton legacy commands use the same context gate; mixed sets
+never fall back to their first element. Pure vector translation uses a neutral
+coordinate origin, not an inferred element anchor. This does not alter the pinned
+origin rule for interactive pointer movement. `selection-voice.ts` now binds browser recognition to an immutable context revision
+containing the complete selection, project and visibility policy. UI cleanup aborts
+on revision changes; callback-time revision checks reject late results before
+cleanup as well. Returning to the same IDs is still a new revision. Recognition
+only supplies normalized text and the shared command preview, never a commit.
+Invalid transcripts remain editable; explicit acceptance retains action validation.
+The existing browser recognition lifecycle supplies timeout, cancellation and errors.
+
+## Corner plus T: bounded composition — 2026-10-06
+
+A host may combine exactly one right-angle corner with remote perpendicular T
+contacts. The incoming wall must have no corner and cannot also be a host or
+have a second T. Existing equal cross-section and T-overlap checks still apply.
+`connectedWallContours` retains composed corner profiles. `validateCornerTContact`
+checks the full contact against the actual remaining longitudinal side and rejects
+contact with the corner partner. No fixed clearance margin is introduced.
+Corner-window validation runs before T opening clipping; crossing a T does not
+permit crossing a miter. All interaction and export paths share this derivation.
+
+Schema 8 is retained: relation fields, units, identity and interpretation are
+unchanged; this extends admissible topology. Older builds reject mixed files
+under their stricter validation. Loading never deletes relations to make them
+fit an older implementation. Existing schema-8 files remain valid.
+
+Correction to the planning assumption: current single-endpoint edits detach an
+end join when endpoints cease to coincide; no shared corner-move action exists.
+User decision (2026-10-06): a dedicated joint corner-move action is not wanted.
+The intended workflow is to select both affected walls and translate the selected
+whole elements together. Do not implicitly move an unselected neighbour.
+Selection-set translation must reuse the shared interaction pipeline and atomic
+history; its implementation and connection handling still require verification.
+Individual whole-wall translation retains its existing automatic-detachment rule.
+See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
+
+
+## Derived wall drawing preview — 2026-10-06
+
+ToolInteraction may expose previewProject for a disposable model snapshot. The
+wall adapter uses previewWallChain/appendWallChain for both that snapshot and
+confirmation validation. BimPlan only renders the returned model or reports the
+Application error. Numeric targets carry no hover candidate, matching commit.
+Draft wall visibility follows its assigned layer; committed picking, snap sources
+and history remain bound to the authoritative project. New draft IDs are never
+added to that project. Invalid targets retain already accepted draft segments,
+show the precise validation error and do not display an invalid body. The current
+slice is the 2D plan; shared 3D drawing preview is not introduced here.
+
+
+## Starting a wall on a host axis — 2026-10-06
+
+The initial wall snap policy uses the shared local T-axis resolver, projecting
+the cursor onto a visible host interior. Ambiguous hosts do not create intent.
+ToolSnapPolicy permits no origin before acquisition; AnchoredSnapPolicy remains
+mandatory for active ToolInteraction. No synthetic construction origin is pinned.
+beginWallChain pins the explicit start candidate in the ephemeral transaction.
+appendWallChain connects endpoint 0 through connectWallAtTAxis; finish alone
+commits history. Cancellation discards intent. Coordinate-only starts do not
+create relations. Existing right-angle/cross-section/topology rules validate
+mouse and numeric targets. A T-connected segment cannot continue into a corner.
+This supersedes the unsupported start status in the historical section below.
+
+
+## Drawing endpoint T intent — 2026-10-06
+
+Wall drawing reuses Application findTAxisReference/queryTAxisSnap and
+connectWallAtTAxis with direct editing. The plan carries the exact candidate
+through ToolInteraction validation and appendWallChain. Numeric input discards
+mouse intent. Only finishWallChain commits history; cancel discards the draft.
+The current slice ends a new segment on an existing visible host axis. A chain
+ending at a T must be finished before drawing again; corner/T combinations
+remain unsupported. Starting on a host axis does not yet create a T relation.
+
+
 ## T contacts do not constrain hosted window movement — 2026-10-06
 
 Binding user clarification: windows stay on their original wall and ignore T

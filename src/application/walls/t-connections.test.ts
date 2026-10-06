@@ -136,7 +136,7 @@ test("whole wall translation detaches even when translated host still contains a
   );
 });
 
-test("invalid persisted identities, duplicate incoming relations and competing corners fail atomically", () => {
+test("invalid persisted identities, duplicate incoming relations fail atomically; remote host corner is allowed", () => {
   const p = connected(),
     before = serializeProject(p);
   for (const r of [
@@ -147,15 +147,15 @@ test("invalid persisted identities, duplicate incoming relations and competing c
   ])
     assert.throws(() => loadProjectData({ ...p, storey: { ...p.storey, wallTJunctions: [r] } }));
   assert.throws(() => previewTConnection(p, p, request));
-  assert.throws(() =>
-    addWall(p, {
-      id: "corner",
-      start: { x: 0, y: 0 },
-      end: { x: 0, y: 3 },
-      thickness: 0.36,
-      height: 2.8,
-    }),
-  );
+  const withCorner = addWall(p, {
+    id: "corner",
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 3 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  assert.equal(withCorner.storey.wallJoins.length, 1);
+  assert.deepEqual(withCorner.storey.wallTJunctions, p.storey.wallTJunctions);
   const third = addWall(p, {
     id: "third",
     start: { x: 4, y: -3 },

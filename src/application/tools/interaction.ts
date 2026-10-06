@@ -1,6 +1,7 @@
+import type { Project } from "../../domain/project/schema.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
-import type { ToolSnapPolicy } from "./snapping.ts";
+import type { AnchoredSnapPolicy, ToolSnapPolicy } from "./snapping.ts";
 export type PrecisionValues = { point: Point2; degrees: number; metres: number; notice?: string };
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
@@ -10,6 +11,7 @@ export type ToolInteraction = {
   input: { axisLabel: string | null; degrees: number | null } | null;
   click: "confirm" | "direction";
   preview: (angle: string, length: string, aim: Point2 | null) => PrecisionValues;
+  previewProject?: (point: Point2, candidate?: SnapCandidate | null) => Project;
   validate: (point: Point2, candidate?: SnapCandidate | null) => void;
   commit: (point: Point2, candidate?: SnapCandidate | null) => void;
   cancel: () => void;
@@ -37,3 +39,5 @@ export function confirmInteraction(
   tool.validate(point, candidate);
   tool.commit(point, candidate);
 }
+
+export type AnchoredToolInteraction = ToolInteraction & { snapping: AnchoredSnapPolicy };

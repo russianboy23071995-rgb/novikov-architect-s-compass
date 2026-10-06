@@ -1,3 +1,9 @@
+import { WindowPlacementFields } from "./WindowPlacementFields";
+import { useWindowPlacement } from "./useWindowPlacement";
+import { useSelectionMove } from "./useSelectionMove";
+import { useElementSelection } from "./useElementSelection";
+import { selectionIndex, type SelectionSet } from "@/application/selection/state";
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
@@ -17,7 +23,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { InteractionInput } from "./InteractionInput";
 import { useToolInteraction } from "./useToolInteraction";
-import { editInteraction, drawingInteraction } from "@/application/tools/adapters";
+import {
+  editInteraction,
+  drawingInteraction,
+  wallStartSnapPolicy,
+} from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import {
@@ -44,7 +54,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { exportIfc } from "@/lib/bim/ifc";
-import { applyCommand } from "@/lib/bim/commands";
+import { applySelectionCommand } from "@/application/commands/selection-command";
 import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
@@ -61,6 +71,7 @@ export function CadWorkspace({
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
   const [layout, setLayout] = useState<ViewportLayout>("single");
+  const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
@@ -99,12 +110,19 @@ export function CadWorkspace({
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
-  const [requestedSelection, setSelection] = useState<Selection>({ kind: "wall", id: "wall-1" });
-  const selection = visibleLayerTarget(project, visibility, requestedSelection);
+  const {
+    targets: selections,
+    selection,
+    choose,
+    setSelection,
+    selectCommitted,
+  } = useElementSelection(project, visibility);
+  const groupMove = useSelectionMove(project, selections, visibility, (next) =>
+    dispatchEditing({ type: "project", project: next }),
+  );
+  const cancelGroup = useRef(groupMove.cancel);
+  cancelGroup.current = groupMove.cancel;
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
-  useEffect(() => {
-    if (requestedSelection && !selection) setSelection(null);
-  }, [requestedSelection, selection]);
   const currentSelection = useRef(selection);
   currentSelection.current = selection;
   const [wallChain, setWallChain] = useState<WallChain | null>(null);
@@ -165,6 +183,7 @@ export function CadWorkspace({
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
   const cancelInteraction = useCallback(() => {
+    cancelGroup.current();
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
@@ -181,7 +200,7 @@ export function CadWorkspace({
       setModelError("");
       setExportMessage("");
     },
-    [cancelInteraction],
+    [cancelInteraction, setSelection],
   );
 
   useEffect(() => {
@@ -219,9 +238,10 @@ export function CadWorkspace({
       if (next) {
         cancelInteraction();
         setTool(next);
-        if (next === "line" || next === "hatch") setSelection(null);
+        if (next === "window" || next === "line" || next === "hatch") setSelection(null);
         setModelError("");
-        if (next === "wall" || next === "line" || next === "hatch") setMode("2D");
+        if (next === "window" || next === "wall" || next === "line" || next === "hatch")
+          setMode("2D");
       }
       if (event.key === "Escape") {
         cancelInteraction();
@@ -233,7 +253,7 @@ export function CadWorkspace({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen, cancelInteraction, referenceSelection.selecting, navigateHistory]);
+  }, [fullscreen, cancelInteraction, referenceSelection.selecting, navigateHistory, setSelection]);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -251,9 +271,10 @@ export function CadWorkspace({
   const selectTool = (next: ToolId) => {
     cancelInteraction();
     setTool(next);
-    if (next === "line" || next === "hatch") setSelection(null);
+    if (next === "window") setDemandOpen(false);
+    if (next === "window" || next === "line" || next === "hatch") setSelection(null);
     setModelError("");
-    if (next === "wall" || next === "line" || next === "hatch") setMode("2D");
+    if (next === "window" || next === "wall" || next === "line" || next === "hatch") setMode("2D");
   };
 
   const showSelection = (
@@ -285,15 +306,32 @@ export function CadWorkspace({
     index?: number,
     modelPoint?: Point,
     edgeIndex?: number,
+    toggle = false,
   ) => {
     if (
       next &&
       !visibleLayerTarget(visibilityNow.current.project, visibilityNow.current.visibility, next)
     )
       return;
-    showSelection(next, anchor, index, modelPoint, edgeIndex);
+    if (toggle && next) {
+      cancelInteraction();
+      choose([next], true);
+      setDemandOpen(true);
+      const point = anchor ?? lastPointer.current;
+      setDemandPosition({ x: point.x + 16, y: point.y + 16 });
+      setPickedPoint({ index: null, anchor: null, edgeIndex: null });
+      setTool("select");
+    } else showSelection(next, anchor, index, modelPoint, edgeIndex);
   };
 
+  const selectMany = (targets: SelectionSet) => {
+    cancelInteraction();
+    choose(targets);
+    setDemandOpen(targets.length > 0);
+    setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
+    setPickedPoint({ index: null, anchor: null, edgeIndex: null });
+    setTool("select");
+  };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection) return;
@@ -327,6 +365,7 @@ export function CadWorkspace({
     if (referenceSelection.selecting) return;
     dispatchEditing({ type: "project", project: next });
     showSelection(selected);
+    selectCommitted(next, selected);
     showNotice("Model updated");
   };
 
@@ -402,7 +441,7 @@ export function CadWorkspace({
     }
   };
 
-  const drawPoint = (point: Point) => {
+  const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
     if (pathDrawing) {
       if (pathPoints.length === 0) {
@@ -426,9 +465,11 @@ export function CadWorkspace({
       if (!activeChain) {
         setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
-        setWallChain(beginWallChain(project, point));
+        setWallChain(beginWallChain(project, point, candidate));
       } else {
-        setWallChain(appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point));
+        setWallChain(
+          appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point, candidate),
+        );
       }
     } catch (error) {
       setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
@@ -445,33 +486,53 @@ export function CadWorkspace({
     }
   };
 
+  const windowTool = useWindowPlacement(
+    tool === "window",
+    project,
+    visibility,
+    (next, id) => {
+      changeProject(next, { kind: "window", id });
+      setTool("select");
+    },
+    () => selectTool("select"),
+  );
+  const windowPlacement = windowTool.adapter;
   const interaction = useToolInteraction(
-    editSession
-      ? editInteraction(
-          editSession,
-          project,
-          selection,
-          (point, candidate) => {
-            const current = visibilityNow.current;
-            if (
-              current.visibility !== visibility ||
-              !visibleLayerTarget(current.project, current.visibility, editSession.target)
-            )
-              return;
-            dispatchEditing({ type: "confirm", session: editSession, selection, point, candidate });
-          },
-          cancelInteraction,
-        )
-      : drawingOrigin && drawingBase
-        ? drawingInteraction(
-            drawingBase,
+    windowPlacement ??
+      groupMove.adapter ??
+      (editSession
+        ? editInteraction(
+            editSession,
             project,
-            drawingOrigin,
-            drawPoint,
+            selection,
+            (point, candidate) => {
+              const current = visibilityNow.current;
+              if (
+                current.visibility !== visibility ||
+                !visibleLayerTarget(current.project, current.visibility, editSession.target)
+              )
+                return;
+              dispatchEditing({
+                type: "confirm",
+                session: editSession,
+                selection,
+                point,
+                candidate,
+              });
+            },
             cancelInteraction,
-            tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
           )
-        : null,
+        : drawingOrigin && drawingBase
+          ? drawingInteraction(
+              drawingBase,
+              project,
+              drawingOrigin,
+              drawPoint,
+              cancelInteraction,
+              tool === "wall" ? activeChain?.points : pathDrawing ? pathPoints : undefined,
+              tool === "wall" ? (activeChain ?? undefined) : undefined,
+            )
+          : null),
     referenceSelection.selecting,
   );
 
@@ -578,7 +639,6 @@ export function CadWorkspace({
               setModelError("");
               setLayersOpen(true);
             }}
-            tool={tool}
             mode={mode}
             layout={layout}
             grid={grid}
@@ -586,6 +646,7 @@ export function CadWorkspace({
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
             onMode={(next) => {
+              groupMove.cancel();
               dispatchEditing({ type: "cancel" });
               setMode(next);
               setWallChain(null);
@@ -593,6 +654,7 @@ export function CadWorkspace({
               if (next === "3D") setTool("select");
             }}
             onLayout={(next) => {
+              groupMove.cancel();
               dispatchEditing({ type: "cancel" });
               setLayout(next);
               setActiveViewport(0);
@@ -631,10 +693,29 @@ export function CadWorkspace({
           onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
         />
         {demandOpen &&
+          !groupMove.active &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selection && !editSession)) && (
             <DemandMenu
               project={project}
+              selectionCount={selections.length}
+              onMoveSelection={
+                selections.length > 1
+                  ? () => {
+                      cancelInteraction();
+                      try {
+                        groupMove.begin();
+                        setDemandOpen(false);
+                        setMode("2D");
+                        setModelError("");
+                      } catch (error) {
+                        setModelError(
+                          error instanceof Error ? error.message : "Bewegung nicht möglich.",
+                        );
+                      }
+                    }
+                  : undefined
+              }
               selection={tool === "select" && !editSession ? selection : null}
               position={demandPosition}
               onPosition={setDemandPosition}
@@ -706,7 +787,16 @@ export function CadWorkspace({
               />
             )}
           </div>
-          {tool === "hatch" && mode === "2D" ? (
+          {tool === "window" ? (
+            <WindowPlacementFields
+              value={windowTool.dimensions}
+              onChange={windowTool.setDimensions}
+              error={windowTool.error}
+              precision={windowTool.precision}
+              onPrecision={windowTool.setPrecision}
+              pickingHost={windowTool.pickingHost}
+            />
+          ) : tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
               <HatchFillFields value={hatchFill} onChange={setHatchFill} />
               <span className="text-xs">
@@ -760,6 +850,13 @@ export function CadWorkspace({
                 Zeichnen abbrechen
               </Button>
             </section>
+          ) : selections.length > 1 ? (
+            <p className="p-3 text-xs text-muted-foreground" role="status">
+              {selections.length} Elemente ausgewählt.{" "}
+              {mode === "3D"
+                ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
+                : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
+            </p>
           ) : (
             <BimInspector
               key={JSON.stringify([selection, project])}
@@ -794,14 +891,54 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  zoomSlot={zoomSlot}
+                  placement={
+                    windowPlacement
+                      ? {
+                          target: interaction.target,
+                          previewProject: windowPlacement.previewProject,
+                          aim: interaction.draft.move,
+                          pick: (point, candidate) => {
+                            interaction.pick(point, candidate);
+                            if (windowTool.pickingHost)
+                              setDemandPosition({
+                                x: lastPointer.current.x + 16,
+                                y: lastPointer.current.y + 16,
+                              });
+                          },
+                        }
+                      : groupMove.active
+                        ? {
+                            target: interaction.target,
+                            previewProject: groupMove.adapter?.previewProject,
+                            aim: interaction.draft.move,
+                            pick: groupMove.pickingOrigin
+                              ? (point) => {
+                                  groupMove.pickOrigin(point);
+                                  setDemandPosition({
+                                    x: lastPointer.current.x + 16,
+                                    y: lastPointer.current.y + 16,
+                                  });
+                                }
+                              : interaction.pick,
+                          }
+                        : undefined
+                  }
                   project={project}
                   drawingPreview={activeChain?.preview}
+                  drawingProjectAt={drawingOrigin ? interaction.adapter?.previewProject : undefined}
                   visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
-                  snapping={interaction.adapter?.snapping ?? null}
+                  selections={selections}
+                  onSelectMany={selectMany}
+                  snapping={
+                    interaction.adapter?.snapping ?? (tool === "wall" ? wallStartSnapPolicy : null)
+                  }
                   drawing={(tool === "wall" || pathDrawing) && mode === "2D"}
-                  endpointSnap={pathDrawing || tool === "select" || tool === "wall"}
+                  endpointSnap={
+                    pathDrawing || tool === "select" || tool === "wall" || tool === "window"
+                  }
                   hoverDwellMs={hoverDwellMs}
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                   draftPoints={pathDrawing ? pathPoints : []}
@@ -829,12 +966,12 @@ export function CadWorkspace({
                     dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
                   }}
                   onEditCancel={() => dispatchEditing({ type: "cancel" })}
-                  onPoint={(point) =>
+                  onPoint={(point, candidate) =>
                     referenceSelection.selecting
                       ? undefined
                       : interaction.adapter
-                        ? interaction.pick(point)
-                        : drawPoint(point)
+                        ? interaction.pick(point, candidate)
+                        : drawPoint(point, candidate)
                   }
                   editSession={editSession?.base === project ? editSession : null}
                   numericTarget={editSession ? interaction.target : undefined}
@@ -864,6 +1001,16 @@ export function CadWorkspace({
                   onActive={setActiveViewport}
                   onFullscreen={() => setFullscreen((value) => !value)}
                 />
+                {groupMove.active && (
+                  <p
+                    role="status"
+                    className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                  >
+                    {groupMove.pickingOrigin
+                      ? "Bewegungsursprung im Grundriss anklicken"
+                      : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
+                  </p>
+                )}
                 {tool === "wall" && (
                   <p
                     role="status"
@@ -895,11 +1042,16 @@ export function CadWorkspace({
                 )}
                 {!referenceSelection.selecting && (
                   <AiCommandBar
+                    onFocus={() => setDemandOpen(false)}
+                    targets={selections}
+                    visibility={visibility}
                     project={project}
-                    selection={selection}
-                    onExecute={(preview) =>
-                      changeProject(applyCommand(project, selection, preview), selection)
-                    }
+                    onExecute={(preview) => {
+                      const next = applySelectionCommand(project, selections, visibility, preview);
+                      cancelInteraction();
+                      setDemandOpen(false);
+                      dispatchEditing({ type: "project", project: next });
+                    }}
                   />
                 )}
                 <div
@@ -937,18 +1089,17 @@ export function CadWorkspace({
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
                     project={project}
-                    active={selection?.id ?? project.storey.id}
+                    active={selections.length ? selections.map((t) => t.id) : [project.storey.id]}
                     onClose={() => setNavigatorOpen(false)}
-                    onSelect={(id) => {
-                      if (project.storey.walls.some((wall) => wall.id === id))
-                        selectElement({ kind: "wall", id });
-                      else if (project.storey.windows.some((opening) => opening.id === id))
-                        selectElement({ kind: "window", id });
-                      else if (project.storey.hatches.some((hatch) => hatch.id === id))
-                        selectElement({ kind: "hatch", id });
-                      else if (project.storey.lines?.some((line) => line.id === id))
-                        selectElement({ kind: "line", id });
-                      else selectElement(null);
+                    onSelect={(id, _label, toggle) => {
+                      selectElement(
+                        selectionIndex(project).get(id) ?? null,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        toggle,
+                      );
                     }}
                   />
                 </ResizablePanel>
@@ -958,12 +1109,13 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
+            zoomSlot={setZoomSlot}
             gridSettings={gridSettings}
             onGridSettings={setGridSettings}
             grid={grid}
             snap={snap}
             ortho={ortho}
-            selection={selection ? 1 : 0}
+            selection={selections.length}
             onGrid={() => setGrid((value) => !value)}
             onSnap={() => setSnap((value) => !value)}
             onOrtho={() => setOrtho((value) => !value)}
