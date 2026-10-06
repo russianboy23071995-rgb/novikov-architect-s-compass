@@ -1,5 +1,24 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Ecke und T: begrenzter Umsetzungsplan — 06.10.2026
+
+PR143 ist freigegeben und in main. Der Plan in
+[docs/walls/CORNER_T_COMBINATION_PLAN.md](docs/walls/CORNER_T_COMBINATION_PLAN.md)
+ordnet den aktuellen Code, einen Drei-Wand-Pruefaufbau und Akzeptanzfaelle zu.
+Ein lesender Modellversuch bestaetigt die atomare Ablehnung der Kombination.
+Wichtigster Befund: Das T-Hostrechteck wuerde eine vorhandene Eckkontur ersetzen;
+die Sperre darf nicht einfach entfernt werden. Keine Laufzeit-/UI-Aenderung.
+
+Genau ein Folgeauftrag: Entfernten rechtwinkligen T-Zulauf an einer Hauptwand
+mit genau einem rechtwinkligen Eckanschluss gemaess diesem Plan implementieren
+und validieren. Erst danach weitere Topologien. Aeltere Folgeauftraege bleiben
+als Verlauf erhalten; dieser Abschnitt definiert den aktuellen naechsten Schritt.
+
+Pruefung: 47 vorhandene Anschluss-/Wandketten-Tests bestanden; diff --check
+sauber. Kein neuer Build erforderlich, da ausschliesslich Markdown geaendert.
+
+
+
 ## Wandkoerper-Vorschau beim Zeichnen — 06.10.2026
 
 PR142 wurde freigegeben und in main zusammengefuehrt. Der neue Schritt zeigt
