@@ -28,9 +28,19 @@ grips; authoritative axis grips remain editable through existing EditSessions.
 Persisted file relations undergo the same geometry validation. No UI-only joins.
 The previous temporary dialog remains diagnostic, not a commit requirement.
 
-Next wall-chain transaction decision: the user explicitly chose Undo for the
-entire chain, not the last segment. Implement a shared draft and one atomic
-completion commit in the next step; chain drawing is not yet implemented.
+Wall-chain transaction implemented 2026-10-06: application/drawing/wall-chain
+owns an ephemeral snapshot-bound draft. Each accepted point uses createDrawing
+and existing Domain join validation; stable wall IDs survive completion. The
+plan renders the draft only as a disposable preview. Authoritative project,
+navigator, save and IFC remain unchanged until finishWallChain supplies one
+history commit. Undo/Redo affects the whole chain as explicitly requested.
+Escape/tool changes discard the draft; changed project identity prevents stale
+completion. Shared drawingInteraction supplies precision, construction origins
+and path references, with no separate snapping or polar calculation.
+Click appends, Enter on the canvas or double-click completes. Numeric Enter in
+the shared form accepts the next point. One-segment chains are valid. Invalid
+continuations preserve prior accepted segments. Current right-angle join limits
+still apply; collinear subdivision and arbitrary-angle connections are deferred.
 
 ## Revised wall-axis interaction decision — 2026-10-05
 

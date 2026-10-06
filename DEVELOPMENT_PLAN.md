@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: fortlaufende Wandkette — 06.10.2026
+
+Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.
+PR120 nach Freigabe in fix/reference-selection-lifecycle uebernommen (e7921a3).
+Neuer Zweig feat/wall-chain-drawing: Klicks ergaenzen einen geprueften Entwurf,
+Doppelklick oder Enter im Canvas uebernimmt die gesamte Kette mit einem Commit.
+Escape und Werkzeugwechsel verwerfen sie. Hilfseingabe/Tab, Fangursprung und
+Pfadreferenzen verwenden weiterhin die gemeinsame ToolInteraction. Vorschau
+und gespeichertes Modell bleiben getrennt; Speichern/IFC enthalten erst die
+abgeschlossene Kette. Ungueltige Fortsetzungen lassen den bisherigen Entwurf
+stehen. Modellwechsel verhindert die Uebernahme veralteter Entwuerfe.
+
+462 Tests bestanden, TypeScript und Build erfolgreich, Lint 0 Fehler und die
+6 bekannten Fast-Refresh-Warnungen. Neue Tests: Vier-Wand-Ring mit vier
+Anschluessen, stabile IDs, ein Undo/Redo, Dateirundlauf, IFC-Profile, fehlerhafte
+und veraltete Fortsetzungen sowie gemeinsame numerische Eingabe. Browser:
+zwei Abschnitte numerisch setzen, Navigator/Undo vor Abschluss unveraendert,
+Enter uebernimmt beide, Undo entfernt beide, Redo stellt sie wieder her, 3D
+kontrolliert; Escape verwirft den naechsten Ursprung. Doppelklick verwendet
+denselben vorhandenen Abschlussweg wie Polylinien; kein separater automatisierter
+Browser-Doppelklicktest. Neue Archicad-Abnahme des Kettenexports steht aus.
+
+Grenzen: Kettenanschluesse weiterhin rechtwinklig mit gleicher Hoehe/Staerke,
+keine kollineare Unterteilung, T-Knoten oder beliebigen Winkel. Noch keine
+Wandparameterwahl vor dem Zeichnen (0,36 m / 2,80 m, rechte Kantenachse).
+
+Abnahme: Wandwerkzeug -> Ursprung -> mehrere rechtwinklige Abschnitte (Shift
+oder Winkel/Laenge) -> Enter im Canvas. Ein Undo entfernt die gesamte Kette;
+Redo stellt sie wieder her. Mit Escape einen weiteren Entwurf verwerfen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Den zurueckgestellten kleinen
+Schraffur-Eigenschaftenschritt umsetzen: unabhaengige Hintergrundfarbe und
+waehlbare Konturanzeige mit Linienfarbe. Gemeinsame validierte Application-
+Aenderung, Eigenschaftenleiste, Dateikompatibilitaet und Undo/Redo verwenden.
+Linienarten und Offset bleiben fuer spaeter vorgemerkt.
+
 ## Aktueller Stand: automatischer rechtwinkliger Wandanschluss — 05.10.2026
 
 Dieser Abschnitt ersetzt alle folgenden historischen Folgeauftraege.
