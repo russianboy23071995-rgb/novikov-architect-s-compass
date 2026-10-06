@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "unit": "m",
+  "id": "density-check",
+  "storey": {
+    "id": "s",
+    "walls": [
+      {
+        "id": "wall-1",
+        "start": {
+          "x": -2,
+          "y": -2
+        },
+        "end": {
+          "x": 1,
+          "y": -2
+        },
+        "height": 2.8,
+        "thickness": 0.36
+      }
+    ],
+    "windows": [],
+    "lines": [
+      {
+        "kind": "line",
+        "points": [
+          {
+            "x": 4,
+            "y": 1
+          },
+          {
+            "x": 6,
+            "y": 1
+          }
+        ],
+        "color": "#334155",
+        "id": "line-a",
+        "penWidth": 0.25,
+        "style": "solid"
+      },
+      {
+        "kind": "line",
+        "points": [
+          {
+            "x": 4,
+            "y": 1
+          },
+          {
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "color": "#334155",
+        "id": "line-b",
+        "penWidth": 0.25,
+        "style": "solid"
+      },
+      {
+        "kind": "line",
+        "points": [
+          {
+            "x": 6,
+            "y": 1
+          },
+          {
+            "x": 6,
+            "y": 3
+          }
+        ],
+        "color": "#334155",
+        "id": "line-c",
+        "penWidth": 0.25,
+        "style": "solid"
+      }
+    ]
+  }
+}

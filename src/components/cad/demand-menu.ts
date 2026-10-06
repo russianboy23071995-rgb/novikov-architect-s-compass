@@ -36,6 +36,12 @@ export function selectionSummary(project: Project, selection: Selection) {
         }
       : null;
   }
+  if (selection.kind === "hatch") {
+    const hatch = project.storey.hatches.find((h) => h.id === selection.id);
+    return hatch
+      ? { title: "Schraffur", details: `${hatch.points.length} Eckpunkte · 2D-Füllung` }
+      : null;
+  }
   const line = project.storey.lines?.find((item) => item.id === selection.id);
   return line
     ? {

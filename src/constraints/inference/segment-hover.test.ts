@@ -8,6 +8,87 @@ import { advanceGuideDirections } from "../guides/directions.ts";
 import { addLine, createProject } from "../../lib/bim/model.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { projectSnapReferences } from "../../application/snapping/project-references.ts";
+import {
+  createAffineScreenMetric,
+  createIsotropicScreenMetric,
+} from "../../geometry/projections/screen-metric.ts";
+import {
+  sameHoverSession,
+  suspendHoverReference,
+  previewPointReferences,
+} from "./hover-reference.ts";
+
+test("affine segment hover uses CSS proximity with bounded endpoints", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const source: SnapReference = {
+    entityId: "s",
+    feature: "segment",
+    point: { x: 1, y: 1 },
+    segment: { start: { x: 0, y: 0 }, end: { x: 2, y: 2 } },
+  };
+  const p = { x: 1, y: 1.5 };
+  const projected = metric.projectSegment(p, source.segment!.start, source.segment!.end)!;
+  assert.ok(projected.t > 0.49 && projected.t < 0.51);
+  assert.equal(hoveredSegment(p, [source], metric), source);
+  assert.equal(hoveredSegment(p, [source], 100), null);
+  const beyond = metric.projectSegment({ x: 3, y: 3 }, source.segment!.start, source.segment!.end)!;
+  assert.deepEqual(beyond.point, source.segment!.end);
+  assert.ok(beyond.t > 1);
+  assert.equal(hoveredSegment({ x: 3, y: 3 }, [source], metric, 1000), null);
+  assert.equal(metric.projectSegment(p, { x: 0, y: 0 }, { x: 0, y: 0 }), null);
+});
+
+test("affine hover keeps 600 ms toggle, restarts dwell on source change and protects origin", () => {
+  const metric = createAffineScreenMetric(100, 0, 0, 1);
+  const sources: SnapReference[] = [0, 30].map((y, i) => ({
+    entityId: String(i),
+    feature: "segment",
+    point: { x: 1, y },
+    segment: { start: { x: 0, y }, end: { x: 2, y } },
+  }));
+  const a = hoveredSegment({ x: 1, y: 5 }, sources, metric)!;
+  const b = hoveredSegment({ x: 1, y: 35 }, sources, metric)!;
+  let state = advanceHoverReference(emptyHoverReference(), a, 0, 600);
+  state = advanceHoverReference(state, b, 500, 600);
+  state = advanceHoverReference(state, b, 1099, 600);
+  assert.equal(state.references.length, 0);
+  state = advanceHoverReference(state, b, 1100, 600);
+  assert.equal(state.references.length, 1);
+  state = suspendHoverReference(state, true);
+  assert.equal(state.references.length, 1);
+  state = advanceHoverReference(state, b, 1200, 600);
+  state = advanceHoverReference(state, b, 1800, 600);
+  assert.equal(state.references.length, 0);
+  const pinned = previewPointReferences(state, [a, b], [a])!;
+  assert.deepEqual(pinned.value.references, [b]);
+  const session = { enabled: true, references: sources, pixelsPerMetre: 100, metric };
+  assert.ok(
+    sameHoverSession(session, { ...session, metric: createAffineScreenMetric(200, 0, 0, 2) }),
+  );
+  assert.equal(sameHoverSession(session, { ...session, references: [...sources] }), false);
+});
+
+test("isotropic segment projection preserves legacy hover radius arithmetic", () => {
+  for (const scale of [0.5, 100, 10000])
+    for (const offset of [0, 1e7]) {
+      const start = { x: offset, y: offset },
+        end = { x: offset + 4, y: offset + 2 };
+      for (const p of [
+        { x: offset + 1, y: offset + 0.5 },
+        { x: offset + 2, y: offset + 1 + 10 / scale },
+      ]) {
+        const metric = createIsotropicScreenMetric(scale),
+          q = metric.projectSegment(p, start, end)!;
+        const t = ((p.x - start.x) * 4 + (p.y - start.y) * 2) / 20;
+        assert.equal(q.t, t);
+        const clamped = Math.max(0, Math.min(1, t));
+        assert.equal(
+          q.distance,
+          Math.hypot(p.x - start.x - clamped * 4, p.y - start.y - clamped * 2) * scale,
+        );
+      }
+    }
+});
 const project = addLine(createProject("p", "s"), {
   id: "line",
   kind: "line",

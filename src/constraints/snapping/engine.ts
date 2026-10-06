@@ -3,6 +3,8 @@ import { projectDirection, angle45Direction } from "../../geometry/projections/d
 import { collectSnapCandidates, gridSnap } from "./candidates.ts";
 import { compareSnapCandidates } from "./ranking.ts";
 import type { GuideDirection } from "../guides/directions.ts";
+import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
+import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
 export type SnapReference = {
   segment?: { start: Point2; end: Point2 };
@@ -38,7 +40,25 @@ export type SnapCandidate = {
   sourceFeature: string;
   priority: number;
 };
+export type SnapSourceQuery = (
+  cursor: Point2,
+  pixelsPerMetre: number,
+  radiusPx: number,
+  active: readonly SnapReference[],
+  intersectionsPaused?: boolean,
+  selectedSegments?: ReadonlySet<string> | null,
+  metric?: ScreenMetric,
+) => readonly SnapReference[];
 export type SnapContext = {
+  /** Viewport capability for additional application-supplied targets with commit intent. */
+  includeInteractionTargets?: boolean;
+  /** Optional view eligibility for ranked geometry candidates; explicit constraints stay unchanged. */
+  acceptCandidate?: (candidate: SnapCandidate) => boolean;
+  /** Shared candidate distances/projection; explicit picking migration remains pending. */
+  metric?: ScreenMetric;
+  intersectionsPaused?: boolean;
+  selectedSegments?: ReadonlySet<string> | null;
+  sourceQuery?: SnapSourceQuery | undefined;
   references: readonly SnapReference[];
   pixelsPerMetre: number;
   enabled: boolean;
@@ -49,6 +69,9 @@ export type SnapContext = {
   activeReferences?: readonly SnapReference[];
   guideDirections?: readonly GuideDirection[];
   angleOrigin?: Point2 | null;
+  /** Session-held Shift direction; never recomputed from subsequent pointer positions. */
+  angleDirection?: Point2 | null;
+  angleLockOrigin?: Point2 | null;
   fixedAxis?: { origin: Point2; direction: Point2 } | null;
 };
 
@@ -72,7 +95,12 @@ export function querySnap(
       (!Number.isFinite(context.gridSpacing) || context.gridSpacing <= 0))
   )
     throw new Error("Invalid snap context");
-  const axis = context.fixedAxis;
+  context = {
+    ...context,
+    metric: context.metric ?? createIsotropicScreenMetric(context.pixelsPerMetre),
+  };
+  let axis = context.fixedAxis;
+  let shiftFallback: ReturnType<typeof querySnap> | null = null;
   if (
     axis &&
     (![axis.origin.x, axis.origin.y].every(Number.isFinite) ||
@@ -80,26 +108,35 @@ export function querySnap(
   )
     throw new Error("Invalid fixed snap axis");
   const origin = context.orthoOrigin;
-  // Explicit Shift constraint takes precedence over automatic snapping and Ortho.
+  // Shift fixes direction; exact compatible targets may still snap along that axis.
   if (context.angleOrigin && !axis) {
     if (![context.angleOrigin.x, context.angleOrigin.y].every(Number.isFinite))
       throw new Error("Invalid angle origin");
-    const angle = angle45Direction(cursor, context.angleOrigin);
+    const angle = context.angleDirection
+      ? {
+          direction: context.angleDirection,
+          degrees:
+            ((Math.atan2(context.angleDirection.y, context.angleDirection.x) * 180) / Math.PI +
+              360) %
+            360,
+        }
+      : angle45Direction(cursor, context.angleOrigin);
     const point = projectDirection(cursor, context.angleOrigin, angle.direction)!;
-    return {
+    shiftFallback = {
       point,
       candidate: {
         kind: "angle",
         worldPoint: point,
         guideOrigin: context.angleOrigin,
         angleDegrees: angle.degrees,
-        distanceOnScreen:
-          Math.hypot(point.x - cursor.x, point.y - cursor.y) * context.pixelsPerMetre,
+        distanceOnScreen: context.metric!.distance(point, cursor),
         sourceEntityId: null,
         sourceFeature: "shift-45",
         priority: -1,
       },
     };
+    axis = { origin: context.angleOrigin, direction: angle.direction };
+    context = { ...context, fixedAxis: axis };
   }
   const horizontal = origin
     ? Math.abs(cursor.x - origin.x) >= Math.abs(cursor.y - origin.y)
@@ -112,11 +149,35 @@ export function querySnap(
           ? { x: p.x, y: origin.y }
           : { x: origin.x, y: p.y }
         : { ...p };
-  if (!context.enabled) return { point: constrain(cursor), candidate: null };
-  const candidates = collectSnapCandidates(cursor, context, constrain);
+  if (!context.enabled) return shiftFallback ?? { point: constrain(cursor), candidate: null };
+  if (context.sourceQuery)
+    context = {
+      ...context,
+      references: context.sourceQuery(
+        cursor,
+        context.pixelsPerMetre,
+        context.endpointRadiusPx,
+        context.activeReferences ?? (context.activeReference ? [context.activeReference] : []),
+        context.intersectionsPaused,
+        context.selectedSegments,
+        context.metric,
+      ),
+    };
+  const candidates = collectSnapCandidates(cursor, context, constrain).filter(
+    ({ candidate }) =>
+      (!shiftFallback ||
+        [
+          "endpoint",
+          "midpoint",
+          "segment-intersection",
+          "intersection",
+          "axis-intersection",
+        ].includes(candidate.kind)) &&
+      (!context.acceptCandidate || context.acceptCandidate(candidate)),
+  );
   candidates.sort(compareSnapCandidates);
   const candidate = candidates[0]?.candidate;
   return candidate
     ? { point: candidate.worldPoint, candidate }
-    : gridSnap(cursor, context, constrain);
+    : (shiftFallback ?? gridSnap(cursor, context, constrain));
 }

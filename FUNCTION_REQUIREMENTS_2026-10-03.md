@@ -76,8 +76,8 @@ Ausgangszweig: feat/direct-edit-shared-snap, HEAD 3bbe2dd8dd3526c66bfa2cdb8633da
 | N41 | T: numerische feste Wandstärke/-höhe; keine Geschossbindung                                  | M, BimInspector → domain/wall/height-binding            | Stage 1; Gespräch                                | N21/N22; Moduswechsel und Öffnungen atomar validieren                                                            |
 | N42 | O: Wand hat Gesamtstärke, keinen Schichtenaufbau                                             | Ziel domain/assembly/materials                          | Neu                                              | N41/N45; AssemblyLayer getrennt von Layer; Summe statt widersprüchlicher Dicken                                  |
 | N43 | T: Einzelwand; Polylinien-Doppelklick vorhanden, keine Wandkette                             | UI/CadWorkspace → application/wall-tool                 | C04 erweitert; Gespräch Wandzeichnen             | N08/N44; Undo pro Segment oder Kette offen, Abbruch/Nullsegmente definieren                                      |
-| N44 | O: keine fachlichen Eck-/T-Verbindungen                                                      | Ziel domain/wall-joins, geometry                        | Gespräch Wandanschlüsse                          | N45, variable Stärken/N42; Eckgriffversatz aus PR #28 vor exaktem Anschluss lösen                                |
-| N45 | O: bisher feste Mittelachse, keine umstellbare Aufbauachse                                   | M, E → domain/wall-reference                            | Neu                                              | Nutzerentscheidung physische Lage vs Zeichenachse; N42, Fenster-/Join-Abhängigkeiten                             |
+| N44 | T: reine rechtwinklige Eckkonturen; keine produktiven Verbindungen/T-Knoten                                                      | Ziel domain/wall-joins, geometry                        | Gespräch Wandanschlüsse                          | N45 umgesetzt; Eckgriff korrigiert; explizites Verbinden, automatisches Lösen bei Einzelwandbewegung; N42/Endzonen offen                                |
+| N45 | T: feste Zeichenachse, numerischer Körperversatz und 2D-/3D-Achsanzeige implementiert                                   | M, E → domain/wall-reference                            | Neu                                              | Nutzerentscheidung physische Lage vs Zeichenachse; N42, Fenster-/Join-Abhängigkeiten                             |
 | N46 | T: abgeleitetes Wandlängenlabel, keine assoziativen Bemaßungen                               | Vw → domain/dimensions, application                     | Neu; Guide-F25 Ebene Bemaßung                    | N16, stabile Feature-Referenzen, Annotation-Scope, ungültige Referenzen                                          |
 | N47 | O: Slab-Werkzeug ist nur UI-Eintrag, kein Deckenmodell                                       | Ziel domain/slab/assembly, geometry                     | Gespräch Geschosse/Decken                        | N16/N21/N22/N39/N42; Stärke/Höhenlage, 2D/3D/IFC                                                                 |
 | N48 | O: keine Deckendurchbrüche                                                                   | Ziel domain/openings, application                       | Neu                                              | N47, gültiges Öffnungsprofil/Host, Rand-/Überschneidungsregeln                                                   |
@@ -115,7 +115,7 @@ Zusätzlich erhalten:
 | Punkt             | Offen; keine angenommene Entscheidung                                                            | Vor Umsetzung nötig                       |
 | ----------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | D / Strg+D        | Beide als Drehen genannt; Unterschied unbekannt, kein erfundenes Kopieren+Drehen                 | N54/N55                                   |
-| Wandachsenwechsel | Physische Wandlage erhalten oder Wand relativ zur Zeichenachse bewegen?                          | N45/N42/N44                               |
+| Wandachsenwechsel | Entschieden 05.10.2026: Wandkörper bewegt sich relativ zur festen Zeichenachse.                          | N45/N42/N44                               |
 | 3D-Export         | Format, Geometrie-/Material-/Metadatenumfang, Einheiten/Koordinaten                              | N02; IFC ersetzt diese Entscheidung nicht |
 | Wandketten-Undo   | Ein Schritt pro Segment oder gesamte Kette; Verhalten bei abgebrochener Kette                    | N43                                       |
 | Weitere Details   | Textskalierung/Stilgrößen, Pipettenfarbquelle, Schemafelder, Template-Vererbung, Pane-Persistenz | Jeweilige N25/N49/N52/N59/N60             |
@@ -132,4 +132,96 @@ Siehe den vollständigen Auftrag am Anfang von [DEVELOPMENT_PLAN.md](DEVELOPMENT
 
 ### Ergänzung zu N45 – Nutzerwunsch 03.10.2026
 
-Die derzeit zentrierte Wandachse soll bei ausgewählter Wand sichtbar und später verschiebbar sein. Dies ergänzt N45, kein zusätzlicher paralleler Auftrag. Zum passenden Zeitpunkt vor Wandanschlüssen umsetzen; vorher klären, ob eine Achsenverschiebung die physische Wandlage erhält oder verändert. Keine Entscheidung dazu vorwegnehmen.
+Die derzeit zentrierte Wandachse soll bei ausgewählter Wand sichtbar und später verschiebbar sein. Dies ergänzt N45, kein zusätzlicher paralleler Auftrag. Vor Wandanschlüssen umsetzen. Entscheidung vom 05.10.2026: Die Zeichenachse bleibt fest; der Wandkörper bewegt sich relativ dazu. Die zentrierte Achse ist seit PR #108 bei Auswahl im Grundriss sichtbar; der numerische Körperversatz ist mit Schema 5 und gemeinsamer Application-Aktion implementiert. Die ausgewählte Achse ist auch in 3D sichtbar; interaktives Versatz-Ziehen bleibt offen.
+
+### N44 – Nutzerentscheidungen und Offsetplanung 05.10.2026
+
+Bewusst „Ecke verbinden“; Einzelwandbewegung löst die Verbindung automatisch.
+Keine Anschlussimplementierung vorhanden. Neun Offsetbeispiele, atomare History
+und offene Endkappen-/Eckgriff-/Öffnungsfragen: [Wand-Eckanschlussentwurf](docs/WALL_CORNER_PLAN.md).
+
+N44-Geometriegrundlage umgesetzt: domain/elements/wall/corner.ts mit 11 neuen Tests.
+Bruttokonturen ohne Öffnungen, UI, persistente Relation oder IFC-Anbindung;
+automatische Verbindung bleibt ausgeschlossen.
+
+N44/Oeffnungsabhaengigkeit: geometrischer Fensterbefund gegen Eckkonturen umgesetzt
+(corner-openings.ts), ohne Zulassungsregel fuer Beruehrung, neue Randabstaende oder
+UI-Anbindung. Bestehende Fenster bleiben unveraendert.
+
+N44-Geometrie: abgeleitete 3D-Eckkoerper mit voll enthaltenen rechteckigen
+Fensteroeffnungen und korrektem Vereinigungsabzug implementiert (corner-solid.ts).
+Keine produktive Verbindung, Renderer- oder IFC-Anbindung; Kontaktregeln bleiben
+offen. Bestehende nicht verbundene Waende unveraendert.
+
+N44/IFC: isolierter Export eines expliziten temporaeren Wandpaars aus denselben
+fachlichen Profilen umgesetzt; zwoelf Faelle unabhaengig mit IfcOpenShell geprueft.
+Noch keine produktiven Verbindungen, keine neue Modellkopie und kein neuer
+normaler UI-Export. Archicad-Abnahme: docs/CORNER_IFC_ACCEPTANCE.md.
+
+N44-Abnahme 05.10.2026: Nutzer bestaetigt den Archicad-Import des expliziten
+Eckmodells einschliesslich Fenster und rechtwinkligem Anschluss als korrekt.
+Persistente Verbindung und offene Endkappen-/Beruehrungsregeln bleiben separat.
+
+## Ergaenzungen aus Nutzerfreigabe 05.10.2026
+
+- Schraffuren: erweiterte Hintergrundfarbe; Kontur als waehlbare Linie mit eigener
+  Linienfarbe. Linienarten ausdruecklich erst spaeter. Gemeinsame Eigenschaften-
+  und Appearance-Aktionen verwenden; UI, Projektdatei und Auswahl abstimmen.
+  Die genaue Bedeutung/Bedienung der erweiterten Hintergrundfarbe bleibt vor
+  Umsetzung zu konkretisieren; vorhandene Fuellfarbe/Deckkraft weiterverwenden.
+- On-Demand-Menue fuer geschlossene Polygone und kuenftige Kreise: Offset zum
+  Vergroessern/Verkleinern derselben Form. Spaeter auch eine Kopie per Hotkey;
+  kein konkreter Hotkey entschieden. Abstandsoffset versus einheitlicher
+  Skalierungsfaktor ist vor Implementierung ausdruecklich zu unterscheiden.
+  Konkave Konturen, Kollaps und Selbstueberschneidungen ueber gemeinsame Geometrie
+  behandeln. Keine Ausweitung der Skalierung auf BIM-/3D-Bauteile.
+
+Einordnung: kleine Folgeetappen im Bereich 2D-Darstellung und Konturbearbeitung
+nach der laufenden Wandanschlussvorschau; keine Umsetzung dieser Wuensche in
+PR zur Anschlussvorschau, keine Verdraengung aelterer Anforderungen.
+
+## Korrektur Wandachsen und Anschluesse — 05.10.2026
+
+Nutzer ersetzt die bisherige Menuepflicht: Achsen zusammenfuehren soll automatisch
+Wandkoerper verbinden. Spaeter fortlaufende Wandkette wie eine Polylinie zeichnen.
+Neue Wandachsen standardmaessig auf einer Kante, wahlweise mittig oder innerhalb
+der Wandbreite; keine neuen Aussenachsen. Ausgewaehlte Achse helltuerkis sichtbar
+und als Bewegungsreferenz nutzbar. Bestehende Koerperversatzentscheidung bleibt:
+Koerper bewegt sich relativ zur festen Zeichenachse. Vorschau-Namen muessen den
+Navigatornamen entsprechen, keine unverstaendlichen ID-Listen.
+Achsenbedienung ist umgesetzt; automatische Anschluesse/Ketten bleiben naechste
+Etappen. Historische Aussenachsen werden nicht stillschweigend umpositioniert.
+
+Fortschritt 05.10.2026: automatische rechtwinklige Achsendverbindungen gleicher
+Hoehe/Staerke sind im normalen Modell integriert, mit Speichern/Undo/IFC.
+Nutzer bestaetigt: Fenster duerfen den Anschlussabschluss nicht beruehren;
+Einzelwand wegbewegen loest und erzeugt wieder gerade Enden. Noch keine T-Knoten
+oder beliebigen Winkel. Wandketten folgen; Undo soll ausdruecklich die gesamte
+Kette rueckgaengig machen. Siehe docs/AUTOMATIC_WALL_CONNECTIONS.md.
+
+### Umsetzung 06.10.2026: Wandkette
+
+Fortlaufende rechtwinklige Wandabschnitte bilden einen gemeinsamen Entwurf.
+Undo/Redo betrifft die gesamte abgeschlossene Kette (Nutzerentscheidung).
+Rasterengine und Winkel-/Laengeneingabe bleiben gemeinsam. Enter im Canvas
+oder Doppelklick schliesst ab; Escape verwirft. Bestehende Anschlussgrenzen
+bleiben. Schraffur-Hintergrund/Konturfarbe folgt als begrenzter Schritt;
+Linienarten und Offset bleiben fuer spaeter vorgemerkt.
+
+
+### Umsetzung 06.10.2026: Schraffur-Hintergrund und Konturfarbe
+
+Separater Hintergrund und sichtbare Kontur mit eigener Farbe sind in den
+Werkzeugeigenschaften umgesetzt, einschliesslich Dateimigration und Undo/Redo.
+Kontur ist Teil der Schraffurdarstellung, keine doppelte Liniengeometrie.
+Linienarten bleiben fuer spaeter. Offset fuer geschlossene Polygone/Kreise und
+spaeterer Kopie-Hotkey bleiben erhalten; naechster Teil beginnt mit konvexen
+2D-Polygonen. Kein Skalieren von BIM-Bauteilen als Ersatz fuer Offset.
+
+
+### Umsetzung 06.10.2026: Offset
+
+On-Demand-Offset fuer einfache konvexe Schraffuren und geschlossene Polylinien
+ist umgesetzt, mit gemeinsamem Fang-/Hilfseingabepfad und Undo/Redo. Alle Seiten
+werden parallel versetzt, nicht skaliert. Konkave Formen, Kreise und spaeterer
+Kopie-Hotkey bleiben erhaltene offene Anforderungen. BIM bleibt ausgeschlossen.
