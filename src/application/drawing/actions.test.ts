@@ -141,7 +141,6 @@ test("window placement rejects hidden hosts/layers, stale context and invalid ge
     createLayerVisibilityPolicy(base, { scope: { kind: "bim-project" }, hiddenLayerIds });
   const visible = policy([]);
   for (const point of [
-    { x: 0, y: 0.18 },
     { x: 5, y: 3 },
     { x: NaN, y: 0 },
   ])
@@ -251,4 +250,64 @@ test("dimension revisions invalidate old previews and new values reach the same 
   draft = { ...draft, height: "" };
   assert.throws(() => adapter().previewProject!(point));
   assert.deepEqual(committed, next);
+});
+
+test("pinned window host uses exact signed distance and retains its explicit host", async () => {
+  const { windowPlacementInteraction, windowPlacementHost } = await import("./window-placement.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { confirmInteraction } = await import("../tools/interaction.ts");
+  for (const end of [
+    { x: 6, y: 0 },
+    { x: 0, y: 6 },
+    { x: -6, y: 0 },
+    { x: 4.8, y: 3.6 },
+  ]) {
+    const empty = createProject("p", "s");
+    const base = createDrawing(empty, empty, "host", {
+      kind: "wall",
+      start: { x: 0, y: 0 },
+      end,
+      ...defaultDrawingWall,
+    });
+    const visibility = createLayerVisibilityPolicy(base, {
+      scope: { kind: "bim-project" },
+      hiddenLayerIds: [],
+    });
+    let committed = base;
+    const tool = windowPlacementInteraction(
+      base,
+      visibility,
+      "win",
+      () => ({ project: base, visibility }),
+      (next) => {
+        committed = next;
+      },
+      () => {},
+      undefined,
+      "host",
+    );
+    const result = tool.preview("566", "2,00", { x: 99, y: 99 });
+    const preview = tool.previewProject!(result.point);
+    assert.ok(Math.abs(preview.storey.windows[0]!.position - 1 / 3) < 1e-12);
+    assert.equal(preview.storey.windows[0]!.wallId, "host");
+    assert.equal(base.storey.windows.length, 0);
+    assert.equal(tool.input!.axisLabel, "Fenstermitte ab Wandanfang");
+    for (const invalid of ["NaN"]) assert.throws(() => tool.preview("", invalid, null));
+    for (const [input, expected] of [
+      ["-100", 0.1],
+      ["100", 0.9],
+    ] as const) {
+      const capped = tool.preview("", input, null);
+      assert.ok(
+        Math.abs(tool.previewProject!(capped.point).storey.windows[0]!.position - expected) < 1e-9,
+      );
+    }
+    confirmInteraction(tool, result.point);
+    assert.deepEqual(committed, preview);
+    const origin = tool.snapping.origin!.point;
+    assert.equal(
+      windowPlacementHost(base, visibility, { x: origin.x + end.x / 2, y: origin.y + end.y / 2 }),
+      "host",
+    );
+  }
 });

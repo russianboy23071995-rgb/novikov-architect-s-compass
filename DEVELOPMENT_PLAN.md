@@ -1,5 +1,81 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Canvas-Fokus und Zoomanzeige - 06.10.2026
+
+Schwarzen Browser-Fokusrahmen bei Mausklick auf 2D-/3D-Canvas entfernt; Tastaturfokus
+bleibt funktional und erhält eine dezente focus-visible-Markierung. Links von Grid
+zeigt eine Prozent-Auswahl den Zoom des aktiven Viewports und setzt dessen bestehende
+Kamera. Ein UI-Portal erhält die Kamera-Verantwortung im CadViewport; kein paralleler
+Zoomzustand im Projekt oder Workspace. Mehrfachansichten veröffentlichen nur die
+aktive Steuerung. 2D-Bezug: 100 Prozent = 100 CSS-Pixel/m; 3D: bisherige Standardansicht.
+Diese Bildschirmwerte sind ausdrücklich kein Druckmaßstab. Mausrad/Fit/Ansichtswechsel
+aktualisieren dieselbe Kamera und damit die Anzeige.
+
+Geändert: BimPlan, BimSolidView, CadViewport, CadWorkspace, StatusBar und Protokoll.
+Browser: 200 Prozent setzt 200 px/m, Canvas-Klick fokussiert ohne outline,
+3D-Wechsel zeigt 100 Prozent. TypeScript, Build und Lint erfolgreich (bekannte Warnungen).
+PR155 bleibt offen: automatischer Approval-Review hat den Merge trotz allgemeiner
+Freigabe abgelehnt; UI-Korrektur als zusätzlicher Commit im bestehenden PR.
+Genau ein Folgeauftrag bleibt Fenster-Integration im verbundenen Grundriss
+mit Speichern/Laden und IFC; keine weitere neue Werkzeugfunktion in diesem Schritt.
+
+
+## Fensterbegrenzung und Darstellung - 06.10.2026
+
+Korrektur zu PR155: Einsetzen und Verschieben begrenzen die Fenstermitte auf den
+zulässigen Bereich der Hostwand, auch bei einem Mausziel jenseits des Wandendes.
+Die gemeinsame Domain-Funktion window-range berechnet den Bereich aus Fensterbreite,
+Wandlänge und gegebenenfalls Gehrungsenden. T-Anschlüsse bleiben ohne Sperrwirkung.
+Keine wiederholte Ganzmodell-Suche nach einem Grenzpunkt. Vorschau und Commit
+verwenden dieselbe Begrenzung; nicht endliche Maße und zu große Fenster bleiben Fehler.
+An Gehrungen bleibt ein numerischer Sicherheitsabstand zur strikt ausgeschlossenen
+Berührung. Die eigentliche Modellvalidierung bleibt unverändert verbindlich.
+
+Grundriss: ausgewählte Fenster erhalten die gemeinsame türkise Auswahlfarbe;
+Kontur und Mittellinie verwenden die vorhandene zoomunabhängige Wandkonturstärke.
+Automatische Wandlängenbeschriftung entfernt. Eigene Fenstermodelle sind ausdrücklich
+für später vorgemerkt; Mess- und Bemaßungswerkzeuge folgen separat.
+
+Nachweis: 579 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Tests für beide Grenzen, vier Richtungen, beide verbundenen
+Wandenden, unveränderte Basis und Bestätigung am Cap. Browser: bestehendes Fenster
+entlang Wand verschoben, Klick weit hinter Wandende -> Position ca. 0,8 ohne Fehler;
+türkise Kontur sichtbar, automatische Wandmaßzahl entfernt. Screenshot window-cap.png.
+Genau ein Folgeauftrag bleibt die unten beschriebene Fenster-Integrationsprüfung
+im verbundenen Grundriss einschließlich Projektdatei und IFC.
+
+
+## Präzise Fensterposition - 06.10.2026
+
+PR154 nach Freigabe normal in main integriert (9a4df17). Optionaler Modus
+„Position per Maß“ in Werkzeugeigenschaften: zuerst sichtbare Wand anklicken,
+danach im gemeinsamen Hilfseingabefenster den Abstand der Fenstermitte vom
+Wandanfang eingeben. Die Hostwand bleibt fest, der Winkel ist vorgegeben.
+Normale Ein-Klick-Platzierung bleibt verfügbar. Wandwahl erzeugt keine History;
+Bestätigung verwendet dieselbe validierte addWindow-Aktion wie die Vorschau.
+Keine eigene Fenster-Tab-Steuerung oder zweite Maßeingabe implementiert.
+
+Geändert: Application window-placement samt actions.test; UI-Bindung
+useWindowPlacement, WindowPlacementFields und kleine Koordination in CadWorkspace;
+Architektur und dieses Protokoll.
+Nachweis: 578 Tests bestanden; TypeScript und Build bestanden; Lint ohne Fehler,
+6 bekannte Fast-Refresh-Warnungen. Test für vier Wandrichtungen, exakten Abstand,
+ungültige Abstände, unveränderte Basis und identischen Vorschau-/Commit-Zustand.
+Browser: 6-m-Wand, Position per Maß, Wandwahl ohne Bauteilerzeugung, Tab, 1,50 m,
+Enter -> neues Fenster mit Position 0,25. Undo entfernt es, Redo stellt es wieder her.
+Screenshot: outputs/window-position.png.
+
+Abnahme: Fensterwerkzeug -> Position per Maß -> Wand anklicken -> Tab -> Abstand
+(z. B. 1,50) -> Enter. Eigenschaften prüfen; danach Undo/Redo. Grenzen: Grundriss,
+Abstand zur Fenstermitte, bestehende Host-/Öffnungsgrenzen bleiben verbindlich.
+Maße und Präzisionsmodus sind Sitzungsvorgaben; keine neue Dateiformatversion.
+
+Genau ein Folgeauftrag: Den vollständigen Fensterwerkzeug-Ablauf in einem kleinen
+verbundenen Grundriss als Integrationsprüfung absichern: Platzierung und Änderung,
+Undo/Redo, Speichern/Laden und IFC müssen denselben Fenster-/Hostzustand behalten.
+Gefundene Fehler begrenzt korrigieren, bevor weitere Bauteilwerkzeuge folgen.
+
+
 ## UI-Korrektur zu PR154 - 06.10.2026
 
 Nach Nutzerhinweis den gesamten werkzeugabhaengigen Optionsbereich aus der oberen

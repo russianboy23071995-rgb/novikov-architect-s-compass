@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function StatusBar({
+  zoomSlot,
   grid,
   gridSettings,
   onGridSettings,
@@ -15,6 +16,7 @@ export function StatusBar({
   onSnap,
   onOrtho,
 }: {
+  zoomSlot: (element: HTMLDivElement | null) => void;
   gridSettings: GridSettings;
   onGridSettings: (value: GridSettings) => void;
   grid: boolean;
@@ -39,6 +41,7 @@ export function StatusBar({
       <div className="h-3 w-px bg-border" />
       <span className="px-1 text-[11px] text-muted-foreground">m</span>
       <div className="h-3 w-px bg-border" />
+      <div ref={zoomSlot} className="shrink-0" />
       <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}>
         <Grid3X3 /> Grid
       </Button>

@@ -1,3 +1,4 @@
+import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
@@ -103,7 +104,14 @@ export function moveWindowAlongWall(project: Project, id: string, distance: numb
   const window = project.storey.windows.find((item) => item.id === id);
   const wall = project.storey.walls.find((item) => item.id === window?.wallId);
   if (!window || !wall) throw new Error("Fenster oder zugehörige Wand fehlt.");
-  return updateWindow(project, id, { position: window.position + distance / wallLength(wall) });
+  return updateWindow(project, id, {
+    position: boundedWindowPosition(
+      project,
+      wall,
+      window.width,
+      window.position + distance / wallLength(wall),
+    ),
+  });
 }
 
 export { parseMetres } from "../../core/units/metres.ts";
