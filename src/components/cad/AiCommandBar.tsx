@@ -3,26 +3,34 @@ import { ArrowUp, Check, Mic, X } from "lucide-react";
 import novikovLogo from "@/assets/novikov-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { previewCommand } from "@/lib/bim/commands";
-import type { CommandPreview, CommandSelection } from "@/lib/bim/commands";
+import {
+  previewSelectionCommand,
+  selectionCommandIsCurrent,
+  type SelectionCommandPreview,
+} from "@/application/commands/selection-command";
+import { singleTarget, type SelectionSet } from "@/application/selection/state";
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { Project } from "@/lib/bim/model";
 import { normalizeSpeech, recognitionConstructor, startVoice } from "@/lib/bim/voice";
 
 type Props = {
   project: Project;
-  selection: CommandSelection;
-  selectionCount?: number;
-  onExecute: (preview: CommandPreview) => void;
+  targets: SelectionSet;
+  visibility: LayerVisibilityPolicy;
+  onExecute: (preview: SelectionCommandPreview) => void;
+  onFocus?: () => void;
 };
 
-export function AiCommandBar({
-  project,
-  selection,
-  onExecute,
-  selectionCount = selection ? 1 : 0,
-}: Props) {
+export function AiCommandBar({ project, targets, visibility, onExecute, onFocus }: Props) {
+  const selection = singleTarget(targets);
+  const selectionCount = targets.length;
   const [command, setCommand] = useState("");
-  const [preview, setPreview] = useState<CommandPreview | null>(null);
+  const [preview, setPreview] = useState<SelectionCommandPreview | null>(null);
+  const activePreview =
+    preview && selectionCommandIsCurrent(project, targets, visibility, preview) ? preview : null;
+  useEffect(() => {
+    setPreview(null);
+  }, [project, targets, visibility]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [voiceAvailable, setVoiceAvailable] = useState(false);
@@ -36,7 +44,7 @@ export function AiCommandBar({
       cancelVoice.current?.();
       cancelVoice.current = null;
     },
-    [project, selection?.kind, selection?.id],
+    [project, targets, visibility],
   );
   const listen = () => {
     if (listening) {
@@ -59,7 +67,7 @@ export function AiCommandBar({
         const text = normalizeSpeech(transcript);
         setCommand(text);
         try {
-          setPreview(previewCommand(project, selection, text));
+          setPreview(previewSelectionCommand(project, targets, visibility, text));
         } catch (error) {
           setError(error instanceof Error ? error.message : "Befehl nicht erkannt.");
         }
@@ -74,7 +82,7 @@ export function AiCommandBar({
   const interpret = () => {
     reset();
     try {
-      setPreview(previewCommand(project, selection, command));
+      setPreview(previewSelectionCommand(project, targets, visibility, command));
     } catch (error) {
       setError(error instanceof Error ? error.message : "Befehl konnte nicht geprüft werden.");
     }
@@ -82,6 +90,7 @@ export function AiCommandBar({
   return (
     <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2">
       <form
+        onFocus={onFocus}
         className="flex items-center gap-1"
         onSubmit={(event) => {
           event.preventDefault();
@@ -93,7 +102,7 @@ export function AiCommandBar({
           <span className="block truncate px-2 text-[9px] text-muted-foreground">
             Lokale Modellbefehle ·{" "}
             {selectionCount > 1
-              ? `${selectionCount} Elemente ausgewählt – Gruppenbefehle folgen`
+              ? `${selectionCount} Elemente ausgewählt`
               : (selection?.id ?? "Kein Bauteil ausgewählt")}
           </span>
           <Input
@@ -103,7 +112,9 @@ export function AiCommandBar({
               setCommand(event.target.value);
               reset();
             }}
-            placeholder="Wandlänge auf 6 m"
+            placeholder={
+              selectionCount > 1 ? "Auswahl um 2 m bei 90 Grad verschieben" : "Wandlänge auf 6 m"
+            }
             aria-label="Modellbefehl"
             className="h-7 border-0 bg-transparent px-2 text-xs shadow-none"
           />
@@ -121,9 +132,11 @@ export function AiCommandBar({
           title={
             !voiceAvailable
               ? "Browser unterstützt keine Spracherkennung"
-              : !selection
-                ? "Zuerst Bauteil auswählen"
-                : "Sprachbefehl für ausgewähltes Bauteil"
+              : selectionCount > 1
+                ? "Gruppenbefehle vorerst per Text eingeben"
+                : !selection
+                  ? "Zuerst Bauteil auswählen"
+                  : "Sprachbefehl für ausgewähltes Bauteil"
           }
         >
           <Mic />
@@ -139,7 +152,7 @@ export function AiCommandBar({
       </form>
       <p className="mt-1 text-[10px] text-muted-foreground">
         Wandlänge, Wandhöhe, Wandstärke, Fensterbreite, Fensterhöhe, Brüstungshöhe auf Zahl m/cm/mm
-        · Fenster zentrieren
+        · Fenster zentrieren · Auswahl um 2 m bei 90 Grad verschieben
       </p>
       <p className="mt-1 text-[10px] text-muted-foreground">
         {voiceAvailable
@@ -166,11 +179,21 @@ export function AiCommandBar({
           {message}
         </p>
       )}
-      {preview && (
+      {activePreview && (
         <div className="mt-2 border-t border-border pt-2">
           <p className="text-xs" aria-label="Befehlsvorschau">
-            {preview.summary}
+            {activePreview.summary}
           </p>
+          <details className="mt-1 text-xs">
+            <summary>Ziele ({activePreview.targets.length})</summary>
+            <ul className="max-h-24 overflow-auto">
+              {activePreview.targets.map((t) => (
+                <li key={`${t.kind}:${t.id}`}>
+                  {t.kind}: {t.id}
+                </li>
+              ))}
+            </ul>
+          </details>
           <div className="mt-2 flex justify-end gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={reset}>
               <X />
@@ -181,7 +204,7 @@ export function AiCommandBar({
               size="sm"
               onClick={() => {
                 try {
-                  onExecute(preview);
+                  onExecute(activePreview);
                   setPreview(null);
                   setCommand("");
                   setError("");

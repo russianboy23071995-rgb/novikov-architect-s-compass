@@ -45,6 +45,19 @@ must consume this same validated action with pinned whole-selection context, nev
 fall back to a single target. See the [selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
 
 
+### Local selection-command adapter - 2026-10-06
+
+`application/commands/selection-command.ts` adapts a bounded translation grammar
+to the shared selection-movement action and polar service. The UI supplies the full
+typed selection, immutable base and visibility policy. Textual previews disclose
+all targets and relationship effects; they never mutate the model. Acceptance
+checks context again and reruns the validated action rather than trusting editable
+preview geometry. Singleton legacy commands use the same context gate; mixed sets
+never fall back to their first element. Pure vector translation uses a neutral
+coordinate origin, not an inferred element anchor. This does not alter the pinned
+origin rule for interactive pointer movement. Group microphone delivery remains a
+separate adapter step; it must use this action and explicit acceptance.
+
 ## Corner plus T: bounded composition — 2026-10-06
 
 A host may combine exactly one right-angle corner with remote perpendicular T
