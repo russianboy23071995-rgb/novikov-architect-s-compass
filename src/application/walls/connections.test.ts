@@ -40,6 +40,40 @@ const opening = {
 };
 const close = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
+test("acute and obtuse automatic joins preserve shared solids, openings, files and history", async () => {
+  for (const angle of [Math.PI / 4, (3 * Math.PI) / 4]) {
+    const base = a();
+    const joined = addWall(base, {
+      id: "B",
+      start: { x: 3, y: 0 },
+      end: { x: 3 + 3 * Math.cos(angle), y: 3 * Math.sin(angle) },
+      ...dimensions,
+    });
+    const p = addWindow(joined, opening);
+    assert.equal(p.storey.wallJoins.length, 1);
+    const bodies = connectedWallSolids(p);
+    const expectedArea = 6 * 0.36 - 0.36 ** 2 * Math.tan(angle / 2);
+    close(buildSolid(p).volume, expectedArea * 2.8 - 1.2 * 1.35 * 0.36);
+    for (const body of bodies)
+      assert.deepEqual(
+        buildSolid(p).faces.filter((f) => f.wallId === body.wallId),
+        body.faces,
+      );
+    assert.deepEqual(deserializeProject(serializeProject(p)), p);
+    const history = commitProject(createHistory(base), p);
+    assert.deepEqual(undoProject(history).present, base);
+    assert.deepEqual(redoProject(undoProject(history)).present, p);
+    const before = serializeProject(p);
+    assert.throws(() => updateWindow(p, "window", { position: 0.79 }), /Fenster/);
+    assert.equal(serializeProject(p), before);
+    const ifc = await exportIfc(p);
+    assert.equal((ifc.match(/=IFCARBITRARYCLOSEDPROFILEDEF\(/g) ?? []).length, 2);
+    assert.equal((ifc.match(/=IFCRELVOIDSELEMENT\(/g) ?? []).length, 1);
+    const detached = moveElement(p, { kind: "wall", id: "B" }, { x: 0, y: 1 });
+    assert.equal(detached.storey.wallJoins.length, 0);
+  }
+});
+
 test("drawing automatically stores exact endpoint connection, shared profiles and window cuts", async () => {
   const p = addWindow(pair(), opening),
     before = serializeProject(p);
@@ -98,8 +132,8 @@ test("near endpoints and T contacts do not silently become end joins; ambiguous/
     /Mehrere/,
   );
   assert.throws(
-    () => addWall(a(), { id: "B", start: { x: 3, y: 0 }, end: { x: 4, y: 3 }, ...dimensions }),
-    /rechten Winkel/,
+    () => addWall(a(), { id: "B", start: { x: 3, y: 0 }, end: { x: 6, y: 0 }, ...dimensions }),
+    /Gehrung/,
   );
   assert.throws(() => updateWall(p, "A", { height: 3 }), /gleiche/);
   assert.equal(serializeProject(p), before);

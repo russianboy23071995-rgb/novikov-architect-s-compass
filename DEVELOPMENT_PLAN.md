@@ -1,5 +1,45 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Schraege automatische Wandecken — 06.10.2026
+
+Dieser Abschnitt ersetzt die historischen Folgeauftraege. Ausgangspunkt ist der
+freigegebene Integrationsstand 1a1608b (PR123). PR124 mit Offset-Textadapter bleibt
+separat offen und ist hier nicht enthalten. Sprache bleibt vorgemerkt; nach der
+Rueckfrage des Nutzers wird zuerst die gemeinsame Wandgeometrie erweitert.
+
+Zweig feat/oblique-wall-corners: Automatische Achsend-Anschluesse erlauben nun
+auch spitze und stumpfe Ecken. Gemeinsame Domain-Gehrung statt Sondergeometrie
+in UI/3D/IFC. Unterschiedliche Achslagen und umgekehrte Zeichenrichtungen sind
+geprueft. Zu kurze/kollineare/numerisch entartete Anschluesse und Fensterkontakte
+werden weiterhin atomar abgewiesen. Keine neuen Bedienelemente oder Dateifelder.
+Das historische Diagnosefenster bleibt auf rechtwinklige Paare begrenzt.
+
+Nachweis: 475 Tests bestanden; TypeScript und Build erfolgreich. Lint ohne Fehler,
+sechs bekannte Fast-Refresh-Warnungen. Neue Tests: beidseitige schräge Gehrungen,
+alle drei Achslagen, Endpunktumkehr, getrennte Konturen, analytische Volumina,
+Fensterkollision, JSON, Undo/Redo und geschlossene dreieckige Wandkette.
+IfcOpenShell 0.8.5 prueft fuenf normale Exporte: rechtes Eck, Rechteck,
+45-/135-Grad-Richtungswechsel mit Fenstern und Dreieck; IFC4/EXPRESS, Beziehungen,
+Profile, Platzierung und Netto-Wandvolumina bestanden.
+Browser: Kette 3 m bei 0 Grad, danach 3 m bei 45 Grad, Enter zum Abschliessen;
+Anschluss aktiv, ganze Kette per Undo/Redo und geschlossene 3D-Darstellung geprueft.
+Die fruehere Archicad-Abnahme betrifft rechte Winkel; neue schräge IFC-Beispiele
+sind unabhaengig validiert, aber noch nicht durch den Nutzer in Archicad geprueft.
+
+Praktische Abnahme: Wandwerkzeug -> freien Startpunkt -> 3 m bei 0 Grad -> 3 m
+bei 45 Grad -> Enter im Canvas. 2D/3D vergleichen, Undo/Redo, speichern/laden.
+Optional die erzeugte oblique-45.ifc in Archicad pruefen.
+Grenzen: gleiche Wandstaerke/Hoehe, zwei Achsenden; kein T-Anschluss oder
+kollineares Fortsetzen. Bestehende Projektdateien behalten ihre Geometrie;
+aeltere Programmstaende koennen neue schräge Anschluesse ablehnen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Den T-Anschluss als begrenzten
+Planungsauftrag anhand der bestehenden Join-Struktur spezifizieren: Achsende an
+Wandachse, ungeteilte durchlaufende Wand, Oeffnungsabstand, Loesen/Undo und
+2D/3D/IFC-Nachweise. Offene Bedienentscheidungen kennzeichnen; erst danach
+implementieren. Unterschiedliche Wandstaerken/Hoehen bleiben separat.
+
+
 ## Aktueller Stand: Offset fuer konvexe 2D-Konturen — 06.10.2026
 
 Dieser Abschnitt ersetzt die folgenden historischen Folgeauftraege.

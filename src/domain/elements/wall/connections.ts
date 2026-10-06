@@ -1,5 +1,5 @@
 import type { Project, Wall } from "../../project/schema.ts";
-import { deriveRightAngleCorner } from "./corner.ts";
+import { deriveWallCorner } from "./corner.ts";
 import { wallBody } from "./body.ts";
 import { wallContourSolid } from "./contour-solid.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
@@ -71,7 +71,7 @@ export function connectedWallContours(project: Project) {
       if (occupied.has(key(end))) throw new Error("Ein Achsende darf nur einmal verbunden sein.");
       occupied.add(key(end));
     }
-    const result = deriveRightAngleCorner(
+    const result = deriveWallCorner(
       { wall: a, endpoint: join.first.endpoint },
       { wall: b, endpoint: join.second.endpoint },
     );

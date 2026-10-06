@@ -1,5 +1,26 @@
 # NOVIKOV CAD Architecture Contract
 
+## Oblique persisted wall corners — 2026-10-06
+
+The automatic connection path now uses Domain deriveWallCorner for non-collinear
+axis-end pairs, including acute and obtuse corners. This supersedes the historical
+right-angle-only restriction below. The existing line intersection service and
+contour validation are shared; no angle-specific renderer or IFC implementation.
+The strict deriveRightAngleCorner entry remains for the older diagnostic preview.
+That dialog is still limited to right angles; automatic drawing/editing does not
+require it. Equal thickness/height, exact endpoint identity, two ends per node,
+valid composed profiles and opening clearance remain mandatory. Parallel axes,
+numerically unresolved seams and miters reaching the opposite cap reject.
+
+Schema 7 is unchanged: joins still store only IDs/end indices. Existing valid
+right-angle projects retain their geometry. The admissible geometry is expanded;
+older releases may reject newly saved oblique joins. All views, snap references
+and ordinary IFC export consume connectedWallSolids. A complete wall chain still
+forms one undo action. T contacts, collinear subdivision and unequal wall sections
+remain outside this step. Future text/voice adapters use existing validated wall
+actions and stable target context, not a separate corner mutation path.
+
+
 ## Convex 2D contour offset — 2026-10-06
 
 Geometry prepareConvexOffset owns parallel edge offsets for either winding.
