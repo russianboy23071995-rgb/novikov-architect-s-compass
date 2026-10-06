@@ -1,5 +1,36 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: T-Anschluss geplant — 06.10.2026
+
+PR125 nach Nutzerfreigabe unverändert zusammengeführt (41f17ba). Der geprüfte
+Stand umfasst 475 bestandene Tests und fünf unabhängig validierte IFC-Beispiele.
+Dieser Folgeauftrag ändert ausschließlich Dokumentation, keine Modellfunktionen.
+
+Siehe [T-Anschluss-Arbeitsentwurf](docs/T_WALL_CONNECTION_PLAN.md): aktuelles
+Endpunktpaar-Schema, unveränderte Hauptwand, gekürzter Nebenkörper, Öffnungen,
+Migration, Fangkontext, Undo sowie gemeinsame 2D/3D/IFC-Abnahmekriterien geprüft.
+T-spezifischer Achsanker und Folgen einer Hauptwandänderung bleiben offen;
+Vorschläge sind ausdrücklich von bestehenden Architekturregeln getrennt.
+
+Korrektur der vorherigen Prioritätsnotiz auf Nutzerwunsch: Text/Sprache werden
+weiterhin gemäß Protokoll an geprüfte Application-Aktionen angebunden, nicht
+wegen der letzten Rückfrage generell vertagt. PR124 ist weiterhin separat offen.
+Diese Freigabe bezog sich auf PR125; PR124 wurde nicht stillschweigend übernommen.
+
+Prüfung dieser Etappe: Modulpfade und Vertragsgrenzen gegen Code abgeglichen,
+relative Dokumentlinks geprüft, git diff --check ohne Fehler. Keine erneuten
+Build-/Testläufe für reine Dokumentation; letzte Codeprüfung unverändert gültig.
+Praktische Abnahme weiterhin: schräge Wandkette zeichnen, 2D/3D und Undo prüfen.
+Der Entwurf selbst schaltet noch keine neue T-Funktion frei.
+
+**Genau ein ausführbarer Folgeauftrag:** Reinen Domain-Geometriehelfer für ein
+rechtwinkliges T aus zwei expliziten Wänden gleicher Stärke/Höhe entwickeln.
+Hauptkontur unverändert, Nebenkontur bis zur zugewandten Körperfläche kürzen;
+Kontaktsegment, analytisches Volumen, Achslagen und Grenzfälle testen. Zunächst
+ohne Öffnungen/weitere Anschlüsse, Persistenz, UI oder automatische Verknüpfung.
+Die offenen Anker-/Bewegungsregeln werden erst für die spätere Integration benötigt.
+
+
 ## Aktueller Stand: Schraege automatische Wandecken — 06.10.2026
 
 Dieser Abschnitt ersetzt die historischen Folgeauftraege. Ausgangspunkt ist der

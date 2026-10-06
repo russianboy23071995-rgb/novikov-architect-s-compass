@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## T-wall connection planning boundary — 2026-10-06
+
+[The bounded T-connection draft](docs/T_WALL_CONNECTION_PLAN.md) records the
+current endpoint-pair limitation and proposes an unbroken host wall with a
+trimmed incoming wall. It is not an implemented connection or a settled anchor
+policy. Preserve common contours, IDs and validated Application actions. Host
+movement/anchor behavior and host opening clearance remain explicit proposals.
+The next geometry-only helper introduces no persistence, UI or command path.
+Text/voice remain companion adapters of verified actions per the guide; there
+is no blanket deferral based on the user's priority question.
+
 ## Oblique persisted wall corners — 2026-10-06
 
 The automatic connection path now uses Domain deriveWallCorner for non-collinear
