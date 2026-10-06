@@ -16,8 +16,8 @@ acquisition, preventing a false corner between opposite incoming branches.
 Rendering wallPlanOutlines removes coincident contact strokes only between
 persisted, visible partners using the authoritative derived contours. It does
 not discover relations from proximity or merge BIM entities. Hiding a partner
-restores the remaining wall's cap. Fill is uniform; selection uses the existing
-axis plus exposed contour. Separate hit geometry, stable IDs and IFC entities
+restores the remaining wall's cap. Fill is uniform; selection uses a subtle neutral exposed contour (1.25 CSS px).
+Turquoise is reserved for the authoritative drawing axis and its handles (2.5 CSS px axis). Separate hit geometry, stable IDs and IFC entities
 remain intact. This is a ground-plan display rule, not a solid boolean union.
 The existing temporary pair-preview overlay remains separately outlined.
 

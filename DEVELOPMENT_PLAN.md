@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Auswahlkorrektur: Steuerungsachse hervorheben — 06.10.2026
+
+Die ausgewählte Wandkontur ist jetzt dezent blaugrau mit 1,25 CSS-Pixeln,
+unabhängig vom Zoom. Die maßgebende Achse bleibt türkis und 2,5 Pixel stark;
+ihre Griffpunkte bleiben ebenfalls türkis. Gemeinsame Grundflächen und
+entfernte Kontaktlinien bleiben erhalten. Ergänzung zum offenen PR138.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
 ## Nutzerkorrektur: gemeinsame Grundfläche und mehrere T-Anschlüsse — 06.10.2026
 
 Ergänzung zum offenen PR138 (noch nicht zusammengeführt): bestätigte Eck- und

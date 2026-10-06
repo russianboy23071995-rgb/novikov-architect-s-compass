@@ -765,8 +765,8 @@ export function BimPlan({
                   })
                   .join(" ")}
                 fill="none"
-                stroke={selection?.id === wall.id ? WALL_AXIS_COLOR : "var(--primary)"}
-                strokeWidth={selection?.id === wall.id ? 0.025 : 0.018}
+                stroke={selection?.id === wall.id ? "#94a3b8" : "var(--primary)"}
+                strokeWidth={selection?.id === wall.id ? 1.25 / camera.pixelsPerMetre : 0.018}
                 pointerEvents="none"
               />
             )}
