@@ -7,18 +7,27 @@ import {
   validateProjectV4,
   validateProjectV5,
   validateProjectV6,
+  validateProjectV7,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 7. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 8. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
-  if (value.schemaVersion === 7) return validateProject(value);
+  if (value.schemaVersion === 8) return validateProject(value);
+  if (value.schemaVersion === 7) {
+    const old = validateProjectV7(value);
+    return validateProject({
+      ...old,
+      schemaVersion: 8,
+      storey: { ...old.storey, wallTJunctions: [] },
+    });
+  }
   if (value.schemaVersion === 6) {
     const old = validateProjectV6(value);
-    return validateProject({
+    return loadProjectData({
       ...old,
       schemaVersion: 7,
       storey: {

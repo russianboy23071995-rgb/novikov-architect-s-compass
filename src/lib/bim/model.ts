@@ -1,3 +1,4 @@
+import { reconcileTJunctions } from "../../domain/elements/wall/t-relations.ts";
 import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { assertAxisInside, offsetAtThickness } from "../../domain/elements/wall/axis-position.ts";
@@ -11,12 +12,19 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 7,
+    schemaVersion: 8,
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),
     unit: "m",
     id: projectId,
-    storey: { id: storeyId, walls: [], windows: [], hatches: [], wallJoins: [] },
+    storey: {
+      id: storeyId,
+      walls: [],
+      windows: [],
+      hatches: [],
+      wallJoins: [],
+      wallTJunctions: [],
+    },
   });
 }
 
@@ -47,6 +55,7 @@ export function updateWall(
   project: Project,
   wallId: string,
   changes: Partial<Omit<Wall, "id">>,
+  intent: "reshape" | "move" = "reshape",
 ): Project {
   const previous = project.storey.walls.find((wall) => wall.id === wallId);
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
@@ -73,7 +82,18 @@ export function updateWall(
     const p = changes[name];
     return p && (p.x !== previous[name].x || p.y !== previous[name].y);
   });
-  return validateProject(axisChanged ? reconcileWallJoins(proposed, wallId, previous) : proposed);
+  // A detached T must not silently turn into an automatic corner in the same edit.
+  const tPartners = project.storey.wallTJunctions.flatMap((r) =>
+    r.hostWallId === wallId
+      ? [r.incoming.wallId]
+      : r.incoming.wallId === wallId
+        ? [r.hostWallId]
+        : [],
+  );
+  const reconciled = axisChanged ? reconcileTJunctions(proposed, wallId, intent) : proposed;
+  return validateProject(
+    axisChanged ? reconcileWallJoins(reconciled, wallId, previous, tPartners) : reconciled,
+  );
 }
 
 export function addWindow(project: Project, opening: Creation<BimWindow>): Project {

@@ -1,5 +1,27 @@
 # NOVIKOV CAD Architecture Contract
 
+## Persisted isolated T relations, schema 8 — 2026-10-06
+
+Current contract supersedes the historical schema-7/persistence status below.
+storey.wallTJunctions stores only hostWallId and incoming wallId/endpoint.
+Strict V7 validation precedes migration with an empty T list; V1–V6 retain their
+explicit migration chain. Loading never discovers or repairs connections.
+Domain t-relations validates disjoint pairs (no shared walls or corner joins)
+and delegates geometry/opening inspection to t-pair. connectedWallContours and
+connectedWallSolids supply the existing plan, 3D, snapping and normal IFC paths.
+The first slice supports right angles and equal thickness/height only.
+
+Application t-connections provides snapshot-bound preview/commit connect and
+disconnect actions, stable IDs and one model-history transaction. Future mouse,
+text and voice adapters use this boundary, never a second relation model.
+Direct-edit translation passes explicit move intent through updateWall and
+removes a participating T without moving its neighbour or rediscovering joins.
+Reshaping retains a relation while the incoming world anchor remains on the host
+interior; otherwise it detaches. An end shortened exactly to the anchor does not
+silently become a corner. Invalid remaining contact geometry rejects atomically.
+Windows may touch T contact but cannot overlap it, including hidden windows.
+No automatic T creation or additional UI workflow is introduced in this slice.
+
 ## Recursion-free T pair kernel — 2026-10-06
 
 Domain t-pair owns inspection and solid derivation from resolved Wall parameters,

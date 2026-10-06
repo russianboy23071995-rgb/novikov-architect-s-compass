@@ -18,7 +18,12 @@ export function editablePoints(project: Project, target: TransformTarget): Point
   throw new Error("Das ausgewählte Element existiert nicht mehr.");
 }
 
-function applyPoints(project: Project, target: TransformTarget, points: Point[]): Project {
+function applyPoints(
+  project: Project,
+  target: TransformTarget,
+  points: Point[],
+  intent: "reshape" | "move" = "reshape",
+): Project {
   if (target.kind === "hatch")
     return previewHatch(project, project, {
       projectId: project.id,
@@ -27,7 +32,7 @@ function applyPoints(project: Project, target: TransformTarget, points: Point[])
       changes: { points },
     });
   return target.kind === "wall"
-    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! })
+    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent)
     : updateLine(project, target.id, { points });
 }
 
@@ -39,6 +44,7 @@ export function moveElement(project: Project, target: TransformTarget, offset: P
     project,
     target,
     editablePoints(project, target).map((p) => ({ x: p.x + offset.x, y: p.y + offset.y })),
+    "move",
   );
 }
 

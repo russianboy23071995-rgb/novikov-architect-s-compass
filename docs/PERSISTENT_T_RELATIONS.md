@@ -1,7 +1,10 @@
 # Dauerhafte T-Verbindungen: Implementierungsvertrag
 
 Stand 06.10.2026, geprüft gegen 0939d01 (PR131).
-Noch keine persistente T-Verbindung implementiert.
+Aktualisierung 06.10.2026: Schema 8 und gemeinsame Application-Aktionen sind
+implementiert. Dieser Vertrag bleibt Grundlage; die frühere Kerntrennung und
+Persistenzvorbereitung sind abgeschlossen. Automatische Erzeugung beim Fangen
+ist der nächste begrenzte Auftrag in DEVELOPMENT_PLAN.md.
 
 Fortschritt 06.10.2026: Die am Ende geplante Kerntrennung ist umgesetzt.
 `t-pair.ts` arbeitet ohne Projektvalidierung, die öffentlichen Einstiege prüfen
@@ -107,11 +110,38 @@ wieder her; Sichtbarkeit bleibt in ihrer unabhängigen History.
   IFC-Prüfung und Archicad-Abnahme. Der separate IFC-Test aus PR131 ist noch
   kein Nachweis einer gespeicherten T-Relation. Nutzerabnahme steht weiterhin aus.
 
-## Genau ein ausführbarer Folgeauftrag
+## Implementierungsnachweis und praktischer Test
 
-Zuerst den bestehenden T-Geometrie-/Öffnungspfad so aufteilen, dass eine bereits
-validierte Projektprüfung ihn ohne validateProject-Rekursion aufrufen kann.
-Vorschau und separater IFC-Abnahmeexport bleiben auf demselben Kern; ihre
-öffentlichen Eingänge behalten strikte Validierung. Grenztests ergänzen und alle
-bestehenden 2D/3D-/IFC-Nachweise erhalten. Noch keine Schemaänderung in diesem
-Schritt. Danach kann Schema 8 mit derselben geprüften Ableitung integriert werden.
+500 Tests einschließlich 12 neuer Integrationsfälle; TypeScript/Build bestanden,
+Lint ohne Fehler (6 bekannte FastRefresh-Warnungen). Generator:
+
+```
+node --experimental-strip-types scripts/generate-t-ifc-fixtures.mjs <Zielordner> --persistent
+```
+
+Erzeugt drei Schema-8-Projekte und reguläre IFC-Exporte (frei, berührend,
+berührend/gedreht). IfcOpenShell 0.8.5 bestätigt IFC4/EXPRESS, Profile,
+Zuordnungen, Platzierungen und analytische Nettovolumina aller drei Dateien.
+Der Modus ohne --persistent bleibt separater Abnahmeexport ohne gespeicherte T.
+
+1. t-free.project.json über Open project laden, 2D und 3D ansehen.
+2. Wall 1 auswählen und Länge von 6 auf 8 m ändern: Nebenwand bleibt stehen,
+   T bleibt erhalten. Mit Undo den Ausgangsstand wiederherstellen.
+3. Wall 1 auf 2 m kürzen: Verbindung löst sich, Nebenwand behält ihre Position.
+   Undo/Redo stellt Beziehung und Geometrie gemeinsam wieder her.
+4. Eine Wand frei verschieben: Verbindung löst sich ohne Mitnahme der anderen.
+5. Speichern, erneut öffnen und den normalen IFC-Button verwenden.
+6. t-touch.project.json prüft erlaubte Fensterberührung; Änderung der Host-
+   Fensterposition zur Mitte muss die Überschneidung ablehnen.
+
+Browser-Laden und 3D-Darstellung geprüft. Save und IFC melden erfolgreiche
+Erstellung/Downloadanforderung; der Automations-Downloadpfad blieb aus, daher
+keine Behauptung eines geprüften Browser-Download-Dateirundlaufs. Dieser ist
+als manueller Abnahmeschritt offen, JSON-Rundlauf ist durch Tests abgesichert.
+Archicad-Abnahme dieser regulären T-Dateien bleibt ebenfalls offen.
+
+## Nächster Auftrag
+
+Einziger aktiver Folgeauftrag ist die Anbindung der gemeinsamen 2D-Endpunkt-
+bewegung an eindeutigen Achsenfang und die gespeicherte T-Aktion, wie im aktuellen
+DEVELOPMENT_PLAN beschrieben. Keine neue Pflichtbedienung im Diagnosefenster.

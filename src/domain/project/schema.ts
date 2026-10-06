@@ -89,19 +89,35 @@ const projectV6Schema = projectV5Schema.extend({
     wallJoins: z.array(z.object({ first: wallEndSchema, second: wallEndSchema }).strict()),
   }),
 });
-const projectSchema = projectV6Schema.extend({
+const projectV7Schema = projectV6Schema.extend({
   schemaVersion: z.literal(7),
   storey: projectV6Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
 });
+const projectSchema = projectV7Schema.extend({
+  schemaVersion: z.literal(8),
+  storey: projectV7Schema.shape.storey.extend({
+    wallTJunctions: z.array(z.object({ hostWallId: id, incoming: wallEndSchema }).strict()),
+  }),
+});
+export function validateProjectV7(value: unknown) {
+  const project = projectV7Schema.parse(value);
+  validateProject({
+    ...project,
+    schemaVersion: 8,
+    storey: { ...project.storey, wallTJunctions: [] },
+  });
+  return project;
+}
 type ProjectV6 = z.infer<typeof projectV6Schema>;
 export function validateProjectV6(value: unknown): ProjectV6 {
   const project = projectV6Schema.parse(value);
   // Reuse current relation validation on a disposable explicitly converted view.
   validateProject({
     ...project,
-    schemaVersion: 7,
+    schemaVersion: 8,
     storey: {
       ...project.storey,
+      wallTJunctions: [],
       hatches: project.storey.hatches.map((h) => ({ ...h, ...defaultHatchAppearance })),
     },
   });
@@ -183,7 +199,7 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 8
       ? project.storey.hatches
       : []),
   ]) {
@@ -202,7 +218,7 @@ function validateGeometry(
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 8
       ? project.storey.hatches
       : []),
   ]) {
@@ -223,7 +239,7 @@ function validateGeometry(
     }
     if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 7)
+  if (project.schemaVersion === 5 || project.schemaVersion === 8)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {
