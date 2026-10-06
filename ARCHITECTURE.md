@@ -2084,3 +2084,11 @@ Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
 Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
+
+
+### Erweiterung 06.10.2026: zwei Ecken an der T-Hauptwand
+Verbindlicher implementierter Stand: Beide Hostenden dürfen rechtwinklige
+Eckanschlüsse besitzen. Die gemeinsame Prüfung berücksichtigt jeden Eckpartner
+und die zusammengesetzte Hostkontur. Kontakt/Überlappung mit einem Eckpartner
+bleibt verboten. Historische Begrenzungen auf genau einen Host-Eckanschluss
+sind damit überholt; andere Topologiegrenzen bleiben bestehen. Kein Schemawechsel.

@@ -143,3 +143,11 @@ zugehörige Matrixfälle als Regressionen, Build/Tests und praktische 2D-/3D-/IF
 Keine Erweiterung auf die ausdrücklich ausgeschlossenen Topologien. Falls die
 geometrische Prüfung neue Bedienentscheidungen erfordert, konkret dokumentieren
 statt still neue Nutzerregeln zu erfinden.
+
+
+### Erweiterung 06.10.2026: zwei Ecken an der T-Hauptwand
+Verbindlicher implementierter Stand: Beide Hostenden dürfen rechtwinklige
+Eckanschlüsse besitzen. Die gemeinsame Prüfung berücksichtigt jeden Eckpartner
+und die zusammengesetzte Hostkontur. Kontakt/Überlappung mit einem Eckpartner
+bleibt verboten. Historische Begrenzungen auf genau einen Host-Eckanschluss
+sind damit überholt; andere Topologiegrenzen bleiben bestehen. Kein Schemawechsel.
