@@ -51,3 +51,41 @@ samples, so wall-clock run duration includes additional workspace renders.
 
 The legacy implementation is kept only in benchmarks/commit-profile.ts. Do not
 import it into the product. The public file serializer remains fully validated.
+
+## Active movement profile (A-01/A-04)
+
+Load a fresh fixture, wait for Loaded, then Profile movement. Do not interact with
+the workspace during the run. Repeat for 100/1000/5000 with and without Image.
+Movement complete means that all 21 recorded samples rendered the measured preview
+and the subsequent cancellation, placement, single Undo and Redo checks passed.
+Report contains the individual samples, phase totals/call counts and acceptance.
+Reload before another run because the acceptance ends with a committed movement.
+
+The driver uses the real Navigator buttons to select 20 walls, starts the real
+On-Demand action and sends synthetic PointerEvent/MouseEvent inputs to the SVG.
+It never invokes the Application movement action directly. Two standard wheel
+steps zoom out before timing, leaving a visible empty area below the fixture.
+Small fixtures may need an additional setup wheel step after their initial fit
+settles; the report records that adjustment and the actual viewBox.
+Every dispatched pointer is checked against the SVG bounds. Both event types use
+the same rounded CSS coordinates. One warmup precedes 21 sequential targets on the same CSS-pixel path (6 px right,
+3 px downward per sample, into the empty side of the fixture), outside the origin snap radius. World targets are recorded
+through the resulting preview; CSS inputs and viewport are included. Initial fit
+differs by fixture, so the same screen travel represents different metre distances.
+The driver waits at least two animation frames and verifies the rendered wall
+position against the last preview snapshot observed by the instrumentation.
+If concurrent work has not reached the DOM, it waits additional frame pairs
+(up to 30); elapsed time includes that wait, and missing renders fail the run.
+
+Only the separate benchmark Vite configuration installs movement-instrumentation.
+It wraps explicit functions in memory and fails if a source anchor no longer
+matches. No production source is modified and no diagnostic module is imported
+by the product build. React Profiler records commit count and render duration.
+
+Phase timings are inclusive and nested: validation includes solids, selection
+preview includes validation, precision preview may include selection preview.
+Do not sum these phases or subtract independent medians to claim exclusive time.
+Elapsed time runs from synthetic dispatch to a verified frame opportunity. It is a paint opportunity, not GPU presentation
+or OS input latency. Synthetic clicks bypass hit testing, and sequential samples
+do not measure event queue/coalescing under continuous hardware input. This focused
+movement scenario does not close dense-snap, contour or peak-memory coverage.

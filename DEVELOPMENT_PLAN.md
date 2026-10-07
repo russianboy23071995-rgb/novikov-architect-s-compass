@@ -1,5 +1,33 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktive Gruppenbewegung vermessen - 07.10.2026
+
+PR168 freigegeben und zusammengefuehrt. Der begrenzte Messauftrag A-01/A-04
+ist abgeschlossen; keine neue Produktfunktion oder Vorschauoptimierung in diesem Schritt.
+[Messbericht](docs/performance/ACTIVE_MOVEMENT_PROFILE.md) und sechs Einzelberichte
+mit je 21 Stichproben dokumentieren den realen gemeinsamen Handler-/Renderpfad
+mit synthetischen DOM-Ereignissen (keine Messung von Hardware- oder GPU-Latenz).
+
+Median bis zur verifizierten Vorschau ohne/mit PNG: 100 Elemente 34,5/1050,0 ms;
+1000 Elemente 203,7/1290,6 ms; 5000 Elemente 1184,2/2085,0 ms. Pro Mausziel
+laufen zwei Vollvalidierungen. Bei unveraenderten PNG-Daten kommen rund 534 ms
+fuer erneute URL-Pruefung/Dekodierung hinzu: neue Vorschau-Assetobjekte verfehlen
+den bestehenden identitaetsbasierten Cache. Snap war auf diesem duenn belegten
+Testweg guenstig; dichte Suchbereiche sind damit nicht allgemein abgenommen.
+
+Alle sechs Faelle: 20 Waende ausgewaehlt, Vorschau angezeigt, Escape ohne History,
+Platzierung, genau ein Undo und Redo bestanden. 623 Tests, Typpruefung und Build
+erfolgreich; Lint ohne Fehler mit 6 bekannten Warnungen. Diagnosecode fehlt im
+Produktionsbundle. A-01 bleibt fuer reale Projekte, dichte/Kontur-Faelle, Hardware-
+Pointer und Peak-/GPU-Speicher offen. A-04 ist vermessen, noch nicht optimiert.
+
+Genau ein naechster Auftrag: den gemeinsamen checkedImageUrl-Pfad so begrenzt
+zwischenspeichern, dass unveraenderte Bildinhalte und Metadaten auch bei neuen
+Vorschau-Assetobjekten wiederverwendet werden. Cache-Bindung begrenzen; geaenderte
+Bytes, MIME oder Masse duerfen keine alte URL erhalten. Datei-/Modellvalidierung
+und History beibehalten; anschliessend denselben Bewegungsparcours vergleichen.
+Die doppelte Vorschauvalidierung bleibt ein danach separat zu bearbeitender Befund.
+
 ## A-03: redundante Commit-Validierung entfernt - 07.10.2026
 
 PR167 freigegeben und zusammengefuehrt. Der begrenzte A-03-Auftrag ist umgesetzt:
@@ -18,7 +46,7 @@ Der Commit bleibt teuer; Vorschauen sind mit dieser Aenderung nicht optimiert.
 Fensterbreite 1,2 -> 1,4 m, Undo -> 1,2 m, Redo -> 1,4 m bestaetigt.
 A-01 bleibt mit seinen ausgewiesenen Messluecken offen.
 
-Genau ein naechster Auftrag (A-01/A-04): den vorhandenen gemeinsamen Gruppen-
+Damals naechster Auftrag (oben abgeschlossen): den vorhandenen gemeinsamen Gruppen-
 bewegungspfad von Pointer-Eingang ueber Fang/Validierung bis zur gerenderten
 Vorschau instrumentieren. Dieselbe Bewegung von 20 Waenden in 100/1000/5000
 Elementen ohne/mit PNG messen, Median/P95 je Phase und Abbruch/Commit/Undo
