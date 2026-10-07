@@ -1548,7 +1548,7 @@ Saved definitions and annotations may initially share the versioned Project file
 
 **Binding user restriction and required application guard for N25:** proportional scaling is allowed only for genuine 2D entities and imported PDF references. BIM/3D objects (including walls, windows, doors, slabs and roofs) remain forbidden even when rendered in a 2D view or DrawingDocument. The future scaling action must resolve authoritative target types/capabilities and validate _every_ target before preview or commit. If any target is forbidden or unresolved, reject the entire selection without partial changes or a history entry. Hiding a toolbar command is insufficient; direct action calls, AI/Text/Voice and imported/reloaded references must pass the same guard. Validate finite positive lengths, nonzero measurement baseline, anchor and target revision. Uniform scale and an explicit anchor form the proposed calibration contract; text/style scaling semantics need separate definition.
 
-No scaling action exists in the inspected code. This documentation records its mandatory implementation gate; it does not claim executable enforcement has been added. Required acceptance cases: permitted drawing line/PDF; BIM wall selected in plan and section rejected; mixed line/wall selection rejected atomically; stale target rejected; valid operation preserves IDs and supports one undo/redo and JSON round-trip. Bitmap import remains an older retained wish; it does not gain scaling permission under the new restriction.
+No scaling action exists in the inspected code. This documentation records its mandatory implementation gate; it does not claim executable enforcement has been added. Required acceptance cases: permitted drawing line/PDF; BIM wall selected in plan and section rejected; mixed line/wall selection rejected atomically; stale target rejected; valid operation preserves IDs and supports one undo/redo and JSON round-trip. Update 2026-10-07: the user explicitly permits two-point calibration of imported PNG/JPEG images as well. This supersedes the bitmap exclusion only; BIM scaling remains forbidden.
 
 **Open user meanings — no default invented:** D versus Ctrl+D; whether a wall-axis switch preserves physical wall position or the drawn reference axis; the 3D export format/contents; undo grouping for wall chains. These block only their respective implementation. Detailed field names, folder layout, PDF decomposition approach, solid-library choice, per-annotation styling and layout-template linkage mechanics remain proposals until separately decided.
 
@@ -2092,3 +2092,15 @@ Eckanschlüsse besitzen. Die gemeinsame Prüfung berücksichtigt jeden Eckpartne
 und die zusammengesetzte Hostkontur. Kontakt/Überlappung mit einem Eckpartner
 bleibt verboten. Historische Begrenzungen auf genau einen Host-Eckanschluss
 sind damit überholt; andere Topologiegrenzen bleiben bestehen. Kein Schemawechsel.
+
+## Image-reference planning boundary — 2026-10-07
+
+See [image-reference plan](docs/references/IMAGE_REFERENCE_PLAN.md) for the verified
+schema-8 integration points and proposed embedded-asset/transform/action contract.
+No reference schema or calibration action is implemented by this documentation.
+Binding user decision: imported PNG/JPEG images may be calibrated using two
+points and a known length. This extends Section 30's permitted reference types;
+all BIM exclusions and whole-target Application guards remain binding. Asset-backed storey references are not DrawingDocuments or copied
+BIM elements. Browser decoders and disposable URLs belong to adapters; project
+files must preserve assets independently of their original local files. Proposed
+field names and embedded storage are an incremental design, not user decisions.
