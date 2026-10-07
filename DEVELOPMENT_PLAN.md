@@ -1,5 +1,26 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Browser-Projektdatei-Roundtrip - 07.10.2026
+
+PR159 freigegeben und in main 49f960e integriert. Entwicklungsserver nach Neustart
+wieder gestartet. Save project erzeugt eine echte Datei im Downloadordner.
+Der automatisierte Download-Event liefert weiterhin einen Timeout, obwohl die
+Datei gespeichert wird; kein nachgewiesener Fehler der Anwendung.
+
+Prüfung mit two-corner-t.project.json: fünf Wände, vier Ecken, ein T und ein
+Fenster laden, speichern, per Undo zum vorherigen Zweielement-Modell wechseln,
+tatsächlich heruntergeladene Datei öffnen und bestätigen. Vollständiger JSON-
+Vergleich mit Ausgangsdatei identisch; Navigator zeigt wieder fünf Wände und
+Fenster. Keine Fehler in der abgefragten Browserkonsole. Keine Runtime-Änderung;
+593 automatisierte Tests und Build aus dem vorherigen Code-Nachweis gelten
+unverändert, in diesem reinen Dokumentationsschritt nicht erneut ausgeführt.
+
+Genau ein Folgeauftrag (Guide-Etappe 7): Bestandsaufnahme und begrenzten technischen
+Plan für eine importierte Bildreferenz mit Zweipunkt-Kalibrierung erstellen.
+Asset-Speicherung, Ebenenzuordnung, Transformation, Undo und Projektdatei müssen
+an bestehende Architektur anschließen. Zunächst Daten-/Aktionsvertrag und konkreten
+kleinen Implementierungsauftrag festlegen; kein PDF-Zerlegen oder Layouteditor.
+
 ## Browser-/IFC-Abnahme Zwei-Ecken-T - 06.10.2026
 
 PR158 freigegeben und in main d2d3af9 integriert. Reproduzierbarer Generator
