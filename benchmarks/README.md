@@ -96,3 +96,10 @@ The image-URL reuse comparison is recorded in
 `docs/performance/image-url-2026-10-07/`. Use the unchanged movement protocol above.
 The image is checked during fixture rendering before movement timing, so this
 comparison measures warm reuse across preview copies, not cold import/decoding.
+
+
+[Selection preview reuse](../docs/performance/SELECTION_PREVIEW_REUSE.md) records
+the next comparison in `docs/performance/preview-reuse-2026-10-07/`. Each recorded
+target now has one project-validation call. The driver/fixtures are unchanged;
+final validate/commit calls intentionally still run full validation outside the
+movement samples.

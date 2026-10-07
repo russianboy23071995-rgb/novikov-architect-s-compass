@@ -1,3 +1,4 @@
+import { createPointPreview } from "../tools/point-preview.ts";
 import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
@@ -283,4 +284,130 @@ test("image movement rejects hidden/stale/nonfinite targets and an unaccompanied
   assert.throws(() => previewSelectionMove(s, p, targets, { x: Infinity, y: 0 }));
   assert.throws(() => beginSelectionMove(p, [...targets, { kind: "window", id: "F" }], origin));
   assert.equal(previewSelectionMove(s, p, targets, origin), p);
+});
+
+test("point preview shares one evaluation, copies coordinates and drops failed or cleared results", () => {
+  let calls = 0,
+    allowed = true;
+  const preview = createPointPreview(
+    (point) => {
+      calls++;
+      if (!Number.isFinite(point.x)) throw new Error("invalid target");
+      return { ...point };
+    },
+    () => {
+      if (!allowed) throw new Error("stale");
+    },
+  );
+  const point = { x: 2, y: 3 };
+  const first = preview.get(point);
+  assert.equal(preview.get({ ...point }), first);
+  assert.equal(calls, 1);
+  point.x = 4;
+  assert.deepEqual(preview.get(point), point);
+  assert.equal(calls, 2);
+  assert.throws(() => preview.get({ x: Infinity, y: 0 }), /invalid target/);
+  preview.get(point);
+  assert.equal(calls, 4);
+  allowed = false;
+  assert.throws(() => preview.get(point), /stale/);
+  allowed = true;
+  preview.get(point);
+  assert.equal(calls, 5);
+  preview.clear();
+  preview.get(point);
+  assert.equal(calls, 6);
+});
+
+test("precision and plan share a group preview; confirmation ignores altered presentation data", () => {
+  const p = fixture(),
+    targets = [...selectionIndex(p).values()];
+  const v = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const session = beginSelectionMove(p, targets, origin, v);
+  let result = p;
+  const adapter = selectionMoveInteraction(
+    session,
+    p,
+    targets,
+    v,
+    (next) => {
+      result = next;
+    },
+    () => {},
+  );
+  const precision = adapter.preview("90", "2", null);
+  const first = adapter.previewProject!(precision.point);
+  assert.equal(adapter.previewProject!({ ...precision.point }), first);
+  // A changed numeric target must derive different geometry.
+  const changed = adapter.preview("90", "3", null);
+  assert.notEqual(adapter.previewProject!(changed.point), first);
+  const displayed = adapter.previewProject!(changed.point);
+  displayed.storey.walls[0]!.height = -1;
+  confirmInteraction(adapter, changed.point);
+  assert.deepEqual(result, previewSelectionMove(session, p, targets, changed.point, v));
+  assert.ok(result.storey.walls[0]!.height > 0);
+  assert.notEqual(adapter.previewProject!(changed.point), displayed);
+  const beforeCancel = adapter.previewProject!(changed.point);
+  adapter.cancel();
+  assert.notEqual(adapter.previewProject!(changed.point), beforeCancel);
+});
+
+test("group preview reuse is scoped to model, selection, visibility and origin", () => {
+  const p = fixture(),
+    targets = [...selectionIndex(p).values()];
+  const visible = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const session = beginSelectionMove(p, targets, origin, visible);
+  const make = (base = p, selected = targets, policy = visible, move = session) =>
+    selectionMoveInteraction(
+      move,
+      base,
+      selected,
+      policy,
+      () => {},
+      () => {},
+    );
+  const a = make(),
+    first = a.previewProject!(target);
+  assert.notEqual(make().previewProject!(target), first);
+  assert.throws(() => make({ ...p }).previewProject!(target));
+  assert.throws(() => make(p, targets.slice(1)).previewProject!(target));
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.storey.hatches[0]!.layerId],
+  });
+  assert.throws(() => make(p, targets, hidden).previewProject!(target));
+  const otherOrigin = beginSelectionMove(p, targets, { x: 10, y: 10 }, visible);
+  assert.notDeepEqual(make(p, targets, visible, otherOrigin).previewProject!(target), first);
+  // Guard the retained hit even if the caller mutates its selection or origin.
+  const removed = targets.pop()!;
+  assert.throws(() => a.previewProject!(target));
+  targets.push(removed);
+  assert.notEqual(a.previewProject!(target), first);
+  session.origin.x++;
+  assert.throws(() => a.previewProject!(target));
+  assert.throws(() => confirmInteraction(a, target));
+  assert.throws(() => a.commit(target));
+});
+
+test("unconstrained mouse input preserves the exact snapped target for plan reuse", () => {
+  const p = fixture(),
+    targets = [...selectionIndex(p).values()];
+  const v = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const adapter = selectionMoveInteraction(
+    beginSelectionMove(p, targets, origin, v),
+    p,
+    targets,
+    v,
+    () => {},
+    () => {},
+  );
+  for (const point of [
+    { x: 22.8, y: -15.3 },
+    { x: 46.3, y: -27 },
+    { x: 48.6, y: -28.2 },
+  ]) {
+    const precision = adapter.preview("", "", point);
+    assert.deepEqual(precision.point, point);
+    assert.equal(adapter.previewProject!(precision.point), adapter.previewProject!(point));
+  }
 });

@@ -2228,3 +2228,16 @@ This is derived disposable presentation data, not model/file validation. No proj
 objects, decoded bitmaps or Blob URLs enter the cache or history. Changed inputs
 are checked again; eviction only changes cost. Cold-load validation remains intact.
 See [measured results and limits](docs/performance/IMAGE_URL_REUSE.md).
+
+## Single-target movement preview reuse - 2026-10-07
+
+`application/tools/point-preview.ts` is a disposable one-entry cache scoped to a
+bound interaction adapter, with exact point coordinates and guards before every
+hit. New immutable context requires a new instance; changed targets, failures,
+cancellation and confirmation clear it. Selection movement shares this result
+between precision evaluation and plan rendering. Its origin, model, selection and
+visibility guards remain active; validate/commit derive fresh snapshots instead of
+trusting presentation output. The UI latest-context guard remains authoritative
+for late callbacks. No global project cache or per-element UI branch is introduced.
+Unconstrained polar input preserves the exact already-resolved aim; explicit
+angle/length constraints and finite-distance guards retain their contracts.

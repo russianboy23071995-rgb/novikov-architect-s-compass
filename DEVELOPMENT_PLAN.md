@@ -1,5 +1,31 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## A-04: gemeinsame Bewegungsvorschau einmal validieren - 07.10.2026
+
+PR170 freigegeben und zusammengefuehrt. Der gemeinsame Application-Baustein
+point-preview haelt ein erfolgreiches Ergebnis pro exaktem Punkt und gebundenem
+Adapter. Gruppenbewegung teilt es zwischen Praezisionseingabe und Grundriss.
+Guards laufen auch beim Treffer; Ziel-/Kontextwechsel, Fehler und Abbruch verwerfen
+es. Validate und Commit rechnen weiterhin frisch; keine UI- oder Elementkopien.
+Ohne Winkel-/Laengeneingabe bleibt das bereits gefangene Mausziel exakt erhalten,
+statt durch Polar-Umrechnung minimale Unterschiede zu erzeugen. Ueberlauf bleibt
+abgewiesen. Modell-, Auswahl- und Sichtbarkeitsgrenzen bleiben bestehen.
+
+[Messbericht](docs/performance/SELECTION_PREVIEW_REUSE.md): In sechs Faellen mit
+je 21 Mauspositionen genau eine statt zwei Vollvalidierungen. Mit PNG sinken die
+Mediane bei 100/1000/5000 Elementen von 514/741/1603 auf 261/371/1235 ms.
+Alle sechs Ablaufe bestehen Vorschau, Abbruch, Platzierung, Undo und Redo.
+633 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
+A-04 bleibt offen: Vollvalidierung und Darstellung grosser Projekte sind teuer.
+A-01-Messluecken fuer reale/dichte Faelle und Hardwareeingabe bleiben bestehen.
+
+Genau ein naechster Auftrag: die reine Pruefung kanonischer Base64-Bilddaten im
+Referenzschema separat instrumentieren und bei bestaetigtem Aufwand deren Ergebnis
+begrenzt nach exaktem Stringinhalt wiederverwenden. Eintrags-/Zeichenbudget festlegen;
+geaenderte oder defekte Daten, MIME/Pixelmasse und Header weiter korrekt pruefen.
+Oeffentliche Datei- und Modellvalidierung behalten, keinen allgemeinen Trusted-
+Project-Pfad einfuehren. Anschliessend denselben Bewegungstest wiederholen.
+
 ## A-04: unveraenderte Referenzbilder wiederverwenden - 07.10.2026
 
 PR169 freigegeben und zusammengefuehrt. Der gemeinsame Bildadapter verwendet
@@ -19,7 +45,7 @@ Alle sechs Ablaufe mit Vorschau, Abbruch, Platzierung, Undo und Redo bestanden.
 A-04 bleibt offen: zwei Vollvalidierungen je Vorschau und teure Wandableitungen
 bestehen weiterhin. A-01-Messluecken fuer reale/dichte Faelle bleiben bestehen.
 
-Genau ein naechster Auftrag: die doppelte Validierung identischer Gruppen-
+Damals naechster Auftrag (oben abgeschlossen): die doppelte Validierung identischer Gruppen-
 bewegungsvorschauen aus Praezisionseingabe und Grundrissdarstellung beseitigen.
 Ein validiertes Ergebnis nur fuer unveraenderten Bewegungskontext und dasselbe
 Ziel wiederverwenden; Modell-/Auswahl-/Sichtbarkeits-/Ursprungs-/Zielwechsel
