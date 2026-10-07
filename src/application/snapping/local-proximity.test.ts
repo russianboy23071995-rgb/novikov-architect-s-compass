@@ -20,12 +20,14 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 8,
+    schemaVersion: 9,
+    assets: [],
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([]),
     unit: "m",
     id: "proximity",
     storey: {
+      references: [],
       hatches: [],
       wallJoins: [],
       wallTJunctions: [],

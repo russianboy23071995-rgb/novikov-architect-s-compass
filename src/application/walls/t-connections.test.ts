@@ -79,11 +79,12 @@ test("persistent T preview, one history commit, disconnect and undo/redo preserv
 test("schema 8 roundtrip and strict V7 migration retain geometry without discovering Ts", () => {
   const p = connected();
   assert.deepEqual(deserializeProject(serializeProject(p)), p);
-  const { wallTJunctions, ...storey } = p.storey;
-  const old = { ...p, schemaVersion: 7, storey };
+  const { references, wallTJunctions, ...storey } = p.storey;
+  const { assets, ...legacyRoot } = p;
+  const old = { ...legacyRoot, schemaVersion: 7, storey };
   const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 8);
-  assert.deepEqual(migrated.storey, { ...storey, wallTJunctions: [] });
+  assert.equal(migrated.schemaVersion, 9);
+  assert.deepEqual(migrated.storey, { ...storey, references: [], wallTJunctions: [] });
   assert.throws(() => loadProjectData({ ...p, schemaVersion: 7 }));
   assert.throws(() => loadProjectData({ ...old, schemaVersion: 8 }));
   assert.throws(() => validateProject(old));

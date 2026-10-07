@@ -1,8 +1,9 @@
+import { assertProjectFileSize } from "../../interop/project-file/size.ts";
 import { deserializeProject, serializeProject, validateProject } from "./model.ts";
 import type { Project } from "./model.ts";
 export type ProjectHistory = { past: Project[]; present: Project; future: Project[] };
 export const HISTORY_LIMIT = 100;
-export const PROJECT_FILE_LIMIT = 10 * 1024 * 1024;
+export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
 export function createHistory(project: Project): ProjectHistory {
   return { past: [], present: validateProject(project), future: [] };
 }
@@ -40,13 +41,12 @@ export function redoProject(history: ProjectHistory): ProjectHistory {
     : history;
 }
 export function readProjectFile(text: string): Project {
-  if (new TextEncoder().encode(text).byteLength > PROJECT_FILE_LIMIT)
-    throw new Error("Projektdatei ist größer als 10 MB.");
+  assertProjectFileSize(text);
   try {
     return deserializeProject(text);
   } catch {
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 8, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 9, Meter) mit gültigen Bauteilen.",
     );
   }
 }

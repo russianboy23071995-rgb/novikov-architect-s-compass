@@ -148,17 +148,24 @@ test("schema 4 roundtrip preserves hatches and BIM; IFC intentionally remains bu
 
 test("strict V3 migration preserves visibility and model IDs and never repairs invalid legacy input", () => {
   const p = createExampleProject();
-  const { hatches, wallTJunctions, wallJoins, ...storey } = p.storey;
+  const { references, hatches, wallTJunctions, wallJoins, ...storey } = p.storey;
+  const { assets, ...legacyRoot } = p;
   const v3 = {
-    ...p,
+    ...legacyRoot,
     schemaVersion: 3,
     storey: { ...storey, walls: storey.walls.map(({ bodyOffset, ...wall }) => wall) },
     bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.wall] },
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 8);
-  assert.deepEqual(migrated.storey, { ...storey, hatches: [], wallJoins: [], wallTJunctions: [] });
+  assert.equal(migrated.schemaVersion, 9);
+  assert.deepEqual(migrated.storey, {
+    ...storey,
+    references: [],
+    hatches: [],
+    wallJoins: [],
+    wallTJunctions: [],
+  });
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
   assert.throws(() => validateProject(v3));
@@ -224,6 +231,8 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
   for (const version of [4, 5, 6]) {
     const old = JSON.parse(JSON.stringify(current));
     old.schemaVersion = version;
+    delete old.assets;
+    delete old.storey.references;
     delete old.storey.wallTJunctions;
     old.storey.hatches.forEach((h: Record<string, unknown>) => {
       delete h["background"];
@@ -236,7 +245,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       });
     const before = JSON.stringify(old);
     const loaded = loadProjectData(old);
-    assert.equal(loaded.schemaVersion, 8);
+    assert.equal(loaded.schemaVersion, 9);
     assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
     assert.equal(JSON.stringify(old), before);
     old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };

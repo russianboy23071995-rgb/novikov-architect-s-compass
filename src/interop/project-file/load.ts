@@ -1,3 +1,4 @@
+import { assertProjectFileSize } from "./size.ts";
 import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
 import {
   validateLegacyProject,
@@ -8,18 +9,28 @@ import {
   validateProjectV5,
   validateProjectV6,
   validateProjectV7,
+  validateProjectV8,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 8. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 9. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
-  if (value.schemaVersion === 8) return validateProject(value);
+  if (value.schemaVersion === 9) return validateProject(value);
+  if (value.schemaVersion === 8) {
+    const old = validateProjectV8(value);
+    return validateProject({
+      ...old,
+      schemaVersion: 9,
+      assets: [],
+      storey: { ...old.storey, references: [] },
+    });
+  }
   if (value.schemaVersion === 7) {
     const old = validateProjectV7(value);
-    return validateProject({
+    return loadProjectData({
       ...old,
       schemaVersion: 8,
       storey: { ...old.storey, wallTJunctions: [] },
@@ -86,5 +97,6 @@ export function loadProjectData(value: unknown): Project {
 }
 
 export function deserializeProject(json: string): Project {
+  assertProjectFileSize(json);
   return loadProjectData(JSON.parse(json));
 }

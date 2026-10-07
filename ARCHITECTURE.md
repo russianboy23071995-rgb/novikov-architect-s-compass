@@ -2104,3 +2104,22 @@ all BIM exclusions and whole-target Application guards remain binding. Asset-bac
 BIM elements. Browser decoders and disposable URLs belong to adapters; project
 files must preserve assets independently of their original local files. Proposed
 field names and embedded storage are an incremental design, not user decisions.
+
+## Implemented image-reference storage slice — 2026-10-07
+
+Runtime schema 9 adds project assets and storey.references. The reference domain
+module validates the storage shape, canonical base64, MIME whitelist, pixel metadata,
+finite noncollapsed transforms and linked asset/layer IDs. It deliberately does not
+decode images; future file/browser adapters must verify actual content, orientation
+and decoded dimensions before rendering/import. No bitmap is trusted as executable
+markup. Migration 1–8 belongs solely to the file adapter and adds empty collections.
+Image bytes are stored once per asset; no blob URLs or decoded images enter history.
+
+application/references/actions.ts binds import to project ID and base snapshot,
+validates an independent preview and commits asset/reference in one history step.
+The shared file-size guard now also protects serialization, import and direct JSON
+loading (10 MiB UTF-8). Storage metadata has a provisional 16-million-pixel budget
+and 16384-pixel edge limit; this is a conservative implementation bound, not a
+measured browser capacity promise. Renderer/decoder resource checks remain pending.
+Layer assignment, occupancy and eligibility include references. Selection/rendering
+and calibration are not yet exposed; existing BIM IFC output ignores these 2D data.
