@@ -1,5 +1,21 @@
 # Browser baseline (A-01)
 
+## Architecture audit (read-only, no browser required)
+
+Run `node --experimental-strip-types benchmarks/architecture-audit.ts` at the
+repository root. It calls the existing selection movement action for mixed
+100/1000/5000-element fixtures and asserts object/value identity, base immutability,
+changed contours on a stationary joined neighbour, and rejection when an unrelated
+wall endpoint arrives at an already joined node. JSON is written to stdout.
+
+This is a baseline diagnostic of the current implementation, not a future
+requirement to keep reallocating all objects, a latency test, or a heap measurement.
+Update the reallocation observations when the preview representation changes.
+See [the architecture review](../docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md)
+and its captured `architecture-audit-2026-10-07.json` for scope and implications.
+
+## Browser setup and measurements
+
 Run `npm run benchmark:browser` and open
 `http://127.0.0.1:8081/benchmarks/browser.html`. This separate development server
 mounts the actual CadWorkspace; it never reads or replaces the user's project.
@@ -96,3 +112,10 @@ The image-URL reuse comparison is recorded in
 `docs/performance/image-url-2026-10-07/`. Use the unchanged movement protocol above.
 The image is checked during fixture rendering before movement timing, so this
 comparison measures warm reuse across preview copies, not cold import/decoding.
+
+
+[Selection preview reuse](../docs/performance/SELECTION_PREVIEW_REUSE.md) records
+the next comparison in `docs/performance/preview-reuse-2026-10-07/`. Each recorded
+target now has one project-validation call. The driver/fixtures are unchanged;
+final validate/commit calls intentionally still run full validation outside the
+movement samples.

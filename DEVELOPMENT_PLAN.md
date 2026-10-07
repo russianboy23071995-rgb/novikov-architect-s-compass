@@ -1,5 +1,86 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Auftrag: Architekturprüfung und A-04-Kurskorrektur — 07.10.2026
+
+Der Nutzer priorisiert eine tragfähige Gesamtlösung vor weiteren Einzelcaches.
+Geprüft: `main` nach PR170 (`4928940`) und offener PR171 auf
+`perf/selection-preview-reuse` (`a588f41`). PR171 wird in diesem Auftrag nicht
+zusammengeführt. Die folgenden älteren Einträge bleiben als Verlauf erhalten;
+dieser Abschnitt bestimmt den aktuellen Folgeauftrag.
+
+Ergebnis und Entscheidungsgrundlage:
+[Architekturreview](docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md).
+Die gemeinsame Modell-/Application-/Fangstruktur bleibt geeignet. Der heiße Pfad
+ist jedoch noch nicht skalierbar: jedes neue Bewegungsziel erstellt/prüft ein
+Gesamtprojekt und stößt breite Darstellungsarbeit an. Ein zusätzlicher
+Base64-Schemacache wird als nächster Schritt zurückgestellt.
+
+Die neue ausführbare Diagnose `benchmarks/architecture-audit.ts` bestätigt:
+Bei einer geänderten Wand entstehen in Projekten mit 100/1.000/5.000 Elementen
+100/1.000/5.000 neue Elementobjekte. Der stehende Eckpartner ändert trotz gleicher
+Parameter seine Kontur. Ein räumlich hinzukommendes, bisher unverbundenes
+Achsende kann einen Anschluss ungültig machen. Die lokale Vorschau muss deshalb
+fachliche **und räumliche** Abhängigkeiten berücksichtigen. Das ist keine
+Latenz-/Speichermessung und kein Nachweis physisch kopierter Base64-Strings.
+
+ARCHITECTURE.md trennt nun ausdrücklich den bestehenden Stand von der
+verbindlichen Migrationsrichtung: vorbereitete gemeinsame Aktion, betroffene
+Vorschau über stabiler Basis, wiederverwendete Anzeige und volle Absicherung
+beim Commit. Keine neue Bedienregel, kein zweites Modell, kein History-/Datei-
+Komplettumbau. Die bisherigen Anforderungsmatrizen und Nutzerwünsche bleiben gültig.
+A-04 bleibt offen; A-01 hat weiterhin Messlücken, A-05/A-06/A-07 bleiben offen.
+
+Prüfung dieses Auftrags: Strukturdiagnose für alle drei Größen bestanden,
+633/633 bestehende Tests bestanden, TypeScript einschließlich Diagnose und
+Produktionsbuild erfolgreich. Lint: 0 Fehler, 6 bekannte Warnungen. Keine neue
+Browser-/Archicad-Abnahme oder neue Latenzmessung, da nur Dokumentation und
+separates Diagnoseprogramm ergänzt wurden.
+
+**Genau ein nächster ausführbarer Auftrag: A-04-Pilot „Auswahl frei bewegen“ im
+2D-Grundriss auf vorbereitete gemeinsame Aktionsauswertung und betroffene
+Vorschau umstellen.** Der vollständige Auftrag und die Abnahme stehen im Review.
+Bereits unterstützte gemischte Auswahlen, Host-Fenster, interne/gelöste
+Grenzanschlüsse und stehende Nachbarn berücksichtigen. Gemeinsame Domain-Regeln
+und die volle Commit-Validierung erhalten; bestehende Text-/Voice-Adapter nutzen
+denselben Weg. Stabile Basisdarstellung und Navigator von Pointer-Updates
+abgrenzen. Kein pauschaler Umbau weiterer Werkzeuge.
+
+Nachweis: fachliche Gleichheit zum bisherigen Vollpfad einschließlich fremdem
+Endpunkt am Anschluss, Ecke/T, numerischen Grenzen, Abbruch und veraltetem
+Kontext. Keine Gesamtvalidierung/Serialisierung oder Base64-Prüfung je Mausziel.
+Die sechs vorhandenen Browserfälle plus einen dichten Anschlussfall vergleichen;
+Vorbereitung getrennt messen. Praktisch Mausplatzierung, Shift/Tab, Zoom,
+Undo/Redo und den bestätigten Stand in Datei/3D/IFC prüfen. Erst nach bestandenem
+Pilot weitere Aktionen anschließen. Neue Bauteile und Sprachfunktionsausbau
+bleiben bis dahin hinter dieser gemeinsamen Grundlage eingeordnet.
+
+## A-04: gemeinsame Bewegungsvorschau einmal validieren - 07.10.2026
+
+PR170 freigegeben und zusammengefuehrt. Der gemeinsame Application-Baustein
+point-preview haelt ein erfolgreiches Ergebnis pro exaktem Punkt und gebundenem
+Adapter. Gruppenbewegung teilt es zwischen Praezisionseingabe und Grundriss.
+Guards laufen auch beim Treffer; Ziel-/Kontextwechsel, Fehler und Abbruch verwerfen
+es. Validate und Commit rechnen weiterhin frisch; keine UI- oder Elementkopien.
+Ohne Winkel-/Laengeneingabe bleibt das bereits gefangene Mausziel exakt erhalten,
+statt durch Polar-Umrechnung minimale Unterschiede zu erzeugen. Ueberlauf bleibt
+abgewiesen. Modell-, Auswahl- und Sichtbarkeitsgrenzen bleiben bestehen.
+
+[Messbericht](docs/performance/SELECTION_PREVIEW_REUSE.md): In sechs Faellen mit
+je 21 Mauspositionen genau eine statt zwei Vollvalidierungen. Mit PNG sinken die
+Mediane bei 100/1000/5000 Elementen von 514/741/1603 auf 261/371/1235 ms.
+Alle sechs Ablaufe bestehen Vorschau, Abbruch, Platzierung, Undo und Redo.
+633 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
+A-04 bleibt offen: Vollvalidierung und Darstellung grosser Projekte sind teuer.
+A-01-Messluecken fuer reale/dichte Faelle und Hardwareeingabe bleiben bestehen.
+
+Damals vorgeschlagener Auftrag, durch die Architekturprüfung oben zurückgestellt:
+die reine Pruefung kanonischer Base64-Bilddaten im
+Referenzschema separat instrumentieren und bei bestaetigtem Aufwand deren Ergebnis
+begrenzt nach exaktem Stringinhalt wiederverwenden. Eintrags-/Zeichenbudget festlegen;
+geaenderte oder defekte Daten, MIME/Pixelmasse und Header weiter korrekt pruefen.
+Oeffentliche Datei- und Modellvalidierung behalten, keinen allgemeinen Trusted-
+Project-Pfad einfuehren. Anschliessend denselben Bewegungstest wiederholen.
+
 ## A-04: unveraenderte Referenzbilder wiederverwenden - 07.10.2026
 
 PR169 freigegeben und zusammengefuehrt. Der gemeinsame Bildadapter verwendet
@@ -19,7 +100,7 @@ Alle sechs Ablaufe mit Vorschau, Abbruch, Platzierung, Undo und Redo bestanden.
 A-04 bleibt offen: zwei Vollvalidierungen je Vorschau und teure Wandableitungen
 bestehen weiterhin. A-01-Messluecken fuer reale/dichte Faelle bleiben bestehen.
 
-Genau ein naechster Auftrag: die doppelte Validierung identischer Gruppen-
+Damals naechster Auftrag (oben abgeschlossen): die doppelte Validierung identischer Gruppen-
 bewegungsvorschauen aus Praezisionseingabe und Grundrissdarstellung beseitigen.
 Ein validiertes Ergebnis nur fuer unveraenderten Bewegungskontext und dasselbe
 Ziel wiederverwenden; Modell-/Auswahl-/Sichtbarkeits-/Ursprungs-/Zielwechsel
@@ -184,9 +265,9 @@ gemeldete 500-Punkte-Fall wurde isoliert deutlich schneller gemessen. Die
 Fangpunktlogik besitzt bereits einen lokalen Index und eine Begrenzung für
 dichte Bereiche. A-01 nimmt beide als Browser-Regression mit auf.
 
-**Aktueller Architekturauftrag:** siehe P0-Messreihe oben. A-01-Teilnachweis und
-A-02 liegen vor; A-03 folgt anhand der gemessenen Kosten. Die noch offenen
-A-01-Abnahmen bleiben ausdruecklich bestehen.
+**Fortschreibung:** A-01-Teilnachweis, A-02 und A-03 liegen vor. Aktuell gilt der
+A-04-Pilot aus der Architekturprüfung am Dateianfang. Die noch offenen
+A-01-Abnahmen bleiben ausdrücklich bestehen.
 
 ## Bildreferenzen gemeinsam bewegen - 07.10.2026
 

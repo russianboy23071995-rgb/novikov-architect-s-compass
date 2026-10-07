@@ -1,3 +1,4 @@
+import { createPointPreview } from "../tools/point-preview.ts";
 import { validateProject, type Project, type Point } from "../../domain/project/schema.ts";
 import { eligibleSelection, targetKey, type SelectionSet } from "./state.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
@@ -109,8 +110,21 @@ export function selectionMoveInteraction(
   commit: (project: Project) => void,
   cancel: () => void,
 ): AnchoredToolInteraction {
-  const previewProject = (point: Point) =>
+  const origin = { ...session.origin };
+  const evaluateProject = (point: Point) =>
     previewSelectionMove(session, current, targets, point, visibility);
+  const assertContext = () => {
+    if (
+      session.base !== current ||
+      !sameTargets(session.targets, targets) ||
+      session.origin.x !== origin.x ||
+      session.origin.y !== origin.y
+    )
+      throw new Error("Bewegungskontext geaendert. Erneut beginnen.");
+    assertMovableSelection(current, targets, visibility);
+  };
+  const preview = createPointPreview(evaluateProject, assertContext);
+  const previewProject = preview.get;
   return {
     identity: session,
     origin: session.origin,
@@ -124,9 +138,18 @@ export function selectionMoveInteraction(
     },
     previewProject,
     validate: (point) => {
-      previewProject(point);
+      preview.clear();
+      assertContext();
+      evaluateProject(point);
     },
-    commit: (point) => commit(previewProject(point)),
-    cancel,
+    commit: (point) => {
+      preview.clear();
+      assertContext();
+      commit(evaluateProject(point));
+    },
+    cancel: () => {
+      preview.clear();
+      cancel();
+    },
   };
 }
