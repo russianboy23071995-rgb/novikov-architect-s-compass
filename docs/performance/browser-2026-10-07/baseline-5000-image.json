@@ -1,0 +1,83 @@
+{
+  "count": 5000,
+  "images": true,
+  "bytes": 9779490,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "heap": {
+    "used": 507598953,
+    "total": 575786565,
+    "limit": 4395630592
+  },
+  "results": {
+    "fixtureValidate": {
+      "n": 1,
+      "medianMs": 556.3000000119209,
+      "p95Ms": 556.3000000119209
+    },
+    "react-update": {
+      "n": 42,
+      "medianMs": 492.3999997973442,
+      "p95Ms": 574.7999999523163
+    },
+    "react-nested-update": {
+      "n": 9,
+      "medianMs": 0.20000001788139343,
+      "p95Ms": 556.3999999761581
+    },
+    "loadAndMount": {
+      "n": 1,
+      "medianMs": 7835.199999988079,
+      "p95Ms": 7835.199999988079
+    },
+    "formKeysLegacy": {
+      "n": 21,
+      "medianMs": 11.100000023841858,
+      "p95Ms": 14
+    },
+    "groupPreview": {
+      "n": 21,
+      "medianMs": 418.5,
+      "p95Ms": 426.2999999821186
+    },
+    "wallPreview": {
+      "n": 21,
+      "medianMs": 412.59999999403954,
+      "p95Ms": 452.2999999821186
+    },
+    "wallSolids": {
+      "n": 21,
+      "medianMs": 0,
+      "p95Ms": 0.09999999403953552
+    },
+    "commit": {
+      "n": 21,
+      "medianMs": 1314.2000000178814,
+      "p95Ms": 1373.800000011921
+    },
+    "undoRedo": {
+      "n": 21,
+      "medianMs": 0,
+      "p95Ms": 0.09999999403953552
+    },
+    "jsonSave": {
+      "n": 21,
+      "medianMs": 435,
+      "p95Ms": 446.5
+    },
+    "jsonLoad": {
+      "n": 21,
+      "medianMs": 429.2999999821186,
+      "p95Ms": 458.19999998807907
+    },
+    "event-pointermove-twoRAF": {
+      "n": 22,
+      "medianMs": 17.5,
+      "p95Ms": 18.899999976158142
+    },
+    "event-click-twoRAF": {
+      "n": 22,
+      "medianMs": 884,
+      "p95Ms": 946.3000000119209
+    }
+  }
+}

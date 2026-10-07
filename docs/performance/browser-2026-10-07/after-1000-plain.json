@@ -1,0 +1,48 @@
+{
+  "count": 1000,
+  "images": false,
+  "bytes": 156794,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "heap": {
+    "used": 106180589,
+    "total": 179087773,
+    "limit": 4395630592
+  },
+  "results": {
+    "fixtureValidate": {
+      "n": 1,
+      "medianMs": 44.5,
+      "p95Ms": 44.5
+    },
+    "react-update": {
+      "n": 32,
+      "medianMs": 65.89999997615814,
+      "p95Ms": 197.30000001192093
+    },
+    "react-nested-update": {
+      "n": 8,
+      "medianMs": 0.29999998211860657,
+      "p95Ms": 60.79999986290932
+    },
+    "loadAndMount": {
+      "n": 1,
+      "medianMs": 701.3000000119209,
+      "p95Ms": 701.3000000119209
+    },
+    "formKeysRevision": {
+      "n": 21,
+      "medianMs": 0,
+      "p95Ms": 0.09999999403953552
+    },
+    "event-pointermove-twoRAF": {
+      "n": 22,
+      "medianMs": 7.799999982118607,
+      "p95Ms": 10.5
+    },
+    "event-click-twoRAF": {
+      "n": 22,
+      "medianMs": 150.10000002384186,
+      "p95Ms": 475.2999999821186
+    }
+  }
+}

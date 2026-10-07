@@ -1,12 +1,37 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## P0-Messreihe und A-02-Korrektur - 07.10.2026
+
+PR166 freigegeben und mit erhaltener Architektur-Aufgabenliste zusammengefuehrt.
+Browser-Parcours und Rohdaten: [P0_BROWSER_BASELINE](docs/performance/P0_BROWSER_BASELINE.md).
+Sechs Szenarien: 100/1000/5000 Elemente ohne/mit PNG, bis 9,33 MiB. Kernaktionen
+je 21 Stichproben, Auswahl je 22 Klicks, Median/P95 und JS-Heap-Snapshot dokumentiert.
+A-02 ersetzt beide vollstaendigen JSON-Formschluessel durch schwache Snapshot-
+Revision plus Auswahlidentitaet. Auswahlwechsel/Modellaenderung aktualisieren
+Formulare; Zoom behaelt Eingabeentwuerfe. Kein Zugriff auf Assets fuer Formschluessel.
+
+619 Tests, Typpruefung inklusive Diagnosecode und Build bestanden; Lint ohne
+Fehler (6 bekannte Warnungen). Browser: Entwurf bei Zoom, Auswahlwechsel,
+Maasseingabe/Undo/Redo und Ebenenzuweisung/Undo geprueft.
+
+A-01 ist ein Teilnachweis: aktive Pointer-bis-Bild-Vorschau, Kontur-/Dichte-
+Browserregressionen, echte Nutzerprojekte und Peak-/GPU-Speicher bleiben offen.
+ConnectedWallSolids besitzt bereits einen Snapshot-Cache; A-04 muss neue Vorschau-
+Snapshots und unveraendertes Modell unterscheiden. Keine pauschale Speicher-Kopiebehauptung.
+
+Genau ein naechster Auftrag: A-03 am vorhandenen grossen Bildszenario in Validierung,
+Wandableitung und JSON-Vergleich aufteilen und einen nachgewiesen redundanten
+Durchlauf begrenzt korrigieren; Guards, Undo/Redo und Dateivalidierung erhalten.
+Raeume bleiben bis zur Stabilisierung zurueckgestellt.
+
+
 ## Architektur und Skalierung: priorisierte Aufgaben - 07.10.2026
 
 Stand der Prüfung: `main` am 07.10.2026. Die Prioritäten gelten für die
 Architekturarbeiten; der unten dokumentierte Auftrag zur Bewegung von
 Bildreferenzen bleibt der festgelegte Funktionsauftrag. Größere Umbauten
-folgen erst auf Messungen mit realen Projekten. Alle folgenden Aufgaben sind
-offen; ein Codebefund allein belegt noch keinen spürbaren Browser-Engpass.
+folgen erst auf Messungen mit realen Projekten. Die Checkboxen zeigen den aktuellen Stand; ein Codebefund allein belegt
+noch keinen spuerbaren Browser-Engpass.
 
 ### P0 - zuerst messen und den bekannten Render-Aufwand entfernen
 
@@ -19,7 +44,7 @@ offen; ein Codebefund allein belegt noch keinen spürbaren Browser-Engpass.
   ausgewählte Gruppen aufnehmen. **Abnahme:** Eine Vergleichsbasis macht
   sichtbar, welcher Pfad tatsächlich bremst; Wiederholung nach Änderungen
   zeigt denselben Ablauf ohne Funktionsverlust.
-- [ ] **A-02 Eigenschaftsformulare ohne vollständige JSON-Schlüssel.** In
+- [x] **A-02 Eigenschaftsformulare ohne vollständige JSON-Schlüssel.** In
   `CadWorkspace` werden Formzustände derzeit über
   `JSON.stringify([selection, project])` geschlüsselt (zwei Stellen). Einen
   stabilen Schlüssel aus Auswahlidentität und passender Modellrevision
@@ -79,10 +104,9 @@ gemeldete 500-Punkte-Fall wurde isoliert deutlich schneller gemessen. Die
 Fangpunktlogik besitzt bereits einen lokalen Index und eine Begrenzung für
 dichte Bereiche. A-01 nimmt beide als Browser-Regression mit auf.
 
-**Genau ein nächster Architekturauftrag:** A-01 als reproduzierbaren
-Browser-Messparcours ausführen und Ergebnisse im Plan festhalten. Danach
-A-02 mit Vorher-/Nachher-Messung bearbeiten; A-03/A-04 nur anhand der
-gefundenen Engpässe konkretisieren.
+**Aktueller Architekturauftrag:** siehe P0-Messreihe oben. A-01-Teilnachweis und
+A-02 liegen vor; A-03 folgt anhand der gemessenen Kosten. Die noch offenen
+A-01-Abnahmen bleiben ausdruecklich bestehen.
 
 ## Bildreferenzen gemeinsam bewegen - 07.10.2026
 

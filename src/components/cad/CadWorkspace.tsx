@@ -1,3 +1,4 @@
+import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
 import { useReferenceCalibration } from "./useReferenceCalibration";
 import { useImageImport } from "./useImageImport";
@@ -69,7 +70,8 @@ import { LayerManager } from "./LayerManager";
 
 export function CadWorkspace({
   layerVisibility,
-}: { layerVisibility?: LayerVisibilityContext } = {}) {
+  initialProject,
+}: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
   const [layersOpen, setLayersOpen] = useState(false);
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
@@ -86,7 +88,7 @@ export function CadWorkspace({
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
   const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
-    createEditingState(createExampleProject()),
+    createEditingState(initialProject ?? createExampleProject()),
   );
   const { history, session: pendingSession } = editing;
   const project = history.present;
@@ -811,7 +813,7 @@ export function CadWorkspace({
             )}
             {tool === "select" && (
               <LayerProperties
-                key={`layer:${JSON.stringify([selection, project])}`}
+                key={`layer:${propertyFormKey(project, selection)}`}
                 project={project}
                 selection={selection}
                 disabled={referenceSelection.selecting}
@@ -922,7 +924,7 @@ export function CadWorkspace({
             </p>
           ) : (
             <BimInspector
-              key={JSON.stringify([selection, project])}
+              key={propertyFormKey(project, selection)}
               project={project}
               selection={selection}
               onChange={changeProject}
