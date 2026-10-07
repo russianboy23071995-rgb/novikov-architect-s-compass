@@ -1,5 +1,89 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Architektur und Skalierung: priorisierte Aufgaben - 07.10.2026
+
+Stand der Prüfung: `main` am 07.10.2026. Die Prioritäten gelten für die
+Architekturarbeiten; der unten dokumentierte Auftrag zur Bewegung von
+Bildreferenzen bleibt der festgelegte Funktionsauftrag. Größere Umbauten
+folgen erst auf Messungen mit realen Projekten. Alle folgenden Aufgaben sind
+offen; ein Codebefund allein belegt noch keinen spürbaren Browser-Engpass.
+
+### P0 - zuerst messen und den bekannten Render-Aufwand entfernen
+
+- [ ] **A-01 Browser-Baseline für große Projekte.** Reproduzierbare Szenarien
+  mit etwa 100, 1.000 und 5.000 Elementen sowie ohne und mit eingebetteten
+  PNG/JPEG-Referenzen nahe der heutigen 10-MiB-Projektgrenze anlegen.
+  Auswahl/Eigenschaften, Pointer-Vorschau, Commit, Undo/Redo und
+  JSON-Laden/Speichern messen; Median/P95 und Speicherbedarf samt Browser,
+  Testdaten und Messmethode dokumentieren. Auch viele verbundene Wände und
+  ausgewählte Gruppen aufnehmen. **Abnahme:** Eine Vergleichsbasis macht
+  sichtbar, welcher Pfad tatsächlich bremst; Wiederholung nach Änderungen
+  zeigt denselben Ablauf ohne Funktionsverlust.
+- [ ] **A-02 Eigenschaftsformulare ohne vollständige JSON-Schlüssel.** In
+  `CadWorkspace` werden Formzustände derzeit über
+  `JSON.stringify([selection, project])` geschlüsselt (zwei Stellen). Einen
+  stabilen Schlüssel aus Auswahlidentität und passender Modellrevision
+  verwenden, ohne das gesamte Projekt bei jedem Render zu serialisieren.
+  **Abnahme:** Auswahlwechsel, Bearbeitung, Undo/Redo sowie Ebenen- und
+  Referenzänderungen aktualisieren die Formulare korrekt; der große
+  Serialisierungsschritt entfällt. Die isolierte Messung von etwa 10 ms für
+  5 MiB ist ein Hinweis, kein gemessener Browserwert.
+
+### P1 - nach der Baseline gezielt die heißen Pfade bearbeiten
+
+- [ ] **A-03 Validierung und History auf Kosten prüfen.** Beim Commit werden
+  aktuell das gesamte Projekt validiert, verbundene Wandkörper abgeleitet und
+  ein JSON-Snapshot für den Vergleich erzeugt. Besonders eingebettete
+  Bilddaten in der A-01-Messung betrachten. Nur bei nachgewiesenem Engpass
+  den Commit-/Vergleichspfad begrenzt optimieren, etwa durch stabile
+  Änderungsidentitäten oder wiederverwendbare, unveränderliche Daten.
+  **Abnahme:** Ungültige und veraltete Aktionen bleiben gesperrt; Undo/Redo,
+  Dateiroundtrip und Projektvalidierung liefern dieselben Ergebnisse.
+  Keine pauschale Aussage über 100-fach kopierte Bilder im Speicher treffen.
+- [ ] **A-04 Vorschauen lokal halten.** `previewWallChain` und
+  `previewSelectionMove` können bei Pointerbewegungen ganze
+  Projektprüfungen auslösen; `BimPlan` berechnet verbundene Wandkörper
+  für die Anzeige. Mit A-01 die Kosten bei vielen Wänden, Öffnungen und
+  Mehrfachauswahl prüfen. Wenn relevant, Vorschau auf betroffene Elemente
+  und gültige Sitzungs-/Projektversion begrenzen oder Ableitungen cachen;
+  beim endgültigen Commit vollständig absichern. **Abnahme:** Messbarer
+  Rückgang der Pointer-Latenz ohne andere Vorschau, veraltete Ergebnisse
+  oder geänderte Commit-/Undo-Semantik.
+
+### P2 - Wartbarkeit und Kapazität planvoll verbessern
+
+- [ ] **A-05 Importzyklus der Kontur-/Offsetlogik auflösen.**
+  `src/application/direct-edit/offset.ts` und `contour.ts` importieren
+  einander. Gemeinsame reine Hilfslogik an eine eindeutige Stelle verschieben.
+  **Abnahme:** Kein gegenseitiger Runtime-Import; Offset- und
+  Konturfunktionen einschließlich Grenzfällen verhalten sich wie zuvor.
+- [ ] **A-06 Projektgröße und Bildspeicherung entscheiden.** Die aktuelle
+  10-MiB-Dateigrenze, eingebettete Base64-Bildreferenzen und das
+  16-Megapixel-Pixelbudget anhand realistischer Projekte und A-01 bewerten.
+  Erst dann eine tragfähige Grenze beziehungsweise ein Asset-/Paketformat
+  festlegen. **Abnahme:** Import, Speichern, Öffnen und Weitergabe
+  funktionieren mit dokumentierten Grenzen; Browser sowie eine spätere
+  Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik. PDF-Import ist
+  eine eigene künftige Funktion.
+- [ ] **A-07 Große UI-Module schrittweise entlasten.** `CadWorkspace`
+  (rund 1.200 Zeilen) und `BimPlan` (rund 1.460 Zeilen) bei konkreten
+  Änderungen in kleine Verantwortlichkeiten schneiden; Geometrie und
+  Projektzustand in bestehenden Domain-/Application-Grenzen halten.
+  **Abnahme:** Kein zweites editierbares Modell im React-State; sichtbares
+  Verhalten und Regressionstests des jeweils bearbeiteten Werkzeugs bleiben
+  erhalten. Kein pauschaler Komplettumbau.
+
+**Bereits adressiert, keine neue offene Engpassaufgabe:** Die
+Konturvorbereitung nutzt Sitzungs-Cache und prüft geänderte Kanten; der zuvor
+gemeldete 500-Punkte-Fall wurde isoliert deutlich schneller gemessen. Die
+Fangpunktlogik besitzt bereits einen lokalen Index und eine Begrenzung für
+dichte Bereiche. A-01 nimmt beide als Browser-Regression mit auf.
+
+**Genau ein nächster Architekturauftrag:** A-01 als reproduzierbaren
+Browser-Messparcours ausführen und Ergebnisse im Plan festhalten. Danach
+A-02 mit Vorher-/Nachher-Messung bearbeiten; A-03/A-04 nur anhand der
+gefundenen Engpässe konkretisieren.
+
 ## Bildreferenzen gemeinsam bewegen - 07.10.2026
 
 PR165 freigegeben und zusammengefuehrt. Die bestehende SelectionMove-Aktion
