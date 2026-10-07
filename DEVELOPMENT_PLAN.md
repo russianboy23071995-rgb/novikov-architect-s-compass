@@ -1,5 +1,32 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## A-04: unveraenderte Referenzbilder wiederverwenden - 07.10.2026
+
+PR169 freigegeben und zusammengefuehrt. Der gemeinsame Bildadapter verwendet
+gepruefte URLs ueber gleichwertige Vorschau-Assetkopien hinweg wieder. Exakter
+Bildinhalt, MIME und Pixelmasse bestimmen den Treffer; neue Daten und Metadaten
+werden erneut geprueft. Begrenzung: acht LRU-Eintraege und 48 MiB konservativ
+gezaehlte Zeichen-Nutzlast. Kein Dateiformat-, Modell- oder History-Wechsel.
+
+[Messbericht](docs/performance/IMAGE_URL_REUSE.md): derselbe Browser-Parcours,
+sechs Faelle mit je 21 Stichproben, identische ViewBoxes und Pointerziele.
+Mit PNG sinkt der Median bis zur Vorschau bei 100/1000/5000 Elementen von
+1050/1291/2085 auf 514/741/1603 ms (rund 51/43/23 Prozent). Wiederholte
+Bild-URL-Dekodierung entfaellt bei warmem Cache. Kaltes Laden bleibt unveraendert.
+Ohne PNG keine relevante Aenderung des Codepfads; Messschwankungen bleiben.
+Alle sechs Ablaufe mit Vorschau, Abbruch, Platzierung, Undo und Redo bestanden.
+628 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
+A-04 bleibt offen: zwei Vollvalidierungen je Vorschau und teure Wandableitungen
+bestehen weiterhin. A-01-Messluecken fuer reale/dichte Faelle bleiben bestehen.
+
+Genau ein naechster Auftrag: die doppelte Validierung identischer Gruppen-
+bewegungsvorschauen aus Praezisionseingabe und Grundrissdarstellung beseitigen.
+Ein validiertes Ergebnis nur fuer unveraenderten Bewegungskontext und dasselbe
+Ziel wiederverwenden; Modell-/Auswahl-/Sichtbarkeits-/Ursprungs-/Zielwechsel
+verwerfen es. Finale Commit- und Stale-Kontextpruefung behalten. Gemeinsamer
+Interaction-/Application-Pfad, keine werkzeugspezifische UI-Kopie. Wiederverwendung
+und Invalidierung testen, dann denselben Sechs-Faelle-Parcours erneut messen.
+
 ## Aktive Gruppenbewegung vermessen - 07.10.2026
 
 PR168 freigegeben und zusammengefuehrt. Der begrenzte Messauftrag A-01/A-04
@@ -21,7 +48,7 @@ erfolgreich; Lint ohne Fehler mit 6 bekannten Warnungen. Diagnosecode fehlt im
 Produktionsbundle. A-01 bleibt fuer reale Projekte, dichte/Kontur-Faelle, Hardware-
 Pointer und Peak-/GPU-Speicher offen. A-04 ist vermessen, noch nicht optimiert.
 
-Genau ein naechster Auftrag: den gemeinsamen checkedImageUrl-Pfad so begrenzt
+Damals naechster Auftrag (oben abgeschlossen): den gemeinsamen checkedImageUrl-Pfad so begrenzt
 zwischenspeichern, dass unveraenderte Bildinhalte und Metadaten auch bei neuen
 Vorschau-Assetobjekten wiederverwendet werden. Cache-Bindung begrenzen; geaenderte
 Bytes, MIME oder Masse duerfen keine alte URL erhalten. Datei-/Modellvalidierung

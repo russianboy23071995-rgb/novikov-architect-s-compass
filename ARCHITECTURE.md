@@ -2216,3 +2216,15 @@ Acceptance compares the observed preview with rendered geometry, then verifies
 cancel, one committed group move, Undo and Redo. Timing is synthetic-dispatch to
 a frame opportunity with DOM verification, not OS input or guaranteed GPU display.
 Nested inclusive phases must not be summed as exclusive costs.
+
+## Bounded image presentation reuse - 2026-10-07
+
+`interop/images/import.ts` caches checked image URLs by exact base64 contents,
+MIME and pixel dimensions across equivalent preview asset copies. IDs and object
+identity are not cache authority. Scalar snapshots detect changed properties even
+on a reused object. LRU retention is bounded to eight entries and 48 MiB of
+conservative UTF-16 input/output string payload; oversized results are not retained.
+This is derived disposable presentation data, not model/file validation. No project
+objects, decoded bitmaps or Blob URLs enter the cache or history. Changed inputs
+are checked again; eviction only changes cost. Cold-load validation remains intact.
+See [measured results and limits](docs/performance/IMAGE_URL_REUSE.md).

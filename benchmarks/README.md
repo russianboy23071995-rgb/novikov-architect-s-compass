@@ -89,3 +89,10 @@ Elapsed time runs from synthetic dispatch to a verified frame opportunity. It is
 or OS input latency. Synthetic clicks bypass hit testing, and sequential samples
 do not measure event queue/coalescing under continuous hardware input. This focused
 movement scenario does not close dense-snap, contour or peak-memory coverage.
+
+
+The image-URL reuse comparison is recorded in
+[IMAGE_URL_REUSE](../docs/performance/IMAGE_URL_REUSE.md), with after reports in
+`docs/performance/image-url-2026-10-07/`. Use the unchanged movement protocol above.
+The image is checked during fixture rendering before movement timing, so this
+comparison measures warm reuse across preview copies, not cold import/decoding.
