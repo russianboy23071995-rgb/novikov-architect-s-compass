@@ -1106,12 +1106,19 @@ export function CadWorkspace({
                 )}
                 {!referenceSelection.selecting && (
                   <AiCommandBar
+                    calibration={calibration.commandContext}
                     onFocus={() => setDemandOpen(false)}
                     targets={selections}
                     visibility={visibility}
                     project={project}
                     onExecute={(preview) => {
-                      const next = applySelectionCommand(project, selections, visibility, preview);
+                      const next = applySelectionCommand(
+                        project,
+                        selections,
+                        visibility,
+                        preview,
+                        calibration.commandContext,
+                      );
                       cancelInteraction();
                       setDemandOpen(false);
                       dispatchEditing({ type: "project", project: next });

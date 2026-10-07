@@ -1,3 +1,4 @@
+import type { CalibrationContext } from "@/application/references/calibration";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Check, Mic, X } from "lucide-react";
 import novikovLogo from "@/assets/novikov-logo.png";
@@ -15,6 +16,7 @@ import { recognitionConstructor } from "@/lib/bim/voice";
 import { startSelectionVoice } from "@/application/commands/selection-voice";
 
 type Props = {
+  calibration?: CalibrationContext | undefined;
   project: Project;
   targets: SelectionSet;
   visibility: LayerVisibilityPolicy;
@@ -22,24 +24,33 @@ type Props = {
   onFocus?: () => void;
 };
 
-export function AiCommandBar({ project, targets, visibility, onExecute, onFocus }: Props) {
+export function AiCommandBar({
+  project,
+  targets,
+  visibility,
+  onExecute,
+  onFocus,
+  calibration,
+}: Props) {
   const selection = singleTarget(targets);
   const selectionCount = targets.length;
   const [command, setCommand] = useState("");
   const [preview, setPreview] = useState<SelectionCommandPreview | null>(null);
   const activePreview =
-    preview && selectionCommandIsCurrent(project, targets, visibility, preview) ? preview : null;
+    preview && selectionCommandIsCurrent(project, targets, visibility, preview, calibration)
+      ? preview
+      : null;
   useEffect(() => {
     setPreview(null);
-  }, [project, targets, visibility]);
+  }, [project, targets, visibility, calibration]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [voiceAvailable, setVoiceAvailable] = useState(false);
   const [listening, setListening] = useState(false);
   const cancelVoice = useRef<(() => void) | null>(null);
   const voiceContext = useMemo(
-    () => ({ project, targets, visibility }),
-    [project, targets, visibility],
+    () => ({ project, targets, visibility, calibration }),
+    [project, targets, visibility, calibration],
   );
   const latestContext = useRef(voiceContext);
   latestContext.current = voiceContext;
@@ -93,7 +104,7 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
   const interpret = () => {
     reset();
     try {
-      setPreview(previewSelectionCommand(project, targets, visibility, command));
+      setPreview(previewSelectionCommand(project, targets, visibility, command, calibration));
     } catch (error) {
       setError(error instanceof Error ? error.message : "Befehl konnte nicht geprüft werden.");
     }
@@ -124,7 +135,11 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
               reset();
             }}
             placeholder={
-              selectionCount > 1 ? "Auswahl um 2 m bei 90 Grad verschieben" : "Wandlänge auf 6 m"
+              calibration
+                ? "Referenz auf 5 m kalibrieren"
+                : selectionCount > 1
+                  ? "Auswahl um 2 m bei 90 Grad verschieben"
+                  : "Wandlänge auf 6 m"
             }
             aria-label="Modellbefehl"
             className="h-7 border-0 bg-transparent px-2 text-xs shadow-none"
@@ -166,6 +181,13 @@ export function AiCommandBar({ project, targets, visibility, onExecute, onFocus 
           ? "Mikrofon startet nur per Klick. Der Browser kann Audio an seinen Spracherkennungsdienst senden. Auswahlwechsel beendet die Aufnahme."
           : "Spracherkennung in diesem Browser nicht verfügbar. Textbefehle bleiben nutzbar."}
       </p>
+      {selection?.kind === "reference" && (
+        <p className="mt-1 text-xs">
+          {calibration
+            ? "Zwei Messpunkte gebunden. Befehl: Referenz auf 5 m kalibrieren."
+            : "Zuerst im On-Demand-Menü zwei Messpunkte für die Kalibrierung aufnehmen."}
+        </p>
+      )}
       {selection?.kind === "hatch" && (
         <p className="px-2 text-xs text-muted-foreground">
           Schraffurfüllung über die Eigenschaften ändern; Befehle zur Füllung folgen später.

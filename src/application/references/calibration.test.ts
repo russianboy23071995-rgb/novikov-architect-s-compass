@@ -1,3 +1,25 @@
+import { createCalibrationContext } from "./calibration.ts";
+import {
+  previewSelectionCommand,
+  applySelectionCommand,
+  type SelectionCommandPreview,
+} from "../commands/selection-command.ts";
+import { startSelectionVoice } from "../commands/selection-voice.ts";
+import type { Recognition } from "../../lib/bim/voice.ts";
+class FakeCalibrationVoice implements Recognition {
+  static latest: FakeCalibrationVoice;
+  lang = "";
+  continuous = false;
+  interimResults = false;
+  onresult: Recognition["onresult"] = null;
+  onerror: Recognition["onerror"] = null;
+  onend: Recognition["onend"] = null;
+  constructor() {
+    FakeCalibrationVoice.latest = this;
+  }
+  start() {}
+  abort() {}
+}
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
@@ -5,7 +27,7 @@ import { createHistory, undoProject, redoProject } from "../../lib/bim/history.t
 import { previewCreateReference } from "./actions.ts";
 import { previewCalibration, commitCalibration, parseCalibrationLength } from "./calibration.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
-import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 function fixture(rotation = 0) {
   const p = createProject("p", "s");
   return previewCreateReference(p, p, {
@@ -111,4 +133,69 @@ test("length requires explicit metric units and handles decimal comma", () => {
   assert.equal(parseCalibrationLength("5000 mm"), 5);
   for (const text of ["5", "0 m", "-2 m", "NaN m", "5 ft", ""])
     assert.throws(() => parseCalibrationLength(text));
+});
+
+test("text calibration uses measured context and rejects stale measurement, targets and grammar", () => {
+  const p = fixture(),
+    v = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const c = createCalibrationContext(p, v, "r", { x: 3, y: 4 }, { x: 7, y: 4 });
+  const preview = previewSelectionCommand(p, targets, v, "Referenz auf 500 cm kalibrieren", c);
+  assert.deepEqual(
+    preview.result,
+    previewCalibration(
+      p,
+      p,
+      targets,
+      { projectId: p.id, referenceId: "r", first: c.first, second: c.second, metres: 5 },
+      v,
+    ),
+  );
+  assert.deepEqual(applySelectionCommand(p, targets, v, preview, c), preview.result);
+  assert.equal(p.storey.references[0]!.metresPerPixel, 0.01);
+  for (const other of [undefined, createCalibrationContext(p, v, "r", c.first, c.second)]) {
+    assert.throws(() => applySelectionCommand(p, targets, v, preview, other));
+  }
+  assert.throws(() => previewSelectionCommand(p, targets, v, "Referenz auf 5 m kalibrieren"));
+  assert.throws(() => previewSelectionCommand(p, [], v, preview.text, c));
+  assert.throws(() => previewSelectionCommand({ ...p }, targets, v, preview.text, c));
+  for (const text of [
+    "Referenz auf 0 m kalibrieren",
+    "Referenz auf -5 m kalibrieren",
+    "Referenz auf 5 kalibrieren",
+    "Referenz auf 5 m kalibrieren und verschieben",
+  ]) {
+    assert.throws(() => previewSelectionCommand(p, targets, v, text, c));
+  }
+});
+
+test("voice calibration shares text preview and ignores results after measurement replacement", () => {
+  const p = fixture(),
+    v = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const c = createCalibrationContext(p, v, "r", { x: 3, y: 4 }, { x: 7, y: 4 });
+  const context = { project: p, targets, visibility: v, calibration: c };
+  let current = context;
+  const previews: SelectionCommandPreview[] = [];
+  const callbacks = {
+    transcript: () => {},
+    preview: (p: SelectionCommandPreview) => previews.push(p),
+    error: (e: string) => {
+      throw new Error(e);
+    },
+    end: () => {},
+  };
+  startSelectionVoice(FakeCalibrationVoice, context, () => current, callbacks);
+  FakeCalibrationVoice.latest.onresult!({
+    results: [{ isFinal: true, 0: { transcript: "Referenz auf fünf Meter kalibrieren." } }],
+  });
+  assert.equal(previews.length, 1);
+  assert.deepEqual(
+    previews[0]!.result,
+    previewSelectionCommand(p, targets, v, "Referenz auf 5 m kalibrieren", c).result,
+  );
+  startSelectionVoice(FakeCalibrationVoice, context, () => current, callbacks);
+  current = { ...context, calibration: createCalibrationContext(p, v, "r", c.first, c.second) };
+  FakeCalibrationVoice.latest.onresult!({
+    results: [{ isFinal: true, 0: { transcript: "Referenz auf 7 Meter kalibrieren." } }],
+  });
+  assert.equal(previews.length, 1);
 });
