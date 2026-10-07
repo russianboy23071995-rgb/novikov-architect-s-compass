@@ -2202,3 +2202,17 @@ No trusted-caller flag, cross-call validation cache or mutation-based shortcut i
 introduced. Public serializeProject/readProjectFile, stale-action guards, normalized
 no-op detection, visibility-only commits and snapshot Undo/Redo retain their contracts.
 The measured diagnostic comparison lives only under benchmarks/.
+
+
+## Development-only active movement measurement - 2026-10-07
+
+The separate benchmark Vite configuration may wrap explicit existing functions in
+memory to observe snap, precision/selection preview, full validation, wall solids
+and plan derivation. Source-anchor mismatches fail visibly. These wrappers and
+the diagnostic driver are never imported by the product build. No parallel model
+or alternate action path is introduced: the driver selects real Navigator targets
+and sends synthetic DOM pointer/click events through the existing plan handlers.
+Acceptance compares the observed preview with rendered geometry, then verifies
+cancel, one committed group move, Undo and Redo. Timing is synthetic-dispatch to
+a frame opportunity with DOM verification, not OS input or guaranteed GPU display.
+Nested inclusive phases must not be summed as exclusive costs.

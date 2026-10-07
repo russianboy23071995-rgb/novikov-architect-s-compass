@@ -1,3 +1,5 @@
+import { runMovementProfile } from "./movement-driver";
+import { traceReactCommit } from "./movement-trace";
 /** Dev-only diagnostic page. Never imported by the product routes. */
 import { commitProfileCases } from "./commit-profile";
 import React, { Profiler, useState } from "react";
@@ -23,6 +25,7 @@ if (!import.meta.env.DEV) throw new Error("Development diagnostics only");
 const samples: Record<string, number[]> = {};
 const add = (key: string, value: number) => (samples[key] ??= []).push(value);
 let imageData = "";
+let movementReport: Awaited<ReturnType<typeof runMovementProfile>> | null = null;
 function image() {
   if (imageData) return imageData;
   const canvas = document.createElement("canvas");
@@ -150,6 +153,8 @@ export function Harness() {
     [report, setReport] = useState("");
   async function load() {
     setStatus("Loading");
+    movementReport = null;
+    setReport("");
     await frame();
     for (const k of Object.keys(samples)) delete samples[k];
     const t = performance.now();
@@ -225,6 +230,17 @@ export function Harness() {
       setStatus(String(e));
     }
   }
+  async function movement() {
+    setStatus("Measuring active movement");
+    await frame();
+    try {
+      movementReport = await runMovementProfile();
+      setStatus("Movement complete");
+      show();
+    } catch (e) {
+      setStatus(String(e));
+    }
+  }
   async function keys() {
     if (!project) return;
     setStatus("Measuring keys");
@@ -252,6 +268,7 @@ export function Harness() {
             ? { used: m.usedJSHeapSize, total: m.totalJSHeapSize, limit: m.jsHeapSizeLimit }
             : null,
           results: stats(),
+          movement: movementReport,
         },
         null,
         2,
@@ -296,6 +313,7 @@ export function Harness() {
         </label>
         <button onClick={load}>Load scenario</button> <button onClick={run}>Measure core</button>{" "}
         <button onClick={profileCommit}>Profile commit</button>{" "}
+        <button onClick={movement}>Profile movement</button>{" "}
         <button onClick={keys}>Measure keys</button> <button onClick={show}>Report</button>
         <p role="status">{status}</p>
         <textarea
@@ -308,7 +326,10 @@ export function Harness() {
       {project && (
         <Profiler
           id="workspace"
-          onRender={(_id, phase, duration) => add(`react-${phase}`, duration)}
+          onRender={(_id, phase, duration) => {
+            add(`react-${phase}`, duration);
+            traceReactCommit(duration);
+          }}
         >
           <CadWorkspace key={propertyFormKey(project, null)} initialProject={project} />
         </Profiler>

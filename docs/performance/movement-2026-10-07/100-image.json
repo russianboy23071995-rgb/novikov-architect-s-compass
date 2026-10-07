@@ -1,0 +1,1055 @@
+{
+  "count": 100,
+  "images": true,
+  "bytes": 9009033,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "heap": {
+    "used": 197784682,
+    "total": 256695986,
+    "limit": 4395630592
+  },
+  "results": {
+    "fixtureValidate": {
+      "n": 1,
+      "medianMs": 388.80000001192093,
+      "p95Ms": 388.80000001192093
+    },
+    "react-update": {
+      "n": 127,
+      "medianMs": 14.100000023841858,
+      "p95Ms": 1048.0000000298023
+    },
+    "react-nested-update": {
+      "n": 2,
+      "medianMs": 48.299999952316284,
+      "p95Ms": 48.299999952316284
+    },
+    "loadAndMount": {
+      "n": 1,
+      "medianMs": 1651.300000011921,
+      "p95Ms": 1651.300000011921
+    },
+    "event-click-twoRAF": {
+      "n": 47,
+      "medianMs": 41.400000005960464,
+      "p95Ms": 302.5
+    },
+    "event-pointermove-twoRAF": {
+      "n": 23,
+      "medianMs": 1050.2000000178814,
+      "p95Ms": 1098.800000011921
+    }
+  },
+  "movement": {
+    "samples": [
+      {
+        "elapsedMs": 1050.7000000178814,
+        "phases": {
+          "snap": {
+            "ms": 0.09999999403953552,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6.399999976158142,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 427.0000000298023,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 427.2000000178814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212.2000000178814,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 539.9000000059605,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1031.5000000298023,
+        "previewStart": {
+          "x": 15.520244984073239,
+          "y": -15.520244984073239
+        },
+        "input": {
+          "clientX": 494,
+          "clientY": 501
+        }
+      },
+      {
+        "elapsedMs": 1020.2999999821186,
+        "phases": {
+          "snap": {
+            "ms": 0.30000001192092896,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 9.400000005960464,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 427.40000000596046,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 427.69999998807907,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212.69999998807907,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 530.2000000178814,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 997.7999999821186,
+        "previewStart": {
+          "x": 20.5,
+          "y": -14.100000000000001
+        },
+        "input": {
+          "clientX": 500,
+          "clientY": 504
+        }
+      },
+      {
+        "elapsedMs": 1081.5,
+        "phases": {
+          "snap": {
+            "ms": 0.09999999403953552,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6.4000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 423.60000002384186,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 423.80000001192093,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 213.09999999403954,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 565.5,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1059.2999999821186,
+        "previewStart": {
+          "x": 22.8,
+          "y": -15.3
+        },
+        "input": {
+          "clientX": 506,
+          "clientY": 507
+        }
+      },
+      {
+        "elapsedMs": 1050,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 7.9000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 440.0000000298023,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 440.30000001192093,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 223.90000000596046,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 552.3000000119209,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1032.5999999940395,
+        "previewStart": {
+          "x": 25.200000000000003,
+          "y": -16.400000000000002
+        },
+        "input": {
+          "clientX": 512,
+          "clientY": 510
+        }
+      },
+      {
+        "elapsedMs": 1050.4000000059605,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 7.0999999940395355,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 431.7999999821186,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 431.89999997615814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212.5,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 561.5999999940395,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1034.7000000178814,
+        "previewStart": {
+          "x": 27.5,
+          "y": -17.6
+        },
+        "input": {
+          "clientX": 518,
+          "clientY": 513
+        }
+      },
+      {
+        "elapsedMs": 1098.9000000059605,
+        "phases": {
+          "snap": {
+            "ms": 0.20000001788139343,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6.0999999940395355,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 447.09999999403954,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 447.19999998807907,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 223.90000000596046,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.3999999761581421,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 591.5,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1080.800000011921,
+        "previewStart": {
+          "x": 29.900000000000002,
+          "y": -18.8
+        },
+        "input": {
+          "clientX": 524,
+          "clientY": 516
+        }
+      },
+      {
+        "elapsedMs": 1043.9000000059605,
+        "phases": {
+          "snap": {
+            "ms": 0.09999999403953552,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 8.5,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 440.69999998807907,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 440.90000000596046,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 220.59999999403954,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 547.0999999940395,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1027.599999934435,
+        "previewStart": {
+          "x": 32.2,
+          "y": -20
+        },
+        "input": {
+          "clientX": 530,
+          "clientY": 519
+        }
+      },
+      {
+        "elapsedMs": 1012.5,
+        "phases": {
+          "snap": {
+            "ms": 0.09999999403953552,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6.4000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 425,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 425.09999999403954,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 215.5,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.7000000178813934,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 532.1999999880791,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 996.7000000178814,
+        "previewStart": {
+          "x": 34.6,
+          "y": -21.1
+        },
+        "input": {
+          "clientX": 536,
+          "clientY": 522
+        }
+      },
+      {
+        "elapsedMs": 1023.6999999880791,
+        "phases": {
+          "snap": {
+            "ms": 0,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 5.900000035762787,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 422.7000000178814,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 422.90000000596046,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 210.90000000596046,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 545.6000000238419,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1006.9000000059605,
+        "previewStart": {
+          "x": 36.9,
+          "y": -22.3
+        },
+        "input": {
+          "clientX": 542,
+          "clientY": 525
+        }
+      },
+      {
+        "elapsedMs": 1052.800000011921,
+        "phases": {
+          "snap": {
+            "ms": 0.20000001788139343,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 421.7000000178814,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 421.80000001192093,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 211.40000000596046,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 572.2000000178814,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1035.4000000059605,
+        "previewStart": {
+          "x": 39.300000000000004,
+          "y": -23.5
+        },
+        "input": {
+          "clientX": 548,
+          "clientY": 528
+        }
+      },
+      {
+        "elapsedMs": 1036.7999999821186,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 8.500000029802322,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 439.5,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 439.7000000178814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 213.59999999403954,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 540.8000000119209,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1020.7999999821186,
+        "previewStart": {
+          "x": 41.6,
+          "y": -24.700000000000003
+        },
+        "input": {
+          "clientX": 554,
+          "clientY": 531
+        }
+      },
+      {
+        "elapsedMs": 1061.5999999940395,
+        "phases": {
+          "snap": {
+            "ms": 0.10000002384185791,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6.4000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 428.80000001192093,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 429,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 211.59999999403954,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 536.6999999880791,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1044.2999999523163,
+        "previewStart": {
+          "x": 44,
+          "y": -25.8
+        },
+        "input": {
+          "clientX": 560,
+          "clientY": 534
+        }
+      },
+      {
+        "elapsedMs": 1026.4000000059605,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 8.000000029802322,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 432.30000001192093,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 432.60000002384186,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 216.5,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 536.5,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1009.9000000059605,
+        "previewStart": {
+          "x": 46.300000000000004,
+          "y": -27
+        },
+        "input": {
+          "clientX": 566,
+          "clientY": 537
+        }
+      },
+      {
+        "elapsedMs": 1016.7000000178814,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 7.4000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 431.69999998807907,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 431.80000001192093,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 211.40000000596046,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.19999998807907104,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.7000000178813934,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 529.5999999940395,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1001.5,
+        "previewStart": {
+          "x": 48.6,
+          "y": -28.200000000000003
+        },
+        "input": {
+          "clientX": 572,
+          "clientY": 540
+        }
+      },
+      {
+        "elapsedMs": 1063.300000011921,
+        "phases": {
+          "snap": {
+            "ms": 0.10000002384185791,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 5.700000017881393,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 431.30000001192093,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 431.5,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.4000000059604645,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 577.1999999880791,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1048.0000000298023,
+        "previewStart": {
+          "x": 51,
+          "y": -29.3
+        },
+        "input": {
+          "clientX": 578,
+          "clientY": 543
+        }
+      },
+      {
+        "elapsedMs": 1052,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 8.699999988079071,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 430.5,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 430.69999998807907,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212.19999998807907,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.7000000178813934,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 559.9000000059605,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1034.199999988079,
+        "previewStart": {
+          "x": 53.300000000000004,
+          "y": -30.5
+        },
+        "input": {
+          "clientX": 584,
+          "clientY": 546
+        }
+      },
+      {
+        "elapsedMs": 1029.199999988079,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 7.0999999940395355,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 432,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 432.09999999403954,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 210.59999999403954,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0.09999999403953552,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.800000011920929,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 541.8000000119209,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1013.3000000119209,
+        "previewStart": {
+          "x": 55.7,
+          "y": -31.700000000000003
+        },
+        "input": {
+          "clientX": 590,
+          "clientY": 549
+        }
+      },
+      {
+        "elapsedMs": 1016.4000000059605,
+        "phases": {
+          "snap": {
+            "ms": 0.20000001788139343,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 6,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 426.0000000298023,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 426.2000000178814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 214.80000001192093,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 534.9000000059605,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1000.7000000178814,
+        "previewStart": {
+          "x": 58,
+          "y": -32.9
+        },
+        "input": {
+          "clientX": 596,
+          "clientY": 552
+        }
+      },
+      {
+        "elapsedMs": 1059.2999999821186,
+        "phases": {
+          "snap": {
+            "ms": 0.19999998807907104,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 7.5999999940395355,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 429.2000000178814,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 429.2000000178814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 213,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.4000000059604645,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 573.0999999940395,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1042.7000000178814,
+        "previewStart": {
+          "x": 60.400000000000006,
+          "y": -34
+        },
+        "input": {
+          "clientX": 602,
+          "clientY": 555
+        }
+      },
+      {
+        "elapsedMs": 1022.8000000119209,
+        "phases": {
+          "snap": {
+            "ms": 0.20000001788139343,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 9.299999982118607,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 425.69999998807907,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 425.89999997615814,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 212.2999999821186,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 538.7000000178814,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1004.2000000476837,
+        "previewStart": {
+          "x": 62.7,
+          "y": -35.2
+        },
+        "input": {
+          "clientX": 608,
+          "clientY": 558
+        }
+      },
+      {
+        "elapsedMs": 1070.300000011921,
+        "phases": {
+          "snap": {
+            "ms": 0.10000002384185791,
+            "calls": 2
+          },
+          "wall-solids": {
+            "ms": 5.9000000059604645,
+            "calls": 3
+          },
+          "project-validation": {
+            "ms": 424.40000000596046,
+            "calls": 2
+          },
+          "selection-preview": {
+            "ms": 424.40000000596046,
+            "calls": 2
+          },
+          "precision-preview": {
+            "ms": 211.2000000178814,
+            "calls": 1
+          },
+          "plan-visibility": {
+            "ms": 0,
+            "calls": 1
+          },
+          "plan-outlines": {
+            "ms": 0.5999999940395355,
+            "calls": 1
+          },
+          "image-url": {
+            "ms": 553.1999999880791,
+            "calls": 1
+          }
+        },
+        "reactCommits": 1,
+        "reactMs": 1052.699999988079,
+        "previewStart": {
+          "x": 65.10000000000001,
+          "y": -36.4
+        },
+        "input": {
+          "clientX": 614,
+          "clientY": 561
+        }
+      }
+    ],
+    "acceptance": {
+      "selectedWalls": 20,
+      "preview": {
+        "x": 65.10000000000001,
+        "y": -36.4
+      },
+      "cancelled": true,
+      "committed": {
+        "x": 43.2,
+        "y": -25.400000000000002
+      },
+      "undo": true,
+      "redo": true
+    },
+    "syntheticPointer": true,
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "viewBox": "-132.12600211103535 -79.04097981308206 347.8920105492783 122.0819596261641",
+      "extraZoomSteps": 0
+    }
+  }
+}
