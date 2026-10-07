@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## A-03: redundante Commit-Validierung entfernt - 07.10.2026
+
+PR167 freigegeben und zusammengefuehrt. Der begrenzte A-03-Auftrag ist umgesetzt:
+Der gerade vollstaendig validierte neue Snapshot wird fuer den Vergleich direkt
+serialisiert; seine UTF-8-Groessenpruefung bleibt explizit erhalten. Keine Caches
+fuer ungesicherte Eingaben, keine Lockerung der Datei- oder Geometrievalidierung.
+
+[Messbericht](docs/performance/A03_COMMIT_VALIDATION.md): 5000 Elemente mit PNG,
+9,33 MiB, je 21 Messungen im selben Browserlauf. Alter/neuer Commit Median
+1390,3/948,7 ms (-31,8 %); P95 1455,3/980,8 ms. Vollvalidierung 438,9 ms,
+kalte Wandableitung darin separat 200,9 ms. JSON-Vergleich/Groessencheck 54,5 ms.
+Der Commit bleibt teuer; Vorschauen sind mit dieser Aenderung nicht optimiert.
+
+623 Tests, TypeScript inklusive Diagnose und Build bestanden; Lint ohne Fehler,
+6 bekannte Warnungen. Browser-Abnahme: unzulaessige Eckhoehe abgewiesen;
+Fensterbreite 1,2 -> 1,4 m, Undo -> 1,2 m, Redo -> 1,4 m bestaetigt.
+A-01 bleibt mit seinen ausgewiesenen Messluecken offen.
+
+Genau ein naechster Auftrag (A-01/A-04): den vorhandenen gemeinsamen Gruppen-
+bewegungspfad von Pointer-Eingang ueber Fang/Validierung bis zur gerenderten
+Vorschau instrumentieren. Dieselbe Bewegung von 20 Waenden in 100/1000/5000
+Elementen ohne/mit PNG messen, Median/P95 je Phase und Abbruch/Commit/Undo
+pruefen. Daraus die naechste Vorschauoptimierung bestimmen. Neue Bauteile und
+Raeume bleiben zurueckgestellt.
+
 ## P0-Messreihe und A-02-Korrektur - 07.10.2026
 
 PR166 freigegeben und mit erhaltener Architektur-Aufgabenliste zusammengefuehrt.
@@ -19,7 +44,7 @@ Browserregressionen, echte Nutzerprojekte und Peak-/GPU-Speicher bleiben offen.
 ConnectedWallSolids besitzt bereits einen Snapshot-Cache; A-04 muss neue Vorschau-
 Snapshots und unveraendertes Modell unterscheiden. Keine pauschale Speicher-Kopiebehauptung.
 
-Genau ein naechster Auftrag: A-03 am vorhandenen grossen Bildszenario in Validierung,
+Damals naechster Auftrag (inzwischen oben abgeschlossen): A-03 am vorhandenen grossen Bildszenario in Validierung,
 Wandableitung und JSON-Vergleich aufteilen und einen nachgewiesen redundanten
 Durchlauf begrenzt korrigieren; Guards, Undo/Redo und Dateivalidierung erhalten.
 Raeume bleiben bis zur Stabilisierung zurueckgestellt.
@@ -56,7 +81,7 @@ noch keinen spuerbaren Browser-Engpass.
 
 ### P1 - nach der Baseline gezielt die heißen Pfade bearbeiten
 
-- [ ] **A-03 Validierung und History auf Kosten prüfen.** Beim Commit werden
+- [x] **A-03 Validierung und History auf Kosten prüfen.** Beim Commit werden
   aktuell das gesamte Projekt validiert, verbundene Wandkörper abgeleitet und
   ein JSON-Snapshot für den Vergleich erzeugt. Besonders eingebettete
   Bilddaten in der A-01-Messung betrachten. Nur bei nachgewiesenem Engpass

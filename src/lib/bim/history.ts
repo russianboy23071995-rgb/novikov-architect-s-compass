@@ -9,7 +9,11 @@ export function createHistory(project: Project): ProjectHistory {
 }
 export function commitProject(history: ProjectHistory, project: Project): ProjectHistory {
   const next = validateProject(project);
-  if (serializeProject(next) === serializeProject(history.present)) return history;
+  // next is the independent, normalized result of the full validation above.
+  // Serialize it directly instead of validating/deriving the same snapshot twice.
+  const nextJson = JSON.stringify(next);
+  assertProjectFileSize(nextJson);
+  if (nextJson === serializeProject(history.present)) return history;
   const { bimVisibility: previousVisibility, ...previousModel } = history.present;
   const { bimVisibility: nextVisibility, ...nextModel } = next;
   if (JSON.stringify(previousModel) === JSON.stringify(nextModel))

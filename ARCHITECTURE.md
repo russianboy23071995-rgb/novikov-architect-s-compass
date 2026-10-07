@@ -2189,3 +2189,16 @@ The initialProject prop only seeds the normal validated editing reducer; it is
 not a second controlled model. A separate development-only benchmark entry mounts
 the actual workspace and calls existing Application actions. It is not a product
 route and its React/heap measurements must not be treated as production guarantees.
+
+
+## Commit validation reuse - 2026-10-07
+
+The existing history boundary still fully validates and independently copies every
+incoming project. Within that synchronous commit, JSON comparison serializes this
+just-validated result directly and explicitly checks its UTF-8 file-size limit,
+instead of invoking the public serializer and repeating validation/solid derivation.
+The current history snapshot still passes through the public validated serializer.
+No trusted-caller flag, cross-call validation cache or mutation-based shortcut is
+introduced. Public serializeProject/readProjectFile, stale-action guards, normalized
+no-op detection, visibility-only commits and snapshot Undo/Redo retain their contracts.
+The measured diagnostic comparison lives only under benchmarks/.
