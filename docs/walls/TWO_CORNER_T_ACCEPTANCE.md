@@ -37,3 +37,24 @@ IFC importieren. Vier geschlossene Ecken und mittigen T-Abschluss in 2D/3D prüf
 Fenstermaße, Brüstung und Hostwand kontrollieren. Keine zusätzliche Trennfläche
 oder Überlappung am T erwarten; die Öffnung liegt links vom T. Dateiformat bleibt
 Schema 8; ältere NOVIKOV-Versionen können diese Kombination ablehnen.
+
+## Ergänzung: tatsächlicher Browser-Datei-Roundtrip 07.10.2026
+
+Geprüfter Code: main 49f960e, unverändert gegenüber PR159.
+Nach Serverneustart erzeugte Save project zunächst novikov-project (8).json
+(07.10.2026 10:23:46, 1125 Bytes) für das Startmodell. Der Download-Event der
+Browserautomation lief trotzdem nach zehn Sekunden ab. Die Dateierzeugung ist
+somit unabhängig von diesem Automationssignal nachgewiesen.
+
+Anschließend two-corner-t.project.json über Open project geladen und bestätigt.
+Save project erzeugte novikov-project (9).json (10:24:27, 2076 Bytes). Beide
+Dateien als JSON vollständig verglichen: identisch, einschließlich IDs,
+Verbindungen, Fenster und Ebenensichtbarkeit. Danach Undo: Navigator wieder
+beim Startmodell mit zwei Elementen. Tatsächlich heruntergeladene Datei (9)
+über Open project geladen: Bestätigungsdialog erfolgreich, Meldung
+„Projektdatei geladen“, fünf Wände und ein Fenster wieder im Navigator und Plan.
+Screenshot lokal: outputs/two-corner-t/browser-roundtrip.png.
+
+Die Lücke des Browser-Datei-Roundtrips ist damit geschlossen. Keine Anpassung an
+Save project erforderlich. Der Timeout bleibt eine Einschränkung des verwendeten
+Automationssignals. Dies ersetzt weiterhin keine Archicad-Abnahme.
