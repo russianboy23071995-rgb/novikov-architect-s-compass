@@ -70,7 +70,8 @@ test("image selection and marquee use shared geometry and layer eligibility", ()
     hiddenLayerIds: [base.defaultLayerIds.line],
   });
   assert.deepEqual(eligibleSelection(p, policy, [target]), []);
-  assert.throws(() => assertMovableSelection(p, [target]), /Bildreferenz/);
+  assert.doesNotThrow(() => assertMovableSelection(p, [target]));
+  assert.throws(() => assertMovableSelection(p, [target], policy));
 });
 
 test("reloaded payload header must agree with stored MIME and dimensions", () => {

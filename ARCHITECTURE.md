@@ -2167,3 +2167,14 @@ identity is a revision token for command preview and voice. Replacing or clearin
 it invalidates pending results. Text and normalized voice call previewCalibration;
 acceptance revalidates through that same action and the existing model history.
 No separate AI geometry or automatic reference inference is introduced.
+
+
+## Reference translation through shared selection - 2026-10-07
+
+SelectionMove now translates image-reference origin alongside the selected BIM
+and drawing geometry in one validated snapshot. Scale, rotation and embedded
+assets remain unchanged. The singleton reference invokes the existing
+useSelectionMove/ToolInteraction consumer; mixed selections and text/voice use
+the same Application action. No image-specific movement engine or pixel snapping.
+Host-window restrictions, visibility eligibility, stale-context guards and
+relationship detachment rules remain binding.

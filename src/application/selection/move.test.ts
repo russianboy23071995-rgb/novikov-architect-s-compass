@@ -1,3 +1,6 @@
+import { previewCreateReference } from "../references/actions.ts";
+import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
+import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -196,4 +199,88 @@ test("shared input and click produce same snapshot, one undo/redo, zero displace
   assert.deepEqual(buildSolid(restored), buildSolid(result));
   const stamp = new Date("2026-10-06T12:00:00Z");
   assert.equal(await exportIfc(restored, stamp), await exportIfc(result, stamp));
+});
+
+function imageFixture() {
+  const p = fixture();
+  return previewCreateReference(p, p, {
+    projectId: p.id,
+    asset: { id: "asset", mimeType: "image/png", pixelWidth: 400, pixelHeight: 200, data: "AAAA" },
+    reference: {
+      id: "image",
+      kind: "image-reference",
+      assetId: "asset",
+      layerId: p.defaultLayerIds.line,
+      origin: { x: 10, y: 12 },
+      rotation: 0.7,
+      metresPerPixel: 0.0125,
+    },
+  });
+}
+test("image movement uses shared origin/input, preserves calibration and is one reversible portable commit", () => {
+  const p = imageFixture(),
+    targets = [{ kind: "reference" as const, id: "image" }],
+    v = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE),
+    s = beginSelectionMove(p, targets, origin, v);
+  let next = p;
+  const adapter = selectionMoveInteraction(
+    s,
+    p,
+    targets,
+    v,
+    (n) => (next = n),
+    () => {},
+  );
+  const aim = adapter.preview("0", "2", null);
+  confirmInteraction(adapter, aim.point);
+  assert.deepEqual(next.storey.references[0], {
+    ...p.storey.references[0],
+    origin: { x: 12, y: 12 },
+  });
+  assert.deepEqual(next.assets, p.assets);
+  assert.deepEqual(next.storey.walls, p.storey.walls);
+  const before = imageReferenceCorners(p.storey.references[0]!, p.assets[0]!);
+  imageReferenceCorners(next.storey.references[0]!, next.assets[0]!).forEach((c, i) => {
+    assert.ok(Math.abs(c.x - before[i]!.x - 2) < 1e-10);
+    assert.equal(c.y, before[i]!.y);
+  });
+  const command = previewSelectionCommand(p, targets, v, "Auswahl um 2 m bei 0 Grad verschieben");
+  assert.deepEqual(applySelectionCommand(p, targets, v, command), next);
+  assert.deepEqual(s.snapping.origin.point, origin);
+  assert.equal(
+    s.snapping.sources([{ entityId: "image", feature: "point", point: origin }]).length,
+    0,
+  );
+  const h = commitProject(createHistory(p), next);
+  assert.equal(h.past.length, 1);
+  assert.deepEqual(undoProject(h).present, p);
+  assert.deepEqual(redoProject(undoProject(h)).present, next);
+  assert.deepEqual(deserializeProject(serializeProject(next)), next);
+});
+test("mixed image and BIM move is atomic with host windows and joins retained", () => {
+  const p = imageFixture(),
+    targets = [...selectionIndex(p).values()];
+  const next = previewSelectionMove(beginSelectionMove(p, targets, origin), p, targets, target);
+  assert.deepEqual(next.storey.references[0]!.origin, { x: 12, y: 11 });
+  assert.deepEqual(next.storey.wallJoins, p.storey.wallJoins);
+  assert.deepEqual(next.storey.wallTJunctions, p.storey.wallTJunctions);
+  assert.deepEqual(next.storey.windows, p.storey.windows);
+  assert.deepEqual(next.storey.walls[0]!.start, { x: 2, y: -1 });
+  assert.deepEqual(p.storey.references[0]!.origin, { x: 10, y: 12 });
+});
+test("image movement rejects hidden/stale/nonfinite targets and an unaccompanied window", () => {
+  const p = imageFixture(),
+    targets = [{ kind: "reference" as const, id: "image" }],
+    s = beginSelectionMove(p, targets, origin);
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.defaultLayerIds.line],
+  });
+  assert.throws(() => beginSelectionMove(p, targets, origin, hidden));
+  assert.throws(() => previewSelectionMove(s, p, targets, target, hidden));
+  assert.throws(() => previewSelectionMove(s, { ...p }, targets, target));
+  assert.throws(() => previewSelectionMove(s, p, [], target));
+  assert.throws(() => previewSelectionMove(s, p, targets, { x: Infinity, y: 0 }));
+  assert.throws(() => beginSelectionMove(p, [...targets, { kind: "window", id: "F" }], origin));
+  assert.equal(previewSelectionMove(s, p, targets, origin), p);
 });

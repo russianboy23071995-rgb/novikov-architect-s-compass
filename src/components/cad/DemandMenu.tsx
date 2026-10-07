@@ -136,7 +136,7 @@ export function DemandMenu({
             className="rounded border p-1 text-left hover:bg-muted"
             onClick={onMoveSelection}
           >
-            Auswahl frei bewegen
+            {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
           </button>
         )}
         {onReferences && (

@@ -27,8 +27,6 @@ export function assertMovableSelection(
 ) {
   if (!targets.length || !sameTargets(targets, eligibleSelection(project, visibility, targets)))
     throw new Error("Auswahl ist nicht mehr sichtbar oder aktuell. Erneut auswählen.");
-  if (targets.some((t) => t.kind === "reference"))
-    throw new Error("Bildreferenz-Bewegung folgt im nächsten Schritt.");
   const walls = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (
     targets.some(
@@ -86,6 +84,9 @@ export function previewSelectionMove(
     ...current,
     storey: {
       ...s,
+      references: s.references.map((r) =>
+        ids.has(r.id) ? { ...r, origin: translate(r.origin) } : r,
+      ),
       walls: s.walls.map((w) =>
         ids.has(w.id) ? { ...w, start: translate(w.start), end: translate(w.end) } : w,
       ),
