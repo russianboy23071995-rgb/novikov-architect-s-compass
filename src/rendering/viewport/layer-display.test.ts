@@ -115,7 +115,14 @@ test("hidden host removes plan symbols and solid surfaces but independent drawin
   });
   const hidden = createLayerDisplay(p, bim, bim.context),
     visible = createLayerDisplay(p, drawing, drawing.context);
-  assert.deepEqual(hidden.plan, { walls: [], windows: [], lines: [], hatches: [], openings: [] });
+  assert.deepEqual(hidden.plan, {
+    walls: [],
+    references: [],
+    windows: [],
+    lines: [],
+    hatches: [],
+    openings: [],
+  });
   assert.equal(hidden.surfaces.faces.length, 0);
   assert.ok(hidden.surfaces.min.every(Number.isFinite));
   assert.equal(hidden.canPick(p, bim.context, "window-1"), false);

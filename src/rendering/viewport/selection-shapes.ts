@@ -1,3 +1,4 @@
+import { imageReferenceCorners } from "./image-reference.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
@@ -8,6 +9,13 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
   const contours = connectedWallContours(project);
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   return [
+    ...project.storey.references.map((r) => ({
+      target: { kind: "reference" as const, id: r.id },
+      points: imageReferenceCorners(
+        r,
+        project.assets.find((a) => a.id === r.assetId)!,
+      ),
+    })),
     ...project.storey.walls.map((w) => ({
       target: { kind: "wall" as const, id: w.id },
       points: contours.get(w.id) ?? wallBody(w).corners,

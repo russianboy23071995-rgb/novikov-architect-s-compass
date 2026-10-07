@@ -117,6 +117,11 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
                   kind: "item",
                 })),
             })),
+            ...project.storey.references.map((r, index): TreeNode => ({
+              id: r.id,
+              label: `Bildreferenz ${index + 1}`,
+              kind: "item",
+            })),
             ...project.storey.hatches.map((hatch, index): TreeNode => ({
               id: hatch.id,
               label: `Schraffur ${index + 1}`,
@@ -164,6 +169,7 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
             {project.storey.walls.length +
               project.storey.windows.length +
               project.storey.hatches.length +
+              project.storey.references.length +
               (project.storey.lines?.length ?? 0)}
           </span>
         </div>

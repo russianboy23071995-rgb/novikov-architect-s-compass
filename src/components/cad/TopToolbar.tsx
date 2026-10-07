@@ -44,6 +44,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 type TopToolbarProps = {
+  onImportImage: () => void;
   onCanvasDisplay: () => void;
   mode: ViewMode;
   layout: ViewportLayout;
@@ -133,7 +134,20 @@ export function TopToolbar(props: TopToolbarProps) {
           aria-label="Application menu"
         >
           {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
-            item === "View" ? (
+            item === "Insert" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    Insert
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onImportImage}>
+                    Bildreferenz importieren…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "View" ? (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <Button

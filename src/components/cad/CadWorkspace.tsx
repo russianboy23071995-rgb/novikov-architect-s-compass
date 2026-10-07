@@ -1,3 +1,4 @@
+import { useImageImport } from "./useImageImport";
 import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useSelectionMove } from "./useSelectionMove";
@@ -107,6 +108,8 @@ export function CadWorkspace({
   useEffect(() => {
     if (pendingSession && !editSession) dispatchEditing({ type: "cancel" });
   }, [pendingSession, editSession]);
+  const imageInput = useRef<HTMLInputElement>(null);
+  const cancelImage = useRef<() => void>(() => {});
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
@@ -184,6 +187,7 @@ export function CadWorkspace({
 
   const cancelInteraction = useCallback(() => {
     cancelGroup.current();
+    cancelImage.current();
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
@@ -334,7 +338,7 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection) return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove = inSolid && selection.kind === "wall";
     if (solidMove && !pickedPoint.anchor) {
@@ -496,7 +500,11 @@ export function CadWorkspace({
     },
     () => selectTool("select"),
   );
-  const windowPlacement = windowTool.adapter;
+  const imageTool = useImageImport(project, visibility, (next, id) =>
+    changeProject(next, { kind: "reference", id }),
+  );
+  cancelImage.current = imageTool.cancel;
+  const windowPlacement = imageTool.adapter ?? windowTool.adapter;
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
@@ -606,9 +614,10 @@ export function CadWorkspace({
                 {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
                 {pendingFile?.project.storey.windows.length} Fenster ·{" "}
                 {pendingFile?.project.storey.lines?.length ?? 0} Linien ·{" "}
-                {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren. Ersetzt das aktuelle
-                Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht übernommene
-                Formulareingaben werden verworfen.
+                {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren ·{" "}
+                {pendingFile?.project.storey.references.length ?? 0} Bildreferenzen. Ersetzt das
+                aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
+                übernommene Formulareingaben werden verworfen.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -632,6 +641,12 @@ export function CadWorkspace({
         </Dialog>
         {!fullscreen && (
           <TopToolbar
+            onImportImage={() => {
+              selectTool("select");
+              setSelection(null);
+              setMode("2D");
+              imageInput.current?.click();
+            }}
             onCanvasDisplay={() => setDisplaySettingsOpen(true)}
             onLayers={() => {
               cancelInteraction();
@@ -682,6 +697,17 @@ export function CadWorkspace({
             canRedo={history.future.length > 0}
           />
         )}
+        <input
+          ref={imageInput}
+          type="file"
+          accept="image/png,image/jpeg"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) void imageTool.begin(file);
+          }}
+        />
         <LayerManager
           project={project}
           onVisibility={(base, action) => dispatchEditing({ type: "visibility", base, action })}
@@ -693,6 +719,8 @@ export function CadWorkspace({
           onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
         />
         {demandOpen &&
+          !imageTool.active &&
+          selection?.kind !== "reference" &&
           !groupMove.active &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selection && !editSession)) && (
@@ -787,7 +815,27 @@ export function CadWorkspace({
               />
             )}
           </div>
-          {tool === "window" ? (
+          {imageTool.active || imageTool.busy || imageTool.error ? (
+            <div className="flex items-center gap-3 text-xs">
+              <label>
+                Bildbreite (m)
+                <input
+                  aria-label="Bildbreite (m)"
+                  className="ml-2 w-24 rounded border bg-background p-1"
+                  value={imageTool.width}
+                  onChange={(e) => imageTool.setWidth(e.target.value)}
+                />
+              </label>
+              <span>
+                {imageTool.busy
+                  ? "Bild wird geprüft…"
+                  : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
+              </span>
+              <Button size="sm" onClick={imageTool.cancel}>
+                Bildimport abbrechen
+              </Button>
+            </div>
+          ) : tool === "window" ? (
             <WindowPlacementFields
               value={windowTool.dimensions}
               onChange={windowTool.setDimensions}
@@ -949,6 +997,7 @@ export function CadWorkspace({
                   ortho={ortho}
                   onSelect={selectElement}
                   onContourStretch={(target, index, anchor) => {
+                    if (target.kind === "reference") return;
                     if (
                       referenceSelection.selecting ||
                       !visibleLayerTarget(
