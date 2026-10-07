@@ -1,3 +1,4 @@
+import { assertProjectFileSize } from "../../interop/project-file/size.ts";
 import { reconcileTJunctions } from "../../domain/elements/wall/t-relations.ts";
 import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -12,13 +13,15 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 8,
+    schemaVersion: 9,
+    assets: [],
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),
     unit: "m",
     id: projectId,
     storey: {
       id: storeyId,
+      references: [],
       walls: [],
       windows: [],
       hatches: [],
@@ -137,7 +140,9 @@ export function windowCentre(project: Project, windowId: string): Point {
 }
 
 export function serializeProject(project: Project): string {
-  return JSON.stringify(validateProject(project));
+  const json = JSON.stringify(validateProject(project));
+  assertProjectFileSize(json);
+  return json;
 }
 
 export function addLine(project: Project, line: Creation<DrawingLine>): Project {

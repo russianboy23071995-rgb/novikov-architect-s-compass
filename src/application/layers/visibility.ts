@@ -56,6 +56,7 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
       ...project.storey.windows,
       ...(project.storey.lines ?? []),
       ...project.storey.hatches,
+      ...project.storey.references,
     ].map((element) => [element.id, element] as const),
   );
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));

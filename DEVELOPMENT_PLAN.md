@@ -1,5 +1,35 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Persistenter Bildreferenz-Datenkern - 07.10.2026
+
+PR161 freigegeben und in main ee8c61d integriert. Schema 9 ergänzt projektweite
+Assets und geschossgebundene Bildreferenzen mit stabilen IDs, Ebene, Asset-Verweis,
+Ursprung, Rotation und einheitlichem Meter-pro-Pixel-Maßstab. Versionen 1–8 werden
+streng validiert migriert; neue Dateien benötigen einen Schema-9-fähigen Build.
+Application previewCreateReference/commitCreateReference erstellt Asset und Referenz
+atomar, prüft Projekt-/Snapshotbindung und Dateigröße. Ebenenbelegung, Zuweisung
+und Sichtbarkeit berücksichtigen Referenzen. Kein neuer UI-/Auswahlmodus.
+
+602 Tests bestanden, TypeScript und Build erfolgreich. Lint: keine Fehler,
+6 bekannte Fast-Refresh-Warnungen. Neue Tests: portable JSON-Datei, Undo/Redo,
+Migration V8, ungültige IDs/Verweise/Ebenen/Base64/MIME/Maße, veralteter Import,
+Transformation, Dateigröße und unveränderter IFC-Export. Bestehende Migrationstests
+verwenden weiterhin echte alte Formate ohne die neuen Felder.
+
+Grenzen: keine Bilddekodierung, kein Canvas-Import oder Kalibriermenü. MIME und
+Pixelmaße sind ein Speichervertrag, noch kein Nachweis dekodierbarer Bilddaten;
+der kommende Adapter muss Inhalte und tatsächliche Dimensionen verifizieren.
+Technisches vorläufiges Budget: 16 Millionen Pixel, maximal 16384 je Kante;
+Projektdatei insgesamt maximal 10 MiB inklusive Base64/Metadaten. Nicht als
+Nutzerentscheidung oder gemessene Kapazitätsgrenze ausgegeben.
+
+Praktische Abnahme derzeit über automatisierte Tests; bisherige Wand-/Fenster-
+Projekte lassen sich weiter öffnen und speichern. Noch kein neuer Bild-Button.
+Genau ein Folgeauftrag: PNG/JPEG-Importadapter mit lokaler Dekodierung und
+Dimensionsprüfung sowie kleiner 2D-Importbedienung integrieren: Breite in Metern,
+Vorschau/Abbruch, atomare Bestätigung, Anzeige, gemeinsame Auswahl und Ebenenfilter,
+Speichern/Wiederöffnen. Kalibrierbedienung und PDF bleiben anschließend separat.
+
 ## Bildreferenz-Planung - 07.10.2026
 
 PR160 freigegeben und in main d18990d integriert. Bestand und Daten-/Aktionsvertrag

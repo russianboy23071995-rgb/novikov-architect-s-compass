@@ -1,3 +1,8 @@
+import {
+  imageAssetSchema,
+  imageReferenceSchema,
+  validateReferenceExtent,
+} from "../elements/reference/model.ts";
 import { connectedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
@@ -93,15 +98,30 @@ const projectV7Schema = projectV6Schema.extend({
   schemaVersion: z.literal(7),
   storey: projectV6Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
 });
-const projectSchema = projectV7Schema.extend({
+const projectV8Schema = projectV7Schema.extend({
   schemaVersion: z.literal(8),
   storey: projectV7Schema.shape.storey.extend({
     wallTJunctions: z.array(z.object({ hostWallId: id, incoming: wallEndSchema }).strict()),
   }),
 });
+const projectSchema = projectV8Schema.extend({
+  schemaVersion: z.literal(9),
+  assets: z.array(imageAssetSchema),
+  storey: projectV8Schema.shape.storey.extend({ references: z.array(imageReferenceSchema) }),
+});
+export function validateProjectV8(value: unknown) {
+  const old = projectV8Schema.parse(value);
+  validateProject({
+    ...old,
+    schemaVersion: 9,
+    assets: [],
+    storey: { ...old.storey, references: [] },
+  });
+  return old;
+}
 export function validateProjectV7(value: unknown) {
   const project = projectV7Schema.parse(value);
-  validateProject({
+  validateProjectV8({
     ...project,
     schemaVersion: 8,
     storey: { ...project.storey, wallTJunctions: [] },
@@ -112,7 +132,7 @@ type ProjectV6 = z.infer<typeof projectV6Schema>;
 export function validateProjectV6(value: unknown): ProjectV6 {
   const project = projectV6Schema.parse(value);
   // Reuse current relation validation on a disposable explicitly converted view.
-  validateProject({
+  validateProjectV8({
     ...project,
     schemaVersion: 8,
     storey: {
@@ -180,6 +200,12 @@ export function validateProject(value: unknown): Project {
   connectedWallSolids(project);
   validateLayers(project);
   validateVisibility(project);
+  const assets = new Map(project.assets.map((a) => [a.id, a]));
+  for (const reference of project.storey.references) {
+    const asset = assets.get(reference.assetId);
+    if (!asset) throw new Error("Unknown image asset: " + reference.assetId);
+    validateReferenceExtent(reference, asset);
+  }
   return project;
 }
 function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3): void {
@@ -196,10 +222,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
+    ...(project.schemaVersion === 9 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 8
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 9
       ? project.storey.hatches
       : []),
   ]) {
@@ -214,11 +241,13 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
+    ...(project.schemaVersion === 9 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
+    ...(project.schemaVersion === 9 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 8
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 9
       ? project.storey.hatches
       : []),
   ]) {
@@ -239,7 +268,7 @@ function validateGeometry(
     }
     if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 8)
+  if (project.schemaVersion === 5 || project.schemaVersion === 9)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

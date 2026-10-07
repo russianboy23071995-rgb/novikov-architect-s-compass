@@ -155,10 +155,11 @@ test("opening contact/collision rejects edits and joining, leaving input and his
 
 test("V5 migration does not auto-connect old touching walls; forged/stale/duplicate V6 links fail", () => {
   const p = pair();
-  const { wallTJunctions, wallJoins, ...storey } = p.storey;
-  const old = { ...p, schemaVersion: 5, storey };
+  const { references, wallTJunctions, wallJoins, ...storey } = p.storey;
+  const { assets, ...legacyRoot } = p;
+  const old = { ...legacyRoot, schemaVersion: 5, storey };
   const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 8);
+  assert.equal(migrated.schemaVersion, 9);
   assert.deepEqual(migrated.storey.wallJoins, []);
   assert.deepEqual(migrated.storey.walls, p.storey.walls);
   assert.equal(updateWall(migrated, "A", { height: 3 }).storey.wallJoins.length, 0);
