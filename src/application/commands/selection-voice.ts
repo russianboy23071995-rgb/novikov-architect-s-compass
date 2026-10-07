@@ -1,3 +1,4 @@
+import type { CalibrationContext } from "../references/calibration.ts";
 import { normalizeSpeech, startVoice, type RecognitionConstructor } from "../../lib/bim/voice.ts";
 import { previewSelectionCommand, type SelectionCommandPreview } from "./selection-command.ts";
 import { eligibleSelection, type SelectionSet } from "../selection/state.ts";
@@ -5,6 +6,7 @@ import { sameTargets } from "../selection/move.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 export type VoiceSelectionContext = {
+  calibration?: CalibrationContext | undefined;
   project: Project;
   targets: SelectionSet;
   visibility: LayerVisibilityPolicy;
@@ -42,7 +44,13 @@ export function startSelectionVoice(
       const text = normalizeSpeech(transcript);
       callbacks.transcript(text);
       try {
-        const preview = previewSelectionCommand(context.project, targets, context.visibility, text);
+        const preview = previewSelectionCommand(
+          context.project,
+          targets,
+          context.visibility,
+          text,
+          context.calibration,
+        );
         if (valid()) callbacks.preview(preview);
       } catch (error) {
         if (valid())

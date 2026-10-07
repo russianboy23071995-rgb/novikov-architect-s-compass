@@ -2,7 +2,11 @@ import { useMemo, useRef, useState } from "react";
 import type { Project, Point } from "@/domain/project/schema";
 import type { SelectionSet } from "@/application/selection/state";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
-import { parseCalibrationLength, previewCalibration } from "@/application/references/calibration";
+import {
+  createCalibrationContext,
+  parseCalibrationLength,
+  previewCalibration,
+} from "@/application/references/calibration";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingSnapPolicy } from "@/application/tools/snapping";
 import { querySnap } from "@/constraints/snapping/engine";
@@ -28,6 +32,19 @@ export function useReferenceCalibration(
     targets[0].id === session.id
       ? session
       : null;
+  const commandContext = useMemo(
+    () =>
+      active?.points.length === 2
+        ? createCalibrationContext(
+            active.base,
+            active.visibility,
+            active.id,
+            active.points[0]!,
+            active.points[1]!,
+          )
+        : undefined,
+    [active],
+  );
   const latest = useRef({ project, targets, visibility, active, length, commit });
   latest.current = { project, targets, visibility, active, length, commit };
   const cancel = () => {
@@ -107,6 +124,7 @@ export function useReferenceCalibration(
     };
   }, [active, project]);
   return {
+    commandContext,
     begin,
     cancel,
     confirm,

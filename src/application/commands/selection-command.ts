@@ -1,3 +1,8 @@
+import {
+  previewCalibration,
+  parseCalibrationLength,
+  type CalibrationContext,
+} from "../references/calibration.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { eligibleSelection, singleTarget, type SelectionSet } from "../selection/state.ts";
@@ -6,6 +11,7 @@ import { resolvePolarInput } from "../../constraints/input/polar.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 
 export type SelectionCommandPreview = {
+  calibration?: CalibrationContext | undefined;
   base: Project;
   targets: SelectionSet;
   visibility: LayerVisibilityPolicy;
@@ -19,6 +25,7 @@ export function previewSelectionCommand(
   targets: SelectionSet,
   visibility: LayerVisibilityPolicy,
   text: string,
+  calibration?: CalibrationContext,
 ): SelectionCommandPreview {
   if (!targets.length || !sameTargets(targets, eligibleSelection(project, visibility, targets)))
     throw new Error("Bitte eine sichtbare, aktuelle Auswahl festlegen.");
@@ -27,7 +34,31 @@ export function previewSelectionCommand(
       text.trim(),
     );
   let result: Project, summary: string;
-  if (move) {
+  if (/^referenz\b/iu.test(text.trim())) {
+    const match = /^referenz\s+auf\s+(.+?)\s+kalibrieren$/iu.exec(text.trim());
+    if (!match) throw new Error("Befehl: Referenz auf 5 m kalibrieren.");
+    if (!calibration)
+      throw new Error(
+        "Zuerst die Bildreferenz auswählen und zwei Messpunkte über Zweipunkt-Kalibrierung aufnehmen.",
+      );
+    if (calibration.visibility !== visibility)
+      throw new Error("Sichtbarkeit geändert. Messpunkte erneut aufnehmen.");
+    const metres = parseCalibrationLength(match[1]!);
+    result = previewCalibration(
+      calibration.base,
+      project,
+      targets,
+      {
+        projectId: calibration.base.id,
+        referenceId: calibration.referenceId,
+        first: calibration.first,
+        second: calibration.second,
+        metres,
+      },
+      visibility,
+    );
+    summary = `Bildreferenz ${calibration.referenceId}: Messstrecke auf ${metres.toLocaleString("de-DE")} m kalibrieren. Erster Messpunkt bleibt fest; gleichmäßige Skalierung.`;
+  } else if (move) {
     const length =
       Number(move[1]!.replace(",", ".")) / { m: 1, cm: 100, mm: 1000 }[move[2]!.toLowerCase()]!;
     const angle = Number(move[3]!.replace(",", "."));
@@ -61,6 +92,7 @@ export function previewSelectionCommand(
     summary = legacy.summary;
   }
   return {
+    calibration,
     base: project,
     targets: targets.map((t) => ({ ...t })),
     visibility,
@@ -74,8 +106,10 @@ export function selectionCommandIsCurrent(
   targets: SelectionSet,
   visibility: LayerVisibilityPolicy,
   preview: SelectionCommandPreview,
+  calibration?: CalibrationContext,
 ): boolean {
   return (
+    calibration === preview.calibration &&
     project === preview.base &&
     visibility === preview.visibility &&
     sameTargets(targets, preview.targets) &&
@@ -88,8 +122,9 @@ export function applySelectionCommand(
   targets: SelectionSet,
   visibility: LayerVisibilityPolicy,
   preview: SelectionCommandPreview,
+  calibration?: CalibrationContext,
 ): Project {
-  if (!selectionCommandIsCurrent(project, targets, visibility, preview))
+  if (!selectionCommandIsCurrent(project, targets, visibility, preview, calibration))
     throw new Error("Modell, Auswahl oder Sichtbarkeit geändert. Bitte Befehl erneut prüfen.");
-  return previewSelectionCommand(project, targets, visibility, preview.text).result;
+  return previewSelectionCommand(project, targets, visibility, preview.text, calibration).result;
 }

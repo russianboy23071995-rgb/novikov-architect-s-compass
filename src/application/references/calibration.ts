@@ -62,3 +62,27 @@ export function commitCalibration(
     previewCalibration(base, history.present, targets, request, visibility),
   );
 }
+
+/** Identity token for one completed measurement; replacing it invalidates pending commands. */
+export type CalibrationContext = Readonly<{
+  base: Project;
+  visibility: LayerVisibilityPolicy;
+  referenceId: string;
+  first: Readonly<Point>;
+  second: Readonly<Point>;
+}>;
+export function createCalibrationContext(
+  base: Project,
+  visibility: LayerVisibilityPolicy,
+  referenceId: string,
+  first: Point,
+  second: Point,
+): CalibrationContext {
+  return Object.freeze({
+    base,
+    visibility,
+    referenceId,
+    first: Object.freeze({ ...first }),
+    second: Object.freeze({ ...second }),
+  });
+}

@@ -2156,3 +2156,14 @@ length form; CadWorkspace only coordinates it. A session pins project, visibilit
 selected reference and two world points. Context changes invalidate it; preview
 does not mutate project/assets and acceptance produces one model history entry.
 Text/Voice adapters are the next bounded task and must reuse this action.
+
+
+## Calibration command adapter - 2026-10-07
+
+The existing selection-command grammar accepts `Referenz auf 5 m kalibrieren`
+only with a completed CalibrationContext from shared point capture. This frozen
+context pins base project, reference ID, visibility and copied world points; its
+identity is a revision token for command preview and voice. Replacing or clearing
+it invalidates pending results. Text and normalized voice call previewCalibration;
+acceptance revalidates through that same action and the existing model history.
+No separate AI geometry or automatic reference inference is introduced.

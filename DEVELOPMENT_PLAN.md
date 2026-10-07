@@ -1,5 +1,30 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Kalibrierung per Text und Sprache - 07.10.2026
+
+PR164 freigegeben und zusammengefuehrt. Nach zwei Messpunkten versteht die
+vorhandene Befehlsleiste "Referenz auf 5 m kalibrieren". Der lokale Parser
+uebersetzt nur zur bestehenden previewCalibration-Aktion. Ein unveraenderlicher
+Messkontext bindet Snapshot, Referenz-ID, Sichtbarkeit und Punkte; neue Messungen
+verwerfen alte Vorschauen und laufende Sprachergebnisse. Uebernahme validiert
+erneut und erzeugt einen Undo-Schritt. BIM-Skalierung bleibt ausgeschlossen.
+
+Nachweis: 615 Tests bestanden; TypeScript und Build erfolgreich; Lint ohne Fehler,
+6 bekannte Warnungen. Browser: Messpunkte, Textvorschau, Uebernahme (4x2 auf
+8,944x4,472 m) und Undo auf 4x2 m. Voice ueber simulierte finale Transkripte
+inklusive veraltetem Messkontext getestet; echter Mikrofontest bleibt Nutzerabnahme.
+Die Befehlsvorschau ist wie bei vorhandenen Befehlen textuell. Keine freie
+Sprachinterpretation, keine automatisch erkannten Bildmesspunkte.
+
+Abnahme: Bild auswaehlen, Zweipunkt-Kalibrierung starten, zwei Punkte klicken.
+In Modellbefehle "Referenz auf 5 m kalibrieren" eingeben oder per Mikrofon sagen.
+Befehl pruefen, Ziel/Lange lesen, Uebernehmen und Undo testen.
+
+Genau ein Folgeauftrag: Bildreferenzen an die gemeinsame Auswahlbewegung anbinden
+(einzeln und gemischt), inklusive Ursprung/Fangengine, Vorschau, atomarem Commit,
+Undo und Textbefehl. Damit laesst sich die kalibrierte Referenz auch ausrichten,
+bevor Guide Etappe 8 beginnt; kein eigener Bewegungsmechanismus.
+
 ## Zweipunkt-Kalibrierung für Bildreferenzen - 07.10.2026
 
 PR163 einschließlich Fokusrahmenkorrektur in main ef325a9 integriert. Die ausgewählte
