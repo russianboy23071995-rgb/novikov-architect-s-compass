@@ -1,5 +1,13 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bild-Fokusrahmen korrigiert - 07.10.2026
+
+Nutzerfehler reproduziert: fokussiertes SVG-image erhält Browser-outline auto 5px;
+die Modelltransformation vergrößert ihn bis über den Canvas. Bild bekommt wie
+andere SVG-Auswahlziele outline-none, der vorhandene CSS-konstante türkise
+Auswahlrahmen bleibt. Browserprüfung: fokussiertes Bild, outline-style none.
+Nächster Auftrag bleibt Zweipunkt-Kalibrierung.
+
 ## PNG/JPEG-Import im Grundriss - 07.10.2026
 
 PR162 freigegeben und in main 925385b integriert. Insert → Bildreferenz importieren

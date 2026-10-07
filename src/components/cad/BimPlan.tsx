@@ -804,6 +804,7 @@ export function BimPlan({
             >
               <image
                 {...selectProps("reference", r.id)}
+                className="cursor-pointer outline-none"
                 href={checkedImageUrl(a)}
                 width={a.pixelWidth * r.metresPerPixel}
                 height={a.pixelHeight * r.metresPerPixel}
