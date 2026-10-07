@@ -1,5 +1,52 @@
 # NOVIKOV CAD Architecture Contract
 
+## Current performance decision: prepared action previews — 2026-10-07
+
+This section sets the direction for A-04 and supersedes the proposed next
+base64-schema cache in the historical development log. The
+[architecture review](docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md) records
+code evidence, reproducible diagnostics, alternatives and the single next pilot.
+Existing product rules and the dependency direction UI → Application → Domain →
+Geometry/Core remain binding.
+
+**Implemented status:** previews still materialize and fully validate projects.
+Bounded image-URL reuse and PR171's one-result interaction cache reduce repeated
+work; they do not provide an incremental model or scalable scene updates. The
+local snapping index already uses the committed model and remains shared.
+
+**Binding direction for the migration, not completed functionality:**
+
+- Application prepares an edit against a stable validated model revision, typed
+  selection, visibility context and origin. Pointer updates change parameters,
+  not the authoritative project. Context changes invalidate the session.
+- Domain owns the affected set and shared pure validation/derivation rules.
+  Include hosted elements, relationship changes, stationary partners whose
+  contours change, and spatially affected endpoint occupancy. Selection IDs or
+  explicit relationship traversal alone are insufficient dependency boundaries.
+- A disposable preview carries affected model/relationship changes and derived
+  geometry over the unchanged base. Do not parse assets, serialize the project
+  or recreate every entity for each target. Preserve checks on resulting finite
+  coordinates, degenerate geometry and all current connection restrictions.
+- Rendering reuses the base scene and replaces the affected display geometry;
+  unrelated Navigator/UI data does not depend on pointer coordinates. View,
+  visibility and model revisions invalidate their own relevant derived data.
+  No renderer representation becomes a second editable BIM model.
+- Mouse, precision, text and voice consume the same Application evaluation and
+  final operation. Confirmation checks current context and fully validates the
+  materialized project through the existing commit/history boundary. File input
+  and public validation stay independent and complete. No public trusted-caller
+  switch or cache keyed only by mutable IDs may bypass validation.
+- Keep snapshot history and project/asset formats during this migration. A
+  transient preview change set does not imply Delta-History or Event Sourcing.
+  First prove the existing 2D whole-selection translation workflow; add further
+  consumers incrementally without copying orchestration into individual tools.
+
+Concrete result types, index implementation and scheduling are implementation
+choices for the pilot, not new user-facing decisions. Workers, a new rendering
+backend, desktop framework or native geometry runtime are not justified by the
+current measurements. Large affected sets can still require large calculations;
+measure preparation, steady-state preview and commit separately.
+
 Tool-specific settings, properties and option hints belong exclusively in the
 Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
 active-tool option model; global project/view/layer controls remain there.

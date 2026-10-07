@@ -1,0 +1,42 @@
+{
+  "reports": [
+    {
+      "count": 100,
+      "changedParameterIds": [
+        "A"
+      ],
+      "newEntityObjects": 100,
+      "unchangedParameterObjectsReallocated": 99,
+      "newAssetObject": true,
+      "equalAssetString": true,
+      "stationaryNeighbourContourChanged": true,
+      "detachedRelations": 1
+    },
+    {
+      "count": 1000,
+      "changedParameterIds": [
+        "A"
+      ],
+      "newEntityObjects": 1000,
+      "unchangedParameterObjectsReallocated": 999,
+      "newAssetObject": true,
+      "equalAssetString": true,
+      "stationaryNeighbourContourChanged": true,
+      "detachedRelations": 1
+    },
+    {
+      "count": 5000,
+      "changedParameterIds": [
+        "A"
+      ],
+      "newEntityObjects": 5000,
+      "unchangedParameterObjectsReallocated": 4999,
+      "newAssetObject": true,
+      "equalAssetString": true,
+      "stationaryNeighbourContourChanged": true,
+      "detachedRelations": 1
+    }
+  ],
+  "unrelatedEndpointAtJoinedNodeRejected": true,
+  "note": "Identity/value assertions only, not a latency or heap measurement."
+}
