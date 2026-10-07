@@ -743,7 +743,7 @@ export function CadWorkspace({
               project={project}
               selectionCount={selections.length}
               onMoveSelection={
-                selections.length > 1
+                selections.length > 1 || selection?.kind === "reference"
                   ? () => {
                       cancelInteraction();
                       try {

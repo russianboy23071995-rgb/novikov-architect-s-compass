@@ -84,6 +84,32 @@ Browser-Messparcours ausführen und Ergebnisse im Plan festhalten. Danach
 A-02 mit Vorher-/Nachher-Messung bearbeiten; A-03/A-04 nur anhand der
 gefundenen Engpässe konkretisieren.
 
+## Bildreferenzen gemeinsam bewegen - 07.10.2026
+
+PR165 freigegeben und zusammengefuehrt. Die bestehende SelectionMove-Aktion
+verschiebt jetzt auch den Bildursprung. Assets, Kalibrierung und Rotation bleiben
+unveraendert. Einzelbild und gemischte Auswahl verwenden denselben Ursprung,
+Fang-/Hilfslinienpfad, Winkel/Laenge, Klick-Commit und Undo. Das Einzelbild bekommt
+im On-Demand-Menue den Einstieg "Element frei bewegen". Text/Voice-Auswahlbewegung
+benutzt automatisch dieselbe Aktion. Hostgebundene Fenster brauchen weiterhin
+ihre Wand in der Gruppe; diese Regel wird nicht gelockert.
+
+Nachweis: 618 Tests, TypeScript und Build erfolgreich; Lint ohne Fehler und mit
+6 bekannten Warnungen. Tests: Bild allein/gemischt mit BIM, fester Massstab und
+Rotation, Assets, Einmal-Undo/Redo, JSON, Textaktion, versteckte/veraltete Ziele.
+Browser: Einzelbild um 2 m numerisch bewegt, Undo stellt Ursprung wieder her;
+Wand und Bild per Strg-Auswahl, Ursprung und Zielklick gemeinsam bearbeitet.
+
+Abnahme: Bild anklicken > Element frei bewegen > Ursprung anklicken > Ziel
+anklicken oder Winkel/Laenge eingeben. Danach Wand mit Strg/Cmd dazunehmen und
+Auswahl frei bewegen. Undo muss jeweils die gesamte Bewegung zuruecknehmen.
+Keine Bildinhalts-Fangpunkte, keine freie Drehung oder PDF-Unterstuetzung.
+
+Genau ein Folgeauftrag gemaess Guide Etappe 8: einen validierten Raumdatenkern
+fuer manuell begrenzte Raumkonturen mit stabiler ID, sichtbarer Kennung, Name,
+Geschoss-/Ebenenzuordnung und geometrischer Flaeche planen und implementieren,
+inklusive Migration, JSON und Tests. Keine automatische Raumerkennung oder WoFlV.
+
 ## Kalibrierung per Text und Sprache - 07.10.2026
 
 PR164 freigegeben und zusammengefuehrt. Nach zwei Messpunkten versteht die
