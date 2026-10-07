@@ -1,4 +1,4 @@
-import type { Project } from "../../domain/project/schema.ts";
+import type { WallGeometry } from "../../domain/project/geometry-scope.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
@@ -10,7 +10,7 @@ const edges = (ring: readonly Point2[]): Edge[] =>
 
 /** Disposable plan strokes. Only persisted, visible partners may remove a seam.
  * Individual fill/hit polygons and BIM identities remain intact. */
-export function wallPlanOutlines(project: Project, visibleIds: ReadonlySet<string>) {
+export function wallPlanOutlines(project: WallGeometry, visibleIds: ReadonlySet<string>) {
   const contours = connectedWallContours(project);
   const rings = new Map(
     project.storey.walls

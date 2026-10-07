@@ -1,3 +1,4 @@
+import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { validateCornerTContact } from "./corner-t-contact.ts";
 import type { Point, Project } from "../../project/schema.ts";
 import { inspectTPair } from "./t-pair.ts";
@@ -7,7 +8,7 @@ export type TJunction = Project["storey"]["wallTJunctions"][number];
 
 /** Strict persisted relationships: loading never repairs or discovers neighbours. */
 export function tConnectionContours(
-  project: Project,
+  project: WallGeometry,
   cornerContours: ReadonlyMap<string, Point[]>,
 ) {
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));

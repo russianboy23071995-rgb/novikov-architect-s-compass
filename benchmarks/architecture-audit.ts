@@ -1,4 +1,4 @@
-/** Read-only diagnostic of existing behavior; no alternate movement implementation. */
+/** Full-snapshot materialization diagnostic; after A-04 this is NOT the pointer path. */
 import assert from "node:assert/strict";
 import { createProject, validateProject } from "../src/lib/bim/model.ts";
 import { beginSelectionMove, previewSelectionMove } from "../src/application/selection/move.ts";

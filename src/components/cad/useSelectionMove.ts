@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   assertMovableSelection,
   beginSelectionMove,
@@ -34,7 +34,34 @@ export function useSelectionMove(
   useEffect(() => {
     if (pending && !active) setPending(null);
   }, [pending, active]);
-  const cancel = () => setPending(null);
+  const cancel = useCallback(() => setPending(null), []);
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  const adapter = useMemo(
+    () =>
+      active?.session
+        ? selectionMoveInteraction(
+            active.session,
+            project,
+            targets,
+            visibility,
+            (next) => {
+              const now = latest.current;
+              if (
+                now.pending !== active ||
+                now.project !== project ||
+                now.visibility !== visibility ||
+                !sameTargets(now.targets, targets)
+              )
+                throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
+              commitRef.current(next);
+              cancel();
+            },
+            cancel,
+          )
+        : null,
+    [active, project, targets, visibility, cancel],
+  );
   return {
     active: !!active,
     pickingOrigin: !!active && !active.session,
@@ -55,26 +82,6 @@ export function useSelectionMove(
         });
     },
     cancel,
-    adapter: active?.session
-      ? selectionMoveInteraction(
-          active.session,
-          project,
-          targets,
-          visibility,
-          (next) => {
-            const now = latest.current;
-            if (
-              now.pending !== active ||
-              now.project !== project ||
-              now.visibility !== visibility ||
-              !sameTargets(now.targets, targets)
-            )
-              throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
-            commit(next);
-            cancel();
-          },
-          cancel,
-        )
-      : null,
+    adapter,
   };
 }

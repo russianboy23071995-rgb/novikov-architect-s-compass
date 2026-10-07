@@ -119,3 +119,24 @@ the next comparison in `docs/performance/preview-reuse-2026-10-07/`. Each record
 target now has one project-validation call. The driver/fixtures are unchanged;
 final validate/commit calls intentionally still run full validation outside the
 movement samples.
+
+
+## Prepared selection pilot
+
+[Prepared preview report](../docs/performance/PREPARED_SELECTION_PREVIEW.md) records
+six comparable runs plus Dense T connections. Preparation durations are recorded
+separately, outside pointer samples. Local preview replaces the prior per-target
+project validation; final materialization still runs the complete checks.
+
+Dense T connections replaces 20 lines with stationary branches on a longer first
+host (equal thickness/height, existing corner/window retained). The driver compares
+rendered wall profiles, seams and openings against the frozen pre-pilot full path
+outside timing, then checks Shift hold/release, Tab length/angle and numeric preview.
+These additional checks were added after the six primary measurement runs; the
+saved dense run includes them. Both preview and final DOM must match.
+
+The older architecture-audit and Measure core/groupPreview exercise full snapshot
+materialization, not the new pointer path. Their allocation counts remain useful
+for the final boundary but must not be described as current pointer allocations.
+Raw reports are diagnostic data, not CI timing thresholds. The product imports no
+benchmark driver, instrumentation or frozen oracle.

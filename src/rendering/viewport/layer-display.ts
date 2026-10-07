@@ -1,3 +1,4 @@
+import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type {
@@ -18,7 +19,7 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
 
 /** Shared renderer filters also accept disposable edit-preview geometry.
  * Eligibility always stays bound to the committed project, never the preview. */
-export function visiblePlanGeometry(project: Project, allows: (id: string) => boolean) {
+export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string) => boolean) {
   const walls = project.storey.walls.filter((w) => allows(w.id));
   const wallIds = new Set(walls.map((w) => w.id));
   return {

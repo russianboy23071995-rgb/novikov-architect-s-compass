@@ -975,7 +975,7 @@ export function CadWorkspace({
                       : groupMove.active
                         ? {
                             target: interaction.target,
-                            previewProject: groupMove.adapter?.previewProject,
+                            geometryPreview: groupMove.adapter?.geometryPreview,
                             aim: interaction.draft.move,
                             pick: groupMove.pickingOrigin
                               ? (point) => {

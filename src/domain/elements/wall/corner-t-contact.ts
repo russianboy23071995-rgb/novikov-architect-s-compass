@@ -1,11 +1,12 @@
-import type { Point, Project, Wall } from "../../project/schema.ts";
+import type { WallGeometry } from "../../project/geometry-scope.ts";
+import type { Point, Wall } from "../../project/schema.ts";
 import { wallBody } from "./body.ts";
 import { pointsCompatible, coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 
 /** Bounded combination: right-angle corners at either host end, contact on its untouched side. */
 export function validateCornerTContact(
-  project: Project,
+  project: WallGeometry,
   host: Wall,
   incomingRing: Point[],
   contact: Point[],
