@@ -83,3 +83,83 @@ test("reloaded payload header must agree with stored MIME and dimensions", () =>
   assert.equal(checkedImageUrl({ ...a, mimeType: "image/jpeg" }), undefined);
   assert.equal(checkedImageUrl({ ...a, data: "invalid" }), undefined);
 });
+
+const cacheAsset = (tag: number, payloadLength = 0) => {
+  const bytes = png();
+  // Distinct ancillary payload; imageHeader checks dimensions, not full decoding.
+  const data =
+    Buffer.from(bytes).toString("base64") +
+    tag.toString(16).padStart(8, "0") +
+    "A".repeat(payloadLength);
+  return {
+    id: `cache-${tag}`,
+    mimeType: "image/png" as const,
+    pixelWidth: 200,
+    pixelHeight: 100,
+    data,
+  };
+};
+
+test("equivalent preview assets reuse the checked URL regardless of ID", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  const asset = cacheAsset(1);
+  const expected = `data:image/png;base64,${asset.data}`;
+  assert.equal(checkedImageUrl(asset), expected);
+  assert.equal(checkedImageUrl({ ...asset, id: "copy" }), expected);
+  assert.equal(decode.mock.callCount(), 1);
+});
+
+test("changed bytes, MIME and dimensions cannot reuse stale results, even on the same object", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  const asset = cacheAsset(2);
+  const original = { ...asset };
+  const url = checkedImageUrl(asset);
+  asset.pixelWidth++;
+  assert.equal(checkedImageUrl(asset), undefined);
+  assert.equal(checkedImageUrl({ ...asset }), undefined);
+  Object.assign(asset, original, { pixelHeight: 101 });
+  assert.equal(checkedImageUrl(asset), undefined);
+  Object.assign(asset, original, { mimeType: "image/jpeg" });
+  assert.equal(checkedImageUrl(asset), undefined);
+  Object.assign(asset, original, { data: "invalid-cache-2" });
+  assert.equal(checkedImageUrl(asset), undefined);
+  Object.assign(asset, original);
+  assert.equal(checkedImageUrl(asset), url);
+  assert.equal(decode.mock.callCount(), 5);
+  asset.data = cacheAsset(3).data;
+  assert.equal(checkedImageUrl(asset), `data:image/png;base64,${asset.data}`);
+  assert.equal(decode.mock.callCount(), 6);
+});
+
+test("cache retains only eight recent results and refreshes recency on a hit", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  const assets = Array.from({ length: 9 }, (_, i) => cacheAsset(100 + i));
+  for (const asset of assets.slice(0, 8)) checkedImageUrl(asset);
+  checkedImageUrl({ ...assets[0]! });
+  checkedImageUrl(assets[8]!);
+  checkedImageUrl({ ...assets[0]! });
+  assert.equal(decode.mock.callCount(), 9);
+  checkedImageUrl(assets[1]!);
+  assert.equal(decode.mock.callCount(), 10);
+});
+
+test("large image strings evict older results at the payload budget", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  // Three 5 MiB base64 strings plus their URLs exceed the 48 MiB UTF-16 budget.
+  const assets = [201, 202, 203].map((tag) => cacheAsset(tag, 5 * 1024 * 1024));
+  for (const asset of assets) checkedImageUrl(asset);
+  checkedImageUrl({ ...assets[2]! });
+  assert.equal(decode.mock.callCount(), 3);
+  checkedImageUrl(assets[0]!);
+  assert.equal(decode.mock.callCount(), 4);
+});
+
+test("a result larger than the entire budget is checked but never retained", (t) => {
+  const asset = cacheAsset(301, 13 * 1024 * 1024);
+  // Isolate cache admission from decoder cost for this above-file-limit input.
+  const decode = t.mock.method(globalThis, "atob", () => Buffer.from(png()).toString("binary"));
+  const expected = `data:image/png;base64,${asset.data}`;
+  assert.equal(checkedImageUrl(asset), expected);
+  assert.equal(checkedImageUrl({ ...asset }), expected);
+  assert.equal(decode.mock.callCount(), 2);
+});

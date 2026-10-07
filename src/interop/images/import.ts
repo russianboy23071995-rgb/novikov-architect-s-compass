@@ -58,12 +58,50 @@ export async function importImage(file: File, id: string): Promise<ImageAsset> {
   }
 }
 
-const checkedUrls = new WeakMap<ImageAsset, string | undefined>();
+// Derived presentation data only: retain at most eight results and 48 MiB of
+// conservative UTF-16 string payload (input + URL). No project/asset objects are
+// retained. Exact contents and metadata, not IDs or object identity, define reuse.
+const MAX_CHECKED_URLS = 8;
+const MAX_CHECKED_URL_BYTES = 48 * 1024 * 1024;
+type CheckedUrl = Pick<ImageAsset, "data" | "mimeType" | "pixelWidth" | "pixelHeight"> & {
+  url: string | undefined;
+  retainedBytes: number;
+};
+const checkedUrls: CheckedUrl[] = [];
+let checkedUrlBytes = 0;
 export function checkedImageUrl(asset: ImageAsset): string | undefined {
-  if (checkedUrls.has(asset)) return checkedUrls.get(asset);
-  const result = checkImageUrl(asset);
-  checkedUrls.set(asset, result);
-  return result;
+  const index = checkedUrls.findIndex(
+    (entry) =>
+      entry.mimeType === asset.mimeType &&
+      entry.pixelWidth === asset.pixelWidth &&
+      entry.pixelHeight === asset.pixelHeight &&
+      entry.data === asset.data,
+  );
+  if (index !== -1) {
+    const [entry] = checkedUrls.splice(index, 1);
+    checkedUrls.push(entry!);
+    return entry!.url;
+  }
+  const url = checkImageUrl(asset);
+  const retainedBytes = 2 * (asset.data.length + (url?.length ?? 0));
+  if (retainedBytes <= MAX_CHECKED_URL_BYTES) {
+    while (
+      checkedUrls.length >= MAX_CHECKED_URLS ||
+      checkedUrlBytes + retainedBytes > MAX_CHECKED_URL_BYTES
+    ) {
+      checkedUrlBytes -= checkedUrls.shift()!.retainedBytes;
+    }
+    checkedUrls.push({
+      data: asset.data,
+      mimeType: asset.mimeType,
+      pixelWidth: asset.pixelWidth,
+      pixelHeight: asset.pixelHeight,
+      url,
+      retainedBytes,
+    });
+    checkedUrlBytes += retainedBytes;
+  }
+  return url;
 }
 function checkImageUrl(asset: ImageAsset): string | undefined {
   try {
