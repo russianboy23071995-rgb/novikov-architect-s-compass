@@ -1,0 +1,88 @@
+{
+  "count": 100,
+  "images": false,
+  "bytes": 16338,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "heap": {
+    "used": 61515275,
+    "total": 128673299,
+    "limit": 4395630592
+  },
+  "results": {
+    "fixtureValidate": {
+      "n": 1,
+      "medianMs": 10.400000005960464,
+      "p95Ms": 10.400000005960464
+    },
+    "react-mount": {
+      "n": 1,
+      "medianMs": 123.49999994039536,
+      "p95Ms": 123.49999994039536
+    },
+    "react-nested-update": {
+      "n": 8,
+      "medianMs": 0.5,
+      "p95Ms": 66.10000005364418
+    },
+    "react-update": {
+      "n": 39,
+      "medianMs": 22.30000001192093,
+      "p95Ms": 63.499999940395355
+    },
+    "loadAndMount": {
+      "n": 1,
+      "medianMs": 339,
+      "p95Ms": 339
+    },
+    "formKeysLegacy": {
+      "n": 21,
+      "medianMs": 0.10000002384185791,
+      "p95Ms": 0.20000001788139343
+    },
+    "groupPreview": {
+      "n": 21,
+      "medianMs": 4,
+      "p95Ms": 4.399999976158142
+    },
+    "wallPreview": {
+      "n": 21,
+      "medianMs": 3.699999988079071,
+      "p95Ms": 4.4000000059604645
+    },
+    "wallSolids": {
+      "n": 21,
+      "medianMs": 0,
+      "p95Ms": 0
+    },
+    "commit": {
+      "n": 21,
+      "medianMs": 11.400000005960464,
+      "p95Ms": 12.5
+    },
+    "undoRedo": {
+      "n": 21,
+      "medianMs": 0,
+      "p95Ms": 0.09999999403953552
+    },
+    "jsonSave": {
+      "n": 21,
+      "medianMs": 3.7999999821186066,
+      "p95Ms": 4.299999982118607
+    },
+    "jsonLoad": {
+      "n": 21,
+      "medianMs": 3.300000011920929,
+      "p95Ms": 4
+    },
+    "event-pointermove-twoRAF": {
+      "n": 22,
+      "medianMs": 6.699999988079071,
+      "p95Ms": 7.5999999940395355
+    },
+    "event-click-twoRAF": {
+      "n": 22,
+      "medianMs": 64.59999999403954,
+      "p95Ms": 92.39999997615814
+    }
+  }
+}

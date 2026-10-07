@@ -2178,3 +2178,14 @@ useSelectionMove/ToolInteraction consumer; mixed selections and text/voice use
 the same Application action. No image-specific movement engine or pixel snapping.
 Host-window restrictions, visibility eligibility, stale-context guards and
 relationship detachment rules remain binding.
+
+
+## Property form revisions and diagnostics - 2026-10-07
+
+Form reset keys use immutable project identity (weak revision token) and selected
+kind/ID. They never serialize or retain embedded assets. Same snapshot/selection
+keeps drafts across presentation renders; model/selection changes reset them.
+The initialProject prop only seeds the normal validated editing reducer; it is
+not a second controlled model. A separate development-only benchmark entry mounts
+the actual workspace and calls existing Application actions. It is not a product
+route and its React/heap measurements must not be treated as production guarantees.
