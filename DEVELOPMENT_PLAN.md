@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Bildreferenz-Planung - 07.10.2026
+
+PR160 freigegeben und in main d18990d integriert. Bestand und Daten-/Aktionsvertrag
+in docs/references/IMAGE_REFERENCE_PLAN.md dokumentiert. Schema 8 besitzt noch
+keine Referenzen/Assets; Auswahl, Ebenen und Snapshot-History sind wiederverwendbar.
+Vorschlag: PNG/JPEG, eingebettete Asset-Daten, expliziter Geschossbezug und eine
+Transformation; Dateigröße muss das bestehende 10-MiB-Leselimit einhalten.
+Nutzerentscheidung: PNG/JPEG dürfen ebenfalls kalibriert werden. Die bisherige
+Bitmap-Ausnahme in ARCHITECTURE.md Abschnitt 30 ist ausdrücklich ersetzt; BIM
+bleibt ausgeschlossen. Keine Runtime-Änderungen.
+
+Genau ein Folgeauftrag: Persistenten Referenz-Datenkern mit validierten Assets,
+Transformation/Verweisen, Dateimigration, atomarer Erstellung, Größenprüfung und
+Roundtrip-/History-/Fehlereingabetests implementieren. Noch keine Canvas-Bedienung,
+keine PDF-Zerlegung und keine Änderung der BIM-Skalierungssperre.
+
 ## Browser-Projektdatei-Roundtrip - 07.10.2026
 
 PR159 freigegeben und in main 49f960e integriert. Entwicklungsserver nach Neustart
