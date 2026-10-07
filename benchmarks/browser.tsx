@@ -1,4 +1,5 @@
 /** Dev-only diagnostic page. Never imported by the product routes. */
+import { commitProfileCases } from "./commit-profile";
 import React, { Profiler, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
@@ -197,6 +198,33 @@ export function Harness() {
       setStatus(String(e));
     }
   }
+  async function profileCommit() {
+    if (!project) return;
+    setStatus("Preparing commit profile");
+    await frame();
+    try {
+      const targets = [...selectionIndex(project).values()].slice(0, 20);
+      const session = beginSelectionMove(project, targets, { x: 0, y: 0 });
+      const next = previewSelectionMove(session, project, targets, { x: 1, y: 1 });
+      const cases = commitProfileCases(createHistory(project), next);
+      for (const [name] of cases) delete samples[name];
+      for (const [, fn] of cases) fn();
+      // Interleave cases and reverse every other round to reduce ordering bias.
+      for (let i = 0; i < 21; i++) {
+        for (const [name, fn] of i % 2 ? [...cases].reverse() : cases) {
+          setStatus(`${name} ${i + 1}/21`);
+          await frame();
+          const t = performance.now();
+          fn();
+          add(name, performance.now() - t);
+        }
+      }
+      setStatus("Commit profile complete");
+      show();
+    } catch (e) {
+      setStatus(String(e));
+    }
+  }
   async function keys() {
     if (!project) return;
     setStatus("Measuring keys");
@@ -267,6 +295,7 @@ export function Harness() {
           Image
         </label>
         <button onClick={load}>Load scenario</button> <button onClick={run}>Measure core</button>{" "}
+        <button onClick={profileCommit}>Profile commit</button>{" "}
         <button onClick={keys}>Measure keys</button> <button onClick={show}>Report</button>
         <p role="status">{status}</p>
         <textarea

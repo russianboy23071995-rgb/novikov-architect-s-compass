@@ -33,3 +33,21 @@ sample is diagnostic only; P95 requires the repeated sample sets.
 Before/after runs must use identical fixtures and the same browser/server/config.
 Check selected property values, applied changes and Undo/Redo as separate functional
 acceptance. Report missing measurement coverage explicitly rather than extrapolate.
+
+## A-03 commit profile
+
+Choose 5000 elements with Image, Load scenario, then Profile commit. Wait for
+Commit profile complete and save Benchmark report. It uses the same 20-wall move
+and compares the frozen pre-A03 commit with the current exported commit. One warmup,
+21 rounds, alternating case order; no timing assertion in unit tests.
+
+validateInclusive includes schema parsing, image base64 checking, geometry and wall
+solids. wallSolidsCold receives a fresh shallow project root per call to bypass the
+existing root-keyed cache; this is a separately measured subcost, not an extra cost
+to add to validation. jsonCompareAndSize serializes both snapshots and checks their
+UTF-8 sizes; modelOnlyCompare omits only visibility. Timing excludes React rendering
+and frame waits around each synchronous call. Diagnostics update the status between
+samples, so wall-clock run duration includes additional workspace renders.
+
+The legacy implementation is kept only in benchmarks/commit-profile.ts. Do not
+import it into the product. The public file serializer remains fully validated.
