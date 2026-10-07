@@ -2123,3 +2123,20 @@ and 16384-pixel edge limit; this is a conservative implementation bound, not a
 measured browser capacity promise. Renderer/decoder resource checks remain pending.
 Layer assignment, occupancy and eligibility include references. Selection/rendering
 and calibration are not yet exposed; existing BIM IFC output ignores these 2D data.
+
+## Image import and plan presentation — 2026-10-07
+
+interop/images/import.ts performs bounded header inspection before browser decoding,
+normalizes orientation through createImageBitmap and canvas PNG serialization, and
+releases the bitmap. No external URLs or SVG import. Stored image headers are
+checked against MIME/dimensions before rendering; this is not full file validation.
+useImageImport owns transient read/placement lifecycle and stale async cancellation.
+It adapts previewCreateReference to existing ToolInteraction, querySnap and generic
+placement; width is local tool input, commit alone stores the reference and asset.
+
+reference joins the shared typed selection index and projected marquee shapes.
+Plan rendering derives one image rectangle from origin, rotation and metres/pixel,
+with CSS-constant selected outline. Layers and Navigator reuse stable IDs. Reference
+pixels are not model snap geometry. Whole-selection moves containing a reference
+currently reject atomically; legacy edit menus are withheld for this type. No
+calibration action or independent image movement engine is introduced here.

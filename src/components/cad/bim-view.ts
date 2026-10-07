@@ -1,3 +1,4 @@
+import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { addWall, addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project, Wall } from "../../lib/bim/model.ts";
@@ -48,7 +49,8 @@ export function planBounds(project: Project): string {
   if (
     !project.storey.walls.length &&
     !project.storey.lines?.length &&
-    !project.storey.hatches.length
+    !project.storey.hatches.length &&
+    !project.storey.references.length
   )
     return "-2 -3 8 6";
   const extents = project.storey.walls.flatMap((wall) =>
@@ -62,6 +64,12 @@ export function planBounds(project: Project): string {
   for (const line of [...(project.storey.lines ?? []), ...project.storey.hatches])
     for (const point of line.points)
       extents.push({ left: point.x, right: point.x, top: -point.y, bottom: -point.y });
+  for (const r of project.storey.references)
+    for (const p of imageReferenceCorners(
+      r,
+      project.assets.find((a) => a.id === r.assetId)!,
+    ))
+      extents.push({ left: p.x, right: p.x, top: -p.y, bottom: -p.y });
   const left = Math.min(...extents.map((p) => p.left)) - 1.5;
   const top = Math.min(...extents.map((p) => p.top)) - 1.5;
   const right = Math.max(...extents.map((p) => p.right)) + 1.5;

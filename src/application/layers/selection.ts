@@ -5,12 +5,14 @@ import type { ElementTarget } from "../selection/target.ts";
 export function selectedLayerElement(project: Project, target: ElementTarget | null) {
   if (!target) return undefined;
   const elements =
-    target.kind === "wall"
-      ? project.storey.walls
-      : target.kind === "window"
-        ? project.storey.windows
-        : target.kind === "hatch"
-          ? project.storey.hatches
-          : project.storey.lines;
+    target.kind === "reference"
+      ? project.storey.references
+      : target.kind === "wall"
+        ? project.storey.walls
+        : target.kind === "window"
+          ? project.storey.windows
+          : target.kind === "hatch"
+            ? project.storey.hatches
+            : project.storey.lines;
   return elements?.find((element) => element.id === target.id);
 }

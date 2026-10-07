@@ -1,5 +1,37 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## PNG/JPEG-Import im Grundriss - 07.10.2026
+
+PR162 freigegeben und in main 925385b integriert. Insert → Bildreferenz importieren
+liest PNG/JPEG lokal. Header-/Pixelbudgetprüfung vor Decode, Browserdekodierung mit
+Orientierung und Normalisierung nach PNG; Daten bleiben eingebettet. Bildbreite
+in Metern steht in Werkzeugeigenschaften. Der vorhandene ToolInteraction-/Snap-
+und Placement-Pfad liefert Vorschau, Klick-Commit und Abbruch. Projekt-/Sichtbarkeits-
+wechsel und abgebrochene Decodergebnisse dürfen nicht nachträglich committen.
+
+Gemeinsame Auswahl um reference erweitert: Klick, Strg/Cmd, Marquee-Geometrie,
+Navigator, Ebenenzuordnung und Filter; blau markierter Rahmen und Bildmaße.
+Bild liegt hinter vorhandener Modellgeometrie. Fit berücksichtigt Bildausdehnung.
+Keine zweite Engine. Bildinhalt hat keine Vektorfangpunkte. Noch keine Referenz-
+Bewegung oder Kalibrieraktion; gemischte Bewegung mit Referenz wird atomar abgewiesen.
+
+Nachweis: 607 Tests, TypeScript, Build erfolgreich; Lint keine Fehler, 6 bekannte
+Warnungen. Browser: JPEG 400×200 auf 4×2 m platziert, Undo/Redo, Ebenenausblendung;
+PNG dekodiert und Import abgebrochen ohne zweites Element. Reproduzierbare
+Projektdatei mit eingebettetem PNG geöffnet: 4×2 m und Position 1,5/0 wieder da.
+Save meldet Download angefordert, aber neue Download-Datei dieses Durchlaufs nicht
+nachgewiesen; Download-Event Timeout. Das Laden der generierten Datei ist kein
+Beleg eines erfolgreichen aktuellen Browser-Downloads. JSON-Roundtrip automatisiert.
+
+Abnahme: Insert → Bildreferenz importieren → PNG/JPEG auswählen → Breite in Metern
+setzen → freie Stelle anklicken. Ebene aus/ein, Undo/Redo und Speichern prüfen.
+Decoder prüft neue Importbilder; gespeicherte Bilder erhalten vor Anzeige einen
+Header-/Maßabgleich. Keine PDF-Unterstützung oder Bildinhaltsanalyse.
+
+Genau ein Folgeauftrag: Zweipunkt-Kalibrierung der ausgewählten Bildreferenz über
+validierte Application-Aktion und gemeinsame Punktaufnahme, Vorschau und Undo
+implementieren; erster Messpunkt bleibt fest, BIM/mischte Ziele sind gesperrt.
+
 ## Persistenter Bildreferenz-Datenkern - 07.10.2026
 
 PR161 freigegeben und in main ee8c61d integriert. Schema 9 ergänzt projektweite

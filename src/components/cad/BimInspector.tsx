@@ -36,6 +36,17 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     selection?.kind === "window"
       ? project.storey.windows.find((item) => item.id === selection.id)
       : undefined;
+  if (selection?.kind === "reference") {
+    const r = project.storey.references.find((r) => r.id === selection.id)!;
+    const a = project.assets.find((a) => a.id === r.assetId)!;
+    return (
+      <p className="p-3 text-xs">
+        Bildreferenz · {(a.pixelWidth * r.metresPerPixel).toFixed(3)} ×{" "}
+        {(a.pixelHeight * r.metresPerPixel).toFixed(3)} m · Position {r.origin.x.toFixed(3)},{" "}
+        {r.origin.y.toFixed(3)} m. Kalibrieren folgt im nächsten Schritt.
+      </p>
+    );
+  }
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">

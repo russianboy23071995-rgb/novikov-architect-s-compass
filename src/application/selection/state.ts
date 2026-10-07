@@ -14,6 +14,7 @@ export function selectionIndex(project: Project): ReadonlyMap<string, ElementTar
     ["window", project.storey.windows],
     ["line", project.storey.lines ?? []],
     ["hatch", project.storey.hatches],
+    ["reference", project.storey.references],
   ] as const)
     for (const element of elements) ids.set(element.id, { kind, id: element.id });
   indexes.set(project, ids);

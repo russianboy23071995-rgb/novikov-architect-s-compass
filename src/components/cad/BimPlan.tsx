@@ -1,3 +1,4 @@
+import { checkedImageUrl } from "@/interop/images/import";
 import { useSelectionMarquee } from "./useSelectionMarquee";
 import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
 import type { SelectionSet } from "@/application/selection/state";
@@ -502,7 +503,7 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey);
   };
-  const selectProps = (kind: "wall" | "window" | "line" | "hatch", id: string) => ({
+  const selectProps = (kind: "wall" | "window" | "line" | "hatch" | "reference", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
@@ -792,6 +793,36 @@ export function BimPlan({
           vectorEffect="non-scaling-stroke"
         />
       )}
+      {shown.storey.references
+        .filter((r) => allowsShown(r.id))
+        .map((r) => {
+          const a = shown.assets.find((a) => a.id === r.assetId)!;
+          return (
+            <g
+              key={r.id}
+              transform={`translate(${r.origin.x} ${-r.origin.y}) rotate(${(-r.rotation * 180) / Math.PI})`}
+            >
+              <image
+                {...selectProps("reference", r.id)}
+                href={checkedImageUrl(a)}
+                width={a.pixelWidth * r.metresPerPixel}
+                height={a.pixelHeight * r.metresPerPixel}
+                pointerEvents={placement ? "none" : "all"}
+              />
+              {selectedIds.has(r.id) && (
+                <rect
+                  width={a.pixelWidth * r.metresPerPixel}
+                  height={a.pixelHeight * r.metresPerPixel}
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth={1.5}
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+              )}
+            </g>
+          );
+        })}
       {plan.hatches.map((hatch) => (
         <g key={hatch.id}>
           {hatch.background.visible && (

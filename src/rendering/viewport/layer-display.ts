@@ -23,6 +23,7 @@ export function visiblePlanGeometry(project: Project, allows: (id: string) => bo
   const wallIds = new Set(walls.map((w) => w.id));
   return {
     walls,
+    references: project.storey.references.filter((r) => allows(r.id)),
     hatches: project.storey.hatches.filter((h) => allows(h.id)),
     windows: project.storey.windows.filter((w) => allows(w.id)),
     lines: (project.storey.lines ?? []).filter((l) => allows(l.id)),
@@ -81,6 +82,15 @@ export function drawingWallVisibility(
         (!policy ||
           (policy.isCurrent(base, policy.context) &&
             !policy.context.hiddenLayerIds.includes(opening.layerId)))
+      );
+    const reference = draft.storey.references.find(
+      (r) => r.id === id && !base.storey.references.some((b) => b.id === id),
+    );
+    if (reference)
+      return (
+        !policy ||
+        (policy.isCurrent(base, policy.context) &&
+          !policy.context.hiddenLayerIds.includes(reference.layerId))
       );
     const wall = newWalls.get(id);
     if (!wall) return isLayerVisible(base, policy, id);
