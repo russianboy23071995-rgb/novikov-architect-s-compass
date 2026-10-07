@@ -2140,3 +2140,19 @@ with CSS-constant selected outline. Layers and Navigator reuse stable IDs. Refer
 pixels are not model snap geometry. Whole-selection moves containing a reference
 currently reject atomically; legacy edit menus are withheld for this type. No
 calibration action or independent image movement engine is introduced here.
+
+
+## Implemented image calibration slice — 2026-10-07
+
+`geometry/transforms/calibrate.ts` supplies uniform scaling about a fixed world
+anchor. `application/references/calibration.ts` owns snapshot/ID/selection and
+visibility guards, explicit metric length parsing, validated preview and history
+commit. BIM and mixed selections are rejected in this action, not only in UI.
+The renderer derives the new image transform from the same project snapshot.
+
+`useReferenceCalibration` is a ToolInteraction adapter: shared point capture and
+snapping, no separate engine. ReferenceCalibrationControls owns the On-Demand
+length form; CadWorkspace only coordinates it. A session pins project, visibility,
+selected reference and two world points. Context changes invalidate it; preview
+does not mutate project/assets and acceptance produces one model history entry.
+Text/Voice adapters are the next bounded task and must reuse this action.

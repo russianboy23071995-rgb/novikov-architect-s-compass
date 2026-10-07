@@ -43,7 +43,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       <p className="p-3 text-xs">
         Bildreferenz · {(a.pixelWidth * r.metresPerPixel).toFixed(3)} ×{" "}
         {(a.pixelHeight * r.metresPerPixel).toFixed(3)} m · Position {r.origin.x.toFixed(3)},{" "}
-        {r.origin.y.toFixed(3)} m. Kalibrieren folgt im nächsten Schritt.
+        {r.origin.y.toFixed(3)} m. Kalibrieren über das On-Demand-Menü.
       </p>
     );
   }
