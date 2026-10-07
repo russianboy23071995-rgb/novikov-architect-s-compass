@@ -1,3 +1,5 @@
+import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
+import { useReferenceCalibration } from "./useReferenceCalibration";
 import { useImageImport } from "./useImageImport";
 import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
@@ -109,6 +111,7 @@ export function CadWorkspace({
     if (pendingSession && !editSession) dispatchEditing({ type: "cancel" });
   }, [pendingSession, editSession]);
   const imageInput = useRef<HTMLInputElement>(null);
+  const cancelCalibration = useRef<() => void>(() => {});
   const cancelImage = useRef<() => void>(() => {});
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
@@ -188,6 +191,7 @@ export function CadWorkspace({
   const cancelInteraction = useCallback(() => {
     cancelGroup.current();
     cancelImage.current();
+    cancelCalibration.current();
     setReferenceEpoch((value) => value + 1);
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
@@ -504,7 +508,11 @@ export function CadWorkspace({
     changeProject(next, { kind: "reference", id }),
   );
   cancelImage.current = imageTool.cancel;
-  const windowPlacement = imageTool.adapter ?? windowTool.adapter;
+  const calibration = useReferenceCalibration(project, selections, visibility, (next, id) =>
+    changeProject(next, { kind: "reference", id }),
+  );
+  cancelCalibration.current = calibration.cancel;
+  const windowPlacement = calibration.adapter ?? imageTool.adapter ?? windowTool.adapter;
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
@@ -720,11 +728,18 @@ export function CadWorkspace({
         />
         {demandOpen &&
           !imageTool.active &&
-          selection?.kind !== "reference" &&
           !groupMove.active &&
           !referenceSelection.selecting &&
           (mode === "2D" || (tool === "select" && selection && !editSession)) && (
             <DemandMenu
+              calibrationControls={
+                selection?.kind === "reference" && selections.length === 1 ? (
+                  <ReferenceCalibrationControls
+                    calibration={calibration}
+                    beforeBegin={cancelInteraction}
+                  />
+                ) : undefined
+              }
               project={project}
               selectionCount={selections.length}
               onMoveSelection={

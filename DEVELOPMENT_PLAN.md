@@ -1,5 +1,29 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Zweipunkt-Kalibrierung für Bildreferenzen - 07.10.2026
+
+PR163 einschließlich Fokusrahmenkorrektur in main ef325a9 integriert. Die ausgewählte
+PNG/JPEG-Referenz erhält im On-Demand-Menü eine Zweipunkt-Kalibrierung. Gemeinsame
+ToolInteraction-Punktaufnahme mit Fanghilfen; explizite positive Länge mit m/cm/mm.
+Reine Geometrietransformation und validierte Application-Vorschau halten den ersten
+Messpunkt fest und skalieren gleichmäßig. Übernehmen erzeugt einen Undo-Schritt.
+BIM, Mischauswahl, versteckte und veraltete Ziele bleiben gesperrt.
+
+Nachweis: 613 Tests bestanden, TypeScript und Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Browser: zwei Punkte aufgenommen, 5 m übernommen, Bild
+von 4×2 auf 8,944×4,472 m skaliert, Undo stellt 4×2 m wieder her. Fokusrahmen
+bleibt ausgeschaltet. Tests sichern Rotation, festen Anker, Einheiten, ungültige
+Ziele/Maße, Undo/Redo und JSON-Roundtrip. Download-Grenze des vorigen Schritts bleibt.
+
+Abnahme: Bild anklicken → Zweipunkt-Kalibrierung → zwei Punkte einer bekannten
+Strecke anklicken → beispielsweise „5 m“ eingeben → Vorschau übernehmen.
+Grenzen: Bildpixel besitzen keine Vektorfangpunkte; noch kein PDF oder Text/Voice-
+Adapter für Kalibrierung. Einzelne Referenzbewegung bleibt ein späterer Auftrag.
+
+Genau ein Folgeauftrag gemäß Guide Etappe 7: Text/Voice-Kalibrieradapter auf dieselbe
+Application-Aktion setzen. Zuvor aufgenommene Messpunkte und stabile Referenz-ID
+als Zielkontext binden, geänderte Kontexte zurückweisen, Vorschau/Annahme/Undo testen.
+
 ## Bild-Fokusrahmen korrigiert - 07.10.2026
 
 Nutzerfehler reproduziert: fokussiertes SVG-image erhält Browser-outline auto 5px;

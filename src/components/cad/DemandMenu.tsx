@@ -6,6 +6,7 @@ import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import type { EditAction } from "@/lib/bim/direct-edit";
 
 export function DemandMenu({
+  calibrationControls,
   project,
   selection,
   position,
@@ -18,6 +19,7 @@ export function DemandMenu({
   onMoveSelection,
   selectionCount = 0,
 }: {
+  calibrationControls?: import("react").ReactNode;
   onMoveSelection?: (() => void) | undefined;
   selectionCount?: number;
   project: Project;
@@ -59,7 +61,7 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
-  if (!summary && !onReferences && !onMoveSelection) return null;
+  if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
   return (
     <div
       ref={panel}
@@ -127,6 +129,7 @@ export function DemandMenu({
       </button>
 
       <div className="grid gap-1">
+        {calibrationControls}
         {onMoveSelection && (
           <button
             type="button"
@@ -145,7 +148,7 @@ export function DemandMenu({
             Referenzen auswählen
           </button>
         )}
-        {selection && summary && (
+        {selection && selection.kind !== "reference" && summary && (
           <>
             {closedContour(project, selection) && (
               <button

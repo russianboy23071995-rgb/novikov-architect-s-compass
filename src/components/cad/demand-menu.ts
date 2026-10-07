@@ -18,6 +18,10 @@ export function selectionSummary(project: Project, selection: Selection) {
   if (!selection) return null;
   const metres = (value: number) =>
     `${value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m`;
+  if (selection.kind === "reference")
+    return project.storey.references.some((r) => r.id === selection.id)
+      ? { title: "Bildreferenz", details: "2D-Referenz" }
+      : null;
   if (selection.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
     return wall
