@@ -64,7 +64,7 @@ test("pickup rejects stale, hidden, deleted and unsupported targets", () => {
   assert.equal(pickupToolDefaults({ ...p }, visibility, { kind: "hatch", id: "source" }), null);
   assert.equal(pickupToolDefaults(p, visibility, { kind: "hatch", id: "missing" }), null);
   assert.equal(
-    pickupToolDefaults(p, visibility, { kind: "wall", id: p.storey.walls[0]!.id }),
+    pickupToolDefaults(p, visibility, { kind: "reference", id: p.storey.walls[0]!.id }),
     null,
   );
   const hidden = createLayerVisibilityPolicy(p, {
@@ -267,4 +267,66 @@ test("line and polyline pickup transfer style and layer into independent new geo
     );
     assert.equal(pickupToolDefaults(p, visibility, { kind: "line", id: "missing" }), null);
   }
+});
+import {
+  beginWallChain,
+  appendWallChain,
+  finishWallChain,
+  previewWallChain,
+} from "../drawing/wall-chain.ts";
+import { updateWall } from "../../lib/bim/model.ts";
+
+test("wall pickup pins owned defaults through prepared preview and whole-chain history", () => {
+  let p = createExampleProject();
+  p = updateWall(p, p.storey.walls[0]!.id, {
+    thickness: 0.42,
+    height: 3.1,
+    bodyOffset: -0.21,
+    layerId: p.defaultLayerIds.line,
+  });
+  const history = createHistory(p);
+  p = history.present;
+  const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE),
+    before = JSON.stringify(p);
+  const preset = pickupToolDefaults(p, visibility, { kind: "wall", id: p.storey.walls[0]!.id })!;
+  assert.equal(preset.tool, "wall");
+  if (preset.tool !== "wall") throw new Error("Expected wall");
+  assert.deepEqual(
+    Object.keys(preset.values).sort(),
+    ["thickness", "height", "bodyOffset", "layerId"].sort(),
+  );
+  let chain = beginWallChain(p, { x: 10, y: 10 }, null, preset.values);
+  preset.values.height = 8;
+  const first = { x: 14, y: 10 },
+    second = { x: 14, y: 14 };
+  const preview = previewWallChain(chain, p, first);
+  assert.deepEqual(preview, appendWallChain(chain, p, "@wall-preview", first).preview);
+  let added = preview.storey.walls.at(-1)!;
+  assert.equal(added.height, 3.1);
+  assert.equal(added.thickness, 0.42);
+  assert.equal(added.bodyOffset, -0.21);
+  assert.equal(added.layerId, p.defaultLayerIds.line);
+  chain = appendWallChain(chain, p, "wall-new-a", first);
+  const cornerPreview = previewWallChain(chain, p, second);
+  assert.deepEqual(cornerPreview, appendWallChain(chain, p, "@wall-preview", second).preview);
+  added = cornerPreview.storey.walls.at(-1)!;
+  assert.equal(added.height, 3.1);
+  assert.equal(added.bodyOffset, -0.21);
+  chain = appendWallChain(chain, p, "wall-new-b", second);
+  const next = commitProject(history, finishWallChain(chain, p));
+  for (const id of ["wall-new-a", "wall-new-b"]) {
+    const wall = next.present.storey.walls.find((w) => w.id === id)!;
+    assert.equal(wall.height, 3.1);
+    assert.equal(wall.thickness, 0.42);
+    assert.equal(wall.layerId, p.defaultLayerIds.line);
+  }
+  assert.equal(next.past.length, 1);
+  assert.deepEqual(undoProject(next).present, p);
+  assert.equal(JSON.stringify(p), before);
+  assert.equal(history.past.length, 0);
+  const hidden = createLayerVisibilityPolicy(p, {
+    ...ALL_LAYERS_VISIBLE,
+    hiddenLayerIds: [p.defaultLayerIds.line],
+  });
+  assert.equal(pickupToolDefaults(p, hidden, { kind: "wall", id: p.storey.walls[0]!.id }), null);
 });

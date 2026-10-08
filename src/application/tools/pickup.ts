@@ -12,10 +12,15 @@ export type LineDefaults = Pick<
   NonNullable<Project["storey"]["lines"]>[number],
   "color" | "penWidth" | "style" | "layerId"
 >;
+export type WallDefaults = Pick<
+  Project["storey"]["walls"][number],
+  "thickness" | "height" | "bodyOffset" | "layerId"
+>;
 export type ToolDefaults =
   | { tool: "hatch"; values: HatchDefaults }
   | { tool: "window"; values: WindowDefaults }
-  | { tool: "line"; values: LineDefaults };
+  | { tool: "line"; values: LineDefaults }
+  | { tool: "wall"; values: WallDefaults };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
 export function pickupToolDefaults(
@@ -24,6 +29,19 @@ export function pickupToolDefaults(
   target: ElementTarget,
 ): ToolDefaults | null {
   if (!visibility.evaluate(project, visibility.context, target.id).eligible) return null;
+  if (target.kind === "wall") {
+    const source = project.storey.walls.find((item) => item.id === target.id);
+    if (!source) return null;
+    return {
+      tool: "wall",
+      values: {
+        thickness: source.thickness,
+        height: source.height,
+        bodyOffset: source.bodyOffset,
+        layerId: source.layerId,
+      },
+    };
+  }
   if (target.kind === "line") {
     const source = project.storey.lines?.find((item) => item.id === target.id);
     if (!source) return null;

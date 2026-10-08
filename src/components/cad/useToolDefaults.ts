@@ -5,12 +5,30 @@ import {
 } from "@/application/drawing/window-placement";
 import { useMemo, useState } from "react";
 import type { Project } from "@/domain/project/schema";
-import type { HatchDefaults, LineDefaults, ToolDefaults } from "@/application/tools/pickup";
+import type {
+  HatchDefaults,
+  LineDefaults,
+  WallDefaults,
+  ToolDefaults,
+} from "@/application/tools/pickup";
 import { defaultHatchFill } from "@/application/drawing/actions";
 import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
+  const [wallState, setWallState] = useState<{ projectId: string; values: WallDefaults } | null>(
+    null,
+  );
+  const wall =
+    wallState?.projectId === project.id
+      ? wallState.values
+      : { thickness: 0.36, height: 2.8, bodyOffset: 0.18, layerId: project.defaultLayerIds.wall };
+  const wallDefaults = {
+    ...wall,
+    layerId: project.layers.some((l) => l.id === wall.layerId)
+      ? wall.layerId
+      : project.defaultLayerIds.wall,
+  };
   const [lineState, setLineState] = useState<{ projectId: string; values: LineDefaults } | null>(
     null,
   );
@@ -62,6 +80,10 @@ export function useToolDefaults(project: Project) {
   };
   return {
     hatch: current,
+    wall: wallDefaults,
+    setWall(values: WallDefaults) {
+      setWallState({ projectId: project.id, values });
+    },
     line: lineDefaults,
     setLine(values: LineDefaults) {
       setLineState({ projectId: project.id, values });
@@ -75,6 +97,8 @@ export function useToolDefaults(project: Project) {
     },
     apply(defaults: ToolDefaults) {
       if (defaults.tool === "hatch") setState({ projectId: project.id, hatch: defaults.values });
+      else if (defaults.tool === "wall")
+        setWallState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "line")
         setLineState({ projectId: project.id, values: defaults.values });
       else

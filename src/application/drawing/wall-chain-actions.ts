@@ -1,3 +1,4 @@
+import type { WallDefaults } from "../tools/pickup.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
@@ -10,12 +11,14 @@ export type WallChain = {
   points: Point[];
   wallIds: string[];
   startCandidate: SnapCandidate | null;
+  defaults?: WallDefaults;
 };
 
 export function beginWallChain(
   base: Project,
   origin: Point,
   candidate?: SnapCandidate | null,
+  defaults?: WallDefaults,
 ): WallChain {
   if (!Number.isFinite(origin.x) || !Number.isFinite(origin.y))
     throw new Error("Ungültiger Ursprung.");
@@ -33,7 +36,14 @@ export function beginWallChain(
       !base.storey.walls.some((w) => w.id === startCandidate.sourceEntityId))
   )
     throw new Error("T-Startziel ist nicht mehr korrekt.");
-  return { base, preview: base, points: [{ ...origin }], wallIds: [], startCandidate };
+  return {
+    base,
+    preview: base,
+    points: [{ ...origin }],
+    wallIds: [],
+    startCandidate,
+    ...(defaults ? { defaults: { ...defaults } } : {}),
+  };
 }
 
 export function appendWallChain(
@@ -55,7 +65,7 @@ export function appendWallChain(
     kind: "wall",
     start: chain.points.at(-1)!,
     end: point,
-    ...defaultDrawingWall,
+    ...(chain.defaults ?? defaultDrawingWall),
   });
   const connectedStart =
     chain.wallIds.length === 0
