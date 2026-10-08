@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: V01c temporaere 2D-Winkelmessung - 08.10.2026
+
+PR208 nach gruener CI zusammengefuehrt. Messen umfasst Strecke/Flaeche/Winkel im
+selben transienten Lebenszyklus und Fangpfad. Drei Punkte ergeben den kleineren
+Winkel 0 bis 180 Grad. Nullschenkel werden abgewiesen. 712 Tests, Typecheck/Lint/Build
+bestanden; Browser 90,00 Grad, Zoom, Neubeginn, Fehler und Escape geprueft.
+[Nachweis](docs/validation/LIVE_ANGLE_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V06a Werkzeugvorgabenuebernahme fuer Schraffuren
+vorbereiten.** Vorhandene Defaults/Erstellungsaktion abgleichen; Eigenschaftenumfang
+mit Nutzer festlegen (Vorschlag: Fuellung, Hintergrund, Kontur, Ebene; keine IDs,
+Punkte oder Verknuepfungen). Gemeinsame Vorgaben-Grenze konkretisieren. Noch keine
+stillschweigende Entscheidung ueber offene Eigenschaften oder andere Werkzeuge.
+Offene K-/V-Ziele bleiben erhalten.
+
+
 ## Nutzeranpassung: Schraffurarten und Tuerkis - 08.10.2026
 
 PR207 nach gruener CI zusammengefuehrt. Gemeinsame tuerkise Darstellung, duennere

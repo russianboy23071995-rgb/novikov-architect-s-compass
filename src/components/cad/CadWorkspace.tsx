@@ -933,12 +933,15 @@ export function CadWorkspace({
                 >
                   <option value="distance">Strecke</option>
                   <option value="area">Fläche</option>
+                  <option value="angle">Winkel</option>
                 </select>
               </label>
               <span role="status">
-                {measurementMode === "area"
-                  ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
-                  : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+                {measurementMode === "angle"
+                  ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
+                  : measurementMode === "area"
+                    ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
+                    : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
               </span>
               <Button size="sm" variant="ghost" onClick={measurement.reset}>
                 Neue Messung
@@ -1080,6 +1083,10 @@ export function CadWorkspace({
                           measurement:
                             measurement.adapter && measurementMode === "distance"
                               ? measurement.value
+                              : undefined,
+                          angleMeasurement:
+                            measurement.adapter && measurementMode === "angle"
+                              ? measurement.angle
                               : undefined,
                           areaMeasurement:
                             measurement.adapter && measurementMode === "area"
