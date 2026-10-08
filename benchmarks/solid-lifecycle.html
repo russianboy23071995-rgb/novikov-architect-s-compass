@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><title>3D Lebenszyklus-Pilot</title
+  ><style>
+    body {
+      font: 14px system-ui;
+      padding: 20px;
+      background: #eef1f3;
+    }
+    canvas {
+      width: 400px;
+      height: 300px;
+      border: 1px solid #ccd;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+  </style>
+  <h1>3D Lebenszyklus: Vergleich</h1>
+  <p>
+    Bisheriger Renderer links, Pilot rechts. Auswahl, Snapshotwechsel und Kontextwiederherstellung.
+  </p>
+  <button id="run">Pruefung starten</button>
+  <pre id="report">Bereit</pre>
+  <div id="views"></div>
+  <script type="module" src="./solid-lifecycle-page.ts"></script>
+</html>
