@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04h zweiter Abschnitt angebunden — 08.10.2026
+
+PR193 nach gruener CI zusammengefuehrt. Gemeinsamer Vorschaucache nutzt den
+geprueften zweiten rechtwinkligen Abschnitt; Platzierung und Folgeabschnitte
+behalten volle Pruefung. 688 Tests, beide Typechecks, Lint und Build bestanden.
+Canvas-Diagnose mit drei Abschnitten, Undo/Redo, Escape/Werkzeugwechsel bestanden.
+[Nachweis und Grenzen](docs/performance/SHARED_CHAIN_CORNER.md).
+
+**Genau ein naechster Auftrag: K06a verbundene Wandzuege und dichte T-Anschluesse
+profilieren.** Betroffene Komponente, Konturableitung und Fensterzuordnung getrennt
+messen, erst daraus Optimierung ableiten. Kein weiterer vorsorglicher Cache.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
 ## Aktueller Stand: K04g zweiter rechtwinkliger Abschnitt — 08.10.2026
 
 PR192 nach gruener CI zusammengefuehrt. Isolierter Pilot verwendet bestehende
