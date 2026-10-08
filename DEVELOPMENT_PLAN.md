@@ -1,5 +1,18 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K06d Einzelwand an gemeinsame Bewegung angebunden - 08.10.2026
+
+PR197 nach gruener CI zusammengefuehrt. Element frei bewegen einer einzelnen
+2D-Wand nutzt den bestehenden Auswahladapter mit gewaehltem Ursprung.
+694 Tests, beide Typechecks, Lint und Build erfolgreich. Browser: Shift,
+Abbruch, Platzierung, Undo/Redo und Ansichtswechsel bestanden. 3D unveraendert.
+[Nachweis und Grenzen](docs/performance/SINGLE_WALL_SHARED_MOVE.md).
+
+**Genau ein naechster Auftrag: K07a 3D-Kamera/Picking/mehrere Ansichten profilieren.**
+Ableitung, Projektion, Puffer und Picking getrennt messen; gleiche Geometrie/IDs
+sichern. Erst aus Befunden einen Engpass waehlen, kein vorsorglicher Rendererwechsel.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
 ## Aktueller Stand: K06c gemeinsame Kettenendwand-Vorbereitung — 08.10.2026
 
 PR196 nach gruener CI zusammengefuehrt. Einmalige Basispruefung und stationaere

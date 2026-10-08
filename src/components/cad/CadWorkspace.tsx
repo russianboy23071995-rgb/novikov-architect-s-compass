@@ -1,3 +1,4 @@
+import { editAnchor } from "@/lib/bim/direct-edit";
 import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
 import { useReferenceCalibration } from "./useReferenceCalibration";
@@ -347,6 +348,19 @@ export function CadWorkspace({
     if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove = inSolid && selection.kind === "wall";
+    if (!inSolid && selection.kind === "wall" && action === "move") {
+      const origin = pickedPoint.anchor ?? editAnchor(project, selection);
+      cancelInteraction();
+      try {
+        groupMove.begin(origin);
+        if (layout === "single") setMode("2D");
+        setModelError("");
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Bewegung nicht m�glich.");
+      }
+      return;
+    }
+
     if (solidMove && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
