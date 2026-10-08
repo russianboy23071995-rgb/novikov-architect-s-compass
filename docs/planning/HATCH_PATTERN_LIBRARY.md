@@ -68,3 +68,20 @@ Keine Bibliothekspersistenz, kein Upload und keine Anwendung auf Projektkonturen
 722 Tests, Typecheck, gezielter Lint und Build erfolgreich. Browser-Abnahme
 wegen Browser-Sandbox-Startfehler offen. Nächster Auftrag: V07c Vertrag zur
 Bibliothekspersistenz und Musteranwendung mit den offenen Nutzerentscheidungen.
+
+## V07c Bibliothek: Nutzerentscheidung vom 08.10.2026
+
+Verbindlich: Die Musterbibliothek soll von Anfang an global und projektübergreifend
+sein. Die frühere Frage projektgebunden versus global ist damit beantwortet.
+Noch offen bleiben Modell- versus Papiermaß sowie neue Variante versus Änderung
+aller bestehenden Anwendungen. Uploadformat bleibt ebenfalls offen.
+
+Technischer Vorschlag (noch keine Nutzerentscheidung): globale Bibliothek über
+plattformneutralen Storage-Adapter; Projektdateien führen die tatsächlich
+verwendeten Definitionen mit, sodass die Darstellung ohne globale Installation
+reproduzierbar bleibt. IDs allein dürfen keine stille Musterersetzung bewirken.
+Anwendungsdaten bleiben im Projekt; Wiederholung/Clipping sind abgeleitet.
+Kein Speichersystem oder Projektformatwechsel vor dem begrenzten Migrationsauftrag.
+
+Nächster Auftrag bleibt V07c: offene Maß- und Änderungsregeln beantworten,
+Creator abnehmen und den Bibliotheks-/Anwendungsvertrag abschließen.
