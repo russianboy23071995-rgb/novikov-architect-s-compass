@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04g zweiter rechtwinkliger Abschnitt — 08.10.2026
+
+PR192 nach gruener CI zusammengefuehrt. Isolierter Pilot verwendet bestehende
+Eck-/Wandkettenaktion in kleinem Umfang, sonst Vollpfad. 687 Tests und 60
+Browservergleiche bestanden; Typecheck und Lint bestanden. Bei 1.000 Elementen
+Median 10,10 -> 0,30 ms, Vorbereitung 24,3 ms. Keine produktive Anbindung.
+[Nachweis und Grenzen](docs/performance/PREPARED_CHAIN_CORNER.md).
+
+**Genau ein naechster Auftrag: K04h zweiten rechtwinkligen Abschnitt zentral
+anbinden.** Kontext-/Abbruch-/Folgepunktbindung, Vollpfad fuer weitere Abschnitte
+und Kandidaten, gesamte Kette ein Undo. DOM-Ablauf pruefen. Keine gleichzeitige
+Winkelerweiterung. Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
 ## Aktueller Stand: K04f Wandzeichen-Vorschau angebunden — 08.10.2026
 
 PR191 nach gruener CI zusammengefuehrt. Erster freier Abschnitt zentral an
