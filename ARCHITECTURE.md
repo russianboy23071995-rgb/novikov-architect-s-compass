@@ -1,5 +1,15 @@
 # NOVIKOV CAD Architecture Contract
 
+## Persistent 3D display buffers - 2026-10-08
+
+BimSolidView delegates GPU resources to rendering/viewport/solid-renderer.
+Camera matrices derive from the shared orthographic projection. Display snapshot,
+local origin and selection changes invalidate buffers; camera changes retain them.
+Canvas alone owns context-loss/restoration and displayed-projection validity.
+CPU picking, stable model IDs and validated model actions remain unchanged.
+The old renderer is retained only as a diagnostic oracle under benchmarks.
+See [integration evidence](docs/performance/SOLID_RENDERER_INTEGRATION.md).
+
 ## Opt-in immutable asset validation — 2026-10-08
 
 The shared asset schema may preserve an asset only when its exact object identity
