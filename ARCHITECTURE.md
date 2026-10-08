@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Hatch appearance pickup: approved scope - 2026-10-08
+
+The user explicitly chose appearance only, preserving the destination layer.
+Hatch tool pickup copies fill (color/opacity), background (visible/color) and
+contour (visible/color); never source layer, ID, points or relationships.
+Resolve source through stable target ID and current visible context. Return owned
+appearance values to transient tool defaults; pickup itself is not a model edit.
+All hatch construction modes must feed the same defaults to the existing validated
+creation action. Creating a new hatch retains destination-layer policy and history.
+This is a binding contract; implementation is the next bounded V06b task.
+[Code mapping and acceptance](docs/planning/HATCH_PRESET_PICKUP.md).
+
+
 ## Shared stable 3D picking service - 2026-10-08
 
 The rendering/viewport world index is derived disposable data bound to immutable

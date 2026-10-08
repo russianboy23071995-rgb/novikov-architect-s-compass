@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: V06a Vorgabenuebernahme abgegrenzt - 08.10.2026
+
+PR209 nach gruener CI zusammengefuehrt. Nutzerentscheidung: nur Darstellung
+uebernehmen, Ebene beibehalten. Fill, Hintergrund und Kontur werden freigegeben;
+Quell-ID, Punkte, Ebene und Beziehungen bleiben ausgeschlossen. Codepfade abgeglichen:
+Zeichnen reicht bislang nur Fill durch; Hintergrund/Kontur brauchen einen gemeinsamen
+Vorgabenpfad. Keine Produktionsaenderung in diesem Vorbereitungsauftrag.
+[Vertrag und Abnahme](docs/planning/HATCH_PRESET_PICKUP.md).
+
+**Genau ein naechster Auftrag: V06b Schraffur-Darstellungsuebernahme umsetzen.**
+Application-Adapter mit stabilem sichtbarem Ziel, gemeinsamer Vorgabenhook und
+bestehende Erstellungsaktion fuer alle vier Modi. Menuebefehl und doppelte
+Rechtsklickgeste teilen den Adapter; Ebene erhalten, kein Undo beim Uebernehmen,
+ein Undo beim Zeichnen. Vollstaendige Tests und Browser-Gestenabnahme laut Vertrag.
+Andere Elementtypen/Preset-Katalog/Dateiformat bleiben ausserhalb dieses Schritts.
+
+
 ## Aktueller Stand: V01c temporaere 2D-Winkelmessung - 08.10.2026
 
 PR208 nach gruener CI zusammengefuehrt. Messen umfasst Strecke/Flaeche/Winkel im
