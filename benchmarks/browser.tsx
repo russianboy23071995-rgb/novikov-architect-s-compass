@@ -1,3 +1,4 @@
+import { tPairFixture } from "./t-pair-fixture";
 import { checkMovementGeometry } from "./movement-geometry-check";
 import { runMovementProfile } from "./movement-driver";
 import { traceReactCommit } from "./movement-trace";
@@ -171,6 +172,8 @@ export function Harness() {
   const [count, setCount] = useState(100),
     [images, setImages] = useState(false),
     [dense, setDense] = useState(false),
+    [heldShift, setHeldShift] = useState(false),
+    [tPair, setTPair] = useState(false),
     [project, setProject] = useState<Project>(),
     [status, setStatus] = useState("Ready"),
     [report, setReport] = useState("");
@@ -181,7 +184,7 @@ export function Harness() {
     await frame();
     for (const k of Object.keys(samples)) delete samples[k];
     const t = performance.now();
-    const p = fixture(count, images, dense);
+    const p = tPair ? tPairFixture() : fixture(count, images, dense);
     add("fixtureValidate", performance.now() - t);
     flushSync(() => setProject(p));
     await frame();
@@ -258,7 +261,13 @@ export function Harness() {
     await frame();
     try {
       if (!project) return;
-      movementReport = await runMovementProfile((delta) => checkMovementGeometry(project, delta));
+      movementReport = await runMovementProfile(
+        (delta) => checkMovementGeometry(project, delta, tPair ? 2 : 20),
+        heldShift,
+        tPair ? 2 : 20,
+        { x: 0, y: tPair ? 0.18 : 0 },
+        tPair,
+      );
       setStatus("Movement complete");
       show();
     } catch (e) {
@@ -284,9 +293,10 @@ export function Harness() {
     setReport(
       JSON.stringify(
         {
-          count,
+          count: tPair ? 4 : count,
           images,
           dense,
+          tPair,
           bytes: project ? new TextEncoder().encode(JSON.stringify(project)).length : 0,
           userAgent: navigator.userAgent,
           heap: m
@@ -344,6 +354,24 @@ export function Harness() {
             onChange={(e) => setDense(e.target.checked)}
           />
           Dense T connections
+        </label>
+        <label>
+          <input
+            aria-label="Hold Shift"
+            type="checkbox"
+            checked={heldShift}
+            onChange={(e) => setHeldShift(e.target.checked)}
+          />
+          Hold Shift
+        </label>
+        <label>
+          <input
+            aria-label="T pair"
+            type="checkbox"
+            checked={tPair}
+            onChange={(e) => setTPair(e.target.checked)}
+          />
+          T pair
         </label>
         <button onClick={load}>Load scenario</button> <button onClick={run}>Measure core</button>{" "}
         <button onClick={profileCommit}>Profile commit</button>{" "}
