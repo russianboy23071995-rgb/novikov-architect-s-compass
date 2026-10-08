@@ -1,4 +1,6 @@
 import { tPairFixture } from "./t-pair-fixture";
+import { ManualRecorder } from "./ManualRecorder";
+import { recordManualReact } from "./manual-capture";
 import { checkMovementGeometry } from "./movement-geometry-check";
 import { runMovementProfile } from "./movement-driver";
 import { traceReactCommit } from "./movement-trace";
@@ -174,9 +176,20 @@ export function Harness() {
     [dense, setDense] = useState(false),
     [heldShift, setHeldShift] = useState(false),
     [tPair, setTPair] = useState(false),
+    [manualRecording, setManualRecording] = useState(false),
+    [running, setRunning] = useState(false),
     [project, setProject] = useState<Project>(),
     [status, setStatus] = useState("Ready"),
     [report, setReport] = useState("");
+  async function task(action: () => Promise<void>) {
+    if (running || manualRecording) return;
+    setRunning(true);
+    try {
+      await action();
+    } finally {
+      setRunning(false);
+    }
+  }
   async function load() {
     setStatus("Loading");
     movementReport = null;
@@ -325,58 +338,62 @@ export function Harness() {
           fontSize: 11,
         }}
       >
-        <label>
-          Elements
-          <select
-            aria-label="Benchmark count"
-            value={count}
-            onChange={(e) => setCount(+e.target.value)}
-          >
-            {[100, 1000, 5000].map((n) => (
-              <option key={n}>{n}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <input
-            aria-label="With image"
-            type="checkbox"
-            checked={images}
-            onChange={(e) => setImages(e.target.checked)}
-          />
-          Image
-        </label>
-        <label>
-          <input
-            aria-label="Dense connections"
-            type="checkbox"
-            checked={dense}
-            onChange={(e) => setDense(e.target.checked)}
-          />
-          Dense T connections
-        </label>
-        <label>
-          <input
-            aria-label="Hold Shift"
-            type="checkbox"
-            checked={heldShift}
-            onChange={(e) => setHeldShift(e.target.checked)}
-          />
-          Hold Shift
-        </label>
-        <label>
-          <input
-            aria-label="T pair"
-            type="checkbox"
-            checked={tPair}
-            onChange={(e) => setTPair(e.target.checked)}
-          />
-          T pair
-        </label>
-        <button onClick={load}>Load scenario</button> <button onClick={run}>Measure core</button>{" "}
-        <button onClick={profileCommit}>Profile commit</button>{" "}
-        <button onClick={movement}>Profile movement</button>{" "}
-        <button onClick={keys}>Measure keys</button> <button onClick={show}>Report</button>
+        <fieldset disabled={running || manualRecording} style={{ border: 0, padding: 0 }}>
+          <label>
+            Elements
+            <select
+              aria-label="Benchmark count"
+              value={count}
+              onChange={(e) => setCount(+e.target.value)}
+            >
+              {[100, 1000, 5000].map((n) => (
+                <option key={n}>{n}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <input
+              aria-label="With image"
+              type="checkbox"
+              checked={images}
+              onChange={(e) => setImages(e.target.checked)}
+            />
+            Image
+          </label>
+          <label>
+            <input
+              aria-label="Dense connections"
+              type="checkbox"
+              checked={dense}
+              onChange={(e) => setDense(e.target.checked)}
+            />
+            Dense T connections
+          </label>
+          <label>
+            <input
+              aria-label="Hold Shift"
+              type="checkbox"
+              checked={heldShift}
+              onChange={(e) => setHeldShift(e.target.checked)}
+            />
+            Hold Shift
+          </label>
+          <label>
+            <input
+              aria-label="T pair"
+              type="checkbox"
+              checked={tPair}
+              onChange={(e) => setTPair(e.target.checked)}
+            />
+            T pair
+          </label>
+          <button onClick={() => task(load)}>Load scenario</button>{" "}
+          <button onClick={() => task(run)}>Measure core</button>{" "}
+          <button onClick={() => task(profileCommit)}>Profile commit</button>{" "}
+          <button onClick={() => task(movement)}>Profile movement</button>{" "}
+          <button onClick={() => task(keys)}>Measure keys</button>{" "}
+          <button onClick={show}>Report</button>
+        </fieldset>
         <p role="status">{status}</p>
         <textarea
           aria-label="Benchmark report"
@@ -384,13 +401,15 @@ export function Harness() {
           readOnly
           style={{ width: "100%", height: 70 }}
         />
+        <ManualRecorder ready={!!project && !running} onRecordingChange={setManualRecording} />
       </aside>
       {project && (
         <Profiler
           id="workspace"
-          onRender={(_id, phase, duration) => {
+          onRender={(_id, phase, duration, _base, start, commit) => {
             add(`react-${phase}`, duration);
             traceReactCommit(duration);
+            recordManualReact(phase, duration, commit, start);
           }}
         >
           <CadWorkspace key={propertyFormKey(project, null)} initialProject={project} />
