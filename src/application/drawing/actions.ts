@@ -17,7 +17,14 @@ export function closedDrawingContour(points: readonly Point[]): Point[] {
   return points.slice(0, end).map((p) => ({ ...p }));
 }
 export type DrawingRequest =
-  | { kind: "hatch"; points: Point[]; fill: Hatch["fill"] }
+  | {
+      kind: "hatch";
+      points: Point[];
+      fill: Hatch["fill"];
+      background?: Hatch["background"];
+      contour?: Hatch["contour"];
+      layerId?: string;
+    }
   | { kind: "wall"; start: Point; end: Point; thickness: number; height: number }
   | { kind: "line"; points: Point[]; lineKind: "line" | "polyline"; appearance: LineAppearance };
 export function assertDrawingContext(base: Project, current: Project) {
@@ -50,7 +57,14 @@ export function createDrawing(
     return previewHatch(base, current, {
       projectId: current.id,
       kind: "create",
-      hatch: { id, points: closedDrawingContour(request.points), fill: request.fill },
+      hatch: {
+        id,
+        points: closedDrawingContour(request.points),
+        fill: request.fill,
+        ...(request.background ? { background: request.background } : {}),
+        ...(request.contour ? { contour: request.contour } : {}),
+        ...(request.layerId ? { layerId: request.layerId } : {}),
+      },
     });
   return request.kind === "wall"
     ? addWall(current, {

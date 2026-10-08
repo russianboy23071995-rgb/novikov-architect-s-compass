@@ -21,6 +21,7 @@ type Props = PlanRun & {
   allowsShown: (id: string) => boolean;
   canPick: (id: string) => boolean;
   handlers: {
+    secondary: (kind: ElementTarget["kind"], id: string, event: React.MouseEvent) => void;
     click: (kind: ElementTarget["kind"], id: string, event: React.MouseEvent) => void;
     key: (kind: ElementTarget["kind"], id: string, event: React.KeyboardEvent) => void;
   };
@@ -52,6 +53,7 @@ export function PlanSceneContent({
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
     "aria-pressed": selectedIds.has(id),
+    onContextMenu: (event: React.MouseEvent) => handlers.secondary(kind, id, event),
     onClick: (event: React.MouseEvent) => handlers.click(kind, id, event),
     onKeyDown: (event: React.KeyboardEvent) => handlers.key(kind, id, event),
   });

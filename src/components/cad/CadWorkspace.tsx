@@ -1,3 +1,5 @@
+import { useToolDefaults } from "./useToolDefaults";
+import { pickupToolDefaults } from "@/application/tools/pickup";
 import { rectangleContour, prepareHatchBoundaries } from "@/application/hatches/construction";
 import type { HatchConstruction } from "@/application/hatches/construction";
 import { useMeasurement } from "./useMeasurement";
@@ -18,7 +20,7 @@ import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings } from "@/application/snapping/grid-settings";
-import { HatchFillFields } from "./HatchControls";
+import { HatchFillFields, HatchPaintFields } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
@@ -44,7 +46,7 @@ import {
   editingReducer,
   supportsWallWorkplaneEdit,
 } from "@/application/direct-edit/controller";
-import { createDrawing, defaultHatchFill } from "@/application/drawing/actions";
+import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
@@ -155,7 +157,8 @@ export function CadWorkspace({
         : null,
     [tool, hatchConstruction, project, visibility],
   );
-  const [hatchFill, setHatchFill] = useState(defaultHatchFill);
+  const toolDefaults = useToolDefaults(project);
+  const hatchFill = toolDefaults.hatch.fill;
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
   const [activeViewport, setActiveViewport] = useState(0);
@@ -465,7 +468,7 @@ export function CadWorkspace({
           project,
           id,
           tool === "hatch"
-            ? { kind: "hatch", points, fill: hatchFill }
+            ? { kind: "hatch", points, ...toolDefaults.hatch }
             : {
                 kind: "line",
                 lineKind,
@@ -976,7 +979,39 @@ export function CadWorkspace({
                   <option value="boundary">Geschlossene Kontur übernehmen</option>
                 </select>
               </label>
-              <HatchFillFields value={hatchFill} onChange={setHatchFill} />
+              <HatchFillFields
+                value={hatchFill}
+                onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
+              />
+              <HatchPaintFields
+                label="Hintergrund"
+                value={toolDefaults.hatch.background}
+                onChange={(background) =>
+                  toolDefaults.setHatch({ ...toolDefaults.hatch, background })
+                }
+              />
+              <HatchPaintFields
+                label="Kontur"
+                value={toolDefaults.hatch.contour}
+                onChange={(contour) => toolDefaults.setHatch({ ...toolDefaults.hatch, contour })}
+              />
+              <label className="text-xs">
+                Ebene
+                <select
+                  aria-label="Schraffur-Zielebene"
+                  className="block h-8 rounded border bg-background"
+                  value={toolDefaults.hatch.layerId}
+                  onChange={(e) =>
+                    toolDefaults.setHatch({ ...toolDefaults.hatch, layerId: e.target.value })
+                  }
+                >
+                  {project.layers.map((layer) => (
+                    <option key={layer.id} value={layer.id}>
+                      {layer.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <span className="text-xs">
                 {hatchConstruction === "polygon"
                   ? `${pathPoints.length} Punkte · Doppelklick schließt`
@@ -1076,6 +1111,14 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  pickupScope={measurementContext}
+                  onPickup={(target) => {
+                    const defaults = pickupToolDefaults(project, visibility, target);
+                    if (!defaults) return;
+                    toolDefaults.apply(defaults);
+                    selectTool(defaults.tool);
+                    setDemandOpen(false);
+                  }}
                   zoomSlot={zoomSlot}
                   placement={
                     windowPlacement

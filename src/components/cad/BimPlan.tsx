@@ -1,3 +1,4 @@
+import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import type { AngleMeasurement } from "@/application/measurement/angle";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
@@ -59,6 +60,8 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  pickupScope?: object;
+  onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
     | {
@@ -117,6 +120,8 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  pickupScope,
+  onPickup,
   draftContour,
   placement,
   drawingPreview,
@@ -536,11 +541,62 @@ export function BimPlan({
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey);
   };
+  const secondary = useRef(createDoubleSecondaryClick());
+  const pickupContext = useMemo(
+    () => ({
+      project,
+      visibility,
+      drawing,
+      placement,
+      editSession,
+      selecting,
+      pan,
+      interactive,
+      pickupScope,
+    }),
+    [
+      project,
+      visibility,
+      drawing,
+      placement,
+      editSession,
+      selecting,
+      pan,
+      interactive,
+      pickupScope,
+    ],
+  );
   const selectProps = (kind: "wall" | "window" | "line" | "hatch" | "reference", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
     "aria-pressed": selectedIds.has(id),
+    onContextMenu: (event: React.MouseEvent) => {
+      if (
+        !onPickup ||
+        !interactive ||
+        editSession ||
+        selecting ||
+        pan ||
+        placement ||
+        (drawing && start)
+      ) {
+        secondary.current.reset();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (
+        secondary.current.click({
+          key: `${kind}:${id}`,
+          context: pickupContext,
+          x: event.clientX,
+          y: event.clientY,
+          time: event.timeStamp,
+        })
+      )
+        onPickup({ kind, id });
+    },
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
@@ -580,6 +636,8 @@ export function BimPlan({
   latestSelect.current = selectProps;
   const sceneHandlers = useMemo(
     () => ({
+      secondary: (kind: NonNullable<Selection>["kind"], id: string, event: React.MouseEvent) =>
+        latestSelect.current(kind, id).onContextMenu(event),
       click: (kind: NonNullable<Selection>["kind"], id: string, event: React.MouseEvent) =>
         latestSelect.current(kind, id).onClick(event),
       key: (kind: NonNullable<Selection>["kind"], id: string, event: React.KeyboardEvent) =>
@@ -639,7 +697,12 @@ export function BimPlan({
       tabIndex={0}
       viewBox={planViewBox(camera, viewSize)}
       preserveAspectRatio="none"
-      onPointerDownCapture={marquee.down}
+      onPointerDownCapture={(event) => {
+        if (event.button !== 2) secondary.current.reset();
+        marquee.down(event);
+      }}
+      onContextMenu={() => secondary.current.reset()}
+      onKeyDownCapture={() => secondary.current.reset()}
       onPointerMoveCapture={marquee.move}
       onPointerUpCapture={marquee.up}
       onPointerDown={(event) => {

@@ -1,5 +1,18 @@
 # NOVIKOV CAD Architecture Contract
 
+## Shared tool-default pickup - 2026-10-08
+
+The user's clarified contract supersedes V06a: rapid double-secondary-click on an
+existing visible element activates its tool and copies its creation defaults,
+INCLUDING layer. There is no pickup toolbar button or menu command. Geometry,
+identity and connections are excluded. Each supported type declares its fields;
+a shared gesture and Application capability boundary serve all adapters.
+Defaults remain editable in Werkzeugeigenschaften before drawing. Pickup itself
+never mutates the source or model history. Creation uses existing validated actions.
+The first implemented adapter is hatch: fill, background, contour, layer. All four
+construction modes use the same defaults. Other element adapters remain future work.
+[Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
+
 ## Shared stable 3D picking service - 2026-10-08
 
 The rendering/viewport world index is derived disposable data bound to immutable

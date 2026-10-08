@@ -98,7 +98,7 @@ export function HatchInspector({
   );
 }
 
-function HatchPaintFields({
+export function HatchPaintFields({
   label,
   value,
   onChange,
