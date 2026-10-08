@@ -335,3 +335,36 @@ test("start T preview validates numeric directions and preserves the accepted se
     previewWallChain(chain, deserializeProject(serializeProject(base)), { x: 2, y: 2 }),
   );
 });
+
+test("prepared first preview is session bound; next segment and confirmation retain full path", async () => {
+  const { previewWallChain } = await import("./wall-chain.ts");
+  const base = createProject("prepared", "storey"),
+    origin = { x: 0, y: 0 };
+  const chain = beginWallChain(base, origin),
+    target = { x: 4, y: 0 };
+  origin.x = 99;
+  assert.deepEqual(
+    previewWallChain(chain, base, target),
+    appendWallChain(chain, base, "@wall-preview", target).preview,
+  );
+  assert.throws(() => previewWallChain(chain, validateProjectCopy(base), target));
+  const fresh = beginWallChain(base, { x: 10, y: 10 });
+  assert.deepEqual(
+    previewWallChain(fresh, base, { x: 14, y: 10 }),
+    appendWallChain(fresh, base, "@wall-preview", { x: 14, y: 10 }).preview,
+  );
+  const next = appendWallChain(chain, base, "first", target),
+    end = { x: 4, y: 3 };
+  assert.deepEqual(
+    previewWallChain(next, base, end),
+    appendWallChain(next, base, "@wall-preview", end).preview,
+  );
+  const final = appendWallChain(next, base, "second", end);
+  const h = commitProject(createHistory(base), finishWallChain(final, base));
+  assert.equal(h.past.length, 1);
+  assert.deepEqual(undoProject(h).present, base);
+  assert.equal(base.storey.walls.length, 0);
+});
+function validateProjectCopy(p: ReturnType<typeof createProject>) {
+  return deserializeProject(serializeProject(p));
+}

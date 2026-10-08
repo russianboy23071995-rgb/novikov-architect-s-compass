@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04f Wandzeichen-Vorschau angebunden — 08.10.2026
+
+PR191 nach gruener CI zusammengefuehrt. Erster freier Abschnitt zentral an
+Wandkettenzustand gebunden; Folgeabschnitte und Anschlusskandidaten bleiben
+Vollpfad. 682 Tests, Typechecks, Lint und Build bestanden. Synthetischer Canvas-
+Ablauf mit Shift, zwei Abschnitten, einem Undo/Redo, Escape und Werkzeugwechsel
+bestanden. [Nachweis und Grenzen](docs/performance/SHARED_WALL_DRAWING.md).
+
+**Genau ein naechster Auftrag: K04g isolierter Pilot fuer den zweiten
+rechtwinkligen Abschnitt einer freien Wandkette.** Bestehende Eckregeln,
+Vollpfadvergleich und konservativer Fallback bei Fremdkontakt/T-Kandidaten.
+Noch keine produktive Erweiterung. Andere K-/V-Ziele bleiben erhalten.
+
+
 ## Aktueller Stand: K04e isolierter Wandzeichen-Pilot — 08.10.2026
 
 PR190 nach gruener CI zusammengefuehrt. Vorbereiteter erster freier Abschnitt
