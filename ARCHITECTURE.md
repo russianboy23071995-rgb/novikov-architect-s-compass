@@ -1,5 +1,19 @@
 # NOVIKOV CAD Architecture Contract
 
+## Model/asset boundary — K02 experiment, 2026-10-08
+
+Stable logical asset IDs and immutable payload identity are separate concerns.
+Shared Application actions and authoritative geometry remain the only mutation
+boundary. Commit validation and atomic undo remain mandatory. Reusing payload
+verification requires an immutable, trusted handle; it must never trust arbitrary
+caller-supplied hashes or skip geometry/reference validation.
+
+The [K02 contract and measurements](docs/performance/MODEL_ASSET_CONTRACT.md)
+define an isolated versioned experiment. Pool layout, portable container,
+retention/GC and budgets are proposals, not a production schema migration.
+Schema 9, current limits, history and rendering remain unchanged.
+
+
 ## User goals and development alignment — 2026-10-08
 
 The [updated coordination](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
