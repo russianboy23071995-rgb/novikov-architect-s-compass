@@ -1,3 +1,4 @@
+import { largePointFixture } from "./large-point-fixture";
 import { setSessionExtrusion } from "./extrusion-mode";
 import { tPairFixture } from "./t-pair-fixture";
 import { ManualRecorder } from "./ManualRecorder";
@@ -194,14 +195,18 @@ export function Harness() {
       setRunning(false);
     }
   }
-  async function load() {
+  async function load(largePoints = false) {
     setStatus("Loading");
     movementReport = null;
     setReport("");
     await frame();
     for (const k of Object.keys(samples)) delete samples[k];
     const t = performance.now();
-    const p = tPair ? tPairFixture() : fixture(count, images, dense);
+    const p = largePoints
+      ? largePointFixture()
+      : tPair
+        ? tPairFixture()
+        : fixture(count, images, dense);
     add("fixtureValidate", performance.now() - t);
     flushSync(() => setProject(p));
     await frame();
@@ -432,7 +437,8 @@ export function Harness() {
               <option value="session">Session reuse</option>
             </select>
           </label>
-          <button onClick={() => task(load)}>Load scenario</button>{" "}
+          <button onClick={() => task(load)}>Load scenario</button>
+          <button onClick={() => task(() => load(true))}>Load 200k points</button>{" "}
           <button onClick={() => task(run)}>Measure core</button>{" "}
           <button onClick={() => task(profileCommit)}>Profile commit</button>{" "}
           <button onClick={() => task(movement)}>Profile movement</button>{" "}

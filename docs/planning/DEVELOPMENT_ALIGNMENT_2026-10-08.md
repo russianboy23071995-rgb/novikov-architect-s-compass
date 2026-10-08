@@ -1,5 +1,14 @@
 # Entwicklungsabstimmung für NOVIKOV CAD vom 8. Oktober 2026
 
+## Rückbestätigung des programmierenden Chats — 08.10.2026
+
+Übergabe und V01–V09 gelesen, mit dem Code abgeglichen und Reihenfolge übernommen.
+PR179 einschließlich dieser Dokumentation nach grüner CI zusammengeführt.
+K01 ist anschließend begrenzt umgesetzt und geprüft; Details und verbleibende
+Zoomgrenze in [LARGE_PLAN_BOUNDS](../performance/LARGE_PLAN_BOUNDS.md).
+K03 ist der nächste Auftrag; die folgenden ursprünglichen Prüfbefunde bleiben
+als historische Ausgangsbasis erhalten.
+
 ## Auftrag und Verbindlichkeit
 
 Der Nutzer hat die aktualisierte Funktionsdatei hochgeladen und beauftragt, die
