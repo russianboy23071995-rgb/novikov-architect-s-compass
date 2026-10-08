@@ -172,6 +172,7 @@ function stats() {
 }
 export function Harness() {
   const [count, setCount] = useState(100),
+    [selectedWalls, setSelectedWalls] = useState(20),
     [images, setImages] = useState(false),
     [dense, setDense] = useState(false),
     [heldShift, setHeldShift] = useState(false),
@@ -275,10 +276,15 @@ export function Harness() {
     await frame();
     try {
       if (!project) return;
+      if (
+        !tPair &&
+        selectedWalls > project.storey.walls.filter((w) => w.id.startsWith("wall-")).length
+      )
+        throw new Error("Load a larger fixture for this wall selection");
       movementReport = await runMovementProfile(
-        (delta) => checkMovementGeometry(project, delta, tPair ? 2 : 20),
+        (delta) => checkMovementGeometry(project, delta, tPair ? 2 : selectedWalls),
         heldShift,
-        tPair ? 2 : 20,
+        tPair ? 2 : selectedWalls,
         { x: 0, y: tPair ? 0.18 : 0 },
         tPair,
         repeatShift,
@@ -312,6 +318,7 @@ export function Harness() {
           images,
           dense,
           tPair,
+          selectedWalls: tPair ? 2 : selectedWalls,
           bytes: project ? new TextEncoder().encode(JSON.stringify(project)).length : 0,
           userAgent: navigator.userAgent,
           heap: m
@@ -397,6 +404,18 @@ export function Harness() {
               onChange={(e) => setRepeatShift(e.target.checked)}
             />
             Repeat Shift
+          </label>
+          <label>
+            Selected walls{" "}
+            <select
+              aria-label="Selected walls"
+              value={selectedWalls}
+              onChange={(e) => setSelectedWalls(Number(e.target.value))}
+            >
+              <option value={20}>20</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
           </label>
           <button onClick={() => task(load)}>Load scenario</button>{" "}
           <button onClick={() => task(run)}>Measure core</button>{" "}

@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: große Auswahlmengen vermessen — 08.10.2026
+
+PR176 mit grüner CI zusammengeführt (main bd8a31a). Diagnoseharness erlaubt
+20/100/200 ausgewählte Wände. Drei Fälle mit 1.000 Elementen geprüft: 20 Wände,
+100 Wände, 100 Wände mit 20 stehenden T-Nachbarn. Vollpfadvergleich, Shift/Tab,
+Abbruch, Platzierung und ein Undo/Redo bestanden. Vorschau-Mediane 24,3/44,9/53,7 ms;
+lokale Geometrie im Drucktest durchschnittlich 3,4/16,1/16,3 ms je Ziel.
+Keine neue Produktänderung. 651 Tests, Types/Build/Lint bestanden.
+[Messdefinitionen, Rohberichte und Grenzen](docs/performance/SELECTION_SCALE_PROFILE.md).
+
+**Genau ein nächster ausführbarer Auftrag:** Wiederholte Wandkörper-/Konturableitung
+in der vorbereiteten Auswahltranslation begrenzt optimieren, mit nachgewiesener
+Wiederverwendung translationsinvarianter Ergebnisse innerhalb einer Sitzung.
+Stehende Nachbarn, gelöste Anschlüsse, Fenster, Extremkoordinaten und fremde
+Endpunkte weiter prüfen; Vollpfadgleichheit und dieselben drei Messfälle verlangen.
+Volle Commit-/History-Validierung bleibt. Keine Migration weiterer Werkzeuge.
+
 ## Aktueller Stand: Auswahlbewegung atomar bestätigen — 08.10.2026
 
 PR175 zusammengeführt, Basis main db17289. Der gemeinsame Bestätigungsweg
