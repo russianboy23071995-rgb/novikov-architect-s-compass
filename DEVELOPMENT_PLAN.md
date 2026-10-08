@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: manuelle Bewegungsaufzeichnung – 08.10.2026
+
+PR173 nach Nutzerfreigabe mit grüner CI zusammengeführt (`main` 5206295).
+Die separate Diagnoseseite kann jetzt echte Pointer-/Shift-Ereignisse, vorhandene
+Berechnungsphasen, React-Commits, RAF-Abstände und lange Hauptthread-Aufgaben
+aufzeichnen. Start/Stopp, 30-Sekunden-Grenze, maximal 10.000 Einträge und JSON-Export;
+kein neuer Modellpfad und keine Änderung der Produktionsoberfläche.
+[Anleitung, Nachweise und Grenzen](docs/performance/MANUAL_MOVEMENT_TRACE.md).
+644 Tests bestanden, Typprüfungen/Lint/Build erfolgreich. Der Shift-Aussetzer
+ist weiterhin offen; die Bedienprüfung bestätigt den Recorder, keinen Bugfix.
+
+**Genau ein nächster ausführbarer Auftrag:** Den tatsächlichen Shift-Aussetzer
+mit dem Recorder aufnehmen, zeitlich zuordnen und den belegten gemeinsamen
+Engpass korrigieren. Danach mit/ohne Shift und gegen den vollständigen
+Geometriepfad prüfen. Bis zu einem solchen Befund keine spekulativen Caches oder
+Werkzeug-Sonderfälle. Die atomare Bestätigung bleibt anschließend vorgesehen.
+
 ## Aktueller Stand: Shift-Ruckeln eingrenzen – 08.10.2026
 
 PR172 nach Nutzerfreigabe zusammengeführt (`main` 0bc64aa). Praktische

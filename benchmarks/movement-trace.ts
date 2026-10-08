@@ -1,4 +1,5 @@
 // Loaded only by the diagnostic Vite configuration, never by product imports.
+import { isManualCaptureActive, recordManualPhase } from "./manual-capture";
 export type MovementSample = {
   elapsedMs: number;
   input?: { clientX: number; clientY: number };
@@ -23,14 +24,16 @@ export function tracePhase<T>(phase: string, fn: () => T): T {
     try {
       return fn();
     } finally {
-      preparationMs.push(performance.now() - started);
+      const duration = performance.now() - started;
+      preparationMs.push(duration);
+      recordManualPhase(phase, started, duration);
     }
   }
-  if (!sample) return fn();
+  if (!sample && !isManualCaptureActive()) return fn();
   const start = performance.now();
   try {
     const result = fn();
-    if (phase === "selection-preview") {
+    if (sample && phase === "selection-preview") {
       const p = (
         result as { geometry: { storey?: { walls?: { start: { x: number; y: number } }[] } } }
       ).geometry;
@@ -38,9 +41,13 @@ export function tracePhase<T>(phase: string, fn: () => T): T {
     }
     return result;
   } finally {
-    const entry = (sample.phases[phase] ??= { ms: 0, calls: 0 });
-    entry.ms += performance.now() - start;
-    entry.calls++;
+    const duration = performance.now() - start;
+    recordManualPhase(phase, start, duration);
+    if (sample) {
+      const entry = (sample.phases[phase] ??= { ms: 0, calls: 0 });
+      entry.ms += duration;
+      entry.calls++;
+    }
   }
 }
 export function traceReactCommit(duration: number) {
