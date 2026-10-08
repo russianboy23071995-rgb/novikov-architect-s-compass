@@ -15,8 +15,13 @@ than copying drag logic or introducing a modal overlay.
 
 User clarification: Tools > Linien Creator manages line styles for line tools,
 independently of Tools > Schraffurenverwaltung and its area-pattern creator.
-The first line-style library stores finite positive alternating dash/gap sequences
-behind Application validation and an interchangeable storage adapter. Browser
+Line-style library version 2 stores named, colored segment structures in a local
+one-dimensional repeat period, plus an inventory of at most ten distinct existing
+style IDs. Version 1 dash/gap definitions migrate to segments on load without a
+write. Built-in library entries can now be edited/deleted by explicit user request;
+deletions persist and remove inventory references atomically in the same payload.
+The drawing editor uses shared querySnap and transient draft state. Storage and
+validation remain behind Application and a replaceable adapter. Browser
 storage is profile/origin-local across projects, not cross-device synchronization.
 Current project line style enum and rendering remain unchanged until a dedicated
 reference/migration task. Symbols, paper/model sizing and in-use deletion rules

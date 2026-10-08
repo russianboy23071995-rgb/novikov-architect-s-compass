@@ -1,3 +1,23 @@
+## Linien Creator: Zeicheneditor und Inventar - 08.10.2026
+
+Nutzer korrigiert bisherigen Umfang: alle Katalogarten bearbeiten/löschen,
+Neue Linienart öffnet Zeichenfeld mit eigener Struktur, Farbe, Name. Zusätzlich
+oben Inventar mit maximal zehn ausgewählten Katalogarten, später fürs Linienwerkzeug.
+Umgesetzt: zeichnbare Segmentstruktur mit Wiederholungsperiode, gemeinsamer Fang,
+Shift-Richtung, Vorschau, Abbrechen und letzten Abschnitt entfernen. Standardarten
+editier-/löschbar in der Bibliothek; bestehende Projektlinien bleiben unverändert.
+Bibliothek v2 und Inventar atomar gespeichert, v1 beim Laden ohne Schreiben migriert.
+Bis zu 100 ältere eigene Arten plus drei Standardarten bleiben ladbar. Keine
+Projektmigration oder Linienwerkzeuganbindung in diesem UI-/Bibliotheksschritt.
+730 Tests einschließlich Migration, Geometrie/Farbe, Inventarlimit, Persistenz,
+Löschen und Schreibfehler bestanden; Typecheck/Lint/Build. Browser-Abnahme offen.
+Abnahme: vorhandene Art bearbeiten, Farbe und Struktur ändern, speichern; neue Art
+über Button zeichnen; Inventar füllen (max. zehn), Art löschen, neu laden prüfen.
+
+**Genau ein nächster Auftrag: Inventar und eigene Strukturen ans Linienwerkzeug
+anbinden.** Stabile portable Definitionen, Rendering und Projektmigration prüfen;
+Maßbezug und Löschregeln für bereits verwendete Arten vorab festlegen.
+
 ## Neue spätere Wünsche - 08.10.2026
 
 Diese Punkte sind aufgenommen, noch nicht umgesetzt; laufender begrenzter
