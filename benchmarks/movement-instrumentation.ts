@@ -31,6 +31,14 @@ export function movementInstrumentation(): Plugin {
       const path = id.split("?")[0]!.replaceAll(String.fromCharCode(92), "/");
       const entries = Object.entries(functions).find(([suffix]) => path.endsWith(suffix))?.[1];
       let code = source.replaceAll("\r\n", "\n");
+      if (path.endsWith("/src/domain/elements/wall/connections.ts")) {
+        code = replaceOnce(
+          code,
+          "export function createPreparedWallSolids(wallIds: readonly string[]) {",
+          "export function createPreparedWallSolids(wallIds: readonly string[]) {\n  if (!useSessionExtrusion()) return (project: WallGeometry) => deriveConnectedWallSolids(project, wallContourSolid);",
+        );
+        code = 'import { useSessionExtrusion } from "/benchmarks/extrusion-mode.ts";\n' + code;
+      }
       if (entries)
         for (const [name, phase] of entries) {
           const raw = `__diagnostic_${name}`;

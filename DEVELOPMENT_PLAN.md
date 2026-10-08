@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Auswahlbewegung paarweise A/B verglichen — 08.10.2026
+
+PR178 mit grüner CI zusammengeführt (main dcb19e8). Diagnoseseite bietet einen
+reinen Vergleichsschalter für frische bzw. sitzungsgebundene Extrusion. Acht Läufe
+(AB/BA für T-Paar mit zwei Fenstern und 100 Wände, jeweils Shift gehalten) bestehen
+Vollpfad, Bedienung und ein Undo/Redo. Große Auswahl profitiert auch insgesamt;
+beim T-Paar dominiert andere React-Arbeit gegenüber der lokalen Wandberechnung.
+Fenstergrößen zwischen den T-Paar-Paaren verschieden, innerhalb der Paare identisch;
+keine gepoolte Auswertung. 654 Tests, Types/Build/Lint bestanden.
+[Messungen, Reproduktion und Grenzen](docs/performance/SELECTION_EXTRUSION_AB.md).
+
+**Genau ein nächster ausführbarer Auftrag:** React-Anteil des T-Paars im
+Diagnoseharness nach Canvas/BimPlan, Hilfseingabe und Shell/Navigator aufschlüsseln.
+Wiederholte unnötige Arbeit belegen und erst dann maximal einen verantwortlichen
+Bereich begrenzt entlasten. Vollpfad, Shift/Tab/Abbruch und ein Undo behalten;
+kein Rendererwechsel oder breite Migration weiterer Werkzeuge.
+
 ## Aktueller Stand: lokale Wandextrusion in der Bewegung wiederverwenden — 08.10.2026
 
 PR177 mit grüner CI zusammengeführt (main 72fe814). Die vorbereitete Auswahlbewegung
