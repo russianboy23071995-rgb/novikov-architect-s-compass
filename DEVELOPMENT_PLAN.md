@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: V01a temporaere 2D-Streckenmessung - 08.10.2026
+
+PR205 nach gruener CI zusammengefuehrt. Lineal-Button startet Messung ueber den
+vorhandenen ToolInteraction-/Fangpfad. Zwei Klicks halten die Distanz fest; Zoom
+bewahrt sie, Escape/Ansichtswechsel beenden den Vorgang. Keine Modell-/Undo-Aktion.
+703 Tests, Typecheck, gezielter Lint und Build bestanden; Browsermessung 3,000 m
+inklusive Zoom, Escape und Moduswechsel geprueft.
+[Nachweis](docs/validation/LIVE_DISTANCE_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V01b temporaere Flaechenmessung in 2D.**
+Punktfolge mit gemeinsamem Fang-/Interaktionspfad erfassen, per Doppelklick schliessen,
+Quadratmeter anzeigen und ungueltige Konturen behandeln. Kein Raum-/Schraffurmodell,
+kein Undo-Eintrag. Winkel und dauerhafte Massketten bleiben spaeter. Offene K-/V-
+Anforderungen und Leistungsgrenzen bleiben bestehen.
+
+
 ## Aktueller Stand: K07g gemeinsamer 3D-Trefferdienst angebunden - 08.10.2026
 
 PR204 nach gruener CI zusammengefuehrt. Weltindex wird kooperativ vorbereitet,

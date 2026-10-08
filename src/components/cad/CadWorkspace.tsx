@@ -1,3 +1,4 @@
+import { useDistanceMeasurement } from "./useDistanceMeasurement";
 import { editAnchor } from "@/lib/bim/direct-edit";
 import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
@@ -114,6 +115,7 @@ export function CadWorkspace({
     if (pendingSession && !editSession) dispatchEditing({ type: "cancel" });
   }, [pendingSession, editSession]);
   const imageInput = useRef<HTMLInputElement>(null);
+  const cancelMeasurement = useRef<() => void>(() => {});
   const cancelCalibration = useRef<() => void>(() => {});
   const cancelImage = useRef<() => void>(() => {});
   const fileInput = useRef<HTMLInputElement>(null);
@@ -192,6 +194,7 @@ export function CadWorkspace({
   const lastPointer = useRef<Point>({ x: 144, y: 164 });
 
   const cancelInteraction = useCallback(() => {
+    cancelMeasurement.current();
     cancelGroup.current();
     cancelImage.current();
     cancelCalibration.current();
@@ -282,10 +285,17 @@ export function CadWorkspace({
   const selectTool = (next: ToolId) => {
     cancelInteraction();
     setTool(next);
-    if (next === "window") setDemandOpen(false);
+    if (next === "window" || next === "measure") setDemandOpen(false);
     if (next === "window" || next === "line" || next === "hatch") setSelection(null);
     setModelError("");
-    if (next === "window" || next === "wall" || next === "line" || next === "hatch") setMode("2D");
+    if (
+      next === "measure" ||
+      next === "window" ||
+      next === "wall" ||
+      next === "line" ||
+      next === "hatch"
+    )
+      setMode("2D");
   };
 
   const showSelection = (
@@ -528,7 +538,18 @@ export function CadWorkspace({
     changeProject(next, { kind: "reference", id }),
   );
   cancelCalibration.current = calibration.cancel;
-  const windowPlacement = calibration.adapter ?? imageTool.adapter ?? windowTool.adapter;
+  const measurementContext = useMemo(
+    () => ({ project, visibility, mode, activeViewport, layout, tool }),
+    [project, visibility, mode, activeViewport, layout, tool],
+  );
+  const measurement = useDistanceMeasurement(
+    tool === "measure" && mode === "2D",
+    measurementContext,
+    () => selectTool("select"),
+  );
+  cancelMeasurement.current = measurement.reset;
+  const windowPlacement =
+    measurement.adapter ?? calibration.adapter ?? imageTool.adapter ?? windowTool.adapter;
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
@@ -665,6 +686,8 @@ export function CadWorkspace({
         </Dialog>
         {!fullscreen && (
           <TopToolbar
+            onMeasure={() => selectTool("measure")}
+            measuring={tool === "measure"}
             onImportImage={() => {
               selectTool("select");
               setSelection(null);
@@ -866,6 +889,10 @@ export function CadWorkspace({
                 Bildimport abbrechen
               </Button>
             </div>
+          ) : tool === "measure" ? (
+            <p role="status" className="text-xs">
+              Strecke messen · Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden
+            </p>
           ) : tool === "window" ? (
             <WindowPlacementFields
               value={windowTool.dimensions}
@@ -974,6 +1001,7 @@ export function CadWorkspace({
                   placement={
                     windowPlacement
                       ? {
+                          measurement: measurement.adapter ? measurement.value : undefined,
                           target: interaction.target,
                           previewProject: windowPlacement.previewProject,
                           aim: interaction.draft.move,
@@ -1016,7 +1044,11 @@ export function CadWorkspace({
                   }
                   drawing={(tool === "wall" || pathDrawing) && mode === "2D"}
                   endpointSnap={
-                    pathDrawing || tool === "select" || tool === "wall" || tool === "window"
+                    pathDrawing ||
+                    tool === "measure" ||
+                    tool === "select" ||
+                    tool === "wall" ||
+                    tool === "window"
                   }
                   hoverDwellMs={hoverDwellMs}
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
@@ -1045,7 +1077,9 @@ export function CadWorkspace({
                     setModelError("");
                     dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
                   }}
-                  onEditCancel={() => dispatchEditing({ type: "cancel" })}
+                  onEditCancel={() =>
+                    measurement.adapter ? interaction.cancel() : dispatchEditing({ type: "cancel" })
+                  }
                   onPoint={(point, candidate) =>
                     referenceSelection.selecting
                       ? undefined
