@@ -1,5 +1,15 @@
 # NOVIKOV CAD Architecture Contract
 
+## Opt-in immutable asset validation — 2026-10-08
+
+The shared asset schema may preserve an asset only when its exact object identity
+was registered after full storage validation and freezing of an owned copy.
+Caller IDs, hashes, frozen flags and deserialized/cloned objects confer no trust.
+All project geometry/reference checks and file-size/undo rules remain mandatory.
+Only diagnostics currently issue these handles; product ingress adoption is K02c.
+See [pilot evidence and limits](docs/performance/VALIDATED_ASSET_HANDLES.md).
+
+
 ## Model/asset boundary — K02 experiment, 2026-10-08
 
 Stable logical asset IDs and immutable payload identity are separate concerns.

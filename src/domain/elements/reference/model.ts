@@ -1,7 +1,7 @@
 import { z } from "zod";
 const id = z.string().trim().min(1);
 // Storage contract only. A browser import adapter must decode and verify image content.
-export const imageAssetSchema = z
+const storageAssetSchema = z
   .object({
     id,
     mimeType: z.enum(["image/png", "image/jpeg"]),
@@ -24,6 +24,21 @@ export const imageAssetSchema = z
   })
   .strict()
   .refine((a) => a.pixelWidth * a.pixelHeight <= 16_000_000, "Image pixel budget exceeded");
+// Identity is the capability: no caller-supplied ID/hash/frozen flag is trusted.
+// Only the diagnostic pilot currently creates handles. Ordinary parses still copy.
+const verifiedAssets = new WeakSet<object>();
+export const imageAssetSchema = z.union([
+  z.custom<z.infer<typeof storageAssetSchema>>(
+    (value) => typeof value === "object" && value !== null && verifiedAssets.has(value),
+  ),
+  storageAssetSchema,
+]);
+/** Own and freeze a fully storage-validated copy. This does not replace image decoding. */
+export function createImageAssetHandle(value: unknown): ImageAsset {
+  const asset = Object.freeze(storageAssetSchema.parse(value));
+  verifiedAssets.add(asset);
+  return asset;
+}
 export const imageReferenceSchema = z
   .object({
     id,
@@ -35,7 +50,7 @@ export const imageReferenceSchema = z
     metresPerPixel: z.number().finite().positive(),
   })
   .strict();
-export type ImageAsset = z.infer<typeof imageAssetSchema>;
+export type ImageAsset = z.infer<typeof storageAssetSchema>;
 export type ImageReference = z.infer<typeof imageReferenceSchema>;
 export function validateReferenceExtent(reference: ImageReference, asset: ImageAsset): void {
   const w = asset.pixelWidth * reference.metresPerPixel;
