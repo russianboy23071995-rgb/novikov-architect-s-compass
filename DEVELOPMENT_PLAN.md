@@ -1,3 +1,19 @@
+## V07c Bibliotheksvertrag - 08.10.2026
+
+Nutzerentscheidungen: globale projektübergreifende Musterbibliothek; Modell-/
+Papiermaß bei Schraffuren in Werkzeugeigenschaften wählbar; Musteränderungen
+aktualisieren gemeinsam alle Anwendungen. Architektur und Fachvertrag ergänzt.
+Uploadformat weiter offen. Einbettung verwendeter Definitionen, Offline-/
+Revisionsabgleich und projektübergreifendes Undo sind technische Vorschläge,
+keine implementierte Synchronisation. Creator-Abnahme weiterhin offen.
+PR215: CI-Formatierungsfehler behoben; voller lokaler Lint ohne Fehler
+(sechs bestehende Fast-Refresh-Warnungen). Produktionscode sonst unverändert.
+
+**Genau ein nächster Auftrag: V07d globale lokale Musterbibliothek.**
+Storage-Adapter, validierte Muster mit stabilen IDs/Namen, Liste/Vorschauen und
+Speichern des Creator-Entwurfs; Neustart/Laden und beschädigte Daten prüfen.
+Keine Projektmigration, Musteranwendung, Synchronisation oder Upload in V07d.
+
 ## V07b Linien-Creator - 08.10.2026
 
 PR214 mit erfolgreicher CI zusammengeführt. Tools > Schraffurenverwaltung öffnet
