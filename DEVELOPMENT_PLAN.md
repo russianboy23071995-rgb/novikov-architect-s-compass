@@ -1,5 +1,17 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07f Weltindex-Gegenpilot bestanden - 08.10.2026
+
+PR203 nach gruener CI zusammengefuehrt. Ein Modellindex uebersteht Kamerawechsel:
+500 Waende Abfragen inkl. erster nach Wechsel ca. 0,1 statt 18,5-19 ms, Aufbau
+jedoch einmalig 153 ms. 699 Tests, 180 Browservergleiche, Typecheck/Lint/Build bestanden.
+[Nachweis und Grenzen](docs/performance/WORLD_PICKING_PILOT.md).
+
+**Genau ein naechster Auftrag: K07g gemeinsamer Trefferdienst fuer stabile 3D-
+Display-Geometrie.** Lebenszeit an Geometrie binden, Kamera wiederverwenden,
+wechselnde Vorschauen konservativ im Vollscan belassen; Aufbau/Invalidierung und
+Canvas-Auswahl pruefen. Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K07e Picking-Pilot vermessen - 08.10.2026
 
 PR202 nach gruener CI zusammengefuehrt. Projizierter Kandidatenindex: 180
