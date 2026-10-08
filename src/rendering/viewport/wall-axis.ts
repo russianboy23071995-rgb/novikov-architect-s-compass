@@ -6,7 +6,7 @@ import type { Wall } from "../../domain/project/schema.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { createAffineScreenMetric } from "../../geometry/projections/screen-metric.ts";
 
-export const WALL_AXIS_COLOR = "#67dce5";
+export { CAD_TURQUOISE as WALL_AXIS_COLOR } from "./highlight.ts";
 const planMetric = createAffineScreenMetric(1, 0, 0, 1);
 export function wallAxisAnchor(wall: Wall, point: { x: number; y: number }) {
   return planMetric.projectSegment(point, wall.start, wall.end)?.point ?? wall.start;

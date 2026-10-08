@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzeranpassung: Schraffurarten und Tuerkis - 08.10.2026
+
+PR207 nach gruener CI zusammengefuehrt. Gemeinsame tuerkise Darstellung, duennere
+Messkonturen und statischer Lichtsaum fuer Achsen/Fenstermarkierung. Schraffuren:
+Polygon, Diagonale, Seite/Hoehe, sichtbare geschlossene Kontur uebernehmen.
+709 Tests, Typecheck/Lint/Build bestanden; Browser-Erstellung und Undo geprueft.
+[Nachweis und klare Erkennungsgrenzen](docs/validation/HATCH_CONSTRUCTION_MODES.md).
+
+**Genau ein naechster Auftrag bleibt V01c: temporaere 2D-Winkelmessung mit drei
+Punkten** (Schenkelpunkt, Scheitel, Schenkelpunkt), auf dem gemeinsamen Messpfad.
+Kleinen Winkel 0 bis 180 Grad anzeigen, Nullschenkel ablehnen, Zoom/Abbruch pruefen.
+Keine Modellmutation. Offene K-/V-Ziele bleiben erhalten.
+
+
 ## Aktueller Stand: V01b temporaere 2D-Flaechenmessung - 08.10.2026
 
 PR206 nach gruener CI zusammengefuehrt. Messart Flaeche nutzt gemeinsamen Messhook,

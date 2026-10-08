@@ -1,3 +1,4 @@
+import { CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import type { AreaMeasurement } from "@/application/measurement/area";
 import type { Point2 } from "@/geometry/primitives/point";
 export function AreaMeasurementOverlay({
@@ -20,10 +21,10 @@ export function AreaMeasurementOverlay({
     <g pointerEvents="none" aria-label={`Flächenmessung ${label}`}>
       <polygon
         points={points.map((p) => `${p.x},${-p.y}`).join(" ")}
-        fill={done ? "var(--primary)" : "none"}
+        fill={done ? CAD_TURQUOISE : "none"}
         fillOpacity={0.12}
-        stroke="var(--primary)"
-        strokeWidth={1.5}
+        stroke={CAD_TURQUOISE}
+        strokeWidth={1}
         vectorEffect="non-scaling-stroke"
         strokeDasharray={done ? undefined : "5 3"}
       />
@@ -34,8 +35,8 @@ export function AreaMeasurementOverlay({
           cy={-p.y}
           r={4 / pixelsPerMetre}
           fill="var(--background)"
-          stroke="var(--primary)"
-          strokeWidth={1.5}
+          stroke={CAD_TURQUOISE}
+          strokeWidth={1}
           vectorEffect="non-scaling-stroke"
         />
       ))}
