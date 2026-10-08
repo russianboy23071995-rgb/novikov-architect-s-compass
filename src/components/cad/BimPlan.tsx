@@ -1,3 +1,5 @@
+import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
+import type { AngleMeasurement } from "@/application/measurement/angle";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
 import type { AreaMeasurement } from "@/application/measurement/area";
@@ -61,6 +63,7 @@ export type BimPlanProps = {
   placement?:
     | {
         measurement?: DistanceMeasurement | undefined;
+        angleMeasurement?: AngleMeasurement | undefined;
         areaMeasurement?: AreaMeasurement | undefined;
         finish?: (() => void) | undefined;
         target: Point | null | undefined;
@@ -1031,6 +1034,13 @@ export function BimPlan({
             }}
           />
         ))}
+      {placement?.angleMeasurement && (
+        <AngleMeasurementOverlay
+          measurement={placement.angleMeasurement}
+          aim={resolvedHover?.point ?? null}
+          pixelsPerMetre={camera.pixelsPerMetre}
+        />
+      )}
       {placement?.areaMeasurement && (
         <AreaMeasurementOverlay
           measurement={placement.areaMeasurement}
