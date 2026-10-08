@@ -1,3 +1,4 @@
+import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
@@ -62,8 +63,43 @@ export function createEditingState(project: Project): EditingState {
   return { history: createHistory(project), session: null, error: "" };
 }
 
+const endpointPreviews = new WeakMap<EditSession, ReturnType<typeof prepareEndpoint>>();
 /** Derived preview only: no history entry and no mutation of the pinned model. */
 export function previewEdit(
+  session: EditSession,
+  project: Project,
+  selection: ElementTarget | null,
+  point: Point,
+  candidate?: SnapCandidate | null,
+): Project {
+  if (selection?.id !== session.target.id || selection?.kind !== session.target.kind)
+    throw new Error("Die Auswahl wurde geändert. Bearbeitung erneut starten.");
+  if (project !== session.base)
+    throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
+  const wall =
+    session.target.kind === "wall"
+      ? project.storey.walls.find((w) => w.id === session.target.id)
+      : undefined;
+  if (
+    wall &&
+    session.action === "point" &&
+    session.index === 1 &&
+    session.anchor.x === wall.end.x &&
+    session.anchor.y === wall.end.y &&
+    project.storey.wallTJunctions.some((t) => t.hostWallId === wall.id)
+  ) {
+    let prepared = endpointPreviews.get(session);
+    if (!prepared) {
+      prepared = prepareEndpoint(project, wall.id);
+      endpointPreviews.set(session, prepared);
+    }
+    return connectSnappedT(session, prepared.evaluate(point).project, point, candidate);
+  }
+  return connectSnappedT(session, editAtPointer(session, project, point), point, candidate);
+}
+
+/** Confirmation never trusts the prepared preview. */
+function fullEdit(
   session: EditSession,
   project: Project,
   selection: ElementTarget | null,
@@ -124,7 +160,7 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
       case "confirm": {
         if (!state.session || state.session !== event.session)
           throw new Error("Diese Bearbeitung ist nicht mehr aktiv.");
-        const next = previewEdit(
+        const next = fullEdit(
           state.session,
           state.history.present,
           event.selection,

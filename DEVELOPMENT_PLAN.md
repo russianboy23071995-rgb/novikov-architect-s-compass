@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04c gemeinsame Endpunkt-Vorschau — 08.10.2026
+
+PR188 nach gruener CI zusammengefuehrt. Der begrenzte T-Hauptwand-Pilot liegt
+jetzt in Application und wird zentral von previewEdit genutzt. Vollstaendige
+Bestaetigung und ein Undo-Schritt bleiben erhalten. 677 Tests bestanden;
+DOM-Ablauf mit freier und T-Wand einschliesslich Shift, Abbruch, Platzierung,
+Undo/Redo und Ansichtswechsel bestanden. Kein Hardware-Latenznachweis.
+[Nachweis und Grenzen](docs/performance/SHARED_ENDPOINT_PREVIEW.md).
+
+**Genau ein naechster Auftrag: K04d Wandzeichnen-/Wandketten-Vorschau vermessen.**
+Vorbereitung, Pointer-Vorschau und Bestaetigung bei 100/1.000 Elementen getrennt
+pruefen; vorhandene gemeinsame Aktionen und Fang-/Shift-Pipeline verwenden.
+Erst anhand des Ergebnisses einen begrenzten Optimierungsbedarf bestimmen.
+Keine neue Vorschau- oder Werkzeugarchitektur auf Vorrat. K-/V-Ziele und die
+manuelle Abnahme des sporadischen Shift-Ruckelns bleiben erhalten.
+
+
 ## Aktueller Stand: K04b vorbereiteter Endpunkt-Pilot — 08.10.2026
 
 PR187 mit gruener CI zusammengefuehrt (main 910dcf7). Isolierter Pilot fuer exakte
