@@ -1,5 +1,42 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Nutzerabstimmung: Skalierbarkeit und erweiterte Produktvision — 08.10.2026
+
+Die [Entwicklungsabstimmung](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+ordnet die erneute Architekturprüfung und den aktualisierten Funktionsupload ein.
+Sie ergänzt N01–N60 und AI01–AI35 um V01–V09; die vollständige Textquelle liegt
+in [docs/requirements](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md).
+AGENTS.md und ARCHITECTURE.md verweisen auf diese Ergänzung.
+
+PR179 hat den vorgesehenen A/B-Vergleich bereits vorgelegt. Diesen laufenden
+Auftrag abschließen; gleiche belegte Messungen nicht erneut einplanen.
+Die React-Unterbaumdiagnose für das offene kleine Shift-Szenario bleibt erhalten,
+wird aber hinter den konkreten Großdatenfehler und die Kapazitätsaufnahme
+eingeordnet. Diese Reihenfolge ersetzt die älteren Folgeaufträge im Verlauf.
+
+**Genau ein nächster neuer Implementierungsauftrag: K01 — planBounds gegen
+große Punktmengen absichern.** Isolierter Original-Funktionskörper:
+20 Polylinien × 10.000 Punkte, etwa 3,48 MB JSON-Testdaten, Node 24:
+RangeError durch Math.min/max mit allen Extents als Argumenten. Vollständige
+Browser-/Projektvalidierung dieser Fixture steht noch aus. Gültige Fixture
+erstellen, Fehler reproduzieren, Grenzen iterativ bestimmen, kleine gemischte
+und leere Fälle erhalten; große Ansicht im Browser einpassen und prüfen.
+
+Danach K03: Import/Platzierung/Bestätigung, 1/10/50/100 Undo-Stände,
+Speichern/Laden, 2D/3D und mehrere Rasterreferenzen mit getrennten Budgets für
+Elemente/Punkte, Bytes und Pixel messen. Vor größerem Dateilimit daraus einen
+begrenzten Asset-/Speicher- oder Commit-/Preview-Auftrag ableiten.
+Keine pauschale Lockerung der Validierung und kein Gesamtumbau der History.
+
+Fachliche Weiterentwicklung: Geschosse/Höhen, modellgebundene Ansichten und
+später Dächer/Trimmen nach ihren Abhängigkeiten. Kleine Funktionen wie
+temporäre Live-Messung oder Werkzeugvorgabenübernahme können zwischen
+abgeschlossenen Stabilitätsaufträgen folgen. AI/Text/Voice nutzen dieselben
+geprüften Aktionen; alle neuen Funktionen werden einzeln angeschlossen.
+
+Status dieser Ergänzung: Dokumentation/Übergabe, keine neue Umsetzung von K01–K08
+oder V01–V09. Bereits implementierter Auswahlbewegungs-Pilot bleibt anerkannt.
+
 ## Aktueller Stand: Auswahlbewegung paarweise A/B verglichen — 08.10.2026
 
 PR178 mit grüner CI zusammengeführt (main dcb19e8). Diagnoseseite bietet einen
