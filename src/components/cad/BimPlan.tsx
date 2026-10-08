@@ -1,3 +1,5 @@
+import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
+import type { AreaMeasurement } from "@/application/measurement/area";
 import { DistanceOverlay } from "./DistanceOverlay";
 import type { DistanceMeasurement } from "@/application/measurement/distance";
 import { PlanSceneRun } from "./PlanSceneRun";
@@ -57,6 +59,8 @@ export type BimPlanProps = {
   placement?:
     | {
         measurement?: DistanceMeasurement | undefined;
+        areaMeasurement?: AreaMeasurement | undefined;
+        finish?: (() => void) | undefined;
         target: Point | null | undefined;
         previewProject?: ToolInteraction["previewProject"];
         geometryPreview?: ToolInteraction["geometryPreview"];
@@ -709,6 +713,7 @@ export function BimPlan({
         if (placement && interactive && !navigationClick.current && !pan) {
           event.preventDefault();
           event.stopPropagation();
+          if (placement.finish && event.detail > 1) return;
           const resolved = pointFromEvent(event);
           const point = placement.target === undefined ? resolved?.point : placement.target;
           if (point)
@@ -782,6 +787,11 @@ export function BimPlan({
       }}
       onDoubleClick={(event) => {
         if (selecting || pan || navigationClick.current) return;
+        if (placement?.finish && interactive) {
+          event.preventDefault();
+          placement.finish();
+          return;
+        }
         if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
@@ -1008,6 +1018,13 @@ export function BimPlan({
             }}
           />
         ))}
+      {placement?.areaMeasurement && (
+        <AreaMeasurementOverlay
+          measurement={placement.areaMeasurement}
+          aim={resolvedHover?.point ?? null}
+          pixelsPerMetre={camera.pixelsPerMetre}
+        />
+      )}
       {placement?.measurement && (
         <DistanceOverlay
           measurement={placement.measurement}

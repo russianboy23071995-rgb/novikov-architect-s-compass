@@ -1,4 +1,5 @@
-import { useDistanceMeasurement } from "./useDistanceMeasurement";
+import { useMeasurement } from "./useMeasurement";
+import type { MeasurementMode } from "./useMeasurement";
 import { editAnchor } from "@/lib/bim/direct-edit";
 import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
@@ -75,6 +76,7 @@ export function CadWorkspace({
   initialProject,
 }: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
   const [layersOpen, setLayersOpen] = useState(false);
+  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
   const [layout, setLayout] = useState<ViewportLayout>("single");
@@ -539,12 +541,13 @@ export function CadWorkspace({
   );
   cancelCalibration.current = calibration.cancel;
   const measurementContext = useMemo(
-    () => ({ project, visibility, mode, activeViewport, layout, tool }),
-    [project, visibility, mode, activeViewport, layout, tool],
+    () => ({ project, visibility, mode, activeViewport, layout, tool, measurementMode }),
+    [project, visibility, mode, activeViewport, layout, tool, measurementMode],
   );
-  const measurement = useDistanceMeasurement(
+  const measurement = useMeasurement(
     tool === "measure" && mode === "2D",
     measurementContext,
+    measurementMode,
     () => selectTool("select"),
   );
   cancelMeasurement.current = measurement.reset;
@@ -890,9 +893,29 @@ export function CadWorkspace({
               </Button>
             </div>
           ) : tool === "measure" ? (
-            <p role="status" className="text-xs">
-              Strecke messen · Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden
-            </p>
+            <div className="flex items-center gap-3 text-xs">
+              <label>
+                Messart{" "}
+                <select
+                  aria-label="Messart"
+                  value={measurementMode}
+                  onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
+                  className="rounded border bg-background p-1"
+                >
+                  <option value="distance">Strecke</option>
+                  <option value="area">Fläche</option>
+                </select>
+              </label>
+              <span role="status">
+                {measurementMode === "area"
+                  ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
+                  : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+              </span>
+              <Button size="sm" variant="ghost" onClick={measurement.reset}>
+                Neue Messung
+              </Button>
+              {measurement.error && <span role="alert">{measurement.error}</span>}
+            </div>
           ) : tool === "window" ? (
             <WindowPlacementFields
               value={windowTool.dimensions}
@@ -1001,7 +1024,18 @@ export function CadWorkspace({
                   placement={
                     windowPlacement
                       ? {
-                          measurement: measurement.adapter ? measurement.value : undefined,
+                          measurement:
+                            measurement.adapter && measurementMode === "distance"
+                              ? measurement.value
+                              : undefined,
+                          areaMeasurement:
+                            measurement.adapter && measurementMode === "area"
+                              ? measurement.area
+                              : undefined,
+                          finish:
+                            measurement.adapter && measurementMode === "area"
+                              ? measurement.finish
+                              : undefined,
                           target: interaction.target,
                           previewProject: windowPlacement.previewProject,
                           aim: interaction.draft.move,

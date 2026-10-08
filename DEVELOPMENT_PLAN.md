@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: V01b temporaere 2D-Flaechenmessung - 08.10.2026
+
+PR206 nach gruener CI zusammengefuehrt. Messart Flaeche nutzt gemeinsamen Messhook,
+ToolInteraction und Fangpfad. Doppelklick schliesst, gemeinsame Polygonvalidierung
+prueft den Ring. Kein Modell-/Undo-Eintrag. 707 Tests, Typecheck/Lint/Build bestanden.
+Browser: 1,080 m² fuer 3,00 x 0,36 m, Zoom und Selbstueberschneidung geprueft.
+[Nachweis und Grenzen](docs/validation/LIVE_AREA_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V01c temporaere 2D-Winkelmessung.** Drei Punkte
+(Schenkelpunkt, Scheitel, Schenkelpunkt) ueber bestehenden Messlebenszyklus erfassen,
+kleineren eingeschlossenen Winkel 0 bis 180 Grad anzeigen, Nullschenkel ablehnen.
+Zoom/Abbruch/Neubeginn pruefen. Keine dauerhafte Bemaßung oder Modellmutation.
+Offene K-/V-Ziele bleiben erhalten.
+
+
 ## Aktueller Stand: V01a temporaere 2D-Streckenmessung - 08.10.2026
 
 PR205 nach gruener CI zusammengefuehrt. Lineal-Button startet Messung ueber den
