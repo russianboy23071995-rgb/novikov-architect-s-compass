@@ -1,76 +1,45 @@
-# V06a: Schraffur-Werkzeugvorgabenuebernahme
+# V06b: Gemeinsame Werkzeugvorgabenuebernahme
 
-Stand 08.10.2026. Vorbereitungsauftrag, noch keine neue Bedienfunktion.
-PR209 wurde nach erfolgreicher CI mit Nutzerfreigabe zusammengefuehrt.
+Stand 08.10.2026. Ersetzt den V06a-Entwurf nach ausdruecklicher Nutzerpraezisierung.
 
-## Verbindliche Nutzerentscheidung
+## Verbindlicher Ablauf
 
-Antwort vom 08.10.2026: "Nur Darstellung übernehmen, Ebene beibehalten".
+Schneller Doppelt-Rechtsklick auf ein sichtbares Element aktiviert sein Werkzeug
+und uebernimmt dessen Erstellungswerte einschliesslich Ebene. Kein eigener Button,
+kein Menuebefehl. Vorgaben sind vor dem Zeichnen in Werkzeugeigenschaften editierbar.
+ID, Geometrie und Verbindungen werden nicht kopiert. Quelle und History bleiben
+bei der Uebernahme unveraendert. Erst neue Geometrie erzeugt einen Modell-Undo-Schritt.
 
-Uebernommen werden ausschliesslich:
-- fill.color und fill.opacity
-- background.visible und background.color
-- contour.visible und contour.color
+## Umsetzung und Grenzen
 
-Nicht uebernommen: layerId, id, points, Beziehungen oder Erstellungsmodus.
-Die aktuelle Zielebene wird nicht von der Quelle ueberschrieben. Im jetzigen Code
-ist das project.defaultLayerIds.line; ein eigener frei einstellbarer Schraffur-
-Zielebenenstatus existiert noch nicht. Diese Planung fuehrt keinen solchen ein.
-Die Entscheidung gilt fuer Schraffuren, nicht pauschal fuer andere Bauteile.
+- application/input/double-secondary.ts: gemeinsame Geste (450 ms, 6 CSS-Pixel;
+  technische Parameter). Gleiches Element und gleicher Interaktionskontext;
+  andere Klicks/Tastatur, Kontextwechsel und gesperrte Bearbeitungen verwerfen.
+- application/tools/pickup.ts: stabile Ziel-ID und aktuelle Sichtbarkeit pruefen;
+  explizite eigene Werte-Kopie. Erster Adapter Schraffur. Kein pauschales Entity-Spread.
+- useToolDefaults: sitzungsbezogener UI-Zustand, getrennt von Modell und History.
+  Geloeschte Zielebene faellt auf Projektvorgabe zurueck.
+- Schraffur: Fill, Hintergrund, Kontur UND Ebene. Alle vier Modi speisen createDrawing
+  und previewHatch. Alte Aufrufer ohne zusaetzliche Werte behalten die bisherigen Defaults.
+- PlanSceneRun/BimPlan verbinden die gemeinsame Geste mit dem Application-Adapter.
+  Waehrend laufender Zeichnung, Platzierung, Direct Edit, Referenzauswahl und Pan
+  keine Uebernahme. Ein inaktives Zeichnungswerkzeug ohne ersten Punkt erlaubt sie.
+- Nur 2D-Schraffuren sind in diesem Piloten angeschlossen. Waende, Fenster, Linien
+  und spaetere Elemente bekommen deklarierte Adapter, keine kopierte Bedienlogik.
+  Kein Preset-Katalog, Dateiformatwechsel oder separate AI-Modelllogik.
 
-## Verifizierter Bestand
+## Nachweis
 
-| Stelle | Befund | Konsequenz |
-| --- | --- | --- |
-| src/domain/elements/hatch/model.ts | Fill, Hintergrund, Kontur getrennt validiert | Darstellungstyp explizit auf diese Felder begrenzen |
-| src/components/cad/CadWorkspace.tsx | hatchFill allein als Zeichenvorgabe | Vollstaendige Darstellungsvorgabe hinter kleinem Hook halten |
-| src/application/drawing/actions.ts | Hatch-Request reicht nur fill weiter | Optionalen Hintergrund/Kontur-Pfad kompatibel ergaenzen |
-| src/application/hatches/actions.ts | previewHatch kann alle Darstellungswerte; Default-Ebene line | Gemeinsame validierte Aktion weiterverwenden, Zielebene bewahren |
-| src/components/cad/HatchControls.tsx | Fill/Paint-Felder bereits vorhanden | Felder gemeinsam fuer Inspector und Vorgaben verwenden |
-| src/components/cad/PlanSceneRun.tsx | gemeinsame Ereignisadapter, bislang kein Rechtsklickpfad | Gesture einmal im Viewport behandeln, keine pro-Form-Gesten |
+715 Tests bestanden. Neue Tests pruefen eigene Werte-Kopie, abweichende Quell-Ebene,
+alle vier Konturkonstruktionen mit identischen Vorgaben, neue IDs, ein Undo beim
+Zeichnen, keine Quellaenderung sowie veraltete/verdeckte/geloeschte/falsche Ziele.
+Geste: Zeit, Entfernung, Ziel, Kontext und Reset. Typecheck, gezielter Lint und Build.
+Browser: Schraffur mit 63 % Deckkraft, Kontur und Innenwand-Ebene erstellt;
+Vorgaben auf 20 %/2D-Zeichnungen geaendert; Doppelt-Rechtsklick stellt 63 %,
+Kontur und Innenwand wieder her und aktiviert Schraffur. Praktische Nutzerabnahme
+bleibt offen; keine pauschale Freigabe fuer noch nicht angebundene Elemente.
 
-## Verbindliche Architekturgrenze
+## Naechster begrenzter Auftrag
 
-Eine reine Application-Funktion liest einen aktuellen sichtbaren Schraffur-Target
-ueber stabile ID und gebundenen Projekt-/Sichtbarkeitskontext. Sie gibt eine eigene
-Kopie nur der Darstellungswerte zurueck. Kein Spread des gesamten Elements.
-Veralteter Kontext, geloeschte/verdeckte Quelle oder falscher Typ werden abgewiesen.
-
-Ein UI-Vorgabenhook haelt diese sitzungsbezogenen Darstellungswerte. Die Uebernahme
-aktiviert das Schraffurwerkzeug und zeigt Werte in Werkzeugeigenschaften. Sie erzeugt
-weder Modellobjekt noch Undo-Eintrag. Die Quelle bleibt unveraendert. Kein Dateiformat-
-wechsel oder dauerhafter Preset-Katalog in diesem Teilauftrag.
-
-Polygon, Diagonalrechteck, Seite/Hoehe und Konturuebernahme muessen denselben
-Darstellungssatz ueber createDrawing -> previewHatch verwenden. Endgueltige neue
-Geometrie und neue ID kommen allein aus dem Zeichenvorgang. Validierung und genau
-ein History-Schritt bleiben an dessen Abschluss. Text/Voice kann spaeter denselben
-Application-Adapter mit stabilem Zielkontext aufrufen; kein eigener AI-Zweig.
-
-## Genau ein Folgeauftrag: V06b begrenzte Umsetzung
-
-Darstellungsuebernahme fuer Schraffuren implementieren. Zugaenglichen Menuebefehl
-"Darstellung als Werkzeugvorgabe" und die gewuenschte doppelte Rechtsklickgeste
-an denselben Adapter anbinden. Eine gemeinsame Ereignisbehandlung muss nur dasselbe
-sichtbare Element im selben Kontext erkennen; kein Uebernehmen ueber zwei Elemente
-hinweg oder waehrend Zeichnen, Navigation, Referenzauswahl oder Direct Edit.
-Zeit-/Bewegungstoleranzen der Geste sind technische Implementierungsparameter;
-nicht als bereits getroffene Nutzerentscheidung darstellen. Normalen Rechtsklick
-und vorhandene Klick-/Doppelklickablaeufe beim Browser-Test ausdruecklich pruefen.
-
-Vorgaben in Werkzeugeigenschaften sichtbar/editierbar machen; bestehende Fill/Paint-
-Felder teilen. Legacy DrawingRequest-Aufrufer ohne neue Felder behalten Defaults.
-
-Abnahme: Quelle mit abweichender Ebene, Fuellung, Hintergrund und Kontur waehlen.
-Uebernehmen veraendert weder Quelle noch History. Alle vier Erstellungsarten ergeben
-neue Schraffuren mit kopierter Darstellung auf unveraenderter Zielebene. Neue IDs,
-unabhaengige Punkte, genau ein Undo-Schritt. Quelle spaeter aendern: bestehende
-Vorgabenkopie bleibt unveraendert. Verdeckte/veraltete Quelle abweisen. Build,
-passende Tests und Browser-Gestenpruefung; eigener PR zur Abnahme.
-
-## Pruefung dieses Vorbereitungsauftrags
-
-Codepfade und Nutzerentscheidung abgeglichen, Dokumentationsdiff auf Fehler geprueft.
-Keine Produktionsdateien geaendert; Tests/Build nicht erneut ausgefuehrt. Die 712
-Tests und erfolgreiche CI gehoeren zum zusammengefuehrten PR209, nicht zu einer
-bereits implementierten Vorgabenuebernahme.
+V06c Fenster an dieselbe Uebernahmegrenze anbinden: Breite, Hoehe, Bruestung,
+Ebene. Keine Host-ID/Position. Gemeinsame Platzierung und Validierung beibehalten.

@@ -1,17 +1,17 @@
 # NOVIKOV CAD Architecture Contract
 
-## Hatch appearance pickup: approved scope - 2026-10-08
+## Shared tool-default pickup - 2026-10-08
 
-The user explicitly chose appearance only, preserving the destination layer.
-Hatch tool pickup copies fill (color/opacity), background (visible/color) and
-contour (visible/color); never source layer, ID, points or relationships.
-Resolve source through stable target ID and current visible context. Return owned
-appearance values to transient tool defaults; pickup itself is not a model edit.
-All hatch construction modes must feed the same defaults to the existing validated
-creation action. Creating a new hatch retains destination-layer policy and history.
-This is a binding contract; implementation is the next bounded V06b task.
-[Code mapping and acceptance](docs/planning/HATCH_PRESET_PICKUP.md).
-
+The user's clarified contract supersedes V06a: rapid double-secondary-click on an
+existing visible element activates its tool and copies its creation defaults,
+INCLUDING layer. There is no pickup toolbar button or menu command. Geometry,
+identity and connections are excluded. Each supported type declares its fields;
+a shared gesture and Application capability boundary serve all adapters.
+Defaults remain editable in Werkzeugeigenschaften before drawing. Pickup itself
+never mutates the source or model history. Creation uses existing validated actions.
+The first implemented adapter is hatch: fill, background, contour, layer. All four
+construction modes use the same defaults. Other element adapters remain future work.
+[Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
 ## Shared stable 3D picking service - 2026-10-08
 

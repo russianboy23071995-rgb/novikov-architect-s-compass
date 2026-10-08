@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## V06b: gemeinsame Vorgabenuebernahme, Pilot Schraffur - 08.10.2026
+
+Neue Nutzerpraezisierung ersetzt V06a: ausschliesslich Doppelt-Rechtsklick,
+Darstellung UND Ebene uebernehmen. Gemeinsame Gesture/Application-Grenze,
+sitzungsbezogene Vorgaben, alle vier Schraffurmodi. Kein Modell-Undo bei Uebernahme.
+715 Tests bestanden; Build/Typecheck/Lint und Browser-Abnahme dokumentiert im
+[Vertrag](docs/planning/HATCH_PRESET_PICKUP.md).
+
+**Genau ein naechster Auftrag: V06c Fenster-Vorgaben an dieselbe Uebernahmegrenze
+anbinden.** Breite, Hoehe, Bruestung und Ebene als Werkzeugvorgaben, keine Host-ID
+oder Position kopieren. Bestehende Fenster-Platzierungsvalidierung erhalten.
+Weitere Elementtypen folgen einzeln; keine neue Gesture pro Typ.
+
+Die folgenden V06a-Angaben sind historische Entscheidungen, durch V06b ersetzt.
+
+
 ## Aktueller Stand: V06a Vorgabenuebernahme abgegrenzt - 08.10.2026
 
 PR209 nach gruener CI zusammengefuehrt. Nutzerentscheidung: nur Darstellung
