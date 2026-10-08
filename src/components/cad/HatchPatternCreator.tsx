@@ -74,15 +74,15 @@ export function HatchPatternCreator({
       }}
     >
       <DialogContent className="glass-panel-strong max-w-4xl max-h-[90vh] overflow-auto">
-        <DialogTitle>Schraffurenverwaltung Â· Linien-Creator</DialogTitle>
+        <DialogTitle>Schraffurenverwaltung · Muster-Creator</DialogTitle>
         <DialogDescription>
-          Lokaler Entwurf in Metern. Zwei Klicks zeichnen eine Linie; Shift hÃ¤lt die Richtung. Noch
+          Lokaler Entwurf in Metern. Zwei Klicks zeichnen eine Linie; Shift hält die Richtung. Noch
           keine Speicherung oder Anwendung auf Projektkonturen.
         </DialogDescription>
         <div className="flex flex-wrap items-end gap-3">
           {(["width", "height"] as const).map((key) => (
             <label key={key} className="text-xs">
-              {key === "width" ? "Zellbreite (m)" : "ZellhÃ¶he (m)"}
+              {key === "width" ? "Zellbreite (m)" : "Zellhöhe (m)"}
               <Input
                 className="w-28"
                 value={size[key]}
@@ -120,7 +120,7 @@ export function HatchPatternCreator({
               direction.current = null;
             }}
           >
-            Entwurf rÃ¼ckgÃ¤ngig
+            Entwurf rückgängig
           </Button>
           <Button
             onClick={() => {
@@ -138,7 +138,7 @@ export function HatchPatternCreator({
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs mb-2">Zeichenzelle Â· {draft.lines.length}/256 Linien</p>
+            <p className="text-xs mb-2">Zeichenzelle · {draft.lines.length}/256 Linien</p>
             <svg
               aria-label="Musterlinien zeichnen"
               tabIndex={0}
@@ -230,7 +230,7 @@ export function HatchPatternCreator({
             </svg>
           </div>
           <div>
-            <p className="text-xs mb-2">Wiederholung Â· 3 Ã— 3 Zellen</p>
+            <p className="text-xs mb-2">Wiederholung · 3 × 3 Zellen</p>
             <svg
               aria-label="Wiederholungsvorschau"
               viewBox={`0 0 ${draft.width * 3} ${draft.height * 3}`}

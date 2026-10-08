@@ -1,5 +1,17 @@
 # NOVIKOV CAD Architecture Contract
 
+## Separate line styles and hatch patterns - 2026-10-08
+
+User clarification: Tools > Linien Creator manages line styles for line tools,
+independently of Tools > Schraffurenverwaltung and its area-pattern creator.
+The first line-style library stores finite positive alternating dash/gap sequences
+behind Application validation and an interchangeable storage adapter. Browser
+storage is profile/origin-local across projects, not cross-device synchronization.
+Current project line style enum and rendering remain unchanged until a dedicated
+reference/migration task. Symbols, paper/model sizing and in-use deletion rules
+for applied custom line styles require their own follow-up contract.
+
+
 ## Hatch library / creator preparation - 2026-10-08
 
 Pattern definitions and contour applications are distinct. Repetition and clipping

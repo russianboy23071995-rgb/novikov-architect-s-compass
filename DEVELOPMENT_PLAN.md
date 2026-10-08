@@ -1,3 +1,23 @@
+## Linien Creator getrennt von Schraffuren - 08.10.2026
+
+Nutzer präzisiert: eigenständiger Tools-Eintrag Linien Creator für Linienarten,
+Vorschauen, Löschen, Bearbeiten, Anlegen. Schraffurenverwaltung bleibt separat.
+Erster Creator: Standardarten (geschützt) und eigene positive Strich-/Lückenfolgen;
+Application-Validierung, austauschbarer Storage-Adapter, browserprofil-/originlokale
+projektübergreifende Speicherung. Kein Projektformatwechsel. Eigene Arten sind
+noch nicht im Linienwerkzeug auswählbar; Symbolmuster noch nicht implementiert.
+Umlaute/Zellhöhe/Rückgängig und Sonderzeichen im Muster-Creator korrigiert.
+726 Tests, Typecheck, voller Lint ohne Fehler (sechs bestehende Warnungen), Build.
+Browser-Abnahme weiterhin offen. Praktischer Test: Tools > Linien Creator,
+Name und 8 5 2 5 eingeben, speichern, bearbeiten, schließen/öffnen und neu laden,
+eigene Art löschen. Tools > Schraffurenverwaltung bleibt Flächenmuster-Creator.
+
+**Genau ein nächster Auftrag: eigene Linienarten ans Linienwerkzeug anbinden.**
+Stabile Referenzen und portable eingebettete Definitionen, Bestandsmigration,
+Darstellung/Vorgabenübernahme und Speichern/Laden gemeinsam prüfen; vor Nutzung
+Maßbezug und Verhalten beim Löschen einer verwendeten Linienart festlegen.
+Globale Schraffurbibliothek V07d bleibt erhalten, ist noch nicht umgesetzt.
+
 ## V07c Bibliotheksvertrag - 08.10.2026
 
 Nutzerentscheidungen: globale projektübergreifende Musterbibliothek; Modell-/
