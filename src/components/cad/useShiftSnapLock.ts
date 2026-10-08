@@ -12,6 +12,8 @@ export function useShiftSnapLock(session: object, resetKey: number) {
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key === "Shift") {
+        // Auto-repeat carries no new modifier state. Do not enqueue React work.
+        if (event.repeat) return;
         const down = event.type === "keydown";
         if (down && !event.repeat) lock.press();
         if (!down) lock.release();

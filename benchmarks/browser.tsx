@@ -175,6 +175,7 @@ export function Harness() {
     [images, setImages] = useState(false),
     [dense, setDense] = useState(false),
     [heldShift, setHeldShift] = useState(false),
+    [repeatShift, setRepeatShift] = useState(false),
     [tPair, setTPair] = useState(false),
     [manualRecording, setManualRecording] = useState(false),
     [running, setRunning] = useState(false),
@@ -280,6 +281,7 @@ export function Harness() {
         tPair ? 2 : 20,
         { x: 0, y: tPair ? 0.18 : 0 },
         tPair,
+        repeatShift,
       );
       setStatus("Movement complete");
       show();
@@ -386,6 +388,15 @@ export function Harness() {
               onChange={(e) => setTPair(e.target.checked)}
             />
             T pair
+          </label>
+          <label>
+            <input
+              aria-label="Repeat Shift"
+              type="checkbox"
+              checked={repeatShift}
+              onChange={(e) => setRepeatShift(e.target.checked)}
+            />
+            Repeat Shift
           </label>
           <button onClick={() => task(load)}>Load scenario</button>{" "}
           <button onClick={() => task(run)}>Measure core</button>{" "}

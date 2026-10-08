@@ -13,7 +13,8 @@ export function checkMovementGeometry(base: Project, delta: Point, selectedCount
   const solids = new Map(connectedWallSolids(expected).map((s) => [s.wallId, s]));
   const outlines = wallPlanOutlines(expected, new Set(expected.storey.walls.map((w) => w.id)));
   const equal = (actual: string | null | undefined, value: string, label: string) => {
-    if (actual !== value) throw new Error(`Full-path DOM mismatch: ${label}`);
+    if (actual !== value)
+      throw new Error(`Full-path DOM mismatch: ${label}; actual=${actual}; expected=${value}`);
   };
   for (const wall of expected.storey.walls) {
     const matches = document.querySelectorAll(`[aria-label="Select wall ${wall.id}"]`);
