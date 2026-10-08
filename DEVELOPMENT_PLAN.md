@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04a Wandendpunkt vermessen — 08.10.2026
+
+PR186 nach gruener CI zusammengefuehrt (main 335546a). Acht Browser-API-Faelle,
+je 20 Ziele: 100/1.000 Elemente, ohne/mit T-Gruppen, ohne/mit Shift. Vorschau,
+Bestaetigung und Undo/Redo stimmen ueberein. [Befund und Grenzen](docs/performance/WALL_ENDPOINT_PROFILE.md).
+Bei 1.000 Elementen Vorschau ca. 3 ms ohne Anschluesse und 8-9 ms mit T-Gruppen;
+Fang/Shift ca. 0,1 ms. Kein DOM-/Renderer-Latenznachweis, Shift-Ruckeln bleibt offen.
+670 Tests, Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+
+**Genau ein naechster Auftrag: K04b isolierter vorbereiteter Endpunkt-Pilot fuer
+axiale Verlaengerung einer T-Hauptwand.** Bestehende Fachregeln wiederverwenden,
+Vorschau gegen Vollpfad vergleichen (Fenster, Nachbarn, fremde Endpunkte), sonst
+Fallback. Vollpruefung bei Bestaetigung und ein Undo-Schritt bleiben. Erst nach
+Nachweis produktiv anbinden. Weitere K-/V-Ziele bleiben erhalten.
+
+
 ## Aktueller Stand: K05b strukturierter Modellvergleich — 08.10.2026
 
 PR185 nach gruener CI zusammengefuehrt (main 2a98213). Zwei weitere JSON-
