@@ -188,3 +188,83 @@ test("window placement checks chosen layer, host visibility and changed draft; p
     placeWindow(p, p, visibility, "wide", point, { width: 10, height: 1, sillHeight: 0.8 }),
   );
 });
+import { addLine } from "../../lib/bim/model.ts";
+
+test("line and polyline pickup transfer style and layer into independent new geometry, with one undo", () => {
+  for (const sourceKind of ["line", "polyline"] as const) {
+    let p = createExampleProject();
+    p = addLine(p, {
+      id: "source-line",
+      kind: sourceKind,
+      points:
+        sourceKind === "line"
+          ? [
+              { x: 0, y: 4 },
+              { x: 2, y: 4 },
+            ]
+          : [
+              { x: 0, y: 4 },
+              { x: 2, y: 4 },
+              { x: 2, y: 5 },
+            ],
+      color: "#123abc",
+      penWidth: 0.7,
+      style: "dashed",
+      layerId: p.defaultLayerIds.wall,
+    });
+    const history = createHistory(p);
+    p = history.present;
+    const before = JSON.stringify(p),
+      visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+    const preset = pickupToolDefaults(p, visibility, { kind: "line", id: "source-line" })!;
+    assert.equal(preset.tool, "line");
+    if (preset.tool !== "line") throw new Error("Expected line");
+    assert.deepEqual(
+      Object.keys(preset.values).sort(),
+      ["color", "penWidth", "style", "layerId"].sort(),
+    );
+    for (const lineKind of ["line", "polyline"] as const) {
+      const points =
+        lineKind === "line"
+          ? [
+              { x: 5, y: 4 },
+              { x: 7, y: 4 },
+            ]
+          : [
+              { x: 5, y: 4 },
+              { x: 7, y: 4 },
+              { x: 7, y: 5 },
+            ];
+      const made = commitProject(
+        history,
+        createDrawing(p, p, "new-line", {
+          kind: "line",
+          lineKind,
+          points,
+          appearance: preset.values,
+          layerId: preset.values.layerId,
+        }),
+      );
+      const line = made.present.storey.lines!.at(-1)!;
+      assert.equal(line.id, "new-line");
+      assert.deepEqual(line.points, points);
+      for (const key of ["color", "penWidth", "style", "layerId"] as const)
+        assert.equal(line[key], preset.values[key]);
+      assert.equal(made.past.length, 1);
+      assert.deepEqual(undoProject(made).present, p);
+    }
+    preset.values.color = "#ffffff";
+    assert.equal(JSON.stringify(p), before);
+    assert.equal(history.past.length, 0);
+    const hidden = createLayerVisibilityPolicy(p, {
+      ...ALL_LAYERS_VISIBLE,
+      hiddenLayerIds: [p.defaultLayerIds.wall],
+    });
+    assert.equal(pickupToolDefaults(p, hidden, { kind: "line", id: "source-line" }), null);
+    assert.equal(
+      pickupToolDefaults({ ...p }, visibility, { kind: "line", id: "source-line" }),
+      null,
+    );
+    assert.equal(pickupToolDefaults(p, visibility, { kind: "line", id: "missing" }), null);
+  }
+});

@@ -1,15 +1,29 @@
+import { defaultLineAppearance } from "@/lib/bim/lines";
 import {
   defaultDrawingWindow,
   type WindowDimensionDraft,
 } from "@/application/drawing/window-placement";
 import { useMemo, useState } from "react";
 import type { Project } from "@/domain/project/schema";
-import type { HatchDefaults, ToolDefaults } from "@/application/tools/pickup";
+import type { HatchDefaults, LineDefaults, ToolDefaults } from "@/application/tools/pickup";
 import { defaultHatchFill } from "@/application/drawing/actions";
 import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
+  const [lineState, setLineState] = useState<{ projectId: string; values: LineDefaults } | null>(
+    null,
+  );
+  const line =
+    lineState?.projectId === project.id
+      ? lineState.values
+      : { ...defaultLineAppearance, layerId: project.defaultLayerIds.line };
+  const lineDefaults = {
+    ...line,
+    layerId: project.layers.some((l) => l.id === line.layerId)
+      ? line.layerId
+      : project.defaultLayerIds.line,
+  };
   const [windowState, setWindowState] = useState<{
     projectId: string;
     values: WindowDimensionDraft;
@@ -48,6 +62,10 @@ export function useToolDefaults(project: Project) {
   };
   return {
     hatch: current,
+    line: lineDefaults,
+    setLine(values: LineDefaults) {
+      setLineState({ projectId: project.id, values });
+    },
     window: windowDefaults,
     setWindow(values: WindowDimensionDraft) {
       setWindowState({ projectId: project.id, values });
@@ -57,6 +75,8 @@ export function useToolDefaults(project: Project) {
     },
     apply(defaults: ToolDefaults) {
       if (defaults.tool === "hatch") setState({ projectId: project.id, hatch: defaults.values });
+      else if (defaults.tool === "line")
+        setLineState({ projectId: project.id, values: defaults.values });
       else
         setWindowState({
           projectId: project.id,

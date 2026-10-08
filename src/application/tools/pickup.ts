@@ -8,8 +8,14 @@ export type WindowDefaults = Pick<
   Project["storey"]["windows"][number],
   "width" | "height" | "sillHeight" | "layerId"
 >;
+export type LineDefaults = Pick<
+  NonNullable<Project["storey"]["lines"]>[number],
+  "color" | "penWidth" | "style" | "layerId"
+>;
 export type ToolDefaults =
-  { tool: "hatch"; values: HatchDefaults } | { tool: "window"; values: WindowDefaults };
+  | { tool: "hatch"; values: HatchDefaults }
+  | { tool: "window"; values: WindowDefaults }
+  | { tool: "line"; values: LineDefaults };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
 export function pickupToolDefaults(
@@ -18,6 +24,19 @@ export function pickupToolDefaults(
   target: ElementTarget,
 ): ToolDefaults | null {
   if (!visibility.evaluate(project, visibility.context, target.id).eligible) return null;
+  if (target.kind === "line") {
+    const source = project.storey.lines?.find((item) => item.id === target.id);
+    if (!source) return null;
+    return {
+      tool: "line",
+      values: {
+        color: source.color,
+        penWidth: source.penWidth,
+        style: source.style,
+        layerId: source.layerId,
+      },
+    };
+  }
   if (target.kind === "window") {
     const source = project.storey.windows.find((item) => item.id === target.id);
     if (!source) return null;

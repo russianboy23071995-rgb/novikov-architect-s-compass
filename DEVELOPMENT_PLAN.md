@@ -1,5 +1,24 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## V06d: Linienvorgaben gemeinsam uebernehmen - 08.10.2026
+
+PR211 nach gruener CI zusammengefuehrt. Linien/Polylinien uebernehmen Farbe,
+Strichstaerke, Strichart und Ebene im gemeinsamen Application-Adapter und
+Vorgabenhook; keine neue Rechtsklicklogik. Zeichnungsmodus bleibt waehlbar.
+Linien-Zielebene vor Zeichnen editierbar, bestehende Erstellungsvalidierung
+und History erhalten. Strichstaerkefeld zeigt externe Vorgaben sofort.
+718 Tests, Typecheck, gezielter Lint und Build bestanden. Praktischer Browser-Test
+blockiert durch nicht startfaehige Browser-Sandbox, auch nach Reset.
+Abnahme: vorhandene Linie zweimal rechts anklicken, Farbe/Staerke/Art/Ebene
+pruefen, neue Linie/Polylinie zeichnen, Undo: nur die neue Geometrie verschwindet.
+
+**Genau ein naechster Auftrag: V06e Wandvorgaben an denselben Adapter anbinden.**
+Staerke, Hoehe, Achslage/Koerperversatz und Ebene explizit deklarieren; keine
+Laenge, Endpunkte, Fenster oder Anschluesse kopieren. Gemeinsame Wandkettenaktion
+und deren atomare History beibehalten. Praktische Linienabnahme vorher nachholen.
+
+
+
 ## V06c: Fenstervorgaben ueber gemeinsame Uebernahme - 08.10.2026
 
 PR210 nach gruener CI zusammengefuehrt. Doppelt-Rechtsklick im Grundriss
