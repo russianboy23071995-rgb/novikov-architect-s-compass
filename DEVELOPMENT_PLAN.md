@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04e isolierter Wandzeichen-Pilot — 08.10.2026
+
+PR190 nach gruener CI zusammengefuehrt. Vorbereiteter erster freier Abschnitt
+verwendet bestehende Fachaktion, bei Kandidaten/Kontakten/ID-Kollision Vollpfad.
+681 Tests und 60 Browservergleiche bestanden. Bei 1.000 Elementen Median
+9,50 auf 0,10 ms; Vorbereitung 30,6 ms. Keine produktive Anbindung.
+[Nachweise und Grenzen](docs/performance/PREPARED_WALL_DRAWING.md).
+
+**Genau ein naechster Auftrag: K04f gemeinsame Zeichensitzung anbinden.**
+Nur erster freier Abschnitt; Basis/Ursprung, Abbruch, Werkzeugwechsel und
+Folgepunkt absichern. Weitere Abschnitte weiterhin Vollpfad, volle Bestaetigung,
+gesamte Kette ein Undo. DOM-Maus-/Shift-Ablauf pruefen. K-/V-Ziele bleiben.
+
+
 ## Aktueller Stand: K04d Wandzeichnen vermessen — 08.10.2026
 
 PR189 nach gruener CI zusammengefuehrt. Acht Browser-API-Faelle mit je 20 Zielen:
