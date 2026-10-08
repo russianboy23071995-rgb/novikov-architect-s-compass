@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K06c gemeinsame Kettenendwand-Vorbereitung — 08.10.2026
+
+PR196 nach gruener CI zusammengefuehrt. Einmalige Basispruefung und stationaere
+Solidableitung integriert; bestehender Ausgabe-/Renderervertrag erhalten.
+693 Tests, Typechecks, Lint und Build bestanden. Auswahlbewegung mit Wand/Fenster,
+Shift, Abbruch, Undo/Redo und Ansichtswechsel im DOM bestanden. 100-Wand-Kette:
+Vorbereitung 54,5 ms, laufend ca. 0,1 ms; keine Framezeitmessung.
+[Nachweis und Bediengrenze](docs/performance/SHARED_CHAIN_MOVE.md).
+
+**Genau ein naechster Auftrag: K06d Einzelwand-Freibewegung an vorhandenen
+Auswahlbewegungsadapter anbinden.** Ursprung, Fang/Eingabe, Kontext und Undo
+bewahren; keine pro-Werkzeug-Duplikation. Andere Direct-Edit-Aktionen unveraendert.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
 ## Aktueller Stand: K06b Kettenendwand-Pilot — 08.10.2026
 
 PR195 nach gruener CI zusammengefuehrt. Nach einmalig vorbereitetem geloesten
