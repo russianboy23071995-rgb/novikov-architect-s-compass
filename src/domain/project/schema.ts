@@ -194,7 +194,7 @@ export function wallLength(wall: { start: Point; end: Point }): number {
   return Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
 }
 
-/** Validates unknown data and returns an independent copy. Throws on invalid data. */
+/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
   validateGeometry(project);

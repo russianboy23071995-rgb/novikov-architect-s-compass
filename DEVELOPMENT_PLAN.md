@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K02b Asset-Handle-Pilot — 08.10.2026
+
+PR182 mit grüner CI zusammengeführt (main ac129fc). Opt-in für vollständig
+geprüfte, eigene unveränderliche Assetobjekte im gemeinsamen Schema; produktive
+Import-/Ladegrenzen noch unverändert. Bestehende Linienaktion und History genutzt,
+keine duplizierte Modelllogik. [Nachweis](docs/performance/VALIDATED_ASSET_HANDLES.md).
+665 Tests, beide Typechecks, Build und Lint bestanden (sechs bestehende Warnungen).
+Gleiche K03-Fixture: Aktion Median 125,9 → 10,1 ms, Commit 287,9 → 62,1 ms;
+einmalige Vorbereitung 111,8 ms. Ein lokaler Lauf, keine Großprojektfreigabe.
+
+**Genau ein nächster Auftrag: K02c Handle-Erzeugung an den gemeinsamen Bildimport-
+und Projektladegrenzen integrieren.** Fremddaten vollständig prüfen, nach Laden
+Identität neu aufbauen; bestehende Format-/Größenlimits erhalten. Import → Linie/
+Wand ändern → Undo/Redo → Speichern/Laden und beschädigte Dateien abnehmen.
+Keine Cachelogik je Werkzeug. Ältere Folgeaufträge sind Historie; K-/V-Ziele bleiben.
+
+
 ## Aktueller Stand: K02 Modell-/Assetvertrag geprüft — 08.10.2026
 
 PR181 nach grüner CI unverändert zusammengeführt (main 629c7c8). Isolierter
