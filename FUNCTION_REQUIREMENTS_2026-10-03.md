@@ -1,5 +1,16 @@
 # Funktionsabgleich N01–N60 — 03.10.2026
 
+## Fortschreibung vom 08.10.2026
+
+Die erneut hochgeladene DOCX wurde vollständig als
+[Textquelle](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md) erfasst.
+Die Schlussabsätze sind in der
+[Entwicklungsabstimmung V01–V09](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+zugeordnet. N01–N60 bleiben erhalten; ihre historischen Statusangaben unten
+sind kein aktueller Implementierungsnachweis. Aktueller Code, Entwicklungsplan
+und verifizierte PR-Nachweise bestimmen den Fortschritt. Die neue Reihenfolge
+berücksichtigt große Dateien, den implementierten Vorschaupiloten und PR179.
+
 ## Quellen, Stand und Belegqualität
 
 Nutzerauftrag: reine Dokumentation und Planung. Quelle für N01–N60 ist der unverändert abgelegte [Arbeitsentwurf](NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md). Die dort genannte fünfseitige „FUNKTIONEN 03.10.2026.pdf“ wurde nicht separat bereitgestellt/gelesen; Seitenverweise und die Vollständigkeit gegenüber dem PDF-Original sind damit nicht unabhängig geprüft. Die 60 Einträge des Entwurfs sind vollständig zugeordnet.

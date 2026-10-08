@@ -1,5 +1,25 @@
 # NOVIKOV CAD Architecture Contract
 
+## User goals and development alignment — 2026-10-08
+
+The [updated coordination](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+and [source transcript](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md)
+extend the requirements with V01–V09: live measurement, multimodal sketch input,
+live 3D section, first-person navigation, context actions, tool-property pickup,
+hatch management, shared property capabilities and semantic 3D trimming.
+These are requirements and migration guidance, not implemented capabilities.
+
+Preserve the prepared shared action boundary. Transient measurement/sketch
+overlays and camera/section-display state are distinct from model edits.
+A permanent cut is a validated domain operation; its dependency on a roof must
+be decided before implementation. Saved views/documents/layouts retain the
+existing shared-model and annotation-scope contract. Common properties use
+capabilities without imposing every field on every element type.
+AI/Text/Voice use the same typed actions and revision-bound preview/acceptance.
+BIM scaling remains forbidden; existing allowed 2D and PDF/PNG/JPEG reference
+calibration is unchanged. No new renderer, language, storage technology or
+desktop packaging is selected by this planning update.
+
 ## Session-local wall extrusion reuse — 2026-10-08
 
 Prepared selection translation may retain one derived local extrusion per pinned

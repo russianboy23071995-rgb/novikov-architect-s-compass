@@ -1,3 +1,4 @@
+import { setSessionExtrusion } from "./extrusion-mode";
 import { tPairFixture } from "./t-pair-fixture";
 import { ManualRecorder } from "./ManualRecorder";
 import { recordManualReact } from "./manual-capture";
@@ -173,6 +174,7 @@ function stats() {
 export function Harness() {
   const [count, setCount] = useState(100),
     [selectedWalls, setSelectedWalls] = useState(20),
+    [reuseExtrusion, setReuseExtrusion] = useState(true),
     [images, setImages] = useState(false),
     [dense, setDense] = useState(false),
     [heldShift, setHeldShift] = useState(false),
@@ -272,6 +274,7 @@ export function Harness() {
     }
   }
   async function movement() {
+    setSessionExtrusion(reuseExtrusion);
     setStatus("Measuring active movement");
     await frame();
     try {
@@ -319,6 +322,7 @@ export function Harness() {
           dense,
           tPair,
           selectedWalls: tPair ? 2 : selectedWalls,
+          extrusionMode: reuseExtrusion ? "session" : "fresh",
           bytes: project ? new TextEncoder().encode(JSON.stringify(project)).length : 0,
           userAgent: navigator.userAgent,
           heap: m
@@ -415,6 +419,17 @@ export function Harness() {
               <option value={20}>20</option>
               <option value={100}>100</option>
               <option value={200}>200</option>
+            </select>
+          </label>
+          <label>
+            Extrusion{" "}
+            <select
+              aria-label="Extrusion mode"
+              value={reuseExtrusion ? "session" : "fresh"}
+              onChange={(e) => setReuseExtrusion(e.target.value === "session")}
+            >
+              <option value="fresh">Fresh baseline</option>
+              <option value="session">Session reuse</option>
             </select>
           </label>
           <button onClick={() => task(load)}>Load scenario</button>{" "}
