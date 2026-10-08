@@ -1,5 +1,23 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Diagnose-Konturvergleich abgesichert — 08.10.2026
+
+Der Konturfehler aus PR175 ist als Rückrechnungsproblem reproduziert: Der
+SVG-Körperversatz verändert beim Zurückrechnen die letzten Gleitkommastellen.
+Der reine Diagnosevergleich prüft Struktur exakt und Zahlen mit absolut 1e-12;
+Produktgeometrie und Modellvalidierung bleiben unverändert. Vier Regressionstests
+verhindern, dass echte Abweichungen, falsche Topologie oder fehlende Geometrie
+übersehen werden. 648 Tests, beide Typprüfungen, Build/Lint erfolgreich;
+der Browserparcours mit Shift-Auto-Repeat und Vollpfadvergleich besteht.
+[Nachweis und Einschränkungen](docs/performance/SHIFT_REPEAT_INPUT.md).
+Das praktische sporadische Ruckeln ist noch nicht vollständig abgenommen.
+
+**Genau ein nächster ausführbarer Auftrag:** Vorbereitung und Bestätigung der
+Auswahlbewegung getrennt profilieren und die doppelte Materialisierung bei
+validate/commit in eine gemeinsame atomare Bestätigung überführen. Vollständige
+Modellprüfung, Kontextschutz, Vollpfadvergleich und genau ein Undo erhalten.
+Keine pauschale Migration anderer Werkzeugvorschauen.
+
 ## Aktueller Stand: Shift-Auto-Repeat abgefangen — 08.10.2026
 
 PR174 ist zusammengeführt (main f5100cd). Die gespeicherte Nutzeraufnahme zeigt

@@ -68,3 +68,32 @@ Den einmaligen Konturvergleich mit der erweiterten Fehlermeldung gezielt
 wiederholen und aufklären, dann die reale Shift-Bewegung praktisch abnehmen.
 Erst danach die atomare Bestätigung fortsetzen. Kein Rendererwechsel und keine
 pauschale Übertragung auf weitere Vorschauaktionen.
+
+## Klärung des Konturvergleichs — 08.10.2026
+
+Der Fehlertyp ist deterministisch reproduziert: Bewegung um (4/137, -4/137)
+mit 0,18 m Körperversatz. Rücklesen aus dem SVG-Körpertransform ergibt für y
+-0,029197080291970795 statt -0,029197080291970802. Der vollständige Modellpfad
+liefert deshalb unter anderem -0,17999999999999997 statt -0,18000000000000002
+in der lokalen Kontur. Dies reproduziert die vorherige Textvergleichsmeldung
+allein durch Rückrechnung, ohne eine Änderung des Produktmodells. Der erste
+historische Fehler hatte keine Werte gespeichert; seine konkreten Werte lassen
+sich nachträglich nicht behaupten.
+
+Der Diagnosevergleich behält SVG-Befehle, Reihenfolge, Anzahl und vollständige
+Konturen bei; Zahlen werden mit absolut 1e-12 verglichen (für Koordinaten Meter).
+Keine relative Toleranz, die mit großen Koordinaten wächst. Fehlende Geometrie,
+NaN/Infinity, andere Topologie und reale Abweichungen werden weiterhin abgewiesen.
+Produktvalidierung und Geometrietoleranzen sind unverändert.
+Vier Regressionstests decken Rundungsreproduktion, echte Verschiebungen,
+Topologie/fehlende Geometrie und nicht endliche Zahlen ab.
+Der Browserparcours besteht erneut einschließlich Vollpfadvergleich, Repeat,
+Shift/Tab, Abbruch, Platzierung und ein Undo/Redo (verified-comparator.json).
+648 Tests, beide Typprüfungen, Lint (0 Fehler/6 bestehende Warnungen) und Build
+bestanden. Die Diagnoseblockade ist damit behoben. Nutzer-Ruckeln bleibt bis zur
+praktischen Abnahme als nicht vollständig behoben gekennzeichnet.
+
+Nächster Auftrag nach Übernahme: Vorbereitung und Bestätigung der Auswahlbewegung
+getrennt profilieren; danach doppelte Materialisierung zwischen validate/commit
+über eine gemeinsame atomare Bestätigung vermeiden. Kontextschutz, vollständige
+Prüfung am History-Übergang und genau ein Undo bleiben verbindlich.
