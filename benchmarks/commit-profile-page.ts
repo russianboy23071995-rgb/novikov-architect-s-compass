@@ -9,7 +9,7 @@ import {
 } from "../src/lib/bim/history";
 import { assertProjectFileSize } from "../src/interop/project-file/size";
 import type { Project } from "../src/lib/bim/model";
-// Diagnostic mirror of commitProject; checked against the public function on every sample.
+// Retained pre-K05b JSON baseline; checked against the public function on every sample.
 function profile(history: ProjectHistory, project: Project) {
   const phases: Record<string, number> = {};
   const measure = <T>(key: string, fn: () => T): T => {
@@ -84,9 +84,17 @@ button.onclick = async () => {
           const t = performance.now();
           actual = commitProject(h, target);
           elapsed = performance.now() - t;
-          observed = profile(h, target);
+          {
+            const start = performance.now();
+            observed = profile(h, target);
+            observed.phases["baselineCommit"] = performance.now() - start;
+          }
         } else {
-          observed = profile(h, target);
+          {
+            const start = performance.now();
+            observed = profile(h, target);
+            observed.phases["baselineCommit"] = performance.now() - start;
+          }
           const t = performance.now();
           actual = commitProject(h, target);
           elapsed = performance.now() - t;

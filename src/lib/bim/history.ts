@@ -1,3 +1,4 @@
+import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { assertProjectFileSize } from "../../interop/project-file/size.ts";
 import { deserializeProject, serializeProject, validateProject } from "./model.ts";
 import type { Project } from "./model.ts";
@@ -14,10 +15,7 @@ export function commitProject(history: ProjectHistory, project: Project): Projec
   const nextJson = JSON.stringify(next);
   assertProjectFileSize(nextJson);
   if (nextJson === serializeProject(history.present)) return history;
-  const { bimVisibility: previousVisibility, ...previousModel } = history.present;
-  const { bimVisibility: nextVisibility, ...nextModel } = next;
-  if (JSON.stringify(previousModel) === JSON.stringify(nextModel))
-    return { ...history, present: next };
+  if (sameProjectModel(history.present, next)) return { ...history, present: next };
   return {
     past: [...history.past, history.present].slice(-HISTORY_LIMIT),
     present: next,

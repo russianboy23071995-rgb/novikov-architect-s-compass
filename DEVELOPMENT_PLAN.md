@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K05b strukturierter Modellvergleich — 08.10.2026
+
+PR185 nach gruener CI zusammengefuehrt (main 2a98213). Zwei weitere JSON-
+Serialisierungen durch gemeinsamen strukturierten Modellvergleich ersetzt;
+Vollpruefungen, erste Serialisierungen, Groessenlimit und History erhalten.
+670 Tests, beide Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+Alle 60 Browserfaelle stimmen mit JSON-Baseline ueberein; Modell-Commit Median
+54,75 auf 45,55 ms, No-op unveraendert. [Nachweis](docs/performance/MODEL_COMPARISON.md).
+
+**Genau ein naechster Auftrag: K04a Wandendpunkt-Vorschau vermessen.** Freie und
+T-verbundene Wand mit Fenstern bei 100/1.000 Elementen; Vorbereitung, Pointer und
+Bestaetigung getrennt, gemeinsame Fang-/Shift-Interaktion einbeziehen. Daraus einen
+begrenzten Anschluss an bestehende Vorschau-Infrastruktur ableiten. Kein neuer
+Renderer/Werkzeugumbau. Andere K-/V-Ziele bleiben; alte Folgeauftraege sind Historie.
+
+
 ## Aktueller Stand: K05a Commit-Phasen gemessen — 08.10.2026
 
 PR184 mit grüner CI zusammengeführt (main bf244dd). Isolierte Diagnose mit je
