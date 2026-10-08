@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04d Wandzeichnen vermessen — 08.10.2026
+
+PR189 nach gruener CI zusammengefuehrt. Acht Browser-API-Faelle mit je 20 Zielen:
+100/1.000 Elemente, erster/zweiter Abschnitt, ohne/mit Shift. Alle Vorschauen,
+Abschluesse und jeweils ein Ketten-Undo/Redo stimmen ueberein.
+Vorschau bei 1.000 Elementen Median rund 8 ms, Fang rund 0,1 ms. Kein separater
+Shift-Engpass belegt; keine Framezeitmessung. [Nachweis](docs/performance/WALL_DRAWING_PROFILE.md).
+
+**Genau ein naechster Auftrag: K04e isolierter vorbereiteter Pilot fuer den ersten
+freien Wandabschnitt.** Bestehende Fachregeln, Vergleich gegen Vollpfad,
+konservativer Fallback bei Anschlusskandidaten/ungeprueften Bedingungen.
+Noch keine produktive Anbindung oder Ketten-Ausweitung. Bestaetigung bleibt
+vollstaendig geprueft, ein Undo. Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben.
+
+
 ## Aktueller Stand: K04c gemeinsame Endpunkt-Vorschau — 08.10.2026
 
 PR188 nach gruener CI zusammengefuehrt. Der begrenzte T-Hauptwand-Pilot liegt
