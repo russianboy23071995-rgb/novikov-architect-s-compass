@@ -13,10 +13,13 @@ Wandabnahme praktisch offen. Abnahme: Wand zweimal rechts anklicken, Werte
 pruefen/aendern, freie Kette mit zwei Abschnitten zeichnen/abschliessen, Undo:
 gesamte neue Kette weg, Quelle bleibt bestehen.
 
-**Genau ein naechster Auftrag: V06f die gemeinsame Doppelt-Rechtsklick-Geste
-an 3D-Wand-/Fenster-Picking anbinden.** Bestehenden Picking-Service und denselben
-Application-Adapter nutzen. Stabile sichtbare IDs, keine Gesture pro Elementtyp.
-Praktische 2D-Abnahme vorher nachholen.
+Nutzerentscheidung vom 08.10.2026: Keine Vorgabenuebernahme in 3D erforderlich.
+Der vorgeschlagene V06f-3D-Auftrag entfaellt ausdruecklich.
+
+**Genau ein naechster Auftrag: praktische 2D-Abnahme der gemeinsamen
+Vorgabenuebernahme fuer Schraffur, Fenster, Linie/Polylinie und Wand nachholen.**
+Funktionierende Browser-Steuerung vorausgesetzt; Werte/Ebene, Werkzeugwechsel,
+Erstellung und Undo pruefen. Kein neuer Funktionsumfang in diesem Auftrag.
 
 
 

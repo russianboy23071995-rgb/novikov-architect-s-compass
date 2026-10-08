@@ -18,7 +18,8 @@ mode is retained; source vertices and identity are excluded. Wall pickup (2D) no
 shares that boundary for thickness, height, body offset and layer. These defaults
 are owned and pinned when a chain begins, feeding both prepared and full preview
 paths and final creation; source joins/windows/endpoints are excluded.
-Other adapters and 3D gesture integration remain future work.
+Other element adapters remain future work. The user explicitly excluded 3D
+pickup on 2026-10-08: tool-default pickup is a 2D-only workflow.
 [Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
 ## Shared stable 3D picking service - 2026-10-08
