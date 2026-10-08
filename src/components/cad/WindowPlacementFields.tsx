@@ -1,3 +1,4 @@
+import type { Project } from "@/domain/project/schema";
 import type { WindowDimensionDraft } from "@/application/drawing/window-placement";
 import { Input } from "@/components/ui/input";
 
@@ -7,6 +8,7 @@ const fields = [
   ["sillHeight", "Brüstungshöhe (m)"],
 ] as const;
 export function WindowPlacementFields({
+  layers,
   value,
   onChange,
   error,
@@ -14,6 +16,7 @@ export function WindowPlacementFields({
   onPrecision,
   pickingHost,
 }: {
+  layers: Project["layers"];
   value: WindowDimensionDraft;
   onChange: (value: WindowDimensionDraft) => void;
   error: string;
@@ -34,6 +37,21 @@ export function WindowPlacementFields({
           />
         </label>
       ))}
+      <label className="text-xs">
+        Ebene
+        <select
+          aria-label="Fenster-Zielebene"
+          className="block h-8 rounded border bg-background"
+          value={value.layerId}
+          onChange={(event) => onChange({ ...value, layerId: event.target.value })}
+        >
+          {layers.map((layer) => (
+            <option key={layer.id} value={layer.id}>
+              {layer.name}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="text-xs">
         <input
           type="checkbox"

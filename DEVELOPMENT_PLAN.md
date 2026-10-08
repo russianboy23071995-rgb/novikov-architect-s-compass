@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## V06c: Fenstervorgaben ueber gemeinsame Uebernahme - 08.10.2026
+
+PR210 nach gruener CI zusammengefuehrt. Doppelt-Rechtsklick im Grundriss
+uebernimmt Fensterbreite, Hoehe, Bruestung und Ebene; keine Host-ID/Position.
+Gemeinsamer Vorgabenhook, keine weitere Gestenerkennung. Zielebene vor Platzierung
+editierbar und auf Existenz/Sichtbarkeit geprueft. 717 Tests, Typecheck, gezielter
+Lint und Build bestanden. Browser: 0,80 m/Innenwand uebernommen, neues Fenster
+mit eigener ID/Position gesetzt; Undo entfernt nur dieses Fenster.
+
+**Genau ein naechster Auftrag: V06d Linienvorgaben an denselben Adapter anbinden.**
+Farbe, Strichstaerke, Strichart und Ebene uebernehmen; keine Punkte/IDs.
+Bestehende Linien-Erstellungsaktion und History verwenden.
+
+
+
 ## V06b: gemeinsame Vorgabenuebernahme, Pilot Schraffur - 08.10.2026
 
 Neue Nutzerpraezisierung ersetzt V06a: ausschliesslich Doppelt-Rechtsklick,
