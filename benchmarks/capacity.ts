@@ -89,7 +89,7 @@ function chainFixture() {
   }
   return validateProject(p);
 }
-async function sourceFile(index: number) {
+export async function sourceFile(index: number) {
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   const ctx = c.getContext("2d")!,

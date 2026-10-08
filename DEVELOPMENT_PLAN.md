@@ -1,5 +1,24 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K02 Modell-/Assetvertrag geprüft — 08.10.2026
+
+PR181 nach grüner CI unverändert zusammengeführt (main 629c7c8). Isolierter
+Vertragsprototyp: stabile Asset-IDs, gemeinsame unveränderliche Payloads,
+Version/Hash/Budgets, portable Speicherung und Altdatei-Roundtrip. Keine Änderung
+am produktiven Modell-/Dateiformat. [Messung und Grenzen](docs/performance/MODEL_ASSET_CONTRACT.md).
+Mit K03-Fixture 156 KB Manifest statt 3,75 MB Projekt; vier logische Assets nutzen
+drei Payloads. Kaltes Split/Unpack ist teuer. Serialisierungsgewinn ist noch kein
+Action-/Commit- oder physischer Speichergewinn.
+
+**Genau ein nächster Auftrag: K02b validierte Asset-Handles am gemeinsamen
+Application-Prüfpfad als isolierter Linienfarben-Pilot.** Unveränderliche Payloads
+nur bei vertrauenswürdigem identischem Handle wiederverwenden; komplette Modell-
+und Referenzprüfung sowie Undo/Redo erhalten. Mit Vollprüfpfad bei drei Bildern
+und 1/10/50/100 Änderungen vergleichen, einschließlich manipuliertem Inhalt.
+Kein Produktformatwechsel. Details und Abnahme im verlinkten Vertrag.
+Ältere nächste-Auftrag-Abschnitte sind Historie; K-/V-Wünsche bleiben erhalten.
+
+
 ## Aktueller Stand: K03 erste Kapazitäts-Baseline — 08.10.2026
 
 PR180 nach grüner CI zusammengeführt (main d3c228c). Reproduzierbare Browserdiagnose

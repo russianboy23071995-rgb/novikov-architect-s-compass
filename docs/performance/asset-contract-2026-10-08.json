@@ -1,0 +1,49 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "fixture": "K03 capacityFixture(1000) + same three sourceFile PNG/JPEG imports",
+  "roundtrip": true,
+  "splitMs": 552,
+  "packMs": 136.59999999403954,
+  "unpackMs": 621.1999999880791,
+  "legacyBytes": 3754947,
+  "packageBytes": 3755496,
+  "manifestBytes": 156022,
+  "payloadChars": 3598940,
+  "duplicate": {
+    "logicalAssets": 4,
+    "uniquePayloads": 3,
+    "legacyBytes": 4958705,
+    "packageBytes": 3755743
+  },
+  "snapshots": [
+    {
+      "count": 1,
+      "oldBytes": 3754964,
+      "modelBytes": 156039,
+      "oldMs": 9.900000005960464,
+      "modelMs": 0.9000000059604645
+    },
+    {
+      "count": 10,
+      "oldBytes": 37549640,
+      "modelBytes": 1560390,
+      "oldMs": 107.09999999403954,
+      "modelMs": 12.5
+    },
+    {
+      "count": 50,
+      "oldBytes": 187748240,
+      "modelBytes": 7801990,
+      "oldMs": 588.5,
+      "modelMs": 53.20000001788139
+    },
+    {
+      "count": 100,
+      "oldBytes": 375496490,
+      "modelBytes": 15603990,
+      "oldMs": 1151.0999999940395,
+      "modelMs": 99.09999999403954
+    }
+  ],
+  "scope": "Serialization only; no action/commit speedup or physical heap claim"
+}
