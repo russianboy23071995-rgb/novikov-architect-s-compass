@@ -1,3 +1,20 @@
+## Einheitliche schwebende Fenster - 08.10.2026
+
+PR216 nach grüner GitHub-CI zusammengeführt. Nutzer bestimmt Ebenenfenster als
+Vorlage aller CAD-Fenster: verschiebbar, kein abgedunkelter Hintergrund, Glass Flow.
+Gemeinsame FloatingPanel-Hülle aus der Ebenenpalette extrahiert; Ebene, Linien
+Creator, Schraffurverwaltung, Canvas-Einstellungen, Anschlussvorschau und
+Projektladebestätigung angebunden. Pointer-/Pfeiltastenverschiebung, Randbegrenzung,
+Schließen/Escape gemeinsam; lange Inhalte scrollbar. Keine neue Modellaktion.
+726 Tests, Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen), Build.
+Browserprüfung erneut durch Sandbox-Startfehler blockiert. Abnahme: Creator öffnen,
+Kopfzeile ziehen, Canvas außerhalb bedienen, schließen; Ebenen/Canvas-Einstellungen
+gegenprüfen. Kein Overlay und kein erzwungener Fokus im Fenster.
+
+**Genau ein nächster Auftrag: eigene Linienarten ans Linienwerkzeug anbinden.**
+Stabile Referenzen/portable Definitionen und Migration, Rendering, Vorgabenübernahme,
+Speichern/Laden prüfen; Maßbezug und Löschen verwendeter Arten davor festlegen.
+
 ## Linien Creator getrennt von Schraffuren - 08.10.2026
 
 Nutzer präzisiert: eigenständiger Tools-Eintrag Linien Creator für Linienarten,

@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { appendPatternLine, resizePatternCell } from "@/application/hatches/pattern-draft";
@@ -64,21 +64,23 @@ export function HatchPatternCreator({
     }).point;
   };
   return (
-    <Dialog
+    <FloatingPanel
       open={open}
-      onOpenChange={(value) => {
+      title="Schraffurenverwaltung · Muster-Creator"
+      width={900}
+      height={650}
+      onClose={() => {
         setStart(null);
         setCursor(null);
         direction.current = null;
-        onOpenChange(value);
+        onOpenChange(false);
       }}
     >
-      <DialogContent className="glass-panel-strong max-w-4xl max-h-[90vh] overflow-auto">
-        <DialogTitle>Schraffurenverwaltung · Muster-Creator</DialogTitle>
-        <DialogDescription>
+      <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
+        <p className="text-xs text-muted-foreground">
           Lokaler Entwurf in Metern. Zwei Klicks zeichnen eine Linie; Shift hält die Richtung. Noch
           keine Speicherung oder Anwendung auf Projektkonturen.
-        </DialogDescription>
+        </p>
         <div className="flex flex-wrap items-end gap-3">
           {(["width", "height"] as const).map((key) => (
             <label key={key} className="text-xs">
@@ -270,7 +272,7 @@ export function HatchPatternCreator({
             {error}
           </p>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </FloatingPanel>
   );
 }
