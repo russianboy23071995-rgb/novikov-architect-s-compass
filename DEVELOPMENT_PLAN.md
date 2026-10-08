@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07b Kameramatrix-Pilot geprueft - 08.10.2026
+
+PR199 nach gruener CI zusammengefuehrt. Isolierter WebGL-Pilot mit einmaligem
+Geometriepuffer, gemeinsamer Projektionsmatrix. 180 Bildvergleiche bestanden,
+maximal zwei abweichende Pixel. 695 Tests, Typecheck, Lint und Build bestanden.
+500 Waende / eine Ansicht: CPU-Draw 72,3 ms versus nahe Timeraufloesung 0,1 ms.
+Kein GPU-/Framezeitnachweis, noch keine Produktumstellung.
+[Nachweis und Grenzen](docs/performance/SOLID_MATRIX_PILOT.md).
+
+**Genau ein naechster Auftrag: K07c Pilot-Lebenszyklus absichern.** Geometrie/
+Sichtbarkeit, Auswahlmarkierung, Resize und Context-Verlust/Wiederherstellung
+gegen Referenz pruefen; danach Produktanbindung entscheiden. Picking unveraendert.
+Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K07a 3D-Kamera und Picking vermessen - 08.10.2026
 
 PR198 nach gruener CI zusammengefuehrt. Diagnose des bestehenden Renderers:
