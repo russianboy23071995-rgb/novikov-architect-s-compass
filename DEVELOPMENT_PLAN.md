@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07g gemeinsamer 3D-Trefferdienst angebunden - 08.10.2026
+
+PR204 nach gruener CI zusammengefuehrt. Weltindex wird kooperativ vorbereitet,
+bei Kamerawechsel weiterverwendet und bei Geometriewechsel verworfen.
+700 Tests, 180 Browservergleiche, Typecheck/Lint/Build bestanden; direkte Canvas-
+Auswahl von Wand und Fenster geprueft. 500 Waende: groesster gemessener Schritt
+4,3 ms, Bereitschaft nach ca. 1 s; bis dahin Vollscan. Keine Gesamt-FPS-Zusage.
+[Nachweis und Grenzen](docs/performance/SHARED_SOLID_PICKING.md).
+
+**Genau ein naechster Auftrag: V01a temporaeres Punkt-zu-Punkt-Messen in 2D.**
+Vorhandene gemeinsame Fang-/Interaktionsinfrastruktur verwenden, Distanz in Metern
+anzeigen, ohne Modellkopie oder Undo-Eintrag. Escape/Ansichtswechsel beenden die
+Messung. Tests fuer genaue Punkte, Zoom und Abbruch; Flaechen/Winkel und dauerhafte
+Massketten bleiben spaeter. Gemaess Abstimmung ist dieser kleine Produktfortschritt
+jetzt sinnvoll; offene K-/V-Ziele und Leistungsgrenzen bleiben erhalten.
+
+
 ## Aktueller Stand: K07f Weltindex-Gegenpilot bestanden - 08.10.2026
 
 PR203 nach gruener CI zusammengefuehrt. Ein Modellindex uebersteht Kamerawechsel:

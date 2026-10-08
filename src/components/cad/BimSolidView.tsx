@@ -1,7 +1,7 @@
+import { useSolidPicking } from "./useSolidPicking";
 import {
   windowSelectionSurfaces,
   windowSelectionEdges,
-  pickSolidElement,
 } from "@/rendering/viewport/window-selection";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
@@ -186,6 +186,11 @@ export function BimSolidView({
   const windowSurfaces = useMemo(
     () => windowSelectionSurfaces(previewProject, (id) => isLayerVisible(project, visibility, id)),
     [previewProject, project, visibility],
+  );
+  const pickDisplayed = useSolidPicking(
+    solid,
+    windowSurfaces,
+    !editSession && previewProject === project && !cornerPreview,
   );
   const selectedWindows = useMemo(
     () =>
@@ -505,13 +510,7 @@ export function BimSolidView({
               return;
             }
             const point = projection.toNdc({ x: event.clientX, y: event.clientY });
-            const hit = pickSolidElement(
-              solid,
-              windowSurfaces,
-              projection.project,
-              point.x,
-              point.y,
-            );
+            const hit = pickDisplayed(projection, point.x, point.y);
             onSelect(
               hit,
               { x: event.clientX, y: event.clientY },

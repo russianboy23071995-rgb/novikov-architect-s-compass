@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## Shared stable 3D picking service - 2026-10-08
+
+The rendering/viewport world index is derived disposable data bound to immutable
+visible surface/window identities. Camera and selection changes reuse it. The
+React adapter owns cancellation and lifetime only. Cooperative preparation must
+retain the existing full scan until ready; previews and identity mismatches use
+that same fallback. Displayed-projection validity and footpoint priority remain
+with BimSolidView. No second editable model or per-tool picking implementation.
+See [evidence and limits](docs/performance/SHARED_SOLID_PICKING.md).
+
+
 ## Persistent 3D display buffers - 2026-10-08
 
 BimSolidView delegates GPU resources to rendering/viewport/solid-renderer.
