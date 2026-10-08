@@ -956,11 +956,18 @@ noch keinen spuerbaren Browser-Engpass.
 - [ ] **A-06 Projektgröße und Bildspeicherung entscheiden.** Die aktuelle
   10-MiB-Dateigrenze, eingebettete Base64-Bildreferenzen und das
   16-Megapixel-Pixelbudget anhand realistischer Projekte und A-01 bewerten.
-  Erst dann eine tragfähige Grenze beziehungsweise ein Asset-/Paketformat
-  festlegen. **Abnahme:** Import, Speichern, Öffnen und Weitergabe
-  funktionieren mit dokumentierten Grenzen; Browser sowie eine spätere
-  Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik. PDF-Import ist
-  eine eigene künftige Funktion.
+  Bilddateien sollen künftig wahlweise als externe Referenz verknüpft werden
+  können; eingebettete Referenzen und vorhandene Schema-9-Projekte bleiben
+  nutzbar. Logische Asset-/Referenz-IDs und ihre Platzierung dürfen nicht vom
+  Dateipfad abhängen. Fehlende oder verschobene Dateien müssen erkennbar und
+  gezielt neu verknüpfbar sein. Für die vollständige Weitergabe muss ein
+  portables Projektpaket die benötigten Referenzdateien mitnehmen.
+  Speicherformat, Auflösung von Dateipfaden, Budgets und Grenzen erst nach
+  Messungen an realistischen Projekten festlegen; das 10-MiB-Limit nicht
+  pauschal erhöhen. **Abnahme:** Import, Speichern, Öffnen, Wiederverknüpfen
+  und Weitergabe funktionieren mit dokumentierten Grenzen; Browser sowie
+  eine spätere Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik und
+  getrennte Dateizugriffsadapter. PDF-Import ist eine eigene künftige Funktion.
 - [ ] **A-07 Große UI-Module schrittweise entlasten.** `CadWorkspace`
   (rund 1.200 Zeilen) und `BimPlan` (rund 1.460 Zeilen) bei konkreten
   Änderungen in kleine Verantwortlichkeiten schneiden; Geometrie und
