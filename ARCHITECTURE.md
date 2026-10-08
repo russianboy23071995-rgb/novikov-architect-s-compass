@@ -6,7 +6,8 @@ The shared asset schema may preserve an asset only when its exact object identit
 was registered after full storage validation and freezing of an owned copy.
 Caller IDs, hashes, frozen flags and deserialized/cloned objects confer no trust.
 All project geometry/reference checks and file-size/undo rules remain mandatory.
-Only diagnostics currently issue these handles; product ingress adoption is K02c.
+PNG/JPEG import and schema-9 project loading now issue fresh handles (K02c).
+File storage validation is not a claim of full image decoding at project load.
 See [pilot evidence and limits](docs/performance/VALIDATED_ASSET_HANDLES.md).
 
 

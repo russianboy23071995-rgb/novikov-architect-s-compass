@@ -72,7 +72,8 @@ button.onclick = async () => {
       };
       return { createMs, actionMs: stats(actions), commitMs: stats(commits), checkpoints };
     }
-    const full = await run(project, "full");
+    // Production import now returns handles; clone explicitly for the control path.
+    const full = await run(structuredClone(project), "full");
     const t = performance.now();
     const pinned = { ...project, assets: project.assets.map(createImageAssetHandle) };
     const pinMs = performance.now() - t;

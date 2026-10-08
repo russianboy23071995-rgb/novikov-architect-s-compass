@@ -1,0 +1,15 @@
+{
+  "importedImages": 3,
+  "lineAndWallEdits": true,
+  "undoRedo": true,
+  "roundtrip": true,
+  "newLoadedIdentity": true,
+  "sharedAcrossEdits": true,
+  "corruptStorageRejected": true,
+  "rendered": [
+    512,
+    512
+  ],
+  "schemaVersion": 9,
+  "fileBytes": 3755091
+}

@@ -25,7 +25,7 @@ const storageAssetSchema = z
   .strict()
   .refine((a) => a.pixelWidth * a.pixelHeight <= 16_000_000, "Image pixel budget exceeded");
 // Identity is the capability: no caller-supplied ID/hash/frozen flag is trusted.
-// Only the diagnostic pilot currently creates handles. Ordinary parses still copy.
+// Import/load boundaries create handles. Ordinary untrusted parses still copy.
 const verifiedAssets = new WeakSet<object>();
 export const imageAssetSchema = z.union([
   z.custom<z.infer<typeof storageAssetSchema>>(
