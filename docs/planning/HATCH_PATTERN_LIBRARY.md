@@ -1,0 +1,61 @@
+# V07a Schraffurverwaltung und Linien-Creator
+
+Stand 08.10.2026. Abgleich und begrenzter Folgeauftrag; noch keine neue Bedienfunktion.
+Nutzer bestaetigt die praktische V06-2D-Abnahme. PR213 ist zusammengefuehrt.
+
+## Bestaetigte Anforderungen
+
+Tools > Schraffurenverwaltung. Vorhandene Muster als Liste mit kleiner Vorschau.
+Von dort zum Schraffurcreator: Muster selbst mit Linien zeichnen, anlegen und
+als Raster wiederholen. Musterdateien hochladen. Uploadformat noch offen:
+Nutzer recherchiert; PAT/SVG/PNG/JPEG sind keine getroffene Formatentscheidung.
+Aeltere Wuensche nach Mauerwerk, Farbe/Deckkraft, Hintergrund, Kontur, vier
+Erstellungsarten und eigener Ebenenzuordnung bleiben gueltig.
+
+## Bestand und Architektur
+
+Hatch ist heute eine geschlossene 2D-Kontur mit Fill, Hintergrund, Kontur und Ebene.
+Es gibt noch keine Musterdefinitionen oder Referenzen darauf. Tools ist im Toolbar
+noch kein Verwaltungsmenue. Bestehende Zeichen-/Fangdienste und validierte Aktionen
+werden wiederverwendet. Die 2D-Uebernahme bleibt der gemeinsame Vorgabenadapter.
+
+Verbindlich: Musterdefinition und Musteranwendung sind unterschiedliche Daten.
+Eine Definition enthaelt stabile ID, Namen und Liniengeometrie in einer lokalen
+Wiederholungszelle. Eine Anwendung bleibt die vorhandene Schraffurkontur; sie
+referenziert ein Muster. Renderer erzeugt die geklippten Wiederholungen daraus,
+keine tausend kopierten Modelllinien. Musterduplikate erhalten neue IDs. Creator-
+Vorschau und Entwurf sind transient; Speichern/Anwenden gehen durch Application.
+Keine Musterberechnung oder Modellmutation ausschliesslich in React.
+Import spaeter ueber Interop-Adapter in denselben validierten Definitionsvertrag.
+AI/Text/Voice spaeter ueber dieselben Aktionen mit stabilem Zielkontext.
+
+Vorschlag fuer den ersten Creator: rechteckige positive Wiederholungszelle,
+Liniensegmente in lokalen Metern, Vorschau eines begrenzten 3x3-Rasters.
+Interne Meter sind gesetzt; sichtbare Musterabstaende in Modell- oder Papiermass
+und spaetere Skalierung benoetigen eine ausdrueckliche Festlegung. Noch keine
+Entscheidung ueber globale Bibliothek versus projektgebundene Bibliothek,
+assoziatives Aendern aller Anwendungen, Importformate oder endlose Linienfamilien.
+Vorerst kein neues Projektdateiformat ohne geprueften Migrationsauftrag.
+
+## Genau ein naechster Auftrag: V07b Linien-Creator als Entwurf
+
+Unter Tools > Schraffurenverwaltung einen funktionierenden Einstieg zum Creator
+bauen. Einen rechteckigen lokalen Linienmuster-Entwurf zeichnen und unmittelbar
+mit einer 3x3-Wiederholung pruefen. Gemeinsame Punkt-/Fanggeometrie verwenden;
+separater Entwurfskontext ohne BIM-Auswahl oder BIM-Modellkopie. Zellenmasse und
+Linien validieren (endlich, positive Zelle, keine Nullsegmente, begrenzte Menge).
+Werkzeugeigenschaften im vorhandenen UI-Konzept behalten. Keine inaktive Upload-
+Schaltflaeche als vorgetaeuschte Funktion. Import bleibt bis Formatentscheidung offen.
+
+Dieser erste Auftrag demonstriert den Creator; permanente Bibliothek, Bearbeiten
+bestehender Definitionen und Fuellen einer Projektkontur folgen im naechsten
+abgegrenzten Auftrag nach Bibliotheks-/Einheitenentscheidung. Keine Zusage einer
+vollstaendigen Bibliothek oder Dateimigration durch diesen Entwurf.
+Abnahme: zwei Linien zeichnen, Zelle aendern, Wiederholung ansehen, letzte Linie
+im Entwurf rueckgaengig, abbrechen: BIM-Modell und dessen Undo bleiben unveraendert.
+Geometrie-/Grenztests, Typecheck/Build und praktische Browser-Abnahme.
+
+## Pruefung dieses Abgleichs
+
+Guide Etappe 5, V07 und Quelltext abgeglichen. Reine Dokumentationsaenderung;
+Diff-Pruefung, keine erneut ausgefuehrten Produktions-Tests oder Builds.
