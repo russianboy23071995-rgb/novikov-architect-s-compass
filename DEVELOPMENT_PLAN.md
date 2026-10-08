@@ -1,5 +1,28 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K03 erste Kapazitäts-Baseline — 08.10.2026
+
+PR180 nach grüner CI zusammengeführt (main d3c228c). Reproduzierbare Browserdiagnose
+für 100/1.000/5.000 Elemente, 200.000 Punkte, 100 verbundene Wände und drei PNG/JPEG-
+Referenzen ergänzt. 1/10/50/100 History-Stände, Import/Platzierung/Commit,
+Speichern/Laden, IFC und 2D/3D-Aufbau erfasst. Nur Diagnose und Dokumentation geändert.
+656 Tests, Types/Build/Lint bestanden.
+[Befunde, Rohdaten und Messgrenzen](docs/performance/CAPACITY_BASELINE.md).
+
+JPEG→PNG/Base64 wächst im Test stark; Referenzserie scheitert an Gesamtdateigrenze.
+Mit drei Bildern kosten kleine Änderungen inklusive History mehrere hundert ms.
+Heapwerte sind Stichproben, kein Peak-/GPU-Nachweis; keine allgemeine Großprojekt-
+Freigabe. Zusammenhängender 100-Wand-Zug bestätigt 100 betroffene Wände bei Einzel-
+bewegung. Reale Großpläne/3D-Navigation/Spitzenspeicher bleiben zu prüfen.
+
+**Genau ein nächster ausführbarer Auftrag: K02 Modell-/Assetvertrag und isolierter
+Vergleichsprototyp.** Unveränderliche Bilddaten, stabile Referenzen/History,
+Inhaltsduplikate, portable Speicherung, Altdateimigration und separate Budgets mit
+denselben Fixtures prüfen. Vorschlag und verbindliche Entscheidung trennen. Noch
+kein Produktdateiformat umstellen, kein größeres Limit oder Delta-History-Umbau.
+Aus dem Nachweis genau einen Migrationsschritt ableiten. Übrige K-/V-Anforderungen
+und die kleine Shift-Diagnose bleiben erhalten.
+
 ## Aktueller Stand: K01 Großpunkt-Absturz behoben — 08.10.2026
 
 Übergabe aus Systemarchitektur planen übernommen; PR179 inklusive V01–V09 und
