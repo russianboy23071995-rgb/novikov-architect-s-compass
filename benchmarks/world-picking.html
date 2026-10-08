@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><title>3D Picking Pilot</title
+  ><style>
+    body {
+      font: 15px system-ui;
+      padding: 24px;
+      background: #eef1f3;
+    }
+    td {
+      padding: 8px 16px;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+  </style>
+  <h1>3D Trefferauswahl: Pilot gegen Vollscan</h1>
+  <p>
+    Ein Index pro Modellzustand, bleibt bei Kamerawechsel erhalten. Noch keine Produktanbindung.
+  </p>
+  <button id="run">Vergleich starten</button>
+  <div id="summary"></div>
+  <pre id="report">Bereit</pre>
+  <script type="module" src="./world-picking-page.ts"></script>
+</html>
