@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K06b Kettenendwand-Pilot — 08.10.2026
+
+PR195 nach gruener CI zusammengefuehrt. Nach einmalig vorbereitetem geloesten
+Anschluss kann dieselbe prepareTranslation eine statt aller Waende berechnen.
+692 Tests und 60 Browservergleiche bestanden. Bei 100 Waenden Median 4,30 ms
+auf unter Timeraufloesung 0,1 ms; Pilotvorbereitung 68,6 ms. Nicht produktiv.
+[Nachweis und Grenzen](docs/performance/PREPARED_CHAIN_MOVE.md).
+
+**Genau ein naechster Auftrag: K06c in bestehende Bewegungsvorbereitung
+integrieren.** Gemeinsame Basispruefung statt doppelter Pilotvorbereitung,
+stationaeren/geaenderten Umfang sauber trennen; Ausgabe-/Renderervertrag,
+Kontext/Abbruch/Nullbewegung und ein Undo erhalten. Vorbereitung und Canvas
+pruefen. Keine pauschale T-/Gruppen-Ausweitung. Andere K-/V-Ziele bleiben.
+
+
 ## Aktueller Stand: K06a verbundene Wandgruppen vermessen — 08.10.2026
 
 PR194 nach gruener CI zusammengefuehrt. Eckketten/T-Gruppen mit 25/100 Waenden
