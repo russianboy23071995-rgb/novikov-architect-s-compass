@@ -37,11 +37,11 @@ import { cn } from "@/lib/utils";
 import type { ViewMode, ViewportLayout } from "./cad-types";
 
 const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
-  { id: "single", label: "Single View", cells: "â–£" },
-  { id: "horizontal", label: "2 Views Horizontal", cells: "â¬’" },
-  { id: "vertical", label: "2 Views Vertical", cells: "â—«" },
-  { id: "three", label: "3 Views", cells: "â–¦" },
-  { id: "four", label: "4 Views", cells: "ç”°" },
+  { id: "single", label: "Single View", cells: "▣" },
+  { id: "horizontal", label: "2 Views Horizontal", cells: "⬒" },
+  { id: "vertical", label: "2 Views Vertical", cells: "◫" },
+  { id: "three", label: "3 Views", cells: "▦" },
+  { id: "four", label: "4 Views", cells: "田" },
 ];
 
 type TopToolbarProps = {
@@ -130,9 +130,7 @@ export function TopToolbar(props: TopToolbarProps) {
             <div className="font-display text-[13px] font-semibold text-foreground">
               NOVIKOV <span className="font-normal text-primary">CAD</span>
             </div>
-            <div className="truncate text-[11px] text-muted-foreground">
-              BIM Project Â· Level 01
-            </div>
+            <div className="truncate text-[11px] text-muted-foreground">BIM Project · Level 01</div>
           </div>
         </div>
         <nav
@@ -166,7 +164,7 @@ export function TopToolbar(props: TopToolbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onSelect={props.onImportImage}>
-                    Bildreferenz importierenâ€¦
+                    Bildreferenz importieren…
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -183,7 +181,7 @@ export function TopToolbar(props: TopToolbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onSelect={props.onCanvasDisplay}>
-                    Canvas-Darstellungâ€¦
+                    Canvas-Darstellung…
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -235,7 +233,7 @@ export function TopToolbar(props: TopToolbarProps) {
             aria-label="Export IFC"
           >
             <Download className="size-4" />
-            {props.exportingIfc ? "Exportingâ€¦" : "IFC"}
+            {props.exportingIfc ? "Exporting…" : "IFC"}
           </Button>
         </div>
         <div
@@ -253,7 +251,7 @@ export function TopToolbar(props: TopToolbarProps) {
             </span>
           </div>
           <IconControl
-            label="AusgewÃ¤hlte Ebene unsichtbar stellen"
+            label="Ausgewählte Ebene unsichtbar stellen"
             disabled={!props.selectedLayer}
             onClick={() =>
               props.selectedLayer &&
@@ -286,7 +284,7 @@ export function TopToolbar(props: TopToolbarProps) {
           </IconControl>
           <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
           <IconControl
-            label="Ebenensichtbarkeit rÃ¼ckgÃ¤ngig"
+            label="Ebenensichtbarkeit rückgängig"
             disabled={!props.canUndoVisibility}
             onClick={() => props.onLayerVisibility({ kind: "undo" })}
           >
@@ -371,7 +369,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <div className="mx-1 h-5 w-px bg-border" />
           <IconControl
             label="NOVIKOV AI"
-            onClick={() => props.onAction("Lokale Modellbefehle: unten eingeben und prÃ¼fen")}
+            onClick={() => props.onAction("Lokale Modellbefehle: unten eingeben und prüfen")}
           >
             <Bot />
           </IconControl>
@@ -379,7 +377,7 @@ export function TopToolbar(props: TopToolbarProps) {
             label="Voice command"
             onClick={() =>
               props.onAction(
-                "Bauteil auswÃ¤hlen und Mikrofon in der Befehlsleiste starten, sofern vom Browser unterstÃ¼tzt",
+                "Bauteil auswählen und Mikrofon in der Befehlsleiste starten, sofern vom Browser unterstützt",
               )
             }
           >
