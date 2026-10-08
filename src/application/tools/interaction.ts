@@ -17,6 +17,8 @@ export type ToolInteraction = {
     evaluate: (point: Point2) => GeometryPreview;
   };
   previewProject?: (point: Point2, candidate?: SnapCandidate | null) => Project;
+  /** Optional atomic path: must validate current context and model before publishing. */
+  confirm?: (point: Point2, candidate?: SnapCandidate | null) => void;
   validate: (point: Point2, candidate?: SnapCandidate | null) => void;
   commit: (point: Point2, candidate?: SnapCandidate | null) => void;
   cancel: () => void;
@@ -41,6 +43,10 @@ export function confirmInteraction(
   point: Point2,
   candidate?: SnapCandidate | null,
 ): void {
+  if (tool.confirm) {
+    tool.confirm(point, candidate);
+    return;
+  }
   tool.validate(point, candidate);
   tool.commit(point, candidate);
 }
