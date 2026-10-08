@@ -127,6 +127,7 @@ export async function runMovementProfile(
   selectedCount = 20,
   bodyOffset = { x: 0, y: 0 },
   includeWindows = false,
+  repeatShift = false,
 ) {
   renderedBodyOffset = bodyOffset;
   takePreparations();
@@ -204,9 +205,30 @@ export async function runMovementProfile(
         );
       if (i) samples.push({ ...sample, input });
     }
+    // No pointer change: repeated modifier signals must not schedule rendering
+    // or change the already locked geometry. This checks the actual UI handlers.
+    let repeatOnly: MovementSample | null = null;
+    if (heldShift && repeatShift) {
+      await frame();
+      const locked = wallStart();
+      startMovementSample();
+      for (let i = 0; i < 12; i++) {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, repeat: true }),
+        );
+        await frame();
+      }
+      repeatOnly = finishMovementSample();
+      if (repeatOnly.reactCommits !== 0 || !same(wallStart(), locked))
+        throw new Error("Shift repeat changed the preview or scheduled React commits");
+    }
     const continuous = await continuousMovement((i) => {
       const point = worldOffset(100 + 60 * Math.sin(i / 12), -50 - 25 * Math.cos(i / 12));
       pointer("pointermove", point.x, point.y, heldShift);
+      if (heldShift && repeatShift)
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, repeat: true }),
+        );
     });
     if (!continuous.trace.previewStart || !same(wallStart(), continuous.trace.previewStart))
       throw new Error("Continuous input did not reach the latest preview");
@@ -282,6 +304,7 @@ export async function runMovementProfile(
     return {
       samples,
       continuous,
+      repeatOnly,
       preparationMs: takePreparations(),
       fullPathComparison: { preview: geometryPreview, commit: geometryCommit },
       acceptance: {
@@ -298,6 +321,7 @@ export async function runMovementProfile(
       },
       syntheticPointer: true,
       heldShift,
+      repeatShift,
       viewport,
     };
   } finally {

@@ -234,7 +234,7 @@ export function BimPlan({
         event.target.closest('[role="dialog"],[role="alertdialog"]')
       )
         return;
-      if (event.key === "Shift") setShiftHeld(event.type === "keydown");
+      if (event.key === "Shift" && !event.repeat) setShiftHeld(event.type === "keydown");
       if (event.key === "Escape" && event.type === "keydown") {
         setHover(null);
         setReferenceReset((value) => value + 1);

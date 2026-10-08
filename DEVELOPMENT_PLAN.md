@@ -1,5 +1,41 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Diagnose-Konturvergleich abgesichert — 08.10.2026
+
+Der Konturfehler aus PR175 ist als Rückrechnungsproblem reproduziert: Der
+SVG-Körperversatz verändert beim Zurückrechnen die letzten Gleitkommastellen.
+Der reine Diagnosevergleich prüft Struktur exakt und Zahlen mit absolut 1e-12;
+Produktgeometrie und Modellvalidierung bleiben unverändert. Vier Regressionstests
+verhindern, dass echte Abweichungen, falsche Topologie oder fehlende Geometrie
+übersehen werden. 648 Tests, beide Typprüfungen, Build/Lint erfolgreich;
+der Browserparcours mit Shift-Auto-Repeat und Vollpfadvergleich besteht.
+[Nachweis und Einschränkungen](docs/performance/SHIFT_REPEAT_INPUT.md).
+Das praktische sporadische Ruckeln ist noch nicht vollständig abgenommen.
+
+**Genau ein nächster ausführbarer Auftrag:** Vorbereitung und Bestätigung der
+Auswahlbewegung getrennt profilieren und die doppelte Materialisierung bei
+validate/commit in eine gemeinsame atomare Bestätigung überführen. Vollständige
+Modellprüfung, Kontextschutz, Vollpfadvergleich und genau ein Undo erhalten.
+Keine pauschale Migration anderer Werkzeugvorschauen.
+
+## Aktueller Stand: Shift-Auto-Repeat abgefangen — 08.10.2026
+
+PR174 ist zusammengeführt (main f5100cd). Die gespeicherte Nutzeraufnahme zeigt
+häufigere lange RAF-Abstände mit Shift. Der kontrollierte Vergleich belegt
+zusätzliche React-Commits durch Auto-Repeat: 481 statt 241 bei 240 Mausupdates.
+Der gemeinsame Tastatureingang verwirft jetzt unveränderte Wiederholungen:
+240 Commits, reine Wiederholungen ohne Mausbewegung verursachen keine Berechnung.
+[Messung, Rohberichte und Einschränkungen](docs/performance/SHIFT_REPEAT_INPUT.md).
+644 Tests, beide Typprüfungen, Build und Lint (6 bekannte Warnungen) bestanden.
+Zwei Shift-Läufe und ein freier Lauf bestehen Vollpfadvergleich und Bedienprüfung.
+Ein erster Konturvergleich schlug einmal fehl; seine Ursache bleibt offen.
+Keine vollständige Behebung des sporadischen Ruckelns behauptet.
+
+**Genau ein nächster ausführbarer Auftrag:** Den einmaligen Konturvergleich mit
+jetzt vollständiger Ist-/Soll-Fehlermeldung reproduzieren und klären; anschließend
+die reale Shift-Bewegung praktisch abnehmen. Die atomare Bestätigung bleibt
+nachgeordnet. Keine weitere spekulative Optimierung und noch keine Übernahme.
+
 ## Aktueller Stand: manuelle Bewegungsaufzeichnung – 08.10.2026
 
 PR173 nach Nutzerfreigabe mit grüner CI zusammengeführt (`main` 5206295).
