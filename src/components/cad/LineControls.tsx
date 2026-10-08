@@ -13,9 +13,15 @@ export function LineStyleFields({
   value: LineAppearance;
   onChange: (value: LineAppearance) => void;
 }) {
-  const [widthText, setWidthText] = useState(() =>
-    Number.isFinite(value.penWidth) ? String(value.penWidth).replace(".", ",") : "",
-  );
+  const [widthDraft, setWidthDraft] = useState({
+    value: value.penWidth,
+    text: String(value.penWidth).replace(".", ","),
+  });
+  const widthText = Object.is(widthDraft.value, value.penWidth)
+    ? widthDraft.text
+    : Number.isFinite(value.penWidth)
+      ? String(value.penWidth).replace(".", ",")
+      : "";
   return (
     <div className="flex flex-wrap items-end gap-2 text-xs">
       <label>
@@ -53,7 +59,7 @@ export function LineStyleFields({
 
           value={widthText}
           onChange={(e) => {
-            setWidthText(e.target.value);
+            setWidthDraft({ value: parsePenWidth(e.target.value), text: e.target.value });
             onChange({ ...value, penWidth: parsePenWidth(e.target.value) });
           }}
         />

@@ -26,7 +26,13 @@ export type DrawingRequest =
       layerId?: string;
     }
   | { kind: "wall"; start: Point; end: Point; thickness: number; height: number }
-  | { kind: "line"; points: Point[]; lineKind: "line" | "polyline"; appearance: LineAppearance };
+  | {
+      kind: "line";
+      points: Point[];
+      lineKind: "line" | "polyline";
+      appearance: LineAppearance;
+      layerId?: string;
+    };
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -80,5 +86,6 @@ export function createDrawing(
         kind: request.lineKind,
         points: request.points,
         ...request.appearance,
+        ...(request.layerId ? { layerId: request.layerId } : {}),
       });
 }

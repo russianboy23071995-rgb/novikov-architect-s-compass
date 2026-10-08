@@ -12,7 +12,9 @@ never mutates the source or model history. Creation uses existing validated acti
 The first implemented adapter is hatch: fill, background, contour, layer. All four
 construction modes use the same defaults. Window pickup now copies width, height,
 sill height and layer through that same boundary (2D). Host and position are chosen
-afresh by the existing validated placement action. Other element adapters remain future work.
+afresh by the existing validated placement action. Line/polyline pickup now uses
+the same boundary for color, pen width, style and layer (2D). The current drawing
+mode is retained; source vertices and identity are excluded. Other adapters remain future work.
 [Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
 ## Shared stable 3D picking service - 2026-10-08

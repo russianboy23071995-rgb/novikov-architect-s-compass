@@ -70,7 +70,6 @@ import type { Point, Project } from "@/lib/bim/model";
 import { createExampleProject } from "./bim-view";
 import type { Selection } from "./bim-view";
 import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
-import { defaultLineAppearance } from "@/lib/bim/lines";
 import { LineStyleFields } from "./LineControls";
 import { LayerProperties } from "./LayerProperties";
 import { LayerManager } from "./LayerManager";
@@ -188,7 +187,7 @@ export function CadWorkspace({
     ],
   );
   const referenceSelection = useReferenceSelection(project, referenceScope, visibility);
-  const [lineAppearance, setLineAppearance] = useState(defaultLineAppearance);
+  const lineAppearance = toolDefaults.line;
   const [modelError, setModelError] = useState("");
   const [exportingIfc, setExportingIfc] = useState(false);
   const [exportMessage, setExportMessage] = useState("");
@@ -474,6 +473,7 @@ export function CadWorkspace({
                 lineKind,
                 points,
                 appearance: lineAppearance,
+                layerId: toolDefaults.line.layerId,
               },
         ),
         {
@@ -1047,7 +1047,29 @@ export function CadWorkspace({
                   <option value="polyline">Polylinie</option>
                 </select>
               </label>
-              <LineStyleFields value={lineAppearance} onChange={setLineAppearance} />
+              <LineStyleFields
+                value={lineAppearance}
+                onChange={(appearance) =>
+                  toolDefaults.setLine({ ...toolDefaults.line, ...appearance })
+                }
+              />
+              <label className="text-xs">
+                Ebene
+                <select
+                  aria-label="Linien-Zielebene"
+                  className="block h-8 rounded border bg-background"
+                  value={toolDefaults.line.layerId}
+                  onChange={(e) =>
+                    toolDefaults.setLine({ ...toolDefaults.line, layerId: e.target.value })
+                  }
+                >
+                  {project.layers.map((layer) => (
+                    <option key={layer.id} value={layer.id}>
+                      {layer.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="text-xs">
                 Hover-Referenz
                 <select
