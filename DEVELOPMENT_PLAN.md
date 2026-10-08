@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K02c zentrale Asset-Eingangsgrenzen — 08.10.2026
+
+PR183 mit grüner CI zusammengeführt (main aed2712). PNG/JPEG-Import und
+Schema-9-Projektladen erzeugen geprüfte unveränderliche Asset-Handles. Bestehende
+Aktionen profitieren gemeinsam; Format, Limits und Modellprüfungen bleiben.
+667 Tests, beide Typechecks, Build und Lint erfolgreich (sechs bekannte Warnungen).
+Browserworkflow Import → Linien-/Wandänderung → Undo/Redo → Speichern/Laden und
+Bilddarstellung bestanden. [Details und Abnahme](docs/performance/ASSET_INGRESS.md).
+
+**Genau ein nächster Auftrag: K05a Commit-Arbeit getrennt profilieren.** Mit
+Dreibild-Fixture Validierung, Serialisierung, Größe und Vergleich für normale
+Änderung, No-op und Sichtbarkeit messen; daraus eine begrenzte gemeinsame
+Optimierung ableiten. Noch kein History-/Formatumbau. Alle übrigen K-/V-Ziele
+und die kleine Shift-Diagnose bleiben erhalten; ältere Folgeaufträge sind Historie.
+
+
 ## Aktueller Stand: K02b Asset-Handle-Pilot — 08.10.2026
 
 PR182 mit grüner CI zusammengeführt (main ac129fc). Opt-in für vollständig

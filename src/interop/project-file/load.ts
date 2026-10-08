@@ -1,3 +1,4 @@
+import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
 import { assertProjectFileSize } from "./size.ts";
 import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
 import {
@@ -18,7 +19,11 @@ import { createStandardLayers } from "../../domain/layers/model.ts";
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
-  if (value.schemaVersion === 9) return validateProject(value);
+  if (value.schemaVersion === 9) {
+    const project = validateProject(value);
+    // Trust is rebuilt from fully validated file data, never persisted IDs/hashes.
+    return { ...project, assets: project.assets.map(createImageAssetHandle) };
+  }
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);
     return validateProject({

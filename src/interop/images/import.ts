@@ -1,4 +1,4 @@
-import { imageAssetSchema, type ImageAsset } from "../../domain/elements/reference/model.ts";
+import { createImageAssetHandle, type ImageAsset } from "../../domain/elements/reference/model.ts";
 import { PROJECT_FILE_LIMIT } from "../project-file/size.ts";
 /** Reads dimensions before decode to bound raster allocation. */
 export function imageHeader(bytes: Uint8Array) {
@@ -46,7 +46,7 @@ export async function importImage(file: File, id: string): Promise<ImageAsset> {
     if (!ctx) throw new Error("Bilddekodierung nicht verfügbar.");
     ctx.drawImage(bitmap, 0, 0);
     const data = canvas.toDataURL("image/png").split(",")[1]!;
-    return imageAssetSchema.parse({
+    return createImageAssetHandle({
       id,
       mimeType: "image/png",
       pixelWidth: bitmap.width,
