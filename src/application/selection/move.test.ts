@@ -419,3 +419,54 @@ test("unconstrained mouse input preserves the exact snapped target for plan reus
     );
   }
 });
+
+test("atomic selection confirmation rejects invalid or mutated context before publishing", () => {
+  for (const defect of ["coordinate", "model", "selection", "origin"] as const) {
+    const p = fixture(),
+      targets = [...selectionIndex(p).values()];
+    const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+    const session = beginSelectionMove(p, targets, origin, policy);
+    let commits = 0;
+    const adapter = selectionMoveInteraction(
+      session,
+      p,
+      targets,
+      policy,
+      () => {
+        commits++;
+      },
+      () => {},
+    );
+    adapter.geometryPreview!.evaluate(target);
+    if (defect === "model") p.storey.walls[0]!.height = -1;
+    if (defect === "selection") targets.pop();
+    if (defect === "origin") session.origin.x++;
+    assert.throws(() =>
+      confirmInteraction(adapter, defect === "coordinate" ? { x: Infinity, y: 0 } : target),
+    );
+    assert.equal(commits, 0);
+  }
+});
+
+test("atomic publication failure propagates and a later confirmation revalidates the base", () => {
+  const p = fixture(),
+    targets = [...selectionIndex(p).values()];
+  const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  let calls = 0;
+  const adapter = selectionMoveInteraction(
+    beginSelectionMove(p, targets, origin, policy),
+    p,
+    targets,
+    policy,
+    () => {
+      calls++;
+      throw new Error("stale publication context");
+    },
+    () => {},
+  );
+  assert.throws(() => confirmInteraction(adapter, target), /stale publication context/);
+  assert.equal(calls, 1);
+  p.storey.walls[0]!.height = -1;
+  assert.throws(() => confirmInteraction(adapter, target));
+  assert.equal(calls, 1);
+});

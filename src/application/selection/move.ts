@@ -153,6 +153,12 @@ export function selectionMoveInteraction(
     (point) => previewSelectionGeometry(session, current, targets, point, visibility),
     assertContext,
   );
+  const confirm = (point: Point) => {
+    preview.clear();
+    assertContext();
+    // Materialize and fully validate once, then publish through the guarded history boundary.
+    commit(evaluateProject(point));
+  };
   return {
     identity: session,
     origin: session.origin,
@@ -170,11 +176,8 @@ export function selectionMoveInteraction(
       assertContext();
       evaluateProject(point);
     },
-    commit: (point) => {
-      preview.clear();
-      assertContext();
-      commit(evaluateProject(point));
-    },
+    confirm,
+    commit: confirm,
     cancel: () => {
       preview.clear();
       cancel();

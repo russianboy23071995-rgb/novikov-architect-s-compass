@@ -287,8 +287,14 @@ export async function runMovementProfile(
     pointer("pointermove", commitPoint.x, commitPoint.y);
     await frame();
     const target = wallStart();
+    startMovementSample();
     pointer("click", commitPoint.x, commitPoint.y);
     await frame();
+    const confirmation = finishMovementSample();
+    if (confirmation.phases["selection-materialize"]?.calls !== 1)
+      throw new Error("Selection confirmation must materialize exactly once");
+    if (!confirmation.phases["project-validation"]?.calls)
+      throw new Error("Selection confirmation skipped full model validation");
     if (!same(wallStart(), target) || same(target, baseline) || button("Undo").disabled)
       throw new Error(
         `Commit mismatch: preview=${JSON.stringify(target)}, actual=${JSON.stringify(wallStart())}, undoDisabled=${button("Undo").disabled}`,
@@ -304,6 +310,7 @@ export async function runMovementProfile(
     return {
       samples,
       continuous,
+      confirmation,
       repeatOnly,
       preparationMs: takePreparations(),
       fullPathComparison: { preview: geometryPreview, commit: geometryCommit },

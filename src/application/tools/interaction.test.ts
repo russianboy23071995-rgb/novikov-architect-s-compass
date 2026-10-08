@@ -266,3 +266,44 @@ test("new project rejects old polyline draft while replacement undo restores onl
   state = editingReducer(state, { type: "redo" });
   assert.deepEqual(state.history.present, loaded);
 });
+
+test("atomic confirmation owns validation/publication and never falls through to legacy callbacks", () => {
+  let calls = 0;
+  const p = createProject("atomic", "s");
+  const tool = drawingInteraction(
+    p,
+    p,
+    origin,
+    () => {
+      throw new Error("legacy commit");
+    },
+    () => {},
+  );
+  const point = { x: 2, y: 3 };
+  const atomic = {
+    ...tool,
+    validate: () => {
+      throw new Error("legacy validation");
+    },
+    confirm: (received: typeof point) => {
+      assert.equal(received, point);
+      calls++;
+    },
+  };
+  confirmInteraction(atomic, point);
+  assert.equal(calls, 1);
+  assert.throws(
+    () =>
+      confirmInteraction(
+        {
+          ...atomic,
+          confirm: () => {
+            throw new Error("stale context");
+          },
+        },
+        point,
+      ),
+    /stale context/,
+  );
+  assert.equal(calls, 1);
+});

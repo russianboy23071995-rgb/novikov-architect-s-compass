@@ -1,5 +1,19 @@
 # NOVIKOV CAD Architecture Contract
 
+## Atomic selection confirmation — 2026-10-08
+
+ToolInteraction may supply `confirm` for an atomic validated publication. The
+shared confirmInteraction calls it exclusively; adapters without it retain the
+validate/commit sequence. Atomic confirmation must check pinned context, derive
+and fully validate the final model afresh, and publish through the guarded
+history boundary. This is not a trusted-preview bypass or a cache of validation.
+The selection translation adapter is the first consumer: it shares one function
+between atomic confirm and direct commit. Explicit validate remains available
+for compatibility; normal mouse/numeric confirmation materializes only once.
+History still validates independently, and the UI's latest-context publication
+guard remains unchanged. Text/voice keep using the same full selection action.
+Other adapters are not migrated by this change.
+
 ## Current performance decision: prepared action previews — 2026-10-07
 
 This section sets the direction for A-04 and supersedes the proposed next

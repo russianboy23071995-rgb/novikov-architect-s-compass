@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Auswahlbewegung atomar bestätigen — 08.10.2026
+
+PR175 zusammengeführt, Basis main db17289. Der gemeinsame Bestätigungsweg
+materialisiert Auswahlbewegungen jetzt einmal statt zweimal. Modell-/Kontext-
+und History-Prüfungen bleiben vollständig. Andere Werkzeuge behalten ihren Ablauf.
+[Messung, Tests und Abnahme](docs/performance/ATOMIC_SELECTION_CONFIRMATION.md).
+651 Tests, beide Typprüfungen, Build und Lint (6 bekannte Warnungen) bestanden.
+T-Paar-Browserparcours: Geometrie, Shift/Tab, Abbruch und ein Undo/Redo bestanden.
+Einzelmessung der Bestätigung: 2 → 1 Materialisierungen; kein allgemeines
+Latenzversprechen und keine neue Behauptung zur vollständigen Shift-Ruckelfreiheit.
+
+**Genau ein nächster ausführbarer Auftrag:** Große betroffene Auswahlmengen und
+viele stehende Anschlussnachbarn im bestehenden Harness vergleichen; Vorbereitung,
+Vorschau und Bestätigung getrennt messen und den Vollpfadvergleich behalten.
+Danach anhand des Befunds den nächsten begrenzten Consumer/Engpass auswählen.
+Keine pauschale Migration weiterer Werkzeuge.
+
 ## Aktueller Stand: Diagnose-Konturvergleich abgesichert — 08.10.2026
 
 Der Konturfehler aus PR175 ist als Rückrechnungsproblem reproduziert: Der
