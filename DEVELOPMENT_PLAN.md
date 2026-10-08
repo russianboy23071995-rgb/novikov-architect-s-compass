@@ -1,5 +1,21 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K05a Commit-Phasen gemessen — 08.10.2026
+
+PR184 mit grüner CI zusammengeführt (main bf244dd). Isolierte Diagnose mit je
+20 Modell-/No-op-/Sichtbarkeitsfällen; sämtliche Ergebnisse mit echtem Commit
+verglichen. [Messung und Grenzen](docs/performance/COMMIT_PHASE_PROFILE.md).
+Echter Commit Median 68,95 / 57,85 / 67,15 ms. Restarbeit verteilt sich auf
+Prüfung, Serialisierung und UTF-8-Größe; History-Verwaltung selbst kaum messbar.
+667 Tests, Typechecks, Build und Lint erfolgreich; sechs bekannte Warnungen.
+
+**Genau ein nächster Auftrag: K05b zusätzlichen Modellvergleich strukturiert
+pilotieren**, um dessen zwei JSON-Serialisierungen zu vermeiden. Vollprüfungen
+und Größenprüfung erhalten. Äquivalenz für No-op, Sichtbarkeit, Modelländerung,
+Assets, Undo/Redo und Fehlerfälle; gleiche Browserfixture messen. Kein weiterer
+Umbau parallel. K-/V-Wünsche und Shift-Diagnose bleiben erhalten.
+
+
 ## Aktueller Stand: K02c zentrale Asset-Eingangsgrenzen — 08.10.2026
 
 PR183 mit grüner CI zusammengeführt (main aed2712). PNG/JPEG-Import und
