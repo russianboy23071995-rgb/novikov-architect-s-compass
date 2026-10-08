@@ -1,5 +1,18 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07e Picking-Pilot vermessen - 08.10.2026
+
+PR202 nach gruener CI zusammengefuehrt. Projizierter Kandidatenindex: 180
+Browservergleiche und 697 Tests bestanden; Typecheck/Lint/Build erfolgreich.
+500 Waende: Abfrage ca. 0,1 statt 19,5-20,5 ms, aber Vorbereitung 42-57 ms je
+Projektion. Daher noch keine Produktintegration.
+[Nachweis und Entscheidung](docs/performance/PROJECTED_PICKING_PILOT.md).
+
+**Genau ein naechster Auftrag: K07f modellgebundener raeumlicher Gegenpilot.**
+Index ueber Kamerawechsel wiederverwenden; Aufbau/erste Abfrage/Folgen getrennt
+messen, Treffer und Tiefe gegen Vollscan pruefen. Danach Ansatz waehlen.
+Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K07d Renderer produktiv angebunden - 08.10.2026
 
 PR201 nach gruener CI zusammengefuehrt. BimSolidView verwendet persistente
