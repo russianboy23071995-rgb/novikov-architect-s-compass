@@ -3,7 +3,7 @@ import { tConnectionContours } from "./t-relations.ts";
 import type { Project, Wall } from "../../project/schema.ts";
 import { deriveWallCorner } from "./corner.ts";
 import { wallBody } from "./body.ts";
-import { wallContourSolid } from "./contour-solid.ts";
+import { wallContourSolid, createWallContourSolidDeriver } from "./contour-solid.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 
@@ -135,14 +135,14 @@ export function connectedWallContours(project: WallGeometry) {
 }
 
 const solidCache = new WeakMap<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
-export function connectedWallSolids(project: WallGeometry) {
+function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wallContourSolid) {
   const cached = solidCache.get(project);
   if (cached) return cached;
   const contours = connectedWallContours(project);
   const result = project.storey.walls
     .filter((w) => contours.has(w.id))
     .map((w) =>
-      wallContourSolid(
+      deriveSolid(
         w,
         contours.get(w.id)!,
         project.storey.windows,
@@ -153,4 +153,14 @@ export function connectedWallSolids(project: WallGeometry) {
     );
   solidCache.set(project, result);
   return result;
+}
+
+export function connectedWallSolids(project: WallGeometry) {
+  return deriveConnectedWallSolids(project, wallContourSolid);
+}
+
+/** Prepared translation owns this bounded local-extrusion reuse lifetime. */
+export function createPreparedWallSolids(wallIds: readonly string[]) {
+  const derive = createWallContourSolidDeriver(wallIds);
+  return (project: WallGeometry) => deriveConnectedWallSolids(project, derive);
 }

@@ -1,7 +1,7 @@
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
-import { connectedWallSolids } from "../elements/wall/connections.ts";
+import { createPreparedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
@@ -94,6 +94,8 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     ].map((e) => e.id),
   );
 
+  const deriveSolids = createPreparedWallSolids(affected.storey.walls.map((w) => w.id));
+
   function evaluate(delta: Point): GeometryPreview {
     if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
       throw new Error("Ungültige Bewegung.");
@@ -147,7 +149,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     for (const reference of geometry.storey.references)
       validateReferenceExtent(reference, assets.get(reference.assetId)!);
     // The exact existing corner/T/opening/solid rules, applied to the dependency closure.
-    connectedWallSolids(geometry);
+    deriveSolids(geometry);
     return freeze({ geometry, replacedIds });
   }
 
