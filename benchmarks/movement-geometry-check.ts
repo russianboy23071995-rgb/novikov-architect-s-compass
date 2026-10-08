@@ -5,8 +5,10 @@ import { connectedWallSolids } from "../src/domain/elements/wall/connections";
 import { wallBody } from "../src/domain/elements/wall/body";
 import { wallPlanOutlines } from "../src/rendering/viewport/wall-plan-outline";
 
-export function checkMovementGeometry(base: Project, delta: Point) {
-  const targets = base.storey.walls.slice(0, 20).map((w) => ({ kind: "wall" as const, id: w.id }));
+export function checkMovementGeometry(base: Project, delta: Point, selectedCount = 20) {
+  const targets = base.storey.walls
+    .slice(0, selectedCount)
+    .map((w) => ({ kind: "wall" as const, id: w.id }));
   const expected = fullSelectionMove(base, targets, delta);
   const solids = new Map(connectedWallSolids(expected).map((s) => [s.wallId, s]));
   const outlines = wallPlanOutlines(expected, new Set(expected.storey.walls.map((w) => w.id)));

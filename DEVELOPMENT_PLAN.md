@@ -1,5 +1,26 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: Shift-Ruckeln eingrenzen – 08.10.2026
+
+PR172 nach Nutzerfreigabe zusammengeführt (`main` 0bc64aa). Praktische
+Auswahlbewegung bestätigt, jedoch sporadisches Stehenbleiben mit Nachspringen
+bei Shift gemeldet: zwei T-verbundene Wände mit zwei Fenstern.
+[Diagnose und Rohmessungen](docs/performance/SHIFT_SELECTION_DIAGNOSIS.md).
+Der separate Browser-Harness prüft jetzt gehaltenes Shift, diese Konstellation,
+explizite Vierfachauswahl und kontinuierliche Eingaben. Geometrievergleich,
+Shift/Tab, Abbruch, Platzierung und ein Undo/Redo bestanden. Ein langer
+RAF-Abstand von 236 ms trat einmal auf; Wiederholungen maximal 35 ms.
+Ursache noch nicht zugeordnet, kein Produktfix behauptet. A-04 bleibt offen.
+
+**Genau ein nächster ausführbarer Auftrag:** Im bestehenden Diagnose-Harness
+eine begrenzte, manuell start-/stoppbare Aufzeichnung echter Auswahlbewegungen
+ergänzen. Pointer-/Shift-Ereignisse, React-Commits und lange Hauptthread-Aufgaben
+zeitlich korrelieren und den gemeldeten Aussetzer an der T-Konstellation zuordnen.
+Erst dann den belegten gemeinsamen Engpass korrigieren. Keine Modelländerung
+durch die Aufzeichnung und keine separaten Fangregeln für einzelne Werkzeuge.
+Die zuvor geplante atomare Bestätigung bleibt nach dieser Fehlerklärung
+vorgesehen; übrige Anforderungen und offene Architekturpunkte bleiben erhalten.
+
 ## Aktueller Stand: A-04-Pilot Auswahlbewegung – 07.10.2026
 
 PR171 nach Nutzerfreigabe zusammengeführt (`main` 4d284da). Der Pilot auf
