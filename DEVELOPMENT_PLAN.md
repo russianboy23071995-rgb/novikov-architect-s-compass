@@ -1,5 +1,17 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07c Pilot-Lebenszyklus abgesichert - 08.10.2026
+
+PR200 nach gruener CI zusammengefuehrt. Auswahl/Konturen, Geometrie/Sichtbarkeit,
+Zoom/DPR und echte Context-Restoration in neun Bildvergleichen bestanden.
+695 Tests, Typecheck inkl. src, Lint und Build bestanden. Noch isolierter Pilot.
+[Nachweis und Grenzen](docs/performance/SOLID_LIFECYCLE_PILOT.md).
+
+**Genau ein naechster Auftrag: K07d begrenzte Produktanbindung in BimSolidView.**
+Eine Ressourcenverantwortung; Projektion, CPU-Picking und Konturen bewahren.
+Canvas-Kamera/Resize/Auswahl/Modellwechsel/Context-Verlust gegen Referenz pruefen.
+Kein weiterer Picking-Umbau. Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K07b Kameramatrix-Pilot geprueft - 08.10.2026
 
 PR199 nach gruener CI zusammengefuehrt. Isolierter WebGL-Pilot mit einmaligem
