@@ -1,3 +1,24 @@
+## Neue spätere Wünsche - 08.10.2026
+
+Diese Punkte sind aufgenommen, noch nicht umgesetzt; laufender begrenzter
+Folgeauftrag bleibt unverändert. Ältere Anforderungen und Anschlussregeln gelten.
+
+- Wandanschlüsse bei ungleichen Wandstärken: T, Ecke und weitere unterstützte
+  Anschlussarten erweitern. Bereits früher offener Punkt, hier ausdrücklich
+  bestätigt. Gemeinsame Geometrie für 2D, 3D und IFC; Achslagen, beide Wandrichtungen,
+  Öffnungen, Bearbeitung, Undo und Speichern/Laden prüfen. Konkrete Abschlussregeln
+  für verschiedene Stärken vor Implementierung festlegen, nicht erfinden.
+- 3D-Projektion: zusätzlich zur vorhandenen axonometrischen Darstellung eine
+  allgemeine Perspektive wählbar anbieten, Steuerung über Einstellungen.
+  Kamera/Projektion, Picking und Fang müssen dieselbe Darstellung berücksichtigen;
+  Ansichtseinstellung verändert keine BIM-Geometrie. Speicherumfang, Kamera-
+  parameter und genaue Platzierung der Einstellung bleiben zu klären.
+- Einstellungen strukturieren: vor weiterem Wachstum einen eigenen kleinen
+  Planungsauftrag für Benutzer-, Projekt-, Ansichts- und Werkzeugvorgaben vorsehen.
+  Vorschlag: zentrale Einstellungsübersicht mit klaren Kategorien und gemeinsamem
+  Zustands-/Speichervertrag; genaue Menüstruktur noch nicht entschieden. Neue
+  Einstellungsfenster verwenden wie alle CAD-Fenster die Ebenen-/FloatingPanel-Vorlage.
+
 ## Einheitliche schwebende Fenster - 08.10.2026
 
 PR216 nach grüner GitHub-CI zusammengeführt. Nutzer bestimmt Ebenenfenster als
