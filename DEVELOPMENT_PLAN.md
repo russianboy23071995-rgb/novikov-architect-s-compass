@@ -1,5 +1,24 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K01 Großpunkt-Absturz behoben — 08.10.2026
+
+Übergabe aus Systemarchitektur planen übernommen; PR179 inklusive V01–V09 und
+Planungsabstimmung nach grüner CI zusammengeführt (main 68ef359).
+planBounds bestimmt Grenzen fortlaufend statt über punktgroße Argumentlisten.
+Validierte 200.000-Punkt-Fixture reproduzierte vorher den RangeError; Tests,
+Datei-Roundtrip und Browser-Zoom/Einpassen bestehen jetzt. 656 Tests, beide
+Typprüfungen, Build/Lint bestanden. Sehr große räumliche Ausdehnung bleibt durch
+Mindestzoom begrenzt; kein allgemeiner Interaktivitätsnachweis großer Dateien.
+[Nachweise und Grenzen](docs/performance/LARGE_PLAN_BOUNDS.md).
+
+**Genau ein nächster ausführbarer Auftrag: K03 Kapazitäts-Baselinebericht.**
+Bestehende Fixtures, verbundene Wände und mehrere PNG/JPEG-Referenzen verwenden;
+Punkte/Elemente, Dateibytes und Bildpixel getrennt erfassen. Import, Platzierung,
+Commit, 1/10/50/100 History-Stände, Speichern/Laden, IFC und 2D/3D vermessen.
+Speichermessung von Schätzungen trennen; Mindestzoom/Ausdehnung aufnehmen. Daraus
+nur einen begrenzten Folgeauftrag ableiten; Dateilimit/History/Assetvertrag vorerst
+bewahren. Die frühere React-Diagnose und neue Fachfunktionen bleiben eingeordnet.
+
 ## Nutzerabstimmung: Skalierbarkeit und erweiterte Produktvision — 08.10.2026
 
 Die [Entwicklungsabstimmung](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)

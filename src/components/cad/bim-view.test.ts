@@ -1,7 +1,16 @@
+import { largePointFixture } from "../../../benchmarks/large-point-fixture.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject, drawingPoint, endAtLength, planBounds } from "./bim-view.ts";
-import { addWall, createProject, updateWall, windowCentre } from "../../lib/bim/model.ts";
+import {
+  addWall,
+  createProject,
+  updateWall,
+  windowCentre,
+  validateProject,
+  serializeProject,
+  deserializeProject,
+} from "../../lib/bim/model.ts";
 
 test("UI example uses the agreed wall/window dimensions and stable initial IDs", () => {
   const project = createExampleProject();
@@ -67,4 +76,61 @@ test("drawing bounds contain wall thickness and flip model Y into SVG coordinate
   assert.ok(x < -2.2 && x + width > 2.2);
   assert.ok(y < -4.2 && y + height > -0.8);
   assert.equal(planBounds(createProject("p", "s")), "-2 -3 8 6");
+});
+
+test("fit bounds accepts a validated 200,000-point project below the file limit", () => {
+  const project = largePointFixture();
+  const file = serializeProject(project);
+  assert.ok(new TextEncoder().encode(file).length < 10 * 1024 * 1024);
+  assert.equal(planBounds(deserializeProject(file)), planBounds(project));
+  assert.equal(planBounds(project), "-501.5 -192.5 1002.9 194");
+});
+
+test("fit bounds retain mixed walls, lines, hatch and rotated reference extents", () => {
+  const project = createExampleProject();
+  project.storey.lines = [
+    {
+      id: "line",
+      layerId: project.defaultLayerIds.line,
+      kind: "line",
+      points: [
+        { x: -8, y: -2 },
+        { x: -5, y: 3 },
+      ],
+      color: "#334155",
+      penWidth: 0.25,
+      style: "solid",
+    },
+  ];
+  project.storey.hatches = [
+    {
+      id: "hatch",
+      kind: "hatch",
+      layerId: project.defaultLayerIds.line,
+      points: [
+        { x: 5, y: 8 },
+        { x: 6, y: 8 },
+        { x: 5, y: 9 },
+      ],
+      fill: { color: "#112233", opacity: 1 },
+      background: { visible: false, color: "#ffffff" },
+      contour: { visible: false, color: "#112233" },
+    },
+  ];
+  project.assets = [
+    { id: "image", mimeType: "image/png", pixelWidth: 2, pixelHeight: 1, data: "AAAA" },
+  ];
+  project.storey.references = [
+    {
+      id: "reference",
+      kind: "image-reference",
+      layerId: project.defaultLayerIds.line,
+      assetId: "image",
+      origin: { x: 10, y: -5 },
+      rotation: Math.PI / 2,
+      metresPerPixel: 1,
+    },
+  ];
+  const validated = validateProject(project);
+  assert.equal(planBounds(validated), "-9.5 -10.5 22 17");
 });
