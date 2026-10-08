@@ -45,6 +45,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 type TopToolbarProps = {
+  onHatchLibrary: () => void;
   onMeasure: () => void;
   measuring: boolean;
   onImportImage: () => void;
@@ -137,7 +138,24 @@ export function TopToolbar(props: TopToolbarProps) {
           aria-label="Application menu"
         >
           {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
-            item === "Insert" ? (
+            item === "Tools" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    Tools
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onHatchLibrary}>
+                    Schraffurenverwaltung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Insert" ? (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">

@@ -59,3 +59,46 @@ Geometrie-/Grenztests, Typecheck/Build und praktische Browser-Abnahme.
 
 Guide Etappe 5, V07 und Quelltext abgeglichen. Reine Dokumentationsaenderung;
 Diff-Pruefung, keine erneut ausgefuehrten Produktions-Tests oder Builds.
+
+## V07b Umsetzung
+
+Lokaler Creator unter Tools, Linienentwurf, Zellmaße, eigene Undo-Liste,
+gemeinsame querySnap-Abfrage und 3x3-SVG-Musterwiederholung implementiert.
+Keine Bibliothekspersistenz, kein Upload und keine Anwendung auf Projektkonturen.
+722 Tests, Typecheck, gezielter Lint und Build erfolgreich. Browser-Abnahme
+wegen Browser-Sandbox-Startfehler offen. Nächster Auftrag: V07c Vertrag zur
+Bibliothekspersistenz und Musteranwendung mit den offenen Nutzerentscheidungen.
+
+## V07c Bibliothek: Nutzerentscheidung vom 08.10.2026
+
+Verbindlich: Die Musterbibliothek soll von Anfang an global und projektübergreifend
+sein. Die frühere Frage projektgebunden versus global ist damit beantwortet.
+Verbindlich: Modellmaß und Papiermaß sind in den Werkzeugeigenschaften bei
+Schraffuren wählbar. Der Maßbezug gehört zur Anwendung, nicht zur Musterdefinition.
+Verbindlich: Bearbeiten eines verwendeten Musters aktualisiert gemeinsam alle
+Anwendungen dieses Musters. Uploadformat bleibt offen.
+
+Technischer Vorschlag (noch keine Nutzerentscheidung): globale Bibliothek über
+plattformneutralen Storage-Adapter; Projektdateien führen die tatsächlich
+verwendeten Definitionen mit, sodass die Darstellung ohne globale Installation
+reproduzierbar bleibt. IDs allein dürfen keine stille Musterersetzung bewirken.
+Anwendungsdaten bleiben im Projekt; Wiederholung/Clipping sind abgeleitet.
+Kein Speichersystem oder Projektformatwechsel vor dem begrenzten Migrationsauftrag.
+
+V07c abgeschlossen als Vertrag; praktische Creator-Abnahme bleibt offen.
+
+Technischer Vorschlag zur Synchronisation: stabile globale Muster-ID mit Revision;
+Anwendungen referenzieren diese ID. Geöffnete Projekte übernehmen Änderungen über
+eine gemeinsame validierte Aktion; geschlossene Dateien werden nicht heimlich
+umgeschrieben. Synchronisation beim Öffnen, Offline-Konflikte und Bedeutung von
+Undo für projektübergreifende Musteränderungen müssen vor diesem Ausbau geklärt
+werden. Eingebettete Definitionen sichern reproduzierbare Offline-Darstellung.
+Papiermaß benötigt einen expliziten Maßstab der Ansicht; Zoom allein ist kein
+Planmaßstab. Das ist noch keine implementierte Synchronisationsfunktion.
+
+Genau ein nächster Auftrag V07d: eine globale lokale Musterbibliothek mit
+Storage-Adapter, validierten Definitionen/IDs/Namen, Liste mit Vorschauen und
+Speichern eines Creator-Entwurfs implementieren. Laden nach Neustart prüfen;
+keine Anwendung, Projektmigration, Synchronisation oder Upload in diesem Schritt.
+Anwendungs-/Maßstabs- und Aktualisierungsregeln folgen als eigener Auftrag.
+

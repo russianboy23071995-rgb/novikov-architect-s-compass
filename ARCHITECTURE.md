@@ -5,7 +5,15 @@
 Pattern definitions and contour applications are distinct. Repetition and clipping
 are derived rendering data, never duplicated editable project lines. Creator drafts
 have a local drawing context and use shared geometry/snapping and Application
-validation. Import formats and library persistence scope remain undecided.
+validation. User decisions (2026-10-08): library is global across projects;
+hatch applications offer model-space or paper-space spacing in tool properties;
+editing a pattern updates all applications of that pattern. The spacing mode
+belongs to the application, not the reusable definition. Pattern identity must
+remain stable across updates. Import format remains undecided. Persistence and
+cross-project synchronization use platform adapters and validated Application
+actions; React does not own the library. Embedded project definitions, revisions,
+offline resolution and update/undo policy remain technical proposals, not yet
+implemented decisions. Paper-space rendering needs an explicit view scale.
 See [requirements, proposals and next task](docs/planning/HATCH_PATTERN_LIBRARY.md).
 
 

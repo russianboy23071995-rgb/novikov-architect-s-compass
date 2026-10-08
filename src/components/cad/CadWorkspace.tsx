@@ -52,6 +52,7 @@ import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
+import { HatchPatternCreator } from "./HatchPatternCreator";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
 import { CornerPreviewDialog } from "./CornerPreviewDialog";
@@ -79,6 +80,7 @@ export function CadWorkspace({
   layerVisibility,
   initialProject,
 }: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
+  const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
@@ -381,13 +383,13 @@ export function CadWorkspace({
         if (layout === "single") setMode("2D");
         setModelError("");
       } catch (error) {
-        setModelError(error instanceof Error ? error.message : "Bewegung nicht m�glich.");
+        setModelError(error instanceof Error ? error.message : "Bewegung nicht mï¿½glich.");
       }
       return;
     }
 
     if (solidMove && !pickedPoint.anchor) {
-      showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
+      showNotice("Zuerst einen sichtbaren WandfuÃŸpunkt anklicken, dann die Bearbeitung wÃ¤hlen.");
       return;
     }
     if (solidMove && !supportsWallWorkplaneEdit(selection, action, pickedPoint.index)) {
@@ -434,7 +436,7 @@ export function CadWorkspace({
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
       setExportMessage(
-        "Projektdatei erstellt · Download angefordert. Noch nicht übernommene Eingaben sind nicht enthalten.",
+        "Projektdatei erstellt Â· Download angefordert. Noch nicht Ã¼bernommene Eingaben sind nicht enthalten.",
       );
       setModelError("");
     } catch {
@@ -447,7 +449,7 @@ export function CadWorkspace({
     setReadingFile(true);
     setModelError("");
     try {
-      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist größer als 10 MB.");
+      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist grÃ¶ÃŸer als 10 MB.");
       const next = readProjectFile(await file.text());
       setPendingFile({ project: next, name: file.name });
     } catch (error) {
@@ -485,8 +487,8 @@ export function CadWorkspace({
     } catch {
       setModelError(
         tool === "hatch"
-          ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
-          : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+          ? "Schraffur prÃ¼fen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Ãœberlappung; Deckkraft 0â€“100 %. Nach ModellÃ¤nderung erneut beginnen."
+          : "Linie benÃ¶tigt unterschiedliche Punkte und eine StrichstÃ¤rke von 0,05 bis 2 mm.",
       );
     }
   };
@@ -507,12 +509,12 @@ export function CadWorkspace({
         setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
       } else if (drawingBase !== project) {
-        setModelError("Das Modell wurde geändert. Zeichnen erneut beginnen.");
+        setModelError("Das Modell wurde geÃ¤ndert. Zeichnen erneut beginnen.");
         return;
       }
       const previous = pathPoints.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) === 0) {
-        setModelError("Nächsten Punkt an einer anderen Position wählen.");
+        setModelError("NÃ¤chsten Punkt an einer anderen Position wÃ¤hlen.");
         return;
       }
       const next = [...pathPoints, point];
@@ -524,7 +526,7 @@ export function CadWorkspace({
         try {
           finishPath(rectangleContour(hatchConstruction as "diagonal" | "side-height", next));
         } catch (e) {
-          setModelError(e instanceof Error ? e.message : "Ungültiges Rechteck.");
+          setModelError(e instanceof Error ? e.message : "UngÃ¼ltiges Rechteck.");
         }
       } else if (tool === "line" && lineKind === "line" && next.length === 2) finishPath(next);
       else setPathPoints(next);
@@ -541,7 +543,7 @@ export function CadWorkspace({
         );
       }
     } catch (error) {
-      setModelError(error instanceof Error ? error.message : "Ungültige Wand.");
+      setModelError(error instanceof Error ? error.message : "UngÃ¼ltige Wand.");
     }
   };
 
@@ -551,7 +553,7 @@ export function CadWorkspace({
       const next = finishWallChain(activeChain, project);
       changeProject(next, { kind: "wall", id: activeChain.wallIds.at(-1)! });
     } catch (error) {
-      setModelError(error instanceof Error ? error.message : "Ungültige Wandkette.");
+      setModelError(error instanceof Error ? error.message : "UngÃ¼ltige Wandkette.");
     }
   };
 
@@ -646,9 +648,9 @@ export function CadWorkspace({
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
       setExportMessage(
-        "IFC export ready · download requested" +
+        "IFC export ready Â· download requested" +
           (project.storey.lines?.length || project.storey.hatches.length
-            ? " · 2D-Linien und Schraffuren sind nur in der JSON-Projektdatei enthalten."
+            ? " Â· 2D-Linien und Schraffuren sind nur in der JSON-Projektdatei enthalten."
             : ""),
       );
     } catch {
@@ -676,7 +678,7 @@ export function CadWorkspace({
           ref={fileInput}
           type="file"
           accept=".json,application/json"
-          aria-label="Projektdatei auswählen"
+          aria-label="Projektdatei auswÃ¤hlen"
           className="hidden"
           onChange={(event) => {
             const file = event.target.files?.[0];
@@ -694,13 +696,13 @@ export function CadWorkspace({
             <DialogHeader>
               <DialogTitle>Projektdatei laden?</DialogTitle>
               <DialogDescription>
-                {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
-                {pendingFile?.project.storey.windows.length} Fenster ·{" "}
-                {pendingFile?.project.storey.lines?.length ?? 0} Linien ·{" "}
-                {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren ·{" "}
+                {pendingFile?.name} Â· {pendingFile?.project.storey.walls.length} WÃ¤nde Â·{" "}
+                {pendingFile?.project.storey.windows.length} Fenster Â·{" "}
+                {pendingFile?.project.storey.lines?.length ?? 0} Linien Â·{" "}
+                {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren Â·{" "}
                 {pendingFile?.project.storey.references.length ?? 0} Bildreferenzen. Ersetzt das
-                aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
-                übernommene Formulareingaben werden verworfen.
+                aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurÃ¼ckkehren. Nicht
+                Ã¼bernommene Formulareingaben werden verworfen.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -722,8 +724,10 @@ export function CadWorkspace({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
         {!fullscreen && (
           <TopToolbar
+            onHatchLibrary={() => setHatchLibraryOpen(true)}
             onMeasure={() => selectTool("measure")}
             measuring={tool === "measure"}
             onImportImage={() => {
@@ -830,7 +834,7 @@ export function CadWorkspace({
                         setModelError("");
                       } catch (error) {
                         setModelError(
-                          error instanceof Error ? error.message : "Bewegung nicht möglich.",
+                          error instanceof Error ? error.message : "Bewegung nicht mÃ¶glich.",
                         );
                       }
                     }
@@ -920,8 +924,8 @@ export function CadWorkspace({
               </label>
               <span>
                 {imageTool.busy
-                  ? "Bild wird geprüft…"
-                  : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
+                  ? "Bild wird geprÃ¼ftâ€¦"
+                  : imageTool.error || "Obere linke Ecke anklicken Â· Esc: Abbruch"}
               </span>
               <Button size="sm" onClick={imageTool.cancel}>
                 Bildimport abbrechen
@@ -938,16 +942,16 @@ export function CadWorkspace({
                   className="rounded border bg-background p-1"
                 >
                   <option value="distance">Strecke</option>
-                  <option value="area">Fläche</option>
+                  <option value="area">FlÃ¤che</option>
                   <option value="angle">Winkel</option>
                 </select>
               </label>
               <span role="status">
                 {measurementMode === "angle"
-                  ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
+                  ? "Schenkelpunkt â†’ Scheitel â†’ Schenkelpunkt Â· Esc: Beenden"
                   : measurementMode === "area"
-                    ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
-                    : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+                    ? "Punkte setzen Â· Doppelklick schlieÃŸt Â· Danach Klick fÃ¼r neue Messung Â· Esc: Beenden"
+                    : "Zwei Punkte anklicken Â· Danach Klick fÃ¼r neue Messung Â· Esc: Beenden"}
               </span>
               <Button size="sm" variant="ghost" onClick={measurement.reset}>
                 Neue Messung
@@ -988,8 +992,8 @@ export function CadWorkspace({
                 >
                   <option value="polygon">Polygon per Klick</option>
                   <option value="diagonal">Rechteck: Diagonale</option>
-                  <option value="side-height">Rechteck: Seite und Höhe</option>
-                  <option value="boundary">Geschlossene Kontur übernehmen</option>
+                  <option value="side-height">Rechteck: Seite und HÃ¶he</option>
+                  <option value="boundary">Geschlossene Kontur Ã¼bernehmen</option>
                 </select>
               </label>
               <HatchFillFields
@@ -1027,13 +1031,13 @@ export function CadWorkspace({
               </label>
               <span className="text-xs">
                 {hatchConstruction === "polygon"
-                  ? `${pathPoints.length} Punkte · Doppelklick schließt`
+                  ? `${pathPoints.length} Punkte Â· Doppelklick schlieÃŸt`
                   : hatchConstruction === "boundary"
                     ? "In ein geschlossenes Polygon klicken"
                     : hatchConstruction === "diagonal"
-                      ? "Zwei gegenüberliegende Ecken anklicken"
-                      : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
-                · Esc verwirft
+                      ? "Zwei gegenÃ¼berliegende Ecken anklicken"
+                      : "Zwei Seitenpunkte, danach HÃ¶he anklicken"}{" "}
+                Â· Esc verwirft
               </span>
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
                 Zeichnen abbrechen
@@ -1094,11 +1098,11 @@ export function CadWorkspace({
                   <option value={1000}>1 Sekunde</option>
                 </select>
               </label>
-              <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
+              <span className="text-xs">{pathPoints.length} Punkte Â· Esc verwirft</span>
               {lineKind === "polyline" && (
                 <span className="text-xs">
-                  Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im Grundriss:
-                  Abschluss
+                  Doppelklick zum AbschlieÃŸen Â· Enter im Feld: nÃ¤chster Punkt Â· Enter im
+                  Grundriss: Abschluss
                 </span>
               )}
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
@@ -1107,10 +1111,10 @@ export function CadWorkspace({
             </section>
           ) : selections.length > 1 ? (
             <p className="p-3 text-xs text-muted-foreground" role="status">
-              {selections.length} Elemente ausgewählt.{" "}
+              {selections.length} Elemente ausgewÃ¤hlt.{" "}
               {mode === "3D"
                 ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
-                : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
+                : "Im ElementmenÃ¼ â€žAuswahl frei bewegenâ€œ wÃ¤hlen, dann Ursprung und Ziel anklicken."}
             </p>
           ) : (
             <BimInspector
@@ -1302,7 +1306,7 @@ export function CadWorkspace({
                   >
                     {groupMove.pickingOrigin
                       ? "Bewegungsursprung im Grundriss anklicken"
-                      : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
+                      : "Klick platziert die Auswahl Â· Tab: LÃ¤nge/Winkel Â· Esc verwirft"}
                   </p>
                 )}
                 {tool === "wall" && (
@@ -1310,7 +1314,7 @@ export function CadWorkspace({
                     role="status"
                     className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
                   >
-                    Wandkette: Klick setzt Abschnitt · Doppelklick/Enter beendet · Esc verwirft
+                    Wandkette: Klick setzt Abschnitt Â· Doppelklick/Enter beendet Â· Esc verwirft
                   </p>
                 )}
                 <InteractionInput

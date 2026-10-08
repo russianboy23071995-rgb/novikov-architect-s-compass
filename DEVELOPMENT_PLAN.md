@@ -1,3 +1,39 @@
+## V07c Bibliotheksvertrag - 08.10.2026
+
+Nutzerentscheidungen: globale projektübergreifende Musterbibliothek; Modell-/
+Papiermaß bei Schraffuren in Werkzeugeigenschaften wählbar; Musteränderungen
+aktualisieren gemeinsam alle Anwendungen. Architektur und Fachvertrag ergänzt.
+Uploadformat weiter offen. Einbettung verwendeter Definitionen, Offline-/
+Revisionsabgleich und projektübergreifendes Undo sind technische Vorschläge,
+keine implementierte Synchronisation. Creator-Abnahme weiterhin offen.
+PR215: CI-Formatierungsfehler behoben; voller lokaler Lint ohne Fehler
+(sechs bestehende Fast-Refresh-Warnungen). Produktionscode sonst unverändert.
+
+**Genau ein nächster Auftrag: V07d globale lokale Musterbibliothek.**
+Storage-Adapter, validierte Muster mit stabilen IDs/Namen, Liste/Vorschauen und
+Speichern des Creator-Entwurfs; Neustart/Laden und beschädigte Daten prüfen.
+Keine Projektmigration, Musteranwendung, Synchronisation oder Upload in V07d.
+
+## V07b Linien-Creator - 08.10.2026
+
+PR214 mit erfolgreicher CI zusammengeführt. Tools > Schraffurenverwaltung öffnet
+einen isolierten Linienentwurf mit rechteckiger Zelle, gemeinsamer Fangabfrage,
+Shift-Richtung und abgeleiteter 3x3-Wiederholung. Eigener Entwurfs-Undo, keine
+BIM-Änderung und keine Änderung des Projektdateiformats. Zellmaße 0,001–100 m,
+maximal 256 Linien, endliche Punkte innerhalb der Zelle, keine Nullsegmente.
+722 Tests bestanden; Typecheck, gezielter Lint und Build bestanden.
+Praktische Browser-Abnahme offen: Browser-Sandbox startet nicht (setup refresh).
+Abnahme: Tools > Schraffurenverwaltung; zwei Linien zeichnen, Zelle vergrößern,
+3x3-Vorschau prüfen, Entwurf rückgängig, schließen; Projekt unverändert.
+Upload und persistente Bibliothek sind noch nicht implementiert. Empfehlung:
+CAD-PAT zuerst, eingeschränktes SVG später, Rasterbilder als eigene Texturen.
+Das ist keine verbindliche Formatentscheidung des Nutzers.
+
+**Genau ein nächster Auftrag: V07c Bibliotheksvertrag für Muster speichern und
+auf vorhandene Schraffuren anwenden festlegen.** Projekt- versus globale
+Bibliothek, Modell- versus Papiermaße und Änderung bestehender Anwendungen
+vor Implementierung klären; Creator praktisch abnehmen.
+
 # Entwicklungsplan NOVIKOV CAD
 
 ## V07a Schraffurverwaltung abgeglichen - 08.10.2026
