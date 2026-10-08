@@ -1,5 +1,18 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## V07a Schraffurverwaltung abgeglichen - 08.10.2026
+
+Nutzer bestaetigt praktische 2D-Abnahme; V06 abgeschlossen fuer heutige Typen.
+Neue Anforderung: Tools > Schraffurenverwaltung, Liste/Vorschauen, Linien-Creator
+mit Wiederholung und Musterupload. Uploadformat offen, Nutzer recherchiert.
+[Architektur, offene Entscheidungen und Abnahme](docs/planning/HATCH_PATTERN_LIBRARY.md).
+
+**Genau ein naechster Auftrag: V07b Linien-Creator als transienten Entwurf mit
+rechteckiger Zelle und 3x3-Wiederholung bauen.** Gemeinsame Fang-/Geometriegrenze,
+kein Projektdateiwechsel oder BIM-Undo fuer Entwurfsaktionen. Bibliotheksspeicherung,
+Anwendung auf Konturen und Import folgen nach den benannten Entscheidungen.
+
+
 ## V06e: Wandvorgaben gemeinsam uebernehmen - 08.10.2026
 
 PR212 nach gruener CI zusammengefuehrt. Wand-Uebernahme im Grundriss: Staerke,

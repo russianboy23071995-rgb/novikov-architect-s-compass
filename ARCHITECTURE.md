@@ -1,5 +1,14 @@
 # NOVIKOV CAD Architecture Contract
 
+## Hatch library / creator preparation - 2026-10-08
+
+Pattern definitions and contour applications are distinct. Repetition and clipping
+are derived rendering data, never duplicated editable project lines. Creator drafts
+have a local drawing context and use shared geometry/snapping and Application
+validation. Import formats and library persistence scope remain undecided.
+See [requirements, proposals and next task](docs/planning/HATCH_PATTERN_LIBRARY.md).
+
+
 ## Shared tool-default pickup - 2026-10-08
 
 The user's clarified contract supersedes V06a: rapid double-secondary-click on an
