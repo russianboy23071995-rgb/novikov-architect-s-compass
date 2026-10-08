@@ -22,22 +22,36 @@ export function distanceInteraction(
   publish: (next: DistanceMeasurement) => void,
   cancel: () => void,
 ): ToolInteraction {
-  const origin = state.end ? null : state.start;
+  return pointMeasurementInteraction(
+    state,
+    state.end ? [] : state.start ? [state.start] : [],
+    (point) => publish(pickMeasurement(state, point)),
+    cancel,
+  );
+}
+/** Shared input and snapping contract for transient point-based measurements. */
+export function pointMeasurementInteraction(
+  identity: object,
+  points: readonly Point2[],
+  pick: (point: Point2) => void,
+  cancel: () => void,
+): ToolInteraction {
+  const origin = points.at(-1);
   return {
-    identity: state,
+    identity,
     origin: origin ?? { x: 0, y: 0 },
     input: null,
     click: "confirm",
     snapping: origin
-      ? drawingSnapPolicy(origin)
+      ? drawingSnapPolicy(origin, points)
       : { origin: null, sources: (r) => [...r], resolve: querySnap },
     preview: () => {
       throw new Error("Messpunkte im Grundriss wählen.");
     },
     validate: (point) => {
-      pickMeasurement(state, point);
+      distanceMetres(point, point);
     },
-    commit: (point) => publish(pickMeasurement(state, point)),
+    commit: pick,
     cancel,
   };
 }

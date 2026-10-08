@@ -191,7 +191,7 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
-          <IconControl label="Strecke messen" onClick={props.onMeasure} active={props.measuring}>
+          <IconControl label="Messen" onClick={props.onMeasure} active={props.measuring}>
             <Ruler className="size-4" />
           </IconControl>
           <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
