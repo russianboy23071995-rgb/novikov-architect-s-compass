@@ -389,9 +389,7 @@ export function CadWorkspace({
     }
 
     if (solidMove && !pickedPoint.anchor) {
-      showNotice(
-        "Zuerst einen sichtbaren WandfuÃŸpunkt anklicken, dann die Bearbeitung wÃ¤hlen.",
-      );
+      showNotice("Zuerst einen sichtbaren WandfuÃŸpunkt anklicken, dann die Bearbeitung wÃ¤hlen.");
       return;
     }
     if (solidMove && !supportsWallWorkplaneEdit(selection, action, pickedPoint.index)) {
@@ -451,8 +449,7 @@ export function CadWorkspace({
     setReadingFile(true);
     setModelError("");
     try {
-      if (file.size > PROJECT_FILE_LIMIT)
-        throw new Error("Projektdatei ist grÃ¶ÃŸer als 10 MB.");
+      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist grÃ¶ÃŸer als 10 MB.");
       const next = readProjectFile(await file.text());
       setPendingFile({ project: next, name: file.name });
     } catch (error) {
@@ -1317,8 +1314,7 @@ export function CadWorkspace({
                     role="status"
                     className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
                   >
-                    Wandkette: Klick setzt Abschnitt Â· Doppelklick/Enter beendet Â· Esc
-                    verwirft
+                    Wandkette: Klick setzt Abschnitt Â· Doppelklick/Enter beendet Â· Esc verwirft
                   </p>
                 )}
                 <InteractionInput
