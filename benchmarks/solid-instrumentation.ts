@@ -6,7 +6,7 @@ export function solidInstrumentation(): Plugin {
     enforce: "pre",
     apply: "serve",
     transform(source, id) {
-      if (!id.replaceAll("\\", "/").endsWith("/src/components/cad/BimSolidView.tsx")) return;
+      if (!id.replaceAll("\\", "/").endsWith("/benchmarks/legacy-solid-renderer.ts")) return;
       let code = source.replaceAll("\r\n", "\n");
       const replace = (before: string, after: string) => {
         if (code.split(before).length !== 2) throw Error("Solid diagnostic drift: " + before);
@@ -25,10 +25,7 @@ export function solidInstrumentation(): Plugin {
         'tracePhase("solid-buffer-submit", () => gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW));',
       );
       return {
-        code:
-          'import { tracePhase } from "/benchmarks/movement-trace.ts";\n' +
-          code +
-          "\nexport { createRenderer as diagnosticRenderer };",
+        code: 'import { tracePhase } from "/benchmarks/movement-trace.ts";\n' + code,
         map: null,
       };
     },

@@ -1,5 +1,4 @@
-// @ts-expect-error Development Vite instrumentation exposes the unchanged renderer only here.
-import { diagnosticRenderer } from "../src/components/cad/BimSolidView";
+import { diagnosticRenderer } from "./legacy-solid-renderer";
 import { buildSolid } from "../src/lib/bim/geometry";
 import { connectedFixture } from "./connected-fixture";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic";

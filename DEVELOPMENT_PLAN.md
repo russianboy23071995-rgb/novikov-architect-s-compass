@@ -1,5 +1,18 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07d Renderer produktiv angebunden - 08.10.2026
+
+PR201 nach gruener CI zusammengefuehrt. BimSolidView verwendet persistente
+Geometriepuffer und gemeinsame Kameramatrix; Canvas besitzt Kontextereignisse.
+695 Tests, Typecheck/Lint/Build und 180 Bildvergleiche bestanden. Echter Workspace:
+Kamera, Modell/Undo, Ebenensichtbarkeit, Fensterauswahl und Context-Restoration.
+[Nachweis und Grenzen](docs/performance/SOLID_RENDERER_INTEGRATION.md).
+
+**Genau ein naechster Auftrag: K07e isolierter Picking-Pilot.** Trefferkandidaten
+pro angezeigter Projektion vorbereiten; Wand/Fenster-ID, Tiefe, Verdeckung und
+Kontextwechsel gegen Vollscan pruefen. Noch keine produktive Picking-Umstellung.
+Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K07c Pilot-Lebenszyklus abgesichert - 08.10.2026
 
 PR200 nach gruener CI zusammengefuehrt. Auswahl/Konturen, Geometrie/Sichtbarkeit,

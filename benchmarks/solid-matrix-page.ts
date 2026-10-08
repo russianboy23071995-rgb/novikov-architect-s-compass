@@ -1,5 +1,4 @@
-// @ts-expect-error Export exists only in the development diagnostic transform.
-import { diagnosticRenderer } from "../src/components/cad/BimSolidView";
+import { diagnosticRenderer } from "./legacy-solid-renderer";
 import { createMatrixRenderer } from "./solid-matrix-renderer";
 import { cameraMatrix, projectWithMatrix } from "./solid-matrix";
 import { connectedFixture } from "./connected-fixture";

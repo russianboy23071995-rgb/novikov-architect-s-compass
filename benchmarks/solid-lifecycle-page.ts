@@ -1,5 +1,4 @@
-// @ts-expect-error Diagnostic-only export.
-import { diagnosticRenderer } from "../src/components/cad/BimSolidView";
+import { diagnosticRenderer } from "./legacy-solid-renderer";
 import { createMatrixRenderer } from "./solid-matrix-renderer";
 import { connectedFixture } from "./connected-fixture";
 import { buildSolid } from "../src/lib/bim/geometry";
