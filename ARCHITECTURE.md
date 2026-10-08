@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## Session-local wall extrusion reuse — 2026-10-08
+
+Prepared selection translation may retain one derived local extrusion per pinned
+wall in its dependency closure. Reuse requires unchanged serialized local profile,
+height, opening rectangles and clipping policy; no new tolerance or ID-only trust.
+Every target still derives/checks connection contours and world coordinates, checks
+foreign endpoints and window rules. Stationary neighbours remain in the closure.
+The cache is private to the prepared session and exposes fresh world-space output;
+public derivation and full confirmation/history validation remain independent.
+See [evidence and limits](docs/performance/SESSION_WALL_EXTRUSION.md).
+
 ## Atomic selection confirmation — 2026-10-08
 
 ToolInteraction may supply `confirm` for an atomic validated publication. The

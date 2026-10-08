@@ -1,5 +1,22 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: lokale Wandextrusion in der Bewegung wiederverwenden — 08.10.2026
+
+PR177 mit grüner CI zusammengeführt (main 72fe814). Die vorbereitete Auswahlbewegung
+behält pro betroffener Wand die letzte lokale Extrusion bei identischen Eingaben.
+Konturen, Anschlüsse und vollständige Commit-/History-Prüfung bleiben erhalten.
+654 Tests, Types/Build/Lint und drei Browser-Vollpfadvergleiche bestanden.
+Lokale Geometrie im Drucktest 1,7/8,5/8,8 ms statt 3,4/16,1/16,3 ms;
+kein konsistenter Gewinn der gesamten Bildschirmvorschau nachgewiesen.
+[Änderungen, Messungen, Grenzen und Abnahme](docs/performance/SESSION_WALL_EXTRUSION.md).
+
+**Genau ein nächster ausführbarer Auftrag:** Kontrollierter alternierender
+A/B-Browservergleich mit identischer Instrumentierung: ursprüngliches T-Paar mit
+zwei Fenstern unter gehaltenem Shift und 100 Wände. Bisherige und sitzungsgebundene
+Ableitung vergleichen, lokale Geometrie und React/Gesamtlatenz getrennt betrachten;
+Vollpfad und ein Undo erhalten. Vor weiterer Optimierung den verbleibenden Engpass
+belegen. Keine Migration weiterer Werkzeuge oder Rendererwechsel.
+
 ## Aktueller Stand: große Auswahlmengen vermessen — 08.10.2026
 
 PR176 mit grüner CI zusammengeführt (main bd8a31a). Diagnoseharness erlaubt

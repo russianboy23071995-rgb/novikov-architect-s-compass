@@ -6,6 +6,9 @@ function replaceOnce(source: string, before: string, after: string) {
 }
 export function movementInstrumentation(): Plugin {
   const functions: Record<string, [string, string][]> = {
+    "/src/geometry/solids/profile-openings.ts": [
+      ["extrudeProfileWithOpenings", "profile-extrusion"],
+    ],
     "/src/interop/images/import.ts": [["checkedImageUrl", "image-url"]],
     "/src/application/selection/move.ts": [
       ["previewSelectionGeometry", "selection-preview"],
