@@ -1,3 +1,4 @@
+import { prepareWallDrawing } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
@@ -76,6 +77,11 @@ export function finishWallChain(chain: WallChain, current: Project): Project {
   return chain.preview;
 }
 
+const preparedPreviews = new WeakMap<
+  WallChain,
+  { id: string; x: number; y: number; value: ReturnType<typeof prepareWallDrawing> }
+>();
+
 /** Derived model only: uses exactly the same validation as placing the next segment. */
 export function previewWallChain(
   chain: WallChain,
@@ -83,6 +89,7 @@ export function previewWallChain(
   point: Point,
   candidate?: SnapCandidate | null,
 ): Project {
+  assertDrawingContext(chain.base, current);
   let id = "@wall-preview";
   const ids = new Set(
     [
@@ -93,5 +100,19 @@ export function previewWallChain(
     ].map((e) => e.id),
   );
   while (ids.has(id)) id += "-";
+  if (
+    !chain.wallIds.length &&
+    chain.points.length === 1 &&
+    !chain.startCandidate &&
+    chain.preview === chain.base
+  ) {
+    const origin = chain.points[0]!;
+    let cached = preparedPreviews.get(chain);
+    if (!cached || cached.id !== id || cached.x !== origin.x || cached.y !== origin.y) {
+      cached = { id, x: origin.x, y: origin.y, value: prepareWallDrawing(current, origin, id) };
+      preparedPreviews.set(chain, cached);
+    }
+    return cached.value.evaluate(point, candidate).project;
+  }
   return appendWallChain(chain, current, id, point, candidate).preview;
 }
