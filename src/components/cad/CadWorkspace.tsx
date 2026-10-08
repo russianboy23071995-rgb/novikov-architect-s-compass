@@ -52,6 +52,7 @@ import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
+import { LineStyleCreator } from "./LineStyleCreator";
 import { HatchPatternCreator } from "./HatchPatternCreator";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
@@ -80,6 +81,7 @@ export function CadWorkspace({
   layerVisibility,
   initialProject,
 }: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
+  const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
@@ -724,9 +726,11 @@ export function CadWorkspace({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {lineCreatorOpen && <LineStyleCreator onClose={() => setLineCreatorOpen(false)} />}
         <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
         {!fullscreen && (
           <TopToolbar
+            onLineCreator={() => setLineCreatorOpen(true)}
             onHatchLibrary={() => setHatchLibraryOpen(true)}
             onMeasure={() => selectTool("measure")}
             measuring={tool === "measure"}
