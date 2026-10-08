@@ -1,4 +1,5 @@
 import {
+  takePreparations,
   startMovementSample,
   finishMovementSample,
   discardMovementSample,
@@ -25,7 +26,7 @@ const plan = () =>
     document.querySelector<SVGSVGElement>('svg[aria-label="BIM floor plan"]'),
     "Missing plan",
   );
-function pointer(type: string, x: number, y: number) {
+function pointer(type: string, x: number, y: number, shiftKey = false) {
   const svg = plan();
   const screen = new DOMPoint(x, -y).matrixTransform(
     requireValue(svg.getScreenCTM(), "Missing plan transform"),
@@ -47,6 +48,7 @@ function pointer(type: string, x: number, y: number) {
     pointerId: 1,
     pointerType: "mouse",
     button: 0,
+    shiftKey,
   };
   svg.dispatchEvent(type === "click" ? new MouseEvent(type, init) : new PointerEvent(type, init));
   return { clientX: init.clientX, clientY: init.clientY };
@@ -101,7 +103,10 @@ async function begin() {
   if (!document.querySelector("main")?.textContent?.includes("Klick platziert die Auswahl"))
     throw new Error("Movement did not enter target mode");
 }
-export async function runMovementProfile() {
+export async function runMovementProfile(
+  checkGeometry?: (delta: { x: number; y: number }) => unknown,
+) {
+  takePreparations();
   const samples: MovementSample[] = [];
   // Use the real wheel handler to make room below the fixture, outside other walls.
   for (let i = 0; i < 2; i++) {
@@ -175,6 +180,50 @@ export async function runMovementProfile() {
       if (i) samples.push({ ...sample, input });
     }
     const preview = wallStart();
+    const geometryPreview = checkGeometry?.(preview);
+    // Untimed UI acceptance: lock a horizontal direction, move far away, release.
+    const horizontal = worldOffset(60, 0),
+      diagonal = worldOffset(60, -60);
+    pointer("pointermove", horizontal.x, horizontal.y);
+    await frame();
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true }));
+    await frame();
+    pointer("pointermove", horizontal.x, horizontal.y, true);
+    await frame();
+    pointer("pointermove", diagonal.x, diagonal.y, true);
+    await frame();
+    if (Math.abs(wallStart().y) > 1e-7) throw new Error("Shift did not retain direction");
+    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+    pointer("pointermove", diagonal.x, diagonal.y);
+    await frame();
+    if (Math.abs(wallStart().y) < 1e-7) throw new Error("Shift direction not released");
+    const key = () =>
+      document.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }),
+      );
+    const input = (label: string) =>
+      requireValue(document.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`), label);
+    const lengthInput = input("Bewegungslänge (m)"),
+      angleInput = input("Bewegungswinkel (Grad)");
+    key();
+    await frame();
+    if (document.activeElement !== lengthInput) throw new Error("First Tab did not focus length");
+    key();
+    await frame();
+    if (document.activeElement !== angleInput) throw new Error("Second Tab did not focus angle");
+    const set = (element: HTMLInputElement, value: string) => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+        element,
+        value,
+      );
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+    set(angleInput, "90");
+    await frame();
+    set(lengthInput, "2");
+    await frame();
+    if (!same(wallStart(), { x: 0, y: 2 })) throw new Error("Numeric preview mismatch");
+    checkGeometry?.(wallStart());
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await frame();
     if (!same(wallStart(), baseline) || !button("Undo").disabled)
@@ -190,6 +239,7 @@ export async function runMovementProfile() {
       throw new Error(
         `Commit mismatch: preview=${JSON.stringify(target)}, actual=${JSON.stringify(wallStart())}, undoDisabled=${button("Undo").disabled}`,
       );
+    const geometryCommit = checkGeometry?.(target);
     button("Undo").click();
     await frame();
     if (!same(wallStart(), baseline) || !button("Undo").disabled)
@@ -199,7 +249,12 @@ export async function runMovementProfile() {
     if (!same(wallStart(), target)) throw new Error("Redo failed");
     return {
       samples,
+      preparationMs: takePreparations(),
+      fullPathComparison: { preview: geometryPreview, commit: geometryCommit },
       acceptance: {
+        shiftRetainedAndReleased: true,
+        tabLengthAngle: true,
+        numericPreview: { degrees: 90, metres: 2 },
         selectedWalls: 20,
         preview,
         cancelled: true,

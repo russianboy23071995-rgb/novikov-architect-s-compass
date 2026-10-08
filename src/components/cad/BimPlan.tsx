@@ -1,14 +1,13 @@
-import { checkedImageUrl } from "@/interop/images/import";
+import { PlanSceneRun } from "./PlanSceneRun";
+import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
+import type { GeometryPreview } from "@/domain/project/geometry-scope";
 import { useSelectionMarquee } from "./useSelectionMarquee";
 import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
 import type { SelectionSet } from "@/application/selection/state";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
-import { wallPlanOutlines } from "@/rendering/viewport/wall-plan-outline";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { useShiftSnapLock } from "./useShiftSnapLock";
-import { connectedWallSolids } from "@/domain/elements/wall/connections";
-import { wallBody } from "@/domain/elements/wall/body";
 import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
 import type { CornerPreview } from "@/application/walls/corner-preview";
 import { anchorDragTarget, type AnchorDrag } from "@/rendering/viewport/anchor-drag";
@@ -21,7 +20,6 @@ import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
-import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
@@ -49,7 +47,6 @@ import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewpo
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
-import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
@@ -59,6 +56,7 @@ export type BimPlanProps = {
     | {
         target: Point | null | undefined;
         previewProject?: ToolInteraction["previewProject"];
+        geometryPreview?: ToolInteraction["geometryPreview"];
         aim: (point: Point) => void;
         pick: (point: Point, candidate?: SnapCandidate | null) => void;
       }
@@ -446,6 +444,16 @@ export function BimPlan({
       }
     }
   }
+  let geometryPreview: GeometryPreview | null = null;
+  if (placement?.geometryPreview) {
+    const point = placement.target === undefined ? pointerSnap?.point : placement.target;
+    if (point)
+      try {
+        geometryPreview = placement.geometryPreview.evaluate(point);
+      } catch (error) {
+        editError = error instanceof Error ? error.message : "Ungültiges Ziel.";
+      }
+  }
   const shown =
     placementProject ??
     preview ??
@@ -456,15 +464,19 @@ export function BimPlan({
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
   );
-  const connected = connectedWallSolids(shown);
-  const plan = visiblePlanGeometry(shown, allowsShown);
-  const outlines = useMemo(
-    () =>
-      wallPlanOutlines(
-        shown,
-        new Set(shown.storey.walls.filter((w) => allowsShown(w.id)).map((w) => w.id)),
-      ),
-    [shown, allowsShown],
+  const scene = useMemo(() => derivePlanScene(shown, allowsShown), [shown, allowsShown]);
+  const previewScene = useMemo(
+    () => (geometryPreview ? derivePlanScene(geometryPreview.geometry, allowsShown) : null),
+    [geometryPreview, allowsShown],
+  );
+  const sceneRuns = useMemo(
+    () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
+    [scene, placement?.geometryPreview?.replacedIds],
+  );
+  const plan = previewScene?.plan ?? scene.plan;
+  const canPick = useCallback(
+    (id: string) => isLayerVisible(project, visibility, id),
+    [project, visibility],
   );
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
@@ -539,7 +551,37 @@ export function BimPlan({
     },
   });
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
-  const selectedIds = new Set((selections ?? (selection ? [selection] : [])).map((t) => t.id));
+  const selectedIds = useMemo(
+    () => new Set((selections ?? (selection ? [selection] : [])).map((t) => t.id)),
+    [selections, selection],
+  );
+  const latestSelect = useRef(selectProps);
+  latestSelect.current = selectProps;
+  const sceneHandlers = useMemo(
+    () => ({
+      click: (kind: NonNullable<Selection>["kind"], id: string, event: React.MouseEvent) =>
+        latestSelect.current(kind, id).onClick(event),
+      key: (kind: NonNullable<Selection>["kind"], id: string, event: React.KeyboardEvent) =>
+        latestSelect.current(kind, id).onKeyDown(event),
+    }),
+    [],
+  );
+  const renderRun = (run: PlanRun) => (
+    <PlanSceneRun
+      key={`${run.kind}:${run.ids[0]}`}
+      {...run}
+      scene={run.affected && previewScene ? previewScene : scene}
+      selectedIds={selectedIds}
+      drawing={drawing}
+      placement={!!placement}
+      pixelsPerMetre={camera.pixelsPerMetre}
+      wallOutlineWidth={wallOutlineWidth}
+      cornerGeometry={cornerPreview?.base === shown ? cornerPreview.geometry : undefined}
+      allowsShown={allowsShown}
+      canPick={canPick}
+      handlers={sceneHandlers}
+    />
+  );
   const shapes = useMemo(
     () =>
       planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
@@ -793,168 +835,7 @@ export function BimPlan({
           vectorEffect="non-scaling-stroke"
         />
       )}
-      {shown.storey.references
-        .filter((r) => allowsShown(r.id))
-        .map((r) => {
-          const a = shown.assets.find((a) => a.id === r.assetId)!;
-          return (
-            <g
-              key={r.id}
-              transform={`translate(${r.origin.x} ${-r.origin.y}) rotate(${(-r.rotation * 180) / Math.PI})`}
-            >
-              <image
-                {...selectProps("reference", r.id)}
-                className="cursor-pointer outline-none"
-                href={checkedImageUrl(a)}
-                width={a.pixelWidth * r.metresPerPixel}
-                height={a.pixelHeight * r.metresPerPixel}
-                pointerEvents={placement ? "none" : "all"}
-              />
-              {selectedIds.has(r.id) && (
-                <rect
-                  width={a.pixelWidth * r.metresPerPixel}
-                  height={a.pixelHeight * r.metresPerPixel}
-                  fill="none"
-                  stroke="#38bdf8"
-                  strokeWidth={1.5}
-                  vectorEffect="non-scaling-stroke"
-                  pointerEvents="none"
-                />
-              )}
-            </g>
-          );
-        })}
-      {plan.hatches.map((hatch) => (
-        <g key={hatch.id}>
-          {hatch.background.visible && (
-            <polygon
-              aria-label="Schraffurhintergrund"
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill={hatch.background.color}
-              pointerEvents="none"
-            />
-          )}
-          <polygon
-            {...selectProps("hatch", hatch.id)}
-            points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-            fill={hatch.fill.color}
-            fillOpacity={hatch.fill.opacity}
-            stroke="transparent"
-            strokeWidth={12}
-            vectorEffect="non-scaling-stroke"
-            pointerEvents="all"
-            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
-          />
-          {hatch.contour.visible && (
-            <polygon
-              aria-label="Schraffurkontur"
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill="none"
-              stroke={hatch.contour.color}
-              strokeWidth={1}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          {selectedIds.has(hatch.id) && (
-            <polygon
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill="none"
-              stroke="#cbd5e1"
-              strokeWidth={2}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-        </g>
-      ))}
-      {plan.walls.map((wall) => {
-        const length = wallLength(wall);
-        const body = wallBody(wall);
-        const angle =
-          (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
-        return (
-          <g
-            key={wall.id}
-            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
-          >
-            <polygon
-              {...selectProps("wall", wall.id)}
-              points={(
-                (cornerPreview?.base === shown &&
-                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
-                connected.find((w) => w.wallId === wall.id)?.localProfile || [
-                  { x: 0, y: -wall.thickness / 2 },
-                  { x: length, y: -wall.thickness / 2 },
-                  { x: length, y: wall.thickness / 2 },
-                  { x: 0, y: wall.thickness / 2 },
-                ]
-              )
-                .map((p) => `${p.x},${-p.y}`)
-                .join(" ")}
-              fill="var(--muted-foreground)"
-              fillOpacity={0.55}
-              stroke={cornerPreview?.base === shown ? "var(--primary)" : "none"}
-              strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
-              className="outline-none focus-visible:stroke-sky-300"
-            />
-            {cornerPreview?.base !== shown && (
-              <path
-                aria-label={`Wandkontur ${wall.id}`}
-                d={(outlines.get(wall.id) ?? [])
-                  .map((edge) => {
-                    const local = (p: Point) => {
-                      const dx = p.x - body.start.x,
-                        dy = p.y - body.start.y;
-                      return `${dx * body.normal.y - dy * body.normal.x},${-(dx * body.normal.x + dy * body.normal.y)}`;
-                    };
-                    return `M${local(edge.start)} L${local(edge.end)}`;
-                  })
-                  .join(" ")}
-                fill="none"
-                stroke={selectedIds.has(wall.id) ? "#94a3b8" : "var(--primary)"}
-                strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
-                pointerEvents="none"
-              />
-            )}
-            {plan.openings
-              .filter((opening) => opening.wallId === wall.id)
-              .map((opening) => (
-                <g key={opening.id}>
-                  <rect
-                    {...(isLayerVisible(project, visibility, opening.id)
-                      ? selectProps("window", opening.id)
-                      : {})}
-                    x={opening.position * length - opening.width / 2}
-                    y={-wall.thickness / 2}
-                    width={opening.width}
-                    height={wall.thickness}
-                    fill="var(--background)"
-                    stroke={
-                      !allowsShown(opening.id)
-                        ? "none"
-                        : selectedIds.has(opening.id)
-                          ? WALL_AXIS_COLOR
-                          : "var(--primary)"
-                    }
-                    strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
-                    className="outline-none"
-                  />
-                  <line
-                    visibility={allowsShown(opening.id) ? "visible" : "hidden"}
-                    x1={opening.position * length - opening.width / 2}
-                    x2={opening.position * length + opening.width / 2}
-                    y1={0}
-                    y2={0}
-                    stroke="var(--primary)"
-                    strokeWidth={wallOutlineWidth / camera.pixelsPerMetre}
-                    pointerEvents="none"
-                  />
-                </g>
-              ))}
-          </g>
-        );
-      })}
+      {sceneRuns.filter((run) => run.kind !== "line").map(renderRun)}
       {selection?.kind === "wall" &&
         plan.walls
           .filter((wall) => wall.id === selection.id)
@@ -1016,39 +897,7 @@ export function BimPlan({
               pointerEvents="none"
             />
           ))}
-      {plan.lines.map((line) => (
-        <g key={line.id}>
-          {selectedIds.has(line.id) && (
-            <path
-              d={linePath(line)}
-              fill="none"
-              stroke="#38bdf8"
-              strokeOpacity={0.4}
-              strokeWidth={5}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          <path
-            d={linePath(line)}
-            fill="none"
-            stroke={line.color}
-            strokeWidth={(line.penWidth * 96) / 25.4}
-            strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
-            vectorEffect="non-scaling-stroke"
-            pointerEvents="none"
-          />
-          <path
-            {...selectProps("line", line.id)}
-            d={linePath(line)}
-            fill="none"
-            stroke="transparent"
-            strokeWidth={12}
-            vectorEffect="non-scaling-stroke"
-            className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
-          />
-        </g>
-      ))}
+      {sceneRuns.filter((run) => run.kind === "line").map(renderRun)}
       {!drawing &&
         !editSession &&
         selection &&

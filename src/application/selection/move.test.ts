@@ -336,20 +336,22 @@ test("precision and plan share a group preview; confirmation ignores altered pre
     () => {},
   );
   const precision = adapter.preview("90", "2", null);
-  const first = adapter.previewProject!(precision.point);
-  assert.equal(adapter.previewProject!({ ...precision.point }), first);
+  const first = adapter.geometryPreview!.evaluate(precision.point);
+  assert.equal(adapter.geometryPreview!.evaluate({ ...precision.point }), first);
   // A changed numeric target must derive different geometry.
   const changed = adapter.preview("90", "3", null);
-  assert.notEqual(adapter.previewProject!(changed.point), first);
-  const displayed = adapter.previewProject!(changed.point);
-  displayed.storey.walls[0]!.height = -1;
+  assert.notEqual(adapter.geometryPreview!.evaluate(changed.point), first);
+  const displayed = adapter.geometryPreview!.evaluate(changed.point);
+  assert.throws(() => {
+    displayed.geometry.storey.walls[0]!.height = -1;
+  });
   confirmInteraction(adapter, changed.point);
   assert.deepEqual(result, previewSelectionMove(session, p, targets, changed.point, v));
   assert.ok(result.storey.walls[0]!.height > 0);
-  assert.notEqual(adapter.previewProject!(changed.point), displayed);
-  const beforeCancel = adapter.previewProject!(changed.point);
+  assert.notEqual(adapter.geometryPreview!.evaluate(changed.point), displayed);
+  const beforeCancel = adapter.geometryPreview!.evaluate(changed.point);
   adapter.cancel();
-  assert.notEqual(adapter.previewProject!(changed.point), beforeCancel);
+  assert.notEqual(adapter.geometryPreview!.evaluate(changed.point), beforeCancel);
 });
 
 test("group preview reuse is scoped to model, selection, visibility and origin", () => {
@@ -367,24 +369,27 @@ test("group preview reuse is scoped to model, selection, visibility and origin",
       () => {},
     );
   const a = make(),
-    first = a.previewProject!(target);
-  assert.notEqual(make().previewProject!(target), first);
-  assert.throws(() => make({ ...p }).previewProject!(target));
-  assert.throws(() => make(p, targets.slice(1)).previewProject!(target));
+    first = a.geometryPreview!.evaluate(target);
+  assert.notEqual(make().geometryPreview!.evaluate(target), first);
+  assert.throws(() => make({ ...p }).geometryPreview!.evaluate(target));
+  assert.throws(() => make(p, targets.slice(1)).geometryPreview!.evaluate(target));
   const hidden = createLayerVisibilityPolicy(p, {
     scope: { kind: "bim-project" },
     hiddenLayerIds: [p.storey.hatches[0]!.layerId],
   });
-  assert.throws(() => make(p, targets, hidden).previewProject!(target));
+  assert.throws(() => make(p, targets, hidden).geometryPreview!.evaluate(target));
   const otherOrigin = beginSelectionMove(p, targets, { x: 10, y: 10 }, visible);
-  assert.notDeepEqual(make(p, targets, visible, otherOrigin).previewProject!(target), first);
+  assert.notDeepEqual(
+    make(p, targets, visible, otherOrigin).geometryPreview!.evaluate(target),
+    first,
+  );
   // Guard the retained hit even if the caller mutates its selection or origin.
   const removed = targets.pop()!;
-  assert.throws(() => a.previewProject!(target));
+  assert.throws(() => a.geometryPreview!.evaluate(target));
   targets.push(removed);
-  assert.notEqual(a.previewProject!(target), first);
+  assert.notEqual(a.geometryPreview!.evaluate(target), first);
   session.origin.x++;
-  assert.throws(() => a.previewProject!(target));
+  assert.throws(() => a.geometryPreview!.evaluate(target));
   assert.throws(() => confirmInteraction(a, target));
   assert.throws(() => a.commit(target));
 });
@@ -408,6 +413,9 @@ test("unconstrained mouse input preserves the exact snapped target for plan reus
   ]) {
     const precision = adapter.preview("", "", point);
     assert.deepEqual(precision.point, point);
-    assert.equal(adapter.previewProject!(precision.point), adapter.previewProject!(point));
+    assert.equal(
+      adapter.geometryPreview!.evaluate(precision.point),
+      adapter.geometryPreview!.evaluate(point),
+    );
   }
 });

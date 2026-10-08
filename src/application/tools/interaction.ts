@@ -1,3 +1,4 @@
+import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
@@ -11,6 +12,10 @@ export type ToolInteraction = {
   input: { axisLabel: string | null; degrees: number | null } | null;
   click: "confirm" | "direction";
   preview: (angle: string, length: string, aim: Point2 | null) => PrecisionValues;
+  geometryPreview?: {
+    replacedIds: readonly string[];
+    evaluate: (point: Point2) => GeometryPreview;
+  };
   previewProject?: (point: Point2, candidate?: SnapCandidate | null) => Project;
   validate: (point: Point2, candidate?: SnapCandidate | null) => void;
   commit: (point: Point2, candidate?: SnapCandidate | null) => void;

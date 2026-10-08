@@ -1,3 +1,4 @@
+import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
 import {
   imageAssetSchema,
   imageReferenceSchema,
@@ -254,20 +255,7 @@ function validateGeometry(
     if (ids.has(entity.id)) throw new Error(`Duplicate ID: ${entity.id}`);
     ids.add(entity.id);
   }
-  for (const line of project.storey.lines ?? []) {
-    if (line.kind === "line" && line.points.length !== 2)
-      throw new Error("A line needs exactly two points");
-    let total = 0;
-    for (let i = 1; i < line.points.length; i++) {
-      const a = line.points[i - 1]!,
-        b = line.points[i]!;
-      const length = Math.hypot(b.x - a.x, b.y - a.y);
-      if (!Number.isFinite(length) || length <= 0)
-        throw new Error("Line segments must have finite positive length");
-      total += length;
-    }
-    if (!Number.isFinite(total)) throw new Error("Line length must be finite");
-  }
+  for (const line of project.storey.lines ?? []) validateLineGeometry(line);
   if (project.schemaVersion === 5 || project.schemaVersion === 9)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
@@ -279,17 +267,6 @@ function validateGeometry(
   for (const opening of project.storey.windows) {
     const wall = walls.get(opening.wallId);
     if (!wall) throw new Error(`Unknown wall: ${opening.wallId}`);
-    const length = wallLength(wall);
-    const centre = opening.position * length;
-    if (
-      opening.width > length ||
-      centre < opening.width / 2 ||
-      length - centre < opening.width / 2
-    ) {
-      throw new Error(`Window ${opening.id} must fit within its wall length`);
-    }
-    if (opening.sillHeight + opening.height > wall.height) {
-      throw new Error(`Window ${opening.id} must fit within its wall height`);
-    }
+    validateWindowGeometry(opening, wall);
   }
 }

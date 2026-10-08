@@ -7,6 +7,10 @@ export type MovementSample = {
   reactMs: number;
   previewStart?: { x: number; y: number };
 };
+const preparationMs: number[] = [];
+export function takePreparations() {
+  return preparationMs.splice(0);
+}
 let active: (MovementSample & { started: number }) | null = null;
 export function startMovementSample() {
   if (active) throw new Error("Overlapping movement samples");
@@ -14,12 +18,22 @@ export function startMovementSample() {
 }
 export function tracePhase<T>(phase: string, fn: () => T): T {
   const sample = active;
+  if (phase === "selection-prepare") {
+    const started = performance.now();
+    try {
+      return fn();
+    } finally {
+      preparationMs.push(performance.now() - started);
+    }
+  }
   if (!sample) return fn();
   const start = performance.now();
   try {
     const result = fn();
     if (phase === "selection-preview") {
-      const p = result as { storey?: { walls?: { start: { x: number; y: number } }[] } };
+      const p = (
+        result as { geometry: { storey?: { walls?: { start: { x: number; y: number } }[] } } }
+      ).geometry;
       if (p.storey?.walls?.[0]) sample.previewStart = { ...p.storey.walls[0].start };
     }
     return result;

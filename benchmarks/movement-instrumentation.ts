@@ -7,7 +7,13 @@ function replaceOnce(source: string, before: string, after: string) {
 export function movementInstrumentation(): Plugin {
   const functions: Record<string, [string, string][]> = {
     "/src/interop/images/import.ts": [["checkedImageUrl", "image-url"]],
-    "/src/application/selection/move.ts": [["previewSelectionMove", "selection-preview"]],
+    "/src/application/selection/move.ts": [
+      ["previewSelectionGeometry", "selection-preview"],
+      ["previewSelectionMove", "selection-materialize"],
+    ],
+    "/src/domain/project/prepared-translation.ts": [["prepareTranslation", "selection-prepare"]],
+    "/src/rendering/viewport/plan-scene.ts": [["derivePlanScene", "plan-scene"]],
+    "/src/components/cad/PlanSceneRun.tsx": [["PlanSceneContent", "plan-run"]],
     "/src/domain/project/schema.ts": [["validateProject", "project-validation"]],
     "/src/domain/elements/wall/connections.ts": [["connectedWallSolids", "wall-solids"]],
     "/src/rendering/viewport/wall-plan-outline.ts": [["wallPlanOutlines", "plan-outlines"]],

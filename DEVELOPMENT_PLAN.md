@@ -1,5 +1,31 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: A-04-Pilot Auswahlbewegung – 07.10.2026
+
+PR171 nach Nutzerfreigabe zusammengeführt (`main` 4d284da). Der Pilot auf
+`perf/prepared-selection-preview` verwendet eine vorbereitete gemeinsame Aktion,
+lokale Geometrievorschau und stabile SVG-/Navigator-Daten. Vollvalidierung und ein
+Undo-Schritt bleiben beim Bestätigen erhalten. Andere Werkzeuge noch unverändert.
+Dieser Abschnitt ersetzt den früheren Folgeauftrag im nachstehenden Verlauf.
+
+[Nachweis, Rohmessungen, Grenzen und Abnahme](docs/performance/PREPARED_SELECTION_PREVIEW.md):
+639 Tests, beide Typprüfungen, Lint (0 Fehler/6 bekannte Warnungen) und Build
+bestanden. Sechs Browserfälle: bei 5.000 Elementen Median 1.027 → 38 ms, mit PNG
+1.235 → 39 ms. Alle Fälle bestehen Abbruch, Mausplatzierung und ein Undo/Redo.
+Zusätzlich 20 gelöste T-Nachbarn: gerenderte Wände/Konturen/Fenster stimmen mit
+Vollpfad überein; Shift, Tab, Zahlenvorschau und Zoom geprüft. Vorbereitung separat
+sichtbar (bis 437 ms). Neuer GitHub-Workflow prüft Test/Types/Lint/Build; sein
+konkretes Ergebnis wird im PR dokumentiert. Praktische Nutzerabnahme steht aus.
+
+**Genau ein nächster ausführbarer Auftrag:** Nach praktischer Pilotabnahme die
+Vorbereitungs- und Bestätigungskosten derselben Auswahlbewegung getrennt
+profilieren und doppelte Aktionsauswertung zwischen `validate` und `commit` in
+eine atomare gemeinsame Bestätigung überführen. Volle Modellprüfung am
+History-Übergang, Kontextschutz, Vergleich zum Vollpfad und genau ein Undo bleiben
+verbindlich. Keine pauschale Migration weiterer Werkzeuge in diesem Schritt.
+A-04 bleibt insgesamt offen; A-01-Messlücken und A-05/A-06/A-07 bleiben bestehen.
+
+
 ## Aktueller Auftrag: Architekturprüfung und A-04-Kurskorrektur — 07.10.2026
 
 Der Nutzer priorisiert eine tragfähige Gesamtlösung vor weiteren Einzelcaches.

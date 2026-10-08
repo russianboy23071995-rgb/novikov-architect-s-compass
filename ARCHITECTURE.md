@@ -9,12 +9,18 @@ code evidence, reproducible diagnostics, alternatives and the single next pilot.
 Existing product rules and the dependency direction UI → Application → Domain →
 Geometry/Core remain binding.
 
-**Implemented status:** previews still materialize and fully validate projects.
-Bounded image-URL reuse and PR171's one-result interaction cache reduce repeated
-work; they do not provide an incremental model or scalable scene updates. The
-local snapping index already uses the committed model and remains shared.
+**Implemented pilot:** 2D whole-selection translation prepares an owned validated
+base once and evaluates a typed geometry preview over it. The conservative wall
+dependency closure includes stationary partners and hosted windows; global endpoint
+occupancy catches unrelated endpoints arriving at joins. Unaffected SVG paint runs
+and Navigator data are reused. Final materialization/context checking and snapshot
+history still fully validate; public validation and file boundaries are unchanged.
+Text/voice selection movement calls the same prepared action through its full
+snapshot interface. Other tool previews still use the existing full-project path.
+See [pilot evidence and limitations](docs/performance/PREPARED_SELECTION_PREVIEW.md).
+The local snapping index continues to use the committed model and remains shared.
 
-**Binding direction for the migration, not completed functionality:**
+**Binding direction for further migration (only the pilot above is implemented):**
 
 - Application prepares an edit against a stable validated model revision, typed
   selection, visibility context and origin. Pointer updates change parameters,

@@ -1,3 +1,4 @@
+import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { tConnectionContours } from "./t-relations.ts";
 import type { Project, Wall } from "../../project/schema.ts";
 import { deriveWallCorner } from "./corner.ts";
@@ -61,7 +62,7 @@ export function reconcileWallJoins(
 }
 
 /** Authoritative disposable contours from persisted endpoint relationships. No schema recursion. */
-export function connectedWallContours(project: Project) {
+export function connectedWallContours(project: WallGeometry) {
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   const counts = new Map<string, number>();
   for (const wall of walls.values())
@@ -133,8 +134,8 @@ export function connectedWallContours(project: Project) {
   return contours;
 }
 
-const solidCache = new WeakMap<Project, ReturnType<typeof wallContourSolid>[]>();
-export function connectedWallSolids(project: Project) {
+const solidCache = new WeakMap<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
+export function connectedWallSolids(project: WallGeometry) {
   const cached = solidCache.get(project);
   if (cached) return cached;
   const contours = connectedWallContours(project);

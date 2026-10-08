@@ -1,5 +1,6 @@
+import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
 import { createPointPreview } from "../tools/point-preview.ts";
-import { validateProject, type Project, type Point } from "../../domain/project/schema.ts";
+import { type Project, type Point } from "../../domain/project/schema.ts";
 import { eligibleSelection, targetKey, type SelectionSet } from "./state.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { drawingSnapPolicy, type AnchoredSnapPolicy } from "../tools/snapping.ts";
@@ -12,6 +13,14 @@ export type SelectionMove = {
   origin: Point;
   snapping: AnchoredSnapPolicy;
 };
+const preparations = new WeakMap<
+  SelectionMove,
+  {
+    action: ReturnType<typeof prepareTranslation>;
+    origin: Point;
+    targets: SelectionSet;
+  }
+>();
 export function sameTargets(a: SelectionSet, b: SelectionSet): boolean {
   const keys = new Set(a.map(targetKey));
   return (
@@ -52,7 +61,7 @@ export function beginSelectionMove(
   const moving = new Set(targets.map((t) => t.id));
   for (const w of base.storey.windows) if (moving.has(w.wallId)) moving.add(w.id);
   const anchor = { ...origin };
-  return {
+  const session: SelectionMove = {
     base,
     targets: targets.map((t) => ({ ...t })),
     origin: anchor,
@@ -62,6 +71,15 @@ export function beginSelectionMove(
         refs.filter((r) => [r, ...(r.dependencies ?? [])].every((s) => !moving.has(s.entityId))),
     },
   };
+  preparations.set(session, {
+    action: prepareTranslation(
+      base,
+      targets.map((t) => t.id),
+    ),
+    origin: { ...anchor },
+    targets: targets.map((t) => ({ ...t })),
+  });
+  return session;
 }
 /** One proposed snapshot: relationships never observe partially translated walls. */
 export function previewSelectionMove(
@@ -74,34 +92,41 @@ export function previewSelectionMove(
   if (session.base !== current || !sameTargets(session.targets, targets))
     throw new Error("Modell oder Auswahl geändert. Bewegung erneut beginnen.");
   assertMovableSelection(current, targets, visibility);
-  const dx = point.x - session.origin.x,
-    dy = point.y - session.origin.y;
-  if (!Number.isFinite(dx) || !Number.isFinite(dy)) throw new Error("Ungültige Bewegung.");
-  if (dx === 0 && dy === 0) return current;
-  const ids = new Set(targets.map((t) => t.id));
-  const translate = (p: Point): Point => ({ x: p.x + dx, y: p.y + dy });
-  const s = current.storey;
-  return validateProject({
-    ...current,
-    storey: {
-      ...s,
-      references: s.references.map((r) =>
-        ids.has(r.id) ? { ...r, origin: translate(r.origin) } : r,
-      ),
-      walls: s.walls.map((w) =>
-        ids.has(w.id) ? { ...w, start: translate(w.start), end: translate(w.end) } : w,
-      ),
-      lines: s.lines?.map((l) => (ids.has(l.id) ? { ...l, points: l.points.map(translate) } : l)),
-      hatches: s.hatches.map((h) =>
-        ids.has(h.id) ? { ...h, points: h.points.map(translate) } : h,
-      ),
-      wallJoins: s.wallJoins.filter((j) => ids.has(j.first.wallId) === ids.has(j.second.wallId)),
-      wallTJunctions: s.wallTJunctions.filter(
-        (j) => ids.has(j.hostWallId) === ids.has(j.incoming.wallId),
-      ),
-    },
+  const prepared = preparation(session);
+  return prepared.action.materialize(current, {
+    x: point.x - prepared.origin.x,
+    y: point.y - prepared.origin.y,
   });
 }
+function preparation(session: SelectionMove) {
+  const prepared = preparations.get(session);
+  if (
+    !prepared ||
+    !sameTargets(prepared.targets, session.targets) ||
+    prepared.origin.x !== session.origin.x ||
+    prepared.origin.y !== session.origin.y
+  )
+    throw new Error("Bewegungskontext geaendert. Erneut beginnen.");
+  return prepared;
+}
+/** No full project materialization or validation on the pointer path. */
+export function previewSelectionGeometry(
+  session: SelectionMove,
+  current: Project,
+  targets: SelectionSet,
+  point: Point,
+  visibility?: LayerVisibilityPolicy,
+) {
+  if (session.base !== current || !sameTargets(session.targets, targets))
+    throw new Error("Modell oder Auswahl geändert. Bewegung erneut beginnen.");
+  assertMovableSelection(current, targets, visibility);
+  const prepared = preparation(session);
+  return prepared.action.evaluate({
+    x: point.x - prepared.origin.x,
+    y: point.y - prepared.origin.y,
+  });
+}
+
 export function selectionMoveInteraction(
   session: SelectionMove,
   current: Project,
@@ -123,8 +148,11 @@ export function selectionMoveInteraction(
       throw new Error("Bewegungskontext geaendert. Erneut beginnen.");
     assertMovableSelection(current, targets, visibility);
   };
-  const preview = createPointPreview(evaluateProject, assertContext);
-  const previewProject = preview.get;
+  const prepared = preparation(session);
+  const preview = createPointPreview(
+    (point) => previewSelectionGeometry(session, current, targets, point, visibility),
+    assertContext,
+  );
   return {
     identity: session,
     origin: session.origin,
@@ -133,10 +161,10 @@ export function selectionMoveInteraction(
     click: "confirm",
     preview: (angle, length, aim) => {
       const value = precisionTarget(session.origin, aim, angle, length);
-      previewProject(value.point);
+      preview.get(value.point);
       return value;
     },
-    previewProject,
+    geometryPreview: { replacedIds: prepared.action.replacedIds, evaluate: preview.get },
     validate: (point) => {
       preview.clear();
       assertContext();

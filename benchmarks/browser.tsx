@@ -1,3 +1,4 @@
+import { checkMovementGeometry } from "./movement-geometry-check";
 import { runMovementProfile } from "./movement-driver";
 import { traceReactCommit } from "./movement-trace";
 /** Dev-only diagnostic page. Never imported by the product routes. */
@@ -45,7 +46,7 @@ function image() {
   imageData = canvas.toDataURL("image/png").split(",")[1]!;
   return imageData;
 }
-function fixture(count: number, withImage: boolean): Project {
+function fixture(count: number, withImage: boolean, dense: boolean): Project {
   const p = createProject("benchmark", "storey");
   const pairs = Math.floor(count / 10);
   for (let i = 0; i < pairs; i++) {
@@ -117,6 +118,27 @@ function fixture(count: number, withImage: boolean): Project {
       metresPerPixel: 0.01,
     });
   }
+  if (dense) {
+    // Twenty stationary branches on the first moving host, retaining its corner/window.
+    p.storey.lines.splice(-20);
+    p.storey.walls[0]!.end.x = 14.3;
+    p.storey.walls[1]!.start.x = 14.3;
+    p.storey.walls[1]!.end.x = 14.3;
+    for (let i = 0; i < 20; i++) {
+      const id = `branch-${i}`,
+        x = 0.5 + i * 0.6;
+      p.storey.walls.push({
+        id,
+        layerId: p.defaultLayerIds.wall,
+        start: { x, y: -2 },
+        end: { x, y: 0 },
+        thickness: 0.36,
+        height: 2.8,
+        bodyOffset: 0,
+      });
+      p.storey.wallTJunctions.push({ hostWallId: "wall-1", incoming: { wallId: id, endpoint: 1 } });
+    }
+  }
   return validateProject(p);
 }
 const frame = () =>
@@ -148,6 +170,7 @@ function stats() {
 export function Harness() {
   const [count, setCount] = useState(100),
     [images, setImages] = useState(false),
+    [dense, setDense] = useState(false),
     [project, setProject] = useState<Project>(),
     [status, setStatus] = useState("Ready"),
     [report, setReport] = useState("");
@@ -158,7 +181,7 @@ export function Harness() {
     await frame();
     for (const k of Object.keys(samples)) delete samples[k];
     const t = performance.now();
-    const p = fixture(count, images);
+    const p = fixture(count, images, dense);
     add("fixtureValidate", performance.now() - t);
     flushSync(() => setProject(p));
     await frame();
@@ -234,7 +257,8 @@ export function Harness() {
     setStatus("Measuring active movement");
     await frame();
     try {
-      movementReport = await runMovementProfile();
+      if (!project) return;
+      movementReport = await runMovementProfile((delta) => checkMovementGeometry(project, delta));
       setStatus("Movement complete");
       show();
     } catch (e) {
@@ -262,6 +286,7 @@ export function Harness() {
         {
           count,
           images,
+          dense,
           bytes: project ? new TextEncoder().encode(JSON.stringify(project)).length : 0,
           userAgent: navigator.userAgent,
           heap: m
@@ -310,6 +335,15 @@ export function Harness() {
             onChange={(e) => setImages(e.target.checked)}
           />
           Image
+        </label>
+        <label>
+          <input
+            aria-label="Dense connections"
+            type="checkbox"
+            checked={dense}
+            onChange={(e) => setDense(e.target.checked)}
+          />
+          Dense T connections
         </label>
         <button onClick={load}>Load scenario</button> <button onClick={run}>Measure core</button>{" "}
         <button onClick={profileCommit}>Profile commit</button>{" "}

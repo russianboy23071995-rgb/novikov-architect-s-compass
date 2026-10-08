@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   Box,
   Building2,
@@ -93,50 +93,55 @@ type ProjectNavigatorProps = {
   onClose: () => void;
 };
 
-export function ProjectNavigator({ active, onSelect, onClose, project }: ProjectNavigatorProps) {
-  const modelTree: TreeNode[] = [
-    {
-      id: project.id,
-      label: "BIM Project",
-      kind: "group",
-      children: [
-        {
-          id: project.storey.id,
-          label: "Level 01",
-          kind: "group",
-          children: [
-            ...project.storey.walls.map((wall, index): TreeNode => ({
-              id: wall.id,
-              label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
-              kind: "group",
-              children: project.storey.windows
-                .filter((opening) => opening.wallId === wall.id)
-                .map((opening, index) => ({
+function NavigatorContent({ active, onSelect, onClose, project }: ProjectNavigatorProps) {
+  const modelTree = useMemo(() => {
+    const openings = new globalThis.Map<string, Project["storey"]["windows"]>();
+    for (const window of project.storey.windows) {
+      if (!openings.has(window.wallId)) openings.set(window.wallId, []);
+      openings.get(window.wallId)!.push(window);
+    }
+    return [
+      {
+        id: project.id,
+        label: "BIM Project",
+        kind: "group",
+        children: [
+          {
+            id: project.storey.id,
+            label: "Level 01",
+            kind: "group",
+            children: [
+              ...project.storey.walls.map((wall, index): TreeNode => ({
+                id: wall.id,
+                label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
+                kind: "group",
+                children: (openings.get(wall.id) ?? []).map((opening, index) => ({
                   id: opening.id,
                   label: `Window ${index + 1} · ${opening.width.toFixed(2)} m`,
                   kind: "item",
                 })),
-            })),
-            ...project.storey.references.map((r, index): TreeNode => ({
-              id: r.id,
-              label: `Bildreferenz ${index + 1}`,
-              kind: "item",
-            })),
-            ...project.storey.hatches.map((hatch, index): TreeNode => ({
-              id: hatch.id,
-              label: `Schraffur ${index + 1}`,
-              kind: "item",
-            })),
-            ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
-              id: line.id,
-              label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
-              kind: "item",
-            })),
-          ],
-        },
-      ],
-    },
-  ];
+              })),
+              ...project.storey.references.map((r, index): TreeNode => ({
+                id: r.id,
+                label: `Bildreferenz ${index + 1}`,
+                kind: "item",
+              })),
+              ...project.storey.hatches.map((hatch, index): TreeNode => ({
+                id: hatch.id,
+                label: `Schraffur ${index + 1}`,
+                kind: "item",
+              })),
+              ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
+                id: line.id,
+                label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
+                kind: "item",
+              })),
+            ],
+          },
+        ],
+      },
+    ] satisfies TreeNode[];
+  }, [project]);
   return (
     <aside
       className="glass-panel-strong flex h-full min-w-0 flex-col overflow-hidden rounded-lg"
@@ -178,5 +183,31 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
         </div>
       </div>
     </aside>
+  );
+}
+
+const StableNavigator = memo(NavigatorContent);
+/** Pointer-driven parent renders never rebuild the unchanged project tree. */
+export function ProjectNavigator(props: ProjectNavigatorProps) {
+  const latest = useRef(props);
+  latest.current = props;
+  const active = useRef(props.active);
+  if (
+    active.current.length !== props.active.length ||
+    active.current.some((id, i) => id !== props.active[i])
+  )
+    active.current = props.active;
+  const onClose = useCallback(() => latest.current.onClose(), []);
+  const onSelect = useCallback<ProjectNavigatorProps["onSelect"]>(
+    (...args) => latest.current.onSelect(...args),
+    [],
+  );
+  return (
+    <StableNavigator
+      project={props.project}
+      active={active.current}
+      onSelect={onSelect}
+      onClose={onClose}
+    />
   );
 }
