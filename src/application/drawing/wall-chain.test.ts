@@ -368,3 +368,38 @@ test("prepared first preview is session bound; next segment and confirmation ret
 function validateProjectCopy(p: ReturnType<typeof createProject>) {
   return deserializeProject(serializeProject(p));
 }
+
+test("second-segment shared preview rejects stale basis and third segment keeps full result", async () => {
+  const { previewWallChain } = await import("./wall-chain.ts");
+  const base = createProject("second-session", "s"),
+    first = appendWallChain(beginWallChain(base, { x: 0, y: 0 }), base, "first", { x: 4, y: 0 });
+  for (const point of [
+    { x: 4, y: 3 },
+    { x: 5, y: 3 },
+    { x: 4, y: -3 },
+  ])
+    assert.deepEqual(
+      previewWallChain(first, base, point),
+      appendWallChain(first, base, "@wall-preview", point).preview,
+    );
+  assert.throws(() => previewWallChain(first, validateProjectCopy(base), { x: 4, y: 3 }));
+  const second = appendWallChain(first, base, "second", { x: 4, y: 3 }),
+    end = { x: 0, y: 3 };
+  assert.deepEqual(
+    previewWallChain(second, base, end),
+    appendWallChain(second, base, "@wall-preview", end).preview,
+  );
+  const final = appendWallChain(second, base, "third", end),
+    h = commitProject(createHistory(base), finishWallChain(final, base));
+  assert.equal(h.past.length, 1);
+  assert.deepEqual(undoProject(h).present, base);
+  assert.deepEqual(redoProject(undoProject(h)), h);
+  const replacement = appendWallChain(beginWallChain(base, { x: 10, y: 10 }), base, "other", {
+    x: 14,
+    y: 10,
+  });
+  assert.deepEqual(
+    previewWallChain(replacement, base, { x: 14, y: 13 }),
+    appendWallChain(replacement, base, "@wall-preview", { x: 14, y: 13 }).preview,
+  );
+});

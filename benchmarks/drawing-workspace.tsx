@@ -59,17 +59,18 @@ async function runUi() {
   window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
   await frame();
   await click(-1, -1);
+  await click(-4, -1);
   document
     .querySelector('svg[aria-label="BIM floor plan"]')!
     .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   await frame();
-  if (walls() !== initial + 2) throw Error(`Expected two walls, got ${walls() - initial}`);
+  if (walls() !== initial + 3) throw Error(`Expected three walls, got ${walls() - initial}`);
   button("Undo");
   await frame();
   if (walls() !== initial) throw Error("Chain undo failed");
   button("Redo");
   await frame();
-  if (walls() !== initial + 2) throw Error("Redo failed");
+  if (walls() !== initial + 3) throw Error("Redo failed");
   button("Wall tool");
   await frame();
   await click(-8, -8);
@@ -79,7 +80,7 @@ async function runUi() {
     .querySelector('svg[aria-label="BIM floor plan"]')!
     .dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   await frame();
-  if (walls() !== initial + 2) throw Error("Cancel changed model");
+  if (walls() !== initial + 3) throw Error("Cancel changed model");
   button("Wall tool");
   await frame();
   await click(-8, -8);
@@ -87,8 +88,8 @@ async function runUi() {
   await frame();
   button("Select tool");
   await frame();
-  if (walls() !== initial + 2) throw Error("Tool switch changed model");
-  return "PASS: mouse/Shift, two segments, one Undo/Redo, Escape and tool switch";
+  if (walls() !== initial + 3) throw Error("Tool switch changed model");
+  return "PASS: mouse/Shift, three segments, one Undo/Redo, Escape and tool switch";
 }
 const diagnostic = document.createElement("button");
 diagnostic.textContent = "Maus/Shift testen";
