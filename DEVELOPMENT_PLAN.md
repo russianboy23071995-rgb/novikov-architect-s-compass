@@ -1,5 +1,19 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K06a verbundene Wandgruppen vermessen — 08.10.2026
+
+PR194 nach gruener CI zusammengefuehrt. Eckketten/T-Gruppen mit 25/100 Waenden
+und Fenstern: 40 Koerper- und 40 Bewegungsvergleiche bestanden. Ein ausgewaehltes
+Element betrifft die ganze Komponente. Fensterfilter unter 0,1 ms; vorbereitete
+Bewegung der ersten Wand einer 100er-Eckkette ca. 4,15 ms. Kein Frame-Nachweis.
+[Details und Grenzen](docs/performance/CONNECTED_WALLS_PROFILE.md).
+
+**Genau ein naechster Auftrag: K06b isolierter Pilot fuer Bewegung der ersten
+Wand einer freien Eckkette.** Stationaere Ableitungen wiederverwenden, fachliche
+Grenze gegen Vollpfad beweisen; Fenster/Fremdendpunkte und konservativen Fallback
+pruefen. Noch keine produktive Anbindung. K-/V-Ziele bleiben erhalten.
+
+
 ## Aktueller Stand: K04h zweiter Abschnitt angebunden — 08.10.2026
 
 PR193 nach gruener CI zusammengefuehrt. Gemeinsamer Vorschaucache nutzt den
