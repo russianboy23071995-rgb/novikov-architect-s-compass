@@ -1,5 +1,18 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K07a 3D-Kamera und Picking vermessen - 08.10.2026
+
+PR198 nach gruener CI zusammengefuehrt. Diagnose des bestehenden Renderers:
+25/100/500 Waende, 1/2/4 Ansichten, zwei Laeufe und je 21 Kontrollvergleiche.
+500 Waende / eine Ansicht: Draw-CPU 49-59 ms, davon 47-57 ms Projektion/Packen.
+694 Tests, Diagnose-Typecheck inkl. src, Lint und Build bestanden.
+[Messgrenzen und Rohdaten](docs/performance/SOLID_CAMERA_PROFILE.md).
+
+**Genau ein naechster Auftrag: K07b isolierter Kameramatrix-/Geometriepuffer-Pilot.**
+Bestehenden WebGL-Pfad verwenden; unveraenderte Weltgeometrie wiederverwenden,
+Projektion/Tiefe/Oeffnungen/IDs gegen bisherigen Pfad vergleichen. Noch keine
+Produktumstellung oder Picking-Neuschreibung. Andere K-/V-Ziele bleiben erhalten.
+
 ## Aktueller Stand: K06d Einzelwand an gemeinsame Bewegung angebunden - 08.10.2026
 
 PR197 nach gruener CI zusammengefuehrt. Element frei bewegen einer einzelnen
