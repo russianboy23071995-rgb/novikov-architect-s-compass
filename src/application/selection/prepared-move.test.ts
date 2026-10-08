@@ -241,3 +241,37 @@ test("scene runs preserve paint order and exclude hidden geometry without a seco
     base.storey.lines!.map((l) => l.id),
   );
 });
+
+test("detached chain end retains full renderer geometry, zero state and stale-context guards", async () => {
+  const { connectedFixture } = await import("../../../benchmarks/connected-fixture.ts");
+  const p = connectedFixture("chain", 25),
+    targets = [{ kind: "wall" as const, id: "wall-0" }];
+  const session = beginSelectionMove(p, targets, { x: 0, y: 0 });
+  for (const point of [
+    { x: -2, y: -2 },
+    { x: -3, y: -1 },
+    { x: 0, y: 0 },
+  ]) {
+    const patch = previewSelectionGeometry(session, p, targets, point),
+      full = fullSelectionMove(p, targets, point);
+    assert.deepEqual(connectedWallSolids(patch.geometry), connectedWallSolids(full));
+    const visible = new Set(p.storey.walls.map((w) => w.id));
+    assert.deepEqual(wallPlanOutlines(patch.geometry, visible), wallPlanOutlines(full, visible));
+    assert.deepEqual(
+      derivePlanScene(patch.geometry, () => true).plan,
+      derivePlanScene(full, () => true).plan,
+    );
+    assert.equal(patch.replacedIds.length, p.storey.walls.length + p.storey.windows.length);
+    assert.equal(
+      previewSelectionMove(session, p, targets, point).storey.wallJoins.length,
+      full.storey.wallJoins.length,
+    );
+  }
+  assert.throws(() =>
+    previewSelectionGeometry(session, validateProject(p), targets, { x: -2, y: -2 }),
+  );
+  assert.throws(() =>
+    previewSelectionGeometry(session, p, [{ kind: "wall", id: "wall-1" }], { x: -2, y: -2 }),
+  );
+  assert.throws(() => previewSelectionGeometry(session, p, targets, { x: 4, y: 4 }));
+});

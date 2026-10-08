@@ -164,3 +164,15 @@ export function createPreparedWallSolids(wallIds: readonly string[]) {
   const derive = createWallContourSolidDeriver(wallIds);
   return (project: WallGeometry) => deriveConnectedWallSolids(project, derive);
 }
+
+/** Internal prepared-translation reuse: stationary scope excludes a detached free end wall.
+ * The caller owns immutable geometry and checks moving endpoints against fixed joined nodes.
+ * Only the stationary scope contains joins; free walls have no connected solid here.
+ */
+export function prepareDetachedEndSolids(stationary: WallGeometry) {
+  const solids = connectedWallSolids(stationary);
+  return (geometry: WallGeometry) => {
+    solidCache.set(geometry, solids);
+    return solids;
+  };
+}

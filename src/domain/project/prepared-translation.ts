@@ -1,7 +1,10 @@
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
-import { createPreparedWallSolids } from "../elements/wall/connections.ts";
+import {
+  createPreparedWallSolids,
+  prepareDetachedEndSolids,
+} from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
@@ -94,7 +97,34 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     ].map((e) => e.id),
   );
 
-  const deriveSolids = createPreparedWallSolids(affected.storey.walls.map((w) => w.id));
+  // Bounded case proven by K06b: one free chain end, optionally its hosted windows.
+  // Derive the changed stationary end once after detachment, not at every pointer target.
+  const degree = new Map<string, number>();
+  for (const j of s.wallJoins)
+    for (const id of [j.first.wallId, j.second.wallId]) degree.set(id, (degree.get(id) ?? 0) + 1);
+  const movingId = movingWalls.length === 1 ? movingWalls[0]!.id : null;
+  const detachedEnd =
+    movingId !== null &&
+    !s.wallTJunctions.length &&
+    degree.get(movingId) === 1 &&
+    [...degree.values()].every((n) => n <= 2) &&
+    selectedIds.every(
+      (id) => id === movingId || s.windows.some((w) => w.id === id && w.wallId === movingId),
+    );
+  const stationary = detachedEnd
+    ? freeze({
+        storey: {
+          ...affected.storey,
+          walls: affected.storey.walls.filter((w) => w.id !== movingId),
+          windows: affected.storey.windows.filter((w) => w.wallId !== movingId),
+          wallJoins: localJoins,
+          wallTJunctions: localTees,
+        },
+      })
+    : null;
+  const deriveSolids = stationary
+    ? prepareDetachedEndSolids(stationary)
+    : createPreparedWallSolids(affected.storey.walls.map((w) => w.id));
 
   function evaluate(delta: Point): GeometryPreview {
     if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
@@ -141,11 +171,13 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       const p = join.first.endpoint === 0 ? wall.start : wall.end;
       if (countAt(pointKey(p)) !== 2) throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     }
-    for (const wall of geometry.storey.walls) wallBody(wall);
+    for (const wall of geometry.storey.walls)
+      if (!detachedEnd || wall.id === movingId) wallBody(wall);
     for (const line of geometry.storey.lines!) validateLineGeometry(line);
     for (const hatch of geometry.storey.hatches) hatchSchema.parse(hatch);
     for (const opening of geometry.storey.windows)
-      validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
+      if (!detachedEnd || opening.wallId === movingId)
+        validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
     for (const reference of geometry.storey.references)
       validateReferenceExtent(reference, assets.get(reference.assetId)!);
     // The exact existing corner/T/opening/solid rules, applied to the dependency closure.
