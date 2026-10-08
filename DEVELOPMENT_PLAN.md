@@ -1,5 +1,20 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## Aktueller Stand: K04b vorbereiteter Endpunkt-Pilot — 08.10.2026
+
+PR187 mit gruener CI zusammengefuehrt (main 910dcf7). Isolierter Pilot fuer exakte
+axiale Verlaengerung des T-Hauptwand-Endes ohne Ecken; bestehendes updateWall auf
+vorbereiteter Gruppe, sonst Vollpfad. Keine produktive UI-Anbindung.
+674 Tests, Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+60 Browservergleiche identisch; bei 1.000 Elementen Median 9,45 auf 0,40 ms,
+Vorbereitung 14,2 ms. [Nachweis und Grenzen](docs/performance/PREPARED_ENDPOINT_PILOT.md).
+
+**Genau ein naechster Auftrag: K04c gemeinsame Endpunkt-Interaktion anbinden.**
+Application-Vorbereitung, Sitzungs-/Basis-/Auswahlbindung, Abbruch und Fallback
+sichern; volle Bestaetigung und ein Undo-Schritt. Praktischen Maus-/Shift-/Renderer-
+Ablauf pruefen. Geltungsbereich nicht gleichzeitig erweitern. K-/V-Ziele bleiben.
+
+
 ## Aktueller Stand: K04a Wandendpunkt vermessen — 08.10.2026
 
 PR186 nach gruener CI zusammengefuehrt (main 335546a). Acht Browser-API-Faelle,
