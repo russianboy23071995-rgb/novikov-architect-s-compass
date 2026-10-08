@@ -1,3 +1,5 @@
+import { rectangleContour, prepareHatchBoundaries } from "@/application/hatches/construction";
+import type { HatchConstruction } from "@/application/hatches/construction";
 import { useMeasurement } from "./useMeasurement";
 import type { MeasurementMode } from "./useMeasurement";
 import { editAnchor } from "@/lib/bim/direct-edit";
@@ -145,6 +147,14 @@ export function CadWorkspace({
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
   const pathDrawing = tool === "line" || tool === "hatch";
+  const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
+  const findHatchBoundary = useMemo(
+    () =>
+      tool === "hatch" && hatchConstruction === "boundary"
+        ? prepareHatchBoundaries(project, visibility)
+        : null,
+    [tool, hatchConstruction, project, visibility],
+  );
   const [hatchFill, setHatchFill] = useState(defaultHatchFill);
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
@@ -446,12 +456,12 @@ export function CadWorkspace({
     }
   };
 
-  const finishPath = (points = pathPoints) => {
+  const finishPath = (points = pathPoints, base = drawingBase) => {
     try {
       const id = `${tool === "hatch" ? "hatch" : "line"}-${crypto.randomUUID()}`;
       changeProject(
         createDrawing(
-          drawingBase!,
+          base!,
           project,
           id,
           tool === "hatch"
@@ -479,6 +489,15 @@ export function CadWorkspace({
 
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
+    if (tool === "hatch" && hatchConstruction === "boundary") {
+      const points = findHatchBoundary?.(point) ?? [];
+      if (points.length) finishPath(points, project);
+      else
+        setModelError(
+          "Keine geschlossene sichtbare Polygonkontur an dieser Stelle. In die Kontur klicken.",
+        );
+      return;
+    }
     if (pathDrawing) {
       if (pathPoints.length === 0) {
         setDrawingBase(project);
@@ -493,7 +512,17 @@ export function CadWorkspace({
         return;
       }
       const next = [...pathPoints, point];
-      if (tool === "line" && lineKind === "line" && next.length === 2) finishPath(next);
+      if (
+        tool === "hatch" &&
+        hatchConstruction !== "polygon" &&
+        next.length === (hatchConstruction === "diagonal" ? 2 : 3)
+      ) {
+        try {
+          finishPath(rectangleContour(hatchConstruction as "diagonal" | "side-height", next));
+        } catch (e) {
+          setModelError(e instanceof Error ? e.message : "Ungültiges Rechteck.");
+        }
+      } else if (tool === "line" && lineKind === "line" && next.length === 2) finishPath(next);
       else setPathPoints(next);
       return;
     }
@@ -927,9 +956,33 @@ export function CadWorkspace({
             />
           ) : tool === "hatch" && mode === "2D" ? (
             <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
+              <label className="text-xs">
+                Erstellung
+                <select
+                  aria-label="Schraffur-Erstellung"
+                  value={hatchConstruction}
+                  onChange={(e) => {
+                    cancelInteraction();
+                    setHatchConstruction(e.target.value as HatchConstruction);
+                  }}
+                  className="block rounded border bg-background p-1"
+                >
+                  <option value="polygon">Polygon per Klick</option>
+                  <option value="diagonal">Rechteck: Diagonale</option>
+                  <option value="side-height">Rechteck: Seite und Höhe</option>
+                  <option value="boundary">Geschlossene Kontur übernehmen</option>
+                </select>
+              </label>
               <HatchFillFields value={hatchFill} onChange={setHatchFill} />
               <span className="text-xs">
-                {pathPoints.length} Punkte · Doppelklick schließt · Esc verwirft
+                {hatchConstruction === "polygon"
+                  ? `${pathPoints.length} Punkte · Doppelklick schließt`
+                  : hatchConstruction === "boundary"
+                    ? "In ein geschlossenes Polygon klicken"
+                    : hatchConstruction === "diagonal"
+                      ? "Zwei gegenüberliegende Ecken anklicken"
+                      : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
+                · Esc verwirft
               </span>
               <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
                 Zeichnen abbrechen
@@ -1088,6 +1141,14 @@ export function CadWorkspace({
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                   draftPoints={pathDrawing ? pathPoints : []}
                   draftFill={tool === "hatch" ? hatchFill : undefined}
+                  draftContour={
+                    tool === "hatch" && hatchConstruction !== "polygon"
+                      ? (point) =>
+                          hatchConstruction === "boundary"
+                            ? (findHatchBoundary?.(point) ?? [])
+                            : rectangleContour(hatchConstruction, [...pathPoints, point])
+                      : undefined
+                  }
                   wallOutlineWidth={wallWidth}
                   gridSettings={gridSettings}
                   snap={snap}
@@ -1132,7 +1193,7 @@ export function CadWorkspace({
                   onEditCommit={(_session, point, candidate) => interaction.pick(point, candidate)}
                   {...(tool === "wall" ||
                   (tool === "line" && lineKind === "polyline") ||
-                  tool === "hatch"
+                  (tool === "hatch" && hatchConstruction === "polygon")
                     ? {
                         onFinish: () => {
                           if (!referenceSelection.selecting) {

@@ -1,3 +1,4 @@
+import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { memo } from "react";
 import type { ElementTarget } from "@/application/selection/target";
 import type { Point } from "@/domain/project/schema";
@@ -196,6 +197,7 @@ export function PlanSceneContent({
                   }
                   strokeWidth={wallOutlineWidth / pixelsPerMetre}
                   className="outline-none"
+                  style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
                 />
                 <line
                   visibility={allowsShown(opening.id) ? "visible" : "hidden"}
@@ -203,7 +205,8 @@ export function PlanSceneContent({
                   x2={opening.position * length + opening.width / 2}
                   y1={0}
                   y2={0}
-                  stroke="var(--primary)"
+                  stroke={selectedIds.has(opening.id) ? WALL_AXIS_COLOR : "var(--primary)"}
+                  style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
                   strokeWidth={wallOutlineWidth / pixelsPerMetre}
                   pointerEvents="none"
                 />

@@ -1,3 +1,4 @@
+import { CAD_TURQUOISE_RGB } from "./highlight.ts";
 import { outlineTriangles } from "./selection-outline.ts";
 import type { OutlineEdge } from "./selection-outline.ts";
 import { cameraMatrix } from "../../geometry/projections/camera-matrix.ts";
@@ -87,7 +88,8 @@ export function createMatrixResources(
       gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
       const border = [
         ...outlineTriangles(outline, projection),
-        ...outlineTriangles(windowOutline, projection, 2, [0.25, 0.8, 0.87]),
+        ...outlineTriangles(windowOutline, projection, 3, [0.72, 0.93, 0.94]),
+        ...outlineTriangles(windowOutline, projection, 1.5, CAD_TURQUOISE_RGB),
       ];
       if (border.length) {
         gl.bindBuffer(gl.ARRAY_BUFFER, borderBuffer);

@@ -1,3 +1,4 @@
+import { CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import { distanceMetres } from "@/application/measurement/distance";
 import type { DistanceMeasurement } from "@/application/measurement/distance";
 import type { Point2 } from "@/geometry/primitives/point";
@@ -21,8 +22,8 @@ export function DistanceOverlay({
         y1={-start.y}
         x2={end.x}
         y2={-end.y}
-        stroke="var(--primary)"
-        strokeWidth={1.5}
+        stroke={CAD_TURQUOISE}
+        strokeWidth={1}
         vectorEffect="non-scaling-stroke"
         strokeDasharray="5 3"
       />
@@ -33,8 +34,8 @@ export function DistanceOverlay({
           cy={-point.y}
           r={4 / pixelsPerMetre}
           fill="var(--background)"
-          stroke="var(--primary)"
-          strokeWidth={1.5}
+          stroke={CAD_TURQUOISE}
+          strokeWidth={1}
           vectorEffect="non-scaling-stroke"
         />
       ))}

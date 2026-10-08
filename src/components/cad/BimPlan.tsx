@@ -1,3 +1,4 @@
+import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
 import type { AreaMeasurement } from "@/application/measurement/area";
 import { DistanceOverlay } from "./DistanceOverlay";
@@ -56,6 +57,7 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
     | {
         measurement?: DistanceMeasurement | undefined;
@@ -112,6 +114,7 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
+  draftContour,
   placement,
   drawingPreview,
   drawingProjectAt,
@@ -355,6 +358,14 @@ export function BimPlan({
         : numericTarget !== undefined
           ? null
           : pointerSnap;
+  let constructedContour: Point[] = [];
+  if (draftContour && resolvedHover) {
+    try {
+      constructedContour = draftContour(resolvedHover.point);
+    } catch {
+      /* incomplete shape */
+    }
+  }
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -862,6 +873,7 @@ export function BimPlan({
                 x2={wall.end.x}
                 y2={-wall.end.y}
                 stroke={WALL_AXIS_COLOR}
+                style={CAD_SHIMMER}
                 strokeWidth={2.5}
                 vectorEffect="non-scaling-stroke"
                 pointerEvents="none"
@@ -905,6 +917,7 @@ export function BimPlan({
               x2={w.end.x}
               y2={-w.end.y}
               stroke={WALL_AXIS_COLOR}
+              style={CAD_SHIMMER}
               strokeWidth={2}
               vectorEffect="non-scaling-stroke"
               pointerEvents="none"
@@ -1063,9 +1076,12 @@ export function BimPlan({
           )}
         </g>
       )}
-      {drawing && draftFill && draftPoints.length >= 2 && (
+      {drawing && draftFill && (draftPoints.length >= 2 || constructedContour.length >= 3) && (
         <polygon
-          points={[...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
+          points={(draftContour
+            ? constructedContour
+            : [...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
+          )
             .map((p) => `${p.x},${-p.y}`)
             .join(" ")}
           fill={draftFill.color}

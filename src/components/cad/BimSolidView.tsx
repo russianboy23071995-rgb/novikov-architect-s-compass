@@ -1,3 +1,4 @@
+import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { useSolidPicking } from "./useSolidPicking";
 import {
   windowSelectionSurfaces,
@@ -564,6 +565,7 @@ export function BimSolidView({
             x2={axis.end.x}
             y2={axis.end.y}
             stroke={WALL_AXIS_COLOR}
+            style={CAD_SHIMMER}
             strokeWidth={2.5}
           />
         </svg>
