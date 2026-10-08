@@ -1,3 +1,5 @@
+import { DistanceOverlay } from "./DistanceOverlay";
+import type { DistanceMeasurement } from "@/application/measurement/distance";
 import { PlanSceneRun } from "./PlanSceneRun";
 import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
 import type { GeometryPreview } from "@/domain/project/geometry-scope";
@@ -54,6 +56,7 @@ import { linePath } from "@/lib/bim/lines";
 export type BimPlanProps = {
   placement?:
     | {
+        measurement?: DistanceMeasurement | undefined;
         target: Point | null | undefined;
         previewProject?: ToolInteraction["previewProject"];
         geometryPreview?: ToolInteraction["geometryPreview"];
@@ -1005,6 +1008,13 @@ export function BimPlan({
             }}
           />
         ))}
+      {placement?.measurement && (
+        <DistanceOverlay
+          measurement={placement.measurement}
+          aim={resolvedHover?.point ?? null}
+          pixelsPerMetre={camera.pixelsPerMetre}
+        />
+      )}
       {editSession && resolvedEdit && (
         <g pointerEvents="none">
           <line

@@ -1,5 +1,6 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import {
+  Ruler,
   EyeOff,
   Focus,
   Layers2,
@@ -44,6 +45,8 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 type TopToolbarProps = {
+  onMeasure: () => void;
+  measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
   mode: ViewMode;
@@ -188,6 +191,9 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
+          <IconControl label="Strecke messen" onClick={props.onMeasure} active={props.measuring}>
+            <Ruler className="size-4" />
+          </IconControl>
           <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
             <Undo2 />
           </IconControl>
