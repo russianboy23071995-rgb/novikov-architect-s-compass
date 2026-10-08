@@ -45,7 +45,7 @@ export function previewWallChain(
       (chain.wallIds.length === 1 && chain.points.length === 2))
   ) {
     const origin = chain.points[0]!;
-    const key = JSON.stringify([chain.points, chain.wallIds]);
+    const key = JSON.stringify([chain.points, chain.wallIds, chain.defaults]);
     let cached = preparedPreviews.get(chain);
     if (!cached || cached.id !== id || cached.key !== key || cached.preview !== chain.preview) {
       cached = {
@@ -54,7 +54,7 @@ export function previewWallChain(
         preview: chain.preview,
         value:
           chain.wallIds.length === 0
-            ? prepareWallDrawing(current, origin, id)
+            ? prepareWallDrawing(current, origin, id, chain.defaults)
             : prepareChainCorner(chain, id),
       };
       preparedPreviews.set(chain, cached);

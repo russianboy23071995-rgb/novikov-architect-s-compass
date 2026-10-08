@@ -1,3 +1,4 @@
+import type { WallDefaults } from "../tools/pickup.ts";
 /** Owned prepared scope for the first free wall segment only. */
 import { validateProject, type Project, type Point } from "../../lib/bim/model.ts";
 import { createDrawing, defaultDrawingWall } from "./actions.ts";
@@ -11,7 +12,13 @@ function freeze<T>(v: T): T {
   }
   return v;
 }
-export function prepareWallDrawing(source: Project, origin: Point, id: string) {
+export function prepareWallDrawing(
+  source: Project,
+  origin: Point,
+  id: string,
+  defaults?: WallDefaults,
+) {
+  const settings = freeze({ ...(defaults ?? defaultDrawingWall) });
   const base = freeze(validateProject(source));
   const start = freeze({ ...origin });
   const s = base.storey;
@@ -45,7 +52,7 @@ export function prepareWallDrawing(source: Project, origin: Point, id: string) {
   });
   const full = (point: Point, candidate?: SnapCandidate | null) =>
     connectWallAtTAxis(
-      createDrawing(base, base, id, { kind: "wall", start, end: point, ...defaultDrawingWall }),
+      createDrawing(base, base, id, { kind: "wall", start, end: point, ...settings }),
       id,
       1,
       point,
@@ -66,7 +73,7 @@ export function prepareWallDrawing(source: Project, origin: Point, id: string) {
         kind: "wall",
         start,
         end: point,
-        ...defaultDrawingWall,
+        ...settings,
       }).storey.walls;
       return {
         path: "local",

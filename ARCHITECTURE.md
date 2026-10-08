@@ -14,7 +14,12 @@ construction modes use the same defaults. Window pickup now copies width, height
 sill height and layer through that same boundary (2D). Host and position are chosen
 afresh by the existing validated placement action. Line/polyline pickup now uses
 the same boundary for color, pen width, style and layer (2D). The current drawing
-mode is retained; source vertices and identity are excluded. Other adapters remain future work.
+mode is retained; source vertices and identity are excluded. Wall pickup (2D) now
+shares that boundary for thickness, height, body offset and layer. These defaults
+are owned and pinned when a chain begins, feeding both prepared and full preview
+paths and final creation; source joins/windows/endpoints are excluded.
+Other element adapters remain future work. The user explicitly excluded 3D
+pickup on 2026-10-08: tool-default pickup is a 2D-only workflow.
 [Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
 ## Shared stable 3D picking service - 2026-10-08

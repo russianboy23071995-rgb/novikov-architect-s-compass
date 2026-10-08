@@ -1,5 +1,28 @@
 # Entwicklungsplan NOVIKOV CAD
 
+## V06e: Wandvorgaben gemeinsam uebernehmen - 08.10.2026
+
+PR212 nach gruener CI zusammengefuehrt. Wand-Uebernahme im Grundriss: Staerke,
+Hoehe, Koerperversatz/Achslage und Ebene. Werte in Werkzeugeigenschaften editierbar.
+Wandkette pinnt eine eigene Vorgabenkopie. Schnelle und volle Vorschau sowie
+Erstellung verwenden diese Werte. Neue IDs/Punkte, keine Quellfenster/-anschluesse.
+719 Tests bestanden, einschliesslich exaktem Vergleich der ersten und zweiten
+Abschnittsvorschau mit dem Vollpfad. Typecheck, gezielter Lint und Build bestanden.
+Browser-Steuerung weiter durch Sandbox-Startfehler blockiert; Linien- und
+Wandabnahme praktisch offen. Abnahme: Wand zweimal rechts anklicken, Werte
+pruefen/aendern, freie Kette mit zwei Abschnitten zeichnen/abschliessen, Undo:
+gesamte neue Kette weg, Quelle bleibt bestehen.
+
+Nutzerentscheidung vom 08.10.2026: Keine Vorgabenuebernahme in 3D erforderlich.
+Der vorgeschlagene V06f-3D-Auftrag entfaellt ausdruecklich.
+
+**Genau ein naechster Auftrag: praktische 2D-Abnahme der gemeinsamen
+Vorgabenuebernahme fuer Schraffur, Fenster, Linie/Polylinie und Wand nachholen.**
+Funktionierende Browser-Steuerung vorausgesetzt; Werte/Ebene, Werkzeugwechsel,
+Erstellung und Undo pruefen. Kein neuer Funktionsumfang in diesem Auftrag.
+
+
+
 ## V06d: Linienvorgaben gemeinsam uebernehmen - 08.10.2026
 
 PR211 nach gruener CI zusammengefuehrt. Linien/Polylinien uebernehmen Farbe,

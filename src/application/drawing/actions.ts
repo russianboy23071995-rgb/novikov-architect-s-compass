@@ -25,7 +25,15 @@ export type DrawingRequest =
       contour?: Hatch["contour"];
       layerId?: string;
     }
-  | { kind: "wall"; start: Point; end: Point; thickness: number; height: number }
+  | {
+      kind: "wall";
+      start: Point;
+      end: Point;
+      thickness: number;
+      height: number;
+      bodyOffset?: number;
+      layerId?: string;
+    }
   | {
       kind: "line";
       points: Point[];
@@ -78,7 +86,8 @@ export function createDrawing(
         start: request.start,
         end: request.end,
         thickness: request.thickness,
-        bodyOffset: request.thickness / 2,
+        bodyOffset: request.bodyOffset ?? request.thickness / 2,
+        ...(request.layerId ? { layerId: request.layerId } : {}),
         height: request.height,
       })
     : addLine(current, {

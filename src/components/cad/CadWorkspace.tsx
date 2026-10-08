@@ -1,3 +1,4 @@
+import { WallDrawingFields } from "./WallDrawingFields";
 import { useToolDefaults } from "./useToolDefaults";
 import { pickupToolDefaults } from "@/application/tools/pickup";
 import { rectangleContour, prepareHatchBoundaries } from "@/application/hatches/construction";
@@ -533,7 +534,7 @@ export function CadWorkspace({
       if (!activeChain) {
         setDrawingBase(project);
         setDemandPosition({ x: lastPointer.current.x + 16, y: lastPointer.current.y + 16 });
-        setWallChain(beginWallChain(project, point, candidate));
+        setWallChain(beginWallChain(project, point, candidate, toolDefaults.wall));
       } else {
         setWallChain(
           appendWallChain(activeChain, project, `wall-${crypto.randomUUID()}`, point, candidate),
@@ -953,6 +954,15 @@ export function CadWorkspace({
               </Button>
               {measurement.error && <span role="alert">{measurement.error}</span>}
             </div>
+          ) : tool === "wall" ? (
+            <WallDrawingFields
+              project={project}
+              value={toolDefaults.wall}
+              onChange={(values) => {
+                cancelInteraction();
+                toolDefaults.setWall(values);
+              }}
+            />
           ) : tool === "window" ? (
             <WindowPlacementFields
               layers={project.layers}
