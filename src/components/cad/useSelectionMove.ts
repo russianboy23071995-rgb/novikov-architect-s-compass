@@ -65,13 +65,13 @@ export function useSelectionMove(
   return {
     active: !!active,
     pickingOrigin: !!active && !active.session,
-    begin: () => {
+    begin: (origin?: Point) => {
       assertMovableSelection(project, targets, visibility);
       setPending({
         base: project,
         targets: targets.map((t) => ({ ...t })),
         visibility,
-        session: null,
+        session: origin ? beginSelectionMove(project, targets, origin, visibility) : null,
       });
     },
     pickOrigin: (origin: Point) => {

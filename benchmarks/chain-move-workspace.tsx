@@ -42,15 +42,9 @@ async function runUi() {
   for (const confirm of [false, true]) {
     button("Select wall wall-0");
     await frame();
-    document
-      .querySelector('[aria-label="Select window window-wall-0"]')!
-      .dispatchEvent(new MouseEvent("click", { bubbles: true, ctrlKey: true }));
+    button("Wandachse Anfang");
     await frame();
-    button("Auswahl frei bewegen");
-    await frame();
-    pointer("pointerdown", 0, 0);
-    pointer("pointerup", 0, 0);
-    pointer("click", 0, 0);
+    button("Element frei bewegen");
     await frame();
     pointer("pointermove", -1, 0);
     await frame();

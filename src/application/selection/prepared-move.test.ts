@@ -275,3 +275,27 @@ test("detached chain end retains full renderer geometry, zero state and stale-co
   );
   assert.throws(() => previewSelectionGeometry(session, p, targets, { x: 4, y: 4 }));
 });
+
+test("single wall shared move preserves picked origins and legacy move geometry", async () => {
+  const { connectedFixture } = await import("../../../benchmarks/connected-fixture.ts");
+  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  for (const kind of ["chain", "tees"] as const) {
+    const base = connectedFixture(kind, 5),
+      target = { kind: "wall" as const, id: "wall-0" },
+      wall = base.storey.walls[0]!;
+    for (const origin of [wall.start, wall.end, { x: wall.start.x, y: wall.start.y + 0.18 }]) {
+      const session = beginSelectionMove(base, [target], origin),
+        point = { x: origin.x - 2, y: origin.y - 2 };
+      const legacy = editAtPointer(
+        { base, target, action: "move", index: 0, anchor: origin },
+        base,
+        point,
+      );
+      assert.deepEqual(previewSelectionMove(session, base, [target], point), legacy);
+      assert.deepEqual(session.origin, origin);
+      assert.throws(() =>
+        previewSelectionGeometry(session, validateProject(base), [target], point),
+      );
+    }
+  }
+});
