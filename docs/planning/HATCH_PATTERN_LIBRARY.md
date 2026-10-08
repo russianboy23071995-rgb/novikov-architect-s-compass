@@ -59,3 +59,12 @@ Geometrie-/Grenztests, Typecheck/Build und praktische Browser-Abnahme.
 
 Guide Etappe 5, V07 und Quelltext abgeglichen. Reine Dokumentationsaenderung;
 Diff-Pruefung, keine erneut ausgefuehrten Produktions-Tests oder Builds.
+
+## V07b Umsetzung
+
+Lokaler Creator unter Tools, Linienentwurf, Zellmaße, eigene Undo-Liste,
+gemeinsame querySnap-Abfrage und 3x3-SVG-Musterwiederholung implementiert.
+Keine Bibliothekspersistenz, kein Upload und keine Anwendung auf Projektkonturen.
+722 Tests, Typecheck, gezielter Lint und Build erfolgreich. Browser-Abnahme
+wegen Browser-Sandbox-Startfehler offen. Nächster Auftrag: V07c Vertrag zur
+Bibliothekspersistenz und Musteranwendung mit den offenen Nutzerentscheidungen.
