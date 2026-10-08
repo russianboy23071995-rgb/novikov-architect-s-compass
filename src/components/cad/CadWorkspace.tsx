@@ -563,6 +563,8 @@ export function CadWorkspace({
       setTool("select");
     },
     () => selectTool("select"),
+    toolDefaults.window,
+    toolDefaults.setWindow,
   );
   const imageTool = useImageImport(project, visibility, (next, id) =>
     changeProject(next, { kind: "reference", id }),
@@ -953,6 +955,7 @@ export function CadWorkspace({
             </div>
           ) : tool === "window" ? (
             <WindowPlacementFields
+              layers={project.layers}
               value={windowTool.dimensions}
               onChange={windowTool.setDimensions}
               error={windowTool.error}

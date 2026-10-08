@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   windowPlacementInteraction,
   windowPlacementHost,
-  defaultDrawingWindow,
   parseWindowDimensions,
   type WindowDimensionDraft,
 } from "@/application/drawing/window-placement";
@@ -16,12 +15,9 @@ export function useWindowPlacement(
   visibility: LayerVisibilityPolicy,
   commit: (next: Project, id: string) => void,
   cancel: () => void,
+  dimensions: WindowDimensionDraft,
+  setDimensions: (value: WindowDimensionDraft) => void,
 ) {
-  const [dimensions, setDimensions] = useState<WindowDimensionDraft>(() => ({
-    width: String(defaultDrawingWindow.width),
-    height: String(defaultDrawingWindow.height),
-    sillHeight: String(defaultDrawingWindow.sillHeight),
-  }));
   const [precision, setPrecision] = useState(false);
   const [host, setHost] = useState<{
     id: string;

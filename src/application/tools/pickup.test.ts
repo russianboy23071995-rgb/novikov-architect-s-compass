@@ -30,6 +30,8 @@ test("pickup owns appearance and source layer, without model/history changes; al
   const before = JSON.stringify(p);
   const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
   const preset = pickupToolDefaults(p, visibility, { kind: "hatch", id: "source" })!;
+  assert.equal(preset.tool, "hatch");
+  if (preset.tool !== "hatch") throw new Error("Expected hatch");
   assert.equal(history.past.length, 0);
   assert.equal(JSON.stringify(p), before);
   assert.equal(preset.values.layerId, p.defaultLayerIds.wall);
@@ -84,4 +86,105 @@ test("double secondary requires same target/context, nearby rapid clicks and res
   assert.equal(g.click({ ...click, time: 1300, x: 30 }), false);
   g.reset();
   assert.equal(g.click({ ...click, time: 1400, x: 30 }), false);
+});
+import { placeWindow, windowPlacementInteraction } from "../drawing/window-placement.ts";
+import { addWall, updateWindow } from "../../lib/bim/model.ts";
+
+test("window pickup copies creation defaults including layer, never host or position; new host and atomic undo", () => {
+  let p = createExampleProject();
+  p = updateWindow(p, p.storey.windows[0]!.id, {
+    width: 0.8,
+    height: 1.1,
+    sillHeight: 0.7,
+    layerId: p.defaultLayerIds.line,
+  });
+  p = addWall(p, {
+    id: "other",
+    start: { x: 0, y: 3 },
+    end: { x: 4, y: 3 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const history = createHistory(p);
+  p = history.present;
+  const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const before = JSON.stringify(p);
+  const preset = pickupToolDefaults(p, visibility, {
+    kind: "window",
+    id: p.storey.windows[0]!.id,
+  })!;
+  assert.equal(preset.tool, "window");
+  if (preset.tool !== "window") throw new Error("Expected window");
+  assert.deepEqual(
+    Object.keys(preset.values).sort(),
+    ["width", "height", "sillHeight", "layerId"].sort(),
+  );
+  assert.equal(JSON.stringify(p), before);
+  assert.equal(history.past.length, 0);
+  const draft = {
+    width: String(preset.values.width),
+    height: String(preset.values.height),
+    sillHeight: String(preset.values.sillHeight),
+    layerId: preset.values.layerId,
+  };
+  let next = history;
+  const adapter = windowPlacementInteraction(
+    p,
+    visibility,
+    "new-window",
+    () => ({ project: p, visibility }),
+    (q) => {
+      next = commitProject(history, q);
+    },
+    () => {},
+    { draft, currentDraft: () => draft },
+  );
+  adapter.commit({ x: 2, y: 3 });
+  const created = next.present.storey.windows.at(-1)!;
+  assert.equal(created.wallId, "other");
+  assert.equal(created.id, "new-window");
+  for (const key of ["width", "height", "sillHeight", "layerId"] as const)
+    assert.equal(created[key], preset.values[key]);
+  assert.equal(next.past.length, 1);
+  assert.deepEqual(undoProject(next).present, p);
+});
+
+test("window placement checks chosen layer, host visibility and changed draft; pickup rejects hidden host", () => {
+  const p = createExampleProject(),
+    visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE),
+    point = { x: 1.5, y: 0 };
+  const hidden = createLayerVisibilityPolicy(p, {
+    ...ALL_LAYERS_VISIBLE,
+    hiddenLayerIds: [p.defaultLayerIds.line],
+  });
+  assert.throws(
+    () => placeWindow(p, p, hidden, "new", point, undefined, undefined, p.defaultLayerIds.line),
+    /ausgeblendet/,
+  );
+  assert.throws(
+    () => placeWindow(p, p, visibility, "new", point, undefined, undefined, "missing"),
+    /existiert/,
+  );
+  const hostHidden = createLayerVisibilityPolicy(p, {
+    ...ALL_LAYERS_VISIBLE,
+    hiddenLayerIds: [p.storey.walls[0]!.layerId],
+  });
+  assert.equal(
+    pickupToolDefaults(p, hostHidden, { kind: "window", id: p.storey.windows[0]!.id }),
+    null,
+  );
+  const draft = { width: "1", height: "1", sillHeight: "0.8", layerId: p.defaultLayerIds.line };
+  const adapter = windowPlacementInteraction(
+    p,
+    visibility,
+    "new",
+    () => ({ project: p, visibility }),
+    () => assert.fail("must not commit"),
+    () => {},
+    { draft, currentDraft: () => ({ ...draft, layerId: p.defaultLayerIds.window }) },
+  );
+  assert.throws(() => adapter.commit(point));
+  assert.throws(() =>
+    placeWindow(p, p, visibility, "wide", point, { width: 10, height: 1, sillHeight: 0.8 }),
+  );
 });

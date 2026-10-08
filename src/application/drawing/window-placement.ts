@@ -13,7 +13,9 @@ import { querySnap } from "../../constraints/snapping/engine.ts";
 export const defaultDrawingWindow = { width: 1.2, height: 1.35, sillHeight: 0.9 } as const;
 
 export type WindowDimensions = { width: number; height: number; sillHeight: number };
-export type WindowDimensionDraft = Readonly<Record<keyof WindowDimensions, string>>;
+export type WindowDimensionDraft = Readonly<
+  Record<keyof WindowDimensions, string> & { layerId?: string }
+>;
 export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimensions {
   const width = parseMetres(draft.width),
     height = parseMetres(draft.height),
@@ -72,6 +74,7 @@ export function placeWindow(
   point: Point,
   dimensions: WindowDimensions = defaultDrawingWindow,
   hostId?: string,
+  layerId: string = current.defaultLayerIds.window,
 ): Project {
   if (base !== current || !visibility.isCurrent(current, visibility.context))
     throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
@@ -92,10 +95,13 @@ export function placeWindow(
         }
       : findWindowHost(current, visibility, point);
   if (!host) throw new Error("Zum Platzieren eine sichtbare Wand anfahren.");
-  if (visibility.context.hiddenLayerIds.includes(current.defaultLayerIds.window))
+  if (!current.layers.some((layer) => layer.id === layerId))
+    throw new Error("Die Fensterebene existiert nicht mehr.");
+  if (visibility.context.hiddenLayerIds.includes(layerId))
     throw new Error("Die Fensterebene ist ausgeblendet. Bitte zuerst einblenden.");
   return addWindow(current, {
     id,
+    layerId,
     wallId: host.wall.id,
     position: boundedWindowPosition(current, host.wall, dimensions.width, host.position),
     ...dimensions,
@@ -128,7 +134,16 @@ export function windowPlacementInteraction(
     if (settings && settings.currentDraft() !== settings.draft)
       throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
     const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
-    return placeWindow(base, now.project, visibility, id, point, dimensions, hostId);
+    return placeWindow(
+      base,
+      now.project,
+      visibility,
+      id,
+      point,
+      dimensions,
+      hostId,
+      settings?.draft.layerId,
+    );
   };
   return {
     identity: {},

@@ -10,7 +10,9 @@ a shared gesture and Application capability boundary serve all adapters.
 Defaults remain editable in Werkzeugeigenschaften before drawing. Pickup itself
 never mutates the source or model history. Creation uses existing validated actions.
 The first implemented adapter is hatch: fill, background, contour, layer. All four
-construction modes use the same defaults. Other element adapters remain future work.
+construction modes use the same defaults. Window pickup now copies width, height,
+sill height and layer through that same boundary (2D). Host and position are chosen
+afresh by the existing validated placement action. Other element adapters remain future work.
 [Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
 
 ## Shared stable 3D picking service - 2026-10-08
