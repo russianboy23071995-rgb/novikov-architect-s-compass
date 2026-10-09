@@ -1,4 +1,9 @@
 import { prepareEndpoint } from "./prepared-endpoint.ts";
+import { resolveProjectHatchPatterns } from "../hatches/pattern-resolution.ts";
+import {
+  validatePatternRevisions,
+  type PatternRevision,
+} from "../../domain/elements/hatch/revision.ts";
 import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
@@ -187,11 +192,55 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
   }
 }
 
-export type EditingEvent =
+type BaseEditingEvent =
   | ModelEditingEvent
   | { type: "visibility"; base: Project; action: VisibilityAction }
   | { type: "load-project"; project: Project };
+export type EditingEvent = BaseEditingEvent & {
+  patternRecords?: readonly PatternRevision[];
+  patternLibraryError?: string;
+};
+
+/** Storage is read by the adapter before dispatch; the reducer stays deterministic. */
 export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  const restore = event.type === "undo" || event.type === "redo";
+  const incoming = event.type === "project" || event.type === "load-project";
+  if ((!restore && !incoming) || event.patternRecords === undefined)
+    return reduceEditing(state, event);
+  try {
+    const snapshot = incoming
+      ? event.project
+      : (event.type === "undo" ? undoProject(state.history) : redoProject(state.history)).present;
+    const catalog = new Map(
+      validatePatternRevisions(event.patternRecords).map((r) => [r.definition.id, r]),
+    );
+    // A missing/older library must not rewind a newer definition already known by this project.
+    if (restore && snapshot.id === state.history.present.id)
+      for (const definition of state.history.present.hatchPatterns) {
+        const revision = definition.revision,
+          known = catalog.get(definition.id);
+        if (revision !== undefined && (!known || known.revision < revision))
+          catalog.set(definition.id, { definition, revision });
+      }
+    const resolution = resolveProjectHatchPatterns(snapshot, snapshot, [...catalog.values()]);
+    const next = reduceEditing(state, incoming ? { ...event, project: resolution.project } : event);
+    if (next.error) return next;
+    return {
+      ...next,
+      history: { ...next.history, present: resolution.project },
+      error: resolution.conflicts.length
+        ? `Musterkonflikt: ${resolution.conflicts.join(", ")}. Eingebettete Darstellung erhalten.`
+        : (event.patternLibraryError ?? ""),
+    };
+  } catch (error) {
+    return {
+      ...state,
+      error: error instanceof Error ? error.message : "Musterabgleich fehlgeschlagen.",
+    };
+  }
+}
+
+function reduceEditing(state: EditingState, event: BaseEditingEvent): EditingState {
   if (event.type === "load-project")
     return {
       ...reduceModelEdit(state, { type: "project", project: event.project }),

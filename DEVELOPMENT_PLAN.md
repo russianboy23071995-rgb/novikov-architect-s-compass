@@ -1,3 +1,38 @@
+## V07h Portabler Revisionskontext - 09.10.2026
+
+PR224 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Projektformat
+12 speichert die bekannte Revision an der einmaligen eingebetteten Musterdefinition.
+Ohne Revision bleibt die Herkunft ausdrücklich unbekannt; strikte Migration 1–11
+erfindet keine Versionsnummer. Schema 11 akzeptiert keine neuen Revisionsfelder.
+Bestehende Definitionen, Konturen, Musterursprünge und Assets bleiben erhalten.
+
+Gemeinsame Application-Auflösung integriert in Projektöffnung, Projektübernahme und
+Undo/Redo. Browser-Storage wird vor Dispatch im Adapter gelesen; Reducer und Domain
+bleiben deterministisch. Neuere Bibliotheksstände werden übernommen, fehlende/ältere
+erhalten eingebettete Inhalte. Gleiche Revision mit anderem Inhalt meldet Konflikt
+und erhält die Darstellung. Beschädigte Bibliothek blockiert das Projekt nicht.
+Projekt-Undo erhält auch ohne Bibliothek neuere bekannte Definitionen desselben
+Projekts. Öffnen bleibt ein Undo-Schritt; Musterabgleich erzeugt keinen zusätzlichen
+Schritt und schreibt niemals in die Bibliothek. Neue globale Bearbeitungs-UI und
+automatische Aktualisierung aller offenen Tabs bleiben ausstehend.
+
+758 Tests bestanden; Typecheck und Produktionsbuild erfolgreich. Lint ohne Fehler,
+sechs bekannte Fast-Refresh-Warnungen. Praktische Browser-Abnahme noch offen.
+Fünf neue Tests:
+Migration 11→12/unbekannte Herkunft, Dateirundlauf, Öffnen als eine Transaktion,
+Undo/Redo mit fehlender Bibliothek, Konflikte/ältere Stände und ungültige Revisionen.
+Runtime-Fixtures auf Version 12 aktualisiert; frühere Eingabeformate bleiben strikt.
+Windows-Zeilenenden aus dem Schreibskript korrigiert; keine fachfremden Teständerungen.
+Praktische Abnahme: vorhandene Musterschraffur speichern, öffnen, Darstellung prüfen;
+Füllfarbe ändern, Undo/Redo, erneut speichern/öffnen. Automatisch neuere Muster lassen
+sich nach Anbindung der Bibliotheksbearbeitung praktisch erzeugen und prüfen.
+
+**Genau ein nächster Auftrag: V07i globale Musterbearbeitung mit Bibliotheks-History.**
+Im vorhandenen nicht-modalen Verwaltungsfenster Bearbeiten und eigenes Undo/Redo
+an den geprüften Kern anbinden; aktives Projekt über dieselbe Auflösung aktualisieren,
+ohne Modell-Undo-Schritt. Veraltete Entwürfe, Konflikte, Speicherfehler und mehrere
+Schraffuren mit gleicher Muster-ID prüfen. Kein Papiermaß oder Upload in diesem Schritt.
+
 ## V07g Revisions-/Bibliotheks-History-Kern - 09.10.2026
 
 PR223 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Bibliotheksformat

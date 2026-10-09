@@ -1,3 +1,4 @@
+import { samePattern } from "../../domain/elements/hatch/revision.ts";
 import {
   validateHatchPattern,
   type HatchPatternDefinition,
@@ -39,7 +40,7 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
     ? validateHatchPattern(request.patternDefinition)
     : null;
   const existing = definition && project.hatchPatterns.find((p) => p.id === definition.id);
-  if (existing && JSON.stringify(existing) !== JSON.stringify(definition))
+  if (existing && !samePattern(existing, definition))
     throw new Error("Muster-ID hat eine andere Definition.");
   const source =
     request.kind === "create" ? request.hatch : hatches.find((h) => h.id === request.id)!;

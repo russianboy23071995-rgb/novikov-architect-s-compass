@@ -251,3 +251,20 @@ verwendet expliziten Kontext und ist noch nicht automatisch beim Laden/Undo akti
 Nächster begrenzter Auftrag V07h: portabler Revisionskontext mit strikter Migration
 und gemeinsamer Auflösung beim Öffnen/Wiederherstellen. Globale Bearbeitungs-UI,
 Papiermaß, Upload und Tab-Synchronisation bleiben nachgelagert.
+
+## V07h Umsetzung - 09.10.2026
+
+Projektformat 12 hält bekannte Revisionen direkt in der einmaligen Mustertabelle.
+Altdateien 1–11 behalten unbekannte Herkunft, ohne erfundene Revisionsnummer.
+Projektöffnung/-übernahme und Undo/Redo verwenden den zentralen Resolver. Der Browser-
+Adapter liest Storage vor Dispatch; Domain/Reducer bleiben frei von Speicherzugriffen.
+Keine Bibliotheksschreibvorgänge und keine zusätzlichen Modell-Undo-Schritte. Fehlende
+Bibliothek erhält portable Inhalte; gleichversionige Konflikte werden gemeldet.
+Wiederherstellen desselben Projekts erhält dessen neueren bekannten Musterstand auch
+bei inzwischen fehlender Bibliothek. 758 Tests sowie Typecheck und Build bestanden.
+
+Abnahme: Musterschraffur speichern/öffnen; Erscheinungsbild ändern, Undo/Redo und
+erneuter Dateirundlauf. Neue globale Versionen sind noch nicht über die UI bearbeitbar.
+Genau ein Folgeauftrag V07i: Bearbeiten und eigene Bibliotheks-History im vorhandenen
+FloatingPanel anbinden, aktives Projekt ohne Modell-History-Schritt zentral auflösen.
+Papiermaß, Upload und vollständige Mehrtab-Synchronisation bleiben getrennte Schritte.
