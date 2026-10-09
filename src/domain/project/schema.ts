@@ -1,3 +1,4 @@
+import { validateLineStyle } from "../elements/line/style.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
 import {
   imageAssetSchema,
@@ -62,7 +63,26 @@ const legacyProjectSchema = z
 
 const currentWallSchema = wallSchema.extend({ layerId: id });
 const currentWindowSchema = windowSchema.extend({ layerId: id });
-const currentLineSchema = lineSchema.extend({ layerId: id });
+const legacyCurrentLineSchema = lineSchema.extend({ layerId: id });
+const currentLineSchema = legacyCurrentLineSchema.extend({
+  style: z.enum(["solid", "dashed", "break", "custom"]),
+  pattern: z
+    .object({
+      id,
+      name: z.string().trim().min(1).max(80),
+      dashes: z.array(z.number().finite()).max(32),
+      color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      colorEditable: z.boolean().optional(),
+      period: positive.max(32000),
+      segments: z
+        .array(z.object({ start: pointSchema, end: pointSchema }).strict())
+        .min(1)
+        .max(128),
+    })
+    .strict()
+    .optional(),
+  repeatLength: positive.min(0.000001).max(1000000).optional(),
+});
 const projectV2Schema = legacyProjectSchema.extend({
   schemaVersion: z.literal(2),
   layers: z.array(layerSchema).min(1),
@@ -70,7 +90,7 @@ const projectV2Schema = legacyProjectSchema.extend({
   storey: legacyProjectSchema.shape.storey.extend({
     walls: z.array(currentWallSchema),
     windows: z.array(currentWindowSchema),
-    lines: z.array(currentLineSchema).optional(),
+    lines: z.array(legacyCurrentLineSchema).optional(),
   }),
 });
 const projectV3Schema = projectV2Schema.extend({
@@ -105,16 +125,25 @@ const projectV8Schema = projectV7Schema.extend({
     wallTJunctions: z.array(z.object({ hostWallId: id, incoming: wallEndSchema }).strict()),
   }),
 });
-const projectSchema = projectV8Schema.extend({
+const projectV9Schema = projectV8Schema.extend({
   schemaVersion: z.literal(9),
   assets: z.array(imageAssetSchema),
   storey: projectV8Schema.shape.storey.extend({ references: z.array(imageReferenceSchema) }),
 });
+const projectSchema = projectV9Schema.extend({
+  schemaVersion: z.literal(10),
+  storey: projectV9Schema.shape.storey.extend({ lines: z.array(currentLineSchema).optional() }),
+});
+export function validateProjectV9(value: unknown) {
+  const old = projectV9Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 10 });
+  return old;
+}
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 9,
+    schemaVersion: 10,
     assets: [],
     storey: { ...old.storey, references: [] },
   });
@@ -223,11 +252,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 9 ? project.storey.references : []),
+    ...(project.schemaVersion === 10 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 9
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 10
       ? project.storey.hatches
       : []),
   ]) {
@@ -242,21 +271,39 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 9 ? project.assets : []),
+    ...(project.schemaVersion === 10 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 9 ? project.storey.references : []),
+    ...(project.schemaVersion === 10 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 9
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 10
       ? project.storey.hatches
       : []),
   ]) {
     if (ids.has(entity.id)) throw new Error(`Duplicate ID: ${entity.id}`);
     ids.add(entity.id);
   }
-  for (const line of project.storey.lines ?? []) validateLineGeometry(line);
-  if (project.schemaVersion === 5 || project.schemaVersion === 9)
+  for (const line of project.storey.lines ?? []) {
+    validateLineGeometry(line);
+    if (project.schemaVersion === 10) {
+      const current = line as DrawingLine;
+      if (current.style === "custom") {
+        if (!current.pattern || !current.repeatLength)
+          throw new Error("Custom line needs an embedded definition and repeat length.");
+        validateLineStyle(current.pattern);
+        if (
+          current.pattern.colorEditable === false &&
+          current.color.toLowerCase() !== current.pattern.color.toLowerCase()
+        )
+          throw new Error("Diese Linienart hat eine feste Farbe.");
+        if (!Number.isFinite((current.repeatLength / current.pattern.period) * 10))
+          throw new Error("Invalid pattern extent.");
+      } else if (current.pattern !== undefined || current.repeatLength !== undefined)
+        throw new Error("Only custom lines may carry a pattern.");
+    }
+  }
+  if (project.schemaVersion === 5 || project.schemaVersion === 10)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

@@ -1,3 +1,5 @@
+import { useLineInventory } from "./useLineInventory";
+import { applyLineStyle } from "@/application/lines/appearance";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { updateLine } from "@/lib/bim/model";
@@ -13,6 +15,7 @@ export function LineStyleFields({
   value: LineAppearance;
   onChange: (value: LineAppearance) => void;
 }) {
+  const inventory = useLineInventory();
   const [widthDraft, setWidthDraft] = useState({
     value: value.penWidth,
     text: String(value.penWidth).replace(".", ","),
@@ -28,6 +31,12 @@ export function LineStyleFields({
         Farbe
         <select
           aria-label="Linienfarbe"
+          disabled={value.pattern?.colorEditable === false}
+          title={
+            value.pattern?.colorEditable === false
+              ? "Feste Farbe aus dem Linien Creator"
+              : undefined
+          }
           className="block rounded border bg-background p-1"
           value={value.color}
           onChange={(e) => onChange({ ...value, color: e.target.value })}
@@ -69,14 +78,52 @@ export function LineStyleFields({
         <select
           aria-label="Strichart"
           className="block rounded border bg-background p-1"
-          value={value.style}
-          onChange={(e) => onChange({ ...value, style: e.target.value as DrawingLine["style"] })}
+          value={
+            value.style === "custom" ? `catalog:${value.pattern?.id}` : `legacy:${value.style}`
+          }
+          onChange={(e) => {
+            const definition = inventory.styles.find((s) => `catalog:${s.id}` === e.target.value);
+            if (definition) onChange(applyLineStyle(value, definition, value.repeatLength ?? 1));
+          }}
         >
-          <option value="solid">Durchgezogen</option>
-          <option value="dashed">Gestrichelt</option>
-          <option value="break">Abbruchlinie</option>
+          {value.style !== "custom" && (
+            <option value={`legacy:${value.style}`}>
+              {value.style === "solid"
+                ? "Durchgezogen"
+                : value.style === "dashed"
+                  ? "Gestrichelt"
+                  : "Abbruchlinie"}{" "}
+              · Bestand
+            </option>
+          )}
+          {value.style === "custom" &&
+            !inventory.styles.some((s) => s.id === value.pattern?.id) && (
+              <option value={`catalog:${value.pattern?.id}`}>
+                {value.pattern?.name} · im Projekt erhalten
+              </option>
+            )}
+          {inventory.styles.map((style) => (
+            <option key={style.id} value={`catalog:${style.id}`}>
+              {style.name}
+            </option>
+          ))}
         </select>
       </label>
+      {value.style === "custom" && (
+        <label>
+          Musterlänge (m)
+          <input
+            aria-label="Musterlänge (m)"
+            className="block w-24 rounded border bg-background p-1"
+            type="number"
+            min="0.000001"
+            step="0.1"
+            value={value.repeatLength ?? 1}
+            onChange={(e) => onChange({ ...value, repeatLength: Number(e.target.value) })}
+          />
+        </label>
+      )}
+      {inventory.error && <p role="alert">{inventory.error}</p>}
     </div>
   );
 }
@@ -93,6 +140,7 @@ export function LineInspector({
     color: line.color,
     penWidth: line.penWidth,
     style: line.style,
+    ...(line.pattern ? { pattern: line.pattern, repeatLength: line.repeatLength } : {}),
   });
   const [error, setError] = useState("");
   return (
@@ -113,7 +161,9 @@ export function LineInspector({
             onChange(updateLine(project, line.id, value), { kind: "line", id: line.id });
             setError("");
           } catch {
-            setError("Strichstärke muss zwischen 0,05 und 2 mm liegen.");
+            setError(
+              "Linieneinstellungen prüfen: Strichstärke 0,05–2 mm und positive Musterlänge.",
+            );
           }
         }}
       >

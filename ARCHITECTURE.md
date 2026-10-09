@@ -1,5 +1,10 @@
 # NOVIKOV CAD Architecture Contract
 
+Production project schema is now 10 (portable custom line patterns, 2026-10-09).
+Earlier schema-9 experiment descriptions below are historical evidence; this
+incremental migration supersedes their claim that the production format is unchanged.
+
+
 ## Shared non-modal windows - 2026-10-08
 
 User decision: opened CAD windows follow the Ebenen palette: draggable, no
@@ -23,9 +28,17 @@ deletions persist and remove inventory references atomically in the same payload
 The drawing editor uses shared querySnap and transient draft state. Storage and
 validation remain behind Application and a replaceable adapter. Browser
 storage is profile/origin-local across projects, not cross-device synchronization.
-Current project line style enum and rendering remain unchanged until a dedicated
-reference/migration task. Symbols, paper/model sizing and in-use deletion rules
-for applied custom line styles require their own follow-up contract.
+User decisions (2026-10-09): custom line patterns use model-space sizing;
+deleting a catalog style preserves existing lines. Schema 10 therefore stores an
+owned validated pattern definition and repeatLength in metres with each custom
+line application. These are immutable application snapshots, not extra editable
+vertices. Schema 1–9 files migrate at the file boundary; legacy appearance stays
+unchanged. Drawing, inspector and 2D pickup share the same appearance contract.
+Inventory changes update shared UI subscriptions; renderer derives SVG tiles with
+continuous phase around polyline vertices and no repeat-count geometry allocation.
+Global catalog edits affect future explicit style assignments; cross-project
+propagation for line styles is not implemented by this snapshot pilot. Hatch
+update-all semantics remain the separately agreed future requirement.
 
 
 ## Hatch library / creator preparation - 2026-10-08
@@ -2452,3 +2465,12 @@ trusting presentation output. The UI latest-context guard remains authoritative
 for late callbacks. No global project cache or per-element UI branch is introduced.
 Unconstrained polar input preserves the exact already-resolved aim; explicit
 angle/length constraints and finite-distance guards retain their contracts.
+
+## Line pattern color contract - 2026-10-09
+
+LineStyleDefinition.colorEditable defaults to true for legacy definitions. When
+false, the embedded pattern color is authoritative; domain project validation
+rejects divergent line colors. UI disables the color control. Renderer converts
+system pen width explicitly using viewport pixels per metre and pattern scale.
+Definitions remain portable project snapshots; catalog edits do not silently
+rewrite existing project lines.
