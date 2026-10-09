@@ -1,3 +1,4 @@
+import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import type { ElementTarget } from "../selection/target.ts";
@@ -5,6 +6,7 @@ import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 
 export type HatchDefaults = Pick<Hatch, "fill" | "background" | "contour" | "layerId"> & {
   patternRotation?: number | undefined;
+  patternSize?: import("../../domain/elements/hatch/model.ts").HatchPatternSize | undefined;
   patternDefinition?:
     import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
 };
@@ -84,6 +86,7 @@ export function pickupToolDefaults(
       ...(source.pattern?.rotation === undefined
         ? {}
         : { patternRotation: source.pattern.rotation }),
+      ...(source.pattern ? { patternSize: patternSize(source.pattern) } : {}),
       patternDefinition: source.pattern
         ? structuredClone(project.hatchPatterns.find((p) => p.id === source.pattern!.patternId)!)
         : null,

@@ -1,3 +1,5 @@
+import { workingPlanScale } from "../views/scale.ts";
+import { hatchCellSize } from "../elements/hatch/sizing.ts";
 import { penSetSchema } from "../pens/model.ts";
 import { validateHatchPattern } from "../elements/hatch/pattern.ts";
 import { validateLineStyle } from "../elements/line/style.ts";
@@ -12,6 +14,7 @@ import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
 import {
   hatchSchema,
+  hatchV15Schema,
   hatchV12Schema,
   solidHatchSchema,
   legacyHatchSchema,
@@ -172,13 +175,13 @@ const projectV12Schema = projectV11Schema.extend({
 });
 const projectV13Schema = projectV12Schema.extend({
   schemaVersion: z.literal(13),
-  storey: projectV12Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+  storey: projectV12Schema.shape.storey.extend({ hatches: z.array(hatchV15Schema) }),
 });
 const projectV14Schema = projectV13Schema.extend({
   schemaVersion: z.literal(14),
   penSet: penSetSchema.optional(),
 });
-const projectSchema = projectV14Schema.extend({
+const projectV15Schema = projectV14Schema.extend({
   schemaVersion: z.literal(15),
   workingViews: z
     .array(
@@ -193,41 +196,50 @@ const projectSchema = projectV14Schema.extend({
     .max(1)
     .optional(),
 });
+const projectSchema = projectV15Schema.extend({
+  schemaVersion: z.literal(16),
+  storey: projectV15Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+});
+export function validateProjectV15(value: unknown) {
+  const old = projectV15Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 16 });
+  return old;
+}
 export function validateProjectV14(value: unknown) {
   const old = projectV14Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15 });
+  validateProject({ ...old, schemaVersion: 16 });
   return old;
 }
 export function validateProjectV13(value: unknown) {
   const old = projectV13Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15 });
+  validateProject({ ...old, schemaVersion: 16 });
   return old;
 }
 export function validateProjectV12(value: unknown) {
   const old = projectV12Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15 });
+  validateProject({ ...old, schemaVersion: 16 });
   return old;
 }
 export function validateProjectV11(value: unknown) {
   const old = projectV11Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15 });
+  validateProject({ ...old, schemaVersion: 16 });
   return old;
 }
 export function validateProjectV10(value: unknown) {
   const old = projectV10Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15, hatchPatterns: [] });
+  validateProject({ ...old, schemaVersion: 16, hatchPatterns: [] });
   return old;
 }
 export function validateProjectV9(value: unknown) {
   const old = projectV9Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 15, hatchPatterns: [] });
+  validateProject({ ...old, schemaVersion: 16, hatchPatterns: [] });
   return old;
 }
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 15,
+    schemaVersion: 16,
     hatchPatterns: [],
     assets: [],
     storey: { ...old.storey, references: [] },
@@ -331,11 +343,15 @@ export function validateProject(value: unknown): Project {
     if (!hatch.pattern) continue;
     const definition = patterns.get(hatch.pattern.patternId);
     if (!definition) throw new Error("Unbekanntes Schraffurmuster.");
+    const cell = hatchCellSize(
+      definition,
+      hatch.pattern,
+      workingPlanScale(project.id, project.storey.id, project.workingViews?.[0]?.denominator),
+    );
     if (
-      ![
-        hatch.pattern.origin.x + definition.width,
-        hatch.pattern.origin.y + definition.height,
-      ].every(Number.isFinite)
+      ![hatch.pattern.origin.x + cell.width, hatch.pattern.origin.y + cell.height].every(
+        Number.isFinite,
+      )
     )
       throw new Error("Ungültige Musterausdehnung.");
     used.add(definition.id);
@@ -356,11 +372,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 15 ? project.storey.references : []),
+    ...(project.schemaVersion === 16 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 15
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 16
       ? project.storey.hatches
       : []),
   ]) {
@@ -375,13 +391,13 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 15 ? project.assets : []),
+    ...(project.schemaVersion === 16 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 15 ? project.storey.references : []),
+    ...(project.schemaVersion === 16 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 15
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 16
       ? project.storey.hatches
       : []),
   ]) {
@@ -390,7 +406,7 @@ function validateGeometry(
   }
   for (const line of project.storey.lines ?? []) {
     validateLineGeometry(line);
-    if (project.schemaVersion === 15) {
+    if (project.schemaVersion === 16) {
       const current = line as DrawingLine;
       if (current.style === "custom") {
         if (!current.pattern || !current.repeatLength)
@@ -407,7 +423,7 @@ function validateGeometry(
         throw new Error("Only custom lines may carry a pattern.");
     }
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 15)
+  if (project.schemaVersion === 5 || project.schemaVersion === 16)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

@@ -77,6 +77,7 @@ export function useToolDefaults(project: Project) {
   const current = {
     ...hatch,
     patternRotation: hatch.patternDefinition ? hatch.patternRotation : undefined,
+    patternSize: hatch.patternDefinition ? hatch.patternSize : undefined,
     // Committed project definitions have already passed the central resolver.
     patternDefinition: hatch.patternDefinition
       ? (project.hatchPatterns.find((p) => p.id === hatch.patternDefinition!.id) ??

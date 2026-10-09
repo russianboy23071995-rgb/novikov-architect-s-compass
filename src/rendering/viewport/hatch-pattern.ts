@@ -1,11 +1,12 @@
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import { positiveFinite, type ScaleContext } from "../../domain/views/scale.ts";
-import { resolveModelLength } from "./display-size.ts";
+import { hatchCellSize } from "../../domain/elements/hatch/sizing.ts";
 
-/** Derived display input only. Production hatch storage remains model-space. */
+/** Optional explicit display override for isolated diagnostics; product reads the application. */
 export type HatchPatternSizing =
-  { mode: "model" } | { mode: "paper"; paperWidthMetres: number; context: ScaleContext };
+  | { mode: "model"; modelWidthMetres?: number }
+  | { mode: "paper"; paperWidthMetres: number; context: ScaleContext };
 
 export function hatchPatternStroke(pixelsPerMetre: number, factor: number): number {
   return positiveFinite(
@@ -17,20 +18,20 @@ export function hatchPatternStroke(pixelsPerMetre: number, factor: number): numb
 export function hatchPatternTile(
   definition: HatchPatternDefinition,
   application: NonNullable<Hatch["pattern"]>,
-  sizing: HatchPatternSizing = { mode: "model" },
+  sizing?: HatchPatternSizing,
+  context?: ScaleContext,
 ) {
   const rotation = application.rotation ?? 0;
   if (!Number.isFinite(rotation) || rotation < 0 || rotation > 360) return null;
   positiveFinite(definition.width);
   positiveFinite(definition.height);
-  if (sizing.mode !== "model" && sizing.mode !== "paper")
-    throw new Error("Ungültiger Mustermaßbezug.");
-  const width =
-    sizing.mode === "paper"
-      ? resolveModelLength({ mode: "paper", metres: sizing.paperWidthMetres }, sizing.context)
-      : resolveModelLength({ mode: "model", metres: definition.width });
-  const factor = positiveFinite(width / definition.width);
-  const height = positiveFinite(definition.height * factor);
+  const size = sizing ?? application;
+  if (size.mode !== "model" && size.mode !== "paper") throw new Error("Ungültiger Mustermaßbezug.");
+  const { width, height, factor } = hatchCellSize(
+    definition,
+    size,
+    sizing?.mode === "paper" ? sizing.context : context,
+  );
   const y = -application.origin.y - height;
   if (![application.origin.x, application.origin.y, y].every(Number.isFinite))
     throw new Error("Ungültiger Musterursprung oder Kachelausdehnung.");

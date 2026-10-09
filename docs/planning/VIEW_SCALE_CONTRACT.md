@@ -183,3 +183,11 @@ des Modell-Undo; Undo/Redo erhält den aktuellen Maßstab. Sitzungs-Map entfernt
 Nutzervorgaben: 1:50, 1:100, 1:200, 1:500, 1:1000, 1:2500, 1:5000 und Individuell
 mit freier Eingabe 1:S. Nächster Einzelauftrag laut Entwicklungsplan ist die
 Schraffur-Papiermodus-Integration, nicht der vollständige MS-04-Ausschnitteditor.
+
+## Erster produktiver Papiermaß-Verbraucher — 10.10.2026
+
+Schraffurmuster verwenden nun den gespeicherten Kontext (Schema 16). Der metrische
+Resolver liegt in domain/views, damit Validierung und Anwendungsaktionen dieselben
+Regeln wie Rendering verwenden. Modell-/Papiermoduswechsel erhält die sichtbare Größe
+(Nutzerentscheidung); gezeichnete Konturen werden nie skaliert. MS-04a konkretisiert
+als nächster begrenzter Planungsauftrag gespeicherte Ausschnitte gemäß Entwicklungsplan.

@@ -1,3 +1,46 @@
+## MS-03a: Schraffuren im Modell- und Papiermaß — 10.10.2026
+
+PR233 nach grüner CI regulär zusammengeführt. Nutzerentscheidung: Mustergröße beim
+Moduswechsel erhalten. Papierbreite liegt intern in Metern, in Eigenschaften in mm;
+Modellbreite in m. Schraffureigenschaften und Werkzeugdefaults teilen dieselben
+Felder/Aktionen. Doppelt-Rechtsklick übernimmt Bezug und Zellbreite. Größenänderungen
+sind Modell-Undo-Schritte; Maßstabswechsel bleiben Ansichtseinstellungen außerhalb.
+
+Schema 16 ergänzt Papierbreite und optionale Modellbreite an der Anwendung. Ohne
+Modellbreite bleiben bestehende Muster exakt in Definitionsgröße. Die optionale
+Breite erlaubt die Rückkehr aus Papiermaß ohne Größensprung nach geändertem S.
+Kontur, Musterdefinition, Ursprung, Winkel und IDs bleiben unverändert. Alte Dateien
+1–15 migrieren strikt; unbekannte oder gemischte Felder und ungültige Zahlen werden
+abgewiesen. Gemeinsamer metrischer Resolver im Domain-Ansichtsmodul, Bildschirm-
+umrechnung im Rendering. Keine duplizierte Werkzeug- oder AI-Geometrielogik.
+
+792 Tests bestanden, Typprüfung inklusive Benchmarks und Produktionsbuild erfolgreich;
+Lint ohne Fehler, sechs bekannte Warnungen. Vier neue Tests mit Unterfällen: Wechsel
+in beide Richtungen, Maßstabsreaktion, Undo/Redo, Migration, Dateirundlauf, Pickup,
+Neuzeichnung, Bewegung, Eigenschafts-/Bibliotheksänderung, fehlender Kontext sowie
+ungültige/extreme Werte. Bestehende Migrationsnachweise erwarten nun Schema 16.
+
+Browser im separaten Testprojekt: 0,20 m bei 1:100 → 2 mm Papiermaß ohne Sprung;
+1:50 ergibt 0,10 m Modellbreite; Rückwechsel erhält 0,10 m. Zellbreite 3 mm übernommen,
+Undo stellt 2 mm wieder her. Doppelt-Rechtsklick, neues Diagonalrechteck: ebenfalls
+Papiermaß/2 mm. Speichern/Öffnen erhält beide Schraffuren. Null-Eingabe wird blockiert.
+Kontur bleibt unverändert, keine erfassten Browserfehler. Screenshot außerhalb des
+Repos: outputs/hatch-paper-mode.jpg. Vorschau und fertige Schraffur verwenden denselben
+Renderer; der ScaleContext bleibt bei Pointerbewegungen stabil für Paint-Run-Memoisierung.
+
+Abnahme: gemusterte Schraffur auswählen, Mustermaß auf Papiermaß stellen, Zellbreite
+in mm eingeben. Unten 1:100/1:50 wechseln: nur Mustergröße ändert sich. Zurück auf
+Modellmaß wechseln, Undo und Dateirundlauf prüfen. Keine PDF-/Druckfunktion oder
+physische Druckstiftbreite; bisheriger Bildschirmstrich bleibt 1 CSS-Pixel.
+
+**Genau ein nächster Auftrag: MS-04a Vertrag für gespeicherte Ausschnitte konkretisieren.**
+Begrenzter Planungs-/Dokumentationsschritt: vorhandene ModelView/DrawingDocument-
+Verträge gegen Arbeitsansicht und Schema 16 abgleichen. Identität, eigener Maßstab,
+eigene Ebenensichtbarkeit, Modellbindung und Lebenszyklus eines Ausschnitts festlegen;
+verbindliche Nutzerregeln von offenen Bedienfragen trennen. Genau einen anschließenden
+kleinen Implementierungspiloten benennen. Noch kein Layouteditor, keine zweite
+Bauteilkopie und keine neuen Dokumentklassen ohne konkreten Anwendungsfall.
+
 ## MS-03: Maßstabsauswahl und persistente Arbeitsansicht — 10.10.2026
 
 PR232 nach grüner CI regulär zusammengeführt. Nutzer wünscht feste Maßstäbe

@@ -17,11 +17,12 @@ import {
   validateProjectV12,
   validateProjectV13,
   validateProjectV14,
+  validateProjectV15,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 15. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 16. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -41,7 +42,9 @@ export function loadProjectData(value: unknown): Project {
     return loadProjectData({ ...validateProjectV13(value), schemaVersion: 14 });
   if (value.schemaVersion === 14)
     return loadProjectData({ ...validateProjectV14(value), schemaVersion: 15 });
-  if (value.schemaVersion === 15) {
+  if (value.schemaVersion === 15)
+    return loadProjectData({ ...validateProjectV15(value), schemaVersion: 16 });
+  if (value.schemaVersion === 16) {
     const project = validateProject(value);
     // Trust is rebuilt from fully validated file data, never persisted IDs/hashes.
     return { ...project, assets: project.assets.map(createImageAssetHandle) };

@@ -32,6 +32,7 @@ import {
   HatchPaintFields,
   HatchPatternFields,
   HatchRotationField,
+  HatchSizeFields,
 } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
@@ -1020,6 +1021,14 @@ export function CadWorkspace({
                   toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
                 }
               />
+              <HatchSizeFields
+                definition={toolDefaults.hatch.patternDefinition}
+                value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
+                context={projectScaleContext(project)}
+                onChange={(patternSize) =>
+                  toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })
+                }
+              />
               <HatchFillFields
                 value={hatchFill}
                 onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
@@ -1263,6 +1272,7 @@ export function CadWorkspace({
                   draftFill={tool === "hatch" ? hatchFill : undefined}
                   draftPattern={tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined}
                   draftPatternRotation={toolDefaults.hatch.patternRotation}
+                  draftPatternSize={toolDefaults.hatch.patternSize}
                   draftContour={
                     tool === "hatch" && hatchConstruction !== "polygon"
                       ? (point) =>

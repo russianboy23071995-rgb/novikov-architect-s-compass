@@ -1,3 +1,4 @@
+import type { ScaleContext } from "@/domain/views/scale";
 import { useId } from "react";
 import {
   hatchPatternTile,
@@ -12,17 +13,30 @@ export function HatchPattern({
   definition,
   pixelsPerMetre,
   sizing,
+  context,
 }: {
   hatch: Pick<Hatch, "points" | "fill" | "pattern">;
   definition: HatchPatternDefinition;
   pixelsPerMetre: number;
   sizing?: HatchPatternSizing;
+  context?: ScaleContext;
 }) {
   const id = useId();
   if (!hatch.pattern) return null;
-  const tile = hatchPatternTile(definition, hatch.pattern, sizing);
-  if (!tile) return null;
-  const strokeWidth = hatchPatternStroke(pixelsPerMetre, tile.factor);
+  let tile: ReturnType<typeof hatchPatternTile>;
+  let strokeWidth: number;
+  try {
+    tile = hatchPatternTile(definition, hatch.pattern, sizing, context);
+    if (!tile) return null;
+    strokeWidth = hatchPatternStroke(pixelsPerMetre, tile.factor);
+  } catch {
+    // Incomplete tool-default input must not crash the canvas. Commit still validates.
+    return (
+      <g role="img" aria-label="Ungültige Mustergröße">
+        <title>Ungültige Mustergröße</title>
+      </g>
+    );
+  }
   return (
     <g pointerEvents="none">
       <defs>

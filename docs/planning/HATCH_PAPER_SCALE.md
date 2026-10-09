@@ -113,3 +113,14 @@ integration remains subsequent work; do not combine it into that persistence tas
 MS-03 speichert den Arbeitsmaßstab mit Schema 15 außerhalb Modell-Undo. Die
 Papiermodus-Integration kann als nächster einzelner Auftrag folgen. Die Regel für
 den Moduswechsel bleibt vorab zu klären; es ist noch keine Papiermodus-Freischaltung.
+
+## Produktintegration umgesetzt — 10.10.2026
+
+Schema 16: Papiermaß mit paperWidthMetres, Modellmaß mit optionaler modelWidthMetres.
+Ohne explizite Modellbreite gilt weiterhin Faktor 1 zur Definition. Nutzer bestätigt:
+Moduswechsel erhält sichtbare Zellgröße am aktuellen S. Der gemeinsame Domain-Resolver
+liefert Umrechnung, Application besitzt Moduswechsel und validierte Aktionen. Größen
+bleiben Eigenschaften der einzelnen Anwendung, nicht globale Bibliotheksänderungen.
+2D-Eigenschaften, Defaults, Pickup, Vorschau, Dateirundlauf und Modell-History sind
+angebunden; 792 Tests, Typprüfung, Build und Browserprüfung bestanden. Druck/PDF und
+physische Druckstifte bleiben offen. Nächster Einzelauftrag siehe DEVELOPMENT_PLAN.md.
