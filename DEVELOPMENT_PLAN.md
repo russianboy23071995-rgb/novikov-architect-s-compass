@@ -1,3 +1,48 @@
+## MS-01: Gemeinsamer Maßstabskontext und Auswahl — 09.10.2026
+
+Auf feat/shared-view-scale nach zusammengeführtem PR229 umgesetzt. Domain/views
+definiert fachliche Grundrissidentität (Projekt/Geschoss), ScaleContext und metrische
+Größen mit Modell-/Papierbezug. Application/views verwaltet immutable Sitzungswerte
+und validiert freie Nenner oder 1:S-Eingaben, auch Dezimalkomma. Rendering löst
+Modell-, Papier- und Bildschirmgrößen gemeinsam auf; fehlende Papierkontexte,
+ungültige Werte sowie numerischer Über-/Unterlauf werden abgewiesen.
+
+Neben Zoom erscheint in 2D Maßstab mit 1:100, Vorschlagsliste und freier Eingabe.
+Enter oder Feldverlassen übernimmt, Escape verwirft die Eingabe. Derselbe fachliche
+Grundriss teilt seinen Maßstab in allen Fenstern; Kamera/Zoom bleiben getrennt.
+Sitzungszustand lebt oberhalb der Fenster, nicht unter deren Layout-/Indexschlüssel.
+Reine Anschlussvorschauen ohne Kontext bieten keinen Maßstabsselektor. 3D bleibt
+ohne Ausgabe-Maßstabswahl. Keine Domain-Umrechnung in CadWorkspace oder je Werkzeug.
+
+783 Tests bestanden, Typecheck und Produktionsbuild erfolgreich, Lint ohne Fehler
+(sechs bekannte Warnungen). Fünf neue Tests mit Unterfällen: Kontextisolation,
+unveränderte Projektdatei/History, freie Eingabe, 2-mm-/0,20-m-Beispiel bei 1:50/100,
+Zoom 25/100/400 und ungültige/extreme Werte. Windows-Testkindprozesse benötigen
+weiterhin genehmigte Ausführung außerhalb der Sandbox (spawn EPERM).
+
+Browser in separatem Testtab: 1:100 → 1:50 lässt SVG-Wandgeometrie und viewBox exakt
+gleich, Undo bleibt deaktiviert. 1:0 abgewiesen, Escape stellt 1:50 wieder her.
+Zwei Fenster: erstes auf 200 % gezoomt; Maßstab im zweiten auf frei eingegebene
+1:75 geändert, erstes zeigt ebenfalls 1:75 und behält 200 %. Wechsel 3D/2D und
+Schließen des zweiten Fensters erhalten 1:75. Neuladen setzt erwartungsgemäß 1:100.
+Keine erfassten Browserfehler. Bild: outputs/shared-view-scale.jpg außerhalb des Repos.
+
+Grenzen: nur sitzungsbezogen, keine Speicherung oder Änderung der Modell-History.
+Noch keine Papiermuster-/Textdarstellung oder Druckfunktion. Andere fachliche
+Kontexte sind im Kern auf Isolation geprüft; die aktuelle UI zeigt weiterhin das
+vorhandene eine Geschoss. Fang-/Messalgorithmen erhalten keinen neuen Maßstabsinput;
+kein neuer manueller Gesamt-Fang-/IFC-Abnahmelauf in diesem Schritt behauptet.
+
+Abnahme: unten 1:50 eingeben und Enter drücken, dann unabhängig zoomen. Zwei
+Ansichten öffnen, Maßstab in einer ändern und in der anderen prüfen. Ungültige
+Eingabe testen. Der Maßstab wird erst im nächsten Schritt für Papiermuster verwendet.
+
+**Genau ein nächster Auftrag: MS-02/V07k Schraffur-Darstellungspilot.** Den neuen
+gemeinsamen Resolver in die Kachelableitung einbinden, Modellpfad unverändert lassen
+und Papier-Zellgrößen mit explizitem ScaleContext in isoliertem Browserbeispiel
+prüfen (Orientierung, Ursprung, Rotation, konstante Bildschirmstriche). Weiterhin
+keine Schema-/Papiermodus-Freischaltung; persistenter Ansichtskontext folgt separat.
+
 ## Maßstabsverträge nach PR230-Review vereinheitlicht — 09.10.2026
 
 Nutzer bestätigt beide Reviewempfehlungen und gibt PR229 ausdrücklich frei.

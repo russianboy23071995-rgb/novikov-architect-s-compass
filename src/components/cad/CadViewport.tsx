@@ -1,4 +1,11 @@
 import { createPortal } from "react-dom";
+import { ViewScaleControl } from "./ViewScaleControl";
+import {
+  changeViewScale,
+  readViewScale,
+  type ViewScaleSession,
+} from "@/application/views/scale-session";
+import type { ScaleContext, WorkingPlanIdentity } from "@/domain/views/scale";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -14,6 +21,8 @@ import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 
 type CadViewportProps = BimPlanProps & {
+  scaleContext?: ScaleContext;
+  onScale?: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
   index: number;
   mode: ViewMode;
@@ -57,6 +66,8 @@ function MiniControl({
 }
 
 export function CadViewport({
+  scaleContext,
+  onScale,
   zoomSlot,
   index,
   mode,
@@ -248,7 +259,21 @@ export function CadViewport({
         <span className="text-axis-x">X</span>
         <span className="-ml-10 -translate-y-5 text-axis-z">{is3D ? "Z" : "Y"}</span>
       </div>
-      {active && zoomSlot && createPortal(zoomControl, zoomSlot)}
+      {active &&
+        zoomSlot &&
+        createPortal(
+          <div className="flex items-center gap-2">
+            {zoomControl}
+            {!is3D && scaleContext && onScale && (
+              <ViewScaleControl
+                key={JSON.stringify(scaleContext)}
+                context={scaleContext}
+                onChange={onScale}
+              />
+            )}
+          </div>,
+          zoomSlot,
+        )}
       <div
         className={cn(
           "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
@@ -336,6 +361,13 @@ export function ViewportManager({
   onActive: (index: number) => void;
   onFullscreen: () => void;
 }) {
+  const [scales, setScales] = useState<ViewScaleSession>({});
+  const view: WorkingPlanIdentity = {
+    kind: "working-plan",
+    projectId: model.project.id,
+    storeyId: model.project.storey.id,
+  };
+  const scaleContext = readViewScale(scales, view);
   const count =
     layout === "single"
       ? 1
@@ -349,6 +381,10 @@ export function ViewportManager({
       {Array.from({ length: count }, (_, index) => (
         <CadViewport
           key={`${layout}-${index}`}
+          scaleContext={scaleContext}
+          onScale={(denominator) =>
+            setScales((previous) => changeViewScale(previous, view, denominator))
+          }
           {...model}
           index={index}
           mode={mode}

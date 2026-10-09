@@ -32,6 +32,18 @@ See [general contract](docs/planning/VIEW_SCALE_CONTRACT.md) and
 [hatch-specific acceptance](docs/planning/HATCH_PAPER_SCALE.md).
 
 
+## Shared session view scale — MS-01, 2026-10-09
+
+Implemented: domain/views identifies the existing semantic working plan by project
+and storey, not pane index. Application/views owns immutable session scale changes
+and strict 1:S input parsing. ViewportManager hosts the session above pane lifetimes;
+all panes bound to that plan read the same ScaleContext, retaining separate cameras.
+The active 2D pane exposes the selector beside Zoom. No storage/model-history write
+occurs; reload starts at 1:100. rendering/viewport/display-size resolves explicit
+model/paper metric sizes and separate screen metrics, rejecting invalid contexts
+and non-positive/non-finite results. Product hatches remain model-space; MS-02 will
+consume this resolver rather than introduce another one. Production schema stays 14.
+
 ## Shared non-modal windows - 2026-10-08
 
 User decision: opened CAD windows follow the Ebenen palette: draggable, no
