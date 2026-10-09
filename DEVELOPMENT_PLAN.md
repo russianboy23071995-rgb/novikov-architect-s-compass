@@ -1,3 +1,28 @@
+## V07e Musteranwendungs-/Aktualisierungsvertrag - 09.10.2026
+
+PR221 (38b571e) nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.
+Hatch-Schema, previewHatch/commitHatch, Projektmigration/-History, Renderer und
+Bibliothek geprüft. Projektformat 10 hat noch keine Mustertabelle/Referenz;
+kein implementierter Ansichts-Ausgabemaßstab. Papiermaß benötigt diesen, Zoom
+ersetzt ihn nicht. Keine neue Codefunktion oder Dateimigration in diesem Auftrag.
+Nutzerantworten: neue Muster beim Öffnen älterer Projekte automatisch übernehmen;
+eigene Bibliotheks-Undo/Redo-History, Projekt-Undo nur Modellzuweisung/-änderung.
+Vertrag dokumentiert: portable Definitionstabelle, stabile Referenzen/Anker,
+Modell-/Papiermaß, künftige monotone Revisionen und automatische zentrale Auflösung,
+keine Downgrades oder stille Konfliktersetzung. Bibliotheks-Undo als neue Revision;
+Projekt-Undo darf globale Aktualisierung nicht durch alte Snapshots zurückdrehen.
+Details und Nachweise in docs/planning/HATCH_PATTERN_LIBRARY.md (V07e).
+Dokumentations-Diff geprüft; 741 Tests/Build und CI stammen vom PR221-Commit,
+nicht erneut ausgeführt. Praktische V07d-Abnahme bleibt im Browser offen.
+
+**Genau ein nächster Auftrag: V07f portabler Modellmaß-Pilot.**
+Muster in Werkzeugeigenschaften vorhandener Schraffuren zuweisen/entfernen und
+als neue Werkzeugvorgabe übernehmen; verwendete Definition einmal im Projekt
+speichern, Migration und Referenzen prüfen. Begrenzte geklippte Darstellung,
+Anker bei Bewegung, Undo/Redo und Dateirundlauf ohne lokale Bibliothek nachweisen.
+Keine globale Musterbearbeitung, Papiermaß, Revision-Synchronisation, Upload oder
+Layout in diesem Piloten. Diese geforderten Erweiterungen bleiben offen.
+
 ## V07d Globale lokale Schraffurmusterbibliothek - 09.10.2026
 
 PR220 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.
