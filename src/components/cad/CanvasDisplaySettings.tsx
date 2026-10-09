@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { FloatingPanel } from "./FloatingPanel";
 
 export function CanvasDisplaySettings({
   open,
@@ -18,12 +12,15 @@ export function CanvasDisplaySettings({
   onWallWidth: (width: number) => void;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-panel-strong max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Canvas-Darstellung</DialogTitle>
-          <DialogDescription>Bildschirmdarstellung des Grundrisses</DialogDescription>
-        </DialogHeader>
+    <FloatingPanel
+      open={open}
+      title="Canvas-Darstellung"
+      onClose={() => onOpenChange(false)}
+      width={420}
+      height={300}
+    >
+      <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
+        <p className="text-xs text-muted-foreground">Bildschirmdarstellung des Grundrisses</p>
         <fieldset className="space-y-3">
           <legend className="font-medium">Wand</legend>
           <label className="flex items-center justify-between gap-4 text-sm">
@@ -46,7 +43,7 @@ export function CanvasDisplaySettings({
             für alle Grundrissfenster und wird in diesem Browser gespeichert.
           </p>
         </fieldset>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </FloatingPanel>
   );
 }

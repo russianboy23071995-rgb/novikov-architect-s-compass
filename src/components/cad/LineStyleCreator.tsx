@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,18 +56,12 @@ export function LineStyleCreator({ onClose }: { onClose: () => void }) {
     setError(loaded.error);
   };
   return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <DialogContent className="glass-panel-strong max-w-2xl max-h-[85vh] overflow-auto">
-        <DialogTitle>Linien Creator</DialogTitle>
-        <DialogDescription>
+    <FloatingPanel open title="Linien Creator" onClose={onClose} width={680}>
+      <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
+        <p className="text-xs text-muted-foreground">
           Linienarten verwalten. Eigene Strich-/Lückenmuster werden projektübergreifend in diesem
           Browserprofil gespeichert. Die Anbindung an das Linienwerkzeug folgt separat.
-        </DialogDescription>
+        </p>
         <div className="max-h-64 overflow-auto space-y-2" aria-label="Vorhandene Linienarten">
           {[...builtInLineStyles, ...styles].map((style) => (
             <div
@@ -154,7 +148,7 @@ export function LineStyleCreator({ onClose }: { onClose: () => void }) {
             {error}
           </p>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </FloatingPanel>
   );
 }

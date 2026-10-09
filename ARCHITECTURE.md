@@ -1,5 +1,16 @@
 # NOVIKOV CAD Architecture Contract
 
+## Shared non-modal windows - 2026-10-08
+
+User decision: opened CAD windows follow the Ebenen palette: draggable, no
+background dimming, Glass Flow styling. FloatingPanel owns the shared shell,
+header pointer/keyboard movement, viewport clamping, close and scoped Escape.
+Window contents own their application/draft actions and validation. Existing
+layer, line creator, hatch creator, display settings, connection preview and
+project-load confirmation use this shell. New CAD windows must reuse it rather
+than copying drag logic or introducing a modal overlay.
+
+
 ## Separate line styles and hatch patterns - 2026-10-08
 
 User clarification: Tools > Linien Creator manages line styles for line tools,

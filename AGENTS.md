@@ -35,3 +35,5 @@
 - Every interactive movement must immediately pin the chosen point as a shared construction origin: point/element movement, stretch and axis actions alike. New element adapters must participate in the same snapping/inference pipeline; do not make origin activation a per-tool opt-in. Preserve explicit host/axis constraints and the user Snap toggle. See ARCHITECTURE.md, Universal movement origin.
 
 - New precision-input consumers must use the ToolInteraction contract and shared useToolInteraction/InteractionInput lifecycle. Keep element-specific validation in application/domain adapters; do not add numeric preview switches or per-tool form/Tab handlers to CadWorkspace or BimPlan. Preserve existing geometric snapping services.
+
+- CAD windows use the shared FloatingPanel shell, modeled on Ebenen: draggable, non-modal, no background dimming, Glass Flow styling. Keep window-specific validation/actions separate; do not duplicate drag or overlay implementations.
