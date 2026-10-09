@@ -78,7 +78,7 @@ test("visibility cancels a pending preview and rejects its late commit; model an
 });
 
 test("strict version-2 migration preserves geometry and membership and defaults visibility to all-visible", () => {
-  const { assets, bimVisibility, ...data } = createExampleProject();
+  const { assets, hatchPatterns, bimVisibility, ...data } = createExampleProject();
   const { references, hatches, wallTJunctions, wallJoins, ...oldStorey } = data.storey;
   const v2 = {
     ...data,
@@ -86,7 +86,7 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     schemaVersion: 2,
   };
   const migrated = loadProjectData(v2);
-  assert.equal(migrated.schemaVersion, 10);
+  assert.equal(migrated.schemaVersion, 11);
   assert.deepEqual(migrated.storey, {
     ...oldStorey,
     references: [],

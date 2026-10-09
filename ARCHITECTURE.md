@@ -1,6 +1,7 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 10 (portable custom line patterns, 2026-10-09).
+Production project schema is now 11 (portable hatch pattern table, 2026-10-09).
+Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
 incremental migration supersedes their claim that the production format is unchanged.
 
@@ -2516,3 +2517,19 @@ is not implied by localStorage. These mechanisms remain future implementation.
 See docs/planning/HATCH_PATTERN_LIBRARY.md, V07e, for the bounded V07f assignment
 pilot, module evidence, tests and separation from paper-scale/global-history work.
 Production project schema stays 10 in this documentation-only change.
+
+## Hatch model-space pilot V07f - 2026-10-09
+
+Production schema 11 embeds used definitions once per project in hatchPatterns.
+Applications hold patternId, model-space mode and explicit origin. Domain validates
+references/definition identity and finite extents; normalization removes unused
+definitions. Versions 1–10 migrate strictly at file ingress with an empty table,
+retaining solid appearances. Used definitions remain portable without local storage.
+HatchRequest accepts an owned definition for shared assignment/removal; conflicting
+same-ID content is rejected until the revision action exists. Drawing and default
+pickup use this action; pickup copies definition/appearance, never contour or anchor.
+Single and prepared group translation move origins; contour edits retain them.
+SVG pattern tiles and polygon clipping provide bounded rendering and draft preview.
+No model geometry is allocated per repetition. Fill color/opacity control strokes,
+background and contour remain independent. Global revision editing/History, automatic
+library reconciliation, paper-space sizing and uploads remain unimplemented.

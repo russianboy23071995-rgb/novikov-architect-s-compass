@@ -3,7 +3,10 @@ import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 
-export type HatchDefaults = Pick<Hatch, "fill" | "background" | "contour" | "layerId">;
+export type HatchDefaults = Pick<Hatch, "fill" | "background" | "contour" | "layerId"> & {
+  patternDefinition?:
+    import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
+};
 export type WindowDefaults = Pick<
   Project["storey"]["windows"][number],
   "width" | "height" | "sillHeight" | "layerId"
@@ -77,6 +80,9 @@ export function pickupToolDefaults(
   return {
     tool: "hatch",
     values: {
+      patternDefinition: source.pattern
+        ? structuredClone(project.hatchPatterns.find((p) => p.id === source.pattern!.patternId)!)
+        : null,
       fill: { ...source.fill },
       background: { ...source.background },
       contour: { ...source.contour },

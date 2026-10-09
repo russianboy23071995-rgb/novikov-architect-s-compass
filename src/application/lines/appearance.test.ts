@@ -41,11 +41,12 @@ test("portable model-space pattern survives catalog deletion and roundtrip, undo
   assert.deepEqual(undoProject(history).present, base);
   assert.throws(() => applyLineStyle(defaultLineAppearance, builtInLineStyles[0]!, 0));
 });
-test("schema 9 loads unchanged geometry as schema 10; invalid embedded patterns rejected", () => {
+test("schema 9 loads unchanged geometry as schema 11; invalid embedded patterns rejected", () => {
   const project = createProject("legacy-style", "storey-legacy");
-  const legacy = { ...project, schemaVersion: 9 };
+  const { hatchPatterns: _patterns, ...old } = project;
+  const legacy = { ...old, schemaVersion: 9 };
   const loaded = loadProjectData(legacy);
-  assert.equal(loaded.schemaVersion, 10);
+  assert.equal(loaded.schemaVersion, 11);
   assert.deepEqual(loaded.storey, project.storey);
   assert.throws(() =>
     addLine(project, {

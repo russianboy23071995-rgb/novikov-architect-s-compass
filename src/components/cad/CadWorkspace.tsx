@@ -21,7 +21,7 @@ import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings } from "@/application/snapping/grid-settings";
-import { HatchFillFields, HatchPaintFields } from "./HatchControls";
+import { HatchFillFields, HatchPaintFields, HatchPatternFields } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
@@ -991,6 +991,13 @@ export function CadWorkspace({
                   <option value="boundary">Geschlossene Kontur übernehmen</option>
                 </select>
               </label>
+              <HatchPatternFields
+                project={project}
+                value={toolDefaults.hatch.patternDefinition}
+                onChange={(patternDefinition) =>
+                  toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
+                }
+              />
               <HatchFillFields
                 value={hatchFill}
                 onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
@@ -1225,6 +1232,7 @@ export function CadWorkspace({
                   start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                   draftPoints={pathDrawing ? pathPoints : []}
                   draftFill={tool === "hatch" ? hatchFill : undefined}
+                  draftPattern={tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined}
                   draftContour={
                     tool === "hatch" && hatchConstruction !== "polygon"
                       ? (point) =>

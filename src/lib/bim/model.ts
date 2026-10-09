@@ -13,7 +13,8 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 10,
+    schemaVersion: 11,
+    hatchPatterns: [],
     assets: [],
     bimVisibility: { hiddenLayerIds: [] },
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),

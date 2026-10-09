@@ -54,7 +54,7 @@ test("reference import is atomic, portable, immutable and one undo/redo step", (
 });
 test("V8 migrates strictly without inventing assets and keeps source unchanged", () => {
   const { base } = setup();
-  const { assets, ...root } = base;
+  const { assets, hatchPatterns, ...root } = base;
   const { references, ...storey } = base.storey;
   const old = { ...root, schemaVersion: 8, storey };
   const before = JSON.stringify(old);

@@ -159,7 +159,11 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
           ids.has(w.id) ? { ...w, start: translate(w.start), end: translate(w.end) } : w,
         ),
         lines: affected.storey.lines!.map((l) => ({ ...l, points: l.points.map(translate) })),
-        hatches: affected.storey.hatches.map((h) => ({ ...h, points: h.points.map(translate) })),
+        hatches: affected.storey.hatches.map((h) => ({
+          ...h,
+          points: h.points.map(translate),
+          ...(h.pattern ? { pattern: { ...h.pattern, origin: translate(h.pattern.origin) } } : {}),
+        })),
         references: affected.storey.references.map((r) => ({ ...r, origin: translate(r.origin) })),
         wallJoins: localJoins,
         wallTJunctions: localTees,

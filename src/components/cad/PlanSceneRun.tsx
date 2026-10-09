@@ -1,3 +1,4 @@
+import { HatchPattern } from "./HatchPattern";
 import { LinePattern } from "./LinePattern";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { memo } from "react";
@@ -102,7 +103,7 @@ export function PlanSceneContent({
           <polygon
             {...selectProps("hatch", hatch.id)}
             points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-            fill={hatch.fill.color}
+            fill={hatch.pattern ? "transparent" : hatch.fill.color}
             fillOpacity={hatch.fill.opacity}
             stroke="transparent"
             strokeWidth={12}
@@ -110,6 +111,13 @@ export function PlanSceneContent({
             pointerEvents="all"
             className="cursor-pointer outline-none focus-visible:stroke-sky-300"
           />
+          {hatch.pattern && (
+            <HatchPattern
+              hatch={hatch}
+              definition={scene.hatchPatterns.get(hatch.pattern.patternId)!}
+              pixelsPerMetre={pixelsPerMetre}
+            />
+          )}
           {hatch.contour.visible && (
             <polygon
               aria-label="Schraffurkontur"
