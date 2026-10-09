@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PointerEvent } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,29 @@ import type { Point2 } from "@/geometry/primitives/point";
 import { querySnap } from "@/constraints/snapping/engine";
 import { angle45Direction } from "@/geometry/projections/direction";
 
-/** Isolated local draft. No project state, assets or BIM history are changed. */
+import { loadHatchPatterns, saveHatchPattern } from "@/application/hatches/pattern-library";
+import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
+import { browserHatchPatternStorage as storage } from "@/interop/hatch-pattern-storage";
+function PatternPreview({ pattern }: { pattern: PatternDraft }) {
+  return (
+    <svg
+      aria-label="Mustervorschau"
+      viewBox={`0 0 ${pattern.width} ${pattern.height}`}
+      className="h-14 w-24 shrink-0 border rounded bg-white/30"
+    >
+      <path
+        d={pattern.lines
+          .map((line) => `M ${line.start.x} ${line.start.y} L ${line.end.x} ${line.end.y}`)
+          .join(" ")}
+        fill="none"
+        stroke="#334155"
+        strokeWidth="1"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+/** Transient drawing draft; persistent library actions are independent of BIM history. */
 export function HatchPatternCreator({
   open,
   onOpenChange,
@@ -23,12 +45,30 @@ export function HatchPatternCreator({
   const [start, setStart] = useState<Point2 | null>(null);
   const [cursor, setCursor] = useState<Point2 | null>(null);
   const [error, setError] = useState("");
+  const [patterns, setPatterns] = useState<HatchPatternDefinition[]>([]);
+  const [libraryError, setLibraryError] = useState("");
+  const [name, setName] = useState("");
+  const [saved, setSaved] = useState("");
+  const reload = () => {
+    try {
+      setPatterns(loadHatchPatterns(storage));
+      setLibraryError("");
+    } catch {
+      setLibraryError(
+        "Bibliothek konnte nicht geladen werden. Vorhandene Daten werden nicht überschrieben.",
+      );
+    }
+  };
+  useEffect(() => {
+    if (open) reload();
+  }, [open]);
   const direction = useRef<Point2 | null>(null);
   const patternId = useId();
   const update = (next: PatternDraft) => {
     setHistory((h) => [...h, draft]);
     setDraft(next);
     setError("");
+    setSaved("");
     setStart(null);
     setCursor(null);
     direction.current = null;
@@ -78,10 +118,80 @@ export function HatchPatternCreator({
     >
       <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
         <p className="text-xs text-muted-foreground">
-          Lokaler Entwurf in Metern. Zwei Klicks zeichnen eine Linie; Shift hält die Richtung. Noch
-          keine Speicherung oder Anwendung auf Projektkonturen.
+          Musterbibliothek für alle Projekte in diesem Browserprofil. Zwei Klicks zeichnen eine
+          Linie; Shift hält die Richtung. Anwendung auf Projektkonturen folgt separat.
         </p>
+        <section aria-label="Gespeicherte Schraffurmuster" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Gespeicherte Muster · {patterns.length}/100</p>
+            <Button variant="outline" onClick={reload}>
+              Neu laden
+            </Button>
+          </div>
+          {libraryError && (
+            <p role="alert" className="text-sm text-destructive">
+              {libraryError}
+            </p>
+          )}
+          <div className="max-h-40 overflow-auto space-y-2">
+            {!patterns.length && !libraryError && (
+              <p className="text-xs text-muted-foreground">
+                Noch keine eigenen Muster gespeichert.
+              </p>
+            )}
+            {patterns.map((pattern) => (
+              <div key={pattern.id} className="flex items-center gap-3 border rounded p-2">
+                <PatternPreview pattern={pattern} />
+                <span className="min-w-0 flex-1 text-xs truncate">{pattern.name}</span>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    update(structuredClone(pattern));
+                    setSize({ width: String(pattern.width), height: String(pattern.height) });
+                    setName(`${pattern.name} Kopie`);
+                    setSaved("");
+                  }}
+                >
+                  Als neuen Entwurf öffnen
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
         <div className="flex flex-wrap items-end gap-3">
+          <label className="text-xs">
+            Mustername
+            <Input
+              className="w-48"
+              value={name}
+              maxLength={80}
+              onChange={(e) => {
+                setName(e.target.value);
+                setSaved("");
+              }}
+            />
+          </label>
+          <Button
+            disabled={!!libraryError}
+            onClick={() => {
+              try {
+                const next = saveHatchPattern(storage, {
+                  id: crypto.randomUUID(),
+                  name,
+                  width: draft.width,
+                  height: draft.height,
+                  lines: draft.lines,
+                });
+                setPatterns(next);
+                setSaved("Muster gespeichert. Erneutes Speichern erstellt eine neue Definition.");
+                setError("");
+              } catch (e) {
+                setError((e as Error).message);
+              }
+            }}
+          >
+            Muster speichern
+          </Button>
           {(["width", "height"] as const).map((key) => (
             <label key={key} className="text-xs">
               {key === "width" ? "Zellbreite (m)" : "Zellhöhe (m)"}
@@ -128,6 +238,8 @@ export function HatchPatternCreator({
             onClick={() => {
               setDraft({ width: 1, height: 1, lines: [] });
               setHistory([]);
+              setName("");
+              setSaved("");
               setSize({ width: "1", height: "1" });
               setStart(null);
               setCursor(null);
@@ -267,6 +379,11 @@ export function HatchPatternCreator({
             </svg>
           </div>
         </div>
+        {saved && (
+          <p role="status" className="text-xs">
+            {saved}
+          </p>
+        )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
