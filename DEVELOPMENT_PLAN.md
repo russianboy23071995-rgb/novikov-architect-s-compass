@@ -1,3 +1,46 @@
+## Nutzerauftrag: Stiftesets und direkte Werkzeugeigenschaften - 09.10.2026
+
+Eigener Entwicklungszweig feat/pen-sets-live-properties auf PR226; dessen Änderungen
+bleiben ungemergt und erhalten. Tools > Stifteset verwaltet benannte Farbenpakete,
+Stifte mit Name/HEX-Farbe und je Paket ein Inventar bis zehn Farben. Paket anlegen,
+Stift bearbeiten/löschen und Inventar ändern sind möglich. Speichern veröffentlicht
+in der lokalen Browserbibliothek und wählt einen portablen Paketstand für das Projekt.
+Keine Live-Verknüpfung der Elementfarben: Nutzerentscheidung, dass bestehende Elemente
+ihre Farbe behalten. Bibliotheksänderungen wirken erst bei erneuter Paketübernahme;
+geschlossene Projektdateien werden nicht verändert. Kein Set-Löschen/Import/Cloudsync.
+
+Gemeinsamer Farbdialog für Linien, Schraffurfüllung, Hintergrund, Kontur, Liniencreator
+und Stiftemanager: Inventar, eigene freie HSV-Palette und HEX-Eingabe. Beide Fenster
+verwenden FloatingPanel (beweglich, nicht modal, kein Abdunkeln). Gesperrte Linienfarben
+bleiben gesperrt. Veraltete Dialogziele werden über den Komponentenlebenszyklus verworfen.
+Projektformat 14 speichert das optionale Stifteset einschließlich Inventar; strikte
+Migration 1–13 erhält den Bestand, alte Versionen akzeptieren kein neues Feld.
+
+PropertyForm koordiniert die bestehende validierte Eigenschaftenübernahme gemeinsam:
+Farb-/Listen-/Checkboxwahl sofort, Zahlen/Text beim Feldverlassen oder Enter. Kein
+Übernehmen-Button mehr für Wand-, Fenster-, Linien- oder Schraffureigenschaften.
+Ungültige Zwischenwerte verändern das Modell nicht. Bestehende Modellaktionen und
+History bleiben maßgebend, unveränderte Werte erzeugen keinen zusätzlichen Undo-Schritt.
+Projekt-Paketwahl ist eine Projektänderung; Bibliotheksänderungen werden von Modell-Undo
+nicht zurückgeschrieben. Creator-Entwürfe und explizite Modellbefehle behalten Bestätigung.
+
+Nachweise: 778 Tests bestanden, Typecheck und Produktionsbuild erfolgreich, vollständiger
+Lint ohne Fehler (sechs bestehende Fast-Refresh-Warnungen). Neue Tests für Inventar/IDs,
+Speicher-/Quota-/Konfliktfehler, portable Pakete ohne Bestandsumfärbung, Farb-Undo/Redo,
+strikte Migration und HSV/RGB-Rundlauf. Keine automatisierte Browserabnahme: Sandbox-
+Setup meldet Windows-Fehler 32 beim Öffnen von node_repl.exe für die ACL-Prüfung.
+Eigener Sitzungsreset erfolglos; vier ältere Hilfsprozesse mit aktiven Eltern gefunden.
+App-Neustart ist der nächste Diagnoseversuch, noch keine bestätigte Reparatur.
+
+Abnahme nach Neustart: Tools > Stifteset, Paket und zwei Stifte erstellen, Inventar
+wählen und speichern. Linie/Schraffur färben; eigenes Fenster prüfen. Zahlen ändern
+und Feld verlassen, ungültiges Maß prüfen, Undo/Redo. Projekt speichern/öffnen und
+Inventar prüfen. Stift später ändern: gezeichnete Elemente müssen unverändert bleiben.
+
+**Genau ein nächster Auftrag:** Nach Codex-Neustart Sandbox und gemeinsame Farb-/
+Eigenschaftenbedienung praktisch prüfen und diesen Schritt abnehmen. Anschließend
+bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag als fachlicher Folgeauftrag vorgemerkt.
+
 ## Nutzerkorrektur: Musterausrichtung und Musterwinkel - 09.10.2026
 
 Ergänzung zu PR226 (weiterhin zur Prüfung offen): Im Creator verlaufen lokale

@@ -1,3 +1,4 @@
+import { ColorField } from "./PenColors";
 import { useId, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { LineStyleDrawing } from "./LineStyleDrawing";
@@ -181,12 +182,10 @@ export function LineStyleCreator({ onClose }: { onClose: () => void }) {
               </label>
               <label className="text-xs">
                 Farbe
-                <Input
-                  aria-label="Linienfarbe"
-                  type="color"
-                  value={draft.color}
-                  className="w-16"
-                  onChange={(e) => setDraft({ ...draft, color: e.target.value })}
+                <ColorField
+                  label="Linienartfarbe"
+                  value={draft.color!}
+                  onChange={(color) => setDraft({ ...draft, color })}
                 />
               </label>
               <label className="flex items-center gap-2 text-xs">

@@ -45,6 +45,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 type TopToolbarProps = {
+  onPenSets: () => void;
   onLineCreator: () => void;
   onHatchLibrary: () => void;
   onMeasure: () => void;
@@ -151,6 +152,7 @@ export function TopToolbar(props: TopToolbarProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onPenSets}>Stifteset…</DropdownMenuItem>
                   <DropdownMenuItem onSelect={props.onLineCreator}>
                     Linien Creator…
                   </DropdownMenuItem>

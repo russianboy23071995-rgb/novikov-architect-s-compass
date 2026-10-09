@@ -1,3 +1,7 @@
+import { CadAppearanceProvider } from "./CadAppearanceProvider";
+import { PenSetManager } from "./PenSetManager";
+import { defaultPenSet } from "@/domain/pens/model";
+import { assignPenSet } from "@/application/pens/library";
 import { WallDrawingFields } from "./WallDrawingFields";
 import { useProjectEditing } from "./useProjectEditing";
 import { useToolDefaults } from "./useToolDefaults";
@@ -37,7 +41,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { AiCommandBar } from "./AiCommandBar";
 import { InteractionInput } from "./InteractionInput";
 import { useToolInteraction } from "./useToolInteraction";
@@ -76,6 +79,7 @@ export function CadWorkspace({
   layerVisibility,
   initialProject,
 }: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
+  const [penSetsOpen, setPenSetsOpen] = useState(false);
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -658,7 +662,7 @@ export function CadWorkspace({
   };
 
   return (
-    <TooltipProvider>
+    <CadAppearanceProvider projectId={project.id} penSet={project.penSet ?? defaultPenSet}>
       <CanvasDisplaySettings
         open={displaySettingsOpen}
         onOpenChange={setDisplaySettingsOpen}
@@ -719,10 +723,18 @@ export function CadWorkspace({
             </div>
           </div>
         </FloatingPanel>
+        {penSetsOpen && (
+          <PenSetManager
+            selected={project.penSet ?? defaultPenSet}
+            onClose={() => setPenSetsOpen(false)}
+            onSelect={(set) => changeProject(assignPenSet(project, project, set), selection)}
+          />
+        )}
         {lineCreatorOpen && <LineStyleCreator onClose={() => setLineCreatorOpen(false)} />}
         <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
         {!fullscreen && (
           <TopToolbar
+            onPenSets={() => setPenSetsOpen(true)}
             onLineCreator={() => setLineCreatorOpen(true)}
             onHatchLibrary={() => setHatchLibraryOpen(true)}
             onMeasure={() => selectTool("measure")}
@@ -1440,6 +1452,6 @@ export function CadWorkspace({
           />
         )}
       </main>
-    </TooltipProvider>
+    </CadAppearanceProvider>
   );
 }

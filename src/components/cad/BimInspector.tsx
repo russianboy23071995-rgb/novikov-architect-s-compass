@@ -1,3 +1,4 @@
+import { PropertyForm } from "./PropertyForm";
 import { defaultDrawingWindow } from "@/application/drawing/window-placement";
 import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
@@ -90,7 +91,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       {opening && (
         <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
-      <form
+      <PropertyForm
         onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -129,10 +130,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
             />
           </label>
         ))}
-        <Button type="submit" size="sm" className="shrink-0">
-          Apply dimensions
-        </Button>
-      </form>
+      </PropertyForm>
       {wall && (
         <label
           className="text-xs"
@@ -173,7 +171,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
         </label>
       )}
       {wall && (
-        <form
+        <PropertyForm
           className="flex items-end gap-2"
           aria-label="Wandkörperversatz"
           onSubmit={(event) => {
@@ -204,13 +202,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               className="mt-1 h-8 w-24"
             />
           </label>
-          <Button type="submit" size="sm">
-            Versatz übernehmen
-          </Button>
-          <Button type="reset" variant="ghost" size="sm" onClick={() => setError("")}>
-            Verwerfen
-          </Button>
-        </form>
+        </PropertyForm>
       )}
       {wall && (
         <Button

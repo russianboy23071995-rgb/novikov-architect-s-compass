@@ -1,6 +1,6 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 11 (portable hatch pattern table, 2026-10-09).
+Production project schema is now 14 (portable pen-set snapshot, 2026-10-09).
 Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
 incremental migration supersedes their claim that the production format is unchanged.
@@ -2603,3 +2603,24 @@ of versions 1–12 preserves definitions and treats missing rotation as zero. Ea
 schemas reject the new field. Defaults, pickup, movement and global revision
 reconciliation retain this application property. Paper-space scale remains pending
 V07j and must not be inferred from camera zoom.
+
+## Pen sets and immediate property editing - 2026-10-09
+
+Implemented: domain/pens owns strict named color/set/inventory data. Application/pens
+validates catalog publication through a replaceable storage interface and project
+palette assignment against a pinned snapshot. Interop owns local browser persistence.
+Global here means one browser profile/origin across projects, not account/cloud sync.
+Schema 14 embeds an optional owned palette snapshot; strict versions 1–13 migrate at
+file ingress. Selecting a package never recolors model elements. User decision: element
+colors remain independent HEX values after catalog changes or deletion. Inventory is
+ordered and limited to ten existing unique pen IDs. Reapplying a package refreshes the
+project snapshot; library writes never occur during project Undo/Redo.
+
+Shared ColorField/ColorPicker and FloatingPanel serve all existing color entry points;
+free palette gestures remain local until release. Shared PropertyForm owns discrete
+choice commits and text/number blur/Enter commits, cancels scheduled work on unmount,
+and preserves Domain/Application validation. Incomplete values remain drafts. It does
+not introduce alternative element mutation logic or remove confirmation from creation
+editors, precision operations or AI proposals. Palette context is presentation state;
+the project and Application actions remain authoritative. Browser visual acceptance
+is still required; automated checks do not claim a verified pointer workflow.

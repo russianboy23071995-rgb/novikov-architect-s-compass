@@ -1,7 +1,8 @@
+import { ColorField } from "./PenColors";
+import { PropertyForm } from "./PropertyForm";
 import { useLineInventory } from "./useLineInventory";
 import { applyLineStyle } from "@/application/lines/appearance";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { updateLine } from "@/lib/bim/model";
 import type { DrawingLine, Project } from "@/lib/bim/model";
 import type { LineAppearance } from "@/lib/bim/lines";
@@ -29,34 +30,12 @@ export function LineStyleFields({
     <div className="flex flex-wrap items-end gap-2 text-xs">
       <label>
         Farbe
-        <select
-          aria-label="Linienfarbe"
+        <ColorField
+          label="Linienfarbe"
+          value={value.pattern?.colorEditable === false ? value.pattern.color! : value.color}
           disabled={value.pattern?.colorEditable === false}
-          title={
-            value.pattern?.colorEditable === false
-              ? "Feste Farbe aus dem Linien Creator"
-              : undefined
-          }
-          className="block rounded border bg-background p-1"
-          value={value.color}
-          onChange={(e) => onChange({ ...value, color: e.target.value })}
-        >
-          {Object.entries({
-            "#334155": "Graphit",
-            "#000000": "Schwarz",
-            "#dc2626": "Rot",
-            "#2563eb": "Blau",
-            "#16a34a": "Grün",
-            "#d97706": "Orange",
-          }).map(([color, name]) => (
-            <option key={color} value={color}>
-              {name}
-            </option>
-          ))}
-          {!["#334155", "#000000", "#dc2626", "#2563eb", "#16a34a", "#d97706"].includes(
-            value.color,
-          ) && <option value={value.color}>{value.color}</option>}
-        </select>
+          onChange={(color) => onChange({ ...value, color })}
+        />
       </label>
       <label>
         Strichstärke (mm)
@@ -144,7 +123,19 @@ export function LineInspector({
   });
   const [error, setError] = useState("");
   return (
-    <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Linieneigenschaften">
+    <PropertyForm
+      className="flex flex-wrap items-end gap-x-4 gap-y-2"
+      aria-label="Linieneigenschaften"
+      onSubmit={(event) => {
+        event.preventDefault();
+        try {
+          onChange(updateLine(project, line.id, value), { kind: "line", id: line.id });
+          setError("");
+        } catch {
+          setError("Linieneinstellungen prüfen: Strichstärke 0,05–2 mm und positive Musterlänge.");
+        }
+      }}
+    >
       <h2 className="text-sm font-semibold">{line.kind === "line" ? "Linie" : "Polylinie"}</h2>
       <p title={line.id} className="max-w-48 truncate text-[10px]">
         {line.id}
@@ -153,27 +144,12 @@ export function LineInspector({
         {lineLength(line).toFixed(2)} m · {line.points.length} Punkte · nur 2D
       </p>
       <LineStyleFields value={value} onChange={setValue} />
-      <Button
-        className="shrink-0"
-        size="sm"
-        onClick={() => {
-          try {
-            onChange(updateLine(project, line.id, value), { kind: "line", id: line.id });
-            setError("");
-          } catch {
-            setError(
-              "Linieneinstellungen prüfen: Strichstärke 0,05–2 mm und positive Musterlänge.",
-            );
-          }
-        }}
-      >
-        Linienstil übernehmen
-      </Button>
+
       {error && (
         <p role="alert" className="mt-2 text-xs text-destructive">
           {error}
         </p>
       )}
-    </section>
+    </PropertyForm>
   );
 }
