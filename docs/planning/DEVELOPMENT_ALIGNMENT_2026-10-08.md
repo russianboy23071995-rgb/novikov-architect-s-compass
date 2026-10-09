@@ -1,6 +1,5 @@
 # Entwicklungsabstimmung für NOVIKOV CAD vom 8. Oktober 2026
 
-
 ## Ergänzung: Produkt-Backlog CAD 2026 — 09.10.2026
 
 Der Nutzer gibt die Ergänzung der Aufgabenliste aus der CAD-2026-Lückenprüfung frei.
