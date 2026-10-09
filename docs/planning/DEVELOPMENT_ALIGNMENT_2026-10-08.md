@@ -1,5 +1,21 @@
 # Entwicklungsabstimmung für NOVIKOV CAD vom 8. Oktober 2026
 
+## Neue Nutzerentscheidung: Maßstab der Arbeitsansicht und Ausschnitte — 09.10.2026
+
+[Verbindlicher Bauplan mit Begriffen, Rechenregeln, Abnahme und MS-01–MS-04](VIEW_SCALE_CONTRACT.md).
+Der vorhandene Bearbeitungs-Canvas bekommt unten **neben Zoom** einen eigenen
+Maßstabsselektor, Standard **1:100**. Er steuert maßstabsabhängige darstellende
+Texte/Zahlen und spätere Papiermuster, niemals BIM-Geometrie oder Messwerte.
+Künftige Text-/Bemaßungs-/Zahlenwerkzeuge erhalten **Modellmaß/Papiermaß**
+als Größenmodus. Spätere gespeicherte Ausschnitte referenzieren dasselbe Modell,
+erhalten bei Erstellung einen frei wählbaren eigenen Maßstab und bleiben vom
+Bearbeitungsmaßstab unabhängig. Zoom ist eine getrennte Kameraeigenschaft.
+Der offene [PR229](https://github.com/russianboy23071995-rgb/novikov-architect-s-compass/pull/229)
+für Papier-Schraffuren muss bei der Umsetzung abgeglichen werden; seine bislang
+offenen Produktfragen zu Anfangswert und UI-Ort sind hierdurch präzisiert.
+Der aktuell aktive nächste Auftrag steht weiterhin im neuesten DEVELOPMENT_PLAN.md;
+die MS-Schritte werden nicht gleichzeitig gestartet.
+
 ## Ergänzung: Produkt-Backlog CAD 2026 — 09.10.2026
 
 Der Nutzer gibt die Ergänzung der Aufgabenliste aus der CAD-2026-Lückenprüfung frei.
