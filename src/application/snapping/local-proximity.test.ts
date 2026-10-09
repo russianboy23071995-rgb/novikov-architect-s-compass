@@ -20,7 +20,7 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     hatchPatterns: [],
     assets: [],
     bimVisibility: { hiddenLayerIds: [] },
