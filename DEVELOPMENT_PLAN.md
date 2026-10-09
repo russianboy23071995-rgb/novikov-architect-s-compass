@@ -1,3 +1,33 @@
+## V07g Revisions-/Bibliotheks-History-Kern - 09.10.2026
+
+PR223 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Bibliotheksformat
+v2 speichert stabile IDs, Revisionen und einen monotonen Veröffentlichungszähler.
+v1 wird beim Lesen verlustfrei im Speicher migriert; bestehende Erstellungs- und
+Auswahloberflächen verwenden weiterhin dieselbe API. Bearbeiten, Undo und Redo
+prüfen Zielrevision und gebundenen Speicherstand. Undo veröffentlicht restaurierten
+Inhalt unter einer neuen Revision. History bleibt sitzungsbezogen, begrenzt auf
+20 Schritte und 4 Millionen serialisierte Zeichen; Speicherfehler liefern keinen
+neuen History-Zustand. Keine atomare Mehrtab-Transaktion zugesichert.
+
+Zentrale Projektauflösung übernimmt neuere Definitionen für alle Anwendungen einer
+ID gemeinsam; fehlende oder ältere Bibliotheksstände erhalten eingebettete Inhalte.
+Gleiche Revision mit anderem Inhalt wird als Konflikt gemeldet. Snapshot-, Referenz-
+und Dateigrößenprüfung bleiben erhalten. Der Pilot verwendet expliziten Revisions-
+kontext: Projektformat 11 speichert diesen noch nicht. Automatische Auflösung beim
+Öffnen/Projekt-Undo und globale Bearbeitungsbuttons sind noch nicht angebunden.
+
+753 Tests bestanden, Typecheck und Produktionsbuild erfolgreich. Voller Lint:
+keine Fehler, sechs bekannte Fast-Refresh-Warnungen. Sieben neue Tests prüfen
+Migration, monotone History, veraltete Aktionen, Speicherfehler, History-Grenzen,
+gemeinsame Auflösung, Konflikte und Modell-Undo mit aktueller globaler Definition.
+Dieser Kernschritt ergänzt keine neue visuelle Bedienung.
+
+**Genau ein nächster Auftrag: V07h portabler Revisionskontext.** Den verwendeten
+Revisionsstand inkrementell in Projektdateien speichern, Altdateien strikt migrieren
+und die gemeinsame Auflösung beim Öffnen sowie Wiederherstellen von Projekt-History
+anbinden. Dateirundlauf, fehlende Bibliothek, Konflikte und getrennte History prüfen.
+Globale Bearbeitungs-UI, Mehrtab-Synchronisation, Papiermaß und Upload folgen später.
+
 ## V07f Portabler Modellmaß-Pilot - 09.10.2026
 
 PR222 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Schema-11-Migration

@@ -2533,3 +2533,20 @@ SVG pattern tiles and polygon clipping provide bounded rendering and draft previ
 No model geometry is allocated per repetition. Fill color/opacity control strokes,
 background and contour remain independent. Global revision editing/History, automatic
 library reconciliation, paper-space sizing and uploads remain unimplemented.
+
+## Hatch revision core V07g - 2026-10-09
+
+Library v2 owns stable definition IDs, positive revisions and a monotone publication
+clock. Legacy v1 migrates in memory on read. Application edits bind expected revision
+and the exact storage token; library Undo/Redo republishes changed content under a
+new revision. Session history is bounded to 20 steps and 4 million serialized
+characters. Storage errors do not return an advanced history. This is optimistic
+session protection, not an atomic multi-tab transaction.
+
+The central resolver takes an explicit project snapshot and embedded/available
+revision records. Newer records update one definition table for all applications;
+missing or older records retain embedded content. Equal revision with different
+content reports a conflict. Full project and file-size validation precedes return.
+These are implemented Domain/Application contracts. Production schema 11 still
+does not persist revision metadata; automatic load/History resolution and global
+editing UI remain future integration, starting with portable revision context V07h.
