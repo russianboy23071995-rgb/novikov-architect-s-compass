@@ -17,7 +17,10 @@ Papiermaß ist noch keine verfügbare Produktfunktion.
 
 Der Architekturvertrag ordnet gespeicherte Ausgabemaßstäbe DrawingDocument und
 Layout-Platzierung zu. Ein ModelView liefert die Modellableitung. Für die reine
-Arbeitsansicht ist der spätere Speicherort ihres Darstellungsmaßstabs noch offen.
+Arbeitsansicht besitzt nach PR230 und dessen bestätigtem Review der fachliche
+Ansichtskontext den Maßstab; Bildschirmfenster referenzieren ihn und besitzen Zoom.
+Interne Papierlängen bleiben Meter, UI-Werte Millimeter. Standard 1:100 und
+Bedienung neben Zoom sind festgelegt; persistente History bleibt offen.
 Kein Projektmaßstab wird vorsorglich als globaler Singleton in CadWorkspace eingeführt.
 
 ## Technischer Vertrag für die Ableitung
@@ -53,18 +56,23 @@ neuen Projektfelder oder Dokumentklassen ein.
 
 ## Offene Produktintegration — keine erfundenen Nutzerentscheidungen
 
-Vor Einführung der Papiermaß-Auswahl: Speicher-/History-Regel und Initialwert für
-den Maßstab der rohen Arbeitsansicht festlegen. Spätere Layout-Platzierungen müssen
+Vor Einführung der Papiermaß-Auswahl: gespeicherten Ansichtskontext und dessen
+History-Regel umsetzen. Initialwert 1:100 und Eigentümer sind inzwischen im
+[allgemeinen Maßstabsvertrag](VIEW_SCALE_CONTRACT.md) festgelegt. Spätere Layout-Platzierungen müssen
 einen explizit aufgelösten effektiven Maßstab liefern; keine unklare Kombination aus
 Dokumentmaßstab und zusätzlicher Vergrößerung. Der spätere Moduswechsel sollte die
 aktuelle Darstellung bei bekanntem S erhalten (Vorschlag, noch keine Bedienregel).
-Minimal-/Maximalwerte in der UI, Voreinstellungen und Druckstiftbreiten bleiben offen.
+Minimal-/Maximalwerte für Größen in der UI, Mustergrößen-Voreinstellungen und Druckstiftbreiten bleiben offen.
 Ausgabemaßstab verändert nie BIM-Geometrie, Kalibrierung oder gemessene Längen.
 
-## Genau ein ausführbarer Folgeauftrag: V07k Darstellungspilot
+## Nachgelagerter Anwendungsfall: V07k innerhalb MS-02
 
-Einen reinen, typisierten Resolver für Modell-/Papier-Zellmaße unter
-`src/rendering/viewport/` implementieren und an die gemeinsame Kachelableitung
+Nach PR230 und Nutzerbestätigung beginnt zuerst MS-01 aus dem allgemeinen
+Maßstabsvertrag. Die folgende Schraffurprüfung bleibt als nachgelagerter
+Anwendungsfall erhalten; sie ist kein zweiter gleichzeitig aktiver Auftrag.
+
+Den allgemeinen Größenresolver aus MS-01 für Modell-/Papier-Zellmaße unter
+`src/rendering/viewport/` verwenden und an die gemeinsame Kachelableitung
 anbinden. Der Pilot nimmt explizite Darstellungsparameter entgegen; die bestehende
 Produktanwendung bleibt Modellmaß. Keine Erweiterung des persistenten Hatch-Typs,
 keine Freischaltung eines Papiermodus ohne Ansichtsvertrag, keine leeren Klassen.

@@ -16,7 +16,7 @@ Vor Umsetzung den dann aktuellen PR-/Code-Stand erneut lesen.
 | **Ausschnitt / Abbild** | Eine später gespeicherte, weiterhin modellgebundene Sicht auf z. B. ein Geschoss, einen Schnitt oder eine Ansicht. Nach §29: ModelView beschreibt die Modellableitung; DrawingDocument speichert Ausschnitt, Sichtbarkeit, ergänzende Annotation und **seinen eigenen Ausgabemaßstab**. Kein kopiertes, unabhängig bearbeitbares Gebäude. |
 | **Ansichts-/Ausgabemaßstab 1:S** | Expliziter positiver, endlicher Nenner S für die Darstellung im jeweiligen 2D-Kontext. 1:100 im Bearbeitungsmodus ist die Anfangsvorgabe; ein Ausschnitt erhält beim Erstellen seinen frei wählbaren eigenen Wert und kann ihn später ändern. Änderung einer Ansicht ändert keinen anderen Maßstab. |
 | **Zoom/Kamera** | Bildschirmnavigation in CSS-Pixeln pro Modellmeter, einschließlich Fit/Pan/Mausrad. Sie ändert nur die Bildschirmvergrößerung. Die vorhandene Zoom-Prozentanzeige und die grafische Meterleiste sind **keine** 1:S-Ausgabe. |
-| **Modellmaß / Papiermaß** | Eigenschaft der **Größe/Strichabstände** einer darstellenden Annotationsanwendung, nicht ihres geometrischen Messwerts. Modellmaß speichert Längen in Modellmetern. Papiermaß speichert die gewünschte physische Größe in Papier-mm, unabhängig vom Ausgabemaßstab. |
+| **Modellmaß / Papiermaß** | Eigenschaft der **Größe/Strichabstände** einer darstellenden Annotationsanwendung, nicht ihres geometrischen Messwerts. Beide Modi speichern intern Meter, mit explizitem Maßbezug. Papiermaße werden in der Bedienung in mm angezeigt/eingegeben und an dieser Grenze umgerechnet. |
 
 Ein Maßstab in 1:S ist für maßhaltige 2D-/orthografische Darstellungen
 definiert. Eine perspektivische 3D-Kamera hat keinen über das ganze Bild
@@ -73,12 +73,19 @@ speichern.
 ## 3. Gemeinsame Größenauflösung
 
 In 2D ist `S` der explizite Nenner, `z` die aktuelle Zahl
-CSS-Pixel pro Modellmeter und `p` eine Papiergröße in mm.
+CSS-Pixel pro Modellmeter. `paperMetres` ist die intern gespeicherte Papiergröße;
+`paperMillimetres` ist ausschließlich der Ein-/Ausgabewert der Bedienung.
 
-- **Papiermaß:** `modelMetres = p * S / 1000`.
+- **UI → interne Länge:** `paperMetres = paperMillimetres / 1000`.
+- **Papiermaß:** `modelMetres = paperMetres * S`.
 - **Modellmaß:** `modelMetres = storedModelMetres`.
 - **Bildschirm:** `screenCssPixels = modelMetres * z`.
-- **Papierausgabe:** `paperMm = modelMetres * 1000 / S`.
+- **Papierausgabe:** `paperMetres = modelMetres / S`; für Anzeige in mm mal 1000.
+
+Nutzerbestätigung nach Review von PR230 (09.10.2026): interne Längeneinheit
+auch für Papiergrößen Meter; keine gemischten mm-/m-Werte unter demselben
+Parameternamen. Persistente Daten und gemeinsame Resolver verwenden Meter;
+UI-/Exportadapter benennen abweichende Einheiten ausdrücklich.
 
 Beispiel: Ein Papiertext mit 2 mm Höhe wird in 1:100 als 0,20 m
 Modelläquivalent, in 1:50 als 0,10 m dargestellt; auf beiden
@@ -99,11 +106,19 @@ Zwischenergebnisse sicherstellen.
 
 ## 4. Zuständigkeit und Speicherung
 
-- Domain/Ansichtskontext hält eine eindeutige Identität des
-  Bearbeitungs-Viewports bzw. später `DrawingDocument.outputScale`.
+- Der fachliche Ansichtskontext besitzt Maßstab und stabile Identität;
+  für Ausschnitte ist dies später `DrawingDocument.outputScale`.
+  Ein Bildschirmfenster besitzt Kamera/Zoom und referenziert den fachlichen
+  Kontext über ViewportBinding. Es besitzt keinen zweiten Ausgabemaßstab.
+  Zwei Fenster desselben Kontextes teilen S, behalten aber unabhängigen Zoom.
+  Zwei unterschiedliche Kontexte haben unabhängige Maßstäbe. Beim Wechsel der
+  Fensterbelegung wird S aus dem Zielkontext gelesen; ein Fenstermaßstab wird
+  niemals auf die neu angezeigte Ansicht übertragen. Diese Eigentümerregel
+  folgt der Nutzerbestätigung nach Review von PR230 am 09.10.2026.
   Der Arbeitsmaßstab ist eine **Ansichtseinstellung**, kein globales
   Feld im Bauteil und keine Eigenschaft jeder einzelnen Annotation.
-  Zukunftsziel: den geänderten Arbeitsmaßstab **pro Projekt** speichern;
+  Zukunftsziel: den geänderten Arbeitsmaßstab **pro fachlichem Ansichtskontext
+  innerhalb des Projekts** speichern;
   neue und migrierte Projekte ohne Feld starten mit 1:100. Der erste
   isolierte UI-Pilot darf den Wert in der Sitzung halten, solange
   Speicherung/History ausdrücklich als noch offen sichtbar bleibt.
@@ -135,7 +150,7 @@ Zwischenergebnisse sicherstellen.
 
 | Schritt | Umfang | Abnahme |
 | --- | --- | --- |
-| **MS-01 Vertrag und Maßstab-UI** | Aktuellen V07j/V07k-Stand und Browser-Status prüfen. Typisierte positive 1:S-Abfrage/Resolver anbinden; Selector **unten neben Zoom** im fokussierten 2D-Bearbeitungs-Canvas mit initial 1:100. Speicher-/History-Grenze vor dem Persistieren festlegen. | Auswahl und freie Eingabe funktionieren; ungültige Werte verändern nichts; Wechsel 1:100 → 1:50 lässt Zoom %, Meterleiste, Geometrie, Fang, Messung und BIM-Undo unverändert. |
+| **MS-01 Vertrag und Maßstab-UI** | Gemeinsamen typisierten ScaleContext/Größenresolver in Domain/Rendering und sitzungsbezogene Kontextänderung in Application anbinden; keine Umrechnung pro Werkzeug. Selector **unten neben Zoom** im fokussierten 2D-Bearbeitungs-Canvas mit initial 1:100. Noch keine Persistenz oder Modell-History; dieser Pilot entscheidet nicht die spätere History-Regel. | Auswahl und freie Eingabe funktionieren; ungültige Werte verändern nichts; Wechsel 1:100 → 1:50 lässt Zoom %, Meterleiste, Geometrie, Fang, Messung und BIM-Undo unverändert. Zwei Fenster derselben fachlichen Ansicht teilen S, nicht Zoom; Fensterwechsel/Schließen verliert oder überträgt S nicht. Unterschiedliche Kontexte bleiben unabhängig. |
 | **MS-02 Papier-/Modellgröße als Pilot** | Ein vorhandenes geeignetes Zeichnungselement bzw. den V07k-Musterpiloten über denselben ScaleContext anbinden; der späteren Text-/Maßketten-Werkzeugeigenschaft einen typisierten Vertrag geben, wenn das Werkzeug implementiert wird. | Das 2-mm-/0,20-m-Beispiel bei 1:50 und 1:100; Zoom und unterschiedliche Browsergrößen liefern die gleichen Modellwerte; bestehende Modellmuster bleiben identisch. Keine leeren Text-/Bemaßungs-Klassen als Vorleistung. |
 | **MS-03 gespeicherte Arbeitsansicht** | Per-Projekt-Persistenz des Arbeitsmaßstabs und Undo-Regel begrenzt entscheiden/implementieren; Migration 1:100 für Altprojekte. | Speichern/Öffnen erhält eigene gültige Wahl, alte Datei öffnet 1:100; keine Änderung an Modellgeometrie, History-/Undo-Verhalten dokumentiert. |
 | **MS-04 eigenständige Ausschnitte** | Erst beim tatsächlichen ModelView-/DrawingDocument-Schritt: frei wählbares S bei Erstellung, gespeicherte Änderung und unabhängige Darstellung. | Arbeitsansicht 1:100 plus zwei modellgebundene Abbilder 1:50/1:200; Bearbeitungsmaßstab und Zoom beliebig ändern; Abbildwerte, Modell-IDs, eigene Annotationen, Dateirundlauf und Ausgabe-Ableitung bleiben korrekt. |
@@ -144,3 +159,10 @@ Die Tabelle ist eine **Folge begrenzter Aufträge**, keine Aufforderung,
 MS-01–MS-04 gleichzeitig zu bauen oder den laufenden Auftrag des
 DEVELOPMENT_PLAN.md zu verdrängen. Nach jedem Schritt dort Status,
 Testnachweis, Grenzen und den nächsten **einen** Auftrag eintragen.
+
+Abgleich nach Nutzerfreigabe von PR229: MS-01 ist nun der nächste einzelne
+Auftrag im Entwicklungsplan. V07k wird als Schraffur-Anwendungsfall in MS-02
+eingeordnet, nicht als paralleler Resolver. Der allgemeine Größenresolver wird
+in MS-01 mit 0,002 m Papiergröße bei S=50/100, Modellgröße 0,20 m, getrenntem
+Zoom sowie fehlenden/ungültigen/extremen Eingaben geprüft. Eigene Text- oder
+Bemaßungsklassen werden erst bei deren tatsächlicher Implementierung erstellt.
