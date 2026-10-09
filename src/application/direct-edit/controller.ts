@@ -1,3 +1,5 @@
+import { changeProjectScale } from "../views/project-scale.ts";
+import type { WorkingPlanIdentity } from "../../domain/views/scale.ts";
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { resolveProjectHatchPatterns } from "../hatches/pattern-resolution.ts";
 import {
@@ -38,6 +40,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | {
       type: "confirm";
@@ -122,6 +125,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "view-scale": {
+        const project = changeProjectScale(state.history.present, event.view, event.denominator);
+        if (project === state.history.present) return state;
+        return {
+          ...state,
+          history: commitProject(state.history, project),
+          session: null,
+          error: "",
+        };
+      }
       case "wall-offset":
         return {
           history: commitWallOffset(state.history, event.base, event.selection, event.request),

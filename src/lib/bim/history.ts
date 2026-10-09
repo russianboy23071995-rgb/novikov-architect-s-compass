@@ -27,7 +27,7 @@ export function undoProject(history: ProjectHistory): ProjectHistory {
   return previous
     ? {
         past: history.past.slice(0, -1),
-        present: retainVisibility(previous, history.present),
+        present: retainViewSettings(previous, history.present),
         future: [history.present, ...history.future],
       }
     : history;
@@ -37,7 +37,7 @@ export function redoProject(history: ProjectHistory): ProjectHistory {
   return next
     ? {
         past: [...history.past, history.present].slice(-HISTORY_LIMIT),
-        present: retainVisibility(next, history.present),
+        present: retainViewSettings(next, history.present),
         future: history.future.slice(1),
       }
     : history;
@@ -48,16 +48,24 @@ export function readProjectFile(text: string): Project {
     return deserializeProject(text);
   } catch {
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 14, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 15, Meter) mit gültigen Bauteilen.",
     );
   }
 }
 
 /** Model undo never rewinds the independent palette settings. Deleted IDs cannot survive. */
-function retainVisibility(snapshot: Project, current: Project): Project {
+function retainViewSettings(snapshot: Project, current: Project): Project {
   const ids = new Set(snapshot.layers.map((l) => l.id));
   const hiddenLayerIds = current.bimVisibility.hiddenLayerIds.filter((id) => ids.has(id));
-  if (JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds))
+  const workingViews =
+    snapshot.id === current.id
+      ? current.workingViews?.filter((view) => view.storeyId === snapshot.storey.id)
+      : snapshot.workingViews;
+  if (
+    JSON.stringify(workingViews) === JSON.stringify(snapshot.workingViews) &&
+    JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds)
+  )
     return snapshot;
-  return { ...snapshot, bimVisibility: { hiddenLayerIds } };
+  const { workingViews: _previousViews, ...model } = snapshot;
+  return { ...model, ...(workingViews ? { workingViews } : {}), bimVisibility: { hiddenLayerIds } };
 }

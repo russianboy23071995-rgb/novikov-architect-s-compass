@@ -174,3 +174,12 @@ geprüft. Nächster einzelner Auftrag ist MS-03 gemäß DEVELOPMENT_PLAN.md.
 Nutzerentscheidung: Arbeitsmaßstab außerhalb des normalen Modell-Undo speichern.
 Modell-Undo/Redo darf den aktuellen Ansichtsmaßstab nicht zurücksetzen. Die
 Persistenz mit Altdatei-Migration bleibt MS-03; sie ist noch nicht implementiert.
+
+## MS-03 umgesetzt — 10.10.2026
+
+Schema 15 speichert workingViews am Projekt, strikt an den vorhandenen Arbeitsgrundriss
+gebunden. Fehlender Eintrag/Altdateien ergeben 1:100. Application publiziert außerhalb
+des Modell-Undo; Undo/Redo erhält den aktuellen Maßstab. Sitzungs-Map entfernt.
+Nutzervorgaben: 1:50, 1:100, 1:200, 1:500, 1:1000, 1:2500, 1:5000 und Individuell
+mit freier Eingabe 1:S. Nächster Einzelauftrag laut Entwicklungsplan ist die
+Schraffur-Papiermodus-Integration, nicht der vollständige MS-04-Ausschnitteditor.

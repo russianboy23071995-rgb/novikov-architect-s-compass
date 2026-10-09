@@ -1,11 +1,7 @@
 import { createPortal } from "react-dom";
 import { ViewScaleControl } from "./ViewScaleControl";
-import {
-  changeViewScale,
-  readViewScale,
-  type ViewScaleSession,
-} from "@/application/views/scale-session";
-import type { ScaleContext, WorkingPlanIdentity } from "@/domain/views/scale";
+import { projectScaleContext } from "@/application/views/project-scale";
+import type { ScaleContext } from "@/domain/views/scale";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -351,8 +347,10 @@ export function ViewportManager({
   active,
   onActive,
   onFullscreen,
+  onScale,
   ...model
 }: BimPlanProps & {
+  onScale: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
   layout: ViewportLayout;
   mode: ViewMode;
@@ -361,13 +359,7 @@ export function ViewportManager({
   onActive: (index: number) => void;
   onFullscreen: () => void;
 }) {
-  const [scales, setScales] = useState<ViewScaleSession>({});
-  const view: WorkingPlanIdentity = {
-    kind: "working-plan",
-    projectId: model.project.id,
-    storeyId: model.project.storey.id,
-  };
-  const scaleContext = readViewScale(scales, view);
+  const scaleContext = projectScaleContext(model.project);
   const count =
     layout === "single"
       ? 1
@@ -382,9 +374,7 @@ export function ViewportManager({
         <CadViewport
           key={`${layout}-${index}`}
           scaleContext={scaleContext}
-          onScale={(denominator) =>
-            setScales((previous) => changeViewScale(previous, view, denominator))
-          }
+          onScale={onScale}
           {...model}
           index={index}
           mode={mode}

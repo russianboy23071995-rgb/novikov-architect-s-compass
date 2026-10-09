@@ -1,3 +1,46 @@
+## MS-03: Maßstabsauswahl und persistente Arbeitsansicht — 10.10.2026
+
+PR232 nach grüner CI regulär zusammengeführt. Nutzer wünscht feste Maßstäbe
+1:50, 1:100, 1:200, 1:500, 1:1000, 1:2500, 1:5000 sowie individuell 1:xxxx.
+Umgesetzt als kompakte Auswahl mit zusätzlichem Eingabefeld bei Individuell.
+Vorgaben übernehmen sofort; freie Eingabe mit Enter/Feldverlassen, Escape verwirft.
+
+Schema 15 speichert den fachlichen Arbeitsmaßstab im Projekt (workingViews),
+Application/views validiert Änderungen. Alte Dateien 1–14 migrieren strikt auf
+1:100; unbekannte Felder/Ansichten, ungültige Zahlen oder fremde Geschosse werden
+abgewiesen. Fenster teilen den Maßstab und behalten unabhängigen Zoom. Bisherige
+Sitzungs-Map entfernt; das Projekt ist die einzige persistente Quelle. Maßstab
+ändert keine Modellgeometrie, legt kein Modell-Undo an und erhält den Redo-Zweig.
+Modell-Undo/Redo behält die aktuelle Ansichtseinstellung. Wie andere Änderungen
+der Projektrevision verwirft eine Maßstabsänderung laufende veraltete Vorschauen.
+
+788 Tests bestanden; Typprüfung inklusive Benchmarks und Produktionsbuild erfolgreich.
+Lint: 0 Fehler, 6 bekannte Warnungen. Vier neue Tests mit Unterfällen für Dateirundlauf,
+Altdatei-Migration, strikten Eingang, unveränderte Geometrie, Kontextisolation,
+Undo/Redo und Laden derselben Projekt-ID. Die zwei bisherigen Sitzungstests wurden
+durch diese Persistenztests ersetzt; numerische Resolver-/Eingabetests bleiben.
+Alle bisherigen Migrationsnachweise erwarten jetzt Schema 15.
+
+Browser: 1:5000 und freie 1:1234 funktionieren; 1:0 wird abgewiesen, Escape stellt
+1:1234 wieder her. Wandhöhe 2,8 → 4 m, Maßstab 1:2500, Undo/Redo: Höhe wechselt,
+Maßstab bleibt. Speichern mit 1:2500, danach 1:50 wählen, Datei öffnen: 1:2500
+wiederhergestellt. Zwei Ansichten teilen 1:1000, erste behält 200 % Zoom. Screenshot:
+outputs/persistent-scale.jpg außerhalb des Repos. Während der Modul-Umbenennung
+ein temporärer Vite-HMR-Importfehler; nach aktualisiertem Import funktioniert die UI.
+Kein neuer IFC-/Druck-/PDF-Abnahmelauf und noch kein Papiermodus im Schraffurwerkzeug.
+
+Praktische Abnahme: unten neben Zoom Vorgabe wählen oder Individuell → 1:125 → Enter.
+Projekt speichern, anderen Maßstab wählen und die Datei wieder öffnen. Dann eine
+Modelländerung rückgängig machen; der aktuelle Maßstab muss stehen bleiben.
+
+**Genau ein nächster Auftrag: Papiermaß im Schraffurwerkzeug integrieren.** Den
+geprüften gemeinsamen Renderer an gespeicherte Schraffuranwendungen anbinden;
+Modell-/Papierbezug, Papier-Zellbreite (UI mm, intern m), Eigenschaften, Defaults
+und Pickup gemeinsam umsetzen. Vorher die noch offene Bedienregel beim Moduswechsel
+klären (Vorschlag: sichtbare Zellgröße am aktuellen S erhalten). Bestehende Muster,
+Rotation und Geometrie erhalten; Migration, Undo und Dateirundlauf prüfen. Keine
+Textwerkzeuge, Layouts oder Druckfunktion gleichzeitig ergänzen.
+
 ## MS-02/V07k: Geprüfter Schraffur-Darstellungspilot — 09.10.2026
 
 PR231 (MS-01) ist nach erfolgreicher GitHub-Prüfung zusammengeführt (bb006d1).

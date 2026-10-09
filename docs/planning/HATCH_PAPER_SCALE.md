@@ -107,3 +107,9 @@ benchmarks/hatch-scale.html page, without changing contour geometry. No print pr
 Next active task is MS-03 view-scale persistence in DEVELOPMENT_PLAN.md. User has
 confirmed that this setting stays outside model Undo/Redo. Product hatch paper-mode
 integration remains subsequent work; do not combine it into that persistence task.
+
+## Persistenzvoraussetzung erfüllt — 10.10.2026
+
+MS-03 speichert den Arbeitsmaßstab mit Schema 15 außerhalb Modell-Undo. Die
+Papiermodus-Integration kann als nächster einzelner Auftrag folgen. Die Regel für
+den Moduswechsel bleibt vorab zu klären; es ist noch keine Papiermodus-Freischaltung.
