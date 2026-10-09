@@ -96,3 +96,14 @@ Abnahme und Tests:
 Danach erst einen eigenen Integrationsauftrag für gespeicherten Ansichtskontext,
 Schema-Migration, Eigenschaften, Defaults/Pickup und atomare Modell-History planen.
 Dieser Folgeauftrag ist hier nicht gleichzeitig aktiv.
+
+## MS-02/V07k acceptance — 2026-10-09
+
+Rendering pilot implemented: explicit paper sizing uses the shared resolver and SVG
+component; production remains model-only/schema 14. 786 tests, typecheck and build
+pass. Browser verified nine zoom/rotation combinations on the isolated
+benchmarks/hatch-scale.html page, without changing contour geometry. No print proof.
+
+Next active task is MS-03 view-scale persistence in DEVELOPMENT_PLAN.md. User has
+confirmed that this setting stays outside model Undo/Redo. Product hatch paper-mode
+integration remains subsequent work; do not combine it into that persistence task.
