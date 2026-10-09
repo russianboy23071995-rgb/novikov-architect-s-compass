@@ -2567,3 +2567,22 @@ retains newer known definitions from the same current project if the library is
 missing or older. It never writes the library or adds a reconciliation Undo step.
 File decoding itself remains platform-neutral and does not consult global storage.
 Live cross-tab updates and the global editing UI are still future work.
+
+## Global hatch library editing V07i - 2026-10-09
+
+The shared FloatingPanel exposes ID/revision-pinned editing and independent library
+Undo/Redo. Creation participates in the same bounded session History. Library Undo
+publishes new monotone revisions; project Undo never writes global storage. Panel
+closure retains History; explicit reload starts a fresh library session while keeping
+the draft's pinned target. External writes invalidate that session. Draft geometry is
+owned separately; invalid definitions or failed storage writes do not publish state.
+
+One storage notification adapter feeds both catalog consumers and active-project
+reconciliation. A deterministic patterns-changed Application event updates only
+present, preserves model past/future and invalidates a direct preview when its base
+actually changes. Defaults follow the resolved project definition, then the catalog.
+Missing/older definitions retain portable content; conflicts are reported. Other
+project files update on opening, not through hidden filesystem writes. Notifications
+and optimistic session guards do not constitute atomic multi-tab publication.
+Production schema remains 12. Paper-space applications still require an explicit
+view/output scale contract, independent of interactive camera zoom.

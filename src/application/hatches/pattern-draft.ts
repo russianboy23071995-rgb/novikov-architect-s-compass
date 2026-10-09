@@ -19,3 +19,10 @@ export function resizePatternCell(
   validatePatternDraft(next);
   return next;
 }
+export function removePatternLine(draft: PatternDraft, index: number): PatternDraft {
+  if (!Number.isInteger(index) || index < 0 || index >= draft.lines.length)
+    throw new Error("Musterlinie existiert nicht.");
+  const next = { ...draft, lines: draft.lines.filter((_, i) => i !== index) };
+  validatePatternDraft(next);
+  return next;
+}

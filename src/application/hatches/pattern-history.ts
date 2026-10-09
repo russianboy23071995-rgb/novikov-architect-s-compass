@@ -92,6 +92,23 @@ export function editHatchPattern(
     "edit",
   );
 }
+/** Creation joins the same independent library history; used project copies remain portable on Undo. */
+export function createLibraryHatchPattern(
+  storage: HatchPatternStorage,
+  history: PatternHistory,
+  definition: HatchPatternDefinition,
+): PatternHistory {
+  guard(storage, history);
+  const owned = validateHatchPattern(definition);
+  if (history.present.records.some((r) => r.definition.id === owned.id))
+    throw new Error("Doppelte Muster-ID.");
+  return publish(
+    storage,
+    history,
+    [...history.present.records, { definition: owned, revision: history.present.clock + 1 }],
+    "edit",
+  );
+}
 export function undoHatchPattern(
   storage: HatchPatternStorage,
   history: PatternHistory,

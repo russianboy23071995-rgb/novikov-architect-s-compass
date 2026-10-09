@@ -268,3 +268,28 @@ erneuter Dateirundlauf. Neue globale Versionen sind noch nicht über die UI bear
 Genau ein Folgeauftrag V07i: Bearbeiten und eigene Bibliotheks-History im vorhandenen
 FloatingPanel anbinden, aktives Projekt ohne Modell-History-Schritt zentral auflösen.
 Papiermaß, Upload und vollständige Mehrtab-Synchronisation bleiben getrennte Schritte.
+
+## V07i Umsetzung - 09.10.2026
+
+Muster bearbeiten mit stabiler ID und gebundener Ausgangsrevision, eigene Bibliotheks-
+Undo/Redo-Pfeile und reversible Neuanlage im vorhandenen FloatingPanel umgesetzt.
+Entwurfslinien sind einzeln entfernbar. Kopie/Neuer Entwurf erzeugen neue Identität;
+Speichern eines gerade angelegten Musters bearbeitet danach dieses. Fenster schließen
+behält History; Neu laden setzt sie zurück und erhält den unveröffentlichten Entwurf.
+Externe Änderungen erzwingen Neu laden; ein veralteter Zielentwurf bleibt gesperrt
+durch den Revisionsschutz, bis das aktuelle Muster bewusst wieder geöffnet wird.
+
+Gemeinsame Storage-Ereignisse aktualisieren das aktive Projekt ohne Modell-History-
+Schritt. Past/Future bleiben erhalten; tatsächliche Basisänderung beendet direkte
+Vorschau. Werkzeugvorgaben folgen dem aufgelösten Projekt-/Bibliotheksstand. Fehlende
+oder ältere Definitionen erhalten portable Inhalte; Konflikte werden angezeigt.
+Geschlossene Dateien werden nicht geschrieben; Abgleich erfolgt beim Öffnen.
+Atomare parallele Tab-Schreibvorgänge und Bibliothekslöschung bleiben ausstehend.
+
+765 Tests, Typecheck, Build und Lint ohne Fehler (sechs bekannte Warnungen). Browser-
+Abnahme wegen Sandbox-Kernelstartfehler offen. Abnahme: zwei Schraffuren zuweisen,
+Muster bearbeiten, speichern, beide prüfen; Bibliotheks-Undo/Redo und Projekt-Undo
+getrennt testen, Fenster schließen/öffnen, Kopie und Entwurfslinien entfernen.
+Genau ein Folgeauftrag V07j: Papiermaß-/Ansichtsmaßstab-Vertrag anhand Code/Architektur
+prüfen und einen begrenzten Umsetzungspiloten planen. Keine Zoom-basierte Ersatzregel.
+Upload wartet weiterhin auf die Nutzerentscheidung zum konkreten Austauschformat.
