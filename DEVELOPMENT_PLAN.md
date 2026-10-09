@@ -1,3 +1,50 @@
+## Nachgeholte Browserabnahme: Stiftesets und Musterwinkel - 09.10.2026
+
+PR226 und PR227 sind nach ausdrücklicher Freigabe zusammengeführt; geprüfte
+Dateibasis entspricht main cbe54bf. Die älteren Offen-/Sandbox-Vermerke unten
+beschreiben den damaligen Stand. Nach Neustart und Wechsel auf die vom Nutzer
+gewünschte Windows-Sandbox unelevated funktionieren normale Shellzugriffe und
+Browserautomation wieder. Vite benötigte weiterhin einen genehmigten Start
+außerhalb der Sandbox (spawn EPERM innerhalb); keine pauschale Entwarnung für
+alle Kindprozesse. Keine weitere Sicherheitskonfiguration verändert.
+
+Praktische Prüfung in einem separaten Testtab, ohne das Modell im Nutzertab
+zu ersetzen:
+
+- Wandlänge 3 → 4 m beim Feldverlassen übernommen; Undo zurück auf 3 m,
+  Redo auf 4 m. Negative Länge abgewiesen, gültiges Modell bleibt erhalten.
+- Eigenes Testpaket QA Farben 09.10 mit Farbstift und Inventareintrag angelegt,
+  gespeichert und wieder geöffnet. Gemeinsamer Schraffur-Farbdialog bietet
+  dieses Inventar an. Auswahl und HEX-Eingabe ändern die Farbe direkt.
+- Rechteckschraffur mit vier Punkten gezeichnet, vorhandenes Mauerwerk-Muster
+  zugewiesen. Creator, Wiederholung und Plan zeigen die gleiche diagonale
+  Orientierung; die 19 Linienkoordinaten stimmen mit der Plan-Kachel überein.
+- Musterwinkel 0 → 90 Grad: SVG dreht das Muster um -90 Grad im Bildschirmraum;
+  Konturpunkte bleiben exakt unverändert. Ein Undo stellt 0 Grad wieder her.
+- Save project liefert novikov-project (10).json; über den echten Dateidialog
+  wieder geöffnet. Schema 14, stabile Schraffur-ID, Kontur, Musterdefinition,
+  Farbe #dc2626 und Stifteset/Inventar erhalten. Der Dateitest verwendet Winkel 0
+  nach Undo; Winkel-90-Dateirundlauf bleibt durch die bestehenden Tests belegt.
+- Teststift nachträglich auf #2563eb geändert und Paket übernommen: vorhandene
+  Schraffur bleibt #dc2626; nur das Angebot im Farbinventar wird blau.
+- Fenster nicht modal und ohne Abdunkeln; Creator per Kopf/Pfeiltaste versetzt.
+  Keine erfassten Browser-Konsolenfehler im geprüften Ablauf.
+
+Lokaler Bildnachweis: outputs/pen-hatch-browser-acceptance.jpg (außerhalb des
+Repositorys). Testpaket QA Farben 09.10 bleibt als eindeutig benanntes Testdatum
+in der lokalen Bibliothek; bestehende Nutzerpakete/Muster wurden nicht geändert.
+Keine neuen Laufzeitänderungen erforderlich. Die 778 Tests, Typecheck, Build und
+Lint aus PR227 bleiben der automatische Nachweis; kein erneuter Lauf für diesen
+Dokumentationsauftrag. Kein Anspruch auf vollständige Prüfung aller Farbfelder,
+Browser oder Bibliotheks-Konfliktfälle; globale Muster-History wurde hier nicht
+erneut mutiert. Die bisher blockierte Kern-Browserabnahme ist abgeschlossen.
+
+**Genau ein nächster begrenzter Auftrag: V07j Papiermaß-/Ansichtsmaßstab-Vertrag.**
+Modellmaß, Papiermaß und interaktiven Zoom gegen Architektur und vorhandenen Code
+abgleichen; gemeinsame Umrechnung und Zuständigkeit für den Ausgabemaßstab
+festlegen und genau einen kleinen Umsetzungspiloten mit Abnahmekriterien planen.
+Kein vollständiger Layouteditor und keine zweite Modellgeometrie.
+
 ## Nutzerauftrag: Stiftesets und direkte Werkzeugeigenschaften - 09.10.2026
 
 Eigener Entwicklungszweig feat/pen-sets-live-properties auf PR226; dessen Änderungen
