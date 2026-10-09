@@ -1,3 +1,31 @@
+## Linieninventar am Linienwerkzeug - 09.10.2026
+
+PR217 und PR218 mit erfolgreicher CI zusammengeführt; PR218 zuvor auf main
+umgestellt. Aktualisierte R26-Produktroadmap gelesen, laufenden Auftrag erhalten.
+Nutzerentscheidungen: eigene Linienmuster im Modellmaß, bestehende Linien behalten
+Muster bei Kataloglöschung. Inventar in Werkzeugeigenschaften für Zeichnen und
+Inspector verfügbar; eigener Musterabstand in Metern (Vorgabe 1 m) editierbar.
+Gemeinsame Application-Vorgaben und 2D-Übernahme enthalten portable Definition.
+Schema 10: validierte Definition und Wiederholungslänge je custom-Linie; Dateien
+1–9 migrieren am Dateirand, alte Stricharten behalten ihre Darstellung. Katalog-
+Löschen/Ändern schreibt keine bestehenden Projektlinien um. Ein vorhandener Stil
+außerhalb des Inventars bleibt als aktueller Wert sichtbar und erhalten.
+SVG-Muster wiederholen ohne zusätzliche Modellpunkte oder unbeschränkte erzeugte
+Segmente; Phase läuft über Polylinienecken weiter. Bibliotheks-/Geometrievalidierung
+in Domain, Inventar/Defaults in Application, Darstellung abgeleitet.
+734 Tests, Typechecks, voller Lint ohne Fehler (sechs bekannte Warnungen), Build.
+Neue Nachweise: Schema-9-Migration, JSON-Roundtrip nach Kataloglöschung, atomarer
+Undo, gemeinsame Erstellung/Übernahme, ungültige Musterlänge und lineare Ableitung
+bei sehr dichter Wiederholung. Praktischer Browser-Test weiter blockiert: Steuerung
+beendet den Node-Prozess vor Zugriff. Visuelle Muster-/Stiftprüfung ist offen.
+Abnahme: Inventarart wählen, Musterlänge 0,25 m, Linie/Polylinie zeichnen; zoomen,
+Wert ändern, rückgängig; speichern/öffnen; Katalogart löschen, bestehende Linie bleibt.
+
+**Genau ein nächster Auftrag: V07d globale lokale Schraffurmusterbibliothek.**
+Creator-Entwürfe validiert dauerhaft speichern, Liste mit Vorschauen und Neustart-
+Laden; keine Musteranwendung, Synchronisation oder Upload in diesem Teilauftrag.
+Praktische Linienabnahme mit Nutzer/Browser nachholen.
+
 ## Linien Creator: Zeicheneditor und Inventar - 08.10.2026
 
 Nutzer korrigiert bisherigen Umfang: alle Katalogarten bearbeiten/löschen,

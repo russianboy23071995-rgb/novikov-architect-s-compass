@@ -10,7 +10,7 @@ export type WindowDefaults = Pick<
 >;
 export type LineDefaults = Pick<
   NonNullable<Project["storey"]["lines"]>[number],
-  "color" | "penWidth" | "style" | "layerId"
+  "color" | "penWidth" | "style" | "layerId" | "pattern" | "repeatLength"
 >;
 export type WallDefaults = Pick<
   Project["storey"]["walls"][number],
@@ -51,6 +51,9 @@ export function pickupToolDefaults(
         color: source.color,
         penWidth: source.penWidth,
         style: source.style,
+        ...(source.pattern
+          ? { pattern: structuredClone(source.pattern), repeatLength: source.repeatLength }
+          : {}),
         layerId: source.layerId,
       },
     };

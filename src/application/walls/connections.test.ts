@@ -159,7 +159,7 @@ test("V5 migration does not auto-connect old touching walls; forged/stale/duplic
   const { assets, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 5, storey };
   const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 9);
+  assert.equal(migrated.schemaVersion, 10);
   assert.deepEqual(migrated.storey.wallJoins, []);
   assert.deepEqual(migrated.storey.walls, p.storey.walls);
   assert.equal(updateWall(migrated, "A", { height: 3 }).storey.wallJoins.length, 0);

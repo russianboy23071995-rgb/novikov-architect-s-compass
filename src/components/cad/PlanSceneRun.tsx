@@ -1,3 +1,4 @@
+import { LinePattern } from "./LinePattern";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { memo } from "react";
 import type { ElementTarget } from "@/application/selection/target";
@@ -230,15 +231,19 @@ export function PlanSceneContent({
               pointerEvents="none"
             />
           )}
-          <path
-            d={linePath(line)}
-            fill="none"
-            stroke={line.color}
-            strokeWidth={(line.penWidth * 96) / 25.4}
-            strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
-            vectorEffect="non-scaling-stroke"
-            pointerEvents="none"
-          />
+          {line.style === "custom" ? (
+            <LinePattern line={line} />
+          ) : (
+            <path
+              d={linePath(line)}
+              fill="none"
+              stroke={line.color}
+              strokeWidth={(line.penWidth * 96) / 25.4}
+              strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
           <path
             {...selectProps("line", line.id)}
             d={linePath(line)}
