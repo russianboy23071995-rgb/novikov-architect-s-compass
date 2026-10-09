@@ -1,4 +1,5 @@
 import { WallDrawingFields } from "./WallDrawingFields";
+import { useProjectEditing } from "./useProjectEditing";
 import { useToolDefaults } from "./useToolDefaults";
 import { pickupToolDefaults } from "@/application/tools/pickup";
 import { rectangleContour, prepareHatchBoundaries } from "@/application/hatches/construction";
@@ -27,7 +28,7 @@ import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/l
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -42,11 +43,7 @@ import {
 } from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import {
-  createEditingState,
-  editingReducer,
-  supportsWallWorkplaneEdit,
-} from "@/application/direct-edit/controller";
+import { supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
@@ -92,8 +89,8 @@ export function CadWorkspace({
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
-  const [editing, dispatchEditing] = useReducer(editingReducer, undefined, () =>
-    createEditingState(initialProject ?? createExampleProject()),
+  const [editing, dispatchEditing] = useProjectEditing(
+    () => initialProject ?? createExampleProject(),
   );
   const { history, session: pendingSession } = editing;
   const project = history.present;
@@ -116,7 +113,7 @@ export function CadWorkspace({
       : null;
   useEffect(() => {
     if (pendingSession && !editSession) dispatchEditing({ type: "cancel" });
-  }, [pendingSession, editSession]);
+  }, [pendingSession, editSession, dispatchEditing]);
   const imageInput = useRef<HTMLInputElement>(null);
   const cancelMeasurement = useRef<() => void>(() => {});
   const cancelCalibration = useRef<() => void>(() => {});
@@ -214,19 +211,19 @@ export function CadWorkspace({
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
     setPathPoints([]);
-  }, []);
+  }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
     (direction: "undo" | "redo") => {
-      dispatchEditing({ type: direction });
       cancelInteraction();
+      dispatchEditing({ type: direction });
       setSelection(null);
       setDemandOpen(false);
       setTool("select");
       setModelError("");
       setExportMessage("");
     },
-    [cancelInteraction, setSelection],
+    [cancelInteraction, setSelection, dispatchEditing],
   );
 
   useEffect(() => {

@@ -82,7 +82,7 @@ test("reference selection draft, cancel, validation and clear never change commi
 });
 function fixture() {
   return validateProject({
-    schemaVersion: 11,
+    schemaVersion: 12,
     hatchPatterns: [],
     assets: [],
     bimVisibility: { hiddenLayerIds: [] },

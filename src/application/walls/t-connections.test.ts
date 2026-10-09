@@ -83,7 +83,7 @@ test("schema 8 roundtrip and strict V7 migration retain geometry without discove
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 7, storey };
   const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 11);
+  assert.equal(migrated.schemaVersion, 12);
   assert.deepEqual(migrated.storey, { ...storey, references: [], wallTJunctions: [] });
   assert.throws(() => loadProjectData({ ...p, schemaVersion: 7 }));
   assert.throws(() => loadProjectData({ ...old, schemaVersion: 8 }));

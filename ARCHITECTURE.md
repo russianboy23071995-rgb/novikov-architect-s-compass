@@ -2550,3 +2550,20 @@ content reports a conflict. Full project and file-size validation precedes retur
 These are implemented Domain/Application contracts. Production schema 11 still
 does not persist revision metadata; automatic load/History resolution and global
 editing UI remain future integration, starting with portable revision context V07h.
+
+## Portable hatch revision context V07h - 2026-10-09
+
+Production schema 12 adds an optional positive safe-integer revision to each used
+embedded definition. Omission means unknown provenance; strict versions 1–11 migrate
+at file ingress without inventing a revision. Definition identity and content remain
+stored once per project, never per hatch. Schema 11 still rejects revision metadata.
+
+Opening, project adoption and project Undo/Redo use the central Application resolver.
+The browser adapter reads library records before dispatch; reducers do not access
+storage. Newer content is adopted; missing/older content retains embedded rendering.
+Equal revision with divergent content reports a conflict. An unreadable library is
+reported while the valid portable project remains usable. Project restoration also
+retains newer known definitions from the same current project if the library is
+missing or older. It never writes the library or adds a reconciliation Undo step.
+File decoding itself remains platform-neutral and does not consult global storage.
+Live cross-tab updates and the global editing UI are still future work.
