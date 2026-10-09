@@ -5,6 +5,23 @@ Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
 incremental migration supersedes their claim that the production format is unchanged.
 
+## Explicit output scale and hatch sizing — V07j, 2026-10-09
+
+Technical direction, not an implemented paper-mode feature: model metres, output
+scale 1:S and camera CSS pixels/metre remain separate. A rendering context supplies
+the effective finite positive S; it is never inferred from camera zoom. Existing
+DrawingDocument/Layout scale ownership remains binding; storage/history/defaults
+for the raw working view are still open, not a new global project-scale field.
+Paper hatch applications will specify a paper cell width in metres. A shared
+rendering resolver derives uniform factor paperWidth * S / definition.width;
+model applications retain factor 1. Origin stays in model coordinates, rotation
+and creator orientation are preserved, and contour/model geometry never scales.
+Missing scale for paper rendering must be explicit, not silently replaced by 1:1.
+Screen stroke conversion must account for the tile factor; physical print pens
+remain undecided. Definitions and repeat lines are not copied into model entities.
+The next isolated renderer pilot does not change production schema 14 or enable
+paper mode in tool properties. See [contract and acceptance](docs/planning/HATCH_PAPER_SCALE.md).
+
 
 ## Shared non-modal windows - 2026-10-08
 

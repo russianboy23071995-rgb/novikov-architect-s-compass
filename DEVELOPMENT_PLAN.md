@@ -1,3 +1,25 @@
+## V07j: Papiermaß-/Ansichtsmaßstab-Vertrag — 09.10.2026
+
+PR228 nach ausdrücklicher Freigabe und erfolgreicher GitHub-CI normal in main
+zusammengeführt (0407ad5). Dokumentationsauftrag auf docs/hatch-paper-scale-contract:
+[Bestand, Umrechnung und Pilot](docs/planning/HATCH_PAPER_SCALE.md).
+Modellmeter, Ausgabe 1:S und Kamera-Zoom getrennt; Papier-Zellbreite wird über
+einen gemeinsamen gleichförmigen Faktor abgeleitet. Ursprung, Drehung und Kontur
+bleiben erhalten. Fehlender Maßstab bekommt keinen Zoom-/1:1-Fallback.
+Architekturvertrag begrenzt ergänzt; Produktionsschema 14 und UI unverändert.
+
+Offen bleiben Speicherort/History/Initialwert des Maßstabs der rohen Arbeitsansicht,
+spätere effektive Layoutmaßstäbe sowie physische Druckstifte. Keine Nutzerentscheidung
+dazu erfunden. Codeprüfung zeigt insbesondere die erforderliche Strichumrechnung
+innerhalb skalierter SVG-Kacheln. Keine neuen Laufzeittests für reine Dokumentation;
+Nachweis: Quelldateien/Formeln/relative Links geprüft, git diff --check sauber.
+
+**Genau ein nächster Auftrag: V07k isolierter Darstellungspilot.** Gemeinsamen
+Resolver für Zellmaße implementieren, bisherigen Modellpfad mit Faktor 1 erhalten
+und Papiermaß mit explizitem S in einem isolierten Browserbeispiel prüfen.
+Akzeptanzmatrix und Fehlerfälle im verlinkten Vertrag. Keine Produkt-UI-/Schema-
+Erweiterung, bevor der gespeicherte Ansichtskontext festgelegt ist.
+
 ## Nachgeholte Browserabnahme: Stiftesets und Musterwinkel - 09.10.2026
 
 PR226 und PR227 sind nach ausdrücklicher Freigabe zusammengeführt; geprüfte
