@@ -2489,3 +2489,30 @@ is independent of project history and production schema 10 remains unchanged.
 React owns the transient draft and list presentation; previews are derived paths,
 not copied project elements. Pattern usage, model/paper scale, portable embedded
 snapshots, revisions and update/undo conflicts remain pending V07e.
+
+## Hatch application contract V07e - 2026-10-09
+
+Binding user answers: loading an older project automatically adopts newer available
+hatch definitions; global pattern edits have their own library Undo/Redo. Project
+Undo changes model assignments, never writes global definitions. Update-all remains
+required; it is not implemented by the append-only V07d library.
+
+Technical decisions for the next incremental feature: embed used definitions once
+in a project table, reference stable IDs from hatch applications, validate referential
+integrity and keep an explicit local-plane anchor. Model sizing uses metres; paper
+sizing requires an explicit output scale from the future view/document contract,
+never camera zoom. The first assignment pilot is model-space only. Legacy hatches
+retain their solid appearance. Repetition/clipping are derived bounded rendering.
+
+Before global editing, add monotone library revisions and central Application
+resolution. Newer valid definitions update all matching applications on load and
+mark the project changed without silently saving closed files. Missing/older library
+entries retain embedded content; equal identity/revision with divergent content is
+a reported integrity conflict, not an implicit replacement. Library Undo publishes
+restored content under a new revision. Project snapshot restoration must use the
+same resolution rather than rewinding global content. Multi-tab transaction safety
+is not implied by localStorage. These mechanisms remain future implementation.
+
+See docs/planning/HATCH_PATTERN_LIBRARY.md, V07e, for the bounded V07f assignment
+pilot, module evidence, tests and separation from paper-scale/global-history work.
+Production project schema stays 10 in this documentation-only change.

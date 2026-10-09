@@ -114,3 +114,112 @@ Lesefehlern nicht überschrieben; Schreibfehler lassen die Liste unverändert.
 741 Tests, Typecheck, Lint/Build erfolgreich. Browser-Abnahme offen.
 Nächster Auftrag V07e: Musteranwendungs-/Aktualisierungsvertrag am vorhandenen
 Projektformat konkretisieren; offene Konflikt- und globale Undo-Regeln klären.
+
+## V07e Musteranwendungs- und Aktualisierungsvertrag - 09.10.2026
+
+### Geprüfter Bestand
+
+PR221 (38b571e) mit erfolgreicher GitHub-CI nach Nutzerfreigabe zusammengeführt.
+Produktionsschema 10 enthält noch keine Musterzuweisung an Hatch. Hatch besitzt
+Kontur, Fill, Hintergrund, Konturfarbe und Ebene (domain/elements/hatch/model.ts).
+previewHatch/commitHatch validieren am aktuellen Projektsnapshot und bieten einen
+Commit/Undo-Schritt (application/hatches/actions.ts). PlanSceneRun zeichnet heute
+die Fläche; project-file/load.ts migriert die älteren Formate. Die Musterbibliothek
+v1 speichert Definitionen mit ID, Namen und Zellgeometrie, noch ohne Revisionen
+oder globale Bearbeitung. Es existiert kein implementierter ModelView-/DrawingDocument-
+Maßstabsvertrag; Bildschirmzoom ist Kamerazustand, kein Ausgabe-Maßstab.
+Projekt-History speichert Projektsnapshots und hält bereits Ebenensichtbarkeit
+außerhalb des Modell-Undo. Dieses Prinzip ist kein Beweis einer Muster-History.
+
+### Verbindliche Nutzerentscheidungen
+
+- Bibliothek global und projektübergreifend; aktuell lokal pro Profil/Origin.
+- Modellmaß und Papiermaß sind bei Schraffuren wählbar, nicht bei allen Werkzeugen.
+- Bearbeiten einer Definition aktualisiert alle Anwendungen dieser Definition.
+- Antwort vom 09.10.2026: beim Öffnen älterer Projekte aktuelle verfügbare Muster
+  automatisch übernehmen; keine Bestätigungsfrage für reguläre neue Revisionen.
+- Antwort vom 09.10.2026: Bibliothek besitzt eigene Undo/Redo-History. Projekt-Undo
+  nimmt Zuweisung und Modellaktionen zurück, verändert niemals die globale Bibliothek.
+- Uploadformat bleibt offen. Linienarten und Schraffurmuster bleiben getrennte Systeme.
+
+### Technische Entscheidungen für den schrittweisen Ausbau
+
+**Definitionen und Referenzen:** Das nächste Projektformat erhält eine projektweite
+Tabelle tatsächlich verwendeter Musterdefinitionen, referenziert über stabile ID.
+Eine Schraffur enthält die Musterreferenz und Anwendungsparameter, keine weitere
+Bauteilkopie und keine einzeln gespeicherten Wiederholungslinien. Die Tabelle
+ermöglicht portable Darstellung ohne installierte Bibliothek und ein gemeinsames
+Aktualisieren aller Referenzen. Bestehende Schema-10-Projekte behalten Vollflächen;
+Migration ergänzt eine leere Tabelle, niemals automatisch ein Muster.
+
+**Anwendung:** Maßbezug gehört zur Schraffur. Im Modellmaß bleiben Zellabstände in
+Metern. Der Pattern-Anker ist ein expliziter Punkt in derselben 2D-Ebene wie die
+Kontur; Translation bewegt ihn mit, Konturbearbeitung erzeugt ihn nicht laufend
+neu. Initialer Anker kann der untere linke Kontur-Bounding-Box-Punkt sein. Diese
+Vorgabe ist eine technische Initialisierung, keine neue Nutzer-Geste. Übernahme
+per Doppel-Rechtsklick kopiert Muster-/Darstellungsvorgaben, keine ID, Kontur oder
+positionsabhängigen Anker. Bestehende Fill-Farbe/Deckkraft steuern zunächst die
+Musterstriche; Hintergrund und Kontur bleiben unabhängige bestehende Eigenschaften.
+
+**Papiermaß:** Eine explizite positive Ausgabe-Skalenzahl S für 1:S muss vom
+ModelView/DrawingDocument bzw. Layout-Kontext kommen; nicht von pixelsPerMetre
+oder einem Zoomprozent. Papierlängen werden im Adapter in Meter umgerechnet:
+Beispiel 2 mm bei 1:50 entsprechen 0,1 m Modellabstand. Die Definition bleibt in
+lokalen Metern; Anwendungsparameter bestimmen die Papier-Zellgröße. Ohne gültigen
+Maßstab ist eine Papiermaß-Aktion nicht zulässig. Der erste Pilot bietet nur
+Modellmaß; Papiermaß bleibt als geforderte Fähigkeit offen und bekommt keinen
+funktionslosen Auswahlpunkt. Kein Layouteditor oder Ersatz-Ansichtsmodell hierfür.
+
+**Revisionen und Auflösung:** Vor der Bearbeitung verwendeter Definitionen wird
+die globale Bibliothek versioniert um monotone Revisionen ergänzt (v1 -> Revision 1).
+Die eingebettete Tabelle nennt die verwendete Revision. Regulär neuere verfügbare
+Revisionen werden beim Öffnen automatisch validiert übernommen; alle Referenzen
+im geöffneten Projekt verwenden dann denselben Stand. Kein implizites Schreiben
+in geschlossene Projektdateien. Das Projekt wird als geändert markiert und erst
+beim normalen Speichern dauerhaft aktualisiert. Fehlende Bibliothek oder dort
+ältere Revision: eingebettete Definition beibehalten, kein Downgrade. Gleiche
+ID/Revision mit anderem Inhalt ist ein Integritätskonflikt: keine stille Ersetzung,
+Diagnose und vorhandene portable Darstellung erhalten. Fehler bei Validierung oder
+Dateigrenzen dürfen keine teilweise aktualisierte Projekttabelle veröffentlichen.
+
+**Getrennte Histories:** Globale Änderungen bekommen eine eigene Bibliotheks-History.
+Bibliotheks-Undo veröffentlicht den früheren Inhalt als neue monotone Revision,
+nicht als Zurücksetzen der Revisionsnummer. Geöffnete Projekte gleichen diese
+Revision über dieselbe Application-Aktion ab. Projekt-Undo/Redo verändert die
+Zuweisung und Kontur, aber darf eine bereits global aktualisierte Definition nicht
+über alte Projektsnapshots zurückdrehen. Beim Wiederherstellen eines Snapshots
+muss dieselbe zentrale Auflösung die verfügbaren Definitionen berücksichtigen.
+Gleichzeitig laufende Vorschauen werden bei geänderter Basis verworfen. Keine
+Zusicherung einer atomaren Transaktion über Browser-Tabs oder geschlossene Dateien;
+Updates benötigen stabile Revisionen, erneute Validierung und sichtbare Fehler.
+Diese globale Bearbeitung/History ist noch nicht implementiert.
+
+**Abhängigkeiten:** Domain prüft Definition, Referenzintegrität und Anwendungswerte;
+Application führt Zuweisen/Entfernen und später Revision-Abgleich aus. Interop
+migriert Dateien und stellt Storage bereit. Rendering nutzt begrenzte SVG-Kacheln
+und Kontur-Clipping; keine Allocation je sichtbarer Wiederholung. UI-Felder bleiben
+in Werkzeugeigenschaften. Maus, Eigenschaften, Vorgabenübernahme und spätere
+Text/AI/Voice-Adapter verwenden denselben typisierten Aktionsvertrag mit Projekt-ID,
+Hatch-ID und gebundenem aktuellen Snapshot. Geometrie/Fanglogik bleibt gemeinsam.
+
+### Genau ein ausführbarer Folgeauftrag V07f
+
+**Portabler Modellmaß-Pilot für vorhandene Schraffurkonturen.** Projektformat
+inkrementell erweitern; tatsächliche verwendete Definitionen einmal pro Projekt
+speichern, referenzierte IDs und Maßwerte validieren. Zuweisen/Entfernen über die
+vorhandene snapshotgebundene Hatch-Application-Aktion in den Eigenschaften sowie
+Vorgaben für neue Schraffuren und Doppel-Rechtsklick ergänzen. Pattern im Modellmaß
+geklippt rendern, Fill/Hintergrund/Kontur erhalten; Translation/Undo/Dateirundlauf
+mit gemeinsamem Anker prüfen. Katalogeinträge nur auswählen, nicht bearbeiten.
+
+Abnahme: zwei Schraffuren mit gleicher Muster-ID, davon eine konkav, zuweisen;
+zoomen, bewegen, Kontur ändern, rückgängig/wiederholen, speichern/öffnen. Frischer
+Storage ohne Bibliothek muss die eingebettete Darstellung reproduzieren. Kein
+Datenverlust bei älteren Projekten, ungültiger ID, beschädigter Definition oder
+Speichergrenze. Dichte Wiederholung darf Modell-/DOM-Größe nicht vervielfachen.
+Tests für Migration, Referenzen, Snapshots, Aktionsschutz, Undo und Renderableitung;
+Typecheck, Lint, Build sowie praktische Sichtprüfung. Papiermaß, globale Bearbeitung,
+Revision-Abgleich, globale History, Upload und Layout bleiben separate Folgeaufträge.
+
+Dieser V07e-Auftrag ändert ausschließlich Dokumentation. Keine neuen Test-/Build-
+Ergebnisse behauptet; die 741 Tests und CI gehören zum überprüften PR221-Commit.
