@@ -21,9 +21,9 @@ function equal(a: unknown, b: unknown): boolean {
   );
 }
 
-/** Exact model comparison after validation; visibility has its own history. */
+/** Exact model comparison after validation; view settings stay outside model history. */
 export function sameProjectModel(a: Project, b: Project): boolean {
-  const { bimVisibility: _a, ...left } = a;
-  const { bimVisibility: _b, ...right } = b;
+  const { bimVisibility: _a, workingViews: _av, ...left } = a;
+  const { bimVisibility: _b, workingViews: _bv, ...right } = b;
   return equal(left, right);
 }

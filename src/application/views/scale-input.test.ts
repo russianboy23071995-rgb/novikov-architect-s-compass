@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { changeViewScale, readViewScale, parseOutputScale } from "./scale-session.ts";
+import { parseOutputScale } from "./scale-input.ts";
 import {
   resolveModelLength,
   resolveScreenLength,
@@ -8,43 +8,9 @@ import {
   paperMillimetresToMetres,
 } from "../../rendering/viewport/display-size.ts";
 import type { WorkingPlanIdentity, ScaleContext } from "../../domain/views/scale.ts";
-import { createProject, serializeProject } from "../../lib/bim/model.ts";
-import { createHistory } from "../../lib/bim/history.ts";
 
 const view: WorkingPlanIdentity = { kind: "working-plan", projectId: "p", storeyId: "s" };
 const context = (denominator: number): ScaleContext => ({ view, denominator });
-
-test("semantic plan scales survive pane rebinding and keep projects/storeys independent", () => {
-  const original = Object.freeze({});
-  const first = readViewScale(original, view);
-  assert.equal(first.denominator, 100);
-  const next = changeViewScale(original, first.view, 50);
-  assert.equal(readViewScale(next, { ...view }).denominator, 50);
-  assert.equal(readViewScale(next, { ...view, storeyId: "other" }).denominator, 100);
-  assert.equal(readViewScale(next, { ...view, projectId: "other" }).denominator, 100);
-  const other = changeViewScale(next, { ...view, storeyId: "other" }, 200);
-  assert.equal(readViewScale(other, view).denominator, 50);
-  assert.equal(changeViewScale(other, view, 50), other);
-  assert.deepEqual(original, {});
-  assert.equal(
-    readViewScale(changeViewScale(next, { ...view, projectId: "p:s" }, 25), {
-      ...view,
-      storeyId: "s:s",
-    }).denominator,
-    100,
-  );
-});
-
-test("scale session does not write model, saved JSON or model history", () => {
-  const project = createProject("p", "s");
-  const history = createHistory(project);
-  const before = JSON.stringify(history);
-  const file = serializeProject(project);
-  const session = changeViewScale({}, view, 25);
-  assert.equal(readViewScale(session, view).denominator, 25);
-  assert.equal(JSON.stringify(history), before);
-  assert.equal(serializeProject(project), file);
-});
 
 test("free scale input is strict and supports decimal comma and 1:S", () => {
   for (const [input, expected] of [
@@ -69,8 +35,6 @@ test("free scale input is strict and supports decimal comma and 1:S", () => {
     "9".repeat(400),
   ])
     assert.throws(() => parseOutputScale(input));
-  for (const value of [0, -1, NaN, Infinity]) assert.throws(() => changeViewScale({}, view, value));
-  assert.throws(() => readViewScale({}, { ...view, storeyId: "" }));
 });
 
 test("one metric resolver separates paper size, model size, output scale and camera zoom", () => {

@@ -1,3 +1,4 @@
+import { projectScaleContext } from "@/application/views/project-scale";
 import { CadAppearanceProvider } from "./CadAppearanceProvider";
 import { PenSetManager } from "./PenSetManager";
 import { defaultPenSet } from "@/domain/pens/model";
@@ -1173,6 +1174,13 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  onScale={(denominator) =>
+                    dispatchEditing({
+                      type: "view-scale",
+                      view: projectScaleContext(project).view,
+                      denominator,
+                    })
+                  }
                   pickupScope={measurementContext}
                   onPickup={(target) => {
                     const defaults = pickupToolDefaults(project, visibility, target);

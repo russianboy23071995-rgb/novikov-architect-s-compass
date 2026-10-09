@@ -1,6 +1,7 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 14 (portable pen-set snapshot, 2026-10-09).
+Production project schema is now 15 (semantic working-view scale, 2026-10-10).
+Schema 14 remains the strict legacy portable pen-set format at file ingress.
 Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
 incremental migration supersedes their claim that the production format is unchanged.
@@ -15,7 +16,7 @@ for the raw working view are now clarified by the user's PR230 review answers:
 the semantic view context owns S, while ViewportBinding routes a pane to it.
 Panes own independent cameras, never independent copies of the same context's S.
 Working contexts start at 1:100; the selector sits beside Zoom. Future persistence
-is per semantic context within the project; persistent history semantics remain open.
+is per semantic context within the project; history semantics are now fixed: working scale stays outside model Undo/Redo.
 All internal lengths, including paper sizes, use metres. UI paper-size fields use
 millimetres with an explicit boundary conversion, never an ambiguous unitless value.
 Paper hatch applications will specify a paper cell width in metres. A shared
@@ -32,7 +33,7 @@ See [general contract](docs/planning/VIEW_SCALE_CONTRACT.md) and
 [hatch-specific acceptance](docs/planning/HATCH_PAPER_SCALE.md).
 
 
-## Shared session view scale — MS-01, 2026-10-09
+## Shared session view scale — MS-01, 2026-10-09 (superseded by MS-03 below)
 
 Implemented: domain/views identifies the existing semantic working plan by project
 and storey, not pane index. Application/views owns immutable session scale changes
@@ -2677,3 +2678,20 @@ Binding user decision: working output scale is a persisted semantic-view setting
 outside normal model Undo/Redo. Model undo must preserve the current view setting.
 Persistence and legacy-file migration are the next bounded MS-03 task, not yet
 implemented by this renderer pilot. Paper-mode product integration follows later.
+
+## Persistent working-view scale — MS-03, 2026-10-10
+
+Implemented: schema 15 optionally embeds workingViews (kind working-plan, storeyId,
+finite positive denominator). Omission resolves to 1:100. The owning project supplies
+project identity; only its existing storey is supported and referenced IDs are checked.
+Legacy 1–14 inputs pass strict legacy validation before migration. Old schemas reject
+new view fields; project opening does not retain an unrelated pane's previous scale.
+
+Application/views owns view-scale changes and resolved contexts. The editing reducer
+publishes the validated setting without adding model history or clearing redo. Model
+Undo/Redo preserves current working-view settings for the matching project/storey.
+A changed project snapshot cancels stale editing previews under existing revision rules.
+ViewportManager derives context from the project; there is no second session scale map.
+Panes retain independent cameras. Presets are 1:50/100/200/500/1000/2500/5000; a separate
+Individuell choice accepts strict 1:S input, committing with Enter or blur. Zoom and
+model geometry remain unchanged. Paper hatch product integration is still pending.
