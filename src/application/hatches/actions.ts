@@ -1,3 +1,7 @@
+import {
+  validateHatchPattern,
+  type HatchPatternDefinition,
+} from "../../domain/elements/hatch/pattern.ts";
 import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -5,7 +9,10 @@ import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { commitProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
 
-export type HatchRequest = { projectId: string } & (
+export type HatchRequest = {
+  projectId: string;
+  patternDefinition?: HatchPatternDefinition | null | undefined;
+} & (
   | {
       kind: "create";
       hatch: Omit<Hatch, "kind" | "layerId" | "background" | "contour"> &
@@ -14,7 +21,9 @@ export type HatchRequest = { projectId: string } & (
   | {
       kind: "update";
       id: string;
-      changes: Partial<Pick<Hatch, "points" | "fill" | "layerId" | "background" | "contour">>;
+      changes: Partial<
+        Pick<Hatch, "points" | "fill" | "layerId" | "background" | "contour" | "pattern">
+      >;
     }
 );
 
@@ -26,8 +35,36 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
   const hatches = project.storey.hatches;
   if (request.kind === "update" && !hatches.some((h) => h.id === request.id))
     throw new Error("Die Schraffur existiert nicht mehr.");
+  const definition = request.patternDefinition
+    ? validateHatchPattern(request.patternDefinition)
+    : null;
+  const existing = definition && project.hatchPatterns.find((p) => p.id === definition.id);
+  if (existing && JSON.stringify(existing) !== JSON.stringify(definition))
+    throw new Error("Muster-ID hat eine andere Definition.");
+  const source =
+    request.kind === "create" ? request.hatch : hatches.find((h) => h.id === request.id)!;
+  const assignment =
+    request.patternDefinition === undefined
+      ? {}
+      : {
+          pattern: definition
+            ? {
+                patternId: definition.id,
+                mode: "model" as const,
+                origin:
+                  source.pattern?.patternId === definition.id
+                    ? source.pattern.origin
+                    : {
+                        x: Math.min(...source.points.map((p) => p.x)),
+                        y: Math.min(...source.points.map((p) => p.y)),
+                      },
+              }
+            : null,
+        };
   const next = validateProject({
     ...project,
+    hatchPatterns:
+      definition && !existing ? [...project.hatchPatterns, definition] : project.hatchPatterns,
     storey: {
       ...project.storey,
       hatches:
@@ -38,11 +75,14 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
                 ...defaultHatchAppearance,
                 layerId: project.defaultLayerIds.line,
                 ...request.hatch,
+                ...assignment,
                 kind: "hatch",
               },
             ]
           : hatches.map((h) =>
-              h.id === request.id ? { ...h, ...request.changes, id: h.id, kind: h.kind } : h,
+              h.id === request.id
+                ? { ...h, ...request.changes, ...assignment, id: h.id, kind: h.kind }
+                : h,
             ),
     },
   });

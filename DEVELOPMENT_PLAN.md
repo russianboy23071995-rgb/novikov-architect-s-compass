@@ -1,3 +1,40 @@
+## V07f Portabler Modellmaß-Pilot - 09.10.2026
+
+PR222 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Schema-11-Migration
+vom Nutzer zusätzlich ausdrücklich freigegeben, nachdem automatische Freigabeprüfung
+zunächst den umfangreichen Schreibvorgang abgelehnt hatte. Unterbrochener Befehl
+hinterließ keine Änderungen; Umsetzung auf feat/hatch-model-patterns.
+
+Muster in Werkzeugvorgaben/Inspector auswählbar; Vollfläche entfernt die Zuweisung.
+Vier bestehende Erstellungsarten und Doppel-Rechtsklick verwenden dieselbe gemeinsame
+Application-Definition. Projektversion 11 speichert verwendete Muster einmal als
+Tabelle; Schraffuren referenzieren ID, Modellmaß und festen Ursprung. Alte Dateien
+1–10 laden über strikte Migration, bestehende Vollflächen behalten ihre Darstellung.
+Unbenutzte Definitionen werden bei Normalisierung entfernt. Ungültige Referenzen,
+doppelte IDs, widersprüchliche Definitionen und veraltete Aktionen werden abgewiesen.
+SVG-Kacheln füllen nur die Kontur, auch in der Zeichenvorschau; keine Modelllinien
+pro Wiederholung. Farbe/Deckkraft, Hintergrund und Kontur bleiben erhalten. Einzel-
+und vorbereitete Gruppenbewegung nehmen den Ursprung mit; Reshape behält ihn.
+Muster werden ohne installierte lokale Bibliothek aus der Projektdatei dargestellt.
+
+746 Tests bestanden; Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild. Neue Nachweise: gemeinsame Definition zweier Konturen (auch konkav),
+Migration 10→11, unabhängige Koordinaten, atomarer Undo/Redo, Dateirundlauf, gleiche
+Einzel-/vorbereitete Gruppenbewegung, Reshape-Ursprung, Stale-/Konflikt-/Referenzschutz,
+Vorgabenübernahme mit neuem Ursprung. Alte Migrationstests bleiben strikt.
+Browserverbindung scheitert weiter am Sandbox-Start; praktische Sichtprüfung offen.
+Abnahme: Muster unter Tools anlegen; Schraffurwerkzeug > Muster wählen, zeichnen;
+vorhandene Schraffur > Muster wählen > Übernehmen. Zoomen, verschieben, Ecke bewegen,
+Undo/Redo, speichern/öffnen. Vollfläche wählen: Muster weg, alte Farben bleiben.
+
+**Genau ein nächster Auftrag: V07g Revisions- und Bibliotheks-History-Kern.**
+Bibliotheksformat v1 ohne Verlust auf monotone Revisionen erweitern; gemeinsame
+validierte Bearbeiten-/Undo-/Redo-Aktionen und zentrale projektseitige Auflösung als
+begrenzten Domain-/Application-Piloten testen. Neuere Revision automatisch übernehmen,
+fehlende/ältere Bibliothek erhalten, gleiche Revision mit anderem Inhalt melden;
+Bibliotheks-Undo veröffentlicht neue Revision. Noch keine automatische UI-/Tab-
+Synchronisation, Papiermaß oder Upload. UI-Anbindung folgt nach diesem Kernnachweis.
+
 ## V07e Musteranwendungs-/Aktualisierungsvertrag - 09.10.2026
 
 PR221 (38b571e) nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.

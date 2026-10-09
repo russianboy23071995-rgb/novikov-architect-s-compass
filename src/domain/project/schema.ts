@@ -1,3 +1,4 @@
+import { validateHatchPattern } from "../elements/hatch/pattern.ts";
 import { validateLineStyle } from "../elements/line/style.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
 import {
@@ -8,7 +9,12 @@ import {
 import { connectedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
-import { hatchSchema, legacyHatchSchema, defaultHatchAppearance } from "../elements/hatch/model.ts";
+import {
+  hatchSchema,
+  solidHatchSchema,
+  legacyHatchSchema,
+  defaultHatchAppearance,
+} from "../elements/hatch/model.ts";
 import { layerSchema, defaultLayerIdsSchema } from "../layers/model.ts";
 
 const id = z.string().trim().min(1);
@@ -117,7 +123,7 @@ const projectV6Schema = projectV5Schema.extend({
 });
 const projectV7Schema = projectV6Schema.extend({
   schemaVersion: z.literal(7),
-  storey: projectV6Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+  storey: projectV6Schema.shape.storey.extend({ hatches: z.array(solidHatchSchema) }),
 });
 const projectV8Schema = projectV7Schema.extend({
   schemaVersion: z.literal(8),
@@ -130,20 +136,43 @@ const projectV9Schema = projectV8Schema.extend({
   assets: z.array(imageAssetSchema),
   storey: projectV8Schema.shape.storey.extend({ references: z.array(imageReferenceSchema) }),
 });
-const projectSchema = projectV9Schema.extend({
+const projectV10Schema = projectV9Schema.extend({
   schemaVersion: z.literal(10),
   storey: projectV9Schema.shape.storey.extend({ lines: z.array(currentLineSchema).optional() }),
 });
+const embeddedPatternSchema = z
+  .object({
+    id: z.string().min(1).max(128),
+    name: z.string().min(1).max(80),
+    width: positive,
+    height: positive,
+    lines: z
+      .array(z.object({ start: pointSchema, end: pointSchema }).strict())
+      .min(1)
+      .max(256),
+  })
+  .strict();
+const projectSchema = projectV10Schema.extend({
+  schemaVersion: z.literal(11),
+  hatchPatterns: z.array(embeddedPatternSchema).max(100),
+  storey: projectV10Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+});
+export function validateProjectV10(value: unknown) {
+  const old = projectV10Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 11, hatchPatterns: [] });
+  return old;
+}
 export function validateProjectV9(value: unknown) {
   const old = projectV9Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 10 });
+  validateProject({ ...old, schemaVersion: 11, hatchPatterns: [] });
   return old;
 }
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 10,
+    schemaVersion: 11,
+    hatchPatterns: [],
     assets: [],
     storey: { ...old.storey, references: [] },
   });
@@ -236,7 +265,24 @@ export function validateProject(value: unknown): Project {
     if (!asset) throw new Error("Unknown image asset: " + reference.assetId);
     validateReferenceExtent(reference, asset);
   }
-  return project;
+  const patterns = new Map(project.hatchPatterns.map((p) => [p.id, validateHatchPattern(p)]));
+  if (patterns.size !== project.hatchPatterns.length)
+    throw new Error("Doppelte Schraffurmuster-ID.");
+  const used = new Set<string>();
+  for (const hatch of project.storey.hatches) {
+    if (!hatch.pattern) continue;
+    const definition = patterns.get(hatch.pattern.patternId);
+    if (!definition) throw new Error("Unbekanntes Schraffurmuster.");
+    if (
+      ![
+        hatch.pattern.origin.x + definition.width,
+        hatch.pattern.origin.y + definition.height,
+      ].every(Number.isFinite)
+    )
+      throw new Error("Ungültige Musterausdehnung.");
+    used.add(definition.id);
+  }
+  return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }
 function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3): void {
   const hidden = project.bimVisibility.hiddenLayerIds;
@@ -252,11 +298,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 10 ? project.storey.references : []),
+    ...(project.schemaVersion === 11 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 10
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 11
       ? project.storey.hatches
       : []),
   ]) {
@@ -271,13 +317,13 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 10 ? project.assets : []),
+    ...(project.schemaVersion === 11 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 10 ? project.storey.references : []),
+    ...(project.schemaVersion === 11 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 10
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 11
       ? project.storey.hatches
       : []),
   ]) {
@@ -286,7 +332,7 @@ function validateGeometry(
   }
   for (const line of project.storey.lines ?? []) {
     validateLineGeometry(line);
-    if (project.schemaVersion === 10) {
+    if (project.schemaVersion === 11) {
       const current = line as DrawingLine;
       if (current.style === "custom") {
         if (!current.pattern || !current.repeatLength)
@@ -303,7 +349,7 @@ function validateGeometry(
         throw new Error("Only custom lines may carry a pattern.");
     }
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 10)
+  if (project.schemaVersion === 5 || project.schemaVersion === 11)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

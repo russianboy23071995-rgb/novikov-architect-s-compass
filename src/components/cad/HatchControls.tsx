@@ -1,3 +1,5 @@
+import { useHatchPatterns } from "./useHatchPatterns";
+import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { previewHatch } from "@/application/hatches/actions";
@@ -56,6 +58,9 @@ export function HatchInspector({
   hatch: Hatch;
   onChange: (p: Project, s: Selection) => void;
 }) {
+  const [definition, setDefinition] = useState<HatchPatternDefinition | null | undefined>(() =>
+    hatch.pattern ? project.hatchPatterns.find((p) => p.id === hatch.pattern!.patternId) : null,
+  );
   const [fill, setFill] = useState(hatch.fill);
   const [background, setBackground] = useState(hatch.background);
   const [contour, setContour] = useState(hatch.contour);
@@ -71,18 +76,20 @@ export function HatchInspector({
             previewHatch(project, project, {
               projectId: project.id,
               kind: "update",
+              patternDefinition: definition ?? null,
               id: hatch.id,
               changes: { fill, background, contour },
             }),
             { kind: "hatch", id: hatch.id },
           );
           setError("");
-        } catch {
-          setError("Farbe und Deckkraft zwischen 0 und 100 % prüfen.");
+        } catch (error) {
+          setError((error as Error).message);
         }
       }}
     >
       <span className="text-xs">Schraffur · {hatch.points.length} Eckpunkte</span>
+      <HatchPatternFields project={project} value={definition} onChange={setDefinition} />
       <HatchFillFields value={fill} onChange={setFill} />
       <HatchPaintFields label="Hintergrund" value={background} onChange={setBackground} />
       <HatchPaintFields label="Kontur" value={contour} onChange={setContour} />
@@ -138,5 +145,39 @@ export function HatchPaintFields({
         />
       </label>
     </fieldset>
+  );
+}
+
+export function HatchPatternFields({
+  project,
+  value,
+  onChange,
+}: {
+  project: Project;
+  value: HatchPatternDefinition | null | undefined;
+  onChange: (value: HatchPatternDefinition | null) => void;
+}) {
+  const library = useHatchPatterns();
+  const patterns = new Map(library.patterns.map((p) => [p.id, p]));
+  for (const p of project.hatchPatterns) patterns.set(p.id, p);
+  if (value && !patterns.has(value.id)) patterns.set(value.id, value);
+  return (
+    <label className="text-xs">
+      Muster · Modellmaß
+      <select
+        aria-label="Schraffurmuster"
+        className="block h-8 rounded border bg-background max-w-48"
+        value={value?.id ?? ""}
+        onChange={(e) => onChange(patterns.get(e.target.value) ?? null)}
+      >
+        <option value="">Vollfläche</option>
+        {[...patterns.values()].map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name} · {p.width} × {p.height} m
+          </option>
+        ))}
+      </select>
+      {library.error && <span role="alert">{library.error}</span>}
+    </label>
   );
 }

@@ -25,13 +25,25 @@ function applyPoints(
   points: Point[],
   intent: "reshape" | "move" = "reshape",
 ): Project {
-  if (target.kind === "hatch")
+  if (target.kind === "hatch") {
+    const hatch = project.storey.hatches.find((h) => h.id === target.id)!;
+    const pattern =
+      intent === "move" && hatch.pattern
+        ? {
+            ...hatch.pattern,
+            origin: {
+              x: hatch.pattern.origin.x + points[0]!.x - hatch.points[0]!.x,
+              y: hatch.pattern.origin.y + points[0]!.y - hatch.points[0]!.y,
+            },
+          }
+        : hatch.pattern;
     return previewHatch(project, project, {
       projectId: project.id,
       kind: "update",
       id: target.id,
-      changes: { points },
+      changes: { points, ...(pattern ? { pattern } : {}) },
     });
+  }
   return target.kind === "wall"
     ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent)
     : updateLine(project, target.id, { points });

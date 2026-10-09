@@ -223,3 +223,14 @@ Revision-Abgleich, globale History, Upload und Layout bleiben separate Folgeauft
 
 Dieser V07e-Auftrag ändert ausschließlich Dokumentation. Keine neuen Test-/Build-
 Ergebnisse behauptet; die 741 Tests und CI gehören zum überprüften PR221-Commit.
+
+## V07f Umsetzung - 09.10.2026
+
+Modellmaß-Zuweisung in Werkzeugeigenschaften/Inspector, gemeinsame Erstellung und
+Doppel-Rechtsklick-Vorgaben, begrenzte SVG-Darstellung inklusive Vorschau umgesetzt.
+Schema 11: eine Definitionstabelle pro Projekt, stabile Referenzen/Ursprung je Kontur;
+strikte Migration 1–10. Bewegung nimmt Ursprung mit, Konturbearbeitung behält ihn.
+746 Tests, Typecheck, Lint/Build erfolgreich; Browser-Sichtprüfung wegen Sandboxfehler
+offen. Globale Bibliotheksbearbeitung/-History, Revision-Synchronisation und Papiermaß
+bleiben offen. Nächster Auftrag V07g: Revisions-/Bibliotheks-History-Kern und zentrale
+Auflösung als getestete Domain-/Application-Aktionen, vor UI-/Tab-Synchronisation.

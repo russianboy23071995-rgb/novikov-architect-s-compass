@@ -23,6 +23,8 @@ export type DrawingRequest =
       fill: Hatch["fill"];
       background?: Hatch["background"];
       contour?: Hatch["contour"];
+      patternDefinition?:
+        import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
       layerId?: string;
     }
   | {
@@ -71,6 +73,7 @@ export function createDrawing(
     return previewHatch(base, current, {
       projectId: current.id,
       kind: "create",
+      patternDefinition: request.patternDefinition,
       hatch: {
         id,
         points: closedDrawingContour(request.points),

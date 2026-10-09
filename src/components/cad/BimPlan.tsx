@@ -1,3 +1,5 @@
+import { HatchPattern } from "./HatchPattern";
+import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import type { AngleMeasurement } from "@/application/measurement/angle";
@@ -94,6 +96,7 @@ export type BimPlanProps = {
   start: Point | null;
   draftPoints?: Point[];
   draftFill?: Hatch["fill"] | undefined;
+  draftPattern?: HatchPatternDefinition | null | undefined;
   gridSettings?: GridSettings;
   wallOutlineWidth?: number;
   snap: boolean;
@@ -142,6 +145,7 @@ export function BimPlan({
   start,
   draftPoints = [],
   draftFill,
+  draftPattern,
   snap,
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
@@ -490,10 +494,16 @@ export function BimPlan({
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
   );
-  const scene = useMemo(() => derivePlanScene(shown, allowsShown), [shown, allowsShown]);
+  const scene = useMemo(
+    () => derivePlanScene(shown, allowsShown, project.hatchPatterns),
+    [shown, allowsShown, project.hatchPatterns],
+  );
   const previewScene = useMemo(
-    () => (geometryPreview ? derivePlanScene(geometryPreview.geometry, allowsShown) : null),
-    [geometryPreview, allowsShown],
+    () =>
+      geometryPreview
+        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns)
+        : null,
+    [geometryPreview, allowsShown, project.hatchPatterns],
   );
   const sceneRuns = useMemo(
     () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
@@ -1149,23 +1159,45 @@ export function BimPlan({
           )}
         </g>
       )}
-      {drawing && draftFill && (draftPoints.length >= 2 || constructedContour.length >= 3) && (
-        <polygon
-          points={(draftContour
+      {drawing &&
+        draftFill &&
+        (draftPoints.length >= 2 || constructedContour.length >= 3) &&
+        (() => {
+          const points = draftContour
             ? constructedContour
-            : [...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
-          )
-            .map((p) => `${p.x},${-p.y}`)
-            .join(" ")}
-          fill={draftFill.color}
-          fillOpacity={draftFill.opacity}
-          stroke="var(--primary)"
-          strokeWidth={1}
-          strokeDasharray="5 4"
-          vectorEffect="non-scaling-stroke"
-          pointerEvents="none"
-        />
-      )}
+            : [...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])];
+          return (
+            <g pointerEvents="none">
+              <polygon
+                points={points.map((p) => `${p.x},${-p.y}`).join(" ")}
+                fill={draftPattern ? "transparent" : draftFill.color}
+                fillOpacity={draftFill.opacity}
+                stroke="var(--primary)"
+                strokeWidth={1}
+                strokeDasharray="5 4"
+                vectorEffect="non-scaling-stroke"
+              />
+              {draftPattern && points.length >= 3 && (
+                <HatchPattern
+                  hatch={{
+                    points,
+                    fill: draftFill,
+                    pattern: {
+                      patternId: draftPattern.id,
+                      mode: "model",
+                      origin: {
+                        x: Math.min(...points.map((p) => p.x)),
+                        y: Math.min(...points.map((p) => p.y)),
+                      },
+                    },
+                  }}
+                  definition={draftPattern}
+                  pixelsPerMetre={camera.pixelsPerMetre}
+                />
+              )}
+            </g>
+          );
+        })()}
       {drawing && draftPoints.length > 0 && (
         <polyline
           points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}

@@ -1,9 +1,14 @@
+import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
 
-export function derivePlanScene(geometry: ModelGeometry, allows: (id: string) => boolean) {
+export function derivePlanScene(
+  geometry: ModelGeometry,
+  allows: (id: string) => boolean,
+  patterns: readonly HatchPatternDefinition[] = [],
+) {
   const plan = visiblePlanGeometry(geometry, allows);
   const openings = new Map<string, typeof plan.openings>();
   for (const opening of plan.openings) {
@@ -12,6 +17,7 @@ export function derivePlanScene(geometry: ModelGeometry, allows: (id: string) =>
   }
   return {
     plan,
+    hatchPatterns: new Map(patterns.map((p) => [p.id, p])),
     openings,
     assets: new Map(geometry.assets.map((a) => [a.id, a])),
     solids: new Map(connectedWallSolids(geometry).map((s) => [s.wallId, s])),

@@ -38,7 +38,21 @@ export const defaultHatchAppearance = {
   background: { visible: false, color: "#ffffff" },
   contour: { visible: false, color: "#64748b" },
 };
-export const hatchSchema = hatchBaseSchema
+export const solidHatchSchema = hatchBaseSchema
   .extend({ background: paintSchema, contour: paintSchema })
+  .superRefine(validateContour);
+export const hatchPatternApplicationSchema = z
+  .object({
+    patternId: z.string().trim().min(1),
+    mode: z.literal("model"),
+    origin: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
+  })
+  .strict();
+export const hatchSchema = hatchBaseSchema
+  .extend({
+    background: paintSchema,
+    contour: paintSchema,
+    pattern: hatchPatternApplicationSchema.nullable().optional(),
+  })
   .superRefine(validateContour);
 export type Hatch = z.infer<typeof hatchSchema>;
