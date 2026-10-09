@@ -41,13 +41,25 @@ export const defaultHatchAppearance = {
 export const solidHatchSchema = hatchBaseSchema
   .extend({ background: paintSchema, contour: paintSchema })
   .superRefine(validateContour);
-export const hatchPatternApplicationSchema = z
+const legacyPatternApplicationSchema = z
   .object({
     patternId: z.string().trim().min(1),
     mode: z.literal("model"),
     origin: z.object({ x: z.number().finite(), y: z.number().finite() }).strict(),
   })
   .strict();
+export const hatchV12Schema = hatchBaseSchema
+  .extend({
+    background: paintSchema,
+    contour: paintSchema,
+    pattern: legacyPatternApplicationSchema.nullable().optional(),
+  })
+  .superRefine(validateContour);
+export const patternRotationSchema = z.number().finite().min(0).max(360);
+export const hatchPatternApplicationSchema = legacyPatternApplicationSchema.extend({
+  // Degrees counter-clockwise around the application origin; omission means 0.
+  rotation: patternRotationSchema.optional(),
+});
 export const hatchSchema = hatchBaseSchema
   .extend({
     background: paintSchema,

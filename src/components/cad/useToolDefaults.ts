@@ -1,4 +1,5 @@
 import { defaultLineAppearance } from "@/lib/bim/lines";
+import { useHatchPatterns } from "./useHatchPatterns";
 import {
   defaultDrawingWindow,
   type WindowDimensionDraft,
@@ -16,6 +17,7 @@ import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
+  const library = useHatchPatterns();
   const [wallState, setWallState] = useState<{ projectId: string; values: WallDefaults } | null>(
     null,
   );
@@ -74,6 +76,13 @@ export function useToolDefaults(project: Project) {
         };
   const current = {
     ...hatch,
+    patternRotation: hatch.patternDefinition ? hatch.patternRotation : undefined,
+    // Committed project definitions have already passed the central resolver.
+    patternDefinition: hatch.patternDefinition
+      ? (project.hatchPatterns.find((p) => p.id === hatch.patternDefinition!.id) ??
+        library.patterns.find((p) => p.id === hatch.patternDefinition!.id) ??
+        hatch.patternDefinition)
+      : hatch.patternDefinition,
     layerId: project.layers.some((l) => l.id === hatch.layerId)
       ? hatch.layerId
       : project.defaultLayerIds.line,

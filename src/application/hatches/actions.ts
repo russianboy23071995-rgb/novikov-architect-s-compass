@@ -3,7 +3,10 @@ import {
   validateHatchPattern,
   type HatchPatternDefinition,
 } from "../../domain/elements/hatch/pattern.ts";
-import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
+import {
+  defaultHatchAppearance,
+  patternRotationSchema,
+} from "../../domain/elements/hatch/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
@@ -13,6 +16,7 @@ import type { ProjectHistory } from "../../lib/bim/history.ts";
 export type HatchRequest = {
   projectId: string;
   patternDefinition?: HatchPatternDefinition | null | undefined;
+  patternRotation?: number | undefined;
 } & (
   | {
       kind: "create";
@@ -52,6 +56,9 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
             ? {
                 patternId: definition.id,
                 mode: "model" as const,
+                ...(source.pattern?.rotation === undefined
+                  ? {}
+                  : { rotation: source.pattern.rotation }),
                 origin:
                   source.pattern?.patternId === definition.id
                     ? source.pattern.origin
@@ -62,6 +69,20 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
               }
             : null,
         };
+  if (request.patternRotation !== undefined) {
+    const pattern =
+      request.patternDefinition !== undefined
+        ? assignment.pattern
+        : request.kind === "update" && request.changes.pattern !== undefined
+          ? request.changes.pattern
+          : source.pattern;
+    if (!pattern) throw new Error("Zuerst ein Schraffurmuster wählen.");
+    if (!patternRotationSchema.safeParse(request.patternRotation).success)
+      throw new Error("Musterwinkel muss zwischen 0 und 360 Grad liegen.");
+    const rotation = request.patternRotation % 360;
+    const { rotation: _previous, ...unrotated } = pattern;
+    assignment.pattern = rotation === 0 ? unrotated : { ...pattern, rotation };
+  }
   const next = validateProject({
     ...project,
     hatchPatterns:

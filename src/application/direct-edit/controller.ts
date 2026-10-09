@@ -195,7 +195,8 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
 type BaseEditingEvent =
   | ModelEditingEvent
   | { type: "visibility"; base: Project; action: VisibilityAction }
-  | { type: "load-project"; project: Project };
+  | { type: "load-project"; project: Project }
+  | { type: "patterns-changed" };
 export type EditingEvent = BaseEditingEvent & {
   patternRecords?: readonly PatternRevision[];
   patternLibraryError?: string;
@@ -203,6 +204,31 @@ export type EditingEvent = BaseEditingEvent & {
 
 /** Storage is read by the adapter before dispatch; the reducer stays deterministic. */
 export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  if (event.type === "patterns-changed") {
+    try {
+      const result = resolveProjectHatchPatterns(
+        state.history.present,
+        state.history.present,
+        event.patternRecords ?? [],
+      );
+      const error = result.conflicts.length
+        ? `Musterkonflikt: ${result.conflicts.join(", ")}. Eingebettete Darstellung erhalten.`
+        : (event.patternLibraryError ?? "");
+      if (result.project === state.history.present)
+        return error === state.error ? state : { ...state, error };
+      return {
+        ...state,
+        history: { ...state.history, present: result.project },
+        session: null,
+        error,
+      };
+    } catch (error) {
+      return {
+        ...state,
+        error: error instanceof Error ? error.message : "Musterabgleich fehlgeschlagen.",
+      };
+    }
+  }
   const restore = event.type === "undo" || event.type === "redo";
   const incoming = event.type === "project" || event.type === "load-project";
   if ((!restore && !incoming) || event.patternRecords === undefined)
@@ -240,7 +266,10 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
   }
 }
 
-function reduceEditing(state: EditingState, event: BaseEditingEvent): EditingState {
+function reduceEditing(
+  state: EditingState,
+  event: Exclude<BaseEditingEvent, { type: "patterns-changed" }>,
+): EditingState {
   if (event.type === "load-project")
     return {
       ...reduceModelEdit(state, { type: "project", project: event.project }),

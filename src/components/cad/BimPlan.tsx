@@ -97,6 +97,7 @@ export type BimPlanProps = {
   draftPoints?: Point[];
   draftFill?: Hatch["fill"] | undefined;
   draftPattern?: HatchPatternDefinition | null | undefined;
+  draftPatternRotation?: number | undefined;
   gridSettings?: GridSettings;
   wallOutlineWidth?: number;
   snap: boolean;
@@ -146,6 +147,7 @@ export function BimPlan({
   draftPoints = [],
   draftFill,
   draftPattern,
+  draftPatternRotation,
   snap,
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
@@ -1184,6 +1186,9 @@ export function BimPlan({
                     fill: draftFill,
                     pattern: {
                       patternId: draftPattern.id,
+                      ...(draftPatternRotation === undefined
+                        ? {}
+                        : { rotation: draftPatternRotation }),
                       mode: "model",
                       origin: {
                         x: Math.min(...points.map((p) => p.x)),

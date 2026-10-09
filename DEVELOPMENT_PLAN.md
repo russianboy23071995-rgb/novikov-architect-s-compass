@@ -1,3 +1,76 @@
+## Nutzerkorrektur: Musterausrichtung und Musterwinkel - 09.10.2026
+
+Ergänzung zu PR226 (weiterhin zur Prüfung offen): Im Creator verlaufen lokale
+Y-Koordinaten nach unten. Die bisherige Plan-Kachel negierte diese nochmals und
+spiegelte dadurch z. B. eine von links unten nach rechts oben gezeichnete Linie.
+Der gemeinsame Renderer erhält jetzt die Orientierung der Zeichenzelle unverändert;
+Vorschau und platzierte Schraffur verwenden denselben Kachelvertrag.
+
+Werkzeugeigenschaften bieten für neue und ausgewählte Schraffuren Musterwinkel
+0–360 Grad, positiv gegen den Uhrzeigersinn. Nur das Muster dreht um seinen Ursprung;
+Kontur, Ebene und globale Definition bleiben unverändert. Gemeinsame Application-
+Aktionen validieren die Eingabe, 360 entspricht 0 ohne zusätzlichen Undo-Schritt.
+Doppelt-Rechtsklick übernimmt den Winkel; Bewegung und Bibliotheksabgleich erhalten ihn.
+Projektformat 13 speichert den optionalen Anwendungswinkel. Strikte Migration 1–12
+setzt fehlende Winkel sinngemäß auf 0; vorhandene Definitionen werden nicht umgeschrieben.
+
+771 Tests bestanden, Typecheck und Produktionsbuild erfolgreich. Voller Lint:
+keine Fehler, sechs bekannte Fast-Refresh-Warnungen. Neue Nachweise: asymmetrische
+Creator-Geometrie, unabhängige Winkel, unveränderte Konturen, Undo/Redo, Dateirundlauf,
+Pickup, Bewegung, Bibliotheksabgleich, ungültige Winkel und strikte Migration.
+Browser-Sichtprüfung wegen Windows-Sandbox-Kernelstart nicht ausführbar; das konkrete
+lokal gespeicherte Muster wurde nicht ausgelesen.
+Abnahme: Mauerwerk bei 0 Grad mit dem Creator vergleichen, dann Musterwinkel 45/90
+übernehmen. Kontur muss unverändert bleiben. Zweite Anwendung, Speichern/Öffnen und
+Undo/Redo prüfen.
+
+**Genau ein nächster Auftrag bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag:**
+Maßbezug und Umrechnung gegen Architektur und Code prüfen und genau einen begrenzten
+Umsetzungspiloten festlegen. Interaktiver Zoom ist kein Ausgabemaßstab.
+
+## V07i Globale Musterbearbeitung und Bibliotheks-History - 09.10.2026
+
+PR225 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Tools >
+Schraffurenverwaltung verwendet weiterhin das gemeinsame bewegliche, nicht-modale
+FloatingPanel. Musterliste zeigt Revision und Bearbeiten; separater Kopie-Entwurf
+behält eine neue ID. Bearbeiten bindet ID/Ausgangsrevision. Zeichenzelle, Name und
+Linien sind bearbeitbar; einzelne Entwurfslinien können entfernt werden. Erneutes
+Speichern eines gerade angelegten Musters bearbeitet dieses; Neuer Entwurf oder
+Kopie legt eine neue ID an. Leere/ungültige Muster werden nicht veröffentlicht.
+
+Eigene Bibliothekspfeile für Undo/Redo, einschließlich Neuanlage, verwenden die
+validierten Kernaktionen. History bleibt beim Schließen/Öffnen des Fensters erhalten;
+manuelles Neu laden setzt sie zurück und erhält den Entwurf. Externe Änderungen
+sperren die alte Bibliothekssitzung bis Neu laden. Der Bearbeitungsentwurf bleibt
+an seine ursprüngliche Revision gebunden; veraltetes Speichern wird abgewiesen.
+Quota-/Validierungsfehler verändern keine Bibliotheks-History. Kein Bibliotheks-
+Löschen eingeführt; Entfernen betrifft nur Linien im Entwurf.
+
+Ein gemeinsamer Storage-Benachrichtigungsadapter aktualisiert das aktive Projekt
+über den vorhandenen Resolver, ohne Modell-Undo-Schritt und mit erhaltenen Past-/
+Future-Stacks. Tatsächliche Änderungen brechen veraltete direkte Vorschauen ab;
+Werkzeugvorgaben folgen dem geprüften Projektstand bzw. der aktuellen Bibliothek.
+Fehlende/ältere Muster erhalten die portable Darstellung, Konflikte bleiben sichtbar.
+Andere Projekte übernehmen beim Öffnen; geschlossene Dateien werden nicht verändert.
+Mehrtab-Benachrichtigung ist integriert, atomare parallele Publikation bleibt offen.
+Projektformat bleibt 12. Modell-/Papiermaßwahl und Upload bleiben ausstehend.
+
+765 Tests bestanden; Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen)
+und Produktionsbuild erfolgreich. Sieben neue Nachweise: Neuanlage-/Quota-/Undo,
+gemeinsame Aktualisierung zweier Konturen mit erhaltener Modell-History, getrennte
+Undo/Redo-Pfade, veraltete Entwürfe, Konflikte/fehlende Muster, Entwurfslinien und
+Storage-Filter/Abmeldung. Browser-Sichtprüfung scheitert am Sandbox-Kernelstart.
+Abnahme: Muster zweimal anwenden; Tools > Schraffurenverwaltung > Bearbeiten;
+Name oder Linien ändern, Änderungen speichern. Beide Schraffuren aktualisieren.
+Bibliothekspfeile prüfen; Füllfarbe im Projekt ändern und normales Undo prüfen.
+Fenster schließen/öffnen: Bibliotheks-History bleibt. Kopie/Neuer Entwurf prüfen.
+
+**Genau ein nächster Auftrag: V07j Papiermaß-/Ansichtsmaßstab-Vertrag.** Vor der
+noch gewünschten Papiermaßwahl den vorhandenen ModelView-/Ausgabemaßstab gegen
+Architektur und Code prüfen; Maßbezug, Umrechnung und Dateimigration als begrenzten
+Vertrag mit genau einem Umsetzungspiloten dokumentieren. Zoom ersetzt keinen
+Ausgabemaßstab. Noch kein Layouteditor, Uploadformat oder neuer Renderer.
+
 ## V07h Portabler Revisionskontext - 09.10.2026
 
 PR224 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Projektformat

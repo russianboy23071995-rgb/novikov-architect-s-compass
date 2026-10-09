@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import {
   createEditingState,
   editingReducer,
@@ -6,7 +6,10 @@ import {
 } from "@/application/direct-edit/controller";
 import { loadPatternLibrary } from "@/application/hatches/pattern-library";
 import { resolveProjectHatchPatterns } from "@/application/hatches/pattern-resolution";
-import { browserHatchPatternStorage } from "@/interop/hatch-pattern-storage";
+import {
+  browserHatchPatternStorage,
+  subscribeHatchPatterns,
+} from "@/interop/hatch-pattern-storage";
 import type { Project } from "@/domain/project/schema";
 
 function context() {
@@ -41,6 +44,11 @@ export function useProjectEditing(initial: () => Project) {
         ? { ...event, ...context() }
         : event,
     );
+  }, []);
+  useEffect(() => {
+    const reconcile = () => dispatch({ type: "patterns-changed", ...context() });
+    reconcile();
+    return subscribeHatchPatterns(reconcile);
   }, []);
   return [state, send] as const;
 }

@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { hatchPatternTile } from "@/rendering/viewport/hatch-pattern";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 /** SVG tiling clips to the contour; no geometry allocated per repetition. */
@@ -13,27 +14,29 @@ export function HatchPattern({
 }) {
   const id = useId();
   if (!hatch.pattern) return null;
-  const { origin } = hatch.pattern;
+  const tile = hatchPatternTile(definition, hatch.pattern);
+  if (!tile) return null;
   return (
     <g pointerEvents="none">
       <defs>
         <pattern
           id={id}
           patternUnits="userSpaceOnUse"
-          x={origin.x}
-          y={-origin.y - definition.height}
-          width={definition.width}
-          height={definition.height}
-          viewBox={`0 ${-definition.height} ${definition.width} ${definition.height}`}
+          x={tile.x}
+          y={tile.y}
+          width={tile.width}
+          height={tile.height}
+          viewBox={tile.viewBox}
+          patternTransform={tile.patternTransform}
           preserveAspectRatio="none"
         >
-          {definition.lines.map((s, i) => (
+          {tile.lines.map((s, i) => (
             <line
               key={i}
               x1={s.start.x}
-              y1={-s.start.y}
+              y1={s.start.y}
               x2={s.end.x}
-              y2={-s.end.y}
+              y2={s.end.y}
               stroke={hatch.fill.color}
               strokeWidth={1 / pixelsPerMetre}
             />

@@ -2567,3 +2567,39 @@ retains newer known definitions from the same current project if the library is
 missing or older. It never writes the library or adds a reconciliation Undo step.
 File decoding itself remains platform-neutral and does not consult global storage.
 Live cross-tab updates and the global editing UI are still future work.
+
+## Global hatch library editing V07i - 2026-10-09
+
+The shared FloatingPanel exposes ID/revision-pinned editing and independent library
+Undo/Redo. Creation participates in the same bounded session History. Library Undo
+publishes new monotone revisions; project Undo never writes global storage. Panel
+closure retains History; explicit reload starts a fresh library session while keeping
+the draft's pinned target. External writes invalidate that session. Draft geometry is
+owned separately; invalid definitions or failed storage writes do not publish state.
+
+One storage notification adapter feeds both catalog consumers and active-project
+reconciliation. A deterministic patterns-changed Application event updates only
+present, preserves model past/future and invalidates a direct preview when its base
+actually changes. Defaults follow the resolved project definition, then the catalog.
+Missing/older definitions retain portable content; conflicts are reported. Other
+project files update on opening, not through hidden filesystem writes. Notifications
+and optimistic session guards do not constitute atomic multi-tab publication.
+Production schema remains 12. Paper-space applications still require an explicit
+view/output scale contract, independent of interactive camera zoom.
+
+## Hatch orientation and application rotation - 2026-10-09
+
+Implemented contract: Creator pattern cells use local x-right/y-down coordinates.
+The shared preview/committed SVG tile preserves those coordinates and anchors the
+cell bottom-left at the application's model-space origin. It must not reflect local
+line geometry again when mapping the model's y-up contour into SVG.
+
+Production schema 13 adds optional rotation in degrees to the hatch application,
+not to the shared library definition. Positive angles rotate the complete pattern
+lattice counter-clockwise around its application origin; contour geometry stays
+unchanged. Domain validation accepts finite 0–360; Application actions normalize
+360 to omitted zero, avoiding false model History entries. Strict ingress migration
+of versions 1–12 preserves definitions and treats missing rotation as zero. Earlier
+schemas reject the new field. Defaults, pickup, movement and global revision
+reconciliation retain this application property. Paper-space scale remains pending
+V07j and must not be inferred from camera zoom.

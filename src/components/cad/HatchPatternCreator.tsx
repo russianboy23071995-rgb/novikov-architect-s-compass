@@ -1,17 +1,21 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { Undo2, Redo2 } from "lucide-react";
+import { useHatchLibraryHistory } from "./useHatchLibraryHistory";
 import type { PointerEvent } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { appendPatternLine, resizePatternCell } from "@/application/hatches/pattern-draft";
+import {
+  appendPatternLine,
+  resizePatternCell,
+  removePatternLine,
+} from "@/application/hatches/pattern-draft";
 import type { PatternDraft } from "@/application/hatches/pattern-draft";
 import type { Point2 } from "@/geometry/primitives/point";
 import { querySnap } from "@/constraints/snapping/engine";
 import { angle45Direction } from "@/geometry/projections/direction";
 
-import { loadHatchPatterns, saveHatchPattern } from "@/application/hatches/pattern-library";
 import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
-import { browserHatchPatternStorage as storage } from "@/interop/hatch-pattern-storage";
 function PatternPreview({ pattern }: { pattern: PatternDraft }) {
   return (
     <svg
@@ -45,25 +49,29 @@ export function HatchPatternCreator({
   const [start, setStart] = useState<Point2 | null>(null);
   const [cursor, setCursor] = useState<Point2 | null>(null);
   const [error, setError] = useState("");
-  const [patterns, setPatterns] = useState<HatchPatternDefinition[]>([]);
-  const [libraryError, setLibraryError] = useState("");
+  const library = useHatchLibraryHistory(open);
+  const records = library.history?.present.records ?? [];
+  const [editing, setEditing] = useState<{ id: string; revision: number } | null>(null);
   const [name, setName] = useState("");
   const [saved, setSaved] = useState("");
-  const reload = () => {
-    try {
-      setPatterns(loadHatchPatterns(storage));
-      setLibraryError("");
-    } catch {
-      setLibraryError(
-        "Bibliothek konnte nicht geladen werden. Vorhandene Daten werden nicht überschrieben.",
-      );
-    }
-  };
-  useEffect(() => {
-    if (open) reload();
-  }, [open]);
   const direction = useRef<Point2 | null>(null);
   const patternId = useId();
+  const openDraft = (pattern: HatchPatternDefinition, revision: number | null) => {
+    setDraft({
+      width: pattern.width,
+      height: pattern.height,
+      lines: structuredClone(pattern.lines),
+    });
+    setHistory([]);
+    setSize({ width: String(pattern.width), height: String(pattern.height) });
+    setName(revision === null ? `${pattern.name} Kopie` : pattern.name);
+    setEditing(revision === null ? null : { id: pattern.id, revision });
+    setSaved("");
+    setError("");
+    setStart(null);
+    setCursor(null);
+    direction.current = null;
+  };
   const update = (next: PatternDraft) => {
     setHistory((h) => [...h, draft]);
     setDraft(next);
@@ -119,37 +127,81 @@ export function HatchPatternCreator({
       <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
         <p className="text-xs text-muted-foreground">
           Musterbibliothek für alle Projekte in diesem Browserprofil. Zwei Klicks zeichnen eine
-          Linie; Shift hält die Richtung. Anwendung auf Projektkonturen folgt separat.
+          Linie; Shift hält die Richtung. Gespeicherte Änderungen aktualisieren alle Anwendungen
+          desselben Musters im aktiven Projekt und beim Öffnen anderer Projekte.
         </p>
         <section aria-label="Gespeicherte Schraffurmuster" className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Gespeicherte Muster · {patterns.length}/100</p>
-            <Button variant="outline" onClick={reload}>
-              Neu laden
-            </Button>
+            <p className="text-sm font-medium">Gespeicherte Muster · {records.length}/100</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs">Bibliothek</span>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Bibliothek rückgängig"
+                title="Bibliothek rückgängig · unabhängig vom Projekt-Undo"
+                disabled={library.stale || !library.history?.past.length}
+                onClick={() => {
+                  if (library.undo())
+                    setSaved(
+                      "Bibliothek rückgängig. Zum Weiterbearbeiten das Muster erneut öffnen.",
+                    );
+                }}
+              >
+                <Undo2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Bibliothek wiederholen"
+                title="Bibliothek wiederholen · unabhängig vom Projekt-Undo"
+                disabled={library.stale || !library.history?.future.length}
+                onClick={() => {
+                  if (library.redo())
+                    setSaved(
+                      "Bibliothek wiederholt. Zum Weiterbearbeiten das Muster erneut öffnen.",
+                    );
+                }}
+              >
+                <Redo2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={library.reload}
+                title="Aktuellen Stand laden; Bibliotheks-History dieser Sitzung zurücksetzen. Entwurf bleibt erhalten."
+              >
+                Neu laden
+              </Button>
+            </div>
           </div>
-          {libraryError && (
+          {library.error && (
             <p role="alert" className="text-sm text-destructive">
-              {libraryError}
+              {library.error}
             </p>
           )}
           <div className="max-h-40 overflow-auto space-y-2">
-            {!patterns.length && !libraryError && (
+            {!records.length && !library.error && (
               <p className="text-xs text-muted-foreground">
                 Noch keine eigenen Muster gespeichert.
               </p>
             )}
-            {patterns.map((pattern) => (
+            {records.map(({ definition: pattern, revision }) => (
               <div key={pattern.id} className="flex items-center gap-3 border rounded p-2">
                 <PatternPreview pattern={pattern} />
-                <span className="min-w-0 flex-1 text-xs truncate">{pattern.name}</span>
+                <span className="min-w-0 flex-1 text-xs truncate">
+                  {pattern.name} · Rev. {revision}
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={library.stale}
+                  onClick={() => openDraft(pattern, revision)}
+                >
+                  Bearbeiten
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
-                    update(structuredClone(pattern));
-                    setSize({ width: String(pattern.width), height: String(pattern.height) });
-                    setName(`${pattern.name} Kopie`);
-                    setSaved("");
+                    openDraft(pattern, null);
                   }}
                 >
                   Als neuen Entwurf öffnen
@@ -158,6 +210,9 @@ export function HatchPatternCreator({
             ))}
           </div>
         </section>
+        <p className="text-xs font-medium">
+          {editing ? `Muster bearbeiten · Ausgangsrevision ${editing.revision}` : "Neues Muster"}
+        </p>
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-xs">
             Mustername
@@ -172,25 +227,32 @@ export function HatchPatternCreator({
             />
           </label>
           <Button
-            disabled={!!libraryError}
+            disabled={library.stale || !library.history}
             onClick={() => {
               try {
-                const next = saveHatchPattern(storage, {
-                  id: crypto.randomUUID(),
+                const definition = {
+                  id: editing?.id ?? crypto.randomUUID(),
                   name,
                   width: draft.width,
                   height: draft.height,
                   lines: draft.lines,
-                });
-                setPatterns(next);
-                setSaved("Muster gespeichert. Erneutes Speichern erstellt eine neue Definition.");
+                };
+                const next = editing
+                  ? library.edit(editing.id, editing.revision, definition)
+                  : library.create(definition);
+                if (!next) return;
+                const record = next.present.records.find((r) => r.definition.id === definition.id)!;
+                setEditing({ id: record.definition.id, revision: record.revision });
+                setSaved(
+                  "Muster gespeichert. Die Projektdarstellung wird automatisch abgeglichen.",
+                );
                 setError("");
               } catch (e) {
                 setError((e as Error).message);
               }
             }}
           >
-            Muster speichern
+            {editing ? "Änderungen speichern" : "Muster speichern"}
           </Button>
           {(["width", "height"] as const).map((key) => (
             <label key={key} className="text-xs">
@@ -238,6 +300,7 @@ export function HatchPatternCreator({
             onClick={() => {
               setDraft({ width: 1, height: 1, lines: [] });
               setHistory([]);
+              setEditing(null);
               setName("");
               setSaved("");
               setSize({ width: "1", height: "1" });
@@ -342,6 +405,24 @@ export function HatchPatternCreator({
                 />
               )}
             </svg>
+            <div className="max-h-28 overflow-auto mt-2 space-y-1" aria-label="Musterlinien">
+              {draft.lines.map((line, index) => (
+                <div key={index} className="flex items-center justify-between gap-2 text-xs">
+                  <span>
+                    Linie {index + 1} · {line.start.x.toFixed(3)}, {line.start.y.toFixed(3)} →{" "}
+                    {line.end.x.toFixed(3)}, {line.end.y.toFixed(3)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label={`Musterlinie ${index + 1} entfernen`}
+                    onClick={() => update(removePatternLine(draft, index))}
+                  >
+                    Entfernen
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
           <div>
             <p className="text-xs mb-2">Wiederholung · 3 × 3 Zellen</p>

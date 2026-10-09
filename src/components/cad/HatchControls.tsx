@@ -64,6 +64,7 @@ export function HatchInspector({
   const [fill, setFill] = useState(hatch.fill);
   const [background, setBackground] = useState(hatch.background);
   const [contour, setContour] = useState(hatch.contour);
+  const [rotation, setRotation] = useState(hatch.pattern?.rotation ?? 0);
   const [error, setError] = useState("");
   return (
     <form
@@ -77,6 +78,7 @@ export function HatchInspector({
               projectId: project.id,
               kind: "update",
               patternDefinition: definition ?? null,
+              patternRotation: definition ? rotation : undefined,
               id: hatch.id,
               changes: { fill, background, contour },
             }),
@@ -90,6 +92,7 @@ export function HatchInspector({
     >
       <span className="text-xs">Schraffur · {hatch.points.length} Eckpunkte</span>
       <HatchPatternFields project={project} value={definition} onChange={setDefinition} />
+      <HatchRotationField value={rotation} onChange={setRotation} enabled={!!definition} />
       <HatchFillFields value={fill} onChange={setFill} />
       <HatchPaintFields label="Hintergrund" value={background} onChange={setBackground} />
       <HatchPaintFields label="Kontur" value={contour} onChange={setContour} />
@@ -102,6 +105,37 @@ export function HatchInspector({
         </p>
       )}
     </form>
+  );
+}
+
+export function HatchRotationField({
+  value,
+  onChange,
+  enabled,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  enabled: boolean;
+}) {
+  return (
+    <label
+      className="text-xs"
+      title="Dreht nur das Muster um seinen Ursprung; positive Winkel gegen den Uhrzeigersinn."
+    >
+      Musterwinkel (°)
+      <input
+        aria-label="Schraffur Musterwinkel"
+        type="number"
+        min={0}
+        max={360}
+        step="any"
+        required
+        disabled={!enabled}
+        className="block h-8 w-24 rounded border bg-background px-2"
+        value={Number.isNaN(value) ? "" : value}
+        onChange={(event) => onChange(event.target.valueAsNumber)}
+      />
+    </label>
   );
 }
 
