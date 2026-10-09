@@ -1,3 +1,53 @@
+## Maßstabsverträge nach PR230-Review vereinheitlicht — 09.10.2026
+
+Nutzer bestätigt beide Reviewempfehlungen und gibt PR229 ausdrücklich frei.
+PR230 ist bereits in main; sein Stand wurde ohne History-Umschreibung in PR229
+integriert. Interne Papierlängen sind verbindlich Meter, Ein-/Ausgabe in mm.
+Der fachliche Ansichtskontext besitzt S; Bildschirmfenster referenzieren ihn
+und besitzen unabhängigen Zoom. Zwei Fenster derselben Ansicht teilen S.
+Initialwert 1:100 und Bedienung neben Zoom gelten; spätere persistente History
+bleibt offen. Architektur, allgemeiner Vertrag, Schraffurplan und AGENTS verweisen
+auf dieselbe Regel. Keine Produktionslogik oder Schemaänderung in diesem Abgleich.
+
+**Genau ein nächster Auftrag: MS-01 gemeinsamer Maßstabskontext und Selector.**
+Typisierten Größenresolver mit intern metrischen Größen und explizitem Maßbezug
+erstellen, sitzungsbezogene Änderung am fachlichen Kontext über Application und
+Selector neben Zoom anbinden. UI und CadWorkspace enthalten keine Umrechnungslogik.
+Standard 1:100, freie gültige Eingabe, kein Persistenz-/Modell-Undo in diesem Pilot.
+Kontextidentität nicht an Fensterindex binden; gleiche Ansicht teilt S, separate
+Ansichten bleiben unabhängig, Kamera bleibt je Fenster. Abnahme: Größenbeispiele,
+ungültige/extreme Eingaben, Fenster-/Ansichtswechsel, unveränderte Geometrie,
+Messung, Fang und Modell-History; Tests, Typprüfung, Build und Browserbedienung.
+V07k ist anschließend der konkrete Schraffurverbraucher innerhalb MS-02, kein
+separater Resolver und kein zweiter aktiver Auftrag. Historische Folgeaufträge
+weiter unten sind durch diesen Kopf ersetzt.
+
+Prüfung dieses Dokumentationsabgleichs: relative Links und git diff --check;
+keine wiederholten Laufzeittests ohne Codeänderung. CI wird am aktualisierten
+PR229 vor der freigegebenen Übernahme geprüft.
+
+## V07j: Papiermaß-/Ansichtsmaßstab-Vertrag — 09.10.2026
+
+PR228 nach ausdrücklicher Freigabe und erfolgreicher GitHub-CI normal in main
+zusammengeführt (0407ad5). Dokumentationsauftrag auf docs/hatch-paper-scale-contract:
+[Bestand, Umrechnung und Pilot](docs/planning/HATCH_PAPER_SCALE.md).
+Modellmeter, Ausgabe 1:S und Kamera-Zoom getrennt; Papier-Zellbreite wird über
+einen gemeinsamen gleichförmigen Faktor abgeleitet. Ursprung, Drehung und Kontur
+bleiben erhalten. Fehlender Maßstab bekommt keinen Zoom-/1:1-Fallback.
+Architekturvertrag begrenzt ergänzt; Produktionsschema 14 und UI unverändert.
+
+Offen bleiben Speicherort/History/Initialwert des Maßstabs der rohen Arbeitsansicht,
+spätere effektive Layoutmaßstäbe sowie physische Druckstifte. Keine Nutzerentscheidung
+dazu erfunden. Codeprüfung zeigt insbesondere die erforderliche Strichumrechnung
+innerhalb skalierter SVG-Kacheln. Keine neuen Laufzeittests für reine Dokumentation;
+Nachweis: Quelldateien/Formeln/relative Links geprüft, git diff --check sauber.
+
+**Genau ein nächster Auftrag: V07k isolierter Darstellungspilot.** Gemeinsamen
+Resolver für Zellmaße implementieren, bisherigen Modellpfad mit Faktor 1 erhalten
+und Papiermaß mit explizitem S in einem isolierten Browserbeispiel prüfen.
+Akzeptanzmatrix und Fehlerfälle im verlinkten Vertrag. Keine Produkt-UI-/Schema-
+Erweiterung, bevor der gespeicherte Ansichtskontext festgelegt ist.
+
 ## Nachgeholte Browserabnahme: Stiftesets und Musterwinkel - 09.10.2026
 
 PR226 und PR227 sind nach ausdrücklicher Freigabe zusammengeführt; geprüfte

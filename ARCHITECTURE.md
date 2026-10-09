@@ -5,6 +5,32 @@ Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
 incremental migration supersedes their claim that the production format is unchanged.
 
+## Explicit output scale and hatch sizing — V07j, 2026-10-09
+
+Technical direction, not an implemented paper-mode feature: model metres, output
+scale 1:S and camera CSS pixels/metre remain separate. A rendering context supplies
+the effective finite positive S; it is never inferred from camera zoom. Existing
+DrawingDocument/Layout scale ownership remains binding; storage/history/defaults
+for the raw working view are now clarified by the user's PR230 review answers:
+the semantic view context owns S, while ViewportBinding routes a pane to it.
+Panes own independent cameras, never independent copies of the same context's S.
+Working contexts start at 1:100; the selector sits beside Zoom. Future persistence
+is per semantic context within the project; persistent history semantics remain open.
+All internal lengths, including paper sizes, use metres. UI paper-size fields use
+millimetres with an explicit boundary conversion, never an ambiguous unitless value.
+Paper hatch applications will specify a paper cell width in metres. A shared
+rendering resolver derives uniform factor paperWidth * S / definition.width;
+model applications retain factor 1. Origin stays in model coordinates, rotation
+and creator orientation are preserved, and contour/model geometry never scales.
+Missing scale for paper rendering must be explicit, not silently replaced by 1:1.
+Screen stroke conversion must account for the tile factor; physical print pens
+remain undecided. Definitions and repeat lines are not copied into model entities.
+The next MS-01 pilot establishes the shared context/resolver and session-local
+selector without changing production schema 14 or enabling paper hatch properties.
+V07k follows as its hatch consumer within MS-02, not a separate scale implementation.
+See [general contract](docs/planning/VIEW_SCALE_CONTRACT.md) and
+[hatch-specific acceptance](docs/planning/HATCH_PAPER_SCALE.md).
+
 
 ## Shared non-modal windows - 2026-10-08
 
