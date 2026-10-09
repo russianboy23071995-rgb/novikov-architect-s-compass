@@ -1,5 +1,56 @@
 # Entwicklungsabstimmung für NOVIKOV CAD vom 8. Oktober 2026
 
+
+## Ergänzung: Produkt-Backlog CAD 2026 — 09.10.2026
+
+Der Nutzer gibt die Ergänzung der Aufgabenliste aus der CAD-2026-Lückenprüfung frei.
+Dieser Abschnitt beschreibt die **langfristige Richtung**, keine Fertigmeldung
+und keinen sofortigen Wechsel des aktuell aktiven Auftrags. Maßgebend für den
+**nächsten begrenzten Implementierungsschritt** ist stets der neueste Kopf von
+[DEVELOPMENT_PLAN.md](../../DEVELOPMENT_PLAN.md). Die älteren K03-/K01-Aufträge
+weiter unten in diesem Dokument sind historische Übergaben. Neue Aufgaben
+werden beim Start mit aktuellem Code und Benutzerablauf abgeglichen und nach
+Umsetzung mit Nachweis im Entwicklungsplan markiert. Bestehende N-/F-/V-/AI-
+Kennungen und Nutzerwünsche werden nicht durch die folgenden R26-IDs ersetzt.
+
+### Reihenfolge und überprüfbare Ziele
+
+| ID / Priorität | Aufgabe / Herkunft | Grenze und Abnahme |
+| --- | --- | --- |
+| R26-01 / P0 | **Große Projektdateien und Referenzen sicher handhaben.** K02/K03 und der bereits vermerkte Wunsch nach verknüpfbaren Bildern konkretisieren. Heute gilt die 10-MiB-Gesamtprojektgrenze; Bilddaten sind eingebettet. | Kapazitätsprofil mit Modellgröße, Bildpixeln, Datei- und Speicherbedarf sowie Öffnen, Bearbeiten, Undo und Speichern messen. Versionierten Modell-/Asset-Vertrag und verknüpfte **oder** portable eingebettete Referenzen mit fehlenden/verschobenen Dateien, Pfadauflösung, Umzug und Austausch prüfen. Keine pauschale Limitanhebung und keine Festlegung auf Datenbank, Desktop oder Browser vor Messung/Vertrag. |
+| R26-02 / P0 | **Datensicherheit und Wiederherstellung.** Neu als ausdrückliche Produktaufgabe. | Atomar speichern, sichere Vorgängerversion/Backup und Wiederaufnahme nach unerwartetem Abbruch konzipieren. Einen unterbrochenen Schreibvorgang und beschädigte/fehlende Assets praktisch prüfen: zuletzt gesichertes Projekt bleibt lesbar; Wiederherstellung zeigt klar an, welchen Stand sie anbietet. Undo ersetzt kein Backup. Plattformadapter bleiben austauschbar. |
+| R26-03 / P1 | **Gebäudekern zu einem nutzbaren Projekt erweitern.** Bereits gewünschte Mehrgeschossigkeit, Höhenbezüge, Türen, Decken, Dächer, Treppen und Räume bündeln; pro Bauteil kleine Schritte. | Gemeinsame stabile Elementidentitäten, Geschoss-/Höhenbezug und fachliche Abhängigkeiten. Änderung eines Bauteils aktualisiert betroffene Anschlüsse, Öffnungen, Räume und Ableitungen nachvollziehbar; Migration, Undo und Dateirundlauf prüfen. Fach-/3D-Elemente werden niemals proportional skaliert; Kalibrierung bleibt auf 2D/PDF/PNG/JPEG-Referenzen beschränkt. |
+| R26-04 / P1 | **Modellgebundene Dokumentation.** Vorhandener Wunsch nach Schnitten, Ansichten, Abbildern, unabhängiger Ansichtsdarstellung, Layouts und Plankopf. | Planansichten und Schnitte aus demselben BIM-Modell ableiten; Annotationen im richtigen Ansichts-/Dokumentkontext verwalten. Änderung am Modell aktualisiert abhängige Zeichnungen; Layout und PDF-Ausgabe behalten Ausschnitt, Maßstab, Sichtbarkeit und Beschriftung. Keine kopierten Bauteile als zweite Wahrheit. |
+| R26-05 / P1 | **Nachvollziehbare Auswertungen.** Räume/Wohnfläche sind bereits gewünscht; neue Ergänzung sind Tür-, Fenster-, Flächen- und Materiallisten. | Bauteillisten aus denselben validierten Modell-IDs und Eigenschaften ableiten. Jede Zahl nennt Umfang/Regelprofil und lässt ihre Quellen erkennen; Änderungen, Ausschlüsse, Rundung und nicht auswertbare Elemente werden sichtbar. Wohnflächenregeln bleiben ein eigenes, versioniertes Profil, keine implizite allgemeine Flächensumme. |
+| R26-06 / P2, früher falls Pilotprojekt blockiert | **Interoperabilität in beide Richtungen.** IFC-Export existiert; IFC-Import bzw. verknüpfte IFC-Referenz und konkret benötigte DWG/DXF-/PDF-Wege sind als Anschlussaufträge zu prüfen. | Erst Austauschfall, unterstützten IFC-Umfang, Einheiten/Koordinaten, GUIDs, unbekannte Bauteile und erneutes Laden festlegen. „IFC unterstützt“ erst behaupten, wenn der konkrete Import-/Exportfall mit Fremddatei reproduzierbar funktioniert. DWG/DXF und PDF sind eigene Teilaufträge, kein pauschales Vollformatversprechen. |
+| R26-07 / P2 | **Planstände und Revisionen.** Neue ausdrückliche Produktaufgabe; an R26-04 anbinden. | Ausgegebene Planversion mit Datum/Stand unveränderlich referenzieren; Änderungen am Modell gegenüber dieser Ausgabe kenntlich machen. Planindex, Revisionsvermerk und reproduzierbarer erneuter Export werden pro Plan geprüft. Modell-History und veröffentlichte Planstände bleiben getrennte Begriffe. |
+| R26-08 / P2 | **Modellqualität und Zusammenarbeit.** Neue ausdrückliche Aufgabe: prüfbare Regeln und später BCF-Aufgaben; IDS nur bei realem IFC-Austauschbedarf. | Vor Ausgabe fehlende Eigenschaften, ungültige Beziehungen und offene Warnungen mit stabilen Element-IDs anzeigen. BCF-Themen an Ansicht/Elemente/Modellrevision binden, importieren und exportieren, sobald ein konkreter Fachplanerablauf feststeht. Prüfregeln dürfen Änderungen nicht heimlich am Modell vornehmen. |
+
+### Planungsregeln für Codex
+
+1. Die **P0/P1/P2-Reihenfolge ist ein strategischer Backlog**, keine Aufforderung,
+   offene PRs oder die aktuelle nächste Aufgabe abzubrechen. Der Linien Creator,
+   Schraffurbibliothek und bestehende V-/N-/AI-Aufträge behalten ihre konkreten
+   Status und Abhängigkeiten. Vor jedem neuen Teilauftrag den aktuellen Stand
+   im Entwicklungsplan und in offenen PRs prüfen; genau einen begrenzten Auftrag
+   wählen und anschließend den Plan mit tatsächlichem Nachweis aktualisieren.
+2. **R26-01 und R26-02 sind Voraussetzungen für vertrauenswürdige große Projekte.**
+   Ein früher schmaler BIM- oder AI-Prototyp ist weiter möglich, sofern sichere
+   Speicherung und messbare Grenzen nicht als schon gelöst ausgegeben werden.
+   Eine Bachelorarbeit mit etwa 200–300 MB aus Archicad ist kein automatisch
+   zugesagtes NOVIKOV-Kapazitätsziel; ein Zielprofil muss anhand repräsentativer
+   Projekte und Referenzdaten festgelegt und gemessen werden.
+3. Gemeinsames Fachmodell, validierte Application-Aktionen, vorbereitete Vorschau,
+   atomarer Commit, Undo und abgeleitete Darstellungen gelten auch für neue
+   Elemente, Listen, Exporte und AI-Eingaben. AI mit Text, Sprache und Skizze
+   bleibt das bereits dokumentierte Produktziel; sie schlägt geprüfte Aktionen
+   mit Vorschau vor und ersetzt keine Datenvalidierung oder Benutzerfreigabe.
+4. Windows und macOS bleiben Zielplattformen. Browser oder installierbare
+   Desktop-Anwendung bleiben offen; Dateiformat und Kernlogik sind unabhängig
+   von Dateidialog, Speicherort und Betriebssystem zu halten. Lizenzmodell,
+   Installer und Verteilung werden vor einer Veröffentlichung als eigene
+   Produktentscheidungen geklärt, nicht durch diese Roadmap festgelegt.
+
 ## Rückbestätigung des programmierenden Chats — 08.10.2026
 
 Übergabe und V01–V09 gelesen, mit dem Code abgeglichen und Reihenfolge übernommen.
