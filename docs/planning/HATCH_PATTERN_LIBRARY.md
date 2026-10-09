@@ -102,3 +102,15 @@ Speichern eines Creator-Entwurfs implementieren. Laden nach Neustart prüfen;
 keine Anwendung, Projektmigration, Synchronisation oder Upload in diesem Schritt.
 Anwendungs-/Maßstabs- und Aktualisierungsregeln folgen als eigener Auftrag.
 
+
+## V07d Umsetzung - 09.10.2026
+
+Globale lokale Bibliothek mit Storage-Adapter und Domain-Validierung umgesetzt.
+Speichern mit stabiler neuer ID, Namen, Zellmaßen und lokalen Linien; Liste mit
+Vorschauen und als neuen Entwurf laden. Neustart-Wiederladen durch frischen
+Storage-Consumer getestet. Bibliothek gilt für Browserprofil/Origin über Projekte;
+noch keine Geräte-Synchronisation oder Musteranwendung. Alte Daten werden bei
+Lesefehlern nicht überschrieben; Schreibfehler lassen die Liste unverändert.
+741 Tests, Typecheck, Lint/Build erfolgreich. Browser-Abnahme offen.
+Nächster Auftrag V07e: Musteranwendungs-/Aktualisierungsvertrag am vorhandenen
+Projektformat konkretisieren; offene Konflikt- und globale Undo-Regeln klären.

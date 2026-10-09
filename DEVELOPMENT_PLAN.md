@@ -1,3 +1,32 @@
+## V07d Globale lokale Schraffurmusterbibliothek - 09.10.2026
+
+PR220 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.
+Eigene Muster aus dem Creator erhalten stabile IDs und Namen. Application lädt
+und speichert die validierte Bibliothek über einen austauschbaren Storage-Adapter.
+In diesem Schritt: projektübergreifend innerhalb eines Browserprofils/Origins, nicht Geräte
+oder unterschiedliche Ports hinweg. Versioniertes Bibliotheksformat 1, maximal
+100 Definitionen und 256 Linien je Muster, begrenzte serialisierte Datenmenge.
+Liste mit kleinen Vorschauen, Speichern und Laden als neuer Entwurf. Neue
+Definitionen erhalten neue IDs; bestehende Definitionen werden nicht geändert.
+Schreib-/Lesefehler, beschädigte Daten und unbekannte Versionen werden gemeldet;
+kein automatisches Überschreiben oder Rücksetzen. Kein Projektformatwechsel,
+keine Änderung des BIM-Undo. Upload und Musteranwendung noch nicht enthalten.
+741 Tests bestanden, Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild. Nachweise: Wiederladen mit frischem Adapter, Datenkopien,
+Zusammenführen weiterer gespeicherter Definitionen, ungültige Eingaben/Limits,
+beschädigte Daten und Speicherfehler ohne Verlust des bisherigen Payloads.
+HTTP 200 auf 8080; visuelle Abnahme offen, Browsersteuerung beendet Node-Prozess.
+Abnahme: Tools > Schraffurenverwaltung, Linie zeichnen, Muster benennen/speichern;
+Browser neu laden: Vorschau bleibt. Als neuen Entwurf öffnen, ändern, unter neuem
+Namen speichern: beide Definitionen bleiben. Anderes Projekt öffnen: Liste bleibt.
+
+**Genau ein nächster Auftrag: V07e Musteranwendungs- und Aktualisierungsvertrag.**
+Den vorhandenen Hatch-/Datei-/History-/Ansichtsvertrag prüfen und einen begrenzten
+Implementierungsauftrag für portable Musterzuweisung festlegen. Modell-/Papiermaß,
+expliziter Ansichtsmaßstab, stabile IDs, eingebettete Definitionen, globale Revisionen
+und gemeinsames Aktualisieren berücksichtigen. Offene Konflikt-/Undo-Regeln für
+projektübergreifende Änderungen mit dem Nutzer klären, keine stille Entscheidung.
+
 ## Kataloglinien: Darstellung und Farbfreigabe - 09.10.2026
 
 Eigene SVG-Muster verwenden eine explizite Umrechnung der System-Strichstärke

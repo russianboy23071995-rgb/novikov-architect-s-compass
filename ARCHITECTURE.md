@@ -2474,3 +2474,18 @@ rejects divergent line colors. UI disables the color control. Renderer converts
 system pen width explicitly using viewport pixels per metre and pattern scale.
 Definitions remain portable project snapshots; catalog edits do not silently
 rewrite existing project lines.
+
+## Global local hatch library - 2026-10-09
+
+V07d: named definitions with stable IDs and local metric cell geometry are validated
+in Domain; Application owns version-1 library loading and append-only saving via
+HatchPatternStorage. Interop uses localStorage per browser profile/origin across
+projects (no cross-device or cross-origin synchronization). Reads are validated,
+limited in size and count; failed reads/writes do not reset existing data. Saving
+rereads current storage before adding a new definition. Opening a stored pattern
+as a draft creates a copy; saving assigns a fresh ID. Existing-definition editing
+and global application updates remain a separate action/contract. Library state
+is independent of project history and production schema 10 remains unchanged.
+React owns the transient draft and list presentation; previews are derived paths,
+not copied project elements. Pattern usage, model/paper scale, portable embedded
+snapshots, revisions and update/undo conflicts remain pending V07e.
