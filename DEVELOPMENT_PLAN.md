@@ -1,3 +1,37 @@
+## MS-02/V07k: Geprüfter Schraffur-Darstellungspilot — 09.10.2026
+
+PR231 (MS-01) ist nach erfolgreicher GitHub-Prüfung zusammengeführt (bb006d1).
+Auf feat/hatch-paper-scale-pilot nutzt die gemeinsame Kachelableitung nun den
+Größenresolver aus MS-01. Explizite, abgeleitete Papierparameter ändern nur die
+Darstellung: 2 mm ergeben bei 1:50 eine 0,10-m-Zelle, bei 1:100 eine 0,20-m-Zelle.
+Seitenverhältnis, Ursprung und Rotation bleiben erhalten. Modellmaß bleibt Standard;
+Produktdateien (Schema 14), Bauteilgeometrie und Modell-History bleiben unverändert.
+
+786 Tests bestanden, Typecheck inklusive Benchmark und Produktionsbuild erfolgreich.
+Drei neue Tests mit Unterfällen vergleichen Modellpfad, Papiergrößen, Ursprung,
+Rotation, Zoom, Eingabe-Unveränderlichkeit und ungültige/extreme Werte. Lint ohne
+Fehler; sechs bekannte Warnungen. Browserprüfung auf benchmarks/hatch-scale.html
+verwendet die echte gemeinsame HatchPattern-Komponente: neun Kombinationen aus
+25/100/400 px/m und 0/45/90 Grad, unveränderte Kontur, korrekte Kachelbreite und
+Umrechnung auf 1 CSS-Pixel Strichbreite. Keine erfassten Browserfehler. Screenshot:
+outputs/hatch-paper-scale.jpg außerhalb des Repos. Kein Druck-/PDF-Nachweis.
+
+Abnahme: http://127.0.0.1:8081/benchmarks/hatch-scale.html öffnen, Zoom und Winkel
+wechseln. Die drei Vergleichsfelder zeigen dieselbe Kontur; Papiermaß 1:50 hat die
+halbe Modell-Zellbreite von 1:100. Keine Freischaltung des Papiermodus im Produkt.
+
+Nutzerentscheidung: Arbeitsmaßstab als gespeicherte Ansichtseinstellung außerhalb
+des normalen Modell-Undo führen. Ein Maßstabswechsel darf keine Modell-History
+anlegen; Modell-Undo darf einen inzwischen geänderten Ansichtsmaßstab nicht ersetzen.
+
+**Genau ein nächster Auftrag: MS-03 Arbeitsmaßstab persistent speichern.** Den
+fachlichen Arbeitsgrundriss-Kontext mit seinem Maßstab in der Projektdatei speichern,
+strikte Migration bestehender Dateien mit Standard 1:100 ergänzen und die bestehende
+Application-Verwaltung anbinden. Gemeinsamer Maßstab je Ansicht, unabhängiger Zoom
+je Fenster und Trennung vom Modell-Undo bleiben verbindlich. Öffnen/Speichern,
+Altdateien, ungültige Daten und Modell-Undo nach Maßstabswechsel testen. Noch keine
+Papiermodus-Freischaltung oder weiteren Ansichts-/Layouttypen in diesem Auftrag.
+
 ## MS-01: Gemeinsamer Maßstabskontext und Auswahl — 09.10.2026
 
 Auf feat/shared-view-scale nach zusammengeführtem PR229 umgesetzt. Domain/views

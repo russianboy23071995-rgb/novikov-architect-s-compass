@@ -2662,3 +2662,18 @@ not introduce alternative element mutation logic or remove confirmation from cre
 editors, precision operations or AI proposals. Palette context is presentation state;
 the project and Application actions remain authoritative. Browser visual acceptance
 is still required; automated checks do not claim a verified pointer workflow.
+
+## Hatch scale rendering pilot and view-history decision — 2026-10-09
+
+Implemented MS-02/V07k: shared rendering/viewport hatch tile derivation consumes
+explicit model/paper display sizing through the common view-size resolver. Paper
+width is internally metres and requires a ScaleContext. Pattern aspect ratio,
+application origin and rotation remain stable; local stroke width compensates for
+both tile scaling and camera pixels per metre. Production consumers still default
+to model sizing. The isolated benchmark reuses the actual SVG component. Derived
+sizing is not a second model and does not extend production schema 14.
+
+Binding user decision: working output scale is a persisted semantic-view setting
+outside normal model Undo/Redo. Model undo must preserve the current view setting.
+Persistence and legacy-file migration are the next bounded MS-03 task, not yet
+implemented by this renderer pilot. Paper-mode product integration follows later.

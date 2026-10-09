@@ -166,3 +166,11 @@ eingeordnet, nicht als paralleler Resolver. Der allgemeine Größenresolver wird
 in MS-01 mit 0,002 m Papiergröße bei S=50/100, Modellgröße 0,20 m, getrenntem
 Zoom sowie fehlenden/ungültigen/extremen Eingaben geprüft. Eigene Text- oder
 Bemaßungsklassen werden erst bei deren tatsächlicher Implementierung erstellt.
+
+## Fortschritt und verbindliche History-Regel — 09.10.2026
+
+MS-01 ist mit PR231 zusammengeführt; MS-02/V07k ist als isolierter Schraffurpilot
+geprüft. Nächster einzelner Auftrag ist MS-03 gemäß DEVELOPMENT_PLAN.md.
+Nutzerentscheidung: Arbeitsmaßstab außerhalb des normalen Modell-Undo speichern.
+Modell-Undo/Redo darf den aktuellen Ansichtsmaßstab nicht zurücksetzen. Die
+Persistenz mit Altdatei-Migration bleibt MS-03; sie ist noch nicht implementiert.
