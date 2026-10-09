@@ -3,7 +3,7 @@
 Stand: 09.10.2026. Nutzeranforderung und Architekturvertrag für die spätere
 Umsetzung; hier wird **keine** Maßstabsfunktion als bereits implementiert
 ausgegeben. Gilt ergänzend zu [ARCHITECTURE.md §29](../../ARCHITECTURE.md)
-und dem offenen [V07j-Vertrag für Schraffuren](HATCH_PAPER_SCALE.md) aus PR229.
+und dem offenen [offenen V07j-Vertrag für Schraffuren in PR229](https://github.com/russianboy23071995-rgb/novikov-architect-s-compass/pull/229).
 Bei zeitlicher Überschneidung sind die hier festgehaltenen
 **Nutzerentscheidungen** (insbesondere 1:100 und Ort der Bedienung) maßgebend.
 Vor Umsetzung den dann aktuellen PR-/Code-Stand erneut lesen.
