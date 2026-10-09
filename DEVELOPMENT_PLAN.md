@@ -1,3 +1,33 @@
+## Nutzerkorrektur: Musterausrichtung und Musterwinkel - 09.10.2026
+
+Ergänzung zu PR226 (weiterhin zur Prüfung offen): Im Creator verlaufen lokale
+Y-Koordinaten nach unten. Die bisherige Plan-Kachel negierte diese nochmals und
+spiegelte dadurch z. B. eine von links unten nach rechts oben gezeichnete Linie.
+Der gemeinsame Renderer erhält jetzt die Orientierung der Zeichenzelle unverändert;
+Vorschau und platzierte Schraffur verwenden denselben Kachelvertrag.
+
+Werkzeugeigenschaften bieten für neue und ausgewählte Schraffuren Musterwinkel
+0–360 Grad, positiv gegen den Uhrzeigersinn. Nur das Muster dreht um seinen Ursprung;
+Kontur, Ebene und globale Definition bleiben unverändert. Gemeinsame Application-
+Aktionen validieren die Eingabe, 360 entspricht 0 ohne zusätzlichen Undo-Schritt.
+Doppelt-Rechtsklick übernimmt den Winkel; Bewegung und Bibliotheksabgleich erhalten ihn.
+Projektformat 13 speichert den optionalen Anwendungswinkel. Strikte Migration 1–12
+setzt fehlende Winkel sinngemäß auf 0; vorhandene Definitionen werden nicht umgeschrieben.
+
+771 Tests bestanden, Typecheck und Produktionsbuild erfolgreich. Voller Lint:
+keine Fehler, sechs bekannte Fast-Refresh-Warnungen. Neue Nachweise: asymmetrische
+Creator-Geometrie, unabhängige Winkel, unveränderte Konturen, Undo/Redo, Dateirundlauf,
+Pickup, Bewegung, Bibliotheksabgleich, ungültige Winkel und strikte Migration.
+Browser-Sichtprüfung wegen Windows-Sandbox-Kernelstart nicht ausführbar; das konkrete
+lokal gespeicherte Muster wurde nicht ausgelesen.
+Abnahme: Mauerwerk bei 0 Grad mit dem Creator vergleichen, dann Musterwinkel 45/90
+übernehmen. Kontur muss unverändert bleiben. Zweite Anwendung, Speichern/Öffnen und
+Undo/Redo prüfen.
+
+**Genau ein nächster Auftrag bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag:**
+Maßbezug und Umrechnung gegen Architektur und Code prüfen und genau einen begrenzten
+Umsetzungspiloten festlegen. Interaktiver Zoom ist kein Ausgabemaßstab.
+
 ## V07i Globale Musterbearbeitung und Bibliotheks-History - 09.10.2026
 
 PR225 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Tools >

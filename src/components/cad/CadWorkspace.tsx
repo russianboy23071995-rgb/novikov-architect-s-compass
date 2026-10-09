@@ -22,7 +22,12 @@ import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
 import { beginWallChain, appendWallChain, finishWallChain } from "@/application/drawing/wall-chain";
 import type { WallChain } from "@/application/drawing/wall-chain";
 import { defaultGridSettings } from "@/application/snapping/grid-settings";
-import { HatchFillFields, HatchPaintFields, HatchPatternFields } from "./HatchControls";
+import {
+  HatchFillFields,
+  HatchPaintFields,
+  HatchPatternFields,
+  HatchRotationField,
+} from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
 import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
@@ -988,6 +993,13 @@ export function CadWorkspace({
                   <option value="boundary">Geschlossene Kontur übernehmen</option>
                 </select>
               </label>
+              <HatchRotationField
+                enabled={!!toolDefaults.hatch.patternDefinition}
+                value={toolDefaults.hatch.patternRotation ?? 0}
+                onChange={(patternRotation) =>
+                  toolDefaults.setHatch({ ...toolDefaults.hatch, patternRotation })
+                }
+              />
               <HatchPatternFields
                 project={project}
                 value={toolDefaults.hatch.patternDefinition}
@@ -1230,6 +1242,7 @@ export function CadWorkspace({
                   draftPoints={pathDrawing ? pathPoints : []}
                   draftFill={tool === "hatch" ? hatchFill : undefined}
                   draftPattern={tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined}
+                  draftPatternRotation={toolDefaults.hatch.patternRotation}
                   draftContour={
                     tool === "hatch" && hatchConstruction !== "polygon"
                       ? (point) =>

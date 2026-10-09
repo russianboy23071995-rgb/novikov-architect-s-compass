@@ -4,6 +4,7 @@ import type { ElementTarget } from "../selection/target.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 
 export type HatchDefaults = Pick<Hatch, "fill" | "background" | "contour" | "layerId"> & {
+  patternRotation?: number | undefined;
   patternDefinition?:
     import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
 };
@@ -80,6 +81,9 @@ export function pickupToolDefaults(
   return {
     tool: "hatch",
     values: {
+      ...(source.pattern?.rotation === undefined
+        ? {}
+        : { patternRotation: source.pattern.rotation }),
       patternDefinition: source.pattern
         ? structuredClone(project.hatchPatterns.find((p) => p.id === source.pattern!.patternId)!)
         : null,
