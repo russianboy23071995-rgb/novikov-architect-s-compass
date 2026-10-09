@@ -234,3 +234,20 @@ strikte Migration 1–10. Bewegung nimmt Ursprung mit, Konturbearbeitung behält
 offen. Globale Bibliotheksbearbeitung/-History, Revision-Synchronisation und Papiermaß
 bleiben offen. Nächster Auftrag V07g: Revisions-/Bibliotheks-History-Kern und zentrale
 Auflösung als getestete Domain-/Application-Aktionen, vor UI-/Tab-Synchronisation.
+
+## V07g Umsetzung - 09.10.2026
+
+Bibliothek v2 mit monotonem Revisionszähler, verlustfreies Lesen von v1 und getrennte
+sitzungsbezogene Bibliotheks-History umgesetzt. Bearbeiten prüft ID, Zielrevision und
+Speichertoken; Undo/Redo veröffentlicht neuen Revisionsstand. 20 Schritte und vier
+Millionen serialisierte Zeichen begrenzen die History. Zentrale Projektauflösung
+übernimmt neuere Definitionen gemeinsam, erhält fehlende/ältere und meldet gleiche
+Revision mit abweichendem Inhalt. Speicherfehler und veraltete Aktionen schreiben
+keinen neuen Aktionszustand. Keine atomare Mehrtab-Sicherheit zugesichert.
+
+753 Tests, Typecheck, Build erfolgreich; Lint ohne Fehler mit sechs bekannten
+Warnungen. Projektformat 11 besitzt noch keine persistierten Revisionen: Auflösung
+verwendet expliziten Kontext und ist noch nicht automatisch beim Laden/Undo aktiv.
+Nächster begrenzter Auftrag V07h: portabler Revisionskontext mit strikter Migration
+und gemeinsamer Auflösung beim Öffnen/Wiederherstellen. Globale Bearbeitungs-UI,
+Papiermaß, Upload und Tab-Synchronisation bleiben nachgelagert.
