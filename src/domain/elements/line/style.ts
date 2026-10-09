@@ -5,6 +5,7 @@ export type LineStyleDefinition = {
   name: string;
   dashes: readonly number[];
   color?: string;
+  colorEditable?: boolean | undefined;
   period?: number;
   segments?: readonly StyleSegment[];
 };
@@ -24,6 +25,8 @@ export function validateLineStyle(style: LineStyleDefinition): ValidatedLineStyl
     !Array.isArray(style.dashes)
   )
     throw new Error("Linienart benötigt ID und Namen (maximal 80 Zeichen).");
+  const colorEditable = style.colorEditable ?? true;
+  if (typeof colorEditable !== "boolean") throw new Error("Ungültige Farbfreigabe.");
   const color = style.color ?? "#334155";
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) throw new Error("Ungültige Linienfarbe.");
   let period = style.period;
@@ -76,6 +79,7 @@ export function validateLineStyle(style: LineStyleDefinition): ValidatedLineStyl
     name: style.name.trim(),
     dashes: [...style.dashes],
     color,
+    colorEditable,
     period: period!,
     segments: segments.map((line) => ({ start: { ...line.start }, end: { ...line.end } })),
   };

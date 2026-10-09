@@ -24,3 +24,12 @@ export function linePatternLayout(points: readonly Point2[], period: number, rep
   }
   return { scale, segments };
 }
+
+/** Explicit conversion avoids browser-dependent non-scaling strokes inside pattern tiles. */
+export function linePatternStroke(penWidth: number, pixelsPerMetre: number, scale: number): number {
+  if (![penWidth, pixelsPerMetre, scale].every((v) => Number.isFinite(v) && v > 0))
+    throw new Error("Invalid pattern stroke metrics");
+  const width = (penWidth * 96) / 25.4 / pixelsPerMetre / scale;
+  if (!Number.isFinite(width)) throw new Error("Invalid pattern stroke extent");
+  return width;
+}

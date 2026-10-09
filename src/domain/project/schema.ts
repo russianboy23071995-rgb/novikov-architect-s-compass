@@ -72,6 +72,7 @@ const currentLineSchema = legacyCurrentLineSchema.extend({
       name: z.string().trim().min(1).max(80),
       dashes: z.array(z.number().finite()).max(32),
       color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      colorEditable: z.boolean().optional(),
       period: positive.max(32000),
       segments: z
         .array(z.object({ start: pointSchema, end: pointSchema }).strict())
@@ -291,6 +292,11 @@ function validateGeometry(
         if (!current.pattern || !current.repeatLength)
           throw new Error("Custom line needs an embedded definition and repeat length.");
         validateLineStyle(current.pattern);
+        if (
+          current.pattern.colorEditable === false &&
+          current.color.toLowerCase() !== current.pattern.color.toLowerCase()
+        )
+          throw new Error("Diese Linienart hat eine feste Farbe.");
         if (!Number.isFinite((current.repeatLength / current.pattern.period) * 10))
           throw new Error("Invalid pattern extent.");
       } else if (current.pattern !== undefined || current.repeatLength !== undefined)

@@ -10,11 +10,15 @@ import {
   addLine,
   serializeProject,
   deserializeProject,
+  updateLine,
 } from "../../lib/bim/model.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
-import { linePatternLayout } from "../../rendering/viewport/line-pattern-layout.ts";
+import {
+  linePatternLayout,
+  linePatternStroke,
+} from "../../rendering/viewport/line-pattern-layout.ts";
 test("portable model-space pattern survives catalog deletion and roundtrip, undo atomic", () => {
   const base = createProject("pattern-project", "storey-pattern");
   const appearance = applyLineStyle(defaultLineAppearance, builtInLineStyles[1]!, 0.25);
@@ -127,4 +131,47 @@ test("shared creation and pickup retain owned custom pattern without geometry du
     }),
   );
   assert.equal(JSON.stringify(next), before);
+});
+
+test("fixed color cannot be overridden, editable colors remain free and survive roundtrip", () => {
+  const base = createProject("color-rule", "color-storey");
+  const locked = applyLineStyle(
+    defaultLineAppearance,
+    { ...builtInLineStyles[0]!, color: "#aa2244", colorEditable: false },
+    1.5,
+  );
+  const line = {
+    id: "locked",
+    kind: "line" as const,
+    points: [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+    ],
+    ...locked,
+  };
+  const project = addLine(base, line);
+  assert.throws(() => updateLine(project, "locked", { color: "#00ff00" }));
+  assert.equal(project.storey.lines![0]!.color, "#aa2244");
+  const reopened = deserializeProject(serializeProject(project));
+  assert.equal(reopened.storey.lines![0]!.pattern!.colorEditable, false);
+  const free = addLine(base, {
+    ...line,
+    id: "free",
+    ...applyLineStyle(
+      defaultLineAppearance,
+      { ...builtInLineStyles[0]!, colorEditable: true },
+      1.5,
+    ),
+  });
+  assert.equal(updateLine(free, "free", { color: "#00ff00" }).storey.lines![0]!.color, "#00ff00");
+  const noFlag = applyLineStyle(defaultLineAppearance, builtInLineStyles[0]!, 1.5);
+  assert.equal(noFlag.pattern!.colorEditable, true);
+});
+test("pattern pen width stays equal to system pen at different zoom and repeat lengths", () => {
+  for (const ppm of [20, 100, 500])
+    for (const scale of [0.005, 0.05, 0.5]) {
+      const width = linePatternStroke(0.25, ppm, scale);
+      assert.ok(Math.abs(width * scale * ppm - (0.25 * 96) / 25.4) < 1e-10);
+    }
+  assert.throws(() => linePatternStroke(0.25, 0, 1));
 });

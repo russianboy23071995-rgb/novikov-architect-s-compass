@@ -31,6 +31,12 @@ export function LineStyleFields({
         Farbe
         <select
           aria-label="Linienfarbe"
+          disabled={value.pattern?.colorEditable === false}
+          title={
+            value.pattern?.colorEditable === false
+              ? "Feste Farbe aus dem Linien Creator"
+              : undefined
+          }
           className="block rounded border bg-background p-1"
           value={value.color}
           onChange={(e) => onChange({ ...value, color: e.target.value })}

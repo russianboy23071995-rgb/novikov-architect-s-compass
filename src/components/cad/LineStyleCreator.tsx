@@ -189,6 +189,14 @@ export function LineStyleCreator({ onClose }: { onClose: () => void }) {
                   onChange={(e) => setDraft({ ...draft, color: e.target.value })}
                 />
               </label>
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={draft.colorEditable ?? true}
+                  onChange={(e) => setDraft({ ...draft, colorEditable: e.target.checked })}
+                />
+                Farbe veränderbar
+              </label>
               <label className="text-xs">
                 Wiederholungslänge
                 <Input

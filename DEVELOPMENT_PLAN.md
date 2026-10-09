@@ -1,3 +1,17 @@
+## Kataloglinien: Darstellung und Farbfreigabe - 09.10.2026
+
+Eigene SVG-Muster verwenden eine explizite Umrechnung der System-Strichstärke
+in Musterkoordinaten statt non-scaling-stroke innerhalb der Musterkachel.
+Farbe veränderbar im Linien Creator ist standardmäßig aktiv (auch für alte
+Definitionen). Deaktiviert: Musterfarbe verbindlich, Farbauswahl gesperrt,
+abweichende Projektaktionen durch gemeinsame Validierung abgewiesen.
+736 Tests bestanden; Typecheck, Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild erfolgreich. Neue Tests: Farbfreigabe, Ablehnung abweichender
+Farbe, JSON-Roundtrip und Strichstärke bei Zoom/Mustergrößen.
+Praktische Abnahme offen: Browsersteuerung startet derzeit nicht. Prüfen:
+rote eigene Linienart mit gesperrter Farbe speichern, auswählen, zeichnen,
+abwählen und zoomen; entsperrte Linie muss weiterhin umfärbbar sein.
+Folgeauftrag bleibt V07d globale lokale Schraffurmusterbibliothek.
 ## Linieninventar am Linienwerkzeug - 09.10.2026
 
 PR217 und PR218 mit erfolgreicher CI zusammengeführt; PR218 zuvor auf main

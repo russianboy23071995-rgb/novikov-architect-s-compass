@@ -2465,3 +2465,12 @@ trusting presentation output. The UI latest-context guard remains authoritative
 for late callbacks. No global project cache or per-element UI branch is introduced.
 Unconstrained polar input preserves the exact already-resolved aim; explicit
 angle/length constraints and finite-distance guards retain their contracts.
+
+## Line pattern color contract - 2026-10-09
+
+LineStyleDefinition.colorEditable defaults to true for legacy definitions. When
+false, the embedded pattern color is authoritative; domain project validation
+rejects divergent line colors. UI disables the color control. Renderer converts
+system pen width explicitly using viewport pixels per metre and pattern scale.
+Definitions remain portable project snapshots; catalog edits do not silently
+rewrite existing project lines.

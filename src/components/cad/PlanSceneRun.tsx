@@ -232,7 +232,7 @@ export function PlanSceneContent({
             />
           )}
           {line.style === "custom" ? (
-            <LinePattern line={line} />
+            <LinePattern line={line} pixelsPerMetre={pixelsPerMetre} />
           ) : (
             <path
               d={linePath(line)}

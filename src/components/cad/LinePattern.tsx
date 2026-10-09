@@ -1,8 +1,14 @@
 import { useId } from "react";
 import type { DrawingLine } from "@/domain/project/schema";
-import { linePatternLayout } from "@/rendering/viewport/line-pattern-layout";
+import { linePatternLayout, linePatternStroke } from "@/rendering/viewport/line-pattern-layout";
 /** Bounded SVG definition; repetition is rendering data, never editable geometry. */
-export function LinePattern({ line }: { line: DrawingLine }) {
+export function LinePattern({
+  line,
+  pixelsPerMetre,
+}: {
+  line: DrawingLine;
+  pixelsPerMetre: number;
+}) {
   const id = useId();
   if (!line.pattern || !line.repeatLength) return null;
   const pattern = line.pattern;
@@ -27,9 +33,8 @@ export function LinePattern({ line }: { line: DrawingLine }) {
               y1={-s.start.y}
               x2={s.end.x}
               y2={-s.end.y}
-              stroke={line.color}
-              strokeWidth={(line.penWidth * 96) / 25.4}
-              vectorEffect="non-scaling-stroke"
+              stroke={pattern.colorEditable === false ? pattern.color : line.color}
+              strokeWidth={linePatternStroke(line.penWidth, pixelsPerMetre, layout.scale)}
             />
           ))}
         </pattern>
