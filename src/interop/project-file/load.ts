@@ -21,11 +21,12 @@ import {
   validateProjectV16,
   validateProjectV17,
   validateProjectV18,
+  projectV19Schema,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 19. */
+/** Migration is only a file-boundary operation; runtime snapshots stay schema 20. */
 export function loadProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -54,6 +55,25 @@ export function loadProjectData(value: unknown): Project {
   if (value.schemaVersion === 18)
     return loadProjectData({ ...validateProjectV18(value), schemaVersion: 19 });
   if (value.schemaVersion === 19) {
+    const old = projectV19Schema.parse(value);
+    const documents = new Set((old.drawingDocuments ?? []).map((d) => d.id));
+    const share = <T extends { documentId?: string | undefined }>(element: T) => {
+      if (element.documentId && !documents.has(element.documentId))
+        throw new Error("Unbekanntes Abbild für 2D-Zeichnung.");
+      const { documentId: _owner, ...shared } = element;
+      return shared;
+    };
+    return loadProjectData({
+      ...old,
+      schemaVersion: 20,
+      storey: {
+        ...old.storey,
+        ...(old.storey.lines ? { lines: old.storey.lines.map(share) } : {}),
+        hatches: old.storey.hatches.map(share),
+      },
+    });
+  }
+  if (value.schemaVersion === 20) {
     const project = validateProject(value);
     // Trust is rebuilt from fully validated file data, never persisted IDs/hashes.
     return { ...project, assets: project.assets.map(createImageAssetHandle) };

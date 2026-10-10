@@ -81,7 +81,6 @@ export function createDrawing(
         : view.storeyId !== current.storey.id))
   )
     throw new Error("Der Zeichenkontext ist nicht mehr gültig.");
-  const ownership = view?.kind === "drawing-document" ? { documentId: view.documentId } : {};
   if (request.kind === "hatch")
     return previewHatch(base, current, {
       projectId: current.id,
@@ -90,7 +89,6 @@ export function createDrawing(
       patternRotation: request.patternRotation,
       patternSize: request.patternSize,
       hatch: {
-        ...ownership,
         id,
         points: closedDrawingContour(request.points),
         fill: request.fill,
@@ -110,7 +108,6 @@ export function createDrawing(
         height: request.height,
       })
     : addLine(current, {
-        ...ownership,
         id,
         kind: request.lineKind,
         points: request.points,

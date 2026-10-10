@@ -2871,3 +2871,22 @@ FloatingPanel renders through a body portal to escape transformed/overflow ances
 The Abbild creation dialog requests centered opening; shared nonmodal dragging and
 Glass Flow styling are retained. Image import in an Abbild is not enabled in this
 bounded lines/hatches step; existing model references remain visible under its filter.
+
+
+## Shared drawings from Abbilder — superseding user decision 2026-10-10
+
+The user has withdrawn document-only ownership for lines and hatches. Lines,
+polylines and hatches drawn in any Abbild now belong to the shared storey drawing,
+just like those drawn in the working plan. They exist once and appear in the working
+model and every Abbild subject to that view's independent layer filter. Editing,
+picking, snapping and project Undo use the existing common paths. This changes
+2D drawing ownership, not their dimensionality or the BIM export contract.
+
+Schema 20 removes documentId from current drawing entities. Strict v19 ingress
+checks the legacy document reference, removes only ownership, and retains all IDs,
+geometry, appearance, patterns and layer assignments without creating copies.
+Versions 1–18 remain supported. The creation action still validates its source
+ViewIdentity but no longer assigns document ownership. Deleting an Abbild no longer
+blocks or deletes its former drawings. Document-only annotations may be considered
+for other future annotation types, but are not the rule for current lines/hatches.
+The independent scale/filter, camera, unclipped model view and common toolbox remain.

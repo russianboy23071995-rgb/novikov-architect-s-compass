@@ -31,17 +31,12 @@ export type LayerEligibility =
   | {
       eligible: false;
       reason:
-        | "stale-project"
-        | "stale-context"
-        | "unknown-element"
-        | "hidden-layer"
-        | "hidden-host"
-        | "foreign-document";
+        "stale-project" | "stale-context" | "unknown-element" | "hidden-layer" | "hidden-host";
     };
 
 /** One read-only policy for future display/picking/snap consumers, never an export filter.
  * Project snapshots must be immutable, as with the existing Application actions.
- * Annotation ownership is checked before layer visibility for every consumer.
+ * All current drawing elements are shared; each view supplies its own layer filter.
  */
 export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilityContext) {
   const project = validateProject(base);
@@ -79,12 +74,6 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
       if (currentContext !== context) return { eligible: false, reason: "stale-context" };
       const element = elements.get(elementId);
       if (!element) return { eligible: false, reason: "unknown-element" };
-      if (
-        "documentId" in element &&
-        element.documentId &&
-        (scope.kind !== "drawing-document" || scope.documentId !== element.documentId)
-      )
-        return { eligible: false, reason: "foreign-document" };
       if (hidden.has(element.layerId)) return { eligible: false, reason: "hidden-layer" };
       if ("wallId" in element && hidden.has(walls.get(element.wallId)!.layerId))
         return { eligible: false, reason: "hidden-host" };

@@ -1,3 +1,31 @@
+## MS-04f: Abbildzeichnungen gehören zum Gesamtmodell — 10.10.2026
+
+Nutzerentscheidung ersetzt die lokale Zuordnung aus MS-04e: Neue Linien/Polylinien
+und Schraffuren aus einem Abbild sind gemeinsame Geschosszeichnungen. Sie erscheinen
+auch im Arbeitsmodell und anderen Abbildern, sofern die jeweilige Ebene sichtbar ist.
+Die unabhängigen Ebenenfilter und Maßstäbe bleiben bestehen. Gemeinsame Auswahl-,
+Fang-, Bearbeitungs- und Undo-Wege; keine Kopien und keine separate Werkzeuglogik.
+
+Schema 20: alte lokale Zeichnungen aus v19 werden beim Laden nach strikter Prüfung
+in gemeinsame Zeichnungen überführt. Nur die Eigentümerzuordnung entfällt; IDs,
+Geometrie, Darstellung und Ebenen bleiben erhalten. Abbildlöschen entfernt keine
+Zeichnungen. Migration 1–19 bleibt unterstützt. Änderung weiterhin in PR238.
+
+Nachweis: 808 Tests bestanden. Typprüfung einschließlich Benchmarks und Build bestanden.
+Tests umfassen gemeinsame Sichtbarkeit/Picking/Fang in Modell und zwei Abbildern,
+Bewegung, Undo/Redo, unabhängiges Ausblenden, Abbildlöschen ohne Geometrieverlust und
+verlustfreie v19-Migration. Browser: Linie und Rechteckschraffur im Abbild gezeichnet,
+anschließend beide im Arbeitsmodell/Modellnavigator sichtbar. Keine Browserfehler.
+Screenshot: outputs/abbild-shared-drawings.png.
+
+Praktischer Test: Im Abbild Linie oder Schraffur zeichnen → Gebäudestruktur öffnen.
+Beide sind dort sichtbar und bearbeitbar. Ausblenden einer Ebene im Abbild ändert
+weiterhin nicht die Sichtbarkeit dieser Ebene im Arbeitsmodell.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Löschen und Ordnerzuordnung anbinden; Löschen eines Abbilds erhält alle gemeinsamen
+Zeichnungen. Behandlung nichtleerer Ordner vor Ordnerlöschung festlegen.
+
 ## MS-04e: Vollständiges Modell und lokale Abbildzeichnungen — 10.10.2026
 
 Nutzerkorrektur im offenen PR238: Abbilder sind bearbeitbare Ansichten des gesamten

@@ -73,13 +73,6 @@ export function changeDrawingDocument(
     });
   }
   const target = drawingDocument(current, action.id);
-  if (
-    action.kind === "delete" &&
-    [...(current.storey.lines ?? []), ...current.storey.hatches].some(
-      (e) => e.documentId === target.id,
-    )
-  )
-    throw new Error("Das Abbild enthält eigene Zeichnungen. Diese zuerst löschen.");
   if (action.kind === "delete")
     return validateProject({
       ...current,

@@ -96,6 +96,8 @@ const currentHatchObject = hatchBaseSchema.extend({
   pattern: hatchPatternApplicationSchema.nullable().optional(),
 });
 export const hatchV18Schema = currentHatchObject.superRefine(validateContour);
-export const hatchSchema = currentHatchObject
+export const hatchV19Schema = currentHatchObject
   .extend({ documentId: z.string().trim().min(1).optional() })
   .superRefine(validateContour);
+
+export const hatchSchema = hatchV18Schema;
