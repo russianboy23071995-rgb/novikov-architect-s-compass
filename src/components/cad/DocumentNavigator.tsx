@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronDown, ChevronRight, File, Folder, Plus } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 import type { DocumentFraming } from "@/domain/views/documents";
@@ -54,6 +54,29 @@ export function DocumentNavigator({
     changeDrawingDocument(base, project, action);
     onDocumentAction(base, action);
   };
+  const dragged = useRef<{ base: Project; id: string } | null>(null);
+  const [dropFolder, setDropFolder] = useState<string | null>(null);
+  const finishDrag = () => {
+    dragged.current = null;
+    setDropFolder(null);
+  };
+  const dropInFolder = (folderId: string) => {
+    const source = dragged.current;
+    finishDrag();
+    if (!source) return;
+    try {
+      // Keep the drag's original project identity: never move a stale/replaced document.
+      const action: DocumentAction = { kind: "assign-folder", id: source.id, folderId };
+      changeDrawingDocument(source.base, project, action);
+      if (project.drawingDocuments?.find((d) => d.id === source.id)?.folderId === folderId) return;
+      onDocumentAction(source.base, action);
+      setSelected(source.id);
+      setClosed((ids) => ids.filter((id) => id !== folderId));
+      setError("");
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  };
   const beginCreate = (kind: "document" | "folder", folderId = "") => {
     setError("");
     setDraft({
@@ -100,12 +123,40 @@ export function DocumentNavigator({
             aria-expanded={folder ? open : undefined}
             aria-level={depth + 1}
             tabIndex={0}
+            draggable={!folder && renaming?.id !== id}
+            onDragStart={(e) => {
+              if (folder || renaming?.id === id) {
+                e.preventDefault();
+                return;
+              }
+              dragged.current = { base: project, id };
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("application/x-novikov-document", id);
+            }}
+            onDragEnd={finishDrag}
+            onDragOver={(e) => {
+              if (!folder || !dragged.current) return;
+              e.preventDefault();
+              e.stopPropagation();
+              e.dataTransfer.dropEffect = "move";
+              setDropFolder(id);
+            }}
+            onDragLeave={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+                setDropFolder((target) => (target === id ? null : target));
+            }}
+            onDrop={(e) => {
+              if (!folder || !dragged.current) return;
+              e.preventDefault();
+              e.stopPropagation();
+              dropInFolder(id);
+            }}
             title={
               folder
                 ? "Ordner öffnen · F2 oder Rechtsklick: umbenennen"
                 : `1:${scale} · Doppelklick: öffnen · F2: umbenennen`
             }
-            className={`flex h-7 items-center gap-1.5 rounded-sm pr-2 text-[13px] hover:bg-accent ${selected === id || activeDocumentId === id ? "bg-primary/12 text-primary" : "text-muted-foreground"}`}
+            className={`${dropFolder === id ? "ring-1 ring-primary bg-primary/15 " : ""}flex h-7 items-center gap-1.5 rounded-sm pr-2 text-[13px] hover:bg-accent ${selected === id || activeDocumentId === id ? "bg-primary/12 text-primary" : "text-muted-foreground"}`}
             style={{ paddingLeft: 6 + depth * 13 }}
             onClick={() => {
               setSelected(id);
