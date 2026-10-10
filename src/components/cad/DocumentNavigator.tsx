@@ -1,3 +1,4 @@
+import { DocumentLayerDraft } from "./DocumentLayerDraft";
 import { useRef, useState } from "react";
 import { ChevronDown, ChevronRight, File, Folder, Plus } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
@@ -44,12 +45,15 @@ export function DocumentNavigator({
     scale: string;
     kind: "document" | "folder";
     folderId: string;
+    hiddenLayerIds?: string[];
   } | null>(null);
   const [closed, setClosed] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; folder: boolean; name: string } | null>(
     null,
   );
+  const pendingFolderRename = useRef<{ id: string; folder: boolean; name: string } | null>(null);
+  const renameInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const run = (base: Project, action: DocumentAction) => {
     changeDrawingDocument(base, project, action);
@@ -80,10 +84,22 @@ export function DocumentNavigator({
   };
   const beginCreate = (kind: "document" | "folder", folderId = "") => {
     setError("");
+    if (kind === "folder") {
+      try {
+        const id = crypto.randomUUID();
+        run(project, { kind: "create-folder", id, name: "Neuer Ordner" });
+        setSelected(id);
+        pendingFolderRename.current = { id, folder: true, name: "Neuer Ordner" };
+      } catch (cause) {
+        setError((cause as Error).message);
+      }
+      return;
+    }
     setDraft({
+      hiddenLayerIds: [...project.bimVisibility.hiddenLayerIds],
       base: project,
       framing: kind === "document" ? getPlanCapture() : null,
-      name: kind === "folder" ? "Neuer Ordner" : "Grundriss",
+      name: "Grundriss",
       scale: `1:${newDocumentScale(project)}`,
       kind,
       folderId:
@@ -200,7 +216,9 @@ export function DocumentNavigator({
             )}
             {renaming?.id === id ? (
               <input
+                ref={renameInput}
                 autoFocus
+                onFocus={(e) => e.currentTarget.select()}
                 aria-label="Name ändern"
                 value={renaming.name}
                 className="min-w-0 flex-1 rounded border bg-popover px-1 text-foreground"
@@ -230,7 +248,19 @@ export function DocumentNavigator({
             )}
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent>
+        <ContextMenuContent
+          onCloseAutoFocus={(event) => {
+            if (pendingFolderRename.current) {
+              event.preventDefault();
+              setRenaming(pendingFolderRename.current);
+              pendingFolderRename.current = null;
+            } else if (renameInput.current) {
+              event.preventDefault();
+              renameInput.current.focus();
+              renameInput.current.select();
+            }
+          }}
+        >
           {createMenu(folder ? id : project.drawingDocuments?.find((d) => d.id === id)?.folderId)}
           <ContextMenuSeparator />
           <ContextMenuItem disabled={standardFolder} onSelect={beginRename}>
@@ -328,7 +358,21 @@ export function DocumentNavigator({
               .map((d) => row(d.id, d.name, false, 0, d.denominator))}
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent>{createMenu()}</ContextMenuContent>
+        <ContextMenuContent
+          onCloseAutoFocus={(event) => {
+            if (pendingFolderRename.current) {
+              event.preventDefault();
+              setRenaming(pendingFolderRename.current);
+              pendingFolderRename.current = null;
+            } else if (renameInput.current) {
+              event.preventDefault();
+              renameInput.current.focus();
+              renameInput.current.select();
+            }
+          }}
+        >
+          {createMenu()}
+        </ContextMenuContent>
       </ContextMenu>
       {!draft && error && <p role="alert">{error}</p>}
       <FloatingPanel
@@ -365,6 +409,8 @@ export function DocumentNavigator({
                         kind: "create",
                         id: crypto.randomUUID(),
                         modelViewId: crypto.randomUUID(),
+                        hiddenLayerIds:
+                          draft.hiddenLayerIds ?? draft.base.bimVisibility.hiddenLayerIds,
                         name: draft.name,
                         denominator: parseOutputScale(draft.scale),
                         ...(draft.framing ? { framing: draft.framing } : {}),
@@ -385,7 +431,14 @@ export function DocumentNavigator({
             {(() => {
               const fields = (
                 <div className="space-y-4">
-                  {" "}
+                  {!draft.id && (
+                    <p className="text-muted-foreground">
+                      Die aktuelle Ansicht wird als Abbild gespeichert. Wähle Name, Maßstab und
+                      Ordner. Das Abbild dient als Grundlage einer eigenständig dargestellten
+                      Zeichnung und bleibt mit dem Hauptmodell verbunden. Das gesamte Modell bleibt
+                      erreichbar.
+                    </p>
+                  )}
                   <div className="flex gap-3">
                     <label className="min-w-0 flex-1">
                       Name
@@ -428,27 +481,11 @@ export function DocumentNavigator({
                         </select>
                       </label>
                       {!draft.id && (
-                        <section aria-label="Aufgenommene aktive Ebenen">
-                          <h3 className="mb-2 font-medium">Aufgenommene aktive Ebenen</h3>
-                          <ul className="flex flex-wrap gap-1.5">
-                            {draft.base.layers
-                              .filter(
-                                (layer) =>
-                                  !draft.base.bimVisibility.hiddenLayerIds.includes(layer.id),
-                              )
-                              .map((layer) => (
-                                <li
-                                  key={layer.id}
-                                  className="rounded border bg-background/50 px-2 py-1"
-                                >
-                                  {layer.name}
-                                </li>
-                              ))}
-                          </ul>
-                          {draft.base.layers.every((layer) =>
-                            draft.base.bimVisibility.hiddenLayerIds.includes(layer.id),
-                          ) && <p>Keine Ebene eingeblendet.</p>}
-                        </section>
+                        <DocumentLayerDraft
+                          layers={draft.base.layers}
+                          hidden={draft.hiddenLayerIds ?? draft.base.bimVisibility.hiddenLayerIds}
+                          onChange={(hiddenLayerIds) => setDraft({ ...draft, hiddenLayerIds })}
+                        />
                       )}
                     </>
                   )}

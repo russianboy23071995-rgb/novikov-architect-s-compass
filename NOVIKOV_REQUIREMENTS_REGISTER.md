@@ -533,6 +533,8 @@ Abbildaufnahme-Präzisierung (10.10.2026, PR241): Die Anwendung ergänzt beim St
 
 Nutzerkorrektur: Standardordner heißt **Abbildsammlung** und bleibt dauerhaft vorhanden, auch neben eigenen Ordnern. Löschen/Umbenennen dieses Ordners gesperrt; bisher automatisch angelegter Ordner Abbilder wird unter Beibehaltung seiner ID umbenannt.
 
+Nutzerergänzung PR241: Neuer Ordner wird per Kontextmenü sofort angelegt, danach Name fokussiert/vollständig markiert. Abbildanlage erklärt Modellbindung, bietet Stammdaten und eine scrollbar durchsuchbare Ebenentabelle mit grauen EyeOff-/grünen Eye-Symbolen. Klick ändert nur den lokalen Erstellungsentwurf; create-DocumentAction validiert und speichert den gewählten Filter atomar bei Erstellung, Hauptmodellfilter bleibt unverändert. Keine separate History für den Entwurf. 17 Abbildtests, Typecheck und Build bestanden; Browser: Textauswahl 0–12, Umbenennen, Suche und ausgeblendete Wand im erstellten Abbild geprüft. Letzter Nutzersatz „Darunter: die folgenden Ebenen können“ unvollständig, keine zusätzlichen Inhalte erfunden.
+
 ### N57 – Aktualisierbare Abbilder mit eigener Ebenendarstellung
 
 - **Stand:** Teilweise vorhanden in main seit PR238: modellgebundene Grundriss-Abbilder mit eigenem Maßstab/Filter und Startzoom, gesamtes Modell erreichbar. Anlage/Löschung/Ordnerzuordnung verwenden normales Projekt-Undo; Sichtbarkeit den gemeinsamen Ebenenumschalter mit kontextbezogener History. Schema20 und Migrationen erhalten Modell und Zeichnungen. Weitere Ansichtsarten bleiben offen.

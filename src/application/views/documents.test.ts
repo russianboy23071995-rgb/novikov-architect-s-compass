@@ -626,3 +626,26 @@ test("Abbildsammlung always exists alongside custom folders and cannot be remove
     { id: "document-folder-default", name: "Abbildsammlung" },
   ]);
 });
+
+test("creation draft visibility belongs only to the new document and validates layer IDs", () => {
+  const base = createExampleProject();
+  const hidden = [base.layers[0]!.id];
+  const action = {
+    kind: "create" as const,
+    id: "draft-doc",
+    modelViewId: "draft-view",
+    name: "Plan",
+    denominator: 100,
+    hiddenLayerIds: hidden,
+  };
+  const next = changeDrawingDocument(base, base, action);
+  assert.deepEqual(next.drawingDocuments![0]!.hiddenLayerIds, hidden);
+  assert.deepEqual(next.bimVisibility, base.bimVisibility);
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
+  assert.throws(() =>
+    changeDrawingDocument(base, base, { ...action, hiddenLayerIds: ["missing"] }),
+  );
+  assert.throws(() => changeDrawingDocument(base, next, action));
+});

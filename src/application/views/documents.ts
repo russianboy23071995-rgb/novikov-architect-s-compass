@@ -11,6 +11,7 @@ export type DocumentAction =
       denominator: number;
       framing?: DocumentFraming;
       folderId?: string;
+      hiddenLayerIds?: string[];
     }
   | { kind: "create-folder"; id: string; name: string }
   | { kind: "rename-folder"; id: string; name: string }
@@ -83,7 +84,7 @@ export function changeDrawingDocument(
           name: action.name,
           modelViewId: source.id,
           denominator: action.denominator,
-          hiddenLayerIds: [...current.bimVisibility.hiddenLayerIds],
+          hiddenLayerIds: [...(action.hiddenLayerIds ?? current.bimVisibility.hiddenLayerIds)],
           ...(action.framing ? { framing: action.framing } : {}),
           ...(action.folderId ? { folderId: action.folderId } : {}),
         },
