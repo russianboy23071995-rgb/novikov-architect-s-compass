@@ -567,63 +567,34 @@ Ein Mapping ist keine Fertigmeldung. Status/Abnahme folgen den referenzierten N-
 
 | Kennung | Ursprünglicher Wunsch | Weitergeführt unter |
 | --- | --- | --- |
-
 | Guide-F01 | Automatische Wohnflächenberechnung und sichtbarer Rechenweg | N35 |
-
 | Guide-F02 | Türnischen, Schornsteinabzüge und Vorbauwände berücksichtigen | N35 |
-
 | Guide-F03 | Wohnflächenbericht nach Vorlage als PDF | N36 |
-
 | Guide-F04 | Name, Adresse, Geschossanzahl und Raumzahl im Bericht | N37 |
-
 | Guide-F05 | On-Demand-Menü nahe Cursor, verschiebbar, bleibt bei Auswahl | N09 |
-
 | Guide-F06 | Gewählten Punkt verschieben | N11 |
-
 | Guide-F07 | Bewegen | N10/N30 |
-
 | Guide-F08 | Info anzeigen | N09/N53 |
-
 | Guide-F09 | Strecken einer gewählten Seite | N13 |
-
 | Guide-F10 | Maßstableiste unter Canvas mit Änderungsmöglichkeit | N04/N15/MS |
-
 | Guide-F11 | Skalierwerkzeug für importierte Zeichnung mit zwei Messpunkten | N25/N28 |
-
 | Guide-F12 | Neue Länge per Menü oder AI-Sprachbefehl | N18/N25 |
-
 | Guide-F13 | Gesamte ausgewählte Referenz anhand der Messstrecke skalieren | N25 |
-
 | Guide-F14 | Grid sowie Snap und Hilfslinien aus dem Gespräch | N07/N08 |
-
 | Guide-F15 | 2D-Linienwerkzeug Punkt zu Punkt, kein Erstellen in 3D | N12/N39 |
-
 | Guide-F16 | Voreinstellung Linie oder Polylinie | N12/N53 |
-
 | Guide-F17 | Farbpalette, Strichstärke und Stricharten | N03/N40/N53 |
-
 | Guide-F18 | Räume in geschlossenen oder teilweise umschlossenen Wänden | N31 |
-
 | Guide-F19 | Raumkennung ab R-001, Name und Fläche | N32 |
-
 | Guide-F20 | Lichte Raumhöhen erkennen und Höhenlinien konfigurieren | N33 |
-
 | Guide-F21 | Unteren und oberen Messbezug wählen | N34 |
-
 | Guide-F22 | Höheninformationen in Wohnflächenberechnung verwenden | N33/N35 |
-
 | Guide-F23 | Schraffur mit optionaler Füllung und Kontur | N39/N40/N58 |
-
 | Guide-F24 | Wählbare Farbe und Deckkraft oder Muster wie Mauerwerk | N40 |
-
 | Guide-F25 | Alle genannten Standardebenen | N16/N38 |
-
 | Guide-F26 | Außenwand als Standard für Wände, 2D-Zeichnungen für 2D | N16 |
-
 | Guide-F27 | Elemente frei zuordnen, Ebenen erstellen und bearbeiten | N16 |
-
 | Guide-F28 | Organisation > Ebenen als eigenes Fenster | N16/N17 |
-
 | Guide-F29 | Ebenenumschalter in Menüleiste, ein- und ausblenden | N17 |
 
 ## 3. AI01–AI35 – Hauptvision und Ausbaukatalog
@@ -1453,23 +1424,14 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 | Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
 | --- | --- | --- |
-
 | V01 | Live Strecken, Flächen und Winkel messen | Gemeinsames Fang-/Geometriesystem; temporäre Messung ohne Modellkopie oder History je Mausziel. Dauerhafte assoziative Maßketten bleiben N46 als eigener Schritt. |
-
 | V02 | Bereich in 2D/3D auswählen, darauf skizzieren und per Sprache/Text Änderungen beschreiben | Ergänzt AI10/AI26/AI31. Ansicht, stabile Ziel-IDs und Modellrevision binden; Änderungsvorschau mit Annahme und Undo über vorhandene Aktionen. Eigenes Modelltraining ist keine festgelegte Voraussetzung. |
-
 | V03 | Live-3D-Schnitt | An N05 anbinden. Zunächst Schnittdarstellung als Ansichtsoperation konzipieren; tatsächliches Beschneiden des Fachmodells ist V09. Umfang der Schnittebenen/Schnittbox vor Umsetzung klären. |
-
 | V04 | First-Person mit WASD und Maus | Kameranavigation pro Ansicht; keine Modelländerung oder Modell-History pro Kamerabewegung. Perspektive, Eingabekonflikte und große Szenen gesondert abnehmen. |
-
 | V05 | Kontextmenü mit Kopieren, Einfügen, Importieren, Spiegeln und Darstellungsreihenfolge | N09/N10/N54 ergänzen; zentrale typisierte Aktionen mit Zulässigkeitsprüfung. Bedeutung der Darstellungsreihenfolge in 3D und erlaubte Spiegeloperationen sind noch offen. |
-
 | V06 | Doppelter Rechtsklick aktiviert das Werkzeug samt Eigenschaften des Elements | Werkzeugvorgaben übernehmen, ohne Quelle zu verändern oder ein neues Element automatisch zu erzeugen. Keine IDs/Anschlüsse kopieren. Eigenschaftenumfang vor Umsetzung festlegen. Das ist nicht automatisch eine Aktion zum Ändern anderer vorhandener Elemente. |
-
 | V07 | Schraffuren verwalten, erstellen und bearbeiten | N39/N40 erweitern; wiederverwendbare Musterdefinitionen von ihren Anwendungen trennen. Änderungen und Variantenbildung ausdrücklich regeln. |
-
 | V08 | Gemeinsame Werkzeugeigenschaften einheitlich zuerst anzeigen | N53 erweitern; Fähigkeiten und fachlich passende Felder verwenden. Kein Universalobjekt, das jedem Typ Breite, Höhe, Länge und Geschoss aufzwingt. |
-
 | V09 | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell. |
 
 ### R26-01–08
@@ -1478,21 +1440,13 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 | Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
 | --- | --- | --- |
-
 | R26-01 / P0 | **Große Projektdateien und Referenzen sicher handhaben.** K02/K03 und der bereits vermerkte Wunsch nach verknüpfbaren Bildern konkretisieren. Heute gilt die 10-MiB-Gesamtprojektgrenze; Bilddaten sind eingebettet. | Kapazitätsprofil mit Modellgröße, Bildpixeln, Datei- und Speicherbedarf sowie Öffnen, Bearbeiten, Undo und Speichern messen. Versionierten Modell-/Asset-Vertrag und verknüpfte **oder** portable eingebettete Referenzen mit fehlenden/verschobenen Dateien, Pfadauflösung, Umzug und Austausch prüfen. Keine pauschale Limitanhebung und keine Festlegung auf Datenbank, Desktop oder Browser vor Messung/Vertrag. |
-
 | R26-02 / P0 | **Datensicherheit und Wiederherstellung.** Neu als ausdrückliche Produktaufgabe. | Atomar speichern, sichere Vorgängerversion/Backup und Wiederaufnahme nach unerwartetem Abbruch konzipieren. Einen unterbrochenen Schreibvorgang und beschädigte/fehlende Assets praktisch prüfen: zuletzt gesichertes Projekt bleibt lesbar; Wiederherstellung zeigt klar an, welchen Stand sie anbietet. Undo ersetzt kein Backup. Plattformadapter bleiben austauschbar. |
-
 | R26-03 / P1 | **Gebäudekern zu einem nutzbaren Projekt erweitern.** Bereits gewünschte Mehrgeschossigkeit, Höhenbezüge, Türen, Decken, Dächer, Treppen und Räume bündeln; pro Bauteil kleine Schritte. | Gemeinsame stabile Elementidentitäten, Geschoss-/Höhenbezug und fachliche Abhängigkeiten. Änderung eines Bauteils aktualisiert betroffene Anschlüsse, Öffnungen, Räume und Ableitungen nachvollziehbar; Migration, Undo und Dateirundlauf prüfen. Fach-/3D-Elemente werden niemals proportional skaliert; Kalibrierung bleibt auf 2D/PDF/PNG/JPEG-Referenzen beschränkt. |
-
 | R26-04 / P1 | **Modellgebundene Dokumentation.** Vorhandener Wunsch nach Schnitten, Ansichten, Abbildern, unabhängiger Ansichtsdarstellung, Layouts und Plankopf. | Planansichten und Schnitte aus demselben BIM-Modell ableiten; Annotationen im richtigen Ansichts-/Dokumentkontext verwalten. Änderung am Modell aktualisiert abhängige Zeichnungen; Layout und PDF-Ausgabe behalten Ausschnitt, Maßstab, Sichtbarkeit und Beschriftung. Keine kopierten Bauteile als zweite Wahrheit. |
-
 | R26-05 / P1 | **Nachvollziehbare Auswertungen.** Räume/Wohnfläche sind bereits gewünscht; neue Ergänzung sind Tür-, Fenster-, Flächen- und Materiallisten. | Bauteillisten aus denselben validierten Modell-IDs und Eigenschaften ableiten. Jede Zahl nennt Umfang/Regelprofil und lässt ihre Quellen erkennen; Änderungen, Ausschlüsse, Rundung und nicht auswertbare Elemente werden sichtbar. Wohnflächenregeln bleiben ein eigenes, versioniertes Profil, keine implizite allgemeine Flächensumme. |
-
 | R26-06 / P2, früher falls Pilotprojekt blockiert | **Interoperabilität in beide Richtungen.** IFC-Export existiert; IFC-Import bzw. verknüpfte IFC-Referenz und konkret benötigte DWG/DXF-/PDF-Wege sind als Anschlussaufträge zu prüfen. | Erst Austauschfall, unterstützten IFC-Umfang, Einheiten/Koordinaten, GUIDs, unbekannte Bauteile und erneutes Laden festlegen. „IFC unterstützt“ erst behaupten, wenn der konkrete Import-/Exportfall mit Fremddatei reproduzierbar funktioniert. DWG/DXF und PDF sind eigene Teilaufträge, kein pauschales Vollformatversprechen. |
-
 | R26-07 / P2 | **Planstände und Revisionen.** Neue ausdrückliche Produktaufgabe; an R26-04 anbinden. | Ausgegebene Planversion mit Datum/Stand unveränderlich referenzieren; Änderungen am Modell gegenüber dieser Ausgabe kenntlich machen. Planindex, Revisionsvermerk und reproduzierbarer erneuter Export werden pro Plan geprüft. Modell-History und veröffentlichte Planstände bleiben getrennte Begriffe. |
-
 | R26-08 / P2 | **Modellqualität und Zusammenarbeit.** Neue ausdrückliche Aufgabe: prüfbare Regeln und später BCF-Aufgaben; IDS nur bei realem IFC-Austauschbedarf. | Vor Ausgabe fehlende Eigenschaften, ungültige Beziehungen und offene Warnungen mit stabilen Element-IDs anzeigen. BCF-Themen an Ansicht/Elemente/Modellrevision binden, importieren und exportieren, sobald ein konkreter Fachplanerablauf feststeht. Prüfregeln dürfen Änderungen nicht heimlich am Modell vornehmen. |
 
 ### K01–K08
@@ -1501,21 +1455,13 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 | Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
 | --- | --- | --- |
-
 | K01 / P1 | planBounds übergibt alle Extents per Spread an Math.min/max. Isolierter Original-Funktionskörper unter Node 24: 20 Polylinien mit je 10.000 Punkten, etwa 3,48 MB JSON-Testdaten, RangeError. Kein vollständiger Browser-/Projektvalidator-Test dieses Datensatzes. | Grenzen iterativ bestimmen; leere/kleine/große Fälle erhalten; gültige große Fixture und Browser-Einpassen nachweisen. |
-
 | K02 / P1 | 10-MiB-Gesamtprojektgrenze greift auch beim Commit; Base64-Bilder liegen im Projekt; JPEG-Import normalisiert nach PNG. Harte Produktgrenze aus size.ts/history.ts/import.ts. | Kapazitätsziel und versionierten Modell-/Asset-Speichervertrag anhand K03 festlegen, bevor das Limit erhöht wird. Portable Weitergabe, Altdateimigration und Windows/macOS-Adapter berücksichtigen. |
-
 | K03 / P1 | Kein vollständiger Nachweis für Dateigröße, Gesamtpixel, Spitzenspeicher und lange History. 16 MP ist nur ein Budget pro Bild; URL-Cache begrenzt Strings, nicht den gesamten decodierten Bild-/GPU-Speicher. | Begrenzte Kapazitätsdiagnose; mehrere Rasterreferenzen, 1/10/50/100 Undo-Stände, Import/Platzierung/Bestätigung/Laden/Speichern und 2D/3D getrennt messen. |
-
 | K04 / P1 | Auswahlbewegung ist lokal vorbereitet, andere Vorschauen laufen weiterhin über Gesamtprojektprüfungen, u. a. Wandbearbeitung, Wandzeichnen und Bildplatzierung. Statischer Codebefund. | Häufigen verbleibenden Consumer messen, anschließend einzeln an dieselbe Infrastruktur anschließen; keine neue Interaktions-/History-Engine pro Werkzeug. |
-
 | K05 / P1 | Bestätigung laut SESSION_WALL_EXTRUSION bei 1.000 Elementen etwa 504–512 ms in einzelnen Klickmessungen, eine Materialisierung, fünf Vollvalidierungen. | Commit separat profilieren; redundante Arbeit an derselben unveränderlichen Revision begrenzt reduzieren. Vollständige Datei-/öffentliche Eingangsprüfung und sichere Veröffentlichung erhalten. |
-
 | K06 / P2 | Betroffene Wandmenge umfasst konservativ die ganze verbundene Komponente; doppelte Konturableitung und Fensterfilter pro Wand bleiben Kandidaten. Statisch belegt, kein neuer isolierter Zeitnachweis. | Zusammenhängenden Wandzug und dichte Anschlüsse messen, Größe der betroffenen Menge protokollieren. Fachlich sichere Grenzen/Host-Indizes und gemeinsame Ableitung erst am Befund verbessern. |
-
 | K08 / P2 | IFC-Export enthält weitere Vollprüfungen, Fensterfilter pro Wand und vollständige Ausgabestrings im Speicher. Statischer Befund, keine neue Exportzeit. | In K03 Exportzeit/Spitzenspeicher aufnehmen; Host-Index und wiederverwendbare geprüfte Ableitungen erst anhand des Profils verbessern. |
-
 | K07 / P2 vor großem 3D-Ausbau | BimSolidView projiziert beim Draw alle Vertices auf der CPU und lädt Geometriepuffer neu; Picking durchsucht Flächen. Kein neuer 3D-Lasttest. | Kamera/Picking/mehrere Ansichten vermessen; GPU-Geometrie wiederverwenden, räumliche Suche und gezielte Aktualisierung prüfen. Kein vorab beschlossener Rendererwechsel. |
 
 
@@ -1570,49 +1516,27 @@ Der technische CAD-Strang und der begleitende Produktstrang sind gemeinsam zu pf
 
 | ID | Anforderung | Status |
 | --- | --- | --- |
-
 | RC01 | Dependencies und Code-/Assetrechte inventarisieren, eigene Werke nachweisen, kommerzielle Weitergabe-/Attributions-/Quellcodepflichten tatsächlich prüfen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC02 | Bedrohungsmodell, Import-/Archiv-/Plugin-/Lizenz-/Updategrenzen, Secret-Schutz, Schwachstellenkontakt/-prozess, sichere Updates und Supportzeitraum. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC03 | Releasegebundene tatsächliche SBOM, ergänzt um native/eingebettete Komponenten; keine Lizenz-/Sicherheitszertifizierung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC04 | Local-first CAD, getrennte Lizenz-/Privacy-Adapter; Konto/Offlineaktivierung/Geräte/Offlinefristen/kommerzielles Modell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC05 | Diagnose und Crash getrennt, aus/Opt-in/Widerruf, minimierte Daten; kostenlose klar bezeichnete Public Beta, Dauer/Folgemodell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC06 | Nach Ablauf und Lizenzserverausfall unterstützte Projekte lesen/exportieren/drucken, laufende Arbeit sicher erhalten; keine Projektlöschung/-verschlüsselung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC07 | P0-Dateisicherheit: Snapshot, Tempdatei/Prüfung/atomare Veröffentlichung, gültigen Vorgänger, Autosave/Backups/Recovery, Migration/Concurrency und Fehlertests. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC08 | Geometrie vs. Normberechnung/Produktversprechen trennen; unabhängige Referenzfälle/Einheiten/Toleranzen/große Koordinaten/Roundtrip. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC09 | Sechs laufende Register mit konkreten Nachweisen aktualisieren; externe Freigabe nicht erfinden. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | RC10 | Zehn vorbereitende Arbeitsbereiche und Definition of Done aus Anlage erhalten; P0 vor Komfort/externem Test, Rechts-/Steuerprüfung vor Vertrieb. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB01 | Reale Laufzeit-/transitive/native/nachgeladene Komponenten und getrennte Build-Tools erfassen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB02 | Releaseversion/Commit/Build/Plattform/Architektur/Hash und SBOM-Generator/Schema/Zeit/ID dokumentieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB03 | Komponenten exakt aufgelöste Version/Herkunft/Referenz/Paketkennung/Lizenz und Beziehungen/Integrität/Lücken; Unbekanntes nicht schätzen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB04 | Generator SPDX-JSON oder CycloneDX-JSON passend zu tatsächlichem Stack auswählen und schema-validieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB05 | Nach Build/Packaging erzeugen; fehlende/ungültige SBOM und ungeklärte Lizenzen blockieren externen Release. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB06 | SBOM/Notices/Hashes/Prüfbericht archivieren, realen Komponentenbestand stichprobenweise und neue Dependency im Neubuild prüfen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | SB07 | Änderungs-/Schwachstellenabgleich mit betroffenen Novikov-Releases, Verantwortlichkeiten/Kontakt/Support vor Verteilung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | HP01 | Anbieteridentität/Rechtsform/Anschrift/Märkte/B2B-B2C/Accounts/Lizenzen/Dienste vor Homepage klären. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | HP02 | Passende Anbieter-/Datenschutz-/EULA-/gegebenenfalls AGB-/Preis-/Support-/Beta-/Rechte-/Security-Inhalte veröffentlichen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | HP03 | Anwendbaren Checkout/Verbraucherwiderruf/Vertragsbestätigung/Kündigung/Barrierefreiheit aktuell fachlich prüfen und umsetzen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | HP04 | Transparente Beta/kein überraschender Zahlungseintritt, nach Ablauf Lese-/Export-/Druckzugriff, keine erzwungene Projektcloud, getrennte Opt-ins, belegte Marketingaussagen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-
 | HP05 | Platzhalter auflösen, rechtliche/steuerliche Freigabe sowie Download/Opt-in/Widerruf/Kontakt/Ablauf/ggf. Kauf/Kündigung praktisch prüfen und Version/Freigabedatum dokumentieren. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
 
 ### Vollständige neue Anlagen – Detailanforderungen erhalten
@@ -5385,203 +5309,104 @@ Historische Reihenfolge/Status nicht mehr aktiv. Jede alte Tabellenanforderung b
 
 | Quelle | Rolle | SHA-256 des gelesenen Inhalts |
 | --- | --- | --- |
-
 | .lovable/plan/novikov-cad-frontend-prototype-2026-09-29.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `304bfcdeeceb778a6ec11438af515c99ca51482f4b14f4bdc3dc5a3c4df1538c` |
-
 | AGENTS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `3e569f9104b69b9172434f4e2d87b3228c526d08b040bc18d0d584584a51035a` |
-
 | ARCHITECTURE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad3ee4ffb059508c60a5af978ef4b8c2a45d48d7f80659ac89d821ee75ab9855` |
-
 | DEVELOPMENT_GUIDE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `84d55c51f07591b8ecb667295e125d47685a2f7d40c8d141ac91832306795dc0` |
-
 | DEVELOPMENT_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e221b2d156ee3d5af2ff66bae49e3f6cf375300a0b1589ef0ab0227b55938654` |
-
 | F13_HILFLINIENSYSTEM.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `d01e2109278d9cdf56f6bd6e662e03674161e0a744de40401f3f54f973b28703` |
-
 | FEATURE_ROADMAP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e406699aa2afbe7b3730fa4fc45e5456e93b3e6332c0031a9ac90ce4cdd91aaa` |
-
 | FUNCTION_REQUIREMENTS_2026-10-03.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `604714d6808e94f792655def583dad14ab0c7285678e2311d43879975a7f81b5` |
-
 | GUIDE_BASELINE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8558b6e2c622b90386bc73af31d7b8f7b64b6cbf84a821a99080055a786a753d` |
-
 | NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0b777dc0191168ed8406ac8135773c06ec0063002b8dff6fb3119b7900d971be` |
-
 | NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f992519b16c6fe00fd5918308adff7099e86b31814e9fbe9ed045630091288b` |
-
 | README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `365563b6236d3a7b8f138e23c64be99c179225fed0c8f8d1f7476d2833749883` |
-
 | STABILIZATION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `69c7cd70aa28f83ee884b7795d8bf6eace80151b9e5456fbdf0f987436ac2729` |
-
 | benchmarks/README.md | Diagnose-/Testevidenz | `ffdc2fa9be0d3687f6826189dbd7bb0b837dd7ce6b76daf87e551a288146ada8` |
-
 | docs/3D_INTERACTION_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b45c3d90af6194488049f014803848fbfb181a2119daf7f66dcc3a6aaa088f79` |
-
 | docs/3D_WORKPLANE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `128592b35fa4eef643959ebec1cf7f486eddbe2048c207db59aabd6065fefd48` |
-
 | docs/AUTOMATIC_WALL_CONNECTIONS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ab5c6367d4c071c626d04dc46067170a022ca0a3da21c2a764a8571749853ef1` |
-
 | docs/CONTOUR_EDGE_PERFORMANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2ef4317ee8c0301beb9f4183cb6b00af3d5456914e6efa8ee743b56821524e7d` |
-
 | docs/CORNER_IFC_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bee41e5e4e7be5a17d8889f6b821e39329b6956775325b83e4e5d54acc8d9e53` |
-
 | docs/LAYER_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `f5aab51a6959587bf697efec3c131229d7fe577d74ed6aa524d3efb4db7f0899` |
-
 | docs/LAYER_VISIBILITY_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dd1208f5abbd703f68b11d6cac8f3f8ed75ce062699cbf9dffde2572d30005cb` |
-
 | docs/LOCAL_SNAP_QUERY_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `502d122271d20173e561f21eeb0bc679833f7fafa3cc9926c7642780ac6a49b4` |
-
 | docs/PERSISTENT_T_RELATIONS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a718140109c7508ff532e07f24df919baf3ea2aaef712757639cfdf39ea77a1d` |
-
 | docs/REFERENCE_SELECTION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ef2acc729f61d82bc853a9e19566b3150ffdcebc1fb1298c9b1f31efcd10452a` |
-
 | docs/T_IFC_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `df6ff37799ed1bf00f37743084a951a85f1fa7f39ff192149bb0f6842c889ce5` |
-
 | docs/T_WALL_CONNECTION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2b180d9d2922edccebac5c5c230b03679ac609ddb367508a88794de8171cde84` |
-
 | docs/T_WINDOW_VALIDATION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0eeaaebd390225c9906429810f81f3602fa01c8d5a182e021170272367759ef6` |
-
 | docs/WALL_CORNER_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `04789c887283a3e7fb5065a574a383c17fe7781e696b861001abea9b7a0a4afd` |
-
 | docs/acceptance/2026-10-04-parallel-workflow.md | Diagnose-/Testevidenz | `3ca6bec5b6e7a03f2433e61d7b924cddf4d4d7467c9075dc1525828c144da763` |
-
 | docs/ai/AI_CAD_PRIMARY_VISION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `7d1bb2e72b2c25dfb011c5e741f93b4be692ba1d1ba4c8dd707580d23beb66b1` |
-
 | docs/ai/AI_FUTURE_VISION.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `dc2ba9ec6123692ffa7eef8c39cbfe35f35df52445bb0a2a2c8b8acecf3cce65` |
-
 | docs/performance/A03_COMMIT_VALIDATION.md | Diagnose-/Testevidenz | `50e2e4af2b515c17c637252b2645aba5c515bdefed54ead19deb0f3ca6248bcf` |
-
 | docs/performance/ACTIVE_MOVEMENT_PROFILE.md | Diagnose-/Testevidenz | `1b3b51ab0fb0843d7b13a050500b05c89775ec209783a6d1aae15d7c5e628a8f` |
-
 | docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md | Diagnose-/Testevidenz | `5a29d2383faa2e2af2b5c6636801fa4c8839f1c3f193e0af6ad3b88c471ed6d8` |
-
 | docs/performance/ASSET_INGRESS.md | Diagnose-/Testevidenz | `82d5781d7540b33d2be19fe1bd0f8c1c67d459c6e3e6148b082ef866af8bfe05` |
-
 | docs/performance/ATOMIC_SELECTION_CONFIRMATION.md | Diagnose-/Testevidenz | `8da980c785d291e26b2b7269c7cf6282936395f874261b4efa53c0d583e842e8` |
-
 | docs/performance/CAPACITY_BASELINE.md | Diagnose-/Testevidenz | `a33fa2e4c361eabcff7c63ba18fbc8102fa84ce80d52b58b0a34e8bdbf63e45b` |
-
 | docs/performance/COMMIT_PHASE_PROFILE.md | Diagnose-/Testevidenz | `fd6c4abc3fdaf5bcf35c54b7834360289ec8b7eea8e54149719b647992a51dcd` |
-
 | docs/performance/CONNECTED_WALLS_PROFILE.md | Diagnose-/Testevidenz | `3b60dc92471de05656ffb32461f36fa33beb2ed333c8b592cb092bbdc0b41ad8` |
-
 | docs/performance/DENSE_SNAPPING.md | Diagnose-/Testevidenz | `ffe92fd0fbf9f68089d7a118c48c13a2894f2e32c7775b2ae868b45f6ea5aa1b` |
-
 | docs/performance/IMAGE_URL_REUSE.md | Diagnose-/Testevidenz | `0a8795ffa03aa7992841c77770fb9c550aaca3b42c4be876a7ae560b170f5c98` |
-
 | docs/performance/LARGE_PLAN_BOUNDS.md | Diagnose-/Testevidenz | `9ebb224f3253e22c87914053532db217532ed2cab77a077cec6071c282e80bf8` |
-
 | docs/performance/LOCAL_INTEGRATION.md | Diagnose-/Testevidenz | `07c987860553c319b84e82d2b2fc7a3dee1c35c65e73bf0880c00e87dd5eaee3` |
-
 | docs/performance/LOCAL_PROXIMITY.md | Diagnose-/Testevidenz | `2e19514a0c6b61d740a0e2e80944e6332c7e7ad53df49b3411c59a5f67bfe14a` |
-
 | docs/performance/LOCAL_SOURCES.md | Diagnose-/Testevidenz | `c5fb0f4ac76fc72abcbff76a09b2c345f8ff6483d225830f8ee527fe03d8f6a7` |
-
 | docs/performance/MANUAL_MOVEMENT_TRACE.md | Diagnose-/Testevidenz | `7d03c2ae1237de232f6f550bc0f09022353e728e19279472817bbb462c856bfb` |
-
 | docs/performance/MODEL_ASSET_CONTRACT.md | Diagnose-/Testevidenz | `73e65eb26bbd55d70797c185de4daf463e8115df02d305e752670ea853f28454` |
-
 | docs/performance/MODEL_COMPARISON.md | Diagnose-/Testevidenz | `ebf6940d0c4a324712f14b8e1c61b96af3d10937de271b8a46eda5db4a6b3944` |
-
 | docs/performance/P0_BROWSER_BASELINE.md | Diagnose-/Testevidenz | `e4a9db058a54a382e2692495cddebe7ccc20b7ad13cca5578f28a18d1dbebf04` |
-
 | docs/performance/PREPARED_CHAIN_CORNER.md | Diagnose-/Testevidenz | `f92dae6c23735dce2150633503bf907b9d8e63434205219292455b7f1c08c118` |
-
 | docs/performance/PREPARED_CHAIN_MOVE.md | Diagnose-/Testevidenz | `4ae85240c7610e92998f2b2f4055156b0d0d9c4572f68c169cdbebe972d9ff00` |
-
 | docs/performance/PREPARED_ENDPOINT_PILOT.md | Diagnose-/Testevidenz | `258508a9062aabf5d51e61c4b4e3510bbf6c5591eea7d806c774a08fe677a4d5` |
-
 | docs/performance/PREPARED_SELECTION_PREVIEW.md | Diagnose-/Testevidenz | `59f3252e0ff7c195a17643a6f5765fa1086df99cc3c4f36444c27701d8c7cc74` |
-
 | docs/performance/PREPARED_WALL_DRAWING.md | Diagnose-/Testevidenz | `4cea62874dd6a5e045c758b42be1b8934a4dbc33daf00138279cc68e8d6b754d` |
-
 | docs/performance/PROJECTED_PICKING_PILOT.md | Diagnose-/Testevidenz | `f4d83457ecad877627cb2f43e643960b6bedbbf2928c5a1c16ac065604a72f61` |
-
 | docs/performance/SELECTION_EXTRUSION_AB.md | Diagnose-/Testevidenz | `f16f3a6831155fb3538d7a0b867207140c2e02449c406cb934555a61dfd19042` |
-
 | docs/performance/SELECTION_PREVIEW_REUSE.md | Diagnose-/Testevidenz | `1aff34219dd6ec9da9405565e579e27b59aa200e1d1c42f25045ace8142fda22` |
-
 | docs/performance/SELECTION_SCALE_PROFILE.md | Diagnose-/Testevidenz | `976a7710bb723cacfe84ef7022ef205d258e281aafc7d2257a2d3eba3bd3a8c1` |
-
 | docs/performance/SESSION_WALL_EXTRUSION.md | Diagnose-/Testevidenz | `7796eeff58b57b993bfc14d405e5d54d90b4ac0248a38909772f4c9d5c5ba4fe` |
-
 | docs/performance/SHARED_CHAIN_CORNER.md | Diagnose-/Testevidenz | `b967e84c9367a8819b0e3f10664406fb4802de0036eaca48cfb5c351e5199fb7` |
-
 | docs/performance/SHARED_CHAIN_MOVE.md | Diagnose-/Testevidenz | `dac3b7c98eb10ce5003610b76719dcb3a61a3b1a7efc2117a4e3a8d79032be78` |
-
 | docs/performance/SHARED_ENDPOINT_PREVIEW.md | Diagnose-/Testevidenz | `f648f7a03f6e5f1df9bc031287f842bfe635e76296af2317ddd3a8c9feee8905` |
-
 | docs/performance/SHARED_SOLID_PICKING.md | Diagnose-/Testevidenz | `840fea65ce5056f5a7d72513ff9f76b21531b34ccda4fa1e431f0c20308280b9` |
-
 | docs/performance/SHARED_WALL_DRAWING.md | Diagnose-/Testevidenz | `2f9dbf85141bea0025937f34b90b22535e46d318ef280fa9e8604f4ea85b187d` |
-
 | docs/performance/SHIFT_REPEAT_INPUT.md | Diagnose-/Testevidenz | `2d50b991dedc43441102ff80f7f24b7d24106967a5b821891dc12e1b7d8546fd` |
-
 | docs/performance/SHIFT_SELECTION_DIAGNOSIS.md | Diagnose-/Testevidenz | `e4c2d82db28484197128a48c1911c5d8f14082f2b891b64bccd2dde5b1e74800` |
-
 | docs/performance/SINGLE_WALL_SHARED_MOVE.md | Diagnose-/Testevidenz | `16a67ff28bcbea316cdefd51388f33e6cba14b1e1b07940bd488263330c75610` |
-
 | docs/performance/SNAP_BASELINE.md | Diagnose-/Testevidenz | `e4c5cefd77884004fbf970f6b590a4e077e4f542a7a8eae6e2f403729e3437e0` |
-
 | docs/performance/SNAP_DENSITY.md | Diagnose-/Testevidenz | `fb7660ebc7c4c156529a1dbd327f58d28370b24103889de56c005f192ea273eb` |
-
 | docs/performance/SOLID_CAMERA_PROFILE.md | Diagnose-/Testevidenz | `7fe746c6568e75de9d6ea4d47c1007be16ac4f2bfc11bf29174ce8cb1b061c71` |
-
 | docs/performance/SOLID_LIFECYCLE_PILOT.md | Diagnose-/Testevidenz | `50542ece21c2c4b78b599a501005d29e5707792f5a5289c75d7e1bd0c2f55b8b` |
-
 | docs/performance/SOLID_MATRIX_PILOT.md | Diagnose-/Testevidenz | `b62f17e62efa7f8f750ac671b7478220c0f594df3630ea31dfb272da97ee25d2` |
-
 | docs/performance/SOLID_RENDERER_INTEGRATION.md | Diagnose-/Testevidenz | `5f21fe1f0454016eca0d75b56dddacd2a5c438114ef13ca3000d80f67a834f10` |
-
 | docs/performance/VALIDATED_ASSET_HANDLES.md | Diagnose-/Testevidenz | `1ee83d5725247b9c23df2ffea858b62756f9c4fa6df3e67cb72bdf801ecf3b79` |
-
 | docs/performance/WALL_DRAWING_PROFILE.md | Diagnose-/Testevidenz | `686405a8107efd64e1ce241cd6e9b1574e2243f1ed688d30dcb317c9972d9557` |
-
 | docs/performance/WALL_ENDPOINT_PROFILE.md | Diagnose-/Testevidenz | `7ed973b082a139843fdf6352dcc54801594c5ece213fa78bf3bf1f461b76def5` |
-
 | docs/performance/WORLD_PICKING_PILOT.md | Diagnose-/Testevidenz | `7d1808e76964bee9be9781c994bbdd5bb86850b14dd397f744d0c26db6b914d4` |
-
 | docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `239d021acf7ceb210bc40d4834bf4a2dd23cddbb9e2ff86bed0c10060d427ab9` |
-
 | docs/planning/HATCH_PAPER_SCALE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b53f1bfd2ba6dbbb86d17f2cb2e2b2d67b008a3794062ff65121a111d6eb3e15` |
-
 | docs/planning/HATCH_PATTERN_LIBRARY.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `8b4311e4cab5709c78ff6b4f30cdfefee0510133699e42dd151f5537567b23be` |
-
 | docs/planning/HATCH_PRESET_PICKUP.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bff36ed5a2547db5cc2a545ac9022e0ec600aa6709eb350673139e252960d1a6` |
-
 | docs/planning/SAVED_DRAWING_VIEWS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9f2e41a7a97a8e8d5da3b81647bb8b27423329d396b80e50291941d9787d4a14` |
-
 | docs/planning/VIEW_SCALE_CONTRACT.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `0dcdc68d9e5d9e9d98cffb17f18a976d20d59660e576581381784a72ea6b0dfe` |
-
 | docs/references/IMAGE_REFERENCE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `6916dfe68f74585c6a185f354c0b5450ed721a525e2972a539a46dc404e40c12` |
-
 | docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `9e5d6460cd2c03100bd6b3ac80cf423b091b29ec26cfe001250126be7272c14d` |
-
 | docs/validation/HATCH_CONSTRUCTION_MODES.md | Diagnose-/Testevidenz | `d25511f19aab082282c171fe4789c9c877d5dbcac5473560d8215db0f4425bb9` |
-
 | docs/validation/LIVE_ANGLE_MEASUREMENT.md | Diagnose-/Testevidenz | `6783e991438838a794ad5f0a43a4b62dbe2c6e097f93b9d8cd66c93b78688481` |
-
 | docs/validation/LIVE_AREA_MEASUREMENT.md | Diagnose-/Testevidenz | `ee810c4a679cdbd1791fbe9e45a34146be3d8a9f55fc67275480b622ac86fa4b` |
-
 | docs/validation/LIVE_DISTANCE_MEASUREMENT.md | Diagnose-/Testevidenz | `4c4765a39f329779b3b038fc099be47af2e9bb7399c3e8007246d2948c577990` |
-
 | docs/walls/CORNER_T_COMBINATION_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `4f2957b75957359f97eb3e99dfa818011421fe654643d8fc311a68dd94e70b8c` |
-
 | docs/walls/SELECTION_MOVE_PLAN.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `e5dec4b83e74bee60bf769f1ac0793c732ecc33b097be0f7775c2814f75f20de` |
-
 | docs/walls/TWO_CORNER_T_ACCEPTANCE.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `14283bd6a9e790b01dbef95e1eb5098ab67b16a51f3a6c98201f0e048b5fd17c` |
-
 | src/components/cad/BIM_UI.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `b7912759a1f13f95336dae487359e66dadc4144ebc5d4ce7735ac8841d0eab80` |
-
 | src/lib/bim/COMMANDS.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `1a4ff6190583433862a7ee07d355e068ac39d3ca111e71f8170fae2cfdaf236e` |
-
 | src/lib/bim/IFC.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `bd8e96fbec05e9a460dc9ba3df51fae908bc284c8b5fdf905198489cbaa693a1` |
-
 | src/lib/bim/LINES.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `722e2b2b28b98d9917fe34fcfd730d66608da22e091ab0f459419e3c4c13e21e` |
-
 | src/lib/bim/PROJECT_FILES.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `a02fc92cb017a8b882c5196c1e90ff997f25355dc4e554c833d28bf05c23ad2c` |
-
 | src/lib/bim/README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `ad405208ec953b5c201e540b65ecc4b3db14ce5021cdc21878e94a87a5cd3052` |
-
 | src/routes/README.md | Guide/Regel/Funktionsquelle; zentral zugeordnet | `2486f50763c31c0cfe0f7282bba9a14a7e2c031988dfc0c8df5f88b9e172b736` |
 
 
@@ -10691,29 +10516,17 @@ Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands-
 
 | Quelle | SHA-256 | Einordnung |
 | --- | --- | --- |
-
 | NOVIKOV_ARCHITEKTUR_REVIEW_UND_FUNKTIONSMAP.md | `94835f1c6f8f00d550685c83cc443925108aebca041c680be61b27bfab47114d` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_ENTWICKLUNGSGUIDE.md | `a8e18e28b3cb224f0e7cfff046cfbcbda1a545eec108c6a1b574a6498624d0dd` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_FUNKTIONSARCHITEKTUR_2026-10-03.md | `cd742b8bc2648c7534cbbeeaa773ca5b8aea320b633e2aa34772742a338bf7f1` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_Entwicklungsleitfaden.md | `84d55c51f07591b8ecb667295e125d47685a2f7d40c8d141ac91832306795dc0` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_Entwicklungsplan.md | `ab90846f90b0d9a6c18da3edaf9646ee8c73d6400b097348f742e6f715606c58` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | 0.Where it all Begins.(1).docx | `6d4aac7711d92d9ef230f593569eca3ced9504527b999414fe255756f99714a9` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | CAD_BIM_2026_AI_Strategie.pdf | `c1f828b1297446c60072d6e6a7ae256e19cb1f838a66e8428431e93161738c34` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | FUNKTIONEN 03.10.2026.docx | `8b9ed3ff6a61952042093167382f7927fb4dc62f15ef92fa58533646a9fcd3e2` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | FUNKTIONEN 03.10.2026.pdf | `dee017a86132e0c9eb0c8489ac5525fe0cb795c1a6ad123c50f768ddaa73c0de` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_CODEX_RELEASE_COMPLIANCE.md | `9c89bd4826a714a044904683d52c02d1e39b30373a4987a06eabcd56b8352a20` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_HOMEPAGE_ANFORDERUNGEN.md | `e8314b119213e2ba54494f38d04f6dac94d2b5c0d3490517ba92fecbfa9bcda5` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
-
 | NOVIKOV_SBOM_KONZEPT.md | `1aab30f16c3c4ffd832d3448084926f15896a1148d99736c153439693d5b33f4` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
 
 Die erneut bereitgestellte FUNKTIONEN-DOCX hat exakt den SHA-256 der Repository-Transkription vom 08.10.; ihr Wortlaut ist oben vollständig erhalten. Das ältere FUNKTIONEN-PDF wurde zusätzlich textuell geprüft und enthält den früheren Katalog; die DOCX ergänzt dessen Schlusswünsche. Frühe lokale Guides sind historische Fassungen, keine zusätzlichen aktiven Aufträge.
