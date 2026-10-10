@@ -1,5 +1,11 @@
 import {
+  listRecoveryProjects,
+  readProjectRecovery,
+  saveProjectRecovery,
+} from "../src/application/project-files/recovery-catalog";
+import {
   createRecoveryStorage,
+  createRecoveryCatalog,
   openRecoveryDatabase,
 } from "../src/interop/project-file/recovery-storage";
 import { readRecovery, saveRecovery } from "../src/application/project-files/recovery";
@@ -48,7 +54,11 @@ if (peer) {
     )
       return;
     try {
-      await storage.replace(data.expected, data.next);
+      const target =
+        typeof data.projectId === "string"
+          ? createRecoveryCatalog(() => openRecoveryDatabase(name)).project(data.projectId)
+          : storage;
+      await target.replace(data.expected, data.next);
       channel.postMessage({ kind: "result", accepted: true });
       log("Schreibversuch bestätigt.");
     } catch (error) {
@@ -83,12 +93,22 @@ if (peer) {
     const live = createEditingState(createExampleProject());
     const unchanged = JSON.stringify(live);
     try {
+      // Exercise upgrade from an actual version-1 database without removing its manual slot.
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(name, 1);
+        request.onupgradeneeded = () => request.result.createObjectStore("snapshots");
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          request.result.close();
+          resolve();
+        };
+      });
       await saveRecovery(live.history.present, storage);
       const baseline = await storage.read();
       let aborted = false;
       // Wrap only the connection in this test. The production adapter still performs
       // its real get/put; abort after native put success, before transaction commit.
-      const aborting = createRecoveryStorage(async () => {
+      const openAborting = async () => {
         const db = await openRecoveryDatabase(name);
         return new Proxy(db, {
           get(target, prop) {
@@ -128,7 +148,8 @@ if (peer) {
             return typeof value === "function" ? value.bind(target) : value;
           },
         });
-      });
+      };
+      const aborting = createRecoveryStorage(openAborting);
       let rejected = false;
       try {
         await saveRecovery({ ...live.history.present, id: "must-not-publish" }, aborting);
@@ -197,7 +218,81 @@ if (peer) {
       log(
         "PASS: beschädigter Stand bietet validierten Vorgänger; Arbeitsmodell und History unverändert.",
       );
-      log("ERGEBNIS: 3/3 Browserprüfungen bestanden.");
+      const catalog = createRecoveryCatalog(() => openRecoveryDatabase(name));
+      await listRecoveryProjects(catalog);
+      assert((await storage.read()) === JSON.stringify(damaged), "Migration verändert Original");
+      assert(
+        (await readProjectRecovery(catalog, winner.project.id))?.project.id === winner.project.id,
+        "Migration fehlt",
+      );
+      await saveProjectRecovery({ ...live.history.present, id: "catalog-a" }, catalog);
+      await saveProjectRecovery({ ...live.history.present, id: "catalog-b" }, catalog);
+      const beforeB = await catalog.project("catalog-b").read();
+      const beforeA = await catalog.project("catalog-a").read();
+      const indexBefore = JSON.stringify(await catalog.list());
+      const abortCatalog = createRecoveryCatalog(openAborting);
+      aborted = false;
+      let projectRejected = false;
+      try {
+        await saveProjectRecovery({ ...live.history.present, id: "catalog-a" }, abortCatalog);
+      } catch {
+        projectRejected = true;
+      }
+      assert(aborted && projectRejected, "Projektabbruch muss Promise ablehnen");
+      assert(
+        (await catalog.project("catalog-a").read()) === beforeA,
+        "Projekt verändert nach Abbruch",
+      );
+      assert(JSON.stringify(await catalog.list()) === indexBefore, "Index verändert nach Abbruch");
+      await saveProjectRecovery({ ...live.history.present, id: "catalog-a" }, catalog);
+      assert((await catalog.project("catalog-b").read()) === beforeB, "Anderes Projekt verdrängt");
+      assert((await catalog.list()).length === 3, "Unvollständige Projektliste");
+      log(
+        "PASS: v1-Upgrade, verlustfreie Migration, unabhängige Projekte, atomarer Abbruch von Index und Daten.",
+      );
+      const projectRaw = (await catalog.project("catalog-a").read())!;
+      const first = JSON.parse(projectRaw);
+      const second = JSON.parse(projectRaw);
+      first.current.savedAt = "2026-10-10T01:00:00Z";
+      second.current.savedAt = "2026-10-10T02:00:00Z";
+      const peerResult = new Promise<{ accepted: boolean }>((resolve, reject) => {
+        const timer = window.setTimeout(() => {
+          receive = undefined;
+          reject(new Error("Zweiter Tab antwortet nicht"));
+        }, 10000);
+        receive = (value) => {
+          clearTimeout(timer);
+          receive = undefined;
+          resolve(value);
+        };
+      });
+      channel.postMessage({
+        kind: "replace",
+        projectId: "catalog-a",
+        expected: projectRaw,
+        next: JSON.stringify(second),
+      });
+      const race = await Promise.all([
+        catalog
+          .project("catalog-a")
+          .replace(projectRaw, JSON.stringify(first))
+          .then(
+            () => ({ accepted: true }),
+            () => ({ accepted: false }),
+          ),
+        peerResult,
+      ]);
+      assert(
+        race.filter((r) => r.accepted).length === 1,
+        "Projektkonflikt ohne eindeutigen Gewinner",
+      );
+      const entry = (await catalog.list()).find((p) => p.projectId === "catalog-a")!;
+      assert(
+        entry.savedAt === (await readProjectRecovery(catalog, "catalog-a"))?.savedAt,
+        "Index und Daten weichen ab",
+      );
+      log("PASS: Projektkonflikt über zwei Tabs; Gewinnerdatum und Index konsistent.");
+      log("ERGEBNIS: 5/5 Browserprüfungen bestanden.");
     } catch (error) {
       log(`FAIL: ${error instanceof Error ? error.message : String(error)}`);
     } finally {

@@ -1,22 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import type { Project } from "@/domain/project/schema";
 import { startRecoveryOffer, type RecoveryOffer } from "@/application/project-files/recovery-offer";
-import { browserRecoveryStorage } from "@/interop/project-file/recovery-storage";
+import { browserRecoveryCatalog } from "@/interop/project-file/recovery-storage";
 import { Button } from "@/components/ui/button";
 
 export function RecoveryStartupNotice({
   context,
-  onPrepare,
+  onOpen,
 }: {
   context: unknown;
-  onPrepare: (candidate: { name: string; project: Project }) => void;
+  onOpen: () => void;
 }) {
   const initialContext = useRef(context);
   const [offer, setOffer] = useState<RecoveryOffer | null>(null);
   const [dismissed, setDismissed] = useState(false);
   useEffect(() => {
     if (context !== initialContext.current) return;
-    const query = startRecoveryOffer(browserRecoveryStorage, setOffer);
+    const query = startRecoveryOffer(browserRecoveryCatalog, setOffer);
     return query.dispose;
   }, [context]);
   if (context !== initialContext.current || dismissed || !offer || offer.kind === "empty")
@@ -29,11 +28,8 @@ export function RecoveryStartupNotice({
       <p role="status">
         {offer.kind === "available" ? (
           <>
-            {offer.candidate.fallback
-              ? "Gültiger Vorgänger verfügbar"
-              : "Lokaler Wiederherstellungsstand verfügbar"}
-            : Projekt „{offer.candidate.project.id}“,{" "}
-            {new Date(offer.candidate.savedAt).toLocaleString()}. Übernahme erst nach Bestätigung.
+            Lokale Wiederherstellungsstände für {offer.projects.length} Projekt(e) verfügbar.
+            Auswahl und Übernahme erst nach Prüfung und Bestätigung.
           </>
         ) : (
           <>
@@ -48,10 +44,10 @@ export function RecoveryStartupNotice({
             size="sm"
             onClick={() => {
               setDismissed(true);
-              onPrepare(offer.candidate);
+              onOpen();
             }}
           >
-            Wiederaufnahme vorbereiten
+            Stände auswählen
           </Button>
         )}
         <Button size="sm" variant="outline" onClick={() => setDismissed(true)}>

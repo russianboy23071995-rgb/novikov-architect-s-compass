@@ -1,19 +1,30 @@
-import { readRecovery, type RecoveryStorage } from "./recovery.ts";
+import {
+  queryRecoveryProjects,
+  type RecoveryCatalog,
+  type RecoverySummary,
+} from "./recovery-catalog.ts";
 
 export type RecoveryOffer =
-  | { kind: "available"; candidate: NonNullable<Awaited<ReturnType<typeof readRecovery>>> }
+  | { kind: "available"; projects: RecoverySummary[] }
   | { kind: "empty" }
   | { kind: "unavailable"; message: string };
 
 /** Read-only startup query. Disposing suppresses even delayed errors, never writes a snapshot. */
 export function startRecoveryOffer(
-  storage: RecoveryStorage,
+  storage: RecoveryCatalog,
   notify: (offer: RecoveryOffer) => void,
 ) {
   let disposed = false;
-  const done = readRecovery(storage).then(
-    (candidate) => {
-      if (!disposed) notify(candidate ? { kind: "available", candidate } : { kind: "empty" });
+  const done = queryRecoveryProjects(storage).then(
+    ({ projects, warnings }) => {
+      if (!disposed)
+        notify(
+          projects.length
+            ? { kind: "available", projects }
+            : warnings.length
+              ? { kind: "unavailable", message: warnings.join(" ") }
+              : { kind: "empty" },
+        );
     },
     (error) => {
       if (!disposed)
