@@ -29,6 +29,7 @@ import type { ManageLayerRequest } from "../layers/actions.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
+  projectLoad?: { accepted: boolean };
   documentLayerActivation?: { base: Project; documentId: string; layerIds: string[] };
   history: ProjectHistory;
   visibilityHistory?: VisibilityHistory;
@@ -238,6 +239,11 @@ export type EditingEvent = BaseEditingEvent & {
 
 /** Storage is read by the adapter before dispatch; the reducer stays deterministic. */
 export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  if (event.type === "load-project") {
+    const { projectLoad: _load, documentLayerActivation: _activation, ...clean } = state;
+    const next = reduceWithPatterns(clean, event);
+    return { ...next, projectLoad: next.projectLoad ?? { accepted: false } };
+  }
   // Tool completion also cancels its transient interaction after committing.
   // Keep the confirmed placement notice through that cleanup.
   if (event.type === "cancel") return reduceWithPatterns(state, event);
@@ -332,12 +338,16 @@ function reduceEditing(
   state: EditingState,
   event: Exclude<BaseEditingEvent, { type: "patterns-changed" }>,
 ): EditingState {
-  if (event.type === "load-project")
+  if (event.type === "load-project") {
+    const next = reduceModelEdit(state, { type: "project", project: event.project });
+    if (next.error) return next;
     return {
-      ...reduceModelEdit(state, { type: "project", project: event.project }),
+      ...next,
+      projectLoad: { accepted: true },
       visibilityHistory: emptyVisibilityHistory(),
       documentVisibilityHistories: {},
     };
+  }
   if (event.type !== "visibility")
     return {
       ...reduceModelEdit(state, event),

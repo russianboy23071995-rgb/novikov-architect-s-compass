@@ -68,8 +68,8 @@ import { HatchPatternCreator } from "./HatchPatternCreator";
 import { TopToolbar } from "./TopToolbar";
 import { ViewportManager } from "./CadViewport";
 import { CornerPreviewDialog } from "./CornerPreviewDialog";
-import { serializeProject } from "@/lib/bim/model";
-import { readProjectFile, PROJECT_FILE_LIMIT } from "@/lib/bim/history";
+import { prepareProjectOpen, requestProjectDownload } from "@/application/project-files/operations";
+import { browserProjectDownload } from "@/interop/project-file/browser-download";
 import { FloatingPanel } from "./FloatingPanel";
 import { exportIfc } from "@/lib/bim/ifc";
 import { applySelectionCommand } from "@/application/commands/selection-command";
@@ -366,28 +366,36 @@ export function CadWorkspace({
       setMode("2D");
   };
 
-  const showSelection = (
-    next: Selection,
-    anchor?: Point,
-    index?: number,
-    modelPoint?: Point,
-    edgeIndex?: number,
-  ) => {
-    cancelInteraction();
-    setPickedPoint({
-      index: index ?? null,
-      anchor: modelPoint ?? null,
-      edgeIndex: edgeIndex ?? null,
-    });
-    setDemandOpen(Boolean(next));
-    if (next && (anchor || next.id !== selection?.id)) {
-      const point = anchor ?? lastPointer.current;
-      setDemandPosition({ x: point.x + 16, y: point.y + 16 });
-    }
-    setSelection(next);
-    setTool("select");
-    setModelError("");
-  };
+  const showSelection = useCallback(
+    (next: Selection, anchor?: Point, index?: number, modelPoint?: Point, edgeIndex?: number) => {
+      cancelInteraction();
+      setPickedPoint({
+        index: index ?? null,
+        anchor: modelPoint ?? null,
+        edgeIndex: edgeIndex ?? null,
+      });
+      setDemandOpen(Boolean(next));
+      if (next && (anchor || next.id !== selection?.id)) {
+        const point = anchor ?? lastPointer.current;
+        setDemandPosition({ x: point.x + 16, y: point.y + 16 });
+      }
+      setSelection(next);
+      setTool("select");
+      setModelError("");
+    },
+    [cancelInteraction, selection?.id, setSelection],
+  );
+
+  const handledProjectLoad = useRef(editing.projectLoad);
+  useEffect(() => {
+    if (handledProjectLoad.current === editing.projectLoad) return;
+    handledProjectLoad.current = editing.projectLoad;
+    if (!editing.projectLoad?.accepted) return;
+    setActiveDocumentId(null);
+    showSelection(null);
+    setExportMessage("Projektdatei geladen.");
+    setPendingFile(null);
+  }, [editing.projectLoad, showSelection]);
 
   const selectElement = (
     next: Selection,
@@ -472,22 +480,11 @@ export function CadWorkspace({
   };
 
   const saveProject = () => {
+    setExportMessage("");
     try {
-      const url = URL.createObjectURL(
-        new Blob([serializeProject(project)], { type: "application/json" }),
-      );
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = "novikov-project.json";
-      document.body.appendChild(anchor);
-      try {
-        anchor.click();
-      } finally {
-        anchor.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
+      requestProjectDownload(project, browserProjectDownload);
       setExportMessage(
-        "Projektdatei erstellt · Download angefordert. Noch nicht übernommene Eingaben sind nicht enthalten.",
+        "Download angefordert · Speicherung auf dem Datenträger nicht bestätigt. Noch nicht übernommene Eingaben sind nicht enthalten.",
       );
       setModelError("");
     } catch {
@@ -498,11 +495,11 @@ export function CadWorkspace({
   const openProjectFile = async (file: File) => {
     if (readingFile) return;
     setReadingFile(true);
+    setPendingFile(null);
+    setExportMessage("");
     setModelError("");
     try {
-      if (file.size > PROJECT_FILE_LIMIT) throw new Error("Projektdatei ist größer als 10 MB.");
-      const next = readProjectFile(await file.text());
-      setPendingFile({ project: next, name: file.name });
+      setPendingFile(await prepareProjectOpen(file));
     } catch (error) {
       setModelError(
         error instanceof Error ? error.message : "Projektdatei konnte nicht gelesen werden.",
@@ -762,14 +759,10 @@ export function CadWorkspace({
               <Button
                 onClick={() => {
                   if (pendingFile) {
-                    setActiveDocumentId(null);
                     dispatchEditing({
                       type: "load-project",
-                      project: ensureDocumentFolder(pendingFile.project),
+                      project: pendingFile.project,
                     });
-                    showSelection(null);
-                    setExportMessage("Projektdatei geladen.");
-                    setPendingFile(null);
                   }
                 }}
               >
@@ -1482,7 +1475,7 @@ export function CadWorkspace({
                 {exportMessage && (
                   <p
                     role="status"
-                    className="absolute bottom-20 left-3 z-30 rounded bg-popover px-2 py-1 text-xs text-foreground"
+                    className="pointer-events-none absolute left-3 top-14 z-40 max-w-sm rounded border border-border bg-popover/95 px-3 py-2 text-xs text-foreground shadow-lg"
                   >
                     {exportMessage}
                   </p>
