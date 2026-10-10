@@ -1,3 +1,4 @@
+import { modelViewSchema, drawingDocumentSchema } from "../views/documents.ts";
 import { workingPlanScale } from "../views/scale.ts";
 import { hatchCellSize } from "../elements/hatch/sizing.ts";
 import { penSetSchema } from "../pens/model.ts";
@@ -196,50 +197,60 @@ const projectV15Schema = projectV14Schema.extend({
     .max(1)
     .optional(),
 });
-const projectSchema = projectV15Schema.extend({
+const projectV16Schema = projectV15Schema.extend({
   schemaVersion: z.literal(16),
   storey: projectV15Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
 });
+const projectSchema = projectV16Schema.extend({
+  schemaVersion: z.literal(17),
+  modelViews: z.array(modelViewSchema).optional(),
+  drawingDocuments: z.array(drawingDocumentSchema).optional(),
+});
+export function validateProjectV16(value: unknown) {
+  const old = projectV16Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 17 });
+  return old;
+}
 export function validateProjectV15(value: unknown) {
   const old = projectV15Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16 });
+  validateProject({ ...old, schemaVersion: 17 });
   return old;
 }
 export function validateProjectV14(value: unknown) {
   const old = projectV14Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16 });
+  validateProject({ ...old, schemaVersion: 17 });
   return old;
 }
 export function validateProjectV13(value: unknown) {
   const old = projectV13Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16 });
+  validateProject({ ...old, schemaVersion: 17 });
   return old;
 }
 export function validateProjectV12(value: unknown) {
   const old = projectV12Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16 });
+  validateProject({ ...old, schemaVersion: 17 });
   return old;
 }
 export function validateProjectV11(value: unknown) {
   const old = projectV11Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16 });
+  validateProject({ ...old, schemaVersion: 17 });
   return old;
 }
 export function validateProjectV10(value: unknown) {
   const old = projectV10Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16, hatchPatterns: [] });
+  validateProject({ ...old, schemaVersion: 17, hatchPatterns: [] });
   return old;
 }
 export function validateProjectV9(value: unknown) {
   const old = projectV9Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 16, hatchPatterns: [] });
+  validateProject({ ...old, schemaVersion: 17, hatchPatterns: [] });
   return old;
 }
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 16,
+    schemaVersion: 17,
     hatchPatterns: [],
     assets: [],
     storey: { ...old.storey, references: [] },
@@ -325,6 +336,17 @@ export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
   if (project.workingViews?.some((view) => view.storeyId !== project.storey.id))
     throw new Error("Unbekanntes Geschoss im Arbeitsmaßstab.");
+  const views = new Map((project.modelViews ?? []).map((v) => [v.id, v]));
+  for (const view of views.values())
+    if (view.storeyId !== project.storey.id) throw new Error("Unbekanntes Geschoss im Abbild.");
+  for (const doc of project.drawingDocuments ?? []) {
+    if (!views.has(doc.modelViewId)) throw new Error("Unbekannte Modellansicht im Abbild.");
+    if (
+      new Set(doc.hiddenLayerIds).size !== doc.hiddenLayerIds.length ||
+      doc.hiddenLayerIds.some((id) => !project.layers.some((l) => l.id === id))
+    )
+      throw new Error("Ungültige Ebenensichtbarkeit im Abbild.");
+  }
   validateGeometry(project);
   connectedWallSolids(project);
   validateLayers(project);
@@ -354,6 +376,18 @@ export function validateProject(value: unknown): Project {
       )
     )
       throw new Error("Ungültige Musterausdehnung.");
+    for (const doc of project.drawingDocuments ?? []) {
+      const size = hatchCellSize(definition, hatch.pattern, {
+        view: { kind: "drawing-document", projectId: project.id, documentId: doc.id },
+        denominator: doc.denominator,
+      });
+      if (
+        ![hatch.pattern.origin.x + size.width, hatch.pattern.origin.y + size.height].every(
+          Number.isFinite,
+        )
+      )
+        throw new Error("Ungültige Musterausdehnung im Abbild.");
+    }
     used.add(definition.id);
   }
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
@@ -372,11 +406,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 16 ? project.storey.references : []),
+    ...(project.schemaVersion === 17 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 16
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 17
       ? project.storey.hatches
       : []),
   ]) {
@@ -391,13 +425,16 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 16 ? project.assets : []),
+    ...(project.schemaVersion === 17
+      ? [...(project.modelViews ?? []), ...(project.drawingDocuments ?? [])]
+      : []),
+    ...(project.schemaVersion === 17 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 16 ? project.storey.references : []),
+    ...(project.schemaVersion === 17 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 16
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 17
       ? project.storey.hatches
       : []),
   ]) {
@@ -406,7 +443,7 @@ function validateGeometry(
   }
   for (const line of project.storey.lines ?? []) {
     validateLineGeometry(line);
-    if (project.schemaVersion === 16) {
+    if (project.schemaVersion === 17) {
       const current = line as DrawingLine;
       if (current.style === "custom") {
         if (!current.pattern || !current.repeatLength)
@@ -423,7 +460,7 @@ function validateGeometry(
         throw new Error("Only custom lines may carry a pattern.");
     }
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 16)
+  if (project.schemaVersion === 5 || project.schemaVersion === 17)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

@@ -1,3 +1,47 @@
+## MS-04c: Gespeicherte Grundrisse als Abbilder — 10.10.2026
+
+PR237 nach grüner CI regulär zusammengeführt. Schema 17 speichert ModelView-Quelle
+und DrawingDocument mit ID, Name, eigenem Maßstab und Ebenenfilter. Strikte Migration
+1–16 erfindet keine Abbilder. Bauteile bleiben ausschließlich im bestehenden Modell.
+Gemeinsame Application-Aktionen und Kontextauflösung werden von Navigator und Renderer
+verwendet; keine neue Geometrie- oder AI-Logik.
+
+Navigator: Tabs Gebäudestruktur/Abbilder; anlegen, umbenennen, öffnen, löschen.
+Neuanlage übernimmt einmal den Filter des Arbeitsmodells, danach unabhängig.
+Nutzerentscheidung: Anlage/Löschung über normales Projekt-Undo. Umbenennen und
+Dokumentmaßstab folgen im Pilot derselben History für Dokumentdefinitionen.
+Sichtbarkeit bleibt beim vorhandenen Ebenenumschalter samt kontextbezogener
+Paletten-History; keine zusätzliche Abbild-History. Arbeitsmaßstab unverändert
+außerhalb Modell-Undo. Modellbearbeitung erfolgt im Arbeitsmodell.
+
+Prüfung: 802 Tests bestanden, Typprüfung einschließlich Benchmarks und Build
+bestanden; Lint 0 Fehler, sechs bekannte Warnungen. Neue Tests prüfen zwei Dokumente,
+Quelle/Filter/Maßstab, Hostfenster, aktuelle Modellprojektion, Stale-Context-Rejection,
+Projekt- und Sichtbarkeits-Undo, Migration, ungültige Referenzen, JSON und identischen
+IFC-Inhalt. Browser: zwei Abbilder 1:50/1:200, Wandebene nur in A ausblenden,
+Arbeitsmodell und B unverändert; Paletten-Undo, Löschen/Projekt-Undo; Wand von 3 auf
+6 m ändern und identische Geometrie in beiden Abbildern prüfen; Speichern/Öffnen.
+Keine erfassten Browserfehler. Anfänglicher Höhenfehler des Abbildfensters behoben.
+Screenshot: outputs/saved-plan-documents.png außerhalb des Repos.
+
+Grenzen: zunächst ganzer Grundriss, ein Abbildfenster, keine Modellbearbeitung darin,
+kein Crop/Layout/Annotationstyp, keine Kamera-Persistenz. Quell-ModelView bleibt bei
+Löschung erhalten. Neue UI-Definitionen sind nicht automatisch Sprachbefehle.
+
+Praktische Abnahme: Navigator → Abbilder → Name/Maßstab → Abbild erstellen → Öffnen.
+Wand auswählen und ihre Ebene ausblenden; zum Arbeitsmodell/zweiten Abbild wechseln.
+Nur das erste Abbild darf betroffen sein. Löschen → Projekt-Undo; anschließend
+Projekt speichern und wieder öffnen.
+
+**Genau ein nächster Auftrag: MS-04d Begrenzungsbereich eines Abbilds festlegen.**
+Zunächst die Bedienregel für einen optionalen rechteckigen Bereich bestätigen;
+dann über die vorhandene Punkt-/Fanginteraktion zwei Punkte aufnehmen, als metrische
+Dokumentdefinition validieren und nur die Darstellung begrenzen. Kein Bauteil darf
+abgeschnitten, dupliziert oder skaliert werden; Pan/Zoom verändert den Bereich nicht.
+Gemeinsamer Renderer/Abbildkontext, Projekt-Undo, Speichern/Migration, zwei unabhängige
+Abbilder und Auswahl außerhalb der Grenze prüfen. Kein Layouteditor, keine neue
+2D-Engine. Bis zur Bedienentscheidung bleibt der gesamte Grundriss Standard.
+
 ## MS-04b: Gemeinsamer Arbeitsansichtskontext — 10.10.2026
 
 PR236 nach erfolgreicher CI regulär zusammengeführt. `application/views/working-context`

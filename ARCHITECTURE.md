@@ -1,6 +1,7 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 16 (model/paper hatch application sizing, 2026-10-10).
+Production project schema is now 17 (saved floor-plan DrawingDocuments, 2026-10-10).
+Schema 16 remains the strict legacy hatch-sizing format at file ingress.
 Schema 15 remains the strict legacy working-view format at file ingress.
 Schema 14 remains the strict legacy portable pen-set format at file ingress.
 Schema 10 remains the strict legacy custom-line format at file ingress.
@@ -1830,11 +1831,11 @@ foreign or stale references are explicit failures. Closing a pane does not delet
 its saved definition. Document visibility is independent of the BIM visibility mask.
 Derived caches include relevant model/definition identity, not pointer or camera.
 
-Schema 16 currently has workingViews only; the drawing-document visibility token
-is not proof of document persistence or existence validation. The bounded next
-pilot consolidates the existing working-plan wiring, without creating unused
-ModelView/Document classes. Document initialization, crop interaction and lifecycle
-history remain proposals until decided. Existing storey annotations retain scope.
+Schema 17 now stores optional ModelViews and DrawingDocuments. The first pilot
+uses one floor-plan source per storey and named full-plan documents with independent
+scale and hidden-layer IDs. Older files migrate without invented documents; strict
+referential validation rejects foreign source/storey/layer IDs. Existing storey
+annotations retain scope. Crop and layout composition are not implemented.
 See [saved-view contract and single pilot](docs/planning/SAVED_DRAWING_VIEWS.md).
 
 # 30. Editing, Layers, Heights and Input Contracts — decision 2026-10-03
@@ -2779,6 +2780,32 @@ has a building-structure tab and an Abbilder tab for listing, opening and managi
 saved documents. Creation copies current visibility once; subsequent document
 visibility is independently editable and saved. Reuse the existing layer switcher
 and its visibility undo/redo with an explicit active scope. No separate Abbild
-undo/redo history is wanted. This does not by itself decide whether document
-creation/deletion joins existing project undo; do not silently make it irreversible.
-These are requirements for the next pilot, not implemented navigator capabilities.
+undo/redo history is wanted. User decision: creation/deletion use normal project
+Undo/Redo. Implemented pilot: rename and document-scale edits use that same project
+history as document-definition changes; working scale remains outside model Undo.
+Document visibility remains outside project Undo and reuses the layer palette's
+history keyed by project/document identity. Loading clears these transient stacks.
+
+## Saved floor-plan pilot — MS-04c, 2026-10-10
+
+Typed Application actions create, rename, rescale and delete DrawingDocuments;
+UI and future AI/Text/Voice adapters share these validated operations. Actions
+require the current base snapshot and stable IDs. Document deletion currently
+retains its source ModelView; there are no layout or document-annotation dependents.
+Future dependents must be explicitly checked before deletion is extended.
+
+The Navigator exposes Gebäudestruktur and Abbilder. Opening binds a read-only
+full-floor-plan viewport to the existing model renderer and context resolver.
+Selection serves layer controls; model drawing/direct edit/pickup/commands are
+not wired into this first document viewport. Project-level layer/library management
+remains available. Definitions and filters persist; active pane/zoom do not.
+Missing active documents show an explicit unresolved state with project Undo or
+return to working model, never a silent replacement rendering. All documents see
+model changes; BIM visibility is not an upstream mask. IFC remains complete.
+
+New documents copy the working-model filter once. Later filters are independent;
+new layers are visible, deleting an unused layer removes its hidden ID in documents.
+Undo retains current document filters for surviving IDs; restoring a deleted
+document restores its last saved definition/filter. There is no second BIM model
+or separate geometry engine. Screen switching currently uses one document pane;
+simultaneous documents and saved crop rectangles remain follow-up work.

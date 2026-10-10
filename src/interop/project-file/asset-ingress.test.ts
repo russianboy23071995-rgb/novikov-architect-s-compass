@@ -72,7 +72,7 @@ test("file ingress renews handles and shares them through wall/line edits and hi
   assert.deepEqual(reopened, h.present);
   assert.notEqual(reopened.assets[0], asset);
   assert.equal(validateProject(reopened).assets[0], reopened.assets[0]);
-  assert.equal(reopened.schemaVersion, 16);
+  assert.equal(reopened.schemaVersion, 17);
 });
 test("file ingress rejects corrupt storage, references and geometry before returning handles", () => {
   for (const mutate of [

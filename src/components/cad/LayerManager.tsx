@@ -7,6 +7,7 @@ import type { ManageLayerRequest } from "@/application/layers/actions";
 import { FloatingPanel } from "./FloatingPanel";
 
 type Props = {
+  hiddenLayerIds?: readonly string[];
   project: Project;
   onVisibility: (base: Project, action: VisibilityAction) => void;
   canUndoVisibility: boolean;
@@ -71,6 +72,7 @@ function LayerRow({
   );
 }
 export function LayerManager({
+  hiddenLayerIds,
   project,
   open,
   onOpenChange,
@@ -98,7 +100,7 @@ export function LayerManager({
             <input
               type="checkbox"
               aria-label={"Ebene sichtbar: " + layer.name}
-              checked={!project.bimVisibility.hiddenLayerIds.includes(layer.id)}
+              checked={!(hiddenLayerIds ?? project.bimVisibility.hiddenLayerIds).includes(layer.id)}
               onChange={(event) =>
                 onVisibility(project, {
                   kind: "set",

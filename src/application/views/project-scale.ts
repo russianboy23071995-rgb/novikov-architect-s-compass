@@ -7,7 +7,9 @@ import {
   type ScaleContext,
 } from "../../domain/views/scale.ts";
 
-export function projectScaleContext(project: Project): ScaleContext {
+export function projectScaleContext(
+  project: Project,
+): ScaleContext & { view: WorkingPlanIdentity } {
   return workingPlanScale(
     project.id,
     project.storey.id,

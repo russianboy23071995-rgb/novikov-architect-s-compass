@@ -86,7 +86,7 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     schemaVersion: 2,
   };
   const migrated = loadProjectData(v2);
-  assert.equal(migrated.schemaVersion, 16);
+  assert.equal(migrated.schemaVersion, 17);
   assert.deepEqual(migrated.storey, {
     ...oldStorey,
     references: [],

@@ -48,7 +48,7 @@ export function readProjectFile(text: string): Project {
     return deserializeProject(text);
   } catch {
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 16, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 17, Meter) mit gültigen Bauteilen.",
     );
   }
 }
@@ -61,11 +61,24 @@ function retainViewSettings(snapshot: Project, current: Project): Project {
     snapshot.id === current.id
       ? current.workingViews?.filter((view) => view.storeyId === snapshot.storey.id)
       : snapshot.workingViews;
+  const drawingDocuments = snapshot.drawingDocuments?.map((doc) => {
+    const latest =
+      snapshot.id === current.id
+        ? current.drawingDocuments?.find((d) => d.id === doc.id)
+        : undefined;
+    return { ...doc, hiddenLayerIds: (latest ?? doc).hiddenLayerIds.filter((id) => ids.has(id)) };
+  });
   if (
+    JSON.stringify(drawingDocuments) === JSON.stringify(snapshot.drawingDocuments) &&
     JSON.stringify(workingViews) === JSON.stringify(snapshot.workingViews) &&
     JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds)
   )
     return snapshot;
   const { workingViews: _previousViews, ...model } = snapshot;
-  return { ...model, ...(workingViews ? { workingViews } : {}), bimVisibility: { hiddenLayerIds } };
+  return {
+    ...model,
+    ...(drawingDocuments ? { drawingDocuments } : {}),
+    ...(workingViews ? { workingViews } : {}),
+    bimVisibility: { hiddenLayerIds },
+  };
 }

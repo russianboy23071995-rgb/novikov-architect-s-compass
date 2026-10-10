@@ -33,7 +33,11 @@ export function ViewScaleControl({
     >
       <label
         className="flex items-center gap-1"
-        title="Arbeitsmaßstab · im Projekt gespeichert, außerhalb Modell-Undo. Zoom bleibt unabhängig."
+        title={
+          context.view.kind === "drawing-document"
+            ? "Abbildmaßstab · im Projekt gespeichert. Zoom bleibt unabhängig."
+            : "Arbeitsmaßstab · im Projekt gespeichert, außerhalb Modell-Undo. Zoom bleibt unabhängig."
+        }
       >
         Maßstab
         <select
