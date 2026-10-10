@@ -1,6 +1,5 @@
 import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
-import { DocumentViewport } from "./DocumentViewport";
 import { resolveWorkingView, resolveDocumentView } from "@/application/views/working-context";
 import { CadAppearanceProvider } from "./CadAppearanceProvider";
 import { PenSetManager } from "./PenSetManager";
@@ -281,10 +280,6 @@ export function CadWorkspace({
         }
         return;
       }
-      if (activeDocumentId) {
-        if (event.key === "Escape") setFullscreen(false);
-        return;
-      }
       const map: Record<string, ToolId> = {
         v: "select",
         w: "wall",
@@ -334,10 +329,6 @@ export function CadWorkspace({
   };
 
   const selectTool = (next: ToolId) => {
-    if (activeDocumentId) {
-      showNotice("Abbild nur zur Ansicht. Zum Zeichnen Arbeitsmodell öffnen.");
-      return;
-    }
     cancelInteraction();
     setTool(next);
     if (next === "window" || next === "measure") setDemandOpen(false);
@@ -516,6 +507,7 @@ export function CadWorkspace({
                 appearance: lineAppearance,
                 layerId: toolDefaults.line.layerId,
               },
+          viewContext.binding,
         ),
         {
           kind: tool === "hatch" ? "hatch" : "line",
@@ -865,8 +857,7 @@ export function CadWorkspace({
           error={editing.error}
           onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
         />
-        {!activeDocumentId &&
-          demandOpen &&
+        {demandOpen &&
           !imageTool.active &&
           !groupMove.active &&
           !referenceSelection.selecting &&
@@ -919,7 +910,7 @@ export function CadWorkspace({
               }}
             />
           )}
-        {!activeDocumentId && cornerWall && (
+        {cornerWall && (
           <CornerPreviewDialog
             viewContext={viewContext}
             project={project}
@@ -934,312 +925,291 @@ export function CadWorkspace({
           aria-label="Werkzeugeigenschaften"
           className="glass-panel-strong h-[130px] shrink-0 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          {activeDocumentId ? (
-            <div className="space-y-2 text-xs">
-              <h2 className="font-semibold">Abbild: {activeDocument?.name ?? "nicht vorhanden"}</h2>
-              <p>
-                Modellgebundener Grundriss · nur zur Ansicht. Ebenensichtbarkeit über den
-                Ebenenumschalter.
-              </p>
-              <Button
-                size="sm"
-                onClick={() => {
-                  setActiveDocumentId(null);
-                  setSelection(null);
-                }}
-              >
-                Arbeitsmodell öffnen
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div className="mb-1 flex items-center gap-3">
-                <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
-                {tool === "select" && selection?.kind === "wall" && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={referenceSelection.selecting}
-                    onClick={() => {
-                      cancelInteraction();
-                      setDemandOpen(false);
-                      setCornerWall(selection.id);
-                    }}
-                  >
-                    Wandanschluss vorschauen
-                  </Button>
-                )}
-                {tool === "select" && (
-                  <LayerProperties
-                    key={`layer:${propertyFormKey(project, selection)}`}
-                    project={project}
-                    selection={selection}
-                    disabled={referenceSelection.selecting}
-                    onAssign={(base, target, layerId) => {
-                      if (referenceSelection.selecting) return;
-                      dispatchEditing({
-                        type: "assign-layer",
-                        base,
-                        target,
-                        selection: currentSelection.current,
-                        layerId,
-                      });
-                      setDemandOpen(false);
-                      setModelError("");
-                    }}
-                  />
-                )}
-              </div>
-              {imageTool.active || imageTool.busy || imageTool.error ? (
-                <div className="flex items-center gap-3 text-xs">
-                  <label>
-                    Bildbreite (m)
-                    <input
-                      aria-label="Bildbreite (m)"
-                      className="ml-2 w-24 rounded border bg-background p-1"
-                      value={imageTool.width}
-                      onChange={(e) => imageTool.setWidth(e.target.value)}
-                    />
-                  </label>
-                  <span>
-                    {imageTool.busy
-                      ? "Bild wird geprüftâ€¦"
-                      : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
-                  </span>
-                  <Button size="sm" onClick={imageTool.cancel}>
-                    Bildimport abbrechen
-                  </Button>
-                </div>
-              ) : tool === "measure" ? (
-                <div className="flex items-center gap-3 text-xs">
-                  <label>
-                    Messart{" "}
-                    <select
-                      aria-label="Messart"
-                      value={measurementMode}
-                      onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
-                      className="rounded border bg-background p-1"
-                    >
-                      <option value="distance">Strecke</option>
-                      <option value="area">Fläche</option>
-                      <option value="angle">Winkel</option>
-                    </select>
-                  </label>
-                  <span role="status">
-                    {measurementMode === "angle"
-                      ? "Schenkelpunkt â†’ Scheitel â†’ Schenkelpunkt · Esc: Beenden"
-                      : measurementMode === "area"
-                        ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
-                        : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
-                  </span>
-                  <Button size="sm" variant="ghost" onClick={measurement.reset}>
-                    Neue Messung
-                  </Button>
-                  {measurement.error && <span role="alert">{measurement.error}</span>}
-                </div>
-              ) : tool === "wall" ? (
-                <WallDrawingFields
-                  project={project}
-                  value={toolDefaults.wall}
-                  onChange={(values) => {
+          <>
+            <div className="mb-1 flex items-center gap-3">
+              <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
+              {tool === "select" && selection?.kind === "wall" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={referenceSelection.selecting}
+                  onClick={() => {
                     cancelInteraction();
-                    toolDefaults.setWall(values);
+                    setDemandOpen(false);
+                    setCornerWall(selection.id);
                   }}
-                />
-              ) : tool === "window" ? (
-                <WindowPlacementFields
-                  layers={project.layers}
-                  value={windowTool.dimensions}
-                  onChange={windowTool.setDimensions}
-                  error={windowTool.error}
-                  precision={windowTool.precision}
-                  onPrecision={windowTool.setPrecision}
-                  pickingHost={windowTool.pickingHost}
-                />
-              ) : tool === "hatch" && mode === "2D" ? (
-                <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
-                  <label className="text-xs">
-                    Erstellung
-                    <select
-                      aria-label="Schraffur-Erstellung"
-                      value={hatchConstruction}
-                      onChange={(e) => {
-                        cancelInteraction();
-                        setHatchConstruction(e.target.value as HatchConstruction);
-                      }}
-                      className="block rounded border bg-background p-1"
-                    >
-                      <option value="polygon">Polygon per Klick</option>
-                      <option value="diagonal">Rechteck: Diagonale</option>
-                      <option value="side-height">Rechteck: Seite und Höhe</option>
-                      <option value="boundary">Geschlossene Kontur übernehmen</option>
-                    </select>
-                  </label>
-                  <HatchRotationField
-                    enabled={!!toolDefaults.hatch.patternDefinition}
-                    value={toolDefaults.hatch.patternRotation ?? 0}
-                    onChange={(patternRotation) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, patternRotation })
-                    }
-                  />
-                  <HatchPatternFields
-                    project={project}
-                    value={toolDefaults.hatch.patternDefinition}
-                    onChange={(patternDefinition) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
-                    }
-                  />
-                  <HatchSizeFields
-                    definition={toolDefaults.hatch.patternDefinition}
-                    value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
-                    context={viewContext.scale}
-                    onChange={(patternSize) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })
-                    }
-                  />
-                  <HatchFillFields
-                    value={hatchFill}
-                    onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
-                  />
-                  <HatchPaintFields
-                    label="Hintergrund"
-                    value={toolDefaults.hatch.background}
-                    onChange={(background) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, background })
-                    }
-                  />
-                  <HatchPaintFields
-                    label="Kontur"
-                    value={toolDefaults.hatch.contour}
-                    onChange={(contour) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, contour })
-                    }
-                  />
-                  <label className="text-xs">
-                    Ebene
-                    <select
-                      aria-label="Schraffur-Zielebene"
-                      className="block h-8 rounded border bg-background"
-                      value={toolDefaults.hatch.layerId}
-                      onChange={(e) =>
-                        toolDefaults.setHatch({ ...toolDefaults.hatch, layerId: e.target.value })
-                      }
-                    >
-                      {project.layers.map((layer) => (
-                        <option key={layer.id} value={layer.id}>
-                          {layer.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <span className="text-xs">
-                    {hatchConstruction === "polygon"
-                      ? `${pathPoints.length} Punkte · Doppelklick schließt`
-                      : hatchConstruction === "boundary"
-                        ? "In ein geschlossenes Polygon klicken"
-                        : hatchConstruction === "diagonal"
-                          ? "Zwei gegenüberliegende Ecken anklicken"
-                          : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
-                    · Esc verwirft
-                  </span>
-                  <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
-                    Zeichnen abbrechen
-                  </Button>
-                </section>
-              ) : tool === "line" && mode === "2D" ? (
-                <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
-                  <label className="text-xs">
-                    Zeichenmodus
-                    <select
-                      aria-label="Zeichenmodus"
-                      className="block rounded border bg-background p-1"
-                      value={lineKind}
-                      onChange={(e) => {
-                        setLineKind(e.target.value as "line" | "polyline");
-                        setPathPoints([]);
-                        setModelError("");
-                      }}
-                    >
-                      <option value="line">Linie</option>
-                      <option value="polyline">Polylinie</option>
-                    </select>
-                  </label>
-                  <LineStyleFields
-                    value={lineAppearance}
-                    onChange={(appearance) =>
-                      toolDefaults.setLine({ ...toolDefaults.line, ...appearance })
-                    }
-                  />
-                  <label className="text-xs">
-                    Ebene
-                    <select
-                      aria-label="Linien-Zielebene"
-                      className="block h-8 rounded border bg-background"
-                      value={toolDefaults.line.layerId}
-                      onChange={(e) =>
-                        toolDefaults.setLine({ ...toolDefaults.line, layerId: e.target.value })
-                      }
-                    >
-                      {project.layers.map((layer) => (
-                        <option key={layer.id} value={layer.id}>
-                          {layer.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="text-xs">
-                    Hover-Referenz
-                    <select
-                      aria-label="Hover-Verweildauer"
-                      className="block rounded border bg-background p-1"
-                      value={hoverDwellMs}
-                      onChange={(e) => setHoverDwellMs(Number(e.target.value))}
-                    >
-                      <option value={200}>0,2 Sekunden</option>
-                      <option value={400}>0,4 Sekunden</option>
-                      <option value={600}>0,6 Sekunden</option>
-                      <option value={1000}>1 Sekunde</option>
-                    </select>
-                  </label>
-                  <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
-                  {lineKind === "polyline" && (
-                    <span className="text-xs">
-                      Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im
-                      Grundriss: Abschluss
-                    </span>
-                  )}
-                  <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
-                    Zeichnen abbrechen
-                  </Button>
-                </section>
-              ) : selections.length > 1 ? (
-                <p className="p-3 text-xs text-muted-foreground" role="status">
-                  {selections.length} Elemente ausgewählt.{" "}
-                  {mode === "3D"
-                    ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
-                    : "Im Elementmenü â€žAuswahl frei bewegenâ€œ wählen, dann Ursprung und Ziel anklicken."}
-                </p>
-              ) : (
-                <BimInspector
-                  key={propertyFormKey(project, selection)}
+                >
+                  Wandanschluss vorschauen
+                </Button>
+              )}
+              {tool === "select" && (
+                <LayerProperties
+                  key={`layer:${propertyFormKey(project, selection)}`}
                   project={project}
                   selection={selection}
-                  onChange={changeProject}
-                  onWallOffset={(base, wallId, offset) =>
+                  disabled={referenceSelection.selecting}
+                  onAssign={(base, target, layerId) => {
+                    if (referenceSelection.selecting) return;
                     dispatchEditing({
-                      type: "wall-offset",
+                      type: "assign-layer",
                       base,
-                      selection,
-                      request: { projectId: base.id, wallId, offset },
-                    })
-                  }
+                      target,
+                      selection: currentSelection.current,
+                      layerId,
+                    });
+                    setDemandOpen(false);
+                    setModelError("");
+                  }}
                 />
               )}
-            </>
-          )}
+            </div>
+            {imageTool.active || imageTool.busy || imageTool.error ? (
+              <div className="flex items-center gap-3 text-xs">
+                <label>
+                  Bildbreite (m)
+                  <input
+                    aria-label="Bildbreite (m)"
+                    className="ml-2 w-24 rounded border bg-background p-1"
+                    value={imageTool.width}
+                    onChange={(e) => imageTool.setWidth(e.target.value)}
+                  />
+                </label>
+                <span>
+                  {imageTool.busy
+                    ? "Bild wird geprüftâ€¦"
+                    : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
+                </span>
+                <Button size="sm" onClick={imageTool.cancel}>
+                  Bildimport abbrechen
+                </Button>
+              </div>
+            ) : tool === "measure" ? (
+              <div className="flex items-center gap-3 text-xs">
+                <label>
+                  Messart{" "}
+                  <select
+                    aria-label="Messart"
+                    value={measurementMode}
+                    onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
+                    className="rounded border bg-background p-1"
+                  >
+                    <option value="distance">Strecke</option>
+                    <option value="area">Fläche</option>
+                    <option value="angle">Winkel</option>
+                  </select>
+                </label>
+                <span role="status">
+                  {measurementMode === "angle"
+                    ? "Schenkelpunkt â†’ Scheitel â†’ Schenkelpunkt · Esc: Beenden"
+                    : measurementMode === "area"
+                      ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
+                      : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+                </span>
+                <Button size="sm" variant="ghost" onClick={measurement.reset}>
+                  Neue Messung
+                </Button>
+                {measurement.error && <span role="alert">{measurement.error}</span>}
+              </div>
+            ) : tool === "wall" ? (
+              <WallDrawingFields
+                project={project}
+                value={toolDefaults.wall}
+                onChange={(values) => {
+                  cancelInteraction();
+                  toolDefaults.setWall(values);
+                }}
+              />
+            ) : tool === "window" ? (
+              <WindowPlacementFields
+                layers={project.layers}
+                value={windowTool.dimensions}
+                onChange={windowTool.setDimensions}
+                error={windowTool.error}
+                precision={windowTool.precision}
+                onPrecision={windowTool.setPrecision}
+                pickingHost={windowTool.pickingHost}
+              />
+            ) : tool === "hatch" && mode === "2D" ? (
+              <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
+                <label className="text-xs">
+                  Erstellung
+                  <select
+                    aria-label="Schraffur-Erstellung"
+                    value={hatchConstruction}
+                    onChange={(e) => {
+                      cancelInteraction();
+                      setHatchConstruction(e.target.value as HatchConstruction);
+                    }}
+                    className="block rounded border bg-background p-1"
+                  >
+                    <option value="polygon">Polygon per Klick</option>
+                    <option value="diagonal">Rechteck: Diagonale</option>
+                    <option value="side-height">Rechteck: Seite und Höhe</option>
+                    <option value="boundary">Geschlossene Kontur übernehmen</option>
+                  </select>
+                </label>
+                <HatchRotationField
+                  enabled={!!toolDefaults.hatch.patternDefinition}
+                  value={toolDefaults.hatch.patternRotation ?? 0}
+                  onChange={(patternRotation) =>
+                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternRotation })
+                  }
+                />
+                <HatchPatternFields
+                  project={project}
+                  value={toolDefaults.hatch.patternDefinition}
+                  onChange={(patternDefinition) =>
+                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
+                  }
+                />
+                <HatchSizeFields
+                  definition={toolDefaults.hatch.patternDefinition}
+                  value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
+                  context={viewContext.scale}
+                  onChange={(patternSize) =>
+                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })
+                  }
+                />
+                <HatchFillFields
+                  value={hatchFill}
+                  onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
+                />
+                <HatchPaintFields
+                  label="Hintergrund"
+                  value={toolDefaults.hatch.background}
+                  onChange={(background) =>
+                    toolDefaults.setHatch({ ...toolDefaults.hatch, background })
+                  }
+                />
+                <HatchPaintFields
+                  label="Kontur"
+                  value={toolDefaults.hatch.contour}
+                  onChange={(contour) => toolDefaults.setHatch({ ...toolDefaults.hatch, contour })}
+                />
+                <label className="text-xs">
+                  Ebene
+                  <select
+                    aria-label="Schraffur-Zielebene"
+                    className="block h-8 rounded border bg-background"
+                    value={toolDefaults.hatch.layerId}
+                    onChange={(e) =>
+                      toolDefaults.setHatch({ ...toolDefaults.hatch, layerId: e.target.value })
+                    }
+                  >
+                    {project.layers.map((layer) => (
+                      <option key={layer.id} value={layer.id}>
+                        {layer.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <span className="text-xs">
+                  {hatchConstruction === "polygon"
+                    ? `${pathPoints.length} Punkte · Doppelklick schließt`
+                    : hatchConstruction === "boundary"
+                      ? "In ein geschlossenes Polygon klicken"
+                      : hatchConstruction === "diagonal"
+                        ? "Zwei gegenüberliegende Ecken anklicken"
+                        : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
+                  · Esc verwirft
+                </span>
+                <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+                  Zeichnen abbrechen
+                </Button>
+              </section>
+            ) : tool === "line" && mode === "2D" ? (
+              <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
+                <label className="text-xs">
+                  Zeichenmodus
+                  <select
+                    aria-label="Zeichenmodus"
+                    className="block rounded border bg-background p-1"
+                    value={lineKind}
+                    onChange={(e) => {
+                      setLineKind(e.target.value as "line" | "polyline");
+                      setPathPoints([]);
+                      setModelError("");
+                    }}
+                  >
+                    <option value="line">Linie</option>
+                    <option value="polyline">Polylinie</option>
+                  </select>
+                </label>
+                <LineStyleFields
+                  value={lineAppearance}
+                  onChange={(appearance) =>
+                    toolDefaults.setLine({ ...toolDefaults.line, ...appearance })
+                  }
+                />
+                <label className="text-xs">
+                  Ebene
+                  <select
+                    aria-label="Linien-Zielebene"
+                    className="block h-8 rounded border bg-background"
+                    value={toolDefaults.line.layerId}
+                    onChange={(e) =>
+                      toolDefaults.setLine({ ...toolDefaults.line, layerId: e.target.value })
+                    }
+                  >
+                    {project.layers.map((layer) => (
+                      <option key={layer.id} value={layer.id}>
+                        {layer.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-xs">
+                  Hover-Referenz
+                  <select
+                    aria-label="Hover-Verweildauer"
+                    className="block rounded border bg-background p-1"
+                    value={hoverDwellMs}
+                    onChange={(e) => setHoverDwellMs(Number(e.target.value))}
+                  >
+                    <option value={200}>0,2 Sekunden</option>
+                    <option value={400}>0,4 Sekunden</option>
+                    <option value={600}>0,6 Sekunden</option>
+                    <option value={1000}>1 Sekunde</option>
+                  </select>
+                </label>
+                <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
+                {lineKind === "polyline" && (
+                  <span className="text-xs">
+                    Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im
+                    Grundriss: Abschluss
+                  </span>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+                  Zeichnen abbrechen
+                </Button>
+              </section>
+            ) : selections.length > 1 ? (
+              <p className="p-3 text-xs text-muted-foreground" role="status">
+                {selections.length} Elemente ausgewählt.{" "}
+                {mode === "3D"
+                  ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
+                  : "Im Elementmenü â€žAuswahl frei bewegenâ€œ wählen, dann Ursprung und Ziel anklicken."}
+              </p>
+            ) : (
+              <BimInspector
+                key={propertyFormKey(project, selection)}
+                project={project}
+                selection={selection}
+                onChange={changeProject}
+                onWallOffset={(base, wallId, offset) =>
+                  dispatchEditing({
+                    type: "wall-offset",
+                    base,
+                    selection,
+                    request: { projectId: base.id, wallId, offset },
+                  })
+                }
+              />
+            )}
+          </>
         </section>
         <div className="relative flex min-h-0 flex-1 gap-2">
-          {!fullscreen && !activeDocumentId && (
+          {(!fullscreen || !!activeDocumentId) && (
             <ToolRail
               activeTool={tool}
               collapsed={railCollapsed}
@@ -1254,44 +1224,34 @@ export function CadWorkspace({
               defaultSize={navigatorOpen && !fullscreen ? "79%" : "100%"}
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
-                {activeDocumentId ? (
-                  activeDocument ? (
-                    <DocumentViewport
-                      framing={activeDocument.framing}
-                      onPlanCapture={onPlanCapture}
-                      project={project}
-                      viewContext={viewContext}
-                      selection={selection}
-                      onSelect={setSelection}
-                      onFullscreen={() => setFullscreen((value) => !value)}
-                      grid={grid}
-                      zoomSlot={zoomSlot}
-                      onScale={(denominator) =>
-                        dispatchEditing({
-                          type: "document",
-                          base: project,
-                          action: { kind: "scale", id: activeDocumentId, denominator },
-                        })
-                      }
-                    />
-                  ) : (
-                    <p role="alert" className="p-4">
-                      Das Abbild ist nicht vorhanden. Mit Projekt-Undo wiederherstellen oder
-                      Arbeitsmodell öffnen.
-                    </p>
-                  )
+                {activeDocumentId && !activeDocument ? (
+                  <p role="alert" className="p-4">
+                    Das Abbild ist nicht vorhanden. Mit Projekt-Undo wiederherstellen oder
+                    Arbeitsmodell öffnen.
+                  </p>
                 ) : (
                   <>
                     <ViewportManager
+                      key={activeDocumentId ?? "working-plan"}
+                      documentFraming={activeDocument?.framing}
                       onPlanCapture={onPlanCapture}
                       viewContext={viewContext}
                       onScale={(denominator) =>
-                        viewContext.binding.kind === "working-plan" &&
-                        dispatchEditing({
-                          type: "view-scale",
-                          view: viewContext.binding,
-                          denominator,
-                        })
+                        viewContext.binding.kind === "drawing-document"
+                          ? dispatchEditing({
+                              type: "document",
+                              base: project,
+                              action: {
+                                kind: "scale",
+                                id: viewContext.binding.documentId,
+                                denominator,
+                              },
+                            })
+                          : dispatchEditing({
+                              type: "view-scale",
+                              view: viewContext.binding,
+                              denominator,
+                            })
                       }
                       pickupScope={measurementContext}
                       onPickup={(target) => {
@@ -1494,7 +1454,7 @@ export function CadWorkspace({
                     {exportMessage}
                   </p>
                 )}
-                {!activeDocumentId && !referenceSelection.selecting && (
+                {!referenceSelection.selecting && (
                   <AiCommandBar
                     calibration={calibration.commandContext}
                     onFocus={() => setDemandOpen(false)}

@@ -1,4 +1,3 @@
-import type { DocumentFraming } from "@/domain/views/documents";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
@@ -64,7 +63,6 @@ import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
-  documentFraming?: DocumentFraming | undefined;
   pickupScope?: object;
   onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
@@ -128,7 +126,6 @@ export type BimPlanProps = {
 };
 
 export function BimPlan({
-  documentFraming,
   pickupScope,
   onPickup,
   draftContour,
@@ -229,7 +226,6 @@ export function BimPlan({
     }
   }, [editSession, project, selection, matchingGrip]);
   const gridId = useId();
-  const documentClipId = useId();
   const gridStep = planScaleBar(camera.pixelsPerMetre).metres;
   const navigation = useRef<{ pointerId: number; x: number; y: number; camera: PlanCamera } | null>(
     null,
@@ -909,19 +905,7 @@ export function BimPlan({
         }
       }}
     >
-      {documentFraming && (
-        <defs>
-          <clipPath id={documentClipId}>
-            <rect
-              x={documentFraming.center.x - documentFraming.width / 2}
-              y={-documentFraming.center.y - documentFraming.height / 2}
-              width={documentFraming.width}
-              height={documentFraming.height}
-            />
-          </clipPath>
-        </defs>
-      )}
-      <g clipPath={documentFraming ? `url(#${documentClipId})` : undefined}>
+      <g>
         {grid && (
           <g pointerEvents="none">
             <defs>

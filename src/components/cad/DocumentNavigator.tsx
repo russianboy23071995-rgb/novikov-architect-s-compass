@@ -182,6 +182,7 @@ export function DocumentNavigator({
       </div>
       {!draft && error && <p role="alert">{error}</p>}
       <FloatingPanel
+        centered
         open={!!draft}
         title="Hinzufügen"
         width={400}
@@ -284,8 +285,8 @@ export function DocumentNavigator({
                     : "Arbeitsgrundriss öffnen"}
                 </p>
                 <p>
-                  Der beim Öffnen dieses Fensters sichtbare Canvas-Bereich wird gespeichert. Das
-                  Abbild bleibt mit dem Modell verbunden.
+                  Gespeichert werden Startposition und Zoom. Das gesamte Modell bleibt erreichbar;
+                  zugeschnitten wird später im Layoutbuch.
                 </p>
               </>
             )}

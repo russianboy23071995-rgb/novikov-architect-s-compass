@@ -1,3 +1,40 @@
+## MS-04e: Vollständiges Modell und lokale Abbildzeichnungen — 10.10.2026
+
+Nutzerkorrektur im offenen PR238: Abbilder sind bearbeitbare Ansichten des gesamten
+Modells. Keine Begrenzung auf den gespeicherten Bildschirmbereich; Beschneiden folgt
+im Layoutbuch. Startposition und Zoom bleiben gespeichert. Der vorhandene Werkzeugkasten
+und alle gemeinsamen Bearbeitungswege stehen im Abbild bereit. Abbildname im Viewport.
+Hinzufügen öffnet mittig; FloatingPanel liegt nun außerhalb der Navigatorbegrenzung.
+
+Verbindliche Nutzerantwort: neue 2D-Zeichnungen nur im jeweiligen Abbild. Schema 19
+speichert documentId an Linien/Polylinien und Schraffuren; gemeinsame Application-Aktion
+und Sichtbarkeitspolitik setzen dieselbe Zuordnung für Anzeige, Auswahl und Fang um.
+Bestehende Geschosszeichnungen und BIM-Bauteile bleiben gemeinsam. Strikte Migration
+1–18, normale Projekt-History. Keine zweite Bauteilkopie und keine separate Toollogik.
+Dokumente mit eigenen Zeichnungen können noch nicht gelöscht werden; Bildimport im
+Abbild bleibt vorerst gesperrt. Das ersetzt die Clip-/Nur-Ansicht-Regeln unten.
+
+Nachweis: 807 Tests bestanden; Typprüfung einschließlich Benchmarks und Build bestanden.
+Lint: 0 Fehler, sechs vorhandene Warnungen. Neue Tests: zwei Abbilder vs. Arbeitsmodell,
+Annotationseigentümer, lokale Fangabfrage/Auswahl, gemeinsame BIM-Änderung, freie
+Gruppenbewegung mit erhaltener Zuordnung, JSON, Undo/Redo, Altdateien, ungültige/stale
+Kontexte und Löschschutz. Browser: Linie und Rechteckschraffur in A, unsichtbar im
+Arbeitsmodell und B; Schraffur-Undo/Redo, Wandhöhe in A auf 3,20 m geändert und im
+Arbeitsmodell bestätigt. 500 % Startzoom, herausgezoomtes vollständiges Modell ohne
+SVG-Clip. Dialog geometrisch zentriert und im Body statt Navigator. Keine Browserfehler.
+Screenshot: outputs/abbild-full-model-editing.png. PR238 bleibt zur Prüfung offen.
+
+Praktische Abnahme: Arbeitsgrundriss stark hineinzoomen → Abbild erstellen/öffnen →
+herauszoomen. Die ganze Geometrie muss wieder sichtbar sein. Linie/Schraffur hinzufügen,
+Arbeitsmodell und anderes Abbild öffnen: dort fehlen diese lokalen Ergänzungen.
+BIM-Eigenschaften dagegen gelten überall; Undo/Redo und Datei speichern funktionieren.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Ordnerzuordnung und Löschen über gemeinsame validierte Aktionen anbinden. Vor dem
+Löschen von Abbildern mit eigenen Zeichnungen beziehungsweise nichtleeren Ordnern
+zunächst die gewünschte Behandlung ihrer Inhalte festlegen; kein stilles Mitlöschen.
+Kein Layouteditor und kein weiterer Modellumbau.
+
 ## MS-04d: Abbild aus ausgerichtetem Canvas und Ordnerbaum — 10.10.2026
 
 Nutzerkorrektur zu PR238 direkt im offenen PR umgesetzt, nicht zusammengeführt.

@@ -202,7 +202,7 @@ test("legacy schema 12 migrates with zero implied angle and retains strict old a
   const p = fixture(),
     old = { ...p, schemaVersion: 12 };
   const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 18);
+  assert.equal(migrated.schemaVersion, 19);
   assert.equal(migrated.storey.hatches[0]!.pattern!.rotation, undefined);
   assert.equal(
     hatchPatternTile(definition, migrated.storey.hatches[0]!.pattern!)!.patternTransform,

@@ -46,7 +46,7 @@ test("schema 9 loads unchanged geometry as schema 11; invalid embedded patterns 
   const { hatchPatterns: _patterns, ...old } = project;
   const legacy = { ...old, schemaVersion: 9 };
   const loaded = loadProjectData(legacy);
-  assert.equal(loaded.schemaVersion, 18);
+  assert.equal(loaded.schemaVersion, 19);
   assert.deepEqual(loaded.storey, project.storey);
   assert.throws(() =>
     addLine(project, {

@@ -104,7 +104,7 @@ test("size edits are one model undo step; view scale stays outside that history;
   assert.deepEqual(readProjectFile(serializeProject(history.present)), history.present);
   const old = { ...p, schemaVersion: 15 };
   const loaded = readProjectFile(JSON.stringify(old));
-  assert.equal(loaded.schemaVersion, 18);
+  assert.equal(loaded.schemaVersion, 19);
   assert.deepEqual(loaded.storey, p.storey);
   assert.throws(() => readProjectFile(JSON.stringify({ ...history.present, schemaVersion: 15 })));
 });

@@ -1,3 +1,9 @@
+import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
+import { createDrawing } from "../drawing/actions.ts";
+import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { resolveWorkingView } from "./working-context.ts";
+import { createLayerDisplay } from "../../rendering/viewport/layer-display.ts";
+import { createVisibleToolSourceQuery } from "../tools/snapping.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -199,7 +205,7 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
   const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 18);
+  assert.equal(migrated.schemaVersion, 19);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
   assert.deepEqual(migrated.storey, old.storey);
@@ -279,7 +285,7 @@ test("captured view framing and folder survive project history and file roundtri
 test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
   const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
   const migrated = readProjectFile(JSON.stringify(legacy));
-  assert.equal(migrated.schemaVersion, 18);
+  assert.equal(migrated.schemaVersion, 19);
   assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
   assert.equal(migrated.documentFolders, undefined);
   assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, documentFolders: [] })));
@@ -290,5 +296,146 @@ test("schema 17 migration keeps existing documents without inventing crop or fol
         drawingDocuments: [{ ...legacy.drawingDocuments![0], folderId: "unknown" }],
       }),
     ),
+  );
+});
+
+test("document annotations stay local in display, picking and local snapping; BIM stays shared", () => {
+  const base = create(create(createExampleProject()), "doc-b");
+  const view = documentBinding(base, "doc-a");
+  const line = createDrawing(
+    base,
+    base,
+    "annotation-line",
+    {
+      kind: "line",
+      lineKind: "line",
+      points: [
+        { x: 10, y: 10 },
+        { x: 12, y: 10 },
+      ],
+      appearance: defaultLineAppearance,
+    },
+    view,
+  );
+  const p = createDrawing(
+    line,
+    line,
+    "annotation-hatch",
+    {
+      kind: "hatch",
+      points: [
+        { x: 20, y: 20 },
+        { x: 22, y: 20 },
+        { x: 20, y: 22 },
+      ],
+      fill: { color: "#123456", opacity: 0.5 },
+    },
+    view,
+  );
+  assert.equal(p.storey.lines![0]!.documentId, "doc-a");
+  assert.equal(p.storey.hatches[0]!.documentId, "doc-a");
+  for (const [context, visible] of [
+    [resolveWorkingView(p), false],
+    [resolveDocumentView(p, documentBinding(p, "doc-b")), false],
+    [resolveDocumentView(p, view), true],
+  ] as const) {
+    const policy = context.visibility;
+    const display = createLayerDisplay(p, policy, policy.context);
+    assert.equal(
+      display.plan.lines.some((l) => l.id === "annotation-line"),
+      visible,
+    );
+    assert.equal(
+      display.plan.hatches.some((h) => h.id === "annotation-hatch"),
+      visible,
+    );
+    assert.equal(display.canPick(p, policy.context, "annotation-line"), visible);
+    const query = createVisibleToolSourceQuery(p, policy, policy.context, null);
+    assert.equal(
+      query({ x: 10, y: 10 }, 100, 10, []).some((r) => r.entityId === "annotation-line"),
+      visible,
+    );
+    assert.equal(display.plan.walls.length, 1);
+  }
+  const changed = updateWall(p, "wall-1", { height: 3.5 });
+  for (const id of ["doc-a", "doc-b"]) {
+    const c = resolveDocumentView(changed, documentBinding(changed, id));
+    assert.equal(
+      createLayerDisplay(changed, c.visibility, c.visibility.context).plan.walls[0]!.height,
+      3.5,
+    );
+  }
+  const policy = resolveDocumentView(p, view).visibility;
+  const targets = [
+    { kind: "line" as const, id: "annotation-line" },
+    { kind: "hatch" as const, id: "annotation-hatch" },
+  ];
+  const session = beginSelectionMove(p, targets, { x: 0, y: 0 }, policy);
+  const moved = previewSelectionMove(session, p, targets, { x: 1, y: 2 }, policy);
+  assert.equal(moved.storey.lines![0]!.documentId, "doc-a");
+  assert.equal(moved.storey.hatches[0]!.documentId, "doc-a");
+  assert.deepEqual(moved.storey.lines![0]!.points[0], { x: 11, y: 12 });
+  assert.throws(() =>
+    beginSelectionMove(p, targets, { x: 0, y: 0 }, resolveWorkingView(p).visibility),
+  );
+  assert.deepEqual(readProjectFile(serializeProject(p)), p);
+  const history = commitProject(createHistory(base), p);
+  assert.deepEqual(undoProject(history).present.storey, base.storey);
+  assert.deepEqual(redoProject(undoProject(history)).present.storey, p.storey);
+  assert.throws(
+    () => changeDrawingDocument(p, p, { kind: "delete", id: "doc-a" }),
+    /eigene Zeichnungen/,
+  );
+});
+
+test("annotation ownership rejects foreign/stale contexts and legacy injection", () => {
+  const base = create(createExampleProject());
+  const request = {
+    kind: "line" as const,
+    lineKind: "line" as const,
+    points: [
+      { x: 0, y: 3 },
+      { x: 2, y: 3 },
+    ],
+    appearance: defaultLineAppearance,
+  };
+  assert.throws(() =>
+    createDrawing(base, base, "a", request, {
+      kind: "drawing-document",
+      projectId: base.id,
+      documentId: "missing",
+    }),
+  );
+  assert.throws(() =>
+    createDrawing(base, base, "a", request, {
+      ...documentBinding(base, "doc-a"),
+      projectId: "other",
+    }),
+  );
+  assert.throws(() =>
+    createDrawing(base, { ...base }, "a", request, documentBinding(base, "doc-a")),
+  );
+  const scoped = createDrawing(base, base, "a", request, documentBinding(base, "doc-a"));
+  assert.throws(() => validateProject({ ...scoped, drawingDocuments: [] }));
+  assert.throws(() => readProjectFile(JSON.stringify({ ...scoped, schemaVersion: 18 })));
+  const legacy = readProjectFile(JSON.stringify({ ...base, schemaVersion: 18 }));
+  assert.equal(legacy.schemaVersion, 19);
+  assert.deepEqual(legacy.storey, base.storey);
+  const wall = createDrawing(
+    base,
+    base,
+    "shared-wall",
+    { kind: "wall", start: { x: 0, y: 5 }, end: { x: 3, y: 5 }, thickness: 0.3, height: 3 },
+    documentBinding(base, "doc-a"),
+  );
+  assert.equal("documentId" in wall.storey.walls.at(-1)!, false);
+  assert.throws(() =>
+    validateProject({
+      ...wall,
+      storey: {
+        ...wall.storey,
+        walls: wall.storey.walls.map((w) => ({ ...w, documentId: "doc-a" })),
+      },
+    }),
   );
 });

@@ -134,16 +134,20 @@ function NavigatorContent({
                 label: `Bildreferenz ${index + 1}`,
                 kind: "item",
               })),
-              ...project.storey.hatches.map((hatch, index): TreeNode => ({
-                id: hatch.id,
-                label: `Schraffur ${index + 1}`,
-                kind: "item",
-              })),
-              ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
-                id: line.id,
-                label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
-                kind: "item",
-              })),
+              ...project.storey.hatches
+                .filter((h) => !h.documentId)
+                .map((hatch, index): TreeNode => ({
+                  id: hatch.id,
+                  label: `Schraffur ${index + 1}`,
+                  kind: "item",
+                })),
+              ...(project.storey.lines ?? [])
+                .filter((l) => !l.documentId)
+                .map((line, index): TreeNode => ({
+                  id: line.id,
+                  label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
+                  kind: "item",
+                })),
             ],
           },
         ],

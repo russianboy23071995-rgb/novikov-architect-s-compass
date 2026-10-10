@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { clampMenuPosition } from "./demand-menu";
@@ -8,6 +9,7 @@ export function FloatingPanel({
   onClose,
   width = 520,
   height = 560,
+  centered = false,
   children,
 }: {
   open: boolean;
@@ -15,6 +17,7 @@ export function FloatingPanel({
   onClose: () => void;
   width?: number;
   height?: number;
+  centered?: boolean;
   children: ReactNode;
 }) {
   const panel = useRef<HTMLDivElement>(null);
@@ -31,8 +34,15 @@ export function FloatingPanel({
       drag.current = null;
       return;
     }
+    let firstMeasure = true;
     const measure = () => {
       const r = panel.current?.getBoundingClientRect();
+      if (firstMeasure && centered)
+        setPosition({
+          x: (window.innerWidth - (r?.width ?? width)) / 2,
+          y: (window.innerHeight - (r?.height ?? height)) / 2,
+        });
+      firstMeasure = false;
       setBounds({
         width: window.innerWidth,
         height: window.innerHeight,
@@ -49,10 +59,10 @@ export function FloatingPanel({
       window.removeEventListener("resize", measure);
       drag.current = null;
     };
-  }, [open, width, height]);
-  if (!open) return null;
+  }, [open, width, height, centered]);
+  if (!open || typeof document === "undefined") return null;
   const visible = clampMenuPosition(position, bounds);
-  return (
+  return createPortal(
     <div
       ref={panel}
       role="dialog"
@@ -128,6 +138,7 @@ export function FloatingPanel({
         </button>
       </header>
       {children}
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -2837,3 +2837,37 @@ building tab restores the working model. Per-row open/delete buttons are removed
 context deletion and moving existing documents between folders remain later work.
 Folder actions use shared project Undo; no additional history. Missing folders and
 duplicate IDs are rejected. The source model and IFC output remain authoritative.
+
+
+## Editable full-model Abbilder and local annotations — user correction 2026-10-10
+
+This binding correction supersedes the read-only viewport and saved-rectangle clipping
+in MS-04c/d above. An Abbild references the entire model projection. Its framing field
+restores only initial center/zoom; width/height remain legacy capture metadata, never
+an eligibility or rendering clip. Cropping belongs to future Layout/ViewportBinding.
+The common editing viewport, toolbox, snapping, selection, properties and validated
+Application operations are used in both contexts. There is no second BIM geometry.
+
+User decision: new 2D drawings in an Abbild belong only to that document. Schema 19
+adds optional documentId ownership to lines/polylines and hatches. Omission retains
+the existing shared storey drawing scope. These objects remain stored in the current
+storey arrays for this single-storey migration; ownership is explicit domain data,
+not inferred from layers or visibility. Strict schema 18 is frozen; versions 1–18
+migrate without inventing owners. Dangling document IDs and document ownership on
+BIM elements are rejected. Future multi-storey/annotation types must extend this
+contract without cloning model components.
+
+The typed createDrawing action accepts a validated ViewIdentity. For document
+contexts it assigns ownership to 2D creation only; walls remain shared. Existing
+edits retain ownership. The common visibility policy checks ownership before layers,
+so display, picking, snapping and movement eligibility exclude foreign annotations.
+Building navigation excludes document-owned drawings. Existing shared storey drawings
+remain shared when edited from an Abbild. BIM edits affect every model projection.
+Normal project Undo/Redo and JSON persistence include annotations; no Abbild history.
+Deleting a nonempty document is currently rejected rather than silently discarding
+its annotations. A deletion policy/UI is a separate follow-up.
+
+FloatingPanel renders through a body portal to escape transformed/overflow ancestors.
+The Abbild creation dialog requests centered opening; shared nonmodal dragging and
+Glass Flow styling are retained. Image import in an Abbild is not enabled in this
+bounded lines/hatches step; existing model references remain visible under its filter.
