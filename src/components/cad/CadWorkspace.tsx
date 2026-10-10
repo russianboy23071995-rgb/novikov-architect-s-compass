@@ -1,3 +1,4 @@
+import { LocalRecoveryStatus } from "./LocalRecoveryStatus";
 import { DocumentLayerNotice } from "./DocumentLayerNotice";
 import { RecoveryPanel } from "./RecoveryPanel";
 import { RecoveryStartupNotice } from "./RecoveryStartupNotice";
@@ -1597,6 +1598,13 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
+            recoveryStatus={
+              <LocalRecoveryStatus
+                project={project}
+                context={editing.projectLoad ?? project.id}
+                onOpen={() => setRecoveryOpen(true)}
+              />
+            }
             zoomSlot={setZoomSlot}
             gridSettings={gridSettings}
             onGridSettings={setGridSettings}

@@ -113,6 +113,53 @@ export function createRecoveryCatalog(openDatabase: () => Promise<IDBDatabase>):
     },
   };
 }
-export const browserRecoveryCatalog = createRecoveryCatalog(() =>
-  openRecoveryDatabase("novikov-recovery"),
-);
+const localListeners = new Set<() => void>();
+let changeChannel: BroadcastChannel | undefined;
+/** Browser-specific wake-up hint only; consumers always reread the authoritative database. */
+export function subscribeRecoveryChanges(listener: () => void) {
+  localListeners.add(listener);
+  if (!changeChannel && typeof BroadcastChannel !== "undefined") {
+    changeChannel = new BroadcastChannel("novikov-recovery-changes");
+    changeChannel.onmessage = () => {
+      for (const notify of localListeners) notify();
+    };
+  }
+  return () => {
+    localListeners.delete(listener);
+    if (!localListeners.size) {
+      changeChannel?.close();
+      changeChannel = undefined;
+    }
+  };
+}
+const catalog = createRecoveryCatalog(() => openRecoveryDatabase("novikov-recovery"));
+export const browserRecoveryCatalog: RecoveryCatalog = {
+  ...catalog,
+  project(id) {
+    const storage = catalog.project(id);
+    return {
+      read: storage.read,
+      async replace(expected, next) {
+        await storage.replace(expected, next);
+        // Notify only after commit. Failure of a hint must never report a committed save as failed.
+        for (const notify of localListeners) {
+          try {
+            notify();
+          } catch {
+            /* Observer is disposable. */
+          }
+        }
+        try {
+          if (changeChannel) changeChannel.postMessage("changed");
+          else if (typeof BroadcastChannel !== "undefined") {
+            const channel = new BroadcastChannel("novikov-recovery-changes");
+            channel.postMessage("changed");
+            channel.close();
+          }
+        } catch {
+          /* Focus refresh remains available. */
+        }
+      },
+    };
+  },
+};
