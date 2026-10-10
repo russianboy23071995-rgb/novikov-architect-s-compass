@@ -1475,7 +1475,7 @@ export function CadWorkspace({
                 {exportMessage && (
                   <p
                     role="status"
-                    className="absolute bottom-20 left-3 z-30 rounded bg-popover px-2 py-1 text-xs text-foreground"
+                    className="pointer-events-none absolute left-3 top-14 z-40 max-w-sm rounded border border-border bg-popover/95 px-3 py-2 text-xs text-foreground shadow-lg"
                   >
                     {exportMessage}
                   </p>
