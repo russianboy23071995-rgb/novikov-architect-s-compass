@@ -68,7 +68,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N06 – Abgeleitete 2D-Dokumente bearbeiten
 
-- **Stand:** Geplant: keine bearbeitbaren Ableitungsdokumente in main; PR238 nur offener Pilot.
+- **Stand:** Teilweise vorhanden: PR238 ist in main (927dfcf). Bearbeitbare Grundriss-Abbilder verwenden dasselbe Modell und gemeinsame Geschosszeichnungen; Linien/Schraffuren aus Abbildern sind seit Nutzerkorrektur nicht abbildlokal. Schnitte/Ansichten und weitere Annotationen bleiben offen.
 - **Zuständigkeit:** Ziel domain/documents, application/document-actions
 - **Altzuordnung:** Neu; Guide-F23/F24 als Ergänzungen
 - **Abnahme/Abhängigkeiten:** N05/N57, Annotation-Scope, Modus Modellaktion vs Dekoration. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -518,7 +518,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N56 – Navigator für Geschosse, Schnitte, Ansichten und 3D
 
-- **Stand:** Teilweise: bestehender Navigator; Gebäudestruktur/Abbilder-Tabs und Ordner aktuell PR238.
+- **Stand:** Teilweise vorhanden: Gebäudestruktur/Abbilder-Tabs und Ordner mit PR238 in main. Folgebranch feat/document-context-management ergänzt Rechtsklick-Ordnerzuordnung und Abbildlöschung, neben Umbenennen und Doppelklick-Öffnen. 809 Tests und Browserabnahme einschließlich Undo/Redo bestanden. Nichtleere Ordner löschen: Nutzerentscheidung noch ausstehend.
 - **Zuständigkeit:** UI/ProjectNavigator → ModelView/Storey-Verweise
 - **Altzuordnung:** Gespräch Navigator
 - **Abnahme/Abhängigkeiten:** N21/N05; benannte 3D-Views, keine Inhaltskopien. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -527,7 +527,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N57 – Aktualisierbare Abbilder mit eigener Ebenendarstellung
 
-- **Stand:** Geplant in main, Umsetzung PR238 offen: modellgebundene Abbilder mit eigenem S/Filter.
+- **Stand:** Teilweise vorhanden in main seit PR238: modellgebundene Grundriss-Abbilder mit eigenem Maßstab/Filter und Startzoom, gesamtes Modell erreichbar. Anlage/Löschung/Ordnerzuordnung verwenden normales Projekt-Undo; Sichtbarkeit den gemeinsamen Ebenenumschalter mit kontextbezogener History. Schema20 und Migrationen erhalten Modell und Zeichnungen. Weitere Ansichtsarten bleiben offen.
 - **Zuständigkeit:** Ziel domain/DrawingDocument, application
 - **Altzuordnung:** Neu
 - **Abnahme/Abhängigkeiten:** N05/N16/N17; Quelle ModelView-ID, Overrides/Invalidierung/Migration. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -536,7 +536,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N58 – Ausschnitte und zusätzliche Gestaltung/Text in Abbildern
 
-- **Stand:** Geplant: Dokumentbereich/-Annotationen; PR238 beinhaltet ersten gespeicherten Bereich, noch keine Annotationen.
+- **Stand:** Teilweise vorhanden: Startansicht/Zoom in PR238, ohne Modellbeschnitt. Nutzerkorrektur 10.10.2026: Linien und Schraffuren aus Abbildern gehören zur gemeinsamen Geschosszeichnung. Zuschnitt erst im Layoutbuch; Texte und weitere Annotationstypen bleiben geplant.
 - **Zuständigkeit:** Ziel DrawingDocument, Annotation-Scope
 - **Altzuordnung:** Guide-F23/F24 ergänzt; Texte neu
 - **Abnahme/Abhängigkeiten:** N57/N39/N49; Dokumentaktionen getrennt von Modellaktionen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -1506,7 +1506,7 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 ### MS – Maßstab und Abbilder
 
-MS-01: gemeinsamer Kontext/Selector; MS-02: Größen-/Schraffurpilot; MS-03: persistenter Arbeitsmaßstab außerhalb Modell-Undo; MS-03a: produktive Schraffurmodell-/Papiermaße; MS-04a: gespeicherter Ansichtsvertrag; MS-04b: gemeinsamer Arbeitskontext. Alle im genannten Umfang vorhanden. MS-04c: gespeicherte Grundriss-Abbilder in offenem PR238, nicht als main-fertig markieren. Weitere Scope-, Schnitt-, Annotations-/Layout- und Ausgabeanforderungen bleiben N05/06/20/46/49/50/57–60. Detailverträge unten.
+MS-01: gemeinsamer Kontext/Selector; MS-02: Größen-/Schraffurpilot; MS-03: persistenter Arbeitsmaßstab außerhalb Modell-Undo; MS-03a: produktive Schraffurmodell-/Papiermaße; MS-04a: gespeicherter Ansichtsvertrag; MS-04b: gemeinsamer Arbeitskontext. Alle im genannten Umfang vorhanden. MS-04c: gespeicherte bearbeitbare Grundriss-Abbilder mit PR238 in main (927dfcf), Schema20, gemeinsame Linien/Schraffuren und unabhängige Filter. Kontextverwaltung im Folgebranch feat/document-context-management, 809 Tests bestanden. Weitere Scope-, Schnitt-, Annotations-/Layout- und Ausgabeanforderungen bleiben N05/06/20/46/49/50/57–60. Detailverträge unten.
 
 
 ## 5. Produktverantwortung – neue Anforderungen vom 10.10.
