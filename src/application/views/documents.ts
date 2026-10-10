@@ -16,6 +16,7 @@ export type DocumentAction =
   | { kind: "rename-folder"; id: string; name: string }
   | { kind: "rename"; id: string; name: string }
   | { kind: "scale"; id: string; denominator: number }
+  | { kind: "assign-folder"; id: string; folderId: string | null }
   | { kind: "delete"; id: string };
 
 export function drawingDocument(project: Project, id: string) {
@@ -73,6 +74,18 @@ export function changeDrawingDocument(
     });
   }
   const target = drawingDocument(current, action.id);
+  if (action.kind === "assign-folder") {
+    if (action.folderId !== null && !current.documentFolders?.some((f) => f.id === action.folderId))
+      throw new Error("Der Abbildordner fehlt.");
+    return validateProject({
+      ...current,
+      drawingDocuments: documents.map((d) => {
+        if (d.id !== target.id) return d;
+        const { folderId: _old, ...document } = d;
+        return action.folderId === null ? document : { ...document, folderId: action.folderId };
+      }),
+    });
+  }
   if (action.kind === "delete")
     return validateProject({
       ...current,

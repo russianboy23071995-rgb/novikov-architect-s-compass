@@ -498,3 +498,40 @@ test("v19 migration promotes former local lines and hatches without loss or dupl
   assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, drawingDocuments: [] })));
   assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, schemaVersion: 20 })));
 });
+
+test("folder assignment preserves document definition and geometry, roundtrips and uses project history", () => {
+  const p = create(createExampleProject());
+  const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const moved = changeDrawingDocument(base, base, {
+    kind: "assign-folder",
+    id: "doc-a",
+    folderId: "folder",
+  });
+  assert.deepEqual(moved.storey, base.storey);
+  assert.deepEqual(moved.drawingDocuments![0], {
+    ...base.drawingDocuments![0],
+    folderId: "folder",
+  });
+  assert.deepEqual(readProjectFile(serializeProject(moved)), moved);
+  const history = commitProject(createHistory(base), moved);
+  assert.deepEqual(undoProject(history).present.drawingDocuments, base.drawingDocuments);
+  assert.deepEqual(
+    redoProject(undoProject(history)).present.drawingDocuments,
+    moved.drawingDocuments,
+  );
+  const unfiled = changeDrawingDocument(moved, moved, {
+    kind: "assign-folder",
+    id: "doc-a",
+    folderId: null,
+  });
+  assert.deepEqual(unfiled.drawingDocuments, base.drawingDocuments);
+  assert.throws(() =>
+    changeDrawingDocument(base, base, { kind: "assign-folder", id: "doc-a", folderId: "unknown" }),
+  );
+  assert.throws(() =>
+    changeDrawingDocument(base, base, { kind: "assign-folder", id: "missing", folderId: "folder" }),
+  );
+  assert.throws(() =>
+    changeDrawingDocument(base, moved, { kind: "assign-folder", id: "doc-a", folderId: "folder" }),
+  );
+});

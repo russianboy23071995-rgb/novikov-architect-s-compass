@@ -14,6 +14,10 @@ import {
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { FloatingPanel } from "./FloatingPanel";
 
@@ -51,6 +55,17 @@ export function DocumentNavigator({
   };
   const row = (id: string, name: string, folder: boolean, depth: number, scale?: number) => {
     const open = !closed.includes(id);
+    const apply = (action: DocumentAction) => {
+      try {
+        run(project, action);
+        setError("");
+        if (action.kind === "assign-folder" && action.folderId)
+          setClosed((ids) => ids.filter((id) => id !== action.folderId));
+        if (action.kind === "delete") setSelected(null);
+      } catch (cause) {
+        setError((cause as Error).message);
+      }
+    };
     const beginRename = () => {
       setError("");
       setRenaming({ id, folder, name });
@@ -139,6 +154,32 @@ export function DocumentNavigator({
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onSelect={beginRename}>Umbenennen</ContextMenuItem>
+          {!folder && (
+            <>
+              <ContextMenuSub>
+                <ContextMenuSubTrigger>In Ordner verschieben</ContextMenuSubTrigger>
+                <ContextMenuSubContent>
+                  <ContextMenuItem
+                    onSelect={() => apply({ kind: "assign-folder", id, folderId: null })}
+                  >
+                    Ohne Ordner
+                  </ContextMenuItem>
+                  {(project.documentFolders ?? []).map((f) => (
+                    <ContextMenuItem
+                      key={f.id}
+                      onSelect={() => apply({ kind: "assign-folder", id, folderId: f.id })}
+                    >
+                      {f.name}
+                    </ContextMenuItem>
+                  ))}
+                </ContextMenuSubContent>
+              </ContextMenuSub>
+              <ContextMenuSeparator />
+              <ContextMenuItem onSelect={() => apply({ kind: "delete", id })}>
+                Abbild löschen
+              </ContextMenuItem>
+            </>
+          )}
         </ContextMenuContent>
       </ContextMenu>
     );
