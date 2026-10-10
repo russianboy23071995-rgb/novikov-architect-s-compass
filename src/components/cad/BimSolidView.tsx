@@ -1,3 +1,4 @@
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { useSolidPicking } from "./useSolidPicking";
 import {
@@ -65,6 +66,7 @@ export function BimSolidView({
   onCamera: (camera: Camera) => void;
   pan: boolean;
   onSelect: BimPlanProps["onSelect"];
+  visibility?: LayerVisibilityPolicy;
   projectionFrame?: ProjectionFrame;
   snap?: boolean;
 } & Pick<
@@ -78,7 +80,6 @@ export function BimSolidView({
   | "onEditAim"
   | "onEditCommit"
   | "interactive"
-  | "visibility"
   | "cornerPreview"
 >) {
   const editSession =
