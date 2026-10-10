@@ -116,3 +116,12 @@ Browservergleich; keine Geschwindigkeitszusage ohne Messung.
 Dieser konkrete Abbau der aktuellen mehrfachen Kontextverdrahtung bereitet den
 Ausschnittpilot vor, ohne offene Dokument-Bedienregeln vorwegzunehmen. Nach MS-04b
 wird genau ein neuer Auftrag im Entwicklungsplan festgelegt.
+
+
+## MS-04b umgesetzt — 10.10.2026
+
+Gemeinsamer Resolver und produktive Verdrahtung implementiert, 796 Tests und Build
+bestanden; Browservergleich der geteilten Ansicht erfolgreich. Siehe aktuellen
+DEVELOPMENT_PLAN.md für Nachweis und den einzigen Folgeauftrag MS-04c. Die obige
+Pilotbeschreibung ist damit historisch; die offenen Dokumententscheidungen bleiben
+offen, bis die angefragten Nutzerantworten vorliegen.

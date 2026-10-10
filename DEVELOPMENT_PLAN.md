@@ -1,3 +1,43 @@
+## MS-04b: Gemeinsamer Arbeitsansichtskontext — 10.10.2026
+
+PR236 nach erfolgreicher CI regulär zusammengeführt. `application/views/working-context`
+löst Arbeitsbindung, Maßstab und Sichtbarkeit gemeinsam gegen einen unveränderlichen
+Projektsnapshot auf. CadWorkspace memoisiert diesen Kontext; ViewportManager,
+CadViewport, BimPlan, Schraffurdefaults und Anschlussvorschau erhalten denselben
+Kontext. BimPlan rekonstruiert keine Arbeitsidentität mehr; der Maßstabsselektor
+besitzt keine zweite Quelle. Explizite Sichtbarkeitsüberschreibungen bleiben erhalten.
+3D erhält weiterhin die vorhandene gemeinsame Sichtbarkeitspolicy.
+
+Fremde Projekt-/Geschossbindungen, unbekannte Dokumentziele und veraltete Snapshots
+werden abgewiesen. Pointer und Zoom erzeugen keinen neuen Kontext. Keine neue
+Dokumentklasse, kein Schemawechsel, keine neue Geometrie-/AI-Logik. Die parallel
+über main eingegangene AI-Hauptvision aus PR235 gelesen und regulär integriert:
+der neue reine Application-Resolver ist auch außerhalb React aufrufbar.
+
+Prüfung: 796 Tests bestanden, darunter vier neue Kontext-Regressionstests mit
+Unterfällen für falsche/veraltete Ziele, explizite Filter, Hostfenster, Rendering,
+Auswahl/Fang, Papiergrößen, unabhängigen Zoom, History und Dateirundlauf.
+Typprüfung einschließlich Benchmarks und Produktionsbuild erfolgreich. Lint:
+0 Fehler, sechs bekannte Warnungen. Browser: zwei Grundrissfenster teilen 1:50;
+Zoom links 200 %, rechts 67,1 %. Wandebene ausblenden entfernt Wand und Fenster
+in beiden Ansichten; Paletten-Undo stellt beide wieder her. Keine erfassten
+Browserfehler. Screenshot: outputs/working-context.jpg außerhalb des Repos.
+Papiergrößen/Dateirundlauf/Modell-Undo in dieser Etappe automatisiert geprüft;
+nicht alle diese Abläufe erneut manuell im Browser ausgeführt.
+
+Praktische Abnahme: Viewport layout → 2 Views Vertical; Maßstab 1:50 wählen,
+eine Ansicht zoomen, andere aktivieren. Maßstab bleibt gleich, Zoom unabhängig.
+Wand auswählen → ihre Ebene ausblenden → Ebenen-Undo: beide Ansichten folgen.
+
+**Genau ein nächster Auftrag: MS-04c erster gespeicherter Grundriss-Ausschnitt.**
+Vor dessen Umsetzung die angefragten Anfangsfilter- und Dokument-History-Regeln
+entscheiden. Dann einen benannten, zunächst nur betrachtbaren Grundriss-Ausschnitt
+mit stabiler ID, Modellbindung, eigenem Maßstab und Filter anlegen/öffnen/speichern.
+Kein Crop-Editor, Layouteditor oder neue Annotationen; zunächst ganzer Grundriss.
+Den gemeinsamen Resolver gezielt erweitern, strikte Migration/Referenzen sowie zwei
+unabhängige Ausschnitte prüfen. Kein zweites Gebäudemodell. Die derzeitige Freigabe
+entscheidet die noch offenen History-/Filterfragen nicht automatisch.
+
 ## MS-04a: Vertrag für gespeicherte Ausschnitte — 10.10.2026
 
 PR234 nach erfolgreicher GitHub-CI regulär zusammengeführt. Reiner Planungsauftrag:
