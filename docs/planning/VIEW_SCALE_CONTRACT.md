@@ -1,12 +1,12 @@
 # Bauplan: Ansichtsmaßstab im Bearbeitungsmodus und in Ausschnitten
 
-Stand: 09.10.2026. Nutzeranforderung und Architekturvertrag für die spätere
-Umsetzung; hier wird **keine** Maßstabsfunktion als bereits implementiert
-ausgegeben. Gilt ergänzend zu [ARCHITECTURE.md §29](../../ARCHITECTURE.md)
-und dem [offenen V07j-Vertrag für Schraffuren in PR229](https://github.com/russianboy23071995-rgb/novikov-architect-s-compass/pull/229).
-Bei zeitlicher Überschneidung sind die hier festgehaltenen
-**Nutzerentscheidungen** (insbesondere 1:100 und Ort der Bedienung) maßgebend.
-Vor Umsetzung den dann aktuellen PR-/Code-Stand erneut lesen.
+Stand: 10.10.2026. Architekturvertrag und Fortschrittsnachweis.
+MS-01 bis MS-03a sind umgesetzt: Arbeitsmaßstab gespeichert außerhalb Modell-Undo,
+Schraffuren mit Modell-/Papiermaß in Schema 16. Gespeicherte Ausschnitte sind noch
+nicht implementiert. Für ihren Codeabgleich und den nächsten begrenzten Pilot gilt
+[SAVED_DRAWING_VIEWS.md](SAVED_DRAWING_VIEWS.md), ergänzend zu
+[ARCHITECTURE.md §29](../../ARCHITECTURE.md). Ältere Fortschrittsabsätze unten
+beschreiben den damaligen Stand; der aktuelle Auftrag steht im Entwicklungsplan.
 
 ## 1. Begriffe und Geltungsbereich
 
@@ -117,16 +117,13 @@ Zwischenergebnisse sicherstellen.
   folgt der Nutzerbestätigung nach Review von PR230 am 09.10.2026.
   Der Arbeitsmaßstab ist eine **Ansichtseinstellung**, kein globales
   Feld im Bauteil und keine Eigenschaft jeder einzelnen Annotation.
-  Zukunftsziel: den geänderten Arbeitsmaßstab **pro fachlichem Ansichtskontext
-  innerhalb des Projekts** speichern;
-  neue und migrierte Projekte ohne Feld starten mit 1:100. Der erste
-  isolierte UI-Pilot darf den Wert in der Sitzung halten, solange
-  Speicherung/History ausdrücklich als noch offen sichtbar bleibt.
+  Der Arbeitsmaßstab ist seit MS-03 im Projekt gespeichert (workingViews);
+  fehlende Einträge und Altprojekte starten mit 1:100.
 - Application prüft Änderungen an gespeicherten Ansichtseinstellungen
   mit gültiger Kontext-/View-ID und unveränderter Revision;
   Annotationen-/Dokumentaktionen nutzen die bestehende validierte
-  Preview-/Commit-/Undo-Grenze. Die Regel, ob ein Wechsel des bloßen
-  Arbeitsmaßstabs einen BIM-Undo-Schritt erzeugt, ist **offen**.
+  Preview-/Commit-/Undo-Grenze. Arbeitsmaßstab erzeugt nach Nutzerentscheidung
+  **keinen Modell-Undo-Schritt**; Modell-Undo erhält den aktuellen Maßstab.
   Navigation/Zoom allein erzeugen keinen BIM-Undo-Schritt.
 - Rendering erhält den **effektiven ScaleContext** als Eingabe.
   Es leitet CSS-/SVG-/Papiergrößen aus einem einzigen Resolver ab.
@@ -139,12 +136,9 @@ Zwischenergebnisse sicherstellen.
   BIM-Modell und behalten ihr eigenes S; Änderungen am Hauptcanvas
   schreiben sie nicht um. Bildschirm-Zoom muss nicht aus S
   rekonstruiert werden.
-- Bereits geplanter V07j/V07k-Schraffur-Pilot darf denselben
-  `ScaleContext` verwenden. Sein Papiermodus ist im heutigen
-  Produktionsschema noch nicht freigeschaltet. Die hier gewählte
-  Anfangsvorgabe 1:100 und der UI-Ort beantworten zwei zuvor
-  offene Produktfragen; bestehende Schraffuren im Modellmaß
-  bleiben unverändert.
+- Schraffuren nutzen seit MS-03a diesen ScaleContext mit Modell-/Papiermaß
+  im Produktionsschema 16. Alte Modellmuster bleiben unverändert; beim
+  Moduswechsel bleibt die sichtbare Größe erhalten. Siehe HATCH_PAPER_SCALE.md.
 
 ## 5. Kleine, abhängige Aufträge für Codex
 

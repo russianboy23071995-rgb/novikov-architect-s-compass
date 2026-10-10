@@ -867,8 +867,10 @@ committing the preview. Window display requires both its own layer and its host
 wall to be visible in the effective context. Real wall openings and the complete
 IFC export remain unchanged. One Application eligibility policy serves all views
 and tools. This resolves the earlier open scope, persistence and host questions.
-Initial filters for newly created DrawingDocuments and visibility undo semantics
-remain open. See docs/LAYER_VISIBILITY_PLAN.md; no visibility implementation yet.
+Initial filters for newly created DrawingDocuments remain open. Update 2026-10-10:
+BIM visibility is implemented with separate palette Undo/Redo, outside model history.
+Document lifecycle/history is not decided by that working-view rule. See
+docs/planning/SAVED_DRAWING_VIEWS.md for the current code/contract distinction.
 
 ## Implemented: layer data and schema-1 migration — 2026-10-04
 
@@ -1800,6 +1802,23 @@ If a requested implementation conflicts with this architecture, do not silently 
 Responsibility boundaries: saved view/document/annotation/layout definitions belong to the domain; validated changes, reference resolution, capabilities and history to application; projections and drawing to rendering/geometry; file migration and output to interop. Proposed folders such as domain/views and domain/documents are responsibility labels, not a requirement to create empty modules.
 
 Saved definitions and annotations may initially share the versioned Project file and existing snapshot history. Hover, temporary guides and open menus remain ephemeral. Model actions and document actions are distinct typed operations through the same validated application/history boundary; no second BIM history or state store is introduced by a canvas pane. New persistent types require reference validation, migration from schemaVersion 1, round-trip and undo tests before release. Navigation alone must not produce model history entries.
+
+## Saved-view context resolution — clarification 2026-10-10 (MS-04a)
+
+Application resolves a typed viewport target against the current project snapshot,
+including source definition, effective scale, visibility and supported capabilities.
+Renderers consume that context; they must not reconstruct a working-plan identity
+for a DrawingDocument or silently fall back to working scale/visibility. Missing,
+foreign or stale references are explicit failures. Closing a pane does not delete
+its saved definition. Document visibility is independent of the BIM visibility mask.
+Derived caches include relevant model/definition identity, not pointer or camera.
+
+Schema 16 currently has workingViews only; the drawing-document visibility token
+is not proof of document persistence or existence validation. The bounded next
+pilot consolidates the existing working-plan wiring, without creating unused
+ModelView/Document classes. Document initialization, crop interaction and lifecycle
+history remain proposals until decided. Existing storey annotations retain scope.
+See [saved-view contract and single pilot](docs/planning/SAVED_DRAWING_VIEWS.md).
 
 # 30. Editing, Layers, Heights and Input Contracts — decision 2026-10-03
 

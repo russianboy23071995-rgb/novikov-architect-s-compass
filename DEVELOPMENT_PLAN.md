@@ -1,3 +1,27 @@
+## MS-04a: Vertrag für gespeicherte Ausschnitte — 10.10.2026
+
+PR234 nach erfolgreicher GitHub-CI regulär zusammengeführt. Reiner Planungsauftrag:
+[Codeabgleich und Ausschnittvertrag](docs/planning/SAVED_DRAWING_VIEWS.md).
+Schema 16 hat noch keine gespeicherten ModelViews/DrawingDocuments. Gemeinsame
+Größenauflösung und Sichtbarkeit existieren; ihre Verbindung ist derzeit über
+Workspace, Viewport und Plan verteilt. Keine zweite Modell- oder Rendererstruktur
+nötig. Architektur §29 präzisiert validierte Kontextauflösung, fehlende Referenzen
+und unabhängige Filter. Historische Maßstabsangaben auf heutigen Stand gebracht.
+
+Offen bleiben Anfangsfilter, Crop-Bedienung und Dokument-Lebenszyklus/History;
+Vorschläge sind ausdrücklich keine Nutzerentscheidungen. Keine Laufzeitänderung.
+Dokumentation gegen genannte Codepfade geprüft, lokale Links und Diff geprüft.
+Tests/Build nicht erneut ausgeführt: letzter Code-Nachweis PR234 mit 792 Tests,
+Typprüfung und Build; diese Planung behauptet keine neue Funktionsabnahme.
+
+**Genau ein nächster Auftrag: MS-04b gemeinsamen Arbeitsansichtskontext anbinden.**
+Bestehenden Arbeitsgrundriss über einen Application-Resolver mit validierter Bindung,
+Maßstab und Sichtbarkeit versorgen; Renderer liest diese Identität statt sie erneut
+zu konstruieren. Zwei Fenster, Papiermuster, Filter/Picking/Snap, unabhängiger Zoom,
+History und Dateirundlauf müssen unverändert funktionieren. Fremde/veraltete Ziele
+abweisen. Kein neues Dateiformat, Ausschnitteditor oder leere Dokumentklassen.
+Vollständiger begrenzter Umfang und Abnahme im verlinkten Vertrag.
+
 ## MS-03a: Schraffuren im Modell- und Papiermaß — 10.10.2026
 
 PR233 nach grüner CI regulär zusammengeführt. Nutzerentscheidung: Mustergröße beim
