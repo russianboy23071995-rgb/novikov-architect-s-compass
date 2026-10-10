@@ -1541,6 +1541,23 @@ Temporary UI state such as hover, active menu or current tooltip must not be sto
 
 AI is a first-class interaction method but not a separate CAD engine.
 
+**Primary product goal, user decision 2026-10-10:** autonomous, speech-capable
+AI CAD that can turn site/plot dimensions, gross building volumes, storey and
+room requirements, and source-backed Bebauungsplan analysis into validated,
+editable design variants. [Scope, acceptance and phased path](docs/ai/AI_CAD_PRIMARY_VISION.md).
+This priority guides all new domain capability design; it does not imply an
+already implemented AI designer or replace the current bounded task.
+
+Every relevant capability exposes a typed Application action or structured
+model query reusable by manual UI, text, voice and future AI. The AI can plan
+many internal steps, but geometry, quantities and constraints remain with the
+CAD/domain engines. Imported plan statements retain document/page/region,
+version, applicability and uncertainty; an ambiguous or unverified rule cannot
+silently become a satisfied design constraint. Multi-step proposals require
+revision-bound context, model diff, explicit publication boundary and Undo.
+A CAD button itself is not the AI integration surface; no direct UI automation
+or second editable AI model is authoritative.
+
 The intended architecture is:
 
 ```text

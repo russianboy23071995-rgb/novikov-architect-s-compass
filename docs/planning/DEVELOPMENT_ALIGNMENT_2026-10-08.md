@@ -1,5 +1,23 @@
 # Entwicklungsabstimmung für NOVIKOV CAD vom 8. Oktober 2026
 
+## Vorrangige Produktvision: autonomes AI CAD — 10.10.2026
+
+Der Nutzer erklärt eine **vollautomatisierte, sprachfähige AI-CAD-Architektur
+für komplexe Entwürfe** zum größten und wichtigsten langfristigen Ziel.
+[Verbindliches Zielbild und Abnahmefall](../ai/AI_CAD_PRIMARY_VISION.md):
+aus Grundstücksdaten, Brutto-Gebäudeblöcken, Geschossen, Raumprogramm
+und überprüfbarer Bebauungsplan-Auswertung modellgebundene Varianten
+eigenständig planen, erzeugen, prüfen und fortschreiben. Unsichere oder
+nicht belegte B-Plan-Aussagen bleiben sichtbar offen. AI nutzt gemeinsame
+typisierte Actions/Queries, fachliche CAD-Regeln, Vorschau/Diff und
+Undo statt UI-Klicksimulation oder zweitem BIM-Modell.
+
+Ab sofort jede neue Fachfunktion auf diese Anschlussfähigkeit prüfen;
+ein kleiner begrenzter AI-Pilot kann vorhandene Aktionen früh nutzen.
+Das Zielbild ist keine Fertigmeldung und verdrängt **nicht** den
+aktuellen nächsten Einzelauftrag im Kopf von DEVELOPMENT_PLAN.md.
+Dessen Umsetzung soll die künftige AI-Steuerbarkeit nicht verbauen.
+
 ## Neue Nutzerentscheidung: Maßstab der Arbeitsansicht und Ausschnitte — 09.10.2026
 
 [Verbindlicher Bauplan mit Begriffen, Rechenregeln, Abnahme und MS-01–MS-04](VIEW_SCALE_CONTRACT.md).
