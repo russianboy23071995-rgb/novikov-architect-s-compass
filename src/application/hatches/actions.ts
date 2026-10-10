@@ -1,3 +1,4 @@
+import { patternSize } from "./pattern-size.ts";
 import { samePattern } from "../../domain/elements/hatch/revision.ts";
 import {
   validateHatchPattern,
@@ -6,6 +7,8 @@ import {
 import {
   defaultHatchAppearance,
   patternRotationSchema,
+  hatchPatternSizeSchema,
+  type HatchPatternSize,
 } from "../../domain/elements/hatch/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -17,6 +20,7 @@ export type HatchRequest = {
   projectId: string;
   patternDefinition?: HatchPatternDefinition | null | undefined;
   patternRotation?: number | undefined;
+  patternSize?: HatchPatternSize | undefined;
 } & (
   | {
       kind: "create";
@@ -48,14 +52,14 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
     throw new Error("Muster-ID hat eine andere Definition.");
   const source =
     request.kind === "create" ? request.hatch : hatches.find((h) => h.id === request.id)!;
-  const assignment =
+  const assignment: { pattern?: Hatch["pattern"] } =
     request.patternDefinition === undefined
       ? {}
       : {
           pattern: definition
             ? {
                 patternId: definition.id,
-                mode: "model" as const,
+                ...patternSize(source.pattern),
                 ...(source.pattern?.rotation === undefined
                   ? {}
                   : { rotation: source.pattern.rotation }),
@@ -69,9 +73,25 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
               }
             : null,
         };
-  if (request.patternRotation !== undefined) {
+  if (request.patternSize !== undefined) {
     const pattern =
       request.patternDefinition !== undefined
+        ? assignment.pattern
+        : request.kind === "update" && request.changes.pattern !== undefined
+          ? request.changes.pattern
+          : source.pattern;
+    if (!pattern) throw new Error("Zuerst ein Schraffurmuster wählen.");
+    const size = hatchPatternSizeSchema.parse(request.patternSize);
+    assignment.pattern = {
+      patternId: pattern.patternId,
+      origin: pattern.origin,
+      ...(pattern.rotation === undefined ? {} : { rotation: pattern.rotation }),
+      ...size,
+    };
+  }
+  if (request.patternRotation !== undefined) {
+    const pattern =
+      assignment.pattern !== undefined
         ? assignment.pattern
         : request.kind === "update" && request.changes.pattern !== undefined
           ? request.changes.pattern

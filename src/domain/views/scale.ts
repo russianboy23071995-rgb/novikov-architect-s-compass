@@ -25,3 +25,11 @@ export function validateScaleContext(context: ScaleContext): ScaleContext {
   positiveFinite(context.denominator);
   return context;
 }
+
+export function workingPlanScale(
+  projectId: string,
+  storeyId: string,
+  denominator = DEFAULT_OUTPUT_SCALE,
+): ScaleContext {
+  return { view: { kind: "working-plan", projectId, storeyId }, denominator };
+}

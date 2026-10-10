@@ -1,3 +1,5 @@
+import { workingPlanScale } from "@/domain/views/scale";
+import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
 import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
@@ -98,6 +100,7 @@ export type BimPlanProps = {
   draftFill?: Hatch["fill"] | undefined;
   draftPattern?: HatchPatternDefinition | null | undefined;
   draftPatternRotation?: number | undefined;
+  draftPatternSize?: HatchPatternSize | undefined;
   gridSettings?: GridSettings;
   wallOutlineWidth?: number;
   snap: boolean;
@@ -148,6 +151,7 @@ export function BimPlan({
   draftFill,
   draftPattern,
   draftPatternRotation,
+  draftPatternSize,
   snap,
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
@@ -176,6 +180,11 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
+  const scaleDenominator = project.workingViews?.[0]?.denominator;
+  const scaleContext = useMemo(
+    () => workingPlanScale(project.id, project.storey.id, scaleDenominator),
+    [project.id, project.storey.id, scaleDenominator],
+  );
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
       ? requestedEditSession
@@ -659,6 +668,7 @@ export function BimPlan({
   );
   const renderRun = (run: PlanRun) => (
     <PlanSceneRun
+      scaleContext={scaleContext}
       key={`${run.kind}:${run.ids[0]}`}
       {...run}
       scene={run.affected && previewScene ? previewScene : scene}
@@ -1189,13 +1199,14 @@ export function BimPlan({
                       ...(draftPatternRotation === undefined
                         ? {}
                         : { rotation: draftPatternRotation }),
-                      mode: "model",
+                      ...(draftPatternSize ?? { mode: "model" as const }),
                       origin: {
                         x: Math.min(...points.map((p) => p.x)),
                         y: Math.min(...points.map((p) => p.y)),
                       },
                     },
                   }}
+                  context={scaleContext}
                   definition={draftPattern}
                   pixelsPerMetre={camera.pixelsPerMetre}
                 />

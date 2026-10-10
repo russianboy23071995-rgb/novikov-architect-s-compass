@@ -1,6 +1,7 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 15 (semantic working-view scale, 2026-10-10).
+Production project schema is now 16 (model/paper hatch application sizing, 2026-10-10).
+Schema 15 remains the strict legacy working-view format at file ingress.
 Schema 14 remains the strict legacy portable pen-set format at file ingress.
 Schema 10 remains the strict legacy custom-line format at file ingress.
 Earlier schema-9 experiment descriptions below are historical evidence; this
@@ -21,7 +22,7 @@ All internal lengths, including paper sizes, use metres. UI paper-size fields us
 millimetres with an explicit boundary conversion, never an ambiguous unitless value.
 Paper hatch applications will specify a paper cell width in metres. A shared
 rendering resolver derives uniform factor paperWidth * S / definition.width;
-model applications retain factor 1. Origin stays in model coordinates, rotation
+legacy model applications retain factor 1; explicit application widths may override it (MS-03a below). Origin stays in model coordinates, rotation
 and creator orientation are preserved, and contour/model geometry never scales.
 Missing scale for paper rendering must be explicit, not silently replaced by 1:1.
 Screen stroke conversion must account for the tile factor; physical print pens
@@ -2712,3 +2713,28 @@ ViewportManager derives context from the project; there is no second session sca
 Panes retain independent cameras. Presets are 1:50/100/200/500/1000/2500/5000; a separate
 Individuell choice accepts strict 1:S input, committing with Enter or blur. Zoom and
 model geometry remain unchanged. Paper hatch product integration is still pending.
+
+## Hatch model/paper application sizing — MS-03a, 2026-10-10
+
+Implemented: schema 16 extends the hatch application with a strict model/paper union.
+Paper mode requires paperWidthMetres; model mode optionally carries modelWidthMetres,
+otherwise it follows definition width exactly. Width is the complete repeat cell,
+not the spacing of any particular pair of lines. The stored width affects only the
+pattern lattice; contour, IDs, origin, rotation and shared definition are unchanged.
+Versions 1–15 migrate at file ingress without altering existing model-mode sizes.
+
+Binding user decision: switching mode preserves the current visible cell size at the
+active semantic view scale. Returning to model mode after a scale change may therefore
+require an explicit model width; it never edits or duplicates the library definition.
+Properties, creation defaults, pickup and shared drawing actions carry the same size
+contract. Edits to application sizing are normal model Undo steps; changing view scale
+remains outside model Undo. Library updates retain application sizing and rotation.
+
+The generic metric resolver now lives in domain/views/display-size so Domain validation
+and Application mode conversion share it without depending on Rendering. Rendering
+adds camera conversion and the shared SVG tile. BimPlan retains a memoized semantic
+scale context across pointer updates; both committed and draft hatches consume it.
+Incomplete draft sizes cannot crash the canvas; commit/file ingress still reject them.
+Project validation checks resolved cell extents at the stored view scale, including
+finite arithmetic. Paper mode is available in 2D properties/defaults. No claim of a
+physical printed output or paper-sized pen width is made; strokes remain 1 CSS pixel.

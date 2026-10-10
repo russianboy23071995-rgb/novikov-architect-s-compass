@@ -26,6 +26,7 @@ export type DrawingRequest =
       patternDefinition?:
         import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
       patternRotation?: number | undefined;
+      patternSize?: import("../../domain/elements/hatch/model.ts").HatchPatternSize | undefined;
       layerId?: string;
     }
   | {
@@ -76,6 +77,7 @@ export function createDrawing(
       kind: "create",
       patternDefinition: request.patternDefinition,
       patternRotation: request.patternRotation,
+      patternSize: request.patternSize,
       hatch: {
         id,
         points: closedDrawingContour(request.points),

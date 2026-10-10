@@ -1,3 +1,4 @@
+import type { ScaleContext } from "@/domain/views/scale";
 import { HatchPattern } from "./HatchPattern";
 import { LinePattern } from "./LinePattern";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
@@ -14,6 +15,7 @@ import { linePath } from "@/lib/bim/lines";
 
 type Props = PlanRun & {
   scene: PlanScene;
+  scaleContext: ScaleContext;
   selectedIds: ReadonlySet<string>;
   drawing: boolean;
   placement: boolean;
@@ -33,6 +35,7 @@ export function PlanSceneContent({
   kind,
   ids,
   scene,
+  scaleContext,
   selectedIds,
   drawing,
   placement,
@@ -113,6 +116,7 @@ export function PlanSceneContent({
           />
           {hatch.pattern && (
             <HatchPattern
+              context={scaleContext}
               hatch={hatch}
               definition={scene.hatchPatterns.get(hatch.pattern.patternId)!}
               pixelsPerMetre={pixelsPerMetre}
