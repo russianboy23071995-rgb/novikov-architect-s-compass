@@ -239,6 +239,15 @@ export type EditingEvent = BaseEditingEvent & {
 
 /** Storage is read by the adapter before dispatch; the reducer stays deterministic. */
 export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  const next = reduceEditingEvent(state, event);
+  // The load token identifies a document session. Ordinary commits/Undo must not erase it.
+  return event.type !== "load-project" &&
+    state.projectLoad &&
+    next.projectLoad !== state.projectLoad
+    ? { ...next, projectLoad: state.projectLoad }
+    : next;
+}
+function reduceEditingEvent(state: EditingState, event: EditingEvent): EditingState {
   if (event.type === "load-project") {
     const { projectLoad: _load, documentLayerActivation: _activation, ...clean } = state;
     const next = reduceWithPatterns(clean, event);

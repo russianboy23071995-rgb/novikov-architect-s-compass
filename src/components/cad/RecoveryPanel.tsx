@@ -1,21 +1,25 @@
+import type { useLocalAutosave } from "./useLocalAutosave";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import {
   readProjectRecovery,
-  saveProjectRecovery,
   listRecoveryProjects,
+  queryRecoveryProjects,
   type RecoverySummary,
 } from "@/application/project-files/recovery-catalog";
-import { browserRecoveryCatalog } from "@/interop/project-file/recovery-storage";
+import {
+  browserRecoveryCatalog,
+  subscribeRecoveryChanges,
+} from "@/interop/project-file/recovery-storage";
 import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
 
 export function RecoveryPanel({
-  project,
+  autosave,
   onClose,
   onPrepare,
 }: {
-  project: Project;
+  autosave: ReturnType<typeof useLocalAutosave>;
   onClose: () => void;
   onPrepare: (candidate: { name: string; project: Project }) => void;
 }) {
@@ -50,6 +54,23 @@ export function RecoveryPanel({
       lifetime.value++;
     };
   }, []);
+  useEffect(() => {
+    let active = true;
+    const unsubscribe = subscribeRecoveryChanges(() => {
+      void queryRecoveryProjects(browserRecoveryCatalog).then(
+        (result) => {
+          if (active) setProjects(result.projects);
+        },
+        () => {
+          /* Existing snapshot/error presentation remains available. */
+        },
+      );
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
   const run = async (id?: string) => {
     const current = ++generation.current.value;
     setBusy(true);
@@ -58,7 +79,8 @@ export function RecoveryPanel({
     setCandidate(null);
     try {
       if (id === undefined) {
-        const result = await saveProjectRecovery(project, browserRecoveryCatalog);
+        const result = await autosave.saveNow();
+        if (!result) return;
         const listing = await listRecoveryProjects(browserRecoveryCatalog);
         if (generation.current.value !== current) return;
         setProjects(listing.projects);
@@ -81,17 +103,37 @@ export function RecoveryPanel({
     <FloatingPanel open title="Lokale Wiederherstellung" onClose={onClose} width={600} height={560}>
       <div className="space-y-4 overflow-auto p-4 text-xs">
         <p>
-          Je Projekt-ID ein manuell erstellter Stand und sein gültiger Vorgänger, nur in diesem
-          Browser unter dieser Adresse. Andere Projekte bleiben erhalten; Dateien mit gleicher
-          Projekt-ID teilen einen Stand. Keine automatische Sicherung und kein externes Backup. Beim
-          Löschen der Browserdaten gehen diese Stände verloren.
+          Je Projekt-ID ein gesicherter Stand und sein gültiger Vorgänger, nur in diesem Browser
+          unter dieser Adresse. Andere Projekte bleiben erhalten; Dateien mit gleicher Projekt-ID
+          teilen einen Stand. Dies ist kein externes Backup. Beim Löschen der Browserdaten gehen
+          diese Stände verloren.
         </p>
         <p>
           Gespeichert werden die übernommenen Projektänderungen einschließlich Abbildern.
           Unbestätigte Eingaben und Undo-History sind nicht enthalten.
         </p>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={autosave.state.enabled}
+            onChange={(event) => autosave.setEnabled(event.target.checked)}
+          />
+          Automatisch lokal sichern (dieses geöffnete Projekt)
+        </label>
+        <p>
+          Nach 2 Sekunden Bearbeitungspause. Nach Projektwechsel oder Neustart wieder ausgeschaltet.
+          Eine bereits gestartete Transaktion kann noch abschließen.
+        </p>
+        {autosave.state.busy && <p role="status">Lokaler Snapshot wird geschrieben…</p>}
+        {autosave.state.error && (
+          <p role="alert">
+            {autosave.state.enabled ? "Autosicherung pausiert. " : ""}
+            {autosave.state.error} Zum erneuten Versuch ausschalten und wieder einschalten oder
+            manuell sichern.
+          </p>
+        )}
         <div className="flex gap-2">
-          <Button size="sm" disabled={busy} onClick={() => void run()}>
+          <Button size="sm" disabled={busy || autosave.state.busy} onClick={() => void run()}>
             Snapshot erstellen
           </Button>
         </div>
