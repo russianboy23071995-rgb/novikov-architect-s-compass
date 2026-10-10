@@ -69,6 +69,7 @@ type TopToolbarProps = {
   exportingIfc: boolean;
   onSave: () => void;
   onOpen: () => void;
+  onRecovery: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -140,7 +141,29 @@ export function TopToolbar(props: TopToolbarProps) {
           aria-label="Application menu"
         >
           {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
-            item === "Tools" ? (
+            item === "File" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    File
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onSave}>
+                    Projektdatei speichern
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onOpen}>Projektdatei öffnen</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={props.onRecovery}>
+                    Lokale Wiederherstellung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Tools" ? (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <Button
