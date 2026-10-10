@@ -4,7 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export type SettingsSection = { id: string; label: string; content: ReactNode };
 
 /** Shared settings body; the existing FloatingPanel owns window movement and closing. */
-export function SettingsSections({ sections }: { sections: [SettingsSection, ...SettingsSection[]] }) {
+export function SettingsSections({
+  sections,
+}: {
+  sections: [SettingsSection, ...SettingsSection[]];
+}) {
   return (
     <Tabs defaultValue={sections[0].id} orientation="vertical" className="flex min-h-0 flex-1">
       <TabsList
