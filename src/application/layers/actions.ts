@@ -61,6 +61,14 @@ export function previewLayerManagement(
     throw new Error("Dieser Ebenenname ist bereits vergeben.");
   return validateProject({
     ...project,
+    ...(request.kind === "create" && project.drawingDocuments
+      ? {
+          drawingDocuments: project.drawingDocuments.map((d) => ({
+            ...d,
+            hiddenLayerIds: [...d.hiddenLayerIds, request.id],
+          })),
+        }
+      : {}),
     layers:
       request.kind === "create"
         ? [...project.layers, { id: request.id, name }]

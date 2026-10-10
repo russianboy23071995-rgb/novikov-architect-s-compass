@@ -26,7 +26,7 @@ function context() {
 }
 
 /** Browser storage adapter; no library reads inside model reducers or geometry. */
-export function useProjectEditing(initial: () => Project) {
+export function useProjectEditing(initial: () => Project, drawingDocumentId: string | null = null) {
   const [state, dispatch] = useReducer(editingReducer, undefined, () => {
     const project = initial(),
       library = context();
@@ -38,13 +38,17 @@ export function useProjectEditing(initial: () => Project) {
         (resolution.conflicts.length ? `Musterkonflikt: ${resolution.conflicts.join(", ")}` : ""),
     };
   });
-  const send = useCallback((event: EditingEvent) => {
-    dispatch(
-      ["load-project", "project", "undo", "redo"].includes(event.type)
-        ? { ...event, ...context() }
-        : event,
-    );
-  }, []);
+  const send = useCallback(
+    (event: EditingEvent) => {
+      if (event.type === "project" && drawingDocumentId) event = { ...event, drawingDocumentId };
+      dispatch(
+        ["load-project", "project", "undo", "redo"].includes(event.type)
+          ? { ...event, ...context() }
+          : event,
+      );
+    },
+    [drawingDocumentId],
+  );
   useEffect(() => {
     const reconcile = () => dispatch({ type: "patterns-changed", ...context() });
     reconcile();

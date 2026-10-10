@@ -1,4 +1,4 @@
-import { DocumentLayerNotice, type DocumentLayerActivation } from "./DocumentLayerNotice";
+import { DocumentLayerNotice } from "./DocumentLayerNotice";
 import { ensureDocumentFolder } from "@/application/views/documents";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
@@ -89,7 +89,6 @@ export function CadWorkspace({
   const onPlanCapture = useCallback((frame: DocumentFraming | null) => {
     capturedPlan.current = frame;
   }, []);
-  const [layerActivation, setLayerActivation] = useState<DocumentLayerActivation | null>(null);
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
   const getPlanCapture = useCallback(() => {
     if (activeDocumentId || !capturedPlan.current) return null;
@@ -132,10 +131,12 @@ export function CadWorkspace({
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
-  const [editing, dispatchEditing] = useProjectEditing(() =>
-    ensureDocumentFolder(initialProject ?? createExampleProject()),
+  const [editing, dispatchEditing] = useProjectEditing(
+    () => ensureDocumentFolder(initialProject ?? createExampleProject()),
+    activeDocumentId,
   );
   const { history, session: pendingSession } = editing;
+  const layerActivation = editing.documentLayerActivation;
   const project = history.present;
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
@@ -879,11 +880,7 @@ export function CadWorkspace({
           open={layersOpen}
           onOpenChange={setLayersOpen}
           error={editing.error}
-          onManage={(base, request) => {
-            if (request.kind === "create" && activeDocumentId)
-              setLayerActivation({ base, documentId: activeDocumentId, layerId: request.id });
-            dispatchEditing({ type: "manage-layer", base, request });
-          }}
+          onManage={(base, request) => dispatchEditing({ type: "manage-layer", base, request })}
         />
         {demandOpen &&
           !imageTool.active &&
@@ -1254,7 +1251,7 @@ export function CadWorkspace({
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 {layerActivation && (
                   <DocumentLayerNotice
-                    key={layerActivation.layerId}
+                    key={layerActivation.layerIds.join(":")}
                     project={project}
                     activeDocumentId={activeDocumentId}
                     activation={layerActivation}

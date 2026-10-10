@@ -1,3 +1,4 @@
+import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
 import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
 import type { LayerVisibilityScope } from "../layers/visibility.ts";
 import { changeProjectScale } from "../views/project-scale.ts";
@@ -28,6 +29,7 @@ import type { ManageLayerRequest } from "../layers/actions.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
 
 export type EditingState = {
+  documentLayerActivation?: { base: Project; documentId: string; layerIds: string[] };
   history: ProjectHistory;
   visibilityHistory?: VisibilityHistory;
   documentVisibilityHistories?: Record<string, VisibilityHistory>;
@@ -231,10 +233,39 @@ type BaseEditingEvent =
 export type EditingEvent = BaseEditingEvent & {
   patternRecords?: readonly PatternRevision[];
   patternLibraryError?: string;
+  drawingDocumentId?: string;
 };
 
 /** Storage is read by the adapter before dispatch; the reducer stays deterministic. */
 export function editingReducer(state: EditingState, event: EditingEvent): EditingState {
+  // Tool completion also cancels its transient interaction after committing.
+  // Keep the confirmed placement notice through that cleanup.
+  if (event.type === "cancel") return reduceWithPatterns(state, event);
+  const { documentLayerActivation: _previous, ...rest } = state;
+  const clean = state.documentLayerActivation ? rest : state;
+  if (event.type !== "project" || !event.drawingDocumentId) return reduceWithPatterns(clean, event);
+  try {
+    const activation = activateDrawnLayers(
+      state.history.present,
+      event.project,
+      event.drawingDocumentId,
+    );
+    const next = reduceWithPatterns(clean, { ...event, project: activation.project });
+    if (next.error || next.history.present === state.history.present || !activation.layerIds.length)
+      return next;
+    return {
+      ...next,
+      documentLayerActivation: {
+        base: state.history.present,
+        documentId: event.drawingDocumentId,
+        layerIds: activation.layerIds,
+      },
+    };
+  } catch (error) {
+    return { ...clean, error: (error as Error).message };
+  }
+}
+function reduceWithPatterns(state: EditingState, event: EditingEvent): EditingState {
   if (event.type === "patterns-changed") {
     try {
       const result = resolveProjectHatchPatterns(

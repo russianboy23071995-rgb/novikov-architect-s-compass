@@ -1,3 +1,4 @@
+import { addWall } from "../../lib/bim/model.ts";
 import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { createDrawing } from "../drawing/actions.ts";
@@ -648,4 +649,63 @@ test("creation draft visibility belongs only to the new document and validates l
     changeDrawingDocument(base, base, { ...action, hiddenLayerIds: ["missing"] }),
   );
   assert.throws(() => changeDrawingDocument(base, next, action));
+});
+
+test("new layers remain hidden in Abbilder until drawing commits in one document", () => {
+  const base = create(createExampleProject());
+  const two = changeDrawingDocument(base, base, {
+    kind: "create",
+    id: "second",
+    modelViewId: "other",
+    name: "Second",
+    denominator: 100,
+  });
+  let state = createEditingState(two);
+  state = editingReducer(state, {
+    type: "manage-layer",
+    base: state.history.present,
+    request: { kind: "create", id: "new-layer", name: "New" },
+  });
+  const before = state.history.present;
+  assert.ok(before.drawingDocuments!.every((d) => d.hiddenLayerIds.includes("new-layer")));
+  assert.equal(state.documentLayerActivation, undefined);
+  const drawn = addWall(before, {
+    id: "drawn",
+    layerId: "new-layer",
+    start: { x: 10, y: 0 },
+    end: { x: 13, y: 0 },
+    height: 2.8,
+    thickness: 0.36,
+  });
+  const committed = editingReducer(state, {
+    type: "project",
+    project: drawn,
+    drawingDocumentId: "doc-a",
+  });
+  assert.equal(committed.error, "");
+  assert.ok(
+    !committed.history.present
+      .drawingDocuments!.find((d) => d.id === "doc-a")!
+      .hiddenLayerIds.includes("new-layer"),
+  );
+  assert.ok(
+    committed.history.present
+      .drawingDocuments!.find((d) => d.id === "second")!
+      .hiddenLayerIds.includes("new-layer"),
+  );
+  assert.deepEqual(committed.documentLayerActivation?.layerIds, ["new-layer"]);
+  assert.equal(
+    editingReducer(committed, { type: "cancel" }).documentLayerActivation,
+    committed.documentLayerActivation,
+  );
+  assert.deepEqual(committed.history.present.bimVisibility, before.bimVisibility);
+  const undo = editingReducer(committed, { type: "undo" });
+  assert.equal(undo.history.present.storey.walls.length, before.storey.walls.length);
+  assert.equal(undo.documentLayerActivation, undefined);
+  assert.equal(editingReducer(undo, { type: "redo" }).documentLayerActivation, undefined);
+  const outside = editingReducer(state, { type: "project", project: drawn });
+  assert.ok(
+    outside.history.present.drawingDocuments!.every((d) => d.hiddenLayerIds.includes("new-layer")),
+  );
+  assert.equal(outside.documentLayerActivation, undefined);
 });

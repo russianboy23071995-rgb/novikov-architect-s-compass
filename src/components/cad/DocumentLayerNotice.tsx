@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 
-export type DocumentLayerActivation = { base: Project; documentId: string; layerId: string };
-/** Announce only a confirmed creation in the original Abbild, never load/undo/view switches. */
+export type DocumentLayerActivation = { base: Project; documentId: string; layerIds: string[] };
+/** Announce confirmed element placement in the original Abbild, never layer creation/load/undo. */
 export function DocumentLayerNotice({
   project,
   activeDocumentId,
@@ -14,15 +14,14 @@ export function DocumentLayerNotice({
   activation: DocumentLayerActivation;
 }) {
   const [dismissed, setDismissed] = useState(false);
-  const layer = project.layers.find((l) => l.id === activation.layerId);
+  const layers = project.layers.filter((l) => activation.layerIds.includes(l.id));
   const document = project.drawingDocuments?.find((d) => d.id === activation.documentId);
   const confirmed =
     project.id === activation.base.id &&
     activeDocumentId === activation.documentId &&
-    !!layer &&
+    layers.length > 0 &&
     !!document &&
-    !activation.base.layers.some((l) => l.id === activation.layerId) &&
-    !document.hiddenLayerIds.includes(activation.layerId);
+    activation.layerIds.every((id) => !document.hiddenLayerIds.includes(id));
   useEffect(() => {
     if (!confirmed) {
       setDismissed(true);
@@ -39,8 +38,8 @@ export function DocumentLayerNotice({
       className="absolute right-3 top-14 z-40 flex max-w-sm gap-3 rounded-lg border border-border bg-popover/95 p-3 text-xs text-foreground shadow-lg backdrop-blur"
     >
       <p>
-        Im Abbild „{document!.name}“ wurde die Ebene „{layer!.name}“ als sichtbar aktiviert.
-        Änderungen sind in den Abbildeinstellungen möglich.
+        Im Abbild „{document!.name}“ wurde die Ebene „{layers.map((l) => l.name).join(", ")}“ als
+        sichtbar aktiviert. Änderungen sind in den Abbildeinstellungen möglich.
       </p>
       <button
         type="button"
