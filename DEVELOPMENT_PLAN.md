@@ -1,3 +1,144 @@
+## MS-04f: Abbildzeichnungen gehören zum Gesamtmodell — 10.10.2026
+
+Nutzerentscheidung ersetzt die lokale Zuordnung aus MS-04e: Neue Linien/Polylinien
+und Schraffuren aus einem Abbild sind gemeinsame Geschosszeichnungen. Sie erscheinen
+auch im Arbeitsmodell und anderen Abbildern, sofern die jeweilige Ebene sichtbar ist.
+Die unabhängigen Ebenenfilter und Maßstäbe bleiben bestehen. Gemeinsame Auswahl-,
+Fang-, Bearbeitungs- und Undo-Wege; keine Kopien und keine separate Werkzeuglogik.
+
+Schema 20: alte lokale Zeichnungen aus v19 werden beim Laden nach strikter Prüfung
+in gemeinsame Zeichnungen überführt. Nur die Eigentümerzuordnung entfällt; IDs,
+Geometrie, Darstellung und Ebenen bleiben erhalten. Abbildlöschen entfernt keine
+Zeichnungen. Migration 1–19 bleibt unterstützt. Änderung weiterhin in PR238.
+
+Nachweis: 808 Tests bestanden. Typprüfung einschließlich Benchmarks und Build bestanden.
+Tests umfassen gemeinsame Sichtbarkeit/Picking/Fang in Modell und zwei Abbildern,
+Bewegung, Undo/Redo, unabhängiges Ausblenden, Abbildlöschen ohne Geometrieverlust und
+verlustfreie v19-Migration. Browser: Linie und Rechteckschraffur im Abbild gezeichnet,
+anschließend beide im Arbeitsmodell/Modellnavigator sichtbar. Keine Browserfehler.
+Screenshot: outputs/abbild-shared-drawings.png.
+
+Praktischer Test: Im Abbild Linie oder Schraffur zeichnen → Gebäudestruktur öffnen.
+Beide sind dort sichtbar und bearbeitbar. Ausblenden einer Ebene im Abbild ändert
+weiterhin nicht die Sichtbarkeit dieser Ebene im Arbeitsmodell.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Löschen und Ordnerzuordnung anbinden; Löschen eines Abbilds erhält alle gemeinsamen
+Zeichnungen. Behandlung nichtleerer Ordner vor Ordnerlöschung festlegen.
+
+## MS-04e: Vollständiges Modell und lokale Abbildzeichnungen — 10.10.2026
+
+Nutzerkorrektur im offenen PR238: Abbilder sind bearbeitbare Ansichten des gesamten
+Modells. Keine Begrenzung auf den gespeicherten Bildschirmbereich; Beschneiden folgt
+im Layoutbuch. Startposition und Zoom bleiben gespeichert. Der vorhandene Werkzeugkasten
+und alle gemeinsamen Bearbeitungswege stehen im Abbild bereit. Abbildname im Viewport.
+Hinzufügen öffnet mittig; FloatingPanel liegt nun außerhalb der Navigatorbegrenzung.
+
+Verbindliche Nutzerantwort: neue 2D-Zeichnungen nur im jeweiligen Abbild. Schema 19
+speichert documentId an Linien/Polylinien und Schraffuren; gemeinsame Application-Aktion
+und Sichtbarkeitspolitik setzen dieselbe Zuordnung für Anzeige, Auswahl und Fang um.
+Bestehende Geschosszeichnungen und BIM-Bauteile bleiben gemeinsam. Strikte Migration
+1–18, normale Projekt-History. Keine zweite Bauteilkopie und keine separate Toollogik.
+Dokumente mit eigenen Zeichnungen können noch nicht gelöscht werden; Bildimport im
+Abbild bleibt vorerst gesperrt. Das ersetzt die Clip-/Nur-Ansicht-Regeln unten.
+
+Nachweis: 807 Tests bestanden; Typprüfung einschließlich Benchmarks und Build bestanden.
+Lint: 0 Fehler, sechs vorhandene Warnungen. Neue Tests: zwei Abbilder vs. Arbeitsmodell,
+Annotationseigentümer, lokale Fangabfrage/Auswahl, gemeinsame BIM-Änderung, freie
+Gruppenbewegung mit erhaltener Zuordnung, JSON, Undo/Redo, Altdateien, ungültige/stale
+Kontexte und Löschschutz. Browser: Linie und Rechteckschraffur in A, unsichtbar im
+Arbeitsmodell und B; Schraffur-Undo/Redo, Wandhöhe in A auf 3,20 m geändert und im
+Arbeitsmodell bestätigt. 500 % Startzoom, herausgezoomtes vollständiges Modell ohne
+SVG-Clip. Dialog geometrisch zentriert und im Body statt Navigator. Keine Browserfehler.
+Screenshot: outputs/abbild-full-model-editing.png. PR238 bleibt zur Prüfung offen.
+
+Praktische Abnahme: Arbeitsgrundriss stark hineinzoomen → Abbild erstellen/öffnen →
+herauszoomen. Die ganze Geometrie muss wieder sichtbar sein. Linie/Schraffur hinzufügen,
+Arbeitsmodell und anderes Abbild öffnen: dort fehlen diese lokalen Ergänzungen.
+BIM-Eigenschaften dagegen gelten überall; Undo/Redo und Datei speichern funktionieren.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Ordnerzuordnung und Löschen über gemeinsame validierte Aktionen anbinden. Vor dem
+Löschen von Abbildern mit eigenen Zeichnungen beziehungsweise nichtleeren Ordnern
+zunächst die gewünschte Behandlung ihrer Inhalte festlegen; kein stilles Mitlöschen.
+Kein Layouteditor und kein weiterer Modellumbau.
+
+## MS-04d: Abbild aus ausgerichtetem Canvas und Ordnerbaum — 10.10.2026
+
+Nutzerkorrektur zu PR238 direkt im offenen PR umgesetzt, nicht zusammengeführt.
+Die Bedienung ersetzt den zuvor vorgeschlagenen Zweipunkt-Crop: Arbeitsgrundriss
+per Zoom/Pan ausrichten → Navigator Abbilder → Hinzufügen → Name/Maßstab → erstellen.
+Das verschiebbare, nicht modale Fenster übernimmt beim Öffnen Mittelpunkt, Zoom und
+sichtbaren metrischen Bereich. Im Tab zunächst nur Hinzufügen; vorhandene Abbilder
+als Baum unter benennbaren Ordnern. Doppelklick/Enter öffnet; F2/Rechtsklick benennt
+um. Keine Öffnen-/Löschen-Buttons. Ordner im gleichen Hinzufügen-Fenster anlegen.
+
+Schema 18 mit optionaler Begrenzung und Ordnerreferenz; strikte Migration 1–17,
+keine erzeugten Abbilder/Ordner in Altdateien. Validierte Application-Aktionen,
+Projekt-Undo, vorhandener Renderer mit Clip. Kein Screenshot-Bitmap und keine
+zweite Modellkopie. Öffnen stellt gespeicherten Zoom/Mittelpunkt wieder her;
+Pan/Zoom im Abbild verändert die gespeicherte Begrenzung nicht. Fit stellt sie
+wieder her. Neue Abbilder starten aus dem 2D-Arbeitsgrundriss, nicht aus einem
+bereits begrenzten Abbild oder einer 3D-Kamera.
+
+Nachweis: 805 Tests bestanden; Typprüfung einschließlich Benchmarks und Build
+bestanden. Lint: 0 Fehler, sechs vorhandene Warnungen. Browser: 500 % übernommen,
+Ordner angelegt/umbenannt, Abbild per Doppelklick geöffnet; SVG-Clip entspricht
+exakt dem zuvor sichtbaren Bereich. Speichern/Laden erhält Zoom, Begrenzung und
+Ordner. Keine erfassten Browserfehler. Screenshot außerhalb des Repos:
+outputs/abbild-tree-framing.png. Andere Fenstergrößen ändern die gespeicherte
+Begrenzung nicht; bei gleicher Zoomzahl können Ränder entstehen bzw. Teile des
+Bereichs Navigation erfordern. Noch ein Ordnerlevel; keine Verschiebeverwaltung.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Die vorhandene validierte Löschaktion an Rechtsklick anbinden; Projekt-Undo und
+aktives gelöschtes Ziel prüfen. Vor Ordnerlöschung die Behandlung enthaltener
+Abbilder festlegen; kein stilles kaskadierendes Löschen. Bestehende Abbilder über
+eine validierte Ordnerzuordnung umsortieren. Kein Layouteditor oder Modellumbau.
+
+## MS-04c: Gespeicherte Grundrisse als Abbilder — 10.10.2026
+
+PR237 nach grüner CI regulär zusammengeführt. Schema 17 speichert ModelView-Quelle
+und DrawingDocument mit ID, Name, eigenem Maßstab und Ebenenfilter. Strikte Migration
+1–16 erfindet keine Abbilder. Bauteile bleiben ausschließlich im bestehenden Modell.
+Gemeinsame Application-Aktionen und Kontextauflösung werden von Navigator und Renderer
+verwendet; keine neue Geometrie- oder AI-Logik.
+
+Navigator: Tabs Gebäudestruktur/Abbilder; anlegen, umbenennen, öffnen, löschen.
+Neuanlage übernimmt einmal den Filter des Arbeitsmodells, danach unabhängig.
+Nutzerentscheidung: Anlage/Löschung über normales Projekt-Undo. Umbenennen und
+Dokumentmaßstab folgen im Pilot derselben History für Dokumentdefinitionen.
+Sichtbarkeit bleibt beim vorhandenen Ebenenumschalter samt kontextbezogener
+Paletten-History; keine zusätzliche Abbild-History. Arbeitsmaßstab unverändert
+außerhalb Modell-Undo. Modellbearbeitung erfolgt im Arbeitsmodell.
+
+Prüfung: 802 Tests bestanden, Typprüfung einschließlich Benchmarks und Build
+bestanden; Lint 0 Fehler, sechs bekannte Warnungen. Neue Tests prüfen zwei Dokumente,
+Quelle/Filter/Maßstab, Hostfenster, aktuelle Modellprojektion, Stale-Context-Rejection,
+Projekt- und Sichtbarkeits-Undo, Migration, ungültige Referenzen, JSON und identischen
+IFC-Inhalt. Browser: zwei Abbilder 1:50/1:200, Wandebene nur in A ausblenden,
+Arbeitsmodell und B unverändert; Paletten-Undo, Löschen/Projekt-Undo; Wand von 3 auf
+6 m ändern und identische Geometrie in beiden Abbildern prüfen; Speichern/Öffnen.
+Keine erfassten Browserfehler. Anfänglicher Höhenfehler des Abbildfensters behoben.
+Screenshot: outputs/saved-plan-documents.png außerhalb des Repos.
+
+Grenzen: zunächst ganzer Grundriss, ein Abbildfenster, keine Modellbearbeitung darin,
+kein Crop/Layout/Annotationstyp, keine Kamera-Persistenz. Quell-ModelView bleibt bei
+Löschung erhalten. Neue UI-Definitionen sind nicht automatisch Sprachbefehle.
+
+Praktische Abnahme: Navigator → Abbilder → Name/Maßstab → Abbild erstellen → Öffnen.
+Wand auswählen und ihre Ebene ausblenden; zum Arbeitsmodell/zweiten Abbild wechseln.
+Nur das erste Abbild darf betroffen sein. Löschen → Projekt-Undo; anschließend
+Projekt speichern und wieder öffnen.
+
+**Genau ein nächster Auftrag: MS-04d Begrenzungsbereich eines Abbilds festlegen.**
+Zunächst die Bedienregel für einen optionalen rechteckigen Bereich bestätigen;
+dann über die vorhandene Punkt-/Fanginteraktion zwei Punkte aufnehmen, als metrische
+Dokumentdefinition validieren und nur die Darstellung begrenzen. Kein Bauteil darf
+abgeschnitten, dupliziert oder skaliert werden; Pan/Zoom verändert den Bereich nicht.
+Gemeinsamer Renderer/Abbildkontext, Projekt-Undo, Speichern/Migration, zwei unabhängige
+Abbilder und Auswahl außerhalb der Grenze prüfen. Kein Layouteditor, keine neue
+2D-Engine. Bis zur Bedienentscheidung bleibt der gesamte Grundriss Standard.
 > **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
 
 ## MS-04b: Gemeinsamer Arbeitsansichtskontext — 10.10.2026

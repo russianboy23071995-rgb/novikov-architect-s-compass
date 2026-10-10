@@ -40,7 +40,7 @@ test("stored scale round-trip preserves geometry and semantic ownership; old fil
   assert.equal(serializeProject(base), before);
   const old = { ...base, schemaVersion: 14 };
   const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 16);
+  assert.equal(migrated.schemaVersion, 20);
   assert.equal(projectScaleContext(migrated).denominator, 100);
   assert.deepEqual(migrated.storey, base.storey);
   assert.throws(() => validateProject(old));

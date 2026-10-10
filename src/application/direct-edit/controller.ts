@@ -1,3 +1,5 @@
+import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
+import type { LayerVisibilityScope } from "../layers/visibility.ts";
 import { changeProjectScale } from "../views/project-scale.ts";
 import type { WorkingPlanIdentity } from "../../domain/views/scale.ts";
 import { prepareEndpoint } from "./prepared-endpoint.ts";
@@ -10,7 +12,11 @@ import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { commitWallOffset, type WallOffsetRequest } from "../walls/body-offset.ts";
 import type { ElementTarget } from "../selection/target.ts";
-import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
+import {
+  changeLayerVisibility,
+  emptyVisibilityHistory,
+  documentVisibilityKey,
+} from "../layers/visibility-actions.ts";
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
 import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
 import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
@@ -24,6 +30,7 @@ import { selectedLayerElement } from "../layers/selection.ts";
 export type EditingState = {
   history: ProjectHistory;
   visibilityHistory?: VisibilityHistory;
+  documentVisibilityHistories?: Record<string, VisibilityHistory>;
   session: EditSession | null;
   error: string;
 };
@@ -40,6 +47,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "document"; base: Project; action: DocumentAction }
   | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | {
@@ -125,6 +133,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "document":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            changeDrawingDocument(event.base, state.history.present, event.action),
+          ),
+          session: null,
+          error: "",
+        };
       case "view-scale": {
         const project = changeProjectScale(state.history.present, event.view, event.denominator);
         if (project === state.history.present) return state;
@@ -207,7 +225,7 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
 
 type BaseEditingEvent =
   | ModelEditingEvent
-  | { type: "visibility"; base: Project; action: VisibilityAction }
+  | { type: "visibility"; base: Project; action: VisibilityAction; scope?: LayerVisibilityScope }
   | { type: "load-project"; project: Project }
   | { type: "patterns-changed" };
 export type EditingEvent = BaseEditingEvent & {
@@ -287,23 +305,39 @@ function reduceEditing(
     return {
       ...reduceModelEdit(state, { type: "project", project: event.project }),
       visibilityHistory: emptyVisibilityHistory(),
+      documentVisibilityHistories: {},
     };
   if (event.type !== "visibility")
     return {
       ...reduceModelEdit(state, event),
+      ...(state.documentVisibilityHistories
+        ? { documentVisibilityHistories: state.documentVisibilityHistories }
+        : {}),
       ...(state.visibilityHistory ? { visibilityHistory: state.visibilityHistory } : {}),
     };
   try {
+    const documentId = event.scope?.kind === "drawing-document" ? event.scope.documentId : null;
+    const historyKey = documentId ? documentVisibilityKey(state.history.present, documentId) : null;
     const next = changeLayerVisibility(
       event.base,
       state.history.present,
-      state.visibilityHistory ?? emptyVisibilityHistory(),
+      (documentId ? state.documentVisibilityHistories?.[historyKey!] : state.visibilityHistory) ??
+        emptyVisibilityHistory(),
       event.action,
+      event.scope,
     );
     if (next.project === state.history.present) return state;
     return {
+      ...state,
       history: { ...state.history, present: next.project },
-      visibilityHistory: next.history,
+      ...(documentId
+        ? {
+            documentVisibilityHistories: {
+              ...state.documentVisibilityHistories,
+              [historyKey!]: next.history,
+            },
+          }
+        : { visibilityHistory: next.history }),
       session: null,
       error: "",
     };

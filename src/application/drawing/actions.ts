@@ -1,3 +1,4 @@
+import type { ViewIdentity } from "../../domain/views/scale.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
@@ -69,8 +70,17 @@ export function createDrawing(
   current: Project,
   id: string,
   request: DrawingRequest,
+  view?: ViewIdentity,
 ): Project {
   assertDrawingContext(base, current);
+  if (
+    view &&
+    (view.projectId !== current.id ||
+      (view.kind === "drawing-document"
+        ? !current.drawingDocuments?.some((d) => d.id === view.documentId)
+        : view.storeyId !== current.storey.id))
+  )
+    throw new Error("Der Zeichenkontext ist nicht mehr gültig.");
   if (request.kind === "hatch")
     return previewHatch(base, current, {
       projectId: current.id,

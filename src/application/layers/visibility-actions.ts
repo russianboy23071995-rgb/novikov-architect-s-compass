@@ -1,3 +1,5 @@
+import type { LayerVisibilityScope } from "./visibility.ts";
+import { drawingDocument } from "../views/documents.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { HISTORY_LIMIT } from "../../lib/bim/history.ts";
@@ -16,10 +18,15 @@ export function changeLayerVisibility(
   current: Project,
   history: VisibilityHistory,
   action: VisibilityAction,
+  scope: LayerVisibilityScope = { kind: "bim-project" },
 ) {
+  if (scope.kind !== "bim-project" && scope.kind !== "drawing-document")
+    throw new Error("Unbekannter Sichtbarkeitskontext.");
   if (base !== current) throw new Error("Das Projekt wurde geändert. Sichtbarkeit erneut ändern.");
   validateProject(current);
-  const before = current.bimVisibility.hiddenLayerIds;
+  const document =
+    scope.kind === "drawing-document" ? drawingDocument(current, scope.documentId) : null;
+  const before = document ? document.hiddenLayerIds : current.bimVisibility.hiddenLayerIds;
   let after: string[];
   let nextHistory: VisibilityHistory;
   if (action.kind !== "undo" && action.kind !== "redo") {
@@ -61,7 +68,17 @@ export function changeLayerVisibility(
           };
   }
   return {
-    project: { ...current, bimVisibility: { hiddenLayerIds: after } },
+    project: document
+      ? {
+          ...current,
+          drawingDocuments: current.drawingDocuments!.map((d) =>
+            d.id === document.id ? { ...d, hiddenLayerIds: after } : d,
+          ),
+        }
+      : { ...current, bimVisibility: { hiddenLayerIds: after } },
     history: nextHistory,
   };
 }
+
+export const documentVisibilityKey = (project: Project, id: string) =>
+  JSON.stringify([project.id, id]);

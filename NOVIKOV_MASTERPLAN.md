@@ -77,6 +77,8 @@ Intern alle Längen in Metern, Papiergrößen in der UI in mm. `paperMetres = pa
 
 ### A07 – Ansichten, Abbilder und Layouts
 
+Nutzerkorrektur 10.10.2026: Ein Abbild zeigt das gesamte Modell; gespeicherte Position/Zoom sind nur die Startansicht. Zuschnitt erfolgt später im Layoutbuch. Linien und Schraffuren aus Abbildern gehören zur gemeinsamen Geschosszeichnung; unabhängige Ebenenfilter bleiben erhalten.
+
 ModelView definiert eine Modellableitung (Geschoss/Schnitt/Ansicht/3D). DrawingDocument heißt in der UI **Abbild**, referenziert eine ModelView und besitzt Maßstab, Bereich, Filter/Stil und dokumentbezogene Ergänzungen. Kein kopiertes Geschoss. Änderungen des BIM aktualisieren die Ableitung. Fehlende/fremde/veraltete Quellreferenzen sind Fehler; kein Arbeitsgrundriss-Fallback.
 
 Abbild übernimmt bei Anlage einmal die aktuelle Ebenensichtbarkeit, danach unabhängig. Arbeits-BIM-Sichtbarkeit ist kein darübergelegter Filter. Navigator-Tabs **Gebäudestruktur** und **Abbilder**. Keine eigene Abbild-Undo-/Redo-Oberfläche; vorhandenen Ebenenumschalter kontextbezogen wiederverwenden. PR-238-Bedienergänzungen gehören erst nach überprüfter Übernahme zum bestätigten Code.
@@ -145,7 +147,7 @@ Bewertung aus 99 Repository-Dokumenten, Schema-/Modell-/History-/Kontextcode und
 | AI/Sprache | Begrenzte deutsche Befehle, Auswahl-/Revisionsbindung, Vorschau/Annahme und Sprachadapter vorhandener Aktionen | Keine generative AI/B-Plan-Engine, kein gesamter Fähigkeitskatalog; reale Transkriptqualität gesondert prüfen |
 | Produkt/Release | Anforderungen in diesen zwei Dateien aufgenommen | Keine Lizenzverwaltung, fertige SBOM, signierte Distribution, Homepage oder geprüfte Public-Beta-Freigabe |
 
-**Offener Entwicklungszweig PR 238:** gespeicherte Grundriss-Abbilder, Navigator/Ordner, eigene Maßstäbe/Filter, gespeicherter sichtbarer Bereich und Ausgangszoom, Schema18, 805 Tests laut PR-Beschreibung. Beim Abruf noch nicht gemergt. Das ist kein bestätigter main-Stand; der PR entwickelt sich weiter. Vor Übernahme aktuellen Head, Entscheidungen, Migration und CI prüfen. Alter PR124 ist kein main-Featurebeleg.
+**Offener Entwicklungszweig PR 238:** gespeicherte bearbeitbare Grundriss-Abbilder, Navigator/Ordner, eigene Maßstäbe/Filter und Ausgangszoom, Schema20, 808 Tests lokal bestanden. Neueste Nutzerkorrektur: gesamtes Modell ohne Clip; neue Linien und Schraffuren auch aus Abbildern sind gemeinsame Geschosszeichnungen. V19-Dateien werden ohne Geometrieverlust migriert. Typprüfung/Build und Browserprüfung bestanden. Beim Abruf noch nicht gemergt. Das ist kein bestätigter main-Stand; der PR entwickelt sich weiter. Vor Übernahme aktuellen Head, Entscheidungen, Migration und CI prüfen. Alter PR124 ist kein main-Featurebeleg.
 
 ## 5. Engpässe und Skalierungsrisiken
 

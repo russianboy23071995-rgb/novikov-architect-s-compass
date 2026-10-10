@@ -1,6 +1,6 @@
 # Gespeicherte Ausschnitte — MS-04a
 
-Stand 10.10.2026. Planung, keine neue Laufzeitfunktion. Codebasis: PR234,
+Historischer Planungsstand MS-04a, 10.10.2026. Umsetzung MS-04c siehe Ergänzung unten. Codebasis: PR234,
 Commit `2db018c`, nach erfolgreicher CI regulär zusammengeführt.
 Maßgebend: [Architektur §29](../../ARCHITECTURE.md),
 [Maßstabsvertrag](VIEW_SCALE_CONTRACT.md) und
@@ -149,3 +149,29 @@ Verbindlich für den nächsten Pilot:
 Dies dokumentiert Bedienanforderungen, keine bereits implementierte Oberfläche.
 Keine eigene Abbild-History bedeutet nicht automatisch, dass Anlage/Löschung niemals
 rückgängig gemacht werden dürfen; diese konkrete Zuordnung wird vor Umsetzung geprüft.
+
+## MS-04c umgesetzt und History entschieden — 10.10.2026
+
+Schema 17 und Navigator-Abbilder umgesetzt. Der Nutzer hat ausdrücklich bestätigt:
+Anlage und Löschung gehören in das normale Projekt-Undo. Keine separate Abbild-
+History. Im Pilot folgen Name und Dokumentmaßstab als Definitionsänderungen ebenfalls
+dem Projekt-Undo. Filter verwenden ausschließlich die bestehende Ebenen-History pro
+aktivem Kontext; Projekt-Undo bewahrt sie bei existierenden Dokumenten. Der
+Arbeitsmaßstab bleibt außerhalb des Modell-Undo.
+
+Neue Abbilder übernehmen den Arbeitsmodellfilter; neue Ebenen sind sichtbar,
+gelöschte unbenutzte Ebenen-IDs werden bereinigt. Der erste Pilot zeigt den gesamten
+Grundriss nur zur Ansicht. Gemeinsames Modell und gemeinsamer Renderer; neue Definitionen
+enthalten keine Bauteilkopien. Der Source-ModelView bleibt bei Dokumentlöschung erhalten.
+802 Tests und Browserprüfung; Nachweis und einziger Folgeauftrag im Entwicklungsplan.
+Die früheren offenen History-/Anfangsfilterpunkte oben sind damit erledigt. Offene
+Crop-/Bearbeitungsentscheidungen werden nicht als Nutzerfreigabe behandelt.
+
+## Nutzerkorrektur und Umsetzung MS-04d
+
+Der Nutzer ersetzt den Zweipunkt-Begrenzungsvorschlag durch das Übernehmen des zuvor
+im Arbeitscanvas ausgerichteten Zooms/Bereichs. Ein Hinzufügen-Button öffnet das
+bestehende FloatingPanel mit Name/Maßstab. Schema 18 speichert die metrische
+Begrenzung plus Ausgangszoom und benannte Ordner. Baumdarstellung, Doppelklick zum
+Öffnen, F2/Rechtsklick zum Umbenennen. Keine Zeilenbuttons; Löschen per Rechtsklick
+bleibt später. Details und nächster einzelner Auftrag im Entwicklungsplan.

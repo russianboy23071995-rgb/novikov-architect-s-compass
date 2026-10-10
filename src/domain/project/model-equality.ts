@@ -25,5 +25,11 @@ function equal(a: unknown, b: unknown): boolean {
 export function sameProjectModel(a: Project, b: Project): boolean {
   const { bimVisibility: _a, workingViews: _av, ...left } = a;
   const { bimVisibility: _b, workingViews: _bv, ...right } = b;
-  return equal(left, right);
+  const model = (p: typeof left) => ({
+    ...p,
+    ...(p.drawingDocuments
+      ? { drawingDocuments: p.drawingDocuments.map(({ hiddenLayerIds: _hidden, ...d }) => d) }
+      : {}),
+  });
+  return equal(model(left), model(right));
 }

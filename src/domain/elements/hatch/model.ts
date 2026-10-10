@@ -90,10 +90,14 @@ export const hatchPatternApplicationSchema = z.union([
     paperWidthMetres: z.number().finite().positive(),
   }),
 ]);
-export const hatchSchema = hatchBaseSchema
-  .extend({
-    background: paintSchema,
-    contour: paintSchema,
-    pattern: hatchPatternApplicationSchema.nullable().optional(),
-  })
+const currentHatchObject = hatchBaseSchema.extend({
+  background: paintSchema,
+  contour: paintSchema,
+  pattern: hatchPatternApplicationSchema.nullable().optional(),
+});
+export const hatchV18Schema = currentHatchObject.superRefine(validateContour);
+export const hatchV19Schema = currentHatchObject
+  .extend({ documentId: z.string().trim().min(1).optional() })
   .superRefine(validateContour);
+
+export const hatchSchema = hatchV18Schema;

@@ -1,3 +1,4 @@
+import { DocumentNavigator, type DocumentNavigation } from "./DocumentNavigator";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   Box,
@@ -85,7 +86,7 @@ function TreeItem({
   );
 }
 
-type ProjectNavigatorProps = {
+type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
 
   active: readonly string[];
@@ -93,7 +94,14 @@ type ProjectNavigatorProps = {
   onClose: () => void;
 };
 
-function NavigatorContent({ active, onSelect, onClose, project }: ProjectNavigatorProps) {
+function NavigatorContent({
+  active,
+  onSelect,
+  onClose,
+  project,
+  ...documents
+}: ProjectNavigatorProps) {
+  const [tab, setTab] = useState<"model" | "documents">("model");
   const modelTree = useMemo(() => {
     const openings = new globalThis.Map<string, Project["storey"]["windows"]>();
     for (const window of project.storey.windows) {
@@ -162,11 +170,40 @@ function NavigatorContent({ active, onSelect, onClose, project }: ProjectNavigat
           <PanelRightClose className="size-4" />
         </Button>
       </header>
-      <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
-        {modelTree.map((node) => (
-          <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
-        ))}
-      </ScrollArea>
+      <div role="tablist" aria-label="Navigatorbereiche" className="flex border-b border-border">
+        <Button
+          role="tab"
+          aria-selected={tab === "model"}
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setTab("model");
+            documents.onOpenDocument(null);
+          }}
+        >
+          Gebäudestruktur
+        </Button>
+        <Button
+          role="tab"
+          aria-selected={tab === "documents"}
+          variant="ghost"
+          size="sm"
+          onClick={() => setTab("documents")}
+        >
+          Abbilder
+        </Button>
+      </div>
+      {tab === "documents" ? (
+        <ScrollArea className="min-h-0 flex-1">
+          <DocumentNavigator key={project.id} project={project} {...documents} />
+        </ScrollArea>
+      ) : (
+        <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
+          {modelTree.map((node) => (
+            <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
+          ))}
+        </ScrollArea>
+      )}
       <div className="border-t border-border px-3 py-2 text-[12px] text-muted-foreground">
         <div className="flex justify-between">
           <span>Model elements</span>
@@ -202,8 +239,20 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onSelect(...args),
     [],
   );
+  const onOpenDocument = useCallback<ProjectNavigatorProps["onOpenDocument"]>(
+    (id) => latest.current.onOpenDocument(id),
+    [],
+  );
+  const onDocumentAction = useCallback<ProjectNavigatorProps["onDocumentAction"]>(
+    (...args) => latest.current.onDocumentAction(...args),
+    [],
+  );
   return (
     <StableNavigator
+      getPlanCapture={props.getPlanCapture}
+      activeDocumentId={props.activeDocumentId}
+      onOpenDocument={onOpenDocument}
+      onDocumentAction={onDocumentAction}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

@@ -1,3 +1,5 @@
+import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
+import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { addWall, addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
@@ -45,12 +47,18 @@ export function drawingPoint(
 }
 
 /** SVG uses downward-positive Y; model coordinates use upward-positive Y. */
-export function planBounds(project: Project): string {
+export function planBounds(project: Project, visibility?: LayerVisibilityPolicy): string {
+  const storey = visibility
+    ? visiblePlanGeometry(
+        project,
+        (id) => visibility.evaluate(project, visibility.context, id).eligible,
+      )
+    : project.storey;
   if (
-    !project.storey.walls.length &&
-    !project.storey.lines?.length &&
-    !project.storey.hatches.length &&
-    !project.storey.references.length
+    !storey.walls.length &&
+    !storey.lines?.length &&
+    !storey.hatches.length &&
+    !storey.references.length
   )
     return "-2 -3 8 6";
   let left = Infinity,
@@ -63,19 +71,20 @@ export function planBounds(project: Project): string {
     top = Math.min(top, -point.y - padding);
     bottom = Math.max(bottom, -point.y + padding);
   };
-  for (const wall of project.storey.walls) {
+  for (const wall of storey.walls) {
     const body = wallBody(wall);
     for (const point of [body.start, body.end, wall.start, wall.end])
       include(point, wall.thickness / 2);
   }
-  for (const line of project.storey.lines ?? []) for (const point of line.points) include(point);
-  for (const hatch of project.storey.hatches) for (const point of hatch.points) include(point);
-  for (const reference of project.storey.references)
+  for (const line of storey.lines ?? []) for (const point of line.points) include(point);
+  for (const hatch of storey.hatches) for (const point of hatch.points) include(point);
+  for (const reference of storey.references)
     for (const point of imageReferenceCorners(
       reference,
       project.assets.find((a) => a.id === reference.assetId)!,
     ))
       include(point);
+  if (!Number.isFinite(left)) return "-2 -3 8 6";
   left -= 1.5;
   top -= 1.5;
   right += 1.5;

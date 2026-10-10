@@ -30,6 +30,14 @@ export function previewLayerManagement(
     return validateProject({
       ...project,
       layers: project.layers.filter((layer) => layer.id !== request.id),
+      ...(project.drawingDocuments
+        ? {
+            drawingDocuments: project.drawingDocuments.map((d) => ({
+              ...d,
+              hiddenLayerIds: d.hiddenLayerIds.filter((id) => id !== request.id),
+            })),
+          }
+        : {}),
       bimVisibility: {
         hiddenLayerIds: project.bimVisibility.hiddenLayerIds.filter((id) => id !== request.id),
       },

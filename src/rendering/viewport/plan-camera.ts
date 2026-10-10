@@ -1,3 +1,4 @@
+import { framingSchema, type DocumentFraming } from "../../domain/views/documents.ts";
 import type { Point2 as Point } from "../../geometry/primitives/point.ts";
 
 export type PlanCamera = { center: Point; pixelsPerMetre: number };
@@ -59,4 +60,14 @@ export function planScaleBar(scale: number): { metres: number; pixels: number } 
   const fraction = target / power;
   const metres = (fraction >= 5 ? 5 : fraction >= 2 ? 2 : 1) * power;
   return { metres, pixels: metres * scale };
+}
+
+/** Capture the visible metric rectangle; output scale never enters camera maths. */
+export function capturePlanFraming(camera: PlanCamera, size: ViewSize): DocumentFraming {
+  return framingSchema.parse({
+    center: { ...camera.center },
+    pixelsPerMetre: camera.pixelsPerMetre,
+    width: size.width / camera.pixelsPerMetre,
+    height: size.height / camera.pixelsPerMetre,
+  });
 }
