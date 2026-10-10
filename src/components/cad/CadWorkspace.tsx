@@ -1,4 +1,4 @@
-import { projectScaleContext } from "@/application/views/project-scale";
+import { resolveWorkingView } from "@/application/views/working-context";
 import { CadAppearanceProvider } from "./CadAppearanceProvider";
 import { PenSetManager } from "./PenSetManager";
 import { defaultPenSet } from "@/domain/pens/model";
@@ -35,7 +35,7 @@ import {
   HatchSizeFields,
 } from "./HatchControls";
 import { selectedLayerElement } from "@/application/layers/selection";
-import { createLayerVisibilityPolicy, visibleLayerTarget } from "@/application/layers/visibility";
+import { visibleLayerTarget } from "@/application/layers/visibility";
 import type { LayerVisibilityContext } from "@/application/layers/visibility";
 import { useReferenceSelection } from "./useReferenceSelection";
 import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference";
@@ -105,17 +105,11 @@ export function CadWorkspace({
   );
   const { history, session: pendingSession } = editing;
   const project = history.present;
-  const visibility = useMemo(
-    () =>
-      createLayerVisibilityPolicy(
-        project,
-        layerVisibility ?? {
-          scope: { kind: "bim-project" },
-          hiddenLayerIds: project.bimVisibility.hiddenLayerIds,
-        },
-      ),
+  const viewContext = useMemo(
+    () => resolveWorkingView(project, undefined, layerVisibility),
     [project, layerVisibility],
   );
+  const visibility = viewContext.visibility;
   const visibilityNow = useRef({ project, visibility });
   visibilityNow.current = { project, visibility };
   const editSession =
@@ -873,6 +867,7 @@ export function CadWorkspace({
           )}
         {cornerWall && (
           <CornerPreviewDialog
+            viewContext={viewContext}
             project={project}
             firstId={cornerWall}
             visibility={visibility}
@@ -1024,7 +1019,7 @@ export function CadWorkspace({
               <HatchSizeFields
                 definition={toolDefaults.hatch.patternDefinition}
                 value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
-                context={projectScaleContext(project)}
+                context={viewContext.scale}
                 onChange={(patternSize) =>
                   toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })
                 }
@@ -1183,10 +1178,11 @@ export function CadWorkspace({
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <ViewportManager
+                  viewContext={viewContext}
                   onScale={(denominator) =>
                     dispatchEditing({
                       type: "view-scale",
-                      view: projectScaleContext(project).view,
+                      view: viewContext.binding,
                       denominator,
                     })
                   }
@@ -1250,7 +1246,6 @@ export function CadWorkspace({
                   project={project}
                   drawingPreview={activeChain?.preview}
                   drawingProjectAt={drawingOrigin ? interaction.adapter?.previewProject : undefined}
-                  visibility={visibility}
                   referenceSelection={referenceSelection}
                   selection={selection}
                   selections={selections}

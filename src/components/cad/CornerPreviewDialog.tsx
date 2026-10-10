@@ -1,3 +1,4 @@
+import type { WorkingViewContext } from "@/application/views/working-context";
 import { useReducer, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,13 @@ import { isLayerVisible, type LayerVisibilityPolicy } from "@/application/layers
 import { CadViewport } from "./CadViewport";
 
 export function CornerPreviewDialog({
+  viewContext,
   project,
   firstId,
   visibility,
   onClose,
 }: {
+  viewContext: WorkingViewContext;
   project: Project;
   firstId: string;
   visibility: LayerVisibilityPolicy;
@@ -159,7 +162,7 @@ export function CornerPreviewDialog({
                   onActivate={() => {}}
                   onFullscreen={() => {}}
                   project={project}
-                  visibility={visibility}
+                  viewContext={viewContext}
                   cornerPreview={preview}
                   selection={null}
                   drawing={false}

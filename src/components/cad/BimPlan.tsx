@@ -1,4 +1,4 @@
-import { workingPlanScale } from "@/domain/views/scale";
+import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
 import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
@@ -33,7 +33,6 @@ import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import { isLayerVisible } from "@/application/layers/visibility";
-import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
@@ -87,7 +86,7 @@ export type BimPlanProps = {
   referenceScope?: object | undefined;
   interactive?: boolean;
   project: Project;
-  visibility?: LayerVisibilityPolicy;
+  viewContext: WorkingViewContext;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
   selections?: SelectionSet;
@@ -138,7 +137,7 @@ export function BimPlan({
   referenceScope,
   interactive = true,
   project,
-  visibility,
+  viewContext,
   snapping: requestedSnapping = null,
   selection: requestedSelection,
   selections,
@@ -180,11 +179,7 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
-  const scaleDenominator = project.workingViews?.[0]?.denominator;
-  const scaleContext = useMemo(
-    () => workingPlanScale(project.id, project.storey.id, scaleDenominator),
-    [project.id, project.storey.id, scaleDenominator],
-  );
+  const { scale: scaleContext, visibility } = viewContext;
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
       ? requestedEditSession

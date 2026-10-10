@@ -1,7 +1,6 @@
 import { createPortal } from "react-dom";
 import { ViewScaleControl } from "./ViewScaleControl";
-import { projectScaleContext } from "@/application/views/project-scale";
-import type { ScaleContext } from "@/domain/views/scale";
+import { assertWorkingViewCurrent } from "@/application/views/working-context";
 import { useEffect, useRef, useState } from "react";
 import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
@@ -17,7 +16,6 @@ import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 
 type CadViewportProps = BimPlanProps & {
-  scaleContext?: ScaleContext;
   onScale?: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
   index: number;
@@ -62,7 +60,6 @@ function MiniControl({
 }
 
 export function CadViewport({
-  scaleContext,
   onScale,
   zoomSlot,
   index,
@@ -73,6 +70,8 @@ export function CadViewport({
   onFullscreen,
   ...model
 }: CadViewportProps) {
+  assertWorkingViewCurrent(model.viewContext, model.project);
+  const scaleContext = model.viewContext.scale;
   const is3D = mode === "3D" && index === 0;
   const [camera, setCamera] = useState(initialCamera);
   const [pan, setPan] = useState(false);
@@ -160,6 +159,7 @@ export function CadViewport({
         {is3D ? (
           <BimSolidView
             {...model}
+            visibility={model.viewContext.visibility}
             interactive={active}
             selection={model.selection}
             camera={camera}
@@ -359,7 +359,6 @@ export function ViewportManager({
   onActive: (index: number) => void;
   onFullscreen: () => void;
 }) {
-  const scaleContext = projectScaleContext(model.project);
   const count =
     layout === "single"
       ? 1
@@ -373,7 +372,6 @@ export function ViewportManager({
       {Array.from({ length: count }, (_, index) => (
         <CadViewport
           key={`${layout}-${index}`}
-          scaleContext={scaleContext}
           onScale={onScale}
           {...model}
           index={index}
