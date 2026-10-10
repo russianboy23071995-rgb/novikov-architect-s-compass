@@ -1,5 +1,5 @@
 import { DocumentLayerDraft } from "./DocumentLayerDraft";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, File, Folder, Plus } from "lucide-react";
 import type { Project } from "@/domain/project/schema";
 import type { DocumentFraming } from "@/domain/views/documents";
@@ -28,6 +28,12 @@ export type DocumentNavigation = {
   getPlanCapture: () => DocumentFraming | null;
   onOpenDocument: (id: string | null) => void;
   onDocumentAction: (base: Project, action: DocumentAction) => void;
+  onDocumentVisibility: (
+    base: Project,
+    documentId: string,
+    layerId: string,
+    visible: boolean,
+  ) => void;
 };
 
 export function DocumentNavigator({
@@ -36,6 +42,7 @@ export function DocumentNavigator({
   getPlanCapture,
   onOpenDocument,
   onDocumentAction,
+  onDocumentVisibility,
 }: DocumentNavigation & { project: Project }) {
   const [draft, setDraft] = useState<{
     id?: string;
@@ -47,6 +54,13 @@ export function DocumentNavigator({
     folderId: string;
     hiddenLayerIds?: string[];
   } | null>(null);
+  const visibilityPending = useRef(false);
+  useEffect(() => {
+    if (visibilityPending.current) {
+      visibilityPending.current = false;
+      setDraft((d) => (d ? { ...d, base: project } : d));
+    }
+  }, [project]);
   const [closed, setClosed] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; folder: boolean; name: string } | null>(
@@ -386,7 +400,7 @@ export function DocumentNavigator({
               : "Abbild hinzufügen"
         }
         width={draft?.kind === "document" ? 720 : 400}
-        height={draft?.kind === "document" ? 540 : 370}
+        height={draft?.kind === "document" ? 880 : 370}
         onClose={() => setDraft(null)}
       >
         {draft && (
@@ -494,6 +508,18 @@ export function DocumentNavigator({
               return draft.kind === "document" && draft.id ? (
                 <DocumentSettingsSections
                   project={project}
+                  onVisibilityChange={(hidden) => {
+                    const before =
+                      project.drawingDocuments?.find((d) => d.id === draft.id)?.hiddenLayerIds ??
+                      [];
+                    const layer = project.layers.find(
+                      (l) => before.includes(l.id) !== hidden.includes(l.id),
+                    );
+                    if (layer && draft.id) {
+                      visibilityPending.current = true;
+                      onDocumentVisibility(project, draft.id, layer.id, !hidden.includes(layer.id));
+                    }
+                  }}
                   {...(draft.id ? { documentId: draft.id } : {})}
                 >
                   {fields}

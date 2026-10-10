@@ -1541,6 +1541,14 @@ export function CadWorkspace({
                       setMode("2D");
                       setActiveDocumentId(id);
                     }}
+                    onDocumentVisibility={(base, documentId, layerId, visible) =>
+                      dispatchEditing({
+                        type: "visibility",
+                        base,
+                        action: { kind: "set", layerId, visible },
+                        scope: { kind: "drawing-document", documentId },
+                      })
+                    }
                     onDocumentAction={(base, action) =>
                       dispatchEditing({ type: "document", base, action })
                     }

@@ -17,12 +17,12 @@ export function DocumentLayerDraft({
     layer.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()),
   );
   return (
-    <section aria-label="Ebenen für das neue Abbild" className="space-y-2">
+    <section aria-label="Ebenen für das Abbild" className="space-y-2">
       <p>
-        Für das neue Abbild sind die folgenden Ebenen vorgesehen. Über das Auge kannst du jede Ebene
+        Für dieses Abbild sind die folgenden Ebenen vorgesehen. Über das Auge kannst du jede Ebene
         ein- oder ausblenden.
       </p>
-      <div className="max-h-52 overflow-y-auto rounded-lg border">
+      <div className="rounded-lg border">
         <table className="w-full text-left text-xs">
           <thead className="sticky top-0 bg-popover">
             <tr>
