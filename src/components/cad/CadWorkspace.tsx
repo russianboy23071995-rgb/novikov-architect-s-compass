@@ -1,3 +1,4 @@
+import { ensureDocumentFolder } from "@/application/views/documents";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
 import { resolveWorkingView, resolveDocumentView } from "@/application/views/working-context";
@@ -88,10 +89,28 @@ export function CadWorkspace({
     capturedPlan.current = frame;
   }, []);
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
-  const getPlanCapture = useCallback(
-    () => (activeDocumentId ? null : capturedPlan.current),
-    [activeDocumentId],
-  );
+  const getPlanCapture = useCallback(() => {
+    if (activeDocumentId || !capturedPlan.current) return null;
+    const canvas = document
+      .querySelector('[aria-label="BIM floor plan"]')
+      ?.closest('[aria-label$=" viewport"]');
+    if (
+      canvas instanceof HTMLElement &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      canvas.animate(
+        [
+          { boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0)", backgroundColor: "transparent" },
+          {
+            boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0.85)",
+            backgroundColor: "rgba(45, 212, 191, 0.12)",
+          },
+          { boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0)", backgroundColor: "transparent" },
+        ],
+        { duration: 700, easing: "ease-out" },
+      );
+    return capturedPlan.current;
+  }, [activeDocumentId]);
   const [penSetsOpen, setPenSetsOpen] = useState(false);
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
@@ -111,8 +130,8 @@ export function CadWorkspace({
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
-  const [editing, dispatchEditing] = useProjectEditing(
-    () => initialProject ?? createExampleProject(),
+  const [editing, dispatchEditing] = useProjectEditing(() =>
+    ensureDocumentFolder(initialProject ?? createExampleProject()),
   );
   const { history, session: pendingSession } = editing;
   const project = history.present;
@@ -741,7 +760,10 @@ export function CadWorkspace({
                 onClick={() => {
                   if (pendingFile) {
                     setActiveDocumentId(null);
-                    dispatchEditing({ type: "load-project", project: pendingFile.project });
+                    dispatchEditing({
+                      type: "load-project",
+                      project: ensureDocumentFolder(pendingFile.project),
+                    });
                     showSelection(null);
                     setExportMessage("Projektdatei geladen.");
                     setPendingFile(null);

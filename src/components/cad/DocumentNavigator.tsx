@@ -82,11 +82,11 @@ export function DocumentNavigator({
     setError("");
     setDraft({
       base: project,
-      framing: getPlanCapture(),
+      framing: kind === "document" ? getPlanCapture() : null,
       name: kind === "folder" ? "Neuer Ordner" : "Grundriss",
       scale: `1:${newDocumentScale(project)}`,
       kind,
-      folderId,
+      folderId: folderId || project.documentFolders?.[0]?.id || "",
     });
   };
   const createMenu = (folderId = "") => (
@@ -324,7 +324,13 @@ export function DocumentNavigator({
       <FloatingPanel
         centered
         open={!!draft}
-        title={draft?.id ? "Abbildeinstellungen" : "Hinzufügen"}
+        title={
+          draft?.id
+            ? "Abbildeinstellungen"
+            : draft?.kind === "folder"
+              ? "Neuer Ordner"
+              : "Abbild hinzufügen"
+        }
         width={draft?.kind === "document" ? 720 : 400}
         height={draft?.kind === "document" ? 540 : 370}
         onClose={() => setDraft(null)}
@@ -393,26 +399,6 @@ export function DocumentNavigator({
                       </label>
                     )}
                   </div>
-                  {!draft.id && (
-                    <label className="block">
-                      Typ
-                      <select
-                        aria-label="Hinzufügen Typ"
-                        className="ml-2 rounded border bg-popover p-1"
-                        value={draft.kind}
-                        onChange={(e) =>
-                          setDraft({
-                            ...draft,
-                            kind: e.target.value as "document" | "folder",
-                            name: e.target.value === "folder" ? "Neuer Ordner" : "Grundriss",
-                          })
-                        }
-                      >
-                        <option value="document">Abbild</option>
-                        <option value="folder">Ordner</option>
-                      </select>
-                    </label>
-                  )}
                   {draft.kind === "document" && (
                     <>
                       <label className="block">
@@ -431,21 +417,34 @@ export function DocumentNavigator({
                           ))}
                         </select>
                       </label>
-                      <p>
-                        Übernommener Zoom:{" "}
-                        {draft.framing
-                          ? `${Number(draft.framing.pixelsPerMetre.toFixed(1))} %`
-                          : "Arbeitsgrundriss öffnen"}
-                      </p>
-                      <p>
-                        Gespeichert werden Startposition und Zoom. Das gesamte Modell bleibt
-                        erreichbar; zugeschnitten wird später im Layoutbuch.
-                      </p>
+                      {!draft.id && (
+                        <section aria-label="Aufgenommene aktive Ebenen">
+                          <h3 className="mb-2 font-medium">Aufgenommene aktive Ebenen</h3>
+                          <ul className="flex flex-wrap gap-1.5">
+                            {draft.base.layers
+                              .filter(
+                                (layer) =>
+                                  !draft.base.bimVisibility.hiddenLayerIds.includes(layer.id),
+                              )
+                              .map((layer) => (
+                                <li
+                                  key={layer.id}
+                                  className="rounded border bg-background/50 px-2 py-1"
+                                >
+                                  {layer.name}
+                                </li>
+                              ))}
+                          </ul>
+                          {draft.base.layers.every((layer) =>
+                            draft.base.bimVisibility.hiddenLayerIds.includes(layer.id),
+                          ) && <p>Keine Ebene eingeblendet.</p>}
+                        </section>
+                      )}
                     </>
                   )}
                 </div>
               );
-              return draft.kind === "document" ? (
+              return draft.kind === "document" && draft.id ? (
                 <DocumentSettingsSections
                   project={project}
                   {...(draft.id ? { documentId: draft.id } : {})}
@@ -453,7 +452,7 @@ export function DocumentNavigator({
                   {fields}
                 </DocumentSettingsSections>
               ) : (
-                <div className="p-4">{fields}</div>
+                <div className="min-h-0 flex-1 overflow-y-auto p-5">{fields}</div>
               );
             })()}
             {error && (

@@ -130,3 +130,20 @@ export function documentBinding(project: Project, id: string): DocumentIdentity 
 export function newDocumentScale(project: Project) {
   return projectScaleContext(project).denominator;
 }
+
+/** Initialize the application's document directory without changing legacy file parsing. */
+export function ensureDocumentFolder(project: Project): Project {
+  if (project.documentFolders?.length) return project;
+  const ids = new Set<string>();
+  const collect = (value: unknown): void => {
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if (key === "id" && typeof child === "string") ids.add(child);
+      else collect(child);
+    }
+  };
+  collect(project);
+  let id = "document-folder-default";
+  while (ids.has(id)) id += "-1";
+  return changeDrawingDocument(project, project, { kind: "create-folder", id, name: "Abbilder" });
+}

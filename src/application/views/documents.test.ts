@@ -1,3 +1,4 @@
+import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
@@ -572,7 +573,7 @@ test("only empty document folders can be deleted without affecting model or docu
   const p = create(createExampleProject());
   const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
   const next = changeDrawingDocument(base, base, { kind: "delete-folder", id: "folder" });
-  assert.deepEqual(next.documentFolders, []);
+  assert.deepEqual(next.documentFolders, p.documentFolders ?? []);
   assert.deepEqual(next.drawingDocuments, base.drawingDocuments);
   assert.deepEqual(next.storey, base.storey);
   assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
@@ -585,4 +586,15 @@ test("only empty document folders can be deleted without affecting model or docu
     changeDrawingDocument(occupied, occupied, { kind: "delete-folder", id: "folder" }),
   );
   assert.throws(() => changeDrawingDocument(base, base, { kind: "delete-folder", id: "missing" }));
+});
+
+test("application startup supplies one empty folder without rewriting legacy parsing or existing folders", () => {
+  const base = createExampleProject();
+  const next = ensureDocumentFolder(base);
+  assert.equal(next.documentFolders?.length, 1);
+  assert.deepEqual(next.storey, base.storey);
+  assert.equal(ensureDocumentFolder(next), next);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  const collision = ensureDocumentFolder({ ...base, id: "document-folder-default" });
+  assert.notEqual(collision.documentFolders![0]!.id, collision.id);
 });
