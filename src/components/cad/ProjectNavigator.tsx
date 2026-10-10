@@ -253,6 +253,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       activeDocumentId={props.activeDocumentId}
       onOpenDocument={onOpenDocument}
       onDocumentAction={onDocumentAction}
+      onDocumentVisibility={props.onDocumentVisibility}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

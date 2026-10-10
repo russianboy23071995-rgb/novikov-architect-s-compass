@@ -1,3 +1,5 @@
+import { addWall } from "../../lib/bim/model.ts";
+import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
@@ -534,4 +536,176 @@ test("folder assignment preserves document definition and geometry, roundtrips a
   assert.throws(() =>
     changeDrawingDocument(base, moved, { kind: "assign-folder", id: "doc-a", folderId: "folder" }),
   );
+});
+
+test("document settings are atomic, preserve view and model and reject invalid or stale targets", () => {
+  const p = create(createExampleProject());
+  const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const action = {
+    kind: "settings" as const,
+    id: "doc-a",
+    name: "Plan",
+    denominator: 50,
+    folderId: "folder",
+  };
+  const next = changeDrawingDocument(base, base, action);
+  assert.deepEqual(next.drawingDocuments![0], {
+    ...base.drawingDocuments![0],
+    name: "Plan",
+    denominator: 50,
+    folderId: "folder",
+  });
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  const history = commitProject(createHistory(base), next);
+  assert.deepEqual(undoProject(history).present, base);
+  assert.deepEqual(redoProject(undoProject(history)).present, next);
+  for (const invalid of [
+    { ...action, name: "" },
+    { ...action, denominator: 0 },
+    { ...action, folderId: "missing" },
+    { ...action, id: "missing" },
+  ])
+    assert.throws(() => changeDrawingDocument(base, base, invalid));
+  assert.throws(() => changeDrawingDocument(base, next, action));
+});
+
+test("only empty document folders can be deleted without affecting model or documents", () => {
+  const p = create(createExampleProject());
+  const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const next = changeDrawingDocument(base, base, { kind: "delete-folder", id: "folder" });
+  assert.deepEqual(next.documentFolders, p.documentFolders ?? []);
+  assert.deepEqual(next.drawingDocuments, base.drawingDocuments);
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
+  const occupied = changeDrawingDocument(base, base, {
+    kind: "assign-folder",
+    id: "doc-a",
+    folderId: "folder",
+  });
+  assert.throws(() =>
+    changeDrawingDocument(occupied, occupied, { kind: "delete-folder", id: "folder" }),
+  );
+  assert.throws(() => changeDrawingDocument(base, base, { kind: "delete-folder", id: "missing" }));
+});
+
+test("application startup supplies one empty folder without rewriting legacy parsing or existing folders", () => {
+  const base = createExampleProject();
+  const next = ensureDocumentFolder(base);
+  assert.equal(next.documentFolders?.length, 1);
+  assert.deepEqual(next.storey, base.storey);
+  assert.equal(ensureDocumentFolder(next), next);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  const collision = ensureDocumentFolder({ ...base, id: "document-folder-default" });
+  assert.notEqual(collision.documentFolders![0]!.id, collision.id);
+});
+
+test("Abbildsammlung always exists alongside custom folders and cannot be removed", () => {
+  const base = createExampleProject();
+  const custom = changeDrawingDocument(base, base, {
+    kind: "create-folder",
+    id: "custom",
+    name: "Eigene Pläne",
+  });
+  const next = ensureDocumentFolder(custom);
+  const standard = next.documentFolders!.find((f) => f.name === "Abbildsammlung")!;
+  assert.equal(next.documentFolders!.length, 2);
+  assert.equal(ensureDocumentFolder(next), next);
+  assert.throws(() =>
+    changeDrawingDocument(next, next, { kind: "delete-folder", id: standard.id }),
+  );
+  assert.throws(() =>
+    changeDrawingDocument(next, next, { kind: "rename-folder", id: standard.id, name: "Anders" }),
+  );
+  const old = changeDrawingDocument(base, base, {
+    kind: "create-folder",
+    id: "document-folder-default",
+    name: "Abbilder",
+  });
+  const updated = ensureDocumentFolder(old);
+  assert.deepEqual(updated.documentFolders, [
+    { id: "document-folder-default", name: "Abbildsammlung" },
+  ]);
+});
+
+test("creation draft visibility belongs only to the new document and validates layer IDs", () => {
+  const base = createExampleProject();
+  const hidden = [base.layers[0]!.id];
+  const action = {
+    kind: "create" as const,
+    id: "draft-doc",
+    modelViewId: "draft-view",
+    name: "Plan",
+    denominator: 100,
+    hiddenLayerIds: hidden,
+  };
+  const next = changeDrawingDocument(base, base, action);
+  assert.deepEqual(next.drawingDocuments![0]!.hiddenLayerIds, hidden);
+  assert.deepEqual(next.bimVisibility, base.bimVisibility);
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
+  assert.throws(() =>
+    changeDrawingDocument(base, base, { ...action, hiddenLayerIds: ["missing"] }),
+  );
+  assert.throws(() => changeDrawingDocument(base, next, action));
+});
+
+test("new layers remain hidden in Abbilder until drawing commits in one document", () => {
+  const base = create(createExampleProject());
+  const two = changeDrawingDocument(base, base, {
+    kind: "create",
+    id: "second",
+    modelViewId: "other",
+    name: "Second",
+    denominator: 100,
+  });
+  let state = createEditingState(two);
+  state = editingReducer(state, {
+    type: "manage-layer",
+    base: state.history.present,
+    request: { kind: "create", id: "new-layer", name: "New" },
+  });
+  const before = state.history.present;
+  assert.ok(before.drawingDocuments!.every((d) => d.hiddenLayerIds.includes("new-layer")));
+  assert.equal(state.documentLayerActivation, undefined);
+  const drawn = addWall(before, {
+    id: "drawn",
+    layerId: "new-layer",
+    start: { x: 10, y: 0 },
+    end: { x: 13, y: 0 },
+    height: 2.8,
+    thickness: 0.36,
+  });
+  const committed = editingReducer(state, {
+    type: "project",
+    project: drawn,
+    drawingDocumentId: "doc-a",
+  });
+  assert.equal(committed.error, "");
+  assert.ok(
+    !committed.history.present
+      .drawingDocuments!.find((d) => d.id === "doc-a")!
+      .hiddenLayerIds.includes("new-layer"),
+  );
+  assert.ok(
+    committed.history.present
+      .drawingDocuments!.find((d) => d.id === "second")!
+      .hiddenLayerIds.includes("new-layer"),
+  );
+  assert.deepEqual(committed.documentLayerActivation?.layerIds, ["new-layer"]);
+  assert.equal(
+    editingReducer(committed, { type: "cancel" }).documentLayerActivation,
+    committed.documentLayerActivation,
+  );
+  assert.deepEqual(committed.history.present.bimVisibility, before.bimVisibility);
+  const undo = editingReducer(committed, { type: "undo" });
+  assert.equal(undo.history.present.storey.walls.length, before.storey.walls.length);
+  assert.equal(undo.documentLayerActivation, undefined);
+  assert.equal(editingReducer(undo, { type: "redo" }).documentLayerActivation, undefined);
+  const outside = editingReducer(state, { type: "project", project: drawn });
+  assert.ok(
+    outside.history.present.drawingDocuments!.every((d) => d.hiddenLayerIds.includes("new-layer")),
+  );
+  assert.equal(outside.documentLayerActivation, undefined);
 });

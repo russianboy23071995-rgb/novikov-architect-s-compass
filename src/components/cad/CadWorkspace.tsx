@@ -1,3 +1,5 @@
+import { DocumentLayerNotice } from "./DocumentLayerNotice";
+import { ensureDocumentFolder } from "@/application/views/documents";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
 import { resolveWorkingView, resolveDocumentView } from "@/application/views/working-context";
@@ -88,10 +90,28 @@ export function CadWorkspace({
     capturedPlan.current = frame;
   }, []);
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
-  const getPlanCapture = useCallback(
-    () => (activeDocumentId ? null : capturedPlan.current),
-    [activeDocumentId],
-  );
+  const getPlanCapture = useCallback(() => {
+    if (activeDocumentId || !capturedPlan.current) return null;
+    const canvas = document
+      .querySelector('[aria-label="BIM floor plan"]')
+      ?.closest('[aria-label$=" viewport"]');
+    if (
+      canvas instanceof HTMLElement &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      canvas.animate(
+        [
+          { boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0)", backgroundColor: "transparent" },
+          {
+            boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0.85)",
+            backgroundColor: "rgba(45, 212, 191, 0.12)",
+          },
+          { boxShadow: "inset 0 0 0 3px rgba(45, 212, 191, 0)", backgroundColor: "transparent" },
+        ],
+        { duration: 700, easing: "ease-out" },
+      );
+    return capturedPlan.current;
+  }, [activeDocumentId]);
   const [penSetsOpen, setPenSetsOpen] = useState(false);
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
@@ -112,9 +132,11 @@ export function CadWorkspace({
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
   const [editing, dispatchEditing] = useProjectEditing(
-    () => initialProject ?? createExampleProject(),
+    () => ensureDocumentFolder(initialProject ?? createExampleProject()),
+    activeDocumentId,
   );
   const { history, session: pendingSession } = editing;
+  const layerActivation = editing.documentLayerActivation;
   const project = history.present;
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
@@ -741,7 +763,10 @@ export function CadWorkspace({
                 onClick={() => {
                   if (pendingFile) {
                     setActiveDocumentId(null);
-                    dispatchEditing({ type: "load-project", project: pendingFile.project });
+                    dispatchEditing({
+                      type: "load-project",
+                      project: ensureDocumentFolder(pendingFile.project),
+                    });
                     showSelection(null);
                     setExportMessage("Projektdatei geladen.");
                     setPendingFile(null);
@@ -1224,6 +1249,14 @@ export function CadWorkspace({
               defaultSize={navigatorOpen && !fullscreen ? "79%" : "100%"}
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
+                {layerActivation && (
+                  <DocumentLayerNotice
+                    key={layerActivation.layerIds.join(":")}
+                    project={project}
+                    activeDocumentId={activeDocumentId}
+                    activation={layerActivation}
+                  />
+                )}
                 {activeDocumentId && !activeDocument ? (
                   <p role="alert" className="p-4">
                     Das Abbild ist nicht vorhanden. Mit Projekt-Undo wiederherstellen oder
@@ -1519,6 +1552,14 @@ export function CadWorkspace({
                       setMode("2D");
                       setActiveDocumentId(id);
                     }}
+                    onDocumentVisibility={(base, documentId, layerId, visible) =>
+                      dispatchEditing({
+                        type: "visibility",
+                        base,
+                        action: { kind: "set", layerId, visible },
+                        scope: { kind: "drawing-document", documentId },
+                      })
+                    }
                     onDocumentAction={(base, action) =>
                       dispatchEditing({ type: "document", base, action })
                     }
