@@ -16,7 +16,7 @@ const root = document.querySelector<HTMLElement>("#root")!;
 root.style.cssText =
   "max-width:1200px;margin:30px auto;padding:15px;font:14px system-ui;line-height:1.6;color:#263840";
 root.innerHTML =
-  '<h1>Recovery-KapazitÃ¤tsmessung</h1><p>Isolierte synthetische Daten, keine Produktionsprojekte. Ein erster Lauf und fÃ¼nf warme Wiederholungen je Profil. Erster Lauf ist nicht gleich kalter Browserprozess. Bilddekodierung/GPU und Stromausfall sind nicht Teil dieser PrÃ¼fung.</p><label>Quellstand <input id="revision" aria-label="Quellstand" value="9eac205 + Recovery-Diagnose" size="45"></label> <button id="run">Messung starten</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status" id="status">Bereit</p><pre id="environment"></pre><div id="results"></div>';
+  '<h1>Recovery-Kapazitätsmessung</h1><p>Isolierte synthetische Daten, keine Produktionsprojekte. Ein erster Lauf und fünf warme Wiederholungen je Profil. Erster Lauf ist nicht gleich kalter Browserprozess. Bilddekodierung/GPU und Stromausfall sind nicht Teil dieser Prüfung.</p><label>Quellstand <input id="revision" aria-label="Quellstand" value="9eac205 + Recovery-Diagnose" size="45"></label> <button id="run">Messung starten</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status" id="status">Bereit</p><pre id="environment"></pre><div id="results"></div>';
 const button = document.querySelector<HTMLButtonElement>("#run")!;
 const download = document.querySelector<HTMLButtonElement>("#download")!;
 const status = document.querySelector<HTMLElement>("#status")!;
@@ -133,7 +133,7 @@ function render(rows: { name: string; bytes: number; samples: Sample[] }[]) {
         stats?.median,
         stats?.p95,
         Math.max(...samples.map((s) => s.maxTimerDelayMs)),
-        observer ? Math.max(...samples.map((s) => s.maxLongTaskMs ?? 0)) : "nicht verfÃ¼gbar",
+        observer ? Math.max(...samples.map((s) => s.maxLongTaskMs ?? 0)) : "nicht verfügbar",
       ]) {
         const td = document.createElement("td");
         td.style.borderBottom = "1px solid #ddd";
@@ -141,7 +141,7 @@ function render(rows: { name: string; bytes: number; samples: Sample[] }[]) {
           typeof value === "number"
             ? value.toFixed(1)
             : value === undefined
-              ? "â€“"
+              ? "–"
               : String(value);
         tr.append(td);
       }
@@ -200,7 +200,7 @@ button.onclick = async () => {
       { name: "Gemischt", lines: 5000, side: 1024 },
     ];
     for (const [index, c] of cases.entries()) {
-      status.textContent = `Erzeuge ${c.name}â€¦`;
+      status.textContent = `Erzeuge ${c.name}…`;
       await pause(30);
       let asset = c.side ? image(c.side) : undefined;
       let base = recoveryFixture(`capacity-${index}`, c.lines, asset);
@@ -214,7 +214,7 @@ button.onclick = async () => {
         json = serializeProject(base);
         bytes = new TextEncoder().encode(json).length;
       }
-      assert(bytes < PROJECT_FILE_LIMIT, "Testdatei Ã¼berschreitet bestehendes Limit");
+      assert(bytes < PROJECT_FILE_LIMIT, "Testdatei überschreitet bestehendes Limit");
       json = serializeProject(base);
       const manual = { ...base, id: `${base.id}-manual` },
         automatic = { ...base, id: `${base.id}-auto` };
@@ -321,7 +321,7 @@ button.onclick = async () => {
     result = { environment, rows };
     download.disabled = false;
     status.textContent =
-      "PASS: Alle Profile und RundlÃ¤ufe abgeschlossen. Rohdaten kÃ¶nnen heruntergeladen werden.";
+      "PASS: Alle Profile und Rundläufe abgeschlossen. Rohdaten können heruntergeladen werden.";
   } catch (error) {
     result = { environment, rows, error: String(error) };
     download.disabled = false;
@@ -335,7 +335,7 @@ button.onclick = async () => {
         resolve();
       };
       request.onblocked = () => {
-        status.textContent += " Testdatenbank-LÃ¶schung blockiert.";
+        status.textContent += " Testdatenbank-Löschung blockiert.";
         resolve();
       };
     });
