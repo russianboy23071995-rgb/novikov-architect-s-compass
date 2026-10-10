@@ -1,4 +1,5 @@
 import { DocumentLayerNotice } from "./DocumentLayerNotice";
+import { RecoveryPanel } from "./RecoveryPanel";
 import { ensureDocumentFolder } from "@/application/views/documents";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
@@ -173,6 +174,7 @@ export function CadWorkspace({
   const fileInput = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<{ project: Project; name: string } | null>(null);
   const [readingFile, setReadingFile] = useState(false);
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   const {
     targets: selections,
     selection,
@@ -735,6 +737,17 @@ export function CadWorkspace({
             if (file) void openProjectFile(file);
           }}
         />
+        {recoveryOpen && (
+          <RecoveryPanel
+            project={project}
+            onClose={() => setRecoveryOpen(false)}
+            onPrepare={(candidate) => {
+              setPendingFile(candidate);
+              setModelError("");
+              setExportMessage("");
+            }}
+          />
+        )}
         <FloatingPanel
           open={!!pendingFile}
           title="Projektdatei laden?"
@@ -836,6 +849,7 @@ export function CadWorkspace({
             onExportIfc={downloadIfc}
             exportingIfc={exportingIfc}
             onSave={saveProject}
+            onRecovery={() => setRecoveryOpen(true)}
             onOpen={() => {
               if (!readingFile) fileInput.current?.click();
             }}
