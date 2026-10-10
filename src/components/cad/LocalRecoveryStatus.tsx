@@ -1,3 +1,4 @@
+import type { AutosaveState } from "@/application/project-files/autosave";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import {
@@ -10,10 +11,12 @@ import {
 } from "@/interop/project-file/recovery-storage";
 
 export function LocalRecoveryStatus({
+  autosave,
   project,
   context,
   onOpen,
 }: {
+  autosave: AutosaveState;
   project: Project;
   context: unknown;
   onOpen: () => void;
@@ -54,15 +57,19 @@ export function LocalRecoveryStatus({
       ? result.status
       : { kind: "checking" };
   const text =
-    status.kind === "current"
-      ? "Lokaler Snapshot aktuell"
-      : status.kind === "changed"
-        ? "Änderungen seit Snapshot"
-        : status.kind === "missing"
-          ? "Kein lokaler Snapshot"
-          : status.kind === "unavailable"
-            ? "Sicherungsstatus unbekannt"
-            : "Snapshot wird geprüft…";
+    autosave.enabled && autosave.error
+      ? "Autosicherung pausiert"
+      : autosave.busy
+        ? "Snapshot wird geschrieben…"
+        : status.kind === "current"
+          ? "Lokaler Snapshot aktuell"
+          : status.kind === "changed"
+            ? "Änderungen seit Snapshot"
+            : status.kind === "missing"
+              ? "Kein lokaler Snapshot"
+              : status.kind === "unavailable"
+                ? "Sicherungsstatus unbekannt"
+                : "Snapshot wird geprüft…";
   const detail =
     status.kind === "current" || status.kind === "changed"
       ? `Stand: ${new Date(status.savedAt).toLocaleString()}. `
@@ -74,7 +81,7 @@ export function LocalRecoveryStatus({
       type="button"
       onClick={onOpen}
       aria-label={`Lokaler Sicherungsstatus: ${text}`}
-      title={`${detail}Nur lokale Wiederherstellung in diesem Browser, kein externes Backup. Klicken öffnet die Wiederherstellung.`}
+      title={`${autosave.enabled ? "Autosicherung an. " : "Autosicherung aus. "}${detail}Nur lokale Wiederherstellung in diesem Browser, kein externes Backup. Klicken öffnet die Wiederherstellung.`}
       className="max-w-56 truncate rounded px-2 text-[11px] text-muted-foreground hover:bg-secondary/60"
     >
       <span role="status">{text}</span>

@@ -1,3 +1,4 @@
+import { useLocalAutosave } from "./useLocalAutosave";
 import { LocalRecoveryStatus } from "./LocalRecoveryStatus";
 import { DocumentLayerNotice } from "./DocumentLayerNotice";
 import { RecoveryPanel } from "./RecoveryPanel";
@@ -141,6 +142,7 @@ export function CadWorkspace({
   const { history, session: pendingSession } = editing;
   const layerActivation = editing.documentLayerActivation;
   const project = history.present;
+  const autosave = useLocalAutosave(project, editing.projectLoad ?? project.id);
   const activeDocument = project.drawingDocuments?.find((d) => d.id === activeDocumentId);
   const viewContext = useMemo(
     () =>
@@ -741,7 +743,7 @@ export function CadWorkspace({
         />
         {recoveryOpen && (
           <RecoveryPanel
-            project={project}
+            autosave={autosave}
             onClose={() => setRecoveryOpen(false)}
             onPrepare={(candidate) => {
               setPendingFile(candidate);
@@ -1600,6 +1602,7 @@ export function CadWorkspace({
           <StatusBar
             recoveryStatus={
               <LocalRecoveryStatus
+                autosave={autosave.state}
                 project={project}
                 context={editing.projectLoad ?? project.id}
                 onOpen={() => setRecoveryOpen(true)}

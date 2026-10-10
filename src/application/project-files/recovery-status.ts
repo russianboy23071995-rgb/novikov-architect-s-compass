@@ -9,7 +9,7 @@ export type RecoveryStatus =
 
 // Compare all persisted content, including view settings excluded from model Undo.
 // Project values are validated plain immutable data. Object property order is irrelevant.
-function sameContent(a: unknown, b: unknown): boolean {
+export function sameRecoveryContent(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (!a || !b || typeof a !== "object" || typeof b !== "object") return false;
   if (Array.isArray(a) || Array.isArray(b))
@@ -17,14 +17,14 @@ function sameContent(a: unknown, b: unknown): boolean {
       Array.isArray(a) &&
       Array.isArray(b) &&
       a.length === b.length &&
-      a.every((v, i) => sameContent(v, b[i]))
+      a.every((v, i) => sameRecoveryContent(v, b[i]))
     );
   const left = a as Record<string, unknown>,
     right = b as Record<string, unknown>;
   const keys = Object.keys(left).filter((k) => left[k] !== undefined);
   return (
     keys.length === Object.keys(right).filter((k) => right[k] !== undefined).length &&
-    keys.every((k) => Object.hasOwn(right, k) && sameContent(left[k], right[k]))
+    keys.every((k) => Object.hasOwn(right, k) && sameRecoveryContent(left[k], right[k]))
   );
 }
 
@@ -49,7 +49,7 @@ export function createRecoveryStatusTracker(
         : !baseline
           ? { kind: "missing" }
           : {
-              kind: sameContent(project, baseline.project) ? "current" : "changed",
+              kind: sameRecoveryContent(project, baseline.project) ? "current" : "changed",
               savedAt: baseline.savedAt,
             };
     notify(status, project, context);
