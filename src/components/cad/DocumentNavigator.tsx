@@ -19,6 +19,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
+import { DocumentSettingsSections } from "./DocumentSettingsSections";
 import { FloatingPanel } from "./FloatingPanel";
 
 export type DocumentNavigation = {
@@ -324,13 +325,13 @@ export function DocumentNavigator({
         centered
         open={!!draft}
         title={draft?.id ? "Abbildeinstellungen" : "Hinzufügen"}
-        width={400}
-        height={370}
+        width={draft?.kind === "document" ? 720 : 400}
+        height={draft?.kind === "document" ? 540 : 370}
         onClose={() => setDraft(null)}
       >
         {draft && (
           <form
-            className="space-y-3 p-4"
+            className="flex min-h-0 flex-1 flex-col text-xs"
             onSubmit={(e) => {
               e.preventDefault();
               try {
@@ -365,85 +366,102 @@ export function DocumentNavigator({
               }
             }}
           >
-            <div className="flex gap-3">
-              <label className="min-w-0 flex-1">
-                Name
-                <input
-                  aria-label="Name"
-                  maxLength={120}
-                  className="w-full rounded border bg-popover p-1"
-                  value={draft.name}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                />
-              </label>
-              {draft.kind === "document" && (
-                <label>
-                  Maßstab
-                  <input
-                    aria-label="Abbildmaßstab"
-                    className="w-24 rounded border bg-popover p-1"
-                    value={draft.scale}
-                    onChange={(e) => setDraft({ ...draft, scale: e.target.value })}
-                  />
-                </label>
-              )}
-            </div>
-            {!draft.id && (
-              <label className="block">
-                Typ
-                <select
-                  aria-label="Hinzufügen Typ"
-                  className="ml-2 rounded border bg-popover p-1"
-                  value={draft.kind}
-                  onChange={(e) =>
-                    setDraft({
-                      ...draft,
-                      kind: e.target.value as "document" | "folder",
-                      name: e.target.value === "folder" ? "Neuer Ordner" : "Grundriss",
-                    })
-                  }
+            {(() => {
+              const fields = (
+                <div className="space-y-4">
+                  {" "}
+                  <div className="flex gap-3">
+                    <label className="min-w-0 flex-1">
+                      Name
+                      <input
+                        aria-label="Name"
+                        maxLength={120}
+                        className="w-full rounded border bg-popover p-1"
+                        value={draft.name}
+                        onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                      />
+                    </label>
+                    {draft.kind === "document" && (
+                      <label>
+                        Maßstab
+                        <input
+                          aria-label="Abbildmaßstab"
+                          className="w-24 rounded border bg-popover p-1"
+                          value={draft.scale}
+                          onChange={(e) => setDraft({ ...draft, scale: e.target.value })}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  {!draft.id && (
+                    <label className="block">
+                      Typ
+                      <select
+                        aria-label="Hinzufügen Typ"
+                        className="ml-2 rounded border bg-popover p-1"
+                        value={draft.kind}
+                        onChange={(e) =>
+                          setDraft({
+                            ...draft,
+                            kind: e.target.value as "document" | "folder",
+                            name: e.target.value === "folder" ? "Neuer Ordner" : "Grundriss",
+                          })
+                        }
+                      >
+                        <option value="document">Abbild</option>
+                        <option value="folder">Ordner</option>
+                      </select>
+                    </label>
+                  )}
+                  {draft.kind === "document" && (
+                    <>
+                      <label className="block">
+                        Ordner
+                        <select
+                          aria-label="Abbildordner"
+                          className="ml-2 rounded border bg-popover p-1"
+                          value={draft.folderId}
+                          onChange={(e) => setDraft({ ...draft, folderId: e.target.value })}
+                        >
+                          <option value="">Ohne Ordner</option>
+                          {(project.documentFolders ?? []).map((f) => (
+                            <option key={f.id} value={f.id}>
+                              {f.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <p>
+                        Übernommener Zoom:{" "}
+                        {draft.framing
+                          ? `${Number(draft.framing.pixelsPerMetre.toFixed(1))} %`
+                          : "Arbeitsgrundriss öffnen"}
+                      </p>
+                      <p>
+                        Gespeichert werden Startposition und Zoom. Das gesamte Modell bleibt
+                        erreichbar; zugeschnitten wird später im Layoutbuch.
+                      </p>
+                    </>
+                  )}
+                </div>
+              );
+              return draft.kind === "document" ? (
+                <DocumentSettingsSections
+                  project={project}
+                  {...(draft.id ? { documentId: draft.id } : {})}
                 >
-                  <option value="document">Abbild</option>
-                  <option value="folder">Ordner</option>
-                </select>
-              </label>
-            )}
-            {draft.kind === "document" && (
-              <>
-                <label className="block">
-                  Ordner
-                  <select
-                    aria-label="Abbildordner"
-                    className="ml-2 rounded border bg-popover p-1"
-                    value={draft.folderId}
-                    onChange={(e) => setDraft({ ...draft, folderId: e.target.value })}
-                  >
-                    <option value="">Ohne Ordner</option>
-                    {(project.documentFolders ?? []).map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <p>
-                  Übernommener Zoom:{" "}
-                  {draft.framing
-                    ? `${Number(draft.framing.pixelsPerMetre.toFixed(1))} %`
-                    : "Arbeitsgrundriss öffnen"}
-                </p>
-                <p>
-                  Gespeichert werden Startposition und Zoom. Das gesamte Modell bleibt erreichbar;
-                  zugeschnitten wird später im Layoutbuch.
-                </p>
-              </>
-            )}
+                  {fields}
+                </DocumentSettingsSections>
+              ) : (
+                <div className="p-4">{fields}</div>
+              );
+            })()}
             {error && (
               <p role="alert" className="text-destructive">
                 {error}
               </p>
             )}
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="m-3 h-7 shrink-0 self-end px-3 text-xs">
               {draft.id
                 ? "Speichern"
                 : draft.kind === "folder"

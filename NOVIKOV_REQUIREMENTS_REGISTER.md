@@ -525,6 +525,8 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
 
+N56 UI-Ergänzung 10.10.2026 (PR241): Wiederverwendbare Einstellungsansicht mit linker Tabspalte zunächst für Abbilder. Allgemein enthält Stammdaten, Ebenensichtbarkeit zeigt aktive und alle vorhandenen Ebenen des Abbilds, Tab2–5 sind Platzhalter. Buttons 28 px hoch/12 px Schrift, Fenster weiterhin verschiebbar ohne Abdunklung. Anzeige der Sichtbarkeit verwendet live den Abbildfilter, Bearbeitung bleibt beim Ebenenumschalter. Browserabnahme und technische Prüfungen im Masterplan.
+
 ### N57 – Aktualisierbare Abbilder mit eigener Ebenendarstellung
 
 - **Stand:** Teilweise vorhanden in main seit PR238: modellgebundene Grundriss-Abbilder mit eigenem Maßstab/Filter und Startzoom, gesamtes Modell erreichbar. Anlage/Löschung/Ordnerzuordnung verwenden normales Projekt-Undo; Sichtbarkeit den gemeinsamen Ebenenumschalter mit kontextbezogener History. Schema20 und Migrationen erhalten Modell und Zeichnungen. Weitere Ansichtsarten bleiben offen.
