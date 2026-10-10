@@ -535,3 +535,54 @@ test("folder assignment preserves document definition and geometry, roundtrips a
     changeDrawingDocument(base, moved, { kind: "assign-folder", id: "doc-a", folderId: "folder" }),
   );
 });
+
+test("document settings are atomic, preserve view and model and reject invalid or stale targets", () => {
+  const p = create(createExampleProject());
+  const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const action = {
+    kind: "settings" as const,
+    id: "doc-a",
+    name: "Plan",
+    denominator: 50,
+    folderId: "folder",
+  };
+  const next = changeDrawingDocument(base, base, action);
+  assert.deepEqual(next.drawingDocuments![0], {
+    ...base.drawingDocuments![0],
+    name: "Plan",
+    denominator: 50,
+    folderId: "folder",
+  });
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  const history = commitProject(createHistory(base), next);
+  assert.deepEqual(undoProject(history).present, base);
+  assert.deepEqual(redoProject(undoProject(history)).present, next);
+  for (const invalid of [
+    { ...action, name: "" },
+    { ...action, denominator: 0 },
+    { ...action, folderId: "missing" },
+    { ...action, id: "missing" },
+  ])
+    assert.throws(() => changeDrawingDocument(base, base, invalid));
+  assert.throws(() => changeDrawingDocument(base, next, action));
+});
+
+test("only empty document folders can be deleted without affecting model or documents", () => {
+  const p = create(createExampleProject());
+  const base = changeDrawingDocument(p, p, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const next = changeDrawingDocument(base, base, { kind: "delete-folder", id: "folder" });
+  assert.deepEqual(next.documentFolders, []);
+  assert.deepEqual(next.drawingDocuments, base.drawingDocuments);
+  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
+  const occupied = changeDrawingDocument(base, base, {
+    kind: "assign-folder",
+    id: "doc-a",
+    folderId: "folder",
+  });
+  assert.throws(() =>
+    changeDrawingDocument(occupied, occupied, { kind: "delete-folder", id: "folder" }),
+  );
+  assert.throws(() => changeDrawingDocument(base, base, { kind: "delete-folder", id: "missing" }));
+});

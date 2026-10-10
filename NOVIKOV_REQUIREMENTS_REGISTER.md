@@ -518,7 +518,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N56 – Navigator für Geschosse, Schnitte, Ansichten und 3D
 
-- **Stand:** Teilweise vorhanden: Gebäudestruktur/Abbilder-Tabs und Ordner mit PR238 in main. Folgebranch feat/document-context-management ergänzt Rechtsklick-Ordnerzuordnung und Abbildlöschung, neben Umbenennen und Doppelklick-Öffnen. 809 Tests und Browserabnahme einschließlich Undo/Redo bestanden. Nichtleere Ordner löschen: Nutzerentscheidung noch ausstehend.
+- **Stand:** Teilweise vorhanden: Gebäudestruktur/Abbilder-Tabs und Ordner mit PR238 in main. Folgebranch feat/document-context-management ergänzt Rechtsklick-Ordnerzuordnung und Abbildlöschung, neben Umbenennen und Doppelklick-Öffnen. 809 Tests und Browserabnahme einschließlich Undo/Redo bestanden. PR240 ist zusammengeführt. Ergänzung feat/document-settings-menu: Rechtsklick auch im leeren Verzeichnis für neues Abbild/neuen Ordner; Abbildeinstellungen als atomare Aktion (Name, Maßstab, Ordner), leere Ordner löschbar. 811 Tests und Browserprüfung bestanden. Nichtleere Ordner löschen: Nutzerentscheidung noch ausstehend, vorerst geschützt.
 - **Zuständigkeit:** UI/ProjectNavigator → ModelView/Storey-Verweise
 - **Altzuordnung:** Gespräch Navigator
 - **Abnahme/Abhängigkeiten:** N21/N05; benannte 3D-Views, keine Inhaltskopien. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.

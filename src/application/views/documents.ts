@@ -17,6 +17,8 @@ export type DocumentAction =
   | { kind: "rename"; id: string; name: string }
   | { kind: "scale"; id: string; denominator: number }
   | { kind: "assign-folder"; id: string; folderId: string | null }
+  | { kind: "delete-folder"; id: string }
+  | { kind: "settings"; id: string; name: string; denominator: number; folderId: string | null }
   | { kind: "delete"; id: string };
 
 export function drawingDocument(project: Project, id: string) {
@@ -47,6 +49,16 @@ export function changeDrawingDocument(
       ),
     });
   }
+  if (action.kind === "delete-folder") {
+    if (!current.documentFolders?.some((f) => f.id === action.id))
+      throw new Error("Der Abbildordner fehlt.");
+    if (documents.some((d) => d.folderId === action.id))
+      throw new Error("Bitte die Abbilder zuerst aus dem Ordner verschieben.");
+    return validateProject({
+      ...current,
+      documentFolders: current.documentFolders.filter((f) => f.id !== action.id),
+    });
+  }
   if (action.kind === "create") {
     const existing = current.modelViews?.find(
       (v) => v.kind === "floor-plan" && v.storeyId === current.storey.id,
@@ -74,14 +86,18 @@ export function changeDrawingDocument(
     });
   }
   const target = drawingDocument(current, action.id);
-  if (action.kind === "assign-folder") {
+  if (action.kind === "assign-folder" || action.kind === "settings") {
     if (action.folderId !== null && !current.documentFolders?.some((f) => f.id === action.folderId))
       throw new Error("Der Abbildordner fehlt.");
     return validateProject({
       ...current,
       drawingDocuments: documents.map((d) => {
         if (d.id !== target.id) return d;
-        const { folderId: _old, ...document } = d;
+        const { folderId: _old, ...original } = d;
+        const document =
+          action.kind === "settings"
+            ? { ...original, name: action.name, denominator: action.denominator }
+            : original;
         return action.folderId === null ? document : { ...document, folderId: action.folderId };
       }),
     });

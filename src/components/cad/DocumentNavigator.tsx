@@ -36,6 +36,7 @@ export function DocumentNavigator({
   onDocumentAction,
 }: DocumentNavigation & { project: Project }) {
   const [draft, setDraft] = useState<{
+    id?: string;
     base: Project;
     framing: DocumentFraming | null;
     name: string;
@@ -53,6 +54,25 @@ export function DocumentNavigator({
     changeDrawingDocument(base, project, action);
     onDocumentAction(base, action);
   };
+  const beginCreate = (kind: "document" | "folder", folderId = "") => {
+    setError("");
+    setDraft({
+      base: project,
+      framing: getPlanCapture(),
+      name: kind === "folder" ? "Neuer Ordner" : "Grundriss",
+      scale: `1:${newDocumentScale(project)}`,
+      kind,
+      folderId,
+    });
+  };
+  const createMenu = (folderId = "") => (
+    <>
+      <ContextMenuItem onSelect={() => beginCreate("document", folderId)}>
+        Neues Abbild
+      </ContextMenuItem>
+      <ContextMenuItem onSelect={() => beginCreate("folder")}>Neuer Ordner</ContextMenuItem>
+    </>
+  );
   const row = (id: string, name: string, folder: boolean, depth: number, scale?: number) => {
     const open = !closed.includes(id);
     const apply = (action: DocumentAction) => {
@@ -153,9 +173,36 @@ export function DocumentNavigator({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent>
+          {createMenu(folder ? id : project.drawingDocuments?.find((d) => d.id === id)?.folderId)}
+          <ContextMenuSeparator />
           <ContextMenuItem onSelect={beginRename}>Umbenennen</ContextMenuItem>
+          {folder && (
+            <ContextMenuItem
+              disabled={!!project.drawingDocuments?.some((d) => d.folderId === id)}
+              onSelect={() => apply({ kind: "delete-folder", id })}
+            >
+              Ordner löschen
+            </ContextMenuItem>
+          )}
           {!folder && (
             <>
+              <ContextMenuItem
+                onSelect={() => {
+                  const document = project.drawingDocuments!.find((d) => d.id === id)!;
+                  setError("");
+                  setDraft({
+                    id,
+                    base: project,
+                    kind: "document",
+                    name: document.name,
+                    scale: `1:${document.denominator}`,
+                    folderId: document.folderId ?? "",
+                    framing: document.framing ?? null,
+                  });
+                }}
+              >
+                Abbildeinstellungen
+              </ContextMenuItem>
               <ContextMenuSub>
                 <ContextMenuSubTrigger>In Ordner verschieben</ContextMenuSubTrigger>
                 <ContextMenuSubContent>
@@ -190,42 +237,42 @@ export function DocumentNavigator({
         size="sm"
         variant="outline"
         aria-label="Abbild oder Ordner hinzufügen"
-        onClick={() => {
-          setError("");
-          setDraft({
-            base: project,
-            framing: getPlanCapture(),
-            name: "Grundriss",
-            scale: `1:${newDocumentScale(project)}`,
-            kind: "document",
-            folderId: project.documentFolders?.some((f) => f.id === selected) ? selected! : "",
-          });
-        }}
+        onClick={() =>
+          beginCreate(
+            "document",
+            project.documentFolders?.some((f) => f.id === selected) ? selected! : "",
+          )
+        }
       >
         <Plus className="size-4" /> Hinzufügen
       </Button>
-      <div role="tree" aria-label="Abbilder" className="mt-2">
-        {(project.documentFolders ?? []).map((folder) => (
-          <div key={folder.id}>
-            {row(folder.id, folder.name, true, 0)}
-            {!closed.includes(folder.id) && (
-              <div role="group">
-                {(project.drawingDocuments ?? [])
-                  .filter((d) => d.folderId === folder.id)
-                  .map((d) => row(d.id, d.name, false, 1, d.denominator))}
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <div role="tree" aria-label="Abbilder" className="mt-2 min-h-40">
+            {(project.documentFolders ?? []).map((folder) => (
+              <div key={folder.id}>
+                {row(folder.id, folder.name, true, 0)}
+                {!closed.includes(folder.id) && (
+                  <div role="group">
+                    {(project.drawingDocuments ?? [])
+                      .filter((d) => d.folderId === folder.id)
+                      .map((d) => row(d.id, d.name, false, 1, d.denominator))}
+                  </div>
+                )}
               </div>
-            )}
+            ))}
+            {(project.drawingDocuments ?? [])
+              .filter((d) => !d.folderId)
+              .map((d) => row(d.id, d.name, false, 0, d.denominator))}
           </div>
-        ))}
-        {(project.drawingDocuments ?? [])
-          .filter((d) => !d.folderId)
-          .map((d) => row(d.id, d.name, false, 0, d.denominator))}
-      </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>{createMenu()}</ContextMenuContent>
+      </ContextMenu>
       {!draft && error && <p role="alert">{error}</p>}
       <FloatingPanel
         centered
         open={!!draft}
-        title="Hinzufügen"
+        title={draft?.id ? "Abbildeinstellungen" : "Hinzufügen"}
         width={400}
         height={370}
         onClose={() => setDraft(null)}
@@ -236,8 +283,15 @@ export function DocumentNavigator({
             onSubmit={(e) => {
               e.preventDefault();
               try {
-                const action: DocumentAction =
-                  draft.kind === "folder"
+                const action: DocumentAction = draft.id
+                  ? {
+                      kind: "settings",
+                      id: draft.id,
+                      name: draft.name,
+                      denominator: parseOutputScale(draft.scale),
+                      folderId: draft.folderId || null,
+                    }
+                  : draft.kind === "folder"
                     ? { kind: "create-folder", id: crypto.randomUUID(), name: draft.name }
                     : {
                         kind: "create",
@@ -248,7 +302,7 @@ export function DocumentNavigator({
                         ...(draft.framing ? { framing: draft.framing } : {}),
                         ...(draft.folderId ? { folderId: draft.folderId } : {}),
                       };
-                if (draft.kind === "document" && !draft.framing)
+                if (!draft.id && draft.kind === "document" && !draft.framing)
                   throw new Error("Bitte zuerst den Arbeitsgrundriss öffnen und ausrichten.");
                 run(draft.base, action);
                 setSelected(action.id);
@@ -283,24 +337,26 @@ export function DocumentNavigator({
                 </label>
               )}
             </div>
-            <label className="block">
-              Typ
-              <select
-                aria-label="Hinzufügen Typ"
-                className="ml-2 rounded border bg-popover p-1"
-                value={draft.kind}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    kind: e.target.value as "document" | "folder",
-                    name: e.target.value === "folder" ? "Neuer Ordner" : "Grundriss",
-                  })
-                }
-              >
-                <option value="document">Abbild</option>
-                <option value="folder">Ordner</option>
-              </select>
-            </label>
+            {!draft.id && (
+              <label className="block">
+                Typ
+                <select
+                  aria-label="Hinzufügen Typ"
+                  className="ml-2 rounded border bg-popover p-1"
+                  value={draft.kind}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      kind: e.target.value as "document" | "folder",
+                      name: e.target.value === "folder" ? "Neuer Ordner" : "Grundriss",
+                    })
+                  }
+                >
+                  <option value="document">Abbild</option>
+                  <option value="folder">Ordner</option>
+                </select>
+              </label>
+            )}
             {draft.kind === "document" && (
               <>
                 <label className="block">
@@ -337,7 +393,11 @@ export function DocumentNavigator({
               </p>
             )}
             <Button type="submit" size="sm">
-              {draft.kind === "folder" ? "Ordner anlegen" : "Abbild erstellen"}
+              {draft.id
+                ? "Speichern"
+                : draft.kind === "folder"
+                  ? "Ordner anlegen"
+                  : "Abbild erstellen"}
             </Button>
           </form>
         )}
