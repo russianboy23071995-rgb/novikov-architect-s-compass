@@ -199,7 +199,7 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
   const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 17);
+  assert.equal(migrated.schemaVersion, 18);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
   assert.deepEqual(migrated.storey, old.storey);
@@ -229,4 +229,66 @@ test("renaming and document scale use validated project history, with no geometr
   assert.deepEqual(history.present.storey, before);
   assert.equal(undoProject(history).present.drawingDocuments![0]!.denominator, 50);
   assert.equal(redoProject(undoProject(history)).present.drawingDocuments![0]!.denominator, 200);
+});
+
+test("captured view framing and folder survive project history and file roundtrip", () => {
+  const base = createExampleProject();
+  let p = changeDrawingDocument(base, base, { kind: "create-folder", id: "folder", name: "Pläne" });
+  const framing = { center: { x: 7, y: -2 }, width: 8, height: 4, pixelsPerMetre: 200 };
+  p = changeDrawingDocument(p, p, {
+    kind: "create",
+    id: "detail",
+    modelViewId: "source",
+    name: "Detail",
+    denominator: 50,
+    folderId: "folder",
+    framing,
+  });
+  assert.deepEqual(p.storey, base.storey);
+  assert.deepEqual(p.drawingDocuments![0]!.framing, framing);
+  assert.deepEqual(readProjectFile(serializeProject(p)), p);
+  const renamed = changeDrawingDocument(p, p, {
+    kind: "rename-folder",
+    id: "folder",
+    name: "Ausführung",
+  });
+  const history = commitProject(createHistory(p), renamed);
+  assert.equal(undoProject(history).present.documentFolders![0]!.name, "Pläne");
+  assert.equal(redoProject(undoProject(history)).present.documentFolders![0]!.name, "Ausführung");
+  for (const invalid of [
+    { width: 0 },
+    { height: -1 },
+    { pixelsPerMetre: Infinity },
+    { center: { x: Infinity, y: 0 } },
+  ])
+    assert.throws(() =>
+      validateProject({
+        ...p,
+        drawingDocuments: [{ ...p.drawingDocuments![0], framing: { ...framing, ...invalid } }],
+      }),
+    );
+  assert.throws(() => validateProject({ ...p, documentFolders: [] }));
+  assert.throws(() =>
+    changeDrawingDocument(p, p, { kind: "create-folder", id: "wall-1", name: "duplicate" }),
+  );
+  assert.throws(() =>
+    changeDrawingDocument(base, p, { kind: "create-folder", id: "stale", name: "stale" }),
+  );
+});
+
+test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
+  const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
+  const migrated = readProjectFile(JSON.stringify(legacy));
+  assert.equal(migrated.schemaVersion, 18);
+  assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
+  assert.equal(migrated.documentFolders, undefined);
+  assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, documentFolders: [] })));
+  assert.throws(() =>
+    readProjectFile(
+      JSON.stringify({
+        ...legacy,
+        drawingDocuments: [{ ...legacy.drawingDocuments![0], folderId: "unknown" }],
+      }),
+    ),
+  );
 });

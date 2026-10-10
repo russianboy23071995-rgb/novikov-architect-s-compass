@@ -1,3 +1,5 @@
+import type { DocumentFraming } from "@/domain/views/documents";
+import { capturePlanFraming } from "@/rendering/viewport/plan-camera";
 import { createPortal } from "react-dom";
 import { ViewScaleControl } from "./ViewScaleControl";
 import { assertWorkingViewCurrent } from "@/application/views/working-context";
@@ -16,6 +18,7 @@ import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 
 type CadViewportProps = BimPlanProps & {
+  onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale?: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
   index: number;
@@ -60,6 +63,7 @@ function MiniControl({
 }
 
 export function CadViewport({
+  onPlanCapture,
   onScale,
   zoomSlot,
   index,
@@ -77,6 +81,7 @@ export function CadViewport({
   const [pan, setPan] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
   const initialBounds = useRef(planBounds(model.project));
+  const savedFraming = useRef(model.documentFraming);
   const [size, setSize] = useState({ width: 800, height: 400 });
   const [planCamera, setPlanCamera] = useState<PlanCamera | null>(null);
   const [planPan, setPlanPan] = useState(false);
@@ -95,7 +100,16 @@ export function CadViewport({
         height: Math.max(1, bounds.height),
       };
       setSize(next);
-      setPlanCamera((previous) => previous ?? fitPlan(initialBounds.current, next));
+      setPlanCamera(
+        (previous) =>
+          previous ??
+          (savedFraming.current
+            ? {
+                center: { ...savedFraming.current.center },
+                pixelsPerMetre: savedFraming.current.pixelsPerMetre,
+              }
+            : fitPlan(initialBounds.current, next)),
+      );
     };
     const observer = new ResizeObserver(measure);
     observer.observe(element);
@@ -103,10 +117,21 @@ export function CadViewport({
     return () => observer.disconnect();
   }, []);
   const plan = planCamera ?? fitPlan(initialBounds.current, size);
+  useEffect(() => {
+    if (active) onPlanCapture?.(is3D ? null : capturePlanFraming(plan, size));
+  }, [active, is3D, onPlanCapture, plan, size]);
   const bar = planScaleBar(plan.pixelsPerMetre);
   const fit = () => {
     if (is3D) setCamera((value) => ({ ...value, zoom: 1, panX: 0, panY: 0 }));
-    else setPlanCamera(fitPlan(planBounds(model.project), size));
+    else
+      setPlanCamera(
+        savedFraming.current
+          ? {
+              center: { ...savedFraming.current.center },
+              pixelsPerMetre: savedFraming.current.pixelsPerMetre,
+            }
+          : fitPlan(planBounds(model.project), size),
+      );
   };
   const zoom = (factor: number) =>
     is3D
@@ -329,7 +354,15 @@ export function CadViewport({
         aria-label="Reset view"
         onClick={() => {
           if (is3D) setCamera(initialCamera);
-          else setPlanCamera(fitPlan(planBounds(model.project), size));
+          else
+            setPlanCamera(
+              savedFraming.current
+                ? {
+                    center: { ...savedFraming.current.center },
+                    pixelsPerMetre: savedFraming.current.pixelsPerMetre,
+                  }
+                : fitPlan(planBounds(model.project), size),
+            );
           setPan(false);
           setPlanPan(false);
         }}
@@ -348,8 +381,10 @@ export function ViewportManager({
   onActive,
   onFullscreen,
   onScale,
+  onPlanCapture,
   ...model
 }: BimPlanProps & {
+  onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
   layout: ViewportLayout;
@@ -373,6 +408,7 @@ export function ViewportManager({
         <CadViewport
           key={`${layout}-${index}`}
           onScale={onScale}
+          onPlanCapture={onPlanCapture}
           {...model}
           index={index}
           mode={mode}

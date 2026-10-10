@@ -1,3 +1,4 @@
+import type { DocumentFraming } from "@/domain/views/documents";
 import { documentVisibilityKey } from "@/application/layers/visibility-actions";
 import { DocumentViewport } from "./DocumentViewport";
 import { resolveWorkingView, resolveDocumentView } from "@/application/views/working-context";
@@ -83,7 +84,15 @@ export function CadWorkspace({
   layerVisibility,
   initialProject,
 }: { layerVisibility?: LayerVisibilityContext; initialProject?: Project } = {}) {
+  const capturedPlan = useRef<DocumentFraming | null>(null);
+  const onPlanCapture = useCallback((frame: DocumentFraming | null) => {
+    capturedPlan.current = frame;
+  }, []);
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
+  const getPlanCapture = useCallback(
+    () => (activeDocumentId ? null : capturedPlan.current),
+    [activeDocumentId],
+  );
   const [penSetsOpen, setPenSetsOpen] = useState(false);
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
@@ -1248,6 +1257,8 @@ export function CadWorkspace({
                 {activeDocumentId ? (
                   activeDocument ? (
                     <DocumentViewport
+                      framing={activeDocument.framing}
+                      onPlanCapture={onPlanCapture}
                       project={project}
                       viewContext={viewContext}
                       selection={selection}
@@ -1272,6 +1283,7 @@ export function CadWorkspace({
                 ) : (
                   <>
                     <ViewportManager
+                      onPlanCapture={onPlanCapture}
                       viewContext={viewContext}
                       onScale={(denominator) =>
                         viewContext.binding.kind === "working-plan" &&
@@ -1537,6 +1549,7 @@ export function CadWorkspace({
                 <ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" />
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
+                    getPlanCapture={getPlanCapture}
                     activeDocumentId={activeDocumentId}
                     onOpenDocument={(id) => {
                       cancelInteraction();

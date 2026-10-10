@@ -1,3 +1,4 @@
+import { capturePlanFraming } from "./plan-camera.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -52,4 +53,15 @@ test("scale bar denotes the actual metre span at each zoom", () => {
     assert.ok(bar.pixels <= 100.000001 && bar.pixels >= 20);
     assert.equal(bar.pixels, bar.metres * scale);
   }
+});
+
+test("saved framing captures pan and zoom as metric extents independent of output scale", () => {
+  const camera = { center: { x: 7, y: -2 }, pixelsPerMetre: 200 };
+  const size = { width: 1200, height: 800 };
+  const frame = capturePlanFraming(camera, size);
+  assert.deepEqual(frame, { center: { x: 7, y: -2 }, pixelsPerMetre: 200, width: 6, height: 4 });
+  assert.equal(planViewBox(camera, size), "4 0 6 4");
+  camera.center.x = 99;
+  assert.equal(frame.center.x, 7);
+  assert.throws(() => capturePlanFraming(camera, { width: 0, height: 800 }));
 });

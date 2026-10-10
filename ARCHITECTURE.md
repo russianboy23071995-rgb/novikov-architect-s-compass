@@ -1,6 +1,7 @@
 # NOVIKOV CAD Architecture Contract
 
-Production project schema is now 17 (saved floor-plan DrawingDocuments, 2026-10-10).
+Production project schema is now 18 (captured document framing and folders, 2026-10-10).
+Schema 17 remains the strict legacy full-plan-document format at file ingress.
 Schema 16 remains the strict legacy hatch-sizing format at file ingress.
 Schema 15 remains the strict legacy working-view format at file ingress.
 Schema 14 remains the strict legacy portable pen-set format at file ingress.
@@ -2809,3 +2810,30 @@ Undo retains current document filters for surviving IDs; restoring a deleted
 document restores its last saved definition/filter. There is no second BIM model
 or separate geometry engine. Screen switching currently uses one document pane;
 simultaneous documents and saved crop rectangles remain follow-up work.
+
+## Captured Abbild framing and navigator tree — user revision 2026-10-10
+
+The user's creation workflow supersedes the proposed two-point crop editor:
+arrange the working 2D canvas first, then Hinzufügen. The existing non-modal
+FloatingPanel collects name/output scale and optionally a destination folder.
+Capture the active working pane's center, CSS pixels/metre and visible metric
+rectangle when the dialog opens; reject 3D/missing working context. Confirmation
+uses the captured base snapshot through the same validated DocumentAction.
+Do not rasterize or duplicate BIM elements. Camera zoom and output scale remain
+independent. Schema 18 stores optional framing and folderId on the document plus
+named, stable-ID documentFolders. Strict v17 migration adds no crop or folder.
+
+Rendering restores recorded center/zoom on opening and clips the existing SVG
+projection to the saved metric rectangle. Navigation inside an Abbild is temporary;
+Fit restores its recorded camera. Resizing the screen does not expand the saved
+model region or scale BIM geometry. Initial zoom is unchanged on differently sized
+screens, which can show margins or require navigation to see the whole saved area.
+Creating a new Abbild starts from the working plan; folders can be created anywhere.
+
+The navigator initially contains only Hinzufügen, then a folder/document tree.
+The same dialog creates named folders (one folder level in this step). Double-click
+or Enter opens a document; F2/context-menu Rename edits names. Switching to the
+building tab restores the working model. Per-row open/delete buttons are removed;
+context deletion and moving existing documents between folders remain later work.
+Folder actions use shared project Undo; no additional history. Missing folders and
+duplicate IDs are rejected. The source model and IFC output remain authoritative.

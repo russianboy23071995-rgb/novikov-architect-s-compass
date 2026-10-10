@@ -166,3 +166,12 @@ enthalten keine Bauteilkopien. Der Source-ModelView bleibt bei Dokumentlöschung
 802 Tests und Browserprüfung; Nachweis und einziger Folgeauftrag im Entwicklungsplan.
 Die früheren offenen History-/Anfangsfilterpunkte oben sind damit erledigt. Offene
 Crop-/Bearbeitungsentscheidungen werden nicht als Nutzerfreigabe behandelt.
+
+## Nutzerkorrektur und Umsetzung MS-04d
+
+Der Nutzer ersetzt den Zweipunkt-Begrenzungsvorschlag durch das Übernehmen des zuvor
+im Arbeitscanvas ausgerichteten Zooms/Bereichs. Ein Hinzufügen-Button öffnet das
+bestehende FloatingPanel mit Name/Maßstab. Schema 18 speichert die metrische
+Begrenzung plus Ausgangszoom und benannte Ordner. Baumdarstellung, Doppelklick zum
+Öffnen, F2/Rechtsklick zum Umbenennen. Keine Zeilenbuttons; Löschen per Rechtsklick
+bleibt später. Details und nächster einzelner Auftrag im Entwicklungsplan.

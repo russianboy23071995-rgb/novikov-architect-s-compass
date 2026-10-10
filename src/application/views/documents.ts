@@ -1,8 +1,19 @@
+import type { DocumentFraming } from "../../domain/views/documents.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import type { DocumentIdentity } from "../../domain/views/scale.ts";
 import { projectScaleContext } from "./project-scale.ts";
 export type DocumentAction =
-  | { kind: "create"; id: string; modelViewId: string; name: string; denominator: number }
+  | {
+      kind: "create";
+      id: string;
+      modelViewId: string;
+      name: string;
+      denominator: number;
+      framing?: DocumentFraming;
+      folderId?: string;
+    }
+  | { kind: "create-folder"; id: string; name: string }
+  | { kind: "rename-folder"; id: string; name: string }
   | { kind: "rename"; id: string; name: string }
   | { kind: "scale"; id: string; denominator: number }
   | { kind: "delete"; id: string };
@@ -20,6 +31,21 @@ export function changeDrawingDocument(
 ): Project {
   if (base !== current) throw new Error("Das Projekt wurde geändert. Abbildaktion erneut starten.");
   const documents = current.drawingDocuments ?? [];
+  if (action.kind === "create-folder")
+    return validateProject({
+      ...current,
+      documentFolders: [...(current.documentFolders ?? []), { id: action.id, name: action.name }],
+    });
+  if (action.kind === "rename-folder") {
+    if (!current.documentFolders?.some((f) => f.id === action.id))
+      throw new Error("Der Abbildordner fehlt.");
+    return validateProject({
+      ...current,
+      documentFolders: current.documentFolders.map((f) =>
+        f.id === action.id ? { ...f, name: action.name } : f,
+      ),
+    });
+  }
   if (action.kind === "create") {
     const existing = current.modelViews?.find(
       (v) => v.kind === "floor-plan" && v.storeyId === current.storey.id,
@@ -40,6 +66,8 @@ export function changeDrawingDocument(
           modelViewId: source.id,
           denominator: action.denominator,
           hiddenLayerIds: [...current.bimVisibility.hiddenLayerIds],
+          ...(action.framing ? { framing: action.framing } : {}),
+          ...(action.folderId ? { folderId: action.folderId } : {}),
         },
       ],
     });

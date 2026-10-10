@@ -1,3 +1,36 @@
+## MS-04d: Abbild aus ausgerichtetem Canvas und Ordnerbaum — 10.10.2026
+
+Nutzerkorrektur zu PR238 direkt im offenen PR umgesetzt, nicht zusammengeführt.
+Die Bedienung ersetzt den zuvor vorgeschlagenen Zweipunkt-Crop: Arbeitsgrundriss
+per Zoom/Pan ausrichten → Navigator Abbilder → Hinzufügen → Name/Maßstab → erstellen.
+Das verschiebbare, nicht modale Fenster übernimmt beim Öffnen Mittelpunkt, Zoom und
+sichtbaren metrischen Bereich. Im Tab zunächst nur Hinzufügen; vorhandene Abbilder
+als Baum unter benennbaren Ordnern. Doppelklick/Enter öffnet; F2/Rechtsklick benennt
+um. Keine Öffnen-/Löschen-Buttons. Ordner im gleichen Hinzufügen-Fenster anlegen.
+
+Schema 18 mit optionaler Begrenzung und Ordnerreferenz; strikte Migration 1–17,
+keine erzeugten Abbilder/Ordner in Altdateien. Validierte Application-Aktionen,
+Projekt-Undo, vorhandener Renderer mit Clip. Kein Screenshot-Bitmap und keine
+zweite Modellkopie. Öffnen stellt gespeicherten Zoom/Mittelpunkt wieder her;
+Pan/Zoom im Abbild verändert die gespeicherte Begrenzung nicht. Fit stellt sie
+wieder her. Neue Abbilder starten aus dem 2D-Arbeitsgrundriss, nicht aus einem
+bereits begrenzten Abbild oder einer 3D-Kamera.
+
+Nachweis: 805 Tests bestanden; Typprüfung einschließlich Benchmarks und Build
+bestanden. Lint: 0 Fehler, sechs vorhandene Warnungen. Browser: 500 % übernommen,
+Ordner angelegt/umbenannt, Abbild per Doppelklick geöffnet; SVG-Clip entspricht
+exakt dem zuvor sichtbaren Bereich. Speichern/Laden erhält Zoom, Begrenzung und
+Ordner. Keine erfassten Browserfehler. Screenshot außerhalb des Repos:
+outputs/abbild-tree-framing.png. Andere Fenstergrößen ändern die gespeicherte
+Begrenzung nicht; bei gleicher Zoomzahl können Ränder entstehen bzw. Teile des
+Bereichs Navigation erfordern. Noch ein Ordnerlevel; keine Verschiebeverwaltung.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Die vorhandene validierte Löschaktion an Rechtsklick anbinden; Projekt-Undo und
+aktives gelöschtes Ziel prüfen. Vor Ordnerlöschung die Behandlung enthaltener
+Abbilder festlegen; kein stilles kaskadierendes Löschen. Bestehende Abbilder über
+eine validierte Ordnerzuordnung umsortieren. Kein Layouteditor oder Modellumbau.
+
 ## MS-04c: Gespeicherte Grundrisse als Abbilder — 10.10.2026
 
 PR237 nach grüner CI regulär zusammengeführt. Schema 17 speichert ModelView-Quelle

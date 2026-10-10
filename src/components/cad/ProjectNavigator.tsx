@@ -176,7 +176,10 @@ function NavigatorContent({
           aria-selected={tab === "model"}
           variant="ghost"
           size="sm"
-          onClick={() => setTab("model")}
+          onClick={() => {
+            setTab("model");
+            documents.onOpenDocument(null);
+          }}
         >
           Gebäudestruktur
         </Button>
@@ -246,6 +249,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
   );
   return (
     <StableNavigator
+      getPlanCapture={props.getPlanCapture}
       activeDocumentId={props.activeDocumentId}
       onOpenDocument={onOpenDocument}
       onDocumentAction={onDocumentAction}

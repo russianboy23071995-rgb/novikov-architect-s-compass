@@ -1,3 +1,4 @@
+import type { DocumentFraming } from "@/domain/views/documents";
 import type { Project } from "@/domain/project/schema";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { Selection } from "./bim-view";
@@ -10,6 +11,8 @@ export function DocumentViewport({
   selection,
   onSelect,
   onScale,
+  onPlanCapture,
+  framing,
   onFullscreen,
   zoomSlot,
   grid,
@@ -19,6 +22,8 @@ export function DocumentViewport({
   selection: Selection;
   onSelect: (selection: Selection) => void;
   onScale: (scale: number) => void;
+  onPlanCapture: (frame: DocumentFraming | null) => void;
+  framing?: DocumentFraming | undefined;
   onFullscreen: () => void;
   zoomSlot: HTMLElement | null;
   grid: boolean;
@@ -28,6 +33,8 @@ export function DocumentViewport({
       <CadViewport
         key={JSON.stringify(viewContext.binding)}
         project={project}
+        documentFraming={framing}
+        onPlanCapture={onPlanCapture}
         viewContext={viewContext}
         index={0}
         mode="2D"
