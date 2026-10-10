@@ -114,7 +114,7 @@ function render(rows: { name: string; bytes: number; samples: Sample[] }[]) {
   target.replaceChildren();
   for (const row of rows) {
     const title = document.createElement("h2");
-    title.textContent = `${row.name} Â· ${(row.bytes / 1048576).toFixed(2)} MiB`;
+    title.textContent = `${row.name} · ${(row.bytes / 1048576).toFixed(2)} MiB`;
     target.append(title);
     const table = document.createElement("table");
     table.style.cssText = "width:100%;text-align:right;border-collapse:collapse";
@@ -138,11 +138,7 @@ function render(rows: { name: string; bytes: number; samples: Sample[] }[]) {
         const td = document.createElement("td");
         td.style.borderBottom = "1px solid #ddd";
         td.textContent =
-          typeof value === "number"
-            ? value.toFixed(1)
-            : value === undefined
-              ? "–"
-              : String(value);
+          typeof value === "number" ? value.toFixed(1) : value === undefined ? "–" : String(value);
         tr.append(td);
       }
       body.append(tr);
