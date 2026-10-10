@@ -2770,3 +2770,15 @@ visibility overrides retain their scope and never imply document persistence.
 3D receives the existing visibility policy without a new 3D scale contract.
 No schema or history changes; saved ModelViews/DrawingDocuments remain future work.
 The resolver is independent of React and available to future typed query adapters.
+
+
+## Abbild navigation and visibility — user decision 2026-10-10
+
+Use “Abbild” / “Abbilder” in the UI for model-linked DrawingDocuments. Navigator
+has a building-structure tab and an Abbilder tab for listing, opening and managing
+saved documents. Creation copies current visibility once; subsequent document
+visibility is independently editable and saved. Reuse the existing layer switcher
+and its visibility undo/redo with an explicit active scope. No separate Abbild
+undo/redo history is wanted. This does not by itself decide whether document
+creation/deletion joins existing project undo; do not silently make it irreversible.
+These are requirements for the next pilot, not implemented navigator capabilities.

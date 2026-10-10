@@ -79,8 +79,8 @@ Dies sind Architekturregeln, keine behaupteten neuen Bedienentscheidungen:
 
 | Offen | Vorschlag, noch nicht beschlossen | Vor welchem Schritt erforderlich |
 | --- | --- | --- |
-| Anfangsfilter eines neuen Ausschnitts | Aktuellen BIM-Filter einmal kopieren, danach unabhängig | Dokumentanlage |
-| Dokumentanlage/-löschung, Umbenennen, Crop und Maßstab: History | Explizite Dokumentaktionen; History-Regel separat mit Nutzer festlegen, nicht pauschal vom Arbeitsmaßstab übernehmen | Persistente Dokumentaktionen |
+| Anfangsfilter | Entschieden: aktuelle Ebenensichtbarkeit einmal übernehmen, danach unabhängig ändern und speichern | Dokumentanlage |
+| Dokumentaktionen: History | Keine eigene Abbild-History (Nutzerentscheidung). Die Zuordnung von Anlage/Löschung zum bestehenden Projekt-Undo ist dadurch noch nicht ausdrücklich entschieden. Ebenensichtbarkeit bleibt beim vorhandenen Ebenenumschalter. | Persistente Dokumentaktionen |
 | Wahl/Änderung des Ausschnittbereichs | Rechteck in Modellkoordinaten; Fit/Zoom verändert ihn nicht | Sichtbarer Ausschnittpilot |
 | Bearbeitungsmodus im Ausschnitt | Erster Pilot nur Ansicht, spätere Modell-/Annotationsbearbeitung klar trennen | Ausschnitt-UI |
 | Neue/gelöschte Ebenen in Dokumentfiltern | Hidden-ID-Modell wiederverwenden; neue Ebenen sichtbar, gelöschte IDs bereinigen | Dokumentfilter-Persistenz |
@@ -125,3 +125,27 @@ bestanden; Browservergleich der geteilten Ansicht erfolgreich. Siehe aktuellen
 DEVELOPMENT_PLAN.md für Nachweis und den einzigen Folgeauftrag MS-04c. Die obige
 Pilotbeschreibung ist damit historisch; die offenen Dokumententscheidungen bleiben
 offen, bis die angefragten Nutzerantworten vorliegen.
+
+
+## Nutzerpräzisierung: Abbilder und Navigator — 10.10.2026
+
+Verbindlich für den nächsten Pilot:
+
+- Nutzerbezeichnung **Abbild**, Mehrzahl **Abbilder**. Die bisherigen Begriffe
+  Ausschnitt/Zuschnitt bezeichnen hier dieselbe modellgebundene Funktion;
+  der technische Architekturbegriff DrawingDocument bleibt erhalten.
+- Ein neues Abbild übernimmt zunächst die aktuelle Ebenensichtbarkeit. Danach
+  können Ebenensichtbarkeiten im Abbild angepasst und gespeichert werden, unabhängig
+  vom Arbeitsmodell und anderen Abbildern.
+- **Keine eigene Undo-/Redo-History für Abbilder.** Ebenensichtbarkeit wird mit
+  demselben Ebenenumschalter wie im Canvas gesteuert. Die vorhandenen Ebenen-Undo-/
+  Redo-Bedienungen werden wiederverwendet; kein zusätzliches Abbild-History-Fenster.
+  Eine Sichtbarkeitsaktion muss eindeutig den aktiven BIM- oder Abbildkontext treffen,
+  niemals unbeabsichtigt den Filter eines anderen Kontextes ändern.
+- Der Navigator erhält zwei Tabs: **Gebäudestruktur** (bisheriger Inhalt) und
+  **Abbilder** (vorhandene Abbilder anzeigen, öffnen und verwalten). Damit ist der
+  Zugriffsort festgelegt. Tabwechsel und Öffnen eines Abbilds sind getrennte Vorgänge.
+
+Dies dokumentiert Bedienanforderungen, keine bereits implementierte Oberfläche.
+Keine eigene Abbild-History bedeutet nicht automatisch, dass Anlage/Löschung niemals
+rückgängig gemacht werden dürfen; diese konkrete Zuordnung wird vor Umsetzung geprüft.

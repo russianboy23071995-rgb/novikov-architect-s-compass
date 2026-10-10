@@ -29,14 +29,20 @@ Praktische Abnahme: Viewport layout → 2 Views Vertical; Maßstab 1:50 wählen,
 eine Ansicht zoomen, andere aktivieren. Maßstab bleibt gleich, Zoom unabhängig.
 Wand auswählen → ihre Ebene ausblenden → Ebenen-Undo: beide Ansichten folgen.
 
-**Genau ein nächster Auftrag: MS-04c erster gespeicherter Grundriss-Ausschnitt.**
-Vor dessen Umsetzung die angefragten Anfangsfilter- und Dokument-History-Regeln
-entscheiden. Dann einen benannten, zunächst nur betrachtbaren Grundriss-Ausschnitt
-mit stabiler ID, Modellbindung, eigenem Maßstab und Filter anlegen/öffnen/speichern.
-Kein Crop-Editor, Layouteditor oder neue Annotationen; zunächst ganzer Grundriss.
-Den gemeinsamen Resolver gezielt erweitern, strikte Migration/Referenzen sowie zwei
-unabhängige Ausschnitte prüfen. Kein zweites Gebäudemodell. Die derzeitige Freigabe
-entscheidet die noch offenen History-/Filterfragen nicht automatisch.
+**Genau ein nächster Auftrag: MS-04c erster gespeicherter Grundriss als Abbild.**
+Nutzerpräzisierung: UI-Bezeichnung „Abbild“, Navigator mit Tabs „Gebäudestruktur“
+und „Abbilder“ zum Anzeigen, Öffnen und Verwalten. Bei Anlage aktuelle
+Ebenensichtbarkeit einmal übernehmen; danach unabhängig im Abbild ändern/speichern.
+Keine eigene Abbild-Undo-/Redo-History. Den bestehenden Ebenenumschalter samt
+Ebenen-History kontextbezogen wiederverwenden. Anlage/Löschung nicht ohne weitere
+Prüfung als unwiderruflich oder automatisch als Modell-Undo definieren.
+
+Einen benannten, zunächst nur betrachtbaren Grundriss als Abbild mit stabiler ID,
+Modellbindung, eigenem Maßstab und Filter anlegen/öffnen/speichern. Kein Crop-Editor,
+Layouteditor oder neue Annotationen; zunächst ganzer Grundriss. Gemeinsamen Resolver
+gezielt erweitern, strikte Migration/Referenzen sowie zwei unabhängige Abbilder prüfen.
+Kein zweites Gebäudemodell. Details im Abbildvertrag. Diese Ergänzung ist nur Planung;
+der Navigator wurde noch nicht geändert.
 
 ## MS-04a: Vertrag für gespeicherte Ausschnitte — 10.10.2026
 
