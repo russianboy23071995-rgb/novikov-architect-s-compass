@@ -39,6 +39,11 @@ export function changeDrawingDocument(
       ...current,
       documentFolders: [...(current.documentFolders ?? []), { id: action.id, name: action.name }],
     });
+  if (
+    (action.kind === "rename-folder" || action.kind === "delete-folder") &&
+    current.documentFolders?.some((f) => f.id === action.id && f.name === "Abbildsammlung")
+  )
+    throw new Error("Die Standard-Abbildsammlung bleibt erhalten und kann nicht umbenannt werden.");
   if (action.kind === "rename-folder") {
     if (!current.documentFolders?.some((f) => f.id === action.id))
       throw new Error("Der Abbildordner fehlt.");
@@ -133,7 +138,16 @@ export function newDocumentScale(project: Project) {
 
 /** Initialize the application's document directory without changing legacy file parsing. */
 export function ensureDocumentFolder(project: Project): Project {
-  if (project.documentFolders?.length) return project;
+  if (project.documentFolders?.some((f) => f.name === "Abbildsammlung")) return project;
+  const previous = project.documentFolders?.find(
+    (f) => /^document-folder-default(?:-1)*$/.test(f.id) && f.name === "Abbilder",
+  );
+  if (previous)
+    return changeDrawingDocument(project, project, {
+      kind: "rename-folder",
+      id: previous.id,
+      name: "Abbildsammlung",
+    });
   const ids = new Set<string>();
   const collect = (value: unknown): void => {
     if (!value || typeof value !== "object") return;
@@ -145,5 +159,9 @@ export function ensureDocumentFolder(project: Project): Project {
   collect(project);
   let id = "document-folder-default";
   while (ids.has(id)) id += "-1";
-  return changeDrawingDocument(project, project, { kind: "create-folder", id, name: "Abbilder" });
+  return changeDrawingDocument(project, project, {
+    kind: "create-folder",
+    id,
+    name: "Abbildsammlung",
+  });
 }

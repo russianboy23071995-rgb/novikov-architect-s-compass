@@ -86,7 +86,11 @@ export function DocumentNavigator({
       name: kind === "folder" ? "Neuer Ordner" : "Grundriss",
       scale: `1:${newDocumentScale(project)}`,
       kind,
-      folderId: folderId || project.documentFolders?.[0]?.id || "",
+      folderId:
+        folderId ||
+        project.documentFolders?.find((f) => f.name === "Abbildsammlung")?.id ||
+        project.documentFolders?.[0]?.id ||
+        "",
     });
   };
   const createMenu = (folderId = "") => (
@@ -110,7 +114,9 @@ export function DocumentNavigator({
         setError((cause as Error).message);
       }
     };
+    const standardFolder = folder && name === "Abbildsammlung";
     const beginRename = () => {
+      if (standardFolder) return;
       setError("");
       setRenaming({ id, folder, name });
     };
@@ -227,10 +233,14 @@ export function DocumentNavigator({
         <ContextMenuContent>
           {createMenu(folder ? id : project.drawingDocuments?.find((d) => d.id === id)?.folderId)}
           <ContextMenuSeparator />
-          <ContextMenuItem onSelect={beginRename}>Umbenennen</ContextMenuItem>
+          <ContextMenuItem disabled={standardFolder} onSelect={beginRename}>
+            Umbenennen
+          </ContextMenuItem>
           {folder && (
             <ContextMenuItem
-              disabled={!!project.drawingDocuments?.some((d) => d.folderId === id)}
+              disabled={
+                standardFolder || !!project.drawingDocuments?.some((d) => d.folderId === id)
+              }
               onSelect={() => apply({ kind: "delete-folder", id })}
             >
               Ordner löschen

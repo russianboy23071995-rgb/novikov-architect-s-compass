@@ -159,6 +159,8 @@ Bewertung aus 99 Repository-Dokumenten, Schema-/Modell-/History-/Kontextcode und
 
 Abbildaufnahme-Präzisierung (10.10.2026, PR241): Die Anwendung ergänzt beim Start/Öffnen einen leeren Ordner „Abbilder“, wenn keine Ordner existieren; strikte Altdateiparser bleiben unverändert, IDs kollisionsfrei. Hinzufügen startet ausschließlich Abbildanlage; Ordneranlage bleibt eigener Rechtsklickbefehl. Zusammenfassung: Name, Maßstab, vorausgewählter vorhandener Ordner und zum Start erfasste aktive Ebenen; keine Typauswahl/Zoomanzeige. Erstellung erst beim Bestätigen, unveränderte Snapshot-Prüfung schützt vor veraltetem Entwurf. Canvas erhält eine 700-ms-Hervorhebung (reduced-motion berücksichtigt). Browser bestätigt Standardordner, Zusammenfassung und Erstellen im Zielordner. 812 Tests, Typecheck, fokussiertes Lint und Build bestanden. Bestehende Projekte werden beim Öffnen nur um den fehlenden Ordner ergänzt, vorhandene Ordner bleiben erhalten.
 
+Nutzerkorrektur: Standardordner heißt **Abbildsammlung** und bleibt dauerhaft vorhanden, auch neben eigenen Ordnern. Löschen/Umbenennen dieses Ordners gesperrt; bisher automatisch angelegter Ordner Abbilder wird unter Beibehaltung seiner ID umbenannt.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.

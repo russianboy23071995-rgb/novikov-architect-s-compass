@@ -531,6 +531,8 @@ N56 UI-Ergänzung 10.10.2026 (PR241): Wiederverwendbare Einstellungsansicht mit 
 
 Abbildaufnahme-Präzisierung (10.10.2026, PR241): Die Anwendung ergänzt beim Start/Öffnen einen leeren Ordner „Abbilder“, wenn keine Ordner existieren; strikte Altdateiparser bleiben unverändert, IDs kollisionsfrei. Hinzufügen startet ausschließlich Abbildanlage; Ordneranlage bleibt eigener Rechtsklickbefehl. Zusammenfassung: Name, Maßstab, vorausgewählter vorhandener Ordner und zum Start erfasste aktive Ebenen; keine Typauswahl/Zoomanzeige. Erstellung erst beim Bestätigen, unveränderte Snapshot-Prüfung schützt vor veraltetem Entwurf. Canvas erhält eine 700-ms-Hervorhebung (reduced-motion berücksichtigt). Browser bestätigt Standardordner, Zusammenfassung und Erstellen im Zielordner. 812 Tests, Typecheck, fokussiertes Lint und Build bestanden. Bestehende Projekte werden beim Öffnen nur um den fehlenden Ordner ergänzt, vorhandene Ordner bleiben erhalten.
 
+Nutzerkorrektur: Standardordner heißt **Abbildsammlung** und bleibt dauerhaft vorhanden, auch neben eigenen Ordnern. Löschen/Umbenennen dieses Ordners gesperrt; bisher automatisch angelegter Ordner Abbilder wird unter Beibehaltung seiner ID umbenannt.
+
 ### N57 – Aktualisierbare Abbilder mit eigener Ebenendarstellung
 
 - **Stand:** Teilweise vorhanden in main seit PR238: modellgebundene Grundriss-Abbilder mit eigenem Maßstab/Filter und Startzoom, gesamtes Modell erreichbar. Anlage/Löschung/Ordnerzuordnung verwenden normales Projekt-Undo; Sichtbarkeit den gemeinsamen Ebenenumschalter mit kontextbezogener History. Schema20 und Migrationen erhalten Modell und Zeichnungen. Weitere Ansichtsarten bleiben offen.

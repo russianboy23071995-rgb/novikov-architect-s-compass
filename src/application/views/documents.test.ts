@@ -598,3 +598,31 @@ test("application startup supplies one empty folder without rewriting legacy par
   const collision = ensureDocumentFolder({ ...base, id: "document-folder-default" });
   assert.notEqual(collision.documentFolders![0]!.id, collision.id);
 });
+
+test("Abbildsammlung always exists alongside custom folders and cannot be removed", () => {
+  const base = createExampleProject();
+  const custom = changeDrawingDocument(base, base, {
+    kind: "create-folder",
+    id: "custom",
+    name: "Eigene Pläne",
+  });
+  const next = ensureDocumentFolder(custom);
+  const standard = next.documentFolders!.find((f) => f.name === "Abbildsammlung")!;
+  assert.equal(next.documentFolders!.length, 2);
+  assert.equal(ensureDocumentFolder(next), next);
+  assert.throws(() =>
+    changeDrawingDocument(next, next, { kind: "delete-folder", id: standard.id }),
+  );
+  assert.throws(() =>
+    changeDrawingDocument(next, next, { kind: "rename-folder", id: standard.id, name: "Anders" }),
+  );
+  const old = changeDrawingDocument(base, base, {
+    kind: "create-folder",
+    id: "document-folder-default",
+    name: "Abbilder",
+  });
+  const updated = ensureDocumentFolder(old);
+  assert.deepEqual(updated.documentFolders, [
+    { id: "document-folder-default", name: "Abbildsammlung" },
+  ]);
+});
