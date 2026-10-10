@@ -1,3 +1,5 @@
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
 ## MS-04b: Gemeinsamer Arbeitsansichtskontext — 10.10.2026
 
 PR236 nach erfolgreicher CI regulär zusammengeführt. `application/views/working-context`
