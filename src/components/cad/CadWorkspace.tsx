@@ -1259,11 +1259,7 @@ export function CadWorkspace({
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
                 <RecoveryStartupNotice
                   context={editing.projectLoad ?? project.id}
-                  onPrepare={(candidate) => {
-                    setPendingFile(candidate);
-                    setModelError("");
-                    setExportMessage("");
-                  }}
+                  onOpen={() => setRecoveryOpen(true)}
                 />
                 {layerActivation && (
                   <DocumentLayerNotice

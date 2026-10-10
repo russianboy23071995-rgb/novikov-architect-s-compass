@@ -8,9 +8,9 @@ export interface RecoveryStorage {
   /** Atomic compare-and-replace; failure must preserve the old record. */
   replace(expected: string | null, next: string): Promise<void>;
 }
-type Snapshot = { savedAt: string; json: string };
-type RecordData = { version: 1; current: Snapshot; previous?: Snapshot };
-function parse(raw: string): RecordData {
+export type Snapshot = { savedAt: string; json: string };
+export type RecordData = { version: 1; current: Snapshot; previous?: Snapshot };
+export function parseRecoveryRecord(raw: string): RecordData {
   let data: RecordData;
   try {
     data = JSON.parse(raw) as RecordData;
@@ -21,7 +21,7 @@ function parse(raw: string): RecordData {
     throw new Error("Ungültiger Wiederherstellungsdatensatz. Vorhandene Daten bleiben erhalten.");
   return data;
 }
-async function prepare(snapshot: Snapshot) {
+export async function prepareRecoverySnapshot(snapshot: Snapshot) {
   if (
     !snapshot ||
     typeof snapshot.json !== "string" ||
@@ -38,16 +38,24 @@ async function prepare(snapshot: Snapshot) {
 }
 async function usable(data: RecordData) {
   try {
-    return { ...(await prepare(data.current)), snapshot: data.current, fallback: false };
+    return {
+      ...(await prepareRecoverySnapshot(data.current)),
+      snapshot: data.current,
+      fallback: false,
+    };
   } catch (error) {
     if (!data.previous) throw error;
-    return { ...(await prepare(data.previous)), snapshot: data.previous, fallback: true };
+    return {
+      ...(await prepareRecoverySnapshot(data.previous)),
+      snapshot: data.previous,
+      fallback: true,
+    };
   }
 }
 export async function readRecovery(storage: RecoveryStorage) {
   const raw = await storage.read();
   if (raw === null) return null;
-  const { snapshot: _snapshot, ...candidate } = await usable(parse(raw));
+  const { snapshot: _snapshot, ...candidate } = await usable(parseRecoveryRecord(raw));
   return candidate;
 }
 export async function saveRecovery(project: Project, storage: RecoveryStorage, now = new Date()) {
@@ -55,7 +63,8 @@ export async function saveRecovery(project: Project, storage: RecoveryStorage, n
   assertProjectFileSize(json);
   const savedAt = now.toISOString();
   const expected = await storage.read();
-  const previous = expected === null ? undefined : (await usable(parse(expected))).snapshot;
+  const previous =
+    expected === null ? undefined : (await usable(parseRecoveryRecord(expected))).snapshot;
   const next: RecordData = {
     version: 1,
     current: { savedAt, json },

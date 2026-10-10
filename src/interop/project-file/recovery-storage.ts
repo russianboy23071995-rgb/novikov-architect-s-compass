@@ -1,10 +1,18 @@
+import type {
+  RecoveryCatalog,
+  RecoverySummary,
+} from "../../application/project-files/recovery-catalog.ts";
 import type { RecoveryStorage } from "../../application/project-files/recovery.ts";
 
 export function openRecoveryDatabase(name: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     let blocked = false;
-    const request = indexedDB.open(name, 1);
-    request.onupgradeneeded = () => request.result.createObjectStore("snapshots");
+    const request = indexedDB.open(name, 2);
+    request.onupgradeneeded = () => {
+      for (const store of ["snapshots", "recovery-index"])
+        if (!request.result.objectStoreNames.contains(store))
+          request.result.createObjectStore(store);
+    };
     request.onerror = () => reject(request.error);
     request.onblocked = () => {
       blocked = true;
@@ -17,14 +25,18 @@ export function openRecoveryDatabase(name: string): Promise<IDBDatabase> {
   });
 }
 /** One local slot with predecessor; IndexedDB publishes only the completed transaction. */
-export function createRecoveryStorage(openDatabase: () => Promise<IDBDatabase>): RecoveryStorage {
+export function createRecoveryStorage(
+  openDatabase: () => Promise<IDBDatabase>,
+  key = "manual",
+  projectId?: string,
+): RecoveryStorage {
   return {
     async read() {
       const db = await openDatabase();
       try {
         return await new Promise<string | null>((resolve, reject) => {
           const tx = db.transaction("snapshots", "readonly");
-          const request = tx.objectStore("snapshots").get("manual");
+          const request = tx.objectStore("snapshots").get(key);
           tx.oncomplete = () => resolve(request.result ?? null);
           tx.onabort = () => reject(tx.error ?? new Error("Lesen abgebrochen."));
           tx.onerror = () => reject(tx.error);
@@ -34,12 +46,19 @@ export function createRecoveryStorage(openDatabase: () => Promise<IDBDatabase>):
       }
     },
     async replace(expected, next) {
+      const savedAt =
+        projectId === undefined
+          ? undefined
+          : (JSON.parse(next) as { current: { savedAt: string } }).current.savedAt;
       const db = await openDatabase();
       try {
         await new Promise<void>((resolve, reject) => {
-          const tx = db.transaction("snapshots", "readwrite");
+          const tx = db.transaction(
+            projectId === undefined ? ["snapshots"] : ["snapshots", "recovery-index"],
+            "readwrite",
+          );
           const store = tx.objectStore("snapshots");
-          const request = store.get("manual");
+          const request = store.get(key);
           let conflict = false;
           request.onsuccess = () => {
             if ((request.result ?? null) !== expected) {
@@ -47,7 +66,10 @@ export function createRecoveryStorage(openDatabase: () => Promise<IDBDatabase>):
               tx.abort();
               return;
             }
-            store.put(next, "manual");
+            store.put(next, key);
+            if (projectId !== undefined) {
+              tx.objectStore("recovery-index").put({ projectId, savedAt }, projectId);
+            }
           };
           tx.oncomplete = () => resolve();
           tx.onabort = () =>
@@ -67,5 +89,30 @@ export function createRecoveryStorage(openDatabase: () => Promise<IDBDatabase>):
 }
 
 export const browserRecoveryStorage = createRecoveryStorage(() =>
+  openRecoveryDatabase("novikov-recovery"),
+);
+
+/** Metadata and payload publish in the same transaction; listing never loads all project files. */
+export function createRecoveryCatalog(openDatabase: () => Promise<IDBDatabase>): RecoveryCatalog {
+  return {
+    legacy: createRecoveryStorage(openDatabase),
+    project: (id) => createRecoveryStorage(openDatabase, `project:${id}`, id),
+    async list() {
+      const db = await openDatabase();
+      try {
+        return await new Promise<RecoverySummary[]>((resolve, reject) => {
+          const tx = db.transaction("recovery-index", "readonly");
+          const request = tx.objectStore("recovery-index").getAll();
+          tx.oncomplete = () => resolve(request.result);
+          tx.onabort = () => reject(tx.error ?? new Error("Projektliste nicht verfügbar."));
+          tx.onerror = () => reject(tx.error);
+        });
+      } finally {
+        db.close();
+      }
+    },
+  };
+}
+export const browserRecoveryCatalog = createRecoveryCatalog(() =>
   openRecoveryDatabase("novikov-recovery"),
 );
