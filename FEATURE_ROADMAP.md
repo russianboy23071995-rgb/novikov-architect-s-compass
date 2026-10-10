@@ -1,3 +1,5 @@
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
 # Historische Funktionsliste NOVIKOV CAD
 
 Quelle: Nutzeranlage **0.Where it all Begins..docx**, erstmals am 30.09.2026 aus dem verknüpften Chat **CAD Bauplan erstellen** gelesen; neueste bereitgestellte Fassung am 01.10.2026 direkt aus der Word-Datei abgeglichen. Diese Quelle wurde am 02.10.2026 durch DEVELOPMENT_GUIDE.md ersetzt. Die alte Anlage wird nicht mehr als Arbeitsgrundlage verwendet. Einträge sind freigegebene Wünsche zur passenden Entwicklungsphase, keine Behauptung bereits fertiger Funktionen.
