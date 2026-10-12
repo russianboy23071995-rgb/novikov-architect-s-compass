@@ -1103,3 +1103,41 @@ optimieren. Vollständige Quellerhaltung, unveränderliche Daten und identische 
 Abfrageergebnisse einschließlich Reihenfolge/Filter/Budget durch Vergleichstests
 gegen den bisherigen Pfad sichern; dieselbe Fixture (25), warme Zooms und Roundtrip
 nachmessen. Kein neuer Renderer, kein globaler Paarvergleich, keine größeren Caches.
+
+## Weniger temporäre Begrenzungsobjekte (12.10.2026, PR292)
+PR291 mit erfolgreicher GitHub-CI zusammengeführt. Zuständige Schicht: gemeinsamer
+geometrischer Boxindex, keine Werkzeug-/Application-Aktionsänderung. Beim Aufbau
+wurde bisher auf jeder Baumebene für jeden Eintrag ein neues Grenzenobjekt erzeugt.
+Nun wird genau ein eigenes Objekt pro Knoten aktualisiert. Sortierung, Teilung,
+Blattgröße, Abfrage, Toleranzen und Eingabevalidierung bleiben unverändert.
+
+Zunächst kalte Indexphasen getrennt: Freeze, Lookup, Punktbaum und Segmentbaum.
+Reproduzierbarer Diagnosebefehl:
+`node --experimental-strip-types benchmarks/snap-index-build.ts <fixture.json>`.
+Dieser Diagnoseadapter bildet die vier Vorbereitungsphasen explizit nach, läuft
+nicht in der Anwendung und muss bei Änderungen dieser Phasen mitgepflegt werden.
+[Sieben Vergleichspaare](snap-index-build-comparison.json), wechselnde Reihenfolge,
+frische Primitiven pro Lauf, dieselbe Fixture (25) mit Hash aus dem vorigen Abschnitt:
+Median Freeze vorher 57,8 ms, Lookup 18,0 ms, beide Baumvorbereitungen zusammen
+105,4 ms. Optimierter Baum-Median 95,3 ms (inklusive Vorbereitung der Einträge).
+Dies sind lokale Node-Messungen, keine Browser-/p95-Garantie. Die unveränderte
+Implementierung ist ausschließlich als Benchmark-/Testoracle erhalten.
+
+[Browsernachweis](snap-index-bounds-browser.json), isolierter Produktions-Workspace
+load-profile: Index 154,9 ms gegenüber 164,5 ms im vorigen Lauf mit derselben Datei.
+Fangableitung 21,4 ms, Szenenableitung 5,2 ms. Warme Zooms ohne erneute Ableitung oder
+Indexaufbau, vier BimPlan-Aufrufe zusammen 0,5 ms. Einzellauf und verschachtelte
+Messwerte; keine Gesamtperformancegarantie. 10014 Elemente, Export (17) bytegleich
+zu (25), SHA256 23599c6390420bc312442434b0d42322666e430261520462b8a3d0290f585952,
+keine Konsolenfehler.
+
+916 Tests bestanden, darunter neue Differentialtests mit 0/1/8/9/100/10000 Quellen
+und jeweils 120 Abfragen: identische Reihenfolge und Wertidentität, dichte/gleiche/
+degenerierte Grenzen, Extremkoordinaten, ungültige Grenzen sowie unveränderte
+Eingaben und isolierte Bounds. Bestehende lokale Fang-, Sichtbarkeits-, Budget-
+und Unveränderlichkeitstests weiterhin grün. Benchmark-Typecheck, gezieltes ESLint,
+Diagnosebuild und regulärer Build bestanden. Benutzeroberfläche unverändert.
+
+Nächster Einzelauftrag: konsolidierte Abnahme ohne Funktionsinstrumentierung mit
+Laden, Wandänderung, Undo/Redo, Datei-Rundlauf und lokaler Wiederherstellung.
+Weitere Mikrooptimierungen erst bei einem konkreten verbleibenden Ablaufproblem.

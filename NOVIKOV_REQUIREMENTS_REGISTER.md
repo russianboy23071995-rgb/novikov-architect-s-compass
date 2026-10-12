@@ -10720,3 +10720,13 @@ kein direkter Vorher-/Nachher-Vergleich. Typprüfung/ESLint/Diagnosebuild bestan
 Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md, snap-index-phases.json.
 Nächster Einzelauftrag gemäß Masterplan: kalten Indexaufbau mit Vergleichsnachweis
 optimieren; Fangsemantik, Filter, Unveränderlichkeit und Budgets erhalten.
+
+### R26-01/02 · Fangindex-Begrenzungen 12.10.2026 (PR292)
+Ein Begrenzungsobjekt pro Baumknoten statt pro Eintrag/Reduktionsschritt.
+Differentialtests zum eingefrorenen Vorherstand prüfen Reihenfolge, Identitäten,
+Randfälle, dichte Quellen, ungültige Grenzen und Schutz gegen spätere Inputänderung.
+916 Tests inklusive bestehender Filter-/Fang-/Budgettests, Typecheck, Lint und Builds
+erfolgreich. Lokaler Median Baumvorbereitung 105,4→95,3 ms (sieben Paare), Browser
+164,5→154,9 ms (Einzellauf). Warmes Zoom ohne Neuaufbau, Roundtrip bytegleich.
+Rohdaten/Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md. Nächster Auftrag gemäß
+Masterplan: konsolidierter Produktionsablauf mit Änderung/Undo/Datei/Recovery.

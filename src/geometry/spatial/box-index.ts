@@ -11,15 +11,16 @@ function valid(box: Box2) {
 export function createBoxIndex<T>(input: readonly Entry<T>[]) {
   function build(entries: Entry<T>[]): Node<T> | undefined {
     if (!entries.length) return undefined;
-    const box = entries.reduce(
-      (b, e) => ({
-        minX: Math.min(b.minX, e.box.minX),
-        minY: Math.min(b.minY, e.box.minY),
-        maxX: Math.max(b.maxX, e.box.maxX),
-        maxY: Math.max(b.maxY, e.box.maxY),
-      }),
-      { ...entries[0]!.box },
-    );
+    // Accumulate into one owned bounds object instead of allocating one per
+    // entry at every tree depth. Never mutate the caller's input bounds.
+    const box = { ...entries[0]!.box };
+    for (let i = 1; i < entries.length; i++) {
+      const next = entries[i]!.box;
+      box.minX = Math.min(box.minX, next.minX);
+      box.minY = Math.min(box.minY, next.minY);
+      box.maxX = Math.max(box.maxX, next.maxX);
+      box.maxY = Math.max(box.maxY, next.maxY);
+    }
     if (entries.length <= 8) return { box, entries };
     const x = box.maxX - box.minX >= box.maxY - box.minY;
     entries.sort((a, b) =>
