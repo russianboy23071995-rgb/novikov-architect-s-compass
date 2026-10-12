@@ -1,5 +1,9 @@
 import type { Project } from "../../domain/project/schema.ts";
-import { migrateLegacyRecovery, type RecoveryCatalog } from "./recovery-catalog.ts";
+import {
+  migrateLegacyRecovery,
+  prepareCatalogV2Writer,
+  type RecoveryCatalog,
+} from "./recovery-catalog.ts";
 import { prepareRecoveryWriter } from "./recovery.ts";
 import { sameRecoveryContent } from "./recovery-status.ts";
 
@@ -17,6 +21,7 @@ const timer: RecoveryTimer = {
 
 /** Holds an optimistic revision from activation, not from just before each write. */
 async function prepareLease(catalog: RecoveryCatalog, id: string) {
+  if (catalog.v2) return prepareCatalogV2Writer(catalog, id);
   await migrateLegacyRecovery(catalog);
   return prepareRecoveryWriter(catalog.project(id), id);
 }

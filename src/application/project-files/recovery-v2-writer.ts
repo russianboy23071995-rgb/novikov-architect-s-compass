@@ -18,16 +18,21 @@ export async function prepareRecoveryV2Writer(
   signal?.throwIfAborted();
   const source = await storage.read();
   signal?.throwIfAborted();
+  let project: Project | undefined;
   let revision: string | null = null,
     previous: RecoverySnapshotV2 | undefined;
   if (source.record !== null) {
     const result = await restoreRecoveryV2(source.record, projectId, codec, signal);
+    project = result.project;
     const record = parseRecoveryV2(source.record);
     previous = structuredClone(result.fallback ? record.previous! : record.current);
     revision = record.revision;
   } else if (source.legacy !== null) throw new Error("Explicit V1 migration required");
   let busy = false;
   return {
+    get project() {
+      return project;
+    },
     async save(input: Project, isCurrent: () => boolean, abort?: AbortSignal, now = new Date()) {
       if (busy) throw new Error("Recovery save already running");
       busy = true;
@@ -38,10 +43,10 @@ export async function prepareRecoveryV2Writer(
         };
         check();
         // Domain validation owns a stable model snapshot and preserves checked asset handles.
-        const project = validateProject(input);
-        if (project.id !== projectId) throw new Error("Recovery project mismatch");
+        const candidate = validateProject(input);
+        if (candidate.id !== projectId) throw new Error("Recovery project mismatch");
         const savedAt = now.toISOString();
-        const document = await codec.prepare(project);
+        const document = await codec.prepare(candidate);
         check();
         const next: RecoveryRecordV2 = {
           version: 2,
@@ -54,6 +59,7 @@ export async function prepareRecoveryV2Writer(
         // Do not re-check cancellation after commit: the write already succeeded.
         revision = next.revision;
         previous = next.current;
+        project = candidate;
         return { savedAt, revision };
       } finally {
         busy = false;
