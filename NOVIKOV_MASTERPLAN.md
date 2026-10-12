@@ -291,6 +291,13 @@ Restbefund: Long Task bei Ladebestätigung 814 ms, bei Wiederaufnahme 890 ms; Se
 
 **Grundrissvorbereitung (12.10.2026, bench/plan-preparation-phases):** PR289 nach UTF-8-Korrektur cadcf6a, erneut 914 Tests/regulärem Build und grüner CI gemergt. Diagnose misst BimPlan 202,2 ms, darin Fangquellen 193 ms, Szene 3,7 ms, Zeichenreihenfolge 0,9 ms. Zoom nutzt Vorbereitungen weiter (BimPlan 0,2 ms). Typprüfung/Lint/Diagnosebuild bestanden, Export byteidentisch, keine Konsolenfehler. Kein Produktumbau. [Nachweis/Grenzen](docs/performance/ASSET_RECOVERY_PILOT.md).
 
+**12.10.2026 · Fangquellen-Teilphasen (PR291):** PR290 mit grüner CI gemergt.
+Diagnose: Ableitung 42,6 ms, Index 164,5 ms; warme Zooms ohne Neuaufbau.
+Verfügbare Fixture (25), 10014 Elemente, Export bytegleich, keine Browserfehler.
+Fixture (27) fehlt inzwischen; daher kein direkter Vergleich mit deren Messwerten.
+Typprüfung, ESLint und Diagnosebuild bestanden; Produktcode unverändert.
+Details/Rohdaten: docs/performance/ASSET_RECOVERY_PILOT.md und snap-index-phases.json.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -359,7 +366,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Fangquellen-Erstellung aufteilen.** Innerhalb createLocalSnapSources die Ableitung projectSnapPrimitives und den Aufbau createPrimitiveSourceIndex getrennt messen. Dieselbe große Fixture und warme Zoomzugriffe verwenden; bestehende Cache-/Sichtbarkeits-/Fangverträge unverändert lassen. Erst daraus eine einzelne Optimierung wählen. Keine Produktänderung, keine neue Indexarchitektur oder Cachevergrößerung in diesem Messschritt.
+**Genau ein aktiver Fortsetzungsschritt: kalten Fangindexaufbau optimieren.** Freeze/Lookup und Baumaufbau innerhalb createPrimitiveSourceIndex zunächst im gleichen Benchmark zuordnen, dann ausschließlich den dominanten Anteil optimieren. Vergleichstests gegen den bisherigen Pfad müssen vollständige Quellen, Unveränderlichkeit sowie lokale Abfrageergebnisse einschließlich Reihenfolge, Filter und Budget erhalten. Verfügbare Fixture (25), warme Zoomzugriffe und bytegleichen Roundtrip nachmessen. Keine neue Indexarchitektur, kein Rendererwechsel, kein globaler Schnittpunktvergleich und keine Cachevergrößerung.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 

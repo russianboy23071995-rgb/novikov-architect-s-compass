@@ -10711,3 +10711,12 @@ Gemeinsamer Parser liest Bytearrays oder vollständig dekodierte Binärstrings. 
 
 ### R26-01/02 · Grundrissvorbereitung 12.10.2026
 BimPlan 202,2 ms, darin Fangquellen 193 ms; Szenenableitung 3,7 ms. Warmer Zoom ohne erneute Vorbereitung. Typprüfung/Lint/Diagnosebuild erfolgreich, Datei byteidentisch. PR289-Codierungsregression vor Merge korrigiert, 914 Tests/CI grün. Rohdaten plan-preparation-phases.json. Nächster Einzelauftrag: Geometrieableitung und räumlichen Indexaufbau getrennt messen.
+
+### R26-01/02 · Fangindex-Teilphasen 12.10.2026 (PR291)
+Diagnose ohne Produktänderung: Geometrieableitung 42,6 ms, Indexaufbau 164,5 ms;
+Zoom verwendet beide weiter. Fixture (25): 10014 Elemente, 106911015 Bytes,
+bytegleicher Roundtrip, keine Browserfehler. Frühere Fixture (27) nicht verfügbar;
+kein direkter Vorher-/Nachher-Vergleich. Typprüfung/ESLint/Diagnosebuild bestanden.
+Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md, snap-index-phases.json.
+Nächster Einzelauftrag gemäß Masterplan: kalten Indexaufbau mit Vergleichsnachweis
+optimieren; Fangsemantik, Filter, Unveränderlichkeit und Budgets erhalten.
