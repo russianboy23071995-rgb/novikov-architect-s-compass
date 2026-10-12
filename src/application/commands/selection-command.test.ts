@@ -148,3 +148,19 @@ test("acceptance has one undo/redo; preview and cancellation require no model hi
   assert.deepEqual(undoProject(next).present, p);
   assert.deepEqual(redoProject(undoProject(next)).present, preview.result);
 });
+
+test("integrated offset command preserves selection context and commits one undo step", () => {
+  const p = fixture();
+  const target = { kind: "hatch" as const, id: p.storey.hatches[0]!.id };
+  const targets = [target];
+  const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const preview = previewSelectionCommand(p, targets, visibility, "Offset um 1 cm");
+  assert.equal(
+    serializeProject(preview.result),
+    serializeProject(previewCommand(p, target, "Offset um 1 cm").result),
+  );
+  const result = applySelectionCommand(p, targets, visibility, preview);
+  const history = commitProject(createHistory(p), result);
+  assert.equal(serializeProject(undoProject(history).present), serializeProject(p));
+  assert.throws(() => applySelectionCommand(p, [], visibility, preview));
+});

@@ -10587,3 +10587,5 @@ Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands-
 | NOVIKOV_SBOM_KONZEPT.md | `1aab30f16c3c4ffd832d3448084926f15896a1148d99736c153439693d5b33f4` | Gesprächsanlage oder historischer lokaler Guide; zentrale Präzisierungen gelten |
 
 Die erneut bereitgestellte FUNKTIONEN-DOCX hat exakt den SHA-256 der Repository-Transkription vom 08.10.; ihr Wortlaut ist oben vollständig erhalten. Das ältere FUNKTIONEN-PDF wurde zusätzlich textuell geprüft und enthält den früheren Katalog; die DOCX ergänzt dessen Schlusswünsche. Frühe lokale Guides sind historische Fassungen, keine zusätzlichen aktiven Aufträge.
+
+**Integrationsnachweis 12.10.2026 (PR124):** Offset-Textbefehl für geschlossene 2D-Polylinien und Schraffuren an aktuellen gemeinsamen Auswahlkontext angepasst. Keine eigene Geometrielogik; Cap und Validierung aus Direct Edit. Kontextwechsel abgewiesen, Übernahme über bestehende History. 871 Tests und Build bestanden.

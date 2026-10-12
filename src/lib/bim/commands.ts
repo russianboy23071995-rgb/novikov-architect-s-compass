@@ -1,3 +1,4 @@
+import { previewOffsetCommand } from "../../application/drawing/offset-command.ts";
 import { serializeProject, updateWall, updateWindow, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
 
@@ -15,6 +16,9 @@ export function previewCommand(
   selection: CommandSelection,
   text: string,
 ): CommandPreview {
+  const offset = previewOffsetCommand(project, selection, text);
+  if (offset && selection)
+    return { ...offset, target: { ...selection }, source: serializeProject(project) };
   const match =
     /^(?:setze\s+)?(wandlänge|wandhöhe|wandstärke|fensterbreite|fensterhöhe|brüstungshöhe)\s+(?:auf\s+)?(\d+(?:[.,]\d+)?)\s*(mm|cm|m)$/iu.exec(
       text.trim(),
