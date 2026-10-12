@@ -1,0 +1,361 @@
+{
+  "profileMiB": 100,
+  "started": "2026-10-12T13:43:34.964Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "dbName": "novikov-asset-recovery-pilot-d7ef1c03-6ac4-4ec2-b62d-6afcccce8ad9",
+  "phases": [
+    {
+      "name": "Fixture mit unterschiedlichen PNGs erzeugen",
+      "start": 20233.09999999404,
+      "ms": 1739.4000000059605,
+      "heapAfter": {
+        "used": 145922295,
+        "total": 158135123,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Erste Assetvorbereitung",
+      "start": 22872,
+      "ms": 1271.3999999761581,
+      "heapAfter": {
+        "used": 792365256,
+        "total": 841985204,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Erste atomare Ablage",
+      "start": 24146.399999976158,
+      "ms": 648.4000000059605,
+      "heapAfter": {
+        "used": 245723729,
+        "total": 291768033,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Unveränderte Assets wiederverwenden",
+      "start": 25341.5,
+      "ms": 49.099999994039536,
+      "heapAfter": {
+        "used": 461829360,
+        "total": 519961448,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Zweiten Modellstand veröffentlichen",
+      "start": 25393.19999998808,
+      "ms": 92.5,
+      "heapAfter": {
+        "used": 478780475,
+        "total": 549551215,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Monolithische Recovery-Hülle schreiben",
+      "start": 25488.29999998212,
+      "ms": 633.4000000059605,
+      "heapAfter": {
+        "used": 787174127,
+        "total": 852794523,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Monolithische Recovery lesen und validieren",
+      "start": 26624.19999998808,
+      "ms": 1111.0999999940395,
+      "heapAfter": {
+        "used": 880174194,
+        "total": 952773618,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Lesepfad gemeinsam / 1",
+      "start": 27769.69999998808,
+      "ms": 1905.4000000059605,
+      "heapAfter": {
+        "used": 1385986193,
+        "total": 1446273117,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Lesepfad gemeinsam / 2",
+      "start": 29677.5,
+      "ms": 2036.0999999940395,
+      "heapAfter": {
+        "used": 1806168500,
+        "total": 1864750532,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Lesepfad gemeinsam / 3",
+      "start": 31717.19999998808,
+      "ms": 2049.199999988079,
+      "heapAfter": {
+        "used": 2228820003,
+        "total": 2297314091,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Recovery nach erneutem Datenbanköffnen",
+      "start": 33888.69999998808,
+      "ms": 1912.0999999940395,
+      "heapAfter": {
+        "used": 1021933919,
+        "total": 1101946863,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Vorgänger prüfen",
+      "start": 35803.79999998212,
+      "ms": 1883,
+      "heapAfter": {
+        "used": 814603076,
+        "total": 879123384,
+        "limit": 4395630592
+      }
+    },
+    {
+      "name": "Stand nach Fehlern unverändert",
+      "start": 37991.89999997616,
+      "ms": 1867.300000011921,
+      "heapAfter": {
+        "used": 618154738,
+        "total": 687807550,
+        "limit": 4395630592
+      }
+    }
+  ],
+  "checks": [
+    "first write stores each different asset once",
+    "geometry edit does not rehash payloads",
+    "second revision writes zero image bytes",
+    "monolithic control roundtrip",
+    "read comparison 0/false: exact model and payloads",
+    "read comparison 1/false: exact model and payloads",
+    "read comparison 2/false: exact model and payloads",
+    "current full model roundtrip after reopen",
+    "previous full model roundtrip",
+    "stale writer rejected",
+    "transaction abort after queued writes",
+    "aborted new asset not persisted",
+    "conflict and abort preserve published head",
+    "corrupt asset rejects recovery before model return",
+    "missing asset rejects recovery before model return"
+  ],
+  "longTasks": [
+    {
+      "start": 20233.09999999404,
+      "ms": 200
+    },
+    {
+      "start": 20434.5,
+      "ms": 123
+    },
+    {
+      "start": 20559.69999998808,
+      "ms": 160
+    },
+    {
+      "start": 20719.899999976158,
+      "ms": 156
+    },
+    {
+      "start": 20878.19999998808,
+      "ms": 128
+    },
+    {
+      "start": 21006.399999976158,
+      "ms": 122
+    },
+    {
+      "start": 21133.29999998212,
+      "ms": 124
+    },
+    {
+      "start": 21261.899999976158,
+      "ms": 116
+    },
+    {
+      "start": 21382.09999999404,
+      "ms": 129
+    },
+    {
+      "start": 21515.59999999404,
+      "ms": 126
+    },
+    {
+      "start": 21646.69999998808,
+      "ms": 135
+    },
+    {
+      "start": 21787.09999999404,
+      "ms": 125
+    },
+    {
+      "start": 21916.5,
+      "ms": 913
+    },
+    {
+      "start": 22872,
+      "ms": 1272
+    },
+    {
+      "start": 24146.399999976158,
+      "ms": 78
+    },
+    {
+      "start": 24269.59999999404,
+      "ms": 409
+    },
+    {
+      "start": 24794.69999998808,
+      "ms": 544
+    },
+    {
+      "start": 25488.29999998212,
+      "ms": 345
+    },
+    {
+      "start": 26121.5,
+      "ms": 499
+    },
+    {
+      "start": 26736,
+      "ms": 999
+    },
+    {
+      "start": 27933.09999999404,
+      "ms": 1742
+    },
+    {
+      "start": 29955.5,
+      "ms": 1758
+    },
+    {
+      "start": 31885.69999998808,
+      "ms": 1880
+    },
+    {
+      "start": 33771.39999997616,
+      "ms": 127
+    },
+    {
+      "start": 34155.39999997616,
+      "ms": 1645
+    },
+    {
+      "start": 36041.19999998808,
+      "ms": 1668
+    },
+    {
+      "start": 37765.89999997616,
+      "ms": 51
+    },
+    {
+      "start": 37879.19999998808,
+      "ms": 56
+    },
+    {
+      "start": 38141,
+      "ms": 1726
+    },
+    {
+      "start": 40055.79999998212,
+      "ms": 81
+    }
+  ],
+  "heapBefore": {
+    "used": 16608732,
+    "total": 24098976,
+    "limit": 4395630592
+  },
+  "storageBefore": {
+    "quota": 11062085134,
+    "usage": 324666894,
+    "usageDetails": {
+      "indexedDB": 324666894
+    }
+  },
+  "projectBytes": 106911023,
+  "images": 12,
+  "first": {
+    "revision": "cc650089-fa33-4fa6-b9aa-b37608799934",
+    "payloadWrites": 12,
+    "payloadBytes": 105284076,
+    "manifestBytes": 1627897
+  },
+  "second": {
+    "revision": "c26dab0e-3deb-4c3e-8930-2c77a5d2a955",
+    "payloadWrites": 0,
+    "payloadBytes": 0,
+    "manifestBytes": 3255744
+  },
+  "controlBytes": 214463622,
+  "readComparison": [
+    {
+      "round": 0,
+      "legacy": false,
+      "totalMs": 1522.2000000178814,
+      "times": {
+        "indexedDB": 163.09999999403954,
+        "schema": 219.10000002384186,
+        "decode": 375.0999999344349,
+        "header": 0.09999999403953552,
+        "hashInput": 322.80000001192093,
+        "hash": 84.80000004172325,
+        "model": 355.59999999403954
+      }
+    },
+    {
+      "round": 1,
+      "legacy": false,
+      "totalMs": 1589.3999999761581,
+      "times": {
+        "indexedDB": 277.90000000596046,
+        "schema": 209.40000000596046,
+        "decode": 371.60000002384186,
+        "header": 0.09999999403953552,
+        "hashInput": 317.60000002384186,
+        "hash": 83.49999997019768,
+        "model": 328.59999999403954
+      }
+    },
+    {
+      "round": 2,
+      "legacy": false,
+      "totalMs": 1573,
+      "times": {
+        "indexedDB": 168.5,
+        "schema": 219.39999997615814,
+        "decode": 390.4999999701977,
+        "header": 0.19999998807907104,
+        "hashInput": 354.1000000536442,
+        "hash": 90.30000004172325,
+        "model": 349.30000001192093
+      }
+    }
+  ],
+  "status": "passed",
+  "heapAfter": {
+    "used": 667892622,
+    "total": 726543310,
+    "limit": 4395630592
+  },
+  "storageAfter": {
+    "quota": 11382359600,
+    "usage": 644941360,
+    "usageDetails": {
+      "indexedDB": 644941360
+    }
+  }
+}

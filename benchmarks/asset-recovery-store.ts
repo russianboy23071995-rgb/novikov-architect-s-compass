@@ -12,7 +12,10 @@ import {
 } from "./asset-contract.ts";
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length;
 export type Head = { revision: string; current: Manifest; previous?: Manifest };
-export function createPreparation() {
+export function createPreparation(profile: 50 | 100 = 50) {
+  if (profile !== 50 && profile !== 100) throw new Error("Unknown pilot profile");
+  const maxBytes = (profile === 100 ? 128 : 64) * 1024 * 1024;
+  const maxPixels = profile === 100 ? 40_000_000 : 32_000_000;
   const cache = new WeakMap<ImageAsset, { key: string; payload: Payload }>();
   let hashes = 0;
   return {
@@ -28,8 +31,7 @@ export function createPreparation() {
       for (const asset of project.assets) {
         size += asset.data.length;
         pixels += asset.pixelWidth * asset.pixelHeight;
-        if (size > 64 * 1024 * 1024 || pixels > 32_000_000)
-          throw new Error("Pilot budget exceeded");
+        if (size > maxBytes || pixels > maxPixels) throw new Error("Pilot budget exceeded");
         let entry = cache.get(asset);
         if (!entry) {
           const { id: _id, ...raw } = asset;
