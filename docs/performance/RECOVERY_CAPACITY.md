@@ -1,5 +1,47 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Workspace-Abnahme vom 12.10.2026
+
+Produktionsbasis `625031e` (PR253); Diagnosezweig `test/large-reference-workspace`. Vollständiger CadWorkspace, reale Adapter, keine Modelltest-Hooks. Eigener Origin `http://127.0.0.1:8082` schützt Nutzer-Recovery auf 8080/8081. Nur synthetische Daten. Chromium 155/Windows. Der Entwicklungsserver ist kein Produktionsperformance-Nachweis.
+
+Reproduktion (Outputs außerhalb Git):
+
+```text
+python benchmarks/reference-workspace-image.py <output.png>
+node --experimental-strip-types benchmarks/reference-workspace-fixture.ts <output.png> <project.json>
+node node_modules/vite/bin/vite.js --config benchmarks/vite.config.ts --port 8082
+```
+
+Dann `/benchmarks/reference-workspace.html` öffnen, Datei mit „Open project“ wählen. Die Diagnose montiert den regulären Workspace und beobachtet ausschließlich Long Tasks und Buttonklickzeiten; keine Ersetzung von Modellaktionen. Dateigenerator: RGB-Rauschen 1550×1550, Python Random Seed 253, PNG/zlib; Projekt-ID acceptance-large-reference-253. Keine Binärfixture im Repository. Gemessene Dateigröße 9.616.625 Bytes = 9,17 MiB; eine Wand, ein Fenster, eine Bildreferenz. Abweichende zlib-Versionen können andere kodierte Bytes erzeugen.
+
+Abnahme:
+- Öffnen vorbereiten und abbrechen: ausgewählte 3-m-Ausgangswand bleibt, kein Bild, Undo deaktiviert.
+- Erneut öffnen/bestätigen: Bild sichtbar, drei Elemente, Auswahl leer. Export vollständig JSON-identisch zur Fixture.
+- Lade-Undo entfernt die Referenz; Redo stellt sie wieder her.
+- Wand auf 4 m ändern: Undo zeigt 3 m, Redo 4 m. Auswahl wird dabei aufgehoben. Bilddaten unverändert.
+- Projekt herunterladen, lokalen Snapshot erstellen, Seite neu laden. Startangebot erkennt genau das Testprojekt.
+- Stand prüfen, Wiederaufnahme vorbereiten/abbrechen erhält das Ausgangsmodell und leere History.
+- Erneut prüfen/vorbereiten/bestätigen: 4-m-Wand, Fenster und Referenz sichtbar. Export vollständig JSON-identisch zum gespeicherten Änderungsstand.
+- Browserkonsole ohne Warnungen/Fehler. Screenshot `outputs/reference-workspace-restored.png` (lokaler Prüfbeleg).
+
+Rohdaten: [Öffnen/Bearbeiten/Sichern](workspace-large-reference-load-2026-10-12.json), [Wiederaufnahme](workspace-large-reference-recovery-2026-10-12.json). Long-Task-Start relativ zu performance.timeOrigin; Klickzeiten im selben Zeitbezug. Kein End-to-End-Timer: Zeit zwischen Bedienhandlungen enthält bewusst Warte-/Prüfzeit und ist keine Laufzeit. Long Tasks sind Beobachtungen, keine Zuordnung zu einer konkreten Funktion.
+
+| Beobachtung | Long Task ms |
+| --- | ---: |
+| Datei vorbereiten | 121 |
+| Bestätigtes Laden | 814 |
+| Export | 129 |
+| Laden Undo / Redo | 104 / 129 |
+| Änderung Undo / Redo | 82 / 86 |
+| Snapshot schreiben, längste beobachtete Task | 179 |
+| Recovery prüfen, zwei Aufrufe | 161 / 174 |
+| Wiederaufnahme bestätigen | 890 |
+
+Validierung des Diagnosezweigs: 876 Tests, App-/Benchmark-Typechecks und Produktionsbuild bestanden; Lint 0 Fehler/6 bekannte Fast-Refresh-Warnungen.
+
+Einzelabläufe, keine Mediane/p95 oder allgemeine Kapazitätsfreigabe. Funktionaler Rundlauf bestanden, dennoch deutliche Hauptthread-Pausen bei bestätigter Übernahme. Genau diese Phase wird als nächster begrenzter Diagnoseauftrag aufgeschlüsselt, bevor eine neue Architekturmaßnahme gewählt wird. Der Startangebot-Hinweis bleibt nach bestätigter Wiederaufnahme sichtbar; als separater UX-Befund dokumentiert. Automatische Sicherung, GPU-/Spitzenspeicher, viele kombinierte Bilder, Browserdatenverlust und Stromausfall sind hier nicht geprüft. Port 8082 ausschließlich für diese Diagnose verwenden; vorhandene Daten auf diesem Origin nicht löschen.
+
+
 ## Pilot vom 12.10.2026: kanonische Base64-Zeichenprüfung
 
 Messstand `16b09d5` auf main `95fae03`. Der gemeinsame Storage-Prüfer verwendet eine private ASCII-Wertetabelle statt Alphabet-Suche pro Zeichen. Keine API-, Format-, Trust-, Größen- oder Pixelbudgetänderung. Nicht-ASCII-Zeichen einschließlich Surrogaten, Padding und ungenutzte Endbits bleiben strikt geprüft. Bilddekodierung bleibt Aufgabe des Importadapters.
