@@ -1,0 +1,945 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "rows": [
+    {
+      "profile": "small",
+      "iteration": 0,
+      "framesMs": 204.90000000596046,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 369238.2999999821,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 369238.89999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 369239.09999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "commitProject",
+          "start": 369238.89999997616,
+          "ms": 0.5
+        },
+        {
+          "name": "editingReducer",
+          "start": 369238.1999999881,
+          "ms": 1.199999988079071
+        },
+        {
+          "name": "validateProject",
+          "start": 369239.39999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 369280.39999997616,
+          "ms": 0
+        },
+        {
+          "name": "editingReducer",
+          "start": 369308.09999999404,
+          "ms": 0
+        }
+      ],
+      "commits": [
+        {
+          "start": 369291.1999999881,
+          "renderMs": 53
+        },
+        {
+          "start": 369348,
+          "renderMs": 39.50000002980232
+        },
+        {
+          "start": 369407.59999999404,
+          "renderMs": 0.800000011920929
+        },
+        {
+          "start": 369414.89999997616,
+          "renderMs": 0
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 369201.09999999404,
+          "ms": 103
+        }
+      ],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "small",
+      "iteration": 1,
+      "framesMs": 60.099999994039536,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 369814.59999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "validateProject",
+          "start": 369814.89999997616,
+          "ms": 0.10000002384185791
+        },
+        {
+          "name": "validateProject",
+          "start": 369815.09999999404,
+          "ms": 0
+        },
+        {
+          "name": "commitProject",
+          "start": 369814.89999997616,
+          "ms": 0.30000001192092896
+        },
+        {
+          "name": "editingReducer",
+          "start": 369814.5,
+          "ms": 0.699999988079071
+        },
+        {
+          "name": "validateProject",
+          "start": 369815.1999999881,
+          "ms": 0
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 369826.6999999881,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "editingReducer",
+          "start": 369841.5,
+          "ms": 0.09999999403953552
+        }
+      ],
+      "commits": [
+        {
+          "start": 369830.09999999404,
+          "renderMs": 15.300000011920929
+        },
+        {
+          "start": 369857.1999999881,
+          "renderMs": 15.400000005960464
+        },
+        {
+          "start": 369867.6999999881,
+          "renderMs": 0.19999998807907104
+        },
+        {
+          "start": 369869,
+          "renderMs": 0
+        }
+      ],
+      "longTasks": [],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "small",
+      "iteration": 2,
+      "framesMs": 115.10000002384186,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 370283.2999999821,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 370283.5,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 370283.59999999404,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 370283.5,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "editingReducer",
+          "start": 370283.2999999821,
+          "ms": 0.4000000059604645
+        },
+        {
+          "name": "validateProject",
+          "start": 370283.7999999821,
+          "ms": 0
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 370310.39999997616,
+          "ms": 0
+        },
+        {
+          "name": "editingReducer",
+          "start": 370349.2999999821,
+          "ms": 0
+        }
+      ],
+      "commits": [
+        {
+          "start": 370319.1999999881,
+          "renderMs": 35.5
+        },
+        {
+          "start": 370386.59999999404,
+          "renderMs": 36.599999994039536
+        },
+        {
+          "start": 370398.89999997616,
+          "renderMs": 0.5
+        },
+        {
+          "start": 370404.2999999821,
+          "renderMs": 0.19999998807907104
+        }
+      ],
+      "longTasks": [],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "small",
+      "iteration": 3,
+      "framesMs": 65.7000000178814,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 370823.2999999821,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 370823.5,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 370823.59999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "commitProject",
+          "start": 370823.5,
+          "ms": 0.29999998211860657
+        },
+        {
+          "name": "editingReducer",
+          "start": 370823.2999999821,
+          "ms": 0.5
+        },
+        {
+          "name": "validateProject",
+          "start": 370823.7999999821,
+          "ms": 0
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 370845.89999997616,
+          "ms": 0.10000002384185791
+        },
+        {
+          "name": "editingReducer",
+          "start": 370860.59999999404,
+          "ms": 0
+        }
+      ],
+      "commits": [
+        {
+          "start": 370850.09999999404,
+          "renderMs": 26.5
+        },
+        {
+          "start": 370873.89999997616,
+          "renderMs": 12.999999970197678
+        },
+        {
+          "start": 370884.6999999881,
+          "renderMs": 0.4000000059604645
+        },
+        {
+          "start": 370888.7999999821,
+          "renderMs": 0.09999999403953552
+        }
+      ],
+      "longTasks": [],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "small",
+      "iteration": 4,
+      "framesMs": 101.59999999403954,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 371295.7999999821,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 371296,
+          "ms": 0
+        },
+        {
+          "name": "validateProject",
+          "start": 371296.09999999404,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 371296,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "editingReducer",
+          "start": 371295.7999999821,
+          "ms": 0.4000000059604645
+        },
+        {
+          "name": "validateProject",
+          "start": 371296.1999999881,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 371327.7999999821,
+          "ms": 0
+        },
+        {
+          "name": "editingReducer",
+          "start": 371348.6999999881,
+          "ms": 0
+        }
+      ],
+      "commits": [
+        {
+          "start": 371336.39999997616,
+          "renderMs": 40.5
+        },
+        {
+          "start": 371385.09999999404,
+          "renderMs": 35.99999997019768
+        },
+        {
+          "start": 371397.6999999881,
+          "renderMs": 0.5
+        },
+        {
+          "start": 371398.6999999881,
+          "renderMs": 0.09999999403953552
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 371295.09999999404,
+          "ms": 51
+        }
+      ],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "small",
+      "iteration": 5,
+      "framesMs": 63,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 371828.1999999881,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "validateProject",
+          "start": 371828.5,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 371828.59999999404,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 371828.5,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "editingReducer",
+          "start": 371828.1999999881,
+          "ms": 0.5
+        },
+        {
+          "name": "validateProject",
+          "start": 371828.7999999821,
+          "ms": 0
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 371844.5,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "editingReducer",
+          "start": 371861.1999999881,
+          "ms": 0
+        }
+      ],
+      "commits": [
+        {
+          "start": 371847.59999999404,
+          "renderMs": 19
+        },
+        {
+          "start": 371875.39999997616,
+          "renderMs": 13.799999982118607
+        },
+        {
+          "start": 371891,
+          "renderMs": 0.19999998807907104
+        },
+        {
+          "start": 371892.09999999404,
+          "renderMs": 0
+        }
+      ],
+      "longTasks": [],
+      "imageLoads": [],
+      "references": 0
+    },
+    {
+      "profile": "large",
+      "iteration": 0,
+      "framesMs": 1065.4000000059605,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 372477.2999999821,
+          "ms": 0.30000001192092896
+        },
+        {
+          "name": "validateProject",
+          "start": 372505.59999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "validateProject",
+          "start": 372536,
+          "ms": 0.29999998211860657
+        },
+        {
+          "name": "commitProject",
+          "start": 372505.59999999404,
+          "ms": 31
+        },
+        {
+          "name": "editingReducer",
+          "start": 372477.1999999881,
+          "ms": 59.5
+        },
+        {
+          "name": "validateProject",
+          "start": 372536.6999999881,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 372573.1999999881,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "imageHeader",
+          "start": 373371.89999997616,
+          "ms": 0.5
+        },
+        {
+          "name": "checkImageUrl",
+          "start": 372574.2999999821,
+          "ms": 798.0999999940395
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 372574.1999999881,
+          "ms": 798.1999999880791
+        },
+        {
+          "name": "editingReducer",
+          "start": 373443.1999999881,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 373471.7999999821,
+          "ms": 0.09999999403953552
+        }
+      ],
+      "commits": [
+        {
+          "start": 373419.39999997616,
+          "renderMs": 941.6999999582767
+        },
+        {
+          "start": 373482.2999999821,
+          "renderMs": 38.599999994039536
+        },
+        {
+          "start": 373505.6999999881,
+          "renderMs": 0.5999999940395355
+        },
+        {
+          "start": 373527.39999997616,
+          "renderMs": 4.799999982118607
+        },
+        {
+          "start": 373535.7999999821,
+          "renderMs": 0.5
+        },
+        {
+          "start": 373539.59999999404,
+          "renderMs": 0.09999999403953552
+        },
+        {
+          "start": 373539.7999999821,
+          "renderMs": 0.09999999403953552
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 372470.39999997616,
+          "ms": 1045
+        }
+      ],
+      "imageLoads": [
+        373530
+      ],
+      "references": 1
+    },
+    {
+      "profile": "large",
+      "iteration": 1,
+      "framesMs": 230.60000002384186,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 374090.7999999821,
+          "ms": 0.30000001192092896
+        },
+        {
+          "name": "validateProject",
+          "start": 374118.59999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "validateProject",
+          "start": 374146.2999999821,
+          "ms": 0.30000001192092896
+        },
+        {
+          "name": "commitProject",
+          "start": 374118.59999999404,
+          "ms": 60.900000005960464
+        },
+        {
+          "name": "editingReducer",
+          "start": 374090.7999999821,
+          "ms": 88.7000000178814
+        },
+        {
+          "name": "validateProject",
+          "start": 374179.59999999404,
+          "ms": 0.29999998211860657
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 374208.2999999821,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 374208.89999997616,
+          "ms": 2.9000000059604645
+        },
+        {
+          "name": "editingReducer",
+          "start": 374262.2999999821,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 374289.1999999881,
+          "ms": 4.800000011920929
+        }
+      ],
+      "commits": [
+        {
+          "start": 374219.6999999881,
+          "renderMs": 128.60000002384186
+        },
+        {
+          "start": 374303.7999999821,
+          "renderMs": 41.09999996423721
+        },
+        {
+          "start": 374315.7999999821,
+          "renderMs": 0.5999999940395355
+        },
+        {
+          "start": 374318.09999999404,
+          "renderMs": 0.09999999403953552
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 374084.2999999821,
+          "ms": 176
+        }
+      ],
+      "imageLoads": [],
+      "references": 1
+    },
+    {
+      "profile": "large",
+      "iteration": 2,
+      "framesMs": 195.09999999403954,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 374858.6999999881,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 374888.6999999881,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "validateProject",
+          "start": 374917.39999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "commitProject",
+          "start": 374888.6999999881,
+          "ms": 55.80000001192093
+        },
+        {
+          "name": "editingReducer",
+          "start": 374858.59999999404,
+          "ms": 85.90000000596046
+        },
+        {
+          "name": "validateProject",
+          "start": 374944.5,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 374971.2999999821,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 374971.7999999821,
+          "ms": 3.7000000178813934
+        },
+        {
+          "name": "editingReducer",
+          "start": 375003.6999999881,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 375026.59999999404,
+          "ms": 3.199999988079071
+        }
+      ],
+      "commits": [
+        {
+          "start": 374984,
+          "renderMs": 124.90000003576279
+        },
+        {
+          "start": 375038.2999999821,
+          "renderMs": 34.5
+        },
+        {
+          "start": 375049.59999999404,
+          "renderMs": 0.7000000178813934
+        },
+        {
+          "start": 375050.5,
+          "renderMs": 0.10000002384185791
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 374853.39999997616,
+          "ms": 148
+        }
+      ],
+      "imageLoads": [],
+      "references": 1
+    },
+    {
+      "profile": "large",
+      "iteration": 3,
+      "framesMs": 179.7999999821186,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 375605,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "validateProject",
+          "start": 375632.89999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 375658.2999999821,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 375632.89999997616,
+          "ms": 56.70000001788139
+        },
+        {
+          "name": "editingReducer",
+          "start": 375604.89999997616,
+          "ms": 84.7000000178814
+        },
+        {
+          "name": "validateProject",
+          "start": 375689.59999999404,
+          "ms": 0.19999998807907104
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 375699.89999997616,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 375700.09999999404,
+          "ms": 4.699999988079071
+        },
+        {
+          "name": "editingReducer",
+          "start": 375726,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 375752.89999997616,
+          "ms": 4.800000011920929
+        }
+      ],
+      "commits": [
+        {
+          "start": 375707.59999999404,
+          "renderMs": 102.50000002980232
+        },
+        {
+          "start": 375767,
+          "renderMs": 40.69999998807907
+        },
+        {
+          "start": 375779.89999997616,
+          "renderMs": 0.29999998211860657
+        },
+        {
+          "start": 375783.39999997616,
+          "renderMs": 0.19999998807907104
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 375599.39999997616,
+          "ms": 125
+        }
+      ],
+      "imageLoads": [],
+      "references": 1
+    },
+    {
+      "profile": "large",
+      "iteration": 4,
+      "framesMs": 195.90000000596046,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 376318.89999997616,
+          "ms": 0.10000002384185791
+        },
+        {
+          "name": "validateProject",
+          "start": 376347.89999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 376378.2999999821,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 376347.89999997616,
+          "ms": 56.60000002384186
+        },
+        {
+          "name": "editingReducer",
+          "start": 376318.7999999821,
+          "ms": 85.7000000178814
+        },
+        {
+          "name": "validateProject",
+          "start": 376404.59999999404,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 376426.89999997616,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 376427.1999999881,
+          "ms": 2.800000011920929
+        },
+        {
+          "name": "editingReducer",
+          "start": 376459.5,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 376485,
+          "ms": 4.699999988079071
+        }
+      ],
+      "commits": [
+        {
+          "start": 376438.7999999821,
+          "renderMs": 119.7000000178814
+        },
+        {
+          "start": 376498.7999999821,
+          "renderMs": 39.19999998807907
+        },
+        {
+          "start": 376508.09999999404,
+          "renderMs": 0.5
+        },
+        {
+          "start": 376509.39999997616,
+          "renderMs": 0.09999999403953552
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 376312.2999999821,
+          "ms": 145
+        }
+      ],
+      "imageLoads": [],
+      "references": 1
+    },
+    {
+      "profile": "large",
+      "iteration": 5,
+      "framesMs": 204.09999999403954,
+      "phases": [
+        {
+          "name": "validateProject",
+          "start": 377055.39999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 377081.39999997616,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "validateProject",
+          "start": 377110.09999999404,
+          "ms": 0.09999999403953552
+        },
+        {
+          "name": "commitProject",
+          "start": 377081.2999999821,
+          "ms": 60.400000005960464
+        },
+        {
+          "name": "editingReducer",
+          "start": 377055.39999997616,
+          "ms": 86.30000001192093
+        },
+        {
+          "name": "validateProject",
+          "start": 377141.7999999821,
+          "ms": 0.20000001788139343
+        },
+        {
+          "name": "derivePlanScene",
+          "start": 377171.09999999404,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 377171.5,
+          "ms": 4.699999988079071
+        },
+        {
+          "name": "editingReducer",
+          "start": 377207.1999999881,
+          "ms": 0
+        },
+        {
+          "name": "checkedImageUrl",
+          "start": 377232.09999999404,
+          "ms": 4.799999982118607
+        }
+      ],
+      "commits": [
+        {
+          "start": 377185.6999999881,
+          "renderMs": 129.7999999821186
+        },
+        {
+          "start": 377244.89999997616,
+          "renderMs": 37.19999998807907
+        },
+        {
+          "start": 377254.59999999404,
+          "renderMs": 0.30000001192092896
+        },
+        {
+          "start": 377255.6999999881,
+          "renderMs": 0.19999998807907104
+        }
+      ],
+      "longTasks": [
+        {
+          "start": 377049.59999999404,
+          "ms": 156
+        }
+      ],
+      "imageLoads": [],
+      "references": 1
+    }
+  ]
+}
