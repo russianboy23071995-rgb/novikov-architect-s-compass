@@ -230,3 +230,48 @@ Praktische Reproduktion: aktuellen 100-MiB-Fixturelauf ausführen, dessen `dbNam
 dem Ergebnis kopieren, Vorbereitungstab schließen, auf Port 8084 die neue Leseseite
 öffnen, Datenbanknamen einsetzen, **Lesetest starten**. Erwartet: **Bestanden: 3 vollständige
 Vergleiche**. Alte Pilotdatenbanken ohne Sollhash werden verständlich abgewiesen.
+
+## Kooperative Assetprüfung und Abbruch (12.10.2026)
+
+Basis `10f61f9`, PR263 nach grüner CI und ausdrücklicher Freigabe zusammengeführt.
+Nur der Diagnose-Service gibt jetzt nach der abgeschlossenen Lesetransaktion, zwischen
+vollständig geprüften Assets (einschließlich vor Modellvalidierung) und vor Rückgabe
+per Timer-Task an den Browser ab. Keine wartende IndexedDB-Transaktion. Ein optionales
+AbortSignal wird vor dem Lesen und vor/nach jedem Taskwechsel geprüft. Eine bereits
+laufende synchrone Prüfung oder IDB-Lesetransaktion wird nicht mitten darin unterbrochen;
+bei Abbruch wird anschließend kein Modell zurückgegeben. Keine Modell- oder DB-Mutation.
+Der injizierbare Scheduler dient gezielten Diagnosetests; Standard ist ein echter Timer,
+kein bloßer Microtask. Der Schreibpfad ist unverändert.
+
+[Isolierte Messung](cooperative-recovery-2026-10-12.json), identische gespeicherte
+100-MiB-Fixture wie zuvor, frische Seite, keine parallelen Builds/Tests:
+
+| Messung | Ergebnis |
+| --- | --- |
+| Servicezeiten | 1.961 / 1.617 / 1.679 ms; Median 1.679 ms |
+| Längste Service-Tasks | 390 / 360 / 347 ms (vorher bis 1.477 ms) |
+| Einzelne Asset-Tasks in den drei Messrunden | 73–98 ms |
+| Abschließende Modellvalidierung | 390,5 / 360,0 / 347,2 ms |
+| Getrennter Ergebnisvergleich | 428 / 410 / 422 ms |
+
+Die Gesamtzeit verbessert sich nicht wesentlich; Ziel ist Reaktionsfähigkeit zwischen
+Prüfabschnitten. Der erste IDB-Zugriff dauerte 514 ms gegenüber 174/203 ms danach.
+Keine p95-/Kaltstartgarantie. Trotz deutlicher Reduktion weiterhin Long Tasks; weder
+flüssige 60-fps-Bedienung noch sofortiger Abbruch innerhalb synchroner Abschnitte behauptet.
+Heap-Stichproben und Vergleichsaufgaben bleiben in den Rohdaten, keine Peak-/Leak-Aussage.
+
+Drei vollständige Modell-/Payload-/Revisionsvergleiche bestanden. Anschließend drei
+gezielte Signalabbrüche: vor Lesen, nach erstem geprüften Asset und nach abschließender
+Modellvalidierung vor Rückgabe. Alle ohne Modellrückgabe. Das sind deterministische
+Scheduler-Injektionen, kein getesteter neuer UI-Abbruchbutton. Die bestehende Leseseite
+enthält weiterhin nur den Teststart; Einbindung in Produkt-UI bleibt außerhalb des Piloten.
+[Frischer 100-MiB-Sicherheitslauf](cooperative-recovery-safety-2026-10-12.json): alle
+15 bestehenden Prüfungen einschließlich beschädigter/fehlender Assets, CAS und
+Transaktionsrollback erneut bestanden. Node-Test ergänzt Taskwechsel und Abbruch vor/nach
+Scheduling. 885 Tests, beide Typechecks und Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+
+Reproduktion wie beim isolierten Lesetest; neues Ergebnis: **3 Abbrüche und 3 vollständige
+Vergleiche**. Die verbleibende Modellprüfung bündelt unter anderem erneute Asset-Schemaprüfung.
+Nächster begrenzter Auftrag laut Masterplan §9: vorhandene unveränderliche Asset-Handles
+bereits in den einzelnen geprüften Abschnitten aufbauen und für die Schlussprüfung nutzen,
+ohne IndexedDB-Daten pauschal zu vertrauen oder neue Vertrauensmarker einzuführen.
