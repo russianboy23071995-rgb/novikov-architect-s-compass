@@ -1,0 +1,50 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 7458.199999988079,
+      "label": "Open project"
+    },
+    {
+      "at": 34325.5,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 83.30000001192093,
+      "duration": 62
+    },
+    {
+      "start": 148,
+      "duration": 168
+    },
+    {
+      "start": 7832.800000011921,
+      "duration": 790
+    }
+  ],
+  "exportPhases": [
+    {
+      "phase": "utf8-size",
+      "start": 157.5,
+      "duration": 0.5
+    },
+    {
+      "phase": "utf8-size",
+      "start": 292.69999998807907,
+      "duration": 0
+    },
+    {
+      "phase": "utf8-size",
+      "start": 7910.800000011921,
+      "duration": 238.5
+    },
+    {
+      "phase": "open-final-check",
+      "start": 8556.300000011921,
+      "duration": 67
+    }
+  ],
+  "build": "production-workspace"
+}

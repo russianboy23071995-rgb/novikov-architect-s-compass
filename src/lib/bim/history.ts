@@ -1,6 +1,6 @@
 import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
 import {
-  assertProjectFileSize,
+  ProjectFileSizeError,
   assertValidatedProjectSize,
 } from "../../interop/project-file/size.ts";
 import { deserializeProject, validateProject } from "./model.ts";
@@ -46,10 +46,10 @@ export function redoProject(history: ProjectHistory): ProjectHistory {
     : history;
 }
 export function readProjectFile(text: string): Project {
-  assertProjectFileSize(text);
   try {
     return deserializeProject(text);
-  } catch {
+  } catch (error) {
+    if (error instanceof ProjectFileSizeError) throw error;
     throw new Error(
       "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 20, Meter) mit gültigen Bauteilen.",
     );

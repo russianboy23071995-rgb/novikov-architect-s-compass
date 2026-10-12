@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadProjectData } from "./load.ts";
+import { loadProjectData, deserializeProject } from "./load.ts";
 import {
   createProject,
   addWall,
@@ -196,4 +196,20 @@ test("all creation paths use the same stable defaults even after a layer rename"
   assert.equal(addWall(p, wall).storey.walls[1]!.layerId, other);
   assert.throws(() => addWall(p, { ...wall, layerId: "missing" }));
   assert.throws(() => addLine(p, { ...p.storey.lines![0]!, id: "l2", layerId: "missing" }));
+});
+
+test("both file entry points preserve UTF-8 budget precedence and normal invalid-file errors", async () => {
+  const { PROJECT_FILE_LIMIT, ProjectFileSizeError } = await import("./size.ts");
+  // Valid JSON padded to the exact byte boundary; not a valid project.
+  const exact = '"' + "ä".repeat((PROJECT_FILE_LIMIT - 2) / 2) + '"';
+  for (const read of [deserializeProject, readProjectFile]) {
+    assert.throws(
+      () => read(exact),
+      (error: unknown) => error instanceof Error && !(error instanceof ProjectFileSizeError),
+    );
+    // Still invalid JSON: size must win before parsing, including direct callers.
+    assert.throws(() => read(exact + "x"), ProjectFileSizeError);
+  }
+  assert.throws(() => readProjectFile("{"), /Ungültige Projektdatei/);
+  assert.throws(() => readProjectFile("{}"), /Ungültige Projektdatei/);
 });

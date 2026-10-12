@@ -2,9 +2,16 @@ import type { Project } from "../../domain/project/schema.ts";
 /** Aggregate portable project budget; independent from individual image ingress. */
 export const PROJECT_FILE_LIMIT = 128 * 1024 * 1024;
 export const PROJECT_FILE_SIZE_ERROR = "Projektdatei ist größer als 128 MiB.";
+/** Distinguishes the public size error from parse/schema failures at UI adapters. */
+export class ProjectFileSizeError extends Error {
+  constructor() {
+    super(PROJECT_FILE_SIZE_ERROR);
+    this.name = "ProjectFileSizeError";
+  }
+}
 export function assertProjectFileSize(text: string): void {
   if (new TextEncoder().encode(text).byteLength > PROJECT_FILE_LIMIT)
-    throw new Error(PROJECT_FILE_SIZE_ERROR);
+    throw new ProjectFileSizeError();
 }
 
 /** Only after full schema validation: canonical base64 is ASCII and needs no JSON escaping.
@@ -23,6 +30,5 @@ export function validatedProjectByteLength(project: Project): number {
 }
 
 export function assertValidatedProjectSize(project: Project): void {
-  if (validatedProjectByteLength(project) > PROJECT_FILE_LIMIT)
-    throw new Error(PROJECT_FILE_SIZE_ERROR);
+  if (validatedProjectByteLength(project) > PROJECT_FILE_LIMIT) throw new ProjectFileSizeError();
 }

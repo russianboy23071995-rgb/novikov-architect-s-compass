@@ -10683,3 +10683,7 @@ Nach vollständiger Validierung zählt serializeProject das exakte JSON-UTF-8-Bu
 
 ### R26-01/02 · Dateivorbereitungsbudget 12.10.2026
 Gemeinsamer exakter Bytezähler nach vollständiger Validierung und Ordnerergänzung ersetzt die abschließende Vollserialisierung in prepareProjectOpen. 911 Tests, Builds/Typprüfung/Lint bestanden; 101,96-MiB-Browserdatei byteidentisch nach Laden exportiert. Abschließende Prüfung im Einzelvergleich 400,5 → 63 ms; gesamte Vorbereitung weiterhin mit 1187-ms-Task. Abbruch/Bestätigung erhalten. Kein Limit-/Formatwechsel. Nächster begrenzter Auftrag im Masterplan: doppelte Eingangsgrößenprüfung zusammenführen. Rohdaten und Einschränkungen in ASSET_RECOVERY_PILOT.md.
+
+
+### R26-01/02 · Gemeinsame Eingangsgrenze 12.10.2026
+readProjectFile verwendet die UTF-8-Prüfung des Deserializers einmalig. Direkte Aufrufe bleiben vor Parsing geschützt; typisierter Größenfehler bewahrt die bisherige Meldung. 912 Tests, Typprüfung, Lint/Builds bestanden. Browserdatei byteidentisch; Vorbereitungs-Task im Einzelvergleich 1187 → 790 ms, keine allgemeine Kapazitätszusage. Nachweis: single-input-size.json und ASSET_RECOVERY_PILOT.md. Nächster Einzelauftrag im Masterplan: konsolidierte Produktionsabnahme ohne Diagnose-Transforms.
