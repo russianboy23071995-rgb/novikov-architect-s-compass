@@ -1,0 +1,167 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 11283.699999988079,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 11524.299999982119,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 37107.19999998808,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 41454.19999998808,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 60985.29999998212,
+      "label": "Save project"
+    },
+    {
+      "at": 72286.69999998808,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 727.9000000059605,
+      "duration": 220
+    },
+    {
+      "start": 11283.40000000596,
+      "duration": 64
+    },
+    {
+      "start": 12029.199999988079,
+      "duration": 135
+    },
+    {
+      "start": 12164.59999999404,
+      "duration": 111
+    },
+    {
+      "start": 12281,
+      "duration": 119
+    },
+    {
+      "start": 12400.199999988079,
+      "duration": 114
+    },
+    {
+      "start": 12519.90000000596,
+      "duration": 106
+    },
+    {
+      "start": 12626.09999999404,
+      "duration": 109
+    },
+    {
+      "start": 12741.09999999404,
+      "duration": 120
+    },
+    {
+      "start": 12866.799999982119,
+      "duration": 113
+    },
+    {
+      "start": 12985.90000000596,
+      "duration": 105
+    },
+    {
+      "start": 13097.09999999404,
+      "duration": 119
+    },
+    {
+      "start": 13221.59999999404,
+      "duration": 110
+    },
+    {
+      "start": 13337.09999999404,
+      "duration": 128
+    },
+    {
+      "start": 13470.699999988079,
+      "duration": 65
+    },
+    {
+      "start": 13540.90000000596,
+      "duration": 78
+    },
+    {
+      "start": 37106.90000000596,
+      "duration": 64
+    },
+    {
+      "start": 41453.90000000596,
+      "duration": 7113
+    },
+    {
+      "start": 48567.09999999404,
+      "duration": 451
+    },
+    {
+      "start": 49320,
+      "duration": 112
+    },
+    {
+      "start": 49432.5,
+      "duration": 109
+    },
+    {
+      "start": 49542,
+      "duration": 103
+    },
+    {
+      "start": 49645.69999998808,
+      "duration": 113
+    },
+    {
+      "start": 49758.90000000596,
+      "duration": 103
+    },
+    {
+      "start": 49862.29999998212,
+      "duration": 110
+    },
+    {
+      "start": 49977.40000000596,
+      "duration": 105
+    },
+    {
+      "start": 50087.19999998808,
+      "duration": 104
+    },
+    {
+      "start": 50196.40000000596,
+      "duration": 110
+    },
+    {
+      "start": 50311.09999999404,
+      "duration": 115
+    },
+    {
+      "start": 50432.09999999404,
+      "duration": 118
+    },
+    {
+      "start": 50564.59999999404,
+      "duration": 128
+    },
+    {
+      "start": 50697.69999998808,
+      "duration": 66
+    },
+    {
+      "start": 50769.5,
+      "duration": 174
+    },
+    {
+      "start": 60984.79999998212,
+      "duration": 2136
+    }
+  ]
+}
