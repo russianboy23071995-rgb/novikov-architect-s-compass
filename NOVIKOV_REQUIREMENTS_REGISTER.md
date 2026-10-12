@@ -10787,3 +10787,12 @@ beide Builds bestanden. Einzelmessung Hashinput 335,9→116,7 ms, Restore 993,7�
 Export bytegleich, keine Konsolenfehler. Nachweis ASSET_RECOVERY_PILOT.md und
 recovery-hash-buffer.json. Gesamtgrenzen unverändert; konsolidierte Wiederholungs-
 und Bearbeitungsabnahme als genau ein nächster Auftrag im Masterplan.
+
+### R26-01/02, K02/03, RC07 · Konsolidierte Recovery-Abnahme (12.10.2026, nach PR299)
+PR299 mit grüner CI gemergt. Drei frische Tabs: identische 101,96-MiB-Exporte;
+Restore 745,1–794,8 ms. Änderung, Undo/Redo, neuer Snapshot und Wiederaufnahme nach
+Seitenneustart bytegleich bestanden. Keine Produktänderung; 922 Tests/Builds aus PR299
+nicht erneut ausgeführt. Beleg ASSET_RECOVERY_PILOT.md und recovery-acceptance-summary.json.
+128-MiB-Produktlimit bleibt; größerer alter Servicepilot ist keine Kapazitätsfreigabe.
+Nächster Einzelauftrag im Masterplan: aktuellen Adapterpfad im vorhandenen großen
+Pilot abgleichen und budgetiert messen, statt weitere 102-MiB-Mikrooptimierungen.

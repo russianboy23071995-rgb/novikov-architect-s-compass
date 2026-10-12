@@ -356,6 +356,15 @@ Gleicher Browser-Snapshot: Hashinput 335,9→116,7 ms; bounded restore 993,7→6
 Einzelmessungen, keine Kapazitätsgarantie; Storage separat und schwankend. Export
 bytegleich, keine Browserfehler. Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md.
 
+### Konsolidierte Recovery-Abnahme (12.10.2026, nach PR299)
+PR299 nach grüner CI zusammengeführt (b621023). Drei frische Tabs auf demselben
+Diagnose-Produktionsbuild: bounded restore 745,1–794,8 ms, Hashinput 128,4–153,9 ms;
+alle drei 101,96-MiB-Exporte bytegleich. Wandhöhe 3,1→3,2, Undo/Redo, neuer Snapshot,
+Seitenneustart und Wiederaufnahme mit erneut bytegleichem Export bestanden. Keine
+Konsolenfehler. Nur Prüfbelege/Dokumentation geändert; 922 Tests und beide Builds aus
+unverändertem PR299, erfolgreiche GitHub-CI. Kein Crash-/Kaltstart-/Kapazitätsversprechen.
+Rohdaten und Reproduktion: docs/performance/ASSET_RECOVERY_PILOT.md.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -424,13 +433,15 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Recovery-Pilot konsolidiert abnehmen.**
-Den unveränderten rund 102-MiB-Snapshot in drei frischen Browser-Tabs wiederherstellen.
-Storage-Lesen, bounded restore und Hashinput getrennt ausweisen, Streuung dokumentieren
-und jeden Export gegen denselben Referenzhash vergleichen. Einen wiederhergestellten
-Stand ändern, Undo/Redo und erneute Sicherung/Wiederaufnahme prüfen. Keine weitere
-Mikrooptimierung oder Limitänderung in diesem Auftrag; anhand der Gesamtabnahme
-verbleibende Blockaden der größeren Projektdateien priorisieren.
+**Genau ein aktiver Fortsetzungsschritt: 250-MiB-Kapazitätsabnahme auf aktuellen Produktadaptern vorbereiten und ausführen.**
+Den vorhandenen 252,57-MiB-Servicepilot wiederverwenden, nicht neu aufbauen. Zuerst
+seine Diagnosecodec-/Budgetabweichungen gegenüber den aktuellen Application-/Interop-
+Adaptern feststellen. Einen isolierten, explizit budgetierten Ablauf mit den gemeinsamen
+aktuellen Prüfungen für Schreiben, frische Wiederaufnahme und vollständigen Rundlauf
+herstellen; Größen-/Pixel-/Zeit-/Heap-Stichprobengrenzen erhalten. Ergebnisse und
+verbleibende Kopien/RAM-Risiken mit dem alten Servicebeleg vergleichen. Keine pauschale
+Erhöhung der produktiven 128-MiB-Grenze oder neue Dateiarchitektur in diesem Auftrag.
+Die Messung muss die nächste konkrete Kapazitätsentscheidung tragen.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
