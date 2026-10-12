@@ -187,3 +187,39 @@ test("invalid revision metadata and unknown payloads are rejected without writes
     assert.equal(store.read(), raw);
   }
 });
+
+test("pattern resolution keeps exact aggregate budget for no-op and updated revisions", async () => {
+  const { resolveProjectHatchPatterns } = await import("./pattern-resolution.ts");
+  const { PROJECT_FILE_LIMIT, validatedProjectByteLength } =
+    await import("../../interop/project-file/size.ts");
+  const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
+  const p = project();
+  p.hatchPatterns = [{ ...pattern, revision: 1 }];
+  p.assets = Array.from({ length: 13 }, (_, i) =>
+    createImageAssetHandle({
+      id: `budget-${i}`,
+      mimeType: "image/png",
+      pixelWidth: 1,
+      pixelHeight: 1,
+      data: i < 12 ? "A".repeat(10 * 1024 * 1024) : "AAAA",
+    }),
+  );
+  const remaining = PROJECT_FILE_LIMIT - validatedProjectByteLength(p);
+  p.assets[12] = createImageAssetHandle({
+    ...p.assets[12]!,
+    data: "A".repeat(4 + Math.floor(remaining / 4) * 4),
+  });
+  p.id += "x".repeat(remaining % 4);
+  assert.equal(new TextEncoder().encode(JSON.stringify(p)).length, PROJECT_FILE_LIMIT);
+  assert.equal(resolveProjectHatchPatterns(p, p, []).project, p);
+  const updated = { ...pattern, revision: 2, name: "ä😀 longer" };
+  assert.throws(
+    () => resolveProjectHatchPatterns(p, p, [{ definition: updated, revision: 2 }]),
+    /128 MiB/,
+  );
+  assert.equal(p.hatchPatterns[0]!.revision, 1);
+  const over = { ...p, id: p.id + "ä" };
+  assert.throws(() => resolveProjectHatchPatterns(over, over, []), /128 MiB/);
+  const invalid = { ...p, assets: [{ ...p.assets[0]!, data: "!!!!" }] };
+  assert.throws(() => resolveProjectHatchPatterns(invalid, invalid, []), /base64/i);
+});

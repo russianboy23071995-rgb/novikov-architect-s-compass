@@ -984,3 +984,29 @@ zusätzlich ausgeführt. Unveränderter Produktcode: 912 Tests aus PR284 als bes
 Nachweis, nicht erneut ausgeführt. Browser zeigt 10014 Elemente; gespeicherte Datei
 (44) byteidentisch zur Eingabe (27), keine Konsolenfehler. Keine allgemeine Kapazitäts-
 oder Performancefreigabe; kein Cloudflare-/SSR-Nachweis.
+
+
+## Musterabgleich ohne Vollserialisierung (12.10.2026)
+
+PR286 übernommen. resolve nutzt nach der bestehenden vollständigen Validierung
+assertValidatedProjectSize(next). No-op behält die ursprüngliche Objektidentität;
+Revisionen/Konflikte/fehlende Definitionen und Rückgaben unverändert. Validierte
+Assetdaten sind kanonisches Base64, daher ist ihre Länge exakt zählbar. Keine
+zusätzlichen Caches oder Umgehung der Schema-Prüfung.
+
+913 Tests, Benchmark-Typecheck, gezieltes ESLint, regulärer Build und load-profile-
+Build bestanden. Neue Regression: exakt 128 MiB mit Bildpayload erlaubt; Wachstum
+bei Musterrevision und zusätzliche Unicodebytes abgewiesen; ungültiges Base64
+abgewiesen; Revision bei Fehler unverändert. Bestehende Revisions-/Historytests grün.
+
+Gleiche 101,96-MiB-Datei im Produktions-Workspace geladen, 10014 Elemente, Export
+(45) byteidentisch zu (27), keine Konsolenfehler. [Nachher](pattern-resolution-budget.json)
+gegen load-attribution-23.json: Musterabgleich 309,8 → 85,7 ms; Ladebefehl einschließlich
+History 360,9 → 149,3 ms. Gesamte erste Task dagegen 1718 → 1910 ms; Bildprüfung
+272,6 → 396 ms und BimPlan-Aufrufe 162,2 → 233,5 ms. Kein belegter End-to-End-Gewinn
+in diesem Einzelvergleich; unterschiedliche Lauf-/Systembedingungen, keine p95-Aussage.
+Verschachtelte Werte nicht addieren. Rest der Task weiterhin unzugeordnet.
+
+Nächster begrenzter Auftrag: Bild-URL-Prüfung im selben Produktionsprofil in Cache-
+Suche, Base64-Dekodierung, Bytekopie und Headerprüfung aufteilen; frische und warme
+Aufrufe trennen. Erst mit diesem Nachweis eine Bildpfadoptimierung auswählen.
