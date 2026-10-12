@@ -10730,3 +10730,13 @@ erfolgreich. Lokaler Median Baumvorbereitung 105,4→95,3 ms (sieben Paare), Bro
 164,5→154,9 ms (Einzellauf). Warmes Zoom ohne Neuaufbau, Roundtrip bytegleich.
 Rohdaten/Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md. Nächster Auftrag gemäß
 Masterplan: konsolidierter Produktionsablauf mit Änderung/Undo/Datei/Recovery.
+
+### R26-01/02, K02/03, RC07 · Produktions-Rundlauf 12.10.2026 (PR293)
+Produktstand 7e1a30e, mode production ohne Funktionsinstrumentierung: 101,96-MiB-
+Fixture laden, Wandhöhe ändern, Undo/Redo, Export/Wiederöffnen und manuelle lokale
+Sicherung mit Wiederaufnahme nach Reload bestanden. Recovery-Export bytegleich
+zum geänderten Projekt; ausschließlich beabsichtigte Wandhöhe gegenüber Eingabe.
+10014 Elemente, keine Konsolenfehler. Produktions-Workspace-Build erfolgreich;
+916 Produkttests aus PR292 unverändert. Kein Crash-/Quota-/Hardwarekapazitätsnachweis.
+Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md und production-roundtrip-recovery.json.
+Nächster Einzelauftrag: lange Tasks beim Recovery-Lesen phasenweise zuordnen.

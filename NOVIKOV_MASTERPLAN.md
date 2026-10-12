@@ -306,6 +306,14 @@ Median Baumvorbereitung 105,4→95,3 ms. Browserindex im Einzelvergleich 164,5�
 warmer Zoom ohne Neuaufbau, Export bytegleich, keine Konsolenfehler. Keine generelle
 Performance-/Kapazitätsfreigabe. Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md.
 
+**12.10.2026 · Konsolidierte Produktionsabnahme (PR293):** PR292 mit grüner CI
+gemergt. Ohne Funktionsinstrumentierung: große Fixture laden, Wandhöhe 2,90→3,10 m,
+Undo/Redo, Export/Wiederöffnen und manueller Snapshot mit Wiederherstellung nach
+Seitenneustart bestanden. Recovery-Export bytegleich zur gespeicherten Änderung;
+10014 Elemente, keine Konsolenfehler. Produktions-Workspace-Build erfolgreich.
+Lange Tasks verbleiben: Standprüfung bis 238 ms, anschließendes Laden bis 1400 ms;
+keine Gesamtlaufzeit-/Kapazitätsfreigabe. Nachweis: ASSET_RECOVERY_PILOT.md.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -374,7 +382,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: konsolidierte Produktionsabnahme der großen Datei.** Im regulären Produktions-Workspace ohne Funktionsinstrumentierung die dokumentierte Fixture (25) laden, ein Wandmaß ändern, Undo/Redo, speichern und wieder öffnen. Den letzten lokalen Wiederherstellungsstand mit demselben Modellzustand vergleichen. Laden, Bearbeiten, Speichern und Wiederherstellen getrennt dokumentieren; verbleibende Blockaden anhand dieses Ablaufs priorisieren. Keine weitere Mikrooptimierung oder Limitänderung ohne konkreten Befund.
+**Genau ein aktiver Fortsetzungsschritt: Recovery-Leseweg zuordnen.** „Stand prüfen“ für die dokumentierte Fixture (25) beziehungsweise ihren Snapshot gezielt in Speicherzugriff, Assetlesen/-prüfung, Rekonstruktion und Validierung aufteilen. Passiven Befund (13 lange Tasks, längste 238 ms) den vorhandenen Pfaden zuordnen und danach genau eine begrenzte Optimierung wählen. Keine Produktänderung, keine ausgelassene Validierung, keine neue Speicherarchitektur oder Limit-/Cacheerhöhung im Diagnoseauftrag.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
