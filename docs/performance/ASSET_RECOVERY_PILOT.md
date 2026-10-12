@@ -275,3 +275,40 @@ Vergleiche**. Die verbleibende Modellprüfung bündelt unter anderem erneute Ass
 Nächster begrenzter Auftrag laut Masterplan §9: vorhandene unveränderliche Asset-Handles
 bereits in den einzelnen geprüften Abschnitten aufbauen und für die Schlussprüfung nutzen,
 ohne IndexedDB-Daten pauschal zu vertrauen oder neue Vertrauensmarker einzuführen.
+
+## Vorbereitete Asset-Handles im Abschluss (12.10.2026)
+
+Basis `c85d2d3`, PR264 nach grüner CI und ausdrücklicher Freigabe zusammengeführt.
+`restoreCheckedSnapshot` prüft weiter Speicherschema, Bildheader und Inhaltsschlüssel
+jedes referenzierten Payloads. Danach erstellt es mit dem bestehenden
+`createImageAssetHandle` je logischer ID ein eigenes unveränderliches Handle. Diese
+Speicherschemaprüfung findet innerhalb der kooperativen Abschnitte statt. Die abschließende
+`validateProject`-Prüfung verwendet dieselben Handles und prüft weiter Modell und Referenzen.
+Keine neuen Vertrauensmarker; Datenbankobjekte gelten weiterhin als ungeprüft.
+Gemeinsamer Payload wird einmal gehasht; mehrere IDs und ihre Reihenfolge bleiben erhalten.
+Kein Zwischenergebnis wird veröffentlicht. Schreibtransaktion, Format und Produktion unverändert.
+
+[Gleiche isolierte 100-MiB-Fixture](recovery-handles-2026-10-12.json), frische Seite:
+
+| Messung | Drei Wiederholungen |
+| --- | --- |
+| Gesamter Service | 1.529 / 1.594 / 1.585 ms |
+| Handleaufbau, über alle Bildabschnitte summiert | 292 / 302 / 288 ms |
+| Abschließende Modellprüfung | 60,7 / 51,6 / 42,8 ms |
+| Längste Service-Task | 114 / 115 / 137 ms |
+
+Vorher Modellprüfung 347–391 ms und maximale Service-Task 390 ms. Die umfangreiche
+Speicherprüfung wird zeitlich verteilt, nicht weggelassen. Gesamtzeit nur moderat verändert;
+keine 60-fps-/p95-Garantie. Einzelne Tasks bleiben über 50 ms. Vergleichshashes und
+Speicherstichproben separat in den Rohdaten, keine Prozesspeak-/GPU-Aussage.
+
+Drei vollständige Modell-/Payload-/Revisionsvergleiche und drei Signalabbrüche bestanden.
+[Frischer Sicherheitslauf](recovery-handles-safety-2026-10-12.json): erneut 15 Prüfungen
+für 100 MiB einschließlich CAS, Rollback und defekter/fehlender Bilder. Drei neue
+Node-Regressionen: gleiche Inhalte mit getrennten IDs und erhaltenen Handleidentitäten;
+fehlende/korrupte Payloads sowie ungültige Ebenenreferenz; Abbruch bei Handleaufbau und
+nach Modellprüfung. 888 Tests, beide Typechecks und Build bestanden; Lint 0 Fehler/6
+bekannte Warnungen. Reproduktion unverändert über reine Leseseite und vorhandene Fixture.
+
+Die nachgewiesene 100-MiB-Basis reicht für die nächste begrenzte Größenmessung. Die
+Produktionsanbindung, Migration und allgemeine Dateifreigabe bleiben separat offen.
