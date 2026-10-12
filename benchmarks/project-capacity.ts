@@ -1,3 +1,5 @@
+import { createBoundedRecoveryCodec } from "../src/interop/project-file/recovery-codec";
+import { PROJECT_FILE_LIMIT } from "../src/interop/project-file/size";
 import { assertProjectFileSize } from "../src/interop/project-file/size";
 import { sameProjectModel } from "../src/domain/project/model-equality";
 import { recoveryFixture } from "./recovery-capacity-fixture";
@@ -150,23 +152,47 @@ run.onclick = async () => {
         "Gespeicherte Datei einschließlich Bilder identisch",
       ),
     );
-    const name = `novikov-capacity-test-${crypto.randomUUID()}`;
-    report["database"] = name;
-    const open = () => openRecoveryDatabase(name);
-    controller = createAutosaveController(createRecoveryCatalog(open, true), () => {});
-    controller.update(reopened.project, "first");
-    await phase("V2 sichern", () => controller!.saveNow());
-    controller.dispose();
-    controller = undefined;
-    const restored = await phase("V2 über frischen Katalog wiederaufnehmen", () =>
-      readProjectRecovery(createRecoveryCatalog(open, true), project.id),
-    );
-    await phase("Vollvergleich V2", () =>
-      check(
-        !!restored && serializeProject(restored.project) === text,
-        "V2-Wiederaufnahme vollständig identisch",
-      ),
-    );
+    for (let i = 1; i <= 3; i++) {
+      for (const mode of ["Vollpfad", "optimiert"]) {
+        const name = `novikov-capacity-test-${crypto.randomUUID()}`;
+        const open = () => openRecoveryDatabase(name);
+        const catalog = createRecoveryCatalog(open, true);
+        if (mode === "Vollpfad") {
+          const bounded = createBoundedRecoveryCodec({
+            modelBytes: PROJECT_FILE_LIMIT,
+            payloadBytes: PROJECT_FILE_LIMIT,
+            pixels: 128_000_000,
+          });
+          // The captured codec object is also used by the storage port. Reproduce the old
+          // product wrapper only in this diagnosis; no production injection API needed.
+          Object.assign(catalog.v2!.codec, {
+            async prepare(p: typeof reopened.project) {
+              assertProjectFileSize(serializeProject(p));
+              return bounded.prepare(p);
+            },
+            async restore(...args: Parameters<typeof bounded.restore>) {
+              const p = await bounded.restore(...args);
+              assertProjectFileSize(serializeProject(p));
+              return p;
+            },
+          });
+        }
+        controller = createAutosaveController(catalog, () => {});
+        controller.update(reopened.project, "first");
+        await phase(`V2 sichern ${mode} ${i}`, () => controller!.saveNow());
+        controller.dispose();
+        controller = undefined;
+        const restored = await phase(`V2 lesen ${mode} ${i}`, () =>
+          readProjectRecovery(catalog, project.id),
+        );
+        await phase(`V2 Vergleich ${mode} ${i}`, () =>
+          check(
+            !!restored && serializeProject(restored.project) === text,
+            `V2 ${mode} ${i} vollständig identisch`,
+          ),
+        );
+      }
+    }
     report["status"] = "passed";
     status.textContent = `Bestanden: ${checks.length} Prüfungen.`;
   } catch (error) {

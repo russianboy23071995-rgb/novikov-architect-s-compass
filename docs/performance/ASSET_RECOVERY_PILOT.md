@@ -564,3 +564,35 @@ neun Prüfungen inklusive Öffnen, Undo/Redo, Datei- und produktivem V2-Rundlauf
 Kein isolierter RAM-Peak, keine Hardware-/p95-Garantie und keine Canvas-Bedienabnahme.
 Weitere Lade-/Recoverykosten unverändert; nächster Einzelauftrag nur Masterplan §9.
 App-/Benchmark-Typechecks bestanden; Lint 0 Fehler und 6 bekannte Warnungen.
+
+
+## Produktives V2-Budget ohne Payloadserialisierung (12.10.2026)
+
+`createProjectRecoveryCodec` bündelt die bisherigen Produktionsbudgets. Vorbereitung
+validiert weiterhin vollständig; Wiederherstellung behält auch die zusätzliche bisherige
+Serialisierungsvalidierung bei. Lediglich die Gesamtgrößenprüfung verwendet jetzt die
+exakte Struktur-plus-Base64-Längenberechnung aus PR272. Hash-/Headerprüfung, getrennte
+Budgets, Quell-/Revisionsvergleich, Kontextprüfung, Vorgänger und atomare Katalogwrites
+bleiben bestehen. Kein neues Format und keine weitere Limitanhebung.
+
+[Messung](recovery-budget-2026-10-12.json): drei A/B-Paare mit 101,96 MiB. Für den alten
+Pfad ersetzt nur die Diagnoseseite das gemeinsame Codecobjekt durch den bisherigen
+Serialisierungswrapper; auch der Storage-Port verwendet dieses Objekt. Beide Varianten
+verwenden dieselben Application-/IndexedDB-Pfade, separate synthetische Datenbanken und
+den gleichen Ausgangsstand. Sicherungsmedian 4.645 → 3.234 ms (30 % kürzer), Lesemedian
+2.456 → 1.673 ms (32 % kürzer). Alle sechs vollständigen Recovery-Inhaltsvergleiche
+bestehen; insgesamt 14 Ablaufprüfungen einschließlich Datei, Commit und Undo.
+
+[Erneute Sicherheitsprüfung](recovery-budget-safety-2026-10-12.json): alle 19 bestehenden
+Browserfälle bestanden, darunter atomarer später Abbruch, V1-Erhalt, current/previous,
+unbekannte Version und Autosave mit Bild. Neuer Codec-Test prüft vollständigen Rundlauf,
+ungültiges Base64, übergroße UTF-8-Metadaten und Signalabbruch. 905 Tests, App-/Benchmark-
+Typechecks und Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+
+Drei sequenzielle A/B-Paare im Entwicklungsbrowser, kein p95-/Hardwareversprechen.
+Hauptthread-Aufgaben bleiben vorhanden. Heapwerte enthalten Kontrollkopien und sind kein
+isolierter Produkt-Peak. Keine echte Dateisystem-/Canvas- oder OS-Neustartabnahme.
+Nächster Einzelauftrag deshalb regulärer CAD-Workspace-Ablauf gemäß Masterplan §9.
+PR272 ist die noch offene Basis; dessen Merge wurde durch die wiederholte Freigabe
+von PR271 nicht vorausgesetzt.
+Hauptthread-Tasks innerhalb der gemessenen Phasen: Sicherung alt 1.783–1.836 ms, neu 1.217–1.536 ms; Lesen alt 637–940 ms, neu 120–142 ms. Phasenzuordnung anhand Startzeit, keine CPU-Ursachenanalyse.

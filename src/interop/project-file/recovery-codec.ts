@@ -8,6 +8,7 @@ import {
 } from "../../domain/elements/reference/model.ts";
 import { imageHeader } from "../images/import.ts";
 import { binaryBytes } from "../images/binary-bytes.ts";
+import { assertValidatedProjectSize, PROJECT_FILE_LIMIT } from "./size.ts";
 import type {
   RecoveryPayload as Payload,
   RecoveryDocument as Document,
@@ -180,6 +181,28 @@ export function createBoundedRecoveryCodec(limits: {
       control.signal?.throwIfAborted();
       check(doc);
       return restoreCheckedSnapshot(doc, control);
+    },
+  };
+}
+
+/** Product budgets over fully validated snapshots, without serializing image payloads. */
+export function createProjectRecoveryCodec() {
+  const bounded = createBoundedRecoveryCodec({
+    modelBytes: PROJECT_FILE_LIMIT,
+    payloadBytes: PROJECT_FILE_LIMIT,
+    pixels: 128_000_000,
+  });
+  return {
+    async prepare(input: Project) {
+      const project = validateProject(input);
+      assertValidatedProjectSize(project);
+      return bounded.prepare(project);
+    },
+    async restore(...args: Parameters<typeof bounded.restore>) {
+      const project = await bounded.restore(...args);
+      // Preserve the full validation previously performed by serializeProject.
+      assertValidatedProjectSize(validateProject(project));
+      return project;
     },
   };
 }

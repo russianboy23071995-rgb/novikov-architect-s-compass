@@ -1,0 +1,26 @@
+{
+  "name": "novikov-routing-test-782f1834-fa94-478d-9433-e7411e9c7901",
+  "started": "2026-10-12T16:21:52.390Z",
+  "checks": [
+    "V2-Upgrade erhält beide Katalogeinträge",
+    "Manueller V1-Originalslot unverändert",
+    "Auflisten migriert kein Projekt",
+    "V1-Wiederaufnahme vor Migration identisch",
+    "Bestehender Save-Controller publiziert V2",
+    "Ausgewähltes V1-Original bleibt erhalten",
+    "Anderes Projekt wird nicht migriert",
+    "Startangebot findet V2 nach Neustart",
+    "Wiederaufnahme nach Neustart vollständig identisch",
+    "Katalog und Head tragen denselben Speicherzeitpunkt",
+    "Später Abbruch verwirft Katalog- und Headwrite",
+    "Atomarer Rollback erhält Katalog und Head",
+    "Alter V1-Schreibpfad überschreibt keinen V2-Katalog",
+    "Beschädigtes current bietet gültigen Vorgänger an",
+    "Unbekannte Version wird als Fehler sichtbar",
+    "Unbekannte Version wird nicht überschrieben",
+    "Unlesbarer Stand bleibt im Katalog sichtbar",
+    "Gültiger Stand nach Fehlerprüfung unverändert",
+    "Automatische Sicherung über bestehenden Timer-/Controllerpfad übernimmt Bild und Modell"
+  ],
+  "status": "passed"
+}

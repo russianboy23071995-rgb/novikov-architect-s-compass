@@ -169,3 +169,27 @@ test("model, payload and pixel budgets apply to preparation and restore", async 
     /Invalid recovery budget/,
   );
 });
+
+test("product codec preserves full validation, exact aggregate rejection and abort", async () => {
+  const { createProjectRecoveryCodec } =
+    await import("../src/interop/project-file/recovery-codec.ts");
+  const { PROJECT_FILE_LIMIT } = await import("../src/interop/project-file/size.ts");
+  const codec = createProjectRecoveryCodec(),
+    p = project();
+  const doc = await codec.prepare(p);
+  assert.deepEqual(await codec.restore(doc), p);
+  const invalid = structuredClone(p);
+  invalid.assets[0]!.data = "wrong!";
+  await assert.rejects(codec.prepare(invalid));
+  const huge = {
+    ...p,
+    layers: p.layers.map((l, i) =>
+      i === 0 ? { ...l, name: "ä".repeat(PROJECT_FILE_LIMIT / 2) } : l,
+    ),
+  };
+  await assert.rejects(codec.prepare(huge), /128 MiB/);
+  const stop = new AbortController();
+  stop.abort();
+  await assert.rejects(codec.restore(doc, { signal: stop.signal }));
+  assert.deepEqual(await codec.restore(doc), p);
+});

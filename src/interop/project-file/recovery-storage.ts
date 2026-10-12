@@ -1,7 +1,5 @@
 import { createRecoveryV2Storage } from "./recovery-v2-storage.ts";
-import { createBoundedRecoveryCodec } from "./recovery-codec.ts";
-import { assertProjectFileSize, PROJECT_FILE_LIMIT } from "./size.ts";
-import { serializeProject } from "../../lib/bim/model.ts";
+import { createProjectRecoveryCodec } from "./recovery-codec.ts";
 import type { RecoveryV2Storage } from "../../application/project-files/recovery-v2.ts";
 import type {
   RecoveryCatalog,
@@ -123,22 +121,7 @@ export function createRecoveryCatalog(
   openDatabase: () => Promise<IDBDatabase>,
   useV2 = false,
 ): RecoveryCatalog {
-  const bounded = createBoundedRecoveryCodec({
-    modelBytes: PROJECT_FILE_LIMIT,
-    payloadBytes: PROJECT_FILE_LIMIT,
-    pixels: 128_000_000,
-  });
-  const codec = {
-    async prepare(project: Parameters<typeof bounded.prepare>[0]) {
-      assertProjectFileSize(serializeProject(project));
-      return bounded.prepare(project);
-    },
-    async restore(...args: Parameters<typeof bounded.restore>) {
-      const project = await bounded.restore(...args);
-      assertProjectFileSize(serializeProject(project));
-      return project;
-    },
-  };
+  const codec = createProjectRecoveryCodec();
   const projectV2 = (id: string): RecoveryV2Storage => ({
     async read() {
       const db = await openDatabase();
