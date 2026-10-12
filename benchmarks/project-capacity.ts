@@ -1,6 +1,8 @@
+import { assertProjectFileSize } from "../src/interop/project-file/size";
+import { sameProjectModel } from "../src/domain/project/model-equality";
 import { recoveryFixture } from "./recovery-capacity-fixture";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
-import { serializeProject, updateWall } from "../src/lib/bim/model";
+import { serializeProject, updateWall, validateProject } from "../src/lib/bim/model";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
 import {
   prepareProjectOpen,
@@ -101,9 +103,30 @@ run.onclick = async () => {
     );
     let history = await phase("History anlegen", () => createHistory(opened.project));
     const wall = history.present.storey.walls[0]!;
-    history = await phase("Wand ändern und committen", () =>
-      commitProject(history, updateWall(history.present, wall.id, { height: wall.height + 0.1 })),
-    );
+    const candidate = updateWall(history.present, wall.id, { height: wall.height + 0.1 });
+    const baselineCommit = () => {
+      const next = validateProject(candidate);
+      const json = JSON.stringify(next);
+      assertProjectFileSize(json);
+      if (json === serializeProject(history.present)) return history;
+      if (sameProjectModel(history.present, next)) return { ...history, present: next };
+      return { past: [...history.past, history.present].slice(-100), present: next, future: [] };
+    };
+    for (let i = 0; i < 3; i++) {
+      const old = await phase(`Commit Vollpfad ${i + 1}`, baselineCommit);
+      const optimized = await phase(`Commit optimiert ${i + 1}`, () =>
+        commitProject(history, candidate),
+      );
+      await phase(`Commit Vergleich ${i + 1}`, () =>
+        check(
+          serializeProject(old.present) === serializeProject(optimized.present) &&
+            old.past.length === optimized.past.length &&
+            old.future.length === optimized.future.length,
+          `Commit A/B ${i + 1} identisch`,
+        ),
+      );
+    }
+    history = commitProject(history, candidate);
     check(history.past.length === 1, "Änderung genau ein Undo-Schritt");
     history = await phase("Undo", () => undoProject(history));
     await phase("Vollvergleich Undo", () =>

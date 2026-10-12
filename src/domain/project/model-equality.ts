@@ -21,6 +21,11 @@ function equal(a: unknown, b: unknown): boolean {
   );
 }
 
+/** Complete serialized-content equality for schema-validated project snapshots. */
+export function sameProjectContent(a: Project, b: Project): boolean {
+  return equal(a, b);
+}
+
 /** Exact model comparison after validation; view settings stay outside model history. */
 export function sameProjectModel(a: Project, b: Project): boolean {
   const { bimVisibility: _a, workingViews: _av, ...left } = a;

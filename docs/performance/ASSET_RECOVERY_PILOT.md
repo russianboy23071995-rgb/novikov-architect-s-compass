@@ -535,3 +535,32 @@ Node-Kapazitätsdiagnose verwendet nun die aktuelle Grenze statt einer festen 32
 Annahme. Produktionsbuild bestanden. Alte Rohdaten und damalige Kapazitätsaussagen
 bleiben historisch unverändert.
 App- und Benchmark-Typechecks ebenfalls bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+
+
+## Modell-Commit ohne monolithische Payloadserialisierung (12.10.2026)
+
+Der Commit validiert neuen und bisherigen Stand weiterhin vollständig. Für den exakten
+UTF-8-Dateiumfang serialisiert `validatedProjectByteLength` alle Felder einschließlich
+leerer Asset-Datenstrings und addiert die Längen der schema-geprüften kanonischen
+Base64-Strings. Diese sind ASCII und benötigen keine JSON-Escapes. Jeder Asset-Eintrag
+zählt, auch mehrfach verwendete Payloads. Keine IDs als Vertrauenssignal und kein Cache
+auf veränderlichen Projekten. Der Baustein darf ausschließlich nach Schema-Prüfung
+verwendet werden; ungeprüfte Dateieingänge behalten ihre Textbyteprüfung.
+
+Der vorhandene strukturierte Vergleich prüft nun auch vollständige Inhalte für No-op;
+Ansichtseinstellungen bleiben wie zuvor außerhalb der Modellhistory. Keine Delta-History,
+keine Änderung der 128-MiB-Grenze oder des Dateiformats. Die bisherigen Übergrößentests
+prüfen weiterhin gültige Einzelbilder oberhalb der Gesamtgrenze und unveränderte History.
+Neue Tests vergleichen UTF-8 mit Umlauten, Emoji, Escapes, mehreren Payloads und Reihenfolge
+gegen vollständiges JSON und prüfen No-op sowie reine Sichtbarkeitsänderungen.
+
+[Browser-A/B](commit-assets-2026-10-12.json), gleiche Seite `/benchmarks/project-capacity.html`:
+drei Paare mit identischem validiertem Ausgangsstand/Kandidaten (101,96 MiB). Der alte
+Commitpfad ist explizit als Vergleich in der Diagnoseseite enthalten. Vollpfad 608–668 ms,
+optimiert 81–122 ms; Median 643,5 → 97,9 ms (etwa 85 % kürzer). Kontrollvergleiche laufen
+außerhalb der Commitmessungen. Alle drei Ergebnisse und Historylängen identisch; insgesamt
+neun Prüfungen inklusive Öffnen, Undo/Redo, Datei- und produktivem V2-Rundlauf bestanden.
+904 Node-Tests und Produktionsbuild bestanden. Es bleiben Hauptthread-Aufgaben über 50 ms.
+Kein isolierter RAM-Peak, keine Hardware-/p95-Garantie und keine Canvas-Bedienabnahme.
+Weitere Lade-/Recoverykosten unverändert; nächster Einzelauftrag nur Masterplan §9.
+App-/Benchmark-Typechecks bestanden; Lint 0 Fehler und 6 bekannte Warnungen.

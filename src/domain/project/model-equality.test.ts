@@ -82,3 +82,32 @@ test("model edits, visibility, noop and undo retain existing transaction behavio
     }),
   );
 });
+
+test("validated byte accounting equals full UTF-8 JSON with escaped text and multiple payloads", async () => {
+  const { validatedProjectByteLength } = await import("../../interop/project-file/size.ts");
+  const p = fixture();
+  p.layers[0]!.name = "ä😀" + String.fromCharCode(34, 92, 10);
+  p.assets.push(createImageAssetHandle({ ...p.assets[0]!, id: "second", data: "AQIDBA==" }));
+  for (const source of [p, { ...p, assets: [] }, { ...p, assets: [...p.assets].reverse() }]) {
+    const checked = validateProject(source);
+    assert.equal(
+      validatedProjectByteLength(checked),
+      new TextEncoder().encode(JSON.stringify(checked)).byteLength,
+    );
+  }
+});
+test("complete equality includes view settings and preserves no-op history", async () => {
+  const { sameProjectContent } = await import("./model-equality.ts");
+  const p = validateProject(fixture());
+  const h = createHistory(p);
+  assert.equal(commitProject(h, structuredClone(p)), h);
+  const view = validateProject({
+    ...p,
+    bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.line] },
+  });
+  assert.equal(sameProjectContent(p, view), false);
+  assert.equal(sameProjectModel(p, view), true);
+  const changed = commitProject(h, view);
+  assert.equal(changed.past.length, 0);
+  assert.deepEqual(changed.present, view);
+});
