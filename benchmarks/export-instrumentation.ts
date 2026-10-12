@@ -10,8 +10,16 @@ export function exportInstrumentation(): Plugin {
       if (path.endsWith("/src/lib/bim/model.ts"))
         pairs = [
           [
-            "JSON.stringify(validateProject(project))",
-            'measureExport("stringify", () => JSON.stringify(measureExport("validate", () => validateProject(project))))',
+            "const checked = validateProject(project);",
+            'const checked = measureExport("validate", () => validateProject(project));',
+          ],
+          [
+            "assertValidatedProjectSize(checked);",
+            'measureExport("validated-size", () => assertValidatedProjectSize(checked));',
+          ],
+          [
+            "return JSON.stringify(checked);",
+            'return measureExport("stringify", () => JSON.stringify(checked));',
           ],
         ];
       if (path.endsWith("/src/interop/project-file/size.ts"))

@@ -10675,3 +10675,7 @@ Produktiver React-/Workspace-Client auf isoliertem Ursprung, ohne Profiler/Diagn
 
 ### R26-01/02 · Exportgrößenprüfung 12.10.2026
 Redundante zweite assertProjectFileSize nach serializeProject entfernt. Vollständige Modellvalidierung und exakte UTF-8-Grenze bleiben im Serializer. Vier Exporte byteidentisch, 908 Tests bestanden. Zwei Vorher-/Nachherläufe: Tasks 974/1126 → 710/620 ms. Diagnose nur per explizitem export-profile-Build. Restliche Kopierkosten und Ladepause offen; nächste einzelne Aufgabe im Masterplan.
+
+
+### R26-01/02 · Serializer-Budget 12.10.2026
+Nach vollständiger Validierung zählt serializeProject das exakte JSON-UTF-8-Budget mit dem vorhandenen gemeinsamen Baustein, ohne eine vollständige Payload-Encodingkopie. Dateiinhalt unverändert. Exakt 128 MiB erlaubt; zusätzliche Unicode-Bytes abgewiesen. 910 Tests, zwei byteidentische Browserexporte; Größenphase 11–16 ms. Nächster Einzelauftrag laut Masterplan: gleicher Baustein bei Dateivorbereitung, ohne Prüf-/Abbruchvertrag zu schwächen.

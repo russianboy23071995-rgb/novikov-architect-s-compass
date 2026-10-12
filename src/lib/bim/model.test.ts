@@ -181,3 +181,46 @@ test("caller-owned inputs are detached from returned snapshots", () => {
   input.start.x = 100;
   assert.equal(project.storey.walls[0]!.start.x, 0);
 });
+
+test("serializer matches the full JSON oracle for Unicode, escapes and duplicate payloads", async () => {
+  const { validateProject } = await import("./model.ts");
+  const p = createProject("unicode", "level");
+  p.layers[0]!.name = 'ä😀"\\\n' + String.fromCharCode(0xd800);
+  p.assets = ["one", "two"].map((id) => ({
+    id,
+    mimeType: "image/png",
+    pixelWidth: 1,
+    pixelHeight: 1,
+    data: "AAAA",
+  }));
+  assert.equal(serializeProject(p), JSON.stringify(validateProject(p)));
+  p.assets[0]!.data = "!!!!";
+  assert.throws(() => serializeProject(p));
+});
+
+test("serializer accepts exactly 128 MiB and rejects an extra Unicode character", async () => {
+  const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
+  const { PROJECT_FILE_LIMIT, validatedProjectByteLength } =
+    await import("../../interop/project-file/size.ts");
+  const p = createProject("boundary", "level");
+  const payload = "A".repeat(10 * 1024 * 1024);
+  p.assets = Array.from({ length: 13 }, (_, i) =>
+    createImageAssetHandle({
+      id: `a${i}`,
+      mimeType: "image/png",
+      pixelWidth: 1,
+      pixelHeight: 1,
+      data: i < 12 ? payload : "AAAA",
+    }),
+  );
+  const remaining = PROJECT_FILE_LIMIT - validatedProjectByteLength(p);
+  p.assets[12] = createImageAssetHandle({
+    ...p.assets[12]!,
+    data: "A".repeat(4 + Math.floor(remaining / 4) * 4),
+  });
+  p.id += "x".repeat(remaining % 4);
+  const text = serializeProject(p);
+  assert.equal(new TextEncoder().encode(text).byteLength, PROJECT_FILE_LIMIT);
+  p.id += "ä";
+  assert.throws(() => serializeProject(p), /128 MiB/);
+});
