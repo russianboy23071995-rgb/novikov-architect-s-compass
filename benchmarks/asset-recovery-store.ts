@@ -1,10 +1,9 @@
 /** Isolated experiment: no production import, migration or garbage collection. */
 import { validateProject, type Project } from "../src/domain/project/schema.ts";
-import type { ImageAsset } from "../src/domain/elements/reference/model.ts";
+import { createImageAssetHandle, type ImageAsset } from "../src/domain/elements/reference/model.ts";
 import {
   payloadKey,
   verifyPayload,
-  restoreProject,
   type Document,
   type Manifest,
   type Payload,
@@ -21,6 +20,37 @@ export async function readCheckpoint(control: ReadControl) {
   control.signal?.throwIfAborted();
   await (control.schedule?.() ?? new Promise<void>((resolve) => setTimeout(resolve, 0)));
   control.signal?.throwIfAborted();
+}
+/** Owned DB snapshot only. Reuse existing handle capability, never trust persisted flags. */
+export async function restoreCheckedSnapshot(
+  doc: Document,
+  probe: ReadControl = {},
+): Promise<Project> {
+  await readCheckpoint(probe);
+  const groups = new Map<string, { id: string; index: number }[]>();
+  doc.model.assets.forEach((a, index) => {
+    const group = groups.get(a.key) ?? [];
+    group.push({ id: a.id, index });
+    groups.set(a.key, group);
+  });
+  const assets: ImageAsset[] = new Array(doc.model.assets.length);
+  for (const [key, links] of groups) {
+    const raw = doc.blobs[key];
+    if (!raw) throw new Error("Missing asset");
+    const payload = verifyPayload(raw, probe);
+    if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
+    for (const link of links) {
+      const handleStart = performance.now();
+      assets[link.index] = createImageAssetHandle({ ...payload, id: link.id });
+      probe.measure?.("handles", performance.now() - handleStart);
+      await readCheckpoint(probe);
+    }
+  }
+  const validateStart = performance.now();
+  const project = validateProject({ ...doc.model, assets });
+  probe.measure?.("model", performance.now() - validateStart);
+  await readCheckpoint(probe);
+  return project;
 }
 export function createPreparation(profile: 50 | 100 = 50) {
   if (profile !== 50 && profile !== 100) throw new Error("Unknown pilot profile");
@@ -172,18 +202,7 @@ export function createAssetRecoveryStore(db: IDBDatabase) {
         };
       });
       probe.measure?.("indexedDB", performance.now() - readStart);
-      await readCheckpoint(probe);
-      for (const [key, raw] of Object.entries(snapshot.blobs)) {
-        const payload = verifyPayload(raw, probe);
-        if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
-        snapshot.blobs[key] = payload;
-        await readCheckpoint(probe);
-      }
-      const validateStart = performance.now();
-      const project = restoreProject(snapshot);
-      probe.measure?.("model", performance.now() - validateStart);
-      // Deliver pending user cancellation before publishing a completely validated result.
-      await readCheckpoint(probe);
+      const project = await restoreCheckedSnapshot(snapshot, probe);
       return { project, revision: snapshot.revision };
     },
   };

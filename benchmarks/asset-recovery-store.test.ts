@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { createProject } from "../src/lib/bim/model.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
-import { createPreparation, openPilotDatabase, readCheckpoint } from "./asset-recovery-store.ts";
+import {
+  createPreparation,
+  openPilotDatabase,
+  readCheckpoint,
+  restoreCheckedSnapshot,
+} from "./asset-recovery-store.ts";
 import { restoreProject, verifyPayload, payloadKey } from "./asset-contract.ts";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 const png =
@@ -14,6 +19,65 @@ const asset = () => ({
   pixelWidth: 1,
   pixelHeight: 1,
   data: png,
+});
+
+test("checked snapshot preserves separate logical IDs and trusted handle identities", async () => {
+  const p = recoveryFixture("handles", 1);
+  p.assets.push(asset(), { ...asset(), id: "b" });
+  const doc = await createPreparation().prepare(p);
+  let hashes = 0;
+  const q = await restoreCheckedSnapshot(doc, {
+    measure: (name) => {
+      if (name === "hash") hashes++;
+    },
+  });
+  assert.deepEqual(q, validateProject(p));
+  assert.equal(hashes, 1);
+  assert.deepEqual(
+    q.assets.map((a) => a.id),
+    ["a", "b"],
+  );
+  assert.notEqual(q.assets[0], q.assets[1]);
+  assert.ok(q.assets.every(Object.isFrozen));
+  assert.equal(validateProject(q).assets[0], q.assets[0]);
+});
+
+test("checked snapshot rejects missing/corrupt payloads and invalid model references", async () => {
+  const p = recoveryFixture("bad", 1);
+  p.assets.push(asset());
+  const doc = await createPreparation().prepare(p);
+  await assert.rejects(() => restoreCheckedSnapshot({ ...doc, blobs: {} }), /Missing asset/);
+  const key = doc.model.assets[0]!.key;
+  await assert.rejects(
+    () =>
+      restoreCheckedSnapshot({
+        ...doc,
+        blobs: { [key]: { ...doc.blobs[key]!, data: png.replace("42mP8", "42mP9") } },
+      }),
+    /integrity mismatch/,
+  );
+  const bad = structuredClone(doc);
+  bad.model.storey.lines![0]!.layerId = "missing-layer";
+  await assert.rejects(() => restoreCheckedSnapshot(bad));
+});
+
+test("checked handles never escape cancellation during preparation or after model validation", async () => {
+  const p = recoveryFixture("abort", 1);
+  p.assets.push(asset());
+  const doc = await createPreparation().prepare(p);
+  for (const when of ["handles", "model"]) {
+    const controller = new AbortController();
+    await assert.rejects(
+      () =>
+        restoreCheckedSnapshot(doc, {
+          signal: controller.signal,
+          measure: (name) => {
+            if (name === when) controller.abort();
+          },
+        }),
+      { name: "AbortError" },
+    );
+  }
 });
 
 test("read checkpoint yields a task and observes cancellation before and after scheduling", async () => {
