@@ -1,0 +1,77 @@
+{
+  "started": "2026-10-12T13:28:53.726Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "dbName": "novikov-asset-recovery-pilot-1fff4f66-703c-4dce-ac72-ddae58e28ba8",
+  "phases": [
+    {
+      "name": "Fixture mit unterschiedlichen PNGs erzeugen",
+      "ms": 949.4000000059605
+    },
+    {
+      "name": "Erste Assetvorbereitung",
+      "ms": 3678.9000000059605
+    },
+    {
+      "name": "Erste atomare Ablage",
+      "ms": 323.5
+    },
+    {
+      "name": "Unveränderte Assets wiederverwenden",
+      "ms": 41
+    },
+    {
+      "name": "Zweiten Modellstand veröffentlichen",
+      "ms": 85
+    },
+    {
+      "name": "Monolithische Recovery-Hülle schreiben",
+      "ms": 316.59999999403954
+    },
+    {
+      "name": "Monolithische Recovery lesen und validieren",
+      "ms": 553.9000000059605
+    },
+    {
+      "name": "Recovery nach erneutem Datenbanköffnen",
+      "ms": 4154.5
+    },
+    {
+      "name": "Vorgänger prüfen",
+      "ms": 4203.0999999940395
+    },
+    {
+      "name": "Stand nach Fehlern unverändert",
+      "ms": 4304.0999999940395
+    }
+  ],
+  "checks": [
+    "first write stores each different asset once",
+    "geometry edit does not rehash payloads",
+    "second revision writes zero image bytes",
+    "monolithic control roundtrip",
+    "current full model roundtrip after reopen",
+    "previous full model roundtrip",
+    "stale writer rejected",
+    "transaction abort after queued writes",
+    "aborted new asset not persisted",
+    "conflict and abort preserve published head",
+    "corrupt asset rejects recovery before model return",
+    "missing asset rejects recovery before model return"
+  ],
+  "projectBytes": 54268053,
+  "images": 6,
+  "first": {
+    "revision": "0cedf4d6-2bbb-45c0-bbc1-2d10458a2a61",
+    "payloadWrites": 6,
+    "payloadBytes": 52642006,
+    "manifestBytes": 1626553
+  },
+  "second": {
+    "revision": "4b87a423-da76-488d-bd02-dbb5bc16f113",
+    "payloadWrites": 0,
+    "payloadBytes": 0,
+    "manifestBytes": 3253056
+  },
+  "controlBytes": 109177178,
+  "status": "passed"
+}
