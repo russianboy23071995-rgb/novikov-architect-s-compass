@@ -1,0 +1,218 @@
+import {
+  parseRecoveryV2,
+  restoreRecoveryV2,
+  type RecoveryV2Storage,
+  type RecoveryV2Codec,
+  type RecoveryRecordV2,
+  type RecoverySnapshotV2,
+  type RecoveryPayload,
+} from "../../application/project-files/recovery-v2.ts";
+
+type StoredSnapshot = Omit<RecoverySnapshotV2, "document"> & {
+  model: RecoverySnapshotV2["document"]["model"];
+};
+type StoredHead = Omit<RecoveryRecordV2, "current" | "previous"> & {
+  current: StoredSnapshot;
+  previous?: StoredSnapshot;
+};
+const stores = ["legacy", "heads", "assets"];
+/** Explicitly isolated until production catalog/upgrade integration is approved. */
+export function openRecoveryV2Pilot(name: string): Promise<IDBDatabase> {
+  if (!name.startsWith("novikov-recovery-v2-pilot-")) throw new Error("Diagnostic database only");
+  return new Promise((resolve, reject) => {
+    let blocked = false;
+    const request = indexedDB.open(name, 1);
+    request.onupgradeneeded = () => {
+      for (const name of stores) request.result.createObjectStore(name);
+    };
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => {
+      blocked = true;
+      reject(new Error("Recovery database blocked"));
+    };
+    request.onsuccess = () => {
+      if (blocked) request.result.close();
+      else {
+        request.result.onversionchange = () => request.result.close();
+        resolve(request.result);
+      }
+    };
+  });
+}
+/** Slot-bound adapter. Codec validation precedes transaction; CAS covers concurrent preparation. */
+export function createRecoveryV2Storage(
+  db: IDBDatabase,
+  projectId: string,
+  codec: RecoveryV2Codec,
+): RecoveryV2Storage {
+  return {
+    read() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(stores, "readonly");
+        let legacy: string | null = null,
+          record: unknown | null = null,
+          problem: unknown;
+        const fail = (error: unknown) => {
+          problem = error;
+          tx.abort();
+        };
+        tx.onabort = () => reject(problem ?? tx.error ?? new Error("Recovery read aborted"));
+        tx.oncomplete = () => resolve({ legacy, record });
+        const old = tx.objectStore("legacy").get(projectId);
+        old.onsuccess = () => {
+          if (old.result !== undefined && typeof old.result !== "string") {
+            fail(new Error("Invalid legacy slot"));
+            return;
+          }
+          legacy = old.result ?? null;
+        };
+        const head = tx.objectStore("heads").get(projectId);
+        head.onsuccess = () => {
+          if (head.result === undefined) return;
+          try {
+            // Unknown versions remain available to the Application rejection path.
+            const raw = head.result as StoredHead;
+            if (raw?.version !== 2) {
+              record = raw;
+              return;
+            }
+            parseRecoveryV2(raw);
+            const hydrate = (s: StoredSnapshot): RecoverySnapshotV2 => {
+              const blobs: Record<string, RecoveryPayload> = Object.create(null);
+              const result = { savedAt: s?.savedAt, document: { model: s?.model, blobs } };
+              // Preserve a malformed candidate so Application can try previous.
+              if (Array.isArray(s?.model?.assets)) {
+                const keys = s.model.assets.flatMap((a) =>
+                  typeof a?.key === "string" ? [a.key] : [],
+                );
+                for (const key of new Set(keys)) {
+                  const asset = tx.objectStore("assets").get(key);
+                  asset.onsuccess = () => {
+                    if (asset.result !== undefined) blobs[key] = asset.result;
+                  };
+                }
+              }
+              return result;
+            };
+            record = {
+              ...raw,
+              current: hydrate(raw.current),
+              ...(raw.previous ? { previous: hydrate(raw.previous) } : {}),
+            };
+          } catch (error) {
+            fail(error);
+          }
+        };
+      });
+    },
+    async publish(expected, input, signal) {
+      signal?.throwIfAborted();
+      // Own the candidate before any async validation; caller mutation cannot alter the commit.
+      const next = structuredClone(input);
+      const tokens = { ...expected };
+      if (next.projectId !== projectId || next.revision === tokens.revision)
+        throw new Error("Recovery context/revision conflict");
+      // Validate both individually: an invalid new current must not hide behind previous.
+      const validate = async (current: RecoverySnapshotV2) => {
+        await restoreRecoveryV2(
+          { version: next.version, projectId, revision: next.revision, current },
+          projectId,
+          codec,
+          signal,
+        );
+      };
+      await validate(next.current);
+      if (next.previous) await validate(next.previous);
+      signal?.throwIfAborted();
+      const payloads = new Map<string, Readonly<RecoveryPayload>>();
+      const strip = (s: RecoverySnapshotV2): StoredSnapshot => {
+        for (const link of s.document.model.assets) {
+          const p = s.document.blobs[link.key]!;
+          const old = payloads.get(link.key);
+          if (old && !samePayload(old, p)) throw new Error("Payload collision");
+          payloads.set(link.key, p);
+        }
+        return { savedAt: s.savedAt, model: s.document.model };
+      };
+      const head: StoredHead = {
+        version: 2,
+        projectId,
+        revision: next.revision,
+        current: strip(next.current),
+        ...(next.previous ? { previous: strip(next.previous) } : {}),
+      };
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(stores, "readwrite");
+        let problem: unknown;
+        const abort = () => {
+          try {
+            tx.abort();
+          } catch {
+            /* Already committed: success wins. */
+          }
+        };
+        const fail = (error: unknown) => {
+          problem = error;
+          abort();
+        };
+        const cleanup = () => signal?.removeEventListener("abort", abort);
+        tx.onabort = () => {
+          cleanup();
+          reject(
+            problem ??
+              (signal?.aborted ? signal.reason : tx.error) ??
+              new Error("Recovery write aborted"),
+          );
+        };
+        tx.oncomplete = () => {
+          cleanup();
+          resolve();
+        };
+        signal?.addEventListener("abort", abort, { once: true });
+        if (signal?.aborted) {
+          abort();
+          return;
+        }
+        const oldLegacy = tx.objectStore("legacy").get(projectId);
+        const oldHead = tx.objectStore("heads").get(projectId);
+        let ready = 0;
+        const check = () => {
+          if (++ready !== 2) return;
+          try {
+            const old = oldHead.result === undefined ? null : parseRecoveryV2(oldHead.result);
+            if (
+              (oldLegacy.result ?? null) !== tokens.legacy ||
+              (old?.revision ?? null) !== tokens.revision ||
+              (old && old.projectId !== projectId)
+            )
+              throw new Error("Recovery revision conflict");
+            for (const [key, payload] of payloads) {
+              const request = tx.objectStore("assets").get(key);
+              request.onsuccess = () => {
+                if (request.result === undefined) tx.objectStore("assets").add(payload, key);
+                else if (!samePayload(request.result, payload))
+                  fail(new Error("Stored payload mismatch"));
+              };
+            }
+            tx.objectStore("heads").put(head, projectId);
+          } catch (error) {
+            fail(error);
+          }
+        };
+        oldLegacy.onsuccess = check;
+        oldHead.onsuccess = check;
+      });
+    },
+  };
+}
+function samePayload(a: RecoveryPayload, b: RecoveryPayload) {
+  return (
+    a !== null &&
+    typeof a === "object" &&
+    Object.keys(a).length === 4 &&
+    a?.mimeType === b.mimeType &&
+    a?.pixelWidth === b.pixelWidth &&
+    a?.pixelHeight === b.pixelHeight &&
+    a?.data === b.data
+  );
+}
