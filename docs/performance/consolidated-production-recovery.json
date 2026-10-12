@@ -1,0 +1,177 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 467.80000001192093,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 729.4000000059605,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 24028,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 24315.80000001192,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 27706.90000000596,
+      "label": "Save project"
+    },
+    {
+      "at": 31000.80000001192,
+      "label": "Abbilder"
+    },
+    {
+      "at": 45256.70000001788,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 231.2000000178814,
+      "duration": 66
+    },
+    {
+      "start": 922.7000000178814,
+      "duration": 70
+    },
+    {
+      "start": 1061.300000011921,
+      "duration": 124
+    },
+    {
+      "start": 1186.2000000178814,
+      "duration": 127
+    },
+    {
+      "start": 1330,
+      "duration": 120
+    },
+    {
+      "start": 1450.9000000059605,
+      "duration": 118
+    },
+    {
+      "start": 1569.9000000059605,
+      "duration": 117
+    },
+    {
+      "start": 1687.6000000238419,
+      "duration": 122
+    },
+    {
+      "start": 1815.4000000059605,
+      "duration": 131
+    },
+    {
+      "start": 1968,
+      "duration": 132
+    },
+    {
+      "start": 2116.5,
+      "duration": 111
+    },
+    {
+      "start": 2232.5,
+      "duration": 113
+    },
+    {
+      "start": 2350.9000000059605,
+      "duration": 108
+    },
+    {
+      "start": 2464,
+      "duration": 107
+    },
+    {
+      "start": 2575.9000000059605,
+      "duration": 64
+    },
+    {
+      "start": 2644.300000011921,
+      "duration": 62
+    },
+    {
+      "start": 24315.5,
+      "duration": 2178
+    },
+    {
+      "start": 26494.100000023842,
+      "duration": 129
+    },
+    {
+      "start": 27109.90000000596,
+      "duration": 110
+    },
+    {
+      "start": 27224.5,
+      "duration": 116
+    },
+    {
+      "start": 27360.90000000596,
+      "duration": 111
+    },
+    {
+      "start": 27482.100000023842,
+      "duration": 104
+    },
+    {
+      "start": 27596.40000000596,
+      "duration": 109
+    },
+    {
+      "start": 27706.100000023842,
+      "duration": 394
+    },
+    {
+      "start": 28128.30000001192,
+      "duration": 109
+    },
+    {
+      "start": 28250.30000001192,
+      "duration": 121
+    },
+    {
+      "start": 28375.70000001788,
+      "duration": 121
+    },
+    {
+      "start": 28503.80000001192,
+      "duration": 107
+    },
+    {
+      "start": 28623.70000001788,
+      "duration": 106
+    },
+    {
+      "start": 28735.100000023842,
+      "duration": 110
+    },
+    {
+      "start": 28849.80000001192,
+      "duration": 109
+    },
+    {
+      "start": 28963.80000001192,
+      "duration": 53
+    },
+    {
+      "start": 29020.90000000596,
+      "duration": 190
+    },
+    {
+      "start": 44119.20000001788,
+      "duration": 827
+    },
+    {
+      "start": 44946.70000001788,
+      "duration": 128
+    }
+  ],
+  "exportPhases": [],
+  "build": "production-workspace"
+}
