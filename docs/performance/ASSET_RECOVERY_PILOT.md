@@ -798,3 +798,27 @@ bestanden; die 908 Modelltests des vorherigen PR wurden hier nicht erneut ausgef
 
 Nächster begrenzter Auftrag: produktive Exportphasen messen und Ursache der
 1,1–1,3-s-Blockade zuordnen. Ladepause bleibt separat offen.
+
+
+## Exportphasen und doppelte Größenprüfung (12.10.2026)
+
+Expliziter Messbuild: `vite build --config benchmarks/production-workspace.config.ts --mode export-profile`.
+Ohne diesen Modus keine Exporttransforms. Gleicher Produktions-Workspace, Recoverystand
+capacity-100 einschließlich Abbild und Höhe 2,9. Zwei echte Downloads vorher und nachher.
+[Vorher](export-phases-before.json), [nachher](export-phases-after.json).
+
+Vorher: Validierung 38/75 ms, stringify inklusive Validierung 116/160 ms (verschachtelt!),
+UTF-8-Größe zweimal 267+296 / 313+302 ms, Blob+URL 276/312 ms.
+serializeProject prüft bereits Größe; requestProjectDownload tat dies unmittelbar nochmals.
+Nur der zweite Aufruf entfernt, unveränderte Modell-/UTF-8-Prüfung bleibt im Serializer.
+Nachher: eine Größenprüfung 273/259 ms, Blob+URL 256/238 ms, Export-Tasks 710/620 ms
+gegenüber 974/1126 ms. Wenige Läufe, keine statistische Endgerätegarantie. Blob+URL umfasst
+nicht den bestätigten Datenträgerabschluss; Downloadstatus bleibt download-requested.
+
+Downloads novikov-project (31) bis (34).json bytegenau identisch, einschließlich Bilder,
+Modell und Abbild. 908 Tests, Benchmark-Typecheck, gezieltes Lint, isolierter Messbuild
+und normaler Produktionsbuild bestanden. Sicherheits-/Fehler-/Limitfälle der bestehenden
+Application- und Serializer-Tests bleiben erhalten. Keine Format-/Budgetänderung.
+
+Nächster begrenzter Pilot: vorhandenen exakten Größenbaustein für validierte Base64-Assets
+im Serializer prüfen, damit auch die verbleibende vollständige UTF-8-Payloadkopie entfällt.

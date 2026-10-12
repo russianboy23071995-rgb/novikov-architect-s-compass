@@ -1,0 +1,239 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 6218.699999988079,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 6500.299999982119,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 14679.799999982119,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 14965.799999982119,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 23906.69999998808,
+      "label": "Save project"
+    },
+    {
+      "at": 27054.90000000596,
+      "label": "Save project"
+    },
+    {
+      "at": 30408.79999998212,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 77.2999999821186,
+      "duration": 58
+    },
+    {
+      "start": 137.2999999821186,
+      "duration": 171
+    },
+    {
+      "start": 6943.5999999940395,
+      "duration": 139
+    },
+    {
+      "start": 7083.5999999940395,
+      "duration": 130
+    },
+    {
+      "start": 7213.799999982119,
+      "duration": 120
+    },
+    {
+      "start": 7334.299999982119,
+      "duration": 120
+    },
+    {
+      "start": 7454.9000000059605,
+      "duration": 121
+    },
+    {
+      "start": 7576.199999988079,
+      "duration": 117
+    },
+    {
+      "start": 7697.9000000059605,
+      "duration": 112
+    },
+    {
+      "start": 7815.5,
+      "duration": 114
+    },
+    {
+      "start": 7934.199999988079,
+      "duration": 118
+    },
+    {
+      "start": 8057.0999999940395,
+      "duration": 117
+    },
+    {
+      "start": 8179.299999982119,
+      "duration": 114
+    },
+    {
+      "start": 8297.699999988079,
+      "duration": 117
+    },
+    {
+      "start": 8420,
+      "duration": 57
+    },
+    {
+      "start": 8483.09999999404,
+      "duration": 60
+    },
+    {
+      "start": 14965.5,
+      "duration": 2112
+    },
+    {
+      "start": 17077.90000000596,
+      "duration": 134
+    },
+    {
+      "start": 17332.59999999404,
+      "duration": 90
+    },
+    {
+      "start": 17461.29999998212,
+      "duration": 131
+    },
+    {
+      "start": 17592.90000000596,
+      "duration": 110
+    },
+    {
+      "start": 17713.09999999404,
+      "duration": 102
+    },
+    {
+      "start": 17815.59999999404,
+      "duration": 116
+    },
+    {
+      "start": 17937.69999998808,
+      "duration": 113
+    },
+    {
+      "start": 18051.69999998808,
+      "duration": 107
+    },
+    {
+      "start": 18163.59999999404,
+      "duration": 110
+    },
+    {
+      "start": 18278.5,
+      "duration": 109
+    },
+    {
+      "start": 18392.5,
+      "duration": 106
+    },
+    {
+      "start": 18504.19999998808,
+      "duration": 106
+    },
+    {
+      "start": 18615,
+      "duration": 109
+    },
+    {
+      "start": 18729.19999998808,
+      "duration": 119
+    },
+    {
+      "start": 18901.59999999404,
+      "duration": 117
+    },
+    {
+      "start": 23906.19999998808,
+      "duration": 974
+    },
+    {
+      "start": 27054.69999998808,
+      "duration": 1126
+    }
+  ],
+  "exportPhases": [
+    {
+      "phase": "utf8-size",
+      "start": 146.19999998807907,
+      "duration": 0.4000000059604645
+    },
+    {
+      "phase": "utf8-size",
+      "start": 284.59999999403954,
+      "duration": 0.19999998807907104
+    },
+    {
+      "phase": "utf8-size",
+      "start": 15114.5,
+      "duration": 286.09999999403954
+    },
+    {
+      "phase": "validate",
+      "start": 23906.79999998212,
+      "duration": 37.900000005960464
+    },
+    {
+      "phase": "stringify",
+      "start": 23906.79999998212,
+      "duration": 115.7000000178814
+    },
+    {
+      "phase": "utf8-size",
+      "start": 24022.5,
+      "duration": 266.5
+    },
+    {
+      "phase": "utf8-size",
+      "start": 24289,
+      "duration": 295.7999999821186
+    },
+    {
+      "phase": "blob-and-url",
+      "start": 24585,
+      "duration": 275.69999998807907
+    },
+    {
+      "phase": "validate",
+      "start": 27055,
+      "duration": 74.7999999821186
+    },
+    {
+      "phase": "stringify",
+      "start": 27055,
+      "duration": 160.2999999821186
+    },
+    {
+      "phase": "utf8-size",
+      "start": 27215.29999998212,
+      "duration": 313
+    },
+    {
+      "phase": "utf8-size",
+      "start": 27528.29999998212,
+      "duration": 302.40000000596046
+    },
+    {
+      "phase": "blob-and-url",
+      "start": 27830.79999998212,
+      "duration": 312.40000000596046
+    }
+  ],
+  "build": "production-workspace"
+}

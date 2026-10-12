@@ -1,3 +1,4 @@
+import { exportPhases } from "./export-trace";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
 import "../src/styles.css";
@@ -36,7 +37,13 @@ exportTrace.onclick = () => {
     new Blob(
       [
         JSON.stringify(
-          { userAgent: navigator.userAgent, events, records, build: "production-workspace" },
+          {
+            userAgent: navigator.userAgent,
+            events,
+            records,
+            exportPhases,
+            build: "production-workspace",
+          },
           null,
           2,
         ),
