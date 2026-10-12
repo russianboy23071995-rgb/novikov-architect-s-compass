@@ -1,3 +1,4 @@
+import { recoveryReadInstrumentation } from "./recovery-read-instrumentation";
 import { workspaceLoadInstrumentation } from "./workspace-load-instrumentation";
 import { exportInstrumentation } from "./export-instrumentation";
 import { defineConfig } from "vite";
@@ -8,6 +9,7 @@ import { fileURLToPath } from "node:url";
 // Separate static build/origin; does not replace the deployment/SSR build.
 export default defineConfig(({ mode }) => ({
   plugins: [
+    ...(mode === "recovery-profile" ? [recoveryReadInstrumentation()] : []),
     ...(mode === "export-profile" ? [exportInstrumentation()] : []),
     ...(mode === "load-profile" ? [workspaceLoadInstrumentation(true)] : []),
     react(),

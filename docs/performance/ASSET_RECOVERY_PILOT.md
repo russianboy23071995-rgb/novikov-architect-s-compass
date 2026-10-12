@@ -1185,3 +1185,35 @@ Nächster Einzelauftrag: Recovery-Leseweg bei „Stand prüfen“ mit derselben 
 phasenweise zuordnen (Speicherzugriff, Assetlesen/-prüfung, Rekonstruktion und
 Validierung), bevor eine Optimierung gewählt wird. Keine Validierung auslassen,
 keine Format-/Limit-/Cacheänderung im Diagnoseauftrag.
+
+## Recovery-Lesephasen (12.10.2026, PR294)
+PR293 nach separat bestätigter grüner GitHub-CI gemergt. Neue Instrumentierung nur
+im expliziten recovery-profile-Modus; Produktcode unverändert. Vorhandene ReadProbe-
+Messpunkte wiederverwendet, zusätzlich Storage-Read, Budget und abschließende
+Validierung gemessen. Async-Zeiten enthalten Warten, verschachtelte Phasen dürfen
+nicht addiert werden. Read-Checkpoints und alle Prüfungen unverändert.
+
+[Rohdaten](recovery-read-phases.json), derselbe capacity-100-Snapshot wie PR293:
+Stand prüfen: Speicherlesen 558,1 ms (separater Startup-Zugriff 65,1 ms), bounded-
+restore 1572,9 ms. Darin zwölf Payloads: Schema 276,8 ms, Dekodierung einschließlich
+Bytekopie 369,2 ms, Header 0,5 ms, Hashinput 330,5 ms, Hash 86,7 ms, Bildhandles
+391,0 ms; Modellvalidierung 58,7 ms, Budget 9,6 ms. Abschließende Validierung/Budget
+56,7 ms. Ein Lauf, kein p95-/End-to-End- oder allgemeiner Kapazitätsnachweis.
+Storage-Read umfasst den Adapter und Browser-Deserialisierung; keine isolierte
+Datenträgerzeit. Handles sind im Einzelvergleich der größte synchrone Teil,
+bestehende Schema-/Unveränderlichkeitsgrenzen dort nicht auf Verdacht umgehen.
+
+Konkreter vermeidbarer Aufwand im Code: verifyPayload dekodiert zu einem String
+und kopiert alle Bytes in ein Uint8Array, nur um imageHeader aufzurufen. Der bereits
+geprüfte gemeinsame imageHeader akzeptiert auch den String. Dies ist unabhängig
+von den weiterhin notwendigen Schema-/Hash-/Handleprüfungen.
+
+Benchmark-Typecheck, fokussiertes ESLint und recovery-profile-Build bestanden.
+Keine neuen Produkttests nötig: Produktcode unverändert, letzter voller Lauf PR292
+916 Tests. Browser: gültiger Stand angeboten, 10014 Elemente wiederhergestellt,
+Export (20) bytegleich zu (18)/(19), SHA256
+cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+Keine Konsolenfehler bei Standprüfung. Next: ausschließlich Recovery-Headerprüfung
+von unnötiger Bytekopie befreien, Differentialtests für PNG/JPEG/Fehlerfälle und
+vollständige Recovery-/Integritäts-/Abbruchtests, danach gleiche Browsermessung.
+Kein Auslassen von Schema, Hash, Budgets, Checkpoints oder Handlevalidierung.
