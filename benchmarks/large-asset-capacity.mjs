@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
+import { PROJECT_FILE_LIMIT, PROJECT_FILE_SIZE_ERROR } from "../src/interop/project-file/size.ts";
 import { readProjectFile } from "../src/lib/bim/history.ts";
 import { splitProject, pack, unpack, restoreProject } from "./asset-contract.ts";
 
@@ -138,13 +139,18 @@ async function worker(size, mode) {
     let inline = JSON.stringify(project);
     report.inlineBytes = Buffer.byteLength(inline);
     const expected = digest(inline);
-    try {
+    if (report.inlineBytes > PROJECT_FILE_LIMIT) {
+      try {
+        readProjectFile(inline);
+        throw Error("Product limit unexpectedly admitted probe");
+      } catch (e) {
+        if (!String(e).includes(PROJECT_FILE_SIZE_ERROR)) throw e;
+      }
+      report.checks.push("product rejects above current limit");
+    } else {
       readProjectFile(inline);
-      throw Error("Product limit unexpectedly admitted probe");
-    } catch (e) {
-      if (!String(e).includes("32 MiB")) throw e;
+      report.checks.push("product accepts within current limit");
     }
-    report.checks.push("product rejects >32MiB");
     inline = null;
     let doc;
     if (mode === "split") doc = await phase("split", () => splitProject(project, budget));

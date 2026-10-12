@@ -51,7 +51,7 @@ test("oversized file is rejected before reading; actual UTF-8 content is checked
         return "";
       },
     }),
-    /32 MiB/,
+    /128 MiB/,
   );
   assert.equal(reads, 0);
   await assert.rejects(
@@ -60,7 +60,7 @@ test("oversized file is rejected before reading; actual UTF-8 content is checked
       size: 1,
       text: async () => "ä".repeat(PROJECT_FILE_LIMIT / 2 + 1),
     }),
-    /32 MiB/,
+    /128 MiB/,
   );
 });
 
@@ -181,7 +181,7 @@ test("24 MiB multi-asset project supports commit, file roundtrip, undo and recov
       },
       storage,
     ),
-    /32 MiB/,
+    /128 MiB/,
   );
   assert.equal(record, saved);
 });
@@ -190,10 +190,10 @@ test("aggregate UTF-8 boundary is inclusive and individual asset budget stays in
   const { assertProjectFileSize } = await import("../../interop/project-file/size.ts");
   const { IMAGE_SOURCE_FILE_LIMIT } = await import("../../interop/images/import.ts");
   const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
-  assert.equal(PROJECT_FILE_LIMIT, 32 * 1024 * 1024);
+  assert.equal(PROJECT_FILE_LIMIT, 128 * 1024 * 1024);
   assert.equal(IMAGE_SOURCE_FILE_LIMIT, 10 * 1024 * 1024);
   assert.doesNotThrow(() => assertProjectFileSize("ä".repeat(PROJECT_FILE_LIMIT / 2)));
-  assert.throws(() => assertProjectFileSize("ä".repeat(PROJECT_FILE_LIMIT / 2) + "x"), /32 MiB/);
+  assert.throws(() => assertProjectFileSize("ä".repeat(PROJECT_FILE_LIMIT / 2) + "x"), /128 MiB/);
   assert.throws(() =>
     createImageAssetHandle({
       id: "too-large",

@@ -111,14 +111,14 @@ test("trusted assets never bypass model reference or geometry validation", () =>
 test("trusted payload still counts toward the aggregate project file limit", () => {
   const p = fixture(true),
     h = createHistory(p);
-  // Four individually valid assets exceed the aggregate file budget.
-  p.assets = Array.from({ length: 4 }, (_, i) =>
+  // Thirteen individually valid assets exceed the aggregate file budget.
+  p.assets = Array.from({ length: 13 }, (_, i) =>
     createImageAssetHandle({
       ...asset,
       id: i === 0 ? asset.id : `large-${i}`,
       data: "A".repeat(10 * 1024 * 1024),
     }),
   );
-  assert.throws(() => commitProject(h, p), /32 MiB/);
+  assert.throws(() => commitProject(h, p), /128 MiB/);
   assert.equal(h.past.length, 0);
 });
