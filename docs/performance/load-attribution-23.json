@@ -1,0 +1,324 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 435,
+      "label": "Open project"
+    },
+    {
+      "at": 6585,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 9524.100000023842,
+      "label": "Save project"
+    },
+    {
+      "at": 11917.300000011921,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 168.5,
+      "duration": 74
+    },
+    {
+      "start": 693,
+      "duration": 600
+    },
+    {
+      "start": 6584.700000017881,
+      "duration": 1718
+    },
+    {
+      "start": 8302.700000017881,
+      "duration": 142
+    },
+    {
+      "start": 8813.5,
+      "duration": 110
+    },
+    {
+      "start": 8936.200000017881,
+      "duration": 95
+    },
+    {
+      "start": 9032.40000000596,
+      "duration": 98
+    },
+    {
+      "start": 9152.5,
+      "duration": 82
+    },
+    {
+      "start": 9237,
+      "duration": 82
+    },
+    {
+      "start": 9320.100000023842,
+      "duration": 94
+    },
+    {
+      "start": 9426.600000023842,
+      "duration": 97
+    },
+    {
+      "start": 9523.600000023842,
+      "duration": 329
+    },
+    {
+      "start": 9890.700000017881,
+      "duration": 112
+    },
+    {
+      "start": 10007.600000023842,
+      "duration": 85
+    },
+    {
+      "start": 10097.5,
+      "duration": 91
+    },
+    {
+      "start": 10193.100000023842,
+      "duration": 82
+    },
+    {
+      "start": 10280.800000011921,
+      "duration": 94
+    }
+  ],
+  "exportPhases": [],
+  "workspacePhases": [
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 176.10000002384186,
+      "duration": 0.3999999761581421
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 204.30000001192093,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 222.40000000596046,
+      "duration": 0.20000001788139343
+    },
+    {
+      "kind": "application",
+      "event": "patterns-changed",
+      "start": 222.2000000178814,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 230.7000000178814,
+      "duration": 2.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 233.7000000178814,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 236.10000002384186,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 241.10000002384186,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 587.2000000178814,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 588.3000000119209,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 1297.9000000059605,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 1298.7000000178814,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 6585.4000000059605,
+      "duration": 309.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "history-commit",
+      "start": 6895.4000000059605,
+      "duration": 50.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "load-project",
+      "start": 6585.4000000059605,
+      "duration": 360.90000000596046
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 6988.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 6999,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 7006.600000023842,
+      "duration": 161.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7168.800000011921,
+      "duration": 24.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7193.600000023842,
+      "duration": 22.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7216.4000000059605,
+      "duration": 21.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7238.100000023842,
+      "duration": 22
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7260.100000023842,
+      "duration": 22.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7282.4000000059605,
+      "duration": 22.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7304.9000000059605,
+      "duration": 22.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7327.800000011921,
+      "duration": 22.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7350.5,
+      "duration": 22.100000023841858
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7372.700000017881,
+      "duration": 22.099999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7394.9000000059605,
+      "duration": 22.099999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 7417,
+      "duration": 24.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 7168.600000023842,
+      "duration": 273.2999999821186
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 7699.4000000059605,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 7699.600000023842,
+      "duration": 8.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 7801.200000017881,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 8123.100000023842,
+      "duration": 0.29999998211860657
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 8653.200000017881,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 9846.800000011921,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 9847.800000011921,
+      "duration": 0
+    }
+  ],
+  "mode": "load-profile",
+  "build": "production-workspace"
+}
