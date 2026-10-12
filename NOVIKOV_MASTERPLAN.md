@@ -314,6 +314,13 @@ Seitenneustart bestanden. Recovery-Export bytegleich zur gespeicherten Änderung
 Lange Tasks verbleiben: Standprüfung bis 238 ms, anschließendes Laden bis 1400 ms;
 keine Gesamtlaufzeit-/Kapazitätsfreigabe. Nachweis: ASSET_RECOVERY_PILOT.md.
 
+**12.10.2026 · Recovery-Lesephasen (PR294):** PR293 nach grüner CI gemergt.
+Diagnose-only: Standprüfung Storage 558,1 ms, bounded restore 1572,9 ms;
+Handles 391,0 ms, Decode/Bytekopie 369,2 ms, Hashinput 330,5 ms, Schema 276,8 ms.
+Header selbst 0,5 ms. Verschachtelte Werte, kein p95-Nachweis. Typprüfung/Lint/
+Diagnosebuild bestanden; wiederhergestellter Export bytegleich. Nachweis/Rohdaten:
+docs/performance/ASSET_RECOVERY_PILOT.md und recovery-read-phases.json.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -382,7 +389,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Recovery-Leseweg zuordnen.** „Stand prüfen“ für die dokumentierte Fixture (25) beziehungsweise ihren Snapshot gezielt in Speicherzugriff, Assetlesen/-prüfung, Rekonstruktion und Validierung aufteilen. Passiven Befund (13 lange Tasks, längste 238 ms) den vorhandenen Pfaden zuordnen und danach genau eine begrenzte Optimierung wählen. Keine Produktänderung, keine ausgelassene Validierung, keine neue Speicherarchitektur oder Limit-/Cacheerhöhung im Diagnoseauftrag.
+**Genau ein aktiver Fortsetzungsschritt: Recovery-Bildheader ohne volle Bytekopie.** verifyPayload soll den vorhandenen gemeinsamen String-fähigen imageHeader nutzen, statt nach atob ein vollständiges Uint8Array zu erzeugen. Akzeptanz/Fehler durch Vergleichstests gegen den bisherigen Pfad sichern (PNG/JPEG, abgeschnittene/falsche Header und Metadaten); vollständige Recovery-, Integritäts- und Abbruchtests durchführen und denselben Snapshot im Browser nachmessen. Schema, Hash, Budgets, Checkpoints und Handlevalidierung unverändert. Keine Cache-/Format-/Limitänderung.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 

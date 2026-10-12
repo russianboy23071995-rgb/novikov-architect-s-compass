@@ -10740,3 +10740,11 @@ zum geänderten Projekt; ausschließlich beabsichtigte Wandhöhe gegenüber Eing
 916 Produkttests aus PR292 unverändert. Kein Crash-/Quota-/Hardwarekapazitätsnachweis.
 Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md und production-roundtrip-recovery.json.
 Nächster Einzelauftrag: lange Tasks beim Recovery-Lesen phasenweise zuordnen.
+
+### R26-01/02, K02/03, RC07 · Recovery-Teilphasen 12.10.2026 (PR294)
+Expliziter Diagnosebuild verwendet vorhandene ReadProbe-Phasen, ergänzt Storage und
+Abschlussprüfung. Kein Produktcode geändert. Standprüfung: Storage 558,1 ms, Restore
+1572,9 ms inkl. Handle-/Schema-/Decode-/Hasharbeit; Header 0,5 ms. Typecheck/Lint/
+Diagnosebuild bestanden, Export bytegleich. Nachweis ASSET_RECOVERY_PILOT.md und
+recovery-read-phases.json. Nächster Schritt: vorhandenen String-Headerleser im
+Recovery-Pfad nutzen, volle Bytekopie entfernen, vollständige Prüfgrenzen erhalten.
