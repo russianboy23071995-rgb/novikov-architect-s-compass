@@ -1,92 +1,24 @@
 /** Isolated experiment: no production import, migration or garbage collection. */
-import { validateProject, type Project } from "../src/domain/project/schema.ts";
-import { createImageAssetHandle, type ImageAsset } from "../src/domain/elements/reference/model.ts";
-import {
-  payloadKey,
-  verifyPayload,
-  type Document,
-  type Manifest,
-  type Payload,
-  type ReadProbe,
-} from "./asset-contract.ts";
+import { type Project } from "../src/domain/project/schema.ts";
+import { type Document, type Manifest, type Payload } from "./asset-contract.ts";
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length;
 export type Head = { revision: string; current: Manifest; previous?: Manifest };
-export type ReadControl = ReadProbe & {
-  signal?: AbortSignal;
-  schedule?: () => Promise<void>;
-};
-/** A real task boundary, not just a resolved promise. No transaction spans this wait. */
-export async function readCheckpoint(control: ReadControl) {
-  control.signal?.throwIfAborted();
-  await (control.schedule?.() ?? new Promise<void>((resolve) => setTimeout(resolve, 0)));
-  control.signal?.throwIfAborted();
-}
-/** Owned DB snapshot only. Reuse existing handle capability, never trust persisted flags. */
-export async function restoreCheckedSnapshot(
-  doc: Document,
-  probe: ReadControl = {},
-): Promise<Project> {
-  await readCheckpoint(probe);
-  const groups = new Map<string, { id: string; index: number }[]>();
-  doc.model.assets.forEach((a, index) => {
-    const group = groups.get(a.key) ?? [];
-    group.push({ id: a.id, index });
-    groups.set(a.key, group);
-  });
-  const assets: ImageAsset[] = new Array(doc.model.assets.length);
-  for (const [key, links] of groups) {
-    const raw = doc.blobs[key];
-    if (!raw) throw new Error("Missing asset");
-    const payload = verifyPayload(raw, probe);
-    if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
-    for (const link of links) {
-      const handleStart = performance.now();
-      assets[link.index] = createImageAssetHandle({ ...payload, id: link.id });
-      probe.measure?.("handles", performance.now() - handleStart);
-      await readCheckpoint(probe);
-    }
-  }
-  const validateStart = performance.now();
-  const project = validateProject({ ...doc.model, assets });
-  probe.measure?.("model", performance.now() - validateStart);
-  await readCheckpoint(probe);
-  return project;
-}
+export {
+  readCheckpoint,
+  restoreCheckedSnapshot,
+} from "../src/interop/project-file/recovery-codec.ts";
+import {
+  restoreCheckedSnapshot,
+  createAssetPreparation,
+} from "../src/interop/project-file/recovery-codec.ts";
+import type { ReadControl } from "../src/interop/project-file/recovery-codec.ts";
+export type { ReadControl } from "../src/interop/project-file/recovery-codec.ts";
 export function createPreparation(profile: 50 | 100 | 250 = 50) {
-  if (profile !== 50 && profile !== 100 && profile !== 250)
-    throw new Error("Unknown pilot profile");
-  const maxBytes = (profile === 250 ? 320 : profile === 100 ? 128 : 64) * 1024 * 1024;
-  const maxPixels = profile === 250 ? 64_000_000 : profile === 100 ? 40_000_000 : 32_000_000;
-  const cache = new WeakMap<ImageAsset, { key: string; payload: Payload }>();
-  let hashes = 0;
-  return {
-    get hashes() {
-      return hashes;
-    },
-    async prepare(input: Project): Promise<Document> {
-      const project = validateProject(input);
-      const blobs: Record<string, Payload> = Object.create(null);
-      const assets = [];
-      let size = 0,
-        pixels = 0;
-      for (const asset of project.assets) {
-        size += asset.data.length;
-        pixels += asset.pixelWidth * asset.pixelHeight;
-        if (size > maxBytes || pixels > maxPixels) throw new Error("Pilot budget exceeded");
-        let entry = cache.get(asset);
-        if (!entry) {
-          const { id: _id, ...raw } = asset;
-          const payload = Object.freeze(verifyPayload(raw));
-          entry = { key: await payloadKey(payload), payload };
-          hashes++;
-          cache.set(asset, entry);
-        }
-        blobs[entry.key] = entry.payload;
-        assets.push({ id: asset.id, key: entry.key });
-      }
-      return { model: { ...project, assets }, blobs };
-    },
-  };
+  if (![50, 100, 250].includes(profile)) throw new Error("Unknown pilot profile");
+  return createAssetPreparation({
+    maxBytes: (profile === 250 ? 320 : profile === 100 ? 128 : 64) * 1024 * 1024,
+    maxPixels: profile === 250 ? 64_000_000 : profile === 100 ? 40_000_000 : 32_000_000,
+  });
 }
 export function openPilotDatabase(name: string): Promise<IDBDatabase> {
   if (!name.startsWith("novikov-asset-recovery-pilot-"))

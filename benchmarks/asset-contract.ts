@@ -3,9 +3,12 @@ import { z } from "zod";
 import { validateProject, type Project } from "../src/lib/bim/model.ts";
 import { readProjectFile } from "../src/lib/bim/history.ts";
 import { imageAssetSchema, type ImageAsset } from "../src/domain/elements/reference/model.ts";
-import { imageHeader } from "../src/interop/images/import.ts";
-import { binaryBytes } from "../src/interop/images/binary-bytes.ts";
-export type ReadProbe = { legacy?: boolean; measure?: (phase: string, ms: number) => void };
+import {
+  verifyPayload as payload,
+  payloadKey as keyOf,
+} from "../src/interop/project-file/recovery-codec.ts";
+import type { ReadProbe } from "../src/interop/project-file/recovery-codec.ts";
+export type { ReadProbe } from "../src/interop/project-file/recovery-codec.ts";
 export type {
   RecoveryPayload as Payload,
   RecoveryManifest as Manifest,
@@ -40,47 +43,6 @@ function freeze<T>(v: T): T {
     Object.freeze(v);
   }
   return v;
-}
-function payload(raw: unknown, probe: ReadProbe = {}): Payload {
-  const started = performance.now();
-  const shape = z
-    .object({
-      mimeType: z.unknown(),
-      pixelWidth: z.unknown(),
-      pixelHeight: z.unknown(),
-      data: z.unknown(),
-    })
-    .strict()
-    .parse(raw);
-  const { id: _id, ...p } = imageAssetSchema.parse({ id: "payload", ...shape });
-  probe.measure?.("schema", performance.now() - started);
-  const decodeStart = performance.now();
-  const binary = atob(p.data);
-  const decoded = probe.legacy
-    ? Uint8Array.from(binary, (c) => c.charCodeAt(0))
-    : binaryBytes(binary);
-  probe.measure?.("decode", performance.now() - decodeStart);
-  const headerStart = performance.now();
-  const header = imageHeader(decoded);
-  if (
-    header.mimeType !== p.mimeType ||
-    header.width !== p.pixelWidth ||
-    header.height !== p.pixelHeight
-  )
-    throw new Error("Image header mismatch");
-  probe.measure?.("header", performance.now() - headerStart);
-  return p;
-}
-async function keyOf(p: Payload, probe: ReadProbe = {}) {
-  const started = performance.now();
-  const encoded = new TextEncoder().encode(
-    JSON.stringify([p.mimeType, p.pixelWidth, p.pixelHeight, p.data]),
-  );
-  probe.measure?.("hashInput", performance.now() - started);
-  const hashStart = performance.now();
-  const hash = await crypto.subtle.digest("SHA-256", encoded);
-  probe.measure?.("hash", performance.now() - hashStart);
-  return Array.from(new Uint8Array(hash), (n) => n.toString(16).padStart(2, "0")).join("");
 }
 function check(model: Manifest, blobs: Document["blobs"], b: Budget) {
   checkBudget(b);

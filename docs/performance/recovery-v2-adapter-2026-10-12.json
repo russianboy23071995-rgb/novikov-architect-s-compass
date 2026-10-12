@@ -1,0 +1,28 @@
+{
+  "started": "2026-10-12T15:36:55.104Z",
+  "name": "novikov-recovery-v2-pilot-bb84c119-998a-43a7-bf92-1e94b593a2ba",
+  "checks": [
+    "V1 byte-identisch erhalten",
+    "Migration vollständig identisch",
+    "Zwei Verbindungen: genau ein CAS-Gewinner",
+    "Vorgänger vollständig erhalten",
+    "Head enthält keine Bildpayloads",
+    "Geänderter V1-Quelltoken blockiert Veröffentlichung",
+    "Abbruch nach Head-Request vor Commit abgewiesen",
+    "Rollback erhält veröffentlichten Head",
+    "Rollback entfernt neue unbestätigte Payload",
+    "Fehlendes current-Bild fällt auf vollständig geprüften Vorgänger zurück",
+    "Ungültiges neues current wird trotz gültigem previous abgewiesen",
+    "Beschädigte Payload wird beim Lesen abgewiesen",
+    "Vorhandene beschädigte Payload wird nicht still wiederverwendet",
+    "Fehlende Payload wird beim Lesen abgewiesen",
+    "Unbekannte V2-Version verhindert Migration",
+    "Unbekannte Version wird auch bei passender Revision nicht überschrieben",
+    "Unbekannter Stand bleibt erhalten",
+    "Fehlerhafte V1-Migration veröffentlicht nichts",
+    "Fehlerhafter Quellstand bleibt ohne V2-Head",
+    "Wiederöffnung nach allen Fehlerfällen vollständig identisch",
+    "V1 auch nach allen Fehlerfällen unverändert"
+  ],
+  "status": "passed"
+}

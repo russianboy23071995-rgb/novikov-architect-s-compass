@@ -388,3 +388,45 @@ Schreibfehler und Commitgrenze. 897 Tests insgesamt, App-/Benchmark-Typechecks u
 grün; Lint 0 Fehler/6 bekannte Warnungen. Keine neue Browserabnahme behauptet:
 Die Einhaltung der Transaktionsregeln durch einen realen V2-IndexedDB-Adapter ist der
 nächste ausdrücklich begrenzte Auftrag. Die existierenden V1- und Diagnosetests bleiben erhalten.
+
+## Isolierter V2-IndexedDB-Adapter (12.10.2026)
+
+`src/interop/project-file/recovery-codec.ts` enthält nun die bislang im Pilot
+geprüften Schema-/Header-/SHA-Prüfungen, kooperativen Leseabschnitte, Handles und
+Vorbereitung mit expliziten Assetbudgets. Die bisherigen Benchmarks delegieren dorthin;
+keine zweite Kopie der Prüflogik. Diagnostische Profile bleiben im Benchmarkwrapper.
+
+`recovery-v2-storage.ts` erfüllt den Application-Port auf einer explizit isolierten
+Datenbank (`novikov-recovery-v2-pilot-*`). Getrennte Stores für V1, V2-Heads und
+inhaltsschlüsselgebundene Payloads. Beide Manifeste und Payloads werden aus einer
+konsistenten Lesetransaktion bezogen. Fehlende Payloads bleiben fehlend, sodass die
+Application den geprüften Vorgänger versuchen kann. Unbekannte Versionen werden
+weder migriert noch überschrieben.
+
+Publikation besitzt vor asynchroner Prüfung eine eigene Kopie des Kandidaten.
+Current und previous werden einzeln vollständig geprüft; ein defekter neuer Stand
+darf sich nicht hinter einem gültigen Vorgänger verstecken. In EINER Schreibtransaktion:
+Vergleich des V1-Quelltextes und der V2-Revision, Prüfung vorhandener Payloadgleichheit,
+Einfügen fehlender Payloads und Veröffentlichung des Heads. Bestätigung nur nach
+`oncomplete`; Fehler/Abort rollen sämtliche neuen Daten zurück. V1 bleibt unberührt.
+Es handelt sich noch nicht um die Migration des bestehenden produktiven Katalogs.
+
+[Browser-Rohdaten](recovery-v2-adapter-2026-10-12.json): **21 Prüfungen bestanden**.
+Zwei reale Datenbankverbindungen, genau ein CAS-Gewinner, geänderter V1-Token,
+Abbruch nach erfolgreichem Head-Request vor Commit samt neuer Payload, vollständiger
+Rundlauf/Vorgänger, fehlendes current-Bild mit gültigem previous, beschädigte/fehlende
+Payloads, ungültige Migration, unbekannte Version und Wiederöffnung nach den Fehlerfällen.
+Die Abort-Injektion beobachtet nur im Harness den echten Headrequest über einen
+lokalen Proxy; der Adapter enthält keinen produktiven Fehler-Injektionsschalter.
+Keine echten Projektdaten geändert, keine Quota-/Stromausfallgarantie abgeleitet.
+
+897 Node-Tests, App-/Benchmark-Typechecks und Build bestanden. Lint 0 Fehler/6 bekannte
+Warnungen. Praktischer Abnahmetest: Diagnose-Vite auf Port 8084, Seite
+`/benchmarks/recovery-v2-browser.html`, „Prüfung starten“ → „Bestanden: 21 Prüfungen“.
+Jeder Lauf verwendet eine neue synthetische Datenbank. Kein sichtbarer CAD-UI-Wechsel.
+
+Grenzen: Adapter überprüft vor jedem Publish vollständig und ist noch nicht als schneller
+warmer Produktionswriter freigegeben. Lesebudgets/Katalog-/Startangebotintegration und
+produktive Migration bleiben offen. Der nächste begrenzte Writerauftrag setzt explizite
+Eingangsbudgets und Sitzungskontext vor der Produktanbindung durch. Produktionslimit
+weiterhin 32 MiB, kein Dateiformatwechsel für manuell gespeicherte Projekte.
