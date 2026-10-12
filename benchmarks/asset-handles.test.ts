@@ -122,3 +122,42 @@ test("trusted payload still counts toward the aggregate project file limit", () 
   assert.throws(() => commitProject(h, p), /128 MiB/);
   assert.equal(h.past.length, 0);
 });
+
+test("re-identification accepts only exact owned identities and validates each new ID", async (t) => {
+  const { reidentifyImageAssetHandle, isImageAssetHandle } =
+    await import("../src/domain/elements/reference/model.ts");
+  const raw = { ...asset };
+  const handle = createImageAssetHandle(raw);
+  raw.data = "bad";
+  let reads = 0;
+  const forged = Object.freeze({
+    ...handle,
+    get data() {
+      reads++;
+      return asset.data;
+    },
+  });
+  for (const value of [
+    null,
+    {},
+    { ...handle },
+    JSON.parse(JSON.stringify(handle)),
+    Object.freeze({ ...handle }),
+    forged,
+    new Proxy(handle, {}),
+  ])
+    assert.throws(() => reidentifyImageAssetHandle(value, "b"), /owned image asset handle/);
+  assert.equal(reads, 0);
+  for (const id of [null, undefined, 0, "", "  "])
+    assert.throws(() => reidentifyImageAssetHandle(handle, id));
+  const chars = t.mock.method(String.prototype, "charCodeAt");
+  const renamed = reidentifyImageAssetHandle(handle, " b ");
+  assert.equal(chars.mock.callCount(), 0, "no repeated base64 scan");
+  assert.deepEqual(renamed, { ...handle, id: "b" });
+  assert.notEqual(renamed, handle);
+  assert.ok(isImageAssetHandle(renamed));
+  assert.ok(Object.isFrozen(renamed));
+  assert.throws(() => {
+    renamed.data = "bad";
+  });
+});

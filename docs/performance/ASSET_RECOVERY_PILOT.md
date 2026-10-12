@@ -1308,3 +1308,35 @@ Ausgeführt: 22 bestehende gezielte Tests aus asset-handles, asset-recovery-stor
 recovery-v2 bestanden; enthalten Identitäts-/Mutationsschutz, Modellgrenzen,
 Integrität und Abbruch. Kein neuer Browserlauf oder Build für reine Dokumentation;
 letzter voller Produktnachweis PR295: 917 Tests und beide Builds.
+
+## Geprüfte Handles wiederverwenden (12.10.2026, PR297)
+PR296 nach grüner CI gemergt. Domain reidentifyImageAssetHandle akzeptiert ausschließlich
+exakte private WeakSet-Identität, prüft die neue ID, kopiert explizite primitive Felder,
+friert die eigene Kopie ein und registriert sie. Keine neue Vertrauensflagge/Registry.
+Private Recovery-Verifikation erstellt einmal einen echten Handle vor dem Hash-await;
+erst nach Header-/Hashvergleich werden neue Link-IDs zugewiesen. Öffentlicher
+verifyPayload-Vertrag mit bisherigem Schema-/Fehlerpfad und Payload ohne ID bleibt
+erhalten. Unzulässige Recovery-Payloads scheitern weiterhin; interne Zod-Fehlerform
+kann durch den direkten Storageparser abweichen, keine Akzeptanzlockerung.
+Modell-/Budgetprüfung, Checkpoints und Fallback unverändert.
+
+920 Tests bestanden. Neue Tests: keine Registryaufnahme durch Spread/JSON/frozen
+Lookalike/Getter/Proxy, kein Lesen gefälschter Getter, ID-Trim/-Ablehnung,
+Unveränderlichkeit; charCodeAt-Instrumentierung belegt keinen Payloadscan bei
+ID-Neuzuweisung und gleiche Scanzahl bei einem oder zwanzig Links. Mehrfachlink-
+Ergebnis identisch zum vollständigen Modellpfad. Rohpayloadmutation nach Hash
+verändert die eigene Kopie nicht; ungültige/doppelte IDs und Abbruch nach Hash
+abgewiesen. Bestehende Header-/Hash-/Budget-/Fallbacktests bleiben grün.
+Benchmark-Typecheck, fokussiertes ESLint, Diagnose- und regulärer Build bestanden.
+
+[Gleicher Browser-Snapshot](recovery-handle-reuse.json): Handles 0,8 statt 353,6 ms,
+bounded restore 846,6 statt 1293,4 ms. Schema 232,6 ms, Decode 112,4 ms, Hashinput
+300,4 ms, Hash 97,3 ms, Modell 49,1 ms. Verschachtelte Zeiten; Einzelvergleich, keine
+p95-/Kapazitätsgarantie. Export (22) bytegleich zum Referenzexport (18):
+cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+Keine Konsolenfehler. Benutzeroberfläche, Dateiformat und Cachegrößen unverändert.
+
+Nächster Einzelauftrag: Hashinput-Vorbereitung in JSON-Serialisierung und UTF-8-
+Encoding aufteilen; anhand identischer Bytes/Hashes beurteilen, ob eine volle
+Zwischenkopie vermeidbar ist. Kein neuer Hashalgorithmus oder Schlüsselformat,
+keine Optimierung auf Kosten der Integritätsprüfung; zunächst Diagnose.
