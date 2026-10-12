@@ -882,3 +882,31 @@ Restbefund: readProjectFile und deserializeProject prüfen denselben Text nachei
 per UTF-8-Encoding (nachher 278,7 und 270,1 ms). Nächster Einzelauftrag: diese doppelte
 Eingangsgrößenprüfung an einer gemeinsamen sicheren Grenze zusammenführen, ohne
 direkte Deserializer-Aufrufe, Größenfehlermeldung oder Migration zu schwächen.
+
+
+## Einmalige Eingangsgrößenprüfung (12.10.2026)
+
+readProjectFile delegiert die Größenprüfung vollständig an deserializeProject.
+Dessen exakte UTF-8-Grenze bleibt vor JSON.parse und Migration bestehen, auch für
+direkte Aufrufer. ProjectFileSizeError unterscheidet den Größenfehler verlässlich
+von Syntax-/Schemafehlern; der UI-Adapter reicht ihn mit unverändertem Meldungstext
+durch und übersetzt andere Fehler weiterhin in die bekannte Projektdateimeldung.
+Kein ungeprüfter öffentlicher Parse-Einstieg und kein zusätzlicher Zustand.
+
+912 Tests bestanden, Benchmark-Typecheck, fokussiertes ESLint und regulärer sowie
+instrumentierter Produktions-Workspace-Build bestanden. Neue Regression überprüft
+beide Eingänge: exakt 128 MiB mit mehrbyteigem Unicode erreichen die Schema-Prüfung;
+ein weiteres Byte wird schon vor Parsing mit Größenfehler abgewiesen. Ungültiges
+JSON und ungültiges Modell behalten die allgemeine Meldung. Bestehende Migrations-,
+Lade-/Abbruch- und Modelltests bleiben grün.
+
+Browser: gleiche 101,96-MiB-Fixture wie zuvor auf Port 8085, 10014 Elemente nach
+Ladebestätigung, Export byteidentisch (SHA-256 wie im vorherigen Abschnitt), keine
+Konsolenfehler. [Rohdaten](single-input-size.json), Vergleich: open-budget-after.json.
+Nur noch eine große UTF-8-Prüfung (238,5 ms statt 278,7 + 270,1 ms), Vorbereitungs-Task
+790 statt 1187 ms. Einzelvergleich, keine statistische oder allgemeine Kapazitätszusage.
+Das betrifft die Vorbereitung, nicht die spätere Übernahme/Renderzeit. Restliche
+Hauptthreadpause bleibt relevant. Nächster Einzelauftrag: konsolidierte Abnahme des
+aktuellen Produktions-Workspaces ohne Messinstrumentierung (Laden, Bearbeiten,
+Undo/Redo, Speichern und Wiederaufnahme) mit derselben großen Fixture; Restpausen
+festhalten, bevor weitere Optimierungen ausgewählt werden.
