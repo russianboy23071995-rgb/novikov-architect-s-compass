@@ -31,6 +31,21 @@ export function createImageAssetHandle(value: unknown): ImageAsset {
   verifiedAssets.add(asset);
   return asset;
 }
+/** Re-identify only an owned storage-validated handle; never grant trust to lookalikes. */
+export function reidentifyImageAssetHandle(value: unknown, nextId: unknown): ImageAsset {
+  if (typeof value !== "object" || value === null || !verifiedAssets.has(value))
+    throw new Error("Expected an owned image asset handle");
+  const source = value as ImageAsset;
+  const asset = Object.freeze({
+    id: id.parse(nextId),
+    mimeType: source.mimeType,
+    pixelWidth: source.pixelWidth,
+    pixelHeight: source.pixelHeight,
+    data: source.data,
+  });
+  verifiedAssets.add(asset);
+  return asset;
+}
 /** Capability check for immutable storage-validated assets; not a decoder verdict. */
 export function isImageAssetHandle(value: ImageAsset): boolean {
   return verifiedAssets.has(value);

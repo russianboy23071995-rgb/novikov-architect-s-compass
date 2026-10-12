@@ -10764,3 +10764,11 @@ Keine Produktänderung. 22 gezielte Tests grün, kein neuer Performancegewinn be
 Konkreter Folgepilot samt Fälschungs-/Ownership-/Fehlerfällen im ASSET_RECOVERY_PILOT.md
 und Masterplan: sichere ID-Neuzuweisung auf registriertem Handle, volle Eingangs-,
 Header-, Hash-, Modell-, Budget- und Abbruchprüfung erhalten.
+
+### R26-01/02, K02/03, RC07 · Recovery-Handlewiederverwendung 12.10.2026 (PR297)
+Runtime-Identität statt erneutem Payloadscan; neue ID vollständig geprüft, eigene
+unveränderliche Kopie. Header/Hash/Modell/Budgets/Abbrüche unverändert. 920 Tests,
+Typecheck/Lint und beide Builds erfolgreich. Browser-Handles 353,6→0,8 ms, Restore
+1293,4→846,6 ms im Einzelvergleich; bytegleicher Export, keine Konsolenfehler.
+Nachweis ASSET_RECOVERY_PILOT.md, recovery-handle-reuse.json. Nächster begrenzter
+Auftrag: Hashinput-Zeit und mögliche Zwischenkopie diagnostisch prüfen.

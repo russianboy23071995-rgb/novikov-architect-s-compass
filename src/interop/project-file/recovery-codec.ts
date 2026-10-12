@@ -4,6 +4,7 @@ import { validateProject, type Project } from "../../domain/project/schema.ts";
 import {
   imageAssetSchema,
   createImageAssetHandle,
+  reidentifyImageAssetHandle,
   type ImageAsset,
 } from "../../domain/elements/reference/model.ts";
 import { imageHeader } from "../images/import.ts";
@@ -14,6 +15,11 @@ import type {
 } from "../../application/project-files/recovery-v2.ts";
 export type ReadProbe = { legacy?: boolean; measure?: (phase: string, ms: number) => void };
 export function verifyPayload(raw: unknown, probe: ReadProbe = {}): Payload {
+  const { id: _id, ...payload } = verifyPayloadImage(raw, probe, false);
+  return payload;
+}
+/** Own the validated copy before any asynchronous integrity check. */
+function verifyPayloadImage(raw: unknown, probe: ReadProbe, own: boolean): ImageAsset {
   const started = performance.now();
   const shape = z
     .object({
@@ -24,7 +30,8 @@ export function verifyPayload(raw: unknown, probe: ReadProbe = {}): Payload {
     })
     .strict()
     .parse(raw);
-  const { id: _id, ...p } = imageAssetSchema.parse({ id: "payload", ...shape });
+  const input = { id: "payload", ...shape };
+  const p = own ? createImageAssetHandle(input) : imageAssetSchema.parse(input);
   probe.measure?.("schema", performance.now() - started);
   const decodeStart = performance.now();
   const binary = atob(p.data);
@@ -78,11 +85,11 @@ export async function restoreCheckedSnapshot(
   for (const [key, links] of groups) {
     const raw = doc.blobs[key];
     if (!raw) throw new Error("Missing asset");
-    const payload = verifyPayload(raw, probe);
+    const payload = verifyPayloadImage(raw, probe, true);
     if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
     for (const link of links) {
       const handleStart = performance.now();
-      assets[link.index] = createImageAssetHandle({ ...payload, id: link.id });
+      assets[link.index] = reidentifyImageAssetHandle(payload, link.id);
       probe.measure?.("handles", performance.now() - handleStart);
       await readCheckpoint(probe);
     }

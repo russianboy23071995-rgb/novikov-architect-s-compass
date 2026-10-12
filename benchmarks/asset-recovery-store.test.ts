@@ -216,3 +216,56 @@ test("recovery string headers preserve payload acceptance and exact failures of 
     }
   }
 });
+
+test("recovery scans a shared payload once regardless of logical link count", async (t) => {
+  const p = recoveryFixture("multi", 1);
+  p.assets.push(asset());
+  const one = await createPreparation().prepare(p);
+  const many = structuredClone(one);
+  many.model.assets = Array.from({ length: 20 }, (_, i) => ({
+    ...one.model.assets[0]!,
+    id: `a${i}`,
+  }));
+  const scan = t.mock.method(String.prototype, "charCodeAt");
+  await restoreCheckedSnapshot(one);
+  const first = scan.mock.callCount();
+  const q = await restoreCheckedSnapshot(many);
+  const second = scan.mock.callCount() - first;
+  assert.ok(first > 0);
+  assert.equal(second, first);
+  assert.deepEqual(q, restoreProject(many));
+  assert.equal(new Set(q.assets.map((a) => a.id)).size, 20);
+  assert.ok(q.assets.every(Object.isFrozen));
+});
+
+test("recovery owns payload fields across hash waits and still rejects invalid links", async () => {
+  const p = recoveryFixture("owned", 1);
+  p.assets.push(asset());
+  const original = await createPreparation().prepare(p);
+  const doc = structuredClone(original);
+  const key = doc.model.assets[0]!.key;
+  const q = await restoreCheckedSnapshot(doc, {
+    measure(name) {
+      if (name === "hash") (doc.blobs[key]! as { data: string }).data = "bad";
+    },
+  });
+  assert.deepEqual(q, restoreProject(original));
+  for (const links of [
+    [{ ...original.model.assets[0]!, id: " " }],
+    [original.model.assets[0]!, original.model.assets[0]!],
+  ])
+    await assert.rejects(() =>
+      restoreCheckedSnapshot({ ...original, model: { ...original.model, assets: links } }),
+    );
+  const controller = new AbortController();
+  await assert.rejects(
+    () =>
+      restoreCheckedSnapshot(original, {
+        signal: controller.signal,
+        measure(name) {
+          if (name === "hash") controller.abort();
+        },
+      }),
+    { name: "AbortError" },
+  );
+});

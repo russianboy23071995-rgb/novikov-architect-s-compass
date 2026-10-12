@@ -335,6 +335,13 @@ WeakSet und eigene eingefrorene Daten erlauben einen begrenzten ID-Neuzuweisungs
 mit Runtime-Identitätskontrolle. Keine Produktänderung; 22 fokussierte Tests bestanden.
 Vertrag/Angriffsfälle/Nachweis in docs/performance/ASSET_RECOVERY_PILOT.md.
 
+**12.10.2026 · Recovery-Handlewiederverwendung (PR297):** PR296 mit grüner CI gemergt.
+Neue ID nur auf registriertem, unveränderlichem Handle; Recovery erhält den geprüften
+Datenbesitz über Hash-await hinweg. Öffentlicher verifyPayload-Vertrag unverändert.
+920 Tests, Typprüfung/Lint und beide Builds bestanden. Handles 353,6→0,8 ms,
+Restore 1293,4→846,6 ms im Browser-Einzelvergleich; Export bytegleich. Nachweis und
+Grenzen: docs/performance/ASSET_RECOVERY_PILOT.md, recovery-handle-reuse.json.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -403,7 +410,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: geprüfte Bildhandles im Recovery-Pfad wiederverwenden.** Den dokumentierten Vertrag aus ASSET_RECOVERY_PILOT.md umsetzen: Domain-Operation für neue ID ausschließlich auf runtime-registriertem unveränderlichem Handle; private Recovery-Verifikation erhält diesen Nachweis, öffentlicher verifyPayload-Vertrag unverändert. Header/Hash vor Wiederaufnahme, Modell-/Budget-/Abbruchprüfungen vollständig erhalten. Differential-, Fälschungs-, Getter-/Proxy-, Mehrfachlink- und Fehlerpfadtests plus ganze Suite/Builds; gleicher Browser-Snapshot und bytegleicher Export. Keine neuen Vertrauensflags, globalen Payloadcaches oder Änderungen anderer Importpfade.
+**Genau ein aktiver Fortsetzungsschritt: Recovery-Hashinput zuordnen.** Die verbleibenden rund 300 ms Hashinput-Vorbereitung im gleichen Snapshot in JSON-Serialisierung und UTF-8-Encoding aufteilen. Prüfen, ob sich eine volle Zwischenkopie unter garantiert identischen Hash-Eingabebytes vermeiden lässt; danach genau einen begrenzten Folgeauftrag wählen. Keine Produktänderung, kein neues Hash-/Schlüsselformat und keine entfallende Integritätsprüfung in diesem Diagnoseauftrag.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
