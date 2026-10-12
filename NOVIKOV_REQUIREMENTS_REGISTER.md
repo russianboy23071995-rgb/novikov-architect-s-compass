@@ -10707,3 +10707,7 @@ Erstzugriffe: Dekodierung 100 ms, Bytekopie 179,2 ms, Header 0,3 ms. 24 warme Ha
 
 ### R26-01/02 · Bildheader ohne Bytekopie 12.10.2026
 Gemeinsamer Parser liest Bytearrays oder vollständig dekodierte Binärstrings. URL-Prüfung ohne volle Bytekopie, Validierung und Cache erhalten. 914 Tests/Differentialoracle, Typprüfung/Lint/Builds bestanden. Browserexport byteidentisch; Bildprüfung 279,8→110,7 ms im Einzelvergleich. Rohdaten image-header-no-copy.json. Nächster Einzelauftrag: BimPlan-Erstableitung zuordnen, keine Gesamtperformancefreigabe.
+
+
+### R26-01/02 · Grundrissvorbereitung 12.10.2026
+BimPlan 202,2 ms, darin Fangquellen 193 ms; Szenenableitung 3,7 ms. Warmer Zoom ohne erneute Vorbereitung. Typprüfung/Lint/Diagnosebuild erfolgreich, Datei byteidentisch. PR289-Codierungsregression vor Merge korrigiert, 914 Tests/CI grün. Rohdaten plan-preparation-phases.json. Nächster Einzelauftrag: Geometrieableitung und räumlichen Indexaufbau getrennt messen.
