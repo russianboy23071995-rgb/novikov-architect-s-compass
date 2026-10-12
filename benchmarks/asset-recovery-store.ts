@@ -52,10 +52,11 @@ export async function restoreCheckedSnapshot(
   await readCheckpoint(probe);
   return project;
 }
-export function createPreparation(profile: 50 | 100 = 50) {
-  if (profile !== 50 && profile !== 100) throw new Error("Unknown pilot profile");
-  const maxBytes = (profile === 100 ? 128 : 64) * 1024 * 1024;
-  const maxPixels = profile === 100 ? 40_000_000 : 32_000_000;
+export function createPreparation(profile: 50 | 100 | 250 = 50) {
+  if (profile !== 50 && profile !== 100 && profile !== 250)
+    throw new Error("Unknown pilot profile");
+  const maxBytes = (profile === 250 ? 320 : profile === 100 ? 128 : 64) * 1024 * 1024;
+  const maxPixels = profile === 250 ? 64_000_000 : profile === 100 ? 40_000_000 : 32_000_000;
   const cache = new WeakMap<ImageAsset, { key: string; payload: Payload }>();
   let hashes = 0;
   return {

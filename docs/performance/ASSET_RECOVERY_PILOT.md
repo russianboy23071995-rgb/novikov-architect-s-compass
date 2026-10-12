@@ -312,3 +312,51 @@ bekannte Warnungen. Reproduktion unverändert über reine Leseseite und vorhande
 
 Die nachgewiesene 100-MiB-Basis reicht für die nächste begrenzte Größenmessung. Die
 Produktionsanbindung, Migration und allgemeine Dateifreigabe bleiben separat offen.
+
+## Begrenztes 250-MiB-Profil (12.10.2026)
+
+[Gesamtlauf](recovery-250-2026-10-12.json) und
+[isolierter Lesetest](recovery-250-isolated-2026-10-12.json), Windows/Chromium 155,
+Diagnose-Port 8084. 264.839.809 Byte (252,57 MiB) Projekt-JSON, 30 verschiedene
+1280×1280-PNGs (49,152 MP), 10.000 Linien und bestehendes Beispielmodell.
+Keine parallele monolithische Doppelhülle; deren Kontrollvergleich entfällt ausdrücklich.
+Vollständige Modell-/Payloadhashes bleiben als eigenständige Vergleichsaufgaben erhalten.
+
+| Messung | Ergebnis |
+| --- | --- |
+| Erstvorbereitung / atomarer Erstwrite | 3.423 / 1.587 ms |
+| Warme Vorbereitung / zweite Veröffentlichung | 52 / 299 ms |
+| Unveränderte Bilder bei zweiter Revision | 0 neue Hashes, 0 Payloadwrites |
+| Isolierter Service, drei Wiederholungen | 4.115 / 4.156 / 4.024 ms |
+| Längste Service-Task je Wiederholung | 154 / 126 / 152 ms |
+| Abschließende Modellprüfung | 65 / 59 / 48 ms |
+| Separate Vergleichsaufgabe | 1.081 / 1.065 / 1.069 ms |
+
+14 Prüfungen im Gesamtlauf bestanden: einmalige Assetspeicherung, warme Wiederverwendung,
+drei vollständige Leservergleiche, Wiederöffnung, Vorgänger, CAS-Konflikt,
+Transaktionsrollback einschließlich neuer Payload, unveränderter Head sowie beschädigte
+und fehlende Assets. Frische Leseseite nach Schließen des Erzeugertabs: drei vollständige
+Modell-/Payload-/Revisionsvergleiche und drei Abbrüche ohne Modellrückgabe bestanden.
+Die Abbrüche sind deterministische Scheduler-Injektionen vor Lesen, nach erstem Asset
+und nach Modellprüfung; keine Behauptung eines getesteten neuen Produkt-Abbruchbuttons.
+
+Diagnosebudgets: maximal 320 MiB Payloadzeichen und 64 MP bei Vorbereitung. Der
+Gesamtlauf besitzt eine kooperative 120-s-Zeitgrenze und eine Heap-Stichprobengrenze
+von 2,5 GiB vor Phasen/Fixturebildern; beide wurden nicht erreicht. Kein harter
+RAM-Schutz: synchrone Aufgaben/IDB-Transaktionen werden nicht sofort unterbrochen,
+Heapwerte sind optional. Die bestehende reine Leseseite hat diese Gesamtlaufwächter
+nicht; ihr fester Ablauf wurde vollständig beendet.
+
+Größte Heap-Stichprobe im Gesamtlauf 1,67 GiB; isoliert nach Service 424–681 MiB,
+nach Vergleich bis 1,13 GiB. Keine erzwungene GC, kein echter Prozesspeak, kein
+GPU-/Leaknachweis. Origin-Storage nahm ungefähr 251,5 MiB zu; andere Pilotdatenbanken
+waren vorhanden. Keine Datenträger-/Quota-/Crashgarantie. Long Tasks bleiben messbar,
+insbesondere separate Vergleichshashes über eine Sekunde gehören zum Harness.
+
+888 Node-Tests, App-/Benchmark-Typechecks und Produktionsbuild bestanden; Lint
+0 Fehler/6 bekannte Warnungen. Keine Produktionsformat-/Limitänderung.
+Reproduktion: `benchmarks/asset-recovery.html` auf Diagnose-Port 8084, Profil
+„250 MiB · ohne Kontrollhülle“, Pilot starten; anschließend Erzeugertab schließen
+und den ausgegebenen Datenbanknamen in `recovery-read-isolation.html` einsetzen.
+Die produktive Anwendung bleibt unberührt. Dieser Befund trägt die nächste begrenzte
+Application-/Migrationsanbindung; er ersetzt deren Sicherheits- und Integrationstests nicht.

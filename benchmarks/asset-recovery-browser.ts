@@ -2,6 +2,7 @@ import {
   createPreparation,
   createAssetRecoveryStore,
   openPilotDatabase,
+  type ReadControl,
 } from "./asset-recovery-store";
 import { recoveryFixture } from "./recovery-capacity-fixture";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
@@ -10,7 +11,7 @@ if (!import.meta.env.DEV || location.port !== "8084") throw new Error("Isolated 
 const root = document.getElementById("root")!;
 root.style.cssText = "font:14px system-ui;max-width:1100px;margin:30px auto;line-height:1.5";
 root.innerHTML =
-  '<h1>Asset-Recovery-Pilot</h1><p>Nur synthetische Daten in eigener Testdatenbank. Keine Produktmigration. Bilder einmalig speichern, Manifest und Vorgänger atomar veröffentlichen.</p><label>Profil <select id="profile"><option value="50">50 MiB · A/B</option><option value="100">100 MiB · gemeinsamer Decoder</option></select></label> <button id="run">Pilot starten</button> <button id="cancel" disabled>Abbrechen</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status">Bereit</p><pre id="output"></pre>';
+  '<h1>Asset-Recovery-Pilot</h1><p>Nur synthetische Daten in eigener Testdatenbank. Keine Produktmigration. Bilder einmalig speichern, Manifest und Vorgänger atomar veröffentlichen.</p><label>Profil <select id="profile"><option value="50">50 MiB · A/B</option><option value="100">100 MiB · gemeinsamer Decoder</option><option value="250">250 MiB · ohne Kontrollhülle</option></select></label> <button id="run">Pilot starten</button> <button id="cancel" disabled>Abbrechen</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status">Bereit</p><pre id="output"></pre>';
 const profileSelect = document.querySelector<HTMLSelectElement>("#profile")!;
 const memorySample = () => {
   const memory = (
@@ -27,10 +28,12 @@ const cancel = document.querySelector<HTMLButtonElement>("#cancel")!;
 const download = document.querySelector<HTMLButtonElement>("#download")!;
 const status = document.querySelector<HTMLElement>('[role="status"]')!;
 const output = document.getElementById("output")!;
+let controller = new AbortController();
 let stopped = false,
   report: Record<string, unknown>;
 cancel.onclick = () => {
   stopped = true;
+  controller.abort();
   status.textContent = "Abbruch nach aktueller Phase…";
 };
 const pause = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -58,7 +61,15 @@ async function count(db: IDBDatabase, store: string) {
   });
 }
 run.onclick = async () => {
-  const profile = Number(profileSelect.value) === 100 ? 100 : 50;
+  const profile =
+    Number(profileSelect.value) === 250 ? 250 : Number(profileSelect.value) === 100 ? 100 : 50;
+  controller = new AbortController();
+  const deadline = setTimeout(() => controller.abort(), 120_000);
+  const checkLimits = () => {
+    controller.signal.throwIfAborted();
+    if ((memorySample()?.used ?? 0) > 2.5 * 1024 ** 3)
+      throw new Error("Diagnostic heap sample above 2.5 GiB");
+  };
   profileSelect.disabled = true;
   run.disabled = true;
   cancel.disabled = false;
@@ -101,6 +112,7 @@ run.onclick = async () => {
     check(pattern.test(error), name);
   };
   const phase = async <T>(name: string, fn: () => Promise<T>) => {
+    checkLimits();
     if (stopped) throw new Error("Cancelled");
     status.textContent = name;
     await pause();
@@ -117,6 +129,7 @@ run.onclick = async () => {
       let size = 0,
         i = 0;
       while (size < profile * 1024 * 1024) {
+        checkLimits();
         if (stopped) throw new Error("Cancelled");
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 1280;
@@ -164,7 +177,7 @@ run.onclick = async () => {
     report["first"] = one;
     check(one.payloadWrites === p.assets.length, "first write stores each different asset once");
     const initialHashes = prep.hashes;
-    const previousJson = JSON.stringify(p);
+    const previousJson = profile === 250 ? "" : JSON.stringify(p);
     p = validateProject({
       ...p,
       storey: {
@@ -186,35 +199,39 @@ run.onclick = async () => {
       two.payloadWrites === 0 && two.payloadBytes === 0,
       "second revision writes zero image bytes",
     );
-    let controlText = "";
-    await phase("Monolithische Recovery-Hülle schreiben", async () => {
-      controlText = JSON.stringify({
-        version: 1,
-        current: { json: JSON.stringify(p), savedAt: "2026-10-12T00:00:00Z" },
-        previous: { json: previousJson, savedAt: "2026-10-11T00:00:00Z" },
+    if (profile !== 250) {
+      let controlText = "";
+      await phase("Monolithische Recovery-Hülle schreiben", async () => {
+        controlText = JSON.stringify({
+          version: 1,
+          current: { json: JSON.stringify(p), savedAt: "2026-10-12T00:00:00Z" },
+          previous: { json: previousJson, savedAt: "2026-10-11T00:00:00Z" },
+        });
+        await mutate(db!, "control", (s) => s.put(controlText, "record"));
       });
-      await mutate(db!, "control", (s) => s.put(controlText, "record"));
-    });
-    report["controlBytes"] = bytes(controlText);
-    controlText = "";
-    await phase("Monolithische Recovery lesen und validieren", async () => {
-      const raw = await new Promise<string>((resolve, reject) => {
-        const tx = db!.transaction("control");
-        const r = tx.objectStore("control").get("record");
-        tx.oncomplete = () => resolve(r.result);
-        tx.onabort = () => reject(tx.error);
+      report["controlBytes"] = bytes(controlText);
+      controlText = "";
+      await phase("Monolithische Recovery lesen und validieren", async () => {
+        const raw = await new Promise<string>((resolve, reject) => {
+          const tx = db!.transaction("control");
+          const r = tx.objectStore("control").get("record");
+          tx.oncomplete = () => resolve(r.result);
+          tx.onabort = () => reject(tx.error);
+        });
+        const q = validateProject(JSON.parse(JSON.parse(raw).current.json));
+        check((await hash(q)) === expected, "monolithic control roundtrip");
       });
-      const q = validateProject(JSON.parse(JSON.parse(raw).current.json));
-      check((await hash(q)) === expected, "monolithic control roundtrip");
-    });
+    } else report["controlSkipped"] = "250 MiB: no monolithic double envelope";
     db.close();
     db = await openPilotDatabase(dbName);
     const reopened = createAssetRecoveryStore(db);
+    const read = (id: string, previous = false, probe: ReadControl = {}) =>
+      reopened.read(id, previous, { ...probe, signal: controller.signal });
     const comparisons: unknown[] = [];
     report["readComparison"] = comparisons;
     // Alternate order to reduce one-sided cache/order effects; no model-result cache.
     for (let round = 0; round < 3; round++) {
-      for (const legacy of profile === 100
+      for (const legacy of profile !== 50
         ? [false]
         : round % 2 === 0
           ? [true, false]
@@ -222,7 +239,7 @@ run.onclick = async () => {
         const times: Record<string, number> = {};
         await phase(`Lesepfad ${legacy ? "alt" : "gemeinsam"} / ${round + 1}`, async () => {
           const start = performance.now();
-          const restored = await reopened.read(p.id, false, {
+          const restored = await read(p.id, false, {
             legacy,
             measure: (name, ms) => {
               times[name] = (times[name] ?? 0) + ms;
@@ -238,13 +255,13 @@ run.onclick = async () => {
     }
     await phase("Recovery nach erneutem Datenbanköffnen", async () =>
       check(
-        (await hash((await reopened.read(p.id)).project)) === expected,
+        (await hash((await read(p.id)).project)) === expected,
         "current full model roundtrip after reopen",
       ),
     );
     await phase("Vorgänger prüfen", async () =>
       check(
-        (await hash((await reopened.read(p.id, true)).project)) === originalHash,
+        (await hash((await read(p.id, true)).project)) === originalHash,
         "previous full model roundtrip",
       ),
     );
@@ -269,7 +286,7 @@ run.onclick = async () => {
     );
     check((await count(db, "assets")) === before, "aborted new asset not persisted");
     await phase("Stand nach Fehlern unverändert", async () => {
-      const q = await reopened.read(p.id);
+      const q = await read(p.id);
       check(
         q.revision === two.revision && (await hash(q.project)) === expected,
         "conflict and abort preserve published head",
@@ -281,13 +298,13 @@ run.onclick = async () => {
       s.put({ ...good, data: good.data.slice(0, -8) + "AAAA" + good.data.slice(-4) }, key),
     );
     await rejection(
-      () => reopened.read(p.id),
+      () => read(p.id),
       /integrity mismatch/,
       "corrupt asset rejects recovery before model return",
     );
     await mutate(db, "assets", (s) => s.delete(key));
     await rejection(
-      () => reopened.read(p.id),
+      () => read(p.id),
       /Missing asset/,
       "missing asset rejects recovery before model return",
     );
@@ -299,6 +316,7 @@ run.onclick = async () => {
     report["error"] = String(e);
     status.textContent = String(e);
   } finally {
+    clearTimeout(deadline);
     await pause();
     for (const entry of observer?.takeRecords() ?? [])
       longTasks.push({ start: entry.startTime, ms: entry.duration });
