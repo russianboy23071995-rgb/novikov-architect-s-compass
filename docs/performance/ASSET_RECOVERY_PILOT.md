@@ -1010,3 +1010,28 @@ Verschachtelte Werte nicht addieren. Rest der Task weiterhin unzugeordnet.
 Nächster begrenzter Auftrag: Bild-URL-Prüfung im selben Produktionsprofil in Cache-
 Suche, Base64-Dekodierung, Bytekopie und Headerprüfung aufteilen; frische und warme
 Aufrufe trennen. Erst mit diesem Nachweis eine Bildpfadoptimierung auswählen.
+
+
+## Bildprüfungs-Teilphasen (12.10.2026)
+PR287 nach Freigabe/grüner CI übernommen. Vorhandene workspaceLoadInstrumentation
+misst zusätzlich atob, binaryBytes, imageHeader, WeakMap-Abfrage und checkedImageUrl
+gesamt. Nur Diagnose, keine Produktänderung. Typprüfung, fokussiertes ESLint und
+load-profile-Build bestanden; regulärer Build ebenfalls ausgeführt. 913 Produkttests
+vom unveränderten PR287-Stand übernommen, nicht erneut ausgeführt.
+
+[Browser-Rohdaten](image-validation-phases.json), gleiche 101,96-MiB-Fixture:
+12 Erstaufrufe, atob insgesamt 100 ms, Bytekopie 179,2 ms, Header 0,3 ms;
+Bildprüfung insgesamt 279,8 ms, öffentliche URL-Funktion 280 ms. Nach Zoom in/out
+24 weitere öffentliche Aufrufe insgesamt 0,1 ms, keine erneute Dekodierung/Kopie.
+WeakMap-Abfrage unter Messauflösung. Der Fallback-Inhaltscache für ungebrandete
+Assets wurde hier nicht benutzt und wird damit nicht bewertet. Ein Ablauf,
+keine p95-Aussage; verschachtelte Summen nicht addieren. Native Bilddekodierung,
+DOM/Layout/GPU weiterhin nicht separat gemessen. Export (46) byteidentisch zur
+Fixture (27), 10014 Elemente, keine Konsolenfehler.
+
+Nächster Pilot: gemeinsamen Headerleser auf Bytezugriff aus Uint8Array oder bereits
+vollständig per atob dekodiertem Binärstring stützen. Vollständige Bytekopie im URL-
+Prüfpfad vermeiden, bestehende Importnutzung weiterverwenden. PNG/JPEG, Marker,
+Trunkierung, Metadatenabweichung und Größenlimits per Differentialtests sichern;
+Base64-Dekodierung und Cache-/Validierungsgrenzen erhalten. Kein partielles blindes
+Headervertrauen, kein Rendererwechsel oder neuer Cache.

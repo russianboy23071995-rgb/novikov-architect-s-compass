@@ -10699,3 +10699,7 @@ Opt-in-load-profile mit gemeinsamen Messhelfern, kein Produktumbau. Ladebefehl 3
 
 ### R26-01/02 · Musterabgleich-Budget 12.10.2026
 Vollserialisierung durch exakten gemeinsamen Bytezähler nach vollständiger Validierung ersetzt. Revisions-/Konfliktvertrag und No-op-Identität erhalten. 913 Tests, Typprüfung/Lint/Builds bestanden; Browserexport byteidentisch. Musterabgleich im Einzelvergleich 309,8→85,7 ms, gesamte Übernahmetask jedoch 1910 statt 1718 ms: keine Gesamtperformancefreigabe. Rohdaten pattern-resolution-budget.json. Nächster Einzelauftrag: Bild-URL-Teilphasen messen.
+
+
+### R26-01/02 · Bildteilphasen 12.10.2026
+Erstzugriffe: Dekodierung 100 ms, Bytekopie 179,2 ms, Header 0,3 ms. 24 warme Handle-Zugriffe bei Zoom ohne erneute Dekodierung. Export byteidentisch; keine Produktänderung. Typprüfung/Lint/Builds bestanden. Rohdaten image-validation-phases.json, Grenzen in ASSET_RECOVERY_PILOT.md. Nächster Pilot: Header aus dekodiertem Binärstring lesen, volle Bytekopie vermeiden, Validierung und gemeinsamen Importpfad bewahren.
