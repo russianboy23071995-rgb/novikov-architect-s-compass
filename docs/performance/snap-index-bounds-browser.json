@@ -1,0 +1,1060 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 5468.200000017881,
+      "label": "Open project"
+    },
+    {
+      "at": 16180.300000011921,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 18632.20000001788,
+      "label": "Zoom in"
+    },
+    {
+      "at": 20178.90000000596,
+      "label": "Zoom out"
+    },
+    {
+      "at": 20523.20000001788,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 75.5,
+      "duration": 51
+    },
+    {
+      "start": 128,
+      "duration": 139
+    },
+    {
+      "start": 5810.9000000059605,
+      "duration": 648
+    },
+    {
+      "start": 16180.09999999404,
+      "duration": 1409
+    },
+    {
+      "start": 17589.09999999404,
+      "duration": 125
+    },
+    {
+      "start": 17900.30000001192,
+      "duration": 52
+    },
+    {
+      "start": 18301,
+      "duration": 105
+    },
+    {
+      "start": 18415.90000000596,
+      "duration": 105
+    },
+    {
+      "start": 18532,
+      "duration": 99
+    },
+    {
+      "start": 18631.5,
+      "duration": 118
+    },
+    {
+      "start": 18788.09999999404,
+      "duration": 107
+    },
+    {
+      "start": 19052.5,
+      "duration": 101
+    },
+    {
+      "start": 19157.40000000596,
+      "duration": 103
+    },
+    {
+      "start": 19279.80000001192,
+      "duration": 101
+    },
+    {
+      "start": 19398.09999999404,
+      "duration": 102
+    },
+    {
+      "start": 19512.70000001788,
+      "duration": 102
+    },
+    {
+      "start": 19752.30000001192,
+      "duration": 94
+    },
+    {
+      "start": 19865.90000000596,
+      "duration": 99
+    },
+    {
+      "start": 19969.90000000596,
+      "duration": 99
+    },
+    {
+      "start": 20178.5,
+      "duration": 92
+    }
+  ],
+  "exportPhases": [],
+  "workspacePhases": [
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 135.80000001192093,
+      "duration": 0.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 172.7000000178814,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 243.7000000178814,
+      "duration": 0.29999998211860657
+    },
+    {
+      "kind": "application",
+      "event": "patterns-changed",
+      "start": 243.59999999403954,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 251.59999999403954,
+      "duration": 0.20000001788139343
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 251.80000001192093,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 251.59999999403954,
+      "duration": 0.6000000238418579
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 252.2000000178814,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 252.30000001192093,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 252.2000000178814,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 252.59999999403954,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 253.09999999403954,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 250.59999999403954,
+      "duration": 3.2000000178813934
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 254,
+      "duration": 0.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 256.90000000596046,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 264.80000001192093,
+      "duration": 0.29999998211860657
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 5699.200000017881,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 5700.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 6465,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 6465.700000017881,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "pattern-resolution",
+      "start": 16180.59999999404,
+      "duration": 44.70000001788139
+    },
+    {
+      "kind": "application",
+      "event": "history-commit",
+      "start": 16225.59999999404,
+      "duration": 49
+    },
+    {
+      "kind": "application",
+      "event": "load-project",
+      "start": 16180.59999999404,
+      "duration": 94
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16332,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 16344.700000017881,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 16351.300000011921,
+      "duration": 21.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 16372.700000017881,
+      "duration": 154.89999997615814
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16351.200000017881,
+      "duration": 176.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16527.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 16527.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 16527.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 16527.80000001192,
+      "duration": 5.199999988079071
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 16533,
+      "duration": 1.2000000178813934
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16351.200000017881,
+      "duration": 185.7999999821186
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16537.40000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16537.40000000596,
+      "duration": 10.800000011920929
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16548.30000001192,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16537.40000000596,
+      "duration": 11.099999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16537.30000001192,
+      "duration": 11.199999988079071
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16548.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16548.59999999404,
+      "duration": 9.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16558.30000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16548.59999999404,
+      "duration": 9.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16548.59999999404,
+      "duration": 9.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16558.30000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16558.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16567.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16558.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16558.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16567.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16567.80000001192,
+      "duration": 12.199999988079071
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16580.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16567.80000001192,
+      "duration": 12.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16567.80000001192,
+      "duration": 12.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16580.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16580.09999999404,
+      "duration": 11.5
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16591.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16580.09999999404,
+      "duration": 11.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16580.09999999404,
+      "duration": 11.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16591.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16591.80000001192,
+      "duration": 12.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16604.20000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16591.80000001192,
+      "duration": 12.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16591.70000001788,
+      "duration": 12.5
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16604.30000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16604.30000001192,
+      "duration": 10.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16614.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16604.30000001192,
+      "duration": 10.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16604.30000001192,
+      "duration": 10.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16614.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16614.90000000596,
+      "duration": 9.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16624.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16614.90000000596,
+      "duration": 9.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16614.90000000596,
+      "duration": 9.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16624.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16624.90000000596,
+      "duration": 10.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16635.20000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16624.90000000596,
+      "duration": 10.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16624.90000000596,
+      "duration": 10.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16635.30000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16635.30000001192,
+      "duration": 9.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16645.20000001788,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16635.30000001192,
+      "duration": 10
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16635.30000001192,
+      "duration": 10
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16645.30000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16645.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16654.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16645.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16645.30000001192,
+      "duration": 9.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16654.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-atob",
+      "start": 16654.70000001788,
+      "duration": 11.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-header",
+      "start": 16666,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 16654.70000001788,
+      "duration": 11.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16654.70000001788,
+      "duration": 11.299999982118607
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16537.09999999404,
+      "duration": 128.90000000596046
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16999.90000000596,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17000.5,
+      "duration": 25.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17139.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17418.20000001788,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17978.90000000596,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18636.70000001788,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.80000001192,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.80000001192,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.80000001192,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18636.80000001192,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18636.90000000596,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18636.90000000596,
+      "duration": 8.699999988079071
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18903.90000000596,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20180.80000001192,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20181,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20181,
+      "duration": 10.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20304.80000001192,
+      "duration": 0.19999998807907104
+    }
+  ],
+  "mode": "load-profile",
+  "build": "production-workspace"
+}
