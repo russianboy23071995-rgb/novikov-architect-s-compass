@@ -10,6 +10,9 @@ import {
   validateProject,
 } from "../../lib/bim/model.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { loadProjectData } from "./load.ts";
+import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
+import { validateProjectV9 } from "../../domain/project/schema.ts";
 import {
   createHistory,
   commitProject,
@@ -54,6 +57,89 @@ function fixture() {
   });
   return p;
 }
+
+test("single asset ingress matches previous full path acceptance and values", () => {
+  const assetChanges = [
+    {},
+    { data: "AA==" },
+    { data: "AAA=" },
+    { data: "AAAA" },
+    { data: "AB==" },
+    { data: "AAB=" },
+    { data: "AAA" },
+    { data: "AA=A" },
+    { data: "AA\n=" },
+    { data: "!!!!" },
+    { data: "" },
+    { mimeType: "image/svg+xml" },
+    { pixelWidth: 0 },
+    { pixelWidth: 16385 },
+    { pixelWidth: 4001, pixelHeight: 4000 },
+    { pixelWidth: 4000, pixelHeight: 4000 },
+    { pixelHeight: 1.5 },
+    { trusted: true },
+    { id: "  a  " },
+  ];
+  for (const change of assetChanges) {
+    const source = fixture();
+    Object.assign(source.assets[0]!, change);
+    const input = JSON.parse(JSON.stringify(source));
+    let expected;
+    try {
+      const parsed = validateProject(input);
+      expected = { ...parsed, assets: parsed.assets.map(createImageAssetHandle) };
+    } catch {
+      assert.throws(() => loadProjectData(input));
+      continue;
+    }
+    assert.deepEqual(loadProjectData(input), expected);
+  }
+});
+
+test("file boundary owns fresh frozen assets and does not trust IDs or frozen impostors", () => {
+  const input = fixture(),
+    before = structuredClone(input);
+  const loaded = loadProjectData(input);
+  assert.deepEqual(input, before);
+  assert.notEqual(loaded.assets[0], input.assets[0]);
+  input.assets[0]!.data = "!!!!";
+  assert.equal(loaded.assets[0]!.data, before.assets[0]!.data);
+  assert.ok(Object.isFrozen(loaded.assets[0]));
+  const again = loadProjectData(loaded);
+  assert.notEqual(again.assets[0], loaded.assets[0]);
+  const forged = fixture();
+  forged.assets[0] = Object.freeze({ ...forged.assets[0]!, data: "!!!!" });
+  assert.throws(() => loadProjectData(forged));
+});
+
+test("validated assets survive version-9 migration while model relationships remain checked", () => {
+  const source = fixture();
+  const { hatchPatterns: _patterns, ...version9 } = source;
+  const old = validateProjectV9({ ...version9, schemaVersion: 9 });
+  const before = structuredClone(old),
+    migrated = loadProjectData(old);
+  assert.deepEqual(old, before);
+  assert.equal(migrated.schemaVersion, 20);
+  assert.deepEqual(migrated.assets, source.assets);
+  assert.ok(Object.isFrozen(migrated.assets[0]));
+  assert.equal(validateProject(migrated).assets[0], migrated.assets[0]);
+  assert.throws(() => loadProjectData({ ...old, assets: [...old.assets, ...old.assets] }));
+  assert.throws(() =>
+    loadProjectData({
+      ...old,
+      storey: {
+        ...old.storey,
+        references: old.storey.references.map((r) => ({ ...r, assetId: "missing" })),
+      },
+    }),
+  );
+});
+
+test("incoming project byte limit remains enforced before asset preparation", () => {
+  const source = fixture();
+  source.assets[0]!.data = "AAAA".repeat(3 * 1024 * 1024);
+  assert.throws(() => readProjectFile(JSON.stringify(source)), /10/);
+});
 test("file ingress renews handles and shares them through wall/line edits and history", () => {
   const source = fixture(),
     loaded = readProjectFile(serializeProject(source)),

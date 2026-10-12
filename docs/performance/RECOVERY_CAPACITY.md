@@ -1,5 +1,52 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Pilot vom 12.10.2026: einmalige Bildprüfung am Dateieingang
+
+PR250 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Messstand
+`bea8688`, Vorgänger `79b864f`; gleiche sechs Profile und Diagnose. Der öffentliche
+`loadProjectData`-Eingang erstellt vollständig geprüfte eigene Asset-Kopien einmal.
+Die private Migration verwendet ihre unveränderlichen Identitätshandles über alle
+Versionen weiter. Sämtliche Projekt-/Beziehungsprüfungen bleiben erhalten. Direkte
+öffentliche Ladeaufrufe erneuern Handles; keine fremde ID oder gefälschte Markierung
+wird vertraut. Das Format und die 10-MiB-Grenze bleiben unverändert.
+
+Vier neue Tests: Akzeptanz-/Wertevergleich mit bisherigem vollständigem Pfad über
+19 Varianten von Base64/Metadaten, eigene unveränderliche Kopien und gefälschte
+Handles, Version-9-Migration/Beziehungen sowie Dateigrößengrenze. Eine zunächst
+mit aktuellen Zusatzfeldern erzeugte Version-9-Testdatei wurde berichtigt; die
+Produktionsmigration wurde dafür nicht gelockert.
+
+[Rohdaten](single-asset-ingress-2026-10-12.json), Beginn 10:02:56 UTC. Chromium 155,
+Windows x64, 12 logische Prozessoren und 16 GiB deviceMemory laut Browser, Dokument
+sichtbar. 252 Phasenmessungen und 108 Inhaltsvergleiche bestanden, keine
+Konsolenfehler. 869 Tests, App-/Benchmark-Typecheck, Build und Lint bestanden
+(0 Fehler/6 bestehende Warnungen). Derselbe Rechner/Browser wie die Referenzmessung vom selben Tag;
+keine randomisierten A/B-Läufe oder kontrollierte Hintergrundlast. Je ein erster
+und fünf warme Läufe; p95 entspricht dem größten warmen Wert. Die Originaldaten
+bleiben erhalten. Dies ist keine allgemeine Kapazitätsfreigabe.
+
+| Profil | Dateivorbereitung Median vorher/nachher ms | Recovery-Lesen Median vorher/nachher ms | Dateivorbereitung p95 nachher ms | Recovery-Lesen p95 nachher ms |
+| --- | ---: | ---: | ---: | ---: |
+| Geometrie 1000 | 8.8 / 7.7 | 10.8 / 9.8 | 8.5 | 10.9 |
+| Geometrie 10000 | 91.6 / 76.7 | 126.3 / 98.7 | 97.6 | 117.1 |
+| Bild klein | 81.1 / 39.7 | 90.2 / 48.9 | 42.9 | 51.8 |
+| Bild mittel | 280.0 / 153.1 | 336.8 / 174.9 | 159.6 | 180.1 |
+| Bild nahe Grenze | 569.5 / 337.2 | 649.8 / 364.9 | 368.8 | 383.2 |
+| Gemischt | 311.9 / 204.2 | 380.0 / 234.3 | 227.4 | 289.5 |
+
+Das große Bildprofil benötigt weiterhin 337 ms Dateivorbereitung bzw. 365 ms
+Recovery-Lesen im warmen Median. Die längsten dort beobachteten Tasks betragen je
+369 ms. Manuelle Sicherung ohne Automatik: 511 ms Median, p95 792 ms. Der Schritt
+beseitigt wiederholte Prüfung, nicht sämtliche Hauptthread-Pausen.
+
+Der verbleibende Base64-Prüfer sucht derzeit für jedes Zeichen in einem
+64-Zeichen-Alphabet. Das ist ein konkreter Kandidat, noch keine isolierte
+Zeitzuordnung. Als nächster begrenzter Auftrag wird dieser Prüfer gegen eine
+lineare Zeichenklassifikation verglichen und nur bei identischer Akzeptanz sowie
+nachgewiesenem Gewinn ersetzt. Zeichenmenge, Padding und ungenutzte Endbits bleiben
+streng geprüft. Keine Decoder-Lockerung, keine Grenzänderung und kein Formatumbau.
+Maßgeblich bleibt allein Masterplan §9.
+
 ## Pilot vom 12.10.2026: geprüfte Schreibrevision
 
 PR249 wurde nach ausdrücklicher Freigabe und erfolgreicher CI zusammengeführt.
