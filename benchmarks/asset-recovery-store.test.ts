@@ -165,3 +165,54 @@ test("pilot rejects header mismatches and cannot open production databases", asy
   await assert.rejects(() => createPreparation().prepare(p));
   assert.throws(() => openPilotDatabase("novikov-production"), /Diagnostic database only/);
 });
+
+test("recovery string headers preserve payload acceptance and exact failures of the byte path", () => {
+  const result = (raw: unknown, legacy: boolean) => {
+    try {
+      return verifyPayload(raw, { legacy });
+    } catch (error) {
+      return { error: (error as Error).name, message: (error as Error).message };
+    }
+  };
+  const png = [
+    137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 100, 0, 0, 0, 50,
+  ];
+  const originals = [
+    png,
+    ...[192, 193, 194].map((m) => [255, 216, 255, m, 0, 8, 8, 0, 50, 0, 100, 0]),
+  ];
+  for (const original of originals) {
+    const mimeType = original === png ? "image/png" : "image/jpeg";
+    const valid = {
+      mimeType,
+      pixelWidth: 100,
+      pixelHeight: 50,
+      data: btoa(String.fromCharCode(...original)),
+    };
+    assert.deepEqual(verifyPayload(valid), valid);
+    const cases = [original];
+    for (let i = 0; i < original.length; i++) {
+      cases.push(original.slice(0, i));
+      for (const value of [0, 1, 255]) {
+        const bytes = [...original];
+        bytes[i] = value;
+        cases.push(bytes);
+      }
+    }
+    for (const bytes of cases) {
+      const raw = { ...valid, data: btoa(String.fromCharCode(...bytes)) };
+      assert.deepEqual(result(raw, false), result(raw, true));
+    }
+    for (const raw of [
+      { ...valid, pixelWidth: 99 },
+      { ...valid, pixelHeight: 51 },
+      { ...valid, mimeType: mimeType === "image/png" ? "image/jpeg" : "image/png" },
+      { ...valid, data: "!invalid!" },
+      { ...valid, extra: 1 },
+      { ...valid, data: valid.data + "\n" },
+    ]) {
+      assert.throws(() => verifyPayload(raw));
+      assert.deepEqual(result(raw, false), result(raw, true));
+    }
+  }
+});

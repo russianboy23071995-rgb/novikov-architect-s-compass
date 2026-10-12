@@ -321,6 +321,13 @@ Header selbst 0,5 ms. Verschachtelte Werte, kein p95-Nachweis. Typprüfung/Lint/
 Diagnosebuild bestanden; wiederhergestellter Export bytegleich. Nachweis/Rohdaten:
 docs/performance/ASSET_RECOVERY_PILOT.md und recovery-read-phases.json.
 
+**12.10.2026 · Recovery-Header ohne Kopie (PR295):** PR294 mit grüner CI gemergt.
+Gemeinsamen String-Headerleser im Recovery-Pfad verwendet; volle Bytekopie entfällt.
+917 Tests, Typprüfung/Lint, regulärer und Diagnosebuild bestanden. Gleicher Snapshot:
+Decode 369,2→116,9 ms, Restore 1572,9→1293,4 ms im Einzelvergleich; Export bytegleich,
+keine Konsolenfehler. Schema/Hash/Budgets/Checkpoints unverändert. Rohdaten und Grenzen:
+docs/performance/ASSET_RECOVERY_PILOT.md, recovery-header-no-copy.json.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -389,7 +396,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Recovery-Bildheader ohne volle Bytekopie.** verifyPayload soll den vorhandenen gemeinsamen String-fähigen imageHeader nutzen, statt nach atob ein vollständiges Uint8Array zu erzeugen. Akzeptanz/Fehler durch Vergleichstests gegen den bisherigen Pfad sichern (PNG/JPEG, abgeschnittene/falsche Header und Metadaten); vollständige Recovery-, Integritäts- und Abbruchtests durchführen und denselben Snapshot im Browser nachmessen. Schema, Hash, Budgets, Checkpoints und Handlevalidierung unverändert. Keine Cache-/Format-/Limitänderung.
+**Genau ein aktiver Fortsetzungsschritt: Recovery-Handleprüfung bewerten.** Den verbleibenden Handle-Anteil (353,6 ms im Einzellauf) auf wiederholte Payloadvalidierung untersuchen. Datenbesitz, Unveränderlichkeit und Vertrauensgrenze zwischen verifyPayload und createImageAssetHandle nachvollziehen; danach genau einen sicheren Folgeauftrag festlegen. Keine ungeprüfte öffentliche Handle-Fabrik, keine entfallende Eingangsvalidierung und keine Produktänderung in diesem Diagnose-/Architekturauftrag.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
