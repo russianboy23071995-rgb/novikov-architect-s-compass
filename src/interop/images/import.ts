@@ -1,3 +1,4 @@
+import { binaryBytes } from "./binary-bytes.ts";
 import { createImageAssetHandle, type ImageAsset } from "../../domain/elements/reference/model.ts";
 import { PROJECT_FILE_LIMIT } from "../project-file/size.ts";
 /** Reads dimensions before decode to bound raster allocation. */
@@ -106,7 +107,7 @@ export function checkedImageUrl(asset: ImageAsset): string | undefined {
 function checkImageUrl(asset: ImageAsset): string | undefined {
   try {
     const binary = atob(asset.data);
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    const bytes = binaryBytes(binary);
     const header = imageHeader(bytes);
     if (
       header.width !== asset.pixelWidth ||
