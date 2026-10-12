@@ -1,3 +1,8 @@
+import { createRecoveryV2Storage } from "./recovery-v2-storage.ts";
+import { createBoundedRecoveryCodec } from "./recovery-codec.ts";
+import { assertProjectFileSize, PROJECT_FILE_LIMIT } from "./size.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import type { RecoveryV2Storage } from "../../application/project-files/recovery-v2.ts";
 import type {
   RecoveryCatalog,
   RecoverySummary,
@@ -7,9 +12,14 @@ import type { RecoveryStorage } from "../../application/project-files/recovery.t
 export function openRecoveryDatabase(name: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     let blocked = false;
-    const request = indexedDB.open(name, 2);
+    const request = indexedDB.open(name, 3);
     request.onupgradeneeded = () => {
-      for (const store of ["snapshots", "recovery-index"])
+      for (const store of [
+        "snapshots",
+        "recovery-index",
+        "recovery-v2-heads",
+        "recovery-v2-assets",
+      ])
         if (!request.result.objectStoreNames.contains(store))
           request.result.createObjectStore(store);
     };
@@ -20,7 +30,10 @@ export function openRecoveryDatabase(name: string): Promise<IDBDatabase> {
     };
     request.onsuccess = () => {
       if (blocked) request.result.close();
-      else resolve(request.result);
+      else {
+        request.result.onversionchange = () => request.result.close();
+        resolve(request.result);
+      }
     };
   });
 }
@@ -54,7 +67,9 @@ export function createRecoveryStorage(
       try {
         await new Promise<void>((resolve, reject) => {
           const tx = db.transaction(
-            projectId === undefined ? ["snapshots"] : ["snapshots", "recovery-index"],
+            projectId === undefined
+              ? ["snapshots"]
+              : ["snapshots", "recovery-index", "recovery-v2-heads"],
             "readwrite",
           );
           const store = tx.objectStore("snapshots");
@@ -66,9 +81,20 @@ export function createRecoveryStorage(
               tx.abort();
               return;
             }
-            store.put(next, key);
-            if (projectId !== undefined) {
-              tx.objectStore("recovery-index").put({ projectId, savedAt }, projectId);
+            const write = () => {
+              store.put(next, key);
+              if (projectId !== undefined)
+                tx.objectStore("recovery-index").put({ projectId, savedAt }, projectId);
+            };
+            if (projectId === undefined) write();
+            else {
+              const v2 = tx.objectStore("recovery-v2-heads").get(projectId);
+              v2.onsuccess = () => {
+                if (v2.result !== undefined) {
+                  conflict = true;
+                  tx.abort();
+                } else write();
+              };
             }
           };
           tx.oncomplete = () => resolve();
@@ -93,8 +119,58 @@ export const browserRecoveryStorage = createRecoveryStorage(() =>
 );
 
 /** Metadata and payload publish in the same transaction; listing never loads all project files. */
-export function createRecoveryCatalog(openDatabase: () => Promise<IDBDatabase>): RecoveryCatalog {
+export function createRecoveryCatalog(
+  openDatabase: () => Promise<IDBDatabase>,
+  useV2 = false,
+): RecoveryCatalog {
+  const bounded = createBoundedRecoveryCodec({
+    modelBytes: PROJECT_FILE_LIMIT,
+    payloadBytes: PROJECT_FILE_LIMIT,
+    pixels: 128_000_000,
+  });
+  const codec = {
+    async prepare(project: Parameters<typeof bounded.prepare>[0]) {
+      assertProjectFileSize(serializeProject(project));
+      return bounded.prepare(project);
+    },
+    async restore(...args: Parameters<typeof bounded.restore>) {
+      const project = await bounded.restore(...args);
+      assertProjectFileSize(serializeProject(project));
+      return project;
+    },
+  };
+  const projectV2 = (id: string): RecoveryV2Storage => ({
+    async read() {
+      const db = await openDatabase();
+      try {
+        return await createRecoveryV2Storage(db, id, codec, {
+          legacy: "snapshots",
+          heads: "recovery-v2-heads",
+          assets: "recovery-v2-assets",
+          legacyKey: `project:${id}`,
+          index: "recovery-index",
+        }).read();
+      } finally {
+        db.close();
+      }
+    },
+    async publish(...args) {
+      const db = await openDatabase();
+      try {
+        await createRecoveryV2Storage(db, id, codec, {
+          legacy: "snapshots",
+          heads: "recovery-v2-heads",
+          assets: "recovery-v2-assets",
+          legacyKey: `project:${id}`,
+          index: "recovery-index",
+        }).publish(...args);
+      } finally {
+        db.close();
+      }
+    },
+  });
   return {
+    ...(useV2 ? { v2: { codec, project: projectV2 } } : {}),
     legacy: createRecoveryStorage(openDatabase),
     project: (id) => createRecoveryStorage(openDatabase, `project:${id}`, id),
     async list() {
@@ -132,33 +208,49 @@ export function subscribeRecoveryChanges(listener: () => void) {
     }
   };
 }
-const catalog = createRecoveryCatalog(() => openRecoveryDatabase("novikov-recovery"));
+const catalog = createRecoveryCatalog(() => openRecoveryDatabase("novikov-recovery"), true);
+function notifyRecoveryChanged() {
+  // Notify only after commit. Failure of a hint must never report a committed save as failed.
+  for (const notify of localListeners) {
+    try {
+      notify();
+    } catch {
+      /* Observer is disposable. */
+    }
+  }
+  try {
+    if (changeChannel) changeChannel.postMessage("changed");
+    else if (typeof BroadcastChannel !== "undefined") {
+      const channel = new BroadcastChannel("novikov-recovery-changes");
+      channel.postMessage("changed");
+      channel.close();
+    }
+  } catch {
+    /* Focus refresh remains available. */
+  }
+}
 export const browserRecoveryCatalog: RecoveryCatalog = {
   ...catalog,
+  v2: {
+    codec: catalog.v2!.codec,
+    project(id) {
+      const port = catalog.v2!.project(id);
+      return {
+        read: port.read,
+        async publish(...args) {
+          await port.publish(...args);
+          notifyRecoveryChanged();
+        },
+      };
+    },
+  },
   project(id) {
     const storage = catalog.project(id);
     return {
       read: storage.read,
       async replace(expected, next) {
         await storage.replace(expected, next);
-        // Notify only after commit. Failure of a hint must never report a committed save as failed.
-        for (const notify of localListeners) {
-          try {
-            notify();
-          } catch {
-            /* Observer is disposable. */
-          }
-        }
-        try {
-          if (changeChannel) changeChannel.postMessage("changed");
-          else if (typeof BroadcastChannel !== "undefined") {
-            const channel = new BroadcastChannel("novikov-recovery-changes");
-            channel.postMessage("changed");
-            channel.close();
-          }
-        } catch {
-          /* Focus refresh remains available. */
-        }
+        notifyRecoveryChanged();
       },
     };
   },

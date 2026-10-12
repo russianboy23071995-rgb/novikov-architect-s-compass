@@ -44,7 +44,14 @@ export function createRecoveryV2Storage(
   db: IDBDatabase,
   projectId: string,
   codec: RecoveryV2Codec,
+  layout = { legacy: "legacy", heads: "heads", assets: "assets", legacyKey: projectId, index: "" },
 ): RecoveryV2Storage {
+  const stores = [
+    layout.legacy,
+    layout.heads,
+    layout.assets,
+    ...(layout.index ? [layout.index] : []),
+  ];
   return {
     read() {
       return new Promise((resolve, reject) => {
@@ -58,7 +65,7 @@ export function createRecoveryV2Storage(
         };
         tx.onabort = () => reject(problem ?? tx.error ?? new Error("Recovery read aborted"));
         tx.oncomplete = () => resolve({ legacy, record });
-        const old = tx.objectStore("legacy").get(projectId);
+        const old = tx.objectStore(layout.legacy).get(layout.legacyKey);
         old.onsuccess = () => {
           if (old.result !== undefined && typeof old.result !== "string") {
             fail(new Error("Invalid legacy slot"));
@@ -66,7 +73,7 @@ export function createRecoveryV2Storage(
           }
           legacy = old.result ?? null;
         };
-        const head = tx.objectStore("heads").get(projectId);
+        const head = tx.objectStore(layout.heads).get(projectId);
         head.onsuccess = () => {
           if (head.result === undefined) return;
           try {
@@ -86,7 +93,7 @@ export function createRecoveryV2Storage(
                   typeof a?.key === "string" ? [a.key] : [],
                 );
                 for (const key of new Set(keys)) {
-                  const asset = tx.objectStore("assets").get(key);
+                  const asset = tx.objectStore(layout.assets).get(key);
                   asset.onsuccess = () => {
                     if (asset.result !== undefined) blobs[key] = asset.result;
                   };
@@ -175,8 +182,8 @@ export function createRecoveryV2Storage(
           abort();
           return;
         }
-        const oldLegacy = tx.objectStore("legacy").get(projectId);
-        const oldHead = tx.objectStore("heads").get(projectId);
+        const oldLegacy = tx.objectStore(layout.legacy).get(layout.legacyKey);
+        const oldHead = tx.objectStore(layout.heads).get(projectId);
         let ready = 0;
         const check = () => {
           if (++ready !== 2) return;
@@ -191,7 +198,12 @@ export function createRecoveryV2Storage(
             const finish = () => {
               try {
                 if (!isCurrent()) throw new Error("Recovery context changed");
-                const written = tx.objectStore("heads").put(head, projectId);
+                if (layout.index)
+                  tx.objectStore(layout.index).put(
+                    { projectId, savedAt: head.current.savedAt },
+                    projectId,
+                  );
+                const written = tx.objectStore(layout.heads).put(head, projectId);
                 written.onsuccess = () => {
                   try {
                     if (!isCurrent()) fail(new Error("Recovery context changed"));
@@ -209,10 +221,10 @@ export function createRecoveryV2Storage(
             };
             if (!remaining) finish();
             for (const [key, payload] of payloads) {
-              const request = tx.objectStore("assets").get(key);
+              const request = tx.objectStore(layout.assets).get(key);
               request.onsuccess = () => {
                 if (request.result === undefined)
-                  tx.objectStore("assets").add(payload, key).onsuccess = ready;
+                  tx.objectStore(layout.assets).add(payload, key).onsuccess = ready;
                 else if (!samePayload(request.result, payload))
                   fail(new Error("Stored payload mismatch"));
                 else ready();

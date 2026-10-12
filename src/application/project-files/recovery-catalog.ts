@@ -1,3 +1,10 @@
+import {
+  migrateRecoveryV1,
+  restoreRecoveryV2,
+  type RecoveryV2Codec,
+  type RecoveryV2Storage,
+} from "./recovery-v2.ts";
+import { prepareRecoveryV2Writer } from "./recovery-v2-writer.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import {
   parseRecoveryRecord,
@@ -11,6 +18,7 @@ import {
 
 export type RecoverySummary = { projectId: string; savedAt: string };
 export interface RecoveryCatalog {
+  v2?: { codec: RecoveryV2Codec; project(id: string): RecoveryV2Storage };
   legacy: RecoveryStorage;
   project(id: string): RecoveryStorage;
   list(): Promise<RecoverySummary[]>;
@@ -44,9 +52,13 @@ async function readLegacyProjects(catalog: RecoveryCatalog) {
   return { grouped, warnings };
 }
 /** Copy, never delete, the old slot. Current and previous may belong to different projects. */
-export async function migrateLegacyRecovery(catalog: RecoveryCatalog): Promise<string[]> {
+export async function migrateLegacyRecovery(
+  catalog: RecoveryCatalog,
+  selectedId?: string,
+): Promise<string[]> {
   const { grouped, warnings } = await readLegacyProjects(catalog);
   for (const [id, snapshots] of grouped) {
+    if (selectedId !== undefined && id !== selectedId) continue;
     const storage = catalog.project(id);
     if ((await storage.read()) !== null) continue;
     const record: RecordData = {
@@ -64,6 +76,7 @@ export async function migrateLegacyRecovery(catalog: RecoveryCatalog): Promise<s
   return warnings;
 }
 export async function listRecoveryProjects(catalog: RecoveryCatalog) {
+  if (catalog.v2) return queryRecoveryProjects(catalog);
   let migrationWarning: string | undefined;
   try {
     await migrateLegacyRecovery(catalog);
@@ -76,6 +89,14 @@ export async function listRecoveryProjects(catalog: RecoveryCatalog) {
   return result;
 }
 export async function readProjectRecovery(catalog: RecoveryCatalog, id: string) {
+  if (catalog.v2) {
+    const source = await catalog.v2.project(id).read();
+    if (source.record !== null)
+      return {
+        ...(await restoreRecoveryV2(source.record, id, catalog.v2.codec)),
+        name: "Lokaler Wiederherstellungsstand",
+      };
+  }
   const storage = catalog.project(id);
   const raw = await storage.read();
   if (raw === null) {
@@ -93,6 +114,13 @@ export async function saveProjectRecovery(
   catalog: RecoveryCatalog,
   now = new Date(),
 ) {
+  if (catalog.v2)
+    return (await prepareCatalogV2Writer(catalog, project.id)).save(
+      project,
+      () => true,
+      undefined,
+      now,
+    );
   await migrateLegacyRecovery(catalog);
   await readProjectRecovery(catalog, project.id);
   return saveRecovery(project, catalog.project(project.id), now);
@@ -117,4 +145,16 @@ export async function queryRecoveryProjects(catalog: RecoveryCatalog) {
     (a, b) => b.savedAt.localeCompare(a.savedAt) || a.projectId.localeCompare(b.projectId),
   );
   return { projects, warnings };
+}
+
+/** Only the selected project migrates; listing and status queries stay read-only. */
+export async function prepareCatalogV2Writer(catalog: RecoveryCatalog, id: string) {
+  if (!catalog.v2) throw new Error("V2 catalog required");
+  const port = catalog.v2.project(id);
+  const source = await port.read();
+  if (source.record === null) {
+    await migrateLegacyRecovery(catalog, id);
+    await migrateRecoveryV1(port, id, catalog.v2.codec);
+  }
+  return prepareRecoveryV2Writer(port, id, catalog.v2.codec);
 }

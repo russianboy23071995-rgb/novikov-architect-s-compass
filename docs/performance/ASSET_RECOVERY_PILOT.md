@@ -463,3 +463,33 @@ Warnungen. Kein neuer UI-/Katalogpfad aktiviert. Nächster Schritt ist die begre
 Produktanbindung für ein ausgewähltes Projekt; manuelles Dateiformat und 32-MiB-Grenze
 bleiben davon getrennt. Kein Nachweis für schnelle warme Großprojektsicherung oder
 Stromausfall-/Quota-Verhalten durch diese kleinen Sicherheitsfixtures.
+
+
+## Produktive Versionsroute (12.10.2026)
+
+Der Browserkatalog verwendet jetzt den bestehenden Application-V2-Writer. IndexedDB
+Version 3 ergänzt Head-/Assetstores; V1-Snapshotstores bleiben erhalten. Auflisten und
+Startangebot lesen nur. Beim Vorbereiten einer Sicherung (auch Autosave-Aktivierung)
+wird ausschließlich das ausgewählte Projekt migriert. Der bisherige manuelle Slot und
+andere Projekte bleiben unverändert. Katalogzeitpunkt und Head werden in derselben
+Transaktion veröffentlicht. Der V1-Kompatibilitätsschreiber weist bereits migrierte
+Projektziele ab. Unbekannte Versionen bleiben sichtbar und werden nicht überschrieben.
+UI, Modellaktionen, History und manuelles Dateiformat ändern sich nicht.
+
+Konservative Produktionsbudgets: weiterhin 32 MiB gesamtes portables JSON, zusätzlich
+32 MiB Modelltext, 32 MiB Payloadzeichen und 128 Millionen Gesamtpixel. Letzteres ist
+eine zusätzliche Schutzgrenze, keine zugesicherte Kapazität. Alte Originale bleiben bei
+Budgetfehlern erhalten. Die Gesamtdateiprüfung serialisiert noch das volle Modell;
+dieser Schritt behauptet deshalb keinen neuen Performancegewinn. Ein IDB-Read kann
+Daten bereits vor der Codecprüfung allozieren. Keine Garbage Collection alter Assets.
+
+[Browsernachweis](recovery-routing-2026-10-12.json): 19 Prüfungen auf einer separaten
+synthetischen Datenbank, einschließlich echtem Datenbankupgrade von Version 2 auf 3,
+PNG-Referenz, bestehendem saveNow-/Autosave-Controller, erneut geöffnetem Katalog,
+Startangebot, vollständigem Projektvergleich, atomarem Rollback, erhaltenem V1,
+unmigriertem Fremdprojekt, Vorgängerfallback und unbekannter Version. Reproduktion:
+Diagnoseserver, `/benchmarks/recovery-routing.html`, Prüfbutton. Das erneute Öffnen
+verwendet frische Controller/DB-Verbindungen; kein vollständiger Browser-/OS-Neustart
+und kein praktischer CAD-Canvas-Test. Produktive Nutzerdaten wurden nicht verwendet.
+902 Node-Tests, beide Typechecks, Produktionsbuild bestanden; Lint 0 Fehler/6 bekannte
+Warnungen. Folgeauftrag ausschließlich Masterplan §9.
