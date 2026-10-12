@@ -1,0 +1,1833 @@
+{
+  "environment": {
+    "at": "2026-10-12T10:02:56.421Z",
+    "revision": "bea8688 - single asset ingress, Vite development",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "deviceMemory": 16,
+    "visibility": "visible",
+    "longTasksSupported": true,
+    "warmRuns": 5,
+    "limitBytes": 10485760
+  },
+  "rows": [
+    {
+      "name": "Geometrie 1000",
+      "bytes": 161051,
+      "elements": 1002,
+      "pixels": 0,
+      "recoveryBytes": 386678,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 4.4000000059604645,
+          "maxTimerDelayMs": 0.6000000238418579,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 4.800000011920929,
+          "maxTimerDelayMs": 0.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 2.9000000059604645,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 8.799999982118607,
+          "maxTimerDelayMs": 1.7000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 7.5999999940395355,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 13.599999994039536,
+          "maxTimerDelayMs": 5.799999982118607,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 9.800000011920929,
+          "maxTimerDelayMs": 1.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 2.7999999821186066,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 4.700000017881393,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 2.300000011920929,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 17.30000001192093,
+          "maxTimerDelayMs": 8,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 7.299999982118607,
+          "maxTimerDelayMs": 1.100000023841858,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 9.699999988079071,
+          "maxTimerDelayMs": 1.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 8.5,
+          "maxTimerDelayMs": 1.2000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 2.800000011920929,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 3.2999999821186066,
+          "maxTimerDelayMs": 1.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 2.0999999940395355,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 23,
+          "maxTimerDelayMs": 12.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 8.300000011920929,
+          "maxTimerDelayMs": 0.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 9.599999994039536,
+          "maxTimerDelayMs": 1.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 7.0999999940395355,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 2.5999999940395355,
+          "maxTimerDelayMs": 1.0999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 3,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 2.800000011920929,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 18.299999982118607,
+          "maxTimerDelayMs": 8.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 6.5,
+          "maxTimerDelayMs": 0.6000000238418579,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 9.900000005960464,
+          "maxTimerDelayMs": 2.2000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 7.300000011920929,
+          "maxTimerDelayMs": 0.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 3.300000011920929,
+          "maxTimerDelayMs": 0.4000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 3.800000011920929,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 2.0999999940395355,
+          "maxTimerDelayMs": 0.8999999761581421,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 14.699999988079071,
+          "maxTimerDelayMs": 5.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 7.199999988079071,
+          "maxTimerDelayMs": 2.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 9.800000011920929,
+          "maxTimerDelayMs": 1.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 7.800000011920929,
+          "maxTimerDelayMs": 0.7000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 2.5999999940395355,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 2.899999976158142,
+          "maxTimerDelayMs": 2,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 2.0999999940395355,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 16,
+          "maxTimerDelayMs": 6.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 7.299999982118607,
+          "maxTimerDelayMs": 0.8999999761581421,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 10.900000005960464,
+          "maxTimerDelayMs": 3,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 7.699999988079071,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        }
+      ]
+    },
+    {
+      "name": "Geometrie 10000",
+      "bytes": 1625151,
+      "elements": 10002,
+      "pixels": 0,
+      "recoveryBytes": 3890878,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 41.10000002384186,
+          "maxTimerDelayMs": 33.30000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 43.70000001788139,
+          "maxTimerDelayMs": 35.70000001788139,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 30.299999982118607,
+          "maxTimerDelayMs": 2.600000023841858,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 62.5,
+          "maxTimerDelayMs": 42.80000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 54.5,
+          "maxTimerDelayMs": 41.39999997615814,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 95.09999999403954,
+          "maxTimerDelayMs": 87.2999999821186,
+          "maxLongTaskMs": 92
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 87.09999999403954,
+          "maxTimerDelayMs": 79.2000000178814,
+          "maxLongTaskMs": 87
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 35.599999994039536,
+          "maxTimerDelayMs": 27.69999998807907,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 35.30000001192093,
+          "maxTimerDelayMs": 27.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 23.200000017881393,
+          "maxTimerDelayMs": 0.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 177.2999999821186,
+          "maxTimerDelayMs": 152.60000002384186,
+          "maxLongTaskMs": 158
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 69.30000001192093,
+          "maxTimerDelayMs": 47,
+          "maxLongTaskMs": 54
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 98.69999998807907,
+          "maxTimerDelayMs": 90.90000000596046,
+          "maxLongTaskMs": 97
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 89.59999999403954,
+          "maxTimerDelayMs": 81.80000001192093,
+          "maxLongTaskMs": 89
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 32.19999998807907,
+          "maxTimerDelayMs": 24.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 40.599999994039536,
+          "maxTimerDelayMs": 32.79999998211861,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 21.799999982118607,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 189.30000001192093,
+          "maxTimerDelayMs": 166.5,
+          "maxLongTaskMs": 171
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 77.80000001192093,
+          "maxTimerDelayMs": 55.400000005960464,
+          "maxLongTaskMs": 63
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 117.09999999403954,
+          "maxTimerDelayMs": 109.40000000596046,
+          "maxLongTaskMs": 115
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 97.59999999403954,
+          "maxTimerDelayMs": 89.7000000178814,
+          "maxLongTaskMs": 97
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 35.19999998807907,
+          "maxTimerDelayMs": 27.19999998807907,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 44.5,
+          "maxTimerDelayMs": 36.599999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 31.599999994039536,
+          "maxTimerDelayMs": 0.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 210.19999998807907,
+          "maxTimerDelayMs": 169.40000000596046,
+          "maxLongTaskMs": 174
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 79.5,
+          "maxTimerDelayMs": 57.80000001192093,
+          "maxLongTaskMs": 65
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 101.40000000596046,
+          "maxTimerDelayMs": 93.5,
+          "maxLongTaskMs": 99
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 76.7000000178814,
+          "maxTimerDelayMs": 68.80000001192093,
+          "maxLongTaskMs": 76
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 26.5,
+          "maxTimerDelayMs": 18.599999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 43.79999998211861,
+          "maxTimerDelayMs": 35.79999998211861,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 26.400000005960464,
+          "maxTimerDelayMs": 1.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 171.09999999403954,
+          "maxTimerDelayMs": 147.7999999821186,
+          "maxLongTaskMs": 153
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 68.80000001192093,
+          "maxTimerDelayMs": 42.70000001788139,
+          "maxLongTaskMs": 50
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 89.59999999403954,
+          "maxTimerDelayMs": 81.69999998807907,
+          "maxLongTaskMs": 88
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 75,
+          "maxTimerDelayMs": 67.2000000178814,
+          "maxLongTaskMs": 75
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 27.399999976158142,
+          "maxTimerDelayMs": 19.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 32.80000001192093,
+          "maxTimerDelayMs": 24.80000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 29.19999998807907,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 159,
+          "maxTimerDelayMs": 139.09999999403954,
+          "maxLongTaskMs": 145
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 64.19999998807907,
+          "maxTimerDelayMs": 43.69999998807907,
+          "maxLongTaskMs": 51
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 91.2999999821186,
+          "maxTimerDelayMs": 83.59999999403954,
+          "maxLongTaskMs": 90
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 74.19999998807907,
+          "maxTimerDelayMs": 66.2999999821186,
+          "maxLongTaskMs": 74
+        }
+      ]
+    },
+    {
+      "name": "Bild klein",
+      "bytes": 1205225,
+      "elements": 3,
+      "pixels": 262144,
+      "recoveryBytes": 2411110,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 0.30000001192092896,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 3.899999976158142,
+          "maxTimerDelayMs": 0.8999999761581421,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 9.599999994039536,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 14.200000017881393,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 13.099999994039536,
+          "maxTimerDelayMs": 0.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 45.099999994039536,
+          "maxTimerDelayMs": 37.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 40.60000002384186,
+          "maxTimerDelayMs": 32.60000002384186,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 0.20000001788139343,
+          "maxTimerDelayMs": 0.7000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 4.5999999940395355,
+          "maxTimerDelayMs": 0.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 15.299999982118607,
+          "maxTimerDelayMs": 0.8999999761581421,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 68.2999999821186,
+          "maxTimerDelayMs": 45.39999997615814,
+          "maxLongTaskMs": 50
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 27.900000005960464,
+          "maxTimerDelayMs": 1.300000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 48.900000005960464,
+          "maxTimerDelayMs": 41,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 38.599999994039536,
+          "maxTimerDelayMs": 30.599999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 0.09999999403953552,
+          "maxTimerDelayMs": 0.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 3.9000000059604645,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 13.5,
+          "maxTimerDelayMs": 0.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 70.5,
+          "maxTimerDelayMs": 48.39999997615814,
+          "maxLongTaskMs": 53
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 22.200000017881393,
+          "maxTimerDelayMs": 0.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 47.19999998807907,
+          "maxTimerDelayMs": 39.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 39.70000001788139,
+          "maxTimerDelayMs": 31.80000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 0.19999998807907104,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 3.5999999940395355,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 14.800000011920929,
+          "maxTimerDelayMs": 0.4000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 69,
+          "maxTimerDelayMs": 46.900000005960464,
+          "maxLongTaskMs": 51
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 93.59999999403954,
+          "maxTimerDelayMs": 1.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 45.20000001788139,
+          "maxTimerDelayMs": 37.20000001788139,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 40.599999994039536,
+          "maxTimerDelayMs": 32.69999998807907,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 0,
+          "maxTimerDelayMs": 0.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 3.5,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 21.80000001192093,
+          "maxTimerDelayMs": 5.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 70,
+          "maxTimerDelayMs": 47.79999998211861,
+          "maxLongTaskMs": 52
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 179.89999997615814,
+          "maxTimerDelayMs": 1.899999976158142,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 49.099999994039536,
+          "maxTimerDelayMs": 41.39999997615814,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 37.80000001192093,
+          "maxTimerDelayMs": 29.900000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 0.10000002384185791,
+          "maxTimerDelayMs": 0.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 3.699999988079071,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 15.100000023841858,
+          "maxTimerDelayMs": 0.7999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 77.30000001192093,
+          "maxTimerDelayMs": 47.80000001192093,
+          "maxLongTaskMs": 52
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 22.400000005960464,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 51.80000001192093,
+          "maxTimerDelayMs": 43.80000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 42.89999997615814,
+          "maxTimerDelayMs": 35,
+          "maxLongTaskMs": 0
+        }
+      ]
+    },
+    {
+      "name": "Bild mittel",
+      "bytes": 4812919,
+      "elements": 3,
+      "pixels": 1048576,
+      "recoveryBytes": 9626498,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 0.09999999403953552,
+          "maxTimerDelayMs": 0.30000001192092896,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 14.099999994039536,
+          "maxTimerDelayMs": 6.199999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 28.5,
+          "maxTimerDelayMs": 2.2999999821186066,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 44.5,
+          "maxTimerDelayMs": 19.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 40.30000001192093,
+          "maxTimerDelayMs": 19.900000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 171.5,
+          "maxTimerDelayMs": 163.69999998807907,
+          "maxLongTaskMs": 165
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 155.30000001192093,
+          "maxTimerDelayMs": 147.5,
+          "maxLongTaskMs": 155
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 0.20000001788139343,
+          "maxTimerDelayMs": 0.5999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 12.900000005960464,
+          "maxTimerDelayMs": 5.0999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 38.400000005960464,
+          "maxTimerDelayMs": 4,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 254.5,
+          "maxTimerDelayMs": 210.69999998807907,
+          "maxLongTaskMs": 214
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 61.400000005960464,
+          "maxTimerDelayMs": 22.900000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 176.19999998807907,
+          "maxTimerDelayMs": 168.5,
+          "maxLongTaskMs": 168
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 151.40000000596046,
+          "maxTimerDelayMs": 143.40000000596046,
+          "maxLongTaskMs": 151
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 0.19999998807907104,
+          "maxTimerDelayMs": 0.8999999761581421,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 14,
+          "maxTimerDelayMs": 6.199999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 41.900000005960464,
+          "maxTimerDelayMs": 3.300000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 273.7000000178814,
+          "maxTimerDelayMs": 200.2000000178814,
+          "maxLongTaskMs": 202
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 68.30000001192093,
+          "maxTimerDelayMs": 24.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 174.80000001192093,
+          "maxTimerDelayMs": 167,
+          "maxLongTaskMs": 167
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 153.10000002384186,
+          "maxTimerDelayMs": 145.2000000178814,
+          "maxLongTaskMs": 153
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 0.19999998807907104,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 13.599999994039536,
+          "maxTimerDelayMs": 5.700000017881393,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 38.099999994039536,
+          "maxTimerDelayMs": 4.300000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 270.19999998807907,
+          "maxTimerDelayMs": 217.90000000596046,
+          "maxLongTaskMs": 217
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 64.2999999821186,
+          "maxTimerDelayMs": 22.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 171.40000000596046,
+          "maxTimerDelayMs": 163.5,
+          "maxLongTaskMs": 163
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 152.2000000178814,
+          "maxTimerDelayMs": 144.30000001192093,
+          "maxLongTaskMs": 152
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 0.20000001788139343,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 13.5,
+          "maxTimerDelayMs": 5.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 36.400000005960464,
+          "maxTimerDelayMs": 2.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 269.69999998807907,
+          "maxTimerDelayMs": 212.69999998807907,
+          "maxLongTaskMs": 200
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 66.19999998807907,
+          "maxTimerDelayMs": 24.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 174.90000000596046,
+          "maxTimerDelayMs": 159,
+          "maxLongTaskMs": 166
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 159.59999999403954,
+          "maxTimerDelayMs": 151.80000001192093,
+          "maxLongTaskMs": 159
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 0.19999998807907104,
+          "maxTimerDelayMs": 0.7000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 13.5,
+          "maxTimerDelayMs": 5.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 41.5,
+          "maxTimerDelayMs": 6.699999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 307.80000001192093,
+          "maxTimerDelayMs": 246,
+          "maxLongTaskMs": 234
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 128.7999999821186,
+          "maxTimerDelayMs": 27.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 180.09999999403954,
+          "maxTimerDelayMs": 172.40000000596046,
+          "maxLongTaskMs": 172
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 157.59999999403954,
+          "maxTimerDelayMs": 149.7000000178814,
+          "maxLongTaskMs": 157
+        }
+      ]
+    },
+    {
+      "name": "Bild nahe Grenze",
+      "bytes": 9648019,
+      "elements": 3,
+      "pixels": 2102500,
+      "recoveryBytes": 19296698,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 0.09999999403953552,
+          "maxTimerDelayMs": 0.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 31.099999994039536,
+          "maxTimerDelayMs": 23.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 48.099999994039536,
+          "maxTimerDelayMs": 6.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 80.90000000596046,
+          "maxTimerDelayMs": 51.400000005960464,
+          "maxLongTaskMs": 58
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 109.39999997615814,
+          "maxTimerDelayMs": 46.39999997615814,
+          "maxLongTaskMs": 54
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 341.2999999821186,
+          "maxTimerDelayMs": 325.2999999821186,
+          "maxLongTaskMs": 332
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 306.2000000178814,
+          "maxTimerDelayMs": 298.40000000596046,
+          "maxLongTaskMs": 306
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 0.09999999403953552,
+          "maxTimerDelayMs": 1.0999999940395355,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 29.099999994039536,
+          "maxTimerDelayMs": 21.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 68.59999999403954,
+          "maxTimerDelayMs": 13.800000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 494.69999998807907,
+          "maxTimerDelayMs": 408.59999999403954,
+          "maxLongTaskMs": 410
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 116.40000000596046,
+          "maxTimerDelayMs": 58.70000001788139,
+          "maxLongTaskMs": 66
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 383,
+          "maxTimerDelayMs": 367.09999999403954,
+          "maxLongTaskMs": 369
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 337.19999998807907,
+          "maxTimerDelayMs": 329.2999999821186,
+          "maxLongTaskMs": 337
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 0.19999998807907104,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 30.099999994039536,
+          "maxTimerDelayMs": 22.30000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 90.19999998807907,
+          "maxTimerDelayMs": 19,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 460.7999999821186,
+          "maxTimerDelayMs": 387.09999999403954,
+          "maxLongTaskMs": 394
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 130.30000001192093,
+          "maxTimerDelayMs": 62.20000001788139,
+          "maxLongTaskMs": 70
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 364.90000000596046,
+          "maxTimerDelayMs": 348.90000000596046,
+          "maxLongTaskMs": 353
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 333.40000000596046,
+          "maxTimerDelayMs": 325.5,
+          "maxLongTaskMs": 333
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 0.20000001788139343,
+          "maxTimerDelayMs": 1.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 34,
+          "maxTimerDelayMs": 26.19999998807907,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 74.80000001192093,
+          "maxTimerDelayMs": 18.600000023841858,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 510.7999999821186,
+          "maxTimerDelayMs": 420,
+          "maxLongTaskMs": 425
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 119.89999997615814,
+          "maxTimerDelayMs": 52.80000001192093,
+          "maxLongTaskMs": 60
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 354.80000001192093,
+          "maxTimerDelayMs": 338.90000000596046,
+          "maxLongTaskMs": 343
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 368.7999999821186,
+          "maxTimerDelayMs": 361.2000000178814,
+          "maxLongTaskMs": 369
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 0.30000001192092896,
+          "maxTimerDelayMs": 0.7000000178813934,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 41.900000005960464,
+          "maxTimerDelayMs": 34.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 103.19999998807907,
+          "maxTimerDelayMs": 26.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 791.8000000119209,
+          "maxTimerDelayMs": 598.8000000119209,
+          "maxLongTaskMs": 600
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 131,
+          "maxTimerDelayMs": 60.400000005960464,
+          "maxLongTaskMs": 68
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 360.59999999403954,
+          "maxTimerDelayMs": 344.5,
+          "maxLongTaskMs": 348
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 304.39999997615814,
+          "maxTimerDelayMs": 296.69999998807907,
+          "maxLongTaskMs": 304
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 0.09999999403953552,
+          "maxTimerDelayMs": 0.09999999403953552,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 27.299999982118607,
+          "maxTimerDelayMs": 19.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 73.80000001192093,
+          "maxTimerDelayMs": 17.600000023841858,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 535.6999999880791,
+          "maxTimerDelayMs": 431.09999999403954,
+          "maxLongTaskMs": 436
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 143.19999998807907,
+          "maxTimerDelayMs": 63.69999998807907,
+          "maxLongTaskMs": 71
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 383.2000000178814,
+          "maxTimerDelayMs": 367.40000000596046,
+          "maxLongTaskMs": 369
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 339.19999998807907,
+          "maxTimerDelayMs": 331.40000000596046,
+          "maxLongTaskMs": 339
+        }
+      ]
+    },
+    {
+      "name": "Gemischt",
+      "bytes": 5622308,
+      "elements": 5003,
+      "pixels": 1048576,
+      "recoveryBytes": 11565276,
+      "samples": [
+        {
+          "phase": "validate",
+          "run": 0,
+          "ms": 16.5,
+          "maxTimerDelayMs": 9.200000017881393,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 0,
+          "ms": 38.30000001192093,
+          "maxTimerDelayMs": 30.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 0,
+          "ms": 31.80000001192093,
+          "maxTimerDelayMs": 1,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 0,
+          "ms": 72.2000000178814,
+          "maxTimerDelayMs": 51.70000001788139,
+          "maxLongTaskMs": 58
+        },
+        {
+          "phase": "automatic",
+          "run": 0,
+          "ms": 63.5,
+          "maxTimerDelayMs": 43.30000001192093,
+          "maxLongTaskMs": 51
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 0,
+          "ms": 257.7000000178814,
+          "maxTimerDelayMs": 249.90000000596046,
+          "maxLongTaskMs": 250
+        },
+        {
+          "phase": "filePrepare",
+          "run": 0,
+          "ms": 189.60000002384186,
+          "maxTimerDelayMs": 181.80000001192093,
+          "maxLongTaskMs": 189
+        },
+        {
+          "phase": "validate",
+          "run": 1,
+          "ms": 13.900000005960464,
+          "maxTimerDelayMs": 5.9000000059604645,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 1,
+          "ms": 33.5,
+          "maxTimerDelayMs": 25.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 1,
+          "ms": 46.900000005960464,
+          "maxTimerDelayMs": 9.300000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 1,
+          "ms": 317.2000000178814,
+          "maxTimerDelayMs": 276.90000000596046,
+          "maxLongTaskMs": 279
+        },
+        {
+          "phase": "automatic",
+          "run": 1,
+          "ms": 95.90000000596046,
+          "maxTimerDelayMs": 55.10000002384186,
+          "maxLongTaskMs": 63
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 1,
+          "ms": 263,
+          "maxTimerDelayMs": 247.19999998807907,
+          "maxLongTaskMs": 254
+        },
+        {
+          "phase": "filePrepare",
+          "run": 1,
+          "ms": 210.5,
+          "maxTimerDelayMs": 202.69999998807907,
+          "maxLongTaskMs": 210
+        },
+        {
+          "phase": "validate",
+          "run": 2,
+          "ms": 15.199999988079071,
+          "maxTimerDelayMs": 7.199999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 2,
+          "ms": 36.29999998211861,
+          "maxTimerDelayMs": 28.400000005960464,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 2,
+          "ms": 72.69999998807907,
+          "maxTimerDelayMs": 36.89999997615814,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 2,
+          "ms": 359.2000000178814,
+          "maxTimerDelayMs": 311.7000000178814,
+          "maxLongTaskMs": 313
+        },
+        {
+          "phase": "automatic",
+          "run": 2,
+          "ms": 108.30000001192093,
+          "maxTimerDelayMs": 52.80000001192093,
+          "maxLongTaskMs": 60
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 2,
+          "ms": 225.30000001192093,
+          "maxTimerDelayMs": 209.5,
+          "maxLongTaskMs": 216
+        },
+        {
+          "phase": "filePrepare",
+          "run": 2,
+          "ms": 204.2000000178814,
+          "maxTimerDelayMs": 196.30000001192093,
+          "maxLongTaskMs": 204
+        },
+        {
+          "phase": "validate",
+          "run": 3,
+          "ms": 15.300000011920929,
+          "maxTimerDelayMs": 7.300000011920929,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 3,
+          "ms": 34.79999998211861,
+          "maxTimerDelayMs": 26.899999976158142,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 3,
+          "ms": 59,
+          "maxTimerDelayMs": 5.5,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 3,
+          "ms": 367.7999999821186,
+          "maxTimerDelayMs": 303.90000000596046,
+          "maxLongTaskMs": 305
+        },
+        {
+          "phase": "automatic",
+          "run": 3,
+          "ms": 139.2999999821186,
+          "maxTimerDelayMs": 78.5,
+          "maxLongTaskMs": 86
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 3,
+          "ms": 289.5,
+          "maxTimerDelayMs": 272,
+          "maxLongTaskMs": 279
+        },
+        {
+          "phase": "filePrepare",
+          "run": 3,
+          "ms": 187.39999997615814,
+          "maxTimerDelayMs": 179.59999999403954,
+          "maxLongTaskMs": 187
+        },
+        {
+          "phase": "validate",
+          "run": 4,
+          "ms": 15.799999982118607,
+          "maxTimerDelayMs": 7.799999982118607,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 4,
+          "ms": 31,
+          "maxTimerDelayMs": 23.099999994039536,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 4,
+          "ms": 49.30000001192093,
+          "maxTimerDelayMs": 12.200000017881393,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 4,
+          "ms": 376.80000001192093,
+          "maxTimerDelayMs": 309.5,
+          "maxLongTaskMs": 309
+        },
+        {
+          "phase": "automatic",
+          "run": 4,
+          "ms": 100.7999999821186,
+          "maxTimerDelayMs": 55.89999997615814,
+          "maxLongTaskMs": 63
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 4,
+          "ms": 220.30000001192093,
+          "maxTimerDelayMs": 204.19999998807907,
+          "maxLongTaskMs": 210
+        },
+        {
+          "phase": "filePrepare",
+          "run": 4,
+          "ms": 200.90000000596046,
+          "maxTimerDelayMs": 193.39999997615814,
+          "maxLongTaskMs": 201
+        },
+        {
+          "phase": "validate",
+          "run": 5,
+          "ms": 14.099999994039536,
+          "maxTimerDelayMs": 6.299999982118607,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "serialize",
+          "run": 5,
+          "ms": 31.80000001192093,
+          "maxTimerDelayMs": 23.80000001192093,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "indexedDB",
+          "run": 5,
+          "ms": 47,
+          "maxTimerDelayMs": 11.199999988079071,
+          "maxLongTaskMs": 0
+        },
+        {
+          "phase": "manual",
+          "run": 5,
+          "ms": 373.2999999821186,
+          "maxTimerDelayMs": 303.59999999403954,
+          "maxLongTaskMs": 305
+        },
+        {
+          "phase": "automatic",
+          "run": 5,
+          "ms": 107.60000002384186,
+          "maxTimerDelayMs": 58.900000005960464,
+          "maxLongTaskMs": 66
+        },
+        {
+          "phase": "recoveryRead",
+          "run": 5,
+          "ms": 234.2999999821186,
+          "maxTimerDelayMs": 226.5,
+          "maxLongTaskMs": 226
+        },
+        {
+          "phase": "filePrepare",
+          "run": 5,
+          "ms": 227.40000000596046,
+          "maxTimerDelayMs": 219.69999998807907,
+          "maxLongTaskMs": 227
+        }
+      ]
+    }
+  ]
+}
