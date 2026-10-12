@@ -11,5 +11,7 @@ export function isCanonicalBase64(value: string): boolean {
   for (let i = 0; i < end; i++) {
     if (!digits[value.charCodeAt(i)]) return false;
   }
-  return padding === 0 || ((digits[value.charCodeAt(end - 1)]! - 1) & (padding === 2 ? 15 : 3)) === 0;
+  return (
+    padding === 0 || ((digits[value.charCodeAt(end - 1)]! - 1) & (padding === 2 ? 15 : 3)) === 0
+  );
 }
