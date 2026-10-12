@@ -58,6 +58,42 @@ export async function readRecovery(storage: RecoveryStorage) {
   const { snapshot: _snapshot, ...candidate } = await usable(parseRecoveryRecord(raw));
   return candidate;
 }
+
+/** A private, byte-bound revision. Only committed writes advance its trusted predecessor. */
+export async function prepareRecoveryWriter(storage: RecoveryStorage, projectId: string) {
+  let expected = await storage.read();
+  const candidate = expected === null ? undefined : await usable(parseRecoveryRecord(expected));
+  if (candidate && candidate.project.id !== projectId)
+    throw new Error("Wiederherstellungsstand gehört zu einem anderen Projekt.");
+  let previous = candidate?.snapshot;
+  let project = candidate?.project;
+  let busy = false;
+  return {
+    get project() {
+      return project;
+    },
+    async save(nextProject: Project, isCurrent: () => boolean, now = new Date()) {
+      if (busy) throw new Error("Eine lokale Sicherung läuft bereits.");
+      if (nextProject.id !== projectId) throw new Error("Projektkontext geändert.");
+      busy = true;
+      try {
+        // Every new content still crosses the full validation/size boundary.
+        const json = serializeProject(nextProject);
+        assertProjectFileSize(json);
+        const current: Snapshot = { savedAt: now.toISOString(), json };
+        const next = JSON.stringify({ version: 1, current, ...(previous ? { previous } : {}) });
+        if (!isCurrent()) throw new Error("Sicherung vor Schreibbeginn abgebrochen.");
+        await storage.replace(expected, next);
+        expected = next;
+        previous = current;
+        project = nextProject;
+        return { savedAt: current.savedAt };
+      } finally {
+        busy = false;
+      }
+    },
+  };
+}
 export async function saveRecovery(project: Project, storage: RecoveryStorage, now = new Date()) {
   const json = serializeProject(project);
   assertProjectFileSize(json);

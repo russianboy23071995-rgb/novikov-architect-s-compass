@@ -1,6 +1,6 @@
 import type { Project } from "../../domain/project/schema.ts";
 import { migrateLegacyRecovery, type RecoveryCatalog } from "./recovery-catalog.ts";
-import { readRecovery, saveRecovery } from "./recovery.ts";
+import { prepareRecoveryWriter } from "./recovery.ts";
 import { sameRecoveryContent } from "./recovery-status.ts";
 
 export const AUTOSAVE_DELAY_MS = 2000;
@@ -18,27 +18,7 @@ const timer: RecoveryTimer = {
 /** Holds an optimistic revision from activation, not from just before each write. */
 async function prepareLease(catalog: RecoveryCatalog, id: string) {
   await migrateLegacyRecovery(catalog);
-  const storage = catalog.project(id);
-  let expected = await storage.read();
-  const candidate = await readRecovery({ read: async () => expected, replace: storage.replace });
-  if (candidate && candidate.project.id !== id)
-    throw new Error("Wiederherstellungsstand gehört zu einem anderen Projekt.");
-  return {
-    project: candidate?.project,
-    async save(project: Project, isCurrent: () => boolean) {
-      if (project.id !== id) throw new Error("Projektkontext geändert.");
-      const result = await saveRecovery(project, {
-        read: async () => expected,
-        async replace(previous, next) {
-          if (!isCurrent()) throw new Error("Sicherung vor Schreibbeginn abgebrochen.");
-          await storage.replace(previous, next);
-          expected = next;
-        },
-      });
-      this.project = project;
-      return result;
-    },
-  };
+  return prepareRecoveryWriter(catalog.project(id), id);
 }
 
 /** One serial writer for manual and automatic snapshots; no pointer/draft state enters here. */
