@@ -1035,3 +1035,23 @@ Prüfpfad vermeiden, bestehende Importnutzung weiterverwenden. PNG/JPEG, Marker,
 Trunkierung, Metadatenabweichung und Größenlimits per Differentialtests sichern;
 Base64-Dekodierung und Cache-/Validierungsgrenzen erhalten. Kein partielles blindes
 Headervertrauen, kein Rendererwechsel oder neuer Cache.
+
+
+## Bildheader ohne vollständige Bytekopie (12.10.2026)
+PR288 übernommen. imageHeader liest über einen gemeinsamen Bytezugriff aus Uint8Array
+oder bereits vollständig per atob dekodiertem Binärstring. Der Import nutzt weiterhin
+Uint8Array; checkedImageUrl vermeidet die zweite vollständige Kopie. Bounds-Prüfung,
+PNG/JPEG-Marker, Metadaten-/Pixelgrenzen, atob und Cacheverträge unverändert.
+914 Tests bestanden, darunter Differentialvergleich gegen eingefrorenen alten Parser
+für PNG, JPEG-SOF 192/193/194, jede Trunkierung, Byteveränderungen und Zufallsdaten.
+Typprüfung, gezieltes Lint, Diagnosebuild und regulärer Build bestanden. Diagnosemarker
+wurden nach einem zunächst fehlgeschlagenen Diagnosebuild an den Binärstring-Aufruf
+angepasst; abschließender Build erfolgreich.
+
+Gleiche 101,96-MiB-Fixture: [Nachher](image-header-no-copy.json), vorher
+image-validation-phases.json. Erstzugriff Bildprüfung 279,8→110,7 ms; atob 110,4 ms,
+Header 0,3 ms, keine Bytekopie. Zoom: warme Aufrufe zusammen 0,1 ms, keine erneute
+Dekodierung. Einzelvergleich, keine Gesamtgeschwindigkeits-/p95-Garantie. Browser
+10014 Elemente, Export (47) byteidentisch zu (27), keine Konsolenfehler.
+Nächster begrenzter Auftrag: verbleibende BimPlan-Erstableitung gezielt aufteilen;
+vorhandene Szenen-/Fangvorbereitung getrennt messen, bevor weitere Optimierung folgt.

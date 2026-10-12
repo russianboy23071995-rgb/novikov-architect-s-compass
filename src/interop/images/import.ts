@@ -1,4 +1,3 @@
-import { binaryBytes } from "./binary-bytes.ts";
 import {
   createImageAssetHandle,
   isImageAssetHandle,
@@ -6,29 +5,37 @@ import {
 } from "../../domain/elements/reference/model.ts";
 // Individual image sources keep their own budget.
 export const IMAGE_SOURCE_FILE_LIMIT = 10 * 1024 * 1024;
-/** Reads dimensions before decode to bound raster allocation. */
-export function imageHeader(bytes: Uint8Array) {
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+/** Reads dimensions before raster decode. Strings must be decoded binary (atob), not base64. */
+export function imageHeader(bytes: Uint8Array | string) {
+  const byte = (index: number) =>
+    typeof bytes === "string" ? bytes.charCodeAt(index) : bytes[index]!;
+  const uint = (index: number, count: number) => {
+    if (index + count > bytes.length)
+      throw new RangeError("Offset is outside the bounds of the DataView");
+    let value = 0;
+    for (let n = 0; n < count; n++) value = value * 256 + byte(index + n);
+    return value;
+  };
   let width = 0,
     height = 0,
     mimeType: "image/png" | "image/jpeg";
-  if (bytes.length >= 24 && [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => bytes[i] === v)) {
+  if (bytes.length >= 24 && [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => byte(i) === v)) {
     mimeType = "image/png";
-    width = view.getUint32(16);
-    height = view.getUint32(20);
-  } else if (bytes[0] === 255 && bytes[1] === 216) {
+    width = uint(16, 4);
+    height = uint(20, 4);
+  } else if (byte(0) === 255 && byte(1) === 216) {
     mimeType = "image/jpeg";
     let i = 2;
     while (i + 3 < bytes.length) {
-      if (bytes[i++] !== 255) throw new Error("Ungültiges JPEG.");
-      while (bytes[i] === 255) i++;
-      const marker = bytes[i++]!;
+      if (byte(i++) !== 255) throw new Error("Ungültiges JPEG.");
+      while (byte(i) === 255) i++;
+      const marker = byte(i++)!;
       if (marker === 217 || marker === 218) break;
-      const length = view.getUint16(i);
+      const length = uint(i, 2);
       if (length < 2 || i + length > bytes.length) break;
       if ([192, 193, 194].includes(marker) && length >= 8) {
-        height = view.getUint16(i + 3);
-        width = view.getUint16(i + 5);
+        height = uint(i + 3, 2);
+        width = uint(i + 5, 2);
         break;
       }
       i += length;
@@ -121,8 +128,7 @@ export function checkedImageUrl(asset: ImageAsset): string | undefined {
 function checkImageUrl(asset: ImageAsset): string | undefined {
   try {
     const binary = atob(asset.data);
-    const bytes = binaryBytes(binary);
-    const header = imageHeader(bytes);
+    const header = imageHeader(binary);
     if (
       header.width !== asset.pixelWidth ||
       header.height !== asset.pixelHeight ||

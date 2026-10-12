@@ -12,7 +12,12 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
         const replacements: [string, string][] = [
           ["atob(asset.data)", 'profileReducer("image-atob", () => atob(asset.data))'],
           ["binaryBytes(binary)", 'profileReducer("image-byte-copy", () => binaryBytes(binary))'],
-          ["imageHeader(bytes)", 'profileReducer("image-header", () => imageHeader(bytes))'],
+          [
+            source.includes("imageHeader(binary)") ? "imageHeader(binary)" : "imageHeader(bytes)",
+            source.includes("imageHeader(binary)")
+              ? 'profileReducer("image-header", () => imageHeader(binary))'
+              : 'profileReducer("image-header", () => imageHeader(bytes))',
+          ],
           [
             "handleUrls.has(asset)",
             'profileReducer("image-handle-cache", () => handleUrls.has(asset))',
@@ -21,7 +26,10 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
         let measured = source;
         for (const [from, to] of replacements) {
           // Header also occurs in importImage: instrument each legitimate call.
-          if (!measured.includes(from)) throw new Error(`Image phase no longer matches: ${from}`);
+          if (!measured.includes(from)) {
+            if (from === "binaryBytes(binary)") continue;
+            throw new Error(`Image phase no longer matches: ${from}`);
+          }
           measured = measured.replaceAll(from, to);
         }
         measured = measured.replace(

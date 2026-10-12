@@ -287,6 +287,8 @@ Restbefund: Long Task bei Ladebestätigung 814 ms, bei Wiederaufnahme 890 ms; Se
 
 **Bildprüfungs-Teilphasen (12.10.2026, bench/image-validation-phases):** PR287 übernommen. Zwölf Erstzugriffe: atob 100 ms, Bytekopie 179,2 ms, Header 0,3 ms. Beim Zoom 24 Wiederzugriffe ohne erneute Dekodierung (gesamt 0,1 ms). Cache funktioniert im geprüften Handle-Pfad; Fallback nicht bewertet. Diagnosebuild/Typprüfung/Lint und regulärer Build bestanden; Export byteidentisch, keine Konsolenfehler. Keine Produktänderung. [Nachweis/Grenzen](docs/performance/ASSET_RECOVERY_PILOT.md).
 
+**Bildheader ohne Bytekopie (12.10.2026, perf/image-header-no-copy):** PR288 übernommen. Gemeinsamer Headerleser für Bytearray und dekodierten Binärstring; volle Bytekopie im URL-Prüfpfad entfernt. 914 Tests einschließlich Differentialoracle, Typprüfung/Lint/Builds bestanden. Browserexport byteidentisch, keine Konsolenfehler. Bildprüfung im Einzelvergleich 279,8→110,7 ms; warme Zugriffe 0,1 ms. Keine Gesamtperformancefreigabe. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md).
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -355,7 +357,7 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Bytekopie vor Bildheaderprüfung vermeiden.** Gemeinsamen PNG-/JPEG-Headerleser für Uint8Array und bereits vollständig dekodierten Binärstring verwenden, sodass checkedImageUrl keine vollständige Bytekopie benötigt. Bestehenden Importpfad, atob-Fehler, Header-/Metadatenprüfung, Pixelgrenzen und Cacheverträge erhalten. Differentialtests mit gültigen/defekten PNG/JPEG und identische Browserfixture; Teilphasen vorher/nachher messen. Kein neuer Cache, kein Format-/Limit-/Rendererwechsel.
+**Genau ein aktiver Fortsetzungsschritt: BimPlan-Erstableitung zuordnen.** Im bestehenden Produktionsprofil mit derselben großen Fixture Szenenableitung und Fangvorbereitung innerhalb des BimPlan-Aufrufs getrennt messen. Vorhandene Messbausteine nutzen, verschachtelte Zeiten nicht addieren, Restanteile offen ausweisen. Erst danach eine konkrete Optimierung wählen. Keine Produktlogik ändern, kein Rendererwechsel und keine neuen Caches.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
