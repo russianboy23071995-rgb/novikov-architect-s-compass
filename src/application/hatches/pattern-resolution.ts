@@ -4,7 +4,7 @@ import {
   type PatternRevision,
 } from "../../domain/elements/hatch/revision.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
-import { assertProjectFileSize } from "../../interop/project-file/size.ts";
+import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
 /** Compatibility action for callers with an explicit, validated revision context. */
 export function resolveHatchPatternRevisions(
   base: Project,
@@ -39,7 +39,7 @@ function resolve(
   embedded: readonly { definition: PatternRevision["definition"]; revision?: number | undefined }[],
   available: readonly PatternRevision[],
 ) {
-  if (base !== current) throw new Error("Projekt wurde geändert. Musterabgleich erneut beginnen.");
+  if (base !== current) throw new Error("Projekt wurde geÃ¤ndert. Musterabgleich erneut beginnen.");
   const project = validateProject(current),
     records = embedded,
     catalog = new Map(validatePatternRevisions(available).map((r) => [r.definition.id, r]));
@@ -82,6 +82,7 @@ function resolve(
         })),
       })
     : current;
-  assertProjectFileSize(JSON.stringify(next));
+  // Both branches have passed full validation; preserve no-op object identity.
+  assertValidatedProjectSize(next);
   return { project: next, records: resolved, updatedIds, conflicts, missingIds };
 }

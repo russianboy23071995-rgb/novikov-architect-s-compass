@@ -10695,3 +10695,7 @@ Produktions-Workspace ff9bbba ohne Diagnose-Transforms: 101,96-MiB-Datei, Laden/
 
 ### R26-01/02 · Produktions-Ladezuordnung 12.10.2026
 Opt-in-load-profile mit gemeinsamen Messhelfern, kein Produktumbau. Ladebefehl 360,9 ms einschließlich 309,8 ms Musterabgleich; History 50,9 ms. Bildprüfung 272,6 ms. Komponentenaufrufe sind keine vollständigen Renderzeiten; Rest der 1718-ms-Task unzugeordnet. Browserdatei byteidentisch, Typprüfung/Lint/Builds erfolgreich. ASSET_RECOVERY_PILOT.md und load-attribution-22/23.json dokumentieren Grenzen. Nächster Einzelpilot: Vollserialisierung zur Größenprüfung im Musterabgleich ersetzen, vollständige Validierung und Revisionsregeln bewahren.
+
+
+### R26-01/02 · Musterabgleich-Budget 12.10.2026
+Vollserialisierung durch exakten gemeinsamen Bytezähler nach vollständiger Validierung ersetzt. Revisions-/Konfliktvertrag und No-op-Identität erhalten. 913 Tests, Typprüfung/Lint/Builds bestanden; Browserexport byteidentisch. Musterabgleich im Einzelvergleich 309,8→85,7 ms, gesamte Übernahmetask jedoch 1910 statt 1718 ms: keine Gesamtperformancefreigabe. Rohdaten pattern-resolution-budget.json. Nächster Einzelauftrag: Bild-URL-Teilphasen messen.
