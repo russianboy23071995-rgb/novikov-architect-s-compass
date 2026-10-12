@@ -671,3 +671,28 @@ Nächster begrenzter Auftrag: Gebäudestruktur im Navigator mit begrenzter Zahl
 sichtbarer Zeilen darstellen (Windowing), unter Erhalt von Auf-/Zuklappen,
 Einzel-/Mehrfachauswahl und Tastaturzugriff. Gleiche Fixture vorher/nachher messen;
 Grundriss und Bildcache bleiben getrennte Folgebefunde. Kein Rendererwechsel.
+
+
+## Geschossnavigator statt Elementliste (12.10.2026)
+
+Nutzerentscheidung ersetzt den oben geplanten Windowing-Auftrag: Einzelbauteile
+sind im Navigator nicht erforderlich. ProjectNavigator erzeugt nur Projekt und
+das vorhandene Geschoss; keine Elementiteration für Baumzeilen. Abbildverwaltung,
+Modell und Canvas-Auswahl bleiben erhalten. Mehrere Geschosse sind kein Teil dieses Schritts.
+
+Identische Datei und Diagnoseursprung wie im vorigen Profil: Navigator-Mount 1,3 ms
+(vorher 821–987 ms), unmittelbarer Folge-Render 0,8 ms (vorher 379–439 ms).
+[Rohdaten](workspace-storey-navigator.json). Längste Task beim Übernehmen weiterhin
+3.727 ms; die verbleibende Grundrissarbeit ist nicht behoben. Einzelvergleich im
+Entwicklungsbuild, keine statistische Endgerätegarantie.
+
+Browserprüfung: 10.014 Elemente bleiben vorhanden; Wand per Canvas-Tastaturziel
+gewählt, Höhe 2,8 → 2,9 geändert, Undo/Redo ausgeführt, Projekt heruntergeladen.
+Vollständiger JSON-Vergleich mit Quelle besteht nach ausschließlich dieser
+beabsichtigten Höhenänderung, einschließlich aller zwölf Bildpayloads. Abbildtab
+zeigt weiterhin Hinzufügen und Abbildsammlung. 905 Regressionstests, Typecheck und
+Build bestanden. Keine neue Persistenzimplementierung.
+
+Praktische Abnahme: Projekt öffnen, Gebäudestruktur zeigt Projekt/Geschoss;
+Wand im Canvas wählen und Eigenschaften ändern; Undo/Redo; zum Abbildtab wechseln.
+Nächster Einzelauftrag: wiederholte Bild-URL-Prüfung für unveränderliche Assets reduzieren.

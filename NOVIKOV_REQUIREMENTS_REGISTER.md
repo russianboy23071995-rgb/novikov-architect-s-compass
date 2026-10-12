@@ -10651,3 +10651,7 @@ Die erneut bereitgestellte FUNKTIONEN-DOCX hat exakt den SHA-256 der Repository-
 
 ### R26-01/02 · Workspace-Ladeprofil 12.10.2026
 Zwei echte Dateiöffnungen derselben 100-MiB-Fixture mit getrennten React-/Application-Timern: Navigator 821–987 ms plus Folge-Render 379–439 ms; Grundriss ebenfalls wesentlich. Bild-URL-Cache verursacht 24 Prüfungen für zwölf Bilder. Keine Produktoptimierung oder weitere Kapazitätsfreigabe. Nächster einzelner Auftrag im Masterplan: begrenzte Navigator-Zeilen. K02/03 und RC07 bleiben teilweise offen; Nachweis in docs/performance/ASSET_RECOVERY_PILOT.md.
+
+
+### Navigator · Nutzerentscheidung 12.10.2026
+Einzelelemente werden nicht mehr im Navigator aufgelistet. Die Gebäudestruktur zeigt Projekt und vorhandenes Geschoss; der Abbildtab bleibt. Geometrieauswahl erfolgt im Canvas. Die zuvor geplante Virtualisierung der Elementliste entfällt. Mehrgeschossverwaltung wird dadurch nicht vorweggenommen. R26-01/02, K02/03: Navigator-Anteil am 100-MiB-Laden auf 1,3 ms reduziert, Gesamt-Ladepause bleibt offen.
