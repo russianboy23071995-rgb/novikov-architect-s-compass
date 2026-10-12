@@ -1373,3 +1373,39 @@ Handles den Fastpath nutzen. Recoveryfehler, Budgets und Abbruchgrenzen unverän
 Voller Test-/Buildlauf und gleicher Snapshot im Browser; bei ausbleibendem Gewinn
 keine zusätzliche Komplexität übernehmen. Keine Ausweitung auf Schreibpfade durch
 neue Vertrauensregister in diesem Pilot.
+
+## Ein Hashpuffer für registrierte Handles (12.10.2026, Folgepilot nach PR298)
+PR298 zusammengeführt. payloadHashInput verwendet das bestehende private Handle-
+Identitätsregister. Nur unveränderliche, kanonische ASCII-Base64-Handles erhalten
+encodeInto in einen exakt dimensionierten Bytepuffer. MIME und Dimensionen bleiben
+JSON.stringify; Suffix und Reihenfolge entsprechen exakt dem bisherigen Format.
+Unregistrierte Werte einschließlich Proxies und frozen Lookalikes behalten den
+vollständigen bisherigen Pfad. Kein neues Register, keine Änderung an Keys, Hash,
+Dateiformat, Headerprüfung, Budgets oder Abbruchgrenzen.
+
+922 Tests bestanden, darunter Differentialtests von Bytes und SHA-256 für PNG/JPEG,
+Dimensionengrenzen, Padding, alle Bytewerte und 10-MiB-Daten; ID-Unabhängigkeit,
+Unicode/Escapes/Getter und gefälschte Identitäten. Benchmark-Typecheck, fokussiertes
+ESLint, Diagnosebuild und regulärer Produktionsbuild bestanden.
+
+[Rohdaten](recovery-hash-buffer.json), derselbe capacity-100-Snapshot vom
+12.10.2026 20:55:38, rund 101,96 MiB, 10000 Linien, Wand/Fenster und zwölf Bildreferenzen:
+
+| Phase | PR298 | Pilot |
+| --- | ---: | ---: |
+| Hashinput gesamt | 335,9 ms | 116,7 ms |
+| SHA-256 | 85,8 ms | 85,2 ms |
+| Bounded restore | 993,7 ms | 683,1 ms |
+
+Neuer hash-buffer-Unterabschnitt 116,4 ms. Schema 239,5 ms, Decode 121,0 ms,
+Handles 0,4 ms. Storage-read-Summe 806,6 ms enthält getrennte Lesevorgänge und ist
+nicht Teil des bounded-restore-Vergleichs. Einzelmessungen, keine p95- oder allgemeine
+Kapazitätsgarantie; verschachtelte Phasen nicht addieren. Der Puffer bleibt proportional
+zur Payloadgröße und die synchrone Kodierung verschwindet nicht vollständig.
+
+Wiederherstellung übernommen, exportiert, keine Konsolenfehler. Export (24) ist
+bytegleich zum Referenzexport (18), SHA-256:
+cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+Gemessener Vorteil rechtfertigt den begrenzten Fastpath. Nächster Auftrag gemäß
+Masterplan: drei Wiederholungen und Bearbeitungs-/Undo-/Sicherungsablauf konsolidiert
+abnehmen, ohne weitere Mikrooptimierung.

@@ -10779,3 +10779,11 @@ Produkt unverändert; Typecheck/Lint/Diagnosebuild grün, Recovery-Export bytegl
 Rohdaten recovery-hash-input.json, Vertrag ASSET_RECOVERY_PILOT.md. Nächster Pilot:
 ein Hash-Bytepuffer nur für registrierte Handles, identische Bytes/Keys belegen,
 unregistrierten Fallback und sämtliche Integritätsgrenzen erhalten.
+
+### R26-01/02, K02/03, RC07 · Hashpuffer 12.10.2026 (Folgepilot nach PR298)
+Registrierte Handles erhalten einen identischen Hash-Bytepuffer ohne ganzen JSON-
+Zwischenstring. Unregistrierter Fallback unverändert. 922 Tests, Typecheck/Lint und
+beide Builds bestanden. Einzelmessung Hashinput 335,9→116,7 ms, Restore 993,7→683,1 ms;
+Export bytegleich, keine Konsolenfehler. Nachweis ASSET_RECOVERY_PILOT.md und
+recovery-hash-buffer.json. Gesamtgrenzen unverändert; konsolidierte Wiederholungs-
+und Bearbeitungsabnahme als genau ein nächster Auftrag im Masterplan.

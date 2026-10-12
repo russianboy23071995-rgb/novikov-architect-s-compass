@@ -1,3 +1,4 @@
+import { payloadHashInput } from "./payload-hash-input.ts";
 /** Shared checked asset codec. Limits are supplied by the caller, not product defaults. */
 import { z } from "zod";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
@@ -50,9 +51,7 @@ function verifyPayloadImage(raw: unknown, probe: ReadProbe, own: boolean): Image
 }
 export async function payloadKey(p: Payload, probe: ReadProbe = {}) {
   const started = performance.now();
-  const encoded = new TextEncoder().encode(
-    JSON.stringify([p.mimeType, p.pixelWidth, p.pixelHeight, p.data]),
-  );
+  const encoded = payloadHashInput(p);
   probe.measure?.("hashInput", performance.now() - started);
   const hashStart = performance.now();
   const hash = await crypto.subtle.digest("SHA-256", encoded);

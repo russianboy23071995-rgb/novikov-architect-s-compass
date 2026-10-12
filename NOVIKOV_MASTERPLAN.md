@@ -348,6 +348,14 @@ Typecheck/Lint/Diagnosebuild bestanden; Export bytegleich, keine Browserfehler.
 Kein Performancegewinn behauptet. Nächster Pilot begrenzt auf exakte Handle-Identität
 und identische Hashbytes. Nachweis: ASSET_RECOVERY_PILOT.md, recovery-hash-input.json.
 
+### Hashinput-Puffer (12.10.2026, Folgepilot nach PR298)
+PR298 zusammengeführt. Registrierte unveränderliche Bildhandles schreiben dieselben
+Hashbytes direkt in einen Puffer; unregistrierte Werte behalten JSON/UTF-8-Fallback.
+922 Tests, Typecheck, fokussiertes ESLint, Diagnose- und Produktionsbuild bestanden.
+Gleicher Browser-Snapshot: Hashinput 335,9→116,7 ms; bounded restore 993,7→683,1 ms.
+Einzelmessungen, keine Kapazitätsgarantie; Storage separat und schwankend. Export
+bytegleich, keine Browserfehler. Nachweis: docs/performance/ASSET_RECOVERY_PILOT.md.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -416,7 +424,13 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Hashinput mit einem Bytepuffer pilotieren.** Ausschließlich für runtime-registrierte unveränderliche Bildhandles Präfix, kanonisches Base64 und JSON-Suffix direkt per encodeInto in einen exakt dimensionierten Puffer schreiben. Unregistrierte Payloads behalten vollständig den bisherigen Pfad. Identische Eingabebytes und SHA-256 durch Differentialtests einschließlich Randgrößen, Padding, IDs, Unicode/Escapes und gefälschter Identitäten belegen; Tests/Builds und gleicher Browser-Snapshot. Keine Hash-/Schlüssel-/Formatänderung, kein neues Vertrauensregister. Nur bei gemessenem Vorteil übernehmen.
+**Genau ein aktiver Fortsetzungsschritt: Recovery-Pilot konsolidiert abnehmen.**
+Den unveränderten rund 102-MiB-Snapshot in drei frischen Browser-Tabs wiederherstellen.
+Storage-Lesen, bounded restore und Hashinput getrennt ausweisen, Streuung dokumentieren
+und jeden Export gegen denselben Referenzhash vergleichen. Einen wiederhergestellten
+Stand ändern, Undo/Redo und erneute Sicherung/Wiederaufnahme prüfen. Keine weitere
+Mikrooptimierung oder Limitänderung in diesem Auftrag; anhand der Gesamtabnahme
+verbleibende Blockaden der größeren Projektdateien priorisieren.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
