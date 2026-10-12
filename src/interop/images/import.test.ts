@@ -285,7 +285,7 @@ function originalHeader(bytes: Uint8Array) {
     mimeType = "image/jpeg";
     let i = 2;
     while (i + 3 < bytes.length) {
-      if (bytes[i++] !== 255) throw new Error("UngÃ¼ltiges JPEG.");
+      if (bytes[i++] !== 255) throw new Error("Ungültiges JPEG.");
       while (bytes[i] === 255) i++;
       const marker = bytes[i++]!;
       if (marker === 217 || marker === 218) break;
@@ -298,9 +298,9 @@ function originalHeader(bytes: Uint8Array) {
       }
       i += length;
     }
-  } else throw new Error("Nur PNG und JPEG werden unterstÃ¼tzt.");
+  } else throw new Error("Nur PNG und JPEG werden unterstützt.");
   if (!width || !height || width > 16384 || height > 16384 || width * height > 16_000_000)
-    throw new Error("BildmaÃŸe ungÃ¼ltig oder grÃ¶ÃŸer als 16 Millionen Pixel.");
+    throw new Error("Bildmaße ungültig oder größer als 16 Millionen Pixel.");
   return { width, height, mimeType };
 }
 

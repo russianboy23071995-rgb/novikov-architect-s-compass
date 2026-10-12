@@ -27,7 +27,7 @@ export function imageHeader(bytes: Uint8Array | string) {
     mimeType = "image/jpeg";
     let i = 2;
     while (i + 3 < bytes.length) {
-      if (byte(i++) !== 255) throw new Error("UngÃƒÂ¼ltiges JPEG.");
+      if (byte(i++) !== 255) throw new Error("Ungültiges JPEG.");
       while (byte(i) === 255) i++;
       const marker = byte(i++)!;
       if (marker === 217 || marker === 218) break;
@@ -40,23 +40,23 @@ export function imageHeader(bytes: Uint8Array | string) {
       }
       i += length;
     }
-  } else throw new Error("Nur PNG und JPEG werden unterstÃƒÂ¼tzt.");
+  } else throw new Error("Nur PNG und JPEG werden unterstützt.");
   if (!width || !height || width > 16384 || height > 16384 || width * height > 16_000_000)
-    throw new Error("BildmaÃƒÅ¸e ungÃƒÂ¼ltig oder grÃƒÂ¶ÃƒÅ¸er als 16 Millionen Pixel.");
+    throw new Error("Bildmaße ungültig oder größer als 16 Millionen Pixel.");
   return { width, height, mimeType };
 }
 export async function importImage(file: File, id: string): Promise<ImageAsset> {
-  if (file.size > IMAGE_SOURCE_FILE_LIMIT) throw new Error("Bilddatei zu groÃƒÅ¸ (maximal 10 MiB).");
+  if (file.size > IMAGE_SOURCE_FILE_LIMIT) throw new Error("Bilddatei zu groß (maximal 10 MiB).");
   imageHeader(new Uint8Array(await file.arrayBuffer()));
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   try {
     if (bitmap.width * bitmap.height > 16_000_000 || bitmap.width > 16384 || bitmap.height > 16384)
-      throw new Error("Bild zu groÃƒÅ¸.");
+      throw new Error("Bild zu groß.");
     const canvas = document.createElement("canvas");
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Bilddekodierung nicht verfÃƒÂ¼gbar.");
+    if (!ctx) throw new Error("Bilddekodierung nicht verfügbar.");
     ctx.drawImage(bitmap, 0, 0);
     const data = canvas.toDataURL("image/png").split(",")[1]!;
     return createImageAssetHandle({
