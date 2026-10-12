@@ -1,5 +1,19 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Erweiterung auf 32 MiB – 12.10.2026
+
+**Kapazitätserweiterung statt Warnpilot (12.10.2026, Nutzerkorrektur / PR #258):** Der 80-%-Warnauftrag ist zurückgestellt. Leitfadenabgleich: 200–300 MB beschreibt bisherige Archicad-Erfahrung (Masterplan §4 und DEVELOPMENT_ALIGNMENT_2026-10-08), keine äquivalente NOVIKOV-Dateigröße. Ziel bleibt die Unterstützung großer realer Projekte. Erster begrenzter Schritt: gemeinsames Gesamtprojektlimit von 10 auf 32 MiB erweitert; Einzelbildquelle 10 MiB, Base64-Storage 10 MiB Zeichen und 16 MP bleiben unabhängig. Kein Formatwechsel, bestehende Migration/Validierung und atomare History-/Recovery-Ablehnung bleiben erhalten. 32 MiB ist eine technische Zwischenstufe, kein finales Produktziel. 880 Tests bestanden; beide Typechecks, Build und Lint (0 Fehler/6 bestehende Warnungen) geprüft. Browser: 28.847.244-Byte-Projekt (27,51 MiB) mit drei Referenzen geladen, Wand geändert, Undo/Redo, Download, IndexedDB-Snapshot, Neuladen und Wiederaufnahme; wiederaufgenommener Export JSON-identisch zum gespeicherten Stand. Grenzen: identische Bildinhalte unter drei IDs, keine GPU-/RAM-/Langhistory- oder 200–300-MB-Freigabe. Siehe RECOVERY_CAPACITY.md.
+
+Produktionsänderung beschränkt auf das gemeinsame Interop-Dateibudget und die einheitliche Fehlermeldung. Die bislang gekoppelte Bildquelldateigrenze ist nun ein eigenständiger Wert. Mehrere bisher einzeln gültige Bilder können gemeinsam die alte Grenze überschreiten. Der bestehende Commit- und Snapshotpfad prüft weiterhin alle Daten; zu große Änderungen erhalten den bisherigen Stand. Alte NOVIKOV-Versionen mit 10-MiB-Limit können neue größere Dateien nicht öffnen, auch wenn das Schema unverändert 20 bleibt.
+
+Neue Tests: 24-MiB-Storagefixture mit drei unterschiedlichen Payloads durch Commit/Undo/Redo, Datei-Rundlauf, Download und Recovery; fehlgeschlagener Oversize-Snapshot erhält Vorgänger. Zusätzlich exakte UTF-8-Grenze (inklusive), Unicode-Überschreitung und getrennte Einzelbildgrenzen. Alte Oversize-Tests auf den neuen Gesamtvertrag angepasst. Storagefixture testet keine Browserdekodierung.
+
+Reproduktion Browser: erst `reference-workspace-image.py` für das bekannte 1550px-PNG, dann `node --experimental-strip-types benchmarks/project-capacity-fixture.ts <png> <json>`. Datei in isoliertem Workspace auf 8082 öffnen, Wand 3→4 m, Undo/Redo, Download, lokalen Snapshot erzeugen, Seite neu laden und Snapshot bestätigen. Testdatei enthält dreimal denselben realen PNG-Inhalt mit eigenen IDs: Dateigröße geprüft, Decoder-/Cachelast unterschiedlicher Inhalte noch offen. Export vor/nach Wiederaufnahme strukturell identisch, keine Konsolenwarnungen/-fehler. Screenshot lokal outputs/capacity32-browser.png. Browsermessung nicht zeitgleich mit ruhiger kontrollierter Systemlast; Entwicklung mit HMR (Resthinweis im Screenshot), kein Kaltstart-/Latenzversprechen.
+
+[Recovery-Lauf mit Long Tasks](capacity32-recovery-2026-10-12.json) dokumentiert eine längste Task von 939 ms; Automationswartezeiten sind keine Anwendungslaufzeiten. Diese Erweiterung beseitigt die harte 10-MiB-Schranke, nicht die noch synchronen Serialisierungs-/Historykosten. Nächste größere Messstufen und Asset-Vertrag gemäß Masterplan §9.
+
+**Der nachfolgende 80-%-Warnvorschlag ist durch die ausdrückliche Nutzerkorrektur zurückgestellt; die darunter aufgeführten 10-MiB-Gesamtgrenzen dokumentieren den vorherigen Stand.** Einzelbild-/Cachegrenzen gelten weiterhin. Kein Warnpilot wird daraus implementiert.
+
 ## Konsolidiertes Projekt-/Assetbudget (12.10.2026)
 
 Codebasis: main `f4bba64` nach freigegebenem PR #257. Dieser Abschnitt ist eine statische Bestandsprüfung mit vorhandenen Messbelegen, keine neue Laufzeitmessung und keine Kapazitätsfreigabe. Verbindlich sind die bestehenden Codegrenzen; die Warnregel weiter unten ist ein Vorschlag.

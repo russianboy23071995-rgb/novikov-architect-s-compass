@@ -68,7 +68,7 @@ test("invalid files and geometry reject without modifying history", () => {
   assert.throws(() => commitProject(h, { ...h.present, unit: "cm" } as never));
   assert.equal(serializeProject(h.present), before);
   assert.equal(h.past.length, 0);
-  assert.throws(() => readProjectFile(" ".repeat(PROJECT_FILE_LIMIT + 1)), /10 MB/);
+  assert.throws(() => readProjectFile(" ".repeat(PROJECT_FILE_LIMIT + 1)), /32 MiB/);
 });
 test("history is bounded and initial/last navigation is a no-op", () => {
   let h = createHistory(createExampleProject());
@@ -158,8 +158,8 @@ test("commit retains the UTF-8 file-size boundary without touching history on re
   // String length is below the limit; its UTF-8 representation exceeds it.
   input.layers[0]!.name = "\u00e4".repeat(PROJECT_FILE_LIMIT / 2);
   assert.ok(JSON.stringify(input).length < PROJECT_FILE_LIMIT);
-  assert.throws(() => commitProject(h, input), /10 MB/);
-  assert.throws(() => serializeProject(input), /10 MB/);
+  assert.throws(() => commitProject(h, input), /32 MiB/);
+  assert.throws(() => serializeProject(input), /32 MiB/);
   assert.equal(h.past.length, 0);
   assert.equal(h.future.length, 0);
   assert.notEqual(h.present.layers[0]!.name, input.layers[0]!.name);

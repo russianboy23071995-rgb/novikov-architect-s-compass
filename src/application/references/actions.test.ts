@@ -131,12 +131,12 @@ test("reference occupies its layer and follows common visibility eligibility", (
 });
 test("file size applies on import commit, export and direct deserialization", () => {
   const { base, request } = setup();
-  request.asset.data = "AAAA".repeat(PROJECT_FILE_LIMIT / 4);
+  base.layers[0]!.name = "x".repeat(PROJECT_FILE_LIMIT);
   const h = createHistory(base);
-  assert.throws(() => commitCreateReference(h, h.present, request), /10 MB/);
+  assert.throws(() => commitCreateReference(h, h.present, request), /32 MiB/);
   const p = validateProject({ ...base, assets: [request.asset] });
-  assert.throws(() => serializeProject(p), /10 MB/);
-  assert.throws(() => deserializeProject(" ".repeat(PROJECT_FILE_LIMIT + 1)), /10 MB/);
+  assert.throws(() => serializeProject(p), /32 MiB/);
+  assert.throws(() => deserializeProject(" ".repeat(PROJECT_FILE_LIMIT + 1)), /32 MiB/);
   assert.equal(h.present.assets.length, 0);
 });
 

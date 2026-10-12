@@ -1,0 +1,59 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 750.8999999761581,
+      "label": "St\u00e4nde ausw\u00e4hlen"
+    },
+    {
+      "at": 1022.5999999940395,
+      "label": "Stand pr\u00fcfen"
+    },
+    {
+      "at": 40195.39999997616,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 40487.89999997616,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 42213.19999998808,
+      "label": "Save project"
+    },
+    {
+      "at": 73029.69999998808,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 368.5,
+      "duration": 205
+    },
+    {
+      "start": 750.5999999940395,
+      "duration": 60
+    },
+    {
+      "start": 1066.3999999761581,
+      "duration": 939
+    },
+    {
+      "start": 40195.19999998808,
+      "duration": 67
+    },
+    {
+      "start": 40487.69999998808,
+      "duration": 638
+    },
+    {
+      "start": 41218.09999999404,
+      "duration": 936
+    },
+    {
+      "start": 42212.79999998212,
+      "duration": 499
+    }
+  ]
+}

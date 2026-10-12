@@ -51,7 +51,7 @@ test("oversized file is rejected before reading; actual UTF-8 content is checked
         return "";
       },
     }),
-    /10 MB/,
+    /32 MiB/,
   );
   assert.equal(reads, 0);
   await assert.rejects(
@@ -60,7 +60,7 @@ test("oversized file is rejected before reading; actual UTF-8 content is checked
       size: 1,
       text: async () => "ä".repeat(PROJECT_FILE_LIMIT / 2 + 1),
     }),
-    /10 MB/,
+    /32 MiB/,
   );
 });
 
@@ -126,5 +126,81 @@ test("confirmed open is acknowledged only after validation and can be undone", a
   assert.equal(
     editingReducer(loaded, { type: "undo" }).history.present.id,
     state.history.present.id,
+  );
+});
+
+test("24 MiB multi-asset project supports commit, file roundtrip, undo and recovery", async () => {
+  const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
+  const { createHistory, commitProject, undoProject, redoProject } =
+    await import("../../lib/bim/history.ts");
+  const { saveRecovery, readRecovery } = await import("./recovery.ts");
+  const { ensureDocumentFolder } = await import("../views/documents.ts");
+  const original = ensureDocumentFolder(createExampleProject());
+  const project = {
+    ...original,
+    assets: Array.from({ length: 3 }, (_, i) =>
+      createImageAssetHandle({
+        id: `large-${i}`,
+        mimeType: "image/png",
+        pixelWidth: 1,
+        pixelHeight: 1,
+        data: (i === 0 ? "AAAA" : i === 1 ? "BBBB" : "CCCC").repeat(2 * 1024 * 1024),
+      }),
+    ),
+  };
+  // Storage-boundary fixture, not a browser-decoding/real-image benchmark.
+  const history = commitProject(createHistory(original), project);
+  const raw = serializeProject(history.present);
+  assert.ok(Buffer.byteLength(raw) > 24 * 1024 * 1024);
+  assert.equal(serializeProject(redoProject(undoProject(history)).present), raw);
+  assert.equal(serializeProject((await prepareProjectOpen(file(raw))).project), raw);
+  let downloaded = "";
+  requestProjectDownload(history.present, (text) => {
+    downloaded = text;
+  });
+  assert.equal(downloaded, raw);
+  let record: string | null = null;
+  const storage = {
+    read: async () => record,
+    replace: async (expected: string | null, next: string) => {
+      assert.equal(record, expected);
+      record = next;
+    },
+  };
+  await saveRecovery(original, storage);
+  await saveRecovery(history.present, storage);
+  assert.equal(serializeProject((await readRecovery(storage))!.project), raw);
+  const saved = record;
+  await assert.rejects(
+    saveRecovery(
+      {
+        ...project,
+        layers: project.layers.map((l, i) =>
+          i === 0 ? { ...l, name: "x".repeat(PROJECT_FILE_LIMIT) } : l,
+        ),
+      },
+      storage,
+    ),
+    /32 MiB/,
+  );
+  assert.equal(record, saved);
+});
+
+test("aggregate UTF-8 boundary is inclusive and individual asset budget stays independent", async () => {
+  const { assertProjectFileSize } = await import("../../interop/project-file/size.ts");
+  const { IMAGE_SOURCE_FILE_LIMIT } = await import("../../interop/images/import.ts");
+  const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
+  assert.equal(PROJECT_FILE_LIMIT, 32 * 1024 * 1024);
+  assert.equal(IMAGE_SOURCE_FILE_LIMIT, 10 * 1024 * 1024);
+  assert.doesNotThrow(() => assertProjectFileSize("ä".repeat(PROJECT_FILE_LIMIT / 2)));
+  assert.throws(() => assertProjectFileSize("ä".repeat(PROJECT_FILE_LIMIT / 2) + "x"), /32 MiB/);
+  assert.throws(() =>
+    createImageAssetHandle({
+      id: "too-large",
+      mimeType: "image/png",
+      pixelWidth: 1,
+      pixelHeight: 1,
+      data: "AAAA".repeat(IMAGE_SOURCE_FILE_LIMIT / 4 + 1),
+    }),
   );
 });

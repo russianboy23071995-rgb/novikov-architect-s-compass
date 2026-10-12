@@ -1,6 +1,7 @@
 import { binaryBytes } from "./binary-bytes.ts";
 import { createImageAssetHandle, type ImageAsset } from "../../domain/elements/reference/model.ts";
-import { PROJECT_FILE_LIMIT } from "../project-file/size.ts";
+// Individual image sources keep their own budget.
+export const IMAGE_SOURCE_FILE_LIMIT = 10 * 1024 * 1024;
 /** Reads dimensions before decode to bound raster allocation. */
 export function imageHeader(bytes: Uint8Array) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -34,7 +35,7 @@ export function imageHeader(bytes: Uint8Array) {
   return { width, height, mimeType };
 }
 export async function importImage(file: File, id: string): Promise<ImageAsset> {
-  if (file.size > PROJECT_FILE_LIMIT) throw new Error("Bilddatei zu groß (maximal 10 MiB).");
+  if (file.size > IMAGE_SOURCE_FILE_LIMIT) throw new Error("Bilddatei zu groß (maximal 10 MiB).");
   imageHeader(new Uint8Array(await file.arrayBuffer()));
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   try {
