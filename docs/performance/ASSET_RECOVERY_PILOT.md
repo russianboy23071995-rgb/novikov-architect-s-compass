@@ -596,3 +596,43 @@ Nächster Einzelauftrag deshalb regulärer CAD-Workspace-Ablauf gemäß Masterpl
 PR272 ist die noch offene Basis; dessen Merge wurde durch die wiederholte Freigabe
 von PR271 nicht vorausgesetzt.
 Hauptthread-Tasks innerhalb der gemessenen Phasen: Sicherung alt 1.783–1.836 ms, neu 1.217–1.536 ms; Lesen alt 637–940 ms, neu 120–142 ms. Phasenzuordnung anhand Startzeit, keine CPU-Ursachenanalyse.
+
+
+## Praktische Workspace-Abnahme (12.10.2026)
+
+Produktbasis main `f833834`, PR272/273 geordnet zusammengeführt. Keine Produktänderung
+in diesem Auftrag. Der bestehende `reference-workspace.html` rendert den echten
+CadWorkspace mit echten Browseradaptern auf Port 8082. Vorhandene andere Testprojekte
+blieben erhalten; Nutzerursprung 8080 unverändert. `workspace-fixture.html` auf 8084
+erzeugt dieselben zwölf deterministischen 1280×1280-PNGs und 10.000 Linien wie der
+Serviceversuch und bietet die 106.911.015-Byte-Datei als Download an.
+
+Ausgeführt: regulärer Open-project-Dateidialog, Ladebestätigung (1 Wand, 1 Fenster,
+10.000 Linien, 12 Referenzen), Übernahme, sichtbare Linien/Wand/Fenster/Bildreferenz.
+Wand über Navigator gewählt, Höhe 2,8 auf 2,9 m geändert. Toolbar Undo, tatsächlicher
+Save-project-Download; Redo und weiterer Download. Gespeicherte Datei über regulären
+Dialog erneut geöffnet und übernommen. Über lokale Wiederherstellung Snapshot erzeugt,
+Erfolg im Katalog abgewartet, Seite neu geladen, Startangebot geöffnet, capacity-100
+geprüft, Wiederaufnahme vorbereitet und bestätigt. Danach erneut heruntergeladen.
+
+[Dateivergleich](workspace-capacity100-2026-10-12.json): vollständiges geparstes JSON
+nach Undo identisch zur Fixture; nach Redo ausschließlich Wandhöhe 2,9; nach Recovery
+vollständig identisch zum gespeicherten Redo-Stand. Alle zwölf Bildpayloads eingeschlossen.
+Hashes/Dateigrößen protokolliert, große Testdateien nicht ins Repository aufgenommen.
+Kein Browserprozess-/OS-Neustart, keine Stromausfallsimulation. UI visuell geprüft;
+nicht jeder einzelne Bildpixel im Canvas separat verglichen.
+
+[Diagnose vor Reload](workspace-capacity100-before-reload.json),
+[Diagnose nach Reload](workspace-capacity100-after-reload.json): Buttonzeitpunkte und
+Long Tasks aus dem bestehenden rein beobachtenden Diagnoseskript. Maxima 5.274 bzw.
+7.113 ms. Breite Accessibility-/DOM-Abfragen liefen wiederholt in Zeitlimits; gezielte
+CSS-Abfragen und Screenshots funktionierten. Daraus allein folgt kein Programmstillstand.
+Auch Eingabefeldabfragen waren teils veraltet; Aussagen zum Modell beruhen deshalb auf
+vollständigen tatsächlichen Dateidownloads. Die Long-Task-Daten sind keine CPU-Stacks
+und trennen Browsersteuerungs-/Diagnosekosten nicht sicher von Renderingkosten.
+
+Ergebnis: Datenablauf bestanden, Bedienperformance noch nicht abgenommen. Die Ursache
+der langen UI-Aufgabe wird im nächsten begrenzten Auftrag zugeordnet, bevor Änderungen
+an Renderer oder Navigator vorgenommen werden. Vorherige 905 Tests/grüne CI gehören zu
+PR273; hier keine erneute vollständige Testsuite für den reinen Diagnose-/Dokuschritt.
+Benchmark-Typecheck und fokussierter Lint der neuen Fixture-Seite bestanden.

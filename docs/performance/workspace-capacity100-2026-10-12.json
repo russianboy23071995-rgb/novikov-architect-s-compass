@@ -1,0 +1,33 @@
+{
+  "checks": {
+    "undo_matches_source": true,
+    "redo_only_changes_height": true,
+    "recovery_matches_saved_file": true
+  },
+  "counts": {
+    "assets": 12,
+    "lines": 10000
+  },
+  "files": [
+    {
+      "name": "capacity-100.json",
+      "bytes": 106911015,
+      "sha256": "ececb9c8b33bc0e8699a05d8c088258d72c7958a838a06e84c2312a47851c278"
+    },
+    {
+      "name": "novikov-project (22).json",
+      "bytes": 106911015,
+      "sha256": "ececb9c8b33bc0e8699a05d8c088258d72c7958a838a06e84c2312a47851c278"
+    },
+    {
+      "name": "novikov-project (23).json",
+      "bytes": 106911015,
+      "sha256": "23599c6390420bc312442434b0d42322666e430261520462b8a3d0290f585952"
+    },
+    {
+      "name": "novikov-project (24).json",
+      "bytes": 106911015,
+      "sha256": "23599c6390420bc312442434b0d42322666e430261520462b8a3d0290f585952"
+    }
+  ]
+}
