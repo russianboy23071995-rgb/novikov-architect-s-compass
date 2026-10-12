@@ -1,0 +1,111 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 543.6999999880791,
+      "label": "Open project"
+    },
+    {
+      "at": 18336.29999998212,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 50302.59999999404,
+      "label": "Save project"
+    },
+    {
+      "at": 50776.90000000596,
+      "label": "Undo"
+    },
+    {
+      "at": 51068.5,
+      "label": "Redo"
+    },
+    {
+      "at": 51353.40000000596,
+      "label": "Wall 1 · 3.00 m"
+    },
+    {
+      "at": 64308.90000000596,
+      "label": "Undo"
+    },
+    {
+      "at": 85945.69999998808,
+      "label": "Redo"
+    },
+    {
+      "at": 86286.5,
+      "label": "Save project"
+    },
+    {
+      "at": 87051.09999999404,
+      "label": "Lokaler Sicherungsstatus: Kein lokaler Snapshot"
+    },
+    {
+      "at": 95843.29999998212,
+      "label": "Snapshot erstellen"
+    },
+    {
+      "at": 115167.40000000596,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 303,
+      "duration": 134
+    },
+    {
+      "start": 8924.09999999404,
+      "duration": 121
+    },
+    {
+      "start": 18336.19999998808,
+      "duration": 814
+    },
+    {
+      "start": 50302.29999998212,
+      "duration": 129
+    },
+    {
+      "start": 50776.69999998808,
+      "duration": 104
+    },
+    {
+      "start": 51068.29999998212,
+      "duration": 129
+    },
+    {
+      "start": 51638.69999998808,
+      "duration": 115
+    },
+    {
+      "start": 64308.5,
+      "duration": 82
+    },
+    {
+      "start": 85945.5,
+      "duration": 86
+    },
+    {
+      "start": 86286.19999998808,
+      "duration": 129
+    },
+    {
+      "start": 87050.90000000596,
+      "duration": 50
+    },
+    {
+      "start": 95843.09999999404,
+      "duration": 68
+    },
+    {
+      "start": 95919.29999998212,
+      "duration": 81
+    },
+    {
+      "start": 96111.19999998808,
+      "duration": 179
+    }
+  ]
+}

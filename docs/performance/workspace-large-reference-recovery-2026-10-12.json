@@ -1,0 +1,91 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 30797.5,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 31215.29999998212,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 47155,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 47460.19999998808,
+      "label": "Abbrechen"
+    },
+    {
+      "at": 55093.59999999404,
+      "label": "Lokaler Sicherungsstatus: Kein lokaler Snapshot"
+    },
+    {
+      "at": 55394.09999999404,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 67451.59999999404,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 67736.19999998808,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 69064.59999999404,
+      "label": "Save project"
+    },
+    {
+      "at": 88763.5,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 374.59999999403954,
+      "duration": 184
+    },
+    {
+      "start": 30797.29999998212,
+      "duration": 62
+    },
+    {
+      "start": 31234.29999998212,
+      "duration": 161
+    },
+    {
+      "start": 47154.79999998212,
+      "duration": 55
+    },
+    {
+      "start": 47460,
+      "duration": 51
+    },
+    {
+      "start": 55093.39999997616,
+      "duration": 52
+    },
+    {
+      "start": 55407.39999997616,
+      "duration": 174
+    },
+    {
+      "start": 67451.39999997616,
+      "duration": 53
+    },
+    {
+      "start": 67736.09999999404,
+      "duration": 890
+    },
+    {
+      "start": 68656.59999999404,
+      "duration": 159
+    },
+    {
+      "start": 69064.5,
+      "duration": 123
+    }
+  ]
+}
