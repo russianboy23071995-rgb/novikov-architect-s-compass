@@ -1,0 +1,236 @@
+{
+  "date": "2026-10-12T12:13:27.251Z",
+  "hardware": {
+    "logicalCpus": 12,
+    "totalMemory": 17128132608
+  },
+  "results": [
+    {
+      "size": 250,
+      "mode": "inline",
+      "node": "v24.19.0",
+      "phases": [
+        {
+          "name": "fixture",
+          "ms": 14890.7045,
+          "timerDelayMs": 14890.5928,
+          "rss": 382513152,
+          "heapUsed": 25165664,
+          "external": 278569904,
+          "maxRss": 437993472
+        },
+        {
+          "name": "write",
+          "ms": 275.2324000000008,
+          "timerDelayMs": 275.1932000000015,
+          "rss": 1501134848,
+          "heapUsed": 549531968,
+          "external": 273848248,
+          "maxRss": 2035228672
+        },
+        {
+          "name": "read",
+          "ms": 956.1018000000004,
+          "timerDelayMs": 956.0707999999977,
+          "rss": 1766825984,
+          "heapUsed": 844863112,
+          "external": 273848248,
+          "maxRss": 2035228672
+        },
+        {
+          "name": "recoveryEnvelopeWrite",
+          "ms": 555.5724999999984,
+          "timerDelayMs": 555.5227999999988,
+          "rss": 2299613184,
+          "heapUsed": 1347496480,
+          "external": 273848248,
+          "maxRss": 2832396288
+        },
+        {
+          "name": "recoveryEnvelopeRead",
+          "ms": 638.8482000000004,
+          "timerDelayMs": 638.7891999999993,
+          "rss": 2301087744,
+          "heapUsed": 1343511888,
+          "external": 273848248,
+          "maxRss": 2832396288
+        }
+      ],
+      "history": [
+        {
+          "count": 1,
+          "rss": 378761216,
+          "heapUsed": 17402352,
+          "external": 273848248,
+          "maxRss": 915369984,
+          "serializationMs": 281.7641999999996,
+          "serializedBytes": 266059213
+        },
+        {
+          "count": 10,
+          "rss": 793448448,
+          "heapUsed": 326925096,
+          "external": 273848248,
+          "maxRss": 915369984,
+          "serializationMs": 284.22239999999874,
+          "serializedBytes": 266059213
+        },
+        {
+          "count": 50,
+          "rss": 993366016,
+          "heapUsed": 519794816,
+          "external": 273848248,
+          "maxRss": 1325473792,
+          "serializationMs": 266.91269999999713,
+          "serializedBytes": 266059213
+        },
+        {
+          "count": 100,
+          "rss": 1236115456,
+          "heapUsed": 760920432,
+          "external": 273848248,
+          "maxRss": 1526394880,
+          "serializationMs": 280.10289999999804,
+          "serializedBytes": 266059213
+        }
+      ],
+      "checks": [
+        "product rejects >32MiB",
+        "100 geometry-validated snapshots; shared payload identity",
+        "full project SHA256 roundtrip equal",
+        "two-snapshot envelope content equal"
+      ],
+      "status": "completed",
+      "activePhase": "recoveryEnvelopeRead",
+      "assets": 84,
+      "pixels": 49545216,
+      "inlineBytes": 266059213,
+      "serializedBytes": 266059213,
+      "recoveryBytes": 532766050,
+      "finalMemory": {
+        "rss": 2301087744,
+        "heapUsed": 1343536888,
+        "external": 273848248,
+        "maxRss": 2832396288
+      }
+    },
+    {
+      "size": 250,
+      "mode": "split",
+      "node": "v24.19.0",
+      "phases": [
+        {
+          "name": "fixture",
+          "ms": 14941.7606,
+          "timerDelayMs": 14941.638299999999,
+          "rss": 382791680,
+          "heapUsed": 23795104,
+          "external": 278569904,
+          "maxRss": 438509568
+        },
+        {
+          "name": "split",
+          "ms": 26115.525999999998,
+          "timerDelayMs": 417.10269999999946,
+          "rss": 501276672,
+          "heapUsed": 39220600,
+          "external": 275514229,
+          "maxRss": 915755008
+        },
+        {
+          "name": "write",
+          "ms": 1651.8696999999956,
+          "timerDelayMs": 1651.6676000000007,
+          "rss": 1509728256,
+          "heapUsed": 285873312,
+          "external": 539942822,
+          "maxRss": 1514676224
+        },
+        {
+          "name": "read",
+          "ms": 28081.832800000004,
+          "timerDelayMs": 1657.9908000000069,
+          "rss": 1874096128,
+          "heapUsed": 963711088,
+          "external": 273870580,
+          "maxRss": 2022121472
+        },
+        {
+          "name": "recoveryEnvelopeWrite",
+          "ms": 559.392399999997,
+          "timerDelayMs": 559.3527000000031,
+          "rss": 2044309504,
+          "heapUsed": 1088204120,
+          "external": 273870580,
+          "maxRss": 2580291584
+        },
+        {
+          "name": "recoveryEnvelopeRead",
+          "ms": 680.1009000000049,
+          "timerDelayMs": 680.0755000000063,
+          "rss": 2045800448,
+          "heapUsed": 1084209328,
+          "external": 273870100,
+          "maxRss": 2580291584
+        }
+      ],
+      "history": [
+        {
+          "count": 1,
+          "rss": 486555648,
+          "heapUsed": 17486312,
+          "external": 273870132,
+          "maxRss": 915755008,
+          "serializationMs": 19.88420000000042,
+          "serializedBytes": 1644097
+        },
+        {
+          "count": 10,
+          "rss": 527904768,
+          "heapUsed": 62686328,
+          "external": 273870100,
+          "maxRss": 915755008,
+          "serializationMs": 19.7071999999971,
+          "serializedBytes": 1644097
+        },
+        {
+          "count": 50,
+          "rss": 729690112,
+          "heapUsed": 255514504,
+          "external": 273870100,
+          "maxRss": 915755008,
+          "serializationMs": 20.511599999997998,
+          "serializedBytes": 1644097
+        },
+        {
+          "count": 100,
+          "rss": 980353024,
+          "heapUsed": 496582144,
+          "external": 273870100,
+          "maxRss": 982536192,
+          "serializationMs": 21.602200000001176,
+          "serializedBytes": 1644097
+        }
+      ],
+      "checks": [
+        "product rejects >32MiB",
+        "100 geometry-validated snapshots; shared payload identity",
+        "full project SHA256 roundtrip equal",
+        "two-snapshot envelope content equal"
+      ],
+      "status": "completed",
+      "activePhase": "recoveryEnvelopeRead",
+      "assets": 84,
+      "pixels": 49545216,
+      "inlineBytes": 266059213,
+      "serializedBytes": 266072722,
+      "recoveryBytes": 532794768,
+      "finalMemory": {
+        "rss": 2045800448,
+        "heapUsed": 1084216456,
+        "external": 273870100,
+        "maxRss": 2580291584
+      }
+    }
+  ]
+}
