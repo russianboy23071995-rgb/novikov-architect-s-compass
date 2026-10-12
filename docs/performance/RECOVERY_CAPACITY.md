@@ -1,5 +1,71 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Pilot vom 12.10.2026: geprüfte Schreibrevision
+
+PR249 wurde nach ausdrücklicher Freigabe und erfolgreicher CI zusammengeführt.
+Der Folgepilot (`79b864f`) ergänzt `prepareRecoveryWriter` im gemeinsamen
+Application-Recovery-Dienst. Seine Closure besitzt die exakt gelesenen Bytes und
+den daraus vollständig geprüften gültigen Snapshot. Eigene erfolgreiche Writes
+ersetzen diese Revision erst nach dem Commit. Es gibt keine extern übergebbare
+„trusted“-Markierung und keinen globalen Cache. Fehler lassen die vorherige
+Revision unverändert; parallele Aufrufe desselben Writers werden abgewiesen.
+
+Der Controller nutzt denselben Writer für manuelle und automatische Sicherung.
+Bei ausgeschalteter Automatik wird pro manuellem Aufruf weiterhin eine neue
+Revision vorbereitet; es ändert sich keine Bedien-/Konfliktregel. Bei aktiver
+Automatik bleibt die Revision bis zum Kontextwechsel bzw. zur bewussten
+Reaktivierung erhalten. Neue Projektinhalte durchlaufen unverändert
+`serializeProject` einschließlich Vollvalidierung und Dateigrenze. Unbekannte
+Speicherbytes und Wiederaufnahme bleiben vollständige Fremddatenprüfungen.
+Der IndexedDB-Adapter und sein atomarer Compare-and-replace wurden nicht geändert.
+
+Fünf zusätzliche Tests vergleichen die Snapshotbytes über mehrere Schreibvorgänge
+mit dem unveränderten vollständigen `saveRecovery`-Pfad, einschließlich beschädigtem
+aktuellem Stand und gültigem Vorgänger. Weitere Fälle: Quota/Transaktionsabbruch,
+falsche Projekt-ID, ungültige neue Geometrie, beschädigte Gesamtdaten, veralteter
+Kontext, zwei konkurrierende Revisionen und gleichzeitige Aufrufe. Bestehende
+Controller-Tests decken Ausschalten/Laden, verzögerte Vorbereitung/Publikation,
+Konfliktpause, Undo/Redo und serielles Schreiben weiterhin ab.
+
+### Vergleichsergebnis
+
+[Rohdaten vom 12.10.2026](recovery-reuse-2026-10-12.json), Beginn 09:30:23 UTC,
+Chromium 155/Windows x64, 12 logische Prozessoren und 16 GiB deviceMemory laut
+Browser, Dokument sichtbar, gleiche sechs Profile und unveränderte Diagnose.
+252 Phasenmessungen und 108 Inhaltsvergleiche bestanden; keine Browserfehler.
+865 Tests, App-/Benchmark-Typecheck, Build und Lint bestanden (0 Fehler,
+6 bestehende Fast-Refresh-Warnungen).
+
+Die zwei Messtage sind kein randomisierter A/B-Versuch; Hintergrundlast und
+Scheduling wurden nicht kontrolliert. Unveränderte Lesezeiten schwanken ebenfalls.
+Warm p95 ist weiterhin der größte von fünf Werten. Vollständige Einzelwerte,
+erste Läufe und Timerverzug stehen im verlinkten JSON.
+
+| Profil | Manuell vorher/nachher Median ms | Auto vorher/nachher Median ms | Auto p95 nachher ms | Auto längste Task vorher/nachher ms |
+| --- | ---: | ---: | ---: | ---: |
+| Geometrie 1000 | 29.7 / 18.9 | 17.0 / 9.0 | 9.4 | 0 / 0 |
+| Geometrie 10000 | 277.7 / 195.2 | 165.3 / 76.1 | 91.7 | 167 / 72 |
+| Bild klein | 172.0 / 111.0 | 94.2 / 23.9 | 28.7 | 84 / 0 |
+| Bild mittel | 689.2 / 416.0 | 356.9 / 88.9 | 114.3 | 334 / 53 |
+| Bild nahe Grenze | 1365.7 / 798.9 | 733.8 / 156.5 | 323.7 | 673 / 88 |
+| Gemischt | 827.2 / 496.1 | 435.4 / 112.1 | 137.0 | 446 / 74 |
+
+Beim größten Bildprofil sinkt der warme Auto-Median von 734 auf 157 ms,
+die längste Auto-Task von 673 auf 88 ms. Eine allgemeine ruckelfreie Bedienung ist
+damit nicht bewiesen: p95 erreicht 324 ms, die Hauptthread-Task weiterhin 88 ms.
+Manuelle Sicherung ohne aktive Automatik braucht noch 799 ms im Median,
+Recovery-Lesen 650 ms. Die erste Prüfung unbekannter Speicherbytes bleibt teuer.
+Die initiale Auto-Aktivierung ist weiterhin nicht in der Auto-Phase enthalten.
+
+Nächster begrenzter Auftrag gemäß Masterplan: an der gemeinsamen Dateigrenze die
+heute doppelte Bild-Storageprüfung (Projektparse, anschließend Handle-Erzeugung)
+auf eine vollständige Prüfung pro eingehendem Asset reduzieren. Keine ungeprüften
+Handles, kein Cache anhand einer vom Benutzer gelieferten ID. Akzeptanz/Ablehnung,
+Migration, Größen-/Pixelgrenzen und unveränderliche eigene Kopien gegen bisherigen
+Pfad prüfen; identische Recovery-/Dateivorbereitungsprofile erneut messen.
+
+Die nachfolgenden Originalmessungen vom 10.10. bleiben als Baseline erhalten.
+
 ## Zweck und Reproduktion
 
 Der Pilot misst die bestehenden Application-/IndexedDB-Pfade mit synthetischen
