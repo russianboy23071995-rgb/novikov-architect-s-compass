@@ -1,5 +1,34 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Aufschlüsselung der Ladebestätigung (12.10.2026)
+
+Produktionsbasis `f50c4bf`, Diagnosezweig `bench/workspace-load-phases`. Eigenständige Vite-Konfiguration `benchmarks/load-phase.config.ts` instrumentiert ausschließlich im Serve-Modus echte Funktionen mit transparenten try/finally-Zeitmessungen. Produktionsdateien und Verhalten unverändert. Transform verweigert veraltete Quelltextstellen. Regulärer CadWorkspace mit React-Profiler auf isoliertem Origin 8083; vorhandene Nutzer-Recovery wird nicht berührt.
+
+Start: `node node_modules/vite/bin/vite.js --config benchmarks/load-phase.config.ts`. `/benchmarks/load-phases.html` öffnen, dieselbe oben beschriebene `large-reference-project.json` wählen und „Phasen messen“ drücken. Die Diagnose reicht echte File-Objekte über den regulären Dateiinput ein und klickt die tatsächliche Ladebestätigung. Pro Profil erster Lauf plus fünf Wiederholungen, zunächst kleines Beispielmodell, dann 9.616.625-Byte-Datei. Datenvorbereitung außerhalb des gemessenen Bestätigungsfensters. Jeweils Dialogabschluss, zwei Frames und 300 ms Beobachtungsnachlauf; Referenzanzahl nach jedem Vorgang geprüft. Warmes erneutes Laden desselben Projekts ist kein unabhängiger Kaltstart und erzeugt bei Inhaltsgleichheit keine neue Undo-Mutation.
+
+[Erster Lauf mit groben Phasen](load-phases-2026-10-12.json), [zweiter Lauf mit Konvertierungsdetails](load-phases-detail-2026-10-12.json). Je 12, insgesamt 24 Bestätigungen/Referenzanzahlprüfungen bestanden; keine Konsolenwarnungen/-fehler. Chromium 155/Windows; Entwicklungsbuild und Profiler-Overhead. 876 Tests, Benchmark-Typecheck, Build und gezieltes Lint bestanden. Screenshot lokal: outputs/load-phases.png. Die lange Dauer eines einzelnen Automationsaufrufs ist keine App-Laufzeit; relevant sind die erfassten Browserphasen.
+
+Detaildurchlauf, Millisekunden:
+
+| Phase | Kleine Kontrolle erster Lauf | Großes Bild erster Lauf | Großes Bild warme Werte |
+| --- | ---: | ---: | --- |
+| Bestätigung bis zwei Frames | 103,7 | 774,9 | 148,8–196,8; Median 169,4 |
+| editingReducer inkl. History | 0,6 | 53,9 | 75,9–83,9 |
+| commitProject (in Reducer enthalten) | 0,3 | 28,4 | 50,8–57,8 |
+| derivePlanScene | <0,1 | <0,1 | <0,1 |
+| checkedImageUrl | entfällt | 569,8 | 5,1–6,2 |
+| darin checkImageUrl (Cache-Miss) | entfällt | 569,7 | entfällt: Cache-Hit |
+| darin atob | entfällt | 9,8 | entfällt |
+| darin Uint8Array.from | entfällt | 559,6 | entfällt |
+| darin imageHeader | entfällt | 0,1 | entfällt |
+| React actualDuration gesamt | 60,4 | 712,3 | 118,2–151,8 |
+| Längste beobachtete Task | keine ≥50 ms | 754 | 108–148 |
+
+**Verschachtelte Messungen nicht addieren:** React actualDuration enthält Renderarbeit und darunter aufgerufene Funktionen; commitProject ist Teil des Reducers, atob/Bytekonvertierung Teil der URL-Prüfung. Profiler liefert Renderdauer und Commit-Zeitpunkte, keine isolierte DOM-Commit-Dauer. SVG-image-load-Ereignis wird protokolliert, liefert aber keine reine Decoder-/GPUzeit. Diese Grenzen werden ausdrücklich nicht durch Differenzbildung als exakte Phasen ausgegeben.
+
+Der erste Durchlauf zeigte 798 ms in checkImageUrl, der zweite 570 ms; Ausführung/Last/JIT streuen. In beiden dominiert derselbe Pfad. Der zweite Durchlauf lokalisiert fast die gesamte Zeit in `Uint8Array.from(binary, c => c.charCodeAt(0))`. Der bestehende 48-MiB-Inhaltscache greift bei Wiederholung; seine Abschaffung oder Vergrößerung ist hier nicht begründet. Ein gezielter Vergleich mit einer vorallokierten Bytearray-Schleife ist der nächste begrenzte Auftrag. Keine Renderer-, Speicherformat- oder Workerentscheidung aus diesen Befunden ableiten. Warme History-/Serialisierungskosten bleiben separat offen.
+
+
 ## Workspace-Abnahme vom 12.10.2026
 
 Produktionsbasis `625031e` (PR253); Diagnosezweig `test/large-reference-workspace`. Vollständiger CadWorkspace, reale Adapter, keine Modelltest-Hooks. Eigener Origin `http://127.0.0.1:8082` schützt Nutzer-Recovery auf 8080/8081. Nur synthetische Daten. Chromium 155/Windows. Der Entwicklungsserver ist kein Produktionsperformance-Nachweis.
