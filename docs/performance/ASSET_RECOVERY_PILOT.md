@@ -716,3 +716,32 @@ einschließlich aller zwölf Payloads. 908 Tests bestanden: zusätzlich zwölf l
 über drei Durchläufe, ungültige Header/MIME/Maße und eingefrorenes Objekt mit veränderlichem
 Getter. Bestehende Mutations-/LRU-/Budgettests bleiben erhalten. Typecheck, gezieltes Lint
 und Build bestanden. Nächster Auftrag: verbleibende Grundriss-Render-/Commitkosten zuordnen.
+
+
+## Grundriss-Teilbäume und Framegrenzen (12.10.2026)
+
+Nur Diagnose auf dem Stand des offenen PR277. Zwei echte Dateiöffnungen derselben
+100-MiB-Fixture auf 8082, ohne vollständige DOM-Abfrage während des Ladens.
+[Rohdaten 1](plan-render-phases-1.json), [Rohdaten 2](plan-render-phases-2.json).
+
+| React-Teilbaum | Lauf 1 | Lauf 2 |
+|---|---:|---:|
+| Bildreferenzen Mount | 591 ms | 733 ms |
+| Linien Mount | 399 ms | 528 ms |
+| Linien unmittelbarer Folge-Render | 187 ms | 245 ms |
+| Grundriss Mount insgesamt | 1160 ms | 1494 ms |
+
+Profilerzeiten sind verschachtelt, nicht addieren. onRender-Callback-Zeitpunkt
+und zwei requestAnimationFrame-Grenzen ergänzen den Verlauf. Beispiel Lauf 1:
+Commitbeginn 32567,7 ms, Workspace-Callback 32840,6 ms, erster rAF 33352,9 ms,
+zweiter rAF 33490,4 ms. Darin liegen weitere React-Updates und Browserarbeit.
+Diese Differenzen sind weder reine Commitkosten noch eine isolierte Paintmessung.
+Die Instrumentierung selbst und der Entwicklungsbuild beeinflussen die Werte.
+
+Codebefund: CadViewport startet mit 800×400-Ersatzgröße und fitPlan; ein Effect
+misst anschließend die reale Fläche und setzt die initiale Kamera. Das passt zur
+beobachteten Folgearbeit, ist aber noch kein kausaler Nachweis. Nächster Pilot:
+Größen-/Kamerawerte bestätigen und teuren ersten Szenenaufbau auf die gemessene
+Kamera abstimmen. Resize, gespeicherte Abbild-Framings, Fit/Zoom und Auswahl prüfen.
+Keine Produktionsänderung dieses Schritts. Benchmark-Typecheck, gezieltes Lint und
+Produktionsbuild bestanden; Modelltests von PR277 werden nicht als neu ausgeführt ausgegeben.
