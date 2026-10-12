@@ -1,0 +1,556 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 3513.5,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 3785.300000011921,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 17124.5,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 133.10000002384186,
+      "duration": 143
+    },
+    {
+      "start": 3987.100000023842,
+      "duration": 86
+    },
+    {
+      "start": 4083.7000000178814,
+      "duration": 90
+    },
+    {
+      "start": 4173.9000000059605,
+      "duration": 89
+    },
+    {
+      "start": 4263.5,
+      "duration": 97
+    },
+    {
+      "start": 4361.100000023842,
+      "duration": 98
+    },
+    {
+      "start": 4459.9000000059605,
+      "duration": 90
+    },
+    {
+      "start": 4550.200000017881,
+      "duration": 96
+    },
+    {
+      "start": 4651.5,
+      "duration": 99
+    },
+    {
+      "start": 4755.600000023842,
+      "duration": 100
+    },
+    {
+      "start": 4860.100000023842,
+      "duration": 92
+    },
+    {
+      "start": 4957,
+      "duration": 87
+    },
+    {
+      "start": 5048.5,
+      "duration": 81
+    },
+    {
+      "start": 5134,
+      "duration": 91
+    },
+    {
+      "start": 5229.300000011921,
+      "duration": 102
+    },
+    {
+      "start": 5367.9000000059605,
+      "duration": 50
+    }
+  ],
+  "exportPhases": [],
+  "workspacePhases": [
+    {
+      "kind": "application",
+      "event": "recovery:storage-read",
+      "start": 250.90000000596046,
+      "duration": 65.09999999403954
+    },
+    {
+      "kind": "application",
+      "event": "recovery:storage-read",
+      "start": 3785.5,
+      "duration": 288.7000000178814
+    },
+    {
+      "kind": "application",
+      "event": "recovery:budget",
+      "start": 4074.600000023842,
+      "duration": 8.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4083.9000000059605,
+      "duration": 21.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4105.4000000059605,
+      "duration": 9.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4115.300000011921,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4115.5,
+      "duration": 24.30000001192093
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4139.800000011921,
+      "duration": 7.0999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4147,
+      "duration": 26.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4173.9000000059605,
+      "duration": 19.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4193.5,
+      "duration": 10.200000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4203.700000017881,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4203.700000017881,
+      "duration": 25.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4229.5,
+      "duration": 6.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4236.5,
+      "duration": 26.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4263.5,
+      "duration": 21.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4285.300000011921,
+      "duration": 9.699999988079071
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4295,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4295.0999999940395,
+      "duration": 26.30000001192093
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4321.4000000059605,
+      "duration": 6.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4328.200000017881,
+      "duration": 32.79999998211861
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4361.200000017881,
+      "duration": 24.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4385.9000000059605,
+      "duration": 10.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4396.200000017881,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4396.200000017881,
+      "duration": 26
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4422.300000011921,
+      "duration": 7
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4429.300000011921,
+      "duration": 30.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4459.9000000059605,
+      "duration": 17.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4477.5,
+      "duration": 8.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4485.9000000059605,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4485.9000000059605,
+      "duration": 23.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4509.800000011921,
+      "duration": 6.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4516.800000011921,
+      "duration": 33.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4550.4000000059605,
+      "duration": 17.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4568,
+      "duration": 9.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4577.300000011921,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4577.4000000059605,
+      "duration": 27.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4604.9000000059605,
+      "duration": 6.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4611.800000011921,
+      "duration": 34.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4651.5,
+      "duration": 21.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4673.300000011921,
+      "duration": 10.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4683.9000000059605,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4683.9000000059605,
+      "duration": 25.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4709.800000011921,
+      "duration": 6.699999988079071
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4716.600000023842,
+      "duration": 34.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4755.600000023842,
+      "duration": 21.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4777.300000011921,
+      "duration": 9.800000011920929
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4787.100000023842,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4787.200000017881,
+      "duration": 31.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4818.800000011921,
+      "duration": 7.0999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4826,
+      "duration": 29.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4860.200000017881,
+      "duration": 22.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4882.700000017881,
+      "duration": 10.099999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4892.800000011921,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4892.9000000059605,
+      "duration": 26.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 4919.5,
+      "duration": 7.100000023841858
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 4926.600000023842,
+      "duration": 26.19999998807907
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 4957,
+      "duration": 21.200000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 4978.200000017881,
+      "duration": 8.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 4987,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 4987,
+      "duration": 23
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 5010,
+      "duration": 6.800000011920929
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 5016.9000000059605,
+      "duration": 27.099999994039536
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 5048.600000023842,
+      "duration": 17.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 5066.100000023842,
+      "duration": 9
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 5075.100000023842,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 5075.100000023842,
+      "duration": 24
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 5099.100000023842,
+      "duration": 6.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 5105.800000011921,
+      "duration": 24
+    },
+    {
+      "kind": "application",
+      "event": "recovery:schema",
+      "start": 5134,
+      "duration": 23.700000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:decode",
+      "start": 5157.700000017881,
+      "duration": 10.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "recovery:header",
+      "start": 5168.5,
+      "duration": 0.10000002384185791
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hashInput",
+      "start": 5168.600000023842,
+      "duration": 22.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:hash",
+      "start": 5191.100000023842,
+      "duration": 6.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "recovery:handles",
+      "start": 5197.9000000059605,
+      "duration": 27.200000017881393
+    },
+    {
+      "kind": "application",
+      "event": "recovery:model",
+      "start": 5229.4000000059605,
+      "duration": 102.5
+    },
+    {
+      "kind": "application",
+      "event": "recovery:bounded-restore",
+      "start": 4074.5,
+      "duration": 1293.4000000059605
+    },
+    {
+      "kind": "application",
+      "event": "recovery:final-validation-budget",
+      "start": 5367.9000000059605,
+      "duration": 50.30000001192093
+    }
+  ],
+  "mode": "recovery-profile",
+  "build": "production-workspace"
+}

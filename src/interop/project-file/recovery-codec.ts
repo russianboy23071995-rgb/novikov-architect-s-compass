@@ -7,7 +7,6 @@ import {
   type ImageAsset,
 } from "../../domain/elements/reference/model.ts";
 import { imageHeader } from "../images/import.ts";
-import { binaryBytes } from "../images/binary-bytes.ts";
 import { assertValidatedProjectSize, PROJECT_FILE_LIMIT } from "./size.ts";
 import type {
   RecoveryPayload as Payload,
@@ -29,9 +28,7 @@ export function verifyPayload(raw: unknown, probe: ReadProbe = {}): Payload {
   probe.measure?.("schema", performance.now() - started);
   const decodeStart = performance.now();
   const binary = atob(p.data);
-  const decoded = probe.legacy
-    ? Uint8Array.from(binary, (c) => c.charCodeAt(0))
-    : binaryBytes(binary);
+  const decoded = probe.legacy ? Uint8Array.from(binary, (c) => c.charCodeAt(0)) : binary;
   probe.measure?.("decode", performance.now() - decodeStart);
   const headerStart = performance.now();
   const header = imageHeader(decoded);

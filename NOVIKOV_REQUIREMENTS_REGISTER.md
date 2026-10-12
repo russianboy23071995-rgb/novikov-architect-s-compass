@@ -10748,3 +10748,11 @@ Abschlussprüfung. Kein Produktcode geändert. Standprüfung: Storage 558,1 ms, 
 Diagnosebuild bestanden, Export bytegleich. Nachweis ASSET_RECOVERY_PILOT.md und
 recovery-read-phases.json. Nächster Schritt: vorhandenen String-Headerleser im
 Recovery-Pfad nutzen, volle Bytekopie entfernen, vollständige Prüfgrenzen erhalten.
+
+### R26-01/02, K02/03, RC07 · Recovery-Header 12.10.2026 (PR295)
+verifyPayload nutzt vorhandenen String-Headerleser, ohne volle Bytekopie. Prüfgrenzen
+unverändert. 917 Tests inklusive Payload-Differentialvergleich und Recoverytests,
+Typecheck/Lint und beide Builds bestanden. Decode 369,2→116,9 ms im Einzelvergleich;
+Export bytegleich. Nachweis ASSET_RECOVERY_PILOT.md, recovery-header-no-copy.json.
+Nächster Einzelauftrag: wiederholte Payloadprüfung bei Handle-Erstellung bewerten,
+Unveränderlichkeit/Ownership sichern, noch keine neue Vertrauensabkürzung umsetzen.

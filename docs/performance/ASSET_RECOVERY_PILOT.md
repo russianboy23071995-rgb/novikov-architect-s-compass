@@ -1217,3 +1217,28 @@ Keine Konsolenfehler bei Standprüfung. Next: ausschließlich Recovery-Headerpr�
 von unnötiger Bytekopie befreien, Differentialtests für PNG/JPEG/Fehlerfälle und
 vollständige Recovery-/Integritäts-/Abbruchtests, danach gleiche Browsermessung.
 Kein Auslassen von Schema, Hash, Budgets, Checkpoints oder Handlevalidierung.
+
+## Recovery-Header ohne Bytekopie (12.10.2026, PR295)
+PR294 nach grüner CI gemergt. verifyPayload übergibt den dekodierten Binärstring
+direkt an den vorhandenen gemeinsamen imageHeader. Vollständige Bytearraykopie
+entfällt im normalen Pfad; expliziter legacy-Diagnosepfad bleibt als Vergleich.
+Schema, Hash, Metadatenvergleich, Budgets, Checkpoints und Handleprüfung unverändert.
+917 Tests bestanden, einschließlich neuer Payload-Differentialtests (PNG, JPEG
+SOF 192/193/194, jede Kürzung, Header-Mutationen, falsche Metadaten/MIME, ungültiges
+Base64 und unbekannte Felder). Bestehende Recovery-/Integritäts-/Abbruchtests grün.
+Benchmark-Typecheck, fokussiertes ESLint, Diagnosebuild und regulärer Build bestanden.
+
+[Gleicher Browser-Snapshot](recovery-header-no-copy.json): Decode 116,9 ms statt
+369,2 ms, Header unverändert 0,5 ms. Bounded restore 1293,4 statt 1572,9 ms.
+Andere Phasen schwanken: Handles 353,6 ms, Hashinput 307,3 ms, Schema 251,1 ms,
+Modell 102,5 ms. Verschachtelte Zeiten; Einzelvergleich, kein p95-Versprechen.
+Export (21) bytegleich zu (18)/(19)/(20), SHA256
+cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+Keine Konsolenfehler, keine Daten-/UI-/Formatänderung.
+
+Nächster Einzelauftrag: die Handle-Erstellung auf wiederholte Payloadprüfungen
+untersuchen. Bereits geprüfte Daten, Besitz/Unveränderlichkeit und Trust-Grenze
+konkret nachvollziehen; nur bei belegter sicherer Wiederverwendung eine begrenzte
+Optimierung vorschlagen. Keine öffentlichen ungeprüften Handle-Fabriken und keine
+entfallende Eingangsvalidierung. Zunächst Diagnose/Architekturprüfung, keine weitere
+Produktoptimierung in diesem Folgeauftrag.
