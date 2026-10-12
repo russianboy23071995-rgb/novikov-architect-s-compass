@@ -21,8 +21,8 @@ export async function prepareProjectOpen(file: ProjectFileSource) {
 
 /** A browser download request cannot confirm durable storage or mark a project saved. */
 export function requestProjectDownload(project: Project, download: DownloadPort) {
+  // serializeProject already validates the model and enforces the exact UTF-8 budget.
   const text = serializeProject(project);
-  assertProjectFileSize(text);
   download(text, "novikov-project.json");
   return { status: "download-requested" as const };
 }

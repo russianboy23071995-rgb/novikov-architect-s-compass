@@ -10671,3 +10671,7 @@ Grundriss wird erst mit gemessener Canvas-Größe aufgebaut; unveränderte Resiz
 
 ### R26-01/02, K02/03, RC07 · Produktions-Workspace 12.10.2026
 Produktiver React-/Workspace-Client auf isoliertem Ursprung, ohne Profiler/Diagnosetransforms. Vollständige Undo-/Redo-/Recovery-Dateivergleiche und gespeichertes Abbild bestanden. Tatsächliche UI-Tasks bis 2,635 s bei Übernahme und 1,142–1,276 s beim Export. Keine allgemeine Performancefreigabe, kein Cloudflare-/SSR-Nachweis. Nächster Einzelauftrag laut Masterplan: Exportphasen zuordnen.
+
+
+### R26-01/02 · Exportgrößenprüfung 12.10.2026
+Redundante zweite assertProjectFileSize nach serializeProject entfernt. Vollständige Modellvalidierung und exakte UTF-8-Grenze bleiben im Serializer. Vier Exporte byteidentisch, 908 Tests bestanden. Zwei Vorher-/Nachherläufe: Tasks 974/1126 → 710/620 ms. Diagnose nur per explizitem export-profile-Build. Restliche Kopierkosten und Ladepause offen; nächste einzelne Aufgabe im Masterplan.
