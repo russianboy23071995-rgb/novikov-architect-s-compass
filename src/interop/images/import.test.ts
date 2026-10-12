@@ -1,3 +1,4 @@
+import { binaryBytes } from "./binary-bytes.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { imageHeader, checkedImageUrl } from "./import.ts";
@@ -162,4 +163,72 @@ test("a result larger than the entire budget is checked but never retained", (t)
   assert.equal(checkedImageUrl(asset), expected);
   assert.equal(checkedImageUrl({ ...asset }), expected);
   assert.equal(decode.mock.callCount(), 2);
+});
+
+test("binary conversion preserves every byte, deterministic random payloads and large decoded images", () => {
+  let seed = 255;
+  const next = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0);
+  const all = String.fromCharCode(...Array.from({ length: 256 }, (_, i) => i));
+  const values = ["", all, all.repeat(32768)];
+  for (let n = 0; n < 100; n++)
+    values.push(
+      Buffer.from(Uint8Array.from({ length: next() % 4096 }, () => next() >>> 24)).toString(
+        "latin1",
+      ),
+    );
+  for (const binary of values) {
+    const expected = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    assert.deepEqual(binaryBytes(binary), expected);
+  }
+});
+
+test("optimized URL path matches previous PNG/JPEG/header failure contract", () => {
+  const previous = (asset: Parameters<typeof checkedImageUrl>[0]) => {
+    try {
+      const bytes = Uint8Array.from(atob(asset.data), (c) => c.charCodeAt(0));
+      const header = imageHeader(bytes);
+      if (
+        header.width !== asset.pixelWidth ||
+        header.height !== asset.pixelHeight ||
+        header.mimeType !== asset.mimeType
+      )
+        return undefined;
+      return `data:${asset.mimeType};base64,${asset.data}`;
+    } catch {
+      return undefined;
+    }
+  };
+  const jpeg = new Uint8Array([
+    255, 216, 255, 224, 0, 4, 0, 0, 255, 192, 0, 8, 8, 0, 100, 0, 200, 0,
+  ]);
+  for (const bytes of [
+    png(),
+    jpeg,
+    new Uint8Array(),
+    new Uint8Array([255, 216, 255]),
+    new TextEncoder().encode("<svg/>"),
+  ]) {
+    for (const mimeType of ["image/png", "image/jpeg"] as const)
+      for (const pixelWidth of [200, 201, 0]) {
+        const a = {
+          id: "diff",
+          mimeType,
+          pixelWidth,
+          pixelHeight: 100,
+          data: Buffer.from(bytes).toString("base64"),
+        };
+        assert.equal(checkedImageUrl(a), previous(a));
+        assert.equal(checkedImageUrl({ ...a, id: "copy" }), previous(a));
+      }
+  }
+  for (const data of ["!bad!", "====", "A", "😀", Buffer.from(png()).toString("base64") + "\n"]) {
+    const a = {
+      id: "invalid",
+      mimeType: "image/png" as const,
+      pixelWidth: 200,
+      pixelHeight: 100,
+      data,
+    };
+    assert.equal(checkedImageUrl(a), previous(a));
+  }
 });

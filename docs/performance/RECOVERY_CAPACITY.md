@@ -1,5 +1,28 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Bild-Bytekonvertierung vom 12.10.2026
+
+Messstand `646ad6b` (Produktionsänderung 01f8d62, main-Basis 350b64c). `binaryBytes` ersetzt ausschließlich die Iterator-Konvertierung in checkImageUrl durch eine vorallokierte Bytearray-Schleife. Eingabe ist der Latin-1-Binärstring von atob, keine allgemeine Unicode-Zeichenfolge. atob, Header-/Metadatenprüfung, URL-Erzeugung, Inhaltscache und seine Budgets bleiben unverändert. Dateiformat und Grenzen werden nicht gelockert.
+
+878 Tests bestanden: zusätzlich byteidentischer Vergleich aller 256 Werte, leerer Eingabe, 100 deterministischer Zufallsstrings und eines 8-MiB-Binärstrings; PNG/JPEG- und ungültige Base64-/Header-/Metadatenfälle gegen vorherigen URL-Pfad. Vorhandene Tests prüfen Cache-Hits, Mutation, LRU und Speicherbudget weiterhin. Beide Typechecks, Build und Lint (0 Fehler/6 bestehende Warnungen) bestanden.
+
+Gleiche Diagnose und Fixture wie unten; ausschließlich Instrumentierungsstelle an neuen Funktionsaufruf angepasst. Kleines Kontrollprojekt und große Datei jeweils erster Lauf + fünf warme Wiederholungen. Zwölf Referenzanzahlprüfungen bestanden; abschließender regulärer Projektexport vollständig JSON-identisch zur ursprünglichen Datei. Keine Konsolenwarnungen/-fehler. [Neue Rohdaten](image-byte-conversion-2026-10-12.json), [Vorgänger](load-phases-detail-2026-10-12.json). Screenshot lokal outputs/image-byte-conversion.png.
+
+| Beobachtung | Vorher ms | Nachher ms |
+| --- | ---: | ---: |
+| Erstlauf Bytekonvertierung | 559,6 | 19,0 |
+| Erstlauf atob | 9,8 | 9,6 |
+| Erstlauf checkImageUrl gesamt | 569,7 | 28,9 |
+| Erstlauf editingReducer inkl. History | 53,9 | 50,8 |
+| Erstlauf Bestätigung bis zwei Frames | 774,9 | 201,2 |
+| Erstlauf längste Task | 754 | 183 |
+| Warme Bestätigung, Median von fünf Läufen | 169,4 | 176,8 |
+
+Der Gewinn liegt erwartungsgemäß im Cache-Miss; warme Wiederholungen profitieren schon zuvor vom vorhandenen Cache. Die leicht unterschiedlichen warmen Mediane sind keine belastbare Regression/Beschleunigung. Entwicklungsserver, gleicher Rechner/Tag, keine randomisierten A/B-Läufe, kein frischer OS-/Browserprozess und keine kontrollierte Hintergrundlast. Keine isolierte GPU-/Decoder-/Commitmessung; verschachtelte Zeiten nicht addieren. Hauptthread-Pausen um 0,2 Sekunden bleiben möglich. Der konkrete Engpass ist damit stark reduziert, nicht die allgemeine Kapazität freigegeben.
+
+Praktische Abnahme: großes Referenzprojekt öffnen, Darstellung prüfen, speichern und wieder öffnen; Wand ändern, Undo/Redo sowie Wiederaufnahme wie im bestehenden Ablauf testen. Als nächster kleiner Auftrag den weiter sichtbaren Startangebot-Hinweis ohne Hot-Reload reproduzieren und gegebenenfalls dessen Lebenszyklus korrigieren, bevor weitere Architekturmaßnahmen erwogen werden.
+
+
 ## Aufschlüsselung der Ladebestätigung (12.10.2026)
 
 Produktionsbasis `f50c4bf`, Diagnosezweig `bench/workspace-load-phases`. Eigenständige Vite-Konfiguration `benchmarks/load-phase.config.ts` instrumentiert ausschließlich im Serve-Modus echte Funktionen mit transparenten try/finally-Zeitmessungen. Produktionsdateien und Verhalten unverändert. Transform verweigert veraltete Quelltextstellen. Regulärer CadWorkspace mit React-Profiler auf isoliertem Origin 8083; vorhandene Nutzer-Recovery wird nicht berührt.

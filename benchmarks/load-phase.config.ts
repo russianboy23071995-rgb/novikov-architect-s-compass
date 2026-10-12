@@ -26,8 +26,8 @@ const plugin: Plugin = {
           'const binary = trace("atob", () => atob(asset.data));',
         ],
         [
-          "const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));",
-          'const bytes = trace("byte-conversion", () => Uint8Array.from(binary, (c) => c.charCodeAt(0)));',
+          "const bytes = binaryBytes(binary);",
+          'const bytes = trace("byte-conversion", () => binaryBytes(binary));',
         ],
       ]) {
         if (code.split(before!).length !== 2)
