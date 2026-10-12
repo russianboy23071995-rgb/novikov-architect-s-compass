@@ -17,13 +17,15 @@ export function workspaceLoadInstrumentation(): Plugin {
           map: null,
         };
       }
-      const name = path.endsWith("/src/components/cad/ProjectNavigator.tsx")
-        ? "ProjectNavigator"
-        : path.endsWith("/src/components/cad/BimPlan.tsx")
-          ? "BimPlan"
-          : path.endsWith("/src/application/direct-edit/controller.ts")
-            ? "editingReducer"
-            : null;
+      const name = path.endsWith("/src/components/cad/PlanSceneRun.tsx")
+        ? "PlanSceneContent"
+        : path.endsWith("/src/components/cad/ProjectNavigator.tsx")
+          ? "ProjectNavigator"
+          : path.endsWith("/src/components/cad/BimPlan.tsx")
+            ? "BimPlan"
+            : path.endsWith("/src/application/direct-edit/controller.ts")
+              ? "editingReducer"
+              : null;
       if (!name) return;
       const marker = `export function ${name}(`;
       if (source.split(marker).length !== 2)
@@ -36,7 +38,7 @@ export function workspaceLoadInstrumentation(): Plugin {
         code =
           'import { Profiler as LoadProfiler } from "react";\nimport { profileWorkspace } from "/benchmarks/workspace-load-trace.ts";\n' +
           code;
-        code += `\nexport function ${name}(props: Parameters<typeof measured${name}>[0]) { const Content = measured${name}; return <LoadProfiler id="${name}" onRender={profileWorkspace}><Content {...props} /></LoadProfiler>; }`;
+        code += `\nexport function ${name}(props: Parameters<typeof measured${name}>[0]) { const Content = measured${name}; return <LoadProfiler id={${name === "PlanSceneContent" ? "`plan-run:${props.kind}`" : JSON.stringify(name)}} onRender={profileWorkspace}><Content {...props} /></LoadProfiler>; }`;
       }
       return { code, map: null };
     },

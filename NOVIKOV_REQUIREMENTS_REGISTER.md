@@ -10659,3 +10659,7 @@ Einzelelemente werden nicht mehr im Navigator aufgelistet. Die Gebäudestruktur 
 
 ### R26-01/02, K02/03 · Bildcache 12.10.2026
 Unveränderliche, intern registrierte Asset-Handles erhalten schwach gebundene geprüfte Darstellungs-URLs. Fremde/frozen/veränderbare Objekte behalten den begrenzten Inhaltscache. Erste Bildprüfung wird nicht ausgelassen; falsche Header/Metadaten bleiben abgewiesen. 908 Tests und identischer vollständiger Dateirundlauf; 24 → 12 Dekodierungen in der 100-MiB-Fixture. Gesamtbedienung weiterhin nicht als flüssig freigegeben.
+
+
+### K02/03 · Grundriss-Aufbau 12.10.2026
+Zwei Detailprofile auf Basis des noch offenen PR277: 10.000 Linien beim Mount 399–528 ms und unmittelbar danach erneut 187–245 ms. Initiale Ersatzgröße und folgende reale Canvas-Messung sind ein konkreter Ursachenkandidat aus dem Code, noch kein kausaler A/B-Nachweis. Nächster Einzelpilot im Masterplan stabilisiert die initiale Kamera; gespeicherte Abbilder und Resize müssen erhalten bleiben. Keine isolierten Paintkosten aus rAF-Zeitpunkten ableiten.
