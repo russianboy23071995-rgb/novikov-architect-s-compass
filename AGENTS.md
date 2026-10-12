@@ -41,3 +41,5 @@
 
 - CAD windows use the shared FloatingPanel shell, modeled on Ebenen: draggable, non-modal, no background dimming, Glass Flow styling. Keep window-specific validation/actions separate; do not duplicate drag or overlay implementations.
 
+
+- Presentation-only tasks (symbols, pictograms, spacing, look-and-feel) change presentation code and nothing else: keep event handlers, state management, application/domain interfaces, model and snapping logic, and existing data untouched — introduce no substitute data and no new model logic. Why: UI work and model work happen in parallel from separate tools, and this boundary is what keeps both branches mergeable and the validated model logic intact.
