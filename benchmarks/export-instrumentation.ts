@@ -22,6 +22,12 @@ export function exportInstrumentation(): Plugin {
             'return measureExport("stringify", () => JSON.stringify(checked));',
           ],
         ];
+      if (path.endsWith("/src/application/project-files/operations.ts")) {
+        const check = source.includes("assertProjectFileSize(serializeProject(project));")
+          ? "assertProjectFileSize(serializeProject(project))"
+          : "assertValidatedProjectSize(validateProject(project))";
+        pairs = [[check + ";", `measureExport("open-final-check", () => ${check});`]];
+      }
       if (path.endsWith("/src/interop/project-file/size.ts"))
         pairs = [
           [

@@ -847,3 +847,38 @@ Performancegarantie. Blob/URL bleibt mit 264–276 ms ein wesentlicher Restantei
 
 Nächster begrenzter Auftrag: erneute Vollserialisierung allein zur Größenprüfung
 in prepareProjectOpen untersuchen und durch denselben geprüften Baustein ersetzen.
+
+
+## Dateivorbereitung ohne Vollserialisierung (12.10.2026)
+
+prepareProjectOpen verwendet nach readProjectFile und ensureDocumentFolder weiterhin
+vollständige validateProject-Prüfung, danach den gemeinsamen exakten Bytezähler.
+Eine vollständige JSON-Ausgabe nur für diese letzte Größenprüfung entfällt.
+Vorlesegrenze, tatsächliche UTF-8-Eingangsprüfung, Migration, Ordnerergänzung und
+Veröffentlichung erst nach Bestätigung bleiben unverändert.
+
+911 Tests bestanden, Benchmark-Typecheck, gezieltes ESLint sowie regulärer Build und
+instrumentierter Produktions-Workspace-Build bestanden. Neue Regression: Unicode,
+Escaping und interne Zeilenumbrüche bleiben erhalten; eine Eingabe exakt bei 128 MiB
+wird abgewiesen, wenn der ergänzte Standardordner das Ausgabebudget überschreitet.
+Der erste Testentwurf erwartete einen abschließenden Zeilenumbruch im Ebenennamen;
+die bestehende Normalisierung entfernt ihn korrekt. Die Fixture prüft nun einen
+internen Zeilenumbruch, ohne diese Regel zu verändern.
+
+Gleiche 101,96-MiB-Datei mit einer Wand, einem Fenster, 10000 Linien, zwölf Bildreferenzen
+und gespeichertem Abbild im isolierten Produktions-Workspace (Port 8085).
+[Rohdaten vorher](open-budget-before.json), [nachher](open-budget-after.json):
+open-final-check 400,5 → 63 ms; zugehörige gesamte Long Task 1319 → 1187 ms.
+Ein Vorher-/Nachherlauf, keine statistische Performancegarantie. Wartezeit des
+Dateidialogs ist keine Ladezeit. Ein-/Ausgabedownloads SHA-256 identisch:
+5AD624428494AFAD8A4152125077508A6B4ADF968D23DE95477168FA9D8C552F.
+Ladebestätigung zeigte alle Bauteilzahlen; nach Bestätigung 10014 Elemente;
+erneute Vorbereitung abgebrochen, Anzeige blieb bei 10014. Keine Konsolenfehler.
+Tests sichern den unveränderten Vorbereitungs-/Historyvertrag zusätzlich ab.
+Dies ist ein echter React-Produktionsclient mit Browseradaptern, kein Nachweis für
+Cloudflare-/SSR-Auslieferung, GPU-Grenzen oder allgemeine Projektkapazität.
+
+Restbefund: readProjectFile und deserializeProject prüfen denselben Text nacheinander
+per UTF-8-Encoding (nachher 278,7 und 270,1 ms). Nächster Einzelauftrag: diese doppelte
+Eingangsgrößenprüfung an einer gemeinsamen sicheren Grenze zusammenführen, ohne
+direkte Deserializer-Aufrufe, Größenfehlermeldung oder Migration zu schwächen.

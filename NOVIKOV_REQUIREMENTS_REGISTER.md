@@ -10679,3 +10679,7 @@ Redundante zweite assertProjectFileSize nach serializeProject entfernt. Vollstä
 
 ### R26-01/02 · Serializer-Budget 12.10.2026
 Nach vollständiger Validierung zählt serializeProject das exakte JSON-UTF-8-Budget mit dem vorhandenen gemeinsamen Baustein, ohne eine vollständige Payload-Encodingkopie. Dateiinhalt unverändert. Exakt 128 MiB erlaubt; zusätzliche Unicode-Bytes abgewiesen. 910 Tests, zwei byteidentische Browserexporte; Größenphase 11–16 ms. Nächster Einzelauftrag laut Masterplan: gleicher Baustein bei Dateivorbereitung, ohne Prüf-/Abbruchvertrag zu schwächen.
+
+
+### R26-01/02 · Dateivorbereitungsbudget 12.10.2026
+Gemeinsamer exakter Bytezähler nach vollständiger Validierung und Ordnerergänzung ersetzt die abschließende Vollserialisierung in prepareProjectOpen. 911 Tests, Builds/Typprüfung/Lint bestanden; 101,96-MiB-Browserdatei byteidentisch nach Laden exportiert. Abschließende Prüfung im Einzelvergleich 400,5 → 63 ms; gesamte Vorbereitung weiterhin mit 1187-ms-Task. Abbruch/Bestätigung erhalten. Kein Limit-/Formatwechsel. Nächster begrenzter Auftrag im Masterplan: doppelte Eingangsgrößenprüfung zusammenführen. Rohdaten und Einschränkungen in ASSET_RECOVERY_PILOT.md.
