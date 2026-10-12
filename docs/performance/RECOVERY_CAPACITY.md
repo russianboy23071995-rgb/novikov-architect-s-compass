@@ -1,5 +1,9 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Startangebot – frischer Browserlauf
+
+**Startangebot-Abnahme (12.10.2026, test/recovery-startup-lifecycle):** PR #256 mit erfolgreicher CI und ausdrücklicher Freigabe zusammengeführt (main bc852a3). Frischer Browserlauf auf isoliertem Test-Origin 8082, ohne Quelltextänderung/Hot-Reload während der Prüfung: Startangebot vorhanden; „Stände auswählen“ und „Weiterarbeiten“ blenden es aus. Recovery-Abbruch verändert das Modell nicht; bestätigte Recovery lädt den gespeicherten 4-m-Stand samt Bildreferenz ohne Resthinweis. Reguläres Dateiladen: Abbruch erhält Startangebot und 3-m-Ausgangsmodell ohne Undo-Eintrag; Bestätigung blendet das Angebot aus. Gleiche Projekt-ID project-1 ebenfalls geprüft: Laden, Undo und Redo ändern die Bildreferenz wie erwartet, ohne erneutes Startangebot. Keine Konsolenwarnungen/-fehler. 878 Tests bestanden, einschließlich bestehender verzögerter Offer-/Kontext-/Same-ID-Prüfungen. Produktionscode unverändert; früherer Resthinweis nicht reproduziert, Hot-Reload als Ursache nicht bewiesen. Lokaler Screenshot outputs/recovery-startup-lifecycle.png. Keine Snapshotlöschung und keine Änderung der Nutzer-Recovery auf 8080.
+
 ## Bild-Bytekonvertierung vom 12.10.2026
 
 Messstand `646ad6b` (Produktionsänderung 01f8d62, main-Basis 350b64c). `binaryBytes` ersetzt ausschließlich die Iterator-Konvertierung in checkImageUrl durch eine vorallokierte Bytearray-Schleife. Eingabe ist der Latin-1-Binärstring von atob, keine allgemeine Unicode-Zeichenfolge. atob, Header-/Metadatenprüfung, URL-Erzeugung, Inhaltscache und seine Budgets bleiben unverändert. Dateiformat und Grenzen werden nicht gelockert.
