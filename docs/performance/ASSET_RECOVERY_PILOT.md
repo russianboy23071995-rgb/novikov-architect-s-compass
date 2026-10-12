@@ -636,3 +636,38 @@ der langen UI-Aufgabe wird im nächsten begrenzten Auftrag zugeordnet, bevor Än
 an Renderer oder Navigator vorgenommen werden. Vorherige 905 Tests/grüne CI gehören zu
 PR273; hier keine erneute vollständige Testsuite für den reinen Diagnose-/Dokuschritt.
 Benchmark-Typecheck und fokussierter Lint der neuen Fixture-Seite bestanden.
+
+
+## Workspace-Ladeprofil 12.10.2026
+
+Nur Diagnose, keine Produktänderung. Dieselbe capacity-100.json (106.911.015 Byte,
+10.000 Linien, zwölf PNGs) zweimal über den echten Datei-Dialog auf Port 8082 geladen.
+React-Profiler um Workspace, BimPlan und Navigator, synchroner Timer um editingReducer;
+zweiter Lauf zusätzlich Bild-URL-Prüfung. Rohdaten: [Lauf 1](workspace-load-profile-1.json),
+[Lauf 2](workspace-load-profile-2.json).
+
+| Abschnitt | Lauf 1 | Lauf 2 |
+|---|---:|---:|
+| Application load-project | 457 ms | 369 ms |
+| Grundriss erster Render | 1.272 ms | 1.165 ms |
+| Navigator erster Render | 987 ms | 821 ms |
+| Grundriss Folge-Render | 592 ms | 431 ms |
+| Navigator Folge-Render | 439 ms | 379 ms |
+
+Im zweiten Lauf: 24 vollständige Bild-URL-Prüfungen für zwölf Assets, zusammen 517 ms.
+Der begrenzte URL-Cache kann diese Fixture nicht halten. Dies ist ein zusätzlicher
+Engpass, aber erklärt die gesamte Pause nicht. Der Navigator erstellt über 10.000
+Zeilen gleichzeitig; diese Arbeit fällt auch im unmittelbaren Folge-Render an.
+
+Grenzen: Entwicklungsbuild mit Profiler, zwei Beobachtungen, keine statistische
+Produktionsgarantie. React actualDuration misst Renderarbeit, nicht die gesamte
+DOM-Commit-/Layout-/Paintzeit; die Werte sind verschachtelt und dürfen nicht mit
+Workspace-Dauer addiert werden. Long-Tasks enthalten weitere Browserarbeit.
+Während der Übernahme wurden keine vollständigen DOM-/Accessibility-Abfragen
+angefordert; der Klick selbst erreichte dennoch das Browsersteuerungs-Zeitlimit.
+Die Diagnose hat Modellvalidierung, Undo und Persistenz nicht ersetzt.
+
+Nächster begrenzter Auftrag: Gebäudestruktur im Navigator mit begrenzter Zahl
+sichtbarer Zeilen darstellen (Windowing), unter Erhalt von Auf-/Zuklappen,
+Einzel-/Mehrfachauswahl und Tastaturzugriff. Gleiche Fixture vorher/nachher messen;
+Grundriss und Bildcache bleiben getrennte Folgebefunde. Kein Rendererwechsel.
