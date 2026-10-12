@@ -10772,3 +10772,10 @@ Typecheck/Lint und beide Builds erfolgreich. Browser-Handles 353,6→0,8 ms, Res
 1293,4→846,6 ms im Einzelvergleich; bytegleicher Export, keine Konsolenfehler.
 Nachweis ASSET_RECOVERY_PILOT.md, recovery-handle-reuse.json. Nächster begrenzter
 Auftrag: Hashinput-Zeit und mögliche Zwischenkopie diagnostisch prüfen.
+
+### R26-01/02, K02/03, RC07 · Hashinput-Zuordnung 12.10.2026 (PR298)
+Diagnose: JSON 76,6 ms, UTF-8 259,3 ms, zusammen 335,9 ms (Einzellauf).
+Produkt unverändert; Typecheck/Lint/Diagnosebuild grün, Recovery-Export bytegleich.
+Rohdaten recovery-hash-input.json, Vertrag ASSET_RECOVERY_PILOT.md. Nächster Pilot:
+ein Hash-Bytepuffer nur für registrierte Handles, identische Bytes/Keys belegen,
+unregistrierten Fallback und sämtliche Integritätsgrenzen erhalten.

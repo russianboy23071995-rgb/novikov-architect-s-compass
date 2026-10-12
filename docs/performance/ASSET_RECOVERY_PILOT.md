@@ -1340,3 +1340,36 @@ Nächster Einzelauftrag: Hashinput-Vorbereitung in JSON-Serialisierung und UTF-8
 Encoding aufteilen; anhand identischer Bytes/Hashes beurteilen, ob eine volle
 Zwischenkopie vermeidbar ist. Kein neuer Hashalgorithmus oder Schlüsselformat,
 keine Optimierung auf Kosten der Integritätsprüfung; zunächst Diagnose.
+
+## Hashinput getrennt (12.10.2026, PR298)
+PR297 nach grüner CI gemergt. Diagnosebuild teilt bestehenden hashInput in hash-json
+und hash-utf8 auf. Keine Produktänderung, gleicher Snapshot, alle Integritätsprüfungen.
+[Rohdaten](recovery-hash-input.json): zwölf Payloads, JSON 76,6 ms, UTF-8 259,3 ms,
+zusammen 335,9 ms; SHA-256 separat 85,8 ms. Bounded restore 993,7 ms. Werte aus einem
+Lauf, verschachtelte Phasen nicht addieren; der Gesamtwert schwankt gegenüber PR297.
+Keine isolierte Zuordnung zu Allokation, String-Flattening oder Garbage Collection
+innerhalb TextEncoder, keine neue Beschleunigung behauptet.
+Benchmark-Typecheck, fokussiertes ESLint und Diagnosebuild bestanden. Export (23)
+bytegleich zum Referenzstand (18), Hash
+cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398;
+keine Konsolenfehler. Letzte volle Produktsuite PR297: 920 Tests, unverändert.
+
+Ein ganzer JSON-Zwischenstring ist bei runtime-registrierten ImageAsset-Handles
+vermeidbar: Ihre unveränderlichen Daten sind kanonisches ASCII-Base64 und benötigen
+keine JSON-Escapes. MIME/Integer-Metadaten mit dem bisherigen JSON.stringify erzeugen,
+dann Präfix, Daten und abschließende Anführungszeichen/Klammer mit encodeInto in
+einen exakt dimensionierten Uint8Array-Puffer schreiben. Der zusammenhängende Puffer
+für WebCrypto bleibt nötig. Dies ist eine zu prüfende Optimierung, kein bereits
+vermessener Gewinn. Keine JS-Zeichenkopierschleife und kein neuer Hashalgorithmus.
+
+Nächster begrenzter Pilot: schnellen Hashinput nur an exakte registrierte Handle-
+Identität knüpfen; unregistrierte Payloads behalten den bisherigen JSON-/UTF-8-Pfad.
+Keine Vertrauensannahme allein aufgrund Typcast, frozen, ID, Hash oder ASCII-Lookalike.
+Differentialtests müssen Bytes UND SHA-256 gegen die bisherige Eingabe vergleichen:
+PNG/JPEG, Dimensionengrenzen, Paddingvarianten, kleine und große gültige Daten,
+abweichende IDs (nicht Teil des Keys), normale Payloads, Unicode/Quotes/Backslashes,
+Getter/Proxy und ungültige Lookalikes im unveränderten Fallback. Prüfen, dass echte
+Handles den Fastpath nutzen. Recoveryfehler, Budgets und Abbruchgrenzen unverändert.
+Voller Test-/Buildlauf und gleicher Snapshot im Browser; bei ausbleibendem Gewinn
+keine zusätzliche Komplexität übernehmen. Keine Ausweitung auf Schreibpfade durch
+neue Vertrauensregister in diesem Pilot.

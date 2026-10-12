@@ -18,6 +18,10 @@ export function recoveryReadInstrumentation(): Plugin {
       } else if (path.endsWith("/src/interop/project-file/recovery-codec.ts")) {
         edits = [
           [
+            "const encoded = new TextEncoder().encode(\n    JSON.stringify([p.mimeType, p.pixelWidth, p.pixelHeight, p.data]),\n  );",
+            'const hashJson = recoverySync("hash-json", () => JSON.stringify([p.mimeType, p.pixelWidth, p.pixelHeight, p.data]));\n  const encoded = recoverySync("hash-utf8", () => new TextEncoder().encode(hashJson));',
+          ],
+          [
             "return restoreCheckedSnapshot(doc, control);",
             "return restoreCheckedSnapshot(doc, { ...control, measure: (phase, ms) => { recoveryMeasure(phase, ms); control.measure?.(phase, ms); } });",
           ],
