@@ -204,3 +204,35 @@ test("aggregate UTF-8 boundary is inclusive and individual asset budget stays in
     }),
   );
 });
+
+test("open preparation preserves Unicode and rejects growth beyond budget from the default folder", async () => {
+  const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
+  const { validatedProjectByteLength } = await import("../../interop/project-file/size.ts");
+  const small = createExampleProject();
+  small.layers[0]!.name = 'ä😀"\\\nEnde';
+  delete small.documentFolders;
+  const prepared = await prepareProjectOpen(file(JSON.stringify(small)));
+  assert.equal(prepared.project.layers[0]!.name, small.layers[0]!.name);
+  assert.ok(prepared.project.documentFolders?.some((f) => f.name === "Abbildsammlung"));
+  const p = createExampleProject();
+  delete p.documentFolders;
+  const payload = "A".repeat(10 * 1024 * 1024);
+  p.assets = Array.from({ length: 13 }, (_, i) =>
+    createImageAssetHandle({
+      id: `budget-${i}`,
+      mimeType: "image/png",
+      pixelWidth: 1,
+      pixelHeight: 1,
+      data: i < 12 ? payload : "AAAA",
+    }),
+  );
+  const remaining = PROJECT_FILE_LIMIT - validatedProjectByteLength(p);
+  p.assets[12] = createImageAssetHandle({
+    ...p.assets[12]!,
+    data: "A".repeat(4 + Math.floor(remaining / 4) * 4),
+  });
+  p.id += "x".repeat(remaining % 4);
+  const raw = JSON.stringify(p);
+  assert.equal(new TextEncoder().encode(raw).length, PROJECT_FILE_LIMIT);
+  await assert.rejects(prepareProjectOpen(file(raw)), /128 MiB/);
+});

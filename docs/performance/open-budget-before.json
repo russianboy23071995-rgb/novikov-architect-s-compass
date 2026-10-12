@@ -1,0 +1,75 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 7117.0999999940395,
+      "label": "Open project"
+    },
+    {
+      "at": 171101.59999999404,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 83.39999997615814,
+      "duration": 61
+    },
+    {
+      "start": 146.39999997615814,
+      "duration": 153
+    },
+    {
+      "start": 10506.899999976158,
+      "duration": 1319
+    }
+  ],
+  "exportPhases": [
+    {
+      "phase": "utf8-size",
+      "start": 155.19999998807907,
+      "duration": 0.4000000059604645
+    },
+    {
+      "phase": "utf8-size",
+      "start": 275.19999998807907,
+      "duration": 0
+    },
+    {
+      "phase": "utf8-size",
+      "start": 10588.699999988079,
+      "duration": 225.30000001192093
+    },
+    {
+      "phase": "utf8-size",
+      "start": 10814.09999999404,
+      "duration": 233.19999998807907
+    },
+    {
+      "phase": "validate",
+      "start": 11425.899999976158,
+      "duration": 41.80000001192093
+    },
+    {
+      "phase": "validated-size",
+      "start": 11467.799999982119,
+      "duration": 19.400000005960464
+    },
+    {
+      "phase": "stringify",
+      "start": 11487.199999988079,
+      "duration": 73.19999998807907
+    },
+    {
+      "phase": "utf8-size",
+      "start": 11560.399999976158,
+      "duration": 266
+    },
+    {
+      "phase": "open-final-check",
+      "start": 11425.899999976158,
+      "duration": 400.5
+    }
+  ],
+  "build": "production-workspace"
+}

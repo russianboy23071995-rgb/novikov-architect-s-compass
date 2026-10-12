@@ -1,8 +1,8 @@
-import type { Project } from "../../domain/project/schema.ts";
+import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import {
-  assertProjectFileSize,
+  assertValidatedProjectSize,
   PROJECT_FILE_LIMIT,
   PROJECT_FILE_SIZE_ERROR,
 } from "../../interop/project-file/size.ts";
@@ -15,7 +15,7 @@ export type DownloadPort = (text: string, filename: string) => void;
 export async function prepareProjectOpen(file: ProjectFileSource) {
   if (file.size > PROJECT_FILE_LIMIT) throw new Error(PROJECT_FILE_SIZE_ERROR);
   const project = ensureDocumentFolder(readProjectFile(await file.text()));
-  assertProjectFileSize(serializeProject(project));
+  assertValidatedProjectSize(validateProject(project));
   return { name: file.name, project };
 }
 
