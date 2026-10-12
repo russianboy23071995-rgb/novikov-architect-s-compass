@@ -101,7 +101,9 @@ export function CadViewport({
         width: Math.max(1, bounds.width),
         height: Math.max(1, bounds.height),
       };
-      setSize(next);
+      setSize((previous) =>
+        previous.width === next.width && previous.height === next.height ? previous : next,
+      );
       setPlanCamera(
         (previous) =>
           previous ??
@@ -120,8 +122,10 @@ export function CadViewport({
   }, []);
   const plan = planCamera ?? fitPlan(initialBounds.current, size);
   useEffect(() => {
-    if (active) onPlanCapture?.(is3D ? null : capturePlanFraming(plan, size));
-  }, [active, is3D, onPlanCapture, plan, size]);
+    // Never publish a framing based on the temporary pre-measurement size.
+    if (active && (is3D || planCamera))
+      onPlanCapture?.(is3D ? null : capturePlanFraming(plan, size));
+  }, [active, is3D, onPlanCapture, plan, planCamera, size]);
   const bar = planScaleBar(plan.pixelsPerMetre);
   const fit = () => {
     if (is3D) setCamera((value) => ({ ...value, zoom: 1, panX: 0, panY: 0 }));
@@ -201,7 +205,7 @@ export function CadViewport({
             pan={pan}
             onSelect={model.onSelect}
           />
-        ) : (
+        ) : planCamera ? (
           <BimPlan
             {...model}
             referenceSelection={active ? model.referenceSelection : undefined}
@@ -213,7 +217,7 @@ export function CadViewport({
             pan={planPan}
             grid={grid}
           />
-        )}
+        ) : null}
       </div>
       <p className="pointer-events-none absolute left-3 top-12 text-[11px] text-muted-foreground">
         {model.drawing
