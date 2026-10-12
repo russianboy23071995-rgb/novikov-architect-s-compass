@@ -8,6 +8,7 @@ import {
   type Document,
   type Manifest,
   type Payload,
+  type ReadProbe,
 } from "./asset-contract.ts";
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length;
 export type Head = { revision: string; current: Manifest; previous?: Manifest };
@@ -122,7 +123,9 @@ export function createAssetRecoveryStore(db: IDBDatabase) {
     async read(
       projectId: string,
       previous = false,
+      probe: ReadProbe = {},
     ): Promise<{ project: Project; revision: string }> {
+      const readStart = performance.now();
       const snapshot = await new Promise<{
         model: Manifest;
         blobs: Record<string, Payload>;
@@ -155,12 +158,16 @@ export function createAssetRecoveryStore(db: IDBDatabase) {
           }
         };
       });
+      probe.measure?.("indexedDB", performance.now() - readStart);
       for (const [key, raw] of Object.entries(snapshot.blobs)) {
-        const payload = verifyPayload(raw);
-        if ((await payloadKey(payload)) !== key) throw new Error("Asset integrity mismatch");
+        const payload = verifyPayload(raw, probe);
+        if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
         snapshot.blobs[key] = payload;
       }
-      return { project: restoreProject(snapshot), revision: snapshot.revision };
+      const validateStart = performance.now();
+      const project = restoreProject(snapshot);
+      probe.measure?.("model", performance.now() - validateStart);
+      return { project, revision: snapshot.revision };
     },
   };
 }

@@ -4,7 +4,7 @@ import { createProject } from "../src/lib/bim/model.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
 import { createPreparation, openPilotDatabase } from "./asset-recovery-store.ts";
-import { restoreProject } from "./asset-contract.ts";
+import { restoreProject, verifyPayload, payloadKey } from "./asset-contract.ts";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 const png =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWZsAAAAASUVORK5CYII=";
@@ -14,6 +14,22 @@ const asset = () => ({
   pixelWidth: 1,
   pixelHeight: 1,
   data: png,
+});
+
+test("shared decoder keeps exact payload and content key; both paths reject malformed ingress", async () => {
+  const { id: _id, ...raw } = asset();
+  const old = verifyPayload(raw, { legacy: true });
+  const current = verifyPayload(raw);
+  assert.deepEqual(current, old);
+  assert.equal(await payloadKey(current), await payloadKey(old));
+  for (const bad of [
+    { ...raw, data: "!invalid!" },
+    { ...raw, pixelHeight: 2 },
+    { ...raw, mimeType: "image/jpeg" },
+    { ...raw, data: btoa("not an image") },
+    { ...raw, extra: true },
+  ])
+    for (const legacy of [true, false]) assert.throws(() => verifyPayload(bad, { legacy }));
 });
 
 test("prepared immutable images survive model revisions without rehashing", async () => {
