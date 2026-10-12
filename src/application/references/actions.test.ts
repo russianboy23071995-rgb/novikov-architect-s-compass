@@ -133,10 +133,10 @@ test("file size applies on import commit, export and direct deserialization", ()
   const { base, request } = setup();
   base.layers[0]!.name = "x".repeat(PROJECT_FILE_LIMIT);
   const h = createHistory(base);
-  assert.throws(() => commitCreateReference(h, h.present, request), /32 MiB/);
+  assert.throws(() => commitCreateReference(h, h.present, request), /128 MiB/);
   const p = validateProject({ ...base, assets: [request.asset] });
-  assert.throws(() => serializeProject(p), /32 MiB/);
-  assert.throws(() => deserializeProject(" ".repeat(PROJECT_FILE_LIMIT + 1)), /32 MiB/);
+  assert.throws(() => serializeProject(p), /128 MiB/);
+  assert.throws(() => deserializeProject(" ".repeat(PROJECT_FILE_LIMIT + 1)), /128 MiB/);
   assert.equal(h.present.assets.length, 0);
 });
 

@@ -137,8 +137,8 @@ test("validated assets survive version-9 migration while model relationships rem
 
 test("incoming project byte limit remains enforced before asset preparation", () => {
   const source = fixture();
-  source.assets[0]!.data = "AAAA".repeat(9 * 1024 * 1024);
-  assert.throws(() => readProjectFile(JSON.stringify(source)), /32 MiB/);
+  source.assets[0]!.data = "AAAA".repeat(33 * 1024 * 1024);
+  assert.throws(() => readProjectFile(JSON.stringify(source)), /128 MiB/);
 });
 test("file ingress renews handles and shares them through wall/line edits and history", () => {
   const source = fixture(),

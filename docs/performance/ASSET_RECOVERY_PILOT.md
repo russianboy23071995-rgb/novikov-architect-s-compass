@@ -493,3 +493,45 @@ verwendet frische Controller/DB-Verbindungen; kein vollständiger Browser-/OS-Ne
 und kein praktischer CAD-Canvas-Test. Produktive Nutzerdaten wurden nicht verwendet.
 902 Node-Tests, beide Typechecks, Produktionsbuild bestanden; Lint 0 Fehler/6 bekannte
 Warnungen. Folgeauftrag ausschließlich Masterplan §9.
+
+
+## 128-MiB-Grenze: produktiver 100-MiB-Serviceablauf (12.10.2026)
+
+Die gemeinsame Projektgrenze beträgt jetzt 128 MiB (UTF-8, inklusive). Dateiöffnung,
+Modell-Commit, Download und V2-Katalog verwenden diese Grenze. Individuelle Bildgrenze
+weiterhin 10 MiB; Recovery zusätzlich maximal 128 Millionen Pixel sowie getrennte
+Modell-/Payloadbudgets von je 128 MiB, bei weiterhin 128 MiB Gesamtdateigrenze.
+Kein neues Format, keine geänderte Modellkopie und keine UI-/Historyänderung.
+
+Reproduktion: Diagnoseserver Port 8084, `/benchmarks/project-capacity.html`, „Ablauf
+prüfen“. [Rohdaten](project-capacity-128-2026-10-12.json). Zwölf verschiedene 1280×1280
+PNGs und 10.000 Linien; 106.911.015 Byte = 101,96 MiB. Sechs Prüfungen bestanden:
+Profilgröße, vollständiges Öffnen, genau ein Undo, vollständiger Undo-Rundlauf,
+gespeicherte Datei und wiederaufgenommenes V2-Projekt einschließlich aller Bilddaten.
+
+| Phase | Dauer im protokollierten Lauf |
+| --- | --- |
+| Datei öffnen | 1.760 ms |
+| Wand ändern + Commit | 809 ms |
+| Undo / Redo | 0,3 / 0,1 ms |
+| Datei serialisieren und Download-Port aufrufen | 603 ms |
+| Erneut öffnen | 1.832 ms |
+| V2 sichern | 4.456 ms |
+| V2 wiederaufnehmen | 2.267 ms |
+
+Dies ist ein vollständiger **Serviceablauf**, kein Canvas-Bediennachweis. Der Download-Port
+fängt den tatsächlichen Dateiinhalt zum Wiederöffnen ab; kein Beleg für dauerhafte
+Dateisystemspeicherung. Frischer Katalog/DB-Verbindung statt Browser-/OS-Neustart.
+Synthetische separate Datenbank, Nutzerdaten unverändert. Einzellauf im Devserver,
+keine Referenzhardware-Garantie/p95. Hauptthread-Pausen bestehen; Heap-Stichproben
+bis etwa 1,69 GB enthalten Fixture, Kontrolltexte und Vergleichskopien und sind kein
+isolierter Produkt-Peak. Die vorherige Erkundung war ebenfalls vollständig erfolgreich.
+128 MiB ist eine Eingangsgrenze, keine Garantie flüssiger Bedienung oder beliebiger
+Geometriedichte. Die monolithischen Serialisierungen sind der nächste begrenzte Auftrag.
+
+902 Tests bestanden: aktualisierte exakte UTF-8-Grenze, vorgezogene Größenablehnung,
+überzählige gültige Bildpayloads und geschützte History. Die vorhandene isolierte
+Node-Kapazitätsdiagnose verwendet nun die aktuelle Grenze statt einer festen 32-MiB-
+Annahme. Produktionsbuild bestanden. Alte Rohdaten und damalige Kapazitätsaussagen
+bleiben historisch unverändert.
+App- und Benchmark-Typechecks ebenfalls bestanden; Lint 0 Fehler/6 bekannte Warnungen.

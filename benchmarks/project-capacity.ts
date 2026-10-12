@@ -1,0 +1,160 @@
+import { recoveryFixture } from "./recovery-capacity-fixture";
+import { createImageAssetHandle } from "../src/domain/elements/reference/model";
+import { serializeProject, updateWall } from "../src/lib/bim/model";
+import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  prepareProjectOpen,
+  requestProjectDownload,
+} from "../src/application/project-files/operations";
+import {
+  createRecoveryCatalog,
+  openRecoveryDatabase,
+} from "../src/interop/project-file/recovery-storage";
+import { createAutosaveController } from "../src/application/project-files/autosave";
+import { readProjectRecovery } from "../src/application/project-files/recovery-catalog";
+if (!import.meta.env.DEV || location.port !== "8084") throw new Error("Diagnostic only");
+const root = document.getElementById("root")!;
+root.style.cssText = "font:15px system-ui;max-width:1100px;margin:30px auto";
+root.innerHTML =
+  '<h1>100 MiB: produktiver Datei- und Recovery-Ablauf</h1><p>Synthetisches Projekt, eigene Testdatenbank. Keine produktiven Nutzerdaten.</p><button id="run">Ablauf prüfen</button><p role="status">Bereit</p><pre id="output"></pre>';
+const run = document.querySelector<HTMLButtonElement>("#run")!;
+const status = document.querySelector<HTMLElement>('[role="status"]')!;
+const output = document.querySelector<HTMLElement>("#output")!;
+const pause = () => new Promise<void>((r) => setTimeout(r, 0));
+const heap = () =>
+  (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ??
+  null;
+run.onclick = async () => {
+  run.disabled = true;
+  const checks: string[] = [],
+    phases: unknown[] = [],
+    tasks: unknown[] = [];
+  const report: Record<string, unknown> = {
+    started: new Date().toISOString(),
+    checks,
+    phases,
+    tasks,
+  };
+  const observer = new PerformanceObserver((list) =>
+    tasks.push(...list.getEntries().map((e) => ({ start: e.startTime, ms: e.duration }))),
+  );
+  observer.observe({ type: "longtask" });
+  const check = (ok: boolean, name: string) => {
+    if (!ok) throw new Error(name);
+    checks.push(name);
+  };
+  const phase = async <T>(name: string, action: () => T | Promise<T>): Promise<T> => {
+    status.textContent = name;
+    await pause();
+    const start = performance.now();
+    const result = await action();
+    phases.push({ name, start, ms: performance.now() - start, heapAfter: heap() });
+    output.textContent = JSON.stringify(report, null, 2);
+    return result;
+  };
+  let controller: ReturnType<typeof createAutosaveController> | undefined;
+  try {
+    const project = await phase("Zwölf PNGs und 10.000 Linien vorbereiten", async () => {
+      const p = recoveryFixture("capacity-100", 10000);
+      for (let i = 1; i <= 12; i++) {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1280;
+        const ctx = canvas.getContext("2d")!,
+          image = ctx.createImageData(1280, 1280);
+        let seed = i;
+        for (let j = 0; j < image.data.length; j++) {
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          image.data[j] = seed >>> 24;
+        }
+        ctx.putImageData(image, 0, 0);
+        p.assets.push(
+          createImageAssetHandle({
+            id: `a${i}`,
+            mimeType: "image/png",
+            pixelWidth: 1280,
+            pixelHeight: 1280,
+            data: canvas.toDataURL("image/png").split(",")[1]!,
+          }),
+        );
+        p.storey.references.push({
+          id: `r${i}`,
+          kind: "image-reference",
+          assetId: `a${i}`,
+          layerId: p.defaultLayerIds.line,
+          origin: { x: i * 10, y: 0 },
+          rotation: 0,
+          metresPerPixel: 0.01,
+        });
+        canvas.width = canvas.height = 0;
+        await pause();
+      }
+      return p;
+    });
+    let text = await phase("Portable Datei erzeugen", () => serializeProject(project));
+    report["bytes"] = new Blob([text]).size;
+    check(Number(report["bytes"]) > 100 * 1024 * 1024, "Profil überschreitet 100 MiB");
+    const opened = await phase("Datei öffnen", () =>
+      prepareProjectOpen(new File([text], "capacity.json")),
+    );
+    await phase("Vollvergleich nach Öffnen", () =>
+      check(serializeProject(opened.project) === text, "Dateiöffnung vollständig identisch"),
+    );
+    let history = await phase("History anlegen", () => createHistory(opened.project));
+    const wall = history.present.storey.walls[0]!;
+    history = await phase("Wand ändern und committen", () =>
+      commitProject(history, updateWall(history.present, wall.id, { height: wall.height + 0.1 })),
+    );
+    check(history.past.length === 1, "Änderung genau ein Undo-Schritt");
+    history = await phase("Undo", () => undoProject(history));
+    await phase("Vollvergleich Undo", () =>
+      check(
+        serializeProject(history.present) === text,
+        "Undo stellt vollständigen Ausgangsstand her",
+      ),
+    );
+    history = await phase("Redo", () => redoProject(history));
+    await phase("Datei speichern über Download-Port", () =>
+      requestProjectDownload(history.present, (value) => {
+        text = value;
+      }),
+    );
+    const reopened = await phase("Gespeicherte Datei erneut öffnen", () =>
+      prepareProjectOpen(new File([text], "saved.json")),
+    );
+    await phase("Vollvergleich gespeicherter Datei", () =>
+      check(
+        serializeProject(reopened.project) === text,
+        "Gespeicherte Datei einschließlich Bilder identisch",
+      ),
+    );
+    const name = `novikov-capacity-test-${crypto.randomUUID()}`;
+    report["database"] = name;
+    const open = () => openRecoveryDatabase(name);
+    controller = createAutosaveController(createRecoveryCatalog(open, true), () => {});
+    controller.update(reopened.project, "first");
+    await phase("V2 sichern", () => controller!.saveNow());
+    controller.dispose();
+    controller = undefined;
+    const restored = await phase("V2 über frischen Katalog wiederaufnehmen", () =>
+      readProjectRecovery(createRecoveryCatalog(open, true), project.id),
+    );
+    await phase("Vollvergleich V2", () =>
+      check(
+        !!restored && serializeProject(restored.project) === text,
+        "V2-Wiederaufnahme vollständig identisch",
+      ),
+    );
+    report["status"] = "passed";
+    status.textContent = `Bestanden: ${checks.length} Prüfungen.`;
+  } catch (error) {
+    report["status"] = "failed";
+    report["error"] = String(error);
+    status.textContent = String(error);
+  } finally {
+    controller?.dispose();
+    await pause();
+    observer.disconnect();
+    output.textContent = JSON.stringify(report, null, 2);
+    run.disabled = false;
+  }
+};
