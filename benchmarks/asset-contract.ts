@@ -6,9 +6,16 @@ import { imageAssetSchema, type ImageAsset } from "../src/domain/elements/refere
 import { imageHeader } from "../src/interop/images/import.ts";
 import { binaryBytes } from "../src/interop/images/binary-bytes.ts";
 export type ReadProbe = { legacy?: boolean; measure?: (phase: string, ms: number) => void };
-export type Payload = Omit<ImageAsset, "id">;
-export type Manifest = Omit<Project, "assets"> & { assets: { id: string; key: string }[] };
-export type Document = { model: Manifest; blobs: Readonly<Record<string, Readonly<Payload>>> };
+export type {
+  RecoveryPayload as Payload,
+  RecoveryManifest as Manifest,
+  RecoveryDocument as Document,
+} from "../src/application/project-files/recovery-v2.ts";
+import type {
+  RecoveryPayload as Payload,
+  RecoveryManifest as Manifest,
+  RecoveryDocument as Document,
+} from "../src/application/project-files/recovery-v2.ts";
 export type Budget = {
   modelBytes: number;
   payloadBytes: number;
