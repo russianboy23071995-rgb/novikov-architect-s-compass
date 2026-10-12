@@ -31,6 +31,10 @@ export function createImageAssetHandle(value: unknown): ImageAsset {
   verifiedAssets.add(asset);
   return asset;
 }
+/** Capability check for immutable storage-validated assets; not a decoder verdict. */
+export function isImageAssetHandle(value: ImageAsset): boolean {
+  return verifiedAssets.has(value);
+}
 export const imageReferenceSchema = z
   .object({
     id,

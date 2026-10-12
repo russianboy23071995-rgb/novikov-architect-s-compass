@@ -696,3 +696,23 @@ Build bestanden. Keine neue Persistenzimplementierung.
 Praktische Abnahme: Projekt öffnen, Gebäudestruktur zeigt Projekt/Geschoss;
 Wand im Canvas wählen und Eigenschaften ändern; Undo/Redo; zum Abbildtab wechseln.
 Nächster Einzelauftrag: wiederholte Bild-URL-Prüfung für unveränderliche Assets reduzieren.
+
+
+## Bild-URLs für unveränderliche Handles (12.10.2026)
+
+WeakMap nur für vom Domain-Modul selbst erzeugte und registrierte unveränderliche
+Asset-Handles. Ein frozen-Flag oder eine ID gewährt keinen Zugang. Der erste Zugriff
+prüft weiterhin Dekodierung und Header. Der Cache hält Assets nicht stark am Leben;
+zusätzliche URL-Darstellung lebt so lange wie das Asset (auch wenn Undo dieses hält).
+Für gewöhnliche veränderbare Eingaben bleiben acht Einträge/48 MiB Inhaltscache erhalten.
+Keine Aussage über tatsächlichen Heap-Peak; URLs für alle lebenden Handles sind nicht
+zusätzlich durch das LRU-Budget begrenzt. Keine Änderung am Dateiformat oder Modell.
+
+Identische capacity-100.json, Port 8082, Entwicklungsbuild: vor Änderung 24 vollständige
+Bildprüfungen/738 ms, danach zwölf/407 ms. Längste Task 3727 → 3392 ms.
+Einzelvergleich, keine statistische Garantie. [Vorher](workspace-storey-navigator.json),
+[nachher](workspace-image-handle-cache.json). Dateidownload vollständig identisch zur Quelle,
+einschließlich aller zwölf Payloads. 908 Tests bestanden: zusätzlich zwölf lebende Handles
+über drei Durchläufe, ungültige Header/MIME/Maße und eingefrorenes Objekt mit veränderlichem
+Getter. Bestehende Mutations-/LRU-/Budgettests bleiben erhalten. Typecheck, gezieltes Lint
+und Build bestanden. Nächster Auftrag: verbleibende Grundriss-Render-/Commitkosten zuordnen.

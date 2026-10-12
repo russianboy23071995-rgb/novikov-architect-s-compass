@@ -1,5 +1,9 @@
 import { binaryBytes } from "./binary-bytes.ts";
-import { createImageAssetHandle, type ImageAsset } from "../../domain/elements/reference/model.ts";
+import {
+  createImageAssetHandle,
+  isImageAssetHandle,
+  type ImageAsset,
+} from "../../domain/elements/reference/model.ts";
 // Individual image sources keep their own budget.
 export const IMAGE_SOURCE_FILE_LIMIT = 10 * 1024 * 1024;
 /** Reads dimensions before decode to bound raster allocation. */
@@ -71,7 +75,16 @@ type CheckedUrl = Pick<ImageAsset, "data" | "mimeType" | "pixelWidth" | "pixelHe
 };
 const checkedUrls: CheckedUrl[] = [];
 let checkedUrlBytes = 0;
+// Weak ownership: URLs live only as long as their verified immutable asset.
+// Storage validation alone is insufficient: the first access still checks the header.
+const handleUrls = new WeakMap<ImageAsset, string | undefined>();
 export function checkedImageUrl(asset: ImageAsset): string | undefined {
+  if (isImageAssetHandle(asset)) {
+    if (handleUrls.has(asset)) return handleUrls.get(asset);
+    const url = checkImageUrl(asset);
+    handleUrls.set(asset, url);
+    return url;
+  }
   const index = checkedUrls.findIndex(
     (entry) =>
       entry.mimeType === asset.mimeType &&

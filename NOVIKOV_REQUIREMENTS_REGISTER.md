@@ -10655,3 +10655,7 @@ Zwei echte Dateiöffnungen derselben 100-MiB-Fixture mit getrennten React-/Appli
 
 ### Navigator · Nutzerentscheidung 12.10.2026
 Einzelelemente werden nicht mehr im Navigator aufgelistet. Die Gebäudestruktur zeigt Projekt und vorhandenes Geschoss; der Abbildtab bleibt. Geometrieauswahl erfolgt im Canvas. Die zuvor geplante Virtualisierung der Elementliste entfällt. Mehrgeschossverwaltung wird dadurch nicht vorweggenommen. R26-01/02, K02/03: Navigator-Anteil am 100-MiB-Laden auf 1,3 ms reduziert, Gesamt-Ladepause bleibt offen.
+
+
+### R26-01/02, K02/03 · Bildcache 12.10.2026
+Unveränderliche, intern registrierte Asset-Handles erhalten schwach gebundene geprüfte Darstellungs-URLs. Fremde/frozen/veränderbare Objekte behalten den begrenzten Inhaltscache. Erste Bildprüfung wird nicht ausgelassen; falsche Header/Metadaten bleiben abgewiesen. 908 Tests und identischer vollständiger Dateirundlauf; 24 → 12 Dekodierungen in der 100-MiB-Fixture. Gesamtbedienung weiterhin nicht als flüssig freigegeben.
