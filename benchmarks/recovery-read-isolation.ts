@@ -100,8 +100,33 @@ run.onclick = async () => {
       report[`releasedHeap${round}`] = heap();
       output.textContent = JSON.stringify(report, null, 2);
     }
+    for (const cancelAt of [0, 2, "after-model"]) {
+      const controller = new AbortController();
+      let modelChecked = false;
+      let checkpoints = 0,
+        aborted = false;
+      if (cancelAt === 0) controller.abort();
+      try {
+        await store.read(expected.projectId, false, {
+          signal: controller.signal,
+          measure: (name) => {
+            if (name === "model") modelChecked = true;
+          },
+          schedule: async () => {
+            await pause();
+            if (++checkpoints === cancelAt || (cancelAt === "after-model" && modelChecked))
+              controller.abort();
+          },
+        });
+      } catch (e) {
+        aborted = e instanceof DOMException && e.name === "AbortError";
+      }
+      if (!aborted) throw new Error(`Cancellation at ${cancelAt} returned a model`);
+      checks.push(`abort at checkpoint ${cancelAt}: no model returned`);
+    }
     report["status"] = "passed";
-    status.textContent = "Bestanden: 3 vollständige Vergleiche. Datenbank unverändert.";
+    status.textContent =
+      "Bestanden: 3 Abbrüche und 3 vollständige Vergleiche. Datenbank unverändert.";
   } catch (e) {
     report["status"] = "failed";
     report["error"] = String(e);

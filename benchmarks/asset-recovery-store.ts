@@ -12,6 +12,16 @@ import {
 } from "./asset-contract.ts";
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length;
 export type Head = { revision: string; current: Manifest; previous?: Manifest };
+export type ReadControl = ReadProbe & {
+  signal?: AbortSignal;
+  schedule?: () => Promise<void>;
+};
+/** A real task boundary, not just a resolved promise. No transaction spans this wait. */
+export async function readCheckpoint(control: ReadControl) {
+  control.signal?.throwIfAborted();
+  await (control.schedule?.() ?? new Promise<void>((resolve) => setTimeout(resolve, 0)));
+  control.signal?.throwIfAborted();
+}
 export function createPreparation(profile: 50 | 100 = 50) {
   if (profile !== 50 && profile !== 100) throw new Error("Unknown pilot profile");
   const maxBytes = (profile === 100 ? 128 : 64) * 1024 * 1024;
@@ -125,8 +135,9 @@ export function createAssetRecoveryStore(db: IDBDatabase) {
     async read(
       projectId: string,
       previous = false,
-      probe: ReadProbe = {},
+      probe: ReadControl = {},
     ): Promise<{ project: Project; revision: string }> {
+      probe.signal?.throwIfAborted();
       const readStart = performance.now();
       const snapshot = await new Promise<{
         model: Manifest;
@@ -161,14 +172,18 @@ export function createAssetRecoveryStore(db: IDBDatabase) {
         };
       });
       probe.measure?.("indexedDB", performance.now() - readStart);
+      await readCheckpoint(probe);
       for (const [key, raw] of Object.entries(snapshot.blobs)) {
         const payload = verifyPayload(raw, probe);
         if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
         snapshot.blobs[key] = payload;
+        await readCheckpoint(probe);
       }
       const validateStart = performance.now();
       const project = restoreProject(snapshot);
       probe.measure?.("model", performance.now() - validateStart);
+      // Deliver pending user cancellation before publishing a completely validated result.
+      await readCheckpoint(probe);
       return { project, revision: snapshot.revision };
     },
   };

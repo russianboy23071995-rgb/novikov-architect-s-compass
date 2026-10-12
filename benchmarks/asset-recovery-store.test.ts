@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createProject } from "../src/lib/bim/model.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
-import { createPreparation, openPilotDatabase } from "./asset-recovery-store.ts";
+import { createPreparation, openPilotDatabase, readCheckpoint } from "./asset-recovery-store.ts";
 import { restoreProject, verifyPayload, payloadKey } from "./asset-contract.ts";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 const png =
@@ -14,6 +14,40 @@ const asset = () => ({
   pixelWidth: 1,
   pixelHeight: 1,
   data: png,
+});
+
+test("read checkpoint yields a task and observes cancellation before and after scheduling", async () => {
+  let timerRan = false;
+  setTimeout(() => {
+    timerRan = true;
+  }, 0);
+  await readCheckpoint({});
+  assert.equal(timerRan, true);
+  const before = new AbortController();
+  before.abort();
+  let calls = 0;
+  await assert.rejects(
+    () =>
+      readCheckpoint({
+        signal: before.signal,
+        schedule: async () => {
+          calls++;
+        },
+      }),
+    { name: "AbortError" },
+  );
+  assert.equal(calls, 0);
+  const during = new AbortController();
+  await assert.rejects(
+    () =>
+      readCheckpoint({
+        signal: during.signal,
+        schedule: async () => {
+          during.abort();
+        },
+      }),
+    { name: "AbortError" },
+  );
 });
 
 test("shared decoder keeps exact payload and content key; both paths reject malformed ingress", async () => {
