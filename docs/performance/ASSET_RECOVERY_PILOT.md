@@ -135,3 +135,52 @@ Reproduktion wie oben; nun lautet das Abschlussresultat **Bestanden: 18 Prüfung
 Die Datenbankspeicherung und die Grenzen des ursprünglichen Piloten bleiben unverändert.
 Die Verbesserung rechtfertigt weitere Kapazitätsmessungen mit diesem gemeinsamen
 Baustein, keinen neuen Decoder, Worker oder Renderer auf Verdacht.
+
+## 100-MiB-Browserprofil (12.10.2026)
+
+Basis `b6a51a3`, PR261 nach erfolgreicher CI und ausdrücklicher Freigabe zusammengeführt.
+Der vorhandene Pilot bietet jetzt 50 MiB (A/B) und 100 MiB (gemeinsamer Decoder).
+Für 100 MiB gelten ausschließlich diagnostisch 128 MiB aggregierte Base64-Zeichen und
+40 Millionen Bildpixel; 50 MiB behält 64 MiB/32 Millionen. Einzelbildregeln unverändert.
+Keine Änderung am Produktionslimit von 32 MiB oder am Projektformat.
+
+[Rohdaten](asset-recovery-100-2026-10-12.json): 106.911.023 Projektbytes (101,96 MiB),
+zwölf unterschiedliche 1280×1280-PNGs, 10.000 Linien, Beispielwand/Fenster.
+15 Browserprüfungen bestanden: drei vollständige Leservergleiche plus die zwölf
+Sicherheits-/Rundlaufprüfungen des Ausgangspiloten. Kein alter Decoder im 100-MiB-Lauf.
+
+| Arbeit | Messung |
+| --- | ---: |
+| Erstvorbereitung | 1.271 ms |
+| Erste atomare Ablage | 648 ms, 105.284.076 Payloadbytes + 1.627.897 Manifestbytes |
+| Warme Vorbereitung | 49 ms, keine neuen Bildhashes |
+| Zweiter Stand | 93 ms, 0 Payloadbytes + 3.255.744 Manifestbytes |
+| Monolithische Kontrollhülle | 633 ms, 214.463.622 Bytes |
+| Vollständiges Lesen, Service-Median aus 3 Läufen | 1.573 ms |
+| Lesen inklusive zusätzlichem Ergebnisvergleich, Median | 2.036 ms |
+
+Long-Task-Beobachter: 30 Einträge über den gesamten Lauf, längster 1.880 ms während
+„Lesepfad gemeinsam / 3“. Die Phasen enthalten auch die zusätzliche JSON-/Hashprüfung
+des Harness. Daraus folgt keine reine Service-Long-Task-Dauer. Die Phasenstarts stehen
+in derselben Performance-Zeitbasis wie die Long Tasks. Keine erzwungene Garbage Collection.
+
+`performance.memory` meldete bei Phasenenden maximal 2.228.820.003 Bytes verwendeten
+JS-Heap (2,08 GiB), am Ende 667.892.622 Bytes. Stichproben, kein echter Peak und kein
+Gesamtprozess-/GPU-RAM. Fixture, monolithische Kontrolle, vollständige JSON-Prüfkopien
+und noch nicht eingesammelte temporäre Objekte sind enthalten; kein Nachweis eines Lecks.
+Diese Chromium-spezifische API kann ungenau sein oder fehlen (dann `null`).
+`navigator.storage.estimate()` meldete originweit 324.666.894 → 644.941.360 Bytes Nutzung.
+Der Origin enthält vorherige Piloten; auch die monolithische Kontrolle wird gespeichert.
+Die Differenz ist deshalb keine isolierte Assetstore-Größe oder Quota-Garantie.
+
+884 Tests, beide Typechecks und Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+Reproduktion: Diagnose auf Port 8084 → Profil **100 MiB** → **Pilot starten** →
+**Bestanden: 15 Prüfungen**. Ergebnis herunterladen. Kein Hot-Reload oder paralleler
+Build während der Messung. Die Auswertung/Download-Automation antwortete stark verzögert;
+die abgeschlossenen Browserphasen sind mit eigenen Zeitstempeln dokumentiert, nicht aus
+der Tool-Laufzeit abgeleitet. Kein Prozessabsturz beobachtet oder behauptet.
+
+Bewertung: funktionaler 100-MiB-Service-Nachweis gelungen, keine produktive Kapazitätsfreigabe.
+Vor weiteren Größenstufen müssen die Messkopien von Servicekosten und Hauptthreadpausen
+getrennt werden. Genau ein Folgeauftrag dazu steht in Masterplan §9; kein vorsorglicher
+Architektur-/Workerwechsel und keine Wiederholung der bereits geklärten Decoderfrage.

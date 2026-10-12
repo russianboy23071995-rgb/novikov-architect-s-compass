@@ -10,7 +10,18 @@ if (!import.meta.env.DEV || location.port !== "8084") throw new Error("Isolated 
 const root = document.getElementById("root")!;
 root.style.cssText = "font:14px system-ui;max-width:1100px;margin:30px auto;line-height:1.5";
 root.innerHTML =
-  '<h1>Asset-Recovery-Pilot · 50 MiB</h1><p>Nur synthetische Daten in eigener Testdatenbank. Keine Produktmigration. Bilder einmalig speichern, Manifest und Vorgänger atomar veröffentlichen.</p><button id="run">Pilot starten</button> <button id="cancel" disabled>Abbrechen</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status">Bereit</p><pre id="output"></pre>';
+  '<h1>Asset-Recovery-Pilot</h1><p>Nur synthetische Daten in eigener Testdatenbank. Keine Produktmigration. Bilder einmalig speichern, Manifest und Vorgänger atomar veröffentlichen.</p><label>Profil <select id="profile"><option value="50">50 MiB · A/B</option><option value="100">100 MiB · gemeinsamer Decoder</option></select></label> <button id="run">Pilot starten</button> <button id="cancel" disabled>Abbrechen</button> <button id="download" disabled>Ergebnis herunterladen</button><p role="status">Bereit</p><pre id="output"></pre>';
+const profileSelect = document.querySelector<HTMLSelectElement>("#profile")!;
+const memorySample = () => {
+  const memory = (
+    performance as Performance & {
+      memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number };
+    }
+  ).memory;
+  return memory
+    ? { used: memory.usedJSHeapSize, total: memory.totalJSHeapSize, limit: memory.jsHeapSizeLimit }
+    : null;
+};
 const run = document.querySelector<HTMLButtonElement>("#run")!;
 const cancel = document.querySelector<HTMLButtonElement>("#cancel")!;
 const download = document.querySelector<HTMLButtonElement>("#download")!;
@@ -47,6 +58,8 @@ async function count(db: IDBDatabase, store: string) {
   });
 }
 run.onclick = async () => {
+  const profile = Number(profileSelect.value) === 100 ? 100 : 50;
+  profileSelect.disabled = true;
   run.disabled = true;
   cancel.disabled = false;
   download.disabled = true;
@@ -55,12 +68,23 @@ run.onclick = async () => {
     checks: string[] = [];
   const dbName = "novikov-asset-recovery-pilot-" + crypto.randomUUID();
   report = {
+    profileMiB: profile,
     started: new Date().toISOString(),
     userAgent: navigator.userAgent,
     dbName,
     phases,
     checks,
   };
+  const longTasks: { start: number; ms: number }[] = [];
+  const observer = PerformanceObserver.supportedEntryTypes.includes("longtask")
+    ? new PerformanceObserver((list) => {
+        for (const entry of list.getEntries())
+          longTasks.push({ start: entry.startTime, ms: entry.duration });
+      })
+    : undefined;
+  observer?.observe({ type: "longtask" });
+  report["longTasks"] = observer ? longTasks : null;
+  report["heapBefore"] = memorySample();
   let db: IDBDatabase | undefined;
   const check = (ok: boolean, name: string) => {
     if (!ok) throw new Error(name);
@@ -82,16 +106,17 @@ run.onclick = async () => {
     await pause();
     const start = performance.now();
     const value = await fn();
-    phases.push({ name, ms: performance.now() - start });
+    phases.push({ name, start, ms: performance.now() - start, heapAfter: memorySample() });
     output.textContent = JSON.stringify(report, null, 2);
     return value;
   };
   try {
+    report["storageBefore"] = (await navigator.storage?.estimate?.()) ?? null;
     let p = await phase("Fixture mit unterschiedlichen PNGs erzeugen", async () => {
       const p = recoveryFixture("asset-recovery-pilot", 10000);
       let size = 0,
         i = 0;
-      while (size < 50 * 1024 * 1024) {
+      while (size < profile * 1024 * 1024) {
         if (stopped) throw new Error("Cancelled");
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 1280;
@@ -133,7 +158,7 @@ run.onclick = async () => {
     const originalHash = await hash(p);
     db = await openPilotDatabase(dbName);
     const store = createAssetRecoveryStore(db),
-      prep = createPreparation();
+      prep = createPreparation(profile);
     const first = await phase("Erste Assetvorbereitung", () => prep.prepare(p));
     const one = await phase("Erste atomare Ablage", () => store.publish(first, null));
     report["first"] = one;
@@ -186,7 +211,11 @@ run.onclick = async () => {
     report["readComparison"] = comparisons;
     // Alternate order to reduce one-sided cache/order effects; no model-result cache.
     for (let round = 0; round < 3; round++) {
-      for (const legacy of round % 2 === 0 ? [true, false] : [false, true]) {
+      for (const legacy of profile === 100
+        ? [false]
+        : round % 2 === 0
+          ? [true, false]
+          : [false, true]) {
         const times: Record<string, number> = {};
         await phase(`Lesepfad ${legacy ? "alt" : "gemeinsam"} / ${round + 1}`, async () => {
           const start = performance.now();
@@ -267,7 +296,18 @@ run.onclick = async () => {
     report["error"] = String(e);
     status.textContent = String(e);
   } finally {
+    await pause();
+    for (const entry of observer?.takeRecords() ?? [])
+      longTasks.push({ start: entry.startTime, ms: entry.duration });
+    observer?.disconnect();
+    report["heapAfter"] = memorySample();
+    try {
+      report["storageAfter"] = (await navigator.storage?.estimate?.()) ?? null;
+    } catch {
+      report["storageAfter"] = null;
+    }
     db?.close();
+    profileSelect.disabled = false;
     run.disabled = false;
     cancel.disabled = true;
     download.disabled = false;
