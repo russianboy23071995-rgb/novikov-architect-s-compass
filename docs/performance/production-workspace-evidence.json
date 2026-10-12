@@ -1,0 +1,28 @@
+{
+  "profile": "production-workspace",
+  "fixtureBytes": 106911459,
+  "checks": {
+    "undoEqualsSource": true,
+    "redoEqualsIntendedEdit": true,
+    "recoveryEqualsRedo": true,
+    "savedViewZoom": 100
+  },
+  "files": [
+    {
+      "name": "novikov-project (27).json",
+      "sha256": "5ad624428494afad8a4152125077508a6b4adf968d23de95477168fa9d8c552f"
+    },
+    {
+      "name": "novikov-project (28).json",
+      "sha256": "5ad624428494afad8a4152125077508a6b4adf968d23de95477168fa9d8c552f"
+    },
+    {
+      "name": "novikov-project (29).json",
+      "sha256": "4fba182d384fe58bf0fed36514e17740f34057ac3cc488e87092b3230aeba1eb"
+    },
+    {
+      "name": "novikov-project (30).json",
+      "sha256": "4fba182d384fe58bf0fed36514e17740f34057ac3cc488e87092b3230aeba1eb"
+    }
+  ]
+}
