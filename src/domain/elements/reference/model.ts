@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isCanonicalBase64 } from "./base64.ts";
 const id = z.string().trim().min(1);
 // Storage contract only. A browser import adapter must decode and verify image content.
 const storageAssetSchema = z
@@ -11,16 +12,7 @@ const storageAssetSchema = z
       .string()
       .min(4)
       .max(10 * 1024 * 1024)
-      .refine((value) => {
-        if (value.length % 4 !== 0) return false;
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        const padding = value.endsWith("==") ? 2 : value.endsWith("=") ? 1 : 0;
-        const end = value.length - padding;
-        for (let i = 0; i < end; i++) if (!alphabet.includes(value[i]!)) return false;
-        return (
-          padding === 0 || (alphabet.indexOf(value[end - 1]!) & (padding === 2 ? 15 : 3)) === 0
-        );
-      }, "Invalid canonical base64"),
+      .refine(isCanonicalBase64, "Invalid canonical base64"),
   })
   .strict()
   .refine((a) => a.pixelWidth * a.pixelHeight <= 16_000_000, "Image pixel budget exceeded");
