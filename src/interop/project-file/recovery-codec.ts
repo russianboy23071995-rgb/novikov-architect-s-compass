@@ -135,3 +135,51 @@ export function createAssetPreparation({
     },
   };
 }
+
+/** Explicit ingress budgets; no implicit increase of supported product capacity. */
+export function createBoundedRecoveryCodec(limits: {
+  modelBytes: number;
+  payloadBytes: number;
+  pixels: number;
+}) {
+  const budget = { ...limits };
+  if (!Object.values(budget).every((n) => Number.isSafeInteger(n) && n > 0))
+    throw new Error("Invalid recovery budget");
+  const preparation = createAssetPreparation({
+    maxBytes: budget.payloadBytes,
+    maxPixels: budget.pixels,
+  });
+  const check = (doc: Document) => {
+    if (new TextEncoder().encode(JSON.stringify(doc.model)).length > budget.modelBytes)
+      throw new Error("Model budget exceeded");
+    let bytes = 0,
+      pixels = 0;
+    for (const p of Object.values(doc.blobs)) {
+      if (
+        !p ||
+        typeof p.data !== "string" ||
+        !Number.isSafeInteger(p.pixelWidth) ||
+        !Number.isSafeInteger(p.pixelHeight) ||
+        p.pixelWidth <= 0 ||
+        p.pixelHeight <= 0
+      )
+        throw new Error("Invalid payload budget input");
+      bytes += p.data.length;
+      pixels += p.pixelWidth * p.pixelHeight;
+      if (bytes > budget.payloadBytes || !Number.isSafeInteger(pixels) || pixels > budget.pixels)
+        throw new Error("Payload budget exceeded");
+    }
+  };
+  return {
+    async prepare(project: Project) {
+      const doc = await preparation.prepare(project);
+      check(doc);
+      return doc;
+    },
+    async restore(doc: Document, control: ReadControl = {}) {
+      control.signal?.throwIfAborted();
+      check(doc);
+      return restoreCheckedSnapshot(doc, control);
+    },
+  };
+}

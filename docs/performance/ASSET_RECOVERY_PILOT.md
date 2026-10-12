@@ -430,3 +430,36 @@ warmer Produktionswriter freigegeben. Lesebudgets/Katalog-/Startangebotintegrati
 produktive Migration bleiben offen. Der nächste begrenzte Writerauftrag setzt explizite
 Eingangsbudgets und Sitzungskontext vor der Produktanbindung durch. Produktionslimit
 weiterhin 32 MiB, kein Dateiformatwechsel für manuell gespeicherte Projekte.
+
+## Zustandsgebundener V2-Writer (12.10.2026)
+
+`prepareRecoveryV2Writer` in der Application-Schicht besitzt erwartete Revision und
+letzten gültigen Snapshot privat. Bei defektem current wird der vollständig geprüfte
+Vorgänger weitergeführt. Unmigrierte V1-Quellen verlangen ausdrücklich zuerst Migration;
+unbekannte V2-Versionen blockieren. Jeder neue Stand passiert Domainprüfung und Codec.
+Nur erfolgreiches Publish aktualisiert die interne Revision und den Vorgänger.
+Fehler/Abbruch erlauben Retry; externe CAS-Konflikte bleiben bis zur neuen Writersitzung
+sichtbar. Parallele Aufträge derselben Sitzung werden abgewiesen.
+
+`createBoundedRecoveryCodec` verlangt explizite Modellbyte-, Payloadzeichen- und
+Pixelbudgets. Vorbereitung sowie Wiedereinlesen prüfen diese Grenzen; zusätzliche
+Schema-/Header-/Hash-/Modellprüfung bleibt erhalten. Keine neuen Produktdefaults.
+Grenzen sind Eingangsprüfungen, kein harter Peak-RAM-Schutz; IDB-Snapshot liegt vor
+Codecprüfung bereits im Speicher. Synchrone Abschnitte bleiben synchron.
+
+Der Port übergibt den aktuellen Sitzungskontext an IndexedDB. Alle Payloadrequests
+müssen vor dem finalen Headrequest erfolgreich sein. Dessen Erfolg prüft den Kontext
+noch innerhalb der Transaktion und bricht bei Veraltung atomar ab. Nach abgeschlossenem
+Commit meldet ein verspäteter Abbruch nicht fälschlich einen Speicherfehler.
+
+[Browsernachweis](recovery-v2-writer-2026-10-12.json): 30 Fälle bestanden, einschließlich
+aller bisherigen 21 Adapterregressionen sowie Writer-Speicherung, Abbruch/Retry,
+Kontextveraltung am finalen Headrequest und externer Konflikt mit neuer Writersitzung.
+Gleiche Diagnoseseite auf Port 8084, „Prüfung starten“; synthetische Datenbank.
+Fünf neue Node-Tests mit mehreren Szenarien für gültigen Vorgänger, Schreibfehler/Retry,
+Parallelität, Abbruch, Kontext, Versionen, externe Konflikte und Budgetgrenzen.
+902 Tests, App-/Benchmark-Typechecks und Build bestanden; Lint 0 Fehler/6 bekannte
+Warnungen. Kein neuer UI-/Katalogpfad aktiviert. Nächster Schritt ist die begrenzte
+Produktanbindung für ein ausgewähltes Projekt; manuelles Dateiformat und 32-MiB-Grenze
+bleiben davon getrennt. Kein Nachweis für schnelle warme Großprojektsicherung oder
+Stromausfall-/Quota-Verhalten durch diese kleinen Sicherheitsfixtures.
