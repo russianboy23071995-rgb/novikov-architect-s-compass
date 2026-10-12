@@ -1141,3 +1141,47 @@ Diagnosebuild und regulärer Build bestanden. Benutzeroberfläche unverändert.
 Nächster Einzelauftrag: konsolidierte Abnahme ohne Funktionsinstrumentierung mit
 Laden, Wandänderung, Undo/Redo, Datei-Rundlauf und lokaler Wiederherstellung.
 Weitere Mikrooptimierungen erst bei einem konkreten verbleibenden Ablaufproblem.
+
+## Konsolidierte Produktionsabnahme (12.10.2026, PR293)
+PR292 nach erfolgreicher GitHub-CI zusammengeführt. Geprüfter Produktstand 7e1a30e,
+isolierter statischer Produktions-Workspace auf 8085 mit echten Workspace-/Datei-/
+Recovery-Adaptern, mode=production: keine Funktionsinstrumentierung, keine React-
+Profilwrapper. Nur passiver Long-Task-Beobachter und UI-Klickprotokoll. Dies ersetzt
+keinen Deployment-/SSR- oder Betriebssystem-Absturztest.
+
+Fixture (25), 106911015 Bytes, 10000 Linien, eine Wand, ein Fenster, zwölf Bilder.
+Die Ausgangshöhe dieser verfügbaren Fixture beträgt 2,90 m (nicht 2,80 m).
+Abnahmeschritte:
+- Laden: 10014 Elemente im Navigator.
+- Wand über ihre zugängliche Tastaturauswahl aktiviert; Höhe 2,90→3,10 m.
+- Undo: Auswahl aufgehoben; nach erneuter Auswahl 2,90 m. Redo: 3,10 m.
+  Der erste automatisierte Zugriff auf das nicht mehr vorhandene Eigenschaftenfeld
+  lief in eine Zeitüberschreitung; kein nachgewiesener Modellfehler oder App-Hänger.
+- Export (18): strukturierter Vergleich mit (25) zeigt ausschließlich
+  /storey/walls/0/height, 2.9→3.1. Bilder und übrige Modelldaten unverändert.
+- Export erneut geladen: Höhe 3,10 m.
+- Manuellen lokalen Snapshot erstellt, Abschlussmeldung abgewartet.
+- Seite neu geladen, Stand capacity-100 vom 12.10.2026 20:55:38 geprüft,
+  Wiederaufnahme vorbereitet und bestätigt: 10014 Elemente und 3,10 m.
+- Recovery-Export (19) bytegleich zu Export (18), SHA256:
+  cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+  Keine Konsolenfehler.
+
+[Passiver Nachweis nach dem Seitenneustart](production-roundtrip-recovery.json):
+mode production, workspacePhases/exportPhases leer. Im Prüfintervall des lokalen
+Stands 13 lange Tasks, zusammen 1464 ms, längste 238 ms. Im anschließenden
+Ladeintervall 14 lange Tasks, zusammen 3134 ms, längste 1400 ms. Exportintervall
+vier lange Tasks, zusammen 426 ms, längste 136 ms. Diese Intervalle enthalten
+Folgearbeiten; weder Aufsummierung noch Klickabstände sind exakte Antwortzeiten.
+Das Protokoll vor dem Neustart wurde nicht exportiert; dort nur funktionaler
+Nachweis, keine nachträglich erfundene Laufzeitmessung.
+
+Statischer Produktionsbuild erfolgreich; keine Produktcodeänderung. Die 916 Tests,
+Typprüfung und regulärer Build wurden für denselben Produktstand in PR292 bestanden
+und nicht für diesen Dokumentations-PR erneut ausgeführt. Keine Freigabe für
+Stromausfall, Quota/Berechtigungsfehler, andere Hardware oder größere Dateien.
+
+Nächster Einzelauftrag: Recovery-Leseweg bei „Stand prüfen“ mit derselben Fixture
+phasenweise zuordnen (Speicherzugriff, Assetlesen/-prüfung, Rekonstruktion und
+Validierung), bevor eine Optimierung gewählt wird. Keine Validierung auslassen,
+keine Format-/Limit-/Cacheänderung im Diagnoseauftrag.
