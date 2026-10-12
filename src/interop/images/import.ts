@@ -1,4 +1,3 @@
-import { binaryBytes } from "./binary-bytes.ts";
 import {
   createImageAssetHandle,
   isImageAssetHandle,
@@ -6,50 +5,58 @@ import {
 } from "../../domain/elements/reference/model.ts";
 // Individual image sources keep their own budget.
 export const IMAGE_SOURCE_FILE_LIMIT = 10 * 1024 * 1024;
-/** Reads dimensions before decode to bound raster allocation. */
-export function imageHeader(bytes: Uint8Array) {
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+/** Reads dimensions before raster decode. Strings must be decoded binary (atob), not base64. */
+export function imageHeader(bytes: Uint8Array | string) {
+  const byte = (index: number) =>
+    typeof bytes === "string" ? bytes.charCodeAt(index) : bytes[index]!;
+  const uint = (index: number, count: number) => {
+    if (index + count > bytes.length)
+      throw new RangeError("Offset is outside the bounds of the DataView");
+    let value = 0;
+    for (let n = 0; n < count; n++) value = value * 256 + byte(index + n);
+    return value;
+  };
   let width = 0,
     height = 0,
     mimeType: "image/png" | "image/jpeg";
-  if (bytes.length >= 24 && [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => bytes[i] === v)) {
+  if (bytes.length >= 24 && [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => byte(i) === v)) {
     mimeType = "image/png";
-    width = view.getUint32(16);
-    height = view.getUint32(20);
-  } else if (bytes[0] === 255 && bytes[1] === 216) {
+    width = uint(16, 4);
+    height = uint(20, 4);
+  } else if (byte(0) === 255 && byte(1) === 216) {
     mimeType = "image/jpeg";
     let i = 2;
     while (i + 3 < bytes.length) {
-      if (bytes[i++] !== 255) throw new Error("Ungültiges JPEG.");
-      while (bytes[i] === 255) i++;
-      const marker = bytes[i++]!;
+      if (byte(i++) !== 255) throw new Error("UngÃƒÂ¼ltiges JPEG.");
+      while (byte(i) === 255) i++;
+      const marker = byte(i++)!;
       if (marker === 217 || marker === 218) break;
-      const length = view.getUint16(i);
+      const length = uint(i, 2);
       if (length < 2 || i + length > bytes.length) break;
       if ([192, 193, 194].includes(marker) && length >= 8) {
-        height = view.getUint16(i + 3);
-        width = view.getUint16(i + 5);
+        height = uint(i + 3, 2);
+        width = uint(i + 5, 2);
         break;
       }
       i += length;
     }
-  } else throw new Error("Nur PNG und JPEG werden unterstützt.");
+  } else throw new Error("Nur PNG und JPEG werden unterstÃƒÂ¼tzt.");
   if (!width || !height || width > 16384 || height > 16384 || width * height > 16_000_000)
-    throw new Error("Bildmaße ungültig oder größer als 16 Millionen Pixel.");
+    throw new Error("BildmaÃƒÅ¸e ungÃƒÂ¼ltig oder grÃƒÂ¶ÃƒÅ¸er als 16 Millionen Pixel.");
   return { width, height, mimeType };
 }
 export async function importImage(file: File, id: string): Promise<ImageAsset> {
-  if (file.size > IMAGE_SOURCE_FILE_LIMIT) throw new Error("Bilddatei zu groß (maximal 10 MiB).");
+  if (file.size > IMAGE_SOURCE_FILE_LIMIT) throw new Error("Bilddatei zu groÃƒÅ¸ (maximal 10 MiB).");
   imageHeader(new Uint8Array(await file.arrayBuffer()));
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   try {
     if (bitmap.width * bitmap.height > 16_000_000 || bitmap.width > 16384 || bitmap.height > 16384)
-      throw new Error("Bild zu groß.");
+      throw new Error("Bild zu groÃƒÅ¸.");
     const canvas = document.createElement("canvas");
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Bilddekodierung nicht verfügbar.");
+    if (!ctx) throw new Error("Bilddekodierung nicht verfÃƒÂ¼gbar.");
     ctx.drawImage(bitmap, 0, 0);
     const data = canvas.toDataURL("image/png").split(",")[1]!;
     return createImageAssetHandle({
@@ -121,8 +128,7 @@ export function checkedImageUrl(asset: ImageAsset): string | undefined {
 function checkImageUrl(asset: ImageAsset): string | undefined {
   try {
     const binary = atob(asset.data);
-    const bytes = binaryBytes(binary);
-    const header = imageHeader(bytes);
+    const header = imageHeader(binary);
     if (
       header.width !== asset.pixelWidth ||
       header.height !== asset.pixelHeight ||

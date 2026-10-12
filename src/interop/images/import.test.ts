@@ -222,7 +222,7 @@ test("optimized URL path matches previous PNG/JPEG/header failure contract", () 
         assert.equal(checkedImageUrl({ ...a, id: "copy" }), previous(a));
       }
   }
-  for (const data of ["!bad!", "====", "A", "😀", Buffer.from(png()).toString("base64") + "\n"]) {
+  for (const data of ["!bad!", "====", "A", "ðŸ˜€", Buffer.from(png()).toString("base64") + "\n"]) {
     const a = {
       id: "invalid",
       mimeType: "image/png" as const,
@@ -269,4 +269,84 @@ test("a frozen lookalike is not granted immutable-handle cache admission", (t) =
   width = 201;
   assert.equal(checkedImageUrl(asset), undefined);
   assert.equal(decode.mock.callCount(), 2);
+});
+
+// Frozen pre-optimization parser serves as the differential oracle.
+function originalHeader(bytes: Uint8Array) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let width = 0,
+    height = 0,
+    mimeType: "image/png" | "image/jpeg";
+  if (bytes.length >= 24 && [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => bytes[i] === v)) {
+    mimeType = "image/png";
+    width = view.getUint32(16);
+    height = view.getUint32(20);
+  } else if (bytes[0] === 255 && bytes[1] === 216) {
+    mimeType = "image/jpeg";
+    let i = 2;
+    while (i + 3 < bytes.length) {
+      if (bytes[i++] !== 255) throw new Error("UngÃ¼ltiges JPEG.");
+      while (bytes[i] === 255) i++;
+      const marker = bytes[i++]!;
+      if (marker === 217 || marker === 218) break;
+      const length = view.getUint16(i);
+      if (length < 2 || i + length > bytes.length) break;
+      if ([192, 193, 194].includes(marker) && length >= 8) {
+        height = view.getUint16(i + 3);
+        width = view.getUint16(i + 5);
+        break;
+      }
+      i += length;
+    }
+  } else throw new Error("Nur PNG und JPEG werden unterstÃ¼tzt.");
+  if (!width || !height || width > 16384 || height > 16384 || width * height > 16_000_000)
+    throw new Error("BildmaÃŸe ungÃ¼ltig oder grÃ¶ÃŸer als 16 Millionen Pixel.");
+  return { width, height, mimeType };
+}
+
+test("byte and binary-string headers match the previous parser across valid and malformed data", () => {
+  const result = (read: () => unknown) => {
+    try {
+      return read();
+    } catch (error) {
+      return { error: (error as Error).name, message: (error as Error).message };
+    }
+  };
+  const png = [
+    137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 100, 0, 0, 0, 50,
+  ];
+  const cases: number[][] = [
+    png,
+    ...[192, 193, 194].map((m) => [255, 216, 255, m, 0, 8, 8, 0, 50, 0, 100, 0]),
+  ];
+  for (const original of [...cases]) {
+    for (let n = 0; n < original.length; n++) cases.push(original.slice(0, n));
+    for (let n = 0; n < original.length; n++)
+      for (const value of [0, 1, 255]) {
+        const changed = [...original];
+        changed[n] = value;
+        cases.push(changed);
+      }
+  }
+  let seed = 12345;
+  for (let n = 0; n < 300; n++)
+    cases.push(
+      Array.from({ length: n % 80 }, () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed & 255;
+      }),
+    );
+  for (const values of cases) {
+    const bytes = Uint8Array.from(values),
+      binary = String.fromCharCode(...values);
+    const expected = result(() => originalHeader(bytes));
+    assert.deepEqual(
+      result(() => imageHeader(bytes)),
+      expected,
+    );
+    assert.deepEqual(
+      result(() => imageHeader(binary)),
+      expected,
+    );
+  }
 });
