@@ -360,3 +360,31 @@ Reproduktion: `benchmarks/asset-recovery.html` auf Diagnose-Port 8084, Profil
 und den ausgegebenen Datenbanknamen in `recovery-read-isolation.html` einsetzen.
 Die produktive Anwendung bleibt unberührt. Dieser Befund trägt die nächste begrenzte
 Application-/Migrationsanbindung; er ersetzt deren Sicherheits- und Integrationstests nicht.
+
+## Application-Vertrag für Recovery V2 (12.10.2026)
+
+`src/application/project-files/recovery-v2.ts` besitzt die gemeinsamen Typen für
+Manifest, Payload, versionierten Recovery-Stand und Storage-/Codec-Ports. Der
+Diagnosecodec importiert diese Typen; Produktcode importiert keine Benchmarks.
+Das Portobjekt enthält aufgelöste Dokumente für den Austausch, **keine neue monolithische
+Dateihülle**. Der Adapter muss Bildinhalte nach Schlüssel separat speichern und wiederverwenden.
+
+`restoreRecoveryV2` prüft Version/Projektkontext und jeden gewählten Stand über den
+vollständig prüfenden Codec. Beschädigtes current darf auf geprüftes previous zurückfallen;
+unbekannte Recordversion und Signalabbruch führen nicht zu stiller Wiederherstellung.
+`migrateRecoveryV1` prüft vorhandene V1-Snapshots mit der bisherigen Dateigrenze,
+bereitet gültige current/previous-Stände vor und liest sie durch denselben Codec zurück.
+Bei ungültigem current wird der gültige Vorgänger zum neuen current. Fremde Projektkontexte
+blockieren die Migration. Defekter bereits vorhandener V2-Stand wird nicht überschrieben.
+
+Die atomare Veröffentlichung muss **V1-Quelltext und V2-Revision** vergleichen.
+Erfolg erst nach Commit; kein V1-Löschen und kein persistierter Vertrauensmarker.
+Ein Abbruch nach erfolgreichem Commit darf nicht fälschlich als fehlgeschlagene Speicherung
+gemeldet werden. Kein Mount ins UI, kein Modell-Undo und kein Produktionsadapterwechsel.
+
+Neun neue Tests in `benchmarks/recovery-v2.test.ts` verwenden echte Payload-/Header-/Hash-
+und Modellprüfung sowie unveränderliche Handles. In-Memory-Port simuliert Konflikte,
+Schreibfehler und Commitgrenze. 897 Tests insgesamt, App-/Benchmark-Typechecks und Build
+grün; Lint 0 Fehler/6 bekannte Warnungen. Keine neue Browserabnahme behauptet:
+Die Einhaltung der Transaktionsregeln durch einen realen V2-IndexedDB-Adapter ist der
+nächste ausdrücklich begrenzte Auftrag. Die existierenden V1- und Diagnosetests bleiben erhalten.
