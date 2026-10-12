@@ -745,3 +745,26 @@ Größen-/Kamerawerte bestätigen und teuren ersten Szenenaufbau auf die gemesse
 Kamera abstimmen. Resize, gespeicherte Abbild-Framings, Fit/Zoom und Auswahl prüfen.
 Keine Produktionsänderung dieses Schritts. Benchmark-Typecheck, gezieltes Lint und
 Produktionsbuild bestanden; Modelltests von PR277 werden nicht als neu ausgeführt ausgegeben.
+
+
+## Initiale Kamera vor Szenenaufbau (12.10.2026)
+
+CadViewport wartet mit BimPlan auf die erste Größenmessung und die daraus
+abgeleitete Kamera; gespeichertes Framing hat unverändert Vorrang. Vorher wird
+kein Ersatz-Framing publiziert. Resize übernimmt ausschließlich geänderte Größen.
+Die 3D-Initialisierung bleibt unverändert.
+
+Gleiche capacity-100.json, 8082: [Nachherprofil](initial-plan-camera.json) zeigt genau
+einen Linienaufbau mit 518 ms. Der zusätzliche 187–245-ms-Durchlauf der beiden
+vorigen Profile entfällt. Erste Darstellung erfolgt nun als nested-update nach der
+leichten Container-Messung; das ist kein zweiter Linienaufbau. Längste Task 2811 ms;
+angesichts vorheriger 2504 ms in einem Lauf wird keine Gesamtbeschleunigung behauptet.
+Kausaler Pilot stützt die vermutete Initialisierungsursache, bleibt Entwicklungsprofil.
+
+Praktisch geprüft: 100-%-Zoom bleibt beim Navigator-Schließen/Öffnen (Resize),
+Abbild bei 100 % erstellt, geöffnet, auf 120 % gezoomt und Fit zurück auf 100 %;
+Wand über Canvas auswählbar. Datei gespeichert, nach Reload wieder geladen,
+gespeichertes Abbild öffnet erneut mit 100 %. Vollständiger Vergleich von storey
+und assets mit Quellfixture identisch. 908 Tests, Benchmark-Typecheck, gezieltes
+Lint und Produktionsbuild bestanden. Keine Modell-/Dateiformatänderung.
+Nächster Auftrag: produktionsnaher Gesamtbedienlauf vor weiteren Optimierungen.

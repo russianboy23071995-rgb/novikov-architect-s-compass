@@ -10663,3 +10663,7 @@ Unveränderliche, intern registrierte Asset-Handles erhalten schwach gebundene g
 
 ### K02/03 · Grundriss-Aufbau 12.10.2026
 Zwei Detailprofile auf Basis des noch offenen PR277: 10.000 Linien beim Mount 399–528 ms und unmittelbar danach erneut 187–245 ms. Initiale Ersatzgröße und folgende reale Canvas-Messung sind ein konkreter Ursachenkandidat aus dem Code, noch kein kausaler A/B-Nachweis. Nächster Einzelpilot im Masterplan stabilisiert die initiale Kamera; gespeicherte Abbilder und Resize müssen erhalten bleiben. Keine isolierten Paintkosten aus rAF-Zeitpunkten ableiten.
+
+
+### K02/03 · Initiale Kamera 12.10.2026
+Grundriss wird erst mit gemessener Canvas-Größe aufgebaut; unveränderte Resize-Messwerte erzeugen keinen neuen Größenstatus. Kein Framing aus der vorläufigen Ersatzgröße. Die zweite Linien-Renderpassage entfällt in der identischen Fixture. 908 Tests; Browser: Resize/Zoom, Abbild anlegen/öffnen/Fit, Datei wieder öffnen und Canvas-Auswahl. Modell/Bildpayloads identisch. Produktionsnahe Gesamtabnahme steht aus.
