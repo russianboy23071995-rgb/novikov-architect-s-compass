@@ -1,3 +1,4 @@
+import { workspacePhases } from "./workspace-load-trace";
 import { exportPhases } from "./export-trace";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
@@ -42,6 +43,8 @@ exportTrace.onclick = () => {
             events,
             records,
             exportPhases,
+            workspacePhases,
+            mode: import.meta.env.MODE,
             build: "production-workspace",
           },
           null,

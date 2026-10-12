@@ -948,3 +948,39 @@ Nächster begrenzter Auftrag: Übernahme nach Bestätigung bei gleicher Fixture
 gezielt zuordnen (gemeinsame Application-/History-Prüfung, Bildableitung, Rendern).
 Vorhandene Messbausteine nutzen; Messanteile sauber trennen und gegen diesen
 Produktionslauf abgleichen. Erst anschließend eine einzelne Optimierung auswählen.
+
+
+## Produktions-Ladezuordnung (12.10.2026)
+
+PR285 übernommen. Gemeinsamen workspaceLoadInstrumentation-Messbaustein um expliziten
+load-profile-Modus im isolierten Produktions-Workspace erweitert. Regulärer Build
+bleibt ohne diese Transforms. Production-Messung umschließt Funktionen direkt;
+component-call misst nur den Komponentenaufruf einschließlich seiner synchronen
+Unterfunktionen, keine vollständige React-Render-/Commit-/Layout-/GPU-Zeit. Keine
+React-Profiler-Aussage aus diesem Produktionsbuild. Rohdaten enthalten mode und
+workspacePhases. Keine src-Produktänderung.
+
+Gleiche 101,96-MiB-Fixture, frischer Tab bzw. Reload, Bestätigung über Oberfläche.
+[Runde 1](load-attribution-22.json), [Runde 2](load-attribution-23.json).
+Zugehörige erste Tasks 1715/1718 ms gegenüber 2185 ms im uninstrumentierten
+Vergleichslauf: unterschiedliche Läufe, kein kausaler Geschwindigkeitsgewinn.
+Runde 2: load-project 360,9 ms, darin pattern-resolution 309,8 ms und history-commit
+50,9 ms. BimPlan-Aufrufe insgesamt 162,2 ms. PlanSceneContent 282,2 ms, darin
+image-url-validation 272,6 ms für zwölf Bilder. ProjectNavigator <0,1 ms.
+Verschachtelte Werte nicht addieren. Der verbleibende Rest der Task ist nicht
+als reine Renderingzeit nachgewiesen; React-Abgleich, DOM, Layout, weitere Arbeit
+und Mess-/Steuerungseinflüsse sind nicht separat erfasst. Weitere Tasks bis 329 ms.
+
+Codebefund: resolveProjectHatchPatterns serialisiert auch bei unveränderten Mustern
+next vollständig für assertProjectFileSize. Die Testdatei enthält keine Schraffuren,
+aber 100 MiB Bildpayload. Messung belegt den Aufwand des gesamten Musterabgleichs;
+der Anteil der konkreten JSON-/Encodingoperation ist noch nicht einzeln gemessen.
+Nächster Pilot: vorhandenen exakten Größenbaustein nach vollständiger Validierung
+verwenden, identischen Muster-/Konflikt-/Revisions- und Fehlervertrag erhalten.
+Kein Cache oder Auslassen von Validierung aufgrund einer ID.
+
+Typprüfung, fokussiertes ESLint und load-profile-Build bestanden. Regulärer Build
+zusätzlich ausgeführt. Unveränderter Produktcode: 912 Tests aus PR284 als bestehender
+Nachweis, nicht erneut ausgeführt. Browser zeigt 10014 Elemente; gespeicherte Datei
+(44) byteidentisch zur Eingabe (27), keine Konsolenfehler. Keine allgemeine Kapazitäts-
+oder Performancefreigabe; kein Cloudflare-/SSR-Nachweis.

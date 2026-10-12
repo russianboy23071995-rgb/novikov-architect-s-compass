@@ -10691,3 +10691,7 @@ readProjectFile verwendet die UTF-8-Prüfung des Deserializers einmalig. Direkte
 
 ### R26-01/02, K02/03, RC07 · Konsolidierte Abnahme 12.10.2026
 Produktions-Workspace ff9bbba ohne Diagnose-Transforms: 101,96-MiB-Datei, Laden/Abbruch/Bestätigung, Lade-Undo/Redo, Bearbeitung/Undo/Redo, Snapshot/Wiederaufnahme und Abbildöffnung bestanden. Erwartete Downloadstände byteidentisch, keine Konsolenfehler. Übernahme weiterhin 2185/2178-ms-Tasks; keine Freigabe flüssiger Großprojektbedienung. Rohdaten consolidated-production-edit.json und consolidated-production-recovery.json; Methodik in ASSET_RECOVERY_PILOT.md. Nächster Einzelauftrag im Masterplan: verbliebene Übernahmepause zuordnen, bevor weiter optimiert wird.
+
+
+### R26-01/02 · Produktions-Ladezuordnung 12.10.2026
+Opt-in-load-profile mit gemeinsamen Messhelfern, kein Produktumbau. Ladebefehl 360,9 ms einschließlich 309,8 ms Musterabgleich; History 50,9 ms. Bildprüfung 272,6 ms. Komponentenaufrufe sind keine vollständigen Renderzeiten; Rest der 1718-ms-Task unzugeordnet. Browserdatei byteidentisch, Typprüfung/Lint/Builds erfolgreich. ASSET_RECOVERY_PILOT.md und load-attribution-22/23.json dokumentieren Grenzen. Nächster Einzelpilot: Vollserialisierung zur Größenprüfung im Musterabgleich ersetzen, vollständige Validierung und Revisionsregeln bewahren.

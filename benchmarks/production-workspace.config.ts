@@ -1,12 +1,18 @@
+import { workspaceLoadInstrumentation } from "./workspace-load-instrumentation";
 import { exportInstrumentation } from "./export-instrumentation";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwind from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
-// Same real workspace/adapters; no diagnostic transforms or React Profiler.
+// Same real workspace/adapters; transforms only in explicit diagnostic modes.
 // Separate static build/origin; does not replace the deployment/SSR build.
 export default defineConfig(({ mode }) => ({
-  plugins: [...(mode === "export-profile" ? [exportInstrumentation()] : []), react(), tailwind()],
+  plugins: [
+    ...(mode === "export-profile" ? [exportInstrumentation()] : []),
+    ...(mode === "load-profile" ? [workspaceLoadInstrumentation(true)] : []),
+    react(),
+    tailwind(),
+  ],
   resolve: { alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) } },
   build: {
     outDir: "dist-production-workspace",
