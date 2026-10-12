@@ -1,5 +1,49 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Konsolidiertes Projekt-/Assetbudget (12.10.2026)
+
+Codebasis: main `f4bba64` nach freigegebenem PR #257. Dieser Abschnitt ist eine statische Bestandsprüfung mit vorhandenen Messbelegen, keine neue Laufzeitmessung und keine Kapazitätsfreigabe. Verbindlich sind die bestehenden Codegrenzen; die Warnregel weiter unten ist ein Vorschlag.
+
+Prüfung dieses Auftrags: 49 bestehende Tests aus operations, recovery, image import, asset ingress und history bestanden; Byte-/Prozentberechnungen separat nachgerechnet, git diff --check sauber. Kein neuer Build oder Browserlauf, da ausschließlich Dokumentation geändert.
+
+### Tatsächlich geltende Grenzen
+
+| Größe | Aktueller Vertrag und Quelle | Bedeutung / Abgrenzung |
+| --- | --- | --- |
+| Gesamtes Projekt-JSON | 10 × 1024² = 10.485.760 UTF-8-Bytes; `src/interop/project-file/size.ts`, `src/lib/bim/history.ts`, `src/lib/bim/model.ts`, `src/application/project-files/operations.ts` | Eingangsdatei, serialisierter normalisierter Stand, Commit und Download sind begrenzt. Genau die Grenze ist erlaubt. Fehlermeldung nennt bislang ungenau „MB“, tatsächlich MiB. |
+| Quelldatei beim Bildimport | Höchstens 10 MiB vor Lesen; `src/interop/images/import.ts` | Keine Zusage, dass ein solches Bild ins Projekt passt. PNG/JPEG wird nach Dekodierung als PNG eingebettet; JPEG-Quellgröße ist kein Prädiktor für die resultierende Größe. |
+| Einzelnes gespeichertes Bild | Höchstens 10.485.760 Base64-Zeichen; `src/domain/elements/reference/model.ts` | ASCII-Zeichen, keine 10 MiB dekodierte Bilddatei. Höchstens 7.864.320 Binärbytes vor JSON-Metadaten; Projektgrenze greift zusätzlich. Kanonisches Base64 bleibt Pflicht. |
+| Bildabmessungen | Je Achse höchstens 16.384, Produkt höchstens 16.000.000 Pixel; Importheader, Decoderergebnis und Storage-Schema | Nur pro Bild. Keine projektweite Pixel- oder Texturgrenze. 16 MP entsprechen bei RGBA8 allein rechnerisch 64.000.000 Bytes (~61 MiB), ohne Decoder-, Canvas-, GPU- oder Kopierkosten. |
+| Abgeleiteter Bild-URL-Cache | Höchstens 8 Einträge und 48 MiB konservative String-Nutzlast; `src/interop/images/import.ts` | Rechnung `2*(Base64.length+URL.length)` für Input und URL, keine Messung tatsächlichen Heaps. Kein Budget für Modell, History, Browserdecoder oder GPU. Zu große Einträge werden verwendet, aber nicht behalten. |
+| Undo/Redo | Bis 100 vergangene Projektstände; `src/lib/bim/history.ts` | Anzahl begrenzt, Bytes nicht separat begrenzt. Geprüfte unveränderliche Assets können geteilt werden; weder 100 vollständige Bildkopien noch kostenloser Verlauf dürfen pauschal angenommen werden. |
+| Recovery | Ein aktueller Stand plus gültiger Vorgänger je Projekt-ID; `src/application/project-files/recovery.ts`, `src/interop/project-file/recovery-storage.ts` | 10 MiB je Projekt-Snapshot, nicht für den gesamten Recovery-Datensatz. JSON-String-Escaping und Hülle kommen hinzu. Mehrere Projekt-IDs summieren sich; kein eigenes Gesamtquota-/Aufräumbudget. IndexedDB-Transaktionsfehler erhalten den bisherigen Stand. |
+| Autosave | Optional, nach 2 s Pause; `src/application/project-files/autosave.ts` | Zeitsteuerung ist keine Speicher- oder Latenzgarantie. Modellprüfung/Serialisierung weiterhin synchron. |
+
+MiB bezeichnet hier stets 1.048.576 Bytes. Base64-Länge ist `4*ceil(Binärbytes/3)`. Die vorhandene große Workspace-Datei mit 9.616.625 Bytes nutzt 91,71 % der 10-MiB-Grenze; rechnerisch bleiben 869.135 Bytes. Das ist Dateireserve, kein freier RAM. Recovery-Größe exakt am erzeugten Envelope messen, nicht mit „zweimal Dateigröße“ garantieren. Das ältere Profil mit 9.648.019 Projektbytes und 19.296.698 Recoverybytes ist nur ein konkreter Datensatz.
+
+### Was die bisherigen Messungen erlauben
+
+- PR #256: 9,17-MiB-Workspace-Datei, 1550×1550-PNG, eine Wand/ein Fenster/eine Referenz: erste Bestätigung bis zwei Frames 201,2 ms, längste Task 183 ms; warmer Median 176,8 ms. Export blieb identisch. Kein Vollnachweis für große Geometrie plus viele Bilder.
+- Base64-Serviceprofil: 10.000-Geometrie-Profil mit etwa 1,55 MiB: Dateivorbereitung 75,1 ms und Recovery-Lesen 91,3 ms (warme Mediane). Größe allein ist kein zuverlässiger Laufzeitindikator.
+- Die Tabellen vom 10.10. und die früheren 0,8–1,3-s-Befunde sind historische Baselines. Nicht als aktuelle Geschwindigkeit nach den Optimierungen darstellen. Unterschiedliche Phasen nicht addieren oder direkt gleichsetzen.
+- Windows/Chromium auf einem Rechner, synthetische Daten, wenige Wiederholungen. Aktuelle Spitzenspeicher-/GPU-, viele-hochkomprimierte-Bilder-, Langhistory-, macOS- und reale Projektmessungen fehlen. Frühere History-Messungen ersetzen diese Abnahme nicht.
+
+### Empfehlung: zuerst Dateireserve sichtbar machen
+
+**Vorschlag, noch nicht implementiert:** Eine nicht blockierende Warnung ab 80 % der bestehenden Projektgrenze (8 MiB = 8.388.608 Bytes). Dieser Wert ist ein vorsichtiger Bedienvorschlag mit 2 MiB Reserve, keine aus Latenzen abgeleitete Leistungsgrenze. Unterhalb der Schwelle wird keine Aussage „sicher“ oder „flüssig“ angezeigt. Das bestehende harte Limit bleibt unverändert. Ein Import kann direkt von unter 80 % über 100 % springen; die Warnung garantiert deshalb keinen erfolgreichen Folgeimport.
+
+Beispiel: „Projektdatei: 8,4 von 10 MiB. Eingebettete Bilder benötigen einen Teil dieses Platzes. Weitere Änderungen können die Dateigrenze erreichen.“ Nicht empfehlen, zum Platzsparen Ebenen auszublenden: Unsichtbare Inhalte bleiben gespeichert. Nicht automatisch Bilder verkleinern, Assets/Snapshots löschen oder Nutzeränderungen bestätigen. Keine ständig wiederkehrenden modalen Dialoge; Status mit einmaligem Hinweis beim Eintritt in den Warnbereich, erneute Aktivierung erst nach Unterschreiten oder Kontextwechsel.
+
+**Zuständigkeit:** Application-Query liefert typisierte Dateinutzungsdaten und Warnstatus für den tatsächlich bestätigten Projektstand; Interop hält die bestehende Bytegrenze/UTF-8-Messung. UI zeigt ausschließlich das Ergebnis. Keine zweite Größenformel in Werkzeugen, keine direkte Persistenz in der Domain und kein zusätzliches Modellfeld/Undo-Ereignis. Spätere AI/Text/Voice kann dieselbe Query lesen.
+
+**Kosten-/Kontextvertrag für den Piloten:** Bestehende Serialisierungs-/Größenprüfung am Commit/Laden nach Möglichkeit für eine abgeleitete Messung verwenden. Kein vollständiges stringify/TextEncoder bei Pointerbewegung oder jedem React-Render. Vor Implementation prüfen, wie bestätigte normalisierte Bytes ohne größere History-API-Änderung weitergereicht werden können; andernfalls eine begrenzte, revisionsgebundene verzögerte Query messen. Ergebnisse nur für aktuelle Projektidentität/Revision publizieren; neue Inhalte, gleicher-ID-Ladevorgang, Undo/Redo und auch gespeicherte Ansichtseinstellungen invalidieren sie. Ein alter Messwert darf nicht als aktuelle Reserve erscheinen. Vorschau und abgebrochene/abgelehnte Änderungen veröffentlichen keinen neuen Wert. Unbekannt/Prüfung läuft ausdrücklich von 0 unterscheiden.
+
+**Abnahme des begrenzten Piloten:** Exakte Bytes mit Unicode, Base64 und JSON-Escaping gegen UTF-8-Export vergleichen; 8 MiB knapp darunter/genau/darüber, 10 MiB genau/darüber; Laden/Undo/Redo/Abbruch und gleicher-ID-Kontext; neue Asset- und Ansichtsänderungen; keine zweite Vollserialisierung pro Pointerereignis; Warnung im Browser mit der vorhandenen 9,17-MiB-Fixture und kleinem Kontrollprojekt. Keine neue Geometrie-, Pixel- oder RAM-Sperre.
+
+### Entscheidungen vor weitergehenden Budgets
+
+Für diesen Warnpiloten ist nur die nicht blockierende 80-%-Bedienregel abzustimmen. Das ist kein Freibrief für höhere Limits. Vor einer Limit-/Formatänderung: unterstützte Projektprofile und Referenzhardware, Zielplattformen, akzeptierte Wartezeiten, Gesamtpixel-/Spitzenspeicherziel sowie portable versus verknüpfte Assets entscheiden. Browser-Speicherquoten sind adapterabhängig; eine spätere Speicherabschätzung darf nur als Schätzung erscheinen und ersetzt keinen erfolgreichen Schreibabschluss. Eine pauschale Verdoppelung des 10-MiB-Limits, ein Worker oder Rendererwechsel folgt aus diesen Daten nicht.
+
 ## Startangebot – frischer Browserlauf
 
 **Startangebot-Abnahme (12.10.2026, test/recovery-startup-lifecycle):** PR #256 mit erfolgreicher CI und ausdrücklicher Freigabe zusammengeführt (main bc852a3). Frischer Browserlauf auf isoliertem Test-Origin 8082, ohne Quelltextänderung/Hot-Reload während der Prüfung: Startangebot vorhanden; „Stände auswählen“ und „Weiterarbeiten“ blenden es aus. Recovery-Abbruch verändert das Modell nicht; bestätigte Recovery lädt den gespeicherten 4-m-Stand samt Bildreferenz ohne Resthinweis. Reguläres Dateiladen: Abbruch erhält Startangebot und 3-m-Ausgangsmodell ohne Undo-Eintrag; Bestätigung blendet das Angebot aus. Gleiche Projekt-ID project-1 ebenfalls geprüft: Laden, Undo und Redo ändern die Bildreferenz wie erwartet, ohne erneutes Startangebot. Keine Konsolenwarnungen/-fehler. 878 Tests bestanden, einschließlich bestehender verzögerter Offer-/Kontext-/Same-ID-Prüfungen. Produktionscode unverändert; früherer Resthinweis nicht reproduziert, Hot-Reload als Ursache nicht bewiesen. Lokaler Screenshot outputs/recovery-startup-lifecycle.png. Keine Snapshotlöschung und keine Änderung der Nutzer-Recovery auf 8080.
