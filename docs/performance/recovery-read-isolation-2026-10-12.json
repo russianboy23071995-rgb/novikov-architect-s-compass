@@ -1,0 +1,115 @@
+{
+  "dbName": "novikov-asset-recovery-pilot-28cbc876-3e39-4d6d-94e3-3c0cc4276751",
+  "started": "2026-10-12T14:33:12.732Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "phases": [
+    {
+      "name": "service-0",
+      "start": 9123.200000017881,
+      "end": 10784.800000011921,
+      "heap": 432292690
+    },
+    {
+      "name": "comparison-0",
+      "start": 10785.90000000596,
+      "end": 11230.200000017881,
+      "heap": 626456464
+    },
+    {
+      "name": "service-1",
+      "start": 11286.800000011921,
+      "end": 12931.700000017881,
+      "heap": 407223797
+    },
+    {
+      "name": "comparison-1",
+      "start": 12932,
+      "end": 13352.100000023842,
+      "heap": 604617640
+    },
+    {
+      "name": "service-2",
+      "start": 13353.5,
+      "end": 14997.300000011921,
+      "heap": 443735921
+    },
+    {
+      "name": "comparison-2",
+      "start": 14997.600000023842,
+      "end": 15419.100000023842,
+      "heap": 637821546
+    }
+  ],
+  "checks": [
+    "full model, payloads and revision 1",
+    "full model, payloads and revision 2",
+    "full model, payloads and revision 3"
+  ],
+  "heapBefore": 13648280,
+  "longTasks": [
+    {
+      "start": 9126.300000011921,
+      "ms": 52
+    },
+    {
+      "start": 9319,
+      "ms": 1465
+    },
+    {
+      "start": 10785.800000011921,
+      "ms": 444
+    },
+    {
+      "start": 11454.200000017881,
+      "ms": 1477
+    },
+    {
+      "start": 12931.800000011921,
+      "ms": 420
+    },
+    {
+      "start": 13356,
+      "ms": 91
+    },
+    {
+      "start": 13578.600000023842,
+      "ms": 1418
+    },
+    {
+      "start": 14997.40000000596,
+      "ms": 421
+    }
+  ],
+  "serviceParts0": {
+    "indexedDB": 199.80000001192093,
+    "schema": 237.4000000655651,
+    "decode": 388.6999998688698,
+    "header": 0.5000000596046448,
+    "hashInput": 342.40000000596046,
+    "hash": 85.69999995827675,
+    "model": 405.09999999403954
+  },
+  "releasedHeap0": 626456464,
+  "serviceParts1": {
+    "indexedDB": 167.40000000596046,
+    "schema": 237.30000001192093,
+    "decode": 389.7000000178814,
+    "header": 0.3999999761581421,
+    "hashInput": 349.19999995827675,
+    "hash": 104.70000004768372,
+    "model": 378.2000000178814
+  },
+  "releasedHeap1": 604617640,
+  "serviceParts2": {
+    "indexedDB": 225.10000002384186,
+    "schema": 222.09999999403954,
+    "decode": 382.7000000178814,
+    "header": 0.09999999403953552,
+    "hashInput": 351.5,
+    "hash": 91.19999995827675,
+    "model": 370.2000000178814
+  },
+  "releasedHeap2": 637821546,
+  "status": "passed",
+  "heapAfter": 637821546
+}

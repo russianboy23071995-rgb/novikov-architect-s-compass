@@ -179,6 +179,9 @@ run.onclick = async () => {
       store.publish(second, one.revision),
     );
     report["second"] = two;
+    await mutate(db, "control", (s) =>
+      s.put({ projectId: p.id, hash: expected, revision: two.revision }, "expected"),
+    );
     check(
       two.payloadWrites === 0 && two.payloadBytes === 0,
       "second revision writes zero image bytes",

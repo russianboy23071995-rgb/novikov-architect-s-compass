@@ -184,3 +184,49 @@ Bewertung: funktionaler 100-MiB-Service-Nachweis gelungen, keine produktive Kapa
 Vor weiteren Größenstufen müssen die Messkopien von Servicekosten und Hauptthreadpausen
 getrennt werden. Genau ein Folgeauftrag dazu steht in Masterplan §9; kein vorsorglicher
 Architektur-/Workerwechsel und keine Wiederholung der bereits geklärten Decoderfrage.
+
+## Service und Prüfkopien getrennt (12.10.2026)
+
+Basis `7ddb5aa` (PR262 nach grüner CI und ausdrücklicher Freigabe zusammengeführt).
+Neue reine Leseseite `benchmarks/recovery-read-isolation.html`; Speicheradapter und
+Validierungslogik unverändert. Der bestehende Fixturelauf speichert zusätzlich nur den
+vorab berechneten Sollhash, Projekt-ID und Revision als kleine Diagnosemetadaten.
+Die Leseseite öffnet ausschließlich eine vorhandene Pilotdatenbank (Version 1).
+Sie lädt keine monolithische Kontrollhülle und keine Ausgangsfixture in den Speicher.
+Vorbereitungstab geschlossen, danach frische Leseseite; kein erzwungenes GC.
+
+[Fixture-/Fehlerprüfungen](recovery-isolation-seed-2026-10-12.json): erneut 15 bestanden.
+[Isolierte Rohdaten](recovery-read-isolation-2026-10-12.json): drei Wiederholungen,
+jeweils vollständiger Modell-/Payloadhash und identische Revision bestätigt. Die
+Integritätsprüfungen des Service bleiben unverändert. IndexedDB-Inhalte der Leseseite
+werden nicht geändert. Ein Timer-Task trennt Service und zusätzlichen Vergleich;
+Ergebnisreferenz nach Vergleich freigegeben. Speicherfreigabe durch GC wird nicht behauptet.
+
+| Messung | Ergebnis |
+| --- | --- |
+| Servicezeiten | 1.662 / 1.645 / 1.644 ms |
+| Zusätzlicher Ergebnisvergleich | 444 / 420 / 422 ms |
+| Längste Service-Tasks je Runde | 1.465 / 1.477 / 1.418 ms |
+| Vergleichs-Tasks | 444 / 420 / 421 ms |
+| JS-Heap nach Service | 432.292.690 / 407.223.797 / 443.735.921 Bytes |
+| JS-Heap nach Vergleich | 626.456.464 / 604.617.640 / 637.821.546 Bytes |
+
+Phasen und Long Tasks teilen dieselbe Performance-Zeitbasis. Taskstarts können dem
+ersten `performance.now()` einer Phase minimal vorausgehen; Zuordnung über Überlappung,
+nicht bloß start >= Phasenstart. Die separate abschließende Modellvalidierung benötigt
+hier 370–405 ms. Ein synchroner Abschnitt bleibt also selbst nach Aufteilung der
+Bildschleife relevant. Kein OS-Kaltstart, Gesamtprozess-RAM oder GPU-Messwert; die
+Chromium-Heap-Stichprobe ist kein Peak. Die früheren 2,08 GiB waren durch den breiteren
+Testaufbau beeinflusst; ein allgemeines Speicherleck lässt sich daraus nicht ableiten.
+
+**Befund:** Die Browserpause ist auch ohne Vergleich real. Der nächste begrenzte Pilot
+soll kooperativ zwischen Assetprüfungen und vor der abschließenden Modellprüfung an den
+Browser abgeben. Vollständige Validierung bleibt Voraussetzung einer Rückgabe; kein
+teilvalidiertes Modell. Restpause der Modellvalidierung getrennt messen, nicht verdecken.
+Keine Produktions-/Worker-/Formatänderung aus diesem Nachweis.
+
+884 Tests, beide Typechecks, Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+Praktische Reproduktion: aktuellen 100-MiB-Fixturelauf ausführen, dessen `dbName` aus
+dem Ergebnis kopieren, Vorbereitungstab schließen, auf Port 8084 die neue Leseseite
+öffnen, Datenbanknamen einsetzen, **Lesetest starten**. Erwartet: **Bestanden: 3 vollständige
+Vergleiche**. Alte Pilotdatenbanken ohne Sollhash werden verständlich abgewiesen.
