@@ -822,3 +822,28 @@ Application- und Serializer-Tests bleiben erhalten. Keine Format-/Budgetänderun
 
 Nächster begrenzter Pilot: vorhandenen exakten Größenbaustein für validierte Base64-Assets
 im Serializer prüfen, damit auch die verbleibende vollständige UTF-8-Payloadkopie entfällt.
+
+
+## Serializer-Budget ohne volle Encodingkopie (12.10.2026)
+
+serializeProject: validateProject bleibt vollständig; danach assertValidatedProjectSize
+mit dem bestehenden gemeinsamen Bytezähler, anschließend unverändertes JSON.stringify.
+Validierte Base64-Payloads sind ASCII und benötigen kein JSON-Escaping. Alle übrigen
+Felder werden weiterhin strukturell serialisiert und als UTF-8 gezählt. Kein Cache,
+keine ID-basierte Annahme, kein Dateiformat- oder Limitwechsel.
+
+Zwei neue Regressionen: Ausgabe identisch zur Voll-JSON-Referenz bei Unicode, Emoji,
+Lone Surrogate, Anführungszeichen, Backslash/Newline und gleichen Payloads; ungültige
+Base64 wird abgewiesen. Exakt 128 MiB werden akzeptiert, ein zusätzliches ä abgewiesen.
+910 Tests bestanden, Benchmark-Typecheck, gezieltes Lint und beide Builds bestanden.
+
+Gleicher Recoverystand/Produktions-Workspace wie zuvor, zwei Downloads:
+[Nachher](serializer-byte-budget.json), [Vorher](export-phases-after.json).
+Größenprüfung 16/11,4 statt 272,5/259 ms; Tasks 511/412 statt 710/620 ms.
+Downloads (35)/(36) byteidentisch mit (33). Neue stringify-Phase misst nur Stringify;
+die frühere Diagnosephase gleichen Namens enthielt zusätzlich Validierung.
+Keine Summierung verschachtelter Altwerte. Kleine Stichprobe, keine allgemeine
+Performancegarantie. Blob/URL bleibt mit 264–276 ms ein wesentlicher Restanteil.
+
+Nächster begrenzter Auftrag: erneute Vollserialisierung allein zur Größenprüfung
+in prepareProjectOpen untersuchen und durch denselben geprüften Baustein ersetzen.

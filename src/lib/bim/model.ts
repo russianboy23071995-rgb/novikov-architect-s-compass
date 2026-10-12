@@ -1,4 +1,4 @@
-import { assertProjectFileSize } from "../../interop/project-file/size.ts";
+import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
 import { reconcileTJunctions } from "../../domain/elements/wall/t-relations.ts";
 import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -141,9 +141,9 @@ export function windowCentre(project: Project, windowId: string): Point {
 }
 
 export function serializeProject(project: Project): string {
-  const json = JSON.stringify(validateProject(project));
-  assertProjectFileSize(json);
-  return json;
+  const checked = validateProject(project);
+  assertValidatedProjectSize(checked);
+  return JSON.stringify(checked);
 }
 
 export function addLine(project: Project, line: Creation<DrawingLine>): Project {

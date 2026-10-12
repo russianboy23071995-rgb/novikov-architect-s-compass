@@ -1,0 +1,225 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 5775.0999999940395,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 6056.199999988079,
+      "label": "Stand prüfen"
+    },
+    {
+      "at": 19063.399999976158,
+      "label": "Wiederaufnahme vorbereiten"
+    },
+    {
+      "at": 19541.09999999404,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 27856.19999998808,
+      "label": "Save project"
+    },
+    {
+      "at": 31718.29999998212,
+      "label": "Save project"
+    },
+    {
+      "at": 34422.89999997616,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 82.2999999821186,
+      "duration": 64
+    },
+    {
+      "start": 148.5,
+      "duration": 170
+    },
+    {
+      "start": 6481.199999988079,
+      "duration": 129
+    },
+    {
+      "start": 6610.299999982119,
+      "duration": 123
+    },
+    {
+      "start": 6734.0999999940395,
+      "duration": 137
+    },
+    {
+      "start": 6871.799999982119,
+      "duration": 122
+    },
+    {
+      "start": 6994.5,
+      "duration": 119
+    },
+    {
+      "start": 7113.799999982119,
+      "duration": 133
+    },
+    {
+      "start": 7251.899999976158,
+      "duration": 131
+    },
+    {
+      "start": 7387.699999988079,
+      "duration": 129
+    },
+    {
+      "start": 7520.799999982119,
+      "duration": 133
+    },
+    {
+      "start": 7670,
+      "duration": 140
+    },
+    {
+      "start": 7816,
+      "duration": 128
+    },
+    {
+      "start": 7949.299999982119,
+      "duration": 114
+    },
+    {
+      "start": 8069,
+      "duration": 57
+    },
+    {
+      "start": 8131.5999999940395,
+      "duration": 55
+    },
+    {
+      "start": 19540.79999998212,
+      "duration": 2196
+    },
+    {
+      "start": 21737.69999998808,
+      "duration": 138
+    },
+    {
+      "start": 22343.59999999404,
+      "duration": 112
+    },
+    {
+      "start": 22463.899999976158,
+      "duration": 101
+    },
+    {
+      "start": 22566,
+      "duration": 92
+    },
+    {
+      "start": 22666.29999998212,
+      "duration": 94
+    },
+    {
+      "start": 22760.899999976158,
+      "duration": 95
+    },
+    {
+      "start": 22864.69999998808,
+      "duration": 92
+    },
+    {
+      "start": 22962.5,
+      "duration": 113
+    },
+    {
+      "start": 23089,
+      "duration": 105
+    },
+    {
+      "start": 23199.69999998808,
+      "duration": 106
+    },
+    {
+      "start": 23310.899999976158,
+      "duration": 108
+    },
+    {
+      "start": 23424.399999976158,
+      "duration": 103
+    },
+    {
+      "start": 23532.79999998212,
+      "duration": 93
+    },
+    {
+      "start": 23678.69999998808,
+      "duration": 125
+    },
+    {
+      "start": 27855.29999998212,
+      "duration": 511
+    },
+    {
+      "start": 31717.899999976158,
+      "duration": 412
+    }
+  ],
+  "exportPhases": [
+    {
+      "phase": "utf8-size",
+      "start": 157,
+      "duration": 0.3999999761581421
+    },
+    {
+      "phase": "utf8-size",
+      "start": 290.89999997615814,
+      "duration": 0
+    },
+    {
+      "phase": "utf8-size",
+      "start": 19712.69999998808,
+      "duration": 340.90000000596046
+    },
+    {
+      "phase": "validate",
+      "start": 27856.29999998212,
+      "duration": 76.7000000178814
+    },
+    {
+      "phase": "validated-size",
+      "start": 27933,
+      "duration": 16
+    },
+    {
+      "phase": "stringify",
+      "start": 27949,
+      "duration": 93.7999999821186
+    },
+    {
+      "phase": "blob-and-url",
+      "start": 28065.59999999404,
+      "duration": 275.69999998807907
+    },
+    {
+      "phase": "validate",
+      "start": 31718.399999976158,
+      "duration": 38
+    },
+    {
+      "phase": "validated-size",
+      "start": 31756.399999976158,
+      "duration": 11.400000005960464
+    },
+    {
+      "phase": "stringify",
+      "start": 31767.79999998212,
+      "duration": 90.59999999403954
+    },
+    {
+      "phase": "blob-and-url",
+      "start": 31858.399999976158,
+      "duration": 264.30000001192093
+    }
+  ],
+  "build": "production-workspace"
+}
