@@ -10647,3 +10647,11 @@ Entwurf gegen gemeinsame ToolSnapPolicy, Hover und Picking abgleichen. Zustands-
 Die erneut bereitgestellte FUNKTIONEN-DOCX hat exakt den SHA-256 der Repository-Transkription vom 08.10.; ihr Wortlaut ist oben vollständig erhalten. Das ältere FUNKTIONEN-PDF wurde zusätzlich textuell geprüft und enthält den früheren Katalog; die DOCX ergänzt dessen Schlusswünsche. Frühe lokale Guides sind historische Fassungen, keine zusätzlichen aktiven Aufträge.
 
 **Integrationsnachweis 12.10.2026 (PR124):** Offset-Textbefehl für geschlossene 2D-Polylinien und Schraffuren an aktuellen gemeinsamen Auswahlkontext angepasst. Keine eigene Geometrielogik; Cap und Validierung aus Direct Edit. Kontextwechsel abgewiesen, Übernahme über bestehende History. 871 Tests und Build bestanden.
+
+
+### R26-01/02 · Workspace-Ladeprofil 12.10.2026
+Zwei echte Dateiöffnungen derselben 100-MiB-Fixture mit getrennten React-/Application-Timern: Navigator 821–987 ms plus Folge-Render 379–439 ms; Grundriss ebenfalls wesentlich. Bild-URL-Cache verursacht 24 Prüfungen für zwölf Bilder. Keine Produktoptimierung oder weitere Kapazitätsfreigabe. Nächster einzelner Auftrag im Masterplan: begrenzte Navigator-Zeilen. K02/03 und RC07 bleiben teilweise offen; Nachweis in docs/performance/ASSET_RECOVERY_PILOT.md.
+
+
+### Navigator · Nutzerentscheidung 12.10.2026
+Einzelelemente werden nicht mehr im Navigator aufgelistet. Die Gebäudestruktur zeigt Projekt und vorhandenes Geschoss; der Abbildtab bleibt. Geometrieauswahl erfolgt im Canvas. Die zuvor geplante Virtualisierung der Elementliste entfällt. Mehrgeschossverwaltung wird dadurch nicht vorweggenommen. R26-01/02, K02/03: Navigator-Anteil am 100-MiB-Laden auf 1,3 ms reduziert, Gesamt-Ladepause bleibt offen.

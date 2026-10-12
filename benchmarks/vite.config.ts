@@ -1,3 +1,4 @@
+import { workspaceLoadInstrumentation } from "./workspace-load-instrumentation";
 import { solidInstrumentation } from "./solid-instrumentation";
 import { movementInstrumentation } from "./movement-instrumentation";
 import { defineConfig } from "vite";
@@ -5,7 +6,13 @@ import react from "@vitejs/plugin-react";
 import tailwind from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 export default defineConfig({
-  plugins: [solidInstrumentation(), movementInstrumentation(), react(), tailwind()],
+  plugins: [
+    workspaceLoadInstrumentation(),
+    solidInstrumentation(),
+    movementInstrumentation(),
+    react(),
+    tailwind(),
+  ],
   resolve: { alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) } },
   server: { host: "127.0.0.1", port: 8081, strictPort: true },
 });

@@ -1,0 +1,593 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 5173.800000011921,
+      "label": "Open project"
+    },
+    {
+      "at": 17262.19999998808,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 31208.19999998808,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 297.59999999403954,
+      "duration": 56
+    },
+    {
+      "start": 354.19999998807907,
+      "duration": 175
+    },
+    {
+      "start": 5370.5,
+      "duration": 1286
+    },
+    {
+      "start": 17261.90000000596,
+      "duration": 4896
+    },
+    {
+      "start": 22158.69999998808,
+      "duration": 355
+    },
+    {
+      "start": 22756.59999999404,
+      "duration": 96
+    },
+    {
+      "start": 22853.5,
+      "duration": 95
+    },
+    {
+      "start": 22949.30000001192,
+      "duration": 88
+    },
+    {
+      "start": 23037.40000000596,
+      "duration": 80
+    },
+    {
+      "start": 23117.69999998808,
+      "duration": 82
+    },
+    {
+      "start": 23199.80000001192,
+      "duration": 82
+    },
+    {
+      "start": 23286.80000001192,
+      "duration": 78
+    },
+    {
+      "start": 23370,
+      "duration": 84
+    },
+    {
+      "start": 23458.40000000596,
+      "duration": 81
+    },
+    {
+      "start": 23543.90000000596,
+      "duration": 80
+    },
+    {
+      "start": 23628.59999999404,
+      "duration": 83
+    },
+    {
+      "start": 23715.80000001192,
+      "duration": 84
+    }
+  ],
+  "workspacePhases": [
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "mount",
+      "actualDuration": 2.4000000059604645,
+      "baseDuration": 1.600000023841858,
+      "startTime": 430.09999999403954,
+      "commitTime": 445.69999998807907
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "mount",
+      "actualDuration": 3.199999988079071,
+      "baseDuration": 2.5,
+      "startTime": 439.59999999403954,
+      "commitTime": 445.69999998807907
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "mount",
+      "actualDuration": 89.60000002384186,
+      "baseDuration": 73.80000001192093,
+      "startTime": 354.69999998807907,
+      "commitTime": 445.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "patterns-changed",
+      "start": 459.19999998807907,
+      "duration": 0.30000001192092896
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "nested-update",
+      "actualDuration": 0.7999999821186066,
+      "baseDuration": 0.7999999821186066,
+      "startTime": 494.40000000596046,
+      "commitTime": 508.90000000596046
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "nested-update",
+      "actualDuration": 3.300000011920929,
+      "baseDuration": 3.2000000178813934,
+      "startTime": 503.5,
+      "commitTime": 508.90000000596046
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "nested-update",
+      "actualDuration": 49.10000005364418,
+      "baseDuration": 47.700000047683716,
+      "startTime": 459.19999998807907,
+      "commitTime": 508.90000000596046
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "nested-update",
+      "actualDuration": 0.7000000178813934,
+      "baseDuration": 0.8999999761581421,
+      "startTime": 527.5999999940395,
+      "commitTime": 528.4000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "nested-update",
+      "actualDuration": 0.7000000178813934,
+      "baseDuration": 47.700000047683716,
+      "startTime": 527.4000000059605,
+      "commitTime": 528.4000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.5999999940395355,
+      "baseDuration": 0.8999999761581421,
+      "startTime": 561.8000000119209,
+      "commitTime": 566.5
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 5.699999988079071,
+      "baseDuration": 45.200000047683716,
+      "startTime": 560.5999999940395,
+      "commitTime": 566.5
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.6000000238418579,
+      "baseDuration": 0.9000000059604645,
+      "startTime": 575.1999999880791,
+      "commitTime": 575.9000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0.7000000178813934,
+      "baseDuration": 45.20000007748604,
+      "startTime": 575.0999999940395,
+      "commitTime": 575.9000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 2.7000000178813934,
+      "baseDuration": 47.800000071525574,
+      "startTime": 806.6999999880791,
+      "commitTime": 809.4000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0,
+      "baseDuration": 47.70000007748604,
+      "startTime": 831.3000000119209,
+      "commitTime": 831.4000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0,
+      "baseDuration": 47.70000007748604,
+      "startTime": 5174.199999988079,
+      "commitTime": 5174.4000000059605
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.30000001192092896,
+      "baseDuration": 0.5999999940395355,
+      "startTime": 5231.0999999940395,
+      "commitTime": 5241.0999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "update",
+      "actualDuration": 2.2999999821186066,
+      "baseDuration": 2.2999999821186066,
+      "startTime": 5236.800000011921,
+      "commitTime": 5241.0999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 37.49999997019768,
+      "baseDuration": 37.099999994039536,
+      "startTime": 5203,
+      "commitTime": 5241.0999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.19999998807907104,
+      "baseDuration": 0.4999999701976776,
+      "startTime": 6688.300000011921,
+      "commitTime": 6694.5999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "update",
+      "actualDuration": 1.5,
+      "baseDuration": 1.5,
+      "startTime": 6692,
+      "commitTime": 6694.5999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 25.099999994039536,
+      "baseDuration": 24.59999993443489,
+      "startTime": 6669.300000011921,
+      "commitTime": 6694.5999999940395
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0.09999999403953552,
+      "baseDuration": 24.299999922513962,
+      "startTime": 6703.0999999940395,
+      "commitTime": 6703.199999988079
+    },
+    {
+      "kind": "application",
+      "event": "load-project",
+      "start": 17262.59999999404,
+      "duration": 368.7000000178814
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 17913.09999999404,
+      "duration": 28.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 17941.90000000596,
+      "duration": 22.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 17965,
+      "duration": 22.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 17987.90000000596,
+      "duration": 22.19999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18010.19999998808,
+      "duration": 22.30000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18032.69999998808,
+      "duration": 22.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18055.5,
+      "duration": 22.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18078.40000000596,
+      "duration": 24
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18102.59999999404,
+      "duration": 22.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18125.19999998808,
+      "duration": 22.30000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18147.69999998808,
+      "duration": 22.80000001192093
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 18170.59999999404,
+      "duration": 24.599999994039536
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "mount",
+      "actualDuration": 1165,
+      "baseDuration": 684.1999996602535,
+      "startTime": 17699.19999998808,
+      "commitTime": 19743.09999999404
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "mount",
+      "actualDuration": 820.9000001549721,
+      "baseDuration": 397.7999995946884,
+      "startTime": 18875.09999999404,
+      "commitTime": 19743.09999999404
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 2455.6000000834465,
+      "baseDuration": 1516.6999993026257,
+      "startTime": 17262.59999999404,
+      "commitTime": 19743.09999999404
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 20581.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20603.90000000596,
+      "duration": 20.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20624.90000000596,
+      "duration": 19.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20644.69999998808,
+      "duration": 18.600000023841858
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20663.40000000596,
+      "duration": 18.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20682.30000001192,
+      "duration": 18.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20701,
+      "duration": 18.900000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20719.90000000596,
+      "duration": 19.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20739.80000001192,
+      "duration": 18.69999998807907
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20758.5,
+      "duration": 19
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20777.59999999404,
+      "duration": 18.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20796.30000001192,
+      "duration": 18.799999982118607
+    },
+    {
+      "kind": "application",
+      "event": "image-url-validation",
+      "start": 20815.09999999404,
+      "duration": 26.200000017881393
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "nested-update",
+      "actualDuration": 430.79999989271164,
+      "baseDuration": 417.6999998688698,
+      "startTime": 20603.5,
+      "commitTime": 21439.80000001192
+    },
+    {
+      "kind": "react-render",
+      "id": "ProjectNavigator",
+      "phase": "nested-update",
+      "actualDuration": 379.1999998688698,
+      "baseDuration": 349.2999995946884,
+      "startTime": 21040.90000000596,
+      "commitTime": 21439.80000001192
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "nested-update",
+      "actualDuration": 834.8999998271465,
+      "baseDuration": 790.9999995231628,
+      "startTime": 20581,
+      "commitTime": 21439.80000001192
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "nested-update",
+      "actualDuration": 0.5,
+      "baseDuration": 417.89999985694885,
+      "startTime": 21841.90000000596,
+      "commitTime": 21842.80000001192
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "nested-update",
+      "actualDuration": 0.7000000178813934,
+      "baseDuration": 791.0999994874,
+      "startTime": 21841.80000001192,
+      "commitTime": 21842.80000001192
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.4000000059604645,
+      "baseDuration": 417.7999998629093,
+      "startTime": 22517.59999999404,
+      "commitTime": 22520.90000000596
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 6.200000017881393,
+      "baseDuration": 791.2999994754791,
+      "startTime": 22514.69999998808,
+      "commitTime": 22520.90000000596
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0.5,
+      "baseDuration": 417.89999985694885,
+      "startTime": 22597.40000000596,
+      "commitTime": 22597.90000000596
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0.5999999940395355,
+      "baseDuration": 791.3999994695187,
+      "startTime": 22597.30000001192,
+      "commitTime": 22597.90000000596
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0.30000001192092896,
+      "baseDuration": 791.5999994874,
+      "startTime": 22673.09999999404,
+      "commitTime": 22673.5
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0.09999999403953552,
+      "baseDuration": 791.6999994814396,
+      "startTime": 23881.40000000596,
+      "commitTime": 23881.59999999404
+    },
+    {
+      "kind": "react-render",
+      "id": "BimPlan",
+      "phase": "update",
+      "actualDuration": 0,
+      "baseDuration": 417.89999985694885,
+      "startTime": 31192.5,
+      "commitTime": 31193
+    },
+    {
+      "kind": "react-render",
+      "id": "workspace",
+      "phase": "update",
+      "actualDuration": 0,
+      "baseDuration": 791.6999994814396,
+      "startTime": 31192.5,
+      "commitTime": 31193
+    }
+  ]
+}

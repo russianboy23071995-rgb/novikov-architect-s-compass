@@ -16,7 +16,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
 import type { Project } from "@/lib/bim/model";
-import { wallLength } from "@/lib/bim/model";
 
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;
@@ -102,54 +101,20 @@ function NavigatorContent({
   ...documents
 }: ProjectNavigatorProps) {
   const [tab, setTab] = useState<"model" | "documents">("model");
-  const modelTree = useMemo(() => {
-    const openings = new globalThis.Map<string, Project["storey"]["windows"]>();
-    for (const window of project.storey.windows) {
-      if (!openings.has(window.wallId)) openings.set(window.wallId, []);
-      openings.get(window.wallId)!.push(window);
-    }
-    return [
-      {
-        id: project.id,
-        label: "BIM Project",
-        kind: "group",
-        children: [
-          {
-            id: project.storey.id,
-            label: "Level 01",
-            kind: "group",
-            children: [
-              ...project.storey.walls.map((wall, index): TreeNode => ({
-                id: wall.id,
-                label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
-                kind: "group",
-                children: (openings.get(wall.id) ?? []).map((opening, index) => ({
-                  id: opening.id,
-                  label: `Window ${index + 1} · ${opening.width.toFixed(2)} m`,
-                  kind: "item",
-                })),
-              })),
-              ...project.storey.references.map((r, index): TreeNode => ({
-                id: r.id,
-                label: `Bildreferenz ${index + 1}`,
-                kind: "item",
-              })),
-              ...project.storey.hatches.map((hatch, index): TreeNode => ({
-                id: hatch.id,
-                label: `Schraffur ${index + 1}`,
-                kind: "item",
-              })),
-              ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
-                id: line.id,
-                label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
-                kind: "item",
-              })),
-            ],
-          },
-        ],
-      },
-    ] satisfies TreeNode[];
-  }, [project]);
+  // The navigator represents project/storey structure, never individual geometry.
+  // Its row count is independent of the number of elements in the storey.
+  const modelTree = useMemo(
+    () =>
+      [
+        {
+          id: project.id,
+          label: "BIM Project",
+          kind: "group",
+          children: [{ id: project.storey.id, label: "Level 01", kind: "group" }],
+        },
+      ] satisfies TreeNode[],
+    [project.id, project.storey.id],
+  );
   return (
     <aside
       className="glass-panel-strong flex h-full min-w-0 flex-col overflow-hidden rounded-lg"

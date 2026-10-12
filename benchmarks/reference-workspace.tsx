@@ -1,3 +1,4 @@
+import { workspacePhases, profileWorkspace } from "./workspace-load-trace";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
@@ -5,7 +6,11 @@ import "../src/styles.css";
 if (!import.meta.env.DEV || location.port !== "8082")
   throw new Error("Use isolated diagnostic origin on port 8082");
 // Real workspace and real browser adapters; separate origin keeps user recovery untouched.
-createRoot(document.getElementById("root")!).render(<CadWorkspace />);
+createRoot(document.getElementById("root")!).render(
+  <React.Profiler id="workspace" onRender={profileWorkspace}>
+    <CadWorkspace />
+  </React.Profiler>,
+);
 
 // Observation only: no model, adapter or event behavior is replaced.
 const events: { at: number; label: string }[] = [];
@@ -35,9 +40,18 @@ exportTrace.style.cssText =
   "position:fixed;right:12px;bottom:36px;z-index:1000;background:white;font:11px system-ui;padding:4px";
 exportTrace.onclick = () => {
   const url = URL.createObjectURL(
-    new Blob([JSON.stringify({ userAgent: navigator.userAgent, events, records }, null, 2)], {
-      type: "application/json",
-    }),
+    new Blob(
+      [
+        JSON.stringify(
+          { userAgent: navigator.userAgent, events, records, workspacePhases },
+          null,
+          2,
+        ),
+      ],
+      {
+        type: "application/json",
+      },
+    ),
   );
   const a = document.createElement("a");
   a.href = url;
