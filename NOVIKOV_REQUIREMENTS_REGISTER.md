@@ -1450,6 +1450,8 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 ### R26-01–08
 
+**R26-01/02 – Recovery-Messnachweis 10.10.2026:** PR248 nach ausdrücklicher Freigabe zusammengeführt. `bench/recovery-capacity`, Messstand 2ceb659 auf Produktionsbasis 9eac205: sechs isolierte Geometrie-/PNG-Profile, 252 Phasenmessungen, 108 erfolgreiche Inhaltsvergleiche. Größtes Projekt 9,20 MiB; warmer Median manuell 1.366 ms/automatisch 734 ms gegenüber 75 ms im Speicheradapter. Längste Browser-Tasks 1.302/673 ms. [Messvertrag, Rohdaten und Reproduktion](docs/performance/RECOVERY_CAPACITY.md). 860 Tests, App-/Benchmark-Typecheck und Build bestanden; keine Browserfehler. Produktionscode/Dateigrenze unverändert. Begrenzter Service-Nachweis, kein kalter Browserstart, Gesamt-RAM/GPU, vollständiges UI-Laden oder Stromausfalltest. Aktiver Folgeauftrag ausschließlich Masterplan §9: geprüfte Speicherrevision innerhalb der Schreibsitzung unter unverändertem CAS-/Validierungsvertrag wiederverwenden.
+
 Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen sind keine aktuelle Messung. Prioritäten/Reihenfolge und erledigte Teilaufträge nach Masterplan bewerten.
 
 | Kennung | Anforderung/Befund der Quelle | Abnahme/Architektur |
@@ -1524,8 +1526,8 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 | V08 | Bestehende Felder/Defaults gemeinsam, zukünftige Capability-Adapter und Strukturierung offen. |
 | V09 | Geplant: fachliches 3D-Trimmen, Abhängigkeit zum Dach vorher klären. |
 | K01 | Großpunkt-Spread-Absturz behoben, nicht erneut als unimplementierten Auftrag starten. |
-| K02 | Vertrag/Pilot, geprüfte Identitätshandles und zentrale Eingangsgrenzen produktiv; Inline-Format/10MiB/Linkrefs bleiben. |
-| K03 | Erste Kapazitätsbaseline vorhanden; keine umfassende Spitzenspeicher-/Langhistory-/GPU-/Großdateiabnahme. |
+| K02 | Vertrag/Pilot, geprüfte Identitätshandles und zentrale Eingangsgrenzen produktiv; Inline-Format/10MiB/Linkrefs bleiben. Recovery-Messung 10.10.: 9,20-MiB-Datei ergibt 18,40 MiB Recovery-Payload mit Vorgänger; Bytes sind kein RAM-/Speicherplatznachweis. |
+| K03 | Erste Kapazitätsbaseline plus Recovery-Serviceprofil vom 10.10.2026 vorhanden, sechs Profile bis 9,20 MiB, Rohdaten in docs/performance/recovery-capacity-2026-10-10.json. Keine umfassende Spitzenspeicher-/Langhistory-/GPU-/Großdateiabnahme und kein Kaltstartnachweis. |
 | K04 | Vorbereitete Auswahl-/Endpunkt-/Wandzeichenpiloten vorhanden; restliche Consumer individuell messen/anschließen. |
 | K05 | Strukturierter Modellvergleich und atomare Bestätigung verbessert; globale Commit-/Dateiprüfung nicht abgeschafft. |
 | K06 | Kettenendwand-/Extrusionsreuse begrenzt integriert; allgemeine verbundene Komponenten/Öffnungsindizes offen. |
@@ -1567,7 +1569,7 @@ Der technische CAD-Strang und der begleitende Produktstrang sind gemeinsam zu pf
 | RC04 | Local-first CAD, getrennte Lizenz-/Privacy-Adapter; Konto/Offlineaktivierung/Geräte/Offlinefristen/kommerzielles Modell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
 | RC05 | Diagnose und Crash getrennt, aus/Opt-in/Widerruf, minimierte Daten; kostenlose klar bezeichnete Public Beta, Dauer/Folgemodell offen. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
 | RC06 | Nach Ablauf und Lizenzserverausfall unterstützte Projekte lesen/exportieren/drucken, laufende Arbeit sicher erhalten; keine Projektlöschung/-verschlüsselung. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
-| RC07 | P0-Dateisicherheit: Snapshot, Tempdatei/Prüfung/atomare Veröffentlichung, gültigen Vorgänger, Autosave/Backups/Recovery, Migration/Concurrency und Fehlertests. | Teilweise: projektbezogene manuelle Browser-Recovery, verlustfreie Legacy-Migration, Vorgänger/CAS und nativer Browsernachweis; Optionaler Autosave-Pilot mit Konfliktpause vorhanden; externe Backups, Kapazitätsnachweis und Plattformgarantien offen. Siehe R26-02. |
+| RC07 | P0-Dateisicherheit: Snapshot, Tempdatei/Prüfung/atomare Veröffentlichung, gültigen Vorgänger, Autosave/Backups/Recovery, Migration/Concurrency und Fehlertests. | Teilweise: projektbezogene Browser-Recovery, verlustfreie Legacy-Migration, Vorgänger/CAS und nativer Browsernachweis; optionaler Autosave-Pilot mit Konfliktpause vorhanden. Begrenzte Recovery-Kapazitätsmessung 10.10.2026 zeigt Hauptthread-Pausen bis 1,3 s; Optimierung gemäß Masterplan §9 ausstehend. Externe Backups, allgemeine Kapazitätsfreigabe und Plattformgarantien offen. Siehe R26-02. |
 | RC08 | Geometrie vs. Normberechnung/Produktversprechen trennen; unabhängige Referenzfälle/Einheiten/Toleranzen/große Koordinaten/Roundtrip. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
 | RC09 | Sechs laufende Register mit konkreten Nachweisen aktualisieren; externe Freigabe nicht erfinden. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
 | RC10 | Zehn vorbereitende Arbeitsbereiche und Definition of Done aus Anlage erhalten; P0 vor Komfort/externem Test, Rechts-/Steuerprüfung vor Vertrieb. | Aufgenommen; technische Umsetzung/Freigaben nicht nachgewiesen |
