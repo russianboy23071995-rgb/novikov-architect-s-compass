@@ -1077,3 +1077,29 @@ React-/DOM-/GPU-Zeit. Ein Durchlauf, keine p95- oder Kapazitätsfreigabe.
 Nächster Einzelauftrag: innerhalb createLocalSnapSources projectSnapPrimitives und
 createPrimitiveSourceIndex getrennt messen. Keine pauschale Cachevergrößerung oder
 vorzeitige Indexoptimierung; erst die Ursache der 193 ms zuordnen.
+
+## Fangquellen und Index getrennt (12.10.2026, PR291)
+PR290 nach erfolgreicher GitHub-Prüfung zusammengeführt. Die Diagnose misst nun
+projectSnapPrimitives und createPrimitiveSourceIndex getrennt; Produktcode unverändert.
+[Rohdaten](snap-index-phases.json): kalte Ableitung 42,6 ms, Indexaufbau 164,5 ms,
+getLocalSnapSources einschließlich beider Phasen 207,1 ms. Szenenableitung 4,1 ms,
+Zeichenreihenfolge 0,8 ms. Warmes Zoom-in/out: vier BimPlan-Aufrufe zusammen 0,7 ms,
+keine erneute Fangquellen- oder Indexerstellung. Verschachtelte Zeiten nicht addieren.
+
+Die bisherige Download-Fixture (27) war nicht mehr vorhanden. Verwendet wurde die
+verfügbare Fixture (25), 106911015 Bytes, 10000 Linien, eine Wand, ein Fenster,
+zwölf Bildreferenzen. SHA256:
+23599c6390420bc312442434b0d42322666e430261520462b8a3d0290f585952.
+Export (16) besitzt denselben Hash; 10014 Elemente im Navigator, keine Konsolenfehler.
+Deshalb kein direkter Vorher-/Nachher-Vergleich mit der anders gehashten Fixture (27).
+Ein Messlauf im isolierten statischen Produktions-Workspace mit Diagnose, keine
+p95-/Kapazitätsfreigabe und keine vollständige React-/DOM-/GPU-Zeit.
+Typprüfung der Benchmarks, gezieltes ESLint und Diagnosebuild bestanden. Bestehende
+914 Produkttests stammen vom unveränderten Produktstand PR289; nicht erneut ausgeführt.
+
+Nächster begrenzter Auftrag: kalten Indexaufbau optimieren. Zunächst Freeze-/Lookup-
+und Baumaufbau intern im selben Benchmark zuordnen, dann nur den dominanten Anteil
+optimieren. Vollständige Quellerhaltung, unveränderliche Daten und identische lokale
+Abfrageergebnisse einschließlich Reihenfolge/Filter/Budget durch Vergleichstests
+gegen den bisherigen Pfad sichern; dieselbe Fixture (25), warme Zooms und Roundtrip
+nachmessen. Kein neuer Renderer, kein globaler Paarvergleich, keine größeren Caches.
