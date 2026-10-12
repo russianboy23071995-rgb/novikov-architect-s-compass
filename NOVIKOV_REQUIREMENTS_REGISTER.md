@@ -1450,6 +1450,10 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 
 ### R26-01–08
 
+**Base64-Prüfpilot (12.10.2026, perf/canonical-base64-scan):** Gemeinsamer Storageprüfer mit privater ASCII-Wertetabelle; Akzeptanz durch erschöpfende Endgruppen-/UTF-16-, Zufalls- und große Differentialtests gegen Vorgänger abgesichert. 876 Tests, Typechecks, Build und Lint (0 Fehler/6 bestehende Warnungen). Browsermessstand 16b09d5: 252 Messungen/108 Inhaltsvergleiche bestanden, keine Browserfehler. 9,20-MiB-Profil: Dateivorbereitung 337 → 93 ms, Recovery-Lesen 365 → 136 ms (warme Mediane). [Rohdaten und Grenzen](docs/performance/RECOVERY_CAPACITY.md). Kein Format-/Limit-/Trustwechsel; noch kein vollständiger Workspace-/GPU-/Speicher-/Kapazitätsnachweis.
+
+**R26-01/02, K02/03, RC07:** Begrenzter Service-Nachweis erweitert; vollständige Workspace-Abnahme ist nächster Einzelauftrag.
+
 **Einmaliger Asset-Eingang (12.10.2026, perf/single-asset-ingress):** PR250 nach ausdrücklicher Freigabe/grüner CI zusammengeführt. Öffentlicher Dateieingang erstellt vollständig geprüfte eigene Asset-Handles, private Migration verwendet sie über alle Versionen weiter. Keine mehrfachen Base64-Storageprüfungen pro eingehendem Asset; Modellbeziehungen, Größen-/Pixelgrenzen und Ablehnung ungültiger Daten bleiben vollständig geprüft. Vier neue Tests mit Vergleich zum alten Pfad, Version-9-Migration und gefälschten Identitäten. 869 Tests, App-/Benchmark-Typecheck, Build und Lint bestanden (0 Fehler/6 bestehende Warnungen). Messstand bea8688: 252 Messungen/108 Inhaltsvergleiche bestanden, keine Browserfehler. 9,20-MiB-Bildprofil: Dateivorbereitung 570 → 337 ms, Recovery-Lesen 650 → 365 ms (warme Mediane); längste Tasks dort noch 369 ms. [Rohdaten, Vergleich und Grenzen](docs/performance/RECOVERY_CAPACITY.md). Kein Format-/Limitwechsel oder allgemeiner Kapazitätsnachweis.
 
 **R26-01/02, K02/03, RC07:** Begrenzter Ladepfad-Nachweis ergänzt; verbleibende Base64-Kosten und allgemeines Projekt-/Assetbudget bleiben offen. Aktiver Folgeauftrag ausschließlich Masterplan §9.

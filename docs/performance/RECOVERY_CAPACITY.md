@@ -1,5 +1,27 @@
 # Recovery-Kapazität – begrenzte Browsermessung
 
+## Pilot vom 12.10.2026: kanonische Base64-Zeichenprüfung
+
+Messstand `16b09d5` auf main `95fae03`. Der gemeinsame Storage-Prüfer verwendet eine private ASCII-Wertetabelle statt Alphabet-Suche pro Zeichen. Keine API-, Format-, Trust-, Größen- oder Pixelbudgetänderung. Nicht-ASCII-Zeichen einschließlich Surrogaten, Padding und ungenutzte Endbits bleiben strikt geprüft. Bilddekodierung bleibt Aufgabe des Importadapters.
+
+Fünf neue Tests: sämtliche 4.096 Zwei-Zeichen- und 262.144 Drei-Zeichen-Endgruppen einschließlich unabhängigem Buffer-Roundtrip; 65.536 UTF-16-Zeichen an jeder der vier Positionen; 3.000 deterministische gültige/mutierte Fälle; große Strings bis 10 MiB; Storagegrenzen und unveränderliche eigene Kopien. Vergleichsoracle enthält den vorherigen Produktionsvertrag inklusive vorgeschalteter Mindestlänge.
+
+Isolierter Node-Vergleich: zwei Aufwärmrunden und sieben Messrunden, abwechselnde Reihenfolge; bei 10 MiB Median 130,4 → 26,5 ms. [Rohdaten](base64-scan-2026-10-12.json), reproduzierbar mit `node --experimental-strip-types benchmarks/base64-scan.ts`. Kein CI-Zeitlimit, kein Dekodierungsbenchmark.
+
+Browser: gleiche sechs synthetischen Profile, erster Lauf plus fünf warme Wiederholungen. 252 Phasenmessungen/108 Inhaltsvergleiche bestanden, keine Konsolenwarnungen/-fehler. Chromium 155 auf Windows, 12 logische Prozessoren/16 GiB laut Browser. [Rohdaten](base64-recovery-2026-10-12.json). Gleicher Tag/Rechner wie Vorgänger; keine randomisierte A/B-Browsermessung, keine kontrollierte Hintergrundlast. p95 bei fünf Werten ist das Maximum. UI-Darstellung, vollständige Bilddekodierung/GPU, Kaltstart, Spitzenspeicher, Eviction und Stromausfall sind nicht abgedeckt.
+
+| Profil | Dateivorbereitung Median vorher/nachher ms | Recovery-Lesen Median vorher/nachher ms | Datei p95 nachher ms | Recovery p95 nachher ms |
+| --- | ---: | ---: | ---: | ---: |
+| Geometrie 1000 | 7.7 / 7.5 | 9.8 / 9.6 | 8.0 | 9.8 |
+| Geometrie 10000 | 76.7 / 75.1 | 98.7 / 91.3 | 76.4 | 91.6 |
+| Bild klein | 39.7 / 12.1 | 48.9 / 19.7 | 12.9 | 20.3 |
+| Bild mittel | 153.1 / 45.8 | 174.9 / 70.2 | 48.8 | 71.7 |
+| Bild nahe Grenze | 337.2 / 92.6 | 364.9 / 135.8 | 95.3 | 143.5 |
+| Gemischt | 204.2 / 82.8 | 234.3 / 114.0 | 83.2 | 117.4 |
+
+876 Tests, App-/Benchmark-Typecheck, Build und Lint (0 Fehler/6 bestehende Warnungen). Hauptthread-Pausen bleiben möglich; keine allgemeine Kapazitätsfreigabe und keine Anhebung der 10-MiB-Grenze. Nächste Abnahme im vollständigen Workspace statt weiterer Optimierung auf Verdacht, siehe Masterplan §9.
+
+
 ## Pilot vom 12.10.2026: einmalige Bildprüfung am Dateieingang
 
 PR250 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Messstand
