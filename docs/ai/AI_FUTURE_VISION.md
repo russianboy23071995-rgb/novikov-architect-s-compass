@@ -1,12 +1,12 @@
 # AI im NOVIKOV CAD: zukünftige Produktanforderungen
 
-Stand: 04.10.2026. Vom Nutzer als Zukunftsvision bereitgestellt und zur Kenntnisnahme aufgenommen.
+Stand: 04.10.2026; Nutzerpräzisierung vom 10.10.2026: AI-CAD ist das **wichtigste langfristige Produktziel**. Die konkrete autonome Entwurfsvision, B-Plan-Auswertung und Architektur-Abnahme stehen in [AI_CAD_PRIMARY_VISION.md](AI_CAD_PRIMARY_VISION.md). Dieser Katalog bleibt als einzelne AI01–AI35-Anforderung erhalten.
 
 ## Quelle und Status
 
 Die unveränderte Originalanlage liegt unter [CAD_BIM_2026_AI_Strategie.pdf](CAD_BIM_2026_AI_Strategie.pdf). Sie enthält 35 Produktanforderungen sowie Empfehlungen für Architektur, Wissen, Prüfung und einen Prototyp. Diese Markdown-Datei macht den Katalog für Codex auffindbar; bei Details ist die Originalanlage zu lesen.
 
-Status: Zukunftsanforderungen, noch keine Implementierung und keine Freigabe zur sofortigen Umsetzung aller Punkte. ARCHITECTURE.md bleibt der Architekturvertrag; DEVELOPMENT_GUIDE.md und der aktuelle DEVELOPMENT_PLAN.md bestimmen die laufende Reihenfolge. Die aktuellen Geometrie-/3D-Aufträge werden durch diese Anlage nicht ersetzt. Vor einem AI-Teilauftrag sind Voraussetzungen und Abnahme konkret festzulegen.
+Status: strategische Hauptvision mit zukünftigen Anforderungen, noch keine fertige AI-CAD-Implementierung und keine Freigabe zur sofortigen Umsetzung aller 35 Punkte. ARCHITECTURE.md bleibt der Architekturvertrag; DEVELOPMENT_GUIDE.md und der aktuelle DEVELOPMENT_PLAN.md bestimmen die laufende Reihenfolge. Die aktuellen Geometrie-/3D-Aufträge werden durch diese Anlage nicht ersetzt. Vor einem AI-Teilauftrag sind Voraussetzungen und Abnahme konkret festzulegen.
 
 Die folgenden Kennungen AI01–AI35 erhalten die Reihenfolge der PDF und sind von den bestehenden Guide-Kennungen F01–F29 zu unterscheiden.
 

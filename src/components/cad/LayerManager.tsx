@@ -1,12 +1,13 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/lib/bim/model";
 import { layerDeletionBlock } from "@/application/layers/actions";
 import type { ManageLayerRequest } from "@/application/layers/actions";
-import { clampMenuPosition } from "./demand-menu";
+import { FloatingPanel } from "./FloatingPanel";
 
 type Props = {
+  hiddenLayerIds?: readonly string[];
   project: Project;
   onVisibility: (base: Project, action: VisibilityAction) => void;
   canUndoVisibility: boolean;
@@ -71,6 +72,7 @@ function LayerRow({
   );
 }
 export function LayerManager({
+  hiddenLayerIds,
   project,
   open,
   onOpenChange,
@@ -82,109 +84,12 @@ export function LayerManager({
 }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
-  const panel = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
-  const [position, setPosition] = useState({ x: 120, y: 140 });
-  const [bounds, setBounds] = useState({
-    width: 1024,
-    height: 768,
-    menuWidth: 520,
-    menuHeight: 560,
-  });
-  useEffect(() => {
-    if (!open) return;
-    const measure = () => {
-      const r = panel.current?.getBoundingClientRect();
-      setBounds({
-        width: window.innerWidth,
-        height: window.innerHeight,
-        menuWidth: r?.width ?? 520,
-        menuHeight: r?.height ?? 560,
-      });
-    };
-    const observer = new ResizeObserver(measure);
-    if (panel.current) observer.observe(panel.current);
-    window.addEventListener("resize", measure);
-    measure();
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [open]);
-  if (!open) return null;
-  const visible = clampMenuPosition(position, bounds);
   const reason =
     selectedId && project.layers.some((layer) => layer.id === selectedId)
       ? layerDeletionBlock(project, selectedId)
       : "Zum Löschen eine Ebene auswählen.";
   return (
-    <div
-      ref={panel}
-      role="dialog"
-      aria-label="Ebenen"
-      aria-modal="false"
-      className="glass-panel-strong fixed z-50 flex h-[560px] max-h-[calc(100dvh-16px)] w-[520px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-xl border shadow-2xl"
-      style={{ left: visible.x, top: visible.y }}
-    >
-      <header className="flex shrink-0 items-center border-b p-2">
-        <button
-          type="button"
-          aria-label="Ebenenfenster verschieben"
-          title="Ziehen oder mit Pfeiltasten verschieben"
-          className="flex-1 cursor-move touch-none rounded px-3 py-2 text-left font-semibold"
-          onPointerDown={(event) => {
-            if (event.button !== 0) return;
-            event.currentTarget.setPointerCapture(event.pointerId);
-            drag.current = { x: event.clientX, y: event.clientY, left: visible.x, top: visible.y };
-          }}
-          onPointerMove={(event) => {
-            if (drag.current)
-              setPosition(
-                clampMenuPosition(
-                  {
-                    x: drag.current.left + event.clientX - drag.current.x,
-                    y: drag.current.top + event.clientY - drag.current.y,
-                  },
-                  bounds,
-                ),
-              );
-          }}
-          onPointerUp={() => {
-            drag.current = null;
-          }}
-          onPointerCancel={() => {
-            drag.current = null;
-          }}
-          onLostPointerCapture={() => {
-            drag.current = null;
-          }}
-          onKeyDown={(event) => {
-            const offset = {
-              ArrowLeft: [-10, 0],
-              ArrowRight: [10, 0],
-              ArrowUp: [0, -10],
-              ArrowDown: [0, 10],
-            }[event.key];
-            if (offset) {
-              event.preventDefault();
-              event.stopPropagation();
-              setPosition(
-                clampMenuPosition({ x: visible.x + offset[0]!, y: visible.y + offset[1]! }, bounds),
-              );
-            }
-          }}
-        >
-          ⠿ Ebenen
-        </button>
-        <button
-          type="button"
-          aria-label="Ebenen schließen"
-          className="rounded px-3 py-2 hover:bg-accent"
-          onClick={() => onOpenChange(false)}
-        >
-          ✕
-        </button>
-      </header>
+    <FloatingPanel open={open} title="Ebenen" onClose={() => onOpenChange(false)}>
       <p className="shrink-0 px-4 py-3 text-xs text-muted-foreground">
         Häkchen: im BIM-Projekt sichtbar. Namen anklicken zum Bearbeiten · Enter oder Feld verlassen
         übernimmt · Escape verwirft die Eingabe
@@ -195,7 +100,7 @@ export function LayerManager({
             <input
               type="checkbox"
               aria-label={"Ebene sichtbar: " + layer.name}
-              checked={!project.bimVisibility.hiddenLayerIds.includes(layer.id)}
+              checked={!(hiddenLayerIds ?? project.bimVisibility.hiddenLayerIds).includes(layer.id)}
               onChange={(event) =>
                 onVisibility(project, {
                   kind: "set",
@@ -274,6 +179,6 @@ export function LayerManager({
           </Button>
         </div>
       </footer>
-    </div>
+    </FloatingPanel>
   );
 }

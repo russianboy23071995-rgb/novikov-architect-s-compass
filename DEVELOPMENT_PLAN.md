@@ -1,39 +1,3291 @@
+## MS-04f: Abbildzeichnungen gehören zum Gesamtmodell — 10.10.2026
+
+Nutzerentscheidung ersetzt die lokale Zuordnung aus MS-04e: Neue Linien/Polylinien
+und Schraffuren aus einem Abbild sind gemeinsame Geschosszeichnungen. Sie erscheinen
+auch im Arbeitsmodell und anderen Abbildern, sofern die jeweilige Ebene sichtbar ist.
+Die unabhängigen Ebenenfilter und Maßstäbe bleiben bestehen. Gemeinsame Auswahl-,
+Fang-, Bearbeitungs- und Undo-Wege; keine Kopien und keine separate Werkzeuglogik.
+
+Schema 20: alte lokale Zeichnungen aus v19 werden beim Laden nach strikter Prüfung
+in gemeinsame Zeichnungen überführt. Nur die Eigentümerzuordnung entfällt; IDs,
+Geometrie, Darstellung und Ebenen bleiben erhalten. Abbildlöschen entfernt keine
+Zeichnungen. Migration 1–19 bleibt unterstützt. Änderung weiterhin in PR238.
+
+Nachweis: 808 Tests bestanden. Typprüfung einschließlich Benchmarks und Build bestanden.
+Tests umfassen gemeinsame Sichtbarkeit/Picking/Fang in Modell und zwei Abbildern,
+Bewegung, Undo/Redo, unabhängiges Ausblenden, Abbildlöschen ohne Geometrieverlust und
+verlustfreie v19-Migration. Browser: Linie und Rechteckschraffur im Abbild gezeichnet,
+anschließend beide im Arbeitsmodell/Modellnavigator sichtbar. Keine Browserfehler.
+Screenshot: outputs/abbild-shared-drawings.png.
+
+Praktischer Test: Im Abbild Linie oder Schraffur zeichnen → Gebäudestruktur öffnen.
+Beide sind dort sichtbar und bearbeitbar. Ausblenden einer Ebene im Abbild ändert
+weiterhin nicht die Sichtbarkeit dieser Ebene im Arbeitsmodell.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Löschen und Ordnerzuordnung anbinden; Löschen eines Abbilds erhält alle gemeinsamen
+Zeichnungen. Behandlung nichtleerer Ordner vor Ordnerlöschung festlegen.
+
+## MS-04e: Vollständiges Modell und lokale Abbildzeichnungen — 10.10.2026
+
+Nutzerkorrektur im offenen PR238: Abbilder sind bearbeitbare Ansichten des gesamten
+Modells. Keine Begrenzung auf den gespeicherten Bildschirmbereich; Beschneiden folgt
+im Layoutbuch. Startposition und Zoom bleiben gespeichert. Der vorhandene Werkzeugkasten
+und alle gemeinsamen Bearbeitungswege stehen im Abbild bereit. Abbildname im Viewport.
+Hinzufügen öffnet mittig; FloatingPanel liegt nun außerhalb der Navigatorbegrenzung.
+
+Verbindliche Nutzerantwort: neue 2D-Zeichnungen nur im jeweiligen Abbild. Schema 19
+speichert documentId an Linien/Polylinien und Schraffuren; gemeinsame Application-Aktion
+und Sichtbarkeitspolitik setzen dieselbe Zuordnung für Anzeige, Auswahl und Fang um.
+Bestehende Geschosszeichnungen und BIM-Bauteile bleiben gemeinsam. Strikte Migration
+1–18, normale Projekt-History. Keine zweite Bauteilkopie und keine separate Toollogik.
+Dokumente mit eigenen Zeichnungen können noch nicht gelöscht werden; Bildimport im
+Abbild bleibt vorerst gesperrt. Das ersetzt die Clip-/Nur-Ansicht-Regeln unten.
+
+Nachweis: 807 Tests bestanden; Typprüfung einschließlich Benchmarks und Build bestanden.
+Lint: 0 Fehler, sechs vorhandene Warnungen. Neue Tests: zwei Abbilder vs. Arbeitsmodell,
+Annotationseigentümer, lokale Fangabfrage/Auswahl, gemeinsame BIM-Änderung, freie
+Gruppenbewegung mit erhaltener Zuordnung, JSON, Undo/Redo, Altdateien, ungültige/stale
+Kontexte und Löschschutz. Browser: Linie und Rechteckschraffur in A, unsichtbar im
+Arbeitsmodell und B; Schraffur-Undo/Redo, Wandhöhe in A auf 3,20 m geändert und im
+Arbeitsmodell bestätigt. 500 % Startzoom, herausgezoomtes vollständiges Modell ohne
+SVG-Clip. Dialog geometrisch zentriert und im Body statt Navigator. Keine Browserfehler.
+Screenshot: outputs/abbild-full-model-editing.png. PR238 bleibt zur Prüfung offen.
+
+Praktische Abnahme: Arbeitsgrundriss stark hineinzoomen → Abbild erstellen/öffnen →
+herauszoomen. Die ganze Geometrie muss wieder sichtbar sein. Linie/Schraffur hinzufügen,
+Arbeitsmodell und anderes Abbild öffnen: dort fehlen diese lokalen Ergänzungen.
+BIM-Eigenschaften dagegen gelten überall; Undo/Redo und Datei speichern funktionieren.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Ordnerzuordnung und Löschen über gemeinsame validierte Aktionen anbinden. Vor dem
+Löschen von Abbildern mit eigenen Zeichnungen beziehungsweise nichtleeren Ordnern
+zunächst die gewünschte Behandlung ihrer Inhalte festlegen; kein stilles Mitlöschen.
+Kein Layouteditor und kein weiterer Modellumbau.
+
+## MS-04d: Abbild aus ausgerichtetem Canvas und Ordnerbaum — 10.10.2026
+
+Nutzerkorrektur zu PR238 direkt im offenen PR umgesetzt, nicht zusammengeführt.
+Die Bedienung ersetzt den zuvor vorgeschlagenen Zweipunkt-Crop: Arbeitsgrundriss
+per Zoom/Pan ausrichten → Navigator Abbilder → Hinzufügen → Name/Maßstab → erstellen.
+Das verschiebbare, nicht modale Fenster übernimmt beim Öffnen Mittelpunkt, Zoom und
+sichtbaren metrischen Bereich. Im Tab zunächst nur Hinzufügen; vorhandene Abbilder
+als Baum unter benennbaren Ordnern. Doppelklick/Enter öffnet; F2/Rechtsklick benennt
+um. Keine Öffnen-/Löschen-Buttons. Ordner im gleichen Hinzufügen-Fenster anlegen.
+
+Schema 18 mit optionaler Begrenzung und Ordnerreferenz; strikte Migration 1–17,
+keine erzeugten Abbilder/Ordner in Altdateien. Validierte Application-Aktionen,
+Projekt-Undo, vorhandener Renderer mit Clip. Kein Screenshot-Bitmap und keine
+zweite Modellkopie. Öffnen stellt gespeicherten Zoom/Mittelpunkt wieder her;
+Pan/Zoom im Abbild verändert die gespeicherte Begrenzung nicht. Fit stellt sie
+wieder her. Neue Abbilder starten aus dem 2D-Arbeitsgrundriss, nicht aus einem
+bereits begrenzten Abbild oder einer 3D-Kamera.
+
+Nachweis: 805 Tests bestanden; Typprüfung einschließlich Benchmarks und Build
+bestanden. Lint: 0 Fehler, sechs vorhandene Warnungen. Browser: 500 % übernommen,
+Ordner angelegt/umbenannt, Abbild per Doppelklick geöffnet; SVG-Clip entspricht
+exakt dem zuvor sichtbaren Bereich. Speichern/Laden erhält Zoom, Begrenzung und
+Ordner. Keine erfassten Browserfehler. Screenshot außerhalb des Repos:
+outputs/abbild-tree-framing.png. Andere Fenstergrößen ändern die gespeicherte
+Begrenzung nicht; bei gleicher Zoomzahl können Ränder entstehen bzw. Teile des
+Bereichs Navigation erfordern. Noch ein Ordnerlevel; keine Verschiebeverwaltung.
+
+**Genau ein nächster Auftrag: Abbildverwaltung per Kontextmenü abschließen.**
+Die vorhandene validierte Löschaktion an Rechtsklick anbinden; Projekt-Undo und
+aktives gelöschtes Ziel prüfen. Vor Ordnerlöschung die Behandlung enthaltener
+Abbilder festlegen; kein stilles kaskadierendes Löschen. Bestehende Abbilder über
+eine validierte Ordnerzuordnung umsortieren. Kein Layouteditor oder Modellumbau.
+
+## MS-04c: Gespeicherte Grundrisse als Abbilder — 10.10.2026
+
+PR237 nach grüner CI regulär zusammengeführt. Schema 17 speichert ModelView-Quelle
+und DrawingDocument mit ID, Name, eigenem Maßstab und Ebenenfilter. Strikte Migration
+1–16 erfindet keine Abbilder. Bauteile bleiben ausschließlich im bestehenden Modell.
+Gemeinsame Application-Aktionen und Kontextauflösung werden von Navigator und Renderer
+verwendet; keine neue Geometrie- oder AI-Logik.
+
+Navigator: Tabs Gebäudestruktur/Abbilder; anlegen, umbenennen, öffnen, löschen.
+Neuanlage übernimmt einmal den Filter des Arbeitsmodells, danach unabhängig.
+Nutzerentscheidung: Anlage/Löschung über normales Projekt-Undo. Umbenennen und
+Dokumentmaßstab folgen im Pilot derselben History für Dokumentdefinitionen.
+Sichtbarkeit bleibt beim vorhandenen Ebenenumschalter samt kontextbezogener
+Paletten-History; keine zusätzliche Abbild-History. Arbeitsmaßstab unverändert
+außerhalb Modell-Undo. Modellbearbeitung erfolgt im Arbeitsmodell.
+
+Prüfung: 802 Tests bestanden, Typprüfung einschließlich Benchmarks und Build
+bestanden; Lint 0 Fehler, sechs bekannte Warnungen. Neue Tests prüfen zwei Dokumente,
+Quelle/Filter/Maßstab, Hostfenster, aktuelle Modellprojektion, Stale-Context-Rejection,
+Projekt- und Sichtbarkeits-Undo, Migration, ungültige Referenzen, JSON und identischen
+IFC-Inhalt. Browser: zwei Abbilder 1:50/1:200, Wandebene nur in A ausblenden,
+Arbeitsmodell und B unverändert; Paletten-Undo, Löschen/Projekt-Undo; Wand von 3 auf
+6 m ändern und identische Geometrie in beiden Abbildern prüfen; Speichern/Öffnen.
+Keine erfassten Browserfehler. Anfänglicher Höhenfehler des Abbildfensters behoben.
+Screenshot: outputs/saved-plan-documents.png außerhalb des Repos.
+
+Grenzen: zunächst ganzer Grundriss, ein Abbildfenster, keine Modellbearbeitung darin,
+kein Crop/Layout/Annotationstyp, keine Kamera-Persistenz. Quell-ModelView bleibt bei
+Löschung erhalten. Neue UI-Definitionen sind nicht automatisch Sprachbefehle.
+
+Praktische Abnahme: Navigator → Abbilder → Name/Maßstab → Abbild erstellen → Öffnen.
+Wand auswählen und ihre Ebene ausblenden; zum Arbeitsmodell/zweiten Abbild wechseln.
+Nur das erste Abbild darf betroffen sein. Löschen → Projekt-Undo; anschließend
+Projekt speichern und wieder öffnen.
+
+**Genau ein nächster Auftrag: MS-04d Begrenzungsbereich eines Abbilds festlegen.**
+Zunächst die Bedienregel für einen optionalen rechteckigen Bereich bestätigen;
+dann über die vorhandene Punkt-/Fanginteraktion zwei Punkte aufnehmen, als metrische
+Dokumentdefinition validieren und nur die Darstellung begrenzen. Kein Bauteil darf
+abgeschnitten, dupliziert oder skaliert werden; Pan/Zoom verändert den Bereich nicht.
+Gemeinsamer Renderer/Abbildkontext, Projekt-Undo, Speichern/Migration, zwei unabhängige
+Abbilder und Auswahl außerhalb der Grenze prüfen. Kein Layouteditor, keine neue
+2D-Engine. Bis zur Bedienentscheidung bleibt der gesamte Grundriss Standard.
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
+## MS-04b: Gemeinsamer Arbeitsansichtskontext — 10.10.2026
+
+PR236 nach erfolgreicher CI regulär zusammengeführt. `application/views/working-context`
+löst Arbeitsbindung, Maßstab und Sichtbarkeit gemeinsam gegen einen unveränderlichen
+Projektsnapshot auf. CadWorkspace memoisiert diesen Kontext; ViewportManager,
+CadViewport, BimPlan, Schraffurdefaults und Anschlussvorschau erhalten denselben
+Kontext. BimPlan rekonstruiert keine Arbeitsidentität mehr; der Maßstabsselektor
+besitzt keine zweite Quelle. Explizite Sichtbarkeitsüberschreibungen bleiben erhalten.
+3D erhält weiterhin die vorhandene gemeinsame Sichtbarkeitspolicy.
+
+Fremde Projekt-/Geschossbindungen, unbekannte Dokumentziele und veraltete Snapshots
+werden abgewiesen. Pointer und Zoom erzeugen keinen neuen Kontext. Keine neue
+Dokumentklasse, kein Schemawechsel, keine neue Geometrie-/AI-Logik. Die parallel
+über main eingegangene AI-Hauptvision aus PR235 gelesen und regulär integriert:
+der neue reine Application-Resolver ist auch außerhalb React aufrufbar.
+
+Prüfung: 796 Tests bestanden, darunter vier neue Kontext-Regressionstests mit
+Unterfällen für falsche/veraltete Ziele, explizite Filter, Hostfenster, Rendering,
+Auswahl/Fang, Papiergrößen, unabhängigen Zoom, History und Dateirundlauf.
+Typprüfung einschließlich Benchmarks und Produktionsbuild erfolgreich. Lint:
+0 Fehler, sechs bekannte Warnungen. Browser: zwei Grundrissfenster teilen 1:50;
+Zoom links 200 %, rechts 67,1 %. Wandebene ausblenden entfernt Wand und Fenster
+in beiden Ansichten; Paletten-Undo stellt beide wieder her. Keine erfassten
+Browserfehler. Screenshot: outputs/working-context.jpg außerhalb des Repos.
+Papiergrößen/Dateirundlauf/Modell-Undo in dieser Etappe automatisiert geprüft;
+nicht alle diese Abläufe erneut manuell im Browser ausgeführt.
+
+Praktische Abnahme: Viewport layout → 2 Views Vertical; Maßstab 1:50 wählen,
+eine Ansicht zoomen, andere aktivieren. Maßstab bleibt gleich, Zoom unabhängig.
+Wand auswählen → ihre Ebene ausblenden → Ebenen-Undo: beide Ansichten folgen.
+
+**Genau ein nächster Auftrag: MS-04c erster gespeicherter Grundriss als Abbild.**
+Nutzerpräzisierung: UI-Bezeichnung „Abbild“, Navigator mit Tabs „Gebäudestruktur“
+und „Abbilder“ zum Anzeigen, Öffnen und Verwalten. Bei Anlage aktuelle
+Ebenensichtbarkeit einmal übernehmen; danach unabhängig im Abbild ändern/speichern.
+Keine eigene Abbild-Undo-/Redo-History. Den bestehenden Ebenenumschalter samt
+Ebenen-History kontextbezogen wiederverwenden. Anlage/Löschung nicht ohne weitere
+Prüfung als unwiderruflich oder automatisch als Modell-Undo definieren.
+
+Einen benannten, zunächst nur betrachtbaren Grundriss als Abbild mit stabiler ID,
+Modellbindung, eigenem Maßstab und Filter anlegen/öffnen/speichern. Kein Crop-Editor,
+Layouteditor oder neue Annotationen; zunächst ganzer Grundriss. Gemeinsamen Resolver
+gezielt erweitern, strikte Migration/Referenzen sowie zwei unabhängige Abbilder prüfen.
+Kein zweites Gebäudemodell. Details im Abbildvertrag. Diese Ergänzung ist nur Planung;
+der Navigator wurde noch nicht geändert.
+
+## MS-04a: Vertrag für gespeicherte Ausschnitte — 10.10.2026
+
+PR234 nach erfolgreicher GitHub-CI regulär zusammengeführt. Reiner Planungsauftrag:
+[Codeabgleich und Ausschnittvertrag](docs/planning/SAVED_DRAWING_VIEWS.md).
+Schema 16 hat noch keine gespeicherten ModelViews/DrawingDocuments. Gemeinsame
+Größenauflösung und Sichtbarkeit existieren; ihre Verbindung ist derzeit über
+Workspace, Viewport und Plan verteilt. Keine zweite Modell- oder Rendererstruktur
+nötig. Architektur §29 präzisiert validierte Kontextauflösung, fehlende Referenzen
+und unabhängige Filter. Historische Maßstabsangaben auf heutigen Stand gebracht.
+
+Offen bleiben Anfangsfilter, Crop-Bedienung und Dokument-Lebenszyklus/History;
+Vorschläge sind ausdrücklich keine Nutzerentscheidungen. Keine Laufzeitänderung.
+Dokumentation gegen genannte Codepfade geprüft, lokale Links und Diff geprüft.
+Tests/Build nicht erneut ausgeführt: letzter Code-Nachweis PR234 mit 792 Tests,
+Typprüfung und Build; diese Planung behauptet keine neue Funktionsabnahme.
+
+**Genau ein nächster Auftrag: MS-04b gemeinsamen Arbeitsansichtskontext anbinden.**
+Bestehenden Arbeitsgrundriss über einen Application-Resolver mit validierter Bindung,
+Maßstab und Sichtbarkeit versorgen; Renderer liest diese Identität statt sie erneut
+zu konstruieren. Zwei Fenster, Papiermuster, Filter/Picking/Snap, unabhängiger Zoom,
+History und Dateirundlauf müssen unverändert funktionieren. Fremde/veraltete Ziele
+abweisen. Kein neues Dateiformat, Ausschnitteditor oder leere Dokumentklassen.
+Vollständiger begrenzter Umfang und Abnahme im verlinkten Vertrag.
+
+## MS-03a: Schraffuren im Modell- und Papiermaß — 10.10.2026
+
+PR233 nach grüner CI regulär zusammengeführt. Nutzerentscheidung: Mustergröße beim
+Moduswechsel erhalten. Papierbreite liegt intern in Metern, in Eigenschaften in mm;
+Modellbreite in m. Schraffureigenschaften und Werkzeugdefaults teilen dieselben
+Felder/Aktionen. Doppelt-Rechtsklick übernimmt Bezug und Zellbreite. Größenänderungen
+sind Modell-Undo-Schritte; Maßstabswechsel bleiben Ansichtseinstellungen außerhalb.
+
+Schema 16 ergänzt Papierbreite und optionale Modellbreite an der Anwendung. Ohne
+Modellbreite bleiben bestehende Muster exakt in Definitionsgröße. Die optionale
+Breite erlaubt die Rückkehr aus Papiermaß ohne Größensprung nach geändertem S.
+Kontur, Musterdefinition, Ursprung, Winkel und IDs bleiben unverändert. Alte Dateien
+1–15 migrieren strikt; unbekannte oder gemischte Felder und ungültige Zahlen werden
+abgewiesen. Gemeinsamer metrischer Resolver im Domain-Ansichtsmodul, Bildschirm-
+umrechnung im Rendering. Keine duplizierte Werkzeug- oder AI-Geometrielogik.
+
+792 Tests bestanden, Typprüfung inklusive Benchmarks und Produktionsbuild erfolgreich;
+Lint ohne Fehler, sechs bekannte Warnungen. Vier neue Tests mit Unterfällen: Wechsel
+in beide Richtungen, Maßstabsreaktion, Undo/Redo, Migration, Dateirundlauf, Pickup,
+Neuzeichnung, Bewegung, Eigenschafts-/Bibliotheksänderung, fehlender Kontext sowie
+ungültige/extreme Werte. Bestehende Migrationsnachweise erwarten nun Schema 16.
+
+Browser im separaten Testprojekt: 0,20 m bei 1:100 → 2 mm Papiermaß ohne Sprung;
+1:50 ergibt 0,10 m Modellbreite; Rückwechsel erhält 0,10 m. Zellbreite 3 mm übernommen,
+Undo stellt 2 mm wieder her. Doppelt-Rechtsklick, neues Diagonalrechteck: ebenfalls
+Papiermaß/2 mm. Speichern/Öffnen erhält beide Schraffuren. Null-Eingabe wird blockiert.
+Kontur bleibt unverändert, keine erfassten Browserfehler. Screenshot außerhalb des
+Repos: outputs/hatch-paper-mode.jpg. Vorschau und fertige Schraffur verwenden denselben
+Renderer; der ScaleContext bleibt bei Pointerbewegungen stabil für Paint-Run-Memoisierung.
+
+Abnahme: gemusterte Schraffur auswählen, Mustermaß auf Papiermaß stellen, Zellbreite
+in mm eingeben. Unten 1:100/1:50 wechseln: nur Mustergröße ändert sich. Zurück auf
+Modellmaß wechseln, Undo und Dateirundlauf prüfen. Keine PDF-/Druckfunktion oder
+physische Druckstiftbreite; bisheriger Bildschirmstrich bleibt 1 CSS-Pixel.
+
+**Genau ein nächster Auftrag: MS-04a Vertrag für gespeicherte Ausschnitte konkretisieren.**
+Begrenzter Planungs-/Dokumentationsschritt: vorhandene ModelView/DrawingDocument-
+Verträge gegen Arbeitsansicht und Schema 16 abgleichen. Identität, eigener Maßstab,
+eigene Ebenensichtbarkeit, Modellbindung und Lebenszyklus eines Ausschnitts festlegen;
+verbindliche Nutzerregeln von offenen Bedienfragen trennen. Genau einen anschließenden
+kleinen Implementierungspiloten benennen. Noch kein Layouteditor, keine zweite
+Bauteilkopie und keine neuen Dokumentklassen ohne konkreten Anwendungsfall.
+
+## MS-03: Maßstabsauswahl und persistente Arbeitsansicht — 10.10.2026
+
+PR232 nach grüner CI regulär zusammengeführt. Nutzer wünscht feste Maßstäbe
+1:50, 1:100, 1:200, 1:500, 1:1000, 1:2500, 1:5000 sowie individuell 1:xxxx.
+Umgesetzt als kompakte Auswahl mit zusätzlichem Eingabefeld bei Individuell.
+Vorgaben übernehmen sofort; freie Eingabe mit Enter/Feldverlassen, Escape verwirft.
+
+Schema 15 speichert den fachlichen Arbeitsmaßstab im Projekt (workingViews),
+Application/views validiert Änderungen. Alte Dateien 1–14 migrieren strikt auf
+1:100; unbekannte Felder/Ansichten, ungültige Zahlen oder fremde Geschosse werden
+abgewiesen. Fenster teilen den Maßstab und behalten unabhängigen Zoom. Bisherige
+Sitzungs-Map entfernt; das Projekt ist die einzige persistente Quelle. Maßstab
+ändert keine Modellgeometrie, legt kein Modell-Undo an und erhält den Redo-Zweig.
+Modell-Undo/Redo behält die aktuelle Ansichtseinstellung. Wie andere Änderungen
+der Projektrevision verwirft eine Maßstabsänderung laufende veraltete Vorschauen.
+
+788 Tests bestanden; Typprüfung inklusive Benchmarks und Produktionsbuild erfolgreich.
+Lint: 0 Fehler, 6 bekannte Warnungen. Vier neue Tests mit Unterfällen für Dateirundlauf,
+Altdatei-Migration, strikten Eingang, unveränderte Geometrie, Kontextisolation,
+Undo/Redo und Laden derselben Projekt-ID. Die zwei bisherigen Sitzungstests wurden
+durch diese Persistenztests ersetzt; numerische Resolver-/Eingabetests bleiben.
+Alle bisherigen Migrationsnachweise erwarten jetzt Schema 15.
+
+Browser: 1:5000 und freie 1:1234 funktionieren; 1:0 wird abgewiesen, Escape stellt
+1:1234 wieder her. Wandhöhe 2,8 → 4 m, Maßstab 1:2500, Undo/Redo: Höhe wechselt,
+Maßstab bleibt. Speichern mit 1:2500, danach 1:50 wählen, Datei öffnen: 1:2500
+wiederhergestellt. Zwei Ansichten teilen 1:1000, erste behält 200 % Zoom. Screenshot:
+outputs/persistent-scale.jpg außerhalb des Repos. Während der Modul-Umbenennung
+ein temporärer Vite-HMR-Importfehler; nach aktualisiertem Import funktioniert die UI.
+Kein neuer IFC-/Druck-/PDF-Abnahmelauf und noch kein Papiermodus im Schraffurwerkzeug.
+
+Praktische Abnahme: unten neben Zoom Vorgabe wählen oder Individuell → 1:125 → Enter.
+Projekt speichern, anderen Maßstab wählen und die Datei wieder öffnen. Dann eine
+Modelländerung rückgängig machen; der aktuelle Maßstab muss stehen bleiben.
+
+**Genau ein nächster Auftrag: Papiermaß im Schraffurwerkzeug integrieren.** Den
+geprüften gemeinsamen Renderer an gespeicherte Schraffuranwendungen anbinden;
+Modell-/Papierbezug, Papier-Zellbreite (UI mm, intern m), Eigenschaften, Defaults
+und Pickup gemeinsam umsetzen. Vorher die noch offene Bedienregel beim Moduswechsel
+klären (Vorschlag: sichtbare Zellgröße am aktuellen S erhalten). Bestehende Muster,
+Rotation und Geometrie erhalten; Migration, Undo und Dateirundlauf prüfen. Keine
+Textwerkzeuge, Layouts oder Druckfunktion gleichzeitig ergänzen.
+
+## MS-02/V07k: Geprüfter Schraffur-Darstellungspilot — 09.10.2026
+
+PR231 (MS-01) ist nach erfolgreicher GitHub-Prüfung zusammengeführt (bb006d1).
+Auf feat/hatch-paper-scale-pilot nutzt die gemeinsame Kachelableitung nun den
+Größenresolver aus MS-01. Explizite, abgeleitete Papierparameter ändern nur die
+Darstellung: 2 mm ergeben bei 1:50 eine 0,10-m-Zelle, bei 1:100 eine 0,20-m-Zelle.
+Seitenverhältnis, Ursprung und Rotation bleiben erhalten. Modellmaß bleibt Standard;
+Produktdateien (Schema 14), Bauteilgeometrie und Modell-History bleiben unverändert.
+
+786 Tests bestanden, Typecheck inklusive Benchmark und Produktionsbuild erfolgreich.
+Drei neue Tests mit Unterfällen vergleichen Modellpfad, Papiergrößen, Ursprung,
+Rotation, Zoom, Eingabe-Unveränderlichkeit und ungültige/extreme Werte. Lint ohne
+Fehler; sechs bekannte Warnungen. Browserprüfung auf benchmarks/hatch-scale.html
+verwendet die echte gemeinsame HatchPattern-Komponente: neun Kombinationen aus
+25/100/400 px/m und 0/45/90 Grad, unveränderte Kontur, korrekte Kachelbreite und
+Umrechnung auf 1 CSS-Pixel Strichbreite. Keine erfassten Browserfehler. Screenshot:
+outputs/hatch-paper-scale.jpg außerhalb des Repos. Kein Druck-/PDF-Nachweis.
+
+Abnahme: http://127.0.0.1:8081/benchmarks/hatch-scale.html öffnen, Zoom und Winkel
+wechseln. Die drei Vergleichsfelder zeigen dieselbe Kontur; Papiermaß 1:50 hat die
+halbe Modell-Zellbreite von 1:100. Keine Freischaltung des Papiermodus im Produkt.
+
+Nutzerentscheidung: Arbeitsmaßstab als gespeicherte Ansichtseinstellung außerhalb
+des normalen Modell-Undo führen. Ein Maßstabswechsel darf keine Modell-History
+anlegen; Modell-Undo darf einen inzwischen geänderten Ansichtsmaßstab nicht ersetzen.
+
+**Genau ein nächster Auftrag: MS-03 Arbeitsmaßstab persistent speichern.** Den
+fachlichen Arbeitsgrundriss-Kontext mit seinem Maßstab in der Projektdatei speichern,
+strikte Migration bestehender Dateien mit Standard 1:100 ergänzen und die bestehende
+Application-Verwaltung anbinden. Gemeinsamer Maßstab je Ansicht, unabhängiger Zoom
+je Fenster und Trennung vom Modell-Undo bleiben verbindlich. Öffnen/Speichern,
+Altdateien, ungültige Daten und Modell-Undo nach Maßstabswechsel testen. Noch keine
+Papiermodus-Freischaltung oder weiteren Ansichts-/Layouttypen in diesem Auftrag.
+
+## MS-01: Gemeinsamer Maßstabskontext und Auswahl — 09.10.2026
+
+Auf feat/shared-view-scale nach zusammengeführtem PR229 umgesetzt. Domain/views
+definiert fachliche Grundrissidentität (Projekt/Geschoss), ScaleContext und metrische
+Größen mit Modell-/Papierbezug. Application/views verwaltet immutable Sitzungswerte
+und validiert freie Nenner oder 1:S-Eingaben, auch Dezimalkomma. Rendering löst
+Modell-, Papier- und Bildschirmgrößen gemeinsam auf; fehlende Papierkontexte,
+ungültige Werte sowie numerischer Über-/Unterlauf werden abgewiesen.
+
+Neben Zoom erscheint in 2D Maßstab mit 1:100, Vorschlagsliste und freier Eingabe.
+Enter oder Feldverlassen übernimmt, Escape verwirft die Eingabe. Derselbe fachliche
+Grundriss teilt seinen Maßstab in allen Fenstern; Kamera/Zoom bleiben getrennt.
+Sitzungszustand lebt oberhalb der Fenster, nicht unter deren Layout-/Indexschlüssel.
+Reine Anschlussvorschauen ohne Kontext bieten keinen Maßstabsselektor. 3D bleibt
+ohne Ausgabe-Maßstabswahl. Keine Domain-Umrechnung in CadWorkspace oder je Werkzeug.
+
+783 Tests bestanden, Typecheck und Produktionsbuild erfolgreich, Lint ohne Fehler
+(sechs bekannte Warnungen). Fünf neue Tests mit Unterfällen: Kontextisolation,
+unveränderte Projektdatei/History, freie Eingabe, 2-mm-/0,20-m-Beispiel bei 1:50/100,
+Zoom 25/100/400 und ungültige/extreme Werte. Windows-Testkindprozesse benötigen
+weiterhin genehmigte Ausführung außerhalb der Sandbox (spawn EPERM).
+
+Browser in separatem Testtab: 1:100 → 1:50 lässt SVG-Wandgeometrie und viewBox exakt
+gleich, Undo bleibt deaktiviert. 1:0 abgewiesen, Escape stellt 1:50 wieder her.
+Zwei Fenster: erstes auf 200 % gezoomt; Maßstab im zweiten auf frei eingegebene
+1:75 geändert, erstes zeigt ebenfalls 1:75 und behält 200 %. Wechsel 3D/2D und
+Schließen des zweiten Fensters erhalten 1:75. Neuladen setzt erwartungsgemäß 1:100.
+Keine erfassten Browserfehler. Bild: outputs/shared-view-scale.jpg außerhalb des Repos.
+
+Grenzen: nur sitzungsbezogen, keine Speicherung oder Änderung der Modell-History.
+Noch keine Papiermuster-/Textdarstellung oder Druckfunktion. Andere fachliche
+Kontexte sind im Kern auf Isolation geprüft; die aktuelle UI zeigt weiterhin das
+vorhandene eine Geschoss. Fang-/Messalgorithmen erhalten keinen neuen Maßstabsinput;
+kein neuer manueller Gesamt-Fang-/IFC-Abnahmelauf in diesem Schritt behauptet.
+
+Abnahme: unten 1:50 eingeben und Enter drücken, dann unabhängig zoomen. Zwei
+Ansichten öffnen, Maßstab in einer ändern und in der anderen prüfen. Ungültige
+Eingabe testen. Der Maßstab wird erst im nächsten Schritt für Papiermuster verwendet.
+
+**Genau ein nächster Auftrag: MS-02/V07k Schraffur-Darstellungspilot.** Den neuen
+gemeinsamen Resolver in die Kachelableitung einbinden, Modellpfad unverändert lassen
+und Papier-Zellgrößen mit explizitem ScaleContext in isoliertem Browserbeispiel
+prüfen (Orientierung, Ursprung, Rotation, konstante Bildschirmstriche). Weiterhin
+keine Schema-/Papiermodus-Freischaltung; persistenter Ansichtskontext folgt separat.
+
+## Maßstabsverträge nach PR230-Review vereinheitlicht — 09.10.2026
+
+Nutzer bestätigt beide Reviewempfehlungen und gibt PR229 ausdrücklich frei.
+PR230 ist bereits in main; sein Stand wurde ohne History-Umschreibung in PR229
+integriert. Interne Papierlängen sind verbindlich Meter, Ein-/Ausgabe in mm.
+Der fachliche Ansichtskontext besitzt S; Bildschirmfenster referenzieren ihn
+und besitzen unabhängigen Zoom. Zwei Fenster derselben Ansicht teilen S.
+Initialwert 1:100 und Bedienung neben Zoom gelten; spätere persistente History
+bleibt offen. Architektur, allgemeiner Vertrag, Schraffurplan und AGENTS verweisen
+auf dieselbe Regel. Keine Produktionslogik oder Schemaänderung in diesem Abgleich.
+
+**Genau ein nächster Auftrag: MS-01 gemeinsamer Maßstabskontext und Selector.**
+Typisierten Größenresolver mit intern metrischen Größen und explizitem Maßbezug
+erstellen, sitzungsbezogene Änderung am fachlichen Kontext über Application und
+Selector neben Zoom anbinden. UI und CadWorkspace enthalten keine Umrechnungslogik.
+Standard 1:100, freie gültige Eingabe, kein Persistenz-/Modell-Undo in diesem Pilot.
+Kontextidentität nicht an Fensterindex binden; gleiche Ansicht teilt S, separate
+Ansichten bleiben unabhängig, Kamera bleibt je Fenster. Abnahme: Größenbeispiele,
+ungültige/extreme Eingaben, Fenster-/Ansichtswechsel, unveränderte Geometrie,
+Messung, Fang und Modell-History; Tests, Typprüfung, Build und Browserbedienung.
+V07k ist anschließend der konkrete Schraffurverbraucher innerhalb MS-02, kein
+separater Resolver und kein zweiter aktiver Auftrag. Historische Folgeaufträge
+weiter unten sind durch diesen Kopf ersetzt.
+
+Prüfung dieses Dokumentationsabgleichs: relative Links und git diff --check;
+keine wiederholten Laufzeittests ohne Codeänderung. CI wird am aktualisierten
+PR229 vor der freigegebenen Übernahme geprüft.
+
+## V07j: Papiermaß-/Ansichtsmaßstab-Vertrag — 09.10.2026
+
+PR228 nach ausdrücklicher Freigabe und erfolgreicher GitHub-CI normal in main
+zusammengeführt (0407ad5). Dokumentationsauftrag auf docs/hatch-paper-scale-contract:
+[Bestand, Umrechnung und Pilot](docs/planning/HATCH_PAPER_SCALE.md).
+Modellmeter, Ausgabe 1:S und Kamera-Zoom getrennt; Papier-Zellbreite wird über
+einen gemeinsamen gleichförmigen Faktor abgeleitet. Ursprung, Drehung und Kontur
+bleiben erhalten. Fehlender Maßstab bekommt keinen Zoom-/1:1-Fallback.
+Architekturvertrag begrenzt ergänzt; Produktionsschema 14 und UI unverändert.
+
+Offen bleiben Speicherort/History/Initialwert des Maßstabs der rohen Arbeitsansicht,
+spätere effektive Layoutmaßstäbe sowie physische Druckstifte. Keine Nutzerentscheidung
+dazu erfunden. Codeprüfung zeigt insbesondere die erforderliche Strichumrechnung
+innerhalb skalierter SVG-Kacheln. Keine neuen Laufzeittests für reine Dokumentation;
+Nachweis: Quelldateien/Formeln/relative Links geprüft, git diff --check sauber.
+
+**Genau ein nächster Auftrag: V07k isolierter Darstellungspilot.** Gemeinsamen
+Resolver für Zellmaße implementieren, bisherigen Modellpfad mit Faktor 1 erhalten
+und Papiermaß mit explizitem S in einem isolierten Browserbeispiel prüfen.
+Akzeptanzmatrix und Fehlerfälle im verlinkten Vertrag. Keine Produkt-UI-/Schema-
+Erweiterung, bevor der gespeicherte Ansichtskontext festgelegt ist.
+
+## Nachgeholte Browserabnahme: Stiftesets und Musterwinkel - 09.10.2026
+
+PR226 und PR227 sind nach ausdrücklicher Freigabe zusammengeführt; geprüfte
+Dateibasis entspricht main cbe54bf. Die älteren Offen-/Sandbox-Vermerke unten
+beschreiben den damaligen Stand. Nach Neustart und Wechsel auf die vom Nutzer
+gewünschte Windows-Sandbox unelevated funktionieren normale Shellzugriffe und
+Browserautomation wieder. Vite benötigte weiterhin einen genehmigten Start
+außerhalb der Sandbox (spawn EPERM innerhalb); keine pauschale Entwarnung für
+alle Kindprozesse. Keine weitere Sicherheitskonfiguration verändert.
+
+Praktische Prüfung in einem separaten Testtab, ohne das Modell im Nutzertab
+zu ersetzen:
+
+- Wandlänge 3 → 4 m beim Feldverlassen übernommen; Undo zurück auf 3 m,
+  Redo auf 4 m. Negative Länge abgewiesen, gültiges Modell bleibt erhalten.
+- Eigenes Testpaket QA Farben 09.10 mit Farbstift und Inventareintrag angelegt,
+  gespeichert und wieder geöffnet. Gemeinsamer Schraffur-Farbdialog bietet
+  dieses Inventar an. Auswahl und HEX-Eingabe ändern die Farbe direkt.
+- Rechteckschraffur mit vier Punkten gezeichnet, vorhandenes Mauerwerk-Muster
+  zugewiesen. Creator, Wiederholung und Plan zeigen die gleiche diagonale
+  Orientierung; die 19 Linienkoordinaten stimmen mit der Plan-Kachel überein.
+- Musterwinkel 0 → 90 Grad: SVG dreht das Muster um -90 Grad im Bildschirmraum;
+  Konturpunkte bleiben exakt unverändert. Ein Undo stellt 0 Grad wieder her.
+- Save project liefert novikov-project (10).json; über den echten Dateidialog
+  wieder geöffnet. Schema 14, stabile Schraffur-ID, Kontur, Musterdefinition,
+  Farbe #dc2626 und Stifteset/Inventar erhalten. Der Dateitest verwendet Winkel 0
+  nach Undo; Winkel-90-Dateirundlauf bleibt durch die bestehenden Tests belegt.
+- Teststift nachträglich auf #2563eb geändert und Paket übernommen: vorhandene
+  Schraffur bleibt #dc2626; nur das Angebot im Farbinventar wird blau.
+- Fenster nicht modal und ohne Abdunkeln; Creator per Kopf/Pfeiltaste versetzt.
+  Keine erfassten Browser-Konsolenfehler im geprüften Ablauf.
+
+Lokaler Bildnachweis: outputs/pen-hatch-browser-acceptance.jpg (außerhalb des
+Repositorys). Testpaket QA Farben 09.10 bleibt als eindeutig benanntes Testdatum
+in der lokalen Bibliothek; bestehende Nutzerpakete/Muster wurden nicht geändert.
+Keine neuen Laufzeitänderungen erforderlich. Die 778 Tests, Typecheck, Build und
+Lint aus PR227 bleiben der automatische Nachweis; kein erneuter Lauf für diesen
+Dokumentationsauftrag. Kein Anspruch auf vollständige Prüfung aller Farbfelder,
+Browser oder Bibliotheks-Konfliktfälle; globale Muster-History wurde hier nicht
+erneut mutiert. Die bisher blockierte Kern-Browserabnahme ist abgeschlossen.
+
+**Genau ein nächster begrenzter Auftrag: V07j Papiermaß-/Ansichtsmaßstab-Vertrag.**
+Modellmaß, Papiermaß und interaktiven Zoom gegen Architektur und vorhandenen Code
+abgleichen; gemeinsame Umrechnung und Zuständigkeit für den Ausgabemaßstab
+festlegen und genau einen kleinen Umsetzungspiloten mit Abnahmekriterien planen.
+Kein vollständiger Layouteditor und keine zweite Modellgeometrie.
+
+## Nutzerauftrag: Stiftesets und direkte Werkzeugeigenschaften - 09.10.2026
+
+Eigener Entwicklungszweig feat/pen-sets-live-properties auf PR226; dessen Änderungen
+bleiben ungemergt und erhalten. Tools > Stifteset verwaltet benannte Farbenpakete,
+Stifte mit Name/HEX-Farbe und je Paket ein Inventar bis zehn Farben. Paket anlegen,
+Stift bearbeiten/löschen und Inventar ändern sind möglich. Speichern veröffentlicht
+in der lokalen Browserbibliothek und wählt einen portablen Paketstand für das Projekt.
+Keine Live-Verknüpfung der Elementfarben: Nutzerentscheidung, dass bestehende Elemente
+ihre Farbe behalten. Bibliotheksänderungen wirken erst bei erneuter Paketübernahme;
+geschlossene Projektdateien werden nicht verändert. Kein Set-Löschen/Import/Cloudsync.
+
+Gemeinsamer Farbdialog für Linien, Schraffurfüllung, Hintergrund, Kontur, Liniencreator
+und Stiftemanager: Inventar, eigene freie HSV-Palette und HEX-Eingabe. Beide Fenster
+verwenden FloatingPanel (beweglich, nicht modal, kein Abdunkeln). Gesperrte Linienfarben
+bleiben gesperrt. Veraltete Dialogziele werden über den Komponentenlebenszyklus verworfen.
+Projektformat 14 speichert das optionale Stifteset einschließlich Inventar; strikte
+Migration 1–13 erhält den Bestand, alte Versionen akzeptieren kein neues Feld.
+
+PropertyForm koordiniert die bestehende validierte Eigenschaftenübernahme gemeinsam:
+Farb-/Listen-/Checkboxwahl sofort, Zahlen/Text beim Feldverlassen oder Enter. Kein
+Übernehmen-Button mehr für Wand-, Fenster-, Linien- oder Schraffureigenschaften.
+Ungültige Zwischenwerte verändern das Modell nicht. Bestehende Modellaktionen und
+History bleiben maßgebend, unveränderte Werte erzeugen keinen zusätzlichen Undo-Schritt.
+Projekt-Paketwahl ist eine Projektänderung; Bibliotheksänderungen werden von Modell-Undo
+nicht zurückgeschrieben. Creator-Entwürfe und explizite Modellbefehle behalten Bestätigung.
+
+Nachweise: 778 Tests bestanden, Typecheck und Produktionsbuild erfolgreich, vollständiger
+Lint ohne Fehler (sechs bestehende Fast-Refresh-Warnungen). Neue Tests für Inventar/IDs,
+Speicher-/Quota-/Konfliktfehler, portable Pakete ohne Bestandsumfärbung, Farb-Undo/Redo,
+strikte Migration und HSV/RGB-Rundlauf. Keine automatisierte Browserabnahme: Sandbox-
+Setup meldet Windows-Fehler 32 beim Öffnen von node_repl.exe für die ACL-Prüfung.
+Eigener Sitzungsreset erfolglos; vier ältere Hilfsprozesse mit aktiven Eltern gefunden.
+App-Neustart ist der nächste Diagnoseversuch, noch keine bestätigte Reparatur.
+
+Abnahme nach Neustart: Tools > Stifteset, Paket und zwei Stifte erstellen, Inventar
+wählen und speichern. Linie/Schraffur färben; eigenes Fenster prüfen. Zahlen ändern
+und Feld verlassen, ungültiges Maß prüfen, Undo/Redo. Projekt speichern/öffnen und
+Inventar prüfen. Stift später ändern: gezeichnete Elemente müssen unverändert bleiben.
+
+**Genau ein nächster Auftrag:** Nach Codex-Neustart Sandbox und gemeinsame Farb-/
+Eigenschaftenbedienung praktisch prüfen und diesen Schritt abnehmen. Anschließend
+bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag als fachlicher Folgeauftrag vorgemerkt.
+
+## Nutzerkorrektur: Musterausrichtung und Musterwinkel - 09.10.2026
+
+Ergänzung zu PR226 (weiterhin zur Prüfung offen): Im Creator verlaufen lokale
+Y-Koordinaten nach unten. Die bisherige Plan-Kachel negierte diese nochmals und
+spiegelte dadurch z. B. eine von links unten nach rechts oben gezeichnete Linie.
+Der gemeinsame Renderer erhält jetzt die Orientierung der Zeichenzelle unverändert;
+Vorschau und platzierte Schraffur verwenden denselben Kachelvertrag.
+
+Werkzeugeigenschaften bieten für neue und ausgewählte Schraffuren Musterwinkel
+0–360 Grad, positiv gegen den Uhrzeigersinn. Nur das Muster dreht um seinen Ursprung;
+Kontur, Ebene und globale Definition bleiben unverändert. Gemeinsame Application-
+Aktionen validieren die Eingabe, 360 entspricht 0 ohne zusätzlichen Undo-Schritt.
+Doppelt-Rechtsklick übernimmt den Winkel; Bewegung und Bibliotheksabgleich erhalten ihn.
+Projektformat 13 speichert den optionalen Anwendungswinkel. Strikte Migration 1–12
+setzt fehlende Winkel sinngemäß auf 0; vorhandene Definitionen werden nicht umgeschrieben.
+
+771 Tests bestanden, Typecheck und Produktionsbuild erfolgreich. Voller Lint:
+keine Fehler, sechs bekannte Fast-Refresh-Warnungen. Neue Nachweise: asymmetrische
+Creator-Geometrie, unabhängige Winkel, unveränderte Konturen, Undo/Redo, Dateirundlauf,
+Pickup, Bewegung, Bibliotheksabgleich, ungültige Winkel und strikte Migration.
+Browser-Sichtprüfung wegen Windows-Sandbox-Kernelstart nicht ausführbar; das konkrete
+lokal gespeicherte Muster wurde nicht ausgelesen.
+Abnahme: Mauerwerk bei 0 Grad mit dem Creator vergleichen, dann Musterwinkel 45/90
+übernehmen. Kontur muss unverändert bleiben. Zweite Anwendung, Speichern/Öffnen und
+Undo/Redo prüfen.
+
+**Genau ein nächster Auftrag bleibt V07j Papiermaß-/Ansichtsmaßstab-Vertrag:**
+Maßbezug und Umrechnung gegen Architektur und Code prüfen und genau einen begrenzten
+Umsetzungspiloten festlegen. Interaktiver Zoom ist kein Ausgabemaßstab.
+
+## V07i Globale Musterbearbeitung und Bibliotheks-History - 09.10.2026
+
+PR225 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Tools >
+Schraffurenverwaltung verwendet weiterhin das gemeinsame bewegliche, nicht-modale
+FloatingPanel. Musterliste zeigt Revision und Bearbeiten; separater Kopie-Entwurf
+behält eine neue ID. Bearbeiten bindet ID/Ausgangsrevision. Zeichenzelle, Name und
+Linien sind bearbeitbar; einzelne Entwurfslinien können entfernt werden. Erneutes
+Speichern eines gerade angelegten Musters bearbeitet dieses; Neuer Entwurf oder
+Kopie legt eine neue ID an. Leere/ungültige Muster werden nicht veröffentlicht.
+
+Eigene Bibliothekspfeile für Undo/Redo, einschließlich Neuanlage, verwenden die
+validierten Kernaktionen. History bleibt beim Schließen/Öffnen des Fensters erhalten;
+manuelles Neu laden setzt sie zurück und erhält den Entwurf. Externe Änderungen
+sperren die alte Bibliothekssitzung bis Neu laden. Der Bearbeitungsentwurf bleibt
+an seine ursprüngliche Revision gebunden; veraltetes Speichern wird abgewiesen.
+Quota-/Validierungsfehler verändern keine Bibliotheks-History. Kein Bibliotheks-
+Löschen eingeführt; Entfernen betrifft nur Linien im Entwurf.
+
+Ein gemeinsamer Storage-Benachrichtigungsadapter aktualisiert das aktive Projekt
+über den vorhandenen Resolver, ohne Modell-Undo-Schritt und mit erhaltenen Past-/
+Future-Stacks. Tatsächliche Änderungen brechen veraltete direkte Vorschauen ab;
+Werkzeugvorgaben folgen dem geprüften Projektstand bzw. der aktuellen Bibliothek.
+Fehlende/ältere Muster erhalten die portable Darstellung, Konflikte bleiben sichtbar.
+Andere Projekte übernehmen beim Öffnen; geschlossene Dateien werden nicht verändert.
+Mehrtab-Benachrichtigung ist integriert, atomare parallele Publikation bleibt offen.
+Projektformat bleibt 12. Modell-/Papiermaßwahl und Upload bleiben ausstehend.
+
+765 Tests bestanden; Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen)
+und Produktionsbuild erfolgreich. Sieben neue Nachweise: Neuanlage-/Quota-/Undo,
+gemeinsame Aktualisierung zweier Konturen mit erhaltener Modell-History, getrennte
+Undo/Redo-Pfade, veraltete Entwürfe, Konflikte/fehlende Muster, Entwurfslinien und
+Storage-Filter/Abmeldung. Browser-Sichtprüfung scheitert am Sandbox-Kernelstart.
+Abnahme: Muster zweimal anwenden; Tools > Schraffurenverwaltung > Bearbeiten;
+Name oder Linien ändern, Änderungen speichern. Beide Schraffuren aktualisieren.
+Bibliothekspfeile prüfen; Füllfarbe im Projekt ändern und normales Undo prüfen.
+Fenster schließen/öffnen: Bibliotheks-History bleibt. Kopie/Neuer Entwurf prüfen.
+
+**Genau ein nächster Auftrag: V07j Papiermaß-/Ansichtsmaßstab-Vertrag.** Vor der
+noch gewünschten Papiermaßwahl den vorhandenen ModelView-/Ausgabemaßstab gegen
+Architektur und Code prüfen; Maßbezug, Umrechnung und Dateimigration als begrenzten
+Vertrag mit genau einem Umsetzungspiloten dokumentieren. Zoom ersetzt keinen
+Ausgabemaßstab. Noch kein Layouteditor, Uploadformat oder neuer Renderer.
+
+## V07h Portabler Revisionskontext - 09.10.2026
+
+PR224 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt. Projektformat
+12 speichert die bekannte Revision an der einmaligen eingebetteten Musterdefinition.
+Ohne Revision bleibt die Herkunft ausdrücklich unbekannt; strikte Migration 1–11
+erfindet keine Versionsnummer. Schema 11 akzeptiert keine neuen Revisionsfelder.
+Bestehende Definitionen, Konturen, Musterursprünge und Assets bleiben erhalten.
+
+Gemeinsame Application-Auflösung integriert in Projektöffnung, Projektübernahme und
+Undo/Redo. Browser-Storage wird vor Dispatch im Adapter gelesen; Reducer und Domain
+bleiben deterministisch. Neuere Bibliotheksstände werden übernommen, fehlende/ältere
+erhalten eingebettete Inhalte. Gleiche Revision mit anderem Inhalt meldet Konflikt
+und erhält die Darstellung. Beschädigte Bibliothek blockiert das Projekt nicht.
+Projekt-Undo erhält auch ohne Bibliothek neuere bekannte Definitionen desselben
+Projekts. Öffnen bleibt ein Undo-Schritt; Musterabgleich erzeugt keinen zusätzlichen
+Schritt und schreibt niemals in die Bibliothek. Neue globale Bearbeitungs-UI und
+automatische Aktualisierung aller offenen Tabs bleiben ausstehend.
+
+758 Tests bestanden; Typecheck und Produktionsbuild erfolgreich. Lint ohne Fehler,
+sechs bekannte Fast-Refresh-Warnungen. Praktische Browser-Abnahme noch offen.
+Fünf neue Tests:
+Migration 11→12/unbekannte Herkunft, Dateirundlauf, Öffnen als eine Transaktion,
+Undo/Redo mit fehlender Bibliothek, Konflikte/ältere Stände und ungültige Revisionen.
+Runtime-Fixtures auf Version 12 aktualisiert; frühere Eingabeformate bleiben strikt.
+Windows-Zeilenenden aus dem Schreibskript korrigiert; keine fachfremden Teständerungen.
+Praktische Abnahme: vorhandene Musterschraffur speichern, öffnen, Darstellung prüfen;
+Füllfarbe ändern, Undo/Redo, erneut speichern/öffnen. Automatisch neuere Muster lassen
+sich nach Anbindung der Bibliotheksbearbeitung praktisch erzeugen und prüfen.
+
+**Genau ein nächster Auftrag: V07i globale Musterbearbeitung mit Bibliotheks-History.**
+Im vorhandenen nicht-modalen Verwaltungsfenster Bearbeiten und eigenes Undo/Redo
+an den geprüften Kern anbinden; aktives Projekt über dieselbe Auflösung aktualisieren,
+ohne Modell-Undo-Schritt. Veraltete Entwürfe, Konflikte, Speicherfehler und mehrere
+Schraffuren mit gleicher Muster-ID prüfen. Kein Papiermaß oder Upload in diesem Schritt.
+
+## V07g Revisions-/Bibliotheks-History-Kern - 09.10.2026
+
+PR223 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Bibliotheksformat
+v2 speichert stabile IDs, Revisionen und einen monotonen Veröffentlichungszähler.
+v1 wird beim Lesen verlustfrei im Speicher migriert; bestehende Erstellungs- und
+Auswahloberflächen verwenden weiterhin dieselbe API. Bearbeiten, Undo und Redo
+prüfen Zielrevision und gebundenen Speicherstand. Undo veröffentlicht restaurierten
+Inhalt unter einer neuen Revision. History bleibt sitzungsbezogen, begrenzt auf
+20 Schritte und 4 Millionen serialisierte Zeichen; Speicherfehler liefern keinen
+neuen History-Zustand. Keine atomare Mehrtab-Transaktion zugesichert.
+
+Zentrale Projektauflösung übernimmt neuere Definitionen für alle Anwendungen einer
+ID gemeinsam; fehlende oder ältere Bibliotheksstände erhalten eingebettete Inhalte.
+Gleiche Revision mit anderem Inhalt wird als Konflikt gemeldet. Snapshot-, Referenz-
+und Dateigrößenprüfung bleiben erhalten. Der Pilot verwendet expliziten Revisions-
+kontext: Projektformat 11 speichert diesen noch nicht. Automatische Auflösung beim
+Öffnen/Projekt-Undo und globale Bearbeitungsbuttons sind noch nicht angebunden.
+
+753 Tests bestanden, Typecheck und Produktionsbuild erfolgreich. Voller Lint:
+keine Fehler, sechs bekannte Fast-Refresh-Warnungen. Sieben neue Tests prüfen
+Migration, monotone History, veraltete Aktionen, Speicherfehler, History-Grenzen,
+gemeinsame Auflösung, Konflikte und Modell-Undo mit aktueller globaler Definition.
+Dieser Kernschritt ergänzt keine neue visuelle Bedienung.
+
+**Genau ein nächster Auftrag: V07h portabler Revisionskontext.** Den verwendeten
+Revisionsstand inkrementell in Projektdateien speichern, Altdateien strikt migrieren
+und die gemeinsame Auflösung beim Öffnen sowie Wiederherstellen von Projekt-History
+anbinden. Dateirundlauf, fehlende Bibliothek, Konflikte und getrennte History prüfen.
+Globale Bearbeitungs-UI, Mehrtab-Synchronisation, Papiermaß und Upload folgen später.
+
+## V07f Portabler Modellmaß-Pilot - 09.10.2026
+
+PR222 nach Nutzerfreigabe mit erfolgreicher CI zusammengeführt. Schema-11-Migration
+vom Nutzer zusätzlich ausdrücklich freigegeben, nachdem automatische Freigabeprüfung
+zunächst den umfangreichen Schreibvorgang abgelehnt hatte. Unterbrochener Befehl
+hinterließ keine Änderungen; Umsetzung auf feat/hatch-model-patterns.
+
+Muster in Werkzeugvorgaben/Inspector auswählbar; Vollfläche entfernt die Zuweisung.
+Vier bestehende Erstellungsarten und Doppel-Rechtsklick verwenden dieselbe gemeinsame
+Application-Definition. Projektversion 11 speichert verwendete Muster einmal als
+Tabelle; Schraffuren referenzieren ID, Modellmaß und festen Ursprung. Alte Dateien
+1–10 laden über strikte Migration, bestehende Vollflächen behalten ihre Darstellung.
+Unbenutzte Definitionen werden bei Normalisierung entfernt. Ungültige Referenzen,
+doppelte IDs, widersprüchliche Definitionen und veraltete Aktionen werden abgewiesen.
+SVG-Kacheln füllen nur die Kontur, auch in der Zeichenvorschau; keine Modelllinien
+pro Wiederholung. Farbe/Deckkraft, Hintergrund und Kontur bleiben erhalten. Einzel-
+und vorbereitete Gruppenbewegung nehmen den Ursprung mit; Reshape behält ihn.
+Muster werden ohne installierte lokale Bibliothek aus der Projektdatei dargestellt.
+
+746 Tests bestanden; Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild. Neue Nachweise: gemeinsame Definition zweier Konturen (auch konkav),
+Migration 10→11, unabhängige Koordinaten, atomarer Undo/Redo, Dateirundlauf, gleiche
+Einzel-/vorbereitete Gruppenbewegung, Reshape-Ursprung, Stale-/Konflikt-/Referenzschutz,
+Vorgabenübernahme mit neuem Ursprung. Alte Migrationstests bleiben strikt.
+Browserverbindung scheitert weiter am Sandbox-Start; praktische Sichtprüfung offen.
+Abnahme: Muster unter Tools anlegen; Schraffurwerkzeug > Muster wählen, zeichnen;
+vorhandene Schraffur > Muster wählen > Übernehmen. Zoomen, verschieben, Ecke bewegen,
+Undo/Redo, speichern/öffnen. Vollfläche wählen: Muster weg, alte Farben bleiben.
+
+**Genau ein nächster Auftrag: V07g Revisions- und Bibliotheks-History-Kern.**
+Bibliotheksformat v1 ohne Verlust auf monotone Revisionen erweitern; gemeinsame
+validierte Bearbeiten-/Undo-/Redo-Aktionen und zentrale projektseitige Auflösung als
+begrenzten Domain-/Application-Piloten testen. Neuere Revision automatisch übernehmen,
+fehlende/ältere Bibliothek erhalten, gleiche Revision mit anderem Inhalt melden;
+Bibliotheks-Undo veröffentlicht neue Revision. Noch keine automatische UI-/Tab-
+Synchronisation, Papiermaß oder Upload. UI-Anbindung folgt nach diesem Kernnachweis.
+
+## V07e Musteranwendungs-/Aktualisierungsvertrag - 09.10.2026
+
+PR221 (38b571e) nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.
+Hatch-Schema, previewHatch/commitHatch, Projektmigration/-History, Renderer und
+Bibliothek geprüft. Projektformat 10 hat noch keine Mustertabelle/Referenz;
+kein implementierter Ansichts-Ausgabemaßstab. Papiermaß benötigt diesen, Zoom
+ersetzt ihn nicht. Keine neue Codefunktion oder Dateimigration in diesem Auftrag.
+Nutzerantworten: neue Muster beim Öffnen älterer Projekte automatisch übernehmen;
+eigene Bibliotheks-Undo/Redo-History, Projekt-Undo nur Modellzuweisung/-änderung.
+Vertrag dokumentiert: portable Definitionstabelle, stabile Referenzen/Anker,
+Modell-/Papiermaß, künftige monotone Revisionen und automatische zentrale Auflösung,
+keine Downgrades oder stille Konfliktersetzung. Bibliotheks-Undo als neue Revision;
+Projekt-Undo darf globale Aktualisierung nicht durch alte Snapshots zurückdrehen.
+Details und Nachweise in docs/planning/HATCH_PATTERN_LIBRARY.md (V07e).
+Dokumentations-Diff geprüft; 741 Tests/Build und CI stammen vom PR221-Commit,
+nicht erneut ausgeführt. Praktische V07d-Abnahme bleibt im Browser offen.
+
+**Genau ein nächster Auftrag: V07f portabler Modellmaß-Pilot.**
+Muster in Werkzeugeigenschaften vorhandener Schraffuren zuweisen/entfernen und
+als neue Werkzeugvorgabe übernehmen; verwendete Definition einmal im Projekt
+speichern, Migration und Referenzen prüfen. Begrenzte geklippte Darstellung,
+Anker bei Bewegung, Undo/Redo und Dateirundlauf ohne lokale Bibliothek nachweisen.
+Keine globale Musterbearbeitung, Papiermaß, Revision-Synchronisation, Upload oder
+Layout in diesem Piloten. Diese geforderten Erweiterungen bleiben offen.
+
+## V07d Globale lokale Schraffurmusterbibliothek - 09.10.2026
+
+PR220 nach Nutzerfreigabe mit erfolgreicher GitHub-CI zusammengeführt.
+Eigene Muster aus dem Creator erhalten stabile IDs und Namen. Application lädt
+und speichert die validierte Bibliothek über einen austauschbaren Storage-Adapter.
+In diesem Schritt: projektübergreifend innerhalb eines Browserprofils/Origins, nicht Geräte
+oder unterschiedliche Ports hinweg. Versioniertes Bibliotheksformat 1, maximal
+100 Definitionen und 256 Linien je Muster, begrenzte serialisierte Datenmenge.
+Liste mit kleinen Vorschauen, Speichern und Laden als neuer Entwurf. Neue
+Definitionen erhalten neue IDs; bestehende Definitionen werden nicht geändert.
+Schreib-/Lesefehler, beschädigte Daten und unbekannte Versionen werden gemeldet;
+kein automatisches Überschreiben oder Rücksetzen. Kein Projektformatwechsel,
+keine Änderung des BIM-Undo. Upload und Musteranwendung noch nicht enthalten.
+741 Tests bestanden, Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild. Nachweise: Wiederladen mit frischem Adapter, Datenkopien,
+Zusammenführen weiterer gespeicherter Definitionen, ungültige Eingaben/Limits,
+beschädigte Daten und Speicherfehler ohne Verlust des bisherigen Payloads.
+HTTP 200 auf 8080; visuelle Abnahme offen, Browsersteuerung beendet Node-Prozess.
+Abnahme: Tools > Schraffurenverwaltung, Linie zeichnen, Muster benennen/speichern;
+Browser neu laden: Vorschau bleibt. Als neuen Entwurf öffnen, ändern, unter neuem
+Namen speichern: beide Definitionen bleiben. Anderes Projekt öffnen: Liste bleibt.
+
+**Genau ein nächster Auftrag: V07e Musteranwendungs- und Aktualisierungsvertrag.**
+Den vorhandenen Hatch-/Datei-/History-/Ansichtsvertrag prüfen und einen begrenzten
+Implementierungsauftrag für portable Musterzuweisung festlegen. Modell-/Papiermaß,
+expliziter Ansichtsmaßstab, stabile IDs, eingebettete Definitionen, globale Revisionen
+und gemeinsames Aktualisieren berücksichtigen. Offene Konflikt-/Undo-Regeln für
+projektübergreifende Änderungen mit dem Nutzer klären, keine stille Entscheidung.
+
+## Kataloglinien: Darstellung und Farbfreigabe - 09.10.2026
+
+Eigene SVG-Muster verwenden eine explizite Umrechnung der System-Strichstärke
+in Musterkoordinaten statt non-scaling-stroke innerhalb der Musterkachel.
+Farbe veränderbar im Linien Creator ist standardmäßig aktiv (auch für alte
+Definitionen). Deaktiviert: Musterfarbe verbindlich, Farbauswahl gesperrt,
+abweichende Projektaktionen durch gemeinsame Validierung abgewiesen.
+736 Tests bestanden; Typecheck, Lint ohne Fehler (sechs bekannte Warnungen),
+Produktionsbuild erfolgreich. Neue Tests: Farbfreigabe, Ablehnung abweichender
+Farbe, JSON-Roundtrip und Strichstärke bei Zoom/Mustergrößen.
+Praktische Abnahme offen: Browsersteuerung startet derzeit nicht. Prüfen:
+rote eigene Linienart mit gesperrter Farbe speichern, auswählen, zeichnen,
+abwählen und zoomen; entsperrte Linie muss weiterhin umfärbbar sein.
+Folgeauftrag bleibt V07d globale lokale Schraffurmusterbibliothek.
+## Linieninventar am Linienwerkzeug - 09.10.2026
+
+PR217 und PR218 mit erfolgreicher CI zusammengeführt; PR218 zuvor auf main
+umgestellt. Aktualisierte R26-Produktroadmap gelesen, laufenden Auftrag erhalten.
+Nutzerentscheidungen: eigene Linienmuster im Modellmaß, bestehende Linien behalten
+Muster bei Kataloglöschung. Inventar in Werkzeugeigenschaften für Zeichnen und
+Inspector verfügbar; eigener Musterabstand in Metern (Vorgabe 1 m) editierbar.
+Gemeinsame Application-Vorgaben und 2D-Übernahme enthalten portable Definition.
+Schema 10: validierte Definition und Wiederholungslänge je custom-Linie; Dateien
+1–9 migrieren am Dateirand, alte Stricharten behalten ihre Darstellung. Katalog-
+Löschen/Ändern schreibt keine bestehenden Projektlinien um. Ein vorhandener Stil
+außerhalb des Inventars bleibt als aktueller Wert sichtbar und erhalten.
+SVG-Muster wiederholen ohne zusätzliche Modellpunkte oder unbeschränkte erzeugte
+Segmente; Phase läuft über Polylinienecken weiter. Bibliotheks-/Geometrievalidierung
+in Domain, Inventar/Defaults in Application, Darstellung abgeleitet.
+734 Tests, Typechecks, voller Lint ohne Fehler (sechs bekannte Warnungen), Build.
+Neue Nachweise: Schema-9-Migration, JSON-Roundtrip nach Kataloglöschung, atomarer
+Undo, gemeinsame Erstellung/Übernahme, ungültige Musterlänge und lineare Ableitung
+bei sehr dichter Wiederholung. Praktischer Browser-Test weiter blockiert: Steuerung
+beendet den Node-Prozess vor Zugriff. Visuelle Muster-/Stiftprüfung ist offen.
+Abnahme: Inventarart wählen, Musterlänge 0,25 m, Linie/Polylinie zeichnen; zoomen,
+Wert ändern, rückgängig; speichern/öffnen; Katalogart löschen, bestehende Linie bleibt.
+
+**Genau ein nächster Auftrag: V07d globale lokale Schraffurmusterbibliothek.**
+Creator-Entwürfe validiert dauerhaft speichern, Liste mit Vorschauen und Neustart-
+Laden; keine Musteranwendung, Synchronisation oder Upload in diesem Teilauftrag.
+Praktische Linienabnahme mit Nutzer/Browser nachholen.
+
+## Linien Creator: Zeicheneditor und Inventar - 08.10.2026
+
+Nutzer korrigiert bisherigen Umfang: alle Katalogarten bearbeiten/löschen,
+Neue Linienart öffnet Zeichenfeld mit eigener Struktur, Farbe, Name. Zusätzlich
+oben Inventar mit maximal zehn ausgewählten Katalogarten, später fürs Linienwerkzeug.
+Umgesetzt: zeichnbare Segmentstruktur mit Wiederholungsperiode, gemeinsamer Fang,
+Shift-Richtung, Vorschau, Abbrechen und letzten Abschnitt entfernen. Standardarten
+editier-/löschbar in der Bibliothek; bestehende Projektlinien bleiben unverändert.
+Bibliothek v2 und Inventar atomar gespeichert, v1 beim Laden ohne Schreiben migriert.
+Bis zu 100 ältere eigene Arten plus drei Standardarten bleiben ladbar. Keine
+Projektmigration oder Linienwerkzeuganbindung in diesem UI-/Bibliotheksschritt.
+730 Tests einschließlich Migration, Geometrie/Farbe, Inventarlimit, Persistenz,
+Löschen und Schreibfehler bestanden; Typecheck/Lint/Build. Browser-Abnahme offen.
+Abnahme: vorhandene Art bearbeiten, Farbe und Struktur ändern, speichern; neue Art
+über Button zeichnen; Inventar füllen (max. zehn), Art löschen, neu laden prüfen.
+
+**Genau ein nächster Auftrag: Inventar und eigene Strukturen ans Linienwerkzeug
+anbinden.** Stabile portable Definitionen, Rendering und Projektmigration prüfen;
+Maßbezug und Löschregeln für bereits verwendete Arten vorab festlegen.
+
+## Neue spätere Wünsche - 08.10.2026
+
+Diese Punkte sind aufgenommen, noch nicht umgesetzt; laufender begrenzter
+Folgeauftrag bleibt unverändert. Ältere Anforderungen und Anschlussregeln gelten.
+
+- Wandanschlüsse bei ungleichen Wandstärken: T, Ecke und weitere unterstützte
+  Anschlussarten erweitern. Bereits früher offener Punkt, hier ausdrücklich
+  bestätigt. Gemeinsame Geometrie für 2D, 3D und IFC; Achslagen, beide Wandrichtungen,
+  Öffnungen, Bearbeitung, Undo und Speichern/Laden prüfen. Konkrete Abschlussregeln
+  für verschiedene Stärken vor Implementierung festlegen, nicht erfinden.
+- 3D-Projektion: zusätzlich zur vorhandenen axonometrischen Darstellung eine
+  allgemeine Perspektive wählbar anbieten, Steuerung über Einstellungen.
+  Kamera/Projektion, Picking und Fang müssen dieselbe Darstellung berücksichtigen;
+  Ansichtseinstellung verändert keine BIM-Geometrie. Speicherumfang, Kamera-
+  parameter und genaue Platzierung der Einstellung bleiben zu klären.
+- Einstellungen strukturieren: vor weiterem Wachstum einen eigenen kleinen
+  Planungsauftrag für Benutzer-, Projekt-, Ansichts- und Werkzeugvorgaben vorsehen.
+  Vorschlag: zentrale Einstellungsübersicht mit klaren Kategorien und gemeinsamem
+  Zustands-/Speichervertrag; genaue Menüstruktur noch nicht entschieden. Neue
+  Einstellungsfenster verwenden wie alle CAD-Fenster die Ebenen-/FloatingPanel-Vorlage.
+
+## Einheitliche schwebende Fenster - 08.10.2026
+
+PR216 nach grüner GitHub-CI zusammengeführt. Nutzer bestimmt Ebenenfenster als
+Vorlage aller CAD-Fenster: verschiebbar, kein abgedunkelter Hintergrund, Glass Flow.
+Gemeinsame FloatingPanel-Hülle aus der Ebenenpalette extrahiert; Ebene, Linien
+Creator, Schraffurverwaltung, Canvas-Einstellungen, Anschlussvorschau und
+Projektladebestätigung angebunden. Pointer-/Pfeiltastenverschiebung, Randbegrenzung,
+Schließen/Escape gemeinsam; lange Inhalte scrollbar. Keine neue Modellaktion.
+726 Tests, Typecheck, voller Lint ohne Fehler (sechs bekannte Warnungen), Build.
+Browserprüfung erneut durch Sandbox-Startfehler blockiert. Abnahme: Creator öffnen,
+Kopfzeile ziehen, Canvas außerhalb bedienen, schließen; Ebenen/Canvas-Einstellungen
+gegenprüfen. Kein Overlay und kein erzwungener Fokus im Fenster.
+
+**Genau ein nächster Auftrag: eigene Linienarten ans Linienwerkzeug anbinden.**
+Stabile Referenzen/portable Definitionen und Migration, Rendering, Vorgabenübernahme,
+Speichern/Laden prüfen; Maßbezug und Löschen verwendeter Arten davor festlegen.
+
+## Linien Creator getrennt von Schraffuren - 08.10.2026
+
+Nutzer präzisiert: eigenständiger Tools-Eintrag Linien Creator für Linienarten,
+Vorschauen, Löschen, Bearbeiten, Anlegen. Schraffurenverwaltung bleibt separat.
+Erster Creator: Standardarten (geschützt) und eigene positive Strich-/Lückenfolgen;
+Application-Validierung, austauschbarer Storage-Adapter, browserprofil-/originlokale
+projektübergreifende Speicherung. Kein Projektformatwechsel. Eigene Arten sind
+noch nicht im Linienwerkzeug auswählbar; Symbolmuster noch nicht implementiert.
+Umlaute/Zellhöhe/Rückgängig und Sonderzeichen im Muster-Creator korrigiert.
+726 Tests, Typecheck, voller Lint ohne Fehler (sechs bestehende Warnungen), Build.
+Browser-Abnahme weiterhin offen. Praktischer Test: Tools > Linien Creator,
+Name und 8 5 2 5 eingeben, speichern, bearbeiten, schließen/öffnen und neu laden,
+eigene Art löschen. Tools > Schraffurenverwaltung bleibt Flächenmuster-Creator.
+
+**Genau ein nächster Auftrag: eigene Linienarten ans Linienwerkzeug anbinden.**
+Stabile Referenzen und portable eingebettete Definitionen, Bestandsmigration,
+Darstellung/Vorgabenübernahme und Speichern/Laden gemeinsam prüfen; vor Nutzung
+Maßbezug und Verhalten beim Löschen einer verwendeten Linienart festlegen.
+Globale Schraffurbibliothek V07d bleibt erhalten, ist noch nicht umgesetzt.
+
+## V07c Bibliotheksvertrag - 08.10.2026
+
+Nutzerentscheidungen: globale projektübergreifende Musterbibliothek; Modell-/
+Papiermaß bei Schraffuren in Werkzeugeigenschaften wählbar; Musteränderungen
+aktualisieren gemeinsam alle Anwendungen. Architektur und Fachvertrag ergänzt.
+Uploadformat weiter offen. Einbettung verwendeter Definitionen, Offline-/
+Revisionsabgleich und projektübergreifendes Undo sind technische Vorschläge,
+keine implementierte Synchronisation. Creator-Abnahme weiterhin offen.
+PR215: CI-Formatierungsfehler behoben; voller lokaler Lint ohne Fehler
+(sechs bestehende Fast-Refresh-Warnungen). Produktionscode sonst unverändert.
+
+**Genau ein nächster Auftrag: V07d globale lokale Musterbibliothek.**
+Storage-Adapter, validierte Muster mit stabilen IDs/Namen, Liste/Vorschauen und
+Speichern des Creator-Entwurfs; Neustart/Laden und beschädigte Daten prüfen.
+Keine Projektmigration, Musteranwendung, Synchronisation oder Upload in V07d.
+
+## V07b Linien-Creator - 08.10.2026
+
+PR214 mit erfolgreicher CI zusammengeführt. Tools > Schraffurenverwaltung öffnet
+einen isolierten Linienentwurf mit rechteckiger Zelle, gemeinsamer Fangabfrage,
+Shift-Richtung und abgeleiteter 3x3-Wiederholung. Eigener Entwurfs-Undo, keine
+BIM-Änderung und keine Änderung des Projektdateiformats. Zellmaße 0,001–100 m,
+maximal 256 Linien, endliche Punkte innerhalb der Zelle, keine Nullsegmente.
+722 Tests bestanden; Typecheck, gezielter Lint und Build bestanden.
+Praktische Browser-Abnahme offen: Browser-Sandbox startet nicht (setup refresh).
+Abnahme: Tools > Schraffurenverwaltung; zwei Linien zeichnen, Zelle vergrößern,
+3x3-Vorschau prüfen, Entwurf rückgängig, schließen; Projekt unverändert.
+Upload und persistente Bibliothek sind noch nicht implementiert. Empfehlung:
+CAD-PAT zuerst, eingeschränktes SVG später, Rasterbilder als eigene Texturen.
+Das ist keine verbindliche Formatentscheidung des Nutzers.
+
+**Genau ein nächster Auftrag: V07c Bibliotheksvertrag für Muster speichern und
+auf vorhandene Schraffuren anwenden festlegen.** Projekt- versus globale
+Bibliothek, Modell- versus Papiermaße und Änderung bestehender Anwendungen
+vor Implementierung klären; Creator praktisch abnehmen.
+
 # Entwicklungsplan NOVIKOV CAD
 
-## Aktueller Stand: Offset-Cap, Klickplatzierung und Textadapter — 06.10.2026
+## V07a Schraffurverwaltung abgeglichen - 08.10.2026
 
-Dieser Abschnitt ersetzt die historischen Folgeauftraege und Ablehnungsregeln.
-PR123 mit angeforderter Korrektur freigegeben/uebernommen (1a1608b): Innenoffset
-behaelt mindestens 1 % der urspruenglichen Laenge jeder Seite; die zuerst
-kollabierende Seite begrenzt den Offset. Bei numerisch sehr kleinen Formen kann
-die Grenze frueher greifen. Maus/Zahl/Commit nutzen identische Begrenzung, die
-Vorschau bleibt bestehen. Konkave Ausgangsformen bleiben zunaechst unsupported.
-Freies Bewegen platziert jetzt sofort per Klick, statt nur den Winkel zu fixieren.
-Tab wechselt weiterhin zuerst zur Laenge, danach zum Winkel. Gemeinsamer Adapter.
+Nutzer bestaetigt praktische 2D-Abnahme; V06 abgeschlossen fuer heutige Typen.
+Neue Anforderung: Tools > Schraffurenverwaltung, Liste/Vorschauen, Linien-Creator
+mit Wiederholung und Musterupload. Uploadformat offen, Nutzer recherchiert.
+[Architektur, offene Entscheidungen und Abnahme](docs/planning/HATCH_PATTERN_LIBRARY.md).
 
-Neuer Zweig feat/offset-text-command: lokaler Befehl "Offset um -5 cm" bzw.
-"Offset 0,05 m" fuer die ausgewaehlte Schraffur/geschlossene Polylinie. Strikter
-Parser mit m/cm/mm, Vorzeichen und Dezimalkomma. Keine Zielvermutung; Vorschau
-bindet Modellstand und Auswahl-ID. Gemeinsame Direct-Edit-Aktion berechnet den
-Offset inklusive Cap, die Zusammenfassung nennt den tatsaechlichen und bei
-Begrenzung den angeforderten Abstand. Bestaetigung ueber bestehende History.
-Kein externes AI-Modell, keine neue Spracherkennungslogik, keine zweite Geometrie.
+**Genau ein naechster Auftrag: V07b Linien-Creator als transienten Entwurf mit
+rechteckiger Zelle und 3x3-Wiederholung bauen.** Gemeinsame Fang-/Geometriegrenze,
+kein Projektdateiwechsel oder BIM-Undo fuer Entwurfsaktionen. Bibliotheksspeicherung,
+Anwendung auf Konturen und Import folgen nach den benannten Entscheidungen.
 
-472 Tests bestanden, TypeScript und Build erfolgreich; Lint nur sechs bekannte
-Warnungen. Browser: 10-cm-Schraffur trotz -100-m-Eingabe ohne Fehler auf 1 mm
-begrenzt; ein Mausklick beendet freie Bewegung; Tab Laenge/Winkel geprueft;
-Textoffset -100 cm zeigt -0,0495 m, Uebernahme und Undo erfolgreich.
 
-Abnahme: kleines Rechteck -> Offset stark nach innen ziehen/eingeben: Vorschau
-bleibt am Cap. Element frei bewegen -> Mausziel klicken: sofort platziert.
-Textfeld mit ausgewaehlter Schraffur: "Offset um -100 cm" -> Befehl pruefen ->
-begrenzten Abstand lesen -> Uebernehmen -> Undo. Keine Dateiformataenderung.
+## V06e: Wandvorgaben gemeinsam uebernehmen - 08.10.2026
 
-**Genau ein ausfuehrbarer Folgeauftrag:** Den lokalen Offset-Textadapter fuer die
-bestehende Spracherkennung freischalten, einschliesslich deutscher Zahlwoerter,
-"nach innen/nach aussen", gepinntem Auswahlkontext und Bestaetigung. Erkennung
-normalisiert ausschliesslich in die gepruefte Grammatik; keine neue Modelllogik.
-Konkave Konturen, Kreise, Linienarten und Kopie-Hotkeys bleiben vorgemerkt.
+PR212 nach gruener CI zusammengefuehrt. Wand-Uebernahme im Grundriss: Staerke,
+Hoehe, Koerperversatz/Achslage und Ebene. Werte in Werkzeugeigenschaften editierbar.
+Wandkette pinnt eine eigene Vorgabenkopie. Schnelle und volle Vorschau sowie
+Erstellung verwenden diese Werte. Neue IDs/Punkte, keine Quellfenster/-anschluesse.
+719 Tests bestanden, einschliesslich exaktem Vergleich der ersten und zweiten
+Abschnittsvorschau mit dem Vollpfad. Typecheck, gezielter Lint und Build bestanden.
+Browser-Steuerung weiter durch Sandbox-Startfehler blockiert; Linien- und
+Wandabnahme praktisch offen. Abnahme: Wand zweimal rechts anklicken, Werte
+pruefen/aendern, freie Kette mit zwei Abschnitten zeichnen/abschliessen, Undo:
+gesamte neue Kette weg, Quelle bleibt bestehen.
+
+Nutzerentscheidung vom 08.10.2026: Keine Vorgabenuebernahme in 3D erforderlich.
+Der vorgeschlagene V06f-3D-Auftrag entfaellt ausdruecklich.
+
+**Genau ein naechster Auftrag: praktische 2D-Abnahme der gemeinsamen
+Vorgabenuebernahme fuer Schraffur, Fenster, Linie/Polylinie und Wand nachholen.**
+Funktionierende Browser-Steuerung vorausgesetzt; Werte/Ebene, Werkzeugwechsel,
+Erstellung und Undo pruefen. Kein neuer Funktionsumfang in diesem Auftrag.
+
+
+
+## V06d: Linienvorgaben gemeinsam uebernehmen - 08.10.2026
+
+PR211 nach gruener CI zusammengefuehrt. Linien/Polylinien uebernehmen Farbe,
+Strichstaerke, Strichart und Ebene im gemeinsamen Application-Adapter und
+Vorgabenhook; keine neue Rechtsklicklogik. Zeichnungsmodus bleibt waehlbar.
+Linien-Zielebene vor Zeichnen editierbar, bestehende Erstellungsvalidierung
+und History erhalten. Strichstaerkefeld zeigt externe Vorgaben sofort.
+718 Tests, Typecheck, gezielter Lint und Build bestanden. Praktischer Browser-Test
+blockiert durch nicht startfaehige Browser-Sandbox, auch nach Reset.
+Abnahme: vorhandene Linie zweimal rechts anklicken, Farbe/Staerke/Art/Ebene
+pruefen, neue Linie/Polylinie zeichnen, Undo: nur die neue Geometrie verschwindet.
+
+**Genau ein naechster Auftrag: V06e Wandvorgaben an denselben Adapter anbinden.**
+Staerke, Hoehe, Achslage/Koerperversatz und Ebene explizit deklarieren; keine
+Laenge, Endpunkte, Fenster oder Anschluesse kopieren. Gemeinsame Wandkettenaktion
+und deren atomare History beibehalten. Praktische Linienabnahme vorher nachholen.
+
+
+
+## V06c: Fenstervorgaben ueber gemeinsame Uebernahme - 08.10.2026
+
+PR210 nach gruener CI zusammengefuehrt. Doppelt-Rechtsklick im Grundriss
+uebernimmt Fensterbreite, Hoehe, Bruestung und Ebene; keine Host-ID/Position.
+Gemeinsamer Vorgabenhook, keine weitere Gestenerkennung. Zielebene vor Platzierung
+editierbar und auf Existenz/Sichtbarkeit geprueft. 717 Tests, Typecheck, gezielter
+Lint und Build bestanden. Browser: 0,80 m/Innenwand uebernommen, neues Fenster
+mit eigener ID/Position gesetzt; Undo entfernt nur dieses Fenster.
+
+**Genau ein naechster Auftrag: V06d Linienvorgaben an denselben Adapter anbinden.**
+Farbe, Strichstaerke, Strichart und Ebene uebernehmen; keine Punkte/IDs.
+Bestehende Linien-Erstellungsaktion und History verwenden.
+
+
+
+## V06b: gemeinsame Vorgabenuebernahme, Pilot Schraffur - 08.10.2026
+
+Neue Nutzerpraezisierung ersetzt V06a: ausschliesslich Doppelt-Rechtsklick,
+Darstellung UND Ebene uebernehmen. Gemeinsame Gesture/Application-Grenze,
+sitzungsbezogene Vorgaben, alle vier Schraffurmodi. Kein Modell-Undo bei Uebernahme.
+715 Tests bestanden; Build/Typecheck/Lint und Browser-Abnahme dokumentiert im
+[Vertrag](docs/planning/HATCH_PRESET_PICKUP.md).
+
+**Genau ein naechster Auftrag: V06c Fenster-Vorgaben an dieselbe Uebernahmegrenze
+anbinden.** Breite, Hoehe, Bruestung und Ebene als Werkzeugvorgaben, keine Host-ID
+oder Position kopieren. Bestehende Fenster-Platzierungsvalidierung erhalten.
+Weitere Elementtypen folgen einzeln; keine neue Gesture pro Typ.
+
+Die folgenden V06a-Angaben sind historische Entscheidungen, durch V06b ersetzt.
+
+
+## Aktueller Stand: V06a Vorgabenuebernahme abgegrenzt - 08.10.2026
+
+PR209 nach gruener CI zusammengefuehrt. Nutzerentscheidung: nur Darstellung
+uebernehmen, Ebene beibehalten. Fill, Hintergrund und Kontur werden freigegeben;
+Quell-ID, Punkte, Ebene und Beziehungen bleiben ausgeschlossen. Codepfade abgeglichen:
+Zeichnen reicht bislang nur Fill durch; Hintergrund/Kontur brauchen einen gemeinsamen
+Vorgabenpfad. Keine Produktionsaenderung in diesem Vorbereitungsauftrag.
+[Vertrag und Abnahme](docs/planning/HATCH_PRESET_PICKUP.md).
+
+**Genau ein naechster Auftrag: V06b Schraffur-Darstellungsuebernahme umsetzen.**
+Application-Adapter mit stabilem sichtbarem Ziel, gemeinsamer Vorgabenhook und
+bestehende Erstellungsaktion fuer alle vier Modi. Menuebefehl und doppelte
+Rechtsklickgeste teilen den Adapter; Ebene erhalten, kein Undo beim Uebernehmen,
+ein Undo beim Zeichnen. Vollstaendige Tests und Browser-Gestenabnahme laut Vertrag.
+Andere Elementtypen/Preset-Katalog/Dateiformat bleiben ausserhalb dieses Schritts.
+
+
+## Aktueller Stand: V01c temporaere 2D-Winkelmessung - 08.10.2026
+
+PR208 nach gruener CI zusammengefuehrt. Messen umfasst Strecke/Flaeche/Winkel im
+selben transienten Lebenszyklus und Fangpfad. Drei Punkte ergeben den kleineren
+Winkel 0 bis 180 Grad. Nullschenkel werden abgewiesen. 712 Tests, Typecheck/Lint/Build
+bestanden; Browser 90,00 Grad, Zoom, Neubeginn, Fehler und Escape geprueft.
+[Nachweis](docs/validation/LIVE_ANGLE_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V06a Werkzeugvorgabenuebernahme fuer Schraffuren
+vorbereiten.** Vorhandene Defaults/Erstellungsaktion abgleichen; Eigenschaftenumfang
+mit Nutzer festlegen (Vorschlag: Fuellung, Hintergrund, Kontur, Ebene; keine IDs,
+Punkte oder Verknuepfungen). Gemeinsame Vorgaben-Grenze konkretisieren. Noch keine
+stillschweigende Entscheidung ueber offene Eigenschaften oder andere Werkzeuge.
+Offene K-/V-Ziele bleiben erhalten.
+
+
+## Nutzeranpassung: Schraffurarten und Tuerkis - 08.10.2026
+
+PR207 nach gruener CI zusammengefuehrt. Gemeinsame tuerkise Darstellung, duennere
+Messkonturen und statischer Lichtsaum fuer Achsen/Fenstermarkierung. Schraffuren:
+Polygon, Diagonale, Seite/Hoehe, sichtbare geschlossene Kontur uebernehmen.
+709 Tests, Typecheck/Lint/Build bestanden; Browser-Erstellung und Undo geprueft.
+[Nachweis und klare Erkennungsgrenzen](docs/validation/HATCH_CONSTRUCTION_MODES.md).
+
+**Genau ein naechster Auftrag bleibt V01c: temporaere 2D-Winkelmessung mit drei
+Punkten** (Schenkelpunkt, Scheitel, Schenkelpunkt), auf dem gemeinsamen Messpfad.
+Kleinen Winkel 0 bis 180 Grad anzeigen, Nullschenkel ablehnen, Zoom/Abbruch pruefen.
+Keine Modellmutation. Offene K-/V-Ziele bleiben erhalten.
+
+
+## Aktueller Stand: V01b temporaere 2D-Flaechenmessung - 08.10.2026
+
+PR206 nach gruener CI zusammengefuehrt. Messart Flaeche nutzt gemeinsamen Messhook,
+ToolInteraction und Fangpfad. Doppelklick schliesst, gemeinsame Polygonvalidierung
+prueft den Ring. Kein Modell-/Undo-Eintrag. 707 Tests, Typecheck/Lint/Build bestanden.
+Browser: 1,080 m² fuer 3,00 x 0,36 m, Zoom und Selbstueberschneidung geprueft.
+[Nachweis und Grenzen](docs/validation/LIVE_AREA_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V01c temporaere 2D-Winkelmessung.** Drei Punkte
+(Schenkelpunkt, Scheitel, Schenkelpunkt) ueber bestehenden Messlebenszyklus erfassen,
+kleineren eingeschlossenen Winkel 0 bis 180 Grad anzeigen, Nullschenkel ablehnen.
+Zoom/Abbruch/Neubeginn pruefen. Keine dauerhafte Bemaßung oder Modellmutation.
+Offene K-/V-Ziele bleiben erhalten.
+
+
+## Aktueller Stand: V01a temporaere 2D-Streckenmessung - 08.10.2026
+
+PR205 nach gruener CI zusammengefuehrt. Lineal-Button startet Messung ueber den
+vorhandenen ToolInteraction-/Fangpfad. Zwei Klicks halten die Distanz fest; Zoom
+bewahrt sie, Escape/Ansichtswechsel beenden den Vorgang. Keine Modell-/Undo-Aktion.
+703 Tests, Typecheck, gezielter Lint und Build bestanden; Browsermessung 3,000 m
+inklusive Zoom, Escape und Moduswechsel geprueft.
+[Nachweis](docs/validation/LIVE_DISTANCE_MEASUREMENT.md).
+
+**Genau ein naechster Auftrag: V01b temporaere Flaechenmessung in 2D.**
+Punktfolge mit gemeinsamem Fang-/Interaktionspfad erfassen, per Doppelklick schliessen,
+Quadratmeter anzeigen und ungueltige Konturen behandeln. Kein Raum-/Schraffurmodell,
+kein Undo-Eintrag. Winkel und dauerhafte Massketten bleiben spaeter. Offene K-/V-
+Anforderungen und Leistungsgrenzen bleiben bestehen.
+
+
+## Aktueller Stand: K07g gemeinsamer 3D-Trefferdienst angebunden - 08.10.2026
+
+PR204 nach gruener CI zusammengefuehrt. Weltindex wird kooperativ vorbereitet,
+bei Kamerawechsel weiterverwendet und bei Geometriewechsel verworfen.
+700 Tests, 180 Browservergleiche, Typecheck/Lint/Build bestanden; direkte Canvas-
+Auswahl von Wand und Fenster geprueft. 500 Waende: groesster gemessener Schritt
+4,3 ms, Bereitschaft nach ca. 1 s; bis dahin Vollscan. Keine Gesamt-FPS-Zusage.
+[Nachweis und Grenzen](docs/performance/SHARED_SOLID_PICKING.md).
+
+**Genau ein naechster Auftrag: V01a temporaeres Punkt-zu-Punkt-Messen in 2D.**
+Vorhandene gemeinsame Fang-/Interaktionsinfrastruktur verwenden, Distanz in Metern
+anzeigen, ohne Modellkopie oder Undo-Eintrag. Escape/Ansichtswechsel beenden die
+Messung. Tests fuer genaue Punkte, Zoom und Abbruch; Flaechen/Winkel und dauerhafte
+Massketten bleiben spaeter. Gemaess Abstimmung ist dieser kleine Produktfortschritt
+jetzt sinnvoll; offene K-/V-Ziele und Leistungsgrenzen bleiben erhalten.
+
+
+## Aktueller Stand: K07f Weltindex-Gegenpilot bestanden - 08.10.2026
+
+PR203 nach gruener CI zusammengefuehrt. Ein Modellindex uebersteht Kamerawechsel:
+500 Waende Abfragen inkl. erster nach Wechsel ca. 0,1 statt 18,5-19 ms, Aufbau
+jedoch einmalig 153 ms. 699 Tests, 180 Browservergleiche, Typecheck/Lint/Build bestanden.
+[Nachweis und Grenzen](docs/performance/WORLD_PICKING_PILOT.md).
+
+**Genau ein naechster Auftrag: K07g gemeinsamer Trefferdienst fuer stabile 3D-
+Display-Geometrie.** Lebenszeit an Geometrie binden, Kamera wiederverwenden,
+wechselnde Vorschauen konservativ im Vollscan belassen; Aufbau/Invalidierung und
+Canvas-Auswahl pruefen. Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K07e Picking-Pilot vermessen - 08.10.2026
+
+PR202 nach gruener CI zusammengefuehrt. Projizierter Kandidatenindex: 180
+Browservergleiche und 697 Tests bestanden; Typecheck/Lint/Build erfolgreich.
+500 Waende: Abfrage ca. 0,1 statt 19,5-20,5 ms, aber Vorbereitung 42-57 ms je
+Projektion. Daher noch keine Produktintegration.
+[Nachweis und Entscheidung](docs/performance/PROJECTED_PICKING_PILOT.md).
+
+**Genau ein naechster Auftrag: K07f modellgebundener raeumlicher Gegenpilot.**
+Index ueber Kamerawechsel wiederverwenden; Aufbau/erste Abfrage/Folgen getrennt
+messen, Treffer und Tiefe gegen Vollscan pruefen. Danach Ansatz waehlen.
+Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K07d Renderer produktiv angebunden - 08.10.2026
+
+PR201 nach gruener CI zusammengefuehrt. BimSolidView verwendet persistente
+Geometriepuffer und gemeinsame Kameramatrix; Canvas besitzt Kontextereignisse.
+695 Tests, Typecheck/Lint/Build und 180 Bildvergleiche bestanden. Echter Workspace:
+Kamera, Modell/Undo, Ebenensichtbarkeit, Fensterauswahl und Context-Restoration.
+[Nachweis und Grenzen](docs/performance/SOLID_RENDERER_INTEGRATION.md).
+
+**Genau ein naechster Auftrag: K07e isolierter Picking-Pilot.** Trefferkandidaten
+pro angezeigter Projektion vorbereiten; Wand/Fenster-ID, Tiefe, Verdeckung und
+Kontextwechsel gegen Vollscan pruefen. Noch keine produktive Picking-Umstellung.
+Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K07c Pilot-Lebenszyklus abgesichert - 08.10.2026
+
+PR200 nach gruener CI zusammengefuehrt. Auswahl/Konturen, Geometrie/Sichtbarkeit,
+Zoom/DPR und echte Context-Restoration in neun Bildvergleichen bestanden.
+695 Tests, Typecheck inkl. src, Lint und Build bestanden. Noch isolierter Pilot.
+[Nachweis und Grenzen](docs/performance/SOLID_LIFECYCLE_PILOT.md).
+
+**Genau ein naechster Auftrag: K07d begrenzte Produktanbindung in BimSolidView.**
+Eine Ressourcenverantwortung; Projektion, CPU-Picking und Konturen bewahren.
+Canvas-Kamera/Resize/Auswahl/Modellwechsel/Context-Verlust gegen Referenz pruefen.
+Kein weiterer Picking-Umbau. Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K07b Kameramatrix-Pilot geprueft - 08.10.2026
+
+PR199 nach gruener CI zusammengefuehrt. Isolierter WebGL-Pilot mit einmaligem
+Geometriepuffer, gemeinsamer Projektionsmatrix. 180 Bildvergleiche bestanden,
+maximal zwei abweichende Pixel. 695 Tests, Typecheck, Lint und Build bestanden.
+500 Waende / eine Ansicht: CPU-Draw 72,3 ms versus nahe Timeraufloesung 0,1 ms.
+Kein GPU-/Framezeitnachweis, noch keine Produktumstellung.
+[Nachweis und Grenzen](docs/performance/SOLID_MATRIX_PILOT.md).
+
+**Genau ein naechster Auftrag: K07c Pilot-Lebenszyklus absichern.** Geometrie/
+Sichtbarkeit, Auswahlmarkierung, Resize und Context-Verlust/Wiederherstellung
+gegen Referenz pruefen; danach Produktanbindung entscheiden. Picking unveraendert.
+Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K07a 3D-Kamera und Picking vermessen - 08.10.2026
+
+PR198 nach gruener CI zusammengefuehrt. Diagnose des bestehenden Renderers:
+25/100/500 Waende, 1/2/4 Ansichten, zwei Laeufe und je 21 Kontrollvergleiche.
+500 Waende / eine Ansicht: Draw-CPU 49-59 ms, davon 47-57 ms Projektion/Packen.
+694 Tests, Diagnose-Typecheck inkl. src, Lint und Build bestanden.
+[Messgrenzen und Rohdaten](docs/performance/SOLID_CAMERA_PROFILE.md).
+
+**Genau ein naechster Auftrag: K07b isolierter Kameramatrix-/Geometriepuffer-Pilot.**
+Bestehenden WebGL-Pfad verwenden; unveraenderte Weltgeometrie wiederverwenden,
+Projektion/Tiefe/Oeffnungen/IDs gegen bisherigen Pfad vergleichen. Noch keine
+Produktumstellung oder Picking-Neuschreibung. Andere K-/V-Ziele bleiben erhalten.
+
+## Aktueller Stand: K06d Einzelwand an gemeinsame Bewegung angebunden - 08.10.2026
+
+PR197 nach gruener CI zusammengefuehrt. Element frei bewegen einer einzelnen
+2D-Wand nutzt den bestehenden Auswahladapter mit gewaehltem Ursprung.
+694 Tests, beide Typechecks, Lint und Build erfolgreich. Browser: Shift,
+Abbruch, Platzierung, Undo/Redo und Ansichtswechsel bestanden. 3D unveraendert.
+[Nachweis und Grenzen](docs/performance/SINGLE_WALL_SHARED_MOVE.md).
+
+**Genau ein naechster Auftrag: K07a 3D-Kamera/Picking/mehrere Ansichten profilieren.**
+Ableitung, Projektion, Puffer und Picking getrennt messen; gleiche Geometrie/IDs
+sichern. Erst aus Befunden einen Engpass waehlen, kein vorsorglicher Rendererwechsel.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+## Aktueller Stand: K06c gemeinsame Kettenendwand-Vorbereitung — 08.10.2026
+
+PR196 nach gruener CI zusammengefuehrt. Einmalige Basispruefung und stationaere
+Solidableitung integriert; bestehender Ausgabe-/Renderervertrag erhalten.
+693 Tests, Typechecks, Lint und Build bestanden. Auswahlbewegung mit Wand/Fenster,
+Shift, Abbruch, Undo/Redo und Ansichtswechsel im DOM bestanden. 100-Wand-Kette:
+Vorbereitung 54,5 ms, laufend ca. 0,1 ms; keine Framezeitmessung.
+[Nachweis und Bediengrenze](docs/performance/SHARED_CHAIN_MOVE.md).
+
+**Genau ein naechster Auftrag: K06d Einzelwand-Freibewegung an vorhandenen
+Auswahlbewegungsadapter anbinden.** Ursprung, Fang/Eingabe, Kontext und Undo
+bewahren; keine pro-Werkzeug-Duplikation. Andere Direct-Edit-Aktionen unveraendert.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
+## Aktueller Stand: K06b Kettenendwand-Pilot — 08.10.2026
+
+PR195 nach gruener CI zusammengefuehrt. Nach einmalig vorbereitetem geloesten
+Anschluss kann dieselbe prepareTranslation eine statt aller Waende berechnen.
+692 Tests und 60 Browservergleiche bestanden. Bei 100 Waenden Median 4,30 ms
+auf unter Timeraufloesung 0,1 ms; Pilotvorbereitung 68,6 ms. Nicht produktiv.
+[Nachweis und Grenzen](docs/performance/PREPARED_CHAIN_MOVE.md).
+
+**Genau ein naechster Auftrag: K06c in bestehende Bewegungsvorbereitung
+integrieren.** Gemeinsame Basispruefung statt doppelter Pilotvorbereitung,
+stationaeren/geaenderten Umfang sauber trennen; Ausgabe-/Renderervertrag,
+Kontext/Abbruch/Nullbewegung und ein Undo erhalten. Vorbereitung und Canvas
+pruefen. Keine pauschale T-/Gruppen-Ausweitung. Andere K-/V-Ziele bleiben.
+
+
+## Aktueller Stand: K06a verbundene Wandgruppen vermessen — 08.10.2026
+
+PR194 nach gruener CI zusammengefuehrt. Eckketten/T-Gruppen mit 25/100 Waenden
+und Fenstern: 40 Koerper- und 40 Bewegungsvergleiche bestanden. Ein ausgewaehltes
+Element betrifft die ganze Komponente. Fensterfilter unter 0,1 ms; vorbereitete
+Bewegung der ersten Wand einer 100er-Eckkette ca. 4,15 ms. Kein Frame-Nachweis.
+[Details und Grenzen](docs/performance/CONNECTED_WALLS_PROFILE.md).
+
+**Genau ein naechster Auftrag: K06b isolierter Pilot fuer Bewegung der ersten
+Wand einer freien Eckkette.** Stationaere Ableitungen wiederverwenden, fachliche
+Grenze gegen Vollpfad beweisen; Fenster/Fremdendpunkte und konservativen Fallback
+pruefen. Noch keine produktive Anbindung. K-/V-Ziele bleiben erhalten.
+
+
+## Aktueller Stand: K04h zweiter Abschnitt angebunden — 08.10.2026
+
+PR193 nach gruener CI zusammengefuehrt. Gemeinsamer Vorschaucache nutzt den
+geprueften zweiten rechtwinkligen Abschnitt; Platzierung und Folgeabschnitte
+behalten volle Pruefung. 688 Tests, beide Typechecks, Lint und Build bestanden.
+Canvas-Diagnose mit drei Abschnitten, Undo/Redo, Escape/Werkzeugwechsel bestanden.
+[Nachweis und Grenzen](docs/performance/SHARED_CHAIN_CORNER.md).
+
+**Genau ein naechster Auftrag: K06a verbundene Wandzuege und dichte T-Anschluesse
+profilieren.** Betroffene Komponente, Konturableitung und Fensterzuordnung getrennt
+messen, erst daraus Optimierung ableiten. Kein weiterer vorsorglicher Cache.
+Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
+## Aktueller Stand: K04g zweiter rechtwinkliger Abschnitt — 08.10.2026
+
+PR192 nach gruener CI zusammengefuehrt. Isolierter Pilot verwendet bestehende
+Eck-/Wandkettenaktion in kleinem Umfang, sonst Vollpfad. 687 Tests und 60
+Browservergleiche bestanden; Typecheck und Lint bestanden. Bei 1.000 Elementen
+Median 10,10 -> 0,30 ms, Vorbereitung 24,3 ms. Keine produktive Anbindung.
+[Nachweis und Grenzen](docs/performance/PREPARED_CHAIN_CORNER.md).
+
+**Genau ein naechster Auftrag: K04h zweiten rechtwinkligen Abschnitt zentral
+anbinden.** Kontext-/Abbruch-/Folgepunktbindung, Vollpfad fuer weitere Abschnitte
+und Kandidaten, gesamte Kette ein Undo. DOM-Ablauf pruefen. Keine gleichzeitige
+Winkelerweiterung. Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben erhalten.
+
+
+## Aktueller Stand: K04f Wandzeichen-Vorschau angebunden — 08.10.2026
+
+PR191 nach gruener CI zusammengefuehrt. Erster freier Abschnitt zentral an
+Wandkettenzustand gebunden; Folgeabschnitte und Anschlusskandidaten bleiben
+Vollpfad. 682 Tests, Typechecks, Lint und Build bestanden. Synthetischer Canvas-
+Ablauf mit Shift, zwei Abschnitten, einem Undo/Redo, Escape und Werkzeugwechsel
+bestanden. [Nachweis und Grenzen](docs/performance/SHARED_WALL_DRAWING.md).
+
+**Genau ein naechster Auftrag: K04g isolierter Pilot fuer den zweiten
+rechtwinkligen Abschnitt einer freien Wandkette.** Bestehende Eckregeln,
+Vollpfadvergleich und konservativer Fallback bei Fremdkontakt/T-Kandidaten.
+Noch keine produktive Erweiterung. Andere K-/V-Ziele bleiben erhalten.
+
+
+## Aktueller Stand: K04e isolierter Wandzeichen-Pilot — 08.10.2026
+
+PR190 nach gruener CI zusammengefuehrt. Vorbereiteter erster freier Abschnitt
+verwendet bestehende Fachaktion, bei Kandidaten/Kontakten/ID-Kollision Vollpfad.
+681 Tests und 60 Browservergleiche bestanden. Bei 1.000 Elementen Median
+9,50 auf 0,10 ms; Vorbereitung 30,6 ms. Keine produktive Anbindung.
+[Nachweise und Grenzen](docs/performance/PREPARED_WALL_DRAWING.md).
+
+**Genau ein naechster Auftrag: K04f gemeinsame Zeichensitzung anbinden.**
+Nur erster freier Abschnitt; Basis/Ursprung, Abbruch, Werkzeugwechsel und
+Folgepunkt absichern. Weitere Abschnitte weiterhin Vollpfad, volle Bestaetigung,
+gesamte Kette ein Undo. DOM-Maus-/Shift-Ablauf pruefen. K-/V-Ziele bleiben.
+
+
+## Aktueller Stand: K04d Wandzeichnen vermessen — 08.10.2026
+
+PR189 nach gruener CI zusammengefuehrt. Acht Browser-API-Faelle mit je 20 Zielen:
+100/1.000 Elemente, erster/zweiter Abschnitt, ohne/mit Shift. Alle Vorschauen,
+Abschluesse und jeweils ein Ketten-Undo/Redo stimmen ueberein.
+Vorschau bei 1.000 Elementen Median rund 8 ms, Fang rund 0,1 ms. Kein separater
+Shift-Engpass belegt; keine Framezeitmessung. [Nachweis](docs/performance/WALL_DRAWING_PROFILE.md).
+
+**Genau ein naechster Auftrag: K04e isolierter vorbereiteter Pilot fuer den ersten
+freien Wandabschnitt.** Bestehende Fachregeln, Vergleich gegen Vollpfad,
+konservativer Fallback bei Anschlusskandidaten/ungeprueften Bedingungen.
+Noch keine produktive Anbindung oder Ketten-Ausweitung. Bestaetigung bleibt
+vollstaendig geprueft, ein Undo. Andere K-/V-Ziele und manuelle Shift-Abnahme bleiben.
+
+
+## Aktueller Stand: K04c gemeinsame Endpunkt-Vorschau — 08.10.2026
+
+PR188 nach gruener CI zusammengefuehrt. Der begrenzte T-Hauptwand-Pilot liegt
+jetzt in Application und wird zentral von previewEdit genutzt. Vollstaendige
+Bestaetigung und ein Undo-Schritt bleiben erhalten. 677 Tests bestanden;
+DOM-Ablauf mit freier und T-Wand einschliesslich Shift, Abbruch, Platzierung,
+Undo/Redo und Ansichtswechsel bestanden. Kein Hardware-Latenznachweis.
+[Nachweis und Grenzen](docs/performance/SHARED_ENDPOINT_PREVIEW.md).
+
+**Genau ein naechster Auftrag: K04d Wandzeichnen-/Wandketten-Vorschau vermessen.**
+Vorbereitung, Pointer-Vorschau und Bestaetigung bei 100/1.000 Elementen getrennt
+pruefen; vorhandene gemeinsame Aktionen und Fang-/Shift-Pipeline verwenden.
+Erst anhand des Ergebnisses einen begrenzten Optimierungsbedarf bestimmen.
+Keine neue Vorschau- oder Werkzeugarchitektur auf Vorrat. K-/V-Ziele und die
+manuelle Abnahme des sporadischen Shift-Ruckelns bleiben erhalten.
+
+
+## Aktueller Stand: K04b vorbereiteter Endpunkt-Pilot — 08.10.2026
+
+PR187 mit gruener CI zusammengefuehrt (main 910dcf7). Isolierter Pilot fuer exakte
+axiale Verlaengerung des T-Hauptwand-Endes ohne Ecken; bestehendes updateWall auf
+vorbereiteter Gruppe, sonst Vollpfad. Keine produktive UI-Anbindung.
+674 Tests, Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+60 Browservergleiche identisch; bei 1.000 Elementen Median 9,45 auf 0,40 ms,
+Vorbereitung 14,2 ms. [Nachweis und Grenzen](docs/performance/PREPARED_ENDPOINT_PILOT.md).
+
+**Genau ein naechster Auftrag: K04c gemeinsame Endpunkt-Interaktion anbinden.**
+Application-Vorbereitung, Sitzungs-/Basis-/Auswahlbindung, Abbruch und Fallback
+sichern; volle Bestaetigung und ein Undo-Schritt. Praktischen Maus-/Shift-/Renderer-
+Ablauf pruefen. Geltungsbereich nicht gleichzeitig erweitern. K-/V-Ziele bleiben.
+
+
+## Aktueller Stand: K04a Wandendpunkt vermessen — 08.10.2026
+
+PR186 nach gruener CI zusammengefuehrt (main 335546a). Acht Browser-API-Faelle,
+je 20 Ziele: 100/1.000 Elemente, ohne/mit T-Gruppen, ohne/mit Shift. Vorschau,
+Bestaetigung und Undo/Redo stimmen ueberein. [Befund und Grenzen](docs/performance/WALL_ENDPOINT_PROFILE.md).
+Bei 1.000 Elementen Vorschau ca. 3 ms ohne Anschluesse und 8-9 ms mit T-Gruppen;
+Fang/Shift ca. 0,1 ms. Kein DOM-/Renderer-Latenznachweis, Shift-Ruckeln bleibt offen.
+670 Tests, Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+
+**Genau ein naechster Auftrag: K04b isolierter vorbereiteter Endpunkt-Pilot fuer
+axiale Verlaengerung einer T-Hauptwand.** Bestehende Fachregeln wiederverwenden,
+Vorschau gegen Vollpfad vergleichen (Fenster, Nachbarn, fremde Endpunkte), sonst
+Fallback. Vollpruefung bei Bestaetigung und ein Undo-Schritt bleiben. Erst nach
+Nachweis produktiv anbinden. Weitere K-/V-Ziele bleiben erhalten.
+
+
+## Aktueller Stand: K05b strukturierter Modellvergleich — 08.10.2026
+
+PR185 nach gruener CI zusammengefuehrt (main 2a98213). Zwei weitere JSON-
+Serialisierungen durch gemeinsamen strukturierten Modellvergleich ersetzt;
+Vollpruefungen, erste Serialisierungen, Groessenlimit und History erhalten.
+670 Tests, beide Typechecks, Build und Lint bestanden (sechs bekannte Warnungen).
+Alle 60 Browserfaelle stimmen mit JSON-Baseline ueberein; Modell-Commit Median
+54,75 auf 45,55 ms, No-op unveraendert. [Nachweis](docs/performance/MODEL_COMPARISON.md).
+
+**Genau ein naechster Auftrag: K04a Wandendpunkt-Vorschau vermessen.** Freie und
+T-verbundene Wand mit Fenstern bei 100/1.000 Elementen; Vorbereitung, Pointer und
+Bestaetigung getrennt, gemeinsame Fang-/Shift-Interaktion einbeziehen. Daraus einen
+begrenzten Anschluss an bestehende Vorschau-Infrastruktur ableiten. Kein neuer
+Renderer/Werkzeugumbau. Andere K-/V-Ziele bleiben; alte Folgeauftraege sind Historie.
+
+
+## Aktueller Stand: K05a Commit-Phasen gemessen — 08.10.2026
+
+PR184 mit grüner CI zusammengeführt (main bf244dd). Isolierte Diagnose mit je
+20 Modell-/No-op-/Sichtbarkeitsfällen; sämtliche Ergebnisse mit echtem Commit
+verglichen. [Messung und Grenzen](docs/performance/COMMIT_PHASE_PROFILE.md).
+Echter Commit Median 68,95 / 57,85 / 67,15 ms. Restarbeit verteilt sich auf
+Prüfung, Serialisierung und UTF-8-Größe; History-Verwaltung selbst kaum messbar.
+667 Tests, Typechecks, Build und Lint erfolgreich; sechs bekannte Warnungen.
+
+**Genau ein nächster Auftrag: K05b zusätzlichen Modellvergleich strukturiert
+pilotieren**, um dessen zwei JSON-Serialisierungen zu vermeiden. Vollprüfungen
+und Größenprüfung erhalten. Äquivalenz für No-op, Sichtbarkeit, Modelländerung,
+Assets, Undo/Redo und Fehlerfälle; gleiche Browserfixture messen. Kein weiterer
+Umbau parallel. K-/V-Wünsche und Shift-Diagnose bleiben erhalten.
+
+
+## Aktueller Stand: K02c zentrale Asset-Eingangsgrenzen — 08.10.2026
+
+PR183 mit grüner CI zusammengeführt (main aed2712). PNG/JPEG-Import und
+Schema-9-Projektladen erzeugen geprüfte unveränderliche Asset-Handles. Bestehende
+Aktionen profitieren gemeinsam; Format, Limits und Modellprüfungen bleiben.
+667 Tests, beide Typechecks, Build und Lint erfolgreich (sechs bekannte Warnungen).
+Browserworkflow Import → Linien-/Wandänderung → Undo/Redo → Speichern/Laden und
+Bilddarstellung bestanden. [Details und Abnahme](docs/performance/ASSET_INGRESS.md).
+
+**Genau ein nächster Auftrag: K05a Commit-Arbeit getrennt profilieren.** Mit
+Dreibild-Fixture Validierung, Serialisierung, Größe und Vergleich für normale
+Änderung, No-op und Sichtbarkeit messen; daraus eine begrenzte gemeinsame
+Optimierung ableiten. Noch kein History-/Formatumbau. Alle übrigen K-/V-Ziele
+und die kleine Shift-Diagnose bleiben erhalten; ältere Folgeaufträge sind Historie.
+
+
+## Aktueller Stand: K02b Asset-Handle-Pilot — 08.10.2026
+
+PR182 mit grüner CI zusammengeführt (main ac129fc). Opt-in für vollständig
+geprüfte, eigene unveränderliche Assetobjekte im gemeinsamen Schema; produktive
+Import-/Ladegrenzen noch unverändert. Bestehende Linienaktion und History genutzt,
+keine duplizierte Modelllogik. [Nachweis](docs/performance/VALIDATED_ASSET_HANDLES.md).
+665 Tests, beide Typechecks, Build und Lint bestanden (sechs bestehende Warnungen).
+Gleiche K03-Fixture: Aktion Median 125,9 → 10,1 ms, Commit 287,9 → 62,1 ms;
+einmalige Vorbereitung 111,8 ms. Ein lokaler Lauf, keine Großprojektfreigabe.
+
+**Genau ein nächster Auftrag: K02c Handle-Erzeugung an den gemeinsamen Bildimport-
+und Projektladegrenzen integrieren.** Fremddaten vollständig prüfen, nach Laden
+Identität neu aufbauen; bestehende Format-/Größenlimits erhalten. Import → Linie/
+Wand ändern → Undo/Redo → Speichern/Laden und beschädigte Dateien abnehmen.
+Keine Cachelogik je Werkzeug. Ältere Folgeaufträge sind Historie; K-/V-Ziele bleiben.
+
+
+## Aktueller Stand: K02 Modell-/Assetvertrag geprüft — 08.10.2026
+
+PR181 nach grüner CI unverändert zusammengeführt (main 629c7c8). Isolierter
+Vertragsprototyp: stabile Asset-IDs, gemeinsame unveränderliche Payloads,
+Version/Hash/Budgets, portable Speicherung und Altdatei-Roundtrip. Keine Änderung
+am produktiven Modell-/Dateiformat. [Messung und Grenzen](docs/performance/MODEL_ASSET_CONTRACT.md).
+Mit K03-Fixture 156 KB Manifest statt 3,75 MB Projekt; vier logische Assets nutzen
+drei Payloads. Kaltes Split/Unpack ist teuer. Serialisierungsgewinn ist noch kein
+Action-/Commit- oder physischer Speichergewinn.
+
+**Genau ein nächster Auftrag: K02b validierte Asset-Handles am gemeinsamen
+Application-Prüfpfad als isolierter Linienfarben-Pilot.** Unveränderliche Payloads
+nur bei vertrauenswürdigem identischem Handle wiederverwenden; komplette Modell-
+und Referenzprüfung sowie Undo/Redo erhalten. Mit Vollprüfpfad bei drei Bildern
+und 1/10/50/100 Änderungen vergleichen, einschließlich manipuliertem Inhalt.
+Kein Produktformatwechsel. Details und Abnahme im verlinkten Vertrag.
+Ältere nächste-Auftrag-Abschnitte sind Historie; K-/V-Wünsche bleiben erhalten.
+
+
+## Aktueller Stand: K03 erste Kapazitäts-Baseline — 08.10.2026
+
+PR180 nach grüner CI zusammengeführt (main d3c228c). Reproduzierbare Browserdiagnose
+für 100/1.000/5.000 Elemente, 200.000 Punkte, 100 verbundene Wände und drei PNG/JPEG-
+Referenzen ergänzt. 1/10/50/100 History-Stände, Import/Platzierung/Commit,
+Speichern/Laden, IFC und 2D/3D-Aufbau erfasst. Nur Diagnose und Dokumentation geändert.
+656 Tests, Types/Build/Lint bestanden.
+[Befunde, Rohdaten und Messgrenzen](docs/performance/CAPACITY_BASELINE.md).
+
+JPEG→PNG/Base64 wächst im Test stark; Referenzserie scheitert an Gesamtdateigrenze.
+Mit drei Bildern kosten kleine Änderungen inklusive History mehrere hundert ms.
+Heapwerte sind Stichproben, kein Peak-/GPU-Nachweis; keine allgemeine Großprojekt-
+Freigabe. Zusammenhängender 100-Wand-Zug bestätigt 100 betroffene Wände bei Einzel-
+bewegung. Reale Großpläne/3D-Navigation/Spitzenspeicher bleiben zu prüfen.
+
+**Genau ein nächster ausführbarer Auftrag: K02 Modell-/Assetvertrag und isolierter
+Vergleichsprototyp.** Unveränderliche Bilddaten, stabile Referenzen/History,
+Inhaltsduplikate, portable Speicherung, Altdateimigration und separate Budgets mit
+denselben Fixtures prüfen. Vorschlag und verbindliche Entscheidung trennen. Noch
+kein Produktdateiformat umstellen, kein größeres Limit oder Delta-History-Umbau.
+Aus dem Nachweis genau einen Migrationsschritt ableiten. Übrige K-/V-Anforderungen
+und die kleine Shift-Diagnose bleiben erhalten.
+
+## Aktueller Stand: K01 Großpunkt-Absturz behoben — 08.10.2026
+
+Übergabe aus Systemarchitektur planen übernommen; PR179 inklusive V01–V09 und
+Planungsabstimmung nach grüner CI zusammengeführt (main 68ef359).
+planBounds bestimmt Grenzen fortlaufend statt über punktgroße Argumentlisten.
+Validierte 200.000-Punkt-Fixture reproduzierte vorher den RangeError; Tests,
+Datei-Roundtrip und Browser-Zoom/Einpassen bestehen jetzt. 656 Tests, beide
+Typprüfungen, Build/Lint bestanden. Sehr große räumliche Ausdehnung bleibt durch
+Mindestzoom begrenzt; kein allgemeiner Interaktivitätsnachweis großer Dateien.
+[Nachweise und Grenzen](docs/performance/LARGE_PLAN_BOUNDS.md).
+
+**Genau ein nächster ausführbarer Auftrag: K03 Kapazitäts-Baselinebericht.**
+Bestehende Fixtures, verbundene Wände und mehrere PNG/JPEG-Referenzen verwenden;
+Punkte/Elemente, Dateibytes und Bildpixel getrennt erfassen. Import, Platzierung,
+Commit, 1/10/50/100 History-Stände, Speichern/Laden, IFC und 2D/3D vermessen.
+Speichermessung von Schätzungen trennen; Mindestzoom/Ausdehnung aufnehmen. Daraus
+nur einen begrenzten Folgeauftrag ableiten; Dateilimit/History/Assetvertrag vorerst
+bewahren. Die frühere React-Diagnose und neue Fachfunktionen bleiben eingeordnet.
+
+## Nutzerabstimmung: Skalierbarkeit und erweiterte Produktvision — 08.10.2026
+
+Die [Entwicklungsabstimmung](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+ordnet die erneute Architekturprüfung und den aktualisierten Funktionsupload ein.
+Sie ergänzt N01–N60 und AI01–AI35 um V01–V09; die vollständige Textquelle liegt
+in [docs/requirements](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md).
+AGENTS.md und ARCHITECTURE.md verweisen auf diese Ergänzung.
+
+PR179 hat den vorgesehenen A/B-Vergleich bereits vorgelegt. Diesen laufenden
+Auftrag abschließen; gleiche belegte Messungen nicht erneut einplanen.
+Die React-Unterbaumdiagnose für das offene kleine Shift-Szenario bleibt erhalten,
+wird aber hinter den konkreten Großdatenfehler und die Kapazitätsaufnahme
+eingeordnet. Diese Reihenfolge ersetzt die älteren Folgeaufträge im Verlauf.
+
+**Genau ein nächster neuer Implementierungsauftrag: K01 — planBounds gegen
+große Punktmengen absichern.** Isolierter Original-Funktionskörper:
+20 Polylinien × 10.000 Punkte, etwa 3,48 MB JSON-Testdaten, Node 24:
+RangeError durch Math.min/max mit allen Extents als Argumenten. Vollständige
+Browser-/Projektvalidierung dieser Fixture steht noch aus. Gültige Fixture
+erstellen, Fehler reproduzieren, Grenzen iterativ bestimmen, kleine gemischte
+und leere Fälle erhalten; große Ansicht im Browser einpassen und prüfen.
+
+Danach K03: Import/Platzierung/Bestätigung, 1/10/50/100 Undo-Stände,
+Speichern/Laden, 2D/3D und mehrere Rasterreferenzen mit getrennten Budgets für
+Elemente/Punkte, Bytes und Pixel messen. Vor größerem Dateilimit daraus einen
+begrenzten Asset-/Speicher- oder Commit-/Preview-Auftrag ableiten.
+Keine pauschale Lockerung der Validierung und kein Gesamtumbau der History.
+
+Fachliche Weiterentwicklung: Geschosse/Höhen, modellgebundene Ansichten und
+später Dächer/Trimmen nach ihren Abhängigkeiten. Kleine Funktionen wie
+temporäre Live-Messung oder Werkzeugvorgabenübernahme können zwischen
+abgeschlossenen Stabilitätsaufträgen folgen. AI/Text/Voice nutzen dieselben
+geprüften Aktionen; alle neuen Funktionen werden einzeln angeschlossen.
+
+Status dieser Ergänzung: Dokumentation/Übergabe, keine neue Umsetzung von K01–K08
+oder V01–V09. Bereits implementierter Auswahlbewegungs-Pilot bleibt anerkannt.
+
+## Aktueller Stand: Auswahlbewegung paarweise A/B verglichen — 08.10.2026
+
+PR178 mit grüner CI zusammengeführt (main dcb19e8). Diagnoseseite bietet einen
+reinen Vergleichsschalter für frische bzw. sitzungsgebundene Extrusion. Acht Läufe
+(AB/BA für T-Paar mit zwei Fenstern und 100 Wände, jeweils Shift gehalten) bestehen
+Vollpfad, Bedienung und ein Undo/Redo. Große Auswahl profitiert auch insgesamt;
+beim T-Paar dominiert andere React-Arbeit gegenüber der lokalen Wandberechnung.
+Fenstergrößen zwischen den T-Paar-Paaren verschieden, innerhalb der Paare identisch;
+keine gepoolte Auswertung. 654 Tests, Types/Build/Lint bestanden.
+[Messungen, Reproduktion und Grenzen](docs/performance/SELECTION_EXTRUSION_AB.md).
+
+**Genau ein nächster ausführbarer Auftrag:** React-Anteil des T-Paars im
+Diagnoseharness nach Canvas/BimPlan, Hilfseingabe und Shell/Navigator aufschlüsseln.
+Wiederholte unnötige Arbeit belegen und erst dann maximal einen verantwortlichen
+Bereich begrenzt entlasten. Vollpfad, Shift/Tab/Abbruch und ein Undo behalten;
+kein Rendererwechsel oder breite Migration weiterer Werkzeuge.
+
+## Aktueller Stand: lokale Wandextrusion in der Bewegung wiederverwenden — 08.10.2026
+
+PR177 mit grüner CI zusammengeführt (main 72fe814). Die vorbereitete Auswahlbewegung
+behält pro betroffener Wand die letzte lokale Extrusion bei identischen Eingaben.
+Konturen, Anschlüsse und vollständige Commit-/History-Prüfung bleiben erhalten.
+654 Tests, Types/Build/Lint und drei Browser-Vollpfadvergleiche bestanden.
+Lokale Geometrie im Drucktest 1,7/8,5/8,8 ms statt 3,4/16,1/16,3 ms;
+kein konsistenter Gewinn der gesamten Bildschirmvorschau nachgewiesen.
+[Änderungen, Messungen, Grenzen und Abnahme](docs/performance/SESSION_WALL_EXTRUSION.md).
+
+**Genau ein nächster ausführbarer Auftrag:** Kontrollierter alternierender
+A/B-Browservergleich mit identischer Instrumentierung: ursprüngliches T-Paar mit
+zwei Fenstern unter gehaltenem Shift und 100 Wände. Bisherige und sitzungsgebundene
+Ableitung vergleichen, lokale Geometrie und React/Gesamtlatenz getrennt betrachten;
+Vollpfad und ein Undo erhalten. Vor weiterer Optimierung den verbleibenden Engpass
+belegen. Keine Migration weiterer Werkzeuge oder Rendererwechsel.
+
+## Aktueller Stand: große Auswahlmengen vermessen — 08.10.2026
+
+PR176 mit grüner CI zusammengeführt (main bd8a31a). Diagnoseharness erlaubt
+20/100/200 ausgewählte Wände. Drei Fälle mit 1.000 Elementen geprüft: 20 Wände,
+100 Wände, 100 Wände mit 20 stehenden T-Nachbarn. Vollpfadvergleich, Shift/Tab,
+Abbruch, Platzierung und ein Undo/Redo bestanden. Vorschau-Mediane 24,3/44,9/53,7 ms;
+lokale Geometrie im Drucktest durchschnittlich 3,4/16,1/16,3 ms je Ziel.
+Keine neue Produktänderung. 651 Tests, Types/Build/Lint bestanden.
+[Messdefinitionen, Rohberichte und Grenzen](docs/performance/SELECTION_SCALE_PROFILE.md).
+
+**Genau ein nächster ausführbarer Auftrag:** Wiederholte Wandkörper-/Konturableitung
+in der vorbereiteten Auswahltranslation begrenzt optimieren, mit nachgewiesener
+Wiederverwendung translationsinvarianter Ergebnisse innerhalb einer Sitzung.
+Stehende Nachbarn, gelöste Anschlüsse, Fenster, Extremkoordinaten und fremde
+Endpunkte weiter prüfen; Vollpfadgleichheit und dieselben drei Messfälle verlangen.
+Volle Commit-/History-Validierung bleibt. Keine Migration weiterer Werkzeuge.
+
+## Aktueller Stand: Auswahlbewegung atomar bestätigen — 08.10.2026
+
+PR175 zusammengeführt, Basis main db17289. Der gemeinsame Bestätigungsweg
+materialisiert Auswahlbewegungen jetzt einmal statt zweimal. Modell-/Kontext-
+und History-Prüfungen bleiben vollständig. Andere Werkzeuge behalten ihren Ablauf.
+[Messung, Tests und Abnahme](docs/performance/ATOMIC_SELECTION_CONFIRMATION.md).
+651 Tests, beide Typprüfungen, Build und Lint (6 bekannte Warnungen) bestanden.
+T-Paar-Browserparcours: Geometrie, Shift/Tab, Abbruch und ein Undo/Redo bestanden.
+Einzelmessung der Bestätigung: 2 → 1 Materialisierungen; kein allgemeines
+Latenzversprechen und keine neue Behauptung zur vollständigen Shift-Ruckelfreiheit.
+
+**Genau ein nächster ausführbarer Auftrag:** Große betroffene Auswahlmengen und
+viele stehende Anschlussnachbarn im bestehenden Harness vergleichen; Vorbereitung,
+Vorschau und Bestätigung getrennt messen und den Vollpfadvergleich behalten.
+Danach anhand des Befunds den nächsten begrenzten Consumer/Engpass auswählen.
+Keine pauschale Migration weiterer Werkzeuge.
+
+## Aktueller Stand: Diagnose-Konturvergleich abgesichert — 08.10.2026
+
+Der Konturfehler aus PR175 ist als Rückrechnungsproblem reproduziert: Der
+SVG-Körperversatz verändert beim Zurückrechnen die letzten Gleitkommastellen.
+Der reine Diagnosevergleich prüft Struktur exakt und Zahlen mit absolut 1e-12;
+Produktgeometrie und Modellvalidierung bleiben unverändert. Vier Regressionstests
+verhindern, dass echte Abweichungen, falsche Topologie oder fehlende Geometrie
+übersehen werden. 648 Tests, beide Typprüfungen, Build/Lint erfolgreich;
+der Browserparcours mit Shift-Auto-Repeat und Vollpfadvergleich besteht.
+[Nachweis und Einschränkungen](docs/performance/SHIFT_REPEAT_INPUT.md).
+Das praktische sporadische Ruckeln ist noch nicht vollständig abgenommen.
+
+**Genau ein nächster ausführbarer Auftrag:** Vorbereitung und Bestätigung der
+Auswahlbewegung getrennt profilieren und die doppelte Materialisierung bei
+validate/commit in eine gemeinsame atomare Bestätigung überführen. Vollständige
+Modellprüfung, Kontextschutz, Vollpfadvergleich und genau ein Undo erhalten.
+Keine pauschale Migration anderer Werkzeugvorschauen.
+
+## Aktueller Stand: Shift-Auto-Repeat abgefangen — 08.10.2026
+
+PR174 ist zusammengeführt (main f5100cd). Die gespeicherte Nutzeraufnahme zeigt
+häufigere lange RAF-Abstände mit Shift. Der kontrollierte Vergleich belegt
+zusätzliche React-Commits durch Auto-Repeat: 481 statt 241 bei 240 Mausupdates.
+Der gemeinsame Tastatureingang verwirft jetzt unveränderte Wiederholungen:
+240 Commits, reine Wiederholungen ohne Mausbewegung verursachen keine Berechnung.
+[Messung, Rohberichte und Einschränkungen](docs/performance/SHIFT_REPEAT_INPUT.md).
+644 Tests, beide Typprüfungen, Build und Lint (6 bekannte Warnungen) bestanden.
+Zwei Shift-Läufe und ein freier Lauf bestehen Vollpfadvergleich und Bedienprüfung.
+Ein erster Konturvergleich schlug einmal fehl; seine Ursache bleibt offen.
+Keine vollständige Behebung des sporadischen Ruckelns behauptet.
+
+**Genau ein nächster ausführbarer Auftrag:** Den einmaligen Konturvergleich mit
+jetzt vollständiger Ist-/Soll-Fehlermeldung reproduzieren und klären; anschließend
+die reale Shift-Bewegung praktisch abnehmen. Die atomare Bestätigung bleibt
+nachgeordnet. Keine weitere spekulative Optimierung und noch keine Übernahme.
+
+## Aktueller Stand: manuelle Bewegungsaufzeichnung – 08.10.2026
+
+PR173 nach Nutzerfreigabe mit grüner CI zusammengeführt (`main` 5206295).
+Die separate Diagnoseseite kann jetzt echte Pointer-/Shift-Ereignisse, vorhandene
+Berechnungsphasen, React-Commits, RAF-Abstände und lange Hauptthread-Aufgaben
+aufzeichnen. Start/Stopp, 30-Sekunden-Grenze, maximal 10.000 Einträge und JSON-Export;
+kein neuer Modellpfad und keine Änderung der Produktionsoberfläche.
+[Anleitung, Nachweise und Grenzen](docs/performance/MANUAL_MOVEMENT_TRACE.md).
+644 Tests bestanden, Typprüfungen/Lint/Build erfolgreich. Der Shift-Aussetzer
+ist weiterhin offen; die Bedienprüfung bestätigt den Recorder, keinen Bugfix.
+
+**Genau ein nächster ausführbarer Auftrag:** Den tatsächlichen Shift-Aussetzer
+mit dem Recorder aufnehmen, zeitlich zuordnen und den belegten gemeinsamen
+Engpass korrigieren. Danach mit/ohne Shift und gegen den vollständigen
+Geometriepfad prüfen. Bis zu einem solchen Befund keine spekulativen Caches oder
+Werkzeug-Sonderfälle. Die atomare Bestätigung bleibt anschließend vorgesehen.
+
+## Aktueller Stand: Shift-Ruckeln eingrenzen – 08.10.2026
+
+PR172 nach Nutzerfreigabe zusammengeführt (`main` 0bc64aa). Praktische
+Auswahlbewegung bestätigt, jedoch sporadisches Stehenbleiben mit Nachspringen
+bei Shift gemeldet: zwei T-verbundene Wände mit zwei Fenstern.
+[Diagnose und Rohmessungen](docs/performance/SHIFT_SELECTION_DIAGNOSIS.md).
+Der separate Browser-Harness prüft jetzt gehaltenes Shift, diese Konstellation,
+explizite Vierfachauswahl und kontinuierliche Eingaben. Geometrievergleich,
+Shift/Tab, Abbruch, Platzierung und ein Undo/Redo bestanden. Ein langer
+RAF-Abstand von 236 ms trat einmal auf; Wiederholungen maximal 35 ms.
+Ursache noch nicht zugeordnet, kein Produktfix behauptet. A-04 bleibt offen.
+
+**Genau ein nächster ausführbarer Auftrag:** Im bestehenden Diagnose-Harness
+eine begrenzte, manuell start-/stoppbare Aufzeichnung echter Auswahlbewegungen
+ergänzen. Pointer-/Shift-Ereignisse, React-Commits und lange Hauptthread-Aufgaben
+zeitlich korrelieren und den gemeldeten Aussetzer an der T-Konstellation zuordnen.
+Erst dann den belegten gemeinsamen Engpass korrigieren. Keine Modelländerung
+durch die Aufzeichnung und keine separaten Fangregeln für einzelne Werkzeuge.
+Die zuvor geplante atomare Bestätigung bleibt nach dieser Fehlerklärung
+vorgesehen; übrige Anforderungen und offene Architekturpunkte bleiben erhalten.
+
+## Aktueller Stand: A-04-Pilot Auswahlbewegung – 07.10.2026
+
+PR171 nach Nutzerfreigabe zusammengeführt (`main` 4d284da). Der Pilot auf
+`perf/prepared-selection-preview` verwendet eine vorbereitete gemeinsame Aktion,
+lokale Geometrievorschau und stabile SVG-/Navigator-Daten. Vollvalidierung und ein
+Undo-Schritt bleiben beim Bestätigen erhalten. Andere Werkzeuge noch unverändert.
+Dieser Abschnitt ersetzt den früheren Folgeauftrag im nachstehenden Verlauf.
+
+[Nachweis, Rohmessungen, Grenzen und Abnahme](docs/performance/PREPARED_SELECTION_PREVIEW.md):
+639 Tests, beide Typprüfungen, Lint (0 Fehler/6 bekannte Warnungen) und Build
+bestanden. Sechs Browserfälle: bei 5.000 Elementen Median 1.027 → 38 ms, mit PNG
+1.235 → 39 ms. Alle Fälle bestehen Abbruch, Mausplatzierung und ein Undo/Redo.
+Zusätzlich 20 gelöste T-Nachbarn: gerenderte Wände/Konturen/Fenster stimmen mit
+Vollpfad überein; Shift, Tab, Zahlenvorschau und Zoom geprüft. Vorbereitung separat
+sichtbar (bis 437 ms). Neuer GitHub-Workflow prüft Test/Types/Lint/Build; sein
+konkretes Ergebnis wird im PR dokumentiert. Praktische Nutzerabnahme steht aus.
+
+**Genau ein nächster ausführbarer Auftrag:** Nach praktischer Pilotabnahme die
+Vorbereitungs- und Bestätigungskosten derselben Auswahlbewegung getrennt
+profilieren und doppelte Aktionsauswertung zwischen `validate` und `commit` in
+eine atomare gemeinsame Bestätigung überführen. Volle Modellprüfung am
+History-Übergang, Kontextschutz, Vergleich zum Vollpfad und genau ein Undo bleiben
+verbindlich. Keine pauschale Migration weiterer Werkzeuge in diesem Schritt.
+A-04 bleibt insgesamt offen; A-01-Messlücken und A-05/A-06/A-07 bleiben bestehen.
+
+
+## Aktueller Auftrag: Architekturprüfung und A-04-Kurskorrektur — 07.10.2026
+
+Der Nutzer priorisiert eine tragfähige Gesamtlösung vor weiteren Einzelcaches.
+Geprüft: `main` nach PR170 (`4928940`) und offener PR171 auf
+`perf/selection-preview-reuse` (`a588f41`). PR171 wird in diesem Auftrag nicht
+zusammengeführt. Die folgenden älteren Einträge bleiben als Verlauf erhalten;
+dieser Abschnitt bestimmt den aktuellen Folgeauftrag.
+
+Ergebnis und Entscheidungsgrundlage:
+[Architekturreview](docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md).
+Die gemeinsame Modell-/Application-/Fangstruktur bleibt geeignet. Der heiße Pfad
+ist jedoch noch nicht skalierbar: jedes neue Bewegungsziel erstellt/prüft ein
+Gesamtprojekt und stößt breite Darstellungsarbeit an. Ein zusätzlicher
+Base64-Schemacache wird als nächster Schritt zurückgestellt.
+
+Die neue ausführbare Diagnose `benchmarks/architecture-audit.ts` bestätigt:
+Bei einer geänderten Wand entstehen in Projekten mit 100/1.000/5.000 Elementen
+100/1.000/5.000 neue Elementobjekte. Der stehende Eckpartner ändert trotz gleicher
+Parameter seine Kontur. Ein räumlich hinzukommendes, bisher unverbundenes
+Achsende kann einen Anschluss ungültig machen. Die lokale Vorschau muss deshalb
+fachliche **und räumliche** Abhängigkeiten berücksichtigen. Das ist keine
+Latenz-/Speichermessung und kein Nachweis physisch kopierter Base64-Strings.
+
+ARCHITECTURE.md trennt nun ausdrücklich den bestehenden Stand von der
+verbindlichen Migrationsrichtung: vorbereitete gemeinsame Aktion, betroffene
+Vorschau über stabiler Basis, wiederverwendete Anzeige und volle Absicherung
+beim Commit. Keine neue Bedienregel, kein zweites Modell, kein History-/Datei-
+Komplettumbau. Die bisherigen Anforderungsmatrizen und Nutzerwünsche bleiben gültig.
+A-04 bleibt offen; A-01 hat weiterhin Messlücken, A-05/A-06/A-07 bleiben offen.
+
+Prüfung dieses Auftrags: Strukturdiagnose für alle drei Größen bestanden,
+633/633 bestehende Tests bestanden, TypeScript einschließlich Diagnose und
+Produktionsbuild erfolgreich. Lint: 0 Fehler, 6 bekannte Warnungen. Keine neue
+Browser-/Archicad-Abnahme oder neue Latenzmessung, da nur Dokumentation und
+separates Diagnoseprogramm ergänzt wurden.
+
+**Genau ein nächster ausführbarer Auftrag: A-04-Pilot „Auswahl frei bewegen“ im
+2D-Grundriss auf vorbereitete gemeinsame Aktionsauswertung und betroffene
+Vorschau umstellen.** Der vollständige Auftrag und die Abnahme stehen im Review.
+Bereits unterstützte gemischte Auswahlen, Host-Fenster, interne/gelöste
+Grenzanschlüsse und stehende Nachbarn berücksichtigen. Gemeinsame Domain-Regeln
+und die volle Commit-Validierung erhalten; bestehende Text-/Voice-Adapter nutzen
+denselben Weg. Stabile Basisdarstellung und Navigator von Pointer-Updates
+abgrenzen. Kein pauschaler Umbau weiterer Werkzeuge.
+
+Nachweis: fachliche Gleichheit zum bisherigen Vollpfad einschließlich fremdem
+Endpunkt am Anschluss, Ecke/T, numerischen Grenzen, Abbruch und veraltetem
+Kontext. Keine Gesamtvalidierung/Serialisierung oder Base64-Prüfung je Mausziel.
+Die sechs vorhandenen Browserfälle plus einen dichten Anschlussfall vergleichen;
+Vorbereitung getrennt messen. Praktisch Mausplatzierung, Shift/Tab, Zoom,
+Undo/Redo und den bestätigten Stand in Datei/3D/IFC prüfen. Erst nach bestandenem
+Pilot weitere Aktionen anschließen. Neue Bauteile und Sprachfunktionsausbau
+bleiben bis dahin hinter dieser gemeinsamen Grundlage eingeordnet.
+
+## A-04: gemeinsame Bewegungsvorschau einmal validieren - 07.10.2026
+
+PR170 freigegeben und zusammengefuehrt. Der gemeinsame Application-Baustein
+point-preview haelt ein erfolgreiches Ergebnis pro exaktem Punkt und gebundenem
+Adapter. Gruppenbewegung teilt es zwischen Praezisionseingabe und Grundriss.
+Guards laufen auch beim Treffer; Ziel-/Kontextwechsel, Fehler und Abbruch verwerfen
+es. Validate und Commit rechnen weiterhin frisch; keine UI- oder Elementkopien.
+Ohne Winkel-/Laengeneingabe bleibt das bereits gefangene Mausziel exakt erhalten,
+statt durch Polar-Umrechnung minimale Unterschiede zu erzeugen. Ueberlauf bleibt
+abgewiesen. Modell-, Auswahl- und Sichtbarkeitsgrenzen bleiben bestehen.
+
+[Messbericht](docs/performance/SELECTION_PREVIEW_REUSE.md): In sechs Faellen mit
+je 21 Mauspositionen genau eine statt zwei Vollvalidierungen. Mit PNG sinken die
+Mediane bei 100/1000/5000 Elementen von 514/741/1603 auf 261/371/1235 ms.
+Alle sechs Ablaufe bestehen Vorschau, Abbruch, Platzierung, Undo und Redo.
+633 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
+A-04 bleibt offen: Vollvalidierung und Darstellung grosser Projekte sind teuer.
+A-01-Messluecken fuer reale/dichte Faelle und Hardwareeingabe bleiben bestehen.
+
+Damals vorgeschlagener Auftrag, durch die Architekturprüfung oben zurückgestellt:
+die reine Pruefung kanonischer Base64-Bilddaten im
+Referenzschema separat instrumentieren und bei bestaetigtem Aufwand deren Ergebnis
+begrenzt nach exaktem Stringinhalt wiederverwenden. Eintrags-/Zeichenbudget festlegen;
+geaenderte oder defekte Daten, MIME/Pixelmasse und Header weiter korrekt pruefen.
+Oeffentliche Datei- und Modellvalidierung behalten, keinen allgemeinen Trusted-
+Project-Pfad einfuehren. Anschliessend denselben Bewegungstest wiederholen.
+
+## A-04: unveraenderte Referenzbilder wiederverwenden - 07.10.2026
+
+PR169 freigegeben und zusammengefuehrt. Der gemeinsame Bildadapter verwendet
+gepruefte URLs ueber gleichwertige Vorschau-Assetkopien hinweg wieder. Exakter
+Bildinhalt, MIME und Pixelmasse bestimmen den Treffer; neue Daten und Metadaten
+werden erneut geprueft. Begrenzung: acht LRU-Eintraege und 48 MiB konservativ
+gezaehlte Zeichen-Nutzlast. Kein Dateiformat-, Modell- oder History-Wechsel.
+
+[Messbericht](docs/performance/IMAGE_URL_REUSE.md): derselbe Browser-Parcours,
+sechs Faelle mit je 21 Stichproben, identische ViewBoxes und Pointerziele.
+Mit PNG sinkt der Median bis zur Vorschau bei 100/1000/5000 Elementen von
+1050/1291/2085 auf 514/741/1603 ms (rund 51/43/23 Prozent). Wiederholte
+Bild-URL-Dekodierung entfaellt bei warmem Cache. Kaltes Laden bleibt unveraendert.
+Ohne PNG keine relevante Aenderung des Codepfads; Messschwankungen bleiben.
+Alle sechs Ablaufe mit Vorschau, Abbruch, Platzierung, Undo und Redo bestanden.
+628 Tests, Typpruefung und Build bestanden; Lint: 0 Fehler, 6 bekannte Warnungen.
+A-04 bleibt offen: zwei Vollvalidierungen je Vorschau und teure Wandableitungen
+bestehen weiterhin. A-01-Messluecken fuer reale/dichte Faelle bleiben bestehen.
+
+Damals naechster Auftrag (oben abgeschlossen): die doppelte Validierung identischer Gruppen-
+bewegungsvorschauen aus Praezisionseingabe und Grundrissdarstellung beseitigen.
+Ein validiertes Ergebnis nur fuer unveraenderten Bewegungskontext und dasselbe
+Ziel wiederverwenden; Modell-/Auswahl-/Sichtbarkeits-/Ursprungs-/Zielwechsel
+verwerfen es. Finale Commit- und Stale-Kontextpruefung behalten. Gemeinsamer
+Interaction-/Application-Pfad, keine werkzeugspezifische UI-Kopie. Wiederverwendung
+und Invalidierung testen, dann denselben Sechs-Faelle-Parcours erneut messen.
+
+## Aktive Gruppenbewegung vermessen - 07.10.2026
+
+PR168 freigegeben und zusammengefuehrt. Der begrenzte Messauftrag A-01/A-04
+ist abgeschlossen; keine neue Produktfunktion oder Vorschauoptimierung in diesem Schritt.
+[Messbericht](docs/performance/ACTIVE_MOVEMENT_PROFILE.md) und sechs Einzelberichte
+mit je 21 Stichproben dokumentieren den realen gemeinsamen Handler-/Renderpfad
+mit synthetischen DOM-Ereignissen (keine Messung von Hardware- oder GPU-Latenz).
+
+Median bis zur verifizierten Vorschau ohne/mit PNG: 100 Elemente 34,5/1050,0 ms;
+1000 Elemente 203,7/1290,6 ms; 5000 Elemente 1184,2/2085,0 ms. Pro Mausziel
+laufen zwei Vollvalidierungen. Bei unveraenderten PNG-Daten kommen rund 534 ms
+fuer erneute URL-Pruefung/Dekodierung hinzu: neue Vorschau-Assetobjekte verfehlen
+den bestehenden identitaetsbasierten Cache. Snap war auf diesem duenn belegten
+Testweg guenstig; dichte Suchbereiche sind damit nicht allgemein abgenommen.
+
+Alle sechs Faelle: 20 Waende ausgewaehlt, Vorschau angezeigt, Escape ohne History,
+Platzierung, genau ein Undo und Redo bestanden. 623 Tests, Typpruefung und Build
+erfolgreich; Lint ohne Fehler mit 6 bekannten Warnungen. Diagnosecode fehlt im
+Produktionsbundle. A-01 bleibt fuer reale Projekte, dichte/Kontur-Faelle, Hardware-
+Pointer und Peak-/GPU-Speicher offen. A-04 ist vermessen, noch nicht optimiert.
+
+Damals naechster Auftrag (oben abgeschlossen): den gemeinsamen checkedImageUrl-Pfad so begrenzt
+zwischenspeichern, dass unveraenderte Bildinhalte und Metadaten auch bei neuen
+Vorschau-Assetobjekten wiederverwendet werden. Cache-Bindung begrenzen; geaenderte
+Bytes, MIME oder Masse duerfen keine alte URL erhalten. Datei-/Modellvalidierung
+und History beibehalten; anschliessend denselben Bewegungsparcours vergleichen.
+Die doppelte Vorschauvalidierung bleibt ein danach separat zu bearbeitender Befund.
+
+## A-03: redundante Commit-Validierung entfernt - 07.10.2026
+
+PR167 freigegeben und zusammengefuehrt. Der begrenzte A-03-Auftrag ist umgesetzt:
+Der gerade vollstaendig validierte neue Snapshot wird fuer den Vergleich direkt
+serialisiert; seine UTF-8-Groessenpruefung bleibt explizit erhalten. Keine Caches
+fuer ungesicherte Eingaben, keine Lockerung der Datei- oder Geometrievalidierung.
+
+[Messbericht](docs/performance/A03_COMMIT_VALIDATION.md): 5000 Elemente mit PNG,
+9,33 MiB, je 21 Messungen im selben Browserlauf. Alter/neuer Commit Median
+1390,3/948,7 ms (-31,8 %); P95 1455,3/980,8 ms. Vollvalidierung 438,9 ms,
+kalte Wandableitung darin separat 200,9 ms. JSON-Vergleich/Groessencheck 54,5 ms.
+Der Commit bleibt teuer; Vorschauen sind mit dieser Aenderung nicht optimiert.
+
+623 Tests, TypeScript inklusive Diagnose und Build bestanden; Lint ohne Fehler,
+6 bekannte Warnungen. Browser-Abnahme: unzulaessige Eckhoehe abgewiesen;
+Fensterbreite 1,2 -> 1,4 m, Undo -> 1,2 m, Redo -> 1,4 m bestaetigt.
+A-01 bleibt mit seinen ausgewiesenen Messluecken offen.
+
+Damals naechster Auftrag (oben abgeschlossen): den vorhandenen gemeinsamen Gruppen-
+bewegungspfad von Pointer-Eingang ueber Fang/Validierung bis zur gerenderten
+Vorschau instrumentieren. Dieselbe Bewegung von 20 Waenden in 100/1000/5000
+Elementen ohne/mit PNG messen, Median/P95 je Phase und Abbruch/Commit/Undo
+pruefen. Daraus die naechste Vorschauoptimierung bestimmen. Neue Bauteile und
+Raeume bleiben zurueckgestellt.
+
+## P0-Messreihe und A-02-Korrektur - 07.10.2026
+
+PR166 freigegeben und mit erhaltener Architektur-Aufgabenliste zusammengefuehrt.
+Browser-Parcours und Rohdaten: [P0_BROWSER_BASELINE](docs/performance/P0_BROWSER_BASELINE.md).
+Sechs Szenarien: 100/1000/5000 Elemente ohne/mit PNG, bis 9,33 MiB. Kernaktionen
+je 21 Stichproben, Auswahl je 22 Klicks, Median/P95 und JS-Heap-Snapshot dokumentiert.
+A-02 ersetzt beide vollstaendigen JSON-Formschluessel durch schwache Snapshot-
+Revision plus Auswahlidentitaet. Auswahlwechsel/Modellaenderung aktualisieren
+Formulare; Zoom behaelt Eingabeentwuerfe. Kein Zugriff auf Assets fuer Formschluessel.
+
+619 Tests, Typpruefung inklusive Diagnosecode und Build bestanden; Lint ohne
+Fehler (6 bekannte Warnungen). Browser: Entwurf bei Zoom, Auswahlwechsel,
+Maasseingabe/Undo/Redo und Ebenenzuweisung/Undo geprueft.
+
+A-01 ist ein Teilnachweis: aktive Pointer-bis-Bild-Vorschau, Kontur-/Dichte-
+Browserregressionen, echte Nutzerprojekte und Peak-/GPU-Speicher bleiben offen.
+ConnectedWallSolids besitzt bereits einen Snapshot-Cache; A-04 muss neue Vorschau-
+Snapshots und unveraendertes Modell unterscheiden. Keine pauschale Speicher-Kopiebehauptung.
+
+Damals naechster Auftrag (inzwischen oben abgeschlossen): A-03 am vorhandenen grossen Bildszenario in Validierung,
+Wandableitung und JSON-Vergleich aufteilen und einen nachgewiesen redundanten
+Durchlauf begrenzt korrigieren; Guards, Undo/Redo und Dateivalidierung erhalten.
+Raeume bleiben bis zur Stabilisierung zurueckgestellt.
+
+
+## Architektur und Skalierung: priorisierte Aufgaben - 07.10.2026
+
+Stand der Prüfung: `main` am 07.10.2026. Die Prioritäten gelten für die
+Architekturarbeiten; der unten dokumentierte Auftrag zur Bewegung von
+Bildreferenzen bleibt der festgelegte Funktionsauftrag. Größere Umbauten
+folgen erst auf Messungen mit realen Projekten. Die Checkboxen zeigen den aktuellen Stand; ein Codebefund allein belegt
+noch keinen spuerbaren Browser-Engpass.
+
+### P0 - zuerst messen und den bekannten Render-Aufwand entfernen
+
+- [ ] **A-01 Browser-Baseline für große Projekte.** Reproduzierbare Szenarien
+  mit etwa 100, 1.000 und 5.000 Elementen sowie ohne und mit eingebetteten
+  PNG/JPEG-Referenzen nahe der heutigen 10-MiB-Projektgrenze anlegen.
+  Auswahl/Eigenschaften, Pointer-Vorschau, Commit, Undo/Redo und
+  JSON-Laden/Speichern messen; Median/P95 und Speicherbedarf samt Browser,
+  Testdaten und Messmethode dokumentieren. Auch viele verbundene Wände und
+  ausgewählte Gruppen aufnehmen. **Abnahme:** Eine Vergleichsbasis macht
+  sichtbar, welcher Pfad tatsächlich bremst; Wiederholung nach Änderungen
+  zeigt denselben Ablauf ohne Funktionsverlust.
+- [x] **A-02 Eigenschaftsformulare ohne vollständige JSON-Schlüssel.** In
+  `CadWorkspace` werden Formzustände derzeit über
+  `JSON.stringify([selection, project])` geschlüsselt (zwei Stellen). Einen
+  stabilen Schlüssel aus Auswahlidentität und passender Modellrevision
+  verwenden, ohne das gesamte Projekt bei jedem Render zu serialisieren.
+  **Abnahme:** Auswahlwechsel, Bearbeitung, Undo/Redo sowie Ebenen- und
+  Referenzänderungen aktualisieren die Formulare korrekt; der große
+  Serialisierungsschritt entfällt. Die isolierte Messung von etwa 10 ms für
+  5 MiB ist ein Hinweis, kein gemessener Browserwert.
+
+### P1 - nach der Baseline gezielt die heißen Pfade bearbeiten
+
+- [x] **A-03 Validierung und History auf Kosten prüfen.** Beim Commit werden
+  aktuell das gesamte Projekt validiert, verbundene Wandkörper abgeleitet und
+  ein JSON-Snapshot für den Vergleich erzeugt. Besonders eingebettete
+  Bilddaten in der A-01-Messung betrachten. Nur bei nachgewiesenem Engpass
+  den Commit-/Vergleichspfad begrenzt optimieren, etwa durch stabile
+  Änderungsidentitäten oder wiederverwendbare, unveränderliche Daten.
+  **Abnahme:** Ungültige und veraltete Aktionen bleiben gesperrt; Undo/Redo,
+  Dateiroundtrip und Projektvalidierung liefern dieselben Ergebnisse.
+  Keine pauschale Aussage über 100-fach kopierte Bilder im Speicher treffen.
+- [ ] **A-04 Vorschauen lokal halten.** `previewWallChain` und
+  `previewSelectionMove` können bei Pointerbewegungen ganze
+  Projektprüfungen auslösen; `BimPlan` berechnet verbundene Wandkörper
+  für die Anzeige. Mit A-01 die Kosten bei vielen Wänden, Öffnungen und
+  Mehrfachauswahl prüfen. Wenn relevant, Vorschau auf betroffene Elemente
+  und gültige Sitzungs-/Projektversion begrenzen oder Ableitungen cachen;
+  beim endgültigen Commit vollständig absichern. **Abnahme:** Messbarer
+  Rückgang der Pointer-Latenz ohne andere Vorschau, veraltete Ergebnisse
+  oder geänderte Commit-/Undo-Semantik.
+
+### P2 - Wartbarkeit und Kapazität planvoll verbessern
+
+- [ ] **A-05 Importzyklus der Kontur-/Offsetlogik auflösen.**
+  `src/application/direct-edit/offset.ts` und `contour.ts` importieren
+  einander. Gemeinsame reine Hilfslogik an eine eindeutige Stelle verschieben.
+  **Abnahme:** Kein gegenseitiger Runtime-Import; Offset- und
+  Konturfunktionen einschließlich Grenzfällen verhalten sich wie zuvor.
+- [ ] **A-06 Projektgröße und Bildspeicherung entscheiden.** Die aktuelle
+  10-MiB-Dateigrenze, eingebettete Base64-Bildreferenzen und das
+  16-Megapixel-Pixelbudget anhand realistischer Projekte und A-01 bewerten.
+  Bilddateien sollen künftig wahlweise als externe Referenz verknüpft werden
+  können; eingebettete Referenzen und vorhandene Schema-9-Projekte bleiben
+  nutzbar. Logische Asset-/Referenz-IDs und ihre Platzierung dürfen nicht vom
+  Dateipfad abhängen. Fehlende oder verschobene Dateien müssen erkennbar und
+  gezielt neu verknüpfbar sein. Für die vollständige Weitergabe muss ein
+  portables Projektpaket die benötigten Referenzdateien mitnehmen.
+  Speicherformat, Auflösung von Dateipfaden, Budgets und Grenzen erst nach
+  Messungen an realistischen Projekten festlegen; das 10-MiB-Limit nicht
+  pauschal erhöhen. **Abnahme:** Import, Speichern, Öffnen, Wiederverknüpfen
+  und Weitergabe funktionieren mit dokumentierten Grenzen; Browser sowie
+  eine spätere Windows-/macOS-Desktop-Hülle nutzen dieselbe Projektlogik und
+  getrennte Dateizugriffsadapter. PDF-Import ist eine eigene künftige Funktion.
+- [ ] **A-07 Große UI-Module schrittweise entlasten.** `CadWorkspace`
+  (rund 1.200 Zeilen) und `BimPlan` (rund 1.460 Zeilen) bei konkreten
+  Änderungen in kleine Verantwortlichkeiten schneiden; Geometrie und
+  Projektzustand in bestehenden Domain-/Application-Grenzen halten.
+  **Abnahme:** Kein zweites editierbares Modell im React-State; sichtbares
+  Verhalten und Regressionstests des jeweils bearbeiteten Werkzeugs bleiben
+  erhalten. Kein pauschaler Komplettumbau.
+
+**Bereits adressiert, keine neue offene Engpassaufgabe:** Die
+Konturvorbereitung nutzt Sitzungs-Cache und prüft geänderte Kanten; der zuvor
+gemeldete 500-Punkte-Fall wurde isoliert deutlich schneller gemessen. Die
+Fangpunktlogik besitzt bereits einen lokalen Index und eine Begrenzung für
+dichte Bereiche. A-01 nimmt beide als Browser-Regression mit auf.
+
+**Fortschreibung:** A-01-Teilnachweis, A-02 und A-03 liegen vor. Aktuell gilt der
+A-04-Pilot aus der Architekturprüfung am Dateianfang. Die noch offenen
+A-01-Abnahmen bleiben ausdrücklich bestehen.
+
+## Bildreferenzen gemeinsam bewegen - 07.10.2026
+
+PR165 freigegeben und zusammengefuehrt. Die bestehende SelectionMove-Aktion
+verschiebt jetzt auch den Bildursprung. Assets, Kalibrierung und Rotation bleiben
+unveraendert. Einzelbild und gemischte Auswahl verwenden denselben Ursprung,
+Fang-/Hilfslinienpfad, Winkel/Laenge, Klick-Commit und Undo. Das Einzelbild bekommt
+im On-Demand-Menue den Einstieg "Element frei bewegen". Text/Voice-Auswahlbewegung
+benutzt automatisch dieselbe Aktion. Hostgebundene Fenster brauchen weiterhin
+ihre Wand in der Gruppe; diese Regel wird nicht gelockert.
+
+Nachweis: 618 Tests, TypeScript und Build erfolgreich; Lint ohne Fehler und mit
+6 bekannten Warnungen. Tests: Bild allein/gemischt mit BIM, fester Massstab und
+Rotation, Assets, Einmal-Undo/Redo, JSON, Textaktion, versteckte/veraltete Ziele.
+Browser: Einzelbild um 2 m numerisch bewegt, Undo stellt Ursprung wieder her;
+Wand und Bild per Strg-Auswahl, Ursprung und Zielklick gemeinsam bearbeitet.
+
+Abnahme: Bild anklicken > Element frei bewegen > Ursprung anklicken > Ziel
+anklicken oder Winkel/Laenge eingeben. Danach Wand mit Strg/Cmd dazunehmen und
+Auswahl frei bewegen. Undo muss jeweils die gesamte Bewegung zuruecknehmen.
+Keine Bildinhalts-Fangpunkte, keine freie Drehung oder PDF-Unterstuetzung.
+
+Genau ein Folgeauftrag gemaess Guide Etappe 8: einen validierten Raumdatenkern
+fuer manuell begrenzte Raumkonturen mit stabiler ID, sichtbarer Kennung, Name,
+Geschoss-/Ebenenzuordnung und geometrischer Flaeche planen und implementieren,
+inklusive Migration, JSON und Tests. Keine automatische Raumerkennung oder WoFlV.
+
+## Kalibrierung per Text und Sprache - 07.10.2026
+
+PR164 freigegeben und zusammengefuehrt. Nach zwei Messpunkten versteht die
+vorhandene Befehlsleiste "Referenz auf 5 m kalibrieren". Der lokale Parser
+uebersetzt nur zur bestehenden previewCalibration-Aktion. Ein unveraenderlicher
+Messkontext bindet Snapshot, Referenz-ID, Sichtbarkeit und Punkte; neue Messungen
+verwerfen alte Vorschauen und laufende Sprachergebnisse. Uebernahme validiert
+erneut und erzeugt einen Undo-Schritt. BIM-Skalierung bleibt ausgeschlossen.
+
+Nachweis: 615 Tests bestanden; TypeScript und Build erfolgreich; Lint ohne Fehler,
+6 bekannte Warnungen. Browser: Messpunkte, Textvorschau, Uebernahme (4x2 auf
+8,944x4,472 m) und Undo auf 4x2 m. Voice ueber simulierte finale Transkripte
+inklusive veraltetem Messkontext getestet; echter Mikrofontest bleibt Nutzerabnahme.
+Die Befehlsvorschau ist wie bei vorhandenen Befehlen textuell. Keine freie
+Sprachinterpretation, keine automatisch erkannten Bildmesspunkte.
+
+Abnahme: Bild auswaehlen, Zweipunkt-Kalibrierung starten, zwei Punkte klicken.
+In Modellbefehle "Referenz auf 5 m kalibrieren" eingeben oder per Mikrofon sagen.
+Befehl pruefen, Ziel/Lange lesen, Uebernehmen und Undo testen.
+
+Genau ein Folgeauftrag: Bildreferenzen an die gemeinsame Auswahlbewegung anbinden
+(einzeln und gemischt), inklusive Ursprung/Fangengine, Vorschau, atomarem Commit,
+Undo und Textbefehl. Damit laesst sich die kalibrierte Referenz auch ausrichten,
+bevor Guide Etappe 8 beginnt; kein eigener Bewegungsmechanismus.
+
+## Zweipunkt-Kalibrierung für Bildreferenzen - 07.10.2026
+
+PR163 einschließlich Fokusrahmenkorrektur in main ef325a9 integriert. Die ausgewählte
+PNG/JPEG-Referenz erhält im On-Demand-Menü eine Zweipunkt-Kalibrierung. Gemeinsame
+ToolInteraction-Punktaufnahme mit Fanghilfen; explizite positive Länge mit m/cm/mm.
+Reine Geometrietransformation und validierte Application-Vorschau halten den ersten
+Messpunkt fest und skalieren gleichmäßig. Übernehmen erzeugt einen Undo-Schritt.
+BIM, Mischauswahl, versteckte und veraltete Ziele bleiben gesperrt.
+
+Nachweis: 613 Tests bestanden, TypeScript und Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Browser: zwei Punkte aufgenommen, 5 m übernommen, Bild
+von 4×2 auf 8,944×4,472 m skaliert, Undo stellt 4×2 m wieder her. Fokusrahmen
+bleibt ausgeschaltet. Tests sichern Rotation, festen Anker, Einheiten, ungültige
+Ziele/Maße, Undo/Redo und JSON-Roundtrip. Download-Grenze des vorigen Schritts bleibt.
+
+Abnahme: Bild anklicken → Zweipunkt-Kalibrierung → zwei Punkte einer bekannten
+Strecke anklicken → beispielsweise „5 m“ eingeben → Vorschau übernehmen.
+Grenzen: Bildpixel besitzen keine Vektorfangpunkte; noch kein PDF oder Text/Voice-
+Adapter für Kalibrierung. Einzelne Referenzbewegung bleibt ein späterer Auftrag.
+
+Genau ein Folgeauftrag gemäß Guide Etappe 7: Text/Voice-Kalibrieradapter auf dieselbe
+Application-Aktion setzen. Zuvor aufgenommene Messpunkte und stabile Referenz-ID
+als Zielkontext binden, geänderte Kontexte zurückweisen, Vorschau/Annahme/Undo testen.
+
+## Bild-Fokusrahmen korrigiert - 07.10.2026
+
+Nutzerfehler reproduziert: fokussiertes SVG-image erhält Browser-outline auto 5px;
+die Modelltransformation vergrößert ihn bis über den Canvas. Bild bekommt wie
+andere SVG-Auswahlziele outline-none, der vorhandene CSS-konstante türkise
+Auswahlrahmen bleibt. Browserprüfung: fokussiertes Bild, outline-style none.
+Nächster Auftrag bleibt Zweipunkt-Kalibrierung.
+
+## PNG/JPEG-Import im Grundriss - 07.10.2026
+
+PR162 freigegeben und in main 925385b integriert. Insert → Bildreferenz importieren
+liest PNG/JPEG lokal. Header-/Pixelbudgetprüfung vor Decode, Browserdekodierung mit
+Orientierung und Normalisierung nach PNG; Daten bleiben eingebettet. Bildbreite
+in Metern steht in Werkzeugeigenschaften. Der vorhandene ToolInteraction-/Snap-
+und Placement-Pfad liefert Vorschau, Klick-Commit und Abbruch. Projekt-/Sichtbarkeits-
+wechsel und abgebrochene Decodergebnisse dürfen nicht nachträglich committen.
+
+Gemeinsame Auswahl um reference erweitert: Klick, Strg/Cmd, Marquee-Geometrie,
+Navigator, Ebenenzuordnung und Filter; blau markierter Rahmen und Bildmaße.
+Bild liegt hinter vorhandener Modellgeometrie. Fit berücksichtigt Bildausdehnung.
+Keine zweite Engine. Bildinhalt hat keine Vektorfangpunkte. Noch keine Referenz-
+Bewegung oder Kalibrieraktion; gemischte Bewegung mit Referenz wird atomar abgewiesen.
+
+Nachweis: 607 Tests, TypeScript, Build erfolgreich; Lint keine Fehler, 6 bekannte
+Warnungen. Browser: JPEG 400×200 auf 4×2 m platziert, Undo/Redo, Ebenenausblendung;
+PNG dekodiert und Import abgebrochen ohne zweites Element. Reproduzierbare
+Projektdatei mit eingebettetem PNG geöffnet: 4×2 m und Position 1,5/0 wieder da.
+Save meldet Download angefordert, aber neue Download-Datei dieses Durchlaufs nicht
+nachgewiesen; Download-Event Timeout. Das Laden der generierten Datei ist kein
+Beleg eines erfolgreichen aktuellen Browser-Downloads. JSON-Roundtrip automatisiert.
+
+Abnahme: Insert → Bildreferenz importieren → PNG/JPEG auswählen → Breite in Metern
+setzen → freie Stelle anklicken. Ebene aus/ein, Undo/Redo und Speichern prüfen.
+Decoder prüft neue Importbilder; gespeicherte Bilder erhalten vor Anzeige einen
+Header-/Maßabgleich. Keine PDF-Unterstützung oder Bildinhaltsanalyse.
+
+Genau ein Folgeauftrag: Zweipunkt-Kalibrierung der ausgewählten Bildreferenz über
+validierte Application-Aktion und gemeinsame Punktaufnahme, Vorschau und Undo
+implementieren; erster Messpunkt bleibt fest, BIM/mischte Ziele sind gesperrt.
+
+## Persistenter Bildreferenz-Datenkern - 07.10.2026
+
+PR161 freigegeben und in main ee8c61d integriert. Schema 9 ergänzt projektweite
+Assets und geschossgebundene Bildreferenzen mit stabilen IDs, Ebene, Asset-Verweis,
+Ursprung, Rotation und einheitlichem Meter-pro-Pixel-Maßstab. Versionen 1–8 werden
+streng validiert migriert; neue Dateien benötigen einen Schema-9-fähigen Build.
+Application previewCreateReference/commitCreateReference erstellt Asset und Referenz
+atomar, prüft Projekt-/Snapshotbindung und Dateigröße. Ebenenbelegung, Zuweisung
+und Sichtbarkeit berücksichtigen Referenzen. Kein neuer UI-/Auswahlmodus.
+
+602 Tests bestanden, TypeScript und Build erfolgreich. Lint: keine Fehler,
+6 bekannte Fast-Refresh-Warnungen. Neue Tests: portable JSON-Datei, Undo/Redo,
+Migration V8, ungültige IDs/Verweise/Ebenen/Base64/MIME/Maße, veralteter Import,
+Transformation, Dateigröße und unveränderter IFC-Export. Bestehende Migrationstests
+verwenden weiterhin echte alte Formate ohne die neuen Felder.
+
+Grenzen: keine Bilddekodierung, kein Canvas-Import oder Kalibriermenü. MIME und
+Pixelmaße sind ein Speichervertrag, noch kein Nachweis dekodierbarer Bilddaten;
+der kommende Adapter muss Inhalte und tatsächliche Dimensionen verifizieren.
+Technisches vorläufiges Budget: 16 Millionen Pixel, maximal 16384 je Kante;
+Projektdatei insgesamt maximal 10 MiB inklusive Base64/Metadaten. Nicht als
+Nutzerentscheidung oder gemessene Kapazitätsgrenze ausgegeben.
+
+Praktische Abnahme derzeit über automatisierte Tests; bisherige Wand-/Fenster-
+Projekte lassen sich weiter öffnen und speichern. Noch kein neuer Bild-Button.
+Genau ein Folgeauftrag: PNG/JPEG-Importadapter mit lokaler Dekodierung und
+Dimensionsprüfung sowie kleiner 2D-Importbedienung integrieren: Breite in Metern,
+Vorschau/Abbruch, atomare Bestätigung, Anzeige, gemeinsame Auswahl und Ebenenfilter,
+Speichern/Wiederöffnen. Kalibrierbedienung und PDF bleiben anschließend separat.
+
+## Bildreferenz-Planung - 07.10.2026
+
+PR160 freigegeben und in main d18990d integriert. Bestand und Daten-/Aktionsvertrag
+in docs/references/IMAGE_REFERENCE_PLAN.md dokumentiert. Schema 8 besitzt noch
+keine Referenzen/Assets; Auswahl, Ebenen und Snapshot-History sind wiederverwendbar.
+Vorschlag: PNG/JPEG, eingebettete Asset-Daten, expliziter Geschossbezug und eine
+Transformation; Dateigröße muss das bestehende 10-MiB-Leselimit einhalten.
+Nutzerentscheidung: PNG/JPEG dürfen ebenfalls kalibriert werden. Die bisherige
+Bitmap-Ausnahme in ARCHITECTURE.md Abschnitt 30 ist ausdrücklich ersetzt; BIM
+bleibt ausgeschlossen. Keine Runtime-Änderungen.
+
+Genau ein Folgeauftrag: Persistenten Referenz-Datenkern mit validierten Assets,
+Transformation/Verweisen, Dateimigration, atomarer Erstellung, Größenprüfung und
+Roundtrip-/History-/Fehlereingabetests implementieren. Noch keine Canvas-Bedienung,
+keine PDF-Zerlegung und keine Änderung der BIM-Skalierungssperre.
+
+## Browser-Projektdatei-Roundtrip - 07.10.2026
+
+PR159 freigegeben und in main 49f960e integriert. Entwicklungsserver nach Neustart
+wieder gestartet. Save project erzeugt eine echte Datei im Downloadordner.
+Der automatisierte Download-Event liefert weiterhin einen Timeout, obwohl die
+Datei gespeichert wird; kein nachgewiesener Fehler der Anwendung.
+
+Prüfung mit two-corner-t.project.json: fünf Wände, vier Ecken, ein T und ein
+Fenster laden, speichern, per Undo zum vorherigen Zweielement-Modell wechseln,
+tatsächlich heruntergeladene Datei öffnen und bestätigen. Vollständiger JSON-
+Vergleich mit Ausgangsdatei identisch; Navigator zeigt wieder fünf Wände und
+Fenster. Keine Fehler in der abgefragten Browserkonsole. Keine Runtime-Änderung;
+593 automatisierte Tests und Build aus dem vorherigen Code-Nachweis gelten
+unverändert, in diesem reinen Dokumentationsschritt nicht erneut ausgeführt.
+
+Genau ein Folgeauftrag (Guide-Etappe 7): Bestandsaufnahme und begrenzten technischen
+Plan für eine importierte Bildreferenz mit Zweipunkt-Kalibrierung erstellen.
+Asset-Speicherung, Ebenenzuordnung, Transformation, Undo und Projektdatei müssen
+an bestehende Architektur anschließen. Zunächst Daten-/Aktionsvertrag und konkreten
+kleinen Implementierungsauftrag festlegen; kein PDF-Zerlegen oder Layouteditor.
+
+## Browser-/IFC-Abnahme Zwei-Ecken-T - 06.10.2026
+
+PR158 freigegeben und in main d2d3af9 integriert. Reproduzierbarer Generator
+scripts/generate-two-corner-t-fixtures.mjs und Abnahmeprotokoll
+ docs/walls/TWO_CORNER_T_ACCEPTANCE.md ergänzt. Browser: automatisches Zeichnen
+auf Hauptwand mit zwei Ecken, Fenster entlang Host über T bewegen, Undo/Redo und
+3D geprüft. IFC unabhängig mit IfcOpenShell: Schema fehlerfrei, fünf Wände,
+ein Fenster, Soll-/Ist-Wandvolumen 21,41136 m³. Archicad-Abnahme ausstehend.
+Browser-Download-Event nicht bestätigt (Timeout); Details und Dateiabgrenzung im
+Abnahmeprotokoll. Keine Änderungen am Anwendungscode dieses Schritts.
+
+Genau ein Folgeauftrag: Projekt-Speichern und Wiederöffnen im Browser einschließlich
+Download-Rückmeldung gezielt prüfen, um die verbleibende Abnahmelücke zu schließen.
+
+
+## T-Hauptwand mit zwei rechtwinkligen Eckanschlüssen - 06.10.2026
+
+Die bisherige Anzahl-Sperre in validateCornerTContact ist durch Prüfung jedes
+Eckpartners ersetzt. Kontakt muss weiterhin vollständig auf einer ungestörten
+Längsseite der zusammengesetzten Kontur liegen. Die Nebenwand darf keinen der
+beiden Partner berühren/überschneiden. Gemeinsame Kontur-, Solid-, Fenster- und
+IFC-Funktionen bleiben unverändert; keine Sonderlogik im UI.
+
+Nachweis: 593 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Neue Matrix: drei Achslagen, beide T-Seiten, global gedreht
+und ungedreht, Ecke vor/nach T, unveränderte Eckkonturen, History und JSON.
+Kollision am zweiten Eckpartner wird atomar abgewiesen. Fenster-Integration jetzt
+auch im geschlossenen Rechteck mit T: Platzierung, Maßänderung, Bewegung durch T,
+Undo/Redo, Speichern/Laden, identischer Solid/IFC mit aktuellen Fenstermaßen.
+Kein neuer Archicad- oder interaktiver Browser-Abnahmetest in diesem Schritt.
+
+Abnahme: Rechteck als Wandkette zeichnen, zusätzliche Wand mittig auf die Achse
+einer Rechteckseite führen. T-Anschluss soll ohne bisherige Anzahl-Meldung entstehen.
+Fenster auf Hauptwand einsetzen und über den T-Anschluss verschieben; speichern,
+neu laden und IFC prüfen. Grenzfall nahe Ecke muss weiterhin abgewiesen werden.
+Weiter ausgeschlossen: schräge Ecke in Kombination mit T, eigene Ecke der Nebenwand,
+Kontakt mit Eckbereich sowie bisher gesperrte Mehrfachtopologien. Schema bleibt 8;
+ältere Builds können diese neue Kombination weiterhin ablehnen.
+
+Genau ein Folgeauftrag: Automatischen Zeichen-/Direct-Edit-Ablauf für diesen neuen
+Zwei-Ecken-T-Fall im Browser prüfen und eine IFC-Abnahmedatei für Archicad bereitstellen.
+
+
+## Fenster-Integrationsprüfung und Lovable-Abgleich - 06.10.2026
+
+PR155 ausdrücklich freigegeben und normal nach main integriert (c3e3c0a).
+Neuer Integrationstest in application/drawing/actions.test.ts prüft zwei vorhandene
+Abläufe: geschlossener Vierwand-Grundriss und offene Kontur mit Eck-/T-Verbindung.
+Fenster präzise platzieren, Vorschau ohne Mutation, einmal bestätigen, Maße ändern,
+auf derselben Wand über T hinweg verschieben, Undo/Redo, JSON speichern/laden,
+identischer 3D-Solid und identischer IFC-Export nach Reload. IFC enthält erwartete
+Wände, Fenster, Öffnungs-/Füllbeziehungen sowie aktuelle Maße und Position.
+580 Tests bestanden, TypeScript und Build erfolgreich, gezielter Lint erfolgreich.
+Keine neue Modellfunktion oder UI in diesem Prüfschritt.
+
+Offene Grenze ausdrücklich nachgewiesen: T-Hauptwand mit zwei Eckanschlüssen
+wird derzeit von validateCornerTContact abgewiesen. Deshalb ist ein geschlossener
+Grundriss mit zusätzlichem T an dieser Wand noch nicht freigegeben. Die unterstützten
+Varianten werden getrennt geprüft; keine Lockerung der Validierung auf Verdacht.
+
+Praktische Abnahme: Vier Wände zum Rechteck verbinden, Fenster per Maß einsetzen,
+Breite ändern, entlang Hostwand bewegen, Undo/Redo, speichern und wieder öffnen,
+IFC exportieren und extern prüfen. Archicad wurde in diesem Schritt nicht ausgeführt.
+
+Lovable: origin/Anpassungen_UI bei eab4092 hat 6 eigene Commits und ihm fehlen 37
+Commits aus origin/main c3e3c0a. WindowPlacementFields/useWindowPlacement fehlen dort.
+Der tatsächlich in Lovable gewählte Zweig ist nicht unabhängig verifiziert; wenn es
+weiter Anpassungen_UI ist, erklärt dessen Stand die fehlenden Fenster. Branch-spezifische
+Synchronisation ist kein fehlender Fenster-PR-Merge. UI-Änderungen nicht überschreiben.
+
+Genau ein Folgeauftrag: main geordnet in einen Integrationszweig auf Basis von
+Anpassungen_UI übernehmen, vorhandene UI-Änderungen erhalten, Konflikte fachlich lösen,
+Build/Tests prüfen und PR gegen Anpassungen_UI zur Synchronisierung vorlegen.
+Danach bleibt die oben dokumentierte Ecke/T-Einschränkung im fachlichen Backlog.
+
+
+## Canvas-Fokus und Zoomanzeige - 06.10.2026
+
+Schwarzen Browser-Fokusrahmen bei Mausklick auf 2D-/3D-Canvas entfernt; Tastaturfokus
+bleibt funktional und erhält eine dezente focus-visible-Markierung. Links von Grid
+zeigt eine Prozent-Auswahl den Zoom des aktiven Viewports und setzt dessen bestehende
+Kamera. Ein UI-Portal erhält die Kamera-Verantwortung im CadViewport; kein paralleler
+Zoomzustand im Projekt oder Workspace. Mehrfachansichten veröffentlichen nur die
+aktive Steuerung. 2D-Bezug: 100 Prozent = 100 CSS-Pixel/m; 3D: bisherige Standardansicht.
+Diese Bildschirmwerte sind ausdrücklich kein Druckmaßstab. Mausrad/Fit/Ansichtswechsel
+aktualisieren dieselbe Kamera und damit die Anzeige.
+
+Geändert: BimPlan, BimSolidView, CadViewport, CadWorkspace, StatusBar und Protokoll.
+Browser: 200 Prozent setzt 200 px/m, Canvas-Klick fokussiert ohne outline,
+3D-Wechsel zeigt 100 Prozent. TypeScript, Build und Lint erfolgreich (bekannte Warnungen).
+PR155 bleibt offen: automatischer Approval-Review hat den Merge trotz allgemeiner
+Freigabe abgelehnt; UI-Korrektur als zusätzlicher Commit im bestehenden PR.
+Genau ein Folgeauftrag bleibt Fenster-Integration im verbundenen Grundriss
+mit Speichern/Laden und IFC; keine weitere neue Werkzeugfunktion in diesem Schritt.
+
+
+## Fensterbegrenzung und Darstellung - 06.10.2026
+
+Korrektur zu PR155: Einsetzen und Verschieben begrenzen die Fenstermitte auf den
+zulässigen Bereich der Hostwand, auch bei einem Mausziel jenseits des Wandendes.
+Die gemeinsame Domain-Funktion window-range berechnet den Bereich aus Fensterbreite,
+Wandlänge und gegebenenfalls Gehrungsenden. T-Anschlüsse bleiben ohne Sperrwirkung.
+Keine wiederholte Ganzmodell-Suche nach einem Grenzpunkt. Vorschau und Commit
+verwenden dieselbe Begrenzung; nicht endliche Maße und zu große Fenster bleiben Fehler.
+An Gehrungen bleibt ein numerischer Sicherheitsabstand zur strikt ausgeschlossenen
+Berührung. Die eigentliche Modellvalidierung bleibt unverändert verbindlich.
+
+Grundriss: ausgewählte Fenster erhalten die gemeinsame türkise Auswahlfarbe;
+Kontur und Mittellinie verwenden die vorhandene zoomunabhängige Wandkonturstärke.
+Automatische Wandlängenbeschriftung entfernt. Eigene Fenstermodelle sind ausdrücklich
+für später vorgemerkt; Mess- und Bemaßungswerkzeuge folgen separat.
+
+Nachweis: 579 Tests bestanden, TypeScript/Build erfolgreich, Lint ohne Fehler
+(6 bekannte Warnungen). Tests für beide Grenzen, vier Richtungen, beide verbundenen
+Wandenden, unveränderte Basis und Bestätigung am Cap. Browser: bestehendes Fenster
+entlang Wand verschoben, Klick weit hinter Wandende -> Position ca. 0,8 ohne Fehler;
+türkise Kontur sichtbar, automatische Wandmaßzahl entfernt. Screenshot window-cap.png.
+Genau ein Folgeauftrag bleibt die unten beschriebene Fenster-Integrationsprüfung
+im verbundenen Grundriss einschließlich Projektdatei und IFC.
+
+
+## Präzise Fensterposition - 06.10.2026
+
+PR154 nach Freigabe normal in main integriert (9a4df17). Optionaler Modus
+„Position per Maß“ in Werkzeugeigenschaften: zuerst sichtbare Wand anklicken,
+danach im gemeinsamen Hilfseingabefenster den Abstand der Fenstermitte vom
+Wandanfang eingeben. Die Hostwand bleibt fest, der Winkel ist vorgegeben.
+Normale Ein-Klick-Platzierung bleibt verfügbar. Wandwahl erzeugt keine History;
+Bestätigung verwendet dieselbe validierte addWindow-Aktion wie die Vorschau.
+Keine eigene Fenster-Tab-Steuerung oder zweite Maßeingabe implementiert.
+
+Geändert: Application window-placement samt actions.test; UI-Bindung
+useWindowPlacement, WindowPlacementFields und kleine Koordination in CadWorkspace;
+Architektur und dieses Protokoll.
+Nachweis: 578 Tests bestanden; TypeScript und Build bestanden; Lint ohne Fehler,
+6 bekannte Fast-Refresh-Warnungen. Test für vier Wandrichtungen, exakten Abstand,
+ungültige Abstände, unveränderte Basis und identischen Vorschau-/Commit-Zustand.
+Browser: 6-m-Wand, Position per Maß, Wandwahl ohne Bauteilerzeugung, Tab, 1,50 m,
+Enter -> neues Fenster mit Position 0,25. Undo entfernt es, Redo stellt es wieder her.
+Screenshot: outputs/window-position.png.
+
+Abnahme: Fensterwerkzeug -> Position per Maß -> Wand anklicken -> Tab -> Abstand
+(z. B. 1,50) -> Enter. Eigenschaften prüfen; danach Undo/Redo. Grenzen: Grundriss,
+Abstand zur Fenstermitte, bestehende Host-/Öffnungsgrenzen bleiben verbindlich.
+Maße und Präzisionsmodus sind Sitzungsvorgaben; keine neue Dateiformatversion.
+
+Genau ein Folgeauftrag: Den vollständigen Fensterwerkzeug-Ablauf in einem kleinen
+verbundenen Grundriss als Integrationsprüfung absichern: Platzierung und Änderung,
+Undo/Redo, Speichern/Laden und IFC müssen denselben Fenster-/Hostzustand behalten.
+Gefundene Fehler begrenzt korrigieren, bevor weitere Bauteilwerkzeuge folgen.
+
+
+## UI-Korrektur zu PR154 - 06.10.2026
+
+Nach Nutzerhinweis den gesamten werkzeugabhaengigen Optionsbereich aus der oberen
+Menueleiste entfernt (Fenster, Wand, Linie, Schraffur, Auswahl, Decke). Eigenschaften
+und Werkzeugeinstellungen gehoeren ausschliesslich in Werkzeugeigenschaften.
+Die alte statische Optionsliste samt Tool-Prop ist entfernt; globale Projekt-,
+Ansichts- und Ebenensteuerung bleibt. Keine Modell-/Bedienlogik hinzugefuegt.
+TypeScript, Build und gezielter Lint bestanden. Browser: Fensterwerkzeug zeigt
+Maße nur in Werkzeugeigenschaften; der obere Optionsbereich ist entfernt.
+Folgeauftrag bleibt die unten dokumentierte praezise Fensterposition.
+
+## Einstellbare Fenstermaße vor Platzierung - 06.10.2026
+
+PR153 nach Freigabe normal in main integriert (3c19cc6). Das Fensterwerkzeug zeigt
+Breite, Höhe und Brüstungshöhe in der festen Werkzeugeigenschaftenleiste. Eingaben
+in Metern mit Komma/Punkt werden über den gemeinsamen Einheitenparser gelesen.
+Leere, nicht endliche, negative oder unzulässige Nullwerte sperren die Platzierung;
+zusätzlich gelten alle bisherigen Host-/Fenstergrenzen aus addWindow.
+
+WindowPlacementFields ist Darstellung, useWindowPlacement hält den Sitzungsentwurf,
+Application parst und führt Vorschau/Validierung/Commit mit denselben Maßen aus.
+Eine neue Entwurfsrevision invalidiert alte Vorschau- und Commit-Callbacks, auch
+vor dem nächsten Effect-Cleanup. Kein Rückfall auf vorherige gültige Maße. Werte
+bleiben bei Werkzeugwechsel während der Sitzung erhalten; bestehende Fenster,
+Projektformat, History und IFC werden durch Eingaben allein nicht geändert.
+
+Nachweis: 577 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests für Komma/Punkt, leere/ungültige Maße, zulässige
+Brüstung 0, veraltete Vorschau nach Maßänderung, übereinstimmenden Commit und
+Hostgrenzen. Browser: leere Breite + Wandklick erzeugt kein Fenster; danach
+0,80 × 1,10 m mit Brüstung 0,70 m eingesetzt, Eigenschaften stimmen überein.
+Erneuter Werkzeugaufruf behält alle drei Werte. Screenshot outputs/window-dimensions.png.
+
+Abnahme: Fensterwerkzeug, Maße oben ändern, Wand anfahren und klicken. Neue Maße
+in Eigenschaften prüfen. Breite löschen: Meldung erscheint, Klick setzt nichts.
+Grenzen: Maße sind Sitzungsvorgaben, nicht über Neustart gespeichert. Position
+weiter per Maus/Fang; keine neue 3D-Platzierung.
+
+Genau ein Folgeauftrag: Präzise Fensterposition vor Platzierung über die gemeinsame
+Hilfseingabe ergänzen: fest gewählte Hostwand und Abstand der Fenstermitte vom
+Wandachsenanfang. Bestehende ToolInteraction-/Tab-/Hostachsenregeln wiederverwenden;
+Mausplatzierung, Abbruch, Maßänderung und Undo müssen denselben Ablauf behalten.
+
+
+## Fensterwerkzeug im Grundriss - 06.10.2026
+
+PR152 nach Freigabe normal in main integriert (c2b9897). Eigenes Fensterwerkzeug
+in der Werkzeugleiste: sichtbare Wand anfahren, vorhandene Fangengine mit
+Hostlaengsachse nutzen, Vorschau sehen, per Klick ein Fenster einsetzen. Danach
+Select und direkt die neuen Fenstereigenschaften. Esc/Abbrechen verwirft ohne
+Modellaenderung. Start aus 3D wechselt zum Grundriss.
+
+Application window-placement + React-Bindung useWindowPlacement nutzen
+ToolInteraction/useToolInteraction und vorhandene Canvas-placement-Schnittstelle.
+Keine eigene Hover-/Tastatur-/Rasterengine. Vorschau/Commit pruefen Basis und
+Sichtbarkeit; addWindow prueft Masse und bestehende Anschlussregeln. Neue IDs
+werden nach Commit gegen das neue Modell ausgewaehlt (gemeinsame Auswahlkorrektur,
+auch fuer bisheriges Einfuegen ueber Inspector). Preview-Fenster erben echte
+Ebenensichtbarkeit. Vorgabemasse werden mit dem bisherigen Inspector geteilt.
+
+Nachweis: 575 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler und
+6 bekannte Warnungen. Neue Tests fuer unveraenderte Basis waehrend Vorschau,
+Abbruch, einen History-Schritt, Undo/Redo, JSON/Solid, Sichtbarkeit, veraltete
+Kontexte, ungueltige Ziele, diagonale/versetzte Waende und Hostachse ohne Snap.
+Browser: 6-m-Wand, Fenster per Klick bei relativer Position 0.2; Navigator und
+Eigenschaften markieren sofort das neue Fenster. Undo entfernt nur dieses Fenster,
+Redo stellt es wieder her; erneuter Werkzeugaufruf + Escape erzeugt kein weiteres.
+Screenshot outputs/window-placement.png.
+
+Abnahme: Fensterwerkzeug waehlen, innerhalb einer ausreichend langen Wand anfahren
+und klicken. Maße anschliessend oben anpassen, Undo/Redo testen. An Wandenden oder
+zu kurzen/niedrigen Waenden bleibt die vorhandene Validierung massgeblich.
+Grenzen: ein Fenster je Werkzeugaufruf; feste Vorgaben 1.20 x 1.35 m, Bruestung
+0.90 m. Bei ueberlagerten Waenden wird der naechste Koerpermittelstrang gewaehlt,
+bei Gleichstand stabile ID-Reihenfolge; keine neue Host-Auswahlliste. Bestehende
+Regeln fuer ueberlappende Fenster bleiben. Keine neue 3D-Platzierung/Glasdetails.
+
+Genau ein Folgeauftrag: Fenstermasse vor dem Platzieren in Werkzeugeigenschaften
+einstellbar machen (Breite, Hoehe, Bruestung) und dieselben Werte durch Vorschau,
+Validierung und Commit fuehren. Geaenderte Vorgaben duerfen keine alte Vorschau
+bestaetigen; bestehende Fenster bleiben unveraendert.
+
+
+## Fenster direkt in 3D auswaehlen - 06.10.2026
+
+PR151 nach Freigabe normal in main integriert (41c1623). Der neue Rendereradapter
+window-selection liefert stabile Fensterziele an dieselbe zentrale Auswahl wie
+Wand, Grundriss und Navigator. Klick in die sichtbare Oeffnung waehlt das Fenster;
+Strg/Cmd ergaenzt/entfernt es. Opaque Vordergrundwaende gewinnen den Tiefentest.
+Versteckte Fenster/Hostwaende liefern keine Ziele. Fenster erhalten eine dezente
+tuerkise Umrandung an beiden Oeffnungsraendern mit GPU-Tiefentest; keine Glasflaeche,
+keine Modellkopie, keine Aenderung an Projektformat, Mengen oder IFC.
+
+Nachweis: 572 Tests, TypeScript und Build erfolgreich; Lint ohne Fehler, sechs
+bekannte Warnungen. Neue Tests fuer Fenster vor Rueckwand, Vordergrundverdeckung,
+versteckte Fenster/Hosts, Koerperversatz, Oeffnungsmasse, beidseitige Kontur,
+Kamerabewegung und gemischte Auswahl. Browser: Oeffnung geklickt, Fenstereigenschaften
+und Navigator synchron; Strg-Klick ergaenzt Fenster zur Wand (2 Ziele). Screenshot
+outputs/window-selection-3d.png. Bestehende Bewegung wechselt im Einzelviewport
+weiter zum Grundriss. Kein neues 3D-Bewegungswerkzeug oder Rahmen in diesem Schritt.
+Deckungsgleiche ueberlappende Fenster bleiben im Navigator einzeln waehlbar;
+kein neues Auswahldurchschalten im Canvas.
+
+Abnahme: 3D aktivieren, in die Fensteroeffnung klicken, Kontur und Eigenschaften
+pruefen. Wand waehlen und Strg/Cmd-Klick auf die Oeffnung: beide ausgewaehlt.
+
+Fensterwerkzeug bewertet: Einfuegen existiert bisher als "Add centred window" in
+den Wandeigenschaften (validiertes addWindow mit History), nicht als Platzierungs-
+werkzeug in der Werkzeugleiste. Ein begrenztes Werkzeug ist jetzt sinnvoll.
+Genau ein Folgeauftrag: Fenster im Grundriss per eigenem Werkzeug an einer sichtbaren
+Hostwand platzieren, mit Positionsvorschau, Klickbestaetigung und Escape-Abbruch.
+Bestehende Massvorgaben/Validierung, ToolInteraction, Fang-/Hostachsenregeln und
+History wiederverwenden; Eigenschaften, Text/Voice und Dateien behalten dieselben
+Modellaktionen. Kein Rahmen-/Glasdetailmodell oder neue 3D-Platzierung.
+
+
+## Gemeinsame Wand-Mehrfachauswahl in 3D - 06.10.2026
+
+PR150 normal nach Freigabe in main integriert (f496af0). Branch
+feat/solid-multi-selection reicht Strg/Cmd bei vorhandenen Wandflaechen- und
+Wandfusspunkt-Treffern an denselben onSelect-Vertrag wie im Grundriss weiter.
+Kein neuer Auswahlzustand und keine eigene Toggle-Logik im Renderer. Einfacher
+Klick ersetzt, Strg/Cmd-Klick ergaenzt/entfernt; Leerklick leert weiterhin.
+Vorhandene Tiefen-/Sichtbarkeitspruefung, Drag-Abgrenzung und Bearbeitung bleiben.
+Navigator, Status, Grundriss sowie Text/Voice sehen dieselbe Auswahl. Mehrere
+gewaehlte Waende behalten ihre bestehenden 3D-Umrandungen. Der Hinweis in den
+Werkzeugeigenschaften verweist fuer Gruppenbewegung auf Grundriss/Modellbefehl.
+
+Nachweis: 569 Tests bestanden, darunter neuer Integrationstest fuer Wandtreffer,
+gemischte zentrale Auswahl, Toggle/Ersetzen, ausgeblendete Ziele und dahinter
+liegende sichtbare Waende. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser mit corner-t-demo: E per Klick,
+N per Strg-Klick hinzu, per Cmd-Klick entfernt, erneut hinzu und in 2D dieselben
+zwei Waende ausgewaehlt. Screenshot outputs/solid-multi-selection.png.
+
+Abnahme: In 3D zwei sichtbare Wandflaechen nacheinander anklicken, bei der zweiten
+Strg (macOS Cmd) halten. Beide sind markiert, Anzahl 2. Erneuter Modifier-Klick
+entfernt die Wand. Wechsel auf 2D erhaelt die Auswahl; dort Gruppenbewegung nutzen.
+Grenzen: Vorhandenes 3D-Picking trifft Waende. Fenster/2D-Elemente erhalten hier
+keine neue Treffergeometrie; keine 3D-Rahmenauswahl oder neue 3D-Gruppenbewegung.
+
+Genau ein Folgeauftrag: Fenster-Picking und eindeutige Fensterauswahlmarkierung
+in 3D als weiteren Adapter an die gemeinsame Auswahl anbinden; Oeffnungen,
+Verdeckung und versteckte Hostwaende pruefen. Keine zweite Auswahlengine.
+
+## Gruppen-Spracheingabe angebunden - 06.10.2026
+
+PR149 nach Freigabe normal in main integriert (854b804). Branch
+feat/selection-voice-command ergaenzt die Aufnahme fuer jede sichtbare Auswahl,
+auch gemischte Gruppen sowie einzelne Linien und Schraffuren. Aufnahme nur auf
+Mikrofonklick. Beispiel: Auswahl um zwei Meter bei neunzig Grad verschieben.
+
+application/commands/selection-voice.ts bindet eine Aufnahme an eine Kontextrevision
+mit Projekt, vollstaendigen typisierten Ziel-IDs und Sichtbarkeit. React beendet
+sie bei Kontextwechsel oder Unmount. Zusaetzlich prueft der Adapter den aktuellen
+Kontext vor der Ergebnisverarbeitung: auch vor Effect-Cleanup eintreffende spaete
+Ergebnisse werden verworfen. Zurueckwechseln zur gleichen Auswahl erzeugt eine
+neue Revision. Kein Rueckfall auf das erste Element und kein automatischer Commit.
+
+Finale Transkripte werden begrenzt normalisiert und vom bestehenden Textadapter
+geprueft; ungueltige Transkripte bleiben im Eingabefeld korrigierbar. Bekannte
+Winkelwoerter 45/90/180/270/360 ergaenzen die bestehende Zahlen-/Einheitenliste;
+keine allgemeine Freitextinterpretation. Einzelbefehle bleiben verfuegbar.
+Vorschau, Zielanzeige, Uebernahme und Undo bleiben dieselben wie beim Text.
+Browser ohne SpeechRecognition behalten Textbedienung. Bestehende 20-Sekunden-
+Grenze und Meldungen fuer Mikrofon-/Netzwerkfehler werden wiederverwendet.
+
+Nachweis: 568 Tests bestanden, 6 neue fuer Gruppen-/Textgleichheit ohne Mutation,
+Kontextwechsel vor Cleanup, spaete Callbacks, Abbruch, Fehler, korrigierbares
+Transkript und Winkelwoerter. Bestehende Voice-Tests pruefen Einzelbefehle,
+Berechtigungsfehler und Timeout. TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Browser: 2 Elemente per Rahmen, Mikrofon fuer
+die gesamte Auswahl aktiv, Textfallback sichtbar. Screenshot outputs/selection-voice.png.
+Keine echte Mikrofonaufnahme oder Erkennungsqualitaet mit Nutzerhardware behauptet;
+Transkripte und Fehler wurden mit simulierter Recognition geprueft.
+
+Abnahme: Wand und Fenster gemeinsam markieren, Mikrofon starten und den Beispiel-
+satz sprechen. Transkript und Ziele pruefen, dann Uebernehmen; Strg+Z nimmt die
+Bewegung zurueck. Zweite Aufnahme starten und Auswahl wechseln: kein spaetes
+Ergebnis darf eine alte Vorschau erzeugen. Bei Browserproblemen Text verwenden.
+
+Genau ein Folgeauftrag: Die gemeinsame Mehrfachauswahl in der 3D-Ansicht fuer
+bereits vorhandene Wandtreffer per Strg/Cmd-Klick anbinden. Zentralen Auswahlzustand
+und Sichtbarkeitsregeln wiederverwenden; keine eigene 3D-Auswahlmenge, kein neues
+Gruppen-Bewegungswerkzeug und keine 3D-Rahmenauswahl in diesem Teilschritt.
+
+## Gruppenbewegung per Textbefehl - 06.10.2026
+
+PR148 nach Freigabe normal in main integriert (200735a). Folgebranch
+feat/selection-text-command bindet die bestehende freie Gruppenbewegung an lokale
+Textbefehle an. Beispiel: Auswahl um 2 m bei 90 Grad verschieben. Meter, cm und mm,
+Dezimalkomma/-punkt sowie Grad/Gradzeichen werden erkannt. Winkel 0 bis 360 Grad;
+0 Grad = +X, 90 Grad = +Y. Positive Laenge erforderlich. Keine geratenen Ziele,
+keine verketteten Teilbefehle und keine freie Sprachinterpretation.
+
+application/commands/selection-command.ts verwendet beginSelectionMove und
+previewSelectionMove sowie die gemeinsame Polarberechnung. Fuer diese reine
+Translation ist (0,0) nur der Ursprung des Verschiebungsvektors, kein geratenes
+Bauteilziel und kein neuer interaktiver Fangpunkt. Bestehende Einzelbefehle werden
+weitergereicht, aber nie auf das erste Mitglied einer Mehrfachauswahl reduziert.
+
+Die textuelle Befehlsvorschau zeigt Anzahl, Richtung/Laenge, mitgefuehrte Fenster,
+geloeste externe Wandanschluesse und eine aufklappbare Liste typisierter Ziel-IDs.
+Das Modell bleibt bis Uebernehmen unveraendert; noch keine geometrische Canvas-
+Befehlsvorschau. Uebernahme prueft den gepinnten Modell-/Auswahl-/Sichtbarkeitskontext
+und berechnet ueber dieselbe validierte Aktion neu. Kontextwechsel verwirft die
+angezeigte Vorschau. Ein Undo-Schritt, gemeinsame Auswahl bleibt nach Uebernahme.
+Das On-Demand-Menue schliesst beim Fokus auf die Befehlseingabe.
+
+Nachweis: 562 Tests bestanden, davon 6 neue fuer gemischte Ziele, Einheiten,
+Maus-/Textgleichheit, Auswirkungen auf Beziehungen/Fenster, stale/verborgene Ziele,
+ungueltige Grammatik/Winkel, Einzelbefehle und Undo/Redo. TypeScript und
+Produktionsbuild erfolgreich, Lint 0 Fehler/6 bekannte Fast-Refresh-Warnungen.
+Browser: 5 Ziele per Rahmen, Textvorschau ohne Geometrieaenderung, Ziel-IDs sichtbar,
+Uebernahme um 2 m in +Y, ein Undo/Redo; anschliessender Strg-Auswahlwechsel entfernt
+die Vorschau. Screenshot outputs/selection-text-command.png.
+
+Abnahme: Mehrere Elemente markieren, unten den Beispielbefehl eingeben, Befehl
+pruefen. Ziele aufklappen, Uebernehmen, Strg+Z. Neue Vorschau erstellen und Auswahl
+wechseln: die alte Vorschau darf nicht mehr uebernommen werden. Fenster ohne ihre
+Hostwand werden fuer die freie Gruppenbewegung weiterhin als ganze Aktion abgewiesen.
+
+Genau ein Folgeauftrag: Gruppen-Sprachtranskripte an denselben Textadapter anbinden.
+Aufnahme an die vollstaendige Auswahl und Modell-/Sichtbarkeitsrevision binden,
+bei Wechsel abbrechen, spaete Ergebnisse verwerfen und niemals automatisch
+uebernehmen. Vorhandene Einzel-Sprachbefehle erhalten; keine zweite Modelllogik.
+
+## Gemeinsame freie Gruppenbewegung implementiert - 06.10.2026
+
+PR147 nach Freigabe normal in main zusammengefuehrt (14c887d). Der Folgebranch
+feat/shared-selection-move ergaenzt einen Verbraucher der gemeinsamen Auswahl:
+application/selection/move.ts berechnet einen vollstaendigen, validierten Snapshot.
+Keine Schleife ueber Einzelwandbewegungen, keine zweite Raster- oder Eingabeengine.
+
+On-Demand: Auswahl frei bewegen -> Ursprung im Grundriss anklicken -> Ziel anklicken
+oder Tab fuer Laenge/Winkel und Uebernehmen. Der Ursprung wird sofort als gemeinsame
+Hilfsreferenz gepinnt; Shift-/Fang-/Hover-Regeln bleiben im vorhandenen System.
+Waende, Linien/Polylinien und Schraffuren koennen gemeinsam verschoben werden.
+Fenster folgen ihrer Hostwand genau einmal, auch wenn sie mitausgewaehlt wurden.
+Interne Ecke-/T-Beziehungen bleiben, Beziehungen zu stehenbleibenden Waenden werden
+entfernt. Es entstehen keine neuen automatischen Anschluesse beim Gruppenplatzieren.
+Fenster ohne mitgewaehlte Hostwand lehnen die ganze freie Bewegung verstaendlich ab;
+ihre bestehende Einzelbewegung entlang der Wand bleibt. Keine stille Teilmenge.
+
+Gepinnte Auswahl/Basis/Sichtbarkeit werden erneut geprueft. Modell-, Auswahl- oder
+Sichtbarkeitswechsel invalidieren den Vorgang; Escape, Abbrechen, Werkzeug-/Ansichts-
+oder Layoutwechsel verwerfen die Vorschau. Ein Commit, ein Modell-Undo; Nullbewegung
+legt keinen History-Eintrag an. Kein Dateiformatwechsel, keine BIM-Skalierung.
+Bedienung in 2D; noch keine 3D-Gruppenbewegung und keine Text-/Voice-Gruppenbefehle.
+Keine neue grosse Performance-Messreihe fuer diese Aktion behauptet.
+
+Nachweis: 556 Tests bestanden (5 neue Tests fuer gemischte Translation, interne/
+externe Beziehungen, Host-Fenster, stale/ungueltige/versteckte Ziele, Fangquellen,
+Maus-/Zahlenaktionsgleichheit, Nullbewegung, Undo/Redo, JSON/3D/IFC-Konsistenz).
+TypeScript und Produktionsbuild mit deklarierten Abhaengigkeiten erfolgreich;
+Lint 0 Fehler, 6 bekannte Fast-Refresh-Warnungen. Browser: Wand/Fenster per Klick
+platziert; 5 gemischte Elemente per Rahmen, Ursprung gepinnt, Tab zuerst Laenge,
+danach Winkel, 2 m bei 90 Grad mit Vorschau uebernommen, einmal Undo/Redo; Abbrechen
+nach Zahlenvorschau laesst Modell und Redo erhalten. Pruefbild outputs/shared-selection-move.png.
+
+Abnahme: Mit Strg-Klick oder Rahmen mehrere Elemente waehlen. Auswahl frei bewegen,
+Ursprung anklicken, mit der Maus verschieben und per Klick platzieren. Alternativ
+Tab, Laenge 2, Tab, Winkel 90, Uebernehmen. Strg+Z nimmt die ganze Bewegung zurueck.
+Bei verbundenen Waenden beide Partner waehlen: interne Verbindung bleibt bestehen.
+
+Genau ein Folgeauftrag: Dieselbe gepruefte Gruppenbewegung als Textbefehlsadapter
+anbinden, mit Vorschau und ausdruecklicher Uebernahme, gepinnter vollstaendiger
+Zielmenge und Ablehnung bei Kontextwechsel. Keine separate AI-Modelllogik; bestehende
+Einzelbefehle erhalten. Sprachtranskripte duerfen spaeter denselben Adapter verwenden.
+
+## Gemeinsame 2D-Auswahl implementiert — 06.10.2026
+
+PR146 freigegeben und normal in main gemergt (c771846). Auf feat/shared-selection
+verwaltet ein gemeinsamer Application-Baustein typisierte Zielmengen fuer Waende,
+Fenster, Linien/Polylinien und Schraffuren, auch gemischt. Navigator und Canvas
+verwenden dieselbe Auswahl. Sichtbarkeit inklusive versteckter Hostwaende gilt
+zentral; keine neue Ebenensperre. Nur genau ein Ziel schaltet Einzelaktionen frei.
+
+Klick ersetzt, Strg/Cmd-Klick schaltet Zugehoerigkeit um, Leerklick leert. Rahmen
+auf freier Flaeche im Auswahlmodus starten: vollstaendig eingeschlossene Geometrie
+inklusive Rand, beide Ziehrichtungen gleich. Mindestbewegung 3 CSS-Pixel. Zeichnen,
+Bearbeiten, Referenzwahl und Pan behalten ihre Gesten. Escape/Pointer-Abbruch oder
+Modell-/Sichtbarkeitswechsel verwerfen den Rahmen. Kein Modell-/Dateiformatwechsel
+und kein Auswahl-Undo. Wandachsen bleiben hervorgehoben; 3D zeigt gewaehlte Waende,
+aber noch keine neue 3D-Mehrfachklick-/Rahmenbedienung. Gruppenbewegung bleibt aus.
+
+Pruefung: 551 Tests bestanden; TypeScript und Produktionsbuild erfolgreich;
+Lint 0 Fehler/6 bekannte Warnungen. Neue Regressionen pruefen alle Typen, gemischte
+Toggle-/Ersetzen-Auswahl, Einzelaktionssperre, Ebenen/Hostsichtbarkeit, ungueltige
+IDs, Rahmenrichtung/Rand/Teiltreffer, Achsversatz und Eckkontur. Browser: 5 Elemente
+per Rahmen, Schraffur per Strg-Klick entfernt, Fenster per Einzelklick gewaehlt,
+Fensterebene ausgeblendet und Rahmen in Gegenrichtung waehlt nur 4. Nach Sichtbar-
+machen und Zoom wieder 5; Navigator und Anzahl stimmen. Keine neue Modellbewegung
+als getestet behauptet. Pruefmodell outputs/selection-demo.json, Bild shared-selection.png.
+
+Abnahme: Select waehlen, auf freie Canvas-Flaeche klicken und Rahmen um verschiedene
+Elemente ziehen. Strg-Klick auf Schraffur entfernt/ergaenzt sie. Einzelklick zeigt
+dessen Eigenschaften. Ebene ausblenden: ihre Elemente werden nicht mitgewaehlt.
+
+Genau ein Folgeauftrag: Die gemeinsame freie Verschiebung als Verbraucher der
+Auswahlmenge an vorhandene ToolInteraction/Raster-/Hilfseingabe anbinden. Gesamten
+Snapshot atomar validieren, interne Wandanschluesse erhalten, externe loesen und
+Host/Fenster-Abhaengigkeiten ohne doppelte Bewegung pruefen. Nicht unterstuetzte
+Mischungen ausdruecklich ablehnen, keine stille Teilmenge bewegen. Ein Undo-Schritt.
+
+
+## Nutzerkorrektur: allgemeine Auswahl vor Gruppenbewegung — 06.10.2026
+
+Die zuvor geplante Wand-Mehrfachauswahl wird ersetzt: ein gemeinsamer,
+werkzeugunabhaengiger Auswahlbaustein fuer ALLE Elementtypen, bereits im ersten
+2D-Schritt fuer Waende, Fenster, Linien/Polylinien und Schraffuren zusammen.
+Verbindlich: Klick, Strg-Klick und aufgezogener Auswahlrahmen; nur sichtbare und
+aktive Ebenen. Auswahlbarkeit ist unabhaengig von Bewegungsfaehigkeiten.
+
+[Ueberarbeiteter Plan](docs/walls/SELECTION_MOVE_PLAN.md) trennt zentrale Auswahl-
+und Ebenenregeln von typbezogener Treffergeometrie. Nutzerklaerung: "aktive Ebenen"
+bedeutet alle eingeblendeten Ebenen; kein zusaetzlicher Sperrstatus.
+Rahmen-Randfaelle, Toggle und konkurrierende Zeichen-/Auswahlgesten bleiben als
+Vorschlaege bzw. offene Details ausgewiesen. Keine Nutzerentscheidung erfunden.
+
+Genau ein Folgeauftrag: Allgemeinen 2D-Auswahl-
+baustein samt Klick/Strg-Klick/Rahmen fuer alle vorhandenen Elementtypen umsetzen
+und pruefen. Gruppenverschiebung folgt als Verbraucher dieser Auswahl, nicht als
+wandbezogene Parallelstruktur. Noch keine Laufzeitaenderung; nur Planungsdokumente.
+Dieser Abschnitt und der ueberarbeitete Plan ersetzen die aelteren Folgeauftraege.
+
+
+## Mehrfachauswahl und Gruppenbewegung: Bestandspruefung — 06.10.2026
+
+PR145 nach Freigabe normal in main gemergt (c8a205c). Aktuell gibt es nur
+Einzelauswahl und Einzelbewegung. Window selection / Filter zeigen Hinweise,
+keine Auswahlmenge. Ein Modellversuch zeigt: sequenzielles Verschieben von H/E/N
+erhaelt die Ecke, verliert aber den internen T-Anschluss. Gruppenbewegung braucht
+also eine gemeinsame Snapshot-Aktion statt wiederholter Einzelbewegungen.
+
+[Plan und Akzeptanzfaelle](docs/walls/SELECTION_MOVE_PLAN.md) dokumentieren die
+betroffenen Module, Wiederverwendung von ToolInteraction/Raster/Hilfseingabe,
+Fensterzuordnung, interne/externe Verbindungen und vorgeschlagene additive Auswahl.
+Bediengesten und Details sind als Vorschlag gekennzeichnet. Keine Laufzeit- oder
+UI-Aenderung, keine neue Gruppenfunktion als fertig behauptet.
+
+58 bestehende Direct-Edit-/ToolInteraction-/Ecke-T-Tests bestanden; diff --check
+sauber. Kein erneuter Build fuer Dokumentation; PR145-Code zuletzt mit 546 Tests,
+TypeScript und Produktionsbuild erfolgreich geprueft.
+
+Genau ein Folgeauftrag: 2D-Wand-Mehrfachauswahl und atomare freie Gruppenbewegung
+gemaess Plan als durchgaengigen Ablauf implementieren: interne Anschluesse erhalten,
+externe loesen, gemeinsame Vorschau/Fang-/Zahleneingabe und ein Undo-Schritt.
+Keine eigene gemeinsame Eckpunktbewegung. Dieser Abschnitt ersetzt die bisherigen
+Folgeauftraege; aeltere Abschnitte bleiben als Verlauf erhalten.
+
+
+## Ecke und entfernter T-Anschluss umgesetzt — 06.10.2026
+
+PR144 wurde freigegeben und in main zusammengefuehrt (7ef1b05). Umsetzung auf
+feat/corner-t-host: Hauptwand mit genau einer rechtwinkligen Ecke und entferntem
+rechtwinkligem T-Zulauf. Die Eckkontur bleibt erhalten; voller T-Kontakt muss
+innerhalb des geraden Seitenstuecks liegen. Beruehrung/Ueberlappung des Eckpartners
+wird abgewiesen. Vorhandene Aktionen, Vorschau, 3D und IFC nutzen dieselbe Domain-
+Ableitung. Fenster duerfen T-Kontakte ueberqueren, nicht den Eckabschluss.
+
+Schema 8 bleibt unveraendert; alte Programme koennen neue Kombinationsdateien
+abweisen. Keine stille Reparatur beim Laden. Zweite Host-Ecke, schrager Eckwinkel
+mit T und eine Ecke an der T-Nebenwand bleiben ausgeschlossen. Reine Eckketten
+und reine Mehrfach-Ts behalten ihr Verhalten.
+
+Pruefung: 546 Tests, TypeScript und Produktionsbuild erfolgreich; Lint 0 Fehler,
+6 bekannte Warnungen. 19 neue Tests: Anschlussreihenfolge, beide Seiten, Drehung,
+Achsversatz, anderes Host-Ende, Kontaktgrenzen, unzulaessige Topologien, Fenster,
+Vorschau/Commit, History, JSON/IFC und Sichtbarkeitskonturen. Browser: Pruefdatei
+mit drei Waenden und Fenster geladen, Grundriss und 3D visuell geprueft.
+IFC generiert und Regressionen bestanden; externer Archicad-Import dieses neuen
+Pruefmodells steht dem Nutzer zur Abnahme offen.
+
+Abnahme: L-foermige Wandkette zeichnen und abschliessen. Entfernt von der Ecke
+eine Nebenwand rechtwinklig auf die Hauptachse fangen und abschliessen. Ecke und
+T in 2D/3D ansehen, Fenster ueber T bewegen, Undo/Redo, speichern und laden.
+Lokale Pruefdateien: outputs/corner-t-demo.json und outputs/corner-t-demo.ifc.
+
+Planungskorrektur: Die im Vorplan angenommene gemeinsame Eckpunktaktion existiert
+noch nicht. Heutiges Bewegen eines einzelnen Achsendpunkts loest die Ecke, wenn
+die Endpunkte auseinandergehen; ein Regressionstest dokumentiert diesen Bestand.
+Nutzerentscheidung 06.10.2026: Eine eigene gemeinsame Eckpunktbewegung wird
+nicht benoetigt und ist als Folgeauftrag gestrichen. Stattdessen waehlt der
+Nutzer beide betroffenen Waende aus und verschiebt diese gemeinsam als ganze
+Elemente. Daraus folgt kein automatisches Mitziehen einer nicht ausgewaehlten Wand.
+
+Genau ein Folgeauftrag: Den vorhandenen Stand der Mehrfachauswahl und gemeinsamen
+Elementverschiebung pruefen und einen begrenzten Umsetzungsschritt fuer zwei
+zusammen ausgewaehlte Waende festlegen. Gemeinsamen Bewegungsursprung, Rasterengine,
+Hilfseingabe, Vorschau und einen Undo-Schritt wiederverwenden; Verhalten interner
+Verbindungen und Anschluesse zu nicht ausgewaehlten Waenden ausdruecklich pruefen.
+Noch keine Gruppenbewegung als implementiert oder abgenommen ausweisen.
+Diese Korrektur aendert nur die Planung, nicht die Laufzeitlogik von PR145.
+
+
+
+## Ecke und T: begrenzter Umsetzungsplan — 06.10.2026
+
+PR143 ist freigegeben und in main. Der Plan in
+[docs/walls/CORNER_T_COMBINATION_PLAN.md](docs/walls/CORNER_T_COMBINATION_PLAN.md)
+ordnet den aktuellen Code, einen Drei-Wand-Pruefaufbau und Akzeptanzfaelle zu.
+Ein lesender Modellversuch bestaetigt die atomare Ablehnung der Kombination.
+Wichtigster Befund: Das T-Hostrechteck wuerde eine vorhandene Eckkontur ersetzen;
+die Sperre darf nicht einfach entfernt werden. Keine Laufzeit-/UI-Aenderung.
+
+Genau ein Folgeauftrag: Entfernten rechtwinkligen T-Zulauf an einer Hauptwand
+mit genau einem rechtwinkligen Eckanschluss gemaess diesem Plan implementieren
+und validieren. Erst danach weitere Topologien. Aeltere Folgeauftraege bleiben
+als Verlauf erhalten; dieser Abschnitt definiert den aktuellen naechsten Schritt.
+
+Pruefung: 47 vorhandene Anschluss-/Wandketten-Tests bestanden; diff --check
+sauber. Kein neuer Build erforderlich, da ausschliesslich Markdown geaendert.
+
+
+
+## Wandkoerper-Vorschau beim Zeichnen — 06.10.2026
+
+PR142 wurde freigegeben und in main zusammengefuehrt. Der neue Schritt zeigt
+im Grundriss bereits vor der Bestaetigung den validierten Wandkoerper samt
+T-Abschluss. Vorschau und Platzierung verwenden dieselbe Application-Aktion.
+Numerische Ziele uebernehmen keine zufaellige Hover-Verbindung. Entwurfswaende
+sind entsprechend ihrer Ebene sichtbar; Fangquellen und History bleiben am
+gespeicherten Modell. Unzulaessige Ziele zeigen den konkreten Fehler, behalten
+bereits gesetzte Entwurfsabschnitte und erzeugen keinen ungueltigen Koerper.
+
+527 Tests bestanden. Browser: T-Start, numerisch 270 Grad/1 m mit Koerpervorschau,
+250 Grad mit Rechtwinkelfehler, Korrektur und Abbruch ohne Modell-/Undo-Aenderung.
+Abnahme: Wand auf Hauptachse beginnen, Richtung und Laenge waehlen; Koerper
+vor Bestaetigung ansehen. Schraeges Ziel zeigt Fehler. Esc verwirft den Entwurf.
+Grenzen: 2D-Vorschau; bisherige T-/Eckregeln bleiben erhalten.
+
+Genau ein Folgeauftrag: Kombination aus Eck- und T-Anschluss an derselben
+Hauptwand anhand eines kleinen Testgrundrisses fachlich und geometrisch
+abgrenzen und einen begrenzten Umsetzungsplan mit Akzeptanzfaellen festhalten.
+Noch keine pauschale Freigabe beliebiger Anschlussnetze.
+
+
+## Wandstart mit T-Anschluss — 06.10.2026
+
+PR139 ist nach Freigabe in main. Neuer Aufgabenbranch aus main: Start einer
+Nebenwand auf einer bestehenden Hauptachse mit explizitem lokalem T-Fang.
+Der erste Klick merkt den Anschluss vor; der Abschnitt wird mit der gemeinsamen
+Application-Aktion validiert. Erst Enter/Doppelklick uebernimmt die Transaktion.
+Abbruch, veralteter Kontext, Snap aus und mehrdeutige Quellen erzeugen keinen
+ungewollten Anschluss. Keine automatische Verbindung nur aus Koordinaten.
+Rechtwinkel, gleiche Querschnitte und bisherige Topologiegrenzen bleiben.
+
+524 Tests bestanden; TypeScript/Build mit main-Abhaengigkeiten erfolgreich,
+Lint 0 Fehler und 6 bekannte Warnungen. Browser: Start auf Achse, rechtwinkliger Abschnitt, Enter,
+Undo/Redo erfolgreich. Regressionen pruefen beide Seiten, JSON/IFC, Abbruch,
+Schraegstellung, Quellenauswahl und striktes Achseninneres.
+Abnahme: Wall waehlen, auf Hauptachse bei T-Anschluss klicken, rechtwinklig
+herauszeichnen (bei Bedarf Shift), Endpunkt setzen, Enter. Undo entfernt
+Nebenwand und Verbindung gemeinsam. Ein T-Abschnitt beendet die Kette.
+
+Genau ein Folgeauftrag: Die Vorschau beim Wandzeichnen um den abgeleiteten
+Wandkoerper samt T-Abschluss ergaenzen; dieselbe Application-Validierung wie
+beim Klick nutzen und Fehler vor der Uebernahme anzeigen. Keine Erweiterung
+der erlaubten Anschlussgeometrien in diesem Vorschau-Schritt.
+
+
+## Branch-Uebergang abgeschlossen — 06.10.2026
+
+PR140 ist in main, PR141 hat Anpassungen_UI aktualisiert. PR139 wird mit
+einem normalen Merge auf main als Zielbasis umgestellt; beide historischen
+Planungsabschnitte bleiben erhalten. Die folgenden Infrastrukturauftraege
+zur erstmaligen Synchronisation sind damit erledigt. Fachlicher Folgeauftrag
+bleibt der T-Anschluss beim Start eines neuen Wandabschnitts.
+
+## T-Fang beim Zeichnen — 06.10.2026
+
+PR138 wurde nach Freigabe zusammengefuehrt. Neue Wandabschnitte koennen mit
+dem gemeinsamen T-Achsfang an einer vorhandenen Hauptwand enden. Klick setzt
+den Abschnitt, Enter/Doppelklick schliesst die Transaktion ab. Die ganze Kette
+bleibt ein Undo-Schritt. Keine Verbindung allein aus numerischen Koordinaten.
+Snap aus, Mehrdeutigkeit und feste Richtung bleiben massgebend. Am T muss die
+Kette abgeschlossen werden; Ecke/T bleibt ausgeschlossen. Vor dem Klick zeigt
+die Vorschau weiterhin die Zeichenachse mit Fangziel, keinen neuen Wandkoerper.
+
+Pruefung: 521 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler
+und 6 bekannte Warnungen. Browser: neue Nebenwand auf Hauptachse gezeichnet,
+T-Fang angezeigt, mit Enter abgeschlossen, Undo/Redo erfolgreich. JSON/IFC und
+Abbruch/Stale-Kontext sind in den Regressionstests enthalten.
+
+Abnahme: Wall waehlen, Start neben vorhandener Wand setzen, rechtwinklig zur
+Hauptachse ziehen, bei T-Anschluss klicken und Enter. Undo entfernt die neue
+Wand mit Anschluss; Redo stellt beides wieder her.
+
+**Genau ein Folgeauftrag:** T-Anschluss auch beim Start eines neuen Wandabschnitts
+auf einer vorhandenen Hauptachse anbinden; dieselbe Application-Aktion,
+Fangprioritaet und atomare Wandketten-History verwenden.
+
+## Gemeinsame Branch-Basis vorbereiten — 06.10.2026
+
+Ziel: main wird der gemeinsame gepruefte Gesamtstand. Lovable arbeitet auf
+Anpassungen_UI; Codex nutzt kleine Aufgabenbranches aus main. Beide Richtungen
+werden per geprueftem PR nach main uebernommen. Danach main regelmaessig in
+Anpassungen_UI mergen, ohne Rebase/Force-Push. Keine zweite dauerhafte finale
+Codex-Version. Parallel moeglichst keine Aenderungen derselben UI-Komponente.
+
+Der Uebergangsbranch integration/current-cad-main verbindet main d2ffebb mit
+dem freigegebenen Integrationsstand 04ba5b5 (bis PR138) konfliktfrei. Main-eigene
+Lovable-Konfigurationsaenderungen bleiben erhalten. PR139 und PR124 bleiben
+separate offene Aufgaben; ihre Freigabe wird hier nicht vorausgesetzt.
+Ergaenzende Pruefung erfolgt in isolierter Kopie mit bun install --frozen-lockfile
+und der deklarierten Lovable-Konfiguration 2.25.2. Keine Aenderung der laufenden
+lokalen node_modules. UI-Zweig-Regeln: Piktogramme, Farben und Abstaende an
+bestehenden Komponenten anpassen; Handler, Modellaktionen, stabile IDs,
+Fanglogik und Eingabe-Lifecycle erhalten. Keine automatische Neugenerierung
+von Werkzeugleisten oder Dependency-Updates fuer reine Gestaltungsaufgaben.
+Anpassungen_UI bleibt unveraendert; dort laufende Arbeit wird nicht ueberschrieben.
+
+Genau ein naechster Infrastrukturauftrag: Nach Pruefung und Freigabe dieses
+Integrations-PR main aktualisieren und den dann aktuellen main-Stand in
+Anpassungen_UI ueber einen separaten geprueften Merge uebernehmen. Dabei dessen
+eigene Dependency-Updates und Praesentationsregeln erhalten und testen. Danach
+PR139 auf die gemeinsame Basis umstellen und die fachliche Reihenfolge fortsetzen.
+
+
+## Nutzerbeschriftung: Wandachslagen — 06.10.2026
+
+Achslagen heißen Außen (bisher rechte Kante), Mitte und Innen (bisher linke
+Kante). Neue gezeichnete Wände und Wandketten verwenden bereits den Versatz
++Stärke/2 und damit standardmäßig Außen. Bestehende Wände und Projektdateien
+behalten ihre gespeicherte Achslage. Keine automatische Ermittlung einer
+Gebäudeaußenseite; die Benennung bezeichnet die bisherigen gerichteten Varianten.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
+## Nutzerkorrektur: Fenster über T-Anschlüsse und Canvas-Darstellung — 06.10.2026
+
+Fenster bleiben laut Klarstellung auf ihrer ursprünglichen Wand und werden von
+T-Anschlüssen nicht mehr blockiert. Dies ersetzt die frühere T-Überlappungssperre.
+Die ursprünglichen Wandgrenzen und Fenstermaße bleiben maßgebend; Ecken sind
+nicht Teil dieser Änderung. Die Öffnung schneidet nur die eigene Wand, keine
+Nebenwand. Bei überquertem beschnittenem Nebenwandabschluss begrenzt der gemeinsame
+Extrusionskern den Ausschnitt auf das reale Wandprofil. 3D und IFC verwenden die
+eigene Wandzuordnung; Anschlussrelationen bleiben unverändert.
+
+View → Canvas-Darstellung → Wand bietet 0,5–2 CSS-Pixel Konturstärke (Standard 1).
+Settings öffnet denselben Dialog, auch bei ausgeblendetem Desktop-Menü. Alle
+Grundrissfenster übernehmen den Wert, der beim Zoomen konstant bleibt und lokal
+im Browser gespeichert wird. Kein Modell-Undo, kein Projektformatwechsel. Achse
+bleibt türkis/2,5 Pixel, Auswahlkontur neutral. Baukörpermaße bleiben unverändert.
+
+517 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Tests für Bewegung über zwei Ts, Host-ID, Undo, Volumen, JSON/IFC und
+beschnittenes Nebenwandprofil. Browser: Fenster aus Zwischenraum auf erstes T,
+danach auf zweites T gesetzt, Undo/Redo; Konturwahl 1,5 Pixel bei Zoomwechsel und
+Neuladen geprüft, anschließend Standard 1 Pixel wieder eingestellt.
+Praktische Abnahme: Fenster → Fenster entlang Wand → über beide Ts bewegen;
+View → Canvas-Darstellung → Konturstärke ändern und zoomen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss neuer Wandabschnitte
+an die gemeinsame Application-Aktion anbinden und Undo der ganzen Wandkette
+beibehalten. Offener PR138 enthält die Korrekturen; noch keine Zusammenführung.
+
+## Auswahlkorrektur: Steuerungsachse hervorheben — 06.10.2026
+
+Die ausgewählte Wandkontur ist jetzt dezent blaugrau mit 1,25 CSS-Pixeln,
+unabhängig vom Zoom. Die maßgebende Achse bleibt türkis und 2,5 Pixel stark;
+ihre Griffpunkte bleiben ebenfalls türkis. Gemeinsame Grundflächen und
+entfernte Kontaktlinien bleiben erhalten. Ergänzung zum offenen PR138.
+Nächster Auftrag bleibt T-Fang beim Zeichnen neuer Wandabschnitte.
+
+## Nutzerkorrektur: gemeinsame Grundfläche und mehrere T-Anschlüsse — 06.10.2026
+
+Ergänzung zum offenen PR138 (noch nicht zusammengeführt): bestätigte Eck- und
+T-Verbindungen erscheinen im Grundriss ohne innere Kontaktlinie mit einheitlicher
+Flächenfarbe. Auswahl bleibt über türkisfarbene Achse und Außenkontur sichtbar.
+Nur gespeicherte Verbindungen entfernen Linien; bloßes Überlagern erzeugt keine
+visuelle Anschlussbestätigung. Ausgeblendete Partner lassen den Abschluss der
+verbleibenden Wand wieder sichtbar werden. Bauteile bleiben einzeln auswählbar.
+
+Die gemeldete Meldung war die bisherige Beschränkung auf ein T-Paar pro Wand.
+Nun sind mehrere rechtwinklige Nebenwände an einer Hauptwand auf beiden Seiten
+zulässig, auch gegenüberliegend am selben Achspunkt. Zusätzlich echten Fehler
+korrigiert: automatische Eckenerkennung darf einen belegten T-Endpunkt nicht
+als Eckpartner behandeln. Gleichseitige Kontaktüberlappungen werden abgewiesen.
+Fensterprüfung, gemeinsame Konturen für 2D/3D/IFC und Einzelbewegung mit gezieltem
+Lösen bleiben erhalten. Nebenwände dürfen noch nicht zugleich Hauptwände oder
+beidseitig angeschlossen sein; Ecke/T-Kombinationen und verschiedene Querschnitte
+bleiben ausgeschlossen und erhalten spezifische Fehlermeldungen.
+
+515 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Neue Prüfungen: mehrere Ts bei linker/mittiger/rechter Achse,
+Gegenseite, falsche Eckenerkennung, Überschneidung, Kürzen, gezieltes Lösen,
+Undo, JSON/IFC, entfernte rotierte Konturen und ausgeblendete Partner.
+Browser: zwei Ts geladen, dritten gegenüberliegenden Anschluss per Punkt frei
+bewegen hergestellt, Trennlinie entfällt; Undo/Redo geprüft; keine Konsolenfehler.
+Screenshot lokal: outputs/multi-t-footprint.png. 3D bleibt aus denselben
+Bauteilkörpern abgeleitet; diese Darstellungsänderung betrifft den Grundriss.
+
+Abnahme: Hauptwand mit rechter Kante, mehrere Nebenwände von beiden Seiten
+ankoppeln. Nach Klick entfernt sich die Kontaktlinie; bei Undo erscheint sie
+wieder. Auswahl einzelner Wände und Fenster sowie Ausblenden prüfen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss über die gemeinsame Application-Aktion
+anbinden; Mehrfach-T-Regeln wiederverwenden und Undo der gesamten Wandkette
+beibehalten. Keine zusätzliche Anschlussgeometrie im Werkzeug.
+
+## Aktueller Stand: T-Fang in der 3D-Endpunktbearbeitung — 06.10.2026
+
+PR137 freigegeben und in den Gesamtzweig fix/reference-selection-lifecycle
+übernommen (d909b54). Der bestehende 3D-Arbeitsebenenpfad trägt nun denselben
+T-Fangkandidaten wie 2D bis zu previewEdit und dem gemeinsamen Commit.
+Die lokale Quellabfrage ergänzt sichtbare Wandachsen; die Application prüft
+zusätzlich den exakten T-Zielpunkt auf Sichtbarkeit. Keine eigene 3D-T-Geometrie.
+Das Fanglabel zeigt T-Anschluss. Numerische Ziele übernehmen keinen alten
+Mauskandidaten; Kamerawechsel, Abbruch und Fokusverlust verwerfen die Mausvorschau.
+
+511 Tests bestanden, TypeScript und Build erfolgreich, Lint 0 Fehler/6 bekannte
+FastRefresh-Warnungen. Neue projektionsgestützte Tests: drei Zoomstufen,
+Vorschau/Commit, ein Undo/Redo, verdeckte Achsen und fehlende/degenerierte
+Arbeitsebenen. Browser: sichtbaren Achsendpunkt der 2,30-m-Nebenwand wählen,
+Punkt frei bewegen, Klick am Hauptachsenziel ergibt 3,00 m; Undo 2,30 m,
+Redo 3,00 m. Keine Browserfehler. Der Browser meldet den JSON-Download als
+angefordert; die Download-Automation konnte die Datei nicht übernehmen.
+Gespeicherte Relationen und Roundtrip sind durch die gemeinsamen Tests geprüft.
+
+Abnahme: zwei isolierte rechtwinklige Wände gleicher Stärke/Höhe verwenden.
+In 3D die Kantenachse zur Kamera drehen, sichtbaren Achsendpunkt anklicken →
+Punkt frei bewegen → Hauptachse am Lotfußpunkt anfahren → T-Anschluss → Klick.
+Undo/Redo prüfen. Mittige oder rückseitige, vom Wandkörper verdeckte Achsen
+werden weiterhin nicht durch den Körper hindurch gefangen; dafür Ansicht drehen
+oder Grundriss verwenden. Beschränkungen auf isolierte rechtwinklige T-Paare,
+z=0 und die vorhandenen Öffnungsregeln bleiben bestehen.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Fang beim Abschluss eines neu
+gezeichneten Wandabschnitts im Grundriss anbinden. Gemeinsame lokale Achsabfrage
+und validierte T-Verbindungsaktion wiederverwenden; nur eindeutige isolierte
+rechtwinklige Paare. Vorschau, Abbruch, Öffnungsprüfung und das vereinbarte Undo
+der gesamten Wandkette absichern. Keine Mehrfach-Ts oder T/Eck-Kombinationen.
+
+## Aktueller Stand: automatischer T-Fang beim 2D-Endpunktbewegen — 06.10.2026
+
+PR134 und PR135 freigegeben/zusammengeführt. Der gestapelte PR135 wurde über
+Integrations-PR136 ohne zusätzliche Codeänderungen in den Gesamtzweig übernommen
+(1663005). Neuer Schritt: Punkt frei bewegen oder Punkt in Flucht strecken kann
+am eindeutig gefangenen Hauptachsenpunkt eine dauerhafte T-Verbindung erzeugen.
+Die Vorschau zeigt den beschnittenen Körper; Klick übernimmt Bewegung und
+Relation als einen Undo-Schritt. Fanglabel: T-Anschluss.
+
+Application t-axis-snap nutzt die lokale sichtbare Quellabfrage, Bildschirmradius
+und vorhandene Referenzauswahl. Der rechtwinklige Fußpunkt des gegenüberliegenden
+Nebenendes wird geprüft. Mehrere mögliche Hosts ergeben keine automatische
+Verbindung; Referenzen auswählen begrenzt die Quellen. Kein globales Durchsuchen
+aller Wandpaare und keine automatische Verbindung bei bloßer numerischer Eingabe.
+Gemeinsamer ToolInteraction-Pfad trägt den Kandidaten zu Vorschau/Commit, ohne
+Werkzeug-/Renderer-Modelllogik. Ganze Elementbewegung erzeugt keine Verbindung.
+
+509 Tests bestanden, TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Browser: unverbundene 2,30-m-Nebenwand per Achsendpunkt auf Hauptachse
+gesetzt; 3,00-m-Achse und korrektes 2,82-m-Körperprofil. Undo wieder 2,30 m,
+Redo wieder verbundenes Profil; 3D-Darstellung geprüft. Neue Tests sichern
+Vorschau/Commit, ein Undo, Pixelradius, Snap aus, Referenzfilter, Mehrdeutigkeit,
+veralteten Kontext, atomare Fehler, schräge Sperrrichtung und Kantenachsen.
+
+Praktische Abnahme: zwei isolierte, rechtwinklig zueinander stehende Wände gleicher
+Stärke/Höhe. Nebenwand auswählen → Wandachse Ende/Anfang → Punkt frei bewegen →
+in Nähe des Lotfußpunktes auf der Hauptachse zeigen → T-Anschluss → Linksklick.
+Undo/Redo sowie 3D prüfen. Optional Testdatei outputs/t-axis-start.project.json
+(lokal, nicht Teil des Repositories). Noch keine T/Eck-Kombination, mehrere Ts
+pro Wand, Zeichnen neuer Wände oder automatische T-Erzeugung in 3D.
+
+**Genau ein ausführbarer Folgeauftrag:** Den vorhandenen 3D-Arbeitsebenen-
+Endpunktpfad an denselben Kandidatentransport anschließen. Dieselbe Application-
+Fang-/Verbindungsaktion verwenden; Vorschau/Klick/Abbruch und Kamerawechsel
+prüfen. Keine zweite T-Geometrie oder eigene 3D-Modellaktion erstellen.
+
+## Nutzerkorrektur: Shift-Flucht halten und SVG-Fokus — 06.10.2026
+
+Gemeinsame Richtungssperre für Grundriss und 3D-Arbeitsebene: Shift erfasst die
+aktuelle Hilfsrichtung (sonst 45°-Raster), hält Ursprung/Richtung unabhängig von
+weiterer Mausbewegung und gibt sie beim Loslassen frei. Tastaturwiederholung
+kalibriert nicht neu; neue Sitzung/Escape/Blur beendet den Zustand. Vorhandene
+explizite Bewegungsachsen bleiben vorrangig; exakt passende Fangpunkte weiterhin
+entlang der festgehaltenen Richtung erreichbar. Keine separate Werkzeuglogik.
+
+Schwarz-weißen Kreis reproduziert: Punkt frei bewegen → Shift + Linksklick auf
+Wandachse. document.activeElement war die Achsen-SVG-Linie mit Browser-outline
+"auto 5px", im Modellraum riesig dargestellt. Achsen-Trefferlinie erhält dieselbe
+outline-none/focus-visible-Farbmarkierung wie andere Trefferpfade. Identischer
+Browserablauf danach ohne Artefakt; Fokus bleibt für Tastaturbedienung erhalten.
+
+504 Tests bestanden, TypeScript/Build bestanden, keine neuen Lint-Warnungen
+(6 bekannte FastRefresh-Warnungen). Neue Tests: Winkelhaltung über weit entfernte
+Maussektoren, Freigabe/Neukalibrierung, schiefe Flucht, exakter Zielfang, Nullweg,
+wechselnde Referenzen, Zoom sowie Vorrang expliziter Achsen.
+
+T-Prüfung: Testprojekt mit gespeicherter Relation liefert im Browser korrekt
+6-m-Hauptprofil und 2,82-m-Nebenprofil bei 3-m-Achse, ohne Überlappung. Einfaches
+Zusammenschieben erzeugt weiterhin keine Relation; das ist die bekannte offene
+Anbindung, keine bestätigte Fehlberechnung einer gespeicherten Verbindung.
+Der konkrete Nutzerprojektstand wurde nicht überschrieben oder als Datei geprüft.
+
+Abnahme: Wandendpunkt → Punkt frei bewegen → in Flucht zielen → Shift halten →
+Maus weit quer bewegen → Linksklick. Die Richtung bleibt fest; kein schwarzer
+Kreis. Shift loslassen, neue Richtung wählen und erneut halten. Auch Linie testen.
+
+**Nächster begrenzter Auftrag:** Automatische T-Verbindung am eindeutigen
+Hauptachsenfang im gemeinsamen 2D-Endpunktbewegungspfad (Details im vorherigen
+Eintrag). PR134 bleibt Grundlage; diese Korrektur ist darauf aufgesetzt.
+
+## Aktueller Stand: gespeicherte T-Verbindungen — 06.10.2026
+
+PR133 freigegeben und übernommen (f0583c8). Schema 8 speichert isolierte
+rechtwinklige T-Paare mit stabilen Wand-IDs und Nebenendpunkt. Strikte Migration
+V1–V7 ergänzt keine automatisch erkannten Beziehungen. Gemeinsame Application-
+Aktionen verbinden/lösen mit Vorschau, Quellstandprüfung und einem Undo-Schritt.
+Plan, 3D und normaler IFC-Export verwenden dieselbe Domain-Konturprüfung.
+
+Einzelwandbewegung löst ohne Mitnahme; Hauptwand-Endänderung behält den festen
+Nebenpunkt bei. Verlässt dieser das Achsinnere, wird gelöst, ohne automatische
+Umdeutung zum Eckanschluss. Verbleibende unzulässige Kontaktbreite wird atomar
+abgewiesen. T-Fenster dürfen berühren, nicht überschneiden, auch auf unsichtbaren
+Ebenen. Mehrfach-Ts und T/Eck-Kombinationen bleiben ausgeschlossen.
+
+Nachweise: 500 Tests bestanden (12 neue Integrationstests); TypeScript und Build
+erfolgreich, Lint 0 Fehler/6 bekannte Warnungen. Drei reguläre IFC-Exporte mit
+IfcOpenShell 0.8.5 unabhängig auf IFC4/EXPRESS, Profile, Zuordnungen, Platzierung
+und Nettovolumen geprüft. Browser: Schema-8-Datei geladen, 3D sichtbar, Save und
+normaler IFC-Button melden erfolgreiche Erstellung/Downloadanforderung. Der
+Browser-Automation lieferte keinen Downloadpfad; ein tatsächlicher Download-
+Dateirundlauf ist damit nicht nachgewiesen. JSON-Rundlauf automatisiert geprüft.
+Praktischer Test und Grenzen: docs/PERSISTENT_T_RELATIONS.md.
+
+**Genau ein ausführbarer Folgeauftrag:** Den gemeinsamen 2D-Endpunktbewegungs-
+Pfad an die gespeicherte T-Aktion anbinden: Ein ausdrücklich gefangener,
+eindeutiger Hauptachsenpunkt liefert Host-ID und Nebenendpunkt für atomare
+Vorschau/Bestätigung. Bestehende Fang-/Referenzauswahl und Ursprungshilfen nutzen,
+keine globale Wandpaarsuche oder neue Einzelwerkzeuglogik. Mehrdeutigkeit,
+Abbruch, veralteten Kontext, Undo und normales Wegbewegen testen. Wandketten-
+Integration und Mehrfachanschlüsse sind nicht Teil dieses nächsten Schritts.
+
+Die folgenden Einträge sind historischer Fortschritt, keine parallelen Aufträge.
+
+## Aktueller Stand: T-Kern ohne Projektvalidierungsrekursion — 06.10.2026
+
+PR132 freigegeben und übernommen (fced2cd). Domain t-pair enthält die bestehende
+Geometrie-/Fenster-/Körperableitung ohne Laufzeitabhängigkeit zur Projektprüfung.
+resolveIsolatedTPair validiert/kopiert an öffentlichen Grenzen weiterhin den
+vollständigen Modellstand, löst IDs auf und prüft die Isolationsbedingung.
+Vorschau und IFC-Abnahmeexport delegieren unverändert an denselben Kern.
+
+488 Tests bestanden; TypeScript und Build erfolgreich; Lint 0 Fehler/6 bekannte
+Warnungen. Neue Tests sichern Verwendung ohne Project, unveränderbare Eingaben,
+Kopplung an den validierten Snapshot, Berührung/Überschneidung und Zurückweisung
+ungültiger vollständiger Projekte auch außerhalb des gewählten Paares.
+Drei neu erzeugte IFC-Dateien bytegenau identisch zur vorherigen Abnahmebasis;
+IfcOpenShell 0.8.5 bestätigt erneut Struktur, Profile, Zuordnungen und Volumina.
+Keine UI-/Schemaänderung, keine erneute Browserprüfung erforderlich. Praktische
+Abnahme weiterhin über die vorhandene T-Vorschau/IFC-Testdateien möglich.
+
+**Genau ein ausführbarer Folgeauftrag:** Die gespeicherte isolierte rechtwinklige
+T-Relation in Schema 8 einschließlich strikter Altdatei-Migration und gemeinsamer
+Application-Aktionen integrieren. Kern aus t-pair aus der Projektprüfung ohne
+Rekursion nutzen; Plan/3D/normaler IFC-Export lesen dieselben Konturen. Speichern/
+Laden, Undo/Redo und vereinbartes Lösen bei Einzelwandbewegung bzw. Wegfall des
+festen Anschlusses prüfen. Keine Mehrfachanschlüsse oder neue automatische
+Fangsuche; zunächst explizite stabile Ziel-IDs in der Application-Aktion.
+
+
+## Aktueller Stand: Dauerhafte T-Bezüge geplant — 06.10.2026
+
+PR131 freigegeben und übernommen (0939d01). Nutzerentscheidung: Hauptwandende
+verlängern/verkürzen lässt den T-Anker an seiner bisherigen Weltposition;
+bei Wegfall aus der Hauptwand löst sich die Verbindung. Einzelwandbewegung
+löst weiterhin ohne Mitnahme. Entscheidung im Architekturvertrag festgehalten.
+
+[Dauerhafte T-Verbindungen](docs/PERSISTENT_T_RELATIONS.md) ordnet Schema-8-
+Migration, stabile Bezüge ohne redundanten Anker, gemeinsame Konturverbraucher,
+Fenster, Bearbeitungsabsicht und Undo/Redo zu. Wichtigster Codebefund:
+inspectTOpenings -> validateProject -> connectedWallSolids würde bei direkter
+Integration rekursiv. Vorher den reinen Kern vom validierenden Einstieg trennen.
+
+Nur Dokumentation geändert. Quellpfade/Verbraucher, Links und diff --check geprüft;
+keine neuen Build-/Testläufe. Letzter Code-Nachweis bleibt 486 Tests sowie drei
+unabhängig bestandene IFC-Prüfungen. Archicad-Abnahme der T-Dateien noch offen.
+Im Programm ist weiterhin nur die temporäre T-Vorschau vorhanden.
+
+**Genau ein ausführbarer Folgeauftrag:** T-Geometrie-/Öffnungskern von der
+Projektvalidierung trennen, damit gespeicherte Beziehungen später ohne Rekursion
+geprüft werden. Öffentliche Vorschau/Abnahmeexport strikt validieren; denselben
+Kern verwenden und bestehende Geometrie-, Fenster- und IFC-Tests erhalten.
+Noch keine Schemaänderung, automatische T-Erkennung oder neue Bedienregel.
+
+
+## Aktueller Stand: T-IFC-Abnahmeexport geprüft — 06.10.2026
+
+PR130 freigegeben und übernommen (b76ab5a). Separater Export exportTJunctionIfc
+nutzt gemeinsamen IFC-Writer und Domain t-solid. Die bestehende Vorschau nutzt
+denselben Helfer; keine zweite Validierung/Geometrie. Normaler IFC-Export und
+Projektformat unverändert. T-Verbindungen bleiben temporär.
+
+486 Tests bestanden, TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Warnungen. Neue IFC-Tests sichern Öffnungen, stabile IDs, unveränderte Eingaben,
+unveränderten regulären Export, Snapshot vor async Hashing und Ablehnung
+ungültiger/überschneidender Ziele. IfcOpenShell 0.8.5 validiert t-free,
+t-touch und t-touch-rotated mit IFC4/EXPRESS, Hierarchie, Fensterzuordnung,
+Profilen, Platzierung und analytischen Netto-Volumina. Summe jeweils 8,17056 m³.
+Keine erneute Browserprüfung nötig: keine UI-Änderung; die geprüften Domain-
+Konturen aus der vorherigen Browservorschau werden wiederverwendet.
+
+Archicad-Abnahme noch offen. Testdateien in outputs/t-ifc-acceptance;
+Anleitung und Reproduktion in [T-IFC-Abnahme](docs/T_IFC_ACCEPTANCE.md).
+Zuerst t-touch.ifc prüfen: zwei Wände und zwei Fenster, beide Öffnungen bündig
+am Anschluss, Hauptwand ungeteilt und kein überschneidendes Wandvolumen.
+Nicht mit dem regulären Export der Ausgangs-Projektdatei verwechseln.
+
+**Genau ein ausführbarer Folgeauftrag:** Die dauerhafte T-Relation anhand der
+vorhandenen Endpunktbezüge und Migration planen und das Verhalten beim
+Verschieben/Verlängern der Hauptwand mit dem Nutzer festlegen. Bestehende Regel
+für Einzelwandbewegung (lösen) berücksichtigen; keine relative Ankerbewegung
+oder Mitnahme unbestätigt einführen. Danach einen begrenzten Persistenzauftrag
+festhalten. Text/Voice bleiben Adapter gemeinsamer geprüfter Aktionen.
+
+
+## Aktueller Stand: T-Vorschau mit Fenstern — 06.10.2026
+
+PR129 freigegeben und übernommen (fb0f21e). Nutzer erlaubt Fenster gegen Wände;
+umgesetzt als Berührung erlaubt, Überschneidung verboten im isolierten T-Fall.
+Die Eckanschlussregel bleibt unverändert. Domain t-openings prüft Hauptfenster
+gegen die Kontaktbreite, Nebenfenster gegen den gekürzten Körper. Application
+nutzt den Bericht und die gemeinsame Öffnungsextrusion. Rundung an lokalen
+Kappengrenzen wird in abgeleiteter Geometrie innerhalb Modell-Toleranz vereinheitlicht.
+
+484 Tests bestanden; TypeScript und Build erfolgreich; Lint keine Fehler,
+sechs bekannte Warnungen. Neue Fälle: beide Kontaktränder, frei/berührend/
+überschneidend, Achslagen und Anschlussseiten, Endpunktumkehr, Rotation,
+Translation, unsichtbare Fenster, unveränderte Eingaben und Netto 8,17056 m³.
+Browser: zwei 1x1-m-Fenster berühren den T-Kontakt, 2D/3D zeigt Ausschnitte,
+Vorschau meldet 8,1706 m³ ohne Fehler. Keine persistente Verbindung oder
+geändertes Speichern/IFC. Fenster über bestehende weitere Anschlüsse bleiben
+außerhalb dieser Vorschau. Keine neuen Befehle; Text/Voice bleiben Adapter.
+
+Abnahme: Hauptwand auswählen -> Wandanschluss vorschauen -> T-Anschluss,
+Nebenwand/Ende wählen. Ein Fenster darf bis an den Kontakt reichen; 1 cm darüber
+hinaus ergibt eine Überschneidungsmeldung. Testdatei mit beiden Kontakten liegt
+in outputs/t-windows-touch.project.json. Die Vorschau verändert das Modell nicht.
+
+**Genau ein ausführbarer Folgeauftrag:** Das isolierte T-Paar einschließlich
+freier und berührender Fenster über den vorhandenen gemeinsamen IFC-Writer als
+separaten Abnahmeexport prüfen. Keine Änderung des regulären Projektexports oder
+persistente T-Verbindung. Profile, Öffnungen, Platzierungen und Nettovolumina
+unabhängig mit IfcOpenShell prüfen und eine Archicad-Testdatei bereitstellen.
+
+
+## Aktueller Stand: T-Fensterprüfung konkretisiert — 06.10.2026
+
+PR128 freigegeben und übernommen (860abc1). Der Folgeauftrag ist als
+[Prüfentwurf](docs/T_WINDOW_VALIDATION.md) ausgearbeitet: Nebenfenster gegen
+gekürzte Kontur, Hauptfenster gegen die vollständige Kontaktbreite prüfen.
+Gemeinsame Modell-Toleranzen, Konturen und Extrusion weiterverwenden. Explizite
+Randindizes unterscheiden sich von der normalisierten Eckgehrung.
+
+Die Frage Berührung erlauben/verbieten wurde an den Nutzer gestellt und ist noch
+offen. Empfehlung bleibt Nichtkontakt ohne zusätzlichen Zentimeterabstand.
+Kein neues Laufzeitverhalten, weiterhin fensterlose T-Vorschau. Die Entscheidung
+wird nicht aus einer allgemeinen PR-Freigabe als bestätigt abgeleitet.
+
+Geprüft: Quellmodule, Randindizes und analytische Beispiele; Referenz-Netto bei
+zwei freien 1x1-m-Fenstern ist 8,17056 m³. Dokumentlinks und diff --check geprüft.
+Keine neuen Tests/Builds für die reine Dokumentation; letzter Code-Nachweis aus
+PR128 bleibt 481 bestandene Tests, TypeScript/Build und Browserprüfung.
+
+**Genau ein ausführbarer Folgeauftrag:** Nach dokumentierter Antwort die
+Domain-Fensterprüfung gemäß docs/T_WINDOW_VALIDATION.md implementieren und an
+die temporäre T-Vorschau anbinden. Freie/berührende/überlappende Fenster beider
+Wände, Achslagen, Modellstandbindung und Nettovolumen prüfen. Keine Persistenz
+oder automatische T-Verknüpfung. Bis zur Antwort keine Berührungsregel umsetzen.
+
+
+## Aktueller Stand: Temporäre T-Anschlussvorschau — 06.10.2026
+
+PR127 freigegeben und übernommen (fadbf33). feat/t-wall-preview ergänzt das
+bestehende Diagnosefenster um den Anschlusstyp Rechtwinkliger T-Anschluss.
+Ausgewählte Wand ist Hauptwand, zweite Wand/Endindex werden explizit gewählt.
+Namen entsprechen dem Navigator; intern bleiben stabile IDs maßgeblich.
+Application t-preview prüft Projektzugehörigkeit und lehnt Fenster sowie weitere
+persistierte Anschlüsse an beiden Wänden zunächst verständlich ab. Domain liefert
+Geometrie; bestehende Extrusion, Preview-Reducer und Renderer werden wiederverwendet.
+Kein zusätzlicher Modellzustand, keine Dateiänderung, kein Commit/Undo-Schritt.
+Auswahlwechsel leert die Vorschau; geänderter Modellstand macht sie ungültig.
+
+481 Tests bestanden; TypeScript/Build erfolgreich, Lint 0 Fehler/6 bekannte
+Fast-Refresh-Warnungen. Neue Tests: gemeinsamer Kontur-/Flächenpfad, Volumen,
+unveränderte Fremdwände/Projekt, Abbruch/veralteter Stand, falsche/fehlende Ziele,
+Fenster und bestehende Anschlüsse. Browser mit 6-m-Hauptwand und 3-m-Nebenwand:
+T in 2D/3D sichtbar, 8,8906 m³ angezeigt; Endpunktwechsel entfernt Vorschau,
+Anfang statt Ende zeigt verständlichen Fehler; Schließen geprüft.
+
+Abnahme: zwei isolierte fensterlose Wände gleicher Stärke/Höhe; Nebenachse endet
+rechtwinklig im Inneren der Hauptachse. Hauptwand auswählen -> Wandanschluss
+vorschauen -> Rechtwinkliger T-Anschluss -> ankommende Wand und ihr Anschlussende
+wählen -> Vorschau anzeigen. Es ist nur eine Diagnose, kein automatischer
+Anschluss: Speichern und IFC exportieren weiterhin das unveränderte Modell.
+
+**Genau ein ausführbarer Folgeauftrag:** Die Fensterregeln für T-Anschlüsse am
+Beispiel beider Wände konkretisieren und die noch offene Nichtkontaktregel an
+der Hauptwand mit dem Nutzer klären. Bestehende Öffnungsprüfung und erforderliche
+Grenztests zuordnen; danach einen begrenzten Implementierungsauftrag festhalten.
+Anker-/Hauptwandbewegung bleibt vor Persistenz gesondert zu entscheiden.
+Text/Voice weiterhin als Adapter geprüfter gemeinsamer Aktionen berücksichtigen.
+
+
+## Aktueller Stand: Reine T-Anschlussgeometrie — 06.10.2026
+
+PR126 nach Freigabe übernommen (4dbca2a). Auf feat/t-wall-geometry ist der
+geplante reine Domain-Helfer deriveRightAngleTJunction implementiert. Er erhält
+zwei explizite Wandparameter/Endindex und liefert Hauptkontur, gekürzte
+Nebenkontur und Kontaktsegment. Hauptwand-ID und alle Achsen bleiben unverändert.
+Wiederverwendung von Wandkörper-, Schnittpunkt-, Toleranz- und Polygonfunktionen.
+Noch keine Projektverknüpfung oder neue Bedienfunktion.
+
+479 Tests bestanden; TypeScript und Build erfolgreich. Lint ohne Fehler mit
+sechs bekannten Fast-Refresh-Warnungen. Vier neue Tests mit Varianten prüfen:
+analytisches Volumen 8,89056 m³ einschließlich bestehender Extrusion, unveränderte
+Eingaben/IDs, beide Anschlussseiten, drei Achslagen, Endpunktumkehr, Rotation,
+Spiegelung, große Koordinaten, Kontakt ohne Überlappung und ungültige Maße,
+Winkel, Achspunkte sowie zu kurze Wände und Endrandkontakte.
+
+Grenze: ausschließlich isoliertes rechtwinkliges Paar gleicher Stärke/Höhe,
+Bruttogeometrie ohne Fenster und ohne weitere Anschlüsse. Der spätere Aufrufer
+muss diese Projektbedingungen prüfen. Kein T-IFC-Export oder T-Canvas-Abnahmetest
+in dieser Etappe; vorhandene Produktabläufe sind unverändert. Automatisierter
+Abnahmetest: src/domain/elements/wall/t-junction.test.ts ausführen. Schema bleibt 7.
+
+**Genau ein ausführbarer Folgeauftrag:** Eine modellstandgebundene temporäre
+Application-Vorschau für das isolierte T-Paar an das bestehende Diagnosefenster
+anbinden. Ziele über stabile IDs und verständliche Wandnamen wählen; Wände mit
+Fenstern oder weiteren Verbindungen zunächst ausdrücklich abweisen. Gemeinsame
+Konturen für 2D/3D verwenden, Wechsel/Abbruch ohne Modellmutation. Keine
+Persistenz oder automatischen T-Verbindungen, keine Entscheidung über
+Hauptwandbewegung vorwegnehmen. Text/Voice folgen weiter den geprüften Aktionen.
+
+
+## Aktueller Stand: T-Anschluss geplant — 06.10.2026
+
+PR125 nach Nutzerfreigabe unverändert zusammengeführt (41f17ba). Der geprüfte
+Stand umfasst 475 bestandene Tests und fünf unabhängig validierte IFC-Beispiele.
+Dieser Folgeauftrag ändert ausschließlich Dokumentation, keine Modellfunktionen.
+
+Siehe [T-Anschluss-Arbeitsentwurf](docs/T_WALL_CONNECTION_PLAN.md): aktuelles
+Endpunktpaar-Schema, unveränderte Hauptwand, gekürzter Nebenkörper, Öffnungen,
+Migration, Fangkontext, Undo sowie gemeinsame 2D/3D/IFC-Abnahmekriterien geprüft.
+T-spezifischer Achsanker und Folgen einer Hauptwandänderung bleiben offen;
+Vorschläge sind ausdrücklich von bestehenden Architekturregeln getrennt.
+
+Korrektur der vorherigen Prioritätsnotiz auf Nutzerwunsch: Text/Sprache werden
+weiterhin gemäß Protokoll an geprüfte Application-Aktionen angebunden, nicht
+wegen der letzten Rückfrage generell vertagt. PR124 ist weiterhin separat offen.
+Diese Freigabe bezog sich auf PR125; PR124 wurde nicht stillschweigend übernommen.
+
+Prüfung dieser Etappe: Modulpfade und Vertragsgrenzen gegen Code abgeglichen,
+relative Dokumentlinks geprüft, git diff --check ohne Fehler. Keine erneuten
+Build-/Testläufe für reine Dokumentation; letzte Codeprüfung unverändert gültig.
+Praktische Abnahme weiterhin: schräge Wandkette zeichnen, 2D/3D und Undo prüfen.
+Der Entwurf selbst schaltet noch keine neue T-Funktion frei.
+
+**Genau ein ausführbarer Folgeauftrag:** Reinen Domain-Geometriehelfer für ein
+rechtwinkliges T aus zwei expliziten Wänden gleicher Stärke/Höhe entwickeln.
+Hauptkontur unverändert, Nebenkontur bis zur zugewandten Körperfläche kürzen;
+Kontaktsegment, analytisches Volumen, Achslagen und Grenzfälle testen. Zunächst
+ohne Öffnungen/weitere Anschlüsse, Persistenz, UI oder automatische Verknüpfung.
+Die offenen Anker-/Bewegungsregeln werden erst für die spätere Integration benötigt.
+
+
+## Aktueller Stand: Schraege automatische Wandecken — 06.10.2026
+
+Dieser Abschnitt ersetzt die historischen Folgeauftraege. Ausgangspunkt ist der
+freigegebene Integrationsstand 1a1608b (PR123). PR124 mit Offset-Textadapter bleibt
+separat offen und ist hier nicht enthalten. Sprache bleibt vorgemerkt; nach der
+Rueckfrage des Nutzers wird zuerst die gemeinsame Wandgeometrie erweitert.
+
+Zweig feat/oblique-wall-corners: Automatische Achsend-Anschluesse erlauben nun
+auch spitze und stumpfe Ecken. Gemeinsame Domain-Gehrung statt Sondergeometrie
+in UI/3D/IFC. Unterschiedliche Achslagen und umgekehrte Zeichenrichtungen sind
+geprueft. Zu kurze/kollineare/numerisch entartete Anschluesse und Fensterkontakte
+werden weiterhin atomar abgewiesen. Keine neuen Bedienelemente oder Dateifelder.
+Das historische Diagnosefenster bleibt auf rechtwinklige Paare begrenzt.
+
+Nachweis: 475 Tests bestanden; TypeScript und Build erfolgreich. Lint ohne Fehler,
+sechs bekannte Fast-Refresh-Warnungen. Neue Tests: beidseitige schräge Gehrungen,
+alle drei Achslagen, Endpunktumkehr, getrennte Konturen, analytische Volumina,
+Fensterkollision, JSON, Undo/Redo und geschlossene dreieckige Wandkette.
+IfcOpenShell 0.8.5 prueft fuenf normale Exporte: rechtes Eck, Rechteck,
+45-/135-Grad-Richtungswechsel mit Fenstern und Dreieck; IFC4/EXPRESS, Beziehungen,
+Profile, Platzierung und Netto-Wandvolumina bestanden.
+Browser: Kette 3 m bei 0 Grad, danach 3 m bei 45 Grad, Enter zum Abschliessen;
+Anschluss aktiv, ganze Kette per Undo/Redo und geschlossene 3D-Darstellung geprueft.
+Die fruehere Archicad-Abnahme betrifft rechte Winkel; neue schräge IFC-Beispiele
+sind unabhaengig validiert, aber noch nicht durch den Nutzer in Archicad geprueft.
+
+Praktische Abnahme: Wandwerkzeug -> freien Startpunkt -> 3 m bei 0 Grad -> 3 m
+bei 45 Grad -> Enter im Canvas. 2D/3D vergleichen, Undo/Redo, speichern/laden.
+Optional die erzeugte oblique-45.ifc in Archicad pruefen.
+Grenzen: gleiche Wandstaerke/Hoehe, zwei Achsenden; kein T-Anschluss oder
+kollineares Fortsetzen. Bestehende Projektdateien behalten ihre Geometrie;
+aeltere Programmstaende koennen neue schräge Anschluesse ablehnen.
+
+**Genau ein ausfuehrbarer Folgeauftrag:** Den T-Anschluss als begrenzten
+Planungsauftrag anhand der bestehenden Join-Struktur spezifizieren: Achsende an
+Wandachse, ungeteilte durchlaufende Wand, Oeffnungsabstand, Loesen/Undo und
+2D/3D/IFC-Nachweise. Offene Bedienentscheidungen kennzeichnen; erst danach
+implementieren. Unterschiedliche Wandstaerken/Hoehen bleiben separat.
+
 
 ## Aktueller Stand: Offset fuer konvexe 2D-Konturen — 06.10.2026
 
@@ -1982,3 +5234,5 @@ Freies Bewegen bestaetigt jetzt per Klick fuer alle gemeinsamen Edit-Adapter.
 Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 471 Tests bestanden; Browser: 10-cm-Kontur auf 1 mm Restlaenge begrenzt,
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
+
+Nachweis zum Branch-Uebergang: Frozen-Lockfile-Installation erfolgreich; 517 Tests, TypeScript und Produktionsbuild mit Lovable-Konfiguration 2.25.2 bestanden.

@@ -12,7 +12,7 @@ export function previewOffsetCommand(
   const match = /^offset\s+(?:um\s+)?([+-]?\d+(?:[.,]\d+)?)\s*(mm|cm|m)$/iu.exec(text.trim());
   if (!match) return null;
   const ring = selection && closedContour(project, selection);
-  if (!selection || !ring)
+  if (!selection || (selection.kind !== "line" && selection.kind !== "hatch") || !ring)
     throw new Error("Bitte eine geschlossene 2D-Polylinie oder Schraffur auswählen.");
   const metres =
     Number(match[1]!.replace(",", ".")) / { m: 1, cm: 100, mm: 1000 }[match[2]!.toLowerCase()]!;

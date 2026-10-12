@@ -30,6 +30,14 @@ export function previewLayerManagement(
     return validateProject({
       ...project,
       layers: project.layers.filter((layer) => layer.id !== request.id),
+      ...(project.drawingDocuments
+        ? {
+            drawingDocuments: project.drawingDocuments.map((d) => ({
+              ...d,
+              hiddenLayerIds: d.hiddenLayerIds.filter((id) => id !== request.id),
+            })),
+          }
+        : {}),
       bimVisibility: {
         hiddenLayerIds: project.bimVisibility.hiddenLayerIds.filter((id) => id !== request.id),
       },
@@ -53,6 +61,14 @@ export function previewLayerManagement(
     throw new Error("Dieser Ebenenname ist bereits vergeben.");
   return validateProject({
     ...project,
+    ...(request.kind === "create" && project.drawingDocuments
+      ? {
+          drawingDocuments: project.drawingDocuments.map((d) => ({
+            ...d,
+            hiddenLayerIds: [...d.hiddenLayerIds, request.id],
+          })),
+        }
+      : {}),
     layers:
       request.kind === "create"
         ? [...project.layers, { id: request.id, name }]
@@ -71,6 +87,7 @@ export function layerDeletionBlock(project: Project, id: string): string | null 
       ...project.storey.windows,
       ...(project.storey.lines ?? []),
       ...project.storey.hatches,
+      ...project.storey.references,
     ].some((element) => element.layerId === id)
   )
     return "Diese Ebene enthält Elemente und kann nicht gelöscht werden.";
@@ -102,6 +119,7 @@ export function previewLayerAssignment(
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
     ...project.storey.hatches,
+    ...project.storey.references,
   ];
   const knownIds = new Set(elements.map((e) => e.id));
   if ([...targets].some((id) => !knownIds.has(id)))
@@ -114,6 +132,7 @@ export function previewLayerAssignment(
     storey: {
       ...project.storey,
       hatches: project.storey.hatches.map(assign),
+      references: project.storey.references.map(assign),
       walls: project.storey.walls.map(assign),
       windows: project.storey.windows.map(assign),
       ...(project.storey.lines === undefined ? {} : { lines: project.storey.lines.map(assign) }),

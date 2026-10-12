@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><title>3D Matrix-Pilot</title
+  ><style>
+    body {
+      font: 14px system-ui;
+      padding: 20px;
+      background: #eef1f3;
+    }
+    canvas {
+      width: 400px;
+      height: 300px;
+      border: 1px solid #ccd;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    td {
+      padding: 6px 15px;
+    }
+  </style>
+  <h1>3D Kameramatrix: Vergleich</h1>
+  <p>Links bisheriger Renderer, rechts isolierter Pilot. CPU-Zeit ohne GPU-Abschluss oder React.</p>
+  <button id="run">Vergleich starten</button>
+  <div id="summary"></div>
+  <div id="views"></div>
+  <pre id="report">Bereit</pre>
+  <script type="module" src="./solid-matrix-page.ts"></script>
+</html>

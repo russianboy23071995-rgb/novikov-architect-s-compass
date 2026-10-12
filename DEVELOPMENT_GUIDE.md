@@ -1,3 +1,5 @@
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
 NOVIKOV CAD Entwicklungsleitfaden für die Arbeit mit Codex
 Stand 2. Oktober 2026
 Dieser Guide übersetzt deine Funktionswünsche in eine Reihenfolge, die das gemeinsame CAD-Modell schrittweise erweitert. Du arbeitest die Etappen einzeln mit Codex durch. Jede Etappe endet mit einer funktionierenden, überprüften Version. Bereits vorhandene Funktionen werden geprüft und weiterverwendet.

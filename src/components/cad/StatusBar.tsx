@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { GridControls } from "./GridControls";
 import type { GridSettings } from "@/application/snapping/grid-settings";
 import { CircleDot, Grid3X3, Magnet, MoveHorizontal, MousePointer2 } from "lucide-react";
@@ -5,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function StatusBar({
+  zoomSlot,
+  recoveryStatus,
   grid,
   gridSettings,
   onGridSettings,
@@ -15,6 +18,8 @@ export function StatusBar({
   onSnap,
   onOrtho,
 }: {
+  recoveryStatus?: ReactNode;
+  zoomSlot: (element: HTMLDivElement | null) => void;
   gridSettings: GridSettings;
   onGridSettings: (value: GridSettings) => void;
   grid: boolean;
@@ -39,6 +44,7 @@ export function StatusBar({
       <div className="h-3 w-px bg-border" />
       <span className="px-1 text-[11px] text-muted-foreground">m</span>
       <div className="h-3 w-px bg-border" />
+      <div ref={zoomSlot} className="shrink-0" />
       <Button variant="ghost" className={toggleClass(grid)} onClick={onGrid}>
         <Grid3X3 /> Grid
       </Button>
@@ -49,6 +55,7 @@ export function StatusBar({
       <Button variant="ghost" className={toggleClass(ortho)} onClick={onOrtho}>
         <MoveHorizontal /> Ortho
       </Button>
+      {recoveryStatus}
       <div className="ml-auto flex items-center gap-3 whitespace-nowrap text-[11px] text-muted-foreground">
         <span className="hidden items-center gap-1 sm:flex">
           <MousePointer2 className="size-3" />

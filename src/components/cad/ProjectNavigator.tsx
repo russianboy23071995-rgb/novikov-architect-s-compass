@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { DocumentNavigator, type DocumentNavigation } from "./DocumentNavigator";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   Box,
   Building2,
@@ -33,8 +34,8 @@ function TreeItem({
 }: {
   node: TreeNode;
   depth: number;
-  active: string;
-  onSelect: (id: string, label: string) => void;
+  active: readonly string[];
+  onSelect: (id: string, label: string, toggle?: boolean) => void;
 }) {
   const [open, setOpen] = useState(!["saved-views", "sheets"].includes(node.id));
   const hasChildren = Boolean(node.children?.length);
@@ -44,7 +45,7 @@ function TreeItem({
       <div
         className={cn(
           "group flex h-7 items-center gap-1 rounded-sm pr-1 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
-          active === node.id && "bg-primary/12 text-primary",
+          active.includes(node.id) && "bg-primary/12 text-primary",
         )}
         style={{ paddingLeft: `${6 + depth * 13}px` }}
       >
@@ -64,7 +65,8 @@ function TreeItem({
         <Button
           variant="ghost"
           className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent"
-          onClick={() => onSelect(node.id, node.label)}
+          aria-pressed={active.includes(node.id)}
+          onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
           <Icon className="size-3.5 shrink-0 opacity-70" />
           <span className="truncate">{node.label}</span>
@@ -84,53 +86,70 @@ function TreeItem({
   );
 }
 
-type ProjectNavigatorProps = {
+type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
 
-  active: string;
-  onSelect: (id: string, label: string) => void;
+  active: readonly string[];
+  onSelect: (id: string, label: string, toggle?: boolean) => void;
   onClose: () => void;
 };
 
-export function ProjectNavigator({ active, onSelect, onClose, project }: ProjectNavigatorProps) {
-  const modelTree: TreeNode[] = [
-    {
-      id: project.id,
-      label: "BIM Project",
-      kind: "group",
-      children: [
-        {
-          id: project.storey.id,
-          label: "Level 01",
-          kind: "group",
-          children: [
-            ...project.storey.walls.map((wall, index): TreeNode => ({
-              id: wall.id,
-              label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
-              kind: "group",
-              children: project.storey.windows
-                .filter((opening) => opening.wallId === wall.id)
-                .map((opening, index) => ({
+function NavigatorContent({
+  active,
+  onSelect,
+  onClose,
+  project,
+  ...documents
+}: ProjectNavigatorProps) {
+  const [tab, setTab] = useState<"model" | "documents">("model");
+  const modelTree = useMemo(() => {
+    const openings = new globalThis.Map<string, Project["storey"]["windows"]>();
+    for (const window of project.storey.windows) {
+      if (!openings.has(window.wallId)) openings.set(window.wallId, []);
+      openings.get(window.wallId)!.push(window);
+    }
+    return [
+      {
+        id: project.id,
+        label: "BIM Project",
+        kind: "group",
+        children: [
+          {
+            id: project.storey.id,
+            label: "Level 01",
+            kind: "group",
+            children: [
+              ...project.storey.walls.map((wall, index): TreeNode => ({
+                id: wall.id,
+                label: `Wall ${index + 1} · ${wallLength(wall).toFixed(2)} m`,
+                kind: "group",
+                children: (openings.get(wall.id) ?? []).map((opening, index) => ({
                   id: opening.id,
                   label: `Window ${index + 1} · ${opening.width.toFixed(2)} m`,
                   kind: "item",
                 })),
-            })),
-            ...project.storey.hatches.map((hatch, index): TreeNode => ({
-              id: hatch.id,
-              label: `Schraffur ${index + 1}`,
-              kind: "item",
-            })),
-            ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
-              id: line.id,
-              label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
-              kind: "item",
-            })),
-          ],
-        },
-      ],
-    },
-  ];
+              })),
+              ...project.storey.references.map((r, index): TreeNode => ({
+                id: r.id,
+                label: `Bildreferenz ${index + 1}`,
+                kind: "item",
+              })),
+              ...project.storey.hatches.map((hatch, index): TreeNode => ({
+                id: hatch.id,
+                label: `Schraffur ${index + 1}`,
+                kind: "item",
+              })),
+              ...(project.storey.lines ?? []).map((line, index): TreeNode => ({
+                id: line.id,
+                label: `${line.kind === "line" ? "Linie" : "Polylinie"} ${index + 1}`,
+                kind: "item",
+              })),
+            ],
+          },
+        ],
+      },
+    ] satisfies TreeNode[];
+  }, [project]);
   return (
     <aside
       className="glass-panel-strong flex h-full min-w-0 flex-col overflow-hidden rounded-lg"
@@ -151,11 +170,40 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
           <PanelRightClose className="size-4" />
         </Button>
       </header>
-      <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
-        {modelTree.map((node) => (
-          <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
-        ))}
-      </ScrollArea>
+      <div role="tablist" aria-label="Navigatorbereiche" className="flex border-b border-border">
+        <Button
+          role="tab"
+          aria-selected={tab === "model"}
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setTab("model");
+            documents.onOpenDocument(null);
+          }}
+        >
+          Gebäudestruktur
+        </Button>
+        <Button
+          role="tab"
+          aria-selected={tab === "documents"}
+          variant="ghost"
+          size="sm"
+          onClick={() => setTab("documents")}
+        >
+          Abbilder
+        </Button>
+      </div>
+      {tab === "documents" ? (
+        <ScrollArea className="min-h-0 flex-1">
+          <DocumentNavigator key={project.id} project={project} {...documents} />
+        </ScrollArea>
+      ) : (
+        <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
+          {modelTree.map((node) => (
+            <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
+          ))}
+        </ScrollArea>
+      )}
       <div className="border-t border-border px-3 py-2 text-[12px] text-muted-foreground">
         <div className="flex justify-between">
           <span>Model elements</span>
@@ -163,6 +211,7 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
             {project.storey.walls.length +
               project.storey.windows.length +
               project.storey.hatches.length +
+              project.storey.references.length +
               (project.storey.lines?.length ?? 0)}
           </span>
         </div>
@@ -171,5 +220,44 @@ export function ProjectNavigator({ active, onSelect, onClose, project }: Project
         </div>
       </div>
     </aside>
+  );
+}
+
+const StableNavigator = memo(NavigatorContent);
+/** Pointer-driven parent renders never rebuild the unchanged project tree. */
+export function ProjectNavigator(props: ProjectNavigatorProps) {
+  const latest = useRef(props);
+  latest.current = props;
+  const active = useRef(props.active);
+  if (
+    active.current.length !== props.active.length ||
+    active.current.some((id, i) => id !== props.active[i])
+  )
+    active.current = props.active;
+  const onClose = useCallback(() => latest.current.onClose(), []);
+  const onSelect = useCallback<ProjectNavigatorProps["onSelect"]>(
+    (...args) => latest.current.onSelect(...args),
+    [],
+  );
+  const onOpenDocument = useCallback<ProjectNavigatorProps["onOpenDocument"]>(
+    (id) => latest.current.onOpenDocument(id),
+    [],
+  );
+  const onDocumentAction = useCallback<ProjectNavigatorProps["onDocumentAction"]>(
+    (...args) => latest.current.onDocumentAction(...args),
+    [],
+  );
+  return (
+    <StableNavigator
+      getPlanCapture={props.getPlanCapture}
+      activeDocumentId={props.activeDocumentId}
+      onOpenDocument={onOpenDocument}
+      onDocumentAction={onDocumentAction}
+      onDocumentVisibility={props.onDocumentVisibility}
+      project={props.project}
+      active={active.current}
+      onSelect={onSelect}
+      onClose={onClose}
+    />
   );
 }

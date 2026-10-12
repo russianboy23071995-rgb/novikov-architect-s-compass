@@ -1,0 +1,68 @@
+{
+  "count": 5000,
+  "images": true,
+  "bytes": 9779490,
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "heap": {
+    "used": 790303286,
+    "total": 839171754,
+    "limit": 4395630592
+  },
+  "results": {
+    "fixtureValidate": {
+      "n": 1,
+      "medianMs": 529,
+      "p95Ms": 529
+    },
+    "react-mount": {
+      "n": 1,
+      "medianMs": 2501.9999998807907,
+      "p95Ms": 2501.9999998807907
+    },
+    "react-nested-update": {
+      "n": 5,
+      "medianMs": 0.10000002384185791,
+      "p95Ms": 448.69999998807907
+    },
+    "react-update": {
+      "n": 130,
+      "medianMs": 494.40000012516975,
+      "p95Ms": 570.9000001847744
+    },
+    "loadAndMount": {
+      "n": 1,
+      "medianMs": 5418.800000011921,
+      "p95Ms": 5418.800000011921
+    },
+    "validateInclusive": {
+      "n": 21,
+      "medianMs": 424.60000002384186,
+      "p95Ms": 447.40000000596046
+    },
+    "wallSolidsCold": {
+      "n": 21,
+      "medianMs": 191.5,
+      "p95Ms": 214.09999999403954
+    },
+    "jsonCompareAndSize": {
+      "n": 21,
+      "medianMs": 55.099999994039536,
+      "p95Ms": 72.69999998807907
+    },
+    "modelOnlyCompare": {
+      "n": 21,
+      "medianMs": 12.300000011920929,
+      "p95Ms": 16.200000017881393
+    },
+    "commitLegacy": {
+      "n": 21,
+      "medianMs": 1362,
+      "p95Ms": 1458.2000000178814
+    },
+    "commitCurrent": {
+      "n": 21,
+      "medianMs": 1354.699999988079,
+      "p95Ms": 1410
+    }
+  }
+}

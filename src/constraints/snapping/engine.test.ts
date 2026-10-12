@@ -1200,3 +1200,9 @@ test("Shift accepts only exact on-axis points and preserves continuous fallback 
     { x: cursor.x, y: 0 },
   );
 });
+
+test("unconstrained polar input keeps exact mouse coordinates but rejects distance overflow", () => {
+  const aim = { x: 22.8, y: -15.3 };
+  assert.deepEqual(resolvePolarInput({ x: 10.2, y: 1.7 }, aim, null, null).point, aim);
+  assert.throws(() => resolvePolarInput({ x: 1e308, y: 0 }, { x: -1e308, y: 0 }, null, null));
+});

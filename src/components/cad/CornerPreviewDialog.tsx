@@ -1,5 +1,6 @@
+import type { WorkingViewContext } from "@/application/views/working-context";
 import { useReducer, useState } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { FloatingPanel } from "./FloatingPanel";
 import { Button } from "@/components/ui/button";
 import { cornerPreviewReducer, currentCornerPreview } from "@/application/walls/corner-preview";
 import type { Project } from "@/domain/project/schema";
@@ -7,17 +8,20 @@ import { isLayerVisible, type LayerVisibilityPolicy } from "@/application/layers
 import { CadViewport } from "./CadViewport";
 
 export function CornerPreviewDialog({
+  viewContext,
   project,
   firstId,
   visibility,
   onClose,
 }: {
+  viewContext: WorkingViewContext;
   project: Project;
   firstId: string;
   visibility: LayerVisibilityPolicy;
   onClose: () => void;
 }) {
   const [base] = useState(project);
+  const [kind, setKind] = useState<"corner" | "t">("corner");
   const [secondId, setSecondId] = useState("");
   const [firstEnd, setFirstEnd] = useState<0 | 1>(1);
   const [secondEnd, setSecondEnd] = useState<0 | 1>(0);
@@ -27,43 +31,60 @@ export function CornerPreviewDialog({
   const stale = project !== base;
   const clear = () => dispatch({ type: "clear" });
   return (
-    <Dialog
+    <FloatingPanel
       open
-      onOpenChange={(open) => {
-        if (!open) {
-          clear();
-          onClose();
-        }
+      title="Wandanschluss · Vorschau"
+      width={1100}
+      height={700}
+      onClose={() => {
+        clear();
+        onClose();
       }}
     >
-      <DialogContent className="glass-panel-strong sm:max-w-[1100px]">
-        <DialogTitle>Wandanschluss · Vorschau</DialogTitle>
-        <DialogDescription>
-          Wähle das Wandpaar und die zu verbindenden Achsenden. Temporäre Vorschau ohne
-          Modelländerung; Escape schließt.
-        </DialogDescription>
+      <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
+        <p className="text-xs text-muted-foreground">
+          Wähle das Wandpaar und den Anschlusstyp. Beim T bleibt die erste Wand durchgehend.
+          Temporäre Vorschau ohne Modelländerung; Escape schließt.
+        </p>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span>
-            Erste Wand: Wall {project.storey.walls.findIndex((w) => w.id === firstId) + 1}
-          </span>
           <label>
-            Erstes Achsende{" "}
+            Anschlusstyp{" "}
             <select
-              aria-label="Erstes Achsende"
-              value={firstEnd}
+              aria-label="Anschlusstyp"
+              value={kind}
               onChange={(e) => {
-                setFirstEnd(Number(e.target.value) as 0 | 1);
+                setKind(e.target.value as "corner" | "t");
                 clear();
               }}
             >
-              <option value={0}>Anfang</option>
-              <option value={1}>Ende</option>
+              <option value="corner">Rechtwinklige Ecke</option>
+              <option value="t">Rechtwinkliger T-Anschluss</option>
             </select>
           </label>
+          <span>
+            {kind === "t" ? "Hauptwand:" : "Erste Wand:"} Wall{" "}
+            {project.storey.walls.findIndex((w) => w.id === firstId) + 1}
+          </span>
+          {kind === "corner" && (
+            <label>
+              Erstes Achsende{" "}
+              <select
+                aria-label="Erstes Achsende"
+                value={firstEnd}
+                onChange={(e) => {
+                  setFirstEnd(Number(e.target.value) as 0 | 1);
+                  clear();
+                }}
+              >
+                <option value={0}>Anfang</option>
+                <option value={1}>Ende</option>
+              </select>
+            </label>
+          )}
           <label>
-            Zweite Wand{" "}
+            {kind === "t" ? "Ankommende Wand" : "Zweite Wand"}{" "}
             <select
-              aria-label="Zweite Wand"
+              aria-label={kind === "t" ? "Ankommende Wand" : "Zweite Wand"}
               value={secondId}
               onChange={(e) => {
                 setSecondId(e.target.value);
@@ -97,12 +118,21 @@ export function CornerPreviewDialog({
           <Button
             disabled={!secondId || stale || !visible}
             onClick={() =>
-              dispatch({
-                type: "preview",
-                project,
-                first: { wallId: firstId, endpoint: firstEnd },
-                second: { wallId: secondId, endpoint: secondEnd },
-              })
+              dispatch(
+                kind === "t"
+                  ? {
+                      type: "t-preview",
+                      project,
+                      hostId: firstId,
+                      incoming: { wallId: secondId, endpoint: secondEnd },
+                    }
+                  : {
+                      type: "preview",
+                      project,
+                      first: { wallId: firstId, endpoint: firstEnd },
+                      second: { wallId: secondId, endpoint: secondEnd },
+                    },
+              )
             }
           >
             Vorschau anzeigen
@@ -132,7 +162,7 @@ export function CornerPreviewDialog({
                   onActivate={() => {}}
                   onFullscreen={() => {}}
                   project={project}
-                  visibility={visibility}
+                  viewContext={viewContext}
                   cornerPreview={preview}
                   selection={null}
                   drawing={false}
@@ -155,7 +185,7 @@ export function CornerPreviewDialog({
         >
           Vorschau schließen
         </Button>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </FloatingPanel>
   );
 }

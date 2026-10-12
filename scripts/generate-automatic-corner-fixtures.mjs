@@ -31,6 +31,10 @@ for (const name of ["automatic-corner", "closed-rectangle"]) {
     p = addWall(p, { id: "C", start: { x: 3, y: 3 }, end: { x: 0, y: 3 }, ...dimensions });
     p = addWall(p, { id: "D", start: { x: 0, y: 3 }, end: { x: 0, y: 0 }, ...dimensions });
   }
+  await writeFixture(name, p);
+}
+
+async function writeFixture(name, p) {
   const bodies = connectedWallSolids(p);
   await writeFile(join(directory, name + ".project.json"), serializeProject(p));
   await writeFile(
@@ -52,3 +56,44 @@ for (const name of ["automatic-corner", "closed-rectangle"]) {
   );
 }
 console.log("Generated automatic join and closed rectangle, normal project export.");
+
+for (const degrees of [45, 135]) {
+  const angle = (degrees * Math.PI) / 180;
+  let oblique = addWall(createProject(`oblique-${degrees}`, "storey-1"), {
+    id: "A",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    ...dimensions,
+  });
+  oblique = addWall(oblique, {
+    id: "B",
+    start: { x: 3, y: 0 },
+    end: { x: 3 + 3 * Math.cos(angle), y: 3 * Math.sin(angle) },
+    ...dimensions,
+  });
+  for (const wallId of ["A", "B"])
+    oblique = addWindow(oblique, {
+      id: `window-${wallId}`,
+      wallId,
+      width: 1.2,
+      height: 1.35,
+      sillHeight: 0.9,
+      position: 0.5,
+    });
+  await writeFixture(`oblique-${degrees}`, oblique);
+}
+let triangle = createProject("triangle", "storey-1");
+const points = [
+  { x: 0, y: 0 },
+  { x: 4, y: 0 },
+  { x: 2, y: 3 },
+];
+for (let i = 0; i < points.length; i++)
+  triangle = addWall(triangle, {
+    id: `wall-${i}`,
+    start: points[i],
+    end: points[(i + 1) % points.length],
+    ...dimensions,
+  });
+await writeFixture("triangle", triangle);
+console.log("Generated oblique 45/135-degree turns with openings and closed triangle.");

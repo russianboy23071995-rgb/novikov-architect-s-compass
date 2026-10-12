@@ -1,3 +1,5 @@
+import { createWallContourSolidDeriver, wallContourSolid } from "./contour-solid.ts";
+import { wallBody } from "./body.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { deriveCornerSolids } from "./corner-solid.ts";
@@ -229,5 +231,77 @@ test("edge-only contacts fail closed, adjacent and vertically overlapping cuts r
     const removed = second.left === 1.5 ? 2 : 1.75;
     close(result.volume, (3 * 2.8 - removed) * 0.36);
     shell(result.faces, result.volume);
+  }
+});
+
+test("session extrusion matches fresh derivation through translation and changed local inputs", () => {
+  const p = addWindow(project(), {
+    id: "opening",
+    wallId: "A",
+    width: 1,
+    height: 1,
+    sillHeight: 0.8,
+    position: 0.5,
+  });
+  const wall = p.storey.walls[0]!;
+  const derive = createWallContourSolidDeriver([wall.id]);
+  for (const dx of [0, 1, -4, 4 / 137, 1e6]) {
+    const moved = {
+      ...wall,
+      start: { x: wall.start.x + dx, y: wall.start.y + dx },
+      end: { x: wall.end.x + dx, y: wall.end.y + dx },
+    };
+    for (const changed of [
+      moved,
+      { ...moved, height: 4 },
+      { ...moved, thickness: 0.5 },
+      { ...moved, end: { x: moved.end.x + 1, y: moved.end.y } },
+    ]) {
+      for (const windows of [
+        p.storey.windows,
+        p.storey.windows.map((w) => ({ ...w, width: 1.1, position: 0.6 })),
+        [],
+      ]) {
+        for (const clip of [false, true]) {
+          const points = wallBody(changed).corners;
+          assert.deepEqual(
+            derive(changed, points, windows, clip),
+            wallContourSolid(changed, points, windows, clip),
+          );
+        }
+      }
+    }
+  }
+});
+
+test("cached local geometry cannot leak through mutable output and invalid geometry still fails", () => {
+  const wall = project().storey.walls[0]!;
+  const derive = createWallContourSolidDeriver([wall.id]);
+  const points = wallBody(wall).corners;
+  const result = derive(wall, points, []);
+  result.faces[0]!.vertices[0]![0] = 999;
+  assert.deepEqual(derive(wall, points, []), wallContourSolid(wall, points, []));
+  for (const height of [-1, NaN, Infinity]) {
+    assert.throws(() => derive({ ...wall, height }, points, []));
+    assert.throws(() => wallContourSolid({ ...wall, height }, points, []));
+  }
+  const malformed = [...points.slice(0, 3), { x: Infinity, y: 0 }];
+  assert.throws(() => derive(wall, malformed, []));
+  assert.deepEqual(derive(wall, points, []), wallContourSolid(wall, points, []));
+});
+
+test("session reuse respects clipped openings and changed contour for the same wall", () => {
+  const wall = project().storey.walls[0]!;
+  const derive = createWallContourSolidDeriver([wall.id]);
+  const points = wallBody(wall).corners;
+  const windows = [{ ...opening("overlap", wall.id, 0.05), layerId: wall.layerId }];
+  assert.deepEqual(
+    derive(wall, points, windows, true),
+    wallContourSolid(wall, points, windows, true),
+  );
+  assert.throws(() => derive(wall, points, windows, false));
+  assert.throws(() => wallContourSolid(wall, points, windows, false));
+  for (const contour of [points, points.map((p) => ({ ...p, x: p.x === 0 ? 0.1 : p.x })), points]) {
+    assert.deepEqual(derive(wall, contour, [], true), wallContourSolid(wall, contour, [], true));
   }
 });

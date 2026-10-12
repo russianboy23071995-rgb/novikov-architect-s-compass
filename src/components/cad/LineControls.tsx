@@ -1,5 +1,8 @@
+import { ColorField } from "./PenColors";
+import { PropertyForm } from "./PropertyForm";
+import { useLineInventory } from "./useLineInventory";
+import { applyLineStyle } from "@/application/lines/appearance";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { updateLine } from "@/lib/bim/model";
 import type { DrawingLine, Project } from "@/lib/bim/model";
 import type { LineAppearance } from "@/lib/bim/lines";
@@ -13,35 +16,26 @@ export function LineStyleFields({
   value: LineAppearance;
   onChange: (value: LineAppearance) => void;
 }) {
-  const [widthText, setWidthText] = useState(() =>
-    Number.isFinite(value.penWidth) ? String(value.penWidth).replace(".", ",") : "",
-  );
+  const inventory = useLineInventory();
+  const [widthDraft, setWidthDraft] = useState({
+    value: value.penWidth,
+    text: String(value.penWidth).replace(".", ","),
+  });
+  const widthText = Object.is(widthDraft.value, value.penWidth)
+    ? widthDraft.text
+    : Number.isFinite(value.penWidth)
+      ? String(value.penWidth).replace(".", ",")
+      : "";
   return (
     <div className="flex flex-wrap items-end gap-2 text-xs">
       <label>
         Farbe
-        <select
-          aria-label="Linienfarbe"
-          className="block rounded border bg-background p-1"
-          value={value.color}
-          onChange={(e) => onChange({ ...value, color: e.target.value })}
-        >
-          {Object.entries({
-            "#334155": "Graphit",
-            "#000000": "Schwarz",
-            "#dc2626": "Rot",
-            "#2563eb": "Blau",
-            "#16a34a": "Grün",
-            "#d97706": "Orange",
-          }).map(([color, name]) => (
-            <option key={color} value={color}>
-              {name}
-            </option>
-          ))}
-          {!["#334155", "#000000", "#dc2626", "#2563eb", "#16a34a", "#d97706"].includes(
-            value.color,
-          ) && <option value={value.color}>{value.color}</option>}
-        </select>
+        <ColorField
+          label="Linienfarbe"
+          value={value.pattern?.colorEditable === false ? value.pattern.color! : value.color}
+          disabled={value.pattern?.colorEditable === false}
+          onChange={(color) => onChange({ ...value, color })}
+        />
       </label>
       <label>
         Strichstärke (mm)
@@ -53,7 +47,7 @@ export function LineStyleFields({
 
           value={widthText}
           onChange={(e) => {
-            setWidthText(e.target.value);
+            setWidthDraft({ value: parsePenWidth(e.target.value), text: e.target.value });
             onChange({ ...value, penWidth: parsePenWidth(e.target.value) });
           }}
         />
@@ -63,14 +57,52 @@ export function LineStyleFields({
         <select
           aria-label="Strichart"
           className="block rounded border bg-background p-1"
-          value={value.style}
-          onChange={(e) => onChange({ ...value, style: e.target.value as DrawingLine["style"] })}
+          value={
+            value.style === "custom" ? `catalog:${value.pattern?.id}` : `legacy:${value.style}`
+          }
+          onChange={(e) => {
+            const definition = inventory.styles.find((s) => `catalog:${s.id}` === e.target.value);
+            if (definition) onChange(applyLineStyle(value, definition, value.repeatLength ?? 1));
+          }}
         >
-          <option value="solid">Durchgezogen</option>
-          <option value="dashed">Gestrichelt</option>
-          <option value="break">Abbruchlinie</option>
+          {value.style !== "custom" && (
+            <option value={`legacy:${value.style}`}>
+              {value.style === "solid"
+                ? "Durchgezogen"
+                : value.style === "dashed"
+                  ? "Gestrichelt"
+                  : "Abbruchlinie"}{" "}
+              · Bestand
+            </option>
+          )}
+          {value.style === "custom" &&
+            !inventory.styles.some((s) => s.id === value.pattern?.id) && (
+              <option value={`catalog:${value.pattern?.id}`}>
+                {value.pattern?.name} · im Projekt erhalten
+              </option>
+            )}
+          {inventory.styles.map((style) => (
+            <option key={style.id} value={`catalog:${style.id}`}>
+              {style.name}
+            </option>
+          ))}
         </select>
       </label>
+      {value.style === "custom" && (
+        <label>
+          Musterlänge (m)
+          <input
+            aria-label="Musterlänge (m)"
+            className="block w-24 rounded border bg-background p-1"
+            type="number"
+            min="0.000001"
+            step="0.1"
+            value={value.repeatLength ?? 1}
+            onChange={(e) => onChange({ ...value, repeatLength: Number(e.target.value) })}
+          />
+        </label>
+      )}
+      {inventory.error && <p role="alert">{inventory.error}</p>}
     </div>
   );
 }
@@ -87,10 +119,23 @@ export function LineInspector({
     color: line.color,
     penWidth: line.penWidth,
     style: line.style,
+    ...(line.pattern ? { pattern: line.pattern, repeatLength: line.repeatLength } : {}),
   });
   const [error, setError] = useState("");
   return (
-    <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Linieneigenschaften">
+    <PropertyForm
+      className="flex flex-wrap items-end gap-x-4 gap-y-2"
+      aria-label="Linieneigenschaften"
+      onSubmit={(event) => {
+        event.preventDefault();
+        try {
+          onChange(updateLine(project, line.id, value), { kind: "line", id: line.id });
+          setError("");
+        } catch {
+          setError("Linieneinstellungen prüfen: Strichstärke 0,05–2 mm und positive Musterlänge.");
+        }
+      }}
+    >
       <h2 className="text-sm font-semibold">{line.kind === "line" ? "Linie" : "Polylinie"}</h2>
       <p title={line.id} className="max-w-48 truncate text-[10px]">
         {line.id}
@@ -99,25 +144,12 @@ export function LineInspector({
         {lineLength(line).toFixed(2)} m · {line.points.length} Punkte · nur 2D
       </p>
       <LineStyleFields value={value} onChange={setValue} />
-      <Button
-        className="shrink-0"
-        size="sm"
-        onClick={() => {
-          try {
-            onChange(updateLine(project, line.id, value), { kind: "line", id: line.id });
-            setError("");
-          } catch {
-            setError("Strichstärke muss zwischen 0,05 und 2 mm liegen.");
-          }
-        }}
-      >
-        Linienstil übernehmen
-      </Button>
+
       {error && (
         <p role="alert" className="mt-2 text-xs text-destructive">
           {error}
         </p>
       )}
-    </section>
+    </PropertyForm>
   );
 }

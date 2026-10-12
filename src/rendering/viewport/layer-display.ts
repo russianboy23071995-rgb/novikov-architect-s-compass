@@ -1,3 +1,5 @@
+import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
+import { isLayerVisible, type LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type {
   createLayerVisibilityPolicy,
@@ -17,11 +19,12 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
 
 /** Shared renderer filters also accept disposable edit-preview geometry.
  * Eligibility always stays bound to the committed project, never the preview. */
-export function visiblePlanGeometry(project: Project, allows: (id: string) => boolean) {
+export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string) => boolean) {
   const walls = project.storey.walls.filter((w) => allows(w.id));
   const wallIds = new Set(walls.map((w) => w.id));
   return {
     walls,
+    references: project.storey.references.filter((r) => allows(r.id)),
     hatches: project.storey.hatches.filter((h) => allows(h.id)),
     windows: project.storey.windows.filter((w) => allows(w.id)),
     lines: (project.storey.lines ?? []).filter((l) => allows(l.id)),
@@ -55,5 +58,47 @@ export function createLayerDisplay(
     canPick(current: Project, currentContext: LayerVisibilityContext, id: string) {
       return policy.evaluate(current, currentContext, id).eligible;
     },
+  };
+}
+
+/** New draft walls are display-only and inherit their actual layer, not committed picking eligibility. */
+export function drawingWallVisibility(
+  base: Project,
+  draft: Project,
+  policy?: LayerVisibilityPolicy,
+) {
+  const existing = new Set(base.storey.walls.map((w) => w.id));
+  const newWalls = new Map(
+    draft.storey.walls.filter((w) => !existing.has(w.id)).map((w) => [w.id, w]),
+  );
+  const existingWindows = new Set(base.storey.windows.map((w) => w.id));
+  const newWindows = new Map(
+    draft.storey.windows.filter((w) => !existingWindows.has(w.id)).map((w) => [w.id, w]),
+  );
+  return (id: string) => {
+    const opening = newWindows.get(id);
+    if (opening)
+      return (
+        isLayerVisible(base, policy, opening.wallId) &&
+        (!policy ||
+          (policy.isCurrent(base, policy.context) &&
+            !policy.context.hiddenLayerIds.includes(opening.layerId)))
+      );
+    const reference = draft.storey.references.find(
+      (r) => r.id === id && !base.storey.references.some((b) => b.id === id),
+    );
+    if (reference)
+      return (
+        !policy ||
+        (policy.isCurrent(base, policy.context) &&
+          !policy.context.hiddenLayerIds.includes(reference.layerId))
+      );
+    const wall = newWalls.get(id);
+    if (!wall) return isLayerVisible(base, policy, id);
+    return (
+      !policy ||
+      (policy.isCurrent(base, policy.context) &&
+        !policy.context.hiddenLayerIds.includes(wall.layerId))
+    );
   };
 }

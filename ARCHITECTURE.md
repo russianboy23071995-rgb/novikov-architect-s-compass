@@ -1,4 +1,667 @@
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
 # NOVIKOV CAD Architecture Contract
+
+Production project schema is now 18 (captured document framing and folders, 2026-10-10).
+Schema 17 remains the strict legacy full-plan-document format at file ingress.
+Schema 16 remains the strict legacy hatch-sizing format at file ingress.
+Schema 15 remains the strict legacy working-view format at file ingress.
+Schema 14 remains the strict legacy portable pen-set format at file ingress.
+Schema 10 remains the strict legacy custom-line format at file ingress.
+Earlier schema-9 experiment descriptions below are historical evidence; this
+incremental migration supersedes their claim that the production format is unchanged.
+
+## Explicit output scale and hatch sizing — V07j, 2026-10-09
+
+Technical direction, not an implemented paper-mode feature: model metres, output
+scale 1:S and camera CSS pixels/metre remain separate. A rendering context supplies
+the effective finite positive S; it is never inferred from camera zoom. Existing
+DrawingDocument/Layout scale ownership remains binding; storage/history/defaults
+for the raw working view are now clarified by the user's PR230 review answers:
+the semantic view context owns S, while ViewportBinding routes a pane to it.
+Panes own independent cameras, never independent copies of the same context's S.
+Working contexts start at 1:100; the selector sits beside Zoom. Future persistence
+is per semantic context within the project; history semantics are now fixed: working scale stays outside model Undo/Redo.
+All internal lengths, including paper sizes, use metres. UI paper-size fields use
+millimetres with an explicit boundary conversion, never an ambiguous unitless value.
+Paper hatch applications will specify a paper cell width in metres. A shared
+rendering resolver derives uniform factor paperWidth * S / definition.width;
+legacy model applications retain factor 1; explicit application widths may override it (MS-03a below). Origin stays in model coordinates, rotation
+and creator orientation are preserved, and contour/model geometry never scales.
+Missing scale for paper rendering must be explicit, not silently replaced by 1:1.
+Screen stroke conversion must account for the tile factor; physical print pens
+remain undecided. Definitions and repeat lines are not copied into model entities.
+The next MS-01 pilot establishes the shared context/resolver and session-local
+selector without changing production schema 14 or enabling paper hatch properties.
+V07k follows as its hatch consumer within MS-02, not a separate scale implementation.
+See [general contract](docs/planning/VIEW_SCALE_CONTRACT.md) and
+[hatch-specific acceptance](docs/planning/HATCH_PAPER_SCALE.md).
+
+
+## Shared session view scale — MS-01, 2026-10-09 (superseded by MS-03 below)
+
+Implemented: domain/views identifies the existing semantic working plan by project
+and storey, not pane index. Application/views owns immutable session scale changes
+and strict 1:S input parsing. ViewportManager hosts the session above pane lifetimes;
+all panes bound to that plan read the same ScaleContext, retaining separate cameras.
+The active 2D pane exposes the selector beside Zoom. No storage/model-history write
+occurs; reload starts at 1:100. rendering/viewport/display-size resolves explicit
+model/paper metric sizes and separate screen metrics, rejecting invalid contexts
+and non-positive/non-finite results. Product hatches remain model-space; MS-02 will
+consume this resolver rather than introduce another one. Production schema stays 14.
+
+## Shared non-modal windows - 2026-10-08
+
+User decision: opened CAD windows follow the Ebenen palette: draggable, no
+background dimming, Glass Flow styling. FloatingPanel owns the shared shell,
+header pointer/keyboard movement, viewport clamping, close and scoped Escape.
+Window contents own their application/draft actions and validation. Existing
+layer, line creator, hatch creator, display settings, connection preview and
+project-load confirmation use this shell. New CAD windows must reuse it rather
+than copying drag logic or introducing a modal overlay.
+
+
+## Separate line styles and hatch patterns - 2026-10-08
+
+User clarification: Tools > Linien Creator manages line styles for line tools,
+independently of Tools > Schraffurenverwaltung and its area-pattern creator.
+Line-style library version 2 stores named, colored segment structures in a local
+one-dimensional repeat period, plus an inventory of at most ten distinct existing
+style IDs. Version 1 dash/gap definitions migrate to segments on load without a
+write. Built-in library entries can now be edited/deleted by explicit user request;
+deletions persist and remove inventory references atomically in the same payload.
+The drawing editor uses shared querySnap and transient draft state. Storage and
+validation remain behind Application and a replaceable adapter. Browser
+storage is profile/origin-local across projects, not cross-device synchronization.
+User decisions (2026-10-09): custom line patterns use model-space sizing;
+deleting a catalog style preserves existing lines. Schema 10 therefore stores an
+owned validated pattern definition and repeatLength in metres with each custom
+line application. These are immutable application snapshots, not extra editable
+vertices. Schema 1–9 files migrate at the file boundary; legacy appearance stays
+unchanged. Drawing, inspector and 2D pickup share the same appearance contract.
+Inventory changes update shared UI subscriptions; renderer derives SVG tiles with
+continuous phase around polyline vertices and no repeat-count geometry allocation.
+Global catalog edits affect future explicit style assignments; cross-project
+propagation for line styles is not implemented by this snapshot pilot. Hatch
+update-all semantics remain the separately agreed future requirement.
+
+
+## Hatch library / creator preparation - 2026-10-08
+
+Pattern definitions and contour applications are distinct. Repetition and clipping
+are derived rendering data, never duplicated editable project lines. Creator drafts
+have a local drawing context and use shared geometry/snapping and Application
+validation. User decisions (2026-10-08): library is global across projects;
+hatch applications offer model-space or paper-space spacing in tool properties;
+editing a pattern updates all applications of that pattern. The spacing mode
+belongs to the application, not the reusable definition. Pattern identity must
+remain stable across updates. Import format remains undecided. Persistence and
+cross-project synchronization use platform adapters and validated Application
+actions; React does not own the library. Embedded project definitions, revisions,
+offline resolution and update/undo policy remain technical proposals, not yet
+implemented decisions. Paper-space rendering needs an explicit view scale.
+See [requirements, proposals and next task](docs/planning/HATCH_PATTERN_LIBRARY.md).
+
+
+## Shared tool-default pickup - 2026-10-08
+
+The user's clarified contract supersedes V06a: rapid double-secondary-click on an
+existing visible element activates its tool and copies its creation defaults,
+INCLUDING layer. There is no pickup toolbar button or menu command. Geometry,
+identity and connections are excluded. Each supported type declares its fields;
+a shared gesture and Application capability boundary serve all adapters.
+Defaults remain editable in Werkzeugeigenschaften before drawing. Pickup itself
+never mutates the source or model history. Creation uses existing validated actions.
+The first implemented adapter is hatch: fill, background, contour, layer. All four
+construction modes use the same defaults. Window pickup now copies width, height,
+sill height and layer through that same boundary (2D). Host and position are chosen
+afresh by the existing validated placement action. Line/polyline pickup now uses
+the same boundary for color, pen width, style and layer (2D). The current drawing
+mode is retained; source vertices and identity are excluded. Wall pickup (2D) now
+shares that boundary for thickness, height, body offset and layer. These defaults
+are owned and pinned when a chain begins, feeding both prepared and full preview
+paths and final creation; source joins/windows/endpoints are excluded.
+Other element adapters remain future work. The user explicitly excluded 3D
+pickup on 2026-10-08: tool-default pickup is a 2D-only workflow.
+[Contract and evidence](docs/planning/HATCH_PRESET_PICKUP.md).
+
+## Shared stable 3D picking service - 2026-10-08
+
+The rendering/viewport world index is derived disposable data bound to immutable
+visible surface/window identities. Camera and selection changes reuse it. The
+React adapter owns cancellation and lifetime only. Cooperative preparation must
+retain the existing full scan until ready; previews and identity mismatches use
+that same fallback. Displayed-projection validity and footpoint priority remain
+with BimSolidView. No second editable model or per-tool picking implementation.
+See [evidence and limits](docs/performance/SHARED_SOLID_PICKING.md).
+
+
+## Persistent 3D display buffers - 2026-10-08
+
+BimSolidView delegates GPU resources to rendering/viewport/solid-renderer.
+Camera matrices derive from the shared orthographic projection. Display snapshot,
+local origin and selection changes invalidate buffers; camera changes retain them.
+Canvas alone owns context-loss/restoration and displayed-projection validity.
+CPU picking, stable model IDs and validated model actions remain unchanged.
+The old renderer is retained only as a diagnostic oracle under benchmarks.
+See [integration evidence](docs/performance/SOLID_RENDERER_INTEGRATION.md).
+
+## Opt-in immutable asset validation — 2026-10-08
+
+The shared asset schema may preserve an asset only when its exact object identity
+was registered after full storage validation and freezing of an owned copy.
+Caller IDs, hashes, frozen flags and deserialized/cloned objects confer no trust.
+All project geometry/reference checks and file-size/undo rules remain mandatory.
+PNG/JPEG import and schema-9 project loading now issue fresh handles (K02c).
+File storage validation is not a claim of full image decoding at project load.
+See [pilot evidence and limits](docs/performance/VALIDATED_ASSET_HANDLES.md).
+
+
+## Model/asset boundary — K02 experiment, 2026-10-08
+
+Stable logical asset IDs and immutable payload identity are separate concerns.
+Shared Application actions and authoritative geometry remain the only mutation
+boundary. Commit validation and atomic undo remain mandatory. Reusing payload
+verification requires an immutable, trusted handle; it must never trust arbitrary
+caller-supplied hashes or skip geometry/reference validation.
+
+The [K02 contract and measurements](docs/performance/MODEL_ASSET_CONTRACT.md)
+define an isolated versioned experiment. Pool layout, portable container,
+retention/GC and budgets are proposals, not a production schema migration.
+Schema 9, current limits, history and rendering remain unchanged.
+
+
+## User goals and development alignment — 2026-10-08
+
+The [updated coordination](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+and [source transcript](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md)
+extend the requirements with V01–V09: live measurement, multimodal sketch input,
+live 3D section, first-person navigation, context actions, tool-property pickup,
+hatch management, shared property capabilities and semantic 3D trimming.
+These are requirements and migration guidance, not implemented capabilities.
+
+Preserve the prepared shared action boundary. Transient measurement/sketch
+overlays and camera/section-display state are distinct from model edits.
+A permanent cut is a validated domain operation; its dependency on a roof must
+be decided before implementation. Saved views/documents/layouts retain the
+existing shared-model and annotation-scope contract. Common properties use
+capabilities without imposing every field on every element type.
+AI/Text/Voice use the same typed actions and revision-bound preview/acceptance.
+BIM scaling remains forbidden; existing allowed 2D and PDF/PNG/JPEG reference
+calibration is unchanged. No new renderer, language, storage technology or
+desktop packaging is selected by this planning update.
+
+## Session-local wall extrusion reuse — 2026-10-08
+
+Prepared selection translation may retain one derived local extrusion per pinned
+wall in its dependency closure. Reuse requires unchanged serialized local profile,
+height, opening rectangles and clipping policy; no new tolerance or ID-only trust.
+Every target still derives/checks connection contours and world coordinates, checks
+foreign endpoints and window rules. Stationary neighbours remain in the closure.
+The cache is private to the prepared session and exposes fresh world-space output;
+public derivation and full confirmation/history validation remain independent.
+See [evidence and limits](docs/performance/SESSION_WALL_EXTRUSION.md).
+
+## Atomic selection confirmation — 2026-10-08
+
+ToolInteraction may supply `confirm` for an atomic validated publication. The
+shared confirmInteraction calls it exclusively; adapters without it retain the
+validate/commit sequence. Atomic confirmation must check pinned context, derive
+and fully validate the final model afresh, and publish through the guarded
+history boundary. This is not a trusted-preview bypass or a cache of validation.
+The selection translation adapter is the first consumer: it shares one function
+between atomic confirm and direct commit. Explicit validate remains available
+for compatibility; normal mouse/numeric confirmation materializes only once.
+History still validates independently, and the UI's latest-context publication
+guard remains unchanged. Text/voice keep using the same full selection action.
+Other adapters are not migrated by this change.
+
+## Current performance decision: prepared action previews — 2026-10-07
+
+This section sets the direction for A-04 and supersedes the proposed next
+base64-schema cache in the historical development log. The
+[architecture review](docs/performance/ARCHITECTURE_REVIEW_2026-10-07.md) records
+code evidence, reproducible diagnostics, alternatives and the single next pilot.
+Existing product rules and the dependency direction UI → Application → Domain →
+Geometry/Core remain binding.
+
+**Implemented pilot:** 2D whole-selection translation prepares an owned validated
+base once and evaluates a typed geometry preview over it. The conservative wall
+dependency closure includes stationary partners and hosted windows; global endpoint
+occupancy catches unrelated endpoints arriving at joins. Unaffected SVG paint runs
+and Navigator data are reused. Final materialization/context checking and snapshot
+history still fully validate; public validation and file boundaries are unchanged.
+Text/voice selection movement calls the same prepared action through its full
+snapshot interface. Other tool previews still use the existing full-project path.
+See [pilot evidence and limitations](docs/performance/PREPARED_SELECTION_PREVIEW.md).
+The local snapping index continues to use the committed model and remains shared.
+
+**Binding direction for further migration (only the pilot above is implemented):**
+
+- Application prepares an edit against a stable validated model revision, typed
+  selection, visibility context and origin. Pointer updates change parameters,
+  not the authoritative project. Context changes invalidate the session.
+- Domain owns the affected set and shared pure validation/derivation rules.
+  Include hosted elements, relationship changes, stationary partners whose
+  contours change, and spatially affected endpoint occupancy. Selection IDs or
+  explicit relationship traversal alone are insufficient dependency boundaries.
+- A disposable preview carries affected model/relationship changes and derived
+  geometry over the unchanged base. Do not parse assets, serialize the project
+  or recreate every entity for each target. Preserve checks on resulting finite
+  coordinates, degenerate geometry and all current connection restrictions.
+- Rendering reuses the base scene and replaces the affected display geometry;
+  unrelated Navigator/UI data does not depend on pointer coordinates. View,
+  visibility and model revisions invalidate their own relevant derived data.
+  No renderer representation becomes a second editable BIM model.
+- Mouse, precision, text and voice consume the same Application evaluation and
+  final operation. Confirmation checks current context and fully validates the
+  materialized project through the existing commit/history boundary. File input
+  and public validation stay independent and complete. No public trusted-caller
+  switch or cache keyed only by mutable IDs may bypass validation.
+- Keep snapshot history and project/asset formats during this migration. A
+  transient preview change set does not imply Delta-History or Event Sourcing.
+  First prove the existing 2D whole-selection translation workflow; add further
+  consumers incrementally without copying orchestration into individual tools.
+
+Concrete result types, index implementation and scheduling are implementation
+choices for the pilot, not new user-facing decisions. Workers, a new rendering
+backend, desktop framework or native geometry runtime are not justified by the
+current measurements. Large affected sets can still require large calculations;
+measure preparation, steady-state preview and commit separately.
+
+Tool-specific settings, properties and option hints belong exclusively in the
+Werkzeugeigenschaften area, not the top application toolbar. TopToolbar has no
+active-tool option model; global project/view/layer controls remain there.
+
+## Window placement adapter — 2026-10-06
+
+`application/drawing/window-placement.ts` derives host/relative position from a
+visible physical wall body and uses existing `addWindow` validation for preview
+and commit. `useWindowPlacement` binds immutable project/visibility and a stable
+new ID; `useToolInteraction` and the generic plan placement binding own interaction.
+The shared snap resolver receives the host's physical longitudinal axis. This
+creation starts without a pinned movement origin or polar input; ToolInteraction
+accepts an unanchored ToolSnapPolicy, while movement adapters explicitly retain
+AnchoredToolInteraction. Existing movement-origin requirements are unchanged.
+Draft window rendering uses its actual layer and host visibility, never a fake
+committed entity. New selection requests accompanying a model commit are validated
+against that new snapshot; ordinary clicks still validate the current snapshot.
+No project schema change. Initial placement uses the existing 1.20 x 1.35 m window
+with 0.90 m sill as defaults; one click commits once, Escape discards. Properties remain shared.
+The placement hook retains editable width/height/sill text for the current workspace
+session. Application parses metre values (decimal comma or point) and applies the
+same dimensions through preview and addWindow. Each immutable draft revision binds
+a new interaction; old preview/commit callbacks reject a changed revision. Invalid
+or incomplete fields cannot fall back to earlier valid dimensions. These tool
+preferences do not mutate existing entities or create model history/file fields.
+
+Optional precise placement first pins a visible wall ID without a model commit.
+The same adapter then anchors the shared precision input at the physical wall
+body start; longitudinal distance locates the window centre relative to the wall
+axis start (the lateral body offset does not change that distance). Wall direction
+is fixed/read-only. Existing precisionTarget, snapping, Tab and confirmation are
+reused. Host choice, project/visibility and dimension revisions reject stale
+callbacks. Only final placement creates history; Escape discards the session.
+
+Window centre bounds are derived once per action by the shared domain wall/window-range
+function, used by both placement and movement. Pointer/precision targets beyond
+those bounds are capped before validated addWindow/updateWindow. Bounds include
+corner seams with numerical clearance and deliberately ignore T junctions. Invalid
+sizes and unavailable hosts remain errors; model validation is not relaxed.
+
+## Shared selection requirement — 2026-10-06
+
+User requirement: selection is a tool-independent Application capability for all
+current and future element types, including mixed sets. Support click, Ctrl-click
+and rectangular marquee. User clarification: active means visible; all shown layers
+are eligible. Reuse existing visibility policy, including hidden-host exclusion for
+windows. Do not introduce a separate activation/lock state for this requirement.
+
+Application owns one typed stable-ID selection set and eligibility rules. Viewport
+adapters supply projected hit geometry; common picking/marquee logic and pointer
+handling are reused, not reimplemented per tool. Selection capability is independent
+of movement support. Actions validate the full pinned target set; never silently
+act on just its first member. Properties, Navigator, On-Demand and AI/Text/Voice
+consume the same context. A selected host does not implicitly select its windows;
+future transformations must account for dependencies without double movement.
+
+Implemented first delivery: shared 2D selection for walls, windows, lines/polylines
+and hatches, including mixed sets. `application/selection/state.ts` owns typed-ID
+transitions, eligibility and the model-bound index. `useElementSelection` binds
+that state to React; renderers and Navigator consume it. Only a singleton supplies
+a legacy action/AI target. No first-item fallback for mixed sets.
+`planSelectionShapes` supplies disposable contours; `enclosedTargets` applies full
+rectangle containment to all vertices (including boundary), independently of type.
+`useSelectionMarquee` owns the pointer gesture. Click replaces, Ctrl/Cmd-click
+toggles, empty click clears; a frame replaces. Start the frame on empty canvas in
+Select mode, after 3 CSS pixels of movement. Drawing, editing, reference selection
+and navigation retain precedence. Escape/pointer cancellation/model or visibility
+change cancel the frame; selection creates no model history.
+3D wall surface and foot-anchor clicks now forward Ctrl/Cmd to the same selection
+transition as the plan. Existing depth/visibility and drag-vs-click gates remain.
+Selected wall outlines share the central set; no separate 3D selection store.
+`rendering/viewport/window-selection.ts` derives opening hit rectangles on the
+physical wall centre plane and outlines on both opening rims. These are disposable
+selection geometry, not glazing or exported model material. Windows and wall
+surfaces compete in the same projected depth space; hidden windows/hosts are
+excluded. A visible opening now targets its window instead of a wall behind it.
+The adapter returns the same typed targets for plain and Ctrl/Cmd selection.
+No 3D marquee or group-movement gesture is added.
+Implemented consumer: `application/selection/move.ts` pins a complete typed target
+set and base project, translates one proposed snapshot, then validates it once per
+proposal. Internal corner/T relations survive; relations crossing the selected-wall
+boundary detach. Host windows retain relative parameters and follow exactly once.
+A selected window without its host rejects the complete free translation. No new
+joins are inferred, no scaling or file-schema change is introduced.
+`useSelectionMove` binds the session and checks current context again at commit.
+`ToolInteraction`, shared polar input and snap policies own precision and inference;
+the viewport's generic placement binding only supplies pointer intent and displays
+the returned preview. Exclude moving entities and hosted windows from snap sources,
+pin the chosen origin immediately. Context changes and cancellation discard the
+preview; commit creates one model history entry. First delivery is 2D. Text/Voice
+must consume this same validated action with pinned whole-selection context, never
+fall back to a single target. See the [selection plan](docs/walls/SELECTION_MOVE_PLAN.md).
+
+
+### Local selection-command adapter - 2026-10-06
+
+`application/commands/selection-command.ts` adapts a bounded translation grammar
+to the shared selection-movement action and polar service. The UI supplies the full
+typed selection, immutable base and visibility policy. Textual previews disclose
+all targets and relationship effects; they never mutate the model. Acceptance
+checks context again and reruns the validated action rather than trusting editable
+preview geometry. Singleton legacy commands use the same context gate; mixed sets
+never fall back to their first element. Pure vector translation uses a neutral
+coordinate origin, not an inferred element anchor. This does not alter the pinned
+origin rule for interactive pointer movement. `selection-voice.ts` now binds browser recognition to an immutable context revision
+containing the complete selection, project and visibility policy. UI cleanup aborts
+on revision changes; callback-time revision checks reject late results before
+cleanup as well. Returning to the same IDs is still a new revision. Recognition
+only supplies normalized text and the shared command preview, never a commit.
+Invalid transcripts remain editable; explicit acceptance retains action validation.
+The existing browser recognition lifecycle supplies timeout, cancellation and errors.
+
+## Corner plus T: bounded composition — 2026-10-06
+
+A host may combine exactly one right-angle corner with remote perpendicular T
+contacts. The incoming wall must have no corner and cannot also be a host or
+have a second T. Existing equal cross-section and T-overlap checks still apply.
+`connectedWallContours` retains composed corner profiles. `validateCornerTContact`
+checks the full contact against the actual remaining longitudinal side and rejects
+contact with the corner partner. No fixed clearance margin is introduced.
+Corner-window validation runs before T opening clipping; crossing a T does not
+permit crossing a miter. All interaction and export paths share this derivation.
+
+Schema 8 is retained: relation fields, units, identity and interpretation are
+unchanged; this extends admissible topology. Older builds reject mixed files
+under their stricter validation. Loading never deletes relations to make them
+fit an older implementation. Existing schema-8 files remain valid.
+
+Correction to the planning assumption: current single-endpoint edits detach an
+end join when endpoints cease to coincide; no shared corner-move action exists.
+User decision (2026-10-06): a dedicated joint corner-move action is not wanted.
+The intended workflow is to select both affected walls and translate the selected
+whole elements together. Do not implicitly move an unselected neighbour.
+Selection-set translation must reuse the shared interaction pipeline and atomic
+history; its implementation and connection handling still require verification.
+Individual whole-wall translation retains its existing automatic-detachment rule.
+See [combination plan](docs/walls/CORNER_T_COMBINATION_PLAN.md).
+
+
+## Derived wall drawing preview — 2026-10-06
+
+ToolInteraction may expose previewProject for a disposable model snapshot. The
+wall adapter uses previewWallChain/appendWallChain for both that snapshot and
+confirmation validation. BimPlan only renders the returned model or reports the
+Application error. Numeric targets carry no hover candidate, matching commit.
+Draft wall visibility follows its assigned layer; committed picking, snap sources
+and history remain bound to the authoritative project. New draft IDs are never
+added to that project. Invalid targets retain already accepted draft segments,
+show the precise validation error and do not display an invalid body. The current
+slice is the 2D plan; shared 3D drawing preview is not introduced here.
+
+
+## Starting a wall on a host axis — 2026-10-06
+
+The initial wall snap policy uses the shared local T-axis resolver, projecting
+the cursor onto a visible host interior. Ambiguous hosts do not create intent.
+ToolSnapPolicy permits no origin before acquisition; AnchoredSnapPolicy remains
+mandatory for active ToolInteraction. No synthetic construction origin is pinned.
+beginWallChain pins the explicit start candidate in the ephemeral transaction.
+appendWallChain connects endpoint 0 through connectWallAtTAxis; finish alone
+commits history. Cancellation discards intent. Coordinate-only starts do not
+create relations. Existing right-angle/cross-section/topology rules validate
+mouse and numeric targets. A T-connected segment cannot continue into a corner.
+This supersedes the unsupported start status in the historical section below.
+
+
+## Drawing endpoint T intent — 2026-10-06
+
+Wall drawing reuses Application findTAxisReference/queryTAxisSnap and
+connectWallAtTAxis with direct editing. The plan carries the exact candidate
+through ToolInteraction validation and appendWallChain. Numeric input discards
+mouse intent. Only finishWallChain commits history; cancel discards the draft.
+The current slice ends a new segment on an existing visible host axis. A chain
+ending at a T must be finished before drawing again; corner/T combinations
+remain unsupported. Starting on a host axis does not yet create a T relation.
+
+
+## T contacts do not constrain hosted window movement — 2026-10-06
+
+Binding user clarification: windows stay on their original wall and ignore T
+contacts while moving. This supersedes the earlier overlap prohibition for T
+openings only. Original wall-axis extent, dimensions and opening-overlap rules
+remain; corner rules are unchanged. Moving a window neither transfers its host
+nor cuts a neighbouring wall. Geometric contact reports remain diagnostic.
+
+T wall solids opt into clipping the rectangular opening to the owning wall's
+derived footprint. The shared extrusion kernel bounds its slices to that profile;
+closed-shell validation remains active. This includes a window crossing a trimmed
+incoming cap. IFC retains its existing owning-wall void relationship, so no
+neighbouring element is silently modified. Model actions, preview, persistence
+and normal export accept the same window positions.
+
+Canvas wall contour width is a presentation preference in CSS pixels (0.5–2,
+default 1), shared by all plan viewports. UI hook owns guarded browser storage;
+it is neither project data nor model history. View → Canvas-Darstellung and the
+Settings control open the same dialog. Turquoise axis stays at 2.5 CSS pixels;
+selected wall outline stays neutral. This supersedes the fixed 1.25 px selection
+width below; physical wall thickness and export geometry are unaffected.
+
+## Shared-host T relations and joined plan outlines — 2026-10-06
+
+Binding decision following the user's multi-side T workflow: a host may have
+multiple right-angle incoming walls on either side, including opposite branches
+at the same axis point. This supersedes the disjoint-pair restriction below.
+An incoming wall may have only one T relation and may not also act as a host.
+Corner/T combinations and differing cross-sections remain unsupported. Same-side
+contact intervals must not overlap; all window/contact checks remain mandatory.
+Schema 8 fields are unchanged; validation accepts this broader topology. Existing
+files retain their exact relations. Earlier builds may reject new multi-T files.
+An endpoint already participating in a T is excluded from automatic corner
+acquisition, preventing a false corner between opposite incoming branches.
+
+Rendering wallPlanOutlines removes coincident contact strokes only between
+persisted, visible partners using the authoritative derived contours. It does
+not discover relations from proximity or merge BIM entities. Hiding a partner
+restores the remaining wall's cap. Fill is uniform; selection uses a subtle neutral exposed contour (1.25 CSS px).
+Turquoise is reserved for the authoritative drawing axis and its handles (2.5 CSS px axis). Separate hit geometry, stable IDs and IFC entities
+remain intact. This is a ground-plan display rule, not a solid boolean union.
+The existing temporary pair-preview overlay remains separately outlined.
+
+The 3D workplane adapter now passes the shared T candidate through preview and
+commit, superseding the earlier unimplemented 3D carrier status below.
+
+## Explicit axis snap intent in 2D endpoint editing — 2026-10-06
+
+Application t-axis-snap derives an endpoint target from nearby eligible axis
+segments supplied by the shared source query. It projects the fixed opposite
+endpoint onto the host axis for the supported right-angle T; the target must be
+inside the segment and within the CSS snap radius. Ambiguous hosts produce no
+connection intent; existing reference selection can restrict sources. No global
+wall-pair search, no inference of a connection from a numeric coordinate alone.
+Only axis-endpoint point/stretch interactions participate in this first slice.
+
+ToolInteraction carries an optional SnapCandidate through shared validation and
+commit. previewEdit combines the endpoint edit with the existing T Application
+action, with the same pinned session/model and one history commit. Plan preview
+and mouse confirmation pass the same candidate; numeric overrides discard it.
+Explicit axes/held Shift remain authoritative. Viewport capability
+includeInteractionTargets keeps 3D unmodified until its target transport is
+integrated; it is a generic carrier, not geometry logic in the renderer.
+The existing isolated/equal-cross-section/right-angle relation limits still apply.
+
+## Held Shift direction — 2026-10-06
+
+Shift now latches the acquired construction direction for the current interaction,
+not the nearest angle on every pointer movement. Application createShiftSnapLock
+owns the transient origin/direction; useShiftSnapLock supplies shared keyboard
+press/release/blur lifecycle for plan and 3D workplane adapters. Existing explicit
+edit axes and host restrictions still win. Recognised oblique guides can be held;
+otherwise the first direction uses the existing 45-degree acquisition. Exact
+compatible snap targets remain eligible along the held axis. Releasing Shift
+permits recalibration; a new interaction/reset discards the latch; view zoom does
+not. This state is neither project data nor model history.
+
+## Persisted isolated T relations, schema 8 — 2026-10-06
+
+Current contract supersedes the historical schema-7/persistence status below.
+storey.wallTJunctions stores only hostWallId and incoming wallId/endpoint.
+Strict V7 validation precedes migration with an empty T list; V1–V6 retain their
+explicit migration chain. Loading never discovers or repairs connections.
+Domain t-relations validates disjoint pairs (no shared walls or corner joins)
+and delegates geometry/opening inspection to t-pair. connectedWallContours and
+connectedWallSolids supply the existing plan, 3D, snapping and normal IFC paths.
+The first slice supports right angles and equal thickness/height only.
+
+Application t-connections provides snapshot-bound preview/commit connect and
+disconnect actions, stable IDs and one model-history transaction. Future mouse,
+text and voice adapters use this boundary, never a second relation model.
+Direct-edit translation passes explicit move intent through updateWall and
+removes a participating T without moving its neighbour or rediscovering joins.
+Reshaping retains a relation while the incoming world anchor remains on the host
+interior; otherwise it detaches. An end shortened exactly to the anchor does not
+silently become a corner. Invalid remaining contact geometry rejects atomically.
+Windows may touch T contact but cannot overlap it, including hidden windows.
+No automatic T creation or additional UI workflow is introduced in this slice.
+
+## Recursion-free T pair kernel — 2026-10-06
+
+Domain t-pair owns inspection and solid derivation from resolved Wall parameters,
+endpoint index and schema-valid windows from one snapshot. It has no runtime
+Project/schema validation dependency. Internal project validation may call this
+kernel after structural/identity checks; it must enforce relation eligibility.
+Public resolveIsolatedTPair validates/copies the full Project and resolves stable
+IDs and the current isolated-pair restriction. inspectTOpenings and deriveTSolids
+use this boundary then delegate to the same kernel. No caller-provided stale
+contours and no second geometry implementation. Application preview and isolated
+IFC export retain their existing public interfaces and strict validation.
+Schema remains 7; persistence/automatic T relations are not implemented here.
+
+
+## Persistent T contract preparation — 2026-10-06
+
+User confirmed: changing one host endpoint keeps the incoming endpoint at its
+world position; when that point leaves the host interior, detach without moving
+the incoming wall. Individual element movement detaches, without propagation.
+[Persistent T contract](docs/PERSISTENT_T_RELATIONS.md) defines the bounded
+implementation plan: IDs/end index identify the anchor; do not store redundant
+coordinates or a proportional anchor. Schema 8 is planned, not implemented.
+Separate validated public entry points from pure internal derivation before
+connecting T solids to validateProject, avoiding recursive validation. Movement
+intent must be explicit; coordinate differences alone are not the action type.
+
+
+## Isolated T IFC acceptance — 2026-10-06
+
+Domain t-solid now owns the validated T pair's opening-aware solids. Application
+re-exports it for the existing snapshot-bound preview; interop/ifc/t-junction
+uses it directly and passes local profiles to the existing writer. No Interop
+import from Application and no duplicate clearance or extrusion implementation.
+This is an explicit acceptance export, not a change to the normal export button.
+No stored T relation or schema migration. The fixture generator supplies free,
+touching and rotated cases with independent analytic net-volume expectations.
+See docs/T_IFC_ACCEPTANCE.md for regeneration and external acceptance.
+
+
+## T-preview opening contact — 2026-10-06
+
+User permits windows to run against a wall. The isolated T-preview interprets
+this as touching allowed, positive overlap rejected, without extra clearance.
+Existing corner-join rules are unchanged. Domain t-openings derives one snapshot's
+T geometry and reports free/touching/overlapping for each target window. Host
+windows are checked against the entire projected contact interval; incoming
+windows against the trimmed contour and correct endpoint cap. Visibility never
+exempts an opening. Application consumes the report and shared cut solids.
+
+contour-solid reconciles numerically compatible local profile X coordinates and
+opening bounds after world/local conversion, preventing spurious tiny extrusion
+cells at a transverse cap. This affects derived geometry only, within existing
+model tolerances. No project mutation or persisted opening resize. T relations
+remain temporary; save/ordinary IFC still use the unchanged model. Further joins
+on either wall remain unsupported by the diagnostic T path.
+
+
+## Temporary T preview adapter — 2026-10-06
+
+Application walls/t-preview resolves stable IDs in a validated Project, rejects
+windows and persisted joins on either target, then consumes the pure T geometry
+and shared wallContourSolid. The existing corner preview reducer binds the
+result to the source snapshot and clears on target/type changes. The diagnostic
+dialog offers a T mode using navigator wall labels, with the selected first wall
+as host. Existing plan profiles and solid preview surfaces display the pair.
+No duplicated geometry or persistent T relation. Closing is discard-only; save,
+history and IFC continue to use the unchanged authoritative Project. Host window
+clearance and anchor/movement policies are still proposals, not implemented rules.
+
+
+## Isolated right-angle T geometry — 2026-10-06
+
+Domain `elements/wall/t-junction.ts` now derives gross contours and a contact
+segment for an explicit host/incoming pair. The host body remains unbroken;
+the incoming cap meets the facing host side. Equal heights/thicknesses and an
+interior axis contact are required. Existing wallBody, line intersection and
+polygon/tolerance services are reused in a local coordinate frame. Numerical
+compatibility is not authorization to auto-connect nearby model entities.
+
+This pure helper knows no Project, windows, other joins, persistence or UI.
+Callers must verify those preconditions separately. It never mutates axes or
+adds a relation. Contact width touching a host end, insufficient incoming length,
+non-right angles and invalid inputs reject. Existing automatic endpoint joins
+remain unchanged. No schema migration, new command or duplicated renderer path.
+The planned anchor/host-movement policies remain open.
+
+## T-wall connection planning boundary — 2026-10-06
+
+[The bounded T-connection draft](docs/T_WALL_CONNECTION_PLAN.md) records the
+current endpoint-pair limitation and proposes an unbroken host wall with a
+trimmed incoming wall. It is not an implemented connection or a settled anchor
+policy. Preserve common contours, IDs and validated Application actions. Host
+movement/anchor behavior and host opening clearance remain explicit proposals.
+The next geometry-only helper introduces no persistence, UI or command path.
+Text/voice remain companion adapters of verified actions per the guide; there
+is no blanket deferral based on the user's priority question.
+
+## Oblique persisted wall corners — 2026-10-06
+
+The automatic connection path now uses Domain deriveWallCorner for non-collinear
+axis-end pairs, including acute and obtuse corners. This supersedes the historical
+right-angle-only restriction below. The existing line intersection service and
+contour validation are shared; no angle-specific renderer or IFC implementation.
+The strict deriveRightAngleCorner entry remains for the older diagnostic preview.
+That dialog is still limited to right angles; automatic drawing/editing does not
+require it. Equal thickness/height, exact endpoint identity, two ends per node,
+valid composed profiles and opening clearance remain mandatory. Parallel axes,
+numerically unresolved seams and miters reaching the opposite cap reject.
+
+Schema 7 is unchanged: joins still store only IDs/end indices. Existing valid
+right-angle projects retain their geometry. The admissible geometry is expanded;
+older releases may reject newly saved oblique joins. All views, snap references
+and ordinary IFC export consume connectedWallSolids. A complete wall chain still
+forms one undo action. T contacts, collinear subdivision and unequal wall sections
+remain outside this step. Future text/voice adapters use existing validated wall
+actions and stable target context, not a separate corner mutation path.
+
 
 ## Convex 2D contour offset — 2026-10-06
 
@@ -208,8 +871,10 @@ committing the preview. Window display requires both its own layer and its host
 wall to be visible in the effective context. Real wall openings and the complete
 IFC export remain unchanged. One Application eligibility policy serves all views
 and tools. This resolves the earlier open scope, persistence and host questions.
-Initial filters for newly created DrawingDocuments and visibility undo semantics
-remain open. See docs/LAYER_VISIBILITY_PLAN.md; no visibility implementation yet.
+Initial filters for newly created DrawingDocuments remain open. Update 2026-10-10:
+BIM visibility is implemented with separate palette Undo/Redo, outside model history.
+Document lifecycle/history is not decided by that working-view rule. See
+docs/planning/SAVED_DRAWING_VIEWS.md for the current code/contract distinction.
 
 ## Implemented: layer data and schema-1 migration — 2026-10-04
 
@@ -883,6 +1548,23 @@ Temporary UI state such as hover, active menu or current tooltip must not be sto
 
 AI is a first-class interaction method but not a separate CAD engine.
 
+**Primary product goal, user decision 2026-10-10:** autonomous, speech-capable
+AI CAD that can turn site/plot dimensions, gross building volumes, storey and
+room requirements, and source-backed Bebauungsplan analysis into validated,
+editable design variants. [Scope, acceptance and phased path](docs/ai/AI_CAD_PRIMARY_VISION.md).
+This priority guides all new domain capability design; it does not imply an
+already implemented AI designer or replace the current bounded task.
+
+Every relevant capability exposes a typed Application action or structured
+model query reusable by manual UI, text, voice and future AI. The AI can plan
+many internal steps, but geometry, quantities and constraints remain with the
+CAD/domain engines. Imported plan statements retain document/page/region,
+version, applicability and uncertainty; an ambiguous or unverified rule cannot
+silently become a satisfied design constraint. Multi-step proposals require
+revision-bound context, model diff, explicit publication boundary and Undo.
+A CAD button itself is not the AI integration surface; no direct UI automation
+or second editable AI model is authoritative.
+
 The intended architecture is:
 
 ```text
@@ -1142,6 +1824,23 @@ Responsibility boundaries: saved view/document/annotation/layout definitions bel
 
 Saved definitions and annotations may initially share the versioned Project file and existing snapshot history. Hover, temporary guides and open menus remain ephemeral. Model actions and document actions are distinct typed operations through the same validated application/history boundary; no second BIM history or state store is introduced by a canvas pane. New persistent types require reference validation, migration from schemaVersion 1, round-trip and undo tests before release. Navigation alone must not produce model history entries.
 
+## Saved-view context resolution — clarification 2026-10-10 (MS-04a)
+
+Application resolves a typed viewport target against the current project snapshot,
+including source definition, effective scale, visibility and supported capabilities.
+Renderers consume that context; they must not reconstruct a working-plan identity
+for a DrawingDocument or silently fall back to working scale/visibility. Missing,
+foreign or stale references are explicit failures. Closing a pane does not delete
+its saved definition. Document visibility is independent of the BIM visibility mask.
+Derived caches include relevant model/definition identity, not pointer or camera.
+
+Schema 17 now stores optional ModelViews and DrawingDocuments. The first pilot
+uses one floor-plan source per storey and named full-plan documents with independent
+scale and hidden-layer IDs. Older files migrate without invented documents; strict
+referential validation rejects foreign source/storey/layer IDs. Existing storey
+annotations retain scope. Crop and layout composition are not implemented.
+See [saved-view contract and single pilot](docs/planning/SAVED_DRAWING_VIEWS.md).
+
 # 30. Editing, Layers, Heights and Input Contracts — decision 2026-10-03
 
 **Binding technical rules for future implementations:**
@@ -1154,7 +1853,7 @@ Saved definitions and annotations may initially share the versioned Project file
 
 **Binding user restriction and required application guard for N25:** proportional scaling is allowed only for genuine 2D entities and imported PDF references. BIM/3D objects (including walls, windows, doors, slabs and roofs) remain forbidden even when rendered in a 2D view or DrawingDocument. The future scaling action must resolve authoritative target types/capabilities and validate _every_ target before preview or commit. If any target is forbidden or unresolved, reject the entire selection without partial changes or a history entry. Hiding a toolbar command is insufficient; direct action calls, AI/Text/Voice and imported/reloaded references must pass the same guard. Validate finite positive lengths, nonzero measurement baseline, anchor and target revision. Uniform scale and an explicit anchor form the proposed calibration contract; text/style scaling semantics need separate definition.
 
-No scaling action exists in the inspected code. This documentation records its mandatory implementation gate; it does not claim executable enforcement has been added. Required acceptance cases: permitted drawing line/PDF; BIM wall selected in plan and section rejected; mixed line/wall selection rejected atomically; stale target rejected; valid operation preserves IDs and supports one undo/redo and JSON round-trip. Bitmap import remains an older retained wish; it does not gain scaling permission under the new restriction.
+No scaling action exists in the inspected code. This documentation records its mandatory implementation gate; it does not claim executable enforcement has been added. Required acceptance cases: permitted drawing line/PDF; BIM wall selected in plan and section rejected; mixed line/wall selection rejected atomically; stale target rejected; valid operation preserves IDs and supports one undo/redo and JSON round-trip. Update 2026-10-07: the user explicitly permits two-point calibration of imported PNG/JPEG images as well. This supersedes the bitmap exclusion only; BIM scaling remains forbidden.
 
 **Open user meanings — no default invented:** D versus Ctrl+D; whether a wall-axis switch preserves physical wall position or the drawn reference axis; the 3D export format/contents; undo grouping for wall chains. These block only their respective implementation. Detailed field names, folder layout, PDF decomposition approach, solid-library choice, per-annotation styling and layout-template linkage mechanics remain proposals until separately decided.
 
@@ -1692,12 +2391,504 @@ Tab bedient weiterhin Laenge/Winkel; Klick fixiert nicht mehr nur die Richtung.
 kein Fehler; freie Schraffurbewegung durch einen Mausklick abgeschlossen.
 
 
-## Local offset text adapter — 2026-10-06
+### Erweiterung 06.10.2026: zwei Ecken an der T-Hauptwand
+Verbindlicher implementierter Stand: Beide Hostenden dürfen rechtwinklige
+Eckanschlüsse besitzen. Die gemeinsame Prüfung berücksichtigt jeden Eckpartner
+und die zusammengesetzte Hostkontur. Kontakt/Überlappung mit einem Eckpartner
+bleibt verboten. Historische Begrenzungen auf genau einen Host-Eckanschluss
+sind damit überholt; andere Topologiegrenzen bleiben bestehen. Kein Schemawechsel.
 
-Application drawing/offset-command strictly parses signed Offset [um] number
-m/cm/mm and targets only the selected closed 2D contour. It invokes the existing
-Direct Edit numeric preview, including the prepared inward cap. The existing
-command envelope pins serialized source and stable selection for confirmation;
-UI displays requested versus actual distance when capped. No separate geometry,
-AI service, new persistence or speech grammar is introduced. UI hints distinguish
-supported offset commands from future style commands.
+## Image-reference planning boundary — 2026-10-07
+
+See [image-reference plan](docs/references/IMAGE_REFERENCE_PLAN.md) for the verified
+schema-8 integration points and proposed embedded-asset/transform/action contract.
+No reference schema or calibration action is implemented by this documentation.
+Binding user decision: imported PNG/JPEG images may be calibrated using two
+points and a known length. This extends Section 30's permitted reference types;
+all BIM exclusions and whole-target Application guards remain binding. Asset-backed storey references are not DrawingDocuments or copied
+BIM elements. Browser decoders and disposable URLs belong to adapters; project
+files must preserve assets independently of their original local files. Proposed
+field names and embedded storage are an incremental design, not user decisions.
+
+## Implemented image-reference storage slice — 2026-10-07
+
+Runtime schema 9 adds project assets and storey.references. The reference domain
+module validates the storage shape, canonical base64, MIME whitelist, pixel metadata,
+finite noncollapsed transforms and linked asset/layer IDs. It deliberately does not
+decode images; future file/browser adapters must verify actual content, orientation
+and decoded dimensions before rendering/import. No bitmap is trusted as executable
+markup. Migration 1–8 belongs solely to the file adapter and adds empty collections.
+Image bytes are stored once per asset; no blob URLs or decoded images enter history.
+
+application/references/actions.ts binds import to project ID and base snapshot,
+validates an independent preview and commits asset/reference in one history step.
+The shared file-size guard now also protects serialization, import and direct JSON
+loading (10 MiB UTF-8). Storage metadata has a provisional 16-million-pixel budget
+and 16384-pixel edge limit; this is a conservative implementation bound, not a
+measured browser capacity promise. Renderer/decoder resource checks remain pending.
+Layer assignment, occupancy and eligibility include references. Selection/rendering
+and calibration are not yet exposed; existing BIM IFC output ignores these 2D data.
+
+## Image import and plan presentation — 2026-10-07
+
+interop/images/import.ts performs bounded header inspection before browser decoding,
+normalizes orientation through createImageBitmap and canvas PNG serialization, and
+releases the bitmap. No external URLs or SVG import. Stored image headers are
+checked against MIME/dimensions before rendering; this is not full file validation.
+useImageImport owns transient read/placement lifecycle and stale async cancellation.
+It adapts previewCreateReference to existing ToolInteraction, querySnap and generic
+placement; width is local tool input, commit alone stores the reference and asset.
+
+reference joins the shared typed selection index and projected marquee shapes.
+Plan rendering derives one image rectangle from origin, rotation and metres/pixel,
+with CSS-constant selected outline. Layers and Navigator reuse stable IDs. Reference
+pixels are not model snap geometry. Whole-selection moves containing a reference
+currently reject atomically; legacy edit menus are withheld for this type. No
+calibration action or independent image movement engine is introduced here.
+
+
+## Implemented image calibration slice — 2026-10-07
+
+`geometry/transforms/calibrate.ts` supplies uniform scaling about a fixed world
+anchor. `application/references/calibration.ts` owns snapshot/ID/selection and
+visibility guards, explicit metric length parsing, validated preview and history
+commit. BIM and mixed selections are rejected in this action, not only in UI.
+The renderer derives the new image transform from the same project snapshot.
+
+`useReferenceCalibration` is a ToolInteraction adapter: shared point capture and
+snapping, no separate engine. ReferenceCalibrationControls owns the On-Demand
+length form; CadWorkspace only coordinates it. A session pins project, visibility,
+selected reference and two world points. Context changes invalidate it; preview
+does not mutate project/assets and acceptance produces one model history entry.
+Text/Voice adapters are the next bounded task and must reuse this action.
+
+
+## Calibration command adapter - 2026-10-07
+
+The existing selection-command grammar accepts `Referenz auf 5 m kalibrieren`
+only with a completed CalibrationContext from shared point capture. This frozen
+context pins base project, reference ID, visibility and copied world points; its
+identity is a revision token for command preview and voice. Replacing or clearing
+it invalidates pending results. Text and normalized voice call previewCalibration;
+acceptance revalidates through that same action and the existing model history.
+No separate AI geometry or automatic reference inference is introduced.
+
+
+## Reference translation through shared selection - 2026-10-07
+
+SelectionMove now translates image-reference origin alongside the selected BIM
+and drawing geometry in one validated snapshot. Scale, rotation and embedded
+assets remain unchanged. The singleton reference invokes the existing
+useSelectionMove/ToolInteraction consumer; mixed selections and text/voice use
+the same Application action. No image-specific movement engine or pixel snapping.
+Host-window restrictions, visibility eligibility, stale-context guards and
+relationship detachment rules remain binding.
+
+
+## Property form revisions and diagnostics - 2026-10-07
+
+Form reset keys use immutable project identity (weak revision token) and selected
+kind/ID. They never serialize or retain embedded assets. Same snapshot/selection
+keeps drafts across presentation renders; model/selection changes reset them.
+The initialProject prop only seeds the normal validated editing reducer; it is
+not a second controlled model. A separate development-only benchmark entry mounts
+the actual workspace and calls existing Application actions. It is not a product
+route and its React/heap measurements must not be treated as production guarantees.
+
+
+## Commit validation reuse - 2026-10-07
+
+The existing history boundary still fully validates and independently copies every
+incoming project. Within that synchronous commit, JSON comparison serializes this
+just-validated result directly and explicitly checks its UTF-8 file-size limit,
+instead of invoking the public serializer and repeating validation/solid derivation.
+The current history snapshot still passes through the public validated serializer.
+No trusted-caller flag, cross-call validation cache or mutation-based shortcut is
+introduced. Public serializeProject/readProjectFile, stale-action guards, normalized
+no-op detection, visibility-only commits and snapshot Undo/Redo retain their contracts.
+The measured diagnostic comparison lives only under benchmarks/.
+
+
+## Development-only active movement measurement - 2026-10-07
+
+The separate benchmark Vite configuration may wrap explicit existing functions in
+memory to observe snap, precision/selection preview, full validation, wall solids
+and plan derivation. Source-anchor mismatches fail visibly. These wrappers and
+the diagnostic driver are never imported by the product build. No parallel model
+or alternate action path is introduced: the driver selects real Navigator targets
+and sends synthetic DOM pointer/click events through the existing plan handlers.
+Acceptance compares the observed preview with rendered geometry, then verifies
+cancel, one committed group move, Undo and Redo. Timing is synthetic-dispatch to
+a frame opportunity with DOM verification, not OS input or guaranteed GPU display.
+Nested inclusive phases must not be summed as exclusive costs.
+
+## Bounded image presentation reuse - 2026-10-07
+
+`interop/images/import.ts` caches checked image URLs by exact base64 contents,
+MIME and pixel dimensions across equivalent preview asset copies. IDs and object
+identity are not cache authority. Scalar snapshots detect changed properties even
+on a reused object. LRU retention is bounded to eight entries and 48 MiB of
+conservative UTF-16 input/output string payload; oversized results are not retained.
+This is derived disposable presentation data, not model/file validation. No project
+objects, decoded bitmaps or Blob URLs enter the cache or history. Changed inputs
+are checked again; eviction only changes cost. Cold-load validation remains intact.
+See [measured results and limits](docs/performance/IMAGE_URL_REUSE.md).
+
+## Single-target movement preview reuse - 2026-10-07
+
+`application/tools/point-preview.ts` is a disposable one-entry cache scoped to a
+bound interaction adapter, with exact point coordinates and guards before every
+hit. New immutable context requires a new instance; changed targets, failures,
+cancellation and confirmation clear it. Selection movement shares this result
+between precision evaluation and plan rendering. Its origin, model, selection and
+visibility guards remain active; validate/commit derive fresh snapshots instead of
+trusting presentation output. The UI latest-context guard remains authoritative
+for late callbacks. No global project cache or per-element UI branch is introduced.
+Unconstrained polar input preserves the exact already-resolved aim; explicit
+angle/length constraints and finite-distance guards retain their contracts.
+
+## Line pattern color contract - 2026-10-09
+
+LineStyleDefinition.colorEditable defaults to true for legacy definitions. When
+false, the embedded pattern color is authoritative; domain project validation
+rejects divergent line colors. UI disables the color control. Renderer converts
+system pen width explicitly using viewport pixels per metre and pattern scale.
+Definitions remain portable project snapshots; catalog edits do not silently
+rewrite existing project lines.
+
+## Global local hatch library - 2026-10-09
+
+V07d: named definitions with stable IDs and local metric cell geometry are validated
+in Domain; Application owns version-1 library loading and append-only saving via
+HatchPatternStorage. Interop uses localStorage per browser profile/origin across
+projects (no cross-device or cross-origin synchronization). Reads are validated,
+limited in size and count; failed reads/writes do not reset existing data. Saving
+rereads current storage before adding a new definition. Opening a stored pattern
+as a draft creates a copy; saving assigns a fresh ID. Existing-definition editing
+and global application updates remain a separate action/contract. Library state
+is independent of project history and production schema 10 remains unchanged.
+React owns the transient draft and list presentation; previews are derived paths,
+not copied project elements. Pattern usage, model/paper scale, portable embedded
+snapshots, revisions and update/undo conflicts remain pending V07e.
+
+## Hatch application contract V07e - 2026-10-09
+
+Binding user answers: loading an older project automatically adopts newer available
+hatch definitions; global pattern edits have their own library Undo/Redo. Project
+Undo changes model assignments, never writes global definitions. Update-all remains
+required; it is not implemented by the append-only V07d library.
+
+Technical decisions for the next incremental feature: embed used definitions once
+in a project table, reference stable IDs from hatch applications, validate referential
+integrity and keep an explicit local-plane anchor. Model sizing uses metres; paper
+sizing requires an explicit output scale from the future view/document contract,
+never camera zoom. The first assignment pilot is model-space only. Legacy hatches
+retain their solid appearance. Repetition/clipping are derived bounded rendering.
+
+Before global editing, add monotone library revisions and central Application
+resolution. Newer valid definitions update all matching applications on load and
+mark the project changed without silently saving closed files. Missing/older library
+entries retain embedded content; equal identity/revision with divergent content is
+a reported integrity conflict, not an implicit replacement. Library Undo publishes
+restored content under a new revision. Project snapshot restoration must use the
+same resolution rather than rewinding global content. Multi-tab transaction safety
+is not implied by localStorage. These mechanisms remain future implementation.
+
+See docs/planning/HATCH_PATTERN_LIBRARY.md, V07e, for the bounded V07f assignment
+pilot, module evidence, tests and separation from paper-scale/global-history work.
+Production project schema stays 10 in this documentation-only change.
+
+## Hatch model-space pilot V07f - 2026-10-09
+
+Production schema 11 embeds used definitions once per project in hatchPatterns.
+Applications hold patternId, model-space mode and explicit origin. Domain validates
+references/definition identity and finite extents; normalization removes unused
+definitions. Versions 1–10 migrate strictly at file ingress with an empty table,
+retaining solid appearances. Used definitions remain portable without local storage.
+HatchRequest accepts an owned definition for shared assignment/removal; conflicting
+same-ID content is rejected until the revision action exists. Drawing and default
+pickup use this action; pickup copies definition/appearance, never contour or anchor.
+Single and prepared group translation move origins; contour edits retain them.
+SVG pattern tiles and polygon clipping provide bounded rendering and draft preview.
+No model geometry is allocated per repetition. Fill color/opacity control strokes,
+background and contour remain independent. Global revision editing/History, automatic
+library reconciliation, paper-space sizing and uploads remain unimplemented.
+
+## Hatch revision core V07g - 2026-10-09
+
+Library v2 owns stable definition IDs, positive revisions and a monotone publication
+clock. Legacy v1 migrates in memory on read. Application edits bind expected revision
+and the exact storage token; library Undo/Redo republishes changed content under a
+new revision. Session history is bounded to 20 steps and 4 million serialized
+characters. Storage errors do not return an advanced history. This is optimistic
+session protection, not an atomic multi-tab transaction.
+
+The central resolver takes an explicit project snapshot and embedded/available
+revision records. Newer records update one definition table for all applications;
+missing or older records retain embedded content. Equal revision with different
+content reports a conflict. Full project and file-size validation precedes return.
+These are implemented Domain/Application contracts. Production schema 11 still
+does not persist revision metadata; automatic load/History resolution and global
+editing UI remain future integration, starting with portable revision context V07h.
+
+## Portable hatch revision context V07h - 2026-10-09
+
+Production schema 12 adds an optional positive safe-integer revision to each used
+embedded definition. Omission means unknown provenance; strict versions 1–11 migrate
+at file ingress without inventing a revision. Definition identity and content remain
+stored once per project, never per hatch. Schema 11 still rejects revision metadata.
+
+Opening, project adoption and project Undo/Redo use the central Application resolver.
+The browser adapter reads library records before dispatch; reducers do not access
+storage. Newer content is adopted; missing/older content retains embedded rendering.
+Equal revision with divergent content reports a conflict. An unreadable library is
+reported while the valid portable project remains usable. Project restoration also
+retains newer known definitions from the same current project if the library is
+missing or older. It never writes the library or adds a reconciliation Undo step.
+File decoding itself remains platform-neutral and does not consult global storage.
+Live cross-tab updates and the global editing UI are still future work.
+
+## Global hatch library editing V07i - 2026-10-09
+
+The shared FloatingPanel exposes ID/revision-pinned editing and independent library
+Undo/Redo. Creation participates in the same bounded session History. Library Undo
+publishes new monotone revisions; project Undo never writes global storage. Panel
+closure retains History; explicit reload starts a fresh library session while keeping
+the draft's pinned target. External writes invalidate that session. Draft geometry is
+owned separately; invalid definitions or failed storage writes do not publish state.
+
+One storage notification adapter feeds both catalog consumers and active-project
+reconciliation. A deterministic patterns-changed Application event updates only
+present, preserves model past/future and invalidates a direct preview when its base
+actually changes. Defaults follow the resolved project definition, then the catalog.
+Missing/older definitions retain portable content; conflicts are reported. Other
+project files update on opening, not through hidden filesystem writes. Notifications
+and optimistic session guards do not constitute atomic multi-tab publication.
+Production schema remains 12. Paper-space applications still require an explicit
+view/output scale contract, independent of interactive camera zoom.
+
+## Hatch orientation and application rotation - 2026-10-09
+
+Implemented contract: Creator pattern cells use local x-right/y-down coordinates.
+The shared preview/committed SVG tile preserves those coordinates and anchors the
+cell bottom-left at the application's model-space origin. It must not reflect local
+line geometry again when mapping the model's y-up contour into SVG.
+
+Production schema 13 adds optional rotation in degrees to the hatch application,
+not to the shared library definition. Positive angles rotate the complete pattern
+lattice counter-clockwise around its application origin; contour geometry stays
+unchanged. Domain validation accepts finite 0–360; Application actions normalize
+360 to omitted zero, avoiding false model History entries. Strict ingress migration
+of versions 1–12 preserves definitions and treats missing rotation as zero. Earlier
+schemas reject the new field. Defaults, pickup, movement and global revision
+reconciliation retain this application property. Paper-space scale remains pending
+V07j and must not be inferred from camera zoom.
+
+## Pen sets and immediate property editing - 2026-10-09
+
+Implemented: domain/pens owns strict named color/set/inventory data. Application/pens
+validates catalog publication through a replaceable storage interface and project
+palette assignment against a pinned snapshot. Interop owns local browser persistence.
+Global here means one browser profile/origin across projects, not account/cloud sync.
+Schema 14 embeds an optional owned palette snapshot; strict versions 1–13 migrate at
+file ingress. Selecting a package never recolors model elements. User decision: element
+colors remain independent HEX values after catalog changes or deletion. Inventory is
+ordered and limited to ten existing unique pen IDs. Reapplying a package refreshes the
+project snapshot; library writes never occur during project Undo/Redo.
+
+Shared ColorField/ColorPicker and FloatingPanel serve all existing color entry points;
+free palette gestures remain local until release. Shared PropertyForm owns discrete
+choice commits and text/number blur/Enter commits, cancels scheduled work on unmount,
+and preserves Domain/Application validation. Incomplete values remain drafts. It does
+not introduce alternative element mutation logic or remove confirmation from creation
+editors, precision operations or AI proposals. Palette context is presentation state;
+the project and Application actions remain authoritative. Browser visual acceptance
+is still required; automated checks do not claim a verified pointer workflow.
+
+## Hatch scale rendering pilot and view-history decision — 2026-10-09
+
+Implemented MS-02/V07k: shared rendering/viewport hatch tile derivation consumes
+explicit model/paper display sizing through the common view-size resolver. Paper
+width is internally metres and requires a ScaleContext. Pattern aspect ratio,
+application origin and rotation remain stable; local stroke width compensates for
+both tile scaling and camera pixels per metre. Production consumers still default
+to model sizing. The isolated benchmark reuses the actual SVG component. Derived
+sizing is not a second model and does not extend production schema 14.
+
+Binding user decision: working output scale is a persisted semantic-view setting
+outside normal model Undo/Redo. Model undo must preserve the current view setting.
+Persistence and legacy-file migration are the next bounded MS-03 task, not yet
+implemented by this renderer pilot. Paper-mode product integration follows later.
+
+## Persistent working-view scale — MS-03, 2026-10-10
+
+Implemented: schema 15 optionally embeds workingViews (kind working-plan, storeyId,
+finite positive denominator). Omission resolves to 1:100. The owning project supplies
+project identity; only its existing storey is supported and referenced IDs are checked.
+Legacy 1–14 inputs pass strict legacy validation before migration. Old schemas reject
+new view fields; project opening does not retain an unrelated pane's previous scale.
+
+Application/views owns view-scale changes and resolved contexts. The editing reducer
+publishes the validated setting without adding model history or clearing redo. Model
+Undo/Redo preserves current working-view settings for the matching project/storey.
+A changed project snapshot cancels stale editing previews under existing revision rules.
+ViewportManager derives context from the project; there is no second session scale map.
+Panes retain independent cameras. Presets are 1:50/100/200/500/1000/2500/5000; a separate
+Individuell choice accepts strict 1:S input, committing with Enter or blur. Zoom and
+model geometry remain unchanged. Paper hatch product integration is still pending.
+
+## Hatch model/paper application sizing — MS-03a, 2026-10-10
+
+Implemented: schema 16 extends the hatch application with a strict model/paper union.
+Paper mode requires paperWidthMetres; model mode optionally carries modelWidthMetres,
+otherwise it follows definition width exactly. Width is the complete repeat cell,
+not the spacing of any particular pair of lines. The stored width affects only the
+pattern lattice; contour, IDs, origin, rotation and shared definition are unchanged.
+Versions 1–15 migrate at file ingress without altering existing model-mode sizes.
+
+Binding user decision: switching mode preserves the current visible cell size at the
+active semantic view scale. Returning to model mode after a scale change may therefore
+require an explicit model width; it never edits or duplicates the library definition.
+Properties, creation defaults, pickup and shared drawing actions carry the same size
+contract. Edits to application sizing are normal model Undo steps; changing view scale
+remains outside model Undo. Library updates retain application sizing and rotation.
+
+The generic metric resolver now lives in domain/views/display-size so Domain validation
+and Application mode conversion share it without depending on Rendering. Rendering
+adds camera conversion and the shared SVG tile. BimPlan retains a memoized semantic
+scale context across pointer updates; both committed and draft hatches consume it.
+Incomplete draft sizes cannot crash the canvas; commit/file ingress still reject them.
+Project validation checks resolved cell extents at the stored view scale, including
+finite arithmetic. Paper mode is available in 2D properties/defaults. No claim of a
+physical printed output or paper-sized pen width is made; strokes remain 1 CSS pixel.
+
+
+## Working view context — implemented MS-04b (2026-10-10)
+
+application/views/working-context.ts resolves the existing working-plan binding,
+project scale and shared visibility policy together. CadWorkspace memoizes by
+immutable project/explicit override; panes and BimPlan consume the same context.
+Camera and pointer updates do not recreate it. CadViewport rejects stale snapshots;
+foreign project/storey and unknown target kinds fail at resolution. Explicit
+visibility overrides retain their scope and never imply document persistence.
+3D receives the existing visibility policy without a new 3D scale contract.
+No schema or history changes; saved ModelViews/DrawingDocuments remain future work.
+The resolver is independent of React and available to future typed query adapters.
+
+
+## Abbild navigation and visibility — user decision 2026-10-10
+
+Use “Abbild” / “Abbilder” in the UI for model-linked DrawingDocuments. Navigator
+has a building-structure tab and an Abbilder tab for listing, opening and managing
+saved documents. Creation copies current visibility once; subsequent document
+visibility is independently editable and saved. Reuse the existing layer switcher
+and its visibility undo/redo with an explicit active scope. No separate Abbild
+undo/redo history is wanted. User decision: creation/deletion use normal project
+Undo/Redo. Implemented pilot: rename and document-scale edits use that same project
+history as document-definition changes; working scale remains outside model Undo.
+Document visibility remains outside project Undo and reuses the layer palette's
+history keyed by project/document identity. Loading clears these transient stacks.
+
+## Saved floor-plan pilot — MS-04c, 2026-10-10
+
+Typed Application actions create, rename, rescale and delete DrawingDocuments;
+UI and future AI/Text/Voice adapters share these validated operations. Actions
+require the current base snapshot and stable IDs. Document deletion currently
+retains its source ModelView; there are no layout or document-annotation dependents.
+Future dependents must be explicitly checked before deletion is extended.
+
+The Navigator exposes Gebäudestruktur and Abbilder. Opening binds a read-only
+full-floor-plan viewport to the existing model renderer and context resolver.
+Selection serves layer controls; model drawing/direct edit/pickup/commands are
+not wired into this first document viewport. Project-level layer/library management
+remains available. Definitions and filters persist; active pane/zoom do not.
+Missing active documents show an explicit unresolved state with project Undo or
+return to working model, never a silent replacement rendering. All documents see
+model changes; BIM visibility is not an upstream mask. IFC remains complete.
+
+New documents copy the working-model filter once. Later filters are independent;
+new layers are visible, deleting an unused layer removes its hidden ID in documents.
+Undo retains current document filters for surviving IDs; restoring a deleted
+document restores its last saved definition/filter. There is no second BIM model
+or separate geometry engine. Screen switching currently uses one document pane;
+simultaneous documents and saved crop rectangles remain follow-up work.
+
+## Captured Abbild framing and navigator tree — user revision 2026-10-10
+
+The user's creation workflow supersedes the proposed two-point crop editor:
+arrange the working 2D canvas first, then Hinzufügen. The existing non-modal
+FloatingPanel collects name/output scale and optionally a destination folder.
+Capture the active working pane's center, CSS pixels/metre and visible metric
+rectangle when the dialog opens; reject 3D/missing working context. Confirmation
+uses the captured base snapshot through the same validated DocumentAction.
+Do not rasterize or duplicate BIM elements. Camera zoom and output scale remain
+independent. Schema 18 stores optional framing and folderId on the document plus
+named, stable-ID documentFolders. Strict v17 migration adds no crop or folder.
+
+Rendering restores recorded center/zoom on opening and clips the existing SVG
+projection to the saved metric rectangle. Navigation inside an Abbild is temporary;
+Fit restores its recorded camera. Resizing the screen does not expand the saved
+model region or scale BIM geometry. Initial zoom is unchanged on differently sized
+screens, which can show margins or require navigation to see the whole saved area.
+Creating a new Abbild starts from the working plan; folders can be created anywhere.
+
+The navigator initially contains only Hinzufügen, then a folder/document tree.
+The same dialog creates named folders (one folder level in this step). Double-click
+or Enter opens a document; F2/context-menu Rename edits names. Switching to the
+building tab restores the working model. Per-row open/delete buttons are removed;
+context deletion and moving existing documents between folders remain later work.
+Folder actions use shared project Undo; no additional history. Missing folders and
+duplicate IDs are rejected. The source model and IFC output remain authoritative.
+
+
+## Editable full-model Abbilder and local annotations — user correction 2026-10-10
+
+This binding correction supersedes the read-only viewport and saved-rectangle clipping
+in MS-04c/d above. An Abbild references the entire model projection. Its framing field
+restores only initial center/zoom; width/height remain legacy capture metadata, never
+an eligibility or rendering clip. Cropping belongs to future Layout/ViewportBinding.
+The common editing viewport, toolbox, snapping, selection, properties and validated
+Application operations are used in both contexts. There is no second BIM geometry.
+
+User decision: new 2D drawings in an Abbild belong only to that document. Schema 19
+adds optional documentId ownership to lines/polylines and hatches. Omission retains
+the existing shared storey drawing scope. These objects remain stored in the current
+storey arrays for this single-storey migration; ownership is explicit domain data,
+not inferred from layers or visibility. Strict schema 18 is frozen; versions 1–18
+migrate without inventing owners. Dangling document IDs and document ownership on
+BIM elements are rejected. Future multi-storey/annotation types must extend this
+contract without cloning model components.
+
+The typed createDrawing action accepts a validated ViewIdentity. For document
+contexts it assigns ownership to 2D creation only; walls remain shared. Existing
+edits retain ownership. The common visibility policy checks ownership before layers,
+so display, picking, snapping and movement eligibility exclude foreign annotations.
+Building navigation excludes document-owned drawings. Existing shared storey drawings
+remain shared when edited from an Abbild. BIM edits affect every model projection.
+Normal project Undo/Redo and JSON persistence include annotations; no Abbild history.
+Deleting a nonempty document is currently rejected rather than silently discarding
+its annotations. A deletion policy/UI is a separate follow-up.
+
+FloatingPanel renders through a body portal to escape transformed/overflow ancestors.
+The Abbild creation dialog requests centered opening; shared nonmodal dragging and
+Glass Flow styling are retained. Image import in an Abbild is not enabled in this
+bounded lines/hatches step; existing model references remain visible under its filter.
+
+
+## Shared drawings from Abbilder — superseding user decision 2026-10-10
+
+The user has withdrawn document-only ownership for lines and hatches. Lines,
+polylines and hatches drawn in any Abbild now belong to the shared storey drawing,
+just like those drawn in the working plan. They exist once and appear in the working
+model and every Abbild subject to that view's independent layer filter. Editing,
+picking, snapping and project Undo use the existing common paths. This changes
+2D drawing ownership, not their dimensionality or the BIM export contract.
+
+Schema 20 removes documentId from current drawing entities. Strict v19 ingress
+checks the legacy document reference, removes only ownership, and retains all IDs,
+geometry, appearance, patterns and layer assignments without creating copies.
+Versions 1–18 remain supported. The creation action still validates its source
+ViewIdentity but no longer assigns document ownership. Deleting an Abbild no longer
+blocks or deletes its former drawings. Document-only annotations may be considered
+for other future annotation types, but are not the rule for current lines/hatches.
+The independent scale/filter, camera, unclipped model view and common toolbox remain.

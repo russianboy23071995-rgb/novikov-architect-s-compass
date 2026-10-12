@@ -6,6 +6,7 @@ import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import type { EditAction } from "@/lib/bim/direct-edit";
 
 export function DemandMenu({
+  calibrationControls,
   project,
   selection,
   position,
@@ -15,7 +16,12 @@ export function DemandMenu({
   edgeIndex,
   onAction,
   onReferences,
+  onMoveSelection,
+  selectionCount = 0,
 }: {
+  calibrationControls?: import("react").ReactNode;
+  onMoveSelection?: (() => void) | undefined;
+  selectionCount?: number;
   project: Project;
   selection: Selection;
   position: Point;
@@ -55,7 +61,7 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
-  if (!summary && !onReferences) return null;
+  if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
   return (
     <div
       ref={panel}
@@ -117,12 +123,22 @@ export function DemandMenu({
           );
         }}
       >
-        ⠿ {summary?.title ?? "Fanghilfen"}
+        ⠿ {selectionCount > 1 ? `${selectionCount} Elemente` : (summary?.title ?? "Fanghilfen")}
         {summary && edgeIndex != null ? ` · Seite ${edgeIndex + 1}` : ""}
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
       <div className="grid gap-1">
+        {calibrationControls}
+        {onMoveSelection && (
+          <button
+            type="button"
+            className="rounded border p-1 text-left hover:bg-muted"
+            onClick={onMoveSelection}
+          >
+            {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
+          </button>
+        )}
         {onReferences && (
           <button
             type="button"
@@ -132,7 +148,7 @@ export function DemandMenu({
             Referenzen auswählen
           </button>
         )}
-        {selection && summary && (
+        {selection && selection.kind !== "reference" && summary && (
           <>
             {closedContour(project, selection) && (
               <button

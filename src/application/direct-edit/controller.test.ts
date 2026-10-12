@@ -445,7 +445,7 @@ test("line point editing snaps to wall corners and excludes every vertex of its 
   assert.deepEqual(preview.storey.lines![0]!.points.at(-1), preview.storey.lines![0]!.points[0]);
 });
 
-test("window snapping stays on its host and invalid target preserves transaction and history", () => {
+test("window snapping stays on its host and excess movement commits the capped preview", () => {
   const target = { kind: "window" as const, id: "window" };
   const state = editingReducer(initial(), { type: "begin", target, action: "move", index: null });
   const context = {
@@ -466,9 +466,9 @@ test("window snapping stays on its host and invalid target preserves transaction
     selection: target,
     point: invalid.point,
   });
-  assert.notEqual(rejected.error, "");
-  assert.equal(rejected.history, state.history);
-  assert.equal(rejected.session, state.session);
+  assert.equal(rejected.error, "");
+  assert.ok(Math.abs(rejected.history.present.storey.windows[0]!.position - 0.8) < 1e-9);
+  assert.equal(rejected.session, null);
 });
 
 test("stretch keeps the selected grip offset and rejects shortening beyond window limits", () => {

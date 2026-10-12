@@ -1,3 +1,5 @@
+import { PropertyForm } from "./PropertyForm";
+import { defaultDrawingWindow } from "@/application/drawing/window-placement";
 import { HatchInspector } from "./HatchControls";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,17 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     selection?.kind === "window"
       ? project.storey.windows.find((item) => item.id === selection.id)
       : undefined;
+  if (selection?.kind === "reference") {
+    const r = project.storey.references.find((r) => r.id === selection.id)!;
+    const a = project.assets.find((a) => a.id === r.assetId)!;
+    return (
+      <p className="p-3 text-xs">
+        Bildreferenz · {(a.pixelWidth * r.metresPerPixel).toFixed(3)} ×{" "}
+        {(a.pixelHeight * r.metresPerPixel).toFixed(3)} m · Position {r.origin.x.toFixed(3)},{" "}
+        {r.origin.y.toFixed(3)} m. Kalibrieren über das On-Demand-Menü.
+      </p>
+    );
+  }
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
@@ -78,7 +91,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       {opening && (
         <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
-      <form
+      <PropertyForm
         onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -117,14 +130,11 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
             />
           </label>
         ))}
-        <Button type="submit" size="sm" className="shrink-0">
-          Apply dimensions
-        </Button>
-      </form>
+      </PropertyForm>
       {wall && (
         <label
           className="text-xs"
-          title="Links/rechts in Zeichenrichtung. Die Achse bleibt fest; der Wandkörper folgt."
+          title="Außen oder innen an der Wandkante, alternativ mittig. Die Achse bleibt fest; der Wandkörper folgt."
         >
           Achslage
           <select
@@ -151,9 +161,9 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               )
             }
           >
-            <option value="right">Rechte Kante</option>
+            <option value="right">Außen</option>
             <option value="centre">Mitte</option>
-            <option value="left">Linke Kante</option>
+            <option value="left">Innen</option>
             <option value="custom" disabled>
               Individuell
             </option>
@@ -161,7 +171,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
         </label>
       )}
       {wall && (
-        <form
+        <PropertyForm
           className="flex items-end gap-2"
           aria-label="Wandkörperversatz"
           onSubmit={(event) => {
@@ -192,13 +202,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               className="mt-1 h-8 w-24"
             />
           </label>
-          <Button type="submit" size="sm">
-            Versatz übernehmen
-          </Button>
-          <Button type="reset" variant="ghost" size="sm" onClick={() => setError("")}>
-            Verwerfen
-          </Button>
-        </form>
+        </PropertyForm>
       )}
       {wall && (
         <Button
@@ -212,9 +216,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
                 addWindow(project, {
                   id,
                   wallId: wall.id,
-                  width: 1.2,
-                  height: 1.35,
-                  sillHeight: 0.9,
+                  ...defaultDrawingWindow,
                   position: 0.5,
                 }),
                 { kind: "window", id },

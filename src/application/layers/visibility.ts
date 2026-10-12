@@ -36,7 +36,7 @@ export type LayerEligibility =
 
 /** One read-only policy for future display/picking/snap consumers, never an export filter.
  * Project snapshots must be immutable, as with the existing Application actions.
- * Document existence is the future binding adapter's responsibility: schema 2 has no documents.
+ * All current drawing elements are shared; each view supplies its own layer filter.
  */
 export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilityContext) {
   const project = validateProject(base);
@@ -56,6 +56,7 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
       ...project.storey.windows,
       ...(project.storey.lines ?? []),
       ...project.storey.hatches,
+      ...project.storey.references,
     ].map((element) => [element.id, element] as const),
   );
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));

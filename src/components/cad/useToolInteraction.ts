@@ -1,3 +1,4 @@
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { useState } from "react";
 import { usePrecisionDraft } from "./usePrecisionDraft";
 import { evaluateInteraction, confirmInteraction } from "@/application/tools/interaction";
@@ -8,12 +9,12 @@ export function useToolInteraction(adapter: ToolInteraction | null, suspended = 
   const draft = usePrecisionDraft(adapter?.identity ?? null);
   const [failure, setFailure] = useState<{ identity: object; message: string } | null>(null);
   const preview = evaluateInteraction(adapter, draft.angle, draft.length, draft.aim);
-  const confirm = (point?: Point2) => {
+  const confirm = (point?: Point2, candidate?: SnapCandidate | null) => {
     if (!adapter || suspended) return;
     const target = point ?? preview.value?.point;
     if (!target) return;
     try {
-      confirmInteraction(adapter, target);
+      confirmInteraction(adapter, target, candidate);
       setFailure(null);
     } catch (error) {
       setFailure({
@@ -22,10 +23,10 @@ export function useToolInteraction(adapter: ToolInteraction | null, suspended = 
       });
     }
   };
-  const pick = (point: Point2) => {
+  const pick = (point: Point2, candidate?: SnapCandidate | null) => {
     if (!adapter) return;
     if (adapter.click === "direction" && !draft.hasInput) draft.fix(adapter.origin, point);
-    else confirm(draft.hasInput ? undefined : point);
+    else confirm(draft.hasInput ? undefined : point, draft.hasInput ? undefined : candidate);
   };
   return {
     adapter,

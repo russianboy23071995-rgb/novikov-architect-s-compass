@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "initial",
+      "pixels": 0,
+      "builds": 1
+    },
+    {
+      "name": "camera only",
+      "pixels": 0,
+      "builds": 1
+    },
+    {
+      "name": "wall and window selection",
+      "pixels": 0,
+      "builds": 2
+    },
+    {
+      "name": "selected zoom DPR2",
+      "pixels": 0,
+      "builds": 2
+    },
+    {
+      "name": "model snapshot replacement",
+      "pixels": 0,
+      "builds": 3
+    },
+    {
+      "name": "hidden host",
+      "pixels": 0,
+      "builds": 4
+    },
+    {
+      "name": "all hidden",
+      "pixels": 0,
+      "builds": 5
+    },
+    {
+      "name": "visible again deselected",
+      "pixels": 0,
+      "builds": 6
+    },
+    {
+      "name": "restored latest snapshot",
+      "pixels": 0,
+      "builds": 7
+    }
+  ],
+  "contextRestored": true,
+  "dispose": true
+}

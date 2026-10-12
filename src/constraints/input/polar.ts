@@ -47,8 +47,13 @@ export function resolvePolarInput(
   const metres =
     length ??
     (angle === null ? Math.hypot(dx, dy) : Math.max(0, dx * direction.x + dy * direction.y));
-  const point = { x: origin.x + metres * direction.x, y: origin.y + metres * direction.y };
-  if (![point.x, point.y].every(Number.isFinite))
+  // An unconstrained mouse target is already resolved by snapping. Preserve it
+  // exactly instead of introducing drift through normalization and reconstruction.
+  const point =
+    angle === null && length === null && aim
+      ? { ...aim }
+      : { x: origin.x + metres * direction.x, y: origin.y + metres * direction.y };
+  if (![point.x, point.y, metres].every(Number.isFinite))
     throw new Error("Bewegung liegt außerhalb des gültigen Zahlenbereichs.");
   return { point, degrees, metres };
 }

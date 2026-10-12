@@ -1,5 +1,6 @@
 import type { VisibilityAction } from "@/application/layers/visibility-actions";
 import {
+  Ruler,
   EyeOff,
   Focus,
   Layers2,
@@ -7,7 +8,6 @@ import {
   Bot,
   Box,
   Check,
-  ChevronDown,
   Grid3X3,
   LayoutGrid,
   Menu,
@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
+import type { ViewMode, ViewportLayout } from "./cad-types";
 
 const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "single", label: "Single View", cells: "▣" },
@@ -44,16 +44,14 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "four", label: "4 Views", cells: "田" },
 ];
 
-const toolOptions: Record<ToolId, { title: string; options: string[] }> = {
-  hatch: { title: "Schraffur", options: ["Nur 2D", "Doppelklick schließt die Kontur"] },
-  select: { title: "Select", options: ["Window selection", "Filter"] },
-  wall: { title: "Wall", options: ["New wall: 0.36 m", "Height 2.80 m", "Click two points"] },
-  slab: { title: "Slab", options: ["Thickness 220 mm", "Level 01", "Concrete"] },
-  line: { title: "Line", options: ["Nur 2D", "Linienstil unter der Werkzeugleiste"] },
-};
-
 type TopToolbarProps = {
-  tool: ToolId;
+  onPenSets: () => void;
+  onLineCreator: () => void;
+  onHatchLibrary: () => void;
+  onMeasure: () => void;
+  measuring: boolean;
+  onImportImage: () => void;
+  onCanvasDisplay: () => void;
   mode: ViewMode;
   layout: ViewportLayout;
   grid: boolean;
@@ -71,6 +69,7 @@ type TopToolbarProps = {
   exportingIfc: boolean;
   onSave: () => void;
   onOpen: () => void;
+  onRecovery: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -119,7 +118,6 @@ function IconControl({
 }
 
 export function TopToolbar(props: TopToolbarProps) {
-  const current = toolOptions[props.tool];
   return (
     <header className="glass-panel-strong z-40 shrink-0 overflow-hidden rounded-lg">
       <div className="flex h-11 min-w-0 items-center gap-2 overflow-x-auto px-2.5">
@@ -142,17 +140,92 @@ export function TopToolbar(props: TopToolbarProps) {
           className="hidden items-center gap-0.5 border-r border-border pr-2 xl:flex"
           aria-label="Application menu"
         >
-          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) => (
-            <Button
-              key={item}
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
-              onClick={() => props.onAction(`${item} menu`)}
-            >
-              {item}
-            </Button>
-          ))}
+          {["File", "Edit", "View", "Insert", "Modify", "Tools"].map((item) =>
+            item === "File" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    File
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onSave}>
+                    Projektdatei speichern
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onOpen}>Projektdatei öffnen</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={props.onRecovery}>
+                    Lokale Wiederherstellung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Tools" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    Tools
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onPenSets}>Stifteset…</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onLineCreator}>
+                    Linien Creator…
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onHatchLibrary}>
+                    Schraffurenverwaltung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Insert" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    Insert
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onImportImage}>
+                    Bildreferenz importieren…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "View" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    View
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>
+                    Canvas-Darstellung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                key={item}
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                onClick={() => props.onAction(`${item} menu`)}
+              >
+                {item}
+              </Button>
+            ),
+          )}
         </nav>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -165,6 +238,9 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
+          <IconControl label="Messen" onClick={props.onMeasure} active={props.measuring}>
+            <Ruler className="size-4" />
+          </IconControl>
           <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
             <Undo2 />
           </IconControl>
@@ -188,23 +264,6 @@ export function TopToolbar(props: TopToolbarProps) {
             <Download className="size-4" />
             {props.exportingIfc ? "Exporting…" : "IFC"}
           </Button>
-        </div>
-        <div className="hidden min-w-0 flex-1 items-center gap-1 2xl:flex">
-          <span className="shrink-0 px-2 text-[12px] font-semibold text-foreground">
-            {current.title}
-          </span>
-          {current.options.map((option) => (
-            <Button
-              key={option}
-              variant="outline"
-              size="sm"
-              className="h-6 max-w-36 rounded px-2 text-[11px] font-normal text-muted-foreground"
-              onClick={() => props.onAction(option)}
-            >
-              {option}
-              <ChevronDown className="size-2.5" />
-            </Button>
-          ))}
         </div>
         <div
           role="group"
@@ -363,7 +422,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Demand menu" active={props.demandOpen} onClick={props.onDemand}>
             <PanelTop />
           </IconControl>
-          <IconControl label="Settings" onClick={() => props.onAction("Settings")}>
+          <IconControl label="Settings" onClick={props.onCanvasDisplay}>
             <Settings />
           </IconControl>
           <Button variant="ghost" size="icon" className="size-8" aria-label="User profile">

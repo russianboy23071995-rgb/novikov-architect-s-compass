@@ -1,5 +1,8 @@
+import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
-import type { ToolSnapPolicy } from "./snapping.ts";
+import type { AnchoredSnapPolicy, ToolSnapPolicy } from "./snapping.ts";
 export type PrecisionValues = { point: Point2; degrees: number; metres: number; notice?: string };
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
@@ -9,8 +12,15 @@ export type ToolInteraction = {
   input: { axisLabel: string | null; degrees: number | null } | null;
   click: "confirm" | "direction";
   preview: (angle: string, length: string, aim: Point2 | null) => PrecisionValues;
-  validate: (point: Point2) => void;
-  commit: (point: Point2) => void;
+  geometryPreview?: {
+    replacedIds: readonly string[];
+    evaluate: (point: Point2) => GeometryPreview;
+  };
+  previewProject?: (point: Point2, candidate?: SnapCandidate | null) => Project;
+  /** Optional atomic path: must validate current context and model before publishing. */
+  confirm?: (point: Point2, candidate?: SnapCandidate | null) => void;
+  validate: (point: Point2, candidate?: SnapCandidate | null) => void;
+  commit: (point: Point2, candidate?: SnapCandidate | null) => void;
   cancel: () => void;
 };
 export type InteractionPreview = { value: PrecisionValues | null; error: string };
@@ -28,7 +38,17 @@ export function evaluateInteraction(
   }
 }
 /** Both mouse and numeric confirmation revalidate; preview alone never commits. */
-export function confirmInteraction(tool: ToolInteraction, point: Point2): void {
-  tool.validate(point);
-  tool.commit(point);
+export function confirmInteraction(
+  tool: ToolInteraction,
+  point: Point2,
+  candidate?: SnapCandidate | null,
+): void {
+  if (tool.confirm) {
+    tool.confirm(point, candidate);
+    return;
+  }
+  tool.validate(point, candidate);
+  tool.commit(point, candidate);
 }
+
+export type AnchoredToolInteraction = ToolInteraction & { snapping: AnchoredSnapPolicy };

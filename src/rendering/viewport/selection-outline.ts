@@ -42,11 +42,11 @@ export function outlineTriangles(
   edges: readonly OutlineEdge[],
   projection: ProjectionState,
   width = 1.5,
+  tint: readonly [number, number, number] = [0.68, 0.76, 0.8],
 ): number[] {
   if (!Number.isFinite(width) || width <= 0) return [];
   const data: number[] = [];
   const { width: w, height: h } = projection.viewport;
-  const tint = [0.68, 0.76, 0.8];
   for (const edge of edges) {
     const a = projection.project([...edge[0]]),
       b = projection.project([...edge[1]]);

@@ -1,3 +1,4 @@
+import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
@@ -18,16 +19,33 @@ export function editablePoints(project: Project, target: TransformTarget): Point
   throw new Error("Das ausgewählte Element existiert nicht mehr.");
 }
 
-function applyPoints(project: Project, target: TransformTarget, points: Point[]): Project {
-  if (target.kind === "hatch")
+function applyPoints(
+  project: Project,
+  target: TransformTarget,
+  points: Point[],
+  intent: "reshape" | "move" = "reshape",
+): Project {
+  if (target.kind === "hatch") {
+    const hatch = project.storey.hatches.find((h) => h.id === target.id)!;
+    const pattern =
+      intent === "move" && hatch.pattern
+        ? {
+            ...hatch.pattern,
+            origin: {
+              x: hatch.pattern.origin.x + points[0]!.x - hatch.points[0]!.x,
+              y: hatch.pattern.origin.y + points[0]!.y - hatch.points[0]!.y,
+            },
+          }
+        : hatch.pattern;
     return previewHatch(project, project, {
       projectId: project.id,
       kind: "update",
       id: target.id,
-      changes: { points },
+      changes: { points, ...(pattern ? { pattern } : {}) },
     });
+  }
   return target.kind === "wall"
-    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! })
+    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent)
     : updateLine(project, target.id, { points });
 }
 
@@ -39,6 +57,7 @@ export function moveElement(project: Project, target: TransformTarget, offset: P
     project,
     target,
     editablePoints(project, target).map((p) => ({ x: p.x + offset.x, y: p.y + offset.y })),
+    "move",
   );
 }
 
@@ -97,7 +116,14 @@ export function moveWindowAlongWall(project: Project, id: string, distance: numb
   const window = project.storey.windows.find((item) => item.id === id);
   const wall = project.storey.walls.find((item) => item.id === window?.wallId);
   if (!window || !wall) throw new Error("Fenster oder zugehörige Wand fehlt.");
-  return updateWindow(project, id, { position: window.position + distance / wallLength(wall) });
+  return updateWindow(project, id, {
+    position: boundedWindowPosition(
+      project,
+      wall,
+      window.width,
+      window.position + distance / wallLength(wall),
+    ),
+  });
 }
 
 export { parseMetres } from "../../core/units/metres.ts";

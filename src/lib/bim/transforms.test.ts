@@ -142,7 +142,9 @@ test("window movement uses signed wall distance, keeps host and rejects crossing
   assert.equal(moved.storey.windows[0]!.position, 0.6);
   assert.equal(moved.storey.windows[0]!.wallId, "wall-1");
   assert.equal(moveWindowAlongWall(p, "window-1", -0.3).storey.windows[0]!.position, 0.4);
-  assert.throws(() => moveWindowAlongWall(p, "window-1", 1));
+  assert.ok(
+    Math.abs(moveWindowAlongWall(p, "window-1", 100).storey.windows[0]!.position - 0.8) < 1e-9,
+  );
   assert.throws(() => moveWindowAlongWall(p, "missing", 0));
   assert.throws(() => moveWindowAlongWall(p, "window-1", NaN));
 });
@@ -162,4 +164,31 @@ test("metre input accepts signed decimal comma/point and rejects incomplete inpu
   assert.equal(parseMetres("0"), 0);
   for (const text of ["", "-", "1,", "Infinity", "1,2.3", "2m", "1e999"])
     assert.ok(Number.isNaN(parseMetres(text)));
+});
+
+test("window cap remains valid at both joined ends and preserves the base", async () => {
+  const { addWall, addWindow, createProject, validateProject } = await import("./model.ts");
+  let p = createProject("caps", "level");
+  for (const wall of [
+    { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    { id: "left", start: { x: 0, y: 3 }, end: { x: 0, y: 0 } },
+    { id: "right", start: { x: 6, y: 0 }, end: { x: 6, y: 3 } },
+  ])
+    p = addWall(p, { ...wall, thickness: 0.36, height: 2.8 });
+  p = addWindow(p, {
+    id: "w",
+    wallId: "host",
+    width: 1.2,
+    height: 1.2,
+    sillHeight: 0.9,
+    position: 0.5,
+  });
+  for (const distance of [-100, 100]) {
+    const next = moveWindowAlongWall(p, "w", distance);
+    assert.deepEqual(validateProject(next), next);
+    const position = next.storey.windows[0]!.position;
+    assert.ok(position > 0.1 && position < 0.9);
+    assert.equal(moveWindowAlongWall(next, "w", distance).storey.windows[0]!.position, position);
+  }
+  assert.equal(p.storey.windows[0]!.position, 0.5);
 });

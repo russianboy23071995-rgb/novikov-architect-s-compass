@@ -1,4 +1,17 @@
+> **Zentrale Dokumentation seit 10.10.2026:** [NOVIKOV_MASTERPLAN.md](NOVIKOV_MASTERPLAN.md) enthält Mission, aktuellen Architekturvertrag, bestätigten Stand und genau einen nächsten Auftrag. [NOVIKOV_REQUIREMENTS_REGISTER.md](NOVIKOV_REQUIREMENTS_REGISTER.md) erhält detaillierte Anforderungen, Altkennungen und Quellen. Diese Datei bleibt als historische Detail-/Nachweisquelle erhalten; alte Status-, Schema- und Folgeauftragsformulierungen sind keine aktuelle Reihenfolge. Neue Anforderungen/Entscheidungen/Status in den zentralen Dateien pflegen. Bei Konflikten gelten die dort festgehaltenen neueren Nutzerentscheidungen.
+
 # Funktionsabgleich N01–N60 — 03.10.2026
+
+## Fortschreibung vom 08.10.2026
+
+Die erneut hochgeladene DOCX wurde vollständig als
+[Textquelle](docs/requirements/FUNKTIONEN_2026-10-08_SOURCE.md) erfasst.
+Die Schlussabsätze sind in der
+[Entwicklungsabstimmung V01–V09](docs/planning/DEVELOPMENT_ALIGNMENT_2026-10-08.md)
+zugeordnet. N01–N60 bleiben erhalten; ihre historischen Statusangaben unten
+sind kein aktueller Implementierungsnachweis. Aktueller Code, Entwicklungsplan
+und verifizierte PR-Nachweise bestimmen den Fortschritt. Die neue Reihenfolge
+berücksichtigt große Dateien, den implementierten Vorschaupiloten und PR179.
 
 ## Quellen, Stand und Belegqualität
 

@@ -1,7 +1,9 @@
+import type { WallGeometry } from "../../project/geometry-scope.ts";
+import { tConnectionContours } from "./t-relations.ts";
 import type { Project, Wall } from "../../project/schema.ts";
-import { deriveRightAngleCorner } from "./corner.ts";
+import { deriveWallCorner } from "./corner.ts";
 import { wallBody } from "./body.ts";
-import { wallContourSolid } from "./contour-solid.ts";
+import { wallContourSolid, createWallContourSolidDeriver } from "./contour-solid.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 
@@ -13,7 +15,12 @@ const same = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   a.x === b.x && a.y === b.y;
 
 /** Model endpoints must coincide exactly; the screen snap radius never creates a join. */
-export function reconcileWallJoins(project: Project, changedId: string, previous?: Wall): Project {
+export function reconcileWallJoins(
+  project: Project,
+  changedId: string,
+  previous?: Wall,
+  excludedPartners: readonly string[] = [],
+): Project {
   const changed = project.storey.walls.find((w) => w.id === changedId)!;
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   const joins = project.storey.wallJoins.filter((join) => {
@@ -26,10 +33,17 @@ export function reconcileWallJoins(project: Project, changedId: string, previous
     const p = point(changed, endpoint);
     if (previous && same(p, point(previous, endpoint))) continue;
     const candidates = project.storey.walls
-      .filter((w) => w.id !== changedId)
+      .filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
       .flatMap((w) =>
         ([0, 1] as const)
-          .filter((e) => same(p, point(w, e)))
+          // A stored T endpoint belongs to its host, not to an automatic corner.
+          .filter(
+            (e) =>
+              same(p, point(w, e)) &&
+              !project.storey.wallTJunctions.some(
+                (t) => t.incoming.wallId === w.id && t.incoming.endpoint === e,
+              ),
+          )
           .map((e) => ({ wallId: w.id, endpoint: e })),
       );
     if (candidates.length > 1)
@@ -48,7 +62,7 @@ export function reconcileWallJoins(project: Project, changedId: string, previous
 }
 
 /** Authoritative disposable contours from persisted endpoint relationships. No schema recursion. */
-export function connectedWallContours(project: Project) {
+export function connectedWallContours(project: WallGeometry) {
   const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
   const counts = new Map<string, number>();
   for (const wall of walls.values())
@@ -71,7 +85,7 @@ export function connectedWallContours(project: Project) {
       if (occupied.has(key(end))) throw new Error("Ein Achsende darf nur einmal verbunden sein.");
       occupied.add(key(end));
     }
-    const result = deriveRightAngleCorner(
+    const result = deriveWallCorner(
       { wall: a, endpoint: join.first.endpoint },
       { wall: b, endpoint: join.second.endpoint },
     );
@@ -116,17 +130,49 @@ export function connectedWallContours(project: Project) {
       }
     }
   }
+  for (const [id, ring] of tConnectionContours(project, contours)) contours.set(id, ring);
   return contours;
 }
 
-const solidCache = new WeakMap<Project, ReturnType<typeof wallContourSolid>[]>();
-export function connectedWallSolids(project: Project) {
+const solidCache = new WeakMap<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
+function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wallContourSolid) {
   const cached = solidCache.get(project);
   if (cached) return cached;
   const contours = connectedWallContours(project);
   const result = project.storey.walls
     .filter((w) => contours.has(w.id))
-    .map((w) => wallContourSolid(w, contours.get(w.id)!, project.storey.windows));
+    .map((w) =>
+      deriveSolid(
+        w,
+        contours.get(w.id)!,
+        project.storey.windows,
+        project.storey.wallTJunctions.some(
+          (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
+        ),
+      ),
+    );
   solidCache.set(project, result);
   return result;
+}
+
+export function connectedWallSolids(project: WallGeometry) {
+  return deriveConnectedWallSolids(project, wallContourSolid);
+}
+
+/** Prepared translation owns this bounded local-extrusion reuse lifetime. */
+export function createPreparedWallSolids(wallIds: readonly string[]) {
+  const derive = createWallContourSolidDeriver(wallIds);
+  return (project: WallGeometry) => deriveConnectedWallSolids(project, derive);
+}
+
+/** Internal prepared-translation reuse: stationary scope excludes a detached free end wall.
+ * The caller owns immutable geometry and checks moving endpoints against fixed joined nodes.
+ * Only the stationary scope contains joins; free walls have no connected solid here.
+ */
+export function prepareDetachedEndSolids(stationary: WallGeometry) {
+  const solids = connectedWallSolids(stationary);
+  return (geometry: WallGeometry) => {
+    solidCache.set(geometry, solids);
+    return solids;
+  };
 }

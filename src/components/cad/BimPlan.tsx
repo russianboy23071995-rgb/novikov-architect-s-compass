@@ -1,5 +1,25 @@
-import { connectedWallSolids } from "@/domain/elements/wall/connections";
-import { wallBody } from "@/domain/elements/wall/body";
+import type { WorkingViewContext } from "@/application/views/working-context";
+import type { HatchPatternSize } from "@/domain/elements/hatch/model";
+import { HatchPattern } from "./HatchPattern";
+import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
+import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
+import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
+import type { AngleMeasurement } from "@/application/measurement/angle";
+import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
+import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
+import type { AreaMeasurement } from "@/application/measurement/area";
+import { DistanceOverlay } from "./DistanceOverlay";
+import type { DistanceMeasurement } from "@/application/measurement/distance";
+import { PlanSceneRun } from "./PlanSceneRun";
+import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
+import type { GeometryPreview } from "@/domain/project/geometry-scope";
+import { useSelectionMarquee } from "./useSelectionMarquee";
+import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import type { SelectionSet } from "@/application/selection/state";
+import type { ToolInteraction } from "@/application/tools/interaction";
+import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
+import type { SnapCandidate } from "@/constraints/snapping/engine";
+import { useShiftSnapLock } from "./useShiftSnapLock";
 import { WALL_AXIS_COLOR, wallAxisAnchor, wallPlanHandles } from "@/rendering/viewport/wall-axis";
 import type { CornerPreview } from "@/application/walls/corner-preview";
 import { anchorDragTarget, type AnchorDrag } from "@/rendering/viewport/anchor-drag";
@@ -12,9 +32,7 @@ import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
-import { visiblePlanGeometry } from "@/rendering/viewport/layer-display";
 import { isLayerVisible } from "@/application/layers/visibility";
-import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
 import { referenceKey } from "@/constraints/inference/construction-reference";
@@ -31,7 +49,6 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
-  resolveToolSnap,
   toolPinnedReferences,
 } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
@@ -41,28 +58,50 @@ import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewpo
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
 import type { EditSession } from "@/lib/bim/direct-edit";
-import { wallLength } from "@/lib/bim/model";
 import type { Point, Project } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
+  pickupScope?: object;
+  onPickup?: (target: NonNullable<Selection>) => void;
+  draftContour?: ((point: Point) => Point[]) | undefined;
+  placement?:
+    | {
+        measurement?: DistanceMeasurement | undefined;
+        angleMeasurement?: AngleMeasurement | undefined;
+        areaMeasurement?: AreaMeasurement | undefined;
+        finish?: (() => void) | undefined;
+        target: Point | null | undefined;
+        previewProject?: ToolInteraction["previewProject"];
+        geometryPreview?: ToolInteraction["geometryPreview"];
+        aim: (point: Point) => void;
+        pick: (point: Point, candidate?: SnapCandidate | null) => void;
+      }
+    | undefined;
   drawingPreview?: Project | undefined;
+  drawingProjectAt?: ToolInteraction["previewProject"];
   cornerPreview?: CornerPreview;
   referenceSelection?: ReferenceSelectionBinding | undefined;
   referenceScope?: object | undefined;
   interactive?: boolean;
   project: Project;
-  visibility?: LayerVisibilityPolicy;
+  viewContext: WorkingViewContext;
   snapping?: ToolSnapPolicy | null;
   selection: Selection;
+  selections?: SelectionSet;
+  onSelectMany?: (targets: SelectionSet) => void;
   drawing: boolean;
   endpointSnap?: boolean;
   hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
   draftFill?: Hatch["fill"] | undefined;
+  draftPattern?: HatchPatternDefinition | null | undefined;
+  draftPatternRotation?: number | undefined;
+  draftPatternSize?: HatchPatternSize | undefined;
   gridSettings?: GridSettings;
+  wallOutlineWidth?: number;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -71,38 +110,50 @@ export type BimPlanProps = {
     index?: number,
     modelPoint?: Point,
     edgeIndex?: number,
+    toggle?: boolean,
   ) => void;
   editSession?: EditSession | null;
   numericTarget?: Point | null | undefined;
   drawingTarget?: Point | null | undefined;
   onDrawingAim?: ((point: Point) => void) | undefined;
   onEditAim?: (session: EditSession, point: Point) => void;
-  onEditDirection?: (session: EditSession, point: Point) => void;
-  onEditCommit?: (session: EditSession, point: Point) => void;
+  onEditDirection?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
+  onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
   onEditCancel?: () => void;
-  onPoint: (point: Point) => void;
+  onPoint: (point: Point, candidate?: SnapCandidate | null) => void;
   onFinish?: () => void;
 };
 
 export function BimPlan({
+  pickupScope,
+  onPickup,
+  draftContour,
+  placement,
   drawingPreview,
+  drawingProjectAt,
   cornerPreview,
   referenceSelection,
   referenceScope,
   interactive = true,
   project,
-  visibility,
+  viewContext,
   snapping: requestedSnapping = null,
   selection: requestedSelection,
+  selections,
+  onSelectMany,
   drawing,
   endpointSnap = false,
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
   draftFill,
+  draftPattern,
+  draftPatternRotation,
+  draftPatternSize,
   snap,
   gridSettings = defaultGridSettings,
+  wallOutlineWidth = 1,
   ortho,
   onSelect,
   onPoint,
@@ -128,6 +179,7 @@ export function BimPlan({
   pan: boolean;
   grid: boolean;
 }) {
+  const { scale: scaleContext, visibility } = viewContext;
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
       ? requestedEditSession
@@ -210,7 +262,7 @@ export function BimPlan({
         event.target.closest('[role="dialog"],[role="alertdialog"]')
       )
         return;
-      if (event.key === "Shift") setShiftHeld(event.type === "keydown");
+      if (event.key === "Shift" && !event.repeat) setShiftHeld(event.type === "keydown");
       if (event.key === "Escape" && event.type === "keydown") {
         setHover(null);
         setReferenceReset((value) => value + 1);
@@ -287,8 +339,9 @@ export function BimPlan({
     acquirePoints,
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
+  const resolveLockedSnap = useShiftSnapLock(visibilitySession, referenceReset);
   const resolvePointer = (point: Point, shift = shiftHeld) =>
-    resolveToolSnap(
+    resolveLockedSnap(
       snapping,
       point,
       {
@@ -299,6 +352,7 @@ export function BimPlan({
         pixelsPerMetre: camera.pixelsPerMetre,
         enabled: snap,
         endpointRadiusPx: 10,
+        includeInteractionTargets: true,
         gridSpacing: gridSpacing(gridSettings),
         activeReference,
         activeReferences,
@@ -308,19 +362,28 @@ export function BimPlan({
     );
   const pointerSnap = hover ? resolvePointer(hover) : null;
   const resolvedHover =
-    drawingTarget !== undefined
-      ? drawingTarget
-        ? {
-            point: drawingTarget,
-            candidate:
-              pointerSnap && pointsCompatible(pointerSnap.point, drawingTarget)
-                ? pointerSnap.candidate
-                : null,
-          }
+    placement?.target !== undefined
+      ? placement.target
+        ? { point: placement.target, candidate: null }
         : null
-      : numericTarget !== undefined
-        ? null
-        : pointerSnap;
+      : drawingTarget !== undefined
+        ? drawingTarget
+          ? {
+              point: drawingTarget,
+              candidate: null,
+            }
+          : null
+        : numericTarget !== undefined
+          ? null
+          : pointerSnap;
+  let constructedContour: Point[] = [];
+  if (draftContour && resolvedHover) {
+    try {
+      constructedContour = draftContour(resolvedHover.point);
+    } catch {
+      /* incomplete shape */
+    }
+  }
   const snapLabels = {
     midpoint: "Mittelpunkt",
     "segment-intersection": "Segmentschnittpunkt",
@@ -375,14 +438,88 @@ export function BimPlan({
   let editError = "";
   if (editSession && resolvedEdit) {
     try {
-      preview = previewEdit(editSession, project, selection, resolvedEdit.point);
+      preview = previewEdit(
+        editSession,
+        project,
+        selection,
+        resolvedEdit.point,
+        resolvedEdit.candidate,
+      );
     } catch {
       editError = "Ungültiges Ziel: Geometrie und Fenstergrenzen prüfen.";
     }
   }
-  const shown = preview ?? (drawing ? drawingPreview : null) ?? project;
-  const connected = connectedWallSolids(shown);
-  const plan = visiblePlanGeometry(shown, (id) => isLayerVisible(project, visibility, id));
+  const drawingPoint = resolvedHover?.point;
+  const drawingCandidate = resolvedHover?.candidate;
+  const drawingResult = useMemo(() => {
+    if (
+      !drawing ||
+      !drawingProjectAt ||
+      !drawingPoint ||
+      !start ||
+      pointsCompatible(start, drawingPoint)
+    )
+      return { project: null, error: "" };
+    try {
+      return { project: drawingProjectAt(drawingPoint, drawingCandidate), error: "" };
+    } catch (error) {
+      return {
+        project: null,
+        error: error instanceof Error ? error.message : "Ungueltiges Wandziel.",
+      };
+    }
+  }, [drawing, drawingProjectAt, drawingPoint, drawingCandidate, start]);
+  let placementProject: Project | null = null;
+  if (placement?.previewProject) {
+    const point = placement.target === undefined ? pointerSnap?.point : placement.target;
+    if (point) {
+      try {
+        placementProject = placement.previewProject(point, pointerSnap?.candidate);
+      } catch (error) {
+        editError = error instanceof Error ? error.message : "Ungültiges Ziel.";
+      }
+    }
+  }
+  let geometryPreview: GeometryPreview | null = null;
+  if (placement?.geometryPreview) {
+    const point = placement.target === undefined ? pointerSnap?.point : placement.target;
+    if (point)
+      try {
+        geometryPreview = placement.geometryPreview.evaluate(point);
+      } catch (error) {
+        editError = error instanceof Error ? error.message : "Ungültiges Ziel.";
+      }
+  }
+  const shown =
+    placementProject ??
+    preview ??
+    drawingResult.project ??
+    (drawing ? drawingPreview : null) ??
+    project;
+  const allowsShown = useMemo(
+    () => drawingWallVisibility(project, shown, visibility),
+    [project, shown, visibility],
+  );
+  const scene = useMemo(
+    () => derivePlanScene(shown, allowsShown, project.hatchPatterns),
+    [shown, allowsShown, project.hatchPatterns],
+  );
+  const previewScene = useMemo(
+    () =>
+      geometryPreview
+        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns)
+        : null,
+    [geometryPreview, allowsShown, project.hatchPatterns],
+  );
+  const sceneRuns = useMemo(
+    () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
+    [scene, placement?.geometryPreview?.replacedIds],
+  );
+  const plan = previewScene?.plan ?? scene.plan;
+  const canPick = useCallback(
+    (id: string) => isLayerVisible(project, visibility, id),
+    [project, visibility],
+  );
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
     const wall = project.storey.walls.find((item) => item.id === selection.id);
@@ -418,13 +555,64 @@ export function BimPlan({
     const matrix = event.currentTarget.getScreenCTM();
     if (!matrix) return null;
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey).point;
+    return resolvePointer({ x: point.x, y: -point.y }, event.shiftKey);
   };
-  const selectProps = (kind: "wall" | "window" | "line" | "hatch", id: string) => ({
+  const secondary = useRef(createDoubleSecondaryClick());
+  const pickupContext = useMemo(
+    () => ({
+      project,
+      visibility,
+      drawing,
+      placement,
+      editSession,
+      selecting,
+      pan,
+      interactive,
+      pickupScope,
+    }),
+    [
+      project,
+      visibility,
+      drawing,
+      placement,
+      editSession,
+      selecting,
+      pan,
+      interactive,
+      pickupScope,
+    ],
+  );
+  const selectProps = (kind: "wall" | "window" | "line" | "hatch" | "reference", id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
-    "aria-pressed": selection?.id === id,
+    "aria-pressed": selectedIds.has(id),
+    onContextMenu: (event: React.MouseEvent) => {
+      if (
+        !onPickup ||
+        !interactive ||
+        editSession ||
+        selecting ||
+        pan ||
+        placement ||
+        (drawing && start)
+      ) {
+        secondary.current.reset();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (
+        secondary.current.click({
+          key: `${kind}:${id}`,
+          context: pickupContext,
+          x: event.clientX,
+          y: event.clientY,
+          time: event.timeStamp,
+        })
+      )
+        onPickup({ kind, id });
+    },
     onClick: (event: React.MouseEvent) => {
       if (!drawing && !editSession) {
         event.stopPropagation();
@@ -437,17 +625,70 @@ export function BimPlan({
           undefined,
           edge?.point ?? point ?? undefined,
           edge?.index,
+          event.ctrlKey || event.metaKey,
         );
       }
     },
     onKeyDown: (event: React.KeyboardEvent) => {
       if (!drawing && !editSession && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
-        onSelect({ kind, id });
+        onSelect(
+          { kind, id },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          event.ctrlKey || event.metaKey,
+        );
       }
     },
   });
   const listPosition = referenceSelection?.hits.length ? referenceSelection.position : null;
+  const selectedIds = useMemo(
+    () => new Set((selections ?? (selection ? [selection] : [])).map((t) => t.id)),
+    [selections, selection],
+  );
+  const latestSelect = useRef(selectProps);
+  latestSelect.current = selectProps;
+  const sceneHandlers = useMemo(
+    () => ({
+      secondary: (kind: NonNullable<Selection>["kind"], id: string, event: React.MouseEvent) =>
+        latestSelect.current(kind, id).onContextMenu(event),
+      click: (kind: NonNullable<Selection>["kind"], id: string, event: React.MouseEvent) =>
+        latestSelect.current(kind, id).onClick(event),
+      key: (kind: NonNullable<Selection>["kind"], id: string, event: React.KeyboardEvent) =>
+        latestSelect.current(kind, id).onKeyDown(event),
+    }),
+    [],
+  );
+  const renderRun = (run: PlanRun) => (
+    <PlanSceneRun
+      scaleContext={scaleContext}
+      key={`${run.kind}:${run.ids[0]}`}
+      {...run}
+      scene={run.affected && previewScene ? previewScene : scene}
+      selectedIds={selectedIds}
+      drawing={drawing}
+      placement={!!placement}
+      pixelsPerMetre={camera.pixelsPerMetre}
+      wallOutlineWidth={wallOutlineWidth}
+      cornerGeometry={cornerPreview?.base === shown ? cornerPreview.geometry : undefined}
+      allowsShown={allowsShown}
+      canPick={canPick}
+      handlers={sceneHandlers}
+    />
+  );
+  const shapes = useMemo(
+    () =>
+      planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
+    [project, visibility],
+  );
+  const marquee = useSelectionMarquee(
+    interactive && !placement && !drawing && !editSession && !selecting && !pan,
+    visibility ?? project,
+    shapes,
+    onSelectMany,
+  );
   const panelX = listPosition
     ? Math.max(
         12,
@@ -473,6 +714,14 @@ export function BimPlan({
       tabIndex={0}
       viewBox={planViewBox(camera, viewSize)}
       preserveAspectRatio="none"
+      onPointerDownCapture={(event) => {
+        if (event.button !== 2) secondary.current.reset();
+        marquee.down(event);
+      }}
+      onContextMenu={() => secondary.current.reset()}
+      onKeyDownCapture={() => secondary.current.reset()}
+      onPointerMoveCapture={marquee.move}
+      onPointerUpCapture={marquee.up}
       onPointerDown={(event) => {
         navigationClick.current = event.button === 1 || (pan && event.button === 0);
         if (navigationClick.current) {
@@ -501,7 +750,8 @@ export function BimPlan({
             event.currentTarget.releasePointerCapture(event.pointerId);
           if (result?.moved && editSession) {
             try {
-              onEditCommit?.(editSession, resolvePointer(result.point, event.shiftKey).point);
+              const snapped = resolvePointer(result.point, event.shiftKey);
+              onEditCommit?.(editSession, snapped.point, snapped.candidate);
             } catch {
               /* Keep the shared edit session available for correction. */
             }
@@ -514,6 +764,7 @@ export function BimPlan({
         }
       }}
       onLostPointerCapture={() => {
+        marquee.cancel();
         navigation.current = null;
         if (gripDrag.current) {
           gripDrag.current = null;
@@ -521,6 +772,7 @@ export function BimPlan({
         }
       }}
       onPointerCancel={() => {
+        marquee.cancel();
         navigation.current = null;
         editDown.current = null;
         if (gripDrag.current) {
@@ -529,6 +781,8 @@ export function BimPlan({
         }
       }}
       onClickCapture={(event) => {
+        marquee.click(event);
+        if (event.defaultPrevented) return;
         if (gripClick.current) {
           gripClick.current = false;
           event.preventDefault();
@@ -550,13 +804,23 @@ export function BimPlan({
           else referenceSelection.hitsAt(hits, point);
           return;
         }
+        if (placement && interactive && !navigationClick.current && !pan) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (placement.finish && event.detail > 1) return;
+          const resolved = pointFromEvent(event);
+          const point = placement.target === undefined ? resolved?.point : placement.target;
+          if (point)
+            placement.pick(point, placement.target === undefined ? resolved?.candidate : null);
+          return;
+        }
         if (navigationClick.current || pan) {
           event.preventDefault();
           event.stopPropagation();
         }
       }}
       onAuxClick={(event) => event.preventDefault()}
-      className={`h-full w-full touch-none ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
+      className={`h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${pan ? "cursor-grab" : drawing ? "cursor-crosshair" : ""}`}
       onPointerMove={(event) => {
         if (!interactive) return;
         setShiftHeld(event.shiftKey);
@@ -571,6 +835,8 @@ export function BimPlan({
         if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
         const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
         if (endpointSnap || editSession) setHover(drawingPoint);
+        if (placement && drawingPoint)
+          placement.aim(resolvePointer(drawingPoint, event.shiftKey).point);
         if (drawing && drawingPoint)
           onDrawingAim?.(resolvePointer(drawingPoint, event.shiftKey).point);
         if (editSession) {
@@ -595,9 +861,10 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const target = resolvePointer(point, event.shiftKey).point;
-              if (onEditDirection) onEditDirection(editSession, target);
-              else onEditCommit?.(editSession, target);
+              const snapped = resolvePointer(point, event.shiftKey);
+              const target = snapped.point;
+              if (onEditDirection) onEditDirection(editSession, target, snapped.candidate);
+              else onEditCommit?.(editSession, target, snapped.candidate);
             } catch {
               /* Invalid preview stays editable. */
             }
@@ -607,12 +874,18 @@ export function BimPlan({
         if (drawing) {
           event.currentTarget.focus();
           if (onFinish && event.detail > 1) return;
-          const point = drawingTarget !== undefined ? drawingTarget : pointFromEvent(event);
-          if (point) onPoint(point);
+          const snap = pointFromEvent(event);
+          const point = drawingTarget !== undefined ? drawingTarget : snap?.point;
+          if (point) onPoint(point, drawingTarget !== undefined ? null : snap?.candidate);
         } else if (event.target === event.currentTarget) onSelect(null);
       }}
       onDoubleClick={(event) => {
         if (selecting || pan || navigationClick.current) return;
+        if (placement?.finish && interactive) {
+          event.preventDefault();
+          placement.finish();
+          return;
+        }
         if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
@@ -621,6 +894,7 @@ export function BimPlan({
       onKeyDown={(event) => {
         if (selecting) return;
         if (event.key === "Escape") {
+          marquee.cancel();
           navigation.current = null;
           setHover(null);
         }
@@ -631,615 +905,564 @@ export function BimPlan({
         }
       }}
     >
-      {grid && (
-        <g pointerEvents="none">
-          <defs>
-            <pattern id={gridId} width={gridStep} height={gridStep} patternUnits="userSpaceOnUse">
-              <path
-                d={`M ${gridStep} 0 L 0 0 0 ${gridStep}`}
-                fill="none"
-                stroke="var(--muted-foreground)"
-                strokeOpacity={0.15}
-                strokeWidth={1 / camera.pixelsPerMetre}
-              />
-            </pattern>
-          </defs>
-          <rect
-            x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
-            y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
-            width={viewSize.width / camera.pixelsPerMetre}
-            height={viewSize.height / camera.pixelsPerMetre}
-            fill={`url(#${gridId})`}
-          />
-        </g>
-      )}
-      {plan.hatches.map((hatch) => (
-        <g key={hatch.id}>
-          {hatch.background.visible && (
-            <polygon
-              aria-label="Schraffurhintergrund"
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill={hatch.background.color}
-              pointerEvents="none"
+      <g>
+        {grid && (
+          <g pointerEvents="none">
+            <defs>
+              <pattern id={gridId} width={gridStep} height={gridStep} patternUnits="userSpaceOnUse">
+                <path
+                  d={`M ${gridStep} 0 L 0 0 0 ${gridStep}`}
+                  fill="none"
+                  stroke="var(--muted-foreground)"
+                  strokeOpacity={0.15}
+                  strokeWidth={1 / camera.pixelsPerMetre}
+                />
+              </pattern>
+            </defs>
+            <rect
+              x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+              y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+              width={viewSize.width / camera.pixelsPerMetre}
+              height={viewSize.height / camera.pixelsPerMetre}
+              fill={`url(#${gridId})`}
             />
-          )}
-          <polygon
-            {...selectProps("hatch", hatch.id)}
-            points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-            fill={hatch.fill.color}
-            fillOpacity={hatch.fill.opacity}
-            stroke="transparent"
-            strokeWidth={12}
-            vectorEffect="non-scaling-stroke"
-            pointerEvents="all"
-            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
-          />
-          {hatch.contour.visible && (
-            <polygon
-              aria-label="Schraffurkontur"
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill="none"
-              stroke={hatch.contour.color}
-              strokeWidth={1}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          {selection?.id === hatch.id && (
-            <polygon
-              points={hatch.points.map((p) => `${p.x},${-p.y}`).join(" ")}
-              fill="none"
-              stroke="#cbd5e1"
-              strokeWidth={2}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-        </g>
-      ))}
-      {plan.walls.map((wall) => {
-        const length = wallLength(wall);
-        const body = wallBody(wall);
-        const angle =
-          (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
-        return (
-          <g
-            key={wall.id}
-            transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
-          >
-            <polygon
-              {...selectProps("wall", wall.id)}
-              points={(
-                (cornerPreview?.base === shown &&
-                  cornerPreview.geometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
-                connected.find((w) => w.wallId === wall.id)?.localProfile || [
-                  { x: 0, y: -wall.thickness / 2 },
-                  { x: length, y: -wall.thickness / 2 },
-                  { x: length, y: wall.thickness / 2 },
-                  { x: 0, y: wall.thickness / 2 },
-                ]
-              )
-                .map((p) => `${p.x},${-p.y}`)
-                .join(" ")}
-              fill={selection?.id === wall.id ? "var(--primary)" : "var(--muted-foreground)"}
-              fillOpacity={0.55}
-              stroke="var(--primary)"
-              strokeWidth={0.018}
-              className="outline-none focus:stroke-foreground"
-            />
-            <text
-              x={length / 2}
-              y={-wall.thickness / 2 - 0.16}
-              textAnchor="middle"
-              fontSize={0.14}
-              fill="var(--foreground)"
-              pointerEvents="none"
-            >
-              {length.toFixed(2)} m
-            </text>
-            {plan.openings
-              .filter((opening) => opening.wallId === wall.id)
-              .map((opening) => (
-                <g key={opening.id}>
-                  <rect
-                    {...(isLayerVisible(project, visibility, opening.id)
-                      ? selectProps("window", opening.id)
-                      : {})}
-                    x={opening.position * length - opening.width / 2}
-                    y={-wall.thickness / 2}
-                    width={opening.width}
-                    height={wall.thickness}
-                    fill="var(--background)"
-                    stroke={
-                      !isLayerVisible(project, visibility, opening.id)
-                        ? "none"
-                        : selection?.id === opening.id
-                          ? "var(--foreground)"
-                          : "var(--primary)"
-                    }
-                    strokeWidth={selection?.id === opening.id ? 0.04 : 0.025}
-                    className="outline-none focus:stroke-foreground"
-                  />
-                  <line
-                    visibility={
-                      isLayerVisible(project, visibility, opening.id) ? "visible" : "hidden"
-                    }
-                    x1={opening.position * length - opening.width / 2}
-                    x2={opening.position * length + opening.width / 2}
-                    y1={0}
-                    y2={0}
-                    stroke="var(--primary)"
-                    strokeWidth={0.02}
-                    pointerEvents="none"
-                  />
-                </g>
-              ))}
           </g>
-        );
-      })}
-      {selection?.kind === "wall" &&
-        plan.walls
-          .filter((wall) => wall.id === selection.id)
-          .map((wall) => (
-            <g key={`axis-${wall.id}`}>
+        )}
+        {marquee.box && (
+          <rect
+            aria-label="Auswahlrahmen"
+            pointerEvents="none"
+            x={Math.min(marquee.box.a.x, marquee.box.b.x)}
+            y={-Math.max(marquee.box.a.y, marquee.box.b.y)}
+            width={Math.abs(marquee.box.a.x - marquee.box.b.x)}
+            height={Math.abs(marquee.box.a.y - marquee.box.b.y)}
+            fill="#38bdf8"
+            fillOpacity={0.08}
+            stroke="#38bdf8"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+        {sceneRuns.filter((run) => run.kind !== "line").map(renderRun)}
+        {selection?.kind === "wall" &&
+          plan.walls
+            .filter((wall) => wall.id === selection.id)
+            .map((wall) => (
+              <g key={`axis-${wall.id}`}>
+                <line
+                  role="img"
+                  aria-label={`Wandachse ${wall.id}`}
+                  x1={wall.start.x}
+                  y1={-wall.start.y}
+                  x2={wall.end.x}
+                  y2={-wall.end.y}
+                  stroke={WALL_AXIS_COLOR}
+                  style={CAD_SHIMMER}
+                  strokeWidth={2.5}
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+                <line
+                  {...selectProps("wall", wall.id)}
+                  aria-label="Wandachse auswählen"
+                  x1={wall.start.x}
+                  y1={-wall.start.y}
+                  x2={wall.end.x}
+                  y2={-wall.end.y}
+                  stroke="transparent"
+                  strokeWidth={12}
+                  vectorEffect="non-scaling-stroke"
+                  className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
+                  onClick={(event) => {
+                    if (drawing || editSession) return;
+                    event.stopPropagation();
+                    const raw = rawPoint(event);
+                    onSelect(
+                      { kind: "wall", id: wall.id },
+                      { x: event.clientX, y: event.clientY },
+                      undefined,
+                      raw ? wallAxisAnchor(wall, raw) : wall.start,
+                      undefined,
+                      event.ctrlKey || event.metaKey,
+                    );
+                  }}
+                />
+              </g>
+            ))}
+        {!selection &&
+          plan.walls
+            .filter((w) => selectedIds.has(w.id))
+            .map((w) => (
               <line
-                role="img"
-                aria-label={`Wandachse ${wall.id}`}
-                x1={wall.start.x}
-                y1={-wall.start.y}
-                x2={wall.end.x}
-                y2={-wall.end.y}
+                key={`selected-axis:${w.id}`}
+                aria-label={`Wandachse ${w.id}`}
+                x1={w.start.x}
+                y1={-w.start.y}
+                x2={w.end.x}
+                y2={-w.end.y}
                 stroke={WALL_AXIS_COLOR}
-                strokeWidth={2.5}
+                style={CAD_SHIMMER}
+                strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
                 pointerEvents="none"
               />
-              <line
-                {...selectProps("wall", wall.id)}
-                aria-label="Wandachse auswählen"
-                x1={wall.start.x}
-                y1={-wall.start.y}
-                x2={wall.end.x}
-                y2={-wall.end.y}
-                stroke="transparent"
-                strokeWidth={12}
-                vectorEffect="non-scaling-stroke"
-                className="cursor-pointer"
-                onClick={(event) => {
-                  if (drawing || editSession) return;
+            ))}
+        {sceneRuns.filter((run) => run.kind === "line").map(renderRun)}
+        {!drawing &&
+          !editSession &&
+          selection &&
+          selectedRing?.map((a, edgeIndex, ring) => {
+            const b = ring[(edgeIndex + 1) % ring.length]!;
+            const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+            const length = Math.hypot(b.x - a.x, b.y - a.y);
+            const sign = selectedShape?.valid && selectedShape.signedArea > 0 ? 1 : -1;
+            const nx = (-(b.y - a.y) / length) * sign,
+              ny = ((b.x - a.x) / length) * sign;
+            const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
+            const cx = point.x + nx * 12 * size,
+              cy = point.y + ny * 12 * size;
+            const arrow = (along: number, across: number) =>
+              `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
+            return (
+              <g
+                key={`edge-${edgeIndex}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`Konturseite ${edgeIndex + 1} strecken`}
+                className="cursor-grab outline-none focus-visible:stroke-blue-800"
+                onPointerDown={(event) => {
+                  if (event.button !== 0 || pan || selecting || !interactive || !onContourStretch)
+                    return;
+                  const start = rawPoint(event);
+                  if (!start || !svg.current) return;
+                  event.preventDefault();
                   event.stopPropagation();
-                  const raw = rawPoint(event);
-                  onSelect(
-                    { kind: "wall", id: wall.id },
-                    { x: event.clientX, y: event.clientY },
-                    undefined,
-                    raw ? wallAxisAnchor(wall, raw) : wall.start,
-                  );
+                  svg.current.focus();
+                  gripClick.current = false;
+                  navigationClick.current = false;
+                  gripDrag.current = {
+                    base: project,
+                    target: selection,
+                    index: edgeIndex,
+                    gesture: {
+                      pointerId: event.pointerId,
+                      origin: point,
+                      pointerStart: start,
+                      screenStart: { x: event.clientX, y: event.clientY },
+                    },
+                  };
+                  svg.current.setPointerCapture(event.pointerId);
+                  onContourStretch(selection, edgeIndex, point);
                 }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+                onKeyDown={(event) => {
+                  if (
+                    (event.key === "Enter" || event.key === " ") &&
+                    interactive &&
+                    !pan &&
+                    !selecting
+                  ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onContourStretch?.(selection, edgeIndex, point);
+                  }
+                }}
+              >
+                <circle cx={cx} cy={-cy} r={10 / camera.pixelsPerMetre} fill="transparent" />
+                <path
+                  d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
+                  fill="none"
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  className="cursor-pointer outline-none focus-visible:stroke-blue-800"
+                  vectorEffect="non-scaling-stroke"
+                  pointerEvents="none"
+                />
+              </g>
+            );
+          })}
+        {!drawing &&
+          !editSession &&
+          selection &&
+          handles.map(({ point, index, label, axis }) => (
+            <circle
+              key={label}
+              cx={point.x}
+              cy={-point.y}
+              r={5 / camera.pixelsPerMetre}
+              fill={axis ? WALL_AXIS_COLOR : "white"}
+              stroke={axis ? WALL_AXIS_COLOR : "#0284c7"}
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              role="button"
+              tabIndex={0}
+              aria-label={label}
+              className="cursor-pointer outline-none focus:stroke-foreground"
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const bounds = event.currentTarget.getBoundingClientRect();
+                  onSelect(selection, { x: bounds.x, y: bounds.y }, index, point);
+                }
+              }}
+            />
+          ))}
+        {placement?.angleMeasurement && (
+          <AngleMeasurementOverlay
+            measurement={placement.angleMeasurement}
+            aim={resolvedHover?.point ?? null}
+            pixelsPerMetre={camera.pixelsPerMetre}
+          />
+        )}
+        {placement?.areaMeasurement && (
+          <AreaMeasurementOverlay
+            measurement={placement.areaMeasurement}
+            aim={resolvedHover?.point ?? null}
+            pixelsPerMetre={camera.pixelsPerMetre}
+          />
+        )}
+        {placement?.measurement && (
+          <DistanceOverlay
+            measurement={placement.measurement}
+            aim={resolvedHover?.point ?? null}
+            pixelsPerMetre={camera.pixelsPerMetre}
+          />
+        )}
+        {editSession && resolvedEdit && (
+          <g pointerEvents="none">
+            <line
+              x1={editSession.anchor.x}
+              y1={-editSession.anchor.y}
+              x2={resolvedEdit.point.x}
+              y2={-resolvedEdit.point.y}
+              stroke={editError ? "#dc2626" : "#0284c7"}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+              strokeDasharray="5 4"
+            />
+            <circle
+              cx={resolvedEdit.point.x}
+              cy={-resolvedEdit.point.y}
+              r={5 / camera.pixelsPerMetre}
+              fill={editError ? "#dc2626" : "#0284c7"}
+            />
+            {editError && (
+              <text
+                role="alert"
+                x={resolvedEdit.point.x}
+                y={-resolvedEdit.point.y - 0.15}
+                fontSize={0.13}
+                fill="#dc2626"
+              >
+                {editError}
+              </text>
+            )}
+          </g>
+        )}
+        {drawing &&
+          draftFill &&
+          (draftPoints.length >= 2 || constructedContour.length >= 3) &&
+          (() => {
+            const points = draftContour
+              ? constructedContour
+              : [...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])];
+            return (
+              <g pointerEvents="none">
+                <polygon
+                  points={points.map((p) => `${p.x},${-p.y}`).join(" ")}
+                  fill={draftPattern ? "transparent" : draftFill.color}
+                  fillOpacity={draftFill.opacity}
+                  stroke="var(--primary)"
+                  strokeWidth={1}
+                  strokeDasharray="5 4"
+                  vectorEffect="non-scaling-stroke"
+                />
+                {draftPattern && points.length >= 3 && (
+                  <HatchPattern
+                    hatch={{
+                      points,
+                      fill: draftFill,
+                      pattern: {
+                        patternId: draftPattern.id,
+                        ...(draftPatternRotation === undefined
+                          ? {}
+                          : { rotation: draftPatternRotation }),
+                        ...(draftPatternSize ?? { mode: "model" as const }),
+                        origin: {
+                          x: Math.min(...points.map((p) => p.x)),
+                          y: Math.min(...points.map((p) => p.y)),
+                        },
+                      },
+                    }}
+                    context={scaleContext}
+                    definition={draftPattern}
+                    pixelsPerMetre={camera.pixelsPerMetre}
+                  />
+                )}
+              </g>
+            );
+          })()}
+        {drawing && draftPoints.length > 0 && (
+          <polyline
+            points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth={0.025}
+            pointerEvents="none"
+          />
+        )}
+        {(drawingResult.error || (placement && editError)) && resolvedHover && (
+          <text
+            role="alert"
+            x={resolvedHover.point.x}
+            y={-resolvedHover.point.y - 18 / camera.pixelsPerMetre}
+            fontSize={12 / camera.pixelsPerMetre}
+            fill="#dc2626"
+            pointerEvents="none"
+          >
+            {drawingResult.error || editError}
+          </text>
+        )}
+        {drawing && start && (
+          <g pointerEvents="none">
+            <circle
+              cx={start.x}
+              cy={-start.y}
+              r={6 / camera.pixelsPerMetre}
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth={1.5}
+              vectorEffect="non-scaling-stroke"
+            />
+            {resolvedHover && (
+              <line
+                x1={start.x}
+                y1={-start.y}
+                x2={resolvedHover.point.x}
+                y2={-resolvedHover.point.y}
+                stroke="var(--primary)"
+                strokeWidth={0.025}
+                strokeDasharray="0.1 0.05"
+              />
+            )}
+          </g>
+        )}
+        {!pan &&
+          snap &&
+          guideCursor &&
+          activeReferences.map((reference) => {
+            const guide = cursorGuide(guideCursor, reference, guideDirections);
+            const extension =
+              40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
+            return (
+              <line
+                key={JSON.stringify([reference.entityId, reference.feature])}
+                aria-label="Referenzhilfslinie"
+                data-guide-kind={guide.kind}
+                pointerEvents="none"
+                x1={guide.origin.x}
+                y1={-guide.origin.y}
+                x2={guide.point.x + extension * guide.direction.x}
+                y2={-guide.point.y - extension * guide.direction.y}
+                stroke="#929aa3"
+                strokeWidth={1}
+                strokeOpacity={0.7}
+                strokeDasharray="6 4"
+                vectorEffect="non-scaling-stroke"
+              />
+            );
+          })}
+        {!pan &&
+          activeReferences.map((reference) => (
+            <g
+              key={`${reference.entityId}/${reference.feature}`}
+              pointerEvents="none"
+              aria-label="Aktive Hover-Referenz"
+            >
+              {reference.segment && (
+                <line
+                  aria-label="Erfasste Linienreferenz"
+                  x1={reference.segment.start.x}
+                  y1={-reference.segment.start.y}
+                  x2={reference.segment.end.x}
+                  y2={-reference.segment.end.y}
+                  stroke="#929aa3"
+                  strokeWidth={3}
+                  strokeDasharray="6 4"
+                  vectorEffect="non-scaling-stroke"
+                />
+              )}
+              <circle
+                cx={reference.point.x}
+                cy={-reference.point.y}
+                r={10.5 / camera.pixelsPerMetre}
+                fill="none"
+                stroke="#929aa3"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
               />
             </g>
           ))}
-      {plan.lines.map((line) => (
-        <g key={line.id}>
-          {selection?.id === line.id && (
-            <path
-              d={linePath(line)}
-              fill="none"
-              stroke="#38bdf8"
-              strokeOpacity={0.4}
-              strokeWidth={5}
-              vectorEffect="non-scaling-stroke"
-              pointerEvents="none"
-            />
-          )}
-          <path
-            d={linePath(line)}
-            fill="none"
-            stroke={line.color}
-            strokeWidth={(line.penWidth * 96) / 25.4}
-            strokeDasharray={line.style === "dashed" ? "8 5" : undefined}
-            vectorEffect="non-scaling-stroke"
-            pointerEvents="none"
-          />
-          <path
-            {...selectProps("line", line.id)}
-            d={linePath(line)}
-            fill="none"
-            stroke="transparent"
-            strokeWidth={12}
-            vectorEffect="non-scaling-stroke"
-            className="cursor-pointer outline-none focus-visible:stroke-sky-300/40"
-          />
-        </g>
-      ))}
-      {!drawing &&
-        !editSession &&
-        selection &&
-        selectedRing?.map((a, edgeIndex, ring) => {
-          const b = ring[(edgeIndex + 1) % ring.length]!;
-          const point = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-          const length = Math.hypot(b.x - a.x, b.y - a.y);
-          const sign = selectedShape?.valid && selectedShape.signedArea > 0 ? 1 : -1;
-          const nx = (-(b.y - a.y) / length) * sign,
-            ny = ((b.x - a.x) / length) * sign;
-          const size = Math.min(1 / camera.pixelsPerMetre, length / 40);
-          const cx = point.x + nx * 12 * size,
-            cy = point.y + ny * 12 * size;
-          const arrow = (along: number, across: number) =>
-            `${cx + nx * along * size - ny * across * size},${-(cy + ny * along * size + nx * across * size)}`;
-          return (
-            <g
-              key={`edge-${edgeIndex}`}
-              role="button"
-              tabIndex={0}
-              aria-label={`Konturseite ${edgeIndex + 1} strecken`}
-              className="cursor-grab outline-none focus-visible:stroke-blue-800"
-              onPointerDown={(event) => {
-                if (event.button !== 0 || pan || selecting || !interactive || !onContourStretch)
-                  return;
-                const start = rawPoint(event);
-                if (!start || !svg.current) return;
-                event.preventDefault();
-                event.stopPropagation();
-                svg.current.focus();
-                gripClick.current = false;
-                navigationClick.current = false;
-                gripDrag.current = {
-                  base: project,
-                  target: selection,
-                  index: edgeIndex,
-                  gesture: {
-                    pointerId: event.pointerId,
-                    origin: point,
-                    pointerStart: start,
-                    screenStart: { x: event.clientX, y: event.clientY },
-                  },
-                };
-                svg.current.setPointerCapture(event.pointerId);
-                onContourStretch(selection, edgeIndex, point);
-              }}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onKeyDown={(event) => {
-                if (
-                  (event.key === "Enter" || event.key === " ") &&
-                  interactive &&
-                  !pan &&
-                  !selecting
-                ) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onContourStretch?.(selection, edgeIndex, point);
-                }
-              }}
-            >
-              <circle cx={cx} cy={-cy} r={10 / camera.pixelsPerMetre} fill="transparent" />
-              <path
-                d={`M ${arrow(-6, 0)} L ${arrow(6, 0)} M ${arrow(-2, -3)} L ${arrow(-6, 0)} L ${arrow(-2, 3)} M ${arrow(2, -3)} L ${arrow(6, 0)} L ${arrow(2, 3)}`}
-                fill="none"
-                stroke="#0284c7"
-                strokeWidth={2}
-                className="cursor-pointer outline-none focus-visible:stroke-blue-800"
-                vectorEffect="non-scaling-stroke"
-                pointerEvents="none"
-              />
-            </g>
-          );
-        })}
-      {!drawing &&
-        !editSession &&
-        selection &&
-        handles.map(({ point, index, label, axis }) => (
-          <circle
-            key={label}
-            cx={point.x}
-            cy={-point.y}
-            r={5 / camera.pixelsPerMetre}
-            fill={axis ? WALL_AXIS_COLOR : "white"}
-            stroke={axis ? WALL_AXIS_COLOR : "#0284c7"}
-            strokeWidth={2}
-            vectorEffect="non-scaling-stroke"
-            role="button"
-            tabIndex={0}
-            aria-label={label}
-            className="cursor-pointer outline-none focus:stroke-foreground"
-            onClick={(event) => {
-              event.stopPropagation();
-              onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                event.stopPropagation();
-                const bounds = event.currentTarget.getBoundingClientRect();
-                onSelect(selection, { x: bounds.x, y: bounds.y }, index, point);
-              }
-            }}
-          />
-        ))}
-      {editSession && resolvedEdit && (
-        <g pointerEvents="none">
-          <line
-            x1={editSession.anchor.x}
-            y1={-editSession.anchor.y}
-            x2={resolvedEdit.point.x}
-            y2={-resolvedEdit.point.y}
-            stroke={editError ? "#dc2626" : "#0284c7"}
-            strokeWidth={1}
-            vectorEffect="non-scaling-stroke"
-            strokeDasharray="5 4"
-          />
-          <circle
-            cx={resolvedEdit.point.x}
-            cy={-resolvedEdit.point.y}
-            r={5 / camera.pixelsPerMetre}
-            fill={editError ? "#dc2626" : "#0284c7"}
-          />
-          {editError && (
-            <text
-              role="alert"
-              x={resolvedEdit.point.x}
-              y={-resolvedEdit.point.y - 0.15}
-              fontSize={0.13}
-              fill="#dc2626"
-            >
-              {editError}
-            </text>
-          )}
-        </g>
-      )}
-      {drawing && draftFill && draftPoints.length >= 2 && (
-        <polygon
-          points={[...draftPoints, ...(resolvedHover ? [resolvedHover.point] : [])]
-            .map((p) => `${p.x},${-p.y}`)
-            .join(" ")}
-          fill={draftFill.color}
-          fillOpacity={draftFill.opacity}
-          stroke="var(--primary)"
-          strokeWidth={1}
-          strokeDasharray="5 4"
-          vectorEffect="non-scaling-stroke"
-          pointerEvents="none"
-        />
-      )}
-      {drawing && draftPoints.length > 0 && (
-        <polyline
-          points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}
-          fill="none"
-          stroke="var(--primary)"
-          strokeWidth={0.025}
-          pointerEvents="none"
-        />
-      )}
-      {drawing && start && (
-        <g pointerEvents="none">
-          <circle
-            cx={start.x}
-            cy={-start.y}
-            r={6 / camera.pixelsPerMetre}
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth={1.5}
-            vectorEffect="non-scaling-stroke"
-          />
-          {resolvedHover && (
-            <line
-              x1={start.x}
-              y1={-start.y}
-              x2={resolvedHover.point.x}
-              y2={-resolvedHover.point.y}
-              stroke="var(--primary)"
-              strokeWidth={0.025}
-              strokeDasharray="0.1 0.05"
-            />
-          )}
-        </g>
-      )}
-      {!pan &&
-        snap &&
-        guideCursor &&
-        activeReferences.map((reference) => {
-          const guide = cursorGuide(guideCursor, reference, guideDirections);
-          const extension =
-            40 / camera.pixelsPerMetre / Math.hypot(guide.direction.x, guide.direction.y);
-          return (
-            <line
-              key={JSON.stringify([reference.entityId, reference.feature])}
-              aria-label="Referenzhilfslinie"
-              data-guide-kind={guide.kind}
-              pointerEvents="none"
-              x1={guide.origin.x}
-              y1={-guide.origin.y}
-              x2={guide.point.x + extension * guide.direction.x}
-              y2={-guide.point.y - extension * guide.direction.y}
-              stroke="#929aa3"
-              strokeWidth={1}
-              strokeOpacity={0.7}
-              strokeDasharray="6 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          );
-        })}
-      {!pan &&
-        activeReferences.map((reference) => (
-          <g
-            key={`${reference.entityId}/${reference.feature}`}
-            pointerEvents="none"
-            aria-label="Aktive Hover-Referenz"
-          >
-            {reference.segment && (
+        {!pan && endpointSnap && (
+          <g pointerEvents="none">
+            {" "}
+            {resolvedHover?.candidate?.guideOrigin && (
               <line
-                aria-label="Erfasste Linienreferenz"
-                x1={reference.segment.start.x}
-                y1={-reference.segment.start.y}
-                x2={reference.segment.end.x}
-                y2={-reference.segment.end.y}
+                aria-label="Temporäre Hilfslinie"
+                x1={resolvedHover.candidate.guideOrigin.x}
+                y1={-resolvedHover.candidate.guideOrigin.y}
+                x2={resolvedHover.point.x}
+                y2={-resolvedHover.point.y}
                 stroke="#929aa3"
-                strokeWidth={3}
+                strokeWidth={1}
                 strokeDasharray="6 4"
                 vectorEffect="non-scaling-stroke"
               />
             )}
-            <circle
-              cx={reference.point.x}
-              cy={-reference.point.y}
-              r={10.5 / camera.pixelsPerMetre}
-              fill="none"
-              stroke="#929aa3"
-              strokeWidth={2}
-              vectorEffect="non-scaling-stroke"
-            />
-          </g>
-        ))}
-      {!pan && endpointSnap && (
-        <g pointerEvents="none">
-          {" "}
-          {resolvedHover?.candidate?.guideOrigin && (
-            <line
-              aria-label="Temporäre Hilfslinie"
-              x1={resolvedHover.candidate.guideOrigin.x}
-              y1={-resolvedHover.candidate.guideOrigin.y}
-              x2={resolvedHover.point.x}
-              y2={-resolvedHover.point.y}
-              stroke="#929aa3"
-              strokeWidth={1}
-              strokeDasharray="6 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          )}
-          {resolvedHover?.candidate?.secondaryGuideOrigin && (
-            <line
-              aria-label="Zweite temporäre Hilfslinie"
-              x1={resolvedHover.candidate.secondaryGuideOrigin.x}
-              y1={-resolvedHover.candidate.secondaryGuideOrigin.y}
-              x2={resolvedHover.point.x}
-              y2={-resolvedHover.point.y}
-              stroke="#929aa3"
-              strokeWidth={1}
-              strokeDasharray="6 4"
-              vectorEffect="non-scaling-stroke"
-            />
-          )}
-        </g>
-      )}
-      {!pan &&
-        endpointSnap &&
-        resolvedHover?.candidate &&
-        (drawing || resolvedHover.candidate.kind !== "grid") && (
-          <g
-            pointerEvents="none"
-            aria-label={`Fanghilfe ${snapLabels[resolvedHover.candidate.kind]}`}
-          >
-            {resolvedHover.candidate.kind === "midpoint" ? (
-              <path
-                d={`M ${resolvedHover.point.x} ${-resolvedHover.point.y - 5 / camera.pixelsPerMetre} l ${5 / camera.pixelsPerMetre} ${9 / camera.pixelsPerMetre} h ${-10 / camera.pixelsPerMetre} Z`}
-                fill="none"
-                stroke="#0284c7"
-                strokeWidth={2}
-                vectorEffect="non-scaling-stroke"
-              />
-            ) : (
-              <circle
-                cx={resolvedHover.point.x}
-                cy={-resolvedHover.point.y}
-                r={4 / camera.pixelsPerMetre}
-                fill="none"
-                stroke="#0284c7"
-                strokeWidth={2}
+            {resolvedHover?.candidate?.secondaryGuideOrigin && (
+              <line
+                aria-label="Zweite temporäre Hilfslinie"
+                x1={resolvedHover.candidate.secondaryGuideOrigin.x}
+                y1={-resolvedHover.candidate.secondaryGuideOrigin.y}
+                x2={resolvedHover.point.x}
+                y2={-resolvedHover.point.y}
+                stroke="#929aa3"
+                strokeWidth={1}
+                strokeDasharray="6 4"
                 vectorEffect="non-scaling-stroke"
               />
             )}
-            <text
-              x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
-              y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
-              fontSize={12 / camera.pixelsPerMetre}
-              fill="#0284c7"
-            >
-              {snapLabels[resolvedHover.candidate.kind]}
-            </text>
           </g>
         )}
-      {selecting && (
-        <g pointerEvents="none">
-          <rect
-            x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
-            y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
-            width={viewSize.width / camera.pixelsPerMetre}
-            height={viewSize.height / camera.pixelsPerMetre}
-            fill="var(--background)"
-            opacity={0.65}
-          />
-          {referenceSelection?.mode === "points" &&
-            referenceSelection.points
-              .filter((r) => isLayerVisible(project, visibility, r.entityId))
-              .map((r) => (
-                <circle
-                  key={referenceKey(r)}
-                  cx={r.point.x}
-                  cy={-r.point.y}
-                  r={8 / camera.pixelsPerMetre}
+        {!pan &&
+          endpointSnap &&
+          resolvedHover?.candidate &&
+          (drawing || resolvedHover.candidate.kind !== "grid") && (
+            <g
+              pointerEvents="none"
+              aria-label={`Fanghilfe ${resolvedHover.candidate.sourceFeature === "t-axis" ? "T-Anschluss" : snapLabels[resolvedHover.candidate.kind]}`}
+            >
+              {resolvedHover.candidate.kind === "midpoint" ? (
+                <path
+                  d={`M ${resolvedHover.point.x} ${-resolvedHover.point.y - 5 / camera.pixelsPerMetre} l ${5 / camera.pixelsPerMetre} ${9 / camera.pixelsPerMetre} h ${-10 / camera.pixelsPerMetre} Z`}
                   fill="none"
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  vectorEffect="non-scaling-stroke"
+                />
+              ) : (
+                <circle
+                  cx={resolvedHover.point.x}
+                  cy={-resolvedHover.point.y}
+                  r={4 / camera.pixelsPerMetre}
+                  fill="none"
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  vectorEffect="non-scaling-stroke"
+                />
+              )}
+              <text
+                x={resolvedHover.point.x + 9 / camera.pixelsPerMetre}
+                y={-resolvedHover.point.y - 9 / camera.pixelsPerMetre}
+                fontSize={12 / camera.pixelsPerMetre}
+                fill="#0284c7"
+              >
+                {resolvedHover.candidate.sourceFeature === "t-axis"
+                  ? "T-Anschluss"
+                  : snapLabels[resolvedHover.candidate.kind]}
+              </text>
+            </g>
+          )}
+        {selecting && (
+          <g pointerEvents="none">
+            <rect
+              x={camera.center.x - viewSize.width / camera.pixelsPerMetre / 2}
+              y={-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2}
+              width={viewSize.width / camera.pixelsPerMetre}
+              height={viewSize.height / camera.pixelsPerMetre}
+              fill="var(--background)"
+              opacity={0.65}
+            />
+            {referenceSelection?.mode === "points" &&
+              referenceSelection.points
+                .filter((r) => isLayerVisible(project, visibility, r.entityId))
+                .map((r) => (
+                  <circle
+                    key={referenceKey(r)}
+                    cx={r.point.x}
+                    cy={-r.point.y}
+                    r={8 / camera.pixelsPerMetre}
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth={2 / camera.pixelsPerMetre}
+                  />
+                ))}
+            {modelSources.allSegments
+              .filter((s) => isLayerVisible(project, visibility, s.source.entityId))
+              .filter(
+                (s) =>
+                  referenceSelection?.state.draft?.includes(segmentKey(s.source)) ||
+                  (referenceSelection?.hot &&
+                    segmentKey(referenceSelection.hot) === segmentKey(s.source)),
+              )
+              .map((s) => (
+                <line
+                  key={segmentKey(s.source)}
+                  x1={s.start.x}
+                  y1={-s.start.y}
+                  x2={s.end.x}
+                  y2={-s.end.y}
                   stroke="#64748b"
-                  strokeWidth={2 / camera.pixelsPerMetre}
+                  strokeWidth={3 / camera.pixelsPerMetre}
                 />
               ))}
-          {modelSources.allSegments
-            .filter((s) => isLayerVisible(project, visibility, s.source.entityId))
-            .filter(
-              (s) =>
-                referenceSelection?.state.draft?.includes(segmentKey(s.source)) ||
-                (referenceSelection?.hot &&
-                  segmentKey(referenceSelection.hot) === segmentKey(s.source)),
-            )
-            .map((s) => (
-              <line
-                key={segmentKey(s.source)}
-                x1={s.start.x}
-                y1={-s.start.y}
-                x2={s.end.x}
-                y2={-s.end.y}
-                stroke="#64748b"
-                strokeWidth={3 / camera.pixelsPerMetre}
-              />
-            ))}
-        </g>
-      )}
-      {referenceSelection &&
-        (selecting || referenceSelection.selected || (endpointSnap && snap && density.paused)) && (
-          <foreignObject
-            transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
-            width={Math.min(440, viewSize.width - 24)}
-            height={selecting ? 340 : 90}
-          >
-            <ReferenceSelectionPanel
-              binding={referenceSelection}
-              pointsEnabled={trackingContext.enabled}
-              pointPreview={previewPoints(referenceSelection.points)}
-              onApplyPoints={() => {
-                const points = referenceSelection.points;
-                const valid = points.every(
-                  (r) =>
-                    isLayerVisible(project, visibility, r.entityId) &&
-                    modelSources.lookup(referenceKey(r)) &&
-                    (!snapping || snapping.sources([r]).length > 0),
-                );
-                if (valid && acquirePoints(points)) referenceSelection.cancel();
-              }}
-              paused={endpointSnap && snap && density.paused}
-              label={(r) => {
-                const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
-                const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
-                if (referenceSelection.mode === "points")
-                  return `${wi >= 0 ? `Wand ${wi + 1}` : li >= 0 ? `Linie ${li + 1}` : "Hilfsreferenz"} · ${r.kind === "midpoint" ? "Mittelpunkt" : "Punkt"} (${r.point.x.toFixed(2)}; ${r.point.y.toFixed(2)})`;
-                return wi >= 0
-                  ? `Wand ${wi + 1} · Achse`
-                  : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
-              }}
-            />
-          </foreignObject>
+          </g>
         )}
+        {referenceSelection &&
+          (selecting ||
+            referenceSelection.selected ||
+            (endpointSnap && snap && density.paused)) && (
+            <foreignObject
+              transform={`translate(${camera.center.x - viewSize.width / camera.pixelsPerMetre / 2 + panelX / camera.pixelsPerMetre} ${-camera.center.y - viewSize.height / camera.pixelsPerMetre / 2 + panelY / camera.pixelsPerMetre}) scale(${1 / camera.pixelsPerMetre})`}
+              width={Math.min(440, viewSize.width - 24)}
+              height={selecting ? 340 : 90}
+            >
+              <ReferenceSelectionPanel
+                binding={referenceSelection}
+                pointsEnabled={trackingContext.enabled}
+                pointPreview={previewPoints(referenceSelection.points)}
+                onApplyPoints={() => {
+                  const points = referenceSelection.points;
+                  const valid = points.every(
+                    (r) =>
+                      isLayerVisible(project, visibility, r.entityId) &&
+                      modelSources.lookup(referenceKey(r)) &&
+                      (!snapping || snapping.sources([r]).length > 0),
+                  );
+                  if (valid && acquirePoints(points)) referenceSelection.cancel();
+                }}
+                paused={endpointSnap && snap && density.paused}
+                label={(r) => {
+                  const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
+                  const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+                  if (referenceSelection.mode === "points")
+                    return `${wi >= 0 ? `Wand ${wi + 1}` : li >= 0 ? `Linie ${li + 1}` : "Hilfsreferenz"} · ${r.kind === "midpoint" ? "Mittelpunkt" : "Punkt"} (${r.point.x.toFixed(2)}; ${r.point.y.toFixed(2)})`;
+                  return wi >= 0
+                    ? `Wand ${wi + 1} · Achse`
+                    : `Linie ${li + 1} · Teilsegment ${Number(r.feature.match(/segment-(\d+)/)?.[1] ?? 0) + 1}`;
+                }}
+              />
+            </foreignObject>
+          )}
+      </g>
     </svg>
   );
 }

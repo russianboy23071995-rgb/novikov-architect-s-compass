@@ -1,0 +1,993 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "fixture": "K03 1000 elements and 3 PNG/JPEG imports",
+  "samplesPerMode": 20,
+  "equivalent": true,
+  "scope": "Diagnostic mirror, alternating measured order; equality checks outside timed sections. No peak memory/FPS claim.",
+  "results": [
+    {
+      "mode": "model",
+      "historyDepth": 20,
+      "timings": {
+        "nextValidation": {
+          "median": 9.450000002980232,
+          "p95": 15.699999988079071
+        },
+        "nextSerialization": {
+          "median": 4.950000002980232,
+          "p95": 6.9000000059604645
+        },
+        "nextSize": {
+          "median": 7.700000017881393,
+          "p95": 10.400000005960464
+        },
+        "previousValidation": {
+          "median": 8.649999991059303,
+          "p95": 28.30000001192093
+        },
+        "previousSerialization": {
+          "median": 5,
+          "p95": 6.5
+        },
+        "previousSize": {
+          "median": 7.450000002980232,
+          "p95": 10.400000005960464
+        },
+        "fullComparison": {
+          "median": 0,
+          "p95": 0
+        },
+        "previousModelSerialization": {
+          "median": 4.5999999940395355,
+          "p95": 6.700000017881393
+        },
+        "nextModelSerialization": {
+          "median": 4.800000011920929,
+          "p95": 5.4000000059604645
+        },
+        "modelComparison": {
+          "median": 0,
+          "p95": 0.09999999403953552
+        },
+        "historyUpdate": {
+          "median": 0,
+          "p95": 0.09999999403953552
+        },
+        "baselineCommit": {
+          "median": 54.75,
+          "p95": 80.2000000178814
+        },
+        "actualCommit": {
+          "median": 45.54999998211861,
+          "p95": 48.5
+        }
+      },
+      "samples": [
+        {
+          "nextValidation": 13.900000005960464,
+          "nextSerialization": 5.799999982118607,
+          "nextSize": 10.5,
+          "previousValidation": 19,
+          "previousSerialization": 5.5999999940395355,
+          "previousSize": 11.900000005960464,
+          "fullComparison": 0.19999998807907104,
+          "previousModelSerialization": 4.5999999940395355,
+          "nextModelSerialization": 6.200000017881393,
+          "modelComparison": 0.09999999403953552,
+          "historyUpdate": 0.09999999403953552,
+          "baselineCommit": 78.30000001192093,
+          "actualCommit": 47.80000001192093
+        },
+        {
+          "nextValidation": 10.799999982118607,
+          "nextSerialization": 5.9000000059604645,
+          "nextSize": 9,
+          "previousValidation": 9.400000005960464,
+          "previousSerialization": 4.5999999940395355,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.4000000059604645,
+          "nextModelSerialization": 5.4000000059604645,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 56.599999994039536,
+          "actualCommit": 48.099999994039536
+        },
+        {
+          "nextValidation": 8.900000005960464,
+          "nextSerialization": 5,
+          "nextSize": 10.099999994039536,
+          "previousValidation": 9.900000005960464,
+          "previousSerialization": 4.5,
+          "previousSize": 7.4000000059604645,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.5,
+          "nextModelSerialization": 5.0999999940395355,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 56.5,
+          "actualCommit": 47.80000001192093
+        },
+        {
+          "nextValidation": 11.400000005960464,
+          "nextSerialization": 4.199999988079071,
+          "nextSize": 7.100000023841858,
+          "previousValidation": 8.899999976158142,
+          "previousSerialization": 4.5,
+          "previousSize": 8,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5,
+          "nextModelSerialization": 4.600000023841858,
+          "modelComparison": 0,
+          "historyUpdate": 0.09999999403953552,
+          "baselineCommit": 53.30000001192093,
+          "actualCommit": 44.099999994039536
+        },
+        {
+          "nextValidation": 8.400000005960464,
+          "nextSerialization": 4.699999988079071,
+          "nextSize": 10.400000005960464,
+          "previousValidation": 7.5999999940395355,
+          "previousSerialization": 4.5,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.200000017881393,
+          "nextModelSerialization": 4.199999988079071,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 51.099999994039536,
+          "actualCommit": 46.599999994039536
+        },
+        {
+          "nextValidation": 12,
+          "nextSerialization": 4.5,
+          "nextSize": 8.200000017881393,
+          "previousValidation": 8.399999976158142,
+          "previousSerialization": 5,
+          "previousSize": 8.400000005960464,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5,
+          "nextModelSerialization": 4.399999976158142,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 55.599999994039536,
+          "actualCommit": 42.099999994039536
+        },
+        {
+          "nextValidation": 8.900000005960464,
+          "nextSerialization": 6.9000000059604645,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 8.099999994039536,
+          "previousSerialization": 5.699999988079071,
+          "previousSize": 7.200000017881393,
+          "fullComparison": 0,
+          "previousModelSerialization": 4,
+          "nextModelSerialization": 5,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 53.30000001192093,
+          "actualCommit": 45.69999998807907
+        },
+        {
+          "nextValidation": 10.099999994039536,
+          "nextSerialization": 5.5,
+          "nextSize": 7.0999999940395355,
+          "previousValidation": 7.5,
+          "previousSerialization": 4.5999999940395355,
+          "previousSize": 7.4000000059604645,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.300000011920929,
+          "nextModelSerialization": 4.199999988079071,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 50.89999997615814,
+          "actualCommit": 48.5
+        },
+        {
+          "nextValidation": 15.699999988079071,
+          "nextSerialization": 6.4000000059604645,
+          "nextSize": 9.199999988079071,
+          "previousValidation": 20.30000001192093,
+          "previousSerialization": 4.299999982118607,
+          "previousSize": 10.400000005960464,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5,
+          "nextModelSerialization": 4.600000023841858,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 75.5,
+          "actualCommit": 44.39999997615814
+        },
+        {
+          "nextValidation": 8.699999988079071,
+          "nextSerialization": 4.800000011920929,
+          "nextSize": 9.299999982118607,
+          "previousValidation": 9.700000017881393,
+          "previousSerialization": 5,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.600000023841858,
+          "nextModelSerialization": 4.899999976158142,
+          "modelComparison": 0,
+          "historyUpdate": 0.10000002384185791,
+          "baselineCommit": 55.5,
+          "actualCommit": 45
+        },
+        {
+          "nextValidation": 8.800000011920929,
+          "nextSerialization": 7,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 8.599999994039536,
+          "previousSerialization": 5.4000000059604645,
+          "previousSize": 7.199999988079071,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.4000000059604645,
+          "nextModelSerialization": 4.9000000059604645,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 54.80000001192093,
+          "actualCommit": 41.400000005960464
+        },
+        {
+          "nextValidation": 8.799999982118607,
+          "nextSerialization": 4.0999999940395355,
+          "nextSize": 8.200000017881393,
+          "previousValidation": 7.300000011920929,
+          "previousSerialization": 5.399999976158142,
+          "previousSize": 9.100000023841858,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.5,
+          "nextModelSerialization": 4.800000011920929,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 53.5,
+          "actualCommit": 48.5
+        },
+        {
+          "nextValidation": 15.800000011920929,
+          "nextSerialization": 4.9000000059604645,
+          "nextSize": 7.899999976158142,
+          "previousValidation": 28.30000001192093,
+          "previousSerialization": 5,
+          "previousSize": 9.699999988079071,
+          "fullComparison": 0,
+          "previousModelSerialization": 6.700000017881393,
+          "nextModelSerialization": 4.9000000059604645,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 83.2000000178814,
+          "actualCommit": 44.89999997615814
+        },
+        {
+          "nextValidation": 8.5,
+          "nextSerialization": 5.699999988079071,
+          "nextSize": 7.700000017881393,
+          "previousValidation": 8.699999988079071,
+          "previousSerialization": 6.5999999940395355,
+          "previousSize": 8.200000017881393,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5999999940395355,
+          "nextModelSerialization": 4.5999999940395355,
+          "modelComparison": 0.09999999403953552,
+          "historyUpdate": 0,
+          "baselineCommit": 54.69999998807907,
+          "actualCommit": 49.80000001192093
+        },
+        {
+          "nextValidation": 7.800000011920929,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 7.699999988079071,
+          "previousSerialization": 6.300000011920929,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.4000000059604645,
+          "nextModelSerialization": 4.700000017881393,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 50.10000002384186,
+          "actualCommit": 47.29999998211861
+        },
+        {
+          "nextValidation": 10,
+          "nextSerialization": 4.799999982118607,
+          "nextSize": 7.700000017881393,
+          "previousValidation": 8,
+          "previousSerialization": 6.5,
+          "previousSize": 7.4000000059604645,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5999999940395355,
+          "nextModelSerialization": 4.5999999940395355,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 53.69999998807907,
+          "actualCommit": 43.20000001788139
+        },
+        {
+          "nextValidation": 15.5,
+          "nextSerialization": 4.200000017881393,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 28.69999998807907,
+          "previousSerialization": 5.4000000059604645,
+          "previousSize": 8.699999988079071,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.200000017881393,
+          "nextModelSerialization": 5,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 80.2000000178814,
+          "actualCommit": 45.39999997615814
+        },
+        {
+          "nextValidation": 11.800000011920929,
+          "nextSerialization": 5.0999999940395355,
+          "nextSize": 7.199999988079071,
+          "previousValidation": 8,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.799999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 6.9000000059604645,
+          "nextModelSerialization": 5.200000017881393,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 57.099999994039536,
+          "actualCommit": 46.599999994039536
+        },
+        {
+          "nextValidation": 7.5999999940395355,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.299999982118607,
+          "previousValidation": 10.700000017881393,
+          "previousSerialization": 4.5999999940395355,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.0999999940395355,
+          "nextModelSerialization": 4.800000011920929,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 50.5,
+          "actualCommit": 43
+        },
+        {
+          "nextValidation": 7.800000011920929,
+          "nextSerialization": 6.4000000059604645,
+          "nextSize": 7.0999999940395355,
+          "previousValidation": 8.299999982118607,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.5,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.700000017881393,
+          "nextModelSerialization": 4.199999988079071,
+          "modelComparison": 0,
+          "historyUpdate": 0,
+          "baselineCommit": 50.900000005960464,
+          "actualCommit": 42.29999998211861
+        }
+      ]
+    },
+    {
+      "mode": "noop",
+      "historyDepth": 0,
+      "timings": {
+        "nextValidation": {
+          "median": 8.800000011920929,
+          "p95": 15.800000011920929
+        },
+        "nextSerialization": {
+          "median": 4.450000002980232,
+          "p95": 6.899999976158142
+        },
+        "nextSize": {
+          "median": 7.600000008940697,
+          "p95": 10
+        },
+        "previousValidation": {
+          "median": 9,
+          "p95": 12.299999982118607
+        },
+        "previousSerialization": {
+          "median": 4.750000014901161,
+          "p95": 5.5999999940395355
+        },
+        "previousSize": {
+          "median": 7.5,
+          "p95": 10.099999994039536
+        },
+        "fullComparison": {
+          "median": 0.5,
+          "p95": 0.6000000238418579
+        },
+        "baselineCommit": {
+          "median": 44,
+          "p95": 54.80000001192093
+        },
+        "actualCommit": {
+          "median": 44.099999994039536,
+          "p95": 56.19999998807907
+        }
+      },
+      "samples": [
+        {
+          "nextValidation": 14.300000011920929,
+          "nextSerialization": 21.5,
+          "nextSize": 8.900000005960464,
+          "previousValidation": 12.299999982118607,
+          "previousSerialization": 4.300000011920929,
+          "previousSize": 10.099999994039536,
+          "fullComparison": 0.4000000059604645,
+          "baselineCommit": 71.80000001192093,
+          "actualCommit": 37.69999998807907
+        },
+        {
+          "nextValidation": 8.400000005960464,
+          "nextSerialization": 4.9000000059604645,
+          "nextSize": 9.800000011920929,
+          "previousValidation": 8.400000005960464,
+          "previousSerialization": 4.5,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0.5,
+          "baselineCommit": 43.900000005960464,
+          "actualCommit": 48.79999998211861
+        },
+        {
+          "nextValidation": 9.700000017881393,
+          "nextSerialization": 4.199999988079071,
+          "nextSize": 7,
+          "previousValidation": 7.199999988079071,
+          "previousSerialization": 4.200000017881393,
+          "previousSize": 6.799999982118607,
+          "fullComparison": 0.4000000059604645,
+          "baselineCommit": 39.5,
+          "actualCommit": 45
+        },
+        {
+          "nextValidation": 7.5,
+          "nextSerialization": 5,
+          "nextSize": 7.200000017881393,
+          "previousValidation": 13.699999988079071,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.4000000059604645,
+          "fullComparison": 0.5999999940395355,
+          "baselineCommit": 46.20000001788139,
+          "actualCommit": 39.099999994039536
+        },
+        {
+          "nextValidation": 9.5,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 8,
+          "previousValidation": 8.900000005960464,
+          "previousSerialization": 5.300000011920929,
+          "previousSize": 7.199999988079071,
+          "fullComparison": 0.5,
+          "baselineCommit": 43.80000001192093,
+          "actualCommit": 48.19999998807907
+        },
+        {
+          "nextValidation": 14.700000017881393,
+          "nextSerialization": 4.199999988079071,
+          "nextSize": 10.300000011920929,
+          "previousValidation": 7.5999999940395355,
+          "previousSerialization": 4.4000000059604645,
+          "previousSize": 7.199999988079071,
+          "fullComparison": 0.6000000238418579,
+          "baselineCommit": 49.20000001788139,
+          "actualCommit": 55.099999994039536
+        },
+        {
+          "nextValidation": 10.699999988079071,
+          "nextSerialization": 4.5,
+          "nextSize": 7.100000023841858,
+          "previousValidation": 9.099999994039536,
+          "previousSerialization": 4.4000000059604645,
+          "previousSize": 7.5,
+          "fullComparison": 0.5999999940395355,
+          "baselineCommit": 44,
+          "actualCommit": 41
+        },
+        {
+          "nextValidation": 12,
+          "nextSerialization": 6.899999976158142,
+          "nextSize": 9.300000011920929,
+          "previousValidation": 10,
+          "previousSerialization": 4.9000000059604645,
+          "previousSize": 7.5999999940395355,
+          "fullComparison": 0.5,
+          "baselineCommit": 51.19999998807907,
+          "actualCommit": 56.80000001192093
+        },
+        {
+          "nextValidation": 8.200000017881393,
+          "nextSerialization": 6.0999999940395355,
+          "nextSize": 7.300000011920929,
+          "previousValidation": 9.299999982118607,
+          "previousSerialization": 5.5999999940395355,
+          "previousSize": 10.5,
+          "fullComparison": 0.5,
+          "baselineCommit": 47.60000002384186,
+          "actualCommit": 39.5
+        },
+        {
+          "nextValidation": 15.900000005960464,
+          "nextSerialization": 4.800000011920929,
+          "nextSize": 10,
+          "previousValidation": 8.799999982118607,
+          "previousSerialization": 5.300000011920929,
+          "previousSize": 9.400000005960464,
+          "fullComparison": 0.5999999940395355,
+          "baselineCommit": 54.80000001192093,
+          "actualCommit": 56.19999998807907
+        },
+        {
+          "nextValidation": 10.599999994039536,
+          "nextSerialization": 5.4000000059604645,
+          "nextSize": 9.299999982118607,
+          "previousValidation": 10.900000005960464,
+          "previousSerialization": 4.200000017881393,
+          "previousSize": 7.5,
+          "fullComparison": 0.5,
+          "baselineCommit": 48.400000005960464,
+          "actualCommit": 40.39999997615814
+        },
+        {
+          "nextValidation": 7.699999988079071,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7,
+          "previousValidation": 7.299999982118607,
+          "previousSerialization": 5.700000017881393,
+          "previousSize": 7.799999982118607,
+          "fullComparison": 0.5,
+          "baselineCommit": 40.39999997615814,
+          "actualCommit": 41.20000001788139
+        },
+        {
+          "nextValidation": 7.199999988079071,
+          "nextSerialization": 5.9000000059604645,
+          "nextSize": 8.099999994039536,
+          "previousValidation": 9.5,
+          "previousSerialization": 5,
+          "previousSize": 7.5,
+          "fullComparison": 0.5999999940395355,
+          "baselineCommit": 43.89999997615814,
+          "actualCommit": 43.5
+        },
+        {
+          "nextValidation": 7.299999982118607,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7,
+          "previousValidation": 8.400000005960464,
+          "previousSerialization": 4.5,
+          "previousSize": 7.5,
+          "fullComparison": 0.4000000059604645,
+          "baselineCommit": 39.5,
+          "actualCommit": 44.30000001192093
+        },
+        {
+          "nextValidation": 8,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.199999988079071,
+          "previousValidation": 10.400000005960464,
+          "previousSerialization": 5,
+          "previousSize": 8.599999994039536,
+          "fullComparison": 0.5,
+          "baselineCommit": 44,
+          "actualCommit": 47.099999994039536
+        },
+        {
+          "nextValidation": 8.099999994039536,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 9.099999994039536,
+          "previousSerialization": 4.700000017881393,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0.5,
+          "baselineCommit": 41.69999998807907,
+          "actualCommit": 43
+        },
+        {
+          "nextValidation": 8.900000005960464,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.699999988079071,
+          "previousValidation": 11,
+          "previousSerialization": 5.0999999940395355,
+          "previousSize": 7.300000011920929,
+          "fullComparison": 0.5,
+          "baselineCommit": 44.80000001192093,
+          "actualCommit": 43.400000005960464
+        },
+        {
+          "nextValidation": 8.700000017881393,
+          "nextSerialization": 4.799999982118607,
+          "nextSize": 7.600000023841858,
+          "previousValidation": 8.599999994039536,
+          "previousSerialization": 4,
+          "previousSize": 7.5999999940395355,
+          "fullComparison": 0.800000011920929,
+          "baselineCommit": 42.10000002384186,
+          "actualCommit": 43.89999997615814
+        },
+        {
+          "nextValidation": 7.4000000059604645,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.199999988079071,
+          "previousValidation": 8.199999988079071,
+          "previousSerialization": 5.200000017881393,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0.5,
+          "baselineCommit": 40.099999994039536,
+          "actualCommit": 47.60000002384186
+        },
+        {
+          "nextValidation": 15.800000011920929,
+          "nextSerialization": 4.199999988079071,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 7,
+          "previousSerialization": 4.5,
+          "previousSize": 7.5,
+          "fullComparison": 0.5,
+          "baselineCommit": 46.900000005960464,
+          "actualCommit": 54.89999997615814
+        }
+      ]
+    },
+    {
+      "mode": "visibility",
+      "historyDepth": 0,
+      "timings": {
+        "nextValidation": {
+          "median": 7.549999997019768,
+          "p95": 9.5
+        },
+        "nextSerialization": {
+          "median": 4.549999997019768,
+          "p95": 5.5
+        },
+        "nextSize": {
+          "median": 7.4000000059604645,
+          "p95": 8.199999988079071
+        },
+        "previousValidation": {
+          "median": 8.749999985098839,
+          "p95": 11.400000005960464
+        },
+        "previousSerialization": {
+          "median": 4.799999997019768,
+          "p95": 6.300000011920929
+        },
+        "previousSize": {
+          "median": 7.5,
+          "p95": 9.5
+        },
+        "fullComparison": {
+          "median": 0,
+          "p95": 0
+        },
+        "previousModelSerialization": {
+          "median": 4.549999997019768,
+          "p95": 6.5999999940395355
+        },
+        "nextModelSerialization": {
+          "median": 4.4000000059604645,
+          "p95": 5.4000000059604645
+        },
+        "modelComparison": {
+          "median": 0.5,
+          "p95": 0.7999999821186066
+        },
+        "historyUpdate": {
+          "median": 0,
+          "p95": 0.09999999403953552
+        },
+        "baselineCommit": {
+          "median": 50.04999999701977,
+          "p95": 60.900000005960464
+        },
+        "actualCommit": {
+          "median": 45.80000001192093,
+          "p95": 52
+        }
+      },
+      "samples": [
+        {
+          "nextValidation": 7.699999988079071,
+          "nextSerialization": 4.800000011920929,
+          "nextSize": 7.199999988079071,
+          "previousValidation": 8.800000011920929,
+          "previousSerialization": 5.5999999940395355,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.300000011920929,
+          "nextModelSerialization": 4.800000011920929,
+          "modelComparison": 0.7999999821186066,
+          "historyUpdate": 0.09999999403953552,
+          "baselineCommit": 51.39999997615814,
+          "actualCommit": 43.20000001788139
+        },
+        {
+          "nextValidation": 7.299999982118607,
+          "nextSerialization": 5.700000017881393,
+          "nextSize": 8.199999988079071,
+          "previousValidation": 11.400000005960464,
+          "previousSerialization": 5.9000000059604645,
+          "previousSize": 8.099999994039536,
+          "fullComparison": 0,
+          "previousModelSerialization": 6.5999999940395355,
+          "nextModelSerialization": 6.800000011920929,
+          "modelComparison": 0.800000011920929,
+          "historyUpdate": 0,
+          "baselineCommit": 60.900000005960464,
+          "actualCommit": 44.5
+        },
+        {
+          "nextValidation": 7.0999999940395355,
+          "nextSerialization": 4.199999988079071,
+          "nextSize": 7.200000017881393,
+          "previousValidation": 7.4000000059604645,
+          "previousSerialization": 4.799999982118607,
+          "previousSize": 7.5,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5,
+          "nextModelSerialization": 4.300000011920929,
+          "modelComparison": 0.5999999940395355,
+          "historyUpdate": 0,
+          "baselineCommit": 47.599999994039536,
+          "actualCommit": 41.69999998807907
+        },
+        {
+          "nextValidation": 8.600000023841858,
+          "nextSerialization": 4.5,
+          "nextSize": 9.599999994039536,
+          "previousValidation": 8.400000005960464,
+          "previousSerialization": 4.399999976158142,
+          "previousSize": 7.4000000059604645,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.0999999940395355,
+          "nextModelSerialization": 4.0999999940395355,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 51.80000001192093,
+          "actualCommit": 47
+        },
+        {
+          "nextValidation": 8,
+          "nextSerialization": 4.5,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 8,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.300000011920929,
+          "nextModelSerialization": 4.699999988079071,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 49.400000005960464,
+          "actualCommit": 45.900000005960464
+        },
+        {
+          "nextValidation": 8.099999994039536,
+          "nextSerialization": 5.5,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 7.5999999940395355,
+          "previousSerialization": 4.200000017881393,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.4000000059604645,
+          "nextModelSerialization": 4.699999988079071,
+          "modelComparison": 0.7000000178813934,
+          "historyUpdate": 0,
+          "baselineCommit": 50,
+          "actualCommit": 69.5
+        },
+        {
+          "nextValidation": 7.4000000059604645,
+          "nextSerialization": 4.5999999940395355,
+          "nextSize": 7.4000000059604645,
+          "previousValidation": 8.799999982118607,
+          "previousSerialization": 6.300000011920929,
+          "previousSize": 9.799999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.9000000059604645,
+          "nextModelSerialization": 4.0999999940395355,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 54.79999998211861,
+          "actualCommit": 42.70000001788139
+        },
+        {
+          "nextValidation": 8.199999988079071,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7.300000011920929,
+          "previousValidation": 7.5,
+          "previousSerialization": 4.299999982118607,
+          "previousSize": 7.5,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.0999999940395355,
+          "nextModelSerialization": 4.4000000059604645,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 49.19999998807907,
+          "actualCommit": 47.400000005960464
+        },
+        {
+          "nextValidation": 7.5999999940395355,
+          "nextSerialization": 4.700000017881393,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 9.300000011920929,
+          "previousSerialization": 4.0999999940395355,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.9000000059604645,
+          "nextModelSerialization": 4.199999988079071,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 50,
+          "actualCommit": 39.599999994039536
+        },
+        {
+          "nextValidation": 7.5,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7,
+          "previousValidation": 7.199999988079071,
+          "previousSerialization": 5.100000023841858,
+          "previousSize": 8,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.700000017881393,
+          "nextModelSerialization": 4.399999976158142,
+          "modelComparison": 0.4000000059604645,
+          "historyUpdate": 0.09999999403953552,
+          "baselineCommit": 49.099999994039536,
+          "actualCommit": 49.599999994039536
+        },
+        {
+          "nextValidation": 14.900000005960464,
+          "nextSerialization": 4.5999999940395355,
+          "nextSize": 7.0999999940395355,
+          "previousValidation": 13.300000011920929,
+          "previousSerialization": 4.5999999940395355,
+          "previousSize": 8.300000011920929,
+          "fullComparison": 0,
+          "previousModelSerialization": 6.9000000059604645,
+          "nextModelSerialization": 5.4000000059604645,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 72.2000000178814,
+          "actualCommit": 49.89999997615814
+        },
+        {
+          "nextValidation": 9.5,
+          "nextSerialization": 5.5,
+          "nextSize": 7,
+          "previousValidation": 7.199999988079071,
+          "previousSerialization": 4.300000011920929,
+          "previousSize": 7.699999988079071,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.4000000059604645,
+          "nextModelSerialization": 4.4000000059604645,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 50.5,
+          "actualCommit": 46.30000001192093
+        },
+        {
+          "nextValidation": 7.5,
+          "nextSerialization": 4.699999988079071,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 8.800000011920929,
+          "previousSerialization": 4.0999999940395355,
+          "previousSize": 7.5,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.4000000059604645,
+          "nextModelSerialization": 4.0999999940395355,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 49.19999998807907,
+          "actualCommit": 45.70000001788139
+        },
+        {
+          "nextValidation": 6.9000000059604645,
+          "nextSerialization": 4.4000000059604645,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 7,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.299999982118607,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.300000011920929,
+          "nextModelSerialization": 4.199999988079071,
+          "modelComparison": 0.5999999940395355,
+          "historyUpdate": 0,
+          "baselineCommit": 47.20000001788139,
+          "actualCommit": 42
+        },
+        {
+          "nextValidation": 6.9000000059604645,
+          "nextSerialization": 5,
+          "nextSize": 7.5999999940395355,
+          "previousValidation": 8.900000005960464,
+          "previousSerialization": 6.699999988079071,
+          "previousSize": 9.5,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.9000000059604645,
+          "nextModelSerialization": 4.799999982118607,
+          "modelComparison": 0.6000000238418579,
+          "historyUpdate": 0,
+          "baselineCommit": 55.900000005960464,
+          "actualCommit": 39.89999997615814
+        },
+        {
+          "nextValidation": 7.300000011920929,
+          "nextSerialization": 4.299999982118607,
+          "nextSize": 8.100000023841858,
+          "previousValidation": 10.299999982118607,
+          "previousSerialization": 4.200000017881393,
+          "previousSize": 7.0999999940395355,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.0999999940395355,
+          "nextModelSerialization": 4.200000017881393,
+          "modelComparison": 0.3999999761581421,
+          "historyUpdate": 0,
+          "baselineCommit": 50.099999994039536,
+          "actualCommit": 48
+        },
+        {
+          "nextValidation": 7.5,
+          "nextSerialization": 4.200000017881393,
+          "nextSize": 7,
+          "previousValidation": 7.5999999940395355,
+          "previousSerialization": 5.199999988079071,
+          "previousSize": 7.300000011920929,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5999999940395355,
+          "nextModelSerialization": 4.5999999940395355,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 48.5,
+          "actualCommit": 41.60000002384186
+        },
+        {
+          "nextValidation": 7.699999988079071,
+          "nextSerialization": 4.300000011920929,
+          "nextSize": 7.0999999940395355,
+          "previousValidation": 8.699999988079071,
+          "previousSerialization": 4.5999999940395355,
+          "previousSize": 7.9000000059604645,
+          "fullComparison": 0,
+          "previousModelSerialization": 4.5,
+          "nextModelSerialization": 4.4000000059604645,
+          "modelComparison": 0.5999999940395355,
+          "historyUpdate": 0,
+          "baselineCommit": 49.89999997615814,
+          "actualCommit": 46.30000001192093
+        },
+        {
+          "nextValidation": 7.299999982118607,
+          "nextSerialization": 4.100000023841858,
+          "nextSize": 7.299999982118607,
+          "previousValidation": 9.099999994039536,
+          "previousSerialization": 5.5,
+          "previousSize": 7.800000011920929,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.199999988079071,
+          "nextModelSerialization": 5.100000023841858,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 51.900000005960464,
+          "actualCommit": 43.29999998211861
+        },
+        {
+          "nextValidation": 7.799999982118607,
+          "nextSerialization": 5.100000023841858,
+          "nextSize": 7.5,
+          "previousValidation": 9.399999976158142,
+          "previousSerialization": 4.800000011920929,
+          "previousSize": 7.700000017881393,
+          "fullComparison": 0,
+          "previousModelSerialization": 5.0999999940395355,
+          "nextModelSerialization": 4.699999988079071,
+          "modelComparison": 0.5,
+          "historyUpdate": 0,
+          "baselineCommit": 52.69999998807907,
+          "actualCommit": 52
+        }
+      ]
+    }
+  ]
+}

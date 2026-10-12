@@ -1,5 +1,12 @@
+import { patternSize, changeHatchSizeMode } from "@/application/hatches/pattern-size";
+import { projectScaleContext } from "@/application/views/project-scale";
+import type { HatchPatternSize } from "@/domain/elements/hatch/model";
+import type { ScaleContext } from "@/domain/views/scale";
+import { ColorField } from "./PenColors";
+import { PropertyForm } from "./PropertyForm";
+import { useHatchPatterns } from "./useHatchPatterns";
+import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { previewHatch } from "@/application/hatches/actions";
 import type { Hatch } from "@/domain/elements/hatch/model";
 import type { Project } from "@/domain/project/schema";
@@ -16,13 +23,10 @@ export function HatchFillFields({
     <>
       <label className="text-xs">
         Füllfarbe
-        <input
-          aria-label="Schraffurfarbe"
-          type="color"
-          className="block h-8 w-16 rounded border"
+        <ColorField
+          label="Schraffurfarbe"
           value={value.color}
-          onInput={(e) => onChange({ ...value, color: e.currentTarget.value })}
-          onChange={(e) => onChange({ ...value, color: e.target.value })}
+          onChange={(color) => onChange({ ...value, color })}
         />
       </label>
       <label className="text-xs">
@@ -56,12 +60,17 @@ export function HatchInspector({
   hatch: Hatch;
   onChange: (p: Project, s: Selection) => void;
 }) {
+  const [definition, setDefinition] = useState<HatchPatternDefinition | null | undefined>(() =>
+    hatch.pattern ? project.hatchPatterns.find((p) => p.id === hatch.pattern!.patternId) : null,
+  );
   const [fill, setFill] = useState(hatch.fill);
   const [background, setBackground] = useState(hatch.background);
   const [contour, setContour] = useState(hatch.contour);
+  const [rotation, setRotation] = useState(hatch.pattern?.rotation ?? 0);
+  const [size, setSize] = useState(() => patternSize(hatch.pattern));
   const [error, setError] = useState("");
   return (
-    <form
+    <PropertyForm
       aria-label="Schraffureigenschaften"
       className="flex flex-wrap items-end gap-3"
       onSubmit={(e) => {
@@ -71,34 +80,73 @@ export function HatchInspector({
             previewHatch(project, project, {
               projectId: project.id,
               kind: "update",
+              patternDefinition: definition ?? null,
+              patternRotation: definition ? rotation : undefined,
+              patternSize: definition ? size : undefined,
               id: hatch.id,
               changes: { fill, background, contour },
             }),
             { kind: "hatch", id: hatch.id },
           );
           setError("");
-        } catch {
-          setError("Farbe und Deckkraft zwischen 0 und 100 % prüfen.");
+        } catch (error) {
+          setError((error as Error).message);
         }
       }}
     >
       <span className="text-xs">Schraffur · {hatch.points.length} Eckpunkte</span>
+      <HatchPatternFields project={project} value={definition} onChange={setDefinition} />
+      <HatchRotationField value={rotation} onChange={setRotation} enabled={!!definition} />
+      <HatchSizeFields
+        definition={definition}
+        value={size}
+        onChange={setSize}
+        context={projectScaleContext(project)}
+      />
       <HatchFillFields value={fill} onChange={setFill} />
       <HatchPaintFields label="Hintergrund" value={background} onChange={setBackground} />
       <HatchPaintFields label="Kontur" value={contour} onChange={setContour} />
-      <Button size="sm" type="submit">
-        Übernehmen
-      </Button>
       {error && (
         <p role="alert" className="text-xs text-destructive">
           {error}
         </p>
       )}
-    </form>
+    </PropertyForm>
   );
 }
 
-function HatchPaintFields({
+export function HatchRotationField({
+  value,
+  onChange,
+  enabled,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  enabled: boolean;
+}) {
+  return (
+    <label
+      className="text-xs"
+      title="Dreht nur das Muster um seinen Ursprung; positive Winkel gegen den Uhrzeigersinn."
+    >
+      Musterwinkel (°)
+      <input
+        aria-label="Schraffur Musterwinkel"
+        type="number"
+        min={0}
+        max={360}
+        step="any"
+        required
+        disabled={!enabled}
+        className="block h-8 w-24 rounded border bg-background px-2"
+        value={Number.isNaN(value) ? "" : value}
+        onChange={(event) => onChange(event.target.valueAsNumber)}
+      />
+    </label>
+  );
+}
+
+export function HatchPaintFields({
   label,
   value,
   onChange,
@@ -127,16 +175,127 @@ function HatchPaintFields({
       </label>
       <label className="text-xs">
         Farbe
-        <input
-          type="color"
-          aria-label={`Schraffur ${label}farbe`}
+        <ColorField
+          label={`Schraffur ${label}farbe`}
           value={value.color}
           disabled={!value.visible}
-          className="block h-8 w-12 rounded border"
-          onInput={(e) => onChange({ ...value, color: e.currentTarget.value })}
-          onChange={(e) => onChange({ ...value, color: e.target.value })}
+          onChange={(color) => onChange({ ...value, color })}
         />
       </label>
     </fieldset>
+  );
+}
+
+export function HatchPatternFields({
+  project,
+  value,
+  onChange,
+}: {
+  project: Project;
+  value: HatchPatternDefinition | null | undefined;
+  onChange: (value: HatchPatternDefinition | null) => void;
+}) {
+  const library = useHatchPatterns();
+  const patterns = new Map(library.patterns.map((p) => [p.id, p]));
+  for (const p of project.hatchPatterns) patterns.set(p.id, p);
+  if (value && !patterns.has(value.id)) patterns.set(value.id, value);
+  return (
+    <label className="text-xs">
+      Muster
+      <select
+        aria-label="Schraffurmuster"
+        className="block h-8 rounded border bg-background max-w-48"
+        value={value?.id ?? ""}
+        onChange={(e) => onChange(patterns.get(e.target.value) ?? null)}
+      >
+        <option value="">Vollfläche</option>
+        {[...patterns.values()].map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name} · {p.width} × {p.height} m
+          </option>
+        ))}
+      </select>
+      {library.error && <span role="alert">{library.error}</span>}
+    </label>
+  );
+}
+
+/** Shared inspector/default controls; conversion lives in Application, not the workspace. */
+export function HatchSizeFields({
+  definition,
+  value,
+  onChange,
+  context,
+}: {
+  definition: HatchPatternDefinition | null | undefined;
+  value: HatchPatternSize;
+  onChange: (value: HatchPatternSize) => void;
+  context: ScaleContext;
+}) {
+  const [error, setError] = useState("");
+  if (!definition) return null;
+  return (
+    <>
+      <label className="text-xs">
+        Mustermaß
+        <select
+          aria-label="Schraffur Maßbezug"
+          className="block h-8 rounded border bg-background px-2"
+          value={value.mode}
+          onChange={(event) => {
+            try {
+              onChange(
+                changeHatchSizeMode(
+                  definition,
+                  value,
+                  event.target.value as "model" | "paper",
+                  context,
+                ),
+              );
+              setError("");
+            } catch (cause) {
+              setError((cause as Error).message);
+            }
+          }}
+        >
+          <option value="model">Modellmaß</option>
+          <option value="paper">Papiermaß</option>
+        </select>
+      </label>
+      <label
+        className="text-xs"
+        title="Breite der Wiederholungszelle; Kontur und Bibliotheksdefinition bleiben unverändert."
+      >
+        Zellbreite ({value.mode === "paper" ? "mm" : "m"})
+        <input
+          aria-label="Schraffur Zellbreite"
+          className="block h-8 w-24 rounded border bg-background px-2"
+          type="number"
+          step="any"
+          min={Number.MIN_VALUE}
+          required
+          value={
+            Number.isNaN(value.mode === "paper" ? value.paperWidthMetres : value.modelWidthMetres)
+              ? ""
+              : value.mode === "paper"
+                ? value.paperWidthMetres * 1000
+                : (value.modelWidthMetres ?? definition.width)
+          }
+          onChange={(event) => {
+            const number = event.target.valueAsNumber;
+            onChange(
+              value.mode === "paper"
+                ? { mode: "paper", paperWidthMetres: number / 1000 }
+                : { mode: "model", modelWidthMetres: number },
+            );
+          }}
+        />
+      </label>
+      {error && (
+        <span role="alert" className="text-xs text-destructive">
+          {error}
+        </span>
+      )}
+    </>
   );
 }

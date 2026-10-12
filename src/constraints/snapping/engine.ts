@@ -50,6 +50,8 @@ export type SnapSourceQuery = (
   metric?: ScreenMetric,
 ) => readonly SnapReference[];
 export type SnapContext = {
+  /** Viewport capability for additional application-supplied targets with commit intent. */
+  includeInteractionTargets?: boolean;
   /** Optional view eligibility for ranked geometry candidates; explicit constraints stay unchanged. */
   acceptCandidate?: (candidate: SnapCandidate) => boolean;
   /** Shared candidate distances/projection; explicit picking migration remains pending. */
@@ -67,6 +69,9 @@ export type SnapContext = {
   activeReferences?: readonly SnapReference[];
   guideDirections?: readonly GuideDirection[];
   angleOrigin?: Point2 | null;
+  /** Session-held Shift direction; never recomputed from subsequent pointer positions. */
+  angleDirection?: Point2 | null;
+  angleLockOrigin?: Point2 | null;
   fixedAxis?: { origin: Point2; direction: Point2 } | null;
 };
 
@@ -107,7 +112,15 @@ export function querySnap(
   if (context.angleOrigin && !axis) {
     if (![context.angleOrigin.x, context.angleOrigin.y].every(Number.isFinite))
       throw new Error("Invalid angle origin");
-    const angle = angle45Direction(cursor, context.angleOrigin);
+    const angle = context.angleDirection
+      ? {
+          direction: context.angleDirection,
+          degrees:
+            ((Math.atan2(context.angleDirection.y, context.angleDirection.x) * 180) / Math.PI +
+              360) %
+            360,
+        }
+      : angle45Direction(cursor, context.angleOrigin);
     const point = projectDirection(cursor, context.angleOrigin, angle.direction)!;
     shiftFallback = {
       point,

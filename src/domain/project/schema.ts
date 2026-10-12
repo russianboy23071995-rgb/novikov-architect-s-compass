@@ -1,7 +1,32 @@
+import {
+  modelViewSchema,
+  drawingDocumentSchema,
+  drawingDocumentV17Schema,
+  documentFolderSchema,
+} from "../views/documents.ts";
+import { workingPlanScale } from "../views/scale.ts";
+import { hatchCellSize } from "../elements/hatch/sizing.ts";
+import { penSetSchema } from "../pens/model.ts";
+import { validateHatchPattern } from "../elements/hatch/pattern.ts";
+import { validateLineStyle } from "../elements/line/style.ts";
+import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
+import {
+  imageAssetSchema,
+  imageReferenceSchema,
+  validateReferenceExtent,
+} from "../elements/reference/model.ts";
 import { connectedWallSolids } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
-import { hatchSchema, legacyHatchSchema, defaultHatchAppearance } from "../elements/hatch/model.ts";
+import {
+  hatchV18Schema,
+  hatchV19Schema,
+  hatchV15Schema,
+  hatchV12Schema,
+  solidHatchSchema,
+  legacyHatchSchema,
+  defaultHatchAppearance,
+} from "../elements/hatch/model.ts";
 import { layerSchema, defaultLayerIdsSchema } from "../layers/model.ts";
 
 const id = z.string().trim().min(1);
@@ -56,7 +81,26 @@ const legacyProjectSchema = z
 
 const currentWallSchema = wallSchema.extend({ layerId: id });
 const currentWindowSchema = windowSchema.extend({ layerId: id });
-const currentLineSchema = lineSchema.extend({ layerId: id });
+const legacyCurrentLineSchema = lineSchema.extend({ layerId: id });
+const currentLineSchema = legacyCurrentLineSchema.extend({
+  style: z.enum(["solid", "dashed", "break", "custom"]),
+  pattern: z
+    .object({
+      id,
+      name: z.string().trim().min(1).max(80),
+      dashes: z.array(z.number().finite()).max(32),
+      color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      colorEditable: z.boolean().optional(),
+      period: positive.max(32000),
+      segments: z
+        .array(z.object({ start: pointSchema, end: pointSchema }).strict())
+        .min(1)
+        .max(128),
+    })
+    .strict()
+    .optional(),
+  repeatLength: positive.min(0.000001).max(1000000).optional(),
+});
 const projectV2Schema = legacyProjectSchema.extend({
   schemaVersion: z.literal(2),
   layers: z.array(layerSchema).min(1),
@@ -64,7 +108,7 @@ const projectV2Schema = legacyProjectSchema.extend({
   storey: legacyProjectSchema.shape.storey.extend({
     walls: z.array(currentWallSchema),
     windows: z.array(currentWindowSchema),
-    lines: z.array(currentLineSchema).optional(),
+    lines: z.array(legacyCurrentLineSchema).optional(),
   }),
 });
 const projectV3Schema = projectV2Schema.extend({
@@ -89,19 +133,181 @@ const projectV6Schema = projectV5Schema.extend({
     wallJoins: z.array(z.object({ first: wallEndSchema, second: wallEndSchema }).strict()),
   }),
 });
-const projectSchema = projectV6Schema.extend({
+const projectV7Schema = projectV6Schema.extend({
   schemaVersion: z.literal(7),
-  storey: projectV6Schema.shape.storey.extend({ hatches: z.array(hatchSchema) }),
+  storey: projectV6Schema.shape.storey.extend({ hatches: z.array(solidHatchSchema) }),
 });
+const projectV8Schema = projectV7Schema.extend({
+  schemaVersion: z.literal(8),
+  storey: projectV7Schema.shape.storey.extend({
+    wallTJunctions: z.array(z.object({ hostWallId: id, incoming: wallEndSchema }).strict()),
+  }),
+});
+const projectV9Schema = projectV8Schema.extend({
+  schemaVersion: z.literal(9),
+  assets: z.array(imageAssetSchema),
+  storey: projectV8Schema.shape.storey.extend({ references: z.array(imageReferenceSchema) }),
+});
+const projectV10Schema = projectV9Schema.extend({
+  schemaVersion: z.literal(10),
+  storey: projectV9Schema.shape.storey.extend({ lines: z.array(currentLineSchema).optional() }),
+});
+const embeddedPatternSchema = z
+  .object({
+    id: z.string().min(1).max(128),
+    name: z.string().min(1).max(80),
+    width: positive,
+    height: positive,
+    lines: z
+      .array(z.object({ start: pointSchema, end: pointSchema }).strict())
+      .min(1)
+      .max(256),
+  })
+  .strict();
+const projectV11Schema = projectV10Schema.extend({
+  schemaVersion: z.literal(11),
+  hatchPatterns: z.array(embeddedPatternSchema).max(100),
+  storey: projectV10Schema.shape.storey.extend({ hatches: z.array(hatchV12Schema) }),
+});
+const projectV12Schema = projectV11Schema.extend({
+  schemaVersion: z.literal(12),
+  // Omission means unknown provenance (legacy or independently created content).
+  hatchPatterns: z
+    .array(
+      embeddedPatternSchema.extend({
+        revision: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional(),
+      }),
+    )
+    .max(100),
+});
+const projectV13Schema = projectV12Schema.extend({
+  schemaVersion: z.literal(13),
+  storey: projectV12Schema.shape.storey.extend({ hatches: z.array(hatchV15Schema) }),
+});
+const projectV14Schema = projectV13Schema.extend({
+  schemaVersion: z.literal(14),
+  penSet: penSetSchema.optional(),
+});
+const projectV15Schema = projectV14Schema.extend({
+  schemaVersion: z.literal(15),
+  workingViews: z
+    .array(
+      z
+        .object({
+          kind: z.literal("working-plan"),
+          storeyId: id,
+          denominator: positive,
+        })
+        .strict(),
+    )
+    .max(1)
+    .optional(),
+});
+const projectV16Schema = projectV15Schema.extend({
+  schemaVersion: z.literal(16),
+  storey: projectV15Schema.shape.storey.extend({ hatches: z.array(hatchV18Schema) }),
+});
+const projectV17Schema = projectV16Schema.extend({
+  schemaVersion: z.literal(17),
+  modelViews: z.array(modelViewSchema).optional(),
+  drawingDocuments: z.array(drawingDocumentV17Schema).optional(),
+});
+const projectV18Schema = projectV17Schema.extend({
+  schemaVersion: z.literal(18),
+  drawingDocuments: z.array(drawingDocumentSchema).optional(),
+  documentFolders: z.array(documentFolderSchema).optional(),
+});
+const scopedLineSchema = currentLineSchema.extend({ documentId: id.optional() });
+export const projectV19Schema = projectV18Schema.extend({
+  schemaVersion: z.literal(19),
+  storey: projectV18Schema.shape.storey.extend({
+    lines: z.array(scopedLineSchema).optional(),
+    hatches: z.array(hatchV19Schema),
+  }),
+});
+const projectSchema = projectV18Schema.extend({
+  schemaVersion: z.literal(20),
+});
+export function validateProjectV18(value: unknown) {
+  const old = projectV18Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV17(value: unknown) {
+  const old = projectV17Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV16(value: unknown) {
+  const old = projectV16Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV15(value: unknown) {
+  const old = projectV15Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV14(value: unknown) {
+  const old = projectV14Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV13(value: unknown) {
+  const old = projectV13Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV12(value: unknown) {
+  const old = projectV12Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV11(value: unknown) {
+  const old = projectV11Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20 });
+  return old;
+}
+export function validateProjectV10(value: unknown) {
+  const old = projectV10Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20, hatchPatterns: [] });
+  return old;
+}
+export function validateProjectV9(value: unknown) {
+  const old = projectV9Schema.parse(value);
+  validateProject({ ...old, schemaVersion: 20, hatchPatterns: [] });
+  return old;
+}
+export function validateProjectV8(value: unknown) {
+  const old = projectV8Schema.parse(value);
+  validateProject({
+    ...old,
+    schemaVersion: 20,
+    hatchPatterns: [],
+    assets: [],
+    storey: { ...old.storey, references: [] },
+  });
+  return old;
+}
+export function validateProjectV7(value: unknown) {
+  const project = projectV7Schema.parse(value);
+  validateProjectV8({
+    ...project,
+    schemaVersion: 8,
+    storey: { ...project.storey, wallTJunctions: [] },
+  });
+  return project;
+}
 type ProjectV6 = z.infer<typeof projectV6Schema>;
 export function validateProjectV6(value: unknown): ProjectV6 {
   const project = projectV6Schema.parse(value);
   // Reuse current relation validation on a disposable explicitly converted view.
-  validateProject({
+  validateProjectV8({
     ...project,
-    schemaVersion: 7,
+    schemaVersion: 8,
     storey: {
       ...project.storey,
+      wallTJunctions: [],
       hatches: project.storey.hatches.map((h) => ({ ...h, ...defaultHatchAppearance })),
     },
   });
@@ -157,14 +363,68 @@ export function wallLength(wall: { start: Point; end: Point }): number {
   return Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
 }
 
-/** Validates unknown data and returns an independent copy. Throws on invalid data. */
+/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
+  if (project.workingViews?.some((view) => view.storeyId !== project.storey.id))
+    throw new Error("Unbekanntes Geschoss im Arbeitsmaßstab.");
+  const views = new Map((project.modelViews ?? []).map((v) => [v.id, v]));
+  for (const view of views.values())
+    if (view.storeyId !== project.storey.id) throw new Error("Unbekanntes Geschoss im Abbild.");
+  for (const doc of project.drawingDocuments ?? []) {
+    if (doc.folderId && !project.documentFolders?.some((f) => f.id === doc.folderId))
+      throw new Error("Unbekannter Abbildordner.");
+    if (!views.has(doc.modelViewId)) throw new Error("Unbekannte Modellansicht im Abbild.");
+    if (
+      new Set(doc.hiddenLayerIds).size !== doc.hiddenLayerIds.length ||
+      doc.hiddenLayerIds.some((id) => !project.layers.some((l) => l.id === id))
+    )
+      throw new Error("Ungültige Ebenensichtbarkeit im Abbild.");
+  }
   validateGeometry(project);
   connectedWallSolids(project);
   validateLayers(project);
   validateVisibility(project);
-  return project;
+  const assets = new Map(project.assets.map((a) => [a.id, a]));
+  for (const reference of project.storey.references) {
+    const asset = assets.get(reference.assetId);
+    if (!asset) throw new Error("Unknown image asset: " + reference.assetId);
+    validateReferenceExtent(reference, asset);
+  }
+  const patterns = new Map(project.hatchPatterns.map((p) => [p.id, validateHatchPattern(p)]));
+  if (patterns.size !== project.hatchPatterns.length)
+    throw new Error("Doppelte Schraffurmuster-ID.");
+  const used = new Set<string>();
+  for (const hatch of project.storey.hatches) {
+    if (!hatch.pattern) continue;
+    const definition = patterns.get(hatch.pattern.patternId);
+    if (!definition) throw new Error("Unbekanntes Schraffurmuster.");
+    const cell = hatchCellSize(
+      definition,
+      hatch.pattern,
+      workingPlanScale(project.id, project.storey.id, project.workingViews?.[0]?.denominator),
+    );
+    if (
+      ![hatch.pattern.origin.x + cell.width, hatch.pattern.origin.y + cell.height].every(
+        Number.isFinite,
+      )
+    )
+      throw new Error("Ungültige Musterausdehnung.");
+    for (const doc of project.drawingDocuments ?? []) {
+      const size = hatchCellSize(definition, hatch.pattern, {
+        view: { kind: "drawing-document", projectId: project.id, documentId: doc.id },
+        denominator: doc.denominator,
+      });
+      if (
+        ![hatch.pattern.origin.x + size.width, hatch.pattern.origin.y + size.height].every(
+          Number.isFinite,
+        )
+      )
+        throw new Error("Ungültige Musterausdehnung im Abbild.");
+    }
+    used.add(definition.id);
+  }
+  return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }
 function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3): void {
   const hidden = project.bimVisibility.hiddenLayerIds;
@@ -180,10 +440,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
+    ...(project.schemaVersion === 20 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 20
       ? project.storey.hatches
       : []),
   ]) {
@@ -198,11 +459,20 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
+    ...(project.schemaVersion === 20
+      ? [
+          ...(project.modelViews ?? []),
+          ...(project.drawingDocuments ?? []),
+          ...(project.documentFolders ?? []),
+        ]
+      : []),
+    ...(project.schemaVersion === 20 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
+    ...(project.schemaVersion === 20 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 7
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 20
       ? project.storey.hatches
       : []),
   ]) {
@@ -210,20 +480,25 @@ function validateGeometry(
     ids.add(entity.id);
   }
   for (const line of project.storey.lines ?? []) {
-    if (line.kind === "line" && line.points.length !== 2)
-      throw new Error("A line needs exactly two points");
-    let total = 0;
-    for (let i = 1; i < line.points.length; i++) {
-      const a = line.points[i - 1]!,
-        b = line.points[i]!;
-      const length = Math.hypot(b.x - a.x, b.y - a.y);
-      if (!Number.isFinite(length) || length <= 0)
-        throw new Error("Line segments must have finite positive length");
-      total += length;
+    validateLineGeometry(line);
+    if (project.schemaVersion === 20) {
+      const current = line as DrawingLine;
+      if (current.style === "custom") {
+        if (!current.pattern || !current.repeatLength)
+          throw new Error("Custom line needs an embedded definition and repeat length.");
+        validateLineStyle(current.pattern);
+        if (
+          current.pattern.colorEditable === false &&
+          current.color.toLowerCase() !== current.pattern.color.toLowerCase()
+        )
+          throw new Error("Diese Linienart hat eine feste Farbe.");
+        if (!Number.isFinite((current.repeatLength / current.pattern.period) * 10))
+          throw new Error("Invalid pattern extent.");
+      } else if (current.pattern !== undefined || current.repeatLength !== undefined)
+        throw new Error("Only custom lines may carry a pattern.");
     }
-    if (!Number.isFinite(total)) throw new Error("Line length must be finite");
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 7)
+  if (project.schemaVersion === 5 || project.schemaVersion === 20)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {
@@ -234,17 +509,6 @@ function validateGeometry(
   for (const opening of project.storey.windows) {
     const wall = walls.get(opening.wallId);
     if (!wall) throw new Error(`Unknown wall: ${opening.wallId}`);
-    const length = wallLength(wall);
-    const centre = opening.position * length;
-    if (
-      opening.width > length ||
-      centre < opening.width / 2 ||
-      length - centre < opening.width / 2
-    ) {
-      throw new Error(`Window ${opening.id} must fit within its wall length`);
-    }
-    if (opening.sillHeight + opening.height > wall.height) {
-      throw new Error(`Window ${opening.id} must fit within its wall height`);
-    }
+    validateWindowGeometry(opening, wall);
   }
 }

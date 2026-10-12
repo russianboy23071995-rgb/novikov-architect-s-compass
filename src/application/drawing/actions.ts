@@ -1,3 +1,4 @@
+import type { ViewIdentity } from "../../domain/views/scale.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
@@ -17,9 +18,34 @@ export function closedDrawingContour(points: readonly Point[]): Point[] {
   return points.slice(0, end).map((p) => ({ ...p }));
 }
 export type DrawingRequest =
-  | { kind: "hatch"; points: Point[]; fill: Hatch["fill"] }
-  | { kind: "wall"; start: Point; end: Point; thickness: number; height: number }
-  | { kind: "line"; points: Point[]; lineKind: "line" | "polyline"; appearance: LineAppearance };
+  | {
+      kind: "hatch";
+      points: Point[];
+      fill: Hatch["fill"];
+      background?: Hatch["background"];
+      contour?: Hatch["contour"];
+      patternDefinition?:
+        import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
+      patternRotation?: number | undefined;
+      patternSize?: import("../../domain/elements/hatch/model.ts").HatchPatternSize | undefined;
+      layerId?: string;
+    }
+  | {
+      kind: "wall";
+      start: Point;
+      end: Point;
+      thickness: number;
+      height: number;
+      bodyOffset?: number;
+      layerId?: string;
+    }
+  | {
+      kind: "line";
+      points: Point[];
+      lineKind: "line" | "polyline";
+      appearance: LineAppearance;
+      layerId?: string;
+    };
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -44,13 +70,32 @@ export function createDrawing(
   current: Project,
   id: string,
   request: DrawingRequest,
+  view?: ViewIdentity,
 ): Project {
   assertDrawingContext(base, current);
+  if (
+    view &&
+    (view.projectId !== current.id ||
+      (view.kind === "drawing-document"
+        ? !current.drawingDocuments?.some((d) => d.id === view.documentId)
+        : view.storeyId !== current.storey.id))
+  )
+    throw new Error("Der Zeichenkontext ist nicht mehr gültig.");
   if (request.kind === "hatch")
     return previewHatch(base, current, {
       projectId: current.id,
       kind: "create",
-      hatch: { id, points: closedDrawingContour(request.points), fill: request.fill },
+      patternDefinition: request.patternDefinition,
+      patternRotation: request.patternRotation,
+      patternSize: request.patternSize,
+      hatch: {
+        id,
+        points: closedDrawingContour(request.points),
+        fill: request.fill,
+        ...(request.background ? { background: request.background } : {}),
+        ...(request.contour ? { contour: request.contour } : {}),
+        ...(request.layerId ? { layerId: request.layerId } : {}),
+      },
     });
   return request.kind === "wall"
     ? addWall(current, {
@@ -58,7 +103,8 @@ export function createDrawing(
         start: request.start,
         end: request.end,
         thickness: request.thickness,
-        bodyOffset: request.thickness / 2,
+        bodyOffset: request.bodyOffset ?? request.thickness / 2,
+        ...(request.layerId ? { layerId: request.layerId } : {}),
         height: request.height,
       })
     : addLine(current, {
@@ -66,5 +112,6 @@ export function createDrawing(
         kind: request.lineKind,
         points: request.points,
         ...request.appearance,
+        ...(request.layerId ? { layerId: request.layerId } : {}),
       });
 }

@@ -1,5 +1,13 @@
+import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
+import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
+import { useSolidPicking } from "./useSolidPicking";
+import {
+  windowSelectionSurfaces,
+  windowSelectionEdges,
+} from "@/rendering/viewport/window-selection";
+import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { selectedWallAxis, WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
-import { faceTriangles } from "@/geometry/solids/face-triangles";
+import { createSolidRenderer as createRenderer } from "@/rendering/viewport/solid-renderer";
 import { cornerPreviewSurfaces } from "@/rendering/viewport/corner-preview";
 import { defaultGridSettings, gridSpacing } from "@/application/snapping/grid-settings";
 import { visibleSurfaces } from "@/rendering/viewport/layer-display";
@@ -18,11 +26,10 @@ import { buildSolid } from "@/lib/bim/geometry";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
-import { isSelectionClick, pickWallInProjection } from "@/lib/bim/picking";
+import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
-import { selectionEdges, outlineTriangles } from "@/rendering/viewport/selection-outline";
-import type { OutlineEdge } from "@/rendering/viewport/selection-outline";
+import { selectionEdges } from "@/rendering/viewport/selection-outline";
 import { useSolidInference } from "./useSolidInference";
 import { previewEdit, supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
 import type { BimPlanProps } from "./BimPlan";
@@ -32,97 +39,12 @@ const viewportOf = (canvas: HTMLCanvasElement) => {
   return { left, top, width, height };
 };
 
-function createRenderer(canvas: HTMLCanvasElement) {
-  const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
-  if (!gl)
-    throw new Error("WebGL is unavailable. Use the 2D view or enable graphics acceleration.");
-  const shader = (type: number, source: string) => {
-    const result = gl.createShader(type)!;
-    gl.shaderSource(result, source);
-    gl.compileShader(result);
-    if (!gl.getShaderParameter(result, gl.COMPILE_STATUS)) {
-      gl.deleteShader(result);
-      throw new Error("3D shader could not be compiled.");
-    }
-    return result;
-  };
-  const vertex = shader(
-    gl.VERTEX_SHADER,
-    "attribute vec3 position; attribute vec3 color; varying vec3 vColor; void main(){gl_Position=vec4(position,1.0);vColor=color;}",
-  );
-  const fragment = shader(
-    gl.FRAGMENT_SHADER,
-    "precision mediump float; varying vec3 vColor; void main(){gl_FragColor=vec4(vColor,1.0);}",
-  );
-  const program = gl.createProgram()!;
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.linkProgram(program);
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    gl.deleteProgram(program);
-    throw new Error("3D renderer could not be initialized.");
-  }
-  const buffer = gl.createBuffer();
-  const position = gl.getAttribLocation(program, "position"),
-    color = gl.getAttribLocation(program, "color");
-  return {
-    draw(
-      solid: DisplaySurfaces,
-      projection: ProjectionState,
-      selectedWall: string | undefined,
-      outline: OutlineEdge[],
-    ) {
-      const { width, height } = projection.backbuffer;
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-      gl.viewport(0, 0, width, height);
-      gl.clearColor(0, 0, 0, 0);
-      gl.enable(gl.DEPTH_TEST);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      gl.useProgram(program);
-      const data: number[] = [];
-      for (const face of solid.faces) {
-        const light =
-          0.5 +
-          0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-        const tint = face.wallId === selectedWall ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
-        for (const triangle of faceTriangles(face.vertices.length))
-          for (const index of triangle)
-            data.push(...projection.project(face.vertices[index]!), ...tint.map((v) => v * light));
-      }
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
-      gl.enableVertexAttribArray(position);
-      gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 24, 0);
-      gl.enableVertexAttribArray(color);
-      gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
-      gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
-      const border = outlineTriangles(outline, projection);
-      if (border.length) {
-        gl.depthMask(false);
-        gl.depthFunc(gl.LEQUAL);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(border), gl.DYNAMIC_DRAW);
-        gl.drawArrays(gl.TRIANGLES, 0, border.length / 6);
-        gl.depthMask(true);
-        gl.depthFunc(gl.LESS);
-      }
-    },
-    dispose() {
-      gl.deleteBuffer(buffer);
-      gl.deleteProgram(program);
-    },
-  };
-}
-
 export function BimSolidView({
   cornerPreview,
   project,
   visibility,
   selection: requestedSelection,
+  selections,
   camera,
   onCamera,
   pan,
@@ -144,10 +66,12 @@ export function BimSolidView({
   onCamera: (camera: Camera) => void;
   pan: boolean;
   onSelect: BimPlanProps["onSelect"];
+  visibility?: LayerVisibilityPolicy;
   projectionFrame?: ProjectionFrame;
   snap?: boolean;
 } & Pick<
   BimPlanProps,
+  | "selections"
   | "gridSettings"
   | "editSession"
   | "numericTarget"
@@ -156,7 +80,6 @@ export function BimSolidView({
   | "onEditAim"
   | "onEditCommit"
   | "interactive"
-  | "visibility"
   | "cornerPreview"
 >) {
   const editSession =
@@ -185,7 +108,11 @@ export function BimSolidView({
   const [viewProjection, setViewProjection] = useState<ProjectionState | null>(null);
   const [previewClient, setPreviewClient] = useState<(Point & { shift: boolean }) | null>(null);
   const [previewReset, setPreviewReset] = useState(0);
-  const [aim, setAim] = useState<{ session: typeof editSession; point: Point } | null>(null);
+  const [aim, setAim] = useState<{
+    session: typeof editSession;
+    point: Point;
+    candidate: SnapCandidate | null;
+  } | null>(null);
   const baseSolid = useMemo(() => {
     const base = buildSolid(project);
     return cornerPreview?.base === project
@@ -202,16 +129,18 @@ export function BimSolidView({
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
+  const targetCandidate =
+    numericTarget === undefined && aim?.session === editSession ? aim?.candidate : undefined;
   const previewProject = useMemo(() => {
     if (editSession && target) {
       try {
-        return previewEdit(editSession, project, selection, target);
+        return previewEdit(editSession, project, selection, target, targetCandidate);
       } catch {
         /* Keep committed model on invalid input. */
       }
     }
     return project;
-  }, [editSession, target, project, selection]);
+  }, [editSession, target, targetCandidate, project, selection]);
   const previewSolid = useMemo(
     () => (previewProject === project ? baseSolid : buildSolid(previewProject)),
     [previewProject, project, baseSolid],
@@ -247,12 +176,43 @@ export function BimSolidView({
           previewProjection,
         )
       : null;
+  const selectedWalls = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "wall" && isLayerVisible(project, visibility, t.id))
+          .map((t) => t.id),
+      ),
+    [selections, selection, project, visibility],
+  );
+  const windowSurfaces = useMemo(
+    () => windowSelectionSurfaces(previewProject, (id) => isLayerVisible(project, visibility, id)),
+    [previewProject, project, visibility],
+  );
+  const pickDisplayed = useSolidPicking(
+    solid,
+    windowSurfaces,
+    !editSession && previewProject === project && !cornerPreview,
+  );
+  const selectedWindows = useMemo(
+    () =>
+      new Set(
+        (selections ?? (selection ? [selection] : []))
+          .filter((t) => t.kind === "window")
+          .map((t) => t.id),
+      ),
+    [selections, selection],
+  );
   const outline = useMemo(
     () =>
-      selection?.kind === "wall"
-        ? selectionEdges(solid.faces.filter((face) => face.wallId === selection.id))
-        : [],
-    [solid, selection],
+      [...selectedWalls].flatMap((id) =>
+        selectionEdges(solid.faces.filter((face) => face.wallId === id)),
+      ),
+    [solid, selectedWalls],
+  );
+  const windowOutline = useMemo(
+    () => windowSelectionEdges(windowSurfaces, selectedWindows),
+    [windowSurfaces, selectedWindows],
   );
   const inference = useSolidInference(
     project,
@@ -283,7 +243,9 @@ export function BimSolidView({
       displayed.current = null;
       setViewProjection(null);
       setPreviewClient(null);
+      setAim(null);
       drag.current = null;
+      renderer.current?.dispose();
       renderer.current = null;
       setError("Graphics context lost. Waiting for restoration; the model is retained.");
     };
@@ -294,6 +256,7 @@ export function BimSolidView({
       displayed.current = null;
       setViewProjection(null);
       setPreviewClient(null);
+      setAim(null);
       setRevision((n) => n + 1);
     };
     let resolution = window.matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
@@ -330,19 +293,21 @@ export function BimSolidView({
       backbufferSize(canvas.clientWidth, canvas.clientHeight, devicePixelRatio),
     );
     setPreviewClient(null);
+    setAim(null);
     setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
   useEffect(() => {
-    const selectedWall =
-      selection?.kind === "wall"
-        ? selection.id
-        : project.storey.windows.find((w) => w.id === selection?.id)?.wallId;
     displayed.current = null;
     if (renderer.current && previewProjection) {
-      renderer.current.draw(solid, previewProjection, selectedWall, outline);
-      displayed.current = { solid, projection: previewProjection };
+      try {
+        renderer.current.draw(solid, previewProjection, selectedWalls, outline, windowOutline);
+        displayed.current = { solid, projection: previewProjection };
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "3D unavailable");
+        setViewProjection(null);
+      }
     }
-  }, [solid, previewProjection, selection, project, revision, outline]);
+  }, [solid, previewProjection, selectedWalls, revision, outline, windowOutline]);
   return (
     <>
       {previewProjection && !error && (
@@ -377,10 +342,11 @@ export function BimSolidView({
               : "Auf z=0 bearbeiten. Klick übernimmt Ziel; Tab für Maße. Pan schaltet auf Navigation; Esc bricht ab."
             : "Sichtbaren Wandfußpunkt als Bewegungsursprung anklicken. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
         }
-        className={`relative z-10 h-full w-full touch-none ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
+        className={`relative z-10 h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             setPreviewClient(null);
+            setAim(null);
             setPreviewReset((n) => n + 1);
           }
           const delta = 0.12;
@@ -389,6 +355,7 @@ export function BimSolidView({
           ) {
             event.preventDefault();
             setPreviewClient(null);
+            setAim(null);
             if (event.key === "ArrowLeft") onCamera({ ...camera, yaw: camera.yaw - delta });
             if (event.key === "ArrowRight") onCamera({ ...camera, yaw: camera.yaw + delta });
             if (event.key === "ArrowUp")
@@ -404,6 +371,7 @@ export function BimSolidView({
         }}
         onPointerDown={(event) => {
           setPreviewClient(null);
+          setAim(null);
           if (event.button !== 0 || drag.current || !interactive) return;
           event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -439,11 +407,18 @@ export function BimSolidView({
                   event.shiftKey,
                 );
                 if (result) {
-                  setAim({ session: editSession, point: result.point });
+                  setAim({
+                    session: editSession,
+                    point: result.point,
+                    candidate: result.candidate,
+                  });
                   onEditAim?.(editSession, result.point);
                 }
               }
-            } else setPreviewClient(null);
+            } else {
+              setPreviewClient(null);
+              setAim(null);
+            }
             return;
           }
           if (!drag.current || drag.current.pointerId !== event.pointerId) return;
@@ -507,7 +482,7 @@ export function BimSolidView({
                   { x: event.clientX, y: event.clientY },
                   event.shiftKey,
                 );
-                if (result) onEditCommit?.(editSession, result.point);
+                if (result) onEditCommit?.(editSession, result.point, result.candidate);
               }
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);
@@ -529,37 +504,48 @@ export function BimSolidView({
                 { x: event.clientX, y: event.clientY },
                 anchor.pointIndex ?? undefined,
                 anchor.worldPoint,
+                undefined,
+                event.ctrlKey || event.metaKey,
               );
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);
               return;
             }
             const point = projection.toNdc({ x: event.clientX, y: event.clientY });
-            const id = pickWallInProjection(
-              solid,
-              projection.frame,
-              projection.camera,
-              projection.aspect,
-              point.x,
-              point.y,
+            const hit = pickDisplayed(projection, point.x, point.y);
+            onSelect(
+              hit,
+              { x: event.clientX, y: event.clientY },
+              undefined,
+              undefined,
+              undefined,
+              event.ctrlKey || event.metaKey,
             );
-            onSelect(id ? { kind: "wall", id } : null, { x: event.clientX, y: event.clientY });
           }
           if (event.currentTarget.hasPointerCapture(event.pointerId))
             event.currentTarget.releasePointerCapture(event.pointerId);
         }}
         onLostPointerCapture={() => {
           setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
         onPointerCancel={() => {
           setPreviewClient(null);
+          setAim(null);
           drag.current = null;
         }}
-        onPointerLeave={() => setPreviewClient(null)}
-        onBlur={() => setPreviewClient(null)}
+        onPointerLeave={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
+        onBlur={() => {
+          setPreviewClient(null);
+          setAim(null);
+        }}
         onWheel={(event) => {
           setPreviewClient(null);
+          setAim(null);
           onCamera({
             ...camera,
             zoom: Math.max(0.2, Math.min(5, camera.zoom * Math.exp(-event.deltaY * 0.001))),
@@ -580,6 +566,7 @@ export function BimSolidView({
             x2={axis.end.x}
             y2={axis.end.y}
             stroke={WALL_AXIS_COLOR}
+            style={CAD_SHIMMER}
             strokeWidth={2.5}
           />
         </svg>

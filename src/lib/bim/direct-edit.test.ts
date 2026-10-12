@@ -104,7 +104,7 @@ test("closed line handle stays closed and style/identity survive the gesture", (
   assert.equal(moved.storey.lines![0]!.id, "poly");
   assert.equal(moved.storey.lines![0]!.color, defaultLineAppearance.color);
 });
-test("window gesture projects onto host and rejects an outside opening", () => {
+test("window gesture projects onto host and caps an outside opening", () => {
   const target = { kind: "window" as const, id: "window-1" };
   const s: EditSession = {
     base,
@@ -114,7 +114,9 @@ test("window gesture projects onto host and rejects an outside opening", () => {
     anchor: editAnchor(base, target),
   };
   assert.equal(editAtPointer(s, base, { x: 1.8, y: 5 }).storey.windows[0]!.position, 0.6);
-  assert.throws(() => editAtPointer(s, base, { x: 3, y: 0 }));
+  assert.ok(
+    Math.abs(editAtPointer(s, base, { x: 300, y: 0 }).storey.windows[0]!.position - 0.8) < 1e-9,
+  );
 });
 
 test("all four corners reach their target on rotated and reversed walls", () => {
