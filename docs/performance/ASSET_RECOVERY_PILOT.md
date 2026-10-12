@@ -1242,3 +1242,69 @@ konkret nachvollziehen; nur bei belegter sicherer Wiederverwendung eine begrenzt
 Optimierung vorschlagen. Keine öffentlichen ungeprüften Handle-Fabriken und keine
 entfallende Eingangsvalidierung. Zunächst Diagnose/Architekturprüfung, keine weitere
 Produktoptimierung in diesem Folgeauftrag.
+
+## Recovery-Handle-Vertrauensgrenze (12.10.2026, PR296)
+Begrenzte Code-/Architekturprüfung, keine Produktänderung. Produktstand aaa9254.
+Die 353,6 ms Handlezeit aus PR295 bleiben historische Einzellauf-Evidenz; diese
+Prüfung isoliert keinen neuen Base64-Zeitanteil und behauptet keinen Speedup.
+
+### Befund und Besitz
+- reference/model.ts: storageAssetSchema prüft ID, MIME, Maße, Größenbudget und
+  kanonisches Base64. createImageAssetHandle prüft mit diesem Schema, besitzt die
+  geparste Kopie, friert sie ein und trägt ihre Identität in ein privates WeakSet ein.
+- imageAssetSchema akzeptiert nur die exakte registrierte Identität ohne erneuten
+  Payloadscan. Object.freeze, gleicher Inhalt/Hash, Spread, JSON oder Proxy sind
+  kein Ersatz für diese Identität. Sämtliche Assetfelder sind primitive Werte;
+  der erzeugte Handle hat eigene unveränderliche Datenfelder, keine Eingabe-Getter.
+- recovery-codec.ts verifyPayload: strikte äußere Form; anschließend
+  imageAssetSchema.parse mit synthetischer ID. Das ist ein frisches gewöhnliches
+  Objekt und daher eine vollständige Storageprüfung. Das Rückgabeobjekt p nach
+  Entfernen der ID ist ebenfalls gewöhnlich, besitzt keinen Handle-Nachweis.
+- restoreCheckedSnapshot gruppiert nach Inhaltsschlüssel, prüft jedes Payload
+  einmal inklusive Header/Metadaten und SHA-256. Danach erzeugt es pro Link mit
+  createImageAssetHandle eine weitere vollständig geprüfte Kopie. Für G unterschiedliche
+  Payloads und L Links bedeutet dies G+L Storage-/Base64prüfungen in diesen Schritten.
+  Bei zwölf unterschiedlichen Bildern und zwölf Links: 24 statt möglicher zwölf.
+- validateProject kann die späteren echten Handles bereits wiederverwenden;
+  Referenzen, doppelte IDs, Geometrie und Gesamtbudgets bleiben davon unabhängig.
+  prepare-/Dateiimport-/Rendererpfade nicht pauschal mitändern.
+
+### Begrenzte technische Entscheidung für den nächsten Piloten
+Die bestehende private Identitätsprüfung wiederverwenden; kein zweites Register,
+kein Hash-zu-Vertrauen-Cache und kein ungeprüfter Importkonstruktor.
+Im Domain-Bildmodul eine eng begrenzte Operation zum Neuvergeben einer ID anbieten:
+Sie akzeptiert zur Laufzeit ausschließlich einen bereits registrierten Handle,
+prüft die neue ID mit demselben Schema, erzeugt eine eigene eingefrorene Kopie mit
+expliziten erlaubten Feldern und registriert diese. Kein Aufrufer darf Payloadfelder
+ändern oder einen boolean-/Typcast-Nachweis zur Vertrauensgewährung liefern.
+Unregistrierte Objekte werden abgewiesen, nicht still als vertrauenswürdig behandelt.
+Diese Operation bezeugt ausschließlich Storagevalidierung, niemals Header-/Hashprüfung.
+
+Im Recovery-Codec eine private gemeinsame Verifikation verwenden, die statt des
+verlorenen Parse-Ergebnisses einmal einen echten Handle erzeugt. Der bestehende
+öffentliche verifyPayload-Vertrag bleibt ein Payload ohne ID; intern darf die
+Wiederherstellung den echten Handle zusätzlich behalten. Strikte Formprüfung,
+Decoder, Headervergleich und Inhaltskey-Format bleiben unverändert. Erst nach
+erfolgreichem Hashvergleich Handles für die tatsächlichen Link-IDs ableiten und
+später das vollständige Modell prüfen. Während await gehaltene Daten stammen aus
+der geprüften eigenen Kopie; keine Rohdaten/Getter danach erneut lesen. Kein
+partielles Modell veröffentlichen. Alle Checkpoints/Abbrüche/Fallbacks behalten.
+Dies ist ein Vertrag für den folgenden Pilot, noch keine neue Implementierung.
+
+### Abnahme des Piloten
+- Echter Handle mit neuer ID: unveränderte Bytes/Metadaten, eigene Identität,
+  eingefroren, bestehende ID-Trim-/Fehlerregeln und Registryprüfung.
+- Fälschungen: Spread/JSON, frozen Lookalike, Getter und Proxy erhalten kein Vertrauen;
+  ungültige IDs abweisen. Mutationen der ursprünglichen Rohdaten wirken nicht nach.
+- Ein Payload mit mehreren Links: verschiedene richtige IDs, dieselben Inhalte;
+  kein wiederholter Payloadscan pro Link (gezielter Instrumentierungsnachweis).
+- Header-/Hashfehler, ungültiges Base64, fehlende Assets, doppelte IDs, verwaiste
+  Referenzen, Budget, Abbruch nach Hash/Checkpoint und Vorgängerfallback unverändert.
+- Differentialvergleich gegen bisherigen vollständigen Pfad, gesamte Testsuite,
+  Builds und derselbe Browser-Snapshot mit bytegleichem Export; kein Zeitbudgettest
+  als Ersatz für Korrektheit.
+
+Ausgeführt: 22 bestehende gezielte Tests aus asset-handles, asset-recovery-store und
+recovery-v2 bestanden; enthalten Identitäts-/Mutationsschutz, Modellgrenzen,
+Integrität und Abbruch. Kein neuer Browserlauf oder Build für reine Dokumentation;
+letzter voller Produktnachweis PR295: 917 Tests und beide Builds.

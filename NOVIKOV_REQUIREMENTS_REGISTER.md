@@ -10756,3 +10756,11 @@ Typecheck/Lint und beide Builds bestanden. Decode 369,2→116,9 ms im Einzelverg
 Export bytegleich. Nachweis ASSET_RECOVERY_PILOT.md, recovery-header-no-copy.json.
 Nächster Einzelauftrag: wiederholte Payloadprüfung bei Handle-Erstellung bewerten,
 Unveränderlichkeit/Ownership sichern, noch keine neue Vertrauensabkürzung umsetzen.
+
+### R26-01/02, K02/03, RC07 · Recovery-Handlevertrag 12.10.2026 (PR296)
+Doppelte Storageprüfung per Codepfad bestätigt; G Payloads/L Links verursachen G+L
+Prüfungen. Bestehende private Handle-Identität als einzige Wiederverwendungsgrenze.
+Keine Produktänderung. 22 gezielte Tests grün, kein neuer Performancegewinn behauptet.
+Konkreter Folgepilot samt Fälschungs-/Ownership-/Fehlerfällen im ASSET_RECOVERY_PILOT.md
+und Masterplan: sichere ID-Neuzuweisung auf registriertem Handle, volle Eingangs-,
+Header-, Hash-, Modell-, Budget- und Abbruchprüfung erhalten.
