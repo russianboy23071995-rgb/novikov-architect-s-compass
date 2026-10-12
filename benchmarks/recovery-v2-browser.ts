@@ -1,3 +1,5 @@
+import { prepareRecoveryV2Writer } from "../src/application/project-files/recovery-v2-writer";
+import { createBoundedRecoveryCodec } from "../src/interop/project-file/recovery-codec";
 import {
   createRecoveryV2Storage,
   openRecoveryV2Pilot,
@@ -250,6 +252,66 @@ button.onclick = async () => {
     check(
       (await read(a, "legacy", p.id)) === legacy,
       "V1 auch nach allen Fehlerfällen unverändert",
+    );
+    const bounded = createBoundedRecoveryCodec({
+      modelBytes: 1024 * 1024,
+      payloadBytes: 1024 * 1024,
+      pixels: 1000,
+    });
+    const writerPort = createRecoveryV2Storage(a, p.id, bounded);
+    const writer = await prepareRecoveryV2Writer(writerPort, p.id, bounded);
+    const saved = await writer.save(p, () => true);
+    check((await writerPort.read()).record !== null, "Writer speichert gültigen Arbeitsstand");
+    const stopped = new AbortController();
+    stopped.abort();
+    await rejects(
+      () => writer.save(p, () => true, stopped.signal),
+      "Writer-Abbruch erhält letzte Revision",
+    );
+    check(
+      ((await writerPort.read()).record as RecoveryRecordV2).revision === saved.revision,
+      "Abbruch verändert Head nicht",
+    );
+    await rejects(() => writer.save(p, () => false), "Veralteter Writer-Kontext wird abgewiesen");
+    let checksBeforeCommit = 0;
+    await rejects(
+      () =>
+        writerPort.publish(
+          { legacy, revision: saved.revision },
+          { ...current, revision: crypto.randomUUID() },
+          undefined,
+          () => ++checksBeforeCommit < 4,
+        ),
+      "Kontextwechsel beim finalen Headrequest rollt Transaktion zurück",
+    );
+    check(
+      ((await writerPort.read()).record as RecoveryRecordV2).revision === saved.revision,
+      "Später Kontextwechsel erhält Head",
+    );
+    await writer.save(q, () => true);
+    check(
+      serializeProject(
+        (await restoreRecoveryV2((await writerPort.read()).record, p.id, bounded)).project,
+      ) === serializeProject(q),
+      "Writer-Retry nach Abbruch speichert vollständig",
+    );
+    const competing = await prepareRecoveryV2Writer(
+      createRecoveryV2Storage(b, p.id, bounded),
+      p.id,
+      bounded,
+    );
+    await competing.save(p, () => true);
+    await rejects(
+      () => writer.save(q, () => true),
+      "Externer Writer-Konflikt wird erhalten statt überschrieben",
+    );
+    const resumed = await prepareRecoveryV2Writer(writerPort, p.id, bounded);
+    await resumed.save(q, () => true);
+    check(
+      serializeProject(
+        (await restoreRecoveryV2((await writerPort.read()).record, p.id, bounded)).project,
+      ) === serializeProject(q),
+      "Neue Writersitzung setzt nach Konflikt sicher fort",
     );
     report["status"] = "passed";
     status.textContent = `Bestanden: ${checks.length} Prüfungen. Produktionsdaten unverändert.`;

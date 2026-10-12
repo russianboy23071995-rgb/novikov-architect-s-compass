@@ -21,12 +21,14 @@ export interface RecoveryV2Storage {
   read(): Promise<{ legacy: string | null; record: unknown | null }>;
   /** Compare BOTH tokens and publish assets/current/previous atomically. Keep V1 untouched.
    * Resolve only after commit; reject/abort must leave the published state unchanged.
+   * Check isCurrent immediately before the final write completes; stale context aborts.
    * Once committed, a late abort must not turn success into failure.
    */
   publish(
     expected: { legacy: string | null; revision: string | null },
     next: RecoveryRecordV2,
     signal?: AbortSignal,
+    isCurrent?: () => boolean,
   ): Promise<void>;
 }
 /** Codec owns full payload schema/header/hash, model validation and resource budgets.

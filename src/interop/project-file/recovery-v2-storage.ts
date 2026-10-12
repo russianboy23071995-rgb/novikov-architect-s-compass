@@ -105,8 +105,9 @@ export function createRecoveryV2Storage(
         };
       });
     },
-    async publish(expected, input, signal) {
+    async publish(expected, input, signal, isCurrent = () => true) {
       signal?.throwIfAborted();
+      if (!isCurrent()) throw new Error("Recovery context changed");
       // Own the candidate before any async validation; caller mutation cannot alter the commit.
       const next = structuredClone(input);
       const tokens = { ...expected };
@@ -124,6 +125,7 @@ export function createRecoveryV2Storage(
       await validate(next.current);
       if (next.previous) await validate(next.previous);
       signal?.throwIfAborted();
+      if (!isCurrent()) throw new Error("Recovery context changed");
       const payloads = new Map<string, Readonly<RecoveryPayload>>();
       const strip = (s: RecoverySnapshotV2): StoredSnapshot => {
         for (const link of s.document.model.assets) {
@@ -186,15 +188,36 @@ export function createRecoveryV2Storage(
               (old && old.projectId !== projectId)
             )
               throw new Error("Recovery revision conflict");
+            const finish = () => {
+              try {
+                if (!isCurrent()) throw new Error("Recovery context changed");
+                const written = tx.objectStore("heads").put(head, projectId);
+                written.onsuccess = () => {
+                  try {
+                    if (!isCurrent()) fail(new Error("Recovery context changed"));
+                  } catch (error) {
+                    fail(error);
+                  }
+                };
+              } catch (error) {
+                fail(error);
+              }
+            };
+            let remaining = payloads.size;
+            const ready = () => {
+              if (--remaining === 0) finish();
+            };
+            if (!remaining) finish();
             for (const [key, payload] of payloads) {
               const request = tx.objectStore("assets").get(key);
               request.onsuccess = () => {
-                if (request.result === undefined) tx.objectStore("assets").add(payload, key);
+                if (request.result === undefined)
+                  tx.objectStore("assets").add(payload, key).onsuccess = ready;
                 else if (!samePayload(request.result, payload))
                   fail(new Error("Stored payload mismatch"));
+                else ready();
               };
             }
-            tx.objectStore("heads").put(head, projectId);
           } catch (error) {
             fail(error);
           }
