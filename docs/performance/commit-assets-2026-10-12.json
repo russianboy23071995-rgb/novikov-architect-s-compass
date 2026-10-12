@@ -1,0 +1,407 @@
+{
+  "started": "2026-10-12T16:13:16.037Z",
+  "checks": [
+    "Profil überschreitet 100 MiB",
+    "Dateiöffnung vollständig identisch",
+    "Commit A/B 1 identisch",
+    "Commit A/B 2 identisch",
+    "Commit A/B 3 identisch",
+    "Änderung genau ein Undo-Schritt",
+    "Undo stellt vollständigen Ausgangsstand her",
+    "Gespeicherte Datei einschließlich Bilder identisch",
+    "V2-Wiederaufnahme vollständig identisch"
+  ],
+  "phases": [
+    {
+      "name": "Zwölf PNGs und 10.000 Linien vorbereiten",
+      "start": 4017.5,
+      "ms": 1565.6000000238419,
+      "heapAfter": 136342383
+    },
+    {
+      "name": "Portable Datei erzeugen",
+      "start": 5589.200000017881,
+      "ms": 417,
+      "heapAfter": 352849585
+    },
+    {
+      "name": "Datei öffnen",
+      "start": 6210.600000023842,
+      "ms": 1579.199999988079,
+      "heapAfter": 764023352
+    },
+    {
+      "name": "Vollvergleich nach Öffnen",
+      "start": 7792.100000023842,
+      "ms": 341.39999997615814,
+      "heapAfter": 873665313
+    },
+    {
+      "name": "History anlegen",
+      "start": 8162.100000023842,
+      "ms": 41.5,
+      "heapAfter": 774795532
+    },
+    {
+      "name": "Commit Vollpfad 1",
+      "start": 8237.90000000596,
+      "ms": 643.5,
+      "heapAfter": 770366127
+    },
+    {
+      "name": "Commit optimiert 1",
+      "start": 8883.40000000596,
+      "ms": 80.59999999403954,
+      "heapAfter": 685738886
+    },
+    {
+      "name": "Commit Vergleich 1",
+      "start": 8989.200000017881,
+      "ms": 572.1999999880791,
+      "heapAfter": 1104835108
+    },
+    {
+      "name": "Commit Vollpfad 2",
+      "start": 9563.300000011921,
+      "ms": 608.4000000059605,
+      "heapAfter": 1430792126
+    },
+    {
+      "name": "Commit optimiert 2",
+      "start": 10229.90000000596,
+      "ms": 121.7000000178814,
+      "heapAfter": 468407562
+    },
+    {
+      "name": "Commit Vergleich 2",
+      "start": 10384.5,
+      "ms": 642.2000000178814,
+      "heapAfter": 888163881
+    },
+    {
+      "name": "Commit Vollpfad 3",
+      "start": 11032.100000023842,
+      "ms": 667.7999999821186,
+      "heapAfter": 664737292
+    },
+    {
+      "name": "Commit optimiert 3",
+      "start": 11724.5,
+      "ms": 97.90000000596046,
+      "heapAfter": 578053195
+    },
+    {
+      "name": "Commit Vergleich 3",
+      "start": 11827.40000000596,
+      "ms": 593,
+      "heapAfter": 999282601
+    },
+    {
+      "name": "Undo",
+      "start": 12500.200000017881,
+      "ms": 0.19999998807907104,
+      "heapAfter": 912724023
+    },
+    {
+      "name": "Vollvergleich Undo",
+      "start": 12506.700000017881,
+      "ms": 332.59999999403954,
+      "heapAfter": 1117271592
+    },
+    {
+      "name": "Redo",
+      "start": 12844.5,
+      "ms": 0,
+      "heapAfter": 1117271592
+    },
+    {
+      "name": "Datei speichern über Download-Port",
+      "start": 12849.5,
+      "ms": 499.80000001192093,
+      "heapAfter": 1333639452
+    },
+    {
+      "name": "Gespeicherte Datei erneut öffnen",
+      "start": 13400.300000011921,
+      "ms": 1618.0999999940395,
+      "heapAfter": 1305639469
+    },
+    {
+      "name": "Vollvergleich gespeicherter Datei",
+      "start": 15021.100000023842,
+      "ms": 390.69999998807907,
+      "heapAfter": 1415144254
+    },
+    {
+      "name": "V2 sichern",
+      "start": 15414.700000017881,
+      "ms": 4072.2999999821186,
+      "heapAfter": 1098239827
+    },
+    {
+      "name": "V2 über frischen Katalog wiederaufnehmen",
+      "start": 19487.5,
+      "ms": 2795.800000011921,
+      "heapAfter": 1503988696
+    },
+    {
+      "name": "Vollvergleich V2",
+      "start": 22289.80000001192,
+      "ms": 651.8000000119209,
+      "heapAfter": 891138738
+    }
+  ],
+  "tasks": [
+    {
+      "start": 4017.5,
+      "ms": 188
+    },
+    {
+      "start": 4207.600000023842,
+      "ms": 112
+    },
+    {
+      "start": 4320.5,
+      "ms": 150
+    },
+    {
+      "start": 4471.600000023842,
+      "ms": 137
+    },
+    {
+      "start": 4611.200000017881,
+      "ms": 123
+    },
+    {
+      "start": 4734.4000000059605,
+      "ms": 114
+    },
+    {
+      "start": 4852.800000011921,
+      "ms": 112
+    },
+    {
+      "start": 4969.300000011921,
+      "ms": 107
+    },
+    {
+      "start": 5081.600000023842,
+      "ms": 116
+    },
+    {
+      "start": 5204.4000000059605,
+      "ms": 108
+    },
+    {
+      "start": 5317.200000017881,
+      "ms": 118
+    },
+    {
+      "start": 5440.100000023842,
+      "ms": 137
+    },
+    {
+      "start": 5589.200000017881,
+      "ms": 617
+    },
+    {
+      "start": 6210.600000023842,
+      "ms": 197
+    },
+    {
+      "start": 6470.600000023842,
+      "ms": 1319
+    },
+    {
+      "start": 7792.100000023842,
+      "ms": 341
+    },
+    {
+      "start": 8162.100000023842,
+      "ms": 74
+    },
+    {
+      "start": 8237.90000000596,
+      "ms": 643
+    },
+    {
+      "start": 8883.40000000596,
+      "ms": 81
+    },
+    {
+      "start": 8989.100000023842,
+      "ms": 572
+    },
+    {
+      "start": 9563.300000011921,
+      "ms": 611
+    },
+    {
+      "start": 10229.90000000596,
+      "ms": 122
+    },
+    {
+      "start": 10384.5,
+      "ms": 642
+    },
+    {
+      "start": 11032,
+      "ms": 668
+    },
+    {
+      "start": 11724.40000000596,
+      "ms": 98
+    },
+    {
+      "start": 11827.40000000596,
+      "ms": 668
+    },
+    {
+      "start": 12506.700000017881,
+      "ms": 332
+    },
+    {
+      "start": 12849.40000000596,
+      "ms": 501
+    },
+    {
+      "start": 13400.300000011921,
+      "ms": 210
+    },
+    {
+      "start": 13691.700000017881,
+      "ms": 1326
+    },
+    {
+      "start": 15021,
+      "ms": 391
+    },
+    {
+      "start": 15444.200000017881,
+      "ms": 1594
+    },
+    {
+      "start": 17107,
+      "ms": 101
+    },
+    {
+      "start": 17208.70000001788,
+      "ms": 106
+    },
+    {
+      "start": 17316,
+      "ms": 104
+    },
+    {
+      "start": 17420.600000023842,
+      "ms": 102
+    },
+    {
+      "start": 17522.80000001192,
+      "ms": 104
+    },
+    {
+      "start": 17627.40000000596,
+      "ms": 111
+    },
+    {
+      "start": 17739.40000000596,
+      "ms": 103
+    },
+    {
+      "start": 17847.5,
+      "ms": 98
+    },
+    {
+      "start": 17950.30000001192,
+      "ms": 92
+    },
+    {
+      "start": 18047.40000000596,
+      "ms": 85
+    },
+    {
+      "start": 18137.70000001788,
+      "ms": 85
+    },
+    {
+      "start": 18227.100000023842,
+      "ms": 106
+    },
+    {
+      "start": 18338.100000023842,
+      "ms": 90
+    },
+    {
+      "start": 18487.40000000596,
+      "ms": 589
+    },
+    {
+      "start": 19084.90000000596,
+      "ms": 133
+    },
+    {
+      "start": 19642.20000001788,
+      "ms": 137
+    },
+    {
+      "start": 19779.20000001788,
+      "ms": 134
+    },
+    {
+      "start": 19913.600000023842,
+      "ms": 124
+    },
+    {
+      "start": 20038.600000023842,
+      "ms": 125
+    },
+    {
+      "start": 20164.600000023842,
+      "ms": 129
+    },
+    {
+      "start": 20294.5,
+      "ms": 137
+    },
+    {
+      "start": 20437,
+      "ms": 135
+    },
+    {
+      "start": 20577.80000001192,
+      "ms": 133
+    },
+    {
+      "start": 20716.30000001192,
+      "ms": 134
+    },
+    {
+      "start": 20855.90000000596,
+      "ms": 134
+    },
+    {
+      "start": 20994.80000001192,
+      "ms": 143
+    },
+    {
+      "start": 21142.600000023842,
+      "ms": 140
+    },
+    {
+      "start": 21287.80000001192,
+      "ms": 51
+    },
+    {
+      "start": 21344.90000000596,
+      "ms": 939
+    },
+    {
+      "start": 22289.80000001192,
+      "ms": 652
+    }
+  ],
+  "bytes": 106911015,
+  "database": "novikov-capacity-test-4c3294b2-cffd-4a68-b205-d75f453fba98",
+  "status": "passed"
+}

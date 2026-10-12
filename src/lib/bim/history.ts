@@ -1,6 +1,9 @@
-import { sameProjectModel } from "../../domain/project/model-equality.ts";
-import { assertProjectFileSize } from "../../interop/project-file/size.ts";
-import { deserializeProject, serializeProject, validateProject } from "./model.ts";
+import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
+import {
+  assertProjectFileSize,
+  assertValidatedProjectSize,
+} from "../../interop/project-file/size.ts";
+import { deserializeProject, validateProject } from "./model.ts";
 import type { Project } from "./model.ts";
 export type ProjectHistory = { past: Project[]; present: Project; future: Project[] };
 export const HISTORY_LIMIT = 100;
@@ -10,11 +13,11 @@ export function createHistory(project: Project): ProjectHistory {
 }
 export function commitProject(history: ProjectHistory, project: Project): ProjectHistory {
   const next = validateProject(project);
-  // next is the independent, normalized result of the full validation above.
-  // Serialize it directly instead of validating/deriving the same snapshot twice.
-  const nextJson = JSON.stringify(next);
-  assertProjectFileSize(nextJson);
-  if (nextJson === serializeProject(history.present)) return history;
+  assertValidatedProjectSize(next);
+  // Preserve the previous serialization boundary's validation of the existing snapshot.
+  const previous = validateProject(history.present);
+  assertValidatedProjectSize(previous);
+  if (sameProjectContent(next, previous)) return history;
   if (sameProjectModel(history.present, next)) return { ...history, present: next };
   return {
     past: [...history.past, history.present].slice(-HISTORY_LIMIT),
