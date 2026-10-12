@@ -47,8 +47,8 @@ export function reidentifyImageAssetHandle(value: unknown, nextId: unknown): Ima
   return asset;
 }
 /** Capability check for immutable storage-validated assets; not a decoder verdict. */
-export function isImageAssetHandle(value: ImageAsset): boolean {
-  return verifiedAssets.has(value);
+export function isImageAssetHandle(value: unknown): boolean {
+  return typeof value === "object" && value !== null && verifiedAssets.has(value);
 }
 export const imageReferenceSchema = z
   .object({
