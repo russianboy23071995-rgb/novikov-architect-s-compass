@@ -768,3 +768,33 @@ gespeichertes Abbild öffnet erneut mit 100 %. Vollständiger Vergleich von stor
 und assets mit Quellfixture identisch. 908 Tests, Benchmark-Typecheck, gezieltes
 Lint und Produktionsbuild bestanden. Keine Modell-/Dateiformatänderung.
 Nächster Auftrag: produktionsnaher Gesamtbedienlauf vor weiteren Optimierungen.
+
+
+## Produktions-Workspace-Abnahme (12.10.2026)
+
+Reproduzierbar: `vite build --config benchmarks/production-workspace.config.ts`,
+danach `vite preview --config benchmarks/production-workspace.config.ts`;
+`http://127.0.0.1:8085/benchmarks/production-workspace.html`. Echter CadWorkspace und
+Browseradapter, React production, ohne React-Profiler und Vite-Diagnosetransforms.
+Long-Task-Observer und Klickzeitpunkte bleiben als reine Beobachtung. Separater
+Client-Build: kein Nachweis für Cloudflare/SSR/Deployment. Isolierter Ursprung
+verändert weder Recovery von 8080 noch von 8082. Keine Produktionscodeänderung.
+
+100-MiB-Fixture inklusive zuvor gespeichertem Abbild: Öffnen, Wand im Canvas wählen,
+Höhe 2,8 → 2,9, Undo/Download, Redo/Download, Abbild öffnen (100 %), lokaler Snapshot,
+Reload, Stand prüfen, bestätigte Wiederaufnahme, Download und Abbild erneut öffnen.
+Alle Vollvergleiche bestanden: Undo = Quelle, Redo = Quelle mit Höhenänderung,
+Recovery = Redo. Zwölf Bildpayloads und Abbild vollständig erhalten.
+[Hashes/Prüfungen](production-workspace-evidence.json),
+[vor Reload](production-workspace-trace-1.json), [nach Reload](production-workspace-trace-2.json).
+
+Nach Klick Projekt laden: 2635-ms-Task. Die beiden Exporte enthalten 1276 bzw.
+1142 ms lange Tasks; Snapshot 1333 ms. Bedienpausen sind somit auch ohne
+Entwicklungsinstrumentierung vorhanden. Kein Vergleichsmedian, keine reine Paint-
+oder Servicezuordnung und keine flüssige Großprojektfreigabe. Die lange Zeit zwischen
+Dateiauswahl und Bestätigung enthält außerdem Browsersteuerung/Wartezeit und ist
+kein Produkt-Ladezeitwert. Typecheck, gezieltes Lint und isolierter Produktionsbuild
+bestanden; die 908 Modelltests des vorherigen PR wurden hier nicht erneut ausgeführt.
+
+Nächster begrenzter Auftrag: produktive Exportphasen messen und Ursache der
+1,1–1,3-s-Blockade zuordnen. Ladepause bleibt separat offen.

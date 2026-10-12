@@ -10667,3 +10667,7 @@ Zwei Detailprofile auf Basis des noch offenen PR277: 10.000 Linien beim Mount 39
 
 ### K02/03 · Initiale Kamera 12.10.2026
 Grundriss wird erst mit gemessener Canvas-Größe aufgebaut; unveränderte Resize-Messwerte erzeugen keinen neuen Größenstatus. Kein Framing aus der vorläufigen Ersatzgröße. Die zweite Linien-Renderpassage entfällt in der identischen Fixture. 908 Tests; Browser: Resize/Zoom, Abbild anlegen/öffnen/Fit, Datei wieder öffnen und Canvas-Auswahl. Modell/Bildpayloads identisch. Produktionsnahe Gesamtabnahme steht aus.
+
+
+### R26-01/02, K02/03, RC07 · Produktions-Workspace 12.10.2026
+Produktiver React-/Workspace-Client auf isoliertem Ursprung, ohne Profiler/Diagnosetransforms. Vollständige Undo-/Redo-/Recovery-Dateivergleiche und gespeichertes Abbild bestanden. Tatsächliche UI-Tasks bis 2,635 s bei Übernahme und 1,142–1,276 s beim Export. Keine allgemeine Performancefreigabe, kein Cloudflare-/SSR-Nachweis. Nächster Einzelauftrag laut Masterplan: Exportphasen zuordnen.
