@@ -150,3 +150,6 @@ export async function unpack(text: string, b: Budget = probeBudget): Promise<Doc
   restoreProject(doc);
   return freeze(doc);
 }
+
+// Shared diagnostic ingress; not exported from production code.
+export { payload as verifyPayload, keyOf as payloadKey };
