@@ -365,9 +365,20 @@ Konsolenfehler. Nur Prüfbelege/Dokumentation geändert; 922 Tests und beide Bui
 unverändertem PR299, erfolgreiche GitHub-CI. Kein Crash-/Kaltstart-/Kapazitätsversprechen.
 Rohdaten und Reproduktion: docs/performance/ASSET_RECOVERY_PILOT.md.
 
+### Nutzerpriorität: Speichererweiterung zurückgestellt (12.10.2026)
+Nach Abnahme des rund 102-MiB-Recoveryablaufs stellt der Nutzer die nächste
+Kapazitätserweiterung ausdrücklich zurück. Produktgrenze 128 MiB bleibt bestehen.
+Der vorhandene 252,57-MiB-Servicepilot und der Abgleich mit aktuellen Produktadaptern
+bleiben vorgemerkt: vor einer weiteren Grenzerhöhung wieder aufnehmen, oder bei
+konkretem Bedarf an größeren Projekten. Dies hebt offene P0-Sicherheitsprüfungen
+vor externer Verteilung nicht auf. Keine weitere Speicheroptimierung aktiv.
+Codeabgleich: Schema20 besitzt ein storey ohne Namen; Navigator zeigt fest Level 01,
+IFC nutzt bisher die Geschoss-ID als Label. ModelView bindet bereits stabile storeyId.
+Nächster CAD-Schritt: Geschossnamen als kleiner nutzbarer Einstieg in R26-03/N21.
+
 ## 5. Engpässe und Skalierungsrisiken
 
-1. **Datei-/Assetgrenze:** 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
+1. **Datei-/Assetgrenze:** Projektdatei aktuell 128 MiB, einzelne Bilddaten weiterhin 10 MiB. Die frühere 10-MiB-Projektgrenze ist abgelöst. 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
 2. **Speichern/Recovery:** Downloadanforderung und Undo sichern weder letzten Datenträgerstand noch Absturz-/Migrationsschutz. Dies ist P0 vor Public Beta mit realen Dateien.
 3. **Commit/Export:** Volle Validierung, Geometrieableitung und Serialisierung bleiben globale Pfade. Ältere Einzelmessungen nicht als aktuelle Zeitgarantie verwenden. Herkunft/Commit, Hardware, Szenario und Median/p95 getrennt nennen.
 4. **Vorschau/Abhängigkeiten:** Begrenzte Piloten sind produktiv; nicht wieder von null anfangen. Restliche Pfade und breite verbundene Komponenten messen. Nur ausgewählte Wand ist keine sichere betroffene Menge.
@@ -433,15 +444,18 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: 250-MiB-Kapazitätsabnahme auf aktuellen Produktadaptern vorbereiten und ausführen.**
-Den vorhandenen 252,57-MiB-Servicepilot wiederverwenden, nicht neu aufbauen. Zuerst
-seine Diagnosecodec-/Budgetabweichungen gegenüber den aktuellen Application-/Interop-
-Adaptern feststellen. Einen isolierten, explizit budgetierten Ablauf mit den gemeinsamen
-aktuellen Prüfungen für Schreiben, frische Wiederaufnahme und vollständigen Rundlauf
-herstellen; Größen-/Pixel-/Zeit-/Heap-Stichprobengrenzen erhalten. Ergebnisse und
-verbleibende Kopien/RAM-Risiken mit dem alten Servicebeleg vergleichen. Keine pauschale
-Erhöhung der produktiven 128-MiB-Grenze oder neue Dateiarchitektur in diesem Auftrag.
-Die Messung muss die nächste konkrete Kapazitätsentscheidung tragen.
+**Genau ein aktiver Fortsetzungsschritt: Bestehendes Geschoss benennen.**
+Einen persistenten Geschossnamen mit unveränderter stabiler ID und expliziter Migration
+alter Projektdateien ergänzen (bisherige Anzeige Level 01 als Bestandsvorgabe).
+Eine gemeinsame validierte Application-Aktion zum Umbenennen mit genau einem normalen
+Projekt-Undo-Schritt bereitstellen; Navigator erhält die Bearbeitung über den vorhandenen
+UI-Vertrag. Gemeinsame Geschossbeschriftungen in Arbeitsansicht und IFC verwenden den
+Namen, Beziehungen/GlobalIds weiterhin die ID. Abbildnamen bleiben eigenständig.
+Tests: gültiger/leerer Name, ID-/Geometrieerhalt, Undo/Redo, alte Datei laden,
+Speichern/Wiederöffnen/Recovery und IFC-Label einschließlich Sonderzeichen; Browserabnahme,
+Build und passende Gesamttests. Keine Mehrgeschossanlage, Höhenänderung oder neue
+Bauteile in diesem Schritt; keine leeren Klassen oder parallele Projektdaten.
+Application-Aktion später auch für Text/AI/Voice nutzbar, keine separate Modelllogik.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
