@@ -89,6 +89,49 @@ Manifeste oder verallgemeinerter Lesebudgets. Kontrollierter CAS-Konflikt ist be
 kein allgemeiner Crash-Durability-Nachweis. Projektformat, 32-MiB-Produktionsgrenze,
 Lizenzgrenzen und Modell-Undo bleiben unverändert.
 
-Der einzige aktive Folgeauftrag steht in Masterplan §9: kalten Asset-Lesepfad zerlegen
-und vorhandene effiziente Eingangsprüfung wiederverwenden, unter unverändert vollständiger
-Integritätsprüfung. Erst danach kann über eine Produktionsanbindung entschieden werden.
+Der jeweils aktive Folgeauftrag steht ausschließlich in Masterplan §9.
+
+## Nachweis: gemeinsamer Decoder (12.10.2026)
+
+PR260 ist nach grüner CI und ausdrücklicher Freigabe zusammengeführt (`224099c`).
+Auf dieser Basis verwendet der Diagnosevertrag jetzt `binaryBytes` aus
+`src/interop/images/binary-bytes.ts`. Produktionscode bleibt unverändert.
+Die alte Iteratorvariante bleibt ausschließlich als diagnostische A/B-Option erhalten.
+Schema, vollständige Base64-Dekodierung, Headervergleich, unveränderter SHA-256-Schlüssel
+und abschließende Modellvalidierung bleiben in beiden Varianten gleich.
+Kein Leseergebnis-/Integritätscache über die IndexedDB-Vertrauensgrenze hinweg.
+
+[Neue Rohdaten](asset-recovery-read-2026-10-12.json): identische 54.268.053 Projektbytes,
+sechs PNGs und 10.000 Linien. Drei Messungen pro Variante auf denselben Datensätzen,
+Reihenfolge alt/neu, neu/alt, alt/neu. Jede Messung liest erneut aus IndexedDB und
+vergleicht das vollständige Ergebnis inklusive Bilddaten mit dem erwarteten Projekt.
+
+| Phase, Median in ms | Alter Iterator | Gemeinsamer Decoder |
+| --- | ---: | ---: |
+| IndexedDB-Lesen | 94,5 | 93,5 |
+| Payloadschema | 100,5 | 100,0 |
+| Base64 und Bytearray | 3.283,8 | 156,4 |
+| Header | 0,1 | <0,1 |
+| Hashdaten aufbauen | 151,8 | 148,4 |
+| SHA-256 | 41,1 | 46,4 |
+| Modell validieren | 167,8 | 160,2 |
+| Gesamter Serviceaufruf | 3.864,8 | 706,7 |
+
+Etwa 82 % weniger Servicezeit in diesem Profil. Phasenmediane sind nicht additiv.
+`totalMs` enthält die gesamte Servicearbeit, aber nicht den zusätzlichen Ergebnis-Hash
+des Testharness; dessen Aufwand ist in `phases` enthalten. Dort liegt der Median bei
+4.061,1 bzw. 899,7 ms. Keine p95-/RAM-/GPU-Aussage; keine kalten OS-/Diskcaches.
+„Kalt“ meint hier Prüfung erneut gelesener Inhalte ohne vorbereiteten Assetcache.
+Messungen liefen ohne parallele Tests/Builds oder Hot-Reload.
+
+18 Browserprüfungen bestanden, darunter die sechs neuen vollständigen A/B-Vergleiche
+sowie weiterhin Vorgänger, CAS, Abbruch/Rollback und korrupte/fehlende Assets.
+884 Node-Tests bestanden. Neuer Regressionstest vergleicht Payload und Schlüssel und
+prüft beide Wege gegen ungültiges Base64, falsche Dimensionen/MIME, unbekannte Header
+und zusätzliche Felder. Bestehende Bytegleichheitstests des gemeinsamen Decoders bleiben
+in der Suite. App-/Benchmark-Typecheck und Build bestanden; Lint 0 Fehler/6 bekannte Warnungen.
+
+Reproduktion wie oben; nun lautet das Abschlussresultat **Bestanden: 18 Prüfungen**.
+Die Datenbankspeicherung und die Grenzen des ursprünglichen Piloten bleiben unverändert.
+Die Verbesserung rechtfertigt weitere Kapazitätsmessungen mit diesem gemeinsamen
+Baustein, keinen neuen Decoder, Worker oder Renderer auf Verdacht.

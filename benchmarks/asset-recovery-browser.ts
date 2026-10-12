@@ -182,6 +182,28 @@ run.onclick = async () => {
     db.close();
     db = await openPilotDatabase(dbName);
     const reopened = createAssetRecoveryStore(db);
+    const comparisons: unknown[] = [];
+    report["readComparison"] = comparisons;
+    // Alternate order to reduce one-sided cache/order effects; no model-result cache.
+    for (let round = 0; round < 3; round++) {
+      for (const legacy of round % 2 === 0 ? [true, false] : [false, true]) {
+        const times: Record<string, number> = {};
+        await phase(`Lesepfad ${legacy ? "alt" : "gemeinsam"} / ${round + 1}`, async () => {
+          const start = performance.now();
+          const restored = await reopened.read(p.id, false, {
+            legacy,
+            measure: (name, ms) => {
+              times[name] = (times[name] ?? 0) + ms;
+            },
+          });
+          comparisons.push({ round, legacy, totalMs: performance.now() - start, times });
+          check(
+            (await hash(restored.project)) === expected,
+            `read comparison ${round}/${legacy}: exact model and payloads`,
+          );
+        });
+      }
+    }
     await phase("Recovery nach erneutem Datenbanköffnen", async () =>
       check(
         (await hash((await reopened.read(p.id)).project)) === expected,

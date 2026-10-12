@@ -1,0 +1,193 @@
+{
+  "started": "2026-10-12T13:38:02.727Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "dbName": "novikov-asset-recovery-pilot-d383e562-9278-4a37-9b2f-20574d2b1e50",
+  "phases": [
+    {
+      "name": "Fixture mit unterschiedlichen PNGs erzeugen",
+      "ms": 893.9000000059605
+    },
+    {
+      "name": "Erste Assetvorbereitung",
+      "ms": 696.1000000238419
+    },
+    {
+      "name": "Erste atomare Ablage",
+      "ms": 295.80000001192093
+    },
+    {
+      "name": "Unveränderte Assets wiederverwenden",
+      "ms": 43.80000001192093
+    },
+    {
+      "name": "Zweiten Modellstand veröffentlichen",
+      "ms": 101.09999999403954
+    },
+    {
+      "name": "Monolithische Recovery-Hülle schreiben",
+      "ms": 370.7999999821186
+    },
+    {
+      "name": "Monolithische Recovery lesen und validieren",
+      "ms": 524.7000000178814
+    },
+    {
+      "name": "Lesepfad alt / 1",
+      "ms": 4281.4000000059605
+    },
+    {
+      "name": "Lesepfad gemeinsam / 1",
+      "ms": 1020.3000000119209
+    },
+    {
+      "name": "Lesepfad gemeinsam / 2",
+      "ms": 899.6999999880791
+    },
+    {
+      "name": "Lesepfad alt / 2",
+      "ms": 4061.0999999940395
+    },
+    {
+      "name": "Lesepfad alt / 3",
+      "ms": 3955.5
+    },
+    {
+      "name": "Lesepfad gemeinsam / 3",
+      "ms": 894
+    },
+    {
+      "name": "Recovery nach erneutem Datenbanköffnen",
+      "ms": 862.6999999880791
+    },
+    {
+      "name": "Vorgänger prüfen",
+      "ms": 865.9000000059605
+    },
+    {
+      "name": "Stand nach Fehlern unverändert",
+      "ms": 894.5999999940395
+    }
+  ],
+  "checks": [
+    "first write stores each different asset once",
+    "geometry edit does not rehash payloads",
+    "second revision writes zero image bytes",
+    "monolithic control roundtrip",
+    "read comparison 0/true: exact model and payloads",
+    "read comparison 0/false: exact model and payloads",
+    "read comparison 1/false: exact model and payloads",
+    "read comparison 1/true: exact model and payloads",
+    "read comparison 2/true: exact model and payloads",
+    "read comparison 2/false: exact model and payloads",
+    "current full model roundtrip after reopen",
+    "previous full model roundtrip",
+    "stale writer rejected",
+    "transaction abort after queued writes",
+    "aborted new asset not persisted",
+    "conflict and abort preserve published head",
+    "corrupt asset rejects recovery before model return",
+    "missing asset rejects recovery before model return"
+  ],
+  "projectBytes": 54268053,
+  "images": 6,
+  "first": {
+    "revision": "508c28df-2c04-4104-8fb8-f974d36d0621",
+    "payloadWrites": 6,
+    "payloadBytes": 52642006,
+    "manifestBytes": 1626553
+  },
+  "second": {
+    "revision": "ff5508a7-447d-4be6-baf5-978ed7431bba",
+    "payloadWrites": 0,
+    "payloadBytes": 0,
+    "manifestBytes": 3253056
+  },
+  "controlBytes": 109177178,
+  "readComparison": [
+    {
+      "round": 0,
+      "legacy": true,
+      "totalMs": 4075.300000011921,
+      "times": {
+        "indexedDB": 88.39999997615814,
+        "schema": 100.50000002980232,
+        "decode": 3508.899999976158,
+        "header": 0.09999999403953552,
+        "hashInput": 161.7999999821186,
+        "hash": 41.30000001192093,
+        "model": 173.80000001192093
+      }
+    },
+    {
+      "round": 0,
+      "legacy": false,
+      "totalMs": 817,
+      "times": {
+        "indexedDB": 113.80000001192093,
+        "schema": 103.09999996423721,
+        "decode": 176.59999999403954,
+        "header": 0,
+        "hashInput": 148.40000000596046,
+        "hash": 48.30000004172325,
+        "model": 174.5
+      }
+    },
+    {
+      "round": 1,
+      "legacy": false,
+      "totalMs": 706.6999999880791,
+      "times": {
+        "indexedDB": 93.5,
+        "schema": 100,
+        "decode": 156.40000000596046,
+        "header": 0,
+        "hashInput": 154.90000000596046,
+        "hash": 41.39999997615814,
+        "model": 160.19999998807907
+      }
+    },
+    {
+      "round": 1,
+      "legacy": true,
+      "totalMs": 3864.800000011921,
+      "times": {
+        "indexedDB": 120.80000001192093,
+        "schema": 108.09999999403954,
+        "decode": 3283.800000011921,
+        "header": 0,
+        "hashInput": 151.79999995231628,
+        "hash": 41.10000005364418,
+        "model": 158.7000000178814
+      }
+    },
+    {
+      "round": 2,
+      "legacy": true,
+      "totalMs": 3755.300000011921,
+      "times": {
+        "indexedDB": 94.5,
+        "schema": 87.40000003576279,
+        "decode": 3186.2999999821186,
+        "header": 0.09999999403953552,
+        "hashInput": 144.40000000596046,
+        "hash": 40.99999997019768,
+        "model": 167.80000001192093
+      }
+    },
+    {
+      "round": 2,
+      "legacy": false,
+      "totalMs": 702.7000000178814,
+      "times": {
+        "indexedDB": 91.09999999403954,
+        "schema": 96.2000000178814,
+        "decode": 156.19999995827675,
+        "header": 0,
+        "hashInput": 145,
+        "hash": 46.400000005960464,
+        "model": 128.60000002384186
+      }
+    }
+  ],
+  "status": "passed"
+}
