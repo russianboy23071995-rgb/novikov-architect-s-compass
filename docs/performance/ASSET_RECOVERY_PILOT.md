@@ -1055,3 +1055,25 @@ Dekodierung. Einzelvergleich, keine Gesamtgeschwindigkeits-/p95-Garantie. Browse
 10014 Elemente, Export (47) byteidentisch zu (27), keine Konsolenfehler.
 Nächster begrenzter Auftrag: verbleibende BimPlan-Erstableitung gezielt aufteilen;
 vorhandene Szenen-/Fangvorbereitung getrennt messen, bevor weitere Optimierung folgt.
+
+
+## Grundrissvorbereitung (12.10.2026)
+PR289 zunächst durch CI gestoppt: nach lokalem Testlauf wurden Fehlermeldungs-Umlaute
+beim erneuten Lesen/Schreiben ohne explizites UTF-8 beschädigt. In cadcf6a korrigiert;
+914 Tests und regulärer Build erneut lokal bestanden, GitHub-CI erfolgreich, dann
+gemergt. Neue Dateibearbeitung verwendet explizites UTF-8.
+
+Bestehende load-profile-Diagnose um getLocalSnapSources, Quellabfragen,
+derivePlanScene und planSceneRuns erweitert. Keine neue Produktlogik. Typprüfung,
+gezieltes ESLint und Diagnosebuild erfolgreich. [Rohdaten](plan-preparation-phases.json):
+gleiche 101,96-MiB-Fixture, BimPlan-Aufrufe zusammen 202,2 ms; darin Fangquellen
+193 ms (zwei Aufrufe einschließlich Cachezugriff), Szenenableitung 3,7 ms,
+Zeichenreihenfolge 0,9 ms, Quellabfragen unter Messauflösung. Beim Zoom vier
+BimPlan-Aufrufe zusammen 0,2 ms, keine erneuten Quell-/Szenenvorbereitungen.
+Verschachtelte Werte nicht addieren, Komponentenlaufzeit ist keine komplette
+React-/DOM-/GPU-Zeit. Ein Durchlauf, keine p95- oder Kapazitätsfreigabe.
+10014 Elemente, Export (48) byteidentisch zur Eingabe (27), keine Konsolenfehler.
+
+Nächster Einzelauftrag: innerhalb createLocalSnapSources projectSnapPrimitives und
+createPrimitiveSourceIndex getrennt messen. Keine pauschale Cachevergrößerung oder
+vorzeitige Indexoptimierung; erst die Ursache der 193 ms zuordnen.

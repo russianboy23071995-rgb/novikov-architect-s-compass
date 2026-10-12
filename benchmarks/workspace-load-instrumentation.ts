@@ -70,6 +70,27 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
           map: null,
         };
       }
+      if (productionCalls) {
+        const names = path.endsWith("/src/rendering/viewport/plan-scene.ts")
+          ? ["derivePlanScene", "planSceneRuns"]
+          : path.endsWith("/src/application/snapping/local-sources.ts")
+            ? ["getLocalSnapSources"]
+            : path.endsWith("/src/application/tools/snapping.ts")
+              ? ["createVisibleToolSourceQuery", "createToolSourceQuery"]
+              : [];
+        if (names.length) {
+          let code =
+            'import { profileReducer } from "/benchmarks/workspace-load-trace.ts";\n' + source;
+          for (const name of names) {
+            const marker = `export function ${name}(`;
+            if (code.split(marker).length !== 2)
+              throw new Error(`Plan profiler no longer matches ${name}`);
+            code = code.replace(marker, `function measured${name}(`);
+            code += `\nexport function ${name}(...args: Parameters<typeof measured${name}>) { return profileReducer("plan:${name}", () => measured${name}(...args)); }`;
+          }
+          return { code, map: null };
+        }
+      }
       const name = path.endsWith("/src/components/cad/PlanSceneRun.tsx")
         ? "PlanSceneContent"
         : path.endsWith("/src/components/cad/ProjectNavigator.tsx")
