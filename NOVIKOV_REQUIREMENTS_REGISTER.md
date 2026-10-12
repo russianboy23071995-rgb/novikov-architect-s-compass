@@ -10687,3 +10687,7 @@ Gemeinsamer exakter Bytezähler nach vollständiger Validierung und Ordnerergän
 
 ### R26-01/02 · Gemeinsame Eingangsgrenze 12.10.2026
 readProjectFile verwendet die UTF-8-Prüfung des Deserializers einmalig. Direkte Aufrufe bleiben vor Parsing geschützt; typisierter Größenfehler bewahrt die bisherige Meldung. 912 Tests, Typprüfung, Lint/Builds bestanden. Browserdatei byteidentisch; Vorbereitungs-Task im Einzelvergleich 1187 → 790 ms, keine allgemeine Kapazitätszusage. Nachweis: single-input-size.json und ASSET_RECOVERY_PILOT.md. Nächster Einzelauftrag im Masterplan: konsolidierte Produktionsabnahme ohne Diagnose-Transforms.
+
+
+### R26-01/02, K02/03, RC07 · Konsolidierte Abnahme 12.10.2026
+Produktions-Workspace ff9bbba ohne Diagnose-Transforms: 101,96-MiB-Datei, Laden/Abbruch/Bestätigung, Lade-Undo/Redo, Bearbeitung/Undo/Redo, Snapshot/Wiederaufnahme und Abbildöffnung bestanden. Erwartete Downloadstände byteidentisch, keine Konsolenfehler. Übernahme weiterhin 2185/2178-ms-Tasks; keine Freigabe flüssiger Großprojektbedienung. Rohdaten consolidated-production-edit.json und consolidated-production-recovery.json; Methodik in ASSET_RECOVERY_PILOT.md. Nächster Einzelauftrag im Masterplan: verbliebene Übernahmepause zuordnen, bevor weiter optimiert wird.

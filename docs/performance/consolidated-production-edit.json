@@ -1,0 +1,245 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "events": [
+    {
+      "at": 5079.5999999940395,
+      "label": "Open project"
+    },
+    {
+      "at": 17075.09999999404,
+      "label": "Abbrechen"
+    },
+    {
+      "at": 17376.19999998808,
+      "label": "Open project"
+    },
+    {
+      "at": 25819.399999976158,
+      "label": "Projekt laden"
+    },
+    {
+      "at": 29522.69999998808,
+      "label": "Undo"
+    },
+    {
+      "at": 30370.19999998808,
+      "label": "Redo"
+    },
+    {
+      "at": 32537.79999998212,
+      "label": "Save project"
+    },
+    {
+      "at": 48070.29999998212,
+      "label": "Save project"
+    },
+    {
+      "at": 49348.79999998212,
+      "label": "Undo"
+    },
+    {
+      "at": 50248.09999999404,
+      "label": "Save project"
+    },
+    {
+      "at": 52316.59999999404,
+      "label": "Redo"
+    },
+    {
+      "at": 53269.69999998808,
+      "label": "Save project"
+    },
+    {
+      "at": 62718.09999999404,
+      "label": "Stände auswählen"
+    },
+    {
+      "at": 68509.19999998808,
+      "label": "Snapshot erstellen"
+    },
+    {
+      "at": 68892.59999999404,
+      "label": "Diagnose herunterladen"
+    }
+  ],
+  "records": [
+    {
+      "start": 87.7999999821186,
+      "duration": 67
+    },
+    {
+      "start": 156.89999997615814,
+      "duration": 159
+    },
+    {
+      "start": 5455.699999988079,
+      "duration": 786
+    },
+    {
+      "start": 17748.09999999404,
+      "duration": 757
+    },
+    {
+      "start": 25819.19999998808,
+      "duration": 2185
+    },
+    {
+      "start": 28004.399999976158,
+      "duration": 139
+    },
+    {
+      "start": 28466.69999998808,
+      "duration": 115
+    },
+    {
+      "start": 28599.29999998212,
+      "duration": 230
+    },
+    {
+      "start": 28843.899999976158,
+      "duration": 122
+    },
+    {
+      "start": 28968.69999998808,
+      "duration": 115
+    },
+    {
+      "start": 29135.899999976158,
+      "duration": 114
+    },
+    {
+      "start": 29254.29999998212,
+      "duration": 115
+    },
+    {
+      "start": 29395.19999998808,
+      "duration": 117
+    },
+    {
+      "start": 29522.29999998212,
+      "duration": 107
+    },
+    {
+      "start": 29635.69999998808,
+      "duration": 113
+    },
+    {
+      "start": 29752.899999976158,
+      "duration": 116
+    },
+    {
+      "start": 29874.899999976158,
+      "duration": 113
+    },
+    {
+      "start": 29996.79999998212,
+      "duration": 114
+    },
+    {
+      "start": 30126.79999998212,
+      "duration": 121
+    },
+    {
+      "start": 30308.69999998808,
+      "duration": 52
+    },
+    {
+      "start": 30369.79999998212,
+      "duration": 1059
+    },
+    {
+      "start": 31429.69999998808,
+      "duration": 136
+    },
+    {
+      "start": 31859,
+      "duration": 110
+    },
+    {
+      "start": 31969.59999999404,
+      "duration": 120
+    },
+    {
+      "start": 32090.69999998808,
+      "duration": 129
+    },
+    {
+      "start": 32221.19999998808,
+      "duration": 83
+    },
+    {
+      "start": 32304.899999976158,
+      "duration": 114
+    },
+    {
+      "start": 32424.899999976158,
+      "duration": 112
+    },
+    {
+      "start": 32537.09999999404,
+      "duration": 422
+    },
+    {
+      "start": 33000.89999997616,
+      "duration": 125
+    },
+    {
+      "start": 33160.59999999404,
+      "duration": 107
+    },
+    {
+      "start": 33284.19999998808,
+      "duration": 105
+    },
+    {
+      "start": 33403.09999999404,
+      "duration": 109
+    },
+    {
+      "start": 33517.79999998212,
+      "duration": 121
+    },
+    {
+      "start": 33644,
+      "duration": 119
+    },
+    {
+      "start": 33769,
+      "duration": 121
+    },
+    {
+      "start": 46503.59999999404,
+      "duration": 113
+    },
+    {
+      "start": 46617.19999998808,
+      "duration": 53
+    },
+    {
+      "start": 46976.19999998808,
+      "duration": 923
+    },
+    {
+      "start": 48070,
+      "duration": 390
+    },
+    {
+      "start": 49348,
+      "duration": 612
+    },
+    {
+      "start": 50247.29999998212,
+      "duration": 403
+    },
+    {
+      "start": 52316.19999998808,
+      "duration": 574
+    },
+    {
+      "start": 53269.19999998808,
+      "duration": 394
+    }
+  ],
+  "exportPhases": [],
+  "build": "production-workspace"
+}

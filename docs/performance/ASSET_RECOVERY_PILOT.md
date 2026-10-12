@@ -910,3 +910,41 @@ Hauptthreadpause bleibt relevant. Nächster Einzelauftrag: konsolidierte Abnahme
 aktuellen Produktions-Workspaces ohne Messinstrumentierung (Laden, Bearbeiten,
 Undo/Redo, Speichern und Wiederaufnahme) mit derselben großen Fixture; Restpausen
 festhalten, bevor weitere Optimierungen ausgewählt werden.
+
+
+## Konsolidierte Produktionsabnahme nach PR284 (12.10.2026)
+
+Code ff9bbba, statischer React-Produktionsclient mit echten Browseradaptern auf
+Port 8085. Build ohne export-profile und ohne React Profiler/Diagnose-Transforms;
+der vorhandene passive Long-Task-/Klickbeobachter bleibt aktiv (exportPhases leer).
+Keine Produktänderung. Produktions-Workspace neu gebaut; 912 Tests und regulärer
+Build sind für denselben unveränderten Produktcode aus PR284 grün, nicht erneut
+als neue Testausführung gezählt. Kein Cloudflare-/SSR-Auslieferungsnachweis.
+
+Fixture: novikov-project (27).json, 101,96 MiB, 1 Wand/1 Fenster/10000 Linien/
+12 PNG-Referenzen, Abbild Kamera-Prüfung. Über die tatsächliche Oberfläche:
+- Vorbereitung und Abbruch: Ausgangsmodell 2 Elemente, Undo weiterhin deaktiviert.
+- Erneut laden/bestätigen: 10014 Elemente. Lade-Undo: 2; Redo: 10014.
+- Download nach Lade-Redo (39) byteidentisch zur Fixture (27).
+- Wandhöhe 2,8 auf 3,1 m: Download (40) unterscheidet sich ausschließlich darin.
+- Bearbeitungs-Undo (41) byteidentisch zu (27); Redo (42) byteidentisch zu (40).
+- Snapshot erstellt, Erfolgsmeldung abgewartet; Seite neu geladen; Stand geprüft,
+  Wiederaufnahme vorbereitet und explizit bestätigt. Download (43) byteidentisch
+  zu (42), SHA-256 38eb1a047a584c757390c1ff4d69d0f76c0ac4a4d1b03184a3f605e55feb2843.
+- Gespeichertes Abbild per Doppelklick geöffnet, Zoom 100 erhalten. Keine Konsolenfehler.
+
+[Bearbeitung/Laden](consolidated-production-edit.json),
+[Wiederaufnahme](consolidated-production-recovery.json): Vorbereitungs-Tasks
+786/757 ms, erste Übernahme 2185 ms, Lade-Redo 1059 ms, Wandänderung 923 ms,
+Bearbeitungs-Undo/Redo 612/574 ms, Exporte 390–422 ms, Wiederaufnahme-Übernahme
+2178 ms, Abbildöffnen 827 ms. Nach Übernahme zusätzlich mehrere Tasks >100 ms.
+Ein Ablauf, keine p95-/RAM-/GPU-Grenzen oder garantierten Nutzerlatenzen. Die
+Browsersteuerung/Beobachtung kann zusätzliche Arbeit verursachen; Long Tasks
+belegen Pausen, weisen deren CPU-Ursache aber nicht nach. Keine Summierung zu
+End-to-End-Zeiten. Dateiinhalt und Wiederherstellung bestanden; flüssige Bedienung
+bei dieser Fixture ist noch nicht nachgewiesen.
+
+Nächster begrenzter Auftrag: Übernahme nach Bestätigung bei gleicher Fixture
+gezielt zuordnen (gemeinsame Application-/History-Prüfung, Bildableitung, Rendern).
+Vorhandene Messbausteine nutzen; Messanteile sauber trennen und gegen diesen
+Produktionslauf abgleichen. Erst anschließend eine einzelne Optimierung auswählen.
