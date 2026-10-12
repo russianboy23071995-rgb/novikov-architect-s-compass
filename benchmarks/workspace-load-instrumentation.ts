@@ -9,10 +9,31 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
       if (path.endsWith("/src/interop/images/import.ts")) {
         const marker = "function checkImageUrl(";
         if (source.split(marker).length !== 2) throw new Error("Image profiler no longer matches");
+        const replacements: [string, string][] = [
+          ["atob(asset.data)", 'profileReducer("image-atob", () => atob(asset.data))'],
+          ["binaryBytes(binary)", 'profileReducer("image-byte-copy", () => binaryBytes(binary))'],
+          ["imageHeader(bytes)", 'profileReducer("image-header", () => imageHeader(bytes))'],
+          [
+            "handleUrls.has(asset)",
+            'profileReducer("image-handle-cache", () => handleUrls.has(asset))',
+          ],
+        ];
+        let measured = source;
+        for (const [from, to] of replacements) {
+          // Header also occurs in importImage: instrument each legitimate call.
+          if (!measured.includes(from)) throw new Error(`Image phase no longer matches: ${from}`);
+          measured = measured.replaceAll(from, to);
+        }
+        measured = measured.replace(
+          "export function checkedImageUrl(",
+          "function measuredCheckedImageUrl(",
+        );
+        measured +=
+          '\nexport function checkedImageUrl(...args: Parameters<typeof measuredCheckedImageUrl>) { return profileReducer("image-url-total", () => measuredCheckedImageUrl(...args)); }';
         return {
           code:
             'import { profileReducer } from "/benchmarks/workspace-load-trace.ts";\n' +
-            source.replace(marker, "function measuredCheckImageUrl(") +
+            measured.replace(marker, "function measuredCheckImageUrl(") +
             '\nfunction checkImageUrl(...args: Parameters<typeof measuredCheckImageUrl>) { return profileReducer("image-url-validation", () => measuredCheckImageUrl(...args)); }',
           map: null,
         };
