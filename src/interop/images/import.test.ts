@@ -1,3 +1,4 @@
+import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
 import { binaryBytes } from "./binary-bytes.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -231,4 +232,41 @@ test("optimized URL path matches previous PNG/JPEG/header failure contract", () 
     };
     assert.equal(checkedImageUrl(a), previous(a));
   }
+});
+
+test("immutable asset URLs survive more than eight live references without redecoding", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  const assets = Array.from({ length: 12 }, (_, i) => createImageAssetHandle(cacheAsset(500 + i)));
+  for (let pass = 0; pass < 3; pass++)
+    for (const asset of assets)
+      assert.equal(checkedImageUrl(asset), `data:image/png;base64,${asset.data}`);
+  assert.equal(decode.mock.callCount(), 12);
+});
+
+test("storage handles still reject incorrect image headers and dimensions", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  const bad = [
+    createImageAssetHandle({ ...cacheAsset(520), pixelWidth: 201 }),
+    createImageAssetHandle({ ...cacheAsset(521), mimeType: "image/jpeg" }),
+    createImageAssetHandle({ ...cacheAsset(522), data: "AAAA" }),
+  ];
+  for (let pass = 0; pass < 2; pass++)
+    for (const asset of bad) assert.equal(checkedImageUrl(asset), undefined);
+  assert.equal(decode.mock.callCount(), 3);
+  assert.ok(checkedImageUrl(createImageAssetHandle(cacheAsset(520))));
+});
+
+test("a frozen lookalike is not granted immutable-handle cache admission", (t) => {
+  const decode = t.mock.method(globalThis, "atob");
+  let width = 200;
+  const asset = Object.freeze({
+    ...cacheAsset(530),
+    get pixelWidth() {
+      return width;
+    },
+  });
+  assert.ok(checkedImageUrl(asset));
+  width = 201;
+  assert.equal(checkedImageUrl(asset), undefined);
+  assert.equal(decode.mock.callCount(), 2);
 });

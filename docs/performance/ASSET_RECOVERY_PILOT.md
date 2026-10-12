@@ -696,3 +696,52 @@ Build bestanden. Keine neue Persistenzimplementierung.
 Praktische Abnahme: Projekt öffnen, Gebäudestruktur zeigt Projekt/Geschoss;
 Wand im Canvas wählen und Eigenschaften ändern; Undo/Redo; zum Abbildtab wechseln.
 Nächster Einzelauftrag: wiederholte Bild-URL-Prüfung für unveränderliche Assets reduzieren.
+
+
+## Bild-URLs für unveränderliche Handles (12.10.2026)
+
+WeakMap nur für vom Domain-Modul selbst erzeugte und registrierte unveränderliche
+Asset-Handles. Ein frozen-Flag oder eine ID gewährt keinen Zugang. Der erste Zugriff
+prüft weiterhin Dekodierung und Header. Der Cache hält Assets nicht stark am Leben;
+zusätzliche URL-Darstellung lebt so lange wie das Asset (auch wenn Undo dieses hält).
+Für gewöhnliche veränderbare Eingaben bleiben acht Einträge/48 MiB Inhaltscache erhalten.
+Keine Aussage über tatsächlichen Heap-Peak; URLs für alle lebenden Handles sind nicht
+zusätzlich durch das LRU-Budget begrenzt. Keine Änderung am Dateiformat oder Modell.
+
+Identische capacity-100.json, Port 8082, Entwicklungsbuild: vor Änderung 24 vollständige
+Bildprüfungen/738 ms, danach zwölf/407 ms. Längste Task 3727 → 3392 ms.
+Einzelvergleich, keine statistische Garantie. [Vorher](workspace-storey-navigator.json),
+[nachher](workspace-image-handle-cache.json). Dateidownload vollständig identisch zur Quelle,
+einschließlich aller zwölf Payloads. 908 Tests bestanden: zusätzlich zwölf lebende Handles
+über drei Durchläufe, ungültige Header/MIME/Maße und eingefrorenes Objekt mit veränderlichem
+Getter. Bestehende Mutations-/LRU-/Budgettests bleiben erhalten. Typecheck, gezieltes Lint
+und Build bestanden. Nächster Auftrag: verbleibende Grundriss-Render-/Commitkosten zuordnen.
+
+
+## Grundriss-Teilbäume und Framegrenzen (12.10.2026)
+
+Nur Diagnose auf dem Stand des offenen PR277. Zwei echte Dateiöffnungen derselben
+100-MiB-Fixture auf 8082, ohne vollständige DOM-Abfrage während des Ladens.
+[Rohdaten 1](plan-render-phases-1.json), [Rohdaten 2](plan-render-phases-2.json).
+
+| React-Teilbaum | Lauf 1 | Lauf 2 |
+|---|---:|---:|
+| Bildreferenzen Mount | 591 ms | 733 ms |
+| Linien Mount | 399 ms | 528 ms |
+| Linien unmittelbarer Folge-Render | 187 ms | 245 ms |
+| Grundriss Mount insgesamt | 1160 ms | 1494 ms |
+
+Profilerzeiten sind verschachtelt, nicht addieren. onRender-Callback-Zeitpunkt
+und zwei requestAnimationFrame-Grenzen ergänzen den Verlauf. Beispiel Lauf 1:
+Commitbeginn 32567,7 ms, Workspace-Callback 32840,6 ms, erster rAF 33352,9 ms,
+zweiter rAF 33490,4 ms. Darin liegen weitere React-Updates und Browserarbeit.
+Diese Differenzen sind weder reine Commitkosten noch eine isolierte Paintmessung.
+Die Instrumentierung selbst und der Entwicklungsbuild beeinflussen die Werte.
+
+Codebefund: CadViewport startet mit 800×400-Ersatzgröße und fitPlan; ein Effect
+misst anschließend die reale Fläche und setzt die initiale Kamera. Das passt zur
+beobachteten Folgearbeit, ist aber noch kein kausaler Nachweis. Nächster Pilot:
+Größen-/Kamerawerte bestätigen und teuren ersten Szenenaufbau auf die gemessene
+Kamera abstimmen. Resize, gespeicherte Abbild-Framings, Fit/Zoom und Auswahl prüfen.
+Keine Produktionsänderung dieses Schritts. Benchmark-Typecheck, gezieltes Lint und
+Produktionsbuild bestanden; Modelltests von PR277 werden nicht als neu ausgeführt ausgegeben.
