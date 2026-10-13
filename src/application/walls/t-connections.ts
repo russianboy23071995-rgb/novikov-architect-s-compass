@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { TJunction } from "../../domain/elements/wall/t-relations.ts";
@@ -19,7 +20,7 @@ export function previewTConnection(
   if (base !== current || request.projectId !== current.id)
     throw new Error("Das Projekt wurde geändert. Anschluss erneut beginnen.");
   const project = validateProject(current);
-  const relations = project.storey.wallTJunctions;
+  const relations = storeyOf(project).wallTJunctions;
   const match = relations.findIndex(
     (r) =>
       r.hostWallId === request.relation.hostWallId &&
@@ -29,14 +30,13 @@ export function previewTConnection(
   if (request.kind === "disconnect" && match < 0)
     throw new Error("Die T-Verbindung existiert nicht mehr.");
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
+    ...replaceStorey(project, {
+      ...storeyOf(project),
       wallTJunctions:
         request.kind === "connect"
           ? [...relations, request.relation]
           : relations.filter((_, i) => i !== match),
-    },
+    }),
   });
 }
 

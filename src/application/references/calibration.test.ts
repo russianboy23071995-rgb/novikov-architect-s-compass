@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { createCalibrationContext } from "./calibration.ts";
 import {
   previewSelectionCommand,
@@ -49,21 +50,21 @@ for (const angle of [0, 0.73])
   test(`calibration preserves anchor, rotation, asset and one undo step (${angle})`, () => {
     const base = fixture(angle),
       h = createHistory(base),
-      r = base.storey.references[0]!,
+      r = storeyOf(base).references[0]!,
       asset = base.assets[0]!;
     const first = imageReferenceCorners(r, asset)[0]!,
       second = imageReferenceCorners(r, asset)[1]!;
     const request = { projectId: base.id, referenceId: "r", first, second, metres: 5 };
     const preview = previewCalibration(base, base, targets, request);
-    const corners = imageReferenceCorners(preview.storey.references[0]!, asset);
+    const corners = imageReferenceCorners(storeyOf(preview).references[0]!, asset);
     assert.ok(
       Math.abs(Math.hypot(corners[1]!.x - corners[0]!.x, corners[1]!.y - corners[0]!.y) - 5) <
         1e-12,
     );
     assert.deepEqual(corners[0], first);
     assert.deepEqual(preview.assets, base.assets);
-    assert.equal(preview.storey.references[0]!.rotation, angle);
-    assert.equal(base.storey.references[0]!.metresPerPixel, 0.01);
+    assert.equal(storeyOf(preview).references[0]!.rotation, angle);
+    assert.equal(storeyOf(base).references[0]!.metresPerPixel, 0.01);
     const next = commitCalibration(h, h.present, targets, request);
     assert.equal(next.past.length, 1);
     assert.deepEqual(undoProject(next).present, h.present);
@@ -72,13 +73,15 @@ for (const angle of [0, 0.73])
   });
 test("interior anchor stays fixed while origin moves", () => {
   const base = fixture();
-  const r = previewCalibration(base, base, targets, {
-    projectId: "p",
-    referenceId: "r",
-    first: { x: 4, y: 3 },
-    second: { x: 5, y: 3 },
-    metres: 2,
-  }).storey.references[0]!;
+  const r = storeyOf(
+    previewCalibration(base, base, targets, {
+      projectId: "p",
+      referenceId: "r",
+      first: { x: 4, y: 3 },
+      second: { x: 5, y: 3 },
+      metres: 2,
+    }),
+  ).references[0]!;
   assert.deepEqual(r.origin, { x: 2, y: 5 });
   assert.equal(r.metresPerPixel, 0.02);
   assert.deepEqual(
@@ -151,7 +154,7 @@ test("text calibration uses measured context and rejects stale measurement, targ
     ),
   );
   assert.deepEqual(applySelectionCommand(p, targets, v, preview, c), preview.result);
-  assert.equal(p.storey.references[0]!.metresPerPixel, 0.01);
+  assert.equal(storeyOf(p).references[0]!.metresPerPixel, 0.01);
   for (const other of [undefined, createCalibrationContext(p, v, "r", c.first, c.second)]) {
     assert.throws(() => applySelectionCommand(p, targets, v, preview, other));
   }

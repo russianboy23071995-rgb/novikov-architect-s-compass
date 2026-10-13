@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -32,12 +33,12 @@ test("hatch preview is isolated; create/update use atomic model history with no-
   const p = history.present;
   const request = { projectId: p.id, kind: "create" as const, hatch: hatch() };
   const preview = previewHatch(p, p, request);
-  assert.equal(p.storey.hatches.length, 0);
+  assert.equal(storeyOf(p).hatches.length, 0);
   request.hatch.points[0]!.x = -20;
-  assert.equal(preview.storey.hatches[0]!.points[0]!.x, 0);
+  assert.equal(storeyOf(preview).hatches[0]!.points[0]!.x, 0);
   const made = commitHatch(history, p, { ...request, hatch: hatch() });
   assert.equal(made.past.length, 1);
-  assert.equal(made.present.storey.hatches[0]!.layerId, p.defaultLayerIds.line);
+  assert.equal(storeyOf(made.present).hatches[0]!.layerId, p.defaultLayerIds.line);
   assert.equal(
     commitHatch(made, made.present, {
       projectId: p.id,
@@ -56,7 +57,7 @@ test("hatch preview is isolated; create/update use atomic model history with no-
   assert.equal(changed.past.length, 2);
   assert.deepEqual(undoProject(changed).present, made.present);
   assert.deepEqual(redoProject(undoProject(changed)).present, changed.present);
-  assert.equal(undoProject(made).present.storey.hatches.length, 0);
+  assert.equal(storeyOf(undoProject(made).present).hatches.length, 0);
 });
 
 test("invalid geometry, fill, IDs and layers cannot commit a hatch", () => {
@@ -83,13 +84,13 @@ test("invalid geometry, fill, IDs and layers cannot commit a hatch", () => {
     { ...hatch(), fill: { color: "#ffffff", opacity: 1.1 } },
     { ...hatch(), fill: { color: "#ffffff", opacity: -0.1 } },
     { ...hatch(), fill: { color: "#ffffff", opacity: NaN } },
-    { ...hatch(), id: p.storey.walls[0]!.id },
+    { ...hatch(), id: storeyOf(p).walls[0]!.id },
     { ...hatch(), id: p.layers[0]!.id },
     { ...hatch(), layerId: "missing" },
   ];
   for (const item of bad)
     assert.throws(() => previewHatch(p, p, { projectId: p.id, kind: "create", hatch: item }));
-  assert.equal(p.storey.hatches.length, 0);
+  assert.equal(storeyOf(p).hatches.length, 0);
   const q = create(p);
   assert.throws(() => previewHatch(q, q, { projectId: q.id, kind: "create", hatch: hatch() }));
   assert.throws(() =>
@@ -123,7 +124,7 @@ test("hatches share layer reassignment, occupied-layer protection and visibility
     elementIds: ["hatch-1"],
     layerId: "custom-hatch",
   });
-  assert.equal(p.storey.hatches[0]!.layerId, "custom-hatch");
+  assert.equal(storeyOf(p).hatches[0]!.layerId, "custom-hatch");
   assert.ok(layerDeletionBlock(p, "custom-hatch"));
   assert.throws(() => previewLayerManagement(p, p, { kind: "delete", id: "custom-hatch" }));
   const policy = createLayerVisibilityPolicy(p, {
@@ -141,15 +142,15 @@ test("schema 4 roundtrip preserves hatches and BIM; IFC intentionally remains bu
     p = create(base);
   const loaded = readProjectFile(serializeProject(p));
   assert.deepEqual(loaded, p);
-  assert.deepEqual(p.storey.walls, base.storey.walls);
-  assert.deepEqual(p.storey.windows, base.storey.windows);
+  assert.deepEqual(storeyOf(p).walls, storeyOf(base).walls);
+  assert.deepEqual(storeyOf(p).windows, storeyOf(base).windows);
   const date = new Date("2026-10-05T12:00:00Z");
   assert.equal(await exportIfc(p, date), await exportIfc(base, date));
 });
 
 test("strict V3 migration preserves visibility and model IDs and never repairs invalid legacy input", () => {
   const p = createExampleProject();
-  const { references, hatches, wallTJunctions, wallJoins, ...storey } = p.storey;
+  const { references, hatches, wallTJunctions, wallJoins, ...storey } = storeyOf(p);
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const v3 = {
     ...legacyRoot,
@@ -159,8 +160,8 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(legacyProjectFixture(v3));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.deepEqual(migrated.storey, {
+  assert.equal(migrated.schemaVersion, 24);
+  assert.deepEqual(storeyOf(migrated), {
     ...storey,
     references: [],
     hatches: [],
@@ -176,7 +177,9 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
     ),
   );
   assert.throws(() =>
-    loadProjectData(legacyProjectFixture({ ...v3, storey: { ...storey, hatches: [hatch()] } })),
+    loadProjectData(
+      legacyProjectFixture({ ...replaceStorey(v3, { ...storey, hatches: [hatch()] }) }),
+    ),
   );
   assert.throws(() => validateProject({ ...p, storey }));
 });
@@ -191,8 +194,8 @@ test("hatch background and contour are atomic, independently switchable and reta
   const request = { projectId: base.id, kind: "update" as const, id: "hatch-1", changes };
   const changed = commitHatch(initial, base, request);
   assert.equal(changed.past.length, 1);
-  assert.deepEqual(changed.present.storey.hatches[0]!.fill, base.storey.hatches[0]!.fill);
-  assert.deepEqual(changed.present.storey.hatches[0]!.points, base.storey.hatches[0]!.points);
+  assert.deepEqual(storeyOf(changed.present).hatches[0]!.fill, storeyOf(base).hatches[0]!.fill);
+  assert.deepEqual(storeyOf(changed.present).hatches[0]!.points, storeyOf(base).hatches[0]!.points);
   assert.deepEqual(readProjectFile(serializeProject(changed.present)), changed.present);
   assert.deepEqual(undoProject(changed).present, base);
   assert.deepEqual(redoProject(undoProject(changed)).present, changed.present);
@@ -200,8 +203,8 @@ test("hatch background and contour are atomic, independently switchable and reta
     ...request,
     changes: { contour: { ...changes.contour, visible: false } },
   });
-  assert.deepEqual(hidden.storey.hatches[0]!.background, changes.background);
-  assert.equal(hidden.storey.hatches[0]!.contour.color, "#123456");
+  assert.deepEqual(storeyOf(hidden).hatches[0]!.background, changes.background);
+  assert.equal(storeyOf(hidden).hatches[0]!.contour.color, "#123456");
   const date = new Date("2026-10-06T12:00:00Z");
   assert.equal(await exportIfc(base, date), await exportIfc(changed.present, date));
 });
@@ -224,11 +227,11 @@ test("malformed appearance cannot commit or load, including hidden paints and mi
         } as Parameters<typeof previewHatch>[2]),
       );
       const file = structuredClone(base);
-      Object.assign(file.storey.hatches[0]!, { [key]: paint });
+      Object.assign(storeyOf(file).hatches[0]!, { [key]: paint });
       assert.throws(() => loadProjectData(legacyProjectFixture(file)));
     }
     const file = structuredClone(base);
-    Reflect.deleteProperty(file.storey.hatches[0]!, key);
+    Reflect.deleteProperty(storeyOf(file).hatches[0]!, key);
     assert.throws(() => loadProjectData(legacyProjectFixture(file)));
   }
 });
@@ -240,23 +243,23 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
     old.schemaVersion = version;
     delete old.assets;
     delete old.hatchPatterns;
-    delete old.storey.references;
-    delete old.storey.wallTJunctions;
-    old.storey.hatches.forEach((h: Record<string, unknown>) => {
+    delete storeyOf(old).references;
+    delete storeyOf(old).wallTJunctions;
+    storeyOf(old).hatches.forEach((h: Record<string, unknown>) => {
       delete h["background"];
       delete h["contour"];
     });
-    if (version < 6) delete old.storey.wallJoins;
+    if (version < 6) delete storeyOf(old).wallJoins;
     if (version < 5)
-      old.storey.walls.forEach((w: Record<string, unknown>) => {
+      storeyOf(old).walls.forEach((w: Record<string, unknown>) => {
         delete w["bodyOffset"];
       });
     const before = legacyFixtureJSON(old);
     const loaded = loadProjectData(legacyProjectFixture(old));
-    assert.equal(loaded.schemaVersion, 23);
-    assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
+    assert.equal(loaded.schemaVersion, 24);
+    assert.deepEqual(storeyOf(loaded).hatches, storeyOf(current).hatches);
     assert.equal(legacyFixtureJSON(old), before);
-    old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };
+    storeyOf(old).hatches[0].contour = { visible: true, color: "#ffffff" };
     assert.throws(() => loadProjectData(legacyProjectFixture(old)));
   }
 });

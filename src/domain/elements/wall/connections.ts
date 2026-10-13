@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { tConnectionContours } from "./t-relations.ts";
 import type { Project, Wall } from "../../project/schema.ts";
@@ -21,9 +22,9 @@ export function reconcileWallJoins(
   previous?: Wall,
   excludedPartners: readonly string[] = [],
 ): Project {
-  const changed = project.storey.walls.find((w) => w.id === changedId)!;
-  const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
-  const joins = project.storey.wallJoins.filter((join) => {
+  const changed = storeyOf(project).walls.find((w) => w.id === changedId)!;
+  const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
+  const joins = storeyOf(project).wallJoins.filter((join) => {
     const a = walls.get(join.first.wallId),
       b = walls.get(join.second.wallId);
     return a && b && same(point(a, join.first.endpoint), point(b, join.second.endpoint));
@@ -32,15 +33,15 @@ export function reconcileWallJoins(
     const first = { wallId: changedId, endpoint };
     const p = point(changed, endpoint);
     if (previous && same(p, point(previous, endpoint))) continue;
-    const candidates = project.storey.walls
-      .filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
+    const candidates = storeyOf(project)
+      .walls.filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
       .flatMap((w) =>
         ([0, 1] as const)
           // A stored T endpoint belongs to its host, not to an automatic corner.
           .filter(
             (e) =>
               same(p, point(w, e)) &&
-              !project.storey.wallTJunctions.some(
+              !storeyOf(project).wallTJunctions.some(
                 (t) => t.incoming.wallId === w.id && t.incoming.endpoint === e,
               ),
           )
@@ -58,12 +59,12 @@ export function reconcileWallJoins(
     const ends = [first, second].sort((a, b) => key(a).localeCompare(key(b)));
     joins.push({ first: ends[0]!, second: ends[1]! });
   }
-  return { ...project, storey: { ...project.storey, wallJoins: joins } };
+  return { ...replaceStorey(project, { ...storeyOf(project), wallJoins: joins }) };
 }
 
 /** Authoritative disposable contours from persisted endpoint relationships. No schema recursion. */
 export function connectedWallContours(project: WallGeometry) {
-  const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
+  const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
   const counts = new Map<string, number>();
   for (const wall of walls.values())
     for (const p of [wall.start, wall.end]) {
@@ -72,7 +73,7 @@ export function connectedWallContours(project: WallGeometry) {
     }
   const contours = new Map<string, ReturnType<typeof wallBody>["corners"]>();
   const occupied = new Set<string>();
-  for (const join of project.storey.wallJoins) {
+  for (const join of storeyOf(project).wallJoins) {
     const a = walls.get(join.first.wallId),
       b = walls.get(join.second.wallId);
     if (!a || !b || a.id === b.id) throw new Error("Ungültige Wandverbindung.");
@@ -107,7 +108,7 @@ export function connectedWallContours(project: WallGeometry) {
       throw new Error("Wand zwischen Anschlüssen zu kurz.");
     const wall = walls.get(id)!;
     const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
-    for (const opening of project.storey.windows.filter((w) => w.wallId === id)) {
+    for (const opening of storeyOf(project).windows.filter((w) => w.wallId === id)) {
       const at = (d: number) => ({
         x: wall.start.x + ((wall.end.x - wall.start.x) * d) / length,
         y: wall.start.y + ((wall.end.y - wall.start.y) * d) / length,
@@ -139,14 +140,14 @@ function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wa
   const cached = solidCache.get(project);
   if (cached) return cached;
   const contours = connectedWallContours(project);
-  const result = project.storey.walls
-    .filter((w) => contours.has(w.id))
+  const result = storeyOf(project)
+    .walls.filter((w) => contours.has(w.id))
     .map((w) =>
       deriveSolid(
         w,
         contours.get(w.id)!,
-        project.storey.windows,
-        project.storey.wallTJunctions.some(
+        storeyOf(project).windows,
+        storeyOf(project).wallTJunctions.some(
           (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
         ),
       ),

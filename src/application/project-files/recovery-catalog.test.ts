@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -112,7 +113,9 @@ test("quota/abort and invalid model preserve all records; wrong project payload 
   failures.clear();
   await assert.rejects(
     saveProjectRecovery(
-      { ...a, storey: { ...a.storey, walls: [{ ...a.storey.walls[0]!, height: -1 }] } },
+      {
+        ...replaceStorey(a, { ...storeyOf(a), walls: [{ ...storeyOf(a).walls[0]!, height: -1 }] }),
+      },
       catalog,
       date,
     ),

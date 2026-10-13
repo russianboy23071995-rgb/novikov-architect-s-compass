@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -16,8 +17,8 @@ export function windowSelectionSurfaces(
   project: Project,
   allows: (id: string) => boolean,
 ): WindowSelectionSurface[] {
-  const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
-  return project.storey.windows.flatMap((opening) => {
+  const walls = new Map(storeyOf(project).walls.map((wall) => [wall.id, wall]));
+  return storeyOf(project).windows.flatMap((opening) => {
     const wall = walls.get(opening.wallId);
     if (!wall || !allows(wall.id) || !allows(opening.id)) return [];
     const body = wallBody(wall),

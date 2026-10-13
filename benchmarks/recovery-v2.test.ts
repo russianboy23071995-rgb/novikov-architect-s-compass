@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -53,7 +54,7 @@ function memory(legacy: string | null) {
 test("V1 migrates current and previous through real checked asset codec; retains legacy bytes", async () => {
   const old = project(),
     current = project();
-  current.storey.lines![0]!.color = "#112233";
+  storeyOf(current).lines![0]!.color = "#112233";
   const raw = JSON.stringify({ version: 1, current: snapshot(current), previous: snapshot(old) });
   const m = memory(raw),
     c = codec();

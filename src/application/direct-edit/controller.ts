@@ -1,3 +1,5 @@
+import { changeBuilding, type BuildingChange } from "../storeys/actions.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { setGroundDatum, type SetGroundDatum } from "../storeys/actions.ts";
 import { setStoreyHeight, type SetStoreyHeight } from "../storeys/actions.ts";
 import { renameStorey, type RenameStorey } from "../storeys/actions.ts";
@@ -53,6 +55,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "building"; base: Project; change: BuildingChange }
   | { type: "set-ground-datum"; base: Project; request: SetGroundDatum }
   | { type: "set-storey-height"; base: Project; request: SetStoreyHeight }
   | { type: "rename-storey"; base: Project; request: RenameStorey }
@@ -103,7 +106,7 @@ export function previewEdit(
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
   const wall =
     session.target.kind === "wall"
-      ? project.storey.walls.find((w) => w.id === session.target.id)
+      ? storeyOf(project).walls.find((w) => w.id === session.target.id)
       : undefined;
   if (
     wall &&
@@ -111,7 +114,7 @@ export function previewEdit(
     session.index === 1 &&
     session.anchor.x === wall.end.x &&
     session.anchor.y === wall.end.y &&
-    project.storey.wallTJunctions.some((t) => t.hostWallId === wall.id)
+    storeyOf(project).wallTJunctions.some((t) => t.hostWallId === wall.id)
   ) {
     let prepared = endpointPreviews.get(session);
     if (!prepared) {
@@ -142,6 +145,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "building":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            changeBuilding(event.base, state.history.present, event.change),
+          ),
+          session: null,
+          error: "",
+        };
       case "set-ground-datum":
         return {
           ...state,

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -20,15 +21,15 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
 /** Shared renderer filters also accept disposable edit-preview geometry.
  * Eligibility always stays bound to the committed project, never the preview. */
 export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string) => boolean) {
-  const walls = project.storey.walls.filter((w) => allows(w.id));
+  const walls = storeyOf(project).walls.filter((w) => allows(w.id));
   const wallIds = new Set(walls.map((w) => w.id));
   return {
     walls,
-    references: project.storey.references.filter((r) => allows(r.id)),
-    hatches: project.storey.hatches.filter((h) => allows(h.id)),
-    windows: project.storey.windows.filter((w) => allows(w.id)),
-    lines: (project.storey.lines ?? []).filter((l) => allows(l.id)),
-    openings: project.storey.windows.filter((w) => wallIds.has(w.wallId)),
+    references: storeyOf(project).references.filter((r) => allows(r.id)),
+    hatches: storeyOf(project).hatches.filter((h) => allows(h.id)),
+    windows: storeyOf(project).windows.filter((w) => allows(w.id)),
+    lines: (storeyOf(project).lines ?? []).filter((l) => allows(l.id)),
+    openings: storeyOf(project).windows.filter((w) => wallIds.has(w.wallId)),
   };
 }
 export function visibleSurfaces(
@@ -67,13 +68,17 @@ export function drawingWallVisibility(
   draft: Project,
   policy?: LayerVisibilityPolicy,
 ) {
-  const existing = new Set(base.storey.walls.map((w) => w.id));
+  const existing = new Set(storeyOf(base).walls.map((w) => w.id));
   const newWalls = new Map(
-    draft.storey.walls.filter((w) => !existing.has(w.id)).map((w) => [w.id, w]),
+    storeyOf(draft)
+      .walls.filter((w) => !existing.has(w.id))
+      .map((w) => [w.id, w]),
   );
-  const existingWindows = new Set(base.storey.windows.map((w) => w.id));
+  const existingWindows = new Set(storeyOf(base).windows.map((w) => w.id));
   const newWindows = new Map(
-    draft.storey.windows.filter((w) => !existingWindows.has(w.id)).map((w) => [w.id, w]),
+    storeyOf(draft)
+      .windows.filter((w) => !existingWindows.has(w.id))
+      .map((w) => [w.id, w]),
   );
   return (id: string) => {
     const opening = newWindows.get(id);
@@ -84,8 +89,8 @@ export function drawingWallVisibility(
           (policy.isCurrent(base, policy.context) &&
             !policy.context.hiddenLayerIds.includes(opening.layerId)))
       );
-    const reference = draft.storey.references.find(
-      (r) => r.id === id && !base.storey.references.some((b) => b.id === id),
+    const reference = storeyOf(draft).references.find(
+      (r) => r.id === id && !storeyOf(base).references.some((b) => b.id === id),
     );
     if (reference)
       return (

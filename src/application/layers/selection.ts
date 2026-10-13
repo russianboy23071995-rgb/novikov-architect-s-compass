@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 
@@ -6,13 +7,13 @@ export function selectedLayerElement(project: Project, target: ElementTarget | n
   if (!target) return undefined;
   const elements =
     target.kind === "reference"
-      ? project.storey.references
+      ? storeyOf(project).references
       : target.kind === "wall"
-        ? project.storey.walls
+        ? storeyOf(project).walls
         : target.kind === "window"
-          ? project.storey.windows
+          ? storeyOf(project).windows
           : target.kind === "hatch"
-            ? project.storey.hatches
-            : project.storey.lines;
+            ? storeyOf(project).hatches
+            : storeyOf(project).lines;
   return elements?.find((element) => element.id === target.id);
 }

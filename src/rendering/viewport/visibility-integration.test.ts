@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -96,5 +97,5 @@ test("edit previews use committed eligibility for both plan and surfaces, retain
   assert.equal(surfaces.faces.length, 0);
   assert.equal(surfaces.min, geometry.min);
   assert.equal(surfaces.max, geometry.max);
-  assert.equal(p.storey.walls[0]!.end.x, 3);
+  assert.equal(storeyOf(p).walls[0]!.end.x, 3);
 });

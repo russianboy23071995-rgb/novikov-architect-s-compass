@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewOffsetCommand } from "../../application/drawing/offset-command.ts";
 import { serializeProject, updateWall, updateWindow, wallLength } from "./model.ts";
 import type { Project } from "./model.ts";
@@ -41,7 +42,7 @@ export function previewCommand(
   let previous: number;
   try {
     if (kind === "wall") {
-      const wall = project.storey.walls.find((w) => w.id === selection.id);
+      const wall = storeyOf(project).walls.find((w) => w.id === selection.id);
       if (!wall) throw new Error("Missing target");
       previous =
         field === "wandlänge"
@@ -62,7 +63,7 @@ export function previewCommand(
             : { thickness: value };
       result = updateWall(project, wall.id, changes);
     } else {
-      const opening = project.storey.windows.find((w) => w.id === selection.id);
+      const opening = storeyOf(project).windows.find((w) => w.id === selection.id);
       if (!opening) throw new Error("Missing target");
       const key =
         field === "fensterbreite"

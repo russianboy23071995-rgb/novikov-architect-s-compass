@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -24,31 +25,31 @@ const session: EditSession = {
 
 test("corner gesture changes one endpoint, retaining wall thickness, opposite end and window", () => {
   const p = editAtPointer(session, base, { x: 5, y: 1.18 });
-  assert.deepEqual(p.storey.walls[0]!.start, { x: 0, y: 0 });
-  const wall = p.storey.walls[0]!;
+  assert.deepEqual(storeyOf(p).walls[0]!.start, { x: 0, y: 0 });
+  const wall = storeyOf(p).walls[0]!;
   const length = Math.hypot(wall.end.x, wall.end.y);
   assert.ok(Math.abs(wall.end.x - (wall.end.y / length) * 0.18 - 5) < 1e-10);
   assert.ok(Math.abs(wall.end.y + (wall.end.x / length) * 0.18 - 1.18) < 1e-10);
-  assert.equal(p.storey.walls[0]!.thickness, 0.36);
-  assert.deepEqual(p.storey.windows, base.storey.windows);
+  assert.equal(storeyOf(p).walls[0]!.thickness, 0.36);
+  assert.deepEqual(storeyOf(p).windows, storeyOf(base).windows);
 });
 test("axis point gesture projects onto original wall direction and rejects crossing", () => {
   const p = editAtPointer({ ...session, action: "stretch" }, base, { x: 6, y: 9 });
-  assert.deepEqual(p.storey.walls[0]!.end, { x: 6, y: 0 });
+  assert.deepEqual(storeyOf(p).walls[0]!.end, { x: 6, y: 0 });
   assert.throws(() => editAtPointer({ ...session, action: "stretch" }, base, { x: -1, y: 0 }));
   assert.throws(() => editAtPointer({ ...session, action: "stretch" }, base, { x: 0.5, y: 0 }));
 });
 test("element translation moves both ends; fixed X/Y actions ignore the other component", () => {
   const s = { ...session, action: "move" as const };
   const p = editAtPointer(s, base, { x: 5, y: 1.18 });
-  assert.deepEqual(p.storey.walls[0]!.start, { x: 2, y: 1 });
-  assert.deepEqual(p.storey.walls[0]!.end, { x: 5, y: 1 });
+  assert.deepEqual(storeyOf(p).walls[0]!.start, { x: 2, y: 1 });
+  assert.deepEqual(storeyOf(p).walls[0]!.end, { x: 5, y: 1 });
   assert.deepEqual(
-    editAtPointer({ ...s, action: "x" }, base, { x: 5, y: 1.18 }).storey.walls[0]!.start,
+    storeyOf(editAtPointer({ ...s, action: "x" }, base, { x: 5, y: 1.18 })).walls[0]!.start,
     { x: 2, y: 0 },
   );
   assert.deepEqual(
-    editAtPointer({ ...s, action: "y" }, base, { x: 5, y: 1.18 }).storey.walls[0]!.start,
+    storeyOf(editAtPointer({ ...s, action: "y" }, base, { x: 5, y: 1.18 })).walls[0]!.start,
     { x: 0, y: 1 },
   );
 });
@@ -56,16 +57,16 @@ test("diagonal element axis projection is exact", () => {
   const p = updateWall(base, "wall-1", { end: { x: 3, y: 4 } });
   const s = { ...session, base: p, anchor: { x: 0, y: 0 }, action: "axis" as const };
   const moved = editAtPointer(s, p, { x: 5, y: 0 });
-  assert.ok(Math.abs(moved.storey.walls[0]!.start.x - 1.8) < 1e-12);
-  assert.ok(Math.abs(moved.storey.walls[0]!.start.y - 2.4) < 1e-12);
+  assert.ok(Math.abs(storeyOf(moved).walls[0]!.start.x - 1.8) < 1e-12);
+  assert.ok(Math.abs(storeyOf(moved).walls[0]!.start.y - 2.4) < 1e-12);
 });
 test("successive previews use the original and create no history until confirmation", () => {
   const before = serializeProject(base);
   const h = createHistory(base);
   const first = editAtPointer({ ...session, action: "move" }, base, { x: 4, y: 0.18 });
   const second = editAtPointer({ ...session, action: "move" }, base, { x: 5, y: 0.18 });
-  assert.equal(first.storey.walls[0]!.start.x, 1);
-  assert.equal(second.storey.walls[0]!.start.x, 2);
+  assert.equal(storeyOf(first).walls[0]!.start.x, 1);
+  assert.equal(storeyOf(second).walls[0]!.start.x, 2);
   assert.equal(serializeProject(base), before);
   assert.equal(h.past.length, 0);
   const committed = commitProject(h, second);
@@ -99,10 +100,10 @@ test("closed line handle stays closed and style/identity survive the gesture", (
     anchor: { x: 0, y: 0 },
   };
   const moved = editAtPointer(s, p, { x: -1, y: 0 });
-  assert.deepEqual(moved.storey.lines![0]!.points[0], { x: -1, y: 0 });
-  assert.deepEqual(moved.storey.lines![0]!.points[3], { x: -1, y: 0 });
-  assert.equal(moved.storey.lines![0]!.id, "poly");
-  assert.equal(moved.storey.lines![0]!.color, defaultLineAppearance.color);
+  assert.deepEqual(storeyOf(moved).lines![0]!.points[0], { x: -1, y: 0 });
+  assert.deepEqual(storeyOf(moved).lines![0]!.points[3], { x: -1, y: 0 });
+  assert.equal(storeyOf(moved).lines![0]!.id, "poly");
+  assert.equal(storeyOf(moved).lines![0]!.color, defaultLineAppearance.color);
 });
 test("window gesture projects onto host and caps an outside opening", () => {
   const target = { kind: "window" as const, id: "window-1" };
@@ -113,9 +114,9 @@ test("window gesture projects onto host and caps an outside opening", () => {
     index: null,
     anchor: editAnchor(base, target),
   };
-  assert.equal(editAtPointer(s, base, { x: 1.8, y: 5 }).storey.windows[0]!.position, 0.6);
+  assert.equal(storeyOf(editAtPointer(s, base, { x: 1.8, y: 5 })).windows[0]!.position, 0.6);
   assert.ok(
-    Math.abs(editAtPointer(s, base, { x: 300, y: 0 }).storey.windows[0]!.position - 0.8) < 1e-9,
+    Math.abs(storeyOf(editAtPointer(s, base, { x: 300, y: 0 })).windows[0]!.position - 0.8) < 1e-9,
   );
 });
 
@@ -127,7 +128,7 @@ test("all four corners reach their target on rotated and reversed walls", () => 
           start: { x: 12, y: -7 },
           end: { x: 12 + 3 * Math.cos(angle), y: -7 + 3 * Math.sin(angle) },
         });
-        const wall = p.storey.walls[0]!;
+        const wall = storeyOf(p).walls[0]!;
         const moving = index === 0 ? wall.start : wall.end;
         const fixed = index === 0 ? wall.end : wall.start;
         const direction = angle + (index === 0 ? Math.PI : 0);
@@ -145,11 +146,11 @@ test("all four corners reach their target on rotated and reversed walls", () => 
         const s = { ...session, base: p, index, anchor };
         assert.deepEqual(editAtPointer(s, p, anchor), p);
         const result = editAtPointer(s, p, target);
-        const changed = result.storey.walls[0]!;
+        const changed = storeyOf(result).walls[0]!;
         const endpoint = index === 0 ? changed.start : changed.end;
         assert.ok(Math.hypot(endpoint.x - expected.x, endpoint.y - expected.y) < 1e-10);
         assert.deepEqual(index === 0 ? changed.end : changed.start, fixed);
-        assert.deepEqual(result.storey.windows, p.storey.windows);
+        assert.deepEqual(storeyOf(result).windows, storeyOf(p).windows);
         // Actual 3D faces use the same physical corner, not a separate corrected overlay.
         assert.ok(
           buildSolid(result).faces.some((face) =>
@@ -186,7 +187,7 @@ test("unreachable corner and opening conflicts reject without committing; axis p
     assert.equal(result.session, state.session);
   }
   const axis = editAtPointer({ ...session, anchor: { x: 3, y: 0 } }, base, { x: 4, y: 1 });
-  assert.deepEqual(axis.storey.walls[0]!.end, { x: 4, y: 1 });
+  assert.deepEqual(storeyOf(axis).walls[0]!.end, { x: 4, y: 1 });
 });
 
 test("numeric and pointer corner edits share preview, one commit and undo/redo", () => {

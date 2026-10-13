@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile, tick } from "./capacity";
 import { importImage } from "../src/interop/images/import";
 import { validateProject, updateLine } from "../src/lib/bim/model";
@@ -52,7 +53,7 @@ button.onclick = async () => {
     for (let i = 0; i < 3; i++) {
       const asset = await importImage(await sourceFile(i), `asset-${i}`);
       p.assets.push(asset);
-      p.storey.references.push({
+      storeyOf(p).references.push({
         id: `ref-${i}`,
         kind: "image-reference",
         assetId: asset.id,

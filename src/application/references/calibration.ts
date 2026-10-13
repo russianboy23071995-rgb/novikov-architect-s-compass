@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { SelectionSet } from "../selection/state.ts";
@@ -36,18 +37,17 @@ export function previewCalibration(
     throw new Error(
       "Nur eine Bildreferenz darf kalibriert werden; BIM- und Mischauswahl sind ausgeschlossen.",
     );
-  const r = current.storey.references.find((r) => r.id === request.referenceId);
+  const r = storeyOf(current).references.find((r) => r.id === request.referenceId);
   if (!r || !isLayerVisible(current, visibility, r.id))
     throw new Error("Bildreferenz nicht verfügbar.");
   const t = calibrationTransform(r.origin, request.first, request.second, request.metres);
   return validateProject({
-    ...current,
-    storey: {
-      ...current.storey,
-      references: current.storey.references.map((item) =>
+    ...replaceStorey(current, {
+      ...storeyOf(current),
+      references: storeyOf(current).references.map((item) =>
         item === r ? { ...r, origin: t.origin, metresPerPixel: r.metresPerPixel * t.factor } : item,
       ),
-    },
+    }),
   });
 }
 export function commitCalibration(

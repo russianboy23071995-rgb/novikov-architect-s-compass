@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { commitProject } from "../../lib/bim/history.ts";
@@ -82,13 +83,9 @@ export function layerDeletionBlock(project: Project, id: string): string | null 
   if (isStandardLayerId(id) || Object.values(project.defaultLayerIds).includes(id))
     return "Standardebenen können nicht gelöscht werden.";
   if (
-    [
-      ...project.storey.walls,
-      ...project.storey.windows,
-      ...(project.storey.lines ?? []),
-      ...project.storey.hatches,
-      ...project.storey.references,
-    ].some((element) => element.layerId === id)
+    project.storeys
+      .flatMap((s) => [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references])
+      .some((element) => element.layerId === id)
   )
     return "Diese Ebene enthält Elemente und kann nicht gelöscht werden.";
   return null;
@@ -115,11 +112,11 @@ export function previewLayerAssignment(
   if (!request.elementIds.length) throw new Error("Keine Elemente ausgewählt.");
   const targets = new Set(request.elementIds);
   const elements = [
-    ...project.storey.walls,
-    ...project.storey.windows,
-    ...(project.storey.lines ?? []),
-    ...project.storey.hatches,
-    ...project.storey.references,
+    ...storeyOf(project).walls,
+    ...storeyOf(project).windows,
+    ...(storeyOf(project).lines ?? []),
+    ...storeyOf(project).hatches,
+    ...storeyOf(project).references,
   ];
   const knownIds = new Set(elements.map((e) => e.id));
   if ([...targets].some((id) => !knownIds.has(id)))
@@ -128,15 +125,16 @@ export function previewLayerAssignment(
   const assign = <T extends { id: string; layerId: string }>(e: T): T =>
     targets.has(e.id) ? { ...e, layerId: request.layerId } : e;
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      hatches: project.storey.hatches.map(assign),
-      references: project.storey.references.map(assign),
-      walls: project.storey.walls.map(assign),
-      windows: project.storey.windows.map(assign),
-      ...(project.storey.lines === undefined ? {} : { lines: project.storey.lines.map(assign) }),
-    },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      hatches: storeyOf(project).hatches.map(assign),
+      references: storeyOf(project).references.map(assign),
+      walls: storeyOf(project).walls.map(assign),
+      windows: storeyOf(project).windows.map(assign),
+      ...(storeyOf(project).lines === undefined
+        ? {}
+        : { lines: storeyOf(project).lines!.map(assign) }),
+    }),
   });
 }
 

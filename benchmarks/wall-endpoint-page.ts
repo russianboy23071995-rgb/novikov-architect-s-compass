@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, tick } from "./capacity";
 import {
   createEditingState,
@@ -21,8 +22,8 @@ button.onclick = async () => {
           output.textContent = `${count} / ${connected ? "T-Hauptwand" : "freie Wand"} / Shift ${shift}`;
           await tick();
           const p = capacityFixture(count);
-          if (!connected) p.storey.wallTJunctions = [];
-          const wall = p.storey.walls[0]!,
+          if (!connected) storeyOf(p).wallTJunctions = [];
+          const wall = storeyOf(p).walls[0]!,
             target = { kind: "wall" as const, id: wall.id };
           let state = createEditingState(p),
             t = performance.now();
@@ -116,8 +117,8 @@ button.onclick = async () => {
             snap: stats(snapTimes),
             preview: stats(previewTimes),
             confirmMs,
-            tConnectionsBefore: base.storey.wallTJunctions.length,
-            tConnectionsAfter: lastPreview.storey.wallTJunctions.length,
+            tConnectionsBefore: storeyOf(base).wallTJunctions.length,
+            tConnectionsAfter: storeyOf(lastPreview).wallTJunctions.length,
             verified: true,
             snapTimes,
             previewTimes,

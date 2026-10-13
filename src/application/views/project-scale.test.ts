@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -35,15 +36,15 @@ test("stored scale round-trip preserves geometry and semantic ownership; old fil
     const next = changeProjectScale(base, view, denominator);
     const loaded = readProjectFile(serializeProject(next));
     assert.equal(projectScaleContext(loaded).denominator, denominator);
-    assert.deepEqual(loaded.storey, base.storey);
+    assert.deepEqual(storeyOf(loaded), storeyOf(base));
     assert.equal(changeProjectScale(next, view, denominator), next);
   }
   assert.equal(serializeProject(base), before);
   const old = { ...base, schemaVersion: 14 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 23);
+  assert.equal(migrated.schemaVersion, 24);
   assert.equal(projectScaleContext(migrated).denominator, 100);
-  assert.deepEqual(migrated.storey, base.storey);
+  assert.deepEqual(storeyOf(migrated), storeyOf(base));
   assert.throws(() => validateProject(old));
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...old, workingViews: [] })));
 });
@@ -83,18 +84,18 @@ test("scale change preserves undo and redo branches and current scale survives b
   assert.equal(history.past.length, 0);
   history = commitProject(history, updateWall(history.present, "wall", { height: 4 }));
   history = undoProject(history);
-  assert.equal(history.present.storey.walls[0]!.height, 2.8);
+  assert.equal(storeyOf(history.present).walls[0]!.height, 2.8);
   const past = history.past,
     future = history.future;
   history = commitProject(history, changeProjectScale(history.present, view, 2500));
   assert.equal(history.past, past);
   assert.equal(history.future, future);
   history = redoProject(history);
-  assert.equal(history.present.storey.walls[0]!.height, 4);
+  assert.equal(storeyOf(history.present).walls[0]!.height, 4);
   assert.equal(projectScaleContext(history.present).denominator, 2500);
   history = undoProject(history);
   assert.equal(projectScaleContext(history.present).denominator, 2500);
-  assert.equal(history.present.storey.walls[0]!.height, 2.8);
+  assert.equal(storeyOf(history.present).walls[0]!.height, 2.8);
 });
 test("application reducer loads the stored value even with reused project ID and rejects stale view events", () => {
   const base = fixture(),

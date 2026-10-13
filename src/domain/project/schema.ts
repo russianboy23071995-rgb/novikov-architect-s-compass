@@ -237,13 +237,19 @@ export const projectV22Schema = projectV21Schema.extend({
   schemaVersion: z.literal(22),
   storey: projectV21Schema.shape.storey.extend({ height: positive.nullable() }),
 });
-const projectSchema = projectV22Schema.extend({
+export const projectV23Schema = projectV22Schema.extend({
   schemaVersion: z.literal(23),
   groundDatum: z.number().finite(),
 });
+const projectSchema = projectV23Schema.omit({ storey: true }).extend({
+  schemaVersion: z.literal(24),
+  groundStoreyId: id,
+  storeys: z.array(projectV22Schema.shape.storey).min(1),
+});
+type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
   const old = projectV18Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -253,7 +259,7 @@ export function validateProjectV18(value: unknown) {
 }
 export function validateProjectV17(value: unknown) {
   const old = projectV17Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -263,7 +269,7 @@ export function validateProjectV17(value: unknown) {
 }
 export function validateProjectV16(value: unknown) {
   const old = projectV16Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -273,7 +279,7 @@ export function validateProjectV16(value: unknown) {
 }
 export function validateProjectV15(value: unknown) {
   const old = projectV15Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -283,7 +289,7 @@ export function validateProjectV15(value: unknown) {
 }
 export function validateProjectV14(value: unknown) {
   const old = projectV14Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -293,7 +299,7 @@ export function validateProjectV14(value: unknown) {
 }
 export function validateProjectV13(value: unknown) {
   const old = projectV13Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -303,7 +309,7 @@ export function validateProjectV13(value: unknown) {
 }
 export function validateProjectV12(value: unknown) {
   const old = projectV12Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -313,7 +319,7 @@ export function validateProjectV12(value: unknown) {
 }
 export function validateProjectV11(value: unknown) {
   const old = projectV11Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -323,7 +329,7 @@ export function validateProjectV11(value: unknown) {
 }
 export function validateProjectV10(value: unknown) {
   const old = projectV10Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -334,7 +340,7 @@ export function validateProjectV10(value: unknown) {
 }
 export function validateProjectV9(value: unknown) {
   const old = projectV9Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
     schemaVersion: 23,
@@ -345,7 +351,7 @@ export function validateProjectV9(value: unknown) {
 }
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
-  validateProject({
+  validateStoreyScope({
     ...old,
     schemaVersion: 23,
     groundDatum: 0,
@@ -432,6 +438,58 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 /** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
+  resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
+  const storeyIds = new Set(project.storeys.map((s) => s.id));
+  for (const view of [...(project.workingViews ?? []), ...(project.modelViews ?? [])])
+    if (!storeyIds.has(view.storeyId)) throw new Error("Unbekanntes Geschoss im Ansichtskontext.");
+  for (const doc of project.drawingDocuments ?? []) {
+    if (!project.modelViews?.some((v) => v.id === doc.modelViewId))
+      throw new Error("Unbekannte Modellansicht im Abbild.");
+  }
+  const ids = new Set<string>();
+  const entities = [
+    project,
+    ...project.layers,
+    ...project.assets,
+    ...(project.modelViews ?? []),
+    ...(project.drawingDocuments ?? []),
+    ...(project.documentFolders ?? []),
+    ...project.storeys.flatMap((s) => [
+      s,
+      ...s.walls,
+      ...s.windows,
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ]),
+  ];
+  for (const entity of entities) {
+    if (ids.has(entity.id)) throw new Error("Duplicate ID: " + entity.id);
+    ids.add(entity.id);
+  }
+  const used = new Set<string>();
+  const { storeys, groundStoreyId: _ground, ...shared } = project;
+  for (const storey of storeys) {
+    const modelViews = project.modelViews?.filter((v) => v.storeyId === storey.id);
+    const scopeInput: SingleProject = {
+      ...shared,
+      schemaVersion: 23,
+      groundDatum: 0,
+      storey,
+      workingViews: project.workingViews?.filter((v) => v.storeyId === storey.id),
+      modelViews,
+      drawingDocuments: project.drawingDocuments?.filter((d) =>
+        modelViews?.some((v) => v.id === d.modelViewId),
+      ),
+    };
+    const scope = validateStoreyScope(scopeInput, scopeInput);
+    scope.hatchPatterns.forEach((p) => used.add(p.id));
+  }
+  return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
+}
+
+function validateStoreyScope(value: unknown, parsed?: SingleProject): SingleProject {
+  const project = parsed ?? projectV23Schema.parse(value);
   resolveStoreyLevels([project.storey], project.storey.id, project.groundDatum);
   if (project.workingViews?.some((view) => view.storeyId !== project.storey.id))
     throw new Error("Unbekanntes Geschoss im Arbeitsmaßstab.");
@@ -493,7 +551,7 @@ export function validateProject(value: unknown): Project {
   }
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }
-function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3): void {
+function validateVisibility(project: SingleProject | ProjectV5 | ProjectV4 | ProjectV3): void {
   const hidden = project.bimVisibility.hiddenLayerIds;
   if (
     new Set(hidden).size !== hidden.length ||
@@ -501,7 +559,9 @@ function validateVisibility(project: Project | ProjectV5 | ProjectV4 | ProjectV3
   )
     throw new Error("Invalid hidden layer IDs");
 }
-function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3): void {
+function validateLayers(
+  project: SingleProject | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3,
+): void {
   const layerIds = new Set(project.layers.map((layer) => layer.id));
   for (const layerId of Object.values(project.defaultLayerIds)) {
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
@@ -520,7 +580,7 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
 }
 
 function validateGeometry(
-  project: LegacyProject | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3 | Project,
+  project: LegacyProject | ProjectV5 | ProjectV4 | ProjectV2 | ProjectV3 | SingleProject,
 ): void {
   const ids = new Set<string>();
   for (const entity of [

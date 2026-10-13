@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { querySnap } from "./engine.ts";
@@ -233,7 +234,7 @@ test("free edit and drawing share oblique guide target and reversible serialized
     points: [point, { x: 5, y: 3 }],
     ...defaultLineAppearance,
   });
-  assert.ok(pointsCompatible(project.storey.lines![0]!.points[0]!, target));
+  assert.ok(pointsCompatible(storeyOf(project).lines![0]!.points[0]!, target));
   const selection = { kind: "line" as const, id: "line" };
   const state = editingReducer(createEditingState(project), {
     type: "begin",

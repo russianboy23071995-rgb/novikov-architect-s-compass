@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../storeys/access.ts";
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
@@ -23,7 +24,7 @@ const pointKey = (p: Point) => JSON.stringify([p.x, p.y]);
 export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
   const base = freeze(validateProject(source));
   const ids = new Set(selectedIds);
-  const s = base.storey;
+  const s = storeyOf(base);
   const available = new Set(
     [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
   );
@@ -63,7 +64,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     },
   };
   freeze(affected);
-  const movingWalls = affected.storey.walls.filter((w) => ids.has(w.id));
+  const movingWalls = storeyOf(affected).walls.filter((w) => ids.has(w.id));
   const retainedJoins = s.wallJoins.filter(
     (j) => ids.has(j.first.wallId) === ids.has(j.second.wallId),
   );
@@ -89,11 +90,11 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
   const assets = new Map(affected.assets.map((a) => [a.id, a]));
   const replacedIds = Object.freeze(
     [
-      ...affected.storey.walls,
-      ...affected.storey.windows,
-      ...affected.storey.lines!,
-      ...affected.storey.hatches,
-      ...affected.storey.references,
+      ...storeyOf(affected).walls,
+      ...storeyOf(affected).windows,
+      ...storeyOf(affected).lines!,
+      ...storeyOf(affected).hatches,
+      ...storeyOf(affected).references,
     ].map((e) => e.id),
   );
 
@@ -114,9 +115,9 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
   const stationary = detachedEnd
     ? freeze({
         storey: {
-          ...affected.storey,
-          walls: affected.storey.walls.filter((w) => w.id !== movingId),
-          windows: affected.storey.windows.filter((w) => w.wallId !== movingId),
+          ...storeyOf(affected),
+          walls: storeyOf(affected).walls.filter((w) => w.id !== movingId),
+          windows: storeyOf(affected).windows.filter((w) => w.wallId !== movingId),
           wallJoins: localJoins,
           wallTJunctions: localTees,
         },
@@ -124,7 +125,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     : null;
   const deriveSolids = stationary
     ? prepareDetachedEndSolids(stationary)
-    : createPreparedWallSolids(affected.storey.walls.map((w) => w.id));
+    : createPreparedWallSolids(storeyOf(affected).walls.map((w) => w.id));
 
   function evaluate(delta: Point): GeometryPreview {
     if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
@@ -154,35 +155,38 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     const geometry: ModelGeometry = {
       assets: affected.assets,
       storey: {
-        ...affected.storey,
-        walls: affected.storey.walls.map((w) =>
+        ...storeyOf(affected),
+        walls: storeyOf(affected).walls.map((w) =>
           ids.has(w.id) ? { ...w, start: translate(w.start), end: translate(w.end) } : w,
         ),
-        lines: affected.storey.lines!.map((l) => ({ ...l, points: l.points.map(translate) })),
-        hatches: affected.storey.hatches.map((h) => ({
+        lines: storeyOf(affected).lines!.map((l) => ({ ...l, points: l.points.map(translate) })),
+        hatches: storeyOf(affected).hatches.map((h) => ({
           ...h,
           points: h.points.map(translate),
           ...(h.pattern ? { pattern: { ...h.pattern, origin: translate(h.pattern.origin) } } : {}),
         })),
-        references: affected.storey.references.map((r) => ({ ...r, origin: translate(r.origin) })),
+        references: storeyOf(affected).references.map((r) => ({
+          ...r,
+          origin: translate(r.origin),
+        })),
         wallJoins: localJoins,
         wallTJunctions: localTees,
       },
     };
-    const localWalls = new Map(geometry.storey.walls.map((w) => [w.id, w]));
+    const localWalls = new Map(storeyOf(geometry).walls.map((w) => [w.id, w]));
     for (const join of localJoins) {
       const wall = localWalls.get(join.first.wallId)!;
       const p = join.first.endpoint === 0 ? wall.start : wall.end;
       if (countAt(pointKey(p)) !== 2) throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     }
-    for (const wall of geometry.storey.walls)
+    for (const wall of storeyOf(geometry).walls)
       if (!detachedEnd || wall.id === movingId) wallBody(wall);
-    for (const line of geometry.storey.lines!) validateLineGeometry(line);
-    for (const hatch of geometry.storey.hatches) hatchSchema.parse(hatch);
-    for (const opening of geometry.storey.windows)
+    for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
+    for (const hatch of storeyOf(geometry).hatches) hatchSchema.parse(hatch);
+    for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
-    for (const reference of geometry.storey.references)
+    for (const reference of storeyOf(geometry).references)
       validateReferenceExtent(reference, assets.get(reference.assetId)!);
     // The exact existing corner/T/opening/solid rules, applied to the dependency closure.
     deriveSolids(geometry);
@@ -201,16 +205,15 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       return all.map((e) => byId.get(e.id) ?? e);
     };
     return validateProject({
-      ...base,
-      storey: {
+      ...replaceStorey(base, {
         ...s,
-        walls: replace(s.walls, patch.geometry.storey.walls),
-        ...(s.lines ? { lines: replace(s.lines, patch.geometry.storey.lines!) } : {}),
-        hatches: replace(s.hatches, patch.geometry.storey.hatches),
-        references: replace(s.references, patch.geometry.storey.references),
+        walls: replace(s.walls, storeyOf(patch.geometry).walls),
+        ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
+        hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
+        references: replace(s.references, storeyOf(patch.geometry).references),
         wallJoins: retainedJoins,
         wallTJunctions: retainedTees,
-      },
+      }),
     });
   }
   return Object.freeze({ evaluate, materialize, replacedIds });

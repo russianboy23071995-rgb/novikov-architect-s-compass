@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -119,12 +120,12 @@ test("global edits update all applications and cancel stale previews without add
   assert.equal(state.history.past, past);
   assert.equal(state.history.future, future);
   assert.equal(state.session, null);
-  assert.deepEqual(state.history.present.storey, present.storey);
+  assert.deepEqual(storeyOf(state.history.present), storeyOf(present));
   assert.equal(state.history.present.hatchPatterns.length, 1);
   assert.equal(state.history.present.hatchPatterns[0]!.revision, 2);
   assert.equal(state.history.present.hatchPatterns[0]!.name, "Aktuell");
   const redone = editingReducer(state, { type: "redo", patternRecords: library.present.records });
-  assert.equal(redone.history.present.storey.hatches[0]!.fill.opacity, 0.8);
+  assert.equal(storeyOf(redone.history.present).hatches[0]!.fill.opacity, 0.8);
   assert.equal(redone.history.present.hatchPatterns[0]!.name, "Aktuell");
   assert.deepEqual(
     readProjectFile(serializeProject(redone.history.present)),

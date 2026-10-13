@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { recoveryFixture, summary } from "./recovery-capacity-fixture.ts";
@@ -13,10 +14,10 @@ test("capacity fixture retains all synthetic geometry through the real file boun
     size: new TextEncoder().encode(json).length,
     text: async () => json,
   });
-  assert.equal(project.storey.lines!.length, 1000);
-  assert.equal(new Set(project.storey.lines!.map((line) => line.id)).size, 1000);
-  assert.equal(project.storey.walls.length, 1);
-  assert.equal(project.storey.windows.length, 1);
+  assert.equal(storeyOf(project).lines!.length, 1000);
+  assert.equal(new Set(storeyOf(project).lines!.map((line) => line.id)).size, 1000);
+  assert.equal(storeyOf(project).walls.length, 1);
+  assert.equal(storeyOf(project).windows.length, 1);
   assert.ok(sameRecoveryContent(project, loaded.project));
 });
 

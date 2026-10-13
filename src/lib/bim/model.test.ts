@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -37,24 +38,24 @@ const fixture = () => addWindow(withWall(), opening);
 test("creates the 3.00 x 0.36 x 2.80 m wall with a centred 1.20 m window", () => {
   const project = fixture();
   assert.equal(project.unit, "m");
-  assert.deepEqual(project.storey.walls, [wall]);
-  assert.deepEqual(project.storey.windows, [opening]);
-  assert.equal(wallLength(project.storey.walls[0]!), 3);
+  assert.deepEqual(storeyOf(project).walls, [wall]);
+  assert.deepEqual(storeyOf(project).windows, [opening]);
+  assert.equal(wallLength(storeyOf(project).walls[0]!), 3);
   assert.deepEqual(windowCentre(project, opening.id), { x: 1.5, y: 0 });
 });
 
 test("extending the wall preserves IDs and keeps the window centred", () => {
   const original = fixture();
   const changed = updateWall(original, wall.id, { end: { x: 6, y: 0 } });
-  assert.equal(changed.storey.walls[0]!.id, wall.id);
-  assert.deepEqual(changed.storey.windows, [opening]);
+  assert.equal(storeyOf(changed).walls[0]!.id, wall.id);
+  assert.deepEqual(storeyOf(changed).windows, [opening]);
   assert.deepEqual(windowCentre(changed, opening.id), { x: 3, y: 0 });
   assert.deepEqual(windowCentre(original, opening.id), { x: 1.5, y: 0 });
 });
 
 test("relative centres work on translated, diagonal and reversed walls", () => {
   const project = updateWall(fixture(), wall.id, { start: { x: 5, y: 6 }, end: { x: 2, y: 2 } });
-  assert.equal(wallLength(project.storey.walls[0]!), 5);
+  assert.equal(wallLength(storeyOf(project).walls[0]!), 5);
   assert.deepEqual(windowCentre(project, opening.id), { x: 3.5, y: 4 });
   assert.deepEqual(
     windowCentre(updateWindow(project, opening.id, { position: 0.25 }), opening.id),
@@ -70,8 +71,8 @@ test("updates wall dimensions and window parameters without changing IDs", () =>
     sillHeight: 1,
     position: 0.6,
   });
-  assert.equal(changed.storey.walls[0]!.thickness, 0.4);
-  assert.deepEqual(changed.storey.windows[0], {
+  assert.equal(storeyOf(changed).walls[0]!.thickness, 0.4);
+  assert.deepEqual(storeyOf(changed).windows[0], {
     ...opening,
     width: 1,
     height: 1.5,
@@ -85,7 +86,7 @@ test("updates wall dimensions and window parameters without changing IDs", () =>
     end: { x: 13, y: 0 },
   });
   assert.equal(
-    updateWindow(other, opening.id, { wallId: "wall-2" }).storey.windows[0]!.wallId,
+    storeyOf(updateWindow(other, opening.id, { wallId: "wall-2" })).windows[0]!.wallId,
     "wall-2",
   );
 });
@@ -150,7 +151,7 @@ test("JSON round-trip preserves IDs, units, geometry and editable relationships"
   const original = fixture();
   const restored = deserializeProject(serializeProject(original));
   assert.deepEqual(restored, original);
-  assert.notEqual(restored.storey.walls[0], original.storey.walls[0]);
+  assert.notEqual(storeyOf(restored).walls[0], storeyOf(original).walls[0]);
   assert.deepEqual(
     windowCentre(updateWall(restored, wall.id, { end: { x: 8, y: 0 } }), opening.id),
     { x: 4, y: 0 },
@@ -168,10 +169,10 @@ test("rejects malformed JSON, unsupported versions/units and corrupt saved model
   ])
     assert.throws(() => deserializeProject(json));
   const corrupt = fixture();
-  corrupt.storey.windows[0]!.width = 4;
+  storeyOf(corrupt).windows[0]!.width = 4;
   assert.throws(() => deserializeProject(JSON.stringify(corrupt)));
   assert.throws(() => serializeProject(corrupt));
-  corrupt.storey.windows[0]!.wallId = "missing";
+  storeyOf(corrupt).windows[0]!.wallId = "missing";
   assert.throws(() => deserializeProject(JSON.stringify(corrupt)));
 });
 
@@ -179,7 +180,7 @@ test("caller-owned inputs are detached from returned snapshots", () => {
   const input = { ...wall, start: { ...wall.start } };
   const project = addWall(createProject("p", "s"), input);
   input.start.x = 100;
-  assert.equal(project.storey.walls[0]!.start.x, 0);
+  assert.equal(storeyOf(project).walls[0]!.start.x, 0);
 });
 
 test("serializer matches the full JSON oracle for Unicode, escapes and duplicate payloads", async () => {

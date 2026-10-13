@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
@@ -53,7 +54,7 @@ export function planBounds(project: Project, visibility?: LayerVisibilityPolicy)
         project,
         (id) => visibility.evaluate(project, visibility.context, id).eligible,
       )
-    : project.storey;
+    : storeyOf(project);
   if (
     !storey.walls.length &&
     !storey.lines?.length &&

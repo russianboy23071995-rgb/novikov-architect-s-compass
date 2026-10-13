@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import { useReducer, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
@@ -63,7 +64,7 @@ export function CornerPreviewDialog({
           </label>
           <span>
             {kind === "t" ? "Hauptwand:" : "Erste Wand:"} Wall{" "}
-            {project.storey.walls.findIndex((w) => w.id === firstId) + 1}
+            {storeyOf(project).walls.findIndex((w) => w.id === firstId) + 1}
           </span>
           {kind === "corner" && (
             <label>
@@ -92,11 +93,11 @@ export function CornerPreviewDialog({
               }}
             >
               <option value="">Bitte wählen</option>
-              {project.storey.walls
-                .filter((w) => w.id !== firstId && isLayerVisible(project, visibility, w.id))
+              {storeyOf(project)
+                .walls.filter((w) => w.id !== firstId && isLayerVisible(project, visibility, w.id))
                 .map((w) => (
                   <option key={w.id} value={w.id}>
-                    Wall {project.storey.walls.findIndex((wall) => wall.id === w.id) + 1}
+                    Wall {storeyOf(project).walls.findIndex((wall) => wall.id === w.id) + 1}
                   </option>
                 ))}
             </select>

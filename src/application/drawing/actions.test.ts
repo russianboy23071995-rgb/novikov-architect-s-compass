@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createDrawing, previewDrawingInput, defaultDrawingWall } from "./actions.ts";
@@ -13,8 +14,8 @@ test("shared drawing creates exact wall dimensions with one history step and mat
   assert.deepEqual(target, { x: 3, y: 0 });
   const request = { kind: "wall" as const, start, end: target, ...defaultDrawingWall };
   const preview = createDrawing(base, base, "w", request);
-  assert.equal(base.storey.walls.length, 0);
-  assert.equal(wallLength(preview.storey.walls[0]!), 3);
+  assert.equal(storeyOf(base).walls.length, 0);
+  assert.equal(wallLength(storeyOf(preview).walls[0]!), 3);
   const solid = buildSolid(preview);
   assert.deepEqual(solid.min, [0, 0, 0]);
   assert.deepEqual(solid.max, [3, 0.36, 2.8]);
@@ -58,8 +59,8 @@ test("shared creation retains line and polyline appearance and validates stale r
       appearance: defaultLineAppearance,
     };
     const next = createDrawing(base, base, "l", request);
-    assert.equal(next.storey.lines![0]!.kind, lineKind);
-    assert.equal(next.storey.lines![0]!.penWidth, 0.25);
+    assert.equal(storeyOf(next).lines![0]!.kind, lineKind);
+    assert.equal(storeyOf(next).lines![0]!.penWidth, 0.25);
     assert.throws(() => createDrawing(base, next, "l2", request), /Modell/);
   }
 });
@@ -96,9 +97,9 @@ test("window placement previews without mutation and commits one undoable serial
   );
   const point = { x: 1.5, y: 0.18 };
   const preview = tool.previewProject!(point);
-  assert.equal(base.storey.windows.length, 0);
+  assert.equal(storeyOf(base).windows.length, 0);
   assert.equal(state.history.past.length, 0);
-  assert.equal(preview.storey.windows[0]!.position, 0.5);
+  assert.equal(storeyOf(preview).windows[0]!.position, 0.5);
   assert.equal(drawingWallVisibility(base, preview, visibility)("win"), true);
   assert.equal(tool.snapping.origin, null);
   const snap = tool.snapping.resolve(
@@ -146,7 +147,7 @@ test("window placement rejects hidden hosts/layers, stale context and invalid ge
   ])
     assert.throws(() => placeWindow(base, base, visible, "win", point));
   assert.throws(() =>
-    placeWindow(base, base, policy([base.storey.walls[0]!.layerId]), "win", { x: 1.5, y: 0.18 }),
+    placeWindow(base, base, policy([storeyOf(base).walls[0]!.layerId]), "win", { x: 1.5, y: 0.18 }),
   );
   assert.throws(() =>
     placeWindow(base, base, policy([base.defaultLayerIds.window]), "win", { x: 1.5, y: 0.18 }),
@@ -176,7 +177,7 @@ test("window placement follows diagonal physical wall instead of drawing axis", 
     end: { x: 5, y: 7 },
     ...defaultDrawingWall,
   });
-  const body = wallBody(base.storey.walls[0]!);
+  const body = wallBody(storeyOf(base).walls[0]!);
   const visibility = createLayerVisibilityPolicy(base, {
     scope: { kind: "bim-project" },
     hiddenLayerIds: [],
@@ -185,7 +186,7 @@ test("window placement follows diagonal physical wall instead of drawing axis", 
     x: body.start.x + 0.6 * (body.end.x - body.start.x),
     y: body.start.y + 0.6 * (body.end.y - body.start.y),
   });
-  assert.ok(Math.abs(next.storey.windows[0]!.position - 0.6) < 1e-12);
+  assert.ok(Math.abs(storeyOf(next).windows[0]!.position - 0.6) < 1e-12);
 });
 
 test("window dimensions parse comma decimals and reject incomplete or invalid measures", async () => {
@@ -231,8 +232,8 @@ test("dimension revisions invalidate old previews and new values reach the same 
   const old = adapter(),
     point = { x: 1.5, y: 0.18 };
   const preview = old.previewProject!(point);
-  assert.equal(preview.storey.windows[0]!.width, 0.8);
-  assert.equal(base.storey.windows.length, 0);
+  assert.equal(storeyOf(preview).windows[0]!.width, 0.8);
+  assert.equal(storeyOf(base).windows.length, 0);
   draft = { ...draft, width: "1,0" };
   assert.throws(() => confirmInteraction(old, point), /Fenstermaße/);
   assert.equal(committed, base);
@@ -240,9 +241,9 @@ test("dimension revisions invalidate old previews and new values reach the same 
   const next = current.previewProject!(point);
   confirmInteraction(current, point);
   assert.deepEqual(committed, next);
-  assert.equal(committed.storey.windows[0]!.width, 1);
-  assert.equal(committed.storey.windows[0]!.height, 1.1);
-  assert.equal(committed.storey.windows[0]!.sillHeight, 0.7);
+  assert.equal(storeyOf(committed).windows[0]!.width, 1);
+  assert.equal(storeyOf(committed).windows[0]!.height, 1.1);
+  assert.equal(storeyOf(committed).windows[0]!.sillHeight, 0.7);
   draft = { ...draft, width: "4" };
   assert.throws(() => confirmInteraction(adapter(), point));
   draft = { ...draft, width: "1", height: "3" };
@@ -288,9 +289,9 @@ test("pinned window host uses exact signed distance and retains its explicit hos
     );
     const result = tool.preview("566", "2,00", { x: 99, y: 99 });
     const preview = tool.previewProject!(result.point);
-    assert.ok(Math.abs(preview.storey.windows[0]!.position - 1 / 3) < 1e-12);
-    assert.equal(preview.storey.windows[0]!.wallId, "host");
-    assert.equal(base.storey.windows.length, 0);
+    assert.ok(Math.abs(storeyOf(preview).windows[0]!.position - 1 / 3) < 1e-12);
+    assert.equal(storeyOf(preview).windows[0]!.wallId, "host");
+    assert.equal(storeyOf(base).windows.length, 0);
     assert.equal(tool.input!.axisLabel, "Fenstermitte ab Wandanfang");
     for (const invalid of ["NaN"]) assert.throws(() => tool.preview("", invalid, null));
     for (const [input, expected] of [
@@ -299,7 +300,8 @@ test("pinned window host uses exact signed distance and retains its explicit hos
     ] as const) {
       const capped = tool.preview("", input, null);
       assert.ok(
-        Math.abs(tool.previewProject!(capped.point).storey.windows[0]!.position - expected) < 1e-9,
+        Math.abs(storeyOf(tool.previewProject!(capped.point)).windows[0]!.position - expected) <
+          1e-9,
       );
     }
     confirmInteraction(tool, result.point);
@@ -335,8 +337,8 @@ test("window tool in connected plan preserves preview, edits, history, reload an
       kind: "connect",
       relation: { hostWallId: "host", incoming: { wallId: "partition", endpoint: 1 } },
     });
-    assert.equal(base.storey.wallJoins.length, closed ? 4 : 2);
-    assert.equal(base.storey.wallTJunctions.length, 1);
+    assert.equal(storeyOf(base).wallJoins.length, closed ? 4 : 2);
+    assert.equal(storeyOf(base).wallTJunctions.length, 1);
     let state = createEditingState(base);
     base = state.history.present;
     const visibility = createLayerVisibilityPolicy(base, {
@@ -358,7 +360,7 @@ test("window tool in connected plan preserves preview, edits, history, reload an
     const point = tool.preview("", "1.5", null).point;
     const preview = tool.previewProject!(point);
     assert.equal(state.history.past.length, 0);
-    assert.equal(base.storey.windows.length, 0);
+    assert.equal(storeyOf(base).windows.length, 0);
     confirmInteraction(tool, point);
     assert.deepEqual(state.history.present, preview);
     assert.equal(state.history.past.length, 1);
@@ -372,7 +374,7 @@ test("window tool in connected plan preserves preview, edits, history, reload an
     const moved = moveWindowAlongWall(state.history.present, "placed", 3);
     state = editingReducer(state, { type: "project", project: moved });
     assert.equal(state.history.past.length, 3);
-    assert.equal(moved.storey.windows[0]!.position, 0.75);
+    assert.equal(storeyOf(moved).windows[0]!.position, 0.75);
     state = editingReducer(state, { type: "undo" });
     assert.deepEqual(state.history.present, resized);
     state = editingReducer(state, { type: "redo" });

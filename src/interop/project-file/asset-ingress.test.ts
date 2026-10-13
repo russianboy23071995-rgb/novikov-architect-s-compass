@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -47,7 +48,7 @@ function fixture() {
     pixelHeight: 1,
     data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWZsAAAAASUVORK5CYII=",
   });
-  p.storey.references.push({
+  storeyOf(p).references.push({
     id: "r",
     kind: "image-reference",
     assetId: "a",
@@ -120,7 +121,7 @@ test("validated assets survive version-9 migration while model relationships rem
   const before = structuredClone(old),
     migrated = loadProjectData(legacyProjectFixture(old));
   assert.deepEqual(old, before);
-  assert.equal(migrated.schemaVersion, 23);
+  assert.equal(migrated.schemaVersion, 24);
   assert.deepEqual(migrated.assets, source.assets);
   assert.ok(Object.isFrozen(migrated.assets[0]));
   assert.equal(validateProject(migrated).assets[0], migrated.assets[0]);
@@ -130,11 +131,10 @@ test("validated assets survive version-9 migration while model relationships rem
   assert.throws(() =>
     loadProjectData(
       legacyProjectFixture({
-        ...old,
-        storey: {
-          ...old.storey,
-          references: old.storey.references.map((r) => ({ ...r, assetId: "missing" })),
-        },
+        ...replaceStorey(old, {
+          ...storeyOf(old),
+          references: storeyOf(old).references.map((r) => ({ ...r, assetId: "missing" })),
+        }),
       }),
     ),
   );
@@ -163,7 +163,7 @@ test("file ingress renews handles and shares them through wall/line edits and hi
   assert.deepEqual(reopened, h.present);
   assert.notEqual(reopened.assets[0], asset);
   assert.equal(validateProject(reopened).assets[0], reopened.assets[0]);
-  assert.equal(reopened.schemaVersion, 23);
+  assert.equal(reopened.schemaVersion, 24);
 });
 test("file ingress rejects corrupt storage, references and geometry before returning handles", () => {
   for (const mutate of [
@@ -174,10 +174,10 @@ test("file ingress rejects corrupt storage, references and geometry before retur
       p.assets[0]!.pixelWidth = 20000;
     },
     (p: ReturnType<typeof fixture>) => {
-      p.storey.references[0]!.assetId = "missing";
+      storeyOf(p).references[0]!.assetId = "missing";
     },
     (p: ReturnType<typeof fixture>) => {
-      p.storey.walls[0]!.height = -1;
+      storeyOf(p).walls[0]!.height = -1;
     },
   ]) {
     const p = fixture();

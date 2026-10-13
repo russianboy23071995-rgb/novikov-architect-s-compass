@@ -25,7 +25,8 @@ test("density boundaries, hysteresis, interruption and exact return deadline", (
 });
 function fixture(n: number) {
   return validateProject({
-    schemaVersion: 23,
+    schemaVersion: 24,
+    groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],
     assets: [],
@@ -33,29 +34,31 @@ function fixture(n: number) {
     ...createStandardLayers([]),
     unit: "m",
     id: "dense",
-    storey: {
-      name: "Level 01",
-      height: null,
-      references: [],
-      hatches: [],
-      wallJoins: [],
-      wallTJunctions: [],
-      id: "s",
-      walls: [],
-      windows: [],
-      lines: Array.from({ length: n }, (_, i) => ({
-        id: "l" + i,
-        layerId: "layer:drawing",
-        kind: "line",
-        points: [
-          { x: -10, y: -1 - i * 0.1 },
-          { x: 10, y: 1 + i * 0.1 },
-        ],
-        color: "#334155",
-        penWidth: 0.25,
-        style: "solid",
-      })),
-    },
+    storeys: [
+      {
+        name: "Level 01",
+        height: null,
+        references: [],
+        hatches: [],
+        wallJoins: [],
+        wallTJunctions: [],
+        id: "s",
+        walls: [],
+        windows: [],
+        lines: Array.from({ length: n }, (_, i) => ({
+          id: "l" + i,
+          layerId: "layer:drawing",
+          kind: "line",
+          points: [
+            { x: -10, y: -1 - i * 0.1 },
+            { x: 10, y: 1 + i * 0.1 },
+          ],
+          color: "#334155",
+          penWidth: 0.25,
+          style: "solid",
+        })),
+      },
+    ],
   });
 }
 test("shared source guard leaves points and remote guides, never materializes dense crossings", () => {

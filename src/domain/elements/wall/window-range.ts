@@ -1,3 +1,4 @@
+import { storeyOf } from "../../storeys/access.ts";
 import type { Project, Wall } from "../../project/schema.ts";
 import { wallLength } from "../../project/schema.ts";
 import { deriveWallCorner } from "./corner.ts";
@@ -16,11 +17,11 @@ export function boundedWindowPosition(
     uy = (wall.end.y - wall.start.y) / length;
   let min = width / 2,
     max = length - width / 2;
-  for (const join of project.storey.wallJoins) {
+  for (const join of storeyOf(project).wallJoins) {
     const end = [join.first, join.second].find((e) => e.wallId === wall.id);
     if (!end) continue;
     const resolve = (e: typeof join.first) => ({
-      wall: project.storey.walls.find((w) => w.id === e.wallId)!,
+      wall: storeyOf(project).walls.find((w) => w.id === e.wallId)!,
       endpoint: e.endpoint,
     });
     const contour = deriveWallCorner(resolve(join.first), resolve(join.second)).walls.find(

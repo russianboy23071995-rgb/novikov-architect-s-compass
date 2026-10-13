@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -34,7 +35,7 @@ test("new drawing uses a boundary axis; axis grips move exact endpoints through 
     end: { x: 8, y: 1 },
     ...defaultDrawingWall,
   });
-  const wall = base.storey.walls.at(-1)!;
+  const wall = storeyOf(base).walls.at(-1)!;
   assert.equal(wall.bodyOffset, wall.thickness / 2);
   assert.deepEqual(wallBody(wall).corner(0, -1), wall.start);
   const handles = wallPlanHandles(wall);
@@ -46,9 +47,9 @@ test("new drawing uses a boundary axis; axis grips move exact endpoints through 
     base,
     { x: 9, y: 3 },
   );
-  assert.deepEqual(moved.storey.walls.at(-1)!.end, { x: 9, y: 3 });
-  assert.deepEqual(moved.storey.walls.at(-1)!.start, wall.start);
-  assert.equal(moved.storey.walls.at(-1)!.bodyOffset, 0.18);
+  assert.deepEqual(storeyOf(moved).walls.at(-1)!.end, { x: 9, y: 3 });
+  assert.deepEqual(storeyOf(moved).walls.at(-1)!.start, wall.start);
+  assert.equal(storeyOf(moved).walls.at(-1)!.bodyOffset, 0.18);
   assert.deepEqual(deserializeProject(serializeProject(moved)), moved);
 });
 
@@ -61,14 +62,14 @@ test("axis placement cannot leave wall; changing thickness retains edge or relat
   for (const offset of [-0.18, -0.09, 0, 0.09, 0.18]) {
     const positioned = updateWall(base, target.id, { bodyOffset: offset });
     const thinner = updateWall(positioned, target.id, { thickness: 0.12 });
-    const wall = thinner.storey.walls[0]!;
+    const wall = storeyOf(thinner).walls[0]!;
     close(wall.bodyOffset, offset / 3);
-    assert.deepEqual(wall.start, positioned.storey.walls[0]!.start);
-    assert.deepEqual(wall.end, positioned.storey.walls[0]!.end);
+    assert.deepEqual(wall.start, storeyOf(positioned).walls[0]!.start);
+    assert.deepEqual(wall.end, storeyOf(positioned).walls[0]!.end);
   }
   // Previously valid files must not move physical geometry silently on load.
   const legacy = structuredClone(base);
-  legacy.storey.walls[0]!.bodyOffset = 0.6;
+  storeyOf(legacy).walls[0]!.bodyOffset = 0.6;
   assert.deepEqual(deserializeProject(serializeProject(legacy)), legacy);
   assert.throws(() => previewWallOffset(legacy, legacy, target, request(0.6)), /Wandachse/);
 });
@@ -81,12 +82,12 @@ test("wall offset keeps drawing axis and hosted window parameters, moves body an
       });
       const initial = serializeProject(base);
       const next = previewWallOffset(base, base, target, request(offset));
-      const wall = next.storey.walls[0]!,
+      const wall = storeyOf(next).walls[0]!,
         body = wallBody(wall),
         normal = { x: -Math.sin(angle), y: Math.cos(angle) };
-      assert.deepEqual(wall.start, base.storey.walls[0]!.start);
-      assert.deepEqual(wall.end, base.storey.walls[0]!.end);
-      assert.deepEqual(next.storey.windows, base.storey.windows);
+      assert.deepEqual(wall.start, storeyOf(base).walls[0]!.start);
+      assert.deepEqual(wall.end, storeyOf(base).walls[0]!.end);
+      assert.deepEqual(storeyOf(next).windows, storeyOf(base).windows);
       close(body.start.x, normal.x * offset);
       close(body.start.y, normal.y * offset);
       const centre = windowCentre(next, "window-1");
@@ -145,7 +146,7 @@ test("offset action is atomic, rejects stale context and non-finite/overflow val
     selection: target,
     request: request(-0.18),
   });
-  assert.equal(applied.history.present.storey.walls[0]!.bodyOffset, -0.18);
+  assert.equal(storeyOf(applied.history.present).walls[0]!.bodyOffset, -0.18);
   assert.equal(applied.history.past.length, 1);
 });
 
@@ -155,24 +156,24 @@ test("offset corners remain exact direct-edit targets for both endpoints and bot
       for (const side of [-1, 1]) {
         const initial = createExampleProject();
         const base = previewWallOffset(initial, initial, target, request(offset));
-        const anchor = wallBody(base.storey.walls[0]!).corner(index, side);
+        const anchor = wallBody(storeyOf(base).walls[0]!).corner(index, side);
         const aim = { x: anchor.x + (index === 0 ? -0.3 : 0.3), y: anchor.y + 0.5 };
         const next = editAtPointer({ base, target, action: "point", index, anchor }, base, aim);
-        const corner = wallBody(next.storey.walls[0]!).corner(index, side);
+        const corner = wallBody(storeyOf(next).walls[0]!).corner(index, side);
         close(corner.x, aim.x);
         close(corner.y, aim.y);
-        assert.equal(next.storey.walls[0]!.bodyOffset, offset);
+        assert.equal(storeyOf(next).walls[0]!.bodyOffset, offset);
       }
 });
 
 test("strict V4 migration adds zero only at file boundary; V5 requires offset", () => {
   const current = createExampleProject();
-  const { references, wallTJunctions, wallJoins, ...oldStorey } = current.storey;
+  const { references, wallTJunctions, wallJoins, ...oldStorey } = storeyOf(current);
   const { assets, hatchPatterns, ...legacyRoot } = current;
   const old = {
     ...legacyRoot,
     schemaVersion: 4,
-    storey: { ...oldStorey, walls: current.storey.walls.map(({ bodyOffset, ...w }) => w) },
+    storey: { ...oldStorey, walls: storeyOf(current).walls.map(({ bodyOffset, ...w }) => w) },
   };
   assert.deepEqual(loadProjectData(legacyProjectFixture(old)), current);
   assert.throws(() => validateProject(old));
@@ -180,8 +181,10 @@ test("strict V4 migration adds zero only at file boundary; V5 requires offset", 
   assert.throws(() =>
     loadProjectData(
       legacyProjectFixture({
-        ...old,
-        storey: { ...old.storey, walls: [{ ...old.storey.walls[0], bodyOffset: 1 }] },
+        ...replaceStorey(old, {
+          ...storeyOf(old),
+          walls: [{ ...storeyOf(old).walls[0], bodyOffset: 1 }],
+        }),
       }),
     ),
   );
@@ -194,7 +197,7 @@ test("IFC exports physical placement and offset while host-relative opening stay
   assert.match(text, /IFCCARTESIANPOINT\(\(0\.,0\.18,0\.\)\)/);
   assert.match(text, /'BodyOffset',\$,IFCLENGTHMEASURE\(0\.18\)/);
   assert.match(text, /IFCOPENINGELEMENT/);
-  assert.deepEqual(wallBody(next.storey.walls[0]!).corners, [
+  assert.deepEqual(wallBody(storeyOf(next).walls[0]!).corners, [
     { x: 0, y: 0 },
     { x: 3, y: 0 },
     { x: 3, y: 0.36 },

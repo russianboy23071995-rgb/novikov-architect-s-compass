@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -13,8 +14,10 @@ import { ensureDocumentFolder } from "../views/documents.ts";
 import { changeProjectScale, projectScaleContext } from "../views/project-scale.ts";
 const project = ensureDocumentFolder(createExampleProject());
 const changed = (height: number) => ({
-  ...project,
-  storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height })) },
+  ...replaceStorey(project, {
+    ...storeyOf(project),
+    walls: storeyOf(project).walls.map((w) => ({ ...w, height })),
+  }),
 });
 async function flush() {
   for (let i = 0; i < 80; i++) await Promise.resolve();
@@ -93,7 +96,7 @@ test("off by default; activation and coalesced edits write only the latest commi
   await f.timer.fire();
   assert.equal(f.writes(), 1);
   assert.equal(
-    (await readProjectRecovery(f.catalog, project.id))?.project.storey.walls[0]?.height,
+    storeyOf((await readProjectRecovery(f.catalog, project.id))?.project)?.walls[0]?.height,
     5,
   );
   assert.equal(f.timer.jobs.size, 0);
@@ -168,7 +171,7 @@ test("two activated sessions retain their revisions: losing writer pauses instea
   assert.equal(store.writes(), 1);
   assert.match(b.last().error!, /another writer/);
   assert.equal(
-    (await readProjectRecovery(store.catalog, project.id))?.project.storey.walls[0]?.height,
+    storeyOf((await readProjectRecovery(store.catalog, project.id))?.project)?.walls[0]?.height,
     3,
   );
   b.controller.update(changed(5), 0);
@@ -210,7 +213,7 @@ test("manual and automatic writes serialize; edits during a write schedule one s
   await flush();
   assert.equal(f.writes(), 2);
   assert.equal(
-    (await readProjectRecovery(f.catalog, project.id))?.project.storey.walls[0]?.height,
+    storeyOf((await readProjectRecovery(f.catalog, project.id))?.project)?.walls[0]?.height,
     4,
   );
 });
@@ -283,7 +286,7 @@ test("real reducer keeps the load context stable through commits and Undo/Redo",
   }
   await f.timer.fire();
   assert.equal(
-    (await readProjectRecovery(f.catalog, project.id))?.project.storey.walls[0]?.height,
+    storeyOf((await readProjectRecovery(f.catalog, project.id))?.project)?.walls[0]?.height,
     3,
   );
   editing = editingReducer(editing, { type: "load-project", project });

@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 /** Reuse the generated 1550px PNG; emit three portable assets above the old 10-MiB limit. */
 import { readFileSync, writeFileSync } from "node:fs";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
@@ -13,9 +14,9 @@ const p = recoveryFixture("capacity32-browser", 0, {
   data: png.toString("base64"),
 });
 const asset = p.assets[0]!;
-const ref = p.storey.references[0]!;
+const ref = storeyOf(p).references[0]!;
 p.assets = Array.from({ length: 3 }, (_, i) => ({ ...asset, id: `large-${i}` }));
-p.storey.references = Array.from({ length: 3 }, (_, i) => ({
+storeyOf(p).references = Array.from({ length: 3 }, (_, i) => ({
   ...ref,
   id: `ref-${i}`,
   assetId: `large-${i}`,

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { defaultWorkingPlan, resolveViewStorey } from "../storeys/context.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import {
@@ -58,7 +59,7 @@ function resolvedContext<T extends ViewIdentity>(
     binding: Object.freeze({ ...binding }),
     scale: Object.freeze({ ...scale, view: Object.freeze({ ...scale.view }) }),
     visibility,
-    storey: context.storey,
+    storey: storeyOf(context),
     isCurrent: context.isCurrent,
   });
 }

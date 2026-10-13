@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
@@ -107,5 +108,5 @@ diagnostic.onclick = async () => {
   }
 };
 const fixture = tPairFixture();
-if (new URLSearchParams(location.search).has("free")) fixture.storey.wallTJunctions = [];
+if (new URLSearchParams(location.search).has("free")) storeyOf(fixture).wallTJunctions = [];
 createRoot(document.getElementById("root")!).render(<CadWorkspace initialProject={fixture} />);

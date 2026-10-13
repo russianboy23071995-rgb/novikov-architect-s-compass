@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -111,7 +112,7 @@ test("empty projects export their hierarchy without invalid empty containment se
 test("snapshot isolation prevents edits during export from mixing model states", async () => {
   const project = createExampleProject();
   const pending = exportIfc(project, date);
-  project.storey.walls[0]!.height = 100;
+  storeyOf(project).walls[0]!.height = 100;
   const ifc = await pending;
   assert.ok(ifc.includes("IFCLENGTHMEASURE(2.8)"));
   assert.ok(!ifc.includes("IFCLENGTHMEASURE(100.)"));
@@ -119,7 +120,7 @@ test("snapshot isolation prevents edits during export from mixing model states",
 
 test("invalid dimensions/references and invalid timestamps reject before download", async () => {
   const corrupt = createExampleProject();
-  corrupt.storey.windows[0]!.wallId = "missing";
+  storeyOf(corrupt).windows[0]!.wallId = "missing";
   await assert.rejects(exportIfc(corrupt, date));
   await assert.rejects(exportIfc(createExampleProject(), new Date(NaN)));
 });
@@ -129,7 +130,7 @@ test("adding unrelated walls does not change existing IDs; window placement is e
   const before = await exportIfc(project, date);
   const after = await exportIfc(
     addWall(updateWindow(project, "window-1", { position: 0.6, sillHeight: 1 }), {
-      ...project.storey.walls[0]!,
+      ...storeyOf(project).walls[0]!,
       id: "another",
       start: { x: 10, y: 5 },
       end: { x: 7, y: 1 },

@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 /** Full-snapshot materialization diagnostic; after A-04 this is NOT the pointer path. */
 import assert from "node:assert/strict";
 import { createProject, validateProject } from "../src/lib/bim/model.ts";
@@ -14,7 +15,7 @@ function fixture(count: number) {
     ["B", { x: 4, y: 0 }, { x: 4, y: 4 }],
     ["C", { x: 10, y: 0 }, { x: 12, y: 0 }],
   ] as const)
-    p.storey.walls.push({
+    storeyOf(p).walls.push({
       id,
       layerId: p.defaultLayerIds.wall,
       start,
@@ -23,11 +24,11 @@ function fixture(count: number) {
       height: 2.8,
       bodyOffset: 0,
     });
-  p.storey.wallJoins.push({
+  storeyOf(p).wallJoins.push({
     first: { wallId: "A", endpoint: 1 },
     second: { wallId: "B", endpoint: 0 },
   });
-  p.storey.windows.push({
+  storeyOf(p).windows.push({
     id: "W",
     wallId: "A",
     layerId: p.defaultLayerIds.window,
@@ -36,7 +37,7 @@ function fixture(count: number) {
     sillHeight: 0.9,
     position: 0.5,
   });
-  p.storey.hatches.push({
+  storeyOf(p).hatches.push({
     id: "H",
     kind: "hatch",
     layerId: p.defaultLayerIds.line,
@@ -55,7 +56,7 @@ function fixture(count: number) {
     pixelHeight: 1,
     data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX5sAAAAASUVORK5CYII=",
   });
-  p.storey.references.push({
+  storeyOf(p).references.push({
     id: "R",
     kind: "image-reference",
     assetId: "asset",
@@ -64,9 +65,9 @@ function fixture(count: number) {
     rotation: 0,
     metresPerPixel: 1,
   });
-  p.storey.lines = [];
+  storeyOf(p).lines = [];
   for (let i = 0; i < count - 6; i++)
-    p.storey.lines.push({
+    storeyOf(p).lines!.push({
       id: `L${i}`,
       layerId: p.defaultLayerIds.line,
       kind: "line",
@@ -82,11 +83,11 @@ function fixture(count: number) {
 }
 function entities(p: Project) {
   return [
-    ...p.storey.walls,
-    ...p.storey.windows,
-    ...p.storey.hatches,
-    ...p.storey.references,
-    ...(p.storey.lines ?? []),
+    ...storeyOf(p).walls,
+    ...storeyOf(p).windows,
+    ...storeyOf(p).hatches,
+    ...storeyOf(p).references,
+    ...(storeyOf(p).lines ?? []),
   ];
 }
 const reports = [100, 1000, 5000].map((count) => {
@@ -110,12 +111,12 @@ const reports = [100, 1000, 5000].map((count) => {
   assert.notEqual(preview.assets[0], base.assets[0]);
   assert.equal(preview.assets[0]!.data, base.assets[0]!.data);
   assert.equal(JSON.stringify(base), original);
-  const b = base.storey.walls.find((w) => w.id === "B")!;
+  const b = storeyOf(base).walls.find((w) => w.id === "B")!;
   const oldContour = connectedWallContours(base).get("B") ?? wallBody(b).corners;
   const newContour = connectedWallContours(preview).get("B") ?? wallBody(b).corners;
   assert.notDeepEqual(newContour, oldContour);
   assert.deepEqual(
-    preview.storey.walls.find((w) => w.id === "B"),
+    storeyOf(preview).walls.find((w) => w.id === "B"),
     b,
   );
   return {
@@ -132,7 +133,7 @@ const reports = [100, 1000, 5000].map((count) => {
 const base = fixture(100),
   targets = [{ kind: "wall" as const, id: "C" }];
 // C has no relation to the joined A/B corner, yet its new endpoint occupies that node.
-assert.ok(!base.storey.wallJoins.some((j) => j.first.wallId === "C" || j.second.wallId === "C"));
+assert.ok(!storeyOf(base).wallJoins.some((j) => j.first.wallId === "C" || j.second.wallId === "C"));
 assert.throws(
   () =>
     previewSelectionMove(beginSelectionMove(base, targets, { x: 0, y: 0 }), base, targets, {

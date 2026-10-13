@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -44,7 +45,7 @@ function fixture() {
 function toPaper(p = fixture()) {
   const size = changeHatchSizeMode(
     definition,
-    patternSize(p.storey.hatches[0]!.pattern),
+    patternSize(storeyOf(p).hatches[0]!.pattern),
     "paper",
     projectScaleContext(p),
   );
@@ -59,8 +60,8 @@ function toPaper(p = fixture()) {
 test("mode changes preserve visible width both ways, including after a scale change", () => {
   const base = fixture(),
     paper = toPaper(base),
-    h = paper.storey.hatches[0]!;
-  assert.deepEqual(h.points, base.storey.hatches[0]!.points);
+    h = storeyOf(paper).hatches[0]!;
+  assert.deepEqual(h.points, storeyOf(base).hatches[0]!.points);
   assert.deepEqual(paper.hatchPatterns, base.hatchPatterns);
   assert.equal(h.pattern!.mode, "paper");
   assert.deepEqual(patternSize(h.pattern), { mode: "paper", paperWidthMetres: 0.002 });
@@ -87,7 +88,7 @@ test("mode changes preserve visible width both ways, including after a scale cha
     changes: {},
     patternSize: size,
   });
-  assert.equal(hatchPatternTile(definition, restored.storey.hatches[0]!.pattern!)!.width, 0.1);
+  assert.equal(hatchPatternTile(definition, storeyOf(restored).hatches[0]!.pattern!)!.width, 0.1);
 });
 test("size edits are one model undo step; view scale stays outside that history; save/load retains mode", () => {
   const p = fixture();
@@ -98,15 +99,15 @@ test("size edits are one model undo step; view scale stays outside that history;
     changeProjectScale(history.present, projectScaleContext(p).view, 50),
   );
   history = undoProject(history);
-  assert.equal(history.present.storey.hatches[0]!.pattern!.mode, "model");
+  assert.equal(storeyOf(history.present).hatches[0]!.pattern!.mode, "model");
   assert.equal(projectScaleContext(history.present).denominator, 50);
   history = redoProject(history);
-  assert.equal(history.present.storey.hatches[0]!.pattern!.mode, "paper");
+  assert.equal(storeyOf(history.present).hatches[0]!.pattern!.mode, "paper");
   assert.deepEqual(readProjectFile(serializeProject(history.present)), history.present);
   const old = { ...p, schemaVersion: 15 };
   const loaded = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(loaded.schemaVersion, 23);
-  assert.deepEqual(loaded.storey, p.storey);
+  assert.equal(loaded.schemaVersion, 24);
+  assert.deepEqual(storeyOf(loaded), storeyOf(p));
   assert.throws(() =>
     readProjectFile(legacyFixtureJSON({ ...history.present, schemaVersion: 15 })),
   );
@@ -125,13 +126,13 @@ test("pickup, drawing, translation, property edits and library updates preserve 
     ...pickup.values,
   });
   assert.deepEqual(
-    patternSize(next.storey.hatches[1]!.pattern),
-    patternSize(p.storey.hatches[0]!.pattern),
+    patternSize(storeyOf(next).hatches[1]!.pattern),
+    patternSize(storeyOf(p).hatches[0]!.pattern),
   );
   const moved = moveElement(p, { kind: "hatch", id: "h" }, { x: 2, y: 3 });
   assert.deepEqual(
-    patternSize(moved.storey.hatches[0]!.pattern),
-    patternSize(p.storey.hatches[0]!.pattern),
+    patternSize(storeyOf(moved).hatches[0]!.pattern),
+    patternSize(storeyOf(p).hatches[0]!.pattern),
   );
   const edited = previewHatch(p, p, {
     projectId: p.id,
@@ -141,13 +142,13 @@ test("pickup, drawing, translation, property edits and library updates preserve 
     patternDefinition: definition,
     patternRotation: 90,
   });
-  assert.equal(edited.storey.hatches[0]!.pattern!.mode, "paper");
+  assert.equal(storeyOf(edited).hatches[0]!.pattern!.mode, "paper");
   const updated = resolveProjectHatchPatterns(p, p, [
     { definition: { ...definition, width: 0.4 }, revision: 2 },
   ]).project;
   assert.deepEqual(
-    patternSize(updated.storey.hatches[0]!.pattern),
-    patternSize(p.storey.hatches[0]!.pattern),
+    patternSize(storeyOf(updated).hatches[0]!.pattern),
+    patternSize(storeyOf(p).hatches[0]!.pattern),
   );
 });
 test("invalid dimensions, stale actions, missing context and overflow are rejected without mutation", () => {
@@ -185,7 +186,7 @@ test("invalid dimensions, stale actions, missing context and overflow are reject
     ),
   );
   const paper = toPaper(p);
-  assert.throws(() => hatchPatternTile(definition, paper.storey.hatches[0]!.pattern!));
+  assert.throws(() => hatchPatternTile(definition, storeyOf(paper).hatches[0]!.pattern!));
   assert.throws(() =>
     changeProjectScale(
       previewHatch(paper, paper, {
@@ -201,15 +202,14 @@ test("invalid dimensions, stale actions, missing context and overflow are reject
   );
   assert.throws(() =>
     validateProject({
-      ...paper,
-      workingViews: [{ kind: "working-plan", storeyId: "s", denominator: 0.001 }],
-      storey: {
-        ...paper.storey,
-        hatches: paper.storey.hatches.map((h) => ({
+      ...replaceStorey(paper, {
+        ...storeyOf(paper),
+        hatches: storeyOf(paper).hatches.map((h) => ({
           ...h,
           pattern: { ...h.pattern, paperWidthMetres: Number.MIN_VALUE },
         })),
-      },
+      }),
+      workingViews: [{ kind: "working-plan", storeyId: "s", denominator: 0.001 }],
     }),
   );
   assert.equal(serializeProject(p), before);

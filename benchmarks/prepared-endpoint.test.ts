@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareEndpoint } from "./prepared-endpoint.ts";
@@ -49,8 +50,8 @@ test("foreign endpoint contacts use full corner and multiple-node rules", () => 
   for (const extra of [1, 2]) {
     const p = tPairFixture();
     for (let i = 0; i < extra; i++)
-      p.storey.walls.push({
-        ...p.storey.walls[0]!,
+      storeyOf(p).walls.push({
+        ...storeyOf(p).walls[0]!,
         id: `foreign-${i}`,
         start: { x: 8, y: 0 },
         end: { x: 8, y: 3 + i },
@@ -73,9 +74,9 @@ test("prepared snapshot is owned and output cannot mutate later previews", () =>
   const p = tPairFixture(),
     pilot = prepareEndpoint(p, "wall-1"),
     before = pilot.evaluate({ x: 8, y: 0 });
-  p.storey.windows[0]!.width = 9;
+  storeyOf(p).windows[0]!.width = 9;
   assert.deepEqual(pilot.evaluate({ x: 8, y: 0 }), before);
   assert.throws(() => {
-    before.project.storey.walls[0]!.height = 9;
+    storeyOf(before.project).walls[0]!.height = 9;
   });
 });

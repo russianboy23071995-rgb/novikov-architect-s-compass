@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject } from "../../lib/bim/model.ts";
@@ -101,8 +102,8 @@ test("both polyline and hatch commit the shared predicted corner without rectang
     points: complete,
     appearance: defaultLineAppearance,
   });
-  assert.deepEqual(hatch.storey.hatches[0]!.points.at(-1), { x: 0, y: 2 });
-  assert.deepEqual(line.storey.lines![0]!.points.at(-1), { x: 0, y: 2 });
+  assert.deepEqual(storeyOf(hatch).hatches[0]!.points.at(-1), { x: 0, y: 2 });
+  assert.deepEqual(storeyOf(line).lines![0]!.points.at(-1), { x: 0, y: 2 });
   assert.equal(serializeProject(p), before);
 });
 
@@ -170,7 +171,7 @@ test("Shift closes rectangles exactly throughout the snap circle for both drawin
               : { kind, points, lineKind: "polyline", appearance: defaultLineAppearance },
           );
           const saved =
-            kind === "hatch" ? next.storey.hatches[0]!.points : next.storey.lines![0]!.points;
+            kind === "hatch" ? storeyOf(next).hatches[0]!.points : storeyOf(next).lines![0]!.points;
           const a = saved[2]!,
             b = saved[3]!,
             c = saved[0]!;

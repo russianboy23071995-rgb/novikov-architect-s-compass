@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, tick } from "./capacity";
 import { prepareEndpoint } from "./prepared-endpoint";
 import { updateWall, validateProject } from "../src/lib/bim/model";
@@ -12,7 +13,7 @@ button.onclick = async () => {
       output.textContent = `${count} Elemente`;
       await tick();
       const p = capacityFixture(count),
-        id = p.storey.walls[0]!.id;
+        id = storeyOf(p).walls[0]!.id;
       let t = performance.now();
       const pilot = prepareEndpoint(p, id),
         prepareMs = performance.now() - t;

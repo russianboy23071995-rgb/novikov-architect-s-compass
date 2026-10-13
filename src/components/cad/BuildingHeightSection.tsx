@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 export type BuildingSectionStorey = {
   id: string;
   name: string;
+  aboveControl?: ReactNode;
+  belowControl?: ReactNode;
+  nameInput?: ReactNode;
   heightInput: ReactNode;
   elevationInput: ReactNode;
 };
@@ -38,13 +41,15 @@ export function BuildingHeightSection({
                 style={{ borderColor: "black" }}
                 className={`ml-8 mr-3 flex items-center border-x-[12px] border-b-[14px] border-black px-4 ${index === 0 ? "border-t-[14px]" : ""}`}
               >
-                <label className="block w-full space-y-1">
+                <div className="block w-full space-y-1">
+                  {storey.aboveControl}
                   <span className="block truncate text-[11px] font-medium" title={storey.name}>
-                    {storey.name}
+                    {storey.nameInput ?? storey.name}
                   </span>
                   <span className="block text-[11px] text-muted-foreground">Geschosshöhe</span>
                   {storey.heightInput}
-                </label>
+                  {storey.belowControl}
+                </div>
               </div>
               <div className="relative">
                 {index === 0 && (

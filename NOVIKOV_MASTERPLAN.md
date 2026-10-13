@@ -457,18 +457,15 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: EG/OG-Geschosssammlung und Bearbeitung anbinden.**
-Die gespeicherte Schema22-Geschosshöhe und Gebäudeeinstellungen weiterverwenden.
-Domainfunktionen aus domain/storeys/heights.ts wiederverwenden. Keine erneute
-Implementierung der bereits geprüften Einzelgeschoss-Höheneingabe.
-Den bestätigten Höhen-/Migrationsvertrag „Verbindliche Höhenregeln und vertikaler
-Pilot (13.10.2026)“ unter R26-03/N21–N22 umsetzen. Zwei bearbeitbare Geschosse,
-Schema-Migration ohne doppelte Bauteile, gemeinsame Anlage-/Höhenaktionen,
-Geschosswahl und Settings-Hülle, konsistente Z-Ableitung in 3D/Picking/IFC sowie
-Undo und Datei/Recovery-Rundlauf. EG bleibt Rohfußboden-Nullbezug; Abstände nach
-oben/unten kumulieren. Althöhen nicht erfinden. Keller-/Einfügeregeln rechnerisch
-absichern, ihre UI, obere Bauteilbindung und Höhenskizze bleiben spätere Schritte.
-Abnahmeszenario und Zuständigkeitsgrenzen stehen im Register.
+**Genau ein aktiver Fortsetzungsschritt: aktive Geschosswahl zum Zeichnen anbinden.**
+Schema24 und die produktive Geschosssammlung aus dem Skizzen-Piloten weiterverwenden.
+Den vorhandenen Application-Geschosskontext für die Wahl im Navigator und die
+Bauteilanlage nutzen. Der aktuelle Übergangsadapter `storeyOf` bedient noch das EG;
+er darf keine dauerhafte Ersatzarchitektur für aktive Geschosse werden. Als einen
+vertikalen Pilot eine Wand samt Fenster im gewählten EG oder OG zeichnen/bearbeiten,
+mit derselben ID im Grundriss, in 3D/Picking und IFC auf abgeleiteter Geschosshöhe.
+Schema24-Migration, andere Geschosse, Abbilder, Undo/Redo und Datei/Recovery erhalten.
+Keine zweite Bauteilkopie pro Ansicht; keine neue Decken-/Dachfunktion in diesem Auftrag.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -554,3 +551,18 @@ weiterhin die produktive Geschosssammlung mit gemeinsamen Aktionen, UI-Anlage,
 Bearbeitung, History und konsistenter 3D-/IFC-Auflösung. Keine erneute Skizzenplanung.
 15 Höhen-/Migration-/Historytests, TypeScript, fokussiertes Lint und Build bestanden;
 Einzelgeschossdarstellung im Browser geprüft. Mehrgeschoss-Abnahme bleibt offen.
+
+### Status 13.10.2026 – Geschosse direkt in der Skizze anlegen
+PR306–309 nach ausdrücklicher Freigabe zusammengeführt. Oberhalb/unterhalb jedes
+Geschosses lassen sich echte Geschosse mit eigener Höhe anlegen, auch zwischen
+bestehenden Geschossen. Namen und Koten sind bearbeitbar; Standardnamen für OG/KG,
+bestehende Namen bleiben erhalten. Schema24 ersetzt das Einzelgeschoss durch
+`storeys` plus `groundStoreyId`; Altdateien werden ohne erfundene Höhe migriert.
+Gemeinsame BuildingChange-Aktion, genau ein Undo-Schritt je Anlage, globale IDs,
+Datei/Recovery und IFC mit allen Geschossen. Keine zweite gespeicherte Geschosskopie.
+942 Tests im vollständigen Lauf bestanden, beide Typechecks,
+Lint der geänderten Dateien und Produktionsbuild bestanden. Browser: OG +3,00 m,
+Keller −2,80 m; Änderung auf 3,00 m ergibt −3,00 m ohne Verschiebung EG/OG;
+Undo/Redo der Anlage und Speichern/Wiederöffnen bestätigen die Höhen.
+Grenze dieses Piloten: Zeichnen und 3D/Picking bleiben beim bisherigen EG. Neue
+Geschosse sind zunächst leer; die aktive Geschosswahl ist der einzige nächste Auftrag.

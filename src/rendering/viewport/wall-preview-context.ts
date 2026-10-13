@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project, Point } from "../../lib/bim/model.ts";
@@ -30,7 +31,9 @@ export function createWallPreviewContext(
   const sources = getLocalSnapSources(project);
   const edges = getWallFootSources(project);
   const wallIds = new Set(
-    project.storey.walls.filter((w) => isLayerVisible(project, visibility, w.id)).map((w) => w.id),
+    storeyOf(project)
+      .walls.filter((w) => isLayerVisible(project, visibility, w.id))
+      .map((w) => w.id),
   );
   const pointOnly = (source: SnapReference) => {
     const result = { ...source };

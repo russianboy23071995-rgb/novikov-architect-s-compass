@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import {
@@ -25,7 +26,7 @@ export function buildSolid(input: Project): Solid {
     max: [-Infinity, -Infinity, -Infinity],
   };
   const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w]));
-  for (const wall of project.storey.walls) {
+  for (const wall of storeyOf(project).walls) {
     const connection = joined.get(wall.id);
     if (connection) {
       solid.faces.push(...connection.faces);
@@ -42,8 +43,8 @@ export function buildSolid(input: Project): Solid {
     const body = wallBody(wall);
     const ux = (wall.end.x - wall.start.x) / length;
     const uy = (wall.end.y - wall.start.y) / length;
-    const openings = project.storey.windows
-      .filter((w) => w.wallId === wall.id)
+    const openings = storeyOf(project)
+      .windows.filter((w) => w.wallId === wall.id)
       .map((w) => ({
         left: w.position * length - w.width / 2,
         right: w.position * length + w.width / 2,

@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import {
   createRecoveryCatalog,
   openRecoveryDatabase,
@@ -139,7 +140,7 @@ run.onclick = async () => {
         (await read("recovery-v2-heads", b.id)) === undefined,
       "Anderes Projekt wird nicht migriert",
     );
-    const changed = { ...a, storey: { ...a.storey, lines: [] } };
+    const changed = { ...replaceStorey(a, { ...storeyOf(a), lines: [] }) };
     controller.update(changed, "session");
     await controller.saveNow();
     controller.dispose();

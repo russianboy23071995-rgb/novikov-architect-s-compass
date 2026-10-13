@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { largePointFixture } from "../../../benchmarks/large-point-fixture.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -14,8 +15,8 @@ import {
 
 test("UI example uses the agreed wall/window dimensions and stable initial IDs", () => {
   const project = createExampleProject();
-  assert.equal(project.storey.walls[0]!.thickness, 0.36);
-  assert.deepEqual(project.storey.windows[0], {
+  assert.equal(storeyOf(project).walls[0]!.thickness, 0.36);
+  assert.deepEqual(storeyOf(project).windows[0], {
     id: "window-1",
     layerId: project.defaultLayerIds.window,
     wallId: "wall-1",
@@ -25,12 +26,12 @@ test("UI example uses the agreed wall/window dimensions and stable initial IDs",
     position: 0.5,
   });
   assert.deepEqual(createExampleProject(), project);
-  assert.notEqual(createExampleProject().storey, project.storey);
+  assert.notEqual(storeyOf(createExampleProject()), storeyOf(project));
 });
 
 test("length editor extends the wall while its window remains centred", () => {
   const project = createExampleProject();
-  const wall = project.storey.walls[0]!;
+  const wall = storeyOf(project).walls[0]!;
   const changed = updateWall(project, wall.id, { end: endAtLength(wall, 6) });
   assert.deepEqual(windowCentre(changed, "window-1"), { x: 3, y: 0 });
   assert.deepEqual(windowCentre(project, "window-1"), { x: 1.5, y: 0 });
@@ -39,7 +40,7 @@ test("length editor extends the wall while its window remains centred", () => {
 
 test("length editor preserves translated, diagonal and reversed wall directions", () => {
   const wall = {
-    ...createExampleProject().storey.walls[0]!,
+    ...storeyOf(createExampleProject()).walls[0]!,
     start: { x: 5, y: 6 },
     end: { x: 2, y: 2 },
   };
@@ -88,7 +89,7 @@ test("fit bounds accepts a validated 200,000-point project below the file limit"
 
 test("fit bounds retain mixed walls, lines, hatch and rotated reference extents", () => {
   const project = createExampleProject();
-  project.storey.lines = [
+  storeyOf(project).lines = [
     {
       id: "line",
       layerId: project.defaultLayerIds.line,
@@ -102,7 +103,7 @@ test("fit bounds retain mixed walls, lines, hatch and rotated reference extents"
       style: "solid",
     },
   ];
-  project.storey.hatches = [
+  storeyOf(project).hatches = [
     {
       id: "hatch",
       kind: "hatch",
@@ -120,7 +121,7 @@ test("fit bounds retain mixed walls, lines, hatch and rotated reference extents"
   project.assets = [
     { id: "image", mimeType: "image/png", pixelWidth: 2, pixelHeight: 1, data: "AAAA" },
   ];
-  project.storey.references = [
+  storeyOf(project).references = [
     {
       id: "reference",
       kind: "image-reference",

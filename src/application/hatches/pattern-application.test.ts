@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -53,7 +54,7 @@ test("two hatch applications share one portable definition and one-step Undo", (
       patternDefinition: definition,
     });
   assert.equal(two.hatchPatterns.length, 1);
-  assert.equal(two.storey.hatches.length, 2);
+  assert.equal(storeyOf(two).hatches.length, 2);
   const history = commitProject(createHistory(base), two);
   assert.deepEqual(undoProject(history).present, base);
   assert.deepEqual(redoProject(undoProject(history)).present, two);
@@ -71,18 +72,18 @@ test("schema 10 migrates existing solid hatches without a library", () => {
   });
   const { hatchPatterns: _unused, ...old } = p;
   const reopened = deserializeProject(legacyFixtureJSON({ ...old, schemaVersion: 10 }));
-  assert.equal(reopened.schemaVersion, 23);
+  assert.equal(reopened.schemaVersion, 24);
   assert.deepEqual(reopened.hatchPatterns, []);
-  assert.deepEqual(reopened.storey.hatches, p.storey.hatches);
+  assert.deepEqual(storeyOf(reopened).hatches, storeyOf(p).hatches);
 });
 test("translation moves anchor, reshape retains it; prepared path matches full action", () => {
   const p = draw();
   const moved = moveElement(p, { kind: "hatch", id: "h" }, { x: 4, y: 5 });
-  assert.deepEqual(moved.storey.hatches[0]!.pattern!.origin, { x: 4, y: 5 });
+  assert.deepEqual(storeyOf(moved).hatches[0]!.pattern!.origin, { x: 4, y: 5 });
   const prepared = prepareTranslation(p, ["h"]).materialize(p, { x: 4, y: 5 });
   assert.deepEqual(prepared, moved);
   const reshaped = moveElementPoint(moved, { kind: "hatch", id: "h" }, 2, { x: 6, y: 6 });
-  assert.deepEqual(reshaped.storey.hatches[0]!.pattern!.origin, { x: 4, y: 5 });
+  assert.deepEqual(storeyOf(reshaped).hatches[0]!.pattern!.origin, { x: 4, y: 5 });
 });
 test("invalid reference, conflicting ID and stale action do not mutate project", () => {
   const p = draw(),
@@ -110,7 +111,7 @@ test("invalid reference, conflicting ID and stale action do not mutate project",
     changes: {},
     patternDefinition: null,
   });
-  assert.equal(solid.storey.hatches[0]!.pattern, null);
+  assert.equal(storeyOf(solid).hatches[0]!.pattern, null);
   assert.equal(serializeProject(p), json);
 });
 test("pickup copies pattern definition but creates a fresh contour anchor", () => {
@@ -124,7 +125,7 @@ test("pickup copies pattern definition but creates a fresh contour anchor", () =
     points: ring.map((q) => ({ x: q.x + 7, y: q.y + 8 })),
     ...picked.values,
   });
-  assert.deepEqual(next.storey.hatches[1]!.pattern!.origin, { x: 7, y: 8 });
+  assert.deepEqual(storeyOf(next).hatches[1]!.pattern!.origin, { x: 7, y: 8 });
   assert.equal(next.hatchPatterns.length, 1);
   const scene = derivePlanScene(next, () => true, next.hatchPatterns);
   assert.equal(scene.hatchPatterns.size, 1);

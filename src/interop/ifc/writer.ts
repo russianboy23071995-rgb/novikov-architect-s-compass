@@ -1,3 +1,4 @@
+import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -62,7 +63,11 @@ export async function writeIfc(
   );
   for (const [id, points] of profiles) {
     const checked = validateSimplePolygon(points);
-    if (!project.storey.walls.some((w) => w.id === id) || !checked.valid || checked.signedArea <= 0)
+    if (
+      !project.storeys.some((s) => s.walls.some((w) => w.id === id)) ||
+      !checked.valid ||
+      checked.signedArea <= 0
+    )
       throw new Error("Invalid IFC wall profile");
   }
   const exportedAt = timestamp.toISOString();
@@ -100,18 +105,11 @@ export async function writeIfc(
     "IFCBUILDING",
     `${await guid("building", "building")},$,'Building',$,$,${buildingPlacement},$,$,.ELEMENT.,$,$,$`,
   );
-  const storeyPlacement = placement(buildingPlacement);
-  const storey = add(
-    "IFCBUILDINGSTOREY",
-    `${await guid("storey", project.storey.id)},$,${label(project.storey.name)},$,$,${storeyPlacement},$,$,.ELEMENT.,0.`,
-  );
   for (const [key, parent, child] of [
     ["project-site", projectRef, site],
     ["site-building", site, building],
-    ["building-storey", building, storey],
-  ] as const) {
-    add("IFCRELAGGREGATES", `${await guid("aggregate", key)},$,$,$,${parent},(${child})`);
-  }
+  ])
+    add("IFCRELAGGREGATES", `${await guid("aggregate", key!)},$,$,$,${parent},(${child})`);
 
   const body = (length: number, thickness: number, height: number, points?: readonly Point2[]) => {
     if (points) {
@@ -150,61 +148,76 @@ export async function writeIfc(
     );
   };
   await properties(projectRef, "project", project.id, [["SchemaVersion", "IFCINTEGER(1)"]]);
-  await properties(storey, "storey", project.storey.id, []);
-  const elements: string[] = [];
-  for (const wall of project.storey.walls) {
-    const length = wallLength(wall);
-    const bodyPosition = wallBody(wall);
-    const wallPlacement = placement(
-      storeyPlacement,
-      bodyPosition.start.x,
-      bodyPosition.start.y,
-      0,
-      (wall.end.x - wall.start.x) / length,
-      (wall.end.y - wall.start.y) / length,
+  const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
+  for (const floor of project.storeys) {
+    const elevation = levels.find((l) => l.storeyId === floor.id)!.elevation;
+    if (elevation === null)
+      throw new Error("Vor dem IFC-Export müssen die Geschosshöhen festgelegt werden.");
+    const storeyPlacement = placement(buildingPlacement, 0, 0, elevation);
+    const storey = add(
+      "IFCBUILDINGSTOREY",
+      `${await guid("storey", floor.id)},$,${label(floor.name)},$,$,${storeyPlacement},$,$,.ELEMENT.,${real(elevation)}`,
     );
-    const wallRef = add(
-      "IFCWALL",
-      `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${body(length, wall.thickness, wall.height, profiles.get(wall.id))},${label(wall.id)},.NOTDEFINED.`,
-    );
-    elements.push(wallRef);
-    await properties(wallRef, "wall", wall.id, [
-      ["Length", `IFCLENGTHMEASURE(${real(length)})`],
-      ["Thickness", `IFCLENGTHMEASURE(${real(wall.thickness)})`],
-      ["Height", `IFCLENGTHMEASURE(${real(wall.height)})`],
-      ["BodyOffset", `IFCLENGTHMEASURE(${real(wall.bodyOffset)})`],
-    ]);
-    for (const window of project.storey.windows.filter((item) => item.wallId === wall.id)) {
-      const openingPlacement = placement(
-        wallPlacement,
-        window.position * length - window.width / 2,
-        0,
-        window.sillHeight,
-      );
-      const opening = add(
-        "IFCOPENINGELEMENT",
-        `${await guid("opening", window.id)},$,${label("Opening " + window.id)},$,$,${openingPlacement},${body(window.width, wall.thickness, window.height)},$,.OPENING.`,
-      );
-      add("IFCRELVOIDSELEMENT", `${await guid("void", window.id)},$,$,$,${wallRef},${opening}`);
-      const windowRef = add(
-        "IFCWINDOW",
-        `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},$,${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
-      );
-      add("IFCRELFILLSELEMENT", `${await guid("fill", window.id)},$,$,$,${opening},${windowRef}`);
-      elements.push(windowRef);
-      await properties(windowRef, "window", window.id, [
-        ["WallId", `IFCTEXT(${text(window.wallId)})`],
-        ["SillHeight", `IFCLENGTHMEASURE(${real(window.sillHeight)})`],
-        ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
-      ]);
-    }
-  }
-  // IFC requires a non-empty set; empty projects still retain their spatial hierarchy.
-  if (elements.length)
     add(
-      "IFCRELCONTAINEDINSPATIALSTRUCTURE",
-      `${await guid("containment", project.storey.id)},$,$,$,(${elements.join(",")}),${storey}`,
+      "IFCRELAGGREGATES",
+      `${await guid("aggregate", floor.id === project.groundStoreyId ? "building-storey" : "building-storey:" + floor.id)},$,$,$,${building},(${storey})`,
     );
+    await properties(storey, "storey", floor.id, []);
+    const elements: string[] = [];
+    for (const wall of floor.walls) {
+      const length = wallLength(wall);
+      const bodyPosition = wallBody(wall);
+      const wallPlacement = placement(
+        storeyPlacement,
+        bodyPosition.start.x,
+        bodyPosition.start.y,
+        0,
+        (wall.end.x - wall.start.x) / length,
+        (wall.end.y - wall.start.y) / length,
+      );
+      const wallRef = add(
+        "IFCWALL",
+        `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${body(length, wall.thickness, wall.height, profiles.get(wall.id))},${label(wall.id)},.NOTDEFINED.`,
+      );
+      elements.push(wallRef);
+      await properties(wallRef, "wall", wall.id, [
+        ["Length", `IFCLENGTHMEASURE(${real(length)})`],
+        ["Thickness", `IFCLENGTHMEASURE(${real(wall.thickness)})`],
+        ["Height", `IFCLENGTHMEASURE(${real(wall.height)})`],
+        ["BodyOffset", `IFCLENGTHMEASURE(${real(wall.bodyOffset)})`],
+      ]);
+      for (const window of floor.windows.filter((item) => item.wallId === wall.id)) {
+        const openingPlacement = placement(
+          wallPlacement,
+          window.position * length - window.width / 2,
+          0,
+          window.sillHeight,
+        );
+        const opening = add(
+          "IFCOPENINGELEMENT",
+          `${await guid("opening", window.id)},$,${label("Opening " + window.id)},$,$,${openingPlacement},${body(window.width, wall.thickness, window.height)},$,.OPENING.`,
+        );
+        add("IFCRELVOIDSELEMENT", `${await guid("void", window.id)},$,$,$,${wallRef},${opening}`);
+        const windowRef = add(
+          "IFCWINDOW",
+          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},$,${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
+        );
+        add("IFCRELFILLSELEMENT", `${await guid("fill", window.id)},$,$,$,${opening},${windowRef}`);
+        elements.push(windowRef);
+        await properties(windowRef, "window", window.id, [
+          ["WallId", `IFCTEXT(${text(window.wallId)})`],
+          ["SillHeight", `IFCLENGTHMEASURE(${real(window.sillHeight)})`],
+          ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
+        ]);
+      }
+    }
+    // IFC requires a non-empty set; empty projects still retain their spatial hierarchy.
+    if (elements.length)
+      add(
+        "IFCRELCONTAINEDINSPATIALSTRUCTURE",
+        `${await guid("containment", floor.id)},$,$,$,(${elements.join(",")}),${storey}`,
+      );
+  }
   return [
     "ISO-10303-21;",
     "HEADER;",

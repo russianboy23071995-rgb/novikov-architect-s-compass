@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -46,7 +47,7 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
   assert.throws(() => updateWall(history.present, "wall", { end: { x: 2.5, y: 3 } }));
   assert.equal(serializeProject(history.present), before);
   history = commitProject(history, updateWall(history.present, "wall", { end: { x: 8, y: 3 } }));
-  assert.equal(wallLength(history.present.storey.walls[0]!), 6);
+  assert.equal(wallLength(storeyOf(history.present).walls[0]!), 6);
   history = undoProject(history);
   assert.equal(serializeProject(history.present), before);
   history = redoProject(history);
@@ -66,9 +67,9 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
     ),
   );
   const moved = history.present;
-  assert.deepEqual(moved.storey.walls[0]!.start, { x: 4, y: 2 });
-  assert.deepEqual(moved.storey.walls[0]!.end, { x: 10, y: 2 });
-  assert.deepEqual(moved.storey.windows, beforeMove.storey.windows);
+  assert.deepEqual(storeyOf(moved).walls[0]!.start, { x: 4, y: 2 });
+  assert.deepEqual(storeyOf(moved).walls[0]!.end, { x: 10, y: 2 });
+  assert.deepEqual(storeyOf(moved).windows, storeyOf(beforeMove).windows);
   history = commitProject(
     history,
     editAtPointer(
@@ -83,7 +84,7 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
       { x: 7.6, y: 2 },
     ),
   );
-  assert.ok(Math.abs(history.present.storey.windows[0]!.position - 0.6) < 1e-12);
+  assert.ok(Math.abs(storeyOf(history.present).windows[0]!.position - 0.6) < 1e-12);
   const afterMoves = history.present;
   history = undoProject(history);
   assert.deepEqual(history.present, moved);
@@ -94,8 +95,8 @@ test("complete wall-window workflow retains dimensions, host and IDs through und
   const saved = serializeProject(history.present);
   const restored = readProjectFile(saved);
   assert.deepEqual(restored, history.present);
-  assert.ok(Math.abs(restored.storey.windows[0]!.position - 0.6) < 1e-12);
-  assert.equal(restored.storey.windows[0]!.wallId, "wall");
+  assert.ok(Math.abs(storeyOf(restored).windows[0]!.position - 0.6) < 1e-12);
+  assert.equal(storeyOf(restored).windows[0]!.wallId, "wall");
   const solid = buildSolid(restored);
   assert.deepEqual(solid.min, [4, 1.82, 0]);
   assert.deepEqual(solid.max, [10, 2.18, 2.8]);

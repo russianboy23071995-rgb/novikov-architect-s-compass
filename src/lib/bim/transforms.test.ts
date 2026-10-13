@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -31,12 +32,12 @@ test("moving a wall preserves its stable identity and hosted window while transl
   const p = createExampleProject();
   const before = serializeProject(p);
   const moved = moveElement(p, target, { x: 2, y: -3 });
-  assert.deepEqual(moved.storey.walls[0], {
-    ...p.storey.walls[0],
+  assert.deepEqual(storeyOf(moved).walls[0], {
+    ...storeyOf(p).walls[0],
     start: { x: 2, y: -3 },
     end: { x: 5, y: -3 },
   });
-  assert.deepEqual(moved.storey.windows, p.storey.windows);
+  assert.deepEqual(storeyOf(moved).windows, storeyOf(p).windows);
   const old = buildSolid(p),
     solid = buildSolid(moved);
   assert.ok(Math.abs(old.volume - solid.volume) < 1e-10);
@@ -52,20 +53,20 @@ test("translation targets ID, preserves polyline shape/style and leaves unrelate
     thickness: 0.36,
   });
   const moved = moveElement(p, lineTarget, { x: -2, y: 1 });
-  assert.deepEqual(moved.storey.lines![0], {
-    ...p.storey.lines![0],
+  assert.deepEqual(storeyOf(moved).lines![0], {
+    ...storeyOf(p).lines![0],
     points: [
       { x: -2, y: 1 },
       { x: 1, y: 5 },
       { x: 4, y: 5 },
     ],
   });
-  assert.deepEqual(moved.storey.walls, p.storey.walls);
+  assert.deepEqual(storeyOf(moved).walls, storeyOf(p).walls);
 });
 test("point edit changes only selected polyline vertex and keeps a closed ring closed", () => {
   const p = poly();
   const next = moveElementPoint(p, lineTarget, 1, { x: 2, y: 5 });
-  assert.deepEqual(next.storey.lines![0]!.points, [
+  assert.deepEqual(storeyOf(next).lines![0]!.points, [
     { x: 0, y: 0 },
     { x: 2, y: 5 },
     { x: 6, y: 4 },
@@ -82,7 +83,7 @@ test("point edit changes only selected polyline vertex and keeps a closed ring c
     ...defaultLineAppearance,
   });
   for (const index of [0, 3]) {
-    const ring = moveElementPoint(closed, lineTarget, index, { x: -1, y: 2 }).storey.lines![0]!
+    const ring = storeyOf(moveElementPoint(closed, lineTarget, index, { x: -1, y: 2 })).lines![0]!
       .points;
     assert.deepEqual(ring[0], { x: -1, y: 2 });
     assert.deepEqual(ring[3], ring[0]);
@@ -95,21 +96,21 @@ test("stretching either diagonal wall endpoint preserves direction and centred w
     end: { x: 4, y: 6 },
   });
   const end = stretchEndpoint(p, target, "end", 10);
-  assert.deepEqual(end.storey.walls[0]!.end, { x: 7, y: 10 });
-  assert.deepEqual(end.storey.walls[0]!.start, { x: 1, y: 2 });
+  assert.deepEqual(storeyOf(end).walls[0]!.end, { x: 7, y: 10 });
+  assert.deepEqual(storeyOf(end).walls[0]!.start, { x: 1, y: 2 });
   const start = stretchEndpoint(p, target, "start", 10);
-  assert.deepEqual(start.storey.walls[0]!.start, { x: -2, y: -2 });
-  assert.deepEqual(start.storey.walls[0]!.end, { x: 4, y: 6 });
-  assert.equal(start.storey.windows[0]!.position, 0.5);
+  assert.deepEqual(storeyOf(start).walls[0]!.start, { x: -2, y: -2 });
+  assert.deepEqual(storeyOf(start).walls[0]!.end, { x: 4, y: 6 });
+  assert.equal(storeyOf(start).windows[0]!.position, 0.5);
 });
 test("polyline stretch changes only terminal segment, preserving intermediate vertices", () => {
   const p = poly();
-  assert.deepEqual(stretchEndpoint(p, lineTarget, "end", 6).storey.lines![0]!.points, [
+  assert.deepEqual(storeyOf(stretchEndpoint(p, lineTarget, "end", 6)).lines![0]!.points, [
     { x: 0, y: 0 },
     { x: 3, y: 4 },
     { x: 9, y: 4 },
   ]);
-  assert.deepEqual(stretchEndpoint(p, lineTarget, "start", 10).storey.lines![0]!.points, [
+  assert.deepEqual(storeyOf(stretchEndpoint(p, lineTarget, "start", 10)).lines![0]!.points, [
     { x: -3, y: -4 },
     { x: 3, y: 4 },
     { x: 6, y: 4 },
@@ -134,16 +135,16 @@ test("invalid indices, missing IDs and nonfinite coordinates cannot edit another
   assert.throws(() => moveElementPoint(p, target, 1, { x: Infinity, y: 0 }));
   const pts = editablePoints(p, target);
   pts[0]!.x = 99;
-  assert.equal(p.storey.walls[0]!.start.x, 0);
+  assert.equal(storeyOf(p).walls[0]!.start.x, 0);
 });
 test("window movement uses signed wall distance, keeps host and rejects crossing wall ends", () => {
   const p = createExampleProject();
   const moved = moveWindowAlongWall(p, "window-1", 0.3);
-  assert.equal(moved.storey.windows[0]!.position, 0.6);
-  assert.equal(moved.storey.windows[0]!.wallId, "wall-1");
-  assert.equal(moveWindowAlongWall(p, "window-1", -0.3).storey.windows[0]!.position, 0.4);
+  assert.equal(storeyOf(moved).windows[0]!.position, 0.6);
+  assert.equal(storeyOf(moved).windows[0]!.wallId, "wall-1");
+  assert.equal(storeyOf(moveWindowAlongWall(p, "window-1", -0.3)).windows[0]!.position, 0.4);
   assert.ok(
-    Math.abs(moveWindowAlongWall(p, "window-1", 100).storey.windows[0]!.position - 0.8) < 1e-9,
+    Math.abs(storeyOf(moveWindowAlongWall(p, "window-1", 100)).windows[0]!.position - 0.8) < 1e-9,
   );
   assert.throws(() => moveWindowAlongWall(p, "missing", 0));
   assert.throws(() => moveWindowAlongWall(p, "window-1", NaN));
@@ -186,9 +187,9 @@ test("window cap remains valid at both joined ends and preserves the base", asyn
   for (const distance of [-100, 100]) {
     const next = moveWindowAlongWall(p, "w", distance);
     assert.deepEqual(validateProject(next), next);
-    const position = next.storey.windows[0]!.position;
+    const position = storeyOf(next).windows[0]!.position;
     assert.ok(position > 0.1 && position < 0.9);
-    assert.equal(moveWindowAlongWall(next, "w", distance).storey.windows[0]!.position, position);
+    assert.equal(storeyOf(moveWindowAlongWall(next, "w", distance)).windows[0]!.position, position);
   }
-  assert.equal(p.storey.windows[0]!.position, 0.5);
+  assert.equal(storeyOf(p).windows[0]!.position, 0.5);
 });

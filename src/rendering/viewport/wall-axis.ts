@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import type { ProjectionState } from "./projection-state.ts";
@@ -49,7 +50,7 @@ export function selectedWallAxis(
   projection: ProjectionState,
 ) {
   if (selection?.kind !== "wall" || !allows(selection.id)) return null;
-  const wall = displayed.storey.walls.find((w) => w.id === selection.id);
+  const wall = storeyOf(displayed).walls.find((w) => w.id === selection.id);
   if (!wall) return null;
   const screen = (point: { x: number; y: number }) => {
     const [x, y] = projection.project([point.x, point.y, 0]);

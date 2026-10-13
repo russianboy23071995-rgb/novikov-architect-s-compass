@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile } from "./capacity";
 import { importImage } from "../src/interop/images/import";
 import { validateProject, serializeProject } from "../src/lib/bim/model";
@@ -12,7 +13,7 @@ button.onclick = async () => {
     for (let i = 0; i < 3; i++) {
       const asset = await importImage(await sourceFile(i), `asset-${i}`);
       p.assets.push(asset);
-      p.storey.references.push({
+      storeyOf(p).references.push({
         id: `ref-${i}`,
         kind: "image-reference",
         layerId: p.defaultLayerIds.line,
@@ -50,8 +51,8 @@ button.onclick = async () => {
     });
     const duplicate = structuredClone(p);
     duplicate.assets.push({ ...p.assets[0]!, id: "duplicate" });
-    duplicate.storey.references.push({
-      ...p.storey.references[0]!,
+    storeyOf(duplicate).references.push({
+      ...storeyOf(p).references[0]!,
       id: "duplicate-ref",
       assetId: "duplicate",
     });

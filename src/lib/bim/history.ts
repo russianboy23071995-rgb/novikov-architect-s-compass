@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
 import {
   ProjectFileSizeError,
@@ -51,7 +52,7 @@ export function readProjectFile(text: string): Project {
   } catch (error) {
     if (error instanceof ProjectFileSizeError) throw error;
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 23, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 24, Meter) mit gültigen Bauteilen.",
     );
   }
 }
@@ -62,7 +63,7 @@ function retainViewSettings(snapshot: Project, current: Project): Project {
   const hiddenLayerIds = current.bimVisibility.hiddenLayerIds.filter((id) => ids.has(id));
   const workingViews =
     snapshot.id === current.id
-      ? current.workingViews?.filter((view) => view.storeyId === snapshot.storey.id)
+      ? current.workingViews?.filter((view) => snapshot.storeys.some((s) => s.id === view.storeyId))
       : snapshot.workingViews;
   const drawingDocuments = snapshot.drawingDocuments?.map((doc) => {
     const latest =

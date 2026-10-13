@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
@@ -11,15 +12,15 @@ export type HatchDefaults = Pick<Hatch, "fill" | "background" | "contour" | "lay
     import("../../domain/elements/hatch/pattern.ts").HatchPatternDefinition | null | undefined;
 };
 export type WindowDefaults = Pick<
-  Project["storey"]["windows"][number],
+  Project["storeys"][number]["windows"][number],
   "width" | "height" | "sillHeight" | "layerId"
 >;
 export type LineDefaults = Pick<
-  NonNullable<Project["storey"]["lines"]>[number],
+  NonNullable<Project["storeys"][number]["lines"]>[number],
   "color" | "penWidth" | "style" | "layerId" | "pattern" | "repeatLength"
 >;
 export type WallDefaults = Pick<
-  Project["storey"]["walls"][number],
+  Project["storeys"][number]["walls"][number],
   "thickness" | "height" | "bodyOffset" | "layerId"
 >;
 export type ToolDefaults =
@@ -36,7 +37,7 @@ export function pickupToolDefaults(
 ): ToolDefaults | null {
   if (!visibility.evaluate(project, visibility.context, target.id).eligible) return null;
   if (target.kind === "wall") {
-    const source = project.storey.walls.find((item) => item.id === target.id);
+    const source = storeyOf(project).walls.find((item) => item.id === target.id);
     if (!source) return null;
     return {
       tool: "wall",
@@ -49,7 +50,7 @@ export function pickupToolDefaults(
     };
   }
   if (target.kind === "line") {
-    const source = project.storey.lines?.find((item) => item.id === target.id);
+    const source = storeyOf(project).lines?.find((item) => item.id === target.id);
     if (!source) return null;
     return {
       tool: "line",
@@ -65,7 +66,7 @@ export function pickupToolDefaults(
     };
   }
   if (target.kind === "window") {
-    const source = project.storey.windows.find((item) => item.id === target.id);
+    const source = storeyOf(project).windows.find((item) => item.id === target.id);
     if (!source) return null;
     return {
       tool: "window",
@@ -78,7 +79,7 @@ export function pickupToolDefaults(
     };
   }
   if (target.kind !== "hatch") return null;
-  const source = project.storey.hatches.find((item) => item.id === target.id);
+  const source = storeyOf(project).hatches.find((item) => item.id === target.id);
   if (!source) return null;
   return {
     tool: "hatch",

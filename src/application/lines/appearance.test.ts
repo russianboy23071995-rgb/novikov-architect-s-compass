@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { pickupToolDefaults } from "../tools/pickup.ts";
@@ -36,8 +37,8 @@ test("portable model-space pattern survives catalog deletion and roundtrip, undo
   deleteLineStyle({ read: () => null, write: () => {} }, builtInLineStyles, "dashed");
   const reopened = deserializeProject(serializeProject(next));
   assert.deepEqual(reopened, next);
-  assert.equal(reopened.storey.lines![0]!.repeatLength, 0.25);
-  assert.equal(reopened.storey.lines![0]!.pattern!.id, "dashed");
+  assert.equal(storeyOf(reopened).lines![0]!.repeatLength, 0.25);
+  assert.equal(storeyOf(reopened).lines![0]!.pattern!.id, "dashed");
   const history = commitProject(createHistory(base), next);
   assert.deepEqual(undoProject(history).present, base);
   assert.throws(() => applyLineStyle(defaultLineAppearance, builtInLineStyles[0]!, 0));
@@ -47,8 +48,8 @@ test("schema 9 loads unchanged geometry as schema 11; invalid embedded patterns 
   const { hatchPatterns: _patterns, ...old } = project;
   const legacy = { ...old, schemaVersion: 9 };
   const loaded = loadProjectData(legacyProjectFixture(legacy));
-  assert.equal(loaded.schemaVersion, 23);
-  assert.deepEqual(loaded.storey, project.storey);
+  assert.equal(loaded.schemaVersion, 24);
+  assert.deepEqual(storeyOf(loaded), storeyOf(project));
   assert.throws(() =>
     addLine(project, {
       id: "invalid",
@@ -106,8 +107,8 @@ test("shared creation and pickup retain owned custom pattern without geometry du
   assert.equal(preset.tool, "line");
   if (preset.tool !== "line") throw new Error("line expected");
   assert.equal(preset.values.repeatLength, 0.4);
-  assert.deepEqual(preset.values.pattern, made.storey.lines![0]!.pattern);
-  assert.notEqual(preset.values.pattern, made.storey.lines![0]!.pattern);
+  assert.deepEqual(preset.values.pattern, storeyOf(made).lines![0]!.pattern);
+  assert.notEqual(preset.values.pattern, storeyOf(made).lines![0]!.pattern);
   const next = createDrawing(made, made, "copy-custom", {
     kind: "line",
     points: [
@@ -117,8 +118,8 @@ test("shared creation and pickup retain owned custom pattern without geometry du
     lineKind: "line",
     appearance: preset.values,
   });
-  assert.equal(next.storey.lines!.length, 2);
-  assert.equal(next.storey.lines![1]!.points.length, 2);
+  assert.equal(storeyOf(next).lines!.length, 2);
+  assert.equal(storeyOf(next).lines![1]!.points.length, 2);
   const before = JSON.stringify(next);
   assert.throws(() =>
     addLine(next, {
@@ -153,9 +154,9 @@ test("fixed color cannot be overridden, editable colors remain free and survive 
   };
   const project = addLine(base, line);
   assert.throws(() => updateLine(project, "locked", { color: "#00ff00" }));
-  assert.equal(project.storey.lines![0]!.color, "#aa2244");
+  assert.equal(storeyOf(project).lines![0]!.color, "#aa2244");
   const reopened = deserializeProject(serializeProject(project));
-  assert.equal(reopened.storey.lines![0]!.pattern!.colorEditable, false);
+  assert.equal(storeyOf(reopened).lines![0]!.pattern!.colorEditable, false);
   const free = addLine(base, {
     ...line,
     id: "free",
@@ -165,7 +166,10 @@ test("fixed color cannot be overridden, editable colors remain free and survive 
       1.5,
     ),
   });
-  assert.equal(updateLine(free, "free", { color: "#00ff00" }).storey.lines![0]!.color, "#00ff00");
+  assert.equal(
+    storeyOf(updateLine(free, "free", { color: "#00ff00" })).lines![0]!.color,
+    "#00ff00",
+  );
   const noFlag = applyLineStyle(defaultLineAppearance, builtInLineStyles[0]!, 1.5);
   assert.equal(noFlag.pattern!.colorEditable, true);
 });

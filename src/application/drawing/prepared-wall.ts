@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { WallDefaults } from "../tools/pickup.ts";
 /** Owned prepared scope for the first free wall segment only. */
 import { validateProject, type Project, type Point } from "../../lib/bim/model.ts";
@@ -21,7 +22,7 @@ export function prepareWallDrawing(
   const settings = freeze({ ...(defaults ?? defaultDrawingWall) });
   const base = freeze(validateProject(source));
   const start = freeze({ ...origin });
-  const s = base.storey;
+  const s = storeyOf(base);
   const ids = new Set(
     [
       base,
@@ -37,9 +38,7 @@ export function prepareWallDrawing(
   );
   const endpoints = s.walls.flatMap((w) => [w.start, w.end]);
   const empty = freeze({
-    ...base,
-    assets: [],
-    storey: {
+    ...replaceStorey(base, {
       ...s,
       walls: [],
       windows: [],
@@ -48,7 +47,8 @@ export function prepareWallDrawing(
       references: [],
       wallJoins: [],
       wallTJunctions: [],
-    },
+    }),
+    assets: [],
   });
   const full = (point: Point, candidate?: SnapCandidate | null) =>
     connectWallAtTAxis(
@@ -69,15 +69,17 @@ export function prepareWallDrawing(
         endpoints.some((p) => pointsCompatible(p, start) || pointsCompatible(p, point))
       )
         return { project: full(point, candidate), path: "full" };
-      const added = createDrawing(empty, empty, id, {
-        kind: "wall",
-        start,
-        end: point,
-        ...settings,
-      }).storey.walls;
+      const added = storeyOf(
+        createDrawing(empty, empty, id, {
+          kind: "wall",
+          start,
+          end: point,
+          ...settings,
+        }),
+      ).walls;
       return {
         path: "local",
-        project: freeze({ ...base, storey: { ...s, walls: [...s.walls, ...added] } }),
+        project: freeze({ ...replaceStorey(base, { ...s, walls: [...s.walls, ...added] }) }),
       };
     },
     confirm: full,

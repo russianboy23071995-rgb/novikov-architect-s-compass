@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 /** Owned calculation scope for the bounded axial T-host endpoint preview. */
 import { validateProject, updateWall, type Project, type Point } from "../../lib/bim/model.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
@@ -10,7 +11,7 @@ function freeze<T>(v: T): T {
 }
 export function prepareEndpoint(source: Project, id: string) {
   const base = freeze(validateProject(source)),
-    s = base.storey,
+    s = storeyOf(base),
     wall = s.walls.find((w) => w.id === id);
   if (!wall) throw Error("Unknown wall");
   const ids = new Set([id]);
@@ -34,9 +35,7 @@ export function prepareEndpoint(source: Project, id: string) {
     s.wallTJunctions.some((t) => t.hostWallId === id) &&
     !s.wallJoins.some((j) => ids.has(j.first.wallId) || ids.has(j.second.wallId));
   const local = freeze({
-    ...base,
-    assets: [],
-    storey: {
+    ...replaceStorey(base, {
       ...s,
       walls: s.walls.filter((w) => ids.has(w.id)),
       windows: s.windows.filter((w) => ids.has(w.wallId)),
@@ -45,7 +44,8 @@ export function prepareEndpoint(source: Project, id: string) {
       lines: [],
       hatches: [],
       references: [],
-    },
+    }),
+    assets: [],
   });
   const foreign = s.walls.filter((w) => !ids.has(w.id)).flatMap((w) => [w.start, w.end]);
   const dx = wall.end.x - wall.start.x,
@@ -69,22 +69,21 @@ export function prepareEndpoint(source: Project, id: string) {
         return { project: updateWall(base, id, { end: point }), path: "full" };
       const next = updateWall(local, id, { end: point });
       if (
-        JSON.stringify(next.storey.wallTJunctions) !==
-          JSON.stringify(local.storey.wallTJunctions) ||
-        JSON.stringify(next.storey.wallJoins) !== JSON.stringify(local.storey.wallJoins)
+        JSON.stringify(storeyOf(next).wallTJunctions) !==
+          JSON.stringify(storeyOf(local).wallTJunctions) ||
+        JSON.stringify(storeyOf(next).wallJoins) !== JSON.stringify(storeyOf(local).wallJoins)
       )
         return { project: updateWall(base, id, { end: point }), path: "full" };
-      const byId = new Map(next.storey.walls.map((w) => [w.id, w]));
+      const byId = new Map(storeyOf(next).walls.map((w) => [w.id, w]));
       return {
         path: "local",
         project: freeze({
-          ...base,
-          storey: {
+          ...replaceStorey(base, {
             ...s,
             walls: s.walls.map((w) => byId.get(w.id) ?? w),
             wallJoins: s.wallJoins,
             wallTJunctions: s.wallTJunctions,
-          },
+          }),
         }),
       };
     },

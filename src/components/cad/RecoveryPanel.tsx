@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { useLocalAutosave } from "./useLocalAutosave";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
@@ -184,8 +185,8 @@ export function RecoveryPanel({
               · {new Date(candidate.savedAt).toLocaleString()}
             </p>
             <p>
-              Projekt: {candidate.project.id} · {candidate.project.storey.walls.length} Wände ·{" "}
-              {candidate.project.storey.windows.length} Fenster
+              Projekt: {candidate.project.id} · {storeyOf(candidate.project).walls.length} Wände ·{" "}
+              {storeyOf(candidate.project).windows.length} Fenster
             </p>
             <Button
               size="sm"

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { imageReferenceCorners } from "./image-reference.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
@@ -7,20 +8,20 @@ export type SelectionShape = { target: ElementTarget; points: readonly Point[] }
 /** World-space plan geometry; contains no selection state or gesture rules. */
 export function planSelectionShapes(project: Project): SelectionShape[] {
   const contours = connectedWallContours(project);
-  const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
+  const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
   return [
-    ...project.storey.references.map((r) => ({
+    ...storeyOf(project).references.map((r) => ({
       target: { kind: "reference" as const, id: r.id },
       points: imageReferenceCorners(
         r,
         project.assets.find((a) => a.id === r.assetId)!,
       ),
     })),
-    ...project.storey.walls.map((w) => ({
+    ...storeyOf(project).walls.map((w) => ({
       target: { kind: "wall" as const, id: w.id },
       points: contours.get(w.id) ?? wallBody(w).corners,
     })),
-    ...project.storey.windows.map((w) => {
+    ...storeyOf(project).windows.map((w) => {
       const host = walls.get(w.wallId)!;
       const length = Math.hypot(host.end.x - host.start.x, host.end.y - host.start.y);
       const at = (d: number) => ({
@@ -36,11 +37,11 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
         }).corners,
       };
     }),
-    ...(project.storey.lines ?? []).map((l) => ({
+    ...(storeyOf(project).lines ?? []).map((l) => ({
       target: { kind: "line" as const, id: l.id },
       points: l.points,
     })),
-    ...project.storey.hatches.map((h) => ({
+    ...storeyOf(project).hatches.map((h) => ({
       target: { kind: "hatch" as const, id: h.id },
       points: h.points,
     })),

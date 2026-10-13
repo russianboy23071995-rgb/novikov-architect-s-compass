@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { segmentMidpoint } from "../../geometry/primitives/segment.ts";
@@ -177,7 +178,7 @@ test("drawing and direct edit share exact midpoint targets, preview, exclusions,
     ...defaultLineAppearance,
   });
   const history = commitProject(createHistory(project), drawn);
-  assert.deepEqual(drawn.storey.lines![0]!.points[0], { x: 1.5, y: 0 });
+  assert.deepEqual(storeyOf(drawn).lines![0]!.points[0], { x: 1.5, y: 0 });
   assert.deepEqual(undoProject(history).present, project);
   assert.deepEqual(
     readProjectFile(serializeProject(redoProject(undoProject(history)).present)),

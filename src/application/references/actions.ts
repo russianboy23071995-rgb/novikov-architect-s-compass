@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { ImageAsset, ImageReference } from "../../domain/elements/reference/model.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
@@ -17,9 +18,11 @@ export function previewCreateReference(
     throw new Error("Das Projekt wurde geändert. Import erneut beginnen.");
   if (request.reference.assetId !== request.asset.id) throw new Error("Asset reference mismatch");
   const next = validateProject({
-    ...current,
+    ...replaceStorey(current, {
+      ...storeyOf(current),
+      references: [...storeyOf(current).references, request.reference],
+    }),
     assets: [...current.assets, request.asset],
-    storey: { ...current.storey, references: [...current.storey.references, request.reference] },
   });
   serializeProject(next); // Never commit a project that its file reader cannot reopen.
   return next;

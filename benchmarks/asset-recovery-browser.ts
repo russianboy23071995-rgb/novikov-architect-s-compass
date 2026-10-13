@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import {
   createPreparation,
   createAssetRecoveryStore,
@@ -152,7 +153,7 @@ run.onclick = async () => {
             data,
           }),
         );
-        p.storey.references.push({
+        storeyOf(p).references.push({
           id: `r${i}`,
           kind: "image-reference",
           assetId: `a${i}`,
@@ -179,11 +180,12 @@ run.onclick = async () => {
     const initialHashes = prep.hashes;
     const previousJson = profile === 250 ? "" : JSON.stringify(p);
     p = validateProject({
-      ...p,
-      storey: {
-        ...p.storey,
-        lines: p.storey.lines!.map((line, i) => (i === 0 ? { ...line, color: "#998877" } : line)),
-      },
+      ...replaceStorey(p, {
+        ...storeyOf(p),
+        lines: storeyOf(p).lines!.map((line, i) =>
+          i === 0 ? { ...line, color: "#998877" } : line,
+        ),
+      }),
     });
     const expected = await hash(p);
     const second = await phase("Unveränderte Assets wiederverwenden", () => prep.prepare(p));

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ViewIdentity } from "../../domain/views/scale.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
@@ -78,7 +79,7 @@ export function createDrawing(
     (view.projectId !== current.id ||
       (view.kind === "drawing-document"
         ? !current.drawingDocuments?.some((d) => d.id === view.documentId)
-        : view.storeyId !== current.storey.id))
+        : view.storeyId !== storeyOf(current).id))
   )
     throw new Error("Der Zeichenkontext ist nicht mehr gültig.");
   if (request.kind === "hatch")

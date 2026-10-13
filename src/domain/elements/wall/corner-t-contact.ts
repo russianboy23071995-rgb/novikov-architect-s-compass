@@ -1,3 +1,4 @@
+import { storeyOf } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import type { Point, Wall } from "../../project/schema.ts";
 import { wallBody } from "./body.ts";
@@ -12,13 +13,13 @@ export function validateCornerTContact(
   contact: Point[],
   corners: ReadonlyMap<string, Point[]>,
 ) {
-  const joins = project.storey.wallJoins.filter(
+  const joins = storeyOf(project).wallJoins.filter(
     (j) => j.first.wallId === host.id || j.second.wallId === host.id,
   );
   if (!joins.length) return;
   const partners = joins.map((join) => {
     const partnerId = join.first.wallId === host.id ? join.second.wallId : join.first.wallId;
-    const partner = project.storey.walls.find((w) => w.id === partnerId)!;
+    const partner = storeyOf(project).walls.find((w) => w.id === partnerId)!;
     const hx = host.end.x - host.start.x,
       hy = host.end.y - host.start.y;
     const px = partner.end.x - partner.start.x,

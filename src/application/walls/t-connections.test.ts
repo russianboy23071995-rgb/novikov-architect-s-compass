@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
 import { deriveTPreview } from "./t-preview.ts";
@@ -63,14 +64,14 @@ test("persistent T preview, one history commit, disconnect and undo/redo preserv
   let h = createHistory(pair());
   const base = h.present;
   const preview = previewTConnection(base, base, request);
-  assert.equal(base.storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(base).wallTJunctions.length, 0);
   h = commitTConnection(h, base, request);
   assert.deepEqual(h.present, preview);
   assert.equal(h.past.length, 1);
   assert.deepEqual(undoProject(h).present, base);
   assert.deepEqual(redoProject(undoProject(h)).present, preview);
   const detached = commitTConnection(h, h.present, { ...request, kind: "disconnect" });
-  assert.equal(detached.present.storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(detached.present).wallTJunctions.length, 0);
   assert.deepEqual(undoProject(detached).present, preview);
   assert.throws(() => commitTConnection(h, base, request), /geändert/);
   assert.throws(() => previewTConnection(base, base, { ...request, projectId: "other" }));
@@ -80,20 +81,22 @@ test("persistent T preview, one history commit, disconnect and undo/redo preserv
 test("schema 8 roundtrip and strict V7 migration retain geometry without discovering Ts", () => {
   const p = connected();
   assert.deepEqual(deserializeProject(serializeProject(p)), p);
-  const { references, wallTJunctions, ...storey } = p.storey;
+  const { references, wallTJunctions, ...storey } = storeyOf(p);
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 7, storey };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.deepEqual(migrated.storey, { ...storey, references: [], wallTJunctions: [] });
+  assert.equal(migrated.schemaVersion, 24);
+  assert.deepEqual(storeyOf(migrated), { ...storey, references: [], wallTJunctions: [] });
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...p, schemaVersion: 7 })));
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 8 })));
   assert.throws(() => validateProject(old));
   assert.throws(() =>
     loadProjectData(
       legacyProjectFixture({
-        ...p,
-        storey: { ...p.storey, wallTJunctions: [{ ...wallTJunctions[0], extra: true }] },
+        ...replaceStorey(p, {
+          ...storeyOf(p),
+          wallTJunctions: [{ ...wallTJunctions[0], extra: true }],
+        }),
       }),
     ),
   );
@@ -102,13 +105,13 @@ test("schema 8 roundtrip and strict V7 migration retain geometry without discove
 test("host resizing preserves world anchor, detaches outside and does not convert T into corner", () => {
   const p = connected();
   const extended = updateWall(p, "host", { start: { x: -2, y: 0 }, end: { x: 8, y: 0 } });
-  assert.deepEqual(extended.storey.walls[1], p.storey.walls[1]);
-  assert.deepEqual(extended.storey.wallTJunctions, p.storey.wallTJunctions);
+  assert.deepEqual(storeyOf(extended).walls[1], storeyOf(p).walls[1]);
+  assert.deepEqual(storeyOf(extended).wallTJunctions, storeyOf(p).wallTJunctions);
   for (const x of [2, 3]) {
     const next = updateWall(p, "host", { end: { x, y: 0 } });
-    assert.equal(next.storey.wallTJunctions.length, 0);
-    assert.equal(next.storey.wallJoins.length, 0);
-    assert.deepEqual(next.storey.walls[1], p.storey.walls[1]);
+    assert.equal(storeyOf(next).wallTJunctions.length, 0);
+    assert.equal(storeyOf(next).wallJoins.length, 0);
+    assert.deepEqual(storeyOf(next).walls[1], storeyOf(p).walls[1]);
     const h = commitProject(createHistory(p), next);
     assert.deepEqual(undoProject(h).present, p);
     assert.deepEqual(redoProject(undoProject(h)).present, next);
@@ -122,20 +125,20 @@ test("whole wall translation detaches even when translated host still contains a
   const p = connected();
   for (const id of ["host", "incoming"]) {
     const next = moveElement(p, { kind: "wall", id }, { x: 1, y: 0 });
-    assert.equal(next.storey.wallTJunctions.length, 0);
-    assert.equal(next.storey.wallJoins.length, 0);
+    assert.equal(storeyOf(next).wallTJunctions.length, 0);
+    assert.equal(storeyOf(next).wallJoins.length, 0);
     assert.deepEqual(
-      next.storey.walls.find((w) => w.id !== id),
-      p.storey.walls.find((w) => w.id !== id),
+      storeyOf(next).walls.find((w) => w.id !== id),
+      storeyOf(p).walls.find((w) => w.id !== id),
     );
   }
   assert.deepEqual(moveElement(p, { kind: "wall", id: "host" }, { x: 0, y: 0 }), p);
   assert.equal(
-    updateWall(p, "incoming", { start: { x: 3, y: -4 } }).storey.wallTJunctions.length,
+    storeyOf(updateWall(p, "incoming", { start: { x: 3, y: -4 } })).wallTJunctions.length,
     1,
   );
   assert.equal(
-    updateWall(p, "incoming", { end: { x: 3, y: -0.5 } }).storey.wallTJunctions.length,
+    storeyOf(updateWall(p, "incoming", { end: { x: 3, y: -0.5 } })).wallTJunctions.length,
     0,
   );
 });
@@ -150,7 +153,9 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     { ...relation, incoming: { wallId: "incoming", endpoint: 0 } },
   ])
     assert.throws(() =>
-      loadProjectData(legacyProjectFixture({ ...p, storey: { ...p.storey, wallTJunctions: [r] } })),
+      loadProjectData(
+        legacyProjectFixture({ ...replaceStorey(p, { ...storeyOf(p), wallTJunctions: [r] }) }),
+      ),
     );
   assert.throws(() => previewTConnection(p, p, request));
   const withCorner = addWall(p, {
@@ -160,8 +165,8 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     thickness: 0.36,
     height: 2.8,
   });
-  assert.equal(withCorner.storey.wallJoins.length, 1);
-  assert.deepEqual(withCorner.storey.wallTJunctions, p.storey.wallTJunctions);
+  assert.equal(storeyOf(withCorner).wallJoins.length, 1);
+  assert.deepEqual(storeyOf(withCorner).wallTJunctions, storeyOf(p).wallTJunctions);
   const third = addWall(p, {
     id: "third",
     start: { x: 4, y: -3 },
@@ -170,10 +175,12 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     height: 2.8,
   });
   assert.equal(
-    previewTConnection(third, third, {
-      ...request,
-      relation: { ...relation, incoming: { wallId: "third", endpoint: 1 } },
-    }).storey.wallTJunctions.length,
+    storeyOf(
+      previewTConnection(third, third, {
+        ...request,
+        relation: { ...relation, incoming: { wallId: "third", endpoint: 1 } },
+      }),
+    ).wallTJunctions.length,
     2,
   );
   for (const changes of [{ thickness: 0.4 }, { height: 3 }, { bodyOffset: 0.5 }])
@@ -206,7 +213,10 @@ test("T windows may cross contacts, including hidden windows, in solid/IFC and r
   p = validateProject({ ...p, bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.window] } });
   for (const id of ["window-incoming"])
     assert.ok(buildSolid(updateWindow(p, id, { position: 0.8 })).volume > buildSolid(p).volume);
-  assert.equal(updateWindow(p, "window-host", { position: 0.5 }).storey.windows[0]!.position, 0.5);
+  assert.equal(
+    storeyOf(updateWindow(p, "window-host", { position: 0.5 })).windows[0]!.position,
+    0.5,
+  );
 });
 
 for (const offset of [-0.18, 0, 0.18])
@@ -228,7 +238,7 @@ function aiming(project = pair()) {
     target,
     action: "point",
     index: 1,
-    anchor: project.storey.walls[1]!.end,
+    anchor: storeyOf(project).walls[1]!.end,
   });
   const session = state.session!;
   const adapter = editInteraction(
@@ -268,8 +278,8 @@ test("local axis snap carries stable host through preview and shared commit as o
   assert.equal(result.candidate?.sourceEntityId, "host");
   assert.deepEqual(result.point, { x: 3, y: 0 });
   const preview = previewEdit(a.session, a.session.base, a.target, result.point, result.candidate);
-  assert.equal(preview.storey.wallTJunctions.length, 1);
-  assert.equal(a.state().history.present.storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(preview).wallTJunctions.length, 1);
+  assert.equal(storeyOf(a.state().history.present).wallTJunctions.length, 0);
   confirmInteraction(a.adapter, result.point, result.candidate);
   assert.deepEqual(a.state().history.present, preview);
   assert.equal(a.state().history.past.length, 1);
@@ -353,7 +363,7 @@ test("plain numeric target never discovers a T; invalid or stale snapped commit 
   const a = aiming();
   const result = resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, snapOptions);
   assert.equal(
-    previewEdit(a.session, a.session.base, a.target, result.point).storey.wallTJunctions.length,
+    storeyOf(previewEdit(a.session, a.session.base, a.target, result.point)).wallTJunctions.length,
     0,
   );
   const changed = updateWall(a.session.base, "host", { height: 3 });
@@ -383,7 +393,7 @@ test("off-midpoint T snap supports edge axes and respects held direction", () =>
     assert.equal(hit.candidate?.sourceFeature, "t-axis");
     assert.deepEqual(hit.point, { x: 2, y: 0 });
     confirmInteraction(a.adapter, hit.point, hit.candidate);
-    assert.equal(a.state().history.present.storey.wallTJunctions.length, 1);
+    assert.equal(storeyOf(a.state().history.present).wallTJunctions.length, 1);
     const constrained = resolveToolSnap(
       a.adapter.snapping,
       { x: 2.03, y: 0.02 },
@@ -427,7 +437,7 @@ test("3D workplane transports the same T target through preview, commit and undo
     const preview = previewEdit(a.session, a.session.base, a.target, snap.point, snap.candidate);
     confirmInteraction(a.adapter, snap.point, snap.candidate);
     assert.deepEqual(a.state().history.present, preview);
-    assert.equal(preview.storey.wallTJunctions.length, 1);
+    assert.equal(storeyOf(preview).wallTJunctions.length, 1);
     assert.equal(a.state().history.past.length, 1);
     assert.deepEqual(undoProject(a.state().history).present, a.session.base);
     assert.deepEqual(redoProject(undoProject(a.state().history)).present, preview);
@@ -490,7 +500,7 @@ test("multiple T branches share a host from both sides and retain independent hi
         relation: { hostWallId: "host", incoming: { wallId: id, endpoint: 1 } },
       });
     }
-    assert.equal(p.storey.wallTJunctions.length, 3);
+    assert.equal(storeyOf(p).wallTJunctions.length, 3);
     assert.equal(connectedWallContours(p).size, 4);
     assert.equal(connectedWallSolids(p).length, 4);
     assert.deepEqual(deserializeProject(serializeProject(p)), p);
@@ -499,9 +509,12 @@ test("multiple T branches share a host from both sides and retain independent hi
       createHistory(p),
       moveElement(p, { kind: "wall", id: "second" }, { x: 0.5, y: 0 }),
     );
-    assert.equal(h.present.storey.wallTJunctions.length, 2);
+    assert.equal(storeyOf(h.present).wallTJunctions.length, 2);
     assert.deepEqual(undoProject(h).present, p);
-    assert.equal(updateWall(p, "host", { end: { x: 3.5, y: 0 } }).storey.wallTJunctions.length, 2);
+    assert.equal(
+      storeyOf(updateWall(p, "host", { end: { x: 3.5, y: 0 } })).wallTJunctions.length,
+      2,
+    );
     const overlap = addWall(p, {
       id: "overlap",
       start: { x: 3.1, y: -3 },
@@ -572,8 +585,8 @@ test("opposite T endpoint snap does not create a spurious corner", () => {
       priority: 0,
     },
   );
-  assert.equal(next.storey.wallTJunctions.length, 2);
-  assert.equal(next.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(next).wallTJunctions.length, 2);
+  assert.equal(storeyOf(next).wallJoins.length, 0);
 });
 
 test("joined corner outline and rotated distant T remove their contact only", () => {
@@ -600,15 +613,14 @@ test("joined corner outline and rotated distant T remove their contact only", ()
     y: -1000000 + Math.sin(0.7) * p.x + Math.cos(0.7) * p.y,
   });
   const rotated = validateProject({
-    ...base,
-    storey: {
-      ...base.storey,
-      walls: base.storey.walls.map((w) => ({
+    ...replaceStorey(base, {
+      ...storeyOf(base),
+      walls: storeyOf(base).walls.map((w) => ({
         ...w,
         start: transform(w.start),
         end: transform(w.end),
       })),
-    },
+    }),
   });
   assert.equal(wallPlanOutlines(rotated, new Set(["host", "incoming"])).get("incoming")!.length, 3);
 });
@@ -637,10 +649,10 @@ test("host window travels across both T contacts with stable identity, undo and 
   const baseVolume = buildSolid(p).volume;
   for (const position of [0.3, 0.5, 0.6, 0.75, 0.9]) {
     const moved = moveWindowAlongWall(p, "travelling", (position - 0.2) * 6);
-    assert.equal(moved.storey.windows[0]!.wallId, "host");
-    assert.ok(Math.abs(moved.storey.windows[0]!.position - position) < 1e-10);
+    assert.equal(storeyOf(moved).windows[0]!.wallId, "host");
+    assert.ok(Math.abs(storeyOf(moved).windows[0]!.position - position) < 1e-10);
     assert.ok(Math.abs(buildSolid(moved).volume - baseVolume) < 1e-8);
-    assert.equal(moved.storey.wallTJunctions.length, 2);
+    assert.equal(storeyOf(moved).wallTJunctions.length, 2);
     assert.deepEqual(deserializeProject(serializeProject(moved)), moved);
     assert.ok((await exportIfc(moved)).includes("IFCWINDOW("));
     assert.deepEqual(undoProject(commitProject(createHistory(p), moved)).present, p);

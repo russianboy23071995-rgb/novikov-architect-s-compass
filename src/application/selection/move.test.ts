@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { createPointPreview } from "../tools/point-preview.ts";
 import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
@@ -72,16 +73,16 @@ test("atomic mixed translation keeps internal corner/T, host window parameters a
     before = serializeProject(p);
   const session = beginSelectionMove(p, targets, origin);
   const moved = previewSelectionMove(session, p, [...targets].reverse(), target);
-  assert.deepEqual(moved.storey.wallJoins, p.storey.wallJoins);
-  assert.deepEqual(moved.storey.wallTJunctions, p.storey.wallTJunctions);
-  assert.deepEqual(moved.storey.windows, p.storey.windows);
-  for (const wall of moved.storey.walls) {
-    const old = p.storey.walls.find((w) => w.id === wall.id)!;
+  assert.deepEqual(storeyOf(moved).wallJoins, storeyOf(p).wallJoins);
+  assert.deepEqual(storeyOf(moved).wallTJunctions, storeyOf(p).wallTJunctions);
+  assert.deepEqual(storeyOf(moved).windows, storeyOf(p).windows);
+  for (const wall of storeyOf(moved).walls) {
+    const old = storeyOf(p).walls.find((w) => w.id === wall.id)!;
     assert.deepEqual(wall.start, { x: old.start.x + 2, y: old.start.y - 1 });
     assert.deepEqual(wall.end, { x: old.end.x + 2, y: old.end.y - 1 });
   }
-  assert.deepEqual(moved.storey.lines![0]!.points[0], { x: 2, y: 3 });
-  assert.deepEqual(moved.storey.hatches[0]!.points[0], { x: 5, y: 3 });
+  assert.deepEqual(storeyOf(moved).lines![0]!.points[0], { x: 2, y: 3 });
+  assert.deepEqual(storeyOf(moved).hatches[0]!.points[0], { x: 5, y: 3 });
   const contours = connectedWallContours(moved);
   for (const [id, points] of connectedWallContours(p))
     points.forEach((point, i) => {
@@ -100,12 +101,12 @@ test("only external relationships detach; unselected host windows follow exactly
   ] as const) {
     const targets = all.filter((t) => (ids as readonly string[]).includes(t.id));
     const next = previewSelectionMove(beginSelectionMove(p, targets, origin), p, targets, target);
-    assert.equal(next.storey.wallJoins.length, corners);
-    assert.equal(next.storey.wallTJunctions.length, tees);
-    assert.deepEqual(next.storey.windows, p.storey.windows);
-    for (const wall of p.storey.walls.filter((w) => !(ids as readonly string[]).includes(w.id)))
+    assert.equal(storeyOf(next).wallJoins.length, corners);
+    assert.equal(storeyOf(next).wallTJunctions.length, tees);
+    assert.deepEqual(storeyOf(next).windows, storeyOf(p).windows);
+    for (const wall of storeyOf(p).walls.filter((w) => !(ids as readonly string[]).includes(w.id)))
       assert.deepEqual(
-        next.storey.walls.find((w) => w.id === wall.id),
+        storeyOf(next).walls.find((w) => w.id === wall.id),
         wall,
       );
   }
@@ -139,7 +140,7 @@ test("unsupported window mixtures, invalid IDs, duplicate IDs, stale selection/m
       target,
       createLayerVisibilityPolicy(p, {
         scope: { kind: "bim-project" },
-        hiddenLayerIds: [p.storey.hatches[0]!.layerId],
+        hiddenLayerIds: [storeyOf(p).hatches[0]!.layerId],
       }),
     ),
   );
@@ -234,14 +235,14 @@ test("image movement uses shared origin/input, preserves calibration and is one 
   );
   const aim = adapter.preview("0", "2", null);
   confirmInteraction(adapter, aim.point);
-  assert.deepEqual(next.storey.references[0], {
-    ...p.storey.references[0],
+  assert.deepEqual(storeyOf(next).references[0], {
+    ...storeyOf(p).references[0],
     origin: { x: 12, y: 12 },
   });
   assert.deepEqual(next.assets, p.assets);
-  assert.deepEqual(next.storey.walls, p.storey.walls);
-  const before = imageReferenceCorners(p.storey.references[0]!, p.assets[0]!);
-  imageReferenceCorners(next.storey.references[0]!, next.assets[0]!).forEach((c, i) => {
+  assert.deepEqual(storeyOf(next).walls, storeyOf(p).walls);
+  const before = imageReferenceCorners(storeyOf(p).references[0]!, p.assets[0]!);
+  imageReferenceCorners(storeyOf(next).references[0]!, next.assets[0]!).forEach((c, i) => {
     assert.ok(Math.abs(c.x - before[i]!.x - 2) < 1e-10);
     assert.equal(c.y, before[i]!.y);
   });
@@ -262,12 +263,12 @@ test("mixed image and BIM move is atomic with host windows and joins retained", 
   const p = imageFixture(),
     targets = [...selectionIndex(p).values()];
   const next = previewSelectionMove(beginSelectionMove(p, targets, origin), p, targets, target);
-  assert.deepEqual(next.storey.references[0]!.origin, { x: 12, y: 11 });
-  assert.deepEqual(next.storey.wallJoins, p.storey.wallJoins);
-  assert.deepEqual(next.storey.wallTJunctions, p.storey.wallTJunctions);
-  assert.deepEqual(next.storey.windows, p.storey.windows);
-  assert.deepEqual(next.storey.walls[0]!.start, { x: 2, y: -1 });
-  assert.deepEqual(p.storey.references[0]!.origin, { x: 10, y: 12 });
+  assert.deepEqual(storeyOf(next).references[0]!.origin, { x: 12, y: 11 });
+  assert.deepEqual(storeyOf(next).wallJoins, storeyOf(p).wallJoins);
+  assert.deepEqual(storeyOf(next).wallTJunctions, storeyOf(p).wallTJunctions);
+  assert.deepEqual(storeyOf(next).windows, storeyOf(p).windows);
+  assert.deepEqual(storeyOf(next).walls[0]!.start, { x: 2, y: -1 });
+  assert.deepEqual(storeyOf(p).references[0]!.origin, { x: 10, y: 12 });
 });
 test("image movement rejects hidden/stale/nonfinite targets and an unaccompanied window", () => {
   const p = imageFixture(),
@@ -343,11 +344,11 @@ test("precision and plan share a group preview; confirmation ignores altered pre
   assert.notEqual(adapter.geometryPreview!.evaluate(changed.point), first);
   const displayed = adapter.geometryPreview!.evaluate(changed.point);
   assert.throws(() => {
-    displayed.geometry.storey.walls[0]!.height = -1;
+    storeyOf(displayed.geometry).walls[0]!.height = -1;
   });
   confirmInteraction(adapter, changed.point);
   assert.deepEqual(result, previewSelectionMove(session, p, targets, changed.point, v));
-  assert.ok(result.storey.walls[0]!.height > 0);
+  assert.ok(storeyOf(result).walls[0]!.height > 0);
   assert.notEqual(adapter.geometryPreview!.evaluate(changed.point), displayed);
   const beforeCancel = adapter.geometryPreview!.evaluate(changed.point);
   adapter.cancel();
@@ -375,7 +376,7 @@ test("group preview reuse is scoped to model, selection, visibility and origin",
   assert.throws(() => make(p, targets.slice(1)).geometryPreview!.evaluate(target));
   const hidden = createLayerVisibilityPolicy(p, {
     scope: { kind: "bim-project" },
-    hiddenLayerIds: [p.storey.hatches[0]!.layerId],
+    hiddenLayerIds: [storeyOf(p).hatches[0]!.layerId],
   });
   assert.throws(() => make(p, targets, hidden).geometryPreview!.evaluate(target));
   const otherOrigin = beginSelectionMove(p, targets, { x: 10, y: 10 }, visible);
@@ -438,7 +439,7 @@ test("atomic selection confirmation rejects invalid or mutated context before pu
       () => {},
     );
     adapter.geometryPreview!.evaluate(target);
-    if (defect === "model") p.storey.walls[0]!.height = -1;
+    if (defect === "model") storeyOf(p).walls[0]!.height = -1;
     if (defect === "selection") targets.pop();
     if (defect === "origin") session.origin.x++;
     assert.throws(() =>
@@ -466,7 +467,7 @@ test("atomic publication failure propagates and a later confirmation revalidates
   );
   assert.throws(() => confirmInteraction(adapter, target), /stale publication context/);
   assert.equal(calls, 1);
-  p.storey.walls[0]!.height = -1;
+  storeyOf(p).walls[0]!.height = -1;
   assert.throws(() => confirmInteraction(adapter, target));
   assert.equal(calls, 1);
 });

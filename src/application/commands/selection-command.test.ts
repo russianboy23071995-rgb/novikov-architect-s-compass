@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewSelectionCommand, applySelectionCommand } from "./selection-command.ts";
@@ -77,7 +78,7 @@ test("external joins and dependent windows are reported; result is recalculated 
   assert.match(preview.summary, /1 externe/);
   const applied = applySelectionCommand(p, targets, v, { ...preview, result: p });
   assert.deepEqual(applied, preview.result);
-  assert.equal(applied.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(applied).wallJoins.length, 0);
 });
 test("wrong, duplicated, hidden, deleted and changed targets never commit a partial set", () => {
   const p = fixture(),
@@ -89,7 +90,7 @@ test("wrong, duplicated, hidden, deleted and changed targets never commit a part
   assert.throws(() => applySelectionCommand(p, [targets[0]!, ...targets.slice(0, -1)], v, preview));
   const hidden = createLayerVisibilityPolicy(p, {
     scope: { kind: "bim-project" },
-    hiddenLayerIds: [p.storey.walls[0]!.layerId],
+    hiddenLayerIds: [storeyOf(p).walls[0]!.layerId],
   });
   assert.throws(() => applySelectionCommand(p, targets, hidden, preview));
   assert.throws(() => previewSelectionCommand(p, targets, hidden, preview.text));
@@ -151,7 +152,7 @@ test("acceptance has one undo/redo; preview and cancellation require no model hi
 
 test("integrated offset command preserves selection context and commits one undo step", () => {
   const p = fixture();
-  const target = { kind: "hatch" as const, id: p.storey.hatches[0]!.id };
+  const target = { kind: "hatch" as const, id: storeyOf(p).hatches[0]!.id };
   const targets = [target];
   const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
   const preview = previewSelectionCommand(p, targets, visibility, "Offset um 1 cm");

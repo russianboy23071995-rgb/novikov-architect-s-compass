@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WallGeometry } from "../../domain/project/geometry-scope.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../geometry/tolerances/model.ts";
@@ -13,14 +14,14 @@ const edges = (ring: readonly Point2[]): Edge[] =>
 export function wallPlanOutlines(project: WallGeometry, visibleIds: ReadonlySet<string>) {
   const contours = connectedWallContours(project);
   const rings = new Map(
-    project.storey.walls
-      .filter((w) => visibleIds.has(w.id))
+    storeyOf(project)
+      .walls.filter((w) => visibleIds.has(w.id))
       .map((w) => [w.id, contours.get(w.id) ?? wallBody(w).corners]),
   );
   const partners = new Map<string, string[]>();
   const pairs = [
-    ...project.storey.wallJoins.map((j) => [j.first.wallId, j.second.wallId]),
-    ...project.storey.wallTJunctions.map((j) => [j.hostWallId, j.incoming.wallId]),
+    ...storeyOf(project).wallJoins.map((j) => [j.first.wallId, j.second.wallId]),
+    ...storeyOf(project).wallTJunctions.map((j) => [j.hostWallId, j.incoming.wallId]),
   ];
   for (const [a, b] of pairs) {
     if (!rings.has(a!) || !rings.has(b!)) continue;

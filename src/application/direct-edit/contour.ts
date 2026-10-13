@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedOffsetTarget } from "./offset.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import { updateLine } from "../../lib/bim/model.ts";
@@ -7,9 +8,9 @@ import { previewHatch } from "../hatches/actions.ts";
 import { editContourEdge, prepareContourEdge } from "../../geometry/polygons/edit-edge.ts";
 export function closedContour(project: Project, target: ElementTarget) {
   if (target.kind === "hatch")
-    return project.storey.hatches.find((h) => h.id === target.id)?.points ?? null;
+    return storeyOf(project).hatches.find((h) => h.id === target.id)?.points ?? null;
   if (target.kind !== "line") return null;
-  const line = project.storey.lines?.find((l) => l.id === target.id);
+  const line = storeyOf(project).lines?.find((l) => l.id === target.id);
   if (!line || line.kind !== "polyline" || line.points.length < 4) return null;
   const a = line.points[0]!,
     b = line.points.at(-1)!;

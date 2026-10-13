@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -17,7 +18,7 @@ test("JSON file round-trip preserves IDs and remains editable", () => {
   const restored = readProjectFile(serializeProject(p));
   assert.deepEqual(restored, p);
   assert.notEqual(restored, p);
-  assert.equal(updateWall(restored, "wall-1", { height: 4 }).storey.walls[0]!.height, 4);
+  assert.equal(storeyOf(updateWall(restored, "wall-1", { height: 4 })).walls[0]!.height, 4);
 });
 test("undo and redo restore complete snapshots including hosted windows", () => {
   const p = createExampleProject();
@@ -25,15 +26,15 @@ test("undo and redo restore complete snapshots including hosted windows", () => 
   const next = commitProject(h, updateWall(p, "wall-1", { end: { x: 6, y: 0 } }));
   assert.deepEqual(undoProject(next).present, p);
   assert.deepEqual(redoProject(undoProject(next)).present, next.present);
-  assert.equal(next.present.storey.windows[0]!.position, 0.5);
-  assert.equal(h.present.storey.walls[0]!.end.x, 3);
+  assert.equal(storeyOf(next.present).windows[0]!.position, 0.5);
+  assert.equal(storeyOf(h.present).walls[0]!.end.x, 3);
 });
 test("creation is reversible without changing stable IDs", () => {
   const p = createExampleProject();
-  const next = addWindow(p, { ...p.storey.windows[0]!, id: "window-2" });
+  const next = addWindow(p, { ...storeyOf(p).windows[0]!, id: "window-2" });
   const h = commitProject(createHistory(p), next);
-  assert.equal(undoProject(h).present.storey.windows.length, 1);
-  assert.equal(redoProject(undoProject(h)).present.storey.windows[1]!.id, "window-2");
+  assert.equal(storeyOf(undoProject(h).present).windows.length, 1);
+  assert.equal(storeyOf(redoProject(undoProject(h)).present).windows[1]!.id, "window-2");
 });
 test("new edit after undo discards redo branch; no-op does not", () => {
   const h = createHistory(createExampleProject());
@@ -60,7 +61,7 @@ test("invalid files and geometry reject without modifying history", () => {
   for (const text of [
     "oops",
     "{}",
-    before.replace('"schemaVersion":23', '"schemaVersion":99'),
+    before.replace('"schemaVersion":24', '"schemaVersion":99'),
     before.replace('"unit":"m"', '"unit":"cm"'),
     before.replace('"width":1.2', '"width":99'),
   ])
@@ -84,12 +85,12 @@ test("history is bounded and initial/last navigation is a no-op", () => {
 test("caller mutation cannot change initial or committed snapshots", () => {
   const p = createExampleProject();
   const h = createHistory(p);
-  p.storey.walls[0]!.height = 99;
-  assert.equal(h.present.storey.walls[0]!.height, 2.8);
+  storeyOf(p).walls[0]!.height = 99;
+  assert.equal(storeyOf(h.present).walls[0]!.height, 2.8);
   const input = updateWall(h.present, "wall-1", { height: 4 });
   const next = commitProject(h, input);
-  input.storey.walls[0]!.height = 100;
-  assert.equal(next.present.storey.walls[0]!.height, 4);
+  storeyOf(input).walls[0]!.height = 100;
+  assert.equal(storeyOf(next.present).walls[0]!.height, 4);
 });
 
 test("normalized no-op preserves the exact history and redo branch", () => {
@@ -101,7 +102,7 @@ test("normalized no-op preserves the exact history and redo branch", () => {
   same.id = ` ${same.id} `;
   same.layers[0]!.name = ` ${same.layers[0]!.name} `;
   assert.equal(commitProject(undone, same), undone);
-  assert.equal(redoProject(undone).present.storey.walls[0]!.height, 4);
+  assert.equal(storeyOf(redoProject(undone).present).walls[0]!.height, 4);
 });
 
 test("visibility-only commit preserves model undo/redo including image assets", () => {
@@ -124,7 +125,7 @@ test("visibility-only commit preserves model undo/redo including image assets", 
   input.bimVisibility.hiddenLayerIds.length = 0;
   assert.deepEqual(hidden.present.bimVisibility.hiddenLayerIds, [p.defaultLayerIds.wall]);
   const redone = redoProject(hidden);
-  assert.equal(redone.present.storey.walls[0]!.height, 4);
+  assert.equal(storeyOf(redone.present).walls[0]!.height, 4);
   assert.deepEqual(redone.present.bimVisibility, hidden.present.bimVisibility);
   assert.deepEqual(readProjectFile(serializeProject(redone.present)), redone.present);
 });
@@ -143,7 +144,7 @@ test("commit rechecks geometry and asset data even after an earlier successful c
   input.assets[0]!.data = "AA?A";
   assert.throws(() => commitProject(committed, input), /base64/);
   const disconnected = structuredClone(committed.present);
-  disconnected.storey.wallJoins.push({
+  storeyOf(disconnected).wallJoins.push({
     first: { wallId: "wall-1", endpoint: 0 },
     second: { wallId: "missing", endpoint: 1 },
   });

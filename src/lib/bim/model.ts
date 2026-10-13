@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
 import { reconcileTJunctions } from "../../domain/elements/wall/t-relations.ts";
 import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
@@ -13,7 +14,8 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 23,
+    schemaVersion: 24,
+    groundStoreyId: storeyId,
     groundDatum: 0,
     hatchPatterns: [],
     assets: [],
@@ -21,17 +23,19 @@ export function createProject(projectId: string, storeyId: string): Project {
     ...createStandardLayers([projectId.trim(), storeyId.trim()]),
     unit: "m",
     id: projectId,
-    storey: {
-      id: storeyId,
-      name: "Level 01",
-      height: null,
-      references: [],
-      walls: [],
-      windows: [],
-      hatches: [],
-      wallJoins: [],
-      wallTJunctions: [],
-    },
+    storeys: [
+      {
+        id: storeyId,
+        name: "Level 01",
+        height: null,
+        references: [],
+        walls: [],
+        windows: [],
+        hatches: [],
+        wallJoins: [],
+        wallTJunctions: [],
+      },
+    ],
   });
 }
 
@@ -44,14 +48,13 @@ export function addWall(
   return validateProject(
     reconcileWallJoins(
       {
-        ...project,
-        storey: {
-          ...project.storey,
+        ...replaceStorey(project, {
+          ...storeyOf(project),
           walls: [
-            ...project.storey.walls,
+            ...storeyOf(project).walls,
             { layerId: project.defaultLayerIds.wall, bodyOffset: 0, ...wall },
           ],
-        },
+        }),
       },
       wall.id,
     ),
@@ -64,7 +67,7 @@ export function updateWall(
   changes: Partial<Omit<Wall, "id">>,
   intent: "reshape" | "move" = "reshape",
 ): Project {
-  const previous = project.storey.walls.find((wall) => wall.id === wallId);
+  const previous = storeyOf(project).walls.find((wall) => wall.id === wallId);
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
   const bodyOffset =
     changes.bodyOffset ??
@@ -76,13 +79,12 @@ export function updateWall(
   if (changes.bodyOffset !== undefined || changes.thickness !== undefined)
     assertAxisInside(changes.thickness ?? previous.thickness, bodyOffset);
   const proposed: Project = {
-    ...project,
-    storey: {
-      ...project.storey,
-      walls: project.storey.walls.map((wall) =>
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((wall) =>
         wall.id === wallId ? { ...wall, ...changes, bodyOffset, id: wall.id } : wall,
       ),
-    },
+    }),
   };
   const axisChanged = ["start", "end"].some((k) => {
     const name = k as "start" | "end";
@@ -90,7 +92,7 @@ export function updateWall(
     return p && (p.x !== previous[name].x || p.y !== previous[name].y);
   });
   // A detached T must not silently turn into an automatic corner in the same edit.
-  const tPartners = project.storey.wallTJunctions.flatMap((r) =>
+  const tPartners = storeyOf(project).wallTJunctions.flatMap((r) =>
     r.hostWallId === wallId
       ? [r.incoming.wallId]
       : r.incoming.wallId === wallId
@@ -105,11 +107,13 @@ export function updateWall(
 
 export function addWindow(project: Project, opening: Creation<BimWindow>): Project {
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      windows: [...project.storey.windows, { layerId: project.defaultLayerIds.window, ...opening }],
-    },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      windows: [
+        ...storeyOf(project).windows,
+        { layerId: project.defaultLayerIds.window, ...opening },
+      ],
+    }),
   });
 }
 
@@ -118,24 +122,23 @@ export function updateWindow(
   windowId: string,
   changes: Partial<Omit<BimWindow, "id">>,
 ): Project {
-  if (!project.storey.windows.some((opening) => opening.id === windowId))
+  if (!storeyOf(project).windows.some((opening) => opening.id === windowId))
     throw new Error(`Unknown window: ${windowId}`);
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      windows: project.storey.windows.map((opening) =>
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      windows: storeyOf(project).windows.map((opening) =>
         opening.id === windowId ? { ...opening, ...changes, id: opening.id } : opening,
       ),
-    },
+    }),
   });
 }
 
 export function windowCentre(project: Project, windowId: string): Point {
   const validated = validateProject(project);
-  const opening = validated.storey.windows.find((item) => item.id === windowId);
+  const opening = storeyOf(validated).windows.find((item) => item.id === windowId);
   if (!opening) throw new Error(`Unknown window: ${windowId}`);
-  const wall = validated.storey.walls.find((item) => item.id === opening.wallId)!;
+  const wall = storeyOf(validated).walls.find((item) => item.id === opening.wallId)!;
   const body = wallBody(wall);
   return {
     x: body.start.x + (wall.end.x - wall.start.x) * opening.position,
@@ -151,11 +154,13 @@ export function serializeProject(project: Project): string {
 
 export function addLine(project: Project, line: Creation<DrawingLine>): Project {
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      lines: [...(project.storey.lines ?? []), { layerId: project.defaultLayerIds.line, ...line }],
-    },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      lines: [
+        ...(storeyOf(project).lines ?? []),
+        { layerId: project.defaultLayerIds.line, ...line },
+      ],
+    }),
   });
 }
 
@@ -164,15 +169,14 @@ export function updateLine(
   lineId: string,
   changes: Partial<Omit<DrawingLine, "id">>,
 ): Project {
-  if (!project.storey.lines?.some((line) => line.id === lineId))
+  if (!storeyOf(project).lines?.some((line) => line.id === lineId))
     throw new Error(`Unknown line: ${lineId}`);
   return validateProject({
-    ...project,
-    storey: {
-      ...project.storey,
-      lines: project.storey.lines.map((line) =>
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      lines: storeyOf(project).lines!.map((line) =>
         line.id === lineId ? { ...line, ...changes, id: line.id } : line,
       ),
-    },
+    }),
   });
 }

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../storeys/access.ts";
 import { createWallContourSolidDeriver, wallContourSolid } from "./contour-solid.ts";
 import { wallBody } from "./body.ts";
 import test from "node:test";
@@ -35,7 +36,7 @@ const project = (a = 0, b = 0) => {
     },
   );
   // This suite inspects an explicit pair without a persisted connection.
-  result.storey.wallJoins = [];
+  storeyOf(result).wallJoins = [];
   return result;
 };
 const opening = (id: string, wallId = "A", position = 0.5) => ({
@@ -89,8 +90,8 @@ test("nine offset profiles extrude to closed outward shells and independent sign
         before = structuredClone(p),
         r = derive(p);
       const contour = deriveRightAngleCorner(
-        { wall: p.storey.walls[0]!, endpoint: 1 },
-        { wall: p.storey.walls[1]!, endpoint: 0 },
+        { wall: storeyOf(p).walls[0]!, endpoint: 1 },
+        { wall: storeyOf(p).walls[1]!, endpoint: 0 },
       );
       close(
         r.volume,
@@ -144,13 +145,13 @@ test("rotated, translated and reversed axes retain volume and closed shells; oth
           x: 100 + Math.cos(angle) * p.x - Math.sin(angle) * p.y,
           y: -50 + Math.sin(angle) * p.x + Math.cos(angle) * p.y,
         });
-      q.storey.walls = q.storey.walls.map((w, i) => ({
+      storeyOf(q).walls = storeyOf(q).walls.map((w, i) => ({
         ...w,
         start: rot(mask & (1 << i) ? w.end : w.start),
         end: rot(mask & (1 << i) ? w.start : w.end),
         bodyOffset: w.bodyOffset * (mask & (1 << i) ? -1 : 1),
       }));
-      if (mask & 1) q.storey.windows[0]!.position = 1 - q.storey.windows[0]!.position;
+      if (mask & 1) storeyOf(q).windows[0]!.position = 1 - storeyOf(q).windows[0]!.position;
       const result = deriveCornerSolids(
         q,
         { wallId: "A", endpoint: mask & 1 ? 0 : 1 },
@@ -243,7 +244,7 @@ test("session extrusion matches fresh derivation through translation and changed
     sillHeight: 0.8,
     position: 0.5,
   });
-  const wall = p.storey.walls[0]!;
+  const wall = storeyOf(p).walls[0]!;
   const derive = createWallContourSolidDeriver([wall.id]);
   for (const dx of [0, 1, -4, 4 / 137, 1e6]) {
     const moved = {
@@ -258,8 +259,8 @@ test("session extrusion matches fresh derivation through translation and changed
       { ...moved, end: { x: moved.end.x + 1, y: moved.end.y } },
     ]) {
       for (const windows of [
-        p.storey.windows,
-        p.storey.windows.map((w) => ({ ...w, width: 1.1, position: 0.6 })),
+        storeyOf(p).windows,
+        storeyOf(p).windows.map((w) => ({ ...w, width: 1.1, position: 0.6 })),
         [],
       ]) {
         for (const clip of [false, true]) {
@@ -275,7 +276,7 @@ test("session extrusion matches fresh derivation through translation and changed
 });
 
 test("cached local geometry cannot leak through mutable output and invalid geometry still fails", () => {
-  const wall = project().storey.walls[0]!;
+  const wall = storeyOf(project()).walls[0]!;
   const derive = createWallContourSolidDeriver([wall.id]);
   const points = wallBody(wall).corners;
   const result = derive(wall, points, []);
@@ -291,7 +292,7 @@ test("cached local geometry cannot leak through mutable output and invalid geome
 });
 
 test("session reuse respects clipped openings and changed contour for the same wall", () => {
-  const wall = project().storey.walls[0]!;
+  const wall = storeyOf(project()).walls[0]!;
   const derive = createWallContourSolidDeriver([wall.id]);
   const points = wallBody(wall).corners;
   const windows = [{ ...opening("overlap", wall.id, 0.05), layerId: wall.layerId }];

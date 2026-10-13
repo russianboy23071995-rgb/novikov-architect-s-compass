@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WallDefaults } from "../tools/pickup.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
@@ -33,7 +34,7 @@ export function beginWallChain(
     startCandidate &&
     (startCandidate.worldPoint.x !== origin.x ||
       startCandidate.worldPoint.y !== origin.y ||
-      !base.storey.walls.some((w) => w.id === startCandidate.sourceEntityId))
+      !storeyOf(base).walls.some((w) => w.id === startCandidate.sourceEntityId))
   )
     throw new Error("T-Startziel ist nicht mehr korrekt.");
   return {
@@ -56,7 +57,7 @@ export function appendWallChain(
   assertDrawingContext(chain.base, current);
   if (
     chain.wallIds.length &&
-    chain.preview.storey.wallTJunctions.some((r) => r.incoming.wallId === chain.wallIds.at(-1))
+    storeyOf(chain.preview).wallTJunctions.some((r) => r.incoming.wallId === chain.wallIds.at(-1))
   )
     throw new Error(
       "Wandkette am T-Anschluss abschlie\u00dfen. Eine T-Nebenwand darf noch keinen eigenen Eckanschluss haben.",

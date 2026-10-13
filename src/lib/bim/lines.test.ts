@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -33,12 +34,12 @@ const line: DrawingLine = {
 
 test("line geometry stays in metres; appearance edits preserve vertices and IDs", () => {
   const p = addLine(createExampleProject(), line);
-  assert.equal(lineLength(p.storey.lines![0]!), 5);
+  assert.equal(lineLength(storeyOf(p).lines![0]!), 5);
   const next = updateLine(p, line.id, { color: "#dc2626", penWidth: 0.7, style: "dashed" });
-  assert.equal(next.storey.lines![0]!.id, line.id);
-  assert.deepEqual(next.storey.lines![0]!.points, line.points);
-  assert.equal(next.storey.lines![0]!.color, "#dc2626");
-  assert.equal(p.storey.lines![0]!.color, line.color);
+  assert.equal(storeyOf(next).lines![0]!.id, line.id);
+  assert.deepEqual(storeyOf(next).lines![0]!.points, line.points);
+  assert.equal(storeyOf(next).lines![0]!.color, "#dc2626");
+  assert.equal(storeyOf(p).lines![0]!.color, line.color);
 });
 test("polyline is one entity with cumulative length and can close back to start", () => {
   const poly = {
@@ -52,7 +53,7 @@ test("polyline is one entity with cumulative length and can close back to start"
     ],
   };
   const p = addLine(createProject("p", "s"), poly);
-  assert.equal(p.storey.lines!.length, 1);
+  assert.equal(storeyOf(p).lines!.length, 1);
   assert.equal(lineLength(poly), 12);
 });
 test("rejects missing, coincident, extra line points and nonfinite geometry", () => {
@@ -124,9 +125,9 @@ test("creation and style changes participate in shared undo and redo", () => {
   const initial = createHistory(createExampleProject());
   const created = commitProject(initial, addLine(initial.present, line));
   const edited = commitProject(created, updateLine(created.present, line.id, { style: "break" }));
-  assert.equal(undoProject(edited).present.storey.lines![0]!.style, "solid");
-  assert.equal(undoProject(undoProject(edited)).present.storey.lines, undefined);
-  assert.equal(redoProject(undoProject(edited)).present.storey.lines![0]!.style, "break");
+  assert.equal(storeyOf(undoProject(edited).present).lines![0]!.style, "solid");
+  assert.equal(storeyOf(undoProject(undoProject(edited)).present).lines, undefined);
+  assert.equal(storeyOf(redoProject(undoProject(edited)).present).lines![0]!.style, "break");
 });
 test("plan bounds include lines even without walls and snapping is shared", () => {
   const p = addLine(createProject("p", "s"), {
@@ -179,7 +180,7 @@ test("all line style edits can be committed together without changing geometry a
     style: "dashed",
   });
   const restored = deserializeProject(serializeProject(changed));
-  assert.deepEqual(restored.storey.lines![0], {
+  assert.deepEqual(storeyOf(restored).lines![0], {
     ...line,
     color: "#dc2626",
     penWidth: 0.7,

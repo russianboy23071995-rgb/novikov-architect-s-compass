@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, validateProject, type Point } from "../../lib/bim/model.ts";
@@ -19,7 +20,7 @@ function fixture(extra = 0) {
     ["P", { x: 7, y: -3 }, { x: 7, y: 0 }],
     ["X", { x: 20, y: 0 }, { x: 22, y: 0 }],
   ] as const)
-    p.storey.walls.push({
+    storeyOf(p).walls.push({
       id,
       start,
       end,
@@ -28,13 +29,13 @@ function fixture(extra = 0) {
       bodyOffset: 0.18,
       layerId: p.defaultLayerIds.wall,
     });
-  p.storey.wallJoins.push({
+  storeyOf(p).wallJoins.push({
     first: { wallId: "H", endpoint: 0 },
     second: { wallId: "E", endpoint: 0 },
   });
   for (const wallId of ["N", "P"])
-    p.storey.wallTJunctions.push({ hostWallId: "H", incoming: { wallId, endpoint: 1 } });
-  p.storey.windows.push({
+    storeyOf(p).wallTJunctions.push({ hostWallId: "H", incoming: { wallId, endpoint: 1 } });
+  storeyOf(p).windows.push({
     id: "W",
     wallId: "H",
     width: 1.2,
@@ -43,7 +44,7 @@ function fixture(extra = 0) {
     position: 0.5,
     layerId: p.defaultLayerIds.window,
   });
-  p.storey.hatches.push({
+  storeyOf(p).hatches.push({
     id: "S",
     kind: "hatch",
     layerId: p.defaultLayerIds.line,
@@ -62,7 +63,7 @@ function fixture(extra = 0) {
     pixelHeight: 1,
     data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX5sAAAAASUVORK5CYII=",
   });
-  p.storey.references.push({
+  storeyOf(p).references.push({
     id: "R",
     kind: "image-reference",
     assetId: "asset",
@@ -71,7 +72,7 @@ function fixture(extra = 0) {
     rotation: 0.7,
     metresPerPixel: 1,
   });
-  p.storey.lines = Array.from({ length: extra + 1 }, (_, i) => ({
+  storeyOf(p).lines = Array.from({ length: extra + 1 }, (_, i) => ({
     id: i ? `unaffected-${i}` : "L",
     kind: "polyline" as const,
     points: [
@@ -126,10 +127,10 @@ test("prepared mixed moves match the frozen full path, solids and seams for corn
       assert.deepEqual(previewSelectionMove(session, base, targets, delta), expected);
       for (const kind of ["walls", "windows", "hatches", "references", "lines"] as const)
         assert.deepEqual(
-          patch.geometry.storey[kind],
-          expected.storey[kind]?.filter((e) => patch.replacedIds.includes(e.id)),
+          storeyOf(patch.geometry)[kind],
+          storeyOf(expected)[kind]?.filter((e) => patch.replacedIds.includes(e.id)),
         );
-      const wallIds = new Set(patch.geometry.storey.walls.map((w) => w.id));
+      const wallIds = new Set(storeyOf(patch.geometry).walls.map((w) => w.id));
       assert.deepEqual(
         connectedWallSolids(patch.geometry),
         connectedWallSolids(expected).filter((s) => wallIds.has(s.wallId)),
@@ -170,30 +171,30 @@ test("pointer patches exclude unrelated data, retain asset/stationary object ide
   const session = beginSelectionMove(base, targets, { x: 0, y: 0 });
   const a = previewSelectionGeometry(session, base, targets, { x: 1, y: -1 });
   const b = previewSelectionGeometry(session, base, targets, { x: 2, y: -2 });
-  assert.equal(a.geometry.storey.lines!.length, 0);
-  assert.equal(a.geometry.storey.walls.length, 4);
+  assert.equal(storeyOf(a.geometry).lines!.length, 0);
+  assert.equal(storeyOf(a.geometry).walls.length, 4);
   assert.equal(a.geometry.assets, b.geometry.assets);
-  assert.equal(a.geometry.storey.windows, b.geometry.storey.windows);
-  assert.equal(a.geometry.storey.walls[1], b.geometry.storey.walls[1]);
-  assert.equal(a.geometry.storey.walls[1]!.id, "E");
+  assert.equal(storeyOf(a.geometry).windows, storeyOf(b.geometry).windows);
+  assert.equal(storeyOf(a.geometry).walls[1], storeyOf(b.geometry).walls[1]);
+  assert.equal(storeyOf(a.geometry).walls[1]!.id, "E");
   assert.throws(() => {
-    a.geometry.storey.walls[0]!.height = -1;
+    storeyOf(a.geometry).walls[0]!.height = -1;
   });
   assert.throws(() => {
     a.geometry.assets[0]!.data = "AAAA";
   });
   assert.throws(() => {
-    a.geometry.storey.wallJoins.push(base.storey.wallJoins[0]!);
+    storeyOf(a.geometry).wallJoins.push(storeyOf(base).wallJoins[0]!);
   });
-  assert.equal(base.storey.wallJoins.length, 1);
-  assert.equal(a.geometry.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(base).wallJoins.length, 1);
+  assert.equal(storeyOf(a.geometry).wallJoins.length, 0);
 });
 
 test("the owned preparation is isolated from caller mutation; full confirmation rejects changed base", () => {
   const base = fixture(),
     action = prepareTranslation(base, ["H"]);
   const a = action.evaluate({ x: 2, y: -1 });
-  base.storey.walls[4]!.height = 9;
+  storeyOf(base).walls[4]!.height = 9;
   assert.deepEqual(action.evaluate({ x: 2, y: -1 }), a);
   assert.throws(() => action.materialize(base, { x: 2, y: -1 }), /Modell/);
   assert.throws(() => prepareTranslation(base, ["missing"]));
@@ -238,7 +239,7 @@ test("scene runs preserve paint order and exclude hidden geometry without a seco
   assert.equal(runs.filter((r) => r.kind === "line").length, 2);
   assert.deepEqual(
     runs.filter((r) => r.kind === "line").flatMap((r) => r.ids),
-    base.storey.lines!.map((l) => l.id),
+    storeyOf(base).lines!.map((l) => l.id),
   );
 });
 
@@ -255,16 +256,16 @@ test("detached chain end retains full renderer geometry, zero state and stale-co
     const patch = previewSelectionGeometry(session, p, targets, point),
       full = fullSelectionMove(p, targets, point);
     assert.deepEqual(connectedWallSolids(patch.geometry), connectedWallSolids(full));
-    const visible = new Set(p.storey.walls.map((w) => w.id));
+    const visible = new Set(storeyOf(p).walls.map((w) => w.id));
     assert.deepEqual(wallPlanOutlines(patch.geometry, visible), wallPlanOutlines(full, visible));
     assert.deepEqual(
       derivePlanScene(patch.geometry, () => true).plan,
       derivePlanScene(full, () => true).plan,
     );
-    assert.equal(patch.replacedIds.length, p.storey.walls.length + p.storey.windows.length);
+    assert.equal(patch.replacedIds.length, storeyOf(p).walls.length + storeyOf(p).windows.length);
     assert.equal(
-      previewSelectionMove(session, p, targets, point).storey.wallJoins.length,
-      full.storey.wallJoins.length,
+      storeyOf(previewSelectionMove(session, p, targets, point)).wallJoins.length,
+      storeyOf(full).wallJoins.length,
     );
   }
   assert.throws(() =>
@@ -282,7 +283,7 @@ test("single wall shared move preserves picked origins and legacy move geometry"
   for (const kind of ["chain", "tees"] as const) {
     const base = connectedFixture(kind, 5),
       target = { kind: "wall" as const, id: "wall-0" },
-      wall = base.storey.walls[0]!;
+      wall = storeyOf(base).walls[0]!;
     for (const origin of [wall.start, wall.end, { x: wall.start.x, y: wall.start.y + 0.18 }]) {
       const session = beginSelectionMove(base, [target], origin),
         point = { x: origin.x - 2, y: origin.y - 2 };

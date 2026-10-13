@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { createProject } from "../../lib/bim/model.ts";
 import { commitLayerManagement } from "./actions.ts";
 import test from "node:test";
@@ -39,12 +40,12 @@ test("shared assignment previews then commits all element kinds atomically; undo
   assert.equal(next.past.length, 1);
   assert.deepEqual(next.present, preview);
   for (const e of [
-    ...next.present.storey.walls,
-    ...next.present.storey.windows,
-    ...next.present.storey.lines!,
+    ...storeyOf(next.present).walls,
+    ...storeyOf(next.present).windows,
+    ...storeyOf(next.present).lines!,
   ])
     assert.equal(e.layerId, request.layerId);
-  assert.equal(next.present.storey.windows[0]!.wallId, "wall-1");
+  assert.equal(storeyOf(next.present).windows[0]!.wallId, "wall-1");
   assert.deepEqual(buildSolid(next.present), buildSolid(base));
   const date = new Date("2026-10-04T00:00:00Z");
   assert.equal(await exportIfc(next.present, date), await exportIfc(base, date));
@@ -65,7 +66,7 @@ test("invalid, mixed and stale targets cannot partially commit", () => {
   };
   for (const bad of [
     { ...request, elementIds: ["wall-1", "missing"] },
-    { ...request, elementIds: [base.storey.id] },
+    { ...request, elementIds: [storeyOf(base).id] },
     { ...request, elementIds: [] },
     { ...request, projectId: "other" },
     { ...request, layerId: "missing" },
@@ -76,7 +77,7 @@ test("invalid, mixed and stale targets cannot partially commit", () => {
   assert.throws(() => commitLayerAssignment(h, structuredClone(base), request));
   assert.equal(serializeProject(base), saved);
   assert.equal(h.past.length, 0);
-  assert.equal(next.present.storey.windows[0]!.layerId, base.defaultLayerIds.window);
+  assert.equal(storeyOf(next.present).windows[0]!.layerId, base.defaultLayerIds.window);
 });
 
 test("create and rename layers retain assignments/defaults through history and files", () => {
@@ -99,7 +100,7 @@ test("create and rename layers retain assignments/defaults through history and f
     id: "custom-layer",
     name: "Altbau",
   });
-  assert.equal(renamed.present.storey.walls[0]!.layerId, "custom-layer");
+  assert.equal(storeyOf(renamed.present).walls[0]!.layerId, "custom-layer");
   assert.deepEqual(renamed.present.defaultLayerIds, base.defaultLayerIds);
   assert.deepEqual(undoProject(renamed).present, assigned.present);
   assert.deepEqual(redoProject(undoProject(renamed)).present, renamed.present);
@@ -115,7 +116,7 @@ test("create and rename layers retain assignments/defaults through history and f
     id: base.defaultLayerIds.wall,
     name: "Fassade",
   });
-  assert.equal(standard.present.storey.walls[0]!.layerId, base.defaultLayerIds.wall);
+  assert.equal(storeyOf(standard.present).walls[0]!.layerId, base.defaultLayerIds.wall);
   assert.equal(standard.present.defaultLayerIds.wall, base.defaultLayerIds.wall);
 });
 

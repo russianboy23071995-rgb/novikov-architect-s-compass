@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { recoveryFixture } from "./recovery-capacity-fixture";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
 import { serializeProject } from "../src/lib/bim/model";
@@ -28,7 +29,7 @@ document.getElementById("generate")!.onclick = async () => {
         data: canvas.toDataURL("image/png").split(",")[1]!,
       }),
     );
-    p.storey.references.push({
+    storeyOf(p).references.push({
       id: `r${i}`,
       kind: "image-reference",
       assetId: `a${i}`,

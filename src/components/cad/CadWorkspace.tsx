@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { useLocalAutosave } from "./useLocalAutosave";
 import { LocalRecoveryStatus } from "./LocalRecoveryStatus";
 import { DocumentLayerNotice } from "./DocumentLayerNotice";
@@ -704,7 +705,7 @@ export function CadWorkspace({
       }
       setExportMessage(
         "IFC export ready · download requested" +
-          (project.storey.lines?.length || project.storey.hatches.length
+          (storeyOf(project).lines?.length || storeyOf(project).hatches.length
             ? " · 2D-Linien und Schraffuren sind nur in der JSON-Projektdatei enthalten."
             : ""),
       );
@@ -761,11 +762,11 @@ export function CadWorkspace({
         >
           <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
             <p className="text-xs text-muted-foreground">
-              {pendingFile?.name} · {pendingFile?.project.storey.walls.length} Wände ·{" "}
-              {pendingFile?.project.storey.windows.length} Fenster ·{" "}
-              {pendingFile?.project.storey.lines?.length ?? 0} Linien ·{" "}
-              {pendingFile?.project.storey.hatches.length ?? 0} Schraffuren ·{" "}
-              {pendingFile?.project.storey.references.length ?? 0} Bildreferenzen. Ersetzt das
+              {pendingFile?.name} · {storeyOf(pendingFile?.project)?.walls.length} Wände ·{" "}
+              {storeyOf(pendingFile?.project)?.windows.length} Fenster ·{" "}
+              {storeyOf(pendingFile?.project)?.lines?.length ?? 0} Linien ·{" "}
+              {storeyOf(pendingFile?.project)?.hatches.length ?? 0} Schraffuren ·{" "}
+              {storeyOf(pendingFile?.project)?.references.length ?? 0} Bildreferenzen. Ersetzt das
               aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
               übernommene Formulareingaben werden verworfen.
             </p>
@@ -799,7 +800,7 @@ export function CadWorkspace({
         <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
         {!fullscreen && (
           <TopToolbar
-            storeyName={project.storey.name}
+            storeyName={storeyOf(project).name}
             onPenSets={() => setPenSetsOpen(true)}
             onLineCreator={() => setLineCreatorOpen(true)}
             onHatchLibrary={() => setHatchLibraryOpen(true)}
@@ -1558,25 +1559,14 @@ export function CadWorkspace({
                 <ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" />
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
-                    onGroundDatum={(base, elevation) =>
-                      dispatchEditing({
-                        type: "set-ground-datum",
-                        base,
-                        request: { projectId: base.id, storeyId: base.storey.id, elevation },
-                      })
-                    }
-                    onStoreyHeight={(base, height) =>
-                      dispatchEditing({
-                        type: "set-storey-height",
-                        base,
-                        request: { projectId: base.id, storeyId: base.storey.id, height },
-                      })
+                    onBuildingChange={(base, change) =>
+                      dispatchEditing({ type: "building", base, change })
                     }
                     onRenameStorey={(base, name) =>
                       dispatchEditing({
                         type: "rename-storey",
                         base,
-                        request: { projectId: base.id, storeyId: base.storey.id, name },
+                        request: { projectId: base.id, storeyId: storeyOf(base).id, name },
                       })
                     }
                     getPlanCapture={getPlanCapture}
@@ -1601,7 +1591,9 @@ export function CadWorkspace({
                       dispatchEditing({ type: "document", base, action })
                     }
                     project={project}
-                    active={selections.length ? selections.map((t) => t.id) : [project.storey.id]}
+                    active={
+                      selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]
+                    }
                     onClose={() => setNavigatorOpen(false)}
                     onSelect={(id, _label, toggle) => {
                       if (activeDocumentId) return;
@@ -1622,7 +1614,7 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
-            storeyName={project.storey.name}
+            storeyName={storeyOf(project).name}
             recoveryStatus={
               <LocalRecoveryStatus
                 autosave={autosave.state}

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { propertyFormKey } from "./property-form-key.ts";
@@ -6,7 +7,7 @@ import { createHistory, commitProject, undoProject, redoProject } from "../../li
 import { updateWall } from "../../lib/bim/model.ts";
 test("property drafts follow immutable revisions, selection and undo/redo without serializing data", () => {
   const p = createExampleProject(),
-    s = { kind: "wall" as const, id: p.storey.walls[0]!.id };
+    s = { kind: "wall" as const, id: storeyOf(p).walls[0]!.id };
   const initial = propertyFormKey(p, s);
   assert.equal(propertyFormKey(p, { ...s }), initial);
   assert.notEqual(propertyFormKey(p, null), initial);
@@ -15,7 +16,7 @@ test("property drafts follow immutable revisions, selection and undo/redo withou
   assert.notEqual(propertyFormKey(h.present, s), initial);
   const u = undoProject(h);
   assert.notEqual(propertyFormKey(u.present, s), propertyFormKey(h.present, s));
-  assert.equal(redoProject(u).present.storey.walls[0]!.height, 3);
+  assert.equal(storeyOf(redoProject(u).present).walls[0]!.height, 3);
   const noRead = new Proxy(p, {
     get() {
       throw new Error("Key must not inspect model or assets");

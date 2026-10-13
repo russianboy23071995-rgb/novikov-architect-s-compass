@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { ToolSnapPolicy } from "./snapping.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import { createShiftSnapLock } from "./shift-lock.ts";
@@ -484,9 +485,8 @@ test("drawing and idle hover use same resolver with Shift origin and Snap off re
 test("dense diagonal boxes and crossings preserve full resolver ranking at multiple scales", () => {
   for (const crossing of [false, true]) {
     const project = validateProject({
-      ...base,
-      storey: {
-        ...base.storey,
+      ...replaceStorey(base, {
+        ...storeyOf(base),
         lines: Array.from({ length: 80 }, (_, i) => {
           const slope = crossing ? 0.2 + i * 0.02 : 1;
           const offset = crossing ? 0.001 * (i % 7) : 2 + i * 0.1;
@@ -501,7 +501,7 @@ test("dense diagonal boxes and crossings preserve full resolver ranking at multi
             ...defaultLineAppearance,
           };
         }),
-      },
+      }),
     });
     const model = getLocalSnapSources(project);
     const full = projectSnapReferences(project);
@@ -753,16 +753,16 @@ test("grid targets survive contour/wall preview, history and zoom metrics", asyn
       assert.equal(serializeProject(session.base), initial, "preview/cancel leaves base untouched");
       if (session.target.kind === "wall") {
         assert.equal(
-          preview.storey.walls[0]!.start.y,
+          storeyOf(preview).walls[0]!.start.y,
           -2.68,
           "chosen corner is on grid, axis remains offset by half thickness",
         );
-        assert.deepEqual(preview.storey.windows, session.base.storey.windows);
+        assert.deepEqual(storeyOf(preview).windows, storeyOf(session.base).windows);
       } else {
         const points =
           session.target.kind === "hatch"
-            ? preview.storey.hatches[0]!.points
-            : preview.storey.lines!.find((l) => l.id === "p-grid")!.points;
+            ? storeyOf(preview).hatches[0]!.points
+            : storeyOf(preview).lines!.find((l) => l.id === "p-grid")!.points;
         assert.equal(points[1]!.x, 3.5);
         assert.equal(points[2]!.x, 3.5);
       }

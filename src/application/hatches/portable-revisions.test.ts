@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -35,9 +36,9 @@ test("schema 11 preserves unknown provenance; schema 12 revisions roundtrip with
   const p = fixture(),
     old = { ...p, schemaVersion: 11 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 23);
+  assert.equal(migrated.schemaVersion, 24);
   assert.equal(migrated.hatchPatterns[0]!.revision, undefined);
-  assert.deepEqual(migrated.storey, p.storey);
+  assert.deepEqual(storeyOf(migrated), storeyOf(p));
   const updated = resolveProjectHatchPatterns(migrated, migrated, available).project;
   assert.equal(updated.hatchPatterns[0]!.revision, 7);
   assert.deepEqual(readProjectFile(serializeProject(updated)), updated);
@@ -90,11 +91,11 @@ test("model Undo/Redo restores appearance but retains newer global content witho
   });
   assert.equal(state.history.past.length, 1);
   const undo = editingReducer(state, { type: "undo", patternRecords: [] });
-  assert.equal(undo.history.present.storey.hatches[0]!.fill.opacity, 0.5);
+  assert.equal(storeyOf(undo.history.present).hatches[0]!.fill.opacity, 0.5);
   assert.equal(undo.history.present.hatchPatterns[0]!.revision, 7);
   assert.equal(undo.history.past.length, 0);
   const redo = editingReducer(undo, { type: "redo", patternRecords: available });
-  assert.equal(redo.history.present.storey.hatches[0]!.fill.opacity, 0.8);
+  assert.equal(storeyOf(redo.history.present).hatches[0]!.fill.opacity, 0.8);
   assert.equal(redo.history.present.hatchPatterns[0]!.revision, 7);
   // Metadata does not make otherwise identical assignment content conflict.
   assert.doesNotThrow(() =>

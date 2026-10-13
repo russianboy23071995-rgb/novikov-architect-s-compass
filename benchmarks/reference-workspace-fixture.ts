@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { recoveryFixture } from "./recovery-capacity-fixture.ts";
 import { serializeProject } from "../src/lib/bim/model.ts";
@@ -11,6 +12,6 @@ const project = recoveryFixture("acceptance-large-reference-253", 0, {
   pixelHeight: 1550,
   data: png.toString("base64"),
 });
-project.storey.references[0]!.origin = { x: 0, y: 2 };
+storeyOf(project).references[0]!.origin = { x: 0, y: 2 };
 writeFileSync(process.argv[3]!, serializeProject(project));
 console.log(Buffer.byteLength(serializeProject(project)));

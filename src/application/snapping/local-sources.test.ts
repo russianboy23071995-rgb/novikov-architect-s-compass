@@ -15,7 +15,8 @@ import { createHistory, commitProject, undoProject, redoProject } from "../../li
 
 function fixture(pairs: number[][]) {
   return validateProject({
-    schemaVersion: 23,
+    schemaVersion: 24,
+    groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],
     assets: [],
@@ -23,39 +24,41 @@ function fixture(pairs: number[][]) {
     ...createStandardLayers([]),
     unit: "m",
     id: "p",
-    storey: {
-      name: "Level 01",
-      height: null,
-      references: [],
-      hatches: [],
-      wallJoins: [],
-      wallTJunctions: [],
-      id: "s",
-      walls: [
-        {
-          id: "w",
-          layerId: "layer:exterior-wall",
-          start: { x: -3, y: -3 },
-          end: { x: -1, y: -3 },
-          height: 2.8,
-          thickness: 0.36,
-          bodyOffset: 0,
-        },
-      ],
-      windows: [],
-      lines: pairs.map(([x, y, a, b], i) => ({
-        id: `l${i}`,
-        layerId: "layer:drawing",
-        kind: "line",
-        points: [
-          { x, y },
-          { x: a, y: b },
+    storeys: [
+      {
+        name: "Level 01",
+        height: null,
+        references: [],
+        hatches: [],
+        wallJoins: [],
+        wallTJunctions: [],
+        id: "s",
+        walls: [
+          {
+            id: "w",
+            layerId: "layer:exterior-wall",
+            start: { x: -3, y: -3 },
+            end: { x: -1, y: -3 },
+            height: 2.8,
+            thickness: 0.36,
+            bodyOffset: 0,
+          },
         ],
-        color: "#334155",
-        penWidth: 0.25,
-        style: "solid",
-      })),
-    },
+        windows: [],
+        lines: pairs.map(([x, y, a, b], i) => ({
+          id: `l${i}`,
+          layerId: "layer:drawing",
+          kind: "line",
+          points: [
+            { x, y },
+            { x: a, y: b },
+          ],
+          color: "#334155",
+          penWidth: 0.25,
+          style: "solid",
+        })),
+      },
+    ],
   });
 }
 const pairs = [

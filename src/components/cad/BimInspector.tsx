@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { PropertyForm } from "./PropertyForm";
 import { defaultDrawingWindow } from "@/application/drawing/window-placement";
 import { HatchInspector } from "./HatchControls";
@@ -21,24 +22,24 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   const [error, setError] = useState("");
   const hatch =
     selection?.kind === "hatch"
-      ? project.storey.hatches.find((h) => h.id === selection.id)
+      ? storeyOf(project).hatches.find((h) => h.id === selection.id)
       : undefined;
   if (hatch) return <HatchInspector project={project} hatch={hatch} onChange={onChange} />;
   const line =
     selection?.kind === "line"
-      ? project.storey.lines?.find((item) => item.id === selection.id)
+      ? storeyOf(project).lines?.find((item) => item.id === selection.id)
       : undefined;
   if (line) return <LineInspector project={project} line={line} onChange={onChange} />;
   const wall =
     selection?.kind === "wall"
-      ? project.storey.walls.find((item) => item.id === selection.id)
+      ? storeyOf(project).walls.find((item) => item.id === selection.id)
       : undefined;
   const opening =
     selection?.kind === "window"
-      ? project.storey.windows.find((item) => item.id === selection.id)
+      ? storeyOf(project).windows.find((item) => item.id === selection.id)
       : undefined;
   if (selection?.kind === "reference") {
-    const r = project.storey.references.find((r) => r.id === selection.id)!;
+    const r = storeyOf(project).references.find((r) => r.id === selection.id)!;
     const a = project.assets.find((a) => a.id === r.assetId)!;
     return (
       <p className="p-3 text-xs">
@@ -82,7 +83,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     <section className="flex flex-wrap items-end gap-x-4 gap-y-2" aria-label="Element properties">
       <h2 className="text-sm font-semibold">{wall ? "Wall properties" : "Window properties"}</h2>
       {wall &&
-        project.storey.wallJoins.some(
+        storeyOf(project).wallJoins.some(
           (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
         ) && <span className="text-xs text-muted-foreground">Wandanschluss aktiv</span>}
       <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -19,7 +20,7 @@ export function tAxisEndpoint(session: EditSession) {
     (session.index !== 0 && session.index !== 1)
   )
     return null;
-  const wall = session.base.storey.walls.find((w) => w.id === session.target.id);
+  const wall = storeyOf(session.base).walls.find((w) => w.id === session.target.id);
   const point = session.index === 0 ? wall?.start : wall?.end;
   // A body-corner drag has a different target than its axis endpoint.
   return wall && point && pointsCompatible(point, session.anchor)
@@ -125,7 +126,7 @@ export function connectWallAtTAxis(
   if (candidate?.sourceFeature !== "t-axis") return proposed;
   if (!candidate.sourceEntityId || !pointsCompatible(candidate.worldPoint, point))
     throw new Error("T-Fangziel ist nicht mehr g\u00fcltig.");
-  const moved = proposed.storey.walls.find((w) => w.id === wallId);
+  const moved = storeyOf(proposed).walls.find((w) => w.id === wallId);
   if (!moved) throw new Error("Wand nicht gefunden.");
   if (!pointsCompatible(endpoint === 0 ? moved.start : moved.end, point))
     throw new Error("T-Fangziel passt nicht zur Wandachse.");
@@ -134,7 +135,7 @@ export function connectWallAtTAxis(
     incoming: { wallId, endpoint },
   };
   if (
-    proposed.storey.wallTJunctions.some(
+    storeyOf(proposed).wallTJunctions.some(
       (r) =>
         r.hostWallId === relation.hostWallId &&
         r.incoming.wallId === relation.incoming.wallId &&

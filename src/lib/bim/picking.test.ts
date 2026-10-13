@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { pickWall, isSelectionClick } from "./picking.ts";
@@ -146,10 +147,15 @@ test("selects reference wall material and leaves its through opening empty", () 
 });
 test("nearest visible wall wins regardless of model order", () => {
   let p = createExampleProject();
-  p.storey.windows = [];
-  p = addWall(p, { ...p.storey.walls[0]!, id: "back", start: { x: 0, y: 2 }, end: { x: 3, y: 2 } });
-  for (const walls of [p.storey.walls, [...p.storey.walls].reverse()]) {
-    const solid = buildSolid({ ...p, storey: { ...p.storey, walls } });
+  storeyOf(p).windows = [];
+  p = addWall(p, {
+    ...storeyOf(p).walls[0]!,
+    id: "back",
+    start: { x: 0, y: 2 },
+    end: { x: 3, y: 2 },
+  });
+  for (const walls of [storeyOf(p).walls, [...storeyOf(p).walls].reverse()]) {
+    const solid = buildSolid({ ...replaceStorey(p, { ...storeyOf(p), walls }) });
     const [x, y] = projectPoint([1.5, 0, 1.4], solid, front, 1);
     assert.equal(pickWall(solid, front, 1, x, y), "wall-1");
   }
@@ -168,7 +174,7 @@ test("wall behind an opening can be selected through it", () => {
 });
 test("picking follows orbit, pan, zoom and viewport aspect ratios", () => {
   const p = createExampleProject();
-  p.storey.windows = [];
+  storeyOf(p).windows = [];
   const solid = buildSolid(p);
   for (const aspect of [0.5, 1, 2]) {
     const camera = { ...initialCamera, zoom: 1.3, panX: 0.1, panY: -0.1 };
@@ -181,7 +187,7 @@ test("diagonal translated wall keeps its stable identity", () => {
     start: { x: 5, y: 8 },
     end: { x: 8, y: 12 },
   });
-  p.storey.windows = [];
+  storeyOf(p).windows = [];
   const solid = buildSolid(p);
   const [x, y] = projectPoint([6.5, 10, 1.4], solid, initialCamera, 1);
   assert.equal(pickWall(solid, initialCamera, 1, x, y), "wall-1");
@@ -224,7 +230,7 @@ test("3D visible wall hits feed the same mixed selection; hidden hits are reject
   const { createLayerDisplay } = await import("../../rendering/viewport/layer-display.ts");
   const base = createExampleProject();
   const p = addWall(base, {
-    ...base.storey.walls[0]!,
+    ...storeyOf(base).walls[0]!,
     id: "back",
     layerId: base.defaultLayerIds.line,
     start: { x: 0, y: 2 },
@@ -252,7 +258,7 @@ test("3D visible wall hits feed the same mixed selection; hidden hits are reject
   assert.deepEqual(selectTargets(selected, [near]), [near]);
   const hidden = createLayerVisibilityPolicy(p, {
     scope: { kind: "bim-project" },
-    hiddenLayerIds: [p.storey.walls[0]!.layerId],
+    hiddenLayerIds: [storeyOf(p).walls[0]!.layerId],
   });
   const hiddenDisplay = createLayerDisplay(p, hidden, hidden.context);
   const [x, y] = projectOrthographic(
@@ -270,7 +276,7 @@ test("3D opening selects its window before rear walls; foreground material wins"
     await import("../../rendering/viewport/window-selection.ts");
   const base = createExampleProject();
   const p = addWall(base, {
-    ...base.storey.walls[0]!,
+    ...storeyOf(base).walls[0]!,
     id: "rear",
     start: { x: 0, y: 2 },
     end: { x: 3, y: 2 },
@@ -295,7 +301,7 @@ test("3D opening selects its window before rear walls; foreground material wins"
     { kind: "wall", id: "rear" },
   );
   const covered = addWall(p, {
-    ...base.storey.walls[0]!,
+    ...storeyOf(base).walls[0]!,
     id: "front",
     start: { x: 0, y: -2 },
     end: { x: 3, y: -2 },
@@ -322,7 +328,7 @@ test("window hit geometry respects physical body offset, dimensions and hidden h
   const edges = windowSelectionEdges(windows, new Set(["window-1"]));
   assert.equal(edges.length, 8);
   assert.ok(Math.abs(edges[0]![1][0] - edges[0]![0][0] - 1.2) < 1e-12);
-  assert.ok(Math.abs(edges[1]![1][2] - edges[1]![0][2] - p.storey.windows[0]!.height) < 1e-12);
+  assert.ok(Math.abs(edges[1]![1][2] - edges[1]![0][2] - storeyOf(p).windows[0]!.height) < 1e-12);
 });
 
 test("window selection follows orbit, zoom, pan and mixed selection transitions", async () => {
@@ -332,10 +338,10 @@ test("window selection follows orbit, zoom, pan and mixed selection transitions"
   const p = createExampleProject(),
     solid = buildSolid(p);
   const windows = windowSelectionSurfaces(p, () => true);
-  const opening = p.storey.windows[0]!;
+  const opening = storeyOf(p).windows[0]!;
   const center: [number, number, number] = [
     1.5,
-    p.storey.walls[0]!.bodyOffset,
+    storeyOf(p).walls[0]!.bodyOffset,
     opening.sillHeight + opening.height / 2,
   ];
   for (const yaw of [0, Math.PI, 0.2])

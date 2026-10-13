@@ -1,25 +1,26 @@
+import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { validateCornerTContact } from "./corner-t-contact.ts";
 import type { Point, Project } from "../../project/schema.ts";
 import { inspectTPair } from "./t-pair.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
 
-export type TJunction = Project["storey"]["wallTJunctions"][number];
+export type TJunction = Project["storeys"][number]["wallTJunctions"][number];
 
 /** Strict persisted relationships: loading never repairs or discovers neighbours. */
 export function tConnectionContours(
   project: WallGeometry,
   cornerContours: ReadonlyMap<string, Point[]>,
 ) {
-  const walls = new Map(project.storey.walls.map((w) => [w.id, w]));
+  const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
   const cornerWalls = new Set(
-    project.storey.wallJoins.flatMap((j) => [j.first.wallId, j.second.wallId]),
+    storeyOf(project).wallJoins.flatMap((j) => [j.first.wallId, j.second.wallId]),
   );
   const incomingIds = new Set<string>();
-  const hostIds = new Set(project.storey.wallTJunctions.map((r) => r.hostWallId));
+  const hostIds = new Set(storeyOf(project).wallTJunctions.map((r) => r.hostWallId));
   const contacts = new Map<string, { side: number; min: number; max: number }[]>();
   const contours = new Map<string, { x: number; y: number }[]>();
-  for (const relation of project.storey.wallTJunctions) {
+  for (const relation of storeyOf(project).wallTJunctions) {
     const host = walls.get(relation.hostWallId),
       incoming = walls.get(relation.incoming.wallId);
     if (!host || !incoming || host.id === incoming.id)
@@ -34,7 +35,7 @@ export function tConnectionContours(
     const result = inspectTPair(
       host,
       { wall: incoming, endpoint: relation.incoming.endpoint },
-      project.storey.windows,
+      storeyOf(project).windows,
     );
     validateCornerTContact(
       project,
@@ -75,11 +76,11 @@ export function reconcileTJunctions(
   changedId: string,
   intent: "move" | "reshape",
 ): Project {
-  const relations = project.storey.wallTJunctions.filter((relation) => {
+  const relations = storeyOf(project).wallTJunctions.filter((relation) => {
     if (relation.hostWallId !== changedId && relation.incoming.wallId !== changedId) return true;
     if (intent === "move") return false;
-    const host = project.storey.walls.find((w) => w.id === relation.hostWallId)!;
-    const incoming = project.storey.walls.find((w) => w.id === relation.incoming.wallId)!;
+    const host = storeyOf(project).walls.find((w) => w.id === relation.hostWallId)!;
+    const incoming = storeyOf(project).walls.find((w) => w.id === relation.incoming.wallId)!;
     const anchor = relation.incoming.endpoint === 0 ? incoming.start : incoming.end;
     const dx = host.end.x - host.start.x,
       dy = host.end.y - host.start.y;
@@ -97,5 +98,5 @@ export function reconcileTJunctions(
       pointsCompatible(anchor, onAxis)
     );
   });
-  return { ...project, storey: { ...project.storey, wallTJunctions: relations } };
+  return { ...replaceStorey(project, { ...storeyOf(project), wallTJunctions: relations }) };
 }

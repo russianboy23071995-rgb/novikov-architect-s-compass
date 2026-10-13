@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { z } from "zod";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -52,14 +53,14 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
   // Build once per snapshot/context, not by scanning all elements on every pointer move.
   const elements = new Map(
     [
-      ...project.storey.walls,
-      ...project.storey.windows,
-      ...(project.storey.lines ?? []),
-      ...project.storey.hatches,
-      ...project.storey.references,
+      ...storeyOf(project).walls,
+      ...storeyOf(project).windows,
+      ...(storeyOf(project).lines ?? []),
+      ...storeyOf(project).hatches,
+      ...storeyOf(project).references,
     ].map((element) => [element.id, element] as const),
   );
-  const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
+  const walls = new Map(storeyOf(project).walls.map((wall) => [wall.id, wall]));
   return Object.freeze({
     context,
     isCurrent(current: Project, currentContext: LayerVisibilityContext) {
