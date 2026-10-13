@@ -10978,3 +10978,93 @@ Keine Formatänderung, noch Schema21/ein Geschoss; keine Höhenentscheidung vorw
 27 gezielte Ansichts-/Abbild-/Maßstabstests bestanden einschließlich Fremdkontext,
 gelöschter Quelle, ungültiger Geschosszuordnung, unabhängiger Sichtbarkeit und No-op.
 TypeScript, fokussiertes ESLint und Produktionsbuild bestanden. Keine UI-Änderung.
+
+### R26-03 / N21–N22 · Verbindliche Höhenregeln und vertikaler Pilot (13.10.2026)
+Quelle: Nutzerfreigabe PR303 und Antworten zu Messstrecke/Einfügen vom 13.10.2026.
+PR303 nach grüner GitHub-Prüfung mit Merge-Commit übernommen; Basis main 9a14b0a.
+Dieser Vertrag ersetzt die zuvor offenen Regeln zur Höhenfortschreibung, Messstrecke
+und zum Einfügen. Noch keine neue Laufzeit-/Formatfunktion implementiert.
+
+#### Bestätigte Produktregeln
+1. OK Rohfußboden EG ist der feste Gebäude-Bezug. In lokalen Modellkoordinaten Z=0;
+   ein späterer geodätischer Höhenbezug ist davon unabhängig und noch offen.
+2. Die Geschosshöhe bezeichnet den Abstand OK Rohfußboden des Geschosses bis
+   OK Rohfußboden des nächsten Geschosses darüber. Keine lichte Raum-/Wandhöhe.
+3. Oberhalb EG werden Änderungen vom EG aus nach oben fortgeschrieben. Unterhalb
+   EG erfolgt die Fortschreibung nach unten; EG und die gegenüberliegende Seite
+   werden nicht mitverschoben. Bei Verkleinerung kehrt sich die Bewegung um.
+4. Beim Einfügen kommt die eingegebene neue Höhe hinzu. Vorhandene Abstände werden
+   nicht aufgeteilt; vorhandene Geschosse jenseits der Einfügestelle verschieben
+   sich vom EG weg. IDs, Bauteilzuordnung und manuelle Namen bleiben stabil.
+5. Höhe neuer Geschosse ausdrücklich eingeben. Keine still erfundene Standardhöhe
+   oder aus bestehenden Wandhöhen abgeleitete Geschosshöhe.
+
+#### Technischer Berechnungsvertrag
+Geordnete Geschosse vom tiefsten zum höchsten, identifiziert über stabile IDs;
+Index g bezeichnet das EG, h_i den Abstand zum nächsthöheren Rohfußboden.
+Z_g = 0; für i > g gilt Z_i = Summe(h_j, j=g..i-1), für i < g gilt
+Z_i = -Summe(h_j, j=i..g-1). Endliche positive Abstände verlangen, Überläufe bei
+Summation abweisen. Diese Indizes sind nur Rechenreihenfolge, niemals Identitäten.
+Die oberste Geschosshöhe definiert eine obere Referenzebene ohne künstliches Geschoss.
+Z-Werte werden abgeleitet; keine zweite unabhängig editierbare Elevation speichern.
+
+Rechenbeispiel (Meter): UG2 h=2,5, UG1 h=2,8, EG h=3,2, OG1 h=3,0 ergibt
+UG2=-5,3, UG1=-2,8, EG=0, OG1=3,2 und obere Referenz=6,2.
+- EG h von 3,2 auf 3,5: OG1=3,5, obere Referenz=6,5; Keller unverändert.
+- UG1 h von 2,8 auf 3,1: UG1=-3,1, UG2=-5,6; EG/OG unverändert.
+- UG2 h von 2,5 auf 2,9: nur UG2=-5,7; UG1=-2,8 bleibt stehen.
+- Einfügen h=2,6 zwischen EG und OG1: neues Geschoss bei +3,2, bisheriges OG1
+  bei +5,8. Einfügen h=2,6 zwischen UG1 und EG: neues Geschoss bei -2,6,
+  bisheriges UG1 bei -5,4 und UG2 bei -7,9 (jeweils vom Ausgangsbeispiel).
+Die abhängige Seite folgt der geänderten Strecke; nicht jeder Keller wird pauschal
+verschoben, wenn nur ein tieferes Intervall geändert wird.
+
+#### Genau ein nächster Implementierungsauftrag: EG/OG-Pilot
+Vertikale Umsetzung mit zwei tatsächlich bearbeitbaren Geschossen, nicht nur einer
+leeren Geschossliste. Gemeinsame Query aus PR303 weiterverwenden.
+- Domain/Format: nächsten freien Schemawert beim Start prüfen (derzeit wäre 22).
+  Einzel-storey zu storeys migrieren, groundStoreyId als fester Bezug, geordnete
+  Eigentümercontainer und Geschosshöhen; kein paralleles persistiertes storey.
+  Alte IDs/Namen/Geometrien/Assets/Ansichten vollständig erhalten. Althöhe bleibt
+  ausdrücklich unbekannt, bis Nutzer sie eingibt; EG bleibt trotzdem bei Z=0.
+  Zugehörigkeit von Fenstern zu Hostwänden und Anschlüssen innerhalb eines Geschosses
+  validieren; IDs projektweit eindeutig. Unbekannte Bezugskette nicht als Nullhöhe rendern.
+- Application: gemeinsame validierte Anlage-/Höhenänderungsaktionen mit Projekt-,
+  Geschoss-ID und Snapshotprüfung. OG anlegen fragt benötigte EG- und OG-Höhe ab;
+  eine atomare Transaktion, ein Undo-Schritt. Ganze betroffene Geometrie prüfen.
+  Bestehende feste Wandhöhe bleibt unverändert, Geschossverschiebung verschiebt
+  den Bauteilursprung; Fenster folgen hostrelativ. Automatische obere Höhenbindung
+  ist ein späterer Pilot, keine implizite Altdatenmigration.
+- Ansicht/Interaktion: aktive Geschosswahl über stabilen Kontext; Wechsel verwirft
+  laufende Interaktionen und veraltete Ziel-/Fangreferenzen. Zeichnen, Auswählen,
+  Bearbeiten und Undo auf dem richtigen Geschoss. Grundriss zeigt dessen lokale XY-
+  Geometrie; Abbildbindung bleibt auf seiner ModelView/storeyId. Projektebenen global,
+  Abbildfilter unabhängig. Kein vollständiges Projekt-Klonen je Ansicht.
+- UI: „Gebäudestruktur“ als Oberknoten; Doppelklick öffnet gemeinsame Settings-Hülle
+  mit Namen/Höhenliste. Navigator-Kontextmenü zunächst „Geschoss darüber“ am obersten
+  Geschoss; EG/1.OG als neue Standardnamen, Altprojektnamen erhalten. Keller und
+  Einfügen zwischen vorhandenen Geschossen folgen später auf denselben Aktionen;
+  im Piloten keine scheinbar aktiven, noch unimplementierten Menüpunkte.
+- Rendering/IFC: gleiche abgeleitete Geschoss-Z-Abfrage für 3D, Picking und Export.
+  IFC je Geschoss eigene stabile Platzierung/Containment; Fensterhöhe nur einmal
+  über Host-/Geschossplacement addieren. Kein stiller Z=0-Fallback für OG.
+- Persistenz: Datei und geprüfte Recovery verwenden eine Migration. Projekt-Undo
+  betrifft Anlage und Höhenänderung; Ansichtswechsel ist kein Modell-Undo. Erhaltene
+  Ansichtssettings gegen noch vorhandene IDs prüfen. 128-MiB-Grenze unverändert.
+- AI/Text/Voice: dieselben typed Actions als Anschlussstelle; keine neue Parser-
+  Fähigkeit behaupten. Kontext muss Projekt/Geschoss/Element eindeutig identifizieren.
+
+Abnahme: Altes Projekt mit Wand/Fenster plus Abbild migrieren; EG-Höhe 3,20 m,
+OG-Höhe 3,00 m eingeben, OG-Wand/Fenster zeichnen. EG/OG getrennt bearbeiten,
+Z=0/+3,20 in 3D/Picking/IFC prüfen. EG-Höhe auf 3,50 ändern: OG nach +3,50,
+feste Wandhöhen/Brüstungen unverändert, ein Undo stellt +3,20 wieder her.
+JSON/Recovery-Rundlauf, Abbildquelle, Ebenenfilter, Standardnamen und manuelle Namen,
+Fremdkontext, doppelte IDs, falsche Hosts, negative/Null/NaN-Höhen und verwaiste
+Referenzen testen. Keller-/Einfügeformeln anhand obiger Fälle als Domainregressionen
+absichern, ohne deren UI-Verfügbarkeit zu behaupten. Vergleich gegen Ein-Geschoss-
+Referenzpfad; keine Verdopplung des Modells für 2D/3D/IFC.
+
+Ausgeschlossen: Decken/Dächer, Fertigfußbodenaufbau, automatische Bauteil-Höhenbindung,
+geodätischer Bezug, Keller-/Zwischengeschoss-UI und Höhenskizzeneditor. Offene zukünftige
+Entscheidungen: Löschen belegter Geschosse, Umhängen bestehender Bauteile und explizites
+Verschieben des Gebäude-Datums. Sie blockieren die oben begrenzte EG/OG-Abnahme nicht.
