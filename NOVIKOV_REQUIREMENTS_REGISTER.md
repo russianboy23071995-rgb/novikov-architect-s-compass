@@ -10839,3 +10839,37 @@ Namen; keine Konsolenfehler. Keine erneute Archicad-Abnahme behauptet.
 N22 bleibt offen: keine Geschosshöhen oder automatische Höhenbindung. Der nächste
 begrenzte Architekturauftrag für zwei Geschosse steht ausschließlich im Masterplan.
 128-MiB-Projektlimit unverändert, größere Speicherklasse weiter zurückgestellt.
+
+### R26-03, N21/N22/N56 · Nutzervertrag Geschossverwaltung (13.10.2026)
+Status: verbindliche Bedien-/Produktvorgaben, noch nicht implementiert; ergänzt den
+Architekturauftrag im Masterplan. Quelle: Nutzeranmerkung und ausdrückliche Antwort
+zur Bezugshöhe am 13.10.2026. Der Einzelgeschoss-Pilot in PR301 bleibt davon getrennt.
+
+- Navigator-Oberknoten „BIM Project“ künftig „Gebäudestruktur“ nennen. Doppelklick
+  öffnet die Gebäudeeinstellungen in der gemeinsamen verschiebbaren, nichtmodalen
+  Settings-/FloatingPanel-Hülle (keine eigene Fensterarchitektur).
+- Dort Gebäude-Höhenbezüge und eine individuelle Geschosshöhe für jedes vorhandene
+  Geschoss bearbeiten. Gebäude-Basis ist ausdrücklich OK Rohdecke / Rohfußboden EG,
+  nicht OK Fertigfußboden. Eine absolute geodätische Höhe ist damit noch nicht festgelegt.
+- Später eine schematische Geschoss-/Höhenskizze im selben Einstellungsfenster mit
+  bearbeitbaren Zahlen ergänzen. Skizze ist abgeleitete Darstellung desselben Modells.
+- Rechtsklick auf ein Geschoss bietet „Geschoss darüber“ und „Geschoss darunter“;
+  hinzufügen und umbenennen analog zur Abbildverwaltung, mit stabilen Geschoss-IDs.
+- Vorgaben für neue Namen: „Erdgeschoss“, darüber „1. Obergeschoss“, danach
+  „2. Obergeschoss“ usw.; direkt unter EG „-1. Kellergeschoss“.
+  Manuell vergebene Namen bleiben eigenständige Metadaten. Keine automatische
+  Umbenennung bestehender Geschosse aus diesen Namensvorgaben ableiten.
+- Jedes Geschoss darf eine eigene Höhe haben. Gemeinsame validierte Application-
+  Aktionen bedienen Navigator, Einstellungen und spätere Text-/AI-/Voice-Adapter.
+  Bauteile werden nicht als Geschosskopien dupliziert.
+
+Vor Höhenimplementierung noch abzugrenzen: genaue Messstrecke der Geschosshöhe
+(Vorschlag Rohfußboden-Oberkante bis Rohfußboden-Oberkante des nächsten Geschosses),
+Folgen einer Höhenänderung für darüberliegende Bezugsebenen, Einfügen zwischen
+bestehenden Geschossen und Standardhöhe neuer Geschosse. Diese Regeln sind noch
+keine Nutzerentscheidungen. Bestehende feste Bauteilhöhen erhalten bei Migration
+keine implizite Höhenbindung; Altprojektnamen werden nicht still ersetzt.
+
+Abnahme des künftigen Piloten: EG mit Rohfußboden-Basis, ein darüber und ein darunter
+angelegtes Geschoss, unterschiedliche Höhen, freie Namen, stabile Zuordnung,
+Undo/Redo und Dateirundlauf; 2D/3D/IFC müssen dieselben Bezugshöhen verwenden.

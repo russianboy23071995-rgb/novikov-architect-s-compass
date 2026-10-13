@@ -474,3 +474,11 @@ Vertrag im vorhandenen Anforderungsregister und den Einzelauftrag hier festhalte
 ## 10. Verwaltung und persönliche Ablage
 
 GitHub bleibt die technische Quelle. Für kommende Arbeitsaufträge genügen diese zwei Dateien plus fokussierte Code-/Test-/Diagnoselesung. GitHub Issues/Projects können später IDs, Prioritäten und Status abbilden; kein weiterer Plugin-Anschluss ist dafür Voraussetzung. Ein zusätzliches Notion-/Linear-System ist optional, würde aber eine klar geregelte Synchronisierung benötigen. Die PDF ist ein datierter Fahrplan für die persönliche Ablage und keine dritte laufend gepflegte Quelle.
+
+### Ergänzung zum aktiven Geschossauftrag (Nutzerentscheidung 13.10.2026)
+Der Architekturauftrag aus §9 berücksichtigt den neuen Nutzervertrag unter
+R26-03/N21/N22/N56 im Register: „Gebäudestruktur“ mit Doppelklick-Einstellungen,
+Geschosse oberhalb/unterhalb per Kontextmenü, individuelle Höhen, Standardnamen
+ab Erdgeschoss und Gebäude-Basis OK Rohdecke / Rohfußboden EG. Höhenskizze später.
+Keine Mehrgeschossimplementierung vor dem begrenzten Migrations-/Höhenvertrag;
+die noch offenen Einfüge- und Höhenfortschreibungsregeln ausdrücklich ausweisen.
