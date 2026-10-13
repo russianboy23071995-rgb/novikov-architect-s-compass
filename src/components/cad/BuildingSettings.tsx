@@ -1,3 +1,4 @@
+import { BuildingHeightSection } from "./BuildingHeightSection";
 import { useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import { FloatingPanel } from "./FloatingPanel";
@@ -14,7 +15,14 @@ export function BuildingSettings({
 }) {
   const [draft, setDraft] = useState<{ base: Project; value: string } | null>(null);
   const value =
-    draft?.value ?? (project.storey.height === null ? "" : String(project.storey.height));
+    draft?.value ??
+    (project.storey.height === null
+      ? ""
+      : project.storey.height.toLocaleString("de-DE", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 12,
+          useGrouping: false,
+        }));
   const parsed = Number(value.replace(",", "."));
   const invalid = value.trim() !== "" && (!Number.isFinite(parsed) || parsed <= 0);
   const stale = draft !== null && draft.base !== project;
@@ -23,48 +31,49 @@ export function BuildingSettings({
     onHeight(draft.base, parsed);
     setDraft(null);
   };
+  const input = (label: string) => (
+    <span className="flex items-center gap-1 rounded border bg-background px-2 py-1">
+      <input
+        aria-label={label}
+        className="min-w-0 w-full bg-transparent font-mono text-xs outline-none focus-visible:ring-1 focus-visible:ring-primary"
+        inputMode="decimal"
+        value={value}
+        placeholder="Nicht festgelegt"
+        aria-invalid={invalid || stale}
+        onChange={(e) => setDraft({ base: draft?.base ?? project, value: e.target.value })}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+          if (e.key === "Escape") setDraft(null);
+        }}
+      />
+      <span className="text-xs text-muted-foreground">m</span>
+    </span>
+  );
   return (
     <FloatingPanel
       open
       centered
       title="Gebäudestruktur – Einstellungen"
       onClose={onClose}
-      width={760}
-      height={620}
+      width={840}
+      height={680}
     >
       <SettingsSections
         sections={[
           {
             id: "general",
-            label: "Allgemein",
+            label: "Allgemeine Gebäudestruktur",
             content: (
               <>
-                <p>Fester Bezug: OK Rohfußboden Erdgeschoss = 0,00 m.</p>
-                <p>
-                  Geschosshöhe: Abstand von OK Rohfußboden bis zur nächsten OK Rohfußboden darüber.
-                  Feste Wandhöhen bleiben unverändert.
-                </p>
-                <label className="block space-y-2">
-                  {project.storey.name} – Geschosshöhe (m)
-                  <input
-                    aria-label="Geschosshöhe (m)"
-                    className="block w-40 rounded border bg-background px-2 py-1 text-xs"
-                    inputMode="decimal"
-                    value={value}
-                    placeholder="Nicht festgelegt"
-                    onChange={(e) =>
-                      setDraft({ base: draft?.base ?? project, value: e.target.value })
-                    }
-                    onBlur={commit}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        commit();
-                      }
-                      if (e.key === "Escape") setDraft(null);
-                    }}
-                  />
-                </label>
+                <p>{project.storey.name} · Fester EG-Bezug an der Oberkante Rohdecke.</p>
+                <BuildingHeightSection
+                  elevationInput={input("Obere Höhenkote (m)")}
+                  heightInput={input("Geschosshöhe (m)")}
+                />
                 {invalid && <p role="alert">Bitte eine endliche Höhe größer als null eingeben.</p>}
                 {stale && (
                   <p role="alert">

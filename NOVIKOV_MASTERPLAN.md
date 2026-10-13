@@ -523,3 +523,10 @@ gemeinsame Application-Aktion mit Undo/Redo und strikter Datei-/Recoverymigratio
 Gebäudestruktur per Doppelklick öffnet gemeinsame Settings-Hülle mit direkter
 Höheneingabe. 936 Tests, beide Typechecks, Lint, Build und Browserprüfung bestanden.
 Weiterhin ein Geschoss: Sammlung, Geschosswahl und 3D/IFC-Z-Anbindung bleiben offen.
+
+### Status 13.10.2026 – Schnittskizze vorgezogen
+Auf Nutzerwunsch Gebäudeeinstellungen als schematischen Rohdecken-Schnitt ergänzt:
+EG-Kote 0,00 m, bearbeitbare obere Kote und Geschosshöhe, Tab „Allgemeine
+Gebäudestruktur“. Bestehenden Modelldatenfluss wiederverwendet; keine zweite
+Geschossebene/Decke erzeugt. 13 gezielte Tests, TypeScript, Lint, Build und beidseitige
+Eingabe-/Undo-Browserprüfung bestanden. Nächster aktiver Auftrag bleibt §9.
