@@ -457,17 +457,13 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Mehrgeschoss-Pilot architektonisch abgrenzen.**
-Den nun benannten Einzelgeschoss-Stand gegen N21/N22 und R26-03 prüfen und einen
-konkreten Migrations-/Integrationsvertrag für zwei Geschosse erstellen. Einmalige
-Bauteilzuordnung, aktive Geschosswahl, ModelView-/Abbildbindung, feste versus gebundene
-Höhe und Z-Ableitung in 3D/IFC zusammen betrachten; vorhandene gemeinsame Aktionen,
-Fang-/Auswahl-/History-/Recoverypfade einbeziehen. Direkte project.storey-Zugriffe
-nach Zuständigkeit und erforderlicher Umstellung zuordnen. Genau einen anschließend
-umsetzbaren vertikalen Pilot mit Zweigeschoss-Abnahmeszenario bestimmen. Offene
-Höhen-/Verschiebungsregeln ausdrücklich markieren, keine Nutzerentscheidungen erfinden.
-Noch keine parallelen Geschosskopien, leeren Klassen oder globale Umstellung; den
-Vertrag im vorhandenen Anforderungsregister und den Einzelauftrag hier festhalten.
+**Genau ein aktiver Fortsetzungsschritt: Geschosskontext zentral auflösen.**
+Gemeinsame typisierte Application-Query für Projekt-/Geschoss-/Ansichtskontext im
+bestehenden Schema21 erstellen. Zunächst working-context.ts und project-scale.ts
+anbinden; gültige und fremde IDs, Abbildquelle, Maßstab und Sichtbarkeit gegen den
+bisherigen Pfad prüfen. Keine neue Geschosssammlung oder Höhenmutation in diesem
+Piloten. Höhen-/Migrationsvertrag vom 13.10.2026 unter R26-03/N21–N22 im Register
+verwenden; dort getrennte Vorschläge nicht als bestätigte Produktregeln behandeln.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -482,3 +478,14 @@ Geschosse oberhalb/unterhalb per Kontextmenü, individuelle Höhen, Standardname
 ab Erdgeschoss und Gebäude-Basis OK Rohdecke / Rohfußboden EG. Höhenskizze später.
 Keine Mehrgeschossimplementierung vor dem begrenzten Migrations-/Höhenvertrag;
 die noch offenen Einfüge- und Höhenfortschreibungsregeln ausdrücklich ausweisen.
+
+### Status 13.10.2026 – Autosicherungsanzeige und Geschossvertrag
+UI-Anzeige links unten ersetzt „Model coordinates“ (grün aktiv, rot aus/pausiert).
+Bestehenden Recovery-Controller unverändert weiterverwendet. Höhen-/Migrationsvertrag
+mit geprüftem Codeinventar, Zuständigkeiten, bestätigter Rohfußboden-EG-Basis und
+expliziten offenen Höhenregeln im Register ergänzt. Noch keine Mehrgeschossfunktion.
+Die vorherige Ergänzung zum Architekturauftrag ist damit bearbeitet; aktiv ist §9.
+Prüfnachweis dieses Auftrags: 18 bestehende Autosave-/Recovery-Status-Tests bestanden,
+TypeScript und fokussiertes ESLint bestanden, Produktionsbuild bestanden. Browser:
+rotes Symbol beim Ausschalten, grünes Symbol beim Einschalten, Öffnen der bestehenden
+Recovery-Palette über das Symbol. Ausgangszustand aktiv wiederhergestellt.
