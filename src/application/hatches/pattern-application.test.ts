@@ -71,7 +71,7 @@ test("schema 10 migrates existing solid hatches without a library", () => {
   });
   const { hatchPatterns: _unused, ...old } = p;
   const reopened = deserializeProject(legacyFixtureJSON({ ...old, schemaVersion: 10 }));
-  assert.equal(reopened.schemaVersion, 21);
+  assert.equal(reopened.schemaVersion, 22);
   assert.deepEqual(reopened.hatchPatterns, []);
   assert.deepEqual(reopened.storey.hatches, p.storey.hatches);
 });

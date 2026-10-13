@@ -87,7 +87,7 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     schemaVersion: 2,
   };
   const migrated = loadProjectData(legacyProjectFixture(v2));
-  assert.equal(migrated.schemaVersion, 21);
+  assert.equal(migrated.schemaVersion, 22);
   assert.deepEqual(migrated.storey, {
     ...oldStorey,
     references: [],

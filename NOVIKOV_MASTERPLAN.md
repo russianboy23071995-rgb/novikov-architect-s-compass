@@ -457,8 +457,10 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: EG/OG-Pilot an das Projektmodell anbinden.**
-Die geprüften Domainfunktionen aus domain/storeys/heights.ts wiederverwenden.
+**Genau ein aktiver Fortsetzungsschritt: EG/OG-Geschosssammlung und Bearbeitung anbinden.**
+Die gespeicherte Schema22-Geschosshöhe und Gebäudeeinstellungen weiterverwenden.
+Domainfunktionen aus domain/storeys/heights.ts wiederverwenden. Keine erneute
+Implementierung der bereits geprüften Einzelgeschoss-Höheneingabe.
 Den bestätigten Höhen-/Migrationsvertrag „Verbindliche Höhenregeln und vertikaler
 Pilot (13.10.2026)“ unter R26-03/N21–N22 umsetzen. Zwei bearbeitbare Geschosse,
 Schema-Migration ohne doppelte Bauteile, gemeinsame Anlage-/Höhenaktionen,
@@ -514,3 +516,10 @@ Acht neue Domainfälle, insgesamt 934 Tests, TypeScript, fokussiertes Lint und B
 bestanden. Noch keine Schema-/UI-/3D-/IFC-Anbindung. Nach Codeinventur von 218 direkten
 Einzelgeschosszugriffen als überprüfbaren ersten Teil isoliert; die vollständige
 vertikale Abnahme bleibt ausdrücklich offen. PR303 ist bereits gemergt, PR304 offen.
+
+### Status 13.10.2026 – Geschosshöhe im Modell und Settings
+PR304/305 zusammengeführt. Schema22 speichert die zunächst unbekannte Geschosshöhe;
+gemeinsame Application-Aktion mit Undo/Redo und strikter Datei-/Recoverymigration.
+Gebäudestruktur per Doppelklick öffnet gemeinsame Settings-Hülle mit direkter
+Höheneingabe. 936 Tests, beide Typechecks, Lint, Build und Browserprüfung bestanden.
+Weiterhin ein Geschoss: Sammlung, Geschosswahl und 3D/IFC-Z-Anbindung bleiben offen.

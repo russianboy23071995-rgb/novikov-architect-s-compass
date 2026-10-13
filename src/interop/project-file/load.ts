@@ -23,6 +23,7 @@ import {
   validateProjectV18,
   projectV19Schema,
   projectV20Schema,
+  projectV21Schema,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
@@ -38,7 +39,7 @@ export function loadProjectData(value: unknown): Project {
     "schemaVersion" in value &&
     typeof value.schemaVersion === "number" &&
     value.schemaVersion >= 9 &&
-    value.schemaVersion <= 21 &&
+    value.schemaVersion <= 22 &&
     "assets" in value &&
     Array.isArray(value.assets)
   ) {
@@ -47,7 +48,7 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 21. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 22. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -96,15 +97,17 @@ export function migrateProjectData(value: unknown): Project {
   }
   if (value.schemaVersion === 20) {
     const old = projectV20Schema.parse(value);
-    return validateProject({
+    return migrateProjectData({
       ...old,
       schemaVersion: 21,
       storey: { ...old.storey, name: "Level 01" },
     });
   }
   if (value.schemaVersion === 21) {
-    return validateProject(value);
+    const old = projectV21Schema.parse(value);
+    return validateProject({ ...old, schemaVersion: 22, storey: { ...old.storey, height: null } });
   }
+  if (value.schemaVersion === 22) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);
     return migrateProjectData({

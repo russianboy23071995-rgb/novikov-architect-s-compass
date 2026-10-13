@@ -159,7 +159,7 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(legacyProjectFixture(v3));
-  assert.equal(migrated.schemaVersion, 21);
+  assert.equal(migrated.schemaVersion, 22);
   assert.deepEqual(migrated.storey, {
     ...storey,
     references: [],
@@ -253,7 +253,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       });
     const before = legacyFixtureJSON(old);
     const loaded = loadProjectData(legacyProjectFixture(old));
-    assert.equal(loaded.schemaVersion, 21);
+    assert.equal(loaded.schemaVersion, 22);
     assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
     assert.equal(legacyFixtureJSON(old), before);
     old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };

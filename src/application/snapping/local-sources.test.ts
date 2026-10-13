@@ -15,7 +15,7 @@ import { createHistory, commitProject, undoProject, redoProject } from "../../li
 
 function fixture(pairs: number[][]) {
   return validateProject({
-    schemaVersion: 21,
+    schemaVersion: 22,
     hatchPatterns: [],
     assets: [],
     bimVisibility: { hiddenLayerIds: [] },
@@ -24,6 +24,7 @@ function fixture(pairs: number[][]) {
     id: "p",
     storey: {
       name: "Level 01",
+      height: null,
       references: [],
       hatches: [],
       wallJoins: [],
