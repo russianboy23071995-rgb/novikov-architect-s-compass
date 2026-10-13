@@ -38,3 +38,17 @@ export function setStoreyHeight(
   if (storey === current.storey) return current;
   return validateProject({ ...current, storey });
 }
+
+export type SetGroundDatum = { projectId: string; storeyId: string; elevation: number };
+/** Height reference of local EG zero; does not translate local geometry. */
+export function setGroundDatum(base: Project, current: Project, request: SetGroundDatum): Project {
+  if (
+    base !== current ||
+    request.projectId !== current.id ||
+    request.storeyId !== current.storey.id
+  )
+    throw new Error("Der Gebäudekontext wurde geändert. Vorgang erneut beginnen.");
+  if (!Number.isFinite(request.elevation)) throw new Error("Endliche EG-Kote erforderlich.");
+  if (request.elevation === current.groundDatum) return current;
+  return validateProject({ ...current, groundDatum: request.elevation });
+}

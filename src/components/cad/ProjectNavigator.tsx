@@ -94,6 +94,7 @@ function TreeItem({
 type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
   onRenameStorey: (base: Project, name: string) => void;
+  onGroundDatum: (base: Project, elevation: number) => void;
   onStoreyHeight: (base: Project, height: number) => void;
 
   active: readonly string[];
@@ -108,6 +109,7 @@ function NavigatorContent({
   project,
   onRenameStorey,
   onStoreyHeight,
+  onGroundDatum,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -245,6 +247,7 @@ function NavigatorContent({
           project={project}
           onClose={() => setSettings(false)}
           onHeight={onStoreyHeight}
+          onDatum={onGroundDatum}
         />
       )}
     </aside>
@@ -271,6 +274,10 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onRenameStorey(...args),
     [],
   );
+  const onGroundDatum = useCallback<ProjectNavigatorProps["onGroundDatum"]>(
+    (...args) => latest.current.onGroundDatum(...args),
+    [],
+  );
   const onStoreyHeight = useCallback<ProjectNavigatorProps["onStoreyHeight"]>(
     (...args) => latest.current.onStoreyHeight(...args),
     [],
@@ -292,6 +299,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
       onStoreyHeight={onStoreyHeight}
+      onGroundDatum={onGroundDatum}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

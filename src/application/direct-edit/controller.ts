@@ -1,3 +1,4 @@
+import { setGroundDatum, type SetGroundDatum } from "../storeys/actions.ts";
 import { setStoreyHeight, type SetStoreyHeight } from "../storeys/actions.ts";
 import { renameStorey, type RenameStorey } from "../storeys/actions.ts";
 import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
@@ -52,6 +53,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "set-ground-datum"; base: Project; request: SetGroundDatum }
   | { type: "set-storey-height"; base: Project; request: SetStoreyHeight }
   | { type: "rename-storey"; base: Project; request: RenameStorey }
   | { type: "document"; base: Project; action: DocumentAction }
@@ -140,6 +142,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "set-ground-datum":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            setGroundDatum(event.base, state.history.present, event.request),
+          ),
+          session: null,
+          error: "",
+        };
       case "set-storey-height":
         return {
           ...state,

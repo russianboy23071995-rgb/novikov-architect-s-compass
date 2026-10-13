@@ -4,10 +4,48 @@ import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { serializeProject, validateProject } from "../../lib/bim/model.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { renameStorey, setStoreyHeight } from "./actions.ts";
+import { renameStorey, setStoreyHeight, setGroundDatum } from "./actions.ts";
 import { exportIfc, stepString } from "../../lib/bim/ifc.ts";
 import { createProjectRecoveryCodec } from "../../interop/project-file/recovery-codec.ts";
 import type { RecoveryDocument } from "../project-files/recovery-v2.ts";
+import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
+
+test("EG datum retains height and geometry with undo, file and recovery roundtrip", async () => {
+  const initial = createExampleProject();
+  const p = setStoreyHeight(initial, initial, {
+    projectId: initial.id,
+    storeyId: initial.storey.id,
+    height: 3,
+  });
+  const request = { projectId: p.id, storeyId: p.storey.id, elevation: 0.5 };
+  const next = setGroundDatum(p, p, request);
+  assert.deepEqual(next.storey, p.storey);
+  assert.equal(
+    resolveStoreyLevels([next.storey], next.storey.id, next.groundDatum)[0]!.upperElevation,
+    3.5,
+  );
+  assert.equal(setGroundDatum(next, next, request), next);
+  for (const elevation of [NaN, Infinity, Number.MAX_VALUE])
+    assert.throws(() => setGroundDatum(p, p, { ...request, elevation }));
+  assert.throws(() => setGroundDatum(p, next, request));
+  assert.throws(() => setGroundDatum(p, p, { ...request, storeyId: "foreign" }));
+  assert.throws(() => setGroundDatum(p, p, { ...request, projectId: "foreign" }));
+  assert.equal(setGroundDatum(p, p, { ...request, elevation: -1 }).groundDatum, -1);
+  let state = createEditingState(p);
+  state = editingReducer(state, { type: "set-ground-datum", base: state.history.present, request });
+  assert.equal(state.error, "");
+  assert.equal(state.history.past.length, 1);
+  state = editingReducer(state, { type: "undo" });
+  assert.equal(state.history.present.groundDatum, 0);
+  state = editingReducer(state, { type: "redo" });
+  assert.deepEqual(state.history.present, next);
+  assert.deepEqual(readProjectFile(serializeProject(next)), next);
+  const codec = createProjectRecoveryCodec();
+  assert.deepEqual(await codec.restore(await codec.prepare(next)), next);
+  const { groundDatum: _datum, ...old } = p;
+  assert.deepEqual(readProjectFile(JSON.stringify({ ...old, schemaVersion: 22 })), p);
+  assert.throws(() => readProjectFile(JSON.stringify({ ...p, schemaVersion: 22 })));
+});
 
 test("storey rename is one undo step, retains identity/geometry and rejects stale context", () => {
   const p = createExampleProject();
@@ -43,7 +81,8 @@ test("schema20 files and recovery migrate explicitly; current format stays stric
     data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWZsAAAAASUVORK5CYII=",
   });
   const { name: _name, height: _height, ...storey } = p.storey;
-  const old = { ...p, schemaVersion: 20, storey };
+  const { groundDatum: _datum, ...legacyProject } = p;
+  const old = { ...legacyProject, schemaVersion: 20, storey };
   const before = JSON.stringify(old);
   const loaded = readProjectFile(before);
   assert.deepEqual(loaded, p);
@@ -55,9 +94,10 @@ test("schema20 files and recovery migrate explicitly; current format stays stric
   assert.throws(() => validateProject({ ...p, storey }));
   const codec = createProjectRecoveryCodec();
   const doc = await codec.prepare(p);
+  const { groundDatum: _modelDatum, ...legacyModel } = doc.model;
   const legacy = {
     ...doc,
-    model: { ...doc.model, schemaVersion: 20, storey },
+    model: { ...legacyModel, schemaVersion: 20, storey },
   } as unknown as RecoveryDocument;
   assert.deepEqual(await codec.restore(legacy), p);
   const key = legacy.model.assets[0]!.key;
@@ -122,7 +162,8 @@ test("storey height uses model undo, rejects stale/invalid input and preserves f
 test("schema21 migrates unknown storey height through file and recovery without invented defaults", async () => {
   const p = createExampleProject();
   const { height: _height, ...storey } = p.storey;
-  const old = { ...p, schemaVersion: 21, storey };
+  const { groundDatum: _datum, ...legacyProject } = p;
+  const old = { ...legacyProject, schemaVersion: 21, storey };
   assert.deepEqual(readProjectFile(JSON.stringify(old)), p);
   assert.throws(() =>
     readProjectFile(JSON.stringify({ ...old, storey: { ...storey, height: 3 } })),
@@ -130,10 +171,11 @@ test("schema21 migrates unknown storey height through file and recovery without 
   assert.throws(() => validateProject({ ...p, storey }));
   const codec = createProjectRecoveryCodec();
   const doc = await codec.prepare(p);
+  const { groundDatum: _modelDatum, ...legacyModel } = doc.model;
   assert.deepEqual(
     await codec.restore({
       ...doc,
-      model: { ...doc.model, schemaVersion: 21, storey },
+      model: { ...legacyModel, schemaVersion: 21, storey },
     } as unknown as RecoveryDocument),
     p,
   );

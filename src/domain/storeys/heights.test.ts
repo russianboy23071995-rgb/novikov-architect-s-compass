@@ -13,6 +13,16 @@ const building = Object.freeze([
   Object.freeze({ id: "eg", height: 3.2, name: "Eingang" }),
   Object.freeze({ id: "og", height: 3, name: "Büro" }),
 ]);
+test("datum offsets upper and lower levels without changing storey intervals", () => {
+  const zero = resolveStoreyLevels(building, "eg");
+  const shifted = resolveStoreyLevels(building, "eg", 0.5);
+  shifted.forEach((level, i) => {
+    assert.equal(level.elevation, zero[i]!.elevation! + 0.5);
+    assert.equal(level.upperElevation, zero[i]!.upperElevation! + 0.5);
+  });
+  assert.throws(() => resolveStoreyLevels(building, "eg", NaN));
+  assert.throws(() => resolveStoreyLevels(building, "eg", Infinity));
+});
 function levels(storeys: readonly StoreyHeight[]) {
   return resolveStoreyLevels(storeys, "eg").map((s) => s.elevation);
 }

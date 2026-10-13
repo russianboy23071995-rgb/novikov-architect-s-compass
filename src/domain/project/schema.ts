@@ -233,16 +233,21 @@ export const projectV21Schema = projectV20Schema.extend({
   schemaVersion: z.literal(21),
   storey: projectV20Schema.shape.storey.extend({ name: z.string().trim().min(1).max(120) }),
 });
-const projectSchema = projectV21Schema.extend({
+export const projectV22Schema = projectV21Schema.extend({
   schemaVersion: z.literal(22),
   storey: projectV21Schema.shape.storey.extend({ height: positive.nullable() }),
+});
+const projectSchema = projectV22Schema.extend({
+  schemaVersion: z.literal(23),
+  groundDatum: z.number().finite(),
 });
 export function validateProjectV18(value: unknown) {
   const old = projectV18Schema.parse(value);
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -251,7 +256,8 @@ export function validateProjectV17(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -260,7 +266,8 @@ export function validateProjectV16(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -269,7 +276,8 @@ export function validateProjectV15(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -278,7 +286,8 @@ export function validateProjectV14(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -287,7 +296,8 @@ export function validateProjectV13(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -296,7 +306,8 @@ export function validateProjectV12(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -305,7 +316,8 @@ export function validateProjectV11(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
   });
   return old;
 }
@@ -314,7 +326,8 @@ export function validateProjectV10(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
     hatchPatterns: [],
   });
   return old;
@@ -324,7 +337,8 @@ export function validateProjectV9(value: unknown) {
   validateProject({
     ...old,
     storey: { ...old.storey, name: "Level 01", height: null },
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
     hatchPatterns: [],
   });
   return old;
@@ -333,7 +347,8 @@ export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 22,
+    schemaVersion: 23,
+    groundDatum: 0,
     hatchPatterns: [],
     assets: [],
     storey: { ...old.storey, references: [], name: "Level 01", height: null },
@@ -417,7 +432,7 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 /** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
-  resolveStoreyLevels([project.storey], project.storey.id);
+  resolveStoreyLevels([project.storey], project.storey.id, project.groundDatum);
   if (project.workingViews?.some((view) => view.storeyId !== project.storey.id))
     throw new Error("Unbekanntes Geschoss im Arbeitsmaßstab.");
   const views = new Map((project.modelViews ?? []).map((v) => [v.id, v]));
@@ -492,11 +507,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 22 ? project.storey.references : []),
+    ...(project.schemaVersion === 23 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 22
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 23
       ? project.storey.hatches
       : []),
   ]) {
@@ -511,20 +526,20 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 22
+    ...(project.schemaVersion === 23
       ? [
           ...(project.modelViews ?? []),
           ...(project.drawingDocuments ?? []),
           ...(project.documentFolders ?? []),
         ]
       : []),
-    ...(project.schemaVersion === 22 ? project.assets : []),
+    ...(project.schemaVersion === 23 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 22 ? project.storey.references : []),
+    ...(project.schemaVersion === 23 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 22
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 23
       ? project.storey.hatches
       : []),
   ]) {
@@ -533,7 +548,7 @@ function validateGeometry(
   }
   for (const line of project.storey.lines ?? []) {
     validateLineGeometry(line);
-    if (project.schemaVersion === 22) {
+    if (project.schemaVersion === 23) {
       const current = line as DrawingLine;
       if (current.style === "custom") {
         if (!current.pattern || !current.repeatLength)
@@ -550,7 +565,7 @@ function validateGeometry(
         throw new Error("Only custom lines may carry a pattern.");
     }
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 22)
+  if (project.schemaVersion === 5 || project.schemaVersion === 23)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {
