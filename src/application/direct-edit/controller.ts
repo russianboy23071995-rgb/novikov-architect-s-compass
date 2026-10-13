@@ -1,3 +1,4 @@
+import { renameStorey, type RenameStorey } from "../storeys/actions.ts";
 import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
 import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
 import type { LayerVisibilityScope } from "../layers/visibility.ts";
@@ -50,6 +51,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "rename-storey"; base: Project; request: RenameStorey }
   | { type: "document"; base: Project; action: DocumentAction }
   | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
@@ -136,6 +138,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "rename-storey":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            renameStorey(event.base, state.history.present, event.request),
+          ),
+          session: null,
+          error: "",
+        };
       case "document":
         return {
           ...state,

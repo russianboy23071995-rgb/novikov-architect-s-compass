@@ -172,7 +172,7 @@ export function CadViewport({
       ? `Abbild · ${model.project.drawingDocuments?.find((d) => d.id === binding.documentId)?.name ?? ""}`
       : is3D
         ? "3D model · Orthographic"
-        : "Level 01 · Plan";
+        : `${model.project.storey.name} · Plan`;
   return (
     <section
       className={cn(
@@ -316,7 +316,7 @@ export function CadViewport({
         {is3D && (
           <>
             <Crosshair className="size-3 text-primary" />
-            <span>3D Orthographic · Level 01 ·</span>
+            <span>3D Orthographic · {model.project.storey.name} ·</span>
           </>
         )}
         {is3D ? (

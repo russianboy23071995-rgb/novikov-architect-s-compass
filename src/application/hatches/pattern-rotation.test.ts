@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { hatchPatternTile } from "../../rendering/viewport/hatch-pattern.ts";
@@ -201,13 +202,13 @@ test("angles validate at shared action and file boundaries; invalid draft angle 
 test("legacy schema 12 migrates with zero implied angle and retains strict old application fields", () => {
   const p = fixture(),
     old = { ...p, schemaVersion: 12 };
-  const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = readProjectFile(legacyFixtureJSON(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.equal(migrated.storey.hatches[0]!.pattern!.rotation, undefined);
   assert.equal(
     hatchPatternTile(definition, migrated.storey.hatches[0]!.pattern!)!.patternTransform,
     "rotate(0 10 -20)",
   );
   assert.deepEqual(migrated.storey, p.storey);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...fixture(45), schemaVersion: 12 })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...fixture(45), schemaVersion: 12 })));
 });

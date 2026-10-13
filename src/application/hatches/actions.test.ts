@@ -1,3 +1,4 @@
+import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewHatch, commitHatch } from "./actions.ts";
@@ -157,8 +158,8 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
     bimVisibility: { hiddenLayerIds: [p.defaultLayerIds.wall] },
   };
   const before = structuredClone(v3);
-  const migrated = loadProjectData(v3);
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = loadProjectData(legacyProjectFixture(v3));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.storey, {
     ...storey,
     references: [],
@@ -169,8 +170,14 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   assert.deepEqual(migrated.bimVisibility, v3.bimVisibility);
   assert.deepEqual(v3, before);
   assert.throws(() => validateProject(v3));
-  assert.throws(() => loadProjectData({ ...v3, bimVisibility: { hiddenLayerIds: ["unknown"] } }));
-  assert.throws(() => loadProjectData({ ...v3, storey: { ...storey, hatches: [hatch()] } }));
+  assert.throws(() =>
+    loadProjectData(
+      legacyProjectFixture({ ...v3, bimVisibility: { hiddenLayerIds: ["unknown"] } }),
+    ),
+  );
+  assert.throws(() =>
+    loadProjectData(legacyProjectFixture({ ...v3, storey: { ...storey, hatches: [hatch()] } })),
+  );
   assert.throws(() => validateProject({ ...p, storey }));
 });
 
@@ -218,18 +225,18 @@ test("malformed appearance cannot commit or load, including hidden paints and mi
       );
       const file = structuredClone(base);
       Object.assign(file.storey.hatches[0]!, { [key]: paint });
-      assert.throws(() => loadProjectData(file));
+      assert.throws(() => loadProjectData(legacyProjectFixture(file)));
     }
     const file = structuredClone(base);
     Reflect.deleteProperty(file.storey.hatches[0]!, key);
-    assert.throws(() => loadProjectData(file));
+    assert.throws(() => loadProjectData(legacyProjectFixture(file)));
   }
 });
 
 test("V4-V6 hatch migration preserves old fill, contours, layers and appearance without permissive legacy parsing", () => {
   const current = create(createExampleProject());
   for (const version of [4, 5, 6]) {
-    const old = JSON.parse(JSON.stringify(current));
+    const old = JSON.parse(legacyFixtureJSON(current));
     old.schemaVersion = version;
     delete old.assets;
     delete old.hatchPatterns;
@@ -244,12 +251,12 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       old.storey.walls.forEach((w: Record<string, unknown>) => {
         delete w["bodyOffset"];
       });
-    const before = JSON.stringify(old);
-    const loaded = loadProjectData(old);
-    assert.equal(loaded.schemaVersion, 20);
+    const before = legacyFixtureJSON(old);
+    const loaded = loadProjectData(legacyProjectFixture(old));
+    assert.equal(loaded.schemaVersion, 21);
     assert.deepEqual(loaded.storey.hatches, current.storey.hatches);
-    assert.equal(JSON.stringify(old), before);
+    assert.equal(legacyFixtureJSON(old), before);
     old.storey.hatches[0].contour = { visible: true, color: "#ffffff" };
-    assert.throws(() => loadProjectData(old));
+    assert.throws(() => loadProjectData(legacyProjectFixture(old)));
   }
 });

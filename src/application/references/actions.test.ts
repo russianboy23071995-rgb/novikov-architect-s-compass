@@ -1,3 +1,4 @@
+import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -57,10 +58,10 @@ test("V8 migrates strictly without inventing assets and keeps source unchanged",
   const { assets, hatchPatterns, ...root } = base;
   const { references, ...storey } = base.storey;
   const old = { ...root, schemaVersion: 8, storey };
-  const before = JSON.stringify(old);
-  assert.deepEqual(loadProjectData(old), base);
-  assert.equal(JSON.stringify(old), before);
-  assert.throws(() => loadProjectData({ ...old, assets: [] }));
+  const before = legacyFixtureJSON(old);
+  assert.deepEqual(loadProjectData(legacyProjectFixture(old)), base);
+  assert.equal(legacyFixtureJSON(old), before);
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, assets: [] })));
   assert.throws(() => validateProject({ ...base, assets: undefined }));
 });
 test("invalid identities, asset links, layers and stale imports fail atomically", () => {
@@ -114,7 +115,7 @@ test("transforms reject overflow and numerically collapsed extents", () => {
 test("missing assets and duplicate cross-kind identities cannot reload", () => {
   const { base, request } = setup();
   const p = previewCreateReference(base, base, request);
-  assert.throws(() => deserializeProject(JSON.stringify({ ...p, assets: [] })));
+  assert.throws(() => deserializeProject(legacyFixtureJSON({ ...p, assets: [] })));
   assert.throws(() => validateProject({ ...p, assets: [{ ...request.asset, id: "ref" }] }));
 });
 test("reference occupies its layer and follows common visibility eligibility", () => {

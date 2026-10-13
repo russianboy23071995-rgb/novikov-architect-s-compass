@@ -225,67 +225,81 @@ export const projectV19Schema = projectV18Schema.extend({
     hatches: z.array(hatchV19Schema),
   }),
 });
-const projectSchema = projectV18Schema.extend({
+export const projectV20Schema = projectV18Schema.extend({
   schemaVersion: z.literal(20),
+});
+const projectSchema = projectV20Schema.extend({
+  schemaVersion: z.literal(21),
+  storey: projectV20Schema.shape.storey.extend({ name: z.string().trim().min(1).max(120) }),
 });
 export function validateProjectV18(value: unknown) {
   const old = projectV18Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV17(value: unknown) {
   const old = projectV17Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV16(value: unknown) {
   const old = projectV16Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV15(value: unknown) {
   const old = projectV15Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV14(value: unknown) {
   const old = projectV14Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV13(value: unknown) {
   const old = projectV13Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV12(value: unknown) {
   const old = projectV12Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV11(value: unknown) {
   const old = projectV11Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20 });
+  validateProject({ ...old, storey: { ...old.storey, name: "Level 01" }, schemaVersion: 21 });
   return old;
 }
 export function validateProjectV10(value: unknown) {
   const old = projectV10Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20, hatchPatterns: [] });
+  validateProject({
+    ...old,
+    storey: { ...old.storey, name: "Level 01" },
+    schemaVersion: 21,
+    hatchPatterns: [],
+  });
   return old;
 }
 export function validateProjectV9(value: unknown) {
   const old = projectV9Schema.parse(value);
-  validateProject({ ...old, schemaVersion: 20, hatchPatterns: [] });
+  validateProject({
+    ...old,
+    storey: { ...old.storey, name: "Level 01" },
+    schemaVersion: 21,
+    hatchPatterns: [],
+  });
   return old;
 }
 export function validateProjectV8(value: unknown) {
   const old = projectV8Schema.parse(value);
   validateProject({
     ...old,
-    schemaVersion: 20,
+    schemaVersion: 21,
     hatchPatterns: [],
     assets: [],
-    storey: { ...old.storey, references: [] },
+    storey: { ...old.storey, references: [], name: "Level 01" },
   });
   return old;
 }
@@ -440,11 +454,11 @@ function validateLayers(project: Project | ProjectV5 | ProjectV4 | ProjectV2 | P
     if (!layerIds.has(layerId)) throw new Error("Unknown default layer: " + layerId);
   }
   for (const element of [
-    ...(project.schemaVersion === 20 ? project.storey.references : []),
+    ...(project.schemaVersion === 21 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 20
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 21
       ? project.storey.hatches
       : []),
   ]) {
@@ -459,20 +473,20 @@ function validateGeometry(
   for (const entity of [
     project,
     project.storey,
-    ...(project.schemaVersion === 20
+    ...(project.schemaVersion === 21
       ? [
           ...(project.modelViews ?? []),
           ...(project.drawingDocuments ?? []),
           ...(project.documentFolders ?? []),
         ]
       : []),
-    ...(project.schemaVersion === 20 ? project.assets : []),
+    ...(project.schemaVersion === 21 ? project.assets : []),
     ...(project.schemaVersion !== 1 ? project.layers : []),
-    ...(project.schemaVersion === 20 ? project.storey.references : []),
+    ...(project.schemaVersion === 21 ? project.storey.references : []),
     ...project.storey.walls,
     ...project.storey.windows,
     ...(project.storey.lines ?? []),
-    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 20
+    ...(project.schemaVersion === 4 || project.schemaVersion === 5 || project.schemaVersion === 21
       ? project.storey.hatches
       : []),
   ]) {
@@ -481,7 +495,7 @@ function validateGeometry(
   }
   for (const line of project.storey.lines ?? []) {
     validateLineGeometry(line);
-    if (project.schemaVersion === 20) {
+    if (project.schemaVersion === 21) {
       const current = line as DrawingLine;
       if (current.style === "custom") {
         if (!current.pattern || !current.repeatLength)
@@ -498,7 +512,7 @@ function validateGeometry(
         throw new Error("Only custom lines may carry a pattern.");
     }
   }
-  if (project.schemaVersion === 5 || project.schemaVersion === 20)
+  if (project.schemaVersion === 5 || project.schemaVersion === 21)
     for (const wall of project.storey.walls) wallBody(wall);
   const walls = new Map(project.storey.walls.map((wall) => [wall.id, wall]));
   for (const wall of walls.values()) {

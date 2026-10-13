@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -173,14 +174,16 @@ test("strict V4 migration adds zero only at file boundary; V5 requires offset", 
     schemaVersion: 4,
     storey: { ...oldStorey, walls: current.storey.walls.map(({ bodyOffset, ...w }) => w) },
   };
-  assert.deepEqual(loadProjectData(old), current);
+  assert.deepEqual(loadProjectData(legacyProjectFixture(old)), current);
   assert.throws(() => validateProject(old));
-  assert.throws(() => loadProjectData({ ...old, schemaVersion: 5 }));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 5 })));
   assert.throws(() =>
-    loadProjectData({
-      ...old,
-      storey: { ...old.storey, walls: [{ ...old.storey.walls[0], bodyOffset: 1 }] },
-    }),
+    loadProjectData(
+      legacyProjectFixture({
+        ...old,
+        storey: { ...old.storey, walls: [{ ...old.storey.walls[0], bodyOffset: 1 }] },
+      }),
+    ),
   );
 });
 

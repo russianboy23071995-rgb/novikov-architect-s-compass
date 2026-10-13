@@ -1,3 +1,4 @@
+import { migrateProjectData } from "./load.ts";
 import { payloadHashInput } from "./payload-hash-input.ts";
 /** Shared checked asset codec. Limits are supplied by the caller, not product defaults. */
 import { z } from "zod";
@@ -94,7 +95,7 @@ export async function restoreCheckedSnapshot(
     }
   }
   const validateStart = performance.now();
-  const project = validateProject({ ...doc.model, assets });
+  const project = migrateProjectData({ ...doc.model, assets });
   probe.measure?.("model", performance.now() - validateStart);
   await readCheckpoint(probe);
   return project;

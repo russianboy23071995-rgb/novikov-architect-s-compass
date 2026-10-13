@@ -22,12 +22,13 @@ import {
   validateProjectV17,
   validateProjectV18,
   projectV19Schema,
+  projectV20Schema,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
 /** Own and fully storage-validate incoming assets once, before versioned project validation.
- * Migration remains private so every public entry crosses this boundary.
+ * File inputs acquire handles here; recovery supplies its independently checked handles.
  * Handles are identity capabilities, never caller-supplied IDs or flags.
  */
 export function loadProjectData(value: unknown): Project {
@@ -37,7 +38,7 @@ export function loadProjectData(value: unknown): Project {
     "schemaVersion" in value &&
     typeof value.schemaVersion === "number" &&
     value.schemaVersion >= 9 &&
-    value.schemaVersion <= 20 &&
+    value.schemaVersion <= 21 &&
     "assets" in value &&
     Array.isArray(value.assets)
   ) {
@@ -46,8 +47,8 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Migration is only a file-boundary operation; runtime snapshots stay schema 20. */
-function migrateProjectData(value: unknown): Project {
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 21. */
+export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
   if (value.schemaVersion === 10) {
@@ -94,6 +95,14 @@ function migrateProjectData(value: unknown): Project {
     });
   }
   if (value.schemaVersion === 20) {
+    const old = projectV20Schema.parse(value);
+    return validateProject({
+      ...old,
+      schemaVersion: 21,
+      storey: { ...old.storey, name: "Level 01" },
+    });
+  }
+  if (value.schemaVersion === 21) {
     return validateProject(value);
   }
   if (value.schemaVersion === 8) {

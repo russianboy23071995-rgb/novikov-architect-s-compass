@@ -799,6 +799,7 @@ export function CadWorkspace({
         <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
         {!fullscreen && (
           <TopToolbar
+            storeyName={project.storey.name}
             onPenSets={() => setPenSetsOpen(true)}
             onLineCreator={() => setLineCreatorOpen(true)}
             onHatchLibrary={() => setHatchLibraryOpen(true)}
@@ -1557,6 +1558,13 @@ export function CadWorkspace({
                 <ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" />
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
+                    onRenameStorey={(base, name) =>
+                      dispatchEditing({
+                        type: "rename-storey",
+                        base,
+                        request: { projectId: base.id, storeyId: base.storey.id, name },
+                      })
+                    }
                     getPlanCapture={getPlanCapture}
                     activeDocumentId={activeDocumentId}
                     onOpenDocument={(id) => {
@@ -1600,6 +1608,7 @@ export function CadWorkspace({
         </div>
         {!fullscreen && (
           <StatusBar
+            storeyName={project.storey.name}
             recoveryStatus={
               <LocalRecoveryStatus
                 autosave={autosave.state}

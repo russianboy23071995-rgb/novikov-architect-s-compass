@@ -203,7 +203,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N21 – Geschosse im Navigator frei erstellen und Höhen definieren
 
-- **Stand:** Geplant: aktueller Codeabgleich Schema20 besitzt genau ein storey ohne Namen, keine freie Mehrgeschossanlage.
+- **Stand:** Teilweise: Schema21 besitzt genau ein benennbares storey, gemeinsame Umbenennungsaktion, Undo und Migration. Freie Mehrgeschossanlage/Höhen noch nicht implementiert.
 - **Zuständigkeit:** M, UI/Navigator → domain/storeys
 - **Altzuordnung:** Gespräch mehrere Geschosse
 - **Abnahme/Abhängigkeiten:** Migration Schema 1, Namen/Höhen/Bezüge, N16; 2D/3D/IFC-Rundlauf. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -10811,3 +10811,65 @@ als Label. ModelView referenziert bereits storeyId. Nächster begrenzter Auftrag
 Geschossname mit Migration, gemeinsamer Umbenennungsaktion, Undo/Redo, Anzeige und
 IFC-Rundlauf. Noch nicht implementiert. Mehrere Geschosse und Höhenbezüge bleiben
 nachfolgende eigene Schritte; kein stiller Höhen-/Geometriewechsel beim Umbenennen.
+
+### R26-03, N21/N22 · Geschoss benennen (13.10.2026)
+Implementiert: src/application/storeys/actions.ts (renameStorey), Modellaktion im
+Editing-Controller, Schema21 samt expliziter 1–20-Datei-/Recovery-Migration. Name
+1–120 Zeichen nach trim; stabile IDs und Bauteile unverändert. Neue Projekte und
+Altdateien verwenden Level 01. Keine UI-eigene Modellmutation. Wiederverwendbare
+Aktion für spätere Text/AI/Voice-Adapter; Parseranbindung noch nicht implementiert.
+
+Bedienung: Navigator → Gebäudestruktur → Geschoss doppelklicken → Name → Umbenennen.
+Abbrechen/Esc ohne Modelländerung. Genau ein Undo/Redo-Schritt; unveränderter Name
+ist No-op. Header, Statusleiste, 2D/3D-Ansicht und IFC-Label folgen; bestehende
+Abbildnamen und GlobalIds ändern sich nicht. Datei- und Recoveryeingang teilen
+vollständig validierende Migration; Payload-Header/Hashprüfung bleibt davor erhalten.
+Alte Parser bis Schema20 öffnen die neue Version nicht: keine stille Erweiterung
+historischer strikter Schemas. Historische Testfixtures entfernen das damals nicht
+vorhandene Namensfeld explizit; Produktvalidierung bleibt strikt.
+
+Nachweise: 925 Gesamttests; drei neue Tests in actions.test.ts für Kontext/History,
+strikte Migration und Datei/Recovery mit echtem PNG und fehlerhaften Payloads sowie
+IFC-Gleichheit abgesehen vom korrekt escapten Namen. Beide Typechecks, fokussiertes
+ESLint und regulärer/statischer Produktionsbuild bestanden. Browser auf 8085:
+Leername gesperrt; Erdgeschoss Süd 'A' benannt; Undo/Redo; Export JSON Version21 und
+IFC mit identischer Geschoss-ID; Snapshot, Reload, geprüfte Wiederaufnahme erhalten
+Namen; keine Konsolenfehler. Keine erneute Archicad-Abnahme behauptet.
+
+N22 bleibt offen: keine Geschosshöhen oder automatische Höhenbindung. Der nächste
+begrenzte Architekturauftrag für zwei Geschosse steht ausschließlich im Masterplan.
+128-MiB-Projektlimit unverändert, größere Speicherklasse weiter zurückgestellt.
+
+### R26-03, N21/N22/N56 · Nutzervertrag Geschossverwaltung (13.10.2026)
+Status: verbindliche Bedien-/Produktvorgaben, noch nicht implementiert; ergänzt den
+Architekturauftrag im Masterplan. Quelle: Nutzeranmerkung und ausdrückliche Antwort
+zur Bezugshöhe am 13.10.2026. Der Einzelgeschoss-Pilot in PR301 bleibt davon getrennt.
+
+- Navigator-Oberknoten „BIM Project“ künftig „Gebäudestruktur“ nennen. Doppelklick
+  öffnet die Gebäudeeinstellungen in der gemeinsamen verschiebbaren, nichtmodalen
+  Settings-/FloatingPanel-Hülle (keine eigene Fensterarchitektur).
+- Dort Gebäude-Höhenbezüge und eine individuelle Geschosshöhe für jedes vorhandene
+  Geschoss bearbeiten. Gebäude-Basis ist ausdrücklich OK Rohdecke / Rohfußboden EG,
+  nicht OK Fertigfußboden. Eine absolute geodätische Höhe ist damit noch nicht festgelegt.
+- Später eine schematische Geschoss-/Höhenskizze im selben Einstellungsfenster mit
+  bearbeitbaren Zahlen ergänzen. Skizze ist abgeleitete Darstellung desselben Modells.
+- Rechtsklick auf ein Geschoss bietet „Geschoss darüber“ und „Geschoss darunter“;
+  hinzufügen und umbenennen analog zur Abbildverwaltung, mit stabilen Geschoss-IDs.
+- Vorgaben für neue Namen: „Erdgeschoss“, darüber „1. Obergeschoss“, danach
+  „2. Obergeschoss“ usw.; direkt unter EG „-1. Kellergeschoss“.
+  Manuell vergebene Namen bleiben eigenständige Metadaten. Keine automatische
+  Umbenennung bestehender Geschosse aus diesen Namensvorgaben ableiten.
+- Jedes Geschoss darf eine eigene Höhe haben. Gemeinsame validierte Application-
+  Aktionen bedienen Navigator, Einstellungen und spätere Text-/AI-/Voice-Adapter.
+  Bauteile werden nicht als Geschosskopien dupliziert.
+
+Vor Höhenimplementierung noch abzugrenzen: genaue Messstrecke der Geschosshöhe
+(Vorschlag Rohfußboden-Oberkante bis Rohfußboden-Oberkante des nächsten Geschosses),
+Folgen einer Höhenänderung für darüberliegende Bezugsebenen, Einfügen zwischen
+bestehenden Geschossen und Standardhöhe neuer Geschosse. Diese Regeln sind noch
+keine Nutzerentscheidungen. Bestehende feste Bauteilhöhen erhalten bei Migration
+keine implizite Höhenbindung; Altprojektnamen werden nicht still ersetzt.
+
+Abnahme des künftigen Piloten: EG mit Rohfußboden-Basis, ein darüber und ein darunter
+angelegtes Geschoss, unterschiedliche Höhen, freie Namen, stabile Zuordnung,
+Undo/Redo und Dateirundlauf; 2D/3D/IFC müssen dieselben Bezugshöhen verwenden.

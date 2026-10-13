@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { pickupToolDefaults } from "../tools/pickup.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
@@ -45,8 +46,8 @@ test("schema 9 loads unchanged geometry as schema 11; invalid embedded patterns 
   const project = createProject("legacy-style", "storey-legacy");
   const { hatchPatterns: _patterns, ...old } = project;
   const legacy = { ...old, schemaVersion: 9 };
-  const loaded = loadProjectData(legacy);
-  assert.equal(loaded.schemaVersion, 20);
+  const loaded = loadProjectData(legacyProjectFixture(legacy));
+  assert.equal(loaded.schemaVersion, 21);
   assert.deepEqual(loaded.storey, project.storey);
   assert.throws(() =>
     addLine(project, {

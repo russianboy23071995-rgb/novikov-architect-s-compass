@@ -5,7 +5,7 @@ export type WallGeometry = {
   storey: Pick<Project["storey"], "walls" | "windows" | "wallJoins" | "wallTJunctions">;
 };
 export type ModelGeometry = {
-  storey: Omit<Project["storey"], "id">;
+  storey: Omit<Project["storey"], "id" | "name">;
   assets: Project["assets"];
 };
 export type GeometryPreview = {

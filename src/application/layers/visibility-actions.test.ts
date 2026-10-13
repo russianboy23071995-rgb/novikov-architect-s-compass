@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -74,7 +75,7 @@ test("visibility cancels a pending preview and rejects its late commit; model an
   assert.equal(display.surfaces.faces.length, 0);
   const date = new Date("2026-10-05T12:00:00Z");
   assert.equal(await exportIfc(p, date), await exportIfc(initial.history.present, date));
-  assert.deepEqual(loadProjectData(JSON.parse(serializeProject(p))), p);
+  assert.deepEqual(loadProjectData(legacyProjectFixture(JSON.parse(serializeProject(p)))), p);
 });
 
 test("strict version-2 migration preserves geometry and membership and defaults visibility to all-visible", () => {
@@ -85,8 +86,8 @@ test("strict version-2 migration preserves geometry and membership and defaults 
     storey: { ...oldStorey, walls: oldStorey.walls.map(({ bodyOffset, ...wall }) => wall) },
     schemaVersion: 2,
   };
-  const migrated = loadProjectData(v2);
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = loadProjectData(legacyProjectFixture(v2));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.storey, {
     ...oldStorey,
     references: [],
@@ -96,22 +97,28 @@ test("strict version-2 migration preserves geometry and membership and defaults 
   });
   assert.deepEqual(migrated.bimVisibility, { hiddenLayerIds: [] });
   assert.equal(v2.schemaVersion, 2);
-  assert.throws(() => loadProjectData({ ...v2, bimVisibility }));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...v2, bimVisibility })));
   assert.throws(() =>
-    loadProjectData({ ...v2, defaultLayerIds: { ...v2.defaultLayerIds, wall: "unknown" } }),
+    loadProjectData(
+      legacyProjectFixture({ ...v2, defaultLayerIds: { ...v2.defaultLayerIds, wall: "unknown" } }),
+    ),
   );
   assert.throws(() =>
-    loadProjectData({ ...migrated, bimVisibility: { hiddenLayerIds: ["missing"] } }),
+    loadProjectData(
+      legacyProjectFixture({ ...migrated, bimVisibility: { hiddenLayerIds: ["missing"] } }),
+    ),
   );
   assert.throws(() =>
-    loadProjectData({
-      ...migrated,
-      bimVisibility: {
-        hiddenLayerIds: [migrated.defaultLayerIds.wall, migrated.defaultLayerIds.wall],
-      },
-    }),
+    loadProjectData(
+      legacyProjectFixture({
+        ...migrated,
+        bimVisibility: {
+          hiddenLayerIds: [migrated.defaultLayerIds.wall, migrated.defaultLayerIds.wall],
+        },
+      }),
+    ),
   );
-  assert.throws(() => loadProjectData({ ...data, schemaVersion: 3 }));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...data, schemaVersion: 3 })));
 });
 
 test("palette actions reject stale/unknown targets; loading resets only the palette history", () => {

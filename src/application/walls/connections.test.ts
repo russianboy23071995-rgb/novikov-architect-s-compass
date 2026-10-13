@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -158,8 +159,8 @@ test("V5 migration does not auto-connect old touching walls; forged/stale/duplic
   const { references, wallTJunctions, wallJoins, ...storey } = p.storey;
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 5, storey };
-  const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = loadProjectData(legacyProjectFixture(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.storey.wallJoins, []);
   assert.deepEqual(migrated.storey.walls, p.storey.walls);
   assert.equal(updateWall(migrated, "A", { height: 3 }).storey.wallJoins.length, 0);

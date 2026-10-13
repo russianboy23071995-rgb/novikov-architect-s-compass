@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { addWall } from "../../lib/bim/model.ts";
 import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
@@ -206,12 +207,12 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
-  const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = readProjectFile(legacyFixtureJSON(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
   assert.deepEqual(migrated.storey, old.storey);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...old, drawingDocuments: [] })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...old, drawingDocuments: [] })));
   assert.throws(() => validateProject(old));
 });
 
@@ -286,14 +287,14 @@ test("captured view framing and folder survive project history and file roundtri
 
 test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
   const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
-  const migrated = readProjectFile(JSON.stringify(legacy));
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = readProjectFile(legacyFixtureJSON(legacy));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
   assert.equal(migrated.documentFolders, undefined);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, documentFolders: [] })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, documentFolders: [] })));
   assert.throws(() =>
     readProjectFile(
-      JSON.stringify({
+      legacyFixtureJSON({
         ...legacy,
         drawingDocuments: [{ ...legacy.drawingDocuments![0], folderId: "unknown" }],
       }),
@@ -436,11 +437,11 @@ test("drawing creation rejects foreign/stale contexts and keeps shared geometry"
   const scoped = createDrawing(base, base, "a", request, documentBinding(base, "doc-a"));
   assert.doesNotThrow(() => validateProject({ ...scoped, drawingDocuments: [] }));
   assert.deepEqual(
-    readProjectFile(JSON.stringify({ ...scoped, schemaVersion: 18 })).storey,
+    readProjectFile(legacyFixtureJSON({ ...scoped, schemaVersion: 18 })).storey,
     scoped.storey,
   );
-  const legacy = readProjectFile(JSON.stringify({ ...base, schemaVersion: 18 }));
-  assert.equal(legacy.schemaVersion, 20);
+  const legacy = readProjectFile(legacyFixtureJSON({ ...base, schemaVersion: 18 }));
+  assert.equal(legacy.schemaVersion, 21);
   assert.deepEqual(legacy.storey, base.storey);
   const wall = createDrawing(
     base,
@@ -490,15 +491,15 @@ test("v19 migration promotes former local lines and hatches without loss or dupl
       hatches: p.storey.hatches.map((h) => ({ ...h, documentId: "doc-a" })),
     },
   };
-  const migrated = readProjectFile(JSON.stringify(legacy));
+  const migrated = readProjectFile(legacyFixtureJSON(legacy));
   assert.deepEqual(migrated, p);
   assert.deepEqual(readProjectFile(serializeProject(migrated)), p);
   const context = resolveWorkingView(migrated);
   const display = createLayerDisplay(migrated, context.visibility, context.visibility.context);
   assert.equal(display.plan.lines.length, 1);
   assert.equal(display.plan.hatches.length, 1);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, drawingDocuments: [] })));
-  assert.throws(() => readProjectFile(JSON.stringify({ ...legacy, schemaVersion: 20 })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, drawingDocuments: [] })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, schemaVersion: 20 })));
 });
 
 test("folder assignment preserves document definition and geometry, roundtrips and uses project history", () => {

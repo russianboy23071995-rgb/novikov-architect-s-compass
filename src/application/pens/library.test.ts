@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { assignPenSet, loadPens, savePenSet } from "./library.ts";
@@ -79,7 +80,7 @@ test("project palette is portable and changes never recolor existing lines", () 
     style: "solid",
   });
   p = assignPenSet(p, p, defaultPenSet);
-  const copy = loadProjectData(JSON.parse(serializeProject(p)));
+  const copy = loadProjectData(legacyProjectFixture(JSON.parse(serializeProject(p))));
   assert.deepEqual(copy.penSet, defaultPenSet);
   const changed = {
     ...defaultPenSet,
@@ -118,11 +119,11 @@ test("direct color property commits once, supports Undo/Redo and no-op adds no h
 test("strict schema 13 migration retains geometry and rejects future palette field", () => {
   const p = createProject("p", "s");
   const old = { ...p, schemaVersion: 13 };
-  const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = loadProjectData(legacyProjectFixture(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.storey, p.storey);
   assert.equal(migrated.penSet, undefined);
-  assert.throws(() => loadProjectData({ ...old, penSet: defaultPenSet }));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, penSet: defaultPenSet })));
 });
 
 import { hsvToHex, hexToHsv } from "./color.ts";
