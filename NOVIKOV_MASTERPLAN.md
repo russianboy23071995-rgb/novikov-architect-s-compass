@@ -457,14 +457,15 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Höhenregeln für den Zweigeschoss-Piloten festlegen.**
-Auf der gemeinsamen Geschossauflösung den Höhenvertrag konkretisieren: vor der
-Implementierung Messstrecke der Geschosshöhe, Folgen einer Höhenänderung für die
-Nachbargeschosse und Einfügen zwischen Geschossen mit dem Nutzer klären. Verbindliche
-OK-Rohfußboden-EG-Basis beibehalten. Danach exakt einen vertikalen EG/OG-Piloten mit
-Schema-Migration, gemeinsamer Anlageaktion, Geschosswahl, 3D/IFC-Z und Undo-Abnahme
-festlegen. Noch keine unbekannten Altprojekthöhen erfinden oder automatische
-Bauteilbindungen setzen. Vertrag im vorhandenen Register pflegen.
+**Genau ein aktiver Fortsetzungsschritt: Vertikaler EG/OG-Pilot.**
+Den bestätigten Höhen-/Migrationsvertrag „Verbindliche Höhenregeln und vertikaler
+Pilot (13.10.2026)“ unter R26-03/N21–N22 umsetzen. Zwei bearbeitbare Geschosse,
+Schema-Migration ohne doppelte Bauteile, gemeinsame Anlage-/Höhenaktionen,
+Geschosswahl und Settings-Hülle, konsistente Z-Ableitung in 3D/Picking/IFC sowie
+Undo und Datei/Recovery-Rundlauf. EG bleibt Rohfußboden-Nullbezug; Abstände nach
+oben/unten kumulieren. Althöhen nicht erfinden. Keller-/Einfügeregeln rechnerisch
+absichern, ihre UI, obere Bauteilbindung und Höhenskizze bleiben spätere Schritte.
+Abnahmeszenario und Zuständigkeitsgrenzen stehen im Register.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -498,3 +499,10 @@ Maßstabsaktionen und Ansichtskontexte angebunden. 27 gezielte Regressionstests,
 TypeScript, fokussiertes Lint und Produktionsbuild bestanden. Schema21 und bestehende
 Bedienung unverändert. Die übrigen direkten Geschosszugriffe bleiben im dokumentierten
 Migrationsumfang; dies ist keine abgeschlossene Mehrgeschossumstellung.
+
+### Status 13.10.2026 – Höhenregeln bestätigt
+PR303 mit ausdrücklicher Freigabe und grüner CI zusammengeführt (main 9a14b0a).
+Nutzer bestätigt Rohfußboden-zu-Rohfußboden, EG als festen Bezug, Fortschreibung
+oberhalb nach oben/unterhalb nach unten und zusätzliche Höhe beim Einfügen.
+Formeln, konkrete Keller-/Obergeschossbeispiele, Migration und genau ein EG/OG-Pilot
+im Register dokumentiert. Nur Dokumentation geändert; keine neue Höhenfunktion.
