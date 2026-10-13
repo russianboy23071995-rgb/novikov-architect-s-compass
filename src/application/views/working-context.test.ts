@@ -122,3 +122,46 @@ test("resolved settings retain existing model undo, palette history and file rou
   }).project;
   assert.equal(isLayerVisible(restored, resolveWorkingView(restored).visibility, "window-1"), true);
 });
+
+// Regression: view adapters must resolve the same storey without copying model data.
+import { resolveViewStorey, defaultWorkingPlan } from "../storeys/context.ts";
+import { changeDrawingDocument, documentBinding } from "./documents.ts";
+import { resolveDocumentView } from "./working-context.ts";
+import { projectScaleContext } from "./project-scale.ts";
+
+test("shared storey resolution preserves independent document scale and visibility", () => {
+  const base = createExampleProject();
+  const project = changeDrawingDocument(base, base, {
+    kind: "create",
+    id: "doc",
+    modelViewId: "view",
+    name: "Plan",
+    denominator: 50,
+    hiddenLayerIds: [base.defaultLayerIds.wall],
+  });
+  const binding = documentBinding(project, "doc");
+  const working = resolveWorkingView(project);
+  const document = resolveDocumentView(project, binding);
+  assert.equal(working.storey, project.storey);
+  assert.equal(document.storey, working.storey);
+  assert.equal(document.scale.denominator, 50);
+  assert.equal(working.scale.denominator, 100);
+  assert.equal(isLayerVisible(project, working.visibility, "wall-1"), true);
+  assert.equal(isLayerVisible(project, document.visibility, "wall-1"), false);
+  assert.equal(resolveViewStorey(project, binding).source?.id, "view");
+  assert.deepEqual(defaultWorkingPlan(project), working.binding);
+  assert.equal(resolveViewStorey(project, binding).isCurrent({ ...project }), false);
+  assert.throws(() => resolveViewStorey(project, { ...binding, projectId: "foreign" }));
+  assert.throws(() => resolveViewStorey(project, { ...binding, documentId: "missing" }));
+  assert.throws(() => resolveDocumentView({ ...project, modelViews: [] }, binding));
+  assert.throws(() =>
+    resolveDocumentView(
+      { ...project, modelViews: project.modelViews!.map((v) => ({ ...v, storeyId: "missing" })) },
+      binding,
+    ),
+  );
+  const foreign = { ...working.binding, storeyId: "missing" };
+  assert.throws(() => projectScaleContext(project, foreign));
+  assert.throws(() => changeProjectScale(project, foreign, 100)); // Even no-op must validate.
+  assert.equal(changeProjectScale(project, working.binding, 100), project);
+});
