@@ -457,7 +457,8 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Vertikaler EG/OG-Pilot.**
+**Genau ein aktiver Fortsetzungsschritt: EG/OG-Pilot an das Projektmodell anbinden.**
+Die geprüften Domainfunktionen aus domain/storeys/heights.ts wiederverwenden.
 Den bestätigten Höhen-/Migrationsvertrag „Verbindliche Höhenregeln und vertikaler
 Pilot (13.10.2026)“ unter R26-03/N21–N22 umsetzen. Zwei bearbeitbare Geschosse,
 Schema-Migration ohne doppelte Bauteile, gemeinsame Anlage-/Höhenaktionen,
@@ -506,3 +507,10 @@ Nutzer bestätigt Rohfußboden-zu-Rohfußboden, EG als festen Bezug, Fortschreib
 oberhalb nach oben/unterhalb nach unten und zusätzliche Höhe beim Einfügen.
 Formeln, konkrete Keller-/Obergeschossbeispiele, Migration und genau ein EG/OG-Pilot
 im Register dokumentiert. Nur Dokumentation geändert; keine neue Höhenfunktion.
+
+### Status 13.10.2026 – Höhenrechenkern, EG/OG-Pilot noch offen
+Domainberechnung, Höhenänderung und Einfügen mit festem EG-Bezug implementiert.
+Acht neue Domainfälle, insgesamt 934 Tests, TypeScript, fokussiertes Lint und Build
+bestanden. Noch keine Schema-/UI-/3D-/IFC-Anbindung. Nach Codeinventur von 218 direkten
+Einzelgeschosszugriffen als überprüfbaren ersten Teil isoliert; die vollständige
+vertikale Abnahme bleibt ausdrücklich offen. PR303 ist bereits gemergt, PR304 offen.

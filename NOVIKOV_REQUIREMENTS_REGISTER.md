@@ -11068,3 +11068,29 @@ Ausgeschlossen: Decken/Dächer, Fertigfußbodenaufbau, automatische Bauteil-Höh
 geodätischer Bezug, Keller-/Zwischengeschoss-UI und Höhenskizzeneditor. Offene zukünftige
 Entscheidungen: Löschen belegter Geschosse, Umhängen bestehender Bauteile und explizites
 Verschieben des Gebäude-Datums. Sie blockieren die oben begrenzte EG/OG-Abnahme nicht.
+
+### R26-03 / N21–N22 · Höhenberechnung implementiert (13.10.2026)
+Erster technischer Teil des EG/OG-Piloten, nicht dessen vollständige Abnahme.
+Codeinventur: 218 Treffer für project.storey bzw. Project["storey"] außerhalb
+*.test.ts. Die produktive Sammlung erfordert koordinierte Umstellung der alten
+Bearbeitungs-/Export-/Recoverypfade; keine dauerhafte zweite Projektkopie als Abkürzung.
+
+Implementiert in domain/storeys/heights.ts: resolveStoreyLevels, changeStoreyHeight
+und insertStorey als reine Domainfunktionen. EG bleibt Z=0, Rohfußboden-Abstände
+werden in beide Richtungen kumuliert. Änderungen erhalten IDs/Metadaten, Einfügen
+addiert die neue Höhe. Unbekannte Althöhen sind null und werden weder aus Wänden
+abgeleitet noch als Null interpretiert. Unbekannte Bezugsketten blockieren Einfügen.
+Numerische Überläufe und verlorene Höhentrennung werden zurückgewiesen. Kein React,
+Renderer, IFC oder Sprachadapter im Rechenkern. Application-Commit/Undo folgt bei
+Anbindung an das Projektmodell, kein zweiter unabhängiger Projektzustand.
+
+Acht Domain-Regressionsfälle: EG/OG, beide Keller-Änderungsrichtungen, Einfügen innen
+und außen, Althöhen, stabile IDs/Namen/Unveränderlichkeit, ungültige Eingaben sowie
+Überlauf/Genauigkeitsverlust. In reguläre Testsuite aufgenommen: 934 Tests bestanden.
+TypeScript, fokussiertes ESLint und Produktionsbuild bestanden; nach Typkorrekturen
+acht Domainfälle erneut bestanden. Keine UI-Änderung und keine Browserabnahme nötig.
+
+Grenze: Die Funktionen sind noch nicht an Schema21, Navigator, 3D oder IFC angebunden.
+Der vollständige EG/OG-Pilot bleibt offen. Kein Benutzer kann damit bereits ein
+zweites Geschoss zeichnen. PR304 bleibt offen; dieser Implementierungsschritt baut
+auf dessen dokumentierten und im Chat bestätigten Höhenregeln auf.
