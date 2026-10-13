@@ -1,3 +1,4 @@
+import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
 import { deriveTPreview } from "./t-preview.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
@@ -82,17 +83,19 @@ test("schema 8 roundtrip and strict V7 migration retain geometry without discove
   const { references, wallTJunctions, ...storey } = p.storey;
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 7, storey };
-  const migrated = loadProjectData(old);
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = loadProjectData(legacyProjectFixture(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.deepEqual(migrated.storey, { ...storey, references: [], wallTJunctions: [] });
-  assert.throws(() => loadProjectData({ ...p, schemaVersion: 7 }));
-  assert.throws(() => loadProjectData({ ...old, schemaVersion: 8 }));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...p, schemaVersion: 7 })));
+  assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 8 })));
   assert.throws(() => validateProject(old));
   assert.throws(() =>
-    loadProjectData({
-      ...p,
-      storey: { ...p.storey, wallTJunctions: [{ ...wallTJunctions[0], extra: true }] },
-    }),
+    loadProjectData(
+      legacyProjectFixture({
+        ...p,
+        storey: { ...p.storey, wallTJunctions: [{ ...wallTJunctions[0], extra: true }] },
+      }),
+    ),
   );
 });
 
@@ -146,7 +149,9 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     { ...relation, incoming: { wallId: "incoming", endpoint: 2 } },
     { ...relation, incoming: { wallId: "incoming", endpoint: 0 } },
   ])
-    assert.throws(() => loadProjectData({ ...p, storey: { ...p.storey, wallTJunctions: [r] } }));
+    assert.throws(() =>
+      loadProjectData(legacyProjectFixture({ ...p, storey: { ...p.storey, wallTJunctions: [r] } })),
+    );
   assert.throws(() => previewTConnection(p, p, request));
   const withCorner = addWall(p, {
     id: "corner",

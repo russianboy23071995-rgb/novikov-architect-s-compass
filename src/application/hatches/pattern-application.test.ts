@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -69,8 +70,8 @@ test("schema 10 migrates existing solid hatches without a library", () => {
     fill: { color: "#112233", opacity: 0.5 },
   });
   const { hatchPatterns: _unused, ...old } = p;
-  const reopened = deserializeProject(JSON.stringify({ ...old, schemaVersion: 10 }));
-  assert.equal(reopened.schemaVersion, 20);
+  const reopened = deserializeProject(legacyFixtureJSON({ ...old, schemaVersion: 10 }));
+  assert.equal(reopened.schemaVersion, 21);
   assert.deepEqual(reopened.hatchPatterns, []);
   assert.deepEqual(reopened.storey.hatches, p.storey.hatches);
 });

@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject, validateProject } from "../../lib/bim/model.ts";
@@ -33,8 +34,8 @@ function fixture() {
 test("schema 11 preserves unknown provenance; schema 12 revisions roundtrip without a library", () => {
   const p = fixture(),
     old = { ...p, schemaVersion: 11 };
-  const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = readProjectFile(legacyFixtureJSON(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.equal(migrated.hatchPatterns[0]!.revision, undefined);
   assert.deepEqual(migrated.storey, p.storey);
   const updated = resolveProjectHatchPatterns(migrated, migrated, available).project;
@@ -49,7 +50,7 @@ test("schema 11 preserves unknown provenance; schema 12 revisions roundtrip with
     ),
   );
   assert.equal(resolveProjectHatchPatterns(updated, updated, []).project, updated);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...updated, schemaVersion: 11 })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...updated, schemaVersion: 11 })));
   assert.throws(() => validateProject(old));
 });
 
@@ -133,7 +134,7 @@ test("invalid persisted revisions and invalid action catalogs reject atomically"
   const p = fixture();
   for (const revision of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, "7", null])
     assert.throws(() =>
-      readProjectFile(JSON.stringify({ ...p, hatchPatterns: [{ ...definition, revision }] })),
+      readProjectFile(legacyFixtureJSON({ ...p, hatchPatterns: [{ ...definition, revision }] })),
     );
   const initial = createEditingState(p);
   const rejected = editingReducer(initial, {

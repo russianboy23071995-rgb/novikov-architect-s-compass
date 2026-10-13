@@ -30,7 +30,9 @@ function TreeItem({
   depth,
   active,
   onSelect,
+  onRename,
 }: {
+  onRename: (id: string) => void;
   node: TreeNode;
   depth: number;
   active: readonly string[];
@@ -65,6 +67,8 @@ function TreeItem({
           variant="ghost"
           className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent"
           aria-pressed={active.includes(node.id)}
+          onDoubleClick={() => onRename(node.id)}
+          title={depth === 1 ? "Doppelklick zum Umbenennen" : undefined}
           onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
           <Icon className="size-3.5 shrink-0 opacity-70" />
@@ -79,6 +83,7 @@ function TreeItem({
             depth={depth + 1}
             active={active}
             onSelect={onSelect}
+            onRename={onRename}
           />
         ))}
     </div>
@@ -87,6 +92,7 @@ function TreeItem({
 
 type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
+  onRenameStorey: (base: Project, name: string) => void;
 
   active: readonly string[];
   onSelect: (id: string, label: string, toggle?: boolean) => void;
@@ -98,8 +104,10 @@ function NavigatorContent({
   onSelect,
   onClose,
   project,
+  onRenameStorey,
   ...documents
 }: ProjectNavigatorProps) {
+  const [rename, setRename] = useState<{ base: Project; name: string } | null>(null);
   const [tab, setTab] = useState<"model" | "documents">("model");
   // The navigator represents project/storey structure, never individual geometry.
   // Its row count is independent of the number of elements in the storey.
@@ -110,10 +118,10 @@ function NavigatorContent({
           id: project.id,
           label: "BIM Project",
           kind: "group",
-          children: [{ id: project.storey.id, label: "Level 01", kind: "group" }],
+          children: [{ id: project.storey.id, label: project.storey.name, kind: "group" }],
         },
       ] satisfies TreeNode[],
-    [project.id, project.storey.id],
+    [project.id, project.storey.id, project.storey.name],
   );
   return (
     <aside
@@ -165,8 +173,51 @@ function NavigatorContent({
       ) : (
         <ScrollArea className="min-h-0 flex-1 px-1.5 py-2">
           {modelTree.map((node) => (
-            <TreeItem key={node.id} node={node} depth={0} active={active} onSelect={onSelect} />
+            <TreeItem
+              key={node.id}
+              node={node}
+              depth={0}
+              active={active}
+              onSelect={onSelect}
+              onRename={(id) => {
+                if (id === project.storey.id)
+                  setRename({ base: project, name: project.storey.name });
+              }}
+            />
           ))}
+          {rename && (
+            <form
+              className="mt-2 space-y-2 px-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!rename.name.trim()) return;
+                onRenameStorey(rename.base, rename.name);
+                setRename(null);
+              }}
+            >
+              <label className="text-xs">
+                Geschossname
+                <input
+                  aria-label="Geschossname"
+                  autoFocus
+                  required
+                  maxLength={120}
+                  className="mt-1 w-full rounded border bg-background px-2 py-1 text-xs"
+                  value={rename.name}
+                  onChange={(event) => setRename({ ...rename, name: event.target.value })}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") setRename(null);
+                  }}
+                />
+              </label>
+              <Button size="sm" type="submit" disabled={!rename.name.trim()}>
+                Umbenennen
+              </Button>
+              <Button size="sm" variant="ghost" type="button" onClick={() => setRename(null)}>
+                Abbrechen
+              </Button>
+            </form>
+          )}
         </ScrollArea>
       )}
       <div className="border-t border-border px-3 py-2 text-[12px] text-muted-foreground">
@@ -204,6 +255,10 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onSelect(...args),
     [],
   );
+  const onRenameStorey = useCallback<ProjectNavigatorProps["onRenameStorey"]>(
+    (...args) => latest.current.onRenameStorey(...args),
+    [],
+  );
   const onOpenDocument = useCallback<ProjectNavigatorProps["onOpenDocument"]>(
     (id) => latest.current.onOpenDocument(id),
     [],
@@ -219,6 +274,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onOpenDocument={onOpenDocument}
       onDocumentAction={onDocumentAction}
       onDocumentVisibility={props.onDocumentVisibility}
+      onRenameStorey={onRenameStorey}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

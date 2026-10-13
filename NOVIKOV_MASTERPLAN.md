@@ -376,6 +376,19 @@ Codeabgleich: Schema20 besitzt ein storey ohne Namen; Navigator zeigt fest Level
 IFC nutzt bisher die Geschoss-ID als Label. ModelView bindet bereits stabile storeyId.
 Nächster CAD-Schritt: Geschossnamen als kleiner nutzbarer Einstieg in R26-03/N21.
 
+### Geschossname (13.10.2026, feat/storey-name)
+PR300 nach ausdrücklicher Freigabe und grüner CI zusammengeführt. Geschossnamen in
+Schema21 gespeichert; alte Projektdateien und Recovery-Stände erhalten beim geprüften
+Lesen Level 01. Gemeinsame Aktion renameStorey mit stabilen Projekt-/Geschoss-IDs,
+Kontextprüfung und normalem Projekt-Undo. Navigator: Doppelklick auf Geschoss, Name
+eingeben, Umbenennen; Esc/Abbrechen verwirft. Kopf-/Statusleiste, Grundriss/3D und IFC
+lesen denselben Namen. Abbildnamen und IFC-GlobalIds bleiben unabhängig/unverändert.
+925 Tests, beide Typechecks, fokussiertes Lint und beide Builds bestanden; ergänzter
+PNG-Recovery-/Fehlerfall gezielt bestanden. Browser: Leername blockiert, Name mit Umlaut
+und Apostroph, Undo/Redo, JSON/IFC-Export, Snapshot/Seitenneustart/Wiederaufnahme ohne
+Konsolenfehler. Noch genau ein Geschoss, keine Höhen-/Geometrieänderung. Schema21-Dateien
+benötigen diese oder neuere Programmversion; Altdateien bleiben lesbar.
+
 ## 5. Engpässe und Skalierungsrisiken
 
 1. **Datei-/Assetgrenze:** Projektdatei aktuell 128 MiB, einzelne Bilddaten weiterhin 10 MiB. Die frühere 10-MiB-Projektgrenze ist abgelöst. 10 MiB = 10.485.760 Bytes, ungefähr 10,49 dezimale MB; nicht gleich zehn Millionen Bytes. Inline-Base64 und JPEG→PNG können Projektbytes erhöhen. Getrennt messen: Elemente/Punkte, kodierte Bytes, Gesamtpixel, dekodierter RAM, GPU und History. 16 MP pro Bild ist kein Gesamtbudget. 200–300 MB Archicad-Datei beschreibt Nutzererfahrung, keine bereits unterstützte Novikov-Größe.
@@ -444,18 +457,17 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Bestehendes Geschoss benennen.**
-Einen persistenten Geschossnamen mit unveränderter stabiler ID und expliziter Migration
-alter Projektdateien ergänzen (bisherige Anzeige Level 01 als Bestandsvorgabe).
-Eine gemeinsame validierte Application-Aktion zum Umbenennen mit genau einem normalen
-Projekt-Undo-Schritt bereitstellen; Navigator erhält die Bearbeitung über den vorhandenen
-UI-Vertrag. Gemeinsame Geschossbeschriftungen in Arbeitsansicht und IFC verwenden den
-Namen, Beziehungen/GlobalIds weiterhin die ID. Abbildnamen bleiben eigenständig.
-Tests: gültiger/leerer Name, ID-/Geometrieerhalt, Undo/Redo, alte Datei laden,
-Speichern/Wiederöffnen/Recovery und IFC-Label einschließlich Sonderzeichen; Browserabnahme,
-Build und passende Gesamttests. Keine Mehrgeschossanlage, Höhenänderung oder neue
-Bauteile in diesem Schritt; keine leeren Klassen oder parallele Projektdaten.
-Application-Aktion später auch für Text/AI/Voice nutzbar, keine separate Modelllogik.
+**Genau ein aktiver Fortsetzungsschritt: Mehrgeschoss-Pilot architektonisch abgrenzen.**
+Den nun benannten Einzelgeschoss-Stand gegen N21/N22 und R26-03 prüfen und einen
+konkreten Migrations-/Integrationsvertrag für zwei Geschosse erstellen. Einmalige
+Bauteilzuordnung, aktive Geschosswahl, ModelView-/Abbildbindung, feste versus gebundene
+Höhe und Z-Ableitung in 3D/IFC zusammen betrachten; vorhandene gemeinsame Aktionen,
+Fang-/Auswahl-/History-/Recoverypfade einbeziehen. Direkte project.storey-Zugriffe
+nach Zuständigkeit und erforderlicher Umstellung zuordnen. Genau einen anschließend
+umsetzbaren vertikalen Pilot mit Zweigeschoss-Abnahmeszenario bestimmen. Offene
+Höhen-/Verschiebungsregeln ausdrücklich markieren, keine Nutzerentscheidungen erfinden.
+Noch keine parallelen Geschosskopien, leeren Klassen oder globale Umstellung; den
+Vertrag im vorhandenen Anforderungsregister und den Einzelauftrag hier festhalten.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 

@@ -103,7 +103,7 @@ export async function writeIfc(
   const storeyPlacement = placement(buildingPlacement);
   const storey = add(
     "IFCBUILDINGSTOREY",
-    `${await guid("storey", project.storey.id)},$,${label(project.storey.id)},$,$,${storeyPlacement},$,$,.ELEMENT.,0.`,
+    `${await guid("storey", project.storey.id)},$,${label(project.storey.name)},$,$,${storeyPlacement},$,$,.ELEMENT.,0.`,
   );
   for (const [key, parent, child] of [
     ["project-site", projectRef, site],

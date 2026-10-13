@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject, validateProject } from "../../lib/bim/model.ts";
@@ -103,10 +104,12 @@ test("size edits are one model undo step; view scale stays outside that history;
   assert.equal(history.present.storey.hatches[0]!.pattern!.mode, "paper");
   assert.deepEqual(readProjectFile(serializeProject(history.present)), history.present);
   const old = { ...p, schemaVersion: 15 };
-  const loaded = readProjectFile(JSON.stringify(old));
-  assert.equal(loaded.schemaVersion, 20);
+  const loaded = readProjectFile(legacyFixtureJSON(old));
+  assert.equal(loaded.schemaVersion, 21);
   assert.deepEqual(loaded.storey, p.storey);
-  assert.throws(() => readProjectFile(JSON.stringify({ ...history.present, schemaVersion: 15 })));
+  assert.throws(() =>
+    readProjectFile(legacyFixtureJSON({ ...history.present, schemaVersion: 15 })),
+  );
 });
 test("pickup, drawing, translation, property edits and library updates preserve application sizing", () => {
   const p = toPaper();

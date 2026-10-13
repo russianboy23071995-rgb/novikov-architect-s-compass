@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function StatusBar({
+  storeyName,
   zoomSlot,
   recoveryStatus,
   grid,
@@ -18,6 +19,7 @@ export function StatusBar({
   onSnap,
   onOrtho,
 }: {
+  storeyName: string;
   recoveryStatus?: ReactNode;
   zoomSlot: (element: HTMLDivElement | null) => void;
   gridSettings: GridSettings;
@@ -61,7 +63,7 @@ export function StatusBar({
           <MousePointer2 className="size-3" />
           {selection} selected
         </span>
-        <span className="text-foreground">Level 01</span>
+        <span className="text-foreground">{storeyName}</span>
         <CircleDot className="size-3 text-status-ok" />
       </div>
     </footer>

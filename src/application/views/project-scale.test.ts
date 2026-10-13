@@ -1,3 +1,4 @@
+import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -39,12 +40,12 @@ test("stored scale round-trip preserves geometry and semantic ownership; old fil
   }
   assert.equal(serializeProject(base), before);
   const old = { ...base, schemaVersion: 14 };
-  const migrated = readProjectFile(JSON.stringify(old));
-  assert.equal(migrated.schemaVersion, 20);
+  const migrated = readProjectFile(legacyFixtureJSON(old));
+  assert.equal(migrated.schemaVersion, 21);
   assert.equal(projectScaleContext(migrated).denominator, 100);
   assert.deepEqual(migrated.storey, base.storey);
   assert.throws(() => validateProject(old));
-  assert.throws(() => readProjectFile(JSON.stringify({ ...old, workingViews: [] })));
+  assert.throws(() => readProjectFile(legacyFixtureJSON({ ...old, workingViews: [] })));
 });
 test("view settings reject invalid, duplicate, unknown or foreign contexts at action/file boundaries", () => {
   const base = fixture(),
@@ -53,7 +54,7 @@ test("view settings reject invalid, duplicate, unknown or foreign contexts at ac
     assert.throws(() => changeProjectScale(base, view, denominator));
     assert.throws(() =>
       readProjectFile(
-        JSON.stringify({
+        legacyFixtureJSON({
           ...base,
           workingViews: [{ kind: "working-plan", storeyId: "s", denominator }],
         }),
@@ -72,7 +73,7 @@ test("view settings reject invalid, duplicate, unknown or foreign contexts at ac
     [{ ...entry, kind: "pane" }],
     [{ ...entry, zoom: 3 }],
   ])
-    assert.throws(() => readProjectFile(JSON.stringify({ ...base, workingViews })));
+    assert.throws(() => readProjectFile(legacyFixtureJSON({ ...base, workingViews })));
 });
 test("scale change preserves undo and redo branches and current scale survives both directions", () => {
   const base = fixture(),

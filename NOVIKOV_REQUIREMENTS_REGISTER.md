@@ -203,7 +203,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N21 – Geschosse im Navigator frei erstellen und Höhen definieren
 
-- **Stand:** Geplant: aktueller Codeabgleich Schema20 besitzt genau ein storey ohne Namen, keine freie Mehrgeschossanlage.
+- **Stand:** Teilweise: Schema21 besitzt genau ein benennbares storey, gemeinsame Umbenennungsaktion, Undo und Migration. Freie Mehrgeschossanlage/Höhen noch nicht implementiert.
 - **Zuständigkeit:** M, UI/Navigator → domain/storeys
 - **Altzuordnung:** Gespräch mehrere Geschosse
 - **Abnahme/Abhängigkeiten:** Migration Schema 1, Namen/Höhen/Bezüge, N16; 2D/3D/IFC-Rundlauf. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -10811,3 +10811,31 @@ als Label. ModelView referenziert bereits storeyId. Nächster begrenzter Auftrag
 Geschossname mit Migration, gemeinsamer Umbenennungsaktion, Undo/Redo, Anzeige und
 IFC-Rundlauf. Noch nicht implementiert. Mehrere Geschosse und Höhenbezüge bleiben
 nachfolgende eigene Schritte; kein stiller Höhen-/Geometriewechsel beim Umbenennen.
+
+### R26-03, N21/N22 · Geschoss benennen (13.10.2026)
+Implementiert: src/application/storeys/actions.ts (renameStorey), Modellaktion im
+Editing-Controller, Schema21 samt expliziter 1–20-Datei-/Recovery-Migration. Name
+1–120 Zeichen nach trim; stabile IDs und Bauteile unverändert. Neue Projekte und
+Altdateien verwenden Level 01. Keine UI-eigene Modellmutation. Wiederverwendbare
+Aktion für spätere Text/AI/Voice-Adapter; Parseranbindung noch nicht implementiert.
+
+Bedienung: Navigator → Gebäudestruktur → Geschoss doppelklicken → Name → Umbenennen.
+Abbrechen/Esc ohne Modelländerung. Genau ein Undo/Redo-Schritt; unveränderter Name
+ist No-op. Header, Statusleiste, 2D/3D-Ansicht und IFC-Label folgen; bestehende
+Abbildnamen und GlobalIds ändern sich nicht. Datei- und Recoveryeingang teilen
+vollständig validierende Migration; Payload-Header/Hashprüfung bleibt davor erhalten.
+Alte Parser bis Schema20 öffnen die neue Version nicht: keine stille Erweiterung
+historischer strikter Schemas. Historische Testfixtures entfernen das damals nicht
+vorhandene Namensfeld explizit; Produktvalidierung bleibt strikt.
+
+Nachweise: 925 Gesamttests; drei neue Tests in actions.test.ts für Kontext/History,
+strikte Migration und Datei/Recovery mit echtem PNG und fehlerhaften Payloads sowie
+IFC-Gleichheit abgesehen vom korrekt escapten Namen. Beide Typechecks, fokussiertes
+ESLint und regulärer/statischer Produktionsbuild bestanden. Browser auf 8085:
+Leername gesperrt; Erdgeschoss Süd 'A' benannt; Undo/Redo; Export JSON Version21 und
+IFC mit identischer Geschoss-ID; Snapshot, Reload, geprüfte Wiederaufnahme erhalten
+Namen; keine Konsolenfehler. Keine erneute Archicad-Abnahme behauptet.
+
+N22 bleibt offen: keine Geschosshöhen oder automatische Höhenbindung. Der nächste
+begrenzte Architekturauftrag für zwei Geschosse steht ausschließlich im Masterplan.
+128-MiB-Projektlimit unverändert, größere Speicherklasse weiter zurückgestellt.

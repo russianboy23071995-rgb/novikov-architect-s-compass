@@ -45,6 +45,7 @@ const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
 ];
 
 type TopToolbarProps = {
+  storeyName: string;
   onPenSets: () => void;
   onLineCreator: () => void;
   onHatchLibrary: () => void;
@@ -133,7 +134,9 @@ export function TopToolbar(props: TopToolbarProps) {
             <div className="font-display text-[13px] font-semibold text-foreground">
               NOVIKOV <span className="font-normal text-primary">CAD</span>
             </div>
-            <div className="truncate text-[11px] text-muted-foreground">BIM Project · Level 01</div>
+            <div className="truncate text-[11px] text-muted-foreground">
+              BIM Project · {props.storeyName}
+            </div>
           </div>
         </div>
         <nav
