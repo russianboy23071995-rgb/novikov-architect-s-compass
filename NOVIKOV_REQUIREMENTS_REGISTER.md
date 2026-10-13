@@ -203,7 +203,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N21 – Geschosse im Navigator frei erstellen und Höhen definieren
 
-- **Stand:** Geplant: Schema16 besitzt genau ein storey, keine freie Mehrgeschossanlage.
+- **Stand:** Geplant: aktueller Codeabgleich Schema20 besitzt genau ein storey ohne Namen, keine freie Mehrgeschossanlage.
 - **Zuständigkeit:** M, UI/Navigator → domain/storeys
 - **Altzuordnung:** Gespräch mehrere Geschosse
 - **Abnahme/Abhängigkeiten:** Migration Schema 1, Namen/Höhen/Bezüge, N16; 2D/3D/IFC-Rundlauf. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -10787,3 +10787,27 @@ beide Builds bestanden. Einzelmessung Hashinput 335,9→116,7 ms, Restore 993,7�
 Export bytegleich, keine Konsolenfehler. Nachweis ASSET_RECOVERY_PILOT.md und
 recovery-hash-buffer.json. Gesamtgrenzen unverändert; konsolidierte Wiederholungs-
 und Bearbeitungsabnahme als genau ein nächster Auftrag im Masterplan.
+
+### R26-01/02, K02/03, RC07 · Konsolidierte Recovery-Abnahme (12.10.2026, nach PR299)
+PR299 mit grüner CI gemergt. Drei frische Tabs: identische 101,96-MiB-Exporte;
+Restore 745,1–794,8 ms. Änderung, Undo/Redo, neuer Snapshot und Wiederaufnahme nach
+Seitenneustart bytegleich bestanden. Keine Produktänderung; 922 Tests/Builds aus PR299
+nicht erneut ausgeführt. Beleg ASSET_RECOVERY_PILOT.md und recovery-acceptance-summary.json.
+128-MiB-Produktlimit bleibt; größerer alter Servicepilot ist keine Kapazitätsfreigabe.
+Nächster Einzelauftrag im Masterplan: aktuellen Adapterpfad im vorhandenen großen
+Pilot abgleichen und budgetiert messen, statt weitere 102-MiB-Mikrooptimierungen.
+
+### R26-01/02, K02/03, RC07 · Nutzerpriorität 12.10.2026
+Weitere Kapazitätserweiterung ausdrücklich zurückgestellt. Produktlimit 128 MiB,
+Bildlimit 10 MiB bleiben. 250-MiB-Pilot und aktueller Adapterabgleich sind vorgemerkt,
+vor nächster Grenzerhöhung oder bei konkretem Größenbedarf wieder aufzunehmen.
+Recovery-Abnahme bleibt gültiger begrenzter Nachweis; offene Sicherheits-/Quota-/Crash-
+und Distributionsprüfungen bleiben erhalten. Kein aktiver Speicher-Ausbauauftrag.
+
+### R26-03, N21/N22 · nächster CAD-Schritt 12.10.2026
+Codeabgleich: domain/project/schema.ts Schema20 enthält ein storey ohne Namen;
+ProjectNavigator.tsx zeigt Level 01 fest; interop/ifc/writer.ts verwendet storey.id
+als Label. ModelView referenziert bereits storeyId. Nächster begrenzter Auftrag:
+Geschossname mit Migration, gemeinsamer Umbenennungsaktion, Undo/Redo, Anzeige und
+IFC-Rundlauf. Noch nicht implementiert. Mehrere Geschosse und Höhenbezüge bleiben
+nachfolgende eigene Schritte; kein stiller Höhen-/Geometriewechsel beim Umbenennen.

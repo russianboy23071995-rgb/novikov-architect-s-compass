@@ -1409,3 +1409,49 @@ cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
 Gemessener Vorteil rechtfertigt den begrenzten Fastpath. Nächster Auftrag gemäß
 Masterplan: drei Wiederholungen und Bearbeitungs-/Undo-/Sicherungsablauf konsolidiert
 abnehmen, ohne weitere Mikrooptimierung.
+
+## Konsolidierte Wiederherstellungsabnahme (12.10.2026, nach PR299)
+PR299 nach erfolgreicher GitHub-CI zusammengeführt, Merge b621023. Unveränderter
+Produktcode 8777123; statischer recovery-profile-Build auf 8085 mit denselben
+Application-/Interop-Adaptern. Keine parallelen Builds oder Tests während der Messung.
+Drei frische Tabs, gleicher Browserprozess und vorhandene Caches; kein OS-/Prozess-
+Kaltstart. Phase-Probes aktiv, kein React-Profiler. Dies ist ein Diagnose-Produktionsbuild,
+nicht die vollständige SSR-Auslieferung.
+
+| Millisekunden | Lauf 1 | Lauf 2 | Lauf 3 |
+| --- | ---: | ---: | ---: |
+| Storage beim Start | 56,4 | 147,4 | 66,7 |
+| Storage für gewählten Snapshot | 375,3 | 554,7 | 338,8 |
+| Bounded restore | 792,5 | 794,8 | 745,1 |
+| Hashinput (enthalten) | 153,9 | 143,9 | 128,4 |
+
+Median bounded restore 792,5 ms, Spannweite 49,7 ms. Hashinput-Median 143,9 ms,
+Spannweite 25,5 ms. Drei Läufe sind kein p95- oder Hardwareversprechen. Storage und
+Restore getrennt betrachten; die enthaltene Hashphase nicht zusätzlich addieren.
+Die vorherige Einzelmessung 683,1 ms ist keine garantierte Gesamtdauer.
+
+Rohdaten: [Lauf 1](recovery-acceptance-1.json), [Lauf 2](recovery-acceptance-2.json),
+[Lauf 3](recovery-acceptance-3.json), [Zusammenfassung](recovery-acceptance-summary.json).
+Alle drei Exporte (26/27/28) haben 106.911.015 Bytes und denselben SHA-256 wie der
+Referenzstand: cf247b50a07462cd14f006ffd8bda0bd3015df45bae73b7953bf3c8d9c063398.
+
+Im dritten Lauf Wand über Canvas-Auswahl gewählt, Höhe von 3,1 auf 3,2 geändert;
+Undo zeigt 3,1, Redo 3,2. Strukturvergleich Export 28/29: ausschließlich
+/storey/walls/0/height geändert. Snapshot um 21:30:08 erstellt, Seite neu geladen,
+Stand geprüft und explizit übernommen. UI-Höhe wieder 3,2. Exporte 29/30 bytegleich:
+8390da59d63dd6db3574a55e98528aa4435b2717a51e2f19e054979c95d38fe0.
+Keine Konsolenfehler in allen Läufen. Keine Produktdateien geändert; 922 Tests,
+Typecheck/Lint und Builds von PR299 unverändert gültig, nicht erneut ausgeführt.
+
+Praktische Wiederholung: Stände auswählen → capacity-100 prüfen → Wiederaufnahme
+vorbereiten → Projekt laden → exportieren. Für Bearbeitung Wand wählen, Höhe ändern,
+Undo/Redo, lokalen Snapshot erstellen, Seite neu laden und den neuen Stand übernehmen.
+Der Teststand auf Diagnose-Port 8085 enthält jetzt 3,2 m; der ursprüngliche 3,1-m-Stand
+ist als Export und Vorgänger erhalten. Normale Arbeitsdaten auf 8080 unverändert.
+
+Bewertung: funktionaler Recovery-Pilot für diese Dateiklasse abgenommen. Weiter offen:
+produktives Limit 128 MiB, synchrone Teilphasen, Inline-Base64-/RAM-Kosten, größere
+reale Projekte, echte Prozessabbrüche und Quota-/Datenträgerbedingungen. Der alte
+252,57-MiB-Servicebeleg verwendet Diagnosebudgets und ist keine aktuelle produktive
+Freigabe. Nächster begrenzter Auftrag gemäß Masterplan: vorhandenen großen Pilot an
+den aktuellen Produktadaptern abgleichen und isoliert abnehmen, vor Limitentscheidung.
