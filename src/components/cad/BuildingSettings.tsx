@@ -88,9 +88,15 @@ export function BuildingSettings({
               <>
                 <p>{project.storey.name} · Höhenbezug an der Oberkante Rohdecke des EG.</p>
                 <BuildingHeightSection
-                  groundInput={input("ground", "EG Bezugshöhe (m)", project.groundDatum)}
-                  elevationInput={input("upper", "Obere Höhenkote (m)", upper)}
-                  heightInput={input("height", "Geschosshöhe (m)", project.storey.height)}
+                  storeys={[
+                    {
+                      id: project.storey.id,
+                      name: project.storey.name,
+                      elevationInput: input("ground", "EG Bezugshöhe (m)", project.groundDatum),
+                      heightInput: input("height", "Geschosshöhe (m)", project.storey.height),
+                    },
+                  ]}
+                  topInput={input("upper", "Obere Höhenkote (m)", upper)}
                 />
                 {invalid && (
                   <p role="alert">
