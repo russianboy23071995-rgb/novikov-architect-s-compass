@@ -457,13 +457,14 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Geschosskontext zentral auflösen.**
-Gemeinsame typisierte Application-Query für Projekt-/Geschoss-/Ansichtskontext im
-bestehenden Schema21 erstellen. Zunächst working-context.ts und project-scale.ts
-anbinden; gültige und fremde IDs, Abbildquelle, Maßstab und Sichtbarkeit gegen den
-bisherigen Pfad prüfen. Keine neue Geschosssammlung oder Höhenmutation in diesem
-Piloten. Höhen-/Migrationsvertrag vom 13.10.2026 unter R26-03/N21–N22 im Register
-verwenden; dort getrennte Vorschläge nicht als bestätigte Produktregeln behandeln.
+**Genau ein aktiver Fortsetzungsschritt: Höhenregeln für den Zweigeschoss-Piloten festlegen.**
+Auf der gemeinsamen Geschossauflösung den Höhenvertrag konkretisieren: vor der
+Implementierung Messstrecke der Geschosshöhe, Folgen einer Höhenänderung für die
+Nachbargeschosse und Einfügen zwischen Geschossen mit dem Nutzer klären. Verbindliche
+OK-Rohfußboden-EG-Basis beibehalten. Danach exakt einen vertikalen EG/OG-Piloten mit
+Schema-Migration, gemeinsamer Anlageaktion, Geschosswahl, 3D/IFC-Z und Undo-Abnahme
+festlegen. Noch keine unbekannten Altprojekthöhen erfinden oder automatische
+Bauteilbindungen setzen. Vertrag im vorhandenen Register pflegen.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -489,3 +490,11 @@ Prüfnachweis dieses Auftrags: 18 bestehende Autosave-/Recovery-Status-Tests bes
 TypeScript und fokussiertes ESLint bestanden, Produktionsbuild bestanden. Browser:
 rotes Symbol beim Ausschalten, grünes Symbol beim Einschalten, Öffnen der bestehenden
 Recovery-Palette über das Symbol. Ausgangszustand aktiv wiederhergestellt.
+
+### Status 13.10.2026 – Gemeinsamer Geschosskontext
+PR301/302 mit ausdrücklicher Freigabe zusammengeführt. Gemeinsame typisierte Query
+in application/storeys/context.ts für Arbeitsansichten und Abbilder implementiert;
+Maßstabsaktionen und Ansichtskontexte angebunden. 27 gezielte Regressionstests,
+TypeScript, fokussiertes Lint und Produktionsbuild bestanden. Schema21 und bestehende
+Bedienung unverändert. Die übrigen direkten Geschosszugriffe bleiben im dokumentierten
+Migrationsumfang; dies ist keine abgeschlossene Mehrgeschossumstellung.

@@ -1,7 +1,6 @@
-import { drawingDocument } from "./documents.ts";
+import { defaultWorkingPlan, resolveViewStorey } from "../storeys/context.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import {
-  viewScaleKey,
   type ViewIdentity,
   type ScaleContext,
   type DocumentIdentity,
@@ -15,19 +14,14 @@ import { createLayerVisibilityPolicy, type LayerVisibilityContext } from "../lay
  */
 export function resolveWorkingView(
   project: Project,
-  binding: WorkingPlanIdentity = projectScaleContext(project).view,
+  binding: WorkingPlanIdentity = defaultWorkingPlan(project),
   visibilityOverride?: LayerVisibilityContext,
 ) {
-  viewScaleKey(binding);
-  if (
-    binding.kind !== "working-plan" ||
-    binding.projectId !== project.id ||
-    binding.storeyId !== project.storey.id
-  )
-    throw new Error("Die Arbeitsansicht gehört nicht zu diesem Projekt oder Geschoss.");
-  const scale = projectScaleContext(project);
+  const scale = projectScaleContext(project, binding);
+  const context = resolveViewStorey(project, binding);
   return resolvedContext(
     project,
+    context,
     binding,
     scale,
     visibilityOverride ?? {
@@ -38,15 +32,12 @@ export function resolveWorkingView(
 }
 
 export function resolveDocumentView(project: Project, binding: DocumentIdentity) {
-  viewScaleKey(binding);
-  if (binding.kind !== "drawing-document" || binding.projectId !== project.id)
-    throw new Error("Fremder Abbildkontext.");
-  const document = drawingDocument(project, binding.documentId);
-  const source = project.modelViews?.find((v) => v.id === document.modelViewId);
-  if (!source || source.kind !== "floor-plan" || source.storeyId !== project.storey.id)
-    throw new Error("Die Modellansicht des Abbilds fehlt.");
+  if (binding.kind !== "drawing-document") throw new Error("Ungültiger Abbildkontext.");
+  const context = resolveViewStorey(project, binding);
+  const document = context.document!;
   return resolvedContext(
     project,
+    context,
     binding,
     { view: binding, denominator: document.denominator },
     {
@@ -57,6 +48,7 @@ export function resolveDocumentView(project: Project, binding: DocumentIdentity)
 }
 function resolvedContext<T extends ViewIdentity>(
   project: Project,
+  context: ReturnType<typeof resolveViewStorey>,
   binding: T,
   scale: ScaleContext,
   filter: LayerVisibilityContext,
@@ -66,9 +58,8 @@ function resolvedContext<T extends ViewIdentity>(
     binding: Object.freeze({ ...binding }),
     scale: Object.freeze({ ...scale, view: Object.freeze({ ...scale.view }) }),
     visibility,
-    isCurrent(current: Project) {
-      return current === project;
-    },
+    storey: context.storey,
+    isCurrent: context.isCurrent,
   });
 }
 export type WorkingViewContext =

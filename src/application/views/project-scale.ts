@@ -1,19 +1,22 @@
+import { defaultWorkingPlan, resolveViewStorey } from "../storeys/context.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import {
   workingPlanScale,
   positiveFinite,
-  viewScaleKey,
   type WorkingPlanIdentity,
   type ScaleContext,
 } from "../../domain/views/scale.ts";
 
 export function projectScaleContext(
   project: Project,
+  view: WorkingPlanIdentity = defaultWorkingPlan(project),
 ): ScaleContext & { view: WorkingPlanIdentity } {
+  if (view.kind !== "working-plan") throw new Error("Ungültige Arbeitsansicht.");
+  const { storey } = resolveViewStorey(project, view);
   return workingPlanScale(
     project.id,
-    project.storey.id,
-    project.workingViews?.find((view) => view.storeyId === project.storey.id)?.denominator,
+    storey.id,
+    project.workingViews?.find((view) => view.storeyId === storey.id)?.denominator,
   );
 }
 
@@ -23,11 +26,9 @@ export function changeProjectScale(
   view: WorkingPlanIdentity,
   denominator: number,
 ): Project {
-  viewScaleKey(view);
-  if (view.projectId !== project.id || view.storeyId !== project.storey.id)
-    throw new Error("Die Arbeitsansicht wurde geÃ¤ndert. MaÃŸstab erneut wÃ¤hlen.");
+  const current = projectScaleContext(project, view);
   positiveFinite(denominator);
-  if (projectScaleContext(project).denominator === denominator) return project;
+  if (current.denominator === denominator) return project;
   return validateProject({
     ...project,
     workingViews: [{ kind: "working-plan", storeyId: view.storeyId, denominator }],

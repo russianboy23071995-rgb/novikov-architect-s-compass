@@ -10963,3 +10963,18 @@ oder pausiert. Farbe zeigt Aktivierung, nicht garantierte letzte Speicherung.
 Snapshotstatus bleibt für Screenreader und das per Klick erreichbare Recoveryfenster
 verfügbar; vorhandener title bleibt, kein neuer Hoverdialog. Keine Speicherlogik,
 Aktivierungsregel oder Modelldatei geändert. Browser: aus/rot und an/grün geprüft.
+
+### R26-03 / N21–N22 · Gemeinsame Geschossauflösung (13.10.2026)
+PR301 und PR302 nach ausdrücklicher Nutzerfreigabe und erfolgreicher GitHub-Prüfung
+mit Merge-Commits in main übernommen. Folgeauftrag basiert auf main e186963.
+Implementiert: application/storeys/context.ts löst Arbeitsansicht oder Abbild über
+Projekt-, Geschoss-, Dokument- und ModelView-ID gegen denselben Snapshot auf.
+Kein stiller Fallback bei fremden/fehlenden IDs; bestehendes Geschoss wird referenziert,
+nicht kopiert. Der explizite Einzelgeschoss-Default liegt zentral in defaultWorkingPlan.
+working-context.ts und project-scale.ts nutzen die Abfrage; auch No-op-Maßstabsaktionen
+prüfen den Zielkontext. Kontext enthält das aufgelöste Geschoss und Snapshot-Gültigkeit.
+Maßstab, unabhängige Abbildsichtbarkeit, bestehende Overrides und History bleiben erhalten.
+Keine Formatänderung, noch Schema21/ein Geschoss; keine Höhenentscheidung vorweggenommen.
+27 gezielte Ansichts-/Abbild-/Maßstabstests bestanden einschließlich Fremdkontext,
+gelöschter Quelle, ungültiger Geschosszuordnung, unabhängiger Sichtbarkeit und No-op.
+TypeScript, fokussiertes ESLint und Produktionsbuild bestanden. Keine UI-Änderung.
