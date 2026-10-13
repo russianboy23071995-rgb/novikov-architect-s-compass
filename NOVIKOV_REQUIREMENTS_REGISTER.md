@@ -11123,3 +11123,22 @@ keine Konsolenfehler. Ansicht des Fensters visuell geprüft.
 Grenze: Die storeys-Sammlung, weitere Geschosse und 3D-/IFC-Offsets sind noch nicht
 implementiert. Neue Schema22-Dateien benötigen diese oder neuere Version; alte Dateien
 bleiben lesbar. Der nächste Auftrag führt den bestehenden EG/OG-Piloten weiter.
+
+### R26-03 / N21–N22 · Bearbeitbare Rohdecken-Skizze (13.10.2026)
+Nutzer zieht die schematische Schnittdarstellung in den aktuellen Settings-Schritt vor.
+BuildingHeightSection zeigt zwei Rohdecken mit Höhenkoten an deren Oberkanten,
+EG ausdrücklich 0,00 m und eine vertikale Geschosshöhenbemaßung. Tab heißt
+„Allgemeine Gebäudestruktur“. Obere Höhenkote und Geschosshöhe sind direkt editierbar,
+Einheit m sichtbar. EG bleibt gemäß bestätigtem Datum fest. Beide Felder bearbeiten
+im bestehenden Ein-Geschoss-Kontext denselben Höhenwert (obere Kote minus EG=0),
+über die vorhandene Application-Aktion, keine zweite Modellgröße oder History.
+
+Die Skizze ist schematisch, keine neue Decke und kein bereits angelegtes OG.
+Bezugspunkt derzeit OK Rohdecke; spätere Umschaltung auf OK Fertigfußboden als Wunsch
+beibehalten, benötigt expliziten Bodenaufbau-/Bezugsvertrag und ist noch nicht aktiv.
+Dateiformat/Domain unverändert gegenüber PR306. Keine Höhenfunktion pro Feld dupliziert.
+
+Nachweis: 13 bestehende Höhen-/Applicationtests, TypeScript, fokussiertes Lint und
+Produktionsbuild bestanden. Browser: obere Kote 3,60 aktualisiert Geschosshöhe;
+Geschosshöhe 3,30 aktualisiert obere Kote; Undo zweimal stellt Ausgangswert 3,00
+wieder her. Zentrierte, nichtmodale Skizze visuell geprüft; keine Konsolenfehler.
