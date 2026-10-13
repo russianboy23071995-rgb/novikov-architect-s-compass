@@ -541,3 +541,16 @@ Kote 4,00 ergibt Höhe 3,50; Undo stellt 3,00 wieder her.
 Der Bezug beschreibt die Höhenkoten; lokale Bauteilgeometrie bleibt beim EG-Ursprung.
 Mehrgeschossdarstellung und gemeinsame 3D-/IFC-Höhenanbindung bleiben der nächste
 begrenzte EG/OG-Pilot aus §9. Kein weiterer Parallelauftrag.
+
+### Nutzerergänzung / Status 13.10.2026 – Mitwachsende Gebäudeskizze
+Skizze auf wiederholbare, über stabile IDs gebundene Geschossabschnitte umgestellt.
+Eingaben bleiben lesbar; lange Listen nutzen den vorhandenen Settings-Scrollbereich.
+Keine zweite Geschossverwaltung in React. Derzeit weiterhin nur das bestehende EG
+angebunden. Anlage-Buttons sind noch nicht implementiert. Nutzer fordert am jeweiligen
+Geschoss ausdrücklich „Geschoss darüber“ UND „Geschoss darunter“ in diesen Settings.
+Dies erweitert den aktiven Auftrag §9 um beide Einfügerichtungen in der Skizze;
+der ältere Ausschluss der Keller-UI gilt dafür nicht mehr. Der nächste Auftrag ist
+weiterhin die produktive Geschosssammlung mit gemeinsamen Aktionen, UI-Anlage,
+Bearbeitung, History und konsistenter 3D-/IFC-Auflösung. Keine erneute Skizzenplanung.
+15 Höhen-/Migration-/Historytests, TypeScript, fokussiertes Lint und Build bestanden;
+Einzelgeschossdarstellung im Browser geprüft. Mehrgeschoss-Abnahme bleibt offen.

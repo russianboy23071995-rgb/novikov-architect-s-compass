@@ -11157,3 +11157,19 @@ Höhenbezug ist keine geodätische Verortung. Die Mehrgeschoss-/3D-/IFC-Anbindun
 gehört weiterhin zum offenen EG/OG-Piloten. Skizze schwarz ohne linke Maßkette.
 Nachweis: 938 Tests, beide Typechecks, fokussiertes Lint, Build; Browserrechnung
 0,50 + 3,00 = 3,50, Rückrechnung über obere Kote und Undo geprüft.
+
+### R26-03 / N21–N22 · Skizze wächst mit den Geschossen (13.10.2026)
+Nutzer fordert die wiederverwendbare Darstellung aller Geschosse und direkt in
+Gebäudeeinstellungen „Geschoss darüber“ / „Geschoss darunter“ je Bezugsgeschoss.
+Beide Richtungen gehören damit in den nächsten produktiven Anlageauftrag; die
+historische Beschränkung auf ein oberstes OG ist insoweit überholt. Die vorhandene
+Domainfunktion insertStorey und die bestätigten kumulierten Höhenregeln bleiben.
+Umgesetzt: BuildingHeightSection nimmt eine geordnete Liste stabil identifizierter
+Abschnitte entgegen, rendert oben nach unten, erhält lesbare Felder und Scrollbarkeit.
+BuildingSettings bindet weiterhin nur das bestehende Projektgeschoss an. Kein neues
+persistiertes Geschoss, keine aktiven Anlagebuttons und keine Mehrgeschoss-3D-Funktion
+behauptet. Die kanonische storeys-Migration und gemeinsame Application-Anlage müssen
+als nächster zusammenhängender Schritt folgen; keine isolierte UI-Geschosskopie.
+15 bestehende Höhen-/Migration-/Undo-Tests, TypeScript, Lint und Build bestanden;
+Browserprüfung der bestehenden Eingaben. Mehrgeschossdarstellung noch nicht vertikal
+abgenommen. Nächster Auftrag bleibt die reale Sammlung mit Anlage/Bearbeitung/Export.
