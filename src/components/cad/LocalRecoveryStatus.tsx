@@ -1,3 +1,4 @@
+import { ShieldCheck, ShieldOff } from "lucide-react";
 import type { AutosaveState } from "@/application/project-files/autosave";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
@@ -76,15 +77,25 @@ export function LocalRecoveryStatus({
       : status.kind === "unavailable"
         ? `${status.message} `
         : "";
+  const active = autosave.enabled && !autosave.error;
+  const automation = active
+    ? "Autosicherung aktiv"
+    : autosave.enabled
+      ? "Autosicherung pausiert"
+      : "Autosicherung ausgeschaltet";
+  const Icon = active ? ShieldCheck : ShieldOff;
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`Lokaler Sicherungsstatus: ${text}`}
+      aria-label={`${automation}. ${text}`}
       title={`${autosave.enabled ? "Autosicherung an. " : "Autosicherung aus. "}${detail}Nur lokale Wiederherstellung in diesem Browser, kein externes Backup. Klicken öffnet die Wiederherstellung.`}
-      className="max-w-56 truncate rounded px-2 text-[11px] text-muted-foreground hover:bg-secondary/60"
+      className={`flex size-6 shrink-0 items-center justify-center rounded hover:bg-secondary/60 ${active ? "text-emerald-600" : "text-red-600"}`}
     >
-      <span role="status">{text}</span>
+      <Icon className="size-4" aria-hidden="true" />
+      <span className="sr-only" role="status">
+        {automation}. {text}
+      </span>
     </button>
   );
 }

@@ -10873,3 +10873,93 @@ keine implizite Höhenbindung; Altprojektnamen werden nicht still ersetzt.
 Abnahme des künftigen Piloten: EG mit Rohfußboden-Basis, ein darüber und ein darunter
 angelegtes Geschoss, unterschiedliche Höhen, freie Namen, stabile Zuordnung,
 Undo/Redo und Dateirundlauf; 2D/3D/IFC müssen dieselben Bezugshöhen verwenden.
+
+### R26-03 / N21–N22 · Höhen- und Migrationsvertrag, Entwurf 13.10.2026
+Status: Codebefund und technische Integrationsgrenzen geprüft; keine Mehrgeschoss-
+oder Höhenimplementierung in diesem Auftrag. Basis: offener PR301, main e08a783.
+Die bestätigten Produktregeln stehen im unmittelbar vorhergehenden Nutzervertrag.
+
+#### Bestand und Umstellungsstellen
+| Zuständigkeit | Bestehender Pfad / Befund | Erforderliche Grenze |
+| --- | --- | --- |
+| Domain / Format | domain/project/schema.ts: Schema21, einzelnes storey, keine Bezugshöhe; workingViews auf max.1 begrenzt | Geschoss-IDs und Eigentümerschaft zentral validieren, Arbeitsansichten je Geschoss auflösen |
+| Ansichten | application/views/working-context.ts, project-scale.ts: ModelView hat storeyId, Auflösung vergleicht mit project.storey.id | Ansicht liefert expliziten Geschosskontext; Abbild kopiert keine Bauteile |
+| Modellaktionen | lib/bim/model.ts, direct-edit.ts; application/drawing, walls, hatches, references, tools/pickup | Aktion bindet Projekt-/Geschoss-/Element-IDs und Ausgangsrevision; kein stiller aktiver-Geschoss-Fallback |
+| Auswahl / Fang | application/selection, application/snapping/project-references.ts, application/layers | Nur im Ansichtskontext sichtbare und zulässige Quellen; Wechsel invalidiert laufende Interaktion und Referenzen |
+| Geometrie | domain/project/geometry-scope.ts, domain/elements/wall, lib/bim/geometry.ts | Bestehende geschosslokale Geometriesichten wiederverwenden, kein fake Project mit ausgetauschtem storey |
+| Anzeige | BimPlan, CadViewport, bim-view, rendering/viewport/* | Grundriss lokal XY; 3D erhält abgeleitetes Z und stabile Eigentümer-IDs; Kamera-/Pickingtransformation konsistent |
+| UI | ProjectNavigator, BimInspector, CadWorkspace, demand-menu, CornerPreviewDialog | Navigator/Settings rufen Application auf; Workspace koordiniert, besitzt keine Höhenformeln |
+| History | lib/bim/history.ts, domain/project/model-equality.ts, direct-edit/controller.ts | Höhen und Geschossanlage Modelländerungen; Ansichtssettings außerhalb Modell-Undo weiterführen, gelöschte IDs bereinigen |
+| Persistenz / Austausch | interop/project-file/load.ts, recovery-codec.ts; interop/ifc/writer.ts | Eine Migration für Datei und Recovery; IFC aktuell ein Geschoss mit Z=0, künftig je Geschoss Placement/Containment |
+| Befehle | lib/bim/commands.ts, application/commands/selection-command.ts | Gemeinsame geprüfte Aktionen; stabiler Zielkontext einschließlich Geschoss, keine zweite AI-Logik |
+
+Reproduzierbare Inventur: rg -l 'project\.storey' src --glob '!*.test.ts'. Zusätzlich
+Project['storey'], Geometrie-Scopes und Z=0-Annahmen prüfen: reine Textsuche ist kein
+Vollständigkeitsnachweis. Globale Assets, Ebenen und Bibliotheken nicht je Geschoss
+kopieren. Fenster behalten genau eine Hostwand im selben Geschoss. Anschlüsse über
+verschiedene Geschosse werden im Piloten abgewiesen.
+
+#### Verbindliche technische Grenzen
+- Meter und Z nach oben; Basisdatum ist OK Rohfußboden EG. Geodätischer Bezug bleibt
+  offen. Keine Gleichsetzung mit Fertigfußboden oder Ableitung aus Wandhöhe.
+- Namen, Reihenfolge und Höhendatum sind keine Identität. Geschoss-/Bauteil-IDs
+  bleiben stabil beim Umbenennen, Einfügen, Sortieren und Export.
+- Ein autoritatives Modell; Grundrisse und Abbilder sind Referenzen mit eigenen
+  Maßstäben/Sichtbarkeiten. Neue Linien/Schraffuren bleiben gemeinsame Geschossdaten.
+- Feste Wandhöhe bleibt fest. Höhenbindung ist eine explizite Alternative mit
+  unterem/oberem Bezug und Offsets; abgeleitete Höhe nicht nochmals editierbar speichern.
+  Änderung prüft betroffene Wände, Anschlüsse und Öffnungen atomar, ein Undo-Schritt.
+- Ein Geschosswechsel ist Ansichtskontext, keine Elementverschiebung. Offene Vorschau,
+  Auswahl und Sprachziel dürfen nicht still auf das andere Geschoss übertragen werden.
+- IFC-Placement und 3D-Z stammen aus derselben Domain-Abfrage; Fensterbrüstung bleibt
+  hostrelativ. Keine doppelten Höhenadditionen in Wand- und Fensterplacement.
+
+#### Empfohlener Zielentwurf (noch keine implementierte Formatentscheidung)
+Project.storeys als Sammlung mit genau einem Eigentümercontainer je Bauteil;
+Building-Datum verweist auf groundStoreyId. Geschoss besitzt name und Rohfußboden-
+Bezug; aktive Geschosswahl gehört zum Ansichtskontext. Lookup-Index je unveränderlichem
+Snapshot ableiten, nicht jeden Mausframe neu suchen. Keine parallele dauerhafte
+project.storey-Kompatibilitätskopie und kein Komplettumbau ohne vertikalen Nachweis.
+
+Höhenvorschlag: Geschosshöhe als Abstand zweier Rohfußboden-Oberkanten. Absolute
+Geschosselevation aus EG-Datum und bestätigter Folge-/Abstandsregel ableiten, nicht
+Elevation und Abstand unabhängig editierbar speichern. Am obersten Geschoss braucht
+es einen expliziten oberen Bezug, auch ohne weiteres Geschoss. Noch offen:
+Höhenänderungen verschieben Nachbargeschosse oder erhalten absolute Höhen; Einfügen
+zwischen Geschossen; Standardhöhe; Verhalten fester/geometrisch gebundener Bauteile
+bei Datumänderung. Diese Produktregeln vor entsprechenden Mutationsaktionen klären.
+
+#### Migration und Abnahme
+- Strikte, versionierte Migration in load.ts; Recovery durch denselben Pfad nach
+  Header-/Payloadprüfung. Vorwärts unbekannte Versionen verständlich ablehnen.
+- Alle alten IDs, Namen, XY-Koordinaten, festen Wandhöhen, Fensterpositionen, Ebenen,
+  Muster, Assets, Abbilder und Maßstäbe erhalten. Bisheriges Geschoss wird EG-
+  Bezugsgeschoss bei Z=0, sein Name wird nicht automatisch „Erdgeschoss“ überschrieben.
+- Altdateien enthalten keine Geschosshöhe: keine aus 2,80-m-Wänden erfundene Höhe.
+  Beim ersten Hinzufügen eines Geschosses expliziten Abstand abfragen; Formatvertrag
+  muss unbekannte Höhe bis dahin ausdrücken können. Kein stilles Default als Bestand.
+- Migration erzeugt keine zweite Bauteilkopie, verändert keine Dateien am Datenträger
+  ohne Speichern und startet kein Autosave ungefragt. Vorherige Snapshotversion bleibt
+  unabhängig als Recovery-Vorgänger; History wird wie bisher nicht importiert.
+- Zweigeschoss-Abnahme nach bestätigten Höhenregeln: EG/OG mit Wand und Fenster,
+  verschiedene feste Wandhöhen; Geschosswechsel, Bearbeiten, Undo/Redo, Abbildbindung,
+  JSON/Recovery und IFC. Gleiche Z-Werte in Domain, 3D, Picking und IFC. Hinzufügen
+  eines UG separat abnehmen; doppelte IDs, fremde Hosts, ungültige Höhen und stale
+  Kontexte blockieren. Messungen mit vielen Bauteilen je Geschoss ergänzen.
+
+#### Nächster begrenzter Implementierungspilot
+Geschosskontext zentral auflösen, noch im bestehenden Schema21: gemeinsame typisierte
+Application-Query für Projekt-/Geschoss-/Arbeitsansicht- und Abbildkontext. Zunächst
+working-context.ts und project-scale.ts anbinden, ohne Modelle/Renderer umzubauen.
+Tests für gültiges Geschoss, falsche Projekt-/Geschoss-ID, Abbildquelle, Maßstab und
+Sichtbarkeit; gleiche Ergebnisse wie bisher. Kein Höhenproduktentscheid notwendig.
+Dieser wiederverwendbare Einstieg entfernt den ersten impliziten Ein-Geschoss-Zugriff,
+bevor die Sammlung und Höhenregeln in einem späteren vertikalen Pilot umgestellt werden.
+
+### R26-01 · Sichtbarer Autosicherungszustand (13.10.2026)
+LocalRecoveryStatus ersetzt „Model coordinates“ ganz links in StatusBar. Grünes
+Schild mit Haken bei enabled ohne Fehler, rotes durchgestrichenes Schild bei aus
+oder pausiert. Farbe zeigt Aktivierung, nicht garantierte letzte Speicherung.
+Snapshotstatus bleibt für Screenreader und das per Klick erreichbare Recoveryfenster
+verfügbar; vorhandener title bleibt, kein neuer Hoverdialog. Keine Speicherlogik,
+Aktivierungsregel oder Modelldatei geändert. Browser: aus/rot und an/grün geprüft.

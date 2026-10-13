@@ -39,10 +39,7 @@ export function StatusBar({
     );
   return (
     <footer className="glass-panel z-40 flex h-7 shrink-0 items-center gap-1 overflow-hidden rounded-md px-2">
-      <div className="hidden min-w-[265px] items-center gap-2 font-mono text-[11px] text-muted-foreground sm:flex">
-        <CrosshairDot />
-        <span>Model coordinates · metres</span>
-      </div>
+      {recoveryStatus}
       <div className="h-3 w-px bg-border" />
       <span className="px-1 text-[11px] text-muted-foreground">m</span>
       <div className="h-3 w-px bg-border" />
@@ -57,7 +54,6 @@ export function StatusBar({
       <Button variant="ghost" className={toggleClass(ortho)} onClick={onOrtho}>
         <MoveHorizontal /> Ortho
       </Button>
-      {recoveryStatus}
       <div className="ml-auto flex items-center gap-3 whitespace-nowrap text-[11px] text-muted-foreground">
         <span className="hidden items-center gap-1 sm:flex">
           <MousePointer2 className="size-3" />
@@ -67,13 +63,5 @@ export function StatusBar({
         <CircleDot className="size-3 text-status-ok" />
       </div>
     </footer>
-  );
-}
-function CrosshairDot() {
-  return (
-    <span className="relative size-3">
-      <span className="absolute left-1.5 top-0 h-3 w-px bg-muted-foreground" />
-      <span className="absolute left-0 top-1.5 h-px w-3 bg-muted-foreground" />
-    </span>
   );
 }
