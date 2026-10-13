@@ -530,3 +530,14 @@ EG-Kote 0,00 m, bearbeitbare obere Kote und Geschosshöhe, Tab „Allgemeine
 Gebäudestruktur“. Bestehenden Modelldatenfluss wiederverwendet; keine zweite
 Geschossebene/Decke erzeugt. 13 gezielte Tests, TypeScript, Lint, Build und beidseitige
 Eingabe-/Undo-Browserprüfung bestanden. Nächster aktiver Auftrag bleibt §9.
+
+### Status 13.10.2026 – Bearbeitbare EG-Kote
+Nutzerpräzisierung umgesetzt: obere Kote = OK EG-Rohdecke + Geschosshöhe.
+Schema23 speichert groundDatum (Altdateien: 0 m); gemeinsame validierte Aktion
+mit Modell-Undo und Datei-/Recoverymigration. Änderung des Bezugs erhält die
+Geschosshöhe. Skizze schwarz, linke Maßkette entfernt. 938 Tests, beide Typechecks,
+fokussiertes Lint und Build bestanden. Browser: 0,50 + 3,00 = 3,50 m; obere
+Kote 4,00 ergibt Höhe 3,50; Undo stellt 3,00 wieder her.
+Der Bezug beschreibt die Höhenkoten; lokale Bauteilgeometrie bleibt beim EG-Ursprung.
+Mehrgeschossdarstellung und gemeinsame 3D-/IFC-Höhenanbindung bleiben der nächste
+begrenzte EG/OG-Pilot aus §9. Kein weiterer Parallelauftrag.

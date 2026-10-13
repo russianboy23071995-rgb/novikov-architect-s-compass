@@ -2,9 +2,11 @@ import type { ReactNode } from "react";
 
 /** Schematic reference diagram, not a second building model or a scaled section. */
 export function BuildingHeightSection({
+  groundInput,
   elevationInput,
   heightInput,
 }: {
+  groundInput: ReactNode;
   elevationInput: ReactNode;
   heightInput: ReactNode;
 }) {
@@ -18,14 +20,13 @@ export function BuildingHeightSection({
           aria-hidden="true"
         >
           {/* Both elevation markers terminate at the upper slab edge. */}
-          <g className="fill-muted stroke-muted-foreground" strokeWidth="1.3">
+          <g fill="black" stroke="black" strokeWidth="1.3">
             <path d="M58 95 H302 V112 H58 Z M58 260 H302 V277 H58 Z" />
             <path d="M72 112 H85 V260 H72 Z M275 112 H288 V260 H275 Z" />
           </g>
-          <g fill="none" className="stroke-primary" strokeWidth="1.25">
+          <g fill="none" stroke="black" strokeWidth="1.25">
             <path d="M300 95 H490 M300 260 H490" />
             <path d="M322 84 L331 95 L340 84 Z M322 249 L331 260 L340 249 Z" />
-            <path d="M45 95 V260 M37 103 L53 87 M37 268 L53 252 M35 95 H58 M35 260 H58" />
           </g>
         </svg>
         <div className="absolute left-[65%] right-3 top-[27px]">
@@ -41,17 +42,17 @@ export function BuildingHeightSection({
           </label>
         </div>
         <div className="absolute left-[65%] right-3 top-[207px]">
-          <span className="block text-[11px] text-muted-foreground">EG · OK Rohdecke</span>
-          <output aria-label="EG Bezugshöhe" className="mt-1 block font-mono text-sm">
-            0,00 m
-          </output>
+          <label className="block space-y-1">
+            <span className="block text-[11px] text-muted-foreground">EG · OK Rohdecke</span>
+            {groundInput}
+          </label>
         </div>
         <span className="absolute bottom-4 left-4 text-[11px] text-muted-foreground">
           Bezug: Oberkante Rohdecke
         </span>
       </div>
       <figcaption className="text-muted-foreground">
-        Schematische Darstellung. Geschosshöhe = obere Höhenkote − EG-Bezug (0,00 m).
+        Schematische Darstellung. Geschosshöhe = obere Höhenkote − EG-Bezug.
       </figcaption>
     </figure>
   );

@@ -11142,3 +11142,18 @@ Nachweis: 13 bestehende Höhen-/Applicationtests, TypeScript, fokussiertes Lint 
 Produktionsbuild bestanden. Browser: obere Kote 3,60 aktualisiert Geschosshöhe;
 Geschosshöhe 3,30 aktualisiert obere Kote; Undo zweimal stellt Ausgangswert 3,00
 wieder her. Zentrierte, nichtmodale Skizze visuell geprüft; keine Konsolenfehler.
+
+### R26-03 / N21–N22 · EG-Kote bearbeiten (13.10.2026)
+Neuere Nutzerentscheidung ersetzt die feste numerische EG-Kote der vorigen Skizze:
+OK EG-Rohdecke ist editierbar, Standard 0,00 m. Obere Kote ergibt sich aus
+EG-Kote plus Geschosshöhe. Höhe ändern erhält EG; obere Kote ändern berechnet
+die Höhe zurück; EG ändern erhält die Höhe. Keine zweite gespeicherte obere Kote.
+Schema23 groundDatum ist eine endliche Meterzahl. Version22 wird strikt mit 0
+migriert; ältere Versionen laufen durch dieselbe Migrationskette, auch Recovery.
+Application setGroundDatum prüft Snapshot/Projekt-/Geschoss-ID, gültige Zahlen
+und auflösbare Höhen. Genau ein Modell-Undo-Schritt; keine separate UI-Modelllogik.
+Derzeit bleibt lokale Geometrie EG-relativ (Z=0), einschließlich IFC. Der neue
+Höhenbezug ist keine geodätische Verortung. Die Mehrgeschoss-/3D-/IFC-Anbindung
+gehört weiterhin zum offenen EG/OG-Piloten. Skizze schwarz ohne linke Maßkette.
+Nachweis: 938 Tests, beide Typechecks, fokussiertes Lint, Build; Browserrechnung
+0,50 + 3,00 = 3,50, Rückrechnung über obere Kote und Undo geprüft.

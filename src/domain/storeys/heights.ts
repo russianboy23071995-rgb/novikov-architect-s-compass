@@ -37,10 +37,12 @@ function step(base: number | null, height: number | null, direction: 1 | -1) {
 export function resolveStoreyLevels(
   storeys: readonly StoreyHeight[],
   groundStoreyId: string,
+  groundDatum = 0,
 ): readonly StoreyLevel[] {
+  if (!Number.isFinite(groundDatum)) throw new Error("Ungültiger EG-Höhenbezug.");
   const ground = validateSequence(storeys, groundStoreyId);
   const elevations: (number | null)[] = Array(storeys.length).fill(null);
-  elevations[ground] = 0;
+  elevations[ground] = groundDatum;
   for (let i = ground + 1; i < storeys.length; i++)
     elevations[i] = step(elevations[i - 1] ?? null, storeys[i - 1]!.height, 1);
   for (let i = ground - 1; i >= 0; i--)
