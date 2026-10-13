@@ -1558,6 +1558,13 @@ export function CadWorkspace({
                 <ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" />
                 <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
                   <ProjectNavigator
+                    onStoreyHeight={(base, height) =>
+                      dispatchEditing({
+                        type: "set-storey-height",
+                        base,
+                        request: { projectId: base.id, storeyId: base.storey.id, height },
+                      })
+                    }
                     onRenameStorey={(base, name) =>
                       dispatchEditing({
                         type: "rename-storey",

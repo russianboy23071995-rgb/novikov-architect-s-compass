@@ -11094,3 +11094,32 @@ Grenze: Die Funktionen sind noch nicht an Schema21, Navigator, 3D oder IFC angeb
 Der vollständige EG/OG-Pilot bleibt offen. Kein Benutzer kann damit bereits ein
 zweites Geschoss zeichnen. PR304 bleibt offen; dieser Implementierungsschritt baut
 auf dessen dokumentierten und im Chat bestätigten Höhenregeln auf.
+
+### R26-03 / N21–N22 · Gespeicherte Geschosshöhe und Gebäudeeinstellungen (13.10.2026)
+PR304/305 nach ausdrücklicher Nutzerfreigabe und grüner CI zusammengeführt, Basis
+main 1f6baa5. Zweiter Teil des EG/OG-Piloten; weiterhin genau ein Geschoss.
+Schema22 ergänzt storey.height (positive Meter oder null = unbekannt). Strikte
+Schema21-Migration setzt null, erfindet keine Althöhen und erhält Namen/IDs/Geometrie.
+Datei und geprüfte Recovery nutzen denselben Migrationspfad. Historische Schemata
+bleiben strikt; Testfixtures entfernen nur Felder, die ihre alte Version nicht kennt.
+
+Gemeinsame Application-Aktion setStoreyHeight verwendet den Domain-Rechenkern,
+validiert Projekt-/Geschoss-/Snapshotkontext und läuft über das bestehende Modell-Undo.
+Höhe ist Metadatum, nicht Teil der geschosslokalen Geometriesicht. Feste Wandhöhen,
+Fenster und IFC-Geometrie bleiben im Einzelgeschoss unverändert. Noch keine obere
+Bauteilbindung oder zweite Geschosskopie.
+
+Navigatorwurzel heißt Gebäudestruktur. Doppelklick öffnet zentrierte verschiebbare,
+nichtmodale FloatingPanel-/SettingsSections-Hülle. Geschosshöhe wird mit Enter/Blur
+übernommen; Dezimalkomma, ungültige Werte, Escape und veraltete Entwürfe berücksichtigt.
+Kein neuer Übernehmen-Button. Geschossname bleibt separat per Navigator umbenennbar.
+
+Nachweis: 936 Tests einschließlich Schema21-Datei-/Recoverymigration, strikt ungültiger
+Altdaten, Höhenaktion, Undo/Redo, Geometrie-/IFC-Erhalt. Beide Typechecks, fokussiertes
+ESLint und Produktionsbuild bestanden. Browser: -2 abgewiesen, 3,20 übernommen,
+Undo auf unbekannt, Redo auf 3,2; Download enthält Schema22 und storey.height=3.2,
+keine Konsolenfehler. Ansicht des Fensters visuell geprüft.
+
+Grenze: Die storeys-Sammlung, weitere Geschosse und 3D-/IFC-Offsets sind noch nicht
+implementiert. Neue Schema22-Dateien benötigen diese oder neuere Version; alte Dateien
+bleiben lesbar. Der nächste Auftrag führt den bestehenden EG/OG-Piloten weiter.

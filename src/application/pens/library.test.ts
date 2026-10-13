@@ -120,7 +120,7 @@ test("strict schema 13 migration retains geometry and rejects future palette fie
   const p = createProject("p", "s");
   const old = { ...p, schemaVersion: 13 };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 21);
+  assert.equal(migrated.schemaVersion, 22);
   assert.deepEqual(migrated.storey, p.storey);
   assert.equal(migrated.penSet, undefined);
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, penSet: defaultPenSet })));

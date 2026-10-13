@@ -1,3 +1,4 @@
+import { BuildingSettings } from "./BuildingSettings";
 import { DocumentNavigator, type DocumentNavigation } from "./DocumentNavigator";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -93,6 +94,7 @@ function TreeItem({
 type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
   onRenameStorey: (base: Project, name: string) => void;
+  onStoreyHeight: (base: Project, height: number) => void;
 
   active: readonly string[];
   onSelect: (id: string, label: string, toggle?: boolean) => void;
@@ -105,8 +107,10 @@ function NavigatorContent({
   onClose,
   project,
   onRenameStorey,
+  onStoreyHeight,
   ...documents
 }: ProjectNavigatorProps) {
+  const [settings, setSettings] = useState(false);
   const [rename, setRename] = useState<{ base: Project; name: string } | null>(null);
   const [tab, setTab] = useState<"model" | "documents">("model");
   // The navigator represents project/storey structure, never individual geometry.
@@ -116,7 +120,7 @@ function NavigatorContent({
       [
         {
           id: project.id,
-          label: "BIM Project",
+          label: "Gebäudestruktur",
           kind: "group",
           children: [{ id: project.storey.id, label: project.storey.name, kind: "group" }],
         },
@@ -180,6 +184,7 @@ function NavigatorContent({
               active={active}
               onSelect={onSelect}
               onRename={(id) => {
+                if (id === project.id) setSettings(true);
                 if (id === project.storey.id)
                   setRename({ base: project, name: project.storey.name });
               }}
@@ -235,6 +240,13 @@ function NavigatorContent({
           <div className="h-full w-2/3 bg-primary/70" />
         </div>
       </div>
+      {settings && (
+        <BuildingSettings
+          project={project}
+          onClose={() => setSettings(false)}
+          onHeight={onStoreyHeight}
+        />
+      )}
     </aside>
   );
 }
@@ -259,6 +271,10 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onRenameStorey(...args),
     [],
   );
+  const onStoreyHeight = useCallback<ProjectNavigatorProps["onStoreyHeight"]>(
+    (...args) => latest.current.onStoreyHeight(...args),
+    [],
+  );
   const onOpenDocument = useCallback<ProjectNavigatorProps["onOpenDocument"]>(
     (id) => latest.current.onOpenDocument(id),
     [],
@@ -275,6 +291,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onDocumentAction={onDocumentAction}
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
+      onStoreyHeight={onStoreyHeight}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

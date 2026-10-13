@@ -1,3 +1,4 @@
+import { setStoreyHeight, type SetStoreyHeight } from "../storeys/actions.ts";
 import { renameStorey, type RenameStorey } from "../storeys/actions.ts";
 import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
 import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
@@ -51,6 +52,7 @@ export function supportsWallWorkplaneEdit(
 }
 
 type ModelEditingEvent =
+  | { type: "set-storey-height"; base: Project; request: SetStoreyHeight }
   | { type: "rename-storey"; base: Project; request: RenameStorey }
   | { type: "document"; base: Project; action: DocumentAction }
   | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
@@ -138,6 +140,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
     return state.session || state.error ? { ...state, session: null, error: "" } : state;
   try {
     switch (event.type) {
+      case "set-storey-height":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            setStoreyHeight(event.base, state.history.present, event.request),
+          ),
+          session: null,
+          error: "",
+        };
       case "rename-storey":
         return {
           ...state,
