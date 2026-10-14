@@ -1,3 +1,4 @@
+import { MovementAxisControls } from "./MovementAxisControls";
 import { selectWorkingStorey, workingStoreyForTarget } from "@/application/storeys/working-storey";
 import { projectElementCounts } from "@/application/storeys/context";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -64,7 +65,7 @@ import {
 } from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import { supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
+import { supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
@@ -487,13 +488,14 @@ export function CadWorkspace({
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
-    const solidMove = inSolid && selection.kind === "wall";
-    if (!inSolid && selection.kind === "wall" && action === "move") {
+    const solidMove =
+      inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
+    if (selection.kind === "wall" && action === "move") {
       const origin = pickedPoint.anchor ?? editAnchor(project, selection);
       cancelInteraction();
       try {
-        groupMove.begin(origin);
-        if (layout === "single") setMode("2D");
+        groupMove.begin(inSolid ? undefined : origin);
+        if (layout === "single" && !inSolid) setMode("2D");
         setModelError("");
       } catch (error) {
         setModelError(error instanceof Error ? error.message : "Bewegung nicht mï¿½glich.");
@@ -501,11 +503,15 @@ export function CadWorkspace({
       return;
     }
 
-    if (solidMove && !pickedPoint.anchor) {
+    if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
     }
-    if (solidMove && !supportsWallWorkplaneEdit(selection, action, pickedPoint.index)) {
+    if (
+      inSolid &&
+      selection.kind === "wall" &&
+      !supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index)
+    ) {
       showNotice("Zuerst einen sichtbaren Wandendpunkt oder eine untere Wandecke anklicken.");
       return;
     }
@@ -965,7 +971,6 @@ export function CadWorkspace({
                       try {
                         groupMove.begin();
                         setDemandOpen(false);
-                        setMode("2D");
                         setModelError("");
                       } catch (error) {
                         setModelError(
@@ -1272,7 +1277,7 @@ export function CadWorkspace({
               <p className="p-3 text-xs text-muted-foreground" role="status">
                 {selections.length} Elemente ausgewählt.{" "}
                 {mode === "3D"
-                  ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
+                  ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
                   : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
               </p>
             ) : (
@@ -1512,13 +1517,26 @@ export function CadWorkspace({
                       onActive={setActiveViewport}
                       onFullscreen={() => setFullscreen((value) => !value)}
                     />
+                    {(groupMove.adapter ||
+                      (editSession && ["move", "point"].includes(editSession.action))) &&
+                      mode === "3D" && (
+                        <MovementAxisControls
+                          project={project}
+                          targets={selections}
+                          onDirection={(angle) =>
+                            interaction.draft.change(angle, interaction.draft.length)
+                          }
+                        />
+                      )}
                     {groupMove.active && (
                       <p
                         role="status"
                         className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
                       >
                         {groupMove.pickingOrigin
-                          ? "Bewegungsursprung im Grundriss anklicken"
+                          ? mode === "3D"
+                            ? "Ursprung frei anklicken · sichtbare Wandecken aller Geschosse rasten ein"
+                            : "Bewegungsursprung im Grundriss anklicken"
                           : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
                       </p>
                     )}

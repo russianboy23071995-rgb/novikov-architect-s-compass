@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useMemo } from "react";
 import type { Project, Point } from "@/lib/bim/model";
@@ -23,6 +24,7 @@ export function useSolidInference(
   shift: boolean,
   visibility?: LayerVisibilityPolicy,
   gridSpacing: number | null = null,
+  workplaneHeight?: number,
 ) {
   const sessionKey = useMemo(
     () => ({ policy, project, visibility }),
@@ -42,8 +44,9 @@ export function useSolidInference(
         policy,
         movingWallId,
         visibility,
+        workplaneHeight,
       ),
-    [project, projection, enabled, resetKey, policy, movingWallId, visibility],
+    [project, projection, enabled, resetKey, policy, movingWallId, visibility, workplaneHeight],
   );
   const context = useMemo(() => ({ ...baseContext, sessionKey }), [baseContext, sessionKey]);
   const cursor = useMemo(() => {
@@ -83,6 +86,9 @@ export function useSolidInference(
     );
   };
   return {
+    origin: policy?.origin?.point,
+    originElevation: workplaneHeight ?? workingStoreyElevation(project),
+    workplaneHeight,
     plane,
     context,
     adapter,

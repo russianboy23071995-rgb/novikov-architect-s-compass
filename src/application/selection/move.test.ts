@@ -583,3 +583,71 @@ test("failed multi-storey preview and cancellation never publish a partial floor
   );
   assert.equal(command.result.storeys.find((s) => s.id === "og")!.walls[0]!.start.x, 2);
 });
+
+import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import {
+  selectionMoveSurfaces,
+  selectionMoveWindows,
+} from "../../rendering/viewport/selection-move-preview.ts";
+import { buildingWindowSelectionSurfaces } from "../../rendering/viewport/window-selection.ts";
+import {
+  selectionMovementAxes,
+  horizontalAxisDegrees,
+  WORLD_MOVEMENT_AXES,
+} from "../input/movement-axes.ts";
+import { precisionTarget } from "../input/precision.ts";
+test("prepared 3D multi-storey preview equals complete committed geometry including windows and detached neighbours", () => {
+  const p = multiFixture();
+  const targets = [
+    { kind: "wall" as const, id: "H" },
+    { kind: "wall" as const, id: "OG-W" },
+  ];
+  const session = beginSelectionMove(p, targets, origin);
+  const patch = previewSelectionGeometry(session, p, targets, target);
+  const next = previewSelectionMove(session, p, targets, target);
+  const faces = (
+    value: ReturnType<typeof buildBuildingSolid> | ReturnType<typeof selectionMoveSurfaces>,
+  ) => value.faces.map((f) => JSON.stringify(f)).sort();
+  assert.deepEqual(
+    faces(selectionMoveSurfaces(buildBuildingSolid(p), p, patch)),
+    faces(buildBuildingSolid(next)),
+  );
+  const windows = (v: ReturnType<typeof buildingWindowSelectionSurfaces>) =>
+    v.map((w) => JSON.stringify(w)).sort();
+  assert.deepEqual(
+    windows(
+      selectionMoveWindows(
+        buildingWindowSelectionSurfaces(p, () => true),
+        p,
+        patch,
+        () => true,
+      ),
+    ),
+    windows(buildingWindowSelectionSurfaces(next, () => true)),
+  );
+  assert.equal(patch.storeyPatches?.length, 2);
+});
+test("movement axis contract supports XYZ but horizontal adapter rejects Z and follows oblique walls", () => {
+  let p = multiFixture();
+  p = addWall(p, {
+    id: "diagonal",
+    start: { x: 10, y: 10 },
+    end: { x: 13, y: 14 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const targets = [{ kind: "wall" as const, id: "diagonal" }];
+  const axes = selectionMovementAxes(p, targets);
+  const axis = axes.find((a) => a.id === "diagonal")!;
+  assert.deepEqual(axis.direction, [0.6, 0.8, 0]);
+  const degrees = horizontalAxisDegrees(axis);
+  const point = precisionTarget({ x: 10, y: 10 }, null, String(degrees), "5").point;
+  assert.ok(Math.abs(point.x - 13) < 1e-10 && Math.abs(point.y - 14) < 1e-10);
+  assert.equal(horizontalAxisDegrees(WORLD_MOVEMENT_AXES[0]!), 0);
+  assert.equal(horizontalAxisDegrees(WORLD_MOVEMENT_AXES[1]!), 90);
+  assert.throws(() => horizontalAxisDegrees(WORLD_MOVEMENT_AXES[2]!), /Höhenaktion/);
+  const session = beginSelectionMove(p, targets, { x: 10, y: 10 });
+  assert.ok(session.snapping.origin.directions?.some((d) => d.x === 0.6 && d.y === 0.8));
+  const next = previewSelectionMove(session, p, targets, point);
+  assert.ok(Math.abs(storeyOf(next).walls.find((w) => w.id === "diagonal")!.start.x - 13) < 1e-10);
+});

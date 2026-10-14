@@ -1,3 +1,4 @@
+import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -19,11 +20,12 @@ export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
  * Overlapping openings are subtracted as a union, not counted twice.
  */
 export function buildSolid(input: Project): Solid {
-  return buildValidatedStoreySolid(validateProject(input));
+  const project = validateProject(input);
+  return buildPreviewSolid(project, workingStoreyElevation(project));
 }
 
-/** Internal builder: caller has already validated the complete project. */
-function buildValidatedStoreySolid(project: Project): Solid {
+/** Derived geometry from a validated project or a validated prepared preview scope. */
+export function buildPreviewSolid(project: ModelGeometry, elevation: number): Solid {
   const solid: Solid = {
     faces: [],
     volume: 0,
@@ -161,7 +163,6 @@ function buildValidatedStoreySolid(project: Project): Solid {
     solid.min = [0, 0, 0];
     solid.max = [1, 1, 1];
   }
-  const elevation = workingStoreyElevation(project);
   if (elevation !== 0) {
     solid.faces = solid.faces.map((f) => ({
       ...f,
@@ -189,7 +190,12 @@ export function buildBuildingSolid(input: Project): Solid {
   const project = validateProject(input);
   const parts = project.storeys
     .filter((s) => s.walls.length > 0)
-    .map((s) => buildValidatedStoreySolid({ ...project, workingStoreyId: s.id }));
+    .map((s) =>
+      buildPreviewSolid(
+        { storey: s, assets: project.assets },
+        workingStoreyElevation({ ...project, workingStoreyId: s.id }),
+      ),
+    );
   const result: Solid = {
     faces: parts.flatMap((p) => p.faces),
     volume: parts.reduce((sum, p) => sum + p.volume, 0),

@@ -1,3 +1,4 @@
+import { selectionMovementAxes } from "../input/movement-axes.ts";
 import { prepareSelectionTranslation as prepareTranslation } from "./storey-translation.ts";
 import { createPointPreview } from "../tools/point-preview.ts";
 import { type Project, type Point } from "../../domain/project/schema.ts";
@@ -71,6 +72,12 @@ export function beginSelectionMove(
       sources: (refs) =>
         refs.filter((r) => [r, ...(r.dependencies ?? [])].every((s) => !moving.has(s.entityId))),
     },
+  };
+  session.snapping.origin = {
+    ...session.snapping.origin,
+    directions: selectionMovementAxes(base, targets)
+      .filter((a) => a.direction[2] === 0)
+      .map((a) => ({ x: a.direction[0], y: a.direction[1] })),
   };
   preparations.set(session, {
     action: prepareTranslation(

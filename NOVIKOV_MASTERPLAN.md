@@ -457,13 +457,12 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: gemeinsame Gruppenbewegung direkt in 3D.**
-Die geprüfte geschossübergreifende Auswahl und atomare Translation weiterverwenden.
-Den vorhandenen ToolInteraction-Vertrag an die 3D-Arbeitsebene anbinden: echter
-sichtbarer Ursprung, vorbereitete Vorschau aller betroffenen Geschosse, gleicher
-Fang-/Shift-/Tab-Ablauf und ein Commit/Undo. Kein vollständiges Modellmaterialisieren
-auf dem Pointerpfad. Abnahme: EG/OG-Auswahl, Maus- und Zahleneingabe, Abbruch,
-Verdeckung, Undo/Redo und Vergleich mit dem bestehenden Grundriss-Aktionspfad.
+**Genau ein aktiver Fortsetzungsschritt: begrenzter Höhenvertrag für Z-Bewegung.**
+Vor einer Z-Mutation klären, wie Bauteilversatz, Geschosszuordnung, verbundene Wände
+und fenstergebundene Höhen zusammenwirken. Bestehende Geschosshöhenauflösung und
+XYZ-Achsenvertrag verwenden; keine automatische Geschossumsortierung erfinden.
+Zunächst Code-/Anforderungsabgleich und konkrete offene Nutzerentscheidungen,
+kein vorgezogener Schemaumbau. XY und schräge Elementachsen bleiben nutzbar.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -615,3 +614,94 @@ EG/OG mit Strg gewählt, On-Demand-Bewegung, Ursprung/Ziel im Grundriss, Datei b
 gleichen XY-Vektor in beiden Geschossen; ein Undo stellt beide Geschosscontainer exakt her.
 Grenze: Maus-Gruppenbewegung startet noch im Grundriss. Die direkte 3D-Vorschau/Bedienung
 ist der nächste einzelne Auftrag, kein bereits abgeschlossener Bestandteil dieses Piloten.
+
+### Status 14.10.2026 – Direkte XY-Gruppenbewegung in 3D
+PR313 mit erfolgreicher CI nach ausdrücklicher Freigabe nach main übernommen.
+Auswahl frei bewegen bleibt in 3D: sichtbarer Wandfußpunkt im Arbeitsgeschoss als
+Ursprung, sofortige Hilfsreferenz, gemeinsamer ToolInteraction-/Fang-/Shift-/Tab-Pfad.
+X/Y und Gegenrichtungen sowie tatsächliche Achsen ausgewählter Wände schreiben in
+ dieselbe Hilfseingabe. XYZ-Richtungsvertrag vorhanden; Z ist ausdrücklich gesperrt.
+Vorbereitete Geometriepatches je Geschoss liefern Wandkörper und Fensterflächen auf
+ihren unveränderten Höhen. Kein vollständiges Project-Materialisieren im Gruppen-
+Pointerpfad; ein Patch wird je Ziel für Körper und Fenster gemeinsam ausgewertet.
+Platzieren nutzt weiterhin vollständige Prüfung und genau einen Projekt-Undo.
+Nachweis: 953 Tests einschließlich Vergleich aller Vorschauflächen/Fenster mit dem
+vollständigen Commit-Pfad, gelöster T-Verbindung, Nachbarwänden und OG; schräge
+3:4-Wandachse ergibt präzise 5-m-Bewegung. Beide Typechecks, gezieltes Lint und Build.
+Browser: EG/OG gemeinsam in 3D, Ursprung, X +1 m per Canvas-Klick, Dateivergleich,
+ein Undo für beide Geschosse; Y=90° und Abbruch der Vorschau. Kein Z-/Perspektiv-
+oder Großprojekt-Performance-Nachweis. Aktive Fanggeometrie und Ursprung bleiben
+an die horizontale Arbeitsebene gebunden. Nächster Einzelauftrag siehe §9.
+
+### Ergänzung 14.10.2026 – Frei gewählter Bewegungsursprung in 3D
+Nutzerkorrektur zum offenen PR314: Nach Auswahl und On-Demand-Bewegungsaktion wird
+zuerst ein eigener Ursprung gewählt. Sichtbare reale Wandecken aller Geschosse,
+auch obere Ecken, werden bildschirmbezogen gefangen und mit einem Ring angezeigt.
+Der Klick fixiert die exakte Ecke; die horizontale Bewegungsebene läuft durch deren
+Z-Höhe. Freier Klick ohne Eckfang setzt einen Ursprung auf der Arbeitsgeschossebene.
+Die Bauteilhöhen/Geschosszuordnung bleiben unverändert; keine Z-Mutation.
+Gemeinsamer abgeleiteter Eckadapter nutzt Körperkonturen, Ebenenfilter und Tiefentest;
+die anschließende Bewegung verwendet weiterhin ToolInteraction, gemeinsame
+Hilfsreferenzen, Präzision und validierte Auswahltranslation. Fangschalter bleibt gültig.
+954 Tests bestanden; zusätzliche obere Ecke, Fangradius, Sichtbarkeit, Ebeneninverse
+und Ursprungsreferenz. Typechecks, gezieltes Lint und Produktionsbuild geprüft.
+Browser: obere OG-Ecke bei aktivem EG, beide Wände +1 m X; Projektdatei bestätigt
+identische XY-Translation und unveränderte Fensterparameter. Z-Höhenvertrag bleibt
+nächster Auftrag nach Abnahme dieser Bedienkorrektur.
+
+### Ergänzung 14.10.2026 – Sichtbare Bewegungsachsen am Ursprung
+Nach bestätigter Ursprungswahl zeigt die gemeinsame 3D-Fangvorschau X/Y als
+beschriftete Richtungspfeile. Z wird ausdrücklich nur zur Orientierung dargestellt;
+keine Höhenbewegung. Die Achsen stammen aus WORLD_MOVEMENT_AXES, werden mit der
+aktuellen Kamera am echten Ursprung projiziert und besitzen eine bildschirmbezogene
+Darstellungslänge. Kein zweiter Fang-/Shift-Algorithmus: bestehende Richtungssperre
+bleibt unverändert. Blickparallele Achsen ohne projizierbare Richtung entfallen.
+Typprüfung, gezieltes Lint, vorhandene Shift-Sperrprüfungen und sechs 3D-Fangtests,
+Produktionsbuild bestanden. Browser: Achsen am oberen OG-Ursprung; Shift-Klick nahe
+X ergibt in beiden Geschossen exakt gleichen X-Versatz bei unverändertem Y.
+PR314 enthält diese Bedienergänzung. Nächster Auftrag bleibt Z-Höhenvertrag nach Abnahme.
+
+### Ergänzung 14.10.2026 – Gemeinsame Bewegung auch für Einzelziele
+Nutzervertrag: Die 3D-Ursprungs-/Achsen-/Fangbedienung ist eine gemeinsame Fähigkeit
+für Bewegungen, unabhängig von der Anzahl ausgewählter Elemente. Einzelwand
+„Element frei bewegen“ verwendet jetzt denselben SelectionMove-Einstieg wie Gruppen:
+freie Ursprungswahl vor Beginn, sichtbare Ecken, temporäre Ursprungsebene, Achsen,
+ToolInteraction und vorbereitete Vorschau. Kein separater Einzelwand-Move-Pfad in 3D.
+Vorhandene gebundene Aktionen bleiben geometrisch gebunden: Punktbearbeitung startet
+am gewählten Punkt, X/Y/Achse folgen ihrer Richtung; Fenster bleibt an seiner Wand.
+Fenster entlang Wand läuft nun direkt in 3D über denselben Direct-Edit-Adapter mit
+Achsen/Fangvorschau auf Höhe der Fenstermitte; kein erzwungener Grundrisswechsel.
+Neue 3D-Elementadapter müssen diesen gemeinsamen Vertrag verwenden. 2D-Linien und
+Schraffuren bekommen dadurch keine künstliche 3D-Repräsentation; Z bleibt gesperrt.
+Browser: einzelne OG-Wand, freie obere Ursprungsecke, Achsen und Abbruch; einzelnes
+OG-Fenster in 3D verschoben, Position geändert bei unveränderten Maßen/Host.
+Zusätzlicher Test prüft Hostbindung, Begrenzung und genau einen Undo-Schritt des
+Fensteradapters. Nächster Auftrag bleibt der Z-Höhenvertrag nach Abnahme von PR314.
+
+Nachweis Einzelziele: 955 Tests vollständig bestanden, App-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich.
+
+### Ergänzung 14.10.2026 – Unabhängige 3D-Kameranavigation
+Gedrückte mittlere Maustaste verschiebt die Kamera in Bildschirmrichtungen;
+Strg/Cmd + mittlere Taste rotiert um die Mitte der ausgewählten sichtbaren Bauteile,
+ohne Auswahl um die aktuelle Ansichtsmitte. Drehpunkt wird pro Geste festgehalten;
+Navigation bestätigt keine laufende Bauteilbewegung. Scrollen zoomt weiterhin.
+Der 3D-Ansichtsrahmen bleibt bei Modelländerungen stabil. „Alles anzeigen“ in der
+unteren Leiste sowie Fit/Reset bauen ihn ausdrücklich aus den aktuellen Gebäude-
+grenzen neu auf. Kein Modell-Undo für Kamerabewegungen. Farbige X/Y/Z-Orientierung
+unten links folgt Kamera-Yaw/Pitch, unabhängig von Modellgröße, Zoom und Pan.
+Geometrischer Test bestätigt bildschirmfesten ausgewählten Pivot und Ansichtsmitte
+nach Pan/Orbit. Typecheck, gezieltes Lint, 12 3D-Bearbeitungs-/Kameratests und Build
+bestanden. Browser: Fit nach 500-%-Zoom und Achsenanzeige geprüft. Physische
+Mausrad-Drag-Kombination ist noch praktisch durch den Nutzer abzunehmen.
+Nächster Auftrag bleibt nach Bedienabnahme der Z-Höhenvertrag.
+
+### Ergänzung 14.10.2026 – Orientierung von unten und künftige 3D-Darstellung
+Beim Orbit unter die Nullebene (negative Kameraneigung der orthografischen Kamera)
+liegt die dekorative Z=0-Fläche mit 28 % Deckkraft über dem Modell; von oben bleibt
+sie mit 14 % hinter dem Modell. Kein Fangziel, keine Auswahl- oder Modelländerung.
+Nutzerwunsch für später: Ansicht → Canvas-Darstellung → 3D erhält gemeinsame
+optische Darstellungsoptionen und zoomunabhängige Elementkonturstärken in Pixeln.
+Die vorhandene Grundriss-Kontursteuerung bleibt getrennt. Umsetzung über gemeinsame
+Renderer-/Darstellungseinstellungen, ohne Bauteilkopien oder Modell-Undo; konkrete
+weitere Darstellungsmodi noch nicht festgelegt. Kontursteuerung 3D ist noch offen.
+Nachweis: Typecheck, gezieltes Lint und Produktionsbuild bestanden. Browser-Unteransicht mit grauer Überlagerung geprüft.

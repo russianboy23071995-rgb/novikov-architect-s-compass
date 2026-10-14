@@ -1,3 +1,4 @@
+import { MovementOriginAxes } from "./MovementOriginAxes";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import type { Point } from "@/lib/bim/model";
 import type { SnapReference } from "@/constraints/snapping/engine";
@@ -39,6 +40,13 @@ export function SolidSnapPreview({
   const span = Math.hypot(width, height);
   return (
     <>
+      {inference.origin && (
+        <MovementOriginAxes
+          projection={projection}
+          origin={inference.origin}
+          elevation={inference.originElevation}
+        />
+      )}
       {/* z=0 construction guides sit behind opaque wall pixels, including their real openings. */}
       <svg
         aria-label="3D Hilfslinien"
@@ -135,7 +143,8 @@ export function SolidSnapPreview({
         role="status"
         className="pointer-events-none absolute bottom-2 left-2 z-20 rounded bg-background/80 px-2 py-1 text-xs"
       >
-        XY · Geschossebene · {hover.references.length} Hilfsreferenzen
+        XY · {inference.workplaneHeight === undefined ? "Geschossebene" : "Ursprungsebene"} ·{" "}
+        {hover.references.length} Hilfsreferenzen
         {candidate?.sourceFeature === "t-axis" && " · T-Anschluss"}
       </p>
     </>

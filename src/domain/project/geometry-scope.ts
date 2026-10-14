@@ -16,6 +16,11 @@ export type ModelGeometry =
       assets: Project["assets"];
     };
 export type GeometryPreview = {
+  storeyPatches?: readonly {
+    storeyId: string;
+    geometry: ModelGeometry;
+    replacedIds: readonly string[];
+  }[];
   geometry: ModelGeometry;
   replacedIds: readonly string[];
 };

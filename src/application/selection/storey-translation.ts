@@ -50,7 +50,10 @@ export function prepareSelectionTranslation(source: Project, ids: readonly strin
     evaluate(delta: Point): GeometryPreview {
       // Every participating storey is evaluated, even though a plan only renders its own patch.
       const patches = parts.map((p) => ({ id: p.id, patch: p.action.evaluate(delta) }));
-      return patches.find((p) => p.id === activeId)?.patch ?? empty;
+      return {
+        ...(patches.find((p) => p.id === activeId)?.patch ?? empty),
+        storeyPatches: patches.map((p) => ({ storeyId: p.id, ...p.patch })),
+      };
     },
     materialize(current: Project, delta: Point): Project {
       if (current !== source || JSON.stringify(validateProject(current)) !== fingerprint)

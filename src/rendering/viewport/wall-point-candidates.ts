@@ -86,7 +86,7 @@ export function createWallPointCandidates(
           visibility: classifyAnchorVisibility(solid, projection, [
             candidate.worldPoint.x,
             candidate.worldPoint.y,
-            0,
+            elevation,
           ]),
         })),
       };
