@@ -1,4 +1,3 @@
-import { storeyOf } from "../../domain/storeys/access.ts";
 import {
   previewCalibration,
   parseCalibrationLength,
@@ -71,12 +70,14 @@ export function previewSelectionCommand(
     const session = beginSelectionMove(project, targets, origin, visibility);
     result = previewSelectionMove(session, project, targets, value.point, visibility);
     const detached =
-      storeyOf(project).wallJoins.length +
-      storeyOf(project).wallTJunctions.length -
-      storeyOf(result).wallJoins.length -
-      storeyOf(result).wallTJunctions.length;
+      project.storeys.flatMap((s) => s.wallJoins).length +
+      project.storeys.flatMap((s) => s.wallTJunctions).length -
+      result.storeys.flatMap((s) => s.wallJoins).length -
+      result.storeys.flatMap((s) => s.wallTJunctions).length;
     const hosts = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
-    const windows = storeyOf(project).windows.filter((w) => hosts.has(w.wallId)).length;
+    const windows = project.storeys
+      .flatMap((s) => s.windows)
+      .filter((w) => hosts.has(w.wallId)).length;
     summary = `${targets.length} Elemente um ${length.toLocaleString("de-DE", { maximumFractionDigits: 10 })} m bei ${value.degrees.toLocaleString("de-DE")}° verschieben (0° = +X, 90° = +Y). ${windows} Fenster ${windows === 1 ? "folgt seiner Wand" : "folgen ihren Wänden"}; ${detached} externe Wandanschlüsse werden gelöst.`;
   } else {
     if (/^auswahl\b/iu.test(text.trim()))

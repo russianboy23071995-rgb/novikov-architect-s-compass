@@ -11251,3 +11251,17 @@ Nachweis: 949 Tests, beide Typechecks, fokussiertes Lint, Build; Browser EG/OG g
 geschossübergreifender Einzelklick, Fensteränderung und Undo. Automatisiert: Keller,
 Kotenfortschreibung, globale Verdeckung, Ebenenfilter und Dateirundlauf/IFC.
 Offen: geschossübergreifende Mehrfachauswahl/atomare Bewegung als nächster Auftrag.
+
+### R26-03 / N21 / N22 – Geschossübergreifende Gruppenbewegung (14.10.2026)
+Gemeinsamer Auswahlindex und Ebenenzielauflösung umfassen alle Geschosse. Strg/Cmd
+kombiniert sichtbare Wände/Fenster; einzelne verbleibende BIM-Ziele stellen ihren
+Geschosskontext wieder her. prepareSelectionTranslation komponiert vorhandene
+prepareTranslation-Vorbereitungen, ohne die Geschosscontainer zusammenzukopieren.
+Jedes Geschoss wird bereits in der Vorschau geprüft; final wird nur ein validierter
+Gesamtzustand veröffentlicht. Fenster benötigen bei freier Bewegung ihren Host;
+Fenster auf mitbewegten Hosts folgen genau einmal. Bestehende Text-/Voice-Aktion
+nutzt denselben Pfad und zählt Anschlüsse/Fenster nun über alle Geschosse.
+Nachweis: 951 Tests, Typechecks, fokussiertes Lint, Build; Browser-Mehrfachauswahl,
+On-Demand-Mausbewegung und Dateivergleich vor/nach Bewegung sowie nach einem Undo.
+Grenze: Grundriss zeigt nur seinen lokalen Vorschaupatch; interaktive Gruppenbewegung
+in 3D folgt als nächster Auftrag über denselben ToolInteraction-Vertrag.

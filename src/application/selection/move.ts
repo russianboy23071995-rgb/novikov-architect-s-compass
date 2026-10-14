@@ -1,5 +1,4 @@
-import { storeyOf } from "../../domain/storeys/access.ts";
-import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
+import { prepareSelectionTranslation as prepareTranslation } from "./storey-translation.ts";
 import { createPointPreview } from "../tools/point-preview.ts";
 import { type Project, type Point } from "../../domain/project/schema.ts";
 import { eligibleSelection, targetKey, type SelectionSet } from "./state.ts";
@@ -43,7 +42,7 @@ export function assertMovableSelection(
     targets.some(
       (t) =>
         t.kind === "window" &&
-        !walls.has(storeyOf(project).windows.find((w) => w.id === t.id)!.wallId),
+        !walls.has(project.storeys.flatMap((s) => s.windows).find((w) => w.id === t.id)!.wallId),
     )
   )
     throw new Error(
@@ -60,7 +59,8 @@ export function beginSelectionMove(
   if (!Number.isFinite(origin.x) || !Number.isFinite(origin.y))
     throw new Error("Ungültiger Ursprung.");
   const moving = new Set(targets.map((t) => t.id));
-  for (const w of storeyOf(base).windows) if (moving.has(w.wallId)) moving.add(w.id);
+  for (const w of base.storeys.flatMap((s) => s.windows))
+    if (moving.has(w.wallId)) moving.add(w.id);
   const anchor = { ...origin };
   const session: SelectionMove = {
     base,

@@ -457,13 +457,13 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: geschossübergreifende Mehrfachauswahl und gemeinsame Bewegung.**
-Die gemeinsame 3D-Gebäudeansicht weiterverwenden. Auswahlziele mit Besitzer-Geschoss
-auflösen; Strg/Cmd-Auswahl über mehrere Geschosse und eine gemeinsame XY-Verschiebung
-über validierte Application-Aktionen ermöglichen. Vorschau/Commit müssen alle betroffenen
-Geschosse atomar behandeln, inklusive Anschlüssen/Fenstern, genau einem Undo-Schritt,
-Ebenenfilter und veraltetem Zielkontext. Kein Zusammenkopieren der Geschosscontainer.
-Abnahme: Auswahl in EG/OG, Verschieben, Abbruch, Undo/Redo, JSON/IFC. Noch keine Decken.
+**Genau ein aktiver Fortsetzungsschritt: gemeinsame Gruppenbewegung direkt in 3D.**
+Die geprüfte geschossübergreifende Auswahl und atomare Translation weiterverwenden.
+Den vorhandenen ToolInteraction-Vertrag an die 3D-Arbeitsebene anbinden: echter
+sichtbarer Ursprung, vorbereitete Vorschau aller betroffenen Geschosse, gleicher
+Fang-/Shift-/Tab-Ablauf und ein Commit/Undo. Kein vollständiges Modellmaterialisieren
+auf dem Pointerpfad. Abnahme: EG/OG-Auswahl, Maus- und Zahleneingabe, Abbruch,
+Verdeckung, Undo/Redo und Vergleich mit dem bestehenden Grundriss-Aktionspfad.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -601,3 +601,17 @@ und Undo erfolgreich. Tests ergänzen Keller, Höhenänderung, JSON, IFC und Ver
 Grenze: Strg/Cmd-Mehrfachauswahl und gemeinsame Bewegung über mehrere Geschosse sind
 noch nicht freigegeben; ein erklärender Hinweis erhält die bisherige Auswahl.
 Dies ist der nächste einzelne Auftrag; normale Mehrfachauswahl im Geschoss bleibt.
+
+### Status 14.10.2026 – Geschossübergreifende Auswahl und atomare XY-Bewegung
+PR312 mit erfolgreicher CI und Freigabe übernommen. Gemeinsamer Auswahlindex umfasst
+alle Geschosse. Strg/Cmd-Klick in 3D erweitert/entfernt Ziele geschossübergreifend.
+Der bestehende Gruppenbewegungs-Adapter teilt Ziele auf ihre echten Geschosscontainer
+auf und verwendet die geprüfte prepareTranslation je Geschoss. Alle Vorschauen werden
+geprüft; nur der aktive Grundrisspatch wird dargestellt. Alle Änderungen werden gemeinsam
+validiert und als ein Projekt-Undo veröffentlicht. Fenster folgen Hosts, Anschlüsse
+verwenden unverändert die bestehenden Regeln. Text-/Voice-Translation verwendet dieselbe Aktion.
+951 Tests, beide Typechecks, gezieltes Lint und Produktionsbuild bestanden. Browser:
+EG/OG mit Strg gewählt, On-Demand-Bewegung, Ursprung/Ziel im Grundriss, Datei bestätigt
+gleichen XY-Vektor in beiden Geschossen; ein Undo stellt beide Geschosscontainer exakt her.
+Grenze: Maus-Gruppenbewegung startet noch im Grundriss. Die direkte 3D-Vorschau/Bedienung
+ist der nächste einzelne Auftrag, kein bereits abgeschlossener Bestandteil dieses Piloten.

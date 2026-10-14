@@ -471,3 +471,115 @@ test("atomic publication failure propagates and a later confirmation revalidates
   assert.throws(() => confirmInteraction(adapter, target));
   assert.equal(calls, 1);
 });
+
+import { setStoreyHeight, addStorey } from "../storeys/actions.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
+import { previewSelectionGeometry } from "./move.ts";
+import { eligibleSelection, selectTargets } from "./state.ts";
+function multiFixture() {
+  let p = fixture();
+  p = setStoreyHeight(p, p, { projectId: p.id, storeyId: p.groundStoreyId, height: 3 });
+  p = addStorey(p, p, {
+    projectId: p.id,
+    storeyId: p.groundStoreyId,
+    id: "og",
+    side: "above",
+    height: 3,
+  });
+  p = selectWorkingStorey(p, p, "og");
+  p = addWall(p, {
+    id: "OG-W",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  p = addWindow(p, {
+    id: "OG-F",
+    wallId: "OG-W",
+    width: 1,
+    height: 1,
+    sillHeight: 1,
+    position: 0.5,
+  });
+  return selectWorkingStorey(p, p, p.groundStoreyId);
+}
+test("multi-storey selection and movement compose per-storey rules atomically with one Undo", async () => {
+  const p = multiFixture(),
+    before = serializeProject(p);
+  const targets = [...selectionIndex(p).values()].filter((t) =>
+    ["H", "N", "OG-W", "OG-F"].includes(t.id),
+  );
+  const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  assert.equal(eligibleSelection(p, policy, targets).length, 4);
+  assert.equal(selectTargets(targets, [{ kind: "wall", id: "OG-W" }], "toggle").length, 3);
+  const session = beginSelectionMove(p, targets, origin, policy);
+  const patch = previewSelectionGeometry(session, p, targets, target, policy);
+  const moved = previewSelectionMove(session, p, targets, target, policy);
+  for (const id of [p.groundStoreyId, "og"]) {
+    const a = moved.storeys.find((s) => s.id === id)!,
+      b = p.storeys.find((s) => s.id === id)!;
+    assert.deepEqual(a.windows, b.windows);
+    for (const wall of b.walls.filter((w) => targets.some((t) => t.id === w.id)))
+      assert.deepEqual(a.walls.find((w) => w.id === wall.id)!.start, {
+        x: wall.start.x + 2,
+        y: wall.start.y - 1,
+      });
+  }
+  assert.equal(storeyOf(moved).wallTJunctions.length, 1);
+  assert.deepEqual(
+    storeyOf(patch.geometry).walls,
+    storeyOf(moved).walls.filter((w) => patch.replacedIds.includes(w.id)),
+  );
+  let history = commitProject(createHistory(p), moved);
+  assert.equal(history.past.length, 1);
+  history = undoProject(history);
+  assert.equal(serializeProject(history.present), before);
+  history = redoProject(history);
+  assert.equal(serializeProject(history.present), serializeProject(moved));
+  assert.equal(
+    serializeProject(deserializeProject(serializeProject(moved))),
+    serializeProject(moved),
+  );
+  assert.equal(await exportIfc(history.present, new Date(0)), await exportIfc(moved, new Date(0)));
+  assert.equal(serializeProject(p), before);
+  assert.throws(() => previewSelectionMove(session, moved, targets, target), /geändert/);
+  assert.throws(() => beginSelectionMove(p, [{ kind: "window", id: "OG-F" }], origin), /zusammen/);
+  const hidden = createLayerVisibilityPolicy(p, {
+    ...ALL_LAYERS_VISIBLE,
+    hiddenLayerIds: [p.storeys[1]!.walls[0]!.layerId],
+  });
+  assert.throws(() => previewSelectionMove(session, p, targets, target, hidden), /sichtbar/);
+});
+test("failed multi-storey preview and cancellation never publish a partial floor", () => {
+  const p = multiFixture(),
+    before = serializeProject(p);
+  const targets = [
+    { kind: "wall" as const, id: "H" },
+    { kind: "wall" as const, id: "OG-W" },
+  ];
+  const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const session = beginSelectionMove(p, targets, origin, policy);
+  let commits = 0,
+    cancels = 0;
+  const interaction = selectionMoveInteraction(
+    session,
+    p,
+    targets,
+    policy,
+    () => commits++,
+    () => cancels++,
+  );
+  assert.throws(() => interaction.confirm!({ x: Infinity, y: 0 }));
+  assert.equal(commits, 0);
+  interaction.cancel();
+  assert.equal(cancels, 1);
+  assert.equal(serializeProject(p), before);
+  const command = previewSelectionCommand(
+    p,
+    targets,
+    policy,
+    "Auswahl um 2 m bei 0 Grad verschieben",
+  );
+  assert.equal(command.result.storeys.find((s) => s.id === "og")!.walls[0]!.start.x, 2);
+});

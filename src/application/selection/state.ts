@@ -1,4 +1,3 @@
-import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ElementTarget } from "./target.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../layers/visibility.ts";
@@ -10,14 +9,15 @@ export function selectionIndex(project: Project): ReadonlyMap<string, ElementTar
   const cached = indexes.get(project);
   if (cached) return cached;
   const ids = new Map<string, ElementTarget>();
-  for (const [kind, elements] of [
-    ["wall", storeyOf(project).walls],
-    ["window", storeyOf(project).windows],
-    ["line", storeyOf(project).lines ?? []],
-    ["hatch", storeyOf(project).hatches],
-    ["reference", storeyOf(project).references],
-  ] as const)
-    for (const element of elements) ids.set(element.id, { kind, id: element.id });
+  for (const storey of project.storeys)
+    for (const [kind, elements] of [
+      ["wall", storey.walls],
+      ["window", storey.windows],
+      ["line", storey.lines ?? []],
+      ["hatch", storey.hatches],
+      ["reference", storey.references],
+    ] as const)
+      for (const element of elements) ids.set(element.id, { kind, id: element.id });
   indexes.set(project, ids);
   return ids;
 }
