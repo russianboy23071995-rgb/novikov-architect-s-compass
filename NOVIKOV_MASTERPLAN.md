@@ -457,12 +457,10 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: begrenzter Höhenvertrag für Z-Bewegung.**
-Vor einer Z-Mutation klären, wie Bauteilversatz, Geschosszuordnung, verbundene Wände
-und fenstergebundene Höhen zusammenwirken. Bestehende Geschosshöhenauflösung und
-XYZ-Achsenvertrag verwenden; keine automatische Geschossumsortierung erfinden.
-Zunächst Code-/Anforderungsabgleich und konkrete offene Nutzerentscheidungen,
-kein vorgezogener Schemaumbau. XY und schräge Elementachsen bleiben nutzbar.
+**Genau ein aktiver Fortsetzungsschritt: gemeinsame Wand-Höhenauflösung und Migration.**
+Der Z-Höhenvertrag ist am 14.10.2026 geklärt (siehe Ergänzung am Dokumentende).
+Zunächst baseOffset, Migration und identische 3D-/IFC-Ableitung mit höhensicheren
+Anschlüssen implementieren. Noch keine Z-Mausaktion oder automatische Geschossumsortierung.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -705,3 +703,52 @@ Die vorhandene Grundriss-Kontursteuerung bleibt getrennt. Umsetzung über gemein
 Renderer-/Darstellungseinstellungen, ohne Bauteilkopien oder Modell-Undo; konkrete
 weitere Darstellungsmodi noch nicht festgelegt. Kontursteuerung 3D ist noch offen.
 Nachweis: Typecheck, gezieltes Lint und Produktionsbuild bestanden. Browser-Unteransicht mit grauer Überlagerung geprüft.
+
+### Höhenvertrag Z-Bewegung – freigegeben am 14.10.2026
+PR #314 ist mit grünem GitHub-Check in main übernommen (93e7c2e).
+Dieser Schritt ist ein Code-/Vertragsabgleich, noch keine Z-Freischaltung.
+
+**Verbindliche Nutzerentscheidungen:**
+- Z-Bewegung behält die Geschosszuordnung und verändert einen relativen Höhenversatz.
+  Änderungen der Geschosslage nehmen das Bauteil einschließlich Versatz mit.
+- Gemeinsam bewegte Wände behalten ihre gegenseitigen Anschlüsse. Anschlüsse zu
+  nicht mitbewegten Wänden werden erst beim Platzieren gelöst; Abbruch erhält sie.
+- Fenster folgen ihrer Wand; ihre relativen Maße und Brüstungshöhen bleiben dabei erhalten.
+
+**Codebefund und technische Grenze:**
+`domain/project/schema.ts` verwendet derzeit Format 24 und keinen vertikalen
+Wandversatz. `domain/storeys/elevation.ts` liefert lokale Geschosslagen; groundDatum
+beschriftet absolute Höhen, verschiebt aber keine lokale Geometrie.
+`lib/bim/geometry.ts` extrudiert ab relativ Z=0 und Öffnungen ab sillHeight.
+`application/selection/move.ts` verwendet zweidimensionale Points;
+`application/input/movement-axes.ts` beschreibt XYZ bereits, weist Z aber bewusst ab.
+Die Anschlussauflösung prüft bisher XY-Endpunkte; das reicht für versetzte Wände nicht.
+
+**Begrenzter technischer Entwurf:**
+- Gemeinsame Domain-Höhenauflösung: Wandfuß = lokale Geschosslage + baseOffset;
+  Wandkopf = Wandfuß + bestehende feste Wandhöhe; Fensterunterkante = Wandfuß +
+  sillHeight. Absolute Höhenanzeige addiert groundDatum genau einmal.
+- baseOffset in Metern, endlich, auch negativ; keine zweite gespeicherte absolute Kote.
+  Migration alter Projekte auf Versatz 0 erhält ihre bisherige Geometrie exakt.
+  Die nächste Formatversion erst bei Implementierung reservieren, parallele Änderungen prüfen.
+- Eine Application-Aktion mit Projekt-/Auswahlkontext und deltaZ, gleicher Versatz für
+  alle Ziele. Wandfenster genau einmal mitnehmen, auch wenn separat mit ausgewählt.
+  Vorschau über stabiler Basis; vollständige Validierung beim Commit; genau ein Undo.
+- Renderer, reale Fangpunkte, Picking, vorbereitete Vorschau, IFC und JSON müssen
+  dieselbe Höhenauflösung nutzen. Keine nur visuelle Verschiebung im Renderer.
+- Anschlussregeln müssen Z berücksichtigen und nach dem Lösen erneutes automatisches
+  Verbinden allein aufgrund gleicher XY-Koordinaten verhindern. Keine neuen vertikalen
+  Teilanschlüsse im ersten Piloten. Keine automatische Geschossumsortierung.
+- AI/Text/Voice später als Adapter derselben geprüften Aktion mit stabilen IDs.
+  Einzelfenster vertikal verschieben und geschossgebundene Wandoberkanten sind nicht
+  Bestandteil dieses Piloten; vorhandene feste Wandhöhen bleiben erhalten.
+
+**Genau ein nächster ausführbarer Auftrag:**
+Zunächst die Domain-Höhenauflösung und abwärtskompatible Migration für Wand-baseOffset
+implementieren, einschließlich gemeinsamer 3D-/IFC-Ableitung und höhensicherer
+Anschlussvalidierung. Noch keine neue Mausaktion. Abnahme: alte Dateien unverändert,
+positive/negative Versätze auf EG/OG/KG, mitwandernde Fenster, Geschosshöhenänderung,
+JSON-Roundtrip und IFC-Koordinaten identisch, ungleiche Anschlusslagen verständlich
+abgewiesen. Danach erst Z-Bewegung auf diese geprüfte Basis aufsetzen.
+Prüfnachweis dieses Dokumentationsschritts: genannte Codepfade gelesen; keine neuen
+Laufzeittests erforderlich, da keine Implementierung geändert wurde.
