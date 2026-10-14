@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { connectedFixture } from "./connected-fixture.ts";
@@ -67,9 +68,9 @@ test("owned snapshot and immutable result protect repeated evaluation", () => {
     pilot = prepareChainMove(p, "wall-0"),
     delta = { x: -1, y: -1 },
     before = pilot.evaluate(delta);
-  p.storey.windows[0]!.width = 99;
+  storeyOf(p).windows[0]!.width = 99;
   assert.deepEqual(pilot.evaluate(delta), before);
   assert.throws(() => {
-    before.project.storey.walls[0]!.height = 99;
+    storeyOf(before.project).walls[0]!.height = 99;
   });
 });

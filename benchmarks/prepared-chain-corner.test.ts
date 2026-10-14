@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareChainCorner } from "./prepared-chain-corner.ts";
@@ -86,16 +87,16 @@ test("pilot owns chain and freezes derived output", () => {
     p = { x: -15, y: -10 },
     before = pilot.evaluate(p);
   c.points[1]!.x = 100;
-  c.preview.storey.windows[0]!.width = 90;
+  storeyOf(c.preview).windows[0]!.width = 90;
   assert.deepEqual(pilot.evaluate(p), before);
   assert.throws(() => {
-    before.project.storey.walls[0]!.height = 90;
+    storeyOf(before.project).walls[0]!.height = 90;
   });
 });
 test("right-angle goal touching a foreign endpoint falls back", () => {
   const c = fixture();
-  c.preview.storey.walls.push({
-    ...c.preview.storey.walls[0]!,
+  storeyOf(c.preview).walls.push({
+    ...storeyOf(c.preview).walls[0]!,
     id: "foreign",
     start: { x: -15, y: -10 },
     end: { x: -11, y: -10 },

@@ -11173,3 +11173,42 @@ als nächster zusammenhängender Schritt folgen; keine isolierte UI-Geschosskopi
 15 bestehende Höhen-/Migration-/Undo-Tests, TypeScript, Lint und Build bestanden;
 Browserprüfung der bestehenden Eingaben. Mehrgeschossdarstellung noch nicht vertikal
 abgenommen. Nächster Auftrag bleibt die reale Sammlung mit Anlage/Bearbeitung/Export.
+
+
+### R26-03 / N21–N22 / N56 · Produktive Anlage aus der Skizze (13.10.2026)
+Nutzerauftrag nach PR309 umgesetzt: an jedem Geschoss „Geschoss darüber“ und
+„Geschoss darunter“, Höhe eingeben, Anlage bestätigen. Auch Einfügen zwischen
+Geschossen verwendet die bestätigten Regeln: zusätzlicher Abstand, Fortschreibung
+vom EG nach außen. EG-Kote verschiebt Höhenkoten, nicht lokale EG-Geometrie.
+Namen und Höhen/Koten lassen sich direkt bearbeiten. Bestehende Geschossnamen
+werden beim Einfügen nicht überschrieben; bei gleichem Standardnamen erhält das
+neue Geschoss einen unterscheidbaren Namenszusatz. Stabile IDs sind maßgebend.
+
+Technischer Vertrag: Schema24 speichert ausschließlich `storeys` in aufsteigender
+Reihenfolge und `groundStoreyId` als Basisbezug. Jede Bauteil-ID bleibt genau einmal
+in ihrem Geschoss. Schema1–23 wandern über die vorhandenen Migrationen in eine
+Ein-Element-Sammlung, vorhandene ID/Name/Geometrie/Höhe/Ansichten bleiben erhalten.
+Keine fiktive Althöhe. Anlage oberhalb mit fehlender Bezugshöhe wird verständlich
+abgewiesen; Keller mit definierter eigener Höhe ist unterhalb EG ableitbar.
+`application/storeys/actions.ts` stellt validierte Änderungen über BuildingChange
+bereit, Controller committed atomar. Mausadapter/Settings haben keine eigene
+Höhenformel. Künftige AI/Text/Voice-Adapter verwenden denselben projectId/storeyId-
+und Basissnapshot-Kontext; sprachliche Geschossbefehle sind noch nicht implementiert.
+
+Validierung prüft alle Geschosse, globale IDs und geschosslokale Fenster-/Anschluss-
+Referenzen. IFC schreibt jede Geschossebene samt lokaler Bauteilzuordnung und dem
+vom EG abgeleiteten Z genau einmal. Unbekannte Höhen werden nicht still durch 0
+ersetzt. Der historische EG-Datumsvertrag bleibt erhalten: EG lokal Z=0, absolute
+Bezugskote getrennt. Recovery und JSON enthalten dieselbe kanonische Sammlung.
+
+Abnahme: Ober-/Untergeschosse, Einfügen, Umbenennen, Höhen-/Kotenänderungen,
+ungültige Höhe/IDs/fremder Kontext, Undo/Redo, Migration, JSON, Recovery, IFC sowie
+Erhalt eines anderen Geschosses beim bisherigen Wand-Edit automatisiert geprüft.
+Browser: +3,00 m OG und −2,80 m KG; Kellerhöhe 3,00 m -> −3,00 m bei unverändertem
+EG/OG. Anlage rückgängig/wiederholt, JSON gespeichert und wieder geöffnet.
+Beide Typechecks, Build und Lint bestanden; 942 automatisierte Tests im Gesamtlauf bestanden.
+
+Explizite Grenze: bestehenden Zeichen-/Renderpfad über gemeinsamen Übergangsadapter
+auf EG erhalten, kein impliziter Geschosswechsel beim Klick auf neue Strukturzeilen.
+Neue Geschosse zunächst leer. Aktive Geschosswahl mit EG/OG-Wand/Fenster und
+3D-/Picking-Abnahme ist noch offen und der einzige nächste Auftrag im Masterplan.

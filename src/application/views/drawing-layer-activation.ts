@@ -1,10 +1,11 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 
 export function activateDrawnLayers(before: Project, after: Project, documentId: string) {
   const document = after.drawingDocuments?.find((d) => d.id === documentId);
   if (!document || before.id !== after.id) throw new Error("Das Abbild ist nicht mehr verfügbar.");
   const elements = (p: Project) =>
-    Object.values(p.storey)
+    Object.values(storeyOf(p))
       .flatMap<unknown>((value) => (Array.isArray(value) ? value : []))
       .filter(
         (value): value is { id: string; layerId: string } =>

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "../../domain/views/documents.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import type { DocumentIdentity } from "../../domain/views/scale.ts";
@@ -67,12 +68,12 @@ export function changeDrawingDocument(
   }
   if (action.kind === "create") {
     const existing = current.modelViews?.find(
-      (v) => v.kind === "floor-plan" && v.storeyId === current.storey.id,
+      (v) => v.kind === "floor-plan" && v.storeyId === storeyOf(current).id,
     );
     const source = existing ?? {
       id: action.modelViewId,
       kind: "floor-plan" as const,
-      storeyId: current.storey.id,
+      storeyId: storeyOf(current).id,
     };
     return validateProject({
       ...current,

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
@@ -7,13 +8,13 @@ export type TransformTarget = { kind: "wall" | "line" | "hatch"; id: string };
 
 export function editablePoints(project: Project, target: TransformTarget): Point[] {
   if (target.kind === "wall") {
-    const wall = project.storey.walls.find((item) => item.id === target.id);
+    const wall = storeyOf(project).walls.find((item) => item.id === target.id);
     if (wall) return [{ ...wall.start }, { ...wall.end }];
   } else if (target.kind === "hatch") {
-    const hatch = project.storey.hatches.find((item) => item.id === target.id);
+    const hatch = storeyOf(project).hatches.find((item) => item.id === target.id);
     if (hatch) return hatch.points.map((point) => ({ ...point }));
   } else {
-    const line = project.storey.lines?.find((item) => item.id === target.id);
+    const line = storeyOf(project).lines?.find((item) => item.id === target.id);
     if (line) return line.points.map((point) => ({ ...point }));
   }
   throw new Error("Das ausgewählte Element existiert nicht mehr.");
@@ -26,7 +27,7 @@ function applyPoints(
   intent: "reshape" | "move" = "reshape",
 ): Project {
   if (target.kind === "hatch") {
-    const hatch = project.storey.hatches.find((h) => h.id === target.id)!;
+    const hatch = storeyOf(project).hatches.find((h) => h.id === target.id)!;
     const pattern =
       intent === "move" && hatch.pattern
         ? {
@@ -113,8 +114,8 @@ export function stretchEndpoint(
 /** Windows move along their existing host, never detach into free space. */
 export function moveWindowAlongWall(project: Project, id: string, distance: number): Project {
   if (!Number.isFinite(distance)) throw new Error("Abstand muss ein endlicher Meterwert sein.");
-  const window = project.storey.windows.find((item) => item.id === id);
-  const wall = project.storey.walls.find((item) => item.id === window?.wallId);
+  const window = storeyOf(project).windows.find((item) => item.id === id);
+  const wall = storeyOf(project).walls.find((item) => item.id === window?.wallId);
   if (!window || !wall) throw new Error("Fenster oder zugehörige Wand fehlt.");
   return updateWindow(project, id, {
     position: boundedWindowPosition(

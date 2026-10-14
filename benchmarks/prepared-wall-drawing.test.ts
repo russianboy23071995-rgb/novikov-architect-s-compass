@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareWallDrawing } from "./prepared-wall-drawing.ts";
@@ -28,7 +29,7 @@ test("free first segment equals full path and preserves neighbours/windows/histo
 test("contacts, duplicate IDs and invalid goals retain full acceptance", () => {
   const p = tPairFixture(),
     origin = { x: -20, y: -20 };
-  for (const id of ["new", p.storey.walls[0]!.id, p.id, " " + p.storey.id + " "])
+  for (const id of ["new", storeyOf(p).walls[0]!.id, p.id, " " + storeyOf(p).id + " "])
     for (const point of [
       { x: 0, y: 0 },
       { x: 6 + 5e-10, y: 0 },
@@ -46,7 +47,7 @@ test("contacts, duplicate IDs and invalid goals retain full acceptance", () => {
       }
       assert.deepEqual(pilot.evaluate(point).project, full);
     }
-  const contact = p.storey.walls[0]!.start;
+  const contact = storeyOf(p).walls[0]!.start;
   assert.equal(prepareWallDrawing(p, contact, "new").evaluate({ x: 0, y: -4 }).path, "full");
 });
 test("prepared source and origin are owned; output immutable", () => {
@@ -55,11 +56,11 @@ test("prepared source and origin are owned; output immutable", () => {
     pilot = prepareWallDrawing(p, o, "new"),
     goal = { x: -10, y: -20 };
   const before = pilot.evaluate(goal);
-  p.storey.windows[0]!.width = 99;
+  storeyOf(p).windows[0]!.width = 99;
   o.x = 999;
   assert.deepEqual(pilot.evaluate(goal), before);
   assert.throws(() => {
-    before.project.storey.walls[0]!.height = 99;
+    storeyOf(before.project).walls[0]!.height = 99;
   });
 });
 test("T candidate always uses full connection action", () => {
@@ -70,7 +71,7 @@ test("T candidate always uses full connection action", () => {
     kind: "midpoint" as const,
     worldPoint: point,
     distanceOnScreen: 0,
-    sourceEntityId: p.storey.walls[0]!.id,
+    sourceEntityId: storeyOf(p).walls[0]!.id,
     sourceFeature: "t-axis",
     priority: 0,
   };

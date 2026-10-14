@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -41,9 +42,9 @@ test("all-visible display matches complete geometry and plan; hidden symbols ret
   });
   const visible = createLayerDisplay(p, all, all.context);
   assert.deepEqual(visible.surfaces.faces, solid.faces);
-  assert.deepEqual(visible.plan.walls, p.storey.walls);
-  assert.deepEqual(visible.plan.windows, p.storey.windows);
-  assert.deepEqual(visible.plan.lines, p.storey.lines);
+  assert.deepEqual(visible.plan.walls, storeyOf(p).walls);
+  assert.deepEqual(visible.plan.windows, storeyOf(p).windows);
+  assert.deepEqual(visible.plan.lines, storeyOf(p).lines);
   const hidden = createLayerVisibilityPolicy(p, {
     scope: { kind: "bim-project" },
     hiddenLayerIds: [p.defaultLayerIds.window, p.defaultLayerIds.line],
@@ -51,7 +52,7 @@ test("all-visible display matches complete geometry and plan; hidden symbols ret
   const display = createLayerDisplay(p, hidden, hidden.context);
   assert.equal(display.plan.windows.length, 0);
   assert.equal(display.plan.lines.length, 0);
-  assert.deepEqual(display.plan.openings, p.storey.windows);
+  assert.deepEqual(display.plan.openings, storeyOf(p).windows);
   assert.deepEqual(display.surfaces, visible.surfaces);
   assert.equal(display.canPick(p, hidden.context, "window-1"), false);
   assert.equal(display.canPick(p, hidden.context, "l"), false);

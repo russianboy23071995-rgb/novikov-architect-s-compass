@@ -1,7 +1,8 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { createProject, validateProject } from "../src/lib/bim/model.ts";
 export function connectedFixture(kind: "chain" | "tees", count: number) {
   const p = createProject("connected-profile", "storey"),
-    s = p.storey;
+    s = storeyOf(p);
   const wall = (id: string, start: { x: number; y: number }, end: { x: number; y: number }) =>
     s.walls.push({
       id,

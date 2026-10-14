@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
@@ -522,24 +523,24 @@ export function BimPlan({
   );
   const handles: { point: Point; index: number; label: string; axis?: boolean }[] = [];
   if (selection?.kind === "wall") {
-    const wall = project.storey.walls.find((item) => item.id === selection.id);
+    const wall = storeyOf(project).walls.find((item) => item.id === selection.id);
     if (wall)
       handles.push(
         ...wallPlanHandles(
           wall,
-          project.storey.wallJoins.some(
+          storeyOf(project).wallJoins.some(
             (j) => j.first.wallId === wall.id || j.second.wallId === wall.id,
           ),
         ),
       );
   } else if (selection?.kind === "hatch") {
-    project.storey.hatches
-      .find((h) => h.id === selection.id)
+    storeyOf(project)
+      .hatches.find((h) => h.id === selection.id)
       ?.points.forEach((point, index) =>
         handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
       );
   } else if (selection?.kind === "line") {
-    const line = project.storey.lines?.find((item) => item.id === selection.id);
+    const line = storeyOf(project).lines?.find((item) => item.id === selection.id);
     line?.points.forEach((point, index) => {
       if (
         index === line.points.length - 1 &&
@@ -1451,8 +1452,8 @@ export function BimPlan({
                 }}
                 paused={endpointSnap && snap && density.paused}
                 label={(r) => {
-                  const wi = project.storey.walls.findIndex((w) => w.id === r.entityId);
-                  const li = project.storey.lines?.findIndex((l) => l.id === r.entityId) ?? -1;
+                  const wi = storeyOf(project).walls.findIndex((w) => w.id === r.entityId);
+                  const li = storeyOf(project).lines?.findIndex((l) => l.id === r.entityId) ?? -1;
                   if (referenceSelection.mode === "points")
                     return `${wi >= 0 ? `Wand ${wi + 1}` : li >= 0 ? `Linie ${li + 1}` : "Hilfsreferenz"} · ${r.kind === "midpoint" ? "Mittelpunkt" : "Punkt"} (${r.point.x.toFixed(2)}; ${r.point.y.toFixed(2)})`;
                   return wi >= 0

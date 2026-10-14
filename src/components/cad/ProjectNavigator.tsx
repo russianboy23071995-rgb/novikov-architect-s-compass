@@ -1,3 +1,5 @@
+import type { BuildingChange } from "@/application/storeys/actions";
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { BuildingSettings } from "./BuildingSettings";
 import { DocumentNavigator, type DocumentNavigation } from "./DocumentNavigator";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
@@ -94,8 +96,7 @@ function TreeItem({
 type ProjectNavigatorProps = DocumentNavigation & {
   project: Project;
   onRenameStorey: (base: Project, name: string) => void;
-  onGroundDatum: (base: Project, elevation: number) => void;
-  onStoreyHeight: (base: Project, height: number) => void;
+  onBuildingChange: (base: Project, change: BuildingChange) => void;
 
   active: readonly string[];
   onSelect: (id: string, label: string, toggle?: boolean) => void;
@@ -108,8 +109,7 @@ function NavigatorContent({
   onClose,
   project,
   onRenameStorey,
-  onStoreyHeight,
-  onGroundDatum,
+  onBuildingChange,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -124,10 +124,12 @@ function NavigatorContent({
           id: project.id,
           label: "Gebäudestruktur",
           kind: "group",
-          children: [{ id: project.storey.id, label: project.storey.name, kind: "group" }],
+          children: [...project.storeys]
+            .reverse()
+            .map((s) => ({ id: s.id, label: s.name, kind: "group" })),
         },
       ] satisfies TreeNode[],
-    [project.id, project.storey.id, project.storey.name],
+    [project.id, project.storeys],
   );
   return (
     <aside
@@ -187,8 +189,10 @@ function NavigatorContent({
               onSelect={onSelect}
               onRename={(id) => {
                 if (id === project.id) setSettings(true);
-                if (id === project.storey.id)
-                  setRename({ base: project, name: project.storey.name });
+                if (project.storeys.some((s) => s.id === id) && id !== project.groundStoreyId)
+                  setSettings(true);
+                if (id === storeyOf(project).id)
+                  setRename({ base: project, name: storeyOf(project).name });
               }}
             />
           ))}
@@ -231,11 +235,11 @@ function NavigatorContent({
         <div className="flex justify-between">
           <span>Model elements</span>
           <span className="font-mono text-foreground">
-            {project.storey.walls.length +
-              project.storey.windows.length +
-              project.storey.hatches.length +
-              project.storey.references.length +
-              (project.storey.lines?.length ?? 0)}
+            {storeyOf(project).walls.length +
+              storeyOf(project).windows.length +
+              storeyOf(project).hatches.length +
+              storeyOf(project).references.length +
+              (storeyOf(project).lines?.length ?? 0)}
           </span>
         </div>
         <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
@@ -246,8 +250,7 @@ function NavigatorContent({
         <BuildingSettings
           project={project}
           onClose={() => setSettings(false)}
-          onHeight={onStoreyHeight}
-          onDatum={onGroundDatum}
+          onAction={onBuildingChange}
         />
       )}
     </aside>
@@ -274,12 +277,8 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
     (...args) => latest.current.onRenameStorey(...args),
     [],
   );
-  const onGroundDatum = useCallback<ProjectNavigatorProps["onGroundDatum"]>(
-    (...args) => latest.current.onGroundDatum(...args),
-    [],
-  );
-  const onStoreyHeight = useCallback<ProjectNavigatorProps["onStoreyHeight"]>(
-    (...args) => latest.current.onStoreyHeight(...args),
+  const onBuildingChange = useCallback<ProjectNavigatorProps["onBuildingChange"]>(
+    (...args) => latest.current.onBuildingChange(...args),
     [],
   );
   const onOpenDocument = useCallback<ProjectNavigatorProps["onOpenDocument"]>(
@@ -298,8 +297,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       onDocumentAction={onDocumentAction}
       onDocumentVisibility={props.onDocumentVisibility}
       onRenameStorey={onRenameStorey}
-      onStoreyHeight={onStoreyHeight}
-      onGroundDatum={onGroundDatum}
+      onBuildingChange={onBuildingChange}
       project={props.project}
       active={active.current}
       onSelect={onSelect}

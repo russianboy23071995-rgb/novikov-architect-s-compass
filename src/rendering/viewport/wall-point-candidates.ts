@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
@@ -28,8 +29,8 @@ export function createWallPointCandidates(
     : baseSolid;
   const sources = getLocalSnapSources(project);
   const walls = new Set(
-    project.storey.walls
-      .filter((w) => w.id !== movingWallId && isLayerVisible(project, visibility, w.id))
+    storeyOf(project)
+      .walls.filter((w) => w.id !== movingWallId && isLayerVisible(project, visibility, w.id))
       .map((wall) => wall.id),
   );
   const plane = projection.workplane(0);

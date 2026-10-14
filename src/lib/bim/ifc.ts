@@ -10,6 +10,10 @@ export async function exportIfc(input: Project, timestamp = new Date()): Promise
   return writeIfc(
     project,
     timestamp,
-    new Map(connectedWallSolids(project).map((w) => [w.wallId, w.localProfile])),
+    new Map(
+      project.storeys
+        .flatMap((storey) => connectedWallSolids({ storey }))
+        .map((w) => [w.wallId, w.localProfile]),
+    ),
   );
 }

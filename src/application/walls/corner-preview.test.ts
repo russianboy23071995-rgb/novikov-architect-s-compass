@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { cornerPreviewReducer, currentCornerPreview } from "./corner-preview.ts";
@@ -30,8 +31,8 @@ test("resolved T kernel needs no Project and matches the validated entry without
   }
   pair.windows.forEach(Object.freeze);
   Object.freeze(pair.windows);
-  project.storey.walls[0]!.height = 7;
-  project.storey.windows[0]!.width = 0.5;
+  storeyOf(project).walls[0]!.height = 7;
+  storeyOf(project).windows[0]!.width = 0.5;
   assert.deepEqual(deriveTPairSolids(pair.host, pair.incoming, pair.windows), expected);
   assert.equal(
     inspectTPair(pair.host, pair.incoming, pair.windows).openings[0]!.status,
@@ -43,7 +44,7 @@ test("resolved T kernel needs no Project and matches the validated entry without
 
 test("public T entries still reject malformed full snapshots beyond the selected pair", () => {
   const p = tFixture();
-  p.storey.walls[2]!.height = -1;
+  storeyOf(p).walls[2]!.height = -1;
   assert.throws(() => deriveTPreview(p, "host", { wallId: "incoming", endpoint: 1 }));
   assert.throws(() => inspectTOpenings(p, "host", { wallId: "incoming", endpoint: 1 }));
   assert.throws(() => resolveIsolatedTPair(p, "host", { wallId: "incoming", endpoint: 1 }));
@@ -120,14 +121,14 @@ test("T windows reuse shared cut solids, independently of visibility and axis di
         x: 1000 + q.x * Math.cos(angle) - q.y * Math.sin(angle),
         y: -2000 + q.x * Math.sin(angle) + q.y * Math.cos(angle),
       });
-      for (const wall of p.storey.walls) {
+      for (const wall of storeyOf(p).walls) {
         const start = wall.start,
           end = wall.end;
         wall.start = tr(reverse ? end : start);
         wall.end = tr(reverse ? start : end);
         if (reverse) wall.bodyOffset = -wall.bodyOffset;
       }
-      if (reverse) for (const w of p.storey.windows) w.position = 1 - w.position;
+      if (reverse) for (const w of storeyOf(p).windows) w.position = 1 - w.position;
       p.bimVisibility.hiddenLayerIds = [p.defaultLayerIds.window];
       const target = { wallId: "incoming", endpoint: (reverse ? 0 : 1) as 0 | 1 };
       const report = inspectTOpenings(p, "host", target);
@@ -154,9 +155,9 @@ test("T clearance uses actual contact width for shifted axes and either approach
     for (const hostOffset of [-0.18, 0, 0.18])
       for (const incomingOffset of [-0.18, 0, 0.18]) {
         const p = tFixture();
-        p.storey.walls[0]!.bodyOffset = hostOffset;
-        p.storey.walls[1]!.bodyOffset = incomingOffset;
-        p.storey.walls[1]!.start.y = sign * 3;
+        storeyOf(p).walls[0]!.bodyOffset = hostOffset;
+        storeyOf(p).walls[1]!.bodyOffset = incomingOffset;
+        storeyOf(p).walls[1]!.start.y = sign * 3;
         // Incoming normal points right when approaching from above, left from below.
         const contactLeft = 3 + sign * incomingOffset - 0.18;
         for (const delta of [-0.01, 0, 0.01]) {
@@ -200,7 +201,7 @@ test("T preview shares profiles/surfaces, preserves unrelated geometry and never
     assert.equal(wall.localProfile.length, wall.contour.length);
   }
   assert.deepEqual(project, before);
-  assert.equal(project.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(project).wallJoins.length, 0);
   assert.equal(currentCornerPreview(state, structuredClone(project)), null);
   assert.deepEqual(cornerPreviewReducer(state, { type: "clear" }), { preview: null, error: "" });
   const invalid = cornerPreviewReducer(state, {

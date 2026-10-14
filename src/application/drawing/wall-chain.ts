@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { prepareWallDrawing } from "./prepared-wall.ts";
 import { prepareChainCorner } from "./prepared-chain-corner.ts";
 import { appendWallChain, type WallChain } from "./wall-chain-actions.ts";
@@ -32,10 +33,10 @@ export function previewWallChain(
   let id = "@wall-preview";
   const ids = new Set(
     [
-      ...chain.preview.storey.walls,
-      ...chain.preview.storey.windows,
-      ...(chain.preview.storey.lines ?? []),
-      ...chain.preview.storey.hatches,
+      ...storeyOf(chain.preview).walls,
+      ...storeyOf(chain.preview).windows,
+      ...(storeyOf(chain.preview).lines ?? []),
+      ...storeyOf(chain.preview).hatches,
     ].map((e) => e.id),
   );
   while (ids.has(id)) id += "-";

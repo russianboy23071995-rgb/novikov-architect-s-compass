@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRecoveryStatusTracker, type RecoveryStatus } from "./recovery-status.ts";
@@ -65,8 +66,10 @@ test("edit, Undo and Redo compare content; changing the same committed reference
   f.tracker.update(project, 0);
   await f.tracker.refresh();
   const modified = {
-    ...project,
-    storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 3 })) },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((w) => ({ ...w, height: 3 })),
+    }),
   };
   let editing = createEditingState(project);
   editing = editingReducer(editing, { type: "load-project", project: modified });
@@ -101,8 +104,10 @@ test("failed save cannot mark changed content as secured", async () => {
   f.tracker.update(project, 0);
   await f.tracker.refresh();
   const changed = {
-    ...project,
-    storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 3 })) },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((w) => ({ ...w, height: 3 })),
+    }),
   };
   f.tracker.update(changed, 0);
   f.fail();
@@ -146,8 +151,10 @@ test("separate project IDs and same-ID load contexts discard late reads", async 
   f.catalog.project = oldPort;
   f.tracker.update(
     {
-      ...project,
-      storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 3 })) },
+      ...replaceStorey(project, {
+        ...storeyOf(project),
+        walls: storeyOf(project).walls.map((w) => ({ ...w, height: 3 })),
+      }),
     },
     "fourth",
   );
@@ -196,8 +203,10 @@ test("external successful replacement invalidates current state on refresh", asy
   await f.tracker.refresh();
   await saveProjectRecovery(
     {
-      ...project,
-      storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 3 })) },
+      ...replaceStorey(project, {
+        ...storeyOf(project),
+        walls: storeyOf(project).walls.map((w) => ({ ...w, height: 3 })),
+      }),
     },
     f.catalog,
   );
@@ -211,12 +220,16 @@ test("pending transaction and edits during its completion never publish a false 
   f.tracker.update(project, 0);
   await f.tracker.refresh();
   const changed = {
-    ...project,
-    storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 3 })) },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((w) => ({ ...w, height: 3 })),
+    }),
   };
   const newer = {
-    ...project,
-    storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: 4 })) },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((w) => ({ ...w, height: 4 })),
+    }),
   };
   f.tracker.update(changed, 0);
   const original = f.catalog.project;

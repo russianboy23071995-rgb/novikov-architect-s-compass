@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { fullSelectionMove } from "./selection-move-oracle";
 import { connectedFixture } from "./connected-fixture";
 import {
@@ -25,14 +26,14 @@ button.onclick = async () => {
         let t = performance.now();
         const prepared = prepareTranslation(p, ["wall-0"]);
         const prepareMs = performance.now() - t,
-          affected = prepared.evaluate({ x: 0, y: 0 }).geometry.storey.walls.length;
+          affected = storeyOf(prepared.evaluate({ x: 0, y: 0 }).geometry).walls.length;
         const contours: number[] = [],
           solids: number[] = [],
           extrusions: number[] = [],
           filters: number[] = [],
           pointer: number[] = [];
         for (let i = 0; i < 10; i++) {
-          const fresh = { storey: p.storey };
+          const fresh = { storey: storeyOf(p) };
           t = performance.now();
           const rings = connectedWallContours(fresh);
           contours.push(performance.now() - t);
@@ -40,14 +41,14 @@ button.onclick = async () => {
           const all = connectedWallSolids(fresh);
           solids.push(performance.now() - t);
           t = performance.now();
-          const derived = p.storey.walls
-            .filter((w) => rings.has(w.id))
+          const derived = storeyOf(p)
+            .walls.filter((w) => rings.has(w.id))
             .map((w) =>
               wallContourSolid(
                 w,
                 rings.get(w.id)!,
-                p.storey.windows,
-                p.storey.wallTJunctions.some(
+                storeyOf(p).windows,
+                storeyOf(p).wallTJunctions.some(
                   (j) => j.hostWallId === w.id || j.incoming.wallId === w.id,
                 ),
               ),
@@ -58,10 +59,10 @@ button.onclick = async () => {
           t = performance.now();
           let total = 0;
           for (let r = 0; r < 100; r++)
-            for (const w of p.storey.walls)
-              total += p.storey.windows.filter((o) => o.wallId === w.id).length;
+            for (const w of storeyOf(p).walls)
+              total += storeyOf(p).windows.filter((o) => o.wallId === w.id).length;
           filters.push((performance.now() - t) / 100);
-          if (total !== 100 * p.storey.windows.length) throw Error("Window assignment mismatch");
+          if (total !== 100 * storeyOf(p).windows.length) throw Error("Window assignment mismatch");
         }
         for (let i = 0; i < 10; i++) {
           const delta = { x: -2 - i * 0.1, y: -2 };
@@ -70,13 +71,16 @@ button.onclick = async () => {
           pointer.push(performance.now() - t);
           const full = fullSelectionMove(p, [{ kind: "wall", id: "wall-0" }], delta);
           for (const name of ["walls", "windows", "wallJoins", "wallTJunctions"] as const)
-            if (JSON.stringify(patch.geometry.storey[name]) !== JSON.stringify(full.storey[name]))
+            if (
+              JSON.stringify(storeyOf(patch.geometry)[name]) !==
+              JSON.stringify(storeyOf(full)[name])
+            )
               throw Error("Prepared move mismatch: " + name);
         }
         results.push({
           kind,
           count,
-          windows: p.storey.windows.length,
+          windows: storeyOf(p).windows.length,
           selectedWalls: 1,
           affectedWalls: affected,
           prepareMs,

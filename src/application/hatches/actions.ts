@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { patternSize } from "./pattern-size.ts";
 import { samePattern } from "../../domain/elements/hatch/revision.ts";
 import {
@@ -41,7 +42,7 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
   if (base !== current || request.projectId !== current.id)
     throw new Error("Das Projekt wurde geändert. Schraffurvorgang erneut beginnen.");
   const project = validateProject(current);
-  const hatches = project.storey.hatches;
+  const hatches = storeyOf(project).hatches;
   if (request.kind === "update" && !hatches.some((h) => h.id === request.id))
     throw new Error("Die Schraffur existiert nicht mehr.");
   const definition = request.patternDefinition
@@ -104,11 +105,8 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
     assignment.pattern = rotation === 0 ? unrotated : { ...pattern, rotation };
   }
   const next = validateProject({
-    ...project,
-    hatchPatterns:
-      definition && !existing ? [...project.hatchPatterns, definition] : project.hatchPatterns,
-    storey: {
-      ...project.storey,
+    ...replaceStorey(project, {
+      ...storeyOf(project),
       hatches:
         request.kind === "create"
           ? [
@@ -126,7 +124,9 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
                 ? { ...h, ...request.changes, ...assignment, id: h.id, kind: h.kind }
                 : h,
             ),
-    },
+    }),
+    hatchPatterns:
+      definition && !existing ? [...project.hatchPatterns, definition] : project.hatchPatterns,
   });
   return JSON.stringify(next) === JSON.stringify(project) ? current : next;
 }

@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { largePointFixture } from "./large-point-fixture";
 import { prepareTranslation } from "../src/domain/project/prepared-translation";
 import { tPairFixture } from "./t-pair-fixture";
@@ -32,27 +33,27 @@ export function capacityFixture(count: number) {
   // Disjoint T groups with windows, not a claim about one huge dependency closure.
   for (let i = 0; i < Math.min(25, Math.floor(count / 10)); i++) {
     const id = (s: string) => `${s}-${i}`;
-    p.storey.walls.push(
-      ...pair.storey.walls.map((w) => ({
+    storeyOf(p).walls.push(
+      ...storeyOf(pair).walls.map((w) => ({
         ...w,
         id: id(w.id),
         start: { x: w.start.x + i * 10, y: w.start.y },
         end: { x: w.end.x + i * 10, y: w.end.y },
       })),
     );
-    p.storey.windows.push(
-      ...pair.storey.windows.map((w) => ({ ...w, id: id(w.id), wallId: id(w.wallId) })),
+    storeyOf(p).windows.push(
+      ...storeyOf(pair).windows.map((w) => ({ ...w, id: id(w.id), wallId: id(w.wallId) })),
     );
-    p.storey.wallTJunctions.push(
-      ...pair.storey.wallTJunctions.map((t) => ({
+    storeyOf(p).wallTJunctions.push(
+      ...storeyOf(pair).wallTJunctions.map((t) => ({
         ...t,
         hostWallId: id(t.hostWallId),
         incoming: { ...t.incoming, wallId: id(t.incoming.wallId) },
       })),
     );
   }
-  p.storey.lines = Array.from(
-    { length: count - p.storey.walls.length - p.storey.windows.length },
+  storeyOf(p).lines = Array.from(
+    { length: count - storeyOf(p).walls.length - storeyOf(p).windows.length },
     (_, i) => ({
       id: `line-${i}`,
       layerId: p.defaultLayerIds.line,
@@ -71,7 +72,7 @@ function chainFixture() {
   let start = { x: 0, y: 0 };
   for (let i = 0; i < 100; i++) {
     const end = { x: start.x + (i % 2 ? 0 : 4), y: start.y + (i % 2 ? 4 : 0) };
-    p.storey.walls.push({
+    storeyOf(p).walls.push({
       id: `wall-${i}`,
       layerId: p.defaultLayerIds.wall,
       start,
@@ -81,7 +82,7 @@ function chainFixture() {
       bodyOffset: 0,
     });
     if (i)
-      p.storey.wallJoins.push({
+      storeyOf(p).wallJoins.push({
         first: { wallId: `wall-${i - 1}`, endpoint: 1 },
         second: { wallId: `wall-${i}`, endpoint: 0 },
       });
@@ -138,20 +139,21 @@ export async function runCapacity(status: (s: string) => void) {
     const start = performance.now();
     const ifc = await exportIfc(p);
     const ifcMs = performance.now() - start;
-    const prepared = p.storey.walls.length
-      ? time(() => prepareTranslation(p, [p.storey.walls[0]!.id]))
+    const prepared = storeyOf(p).walls.length
+      ? time(() => prepareTranslation(p, [storeyOf(p).walls[0]!.id]))
       : null;
     const preview = prepared ? time(() => prepared.value.evaluate({ x: 0.1, y: -1 })) : null;
     profiles.push({
       prepareMs: prepared?.ms,
       previewMs: preview?.ms,
-      affectedWalls: preview?.value.geometry.storey.walls.length,
+      affectedWalls: storeyOf(preview?.value.geometry)?.walls.length,
       fixture:
         count === 200000 ? "200k-points" : count === -1 ? "100-connected-walls" : String(count),
-      elementCount: p.storey.walls.length + p.storey.windows.length + (p.storey.lines?.length ?? 0),
-      wallCount: p.storey.walls.length,
-      tConnections: p.storey.wallTJunctions.length,
-      pointCount: (p.storey.lines ?? []).reduce((n, l) => n + l.points.length, 0),
+      elementCount:
+        storeyOf(p).walls.length + storeyOf(p).windows.length + (storeyOf(p).lines?.length ?? 0),
+      wallCount: storeyOf(p).walls.length,
+      tConnections: storeyOf(p).wallTJunctions.length,
+      pointCount: (storeyOf(p).lines ?? []).reduce((n, l) => n + l.points.length, 0),
       fileBytes: bytes(save.value),
       saveMs: save.ms,
       loadMs: load.ms,
@@ -255,12 +257,12 @@ export async function runCapacity(status: (s: string) => void) {
     const request = {
       projectId: probe.id,
       asset,
-      reference: { ...p.storey.references[0]!, id: `ref-${i}`, assetId: asset.id },
+      reference: { ...storeyOf(p).references[0]!, id: `ref-${i}`, assetId: asset.id },
     };
     try {
       probe = previewCreateReference(probe, probe, request);
       limit.push({
-        references: probe.storey.references.length,
+        references: storeyOf(probe).references.length,
         bytes: bytes(JSON.stringify(probe)),
         accepted: true,
       });

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildSolid, initialCamera, projectPoint } from "./geometry.ts";
@@ -122,7 +123,7 @@ test("full-width and floor-level openings do not leave phantom faces", () => {
 test("empty projects are renderable and corrupt input is rejected", () => {
   assert.equal(buildSolid(createProject("p", "s")).faces.length, 0);
   const corrupt = fixture();
-  corrupt.storey.windows[0]!.height = 10;
+  storeyOf(corrupt).windows[0]!.height = 10;
   assert.throws(() => buildSolid(corrupt));
 });
 

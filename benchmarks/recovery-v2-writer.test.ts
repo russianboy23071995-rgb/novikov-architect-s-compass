@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareRecoveryV2Writer } from "../src/application/project-files/recovery-v2-writer.ts";
@@ -50,7 +51,7 @@ test("writer advances only after commit; failed save retries with last successfu
     p = project();
   const writer = await prepareRecoveryV2Writer(m.port, p.id, codec);
   const first = await writer.save(p, () => true);
-  const changed = { ...p, storey: { ...p.storey, lines: [] } };
+  const changed = { ...replaceStorey(p, { ...storeyOf(p), lines: [] }) };
   m.state.fail = true;
   await assert.rejects(
     writer.save(changed, () => true),

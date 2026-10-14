@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject } from "../src/lib/bim/model.ts";
@@ -57,7 +58,7 @@ test("checked snapshot rejects missing/corrupt payloads and invalid model refere
     /integrity mismatch/,
   );
   const bad = structuredClone(doc);
-  bad.model.storey.lines![0]!.layerId = "missing-layer";
+  storeyOf(bad.model).lines![0]!.layerId = "missing-layer";
   await assert.rejects(() => restoreCheckedSnapshot(bad));
 });
 
@@ -136,14 +137,16 @@ test("prepared immutable images survive model revisions without rehashing", asyn
   const prep = createPreparation();
   const first = await prep.prepare(p);
   const changed = validateProject({
-    ...p,
-    storey: { ...p.storey, lines: p.storey.lines!.map((line) => ({ ...line, color: "#998877" })) },
+    ...replaceStorey(p, {
+      ...storeyOf(p),
+      lines: storeyOf(p).lines!.map((line) => ({ ...line, color: "#998877" })),
+    }),
   });
   const second = await prep.prepare(changed);
   assert.equal(prep.hashes, 1);
   assert.equal(second.blobs[second.model.assets[0]!.key], first.blobs[first.model.assets[0]!.key]);
   assert.deepEqual(restoreProject(second), changed);
-  assert.equal(first.model.storey.lines![0]!.color, "#334455");
+  assert.equal(storeyOf(first.model).lines![0]!.color, "#334455");
 });
 
 test("mutable external asset identity cannot reuse a stale content key", async () => {

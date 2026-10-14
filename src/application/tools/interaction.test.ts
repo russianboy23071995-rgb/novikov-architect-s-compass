@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateInteraction, confirmInteraction } from "./interaction.ts";
@@ -170,7 +171,7 @@ test("successive polyline segments reuse drawing interaction without commits unt
     assert.deepEqual(result.value?.point, expected);
     confirmInteraction(tool, result.value!.point);
     assert.equal(state.history.past.length, 0);
-    assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+    assert.equal(storeyOf(state.history.present).lines?.length ?? 0, 0);
   }
   const next = createDrawing(base, base, "poly", {
     kind: "line",
@@ -180,7 +181,7 @@ test("successive polyline segments reuse drawing interaction without commits unt
   });
   state = editingReducer(state, { type: "project", project: next });
   assert.equal(state.history.past.length, 1);
-  assert.equal(state.history.present.storey.lines![0]!.points.length, 4);
+  assert.equal(storeyOf(state.history.present).lines![0]!.points.length, 4);
   assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, base);
   const restored = editingReducer(editingReducer(state, { type: "undo" }), { type: "redo" });
   assert.deepEqual(restored.history.present, next);
@@ -201,7 +202,7 @@ test("cancelling a polyline draft leaves no model element or history entry", () 
   tool.cancel();
   assert.equal(points.length, 0);
   assert.equal(state.history.past.length, 0);
-  assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+  assert.equal(storeyOf(state.history.present).lines?.length ?? 0, 0);
 });
 
 test("history and project replacement invalidate the old edit session, even after undo to its original model", () => {
@@ -261,7 +262,7 @@ test("new project rejects old polyline draft while replacement undo restores onl
   state = editingReducer(state, { type: "project", project: loaded });
   state = editingReducer(state, { type: "undo" });
   assert.deepEqual(state.history.present, base);
-  assert.equal(state.history.present.storey.lines?.length ?? 0, 0);
+  assert.equal(storeyOf(state.history.present).lines?.length ?? 0, 0);
   assert.equal(state.session, null);
   state = editingReducer(state, { type: "redo" });
   assert.deepEqual(state.history.present, loaded);

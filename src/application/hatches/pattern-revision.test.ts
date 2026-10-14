@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadPatternLibrary, loadHatchPatterns, saveHatchPattern } from "./pattern-library.ts";
@@ -132,7 +133,7 @@ test("resolver updates every reference once, retains missing/older data and repo
   assert.deepEqual(result.updatedIds, ["p"]);
   assert.equal(result.project.hatchPatterns.length, 1);
   assert.equal(result.project.hatchPatterns[0]!.name, "New");
-  assert.deepEqual(result.project.storey, p.storey);
+  assert.deepEqual(storeyOf(result.project), storeyOf(p));
   assert.equal(
     resolveHatchPatternRevisions(result.project, result.project, result.records, embedded).project,
     result.project,
@@ -158,11 +159,10 @@ test("resolver updates every reference once, retains missing/older data and repo
 test("independent model Undo resolution does not rewind global pattern content", () => {
   const p = project();
   const moved = {
-    ...p,
-    storey: {
-      ...p.storey,
-      hatches: p.storey.hatches.map((h) => ({ ...h, fill: { ...h.fill, opacity: 0.7 } })),
-    },
+    ...replaceStorey(p, {
+      ...storeyOf(p),
+      hatches: storeyOf(p).hatches.map((h) => ({ ...h, fill: { ...h.fill, opacity: 0.7 } })),
+    }),
   };
   const undo = undoProject(commitProject(createHistory(p), moved)).present;
   const result = resolveHatchPatternRevisions(
@@ -172,7 +172,7 @@ test("independent model Undo resolution does not rewind global pattern content",
     [{ definition: { ...pattern, name: "Global new" }, revision: 4 }],
   );
   assert.equal(result.project.hatchPatterns[0]!.name, "Global new");
-  assert.equal(result.project.storey.hatches[0]!.fill.opacity, 0.5);
+  assert.equal(storeyOf(result.project).hatches[0]!.fill.opacity, 0.5);
 });
 test("invalid revision metadata and unknown payloads are rejected without writes", () => {
   for (const revision of [0, -1, NaN, Infinity, 1.5, Number.MAX_SAFE_INTEGER + 1])

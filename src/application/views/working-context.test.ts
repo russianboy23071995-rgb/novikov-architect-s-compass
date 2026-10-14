@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -107,7 +108,7 @@ test("resolved settings retain existing model undo, palette history and file rou
   history = commitProject(history, filter.project);
   assert.equal(history.past.length, 1);
   history = undoProject(history);
-  assert.equal(history.present.storey.walls[0]!.height, 2.8);
+  assert.equal(storeyOf(history.present).walls[0]!.height, 2.8);
   for (const project of [
     history.present,
     redoProject(history).present,
@@ -142,8 +143,8 @@ test("shared storey resolution preserves independent document scale and visibili
   const binding = documentBinding(project, "doc");
   const working = resolveWorkingView(project);
   const document = resolveDocumentView(project, binding);
-  assert.equal(working.storey, project.storey);
-  assert.equal(document.storey, working.storey);
+  assert.equal(storeyOf(working), storeyOf(project));
+  assert.equal(storeyOf(document), storeyOf(working));
   assert.equal(document.scale.denominator, 50);
   assert.equal(working.scale.denominator, 100);
   assert.equal(isLayerVisible(project, working.visibility, "wall-1"), true);

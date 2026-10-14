@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { diagnosticRenderer } from "./legacy-solid-renderer";
 import { buildSolid } from "../src/lib/bim/geometry";
 import { connectedFixture } from "./connected-fixture";
@@ -41,7 +42,7 @@ button.onclick = async () => {
       const solid = buildSolid(project),
         buildMs = performance.now() - t;
       const originalSolid = JSON.stringify(solid),
-        ids = new Set(project.storey.walls.map((w) => w.id));
+        ids = new Set(storeyOf(project).walls.map((w) => w.id));
       if (solid.faces.some((f) => !ids.has(f.wallId))) throw Error("Unknown geometry ID");
       const windows = windowSelectionSurfaces(project, () => true),
         frame = createProjectionFrame(solid);

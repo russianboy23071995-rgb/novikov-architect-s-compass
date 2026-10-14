@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeSpeech, recognitionConstructor, startVoice } from "./voice.ts";
@@ -108,7 +109,7 @@ test("spoken units, simple numbers and decimal commas use existing model validat
     { kind: "wall", id: "wall-1" },
     normalizeSpeech("Wandlänge auf sechs Meter!"),
   );
-  assert.equal(result.result.storey.walls[0]!.end.x, 6);
+  assert.equal(storeyOf(result.result).walls[0]!.end.x, 6);
   assert.equal(normalizeSpeech("Wandstärke 360 Millimeter"), "wandstärke 360 mm");
   assert.throws(() =>
     previewCommand(
@@ -120,9 +121,9 @@ test("spoken units, simple numbers and decimal commas use existing model validat
 });
 test("hundreds of walls do not change the selected stable ID target", () => {
   const p = createExampleProject();
-  const template = p.storey.walls[0]!;
+  const template = storeyOf(p).walls[0]!;
   for (let i = 0; i < 300; i++)
-    p.storey.walls.push({
+    storeyOf(p).walls.push({
       ...template,
       id: `extra-${i}`,
       start: { x: i * 5, y: 5 },
@@ -133,8 +134,8 @@ test("hundreds of walls do not change the selected stable ID target", () => {
     { kind: "wall", id: "extra-237" },
     normalizeSpeech("Wandhöhe vier Meter"),
   ).result;
-  assert.equal(result.storey.walls.find((w) => w.id === "extra-237")!.height, 4);
-  assert.equal(result.storey.walls.filter((w) => w.height !== 2.8).length, 1);
+  assert.equal(storeyOf(result).walls.find((w) => w.id === "extra-237")!.height, 4);
+  assert.equal(storeyOf(result).walls.filter((w) => w.height !== 2.8).length, 1);
 });
 
 test("recording has a bounded lifetime", (context) => {

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -86,9 +87,9 @@ test("rotation affects tile lattice around fixed origin, never contour or shared
     changes: {},
     patternRotation: 90,
   });
-  const hatch = rotated.storey.hatches[0]!;
-  assert.deepEqual(hatch.points, p.storey.hatches[0]!.points);
-  assert.deepEqual(hatch.fill, p.storey.hatches[0]!.fill);
+  const hatch = storeyOf(rotated).hatches[0]!;
+  assert.deepEqual(hatch.points, storeyOf(p).hatches[0]!.points);
+  assert.deepEqual(hatch.fill, storeyOf(p).hatches[0]!.fill);
   assert.deepEqual(hatch.pattern!.origin, { x: 10, y: 20 });
   assert.deepEqual(rotated.hatchPatterns, p.hatchPatterns);
   const tile = hatchPatternTile(definition, hatch.pattern!)!;
@@ -103,8 +104,8 @@ test("rotation affects tile lattice around fixed origin, never contour or shared
     patternDefinition: definition,
     patternRotation: 15,
   });
-  assert.equal(twice.storey.hatches[0]!.pattern!.rotation, 90);
-  assert.equal(twice.storey.hatches[1]!.pattern!.rotation, 15);
+  assert.equal(storeyOf(twice).hatches[0]!.pattern!.rotation, 90);
+  assert.equal(storeyOf(twice).hatches[1]!.pattern!.rotation, 15);
 });
 
 test("pattern angle survives a single Undo/Redo step, file roundtrip, movement and library updates", () => {
@@ -122,12 +123,12 @@ test("pattern angle survives a single Undo/Redo step, file roundtrip, movement a
   assert.deepEqual(redoProject(undoProject(history)).present, rotated);
   assert.deepEqual(readProjectFile(serializeProject(rotated)), rotated);
   const moved = moveElement(rotated, { kind: "hatch", id: "h" }, { x: 2, y: 3 });
-  assert.equal(moved.storey.hatches[0]!.pattern!.rotation, 37.5);
-  assert.deepEqual(moved.storey.hatches[0]!.pattern!.origin, { x: 12, y: 23 });
+  assert.equal(storeyOf(moved).hatches[0]!.pattern!.rotation, 37.5);
+  assert.deepEqual(storeyOf(moved).hatches[0]!.pattern!.origin, { x: 12, y: 23 });
   const refreshed = resolveProjectHatchPatterns(moved, moved, [
     { definition: { ...definition, name: "Neu" }, revision: 7 },
   ]).project;
-  assert.deepEqual(refreshed.storey, moved.storey);
+  assert.deepEqual(storeyOf(refreshed), storeyOf(moved));
 });
 
 test("defaults pickup copies angle and produces an independent new origin", () => {
@@ -144,8 +145,8 @@ test("defaults pickup copies angle and produces an independent new origin", () =
     points: points.map((q) => ({ x: q.x + 7, y: q.y + 8 })),
     ...picked.values,
   });
-  assert.equal(next.storey.hatches[1]!.pattern!.rotation, 135);
-  assert.deepEqual(next.storey.hatches[1]!.pattern!.origin, { x: 17, y: 28 });
+  assert.equal(storeyOf(next).hatches[1]!.pattern!.rotation, 135);
+  assert.deepEqual(storeyOf(next).hatches[1]!.pattern!.origin, { x: 17, y: 28 });
   const retained = previewHatch(next, next, {
     projectId: p.id,
     kind: "update",
@@ -153,7 +154,7 @@ test("defaults pickup copies angle and produces an independent new origin", () =
     changes: {},
     patternDefinition: definition,
   });
-  assert.equal(retained.storey.hatches[1]!.pattern!.rotation, 135);
+  assert.equal(storeyOf(retained).hatches[1]!.pattern!.rotation, 135);
 });
 
 test("angles validate at shared action and file boundaries; invalid draft angle emits no tile", () => {
@@ -171,11 +172,11 @@ test("angles validate at shared action and file boundaries; invalid draft angle 
     );
     assert.throws(() => fixture(angle));
     assert.equal(
-      hatchPatternTile(definition, { ...p.storey.hatches[0]!.pattern!, rotation: angle }),
+      hatchPatternTile(definition, { ...storeyOf(p).hatches[0]!.pattern!, rotation: angle }),
       null,
     );
     const bad = structuredClone(p);
-    bad.storey.hatches[0]!.pattern!.rotation = angle;
+    storeyOf(bad).hatches[0]!.pattern!.rotation = angle;
     assert.throws(() => validateProject(bad));
   }
   assert.equal(serializeProject(p), before);
@@ -203,12 +204,12 @@ test("legacy schema 12 migrates with zero implied angle and retains strict old a
   const p = fixture(),
     old = { ...p, schemaVersion: 12 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.equal(migrated.storey.hatches[0]!.pattern!.rotation, undefined);
+  assert.equal(migrated.schemaVersion, 24);
+  assert.equal(storeyOf(migrated).hatches[0]!.pattern!.rotation, undefined);
   assert.equal(
-    hatchPatternTile(definition, migrated.storey.hatches[0]!.pattern!)!.patternTransform,
+    hatchPatternTile(definition, storeyOf(migrated).hatches[0]!.pattern!)!.patternTransform,
     "rotate(0 10 -20)",
   );
-  assert.deepEqual(migrated.storey, p.storey);
+  assert.deepEqual(storeyOf(migrated), storeyOf(p));
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...fixture(45), schemaVersion: 12 })));
 });

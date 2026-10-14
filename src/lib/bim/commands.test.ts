@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewHatch } from "../../application/hatches/actions.ts";
 import { addLine, createProject } from "./model.ts";
 import test from "node:test";
@@ -15,18 +16,18 @@ test("preview is non-mutating; commit extends reference wall and keeps window ce
   assert.equal(JSON.stringify(p), before);
   assert.match(preview.summary, /3 → 6 m/);
   const next = applyCommand(p, wall, preview);
-  assert.equal(next.storey.walls[0]!.end.x, 6);
+  assert.equal(storeyOf(next).walls[0]!.end.x, 6);
   assert.equal(windowCentre(next, "window-1").x, 3);
-  assert.equal(next.storey.walls[0]!.id, "wall-1");
+  assert.equal(storeyOf(next).walls[0]!.id, "wall-1");
 });
 
 test("units and wall fields are converted to metres", () => {
   const p = createExampleProject();
   assert.equal(
-    previewCommand(p, wall, "Wandstärke auf 400 mm").result.storey.walls[0]!.thickness,
+    storeyOf(previewCommand(p, wall, "Wandstärke auf 400 mm").result).walls[0]!.thickness,
     0.4,
   );
-  assert.equal(previewCommand(p, wall, "Wandhöhe 350 cm").result.storey.walls[0]!.height, 3.5);
+  assert.equal(storeyOf(previewCommand(p, wall, "Wandhöhe 350 cm").result).walls[0]!.height, 3.5);
 });
 
 test("window dimensions and zero sill are supported", () => {
@@ -36,16 +37,19 @@ test("window dimensions and zero sill are supported", () => {
     ["Fensterhöhe auf 1.5 m", "height", 1.5],
     ["Brüstungshöhe 0 m", "sillHeight", 0],
   ] as const) {
-    assert.equal(previewCommand(p, windowSelection, command).result.storey.windows[0]![key], value);
+    assert.equal(
+      storeyOf(previewCommand(p, windowSelection, command).result).windows[0]![key],
+      value,
+    );
   }
 });
 
 test("centering preserves dimensions and host", () => {
   const p = updateWindow(createExampleProject(), "window-1", { position: 0.3 });
   const next = previewCommand(p, windowSelection, "Fenster zentrieren").result;
-  assert.equal(next.storey.windows[0]!.position, 0.5);
-  assert.equal(next.storey.windows[0]!.width, 1.2);
-  assert.equal(next.storey.windows[0]!.wallId, "wall-1");
+  assert.equal(storeyOf(next).windows[0]!.position, 0.5);
+  assert.equal(storeyOf(next).windows[0]!.width, 1.2);
+  assert.equal(storeyOf(next).windows[0]!.wallId, "wall-1");
 });
 
 test("invalid geometry rejects the whole command without mutation", () => {
@@ -100,8 +104,8 @@ test("diagonal wall length edit preserves start and direction", () => {
     end: { x: 5, y: 7 },
   });
   const next = previewCommand(p, wall, "Wandlänge 10 m").result;
-  assert.deepEqual(next.storey.walls[0]!.start, { x: 2, y: 3 });
-  assert.deepEqual(next.storey.walls[0]!.end, { x: 8, y: 11 });
+  assert.deepEqual(storeyOf(next).walls[0]!.start, { x: 2, y: 3 });
+  assert.deepEqual(storeyOf(next).walls[0]!.end, { x: 8, y: 11 });
 });
 
 test("offset text uses common cap, units and stable target context for both 2D types", () => {

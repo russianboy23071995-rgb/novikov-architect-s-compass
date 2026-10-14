@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { prepareTranslation } from "../src/domain/project/prepared-translation";
 import { connectedFixture } from "./connected-fixture";
 import { fullSelectionMove } from "./selection-move-oracle";
@@ -42,8 +43,8 @@ button.onclick = async () => {
         }
         if (
           local.path !== "local" ||
-          JSON.stringify(full.geometry.storey.walls) !==
-            JSON.stringify(local.project.storey.walls) ||
+          JSON.stringify(storeyOf(full.geometry).walls) !==
+            JSON.stringify(storeyOf(local.project).walls) ||
           JSON.stringify(validateProject(local.project)) !==
             JSON.stringify(fullSelectionMove(p, [{ kind: "wall", id }], point))
         )

@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -51,7 +52,7 @@ test("acute and obtuse automatic joins preserve shared solids, openings, files a
       ...dimensions,
     });
     const p = addWindow(joined, opening);
-    assert.equal(p.storey.wallJoins.length, 1);
+    assert.equal(storeyOf(p).wallJoins.length, 1);
     const bodies = connectedWallSolids(p);
     const expectedArea = 6 * 0.36 - 0.36 ** 2 * Math.tan(angle / 2);
     close(buildSolid(p).volume, expectedArea * 2.8 - 1.2 * 1.35 * 0.36);
@@ -71,14 +72,14 @@ test("acute and obtuse automatic joins preserve shared solids, openings, files a
     assert.equal((ifc.match(/=IFCARBITRARYCLOSEDPROFILEDEF\(/g) ?? []).length, 2);
     assert.equal((ifc.match(/=IFCRELVOIDSELEMENT\(/g) ?? []).length, 1);
     const detached = moveElement(p, { kind: "wall", id: "B" }, { x: 0, y: 1 });
-    assert.equal(detached.storey.wallJoins.length, 0);
+    assert.equal(storeyOf(detached).wallJoins.length, 0);
   }
 });
 
 test("drawing automatically stores exact endpoint connection, shared profiles and window cuts", async () => {
   const p = addWindow(pair(), opening),
     before = serializeProject(p);
-  assert.equal(p.storey.wallJoins.length, 1);
+  assert.equal(storeyOf(p).wallJoins.length, 1);
   const bodies = connectedWallSolids(p),
     solid = buildSolid(p);
   assert.equal(bodies.length, 2);
@@ -100,12 +101,12 @@ test("moving an axis onto another joins atomically; moving away restores straigh
   const joined = moveElement(base, { kind: "wall", id: "B" }, { x: -1, y: 0 });
   let history = commitProject(createHistory(base), joined);
   assert.equal(history.past.length, 1);
-  assert.equal(history.present.storey.wallJoins.length, 1);
+  assert.equal(storeyOf(history.present).wallJoins.length, 1);
   assert.deepEqual(undoProject(history).present, base);
   assert.deepEqual(redoProject(undoProject(history)).present, joined);
   const detached = moveElement(joined, { kind: "wall", id: "B" }, { x: 1, y: 0 });
   history = commitProject(history, detached);
-  assert.equal(detached.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(detached).wallJoins.length, 0);
   assert.equal(connectedWallSolids(detached).length, 0);
   close(buildSolid(detached).volume, 6 * 0.36 * 2.8);
   assert.deepEqual(undoProject(history).present, joined);
@@ -114,7 +115,7 @@ test("moving an axis onto another joins atomically; moving away restores straigh
 test("both ends of a wall retain their connections in a closed rectangle", () => {
   let p = addWall(pair(), { id: "C", start: { x: 3, y: 3 }, end: { x: 0, y: 3 }, ...dimensions });
   p = addWall(p, { id: "D", start: { x: 0, y: 3 }, end: { x: 0, y: 0 }, ...dimensions });
-  assert.equal(p.storey.wallJoins.length, 4);
+  assert.equal(storeyOf(p).wallJoins.length, 4);
   const solid = buildSolid(p);
   close(solid.volume, (3 * 3 - (3 - 0.72) ** 2) * 2.8);
   const restored = deserializeProject(serializeProject(p));
@@ -124,7 +125,7 @@ test("both ends of a wall retain their connections in a closed rectangle", () =>
 test("near endpoints and T contacts do not silently become end joins; ambiguous/unsupported joins reject", () => {
   for (const x of [3 + 1e-10, 1.5]) {
     const p = addWall(a(), { id: "B", start: { x, y: 0 }, end: { x, y: 3 }, ...dimensions });
-    assert.equal(p.storey.wallJoins.length, 0);
+    assert.equal(storeyOf(p).wallJoins.length, 0);
   }
   const p = pair(),
     before = serializeProject(p);
@@ -150,26 +151,28 @@ test("opening contact/collision rejects edits and joining, leaving input and his
     () => addWall(detached, { id: "B", start: { x: 3, y: 0 }, end: { x: 3, y: 3 }, ...dimensions }),
     /Fenster/,
   );
-  assert.equal(detached.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(detached).wallJoins.length, 0);
   assert.equal(serializeProject(p), before);
 });
 
 test("V5 migration does not auto-connect old touching walls; forged/stale/duplicate V6 links fail", () => {
   const p = pair();
-  const { references, wallTJunctions, wallJoins, ...storey } = p.storey;
+  const { references, wallTJunctions, wallJoins, ...storey } = storeyOf(p);
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 5, storey };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.deepEqual(migrated.storey.wallJoins, []);
-  assert.deepEqual(migrated.storey.walls, p.storey.walls);
-  assert.equal(updateWall(migrated, "A", { height: 3 }).storey.wallJoins.length, 0);
+  assert.equal(migrated.schemaVersion, 24);
+  assert.deepEqual(storeyOf(migrated).wallJoins, []);
+  assert.deepEqual(storeyOf(migrated).walls, storeyOf(p).walls);
+  assert.equal(storeyOf(updateWall(migrated, "A", { height: 3 })).wallJoins.length, 0);
   assert.throws(() => validateProject(old));
   assert.throws(() =>
-    validateProject({ ...p, storey: { ...p.storey, wallJoins: [...wallJoins, ...wallJoins] } }),
+    validateProject({
+      ...replaceStorey(p, { ...storeyOf(p), wallJoins: [...wallJoins, ...wallJoins] }),
+    }),
   );
   const stale = structuredClone(p);
-  stale.storey.walls[1]!.start.x = 4;
+  storeyOf(stale).walls[1]!.start.x = 4;
   assert.throws(() => validateProject(stale), /übereinstimmen/);
 });
 
@@ -181,10 +184,10 @@ test("snapping follows real connected corners while axis handles stay exact; vis
   assert.equal(joined.length, 4);
   for (const r of joined)
     assert.ok(bodies[0]!.contour.some((c) => c.x === r.point.x && c.y === r.point.y));
-  assert.equal(wallPlanHandles(p.storey.walls[0]!, true).length, 2);
+  assert.equal(wallPlanHandles(storeyOf(p).walls[0]!, true).length, 2);
   const hidden = structuredClone(p);
   const layer = hidden.layers.find((l) => l.id !== hidden.defaultLayerIds.wall)!;
-  hidden.storey.walls[1]!.layerId = layer.id;
+  storeyOf(hidden).walls[1]!.layerId = layer.id;
   const policy = createLayerVisibilityPolicy(hidden, {
     scope: { kind: "bim-project" },
     hiddenLayerIds: [layer.id],

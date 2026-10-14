@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { beginWallChain, appendWallChain, finishWallChain } from "./wall-chain.ts";
@@ -17,7 +18,7 @@ test("closed triangular wall chain composes two oblique ends per wall and undoes
   ].entries())
     chain = appendWallChain(chain, base, `wall-${i}`, point);
   const p = finishWallChain(chain, base);
-  assert.equal(p.storey.wallJoins.length, 3);
+  assert.equal(storeyOf(p).wallJoins.length, 3);
   const inradius = 12 / (4 + 2 * Math.sqrt(13));
   const expected = 6 * (1 - (1 - 0.36 / inradius) ** 2) * 2.8;
   assert.ok(Math.abs(buildSolid(p).volume - expected) < 1e-8);
@@ -42,12 +43,12 @@ test("closed wall chain is one atomic history action, persisted with stable IDs 
     chain = appendWallChain(chain, base, `wall-${i}`, point);
   assert.equal(serializeProject(base), before);
   assert.equal(history.past.length, 0);
-  assert.equal(chain.preview.storey.wallJoins.length, 4);
+  assert.equal(storeyOf(chain.preview).wallJoins.length, 4);
   assert.deepEqual(
-    chain.preview.storey.walls.map((w) => w.id),
+    storeyOf(chain.preview).walls.map((w) => w.id),
     chain.wallIds,
   );
-  assert.ok(chain.preview.storey.walls.every((w) => w.bodyOffset === 0.18));
+  assert.ok(storeyOf(chain.preview).walls.every((w) => w.bodyOffset === 0.18));
   const committed = commitProject(history, finishWallChain(chain, base));
   assert.equal(committed.past.length, 1);
   const undone = undoProject(committed);
@@ -71,12 +72,12 @@ test("invalid continuation preserves valid draft and allows correction; abandone
   ])
     assert.throws(() => appendWallChain(first, base, "b", point));
   assert.equal(serializeProject(first.preview), snapshot);
-  assert.equal(base.storey.walls.length, 0);
+  assert.equal(storeyOf(base).walls.length, 0);
   assert.equal(
-    appendWallChain(first, base, "b", { x: 3, y: 3 }).preview.storey.wallJoins.length,
+    storeyOf(appendWallChain(first, base, "b", { x: 3, y: 3 }).preview).wallJoins.length,
     1,
   );
-  assert.equal(finishWallChain(first, base).storey.walls.length, 1);
+  assert.equal(storeyOf(finishWallChain(first, base)).walls.length, 1);
   assert.throws(() => beginWallChain(base, { x: Infinity, y: 0 }));
 });
 
@@ -111,7 +112,7 @@ test("successive chain origins reuse the shared precision and snapping interacti
     { x: 3, y: 0 },
     { x: 3, y: 3 },
   ]);
-  assert.equal(chain.preview.storey.wallJoins.length, 1);
+  assert.equal(storeyOf(chain.preview).wallJoins.length, 1);
 });
 
 import { addWall } from "../../lib/bim/model.ts";
@@ -163,10 +164,10 @@ test("drawing T snap creates a persisted relation with one atomic undo and IFC",
   assert.equal(snap.candidate?.sourceFeature, "t-axis");
   assert.deepEqual(snap.point, { x: 3, y: 0 });
   adapter.validate(snap.point, snap.candidate);
-  assert.equal(base.storey.walls.length, 1);
+  assert.equal(storeyOf(base).walls.length, 1);
   const draft = appendWallChain(chain, base, "new", snap.point, snap.candidate);
   const p = finishWallChain(draft, base);
-  assert.equal(p.storey.wallTJunctions.length, 1);
+  assert.equal(storeyOf(p).wallTJunctions.length, 1);
   assert.deepEqual(deserializeProject(serializeProject(p)), p);
   assert.ok(buildSolid(p).volume > 0);
   assert.match(await exportIfc(p), /IFCWALL/);
@@ -180,7 +181,7 @@ test("drawing numeric coordinates alone do not create a T; stale intent is rejec
   const { base, chain, adapter, context } = tDrawing();
   const snap = adapter.snapping.resolve({ x: 3, y: 0 }, context);
   assert.equal(
-    appendWallChain(chain, base, "plain", snap.point).preview.storey.wallTJunctions.length,
+    storeyOf(appendWallChain(chain, base, "plain", snap.point).preview).wallTJunctions.length,
     0,
   );
   assert.throws(
@@ -246,7 +247,7 @@ test("T start snaps locally without pinning a fake origin and commits with one u
   assert.equal(chain.preview, base);
   const draft = appendWallChain(chain, base, "branch", { x: 2.4, y: -2 });
   const p = finishWallChain(draft, base);
-  assert.deepEqual(p.storey.wallTJunctions, [
+  assert.deepEqual(storeyOf(p).wallTJunctions, [
     { hostWallId: "host", incoming: { wallId: "branch", endpoint: 0 } },
   ]);
   assert.deepEqual(deserializeProject(serializeProject(p)), p);
@@ -264,7 +265,7 @@ test("T start validates both sides, rejects oblique and stale targets without mu
   const snap = wallStartSnapPolicy.resolve({ x: 2.4, y: 0 }, context);
   const chain = beginWallChain(base, snap.point, snap.candidate);
   assert.equal(
-    appendWallChain(chain, base, "upper", { x: 2.4, y: 2 }).preview.storey.wallTJunctions.length,
+    storeyOf(appendWallChain(chain, base, "upper", { x: 2.4, y: 2 }).preview).wallTJunctions.length,
     1,
   );
   assert.throws(() => appendWallChain(chain, base, "oblique", { x: 4, y: 2 }));
@@ -274,8 +275,9 @@ test("T start validates both sides, rejects oblique and stale targets without mu
     appendWallChain(chain, deserializeProject(serializeProject(base)), "stale", { x: 2.4, y: 2 }),
   );
   assert.equal(
-    appendWallChain(beginWallChain(base, snap.point), base, "plain", { x: 2.4, y: 2 }).preview
-      .storey.wallTJunctions.length,
+    storeyOf(
+      appendWallChain(beginWallChain(base, snap.point), base, "plain", { x: 2.4, y: 2 }).preview,
+    ).wallTJunctions.length,
     0,
   );
 });
@@ -309,15 +311,15 @@ test("wall body preview and placement produce identical T geometry without chang
   const snap = adapter.snapping.resolve({ x: 3, y: 0 }, context);
   const before = serializeProject(base);
   const preview = adapter.previewProject!(snap.point, snap.candidate);
-  const id = preview.storey.walls.find((w) => w.id !== "host")!.id;
+  const id = storeyOf(preview).walls.find((w) => w.id !== "host")!.id;
   const placed = appendWallChain(chain, base, id, snap.point, snap.candidate).preview;
   assert.deepEqual(preview, placed);
-  assert.equal(preview.storey.wallTJunctions.length, 1);
+  assert.equal(storeyOf(preview).wallTJunctions.length, 1);
   assert.equal(serializeProject(base), before);
   assert.equal(chain.wallIds.length, 0);
   assert.throws(() => adapter.previewProject!({ x: 4, y: 1 }, snap.candidate));
   assert.throws(() => adapter.validate({ x: 4, y: 1 }, snap.candidate));
-  assert.equal(adapter.previewProject!(snap.point, null).storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(adapter.previewProject!(snap.point, null)).wallTJunctions.length, 0);
 });
 
 test("start T preview validates numeric directions and preserves the accepted segment on rejection", () => {
@@ -325,12 +327,12 @@ test("start T preview validates numeric directions and preserves the accepted se
   const snap = wallStartSnapPolicy.resolve({ x: 2, y: 0 }, context);
   const chain = beginWallChain(base, snap.point, snap.candidate);
   const preview = previewWallChain(chain, base, { x: 2, y: 2 });
-  assert.equal(preview.storey.wallTJunctions[0]!.incoming.endpoint, 0);
+  assert.equal(storeyOf(preview).wallTJunctions[0]!.incoming.endpoint, 0);
   assert.throws(() => previewWallChain(chain, base, { x: 3, y: 2 }));
   assert.equal(chain.preview, base);
   const accepted = appendWallChain(chain, base, "new", { x: 2, y: 2 });
   assert.throws(() => previewWallChain(accepted, base, { x: 4, y: 2 }));
-  assert.equal(accepted.preview.storey.walls.length, 2);
+  assert.equal(storeyOf(accepted.preview).walls.length, 2);
   assert.throws(() =>
     previewWallChain(chain, deserializeProject(serializeProject(base)), { x: 2, y: 2 }),
   );
@@ -363,7 +365,7 @@ test("prepared first preview is session bound; next segment and confirmation ret
   const h = commitProject(createHistory(base), finishWallChain(final, base));
   assert.equal(h.past.length, 1);
   assert.deepEqual(undoProject(h).present, base);
-  assert.equal(base.storey.walls.length, 0);
+  assert.equal(storeyOf(base).walls.length, 0);
 });
 function validateProjectCopy(p: ReturnType<typeof createProject>) {
   return deserializeProject(serializeProject(p));

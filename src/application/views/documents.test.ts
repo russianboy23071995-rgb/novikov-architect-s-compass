@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { addWall } from "../../lib/bim/model.ts";
 import { ensureDocumentFolder } from "./documents.ts";
@@ -52,7 +53,7 @@ test("two documents share one source model, copy initial visibility and resolve 
     p = create(a, "doc-b", 200);
   assert.equal(p.modelViews!.length, 1);
   assert.equal(p.drawingDocuments!.length, 2);
-  assert.deepEqual(p.storey, base.storey);
+  assert.deepEqual(storeyOf(p), storeyOf(base));
   assert.deepEqual(p.drawingDocuments![0]!.hiddenLayerIds, hidden.bimVisibility.hiddenLayerIds);
   const shown = changeLayerVisibility(
     p,
@@ -109,10 +110,10 @@ test("document lifecycle uses project undo; visibility does not rewind with mode
   assert.equal(state.history.past.length, 2);
   const filter = state.history.present.drawingDocuments![0]!.hiddenLayerIds;
   state = editingReducer(state, { type: "undo", patternRecords: [] });
-  assert.equal(state.history.present.storey.walls[0]!.height, 2.8);
+  assert.equal(storeyOf(state.history.present).walls[0]!.height, 2.8);
   assert.deepEqual(state.history.present.drawingDocuments![0]!.hiddenLayerIds, filter);
   state = editingReducer(state, { type: "redo", patternRecords: [] });
-  assert.equal(state.history.present.storey.walls[0]!.height, 4);
+  assert.equal(storeyOf(state.history.present).walls[0]!.height, 4);
   state = editingReducer(state, {
     type: "document",
     base: state.history.present,
@@ -208,17 +209,17 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 23);
+  assert.equal(migrated.schemaVersion, 24);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
-  assert.deepEqual(migrated.storey, old.storey);
+  assert.deepEqual(storeyOf(migrated), storeyOf(old));
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...old, drawingDocuments: [] })));
   assert.throws(() => validateProject(old));
 });
 
 test("renaming and document scale use validated project history, with no geometry mutation", () => {
   let history = createHistory(create(createExampleProject()));
-  const before = history.present.storey;
+  const before = storeyOf(history.present);
   history = commitProject(
     history,
     changeDrawingDocument(history.present, history.present, {
@@ -235,7 +236,7 @@ test("renaming and document scale use validated project history, with no geometr
       denominator: 200,
     }),
   );
-  assert.deepEqual(history.present.storey, before);
+  assert.deepEqual(storeyOf(history.present), before);
   assert.equal(undoProject(history).present.drawingDocuments![0]!.denominator, 50);
   assert.equal(redoProject(undoProject(history)).present.drawingDocuments![0]!.denominator, 200);
 });
@@ -253,7 +254,7 @@ test("captured view framing and folder survive project history and file roundtri
     folderId: "folder",
     framing,
   });
-  assert.deepEqual(p.storey, base.storey);
+  assert.deepEqual(storeyOf(p), storeyOf(base));
   assert.deepEqual(p.drawingDocuments![0]!.framing, framing);
   assert.deepEqual(readProjectFile(serializeProject(p)), p);
   const renamed = changeDrawingDocument(p, p, {
@@ -288,7 +289,7 @@ test("captured view framing and folder survive project history and file roundtri
 test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
   const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
   const migrated = readProjectFile(legacyFixtureJSON(legacy));
-  assert.equal(migrated.schemaVersion, 23);
+  assert.equal(migrated.schemaVersion, 24);
   assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
   assert.equal(migrated.documentFolders, undefined);
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, documentFolders: [] })));
@@ -335,8 +336,8 @@ test("drawings created in documents are shared in display, picking, snapping and
     },
     view,
   );
-  assert.equal("documentId" in p.storey.lines![0]!, false);
-  assert.equal("documentId" in p.storey.hatches[0]!, false);
+  assert.equal("documentId" in storeyOf(p).lines![0]!, false);
+  assert.equal("documentId" in storeyOf(p).hatches[0]!, false);
   for (const [context, visible] of [
     [resolveWorkingView(p), true],
     [resolveDocumentView(p, documentBinding(p, "doc-b")), true],
@@ -375,18 +376,18 @@ test("drawings created in documents are shared in display, picking, snapping and
   ];
   const session = beginSelectionMove(p, targets, { x: 0, y: 0 }, policy);
   const moved = previewSelectionMove(session, p, targets, { x: 1, y: 2 }, policy);
-  assert.equal("documentId" in moved.storey.lines![0]!, false);
-  assert.equal("documentId" in moved.storey.hatches[0]!, false);
-  assert.deepEqual(moved.storey.lines![0]!.points[0], { x: 11, y: 12 });
+  assert.equal("documentId" in storeyOf(moved).lines![0]!, false);
+  assert.equal("documentId" in storeyOf(moved).hatches[0]!, false);
+  assert.deepEqual(storeyOf(moved).lines![0]!.points[0], { x: 11, y: 12 });
   assert.doesNotThrow(() =>
     beginSelectionMove(p, targets, { x: 0, y: 0 }, resolveWorkingView(p).visibility),
   );
   assert.deepEqual(readProjectFile(serializeProject(p)), p);
   const history = commitProject(createHistory(base), p);
-  assert.deepEqual(undoProject(history).present.storey, base.storey);
-  assert.deepEqual(redoProject(undoProject(history)).present.storey, p.storey);
+  assert.deepEqual(storeyOf(undoProject(history).present), storeyOf(base));
+  assert.deepEqual(storeyOf(redoProject(undoProject(history)).present), storeyOf(p));
   const deleted = changeDrawingDocument(p, p, { kind: "delete", id: "doc-a" });
-  assert.deepEqual(deleted.storey, p.storey);
+  assert.deepEqual(storeyOf(deleted), storeyOf(p));
   const hidden = changeLayerVisibility(
     p,
     p,
@@ -437,12 +438,12 @@ test("drawing creation rejects foreign/stale contexts and keeps shared geometry"
   const scoped = createDrawing(base, base, "a", request, documentBinding(base, "doc-a"));
   assert.doesNotThrow(() => validateProject({ ...scoped, drawingDocuments: [] }));
   assert.deepEqual(
-    readProjectFile(legacyFixtureJSON({ ...scoped, schemaVersion: 18 })).storey,
-    scoped.storey,
+    storeyOf(readProjectFile(legacyFixtureJSON({ ...scoped, schemaVersion: 18 }))),
+    storeyOf(scoped),
   );
   const legacy = readProjectFile(legacyFixtureJSON({ ...base, schemaVersion: 18 }));
-  assert.equal(legacy.schemaVersion, 23);
-  assert.deepEqual(legacy.storey, base.storey);
+  assert.equal(legacy.schemaVersion, 24);
+  assert.deepEqual(storeyOf(legacy), storeyOf(base));
   const wall = createDrawing(
     base,
     base,
@@ -450,14 +451,13 @@ test("drawing creation rejects foreign/stale contexts and keeps shared geometry"
     { kind: "wall", start: { x: 0, y: 5 }, end: { x: 3, y: 5 }, thickness: 0.3, height: 3 },
     documentBinding(base, "doc-a"),
   );
-  assert.equal("documentId" in wall.storey.walls.at(-1)!, false);
+  assert.equal("documentId" in storeyOf(wall).walls.at(-1)!, false);
   assert.throws(() =>
     validateProject({
-      ...wall,
-      storey: {
-        ...wall.storey,
-        walls: wall.storey.walls.map((w) => ({ ...w, documentId: "doc-a" })),
-      },
+      ...replaceStorey(wall, {
+        ...storeyOf(wall),
+        walls: storeyOf(wall).walls.map((w) => ({ ...w, documentId: "doc-a" })),
+      }),
     }),
   );
 });
@@ -486,9 +486,9 @@ test("v19 migration promotes former local lines and hatches without loss or dupl
     ...p,
     schemaVersion: 19,
     storey: {
-      ...p.storey,
-      lines: p.storey.lines!.map((l) => ({ ...l, documentId: "doc-a" })),
-      hatches: p.storey.hatches.map((h) => ({ ...h, documentId: "doc-a" })),
+      ...storeyOf(p),
+      lines: storeyOf(p).lines!.map((l) => ({ ...l, documentId: "doc-a" })),
+      hatches: storeyOf(p).hatches.map((h) => ({ ...h, documentId: "doc-a" })),
     },
   };
   const migrated = readProjectFile(legacyFixtureJSON(legacy));
@@ -510,7 +510,7 @@ test("folder assignment preserves document definition and geometry, roundtrips a
     id: "doc-a",
     folderId: "folder",
   });
-  assert.deepEqual(moved.storey, base.storey);
+  assert.deepEqual(storeyOf(moved), storeyOf(base));
   assert.deepEqual(moved.drawingDocuments![0], {
     ...base.drawingDocuments![0],
     folderId: "folder",
@@ -556,7 +556,7 @@ test("document settings are atomic, preserve view and model and reject invalid o
     denominator: 50,
     folderId: "folder",
   });
-  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(storeyOf(next), storeyOf(base));
   assert.deepEqual(readProjectFile(serializeProject(next)), next);
   const history = commitProject(createHistory(base), next);
   assert.deepEqual(undoProject(history).present, base);
@@ -577,7 +577,7 @@ test("only empty document folders can be deleted without affecting model or docu
   const next = changeDrawingDocument(base, base, { kind: "delete-folder", id: "folder" });
   assert.deepEqual(next.documentFolders, p.documentFolders ?? []);
   assert.deepEqual(next.drawingDocuments, base.drawingDocuments);
-  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(storeyOf(next), storeyOf(base));
   assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
   const occupied = changeDrawingDocument(base, base, {
     kind: "assign-folder",
@@ -594,7 +594,7 @@ test("application startup supplies one empty folder without rewriting legacy par
   const base = createExampleProject();
   const next = ensureDocumentFolder(base);
   assert.equal(next.documentFolders?.length, 1);
-  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(storeyOf(next), storeyOf(base));
   assert.equal(ensureDocumentFolder(next), next);
   assert.deepEqual(readProjectFile(serializeProject(next)), next);
   const collision = ensureDocumentFolder({ ...base, id: "document-folder-default" });
@@ -643,7 +643,7 @@ test("creation draft visibility belongs only to the new document and validates l
   const next = changeDrawingDocument(base, base, action);
   assert.deepEqual(next.drawingDocuments![0]!.hiddenLayerIds, hidden);
   assert.deepEqual(next.bimVisibility, base.bimVisibility);
-  assert.deepEqual(next.storey, base.storey);
+  assert.deepEqual(storeyOf(next), storeyOf(base));
   assert.deepEqual(readProjectFile(serializeProject(next)), next);
   assert.deepEqual(undoProject(commitProject(createHistory(base), next)).present, base);
   assert.throws(() =>
@@ -701,7 +701,7 @@ test("new layers remain hidden in Abbilder until drawing commits in one document
   );
   assert.deepEqual(committed.history.present.bimVisibility, before.bimVisibility);
   const undo = editingReducer(committed, { type: "undo" });
-  assert.equal(undo.history.present.storey.walls.length, before.storey.walls.length);
+  assert.equal(storeyOf(undo.history.present).walls.length, storeyOf(before).walls.length);
   assert.equal(undo.documentLayerActivation, undefined);
   assert.equal(editingReducer(undo, { type: "redo" }).documentLayerActivation, undefined);
   const outside = editingReducer(state, { type: "project", project: drawn });

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
@@ -82,7 +83,8 @@ test("reference selection draft, cancel, validation and clear never change commi
 });
 function fixture() {
   return validateProject({
-    schemaVersion: 23,
+    schemaVersion: 24,
+    groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],
     assets: [],
@@ -90,30 +92,32 @@ function fixture() {
     ...createStandardLayers([]),
     unit: "m",
     id: "refs",
-    storey: {
-      name: "Level 01",
-      height: null,
-      references: [],
-      hatches: [],
-      wallJoins: [],
-      wallTJunctions: [],
-      id: "s",
-      walls: [],
-      windows: [],
-      lines: Array.from({ length: 48 }, (_, i) => ({
-        id: "l" + i,
-        layerId: "layer:drawing",
-        kind: "polyline",
-        points: [
-          { x: -10, y: -i - 1 },
-          { x: 10, y: i + 1 },
-          { x: 20, y: i + 1 },
-        ],
-        color: "#334155",
-        penWidth: 0.25,
-        style: "solid",
-      })),
-    },
+    storeys: [
+      {
+        name: "Level 01",
+        height: null,
+        references: [],
+        hatches: [],
+        wallJoins: [],
+        wallTJunctions: [],
+        id: "s",
+        walls: [],
+        windows: [],
+        lines: Array.from({ length: 48 }, (_, i) => ({
+          id: "l" + i,
+          layerId: "layer:drawing",
+          kind: "polyline",
+          points: [
+            { x: -10, y: -i - 1 },
+            { x: 10, y: i + 1 },
+            { x: 20, y: i + 1 },
+          ],
+          color: "#334155",
+          penWidth: 0.25,
+          style: "solid",
+        })),
+      },
+    ],
   });
 }
 test("selected segment pairs before density guard; unrelated points and remote guides remain", () => {
@@ -223,7 +227,7 @@ test("point candidates obey host exclusions and snapshot invalidation without pa
   );
   const old = local.references[0]!;
   const changed = fixture();
-  changed.storey.lines![1]!.points[0]!.x += 1;
+  storeyOf(changed).lines![1]!.points[0]!.x += 1;
   const next = createLocalSnapSources(changed);
   assert.equal(next.lookup(referenceKey(old)), undefined);
 });

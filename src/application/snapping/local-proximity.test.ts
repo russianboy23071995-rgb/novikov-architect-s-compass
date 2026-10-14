@@ -20,7 +20,8 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 23,
+    schemaVersion: 24,
+    groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],
     assets: [],
@@ -28,29 +29,31 @@ function fixture(pairs: [number, number, number, number][]): Project {
     ...createStandardLayers([]),
     unit: "m",
     id: "proximity",
-    storey: {
-      name: "Level 01",
-      height: null,
-      references: [],
-      hatches: [],
-      wallJoins: [],
-      wallTJunctions: [],
-      id: "s",
-      walls: [],
-      windows: [],
-      lines: pairs.map(([x, y, a, b], i) => ({
-        id: `l${i}`,
-        layerId: "layer:drawing",
-        kind: "line",
-        points: [
-          { x, y },
-          { x: a, y: b },
-        ],
-        color: "#334155",
-        penWidth: 0.25,
-        style: "solid",
-      })),
-    },
+    storeys: [
+      {
+        name: "Level 01",
+        height: null,
+        references: [],
+        hatches: [],
+        wallJoins: [],
+        wallTJunctions: [],
+        id: "s",
+        walls: [],
+        windows: [],
+        lines: pairs.map(([x, y, a, b], i) => ({
+          id: `l${i}`,
+          layerId: "layer:drawing",
+          kind: "line",
+          points: [
+            { x, y },
+            { x: a, y: b },
+          ],
+          color: "#334155",
+          penWidth: 0.25,
+          style: "solid",
+        })),
+      },
+    ],
   };
 }
 

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { selectedWallAxis } from "./wall-axis.ts";
@@ -66,7 +67,7 @@ test("axis follows the shared move preview, cancellation, commit and undo/redo",
   });
   const preview = previewEdit(begin.session!, begin.history.present, selection, { x: 2, y: 1 });
   assert.notDeepEqual(axis(preview), axis());
-  assert.deepEqual(preview.storey.walls[0]!.start, { x: 2, y: 1 });
+  assert.deepEqual(storeyOf(preview).walls[0]!.start, { x: 2, y: 1 });
   assert.deepEqual(axis(editingReducer(begin, { type: "cancel" }).history.present), axis());
   const committed = editingReducer(begin, {
     type: "confirm",

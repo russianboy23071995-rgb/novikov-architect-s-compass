@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
@@ -129,15 +130,15 @@ for (const kind of ["hatch", "line"] as const)
     assert.deepEqual(deserializeProject(serializeProject(result.project)), result.project);
     assert.deepEqual(editingReducer(editing, { type: "cancel" }).history, initial.history);
     if (kind === "hatch")
-      assert.deepEqual(result.project.storey.hatches[0]!.contour, {
+      assert.deepEqual(storeyOf(result.project).hatches[0]!.contour, {
         visible: true,
         color: "#654321",
       });
     else {
-      assert.equal(result.project.storey.lines![0]!.style, "dashed");
+      assert.equal(storeyOf(result.project).lines![0]!.style, "dashed");
       assert.deepEqual(
-        result.project.storey.lines![0]!.points.at(-1),
-        result.project.storey.lines![0]!.points[0],
+        storeyOf(result.project).lines![0]!.points.at(-1),
+        storeyOf(result.project).lines![0]!.points[0],
       );
     }
   });

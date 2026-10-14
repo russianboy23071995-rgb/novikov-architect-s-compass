@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { isLayerVisible } from "../layers/visibility.ts";
@@ -9,7 +10,7 @@ import { contains } from "../../geometry/polygons/contains.ts";
 /** Prepare only visible, explicit, simple closed 2D contours once per model/context.
  * Nested hits resolve to smallest containing area; equal areas retain source order. */
 export function prepareHatchBoundaries(project: Project, visibility: LayerVisibilityPolicy) {
-  const contours = [...(project.storey.lines ?? []), ...project.storey.hatches]
+  const contours = [...(storeyOf(project).lines ?? []), ...storeyOf(project).hatches]
     .flatMap((line) => {
       const points = line.points;
       if (

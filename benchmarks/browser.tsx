@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { largePointFixture } from "./large-point-fixture";
 import { setSessionExtrusion } from "./extrusion-mode";
 import { tPairFixture } from "./t-pair-fixture";
@@ -59,7 +60,7 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
       y = Math.floor(i / 25) * 8;
     const a = `wall-${i * 2 + 1}`,
       b = `wall-${i * 2 + 2}`;
-    p.storey.walls.push(
+    storeyOf(p).walls.push(
       {
         id: a,
         layerId: p.defaultLayerIds.wall,
@@ -79,11 +80,11 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
         bodyOffset: 0,
       },
     );
-    p.storey.wallJoins.push({
+    storeyOf(p).wallJoins.push({
       first: { wallId: a, endpoint: 1 },
       second: { wallId: b, endpoint: 0 },
     });
-    p.storey.windows.push({
+    storeyOf(p).windows.push({
       id: `window-${i}`,
       wallId: a,
       layerId: p.defaultLayerIds.window,
@@ -93,9 +94,9 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
       position: 0.5,
     });
   }
-  p.storey.lines = [];
+  storeyOf(p).lines = [];
   for (let i = pairs * 3; i < count - (withImage ? 1 : 0); i++)
-    p.storey.lines.push({
+    storeyOf(p).lines!.push({
       id: `line-${i}`,
       layerId: p.defaultLayerIds.line,
       kind: "line",
@@ -113,7 +114,7 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
       pixelHeight: 1400,
       data: image(),
     });
-    p.storey.references.push({
+    storeyOf(p).references.push({
       id: "reference",
       kind: "image-reference",
       assetId: "image",
@@ -125,14 +126,14 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
   }
   if (dense) {
     // Twenty stationary branches on the first moving host, retaining its corner/window.
-    p.storey.lines.splice(-20);
-    p.storey.walls[0]!.end.x = 14.3;
-    p.storey.walls[1]!.start.x = 14.3;
-    p.storey.walls[1]!.end.x = 14.3;
+    storeyOf(p).lines!.splice(-20);
+    storeyOf(p).walls[0]!.end.x = 14.3;
+    storeyOf(p).walls[1]!.start.x = 14.3;
+    storeyOf(p).walls[1]!.end.x = 14.3;
     for (let i = 0; i < 20; i++) {
       const id = `branch-${i}`,
         x = 0.5 + i * 0.6;
-      p.storey.walls.push({
+      storeyOf(p).walls.push({
         id,
         layerId: p.defaultLayerIds.wall,
         start: { x, y: -2 },
@@ -141,7 +142,10 @@ function fixture(count: number, withImage: boolean, dense: boolean): Project {
         height: 2.8,
         bodyOffset: 0,
       });
-      p.storey.wallTJunctions.push({ hostWallId: "wall-1", incoming: { wallId: id, endpoint: 1 } });
+      storeyOf(p).wallTJunctions.push({
+        hostWallId: "wall-1",
+        incoming: { wallId: id, endpoint: 1 },
+      });
     }
   }
   return validateProject(p);
@@ -286,7 +290,7 @@ export function Harness() {
       if (!project) return;
       if (
         !tPair &&
-        selectedWalls > project.storey.walls.filter((w) => w.id.startsWith("wall-")).length
+        selectedWalls > storeyOf(project).walls.filter((w) => w.id.startsWith("wall-")).length
       )
         throw new Error("Load a larger fixture for this wall selection");
       movementReport = await runMovementProfile(

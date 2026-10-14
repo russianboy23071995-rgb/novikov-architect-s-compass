@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Project } from "../../lib/bim/model.ts";
@@ -64,7 +65,7 @@ export function projectSnapPrimitives(project: Project) {
     return refs;
   };
   const references: SnapReference[] = [
-    ...project.storey.walls.flatMap((wall) => {
+    ...storeyOf(project).walls.flatMap((wall) => {
       const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
       const body = wallBody(wall);
       return [
@@ -89,7 +90,7 @@ export function projectSnapPrimitives(project: Project) {
         ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
     }),
-    ...project.storey.hatches.flatMap((hatch) =>
+    ...storeyOf(project).hatches.flatMap((hatch) =>
       hatch.points.flatMap((point, index) => {
         const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;
         const after = hatch.points[(index + 1) % hatch.points.length]!;
@@ -104,7 +105,7 @@ export function projectSnapPrimitives(project: Project) {
         ];
       }),
     ),
-    ...(project.storey.lines ?? []).flatMap((line) => [
+    ...(storeyOf(project).lines ?? []).flatMap((line) => [
       ...line.points.map((point, index) => ({
         point: { ...point },
         entityId: line.id,

@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { sameSvgGeometry } from "./svg-geometry-equality";
 /** Untimed DOM comparison with the frozen full-project path, not the preview producer. */
 import type { Project, Point } from "../src/domain/project/schema";
@@ -7,17 +8,17 @@ import { wallBody } from "../src/domain/elements/wall/body";
 import { wallPlanOutlines } from "../src/rendering/viewport/wall-plan-outline";
 
 export function checkMovementGeometry(base: Project, delta: Point, selectedCount = 20) {
-  const targets = base.storey.walls
-    .slice(0, selectedCount)
+  const targets = storeyOf(base)
+    .walls.slice(0, selectedCount)
     .map((w) => ({ kind: "wall" as const, id: w.id }));
   const expected = fullSelectionMove(base, targets, delta);
   const solids = new Map(connectedWallSolids(expected).map((s) => [s.wallId, s]));
-  const outlines = wallPlanOutlines(expected, new Set(expected.storey.walls.map((w) => w.id)));
+  const outlines = wallPlanOutlines(expected, new Set(storeyOf(expected).walls.map((w) => w.id)));
   const equal = (actual: string | null | undefined, value: string, label: string) => {
     if (!sameSvgGeometry(actual, value))
       throw new Error(`Full-path DOM mismatch: ${label}; actual=${actual}; expected=${value}`);
   };
-  for (const wall of expected.storey.walls) {
+  for (const wall of storeyOf(expected).walls) {
     const matches = document.querySelectorAll(`[aria-label="Select wall ${wall.id}"]`);
     if (matches.length !== 1) throw new Error(`Expected one rendered wall: ${wall.id}`);
     const polygon = matches[0]!;
@@ -52,8 +53,8 @@ export function checkMovementGeometry(base: Project, delta: Point, selectedCount
       `${wall.id} outline`,
     );
   }
-  for (const opening of expected.storey.windows) {
-    const wall = expected.storey.walls.find((w) => w.id === opening.wallId)!;
+  for (const opening of storeyOf(expected).windows) {
+    const wall = storeyOf(expected).walls.find((w) => w.id === opening.wallId)!;
     const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
     const rect = document.querySelector(`[aria-label="Select window ${opening.id}"]`);
     for (const [key, value] of Object.entries({
@@ -65,9 +66,9 @@ export function checkMovementGeometry(base: Project, delta: Point, selectedCount
       equal(rect?.getAttribute(key), String(value), `${opening.id} ${key}`);
   }
   return {
-    walls: expected.storey.walls.length,
-    windows: expected.storey.windows.length,
-    retainedCorners: expected.storey.wallJoins.length,
-    retainedTees: expected.storey.wallTJunctions.length,
+    walls: storeyOf(expected).walls.length,
+    windows: storeyOf(expected).windows.length,
+    retainedCorners: storeyOf(expected).wallJoins.length,
+    retainedTees: storeyOf(expected).wallTJunctions.length,
   };
 }

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { capturePlanFraming } from "@/rendering/viewport/plan-camera";
 import { createPortal } from "react-dom";
@@ -172,7 +173,7 @@ export function CadViewport({
       ? `Abbild · ${model.project.drawingDocuments?.find((d) => d.id === binding.documentId)?.name ?? ""}`
       : is3D
         ? "3D model · Orthographic"
-        : `${model.project.storey.name} · Plan`;
+        : `${storeyOf(model.project).name} · Plan`;
   return (
     <section
       className={cn(
@@ -316,7 +317,7 @@ export function CadViewport({
         {is3D && (
           <>
             <Crosshair className="size-3 text-primary" />
-            <span>3D Orthographic · {model.project.storey.name} ·</span>
+            <span>3D Orthographic · {storeyOf(model.project).name} ·</span>
           </>
         )}
         {is3D ? (

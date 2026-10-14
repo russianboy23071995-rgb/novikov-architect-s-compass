@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -87,8 +88,8 @@ test("project palette is portable and changes never recolor existing lines", () 
     pens: defaultPenSet.pens.map((p) => (p.id === "red" ? { ...p, color: "#112233" } : p)),
   };
   const next = assignPenSet(p, p, changed);
-  assert.deepEqual(next.storey, p.storey);
-  assert.equal(next.storey.lines![0]!.color, "#dc2626");
+  assert.deepEqual(storeyOf(next), storeyOf(p));
+  assert.equal(storeyOf(next).lines![0]!.color, "#dc2626");
   assert.equal(assignPenSet(next, next, changed), next);
   assert.throws(() => assignPenSet(p, next, changed), /geändert/);
 });
@@ -107,8 +108,8 @@ test("direct color property commits once, supports Undo/Redo and no-op adds no h
   const before = createHistory(p);
   const changed = commitProject(before, updateLine(p, "l", { color: "#112233" }));
   assert.equal(changed.past.length, 1);
-  assert.equal(undoProject(changed).present.storey.lines![0]!.color, "#000000");
-  assert.equal(redoProject(undoProject(changed)).present.storey.lines![0]!.color, "#112233");
+  assert.equal(storeyOf(undoProject(changed).present).lines![0]!.color, "#000000");
+  assert.equal(storeyOf(redoProject(undoProject(changed)).present).lines![0]!.color, "#112233");
   assert.equal(
     commitProject(changed, updateLine(changed.present, "l", { color: "#112233" })),
     changed,
@@ -120,8 +121,8 @@ test("strict schema 13 migration retains geometry and rejects future palette fie
   const p = createProject("p", "s");
   const old = { ...p, schemaVersion: 13 };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.deepEqual(migrated.storey, p.storey);
+  assert.equal(migrated.schemaVersion, 24);
+  assert.deepEqual(storeyOf(migrated), storeyOf(p));
   assert.equal(migrated.penSet, undefined);
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, penSet: defaultPenSet })));
 });

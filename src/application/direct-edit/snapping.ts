@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { tAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
@@ -18,7 +19,7 @@ export function editSnapReferences(
 ): SnapReference[] {
   const host =
     session.target.kind === "window"
-      ? session.base.storey.windows.find((w) => w.id === session.target.id)?.wallId
+      ? storeyOf(session.base).windows.find((w) => w.id === session.target.id)?.wallId
       : null;
   return references.filter((r) =>
     [r, ...(r.dependencies ?? [])].every(
@@ -30,8 +31,8 @@ export function editSnapReferences(
 export function editDirection(session: EditSession): Point2 | null {
   if (session.action === "offset") return offsetDirection(session);
   if (session.target.kind === "window") {
-    const window = session.base.storey.windows.find((w) => w.id === session.target.id)!;
-    const wall = session.base.storey.walls.find((w) => w.id === window.wallId)!;
+    const window = storeyOf(session.base).windows.find((w) => w.id === session.target.id)!;
+    const wall = storeyOf(session.base).walls.find((w) => w.id === window.wallId)!;
     return { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
   }
   if (session.action === "edge") {

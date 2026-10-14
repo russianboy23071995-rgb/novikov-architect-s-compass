@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewEdit } from "../../application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -286,7 +287,7 @@ test("wall creation consumes shared guide intersection with one undo and JSON ro
   assert.equal(history.past.length, 1);
   assert.deepEqual(undoProject(history).present, project);
   const loaded = readProjectFile(serializeProject(redoProject(undoProject(history)).present));
-  assert.deepEqual(loaded.storey.walls[0]!.end, { x: 3.027, y: 1.013 });
+  assert.deepEqual(storeyOf(loaded).walls[0]!.end, { x: 3.027, y: 1.013 });
 });
 
 test("Shift locks all eight directions even with grid disabled, and release restores free snapping", () => {
@@ -435,7 +436,7 @@ test("guide-derived model coordinates survive commit, undo, redo and JSON", () =
   assert.equal(history.past.length, 1);
   assert.deepEqual(undoProject(history).present, project);
   const restored = readProjectFile(serializeProject(redoProject(undoProject(history)).present));
-  assert.equal(restored.storey.lines![0]!.points[1]!.y, a.point.y);
+  assert.equal(storeyOf(restored).lines![0]!.points[1]!.y, a.point.y);
   assert.equal(JSON.stringify(restored).includes("activeReference"), false);
 });
 
@@ -516,7 +517,10 @@ test("model adapter and snapped line workflow preserve exact point, ID, undo and
     ...defaultLineAppearance,
   };
   const committed = commitProject(history, addLine(history.present, line));
-  assert.deepEqual(committed.present.storey.lines![0]!.points[0], project.storey.walls[0]!.end);
+  assert.deepEqual(
+    storeyOf(committed.present).lines![0]!.points[0],
+    storeyOf(project).walls[0]!.end,
+  );
   assert.equal(committed.past.length, 1);
   assert.deepEqual(undoProject(committed).present, project);
   assert.deepEqual(

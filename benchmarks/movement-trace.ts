@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 // Loaded only by the diagnostic Vite configuration, never by product imports.
 import { isManualCaptureActive, recordManualPhase } from "./manual-capture";
 export type MovementSample = {
@@ -35,9 +36,10 @@ export function tracePhase<T>(phase: string, fn: () => T): T {
     const result = fn();
     if (sample && phase === "selection-preview") {
       const p = (
-        result as { geometry: { storey?: { walls?: { start: { x: number; y: number } }[] } } }
+        result as { geometry: { storey: { walls?: { start: { x: number; y: number } }[] } } }
       ).geometry;
-      if (p.storey?.walls?.[0]) sample.previewStart = { ...p.storey.walls[0].start };
+      const start = storeyOf(p)?.walls?.[0]?.start;
+      if (start) sample.previewStart = { ...start };
     }
     return result;
   } finally {

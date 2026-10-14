@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { addWall } from "../../lib/bim/model.ts";
@@ -61,7 +62,7 @@ test("overlapping walls use the same nearest depth as picking regardless of face
 
 test("orbit reverses occlusion; pan and zoom use the current projection", () => {
   const project = createExampleProject();
-  project.storey.windows = [];
+  storeyOf(project).windows = [];
   const solid = buildSolid(project);
   for (const zoom of [0.7, 1.2])
     for (const pitch of [0, 0.15]) {

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { addWall, addWindow, createProject } from "../../lib/bim/model.ts";
@@ -18,7 +19,7 @@ function fixture() {
     { id: "C", start: { x: 8, y: 0 }, end: { x: 11, y: 0 } },
   ])
     p = addWall(p, { ...wall, thickness: 0.36, height: 2.8 });
-  p.storey.wallJoins = []; // Explicit acceptance path, independent from automatic joins.
+  storeyOf(p).wallJoins = []; // Explicit acceptance path, independent from automatic joins.
   return addWindow(p, {
     id: "window",
     wallId: "A",
@@ -67,7 +68,7 @@ test("isolated T IFC shares identities, cuts both touching windows and leaves or
   assert.deepEqual(identities(result), identities(normal));
   assert.deepEqual(p, before);
   assert.equal(await exportIfc(p, date), normal);
-  assert.equal(p.storey.wallJoins.length, 0);
+  assert.equal(storeyOf(p).wallJoins.length, 0);
 });
 
 test("T acceptance export snapshots inputs and permits crossing contacts", async () => {
@@ -76,7 +77,7 @@ test("T acceptance export snapshots inputs and permits crossing contacts", async
     target = { wallId: "incoming", endpoint: 1 as const };
   const expected = await exportTJunctionIfc(p, "host", target, d);
   const pending = exportTJunctionIfc(p, "host", target, d);
-  p.storey.windows[0]!.position = 0.5;
+  storeyOf(p).windows[0]!.position = 0.5;
   d.setFullYear(2040);
   assert.equal(await pending, expected);
   assert.ok((await exportTJunctionIfc(p, "host", target, date)).includes("IFCWINDOW("));
@@ -109,19 +110,19 @@ test("corner IFC snapshots input and date before asynchronous GUID hashing", asy
     d = new Date(date),
     expected = await exportCornerIfc(p, ...targets, d);
   const pending = exportCornerIfc(p, ...targets, d);
-  p.storey.walls[0]!.height = 7;
-  p.storey.windows[0]!.width = 0.5;
+  storeyOf(p).walls[0]!.height = 7;
+  storeyOf(p).windows[0]!.width = 0.5;
   d.setFullYear(2040);
   assert.equal(await pending, expected);
 });
 test("unsupported openings and invalid target fail without fallback geometry", async () => {
   const p = fixture();
   await assert.rejects(exportCornerIfc(p, { wallId: "missing", endpoint: 0 }, targets[1], date));
-  p.storey.windows[0]!.position = 2.22 / 3;
+  storeyOf(p).windows[0]!.position = 2.22 / 3;
   await assert.rejects(exportCornerIfc(p, ...targets, date), /touching/);
-  p.storey.windows[0]!.position = 0.79;
+  storeyOf(p).windows[0]!.position = 0.79;
   await assert.rejects(exportCornerIfc(p, ...targets, date), /outside/);
-  p.storey.walls[0]!.height = -1;
+  storeyOf(p).walls[0]!.height = -1;
   await assert.rejects(exportCornerIfc(p, ...targets, date));
 });
 test("shared writer rejects unknown and invalid profile overrides", async () => {

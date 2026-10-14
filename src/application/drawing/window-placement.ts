@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { precisionTarget } from "../input/precision.ts";
 import { parseMetres } from "../../core/units/metres.ts";
@@ -30,8 +31,8 @@ export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimens
 }
 
 function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
-  const hosts = project.storey.walls
-    .filter((w) => isLayerVisible(project, visibility, w.id))
+  const hosts = storeyOf(project)
+    .walls.filter((w) => isLayerVisible(project, visibility, w.id))
     .flatMap((wall) => {
       const body = wallBody(wall);
       const direction = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
@@ -80,7 +81,9 @@ export function placeWindow(
     throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
   if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
   const wall = hostId
-    ? current.storey.walls.find((w) => w.id === hostId && isLayerVisible(current, visibility, w.id))
+    ? storeyOf(current).walls.find(
+        (w) => w.id === hostId && isLayerVisible(current, visibility, w.id),
+      )
     : null;
   if (hostId && !wall) throw new Error("Gewählte Wand ist nicht mehr verfügbar.");
   const body = wall ? wallBody(wall) : null;
@@ -120,7 +123,7 @@ export function windowPlacementInteraction(
   settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
   hostId?: string,
 ): ToolInteraction {
-  const wall = hostId ? base.storey.walls.find((w) => w.id === hostId) : null;
+  const wall = hostId ? storeyOf(base).walls.find((w) => w.id === hostId) : null;
   if (hostId && !wall) throw new Error("Gewählte Wand fehlt.");
   const body = wall ? wallBody(wall) : null;
   const direction = wall ? { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y } : null;

@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import { createExampleProject } from "../src/components/cad/bim-view.ts";
 import { ensureDocumentFolder } from "../src/application/views/documents.ts";
 import { validateProject, type Project } from "../src/domain/project/schema.ts";
@@ -5,12 +6,10 @@ import { createImageAssetHandle, type ImageAsset } from "../src/domain/elements/
 
 export function recoveryFixture(id: string, count: number, image?: ImageAsset): Project {
   const base = ensureDocumentFolder({ ...createExampleProject(), id });
-  const layerId = base.storey.walls[0]!.layerId;
+  const layerId = storeyOf(base).walls[0]!.layerId;
   return validateProject({
-    ...base,
-    assets: image ? [createImageAssetHandle(image)] : [],
-    storey: {
-      ...base.storey,
+    ...replaceStorey(base, {
+      ...storeyOf(base),
       lines: Array.from({ length: count }, (_, i) => ({
         id: `line-${i}`,
         kind: "line" as const,
@@ -36,7 +35,8 @@ export function recoveryFixture(id: string, count: number, image?: ImageAsset): 
             },
           ]
         : [],
-    },
+    }),
+    assets: image ? [createImageAssetHandle(image)] : [],
   });
 }
 export function summary(values: number[]) {

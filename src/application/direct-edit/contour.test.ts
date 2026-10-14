@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { boundedEdgeTarget } from "./contour.ts";
@@ -35,7 +36,7 @@ test("session cap reuses bounded targets without leaking mutable outputs or stal
   first.y = 999;
   assert.deepEqual(boundedEdgeTarget(session, raw), expected);
   const fresh = { ...session, base: base() };
-  fresh.base.storey.lines![0]!.points = rectangle(2);
+  storeyOf(fresh.base).lines![0]!.points = rectangle(2);
   const changed = boundedEdgeTarget(fresh, raw);
   assert.ok(changed.y > 1.9 && changed.y < 2);
   assert.deepEqual(boundedEdgeTarget(session, raw), expected);

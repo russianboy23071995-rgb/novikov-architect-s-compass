@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile, tick } from "./capacity";
 import { importImage } from "../src/interop/images/import";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
@@ -13,7 +14,7 @@ button.onclick = async () => {
     for (let i = 0; i < 3; i++) {
       const asset = await importImage(await sourceFile(i), `asset-${i}`);
       project.assets.push(asset);
-      project.storey.references.push({
+      storeyOf(project).references.push({
         id: `ref-${i}`,
         kind: "image-reference",
         layerId: project.defaultLayerIds.line,

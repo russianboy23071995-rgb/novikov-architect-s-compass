@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -134,8 +135,8 @@ test("3D axis/stretch use the existing fixed direction ahead of Shift/Ortho and 
           assert.deepEqual(state.history.present, preview);
           assert.equal(state.history.past.length, 1);
           const changed = state.history.present,
-            wall = changed.storey.walls[0]!,
-            before = base.storey.walls[0]!;
+            wall = storeyOf(changed).walls[0]!,
+            before = storeyOf(base).walls[0]!;
           if (action === "stretch") {
             assert.deepEqual(
               index === 0 ? wall.end : wall.start,
@@ -154,7 +155,7 @@ test("3D axis/stretch use the existing fixed direction ahead of Shift/Ortho and 
           }
           assert.equal(wall.thickness, 0.36);
           assert.equal(wall.height, 2.8);
-          assert.deepEqual(changed.storey.windows, base.storey.windows);
+          assert.deepEqual(storeyOf(changed).windows, storeyOf(base).windows);
           assert.deepEqual(deserializeProject(serializeProject(changed)), changed);
           const undone = editingReducer(state, { type: "undo" });
           assert.deepEqual(undone.history.present, base);
@@ -207,7 +208,7 @@ test("3D stretch rejects window conflict and crossing the opposite end without a
     );
     assert.equal(state.session, session);
     confirmInteraction(tool, evaluateInteraction(tool, "", "1", null).value!.point);
-    assert.equal(wallLength(state.history.present.storey.walls[0]!), 4);
+    assert.equal(wallLength(storeyOf(state.history.present).walls[0]!), 4);
     assert.equal(state.history.past.length, 1);
   }
 });
@@ -299,14 +300,14 @@ test("picked 3D corners reuse polar input, offset geometry, pinned inference and
     assert.equal(state.history.past.length, 1);
     const edited = state.history.present;
     assert.deepEqual(edited, preview);
-    const wall = edited.storey.walls[0]!;
+    const wall = storeyOf(edited).walls[0]!;
     assert.deepEqual(
       index === 0 ? wall.end : wall.start,
-      index === 0 ? base.storey.walls[0]!.end : base.storey.walls[0]!.start,
+      index === 0 ? storeyOf(base).walls[0]!.end : storeyOf(base).walls[0]!.start,
     );
     assert.equal(wall.thickness, 0.36);
     assert.equal(wall.height, 2.8);
-    assert.deepEqual(edited.storey.windows, base.storey.windows);
+    assert.deepEqual(storeyOf(edited).windows, storeyOf(base).windows);
     const physicalCorner = projectSnapPrimitives(edited).references.find(
       (r) => r.feature === feature,
     )!.point;
@@ -365,7 +366,7 @@ test("3D corner rejects impossible targets and too-short walls without losing th
   }
   assert.equal(evaluateInteraction(tool, "180", "2.5", null).value, null);
   confirmInteraction(tool, { x: 4, y: -0.18 });
-  assert.equal(wallLength(state.history.present.storey.walls[0]!), 4);
+  assert.equal(wallLength(storeyOf(state.history.present).walls[0]!), 4);
   assert.equal(state.history.past.length, 1);
 });
 
@@ -433,9 +434,9 @@ test("3D move uses the shared validated transaction, host opening, JSON and IFC"
   assert.deepEqual(moved, preview);
   assert.equal(state.history.past.length, 1);
   assert.equal(state.session, null);
-  assert.equal(moved.storey.walls[0]!.start.y, 1);
-  assert.equal(moved.storey.walls[0]!.end.y, 1);
-  assert.deepEqual(moved.storey.windows, project.storey.windows);
+  assert.equal(storeyOf(moved).walls[0]!.start.y, 1);
+  assert.equal(storeyOf(moved).walls[0]!.end.y, 1);
+  assert.deepEqual(storeyOf(moved).windows, storeyOf(project).windows);
   assert.equal(buildSolid(moved).min[2], 0);
   assert.equal(buildSolid(moved).max[2], 2.8);
   assert.ok(Math.abs(buildSolid(moved).min[1] - buildSolid(project).min[1] - 1) < 1e-9);

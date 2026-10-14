@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
@@ -64,8 +65,10 @@ test("prepared writer produces byte-identical snapshots to full path, including 
     );
     for (const height of [3, 4, 5]) {
       const next = {
-        ...project,
-        storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height })) },
+        ...replaceStorey(project, {
+          ...storeyOf(project),
+          walls: storeyOf(project).walls.map((w) => ({ ...w, height })),
+        }),
       };
       await saveRecovery(next, full.port, instant);
       await writer.save(next, () => true, instant);
@@ -118,8 +121,10 @@ test("prepared writer rejects unknown corruption, wrong identity and invalid new
     /Projektkontext/,
   );
   const invalid = {
-    ...project,
-    storey: { ...project.storey, walls: project.storey.walls.map((w) => ({ ...w, height: -1 })) },
+    ...replaceStorey(project, {
+      ...storeyOf(project),
+      walls: storeyOf(project).walls.map((w) => ({ ...w, height: -1 })),
+    }),
   };
   await assert.rejects(writer.save(invalid, () => true));
   assert.equal(store.get(), before);
@@ -176,7 +181,7 @@ test("empty store and explicit snapshot roundtrip retain portable model data", a
   await saveRecovery(project, store.port, instant);
   const recovered = await readRecovery(store.port);
   assert.equal(recovered?.savedAt, instant.toISOString());
-  assert.deepEqual(recovered?.project.storey, project.storey);
+  assert.deepEqual(storeyOf(recovered?.project), storeyOf(project));
   assert.equal(recovered?.fallback, false);
 });
 

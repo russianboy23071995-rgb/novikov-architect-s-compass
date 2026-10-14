@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -134,11 +135,11 @@ test("two-wall 3D parallel workflow: acquire, precise preview, cancel, commit, u
   assert.deepEqual(state.history.present, preview);
   assert.equal(state.history.past.length, 1);
   const moved = state.history.present,
-    wall = moved.storey.walls[0]!;
+    wall = storeyOf(moved).walls[0]!;
   assert.ok(Math.abs(wall.start.x - 2) < 1e-9 && Math.abs(wall.start.y - 1.5) < 1e-9);
   assert.ok(Math.abs(wall.end.x - 5) < 1e-9 && Math.abs(wall.end.y - 1.5) < 1e-9);
-  assert.deepEqual(moved.storey.walls[1], before.storey.walls[1]);
-  assert.deepEqual(moved.storey.windows, before.storey.windows);
+  assert.deepEqual(storeyOf(moved).walls[1], storeyOf(before).walls[1]);
+  assert.deepEqual(storeyOf(moved).windows, storeyOf(before).windows);
   state = editingReducer(state, { type: "undo" });
   assert.deepEqual(state.history.present, before);
   state = editingReducer(state, { type: "redo" });

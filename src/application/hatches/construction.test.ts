@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { rectangleContour, prepareHatchBoundaries } from "./construction.ts";
@@ -85,8 +86,8 @@ test("boundary picking uses explicit visible closed polygons, smallest nested co
     points: pick({ x: 1.5, y: 1.5 }),
     fill: { color: "#123456", opacity: 0.4 },
   });
-  assert.equal(next.storey.hatches.length, 1);
-  assert.equal(p.storey.hatches.length, 0);
+  assert.equal(storeyOf(next).hatches.length, 1);
+  assert.equal(storeyOf(p).hatches.length, 0);
   assert.throws(() =>
     createDrawing(p, next, "stale", {
       kind: "hatch",

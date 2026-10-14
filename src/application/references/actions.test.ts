@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -51,12 +52,12 @@ test("reference import is atomic, portable, immutable and one undo/redo step", (
   assert.deepEqual(undoProject(next).present, h.present);
   assert.deepEqual(redoProject(undoProject(next)).present, next.present);
   request.reference.origin.x = 99;
-  assert.equal(next.present.storey.references[0]!.origin.x, 3);
+  assert.equal(storeyOf(next.present).references[0]!.origin.x, 3);
 });
 test("V8 migrates strictly without inventing assets and keeps source unchanged", () => {
   const { base } = setup();
   const { assets, hatchPatterns, ...root } = base;
-  const { references, ...storey } = base.storey;
+  const { references, ...storey } = storeyOf(base);
   const old = { ...root, schemaVersion: 8, storey };
   const before = legacyFixtureJSON(old);
   assert.deepEqual(loadProjectData(legacyProjectFixture(old)), base);
@@ -70,7 +71,7 @@ test("invalid identities, asset links, layers and stale imports fail atomically"
   for (const r of [
     { ...request, projectId: "other" },
     { ...request, asset: { ...request.asset, id: base.id } },
-    { ...request, reference: { ...request.reference, id: base.storey.id } },
+    { ...request, reference: { ...request.reference, id: storeyOf(base).id } },
     { ...request, reference: { ...request.reference, assetId: "missing" } },
     { ...request, reference: { ...request.reference, layerId: "missing" } },
   ])

@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -18,7 +19,7 @@ test("a foot corner behind a window is visible, closing the opening occludes it"
     height: 2.8,
     thickness: 0.36,
   });
-  const closed = { ...open, storey: { ...open.storey, windows: [] } };
+  const closed = { ...replaceStorey(open, { ...storeyOf(open), windows: [] }) };
   for (const [project, visibility] of [
     [open, "visible"],
     [closed, "occluded"],

@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject } from "../../lib/bim/model.ts";
@@ -48,9 +49,9 @@ test("closed drawing uses the same numeric and snap origin contract, then commit
   const created = createDrawing(p, p, "h", request);
   const next = editingReducer(state, { type: "project", project: created });
   assert.equal(next.history.past.length, 1);
-  assert.deepEqual(next.history.present.storey.hatches[0]!.points, points);
+  assert.deepEqual(storeyOf(next.history.present).hatches[0]!.points, points);
   const undo = editingReducer(next, { type: "undo" });
-  assert.equal(undo.history.present.storey.hatches.length, 0);
+  assert.equal(storeyOf(undo.history.present).hatches.length, 0);
   assert.deepEqual(editingReducer(undo, { type: "redo" }).history.present, next.history.present);
   assert.deepEqual(readProjectFile(serializeProject(next.history.present)), next.history.present);
 });
@@ -61,14 +62,14 @@ test("explicit closing point is normalized once; invalid and stale finishes neve
   assert.deepEqual(closedDrawingContour(closed), points);
   assert.equal(closed.length, 5);
   assert.deepEqual(
-    createDrawing(p, p, "h", { ...request, points: closed }).storey.hatches[0]!.points,
+    storeyOf(createDrawing(p, p, "h", { ...request, points: closed })).hatches[0]!.points,
     points,
   );
   for (const ring of [[], points.slice(0, 2), [points[0]!, points[2]!, points[1]!, points[3]!]]) {
     assert.throws(() => createDrawing(p, p, "h", { ...request, points: ring }));
   }
   assert.throws(() => createDrawing(p, structuredClone(p), "h", request));
-  assert.equal(p.storey.hatches.length, 0);
+  assert.equal(storeyOf(p).hatches.length, 0);
 });
 
 test("hatch vertices and every closed edge feed the shared local source query; hidden layer removes them", () => {
@@ -117,7 +118,7 @@ test("hatch selection supports layer assignment and plan extents without becomin
     selection: target,
     layerId: layer,
   });
-  assert.equal(assigned.history.present.storey.hatches[0]!.layerId, layer);
+  assert.equal(storeyOf(assigned.history.present).hatches[0]!.layerId, layer);
   assert.equal(assigned.history.past.length, 1);
   assert.equal(planBounds(p), "-1.5 -3.5 6 5");
   assert.throws(() => previewCommand(p, target, "Wandlänge auf 6 m"));
@@ -159,17 +160,17 @@ test("hatch direct edit shares all six actions, every vertex, pinned origin and 
       );
       adapter.validate(numeric.point);
       const next = editAtPointer(session, session.base, numeric.point);
-      const result = next.storey.hatches[0]!;
+      const result = storeyOf(next).hatches[0]!;
       const delta = { x: numeric.point.x - anchor.x, y: numeric.point.y - anchor.y };
       result.points.forEach((point, i) => {
         const moves = (action !== "point" && action !== "stretch") || i === index;
         assert.ok(Math.abs(point.x - points[i]!.x - (moves ? delta.x : 0)) < 1e-10);
         assert.ok(Math.abs(point.y - points[i]!.y - (moves ? delta.y : 0)) < 1e-10);
       });
-      assert.deepEqual(result.fill, p.storey.hatches[0]!.fill);
-      assert.equal(result.layerId, p.storey.hatches[0]!.layerId);
+      assert.deepEqual(result.fill, storeyOf(p).hatches[0]!.fill);
+      assert.equal(result.layerId, storeyOf(p).hatches[0]!.layerId);
       assert.equal(result.id, "h");
-      assert.deepEqual(p.storey.hatches[0]!.points, points);
+      assert.deepEqual(storeyOf(p).hatches[0]!.points, points);
       const committed = editingReducer(state, {
         type: "confirm",
         session,

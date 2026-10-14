@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { startSelectionVoice, type VoiceSelectionContext } from "./selection-voice.ts";
@@ -83,8 +84,8 @@ test("group speech produces exactly the text preview, leaves model unchanged and
   assert.equal(s.recognition.aborted, true);
   assert.equal(s.ended(), 1);
   assert.equal(
-    applySelectionCommand(c.project, c.targets, c.visibility, s.previews[0]!).storey.walls[0]!.start
-      .y,
+    storeyOf(applySelectionCommand(c.project, c.targets, c.visibility, s.previews[0]!)).walls[0]!
+      .start.y,
     2,
   );
 });

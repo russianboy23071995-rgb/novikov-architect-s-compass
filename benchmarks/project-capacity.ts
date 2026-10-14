@@ -1,3 +1,4 @@
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { createBoundedRecoveryCodec } from "../src/interop/project-file/recovery-codec";
 import { PROJECT_FILE_LIMIT } from "../src/interop/project-file/size";
 import { assertProjectFileSize } from "../src/interop/project-file/size";
@@ -80,7 +81,7 @@ run.onclick = async () => {
             data: canvas.toDataURL("image/png").split(",")[1]!,
           }),
         );
-        p.storey.references.push({
+        storeyOf(p).references.push({
           id: `r${i}`,
           kind: "image-reference",
           assetId: `a${i}`,
@@ -104,7 +105,7 @@ run.onclick = async () => {
       check(serializeProject(opened.project) === text, "Dateiöffnung vollständig identisch"),
     );
     let history = await phase("History anlegen", () => createHistory(opened.project));
-    const wall = history.present.storey.walls[0]!;
+    const wall = storeyOf(history.present).walls[0]!;
     const candidate = updateWall(history.present, wall.id, { height: wall.height + 0.1 });
     const baselineCommit = () => {
       const next = validateProject(candidate);

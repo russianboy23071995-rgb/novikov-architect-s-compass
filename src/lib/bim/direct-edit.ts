@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewContourOffset } from "../../application/direct-edit/offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { previewContourEdge } from "../../application/direct-edit/contour.ts";
@@ -25,8 +26,8 @@ export type EditSession = {
 export function editAnchor(project: Project, target: EditTarget): Point {
   if (target.kind !== "window")
     return editablePoints(project, { kind: target.kind, id: target.id })[0]!;
-  const opening = project.storey.windows.find((item) => item.id === target.id);
-  const wall = project.storey.walls.find((item) => item.id === opening?.wallId);
+  const opening = storeyOf(project).windows.find((item) => item.id === target.id);
+  const wall = storeyOf(project).walls.find((item) => item.id === opening?.wallId);
   if (!opening || !wall) throw new Error("Fenster nicht gefunden.");
   return windowCentre(project, opening.id);
 }
@@ -43,8 +44,8 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
   if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
     throw new Error("Ungültige Zielposition.");
   if (target.kind === "window") {
-    const opening = base.storey.windows.find((item) => item.id === target.id)!;
-    const wall = base.storey.walls.find((item) => item.id === opening.wallId)!;
+    const opening = storeyOf(base).windows.find((item) => item.id === target.id)!;
+    const wall = storeyOf(base).walls.find((item) => item.id === opening.wallId)!;
     return moveWindowAlongWall(
       base,
       target.id,
@@ -71,7 +72,7 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
   if (action === "point" || action === "stretch") {
     if (index === null) throw new Error("Zuerst einen Punktgriff anklicken.");
     if (target.kind === "wall" && action === "point") {
-      const wall = base.storey.walls.find((item) => item.id === target.id)!;
+      const wall = storeyOf(base).walls.find((item) => item.id === target.id)!;
       const length = Math.hypot(vector.x, vector.y);
       for (const side of [-1, 1]) {
         const offset = wallBody(wall).sideOffset(side) * (i === 0 ? -1 : 1);

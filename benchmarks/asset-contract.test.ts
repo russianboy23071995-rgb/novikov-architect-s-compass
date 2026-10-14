@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject, serializeProject } from "../src/lib/bim/model.ts";
@@ -16,7 +17,7 @@ function fixture() {
   const p = createProject("p", "s");
   for (const id of ["a", "b"]) {
     p.assets.push({ id, mimeType: "image/png", pixelWidth: 1, pixelHeight: 1, data: png });
-    p.storey.references.push({
+    storeyOf(p).references.push({
       id: `r-${id}`,
       kind: "image-reference",
       layerId: p.defaultLayerIds.line,
@@ -38,7 +39,7 @@ test("content dedup preserves distinct asset IDs and exact portable legacy round
   );
   assert.equal(doc.model.assets[0]!.key, doc.model.assets[1]!.key);
   assert.deepEqual(restoreProject(await unpack(pack(doc))), p);
-  assert.ok(Object.isFrozen(doc.model.storey.references[0]));
+  assert.ok(Object.isFrozen(storeyOf(doc.model).references[0]));
   assert.ok(Object.isFrozen(Object.values(doc.blobs)[0]));
 });
 test("missing, corrupted and duplicate payloads and unknown versions fail closed", async () => {
@@ -77,7 +78,7 @@ test("asset payload remains reachable from earlier immutable snapshots", async (
   const doc = await splitProject(fixture());
   const removed = {
     ...doc,
-    model: { ...doc.model, assets: [], storey: { ...doc.model.storey, references: [] } },
+    model: { ...replaceStorey(doc.model, { ...storeyOf(doc.model), references: [] }), assets: [] },
   };
   assert.equal(restoreProject(removed).assets.length, 0);
   assert.equal(restoreProject(doc).assets.length, 2);

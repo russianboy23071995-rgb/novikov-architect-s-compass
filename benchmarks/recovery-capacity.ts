@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import { recoveryFixture, summary } from "./recovery-capacity-fixture";
 import { validateProject, type Project } from "../src/domain/project/schema";
 import { serializeProject } from "../src/lib/bim/model";
@@ -103,11 +104,10 @@ function image(side: number): ImageAsset {
   };
 }
 const updated = (project: Project, run: number) => ({
-  ...project,
-  storey: {
-    ...project.storey,
-    walls: project.storey.walls.map((w) => ({ ...w, height: 2.8 + (run + 1) / 100 })),
-  },
+  ...replaceStorey(project, {
+    ...storeyOf(project),
+    walls: storeyOf(project).walls.map((w) => ({ ...w, height: 2.8 + (run + 1) / 100 })),
+  }),
 });
 function render(rows: { name: string; bytes: number; samples: Sample[] }[]) {
   const target = document.querySelector<HTMLElement>("#results")!;

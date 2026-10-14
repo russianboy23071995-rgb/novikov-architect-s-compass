@@ -1,3 +1,4 @@
+import { storeyOf } from "../../storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { inspectCornerOpenings, type CornerTarget } from "./corner-openings.ts";
@@ -28,7 +29,7 @@ const project = (a = 0, b = 0) => {
     },
   );
   // This suite inspects an explicit pair without a persisted connection.
-  result.storey.wallJoins = [];
+  storeyOf(result).wallJoins = [];
   return result;
 };
 const opening = (id: string, wallId: string, position: number) => ({
@@ -112,13 +113,13 @@ test("reports survive rotation, reflection, translation and reversed wall direct
             x: 1000 + Math.cos(angle) * q.x - Math.sin(angle) * q.y * mirror,
             y: -2000 + Math.sin(angle) * q.x + Math.cos(angle) * q.y * mirror,
           });
-          next.storey.walls = next.storey.walls.map((w, i) => ({
+          storeyOf(next).walls = storeyOf(next).walls.map((w, i) => ({
             ...w,
             start: transform(mask & (1 << i) ? w.end : w.start),
             end: transform(mask & (1 << i) ? w.start : w.end),
             bodyOffset: w.bodyOffset * mirror * (mask & (1 << i) ? -1 : 1),
           }));
-          next.storey.windows = next.storey.windows.map((w) => ({
+          storeyOf(next).windows = storeyOf(next).windows.map((w) => ({
             ...w,
             position: mask & (w.wallId === "A" ? 1 : 2) ? 1 - w.position : w.position,
           }));
@@ -159,10 +160,10 @@ test("only requested hosts assessed, hidden layers still checked, fresh geometry
   assert.equal(report(p).openings[0]!.status, "touching");
   assert.throws(() => inspectCornerOpenings(p, { wallId: "missing", endpoint: 0 }, targets[1]));
   const bad = structuredClone(p);
-  bad.storey.windows[0]!.width = -1;
+  storeyOf(bad).windows[0]!.width = -1;
   assert.throws(() => report(bad));
   const high = structuredClone(p);
-  high.storey.windows[0]!.height = 5;
+  storeyOf(high).windows[0]!.height = 5;
   assert.throws(() => report(high));
 });
 

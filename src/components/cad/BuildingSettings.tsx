@@ -1,83 +1,147 @@
-import { BuildingHeightSection } from "./BuildingHeightSection";
 import { useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import { resolveStoreyLevels } from "@/domain/storeys/heights";
+import { changeBuilding, type BuildingChange } from "@/application/storeys/actions";
+import { BuildingHeightSection } from "./BuildingHeightSection";
 import { FloatingPanel } from "./FloatingPanel";
 import { SettingsSections } from "./SettingsSections";
 
-type Field = "ground" | "upper" | "height";
-const format = (value: number | null) =>
-  value === null
+type Field = "height" | "elevation" | "name" | "top";
+const format = (v: number | null) =>
+  v === null
     ? ""
-    : value.toLocaleString("de-DE", {
+    : v.toLocaleString("de-DE", {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 20,
+        maximumFractionDigits: 12,
         useGrouping: false,
       });
 export function BuildingSettings({
   project,
   onClose,
-  onHeight,
-  onDatum,
+  onAction,
 }: {
   project: Project;
   onClose: () => void;
-  onHeight: (base: Project, height: number) => void;
-  onDatum: (base: Project, elevation: number) => void;
+  onAction: (base: Project, change: BuildingChange) => void;
 }) {
-  const [draft, setDraft] = useState<{ base: Project; value: string; field: Field } | null>(null);
-  const upper = resolveStoreyLevels([project.storey], project.storey.id, project.groundDatum)[0]!
-    .upperElevation;
-  const parsed = draft ? Number(draft.value.replace(",", ".")) : NaN;
-  const height = draft?.field === "upper" ? parsed - project.groundDatum : parsed;
-  const invalid =
-    !!draft &&
-    (!draft.value.trim() ||
-      !Number.isFinite(parsed) ||
-      (draft.field !== "ground" && (!Number.isFinite(height) || height <= 0)));
-  const stale = draft !== null && draft.base !== project;
-  const commit = () => {
-    if (!draft || stale || invalid) return;
-    if (draft.field === "ground") onDatum(draft.base, parsed);
-    else onHeight(draft.base, height);
-    setDraft(null);
+  const [draft, setDraft] = useState<{
+    base: Project;
+    storeyId: string;
+    field: Field;
+    value: string;
+  } | null>(null);
+  const [adding, setAdding] = useState<{
+    base: Project;
+    storeyId: string;
+    side: "above" | "below";
+    height: string;
+  } | null>(null);
+  const [error, setError] = useState("");
+  const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
+  const submit = (base: Project, change: BuildingChange) => {
+    try {
+      changeBuilding(base, project, change);
+      onAction(base, change);
+      setError("");
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
   };
-  const input = (field: Field, label: string, value: number | null) => (
+  const commit = () => {
+    if (!draft) return;
+    const number = Number(draft.value.replace(",", "."));
+    if (!draft.value.trim() || (draft.field !== "name" && !Number.isFinite(number))) {
+      setError("Bitte einen gültigen Wert eingeben.");
+      return;
+    }
+    const request = { projectId: draft.base.id, storeyId: draft.storeyId };
+    let change: BuildingChange;
+    if (draft.field === "name")
+      change = { kind: "name", request: { ...request, name: draft.value } };
+    else if (draft.field === "elevation")
+      change = { kind: "elevation", request: { ...request, elevation: number } };
+    else {
+      const lower = levels.find((l) => l.storeyId === draft.storeyId)!.elevation;
+      if (draft.field === "top" && lower === null) {
+        setError("Zunächst die darunterliegenden Geschosshöhen festlegen.");
+        return;
+      }
+      change = {
+        kind: "height",
+        request: { ...request, height: draft.field === "top" ? number - lower! : number },
+      };
+    }
+    if (submit(draft.base, change)) setDraft(null);
+  };
+  const input = (id: string, field: Field, label: string, value: number | string | null) => (
     <span className="flex items-center gap-1 rounded border bg-background px-2 py-1">
       <input
         aria-label={label}
         className="min-w-0 w-full bg-transparent font-mono text-xs outline-none focus-visible:ring-1 focus-visible:ring-primary"
-        inputMode="decimal"
-        value={draft?.field === field ? draft.value : format(value)}
+        inputMode={field === "name" ? "text" : "decimal"}
+        maxLength={field === "name" ? 120 : undefined}
+        value={
+          draft?.storeyId === id && draft.field === field
+            ? draft.value
+            : typeof value === "string"
+              ? value
+              : format(value)
+        }
         placeholder="Nicht festgelegt"
-        aria-invalid={draft?.field === field && (invalid || stale)}
-        onChange={(e) =>
+        onChange={(e) => {
+          setError("");
           setDraft({
-            base: draft?.field === field ? draft.base : project,
+            base: draft?.storeyId === id && draft.field === field ? draft.base : project,
+            storeyId: id,
             field,
             value: e.target.value,
-          })
-        }
+          });
+        }}
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
             commit();
           }
-          if (e.key === "Escape") setDraft(null);
+          if (e.key === "Escape") {
+            e.preventDefault();
+            setDraft(null);
+            setError("");
+          }
         }}
       />
-      <span className="text-xs text-muted-foreground">m</span>
+      {field !== "name" && <span className="text-xs text-muted-foreground">m</span>}
     </span>
   );
+  const insertion = (id: string, side: "above" | "below", name: string) => (
+    <button
+      type="button"
+      className="w-full rounded border px-1 py-1 text-[10px] hover:bg-muted"
+      aria-label={`Geschoss ${side === "above" ? "darüber" : "darunter"} hinzufügen: ${name}`}
+      onClick={() => {
+        setError("");
+        setAdding({
+          base: project,
+          storeyId: id,
+          side,
+          height: format(project.storeys.find((s) => s.id === id)!.height),
+        });
+      }}
+    >
+      {side === "above" ? "↑ Geschoss darüber" : "↓ Geschoss darunter"}
+    </button>
+  );
+  const top = project.storeys.at(-1)!;
   return (
     <FloatingPanel
       open
       centered
       title="Gebäudestruktur – Einstellungen"
       onClose={onClose}
-      width={840}
-      height={680}
+      width={920}
+      height={820}
     >
       <SettingsSections
         sections={[
@@ -86,35 +150,103 @@ export function BuildingSettings({
             label: "Allgemeine Gebäudestruktur",
             content: (
               <>
-                <p>{project.storey.name} · Höhenbezug an der Oberkante Rohdecke des EG.</p>
+                <p>
+                  Höhenbezug: OK Rohdecke Erdgeschoss. Neue Geschosse erhalten eine eigene Höhe.
+                </p>
+                {adding && (
+                  <form
+                    className="space-y-2 rounded border bg-background p-3"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!adding.height.trim()) {
+                        setError("Die Höhe des neuen Geschosses fehlt.");
+                        return;
+                      }
+                      if (
+                        submit(adding.base, {
+                          kind: "insert",
+                          request: {
+                            projectId: adding.base.id,
+                            storeyId: adding.storeyId,
+                            side: adding.side,
+                            id: crypto.randomUUID(),
+                            height: Number(adding.height.replace(",", ".")),
+                          },
+                        })
+                      )
+                        setAdding(null);
+                    }}
+                  >
+                    <p>
+                      Neues Geschoss {adding.side === "above" ? "oberhalb" : "unterhalb"} von{" "}
+                      {adding.base.storeys.find((s) => s.id === adding.storeyId)?.name}
+                    </p>
+                    <label className="flex items-center gap-2">
+                      Geschosshöhe
+                      <input
+                        autoFocus
+                        aria-label="Höhe des neuen Geschosses (m)"
+                        inputMode="decimal"
+                        className="w-24 rounded border px-2 py-1"
+                        value={adding.height}
+                        onChange={(e) => setAdding({ ...adding, height: e.target.value })}
+                      />{" "}
+                      m
+                    </label>
+                    <button
+                      type="submit"
+                      className="rounded bg-primary px-3 py-1 text-xs text-primary-foreground"
+                    >
+                      Hinzufügen
+                    </button>{" "}
+                    <button
+                      type="button"
+                      className="rounded border px-3 py-1 text-xs"
+                      onClick={() => {
+                        setAdding(null);
+                        setError("");
+                      }}
+                    >
+                      Abbrechen
+                    </button>
+                  </form>
+                )}
+                {error && (
+                  <p role="alert" className="text-destructive">
+                    {error}
+                  </p>
+                )}
                 <BuildingHeightSection
-                  storeys={[
-                    {
-                      id: project.storey.id,
-                      name: project.storey.name,
-                      elevationInput: input("ground", "EG Bezugshöhe (m)", project.groundDatum),
-                      heightInput: input("height", "Geschosshöhe (m)", project.storey.height),
-                    },
-                  ]}
-                  topInput={input("upper", "Obere Höhenkote (m)", upper)}
+                  topInput={input(
+                    top.id,
+                    "top",
+                    "Obere Höhenkote (m)",
+                    levels.at(-1)!.upperElevation,
+                  )}
+                  storeys={project.storeys.map((s, i) => ({
+                    id: s.id,
+                    name: s.name,
+                    nameInput: input(s.id, "name", `Geschossname ${s.name}`, s.name),
+                    heightInput: input(s.id, "height", `Geschosshöhe ${s.name} (m)`, s.height),
+                    elevationInput: input(
+                      s.id,
+                      "elevation",
+                      s.id === project.groundStoreyId
+                        ? "EG Bezugshöhe (m)"
+                        : `Höhenkote ${s.name} (m)`,
+                      levels[i]!.elevation,
+                    ),
+                    aboveControl: insertion(s.id, "above", s.name),
+                    belowControl: insertion(s.id, "below", s.name),
+                  }))}
                 />
-                {invalid && (
-                  <p role="alert">
-                    Endliche Höhenkote erforderlich. Die obere Kote muss über der EG-Kote liegen.
-                  </p>
-                )}
-                {stale && (
-                  <p role="alert">
-                    Das Projekt wurde geändert. Escape drücken und erneut eingeben.
-                  </p>
-                )}
                 <p className="text-muted-foreground">
-                  Die EG-Kote legt den Höhenbezug fest. Ihre Änderung erhält die Geschosshöhe und
-                  verschiebt die obere Kote.
+                  Höhenänderungen werden vom EG aus nach oben bzw. unten fortgeschrieben. Die
+                  EG-Kote erhält die Geschosshöhen. Rückgängig über das Projekt-Undo.
                 </p>
                 <p className="text-muted-foreground">
-                  Gültige Eingaben werden mit Enter oder beim Verlassen des Feldes übernommen.
-                  Rückgängig über das Projekt-Undo.
+                  Dieser Schritt verwaltet die Gebäudestruktur. Gezeichnet wird weiterhin im
+                  bisherigen Erdgeschoss; die Geschosswahl zum Zeichnen folgt.
                 </p>
               </>
             ),

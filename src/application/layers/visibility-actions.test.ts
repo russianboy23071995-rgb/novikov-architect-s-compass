@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -29,7 +30,7 @@ test("model undo/redo and palette undo/redo remain independent, including an exi
   const hidden = hide(moved);
   assert.equal(hidden.history.past.length, 1);
   const undone = editingReducer(hidden, { type: "undo" });
-  assert.equal(undone.history.present.storey.walls[0]!.end.x, 3);
+  assert.equal(storeyOf(undone.history.present).walls[0]!.end.x, 3);
   assert.deepEqual(undone.history.present.bimVisibility.hiddenLayerIds, [
     undone.history.present.defaultLayerIds.wall,
   ]);
@@ -37,10 +38,10 @@ test("model undo/redo and palette undo/redo remain independent, including an exi
   assert.deepEqual(shown.history.present.bimVisibility.hiddenLayerIds, []);
   assert.equal(shown.history.future, undone.history.future);
   const redone = editingReducer(shown, { type: "redo" });
-  assert.equal(redone.history.present.storey.walls[0]!.end.x, 6);
+  assert.equal(storeyOf(redone.history.present).walls[0]!.end.x, 6);
   assert.deepEqual(redone.history.present.bimVisibility.hiddenLayerIds, []);
   const hiddenAgain = palette(redone, "redo");
-  assert.equal(hiddenAgain.history.present.storey.walls[0]!.end.x, 6);
+  assert.equal(storeyOf(hiddenAgain.history.present).walls[0]!.end.x, 6);
   assert.equal(hiddenAgain.history.present.bimVisibility.hiddenLayerIds.length, 1);
   assert.equal(hide(hiddenAgain), hiddenAgain); // no-op leaves both histories untouched
 });
@@ -56,7 +57,7 @@ test("visibility cancels a pending preview and rejects its late commit; model an
   const hidden = hide(edit);
   assert.equal(hidden.session, null);
   assert.equal(hidden.history.past.length, 0);
-  assert.deepEqual(hidden.history.present.storey, edit.history.present.storey);
+  assert.deepEqual(storeyOf(hidden.history.present), storeyOf(edit.history.present));
   const late = editingReducer(hidden, {
     type: "confirm",
     session: edit.session!,
@@ -80,15 +81,15 @@ test("visibility cancels a pending preview and rejects its late commit; model an
 
 test("strict version-2 migration preserves geometry and membership and defaults visibility to all-visible", () => {
   const { assets, hatchPatterns, bimVisibility, ...data } = createExampleProject();
-  const { references, hatches, wallTJunctions, wallJoins, ...oldStorey } = data.storey;
+  const { references, hatches, wallTJunctions, wallJoins, ...oldStorey } = storeyOf(data);
   const v2 = {
     ...data,
     storey: { ...oldStorey, walls: oldStorey.walls.map(({ bodyOffset, ...wall }) => wall) },
     schemaVersion: 2,
   };
   const migrated = loadProjectData(legacyProjectFixture(v2));
-  assert.equal(migrated.schemaVersion, 23);
-  assert.deepEqual(migrated.storey, {
+  assert.equal(migrated.schemaVersion, 24);
+  assert.deepEqual(storeyOf(migrated), {
     ...oldStorey,
     references: [],
     hatches: [],
@@ -202,7 +203,7 @@ test("toolbar operations change the complete layer catalogue atomically in palet
     apply(partial, { kind: "invert" }).history.present.bimVisibility,
     others.history.present.bimVisibility,
   );
-  assert.deepEqual(all.history.present.storey, p.storey);
+  assert.deepEqual(storeyOf(all.history.present), storeyOf(p));
 });
 
 test("toolbar operations reject unknown layer IDs and stale project bindings", () => {

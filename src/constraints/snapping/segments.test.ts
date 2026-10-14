@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { intersectSegments } from "../../geometry/intersections/segments.ts";
@@ -105,8 +106,7 @@ test("polyline self-crossings and source order retain a deterministic target", (
     line("b", [p(1, -2), p(1, 1)]),
   );
   const reversed = {
-    ...first,
-    storey: { ...first.storey, lines: [...first.storey.lines!].reverse() },
+    ...replaceStorey(first, { ...storeyOf(first), lines: [...storeyOf(first).lines!].reverse() }),
   };
   assert.deepEqual(
     projectSnapReferences(first).filter((r) => r.kind === "segment-intersection"),

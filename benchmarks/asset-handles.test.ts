@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -25,7 +26,7 @@ function fixture(trusted = false) {
     ...defaultLineAppearance,
   });
   p.assets.push(trusted ? createImageAssetHandle(asset) : { ...asset });
-  p.storey.references.push({
+  storeyOf(p).references.push({
     id: "r",
     kind: "image-reference",
     layerId: p.defaultLayerIds.line,
@@ -81,23 +82,24 @@ test("trusted assets never bypass model reference or geometry validation", () =>
   const invalid = [
     { ...p, assets: [{ ...p.assets[0]!, data: "!!!!" }] },
     {
-      ...p,
-      storey: { ...p.storey, references: [{ ...p.storey.references[0]!, assetId: "missing" }] },
+      ...replaceStorey(p, {
+        ...storeyOf(p),
+        references: [{ ...storeyOf(p).references[0]!, assetId: "missing" }],
+      }),
     },
     {
-      ...p,
-      storey: {
-        ...p.storey,
+      ...replaceStorey(p, {
+        ...storeyOf(p),
         lines: [
           {
-            ...p.storey.lines![0]!,
+            ...storeyOf(p).lines![0]!,
             points: [
               { x: 0, y: 0 },
               { x: 0, y: 0 },
             ],
           },
         ],
-      },
+      }),
     },
     { ...p, assets: [...p.assets, ...p.assets] },
   ];

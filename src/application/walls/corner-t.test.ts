@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import {
   beginWallChain,
   appendWallChain,
@@ -55,8 +56,8 @@ for (const offset of [-0.18, 0, 0.18])
         const { p, before } = fixture(offset, side, angle);
         for (const id of ["H", "E"])
           assert.deepEqual(connectedWallContours(p).get(id), connectedWallContours(before).get(id));
-        assert.equal(p.storey.wallJoins.length, 1);
-        assert.equal(p.storey.wallTJunctions.length, 1);
+        assert.equal(storeyOf(p).wallJoins.length, 1);
+        assert.equal(storeyOf(p).wallTJunctions.length, 1);
         assert.deepEqual(deserializeProject(serializeProject(p)), p);
         for (const s of connectedWallSolids(p))
           assert.deepEqual(s.contour, connectedWallContours(p).get(s.wallId));
@@ -78,8 +79,8 @@ test("mixed corner and T: windows cross T, corner clipping remains forbidden, JS
   });
   for (const position of [0.3, 0.5, 0.7]) {
     const moved = updateWindow(p, "F", { position });
-    assert.equal(moved.storey.windows[0]!.wallId, "H");
-    assert.deepEqual(moved.storey.wallTJunctions, p.storey.wallTJunctions);
+    assert.equal(storeyOf(moved).windows[0]!.wallId, "H");
+    assert.deepEqual(storeyOf(moved).wallTJunctions, storeyOf(p).wallTJunctions);
   }
   // At the corner, this offset leaves the window on the miter's inner vertex.
   assert.throws(() => updateWindow(p, "F", { position: 0.1 }));
@@ -99,20 +100,20 @@ test("mixed corner and T: windows cross T, corner clipping remains forbidden, JS
 test("mixed connections resize at fixed T anchor and detach only affected relations on translation", () => {
   const { p } = fixture();
   const enlarged = updateWall(p, "H", { end: { x: 18, y: -20 } });
-  assert.deepEqual(enlarged.storey.wallTJunctions, p.storey.wallTJunctions);
+  assert.deepEqual(storeyOf(enlarged).wallTJunctions, storeyOf(p).wallTJunctions);
   assert.deepEqual(
-    enlarged.storey.walls.find((w) => w.id === "N"),
-    p.storey.walls.find((w) => w.id === "N"),
+    storeyOf(enlarged).walls.find((w) => w.id === "N"),
+    storeyOf(p).walls.find((w) => w.id === "N"),
   );
   const shortened = updateWall(p, "H", { end: { x: 12, y: -20 } });
-  assert.equal(shortened.storey.wallTJunctions.length, 0);
-  assert.equal(shortened.storey.wallJoins.length, 1);
+  assert.equal(storeyOf(shortened).wallTJunctions.length, 0);
+  assert.equal(storeyOf(shortened).wallJoins.length, 1);
   const moved = moveElement(p, { kind: "wall", id: "N" }, { x: 1, y: 0 });
-  assert.equal(moved.storey.wallTJunctions.length, 0);
-  assert.equal(moved.storey.wallJoins.length, 1);
+  assert.equal(storeyOf(moved).wallTJunctions.length, 0);
+  assert.equal(storeyOf(moved).wallJoins.length, 1);
   const host = moveElement(p, { kind: "wall", id: "H" }, { x: 1, y: 0 });
-  assert.equal(host.storey.wallJoins.length, 0);
-  assert.equal(host.storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(host).wallJoins.length, 0);
+  assert.equal(storeyOf(host).wallTJunctions.length, 0);
   const snapshot = serializeProject(p);
   assert.throws(() => updateWall(p, "E", { end: { x: 11, y: -17 } }));
   assert.equal(serializeProject(p), snapshot);
@@ -138,7 +139,7 @@ test("T near inner miter, touching corner partner, and excluded topologies fail 
     end: { x: 0.73, y: 0 },
     ...dimensions,
   });
-  assert.equal(previewTConnection(clear, clear, request).storey.wallTJunctions.length, 1);
+  assert.equal(storeyOf(previewTConnection(clear, clear, request)).wallTJunctions.length, 1);
   const { before } = fixture();
   const two = addWall(before, {
     id: "E2",
@@ -146,7 +147,7 @@ test("T near inner miter, touching corner partner, and excluded topologies fail 
     end: { x: 16, y: -17 },
     ...dimensions,
   });
-  assert.equal(previewTConnection(two, two, request).storey.wallJoins.length, 2);
+  assert.equal(storeyOf(previewTConnection(two, two, request)).wallJoins.length, 2);
   const incomingCorner = addWall(before, {
     id: "E3",
     start: { x: 13, y: -23 },
@@ -166,15 +167,17 @@ test("mixed plan outlines hide both contact seams, hidden partners restore host 
     edges.reduce((sum, e) => sum + Math.hypot(e.end.x - e.start.x, e.end.y - e.start.y), 0);
   assert.ok(length(all.get("H")!) < length(hostOnly.get("H")!) - 0.7);
   assert.equal(hostOnly.get("H")!.length, 4);
-  assert.equal(p.storey.wallJoins.length, 1);
-  assert.equal(p.storey.wallTJunctions.length, 1);
+  assert.equal(storeyOf(p).wallJoins.length, 1);
+  assert.equal(storeyOf(p).wallTJunctions.length, 1);
 });
 
 test("shared drawing adapter previews and commits T on a corner host, with one undo", () => {
   const { before } = fixture();
   const base = {
-    ...before,
-    storey: { ...before.storey, walls: before.storey.walls.filter((w) => w.id !== "N") },
+    ...replaceStorey(before, {
+      ...storeyOf(before),
+      walls: storeyOf(before).walls.filter((w) => w.id !== "N"),
+    }),
   };
   const origin = { x: 13, y: -23 };
   const chain = beginWallChain(base, origin);
@@ -216,8 +219,8 @@ test("shared drawing adapter previews and commits T on a corner host, with one u
     connectedWallContours(preview).get("@wall-preview"),
     connectedWallContours(placed).get("N"),
   );
-  assert.equal(base.storey.walls.length, 2);
-  assert.equal(base.storey.wallTJunctions.length, 0);
+  assert.equal(storeyOf(base).walls.length, 2);
+  assert.equal(storeyOf(base).wallTJunctions.length, 0);
   const h = commitProject(createHistory(base), placed);
   assert.equal(h.past.length, 1);
   assert.deepEqual(undoProject(h).present, base);
@@ -245,11 +248,11 @@ test("corner at host end and reversed incoming endpoint retain the composed prof
 test("existing single endpoint edit detaches the corner; partner is not moved implicitly", () => {
   const { p } = fixture();
   const next = updateWall(p, "H", { start: { x: 9, y: -20 } });
-  assert.equal(next.storey.wallJoins.length, 0);
-  assert.equal(next.storey.wallTJunctions.length, 1);
+  assert.equal(storeyOf(next).wallJoins.length, 0);
+  assert.equal(storeyOf(next).wallTJunctions.length, 1);
   assert.deepEqual(
-    next.storey.walls.find((w) => w.id === "E"),
-    p.storey.walls.find((w) => w.id === "E"),
+    storeyOf(next).walls.find((w) => w.id === "E"),
+    storeyOf(p).walls.find((w) => w.id === "E"),
   );
 });
 
@@ -273,7 +276,7 @@ for (const offset of [-0.18, 0, 0.18])
         const { before } = fixture(offset, side, angle);
         const cornersFirst = addWall(before, second);
         const connected = previewTConnection(cornersFirst, cornersFirst, request);
-        assert.equal(combined.storey.wallJoins.length, 2);
+        assert.equal(storeyOf(combined).wallJoins.length, 2);
         assert.deepEqual(connectedWallContours(combined), connectedWallContours(connected));
         for (const id of ["H", "E", "E2"])
           assert.deepEqual(

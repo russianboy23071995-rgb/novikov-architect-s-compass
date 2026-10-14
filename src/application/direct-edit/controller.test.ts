@@ -1,3 +1,4 @@
+import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";
@@ -36,7 +37,7 @@ test("repeated previews preserve history and model; one confirmation has one rev
   const before = serializeProject(state.history.present);
   for (let i = 1; i <= 40; i++) {
     const preview = previewEdit(state.session!, state.history.present, wall, { x: i, y: 2 });
-    assert.deepEqual(preview.storey.walls[0]!.start, { x: i, y: 2 });
+    assert.deepEqual(storeyOf(preview).walls[0]!.start, { x: i, y: 2 });
   }
   assert.equal(serializeProject(state.history.present), before);
   assert.equal(state.history.past.length, 0);
@@ -49,7 +50,10 @@ test("repeated previews preserve history and model; one confirmation has one rev
   assert.equal(moved.error, "");
   assert.equal(moved.session, null);
   assert.equal(moved.history.past.length, 1);
-  assert.deepEqual(moved.history.present.storey.windows, state.history.present.storey.windows);
+  assert.deepEqual(
+    storeyOf(moved.history.present).windows,
+    storeyOf(state.history.present).windows,
+  );
   assert.equal(serializeProject(editingReducer(moved, { type: "undo" }).history.present), before);
   assert.deepEqual(
     editingReducer(editingReducer(moved, { type: "undo" }), { type: "redo" }).history.present,
@@ -207,9 +211,9 @@ test("line movement uses the same lifecycle, retaining ID and style through JSON
     selection: target,
     point: { x: 4, y: 2 },
   });
-  const line = moved.history.present.storey.lines![0]!;
+  const line = storeyOf(moved.history.present).lines![0]!;
   assert.deepEqual(line, {
-    ...project.storey.lines![0],
+    ...storeyOf(project).lines![0],
     points: [
       { x: 4, y: 2 },
       { x: 6, y: 2 },
@@ -231,7 +235,7 @@ test("confirmed wall movement survives file, solid geometry and IFC adapters", a
   const restored = readProjectFile(serializeProject(moved.history.present));
   assert.deepEqual(buildSolid(restored).min, [4, 1.82, 0]);
   assert.deepEqual(buildSolid(restored).max, [7, 2.18, 2.8]);
-  assert.equal(restored.storey.windows[0]!.position, 0.5);
+  assert.equal(storeyOf(restored).windows[0]!.position, 0.5);
   const ifc = await exportIfc(restored, new Date("2026-10-02T00:00:00Z"));
   assert.ok(ifc.includes("IFCCARTESIANPOINT((4.,2.,0.))"));
   assert.ok(ifc.includes("IFCLENGTHMEASURE(3.)"));
@@ -440,9 +444,12 @@ test("line point editing snaps to wall corners and excludes every vertex of its 
   assert.equal(result.candidate?.kind, "endpoint");
   assert.deepEqual(result.point, { x: 3, y: 0.18 });
   const preview = previewEdit(state.session!, state.history.present, target, result.point);
-  assert.equal(preview.storey.lines![0]!.points[0]!.x, result.point.x);
-  assert.ok(Math.abs(preview.storey.lines![0]!.points[0]!.y - result.point.y) < 1e-12);
-  assert.deepEqual(preview.storey.lines![0]!.points.at(-1), preview.storey.lines![0]!.points[0]);
+  assert.equal(storeyOf(preview).lines![0]!.points[0]!.x, result.point.x);
+  assert.ok(Math.abs(storeyOf(preview).lines![0]!.points[0]!.y - result.point.y) < 1e-12);
+  assert.deepEqual(
+    storeyOf(preview).lines![0]!.points.at(-1),
+    storeyOf(preview).lines![0]!.points[0],
+  );
 });
 
 test("window snapping stays on its host and excess movement commits the capped preview", () => {
@@ -455,7 +462,7 @@ test("window snapping stays on its host and excess movement commits the capped p
   const valid = resolveEditSnap(state.session!, { x: 1.82, y: 0.02 }, context);
   assert.equal(valid.candidate?.kind, "endpoint");
   assert.equal(
-    previewEdit(state.session!, state.history.present, target, valid.point).storey.windows[0]!
+    storeyOf(previewEdit(state.session!, state.history.present, target, valid.point)).windows[0]!
       .position,
     0.6,
   );
@@ -467,7 +474,7 @@ test("window snapping stays on its host and excess movement commits the capped p
     point: invalid.point,
   });
   assert.equal(rejected.error, "");
-  assert.ok(Math.abs(rejected.history.present.storey.windows[0]!.position - 0.8) < 1e-9);
+  assert.ok(Math.abs(storeyOf(rejected.history.present).windows[0]!.position - 0.8) < 1e-9);
   assert.equal(rejected.session, null);
 });
 
@@ -486,7 +493,7 @@ test("stretch keeps the selected grip offset and rejects shortening beyond windo
   const valid = resolveEditSnap(state.session!, { x: 4.04, y: 0.2 }, context);
   assert.equal(valid.candidate?.kind, "endpoint");
   assert.deepEqual(
-    previewEdit(state.session!, state.history.present, wall, valid.point).storey.walls[0]!.end,
+    storeyOf(previewEdit(state.session!, state.history.present, wall, valid.point)).walls[0]!.end,
     { x: 4.037, y: 0 },
   );
   assert.throws(() =>
@@ -513,7 +520,7 @@ test("window host axis accepts external guides but excludes host and dependent s
   assert.equal(result.candidate?.kind, "axis-intersection");
   assert.ok(
     Math.abs(
-      previewEdit(state.session!, state.history.present, target, result.point).storey.windows[0]!
+      storeyOf(previewEdit(state.session!, state.history.present, target, result.point)).windows[0]!
         .position - 0.6,
     ) < 1e-12,
   );
@@ -558,7 +565,7 @@ test("numeric X/Y/element moves accept signed comma metres and share preview, co
       });
       assert.deepEqual(committed.history.present, result.project);
       const amount = Number(text.replace(",", "."));
-      const moved = result.project.storey.walls[0]!;
+      const moved = storeyOf(result.project).walls[0]!;
       assert.equal(moved.start.x, action === "y" ? 0 : action === "axis" ? -amount || 0 : amount);
       assert.equal(moved.start.y, action === "y" ? amount : 0);
       assert.deepEqual(
@@ -622,7 +629,7 @@ test("oblique numeric movement uses normalized pinned direction with exact signe
   const result = previewNumericMove(state.session!, state.history.present, target, "-2,5");
   assert.deepEqual(result.point, { x: 1.5, y: 2 });
   assert.match(numericMoveAxis(state.session!)!.label, /2 → 1/);
-  assert.deepEqual(result.project.storey.lines![0]!.points, [
+  assert.deepEqual(storeyOf(result.project).lines![0]!.points, [
     { x: 1.5, y: 2 },
     { x: 4.5, y: 6 },
   ]);
@@ -642,7 +649,7 @@ test("free polar move preserves clicked corner origin, dimensions and one revers
   assert.equal(movementDirection(session, aim), 90);
   const result = previewMovementInput(session, state.history.present, wall, "90", "1,25", aim);
   assert.deepEqual(result.point, { x: 3, y: 1.43 });
-  const moved = result.project.storey.walls[0]!;
+  const moved = storeyOf(result.project).walls[0]!;
   assert.deepEqual(moved.start, { x: 0, y: 1.25 });
   assert.deepEqual(moved.end, { x: 3, y: 1.25 });
   assert.equal(moved.thickness, 0.36);
@@ -742,9 +749,9 @@ test("numeric stretch preserves wall corner offset and validates window and neig
   const session = state.session!;
   const result = previewMovementInput(session, state.history.present, wall, "", "1,25", null);
   assert.deepEqual(result.point, { x: 4.25, y: 0.18 });
-  assert.deepEqual(result.project.storey.walls[0]!.end, { x: 4.25, y: 0 });
-  assert.deepEqual(result.project.storey.walls[0]!.start, { x: 0, y: 0 });
-  assert.equal(result.project.storey.windows[0]!.position, 0.5);
+  assert.deepEqual(storeyOf(result.project).walls[0]!.end, { x: 4.25, y: 0 });
+  assert.deepEqual(storeyOf(result.project).walls[0]!.start, { x: 0, y: 0 });
+  assert.equal(storeyOf(result.project).windows[0]!.position, 0.5);
   const committed = editingReducer(state, {
     type: "confirm",
     session,
@@ -820,8 +827,8 @@ test("oblique numeric stretch moves only selected line or wall end in either sig
         );
         const points =
           kind === "line"
-            ? result.project.storey.lines![0]!.points
-            : [result.project.storey.walls[0]!.start, result.project.storey.walls[0]!.end];
+            ? storeyOf(result.project).lines![0]!.points
+            : [storeyOf(result.project).walls[0]!.start, storeyOf(result.project).walls[0]!.end];
         const sign = index === 0 ? -1 : 1;
         assert.ok(
           Math.abs(points[index]!.x - (index === 0 ? 0 : 3) - sign * distance * 0.6) < 1e-12,
@@ -913,8 +920,8 @@ test("window movement pins its chosen point while retaining host direction and e
   );
   assert.equal(result.point.y, 0.18);
   const preview = previewEdit(session, state.history.present, session.target, result.point);
-  assert.ok(Math.abs(preview.storey.windows[0]!.position - 1.7 / 3) < 1e-9);
-  assert.equal(preview.storey.windows[0]!.wallId, "wall");
+  assert.ok(Math.abs(storeyOf(preview).windows[0]!.position - 1.7 / 3) < 1e-9);
+  assert.equal(storeyOf(preview).windows[0]!.wallId, "wall");
 });
 
 test("polar point input retains opposite wall endpoint and commits one undo step", () => {
@@ -926,8 +933,8 @@ test("polar point input retains opposite wall endpoint and commits one undo step
     anchor: { x: 3, y: 0.18 },
   });
   const result = previewMovementInput(state.session!, state.history.present, wall, "90", "1", null);
-  assert.deepEqual(result.project.storey.walls[0]!.start, { x: 0, y: 0 });
-  const end = result.project.storey.walls[0]!.end;
+  assert.deepEqual(storeyOf(result.project).walls[0]!.start, { x: 0, y: 0 });
+  const end = storeyOf(result.project).walls[0]!.end;
   const length = Math.hypot(end.x, end.y);
   assert.ok(Math.abs(end.x - (end.y / length) * 0.18 - 3) < 1e-10);
   assert.ok(Math.abs(end.y + (end.x / length) * 0.18 - 1.18) < 1e-10);
@@ -956,8 +963,8 @@ test("layer property assignment discards movement preview and produces one rever
   assert.equal(next.error, "");
   assert.equal(next.session, null);
   assert.equal(next.history.past.length, 1);
-  assert.deepEqual(next.history.present.storey.walls[0]!.start, base.storey.walls[0]!.start);
-  assert.equal(next.history.present.storey.walls[0]!.layerId, event.layerId);
+  assert.deepEqual(storeyOf(next.history.present).walls[0]!.start, storeyOf(base).walls[0]!.start);
+  assert.equal(storeyOf(next.history.present).walls[0]!.layerId, event.layerId);
   assert.deepEqual(readProjectFile(serializeProject(next.history.present)), next.history.present);
   const undo = editingReducer(next, { type: "undo" });
   assert.deepEqual(undo.history.present, base);
@@ -1021,7 +1028,7 @@ test("window and line properties share the same layer transition without changin
     });
     assert.equal(next.error, "");
     assert.equal(next.history.past.length, 1);
-    assert.equal(next.history.present.storey.windows[0]!.wallId, "wall");
+    assert.equal(storeyOf(next.history.present).windows[0]!.wallId, "wall");
     assert.deepEqual(buildSolid(next.history.present), buildSolid(state.history.present));
   }
 });

@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { sameProjectModel } from "./model-equality.ts";
@@ -42,7 +43,7 @@ test("structured model comparison agrees with JSON for visibility, fields and as
     { ...p, assets: [{ ...p.assets[0]!, data: "AAAB" }] },
     { ...p, assets: [] },
     { ...p, id: "ä中" },
-    { ...p, storey: { ...p.storey, lines: undefined } },
+    { ...replaceStorey(p, { ...storeyOf(p), lines: undefined }) },
   ];
   for (const a of cases) for (const b of cases) assert.equal(sameProjectModel(a, b), oracle(a, b));
   const negativeZero = updateLine(p, "l", {
@@ -55,13 +56,13 @@ test("structured model comparison agrees with JSON for visibility, fields and as
 });
 test("comparison preserves key-order semantics and optional undefined omission", () => {
   const p = fixture(),
-    reordered = { ...p, storey: { ...p.storey } };
+    reordered = { ...replaceStorey(p, { ...storeyOf(p) }) };
   const { data, ...rest } = p.assets[0]!;
   reordered.assets = [{ data, ...rest }];
   assert.equal(sameProjectModel(p, reordered), oracle(p, reordered));
-  const a = { ...p, storey: { ...p.storey, lines: undefined } };
+  const a = { ...replaceStorey(p, { ...storeyOf(p), lines: undefined }) };
   const b: ReturnType<typeof createProject> = structuredClone(a);
-  delete b.storey.lines;
+  delete storeyOf(b).lines;
   assert.equal(sameProjectModel(a, b), true);
 });
 test("model edits, visibility, noop and undo retain existing transaction behavior", () => {

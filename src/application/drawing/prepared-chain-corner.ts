@@ -1,3 +1,4 @@
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 /** Owned prepared scope for the second free right-angle segment. */
 import { validateProject, type Point } from "../../lib/bim/model.ts";
 import { appendWallChain, type WallChain } from "./wall-chain-actions.ts";
@@ -20,7 +21,7 @@ export function prepareChainCorner(source: WallChain, id: string) {
     startCandidate: source.startCandidate ? structuredClone(source.startCandidate) : null,
   });
   const p = chain.preview,
-    s = p.storey,
+    s = storeyOf(p),
     first = s.walls.find((w) => w.id === chain.wallIds[0]);
   const supported =
     chain.wallIds.length === 1 &&
@@ -47,9 +48,7 @@ export function prepareChainCorner(source: WallChain, id: string) {
     ].map((e) => e.id),
   );
   const local = freeze({
-    ...p,
-    assets: [],
-    storey: {
+    ...replaceStorey(p, {
       ...s,
       walls: first ? [first] : [],
       windows: [],
@@ -58,7 +57,8 @@ export function prepareChainCorner(source: WallChain, id: string) {
       references: [],
       wallJoins: [],
       wallTJunctions: [],
-    },
+    }),
+    assets: [],
   });
   const localChain = { ...chain, base: local, preview: local };
   const full = (point: Point, candidate?: SnapCandidate | null) =>
@@ -82,16 +82,15 @@ export function prepareChainCorner(source: WallChain, id: string) {
       )
         return { path: "full" as const, project: full(point, candidate) };
       const next = appendWallChain(localChain, local, id, point).preview;
-      const walls = new Map(next.storey.walls.map((w) => [w.id, w]));
+      const walls = new Map(storeyOf(next).walls.map((w) => [w.id, w]));
       return {
         path: "local" as const,
         project: freeze({
-          ...p,
-          storey: {
+          ...replaceStorey(p, {
             ...s,
-            walls: [...s.walls.map((w) => walls.get(w.id) ?? w), next.storey.walls.at(-1)!],
-            wallJoins: [...s.wallJoins, ...next.storey.wallJoins],
-          },
+            walls: [...s.walls.map((w) => walls.get(w.id) ?? w), storeyOf(next).walls.at(-1)!],
+            wallJoins: [...s.wallJoins, ...storeyOf(next).wallJoins],
+          }),
         }),
       };
     },
