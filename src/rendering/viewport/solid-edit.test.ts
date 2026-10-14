@@ -11,7 +11,7 @@ import {
   createEditingState,
   editingReducer,
   previewEdit,
-  supportsWallWorkplaneEdit,
+  supportsHorizontalWorkplaneEdit,
 } from "../../application/direct-edit/controller.ts";
 import { editInteraction } from "../../application/tools/adapters.ts";
 import { evaluateInteraction, confirmInteraction } from "../../application/tools/interaction.ts";
@@ -49,8 +49,10 @@ test("workplane capabilities keep point/stretch tied to endpoints and exclude ot
     for (const kind of ["wall", "window", "line"] as const) {
       for (const index of [null, 0, 1, 2, -1]) {
         assert.equal(
-          supportsWallWorkplaneEdit({ kind, id: "id" }, action, index),
-          kind === "wall" && (!["point", "stretch"].includes(action) || index === 0 || index === 1),
+          supportsHorizontalWorkplaneEdit({ kind, id: "id" }, action, index),
+          (kind === "window" && action === "axis") ||
+            (kind === "wall" &&
+              (!["point", "stretch"].includes(action) || index === 0 || index === 1)),
         );
       }
     }
@@ -509,4 +511,31 @@ test("stationary wall sources remain visible behind excluded moving material", (
   const refs = edit.context.sourceQuery!(point, 1, 10, [policy.origin]);
   assert.ok(refs.some((r) => r.entityId === "back"));
   assert.ok(refs.every((r) => r.entityId !== "wall-1"));
+});
+
+test("single-window 3D axis adapter preserves host and clamps through the shared action", () => {
+  const target = { kind: "window" as const, id: "window-1" };
+  const state = editingReducer(createEditingState(project), {
+    type: "begin",
+    target,
+    action: "axis",
+    index: null,
+  });
+  assert.ok(state.session);
+  const next = previewEdit(state.session, state.history.present, target, { x: 100, y: 40 });
+  const before = storeyOf(project).windows[0],
+    after = storeyOf(next).windows[0];
+  assert.ok(before && after);
+  assert.equal(after.wallId, before.wallId);
+  assert.equal(after.sillHeight, before.sillHeight);
+  assert.equal(after.height, before.height);
+  assert.notEqual(after.position, before.position);
+  const committed = editingReducer(state, {
+    type: "confirm",
+    session: state.session,
+    selection: target,
+    point: { x: 100, y: 40 },
+  });
+  assert.equal(committed.history.past.length, 1);
+  assert.deepEqual(storeyOf(committed.history.present).windows, storeyOf(next).windows);
 });

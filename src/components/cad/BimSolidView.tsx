@@ -37,7 +37,7 @@ import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges } from "@/rendering/viewport/selection-outline";
 import { useSolidInference } from "./useSolidInference";
-import { previewEdit, supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
+import { previewEdit, supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import type { BimPlanProps } from "./BimPlan";
 
 const viewportOf = (canvas: HTMLCanvasElement) => {
@@ -133,8 +133,8 @@ export function BimSolidView({
     [baseSolid, projectionFrame],
   );
   const moving =
-    editSession?.target.kind === "wall" &&
-    supportsWallWorkplaneEdit(editSession.target, editSession.action, editSession.index) &&
+    !!editSession &&
+    supportsHorizontalWorkplaneEdit(editSession.target, editSession.action, editSession.index) &&
     editSession.base === project;
   const target =
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
@@ -239,6 +239,15 @@ export function BimSolidView({
     () => windowSelectionEdges(windowSurfaces, selectedWindows),
     [windowSurfaces, selectedWindows],
   );
+  const windowWorkplane = useMemo(() => {
+    if (editSession?.target.kind !== "window") return undefined;
+    const opening = project.storeys
+      .flatMap((s) => s.windows)
+      .find((w) => w.id === editSession.target.id);
+    return opening
+      ? workingStoreyElevation(project) + opening.sillHeight + opening.height / 2
+      : undefined;
+  }, [project, editSession]);
   const inference = useSolidInference(
     project,
     previewProjection,
@@ -246,12 +255,12 @@ export function BimSolidView({
     snap && !error && interactive,
     previewReset,
     placement?.geometryPreview ? snapping : moving ? snapping : null,
-    moving ? editSession.target.id : undefined,
+    moving && editSession.target.kind === "wall" ? editSession.target.id : undefined,
     ortho,
     previewClient?.shift ?? false,
     visibility,
     moving || placement?.geometryPreview ? gridSpacing(gridSettings) : null,
-    placement?.geometryPreview ? originHeight : undefined,
+    placement?.geometryPreview ? originHeight : windowWorkplane,
   );
   const pickingMovementOrigin = !!placement && !placement.geometryPreview;
   const originQuery = useMemo(

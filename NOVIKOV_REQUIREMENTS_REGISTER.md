@@ -11306,3 +11306,22 @@ Typprüfung, gezieltes Lint, vorhandene Shift-Sperrprüfungen und sechs 3D-Fangt
 Produktionsbuild bestanden. Browser: Achsen am oberen OG-Ursprung; Shift-Klick nahe
 X ergibt in beiden Geschossen exakt gleichen X-Versatz bei unverändertem Y.
 PR314 enthält diese Bedienergänzung. Nächster Auftrag bleibt Z-Höhenvertrag nach Abnahme.
+
+### Ergänzung 14.10.2026 – Gemeinsame Bewegung auch für Einzelziele
+Nutzervertrag: Die 3D-Ursprungs-/Achsen-/Fangbedienung ist eine gemeinsame Fähigkeit
+für Bewegungen, unabhängig von der Anzahl ausgewählter Elemente. Einzelwand
+„Element frei bewegen“ verwendet jetzt denselben SelectionMove-Einstieg wie Gruppen:
+freie Ursprungswahl vor Beginn, sichtbare Ecken, temporäre Ursprungsebene, Achsen,
+ToolInteraction und vorbereitete Vorschau. Kein separater Einzelwand-Move-Pfad in 3D.
+Vorhandene gebundene Aktionen bleiben geometrisch gebunden: Punktbearbeitung startet
+am gewählten Punkt, X/Y/Achse folgen ihrer Richtung; Fenster bleibt an seiner Wand.
+Fenster entlang Wand läuft nun direkt in 3D über denselben Direct-Edit-Adapter mit
+Achsen/Fangvorschau auf Höhe der Fenstermitte; kein erzwungener Grundrisswechsel.
+Neue 3D-Elementadapter müssen diesen gemeinsamen Vertrag verwenden. 2D-Linien und
+Schraffuren bekommen dadurch keine künstliche 3D-Repräsentation; Z bleibt gesperrt.
+Browser: einzelne OG-Wand, freie obere Ursprungsecke, Achsen und Abbruch; einzelnes
+OG-Fenster in 3D verschoben, Position geändert bei unveränderten Maßen/Host.
+Zusätzlicher Test prüft Hostbindung, Begrenzung und genau einen Undo-Schritt des
+Fensteradapters. Nächster Auftrag bleibt der Z-Höhenvertrag nach Abnahme von PR314.
+
+Nachweis Einzelziele: 955 Tests vollständig bestanden, App-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich.

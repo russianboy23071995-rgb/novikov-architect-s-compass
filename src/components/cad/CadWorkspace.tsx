@@ -65,7 +65,7 @@ import {
 } from "@/application/tools/adapters";
 import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
-import { supportsWallWorkplaneEdit } from "@/application/direct-edit/controller";
+import { supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/lib/bim/direct-edit";
 import { ProjectNavigator } from "./ProjectNavigator";
@@ -488,13 +488,14 @@ export function CadWorkspace({
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
-    const solidMove = inSolid && selection.kind === "wall";
-    if (!inSolid && selection.kind === "wall" && action === "move") {
+    const solidMove =
+      inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
+    if (selection.kind === "wall" && action === "move") {
       const origin = pickedPoint.anchor ?? editAnchor(project, selection);
       cancelInteraction();
       try {
-        groupMove.begin(origin);
-        if (layout === "single") setMode("2D");
+        groupMove.begin(inSolid ? undefined : origin);
+        if (layout === "single" && !inSolid) setMode("2D");
         setModelError("");
       } catch (error) {
         setModelError(error instanceof Error ? error.message : "Bewegung nicht mï¿½glich.");
@@ -502,11 +503,15 @@ export function CadWorkspace({
       return;
     }
 
-    if (solidMove && !pickedPoint.anchor) {
+    if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
     }
-    if (solidMove && !supportsWallWorkplaneEdit(selection, action, pickedPoint.index)) {
+    if (
+      inSolid &&
+      selection.kind === "wall" &&
+      !supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index)
+    ) {
       showNotice("Zuerst einen sichtbaren Wandendpunkt oder eine untere Wandecke anklicken.");
       return;
     }
