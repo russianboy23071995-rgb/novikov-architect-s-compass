@@ -1,3 +1,4 @@
+import { MovementAxisControls } from "./MovementAxisControls";
 import { selectWorkingStorey, workingStoreyForTarget } from "@/application/storeys/working-storey";
 import { projectElementCounts } from "@/application/storeys/context";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -965,7 +966,6 @@ export function CadWorkspace({
                       try {
                         groupMove.begin();
                         setDemandOpen(false);
-                        setMode("2D");
                         setModelError("");
                       } catch (error) {
                         setModelError(
@@ -1272,7 +1272,7 @@ export function CadWorkspace({
               <p className="p-3 text-xs text-muted-foreground" role="status">
                 {selections.length} Elemente ausgewählt.{" "}
                 {mode === "3D"
-                  ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
+                  ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
                   : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
               </p>
             ) : (
@@ -1512,13 +1512,26 @@ export function CadWorkspace({
                       onActive={setActiveViewport}
                       onFullscreen={() => setFullscreen((value) => !value)}
                     />
+                    {(groupMove.adapter ||
+                      (editSession && ["move", "point"].includes(editSession.action))) &&
+                      mode === "3D" && (
+                        <MovementAxisControls
+                          project={project}
+                          targets={selections}
+                          onDirection={(angle) =>
+                            interaction.draft.change(angle, interaction.draft.length)
+                          }
+                        />
+                      )}
                     {groupMove.active && (
                       <p
                         role="status"
                         className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
                       >
                         {groupMove.pickingOrigin
-                          ? "Bewegungsursprung im Grundriss anklicken"
+                          ? mode === "3D"
+                            ? "Sichtbaren Wandfußpunkt im Arbeitsgeschoss als Ursprung anklicken"
+                            : "Bewegungsursprung im Grundriss anklicken"
                           : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
                       </p>
                     )}

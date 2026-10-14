@@ -1,3 +1,7 @@
+import {
+  selectionMoveSurfaces,
+  selectionMoveWindows,
+} from "@/rendering/viewport/selection-move-preview";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { useSolidPicking } from "./useSolidPicking";
@@ -41,6 +45,7 @@ const viewportOf = (canvas: HTMLCanvasElement) => {
 
 export function BimSolidView({
   cornerPreview,
+  placement,
   project,
   visibility,
   selection: requestedSelection,
@@ -71,6 +76,7 @@ export function BimSolidView({
   snap?: boolean;
 } & Pick<
   BimPlanProps,
+  | "placement"
   | "selections"
   | "gridSettings"
   | "editSession"
@@ -102,6 +108,7 @@ export function BimSolidView({
     moved: boolean;
     editing: typeof editSession;
     navigation: boolean;
+    placementPreview: BimPlanProps["placement"];
   } | null>(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
@@ -141,10 +148,21 @@ export function BimSolidView({
     }
     return project;
   }, [editSession, target, targetCandidate, project, selection]);
-  const previewSolid = useMemo(
-    () => (previewProject === project ? baseSolid : buildBuildingSolid(previewProject)),
-    [previewProject, project, baseSolid],
-  );
+  const [placementAim, setPlacementAim] = useState<Point | null>(null);
+  useEffect(() => setPlacementAim(null), [placement?.geometryPreview]);
+  const placementTarget = placement?.target === undefined ? placementAim : placement.target;
+  const placementPatch = useMemo(() => {
+    if (!placement?.geometryPreview || !placementTarget) return null;
+    try {
+      return placement.geometryPreview.evaluate(placementTarget);
+    } catch {
+      return null;
+    }
+  }, [placement?.geometryPreview, placementTarget]);
+  const previewSolid = useMemo(() => {
+    if (placementPatch) return selectionMoveSurfaces(baseSolid, project, placementPatch);
+    return previewProject === project ? baseSolid : buildBuildingSolid(previewProject);
+  }, [previewProject, project, baseSolid, placementPatch]);
   const solid = useMemo(
     () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
     [previewSolid, project, visibility],
@@ -185,17 +203,15 @@ export function BimSolidView({
       ),
     [selections, selection, project, visibility],
   );
-  const windowSurfaces = useMemo(
-    () =>
-      buildingWindowSelectionSurfaces(previewProject, (id) =>
-        isLayerVisible(project, visibility, id),
-      ),
-    [previewProject, project, visibility],
-  );
+  const windowSurfaces = useMemo(() => {
+    const allows = (id: string) => isLayerVisible(project, visibility, id);
+    const base = buildingWindowSelectionSurfaces(previewProject, allows);
+    return placementPatch ? selectionMoveWindows(base, project, placementPatch, allows) : base;
+  }, [previewProject, project, visibility, placementPatch]);
   const pickDisplayed = useSolidPicking(
     solid,
     windowSurfaces,
-    !editSession && previewProject === project && !cornerPreview,
+    !editSession && !placement && previewProject === project && !cornerPreview,
   );
   const selectedWindows = useMemo(
     () =>
@@ -223,12 +239,12 @@ export function BimSolidView({
     previewClient,
     snap && !error && interactive,
     previewReset,
-    moving ? snapping : null,
+    placement?.geometryPreview ? snapping : moving ? snapping : null,
     moving ? editSession.target.id : undefined,
     ortho,
     previewClient?.shift ?? false,
     visibility,
-    moving ? gridSpacing(gridSettings) : null,
+    moving || placement?.geometryPreview ? gridSpacing(gridSettings) : null,
   );
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -385,7 +401,8 @@ export function BimSolidView({
             pointerId: event.pointerId,
             moved: false,
             editing: editSession,
-            navigation: !moving || pan,
+            placementPreview: placement,
+            navigation: (!moving && !placement) || pan,
           };
         }}
         onPointerMove={(event) => {
@@ -404,6 +421,16 @@ export function BimSolidView({
               )
             ) {
               setPreviewClient({ x: event.clientX, y: event.clientY, shift: event.shiftKey });
+              if (placement && !pan) {
+                const result = inference.resolve(
+                  { x: event.clientX, y: event.clientY },
+                  event.shiftKey,
+                );
+                if (result) {
+                  setPlacementAim(result.point);
+                  placement.aim(result.point);
+                }
+              }
               if (moving && !pan) {
                 const result = inference.resolve(
                   { x: event.clientX, y: event.clientY },
@@ -452,7 +479,13 @@ export function BimSolidView({
           const gesture = drag.current;
           if (!gesture || gesture.pointerId !== event.pointerId) return;
           drag.current = null;
-          if (gesture.editing !== editSession || !interactive) return;
+          if (
+            gesture.editing !== editSession ||
+            !interactive ||
+            gesture.placementPreview?.geometryPreview !== placement?.geometryPreview ||
+            Boolean(gesture.placementPreview) !== Boolean(placement)
+          )
+            return;
           if (
             !gesture.moved &&
             isSelectionClick(gesture.x, gesture.y, event.clientX, event.clientY) &&
@@ -478,6 +511,33 @@ export function BimSolidView({
               return;
             }
             const projection = current.projection;
+            if (placement) {
+              if (!gesture.navigation) {
+                if (placement.geometryPreview) {
+                  const result = inference.resolve(
+                    { x: event.clientX, y: event.clientY },
+                    event.shiftKey,
+                  );
+                  const point = placement.target === undefined ? result?.point : placement.target;
+                  if (point) placement.pick(point, result?.candidate);
+                } else {
+                  const hits = inference.adapter?.query(
+                    project,
+                    projection,
+                    { x: event.clientX, y: event.clientY },
+                    10,
+                  );
+                  const anchor =
+                    hits?.status === "ok"
+                      ? hits.candidates.find((c) => c.visibility === "visible")
+                      : null;
+                  if (anchor) placement.pick(anchor.worldPoint);
+                }
+              }
+              if (canvas.hasPointerCapture(event.pointerId))
+                canvas.releasePointerCapture(event.pointerId);
+              return;
+            }
             if (editSession) {
               // Navigation is never also a target click. Invalid inverse never confirms.
               if (moving && !gesture.navigation) {
@@ -485,7 +545,13 @@ export function BimSolidView({
                   { x: event.clientX, y: event.clientY },
                   event.shiftKey,
                 );
-                if (result) onEditCommit?.(editSession, result.point, result.candidate);
+                const point = numericTarget === undefined ? result?.point : numericTarget;
+                if (point)
+                  onEditCommit?.(
+                    editSession,
+                    point,
+                    numericTarget === undefined ? result?.candidate : undefined,
+                  );
               }
               if (canvas.hasPointerCapture(event.pointerId))
                 canvas.releasePointerCapture(event.pointerId);

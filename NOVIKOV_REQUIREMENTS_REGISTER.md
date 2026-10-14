@@ -11265,3 +11265,16 @@ Nachweis: 951 Tests, Typechecks, fokussiertes Lint, Build; Browser-Mehrfachauswa
 On-Demand-Mausbewegung und Dateivergleich vor/nach Bewegung sowie nach einem Undo.
 Grenze: Grundriss zeigt nur seinen lokalen Vorschaupatch; interaktive Gruppenbewegung
 in 3D folgt als nächster Auftrag über denselben ToolInteraction-Vertrag.
+
+### R26-03 / N21 / N22 / gemeinsame Rasterengine – direkte 3D-XY-Bewegung (14.10.2026)
+Nutzerfreigabe PR313; gewünschte Erweiterung um X/Y und tatsächliche schräge
+Elementachsen umgesetzt über denselben ToolInteraction-Adapter. Bewegungsachsen
+tragen XYZ-Vektoren; der horizontale Adapter weist Z ausdrücklich ab. Auswahl-
+translation liefert vorbereitete Patches je Geschoss; Rendering erzeugt daraus
+nur abgeleitete Wand-/Fensterflächen. Ein validierter Commit und ein Undo wie in 2D.
+Browser: EG/OG X +1 m, Canvas-Klick, beide Geschosse mit einem Undo zurückgenommen;
+Y-Richtung und Abbruch. Tests vergleichen vorbereitete Vorschau mit vollständigem
+Pfad einschließlich Anschlussauflösung/Nachbarwänden/Fenstern; schräge Wandachse
+als normierter Vektor geprüft. 953 Tests bestanden, Typechecks/Lint/Build erfolgreich.
+Grenzen: sichtbarer Ursprung auf aktiver Geschossebene; keine Z-Mutation, keine neue
+3D-Repräsentation für 2D-Linien/Schraffuren. Z-Höhenvertrag ist der nächste Auftrag.

@@ -457,13 +457,12 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: gemeinsame Gruppenbewegung direkt in 3D.**
-Die geprüfte geschossübergreifende Auswahl und atomare Translation weiterverwenden.
-Den vorhandenen ToolInteraction-Vertrag an die 3D-Arbeitsebene anbinden: echter
-sichtbarer Ursprung, vorbereitete Vorschau aller betroffenen Geschosse, gleicher
-Fang-/Shift-/Tab-Ablauf und ein Commit/Undo. Kein vollständiges Modellmaterialisieren
-auf dem Pointerpfad. Abnahme: EG/OG-Auswahl, Maus- und Zahleneingabe, Abbruch,
-Verdeckung, Undo/Redo und Vergleich mit dem bestehenden Grundriss-Aktionspfad.
+**Genau ein aktiver Fortsetzungsschritt: begrenzter Höhenvertrag für Z-Bewegung.**
+Vor einer Z-Mutation klären, wie Bauteilversatz, Geschosszuordnung, verbundene Wände
+und fenstergebundene Höhen zusammenwirken. Bestehende Geschosshöhenauflösung und
+XYZ-Achsenvertrag verwenden; keine automatische Geschossumsortierung erfinden.
+Zunächst Code-/Anforderungsabgleich und konkrete offene Nutzerentscheidungen,
+kein vorgezogener Schemaumbau. XY und schräge Elementachsen bleiben nutzbar.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -615,3 +614,21 @@ EG/OG mit Strg gewählt, On-Demand-Bewegung, Ursprung/Ziel im Grundriss, Datei b
 gleichen XY-Vektor in beiden Geschossen; ein Undo stellt beide Geschosscontainer exakt her.
 Grenze: Maus-Gruppenbewegung startet noch im Grundriss. Die direkte 3D-Vorschau/Bedienung
 ist der nächste einzelne Auftrag, kein bereits abgeschlossener Bestandteil dieses Piloten.
+
+### Status 14.10.2026 – Direkte XY-Gruppenbewegung in 3D
+PR313 mit erfolgreicher CI nach ausdrücklicher Freigabe nach main übernommen.
+Auswahl frei bewegen bleibt in 3D: sichtbarer Wandfußpunkt im Arbeitsgeschoss als
+Ursprung, sofortige Hilfsreferenz, gemeinsamer ToolInteraction-/Fang-/Shift-/Tab-Pfad.
+X/Y und Gegenrichtungen sowie tatsächliche Achsen ausgewählter Wände schreiben in
+ dieselbe Hilfseingabe. XYZ-Richtungsvertrag vorhanden; Z ist ausdrücklich gesperrt.
+Vorbereitete Geometriepatches je Geschoss liefern Wandkörper und Fensterflächen auf
+ihren unveränderten Höhen. Kein vollständiges Project-Materialisieren im Gruppen-
+Pointerpfad; ein Patch wird je Ziel für Körper und Fenster gemeinsam ausgewertet.
+Platzieren nutzt weiterhin vollständige Prüfung und genau einen Projekt-Undo.
+Nachweis: 953 Tests einschließlich Vergleich aller Vorschauflächen/Fenster mit dem
+vollständigen Commit-Pfad, gelöster T-Verbindung, Nachbarwänden und OG; schräge
+3:4-Wandachse ergibt präzise 5-m-Bewegung. Beide Typechecks, gezieltes Lint und Build.
+Browser: EG/OG gemeinsam in 3D, Ursprung, X +1 m per Canvas-Klick, Dateivergleich,
+ein Undo für beide Geschosse; Y=90° und Abbruch der Vorschau. Kein Z-/Perspektiv-
+oder Großprojekt-Performance-Nachweis. Aktive Fanggeometrie und Ursprung bleiben
+an die horizontale Arbeitsebene gebunden. Nächster Einzelauftrag siehe §9.
