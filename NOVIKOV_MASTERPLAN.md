@@ -457,10 +457,10 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: gemeinsame Application-Aktion für Z-Translation.**
-Die gemeinsame Höhenauflösung/Format25 ist implementiert (Nachweis am Dokumentende).
-Nächster Pilot: vorbereitete Auswahl-Vorschau, validierter Commit, Anschlussbehandlung,
-mitwandernde Fenster und genau ein Undo. Erst danach UI-Anbindung der Z-Achse.
+**Genau ein aktiver Fortsetzungsschritt: Z-Aktion an die 3D-Bewegungsinteraktion anbinden.**
+Die gemeinsame vorbereitete Application-Aktion ist implementiert (Nachweis am Ende).
+Ursprung, Z-Achse, Shift-Sperre und Präzision nutzen bestehende gemeinsame Verträge.
+Vorschau/Commit über prepareZTranslation, keine doppelte Modelllogik im Werkzeug.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -785,3 +785,28 @@ UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.
 
 
 Ergänzung 14.10.2026: Wand-Werkzeugeigenschaften besitzen jetzt das Feld Z-Versatz zum Geschoss (m), bezogen auf OK Rohdecke. Signierte Werte mit Dezimalkomma/-punkt, Übernahme per Enter/Blur über PropertyForm und updateWall, keine separate Modelllogik. Fenster folgen. Browser: +0,5 m und ein Undo geprüft; 8 Höhentests, Typecheck, gezieltes Lint und Build bestanden. Ungleiche Anschlussfußhöhen bleiben vorerst abgewiesen; nächste Aktion löst externe Anschlüsse gemäß Vertrag.
+
+
+### 14.10.2026 – Gemeinsame Z-Auswahlaktion
+PR316 mit erfolgreichem GitHub-Check in main übernommen (8e3bb6b).
+`application/selection/z-translation.ts` bereitet eine snapshotgebundene Z-Aktion
+für eine oder mehrere Wände über Geschossgrenzen vor. Mit ausgewählte Fenster werden
+nicht doppelt verschoben; Brüstung und Host bleiben unverändert. Gemischte Auswahl
+mit 2D-Elementen sowie Fenster ohne ausgewählte Wand werden verständlich abgewiesen.
+Die vorbereitete Vorschau verwendet eigene unveränderliche Daten und die bestehende
+GeometryPreview-/StoreyPatch-Ableitung. Nur betroffene Anschlussgruppen werden als
+Patch geliefert. Interne Anschlüsse bleiben erhalten; externe Anschlüsse werden in
+der Vorschau gelöst dargestellt und erst beim Commit dauerhaft gelöst. Abbruch
+verändert das Modell nicht. Nullbewegung ist ein No-op inklusive Anschlusserhalt.
+Commit prüft vollständiges Projekt, Kontext und Basissnapshot erneut und nutzt die
+bestehende History: genau ein Undo-Schritt, Redo stellt dieselbe Aktion wieder her.
+Keine neue UI oder Z-Mausbedienung; Werkzeugeigenschaft Z-Versatz bleibt unverändert.
+
+Vier neue Tests vergleichen Vorschau mit vollständigem Commit, einschließlich Ecke,
+T, gelöstem Nachbarn, Fenster, EG/OG-Auswahl, negativen/positiven Versätzen,
+Nullbewegung, ungültigen Zahlen, stale/mutierter Basis, Abbruch und Undo/Redo.
+Nächster Einzelauftrag: die bestehende 3D-Bewegungsinteraktion an diese Z-Aktion
+anbinden, einschließlich gewähltem Ursprung, Z-Achse, Shift und gemeinsamer Präzision.
+Keine neue werkzeugspezifische Höhenlogik; praktische Abnahme erfolgt dann im Canvas.
+
+Nachweis Z-Aktion: 968 Tests bestanden; App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich. Keine Browserabnahme behauptet: noch keine neue UI-Anbindung.
