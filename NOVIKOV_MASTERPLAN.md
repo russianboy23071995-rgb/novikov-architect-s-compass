@@ -694,3 +694,14 @@ nach Pan/Orbit. Typecheck, gezieltes Lint, 12 3D-Bearbeitungs-/Kameratests und B
 bestanden. Browser: Fit nach 500-%-Zoom und Achsenanzeige geprüft. Physische
 Mausrad-Drag-Kombination ist noch praktisch durch den Nutzer abzunehmen.
 Nächster Auftrag bleibt nach Bedienabnahme der Z-Höhenvertrag.
+
+### Ergänzung 14.10.2026 – Orientierung von unten und künftige 3D-Darstellung
+Beim Orbit unter die Nullebene (negative Kameraneigung der orthografischen Kamera)
+liegt die dekorative Z=0-Fläche mit 28 % Deckkraft über dem Modell; von oben bleibt
+sie mit 14 % hinter dem Modell. Kein Fangziel, keine Auswahl- oder Modelländerung.
+Nutzerwunsch für später: Ansicht → Canvas-Darstellung → 3D erhält gemeinsame
+optische Darstellungsoptionen und zoomunabhängige Elementkonturstärken in Pixeln.
+Die vorhandene Grundriss-Kontursteuerung bleibt getrennt. Umsetzung über gemeinsame
+Renderer-/Darstellungseinstellungen, ohne Bauteilkopien oder Modell-Undo; konkrete
+weitere Darstellungsmodi noch nicht festgelegt. Kontursteuerung 3D ist noch offen.
+Nachweis: Typecheck, gezieltes Lint und Produktionsbuild bestanden. Browser-Unteransicht mit grauer Überlagerung geprüft.

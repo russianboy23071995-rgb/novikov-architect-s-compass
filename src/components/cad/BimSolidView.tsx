@@ -364,13 +364,13 @@ export function BimSolidView({
       {previewProjection && !error && (
         <svg
           aria-label="Orientierungsebene z=0"
-          className="pointer-events-none absolute inset-0"
+          className={`pointer-events-none absolute inset-0 ${camera.pitch < 0 ? "z-[11]" : ""}`}
           width={previewProjection.viewport.width}
           height={previewProjection.viewport.height}
         >
           <polygon
             points={orientationFloor(baseSolid, previewProjection) ?? ""}
-            fill="rgba(120, 134, 145, 0.14)"
+            fill={camera.pitch < 0 ? "rgba(120, 134, 145, 0.28)" : "rgba(120, 134, 145, 0.14)"}
             stroke="rgba(120, 134, 145, 0.3)"
             strokeWidth={1}
           />
