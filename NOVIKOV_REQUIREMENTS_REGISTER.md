@@ -11433,3 +11433,28 @@ UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.
 
 
 Ergänzung 14.10.2026: Wand-Werkzeugeigenschaften besitzen jetzt das Feld Z-Versatz zum Geschoss (m), bezogen auf OK Rohdecke. Signierte Werte mit Dezimalkomma/-punkt, Übernahme per Enter/Blur über PropertyForm und updateWall, keine separate Modelllogik. Fenster folgen. Browser: +0,5 m und ein Undo geprüft; 8 Höhentests, Typecheck, gezieltes Lint und Build bestanden. Ungleiche Anschlussfußhöhen bleiben vorerst abgewiesen; nächste Aktion löst externe Anschlüsse gemäß Vertrag.
+
+
+### 14.10.2026 – Gemeinsame Z-Auswahlaktion
+PR316 mit erfolgreichem GitHub-Check in main übernommen (8e3bb6b).
+`application/selection/z-translation.ts` bereitet eine snapshotgebundene Z-Aktion
+für eine oder mehrere Wände über Geschossgrenzen vor. Mit ausgewählte Fenster werden
+nicht doppelt verschoben; Brüstung und Host bleiben unverändert. Gemischte Auswahl
+mit 2D-Elementen sowie Fenster ohne ausgewählte Wand werden verständlich abgewiesen.
+Die vorbereitete Vorschau verwendet eigene unveränderliche Daten und die bestehende
+GeometryPreview-/StoreyPatch-Ableitung. Nur betroffene Anschlussgruppen werden als
+Patch geliefert. Interne Anschlüsse bleiben erhalten; externe Anschlüsse werden in
+der Vorschau gelöst dargestellt und erst beim Commit dauerhaft gelöst. Abbruch
+verändert das Modell nicht. Nullbewegung ist ein No-op inklusive Anschlusserhalt.
+Commit prüft vollständiges Projekt, Kontext und Basissnapshot erneut und nutzt die
+bestehende History: genau ein Undo-Schritt, Redo stellt dieselbe Aktion wieder her.
+Keine neue UI oder Z-Mausbedienung; Werkzeugeigenschaft Z-Versatz bleibt unverändert.
+
+Vier neue Tests vergleichen Vorschau mit vollständigem Commit, einschließlich Ecke,
+T, gelöstem Nachbarn, Fenster, EG/OG-Auswahl, negativen/positiven Versätzen,
+Nullbewegung, ungültigen Zahlen, stale/mutierter Basis, Abbruch und Undo/Redo.
+Nächster Einzelauftrag: die bestehende 3D-Bewegungsinteraktion an diese Z-Aktion
+anbinden, einschließlich gewähltem Ursprung, Z-Achse, Shift und gemeinsamer Präzision.
+Keine neue werkzeugspezifische Höhenlogik; praktische Abnahme erfolgt dann im Canvas.
+
+Nachweis Z-Aktion: 968 Tests bestanden; App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich. Keine Browserabnahme behauptet: noch keine neue UI-Anbindung.
