@@ -222,9 +222,10 @@ export function CadViewport({
         ) : planCamera ? (
           <BimPlan
             {...model}
+            placement={model.placement?.movementAxis === "z" ? undefined : model.placement}
             referenceSelection={active ? model.referenceSelection : undefined}
             referenceScope={model.referenceSelection?.scope}
-            interactive={active}
+            interactive={active && model.placement?.movementAxis !== "z"}
             camera={plan}
             viewSize={size}
             onCamera={setPlanCamera}

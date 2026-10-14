@@ -11458,3 +11458,38 @@ anbinden, einschließlich gewähltem Ursprung, Z-Achse, Shift und gemeinsamer Pr
 Keine neue werkzeugspezifische Höhenlogik; praktische Abnahme erfolgt dann im Canvas.
 
 Nachweis Z-Aktion: 968 Tests bestanden; App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich. Keine Browserabnahme behauptet: noch keine neue UI-Anbindung.
+
+
+### 14.10.2026 – Z-Bewegung im 3D-Canvas
+PR317 mit grünem GitHub-Check ausdrücklich freigegeben und in main übernommen (c081040).
+Gemeinsamer SelectionMove-Consumer bindet jetzt den Z-Adapter an prepareZTranslation.
+Einzelwand und Wandgruppe: frei bewegen → realen Ursprung wählen → Z wählen → Mausziel
+anklicken oder signierte Länge per gemeinsamem Hilfseingabefenster eingeben. + hebt,
+− senkt. Z bleibt fest, auch mit Shift und seitlicher Mausabweichung; keine neue
+Shift-/Tab-Implementierung. XY-/Wandachsen bleiben über vorhandene Richtungsbedienung
+verfügbar. Achsenwechsel verwirft alte Präzisionswerte, erhält den gewählten Ursprung.
+
+Rendering-Adapter axisPointerDistance übersetzt Bildschirmposition in signierte
+Meter entlang einer projizierten Achse. Nahe Blickrichtung (<1 CSS-Pixel/Meter)
+keine Mausplatzierung; Hinweis auf Kameradrehung oder numerische Eingabe. Der
+Z-ToolInteraction-Adapter verwendet ausdrücklich lokale skalare Eingabekoordinaten;
+nur deltaZ gelangt in die Modellaktion. Ein eventuell paralleler Grundriss konsumiert
+diese Koordinaten nicht. Echte Ursprungs-XYZ verbleiben für Projektion und Achsenanzeige.
+Aktive Z-Achse wird betont. XY-Fanghilfen werden im Z-Modus nicht falsch projiziert.
+
+Bestätigte Regeln bleiben: Geschoss erhalten, relativer Wandfußversatz, Fenster
+folgen einmal, innere Anschlüsse erhalten, äußere am Commit lösen, volle Prüfung
+beim Platzieren, ein Modell-Undo. Gemeinsamer Commit-Guard prüft aktuellen Kontext.
+Beim UI-Anschluss entdeckte doppelt codierte Umlaute der Z-Aktionsfehler korrigiert.
+
+Nachweis: 970 Tests bestanden, App-/Benchmark-Typecheck, gezieltes Lint und Build.
+Zwei neue Tests für Maus-/Zahleneingabe, Dezimalkomma, negative Werte, ungültige
+Koordinaten, Undo sowie Projektionsrichtung/Seitenabweichung/Ansicht entlang Z.
+Browser: Einzelwand mit Fenster +0,5/−0,5 m, Enter, Undo, Shift-Klick (0,7355214 m),
+Z→Y (90°), Abbruch. Bild: outputs/solid-z-movement.png außerhalb des Repos.
+Tests prüfen Anschlussgruppen bereits über den gemeinsamen Aktionspfad; praktische
+Mehrgeschoss-/Archicad-Abnahme dieses UI-Schritts noch offen. Keine Kapazitätszusage.
+Grenzen: Z bewusst per Achsenbutton wählen; kein automatischer Z-Höhenfang an fremden
+Punkten, kein freies XYZ-Ziehen, keine Z-Bewegung einzelner Fenster/2D-Elemente.
+Genau ein Folgeauftrag: Mehrgeschoss-Abnahmefall für Z-Bewegung mit verbundenen
+Wänden, Fenstern und unbewegten Nachbarn durch Canvas, Undo/Redo, JSON und IFC führen.

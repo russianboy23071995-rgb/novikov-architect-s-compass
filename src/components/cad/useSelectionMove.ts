@@ -1,3 +1,4 @@
+import { zMoveInteraction } from "@/application/selection/z-interaction";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   assertMovableSelection,
@@ -22,6 +23,7 @@ export function useSelectionMove(
     targets: SelectionSet;
     visibility: LayerVisibilityPolicy;
     session: SelectionMove | null;
+    axis: "xy" | "z";
   } | null>(null);
   const latest = useRef({ project, targets, visibility, pending });
   latest.current = { project, targets, visibility, pending };
@@ -37,33 +39,34 @@ export function useSelectionMove(
   const cancel = useCallback(() => setPending(null), []);
   const commitRef = useRef(commit);
   commitRef.current = commit;
-  const adapter = useMemo(
-    () =>
-      active?.session
-        ? selectionMoveInteraction(
-            active.session,
-            project,
-            targets,
-            visibility,
-            (next) => {
-              const now = latest.current;
-              if (
-                now.pending !== active ||
-                now.project !== project ||
-                now.visibility !== visibility ||
-                !sameTargets(now.targets, targets)
-              )
-                throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
-              commitRef.current(next);
-              cancel();
-            },
-            cancel,
-          )
-        : null,
-    [active, project, targets, visibility, cancel],
-  );
+  const adapter = useMemo(() => {
+    if (!active?.session) return null;
+    const publish = (next: Project) => {
+      const now = latest.current;
+      if (
+        now.pending !== active ||
+        now.project !== project ||
+        now.visibility !== visibility ||
+        !sameTargets(now.targets, targets)
+      )
+        throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
+      commitRef.current(next);
+      cancel();
+    };
+    return active.axis === "z"
+      ? zMoveInteraction(project, targets, visibility, publish, cancel)
+      : selectionMoveInteraction(active.session, project, targets, visibility, publish, cancel);
+  }, [active, project, targets, visibility, cancel]);
   return {
     active: !!active,
+    axis: active?.axis ?? "xy",
+    origin: active?.session?.origin,
+    canMoveZ:
+      targets.some((t) => t.kind === "wall") &&
+      targets.every((t) => t.kind === "wall" || t.kind === "window"),
+    setAxis: (axis: "xy" | "z") => {
+      if (active?.session) setPending({ ...active, axis });
+    },
     pickingOrigin: !!active && !active.session,
     begin: (origin?: Point) => {
       assertMovableSelection(project, targets, visibility);
@@ -71,6 +74,7 @@ export function useSelectionMove(
         base: project,
         targets: targets.map((t) => ({ ...t })),
         visibility,
+        axis: "xy",
         session: origin ? beginSelectionMove(project, targets, origin, visibility) : null,
       });
     },

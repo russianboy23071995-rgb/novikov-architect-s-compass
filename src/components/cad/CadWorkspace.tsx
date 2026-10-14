@@ -193,6 +193,7 @@ export function CadWorkspace({
   const groupMove = useSelectionMove(project, selections, visibility, (next) =>
     dispatchEditing({ type: "project", project: next }),
   );
+  const pendingMoveDirection = useRef<string | null>(null);
   const cancelGroup = useRef(groupMove.cancel);
   cancelGroup.current = groupMove.cancel;
   const selectedLayerId = selectedLayerElement(project, selection)?.layerId;
@@ -737,6 +738,13 @@ export function CadWorkspace({
           : null),
     referenceSelection.selecting,
   );
+  useEffect(() => {
+    if (groupMove.axis === "xy" && pendingMoveDirection.current !== null) {
+      const angle = pendingMoveDirection.current;
+      pendingMoveDirection.current = null;
+      interaction.draft.change(angle, "");
+    }
+  }, [groupMove.axis, interaction.draft]);
 
   const downloadIfc = async () => {
     if (exportingIfc) return;
@@ -1401,6 +1409,8 @@ export function CadWorkspace({
                             ? {
                                 target: interaction.target,
                                 geometryPreview: groupMove.adapter?.geometryPreview,
+                                movementAxis: groupMove.axis,
+                                movementOrigin: groupMove.origin,
                                 aim: interaction.draft.move,
                                 pick: groupMove.pickingOrigin
                                   ? (point) => {
@@ -1523,9 +1533,17 @@ export function CadWorkspace({
                         <MovementAxisControls
                           project={project}
                           targets={selections}
-                          onDirection={(angle) =>
-                            interaction.draft.change(angle, interaction.draft.length)
+                          onZ={
+                            groupMove.adapter && groupMove.canMoveZ
+                              ? () => groupMove.setAxis("z")
+                              : undefined
                           }
+                          onDirection={(angle) => {
+                            if (groupMove.axis === "z") {
+                              pendingMoveDirection.current = angle;
+                              groupMove.setAxis("xy");
+                            } else interaction.draft.change(angle, interaction.draft.length);
+                          }}
                         />
                       )}
                     {groupMove.active && (

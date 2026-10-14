@@ -1,3 +1,5 @@
+import { axisPointerDistance } from "@/rendering/viewport/axis-pointer";
+import { MovementOriginAxes } from "./MovementOriginAxes";
 import { wallBase } from "@/domain/elements/wall/heights";
 import { cameraFocus, orbitAround } from "@/rendering/viewport/camera-navigation";
 import type { Vector3 } from "@/geometry/projections/orthographic";
@@ -265,13 +267,14 @@ export function BimSolidView({
           opening.height / 2
       : undefined;
   }, [project, editSession]);
+  const verticalMove = placement?.movementAxis === "z";
   const inference = useSolidInference(
     project,
     previewProjection,
     previewClient,
-    snap && !error && interactive,
+    snap && !error && interactive && !verticalMove,
     previewReset,
-    placement?.geometryPreview ? snapping : moving ? snapping : null,
+    verticalMove ? null : placement?.geometryPreview ? snapping : moving ? snapping : null,
     moving && editSession.target.kind === "wall" ? editSession.target.id : undefined,
     ortho,
     previewClient?.shift ?? false,
@@ -279,6 +282,29 @@ export function BimSolidView({
     moving || placement?.geometryPreview ? gridSpacing(gridSettings) : null,
     placement?.geometryPreview ? originHeight : windowWorkplane,
   );
+  const resolvePlacement = (client: Point, shift: boolean) => {
+    if (!verticalMove) return inference.resolve(client, shift);
+    const origin = placement?.movementOrigin;
+    if (!previewProjection || !origin || originHeight === undefined) return null;
+    const metres = axisPointerDistance(
+      previewProjection,
+      [origin.x, origin.y, originHeight],
+      [0, 0, 1],
+      client,
+    );
+    return metres === null ? null : { point: { x: metres, y: 0 }, candidate: null };
+  };
+  const verticalPointerUnavailable =
+    verticalMove &&
+    previewProjection &&
+    placement?.movementOrigin &&
+    originHeight !== undefined &&
+    axisPointerDistance(
+      previewProjection,
+      [placement.movementOrigin.x, placement.movementOrigin.y, originHeight],
+      [0, 0, 1],
+      { x: 0, y: 0 },
+    ) === null;
   const pickingMovementOrigin = !!placement && !placement.geometryPreview;
   const originQuery = useMemo(
     () =>
@@ -390,9 +416,28 @@ export function BimSolidView({
       )}
       <SolidSnapPreview
         projection={previewProjection}
-        enabled={snap && !error && interactive}
+        enabled={snap && !error && interactive && !verticalMove}
         inference={inference}
       />
+      {verticalMove &&
+        previewProjection &&
+        placement?.movementOrigin &&
+        originHeight !== undefined && (
+          <MovementOriginAxes
+            projection={previewProjection}
+            origin={placement.movementOrigin}
+            elevation={originHeight}
+            verticalActive
+          />
+        )}
+      {verticalPointerUnavailable && (
+        <p
+          role="status"
+          className="pointer-events-none absolute bottom-20 left-3 z-30 rounded bg-popover px-2 py-1 text-xs"
+        >
+          Z-Achse in Blickrichtung: Ansicht drehen oder Länge eingeben.
+        </p>
+      )}
       {originCandidate && previewProjection && (
         <svg
           aria-label="Bewegungsursprung Fangvorschau"
@@ -512,7 +557,7 @@ export function BimSolidView({
             ) {
               setPreviewClient({ x: event.clientX, y: event.clientY, shift: event.shiftKey });
               if (placement && !pan) {
-                const result = inference.resolve(
+                const result = resolvePlacement(
                   { x: event.clientX, y: event.clientY },
                   event.shiftKey,
                 );
@@ -608,7 +653,7 @@ export function BimSolidView({
             if (placement) {
               if (!gesture.navigation) {
                 if (placement.geometryPreview) {
-                  const result = inference.resolve(
+                  const result = resolvePlacement(
                     { x: event.clientX, y: event.clientY },
                     event.shiftKey,
                   );
