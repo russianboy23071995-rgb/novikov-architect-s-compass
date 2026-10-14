@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
 import { visibleSurfaces } from "./layer-display.ts";
@@ -94,7 +95,7 @@ export function createWallPreviewContext(
   const edges = getWallFootSources(project);
   const wallIds = new Set(
     storeyOf(project)
-      .walls.filter((w) => isLayerVisible(project, visibility, w.id))
+      .walls.filter((w) => wallBase(w) === 0 && isLayerVisible(project, visibility, w.id))
       .map((w) => w.id),
   );
   const pointOnly = (source: SnapReference) => {

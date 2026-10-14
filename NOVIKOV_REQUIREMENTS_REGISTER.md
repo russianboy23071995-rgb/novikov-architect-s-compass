@@ -11400,3 +11400,36 @@ JSON-Roundtrip und IFC-Koordinaten identisch, ungleiche Anschlusslagen verständ
 abgewiesen. Danach erst Z-Bewegung auf diese geprüfte Basis aufsetzen.
 Prüfnachweis dieses Dokumentationsschritts: genannte Codepfade gelesen; keine neuen
 Laufzeittests erforderlich, da keine Implementierung geändert wurde.
+
+### 14.10.2026 – Gemeinsame Wand-Höhenauflösung implementiert
+PR315 (Höhenvertrag) mit erfolgreichem Check in main übernommen, d10c74a.
+Format25 ergänzt optionales baseOffset in Metern; fehlend bedeutet exakt 0.
+Die explizite Migration V24→V25 erhält alte Geometrie ohne zusätzliche Nullfelder;
+ältere Versionen durchlaufen weiterhin ihre strengen Migrationsstufen.
+Domain `elements/wall/heights.ts` löst lokale Wandfuß-/Kopfhöhen auf. Fenster bleiben
+relativ zur Wand. Geschossauflösung und absoluter Gebäudedatum-Bezug bleiben getrennt.
+3D-Material, Fenster-Auswahlflächen, Steuerungsachse, reale Ursprungecken, bestehende
+XY-Vorschau und IFC-Platzierungen berücksichtigen den Versatz. Fangquellen auf der
+Geschossebene bieten versetzte Wandfüße nicht fälschlich als Punkte auf Z=Geschoss an;
+freie 3D-Ursprungswahl nutzt echte Körperpunkte, Bearbeitung die jeweilige Arbeitsebene.
+Eck-/T-Paarprüfung lehnt unterschiedliche Fußhöhen ab. Automatische Ecksuche und
+vorbereitete XY-Bewegung zählen Anschlussknoten mit ihrer Höhe, nicht nur mit XY.
+Keine Z-Mausaktion und keine neue Höhen-Eigenschaftenoberfläche in diesem Schritt.
+
+Nachweis: 964 Tests bestanden, darunter acht neue Fälle für signierte Versätze,
+V24-Migration/forgierte Altdateien, ungültige Höhen, EG/OG/KG, Fenster/JSON/reale
+Ecken, feste und vorbereitete Anschlüsse sowie rekursiv aufgelöste IFC-Platzierungen.
+App-Typecheck, gezieltes Lint und Produktionsbuild bestanden. Vorhandene Testdateien
+wurden ausschließlich bei Erwartungen an die aktuelle Formatversion angeglichen.
+Praktische Testdateien: outputs/wall-height-acceptance.json und .ifc (außerhalb Repo).
+Drei Wände mit Fenstern bei 0 / +0,50 / −0,50 m; Browser-/Archicad-Abnahme dieses
+neuen Beispiels noch offen. Keine erneute Großprojekt-Performancefreigabe.
+
+Genau ein Folgeauftrag: gemeinsame Application-Aktion für Z-Translation einer
+Wand-Auswahl implementieren, zunächst mit vorbereiteter Vorschau und vollständigem
+Commit-Vergleich. Geschoss/IDs erhalten, interne Anschlüsse erhalten, externe erst
+beim Commit lösen, Fenster einmal mitnehmen, stale-Kontext ablehnen, ein Undo.
+UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.
+
+
+Ergänzung 14.10.2026: Wand-Werkzeugeigenschaften besitzen jetzt das Feld Z-Versatz zum Geschoss (m), bezogen auf OK Rohdecke. Signierte Werte mit Dezimalkomma/-punkt, Übernahme per Enter/Blur über PropertyForm und updateWall, keine separate Modelllogik. Fenster folgen. Browser: +0,5 m und ein Undo geprüft; 8 Höhentests, Typecheck, gezieltes Lint und Build bestanden. Ungleiche Anschlussfußhöhen bleiben vorerst abgewiesen; nächste Aktion löst externe Anschlüsse gemäß Vertrag.

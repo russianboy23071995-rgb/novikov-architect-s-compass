@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -36,7 +37,7 @@ export function windowPreviewSurfaces(
     const uy = (wall.end.y - wall.start.y) / length;
     const left = opening.position * length - opening.width / 2;
     const right = left + opening.width;
-    const bottom = opening.sillHeight + elevation,
+    const bottom = opening.sillHeight + wallBase(wall, elevation),
       top = bottom + opening.height;
     const at = (along: number, z: number): Vector3 => [
       body.start.x + ux * along,

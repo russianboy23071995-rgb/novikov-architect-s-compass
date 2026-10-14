@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import type { CornerPreview } from "../../application/walls/corner-preview.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -19,7 +20,11 @@ export function cornerPreviewSurfaces(
         vertices: f.vertices.map(([x, y, z]): [number, number, number] => [
           x,
           y,
-          z + workingStoreyElevation(project),
+          z +
+            wallBase(
+              project.storeys.flatMap((s) => s.walls).find((wall) => wall.id === w.wallId)!,
+              workingStoreyElevation(project),
+            ),
         ]),
       })),
     ),

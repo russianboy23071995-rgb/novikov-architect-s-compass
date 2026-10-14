@@ -1,3 +1,4 @@
+import { assertSameWallBase } from "./heights.ts";
 import type { Wall } from "../../project/schema.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { intersectLines } from "../../../geometry/intersections/lines.ts";
@@ -6,7 +7,7 @@ import { pointsCompatible, coordinatesCompatible } from "../../../geometry/toler
 import { wallBody } from "./body.ts";
 
 export type CornerEnd = {
-  wall: Pick<Wall, "id" | "start" | "end" | "thickness" | "height" | "bodyOffset">;
+  wall: Pick<Wall, "id" | "start" | "end" | "thickness" | "height" | "bodyOffset" | "baseOffset">;
   endpoint: 0 | 1;
 };
 const RIGHT_ANGLE_DOT_TOLERANCE = 1e-10; // Dimensionless; not a distance or snap radius.
@@ -25,6 +26,7 @@ export function deriveRightAngleCorner(first: CornerEnd, second: CornerEnd) {
 }
 
 function deriveCorner(first: CornerEnd, second: CornerEnd, rightAngleOnly: boolean) {
+  assertSameWallBase(first.wall, second.wall);
   const ends = [first, second].sort((a, b) => (a.wall.id < b.wall.id ? -1 : 1));
   if (!first.wall.id.trim() || !second.wall.id.trim() || first.wall.id === second.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");

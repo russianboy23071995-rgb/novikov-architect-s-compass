@@ -1,3 +1,4 @@
+import { wallBase } from "../elements/wall/heights.ts";
 import { storeyOf, replaceStorey } from "../storeys/access.ts";
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
@@ -18,7 +19,7 @@ function freeze<T>(value: T): T {
   }
   return value;
 }
-const pointKey = (p: Point) => JSON.stringify([p.x, p.y]);
+const pointKey = (p: Point, z: number) => JSON.stringify([p.x, p.y, z]);
 
 /** One full preparation. Per-target work uses this owned immutable snapshot only. */
 export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
@@ -76,7 +77,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
   const counts = new Map<string, number>();
   for (const wall of s.walls)
     for (const p of [wall.start, wall.end]) {
-      const key = pointKey(p);
+      const key = pointKey(p, wallBase(wall));
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
   const fixedJoinedNodes = new Set(
@@ -84,7 +85,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       .filter((j) => !ids.has(j.first.wallId))
       .map((j) => {
         const wall = byWall.get(j.first.wallId)!;
-        return pointKey(j.first.endpoint === 0 ? wall.start : wall.end);
+        return pointKey(j.first.endpoint === 0 ? wall.start : wall.end, wallBase(wall));
       }),
   );
   const assets = new Map(affected.assets.map((a) => [a.id, a]));
@@ -138,14 +139,14 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       return next;
     };
     const changedCounts = new Map<string, number>();
-    const changeCount = (p: Point, change: number) => {
-      const key = pointKey(p);
+    const changeCount = (p: Point, change: number, z: number) => {
+      const key = pointKey(p, z);
       changedCounts.set(key, (changedCounts.get(key) ?? 0) + change);
     };
     for (const wall of movingWalls)
       for (const p of [wall.start, wall.end]) {
-        changeCount(p, -1);
-        changeCount(translate(p), 1);
+        changeCount(p, -1, wallBase(wall));
+        changeCount(translate(p), 1, wallBase(wall));
       }
     const countAt = (key: string) => (counts.get(key) ?? 0) + (changedCounts.get(key) ?? 0);
     // Spatial dependency: a moving, previously unrelated endpoint may occupy a fixed join.
@@ -177,7 +178,8 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     for (const join of localJoins) {
       const wall = localWalls.get(join.first.wallId)!;
       const p = join.first.endpoint === 0 ? wall.start : wall.end;
-      if (countAt(pointKey(p)) !== 2) throw new Error("Mehrfachanschluss noch nicht unterstützt.");
+      if (countAt(pointKey(p, wallBase(wall))) !== 2)
+        throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     }
     for (const wall of storeyOf(geometry).walls)
       if (!detachedEnd || wall.id === movingId) wallBody(wall);

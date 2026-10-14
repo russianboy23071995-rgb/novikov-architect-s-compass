@@ -52,7 +52,7 @@ export function readProjectFile(text: string): Project {
   } catch (error) {
     if (error instanceof ProjectFileSizeError) throw error;
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 24, Meter) mit gültigen Bauteilen.",
+      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 25, Meter) mit gültigen Bauteilen.",
     );
   }
 }

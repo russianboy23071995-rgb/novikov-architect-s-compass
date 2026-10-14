@@ -133,6 +133,40 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
         ))}
       </PropertyForm>
       {wall && (
+        <PropertyForm
+          aria-label="Wandfußhöhe"
+          className="flex items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const raw = String(new FormData(event.currentTarget).get("baseOffset") ?? "")
+              .trim()
+              .replace(",", ".");
+            run(() => {
+              const baseOffset = raw === "" ? NaN : Number(raw);
+              if (!Number.isFinite(baseOffset))
+                throw new Error("Bitte einen endlichen Z-Versatz in Metern eingeben.");
+              if (baseOffset === (wall.baseOffset ?? 0)) return;
+              onChange(updateWall(project, wall.id, { baseOffset }), selection);
+            });
+          }}
+        >
+          <label
+            className="text-xs"
+            title="Wandfuß relativ zur OK Rohdecke des zugeordneten Geschosses. Fenster folgen der Wand. Enter oder Feld verlassen übernimmt."
+          >
+            Z-Versatz zum Geschoss (m)
+            <Input
+              aria-label="Z-Versatz zum Geschoss (m)"
+              name="baseOffset"
+              inputMode="decimal"
+              required
+              defaultValue={wall.baseOffset ?? 0}
+              className="mt-1 h-8 w-28"
+            />
+          </label>
+        </PropertyForm>
+      )}
+      {wall && (
         <label
           className="text-xs"
           title="Außen oder innen an der Wandkante, alternativ mittig. Die Achse bleibt fest; der Wandkörper folgt."

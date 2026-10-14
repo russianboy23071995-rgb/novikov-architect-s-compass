@@ -15,7 +15,7 @@ import { createHistory, commitProject, undoProject, redoProject } from "../../li
 
 function fixture(pairs: number[][]) {
   return validateProject({
-    schemaVersion: 24,
+    schemaVersion: 25,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

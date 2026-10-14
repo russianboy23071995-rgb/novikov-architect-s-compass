@@ -1,3 +1,4 @@
+import { wallHeights } from "../elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -241,11 +242,18 @@ export const projectV23Schema = projectV22Schema.extend({
   schemaVersion: z.literal(23),
   groundDatum: z.number().finite(),
 });
-const projectSchema = projectV23Schema.omit({ storey: true }).extend({
+export const projectV24Schema = projectV23Schema.omit({ storey: true }).extend({
   schemaVersion: z.literal(24),
   groundStoreyId: id,
   workingStoreyId: id.optional(),
   storeys: z.array(projectV22Schema.shape.storey).min(1),
+});
+const raisedWallSchema = offsetWallSchema.extend({ baseOffset: z.number().finite().optional() });
+const projectSchema = projectV24Schema.extend({
+  schemaVersion: z.literal(25),
+  storeys: z
+    .array(projectV22Schema.shape.storey.extend({ walls: z.array(raisedWallSchema) }))
+    .min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -426,7 +434,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof offsetWallSchema>;
+export type Wall = z.infer<typeof raisedWallSchema>;
 export type BimWindow = z.infer<typeof currentWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
@@ -477,7 +485,12 @@ export function validateProject(value: unknown): Project {
   }
   const used = new Set<string>();
   const { storeys, groundStoreyId: _ground, ...shared } = project;
+  const localLevels = new Map(
+    resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
+  );
   for (const storey of storeys) {
+    const elevation = localLevels.get(storey.id);
+    for (const wall of storey.walls) wallHeights(wall, elevation ?? 0);
     const modelViews = project.modelViews?.filter((v) => v.storeyId === storey.id);
     const scopeInput: SingleProject = {
       ...shared,

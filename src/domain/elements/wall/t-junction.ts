@@ -1,3 +1,4 @@
+import { assertSameWallBase } from "./heights.ts";
 import type { CornerEnd } from "./corner.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { wallBody } from "./body.ts";
@@ -10,6 +11,7 @@ import { coordinatesCompatible, pointsCompatible } from "../../../geometry/toler
  * Callers must verify those project-level preconditions before using this result.
  */
 export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
+  assertSameWallBase(host, incoming.wall);
   if (!host.id.trim() || !incoming.wall.id.trim() || host.id === incoming.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
   if (incoming.endpoint !== 0 && incoming.endpoint !== 1)
