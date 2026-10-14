@@ -1,3 +1,5 @@
+import { selectWorkingStorey } from "@/application/storeys/working-storey";
+import { projectElementCounts } from "@/application/storeys/context";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { useLocalAutosave } from "./useLocalAutosave";
 import { LocalRecoveryStatus } from "./LocalRecoveryStatus";
@@ -762,12 +764,12 @@ export function CadWorkspace({
         >
           <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
             <p className="text-xs text-muted-foreground">
-              {pendingFile?.name} · {storeyOf(pendingFile?.project)?.walls.length} Wände ·{" "}
-              {storeyOf(pendingFile?.project)?.windows.length} Fenster ·{" "}
-              {storeyOf(pendingFile?.project)?.lines?.length ?? 0} Linien ·{" "}
-              {storeyOf(pendingFile?.project)?.hatches.length ?? 0} Schraffuren ·{" "}
-              {storeyOf(pendingFile?.project)?.references.length ?? 0} Bildreferenzen. Ersetzt das
-              aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
+              {pendingFile?.name} · {projectElementCounts(pendingFile?.project).walls} Wände ·{" "}
+              {projectElementCounts(pendingFile?.project).windows} Fenster ·{" "}
+              {projectElementCounts(pendingFile?.project).lines ?? 0} Linien ·{" "}
+              {projectElementCounts(pendingFile?.project).hatches ?? 0} Schraffuren ·{" "}
+              {projectElementCounts(pendingFile?.project).references ?? 0} Bildreferenzen. Ersetzt
+              das aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
               übernommene Formulareingaben werden verworfen.
             </p>
             <div className="flex justify-end gap-2">
@@ -1282,7 +1284,7 @@ export function CadWorkspace({
                 ) : (
                   <>
                     <ViewportManager
-                      key={activeDocumentId ?? "working-plan"}
+                      key={activeDocumentId ?? storeyOf(project).id}
                       documentFraming={activeDocument?.framing}
                       onPlanCapture={onPlanCapture}
                       viewContext={viewContext}
@@ -1577,6 +1579,24 @@ export function CadWorkspace({
                       setDemandOpen(false);
                       setTool("select");
                       setMode("2D");
+                      const doc = project.drawingDocuments?.find((d) => d.id === id);
+                      const source = project.modelViews?.find((v) => v.id === doc?.modelViewId);
+                      if (!source) return;
+                      try {
+                        selectWorkingStorey(project, project, source.storeyId);
+                      } catch {
+                        dispatchEditing({
+                          type: "working-storey",
+                          base: project,
+                          storeyId: source.storeyId,
+                        });
+                        return;
+                      }
+                      dispatchEditing({
+                        type: "working-storey",
+                        base: project,
+                        storeyId: source.storeyId,
+                      });
                       setActiveDocumentId(id);
                     }}
                     onDocumentVisibility={(base, documentId, layerId, visible) =>
@@ -1596,6 +1616,15 @@ export function CadWorkspace({
                     }
                     onClose={() => setNavigatorOpen(false)}
                     onSelect={(id, _label, toggle) => {
+                      if (project.storeys.some((s) => s.id === id)) {
+                        cancelInteraction();
+                        setSelection(null);
+                        setDemandOpen(false);
+                        setTool("select");
+                        setActiveDocumentId(null);
+                        dispatchEditing({ type: "working-storey", base: project, storeyId: id });
+                        return;
+                      }
                       if (activeDocumentId) return;
                       selectElement(
                         selectionIndex(project).get(id) ?? null,

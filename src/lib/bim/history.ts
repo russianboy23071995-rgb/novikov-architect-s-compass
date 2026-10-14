@@ -59,6 +59,9 @@ export function readProjectFile(text: string): Project {
 
 /** Model undo never rewinds the independent palette settings. Deleted IDs cannot survive. */
 function retainViewSettings(snapshot: Project, current: Project): Project {
+  const requested = snapshot.id === current.id ? current.workingStoreyId : snapshot.workingStoreyId;
+  const workingStoreyId =
+    requested && snapshot.storeys.some((s) => s.id === requested) ? requested : undefined;
   const ids = new Set(snapshot.layers.map((l) => l.id));
   const hiddenLayerIds = current.bimVisibility.hiddenLayerIds.filter((id) => ids.has(id));
   const workingViews =
@@ -73,14 +76,16 @@ function retainViewSettings(snapshot: Project, current: Project): Project {
     return { ...doc, hiddenLayerIds: (latest ?? doc).hiddenLayerIds.filter((id) => ids.has(id)) };
   });
   if (
+    workingStoreyId === snapshot.workingStoreyId &&
     JSON.stringify(drawingDocuments) === JSON.stringify(snapshot.drawingDocuments) &&
     JSON.stringify(workingViews) === JSON.stringify(snapshot.workingViews) &&
     JSON.stringify(hiddenLayerIds) === JSON.stringify(snapshot.bimVisibility.hiddenLayerIds)
   )
     return snapshot;
-  const { workingViews: _previousViews, ...model } = snapshot;
+  const { workingViews: _previousViews, workingStoreyId: _previousStorey, ...model } = snapshot;
   return {
     ...model,
+    ...(workingStoreyId ? { workingStoreyId } : {}),
     ...(drawingDocuments ? { drawingDocuments } : {}),
     ...(workingViews ? { workingViews } : {}),
     bimVisibility: { hiddenLayerIds },

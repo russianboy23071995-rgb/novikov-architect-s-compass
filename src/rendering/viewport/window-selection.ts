@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
@@ -27,7 +28,7 @@ export function windowSelectionSurfaces(
     const uy = (wall.end.y - wall.start.y) / length;
     const left = opening.position * length - opening.width / 2;
     const right = left + opening.width;
-    const bottom = opening.sillHeight,
+    const bottom = opening.sillHeight + workingStoreyElevation(project),
       top = bottom + opening.height;
     const at = (along: number, z: number): Vector3 => [
       body.start.x + ux * along,

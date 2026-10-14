@@ -11212,3 +11212,29 @@ Explizite Grenze: bestehenden Zeichen-/Renderpfad über gemeinsamen Übergangsad
 auf EG erhalten, kein impliziter Geschosswechsel beim Klick auf neue Strukturzeilen.
 Neue Geschosse zunächst leer. Aktive Geschosswahl mit EG/OG-Wand/Fenster und
 3D-/Picking-Abnahme ist noch offen und der einzige nächste Auftrag im Masterplan.
+
+
+### R26-03 / N21–N22 · Aktiver Geschosskontext (14.10.2026)
+Gemeinsame Application-Aktion selectWorkingStorey prüft Snapshot, existierende ID
+und aufgelöste Höhe. Wahl ist eine gespeicherte Ansichtseinstellung außerhalb des
+Modell-Undo. Optionales workingStoreyId ergänzt Schema24; fehlende Wahl bedeutet
+EG, eine unbekannte explizite ID oder unaufgelöste gewählte Höhe wird abgewiesen.
+Die Gebäude-Basis groundStoreyId wird durch die Wahl niemals verändert.
+Geschosswechsel beendet Interaktion und Auswahl; vorhandene Werkzeuge benutzen
+über den gemeinsamen Containerzugriff dieselben Modellaktionen ohne Werkzeugkopien.
+AI/Text/Voice können dieselbe Aktion mit stabiler Geschoss-ID und Snapshot verwenden;
+kein gesonderter Sprachparser und kein MCP-Server in diesem Auftrag.
+
+Aktives Geschoss ist in Grundriss, Eigenschaften und bearbeitbarer 3D-Ansicht gleich.
+Domain-Query workingStoreyElevation liefert lokales Gebäude-Z wie IFC; Fenster und
+Achsen, Fußkanten, Picking und horizontale Arbeitsebene erhalten denselben Versatz.
+Keine Translation der gespeicherten lokalen Bauteilpunkte. Absolute EG-Kote bleibt
+getrennter Bezug. Neue Abbilder binden das Arbeitsgeschoss; Öffnen wählt die Quelle.
+IFC enthält unverändert alle Geschosse. Globales Ebenensystem bleibt gemeinsam.
+
+Abnahme: EG/OG-Wände und Fenster, Erhalt des anderen Geschosses, Kontextfehler,
+Undo/Redo ohne Rücksetzen der Ansicht, Abbildbindung, Datei/Recovery, identischer
+IFC bei unterschiedlicher Arbeitsgeschosswahl und erhöhte 3D-Fang-/Pickingpunkte.
+Browser: OG-Wand gezeichnet, Fenster ergänzt, EG unverändert; OG-Wand in 3D wählbar.
+Keine vollständige 3D-Gebäudeübersicht behauptet: zunächst aktives Geschoss allein.
+Nächster Auftrag ist die gemeinsame 3D-Übersicht über alle Geschosse aus §9.

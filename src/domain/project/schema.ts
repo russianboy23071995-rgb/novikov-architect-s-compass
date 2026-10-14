@@ -244,6 +244,7 @@ export const projectV23Schema = projectV22Schema.extend({
 const projectSchema = projectV23Schema.omit({ storey: true }).extend({
   schemaVersion: z.literal(24),
   groundStoreyId: id,
+  workingStoreyId: id.optional(),
   storeys: z.array(projectV22Schema.shape.storey).min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
@@ -438,8 +439,15 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 /** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
   const project = projectSchema.parse(value);
-  resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
+  const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
+  if (
+    project.workingStoreyId &&
+    levels.find((s) => s.storeyId === project.workingStoreyId)?.elevation === null
+  )
+    throw new Error("Die Höhe des Arbeitsgeschosses ist nicht aufgelöst.");
   const storeyIds = new Set(project.storeys.map((s) => s.id));
+  if (project.workingStoreyId && !storeyIds.has(project.workingStoreyId))
+    throw new Error("Unbekanntes Arbeitsgeschoss.");
   for (const view of [...(project.workingViews ?? []), ...(project.modelViews ?? [])])
     if (!storeyIds.has(view.storeyId)) throw new Error("Unbekanntes Geschoss im Ansichtskontext.");
   for (const doc of project.drawingDocuments ?? []) {

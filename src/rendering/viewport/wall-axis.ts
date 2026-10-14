@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
@@ -41,7 +42,7 @@ export function wallPlanHandles(wall: Wall, connected = false) {
 
 /** Selection-only construction overlay in CSS pixels, intentionally visible through
  * the body. Uses the displayed model snapshot; never contributes to picking/snapping.
- * The current single-storey model has its wall feet at z=0.
+ * Wall feet use the active storey elevation.
  */
 export function selectedWallAxis(
   displayed: Project,
@@ -53,7 +54,7 @@ export function selectedWallAxis(
   const wall = storeyOf(displayed).walls.find((w) => w.id === selection.id);
   if (!wall) return null;
   const screen = (point: { x: number; y: number }) => {
-    const [x, y] = projection.project([point.x, point.y, 0]);
+    const [x, y] = projection.project([point.x, point.y, workingStoreyElevation(displayed)]);
     return {
       x: ((x + 1) * projection.viewport.width) / 2,
       y: ((1 - y) * projection.viewport.height) / 2,

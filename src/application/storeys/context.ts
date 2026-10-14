@@ -6,7 +6,7 @@ import {
   type WorkingPlanIdentity,
 } from "../../domain/views/scale.ts";
 
-/** The schema21 single-storey default lives here, not in view consumers. */
+/** Shared working-plan identity; files without an explicit choice start at EG. */
 export function defaultWorkingPlan(project: Project): WorkingPlanIdentity {
   return { kind: "working-plan", projectId: project.id, storeyId: storeyOf(project).id };
 }
@@ -36,4 +36,13 @@ export function resolveViewStorey(project: Project, binding: ViewIdentity) {
     source,
     isCurrent: (current: Project) => current === project,
   });
+}
+
+/** File summaries describe the complete document, independent of the active view. */
+export function projectElementCounts(project: Project | undefined) {
+  const result = { walls: 0, windows: 0, lines: 0, hatches: 0, references: 0 };
+  for (const storey of project?.storeys ?? [])
+    for (const kind of Object.keys(result) as (keyof typeof result)[])
+      result[kind] += storey[kind]?.length ?? 0;
+  return result;
 }

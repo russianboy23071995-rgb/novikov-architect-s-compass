@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
@@ -12,7 +13,7 @@ import type { ProjectionState } from "./projection-state.ts";
 import { classifyAnchorVisibility } from "./anchor-visibility.ts";
 import { wallEndpointIndex } from "../../application/snapping/project-references.ts";
 
-/** Read-only adapter for existing wall axis/corner/midpoint sources on z=0.
+/** Read-only adapter for existing wall axis/corner/midpoint sources on the active storey plane.
  * Project snapshots must be immutable, as in the shared application source cache.
  * Recreate after model/projection changes; no hidden-target selection policy here. */
 export function createWallPointCandidates(
@@ -33,10 +34,11 @@ export function createWallPointCandidates(
       .walls.filter((w) => w.id !== movingWallId && isLayerVisible(project, visibility, w.id))
       .map((wall) => wall.id),
   );
-  const plane = projection.workplane(0);
+  const elevation = workingStoreyElevation(project);
+  const plane = projection.workplane(elevation);
   return Object.freeze({
     visibilityAt: (point: Point2) =>
-      classifyAnchorVisibility(solid, projection, [point.x, point.y, 0]),
+      classifyAnchorVisibility(solid, projection, [point.x, point.y, elevation]),
     query(
       currentProject: Project,
       currentProjection: ProjectionState,
@@ -80,7 +82,7 @@ export function createWallPointCandidates(
           )!,
           sourceId: JSON.stringify([candidate.sourceEntityId, candidate.sourceFeature]),
           pointIndex: wallEndpointIndex(candidate.sourceFeature ?? ""),
-          modelPoint: [candidate.worldPoint.x, candidate.worldPoint.y, 0] as const,
+          modelPoint: [candidate.worldPoint.x, candidate.worldPoint.y, elevation] as const,
           visibility: classifyAnchorVisibility(solid, projection, [
             candidate.worldPoint.x,
             candidate.worldPoint.y,

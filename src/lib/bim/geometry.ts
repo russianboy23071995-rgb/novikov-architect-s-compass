@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -155,6 +156,15 @@ export function buildSolid(input: Project): Solid {
   if (!solid.faces.length) {
     solid.min = [0, 0, 0];
     solid.max = [1, 1, 1];
+  }
+  const elevation = workingStoreyElevation(project);
+  if (elevation !== 0) {
+    solid.faces = solid.faces.map((f) => ({
+      ...f,
+      vertices: f.vertices.map(([x, y, z]): Vec3 => [x, y, z + elevation]),
+    }));
+    solid.min[2] += elevation;
+    solid.max[2] += elevation;
   }
   return solid;
 }
