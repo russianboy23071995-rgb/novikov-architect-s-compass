@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Stand: 10.10.2026. Referenz: `main` `6abcf7c32821d1cf92237c3cdffe92a4312fe6a9` (PR 237). Dokumentationsauftrag: alle vorhandenen Leitfäden zusammenführen, Anforderungen erhalten und Fortschritt von Zukunftszielen unterscheiden.
+Aktueller Arbeitsauftrag: 14.10.2026 – Reviewkorrekturen AUD14-01 bis AUD14-07, ausdrücklich zur sofortigen sequenziellen Umsetzung freigegeben. Prüfbezug: main `c081040d5fb7a8833ac8493bfd0ae669ef617e1e`, PR281–317; PR318 zum Auftragsabgleich offen. Ursprüngliche Konsolidierung vom 10.10.2026 bleibt historische Provenienz.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -397,7 +397,7 @@ benötigen diese oder neuere Programmversion; Altdateien bleiben lesbar.
 4. **Vorschau/Abhängigkeiten:** Begrenzte Piloten sind produktiv; nicht wieder von null anfangen. Restliche Pfade und breite verbundene Komponenten messen. Nur ausgewählte Wand ist keine sichere betroffene Menge.
 5. **3D:** Frühere CPU-Kamera-Neupackung wurde produktiv verbessert. Indexvorbereitung, Scan-Fallback, Preview, große Koordinaten und mehrere schwere Ansichten bleiben konkret zu vermessen. Kein begründeter pauschaler Rendererwechsel.
 6. **Bibliotheken/Clientzustand:** Lokale Profile, Konflikte/Quota, konkurrierende Tabs und portable Linienkopien haben unterschiedliche Risiken. CadWorkspace darf nicht permanent Fachmodell/Settings/Actions aufsammeln.
-7. **Fachmodell für AI:** Ein Geschoss plus Wand/Fenster ist noch kein vollständiges Gebäudemodell. Räume, Höhenbezüge, Quellen, Abhängigkeiten, strukturierte Queries und Transaktionen sind Voraussetzungen komplexer autonomer Entwürfe.
+7. **Fachmodell für AI:** Mehrere Geschosse, Wände/Fenster und Höhenversätze sind im Stand PR317 vorhanden; dies ist noch kein vollständiges Gebäudemodell. Räume, Höhenbezüge, Quellen, Abhängigkeiten, strukturierte Queries und Transaktionen sind Voraussetzungen komplexer autonomer Entwürfe.
 
 Leistungsprofil wiederverwenden: 100/1.000/5.000 Elemente, viele Polygonpunkte, verbundene Wände/T-Knoten, mehrere echte Rasterpläne, 1/10/50/100 History-Stände, Laden/Pointer/Commit/Undo/2D/3D/Export getrennt. Kalte und warme Pfade unterscheiden, Budgets/Abbruchgrenzen dokumentieren. Kein Limit nur hochsetzen und keine Datenstruktur auf Verdacht austauschen.
 
@@ -407,7 +407,7 @@ Priorität ist Risikostufe, keine Aufforderung zu paralleler Umsetzung. AI-Ansch
 
 | Abschnitt | Priorität | Ergebnis und Abnahme | Bezug |
 | --- | --- | --- | --- |
-| 0 – Geordneten Stand sichern | aktuell | Laufenden Abbild-PR238 gegen aktuellen main und Nutzerentscheidungen abnehmen, keine Doppelimplementierung. Zwei Abbilder desselben Modells behalten eigene Maßstäbe/Filter und Dateirundlauf. | MS-04c, N57/N60 |
+| 0 – Geordneten Stand sichern | historischer Auftrag; aktuell §9 AUD14 | Abbild-PR238 war Teil der früheren Reihenfolge. Aktuell gelten AUD14-01 bis AUD14-07; keine Doppelimplementierung. Zwei Abbilder desselben Modells behalten eigene Maßstäbe/Filter und Dateirundlauf. | MS-04c, N57/N60 |
 | 1 – Daten und Kapazität | P0 | Persistenz-/Recovery-Pilot mit letztem gültigen Stand, Absturz, vollem Datenträger, Berechtigungen und Migration. Anschließend gemessenes Projekt-/Assetbudget, verknüpfte und portable Referenzen mit Umzug/fehlenden Quellen. Reihenfolge nach akutem Befund. | R26-01/02, K02/03, RC07/SB |
 | 2 – Fachmodell | P1 | Mehrgeschossigkeit und feste/gebundene Höhen, dann passende Bauteile einzeln: Türen/Decken/Dächer/Stützen/Treppen, Schichtaufbau, Räume. Jede Fachfähigkeit mit Action/Query, Abhängigkeiten, Undo, Migration und gemeinsamen Ansichten. | R26-03, N21/22/31–35/42/47/48, V09 |
 | 3 – Dokumentation | P1 | Abbilder zu Schnitt/Ansicht erweitern, Scope für Text/assoziative Maße, Papier-/Modellgrößen, Layout/Master/Plankopf, maßhaltiger PDF-/Drucknachweis. | R26-04/07, N05/06/20/46/49/50/57–60, MS |
@@ -457,10 +457,25 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: Z-Aktion an die 3D-Bewegungsinteraktion anbinden.**
-Die gemeinsame vorbereitete Application-Aktion ist implementiert (Nachweis am Ende).
-Ursprung, Z-Achse, Shift-Sperre und Präzision nutzen bestehende gemeinsame Verträge.
-Vorschau/Commit über prepareZTranslation, keine doppelte Modelllogik im Werkzeug.
+**Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
+
+**Genau ein aktiver Schritt: AUD14-01 – zulässige Projektzustände und Recovery-Gesamtbudget konsistent machen.** Dieser Auftrag ersetzt die bisherige Fortsetzung mit neuen Z-Funktionen und hat Vorrang vor weiteren Features. PR318 enthält bereits laufende Z-UI-Arbeit: Änderungen und Nachweise sichern, nichts verwerfen oder ungeprüft als erledigt übernehmen. Die sieben Reviewaufträge jetzt beginnen; ein Merge von PR318 ist dafür keine Voraussetzung. Keine parallelen Implementierungen der sieben Punkte.
+
+Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
+
+| Reihenfolge | ID | Priorität | Ausführbarer Auftrag |
+| --- | --- | --- | --- |
+| 1 | AUD14-01 | P0 | Datei-/Modellzulässigkeit und Recovery-Gesamtpixelbudget abgleichen, Grenzfall reproduzieren und konsistent lösen. |
+| 2 | AUD14-02 | P1 | Vollständige Projekt-/Bildserialisierung aus XY-/Z-Bewegung und weiteren betroffenen Änderungsvergleichen entfernen; Snapshot-/Mutationsschutz erhalten. |
+| 3 | AUD14-03 | P1 | 3D-Ressourcen für unveränderte Geometrie wiederverwenden; Vorschau und Auswahl begrenzt aktualisieren. |
+| 4 | AUD14-04 | P1 | Wiederholte globale Validierung/Ableitung begrenzen, Ansichtskontext von Modelländerung trennen und verbleibende direkte 3D-Vorschauen vorbereiten. |
+| 5 | AUD14-05 | P1 | Neuen räumlichen 3D-Ursprungsfang lokal abfragen; große Anschlussgruppen mitmessen und betroffene Menge fachlich sicher begrenzen. |
+| 6 | AUD14-06 | P1 | Recovery-Aufbewahrung, Langhistory, Bild-/Geometrie-Caches und reale Speicher-/Quota-Grenzen über lange Sitzungen prüfen und sicher begrenzen. |
+| 7 | AUD14-07 | P2 / Abschlussgate | Aktuellen Dokumentationsstatus, UTF-8-Texte und Zuständigkeiten bereinigen; gesamten Block mit schwerem Mehrgeschossprofil abnehmen. |
+
+Alle IDs beginnen als **offen / zur sofortigen Bearbeitung freigegeben**, nicht als implementiert. Details, konkrete Codebefunde und Abnahmekriterien stehen im Register unter diesen IDs. Für jeden Punkt: aktuellen main und offene PRs abgleichen; Vorhermessung/Reproduktion; kleinster sinnvoller Fix; Fach-/Fehlerregression; App-/Benchmark-Typecheck, relevantes Lint/Build und produktionsnaher Browsernachweis. Verschachtelte Zeiten nicht addieren, Einzelmessungen nicht als p95 ausgeben. Nachweise auf Commit/Fixture beziehen; Status und nächsten aktiven Schritt hier aktualisieren. Nur Messinstrumentierung ohne Erfüllung des Abnahmekriteriums schließt einen Punkt nicht.
+
+Gemeinsamer Akzeptanzkontext: Schule etwa 1.000 m² je Geschoss, fünf Geschosse, viele Wände/Fenster/Eck-/T-Anschlüsse, Linien/Schraffuren/Polygonpunkte, mehrere Abbilder und bis zu 20 Referenzpläne als Prüfrichtwert. 128 MiB bleibt der derzeitige portable Dateivertrag; größere Kapazität ist keine Voraussetzung dieser Korrekturen. Schwere BIM- und Bildprofile getrennt sowie kombiniert messen. Referenzhardware/Browser, kalte und warme Läufe, Wiederholungen, Pointer/Commit/Undo, 2D/3D, Export/Recovery, Peak-Speicher und Grenzen dokumentieren. Verfügbare Fachfunktionen verwenden; fehlende Räume/Decken/Dächer nicht durch Testbehauptungen ersetzen. Die Archicad-Bachelorarbeit erst später mit passendem Importadapter, keine PLN-/IFC-Importfähigkeit behaupten.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
