@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useMemo } from "react";
 import type { Project, Point } from "@/lib/bim/model";
@@ -85,6 +86,8 @@ export function useSolidInference(
     );
   };
   return {
+    origin: policy?.origin?.point,
+    originElevation: workplaneHeight ?? workingStoreyElevation(project),
     workplaneHeight,
     plane,
     context,

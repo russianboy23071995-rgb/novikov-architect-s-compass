@@ -1,3 +1,4 @@
+import { MovementOriginAxes } from "./MovementOriginAxes";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import type { Point } from "@/lib/bim/model";
 import type { SnapReference } from "@/constraints/snapping/engine";
@@ -39,6 +40,13 @@ export function SolidSnapPreview({
   const span = Math.hypot(width, height);
   return (
     <>
+      {inference.origin && (
+        <MovementOriginAxes
+          projection={projection}
+          origin={inference.origin}
+          elevation={inference.originElevation}
+        />
+      )}
       {/* z=0 construction guides sit behind opaque wall pixels, including their real openings. */}
       <svg
         aria-label="3D Hilfslinien"

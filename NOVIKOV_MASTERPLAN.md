@@ -648,3 +648,15 @@ und Ursprungsreferenz. Typechecks, gezieltes Lint und Produktionsbuild geprüft.
 Browser: obere OG-Ecke bei aktivem EG, beide Wände +1 m X; Projektdatei bestätigt
 identische XY-Translation und unveränderte Fensterparameter. Z-Höhenvertrag bleibt
 nächster Auftrag nach Abnahme dieser Bedienkorrektur.
+
+### Ergänzung 14.10.2026 – Sichtbare Bewegungsachsen am Ursprung
+Nach bestätigter Ursprungswahl zeigt die gemeinsame 3D-Fangvorschau X/Y als
+beschriftete Richtungspfeile. Z wird ausdrücklich nur zur Orientierung dargestellt;
+keine Höhenbewegung. Die Achsen stammen aus WORLD_MOVEMENT_AXES, werden mit der
+aktuellen Kamera am echten Ursprung projiziert und besitzen eine bildschirmbezogene
+Darstellungslänge. Kein zweiter Fang-/Shift-Algorithmus: bestehende Richtungssperre
+bleibt unverändert. Blickparallele Achsen ohne projizierbare Richtung entfallen.
+Typprüfung, gezieltes Lint, vorhandene Shift-Sperrprüfungen und sechs 3D-Fangtests,
+Produktionsbuild bestanden. Browser: Achsen am oberen OG-Ursprung; Shift-Klick nahe
+X ergibt in beiden Geschossen exakt gleichen X-Versatz bei unverändertem Y.
+PR314 enthält diese Bedienergänzung. Nächster Auftrag bleibt Z-Höhenvertrag nach Abnahme.
