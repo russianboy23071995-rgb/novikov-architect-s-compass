@@ -632,3 +632,19 @@ Browser: EG/OG gemeinsam in 3D, Ursprung, X +1 m per Canvas-Klick, Dateivergleic
 ein Undo für beide Geschosse; Y=90° und Abbruch der Vorschau. Kein Z-/Perspektiv-
 oder Großprojekt-Performance-Nachweis. Aktive Fanggeometrie und Ursprung bleiben
 an die horizontale Arbeitsebene gebunden. Nächster Einzelauftrag siehe §9.
+
+### Ergänzung 14.10.2026 – Frei gewählter Bewegungsursprung in 3D
+Nutzerkorrektur zum offenen PR314: Nach Auswahl und On-Demand-Bewegungsaktion wird
+zuerst ein eigener Ursprung gewählt. Sichtbare reale Wandecken aller Geschosse,
+auch obere Ecken, werden bildschirmbezogen gefangen und mit einem Ring angezeigt.
+Der Klick fixiert die exakte Ecke; die horizontale Bewegungsebene läuft durch deren
+Z-Höhe. Freier Klick ohne Eckfang setzt einen Ursprung auf der Arbeitsgeschossebene.
+Die Bauteilhöhen/Geschosszuordnung bleiben unverändert; keine Z-Mutation.
+Gemeinsamer abgeleiteter Eckadapter nutzt Körperkonturen, Ebenenfilter und Tiefentest;
+die anschließende Bewegung verwendet weiterhin ToolInteraction, gemeinsame
+Hilfsreferenzen, Präzision und validierte Auswahltranslation. Fangschalter bleibt gültig.
+954 Tests bestanden; zusätzliche obere Ecke, Fangradius, Sichtbarkeit, Ebeneninverse
+und Ursprungsreferenz. Typechecks, gezieltes Lint und Produktionsbuild geprüft.
+Browser: obere OG-Ecke bei aktivem EG, beide Wände +1 m X; Projektdatei bestätigt
+identische XY-Translation und unveränderte Fensterparameter. Z-Höhenvertrag bleibt
+nächster Auftrag nach Abnahme dieser Bedienkorrektur.

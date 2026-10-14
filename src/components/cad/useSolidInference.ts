@@ -23,6 +23,7 @@ export function useSolidInference(
   shift: boolean,
   visibility?: LayerVisibilityPolicy,
   gridSpacing: number | null = null,
+  workplaneHeight?: number,
 ) {
   const sessionKey = useMemo(
     () => ({ policy, project, visibility }),
@@ -42,8 +43,9 @@ export function useSolidInference(
         policy,
         movingWallId,
         visibility,
+        workplaneHeight,
       ),
-    [project, projection, enabled, resetKey, policy, movingWallId, visibility],
+    [project, projection, enabled, resetKey, policy, movingWallId, visibility, workplaneHeight],
   );
   const context = useMemo(() => ({ ...baseContext, sessionKey }), [baseContext, sessionKey]);
   const cursor = useMemo(() => {
@@ -83,6 +85,7 @@ export function useSolidInference(
     );
   };
   return {
+    workplaneHeight,
     plane,
     context,
     adapter,

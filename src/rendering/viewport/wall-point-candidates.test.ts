@@ -141,3 +141,55 @@ test("visibility is annotated without filtering hidden or outside footpoints", (
     if (!panX) assert.ok(result.candidates.some((c) => c.visibility === "visible"));
   }
 });
+
+import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
+import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { createWallPreviewContext } from "./wall-preview-context.ts";
+import { beginSelectionMove } from "../../application/selection/move.ts";
+test("3D movement origin acquires real upper corners, respects pixel radius and visibility", () => {
+  const project = createExampleProject();
+  const projection = createProjectionState(
+    createProjectionFrame(buildBuildingSolid(project)),
+    initialCamera,
+    { left: 20, top: 30, width: 800, height: 600 },
+    backbufferSize(800, 600, 1),
+  )!;
+  const query = createMovementOriginQuery(project, projection, () => true);
+  const screen = (p: readonly [number, number, number]) => {
+    const q = projection.project(p);
+    return { x: 20 + (q[0] + 1) * 400, y: 30 + (1 - q[1]) * 300 };
+  };
+  const corner = movementCorners(project).find(
+    (c) => c.point[2] === 2.8 && query(screen(c.point), 0.01),
+  );
+  assert.ok(corner);
+  const cursor = screen(corner.point);
+  assert.deepEqual(query({ x: cursor.x + 4, y: cursor.y }, 10)?.point, corner.point);
+  assert.equal(query({ x: cursor.x + 4, y: cursor.y }, 1), null);
+  assert.equal(createMovementOriginQuery(project, projection, () => false)(cursor), null);
+  const plane = projection.workplane(corner.point[2]);
+  assert.equal(plane.status, "ok");
+  if (plane.status !== "ok") return;
+  const inverse = plane.value.toPlane(cursor);
+  assert.equal(inverse.status, "ok");
+  if (inverse.status !== "ok") return;
+  assert.ok(Math.abs(inverse.value.point.x - corner.point[0]) < 1e-10);
+  assert.ok(Math.abs(inverse.value.point.y - corner.point[1]) < 1e-10);
+  const session = beginSelectionMove(
+    project,
+    [{ kind: "wall", id: corner.id }],
+    inverse.value.point,
+  );
+  const context = createWallPreviewContext(
+    project,
+    projection,
+    true,
+    0,
+    session.snapping,
+    undefined,
+    undefined,
+    corner.point[2],
+  );
+  assert.equal(context.context.pinnedReferences?.length, 1);
+  assert.ok(context.context.acceptReference!(session.snapping.origin));
+});

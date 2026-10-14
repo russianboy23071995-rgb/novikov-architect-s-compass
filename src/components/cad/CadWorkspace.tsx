@@ -1530,7 +1530,7 @@ export function CadWorkspace({
                       >
                         {groupMove.pickingOrigin
                           ? mode === "3D"
-                            ? "Sichtbaren Wandfußpunkt im Arbeitsgeschoss als Ursprung anklicken"
+                            ? "Ursprung frei anklicken · sichtbare Wandecken aller Geschosse rasten ein"
                             : "Bewegungsursprung im Grundriss anklicken"
                           : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
                       </p>

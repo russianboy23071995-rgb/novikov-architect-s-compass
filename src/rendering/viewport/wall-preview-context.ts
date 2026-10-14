@@ -1,3 +1,7 @@
+import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
+import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { visibleSurfaces } from "./layer-display.ts";
+import { classifyAnchorVisibility } from "./anchor-visibility.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
@@ -24,11 +28,68 @@ export function createWallPreviewContext(
   policy: ToolSnapPolicy | null = null,
   movingWallId?: string,
   visibility?: LayerVisibilityPolicy,
+  workplaneHeight?: number,
 ) {
   const adapter = projection
     ? createWallPointCandidates(project, projection, movingWallId, visibility)
     : null;
-  const plane = projection?.workplane(workingStoreyElevation(project));
+  const elevation = workplaneHeight ?? workingStoreyElevation(project);
+  const plane = projection?.workplane(elevation);
+  if (workplaneHeight !== undefined && workplaneHeight !== workingStoreyElevation(project)) {
+    const allows = (id: string) => id !== movingWallId && isLayerVisible(project, visibility, id);
+    const solid = visibleSurfaces(buildBuildingSolid(project), allows);
+    const query = projection ? createMovementOriginQuery(project, projection, allows) : null;
+    const references: SnapReference[] = movementCorners(project)
+      .filter((c) => allows(c.id) && Math.abs(c.point[2] - elevation) < 1e-8)
+      .map((c) => ({
+        entityId: c.id,
+        feature: `spatial-corner:${JSON.stringify(c.point)}`,
+        point: { x: c.point[0], y: c.point[1] },
+      }));
+    const lookup = new Map(references.map((r) => [referenceKey(r), r]));
+    const isOrigin = (r: SnapReference) =>
+      !!policy?.origin && referenceKey(r) === referenceKey(policy.origin);
+    const valid = (r: SnapReference): boolean =>
+      isOrigin(r) || (!!lookup.has(referenceKey(r)) && (!policy || policy.sources([r]).length > 0));
+    const visible = (p: Point) =>
+      classifyAnchorVisibility(solid, projection, [p.x, p.y, elevation]) === "visible";
+    const context: HoverContext = {
+      enabled,
+      sessionKey: policy ?? project,
+      resetKey,
+      pinnedReferences: policy?.origin ? [policy.origin] : [],
+      references: [],
+      pixelsPerMetre: 1,
+      ...(plane?.status === "ok" ? { metric: plane.value.metric } : {}),
+      suspended: !projection || plane?.status !== "ok",
+      sourceQuery: (cursor, _scale, radius, active = []) => {
+        if (plane?.status !== "ok" || !query) return [];
+        const screen = plane.value.toScreen(cursor);
+        const hit = screen.status === "ok" ? query(screen.value, radius, elevation) : null;
+        const local = hit
+          ? lookup.get(
+              JSON.stringify([
+                hit.id,
+                `spatial-corner:${JSON.stringify(hit.point)}`,
+                hit.point[0],
+                hit.point[1],
+              ]),
+            )
+          : null;
+        return withConstructionReferences(
+          [
+            ...active.filter(valid),
+            ...(local && valid(local) ? [local] : []),
+            ...(policy?.origin ? [policy.origin] : []),
+          ],
+          active.filter(valid),
+        );
+      },
+      acceptReference: (r) => isOrigin(r) || (valid(r) && visible(r.point)),
+      acceptCandidate: (c) => visible(c.worldPoint),
+    };
+    return { adapter, plane, context };
+  }
   const sources = getLocalSnapSources(project);
   const edges = getWallFootSources(project);
   const wallIds = new Set(

@@ -1,3 +1,5 @@
+import { createMovementOriginQuery } from "@/rendering/viewport/movement-origin";
+import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,
@@ -148,6 +150,10 @@ export function BimSolidView({
     }
     return project;
   }, [editSession, target, targetCandidate, project, selection]);
+  const [originHeight, setOriginHeight] = useState<number | undefined>();
+  useEffect(() => {
+    if (!placement) setOriginHeight(undefined);
+  }, [placement]);
   const [placementAim, setPlacementAim] = useState<Point | null>(null);
   useEffect(() => setPlacementAim(null), [placement?.geometryPreview]);
   const placementTarget = placement?.target === undefined ? placementAim : placement.target;
@@ -245,7 +251,19 @@ export function BimSolidView({
     previewClient?.shift ?? false,
     visibility,
     moving || placement?.geometryPreview ? gridSpacing(gridSettings) : null,
+    placement?.geometryPreview ? originHeight : undefined,
   );
+  const pickingMovementOrigin = !!placement && !placement.geometryPreview;
+  const originQuery = useMemo(
+    () =>
+      previewProjection && pickingMovementOrigin
+        ? createMovementOriginQuery(project, previewProjection, (id) =>
+            isLayerVisible(project, visibility, id),
+          )
+        : null,
+    [project, previewProjection, visibility, pickingMovementOrigin],
+  );
+  const originCandidate = snap && previewClient && originQuery ? originQuery(previewClient) : null;
   useEffect(() => {
     const canvas = canvasRef.current!;
     const setup = () => {
@@ -349,6 +367,23 @@ export function BimSolidView({
         enabled={snap && !error && interactive}
         inference={inference}
       />
+      {originCandidate && previewProjection && (
+        <svg
+          aria-label="Bewegungsursprung Fangvorschau"
+          className="pointer-events-none absolute inset-0 z-20"
+          width={previewProjection.viewport.width}
+          height={previewProjection.viewport.height}
+        >
+          <circle
+            cx={originCandidate.screen.x - previewProjection.viewport.left}
+            cy={originCandidate.screen.y - previewProjection.viewport.top}
+            r={10.5}
+            fill="none"
+            stroke="#aeb5bd"
+            strokeWidth={2.5}
+          />
+        </svg>
+      )}
       <canvas
         ref={canvasRef}
         aria-label="3D walls with window openings"
@@ -357,9 +392,9 @@ export function BimSolidView({
         title={
           moving
             ? editSession.action === "move"
-              ? "Wand auf der Geschossebene bewegen. Klick fixiert Richtung; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
+              ? "Wand auf der Geschossebene bewegen. Klick platziert; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
               : "Auf der Geschossebene bearbeiten. Klick übernimmt Ziel; Tab für Maße. Pan schaltet auf Navigation; Esc bricht ab."
-            : "Sichtbaren Wandfußpunkt als Bewegungsursprung anklicken. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
+            : "Bewegungsursprung frei wählen; sichtbare Wandecken rasten ein. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
         }
         className={`relative z-10 h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onKeyDown={(event) => {
@@ -521,17 +556,20 @@ export function BimSolidView({
                   const point = placement.target === undefined ? result?.point : placement.target;
                   if (point) placement.pick(point, result?.candidate);
                 } else {
-                  const hits = inference.adapter?.query(
-                    project,
-                    projection,
-                    { x: event.clientX, y: event.clientY },
-                    10,
-                  );
-                  const anchor =
-                    hits?.status === "ok"
-                      ? hits.candidates.find((c) => c.visibility === "visible")
+                  const client = { x: event.clientX, y: event.clientY };
+                  const anchor = snap ? originQuery?.(client) : null;
+                  const height = anchor?.point[2] ?? workingStoreyElevation(project);
+                  const plane = projection.workplane(height);
+                  const inverse = plane.status === "ok" ? plane.value.toPlane(client) : null;
+                  const point = anchor
+                    ? { x: anchor.point[0], y: anchor.point[1] }
+                    : inverse?.status === "ok"
+                      ? inverse.value.point
                       : null;
-                  if (anchor) placement.pick(anchor.worldPoint);
+                  if (point) {
+                    setOriginHeight(height);
+                    placement.pick(point);
+                  }
                 }
               }
               if (canvas.hasPointerCapture(event.pointerId))
