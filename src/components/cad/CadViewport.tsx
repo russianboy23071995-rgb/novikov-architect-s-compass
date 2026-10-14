@@ -1,3 +1,6 @@
+import { CameraAxes } from "./CameraAxes";
+import { buildBuildingSolid } from "@/lib/bim/geometry";
+import { createProjectionFrame } from "@/geometry/projections/orthographic";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "@/domain/views/documents";
 import { capturePlanFraming } from "@/rendering/viewport/plan-camera";
@@ -81,6 +84,13 @@ export function CadViewport({
   const scaleContext = model.viewContext.scale;
   const is3D = mode === "3D" && index === 0;
   const [camera, setCamera] = useState(initialCamera);
+  const [solidFrame, setSolidFrame] = useState<ReturnType<typeof createProjectionFrame> | null>(
+    null,
+  );
+  useEffect(() => {
+    if (is3D && !solidFrame)
+      setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
+  }, [is3D, solidFrame, model.project]);
   const [pan, setPan] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
   const initialBounds = useRef(planBounds(model.project, model.viewContext.visibility));
@@ -129,8 +139,10 @@ export function CadViewport({
   }, [active, is3D, onPlanCapture, plan, planCamera, size]);
   const bar = planScaleBar(plan.pixelsPerMetre);
   const fit = () => {
-    if (is3D) setCamera((value) => ({ ...value, zoom: 1, panX: 0, panY: 0 }));
-    else
+    if (is3D) {
+      setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
+      setCamera((value) => ({ ...value, zoom: 1, panX: 0, panY: 0 }));
+    } else
       setPlanCamera(
         savedFraming.current
           ? {
@@ -201,6 +213,7 @@ export function CadViewport({
             interactive={active}
             selection={model.selection}
             camera={camera}
+            {...(solidFrame ? { projectionFrame: solidFrame } : {})}
             onCamera={setCamera}
             snap={model.snap}
             pan={pan}
@@ -287,17 +300,24 @@ export function CadViewport({
         <i>FRONT</i>
         <b>RIGHT</b>
       </div>
-      <div className="absolute bottom-[75px] left-4 flex items-end gap-0.5 font-mono text-[8px]">
-        <span className="block h-7 w-px bg-axis-z" />
-        <span className="block h-px w-7 bg-axis-x" />
-        <span className="text-axis-x">X</span>
-        <span className="-ml-10 -translate-y-5 text-axis-z">{is3D ? "Z" : "Y"}</span>
-      </div>
+      {is3D ? (
+        <CameraAxes camera={camera} />
+      ) : (
+        <div className="absolute bottom-[75px] left-4 flex items-end gap-0.5 font-mono text-[8px]">
+          <span className="block h-7 w-px bg-axis-z" />
+          <span className="block h-px w-7 bg-axis-x" />
+          <span className="text-axis-x">X</span>
+          <span className="-ml-10 -translate-y-5 text-axis-z">Y</span>
+        </div>
+      )}
       {active &&
         zoomSlot &&
         createPortal(
           <div className="flex items-center gap-2">
             {zoomControl}
+            <MiniControl label="Alles anzeigen" onClick={fit}>
+              <Focus size={14} />
+            </MiniControl>
             {!is3D && scaleContext && onScale && (
               <ViewScaleControl
                 key={JSON.stringify(scaleContext)}
@@ -366,8 +386,10 @@ export function CadViewport({
         className="absolute bottom-2 right-3 size-7 bg-popover/65 text-muted-foreground"
         aria-label="Reset view"
         onClick={() => {
-          if (is3D) setCamera(initialCamera);
-          else
+          if (is3D) {
+            setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
+            setCamera(initialCamera);
+          } else
             setPlanCamera(
               savedFraming.current
                 ? {

@@ -539,3 +539,24 @@ test("single-window 3D axis adapter preserves host and clamps through the shared
   assert.equal(committed.history.past.length, 1);
   assert.deepEqual(storeyOf(committed.history.present).windows, storeyOf(next).windows);
 });
+
+import { cameraFocus, orbitAround } from "./camera-navigation.ts";
+import { projectOrthographic } from "../../geometry/projections/orthographic.ts";
+test("camera orbit retains selected pivot and unselected viewport centre after free pan", () => {
+  const frame = createProjectionFrame(buildSolid(project));
+  const camera = { ...initialCamera, panX: 2.4, panY: -1.7, zoom: 2 };
+  const focus = cameraFocus(frame, camera, 1.8);
+  const centre = projectOrthographic(focus, frame, camera, 1.8);
+  assert.ok(Math.abs(centre[0]) < 1e-10 && Math.abs(centre[1]) < 1e-10);
+  for (const pivot of [focus, [3, 2, 1] as const]) {
+    const before = projectOrthographic(pivot, frame, camera, 1.8);
+    const after = projectOrthographic(
+      pivot,
+      frame,
+      orbitAround(frame, camera, 1.8, pivot, 120, -35),
+      1.8,
+    );
+    assert.ok(Math.abs(before[0] - after[0]) < 1e-10);
+    assert.ok(Math.abs(before[1] - after[1]) < 1e-10);
+  }
+});

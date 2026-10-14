@@ -1,3 +1,5 @@
+import { cameraFocus, orbitAround } from "@/rendering/viewport/camera-navigation";
+import type { Vector3 } from "@/geometry/projections/orthographic";
 import { createMovementOriginQuery } from "@/rendering/viewport/movement-origin";
 import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import {
@@ -110,6 +112,9 @@ export function BimSolidView({
     moved: boolean;
     editing: typeof editSession;
     navigation: boolean;
+    button: number;
+    navigationMode: "pan" | "orbit";
+    pivot: Vector3;
     placementPreview: BimPlanProps["placement"];
   } | null>(null);
   const [error, setError] = useState("");
@@ -403,7 +408,7 @@ export function BimSolidView({
             ? editSession.action === "move"
               ? "Wand auf der Geschossebene bewegen. Klick platziert; Tab für Länge und Winkel. Pan schaltet auf Navigation; Esc bricht ab."
               : "Auf der Geschossebene bearbeiten. Klick übernimmt Ziel; Tab für Maße. Pan schaltet auf Navigation; Esc bricht ab."
-            : "Bewegungsursprung frei wählen; sichtbare Wandecken rasten ein. Ziehen dreht oder verschiebt die Ansicht. Pfeiltasten drehen, +/− zoomt."
+            : "Bewegungsursprung frei wählen; sichtbare Wandecken rasten ein. Mausrad gedrückt: verschieben. Strg/Cmd + Mausrad gedrückt: Orbit. Scrollen zoomt."
         }
         className={`relative z-10 h-full w-full touch-none outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/40 ${moving && !pan ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onKeyDown={(event) => {
@@ -432,12 +437,31 @@ export function BimSolidView({
               });
           }
         }}
+        onAuxClick={(event) => event.preventDefault()}
         onPointerDown={(event) => {
           setPreviewClient(null);
           setAim(null);
-          if (event.button !== 0 || drag.current || !interactive) return;
+          if (![0, 1].includes(event.button) || drag.current || !interactive) return;
+          event.preventDefault();
           event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
+          const selectedIds = new Set(
+            (selections ?? (selection ? [selection] : [])).map((t) => t.id),
+          );
+          const min = [Infinity, Infinity, Infinity],
+            max = [-Infinity, -Infinity, -Infinity];
+          const include = (vertices: readonly Vector3[]) => {
+            for (const v of vertices)
+              for (const i of [0, 1, 2] as const) {
+                min[i] = Math.min(min[i]!, v[i]);
+                max[i] = Math.max(max[i]!, v[i]);
+              }
+          };
+          for (const face of solid.faces) if (selectedIds.has(face.wallId)) include(face.vertices);
+          for (const face of windowSurfaces) if (selectedIds.has(face.id)) include(face.vertices);
+          const pivot: Vector3 = Number.isFinite(min[0])
+            ? [(min[0]! + max[0]!) / 2, (min[1]! + max[1]!) / 2, (min[2]! + max[2]!) / 2]
+            : cameraFocus(frame, camera, displayed.current?.projection.aspect ?? 1);
           drag.current = {
             x: event.clientX,
             y: event.clientY,
@@ -446,7 +470,17 @@ export function BimSolidView({
             moved: false,
             editing: editSession,
             placementPreview: placement,
-            navigation: (!moving && !placement) || pan,
+            navigation: event.button === 1 || (!moving && !placement) || pan,
+            button: event.button,
+            navigationMode:
+              event.button === 1
+                ? event.ctrlKey || event.metaKey
+                  ? "orbit"
+                  : "pan"
+                : pan
+                  ? "pan"
+                  : "orbit",
+            pivot,
           };
         }}
         onPointerMove={(event) => {
@@ -506,17 +540,20 @@ export function BimSolidView({
             dy = event.clientY - drag.current.y,
             base = drag.current.camera;
           onCamera(
-            pan
+            drag.current.navigationMode === "pan"
               ? {
                   ...base,
                   panX: base.panX + (dx / event.currentTarget.clientWidth) * 2,
                   panY: base.panY - (dy / event.currentTarget.clientHeight) * 2,
                 }
-              : {
-                  ...base,
-                  yaw: base.yaw + dx * 0.008,
-                  pitch: Math.max(-1.45, Math.min(1.45, base.pitch + dy * 0.008)),
-                },
+              : orbitAround(
+                  frame,
+                  base,
+                  displayed.current?.projection.aspect ?? 1,
+                  drag.current.pivot,
+                  dx,
+                  dy,
+                ),
           );
         }}
         onPointerUp={(event) => {
@@ -531,6 +568,7 @@ export function BimSolidView({
           )
             return;
           if (
+            gesture.button === 0 &&
             !gesture.moved &&
             isSelectionClick(gesture.x, gesture.y, event.clientX, event.clientY) &&
             !error

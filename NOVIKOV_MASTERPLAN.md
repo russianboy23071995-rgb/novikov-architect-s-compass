@@ -679,3 +679,18 @@ Zusätzlicher Test prüft Hostbindung, Begrenzung und genau einen Undo-Schritt d
 Fensteradapters. Nächster Auftrag bleibt der Z-Höhenvertrag nach Abnahme von PR314.
 
 Nachweis Einzelziele: 955 Tests vollständig bestanden, App-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich.
+
+### Ergänzung 14.10.2026 – Unabhängige 3D-Kameranavigation
+Gedrückte mittlere Maustaste verschiebt die Kamera in Bildschirmrichtungen;
+Strg/Cmd + mittlere Taste rotiert um die Mitte der ausgewählten sichtbaren Bauteile,
+ohne Auswahl um die aktuelle Ansichtsmitte. Drehpunkt wird pro Geste festgehalten;
+Navigation bestätigt keine laufende Bauteilbewegung. Scrollen zoomt weiterhin.
+Der 3D-Ansichtsrahmen bleibt bei Modelländerungen stabil. „Alles anzeigen“ in der
+unteren Leiste sowie Fit/Reset bauen ihn ausdrücklich aus den aktuellen Gebäude-
+grenzen neu auf. Kein Modell-Undo für Kamerabewegungen. Farbige X/Y/Z-Orientierung
+unten links folgt Kamera-Yaw/Pitch, unabhängig von Modellgröße, Zoom und Pan.
+Geometrischer Test bestätigt bildschirmfesten ausgewählten Pivot und Ansichtsmitte
+nach Pan/Orbit. Typecheck, gezieltes Lint, 12 3D-Bearbeitungs-/Kameratests und Build
+bestanden. Browser: Fit nach 500-%-Zoom und Achsenanzeige geprüft. Physische
+Mausrad-Drag-Kombination ist noch praktisch durch den Nutzer abzunehmen.
+Nächster Auftrag bleibt nach Bedienabnahme der Z-Höhenvertrag.
