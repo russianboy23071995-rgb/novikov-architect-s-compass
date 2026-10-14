@@ -205,3 +205,104 @@ test("undoing the selected storey's creation returns to EG without a dangling vi
   assert.equal(state.history.present.workingStoreyId, undefined);
   assert.deepEqual(readProjectFile(serializeProject(state.history.present)), state.history.present);
 });
+
+import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import {
+  buildingWindowSelectionSurfaces,
+  pickSolidElement,
+} from "../../rendering/viewport/window-selection.ts";
+import { workingStoreyForTarget } from "./working-storey.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+import { visibleSurfaces } from "../../rendering/viewport/layer-display.ts";
+
+test("building scene includes EG, OG and basement independently of the active storey", async () => {
+  let p = fixture();
+  p = selectWorkingStorey(p, p, "og");
+  p = addWall(p, {
+    id: "upper",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.3,
+    height: 2.8,
+  });
+  p = addWindow(p, {
+    id: "upper-window",
+    wallId: "upper",
+    width: 1,
+    height: 1,
+    sillHeight: 1,
+    position: 0.5,
+  });
+  p = addStorey(p, p, {
+    projectId: p.id,
+    storeyId: p.groundStoreyId,
+    side: "below",
+    id: "kg",
+    height: 2.7,
+  });
+  p = selectWorkingStorey(p, p, "kg");
+  p = addWall(p, {
+    id: "lower",
+    start: { x: 0, y: 0 },
+    end: { x: 5, y: 0 },
+    thickness: 0.3,
+    height: 2.5,
+  });
+  const scene = buildBuildingSolid(p);
+  assert.equal(scene.min[2], -2.7);
+  assert.equal(scene.max[2], 5.8);
+  assert.equal(new Set(scene.faces.map((f) => f.wallId)).size, 3);
+  assert.equal(buildBuildingSolid(p), scene);
+  const ground = selectWorkingStorey(p, p, p.groundStoreyId);
+  assert.deepEqual(buildBuildingSolid(ground), scene);
+  assert.equal(workingStoreyForTarget(ground, { kind: "wall", id: "upper" }), "og");
+  assert.equal(workingStoreyForTarget(ground, { kind: "window", id: "upper-window" }), "og");
+  assert.equal(workingStoreyForTarget(ground, { kind: "wall", id: "missing" }), null);
+  const windows = buildingWindowSelectionSurfaces(ground, () => true);
+  assert.equal(windows.length, 2);
+  assert.equal(
+    Math.min(...windows.find((w) => w.id === "upper-window")!.vertices.map((v) => v[2])),
+    4,
+  );
+  const policy = createLayerVisibilityPolicy(ground, ALL_LAYERS_VISIBLE);
+  assert.equal(policy.evaluate(ground, policy.context, "upper").eligible, true);
+  assert.equal(policy.evaluate(ground, policy.context, "lower").eligible, true);
+  const hidden = createLayerVisibilityPolicy(ground, {
+    ...ALL_LAYERS_VISIBLE,
+    hiddenLayerIds: [ground.storeys.find((s) => s.id === "og")!.walls[0]!.layerId],
+  });
+  const allows = (id: string) => hidden.evaluate(ground, hidden.context, id).eligible;
+  assert.equal(visibleSurfaces(scene, allows).faces.length, 0);
+  assert.equal(buildingWindowSelectionSurfaces(ground, allows).length, 0);
+  assert.deepEqual(buildBuildingSolid(readProjectFile(serializeProject(ground))), scene);
+  assert.equal(await exportIfc(ground, new Date(0)), await exportIfc(p, new Date(0)));
+  const raised = setStoreyHeight(ground, ground, {
+    projectId: ground.id,
+    storeyId: ground.groundStoreyId,
+    height: 4,
+  });
+  assert.equal(buildBuildingSolid(raised).max[2], 6.8);
+  assert.equal(buildBuildingSolid(raised).min[2], -2.7);
+});
+
+test("whole-building picking uses common depth, including material in another storey", () => {
+  let p = fixture();
+  p = selectWorkingStorey(p, p, "og");
+  p = addWall(p, {
+    id: "upper",
+    start: { x: 0, y: 0 },
+    end: { x: 3, y: 0 },
+    thickness: 0.36,
+    height: 2.8,
+  });
+  const scene = buildBuildingSolid(p);
+  // Top-down: identical XY footprint, the upper wall occludes the ground wall.
+  const projection = ([x, y, z]: readonly [number, number, number]): [number, number, number] => [
+    (x - 1.5) / 3,
+    y,
+    -z / 10,
+  ];
+  assert.deepEqual(pickSolidElement(scene, [], projection, 0, 0), { kind: "wall", id: "upper" });
+  const withoutUpper = visibleSurfaces(scene, (id) => id !== "upper");
+  assert.equal(pickSolidElement(withoutUpper, [], projection, 0, 0)?.id, "wall-1");
+});

@@ -85,3 +85,10 @@ export function pickSolidElement(
   }
   return target;
 }
+
+/** Opening hit planes share the same all-storey scene and world elevations as wall surfaces. */
+export function buildingWindowSelectionSurfaces(project: Project, allows: (id: string) => boolean) {
+  return project.storeys.flatMap((s) =>
+    s.windows.length ? windowSelectionSurfaces({ ...project, workingStoreyId: s.id }, allows) : [],
+  );
+}

@@ -4,7 +4,7 @@ import { visibleSurfaces } from "./layer-display.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../lib/bim/model.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
 import { getLocalSnapSources } from "../../application/snapping/local-sources.ts";
 import { collectSnapCandidates } from "../../constraints/snapping/candidates.ts";
 import { compareSnapCandidates } from "../../constraints/snapping/ranking.ts";
@@ -22,7 +22,7 @@ export function createWallPointCandidates(
   movingWallId?: string,
   visibility?: LayerVisibilityPolicy,
 ) {
-  const complete = buildSolid(project);
+  const complete = buildBuildingSolid(project);
   const baseSolid = visibleSurfaces(complete, (id) => isLayerVisible(project, visibility, id));
   // A moving preview is neither a target nor an occluder of its stationary sources.
   const solid = movingWallId

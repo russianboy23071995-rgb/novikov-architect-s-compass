@@ -11238,3 +11238,16 @@ IFC bei unterschiedlicher Arbeitsgeschosswahl und erhöhte 3D-Fang-/Pickingpunkt
 Browser: OG-Wand gezeichnet, Fenster ergänzt, EG unverändert; OG-Wand in 3D wählbar.
 Keine vollständige 3D-Gebäudeübersicht behauptet: zunächst aktives Geschoss allein.
 Nächster Auftrag ist die gemeinsame 3D-Übersicht über alle Geschosse aus §9.
+
+### R26-03 / N21 / N22 – Gemeinsame 3D-Gebäudeansicht (14.10.2026)
+Nutzervertrag: 3D zeigt alle Geschosse gemeinsam im Sichtfeld. Arbeitsgeschoss ist
+Bearbeitungskontext, kein 3D-Sichtfilter. buildBuildingSolid bündelt die vorhandene
+Wandgeometrie mit einmaliger Höhenaddition, buildingWindowSelectionSurfaces die
+Fenster-Hitflächen. Globale Sichtbarkeit und gemeinsame Tiefe gelten für alle Geschosse.
+workingStoreyForTarget löst stabile BIM-Ziele vor dem vorhandenen Aktionspfad auf.
+2D bleibt Geschosszeichnung. Linien/Schraffuren bleiben 2D-Elemente; keine neu erfundene
+3D-Repräsentation. Keine zusätzliche Projektkopie oder geänderte IFC-Semantik.
+Nachweis: 949 Tests, beide Typechecks, fokussiertes Lint, Build; Browser EG/OG gemeinsam,
+geschossübergreifender Einzelklick, Fensteränderung und Undo. Automatisiert: Keller,
+Kotenfortschreibung, globale Verdeckung, Ebenenfilter und Dateirundlauf/IFC.
+Offen: geschossübergreifende Mehrfachauswahl/atomare Bewegung als nächster Auftrag.

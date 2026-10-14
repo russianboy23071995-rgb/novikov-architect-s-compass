@@ -12,3 +12,19 @@ export function selectWorkingStorey(base: Project, current: Project, storeyId: s
   if ((current.workingStoreyId ?? current.groundStoreyId) === storeyId) return current;
   return validateProject({ ...current, workingStoreyId: storeyId });
 }
+
+/** Resolve a picked BIM target by stable ID before invoking the existing storey-bound actions. */
+export function workingStoreyForTarget(
+  project: Project,
+  target: { kind: string; id: string },
+): string | null {
+  return (
+    project.storeys.find((s) =>
+      target.kind === "wall"
+        ? s.walls.some((w) => w.id === target.id)
+        : target.kind === "window"
+          ? s.windows.some((w) => w.id === target.id)
+          : false,
+    )?.id ?? null
+  );
+}

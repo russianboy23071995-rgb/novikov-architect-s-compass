@@ -19,7 +19,11 @@ export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
  * Overlapping openings are subtracted as a union, not counted twice.
  */
 export function buildSolid(input: Project): Solid {
-  const project = validateProject(input);
+  return buildValidatedStoreySolid(validateProject(input));
+}
+
+/** Internal builder: caller has already validated the complete project. */
+function buildValidatedStoreySolid(project: Project): Solid {
   const solid: Solid = {
     faces: [],
     volume: 0,
@@ -175,4 +179,27 @@ export const initialCamera: Camera = { yaw: -0.45, pitch: 0.3, zoom: 1, panX: 0,
 /** Orthographic camera in a Z-up world; depth is preserved for WebGL occlusion. */
 export function projectPoint(point: Vec3, solid: Solid, camera: Camera, aspect: number): Vec3 {
   return projectOrthographic(point, createProjectionFrame(solid), camera, aspect);
+}
+
+const buildings = new WeakMap<Project, Solid>();
+/** One derived building scene. Storeys remain authoritative; working selection is not a filter. */
+export function buildBuildingSolid(input: Project): Solid {
+  const cached = buildings.get(input);
+  if (cached) return cached;
+  const project = validateProject(input);
+  const parts = project.storeys
+    .filter((s) => s.walls.length > 0)
+    .map((s) => buildValidatedStoreySolid({ ...project, workingStoreyId: s.id }));
+  const result: Solid = {
+    faces: parts.flatMap((p) => p.faces),
+    volume: parts.reduce((sum, p) => sum + p.volume, 0),
+    min: parts.length
+      ? ([0, 1, 2].map((i) => Math.min(...parts.map((p) => p.min[i]!))) as Vec3)
+      : [-1, -1, -1],
+    max: parts.length
+      ? ([0, 1, 2].map((i) => Math.max(...parts.map((p) => p.max[i]!))) as Vec3)
+      : [1, 1, 1],
+  };
+  buildings.set(input, result);
+  return result;
 }
