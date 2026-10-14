@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
@@ -27,7 +28,7 @@ export function createWallPreviewContext(
   const adapter = projection
     ? createWallPointCandidates(project, projection, movingWallId, visibility)
     : null;
-  const plane = projection?.workplane(0);
+  const plane = projection?.workplane(workingStoreyElevation(project));
   const sources = getLocalSnapSources(project);
   const edges = getWallFootSources(project);
   const wallIds = new Set(

@@ -1,16 +1,21 @@
-export type StoreySource = { storey: unknown } | { storeys: unknown[]; groundStoreyId: string };
+export type StoreySource =
+  | { storey: unknown }
+  | { storeys: unknown[]; groundStoreyId: string; workingStoreyId?: string | undefined };
 type StoreyOf<P> = P extends { storey: unknown }
   ? P["storey"]
   : P extends { storeys: unknown[] }
     ? P["storeys"][number]
     : undefined;
 /** A scoped geometry calculation may own one storey; persisted projects only own storeys.
- * Existing drawing adapters target the ground storey until active-storey editing is wired.
+ * The persisted working-view context selects one storey; legacy files default to EG.
+ * This never changes the building datum or duplicates storey geometry.
  */
 export function storeyOf<P extends StoreySource | undefined>(source: P): StoreyOf<P> {
   if (!source) return undefined as StoreyOf<P>;
   if ("storey" in source) return source.storey as StoreyOf<P>;
-  const result = source.storeys.find((s) => (s as { id: string }).id === source.groundStoreyId);
+  const result = source.storeys.find(
+    (s) => (s as { id: string }).id === (source.workingStoreyId ?? source.groundStoreyId),
+  );
   if (!result) throw new Error("Das Bezugsgeschoss fehlt.");
   return result as StoreyOf<P>;
 }

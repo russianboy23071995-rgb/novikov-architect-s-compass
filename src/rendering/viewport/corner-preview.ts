@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import type { CornerPreview } from "../../application/walls/corner-preview.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
@@ -12,7 +13,16 @@ export function cornerPreviewSurfaces(
   const ids = new Set(preview.geometry.walls.map((w) => w.wallId));
   const faces = [
     ...base.faces.filter((f) => !ids.has(f.wallId)),
-    ...preview.geometry.walls.flatMap((w) => w.faces),
+    ...preview.geometry.walls.flatMap((w) =>
+      w.faces.map((f) => ({
+        ...f,
+        vertices: f.vertices.map(([x, y, z]): [number, number, number] => [
+          x,
+          y,
+          z + workingStoreyElevation(project),
+        ]),
+      })),
+    ),
   ];
   const min = [...base.min] as [number, number, number],
     max = [...base.max] as [number, number, number];

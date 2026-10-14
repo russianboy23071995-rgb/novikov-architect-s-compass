@@ -1,3 +1,4 @@
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { changeBuilding, type BuildingChange } from "../storeys/actions.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { setGroundDatum, type SetGroundDatum } from "../storeys/actions.ts";
@@ -276,6 +277,7 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
 }
 
 type BaseEditingEvent =
+  | { type: "working-storey"; base: Project; storeyId: string }
   | ModelEditingEvent
   | { type: "visibility"; base: Project; action: VisibilityAction; scope?: LayerVisibilityScope }
   | { type: "load-project"; project: Project }
@@ -297,6 +299,21 @@ export function editingReducer(state: EditingState, event: EditingEvent): Editin
     : next;
 }
 function reduceEditingEvent(state: EditingState, event: EditingEvent): EditingState {
+  if (event.type === "working-storey") {
+    try {
+      return {
+        ...state,
+        history: {
+          ...state.history,
+          present: selectWorkingStorey(event.base, state.history.present, event.storeyId),
+        },
+        session: null,
+        error: "",
+      };
+    } catch (error) {
+      return { ...state, error: (error as Error).message };
+    }
+  }
   if (event.type === "load-project") {
     const { projectLoad: _load, documentLayerActivation: _activation, ...clean } = state;
     const next = reduceWithPatterns(clean, event);
@@ -329,7 +346,10 @@ function reduceEditingEvent(state: EditingState, event: EditingEvent): EditingSt
     return { ...clean, error: (error as Error).message };
   }
 }
-function reduceWithPatterns(state: EditingState, event: EditingEvent): EditingState {
+function reduceWithPatterns(
+  state: EditingState,
+  event: Exclude<EditingEvent, { type: "working-storey" }>,
+): EditingState {
   if (event.type === "patterns-changed") {
     try {
       const result = resolveProjectHatchPatterns(
@@ -394,7 +414,7 @@ function reduceWithPatterns(state: EditingState, event: EditingEvent): EditingSt
 
 function reduceEditing(
   state: EditingState,
-  event: Exclude<BaseEditingEvent, { type: "patterns-changed" }>,
+  event: Exclude<BaseEditingEvent, { type: "patterns-changed" | "working-storey" }>,
 ): EditingState {
   if (event.type === "load-project") {
     const next = reduceModelEdit(state, { type: "project", project: event.project });

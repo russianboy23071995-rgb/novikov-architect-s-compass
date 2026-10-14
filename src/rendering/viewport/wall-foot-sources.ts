@@ -1,3 +1,4 @@
+import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
@@ -6,7 +7,7 @@ import { selectionEdges } from "./selection-outline.ts";
 
 const cache = new WeakMap<Project, ReturnType<typeof createPrimitiveSourceIndex>>();
 
-/** Real z=0 material edges, including gaps from openings reaching the floor.
+/** Real material edges at the active storey elevation, including gaps from openings reaching the floor.
  * Uses the same conforming mesh boundary extraction as selection outlines.
  * Stable geometry identities and local indexing are shared, never per tool.
  */
@@ -14,6 +15,7 @@ export function getWallFootSources(project: Project) {
   const cached = cache.get(project);
   if (cached) return cached;
   const solid = buildSolid(project);
+  const elevation = workingStoreyElevation(project);
   const grouped = new Map<string, typeof solid.faces>();
   for (const face of solid.faces) {
     const faces = grouped.get(face.wallId) ?? [];
@@ -23,7 +25,7 @@ export function getWallFootSources(project: Project) {
   const references: SnapReference[] = [];
   for (const [id, faces] of grouped) {
     for (const [a, b] of selectionEdges(faces)) {
-      if (a[2] !== 0 || b[2] !== 0) continue;
+      if (a[2] !== elevation || b[2] !== elevation) continue;
       const start = { x: a[0], y: a[1] },
         end = { x: b[0], y: b[1] };
       references.push({

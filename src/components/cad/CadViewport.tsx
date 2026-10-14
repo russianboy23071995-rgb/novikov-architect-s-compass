@@ -232,10 +232,10 @@ export function CadViewport({
               ? pan
                 ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
                 : model.editSession.action === "point"
-                  ? "Wandecke auf z=0 bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
+                  ? "Wandecke auf der Geschossebene bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
                   : model.editSession.action === "move"
-                    ? "Wand auf z=0 bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
-                    : "Feste Achse auf z=0 · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
+                    ? "Wand auf der Geschossebene bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
+                    : "Feste Achse auf der Geschossebene · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
               : pan
                 ? "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Pan"
                 : "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Orbit"

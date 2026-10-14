@@ -245,8 +245,8 @@ export function BuildingSettings({
                   EG-Kote erhält die Geschosshöhen. Rückgängig über das Projekt-Undo.
                 </p>
                 <p className="text-muted-foreground">
-                  Dieser Schritt verwaltet die Gebäudestruktur. Gezeichnet wird weiterhin im
-                  bisherigen Erdgeschoss; die Geschosswahl zum Zeichnen folgt.
+                  Im Navigator wählst du das aktive Geschoss für Grundriss und 3D. Bauteile bleiben
+                  ihrem Geschoss zugeordnet.
                 </p>
               </>
             ),

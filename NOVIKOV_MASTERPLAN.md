@@ -457,15 +457,14 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: aktive Geschosswahl zum Zeichnen anbinden.**
-Schema24 und die produktive Geschosssammlung aus dem Skizzen-Piloten weiterverwenden.
-Den vorhandenen Application-Geschosskontext für die Wahl im Navigator und die
-Bauteilanlage nutzen. Der aktuelle Übergangsadapter `storeyOf` bedient noch das EG;
-er darf keine dauerhafte Ersatzarchitektur für aktive Geschosse werden. Als einen
-vertikalen Pilot eine Wand samt Fenster im gewählten EG oder OG zeichnen/bearbeiten,
-mit derselben ID im Grundriss, in 3D/Picking und IFC auf abgeleiteter Geschosshöhe.
-Schema24-Migration, andere Geschosse, Abbilder, Undo/Redo und Datei/Recovery erhalten.
-Keine zweite Bauteilkopie pro Ansicht; keine neue Decken-/Dachfunktion in diesem Auftrag.
+**Genau ein aktiver Fortsetzungsschritt: gemeinsame 3D-Gebäudeübersicht.**
+Die geprüfte aktive Geschosswahl und Höhenauflösung weiterverwenden. In einer
+3D-Übersicht alle Geschosse mit ihren abgeleiteten Höhen darstellen; Auswahl muss
+die Besitzer-Geschoss-ID eindeutig auflösen und vor Bearbeitung den gemeinsamen
+Kontext verwenden. Aktive Arbeitsebene, globale Ebenensichtbarkeit, Fenster-Picking,
+Fangquellen und Vorschauen erhalten. Kein zweites BIM-Modell und keine doppelte
+Höhenaddition. Abnahme: EG/OG mit Wänden und Fenstern, Keller, Höhenänderung,
+Auswahl/Undo, Datei/Recovery und vollständiger IFC-Vergleich. Noch keine Decken.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -566,3 +565,24 @@ Keller −2,80 m; Änderung auf 3,00 m ergibt −3,00 m ohne Verschiebung EG/OG;
 Undo/Redo der Anlage und Speichern/Wiederöffnen bestätigen die Höhen.
 Grenze dieses Piloten: Zeichnen und 3D/Picking bleiben beim bisherigen EG. Neue
 Geschosse sind zunächst leer; die aktive Geschosswahl ist der einzige nächste Auftrag.
+
+### Status 14.10.2026 – Aktives Geschoss zum Zeichnen und Bearbeiten
+PR310 nach erfolgreicher CI und ausdrücklicher Freigabe in main übernommen.
+Navigatorwahl setzt über selectWorkingStorey den gemeinsamen Arbeitskontext.
+workingStoreyId ist eine optionale, additive Schema24-Ansichtseinstellung; alte
+Dateien starten weiterhin im EG. Kein Modell-Undo für die Wahl; Undo/Redo erhält
+die Wahl, solange das Geschoss existiert, andernfalls Rückkehr zum EG.
+Bestehende gemeinsame Aktionen verwenden den gewählten Geschosscontainer.
+Grundriss, Eigenschaften und aktive 3D-Ansicht zeigen dasselbe Geschoss;
+3D-Geometrie, Fenster, Achsen, Fußpunkte und Fang-/Bearbeitungsebene nutzen die
+abgeleitete lokale Gebäudehöhe. groundDatum bleibt der absolute Kotenbezug.
+Abbilder öffnen ihr Quellgeschoss; neue Abbilder binden das aktive Geschoss.
+IFC bleibt vollständig über alle Geschosse, unabhängig vom gewählten Arbeitsgeschoss.
+Browser: OG gewählt, Wand gezeichnet, Fenster eingesetzt, EG unverändert, OG-Wand
+in 3D ausgewählt; gespeicherte JSON-Datei enthält je eine Wand/Fenster in EG und OG.
+Grenze: die bearbeitbare 3D-Ansicht zeigt in diesem Pilot das aktive Geschoss.
+Die geschossübergreifende Gebäudeübersicht ist der nächste einzelne Auftrag.
+
+Nachweis: 947 Tests bestanden; Typprüfung für Anwendung und Benchmarks,
+gezieltes ESLint und Produktionsbuild erfolgreich. Browser-Wiederöffnung stellt
+das aktive OG wieder her; Dateiübersicht zählt Bauteile aller Geschosse.
