@@ -782,3 +782,6 @@ Wand-Auswahl implementieren, zunächst mit vorbereiteter Vorschau und vollständ
 Commit-Vergleich. Geschoss/IDs erhalten, interne Anschlüsse erhalten, externe erst
 beim Commit lösen, Fenster einmal mitnehmen, stale-Kontext ablehnen, ein Undo.
 UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.
+
+
+Ergänzung 14.10.2026: Wand-Werkzeugeigenschaften besitzen jetzt das Feld Z-Versatz zum Geschoss (m), bezogen auf OK Rohdecke. Signierte Werte mit Dezimalkomma/-punkt, Übernahme per Enter/Blur über PropertyForm und updateWall, keine separate Modelllogik. Fenster folgen. Browser: +0,5 m und ein Undo geprüft; 8 Höhentests, Typecheck, gezieltes Lint und Build bestanden. Ungleiche Anschlussfußhöhen bleiben vorerst abgewiesen; nächste Aktion löst externe Anschlüsse gemäß Vertrag.
