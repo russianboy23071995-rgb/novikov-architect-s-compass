@@ -69,6 +69,8 @@ export type BimPlanProps = {
   draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
     | {
+        movementAxis?: "xy" | "z" | undefined;
+        movementOrigin?: Point | undefined;
         measurement?: DistanceMeasurement | undefined;
         angleMeasurement?: AngleMeasurement | undefined;
         areaMeasurement?: AreaMeasurement | undefined;

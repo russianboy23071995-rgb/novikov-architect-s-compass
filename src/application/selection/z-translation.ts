@@ -26,12 +26,12 @@ export function prepareZTranslation(
 ) {
   assertMovableSelection(source, targets, visibility);
   if (targets.some((t) => t.kind !== "wall" && t.kind !== "window"))
-    throw new Error("Z-Bewegung unterstÃƒÂ¼tzt zunÃƒÂ¤chst WÃƒÂ¤nde mit ihren Fenstern.");
+    throw new Error("Z-Bewegung unterstützt zunächst Wände mit ihren Fenstern.");
   const base = freeze(validateProject(source));
   const fingerprint = JSON.stringify(base);
   const selection = targets.map((t) => ({ ...t }));
   const moving = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
-  if (!moving.size) throw new Error("Mindestens eine Wand auswÃƒÂ¤hlen.");
+  if (!moving.size) throw new Error("Mindestens eine Wand auswählen.");
   const levels = new Map(
     resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
@@ -39,7 +39,7 @@ export function prepareZTranslation(
     .filter((s) => s.walls.some((w) => moving.has(w.id)))
     .map((s) => {
       const elevation = levels.get(s.id);
-      if (elevation == null) throw new Error("GeschosshÃƒÂ¶he nicht aufgelÃƒÂ¶st.");
+      if (elevation == null) throw new Error("Geschosshöhe nicht aufgelöst.");
       const neighbours = new Map<string, Set<string>>();
       for (const [a, b] of [
         ...s.wallJoins.map((j) => [j.first.wallId, j.second.wallId]),
@@ -82,7 +82,7 @@ export function prepareZTranslation(
       !sameTargets(selection, currentTargets) ||
       !sameTargets(selection, eligibleSelection(current, visibility, currentTargets))
     )
-      throw new Error("Modell oder Auswahl geÃƒÂ¤ndert. Z-Bewegung erneut beginnen.");
+      throw new Error("Modell oder Auswahl geändert. Z-Bewegung erneut beginnen.");
   };
   const shifted = (
     wall: Project["storeys"][number]["walls"][number],
@@ -93,7 +93,7 @@ export function prepareZTranslation(
     const next = { ...wall, baseOffset: wallBase(wall) + delta };
     wallHeights(next, elevation);
     if (wallBase(next) === wallBase(wall))
-      throw new Error("Z-Bewegung ist bei dieser HÃƒÂ¶he nicht darstellbar.");
+      throw new Error("Z-Bewegung ist bei dieser Höhe nicht darstellbar.");
     return next;
   };
   const evaluate = (
@@ -128,7 +128,7 @@ export function prepareZTranslation(
   const materialize = (current: Project, currentTargets: SelectionSet, delta: number): Project => {
     const preview = evaluate(current, currentTargets, delta);
     if (JSON.stringify(validateProject(current)) !== fingerprint)
-      throw new Error("Modell geÃƒÂ¤ndert. Z-Bewegung erneut beginnen.");
+      throw new Error("Modell geändert. Z-Bewegung erneut beginnen.");
     if (delta === 0) return current;
     const patches = new Map(preview.storeyPatches!.map((p) => [p.storeyId, p]));
     return validateProject({
