@@ -2,7 +2,7 @@ import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { useSolidPicking } from "./useSolidPicking";
 import {
-  windowSelectionSurfaces,
+  buildingWindowSelectionSurfaces,
   windowSelectionEdges,
 } from "@/rendering/viewport/window-selection";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
@@ -22,7 +22,7 @@ import {
 } from "@/rendering/viewport/projection-state";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildSolid } from "@/lib/bim/geometry";
+import { buildBuildingSolid } from "@/lib/bim/geometry";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
@@ -114,7 +114,7 @@ export function BimSolidView({
     candidate: SnapCandidate | null;
   } | null>(null);
   const baseSolid = useMemo(() => {
-    const base = buildSolid(project);
+    const base = buildBuildingSolid(project);
     return cornerPreview?.base === project
       ? cornerPreviewSurfaces(project, base, cornerPreview)
       : base;
@@ -142,7 +142,7 @@ export function BimSolidView({
     return project;
   }, [editSession, target, targetCandidate, project, selection]);
   const previewSolid = useMemo(
-    () => (previewProject === project ? baseSolid : buildSolid(previewProject)),
+    () => (previewProject === project ? baseSolid : buildBuildingSolid(previewProject)),
     [previewProject, project, baseSolid],
   );
   const solid = useMemo(
@@ -186,7 +186,10 @@ export function BimSolidView({
     [selections, selection, project, visibility],
   );
   const windowSurfaces = useMemo(
-    () => windowSelectionSurfaces(previewProject, (id) => isLayerVisible(project, visibility, id)),
+    () =>
+      buildingWindowSelectionSurfaces(previewProject, (id) =>
+        isLayerVisible(project, visibility, id),
+      ),
     [previewProject, project, visibility],
   );
   const pickDisplayed = useSolidPicking(

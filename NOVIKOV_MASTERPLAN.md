@@ -457,14 +457,13 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: gemeinsame 3D-Gebäudeübersicht.**
-Die geprüfte aktive Geschosswahl und Höhenauflösung weiterverwenden. In einer
-3D-Übersicht alle Geschosse mit ihren abgeleiteten Höhen darstellen; Auswahl muss
-die Besitzer-Geschoss-ID eindeutig auflösen und vor Bearbeitung den gemeinsamen
-Kontext verwenden. Aktive Arbeitsebene, globale Ebenensichtbarkeit, Fenster-Picking,
-Fangquellen und Vorschauen erhalten. Kein zweites BIM-Modell und keine doppelte
-Höhenaddition. Abnahme: EG/OG mit Wänden und Fenstern, Keller, Höhenänderung,
-Auswahl/Undo, Datei/Recovery und vollständiger IFC-Vergleich. Noch keine Decken.
+**Genau ein aktiver Fortsetzungsschritt: geschossübergreifende Mehrfachauswahl und gemeinsame Bewegung.**
+Die gemeinsame 3D-Gebäudeansicht weiterverwenden. Auswahlziele mit Besitzer-Geschoss
+auflösen; Strg/Cmd-Auswahl über mehrere Geschosse und eine gemeinsame XY-Verschiebung
+über validierte Application-Aktionen ermöglichen. Vorschau/Commit müssen alle betroffenen
+Geschosse atomar behandeln, inklusive Anschlüssen/Fenstern, genau einem Undo-Schritt,
+Ebenenfilter und veraltetem Zielkontext. Kein Zusammenkopieren der Geschosscontainer.
+Abnahme: Auswahl in EG/OG, Verschieben, Abbruch, Undo/Redo, JSON/IFC. Noch keine Decken.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -586,3 +585,19 @@ Die geschossübergreifende Gebäudeübersicht ist der nächste einzelne Auftrag.
 Nachweis: 947 Tests bestanden; Typprüfung für Anwendung und Benchmarks,
 gezieltes ESLint und Produktionsbuild erfolgreich. Browser-Wiederöffnung stellt
 das aktive OG wieder her; Dateiübersicht zählt Bauteile aller Geschosse.
+
+### Status 14.10.2026 – Gemeinsame 3D-Gebäudeansicht
+PR311 nach erfolgreicher CI und ausdrücklicher Freigabe in main übernommen.
+Alle Geschosse liefern ihre Wandkörper und Fensteröffnungen in dieselbe abgeleitete
+3D-Szene, auf den gemeinsam aufgelösten Höhen. Die Arbeitsgeschosswahl filtert diese
+Szene nicht mehr. Ebenenfilter, Tiefentest, Fit und Picking beziehen das gesamte Gebäude
+ein; aktive Fangquellen bleiben auf der jeweiligen Arbeitsebene, werden aber durch
+sichtbare Bauteile aller Geschosse verdeckt. Keine Kopie im gespeicherten Modell.
+Einzelklick auf ein Bauteil eines anderen Geschosses löst dessen Besitzer auf und
+wechselt den Bearbeitungskontext. Kamera bleibt erhalten. 2D bleibt geschossbezogen.
+949 Tests, beide Typprüfungen, gezieltes Lint und Build bestanden. Browser: EG und OG
+mit Fenstern gleichzeitig sichtbar; Auswahl EG-Wand und OG-Fenster, Breitenänderung
+und Undo erfolgreich. Tests ergänzen Keller, Höhenänderung, JSON, IFC und Verdeckung.
+Grenze: Strg/Cmd-Mehrfachauswahl und gemeinsame Bewegung über mehrere Geschosse sind
+noch nicht freigegeben; ein erklärender Hinweis erhält die bisherige Auswahl.
+Dies ist der nächste einzelne Auftrag; normale Mehrfachauswahl im Geschoss bleibt.

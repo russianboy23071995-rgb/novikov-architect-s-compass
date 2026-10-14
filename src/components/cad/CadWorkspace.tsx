@@ -1,4 +1,4 @@
-import { selectWorkingStorey } from "@/application/storeys/working-storey";
+import { selectWorkingStorey, workingStoreyForTarget } from "@/application/storeys/working-storey";
 import { projectElementCounts } from "@/application/storeys/context";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { useLocalAutosave } from "./useLocalAutosave";
@@ -419,6 +419,35 @@ export function CadWorkspace({
       !visibleLayerTarget(visibilityNow.current.project, visibilityNow.current.visibility, next)
     )
       return;
+    const targetStorey = next ? workingStoreyForTarget(project, next) : null;
+    if (next && targetStorey && targetStorey !== storeyOf(project).id) {
+      if (toggle && selections.length > 0) {
+        showNotice(
+          "Mehrfachauswahl ist derzeit innerhalb eines Geschosses möglich. Ohne Strg/Cmd wird das andere Geschoss zur Bearbeitung gewählt.",
+        );
+        return;
+      }
+      try {
+        const active = selectWorkingStorey(project, project, targetStorey);
+        cancelInteraction();
+        setActiveDocumentId(null);
+        dispatchEditing({ type: "working-storey", base: project, storeyId: targetStorey });
+        selectCommitted(active, next);
+        setPickedPoint({
+          index: index ?? null,
+          anchor: modelPoint ?? null,
+          edgeIndex: edgeIndex ?? null,
+        });
+        setDemandOpen(true);
+        const point = anchor ?? lastPointer.current;
+        setDemandPosition({ x: point.x + 16, y: point.y + 16 });
+        setTool("select");
+        setModelError("");
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Geschoss nicht verfügbar.");
+      }
+      return;
+    }
     if (toggle && next) {
       cancelInteraction();
       choose([next], true);
@@ -1284,7 +1313,9 @@ export function CadWorkspace({
                 ) : (
                   <>
                     <ViewportManager
-                      key={activeDocumentId ?? storeyOf(project).id}
+                      key={
+                        mode === "3D" ? "building-3d" : (activeDocumentId ?? storeyOf(project).id)
+                      }
                       documentFraming={activeDocument?.framing}
                       onPlanCapture={onPlanCapture}
                       viewContext={viewContext}

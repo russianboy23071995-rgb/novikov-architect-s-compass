@@ -172,7 +172,7 @@ export function CadViewport({
     binding.kind === "drawing-document"
       ? `Abbild · ${model.project.drawingDocuments?.find((d) => d.id === binding.documentId)?.name ?? ""}`
       : is3D
-        ? "3D model · Orthographic"
+        ? "Gesamtgebäude · Orthographic"
         : `${storeyOf(model.project).name} · Plan`;
   return (
     <section
@@ -317,7 +317,7 @@ export function CadViewport({
         {is3D && (
           <>
             <Crosshair className="size-3 text-primary" />
-            <span>3D Orthographic · {storeyOf(model.project).name} ·</span>
+            <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
           </>
         )}
         {is3D ? (
