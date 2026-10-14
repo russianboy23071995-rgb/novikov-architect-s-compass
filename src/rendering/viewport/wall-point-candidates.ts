@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { visibleSurfaces } from "./layer-display.ts";
@@ -31,7 +32,10 @@ export function createWallPointCandidates(
   const sources = getLocalSnapSources(project);
   const walls = new Set(
     storeyOf(project)
-      .walls.filter((w) => w.id !== movingWallId && isLayerVisible(project, visibility, w.id))
+      .walls.filter(
+        (w) =>
+          wallBase(w) === 0 && w.id !== movingWallId && isLayerVisible(project, visibility, w.id),
+      )
       .map((wall) => wall.id),
   );
   const elevation = workingStoreyElevation(project);

@@ -1,3 +1,4 @@
+import { wallBase, assertSameWallBase } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { tConnectionContours } from "./t-relations.ts";
@@ -34,7 +35,12 @@ export function reconcileWallJoins(
     const p = point(changed, endpoint);
     if (previous && same(p, point(previous, endpoint))) continue;
     const candidates = storeyOf(project)
-      .walls.filter((w) => w.id !== changedId && !excludedPartners.includes(w.id))
+      .walls.filter(
+        (w) =>
+          w.id !== changedId &&
+          !excludedPartners.includes(w.id) &&
+          wallBase(w) === wallBase(changed),
+      )
       .flatMap((w) =>
         ([0, 1] as const)
           // A stored T endpoint belongs to its host, not to an automatic corner.
@@ -68,7 +74,7 @@ export function connectedWallContours(project: WallGeometry) {
   const counts = new Map<string, number>();
   for (const wall of walls.values())
     for (const p of [wall.start, wall.end]) {
-      const k = JSON.stringify([p.x, p.y]);
+      const k = JSON.stringify([p.x, p.y, wallBase(wall)]);
       counts.set(k, (counts.get(k) ?? 0) + 1);
     }
   const contours = new Map<string, ReturnType<typeof wallBody>["corners"]>();
@@ -77,10 +83,11 @@ export function connectedWallContours(project: WallGeometry) {
     const a = walls.get(join.first.wallId),
       b = walls.get(join.second.wallId);
     if (!a || !b || a.id === b.id) throw new Error("Ungültige Wandverbindung.");
+    assertSameWallBase(a, b);
     const node = point(a, join.first.endpoint);
     if (!same(point(a, join.first.endpoint), point(b, join.second.endpoint)))
       throw new Error("Verbundene Achsenden müssen übereinstimmen.");
-    if (counts.get(JSON.stringify([node.x, node.y])) !== 2)
+    if (counts.get(JSON.stringify([node.x, node.y, wallBase(a)])) !== 2)
       throw new Error("Mehrfachanschluss noch nicht unterstützt.");
     for (const end of [join.first, join.second]) {
       if (occupied.has(key(end))) throw new Error("Ein Achsende darf nur einmal verbunden sein.");

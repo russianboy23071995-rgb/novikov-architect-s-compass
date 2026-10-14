@@ -36,7 +36,7 @@ test("schema 11 preserves unknown provenance; schema 12 revisions roundtrip with
   const p = fixture(),
     old = { ...p, schemaVersion: 11 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 24);
+  assert.equal(migrated.schemaVersion, 25);
   assert.equal(migrated.hatchPatterns[0]!.revision, undefined);
   assert.deepEqual(storeyOf(migrated), storeyOf(p));
   const updated = resolveProjectHatchPatterns(migrated, migrated, available).project;

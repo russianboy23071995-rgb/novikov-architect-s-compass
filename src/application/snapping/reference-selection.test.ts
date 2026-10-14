@@ -83,7 +83,7 @@ test("reference selection draft, cancel, validation and clear never change commi
 });
 function fixture() {
   return validateProject({
-    schemaVersion: 24,
+    schemaVersion: 25,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

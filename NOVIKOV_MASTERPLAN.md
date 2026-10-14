@@ -457,10 +457,10 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Genau ein aktiver Fortsetzungsschritt: gemeinsame Wand-Höhenauflösung und Migration.**
-Der Z-Höhenvertrag ist am 14.10.2026 geklärt (siehe Ergänzung am Dokumentende).
-Zunächst baseOffset, Migration und identische 3D-/IFC-Ableitung mit höhensicheren
-Anschlüssen implementieren. Noch keine Z-Mausaktion oder automatische Geschossumsortierung.
+**Genau ein aktiver Fortsetzungsschritt: gemeinsame Application-Aktion für Z-Translation.**
+Die gemeinsame Höhenauflösung/Format25 ist implementiert (Nachweis am Dokumentende).
+Nächster Pilot: vorbereitete Auswahl-Vorschau, validierter Commit, Anschlussbehandlung,
+mitwandernde Fenster und genau ein Undo. Erst danach UI-Anbindung der Z-Achse.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
@@ -752,3 +752,33 @@ JSON-Roundtrip und IFC-Koordinaten identisch, ungleiche Anschlusslagen verständ
 abgewiesen. Danach erst Z-Bewegung auf diese geprüfte Basis aufsetzen.
 Prüfnachweis dieses Dokumentationsschritts: genannte Codepfade gelesen; keine neuen
 Laufzeittests erforderlich, da keine Implementierung geändert wurde.
+
+### 14.10.2026 – Gemeinsame Wand-Höhenauflösung implementiert
+PR315 (Höhenvertrag) mit erfolgreichem Check in main übernommen, d10c74a.
+Format25 ergänzt optionales baseOffset in Metern; fehlend bedeutet exakt 0.
+Die explizite Migration V24→V25 erhält alte Geometrie ohne zusätzliche Nullfelder;
+ältere Versionen durchlaufen weiterhin ihre strengen Migrationsstufen.
+Domain `elements/wall/heights.ts` löst lokale Wandfuß-/Kopfhöhen auf. Fenster bleiben
+relativ zur Wand. Geschossauflösung und absoluter Gebäudedatum-Bezug bleiben getrennt.
+3D-Material, Fenster-Auswahlflächen, Steuerungsachse, reale Ursprungecken, bestehende
+XY-Vorschau und IFC-Platzierungen berücksichtigen den Versatz. Fangquellen auf der
+Geschossebene bieten versetzte Wandfüße nicht fälschlich als Punkte auf Z=Geschoss an;
+freie 3D-Ursprungswahl nutzt echte Körperpunkte, Bearbeitung die jeweilige Arbeitsebene.
+Eck-/T-Paarprüfung lehnt unterschiedliche Fußhöhen ab. Automatische Ecksuche und
+vorbereitete XY-Bewegung zählen Anschlussknoten mit ihrer Höhe, nicht nur mit XY.
+Keine Z-Mausaktion und keine neue Höhen-Eigenschaftenoberfläche in diesem Schritt.
+
+Nachweis: 964 Tests bestanden, darunter acht neue Fälle für signierte Versätze,
+V24-Migration/forgierte Altdateien, ungültige Höhen, EG/OG/KG, Fenster/JSON/reale
+Ecken, feste und vorbereitete Anschlüsse sowie rekursiv aufgelöste IFC-Platzierungen.
+App-Typecheck, gezieltes Lint und Produktionsbuild bestanden. Vorhandene Testdateien
+wurden ausschließlich bei Erwartungen an die aktuelle Formatversion angeglichen.
+Praktische Testdateien: outputs/wall-height-acceptance.json und .ifc (außerhalb Repo).
+Drei Wände mit Fenstern bei 0 / +0,50 / −0,50 m; Browser-/Archicad-Abnahme dieses
+neuen Beispiels noch offen. Keine erneute Großprojekt-Performancefreigabe.
+
+Genau ein Folgeauftrag: gemeinsame Application-Aktion für Z-Translation einer
+Wand-Auswahl implementieren, zunächst mit vorbereiteter Vorschau und vollständigem
+Commit-Vergleich. Geschoss/IDs erhalten, interne Anschlüsse erhalten, externe erst
+beim Commit lösen, Fenster einmal mitnehmen, stale-Kontext ablehnen, ein Undo.
+UI-Achsenanbindung folgt auf die geprüfte Aktion, ohne parallele Modelllogik.

@@ -1,3 +1,4 @@
+import { wallBase } from "@/domain/elements/wall/heights";
 import { cameraFocus, orbitAround } from "@/rendering/viewport/camera-navigation";
 import type { Vector3 } from "@/geometry/projections/orthographic";
 import { createMovementOriginQuery } from "@/rendering/viewport/movement-origin";
@@ -245,12 +246,23 @@ export function BimSolidView({
     [windowSurfaces, selectedWindows],
   );
   const windowWorkplane = useMemo(() => {
+    if (editSession?.target.kind === "wall") {
+      const wall = project.storeys
+        .flatMap((s) => s.walls)
+        .find((w) => w.id === editSession.target.id);
+      return wall ? wallBase(wall, workingStoreyElevation(project)) : undefined;
+    }
     if (editSession?.target.kind !== "window") return undefined;
     const opening = project.storeys
       .flatMap((s) => s.windows)
       .find((w) => w.id === editSession.target.id);
     return opening
-      ? workingStoreyElevation(project) + opening.sillHeight + opening.height / 2
+      ? wallBase(
+          project.storeys.flatMap((s) => s.walls).find((w) => w.id === opening.wallId)!,
+          workingStoreyElevation(project),
+        ) +
+          opening.sillHeight +
+          opening.height / 2
       : undefined;
   }, [project, editSession]);
   const inference = useSolidInference(

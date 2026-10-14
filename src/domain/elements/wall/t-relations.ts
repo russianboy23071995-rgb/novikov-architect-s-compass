@@ -1,3 +1,4 @@
+import { assertSameWallBase } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
 import { validateCornerTContact } from "./corner-t-contact.ts";
@@ -31,6 +32,7 @@ export function tConnectionContours(
       throw new Error(
         "Eine Nebenwand darf vorerst nur einen T-Anschluss haben und nicht zugleich Hauptwand sein.",
       );
+    assertSameWallBase(host, incoming);
     incomingIds.add(incoming.id);
     const result = inspectTPair(
       host,

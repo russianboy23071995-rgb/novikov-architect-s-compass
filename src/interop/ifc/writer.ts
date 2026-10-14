@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
@@ -171,7 +172,7 @@ export async function writeIfc(
         storeyPlacement,
         bodyPosition.start.x,
         bodyPosition.start.y,
-        0,
+        wallBase(wall),
         (wall.end.x - wall.start.x) / length,
         (wall.end.y - wall.start.y) / length,
       );

@@ -1,3 +1,4 @@
+import { wallBase } from "../../domain/elements/wall/heights.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -163,13 +164,19 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     solid.min = [0, 0, 0];
     solid.max = [1, 1, 1];
   }
-  if (elevation !== 0) {
+  const bases = new Map(storeyOf(project).walls.map((w) => [w.id, wallBase(w, elevation)]));
+  if (solid.faces.length && [...bases.values()].some((z) => z !== 0)) {
     solid.faces = solid.faces.map((f) => ({
       ...f,
-      vertices: f.vertices.map(([x, y, z]): Vec3 => [x, y, z + elevation]),
+      vertices: f.vertices.map(([x, y, z]): Vec3 => [x, y, z + bases.get(f.wallId)!]),
     }));
-    solid.min[2] += elevation;
-    solid.max[2] += elevation;
+    solid.min[2] = Infinity;
+    solid.max[2] = -Infinity;
+    for (const face of solid.faces)
+      for (const p of face.vertices) {
+        solid.min[2] = Math.min(solid.min[2], p[2]);
+        solid.max[2] = Math.max(solid.max[2], p[2]);
+      }
   }
   return solid;
 }

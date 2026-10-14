@@ -54,7 +54,7 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 24);
+    assert.equal(migrated.schemaVersion, 25);
     assert.deepEqual(
       storeyOf(migrated).walls.map(strip),
       storeyOf(input).walls.map((w) => ({ ...w, bodyOffset: 0 })),
