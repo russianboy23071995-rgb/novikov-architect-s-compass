@@ -31,7 +31,7 @@ import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
-import { selectionIndex, type SelectionSet } from "@/application/selection/state";
+import { selectionIndex, selectTargets, type SelectionSet } from "@/application/selection/state";
 import type { SnapCandidate } from "@/constraints/snapping/engine";
 import { CanvasDisplaySettings } from "./CanvasDisplaySettings";
 import { useCanvasDisplaySettings } from "./useCanvasDisplaySettings";
@@ -406,6 +406,18 @@ export function CadWorkspace({
     setPendingFile(null);
   }, [editing.projectLoad, showSelection]);
 
+  const toggleSelection = (target: NonNullable<Selection>) => {
+    const next = selectTargets(selections, [target], "toggle");
+    const remaining = next.length === 1 ? next[0]! : null;
+    const owner = remaining ? workingStoreyForTarget(project, remaining) : null;
+    if (remaining && owner && owner !== storeyOf(project).id) {
+      const active = selectWorkingStorey(project, project, owner);
+      setActiveDocumentId(null);
+      dispatchEditing({ type: "working-storey", base: project, storeyId: owner });
+      selectCommitted(active, remaining);
+    } else choose(next);
+  };
+
   const selectElement = (
     next: Selection,
     anchor?: Point,
@@ -421,10 +433,14 @@ export function CadWorkspace({
       return;
     const targetStorey = next ? workingStoreyForTarget(project, next) : null;
     if (next && targetStorey && targetStorey !== storeyOf(project).id) {
-      if (toggle && selections.length > 0) {
-        showNotice(
-          "Mehrfachauswahl ist derzeit innerhalb eines Geschosses möglich. Ohne Strg/Cmd wird das andere Geschoss zur Bearbeitung gewählt.",
-        );
+      if (toggle) {
+        cancelInteraction();
+        toggleSelection(next);
+        setDemandOpen(true);
+        setPickedPoint({ index: null, anchor: null, edgeIndex: null });
+        const point = anchor ?? lastPointer.current;
+        setDemandPosition({ x: point.x + 16, y: point.y + 16 });
+        setTool("select");
         return;
       }
       try {
@@ -450,7 +466,7 @@ export function CadWorkspace({
     }
     if (toggle && next) {
       cancelInteraction();
-      choose([next], true);
+      toggleSelection(next);
       setDemandOpen(true);
       const point = anchor ?? lastPointer.current;
       setDemandPosition({ x: point.x + 16, y: point.y + 16 });
@@ -930,7 +946,7 @@ export function CadWorkspace({
           !imageTool.active &&
           !groupMove.active &&
           !referenceSelection.selecting &&
-          (mode === "2D" || (tool === "select" && selection && !editSession)) && (
+          (mode === "2D" || (tool === "select" && selections.length > 0 && !editSession)) && (
             <DemandMenu
               calibrationControls={
                 selection?.kind === "reference" && selections.length === 1 ? (
@@ -1257,7 +1273,7 @@ export function CadWorkspace({
                 {selections.length} Elemente ausgewählt.{" "}
                 {mode === "3D"
                   ? "Gemeinsam bewegen: im Grundriss oder per Modellbefehl."
-                  : "Im Elementmenü â€žAuswahl frei bewegenâ€œ wählen, dann Ursprung und Ziel anklicken."}
+                  : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
               </p>
             ) : (
               <BimInspector
