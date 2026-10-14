@@ -1,3 +1,4 @@
+import { assertRasterBudgetChange } from "../../domain/project/raster-budget.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
 import {
@@ -12,12 +13,17 @@ export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
 export function createHistory(project: Project): ProjectHistory {
   return { past: [], present: validateProject(project), future: [] };
 }
-export function commitProject(history: ProjectHistory, project: Project): ProjectHistory {
+export function commitProject(
+  history: ProjectHistory,
+  project: Project,
+  options: { legacyFileOpen?: boolean } = {},
+): ProjectHistory {
   const next = validateProject(project);
   assertValidatedProjectSize(next);
   // Preserve the previous serialization boundary's validation of the existing snapshot.
   const previous = validateProject(history.present);
   assertValidatedProjectSize(previous);
+  if (!options.legacyFileOpen) assertRasterBudgetChange(previous, next);
   if (sameProjectContent(next, previous)) return history;
   if (sameProjectModel(history.present, next)) return { ...history, present: next };
   return {

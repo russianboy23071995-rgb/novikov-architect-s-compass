@@ -11467,7 +11467,7 @@ Prüfbezug: Review PR281–317 / main c081040d5fb7a8833ac8493bfd0ae669ef617e1e. 
 Verbindliche aktive Reihenfolge ausschließlich im Masterplan §9. Alle sieben Punkte sind zur Diagnose, begrenzten Umsetzung und Prüfung freigegeben; genau einer wird aktiv bearbeitet. Historische Fortsetzungsprompts werden dadurch ersetzt. Nach erfolgreichem Abschluss unmittelbar zum nächsten offenen Punkt weitergehen. Keine weiteren Featureaufträge vor Abschluss dieses Blocks. Kein Punkt wird durch bloßen PR-Merge, einen isolierten Mikrobenchmark oder eine unbelegte Aussage „optimiert“ geschlossen.
 
 ### AUD14-01 – Projektzulässigkeit und Recovery-Gesamtbudget
-Status: offen; erster aktiver Auftrag, P0. Bezug: A03/A10, K02/K03, R26-01/02, RC07.
+Status: begrenzt implementiert und fokussiert geprüft; PR-Abnahme offen, P0. Nachweis/Übergangsvertrag am Dateiende. Bezug: A03/A10, K02/K03, R26-01/02, RC07.
 Befund: portables Projektlimit 128 MiB; Einzelbild maximal 16.000.000 Pixel; Recovery zusätzlich 128.000.000 Gesamtpixel. validateProject hat kein entsprechendes aggregiertes Pixelbudget. Assetvorbereitung zählt logische Assets, Restore-Budget zählt eindeutige Blobpayloads. Neun unterschiedliche 4.000×4.000-Pläne können unter der Dateigrenze liegen und dennoch das Recovery-Pixelbudget überschreiten. Dies war statisch festgestellt, kein vollständiger neuer Browsernachweis.
 Auftrag: Grenzfall mit echten ausreichend komprimierten Bildern reproduzieren. Gemeinsamen Vertrag für zulässige Modellzustände/Dateiöffnung/Import/Commit/Export/Recovery definieren und implementieren. Logische Links vs. eindeutige Payloads vs. dekodierter Rasterbedarf explizit unterscheiden; Duplikate dürfen keinen unbemerkten Budgetwechsel bewirken. Raster-/RAM-Grenzen nicht durch blindes Erhöhen umgehen. Bereits vorhandene überbudgetierte Daten les-/exportierbar und letzte gültige Sicherung geschützt halten; Migration/Überschreitung verständlich melden. Wenn die endgültige Ressourcenpolitik eine fehlende Nutzerentscheidung verlangt, erst Reproduktion, gemessene Optionen und sicher überprüfbaren Lösungsvorschlag erstellen.
 Abnahme: unter/an/über Byte- und Pixelgrenzen, neun große unterschiedliche Bilder, gleiche Payload mit mehreren IDs/Links, Unicode, Migration, manuelle/automatische Sicherung, Reload/Wiederaufnahme, Fehler/Abbruch/Quota und Vorgängererhalt. Kein offen angenommener Projektzustand darf ohne deutlich dokumentierten Übergangsvertrag später unerwartet unsicherbar sein.
@@ -11512,3 +11512,46 @@ Befund: widersprüchliche historische „ein Geschoss“-/PR-/Weiterauftragsanga
 Auftrag: aktuelle Statusübersicht/§9 als eindeutig maßgeblich pflegen, historische Quellen/Anforderungen erhalten und als solche markieren. Laufzeittexte ohne Verhaltensänderung korrigieren; relevante UI-Fehlermeldungen prüfen. Gemeinsame Infrastruktur/Orchestrierung fokussiert kapseln, Fachmodell bleibt Application/Domain; keine reine Zeilenzahl-Refaktorierung. Noch fehlende Fachfunktionen weiter offen lassen.
 Gesamtabnahme: repräsentatives Schulprofil mit fünf Geschossen (ca. 1.000 m² je Geschoss), vielen vorhandenen BIM-Elementen/Eck-/T-Verbindungen/Fenstern, Schraffuren/Polygonpunkten, mehreren Abbildern und bis zu 20 Referenzplänen als Richtwert. Geometrieschwere und bildschwere Fälle getrennt/kombiniert; 128-MiB-Dateivertrag beachten. Öffnen, Geschosswechsel, Auswahl, XY/Z-Vorschau und Commit, Undo/Redo, Export, Autosave/Snapshot/Reload/Wiederaufnahme. Wiederholungen, kalte/warme Caches, Hardware/Browser, Median/angebenbare Verteilung, Task-/Framepausen, Speicher und vollständige Inhalt-/Geometrievergleiche dokumentieren. Bisheriger ~102-MiB-Test mit 10.000 Linien/12 PNGs ist kein Ersatz für einen schweren BIM-Nachweis. Reale Archicad-Datei erst bei unterstütztem Import; fehlende Raum-/Decken-/Dachobjekte nicht vortäuschen.
 Abschluss: alle sieben IDs mit Beleg/PR/Commit als erfüllt oder konkret verbleibender Blocker ausgewiesen; danach neuer Architekturreview. Keine pauschale Garantie für alle großen Gebäude oder Dateigrößen aus einzelnen Messläufen ableiten.
+
+
+### AUD14-01 – begrenzter P0-Fix und Nachweis (14.10.2026)
+Basis main 7621765, separater Zweig fix/recovery-resource-contract; PR318 bleibt
+unverändert offen. Reproduktion mit neun echten, verschiedenfarbigen RGB-PNGs,
+je 4000×4000 Pixel, bestätigte den Fehler: 646.910 Bytes portable Datei,
+Import/Öffnen zulässig, Recovery-Schreiben und Lesen abgewiesen. Neun IDs mit
+identischem Bild: 678.558 Bytes, Schreiben abgewiesen, Lesen zuvor akzeptiert.
+Rohbefund lokal outputs/aud14-01/reproduction.json. Synthetische Vollbilder,
+keine echten Architekturpläne und keine neue Kapazitäts-/RAM-Freigabe.
+
+Gemeinsamer konservativer Vertrag in domain/project/raster-budget.ts:
+128.000.000 Pixel je Projekt, Summe je logischem Asset. Identische Payload unter
+mehreren Asset-IDs zählt mehrfach; mehrere Referenzen auf dieselbe Asset-ID zählen
+nur einmal. Deduplizierte Blobzahl ist eine Speicheroptimierung, kein Zulässigkeits-
+wechsel. Dekodierter Browser-/GPU-Bedarf kann davon abweichen und bleibt AUD14-06.
+Bytebudget 128 MiB und Einzelbildbudget 16 Millionen Pixel unverändert.
+
+Neue Referenzimporte und normale Modell-Commits dürfen die Rastergrenze nicht
+überschreiten. Bereits überbudgetierte Projekte dürfen nicht weiter wachsen.
+Gemeinsame V1/V2-Sicherung prüft vor Veröffentlichung; V2-Wiederherstellung zählt
+zusätzlich logische Assetlinks wie der Schreibpfad und behält defensive Blobgrenzen.
+Übergangsvertrag: Domain-Dateischema/Migration behalten vorhandene größere Dateien
+lesbar. Explizites Datei-/Legacy-Laden ist erlaubt, ebenso Modelländerungen ohne
+Budgetwachstum, Undo/Redo und verlustfreier Datei-Export. Warnung vor Ladeübernahme,
+dauerhafter Canvas-Hinweis und rotes Recovery-Symbol melden ausdrücklich die nicht
+mögliche lokale Sicherung. Keine Behauptung, dass Export den Datenträgerschreibvorgang
+bestätigt. Kein Formatwechsel, keine Löschung existierender Snapshots oder Blobdaten.
+
+Nachweise: gesamte Testsuite 972 Tests grün plus anschließend zwei zusätzliche
+Grenzfalltests grün (974 insgesamt vorhandene Fälle); App-/Benchmark-Typecheck,
+gezieltes Lint und Build. Neue sechs Tests: unter/an/über Pixelgrenze, neun reale
+PNGs, Duplikatlinks/gemeinsame Referenzen, Import-/Commitgrenze, Altdatei/V24-Migration,
+Unicode, Export, Undo/Redo, Snapshot-Abbruch und simulierte Quota-Publishfehler.
+Browser auf Port8082 mit eigenem Testprojekt budget-ü: Altdatei laden mit Warnung,
+Download enthält alle neun Assets/Referenzen exakt; manuelle Sicherung abgewiesen,
+Autosicherungsstatus rot/pausiert. Acht Bilder am Grenzwert erfolgreich gesichert;
+neun Bilder abgewiesen, Reload und Wiederaufnahme liefern den unveränderten
+Acht-Bilder-Stand. Erneuter Export payload-/referenzgleich. Keine fremden Slots
+verändert. Beleg outputs/aud14-01/legacy-warning.png. Physische Plattenfüllung,
+reale Browser-Quota und schweres Gesamtprofil nicht neu simuliert; Langzeitaufbewahrung
+und kombinierte Abnahme bleiben AUD14-06/07. AUD14-01: implementiert und fokussiert
+geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.

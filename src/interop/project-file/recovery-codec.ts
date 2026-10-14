@@ -1,3 +1,8 @@
+import {
+  PROJECT_RASTER_PIXEL_LIMIT,
+  assertProjectRasterBudget,
+  rasterPixels,
+} from "../../domain/project/raster-budget.ts";
 import { migrateProjectData } from "./load.ts";
 import { payloadHashInput } from "./payload-hash-input.ts";
 /** Shared checked asset codec. Limits are supplied by the caller, not product defaults. */
@@ -157,6 +162,19 @@ export function createBoundedRecoveryCodec(limits: {
   const check = (doc: Document) => {
     if (new TextEncoder().encode(JSON.stringify(doc.model)).length > budget.modelBytes)
       throw new Error("Model budget exceeded");
+    const linked = doc.model.assets.map((a) => {
+      const payload = doc.blobs[a.key];
+      if (!payload) throw new Error("Missing asset");
+      return payload;
+    });
+    if (
+      rasterPixels(linked) > budget.pixels ||
+      linked.reduce(
+        (sum, p) => sum + (typeof p.data === "string" ? p.data.length : budget.payloadBytes + 1),
+        0,
+      ) > budget.payloadBytes
+    )
+      throw new Error("Linked asset budget exceeded");
     let bytes = 0,
       pixels = 0;
     for (const p of Object.values(doc.blobs)) {
@@ -194,12 +212,13 @@ export function createProjectRecoveryCodec() {
   const bounded = createBoundedRecoveryCodec({
     modelBytes: PROJECT_FILE_LIMIT,
     payloadBytes: PROJECT_FILE_LIMIT,
-    pixels: 128_000_000,
+    pixels: PROJECT_RASTER_PIXEL_LIMIT,
   });
   return {
     async prepare(input: Project) {
       const project = validateProject(input);
       assertValidatedProjectSize(project);
+      assertProjectRasterBudget(project);
       return bounded.prepare(project);
     },
     async restore(...args: Parameters<typeof bounded.restore>) {
