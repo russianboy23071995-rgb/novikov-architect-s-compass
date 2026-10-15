@@ -489,7 +489,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-05 – lokale 3D-Ursprungsfangabfrage (Teilauftrag).**
+**Genau ein aktiver Schritt: AUD14-06 – Langsitzungs-Speicher und Recovery-Aufbewahrung zunächst vermessen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -511,8 +511,9 @@ PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Te
 PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in Teil 21.
 PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis AUD14-05 Teil 1.
 PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiesen (AUD14-05 Teil 2).
-Nächster Einzelauftrag: große Anschlussgruppen und Fremdendpunktprüfung separat messen;
-Abhängigkeiten nur bei vollständiger geometrischer Gleichheit begrenzen.
+PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktprüfung in AUD14-05 Teil 3.
+Nächster Einzelauftrag: AUD14-06 Langsitzung mit History und Referenzbildern vermessen;
+Recovery-Referenzen/Schreiber und tatsächliche Aufbewahrung vor jeder Bereinigung erfassen.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -1963,3 +1964,51 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 3. AUD14-07 verbleibende Restschuld, Kamerawechselkosten und gemischtes Schulmodellprofil
    zusammenhängend abnehmen; Dokumentations-/Zuständigkeitsbefunde einschließen.
 AUD14-05 insgesamt sowie AUD14-04-Restschuld bleiben bis zur jeweiligen Abnahme offen.
+
+
+### AUD14-05 Teil 3 – Anschlussgruppen und fremde Endpunkte (15.10.2026)
+
+PR345 nach ausdrücklicher Freigabe und grüner CI in main gemergt (cb895cc).
+createCompatiblePointIndex unter geometry/spatial verwendet den gemeinsamen Boxindex,
+eigene Punktkopien und MAX_MODEL_TOLERANCE_METRES nur als konservative Suchgrenze.
+pointsCompatible bleibt die maßgebliche enge Prüfung. Keine neue Fangtoleranz, kein
+Kandidatencap. prepared-endpoint prüft beide bewegten Enden damit statt einer linearen
+Fremdpunktliste. Neue Kontakte behalten Vollprüfung. Vollständige Anschlussgruppe,
+Fenster, Relationreihenfolge und vollständiger Commit bleiben unverändert.
+
+1057 Tests, beide Typechecks, gezieltes Lint und Build bestanden. Drei zusätzliche Tests:
+Toleranzgrenzen von kleinen bis extremen Koordinaten, ungültige/duplizierte Punkte,
+Ownership, verteilte Punktmengen; 51 verbundene Wände inklusive Fenstern mit Verlängerung,
+Kürzung/gelösten Anschlüssen, Schrägänderung und fremden Kontaktzielen exakt gegen Vollpfad.
+Browserregression: 502 Wände/fünf Geschosse, 48 gleiche Pixelbilder sowie 48 gleiche
+Projekt-/Commit-/Undo-/Abbruchvergleiche. Das Browserprofil enthält ein T-Paar, nicht die
+51-Wand-Anschlussgruppe; deren Nachweis ist der separate Modellvergleich.
+
+connection-group-profile.ts mit Vorher-/Nachher-Rohdaten connection-group-before.json /
+connection-group-results.json: sieben Ziele, erstes nicht im warmen Median, Projektgleichheit
+außerhalb Messung, vorbereitet jeweils vor Vollpfad. Node, keine Frame-/p95-Garantie.
+Warme Vorschau vorher → nachher:
+- Zwei verbundene Wände ohne fremde: 1,324 → 1,235 ms.
+- Zwei verbundene Wände plus 1000 fremde: 1,014 → 0,878 ms; Vorbereitung 9,007 → 15,874 ms.
+- Elf verbundene Wände plus 100 fremde: 3,289 → 3,298 ms.
+- 51 verbundene Wände plus 100 fremde: 14,930 → 14,618 ms.
+Der Fremdpunktindex begrenzt Suche, beschleunigt große Anschlussgruppen aber nicht wesentlich.
+Keine Behauptung, dieser dominante Rest sei gelöst. Messstreuung und nicht alternierende
+Reihenfolge beachten; kleiner Zeitunterschied ist kein allgemeiner Leistungsbeweis.
+
+Fachliche Grenze: wallDependencyClosure behält absichtlich alle Eck-/T-Partner. Ohne
+inkrementellen Validierungsvertrag darf man entfernte Gruppenmitglieder nicht abschneiden:
+Kürzung kann Beziehungen lösen, stationäre Profile und Fenster hängen weiterhin daran.
+51 verbundene Wände bleiben rund 14,6 ms Modellvorschau ohne Renderer. Dieser offene
+AUD14-05-Rest benötigt gesonderte inkrementelle Prüfung, kein willkürliches Gruppenlimit.
+Übergang zur bereits geplanten Speicherprüfung ist eine Priorisierung, keine Schließung
+von AUD14-05. Restbefund bleibt verbindlich für AUD14-07 und den späteren Architekturreview.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. AUD14-06 Langsitzung mit 1/10/50/100 History-Ständen, Bildwechseln und Recovery-Slots
+   vermessen; gehaltene Referenzen und konkurrierende Schreiber vor Bereinigung erfassen.
+2. Aus Messung sichere Aufbewahrung/Bereinigung ableiten; gültige aktuelle/vorherige Stände,
+   Migration und andere Projekte/Tabs schützen, Quota-/Abbruchfälle nachweisen.
+3. AUD14-07 gemischtes Schulprofil einschließlich großer Anschlussgruppen/Kamerawechsel
+   prüfen und offene Leistungs-/Architekturbefunde als Abschlussgate behandeln.
+AUD14-04-Restschuld, großer Anschlussgruppenrest und AUD14-07 bleiben ausdrücklich offen.
