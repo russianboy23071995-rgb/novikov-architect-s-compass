@@ -12038,3 +12038,19 @@ Danach große Anschlussgruppen/Fremdendpunkte messen, anschließend AUD14-06.
 AUD14-07 bleibt vollständiges Schulmodell-/Workspace-/Bild-/Langzeit-Abschlussgate.
 
 Prüfabschluss Teil 21: 1048 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden.
+
+
+### AUD14-05 Teil 1 – Räumliche Ursprungskandidaten
+PR343 gemergt (180320a). Vorhandener Boxindex begrenzt projizierte 3D-Eckpunkte pro Pointer;
+ursprüngliche stabile Reihenfolge, Distanz, Höhe und Verdeckung unverändert. Vorhandene
+Query-Lebensdauer/Invalidierung, kein eigener globaler Cache oder neues Fangsystem.
+1051 Tests, beide Typechecks, Lint und Build bestanden. Eingefrorenes lineares Orakel in
+benchmarks; drei zusätzliche Regressionen und Browservergleich (48 Fangresultate,
+sechs Pixelvergleiche, 500 Wände/500 Fenster) bestanden. Rohdaten local-origin-*.json.
+500 Wände: leerer Bereich 1,237 → 0,0029 ms; gemischt 13,989 → 12,830 ms; dicht
+15,254 → 15,815 ms. Keine allgemeine Gesamtbeschleunigung. Vorbereitung separat,
+Cache-Reihenfolge ungleich, kein fairer Kaltstartnachweis. Keine Framegarantie.
+Einziger nächster Auftrag: Verdeckungsprüfung phasenweise messen und gemeinschaftlich
+vorbereitet räumlich begrenzen, bei identischer Tiefen-/Sichtbarkeitspolitik. Danach
+Anschlussgruppen/Fremdendpunkte, dann AUD14-06. AUD14-05 und Restschuld aus AUD14-04
+sowie Gesamtabnahme AUD14-07 bleiben offen.
