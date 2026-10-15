@@ -1,3 +1,4 @@
+import { rasterBudgetWarning } from "@/domain/project/raster-budget";
 import { ShieldCheck, ShieldOff } from "lucide-react";
 import type { AutosaveState } from "@/application/project-files/autosave";
 import { useEffect, useRef, useState } from "react";
@@ -57,8 +58,10 @@ export function LocalRecoveryStatus({
     result?.project === project && result.context === context
       ? result.status
       : { kind: "checking" };
-  const text =
-    autosave.enabled && autosave.error
+  const budgetWarning = rasterBudgetWarning(project);
+  const text = budgetWarning
+    ? "Lokale Sicherung nicht möglich: Bildpixelbudget überschritten"
+    : autosave.enabled && autosave.error
       ? "Autosicherung pausiert"
       : autosave.busy
         ? "Snapshot wird geschrieben…"
@@ -77,7 +80,7 @@ export function LocalRecoveryStatus({
       : status.kind === "unavailable"
         ? `${status.message} `
         : "";
-  const active = autosave.enabled && !autosave.error;
+  const active = autosave.enabled && !autosave.error && !budgetWarning;
   const automation = active
     ? "Autosicherung aktiv"
     : autosave.enabled
@@ -89,7 +92,7 @@ export function LocalRecoveryStatus({
       type="button"
       onClick={onOpen}
       aria-label={`${automation}. ${text}`}
-      title={`${autosave.enabled ? "Autosicherung an. " : "Autosicherung aus. "}${detail}Nur lokale Wiederherstellung in diesem Browser, kein externes Backup. Klicken öffnet die Wiederherstellung.`}
+      title={`${autosave.enabled ? "Autosicherung an. " : "Autosicherung aus. "}${detail}${budgetWarning ?? ""} Nur lokale Wiederherstellung in diesem Browser, kein externes Backup. Klicken öffnet die Wiederherstellung.`}
       className={`flex size-6 shrink-0 items-center justify-center rounded hover:bg-secondary/60 ${active ? "text-emerald-600" : "text-red-600"}`}
     >
       <Icon className="size-4" aria-hidden="true" />

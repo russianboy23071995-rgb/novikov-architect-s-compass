@@ -1,3 +1,4 @@
+import { assertProjectRasterBudget } from "../../domain/project/raster-budget.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { ImageAsset, ImageReference } from "../../domain/elements/reference/model.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
@@ -24,6 +25,7 @@ export function previewCreateReference(
     }),
     assets: [...current.assets, request.asset],
   });
+  assertProjectRasterBudget(next);
   serializeProject(next); // Never commit a project that its file reader cannot reopen.
   return next;
 }

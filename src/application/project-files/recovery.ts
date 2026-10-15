@@ -1,3 +1,4 @@
+import { assertProjectRasterBudget } from "../../domain/project/raster-budget.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { assertProjectFileSize } from "../../interop/project-file/size.ts";
@@ -78,6 +79,7 @@ export async function prepareRecoveryWriter(storage: RecoveryStorage, projectId:
       busy = true;
       try {
         // Every new content still crosses the full validation/size boundary.
+        assertProjectRasterBudget(nextProject);
         const json = serializeProject(nextProject);
         assertProjectFileSize(json);
         const current: Snapshot = { savedAt: now.toISOString(), json };

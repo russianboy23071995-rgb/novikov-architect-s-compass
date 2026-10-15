@@ -418,8 +418,20 @@ function reduceEditing(
   event: Exclude<BaseEditingEvent, { type: "patterns-changed" | "working-storey" }>,
 ): EditingState {
   if (event.type === "load-project") {
-    const next = reduceModelEdit(state, { type: "project", project: event.project });
-    if (next.error) return next;
+    let next: EditingState;
+    try {
+      next = {
+        ...state,
+        history: commitProject(state.history, event.project, { legacyFileOpen: true }),
+        session: null,
+        error: "",
+      };
+    } catch (error) {
+      return {
+        ...state,
+        error: error instanceof Error ? error.message : "Projekt konnte nicht geladen werden.",
+      };
+    }
     return {
       ...next,
       projectLoad: { accepted: true },

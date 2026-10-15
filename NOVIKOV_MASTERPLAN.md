@@ -459,7 +459,13 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-01 – zulässige Projektzustände und Recovery-Gesamtbudget konsistent machen.** Dieser Auftrag ersetzt die bisherige Fortsetzung mit neuen Z-Funktionen und hat Vorrang vor weiteren Features. PR318 enthält bereits laufende Z-UI-Arbeit: Änderungen und Nachweise sichern, nichts verwerfen oder ungeprüft als erledigt übernehmen. Die sieben Reviewaufträge jetzt beginnen; ein Merge von PR318 ist dafür keine Voraussetzung. Keine parallelen Implementierungen der sieben Punkte.
+**Genau ein aktiver Schritt: AUD14-02 – Änderungsvergleich ohne gesamte Bildserialisierung.**
+AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
+begrenzter Altdatei-Übergangsvertrag am Dateiende. PR-Abnahme bleibt offen. PR318
+bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
+Keine neuen Features vor diesem Reviewblock. AUD14-02 beginnt mit Messung der
+bestehenden XY-/Z-Vorbereitung und des finalen Vergleichs, einschließlich Mutationsschutz.
+
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
 
@@ -825,3 +831,46 @@ anbinden, einschließlich gewähltem Ursprung, Z-Achse, Shift und gemeinsamer Pr
 Keine neue werkzeugspezifische Höhenlogik; praktische Abnahme erfolgt dann im Canvas.
 
 Nachweis Z-Aktion: 968 Tests bestanden; App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild erfolgreich. Keine Browserabnahme behauptet: noch keine neue UI-Anbindung.
+
+
+### AUD14-01 – begrenzter P0-Fix und Nachweis (14.10.2026)
+Basis main 7621765, separater Zweig fix/recovery-resource-contract; PR318 bleibt
+unverändert offen. Reproduktion mit neun echten, verschiedenfarbigen RGB-PNGs,
+je 4000×4000 Pixel, bestätigte den Fehler: 646.910 Bytes portable Datei,
+Import/Öffnen zulässig, Recovery-Schreiben und Lesen abgewiesen. Neun IDs mit
+identischem Bild: 678.558 Bytes, Schreiben abgewiesen, Lesen zuvor akzeptiert.
+Rohbefund lokal outputs/aud14-01/reproduction.json. Synthetische Vollbilder,
+keine echten Architekturpläne und keine neue Kapazitäts-/RAM-Freigabe.
+
+Gemeinsamer konservativer Vertrag in domain/project/raster-budget.ts:
+128.000.000 Pixel je Projekt, Summe je logischem Asset. Identische Payload unter
+mehreren Asset-IDs zählt mehrfach; mehrere Referenzen auf dieselbe Asset-ID zählen
+nur einmal. Deduplizierte Blobzahl ist eine Speicheroptimierung, kein Zulässigkeits-
+wechsel. Dekodierter Browser-/GPU-Bedarf kann davon abweichen und bleibt AUD14-06.
+Bytebudget 128 MiB und Einzelbildbudget 16 Millionen Pixel unverändert.
+
+Neue Referenzimporte und normale Modell-Commits dürfen die Rastergrenze nicht
+überschreiten. Bereits überbudgetierte Projekte dürfen nicht weiter wachsen.
+Gemeinsame V1/V2-Sicherung prüft vor Veröffentlichung; V2-Wiederherstellung zählt
+zusätzlich logische Assetlinks wie der Schreibpfad und behält defensive Blobgrenzen.
+Übergangsvertrag: Domain-Dateischema/Migration behalten vorhandene größere Dateien
+lesbar. Explizites Datei-/Legacy-Laden ist erlaubt, ebenso Modelländerungen ohne
+Budgetwachstum, Undo/Redo und verlustfreier Datei-Export. Warnung vor Ladeübernahme,
+dauerhafter Canvas-Hinweis und rotes Recovery-Symbol melden ausdrücklich die nicht
+mögliche lokale Sicherung. Keine Behauptung, dass Export den Datenträgerschreibvorgang
+bestätigt. Kein Formatwechsel, keine Löschung existierender Snapshots oder Blobdaten.
+
+Nachweise: gesamte Testsuite 972 Tests grün plus anschließend zwei zusätzliche
+Grenzfalltests grün (974 insgesamt vorhandene Fälle); App-/Benchmark-Typecheck,
+gezieltes Lint und Build. Neue sechs Tests: unter/an/über Pixelgrenze, neun reale
+PNGs, Duplikatlinks/gemeinsame Referenzen, Import-/Commitgrenze, Altdatei/V24-Migration,
+Unicode, Export, Undo/Redo, Snapshot-Abbruch und simulierte Quota-Publishfehler.
+Browser auf Port8082 mit eigenem Testprojekt budget-ü: Altdatei laden mit Warnung,
+Download enthält alle neun Assets/Referenzen exakt; manuelle Sicherung abgewiesen,
+Autosicherungsstatus rot/pausiert. Acht Bilder am Grenzwert erfolgreich gesichert;
+neun Bilder abgewiesen, Reload und Wiederaufnahme liefern den unveränderten
+Acht-Bilder-Stand. Erneuter Export payload-/referenzgleich. Keine fremden Slots
+verändert. Beleg outputs/aud14-01/legacy-warning.png. Physische Plattenfüllung,
+reale Browser-Quota und schweres Gesamtprofil nicht neu simuliert; Langzeitaufbewahrung
+und kombinierte Abnahme bleiben AUD14-06/07. AUD14-01: implementiert und fokussiert
+geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.

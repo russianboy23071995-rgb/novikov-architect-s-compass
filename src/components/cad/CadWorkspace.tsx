@@ -1,3 +1,4 @@
+import { RasterBudgetNotice } from "./RasterBudgetNotice";
 import { MovementAxisControls } from "./MovementAxisControls";
 import { selectWorkingStorey, workingStoreyForTarget } from "@/application/storeys/working-storey";
 import { projectElementCounts } from "@/application/storeys/context";
@@ -823,6 +824,7 @@ export function CadWorkspace({
               das aktuelle Modell. Mit Undo kannst du zum vorherigen Modell zurückkehren. Nicht
               übernommene Formulareingaben werden verworfen.
             </p>
+            <RasterBudgetNotice project={pendingFile?.project} />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setPendingFile(null)}>
                 Abbrechen
@@ -1314,6 +1316,9 @@ export function CadWorkspace({
               defaultSize={navigatorOpen && !fullscreen ? "79%" : "100%"}
             >
               <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
+                <div className="absolute left-3 top-12 z-40 max-w-lg">
+                  <RasterBudgetNotice project={project} />
+                </div>
                 <RecoveryStartupNotice
                   context={editing.projectLoad ?? project.id}
                   onOpen={() => setRecoveryOpen(true)}
