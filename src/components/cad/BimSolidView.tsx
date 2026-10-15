@@ -32,7 +32,7 @@ import {
   projectionStateMatches,
 } from "@/rendering/viewport/projection-state";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { buildBuildingSolid } from "@/lib/bim/geometry";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/lib/bim/model";
@@ -118,6 +118,7 @@ export function BimSolidView({
     button: number;
     navigationMode: "pan" | "orbit";
     pivot: Vector3;
+    aspect: number;
     placementPreview: BimPlanProps["placement"];
   } | null>(null);
   const [error, setError] = useState("");
@@ -372,7 +373,7 @@ export function BimSolidView({
       canvas.removeEventListener("webglcontextrestored", setup);
     };
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     displayed.current = null;
     const canvas = canvasRef.current!;
     const projection = createProjectionState(
@@ -385,7 +386,7 @@ export function BimSolidView({
     setAim(null);
     setViewProjection(renderer.current ? projection : null);
   }, [frame, camera, revision]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     displayed.current = null;
     if (renderer.current && previewProjection) {
       try {
@@ -402,13 +403,17 @@ export function BimSolidView({
       {previewProjection && !error && (
         <svg
           aria-label="Orientierungsebene z=0"
-          className={`pointer-events-none absolute inset-0 ${camera.pitch < 0 ? "z-[11]" : ""}`}
+          className={`pointer-events-none absolute inset-0 ${previewProjection.camera.pitch < 0 ? "z-[11]" : ""}`}
           width={previewProjection.viewport.width}
           height={previewProjection.viewport.height}
         >
           <polygon
             points={orientationFloor(baseSolid, previewProjection) ?? ""}
-            fill={camera.pitch < 0 ? "rgba(120, 134, 145, 0.28)" : "rgba(120, 134, 145, 0.14)"}
+            fill={
+              previewProjection.camera.pitch < 0
+                ? "rgba(120, 134, 145, 0.28)"
+                : "rgba(120, 134, 145, 0.14)"
+            }
             stroke="rgba(120, 134, 145, 0.3)"
             strokeWidth={1}
           />
@@ -497,9 +502,12 @@ export function BimSolidView({
           };
           for (const face of solid.faces) if (selectedIds.has(face.wallId)) include(face.vertices);
           for (const face of windowSurfaces) if (selectedIds.has(face.id)) include(face.vertices);
+          const aspect =
+            displayed.current?.projection.aspect ??
+            event.currentTarget.width / Math.max(1, event.currentTarget.height);
           const pivot: Vector3 = Number.isFinite(min[0])
             ? [(min[0]! + max[0]!) / 2, (min[1]! + max[1]!) / 2, (min[2]! + max[2]!) / 2]
-            : cameraFocus(frame, camera, displayed.current?.projection.aspect ?? 1);
+            : cameraFocus(frame, camera, aspect);
           drag.current = {
             x: event.clientX,
             y: event.clientY,
@@ -519,6 +527,7 @@ export function BimSolidView({
                   ? "pan"
                   : "orbit",
             pivot,
+            aspect,
           };
         }}
         onPointerMove={(event) => {
@@ -584,14 +593,7 @@ export function BimSolidView({
                   panX: base.panX + (dx / event.currentTarget.clientWidth) * 2,
                   panY: base.panY - (dy / event.currentTarget.clientHeight) * 2,
                 }
-              : orbitAround(
-                  frame,
-                  base,
-                  displayed.current?.projection.aspect ?? 1,
-                  drag.current.pivot,
-                  dx,
-                  dy,
-                ),
+              : orbitAround(frame, base, drag.current.aspect, drag.current.pivot, dx, dy),
           );
         }}
         onPointerUp={(event) => {

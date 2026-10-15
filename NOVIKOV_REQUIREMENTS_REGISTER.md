@@ -12178,3 +12178,12 @@ Ziel angenommen, aber bis Langsitzungs-/Pausennachweis nicht aktiviert; manuelle
 Nächster aktiver Auftrag: Langsitzungs-/Bild-/Undo-/Reload- und Speicherprofil, danach bedarfs-
 gesteuerte Wartung über gemeinsamen Port, anschließend AUD14-07. Keine ungemessene Wartung
 nach jeder Autosicherung; keine Zusage einer externen Datensicherung.
+
+### AUD14-07 – Nutzerbefund langsamer Orbit (15.10.2026)
+
+Priorisierter Teilfix: auch einzelne Wand flackert bei langsamer Rotation. Kamera-/GPU-Commit
+in BimSolidView vor Paint synchronisiert, Orbit-Aspekt pro Geste stabil, Bodenorientierung an
+projizierte Kamera gebunden. Isolierter Browservergleich 160 kleine Kameraschritte: vorher
+160 veraltete Matrizen, nachher 0, keine WebGL-Fehler. Keine Geometrie-/Speichermodelländerung.
+Praktische Nutzerabnahme offen, keine allgemeine Performancegarantie aus Commit-Prüfung.
+Danach zurück zur Langsitzungsprüfung und erst anschließend automatischer Wartung.

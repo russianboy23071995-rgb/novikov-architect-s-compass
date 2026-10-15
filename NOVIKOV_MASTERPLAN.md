@@ -2277,3 +2277,30 @@ Nachweis dieses Schritts: 1067 Tests bestanden, Benchmark-/Application-Typecheck
 ESLint und Build erfolgreich. Neue Tests prüfen Default, gespeicherte Ein/Aus-Entscheidung,
 Speicherfehler und automatisches Sichern über Projektwechsel. Keine neue visuelle Browserabnahme
 und keine Langsitzungs- oder automatische Bereinigungsabnahme aus diesen Tests abgeleitet.
+
+### Priorisierter Nutzerbefund – 3D-Kamera/Wandflackern (15.10.2026)
+
+Nutzer meldet Flackern einzelner Wandflächen bei sehr langsamem Orbit, auch bei nur einer Wand.
+Dieser begrenzte Bugfix hat Vorrang vor der Langsitzungsprüfung. Basis ist der noch offene PR351;
+keine Mergefreigabe dafür abgeleitet. BimSolidView veröffentlichte die Kamera-Projektion und den
+GPU-Draw erst in getrennten passiven Effects. DOM/Orientierung und GPU konnten verschiedene
+Kamerastände enthalten. Beide Präsentationsschritte laufen jetzt als Layout-Effects vor dem
+Browser-Paint. Orientierungsebene verwendet die tatsächlich projizierte Kamera. Orbit bindet
+das Seitenverhältnis beim Gestenbeginn, statt während einer invalidierten Projektion auf 1
+zurückzufallen. Keine Änderung an Modellgeometrie, Fangquellen oder GPU-Geometriecache.
+
+Isolierte Browser-Gegenprobe camera-frame.html/.tsx mit echtem BimSolidView, einer Wand und
+Öffnung, 160 kleinen Orbit-/Pan-Schritten: alter Code 160 veraltete GPU-Kameramatrizen am
+synchronen React-Commit-Ende; korrigierter Code 0, WebGL-Fehler 0. Original als temporäre separate
+Komponente geprüft und danach entfernt. Dies belegt den Präsentationsversatz, aber keine
+Framezeit-/Großmodellgarantie und nicht jedes mögliche Flackern (z.B. überlappende Flächen).
+Praktische Abnahme am Nutzerbeispiel bleibt erforderlich. Prüfharness verändert keine Nutzerdaten.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Korrigierten langsamen Orbit am Nutzerbeispiel abnehmen; bei Restflackern dessen Darstellung
+   gezielt erfassen, statt den gesamten Renderer umzubauen.
+2. Langsitzungen mit Bildwechsel/Undo/Reload und synchronen Wartungspausen prüfen.
+3. Nach Belastungsnachweis bedarfsabhängige automatische Wartung über gemeinsamen Port anbinden.
+AUD14-07 Schulprofil bleibt anschließend vorgemerkt.
+
+Validierung des Kamera-Teilfixes: 1067 Tests, Typecheck, gezieltes ESLint und Build bestanden.
