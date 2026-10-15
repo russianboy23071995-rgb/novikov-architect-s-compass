@@ -1,0 +1,9 @@
+{
+  "status": "RELOAD_PASS",
+  "name": "novikov-recovery-v2-pilot-undo-e7bbd5d6-ebeb-4d62-91de-41c1f41d23af",
+  "current": "d7ba3bc7c8444b2b9dc6992f94ff885e604c05e8bf57bc4b40a22c92e6f63f19",
+  "previous": "cc23f8519b4f70fe699837e488c1d3e9950b358d9b537f735cdc10edfb237181",
+  "foreign": "071be3f45b6a1d11d0023f700a511adaafede45a92b8eedac38241fa4468ebab",
+  "saves": 32,
+  "navigationType": "reload"
+}
