@@ -46,6 +46,8 @@ function prepareCapability(
     return prepareLinePreview(session);
   if (session.target.kind === "window" && session.action === "axis")
     return prepareWindowAxisPreview(session);
+  if (session.target.kind === "wall" && session.action === "stretch")
+    return prepareWallEndpointPreview(session);
   // Remaining registered adapters currently expose geometry patches only.
   if (projectView) return null;
   return prepareWallEndpointPreview(session);
