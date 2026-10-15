@@ -2,7 +2,7 @@ import { CAD_TURQUOISE_RGB } from "./highlight.ts";
 import { outlineTriangles } from "./selection-outline.ts";
 import type { OutlineEdge } from "./selection-outline.ts";
 import { cameraMatrix } from "../../geometry/projections/camera-matrix.ts";
-import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
+import { createSolidBufferCache } from "./solid-buffer.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
@@ -48,22 +48,27 @@ export function createMatrixResources(
   const position = gl.getAttribLocation(program, "position"),
     color = gl.getAttribLocation(program, "color");
   const cameraUniform = gl.getUniformLocation(program, "camera");
-  const data: number[] = [];
-  for (const face of solid.faces) {
-    const light =
-      0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-    const tint = selected.has(face.wallId) ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
-    for (const triangle of faceTriangles(face.vertices.length))
-      for (const index of triangle)
-        data.push(
-          ...face.vertices[index]!.map((v, i) => v - origin[i]!),
-          ...tint.map((v) => v * light),
-        );
-  }
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+  const cache = createSolidBufferCache();
+  let localOrigin: Vector3 = [...origin],
+    vertexCount = 0;
+  const update = (
+    next: DisplaySurfaces,
+    nextOrigin: Vector3,
+    nextSelected: ReadonlySet<string>,
+  ) => {
+    const change = cache.update(next, nextOrigin, nextSelected);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    if (change.full) gl.bufferData(gl.ARRAY_BUFFER, change.full, gl.DYNAMIC_DRAW);
+    else
+      for (const patch of change.patches)
+        gl.bufferSubData(gl.ARRAY_BUFFER, patch.offset, patch.data);
+    localOrigin = [...nextOrigin];
+    vertexCount = change.vertexCount;
+  };
+  update(solid, origin, selected);
 
   return {
+    update,
     draw(projection: ProjectionState, outline: OutlineEdge[], windowOutline: OutlineEdge[]) {
       const { width, height } = projection.backbuffer;
       if (canvas.width !== width || canvas.height !== height) {
@@ -79,13 +84,13 @@ export function createMatrixResources(
       gl.uniformMatrix4fv(
         cameraUniform,
         false,
-        cameraMatrix(projection.frame, projection.camera, projection.aspect, origin),
+        cameraMatrix(projection.frame, projection.camera, projection.aspect, localOrigin),
       );
       gl.enableVertexAttribArray(position);
       gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 24, 0);
       gl.enableVertexAttribArray(color);
       gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 24, 12);
-      gl.drawArrays(gl.TRIANGLES, 0, data.length / 6);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
       const border = [
         ...outlineTriangles(outline, projection),
         ...outlineTriangles(windowOutline, projection, 3, [0.72, 0.93, 0.94]),
@@ -116,7 +121,7 @@ export function createMatrixResources(
   };
 }
 
-/** Canvas owns context events. This adapter owns resources for one displayed snapshot. */
+/** Canvas owns context events; one program and two buffers survive displayed snapshots. */
 export function createSolidRenderer(canvas: HTMLCanvasElement) {
   if (!canvas.getContext("webgl", { antialias: true, alpha: true }))
     throw new Error("WebGL is unavailable. Use the 2D view or enable graphics acceleration.");
@@ -141,9 +146,8 @@ export function createSolidRenderer(canvas: HTMLCanvasElement) {
         selected.size !== nextSelected.size ||
         ![...selected].every((id) => nextSelected.has(id))
       ) {
-        resource?.dispose();
-        resource = null;
-        resource = createMatrixResources(canvas, solid, nextOrigin, nextSelected);
+        if (resource) resource.update(solid, nextOrigin, nextSelected);
+        else resource = createMatrixResources(canvas, solid, nextOrigin, nextSelected);
         previous = solid;
         origin = [...nextOrigin];
         selected = new Set(nextSelected);

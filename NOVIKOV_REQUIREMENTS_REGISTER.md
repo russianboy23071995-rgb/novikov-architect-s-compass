@@ -11480,7 +11480,7 @@ Auftrag: gemeinsame sichere Snapshot-/Revisions-/Ownership-Grenze und vorhandene
 Abnahme: Einzelwand sowie 2/5 Geschosse, große Bilder mit unveränderter Auswahlgröße, Vorbereitung/Pointer/Commit getrennt; stale/mutierte Basis, No-op, externe/interne Anschlüsse, Fenster einmal mitnehmen, ein Undo/Redo und Datei-/Recoverygleichheit. Messung und Instrumentierung belegen entfernte Payloadserialisierung; Integrität bleibt erhalten.
 
 ### AUD14-03 – 3D-Ressourcen lokal aktualisieren
-Status: offen, P1. Bezug: A02/A04/A05.
+Status: begrenzter Renderer-Fix implementiert und geprüft am 15.10.2026; PR-Abnahme offen, P1. Bezug: A02/A04/A05.
 Code: rendering/viewport/selection-move-preview.ts, rendering/viewport/solid-renderer.ts, components/cad/BimSolidView.tsx.
 Befund: vorbereitete Geometriepatches werden wieder zu Gesamtflächen komponiert. Neue Solididentität oder andere Wandauswahl führt im Renderer zu vollständiger Ressourcenentsorgung/-erstellung, Shaderkompilierung, Dreieckspackung und GPU-Upload. Reine Kamerabewegung verwendet Ressourcen bereits weiter.
 Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlaufzeit, unveränderte Geometriepuffer wiederverwenden; Auswahl und betroffene Vorschauflächen separat bzw. begrenzt aktualisieren. Kein zusätzlicher autoritativer Meshbestand, kein pauschaler Rendererwechsel. Verdeckung, Fenster, Präzision großer Koordinaten, DPR, Verlust/Wiederherstellung des WebGL-Kontexts erhalten.
@@ -11567,3 +11567,15 @@ Node-Vorher/Nachher und Chromium-155-Aktionsnachweis in
 `benchmarks/translation-content-results.json`; Methodik und Grenzen im Masterplan.
 Keine Aussage zur gesamten Framezeit oder schweren Schule. Nächster aktiver
 Einzelauftrag AUD14-03 (3D-Ressourcen), danach übrige AUD14-Reihenfolge.
+
+
+### AUD14-03 – Nachweis 15.10.2026
+Programm-/Pufferlebensdauer vom Solidwechsel entkoppelt. Stabile Wandbereiche,
+partielle Geometrie-/Farbuploads, Auswahländerung nur an betroffenen IDs.
+Topologie-/Sichtbarkeits-/Ursprungswechsel dürfen weiterhin Gesamtgeometrie hochladen;
+CPU-Gruppierung neuer Solids und Outline-Ribbons bleiben global bzw. unverändert.
+982 Tests und 36 echte WebGL-Pixelvergleiche einschließlich DPR, Fensteröffnung,
+Abbruch, großen Weltkoordinaten, plus Kontextwiederherstellung bestanden.
+Rohzahlen und Grenzen in `benchmarks/solid-resource-results.json` und Masterplan.
+Keine GPU-/Gesamtframezeitgarantie. Nächster Einzelauftrag AUD14-04; schweres
+Mehrgeschoss-/Langsession-Abschlussgate bleibt offen.
