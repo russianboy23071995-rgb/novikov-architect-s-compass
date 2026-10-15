@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-15",
+  "productBase": "55bf7a9",
+  "fixture": "S1 G, five storeys, 300 walls, 200 windows, no images",
+  "browser": "Codex in-app, isolated production workspace port 8085",
+  "selection": "2D keyboard Space/Control+Space because window overlaps wall hit area; 3D mouse/Control+click",
+  "xy2D": {
+    "targets": [
+      "s0-w0",
+      "s0-w1"
+    ],
+    "input": "origin click; 90 degrees, 0.2m, Enter",
+    "wholeProjectMatchAfterCoordinateTolerance": true,
+    "maxCoordinateError": 2.220446049250313e-16,
+    "internalTCount": 1,
+    "detachedExternalTCount": 9,
+    "windowsUnchangedRelativeToHosts": true,
+    "undoExactWholeProject": true,
+    "undoEmpty": true
+  },
+  "xy3D": {
+    "targets": [
+      "s4-w0",
+      "s4-w1"
+    ],
+    "input": "origin click; X button, 0.2m, Enter",
+    "wholeProjectMatchAfterCoordinateTolerance": true,
+    "maxCoordinateError": 0,
+    "internalTCount": 1,
+    "detachedExternalTCount": 9,
+    "windowsUnchangedRelativeToHosts": true,
+    "undoExactStoreys": true,
+    "redoExactWholeProject": true,
+    "undoEmpty": true
+  },
+  "z3D": {
+    "status": "blocked",
+    "reason": "Z button disabled; WORLD_MOVEMENT_AXES is orientation only; prepareZTranslation has no production UI caller"
+  },
+  "notVerified": [
+    "continuous pointer movement with held Shift",
+    "preview frame geometry oracle",
+    "GB image variant group gestures",
+    "Z via actual workspace",
+    "full S1 acceptance",
+    "performance residual resolved"
+  ]
+}
