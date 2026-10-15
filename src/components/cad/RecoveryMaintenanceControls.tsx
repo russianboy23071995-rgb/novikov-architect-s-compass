@@ -1,23 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  createRecoveryMaintenance,
-  type MaintenanceState,
-  type RecoveryMaintenanceStorage,
-} from "@/application/project-files/recovery-maintenance";
+import { useEffect } from "react";
+import type { MaintenanceState } from "@/application/project-files/recovery-maintenance";
 import { Button } from "@/components/ui/button";
-/** Port-injected controls. Unmount aborts pending work; only a user click starts maintenance. */
-export function RecoveryMaintenanceControls({ storage }: { storage: RecoveryMaintenanceStorage }) {
-  const [state, setState] = useState<MaintenanceState>({ status: "idle", message: "" });
-  const controller = useRef<ReturnType<typeof createRecoveryMaintenance> | null>(null);
-  useEffect(() => {
-    const action = createRecoveryMaintenance(storage, setState);
-    controller.current = action;
-    setState({ status: "idle", message: "" });
-    return () => {
-      action.dispose();
-      controller.current = null;
-    };
-  }, [storage]);
+/** Consumer of shared state; unmount only cancels a dialog-owned manual run. */
+export function RecoveryMaintenanceControls({
+  state,
+  run,
+  cancel,
+  close,
+}: {
+  state: MaintenanceState;
+  run: () => Promise<void> | undefined;
+  cancel: () => void;
+  close: () => void;
+}) {
+  useEffect(() => () => close(), [close]);
   const running = state.status === "running";
   return (
     <section
@@ -33,12 +29,14 @@ export function RecoveryMaintenanceControls({ storage }: { storage: RecoveryMain
           size="sm"
           variant="outline"
           disabled={running}
-          onClick={() => void controller.current?.run()}
+          onClick={() => {
+            void run();
+          }}
         >
           Speicher warten
         </Button>
         {running && (
-          <Button size="sm" variant="outline" onClick={() => controller.current?.cancel()}>
+          <Button size="sm" variant="outline" onClick={cancel}>
             Abbrechen
           </Button>
         )}

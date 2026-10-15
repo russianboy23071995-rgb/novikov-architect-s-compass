@@ -38,7 +38,7 @@ export function createMaintenanceCoordinator(
   let quietSince = clock.now(),
     lastAutomatic = -Infinity;
   let cancelTimer: (() => void) | undefined;
-  let active: { promise?: Promise<void> } | undefined;
+  let active: { promise?: Promise<void>; manual: boolean } | undefined;
   let outcome: RetentionResult | undefined,
     status: MaintenanceState["status"] = "idle";
   const service = createRecoveryMaintenance(
@@ -88,7 +88,7 @@ export function createMaintenanceCoordinator(
     // Manual actions may bypass cooldown, never an active save/import/gesture.
     if (conditions.busy) return Promise.resolve();
     clearTimer();
-    const run = {} as { promise?: Promise<void> };
+    const run = { manual } as { promise?: Promise<void>; manual: boolean };
     active = run;
     const capturedEpoch = epoch,
       capturedGeneration = generation;
@@ -155,6 +155,13 @@ export function createMaintenanceCoordinator(
       service.cancel();
     },
     runManual: () => start(true),
+    closeManual() {
+      if (active?.manual) {
+        pending = false;
+        clearTimer();
+        service.cancel();
+      }
+    },
     cancel() {
       pending = false;
       clearTimer();

@@ -1,5 +1,5 @@
 import { RecoveryMaintenanceControls } from "./RecoveryMaintenanceControls";
-import { browserRecoveryMaintenance } from "@/interop/project-file/recovery-maintenance-storage";
+
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { useLocalAutosave } from "./useLocalAutosave";
 import { useEffect, useRef, useState } from "react";
@@ -27,6 +27,11 @@ export function RecoveryPanel({
   onPrepare: (candidate: { name: string; project: Project }) => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const hold = autosave.hold;
+  useEffect(() => {
+    hold("recovery-dialog", busy);
+    return () => hold("recovery-dialog", false);
+  }, [busy, hold]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [candidate, setCandidate] = useState<Awaited<ReturnType<typeof readProjectRecovery>>>(null);
@@ -142,7 +147,12 @@ export function RecoveryPanel({
             Snapshot erstellen
           </Button>
         </div>
-        <RecoveryMaintenanceControls storage={browserRecoveryMaintenance} />
+        <RecoveryMaintenanceControls
+          state={autosave.maintenanceState}
+          run={autosave.runMaintenance}
+          cancel={autosave.cancelMaintenance}
+          close={autosave.closeMaintenanceDialog}
+        />
         {warnings.map((warning, index) => (
           <p key={index} role="alert">
             {warning}

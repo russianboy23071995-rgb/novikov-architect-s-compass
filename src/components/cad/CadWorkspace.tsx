@@ -687,6 +687,21 @@ export function CadWorkspace({
     changeProject(next, { kind: "reference", id }),
   );
   cancelCalibration.current = calibration.cancel;
+  const recoveryBusy =
+    !!pendingSession ||
+    groupMove.active ||
+    tool !== "select" ||
+    readingFile ||
+    !!pendingFile ||
+    imageTool.busy ||
+    imageTool.active ||
+    !!calibration.adapter ||
+    exportingIfc;
+  const holdRecovery = autosave.hold;
+  useEffect(() => {
+    holdRecovery("workspace", recoveryBusy);
+    return () => holdRecovery("workspace", false);
+  }, [recoveryBusy, holdRecovery]);
   const measurementContext = useMemo(
     () => ({ project, visibility, mode, activeViewport, layout, tool, measurementMode }),
     [project, visibility, mode, activeViewport, layout, tool, measurementMode],

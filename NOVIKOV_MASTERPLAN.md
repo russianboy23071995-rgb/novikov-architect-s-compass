@@ -2534,3 +2534,38 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Current/Previous und fremde Projekte vor/nach Wartung vergleichen.
 3. Offene Stunden-/Quota-/Prozessmessungen gezielt ergänzen und Mehrtab-Verhalten prüfen;
    keine pauschale Leistungs- oder globale Parallelitätsgarantie aus den bisherigen Tests.
+
+### AUD14-06 – Recovery-Service und UI-Anbindung (15.10.2026)
+
+#358 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+createRecoverySession besitzt Autosave und Wartungskoordinator gemeinsam. Autosave
+meldet nur nach erfolgreichem V2-Publish im gültigen Kontext Bedarf; No-op/Fehler nicht.
+Fehler eines Wartungsbeobachters kann einen bereits committed Save nicht zurücknehmen.
+Busy wird vor dem Save synchron an Wartung weitergegeben. Kontext/Opt-out verwerfen
+alten Bedarf. Mehrere unabhängige Holds für Workspace, Recovery-Dialog und Input.
+
+useLocalAutosave hält die Instanz über Dialogwechsel hinweg. RecoveryMaintenanceControls
+ist nur Consumer; Schließen beendet nur einen gerade manuell gestarteten Lauf (closeManual),
+nicht eine spätere automatische Wartung. Browseradapter erfasst Pointer/Keys/Wheel,
+gehaltene Eingaben, Blur/Focus und Sichtbarkeit mit vollständigem Listener-Cleanup.
+Workspace meldet Datei-/Bildimport, ausstehendes Öffnen, Bearbeitung und Gruppenbewegung.
+Konservativer Pilot: auch jedes ausgewählte Nicht-Select-Werkzeug blockiert Automatik,
+selbst wenn noch keine Geometrie gezeichnet wird. Kein je-Werkzeug-Collector.
+
+Automatik jetzt bei aktiver fehlerfreier Autosicherung angebunden: 30 s Ruhe nach
+V2-Save, fünf Minuten Mindestabstand, bestehende Retry-/Fehlersperren. Keine Änderung
+an Modell/Undo, Datenformat oder Collector. Keine tabübergreifende Laufzeit-Sperre.
+
+Validierung: sechs zusätzliche Tests (vier Service-Integration, Dialogbesitz,
+Browser-Input-Lifecycle), insgesamt 1083/1083 bestanden; Typecheck, gezieltes ESLint,
+Build und diff --check bestanden. Isolierter Browser-Dialog mit simuliertem Storage-Port
+zeigt erfolgreichen manuellen Lauf. Keine echte automatische Datenbankwartung durch
+Browserabnahme behauptet; Nutzerprojekt nicht für Tests verändert.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Automatischen 30-s-Ruheablauf mit echtem Recovery-Service/Storage in isolierter
+   Browser-Testdatenbank prüfen: Eingabe/Save/Abbruch, neuer Versuch, alle Sicherungsinhalte.
+2. Mehrtab-Konkurrenz, längere Sitzungen und Quota-/Prozessgrenzen gezielt prüfen;
+   verbleibende Einschränkungen getrennt von gemessenen Produktfehlern dokumentieren.
+3. Nach Abnahme Recovery-Etappe abschließen und nächsten priorisierten CAD-Auftrag
+   aus dem Masterplan auswählen; große Speichererweiterung bleibt separat vorgemerkt.
