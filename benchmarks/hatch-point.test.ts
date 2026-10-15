@@ -118,3 +118,57 @@ test("hatch preview is disposable and placement retains full validation and one 
   assert.ok(invalid.error);
   assert.equal(invalid.history.past.length, 0);
 });
+
+test("incremental hatch points match full validation for concavity, crossings and large coordinates", () => {
+  let seed = 907;
+  const random = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32;
+  for (const offset of [0, 1e9]) {
+    const base = hatchPointFixture(2, 40);
+    storeyOf(base).hatches[0]!.points = Array.from({ length: 40 }, (_, i) => {
+      const angle = (i * Math.PI) / 20,
+        radius = i % 2 ? 7 : 10;
+      return { x: offset + radius * Math.cos(angle), y: offset + radius * Math.sin(angle) };
+    });
+    for (const index of [0, 1, 17, 39]) {
+      const edit = session(base, index);
+      // Non-vertex origins must preserve offset arithmetic, not assign pointer directly.
+      edit.anchor = { x: edit.anchor.x + 0.3, y: edit.anchor.y - 0.7 };
+      const prepared = prepareDirectEditPreview(edit)!;
+      const targets = Array.from({ length: 35 }, () => ({
+        x: offset + random() * 30 - 15,
+        y: offset + random() * 30 - 15,
+      }));
+      targets.push(edit.anchor, { x: 1e308, y: -1e308 });
+      for (const point of targets) {
+        let full: ReturnType<typeof editAtPointer> | undefined;
+        try {
+          full = editAtPointer(edit, base, point);
+        } catch {
+          /* Expected invalid geometry. */
+        }
+        if (!full) assert.throws(() => prepared.evaluate(base, edit.target, point));
+        else assert.deepEqual(prepared.materialize!(base, edit.target, point), full);
+      }
+    }
+  }
+});
+
+test("prepared contour owns its baseline and returned previews cannot corrupt later targets", () => {
+  const base = hatchPointFixture(2, 129),
+    edit = session(base, 0);
+  const prepared = prepareDirectEditPreview(edit)!;
+  const expected = editAtPointer(edit, base, { x: 10.1, y: 0 });
+  const patch = prepared.evaluate(base, edit.target, { x: 10.1, y: 0 });
+  assert.throws(() => {
+    storeyOf(patch.geometry).hatches[0]!.points[1]!.x = NaN;
+  });
+  assert.throws(() => {
+    storeyOf(patch.geometry).hatches[0]!.fill.color = "#ffffff";
+  });
+  edit.anchor.x = 500;
+  storeyOf(base).hatches[0]!.points[5]!.x = NaN;
+  assert.deepEqual(
+    prepared.materialize!(base, { kind: "hatch", id: "h0" }, { x: 10.1, y: 0 }),
+    expected,
+  );
+});
