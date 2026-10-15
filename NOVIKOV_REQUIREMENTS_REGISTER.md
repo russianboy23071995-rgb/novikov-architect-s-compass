@@ -12244,3 +12244,12 @@ manuell erfolgreicher Wartung. Keine automatische Quota-Rettung, keine Heap-Schw
 Heutiger dialoggebundener Controller muss in langlebige gemeinsame Steuerung überführt
 werden. Tabübergreifende Laufzeit-Sperre nicht bereits vorhanden; Root-CAS bleibt Schutz.
 Nächster begrenzter Auftrag: Koordinator und deterministische Tests, noch ohne UI-Aktivierung.
+
+### AUD14-06 – Application-Koordinator umgesetzt (15.10.2026)
+
+maintenance-coordinator.ts nutzt bestehenden manuellen Controller und Storage-Port,
+führt Timer/Bedarf/Retry/Fehlersperre/Kontextschutz gemeinsam. Neun neue Tests, gesamt
+1077 Tests, Typecheck, ESLint und Build bestanden. Noch keine UI-Instanz, kein
+automatischer Produktlauf. Folgeschritt: echte erfolgreiche V2-Publishes, Aktivität,
+Busy-Zustände und Wartungsdialog mit einer langlebigen Instanz verbinden; No-op/Fehler-
+Filter und Dialog-Lifecycle dort absichern. Vollständiger Status im Masterplan.

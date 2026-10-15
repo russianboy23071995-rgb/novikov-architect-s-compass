@@ -2503,3 +2503,34 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    derselben Instanz betreiben. Automatik erst nach bestandenen Integrationstests aktivieren.
 3. Browserabnahme mit Speichern, Bearbeiten, Abbruch und Mehrprojekt-Sicherungsvergleich;
    Stunden-/Quota-/Prozessmessungen als ausdrücklich offene Belastungsnachweise fortführen.
+
+### AUD14-06 – Gemeinsamer Application-Koordinator (15.10.2026)
+
+#357 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+maintenance-coordinator.ts implementiert den vereinbarten Pilotvertrag mit injizierter
+Uhr/Timer, Aktivitäts-/Busy-Signalen, Kontext-Epoche und monotoner Bedarfsgeneration.
+Bestehender createRecoveryMaintenance-Controller bleibt zuständig für Storage-Aufruf,
+Abbruch und Meldungen. Manuelle und automatische Aufrufe des neuen Koordinators teilen
+exakt diese Instanz; keine zweite Collector-Implementierung. Noch nicht in UI instanziiert.
+
+30-s-Ruhephase, 5-min-Abstand, Coalescing, maximal zwei automatische Versuche je
+Bedarfsgeneration; Storage-/unlesbare-Root-Fehler sperren bis manuellem Erfolg.
+Aktive Sicherung/Geste (busy) verhindert Starts und bricht Wartung kooperativ ab.
+Single-flight bleibt bis Promise-Abschluss erhalten. Kontextwechsel verwirft alten
+Bedarf; verspäteter Erfolg konsumiert keine neuere Bedarfsgeneration. Expliziter
+manueller Abbruch konsumiert vorgemerkten Bedarf. Kein automatischer Start aus Konstruktion.
+
+Validierung: neun deterministische Koordinatortests, insgesamt 1077 Tests bestanden;
+Typecheck, gezieltes ESLint, Build und diff --check bestanden. Keine Browserabnahme
+behauptet: es gibt noch keinen UI-Consumer. committed() ist ausdrücklich nur für echte
+V2-Publishes; No-op-/Fehlerfilter und reale Busy-/Aktivitätssignale sind Integrationsauftrag.
+Keine tabübergreifende Laufzeit-Sperre oder neue Speichergrenzen implementiert.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Erfolgreiches V2-Publish-Signal sowie zentrale Aktivität/Busy-Zustände und manuellen
+   Dialog an genau eine langlebige Koordinatorinstanz anbinden; Integrationstests für
+   No-op/Fehler, Dialogwechsel und Save-Priorität. Automatik erst nach deren Bestehen aktivieren.
+2. Automatische Ruhephase, Unterbrechung und Wiederanlauf im Browser praktisch abnehmen;
+   Current/Previous und fremde Projekte vor/nach Wartung vergleichen.
+3. Offene Stunden-/Quota-/Prozessmessungen gezielt ergänzen und Mehrtab-Verhalten prüfen;
+   keine pauschale Leistungs- oder globale Parallelitätsgarantie aus den bisherigen Tests.
