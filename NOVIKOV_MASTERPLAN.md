@@ -2404,3 +2404,28 @@ Nächste drei Schritte (nur Schritt 1 aktiv):
 1. Wartung bei mehreren gespeicherten Projekten isoliert messen; Heap-Zuordnung und Abbruchverhalten prüfen.
 2. Aus belastbaren Daten bedarfsabhängige Auslöser und Grenzen festlegen; verbleibende Messlücken ausdrücklich behandeln.
 3. Automatische Wartung über den gemeinsamen Port anbinden und praktisch abnehmen.
+
+### AUD14-06 – Acht Projekte und Abbruchschutz (15.10.2026)
+
+#355 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+Neuer Browserharness recovery-multiple nutzt gemeinsame extrahierte Diagnose-Fixtures
+(Rauschbild und Payloadstatistik) und unveränderten produktiven Wartungsadapter.
+Acht Projekte mit je 1000 Linien, drei unterschiedlichen 1024x1024-PNG-Revisionen.
+Abbruch vor Öffnen und zeitgesteuert während Vorbereitung: AbortError, alle 24
+Payloads erhalten, Current/Previous sämtlicher Projekte per SHA-256 der vollständigen
+Serialisierung identisch. Kein erzwungener Abbruch mitten in Löschtransaktion behauptet.
+
+Zwei Browserläufe PASS. Finaler Lauf: genau acht verwaiste Payloads entfernt,
+16 geschützte Payloads bleiben; 75405420 auf 50271656 Base64-Zeichen. Alle 16
+Sicherungsinhalte unverändert. Wartung 701,7 ms End-to-End (erster Lauf 571,2 ms),
+keine Gleichsetzung mit synchroner UI-Blockade. Heap-Stichproben nur im Wartungsfenster
+ca. 38,35–115,90 MB; zeitlich isoliert, aber grobe/geteilte JS-Heap-API einschließlich
+vorhandener Laufzeitdaten, keine kausale Zuordnung sämtlicher Bytes zum Collector.
+Keine Prozess-/GPU-Spitze, kein Stunden-/Quota-Test. Ergebnis recovery-multiple-results.json.
+Typecheck, gezieltes ESLint und Build bestanden. Keine Produktionslogik geändert.
+
+Nächste drei Schritte (nur Schritt 1 aktiv):
+1. Begrenzte Auslöse-/Abbruchregeln für automatische Wartung aus bisherigen Nachweisen festlegen (Ruhephase, kein paralleler Lauf, begrenzte Wiederholung, keine Zwangsbereinigung bei unlesbaren Sicherungen).
+2. Diese Steuerung über den gemeinsamen Wartungsport mit deterministischen Tests implementieren; grobe Heap-Werte nicht als Auslöser verwenden.
+3. Integration praktisch auf Unterbrechung, Wiederanlauf und unveränderte Sicherungen abnehmen; Stunden-/Quota-/Prozessmessungen als offene Belastungsnachweise weiterführen.
+Automatische Wartung bleibt in diesem Schritt aus.

@@ -12221,3 +12221,14 @@ JS-Heap-Stichproben 15,46–240,40 MB, kein isolierter Produkt-/Prozess-/GPU-Pea
 Origin-Speicherschätzung getrennt von Payloadzählung dokumentiert. Typecheck,
 ESLint und Build bestanden. Kein Stundenlauf und keine automatische Wartungsfreigabe.
 Nächster begrenzter Auftrag: Mehrprojekt-Wartung isoliert messen (Masterplan).
+
+### AUD14-06 – Mehrprojekt-Wartung (15.10.2026)
+
+recovery-multiple: acht Projekte, je drei PNG-Revisionen und 1000 Linien.
+Zwei Browserläufe PASS. Abbruch vor Öffnen und während Vorbereitung erhält alle
+24 Payloads und Current/Previous aller Projekte. Vollständige Wartung löscht acht
+verwaiste Payloads, erhält alle 16 geschützten Sicherungsinhalte (SHA-256-Vergleich).
+Final 701,7 ms End-to-End; grobe JS-Heap-Stichproben im Wartungsfenster 38,35–115,90 MB.
+Keine Prozess-/GPU-/UI-Blockade-Aussage. Typecheck, ESLint und Build bestanden.
+Nächster Auftrag: begrenzte automatische Auslöse-/Abbruchregeln gemäß Masterplan;
+keine automatische Wartung in diesem PR. Stunden-/Quota-Nachweise bleiben offen.
