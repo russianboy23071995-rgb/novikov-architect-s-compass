@@ -510,8 +510,9 @@ PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und vergli
 PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Teil 20).
 PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in Teil 21.
 PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis AUD14-05 Teil 1.
-Nächster Einzelauftrag: Verdeckungsprüfung des 3D-Ursprungsfangs vorbereitet räumlich
-begrenzen; gleiche sichtbare Treffer und Tiefentoleranz gegen bisherigen Vollscan prüfen.
+PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiesen (AUD14-05 Teil 2).
+Nächster Einzelauftrag: große Anschlussgruppen und Fremdendpunktprüfung separat messen;
+Abhängigkeiten nur bei vollständiger geometrischer Gleichheit begrenzen.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -1917,3 +1918,48 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Große Anschlussgruppen und Fremdendpunktprüfung separat messen und fachlich sicher begrenzen.
 3. Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen (AUD14-06).
 AUD14-04-Restschuld sowie AUD14-07-Gesamtabnahme bleiben offen.
+
+
+### AUD14-05 Teil 2 – Vorbereitete Verdeckungsprüfung (15.10.2026)
+
+PR344 nach ausdrücklicher Freigabe und grüner CI in main gemergt (c0abb7f).
+Phasenmessung depth-before.json: reine bisherige Tiefenabfrage bei 500 Wänden, 20
+Eckziele, Median 11,459 ms. Das bestätigt globale Flächenprojektion/Dreiecksprüfung
+als tatsächlichen Kostenanteil; verschachtelte Phasen werden nicht addiert.
+
+prepareNearestWallSurface projiziert Flächen einmal pro Query, hält eigene Koordinaten
+und den vorhandenen generischen Boxindex. Kandidaten werden in ursprünglicher
+Flächenreihenfolge mit unverändertem faceTriangles/triangleDepth geprüft; gleiche Tiefe
+behält den bisherigen Gewinner. Konservative Bounds-Erweiterung erhält Randtoleranz;
+extreme/nicht endliche Projektionsfälle durchlaufen die vorbereitete vollständige
+Flächenliste. Keine X-Ray-Regel oder Tiefentoleranz geändert. prepareAnchorVisibility
+verwendet dieselbe zentrale Klassifikation wie der Vollpfad. Einziger neuer Consumer:
+createMovementOriginQuery; übrige Picking-/Sichtbarkeitspfade unverändert.
+Vorbereitung lebt im vorhandenen Kamera-/Modell-/Sichtbarkeitskontext, kein globaler Cache.
+
+1054 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Drei neue Tests
+für Dreiecksränder, tolerierte Randüberschreitung, entartete/schmale Dreiecke, Tiefenbereich,
+ungültige/extreme Projektion, Gleichstände, eigene Koordinaten sowie Kamera/Zoom-Kontexte.
+Bestehende lokale Fangtests vergleichen weiter gegen das eingefrorene lineare Orakel.
+Browser: 500 Wände/500 Fenster, sechs gleiche Pixelbilder und 48 gleiche Fangresultate
+(Windows IAB Chrome/155; depth-browser-results.json). Keine Hardwareeingabe-/Framegarantie.
+
+Runner depth-profile.ts / depth-results.json: 20 Tiefenabfragen, Vollpfad jeweils zuerst;
+Median 11,589 → 0,059 ms, einmalige Vorbereitung 76,417 ms separat. Reihenfolge nicht
+alterniert, keine p95-/Kaltstart-Zusage. Gesamtquery mit unverändertem local-origin-profile.ts,
+40 alternierende Ziele und Gleichheitsprüfung außerhalb Messung (depth-origin-results.json):
+- 500 Wände, gemischte Treffer Zoom 1: linear 13,759 → vorbereitet 0,069 ms.
+- Dichte Projektion Zoom 0,02: 15,265 → 4,927 ms.
+- Leerer Suchbereich Zoom 1: 1,467 → 0,004 ms.
+Gesamtquery-Vorbereitung ist sequenziell mit geteilten Caches protokolliert, kein fairer
+Kaltstartvergleich. Vorbereitung bei Kamerawechsel und dichte überlappende Kandidaten
+bleiben relevante Kosten; keine pauschale Skalierungs-/Framerate-Zusage. Rund 76 ms
+Vorbereitung sind ausdrücklich kein flüssiger Gesamtframe-Nachweis.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Große Anschlussgruppen und Fremdendpunktprüfung messen; sichere räumliche Eingrenzung
+   nur bei erhaltenen Fenster-/Nachbar-/Anschlussabhängigkeiten und Vollcommitvergleich.
+2. AUD14-06 Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen.
+3. AUD14-07 verbleibende Restschuld, Kamerawechselkosten und gemischtes Schulmodellprofil
+   zusammenhängend abnehmen; Dokumentations-/Zuständigkeitsbefunde einschließen.
+AUD14-05 insgesamt sowie AUD14-04-Restschuld bleiben bis zur jeweiligen Abnahme offen.
