@@ -1,0 +1,613 @@
+{
+  "method": "Node, one first and eight warm samples, alternating project/patch order, full action timed separately, equality checked outside timings. Plan derivation only, no DOM/GPU/frame or snapping measurement. Synthetic unconnected fixtures; not a worst-case guarantee.",
+  "profiles": [
+    {
+      "kind": "hatch-point",
+      "size": 10,
+      "storeys": 2,
+      "hatches": 10,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 10.806899999999985,
+      "samples": [
+        {
+          "projectPreviewMs": 10.3493,
+          "fullPlanMs": 0.7886000000000024,
+          "fullActionMs": 15.962799999999987,
+          "patchMs": 0.17969999999996844,
+          "patchPlanMs": 0.06399999999996453
+        },
+        {
+          "patchMs": 0.09090000000003329,
+          "patchPlanMs": 0.037599999999997635,
+          "projectPreviewMs": 0.08600000000001273,
+          "fullPlanMs": 0.25830000000001974,
+          "fullActionMs": 12.005300000000034
+        },
+        {
+          "projectPreviewMs": 0.1079000000000292,
+          "fullPlanMs": 0.046699999999987085,
+          "fullActionMs": 11.835000000000036,
+          "patchMs": 0.29479999999995243,
+          "patchPlanMs": 0.05880000000001928
+        },
+        {
+          "patchMs": 0.28590000000002647,
+          "patchPlanMs": 0.028999999999996362,
+          "projectPreviewMs": 0.15149999999999864,
+          "fullPlanMs": 0.03719999999998436,
+          "fullActionMs": 15.369100000000003
+        },
+        {
+          "projectPreviewMs": 0.07009999999996808,
+          "fullPlanMs": 0.05350000000004229,
+          "fullActionMs": 13.499799999999993,
+          "patchMs": 0.08109999999999218,
+          "patchPlanMs": 0.04770000000002028
+        },
+        {
+          "patchMs": 0.03710000000000946,
+          "patchPlanMs": 0.013899999999978263,
+          "projectPreviewMs": 0.05189999999998918,
+          "fullPlanMs": 0.023400000000037835,
+          "fullActionMs": 11.326800000000048
+        },
+        {
+          "projectPreviewMs": 0.06970000000001164,
+          "fullPlanMs": 0.027699999999981628,
+          "fullActionMs": 15.714200000000005,
+          "patchMs": 0.15440000000000964,
+          "patchPlanMs": 0.024999999999977263
+        },
+        {
+          "patchMs": 0.035399999999981446,
+          "patchPlanMs": 0.009900000000016007,
+          "projectPreviewMs": 0.04529999999999745,
+          "fullPlanMs": 0.011399999999980537,
+          "fullActionMs": 11.863099999999974
+        },
+        {
+          "projectPreviewMs": 0.05729999999999791,
+          "fullPlanMs": 0.020899999999983265,
+          "fullActionMs": 9.736800000000017,
+          "patchMs": 0.06939999999997326,
+          "patchPlanMs": 0.01870000000002392
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.06989999999998986,
+        "fullPlanMs": 0.03244999999998299,
+        "fullActionMs": 11.934200000000004,
+        "patchMs": 0.08600000000001273,
+        "patchPlanMs": 0.026999999999986812
+      }
+    },
+    {
+      "kind": "line-point",
+      "size": 10,
+      "storeys": 2,
+      "hatches": 10,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 4.662899999999979,
+      "samples": [
+        {
+          "projectPreviewMs": 4.613900000000001,
+          "fullPlanMs": 0.05220000000002756,
+          "fullActionMs": 4.751599999999996,
+          "patchMs": 0.10469999999997981,
+          "patchPlanMs": 0.021500000000003183
+        },
+        {
+          "patchMs": 0.010300000000029286,
+          "patchPlanMs": 0.008300000000019736,
+          "projectPreviewMs": 0.009799999999984266,
+          "fullPlanMs": 0.04390000000000782,
+          "fullActionMs": 4.314600000000041
+        },
+        {
+          "projectPreviewMs": 0.017399999999952342,
+          "fullPlanMs": 0.022600000000011278,
+          "fullActionMs": 4.015099999999961,
+          "patchMs": 0.027899999999988268,
+          "patchPlanMs": 0.015699999999981173
+        },
+        {
+          "patchMs": 0.009000000000014552,
+          "patchPlanMs": 0.006500000000016826,
+          "projectPreviewMs": 0.009999999999990905,
+          "fullPlanMs": 0.014400000000023283,
+          "fullActionMs": 5.37050000000005
+        },
+        {
+          "projectPreviewMs": 0.029899999999997817,
+          "fullPlanMs": 0.022499999999979536,
+          "fullActionMs": 4.096499999999992,
+          "patchMs": 0.03690000000000282,
+          "patchPlanMs": 0.019400000000018736
+        },
+        {
+          "patchMs": 0.008100000000013097,
+          "patchPlanMs": 0.006799999999998363,
+          "projectPreviewMs": 0.0078000000000315595,
+          "fullPlanMs": 0.013500000000021828,
+          "fullActionMs": 4.567999999999984
+        },
+        {
+          "projectPreviewMs": 0.0221000000000231,
+          "fullPlanMs": 0.029200000000003,
+          "fullActionMs": 5.063099999999963,
+          "patchMs": 0.023099999999999454,
+          "patchPlanMs": 0.015899999999987813
+        },
+        {
+          "patchMs": 0.006999999999948159,
+          "patchPlanMs": 0.006399999999985084,
+          "projectPreviewMs": 0.00909999999998945,
+          "fullPlanMs": 0.013800000000003365,
+          "fullActionMs": 4.416699999999992
+        },
+        {
+          "projectPreviewMs": 0.021200000000021646,
+          "fullPlanMs": 0.022199999999998,
+          "fullActionMs": 4.431600000000003,
+          "patchMs": 0.02580000000000382,
+          "patchPlanMs": 0.01959999999996853
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.013699999999971624,
+        "fullPlanMs": 0.022349999999988768,
+        "fullActionMs": 4.424149999999997,
+        "patchMs": 0.01670000000001437,
+        "patchPlanMs": 0.012000000000000455
+      }
+    },
+    {
+      "kind": "window-axis",
+      "size": 10,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 50,
+      "preparedCapability": true,
+      "preparationMs": 1.6589999999999918,
+      "samples": [
+        {
+          "projectPreviewMs": 1.2124000000000024,
+          "fullPlanMs": 0.7666999999999575,
+          "fullActionMs": 0.7968999999999937,
+          "patchMs": 0.3201000000000249,
+          "patchPlanMs": 0.03390000000001692
+        },
+        {
+          "patchMs": 0.21930000000003247,
+          "patchPlanMs": 0.030900000000031014,
+          "projectPreviewMs": 0.7948000000000093,
+          "fullPlanMs": 0.13110000000000355,
+          "fullActionMs": 0.7821999999999889
+        },
+        {
+          "projectPreviewMs": 0.8423999999999978,
+          "fullPlanMs": 0.22210000000001173,
+          "fullActionMs": 0.697400000000016,
+          "patchMs": 0.2004000000000019,
+          "patchPlanMs": 0.023700000000019372
+        },
+        {
+          "patchMs": 0.15219999999999345,
+          "patchPlanMs": 0.018200000000035743,
+          "projectPreviewMs": 0.9633999999999787,
+          "fullPlanMs": 0.08120000000002392,
+          "fullActionMs": 0.6855999999999653
+        },
+        {
+          "projectPreviewMs": 0.4397000000000162,
+          "fullPlanMs": 0.07900000000000773,
+          "fullActionMs": 0.4467999999999961,
+          "patchMs": 0.12860000000000582,
+          "patchPlanMs": 0.017499999999984084
+        },
+        {
+          "patchMs": 0.11869999999998981,
+          "patchPlanMs": 0.015300000000024738,
+          "projectPreviewMs": 0.587099999999964,
+          "fullPlanMs": 0.12130000000001928,
+          "fullActionMs": 0.5031999999999925
+        },
+        {
+          "projectPreviewMs": 0.45659999999998035,
+          "fullPlanMs": 0.08709999999996398,
+          "fullActionMs": 0.561300000000017,
+          "patchMs": 0.2084000000000401,
+          "patchPlanMs": 0.028999999999996362
+        },
+        {
+          "patchMs": 0.2360999999999649,
+          "patchPlanMs": 0.025899999999978718,
+          "projectPreviewMs": 1.1464000000000283,
+          "fullPlanMs": 0.10789999999997235,
+          "fullActionMs": 0.7658000000000129
+        },
+        {
+          "projectPreviewMs": 0.48099999999999454,
+          "fullPlanMs": 0.09770000000003165,
+          "fullActionMs": 0.5097999999999843,
+          "patchMs": 0.14519999999998845,
+          "patchPlanMs": 0.01999999999998181
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.6909499999999866,
+        "fullPlanMs": 0.102800000000002,
+        "fullActionMs": 0.6234499999999912,
+        "patchMs": 0.17629999999999768,
+        "patchPlanMs": 0.02185000000000059
+      }
+    },
+    {
+      "kind": "wall-stretch",
+      "size": 10,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 50,
+      "preparedCapability": false,
+      "preparationMs": 0.16109999999997626,
+      "samples": [
+        {
+          "projectPreviewMs": 1.5031000000000176,
+          "fullPlanMs": 0.12229999999999563,
+          "fullActionMs": 0.8456999999999653
+        },
+        {
+          "projectPreviewMs": 0.8319999999999936,
+          "fullPlanMs": 0.13859999999999673,
+          "fullActionMs": 0.952699999999993
+        },
+        {
+          "projectPreviewMs": 0.5585999999999558,
+          "fullPlanMs": 0.15550000000001774,
+          "fullActionMs": 0.44880000000000564
+        },
+        {
+          "projectPreviewMs": 0.49320000000000164,
+          "fullPlanMs": 0.05680000000000973,
+          "fullActionMs": 0.44020000000000437
+        },
+        {
+          "projectPreviewMs": 0.4177999999999997,
+          "fullPlanMs": 0.2903999999999769,
+          "fullActionMs": 0.6768000000000143
+        },
+        {
+          "projectPreviewMs": 0.4288999999999987,
+          "fullPlanMs": 0.05459999999999354,
+          "fullActionMs": 0.43100000000004
+        },
+        {
+          "projectPreviewMs": 0.766900000000021,
+          "fullPlanMs": 0.06369999999998299,
+          "fullActionMs": 0.41109999999997626
+        },
+        {
+          "projectPreviewMs": 0.3909999999999627,
+          "fullPlanMs": 0.056100000000014916,
+          "fullActionMs": 0.3926999999999907
+        },
+        {
+          "projectPreviewMs": 0.42669999999998254,
+          "fullPlanMs": 0.052500000000009095,
+          "fullActionMs": 0.3967000000000098
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.4610500000000002,
+        "fullPlanMs": 0.06024999999999636,
+        "fullActionMs": 0.4356000000000222
+      }
+    },
+    {
+      "kind": "hatch-point",
+      "size": 100,
+      "storeys": 2,
+      "hatches": 100,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 47.26400000000001,
+      "samples": [
+        {
+          "projectPreviewMs": 43.79899999999998,
+          "fullPlanMs": 0.032100000000014006,
+          "fullActionMs": 78.84720000000004,
+          "patchMs": 0.0886000000000422,
+          "patchPlanMs": 0.0546999999999116
+        },
+        {
+          "patchMs": 0.040599999999926695,
+          "patchPlanMs": 0.011999999999943611,
+          "projectPreviewMs": 0.05119999999999436,
+          "fullPlanMs": 0.040300000000002,
+          "fullActionMs": 78.56460000000004
+        },
+        {
+          "projectPreviewMs": 0.05010000000004311,
+          "fullPlanMs": 0.0724999999999909,
+          "fullActionMs": 88.86860000000001,
+          "patchMs": 0.03930000000002565,
+          "patchPlanMs": 0.023500000000012733
+        },
+        {
+          "patchMs": 0.02179999999998472,
+          "patchPlanMs": 0.00580000000002201,
+          "projectPreviewMs": 0.03230000000007749,
+          "fullPlanMs": 0.06229999999993652,
+          "fullActionMs": 77.15179999999998
+        },
+        {
+          "projectPreviewMs": 0.06610000000000582,
+          "fullPlanMs": 0.03740000000004784,
+          "fullActionMs": 85.72630000000015,
+          "patchMs": 0.04619999999999891,
+          "patchPlanMs": 0.03309999999987667
+        },
+        {
+          "patchMs": 0.024100000000089494,
+          "patchPlanMs": 0.008699999999862484,
+          "projectPreviewMs": 0.039800000000013824,
+          "fullPlanMs": 0.018500000000130967,
+          "fullActionMs": 102.98489999999993
+        },
+        {
+          "projectPreviewMs": 0.06850000000008549,
+          "fullPlanMs": 0.04539999999997235,
+          "fullActionMs": 74.33389999999986,
+          "patchMs": 0.05700000000001637,
+          "patchPlanMs": 0.03440000000000509
+        },
+        {
+          "patchMs": 0.032500000000027285,
+          "patchPlanMs": 0.009999999999990905,
+          "projectPreviewMs": 0.053800000000137516,
+          "fullPlanMs": 0.026700000000118962,
+          "fullActionMs": 92.43949999999995
+        },
+        {
+          "projectPreviewMs": 0.06330000000002656,
+          "fullPlanMs": 0.0443000000000211,
+          "fullActionMs": 104.50980000000004,
+          "patchMs": 0.047100000000000364,
+          "patchPlanMs": 0.03480000000013206
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.05250000000006594,
+        "fullPlanMs": 0.04230000000001155,
+        "fullActionMs": 87.29745000000008,
+        "patchMs": 0.03994999999997617,
+        "patchPlanMs": 0.017749999999978172
+      }
+    },
+    {
+      "kind": "line-point",
+      "size": 100,
+      "storeys": 2,
+      "hatches": 100,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 40.88280000000009,
+      "samples": [
+        {
+          "projectPreviewMs": 40.62609999999995,
+          "fullPlanMs": 0.033800000000155705,
+          "fullActionMs": 38.930000000000064,
+          "patchMs": 0.043400000000019645,
+          "patchPlanMs": 0.03199999999992542
+        },
+        {
+          "patchMs": 0.00479999999993197,
+          "patchPlanMs": 0.005999999999858119,
+          "projectPreviewMs": 0.008299999999962893,
+          "fullPlanMs": 0.026699999999891588,
+          "fullActionMs": 38.32069999999999
+        },
+        {
+          "projectPreviewMs": 0.026000000000067303,
+          "fullPlanMs": 0.05510000000003856,
+          "fullActionMs": 43.94800000000009,
+          "patchMs": 0.014300000000048385,
+          "patchPlanMs": 0.029399999999895954
+        },
+        {
+          "patchMs": 0.0027999999999792635,
+          "patchPlanMs": 0.005300000000033833,
+          "projectPreviewMs": 0.009900000000016007,
+          "fullPlanMs": 0.02729999999996835,
+          "fullActionMs": 45.10130000000004
+        },
+        {
+          "projectPreviewMs": 0.022600000000011278,
+          "fullPlanMs": 0.04850000000010368,
+          "fullActionMs": 37.033500000000004,
+          "patchMs": 0.019700000000057116,
+          "patchPlanMs": 0.03239999999982501
+        },
+        {
+          "patchMs": 0.0029999999999290594,
+          "patchPlanMs": 0.005799999999908323,
+          "projectPreviewMs": 0.008700000000089858,
+          "fullPlanMs": 0.03110000000015134,
+          "fullActionMs": 36.32920000000013
+        },
+        {
+          "projectPreviewMs": 0.020299999999906504,
+          "fullPlanMs": 0.0523000000000593,
+          "fullActionMs": 38.1552999999999,
+          "patchMs": 0.019700000000057116,
+          "patchPlanMs": 0.033200000000078944
+        },
+        {
+          "patchMs": 0.00430000000005748,
+          "patchPlanMs": 0.009000000000014552,
+          "projectPreviewMs": 0.010399999999890497,
+          "fullPlanMs": 0.04070000000001528,
+          "fullActionMs": 38.122299999999996
+        },
+        {
+          "projectPreviewMs": 0.019700000000057116,
+          "fullPlanMs": 0.04100000000016735,
+          "fullActionMs": 36.32860000000005,
+          "patchMs": 0.04330000000004475,
+          "patchPlanMs": 0.05869999999981701
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.015049999999973807,
+        "fullPlanMs": 0.04085000000009131,
+        "fullActionMs": 38.13879999999995,
+        "patchMs": 0.009549999999990177,
+        "patchPlanMs": 0.019199999999955253
+      }
+    },
+    {
+      "kind": "window-axis",
+      "size": 100,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 500,
+      "preparedCapability": true,
+      "preparationMs": 3.991600000000062,
+      "samples": [
+        {
+          "projectPreviewMs": 2.858299999999872,
+          "fullPlanMs": 0.3911000000000513,
+          "fullActionMs": 3.2825000000000273,
+          "patchMs": 0.15530000000012478,
+          "patchPlanMs": 0.022200000000111686
+        },
+        {
+          "patchMs": 0.08310000000005857,
+          "patchPlanMs": 0.011199999999917054,
+          "projectPreviewMs": 3.4631000000001677,
+          "fullPlanMs": 0.3865000000000691,
+          "fullActionMs": 3.317399999999907
+        },
+        {
+          "projectPreviewMs": 3.2505999999998494,
+          "fullPlanMs": 0.5833000000002357,
+          "fullActionMs": 2.8261999999999716,
+          "patchMs": 0.10849999999982174,
+          "patchPlanMs": 0.020199999999931606
+        },
+        {
+          "patchMs": 0.07210000000031869,
+          "patchPlanMs": 0.009799999999813735,
+          "projectPreviewMs": 3.897100000000137,
+          "fullPlanMs": 0.5570999999999913,
+          "fullActionMs": 2.6983000000000175
+        },
+        {
+          "projectPreviewMs": 2.9977999999996428,
+          "fullPlanMs": 0.38439999999991414,
+          "fullActionMs": 2.7609999999999673,
+          "patchMs": 0.11740000000008877,
+          "patchPlanMs": 0.019499999999879947
+        },
+        {
+          "patchMs": 0.07360000000016953,
+          "patchPlanMs": 0.009199999999964348,
+          "projectPreviewMs": 2.9906999999998334,
+          "fullPlanMs": 0.3540000000002692,
+          "fullActionMs": 3.1646999999998116
+        },
+        {
+          "projectPreviewMs": 3.634700000000066,
+          "fullPlanMs": 0.3429999999998472,
+          "fullActionMs": 2.747100000000046,
+          "patchMs": 0.12660000000005311,
+          "patchPlanMs": 0.023999999999887223
+        },
+        {
+          "patchMs": 0.07400000000006912,
+          "patchPlanMs": 0.008800000000064756,
+          "projectPreviewMs": 2.6945999999998094,
+          "fullPlanMs": 0.32979999999997744,
+          "fullActionMs": 3.737499999999727
+        },
+        {
+          "projectPreviewMs": 2.672700000000077,
+          "fullPlanMs": 0.3297000000002299,
+          "fullActionMs": 2.7841000000003078,
+          "patchMs": 0.13760000000002037,
+          "patchPlanMs": 0.01929999999993015
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 3.124199999999746,
+        "fullPlanMs": 0.3692000000000917,
+        "fullActionMs": 2.8051500000001397,
+        "patchMs": 0.09579999999994016,
+        "patchPlanMs": 0.015249999999923602
+      }
+    },
+    {
+      "kind": "wall-stretch",
+      "size": 100,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 500,
+      "preparedCapability": false,
+      "preparationMs": 0.014500000000225555,
+      "samples": [
+        {
+          "projectPreviewMs": 3.0045000000000073,
+          "fullPlanMs": 0.34160000000019863,
+          "fullActionMs": 2.8662999999996828
+        },
+        {
+          "projectPreviewMs": 3.0093000000001666,
+          "fullPlanMs": 0.34999999999990905,
+          "fullActionMs": 4.91359999999986
+        },
+        {
+          "projectPreviewMs": 4.860599999999977,
+          "fullPlanMs": 0.55600000000004,
+          "fullActionMs": 5.220699999999852
+        },
+        {
+          "projectPreviewMs": 2.869799999999941,
+          "fullPlanMs": 0.3287000000000262,
+          "fullActionMs": 2.608400000000074
+        },
+        {
+          "projectPreviewMs": 3.060399999999845,
+          "fullPlanMs": 0.3330999999998312,
+          "fullActionMs": 2.6482999999998356
+        },
+        {
+          "projectPreviewMs": 2.9945999999999913,
+          "fullPlanMs": 0.5668000000000575,
+          "fullActionMs": 3.1285000000002583
+        },
+        {
+          "projectPreviewMs": 3.003900000000158,
+          "fullPlanMs": 0.3283999999998741,
+          "fullActionMs": 2.8224999999997635
+        },
+        {
+          "projectPreviewMs": 3.552599999999984,
+          "fullPlanMs": 0.3242000000000189,
+          "fullActionMs": 2.8471999999997024
+        },
+        {
+          "projectPreviewMs": 2.7597999999998137,
+          "fullPlanMs": 0.3305000000000291,
+          "fullActionMs": 2.7773000000001957
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 3.0066000000001623,
+        "fullPlanMs": 0.33179999999993015,
+        "fullActionMs": 2.834849999999733
+      }
+    }
+  ]
+}
