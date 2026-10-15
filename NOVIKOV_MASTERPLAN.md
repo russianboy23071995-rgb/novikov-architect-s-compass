@@ -2277,3 +2277,53 @@ Nachweis dieses Schritts: 1067 Tests bestanden, Benchmark-/Application-Typecheck
 ESLint und Build erfolgreich. Neue Tests prüfen Default, gespeicherte Ein/Aus-Entscheidung,
 Speicherfehler und automatisches Sichern über Projektwechsel. Keine neue visuelle Browserabnahme
 und keine Langsitzungs- oder automatische Bereinigungsabnahme aus diesen Tests abgeleitet.
+
+### Priorisierter Nutzerbefund – 3D-Kamera/Wandflackern (15.10.2026)
+
+Nutzer meldet Flackern einzelner Wandflächen bei sehr langsamem Orbit, auch bei nur einer Wand.
+Dieser begrenzte Bugfix hat Vorrang vor der Langsitzungsprüfung. Basis ist der noch offene PR351;
+keine Mergefreigabe dafür abgeleitet. BimSolidView veröffentlichte die Kamera-Projektion und den
+GPU-Draw erst in getrennten passiven Effects. DOM/Orientierung und GPU konnten verschiedene
+Kamerastände enthalten. Beide Präsentationsschritte laufen jetzt als Layout-Effects vor dem
+Browser-Paint. Orientierungsebene verwendet die tatsächlich projizierte Kamera. Orbit bindet
+das Seitenverhältnis beim Gestenbeginn, statt während einer invalidierten Projektion auf 1
+zurückzufallen. Keine Änderung an Modellgeometrie, Fangquellen oder GPU-Geometriecache.
+
+Isolierte Browser-Gegenprobe camera-frame.html/.tsx mit echtem BimSolidView, einer Wand und
+Öffnung, 160 kleinen Orbit-/Pan-Schritten: alter Code 160 veraltete GPU-Kameramatrizen am
+synchronen React-Commit-Ende; korrigierter Code 0, WebGL-Fehler 0. Original als temporäre separate
+Komponente geprüft und danach entfernt. Dies belegt den Präsentationsversatz, aber keine
+Framezeit-/Großmodellgarantie und nicht jedes mögliche Flackern (z.B. überlappende Flächen).
+Praktische Abnahme am Nutzerbeispiel bleibt erforderlich. Prüfharness verändert keine Nutzerdaten.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Korrigierten langsamen Orbit am Nutzerbeispiel abnehmen; bei Restflackern dessen Darstellung
+   gezielt erfassen, statt den gesamten Renderer umzubauen.
+2. Langsitzungen mit Bildwechsel/Undo/Reload und synchronen Wartungspausen prüfen.
+3. Nach Belastungsnachweis bedarfsabhängige automatische Wartung über gemeinsamen Port anbinden.
+AUD14-07 Schulprofil bleibt anschließend vorgemerkt.
+
+Validierung des Kamera-Teilfixes: 1067 Tests, Typecheck, gezieltes ESLint und Build bestanden.
+
+### Kamerageste am Browserrand – Nutzerpräzisierung (15.10.2026)
+
+Langsames Flackern vom Nutzer bestätigt behoben. Neuer Befund wurde präzisiert: Fehlerseite
+beim Cursor außerhalb des Browsers, nicht allein durch schnelles Drehen. Route-Fehlerseite
+beobachtet; konkrete Exception in verfügbaren Browserlogs nicht enthalten. 26 interne
+Orbitgesten ohne Fehler. Browserautomation erlaubt keine Koordinaten außerhalb des Tabs;
+daher keine Behauptung einer vollständigen Reproduktion des ursprünglichen Absturzes.
+
+PR352 ergänzt: gemeinsamer Navigation-Exit-Beobachter beendet nur transiente Kameragesten
+bei document.pointerout ohne relatedTarget, window.blur und verborgenem Dokument. Ref wird
+vor Capture-Freigabe gelöscht; bereits verlorene Pointer-ID (NotFoundError) toleriert. Fehlender
+buttons-Zustand stoppt eine noch offene Navigation. Kein Modellcommit und keine Abbruchlogik
+für Modellaktionen erfunden. Listener werden beim Unmount entfernt.
+
+1068 Tests, Typecheck, Build bestanden. Isolierter Browserharness mit echter Drag-Geste und
+simuliertem Browseraustritt während Capture: keine Kameraänderungen nach Abbruch. Anschließend
+160 Synchronisierungsschritte weiterhin PASS, 0 veraltete GPU-Matrizen, WebGL-Fehler 0.
+Das ist ein geprüfter Lifecycle-Schutz, kein Beweis für die Ursache der gemeldeten Fehlerseite.
+
+Nächste drei Schritte, nur erster aktiv: (1) echten Browserrand-Ablauf praktisch abnehmen,
+bei Wiederauftreten konkrete Exception erfassen; (2) Langsitzungs-/Speicherlastprüfung;
+(3) bedarfsgesteuerte automatische Wartung nach Belastungsnachweis. Kein Merge dieser PRs.
