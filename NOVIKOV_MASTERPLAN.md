@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR336 gemergt (97913b7); gemeinsamer Fensteradapter auch in 2D geprüft (Teil 15 unten).
-Nächster Einzelauftrag: Seitenstreckung geschlossener Polylinien über die gemeinsame
-vorbereitete Kontur-/Cap-Berechnung anbinden und gegen den Vollpfad messen.
+PR337 gemergt (744eafc); Polylinien-Seitenstreckung vorbereitet und verglichen (Teil 16 unten).
+Nächster Einzelauftrag: Offset geschlossener Polylinien über gemeinsame Geometrie-/Cap-
+Berechnung im vorhandenen Linienadapter vorbereiten und mit Vollpfad vergleichen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1600,3 +1600,44 @@ unveränderten Schraffur-Hintergrundlast messen. Kein neuer Renderer-/Fangzweig.
 Diese Aktion nutzt laut Teil 13 noch updateLine mit globaler Validierung; ihre genaue
 Kostenhöhe ist vor Umsetzung zu messen, nicht aus der Linienpunktmessung zu behaupten.
 AUD14-04 bleibt offen; andere Restpfade und AUD14-05/06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 16 – Vorbereitete Polylinien-Seitenstreckung (15.10.2026)
+
+PR337 nach ausdrücklicher Freigabe und grüner CI gemergt (744eafc).
+Der vorhandene Linienadapter heißt nun prepareLinePreview und verarbeitet point/edge.
+Geschlossene Polylinien nutzen unverändert prepareSessionContourEdge mit eigener
+validierter Basis, gemeinsamem Inferenz-Cap und prepareContourEdgeEdit. Keine neue
+Begrenzungslogik: die Kontur wird vor der Linienmaterialisierung wieder geschlossen,
+validateLineGeometry bleibt aktiv. Punktzahl/Darstellung/Zuordnung bleiben unverändert.
+Offene Pfade und der doppelte Schließgriff als Kantenindex werden abgewiesen.
+Commit unverändert vollständig geprüft, ein Undo; kein Renderer-/Fangzweig ergänzt.
+
+1024 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Vergleich
+gegen Vollaktion und ursprünglichen prepareContourEdge für Rechteck, spitzes Dreieck,
+konkave Kontur, beide Umlaufrichtungen, erste/letzte Seite, 500 Punkte, rohe/bereits
+begrenzte Ziele, Überziehen und Rückweg. Exakte Projekte, Planszenen und Patches,
+eigene festfarbige Linienart, Kontextwechsel, nicht endliche Ziele, vorgewärmte dann
+veränderte Basis, Abbruch, Platzieren und Undo geprüft. Ungültige fremde Schraffur
+blockiert weiterhin Commit. Keine neue visuelle Browserabnahme behauptet.
+
+Vor Umsetzung gemessen: line-edge-before.json (preparedCapability=false; Feld prepared
+bezeichnet dort den Controller-Legacy-Fallback). Bei 100 Schraffuren à 100 Punkten
+37,71 ms Vollpfad / 41,10 ms Controller warm. Gleiche unveränderte Szenen nach Umsetzung
+in line-edge-results.json, Runner line-edge-profile.ts. Unabhängige Sitzungscaches,
+Vollpfad/Vorschau-Reihenfolge alterniert, erster + acht warme Werte, Cap-Arbeit enthalten,
+Vorbereitung separat, exakte Projektgleichheit je Ziel außerhalb der Zeitmessung:
+- 100 Schraffuren à 100 Punkte: Vollpfad 39,00 → Vorschau 1,74 ms; Vorbereitung 40,38 ms.
+- 10 Schraffuren à 100 Punkte: Vollpfad 8,82 → Vorschau 2,24 ms; Vorbereitung 5,19 ms.
+- eine Schraffur und Polylinie mit 500 Konturpunkten: 15,84 → 9,08 ms; Vorbereitung 9,87 ms.
+Vorher/Nachher-Werte sind einzelne Läufe mit Streuung, keine garantierte Skalierung.
+Cap-Ereignisse, große Konturen, Linienprüfung, Materialisierung und Planableitung bleiben
+Kosten. Keine Gesamtframe-/GPU-Garantie; insbesondere 500 Punkte bleiben merklich teuer.
+
+Abnahme: Seite einer spitzen/konkaven geschlossenen Polylinie über die zulässige Grenze
+ziehen und zurück, abbrechen/platzieren, einmal Undo; Schließpunkt und Linienart erhalten.
+Einziger Folgeauftrag: Offset geschlossener Polylinien im vorhandenen Linienadapter
+vorbereiten, gemeinsame offsetContourPoints-/Cap-Berechnung wiederverwenden. Konvexitäts-
+und Mindestgrößenregeln sowie vollständige Zielkontur-/Linienprüfung erhalten; kleine
+Formen, beide Umlaufrichtungen, Kontext und Commit/Undo gegen Vollpfad vergleichen/messen.
+AUD14-04 bleibt offen; übrige Restpfade und AUD14-05/06/07 bleiben erhalten.

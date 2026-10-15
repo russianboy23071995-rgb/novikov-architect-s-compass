@@ -1,0 +1,152 @@
+{
+  "method": "Node; full and prepared path have independent session/cap caches; include cap work for changing targets; first and eight warm samples separate; alternate order; exact project equality every sample. No frame/rendering guarantee. Baseline before adapter registration: preparedCapability=false; prepared field measures controller legacy fallback, not an optimized adapter. Its first call includes cache preparation.",
+  "profiles": [
+    {
+      "count": 1,
+      "vertices": 500,
+      "fullPreparationMs": 9.703800000000001,
+      "preparationMs": 0.10139999999998395,
+      "preparedCapability": false,
+      "samples": [
+        {
+          "full": 37.03449999999998,
+          "prepared": 38.37949999999995
+        },
+        {
+          "prepared": 33.7953,
+          "full": 22.470000000000027
+        },
+        {
+          "full": 17.378199999999993,
+          "prepared": 14.190300000000036
+        },
+        {
+          "prepared": 15.30189999999999,
+          "full": 12.563400000000001
+        },
+        {
+          "full": 13.564399999999978,
+          "prepared": 17.791200000000003
+        },
+        {
+          "prepared": 11.688300000000027,
+          "full": 12.658100000000047
+        },
+        {
+          "full": 14.53649999999999,
+          "prepared": 15.344299999999976
+        },
+        {
+          "prepared": 15.679700000000025,
+          "full": 17.13040000000001
+        },
+        {
+          "full": 11.741800000000012,
+          "prepared": 12.679500000000075
+        }
+      ],
+      "warmMedianMs": {
+        "full": 14.050449999999984,
+        "prepared": 15.323099999999982
+      }
+    },
+    {
+      "count": 100,
+      "vertices": 100,
+      "fullPreparationMs": 0.7484000000000606,
+      "preparationMs": 0.005700000000047112,
+      "preparedCapability": false,
+      "samples": [
+        {
+          "full": 46.62290000000007,
+          "prepared": 42.33210000000008
+        },
+        {
+          "prepared": 45.21500000000003,
+          "full": 37.62379999999996
+        },
+        {
+          "full": 36.52710000000002,
+          "prepared": 37.59500000000003
+        },
+        {
+          "prepared": 38.07599999999991,
+          "full": 37.79770000000008
+        },
+        {
+          "full": 36.629600000000096,
+          "prepared": 36.634000000000015
+        },
+        {
+          "prepared": 42.28430000000003,
+          "full": 40.23440000000005
+        },
+        {
+          "full": 36.80890000000022,
+          "prepared": 39.92439999999988
+        },
+        {
+          "prepared": 46.71100000000001,
+          "full": 40.177599999999984
+        },
+        {
+          "full": 40.927999999999884,
+          "prepared": 48.487300000000005
+        }
+      ],
+      "warmMedianMs": {
+        "full": 37.71075000000002,
+        "prepared": 41.104349999999954
+      }
+    },
+    {
+      "count": 10,
+      "vertices": 100,
+      "fullPreparationMs": 0.6361000000001695,
+      "preparationMs": 0.004100000000107684,
+      "preparedCapability": false,
+      "samples": [
+        {
+          "full": 5.814799999999877,
+          "prepared": 6.202600000000075
+        },
+        {
+          "prepared": 5.6004999999997835,
+          "full": 6.757100000000037
+        },
+        {
+          "full": 5.702199999999948,
+          "prepared": 5.974899999999934
+        },
+        {
+          "prepared": 5.5625,
+          "full": 7.20049999999992
+        },
+        {
+          "full": 5.781399999999849,
+          "prepared": 5.507399999999961
+        },
+        {
+          "prepared": 5.670499999999947,
+          "full": 6.295100000000048
+        },
+        {
+          "full": 5.546199999999999,
+          "prepared": 5.513599999999997
+        },
+        {
+          "prepared": 5.385700000000043,
+          "full": 6.156700000000001
+        },
+        {
+          "full": 6.434799999999996,
+          "prepared": 5.495599999999968
+        }
+      ],
+      "warmMedianMs": {
+        "full": 6.225900000000024,
+        "prepared": 5.538049999999998
+      }
+    }
+  ]
+}

@@ -11941,3 +11941,18 @@ und globale Planableitung bleiben Kosten; keine Frame-/GPU-Garantie.
 Einziger Folgeauftrag: geschlossene Polylinie Seitenstrecken über vorhandene gemeinsame
 Konturvorbereitung/Cap, genaue Kosten zuerst messen, Vollpfad-/Commit-/Undo-Vergleich.
 Andere Restpfade aus Teil 13 und AUD14-05/06/07 bleiben offen; AUD14-04 nicht abgeschlossen.
+
+
+### AUD14-04 Teil 16 – Polylinien-Seitenstreckung (15.10.2026)
+PR337 gemergt (744eafc). Bestehender Linienadapter unterstützt point/edge über gemeinsame
+prepareSessionContourEdge-/Cap-Vorbereitung. Schließpunkt, Kontur- und Linienprüfung,
+volle Commitprüfung und ein Undo erhalten. Keine neue Geometrie-/Renderer-/Fanglogik.
+1024 Tests, beide Typechecks, Lint und Build bestanden. Vollpfad-/Planszenen-/Patch-
+Vergleich mit spitzen/konkaven Formen, Winding, erster/letzter Kante, 500 Punkten,
+rohen/begrenzten Zielen und Rückweg, eigenen Linienarten, Kontext und Commit/Undo.
+Vorher-Messung line-edge-before.json; Vergleich line-edge-results.json: 100 fremde
+100-Punkt-Schraffuren, warmer Vollpfad 39,00 → Vorschau 1,74 ms, Vorbereitung 40,38 ms.
+500-Punkt-Cap bleibt mit 9,08 ms teuer; keine Framegarantie, keine neue Browserabnahme.
+Einziger Folgeauftrag: Offset geschlossener Polylinien über vorhandenen Linienadapter
+und gemeinsame Offset-/Cap-Berechnung vorbereiten; Mindestgröße, Kontur-/Linienprüfung,
+Vollpfad-/Commit-/Undo-Nachweis erhalten. AUD14-04 und übrige Restaufträge bleiben offen.
