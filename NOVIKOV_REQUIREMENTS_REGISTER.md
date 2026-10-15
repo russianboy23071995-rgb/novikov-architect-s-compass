@@ -12293,3 +12293,12 @@ Konkreter Verlust gültiger Sicherungen/falscher Commit-Erfolg/Retry-Sturm bleib
 Fehlende Extremmessung allein rechtfertigt keinen Speicherausbau und blockiert nicht alle
 CAD-Aufträge. Danach AUD14-07 Gesamt-Abnahme, keine beliebige neue Feature-Etappe.
 Abnahmekriterien und genau ein Folgeauftrag stehen im jüngsten Masterplanabschnitt.
+
+### AUD14-06 – Zwei-Tab-Teilabnahme (15.10.2026)
+
+Zwei echte IAB-Tabs: veralteter Writer abgewiesen; Wartung in B erhält Gewinner,
+Vorgänger und fremdes Projekt; vollständiger Vergleich in A/B sowie A nach Schließen
+von B erfolgreich. Typecheck/ESLint/Build bestanden. Kein Produktionsfix nötig.
+Offen: echte Hidden-/Focus-Übergänge (IAB meldete beide sichtbar), Schließen mitten in
+Arbeit und automatische Mehrtab-Retries. Nicht als bestanden markieren; vor Public Beta
+in geeigneter Umgebung prüfen. AUD14-07 wird als nächster begrenzter Planauftrag begonnen.

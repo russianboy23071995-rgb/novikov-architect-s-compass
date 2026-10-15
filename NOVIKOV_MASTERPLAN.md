@@ -2665,3 +2665,35 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    reproduzierbaren Gesamtprüflauf festlegen, fehlende BIM-Typen nicht vortäuschen.
 3. Nach AUD14-07-Statusabgleich nächsten fachlichen CAD-Schritt auswählen; Release-Gates
    separat erhalten. Keine neue Feature-Reihenfolge erfinden oder alle Audit-IDs schließen.
+
+### AUD14-06 – Zwei echte Tabs, abgegrenzter Nachweis (15.10.2026)
+
+#362 nach grüner CI ausdrücklich freigegeben und in main übernommen.
+recovery-two-tabs.html/.ts: zwei getrennte IAB-Tabs A/B, gemeinsame explizite Test-Run-ID,
+eigene UUID-artig benannte Pilotdatenbank. Beide Writer auf demselben Ausgangsstand
+vorbereitet. A speichert erfolgreich, B wird mit Recovery revision conflict abgewiesen.
+B startet Wartung über produktiven Recovery-Service und Storage: ein verwaister Payload
+entfernt, drei geschützt. Beide Tabs vergleichen Gewinner, gültigen Vorgänger und
+fremdes Projekt vollständig. B danach geschlossen, A prüft erneut erfolgreich.
+Ergebnis recovery-two-tabs-results.json; keine Nutzerprojekte verändert.
+Typecheck, gezieltes ESLint und Build bestanden. Keine Produktionsänderung.
+
+**Teilabnahme, keine vollständige Lifecycle-Freigabe:** Beide eingebetteten Tabs lieferten
+nur visible=true. Hintergrund-/Fokuswechsel wurden nicht beobachtet und nicht künstlich
+als echte Ereignisse ausgegeben. B wurde nach abgeschlossener Wartung geschlossen,
+nicht mitten in einer Transaktion. Automatischer Retry in zwei Tabs nicht getestet.
+Der Harness nutzt echte Writer für Saves und den gemeinsamen Service für manuelle
+Wartung; der automatische Zeitpfad hat seinen separaten früheren Nachweis.
+Listener-Abmeldung/Blur/Hidden bleiben bisher Unit-Test-Belege. Echte Fokuswechsel,
+Schließen während aktiver Arbeit und Mehrtab-Automatik bleiben vor Public Beta in einer
+geeigneten Browserumgebung zu prüfen. Kein beobachteter Sicherheitsfehler, kein Anlass
+für einen vorsorglichen globalen Lock oder weiteren Speicherausbau.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. AUD14-07 Bestand zusammenführen: Schul-/Mehrgeschoss-Fixtures und verbleibende
+   Anschlussgruppen-/Kamera-/Workspace-Kosten prüfen und genau einen repräsentativen
+   Gesamtprüflauf festlegen. Offene Recovery-Lifecycle-Gates ausdrücklich übernehmen.
+2. Diesen Gesamtprüflauf ausführen und ausschließlich reproduzierte priorisierte Fehler
+   beheben; Modell-/Commit-/Undo-/Speicherbelege zusammenhalten.
+3. Nach Audit-Statusabgleich nächsten fachlichen CAD-Schritt bestimmen; Release-Gates
+   zu Fokus/Tab-Abbruch, Langzeit/Quota/Prozessmessungen bleiben unabhängig offen.

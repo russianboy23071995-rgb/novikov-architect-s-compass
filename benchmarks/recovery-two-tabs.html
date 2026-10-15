@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><title>Recovery Zwei-Tab-Test</title>
+  <h1>Recovery: zwei getrennte Tabs</h1>
+  <p>
+    Testdatenbank ausschließlich über explizite Run-ID. Reihenfolge: A initialisieren, beide
+    vorbereiten, A speichern, B speichern, warten, prüfen.
+  </p>
+  <button data-action="init">Initialisieren (A)</button
+  ><button data-action="prepare">Writer vorbereiten</button
+  ><button data-action="save">Speichern</button
+  ><button data-action="maintain">Warten</button
+  ><button data-action="verify">Inhalte prüfen</button>
+  <pre id="result"></pre>
+  <script type="module" src="./recovery-two-tabs.ts"></script>
+</html>
