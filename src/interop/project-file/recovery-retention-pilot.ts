@@ -1,3 +1,7 @@
+import {
+  parseRecoveryRecord,
+  prepareRecoverySnapshot,
+} from "../../application/project-files/recovery.ts";
 import type {
   RecoveryV2Codec,
   RecoveryRecordV2,
@@ -6,11 +10,11 @@ import { restoreRecoveryV2 } from "../../application/project-files/recovery-v2.t
 import { createRecoveryV2Storage } from "./recovery-v2-storage.ts";
 
 type Entry = { key: IDBValidKey; value: unknown };
-function readHeads(db: IDBDatabase): Promise<Entry[]> {
+function readEntries(db: IDBDatabase, store: string): Promise<Entry[]> {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction("heads"),
+    const tx = db.transaction(store),
       entries: Entry[] = [];
-    const request = tx.objectStore("heads").openCursor();
+    const request = tx.objectStore(store).openCursor();
     request.onsuccess = () => {
       const cursor = request.result;
       if (cursor) {
@@ -37,26 +41,60 @@ function stored(record: RecoveryRecordV2) {
 }
 export type RetentionResult =
   | { status: "collected"; deleted: number; retained: number }
-  | { status: "skipped"; reason: "unreadable-roots" | "changed-roots" | "legacy-present" };
+  | { status: "skipped"; reason: "unreadable-roots" | "changed-roots" | "unreadable-legacy" };
 /** Diagnostic-only entry point. No production caller. Validation may yield; deletion never
  * trusts that old read: all heads are compared again inside the serializable write transaction.
- * Legacy presence conservatively disables this first pilot, including migrated originals.
+ * Valid V1 snapshots embed their image bytes and remain untouched. Unknown legacy data blocks GC.
  */
 export async function collectRecoveryV2Pilot(
   db: IDBDatabase,
   codec: RecoveryV2Codec,
   signal?: AbortSignal,
+  layoutForSlot = (id: string) => ({
+    legacy: "legacy",
+    heads: "heads",
+    assets: "assets",
+    legacyKey: id,
+    index: "",
+  }),
 ): Promise<RetentionResult> {
   if (!db.name.startsWith("novikov-recovery-v2-pilot-"))
     throw new Error("Diagnostic database only");
   signal?.throwIfAborted();
-  const expected = await readHeads(db);
+  const layout = layoutForSlot("");
+  const expected = await readEntries(db, layout.heads);
+  const expectedLegacy = await readEntries(db, layout.legacy);
+  try {
+    for (const entry of expectedLegacy) {
+      signal?.throwIfAborted();
+      if (typeof entry.value !== "string") throw new Error("Unknown legacy data");
+      const record = parseRecoveryRecord(entry.value);
+      if (Object.keys(record).some((k) => !["version", "current", "previous"].includes(k)))
+        throw new Error("Unknown legacy fields");
+      for (const snapshot of [
+        record.current,
+        ...(record.previous !== undefined ? [record.previous] : []),
+      ]) {
+        if (Object.keys(snapshot).some((k) => !["savedAt", "json"].includes(k)))
+          throw new Error("Unknown legacy snapshot fields");
+        await prepareRecoverySnapshot(snapshot);
+      }
+    }
+  } catch {
+    signal?.throwIfAborted();
+    return { status: "skipped", reason: "unreadable-legacy" };
+  }
   const validatedKeys = new Set<string>();
   try {
     for (const entry of expected) {
       signal?.throwIfAborted();
       if (typeof entry.key !== "string") throw new Error("Invalid slot key");
-      const source = await createRecoveryV2Storage(db, entry.key, codec).read();
+      const source = await createRecoveryV2Storage(
+        db,
+        entry.key,
+        codec,
+        layoutForSlot(entry.key),
+      ).read();
       const record = source.record as RecoveryRecordV2;
       // Check each candidate individually: fallback success must not authorize deletion.
       await restoreRecoveryV2({ ...record, previous: undefined }, entry.key, codec, signal);
@@ -79,7 +117,10 @@ export async function collectRecoveryV2Pilot(
   signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     // Same scope as publish/migrate. A competing writer runs wholly before or after us.
-    const tx = db.transaction(["legacy", "heads", "assets"], "readwrite");
+    const tx = db.transaction(
+      [layout.legacy, layout.heads, layout.assets, ...(layout.index ? [layout.index] : [])],
+      "readwrite",
+    );
     let result: RetentionResult = { status: "skipped", reason: "changed-roots" };
     let deleted = 0,
       retained = 0;
@@ -105,8 +146,21 @@ export async function collectRecoveryV2Pilot(
       return;
     }
     const entries: Entry[] = [];
-    const legacy = tx.objectStore("legacy").count();
-    const heads = tx.objectStore("heads").openCursor();
+    const legacyEntries: Entry[] = [];
+    const legacy = tx.objectStore(layout.legacy).openCursor();
+    let legacyDone = false,
+      headsDone = false;
+    legacy.onsuccess = () => {
+      const cursor = legacy.result;
+      if (cursor) {
+        legacyEntries.push({ key: cursor.key, value: cursor.value });
+        cursor.continue();
+      } else {
+        legacyDone = true;
+        collect();
+      }
+    };
+    const heads = tx.objectStore(layout.heads).openCursor();
     heads.onsuccess = () => {
       const cursor = heads.result;
       if (cursor) {
@@ -114,15 +168,17 @@ export async function collectRecoveryV2Pilot(
         cursor.continue();
         return;
       }
-      if (legacy.result) {
-        result = { status: "skipped", reason: "legacy-present" };
-        return;
-      }
+      headsDone = true;
+      collect();
+    };
+    const collect = () => {
+      if (!legacyDone || !headsDone) return;
+      if (JSON.stringify(legacyEntries) !== JSON.stringify(expectedLegacy)) return;
       if (JSON.stringify(entries) !== JSON.stringify(expected)) return;
       // Root set is usable only after every slot matches the fully validated snapshot.
       const roots = validatedKeys;
       // Keys only: never load all image payloads just to delete an orphan.
-      const assets = tx.objectStore("assets").openKeyCursor();
+      const assets = tx.objectStore(layout.assets).openKeyCursor();
       assets.onsuccess = () => {
         const cursor = assets.result;
         if (!cursor) {
@@ -131,7 +187,7 @@ export async function collectRecoveryV2Pilot(
         }
         if (typeof cursor.key === "string" && roots.has(cursor.key)) retained++;
         else {
-          tx.objectStore("assets").delete(cursor.primaryKey);
+          tx.objectStore(layout.assets).delete(cursor.primaryKey);
           deleted++;
         }
         cursor.continue();
