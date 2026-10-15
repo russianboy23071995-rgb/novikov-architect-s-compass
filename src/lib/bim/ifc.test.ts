@@ -4,12 +4,128 @@ import { test } from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { addWall, createProject, updateWall, updateWindow } from "./model.ts";
 import { exportIfc, ifcGuid, stepReal, stepString } from "./ifc.ts";
+import { addWindow, serializeProject, deserializeProject } from "./model.ts";
+import { addStorey, setStoreyHeight, setGroundDatum } from "../../application/storeys/actions.ts";
+import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
+import { prepareZTranslation } from "../../application/selection/z-translation.ts";
+import { createHistory, undoProject } from "./history.ts";
+import type { Project } from "../../domain/project/schema.ts";
 
 const date = new Date("2026-09-30T12:00:00Z");
 const rows = (ifc: string, entity: string) =>
   ifc.split("\n").filter((line) => line.includes(`=${entity}(`));
 const globalIds = (ifc: string, entity: string) =>
   rows(ifc, entity).map((line) => line.match(/\('([^']+)'/)![1]);
+
+// Limited reader for the writer's placement/containment output, not a general IFC parser.
+async function assertStoreyExport(project: Project, levels: Record<string, number>) {
+  const text = await exportIfc(project, date);
+  const entities = new Map([...text.matchAll(/^(#\d+)=(.*);$/gm)].map((m) => [m[1]!, m[2]!]));
+  const byGuid = async (kind: string, id: string) => {
+    const guid = await ifcGuid(project.id, kind, id);
+    const entry = [...entities].find(([, row]) => row.includes(`('${guid}',`));
+    assert.ok(entry, `${kind} ${id} exported`);
+    return entry;
+  };
+  const z = (ref: string): number => {
+    const row = entities.get(ref);
+    assert.ok(row, `placement reference ${ref} exists`);
+    const refs = row.match(/#\d+/g) ?? [];
+    if (row.startsWith("IFCLOCALPLACEMENT(")) return refs.reduce((sum, r) => sum + z(r), 0);
+    if (row.startsWith("IFCAXIS2PLACEMENT3D(")) return z(refs[0]!);
+    assert.ok(row.startsWith("IFCCARTESIANPOINT("));
+    return Number(row.match(/\(\((.*)\)\)/)![1]!.split(",")[2]);
+  };
+  const near = (actual: number, expected: number) =>
+    assert.ok(Math.abs(actual - expected) < 1e-10, `${actual} != ${expected}`);
+  for (const floor of project.storeys) {
+    const [floorRef, floorRow] = await byGuid("storey", floor.id);
+    near(z(floorRow.split(",")[5]!), levels[floor.id]!);
+    near(Number(floorRow.slice(0, -1).split(",").at(-1)), levels[floor.id]!);
+    const expectedMembers: string[] = [];
+    for (const wall of floor.walls) {
+      const [wallRef, wallRow] = await byGuid("wall", wall.id);
+      expectedMembers.push(wallRef);
+      const wallZ = levels[floor.id]! + (wall.baseOffset ?? 0);
+      near(z(wallRow.split(",")[5]!), wallZ);
+      for (const window of floor.windows.filter((w) => w.wallId === wall.id)) {
+        const [windowRef, windowRow] = await byGuid("window", window.id);
+        const [openingRef, openingRow] = await byGuid("opening", window.id);
+        expectedMembers.push(windowRef);
+        near(z(windowRow.split(",")[5]!), wallZ + window.sillHeight);
+        near(z(openingRow.split(",")[5]!), wallZ + window.sillHeight);
+        assert.ok(
+          rows(text, "IFCRELVOIDSELEMENT").some((r) => r.endsWith(`,${wallRef},${openingRef});`)),
+        );
+        assert.ok(
+          rows(text, "IFCRELFILLSELEMENT").some((r) => r.endsWith(`,${openingRef},${windowRef});`)),
+        );
+      }
+    }
+    const contained = rows(text, "IFCRELCONTAINEDINSPATIALSTRUCTURE").filter((r) =>
+      r.endsWith(`,${floorRef});`),
+    );
+    assert.equal(contained.length, 1);
+    const members = contained[0]!.match(/,\((#[\d,#]+)\),#\d+\);$/)![1]!.split(",");
+    assert.deepEqual(members.sort(), expectedMembers.sort());
+  }
+  assert.equal(rows(text, "IFCRELCONTAINEDINSPATIALSTRUCTURE").length, project.storeys.length);
+  return text;
+}
+
+test("multi-storey IFC preserves heights and containment through Z move, height edits, reload and undo", async () => {
+  let p = createProject("ifc-height-proof", "eg");
+  p = setStoreyHeight(p, p, { projectId: p.id, storeyId: "eg", height: 3.2 });
+  p = addStorey(p, p, { projectId: p.id, storeyId: "eg", side: "above", id: "og", height: 3.1 });
+  p = addStorey(p, p, { projectId: p.id, storeyId: "eg", side: "below", id: "kg", height: 2.6 });
+  for (const [id, offset] of [
+    ["kg", -0.4],
+    ["eg", 0],
+    ["og", 0.6],
+  ] as const) {
+    p = selectWorkingStorey(p, p, id);
+    p = addWall(p, {
+      id: `${id}-wall`,
+      start: { x: 0, y: 0 },
+      end: { x: 3, y: 2 },
+      thickness: 0.36,
+      height: 2.8,
+      baseOffset: offset,
+    });
+    p = addWindow(p, {
+      id: `${id}-window`,
+      wallId: `${id}-wall`,
+      width: 1.2,
+      height: 1.2,
+      sillHeight: 0.9,
+      position: 0.5,
+    });
+  }
+  const levels = { kg: -2.6, eg: 0, og: 3.2 };
+  const baseline = await assertStoreyExport(p, levels);
+  const targets = [{ kind: "wall" as const, id: "og-wall" }];
+  // Move beyond the storey interval: spatial ownership must still stay OG.
+  const history = createHistory(p);
+  const moved = prepareZTranslation(history.present, targets).commit(history, targets, -4);
+  const exported = await assertStoreyExport(moved.present, levels);
+  assert.equal(
+    await assertStoreyExport(deserializeProject(serializeProject(moved.present)), levels),
+    exported,
+  );
+  assert.equal(await assertStoreyExport(undoProject(moved).present, levels), baseline);
+  let edited = setStoreyHeight(moved.present, moved.present, {
+    projectId: p.id,
+    storeyId: "eg",
+    height: 4,
+  });
+  edited = setStoreyHeight(edited, edited, { projectId: p.id, storeyId: "kg", height: 3 });
+  const changed = await assertStoreyExport(edited, { kg: -3, eg: 0, og: 4 });
+  for (const type of ["IFCBUILDINGSTOREY", "IFCWALL", "IFCWINDOW", "IFCOPENINGELEMENT"])
+    assert.deepEqual(globalIds(changed, type), globalIds(baseline, type));
+  // Absolute survey datum remains annotation; model/IFC coordinates stay EG-relative.
+  edited = setGroundDatum(edited, edited, { projectId: p.id, storeyId: "eg", elevation: 100 });
+  assert.equal(await assertStoreyExport(edited, { kg: -3, eg: 0, og: 4 }), changed);
+});
 
 test("exports IFC4 with metre units, hierarchy and separate wall/opening/window entities", async () => {
   const ifc = await exportIfc(createExampleProject(), date);
