@@ -12437,3 +12437,12 @@ Nutzer bestätigt Z per Hilfseingabe und Auflösen bei Einzelbewegung verbundene
 Z ist ausdrücklich achsgebunden, kein Shift-Test nötig. Mausgesteuerte XY-/Elementrichtung
 mit dauerhaftem Shift bleibt offen. Keine automatische Shift-Z-Anwahl zugesagt.
 Nächster begrenzter Auftrag: Recovery-Zusammenfassung aller Geschosse.
+
+### AUD14-07 – Recovery-Inhaltsanzeige korrigiert (15.10.2026)
+#374 gemergt. RecoveryPanel zählte nur das aktive Geschoss; Sicherung selbst vollständig.
+recoveryContentSummary summiert jetzt alle Geschosse ohne Elemente/Assets zu materialisieren;
+UI zeigt Geschossanzahl und kennzeichnet die Wand-/Fenstersumme als gesamtes Projekt.
+24 fokussierte Recovery-Tests, TypeScript, ESLint, Produktionsbuild bestanden. Test mit
+leerem EG und Inhalten in KG/OG über echten Recovery-Code samt In-Memory-Port; keine
+Änderung echter Sicherungen. Visuelle Abnahme noch nicht durchgeführt.
+Nächster Auftrag: offenen Abbildwechsel-Performancebefund messen und eingrenzen.
