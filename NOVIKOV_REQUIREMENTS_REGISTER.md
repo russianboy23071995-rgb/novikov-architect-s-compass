@@ -12302,3 +12302,23 @@ von B erfolgreich. Typecheck/ESLint/Build bestanden. Kein Produktionsfix nötig.
 Offen: echte Hidden-/Focus-Übergänge (IAB meldete beide sichtbar), Schließen mitten in
 Arbeit und automatische Mehrtab-Retries. Nicht als bestanden markieren; vor Public Beta
 in geeigneter Umgebung prüfen. AUD14-07 wird als nächster begrenzter Planauftrag begonnen.
+
+### AUD14-07 – Gesamtprüfprofil S1 festgelegt (15.10.2026)
+
+Basis main bb5db2d, #363 gemergt mit grüner CI. Bestandsabgleich, keine neue Messung.
+Verbindlicher nächster Auftrag und Ablauf stehen im jüngsten AUD14-07-Abschnitt des
+Masterplans: fünf Geschosse à 40 × 25 m, insgesamt 300 Wände/200 Fenster, Eck-/T-Gruppen,
+50 Schraffuren, 500 Linien, fünf Abbilder; identische Geometrie ohne und mit 20 echten
+1024×1024-PNGs. Separate vorhandene 51-Wand-Gruppe als Stresskontrolle. Vorhandene
+building-view-, translation-content-, connection-group- und preview-block-Belege
+wiederverwenden; echter production-workspace ergänzt Microbenchmarks. Alle Stückzahlen
+sind Testvorgaben, keine neue Produktkapazität. Fehlende Dächer/Räume/Decken nicht imitieren.
+
+S1 verlangt Vollpfad-/Vorschaugleichheit inklusive stationärer Nachbarn, atomare Commits,
+einen Undo-Schritt, Abbruch, Datei-/Recovery-Inhaltsvergleich, IFC-Modellabgleich und echte
+Kamera-/Fang-/Workspace-Traces. Rohwerte, kalte/warme Phasen, Umgebung und Grenzen angeben.
+AUD14-04 globale Planableitung/Legacy-Pfade und AUD14-05 große Gruppen/Kameravorbereitung
+bleiben ausdrücklich offen. AUD14-06 Release-Gates aus #362/#363 bleiben erhalten;
+S1 schließt weder den zweistündigen Lauf noch Quota-/Prozess-/GPU-Nachweise ein.
+AUD14-07 bleibt offen bis Ausführung und Einordnung aller Audit-IDs. Offener Alt-PR #318
+wird nicht automatisch übernommen. Kein Produktcode in diesem Planauftrag geändert.
