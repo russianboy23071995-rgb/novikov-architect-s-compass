@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – Recovery-Restnachweise risikobasiert eingeordnet; genau ein nächster Auftrag: echter Zwei-Tab-Lifecycle-Test in isolierter Datenbank (siehe jüngsten Abschnitt AUD14-06). Danach AUD14-07 Gesamt-Abnahme. Historische Auditbasis: main c081040, PR281–317; aktuelle Merge-/Prüfbelege stehen bei den jeweiligen Nachträgen.
+Aktueller Arbeitsauftrag: 15.10.2026 – AUD14-07 Bestandsabgleich abgeschlossen, Gesamtprüfprofil festgelegt (jüngster Abschnitt AUD14-07). Genau ein nächster Auftrag: dieses Profil als reproduzierbare Fixture und gemeinsamen Prüflauf umsetzen und ausführen. Recovery-Release-Gates bleiben offen. Historische Nachträge sind Belege, keine konkurrierenden Arbeitsaufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2697,3 +2697,80 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    beheben; Modell-/Commit-/Undo-/Speicherbelege zusammenhalten.
 3. Nach Audit-Statusabgleich nächsten fachlichen CAD-Schritt bestimmen; Release-Gates
    zu Fokus/Tab-Abbruch, Langzeit/Quota/Prozessmessungen bleiben unabhängig offen.
+
+### AUD14-07 – Bestandsabgleich und ausführbares Gesamtprüfprofil (15.10.2026)
+
+Basis main bb5db2d nach ausdrücklich freigegebenem Merge von #363, GitHub check SUCCESS.
+Offen ist außerdem #318 (feat/solid-z-movement); dieser Altzweig wird weder als aktuelle
+Basis verwendet noch ohne eigenen Vergleich übernommen. Dieser Schritt ist ein Code- und
+Nachweisabgleich, keine neue Leistungs- oder Browserabnahme. Maßgeblich für den nächsten
+Auftrag ist dieser Abschnitt; die frühere Recovery-Folgeaufgabe ist abgeschlossen bzw.
+mit ihren ausdrücklich offenen Lifecycle-Gates abgegrenzt.
+
+| Wiederverwendbarer Bestand | Nachweis und konkrete Grenze |
+| --- | --- |
+| building-view-fixture/profile.ts | Fünf Geschosse mit getrennten Wänden/Fenstern, Geschosswechsel und gemeinsame Solid-Ableitung; kein schulähnlicher Anschlussgrundriss. |
+| connection-group-fixture/profile.ts | Parametrisierte T-Gruppe, Fenster und fremde Wände; exakter Vergleich prepareEndpoint gegen editAtPointer. 51-Wand-Gruppe bisher Node-, nicht vollständiger Workspace-Nachweis. |
+| translation-content.test.ts und selection-move-oracle.ts | XY-Vollpfadvergleich, Z-Kontextschutz, genau ein Undo, Datei-/Recovery-Roundtrip. Kleine Mehrgeschoss-Fixture ersetzt keinen Gebäudelasttest. |
+| preview-block-browser.ts / Ergebnisse zu #342 | 502 Wände, fünf Geschosse, Pixel-/Projektvergleiche; keine vollständige React-/Eingabe-/Framezeit und kein schwerer Bildmix. |
+| camera-frame.tsx | Reale BimSolidView und Matrix-/GL-Kontrolle, kleines Beispiel. Kein Nachweis großer Gebäude bei Kamerawechsel. |
+| production-workspace.tsx/.config.ts | Echter CadWorkspace, isolierter Produktionsbuild auf Port 8085, Longtasks und optionale Phasentraces; geeigneter UI-Prüfträger, kein Ersatz durch vereinfachten Renderer. |
+| Recovery-Harnesses bis #363 | Inhaltsschutz, CAS und Wartung belegt; Hintergrundwechsel, aktiver Tab-Abbruch, Mehrtab-Automatik, zwei Stunden, echte Quota und Prozess-/GPU-Spitzen weiterhin offen. |
+
+**Genau ein ausführbarer Folgeauftrag: Gesamtprüfprofil S1 erstellen und ausführen.**
+Ein deterministischer Generator mit manifestierten IDs erzeugt ein schulähnliches
+synthetisches Modell aus tatsächlich unterstützten Typen. Keine neuen Produktfunktionen
+oder separaten Modell-/Fangpfade. Vorhandene Fixtures/Orakel und echte Application-Aktionen
+wiederverwenden; das Resultat muss validateProject bestehen. Kein Archicad-Import behaupten.
+
+- Fünf Geschosse, jeweils 40 × 25 m Grundrissbereich (1.000 m² Prüfgrundfläche,
+  keine berechnete Raum-/Wohnfläche), EG 0 m, Geschosshöhen 3 m.
+- Je Geschoss 60 Wände, 40 Fenster, 10 geschlossene Schraffuren mit je 8 Punkten,
+  100 Linien und ein Abbild; stabile globale IDs. Anschlussmanifest: je eine Ecke
+  und eine zusammenhängende T-Gruppe aus Hauptwand und zehn Nebenwänden. Weitere
+  Wände bleiben unabhängig. Öffnungen dürfen gemäß den bestehenden Regeln liegen.
+- Genau dieselbe Geometrie in zwei Varianten: G ohne Rasterbilder, GB mit 20 echten,
+  deterministisch erzeugten unterschiedlichen 1024×1024-PNGs (vier pro Geschoss).
+  Logische Pixel, Payloadbytes und tatsächliche portable Dateigröße protokollieren;
+  bestehende Datei-/Rasterlimits einhalten. Keine künstlichen Base64-Platzhalter.
+- Die bereits vorhandene 51-Wand-Anschlussgruppe separat als Stresskontrolle ausführen,
+  nicht unbemerkt in das 40 × 25-m-Profil pressen oder als Schulgrundriss bezeichnen.
+  Ein zusätzliches bildschweres Grenzprofil und 500+ BIM-Wände bleiben spätere
+  Kapazitätsprüfungen, falls S1 diese Last nicht erreicht. S1 ist kein Vollabschluss.
+
+Ablauf pro Variante: Datei öffnen; alle fünf Geschosse und Abbilder wechseln; 3D mit
+allen Geschossen anzeigen; eine T-Gruppe und eine geschossübergreifende Auswahl bewegen
+(XY und Z); einen verbundenen Endpunkt ändern; jede Aktion einmal abbrechen und einmal
+platzieren; Undo/Redo; Projekt speichern/neu öffnen; IFC exportieren; lokale Sicherung
+und Wiederaufnahme in eigener Test-Origin prüfen. Kamera langsam und schnell orbitieren,
+pannen und Ansicht einpassen; Ursprung/Fang mit Shift und ohne Shift vergleichen.
+Keine Nutzerdatei oder Nutzer-Recovery-Datenbank überschreiben.
+
+Nachweis getrennt erheben: (a) deterministische Modell-/Vorschau-/Commit-Vergleiche gegen
+den bisherigen vollständigen Prüfpfad, einschließlich stationärer Nachbarn, gelöster
+Anschlüsse und Fenster; (b) echter Workspace im Browser mit Eingaben, Screenshots und
+Longtask-/Frame-Trace. Ein Callback-Mikrobenchmark allein genügt nicht. Pro Modellaktion
+exakt ein Undo-Schritt, Abbruch unverändert, Rundreise vollständig inhaltlich gleich;
+IFC-IDs, Geschosszuordnung, Wand-/Fensterzahlen und Höhen gegenüber dem Modell prüfen.
+Externe Archicad-Abnahme bleibt separat beim Nutzer, frühere Abnahme nicht umdeuten.
+
+Messprotokoll: Commit, Buildmodus, Betriebssystem, Browser, verfügbare CPU/RAM/GPU-Angaben,
+Viewport/DPR, Manifest und Ergebnisdatei. Ein Kaltlauf nach neuem Dokument plus zehn warme
+Wiederholungen, Rohwerte/Median/Maximum; bei so kleiner Stichprobe keine belastbare
+p95-Zusage. Vorbereitung, Pointervorschau, Commit, Kamerawechsel, Laden/Speichern und
+Export separat. Lange Tasks >50 ms markieren; keine 60-FPS- oder Hardwaregarantie daraus.
+Optionales performance.memory ausdrücklich nur JS-Heap; fehlende Prozessmessung offen.
+
+Sicherheits-/Geometrieabweichungen stoppen die Abnahme. Reproduzierbare Performancepausen
+mit Phase und Szene priorisieren; nur einen nachgewiesenen Engpass im nächsten Fix ändern,
+keinen Rendererwechsel oder vorsorglichen Architekturumbau. Aktuelle Restschuld AUD14-04
+(weitere Wandketten, alte direkte move/x/y-Pfade, globale Planableitung) und AUD14-05
+(große Gruppen, Kamerawechselvorbereitung) nicht wegen bestandener Kleinfälle schließen.
+Am Ende AUD14-01 bis -07 einzeln auf Befund/Beleg/Restgrenze abgleichen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. S1-Generator und gemeinsamen Prüflauf gemäß obigem Vertrag umsetzen und ausführen.
+2. Den daraus höchstpriorisierten reproduzierten Fehler beheben, falls vorhanden;
+   andernfalls Audit-Abnahme mit offenen Release-/Kapazitätsgrenzen dokumentieren.
+3. Nach diesem Statusabgleich genau einen nächsten fachlichen CAD-Schritt auswählen.
+   Die zurückgestellte Speichererweiterung und Recovery-Release-Gates bleiben vorgemerkt.
