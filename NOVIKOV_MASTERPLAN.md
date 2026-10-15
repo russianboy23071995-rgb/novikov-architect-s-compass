@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR337 gemergt (744eafc); Polylinien-Seitenstreckung vorbereitet und verglichen (Teil 16 unten).
-Nächster Einzelauftrag: Offset geschlossener Polylinien über gemeinsame Geometrie-/Cap-
-Berechnung im vorhandenen Linienadapter vorbereiten und mit Vollpfad vergleichen.
+PR337 gemergt (744eafc); PR338 offen. Polylinien-Offset auf dessen Stand geprüft (Teil 17).
+Nächster Einzelauftrag: Knicken geschlossener Polylinien über gemeinsame Kontureinfügung
+vorbereiten; Punktanzahl einschließlich Schließpunkt und vollständige Commitprüfung erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1641,3 +1641,52 @@ vorbereiten, gemeinsame offsetContourPoints-/Cap-Berechnung wiederverwenden. Kon
 und Mindestgrößenregeln sowie vollständige Zielkontur-/Linienprüfung erhalten; kleine
 Formen, beide Umlaufrichtungen, Kontext und Commit/Undo gegen Vollpfad vergleichen/messen.
 AUD14-04 bleibt offen; übrige Restpfade und AUD14-05/06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 17 – Vorbereiteter Polylinien-Offset (15.10.2026)
+
+Nutzerfreigabe wiederholt #337: dieser PR war bereits gemergt (744eafc). #338 bleibt
+unverändert offen; dieser Folgeauftrag baut auf seinem Entwicklungszweig auf und
+berechtigt nicht zu dessen Merge. Neuer Prüf-PR daher mit Basis perf/prepared-line-edge.
+
+Vorhandener Linienadapter unterstützt nun Offset geschlossener Polylinien. Er nutzt
+unverändert offsetContourPoints/offsetDirection und die bestehende konvexe Offset-
+Berechnung einschließlich Mindestgröße/Cap. Nullindex entspricht Kante 0. Eine eigene
+validierte Sitzung fixiert Basis, Ziel und Ursprung. Schließpunkt wird wieder angefügt,
+Linienprüfung und vollständige Commitprüfung mit einem Undo bleiben erhalten.
+
+Die vollständige Zielkonturprüfung liegt jetzt in offsetContourPoints, gemeinsam für
+Vollaktion und Vorschau. Zuvor prüfte der vorbereitete Schraffuradapter sie separat;
+Polylinien hatten nach der Offsetberechnung nur deren numerische Kantenprüfung und
+Linienvalidierung. Damit wird auch ihre Vollaktion bei numerisch ungültiger Zielkontur
+abgewiesen, statt nur die Vorschau strenger zu machen. Keine neue Offset-/Cap-Geometrie,
+kein Renderer-/Fangzweig. Die Schema-Konturprüfung für Schraffuren bleibt erhalten.
+
+1028 Tests, beide Typechecks, gezieltes Lint und Build bestanden. Exakte Projekte,
+Planszenen und Patches bei beiden Umlaufrichtungen, kleinen Formen (Faktor 1e-5),
+großen Koordinaten, Roh-/Cap-Zielen, Rückweg, eigenen Linienarten, fremden Musterschraffuren,
+anderem Arbeitsgeschoss, Kontextwechsel, nicht endlichen/konkaven/offenen Fällen,
+Abbruch, Commit und Undo. Keine neue visuelle Browserabnahme behauptet.
+
+Messung line-offset-profile.ts / line-offset-results.json: unabhängige Sitzungscaches,
+erster und acht warme Ziele, alternierende Reihenfolge, Vorbereitung separat, exakte
+Projektgleichheit außerhalb der Messzeit. Vollpfad → Vorschau:
+- 100 Schraffuren à 100 Punkte: 44,77 → 0,316 ms; Vorbereitung 44,89 ms.
+- 10 Schraffuren à 100 Punkte: 4,33 → 0,301 ms; Vorbereitung 5,08 ms.
+- 500 Konturpunkte mit einer Hintergrundschraffur: 3,65 → 1,41 ms; Vorbereitung 11,31 ms.
+Vollständige Zielkontur-/Linienprüfung, Materialisierung und Planableitung bleiben Kosten.
+Keine Gesamtframe-/GPU-Garantie, keine pauschale Skalierungszusage.
+
+Abnahme: geschlossene konvexe Polylinie mit eigener Linienart nach innen über den Cap
+ziehen und zurück; Schließpunkt/Darstellung erhalten, platzieren und einmal Undo.
+
+Ab jetzt enthalten Abschlussberichte drei nächste Schritte (AGENTS angepasst).
+Nur Schritt 1 ist aktiv; 2 und 3 sind Ausblick, keine parallelen Aufträge:
+1. Knicken/Punkt einfügen bei geschlossenen Polylinien im vorhandenen Linienadapter
+   vorbereiten; gemeinsame Kontureinfügung, Punktanzahl einschließlich Schließpunkt,
+   Vollpfad-/Commit-/Undo-Vergleich und Hintergrundlast messen.
+2. Verbliebenes direktes Wand-Strecken begrenzen; Anschluss-/Fensterabhängigkeiten und
+   Körpergriffe vor einer Erweiterung des gemeinsamen Endpunktadapters vergleichen.
+3. Lokale räumliche 3D-Fangsuche (AUD14-05), sobald AUD14-04 samt Restbefunden abgenommen
+   ist; Quellen-/Kamera-/Sichtbarkeitskontext und vollständige Anschlussgruppe bewahren.
+AUD14-04 bleibt offen. Restpfade aus Teil 13 und AUD14-06/07 werden nicht gestrichen.

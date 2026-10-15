@@ -1,3 +1,4 @@
+import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point } from "../../lib/bim/model.ts";
 import { updateLine } from "../../lib/bim/model.ts";
@@ -20,12 +21,15 @@ function prepared(session: EditSession) {
 export function offsetDirection(session: EditSession) {
   return prepared(session).normal(session.index ?? 0);
 }
-/** Shared point derivation for full actions and prepared hatch previews. */
+/** Shared point derivation for full actions and prepared contour previews. */
 export function offsetContourPoints(session: EditSession, pointer: Point) {
   const normal = offsetDirection(session);
   const distance =
     (pointer.x - session.anchor.x) * normal.x + (pointer.y - session.anchor.y) * normal.y;
-  return prepared(session).at(distance);
+  const points = prepared(session).at(distance);
+  const validation = validateSimplePolygon(points);
+  if (!validation.valid) throw Error("Offset erzeugt eine ungültige Kontur.");
+  return points;
 }
 
 export function previewContourOffset(session: EditSession, pointer: Point) {

@@ -39,7 +39,7 @@ function prepareCapability(
     ["point", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareHatchContourPreview(session);
-  if (session.target.kind === "line" && ["point", "edge"].includes(session.action))
+  if (session.target.kind === "line" && ["point", "edge", "offset"].includes(session.action))
     return prepareLinePreview(session);
   if (session.target.kind === "window" && session.action === "axis")
     return prepareWindowAxisPreview(session);
