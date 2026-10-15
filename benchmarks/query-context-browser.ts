@@ -1,3 +1,4 @@
+import { linearMovementOriginQuery } from "./movement-origin-oracle.ts";
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { prepareViewportModel } from "../src/rendering/viewport/prepared-model.ts";
 import {
@@ -41,7 +42,7 @@ document.querySelector("#run")!.addEventListener("click", () => {
         if (read().some((v, i) => v !== pixels[i])) throw Error("Pixel mismatch");
         pixelComparisons++;
         const prepared = createMovementOriginQuery(project, view, () => true, basis);
-        const fresh = createMovementOriginQuery(project, view, () => true);
+        const fresh = linearMovementOriginQuery(project, view, () => true);
         for (const corner of corners) {
           const p = view.project(corner.point),
             cursor = { x: (p[0] + 1) * 300, y: (1 - p[1]) * 200 };
@@ -53,6 +54,7 @@ document.querySelector("#run")!.addEventListener("click", () => {
     output.textContent = JSON.stringify(
       {
         status: "PASS",
+        oracle: "frozen linear query before spatial index",
         userAgent: navigator.userAgent,
         walls: 500,
         windows: 500,

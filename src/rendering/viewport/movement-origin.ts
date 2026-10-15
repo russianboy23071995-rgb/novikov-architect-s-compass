@@ -1,3 +1,4 @@
+import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
 import { viewportModel, type PreparedViewportModel } from "./prepared-model.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
@@ -56,10 +57,32 @@ export function createMovementOriginQuery(
         },
       };
     });
+  const index = createBoxIndex(
+    projected.flatMap((c, order) =>
+      Number.isFinite(c.screen.x) && Number.isFinite(c.screen.y)
+        ? [
+            {
+              box: { minX: c.screen.x, maxX: c.screen.x, minY: c.screen.y, maxY: c.screen.y },
+              value: order,
+            },
+          ]
+        : [],
+    ),
+  );
+  const finiteBound = (n: number) => Math.max(-Number.MAX_VALUE, Math.min(Number.MAX_VALUE, n));
   return (client: Point, radius = 10, height?: number) => {
     if (![client.x, client.y, radius].every(Number.isFinite) || radius < 0) return null;
     return (
-      projected
+      index
+        .query({
+          minX: finiteBound(client.x - radius),
+          maxX: finiteBound(client.x + radius),
+          minY: finiteBound(client.y - radius),
+          maxY: finiteBound(client.y + radius),
+        })
+        // Tree traversal order is not the original stable tie-break order.
+        .sort((a, b) => a - b)
+        .map((i) => projected[i]!)
         .map((c) => ({ ...c, distance: Math.hypot(c.screen.x - client.x, c.screen.y - client.y) }))
         .filter(
           (c) =>

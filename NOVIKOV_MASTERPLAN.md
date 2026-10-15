@@ -509,8 +509,9 @@ PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglich
 PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und verglichen (Teil 19).
 PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Teil 20).
 PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in Teil 21.
-Nächster Einzelauftrag: createMovementOriginQuery lokal räumlich abfragen, bei identischen
-Fangresultaten, Höhenfiltern, Sichtbarkeitsregeln und stabiler Reihenfolge bei Gleichstand.
+PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis AUD14-05 Teil 1.
+Nächster Einzelauftrag: Verdeckungsprüfung des 3D-Ursprungsfangs vorbereitet räumlich
+begrenzen; gleiche sichtbare Treffer und Tiefentoleranz gegen bisherigen Vollscan prüfen.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -1874,3 +1875,45 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 AUD14-04-Restschuld und AUD14-07 bleiben ausdrücklich offen.
 
 Prüfabschluss Teil 21: 1048 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden.
+
+
+### AUD14-05 Teil 1 – Lokale 3D-Ursprungsfangabfrage (15.10.2026)
+
+PR343 nach ausdrücklicher Freigabe und grüner CI in main gemergt (180320a).
+createMovementOriginQuery nutzt den vorhandenen generischen createBoxIndex für projizierte
+Eckpunkte. Pro Pointer wird nur das Radius-Rechteck abgefragt; ursprüngliche Reihenfolge
+vor Distanzsortierung wiederhergestellt. Kreisradius, Höhe, sichtbare Flächen und
+classifyAnchorVisibility unverändert. Kein zweites Fangsystem, keine Modelländerung.
+Index lebt in der vorhandenen Query-Closure: Modell-/Kamera-/Viewport-/Sichtbarkeitswechsel
+erzeugen wie bisher eine neue Abfrage. Keine globale zusätzliche Cache-Lebensdauer.
+Nicht endliche Projektionen werden ausgeschlossen; endliche überlaufende Abfragegrenzen
+auf Number.MAX_VALUE begrenzt. Die vorherige Invalid-/Nullradius-Semantik bleibt erhalten.
+
+1051 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Drei neue
+Vergleichstests gegen eingefrorenen bisherigen Vollscan (nur benchmarks): Kamera, Zoom,
+Sichtbarkeit, Höhe einschließlich NaN, Radiusgrenzen/Nullradius, extreme/ungültige Eingaben,
+dichte Projektion und Verdeckung. Browser: 500 Wände/500 Fenster, sechs pixelgleiche
+Kamerabilder und 48 exakt gleiche Fangresultate gegen das lineare Orakel bestanden.
+Windows IAB Chrome/155; local-origin-browser-results.json. Bestehende Kontexttests bleiben.
+
+local-origin-profile.ts / local-origin-results.json: 50/500 Wände, Zoom 1 und 0,02,
+40 alternierende Abfragen je Fall, erste zwei nicht im Median, Gleichheitsprüfung außerhalb
+Messung. 500 Wände, Vollscan → lokal in ms:
+- Leerer Suchbereich, Zoom 1: 1,237 → 0,0029; Zoom 0,02: 1,228 → 0,0025.
+- Gemischte Treffer, Zoom 1: 13,989 → 12,830.
+- Dichte Projektion, Zoom 0,02: 15,254 → 15,815, also kein Gesamtgewinn.
+Vorbereitung separat protokolliert, aber sequenziell mit gemeinsam erwärmter Geometrie;
+kein fairer Kaltstartvergleich. Keine Frame-/p95-/universelle Beschleunigungsgarantie.
+
+Die räumliche Kandidatenbegrenzung ist fachlich abgesichert, AUD14-05 insgesamt bleibt offen.
+Codebefund: nearestWallSurface projiziert für die Verdeckungsprüfung weiterhin alle Flächen
+und prüft deren Dreiecke je Kandidat. Dieser globale Rest erklärt einen plausiblen Engpass;
+Phasenmessung muss den Anteil vor der nächsten Optimierung separat bestätigen. Dichte
+Kandidatenmenge und Vorbereitung bleiben ebenso zu messen. Kein unzulässiger Kandidatencap.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Verdeckungsprüfung messen und als gemeinsamen vorbereiteten räumlichen Tiefenquery
+   begrenzen; identische Treffer/Toleranz/Reihenfolge, Kamera-/Sichtbarkeitswechsel prüfen.
+2. Große Anschlussgruppen und Fremdendpunktprüfung separat messen und fachlich sicher begrenzen.
+3. Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen (AUD14-06).
+AUD14-04-Restschuld sowie AUD14-07-Gesamtabnahme bleiben offen.
