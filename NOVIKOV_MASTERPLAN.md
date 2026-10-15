@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – S1-Modellvergleich und erster Produktions-Workspace-Lauf abgeschlossen, Gesamtabnahme bleibt offen. Genau ein nächster Auftrag: gemessene Geschoss-/Abbildwechselpausen phasenweise reproduzieren und den dominanten belegten Pfad korrigieren (jüngster AUD14-07-Abschnitt). Recovery-Release-Gates bleiben erhalten.
+Aktueller Arbeitsauftrag: 15.10.2026 – wiederholte Vollvalidierung beim Geschosswechsel korrigiert und in S1 G gemessen. Genau ein nächster Auftrag: denselben Fix bei S1 GB und Abbildwechseln phasenweise nachprüfen, einschließlich verbleibender langer Tasks. Keine pauschale Performance-Abnahme; Recovery-Release-Gates bleiben erhalten.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2849,3 +2849,56 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Recovery-Anzeigebefund korrigieren. Große Gruppen bleiben gesondert messpflichtig.
 3. Auditstatus erneut abgleichen und nächsten fachlichen CAD-Auftrag auswählen;
    Speichererweiterung zurückgestellt, Langzeit-/Quota-/Mehrtab-Release-Gates offen.
+
+### AUD14-07 – Geschosswechsel: geprüfte Basis weiterverwenden (15.10.2026)
+PR #365 nach grüner CI gemergt, Basis 694fd2f. Bounded Fix an der gemeinsamen
+Snapshot-/Sichtbarkeitsschicht, keine neue Renderer- oder Werkzeugsonderlogik.
+
+Vorher erzeugt selectWorkingStorey aus einem Spread eine neue Vollvalidierung/Kopie;
+createLayerVisibilityPolicy validiert anschließend erneut. Explizite Profiltransforms
+nur im Diagnosebuild erfassen validateProject, Snapshot und Geschossaktion zusätzlich
+zu vorhandenen Plan-/Fangindex-/Komponenten-Aufrufen. Produktionsbuild ohne Diagnose
+enthält diese Instrumentierung nicht.
+
+snapshotWithWorkingStorey erlaubt ausschließlich den geprüften Wechsel der Geschoss-ID
+auf einer privat registrierten, unveränderlichen Basis. Unbekannte oder höhenmäßig nicht
+aufgelöste Geschosse werden abgewiesen; fremde/mutable Quellen werden zuerst vollständig
+validiert und kopiert. Kein generisches Patch-/Trust-Flag. Neue Kontextidentität erhält
+Stale-Schutz, Bauteile bleiben identisch geteilt. Sichtbarkeit nutzt dieselbe Factory,
+prüft ihre eigenen Layer-/Scope-Daten weiterhin und bleibt an den aktuellen Kontext
+gebunden. Modelländerung/Commit/Datei-/Recovery-Validierung unverändert.
+
+Kontrollierter Vergleich: S1 G, Produktions-Diagnosebuild Port8085, 1280×720 DPR1,
+20 echte Navigator-Klicks (10× OG/EG), vorher/nachher jeweils frische Seite, gleiche
+Fixture und Browserumgebung wie zuvor. Nutzer-Port8080 unverändert. Rohdaten:
+benchmarks/storey-switch-before.json und storey-switch-after.json. Auswertungsfenster:
+erster Geschossklick bis letzter Geschossklick +180 ms. Zeiten sind inklusive verschachtelter
+Aufrufe und dürfen nicht summiert werden; Komponentenzeiten sind keine React-/DOM-Gesamtzeit.
+
+| Phase über 20 Wechsel | Vorher | Nachher |
+| --- | --- | --- |
+| Vollvalidierung Anzahl / Summe | 40 / 533,4 ms | 1 / 14,8 ms |
+| working-storey Reducer Summe / Maximum | 286,0 / 18,4 ms | 17,1 / 16,5 ms |
+| Grundrissableitung Summe | 25,3 ms | 20,3 ms |
+| Lange Tasks Anzahl / Summe / Maximum | 19 / 1198 / 75 ms | 3 / 181 / 77 ms |
+
+Einmalige Besitzübernahme beim ersten Wechsel bleibt absichtlich erhalten. Die lange
+Maximum-Spitze ist nicht behoben; kein Beleg für durchgehend flüssige Frames. Fangindex
+wird weiterhin pro Wechsel aufgebaut (20 Aufrufe, Median ca. 3,1 ms nachher). Rendering,
+DOM, GC, Bildvariante und Abbild-Performance noch nicht vollständig separat isoliert.
+Zehn zusätzliche Abbildöffnungen OG/EG per Doppelklick funktional ausgeführt; diese
+gehören nicht zum zeitlich abgeschlossenen Geschossvergleich. Viewportoverride danach
+zurückgesetzt. Screenshot outputs/s1-switch-after.png.
+
+1086 Tests bestanden: neue Regressionen für Inhaltgleichheit zum vollständigen Prüfpfad,
+Identitätsteilung, Stale-Kontext, mutable Quellen, gefälschte eingefrorene Kopien und
+ungültige Eingaben. Bestehende Undo/Redo-/IFC-/S1-Tests weiterhin grün. Typecheck inkl.
+Benchmarks, gezieltes ESLint, regulärer und isolierter Diagnosebuild bestanden. Initialer
+Teststart fand einen doppelten Import im ergänzten Test; korrigiert, volle Suite grün.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** S1 GB und Abbildwechsel mit denselben Phasen nachprüfen, verbleibende
+   lange Tasks eingrenzen; keine weiteren Optimierungen ohne Nachweis.
+2. Offene S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
+3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Audit-/Folgeauftrag abgleichen.
+Langzeit/Quota/Mehrtab und Gesamt-GPU-Gates bleiben offen; Speichererweiterung zurückgestellt.

@@ -1,4 +1,5 @@
 import { validateProject, type Project } from "./schema.ts";
+import { resolveStoreyLevels } from "../storeys/heights.ts";
 
 // Provenance is private: caller freezing, casting or copying cannot grant trust.
 const owned = new WeakSet<object>();
@@ -24,4 +25,21 @@ export function createProjectSnapshot(source: Project): Project {
 /** Only factory-owned, deeply immutable and fully validated projects qualify. */
 export function isOwnedProjectSnapshot(source: Project): boolean {
   return owned.has(source);
+}
+
+/** Narrow view-only transition. No caller-provided model patch can acquire provenance.
+ * Untrusted/mutable inputs still pass full validation before anything is shared.
+ */
+export function snapshotWithWorkingStorey(source: Project, storeyId: string): Project {
+  const base = createProjectSnapshot(source);
+  const level = resolveStoreyLevels(base.storeys, base.groundStoreyId).find(
+    (entry) => entry.storeyId === storeyId,
+  );
+  if (!level) throw new Error("Unbekanntes Arbeitsgeschoss.");
+  if (level.elevation === null)
+    throw new Error("Zunächst die Geschosshöhen bis zu diesem Geschoss festlegen.");
+  if ((base.workingStoreyId ?? base.groundStoreyId) === storeyId) return base;
+  const next = Object.freeze({ ...base, workingStoreyId: storeyId });
+  owned.add(next);
+  return next;
 }

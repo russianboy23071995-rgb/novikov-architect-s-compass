@@ -71,17 +71,23 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
         };
       }
       if (productionCalls) {
-        const names = path.endsWith("/src/rendering/viewport/plan-scene.ts")
-          ? ["derivePlanScene", "planSceneRuns"]
-          : path.endsWith("/src/application/snapping/project-references.ts")
-            ? ["projectSnapPrimitives"]
-            : path.endsWith("/src/constraints/snapping/local-source-index.ts")
-              ? ["createPrimitiveSourceIndex"]
-              : path.endsWith("/src/application/snapping/local-sources.ts")
-                ? ["getLocalSnapSources"]
-                : path.endsWith("/src/application/tools/snapping.ts")
-                  ? ["createVisibleToolSourceQuery", "createToolSourceQuery"]
-                  : [];
+        const names = path.endsWith("/src/domain/project/schema.ts")
+          ? ["validateProject"]
+          : path.endsWith("/src/domain/project/owned-snapshot.ts")
+            ? ["createProjectSnapshot"]
+            : path.endsWith("/src/application/storeys/working-storey.ts")
+              ? ["selectWorkingStorey"]
+              : path.endsWith("/src/rendering/viewport/plan-scene.ts")
+                ? ["derivePlanScene", "planSceneRuns"]
+                : path.endsWith("/src/application/snapping/project-references.ts")
+                  ? ["projectSnapPrimitives"]
+                  : path.endsWith("/src/constraints/snapping/local-source-index.ts")
+                    ? ["createPrimitiveSourceIndex"]
+                    : path.endsWith("/src/application/snapping/local-sources.ts")
+                      ? ["getLocalSnapSources"]
+                      : path.endsWith("/src/application/tools/snapping.ts")
+                        ? ["createVisibleToolSourceQuery", "createToolSourceQuery"]
+                        : [];
         if (names.length) {
           let code =
             'import { profileReducer } from "/benchmarks/workspace-load-trace.ts";\n' + source;

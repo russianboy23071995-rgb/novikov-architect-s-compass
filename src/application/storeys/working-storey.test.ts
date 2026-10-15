@@ -13,6 +13,13 @@ import { windowSelectionSurfaces } from "../../rendering/viewport/window-selecti
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { changeDrawingDocument } from "../views/documents.ts";
 import { resolveDocumentView, resolveWorkingView } from "../views/working-context.ts";
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+  snapshotWithWorkingStorey,
+} from "../../domain/project/owned-snapshot.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 function fixture() {
   const initial = createExampleProject();
   const ground = setStoreyHeight(initial, initial, {
@@ -28,6 +35,38 @@ function fixture() {
     height: 3.2,
   });
 }
+test("view-only floor switching shares validated model, preserves full-path content and stale guards", () => {
+  const base = createProjectSnapshot(fixture());
+  const active = selectWorkingStorey(base, base, "og");
+  assert.notEqual(active, base);
+  assert.equal(active.storeys, base.storeys);
+  assert.equal(active.layers, base.layers);
+  assert.equal(isOwnedProjectSnapshot(active), true);
+  assert.deepEqual(active, validateProject({ ...base, workingStoreyId: "og" }));
+  const policy = createLayerVisibilityPolicy(active, ALL_LAYERS_VISIBLE);
+  const back = selectWorkingStorey(active, active, base.groundStoreyId);
+  assert.equal(back.storeys, base.storeys);
+  assert.equal(policy.isCurrent(back, policy.context), false);
+  assert.throws(() => selectWorkingStorey(active, back, "og"));
+  assert.deepEqual(back, validateProject({ ...base, workingStoreyId: base.groundStoreyId }));
+});
+
+test("floor snapshot provenance cannot be forged by spread or freezing and detaches mutable sources", () => {
+  const source = fixture();
+  const next = snapshotWithWorkingStorey(source, "og");
+  assert.notEqual(next.storeys, source.storeys);
+  source.storeys[0]!.walls[0]!.height = -1;
+  assert.ok(next.storeys[0]!.walls[0]!.height > 0);
+  assert.throws(() => snapshotWithWorkingStorey(source, "og"));
+  assert.throws(() => createLayerVisibilityPolicy(source, ALL_LAYERS_VISIBLE));
+  const forged = Object.freeze({ ...next, storeys: source.storeys });
+  assert.equal(isOwnedProjectSnapshot(forged), false);
+  assert.throws(() => snapshotWithWorkingStorey(forged, next.groundStoreyId));
+  assert.throws(() => snapshotWithWorkingStorey(next, "missing"));
+  assert.throws(() => {
+    next.storeys[0]!.walls[0]!.height = 9;
+  });
+});
 test("active storey routes existing wall/window actions and derives world height once", async () => {
   const ground = fixture();
   const active = selectWorkingStorey(ground, ground, "og");
@@ -212,7 +251,7 @@ import {
   pickSolidElement,
 } from "../../rendering/viewport/window-selection.ts";
 import { workingStoreyForTarget } from "./working-storey.ts";
-import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+
 import { visibleSurfaces } from "../../rendering/viewport/layer-display.ts";
 
 test("building scene includes EG, OG and basement independently of the active storey", async () => {

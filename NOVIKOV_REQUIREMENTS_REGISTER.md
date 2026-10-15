@@ -12341,3 +12341,16 @@ Recovery-Prüfzusammenfassung nennt nur Arbeitsgeschoss (60/40), Übernahme korr
 (300/200); als P2-Darstellungsfix vorgemerkt, Inhalt vollständig gesichert.
 AUD14-01/02 fokussierte Belege erhalten; AUD14-03 Gesamt-GPU-Nachweis offen, AUD14-04/05
 Restpfade/Wechsel/Gruppen offen, AUD14-06 Release-Gates offen, AUD14-07 nicht abgeschlossen.
+
+### AUD14-07 – Geschosswechsel auf gemeinsamer geprüfter Basis (15.10.2026)
+Nach Merge #365 (694fd2f): enge Domain-Snapshot-Transition für workingStoreyId und
+Wiederverwendung in der Sichtbarkeit. Mutable/fremde Eingaben bleiben voll geprüft;
+keine Änderung der Commit-/Datei-/Recovery-Grenze. Identitätsteilung, Stale-Schutz und
+Vollpfad-Inhalte regressionsgetestet. 1086 Tests, Typecheck, Lint, beide Builds bestanden.
+S1 G, 20 echte Geschosswechsel, fester Viewport: Vollprüfungen 40 → 1, Reducer-Summe
+286,0 → 17,1 ms; lange Tasks 19 → 3, Maximum 75 → 77 ms. Keine vollständige Lagfreiheit.
+Rohdaten benchmarks/storey-switch-before/after.json; Methodik und Grenzen im Masterplan.
+Abbilder 10× funktional geöffnet, noch kein phasenweiser Abbild-/GB-Vergleich.
+Genau nächster Auftrag: GB und Abbildwechsel messen, verbleibende lange Tasks eingrenzen.
+AUD14-04/05/06/07 bleiben teilweise offen; S1-Gruppen/Shift/IFC-Höhen, Recovery-Anzeige
+und bekannte Release-Gates bleiben erhalten.
