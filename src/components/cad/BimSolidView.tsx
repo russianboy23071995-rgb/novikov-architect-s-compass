@@ -1,3 +1,4 @@
+import { prepareWindowAxisPreview } from "@/application/direct-edit/prepared-window";
 import { prepareViewportModel } from "@/rendering/viewport/prepared-model";
 import { wallBase } from "@/domain/elements/wall/heights";
 import { cameraFocus, orbitAround } from "@/rendering/viewport/camera-navigation";
@@ -148,7 +149,29 @@ export function BimSolidView({
     numericTarget !== undefined ? numericTarget : aim?.session === editSession ? aim?.point : null;
   const targetCandidate =
     numericTarget === undefined && aim?.session === editSession ? aim?.candidate : undefined;
+  const preparedWindow = useMemo(() => {
+    if (
+      editSession?.target.kind !== "window" ||
+      editSession.action !== "axis" ||
+      editSession.base !== project
+    )
+      return null;
+    try {
+      return prepareWindowAxisPreview(editSession);
+    } catch {
+      return null;
+    }
+  }, [editSession, project]);
+  const windowPatch = useMemo(() => {
+    if (!preparedWindow || !target) return null;
+    try {
+      return preparedWindow.evaluate(project, selection, target);
+    } catch {
+      return null;
+    }
+  }, [preparedWindow, project, selection, target]);
   const previewProject = useMemo(() => {
+    if (preparedWindow) return project;
     if (editSession && target) {
       try {
         return previewEdit(editSession, project, selection, target, targetCandidate);
@@ -157,7 +180,7 @@ export function BimSolidView({
       }
     }
     return project;
-  }, [editSession, target, targetCandidate, project, selection]);
+  }, [editSession, target, targetCandidate, project, selection, preparedWindow]);
   const [originHeight, setOriginHeight] = useState<number | undefined>();
   useEffect(() => {
     if (!placement) setOriginHeight(undefined);
@@ -173,10 +196,11 @@ export function BimSolidView({
       return null;
     }
   }, [placement?.geometryPreview, placementTarget]);
+  const geometryPatch = placementPatch ?? windowPatch;
   const previewSolid = useMemo(() => {
-    if (placementPatch) return selectionMoveSurfaces(baseSolid, project, placementPatch);
+    if (geometryPatch) return selectionMoveSurfaces(baseSolid, project, geometryPatch);
     return previewProject === project ? baseSolid : buildBuildingSolid(previewProject);
-  }, [previewProject, project, baseSolid, placementPatch]);
+  }, [previewProject, project, baseSolid, geometryPatch]);
   const solid = useMemo(
     () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
     [previewSolid, project, visibility],
@@ -220,8 +244,8 @@ export function BimSolidView({
   const windowSurfaces = useMemo(() => {
     const allows = (id: string) => isLayerVisible(project, visibility, id);
     const base = buildingWindowSelectionSurfaces(previewProject, allows);
-    return placementPatch ? selectionMoveWindows(base, project, placementPatch, allows) : base;
-  }, [previewProject, project, visibility, placementPatch]);
+    return geometryPatch ? selectionMoveWindows(base, project, geometryPatch, allows) : base;
+  }, [previewProject, project, visibility, geometryPatch]);
   const pickDisplayed = useSolidPicking(
     solid,
     windowSurfaces,

@@ -466,10 +466,10 @@ bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 ni
 Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
 implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
 ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
-AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership (PR322/323 gemergt) und
-vorbereiteter 3D-Abfragekontext geprüft. Nächster Einzelauftrag: direkte
-3D-Einzelelementvorschau für Wand/Fenster messen und auf begrenzte vorbereitete
-Ableitung ausrichten; Vollprüfung beim Platzieren unverändert erhalten.
+AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership und 3D-Abfragebasis (PR322–324
+gemergt), Fenster-Achsvorschau als begrenzter Pilot geprüft. Nächster Einzelauftrag:
+direkte Wand-Endpunktvorschau in 3D messen und ihren vollständigen Fallback gegen
+einen begrenzten vorbereiteten Pfad abgleichen; Vollprüfung beim Platzieren erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1066,3 +1066,51 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   und Fenster messen, globalen Prüf-/Ableitungspfad eingrenzen und ersten begrenzten
   vorbereiteten Pfad gegen vollständige Validierung vergleichen. Danach verbleibende
   Schraffurprüfung; AUD14-05/06/07 bleiben offen.
+
+
+### AUD14-04, Teil 4 – Vorbereitete Fenster-Achsvorschau (15.10.2026)
+
+- PR324 nach grüner CI freigegeben und als `58596a3` in main übernommen.
+- Fenster-Achsvorschau bislang: `editAtPointer`/`updateWindow` prüft das ganze Projekt,
+  `buildBuildingSolid` prüft und leitet anschließend das ganze Gebäude erneut ab.
+- Neuer Application-Pilot `prepareWindowAxisPreview`: vollständiger geprüfter Snapshot
+  einmalig, vollständige Anschlussgruppe der Fensterwand einschließlich aller Fenster
+  darin. Gemeinsame `wallDependencyClosure` auch für bestehenden XY-Vorschaupfad genutzt.
+- Fachlogik unverändert: vorhandenes `editAtPointer` auf lokalem Berechnungsprojekt;
+  darin bleiben Geschossstruktur/-höhen erhalten, fremde Bauteile und Referenzbilder
+  sind ausgeklammert. Dieses Hilfsprojekt ist ausschließlich Berechnungsumfang und
+  wird niemals persistiert oder bestätigt. Keine eigene Fenster-/Cap-/Anschlusslogik.
+- 3D ersetzt über vorhandene `GeometryPreview`-Komposition nur diese Wände/Fenster.
+  Öffnung und Auswahlkontur verwenden denselben Patch. Fenster ignorieren weiterhin
+  T-Anschlusspositionen; Wandenden/Eckabschlüsse begrenzen weiterhin wie zuvor.
+  Andere Direktbearbeitungen behalten ihren vollständigen Pfad.
+- Bestätigung weiterhin vollständig über `fullEdit`; keine Übernahme der lokalen
+  Vorschau als Projekt. Auswahl-/Snapshotwechsel abgewiesen, ungültige Ziele halten
+  die bestätigte Basis. Ein Undo-Schritt und Abbruch bleiben unverändert.
+- 991 Tests bestanden; neue Vergleichstests: beide Eckabschlüsse, Doppel-T,
+  Nachbarfenster, Wandenden/Cap, erhöhte Geschosse und Wandversatz, unveränderte
+  Nachbarflächen, ungültige/stale Eingaben, volle Bestätigungsprüfung und ein Undo.
+  App-/Benchmark-Typecheck, gezieltes Lint, Produktionsbuild bestanden.
+- Chromium 155: acht exakte Pixelvergleiche einschließlich Fensterkontur bei zwei
+  Kamerawinkeln und Zielpunkten innerhalb/außerhalb der Wandgrenzen bestanden.
+- Messung: 500 unabhängige Wände/Fenster, fünf Geschosse, ein betroffener Wandkörper;
+  einmalige Vorbereitung 7,636 ms. Sechs warme Zielpunkte: Median vollständiger Pfad
+  54,405 → vorbereiteter Pfad 14,374 ms. Erste Ausführung separat dokumentiert.
+  Keine Gesamtframe-/p95-Garantie; `benchmarks/window-preview-results.json` enthält Rohdaten.
+- Grenzen: vollständige Anschlussgruppen können groß bleiben. Szenenkomposition,
+  Bounds und Fensterkonturen haben weiterhin globale Arbeit. Noch kein optimierter
+  direkter Wand-Endpunktpfad und keine abgeschlossene Schraffurprüfung.
+- Abnahme: Fenster in 3D auf seiner Wand verschieben, auch über Doppel-T und über
+  Wandenden hinaus. Kontur/Öffnung müssen gemeinsam folgen; Klick platziert, Undo
+  stellt Ausgangslage wieder her. Ebenenfilter und anderes Geschoss prüfen.
+- Nächster einzelner Auftrag AUD14-04: direkte Wand-Endpunktvorschau messen und
+  vorbereiteten Bereich mit vollem Fallback sicher vergleichen. Danach Schraffurprüfung.
+
+### Nutzerhinweis für AUD14-05 – Hilfspunkte an ihre Quellen binden (15.10.2026)
+
+Der Vorschlag ist sinnvoll und teilweise vorhanden: `SnapReference.entityId` und
+`feature` identifizieren Element/Merkmal; konstruierte Punkte führen `dependencies`.
+Keine eigene Rasterengine je Wand und keine Hilfspunkte als zusätzliche BIM-Bauteile.
+Bei AUD14-05 Quellenzuordnung für lokale Suche/gezielte Invalidierung nutzen; bei
+Schnittpunkten alle beteiligten Quellen erhalten. Die Zuordnung allein ersetzt
+keinen räumlichen Index und löst globale Projektionsarbeit nicht automatisch.

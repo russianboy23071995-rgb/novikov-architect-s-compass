@@ -11617,3 +11617,18 @@ sechs WebGL-Pixel- und 48 Fangvergleiche im Browser. Rohprofil und Grenzen:
 Keine Gesamtlösung der globalen Ecksuche oder Framezeitgarantie. Nächster begrenzter
 AUD14-04-Auftrag: direkte Wand-/Fenstervorschau in 3D messen und vorbereitet begrenzen,
 mit voller Prüfung beim Platzieren. Danach Schraffurprüfung; AUD14-05 bleibt offen.
+
+
+### AUD14-04 Teil 4 – Fenster-Achsvorschau, 15.10.2026
+Gemeinsame konservative Anschlussclosure; bestehende Fensteraktion auf vorbereiteter
+Berechnungsteilmenge, vorhandene GeometryPreview-Komposition in 3D. Vollständige
+Bestätigung/ein Undo unverändert. 991 Tests, beide Typechecks, Lint, Build und acht
+WebGL-Pixelvergleiche bestanden. Eck-/Doppel-T-/Nachbarfenster-/Höhen-/Cap-Vergleiche.
+Profil 500 Wände: 54,405 → 14,374 ms warm; Vorbereitung separat, keine Framegarantie.
+Nächster begrenzter AUD14-04-Auftrag: direkte Wand-Endpunktvorschau und voller Fallback.
+
+### AUD14-05 – Nutzerhinweis Quellengebundene Hilfspunkte, 15.10.2026
+Element-ID/Merkmal und Quellenabhängigkeiten existieren bereits in SnapReference.
+Für lokale Suche/gezielte Invalidierung nutzen; gemeinsame Engine behalten, keine
+Hilfspunkte als zweite BIM-Geometrie. Schnittpunkte benötigen mehrere Quellen.
+Quellenzuordnung ersetzt den räumlichen Index nicht; Umsetzung bleibt nach AUD14-04.
