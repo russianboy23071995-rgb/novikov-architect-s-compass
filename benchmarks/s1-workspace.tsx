@@ -68,6 +68,7 @@ const project = s1Fixture(
 );
 createRoot(document.getElementById("root")!).render(<CadWorkspace initialProject={project} />);
 const events: unknown[] = [],
+  longAnimationFrames: unknown[] = [],
   longtasks: unknown[] = [],
   frames: number[] = [];
 let last = performance.now(),
@@ -99,6 +100,11 @@ const observer = new PerformanceObserver((list) =>
 );
 if (PerformanceObserver.supportedEntryTypes.includes("longtask"))
   observer.observe({ entryTypes: ["longtask"] });
+const frameObserver = new PerformanceObserver((list) => {
+  longAnimationFrames.push(...list.getEntries().map((entry) => entry.toJSON()));
+});
+if (PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"))
+  frameObserver.observe({ type: "long-animation-frame", buffered: false });
 const panel = document.createElement("details");
 panel.style.cssText =
   "position:fixed;right:12px;top:130px;z-index:1000;background:white;max-width:480px;max-height:60vh;overflow:auto;padding:8px;font:12px system-ui";
@@ -113,6 +119,9 @@ const report: Record<string, unknown> = {
   viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
   events,
   longtasks,
+  longAnimationFrames,
+  longAnimationFrameSupported:
+    PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"),
   workspacePhases,
 };
 const show = () => {
@@ -120,6 +129,8 @@ const show = () => {
 };
 panel.querySelector("#s1-start")!.addEventListener("click", () => {
   observer.takeRecords();
+  frameObserver.takeRecords();
+  longAnimationFrames.length = 0;
   events.length = longtasks.length = frames.length = workspacePhases.length = 0;
   report["measurementStart"] = performance.now();
   report["measurementEnd"] = null;
@@ -128,6 +139,8 @@ panel.querySelector("#s1-start")!.addEventListener("click", () => {
   running = true;
   if (PerformanceObserver.supportedEntryTypes.includes("longtask"))
     observer.observe({ entryTypes: ["longtask"] });
+  if (PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"))
+    frameObserver.observe({ type: "long-animation-frame", buffered: false });
   show();
 });
 panel.querySelector("#s1-check")!.addEventListener("click", async () => {
@@ -146,6 +159,8 @@ panel.querySelector("#s1-check")!.addEventListener("click", async () => {
 panel.querySelector("#s1-trace")!.addEventListener("click", () => {
   running = false;
   observer.disconnect();
+  longAnimationFrames.push(...frameObserver.takeRecords().map((entry) => entry.toJSON()));
+  frameObserver.disconnect();
   report["measurementEnd"] = performance.now();
   report["frames"] = frames;
   show();

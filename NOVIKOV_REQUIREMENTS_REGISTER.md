@@ -12376,3 +12376,15 @@ Rohdaten image-dom/blob/hidden-switch.json und Grenzen im Masterplan dokumentier
 Typecheck/Lint/Diagnosebuild bestanden. Nächster einziger Auftrag: Hauptthread-Aufzeichnung
 mit Commit/Layout/Skript-Zuordnung und Messwerkzeugkontrolle vor weiterem Produktfix.
 Alle übrigen S1-/Recovery-/Release-Gates bleiben offen.
+
+### AUD14-07 – Browser-Frame-Zuordnung und begrenzter Diagnoseabschluss (15.10.2026)
+#368 gemergt (3894c53). Zwei S1-GB-Serien à20 Abbildwechsel: erster Lauf5 lange Tasks/
+13 lange Frames, zweiter ohne Produktfix0 Tasks/2 lange Frames. Browser ordnet Aufwand
+DIV#root.ondblclick zu; erzwungenes Layout nur1,5–2,6 ms. Workspace-Funktion selbst
+max0,7 ms im zweiten Lauf. Kein innerer CPU-Callstack, Commit-/Werkzeugeinfluss offen.
+Rohdaten image-frame-attribution.json und view-workspace-attribution.json; Methodik im
+Masterplan. Keine pauschale Lagfreiheit. Rest als P2 erhalten; weiterer CPU-Trace bei
+Reproduktion nötig. Diagnoseetappe begrenzt beendet, keine spekulative Produktänderung.
+Typecheck/Lint/Diagnosebuild bestanden, Basis-CI grün.
+Nächster einziger Auftrag: S1-Gruppenbewegungen XY/Z mit/ohne Shift praktisch abnehmen;
+danach IFC-Höhen/Containment und Recovery-Zusammenfassung. Release-Gates bleiben offen.

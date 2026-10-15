@@ -101,15 +101,17 @@ export function workspaceLoadInstrumentation(productionCalls = false): Plugin {
           return { code, map: null };
         }
       }
-      const name = path.endsWith("/src/components/cad/PlanSceneRun.tsx")
-        ? "PlanSceneContent"
-        : path.endsWith("/src/components/cad/ProjectNavigator.tsx")
-          ? "ProjectNavigator"
-          : path.endsWith("/src/components/cad/BimPlan.tsx")
-            ? "BimPlan"
-            : path.endsWith("/src/application/direct-edit/controller.ts")
-              ? "editingReducer"
-              : null;
+      const name = path.endsWith("/src/components/cad/CadWorkspace.tsx")
+        ? "CadWorkspace"
+        : path.endsWith("/src/components/cad/PlanSceneRun.tsx")
+          ? "PlanSceneContent"
+          : path.endsWith("/src/components/cad/ProjectNavigator.tsx")
+            ? "ProjectNavigator"
+            : path.endsWith("/src/components/cad/BimPlan.tsx")
+              ? "BimPlan"
+              : path.endsWith("/src/application/direct-edit/controller.ts")
+                ? "editingReducer"
+                : null;
       if (!name) return;
       const marker = `export function ${name}(`;
       if (source.split(marker).length !== 2)
