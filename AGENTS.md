@@ -13,7 +13,7 @@
 
 ## Architecture decisions
 
-- End each completed task report with the next concrete development step, as requested by the user.
+- End each completed task report with the next three concrete development steps, marking the immediate next step; keep exactly one implementation task active (user update 2026-10-15).
 
 - Start with `NOVIKOV_MASTERPLAN.md`: this is the consolidated mission, architectural contract, verified status, priorities and one active next task (user request 2026-10-10).
 - Read only the relevant IDs/detail capsules in `NOVIKOV_REQUIREMENTS_REGISTER.md`. It preserves N01–N60, Guide-F01–F29, AI01–AI35, V/K/R26, product/release/SBOM/homepage requirements and source provenance. Do not load every old guide for each task.

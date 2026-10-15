@@ -2,10 +2,7 @@ import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
-import {
-  preparePolygonVertexEdit,
-  validateSimplePolygon,
-} from "../../geometry/polygons/simple-polygon.ts";
+import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
@@ -51,9 +48,6 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
       points.forEach(Object.freeze);
     } else if (offset) {
       points = offsetContourPoints(pinned, point);
-      const result = validateSimplePolygon(points);
-      if (!result.valid)
-        throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
       points.forEach(Object.freeze);
     } else if (edge) {
       points = edge.edit(point);

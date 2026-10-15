@@ -1,0 +1,152 @@
+{
+  "method": "Node; full and prepared path have independent session/cap caches; include cap work for changing targets; first and eight warm samples separate; alternate order; exact project equality every sample. No frame/rendering guarantee.",
+  "profiles": [
+    {
+      "count": 1,
+      "vertices": 500,
+      "fullPreparationMs": 12.38900000000001,
+      "preparationMs": 11.306899999999985,
+      "preparedCapability": true,
+      "samples": [
+        {
+          "full": 6.957599999999985,
+          "prepared": 1.9312999999999931
+        },
+        {
+          "prepared": 1.912399999999991,
+          "full": 3.6766999999999825
+        },
+        {
+          "full": 4.060000000000002,
+          "prepared": 1.073699999999974
+        },
+        {
+          "prepared": 1.131399999999985,
+          "full": 3.629599999999982
+        },
+        {
+          "full": 3.981300000000033,
+          "prepared": 2.5570000000000164
+        },
+        {
+          "prepared": 1.4081999999999653,
+          "full": 5.4728000000000065
+        },
+        {
+          "full": 3.414100000000019,
+          "prepared": 1.599899999999991
+        },
+        {
+          "prepared": 1.0237999999999943,
+          "full": 3.586999999999989
+        },
+        {
+          "full": 2.8048,
+          "prepared": 1.4180000000000064
+        }
+      ],
+      "warmMedianMs": {
+        "full": 3.6531499999999824,
+        "prepared": 1.4130999999999858
+      }
+    },
+    {
+      "count": 100,
+      "vertices": 100,
+      "fullPreparationMs": 1.1212999999999624,
+      "preparationMs": 44.89359999999999,
+      "preparedCapability": true,
+      "samples": [
+        {
+          "full": 42.6225,
+          "prepared": 0.33449999999999136
+        },
+        {
+          "prepared": 0.513499999999965,
+          "full": 45.02449999999999
+        },
+        {
+          "full": 43.13060000000007,
+          "prepared": 0.31950000000006185
+        },
+        {
+          "prepared": 0.3165000000000191,
+          "full": 45.37819999999999
+        },
+        {
+          "full": 41.34870000000001,
+          "prepared": 0.30900000000008276
+        },
+        {
+          "prepared": 0.5082999999999629,
+          "full": 45.04769999999996
+        },
+        {
+          "full": 41.23410000000001,
+          "prepared": 0.30979999999999563
+        },
+        {
+          "prepared": 0.31549999999992906,
+          "full": 44.51019999999994
+        },
+        {
+          "full": 48.66009999999994,
+          "prepared": 0.3147999999999911
+        }
+      ],
+      "warmMedianMs": {
+        "full": 44.767349999999965,
+        "prepared": 0.3159999999999741
+      }
+    },
+    {
+      "count": 10,
+      "vertices": 100,
+      "fullPreparationMs": 0.9112999999999829,
+      "preparationMs": 5.078399999999988,
+      "preparedCapability": true,
+      "samples": [
+        {
+          "full": 4.897899999999936,
+          "prepared": 0.29949999999996635
+        },
+        {
+          "prepared": 0.34019999999998163,
+          "full": 4.164300000000026
+        },
+        {
+          "full": 4.147099999999909,
+          "prepared": 0.30160000000000764
+        },
+        {
+          "prepared": 0.33740000000000236,
+          "full": 4.983299999999986
+        },
+        {
+          "full": 4.466799999999921,
+          "prepared": 0.29899999999997817
+        },
+        {
+          "prepared": 0.290300000000002,
+          "full": 5.252100000000041
+        },
+        {
+          "full": 4.019800000000032,
+          "prepared": 0.300200000000018
+        },
+        {
+          "prepared": 0.3310000000000173,
+          "full": 4.186400000000049
+        },
+        {
+          "full": 4.883100000000013,
+          "prepared": 0.3000000000000682
+        }
+      ],
+      "warmMedianMs": {
+        "full": 4.326599999999985,
+        "prepared": 0.3009000000000128
+      }
+    }
+  ]
+}

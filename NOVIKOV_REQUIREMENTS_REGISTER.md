@@ -11956,3 +11956,19 @@ Vorher-Messung line-edge-before.json; Vergleich line-edge-results.json: 100 frem
 Einziger Folgeauftrag: Offset geschlossener Polylinien über vorhandenen Linienadapter
 und gemeinsame Offset-/Cap-Berechnung vorbereiten; Mindestgröße, Kontur-/Linienprüfung,
 Vollpfad-/Commit-/Undo-Nachweis erhalten. AUD14-04 und übrige Restaufträge bleiben offen.
+
+
+### AUD14-04 Teil 17 – Polylinien-Offset (15.10.2026)
+#337 bereits gemergt, #338 weiterhin offen; Folgeauftrag auf dessen Zweig ohne Merge.
+Linienadapter nutzt gemeinsame Offset-/Cap-Berechnung; vollständige Zielkonturprüfung
+nun im gemeinsamen offsetContourPoints für Vollaktion und Vorschau. Dies sichert auch
+Polylinien zusätzlich gegen numerisch ungültige Konturen. Schließpunkt/Linienregeln,
+vollständiger Commit und ein Undo erhalten, keine neue Geometrie-/Fang-/Rendererlogik.
+1028 Tests, beide Typechecks, Lint und Build bestanden; Projekt-/Planszenen-/Patch-
+Vergleich, kleine/große Koordinaten, Cap/Rückweg, eigene Linienarten und Kontext/Undo.
+line-offset-results.json: 100 fremde Schraffuren à 100 Punkte: 44,77 → 0,316 ms warm,
+Vorbereitung 44,89 ms separat. Keine Framegarantie oder neue visuelle Browserabnahme.
+Einziger nächster Auftrag: Knicken geschlossener Polylinien vorbereiten mit gemeinsamer
+Kontureinfügung und korrekter Punktgrenze einschließlich Schließpunkt. Ausblick danach:
+Wand-Strecken, dann AUD14-05 nach AUD14-04-Abnahme. Abschlussberichte nennen künftig
+immer drei Schritte; nur einer aktiv. Andere Restpfade/AUD14-06/07 bleiben erhalten.
