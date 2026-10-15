@@ -12232,3 +12232,15 @@ Final 701,7 ms End-to-End; grobe JS-Heap-Stichproben im Wartungsfenster 38,35–
 Keine Prozess-/GPU-/UI-Blockade-Aussage. Typecheck, ESLint und Build bestanden.
 Nächster Auftrag: begrenzte automatische Auslöse-/Abbruchregeln gemäß Masterplan;
 keine automatische Wartung in diesem PR. Stunden-/Quota-Nachweise bleiben offen.
+
+### AUD14-06 – Automatische Auslöse-/Abbruchregeln (15.10.2026)
+
+Vertrag im Masterplan ergänzt, keine Produktionsänderung: ein Application-Koordinator
+für manuelle/automatische Wartung, bestehender Storage-Port, Bedarf nur nach erfolgreichem
+V2-Publish, 30 s Ruhe, 5 min Mindestabstand automatischer Versuche. Zeiten sind Pilotwerte.
+Save/aktive Geste hat Vorrang; kooperativer Abbruch, kein paralleler Aufruf, höchstens ein
+Retry desselben Bedarfs. Unlesbare Sicherungen/Storage-Fehler sperren Automatik bis zu
+manuell erfolgreicher Wartung. Keine automatische Quota-Rettung, keine Heap-Schwellen.
+Heutiger dialoggebundener Controller muss in langlebige gemeinsame Steuerung überführt
+werden. Tabübergreifende Laufzeit-Sperre nicht bereits vorhanden; Root-CAS bleibt Schutz.
+Nächster begrenzter Auftrag: Koordinator und deterministische Tests, noch ohne UI-Aktivierung.
