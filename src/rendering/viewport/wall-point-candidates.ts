@@ -1,3 +1,4 @@
+import { viewportModel, type PreparedViewportModel } from "./prepared-model.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -22,23 +23,25 @@ export function createWallPointCandidates(
   projection: ProjectionState,
   movingWallId?: string,
   visibility?: LayerVisibilityPolicy,
+  prepared?: PreparedViewportModel,
 ) {
-  const complete = buildBuildingSolid(project);
+  const model = viewportModel(project, prepared);
+  const complete = buildBuildingSolid(model);
   const baseSolid = visibleSurfaces(complete, (id) => isLayerVisible(project, visibility, id));
   // A moving preview is neither a target nor an occluder of its stationary sources.
   const solid = movingWallId
     ? { ...baseSolid, faces: baseSolid.faces.filter((f) => f.wallId !== movingWallId) }
     : baseSolid;
-  const sources = getLocalSnapSources(project);
+  const sources = getLocalSnapSources(model);
   const walls = new Set(
-    storeyOf(project)
+    storeyOf(model)
       .walls.filter(
         (w) =>
           wallBase(w) === 0 && w.id !== movingWallId && isLayerVisible(project, visibility, w.id),
       )
       .map((wall) => wall.id),
   );
-  const elevation = workingStoreyElevation(project);
+  const elevation = workingStoreyElevation(model);
   const plane = projection.workplane(elevation);
   return Object.freeze({
     visibilityAt: (point: Point2) =>

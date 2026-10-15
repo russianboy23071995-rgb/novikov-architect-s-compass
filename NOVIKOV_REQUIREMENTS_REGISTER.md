@@ -11604,3 +11604,16 @@ owned Cachehit ~0,002 ms. Keine globale Ownership- oder Framezeitgarantie.
 Nächster einzelner Auftrag AUD14-04: vorbereiteten gemeinsamen 3D-Abfragekontext
 auf stabile geprüfte Basis ausrichten; Kamera-/Projektionswechsel von Modellprüfung
 entkoppeln. Bestehende Identitätscaches und finale Validierung dabei nicht umgehen.
+
+
+### AUD14-04 Teil 3 – Nachweis 15.10.2026
+Gemeinsame vorbereitete immutable Modellbasis im 3D-Viewport an Darstellung,
+Wand-/Fußkantenfang und Bewegungsursprung angebunden. Kamera/Filter bleiben getrennt;
+ursprüngliche Projektidentität steuert Veraltung. Keine erneute Vollprüfung der
+stabilen Basis bei Kamerawechsel. Bewegungs-Eckcache an unveränderliche Szene gebunden.
+989 Tests, beide Typechecks, Lint und Build bestanden; 216 Node-Vergleiche sowie
+sechs WebGL-Pixel- und 48 Fangvergleiche im Browser. Rohprofil und Grenzen:
+`benchmarks/query-context-results.json` (warm 32,377 → 18,108 ms, Vorbereitung separat).
+Keine Gesamtlösung der globalen Ecksuche oder Framezeitgarantie. Nächster begrenzter
+AUD14-04-Auftrag: direkte Wand-/Fenstervorschau in 3D messen und vorbereitet begrenzen,
+mit voller Prüfung beim Platzieren. Danach Schraffurprüfung; AUD14-05 bleibt offen.

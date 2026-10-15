@@ -1,3 +1,4 @@
+import { viewportModel, type PreparedViewportModel } from "./prepared-model.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
@@ -7,13 +8,17 @@ import type { ProjectionState } from "./projection-state.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 
 export type MovementCorner = { id: string; point: Vector3 };
-const cache = new WeakMap<Project, readonly MovementCorner[]>();
+const cache = new WeakMap<ReturnType<typeof buildBuildingSolid>, readonly MovementCorner[]>();
 /** Shared derived boundary corners, including upper edges and every storey. */
-export function movementCorners(project: Project): readonly MovementCorner[] {
-  const cached = cache.get(project);
+export function movementCorners(
+  project: Project,
+  prepared?: PreparedViewportModel,
+): readonly MovementCorner[] {
+  const solid = buildBuildingSolid(viewportModel(project, prepared));
+  const cached = cache.get(solid);
   if (cached) return cached;
   const grouped = new Map<string, ReturnType<typeof buildBuildingSolid>["faces"]>();
-  for (const f of buildBuildingSolid(project).faces) {
+  for (const f of solid.faces) {
     const faces = grouped.get(f.wallId) ?? [];
     faces.push(f);
     grouped.set(f.wallId, faces);
@@ -25,7 +30,9 @@ export function movementCorners(project: Project): readonly MovementCorner[] {
       for (const point of edge) points.set(JSON.stringify(point), point);
     for (const point of points.values()) corners.push({ id, point });
   }
-  cache.set(project, corners);
+  for (const corner of corners) Object.freeze(corner);
+  Object.freeze(corners);
+  cache.set(solid, corners);
   return corners;
 }
 /** Screen-distance acquisition uses the same displayed solid/depth policy as selection. */
@@ -33,9 +40,11 @@ export function createMovementOriginQuery(
   project: Project,
   projection: ProjectionState,
   allows: (id: string) => boolean,
+  prepared?: PreparedViewportModel,
 ) {
-  const solid = visibleSurfaces(buildBuildingSolid(project), allows);
-  const projected = movementCorners(project)
+  const model = viewportModel(project, prepared);
+  const solid = visibleSurfaces(buildBuildingSolid(model), allows);
+  const projected = movementCorners(model)
     .filter((c) => allows(c.id))
     .map((c) => {
       const p = projection.project(c.point);
