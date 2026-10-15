@@ -1,3 +1,4 @@
+import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -50,9 +51,14 @@ export function selectedWallAxis(
   selection: ElementTarget | null,
   allows: (id: string) => boolean,
   projection: ProjectionState,
+  patch?: GeometryPreview | null,
 ) {
   if (selection?.kind !== "wall" || !allows(selection.id)) return null;
-  const wall = storeyOf(displayed).walls.find((w) => w.id === selection.id);
+  const scope = patch?.storeyPatches
+    ? patch.storeyPatches.find((p) => p.storeyId === storeyOf(displayed).id)
+    : patch;
+  const geometry = scope?.replacedIds.includes(selection.id) ? scope.geometry : displayed;
+  const wall = storeyOf(geometry).walls.find((w) => w.id === selection.id);
   if (!wall) return null;
   const screen = (point: { x: number; y: number }) => {
     const [x, y] = projection.project([

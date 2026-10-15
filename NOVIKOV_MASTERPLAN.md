@@ -499,8 +499,10 @@ ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gem
 AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership und 3D-Abfragebasis (PR322–324
 gemergt), Fenster-Achsvorschau PR325 gemergt (f734413). Gemeinsamer Application-Einstieg
 und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzelauftrag:
-direkte Wand-Endpunktvorschau in 3D messen und ihren vollständigen Fallback gegen
-einen begrenzten vorbereiteten Pfad abgleichen; Vollprüfung beim Platzieren erhalten.
+Nach PR326 (gemergt, f946825) ist die axiale T-Hauptwand-Endpunktvorschau über den
+Application-Einstieg als Geometriepatch geprüft. Nächster Einzelauftrag: die noch vollständigen
+Wand-Endpunktfälle (Anfang, Kürzen, schräge Bewegung) messen und die fachlich sichere
+Abhängigkeitsgrenze für denselben Adapter bestimmen; keine Renderer-Sonderzweige.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1159,3 +1161,38 @@ Nächster einzelner Auftrag bleibt die direkte Wand-Endpunktvorschau: über dens
 integrieren, gegen den vollständigen Pfad vergleichen und messen. Kein neuer UI-Typschalter.
 
 Nachweis dieses Schritts: 992 Tests bestanden, App-/Benchmark-Typecheck, gezieltes Lint und Build erfolgreich. Bestehende Geometrie-/Kontur-/Commit-Vergleiche laufen durch den gemeinsamen Einstieg; unbekannte Operation und ungültiges Ziel zusätzlich geprüft. Keine neue Browserabnahme oder neue Performancezahl für diese verhaltensgleiche Umverdrahtung behauptet.
+
+### AUD14-04, Teil 5 – Wand-Endpunktpatch im gemeinsamen Einstieg (15.10.2026)
+
+PR326 nach Freigabe und erfolgreicher CI gemergt (f946825). `prepareDirectEditPreview`
+registriert den vorhandenen begrenzten T-Hauptwand-Piloten als weiteren Application-Adapter.
+Keine zusätzliche Typentscheidung in BimSolidView. `prepareEndpoint.evaluateGeometry`
+liefert die lokale Anschlussgruppe direkt an die bestehende Patchkomposition; sein bisheriger
+Projektpfad bleibt für 2D erhalten. Gemeinsame Snapshot-Ownership und wallDependencyClosure
+ersetzen die bisherige eigene Anschlussgraphsuche. Andere Geschosse sind im lokalen
+Berechnungsprojekt leer; ihre Flächen bleiben in der Darstellung wiederverwendet.
+
+Grenze ausdrücklich: Punktaktion am Achsende Index 1 einer T-Hauptwand. Nur axiale
+Verlängerung ohne Eckanschlussgruppe/fremden Endpunktkontakt läuft lokal. Kürzen, schräge
+Ziele und neue T-Fanganschlüsse verwenden weiterhin den vollständigen Fachpfad. Neue
+T-Fanginformationen werden durch den gemeinsamen Vorschauvertrag transportiert.
+Die ausgewählte Wandachse liest ebenfalls den angezeigten Patch, damit sie nicht zurückbleibt.
+Commit bleibt unverändert vollständig validiert und erzeugt einen Undo-Schritt.
+
+Nachweis: 996 Tests, beide Typechecks, gezieltes Lint und Build bestanden. Vergleich umfasst
+T-/Doppel-T-/Eckabhängigkeiten, stationäre Partner/Fenster, Mehrgeschosse mit Wandhöhenversatz,
+fremde Endpunkte/Mehrfachknoten, T-Fang, ungültige Ziele, geänderten Kontext, Abbruch und Undo.
+Browser Chromium155: acht pixelgleiche Darstellungen einschließlich Auswahlkontur sowie
+acht Achsenvergleiche gegen Vollableitung. Diagnose: benchmarks/wall-patch.html.
+
+Messung mit 502 Wänden und 502 Fenstern auf fünf Geschossen: warme Mediane
+38.01 ms (Projektvorschau + Gebäudeableitung) gegenüber 13.27 ms (Patch + Komposition),
+einmalige Vorbereitung 8.92 ms. Zwei Wände im lokalen Berechnungsumfang.
+Ein erster und acht warme Werte, wechselnde Reihenfolge, Rohdaten/Methodik in
+`benchmarks/wall-patch-results.json`. Keine Gesamtframe-/GPU-/Heapgarantie. Die Vergleichsbasis
+nutzt bereits den aktuellen gemeinsamen prepareEndpoint; kein historischer Commitvergleich.
+Globale Komposition und Fremdendpunktsuche sowie breite Anschlussgruppen bleiben offen.
+
+Einziger Folgeauftrag: die noch vollständigen Wand-Endpunktfälle (Anfang/Kürzen/schräg)
+gegen denselben Vertrag und ihre Abhängigkeitsgrenze prüfen. Danach verbleibende
+Schraffurprüfungen in AUD14-04; AUD14-05/06/07 bleiben offen.

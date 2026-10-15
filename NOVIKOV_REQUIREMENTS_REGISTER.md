@@ -11645,3 +11645,15 @@ Einziger Folgeauftrag: vorbereitete Wand-Endpunktvorschau über den gemeinsamen 
 mit vollständigem Vergleich und Messung; keine neue Renderer-Sonderbehandlung.
 
 Nachweis dieses Schritts: 992 Tests bestanden, App-/Benchmark-Typecheck, gezieltes Lint und Build erfolgreich. Bestehende Geometrie-/Kontur-/Commit-Vergleiche laufen durch den gemeinsamen Einstieg; unbekannte Operation und ungültiges Ziel zusätzlich geprüft. Keine neue Browserabnahme oder neue Performancezahl für diese verhaltensgleiche Umverdrahtung behauptet.
+
+### AUD14-04 Teil 5 – Gemeinsamer Wand-Endpunktpatch, 15.10.2026
+
+PR326 gemergt (f946825). Bestehender axialer T-Hauptwand-Endpunktpilot liefert jetzt
+GeometryPreview über prepareDirectEditPreview, inklusive angezeigter Wandachse. Keine
+neue Renderer-Typverzweigung. Vollständige Commitvalidierung und ein Undo erhalten.
+996 Tests, Typechecks, gezieltes Lint, Build und acht Browser-Pixel-/Achsenvergleiche bestanden.
+Messwerte und Grenzen: benchmarks/wall-patch-results.json, Masterplan AUD14-04 Teil 5.
+Noch kein allgemeiner lokaler Wand-Endpunktadapter: Anfang/Kürzen/schräge Bewegung,
+neue Anschlüsse und große Anschlussgruppen bleiben ausdrücklich offen.
+Nächster einzelner Auftrag: diese verbleibenden Wand-Endpunktfälle messen und ihren
+sicheren Abhängigkeitsumfang für denselben Adapter bestimmen.
