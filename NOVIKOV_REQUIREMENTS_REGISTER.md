@@ -12413,3 +12413,10 @@ Node-Pointermessung z-input-pointer-evidence.json; kein Ersatz für Frame-/GPU-N
 Z-Fremdreferenzfang und kontinuierlicher Shift-Test noch offen. Vorbereitung/Komposition
 bleiben benannte Kosten. Abbildwechsel-Restbefund nicht geschlossen. Nächster einziger
 Auftrag: verbleibende S1-Gruppen-/Shift-Abnahme einschließlich GB vervollständigen.
+
+### AUD14-07 – GB-Mausabnahme: Teilnachweis, Unterbrechung (15.10.2026)
+#371 gemergt. S1 GB: numerische XY/Z-Gruppenbewegungen mit 20 Bildassets, vollständiger
+Exportvergleich und ein Undo bestanden. Beleg benchmarks/s1-gb-movement-ui-evidence.json.
+Kontinuierlicher Shift-Maustest und unabhängiger Vorschauflächenvergleich weiter offen;
+Codex-Prozessabsturz/Hänger im Windows-Protokoll, Ursache ungeklärt. Kein belegter
+NOVIKOV-Geometrieabsturz und keine Lag-Freigabe. Details und genau ein Folgeauftrag im Masterplan.

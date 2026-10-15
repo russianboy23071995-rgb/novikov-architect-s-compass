@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-15",
+  "base": "2d450e3",
+  "fixture": "S1 GB",
+  "assets": 20,
+  "browser": "isolated production workspace port 8085, production-data images",
+  "xy": {"targets": ["s0-w0", "s0-w1"], "delta": {"x": 0, "y": 0.2}, "wholeProjectWithin1e10": true, "undoWholeProjectExact": true},
+  "z": {"targets": ["s4-w0", "s4-w1"], "delta": 0.5, "wholeProjectExact": true, "undoAllStoreysExact": true, "undoEmpty": true},
+  "assetsUnchanged": true,
+  "limits": ["Numeric placement, not continuous Shift pointer motion", "Images present in project and 2D, not rendered in 3D", "Independent Node full-face comparison interrupted, no result", "No lag-free or GPU frame-equivalence claim"],
+  "interruption": "Windows WER reports codex.exe BEX64 and Codex MoAppHang; local servers and test process ended. Root cause not determined. Product server restarted and HTTP 200 verified."
+}

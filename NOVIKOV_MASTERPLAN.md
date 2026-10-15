@@ -3135,3 +3135,34 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung aller Geschosse korrigieren und offene Performance-/Release-
    Nachweise abgleichen. Keine Freigabe als lagfrei; Speichererweiterung bleibt zurückgestellt.
+
+### AUD14-07 – GB-Teilabnahme und unterbrochene Testumgebung (15.10.2026)
+PR #371 nach erfolgreicher CI mit Nutzerfreigabe nach main übernommen (2d450e3).
+Im isolierten Produktions-Workspace (8085, variant=GB, unveränderte production-data-
+Bildreferenzen) wurden s0-w0/w1 in 2D um 0,2 m in Y und s4-w0/w1 in 3D um 0,5 m
+in Z numerisch platziert. Der komplette JSON-Export stimmt mit der erwarteten Änderung
+überein (XY Rundung 1e-10, Z exakt). Interner T-Anschluss erhalten, neun externe gelöst;
+Fenster und alle 20 Bildassets unverändert. Ein Undo stellt in 2D das ganze Projekt und
+in 3D alle Geschossdaten exakt wieder her; Undo danach leer. Bildreferenzen sind im
+Grundriss sichtbar, werden in 3D nicht gerendert. Kein 3D-Bildrenderlast-Nachweis.
+Beleg: benchmarks/s1-gb-movement-ui-evidence.json, outputs/s1-gb-z-preview.png.
+
+Die Testumgebung wurde anschließend unterbrochen. Windows WER protokolliert codex.exe
+BEX64 sowie Codex MoAppHang; beide Webserver und der Prüfprozess waren danach beendet.
+Kein nachgewiesener NOVIKOV-Geometrieabsturz, Auslöser unbekannt. Port8080 neu gestartet,
+HTTP200 geprüft. Der unabhängige Node-Vergleich kompletter Vorschauflächen wurde
+unterbrochen und wird NICHT als bestanden gewertet. Kein erneuter schwerer Lauf ohne
+isolierte, begrenzte Ausgabe; ein Cross-Realm-Assert hatte zuvor unnötig große synthetische
+Bilddaten in die Testausgabe geschrieben. Ein kausaler Zusammenhang ist nicht belegt.
+
+Kontinuierliches Shift-Halten mit Mausbewegung bleibt wegen der verfügbaren Browser-
+Steuerung ungetestet. Shift-Klick ersetzt dies nicht. Z wird ausdrücklich über Z aktiviert
+und bleibt auch ohne Shift achsgebunden; Shift allein wählt Z nicht automatisch.
+Keine Produktänderung; #371 CI grün. Für diese Dokumentationsänderung keine erneute
+Vollsuite/Build. Abbildwechsel-Restbefund und Release-Gates weiterhin offen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** Restliche S1-Abnahme: kontinuierlicher Shift-Maustest und isolierter
+   Vorschauvergleich ohne große Bilddaten-Ausgabe. Kein Abschluss als lagfrei.
+2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
+3. Recovery-Zusammenfassung aller Geschosse und offene Performance-/Release-Gates prüfen.
