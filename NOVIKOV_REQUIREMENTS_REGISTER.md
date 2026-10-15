@@ -11669,3 +11669,37 @@ Build und 16 Browser-Pixel-/Achsenvergleiche bestanden. Rohdaten:
 benchmarks/shared-endpoints-results.json; Details Masterplan Teil 6.
 Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen in AUD14-04 messen und
 sicher vorbereiten; keine neue werkzeugspezifische Fangengine.
+
+
+### AUD14-04 Teil 7 – Räumliche Konturprüfung (15.10.2026)
+
+PR328 nach ausdrücklicher Freigabe und grüner CI gemergt (6e4df27).
+Befund: prepareStoreyTranslation prüft verschobene Schraffuren je Ziel mit hatchSchema;
+auch direkte Konturaktionen erreichen validateSimplePolygon. Dessen Bounds-Vorfilter
+wurde bisher erst nach Bildung jedes Kantenpaares angewendet.
+
+Gemeinsamer Fix in Geometry: vorhandener createBoxIndex begrenzt Kandidaten für
+Konturen über 128 Punkte. Modelltoleranz plus Rundungsreserve erweitern die Suche;
+unveränderte exakte Kontaktprädikate und Paarreihenfolge erhalten das Ergebnis
+inklusive erster Fehlerstelle. Kleine Konturen behalten den einfachen Pfad.
+Keine Werkzeugkopie, keine Rendereränderung, keine ungeprüfte Translationsannahme:
+bei großen Koordinaten kann auch verschobene Geometrie kollabieren. Vollständige
+Commit-Prüfung und History bleiben erhalten. Indexaufbau weiterhin pro Prüfung.
+
+Nachweis: 1002 Tests, beide Typechecks, fokussiertes Lint und Produktionsbuild.
+Eingefrorener bisheriger Validator als Oracle für konvexe/konkave, berührende,
+vertauschte, kollabierende und nicht endliche Konturen. Große Schraffurbewegung:
+Vorschau/Projektvergleich, stale Kontext, numerischer Kollaps und genau ein Undo.
+Keine neue visuelle Browserabnahme für diesen internen Geometriefix behauptet.
+
+Messung: benchmarks/polygon-validation-results.json; reine Polygonprüfung inklusive
+Indexaufbau, ein erster und acht warme Werte, alternierende Reihenfolge.
+500 Punkte warme Mediane: konvex 4,84 → 1,83 ms, gezackt 6,58 → 4,09 ms.
+2000 Punkte: 67,24 → 4,15 ms bzw. 119,38 → 64,75 ms. Kleine Fälle sind
+rausch-/Overhead-empfindlich. Keine Gesamtframegarantie; dicht überlappende Bounds
+bleiben quadratisch, Kandidaten werden nicht abgeschnitten. Wiederholte Prüfungen
+unveränderter Schraffuren im vollständigen Legacy-Projektpfad bleiben offen.
+
+Einziger Folgeauftrag: direkte Schraffur-Punktvorschau über gemeinsamen vorbereiteten
+Application-Einstieg begrenzen; Vollpfad-/Commit-/Undo-Gleichheit und Pointerarbeit
+messen. AUD14-04 bleibt offen, AUD14-05/06/07 folgen danach. A04 gilt weiter.
