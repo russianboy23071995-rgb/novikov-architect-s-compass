@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "axis": "XY",
+      "pass": true,
+      "faces": 7050,
+      "fullFaces": 7050,
+      "previewHash": "f007526e11eb05a435010537a34186abeaa0d1ae73b367d9201ca4297d8f007a",
+      "fullHash": "f007526e11eb05a435010537a34186abeaa0d1ae73b367d9201ca4297d8f007a",
+      "coordinateRounding": 1E-10,
+      "assets": 20
+    },
+    {
+      "axis": "Z",
+      "pass": true,
+      "faces": 7050,
+      "fullFaces": 7050,
+      "previewHash": "21019ee9b81d2addf1141956000b5e644975eab7ab116a3f7713f3a25ba4399f",
+      "fullHash": "21019ee9b81d2addf1141956000b5e644975eab7ab116a3f7713f3a25ba4399f",
+      "coordinateRounding": 1E-10,
+      "assets": 20
+    }
+  ],
+  "manualShiftAcceptance": "pending; user has not tested",
+  "fixture": "S1 GB",
+  "date": "2026-10-15",
+  "scope": "Sorted derived solid faces, coordinates rounded to 1e-10; not GPU pixels or frame timing",
+  "focusedTests": 24,
+  "base": "c17c0c6"
+}

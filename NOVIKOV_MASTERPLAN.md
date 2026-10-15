@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #370 gemergt; Z-Bewegung an gemeinsame 3D-Interaktion angebunden, numerische und Mausplatzierung im S1-G-Workspace geprüft. Genau nächster Auftrag: verbleibende S1-Gruppen-/Shift-Abnahme vervollständigen; Abbildwechsel-Performancebefund bleibt offen.
+Aktueller Arbeitsauftrag: 15.10.2026 – #372 gemergt; S1-GB-Vorschauvergleich XY/Z bestanden. Praktische Shift-Dauerbewegung wartet auf Nutzerabnahme. Genau nächster technischer Auftrag: IFC-Höhen und Geschosszuordnung nachweisen; Abbildwechsel-Performancebefund bleibt offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3166,3 +3166,37 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Vorschauvergleich ohne große Bilddaten-Ausgabe. Kein Abschluss als lagfrei.
 2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung aller Geschosse und offene Performance-/Release-Gates prüfen.
+
+
+### AUD14-07 – Isolierter Vorschauvergleich abgeschlossen (15.10.2026)
+#372 nach erfolgreicher CI und ausdrücklicher Freigabe gemergt (c17c0c6).
+benchmarks/s1-export-preview-check.ts vergleicht die zuvor im echten S1-GB-Workspace
+exportierten Projekte: Baseline, XY (+0,2 m Y für s0-w0/w1), Z (+0,5 m für s4-w0/w1).
+Normale Projektimportgrenze, unveränderte 20 Bildassets; begrenzter Node-Heap (768 MiB),
+Ausgabe ausschließlich Anzahl/Prüfsumme. Keine großen Objekt-/Bilddaten-Diffs mehr.
+
+Ergebnis: XY und Z jeweils 7050 Vorschauflächen gleich dem vollständigen Solidaufbau
+des tatsächlich exportierten Projekts. Flächenreihenfolge neutralisiert, numerische
+Koordinaten auf 1e-10 gerundet. Beleg benchmarks/s1-export-preview-evidence.json.
+Dies prüft die abgeleitete Geometrie, nicht GPU-Pixel, Interaktionslatenz oder Framezeiten.
+24 gezielte Tests (gemeinsame Shift-Sperre, Z-Adapter, Achsprojektion) bestanden;
+Benchmark-Typecheck und fokussiertes ESLint bestanden. Keine Produktänderung, deshalb
+keine erneute vollständige Testsuite/Produktbuild. Kein Crash in diesem begrenzten Lauf.
+Der frühere Codex-Absturz bleibt ungeklärt; daraus wird keine Ursachenbehauptung abgeleitet.
+
+Praktische Shift-Dauerbewegung ausdrücklich noch offen: Nutzer antwortet „Noch nicht
+getestet“. Testanleitung übergeben: verbundene Wandgruppe, Ursprung, Richtung, Shift
+halten und weit seitlich bewegen, platzieren, ein Undo; anschließend ausdrücklich Z
+wählen und wiederholen. Kein weiterer automatisierter Shift-Klick als Ersatznachweis.
+Technische Vorschauprüfung abgeschlossen, gesamte praktische S1-Abnahme NICHT geschlossen.
+Die ausstehende Nutzerprüfung blockiert nicht den unabhängigen IFC-Nachweis.
+
+Reproduktion (Node mit Type-Stripping):
+node --max-old-space-size=768 --experimental-strip-types benchmarks/s1-export-preview-check.ts <baseline.json> <xy.json> <z.json>
+Die drei Eingaben sind Exporte des beschriebenen Testablaufs, keine beliebigen Nutzerprojekte.
+
+Nächste drei Schritte, nur Schritt 1 als nächster technischer Auftrag:
+1. **Unmittelbar:** IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen;
+   praktische Shift-Rückmeldung parallel offen halten.
+2. Recovery-Zusammenfassung aller Geschosse prüfen und gegebenenfalls korrigieren.
+3. Abbildwechsel-Performancebefund und verbleibende S1-/Release-Gates gezielt abarbeiten.
