@@ -1,3 +1,5 @@
+import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
+import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
@@ -9,7 +11,11 @@ function prepareWindowAxisPreview(session: EditSession) {
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { createProject, addWall, addWindow } from "../src/lib/bim/model.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
-import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
+import {
+  previewEdit,
+  createEditingState,
+  editingReducer,
+} from "../src/application/direct-edit/controller.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import {
   selectionMoveSurfaces,
@@ -69,7 +75,15 @@ test("window patch matches full geometry, outlines and caps across corners, doub
   const multi = buildingViewFixture(2);
   multi.workingStoreyId = "s2";
   multi.storeys[2]!.walls[0]!.baseOffset = 0.4;
-  for (const p of [joined(false), joined(true), multi]) {
+  const oblique = joined(true);
+  for (const wall of storeyOf(oblique).walls)
+    for (const point of [wall.start, wall.end]) {
+      const x = point.x,
+        y = point.y;
+      point.x = x * Math.cos(0.7) - y * Math.sin(0.7);
+      point.y = x * Math.sin(0.7) + y * Math.cos(0.7);
+    }
+  for (const p of [joined(false), joined(true), multi, oblique]) {
     const id = storeyOf(p).windows[0]!.id,
       target = { kind: "window" as const, id };
     const session: EditSession = {
@@ -86,6 +100,13 @@ test("window patch matches full geometry, outlines and caps across corners, doub
       const point = { x: session.anchor.x + dx, y: session.anchor.y + 9 };
       const full = editAtPointer(session, p, point),
         patch = prepared.evaluate(p, target, point);
+      const materialized = prepared.materialize!(p, target, point);
+      assert.deepEqual(materialized, full);
+      assert.deepEqual(previewEdit(session, p, target, point), full);
+      assert.deepEqual(
+        derivePlanScene(materialized, () => true),
+        derivePlanScene(full, () => true),
+      );
       const derived = selectionMoveSurfaces(solid, p, patch);
       assert.deepEqual(canonical(derived.faces), canonical(buildBuildingSolid(full).faces));
       assert.deepEqual(
@@ -111,6 +132,8 @@ test("window preview never commits; confirmation validates whole project and cre
     prepared = prepareWindowAxisPreview(session);
   const point = { x: 4, y: 0 };
   prepared.evaluate(base, target, point);
+  assert.deepEqual(prepared.materialize!(base, target, point), editAtPointer(session, base, point));
+  assert.equal(editingReducer(state, { type: "cancel" }).history.present, base);
   assert.equal(state.history.past.length, 0);
   const committed = editingReducer(state, { type: "confirm", session, selection: target, point });
   assert.equal(committed.error, "");
@@ -146,4 +169,38 @@ test("common preview entry explicitly leaves unmigrated wall operations on the l
       anchor: { x: 0, y: 0 },
     }),
   );
+});
+
+test("window 2D materialization preserves foreign contents and snapshot ownership", () => {
+  const base = joined(true),
+    foreign = hatchPointFixture(2, 4);
+  base.hatchPatterns = foreign.hatchPatterns;
+  storeyOf(base).hatches = storeyOf(foreign).hatches;
+  const target = { kind: "window" as const, id: "window" };
+  const session: EditSession = {
+    base,
+    target,
+    action: "axis",
+    index: null,
+    anchor: editAnchor(base, target),
+  };
+  const prepared = prepareWindowAxisPreview(session),
+    point = { x: 4, y: 0 };
+  const full = editAtPointer(session, base, point);
+  assert.deepEqual(prepared.materialize!(base, target, point), full);
+  assert.deepEqual(
+    derivePlanScene(prepared.materialize!(base, target, point), () => true, base.hatchPatterns),
+    derivePlanScene(full, () => true, base.hatchPatterns),
+  );
+  assert.throws(() => prepared.materialize!({ ...base }, target, point));
+  assert.throws(() =>
+    prepared.materialize!(base, { kind: "window", id: "neighbour-window" }, point),
+  );
+  assert.throws(() => prepared.materialize!(base, target, { x: NaN, y: 0 }));
+  const output = prepared.materialize!(base, target, point);
+  assert.throws(() => {
+    storeyOf(output).windows[0]!.position = 0;
+  });
+  storeyOf(base).hatches[0]!.points[0]!.x = NaN;
+  assert.deepEqual(prepared.materialize!(base, target, point), full);
 });

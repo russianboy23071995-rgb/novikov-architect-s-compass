@@ -11925,3 +11925,19 @@ Kein Frameversprechen; Pfadlänge und Vorbereitung bleiben Kosten, globale Plana
 Einziger Folgeauftrag: vorhandenen Fenster-Achsadapter für direkte 2D-Vorschau wiederverwenden,
 Vollpfad-/Commit-/Undo-Vergleich und 50/500-Wände-Messung. Restpfade Teil 13 bleiben offen;
 AUD14-04 sowie nachgeordnet AUD14-05/06/07 nicht als abgeschlossen behandeln.
+
+
+### AUD14-04 Teil 15 – Fenster-Achsvorschau 2D (15.10.2026)
+PR336 gemergt (97913b7). prepared-window.ts bietet jetzt Projektmaterialisierung;
+Registrierung vor projectView-Fallback. Ein gemeinsamer resolve-Pfad für 2D und 3D,
+keine neue Fenstergeometrie. Nur das bewegte Fenster in die vollständige eigene Basis
+übernehmen; vollständiger Commit und ein Undo erhalten.
+1020 Tests, beide Typechecks, Lint und Build bestanden. Projekt-/Planszenen-/Controller-
+Vergleich zusätzlich zu 3D: Wandgrenzen, Ecken, Doppel-T, schräge Wände, Obergeschoss,
+Höhenversatz, Musterschraffuren, Kontext-/Besitzschutz, Abbruch und Commit/Undo.
+Keine neue visuelle Browserabnahme. Messung window-plan-results.json: 500 Wände/Fenster,
+warmer Vollpfad 3,28 → Vorschau 0,13 ms; Vorbereitung 5,99 ms separat. Anschlussgruppe
+und globale Planableitung bleiben Kosten; keine Frame-/GPU-Garantie.
+Einziger Folgeauftrag: geschlossene Polylinie Seitenstrecken über vorhandene gemeinsame
+Konturvorbereitung/Cap, genaue Kosten zuerst messen, Vollpfad-/Commit-/Undo-Vergleich.
+Andere Restpfade aus Teil 13 und AUD14-05/06/07 bleiben offen; AUD14-04 nicht abgeschlossen.

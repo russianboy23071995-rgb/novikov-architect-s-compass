@@ -1,6 +1,6 @@
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallDependencyClosure } from "../../domain/elements/wall/dependency-closure.ts";
-import { storeyOf } from "../../domain/storeys/access.ts";
+import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
@@ -43,14 +43,27 @@ export function prepareWindowAxisPreview(session: EditSession) {
   const replacedIds = Object.freeze(
     [...storeyOf(local).walls, ...storeyOf(local).windows].map((e) => e.id),
   );
+  function resolve(current: Project, selection: ElementTarget | null, point: Point) {
+    if (current !== source || selection?.kind !== target.kind || selection.id !== target.id)
+      throw Error("Bearbeitungskontext geändert.");
+    return editAtPointer(localSession, local, point);
+  }
   return Object.freeze({
     affectedWalls: ids.size,
     evaluate(current: Project, selection: ElementTarget | null, point: Point): GeometryPreview {
-      if (current !== source || selection?.kind !== target.kind || selection.id !== target.id)
-        throw Error("Bearbeitungskontext geändert.");
-      const next = editAtPointer(localSession, local, point);
+      const next = resolve(current, selection, point);
       const geometry = { storey: storeyOf(next), assets: next.assets };
       return { geometry, replacedIds, storeyPatches: [{ storeyId: s.id, geometry, replacedIds }] };
+    },
+    materialize(current: Project, selection: ElementTarget | null, point: Point): Project {
+      const next = resolve(current, selection, point);
+      // The shared window-axis action changes only this opening's relative position.
+      // Keep the complete original project; the dependency scope is only a validation view.
+      const changed = Object.freeze({ ...storeyOf(next).windows.find((w) => w.id === target.id)! });
+      return replaceStorey(base, {
+        ...s,
+        windows: s.windows.map((w) => (w.id === target.id ? changed : w)),
+      });
     },
   });
 }
