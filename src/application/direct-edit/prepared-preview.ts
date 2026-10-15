@@ -1,3 +1,5 @@
+import { prepareWallEndpointPreview } from "./prepared-wall.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { prepareWindowAxisPreview } from "./prepared-window.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
@@ -8,7 +10,12 @@ import type { ElementTarget } from "../selection/target.ts";
  * Prepare once per edit session. Adapters own dependency scope, not the renderer.
  */
 export interface PreparedDirectEditPreview {
-  evaluate(current: Project, selection: ElementTarget | null, point: Point): GeometryPreview;
+  evaluate(
+    current: Project,
+    selection: ElementTarget | null,
+    point: Point,
+    candidate?: SnapCandidate | null,
+  ): GeometryPreview;
 }
 
 /** null explicitly denotes an unmigrated legacy path, not an optimized capability.
@@ -18,5 +25,5 @@ export interface PreparedDirectEditPreview {
 export function prepareDirectEditPreview(session: EditSession): PreparedDirectEditPreview | null {
   if (session.target.kind === "window" && session.action === "axis")
     return prepareWindowAxisPreview(session);
-  return null;
+  return prepareWallEndpointPreview(session);
 }

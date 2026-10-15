@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-15",
+  "method": "Node, 5 storeys; existing previewEdit plus buildBuildingSolid versus prepared Application patch plus selectionMoveSurfaces. Same process, alternating evaluation order, one first and eight warm samples. Basis scene outside timings; preparation separately. Baseline uses current shared prepareEndpoint. No GPU, picking, inference, full UI frame, heap or cold-process guarantee. No percentile estimate from small sample.",
+  "profiles": [
+    {
+      "walls": 52,
+      "windows": 52,
+      "preparationMs": 3.2569000000000017,
+      "first": {
+        "oldMs": 18.563500000000005,
+        "preparedMs": 6.583100000000002,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 11.723599999999976,
+          "preparedMs": 4.06310000000002,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 11.465499999999963,
+          "preparedMs": 5.268200000000036,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 10.088999999999999,
+          "preparedMs": 4.511099999999999,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 11.063600000000008,
+          "preparedMs": 3.5649999999999977,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 8.763300000000015,
+          "preparedMs": 4.099400000000003,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 9.957100000000025,
+          "preparedMs": 2.968900000000019,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 6.877900000000011,
+          "preparedMs": 3.025599999999997,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 6.835300000000018,
+          "preparedMs": 2.5242000000000075,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 10.023050000000012,
+        "preparedMs": 3.814050000000009
+      }
+    },
+    {
+      "walls": 502,
+      "windows": 502,
+      "preparationMs": 8.916100000000029,
+      "first": {
+        "oldMs": 45.31510000000003,
+        "preparedMs": 13.213499999999954,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 29.873699999999985,
+          "preparedMs": 18.35390000000001,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 37.306299999999965,
+          "preparedMs": 13.584499999999935,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 75.17100000000005,
+          "preparedMs": 12.953000000000088,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 46.23770000000002,
+          "preparedMs": 15.381600000000049,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 38.72270000000003,
+          "preparedMs": 12.04239999999993,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 29.217200000000048,
+          "preparedMs": 17.10469999999998,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 37.123500000000035,
+          "preparedMs": 10.930500000000052,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 43.92640000000006,
+          "preparedMs": 11.194899999999961,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 38.0145,
+        "preparedMs": 13.268750000000011
+      }
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "pixelComparisons": 8
+  },
+  "limits": [
+    "Only point/index=1 with exact axis anchor on a T host is registered.",
+    "Local path only axial extension without corner component or foreign endpoint contact; other targets use full validation.",
+    "Foreign endpoint scan and global scene composition still scale; large connected components are not bounded to a constant size.",
+    "Commit remains the existing full operation."
+  ]
+}

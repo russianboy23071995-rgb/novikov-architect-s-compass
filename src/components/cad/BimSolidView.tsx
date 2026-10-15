@@ -160,11 +160,11 @@ export function BimSolidView({
   const editPatch = useMemo(() => {
     if (!preparedEdit || !target) return null;
     try {
-      return preparedEdit.evaluate(project, selection, target);
+      return preparedEdit.evaluate(project, selection, target, targetCandidate);
     } catch {
       return null;
     }
-  }, [preparedEdit, project, selection, target]);
+  }, [preparedEdit, project, selection, target, targetCandidate]);
   const previewProject = useMemo(() => {
     if (preparedEdit) return project;
     if (editSession && target) {
@@ -225,6 +225,7 @@ export function BimSolidView({
           selection,
           (id) => isLayerVisible(project, visibility, id),
           previewProjection,
+          geometryPatch,
         )
       : null;
   const selectedWalls = useMemo(
