@@ -12322,3 +12322,22 @@ bleiben ausdrücklich offen. AUD14-06 Release-Gates aus #362/#363 bleiben erhalt
 S1 schließt weder den zweistündigen Lauf noch Quota-/Prozess-/GPU-Nachweise ein.
 AUD14-07 bleibt offen bis Ausführung und Einordnung aller Audit-IDs. Offener Alt-PR #318
 wird nicht automatisch übernommen. Kein Produktcode in diesem Planauftrag geändert.
+
+### AUD14-07 – S1 Teilnachweis und priorisierter Rest (15.10.2026)
+#364 gemergt, Basis 2228770. S1 G/GB: 300 Wände, 200 Fenster, fünf Geschosse,
+50 Schraffuren/500 Linien/fünf Abbilder, GB 20 echte PNGs und 63.016.967 portable Bytes.
+Je 44 XY/Z-Modell-/Vorschau-/Historyfälle bestanden; Endpunkt, Datei/Recovery-Codec/IFC
+verglichen. Echte GB-UI-Bewegung, Undo/Redo, Dateiimport und lokale Wiederaufnahme:
+vollständiger Download-Inhaltsvergleich identisch. 1084 Tests, Typecheck, Lint, Builds grün.
+Keine Produktlogik verändert. Methodik/Rohdateien und alle Grenzen im jüngsten Masterplan.
+
+P2: Geschosswechsel im Produktions-Workspace erzeugen lange Tasks von 90–118 ms (G)
+bzw. 120–206 ms (GB). Nächster einziger Auftrag: phasenweise und mit festem Viewport
+reproduzieren, dann nur dominant nachgewiesenen Pfad ändern. Keine Vermutung über Renderer
+oder Bildpayload als feststehende Ursache. Erzeugung der PNG-Testdaten separat behandeln.
+Weiter offen: S1-Maus-/Shift-Gruppenabläufe, kontrollierte Kaltstarts/Wiederholungen,
+GB-Kameratrace, IFC-Höhen/Containment, Reload-Wiederaufnahme, große Gruppen im Browser.
+Recovery-Prüfzusammenfassung nennt nur Arbeitsgeschoss (60/40), Übernahme korrekt Gesamt
+(300/200); als P2-Darstellungsfix vorgemerkt, Inhalt vollständig gesichert.
+AUD14-01/02 fokussierte Belege erhalten; AUD14-03 Gesamt-GPU-Nachweis offen, AUD14-04/05
+Restpfade/Wechsel/Gruppen offen, AUD14-06 Release-Gates offen, AUD14-07 nicht abgeschlossen.

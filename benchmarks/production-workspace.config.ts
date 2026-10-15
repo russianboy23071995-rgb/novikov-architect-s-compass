@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => ({
   resolve: { alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) } },
   build: {
     outDir: "dist-production-workspace",
-    rollupOptions: { input: "benchmarks/production-workspace.html" },
+    rollupOptions: {
+      input: ["benchmarks/production-workspace.html", "benchmarks/s1-workspace.html"],
+    },
   },
   preview: { host: "127.0.0.1", port: 8085, strictPort: true },
 }));

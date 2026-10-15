@@ -1,0 +1,177 @@
+{
+  "method": "7 targets; prepared then full; exact project comparison outside timing; preparation separate; connected branches each host a window",
+  "runs": [
+    {
+      "branches": 1,
+      "foreign": 0,
+      "affectedWalls": 2,
+      "preparationMs": 1.8631000000000029,
+      "samples": [
+        {
+          "previewMs": 2.5186999999999955,
+          "fullMs": 1.3285999999999945,
+          "path": "local"
+        },
+        {
+          "previewMs": 2.1015000000000157,
+          "fullMs": 1.6855999999999938,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.6067999999999927,
+          "fullMs": 1.1149000000000058,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.0494000000000199,
+          "fullMs": 1.4133999999999958,
+          "path": "local"
+        },
+        {
+          "previewMs": 2.717599999999976,
+          "fullMs": 3.6601,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.9506999999999834,
+          "fullMs": 0.9253000000000213,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.3930000000000007,
+          "fullMs": 0.7449000000000012,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 1,
+      "foreign": 1000,
+      "affectedWalls": 2,
+      "preparationMs": 16.10130000000001,
+      "samples": [
+        {
+          "previewMs": 1.1835999999999842,
+          "fullMs": 8.696100000000001,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.213799999999992,
+          "fullMs": 7.177500000000009,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.8438999999999908,
+          "fullMs": 6.3504999999999825,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.4845000000000255,
+          "fullMs": 6.062199999999962,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.153599999999983,
+          "fullMs": 6.370599999999968,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.7231000000000449,
+          "fullMs": 5.7841999999999985,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.91700000000003,
+          "fullMs": 6.474499999999978,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 10,
+      "foreign": 100,
+      "affectedWalls": 11,
+      "preparationMs": 5.6936999999999784,
+      "samples": [
+        {
+          "previewMs": 3.6581999999999653,
+          "fullMs": 5.694700000000012,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.4446000000000367,
+          "fullMs": 4.343399999999974,
+          "path": "local"
+        },
+        {
+          "previewMs": 2.823599999999999,
+          "fullMs": 4.4033000000000015,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.238300000000038,
+          "fullMs": 3.4266000000000076,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.4682999999999993,
+          "fullMs": 3.9511999999999716,
+          "path": "local"
+        },
+        {
+          "previewMs": 4.1952,
+          "fullMs": 3.3076000000000363,
+          "path": "local"
+        },
+        {
+          "previewMs": 2.879000000000019,
+          "fullMs": 3.9943000000000097,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 50,
+      "foreign": 100,
+      "affectedWalls": 51,
+      "preparationMs": 14.009000000000015,
+      "samples": [
+        {
+          "previewMs": 13.534099999999967,
+          "fullMs": 18.124400000000037,
+          "path": "local"
+        },
+        {
+          "previewMs": 12.842900000000043,
+          "fullMs": 13.929599999999994,
+          "path": "local"
+        },
+        {
+          "previewMs": 16.081399999999974,
+          "fullMs": 13.062900000000013,
+          "path": "local"
+        },
+        {
+          "previewMs": 14.116300000000024,
+          "fullMs": 15.488400000000013,
+          "path": "local"
+        },
+        {
+          "previewMs": 16.318700000000035,
+          "fullMs": 15.309399999999982,
+          "path": "local"
+        },
+        {
+          "previewMs": 12.330499999999915,
+          "fullMs": 15.185100000000034,
+          "path": "local"
+        },
+        {
+          "previewMs": 11.75630000000001,
+          "fullMs": 12.269499999999994,
+          "path": "local"
+        }
+      ]
+    }
+  ]
+}
