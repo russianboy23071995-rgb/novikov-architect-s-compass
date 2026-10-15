@@ -12365,3 +12365,14 @@ Rohdaten document-switch-g/gb.json und storey-switch-gb.json, Methodik im Master
 Nur Harness/Nachweise geändert; Typecheck/Lint/Diagnosebuild bestanden, #366 CI grün.
 Nächster Einzelauftrag: DOM-/Bilddarstellung des Abbildwechsels eingrenzen. Alle übrigen
 S1-/Recovery-/AUD14-Gates bleiben erhalten, kein Gesamtabschluss.
+
+### AUD14-07 – Bild-Gegenversuche ohne Produktumbau (15.10.2026)
+#367 gemergt (e0f90ae). Drei warme S1-GB-Serien à 20 Abbildwechsel: Data-URLs sichtbar
+20 lange Tasks (51–82 ms), Blob-Kontrolle 13 (50–69 ms), display:none-Kontrolle 15
+(50–68 ms). Native href-Zuweisungen insgesamt nur 8,6 / 3,7 / 10,0 ms.
+Keine vollständige Erklärung oder Lagbehebung; 'bildbezogen' bleibt Korrelation.
+Diagnose-Blob-Cache ausschließlich isolierte Testseite, kein Produktionsvertrag.
+Rohdaten image-dom/blob/hidden-switch.json und Grenzen im Masterplan dokumentiert.
+Typecheck/Lint/Diagnosebuild bestanden. Nächster einziger Auftrag: Hauptthread-Aufzeichnung
+mit Commit/Layout/Skript-Zuordnung und Messwerkzeugkontrolle vor weiterem Produktfix.
+Alle übrigen S1-/Recovery-/Release-Gates bleiben offen.

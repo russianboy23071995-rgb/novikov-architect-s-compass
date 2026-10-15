@@ -7,6 +7,61 @@ import { checkS1 } from "./s1-check";
 import { image } from "./recovery-session-fixture";
 import "../src/styles.css";
 if (!import.meta.env.PROD || location.port !== "8085") throw Error("Isolated production test only");
+// Diagnostic only: isolate synchronous browser cost of assigning SVG image URLs.
+// No source payload is recorded and the native call/arguments remain unchanged.
+const nativeSetAttribute = Element.prototype.setAttribute;
+// Counterfactual confined to this disposable fixture page. Never a product cache:
+// intentionally retained for the run, all URLs revoked when leaving this page.
+const shortImageUrls = new URLSearchParams(location.search).get("imageUrls") === "blob";
+const hideImages = new URLSearchParams(location.search).get("imagePaint") === "hidden";
+if (hideImages) {
+  const style = document.createElement("style");
+  style.textContent = "svg image { display: none !important; }";
+  document.head.append(style);
+}
+const diagnosticUrls = new Map<string, string>();
+addEventListener("pagehide", () => {
+  for (const url of diagnosticUrls.values()) URL.revokeObjectURL(url);
+  diagnosticUrls.clear();
+});
+Element.prototype.setAttribute = function (name: string, value: string) {
+  if (
+    this.namespaceURI !== "http://www.w3.org/2000/svg" ||
+    this.localName !== "image" ||
+    name !== "href"
+  )
+    return nativeSetAttribute.call(this, name, value);
+  if (shortImageUrls && value.startsWith("data:image/")) {
+    let url = diagnosticUrls.get(value);
+    if (!url) {
+      const conversionStart = performance.now();
+      const comma = value.indexOf(",");
+      const binary = atob(value.slice(comma + 1));
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      url = URL.createObjectURL(new Blob([bytes], { type: value.slice(5, value.indexOf(";")) }));
+      diagnosticUrls.set(value, url);
+      workspacePhases.push({
+        kind: "browser-dom",
+        event: "diagnostic-blob-create",
+        start: conversionStart,
+        duration: performance.now() - conversionStart,
+      });
+    }
+    value = url;
+  }
+  const start = performance.now();
+  try {
+    return nativeSetAttribute.call(this, name, value);
+  } finally {
+    workspacePhases.push({
+      kind: "browser-dom",
+      event: "svg-image-href",
+      start,
+      duration: performance.now() - start,
+      characters: value.length,
+    });
+  }
+};
 const mixed = new URLSearchParams(location.search).get("variant") === "GB";
 const project = s1Fixture(
   mixed ? Array.from({ length: 20 }, (_, i) => ({ ...image(100 + i), id: `s1-image-${i}` })) : [],
@@ -52,6 +107,8 @@ panel.innerHTML =
 document.body.append(panel);
 const report: Record<string, unknown> = {
   variant: mixed ? "GB" : "G",
+  imageUrls: shortImageUrls ? "diagnostic-blob" : "production-data",
+  imagePaint: hideImages ? "diagnostic-hidden" : "visible",
   userAgent: navigator.userAgent,
   viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
   events,

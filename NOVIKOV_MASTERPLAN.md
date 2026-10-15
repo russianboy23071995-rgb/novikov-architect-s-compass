@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #366 gemergt; S1 GB-Geschosswechsel und G/GB-Abbildwechsel gemessen. Gemeinsame Snapshot-Wiederverwendung bestätigt. Genau nächster Auftrag: verbleibende bildbezogene Abbildwechselpausen auf Browser-/DOM-Darstellung eingrenzen, bevor ein weiterer Produktfix gewählt wird. Release-Gates bleiben offen.
+Aktueller Arbeitsauftrag: 15.10.2026 – #367 gemergt; SVG-URL-Zuweisung und zwei Bild-Gegenversuche eingegrenzt. Kein belegter Anlass für Blob-Cache-/Rendererumbau. Genau nächster Auftrag: Browser-Hauptthread-Aufzeichnung mit Commit/Layout/Skript-Zuordnung und Kontrolle des Messwerkzeugeinflusses, bevor ein Produktfix gewählt wird.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2957,3 +2957,55 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
 Speichererweiterung bleibt zurückgestellt; Langzeit/Quota/Mehrtab-Gates bleiben offen.
+
+### AUD14-07 – DOM-Zuweisung und Bild-Gegenversuche (15.10.2026)
+#367 nach grüner CI gemergt, Basis e0f90ae. Nur Diagnoseharness erweitert; keine
+Produktlogik und keine Datei-/Speicherformate verändert.
+
+S1 GB, 1280×720 DPR1, jeweils frische Seite, OG/EG vorgewärmt, Autosicherung aktuell,
+danach 20 kontinuierliche Abbildwechsel bei geschlossenem Diagnosepanel. Port8085;
+Nutzer-Port8080 unberührt. Native Element.setAttribute-Zeit nur für SVG image href
+im isolierten Harness gemessen; nur Dauer und Zeichenanzahl, keine Bildpayloads im Log.
+Keine Messung von späterem Browser-Decoding oder GPU-Arbeit durch diesen Wrapper.
+
+| Kontrollversuch | Lange Tasks | Spannweite | 80 native href-Zuweisungen zusammen |
+| --- | --- | --- | --- |
+| Produktions-Data-URLs, sichtbar | 20 | 51–82 ms | 8,6 ms |
+| Identische Bildbytes als temporäre Blob-URLs | 13 | 50–69 ms | 3,7 ms |
+| Data-URLs, SVG-Bilder per display:none | 15 | 50–68 ms | 10,0 ms |
+
+Rohdaten benchmarks/image-dom-switch.json, image-blob-switch.json und
+image-hidden-switch.json. Baseline vor Ergänzung der Variantenmetadaten erstellt:
+fehlende imageUrls/imagePaint entsprechen dort Produktions-Data-URLs/sichtbar.
+Keine erneute Vollvalidierung/atob in den warmen Messbereichen. Gemeinsame
+Fangvorbereitung ungefähr 118–122 ms über 20 Wechsel, BimPlan-Funktionsaufrufe
+157–160 ms inklusive dieser Vorbereitung. Teilzeiten sind verschachtelt.
+
+Die warmen Blob-URLs entstehen ausschließlich im Diagnoseharness aus denselben Bytes.
+Der Test hält sie für die Messung und widerruft sie beim pagehide. Das ist bewusst kein
+produktionsfähiger Ressourcenmanager und kein Vorbild für neue Produkt-Consumer.
+PNG-Erzeugung/erstmalige Blob-Erstellung nicht als Wechselzeit ausgegeben. Hidden-Modus
+behält Modell, IDs, DOM-Bildknoten und Attribute, unterdrückt nur deren Darstellung;
+Browser-Decoding ist dadurch nicht garantiert abgeschaltet.
+
+Schluss: native href-Zuweisung allein erklärt die Pausen nicht. Kurze URLs und fehlende
+Bildflächen beseitigen sie ebenfalls nicht. Die beobachteten Unterschiede sind keine
+kausal isolierte CPU-/GPU-Zuschreibung (Laufreihenfolge, GC und Werkzeuginteraktion
+nicht kontrolliert). Bisherige Bezeichnung 'bildbezogen' ist eine Korrelation zwischen
+G/GB, kein Nachweis eines Bildrendererfehlers. Deshalb kein Blob-Cache-/Rendererumbau
+auf Verdacht. Weiter offen: React-Commit/DOM, Layout/Paint, Browserarbeit und Einfluss
+der UI-Teststeuerung. Diese müssen in einer echten Hauptthread-Aufzeichnung zugeordnet
+werden, statt weitere unverbundene Cache-Optimierungen vorzunehmen.
+
+Verifikation: drei Serien mit je 20 echten Doppelklicks und working-storey-Ereignissen;
+Typecheck inkl. Benchmarks, gezieltes ESLint und Produktions-Diagnosebuild bestanden.
+#367 CI erfolgreich; Vollsuite in diesem reinen Diagnoseauftrag nicht erneut lokal
+laufen lassen. Screenshot outputs/s1-blob-proof.png zeigt die weiterhin sichtbaren
+Referenzbilder des Blob-Gegenversuchs. Viewportoverride zurückgesetzt.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** Browser-Hauptthread-Aufzeichnung für einen warmen Abbildwechsel
+   mit Skript-/Commit-/Layout-Zuordnung und Messwerkzeugkontrolle; erst dann Produktfix.
+2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
+3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
+Langzeit/Quota/Mehrtab/GPU-Gates und zurückgestellte Speichererweiterung bleiben erhalten.
