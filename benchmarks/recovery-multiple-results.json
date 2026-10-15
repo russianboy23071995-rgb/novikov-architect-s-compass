@@ -1,0 +1,171 @@
+{
+  "limitations": "Synthetic eight-project workload. Optional heap values are coarse/shared; not process/GPU peaks. Abort tested during preparation, not forced inside deletion transaction. No user database.",
+  "name": "novikov-recovery-v2-pilot-multiple-f998f022-a905-4174-886c-80ad5127e181",
+  "before": {
+    "count": 24,
+    "base64Characters": 75405420
+  },
+  "before-open": "PASS: 24 payloads and all current/previous states intact",
+  "during-preparation": "PASS: 24 payloads and all current/previous states intact",
+  "collected": {
+    "status": "collected",
+    "deleted": 8,
+    "retained": 16
+  },
+  "maintenanceMs": 701.7000000029802,
+  "maintenanceHeapSamples": [
+    {
+      "ms": 0.10000000894069672,
+      "heap": 97577170
+    },
+    {
+      "ms": 21,
+      "heap": 97577170
+    },
+    {
+      "ms": 40.900000005960464,
+      "heap": 97577170
+    },
+    {
+      "ms": 67.80000001192093,
+      "heap": 38350946
+    },
+    {
+      "ms": 90.70000000298023,
+      "heap": 38350946
+    },
+    {
+      "ms": 100.20000000298023,
+      "heap": 38350946
+    },
+    {
+      "ms": 125.40000000596046,
+      "heap": 74518648
+    },
+    {
+      "ms": 150,
+      "heap": 74518648
+    },
+    {
+      "ms": 162.1000000089407,
+      "heap": 74518648
+    },
+    {
+      "ms": 194.1000000089407,
+      "heap": 42202016
+    },
+    {
+      "ms": 215,
+      "heap": 42202016
+    },
+    {
+      "ms": 223.5,
+      "heap": 42202016
+    },
+    {
+      "ms": 252,
+      "heap": 78389992
+    },
+    {
+      "ms": 273.1000000089407,
+      "heap": 78389992
+    },
+    {
+      "ms": 281.5,
+      "heap": 78389992
+    },
+    {
+      "ms": 313.1000000089407,
+      "heap": 79699496
+    },
+    {
+      "ms": 335.5,
+      "heap": 79699496
+    },
+    {
+      "ms": 340.30000001192093,
+      "heap": 79699496
+    },
+    {
+      "ms": 371.5,
+      "heap": 115896006
+    },
+    {
+      "ms": 393.20000000298023,
+      "heap": 115896006
+    },
+    {
+      "ms": 405.30000001192093,
+      "heap": 115896006
+    },
+    {
+      "ms": 421.30000001192093,
+      "heap": 115896006
+    },
+    {
+      "ms": 457.1000000089407,
+      "heap": 52325678
+    },
+    {
+      "ms": 464.90000000596046,
+      "heap": 52325678
+    },
+    {
+      "ms": 497.30000001192093,
+      "heap": 52325678
+    },
+    {
+      "ms": 515.9000000059605,
+      "heap": 88495948
+    },
+    {
+      "ms": 524,
+      "heap": 88495948
+    },
+    {
+      "ms": 544,
+      "heap": 88495948
+    },
+    {
+      "ms": 563.6000000089407,
+      "heap": 88495948
+    },
+    {
+      "ms": 581.6000000089407,
+      "heap": 81045732
+    },
+    {
+      "ms": 601.8000000119209,
+      "heap": 81045732
+    },
+    {
+      "ms": 621.8000000119209,
+      "heap": 81045732
+    },
+    {
+      "ms": 641.6000000089407,
+      "heap": 81045996
+    },
+    {
+      "ms": 661.9000000059605,
+      "heap": 81045996
+    },
+    {
+      "ms": 681.7000000029802,
+      "heap": 81045996
+    },
+    {
+      "ms": 700.9000000059605,
+      "heap": 81046260
+    },
+    {
+      "ms": 701.7000000029802,
+      "heap": 81046260
+    }
+  ],
+  "after": {
+    "count": 16,
+    "base64Characters": 50271656
+  },
+  "status": "PASS"
+}
