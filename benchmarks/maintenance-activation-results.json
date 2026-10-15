@@ -1,0 +1,52 @@
+{
+  "name": "novikov-recovery-v2-pilot-layout-328c3d64-9230-496f-b946-a8f2b854f7b5",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "started": "2026-10-15T16:30:13.777Z",
+  "checks": [
+    "Produktadapter startet beim Anlegen keine Wartung",
+    "Manuelle Aktion öffnet genau eine Verbindung",
+    "Produktives Layout: nur zwei nicht mehr von V2 benötigte Bilder entfernt",
+    "Echtes V1-Migrationsoriginal bytegleich erhalten",
+    "Beide eingebetteten V1-Bildstände bleiben unabhängig von V2-Payloads lesbar",
+    "Migrierter V2-Stand vollständig erhalten",
+    "Katalogindex unverändert",
+    "Unbekannter Altstand blockiert Bereinigung",
+    "Beschädigter V1-Vorgänger blockiert Bereinigung",
+    "Neuer V1-Slot während Vorbereitung invalidiert atomare Freigabe",
+    "Application-Aktion nutzt echten Produktionsadapter erfolgreich",
+    "Vorab-Abbruch öffnet keinen Speicher",
+    "Simulierter Quota-Fehler am Adapter wird ohne Retry gemeldet",
+    "Letzte Sicherung nach Fehler unverändert",
+    "1000 Linien: Modell bleibt vollständig identisch",
+    "10000 Linien: Modell bleibt vollständig identisch",
+    "DB-Neuöffnung erhält Original und bereinigten Bestand"
+  ],
+  "timings": [
+    {
+      "lines": 1000,
+      "runs": [
+        49.5,
+        48.79999999701977,
+        49.80000001192093
+      ],
+      "totalMs": {
+        "median": 49.5,
+        "observedMaximum": 49.80000001192093
+      }
+    },
+    {
+      "lines": 10000,
+      "runs": [
+        476.6000000089407,
+        586.5999999940395,
+        517.5
+      ],
+      "totalMs": {
+        "median": 517.5,
+        "observedMaximum": 586.5999999940395
+      }
+    }
+  ],
+  "status": "PASS",
+  "finished": "2026-10-15T16:30:17.135Z"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "novikov-recovery-v2-pilot-retention-gc-bf4d076b-5d9a-481c-af7b-2f9a38c5a97b",
+  "started": "2026-10-15T16:30:55.150Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "checks": [
+    "Nur verwaistes Bild gelöscht; current/previous und fremder Slot geschützt",
+    "Anderes Projekt vollständig identisch wiederhergestellt",
+    "Beschädigter aktueller Stand verhindert Bereinigung",
+    "Gültiger Vorgänger bleibt als Rückfall vollständig lesbar",
+    "Beschädigter Vorgänger verhindert Bereinigung",
+    "Unbekannte Version verhindert jede Löschung",
+    "Unlesbare V1-Daten blockieren Pilot; Original bleibt bytegleich",
+    "Undo-Bild nach Bereinigung erneut vollständig bereitgestellt",
+    "Veralteter Schreiber bleibt durch CAS gesperrt",
+    "Veröffentlichung während Vorbereitung invalidiert Bereinigung",
+    "Neue Referenzen beider Slots nach Konflikt vollständig geschützt",
+    "Konkurrierendes Speichern und Bereinigen erhalten gültigen Stand",
+    "Abbruch vor Start löscht nichts",
+    "Abbruch nach ausgeführter Löschung rollt gesamten Payloadbestand zurück",
+    "Bildentfernung bereinigt nur außerhalb aller current/previous-Referenzen",
+    "Projekt nach DB-Neuöffnung vollständig identisch"
+  ],
+  "status": "PASS",
+  "finished": "2026-10-15T16:30:55.352Z"
+}

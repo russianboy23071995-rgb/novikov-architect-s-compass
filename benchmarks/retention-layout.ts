@@ -1,3 +1,8 @@
+import { createRecoveryMaintenanceStorage } from "../src/interop/project-file/recovery-maintenance-storage.ts";
+import {
+  createRecoveryMaintenance,
+  type MaintenanceState,
+} from "../src/application/project-files/recovery-maintenance.ts";
 import { collectRecoveryV2Pilot } from "../src/interop/project-file/recovery-retention-pilot.ts";
 import { recoveryV2Layout } from "../src/interop/project-file/recovery-layout.ts";
 import {
@@ -83,7 +88,14 @@ button.onclick = async () => {
     await writer.save(c!, () => true);
     await writer.save(c!, () => true);
     const indexBefore = JSON.stringify(await readAll(db, "recovery-index"));
-    const result = await collectRecoveryV2Pilot(db, codec, undefined, recoveryV2Layout);
+    let opens = 0;
+    const maintenance = createRecoveryMaintenanceStorage(() => {
+      opens++;
+      return openRecoveryDatabase(name);
+    });
+    check(opens === 0, "Produktadapter startet beim Anlegen keine Wartung");
+    const result = await maintenance.collect(new AbortController().signal);
+    check(opens === 1, "Manuelle Aktion öffnet genau eine Verbindung");
     check(
       result.status === "collected" && result.deleted === 2 && result.retained === 1,
       "Produktives Layout: nur zwei nicht mehr von V2 benötigte Bilder entfernt",
@@ -149,6 +161,40 @@ button.onclick = async () => {
       "Neuer V1-Slot während Vorbereitung invalidiert atomare Freigabe",
     );
     await put(db, "new-slot", undefined);
+    const states: MaintenanceState[] = [];
+    const action = createRecoveryMaintenance(maintenance, (state) => states.push(state));
+    await action.run();
+    check(
+      states.at(-1)?.status === "success",
+      "Application-Aktion nutzt echten Produktionsadapter erfolgreich",
+    );
+    const cancelled = new AbortController();
+    cancelled.abort();
+    const opensBefore = opens;
+    let aborted = false;
+    try {
+      await maintenance.collect(cancelled.signal);
+    } catch {
+      aborted = true;
+    }
+    check(aborted && opens === opensBefore, "Vorab-Abbruch öffnet keinen Speicher");
+    const quotaStates: MaintenanceState[] = [];
+    const quotaPort = createRecoveryMaintenanceStorage(async () => {
+      throw new DOMException("injected", "QuotaExceededError");
+    });
+    await createRecoveryMaintenance(quotaPort, (state) => quotaStates.push(state)).run();
+    check(
+      quotaStates.at(-1)?.status === "error" &&
+        quotaStates.at(-1)!.message.includes("Speichergrenze"),
+      "Simulierter Quota-Fehler am Adapter wird ohne Retry gemeldet",
+    );
+    check(
+      serializeProject(
+        (await restoreRecoveryV2((await v2.project("migration").read()).record, "migration", codec))
+          .project,
+      ) === serializeProject(c!),
+      "Letzte Sicherung nach Fehler unverändert",
+    );
     const profileWriter = await prepareRecoveryV2Writer(v2.project("profile"), "profile", codec);
     for (const lines of [1000, 10000]) {
       const project = recoveryFixture("profile", lines);

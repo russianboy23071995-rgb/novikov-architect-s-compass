@@ -12139,3 +12139,31 @@ Frame-/p95-/Langlaufnachweis, kleine Bilder; Kosten nicht mit schweren BIM-Model
 Nächster Auftrag: explizite abbrechbare Wartungsaktion über Application-/Storage-Port samt
 Quota-/Abbruchschutz; keine Bereinigung pro Autosave. Danach Langsitzungs-/Speicherprofil,
 anschließend AUD14-07-Gesamtgate. Gesamtabnahme AUD14-06 bleibt offen.
+
+
+### AUD14-06 – Wartungssteuerung, Freigabegrenze (15.10.2026)
+PR348 ist bereits gemergt; erneute Freigabe dafür umfasst keinen Merge von PR349.
+RecoveryMaintenanceStorage/Application-Controller und port-injizierte Bedienelemente
+vorbereitet, aber keine Produktanbindung. Diagnose-Schranke und Löschlogik unverändert.
+Automatische Freigabeprüfung blockiert deren Produktionsaktivierung wegen vergrößertem
+Datenverlustrisiko; ausdrückliche Nutzerfreigabe ausstehend. Keine Umgehung.
+1063 Tests einschließlich sechs neuer Controllerfälle (Doppelstart, Abort/Commit-Rennen,
+Quota/Fehler ohne Retry, Dispose, Skip und Observerfehler), Typecheck, Lint und Build bestanden.
+Browserbedienung mit gekennzeichnetem simulierten Port: Start/Abbruch/Neustart/Erfolg geprüft,
+kein Datenbankzugriff. Noch keine Zusage produktiver Wartung. Nächster Auftrag bleibt echte
+kontrollierte Anbindung nach Freigabe, danach Langlauf/Speicher und AUD14-07-Gesamtgate.
+
+
+### AUD14-06 – Freigegebene manuelle Wartungsanbindung (15.10.2026)
+Ausdrückliche Nutzerfreigabe für echte lokale Daten ausschließlich über „Speicher warten“;
+Blockade aus Teil 4 damit für diese Anbindung aufgehoben. PR350 auf Basis PR349 vervollständigt,
+keine Mergefreigabe impliziert. Ein gemeinsamer Collector für Diagnose und Produktionsadapter;
+separater Diagnose-Wrapper behält Namensschutz. UI in RecoveryPanel, Signalabbruch/Unmount,
+Verbindungsschluss bei Erfolg/Fehler, keine Autosave-/History-/Timer-/Retry-Kopplung.
+1063 Tests, Typecheck, Lint und Build grün; 17 Integrations- plus 16 reale IDB-Regressions-
+assertions bestanden. QuotaExceededError am Öffnungsport injiziert, keine tatsächliche volle
+Platte behauptet. Letzte Sicherung danach identisch; Rollback und Fremdslot-/Vorgängerschutz
+erneut nachgewiesen. UI-Button sichtbar, Benutzerbereinigung nicht für Tests ausgeführt.
+Gesamtmessung bei 10000 Linien ca. 517,5 ms Median, drei Läufe, keine Frame-/Langzeitgarantie.
+Nächster Auftrag: Langsitzung/Bildwechsel/Undo/Reload/Speicherlast; danach gemessene Pausen/
+Speicherengpässe und AUD14-07 Gesamtgate. AUD14-06 bleibt teilweise/offen.
