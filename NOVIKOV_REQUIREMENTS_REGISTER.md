@@ -11632,3 +11632,16 @@ Element-ID/Merkmal und Quellenabhängigkeiten existieren bereits in SnapReferenc
 Für lokale Suche/gezielte Invalidierung nutzen; gemeinsame Engine behalten, keine
 Hilfspunkte als zweite BIM-Geometrie. Schnittpunkte benötigen mehrere Quellen.
 Quellenzuordnung ersetzt den räumlichen Index nicht; Umsetzung bleibt nach AUD14-04.
+
+### AUD14-04 – Verbindliche Wiederverwendung, 15.10.2026
+
+Nutzer fordert, dass erfolgreiche Fixes alle künftigen Werkzeuge leiten, auch Dach/Decke/
+Treppe in 2D und 3D. PR325 gemergt (f734413). Gemeinsamer Application-Einstieg
+`prepareDirectEditPreview` ersetzt den Fenster-Typschalter im 3D-Renderer. A04 definiert
+Vorbereitung, Abhängigkeitsmenge, gemeinsame Fang-/Patchverarbeitung, vollständigen Commit
+und verpflichtende Äquivalenz-/Leistungsnachweise. Kein abgeschlossener Universalumbau:
+Legacy-Endpunktpfade, globale Komposition und lokale 3D-Suche bleiben offene Arbeit.
+Einziger Folgeauftrag: vorbereitete Wand-Endpunktvorschau über den gemeinsamen Einstieg
+mit vollständigem Vergleich und Messung; keine neue Renderer-Sonderbehandlung.
+
+Nachweis dieses Schritts: 992 Tests bestanden, App-/Benchmark-Typecheck, gezieltes Lint und Build erfolgreich. Bestehende Geometrie-/Kontur-/Commit-Vergleiche laufen durch den gemeinsamen Einstieg; unbekannte Operation und ungültiges Ziel zusätzlich geprüft. Keine neue Browserabnahme oder neue Performancezahl für diese verhaltensgleiche Umverdrahtung behauptet.

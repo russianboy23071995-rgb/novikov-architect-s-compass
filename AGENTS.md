@@ -43,3 +43,5 @@
 
 
 - Presentation-only tasks (symbols, pictograms, spacing, look-and-feel) change presentation code and nothing else: keep event handlers, state management, application/domain interfaces, model and snapping logic, and existing data untouched — introduce no substitute data and no new model logic. Why: UI work and model work happen in parallel from separate tools, and this boundary is what keeps both branches mergeable and the validated model logic intact.
+
+- User decision 2026-10-15: a validated performance fix is the mandatory baseline for future tools, not a tool-specific exception. Follow the A04 admission gate in NOVIKOV_MASTERPLAN.md for every new/extended 2D or 3D movement, including roofs, slabs and stairs. Reuse the shared inference, prepared snapshot, Application preview capability and geometry patch composition. Do not add element-type preview dispatch to renderers. Existing legacy fallbacks are migration debt, not examples for new tools. Require full-path geometry/commit equivalence and measured pointer-work evidence; document any remaining global work explicitly before claiming completion.

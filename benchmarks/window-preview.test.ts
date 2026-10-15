@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { prepareWindowAxisPreview } from "../src/application/direct-edit/prepared-window.ts";
+import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
+function prepareWindowAxisPreview(session: EditSession) {
+  const prepared = prepareDirectEditPreview(session);
+  assert.ok(prepared, "window-axis capability must be registered in the common entry");
+  return prepared;
+}
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { createProject, addWall, addWindow } from "../src/lib/bim/model.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
@@ -116,5 +121,29 @@ test("window preview never commits; confirmation validates whole project and cre
   assert.notEqual(
     editingReducer(state, { type: "confirm", session, selection: target, point }).error,
     "",
+  );
+});
+
+test("common preview entry explicitly leaves unmigrated wall operations on the legacy path", () => {
+  const base = joined(true);
+  const target = { kind: "wall" as const, id: "host" };
+  assert.equal(
+    prepareDirectEditPreview({
+      base,
+      target,
+      action: "move",
+      index: null,
+      anchor: editAnchor(base, target),
+    }),
+    null,
+  );
+  assert.throws(() =>
+    prepareDirectEditPreview({
+      base,
+      target: { kind: "window", id: "missing" },
+      action: "axis",
+      index: null,
+      anchor: { x: 0, y: 0 },
+    }),
   );
 });
