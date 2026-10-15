@@ -6,6 +6,13 @@
     24 beschleunigte Bearbeitungszyklen, 1000 Linien und 1024×1024-PNGs. Keine Nutzerdaten. Kein
     Stunden-Dauertest, kein voller Datenträger.
   </p>
+  <label
+    >Laufprofil
+    <select id="duration">
+      <option value="24">24 schnelle Zyklen</option>
+      <option value="120">120 Zyklen mit 1 s Pause (mindestens 2 Minuten)</option>
+    </select></label
+  >
   <button id="run">Prüfung starten</button>
   <pre id="result">Bereit</pre>
   <script type="module" src="./recovery-session.ts"></script>

@@ -12212,3 +12212,12 @@ vollständigem Seitenreload (RELOAD_PASS). Typecheck/ESLint/Build bestanden.
 Keine Aussage über Stundenbetrieb, Browserprozess-Neustart, persistente Undo-History
 oder maximalen Speicherverbrauch. Folgeschritte gemäß aktuellem Masterplan;
 automatische Wartung weiterhin nicht aktiviert. Keine Nutzerdaten verändert.
+
+### AUD14-06 – Zeitprofil 120 Zyklen (15.10.2026)
+
+Bestehender Recovery-Sitzungsharness erweitert. PASS nach 162,3 s mit 120 Zyklen;
+Current/Previous/Fremdprojekt unverändert, final zwei Payloads. Grobe optionale
+JS-Heap-Stichproben 15,46–240,40 MB, kein isolierter Produkt-/Prozess-/GPU-Peak.
+Origin-Speicherschätzung getrennt von Payloadzählung dokumentiert. Typecheck,
+ESLint und Build bestanden. Kein Stundenlauf und keine automatische Wartungsfreigabe.
+Nächster begrenzter Auftrag: Mehrprojekt-Wartung isoliert messen (Masterplan).

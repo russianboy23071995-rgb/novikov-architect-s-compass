@@ -62,14 +62,32 @@ const button = document.querySelector<HTMLButtonElement>("#run")!,
 button.onclick = async () => {
   button.disabled = true;
   const name = `novikov-recovery-v2-pilot-session-${crypto.randomUUID()}`;
+  const duration = document.querySelector<HTMLSelectElement>("#duration")!.value === "120";
+  const cycles = duration ? 120 : 24;
+  const intervalMs = duration ? 1000 : 20;
+  const samples: { atMs: number; usedJSHeapSize: number | null; visibility: string }[] = [];
+  const baseline = performance.now();
+  const sampleHeap = () => {
+    const memory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    samples.push({
+      atMs: performance.now() - baseline,
+      usedJSHeapSize: memory?.usedJSHeapSize ?? null,
+      visibility: document.visibilityState,
+    });
+  };
+  sampleHeap();
+  const memoryTimer = setInterval(sampleHeap, 1000);
   const rows: unknown[] = [];
   const report: Record<string, unknown> = {
     name,
+    cycles,
+    intervalMs,
+    samples,
     started: new Date().toISOString(),
     userAgent: navigator.userAgent,
     rows,
     limitations:
-      "24 accelerated cycles; DB connection reopen, not full browser restart; prior model re-save, not UI Undo; storage character count is not disk/heap usage; no quota exhaustion.",
+      "Timed synthetic workload, not hours-long usage; no UI Undo; heap API is optional/coarse/shared, not process or GPU memory; samples cannot prove peak/leak freedom; raster allocation is theoretical; no quota exhaustion.",
   };
   const longTasks: { startTime: number; duration: number }[] = [];
   const observer = PerformanceObserver.supportedEntryTypes.includes("longtask")
@@ -87,6 +105,9 @@ button.onclick = async () => {
     pulse = now;
   }, 16);
   try {
+    report["storageBefore"] = await navigator.storage.estimate();
+    report["rasterBufferBytesPerGeneratedImage"] = 1024 * 1024 * 4;
+    report["processAndGpuMemory"] = "Unavailable in this harness";
     const catalog = createRecoveryCatalog(() => openRecoveryDatabase(name), true),
       v2 = catalog.v2!,
       codec = v2.codec;
@@ -98,7 +119,7 @@ button.onclick = async () => {
     ).save(foreign, () => true);
     let writer = await prepareRecoveryV2Writer(v2.project("session"), "session", codec);
     let previous = original;
-    for (let cycle = 0; cycle < 24; cycle++) {
+    for (let cycle = 0; cycle < cycles; cycle++) {
       const current =
         cycle % 4 === 2
           ? recoveryFixture("session", 1000)
@@ -157,9 +178,10 @@ button.onclick = async () => {
         before,
         after,
       });
-      output.textContent = `Lauf ${cycle + 1}/24, aktueller und vorheriger Stand sowie fremdes Projekt identisch.`;
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      output.textContent = `Lauf ${cycle + 1}/${cycles}, aktueller und vorheriger Stand sowie fremdes Projekt identisch.`;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
     }
+    report["storageAfter"] = await navigator.storage.estimate();
     report["status"] = "PASS";
     report["finalPayloads"] = await payloadStats(name);
   } catch (error) {
@@ -167,6 +189,9 @@ button.onclick = async () => {
     report["error"] = String(error);
   } finally {
     await new Promise((resolve) => setTimeout(resolve, 50));
+    clearInterval(memoryTimer);
+    sampleHeap();
+    report["elapsedMs"] = performance.now() - baseline;
     observer?.disconnect();
     report["longTasks"] = observer ? longTasks : null;
     clearInterval(timer);

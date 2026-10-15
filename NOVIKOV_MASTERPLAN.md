@@ -2379,3 +2379,28 @@ Nächste drei Schritte (nur Schritt 1 aktiv):
 1. Längeren Belastungslauf mit Bildwechsel und getrennten Heap-/Prozess-/Rastermessungen vorbereiten und ausführen.
 2. Aus Messungen sichere Wartungsauslöser und Speichergrenzen ableiten; nur belegte Engpässe korrigieren.
 3. Bedarfsgesteuerte automatische Wartung über den bestehenden Port nach bestandenen Gates anbinden.
+
+### AUD14-06 – Zeitprofil mit Speicherstichproben (15.10.2026)
+
+#354 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+Bestehender recovery-session-Harness um auswählbare 120 Zyklen mit je 1 s Pause
+und optionale JS-Heap-Stichproben erweitert; kein zweiter Collector/Produktpfad.
+Browserlauf PASS: 162305,5 ms, 120 Zyklen, 1000 Linien, echte 1024x1024-Rausch-PNGs.
+Current/Previous/fremdes Projekt durchgehend identisch. Nach Wartung maximal drei
+Payloads, abschließend zwei mit 6283500 Base64-Zeichen. Wartung maximal 176,5 ms
+End-to-End; globale Timerlücke maximal 182,8 ms. 61 Long Tasks im Gesamtlauf,
+nicht automatisch Wartungskosten. Ergebnis: benchmarks/recovery-duration-results.json.
+
+Optionale performance.memory-Stichproben: ca. 15,46 bis 240,40 MB, zuletzt 85,96 MB.
+Diese groben Werte schließen Fixture-Erzeugung, Serialisierung und Vergleich ein;
+keine Leakfreiheit, kein isolierter Collector-Peak und keine Prozess-/GPU-Messung.
+StorageManager.estimate meldet für den gesamten Origin ca. 24,83 auf 31,74 MB;
+das ist keine physische Größe der einzelnen Testdatenbank. Rasterbuffer rechnerisch
+4 MiB je erzeugtem Bild; keine gemessene Raster-/GPU-Spitze. 162 Sekunden sind kein
+Stunden-Dauertest. Testdatenbank bleibt isoliert bestehen. Produktionscode unverändert.
+Typecheck, gezieltes ESLint und Build bestanden. Automatische Wartung bleibt aus.
+
+Nächste drei Schritte (nur Schritt 1 aktiv):
+1. Wartung bei mehreren gespeicherten Projekten isoliert messen; Heap-Zuordnung und Abbruchverhalten prüfen.
+2. Aus belastbaren Daten bedarfsabhängige Auslöser und Grenzen festlegen; verbleibende Messlücken ausdrücklich behandeln.
+3. Automatische Wartung über den gemeinsamen Port anbinden und praktisch abnehmen.
