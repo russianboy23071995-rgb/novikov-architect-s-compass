@@ -11590,3 +11590,17 @@ Rohwerte `benchmarks/building-view-results.json`; Detailgrenzen im Masterplan.
 Bestehende Identitätscache-Annahme immutable Snapshots nicht ausgeweitet:
 Ownership/Mutationsabsicherung sowie doppelte Validierungen sind der nächste
 Einzelauftrag innerhalb AUD14-04. Der Gesamtpunkt bleibt ausdrücklich offen.
+
+
+### AUD14-04 Teil 2 – Nachweis 15.10.2026
+Gebäude-Cache gegen mutable Same-Identity-Eingaben abgesichert. Gemeinsame private
+Ownership-Factory prüft und friert eigene Snapshots ein; bisheriger mutable
+validateProject-Vertrag bleibt erhalten. Pilot: Geschosswechsel und vorbereitete
+XY-/Z-Basen; vollständige Bestätigungsprüfung/ein Undo bleiben erhalten.
+987 Tests, beide Typechecks, Lint, Build und sieben exakte WebGL-Pixelvergleiche bestanden.
+Rohmessung/Grenzen: `benchmarks/building-ownership-results.json`. Mutable Eingaben
+kosten bei Wiederholung weiterhin Vollvalidierung (~6,967 ms bei 500 Wänden/Fenstern);
+owned Cachehit ~0,002 ms. Keine globale Ownership- oder Framezeitgarantie.
+Nächster einzelner Auftrag AUD14-04: vorbereiteten gemeinsamen 3D-Abfragekontext
+auf stabile geprüfte Basis ausrichten; Kamera-/Projektionswechsel von Modellprüfung
+entkoppeln. Bestehende Identitätscaches und finale Validierung dabei nicht umgehen.

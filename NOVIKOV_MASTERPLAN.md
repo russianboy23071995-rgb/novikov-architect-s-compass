@@ -466,9 +466,10 @@ bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 ni
 Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
 implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
 ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
-AUD14-04 bleibt aktiv: erster Teil Gebäudeableitung bei Ansichtssnapshotwechsel geprüft.
-Nächster Einzelauftrag: Ownership-/Mutationsvertrag des bestehenden Identitätscaches
-und doppelte Validierungen an Ansichtseinstellungsgrenzen prüfen, bevor Prüfungen entfallen.
+AUD14-04 bleibt aktiv: Gebäudeableitung (PR322 gemergt) und Ownership-Pilot geprüft.
+Nächster Einzelauftrag: stabilen vorbereiteten 3D-Abfragekontext auf geprüfte Snapshots
+ausrichten; wiederholte Modellprüfung bei Kamera-/Projektionswechsel vermeiden.
+Verbleibende mutable Kontexte und direkte 3D-Vorschaupfade sind noch offen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -987,3 +988,42 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   bestehende Snapshot-Ownership und Identitätscache-Mutationsannahme absichern und
   doppelte Validierung an Ansichtseinstellungsgrenzen messen/begrenzt reduzieren.
   Danach verbleibende 3D-Vorschaupfade/Schraffurprüfungen; erst dann AUD14-05.
+
+
+### AUD14-04, Teil 2 – Geprüfte Snapshot-Ownership und sicherer Gebäude-Cache (15.10.2026)
+
+- PR #322 nach grüner CI ausdrücklich freigegeben und als Merge `5943fe3` übernommen.
+- Reproduzierter Fehler: nach In-place-Änderung einer Wandhöhe gab der Identitätscache
+  dieselbe veraltete Szene zurück. Der neue Regressionstest scheiterte vor dem Fix.
+- `domain/project/owned-snapshot.ts` besitzt die gemeinsame Factory: vollständige
+  Validierung, eigene tief eingefrorene Struktur und private WeakSet-Provenienz.
+  Aufruferdaten werden nicht eingefroren; geprüfte immutable Bildhandles dürfen geteilt
+  bleiben. Kein öffentliches Trusted-Flag. `validateProject` bleibt eine mutable Kopie.
+- Gebäude-Cache darf nur für solche Snapshots die frühere Vollprüfung wiederverwenden.
+  Veränderliche öffentliche Eingaben durchlaufen auch bei gleicher Identität die
+  vollständige Prüfung; gültige Änderungen aktualisieren, ungültige werden abgewiesen.
+  Selber einfrieren, Spread oder Type-Cast gewähren keinen ungeprüften Zugriff.
+- Begrenzte Einführung: Arbeitsgeschosswechsel liefert einen solchen Snapshot;
+  vorbereitete XY-/Z-Bewegungsbasen verwenden dieselbe Factory statt eigener Freeze-Logik.
+  Platzierung prüft weiter vollständig; ein Undo-Schritt bleibt erhalten.
+- Messung gegen `5943fe3`: fünf Geschosse/500 Wände und Fenster, erster Lauf separat,
+  sechs warme Beobachtungen. Median Geschossaktion 3,335 → 4,764 ms (Freeze-Arbeit),
+  anschließende Gebäudeabfrage 4,728 → 1,104 ms (keine zweite Vollprüfung).
+  Separate wiederholte Abfrage: owned etwa 0,002 ms, mutable etwa 6,967 ms.
+  Snapshot-Erstellung separat 9,493 ms. Keine Gesamtframe-/p95-Garantie;
+  erster owned Cachelauf teilt bereits die mutable Szene, also kein Kaltstartvergleich.
+- 987 Tests, beide Typechecks, gezieltes Lint und Produktionsbuild bestanden.
+  Chromium 155: sieben Geschosswechsel mit exakt gleichen WebGL-Pixeln bestanden.
+  Rohwerte und Grenzen: `benchmarks/building-ownership-results.json`;
+  zusätzliche Messung `benchmarks/building-cache-profile.ts`.
+- Praktische Abnahme: Geschoss wechseln, Wand bearbeiten, zwischen 2D/3D wechseln;
+  Gebäude muss aktuell bleiben. Bewegung bestätigen und mit einem Undo zurücknehmen.
+- **Grenze:** Nicht alle Projektzustände und anderen Identitätscaches sind bereits auf
+  Ownership umgestellt. Mutable Eingaben verursachen jetzt bewusst Prüfkosten; bei
+  Neuaufbau von Projektions-/Kamerakontexten können diese mehrfach auftreten. Die
+  memoisierten Ursprungsabfragen validieren nicht pro Zeigerabfrage erneut.
+- **Ein nächster aktiver Auftrag (AUD14-04):** gemeinsamen vorbereiteten 3D-Abfragekontext
+  für stabile Modellbasis untersuchen und begrenzt auf owned Snapshots umstellen, sodass
+  Kamera-/Projektionswechsel keine wiederholte Modellprüfung auslösen. Zielkontext und
+  Sichtbarkeit müssen aktuell bleiben; Vergleich mit vollständigem Pfad und Messung.
+  Anschließend verbleibende direkte 3D-Vorschau-/Schraffurprüfungen; AUD14-05 noch nicht starten.
