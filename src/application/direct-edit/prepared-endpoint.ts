@@ -25,7 +25,12 @@ function replaceRelations<T>(all: T[], before: T[], after: T[]): T[] {
 }
 
 /** Complete original join/T component, including partners whose joins may detach. */
-export function prepareEndpoint(source: Project, id: string, index: 0 | 1 = 1) {
+export function prepareEndpoint(
+  source: Project,
+  id: string,
+  index: 0 | 1 = 1,
+  stretch?: { anchor: Point },
+) {
   const base = createProjectSnapshot(source),
     s = storeyOf(base);
   const wall = s.walls.find((w) => w.id === id);
@@ -54,9 +59,9 @@ export function prepareEndpoint(source: Project, id: string, index: 0 | 1 = 1) {
   const session: EditSession = Object.freeze({
     base,
     target: { kind: "wall" as const, id },
-    action: "point",
+    action: stretch ? "stretch" : "point",
     index,
-    anchor: index === 0 ? wall.start : wall.end,
+    anchor: stretch ? Object.freeze({ ...stretch.anchor }) : index === 0 ? wall.start : wall.end,
   });
   const localSession: EditSession = Object.freeze({ ...session, base: scoped });
   const full = (point: Point) => ({

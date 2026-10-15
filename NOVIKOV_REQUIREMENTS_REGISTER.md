@@ -11986,3 +11986,19 @@ Keine Framegarantie. Aktiver Folgeauftrag: direktes Wand-Strecken messen und gem
 vorbereiten mit vollständigem Fenster-/Anschluss-/Commitvergleich. Ausblick danach
 AUD14-05 lokale 3D-Fangsuche (nach AUD14-04-Abnahme), dann AUD14-06 Langzeitspeicher/Recovery.
 Andere Restpfade und AUD14-07 bleiben offen.
+
+
+### AUD14-04 Teil 19 – Wand-Strecken
+PR340 gemergt (ff4af16). Gemeinsamer Endpunktadapter führt die originale Streckaktion
+auf der vollständigen vorbereiteten Anschlussgruppe aus, inklusive versetzter Ursprünge.
+2D-Materialisierung und 3D-Patch registriert; neue T-Kandidaten im gemeinsamen Controller
+berücksichtigt, fremde Kontakte mit Vollpfad. Vollcommit und ein Undo erhalten.
+1040 Tests, beide Typechecks, Lint und Build bestanden. Acht zusätzliche Vergleichstests
+für beide Enden, schräge Achsen/Körpergriffe, Fenster, Eck-/Doppel-T-Nachbarn, gelöste
+Anschlüsse, fremde Endpunkte, Kontext, Abbruch und Undo. Keine neue Browserabnahme.
+wall-stretch-results.json: 502 Wände, Vollpfad 4,157/4,361 → Vorschau 0,796/0,703 ms;
+Vorbereitung 6,980/4,669 ms separat. Vorhermessung und Runner ebenfalls gespeichert.
+Keine Framegarantie; Fremdpunktliste, große Anschlussgruppe und Planableitung bleiben.
+Einziger Folgeauftrag: freie Wandkörper-Eckbewegung über denselben Adapter vorbereiten
+und vergleichen; diese andere Aktion ist noch Legacy. Danach AUD14-05 nach AUD14-04-
+Restabnahme, anschließend AUD14-06. Andere Restpfade/AUD14-07 nicht abgeschlossen.

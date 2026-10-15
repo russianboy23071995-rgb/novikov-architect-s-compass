@@ -506,8 +506,9 @@ PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unt
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
 PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglichen (Teil 18).
-Nächster Einzelauftrag: direktes Wand-Strecken messen und im gemeinsamen Endpunktadapter
-begrenzen; Fenster-/Anschlussabhängigkeiten und vollständige Commitprüfung erhalten.
+PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und verglichen (Teil 19).
+Nächster Einzelauftrag: freie Wandkörper-Eckbewegung gegen Achsgriff unterscheiden,
+messen und im gemeinsamen Endpunktadapter vorbereiten; Körperoffset und Anschlüsse erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1734,3 +1735,44 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen; gültige Sicherungen,
    Undo-Stände und konkurrierende Schreiber bei jeder Bereinigung schützen.
 AUD14-04 bleibt offen. Weitere Restpfade aus Teil 13 sowie AUD14-07 bleiben dokumentiert.
+
+
+### AUD14-04 Teil 19 – Direktes Wand-Strecken (15.10.2026)
+
+PR340 nach ausdrücklicher Freigabe und grüner CI in main gemergt (ff4af16).
+Der vorhandene Endpunktadapter führt nun auch die unveränderte stretch-Aktion auf der
+vorbereiteten vollständigen Anschlussgruppe aus. Originaler Ursprung und Achsprojektion
+bleiben erhalten, einschließlich Körperoffset-Griffen. Gemeinsame Registrierung liefert
+2D-Projektansicht und 3D-Geometriepatch; keine neue Renderer- oder Fang-Sonderlogik.
+Neue fremde Endkontakte und explizite T-Ziele erhalten vollständige Prüfung. Der gemeinsame
+2D-Controller berücksichtigt T-Kandidaten auch nach vorbereiteter Materialisierung.
+Commit prüft weiterhin das vollständige Projekt und erzeugt genau einen Undo-Schritt.
+
+1040 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden. Acht neue
+Tests vergleichen Projekte, 3D-Flächen, Fensterflächen und Auswahlachsen mit dem Vollpfad:
+beide Enden, Kürzen/Verlängern, schräge Wände, seitlich versetzte Ursprünge, Eck-/Doppel-T-
+Anschlüsse, gelöste Nachbarn, fremde/verbrauchte Endpunkte und neue T-Ziele. Kontextwechsel,
+Abbruch, ungültige Ziele und Vollcommit/Undo geprüft. Keine neue visuelle Browserabnahme.
+
+Runner wall-stretch-profile.ts, Rohdaten wall-stretch-before.json und wall-stretch-results.json.
+Fünf Geschosse plus T-Paar mit Fenstern; erster und acht warme Ziele, alternierende
+Reihenfolge, exakte Projektgleichheit außerhalb der Messung, Vorbereitung separat.
+Im Nachherlauf Vollpfad → vorbereitete Projektvorschau (warme Mediane):
+- 52 Wände, Anfang/Ende: 2,064 → 1,349 ms / 1,381 → 0,813 ms.
+- 502 Wände, Anfang/Ende: 4,157 → 0,796 ms / 4,361 → 0,703 ms.
+Vorbereitung bei 502 Wänden: 6,980 / 4,669 ms. Vorherlauf ohne Capability:
+502 Wände, Vorschau 5,055 / 3,426 ms. Messstreuung beachten; keine Frame-/GPU-Garantie.
+Lineare Fremdpunktprüfung, große vollständige Anschlussgruppen, Projektmaterialisierung
+und anschließende Planableitung bleiben Kosten. Freie Wandkörper-Eckbewegung bleibt ein
+expliziter Legacy-Pfad; die Streckoptimierung deckt diese andere Aktion nicht automatisch ab.
+
+Praktische Abnahme: angeschlossene Wand mit Fenstern an beiden Enden strecken, auch schräg;
+Nachbaranschlüsse und Fenster beobachten; abbrechen, platzieren, einmal Undo vergleichen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Freie Wandkörper-Eckbewegung messen und im gemeinsamen Endpunktadapter vorbereiten.
+   Körperoffset, beide Enden, schräge Achsen, Fenster/Nachbarn und Vollcommit vergleichen.
+2. AUD14-05: lokale räumliche 3D-Fangsuche und große Anschlussgruppen nach verbleibender
+   AUD14-04-Abnahme; Kontext und Fangrangfolge erhalten.
+3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
+AUD14-04 bleibt offen; weitere Restpfade aus Teil 13 und AUD14-07 bleiben dokumentiert.

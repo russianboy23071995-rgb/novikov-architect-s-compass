@@ -108,7 +108,7 @@ export function previewEdit(
   if (project !== session.base)
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
   const preparedProject = preparedProjectPreview(session, project, selection, point);
-  if (preparedProject) return preparedProject;
+  if (preparedProject) return connectSnappedT(session, preparedProject, point, candidate);
   const wall =
     session.target.kind === "wall"
       ? storeyOf(project).walls.find((w) => w.id === session.target.id)
