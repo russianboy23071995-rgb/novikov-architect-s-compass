@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR332 gemergt (ee48dbe); Schraffur-Offset vorbereitet und verglichen (Teil 11 unten).
-Nächster Einzelauftrag: Schraffur-Knicken (Punkt einfügen) im gemeinsamen vorbereiteten
-Vertrag begrenzen; Punktanzahlgrenze und vollständige Kontur-/Commitprüfung erhalten.
+PR333 gemergt (cdc6fd2); Schraffur-Knicken vorbereitet und verglichen (Teil 12 unten).
+Nächster Einzelauftrag: AUD14-04-Abschlussprüfung der verbliebenen Legacy-Vorschaupfade
+mit Pfad-/Kostenliste und priorisiertem Restbefund, ohne neue Werkzeugmigration.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1421,3 +1421,38 @@ abbrechen oder platzieren und einmal Undo; Musterlage und übrige Elemente erhal
 Einziger Folgeauftrag: Schraffur-„Knicken“ (Punkt einfügen) im gemeinsamen vorbereiteten
 Vertrag begrenzen; Punktanzahlgrenze und vollständige Kontur-/Commitprüfung erhalten.
 AUD14-04 bleibt aktiv, AUD14-05/06/07 folgen danach. Andere Legacy-Pfade bleiben offen.
+
+
+### AUD14-04 Teil 12 – Vorbereitete Schraffur-Knickvorschau (15.10.2026)
+
+PR333 nach ausdrücklicher Freigabe und grüner CI gemergt (cdc6fd2).
+Punkt einfügen verwendet denselben Application-Vorschauadapter wie Punktbewegung,
+Seitenstreckung und Offset. Die gemeinsame Geometriefunktion prepareContourInsertion
+besitzt eine kopierte, einmal geprüfte Ausgangskontur und verwendet die bestehende
+Punktableitung. Jede Zielkontur wird weiterhin vollständig auf Gültigkeit und Umlaufrichtung
+geprüft. MAX_HATCH_POINTS ist die gemeinsame Grenze für Schema und Vorbereitung:
+9.999 auf 10.000 Punkte zulässig, darüber abgewiesen. Keine neue Renderer-/Fanglogik.
+Platzieren bleibt auf dem vollständigen Projektprüfpfad, atomar mit einem Undo.
+
+1016 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Verglichen:
+Projekt, Geometriepatch und Planszene, konkave Kontur, beide Umlaufrichtungen,
+erste/letzte Kante, absolute Zielposition unabhängig vom Ursprung, ungültige Ziele,
+Punktanzahlgrenze, Kontextwechsel, Abbruch, Undo und unbetroffene ungültige Elemente
+beim Commit. Muster und übrige Projektelemente bleiben erhalten.
+Keine neue visuelle Browserabnahme behauptet; der Renderer bleibt unverändert.
+
+Rohdaten: benchmarks/hatch-insert-results.json. Node; Vorbereitung separat,
+ein erster und acht warme Werte mit wechselnder Reihenfolge und exakter Projektgleichheit.
+Warme Mediane Vollpfad → vorbereitete Vorschau:
+- eine 500-Punkt-Kontur: 6,53 → 1,17 ms; Vorbereitung 13,45 ms.
+- 100 Schraffuren mit je 100 Punkten: 76,41 → 0,30 ms; Vorbereitung 55,28 ms.
+- 500 Vierecke: 15,61 → 0,03 ms; Vorbereitung 8,62 ms.
+Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung und Projektmaterialisierung
+bleiben Kosten. Weitere Legacy-Vorschauen sind noch nicht durchgehend vorbereitet.
+
+Abnahme: Musterschraffur auswählen, an erster/letzter Seite „Knicken“ starten,
+Punkt verschieben, abbrechen beziehungsweise platzieren und einmal Undo.
+Einziger Folgeauftrag: AUD14-04-Abschlussprüfung der verbliebenen Legacy-Vorschaupfade
+mit einer konkreten Pfad-/Kostenliste und priorisiertem Restbefund. Dabei keine neuen
+Werkzeugmigrationen beginnen; daraus den nächsten begrenzten Fix oder AUD14-05 ableiten.
+AUD14-04 bleibt bis zu dieser Prüfung offen; AUD14-05/06/07 bleiben erhalten.

@@ -29,6 +29,21 @@ export function editContourEdge(
   return result;
 }
 
+/** Pin the validated source once; insertion still checks the entire target contour. */
+export function prepareContourInsertion(input: readonly Point2[], index: number) {
+  const points = input.map((p) => ({ ...p }));
+  contourEdge(points, index);
+  const before = validateSimplePolygon(points);
+  if (!before.valid) throw new Error("Ungültige Ausgangskontur.");
+  return (target: Point2): Point2[] => {
+    const result = moveContourEdge(points, index, "insert", points[index]!, target);
+    const after = validateSimplePolygon(result);
+    if (!after.valid || before.signedArea * after.signedArea <= 0)
+      throw new Error("Die Änderung erzeugt eine ungültige Kontur.");
+    return result;
+  };
+}
+
 function moveContourEdge(
   points: readonly Point2[],
   index: number,

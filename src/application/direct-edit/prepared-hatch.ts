@@ -1,3 +1,5 @@
+import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
+import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
 import {
@@ -13,10 +15,13 @@ import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
 /** An owned validated snapshot fixes all non-contour fields. Point/edge previews
- * use changed-edge checks; offset changes every vertex and retains full contour validation.
+ * use changed-edge checks; offset and insertion retain full target contour validation.
  */
 export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
-  if (session.target.kind !== "hatch" || !["point", "edge", "offset"].includes(session.action))
+  if (
+    session.target.kind !== "hatch" ||
+    !["point", "edge", "offset", "insert"].includes(session.action)
+  )
     throw Error("Unsupported hatch preview");
   const source = session.base,
     base = createProjectSnapshot(source),
@@ -25,6 +30,9 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
   const index = session.index ?? (session.action === "offset" ? 0 : null);
   if (!hatch || index === null || !Number.isInteger(index) || !hatch.points[index])
     throw Error("Invalid hatch grip");
+  if (session.action === "insert" && hatch.points.length >= MAX_HATCH_POINTS)
+    throw Error("Maximale Anzahl der Schraffurpunkte erreicht.");
+  const insert = session.action === "insert" ? prepareContourInsertion(hatch.points, index) : null;
   const edge = session.action === "edge" ? prepareSessionContourEdge(session, hatch.points) : null;
   const contour =
     session.action === "point" ? preparePolygonVertexEdit(hatch.points, [index]) : null;
@@ -38,7 +46,10 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
     if (current !== source || selection?.id !== target.id || selection.kind !== target.kind)
       throw Error("Bearbeitungskontext geaendert.");
     let points: Point[];
-    if (offset) {
+    if (insert) {
+      points = insert(point);
+      points.forEach(Object.freeze);
+    } else if (offset) {
       points = offsetContourPoints(pinned, point);
       const result = validateSimplePolygon(points);
       if (!result.valid)

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 
+export const MAX_HATCH_POINTS = 10000;
+
 /** A model-space 2D filled contour; metres, no volume, holes or pattern definition yet. */
 const hatchBaseSchema = z
   .object({
@@ -10,7 +12,7 @@ const hatchBaseSchema = z
     points: z
       .array(z.object({ x: z.number().finite(), y: z.number().finite() }).strict())
       .min(3)
-      .max(10000),
+      .max(MAX_HATCH_POINTS),
     fill: z
       .object({
         color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
