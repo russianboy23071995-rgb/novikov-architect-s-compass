@@ -59,6 +59,36 @@ Vorbereitete Bearbeitung bindet einen gültigen unveränderlichen Ausgangsstand 
 
 Snapshot-History bleibt vorerst bestehen. Delta-/Change-Set-History erst bei gemessenem Bedarf; History ist kein Backup. Wandkette als ein Modell-Undo-Schritt. Ansichtsmaßstab außerhalb Modell-Undo; Ebenensichtbarkeit verwendet ihre vorhandene getrennte History; Musterbibliothek eigene History mit neuen monotonen Revisionen. Diese bewusst verschiedenen Vorgänge dürfen nicht still vereinheitlicht werden. Keine eigene Abbild-History; konkrete Dokumentanlage/-löschung muss fachlich zugeordnet sein.
 
+#### Verbindliches Abnahmegate für neue Bewegungsadapter (Nutzerentscheidung 15.10.2026)
+
+Ein geprüfter Fix gilt als gemeinsame Vorgabe für alle folgenden Werkzeuge: Grundriss und
+3D, Einzel-/Mehrfachauswahl und künftige Decken, Dächer, Treppen. Gemeinsamer Fang allein
+verhindert keine Engpässe, wenn ein Adapter daneben das ganze Modell prüft oder ableitet.
+
+- Einmalige Vorbereitung pro Bearbeitung auf geprüfter unveränderlicher Basis; Kamera,
+  Zoom und Pointer dürfen diese Modellbasis nicht unnötig neu vorbereiten.
+- Gemeinsame Fang-/Referenzpipeline mit stabiler Quellen-ID und fachlichen Abhängigkeiten;
+  lokale Kandidaten plus aktive Hilfsreferenzen. Keine neue Fangengine pro Elementtyp.
+- Application-Adapter liefert eine abgeleitete GeometryPreview mit vollständiger betroffener
+  Menge einschließlich stationärer Nachbarn. Renderer komponiert sie gemeinsam; fachliche
+  Typauswahl gehört in Application. `prepareDirectEditPreview` ist der Einstieg für die
+  bisher migrierte direkte Bearbeitung; Auswahlbewegung verwendet ihren bestehenden
+  vorbereiteten Pfad und denselben GeometryPreview-Vertrag.
+- Keine zusätzliche Gesamtprojekt-Validierung, Payload-Serialisierung, globale Paarbildung
+  oder GPU-Neuanlage pro Pointerbewegung einführen. Verbleibende globale Komposition,
+  große Anschlussgruppen und Legacy-Fallbacks ausdrücklich messen und kennzeichnen.
+- Platzieren prüft den vollständigen aktuellen Modell-/Auswahlkontext und Fachzustand;
+  atomare Veröffentlichung, genau ein Undo-Schritt; Abbruch veröffentlicht nichts.
+- Vor Adapterfreigabe: Geometrie-/Auswahlkonturvergleich gegen die vollständige Aktion,
+  Anschlüsse und gelöste Nachbarn, Fenster, fremde Endpunkte soweit betroffen, Grenzwerte,
+  stale Kontext, Abbruch und Undo. Zusätzlich repräsentative Größenmessung: Vorbereitung,
+  erster und warme Schritte getrennt; Aufruf-/Arbeitsmenge sowie verbleibende Kosten nennen.
+  Bei Renderingänderung visueller Nachweis. Bestehende Äquivalenztests bleiben Regressionen.
+
+Dies ist eine verbindliche Entwicklungs-/Reviewregel, keine Behauptung, alle Altpfade seien
+bereits migriert oder eine Typenschnittstelle könne Laufzeitkomplexität allein garantieren.
+Ein neuer Adapter ohne diese Nachweise ist nicht abgeschlossen. Keine leeren Zukunftsklassen.
+
 ### A05 – Geometrie, Fang und 3D
 
 Einheiten, Achsen, numerische Verträglichkeit und toleranzabhängige Grenzen zentral halten. Allgemeine Geometrie getrennt von Host-/Öffnungs-/Anschlussregeln. Ungültige, entartete oder mehrdeutige Fälle explizit melden; Koordinaten nicht heimlich zurechtrücken.
@@ -467,7 +497,8 @@ Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierte
 implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
 ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
 AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership und 3D-Abfragebasis (PR322–324
-gemergt), Fenster-Achsvorschau als begrenzter Pilot geprüft. Nächster Einzelauftrag:
+gemergt), Fenster-Achsvorschau PR325 gemergt (f734413). Gemeinsamer Application-Einstieg
+und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzelauftrag:
 direkte Wand-Endpunktvorschau in 3D messen und ihren vollständigen Fallback gegen
 einen begrenzten vorbereiteten Pfad abgleichen; Vollprüfung beim Platzieren erhalten.
 
@@ -1114,3 +1145,17 @@ Keine eigene Rasterengine je Wand und keine Hilfspunkte als zusätzliche BIM-Bau
 Bei AUD14-05 Quellenzuordnung für lokale Suche/gezielte Invalidierung nutzen; bei
 Schnittpunkten alle beteiligten Quellen erhalten. Die Zuordnung allein ersetzt
 keinen räumlichen Index und löst globale Projektionsarbeit nicht automatisch.
+
+### AUD14-04 – Gemeinsamer Einstieg statt weiterer Renderer-Sonderfälle (15.10.2026)
+
+Nutzerkritik übernommen: Die gemeinsamen Regeln waren in einzelnen Altpfaden noch nicht
+konsequent umgesetzt. PR325 ist freigegeben und gemergt. Der Fensterpilot wird nun über
+`prepareDirectEditPreview` angebunden; BimSolidView kennt dafür keinen Fenstertyp-Schalter
+mehr. Die bestehenden Vergleichs- und Commit-Tests laufen über diesen Einstieg.
+Nicht migrierte Operationen liefern ausdrücklich keine vorbereitete Fähigkeit und bleiben
+vorerst auf dem bisherigen Pfad. Kein zusätzlicher Geschwindigkeitsgewinn behauptet.
+A04 und AGENTS verlangen die Wiederverwendung und Nachweise auch für künftige Bauteile.
+Nächster einzelner Auftrag bleibt die direkte Wand-Endpunktvorschau: über denselben Einstieg
+integrieren, gegen den vollständigen Pfad vergleichen und messen. Kein neuer UI-Typschalter.
+
+Nachweis dieses Schritts: 992 Tests bestanden, App-/Benchmark-Typecheck, gezieltes Lint und Build erfolgreich. Bestehende Geometrie-/Kontur-/Commit-Vergleiche laufen durch den gemeinsamen Einstieg; unbekannte Operation und ungültiges Ziel zusätzlich geprüft. Keine neue Browserabnahme oder neue Performancezahl für diese verhaltensgleiche Umverdrahtung behauptet.
