@@ -132,7 +132,7 @@ button.onclick = async () => {
     check(
       (await collectRecoveryV2Pilot(db, codec)).status === "skipped" &&
         (await get(db, "legacy", "A")) === legacy,
-      "V1-Präsenz blockiert Pilot; Original bleibt bytegleich",
+      "Unlesbare V1-Daten blockieren Pilot; Original bleibt bytegleich",
     );
     await put(db, "legacy", "A", undefined);
     const stale = await prepareRecoveryV2Writer(

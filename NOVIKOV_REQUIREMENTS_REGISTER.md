@@ -12124,3 +12124,18 @@ vollständige Vorbereitung/Headkopien vor Aktivierung messen, nicht an jeden Aut
 Nächster einzelner Auftrag: produktives Store-Layout/Migrationsfälle und Kosten isoliert
 prüfen. Anschließend kontrollierte Anbindung/Fehlerabnahme, danach AUD14-07-Gesamtgate.
 AUD14-06 bleibt teilweise/offen, ebenso AUD14-04/05-Restbefunde.
+
+
+### AUD14-06 – Produktives Store-Layout und V1-Migrationsschutz (15.10.2026)
+PR348 gemergt (4e1945d). Gemeinsame recoveryV2Layout-Funktion ohne Verhaltensänderung der
+Produkt-Adressierung. Pilot weiterhin nur Diagnose-DB. Vollständig geprüfte V1-current/
+previous enthalten Bilder inline und bleiben bytegleich; beschädigte/unbekannte Altstände
+blockieren Löschung. Atomarer Vergleich aller V1-Einträge zusätzlich zu sämtlichen V2-Heads,
+Katalogindex unverändert. Echter Migrationspfad über Produktionskatalog isoliert geprüft.
+11 neue und 16 bisherige Browser-Assertions, 1057 Modelltests, beide Typechecks, Lint, Build
+bestanden. Rohdaten retention-layout-results.json und retention-layout-regression.json.
+Drei Gesamtläufe je Größe: Median 46,3 ms bei 1000 und 386 ms bei 10000 Linien. Kein Peak-/
+Frame-/p95-/Langlaufnachweis, kleine Bilder; Kosten nicht mit schweren BIM-Modellen gleichsetzen.
+Nächster Auftrag: explizite abbrechbare Wartungsaktion über Application-/Storage-Port samt
+Quota-/Abbruchschutz; keine Bereinigung pro Autosave. Danach Langsitzungs-/Speicherprofil,
+anschließend AUD14-07-Gesamtgate. Gesamtabnahme AUD14-06 bleibt offen.

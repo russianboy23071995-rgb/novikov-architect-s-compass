@@ -1,0 +1,46 @@
+{
+  "name": "novikov-recovery-v2-pilot-layout-75e2907a-2910-4105-af87-d3b5f193152a",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "started": "2026-10-15T16:17:11.931Z",
+  "checks": [
+    "Produktives Layout: nur zwei nicht mehr von V2 benötigte Bilder entfernt",
+    "Echtes V1-Migrationsoriginal bytegleich erhalten",
+    "Beide eingebetteten V1-Bildstände bleiben unabhängig von V2-Payloads lesbar",
+    "Migrierter V2-Stand vollständig erhalten",
+    "Katalogindex unverändert",
+    "Unbekannter Altstand blockiert Bereinigung",
+    "Beschädigter V1-Vorgänger blockiert Bereinigung",
+    "Neuer V1-Slot während Vorbereitung invalidiert atomare Freigabe",
+    "1000 Linien: Modell bleibt vollständig identisch",
+    "10000 Linien: Modell bleibt vollständig identisch",
+    "DB-Neuöffnung erhält Original und bereinigten Bestand"
+  ],
+  "timings": [
+    {
+      "lines": 1000,
+      "runs": [
+        45.6000000089407,
+        53.5,
+        46.29999999701977
+      ],
+      "totalMs": {
+        "median": 46.29999999701977,
+        "observedMaximum": 53.5
+      }
+    },
+    {
+      "lines": 10000,
+      "runs": [
+        406.20000000298023,
+        386,
+        378.79999999701977
+      ],
+      "totalMs": {
+        "median": 386,
+        "observedMaximum": 406.20000000298023
+      }
+    }
+  ],
+  "status": "PASS",
+  "finished": "2026-10-15T16:17:14.595Z"
+}

@@ -161,7 +161,8 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 Aktuelle AUD14-06-Teilevidenz: reproduzierbare History-/Recovery-Aufbewahrungsmessung
 mit zwei isolierten Projektslots; alte V2-Bildpayloads bleiben nach Bildwechseln gespeichert.
-Isolierter transaktionaler Bereinigungspilot bestanden (AUD14-06 Teil 2).
+Isolierter transaktionaler Bereinigungspilot inklusive produktivem Store-Layout und
+V1-Migrationsoriginalen bestanden (AUD14-06 Teile 2/3).
 Kein Nachweis eines JS-Speicherlecks und noch keine automatische Bereinigung; Details unten.
 
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
@@ -494,7 +495,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-06 – Bereinigungspilot im produktiven Store-Layout mit V1-Migrationsschutz und Vorbereitungskosten isoliert prüfen.**
+**Genau ein aktiver Schritt: AUD14-06 – explizite abbrechbare Recovery-Wartungsaktion hinter dem Application-/Storage-Port anbinden und gegen Quota-/Abbruchfälle prüfen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -519,8 +520,8 @@ PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiese
 PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktprüfung in AUD14-05 Teil 3.
 PR346 gemergt (9c38ffc); AUD14-06-Messung mit 220 Modelländerungen dokumentiert unten.
 PR347 gemergt (aeddaec); transaktionaler Bereinigungspilot und Browsernachweis unten.
-Nächster Einzelauftrag: produktives Store-Layout/Migrationsfälle und Vorbereitungskosten
-weiter isoliert prüfen; noch keine automatische Produktionsbereinigung.
+PR348 gemergt (4e1945d); produktives Layout und V1-Schutz isoliert geprüft, siehe Teil 3.
+Nächster Einzelauftrag: explizite abbrechbare Wartungsaktion, keine Bereinigung pro Autosave.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -2131,3 +2132,46 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Bildentfernung/Undo/Reload abschließen. Gültige letzte Sicherung bleibt unangetastet.
 3. AUD14-07 Schulprofil, große Anschlussgruppen/Kamerawechsel und Architektur-/Statuskorrekturen
    abnehmen. AUD14-04/05-Restschuld und AUD14-06-Gesamtabnahme bleiben offen.
+
+
+### AUD14-06 Teil 3 – Produktives Layout und Migrationsschutz (15.10.2026)
+
+PR348 nach ausdrücklicher Freigabe und grüner CI in main gemergt (4e1945d).
+Gemeinsame recoveryV2Layout-Funktion hält Store-Namen/Slotadressierung für Produktionsadapter
+und Pilot zusammen. Keine Anbindung der Bereinigung an das Produkt; Namensschutz für
+Diagnosedatenbanken bleibt. Bestehender Storageadapter verwendet identische Store-Namen.
+
+Der Pilot prüft jetzt jeden vorhandenen V1-current/previous mit der vorhandenen vollständigen
+Snapshot-Prüfung. V1 enthält Bildbytes inline, verweist nicht auf den V2-Payloadstore. Gültige
+V1-Originale bleiben bytegleich liegen und blockieren V2-Bereinigung nicht mehr. Unbekannte
+Versionen, Zusatzfelder oder beschädigte Kandidaten blockieren weiterhin den ganzen Lauf.
+Vor jeder Löschung werden sämtliche V1-Einträge UND V2-Heads/Slotkeys in derselben atomaren
+Schreibtransaktion mit der geprüften Basis verglichen. Ein neuer/ersetzter Altstand während
+Vorbereitung verhindert Löschung. Katalogindex ist in der Sperre, wird nicht verändert.
+
+retention-layout.html/.ts mit createRecoveryCatalog/openRecoveryDatabase in isolierter DB:
+11 Assertions bestanden. Echte V1-Migration mit zwei unterschiedlichen eingebetteten Bildern,
+weitere V2-Bildwechsel, genau zwei verwaiste Payloads gelöscht/einer erhalten; V1-current und
+previous bleiben unabhängig lesbar. V2-Modell und Index unverändert, unbekannte Version und
+beschädigter Vorgänger blockieren; deterministisch neuer V1-Slot während Vorbereitung führt
+zu changed-roots. Modelle mit 1000/10000 Linien vollständig per serializeProject verglichen,
+DB-Neuöffnung geprüft. Zusätzlich 16 bisherige Browserfälle erneut bestanden (separater
+Regressionsbericht). 1057 Modelltests, beide Typechecks, gezieltes Lint und Build bestanden.
+
+Messung Windows IAB Chrome/155, retention-layout-results.json: drei sequenzielle Läufe je
+Größe, inklusive vollständiger Vorbereitung und Transaktion; zwei V2-Projektslots, kleine
+2×2-Bilder und V1-Original. Gesamtmedian 1000 Linien 46,3 ms, beobachtetes Maximum 53,5 ms;
+10000 Linien 386,0 ms, Maximum 406,2 ms. Kein statistisch belastbares p95, keine getrennte
+Phasen-/Frame-/Peakmessung, kein schweres Raster-/BIM-Schulmodell und keine Langsitzung.
+Die End-to-End-Kosten verbieten eine ungemessene Ausführung nach jedem Autosave. Vorlage
+für die nächste Anbindung: explizite Wartungsaktion mit Fortschritt/Abbruch, außerhalb der
+Zeichen-/Vorschaupfade; keine automatische Endlosschleife bei Konflikt oder Quota. Das ist
+noch keine Zusage, dass synchrone Teilphasen ruckelfrei sind; deren Pausen vor UI-Abnahme messen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Explizite abbrechbare Wartungsaktion über gemeinsamen Application-/Storage-Port anbinden;
+   Status/Fehler, letzte Sicherung und Quota-/Abbruchfälle absichern, nicht pro Autosave.
+2. Längere Sitzungen mit Bildwechsel/Entfernung, Undo, Reload und gemischtem Speicherprofil
+   prüfen; synchrone Pausen und Speicherbereiche getrennt ausweisen.
+3. AUD14-07 Schulprofil und verbleibende Anschlussgruppen-/Kamera-/Architekturbefunde abnehmen.
+AUD14-06 und AUD14-04/05-Restschuld bleiben offen; keine automatische Nutzerbereinigung.

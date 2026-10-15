@@ -1,3 +1,4 @@
+import { recoveryV2Layout } from "./recovery-layout.ts";
 import { createRecoveryV2Storage } from "./recovery-v2-storage.ts";
 import { createProjectRecoveryCodec } from "./recovery-codec.ts";
 import type { RecoveryV2Storage } from "../../application/project-files/recovery-v2.ts";
@@ -126,13 +127,7 @@ export function createRecoveryCatalog(
     async read() {
       const db = await openDatabase();
       try {
-        return await createRecoveryV2Storage(db, id, codec, {
-          legacy: "snapshots",
-          heads: "recovery-v2-heads",
-          assets: "recovery-v2-assets",
-          legacyKey: `project:${id}`,
-          index: "recovery-index",
-        }).read();
+        return await createRecoveryV2Storage(db, id, codec, recoveryV2Layout(id)).read();
       } finally {
         db.close();
       }
@@ -140,13 +135,7 @@ export function createRecoveryCatalog(
     async publish(...args) {
       const db = await openDatabase();
       try {
-        await createRecoveryV2Storage(db, id, codec, {
-          legacy: "snapshots",
-          heads: "recovery-v2-heads",
-          assets: "recovery-v2-assets",
-          legacyKey: `project:${id}`,
-          index: "recovery-index",
-        }).publish(...args);
+        await createRecoveryV2Storage(db, id, codec, recoveryV2Layout(id)).publish(...args);
       } finally {
         db.close();
       }
