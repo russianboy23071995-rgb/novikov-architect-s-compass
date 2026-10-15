@@ -2327,3 +2327,32 @@ Das ist ein geprüfter Lifecycle-Schutz, kein Beweis für die Ursache der gemeld
 Nächste drei Schritte, nur erster aktiv: (1) echten Browserrand-Ablauf praktisch abnehmen,
 bei Wiederauftreten konkrete Exception erfassen; (2) Langsitzungs-/Speicherlastprüfung;
 (3) bedarfsgesteuerte automatische Wartung nach Belastungsnachweis. Kein Merge dieser PRs.
+
+### AUD14-06 – Beschleunigte Bild-/Sicherungssitzung (15.10.2026)
+
+Nutzer bestätigt Kamera-/Browserrand-Fix praktisch. #351 und #352 ausdrücklich freigegeben
+und in main übernommen (#352 bc34f668). Nächster begrenzter Prüfauftrag umgesetzt als
+recovery-session.html/.ts, mit echtem Katalog/Writer/Produkt-Wartungsadapter in eigener UUID-DB.
+24 beschleunigte Zyklen mit 1000 Linien, echten 1024×1024-PNGs, wechselnden Bildinhalten,
+Entfernung und erneutem Speichern des ursprünglichen Modells. Je Zyklus vollständige
+serializeProject-Vergleiche von Current, Previous (ab zweitem Zyklus) und fremdem Projekt.
+Nach Wartung maximal drei benötigte Bildpayloads, am Ende zwei mit insgesamt 6283500 Base64-
+Zeichen. Dies ist logische Nutzlast, keine physische Platten-/Heap-/GPU-Messung.
+
+Zwei Läufe PASS. Messwiederholung mit Long-Task-Beobachter: 12 Wartungen ca. 109–231 ms
+End-to-End. 14 Long Tasks im gesamten Test, keine überlappte die protokollierten Wartungs-
+zeitfenster. Globale Zeitgeberlücke maximal 202 ms, einschließlich Bilderzeugung, Serialisierung
+und Prüfvergleichen; nicht als Collector-Pause ausgeben. Keine statistische p95-/Ruckelfrei-
+Garantie. Ergebnis in recovery-session-results.json. Typecheck, gezieltes ESLint und Build
+bestanden; unveränderte Produktionsbasis zuletzt 1068 Tests und GitHub-CI grün.
+
+Grenzen: Lauf ist beschleunigt (Sekunden), kein Stunden-Dauertest. Adapter öffnen Verbindungen
+neu, kein kompletter Browserneustart. Rückkehr zum alten Modell simuliert den zu sichernden
+Undo-Inhalt, führt aber kein UI-Undo aus. Kein echter Quota-Vollzustand, keine Heap-/Prozess-
+Peakmessung. Automatische Wartung bleibt bis zu deren Nachweis aus. Keine Nutzerdaten bereinigt.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Reale längere Sitzung mit Application-Undo/Redo und vollständigem Reload ergänzen.
+2. Heap-/Prozess-/Rasterspitzen und Speichergrenzen getrennt messen; nur belegte Engpässe beheben.
+3. Bedarfsgesteuerte automatische Wartung über bestehenden Port nach bestandenen Gates anbinden.
+AUD14-07 großes Schulprofil bleibt anschließend offen.
