@@ -1,4 +1,4 @@
-import { prepareHatchPointPreview } from "./prepared-hatch.ts";
+import { prepareHatchContourPreview } from "./prepared-hatch.ts";
 import { prepareWallEndpointPreview } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { prepareWindowAxisPreview } from "./prepared-window.ts";
@@ -33,8 +33,8 @@ function prepareCapability(
   session: EditSession,
   projectView: boolean,
 ): PreparedDirectEditPreview | null {
-  if (session.target.kind === "hatch" && session.action === "point")
-    return prepareHatchPointPreview(session);
+  if (session.target.kind === "hatch" && ["point", "edge"].includes(session.action))
+    return prepareHatchContourPreview(session);
   // Remaining registered adapters currently expose geometry patches only.
   if (projectView) return null;
   if (session.target.kind === "window" && session.action === "axis")

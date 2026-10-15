@@ -171,3 +171,32 @@ export function prepareContourEdge(input: readonly Point2[], index: number, orig
     return point(1);
   };
 }
+
+/** One owned contour and shared cap result for both target display and geometry.
+ * The historical full edit remains the commit oracle; only changed contact pairs
+ * need checking against this validated baseline during preview.
+ */
+export function prepareContourEdgeEdit(input: readonly Point2[], index: number, origin: Point2) {
+  const points = input.map((p) => ({ ...p })),
+    anchor = { ...origin };
+  const cap = prepareContourEdge(points, index, anchor);
+  const validation = preparePolygonVertexEdit(points, [index, (index + 1) % points.length]);
+  let last: { input: Point2; output: Point2 } | undefined;
+  function bound(target: Point2): Point2 {
+    if (last && [last.input, last.output].some((p) => p.x === target.x && p.y === target.y))
+      return { ...last.output };
+    const output = cap(target);
+    last = { input: { ...target }, output: { ...output } };
+    return output;
+  }
+  return Object.freeze({
+    bound,
+    edit(target: Point2): Point2[] {
+      const result = moveContourEdge(points, index, "edge", anchor, bound(target));
+      const after = validation.validate(result);
+      if (!after.valid || validation.signedArea * after.signedArea <= 0)
+        throw new Error("Die Aenderung erzeugt eine ungueltige Kontur.");
+      return result;
+    },
+  });
+}
