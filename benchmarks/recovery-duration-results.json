@@ -1,0 +1,2662 @@
+{
+  "name": "novikov-recovery-v2-pilot-session-2d9dc4fe-fbe4-4bba-9216-6030d1f2fd5b",
+  "cycles": 120,
+  "intervalMs": 1000,
+  "samples": [
+    {
+      "atMs": 0.09999999403953552,
+      "usedJSHeapSize": 15463695,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 1009.5,
+      "usedJSHeapSize": 54935705,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 2001.2999999970198,
+      "usedJSHeapSize": 70965081,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 3010.2000000029802,
+      "usedJSHeapSize": 85184290,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 4001.0999999940395,
+      "usedJSHeapSize": 107923451,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 5009.5999999940395,
+      "usedJSHeapSize": 50537439,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 6001.0999999940395,
+      "usedJSHeapSize": 63162669,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 7009,
+      "usedJSHeapSize": 64154548,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 8000.70000000298,
+      "usedJSHeapSize": 67565650,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 9009.70000000298,
+      "usedJSHeapSize": 108345567,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 10007.89999999106,
+      "usedJSHeapSize": 130241958,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 11009.20000000298,
+      "usedJSHeapSize": 79680579,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 12001,
+      "usedJSHeapSize": 94786268,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 13008.89999999106,
+      "usedJSHeapSize": 67463766,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 14003.89999999106,
+      "usedJSHeapSize": 101860988,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 15009.5,
+      "usedJSHeapSize": 106970352,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 16002.09999999404,
+      "usedJSHeapSize": 79706019,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 17009.29999999702,
+      "usedJSHeapSize": 94784366,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 18054.29999999702,
+      "usedJSHeapSize": 127703434,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 19008.89999999106,
+      "usedJSHeapSize": 67495318,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 20001.59999999404,
+      "usedJSHeapSize": 106999793,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 21008.70000000298,
+      "usedJSHeapSize": 79773471,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 22124.70000000298,
+      "usedJSHeapSize": 73376483,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 23009.29999999702,
+      "usedJSHeapSize": 94914839,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 24001.5,
+      "usedJSHeapSize": 67533142,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 25016.29999999702,
+      "usedJSHeapSize": 106457964,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 26001.5,
+      "usedJSHeapSize": 106459944,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 27009.70000000298,
+      "usedJSHeapSize": 46608627,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 28001.20000000298,
+      "usedJSHeapSize": 94943784,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 29000.79999999702,
+      "usedJSHeapSize": 153388440,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 30001.20000000298,
+      "usedJSHeapSize": 67644354,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 31009,
+      "usedJSHeapSize": 106850253,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 32001.20000000298,
+      "usedJSHeapSize": 79831371,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 33023,
+      "usedJSHeapSize": 55590023,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 34001.89999999106,
+      "usedJSHeapSize": 94843885,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 35008.79999999702,
+      "usedJSHeapSize": 67568598,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 36001.5,
+      "usedJSHeapSize": 106549139,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 37021.70000000298,
+      "usedJSHeapSize": 131279809,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 38001.09999999404,
+      "usedJSHeapSize": 46614367,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 39008.79999999702,
+      "usedJSHeapSize": 94980734,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 40000.79999999702,
+      "usedJSHeapSize": 67669878,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 41021.79999999702,
+      "usedJSHeapSize": 86500095,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 42001,
+      "usedJSHeapSize": 107276080,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 43009.79999999702,
+      "usedJSHeapSize": 79847359,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 44001.59999999404,
+      "usedJSHeapSize": 94877077,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 45035.79999999702,
+      "usedJSHeapSize": 127772974,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 46000.70000000298,
+      "usedJSHeapSize": 67599670,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 47009,
+      "usedJSHeapSize": 106496098,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 48000.70000000298,
+      "usedJSHeapSize": 46640131,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 49023.59999999404,
+      "usedJSHeapSize": 79564742,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 50001,
+      "usedJSHeapSize": 91843502,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 51008.79999999702,
+      "usedJSHeapSize": 67669134,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 52001,
+      "usedJSHeapSize": 106620000,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 53007.20000000298,
+      "usedJSHeapSize": 133713699,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 54001.29999999702,
+      "usedJSHeapSize": 79901195,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 55008.70000000298,
+      "usedJSHeapSize": 94936834,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 56001,
+      "usedJSHeapSize": 67608498,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 57006.29999999702,
+      "usedJSHeapSize": 106547009,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 58001.5,
+      "usedJSHeapSize": 107381593,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 59008.79999999702,
+      "usedJSHeapSize": 79840175,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 60000.70000000298,
+      "usedJSHeapSize": 94801224,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 61061.89999999106,
+      "usedJSHeapSize": 127532004,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 62001.20000000298,
+      "usedJSHeapSize": 67432942,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 63009,
+      "usedJSHeapSize": 106060377,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 64001.39999999106,
+      "usedJSHeapSize": 75226455,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 65094.79999999702,
+      "usedJSHeapSize": 107979975,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 66001.79999999702,
+      "usedJSHeapSize": 64604431,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 67009.20000000298,
+      "usedJSHeapSize": 67438834,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 68001.5,
+      "usedJSHeapSize": 78570663,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 69009.39999999106,
+      "usedJSHeapSize": 83874329,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 70001.79999999702,
+      "usedJSHeapSize": 99727757,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 71009.39999999106,
+      "usedJSHeapSize": 152374840,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 72001,
+      "usedJSHeapSize": 125807493,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 73009.39999999106,
+      "usedJSHeapSize": 97310991,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 74001.09999999404,
+      "usedJSHeapSize": 93994091,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 75009.09999999404,
+      "usedJSHeapSize": 154080598,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 76000.5,
+      "usedJSHeapSize": 240398180,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 77099.09999999404,
+      "usedJSHeapSize": 231278887,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 78001.09999999404,
+      "usedJSHeapSize": 125789987,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 79008.89999999106,
+      "usedJSHeapSize": 62696965,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 80012.59999999404,
+      "usedJSHeapSize": 138712353,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 81009.39999999106,
+      "usedJSHeapSize": 59314604,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 82000.70000000298,
+      "usedJSHeapSize": 64052740,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 83008.79999999702,
+      "usedJSHeapSize": 81445302,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 84016.29999999702,
+      "usedJSHeapSize": 104231098,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 85009.20000000298,
+      "usedJSHeapSize": 48507253,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 86001.59999999404,
+      "usedJSHeapSize": 93254136,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 87009.09999999404,
+      "usedJSHeapSize": 122480016,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 88049.79999999702,
+      "usedJSHeapSize": 110001619,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 89009.09999999404,
+      "usedJSHeapSize": 67461722,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 90001.29999999702,
+      "usedJSHeapSize": 78584499,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 91009.29999999702,
+      "usedJSHeapSize": 79577135,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 92045.89999999106,
+      "usedJSHeapSize": 73020876,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 93009,
+      "usedJSHeapSize": 94765596,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 94001.20000000298,
+      "usedJSHeapSize": 67461094,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 95009.09999999404,
+      "usedJSHeapSize": 106436932,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 96012.20000000298,
+      "usedJSHeapSize": 92457808,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 97009,
+      "usedJSHeapSize": 79615483,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 98000.79999999702,
+      "usedJSHeapSize": 94755477,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 99008.89999999106,
+      "usedJSHeapSize": 67456574,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 100017.89999999106,
+      "usedJSHeapSize": 64206607,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 101008.70000000298,
+      "usedJSHeapSize": 106052676,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 102001.29999999702,
+      "usedJSHeapSize": 74154335,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 103008.59999999404,
+      "usedJSHeapSize": 117270161,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 104100.79999999702,
+      "usedJSHeapSize": 149960276,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 105009.20000000298,
+      "usedJSHeapSize": 102352851,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 106001,
+      "usedJSHeapSize": 80321477,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 107009,
+      "usedJSHeapSize": 96047395,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 108071.5,
+      "usedJSHeapSize": 128791623,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 109009.29999999702,
+      "usedJSHeapSize": 94732979,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 110001.39999999106,
+      "usedJSHeapSize": 67474610,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 111008.89999999106,
+      "usedJSHeapSize": 106534873,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 112021.70000000298,
+      "usedJSHeapSize": 88348657,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 113009.20000000298,
+      "usedJSHeapSize": 79628383,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 114000.59999999404,
+      "usedJSHeapSize": 94801374,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 115008.79999999702,
+      "usedJSHeapSize": 67479746,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 116016.20000000298,
+      "usedJSHeapSize": 84205056,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 117009,
+      "usedJSHeapSize": 106105004,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 118001.39999999106,
+      "usedJSHeapSize": 74975747,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 119016.29999999702,
+      "usedJSHeapSize": 130120089,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 120001,
+      "usedJSHeapSize": 64662711,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 121009.20000000298,
+      "usedJSHeapSize": 67496718,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 122001.59999999404,
+      "usedJSHeapSize": 81599277,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 123025,
+      "usedJSHeapSize": 38405685,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 124001,
+      "usedJSHeapSize": 79626951,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 125009.5,
+      "usedJSHeapSize": 94801948,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 126000.79999999702,
+      "usedJSHeapSize": 67500126,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 127015.59999999404,
+      "usedJSHeapSize": 92909287,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 128001.29999999702,
+      "usedJSHeapSize": 106557492,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 129009.59999999404,
+      "usedJSHeapSize": 79621343,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 130001.39999999106,
+      "usedJSHeapSize": 94845064,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 131014,
+      "usedJSHeapSize": 129544537,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 132001.39999999106,
+      "usedJSHeapSize": 67511314,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 133009.5,
+      "usedJSHeapSize": 106116222,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 134001,
+      "usedJSHeapSize": 74578035,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 135022.29999999702,
+      "usedJSHeapSize": 124337812,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 136001.5,
+      "usedJSHeapSize": 64681447,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 137009.29999999702,
+      "usedJSHeapSize": 67510382,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 138000.79999999702,
+      "usedJSHeapSize": 78633159,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 139009.29999999702,
+      "usedJSHeapSize": 105917939,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 140001.09999999404,
+      "usedJSHeapSize": 79662675,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 141009.20000000298,
+      "usedJSHeapSize": 94854889,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 142000.89999999106,
+      "usedJSHeapSize": 67547942,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 143020.29999999702,
+      "usedJSHeapSize": 90326384,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 144000.79999999702,
+      "usedJSHeapSize": 106571253,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 145009.09999999404,
+      "usedJSHeapSize": 79639379,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 146000.79999999702,
+      "usedJSHeapSize": 94769863,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 147024.89999999106,
+      "usedJSHeapSize": 100201839,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 148001.5,
+      "usedJSHeapSize": 67518118,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 149009.70000000298,
+      "usedJSHeapSize": 106154132,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 150000.70000000298,
+      "usedJSHeapSize": 67229575,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 151034.79999999702,
+      "usedJSHeapSize": 99971438,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 152000.70000000298,
+      "usedJSHeapSize": 114808815,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 153009.29999999702,
+      "usedJSHeapSize": 102359281,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 154001.20000000298,
+      "usedJSHeapSize": 80410409,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 155008.79999999702,
+      "usedJSHeapSize": 100198387,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 156001,
+      "usedJSHeapSize": 96176859,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 157008.70000000298,
+      "usedJSHeapSize": 94811930,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 158000.89999999106,
+      "usedJSHeapSize": 117158271,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 159009.39999999106,
+      "usedJSHeapSize": 67524798,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 160001.70000000298,
+      "usedJSHeapSize": 107807640,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 161008.79999999702,
+      "usedJSHeapSize": 123359482,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 162000.89999999106,
+      "usedJSHeapSize": 79673027,
+      "visibility": "visible"
+    },
+    {
+      "atMs": 162305.5,
+      "usedJSHeapSize": 85963649,
+      "visibility": "visible"
+    }
+  ],
+  "started": "2026-10-15T17:15:09.931Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "rows": [
+    {
+      "cycle": 0,
+      "kind": "replace-image",
+      "saveMs": 89.3999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 1,
+      "kind": "replace-image",
+      "saveMs": 124.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 2,
+      "kind": "remove",
+      "saveMs": 60.70000000298023,
+      "maintenanceMs": 96.90000000596046,
+      "maintenanceStarted": 6997.79999999702,
+      "maintenanceFinished": 7094.70000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426708
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283980
+      }
+    },
+    {
+      "cycle": 3,
+      "kind": "restore-old-model",
+      "saveMs": 138.69999998807907,
+      "maintenanceMs": 127.19999998807907,
+      "maintenanceStarted": 8375.40000000596,
+      "maintenanceFinished": 8502.59999999404,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425524
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 4,
+      "kind": "replace-image",
+      "saveMs": 225.19999998807907,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 5,
+      "kind": "replace-image",
+      "saveMs": 118.6000000089407,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 6,
+      "kind": "remove",
+      "saveMs": 67,
+      "maintenanceMs": 129.29999999701977,
+      "maintenanceStarted": 12597.90000000596,
+      "maintenanceFinished": 12727.20000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12566216
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6282912
+      }
+    },
+    {
+      "cycle": 7,
+      "kind": "restore-old-model",
+      "saveMs": 63.099999994039536,
+      "maintenanceMs": 94.3999999910593,
+      "maintenanceStarted": 13929.40000000596,
+      "maintenanceFinished": 14023.79999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9424456
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 8,
+      "kind": "replace-image",
+      "saveMs": 128,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 9,
+      "kind": "replace-image",
+      "saveMs": 111.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 10,
+      "kind": "remove",
+      "saveMs": 59.599999994039536,
+      "maintenanceMs": 126.6000000089407,
+      "maintenanceStarted": 17935.09999999404,
+      "maintenanceFinished": 18061.70000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567684
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284284
+      }
+    },
+    {
+      "cycle": 11,
+      "kind": "restore-old-model",
+      "saveMs": 64,
+      "maintenanceMs": 91.3999999910593,
+      "maintenanceStarted": 19257.40000000596,
+      "maintenanceFinished": 19348.79999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425828
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 12,
+      "kind": "replace-image",
+      "saveMs": 132.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 13,
+      "kind": "replace-image",
+      "saveMs": 118.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 14,
+      "kind": "remove",
+      "saveMs": 63.5,
+      "maintenanceMs": 128.59999999403954,
+      "maintenanceStarted": 23364.5,
+      "maintenanceFinished": 23493.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568664
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284560
+      }
+    },
+    {
+      "cycle": 15,
+      "kind": "restore-old-model",
+      "saveMs": 62.30000001192093,
+      "maintenanceMs": 93.20000000298023,
+      "maintenanceStarted": 24696.09999999404,
+      "maintenanceFinished": 24789.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426104
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 16,
+      "kind": "replace-image",
+      "saveMs": 132.69999998807907,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 17,
+      "kind": "replace-image",
+      "saveMs": 156.79999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 18,
+      "kind": "remove",
+      "saveMs": 63.400000005960464,
+      "maintenanceMs": 114.70000000298023,
+      "maintenanceStarted": 28752.79999999702,
+      "maintenanceFinished": 28867.5,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567684
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284404
+      }
+    },
+    {
+      "cycle": 19,
+      "kind": "restore-old-model",
+      "saveMs": 61,
+      "maintenanceMs": 87.40000000596046,
+      "maintenanceStarted": 30052.79999999702,
+      "maintenanceFinished": 30140.20000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425948
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 20,
+      "kind": "replace-image",
+      "saveMs": 166.3999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 21,
+      "kind": "replace-image",
+      "saveMs": 117.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 22,
+      "kind": "remove",
+      "saveMs": 61.5,
+      "maintenanceMs": 129,
+      "maintenanceStarted": 34112.09999999404,
+      "maintenanceFinished": 34241.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568192
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283952
+      }
+    },
+    {
+      "cycle": 23,
+      "kind": "restore-old-model",
+      "saveMs": 106.5,
+      "maintenanceMs": 92.6000000089407,
+      "maintenanceStarted": 35490.59999999404,
+      "maintenanceFinished": 35583.20000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425496
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 24,
+      "kind": "replace-image",
+      "saveMs": 129.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 25,
+      "kind": "replace-image",
+      "saveMs": 121.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 26,
+      "kind": "remove",
+      "saveMs": 53.400000005960464,
+      "maintenanceMs": 114.29999999701977,
+      "maintenanceStarted": 39511.90000000596,
+      "maintenanceFinished": 39626.20000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12565932
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283128
+      }
+    },
+    {
+      "cycle": 27,
+      "kind": "restore-old-model",
+      "saveMs": 74,
+      "maintenanceMs": 93.90000000596046,
+      "maintenanceStarted": 40834.5,
+      "maintenanceFinished": 40928.40000000596,
+      "before": {
+        "count": 3,
+        "base64Characters": 9424672
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 28,
+      "kind": "replace-image",
+      "saveMs": 128.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 29,
+      "kind": "replace-image",
+      "saveMs": 117.69999998807907,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 30,
+      "kind": "remove",
+      "saveMs": 65.59999999403954,
+      "maintenanceMs": 128.1000000089407,
+      "maintenanceStarted": 44899.59999999404,
+      "maintenanceFinished": 45027.70000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568396
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284396
+      }
+    },
+    {
+      "cycle": 31,
+      "kind": "restore-old-model",
+      "saveMs": 71.5,
+      "maintenanceMs": 98.70000000298023,
+      "maintenanceStarted": 46239.5,
+      "maintenanceFinished": 46338.20000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425940
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 32,
+      "kind": "replace-image",
+      "saveMs": 143.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 33,
+      "kind": "replace-image",
+      "saveMs": 104.59999999403954,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 34,
+      "kind": "remove",
+      "saveMs": 62.400000005960464,
+      "maintenanceMs": 119.40000000596046,
+      "maintenanceStarted": 50287,
+      "maintenanceFinished": 50406.40000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12566208
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6282940
+      }
+    },
+    {
+      "cycle": 35,
+      "kind": "restore-old-model",
+      "saveMs": 82.90000000596046,
+      "maintenanceMs": 91.70000000298023,
+      "maintenanceStarted": 51610.70000000298,
+      "maintenanceFinished": 51702.40000000596,
+      "before": {
+        "count": 3,
+        "base64Characters": 9424484
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 36,
+      "kind": "replace-image",
+      "saveMs": 121,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 37,
+      "kind": "replace-image",
+      "saveMs": 105.79999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 38,
+      "kind": "remove",
+      "saveMs": 57.20000000298023,
+      "maintenanceMs": 128.8999999910593,
+      "maintenanceStarted": 55609.90000000596,
+      "maintenanceFinished": 55738.79999999702,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567908
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284036
+      }
+    },
+    {
+      "cycle": 39,
+      "kind": "restore-old-model",
+      "saveMs": 59,
+      "maintenanceMs": 88.59999999403954,
+      "maintenanceStarted": 56931.90000000596,
+      "maintenanceFinished": 57020.5,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425580
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 40,
+      "kind": "replace-image",
+      "saveMs": 116.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 41,
+      "kind": "replace-image",
+      "saveMs": 105.79999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 42,
+      "kind": "remove",
+      "saveMs": 64.5,
+      "maintenanceMs": 133.1000000089407,
+      "maintenanceStarted": 60928.59999999404,
+      "maintenanceFinished": 61061.70000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12566544
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283516
+      }
+    },
+    {
+      "cycle": 43,
+      "kind": "restore-old-model",
+      "saveMs": 69.59999999403954,
+      "maintenanceMs": 96.90000000596046,
+      "maintenanceStarted": 62270.59999999404,
+      "maintenanceFinished": 62367.5,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425060
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 44,
+      "kind": "replace-image",
+      "saveMs": 128.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 45,
+      "kind": "replace-image",
+      "saveMs": 101.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 46,
+      "kind": "remove",
+      "saveMs": 68.40000000596046,
+      "maintenanceMs": 122.80000001192093,
+      "maintenanceStarted": 66341.59999999404,
+      "maintenanceFinished": 66464.40000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567888
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284360
+      }
+    },
+    {
+      "cycle": 47,
+      "kind": "restore-old-model",
+      "saveMs": 60,
+      "maintenanceMs": 82.09999999403954,
+      "maintenanceStarted": 67668.5,
+      "maintenanceFinished": 67750.59999999404,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425904
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 48,
+      "kind": "replace-image",
+      "saveMs": 105.19999998807907,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 49,
+      "kind": "replace-image",
+      "saveMs": 116.90000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 50,
+      "kind": "remove",
+      "saveMs": 62.80000001192093,
+      "maintenanceMs": 102.09999999403954,
+      "maintenanceStarted": 71664.40000000596,
+      "maintenanceFinished": 71766.5,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568608
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284332
+      }
+    },
+    {
+      "cycle": 51,
+      "kind": "restore-old-model",
+      "saveMs": 64.70000000298023,
+      "maintenanceMs": 94,
+      "maintenanceStarted": 72985.29999999702,
+      "maintenanceFinished": 73079.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425876
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 52,
+      "kind": "replace-image",
+      "saveMs": 115.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 53,
+      "kind": "replace-image",
+      "saveMs": 157.6000000089407,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 54,
+      "kind": "remove",
+      "saveMs": 65.3999999910593,
+      "maintenanceMs": 94.79999999701977,
+      "maintenanceStarted": 77043.29999999702,
+      "maintenanceFinished": 77138.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568040
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284460
+      }
+    },
+    {
+      "cycle": 55,
+      "kind": "restore-old-model",
+      "saveMs": 60,
+      "maintenanceMs": 86,
+      "maintenanceStarted": 78356.40000000596,
+      "maintenanceFinished": 78442.40000000596,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426004
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 56,
+      "kind": "replace-image",
+      "saveMs": 117.30000001192093,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 57,
+      "kind": "replace-image",
+      "saveMs": 161.59999999403954,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 58,
+      "kind": "remove",
+      "saveMs": 54.5,
+      "maintenanceMs": 85.8999999910593,
+      "maintenanceStarted": 82407.40000000596,
+      "maintenanceFinished": 82493.29999999702,
+      "before": {
+        "count": 4,
+        "base64Characters": 12565020
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6282704
+      }
+    },
+    {
+      "cycle": 59,
+      "kind": "restore-old-model",
+      "saveMs": 67.29999999701977,
+      "maintenanceMs": 100.5,
+      "maintenanceStarted": 83740,
+      "maintenanceFinished": 83840.5,
+      "before": {
+        "count": 3,
+        "base64Characters": 9424248
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 60,
+      "kind": "replace-image",
+      "saveMs": 121.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 61,
+      "kind": "replace-image",
+      "saveMs": 175.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 62,
+      "kind": "remove",
+      "saveMs": 66,
+      "maintenanceMs": 93.09999999403954,
+      "maintenanceStarted": 87908.70000000298,
+      "maintenanceFinished": 88001.79999999702,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567952
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284232
+      }
+    },
+    {
+      "cycle": 63,
+      "kind": "restore-old-model",
+      "saveMs": 80.40000000596046,
+      "maintenanceMs": 116.59999999403954,
+      "maintenanceStarted": 89211.90000000596,
+      "maintenanceFinished": 89328.5,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425776
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 64,
+      "kind": "replace-image",
+      "saveMs": 148.59999999403954,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 65,
+      "kind": "replace-image",
+      "saveMs": 126.3999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 66,
+      "kind": "remove",
+      "saveMs": 56.099999994039536,
+      "maintenanceMs": 96.40000000596046,
+      "maintenanceStarted": 93320.5,
+      "maintenanceFinished": 93416.90000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568788
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283632
+      }
+    },
+    {
+      "cycle": 67,
+      "kind": "restore-old-model",
+      "saveMs": 69.70000000298023,
+      "maintenanceMs": 95.3999999910593,
+      "maintenanceStarted": 94638.20000000298,
+      "maintenanceFinished": 94733.59999999404,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425176
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 68,
+      "kind": "replace-image",
+      "saveMs": 115.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 69,
+      "kind": "replace-image",
+      "saveMs": 117.20000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 70,
+      "kind": "remove",
+      "saveMs": 64.1000000089407,
+      "maintenanceMs": 156.1000000089407,
+      "maintenanceStarted": 98640.79999999702,
+      "maintenanceFinished": 98796.90000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568516
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284212
+      }
+    },
+    {
+      "cycle": 71,
+      "kind": "restore-old-model",
+      "saveMs": 74.70000000298023,
+      "maintenanceMs": 99.90000000596046,
+      "maintenanceStarted": 100020.5,
+      "maintenanceFinished": 100120.40000000596,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425756
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 72,
+      "kind": "replace-image",
+      "saveMs": 114.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 73,
+      "kind": "replace-image",
+      "saveMs": 104.20000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 74,
+      "kind": "remove",
+      "saveMs": 63,
+      "maintenanceMs": 126.30000001192093,
+      "maintenanceStarted": 104016.09999999404,
+      "maintenanceFinished": 104142.40000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12565908
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6282460
+      }
+    },
+    {
+      "cycle": 75,
+      "kind": "restore-old-model",
+      "saveMs": 69.3999999910593,
+      "maintenanceMs": 100.09999999403954,
+      "maintenanceStarted": 105342.40000000596,
+      "maintenanceFinished": 105442.5,
+      "before": {
+        "count": 3,
+        "base64Characters": 9424004
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 76,
+      "kind": "replace-image",
+      "saveMs": 124.3999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 77,
+      "kind": "replace-image",
+      "saveMs": 113.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 78,
+      "kind": "remove",
+      "saveMs": 55.79999999701977,
+      "maintenanceMs": 109.8999999910593,
+      "maintenanceStarted": 109351.20000000298,
+      "maintenanceFinished": 109461.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567080
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284428
+      }
+    },
+    {
+      "cycle": 79,
+      "kind": "restore-old-model",
+      "saveMs": 61.79999999701977,
+      "maintenanceMs": 104.70000000298023,
+      "maintenanceStarted": 110662.59999999404,
+      "maintenanceFinished": 110767.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425972
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 80,
+      "kind": "replace-image",
+      "saveMs": 127.59999999403954,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 81,
+      "kind": "replace-image",
+      "saveMs": 120.6000000089407,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 82,
+      "kind": "remove",
+      "saveMs": 62,
+      "maintenanceMs": 125.3999999910593,
+      "maintenanceStarted": 114702.70000000298,
+      "maintenanceFinished": 114828.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568632
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284636
+      }
+    },
+    {
+      "cycle": 83,
+      "kind": "restore-old-model",
+      "saveMs": 67.40000000596046,
+      "maintenanceMs": 92.09999999403954,
+      "maintenanceStarted": 116028.20000000298,
+      "maintenanceFinished": 116120.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426180
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 84,
+      "kind": "replace-image",
+      "saveMs": 136.20000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 85,
+      "kind": "replace-image",
+      "saveMs": 101.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 86,
+      "kind": "remove",
+      "saveMs": 53.400000005960464,
+      "maintenanceMs": 118.90000000596046,
+      "maintenanceStarted": 120040.09999999404,
+      "maintenanceFinished": 120159,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568212
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284860
+      }
+    },
+    {
+      "cycle": 87,
+      "kind": "restore-old-model",
+      "saveMs": 70.70000000298023,
+      "maintenanceMs": 95.29999999701977,
+      "maintenanceStarted": 121376.70000000298,
+      "maintenanceFinished": 121472,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426404
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 88,
+      "kind": "replace-image",
+      "saveMs": 116.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 89,
+      "kind": "replace-image",
+      "saveMs": 126.69999998807907,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 90,
+      "kind": "remove",
+      "saveMs": 69.20000000298023,
+      "maintenanceMs": 93.80000001192093,
+      "maintenanceStarted": 125413.09999999404,
+      "maintenanceFinished": 125506.90000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568272
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283764
+      }
+    },
+    {
+      "cycle": 91,
+      "kind": "restore-old-model",
+      "saveMs": 139.09999999403954,
+      "maintenanceMs": 85,
+      "maintenanceStarted": 126803.20000000298,
+      "maintenanceFinished": 126888.20000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425308
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 92,
+      "kind": "replace-image",
+      "saveMs": 124.8999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 93,
+      "kind": "replace-image",
+      "saveMs": 117.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 94,
+      "kind": "remove",
+      "saveMs": 61.3999999910593,
+      "maintenanceMs": 126.5,
+      "maintenanceStarted": 130798.90000000596,
+      "maintenanceFinished": 130925.40000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567140
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283860
+      }
+    },
+    {
+      "cycle": 95,
+      "kind": "restore-old-model",
+      "saveMs": 64.40000000596046,
+      "maintenanceMs": 96.8999999910593,
+      "maintenanceStarted": 132122.40000000596,
+      "maintenanceFinished": 132219.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425404
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 96,
+      "kind": "replace-image",
+      "saveMs": 123.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 97,
+      "kind": "replace-image",
+      "saveMs": 107.40000000596046,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 98,
+      "kind": "remove",
+      "saveMs": 52.5,
+      "maintenanceMs": 129.5,
+      "maintenanceStarted": 136133.20000000298,
+      "maintenanceFinished": 136262.70000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568112
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284212
+      }
+    },
+    {
+      "cycle": 99,
+      "kind": "restore-old-model",
+      "saveMs": 58.29999999701977,
+      "maintenanceMs": 89.29999999701977,
+      "maintenanceStarted": 137443.40000000596,
+      "maintenanceFinished": 137532.70000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425756
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 100,
+      "kind": "replace-image",
+      "saveMs": 131.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 101,
+      "kind": "replace-image",
+      "saveMs": 124.20000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 102,
+      "kind": "remove",
+      "saveMs": 64.5,
+      "maintenanceMs": 101.3999999910593,
+      "maintenanceStarted": 141569.70000000298,
+      "maintenanceFinished": 141671.09999999404,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567900
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283732
+      }
+    },
+    {
+      "cycle": 103,
+      "kind": "restore-old-model",
+      "saveMs": 68.80000001192093,
+      "maintenanceMs": 95.5,
+      "maintenanceStarted": 142877.29999999702,
+      "maintenanceFinished": 142972.79999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425276
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 104,
+      "kind": "replace-image",
+      "saveMs": 112.20000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 105,
+      "kind": "replace-image",
+      "saveMs": 102.29999999701977,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 106,
+      "kind": "remove",
+      "saveMs": 57.70000000298023,
+      "maintenanceMs": 129.70000000298023,
+      "maintenanceStarted": 146890.29999999702,
+      "maintenanceFinished": 147020,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567760
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283612
+      }
+    },
+    {
+      "cycle": 107,
+      "kind": "restore-old-model",
+      "saveMs": 66.90000000596046,
+      "maintenanceMs": 99.70000000298023,
+      "maintenanceStarted": 148219,
+      "maintenanceFinished": 148318.70000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425156
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 108,
+      "kind": "replace-image",
+      "saveMs": 131.70000000298023,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 109,
+      "kind": "replace-image",
+      "saveMs": 102.5,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 110,
+      "kind": "remove",
+      "saveMs": 64.8999999910593,
+      "maintenanceMs": 120.29999999701977,
+      "maintenanceStarted": 152274.70000000298,
+      "maintenanceFinished": 152395,
+      "before": {
+        "count": 4,
+        "base64Characters": 12566336
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284208
+      }
+    },
+    {
+      "cycle": 111,
+      "kind": "restore-old-model",
+      "saveMs": 61.70000000298023,
+      "maintenanceMs": 101.8999999910593,
+      "maintenanceStarted": 153591.40000000596,
+      "maintenanceFinished": 153693.29999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425752
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 112,
+      "kind": "replace-image",
+      "saveMs": 122.1000000089407,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 113,
+      "kind": "replace-image",
+      "saveMs": 131,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 114,
+      "kind": "remove",
+      "saveMs": 60.79999999701977,
+      "maintenanceMs": 116.20000000298023,
+      "maintenanceStarted": 157645.20000000298,
+      "maintenanceFinished": 157761.40000000596,
+      "before": {
+        "count": 4,
+        "base64Characters": 12568424
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6284720
+      }
+    },
+    {
+      "cycle": 115,
+      "kind": "restore-old-model",
+      "saveMs": 71.1000000089407,
+      "maintenanceMs": 112.20000000298023,
+      "maintenanceStarted": 158959.5,
+      "maintenanceFinished": 159071.70000000298,
+      "before": {
+        "count": 3,
+        "base64Characters": 9426264
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    },
+    {
+      "cycle": 116,
+      "kind": "replace-image",
+      "saveMs": 142,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 117,
+      "kind": "replace-image",
+      "saveMs": 496.3999999910593,
+      "maintenanceMs": null,
+      "maintenanceStarted": null,
+      "maintenanceFinished": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "cycle": 118,
+      "kind": "remove",
+      "saveMs": 66.29999999701977,
+      "maintenanceMs": 139.5,
+      "maintenanceStarted": 163462.20000000298,
+      "maintenanceFinished": 163601.70000000298,
+      "before": {
+        "count": 4,
+        "base64Characters": 12567144
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283796
+      }
+    },
+    {
+      "cycle": 119,
+      "kind": "restore-old-model",
+      "saveMs": 85,
+      "maintenanceMs": 176.5,
+      "maintenanceStarted": 164846.29999999702,
+      "maintenanceFinished": 165022.79999999702,
+      "before": {
+        "count": 3,
+        "base64Characters": 9425340
+      },
+      "after": {
+        "count": 2,
+        "base64Characters": 6283500
+      }
+    }
+  ],
+  "limitations": "Timed synthetic workload, not hours-long usage; no UI Undo; heap API is optional/coarse/shared, not process or GPU memory; samples cannot prove peak/leak freedom; raster allocation is theoretical; no quota exhaustion.",
+  "storageBefore": {
+    "quota": 10762244478,
+    "usage": 24826238,
+    "usageDetails": {
+      "indexedDB": 24826238
+    }
+  },
+  "rasterBufferBytesPerGeneratedImage": 4194304,
+  "processAndGpuMemory": "Unavailable in this harness",
+  "storageAfter": {
+    "quota": 10769158754,
+    "usage": 31740514,
+    "usageDetails": {
+      "indexedDB": 31740514
+    }
+  },
+  "status": "PASS",
+  "finalPayloads": {
+    "count": 2,
+    "base64Characters": 6283500
+  },
+  "elapsedMs": 162305.5,
+  "longTasks": [
+    {
+      "startTime": 3969.5,
+      "duration": 176
+    },
+    {
+      "startTime": 4271.79999999702,
+      "duration": 127
+    },
+    {
+      "startTime": 5547.79999999702,
+      "duration": 125
+    },
+    {
+      "startTime": 9692.40000000596,
+      "duration": 143
+    },
+    {
+      "startTime": 11164.40000000596,
+      "duration": 117
+    },
+    {
+      "startTime": 15195.79999999702,
+      "duration": 105
+    },
+    {
+      "startTime": 16524.79999999702,
+      "duration": 109
+    },
+    {
+      "startTime": 20524.20000000298,
+      "duration": 124
+    },
+    {
+      "startTime": 21900.79999999702,
+      "duration": 116
+    },
+    {
+      "startTime": 25963.90000000596,
+      "duration": 123
+    },
+    {
+      "startTime": 27307.79999999702,
+      "duration": 101
+    },
+    {
+      "startTime": 31308.70000000298,
+      "duration": 117
+    },
+    {
+      "startTime": 32684.40000000596,
+      "duration": 102
+    },
+    {
+      "startTime": 36748.59999999404,
+      "duration": 123
+    },
+    {
+      "startTime": 38092.5,
+      "duration": 122
+    },
+    {
+      "startTime": 42092.40000000596,
+      "duration": 126
+    },
+    {
+      "startTime": 43452.5,
+      "duration": 106
+    },
+    {
+      "startTime": 47516.79999999702,
+      "duration": 130
+    },
+    {
+      "startTime": 48892.59999999404,
+      "duration": 106
+    },
+    {
+      "startTime": 52876.20000000298,
+      "duration": 110
+    },
+    {
+      "startTime": 54204.70000000298,
+      "duration": 104
+    },
+    {
+      "startTime": 58188,
+      "duration": 106
+    },
+    {
+      "startTime": 59516.40000000596,
+      "duration": 107
+    },
+    {
+      "startTime": 63531.70000000298,
+      "duration": 129
+    },
+    {
+      "startTime": 64908.29999999702,
+      "duration": 116
+    },
+    {
+      "startTime": 68956.09999999404,
+      "duration": 101
+    },
+    {
+      "startTime": 70252.20000000298,
+      "duration": 114
+    },
+    {
+      "startTime": 74251.79999999702,
+      "duration": 108
+    },
+    {
+      "startTime": 75596.40000000596,
+      "duration": 121
+    },
+    {
+      "startTime": 79612.40000000596,
+      "duration": 104
+    },
+    {
+      "startTime": 80956,
+      "duration": 106
+    },
+    {
+      "startTime": 85035.70000000298,
+      "duration": 136
+    },
+    {
+      "startTime": 86412,
+      "duration": 126
+    },
+    {
+      "startTime": 90508.5,
+      "duration": 129
+    },
+    {
+      "startTime": 91884.20000000298,
+      "duration": 128
+    },
+    {
+      "startTime": 95900.20000000298,
+      "duration": 108
+    },
+    {
+      "startTime": 97227.79999999702,
+      "duration": 105
+    },
+    {
+      "startTime": 101292.09999999404,
+      "duration": 102
+    },
+    {
+      "startTime": 102620.29999999702,
+      "duration": 98
+    },
+    {
+      "startTime": 106621,
+      "duration": 119
+    },
+    {
+      "startTime": 107964.59999999404,
+      "duration": 99
+    },
+    {
+      "startTime": 111932,
+      "duration": 102
+    },
+    {
+      "startTime": 113259.90000000596,
+      "duration": 124
+    },
+    {
+      "startTime": 117292,
+      "duration": 114
+    },
+    {
+      "startTime": 118636.20000000298,
+      "duration": 101
+    },
+    {
+      "startTime": 122652.09999999404,
+      "duration": 124
+    },
+    {
+      "startTime": 123980.40000000596,
+      "duration": 127
+    },
+    {
+      "startTime": 128044.59999999404,
+      "duration": 107
+    },
+    {
+      "startTime": 129372.40000000596,
+      "duration": 120
+    },
+    {
+      "startTime": 133388.5,
+      "duration": 112
+    },
+    {
+      "startTime": 134732.70000000298,
+      "duration": 110
+    },
+    {
+      "startTime": 138732.59999999404,
+      "duration": 130
+    },
+    {
+      "startTime": 140108.40000000596,
+      "duration": 124
+    },
+    {
+      "startTime": 144156.40000000596,
+      "duration": 112
+    },
+    {
+      "startTime": 145483.90000000596,
+      "duration": 107
+    },
+    {
+      "startTime": 149500.20000000298,
+      "duration": 120
+    },
+    {
+      "startTime": 150859.70000000298,
+      "duration": 103
+    },
+    {
+      "startTime": 154876.09999999404,
+      "duration": 121
+    },
+    {
+      "startTime": 156236.59999999404,
+      "duration": 106
+    },
+    {
+      "startTime": 160236.29999999702,
+      "duration": 130
+    },
+    {
+      "startTime": 161612.40000000596,
+      "duration": 121
+    }
+  ],
+  "maxObservedTimerGapMs": 182.80000001192093,
+  "finished": "2026-10-15T17:17:52.236Z"
+}
