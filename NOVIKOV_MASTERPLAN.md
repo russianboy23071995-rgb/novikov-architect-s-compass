@@ -2599,3 +2599,30 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    nur tatsächlich gemessene Produktfehler beheben, keine pauschalen Leistungszusagen.
 3. Nach dieser Abnahme den nächsten priorisierten CAD-Auftrag im Masterplan auswählen;
    größere Speichererweiterung bleibt gesondert vorgemerkt.
+
+### AUD14-06 – Konkurrierende Recovery-Instanzen (15.10.2026)
+
+#360 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+recovery-concurrent: zwei unabhängige Katalog-/Writerinstanzen und getrennte IndexedDB-
+Verbindungen auf derselben isolierten UUID-Datenbank. Der produktive Collector wird
+am injizierten Codec-restore gezielt mit einem erfolgreichen neuen Save verschachtelt.
+Ergebnis: skipped/changed-roots, keine Löschung. Ein zuvor vorbereiteter veralteter Writer
+wird abgewiesen, Siegerstand und Vorgänger bleiben identisch; fremdes Projekt ebenfalls.
+Anschließend zwei produktive Wartungsadapter gleichzeitig: erster löscht einen verwaisten
+Payload, zweiter null; beide erhalten drei benötigte. Vollständiger serializeProject-
+Vergleich von Current/Previous/Fremdprojekt vor und nach Parallelwartung erfolgreich.
+Browser PASS; Ergebnis recovery-concurrent-results.json. Typecheck, gezieltes ESLint,
+Build bestanden. Keine Produktionsänderung; Basis zuletzt 1083 Tests/CI grün.
+
+Grenzen: getrennte Instanzen/Verbindungen in einer Seite, kein echter zweiter Tab/Prozess.
+Erzwungene Verschachtelung am Codec, keine Aussage über alle Timingkombinationen oder
+Durchsatz. Sicherheitsmechanismus bewiesen für diesen Ablauf; globale Deduplizierung
+nicht implementiert. Keine Nutzerdaten, Quota-Vollzustände oder Stundenmessungen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Offene Recovery-Nachweise risikobasiert einordnen: echte Mehrtab-Lifecyclefälle,
+   Stunden-/Quota-/Prozessmessungen mit klaren Abnahmekriterien und Release-Zuordnung;
+   keine weitere Speichererweiterung allein wegen fehlender Extremmessungen beginnen.
+2. Den aus dieser Einordnung tatsächlich nötigen begrenzten Prüf-/Fixauftrag abschließen.
+3. Nächsten priorisierten CAD-Auftrag anhand des Masterplans auswählen und beginnen;
+   offene Release-Belastungsprüfungen ausdrücklich weiterführen.

@@ -1,0 +1,26 @@
+{
+  "limitations": "Two independent writer/catalog instances and separate IndexedDB connections in one browser page. Forced interleaving at codec restore; not two tabs/processes or a duration/throughput guarantee.",
+  "name": "novikov-recovery-v2-pilot-concurrent-967bce89-e61f-4335-b5e7-84ddea7643fe",
+  "interruptedCollection": {
+    "status": "skipped",
+    "reason": "changed-roots"
+  },
+  "staleWriterRejected": true,
+  "parallelCollectors": [
+    {
+      "status": "collected",
+      "deleted": 1,
+      "retained": 3
+    },
+    {
+      "status": "collected",
+      "deleted": 0,
+      "retained": 3
+    }
+  ],
+  "payloads": {
+    "count": 3,
+    "base64Characters": 9427100
+  },
+  "status": "PASS"
+}
