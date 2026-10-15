@@ -12192,3 +12192,13 @@ AUD14-07 Nutzerpräzisierung 15.10.2026: langsames Flackern behoben bestätigt; 
 Verlassen des Browserbereichs. Navigation-Exit-Lifecycle und fehlende Maustasten abgesichert,
 1068 Tests und isolierte Browser-Abbruchprobe bestanden. Ursache der ursprünglichen Exception
 noch nicht belegt; echte Fensterrand-Abnahme offen. PR352 um Schutz ergänzt, nicht gemergt.
+
+### AUD14-06 – Beschleunigte Sitzungsprüfung (15.10.2026)
+
+24 Bildwechsel-/Entfernungs-/Altdaten-Zyklen mit 1000 Linien und 1024er PNGs bestehen:
+Current/Previous/fremder Slot vollständig identisch, nach Wartung begrenzte Payloadmenge.
+Zweiter Lauf: 12 Wartungen 109–231 ms Gesamtzeit; 14 globale Long Tasks, keine zeitliche
+Überlappung mit Wartung. Keine Heap-/Platten-/Stunden- oder UI-Undo-Abnahme behauptet.
+Nächster Auftrag: reale längere Sitzung/Application-Undo/Reload; danach getrennte Speicher-
+spitzen-/Grenzmessung, dann automatisierte Wartung. Kamera-/Browserrand praktisch abgenommen,
+PR351/352 mit ausdrücklicher Freigabe gemergt. Kein weiterer Merge autorisiert.
