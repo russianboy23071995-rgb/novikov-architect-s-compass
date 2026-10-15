@@ -7,10 +7,12 @@ export function MovementOriginAxes({
   projection,
   origin,
   elevation,
+  vertical = false,
 }: {
   projection: ProjectionState;
   origin: Point;
   elevation: number;
+  vertical?: boolean;
 }) {
   const { width, height } = projection.viewport;
   const project = (x: number, y: number, z: number) => {
@@ -45,7 +47,9 @@ export function MovementOriginAxes({
           <g key={axis.id} data-movement-axis={axis.id}>
             <title>
               {axis.id === "z"
-                ? "Z: nur Orientierung, Höhenbewegung noch gesperrt"
+                ? vertical
+                  ? "Z: Höhenbewegung aktiv"
+                  : "Z: im Achsenmenü aktivieren"
                 : `${axis.label}: Maus in Richtung führen, dann Shift halten`}
             </title>
             <line
@@ -54,7 +58,7 @@ export function MovementOriginAxes({
               x2={x}
               y2={y}
               stroke={color}
-              strokeWidth={1.5}
+              strokeWidth={vertical && axis.id === "z" ? 2.5 : 1.5}
               strokeDasharray={axis.id === "z" ? "3 5" : "7 4"}
             />
             <path
@@ -76,7 +80,7 @@ export function MovementOriginAxes({
               fontWeight={600}
             >
               {axis.label}
-              {axis.id === "z" ? " · Orientierung" : ""}
+              {axis.id === "z" && vertical ? " · aktiv" : ""}
             </text>
           </g>
         );

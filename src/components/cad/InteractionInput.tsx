@@ -34,6 +34,7 @@ export function InteractionInput({
       angleHint={degrees === undefined ? "Maus" : String(Number(degrees.toFixed(2)))}
       lengthHint={preview.value ? String(Number(preview.value.metres.toFixed(3))) : "Maus"}
       axisLabel={preview.value?.notice ?? adapter.input.axisLabel}
+      scalar={!!adapter.axisConstraint}
       mouseHint={
         adapter.click === "direction"
           ? "Mausrichtung · Tab: Länge ↔ Winkel"

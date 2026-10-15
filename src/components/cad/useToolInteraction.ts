@@ -6,7 +6,7 @@ import type { ToolInteraction } from "@/application/tools/interaction";
 import type { Point2 } from "@/geometry/primitives/point";
 /** One lifecycle for every adapter: input, preview, click, confirmation and cancellation. */
 export function useToolInteraction(adapter: ToolInteraction | null, suspended = false) {
-  const draft = usePrecisionDraft(adapter?.identity ?? null);
+  const draft = usePrecisionDraft(adapter?.identity ?? null, adapter?.initialAngle);
   const [failure, setFailure] = useState<{ identity: object; message: string } | null>(null);
   const preview = evaluateInteraction(adapter, draft.angle, draft.length, draft.aim);
   const confirm = (point?: Point2, candidate?: SnapCandidate | null) => {

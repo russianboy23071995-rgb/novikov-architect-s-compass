@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-15",
+  "fixture": "S1 G, production workspace 8085",
+  "singleNumeric": {
+    "id": "s4-w0",
+    "offset": 0.5,
+    "externalTCount": 0,
+    "undoEmpty": true
+  },
+  "groupNumeric": {
+    "ids": [
+      "s4-w0",
+      "s4-w1"
+    ],
+    "offset": -0.5,
+    "wholeProjectEqualsExpected": true,
+    "internalTPreserved": 1,
+    "externalTDetached": 9,
+    "undoRestoresAllStoreys": true,
+    "undoEmpty": true
+  },
+  "mouse": {
+    "target": "s4-w0",
+    "modifier": "Shift held for placement click only",
+    "resultOffset": 3.1999999999999993,
+    "windowsUnchanged": true
+  },
+  "axisSwitch": {
+    "from": "Z",
+    "to": "X",
+    "initialAngle": "0"
+  },
+  "cancel": {
+    "undoEmpty": true
+  },
+  "limits": [
+    "Not a continuous Shift drag test",
+    "No GB images in this UI run",
+    "No frame-time performance guarantee"
+  ]
+}

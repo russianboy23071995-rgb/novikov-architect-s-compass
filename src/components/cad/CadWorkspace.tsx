@@ -1421,6 +1421,7 @@ export function CadWorkspace({
                             ? {
                                 target: interaction.target,
                                 geometryPreview: groupMove.adapter?.geometryPreview,
+                                axisConstraint: groupMove.adapter?.axisConstraint,
                                 aim: interaction.draft.move,
                                 pick: groupMove.pickingOrigin
                                   ? (point) => {
@@ -1543,9 +1544,12 @@ export function CadWorkspace({
                         <MovementAxisControls
                           project={project}
                           targets={selections}
-                          onDirection={(angle) =>
-                            interaction.draft.change(angle, interaction.draft.length)
-                          }
+                          vertical={groupMove.axis === "z"}
+                          onVertical={groupMove.canUseZ ? () => groupMove.setAxis("z") : undefined}
+                          onDirection={(angle) => {
+                            groupMove.setAxis("xy", angle);
+                            interaction.draft.change(angle, interaction.draft.length);
+                          }}
                         />
                       )}
                     {groupMove.active && (
@@ -1557,7 +1561,9 @@ export function CadWorkspace({
                           ? mode === "3D"
                             ? "Ursprung frei anklicken · sichtbare Wandecken aller Geschosse rasten ein"
                             : "Bewegungsursprung im Grundriss anklicken"
-                          : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
+                          : groupMove.axis === "z"
+                            ? "Z: Maus oder signierten Versatz eingeben · Klick platziert · Esc verwirft"
+                            : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
                       </p>
                     )}
                     {tool === "wall" && (

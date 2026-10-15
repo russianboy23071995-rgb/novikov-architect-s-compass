@@ -44,6 +44,8 @@ import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges } from "@/rendering/viewport/selection-outline";
 import { useSolidInference } from "./useSolidInference";
 import { previewEdit, supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
+import { axisTarget } from "@/rendering/viewport/axis-target";
+import { MovementOriginAxes } from "./MovementOriginAxes";
 import type { BimPlanProps } from "./BimPlan";
 
 const viewportOf = (canvas: HTMLCanvasElement) => {
@@ -200,8 +202,14 @@ export function BimSolidView({
   useEffect(() => {
     if (!placement) setOriginHeight(undefined);
   }, [placement]);
-  const [placementAim, setPlacementAim] = useState<Point | null>(null);
-  useEffect(() => setPlacementAim(null), [placement?.geometryPreview]);
+  const [placementAimState, setPlacementAim] = useState<{
+    context: object | undefined;
+    point: Point;
+  } | null>(null);
+  const placementAim =
+    placementAimState?.context === placement?.geometryPreview
+      ? (placementAimState?.point ?? null)
+      : null;
   const placementTarget = placement?.target === undefined ? placementAim : placement.target;
   const placementPatch = useMemo(() => {
     if (!placement?.geometryPreview || !placementTarget) return null;
@@ -311,7 +319,7 @@ export function BimSolidView({
     project,
     previewProjection,
     previewClient,
-    snap && !error && interactive,
+    snap && !error && interactive && !placement?.axisConstraint,
     previewReset,
     placement?.geometryPreview ? snapping : moving ? snapping : null,
     moving && editSession.target.kind === "wall" ? editSession.target.id : undefined,
@@ -323,6 +331,20 @@ export function BimSolidView({
     queryModel,
   );
   const pickingMovementOrigin = !!placement && !placement.geometryPreview;
+  const resolvePlacement = (client: Point, shift: boolean) => {
+    if (placement?.axisConstraint) {
+      if (!previewProjection) return null;
+      const point = axisTarget(
+        previewProjection,
+        placement.axisConstraint,
+        originHeight ?? workingStoreyElevation(project),
+        client,
+        snap ? gridSpacing(gridSettings) : null,
+      );
+      return point ? { point, candidate: null } : null;
+    }
+    return inference.resolve(client, shift);
+  };
   const originQuery = useMemo(
     () =>
       previewProjection && pickingMovementOrigin
@@ -440,9 +462,17 @@ export function BimSolidView({
       )}
       <SolidSnapPreview
         projection={previewProjection}
-        enabled={snap && !error && interactive}
+        enabled={snap && !error && interactive && !placement?.axisConstraint}
         inference={inference}
       />
+      {placement?.axisConstraint && previewProjection && (
+        <MovementOriginAxes
+          projection={previewProjection}
+          origin={placement.axisConstraint.origin}
+          elevation={originHeight ?? workingStoreyElevation(project)}
+          vertical
+        />
+      )}
       {originCandidate && previewProjection && (
         <svg
           aria-label="Bewegungsursprung Fangvorschau"
@@ -570,12 +600,12 @@ export function BimSolidView({
             ) {
               setPreviewClient({ x: event.clientX, y: event.clientY, shift: event.shiftKey });
               if (placement && !pan) {
-                const result = inference.resolve(
+                const result = resolvePlacement(
                   { x: event.clientX, y: event.clientY },
                   event.shiftKey,
                 );
                 if (result) {
-                  setPlacementAim(result.point);
+                  setPlacementAim({ context: placement.geometryPreview, point: result.point });
                   placement.aim(result.point);
                 }
               }
@@ -659,7 +689,7 @@ export function BimSolidView({
             if (placement) {
               if (!gesture.navigation) {
                 if (placement.geometryPreview) {
-                  const result = inference.resolve(
+                  const result = resolvePlacement(
                     { x: event.clientX, y: event.clientY },
                     event.shiftKey,
                   );

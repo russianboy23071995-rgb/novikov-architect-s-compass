@@ -12401,3 +12401,15 @@ oder Vollprüfung im Pointerpfad; vollständige Platzierungsprüfung und ein Und
 Kontinuierliche Shift-Mausbewegung, GB-Gruppen und Vorschauvergleich bleiben offen.
 Abbildwechsel-Performancebefund bleibt offen und vor Gesamtfreigabe erneut zu prüfen;
 fehlende Reproduktion ist keine Behebung. IFC/Recovery/Release-Gates bleiben bestehen.
+
+### AUD14-07 / A04 – Gemeinsamer Z-Bedienadapter (15.10.2026)
+#370 gemergt, Z-Anbindung jetzt produktiv über useSelectionMove und ToolInteraction.
+selectionZInteraction verwendet prepareZTranslation; axisTarget ist ausschließlich
+Viewport-Koordinatenabbildung, keine Elementlogik. Einzelwand und Wandgruppe, signierte
+Eingabe, Mausplatzierung, Abbruch und ein Undo. Geschosszugehörigkeit und Fensterrelationen
+bleiben, interne Verbindungen bleiben, externe werden beim Commit gelöst.
+1088 Tests und Builds bestanden. S1-G-Browsernachweis z-ui-acceptance.json, begrenzte
+Node-Pointermessung z-input-pointer-evidence.json; kein Ersatz für Frame-/GPU-Nachweis.
+Z-Fremdreferenzfang und kontinuierlicher Shift-Test noch offen. Vorbereitung/Komposition
+bleiben benannte Kosten. Abbildwechsel-Restbefund nicht geschlossen. Nächster einziger
+Auftrag: verbleibende S1-Gruppen-/Shift-Abnahme einschließlich GB vervollständigen.
