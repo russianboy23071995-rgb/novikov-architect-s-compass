@@ -459,13 +459,15 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-03 – 3D-Ressourcen lokal aktualisieren.**
+**Genau ein aktiver Schritt: AUD14-04 – wiederholte globale Validierung/Ableitung begrenzen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
 Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
-implementiert und geprüft. Nächster begrenzter Auftrag: Ressourcenlebensdauer im
-3D-Renderer messen und unveränderte Programme/Puffer bei Auswahlwechsel wiederverwenden.
+implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
+ist im unten begrenzten Umfang geprüft. Nächster Einzelauftrag AUD14-04: zunächst
+Aufruf-/Kopier-/Geometriearbeit bei Geschoss-/Ansichtswechsel messen und die
+Gebäudeableitung vom bloßen Ansichtskontext trennen, ohne Validierungsgrenzen zu lockern.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -912,3 +914,37 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   Bildreferenzen wiederholen. Die bisherigen Bediengesten bleiben unverändert.
 - Nächster Einzelauftrag AUD14-03: unveränderte 3D-Ressourcen bei Auswahl und
   Bewegung wiederverwenden, zunächst Ressourcen-/Uploadzähler und Auswahlwechsel.
+
+
+### AUD14-03 – stabile 3D-Ressourcen und begrenzte Uploads (15.10.2026)
+
+- `solid-renderer.ts` hält ein Programm und zwei Puffer über Auswahl-/Geometriewechsel
+  hinweg. Canvas-Kontextverlust entsorgt sie wie bisher; Wiederherstellung erzeugt sie neu.
+- `solid-buffer.ts` ist ein wegwerfbarer Darstellungs-Cache, kein zweites BIM-Modell.
+  Ein gemeinsamer Geometriepuffer enthält stabile Wandbereiche. Gleicher Aufbau:
+  nur geänderte Geometrie/Farben per `bufferSubData`; Auswahl bei gleichem Solid
+  prüft nur vorher/nachher ausgewählte IDs. Vorschau-Umsortierung ändert keine Bereiche.
+- Unveränderte Wände werden nicht neu trianguliert/verpackt/hochgeladen. Fensterlöcher,
+  Beleuchtung, lokale Koordinaten, Tiefentest und bestehende Konturribbons bleiben erhalten.
+- Bewusster Rückfall: andere Wandanzahl, andere Dreieckanzahl/Offsets oder neuer lokaler
+  Ursprung erzeugen einen vollständigen Geometrie-Upload, aber kein neues Shaderprogramm.
+  Neue Solids werden weiterhin insgesamt nach Wandgruppen durchsucht; Vorschaukomposition
+  und Konturribbons bleiben unverändert. Keine vollständige lokale CPU-/GPU-Pipeline behauptet.
+- Vorher/Nachher am Commit `a585b68`: Windows Node 24.19.0, WebGL-Befehlsrekorder,
+  100/1.000/5.000 einfache Quad-Wände, feste kleine Auswahl; initial + sechs Auswahlwechsel
+  + sechs Bewegungsupdates. Bei 5.000 Wänden: Programme 13 → 1, Puffer 26 → 2;
+  Upload 9.360.000 Byte → 720.000 Byte initial plus 2.592 Byte Updates.
+  Warme CPU-Mediane (fünf Updates nach erster Ausführung): Auswahl 16,903 → 0,035 ms,
+  Bewegung 18,123 → 2,798 ms. Rekorderzahlen sind keine GPU-/Framezeiten.
+- Chromium 155, echte WebGL-Ausgabe: **36 exakte Pixelvergleiche** zwischen wiederverwendetem
+  und frischem Renderer bestanden (Wände mit Anschluss/Fenster, Auswahl, Vorschau, Abbruch,
+  Sichtbarkeit, DPR1/2, Blick von oben/unten, Ursprung bei 1e9). Kontextverlust und
+  Wiederherstellung bestanden. Rohwerte/Methodik: `benchmarks/solid-resource-results.json`;
+  ausführbare Diagnose: `benchmarks/solid-resource.html`.
+- Verifikation: 982 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild.
+  Bestehende Vorschau-/Commit-/Fenster-Hitflächenregressionen bleiben aktiv.
+  Neue PR-Abnahme offen. Schwere Schule, Gesamtframezeit und Langsession bleiben Abschlussgate.
+- Praktische Abnahme: in 3D Wand auswählen/abwählen, bewegen und abbrechen; Fensteröffnung
+  und stehende Nachbarwand müssen unverändert aussehen. Danach mit Shift platzieren und Undo.
+- Nächster Einzelauftrag AUD14-04: Aufruf-/Kopierarbeit bei Geschoss-/Ansichtswechsel
+  messen und unveränderte Gebäudeableitungen wiederverwenden.

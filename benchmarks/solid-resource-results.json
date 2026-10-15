@@ -1,0 +1,308 @@
+{
+  "before": [
+    {
+      "count": 100,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 14400,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 7,
+        "buffers": 14,
+        "fullBytes": 100800,
+        "partialBytes": 0,
+        "deletedPrograms": 6,
+        "deletedBuffers": 12
+      },
+      "moved": {
+        "programs": 13,
+        "buffers": 26,
+        "fullBytes": 187200,
+        "partialBytes": 0,
+        "deletedPrograms": 12,
+        "deletedBuffers": 24
+      },
+      "selectionMs": [
+        0.8890999999999991,
+        0.9120999999999952,
+        0.7719000000000023,
+        1.0161000000000087,
+        0.5664000000000016,
+        0.8199000000000041
+      ],
+      "movementMs": [
+        0.8729999999999905,
+        0.7694000000000045,
+        0.7741000000000042,
+        0.37649999999999295,
+        0.5057000000000045,
+        0.34260000000000446
+      ]
+    },
+    {
+      "count": 1000,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 144000,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 7,
+        "buffers": 14,
+        "fullBytes": 1008000,
+        "partialBytes": 0,
+        "deletedPrograms": 6,
+        "deletedBuffers": 12
+      },
+      "moved": {
+        "programs": 13,
+        "buffers": 26,
+        "fullBytes": 1872000,
+        "partialBytes": 0,
+        "deletedPrograms": 12,
+        "deletedBuffers": 24
+      },
+      "selectionMs": [
+        4.7166,
+        3.483300000000014,
+        4.351700000000022,
+        4.862300000000005,
+        10.31280000000001,
+        5.496500000000026
+      ],
+      "movementMs": [
+        4.159400000000005,
+        4.931600000000003,
+        4.833700000000022,
+        4.153800000000018,
+        4.377399999999994,
+        4.520700000000005
+      ]
+    },
+    {
+      "count": 5000,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 720000,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 7,
+        "buffers": 14,
+        "fullBytes": 5040000,
+        "partialBytes": 0,
+        "deletedPrograms": 6,
+        "deletedBuffers": 12
+      },
+      "moved": {
+        "programs": 13,
+        "buffers": 26,
+        "fullBytes": 9360000,
+        "partialBytes": 0,
+        "deletedPrograms": 12,
+        "deletedBuffers": 24
+      },
+      "selectionMs": [
+        18.476500000000016,
+        14.974999999999994,
+        16.902800000000013,
+        16.214499999999987,
+        18.423500000000047,
+        18.886500000000012
+      ],
+      "movementMs": [
+        20.893700000000024,
+        15.913400000000024,
+        20.340499999999963,
+        20.095700000000022,
+        17.94380000000001,
+        18.122599999999977
+      ]
+    }
+  ],
+  "after": [
+    {
+      "count": 100,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 14400,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 14400,
+        "partialBytes": 1584,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "moved": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 14400,
+        "partialBytes": 2592,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selectionMs": [
+        0.20479999999999166,
+        0.3680999999999983,
+        0.13620000000000232,
+        0.18310000000001025,
+        0.1268000000000029,
+        0.07310000000001082
+      ],
+      "movementMs": [
+        0.4753000000000043,
+        0.2822999999999922,
+        0.216700000000003,
+        0.17560000000000286,
+        0.595799999999997,
+        0.2664999999999935
+      ]
+    },
+    {
+      "count": 1000,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 144000,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 144000,
+        "partialBytes": 1584,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "moved": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 144000,
+        "partialBytes": 2592,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selectionMs": [
+        0.09959999999999525,
+        0.037600000000011846,
+        0.03740000000000521,
+        0.03309999999999036,
+        0.05920000000000414,
+        0.046700000000001296
+      ],
+      "movementMs": [
+        1.1580000000000013,
+        1.460400000000007,
+        1.0991999999999962,
+        1.2143999999999835,
+        0.641399999999976,
+        1.3161000000000058
+      ]
+    },
+    {
+      "count": 5000,
+      "initial": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 720000,
+        "partialBytes": 0,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selection": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 720000,
+        "partialBytes": 1584,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "moved": {
+        "programs": 1,
+        "buffers": 2,
+        "fullBytes": 720000,
+        "partialBytes": 2592,
+        "deletedPrograms": 0,
+        "deletedBuffers": 0
+      },
+      "selectionMs": [
+        0.054400000000015325,
+        0.033799999999985175,
+        0.06780000000000541,
+        0.03509999999999991,
+        0.032200000000017326,
+        0.0438000000000045
+      ],
+      "movementMs": [
+        3.2830999999999904,
+        2.7165999999999997,
+        3.4052000000000078,
+        2.7978999999999985,
+        3.5808000000000106,
+        1.9694000000000074
+      ]
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "checks": [
+      "base DPR1 pitch0.6: equal",
+      "selection DPR1 pitch0.6: equal",
+      "preview 0.1 DPR1 pitch0.6: equal",
+      "preview 0.2 DPR1 pitch0.6: equal",
+      "preview 0.3 DPR1 pitch0.6: equal",
+      "cancel DPR1 pitch0.6: equal",
+      "hidden neighbour DPR1 pitch0.6: equal",
+      "restore DPR1 pitch0.6: equal",
+      "distant origin DPR1 pitch0.6: equal",
+      "base DPR1 pitch-0.6: equal",
+      "selection DPR1 pitch-0.6: equal",
+      "preview 0.1 DPR1 pitch-0.6: equal",
+      "preview 0.2 DPR1 pitch-0.6: equal",
+      "preview 0.3 DPR1 pitch-0.6: equal",
+      "cancel DPR1 pitch-0.6: equal",
+      "hidden neighbour DPR1 pitch-0.6: equal",
+      "restore DPR1 pitch-0.6: equal",
+      "distant origin DPR1 pitch-0.6: equal",
+      "base DPR2 pitch0.6: equal",
+      "selection DPR2 pitch0.6: equal",
+      "preview 0.1 DPR2 pitch0.6: equal",
+      "preview 0.2 DPR2 pitch0.6: equal",
+      "preview 0.3 DPR2 pitch0.6: equal",
+      "cancel DPR2 pitch0.6: equal",
+      "hidden neighbour DPR2 pitch0.6: equal",
+      "restore DPR2 pitch0.6: equal",
+      "distant origin DPR2 pitch0.6: equal",
+      "base DPR2 pitch-0.6: equal",
+      "selection DPR2 pitch-0.6: equal",
+      "preview 0.1 DPR2 pitch-0.6: equal",
+      "preview 0.2 DPR2 pitch-0.6: equal",
+      "preview 0.3 DPR2 pitch-0.6: equal",
+      "cancel DPR2 pitch-0.6: equal",
+      "hidden neighbour DPR2 pitch-0.6: equal",
+      "restore DPR2 pitch-0.6: equal",
+      "distant origin DPR2 pitch-0.6: equal"
+    ],
+    "contextRestored": true
+  },
+  "method": "Baseline a585b68, Windows Node 24.19.0. Recording WebGL command adapter, not GPU timing: 100/1000/5000 separate quad walls, initial draw, 6 selection changes, 6 movement previews (first is zero movement plus reorder); first update separate from warm median of remaining 5. One selected/moved wall. Chromium 155 real WebGL pixels: connected walls with opening, selection, previews, cancel, visibility, DPR1/2, pitch +/-0.6, origin 1e9 and context restoration. Not a heavy-school or total-frame benchmark."
+}
