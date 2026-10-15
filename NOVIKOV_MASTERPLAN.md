@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #367 gemergt; SVG-URL-Zuweisung und zwei Bild-Gegenversuche eingegrenzt. Kein belegter Anlass für Blob-Cache-/Rendererumbau. Genau nächster Auftrag: Browser-Hauptthread-Aufzeichnung mit Commit/Layout/Skript-Zuordnung und Kontrolle des Messwerkzeugeinflusses, bevor ein Produktfix gewählt wird.
+Aktueller Arbeitsauftrag: 15.10.2026 – #368 gemergt; Browser-Frame-Zuordnung abgeschlossen als begrenzter Diagnosebeleg, schwankender Abbildwechsel-Restbefund bleibt offen. Genau nächster Auftrag: S1-Gruppenbewegungen XY/Z mit und ohne Shift im realen Workspace praktisch vergleichen; keine weitere spekulative Bildoptimierung.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3009,3 +3009,47 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
 Langzeit/Quota/Mehrtab/GPU-Gates und zurückgestellte Speichererweiterung bleiben erhalten.
+
+### AUD14-07 – Browser-Frame-Zuordnung, begrenzter Diagnoseabschluss (15.10.2026)
+#368 nach grüner CI auf 3894c53 gemergt. Diagnoseharness erfasst zusätzlich Long Animation
+Frames mit Browser-Skriptzuordnung, erzwungener Layoutzeit und Renderstart. Unterstützungs-
+flag wird mitgespeichert; fehlende API darf nicht als null Aufwand interpretiert werden.
+Observer wird beim Messneustart geleert und beim Abschluss beendet. CadWorkspace selbst
+ist zusätzlich im expliziten Profilbuild als Funktionsphase instrumentiert.
+
+S1 GB, warme OG/EG-Abbilder, aktueller Autosicherungsstand, je 20 kontinuierliche
+Doppelklicks, 1280×720 DPR1, Data-URLs/sichtbare Bilder. Test-Port8085; Nutzer-Port8080
+unverändert. Rohdaten image-frame-attribution.json und view-workspace-attribution.json.
+Erster Lauf: fünf lange Tasks und 13 lange Frames. Browser ordnet deren Skripte dem
+DIV#root.ondblclick-Ereignis zu (39,6–60,6 ms), erzwungenes Layout 1,5–2,6 ms je erfasstem
+Skript. Zweiter Lauf mit zusätzlichem Workspace-Wrapper: keine langen Tasks, zwei lange
+Frames (50,4/51,3 ms), Skripte 41,7/44,0 ms und Layout 1,5/1,8 ms. Kein Produktfix zwischen
+den Läufen. Arbeitslast/JIT/GC und Instrumentierungseinfluss nicht kontrolliert.
+
+CadWorkspace-Aufrufe im zweiten Lauf insgesamt 12,9 ms (40 Aufrufe, max.0,7 ms);
+BimPlan 122,7 ms inklusive Fangvorbereitung94,8 ms; PlanSceneContent7,7 ms und native
+Bild-href-Zuweisung7,6 ms insgesamt. Diese Funktionswrapper erfassen nicht den gesamten
+React-Baum und Commit. Keine wiederholte Vollvalidierung im Messbereich.
+
+Ergebnis: Hinweise auf JavaScript im synchronen Öffnungsereignis, keine dominante
+Layout- oder belegte Bild-URL-Ursache. Long Animation Frames sind KEIN vollständiger
+CPU-Sampling-Trace und liefern keinen inneren Callstack des React-Ereignisses. Der
+Messwerkzeugeinfluss ist damit nicht ausgeschlossen; der Snapshot-Fix bleibt bestätigt,
+der wechselhafte Restbefund bleibt ausdrücklich offen. Für weitere Optimierung ist bei
+Reproduktion eine CPU-Aufzeichnung inkl. React-Commit und Gegenprobe ohne laufende
+Automationsabfragen erforderlich. Kein Produktfix und keine Freigabe als lagfrei.
+
+Diese begrenzte Diagnoseetappe wird beendet: kein weiterer Cache-/Rendererumbau auf
+Verdacht. Weiteres Sampling als offener P2-Nachweis, statt fortlaufend neue Harness-
+Varianten zur vermeintlichen Behebung zu erklären. Die ausstehende S1-Funktionsabnahme
+hat nun Vorrang. Langzeit/Quota/Mehrtab/GPU-Gates bleiben erhalten.
+
+Verifikation: Benchmark-Typecheck, fokussiertes ESLint und isolierter Produktions-
+Diagnosebuild bestanden; #368 CI grün. Keine Produktänderung, Vollsuite lokal nicht erneut
+ausgeführt. Screenshot outputs/s1-attribution.png; Viewportoverride zurückgesetzt.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** S1-Gruppenbewegungen XY/Z mit und ohne Shift im echten Workspace
+   vergleichen; Anschlüsse, Fenster und genau einen Undo-Schritt praktisch prüfen.
+2. IFC-Höhen/Containment für mehrere Geschosse nachweisen.
+3. Recovery-Zusammenfassung für alle Geschosse korrigieren und offene Audit-Gates abgleichen.
