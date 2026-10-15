@@ -24,18 +24,21 @@ function frame(now: number) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-document.addEventListener(
-  "click",
-  (e) => {
-    const target = (e.target as Element).closest("button");
-    if (target)
-      events.push({
-        at: performance.now(),
-        label: target.getAttribute("aria-label") ?? target.textContent,
-      });
-  },
-  true,
-);
+for (const eventType of ["click", "dblclick"])
+  document.addEventListener(
+    eventType,
+    (e) => {
+      if (!running) return;
+      const target = (e.target as Element).closest('button, [role="treeitem"]');
+      if (target)
+        events.push({
+          at: performance.now(),
+          type: eventType,
+          label: target.getAttribute("aria-label") ?? target.textContent,
+        });
+    },
+    true,
+  );
 const observer = new PerformanceObserver((list) =>
   longtasks.push(...list.getEntries().map((e) => ({ start: e.startTime, duration: e.duration }))),
 );
@@ -45,7 +48,7 @@ const panel = document.createElement("details");
 panel.style.cssText =
   "position:fixed;right:12px;top:130px;z-index:1000;background:white;max-width:480px;max-height:60vh;overflow:auto;padding:8px;font:12px system-ui";
 panel.innerHTML =
-  '<summary>S1 Diagnose</summary><button id="s1-check">Modellvergleich ausführen</button> <button id="s1-trace">Messung abschließen</button><pre id="s1-result"></pre>';
+  '<summary>S1 Diagnose</summary><button id="s1-start">Messung neu starten</button> <button id="s1-check">Modellvergleich ausführen</button> <button id="s1-trace">Messung abschließen</button><pre id="s1-result"></pre>';
 document.body.append(panel);
 const report: Record<string, unknown> = {
   variant: mixed ? "GB" : "G",
@@ -58,6 +61,18 @@ const report: Record<string, unknown> = {
 const show = () => {
   panel.querySelector("#s1-result")!.textContent = JSON.stringify(report, null, 2);
 };
+panel.querySelector("#s1-start")!.addEventListener("click", () => {
+  observer.takeRecords();
+  events.length = longtasks.length = frames.length = workspacePhases.length = 0;
+  report["measurementStart"] = performance.now();
+  report["measurementEnd"] = null;
+  last = performance.now();
+  if (!running) requestAnimationFrame(frame);
+  running = true;
+  if (PerformanceObserver.supportedEntryTypes.includes("longtask"))
+    observer.observe({ entryTypes: ["longtask"] });
+  show();
+});
 panel.querySelector("#s1-check")!.addEventListener("click", async () => {
   report["status"] = "running";
   show();
@@ -74,6 +89,7 @@ panel.querySelector("#s1-check")!.addEventListener("click", async () => {
 panel.querySelector("#s1-trace")!.addEventListener("click", () => {
   running = false;
   observer.disconnect();
+  report["measurementEnd"] = performance.now();
   report["frames"] = frames;
   show();
 });
