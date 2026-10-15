@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "storeys": 5,
+  "walls": 500,
+  "windows": 500,
+  "runs": [
+    {
+      "switchMs": 4.5999999940395355,
+      "deriveMs": 1.800000011920929,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 5.799999997019768,
+      "deriveMs": 1.8999999910593033,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 5.799999997019768,
+      "deriveMs": 1.6000000089406967,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 3.5,
+      "deriveMs": 1.0999999940395355,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 2.8999999910593033,
+      "deriveMs": 1.1000000089406967,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 3.5,
+      "deriveMs": 1,
+      "identicalPixels": true
+    },
+    {
+      "switchMs": 3.3999999910593033,
+      "deriveMs": 1.2000000029802322,
+      "identicalPixels": true
+    }
+  ]
+}

@@ -12018,3 +12018,23 @@ Einziger nächster Auftrag: zusammenhängende AUD14-04-Restabnahme mit aktuellem
 Mehrgeschossprofil und Restpfadabgleich, keine weitere pauschale Migration ohne Messung.
 Danach AUD14-05 lokale 3D-Fangsuche und AUD14-06 Langsitzungs-Speicher/Recovery.
 AUD14-04 bleibt bis zur Restabnahme offen; AUD14-07 weiterhin Abschlussgate.
+
+
+### AUD14-04 Teil 21 / Übergang AUD14-05
+PR342 gemergt (a40bc22). Kein Produktcode geändert. Browserprüfung mit 502 Wänden über
+fünf Geschosse: 48 pixelgleiche Achs-/Körpergriff-/Streckvorschauen und 48 exakte
+Projekt-/Commit-/Undo-/Abbruchvergleiche. Sieben Geschosswechsel pixelgleich, sechs
+Kamera-Pixelvergleiche und 48 Fangresultate gleich. Chrome/155 IAB Windows.
+Rohdaten benchmarks/preview-block-*-browser*.json, Node-Daten preview-block-node-results.json;
+Runner preview-block-browser.ts und unverändertes remaining-preview-profile.ts.
+Große Szene: Vorschau Schraffurpunkt 0,049, Linienpunkt 0,020, Fensterachse 0,132,
+Wand-Strecken 0,129 ms warm. Kein React-/Hardwareeingabe-/p95-/GPU-Garantienachweis.
+Restschuld: weitere Wandkettenabschnitte, alte direkte move/x/y-Pfade, globale Planableitung,
+Fremdendpunktliste/große Anschlussgruppen. AUD14-04 bleibt dafür und bis Gesamtgate offen.
+Der begrenzte Nachweis erlaubt den Übergang zum einzigen aktiven Auftrag AUD14-05:
+createMovementOriginQuery lokal räumlich abfragen statt alle projizierten Ecken pro Pointer
+zu scannen; Resultate, stabile Gleichstände, Höhe, Verdeckung und Kontextwechsel erhalten.
+Danach große Anschlussgruppen/Fremdendpunkte messen, anschließend AUD14-06.
+AUD14-07 bleibt vollständiges Schulmodell-/Workspace-/Bild-/Langzeit-Abschlussgate.
+
+Prüfabschluss Teil 21: 1048 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden.

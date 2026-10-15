@@ -489,7 +489,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-04 – wiederholte globale Validierung/Ableitung begrenzen.**
+**Genau ein aktiver Schritt: AUD14-05 – lokale 3D-Ursprungsfangabfrage (Teilauftrag).**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -508,8 +508,10 @@ PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
 PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglichen (Teil 18).
 PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und verglichen (Teil 19).
 PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Teil 20).
-Nächster Einzelauftrag: zusammenhängende AUD14-04-Restabnahme mit Browser-/Mehrgeschossprofil
-und aktuellem Restpfadabgleich; danach begrenzten Übergang zur lokalen 3D-Fangsuche festlegen.
+PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in Teil 21.
+Nächster Einzelauftrag: createMovementOriginQuery lokal räumlich abfragen, bei identischen
+Fangresultaten, Höhenfiltern, Sichtbarkeitsregeln und stabiler Reihenfolge bei Gleichstand.
+AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1817,3 +1819,58 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Sichtbarkeitskontext sowie Fangrangfolge ausdrücklich mitprüfen.
 3. AUD14-06 Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
 AUD14-04 ist bis zur Restabnahme nicht geschlossen; AUD14-07 bleibt Abschlussgate.
+
+
+### AUD14-04 Teil 21 – Zusammenhängender Vergleich und Übergang (15.10.2026)
+
+PR342 nach ausdrücklicher Freigabe und grüner CI in main gemergt (a40bc22).
+Keine Produktänderung in diesem Schritt. Vorhandene Browserprüfungen wiederverwendet,
+Wandvergleich als preview-block.html / preview-block-browser.ts auf 502 Wände und
+Achsgriff/Körpergriff/Strecken erweitert. Zwei Enden, zwei Kamerawinkel, vier Ziele:
+48 pixelgleiche Vorschauen, 48 exakte Projekt-/Commit-/Undo-/Abbruchvergleiche bestanden.
+Rendererprüfung nutzt echten WebGL-Canvas, aber Application-Aktionen direkt; keine
+Behauptung über echte Mausereignisse, React-Gesamtframes oder kontinuierliche Eingabe.
+IAB auf Windows, Chrome/155.0.0.0; Rohdaten preview-block-browser-results.json.
+
+Geschosswechsel: fünf Geschosse, 500 Wände/500 Fenster, sieben Wechsel; unveränderte
+Geometrieidentität und Pixel bestanden (preview-block-storey-browser.json).
+Kamera-/Abfragebasis: sechs Pixelvergleiche und 48 Fangresultatvergleiche bestanden
+(preview-block-query-browser.json). Diese acht getesteten Ecken pro Kameralage sind
+keine flächendeckende Abnahme sämtlicher Verdeckungs-/Sichtbarkeitsfälle.
+
+remaining-preview-profile.ts unverändert erneut ausgeführt; alte Ergebnisse erhalten,
+aktuelle Daten preview-block-node-results.json. Große Szene, warme Mediane in ms:
+| Pfad | Projektvorschau | volle Planableitung | Geometriepatch |
+| --- | --- | --- | --- |
+| Schraffurpunkt, 100 Konturen à 100 Punkte | 0,049 | 0,037 | 0,033 |
+| Linienpunkt, gleicher Hintergrund | 0,020 | 0,048 | 0,011 |
+| Fensterachse, 500 Wände/500 Fenster | 0,132 | 0,663 | 0,124 |
+| Wand-Strecken, gleicher Hintergrund | 0,129 | 0,548 | 0,121 |
+Erster + acht warme Ziele, Vorbereitung separat, exakte Projektgleichheit außerhalb
+Zeitmessung. Synthetische Befunde ohne p95-/Frame-/GPU-Garantie. Die historischen
+Globalprüfungsengpässe dieser vier Pfade sind im heutigen Profil nicht mehr vorhanden.
+
+Restabgleich: registrierte Linie/Schraffur Punkt/Seite/Offset/Knicken sowie Fensterachse
+und Wandpunkt/-stretch vorbereitet. Fremde Endkontakte und T-Ziele verwenden absichtlich
+Vollprüfung. Wandkette ab weiteren Abschnitten/Startkandidaten nutzt weiterhin appendWallChain;
+ID-Sammlung, direkte alte move/x/y-Pfade, vollständige Planableitung und große Anschlussgruppen
+bleiben Restschuld. Keine ungemessene pauschale Migration oder Aussage, alle Pfade seien schnell.
+Neue Befunde dort vor Änderung messen; Gesamtprofil mit Referenzbildern, Langsitzung und
+realen Workspace-Eingaben bleibt AUD14-07 vorbehalten. AUD14-04 wird nicht geschlossen.
+
+Übergangsentscheidung: Der begrenzt geprüfte Vorschauumfang rechtfertigt jetzt AUD14-05.
+createMovementOriginQuery (rendering/viewport/movement-origin.ts) projiziert einmal, läuft
+aber pro Mausabfrage noch per map/filter über alle Ecken. Gemeinsamen räumlichen Index
+verwenden, lokales Radius-Rechteck abfragen, anschließend exakt dieselbe Distanz, Höhe,
+stabile Gleichstandreihenfolge und classifyAnchorVisibility anwenden. Kontextänderungen
+(Kamera/Viewport/Sichtbarkeit/Modell) dürfen keine veralteten Kandidaten liefern.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. AUD14-05: lokale 3D-Ursprungsfangabfrage mit vollständigem linearen Vergleichsorakel,
+   dichter/verteilter Geometrie, kalter Vorbereitung und warmen Abfragen.
+2. AUD14-05: große Anschlussgruppen und lineare Fremdendpunktprüfung separat messen;
+   betroffene Menge nur bei nachgewiesener fachlicher Gleichheit begrenzen.
+3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen.
+AUD14-04-Restschuld und AUD14-07 bleiben ausdrücklich offen.
+
+Prüfabschluss Teil 21: 1048 Tests, App-/Benchmark-Typecheck, gezieltes ESLint und Build bestanden.
