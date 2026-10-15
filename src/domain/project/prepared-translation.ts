@@ -1,3 +1,4 @@
+import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
 import { wallBase } from "../elements/wall/heights.ts";
 import { storeyOf } from "../storeys/access.ts";
@@ -34,22 +35,10 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
   if (s.windows.some((w) => ids.has(w.id) && !ids.has(w.wallId)))
     throw new Error("Fenster zusammen mit ihrer Wand auswählen.");
   const byWall = new Map(s.walls.map((w) => [w.id, w]));
-  const neighbours = new Map<string, Set<string>>();
-  for (const [a, b] of [
-    ...s.wallJoins.map((j) => [j.first.wallId, j.second.wallId] as const),
-    ...s.wallTJunctions.map((j) => [j.hostWallId, j.incoming.wallId] as const),
-  ]) {
-    for (const [from, to] of [
-      [a, b],
-      [b, a],
-    ] as const) {
-      if (!neighbours.has(from)) neighbours.set(from, new Set());
-      neighbours.get(from)!.add(to);
-    }
-  }
-  // Conservative connected-component closure, prepared once. Includes stationary partners.
-  const walls = new Set(selectedIds.filter((id) => byWall.has(id)));
-  for (const id of walls) for (const neighbour of neighbours.get(id) ?? []) walls.add(neighbour);
+  const walls = wallDependencyClosure(
+    base,
+    selectedIds.filter((id) => byWall.has(id)),
+  );
   const affected: ModelGeometry = {
     assets: base.assets.filter((a) =>
       s.references.some((r) => ids.has(r.id) && r.assetId === a.id),

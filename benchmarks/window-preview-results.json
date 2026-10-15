@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "baseline": "58596a3 (merged PR324), full editAtPointer + buildBuildingSolid remains available",
+  "runtime": "Windows Node 24.19.0",
+  "method": "window-preview-profile.ts, 500 independent walls/windows across five storeys; full/prepared alternating at seven targets, first separate, six warm observations. Includes scene composition; excludes React/UI/frame/GC guarantees.",
+  "profile": {
+    "walls": 500,
+    "windows": 500,
+    "affectedWalls": 1,
+    "preparationMs": 7.635600000000011,
+    "first": {
+      "fullMs": 15.738299999999981,
+      "preparedMs": 13.57510000000002
+    },
+    "warm": [
+      {
+        "fullMs": 63.32480000000004,
+        "preparedMs": 14.55989999999997
+      },
+      {
+        "fullMs": 56.720399999999984,
+        "preparedMs": 14.18889999999999
+      },
+      {
+        "fullMs": 58.799199999999985,
+        "preparedMs": 15.003399999999942
+      },
+      {
+        "fullMs": 48.746099999999956,
+        "preparedMs": 8.887500000000045
+      },
+      {
+        "fullMs": 52.08929999999998,
+        "preparedMs": 9.441000000000031
+      },
+      {
+        "fullMs": 34.19920000000002,
+        "preparedMs": 15.583599999999933
+      }
+    ]
+  },
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "pixelComparisons": 8
+  },
+  "limits": [
+    "Connected components remain complete and can be large.",
+    "Scoped calculation project retains storey levels and uses existing full window operation; it is never committed.",
+    "Scene face filtering/bounds and window outline composition remain global.",
+    "Only window axis preview in 3D uses this pilot; direct wall preview and hatch checks remain open."
+  ]
+}
