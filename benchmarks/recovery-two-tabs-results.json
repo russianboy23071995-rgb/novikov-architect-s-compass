@@ -1,0 +1,51 @@
+{
+  "tabAAfterClosingB": {
+    "role": "a",
+    "name": "novikov-recovery-v2-pilot-tabs-acceptance-20261015-1754",
+    "events": [
+      {
+        "visible": true
+      }
+    ],
+    "limitations": "Real separate tabs; deterministic writer conflict. Lifecycle log records only events actually delivered. No process-kill, quota or hours test.",
+    "initialized": true,
+    "prepared": true,
+    "save": "committed",
+    "verification": "PASS: winner, previous, foreign identical",
+    "payloads": {
+      "count": 3,
+      "base64Characters": 9426192
+    }
+  },
+  "tabB": {
+    "role": "b",
+    "name": "novikov-recovery-v2-pilot-tabs-acceptance-20261015-1754",
+    "events": [
+      {
+        "visible": true
+      },
+      {
+        "maintenance": {
+          "status": "running",
+          "message": "Sicherungsstände werden geprüft und ungenutzte Bilddaten bereinigt…"
+        }
+      },
+      {
+        "maintenance": {
+          "status": "success",
+          "message": "1 ungenutzte Bilddaten entfernt; 3 benötigte Bilddaten erhalten."
+        }
+      }
+    ],
+    "limitations": "Real separate tabs; deterministic writer conflict. Lifecycle log records only events actually delivered. No process-kill, quota or hours test.",
+    "prepared": true,
+    "save": "rejected",
+    "saveError": "Error: Recovery revision conflict",
+    "payloads": {
+      "count": 3,
+      "base64Characters": 9426192
+    },
+    "verification": "PASS: winner, previous, foreign identical"
+  },
+  "limitations": "Both embedded tabs reported visible=true; no real hidden/focus transition established. B closed after maintenance completed, not during transaction. Automatic retry not exercised."
+}
