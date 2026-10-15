@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 14.10.2026 – Reviewkorrekturen AUD14-01 bis AUD14-07, ausdrücklich zur sofortigen sequenziellen Umsetzung freigegeben. Prüfbezug: main `c081040d5fb7a8833ac8493bfd0ae669ef617e1e`, PR281–317; PR318 zum Auftragsabgleich offen. Ursprüngliche Konsolidierung vom 10.10.2026 bleibt historische Provenienz.
+Aktueller Arbeitsauftrag: 15.10.2026 – Recovery-Restnachweise risikobasiert eingeordnet; genau ein nächster Auftrag: echter Zwei-Tab-Lifecycle-Test in isolierter Datenbank (siehe jüngsten Abschnitt AUD14-06). Danach AUD14-07 Gesamt-Abnahme. Historische Auditbasis: main c081040, PR281–317; aktuelle Merge-/Prüfbelege stehen bei den jeweiligen Nachträgen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2626,3 +2626,42 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Den aus dieser Einordnung tatsächlich nötigen begrenzten Prüf-/Fixauftrag abschließen.
 3. Nächsten priorisierten CAD-Auftrag anhand des Masterplans auswählen und beginnen;
    offene Release-Belastungsprüfungen ausdrücklich weiterführen.
+
+### AUD14-06 – Restnachweise und Release-Zuordnung (15.10.2026)
+
+#361 nach grüner CI ausdrücklich freigegeben und in main übernommen. Dieser Auftrag ist
+Dokumentation/Planung auf Basis des Codes und vorhandener Belege, keine neue Laufzeitmessung.
+AUD14-06 ist funktional weitgehend umgesetzt, aber nicht pauschal vollständig abgenommen.
+Keine neue Speichergrenze und kein erneuter Ausbau des vom Nutzer zurückgestellten Umfangs.
+
+| Offener Nachweis | Risiko / bisheriger Beleg | Zeitpunkt und konkrete Abnahme |
+| --- | --- | --- |
+| Echter Zwei-Tab-Lifecycle | Root-Wechsel, veralteter Writer und parallele Collector-Verbindungen sind geprüft; getrennte Dokumente mit Fokus/Visibility/Schließen nicht. | Einziger unmittelbarer Folgeauftrag. Zwei Tabs derselben isolierten Origin/UUID-DB, konkurrierende Saves und Wartung, Hintergrundwechsel, Schließen einer Sitzung. Gewinner, gültiger Vorgänger und fremdes Projekt unverändert; Konflikt verständlich; kein Retry-Sturm. |
+| Längere Sitzung | 162-s-Lastlauf und 30-s-Ruheablauf bestanden, keine Stundenbehauptung. | Vor Public Beta: reproduzierbarer mindestens zweistündiger Lauf als initiales Prüfprofil (Testvorgabe, keine Produktspezifikation), periodisch Bildwechsel/Undo/Save/Wartung/Reload. Kein Verlust geschützter Stände; Retention bleibt am erwarteten Root-Satz, Wiederherstellung am Ende vollständig vergleichbar. Wachstum separat dem Harness/History/Storage/Renderer zuordnen. |
+| Tatsächliche Quota-Erschöpfung | Injizierte Quota-/Storage-Fehler und Fail-closed-Pfade vorhanden; echter Browser-Quota-Zustand fehlt. | Vor Public Beta nur in wegwerfbarem Testprofil bzw. kontrollierter Testumgebung, niemals Nutzer-Origin oder Systemdatenträger absichtlich füllen. Fehlender Platz darf keine bestehende gültige Sicherung überschreiben; Meldung, kein automatischer Retry-/Löschsturm, nach Freigabe von Testplatz manueller Wiederanlauf. Ist die Umgebung nicht verfügbar, bleibt Gate offen. |
+| Prozess-/Raster-/GPU-Spitzen | Grobe JS-Heap-Werte und rechnerische Rasterpuffer sind keine Prozessmessungen. | Mit AUD14-07 auf dokumentierter Zielhardware vor Kapazitäts-/Leistungsfreigabe messen. Projektgröße, logische Pixel, Prozesszuordnung, Lade-/Bearbeitungs-/Wartungsphasen und Messwerkzeug angeben. Keine Produktgrenze allein aus optionaler performance.memory-API ableiten. |
+| Tabübergreifende Laufzeit-Deduplizierung | Pro Instanz Single-flight, Storage-Transaktionen schützen Daten auch bei zwei Collectoren. Keine globale Sperre. | Kein Architekturumbau auf Verdacht. Erst beim Zwei-Tab-Test entscheiden, ob reproduzierte Ressourcen-/Lifecycleprobleme einen gemeinsamen Plattform-Lock erfordern. Sicherheitsregeln bleiben unabhängig davon zwingend. |
+
+**Stop-/Fortsetzungsregel:** Reproduzierter Verlust einer gültigen Sicherung, falscher
+Erfolg bei fehlgeschlagenem Commit oder unbegrenzter Wiederholungszyklus ist P0 und stoppt
+die nächste Feature-Etappe bis zur Korrektur. Ein bloß fehlender Stunden-/Peaknachweis
+blockiert keine unabhängige CAD-Implementierung; er blockiert die zugehörige Release- oder
+Kapazitätszusage. Ein Merge ersetzt weder diese Nachweise noch fachliche Nutzerabnahme.
+Vorhandene Format-/Raster-/Dateigrenzen bleiben unverändert.
+
+**Genau ein ausführbarer Folgeauftrag:** Bestehenden Konkurrenzharness um zwei getrennte
+Browserdokumente erweitern, mit derselben expliziten Testdatenbank und dem produktiven
+Recovery-Service/Storage. Steuerung/Ergebnisabgleich testlokal; keine neue Produktions-
+Kommunikation oder Sperre vorsorglich einführen. Gemeinsamen Konfliktfall reproduzierbar
+synchronisieren. Sichtbarkeit/Fokus/Schließen gesondert von Datenbank-Race protokollieren.
+Aktuellen/vorherigen/fremden Inhalt vollständig vergleichen, automatischen Retry begrenzen,
+Abbruch und Listener-Lifecycle prüfen. Sicherheitsfehler im selben begrenzten Auftrag
+beheben; andernfalls Nachweis dokumentieren und Recovery-Schleife beenden.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Echten Zwei-Tab-Lifecycle-Test gemäß obigem Auftrag ausführen.
+2. AUD14-07 beginnen: aktuellen Schul-/Mehrgeschoss-Prüfbestand und noch offene große
+   Anschlussgruppen-/Kamera-/Workspace-Kosten zusammenführen; einen repräsentativen,
+   reproduzierbaren Gesamtprüflauf festlegen, fehlende BIM-Typen nicht vortäuschen.
+3. Nach AUD14-07-Statusabgleich nächsten fachlichen CAD-Schritt auswählen; Release-Gates
+   separat erhalten. Keine neue Feature-Reihenfolge erfinden oder alle Audit-IDs schließen.
