@@ -1,5 +1,6 @@
+import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
 import { wallBase } from "../elements/wall/heights.ts";
-import { storeyOf, replaceStorey } from "../storeys/access.ts";
+import { storeyOf } from "../storeys/access.ts";
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
@@ -22,8 +23,7 @@ function freeze<T>(value: T): T {
 const pointKey = (p: Point, z: number) => JSON.stringify([p.x, p.y, z]);
 
 /** One full preparation. Per-target work uses this owned immutable snapshot only. */
-export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
-  const base = freeze(validateProject(source));
+function prepareStoreyTranslation(base: Project, selectedIds: readonly string[]) {
   const ids = new Set(selectedIds);
   const s = storeyOf(base);
   const available = new Set(
@@ -195,28 +195,92 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
     return freeze({ geometry, replacedIds });
   }
 
-  function materialize(current: Project, delta: Point): Project {
-    // Identity is necessary but not sufficient for arbitrary public callers mutating a base.
-    // Full comparison is a confirmation boundary, never part of pointer evaluation.
-    if (current !== source || JSON.stringify(validateProject(current)) !== JSON.stringify(base))
-      throw new Error("Modell geändert. Bewegung erneut beginnen.");
+  function materialize(delta: Point) {
     const patch = evaluate(delta);
-    if (delta.x === 0 && delta.y === 0) return current;
+    if (delta.x === 0 && delta.y === 0) return s;
     const replace = <T extends { id: string }>(all: readonly T[], changed: readonly T[]): T[] => {
       const byId = new Map(changed.map((e) => [e.id, e]));
       return all.map((e) => byId.get(e.id) ?? e);
     };
-    return validateProject({
-      ...replaceStorey(base, {
-        ...s,
-        walls: replace(s.walls, storeyOf(patch.geometry).walls),
-        ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
-        hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
-        references: replace(s.references, storeyOf(patch.geometry).references),
-        wallJoins: retainedJoins,
-        wallTJunctions: retainedTees,
-      }),
-    });
+    return {
+      ...s,
+      walls: replace(s.walls, storeyOf(patch.geometry).walls),
+      ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
+      hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
+      references: replace(s.references, storeyOf(patch.geometry).references),
+      wallJoins: retainedJoins,
+      wallTJunctions: retainedTees,
+    };
   }
   return Object.freeze({ evaluate, materialize, replacedIds });
+}
+
+/** Public boundary: one validated owned snapshot, one final whole-model check.
+ * Private per-storey builders cannot be called with an unvalidated caller project.
+ */
+export function prepareStoreysTranslation(source: Project, selectedIds: readonly string[]) {
+  const snapshot = prepareProjectSnapshot(source);
+  const base = snapshot.base;
+  const selected = new Set(selectedIds);
+  const parts = base.storeys.flatMap((s) => {
+    const ids = [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references]
+      .filter((e) => selected.has(e.id))
+      .map((e) => e.id);
+    return ids.length
+      ? [
+          {
+            id: s.id,
+            ids,
+            action: prepareStoreyTranslation({ ...base, workingStoreyId: s.id }, ids),
+          },
+        ]
+      : [];
+  });
+  if (
+    !selectedIds.length ||
+    selected.size !== selectedIds.length ||
+    parts.reduce((n, p) => n + p.ids.length, 0) !== selectedIds.length
+  )
+    throw new Error("Ungültige Bewegungsauswahl.");
+  const activeId = storeyOf(base).id;
+  const empty: GeometryPreview = {
+    geometry: {
+      assets: [],
+      storey: {
+        walls: [],
+        windows: [],
+        lines: [],
+        hatches: [],
+        references: [],
+        wallJoins: [],
+        wallTJunctions: [],
+      },
+    },
+    replacedIds: [],
+  };
+  return Object.freeze({
+    replacedIds: parts.find((p) => p.id === activeId)?.action.replacedIds ?? [],
+    evaluate(delta: Point): GeometryPreview {
+      if (parts.length === 1 && parts[0]!.id === activeId) return parts[0]!.action.evaluate(delta);
+      const patches = parts.map((p) => ({ storeyId: p.id, ...p.action.evaluate(delta) }));
+      const active = patches.find((p) => p.storeyId === activeId) ?? empty;
+      return { ...active, storeyPatches: patches };
+    },
+    materialize(current: Project, delta: Point): Project {
+      snapshot.assertCurrent(current);
+      const changed = new Map(parts.map((p) => [p.id, p.action.materialize(delta)]));
+      if (delta.x === 0 && delta.y === 0) return current;
+      return validateProject({ ...base, storeys: base.storeys.map((s) => changed.get(s.id) ?? s) });
+    },
+  });
+}
+
+/** Single active-storey API retains its selection contract. */
+export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
+  const s = storeyOf(source);
+  const available = new Set(
+    [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
+  );
+  if (selectedIds.some((id) => !available.has(id))) throw new Error("Ungültige Bewegungsauswahl.");
+  return prepareStoreysTranslation(source, selectedIds);
 }

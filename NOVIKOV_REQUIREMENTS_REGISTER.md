@@ -11473,7 +11473,7 @@ Auftrag: Grenzfall mit echten ausreichend komprimierten Bildern reproduzieren. G
 Abnahme: unter/an/über Byte- und Pixelgrenzen, neun große unterschiedliche Bilder, gleiche Payload mit mehreren IDs/Links, Unicode, Migration, manuelle/automatische Sicherung, Reload/Wiederaufnahme, Fehler/Abbruch/Quota und Vorgängererhalt. Kein offen angenommener Projektzustand darf ohne deutlich dokumentierten Übergangsvertrag später unerwartet unsicherbar sein.
 
 ### AUD14-02 – Änderungsvergleich ohne gesamte Bildserialisierung
-Status: offen, P1. Bezug: A03/A04, K02/K03.
+Status: begrenzt implementiert und geprüft am 15.10.2026, neue PR-Abnahme offen, P1. Bezug: A03/A04, K02/K03.
 Code: application/selection/storey-translation.ts, application/selection/z-translation.ts, domain/project/prepared-translation.ts; zusätzlich application/hatches/actions.ts mit vollständigem JSON-No-op-Vergleich.
 Befund: vollständige JSON-Fingerabdrücke/Bestätigungsvergleiche enthalten unveränderte Bilder. Geschossübergreifende XY-Vorbereitung prüft die Gesamtbasis zusätzlich pro beteiligtem Geschoss. Der Zeigerpfad der vorbereiteten Gruppenbewegung materialisiert bereits nicht das Gesamtprojekt; diese Verbesserung erhalten.
 Auftrag: gemeinsame sichere Snapshot-/Revisions-/Ownership-Grenze und vorhandenen strukturierten Modellvergleich nutzen oder begrenzt erweitern. Identität allein ersetzt nicht den bestehenden Schutz gegen mutierte öffentliche Eingaben. Kein Hash des gesamten Projekts bei jeder Bewegung als Ersatz. Unveränderte Payloads/Geometrie teilen; keine duplizierte Implementierung für Maus/Text/Sprache.
@@ -11555,3 +11555,15 @@ verändert. Beleg outputs/aud14-01/legacy-warning.png. Physische Plattenfüllung
 reale Browser-Quota und schweres Gesamtprofil nicht neu simuliert; Langzeitaufbewahrung
 und kombinierte Abnahme bleiben AUD14-06/07. AUD14-01: implementiert und fokussiert
 geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
+
+
+### AUD14-02 – Nachweis 15.10.2026
+Gemeinsame validierte Snapshotgrenze für XY/Z, strukturierter Inhaltsvergleich auch
+für Schraffur-No-op. Geschossabhängige XY-Ableitung intern und ohne wiederholte
+Gesamtvorbereitung; vollständige Bestätigungsprüfung bleibt. 979 Tests einschließlich
+Mutationsschutz, bestehender Anschlussoracles und neuer 1/2/5-Geschoss-Regressionen,
+PNG-Datei-/Recoveryroundtrip, Undo/Redo und Instrumentierung ohne Payload-JSON.
+Node-Vorher/Nachher und Chromium-155-Aktionsnachweis in
+`benchmarks/translation-content-results.json`; Methodik und Grenzen im Masterplan.
+Keine Aussage zur gesamten Framezeit oder schweren Schule. Nächster aktiver
+Einzelauftrag AUD14-03 (3D-Ressourcen), danach übrige AUD14-Reihenfolge.

@@ -459,12 +459,13 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-02 – Änderungsvergleich ohne gesamte Bildserialisierung.**
+**Genau ein aktiver Schritt: AUD14-03 – 3D-Ressourcen lokal aktualisieren.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
-begrenzter Altdatei-Übergangsvertrag am Dateiende. PR-Abnahme bleibt offen. PR318
+begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
-Keine neuen Features vor diesem Reviewblock. AUD14-02 beginnt mit Messung der
-bestehenden XY-/Z-Vorbereitung und des finalen Vergleichs, einschließlich Mutationsschutz.
+Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
+implementiert und geprüft. Nächster begrenzter Auftrag: Ressourcenlebensdauer im
+3D-Renderer messen und unveränderte Programme/Puffer bei Auswahlwechsel wiederverwenden.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -874,3 +875,40 @@ verändert. Beleg outputs/aud14-01/legacy-warning.png. Physische Plattenfüllung
 reale Browser-Quota und schweres Gesamtprofil nicht neu simuliert; Langzeitaufbewahrung
 und kombinierte Abnahme bleiben AUD14-06/07. AUD14-01: implementiert und fokussiert
 geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
+
+
+### AUD14-02 – gemeinsame Bewegungssnapshots ohne Payload-JSON (15.10.2026)
+
+- `prepared-snapshot.ts` besitzt die validierte, eingefrorene Basis für XY und Z.
+  Bestätigung prüft weiterhin Identität UND validierten vollständigen Inhalt mit
+  `sameProjectContent`; keine reine Identitätsannahme für öffentliche mutable Eingaben.
+  Unveränderte Bildhandles bleiben geteilt. Kein Gesamthash als Ersatz.
+- Private Geschossableitungen in `prepared-translation.ts` teilen eine Basis.
+  Geschossübergreifendes XY prüft die Basis einmal bei Vorbereitung und einmal
+  bei Bestätigung, danach das zusammengesetzte Ergebnis vollständig. Kein öffentliches
+  „already validated“-Flag; kein Teilcommit. Schraffur-No-op nutzt denselben Vergleich.
+- Vergleichsprofil: Windows, Node 24.19.0, Basis `1fc8db9`, 1/2/5 Geschosse,
+  eine Wand je Geschoss, konstante Auswahl von zwei Wänden bei 2/5 Geschossen;
+  ohne Bilder und mit vier unveränderten synthetischen 8-MiB-Base64-Payloads.
+  Erste Ausführung je Fall separat, danach fünf warme Läufe und jeweils 30 Pointerziele.
+  Kein Prozess-Kaltstart, kein p95 und keine gesamte Frame-/UI-Zeit.
+- Warme Mediane mit 32 MiB: fünf Geschosse XY Vorbereitung 32,425 → 0,202 ms,
+  Pointer 0,019 → 0,023 ms, Bestätigung 176,629 → 0,406 ms;
+  Z Vorbereitung 33,627 → 0,247 ms, Bestätigung 34,149 → 0,490 ms.
+  Kleine Pointerdifferenzen sind keine belastbare Regression bei diesen Laufzeiten.
+  Rohwerte und Browsernachweis: `benchmarks/translation-content-results.json`.
+- Browser Chromium 155: Produktionsaktionen über Diagnoseentry mit 1/2/5 Geschossen,
+  XY/Z, einem Historyschritt, Undo/Redo bestanden. Fünf Geschosse warmer XY-
+  Bestätigungsmedian 0,5 ms. Keine Bilddekodierung und kein Renderingbenchmark.
+- Regressionen: bestehende Anschluss-/Fenster-/Fremdendpunktvergleiche bleiben aktiv;
+  neue Tests für Mehrgeschoss-Oraclegleichheit, mutierte Geometrie/Ebenen/Höhen/Bilder,
+  stale Basis, No-op und Instrumentierung ohne Payloadserialisierung. Datei und Recovery
+  verwenden echte PNGs; synthetische Payloads dienen nur dem isolierten Zeitprofil.
+- Verifikation: 979 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild.
+  AUD14-02 im begrenzten Umfang geprüft; neue PR-Abnahme offen. Schwere Gebäude-,
+  GPU- und Langsessionabnahme bleiben AUD14-03 bis AUD14-07.
+- Praktische Abnahme: zwei Wände über zwei Geschosse auswählen, frei bewegen,
+  platzieren, einmal Undo und Redo; Fenster folgen genau einmal. Dasselbe mit
+  Bildreferenzen wiederholen. Die bisherigen Bediengesten bleiben unverändert.
+- Nächster Einzelauftrag AUD14-03: unveränderte 3D-Ressourcen bei Auswahl und
+  Bewegung wiederverwenden, zunächst Ressourcen-/Uploadzähler und Auswahlwechsel.
