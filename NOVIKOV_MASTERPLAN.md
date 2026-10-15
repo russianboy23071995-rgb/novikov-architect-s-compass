@@ -466,10 +466,10 @@ bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 ni
 Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
 implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
 ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
-AUD14-04 bleibt aktiv: Gebäudeableitung (PR322 gemergt) und Ownership-Pilot geprüft.
-Nächster Einzelauftrag: stabilen vorbereiteten 3D-Abfragekontext auf geprüfte Snapshots
-ausrichten; wiederholte Modellprüfung bei Kamera-/Projektionswechsel vermeiden.
-Verbleibende mutable Kontexte und direkte 3D-Vorschaupfade sind noch offen.
+AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership (PR322/323 gemergt) und
+vorbereiteter 3D-Abfragekontext geprüft. Nächster Einzelauftrag: direkte
+3D-Einzelelementvorschau für Wand/Fenster messen und auf begrenzte vorbereitete
+Ableitung ausrichten; Vollprüfung beim Platzieren unverändert erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1027,3 +1027,42 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   Kamera-/Projektionswechsel keine wiederholte Modellprüfung auslösen. Zielkontext und
   Sichtbarkeit müssen aktuell bleiben; Vergleich mit vollständigem Pfad und Messung.
   Anschließend verbleibende direkte 3D-Vorschau-/Schraffurprüfungen; AUD14-05 noch nicht starten.
+
+
+### AUD14-04, Teil 3 – Stabile Modellbasis für 3D-Abfragen (15.10.2026)
+
+- PR323 nach grüner CI freigegeben und als `819cef9` in main zusammengeführt.
+- `rendering/viewport/prepared-model.ts` kapselt einen geprüften immutable Snapshot
+  und bindet ihn privat an den ursprünglichen Projektkontext. Kein globaler Cache nach
+  mutable Projektidentität; Aufrufer besitzen die Lebensdauer. Kopierte/fremde Tokens
+  werden abgewiesen. Neue Projektidentität erfordert neue Vorbereitung.
+- BimSolidView bereitet pro Projektidentität eine gemeinsame Basis vor. Darstellung,
+  Wandfang, Fußkanten, erhöhte Arbeitsebene und Bewegungsursprung greifen darauf zu.
+  Kamera, Projektion, Sichtbarkeit und Hover-/Bearbeitungssitzung bleiben getrennt.
+  Identitätsprüfungen verwenden weiterhin das ursprüngliche Projekt; Ebenenfilter
+  bleiben aktuell. Kein zusätzlicher veränderlicher Modellbestand, kein neues Undo.
+- Bewegungs-Eckcache ist nun an die eingefrorene abgeleitete Szene gebunden, statt an
+  einen möglicherweise veränderten öffentlichen Projekteingang. Ergebnisse sind
+  eingefroren; mutable direkte Aufrufe werden weiter vollständig geprüft.
+- Expliziter Vertrag: eine vorbereitete Basis ist eine Momentaufnahme. In-place-
+  Änderung des Ursprungs verändert sie nicht. UI-Modelländerungen liefern neue
+  Identitäten; abschließende Modellvalidierung bleibt außerhalb dieser Lesebasis.
+- 989 Tests bestanden. Neue Tests vergleichen 216 Fang-/Kontextresultate über Kamera,
+  Zoom, Höhen, Ebenensichtbarkeit und bewegte Wände; fremde/veraltete Kontexte werden
+  abgewiesen. Kamerakontextaufbau liest ursprüngliche Validierungsdaten nicht erneut.
+  App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild bestanden.
+- Chromium 155: sechs exakte WebGL-Pixelvergleiche und 48 Fangabfragen bei 500 Wänden
+  und 500 Fenstern erfolgreich. Diagnose: `benchmarks/query-context.html`.
+- Profil gegen `819cef9`: sieben Kamerazustände, erste Ausführung separat, sechs warme
+  Beobachtungen. Median Kontextaufbau 32,377 → 18,108 ms; zusätzliche einmalige
+  Vorbereitung 11,016 ms. Erster Kontextaufbau 225,108 → 194,087 ms.
+  Rohwerte/Methodik: `benchmarks/query-context-results.json`. Keine Gesamtframe-/p95-
+  Garantie. Eckprojektion, globale Scans und erste Geometrievorbereitung bleiben teuer;
+  lokale 3D-Kandidatensuche ist weiterhin AUD14-05, nicht als erledigt bezeichnet.
+- Praktische Abnahme: 3D-Bewegung beginnen, Ursprung an einer Wandecke wählen;
+  Kamera orbitieren/zoomen, mit Shift ausrichten, abbrechen und erneut platzieren.
+  Verdeckte/ausgeblendete Wände dürfen nicht zu Fangzielen werden; Undo unverändert.
+- **Nächster einzelner Auftrag AUD14-04:** direkte 3D-Einzelelementvorschau für Wand
+  und Fenster messen, globalen Prüf-/Ableitungspfad eingrenzen und ersten begrenzten
+  vorbereiteten Pfad gegen vollständige Validierung vergleichen. Danach verbleibende
+  Schraffurprüfung; AUD14-05/06/07 bleiben offen.

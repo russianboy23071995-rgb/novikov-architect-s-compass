@@ -1,3 +1,4 @@
+import { prepareViewportModel } from "@/rendering/viewport/prepared-model";
 import { wallBase } from "@/domain/elements/wall/heights";
 import { cameraFocus, orbitAround } from "@/rendering/viewport/camera-navigation";
 import type { Vector3 } from "@/geometry/projections/orthographic";
@@ -128,12 +129,13 @@ export function BimSolidView({
     point: Point;
     candidate: SnapCandidate | null;
   } | null>(null);
+  const queryModel = useMemo(() => prepareViewportModel(project), [project]);
   const baseSolid = useMemo(() => {
-    const base = buildBuildingSolid(project);
+    const base = buildBuildingSolid(queryModel.model);
     return cornerPreview?.base === project
       ? cornerPreviewSurfaces(project, base, cornerPreview)
       : base;
-  }, [project, cornerPreview]);
+  }, [project, cornerPreview, queryModel]);
   const frame = useMemo(
     () => projectionFrame ?? createProjectionFrame(baseSolid),
     [baseSolid, projectionFrame],
@@ -278,16 +280,20 @@ export function BimSolidView({
     visibility,
     moving || placement?.geometryPreview ? gridSpacing(gridSettings) : null,
     placement?.geometryPreview ? originHeight : windowWorkplane,
+    queryModel,
   );
   const pickingMovementOrigin = !!placement && !placement.geometryPreview;
   const originQuery = useMemo(
     () =>
       previewProjection && pickingMovementOrigin
-        ? createMovementOriginQuery(project, previewProjection, (id) =>
-            isLayerVisible(project, visibility, id),
+        ? createMovementOriginQuery(
+            project,
+            previewProjection,
+            (id) => isLayerVisible(project, visibility, id),
+            queryModel,
           )
         : null,
-    [project, previewProjection, visibility, pickingMovementOrigin],
+    [project, previewProjection, visibility, pickingMovementOrigin, queryModel],
   );
   const originCandidate = snap && previewClient && originQuery ? originQuery(previewClient) : null;
   useEffect(() => {

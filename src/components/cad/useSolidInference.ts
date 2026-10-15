@@ -1,3 +1,4 @@
+import type { PreparedViewportModel } from "@/rendering/viewport/prepared-model";
 import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useMemo } from "react";
@@ -25,6 +26,7 @@ export function useSolidInference(
   visibility?: LayerVisibilityPolicy,
   gridSpacing: number | null = null,
   workplaneHeight?: number,
+  prepared?: PreparedViewportModel,
 ) {
   const sessionKey = useMemo(
     () => ({ policy, project, visibility }),
@@ -45,8 +47,19 @@ export function useSolidInference(
         movingWallId,
         visibility,
         workplaneHeight,
+        prepared,
       ),
-    [project, projection, enabled, resetKey, policy, movingWallId, visibility, workplaneHeight],
+    [
+      project,
+      projection,
+      enabled,
+      resetKey,
+      policy,
+      movingWallId,
+      visibility,
+      workplaneHeight,
+      prepared,
+    ],
   );
   const context = useMemo(() => ({ ...baseContext, sessionKey }), [baseContext, sessionKey]);
   const cursor = useMemo(() => {

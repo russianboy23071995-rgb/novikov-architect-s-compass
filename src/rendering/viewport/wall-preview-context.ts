@@ -1,3 +1,8 @@
+import {
+  prepareViewportModel,
+  viewportModel,
+  type PreparedViewportModel,
+} from "./prepared-model.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
@@ -30,17 +35,20 @@ export function createWallPreviewContext(
   movingWallId?: string,
   visibility?: LayerVisibilityPolicy,
   workplaneHeight?: number,
+  prepared?: PreparedViewportModel,
 ) {
+  const basis = prepared ?? prepareViewportModel(project);
+  const model = viewportModel(project, basis);
   const adapter = projection
-    ? createWallPointCandidates(project, projection, movingWallId, visibility)
+    ? createWallPointCandidates(project, projection, movingWallId, visibility, basis)
     : null;
-  const elevation = workplaneHeight ?? workingStoreyElevation(project);
+  const elevation = workplaneHeight ?? workingStoreyElevation(model);
   const plane = projection?.workplane(elevation);
-  if (workplaneHeight !== undefined && workplaneHeight !== workingStoreyElevation(project)) {
+  if (workplaneHeight !== undefined && workplaneHeight !== workingStoreyElevation(model)) {
     const allows = (id: string) => id !== movingWallId && isLayerVisible(project, visibility, id);
-    const solid = visibleSurfaces(buildBuildingSolid(project), allows);
-    const query = projection ? createMovementOriginQuery(project, projection, allows) : null;
-    const references: SnapReference[] = movementCorners(project)
+    const solid = visibleSurfaces(buildBuildingSolid(model), allows);
+    const query = projection ? createMovementOriginQuery(project, projection, allows, basis) : null;
+    const references: SnapReference[] = movementCorners(model)
       .filter((c) => allows(c.id) && Math.abs(c.point[2] - elevation) < 1e-8)
       .map((c) => ({
         entityId: c.id,
@@ -91,10 +99,10 @@ export function createWallPreviewContext(
     };
     return { adapter, plane, context };
   }
-  const sources = getLocalSnapSources(project);
-  const edges = getWallFootSources(project);
+  const sources = getLocalSnapSources(model);
+  const edges = getWallFootSources(model);
   const wallIds = new Set(
-    storeyOf(project)
+    storeyOf(model)
       .walls.filter((w) => wallBase(w) === 0 && isLayerVisible(project, visibility, w.id))
       .map((w) => w.id),
   );

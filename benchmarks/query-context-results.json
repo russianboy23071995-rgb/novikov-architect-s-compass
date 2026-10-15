@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-15",
+  "baseline": "819cef9 (merged PR323)",
+  "runtime": "Windows, Node 24.19.0",
+  "method": "query-context-profile.ts: 500 walls/windows, seven camera states, first separate and six warm observations. Elevated workplane context plus movement-origin preparation; no pointer query/total frame/p95 claim. Geometry construction precedes timed blocks.",
+  "before": {
+    "walls": 500,
+    "windows": 500,
+    "firstMs": 225.10789999999997,
+    "warmMs": [
+      37.65120000000002,
+      32.33019999999999,
+      32.424600000000055,
+      33.174499999999966,
+      31.924800000000005,
+      29.543600000000083
+    ]
+  },
+  "after": {
+    "preparationMs": 11.01600000000002,
+    "walls": 500,
+    "windows": 500,
+    "firstMs": 194.08689999999996,
+    "warmMs": [
+      26.11500000000001,
+      18.205400000000054,
+      19.946800000000053,
+      18.010400000000004,
+      16.979400000000055,
+      16.46659999999997
+    ]
+  },
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "walls": 500,
+    "windows": 500,
+    "pixelComparisons": 6,
+    "queryComparisons": 48
+  },
+  "limits": [
+    "Remaining projection and corner scans are global.",
+    "Prepared basis is captured, immutable; source identity changes require a new basis. In-place caller mutation cannot update this captured basis.",
+    "Commit validation and model history unchanged.",
+    "Direct single-element preview and hatch checks remain AUD14-04 work."
+  ]
+}
