@@ -12002,3 +12002,19 @@ Keine Framegarantie; Fremdpunktliste, große Anschlussgruppe und Planableitung b
 Einziger Folgeauftrag: freie Wandkörper-Eckbewegung über denselben Adapter vorbereiten
 und vergleichen; diese andere Aktion ist noch Legacy. Danach AUD14-05 nach AUD14-04-
 Restabnahme, anschließend AUD14-06. Andere Restpfade/AUD14-07 nicht abgeschlossen.
+
+
+### AUD14-04 Teil 20 – Freie Wandkörper-Eckbewegung
+PR341 gemergt (0a093f6). Gemeinsamer Endpunktadapter bewahrt Originalaktion und Körpergriff;
+editAtPointer/endpointAtOffsetTarget unverändert. Gemeinsame 2D-/3D-Registrierung,
+Vollpfad bei neuen fremden Kontakten/T-Zielen, Vollcommit und ein Undo bleiben erhalten.
+1048 Tests, beide Typechecks, Lint und Build bestanden. Acht neue Vergleiche einschließlich
+beider Körperseiten, schräger Achsen, Fenster, Nachbaranschlüssen, belegter Endknoten,
+Kontext, Abbruch und Undo. Keine neue Browserabnahme. Runner wall-body-point-profile.ts,
+Rohdaten wall-body-point-before.json / wall-body-point-results.json. Bei 502 Wänden
+Vollpfad 3,439/3,507 → Vorschau 0,191/0,220 ms warm, Vorbereitung 5,932/5,070 ms separat.
+Keine Framegarantie; Fremdpunktliste, große Anschlussgruppen und Planableitung bleiben.
+Einziger nächster Auftrag: zusammenhängende AUD14-04-Restabnahme mit aktuellem Browser-/
+Mehrgeschossprofil und Restpfadabgleich, keine weitere pauschale Migration ohne Messung.
+Danach AUD14-05 lokale 3D-Fangsuche und AUD14-06 Langsitzungs-Speicher/Recovery.
+AUD14-04 bleibt bis zur Restabnahme offen; AUD14-07 weiterhin Abschlussgate.

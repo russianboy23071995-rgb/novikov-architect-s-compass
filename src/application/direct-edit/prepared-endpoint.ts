@@ -29,7 +29,7 @@ export function prepareEndpoint(
   source: Project,
   id: string,
   index: 0 | 1 = 1,
-  stretch?: { anchor: Point },
+  gesture?: { anchor: Point; action?: "point" | "stretch" },
 ) {
   const base = createProjectSnapshot(source),
     s = storeyOf(base);
@@ -59,9 +59,9 @@ export function prepareEndpoint(
   const session: EditSession = Object.freeze({
     base,
     target: { kind: "wall" as const, id },
-    action: stretch ? "stretch" : "point",
+    action: gesture ? (gesture.action ?? "stretch") : "point",
     index,
-    anchor: stretch ? Object.freeze({ ...stretch.anchor }) : index === 0 ? wall.start : wall.end,
+    anchor: gesture ? Object.freeze({ ...gesture.anchor }) : index === 0 ? wall.start : wall.end,
   });
   const localSession: EditSession = Object.freeze({ ...session, base: scoped });
   const full = (point: Point) => ({
