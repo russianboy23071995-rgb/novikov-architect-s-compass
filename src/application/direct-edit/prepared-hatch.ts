@@ -1,5 +1,9 @@
+import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
-import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
+import {
+  preparePolygonVertexEdit,
+  validateSimplePolygon,
+} from "../../geometry/polygons/simple-polygon.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
@@ -8,34 +12,39 @@ import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
-/** Point/edge edits change only declared contour vertices. A validated owned snapshot fixes all
- * other hatch fields; shared prepared polygon validation checks the changed edges.
+/** An owned validated snapshot fixes all non-contour fields. Point/edge previews
+ * use changed-edge checks; offset changes every vertex and retains full contour validation.
  */
 export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
-  if (session.target.kind !== "hatch" || !["point", "edge"].includes(session.action))
+  if (session.target.kind !== "hatch" || !["point", "edge", "offset"].includes(session.action))
     throw Error("Unsupported hatch preview");
   const source = session.base,
     base = createProjectSnapshot(source),
     level = storeyOf(base);
   const hatch = level.hatches.find((h) => h.id === session.target.id);
-  if (
-    !hatch ||
-    session.index === null ||
-    !Number.isInteger(session.index) ||
-    !hatch.points[session.index]
-  )
+  const index = session.index ?? (session.action === "offset" ? 0 : null);
+  if (!hatch || index === null || !Number.isInteger(index) || !hatch.points[index])
     throw Error("Invalid hatch grip");
-  const index = session.index;
   const edge = session.action === "edge" ? prepareSessionContourEdge(session, hatch.points) : null;
-  const contour = edge ? null : preparePolygonVertexEdit(hatch.points, [index]);
+  const contour =
+    session.action === "point" ? preparePolygonVertexEdit(hatch.points, [index]) : null;
   const target = Object.freeze({ ...session.target });
   const anchor = Object.freeze({ ...session.anchor });
+  const pinned: EditSession = Object.freeze({ ...session, base, target, anchor });
+  const offset = session.action === "offset";
+  if (offset) offsetDirection(pinned); // Prepare the existing geometry once; reject unsupported contours now.
   const replacedIds = Object.freeze([hatch.id]);
   function resolve(current: Project, selection: ElementTarget | null, point: Point) {
     if (current !== source || selection?.id !== target.id || selection.kind !== target.kind)
       throw Error("Bearbeitungskontext geaendert.");
     let points: Point[];
-    if (edge) {
+    if (offset) {
+      points = offsetContourPoints(pinned, point);
+      const result = validateSimplePolygon(points);
+      if (!result.valid)
+        throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
+      points.forEach(Object.freeze);
+    } else if (edge) {
       points = edge.edit(point);
       points.forEach(Object.freeze);
     } else {

@@ -33,7 +33,7 @@ function prepareCapability(
   session: EditSession,
   projectView: boolean,
 ): PreparedDirectEditPreview | null {
-  if (session.target.kind === "hatch" && ["point", "edge"].includes(session.action))
+  if (session.target.kind === "hatch" && ["point", "edge", "offset"].includes(session.action))
     return prepareHatchContourPreview(session);
   // Remaining registered adapters currently expose geometry patches only.
   if (projectView) return null;
