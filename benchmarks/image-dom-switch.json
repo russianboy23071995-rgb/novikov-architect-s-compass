@@ -1,0 +1,5497 @@
+{
+  "variant": "GB",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "dpr": 1
+  },
+  "events": [
+    {
+      "at": 15509.29999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 15523.89999999106,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 15524,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 15787.09999999404,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 15800.20000000298,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 15800.29999999702,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 16088.70000000298,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 16116.79999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 16117,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 16360.39999999106,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 16382.70000000298,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 16382.89999999106,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 16633.70000000298,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 16675.09999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 16675.20000000298,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 17163.89999999106,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 17184.79999999702,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 17185,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 17493.79999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 17534.20000000298,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 17534.39999999106,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 17775.5,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 17796.09999999404,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 17796.39999999106,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18053.59999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18074,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18074.29999999702,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18330.59999999404,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18345.79999999702,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18346,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18608.79999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18629.70000000298,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18630,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 18886.70000000298,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18907.5,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 18907.79999999702,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 19172.59999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 19192.29999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 19192.59999999404,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 19450.70000000298,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 19470,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 19470.20000000298,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 19741.59999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 19762.09999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 19762.59999999404,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20005.39999999106,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20026,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20026.29999999702,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20282.79999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20297.79999999702,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20298,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20553.89999999106,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20569.20000000298,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20569.39999999106,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 20832.09999999404,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20847,
+      "type": "click",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 20847.20000000298,
+      "type": "dblclick",
+      "label": "1. Obergeschoss"
+    },
+    {
+      "at": 21116.5,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 21137.5,
+      "type": "click",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 21137.79999999702,
+      "type": "dblclick",
+      "label": "Erdgeschoss"
+    },
+    {
+      "at": 21671.89999999106,
+      "type": "click",
+      "label": "Messung abschließen"
+    }
+  ],
+  "longtasks": [
+    {
+      "start": 15523.70000000298,
+      "duration": 82
+    },
+    {
+      "start": 15800.09999999404,
+      "duration": 51
+    },
+    {
+      "start": 16116.5,
+      "duration": 71
+    },
+    {
+      "start": 16382.39999999106,
+      "duration": 70
+    },
+    {
+      "start": 16674.89999999106,
+      "duration": 58
+    },
+    {
+      "start": 17184.59999999404,
+      "duration": 57
+    },
+    {
+      "start": 17533.59999999404,
+      "duration": 61
+    },
+    {
+      "start": 17795.79999999702,
+      "duration": 58
+    },
+    {
+      "start": 18073.70000000298,
+      "duration": 75
+    },
+    {
+      "start": 18345.5,
+      "duration": 59
+    },
+    {
+      "start": 18629.39999999106,
+      "duration": 58
+    },
+    {
+      "start": 18907.20000000298,
+      "duration": 65
+    },
+    {
+      "start": 19192,
+      "duration": 65
+    },
+    {
+      "start": 19469.70000000298,
+      "duration": 61
+    },
+    {
+      "start": 19761.70000000298,
+      "duration": 60
+    },
+    {
+      "start": 20025.70000000298,
+      "duration": 62
+    },
+    {
+      "start": 20297.70000000298,
+      "duration": 58
+    },
+    {
+      "start": 20568.89999999106,
+      "duration": 55
+    },
+    {
+      "start": 20846.70000000298,
+      "duration": 55
+    },
+    {
+      "start": 21137.09999999404,
+      "duration": 60
+    }
+  ],
+  "workspacePhases": [
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15524.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 15524.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 15524.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15524.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 15524.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 15524.29999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15524.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 15531.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 15567.79999999702,
+      "duration": 4.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 15572,
+      "duration": 3.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 15567.79999999702,
+      "duration": 7.700000002980232
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 15575.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 15575.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 15575.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 15575.59999999404,
+      "duration": 1.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 15576.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 15567.79999999702,
+      "duration": 9.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15577.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15577.70000000298,
+      "duration": 1.5,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15579.29999999702,
+      "duration": 1.4000000059604645,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15580.79999999702,
+      "duration": 1.2000000029802322,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15582.09999999404,
+      "duration": 1.4000000059604645,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15583.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15583.70000000298,
+      "duration": 0.3999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15585.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 15587.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 15611.20000000298,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15800.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 15800.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 15800.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15800.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 15800.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 15800.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 15800.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 15805,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 15832.29999999702,
+      "duration": 2.7999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 15835.09999999404,
+      "duration": 2.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 15832.29999999702,
+      "duration": 5.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 15837.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 15837.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 15837.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 15837.59999999404,
+      "duration": 0.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 15838.29999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 15832.29999999702,
+      "duration": 6.5
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15838.89999999106,
+      "duration": 0.20000000298023224,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15839.09999999404,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15839.09999999404,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 15839.09999999404,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15839.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15839.29999999702,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 15841,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 15843.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 15857.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16117.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16117.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 16117.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16117.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16117.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 16117.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16117.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16122,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 16160.89999999106,
+      "duration": 3.300000011920929
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 16164.29999999702,
+      "duration": 3.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16160.89999999106,
+      "duration": 6.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16167.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 16167.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 16167.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 16167.79999999702,
+      "duration": 1.0999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 16168.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16160.79999999702,
+      "duration": 8.799999997019768
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16169.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16169.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16169.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16169.79999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16169.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16169.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16169.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16169.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16169.79999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16169.89999999106,
+      "duration": 0.20000000298023224,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16170.09999999404,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16170.09999999404,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16170.20000000298,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16170.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16170.39999999106,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16173,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16176.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16195.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16383.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16383.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 16383.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16383.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16383.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 16383.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16383.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16389,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 16427,
+      "duration": 3.8999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 16430.89999999106,
+      "duration": 3.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16427,
+      "duration": 7.0999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16434.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 16434.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 16434.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 16434.20000000298,
+      "duration": 1.199999988079071
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 16435.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16426.89999999106,
+      "duration": 9.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16436.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16436.5,
+      "duration": 0,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16436.5,
+      "duration": 0.09999999403953552,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16436.59999999404,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16436.59999999404,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16436.59999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16436.79999999702,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16439.29999999702,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16442.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16459.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 16675.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16680.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 16712.59999999404,
+      "duration": 4.299999997019768
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 16716.89999999106,
+      "duration": 2.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16712.59999999404,
+      "duration": 7
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 16719.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 16719.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 16719.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 16719.70000000298,
+      "duration": 0.7999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 16720.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16712.59999999404,
+      "duration": 8.5
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16721.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16721.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16721.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16721.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16721.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16721.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 16721.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 16721.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16721.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16721.29999999702,
+      "duration": 0,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16721.29999999702,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16721.39999999106,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 16721.39999999106,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16721.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16721.70000000298,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 16723.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 16725.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 16738.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17185.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17185.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 17185.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17185.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17185.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 17185.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17185.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17189.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 17220.5,
+      "duration": 2.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 17223.20000000298,
+      "duration": 2.8999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17220.5,
+      "duration": 5.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17226.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 17226.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 17226.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 17226.29999999702,
+      "duration": 1
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 17227.29999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17220.5,
+      "duration": 7.399999991059303
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17228,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17228,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17228.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17228,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17228.09999999404,
+      "duration": 0,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17228.20000000298,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17228.20000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17228.29999999702,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17228.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17228.39999999106,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17230.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17232.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17248.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17534.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17534.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 17534.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17534.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17534.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 17534.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17534.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17540.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 17571.39999999106,
+      "duration": 2.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 17574.29999999702,
+      "duration": 2.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17571.39999999106,
+      "duration": 5.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17576.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 17576.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 17576.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 17576.89999999106,
+      "duration": 1
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 17577.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17571.39999999106,
+      "duration": 7.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17578.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17578.79999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17578.89999999106,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17579,
+      "duration": 0.09999999403953552,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17579.09999999404,
+      "duration": 0.10000000894069672,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17579.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17579.39999999106,
+      "duration": 0.5
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17582.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17585,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17603.29999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17796.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17796.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 17796.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17796.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 17796.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 17796.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 17796.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17801,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 17831.59999999404,
+      "duration": 2.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 17834,
+      "duration": 2.7999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17831.59999999404,
+      "duration": 5.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 17836.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 17836.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 17836.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 17837,
+      "duration": 0.8999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 17837.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17831.59999999404,
+      "duration": 6.799999997019768
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17838.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17838.70000000298,
+      "duration": 0,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17838.70000000298,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17838.79999999702,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 17838.79999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17838.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17839,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 17840.70000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 17843.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 17859.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18074.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18074.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 18074.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18074.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18074.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 18074.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18074.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18080.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 18111.59999999404,
+      "duration": 4.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 18116.5,
+      "duration": 3.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18111.59999999404,
+      "duration": 8.100000008940697
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18119.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 18119.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 18119.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 18119.79999999702,
+      "duration": 1.2999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 18121.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18111.5,
+      "duration": 10.599999994039536
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18122.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18122.39999999106,
+      "duration": 0,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18122.39999999106,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18122.39999999106,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18122.39999999106,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18122.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18122.59999999404,
+      "duration": 0.6000000089406967
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18124.70000000298,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18126.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18156.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18346.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18346.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 18346.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18346.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18346.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 18346.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18346.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18350.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 18382.39999999106,
+      "duration": 3.800000011920929
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 18386.20000000298,
+      "duration": 2.699999988079071
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18382.39999999106,
+      "duration": 6.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18389,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 18389,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 18389,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 18389,
+      "duration": 0.7999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 18389.79999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18382.39999999106,
+      "duration": 8
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18390.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18390.59999999404,
+      "duration": 0.10000000894069672,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18390.70000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18390.79999999702,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18390.79999999702,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18390.79999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18391,
+      "duration": 0.3999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18393.39999999106,
+      "duration": 0.30000001192092896
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18396.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18411.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18630.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18630.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 18630.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18630.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18630.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 18630.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18630.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18634.59999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 18662.70000000298,
+      "duration": 3.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 18666.20000000298,
+      "duration": 3.199999988079071
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18662.70000000298,
+      "duration": 6.799999997019768
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18669.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 18669.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 18669.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 18669.59999999404,
+      "duration": 1
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 18670.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18662.70000000298,
+      "duration": 8.699999988079071
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18671.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18671.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18671.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18671.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18671.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18671.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18671.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18671.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18671.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18671.5,
+      "duration": 0.20000000298023224,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18671.70000000298,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18671.70000000298,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18671.70000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18671.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18672,
+      "duration": 0.5
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18674.59999999404,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18677.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18693.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18907.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18907.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 18907.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18908,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 18908,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 18908,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 18908.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18912.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 18947.5,
+      "duration": 2.8999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 18950.39999999106,
+      "duration": 2.6000000089406967
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18947.5,
+      "duration": 5.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 18953,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 18953,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 18953,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 18953,
+      "duration": 0.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 18953.70000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18947.5,
+      "duration": 10.799999997019768
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18958.5,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18958.59999999404,
+      "duration": 0.10000000894069672,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18958.70000000298,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18958.79999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 18958.89999999106,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18958.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18959,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 18960.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 18963.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 18978.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19192.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19192.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 19192.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19192.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19192.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 19192.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19192.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19198.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 19231.29999999702,
+      "duration": 3.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 19234.70000000298,
+      "duration": 3.2999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19231.29999999702,
+      "duration": 6.700000002980232
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19238,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 19238,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 19238,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 19238,
+      "duration": 1
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 19239,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19231.29999999702,
+      "duration": 8.400000005960464
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19239.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19239.79999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19239.89999999106,
+      "duration": 0.10000000894069672,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19240,
+      "duration": 0.09999999403953552,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19240.09999999404,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19240.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19240.29999999702,
+      "duration": 0.5
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19242.89999999106,
+      "duration": 0.30000001192092896
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19246.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19263.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19470.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19470.29999999702,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 19470.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19470.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19470.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 19470.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19470.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19475.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 19508.39999999106,
+      "duration": 3.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 19511.59999999404,
+      "duration": 2.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19508.39999999106,
+      "duration": 5.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19514.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 19514.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 19514.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 19514.39999999106,
+      "duration": 0.6000000089406967
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 19515,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19508.39999999106,
+      "duration": 7.200000002980232
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19515.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19515.70000000298,
+      "duration": 0.19999998807907104,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19515.89999999106,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19515.89999999106,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19515.89999999106,
+      "duration": 0.10000000894069672,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19516,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19516.20000000298,
+      "duration": 0.3999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19518.79999999702,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19521.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19537.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19762.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19762.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 19762.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19762.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 19762.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 19762.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 19762.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19768.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 19799.89999999106,
+      "duration": 2.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 19802.79999999702,
+      "duration": 2.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19799.89999999106,
+      "duration": 5.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 19805.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 19805.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 19805.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 19805.39999999106,
+      "duration": 1.1000000089406967
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 19806.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19799.79999999702,
+      "duration": 7.299999997019768
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19807.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19807.20000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19807.29999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19807.39999999106,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 19807.5,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19807.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19807.59999999404,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 19809.70000000298,
+      "duration": 0.19999998807907104
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 19812.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 19829,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20026.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20031.70000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 20066.79999999702,
+      "duration": 2.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 20069.29999999702,
+      "duration": 2.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20066.79999999702,
+      "duration": 4.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20071.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 20071.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 20071.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 20071.79999999702,
+      "duration": 0.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 20072.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20066.79999999702,
+      "duration": 6.299999997019768
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20073.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20073.20000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20073.39999999106,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20073.39999999106,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20073.39999999106,
+      "duration": 0.10000000894069672,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20073.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20073.59999999404,
+      "duration": 0.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20076.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20078.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20093.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20298.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20302.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 20332.09999999404,
+      "duration": 3.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 20335.29999999702,
+      "duration": 3.2000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20332.09999999404,
+      "duration": 6.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20338.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 20338.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 20338.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 20338.5,
+      "duration": 1
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 20339.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20332.09999999404,
+      "duration": 8
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20340.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20340.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20340.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20340.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20340.20000000298,
+      "duration": 0.09999999403953552,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20340.29999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20340.39999999106,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20340.39999999106,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20340.39999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20340.59999999404,
+      "duration": 0.29999999701976776
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20342.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20345.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20362.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20569.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20569.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 20569.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20569.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20569.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 20569.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20569.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20574.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 20605.29999999702,
+      "duration": 2.0999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 20607.39999999106,
+      "duration": 2.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20605.29999999702,
+      "duration": 4.5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20609.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 20609.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 20609.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 20610,
+      "duration": 0.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 20610.59999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20605.29999999702,
+      "duration": 5.5999999940395355
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20611,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20611,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20611,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20611,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20611.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20611.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20611.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20611.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20611,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20611.09999999404,
+      "duration": 0,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20611.20000000298,
+      "duration": 0,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20611.20000000298,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20611.20000000298,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20611.20000000298,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20611.39999999106,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20613.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20615.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20630.5,
+      "duration": 0.09999999403953552
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20847.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20847.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 20847.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20847.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 20847.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 20847.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 20847.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20851.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 20882.79999999702,
+      "duration": 2.2999999970197678
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 20885.09999999404,
+      "duration": 2.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20882.79999999702,
+      "duration": 5
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 20887.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 20887.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 20887.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 20888,
+      "duration": 0.7000000029802322
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 20888.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20882.79999999702,
+      "duration": 6.4000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20889.29999999702,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20889.29999999702,
+      "duration": 0.09999999403953552,
+      "characters": 3142182
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20889.39999999106,
+      "duration": 0,
+      "characters": 3142678
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20889.39999999106,
+      "duration": 0,
+      "characters": 3142378
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 20889.39999999106,
+      "duration": 0,
+      "characters": 3142278
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20889.5,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20889.59999999404,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 20891.5,
+      "duration": 0.20000000298023224
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 20893.70000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 20908,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "cancel",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:selectWorkingStorey",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "working-storey",
+      "start": 21138,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createProjectSnapshot",
+      "start": 21138.09999999404,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 21143.79999999702,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:projectSnapPrimitives",
+      "start": 21175.09999999404,
+      "duration": 2.9000000059604645
+    },
+    {
+      "kind": "application",
+      "event": "plan:createPrimitiveSourceIndex",
+      "start": 21178,
+      "duration": 3.3999999910593033
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 21175.09999999404,
+      "duration": 6.299999997019768
+    },
+    {
+      "kind": "application",
+      "event": "plan:getLocalSnapSources",
+      "start": 21181.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createToolSourceQuery",
+      "start": 21181.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:createVisibleToolSourceQuery",
+      "start": 21181.39999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "plan:derivePlanScene",
+      "start": 21181.39999999106,
+      "duration": 0.800000011920929
+    },
+    {
+      "kind": "application",
+      "event": "plan:planSceneRuns",
+      "start": 21182.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 21175.09999999404,
+      "duration": 7.600000008940697
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-handle-cache",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "image-url-total",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 21182.89999999106,
+      "duration": 0
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 21183,
+      "duration": 0,
+      "characters": 3140558
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 21183,
+      "duration": 0.09999999403953552,
+      "characters": 3140750
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 21183.09999999404,
+      "duration": 0,
+      "characters": 3141758
+    },
+    {
+      "kind": "browser-dom",
+      "event": "svg-image-href",
+      "start": 21183.09999999404,
+      "duration": 0,
+      "characters": 3141926
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 21183.09999999404,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 21183.39999999106,
+      "duration": 0.30000001192092896
+    },
+    {
+      "kind": "application",
+      "event": "component-call:PlanSceneContent",
+      "start": 21185.89999999106,
+      "duration": 0.10000000894069672
+    },
+    {
+      "kind": "application",
+      "event": "component-call:ProjectNavigator",
+      "start": 21188.20000000298,
+      "duration": 0
+    },
+    {
+      "kind": "application",
+      "event": "component-call:BimPlan",
+      "start": 21204.29999999702,
+      "duration": 0.09999999403953552
+    }
+  ],
+  "measurementStart": 14959.5,
+  "measurementEnd": 21672,
+  "frames": [
+    1.3000000059601007,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    7.099999999998545,
+    6.800000000001091,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    6.899999999999636,
+    7.100000000000364,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    7,
+    7.099999999998545,
+    6.800000000001091,
+    6.899999999999636,
+    7,
+    83.39999999999964,
+    6.899999999999636,
+    6.900000000001455,
+    6.899999999999636,
+    7,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    6.800000000001091,
+    7,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    48.70000000000073,
+    6.899999999999636,
+    6.899999999999636,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.899999999999636,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    7,
+    6.800000000001091,
+    7,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    62.600000000000364,
+    13.800000000001091,
+    20.899999999999636,
+    6.899999999999636,
+    7.100000000000364,
+    6.799999999999272,
+    7,
+    6.899999999999636,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    6.899999999999636,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999999636,
+    7,
+    6.899999999999636,
+    7,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    69.5,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    6.799999999999272,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.799999999999272,
+    7.200000000000728,
+    6.799999999999272,
+    6.900000000001455,
+    7,
+    55.5,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7.099999999998545,
+    6.80000000000291,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    20.799999999999272,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    13.900000000001455,
+    6.899999999997817,
+    13.900000000001455,
+    14,
+    7,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    48.599999999998545,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7.100000000002183,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.799999999999272,
+    7.100000000002183,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    6.899999999997817,
+    7.100000000002183,
+    6.899999999997817,
+    6.80000000000291,
+    7.099999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    55.5,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7.100000000002183,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    14.200000000000728,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7.100000000002183,
+    6.799999999999272,
+    7.099999999998545,
+    48.5,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    6.799999999999272,
+    7.099999999998545,
+    7,
+    6.900000000001455,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.80000000000291,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7.099999999998545,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    69.39999999999782,
+    7,
+    6.799999999999272,
+    7.100000000002183,
+    7,
+    6.700000000000728,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    55.599999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    7.100000000002183,
+    6.899999999997817,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    7.100000000002183,
+    6.700000000000728,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    7.100000000002183,
+    6.799999999999272,
+    7,
+    48.599999999998545,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.799999999999272,
+    7.100000000002183,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    7.100000000002183,
+    6.899999999997817,
+    55.60000000000218,
+    13.899999999997817,
+    6.799999999999272,
+    7.100000000002183,
+    7,
+    6.899999999997817,
+    6.80000000000291,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.80000000000291,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    55.70000000000073,
+    7,
+    6.899999999997817,
+    6.80000000000291,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7.100000000002183,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    55.599999999998545,
+    7,
+    14.099999999998545,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.80000000000291,
+    7.099999999998545,
+    7,
+    6.900000000001455,
+    55.5,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    55.5,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7.099999999998545,
+    6.80000000000291,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    55.599999999998545,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.799999999999272,
+    7.100000000002183,
+    6.899999999997817,
+    6.900000000001455,
+    6.900000000001455,
+    7.19999999999709,
+    6.80000000000291,
+    6.799999999999272,
+    7.099999999998545,
+    6.900000000001455,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    7,
+    6.900000000001455,
+    6.799999999999272,
+    7.099999999998545,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    48.70000000000073,
+    6.900000000001455,
+    6.799999999999272,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.80000000000291,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    48.69999999999709,
+    7,
+    6.80000000000291,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7.099999999998545,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    55.599999999998545,
+    6.900000000001455,
+    6.799999999999272,
+    7.099999999998545,
+    6.900000000001455,
+    7.099999999998545,
+    6.80000000000291,
+    6.899999999997817,
+    7,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    6.900000000001455,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    6.899999999997817,
+    7,
+    6.900000000001455,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    7,
+    6.900000000001455,
+    6.899999999997817,
+    7.100000000002183,
+    6.799999999999272,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    6.900000000001455,
+    7,
+    7.099999999998545,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    6.900000000001455,
+    7,
+    7,
+    6.799999999999272,
+    7,
+    6.900000000001455,
+    7,
+    6.899999999997817,
+    7,
+    7
+  ]
+}
