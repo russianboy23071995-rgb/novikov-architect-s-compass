@@ -3,7 +3,7 @@ import type { Point2 } from "@/geometry/primitives/point";
 import { precisionTarget } from "@/application/input/precision";
 
 /** One transient input lifecycle shared by editing and drawing tools. */
-export function usePrecisionDraft(context: object | null) {
+export function usePrecisionDraft(context: object | null, initialAngle = "") {
   const [saved, setSaved] = useState<{
     context: object;
     angle: string;
@@ -12,7 +12,7 @@ export function usePrecisionDraft(context: object | null) {
     focus: Point2 | null;
   } | null>(null);
   const current = saved?.context === context ? saved : null;
-  const draft = current ?? { angle: "", length: "", aim: null, focus: null };
+  const draft = current ?? { angle: initialAngle, length: "", aim: null, focus: null };
   const change = (angle: string, length: string) => {
     if (context) setSaved({ ...draft, context, angle, length });
   };

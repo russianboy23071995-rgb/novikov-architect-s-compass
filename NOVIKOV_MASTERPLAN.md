@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #369 gemergt; S1-Gruppenprüfung liefert bestandene numerische XY-Commits, aber Z ist im echten Workspace weiterhin gesperrt. Genau nächster Auftrag: vorhandene vorbereitete Z-Aktion an die gemeinsame 3D-Gruppenbedienung anbinden und abnehmen. Shift-Dauerbewegung und Performance-Restbefund bleiben offen.
+Aktueller Arbeitsauftrag: 15.10.2026 – #370 gemergt; Z-Bewegung an gemeinsame 3D-Interaktion angebunden, numerische und Mausplatzierung im S1-G-Workspace geprüft. Genau nächster Auftrag: verbleibende S1-Gruppen-/Shift-Abnahme vervollständigen; Abbildwechsel-Performancebefund bleibt offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3090,3 +3090,48 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Verbleibende S1-Maus-/Shift-Gruppenabnahme und IFC-Höhen/Containment abschließen.
 3. Recovery-Zusammenfassung aller Geschosse korrigieren und offene Performance-/Release-
    Nachweise abgleichen. Speichererweiterung bleibt wie vereinbart zurückgestellt.
+
+### AUD14-07 – Z-Aktion im gemeinsamen 3D-Ablauf (15.10.2026)
+#370 mit erfolgreicher CI nach main übernommen (a097d4b). Die vorhandene vorbereitete
+Z-Aktion ist jetzt über selectionZInteraction in useSelectionMove/useToolInteraction
+angebunden. Für einzelne Wände und Wandgruppen: Ursprung auswählen, Z wählen, Mausziel
+anklicken oder signierten Versatz eingeben. Fenster bleiben bei ihrer Wand, Geschoss-ID
+bleibt erhalten, interne Anschlüsse bleiben und externe lösen sich beim Platzieren.
+
+ToolInteraction beschreibt die räumliche Achse; axisTarget übersetzt orthografische
+CSS-Mauskoordinaten in signierten Achsabstand. Keine BIM-Mutation im Renderer. Der
+bestehende Geometriepatch-Pfad übernimmt die Vorschau. Ein vollständiger Commit am Ende,
+ein Undo; Escape/Abbrechen ändern kein Modell. Achsenwechsel setzt den Eingabekontext
+zurück und verhindert die Wiederverwendung eines XY-Mausziels als Z-Ziel. Die gemeinsame
+Hilfseingabe zeigt für Z nur einen signierten Abstand. X/Y bleiben über dieselbe Leiste
+verfügbar. Nicht unterstützte Auswahlen bekommen weiterhin keinen aktiven Z-Button.
+
+Die beim Vorbereiten geprüfte Auswahlberechtigung wird nicht erneut über alle Bauteile
+pro Z-Pointerprobe gesucht. Referenzidentität von Modell, Auswahl und Sichtbarkeit bleibt
+geprüft; vollständige Materialisierung/Validierung bleibt an der Commit-Grenze. Messung
+benchmarks/z-input-pointer-evidence.json: 1000 Node-Geometrieproben S1 G, p95 0,0169 ms,
+maximal 0,0746 ms, Vorbereitung inkl. XY-Session rund 60,6 ms. Dies misst NICHT Browser-
+Frames, Rendering oder Commit. Die vorhandene Geometriekomposition durchläuft weiterhin
+Basisflächen; keine Behauptung global konstanter Renderkosten oder einer Lag-Behebung.
+
+Verifikation: 1088 Tests bestanden, Benchmark-Typecheck, fokussiertes ESLint, Produktions-
+und Diagnosebuild bestanden. Neue Tests vergleichen Z-Adapter-Vorschau mit vollständiger
+Geometrie samt Fenstern/Anschlüssen/Undo und prüfen Achsprojektion bei Kamera/Zoom/DPR.
+Browser Port8085: Einzelwand +0,5 m, s4-w0/w1 zusammen -0,5 m, komplettes exportiertes
+Projekt gegen erwartete Änderung gleich; ein Undo stellt alle Geschosse wieder her.
+Mausplatzierung mit Shift beim Klick, Rückwechsel Z→X (Winkel 0), Abbruch ohne History-
+Eintrag geprüft. Beleg benchmarks/z-ui-acceptance.json; Screenshot outputs/z-ui-preview.png.
+Nutzer-Port8080 nicht für Testdaten verändert. Temporäre Viewportgröße zurückgesetzt.
+
+Begrenzung: nur Wände mit mitgeführten Fenstern; Z bleibt explizit gewählt und dadurch
+unabhängig von Shift fest. Z-Raster nutzt die gemeinsame Schrittweite. Allgemeiner Fang
+auf fremde Höhenreferenzen folgt separat. Bei Blick entlang Z ist keine eindeutige
+Mausprojektion möglich, numerische Eingabe bleibt nutzbar. Keine automatische 3D-Allachsen-
+Wahl. Kontinuierliche Shift-Mausbewegung, GB-Gruppentest und Abbildwechsel-Restbefund bleiben
+offen; Shift-Klick ist KEIN kontinuierlicher Shift-Test. Release-Gates unverändert offen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** S1-Gruppen-/Shift-Abnahme einschließlich GB und Vorschauvergleich vervollständigen.
+2. IFC-Höhen und Geschosszuordnung für mehrere Geschosse nachweisen.
+3. Recovery-Zusammenfassung aller Geschosse korrigieren und offene Performance-/Release-
+   Nachweise abgleichen. Keine Freigabe als lagfrei; Speichererweiterung bleibt zurückgestellt.

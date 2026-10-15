@@ -12,6 +12,7 @@ export function PrecisionInput({
   angleHint,
   lengthHint,
   axisLabel,
+  scalar = false,
   mouseHint = "Mausrichtung · Tab: Länge ↔ Winkel",
   onChange,
   onCaptureDirection,
@@ -28,6 +29,7 @@ export function PrecisionInput({
   angleHint: string;
   lengthHint: string;
   axisLabel: string | null;
+  scalar?: boolean;
   mouseHint?: string;
   onChange: (angle: string, length: string) => void;
   onCaptureDirection: () => void;
@@ -62,13 +64,14 @@ export function PrecisionInput({
       event.preventDefault();
       const inside = active === lengthField.current || active === angleField.current;
       if (!inside && !angle.trim() && !axisLabel) onCaptureDirection();
-      const target = active === lengthField.current ? angleField.current : lengthField.current;
+      const target =
+        !scalar && active === lengthField.current ? angleField.current : lengthField.current;
       target?.focus();
       target?.select();
     };
     window.addEventListener("keydown", tab, true);
     return () => window.removeEventListener("keydown", tab, true);
-  }, [angle, axisLabel, onCaptureDirection]);
+  }, [angle, axisLabel, onCaptureDirection, scalar]);
   const drag = useRef<{ pointer: Point2; origin: Point2; id: number } | null>(null);
   const [bounds, setBounds] = useState({
     width: 1024,
@@ -168,23 +171,25 @@ export function PrecisionInput({
       >
         ⠿ Hilfseingabe · Rasterengine
       </button>
-      <div className="grid grid-cols-2 gap-2">
+      <div className={scalar ? "grid gap-2" : "grid grid-cols-2 gap-2"}>
+        {!scalar && (
+          <label>
+            Winkel °
+            <input
+              ref={angleField}
+              aria-label="Bewegungswinkel (Grad)"
+              className={field}
+              inputMode="decimal"
+              value={angle}
+              placeholder={angleHint}
+              readOnly={!!axisLabel}
+              title={axisLabel ?? "Leer: Maus · Zahl: feste Richtung"}
+              onChange={(e) => onChange(e.target.value, length)}
+            />
+          </label>
+        )}
         <label>
-          Winkel °
-          <input
-            ref={angleField}
-            aria-label="Bewegungswinkel (Grad)"
-            className={field}
-            inputMode="decimal"
-            value={angle}
-            placeholder={angleHint}
-            readOnly={!!axisLabel}
-            title={axisLabel ?? "Leer: Maus · Zahl: feste Richtung"}
-            onChange={(e) => onChange(e.target.value, length)}
-          />
-        </label>
-        <label>
-          Länge m
+          {scalar ? "Z-Versatz m" : "Länge m"}
           <input
             ref={lengthField}
             aria-label="Bewegungslänge (m)"

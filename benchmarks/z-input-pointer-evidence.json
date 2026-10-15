@@ -1,0 +1,10 @@
+{
+  "fixture": "S1 G; 300 walls/200 windows/5 storeys",
+  "samples": 1000,
+  "prepareMs": 60.61240000000004,
+  "p50Ms": 0.006500000000073669,
+  "p95Ms": 0.016899999999964166,
+  "maxMs": 0.0746000000000322,
+  "scope": "Node application geometry evaluation only; excludes rendering, browser frames and commit",
+  "noLagGuarantee": true
+}

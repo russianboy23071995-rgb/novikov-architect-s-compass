@@ -7,6 +7,9 @@ export type PrecisionValues = { point: Point2; degrees: number; metres: number; 
 /** Concrete tool supplies geometry/validation/actions, never keyboard or widget logic. */
 export type ToolInteraction = {
   identity: object;
+  initialAngle?: string;
+  /** Optional spatial axis; Point2 values encode its signed distance in local y. */
+  axisConstraint?: { origin: Point2; direction: readonly [number, number, number] };
   snapping: ToolSnapPolicy;
   origin: Point2;
   input: { axisLabel: string | null; degrees: number | null } | null;

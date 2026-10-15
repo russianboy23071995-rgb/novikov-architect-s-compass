@@ -6,10 +6,14 @@ export function MovementAxisControls({
   project,
   targets,
   onDirection,
+  onVertical,
+  vertical = false,
 }: {
   project: Project;
   targets: SelectionSet;
   onDirection: (degrees: string) => void;
+  onVertical?: (() => void) | undefined;
+  vertical?: boolean;
 }) {
   return (
     <div
@@ -37,14 +41,21 @@ export function MovementAxisControls({
         .map((axis) => (
           <button
             key={axis.id}
-            disabled={axis.direction[2] !== 0}
+            disabled={axis.direction[2] !== 0 && !onVertical}
+            aria-pressed={axis.direction[2] !== 0 ? vertical : false}
             title={
               axis.direction[2] !== 0
-                ? "Z: Höhenaktion noch nicht freigegeben"
+                ? onVertical
+                  ? "Z-Versatz: Maus oder signierte Länge"
+                  : "Z für diese Auswahl nicht verfügbar"
                 : `Richtung ${axis.label} festhalten`
             }
             className="rounded px-2 py-1 hover:bg-muted disabled:opacity-40"
-            onClick={() => onDirection(String(horizontalAxisDegrees(axis)))}
+            onClick={() =>
+              axis.direction[2] !== 0
+                ? onVertical?.()
+                : onDirection(String(horizontalAxisDegrees(axis)))
+            }
           >
             {axis.label}
           </button>

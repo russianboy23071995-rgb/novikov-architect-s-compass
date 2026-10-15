@@ -76,6 +76,7 @@ export type BimPlanProps = {
         target: Point | null | undefined;
         previewProject?: ToolInteraction["previewProject"];
         geometryPreview?: ToolInteraction["geometryPreview"];
+        axisConstraint?: ToolInteraction["axisConstraint"];
         aim: (point: Point) => void;
         pick: (point: Point, candidate?: SnapCandidate | null) => void;
       }

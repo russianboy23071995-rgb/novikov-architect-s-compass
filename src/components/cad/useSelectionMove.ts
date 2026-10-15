@@ -9,6 +9,7 @@ import {
 import type { SelectionSet } from "@/application/selection/state";
 import type { Project, Point } from "@/domain/project/schema";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
+import { selectionZInteraction } from "@/application/selection/z-interaction";
 
 /** The selection consumer pins context; keyboard/input/snapping remain ToolInteraction-owned. */
 export function useSelectionMove(
@@ -22,6 +23,8 @@ export function useSelectionMove(
     targets: SelectionSet;
     visibility: LayerVisibilityPolicy;
     session: SelectionMove | null;
+    axis: "xy" | "z";
+    direction?: string;
   } | null>(null);
   const latest = useRef({ project, targets, visibility, pending });
   latest.current = { project, targets, visibility, pending };
@@ -37,37 +40,39 @@ export function useSelectionMove(
   const cancel = useCallback(() => setPending(null), []);
   const commitRef = useRef(commit);
   commitRef.current = commit;
-  const adapter = useMemo(
-    () =>
-      active?.session
-        ? selectionMoveInteraction(
-            active.session,
-            project,
-            targets,
-            visibility,
-            (next) => {
-              const now = latest.current;
-              if (
-                now.pending !== active ||
-                now.project !== project ||
-                now.visibility !== visibility ||
-                !sameTargets(now.targets, targets)
-              )
-                throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
-              commitRef.current(next);
-              cancel();
-            },
-            cancel,
-          )
-        : null,
-    [active, project, targets, visibility, cancel],
-  );
+  const adapter = useMemo(() => {
+    if (!active?.session) return null;
+    const publish = (next: Project) => {
+      const now = latest.current;
+      if (
+        now.pending !== active ||
+        now.project !== project ||
+        now.visibility !== visibility ||
+        !sameTargets(now.targets, targets)
+      )
+        throw new Error("Bewegung nicht mehr aktuell. Erneut beginnen.");
+      commitRef.current(next);
+      cancel();
+    };
+    if (active.axis === "z")
+      return selectionZInteraction(active.session, visibility, publish, cancel);
+    const xy = selectionMoveInteraction(
+      active.session,
+      project,
+      targets,
+      visibility,
+      publish,
+      cancel,
+    );
+    return { ...xy, initialAngle: active.direction ?? "" };
+  }, [active, project, targets, visibility, cancel]);
   return {
     active: !!active,
     pickingOrigin: !!active && !active.session,
     begin: (origin?: Point) => {
       assertMovableSelection(project, targets, visibility);
       setPending({
+        axis: "xy",
         base: project,
         targets: targets.map((t) => ({ ...t })),
         visibility,
@@ -83,5 +88,13 @@ export function useSelectionMove(
     },
     cancel,
     adapter,
+    axis: active?.axis ?? "xy",
+    canUseZ:
+      !!active?.session &&
+      targets.some((t) => t.kind === "wall") &&
+      targets.every((t) => t.kind === "wall" || t.kind === "window"),
+    setAxis: (axis: "xy" | "z", direction = "") => {
+      if (active?.session && axis !== active.axis) setPending({ ...active, axis, direction });
+    },
   };
 }
