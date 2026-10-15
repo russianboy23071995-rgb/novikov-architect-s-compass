@@ -294,3 +294,40 @@ test("real reducer keeps the load context stable through commits and Undo/Redo",
   f.controller.update(editing.history.present, editing.projectLoad);
   assert.equal(f.last().enabled, false);
 });
+
+test("profile preference starts saving, follows project switches and keeps explicit opt-out", async () => {
+  const store = memory(),
+    timer = clock();
+  const states: AutosaveState[] = [];
+  const controller = createAutosaveController(
+    store.catalog,
+    (s) => states.push(s),
+    timer.port,
+    true,
+  );
+  controller.update(project, 0);
+  assert.equal(states.at(-1)!.enabled, true);
+  await timer.fire();
+  assert.equal(store.writes(), 1);
+  controller.update({ ...project, id: "second-project" }, 1);
+  await timer.fire();
+  assert.equal(store.writes(), 2);
+  controller.setEnabled(false);
+  controller.update(project, 2);
+  await timer.fire();
+  assert.equal(states.at(-1)!.enabled, false);
+  assert.equal(store.writes(), 2);
+  controller.dispose();
+});
+
+test("stored opt-out does not open a writer on startup or project switch", async () => {
+  const store = memory(),
+    timer = clock();
+  const controller = createAutosaveController(store.catalog, () => {}, timer.port, false);
+  controller.update(project, 0);
+  controller.update({ ...project, id: "another-project" }, 1);
+  await timer.fire();
+  assert.equal(timer.jobs.size, 0);
+  assert.equal(store.writes(), 0);
+  controller.dispose();
+});

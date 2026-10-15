@@ -31,8 +31,10 @@ export function createAutosaveController(
   catalog: RecoveryCatalog,
   notify: (state: AutosaveState) => void,
   clock: RecoveryTimer = timer,
+  initialPreference?: boolean,
 ) {
   let state: AutosaveState = { enabled: false, busy: false, error: null };
+  let preference = initialPreference;
   let project: Project | undefined;
   let context: unknown;
   let generation = 0;
@@ -101,11 +103,17 @@ export function createAutosaveController(
         generation++;
         cancel();
         lease = undefined;
-        publish({ enabled: false, error: null });
+        publish({ enabled: preference ?? false, error: null });
+        if (state.enabled) {
+          lease = acquire();
+          schedule();
+        }
       } else if (changed) schedule();
     },
     setEnabled(enabled: boolean) {
-      if (disposed || !project || enabled === state.enabled) return;
+      if (disposed || !project) return;
+      if (initialPreference !== undefined) preference = enabled;
+      if (enabled === state.enabled) return;
       generation++;
       cancel();
       lease = undefined;
