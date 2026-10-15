@@ -1,0 +1,493 @@
+{
+  "method": "Node, one first and eight warm samples, alternating project/patch order, full-path equality checked outside timings. Plan derivation only, no DOM/GPU/frame or snapping measurement. Synthetic unconnected fixtures; not a worst-case guarantee.",
+  "profiles": [
+    {
+      "kind": "hatch-point",
+      "size": 10,
+      "storeys": 2,
+      "hatches": 10,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 11.150100000000009,
+      "samples": [
+        {
+          "projectPreviewMs": 8.43889999999999,
+          "fullPlanMs": 0.5190999999999804,
+          "patchMs": 1.2364000000000033,
+          "patchPlanMs": 0.06569999999999254
+        },
+        {
+          "patchMs": 0.056199999999989814,
+          "patchPlanMs": 0.017699999999990723,
+          "projectPreviewMs": 0.0736999999999739,
+          "fullPlanMs": 0.02960000000001628
+        },
+        {
+          "projectPreviewMs": 0.09600000000000364,
+          "fullPlanMs": 0.0362999999999829,
+          "patchMs": 0.09910000000002128,
+          "patchPlanMs": 0.030300000000011096
+        },
+        {
+          "patchMs": 0.0736999999999739,
+          "patchPlanMs": 0.03069999999996753,
+          "projectPreviewMs": 0.07110000000000127,
+          "fullPlanMs": 0.03609999999997626
+        },
+        {
+          "projectPreviewMs": 0.12630000000001473,
+          "fullPlanMs": 0.046699999999987085,
+          "patchMs": 0.061399999999991905,
+          "patchPlanMs": 0.049100000000009913
+        },
+        {
+          "patchMs": 0.03350000000000364,
+          "patchPlanMs": 0.012800000000027012,
+          "projectPreviewMs": 0.04879999999997153,
+          "fullPlanMs": 0.023700000000019372
+        },
+        {
+          "projectPreviewMs": 0.14910000000003265,
+          "fullPlanMs": 0.022600000000011278,
+          "patchMs": 0.0554000000000201,
+          "patchPlanMs": 0.03000000000002956
+        },
+        {
+          "patchMs": 0.03469999999998663,
+          "patchPlanMs": 0.007799999999974716,
+          "projectPreviewMs": 0.04909999999995307,
+          "fullPlanMs": 0.017599999999958982
+        },
+        {
+          "projectPreviewMs": 0.06009999999997717,
+          "fullPlanMs": 0.02240000000000464,
+          "patchMs": 0.056300000000021555,
+          "patchPlanMs": 0.02949999999998454
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.07239999999998759,
+        "fullPlanMs": 0.026650000000017826,
+        "patchMs": 0.056250000000005684,
+        "patchPlanMs": 0.02975000000000705
+      }
+    },
+    {
+      "kind": "line-point",
+      "size": 10,
+      "storeys": 2,
+      "hatches": 10,
+      "walls": 0,
+      "preparedCapability": false,
+      "preparationMs": 0.09450000000003911,
+      "samples": [
+        {
+          "projectPreviewMs": 6.096400000000017,
+          "fullPlanMs": 0.09500000000002728
+        },
+        {
+          "projectPreviewMs": 4.167299999999955,
+          "fullPlanMs": 0.02039999999999509
+        },
+        {
+          "projectPreviewMs": 3.8409000000000333,
+          "fullPlanMs": 0.018299999999953798
+        },
+        {
+          "projectPreviewMs": 3.859199999999987,
+          "fullPlanMs": 0.02060000000005857
+        },
+        {
+          "projectPreviewMs": 3.7992000000000417,
+          "fullPlanMs": 0.022699999999986176
+        },
+        {
+          "projectPreviewMs": 3.6200000000000045,
+          "fullPlanMs": 0.02119999999990796
+        },
+        {
+          "projectPreviewMs": 5.7666000000000395,
+          "fullPlanMs": 0.02689999999995507
+        },
+        {
+          "projectPreviewMs": 3.761700000000019,
+          "fullPlanMs": 0.020800000000008367
+        },
+        {
+          "projectPreviewMs": 4.34699999999998,
+          "fullPlanMs": 0.023800000000051114
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 3.85005000000001,
+        "fullPlanMs": 0.020999999999958163
+      }
+    },
+    {
+      "kind": "window-axis",
+      "size": 10,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 50,
+      "preparedCapability": true,
+      "preparationMs": 1.2007000000000971,
+      "samples": [
+        {
+          "projectPreviewMs": 0.8159999999999172,
+          "fullPlanMs": 0.5043000000000575,
+          "patchMs": 0.22669999999993706,
+          "patchPlanMs": 0.036200000000008004
+        },
+        {
+          "patchMs": 0.1493000000000393,
+          "patchPlanMs": 0.01929999999993015,
+          "projectPreviewMs": 0.5041999999999689,
+          "fullPlanMs": 0.0906999999999698
+        },
+        {
+          "projectPreviewMs": 0.9936999999999898,
+          "fullPlanMs": 0.13440000000002783,
+          "patchMs": 0.7425999999999249,
+          "patchPlanMs": 0.023199999999974352
+        },
+        {
+          "patchMs": 0.151299999999992,
+          "patchPlanMs": 0.02149999999994634,
+          "projectPreviewMs": 0.5961000000000922,
+          "fullPlanMs": 0.08029999999996562
+        },
+        {
+          "projectPreviewMs": 0.5192999999999302,
+          "fullPlanMs": 0.2138999999999669,
+          "patchMs": 0.13279999999997472,
+          "patchPlanMs": 0.018100000000004002
+        },
+        {
+          "patchMs": 0.11469999999997071,
+          "patchPlanMs": 0.015300000000024738,
+          "projectPreviewMs": 0.6596000000000686,
+          "fullPlanMs": 0.1030999999999267
+        },
+        {
+          "projectPreviewMs": 0.5598999999999705,
+          "fullPlanMs": 0.0746000000000322,
+          "patchMs": 0.12030000000004293,
+          "patchPlanMs": 0.016500000000064574
+        },
+        {
+          "patchMs": 0.4999000000000251,
+          "patchPlanMs": 0.019900000000006912,
+          "projectPreviewMs": 0.43829999999991287,
+          "fullPlanMs": 0.07480000000009568
+        },
+        {
+          "projectPreviewMs": 0.43270000000006803,
+          "fullPlanMs": 0.10259999999993852,
+          "patchMs": 0.16989999999998417,
+          "patchPlanMs": 0.025700000000028922
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.5395999999999503,
+        "fullPlanMs": 0.09664999999995416,
+        "patchMs": 0.15030000000001564,
+        "patchPlanMs": 0.01959999999996853
+      }
+    },
+    {
+      "kind": "wall-stretch",
+      "size": 10,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 50,
+      "preparedCapability": false,
+      "preparationMs": 0.06179999999994834,
+      "samples": [
+        {
+          "projectPreviewMs": 1.4945000000000164,
+          "fullPlanMs": 0.13450000000000273
+        },
+        {
+          "projectPreviewMs": 0.5271000000000186,
+          "fullPlanMs": 0.11359999999990578
+        },
+        {
+          "projectPreviewMs": 0.485300000000052,
+          "fullPlanMs": 0.4033000000000584
+        },
+        {
+          "projectPreviewMs": 0.42880000000002383,
+          "fullPlanMs": 0.05419999999992342
+        },
+        {
+          "projectPreviewMs": 0.6019999999999754,
+          "fullPlanMs": 0.05599999999992633
+        },
+        {
+          "projectPreviewMs": 0.5742999999999938,
+          "fullPlanMs": 0.05750000000000455
+        },
+        {
+          "projectPreviewMs": 0.725400000000036,
+          "fullPlanMs": 0.053699999999935244
+        },
+        {
+          "projectPreviewMs": 0.49350000000004,
+          "fullPlanMs": 0.05490000000008877
+        },
+        {
+          "projectPreviewMs": 0.5940000000000509,
+          "fullPlanMs": 0.05719999999996617
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.5507000000000062,
+        "fullPlanMs": 0.05659999999994625
+      }
+    },
+    {
+      "kind": "hatch-point",
+      "size": 100,
+      "storeys": 2,
+      "hatches": 100,
+      "walls": 0,
+      "preparedCapability": true,
+      "preparationMs": 41.155000000000086,
+      "samples": [
+        {
+          "projectPreviewMs": 48.21049999999991,
+          "fullPlanMs": 0.04390000000000782,
+          "patchMs": 0.08310000000005857,
+          "patchPlanMs": 0.08579999999994925
+        },
+        {
+          "patchMs": 0.02970000000004802,
+          "patchPlanMs": 0.008299999999962893,
+          "projectPreviewMs": 0.03300000000001546,
+          "fullPlanMs": 0.023099999999999454
+        },
+        {
+          "projectPreviewMs": 0.054300000000012005,
+          "fullPlanMs": 0.0442000000000462,
+          "patchMs": 0.04539999999997235,
+          "patchPlanMs": 0.028199999999969805
+        },
+        {
+          "patchMs": 0.022400000000061482,
+          "patchPlanMs": 0.006600000000048567,
+          "projectPreviewMs": 0.036899999999945976,
+          "fullPlanMs": 0.021700000000009823
+        },
+        {
+          "projectPreviewMs": 0.061599999999998545,
+          "fullPlanMs": 0.05859999999984211,
+          "patchMs": 0.040199999999913416,
+          "patchPlanMs": 0.02250000000003638
+        },
+        {
+          "patchMs": 0.022600000000011278,
+          "patchPlanMs": 0.005799999999908323,
+          "projectPreviewMs": 0.030599999999822103,
+          "fullPlanMs": 0.017399999999952342
+        },
+        {
+          "projectPreviewMs": 0.046500000000150976,
+          "fullPlanMs": 0.03490000000010696,
+          "patchMs": 0.04369999999994434,
+          "patchPlanMs": 0.02659999999991669
+        },
+        {
+          "patchMs": 0.02200000000016189,
+          "patchPlanMs": 0.006300000000010186,
+          "projectPreviewMs": 0.03279999999995198,
+          "fullPlanMs": 0.01830000000018117
+        },
+        {
+          "projectPreviewMs": 0.04909999999995307,
+          "fullPlanMs": 0.07799999999997453,
+          "patchMs": 0.04039999999986321,
+          "patchPlanMs": 0.026900000000068758
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 0.041700000000048476,
+        "fullPlanMs": 0.029000000000053205,
+        "patchMs": 0.03494999999998072,
+        "patchPlanMs": 0.015399999999999636
+      }
+    },
+    {
+      "kind": "line-point",
+      "size": 100,
+      "storeys": 2,
+      "hatches": 100,
+      "walls": 0,
+      "preparedCapability": false,
+      "preparationMs": 0.004100000000107684,
+      "samples": [
+        {
+          "projectPreviewMs": 37.825599999999895,
+          "fullPlanMs": 0.03919999999993706
+        },
+        {
+          "projectPreviewMs": 38.72129999999993,
+          "fullPlanMs": 0.025900000000092405
+        },
+        {
+          "projectPreviewMs": 35.695199999999886,
+          "fullPlanMs": 0.026600000000144064
+        },
+        {
+          "projectPreviewMs": 33.95090000000005,
+          "fullPlanMs": 0.024899999999888678
+        },
+        {
+          "projectPreviewMs": 42.80809999999997,
+          "fullPlanMs": 0.030700000000024374
+        },
+        {
+          "projectPreviewMs": 36.082099999999855,
+          "fullPlanMs": 0.03220000000010259
+        },
+        {
+          "projectPreviewMs": 40.156299999999874,
+          "fullPlanMs": 0.03099999999994907
+        },
+        {
+          "projectPreviewMs": 34.46369999999979,
+          "fullPlanMs": 0.03629999999975553
+        },
+        {
+          "projectPreviewMs": 34.94140000000016,
+          "fullPlanMs": 0.028999999999996362
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 35.88864999999987,
+        "fullPlanMs": 0.029850000000010368
+      }
+    },
+    {
+      "kind": "window-axis",
+      "size": 100,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 500,
+      "preparedCapability": true,
+      "preparationMs": 3.584600000000137,
+      "samples": [
+        {
+          "projectPreviewMs": 2.899399999999787,
+          "fullPlanMs": 0.6422999999999774,
+          "patchMs": 0.1712999999999738,
+          "patchPlanMs": 0.02790000000004511
+        },
+        {
+          "patchMs": 0.08669999999983702,
+          "patchPlanMs": 0.015399999999772263,
+          "projectPreviewMs": 3.0778000000000247,
+          "fullPlanMs": 0.6556000000000495
+        },
+        {
+          "projectPreviewMs": 3.9702000000002045,
+          "fullPlanMs": 0.8658000000000357,
+          "patchMs": 0.17140000000017608,
+          "patchPlanMs": 0.025099999999838474
+        },
+        {
+          "patchMs": 0.08079999999972642,
+          "patchPlanMs": 0.015300000000024738,
+          "projectPreviewMs": 3.0330000000003565,
+          "fullPlanMs": 0.8732999999997446
+        },
+        {
+          "projectPreviewMs": 2.8562999999999192,
+          "fullPlanMs": 0.5642000000002554,
+          "patchMs": 0.14899999999988722,
+          "patchPlanMs": 0.0261000000000422
+        },
+        {
+          "patchMs": 0.08130000000028303,
+          "patchPlanMs": 0.012899999999717693,
+          "projectPreviewMs": 3.2687000000000808,
+          "fullPlanMs": 0.901299999999992
+        },
+        {
+          "projectPreviewMs": 3.256199999999808,
+          "fullPlanMs": 0.5768000000002758,
+          "patchMs": 0.13380000000006476,
+          "patchPlanMs": 0.020599999999831198
+        },
+        {
+          "patchMs": 0.08099999999967622,
+          "patchPlanMs": 0.012000000000170985,
+          "projectPreviewMs": 2.8832000000002154,
+          "fullPlanMs": 0.5877999999997883
+        },
+        {
+          "projectPreviewMs": 3.244799999999941,
+          "fullPlanMs": 0.529700000000048,
+          "patchMs": 0.1410000000000764,
+          "patchPlanMs": 0.03660000000036234
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 3.161299999999983,
+        "fullPlanMs": 0.6216999999999189,
+        "patchMs": 0.11024999999995089,
+        "patchPlanMs": 0.01799999999980173
+      }
+    },
+    {
+      "kind": "wall-stretch",
+      "size": 100,
+      "storeys": 5,
+      "hatches": 0,
+      "walls": 500,
+      "preparedCapability": false,
+      "preparationMs": 0.013300000000072032,
+      "samples": [
+        {
+          "projectPreviewMs": 3.7478000000000975,
+          "fullPlanMs": 0.864100000000235
+        },
+        {
+          "projectPreviewMs": 3.438000000000102,
+          "fullPlanMs": 0.5396999999998116
+        },
+        {
+          "projectPreviewMs": 3.079099999999926,
+          "fullPlanMs": 0.6912000000002081
+        },
+        {
+          "projectPreviewMs": 3.211999999999989,
+          "fullPlanMs": 0.6748999999999796
+        },
+        {
+          "projectPreviewMs": 3.1133999999997286,
+          "fullPlanMs": 0.48430000000007567
+        },
+        {
+          "projectPreviewMs": 3.053899999999885,
+          "fullPlanMs": 0.49070000000028813
+        },
+        {
+          "projectPreviewMs": 2.905499999999847,
+          "fullPlanMs": 0.5280999999999949
+        },
+        {
+          "projectPreviewMs": 3.521600000000035,
+          "fullPlanMs": 0.5069000000003143
+        },
+        {
+          "projectPreviewMs": 2.9049999999997453,
+          "fullPlanMs": 0.5027000000000044
+        }
+      ],
+      "warmMedians": {
+        "projectPreviewMs": 3.096249999999827,
+        "fullPlanMs": 0.5175000000001546
+      }
+    }
+  ]
+}

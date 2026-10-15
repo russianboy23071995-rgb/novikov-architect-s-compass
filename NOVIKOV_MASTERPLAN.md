@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR333 gemergt (cdc6fd2); Schraffur-Knicken vorbereitet und verglichen (Teil 12 unten).
-Nächster Einzelauftrag: AUD14-04-Abschlussprüfung der verbliebenen Legacy-Vorschaupfade
-mit Pfad-/Kostenliste und priorisiertem Restbefund, ohne neue Werkzeugmigration.
+PR334 gemergt (bbcefef); verbliebene Vorschaupfade geprüft und gemessen (Teil 13 unten).
+Nächster Einzelauftrag: vorbereitete Linienpunkt-Vorschau für offene Linien und
+geschlossene Polylinien; vollständige Commitprüfung und gemeinsame Registrierung erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1456,3 +1456,55 @@ Einziger Folgeauftrag: AUD14-04-Abschlussprüfung der verbliebenen Legacy-Vorsch
 mit einer konkreten Pfad-/Kostenliste und priorisiertem Restbefund. Dabei keine neuen
 Werkzeugmigrationen beginnen; daraus den nächsten begrenzten Fix oder AUD14-05 ableiten.
 AUD14-04 bleibt bis zu dieser Prüfung offen; AUD14-05/06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 13 – Restpfade und Priorisierung (15.10.2026)
+
+PR334 nach ausdrücklicher Freigabe und grüner CI gemergt (bbcefef).
+Dies ist eine Bestandsprüfung, keine neue Werkzeugmigration und kein Abschluss des
+Gesamtpunkts. Produktionscode und Bedienung bleiben unverändert.
+
+| Pfad | Codebeleg | Aktueller Restaufwand / Einordnung |
+| --- | --- | --- |
+| Schraffur Punkt/Seite/Offset/Knicken | application/direct-edit/prepared-preview.ts, prepared-hatch.ts | Vorbereitet; Zielkonturprüfung bleibt. BimPlan erhält eine materialisierte Projektansicht. |
+| Linienpunkt, auch geschlossene Polylinie | lib/bim/direct-edit.ts → application/direct-edit/transforms.ts → lib/bim/model.ts:updateLine | Kein registrierter vorbereiteter Adapter; validateProject prüft alle unveränderten Elemente mit. Gemessener stärkster Restengpass dieses Vergleichs. |
+| Fenster entlang Achse | prepared-preview.ts, prepared-window.ts, controller.ts | 3D erhält lokalen Patch; projectView beendet Registrierung vor dem Fensteradapter. Direkte 2D-Vorschau läuft deshalb noch vollständig. |
+| Wandachsende | prepared-wall.ts, prepared-endpoint.ts, controller.ts | Exakte Achsgriffe vorbereitet; neue T-Ziele/fremde Endkontakte können absichtlich zum Vollpfad führen. Fremdpunktliste wird linear geprüft, Anschlussgruppe kann groß sein: AUD14-05. |
+| Wandkörpergriff / Strecken | prepared-wall.ts, lib/bim/direct-edit.ts | Kein allgemeiner vorbereiteter Adapter. Stretch hier direkt über EditSession gemessen; tatsächliche Menü-/Interaktionshäufigkeit nicht erhoben. |
+| Freie Auswahlbewegung XY/Z | application/selection/move.ts, storey-translation.ts, z-translation.ts | Gemeinsamer vorbereiteter Auswahlpfad vorhanden, nicht mit jedem noch vorhandenen direkten move/x/y-Legacypfad gleichsetzen. Kein erneuter Gesamt-Performancebeleg in dieser Prüfung. |
+| Linien-Knicken/Seite/Offset, direkte Schraffurbewegung/-stretch | contour.ts, offset.ts, transforms.ts | Registrierungsgrenze bleibt; vollständige updateLine/previewHatch-Pfade. Nicht separat vermessen; keine pauschale Übertragung der Punktmessung. |
+| Wand zeichnen/Kette | application/drawing/wall-chain.ts:previewWallChain | Erster Abschnitt/erste Ecke teilweise vorbereitet; übrige Ketten/Startkandidaten nutzen appendWallChain. ID-Sammlung bleibt pro Abfrage. Separat vermessen, bevor weitere Optimierung beauftragt wird. |
+| Grundrissableitung | components/cad/BimPlan.tsx, rendering/viewport/plan-scene.ts | Direkter Edit ersetzt shown; derivePlanScene erzeugt Maps, Wandkörper und Konturen erneut. Auswahlbewegung hat bereits separate Patch-Komposition. Kein Rendererwechsel erforderlich. |
+
+Messverfahren: benchmarks/remaining-preview-profile.ts mit Node TypeScript ausführen.
+Rohdaten remaining-preview-results.json: je Profil erster + acht warme Werte, Reihenfolge
+Projekt/Patch wechselnd, Vorbereitungszeit separat. Vorschau-Projekt für jedes Ziel exakt
+mit editAtPointer verglichen; Gleichheitsprüfung außerhalb der Messzeit. Keine neuen
+Behauptungen zur Patchgleichheit über die bereits vorhandenen Adaptertests hinaus.
+
+| Direkter Pfad | Kleine / große Szene | Vorschau warm klein → groß | Planableitung groß | Patch groß / Patch-Plan groß |
+| --- | --- | --- | --- | --- |
+| Schraffurpunkt | 10 / 100 Schraffuren à 100 Punkte | 0,072 → 0,042 ms | 0,029 ms | 0,035 / 0,015 ms |
+| Linienpunkt | dieselben unveränderten Schraffuren + eine Linie | 3,85 → 35,89 ms | 0,030 ms | nicht vorhanden |
+| Fensterachse | 5 Geschosse, 50 / 500 Wände und ebenso viele Fenster | 0,54 → 3,16 ms | 0,622 ms | 0,110 / 0,018 ms |
+| Wand-Strecken | dieselben Gebäude | 0,55 → 3,10 ms | 0,518 ms | nicht vorhanden |
+
+Die kleine/große Schraffurpunktzeit ist kein Skalierungsgesetz (JIT/Messstreuung).
+Unverbundene synthetische Gebäude, keine großen Anschlussnetze, DOM/GPU, Fangabfrage,
+React-Gesamtframes oder reale Langsitzung gemessen. Insbesondere ist die reine
+Planableitung im gemessenen Fall nicht der größte Engpass. Keine neue Browserabnahme.
+1016 Tests und Build bestanden; Diagnose-Typecheck und gezieltes Lint bestanden.
+
+Priorisierung: zuerst den nachgewiesenen globalen updateLine-Prüfpfad für Linienpunkte
+begrenzen. Danach Restbefund erneut bewerten; Fenster-2D, übrige Konturaktionen und
+Wand-Strecken sind dokumentierte Restschuld, keine erledigten Funktionen. AUD14-05/06/07
+bleiben nachgeordnet; vollständige Prüfung beim Platzieren und ein Undo bleiben Pflicht.
+
+**Einziger nächster Auftrag:** Linienpunkt-Vorschau (offene Linie und geschlossene
+Polyline) über den gemeinsamen vorbereiteten Application-Vertrag bereitstellen.
+Eigene unveränderliche Basis, gemeinsame Punktableitung, Erhalt des doppelten
+Schließpunkts, vollständige lokale Linienregeln und Vollprüfung beim Commit.
+Exakte Projekt-/Planszenenvergleiche inklusive ungültiger Ziele, Linienarten und
+unbetroffener ungültiger Elemente; wieder dieselbe 10/100-Schraffuren-Messung.
+Keine Renderer-Typabfrage, keine neuen Eingabe-/Fangregeln und kein Ausweiten auf
+Linien-Offset/Seitenstreckung in diesem Einzelauftrag.
