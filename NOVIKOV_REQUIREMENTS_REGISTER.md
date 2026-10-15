@@ -12272,3 +12272,12 @@ Save Wartung durch Aktivität abgebrochen: keine Veränderung. Manueller Wiedera
 Eigene UUID-Testdatenbank, keine Nutzerdaten. Typecheck/ESLint/Build bestanden.
 Keine reale CAD-Geste oder Fünf-Minuten-Retry-Abnahme behauptet. Nächster begrenzter
 Auftrag: konkurrierende Sitzungen auf derselben Testdatenbank (siehe Masterplan).
+
+### AUD14-06 – Konkurrenznachweis (15.10.2026)
+
+recovery-concurrent Browser PASS: Root-Wechsel während Collector-Vorbereitung führt zu
+changed-roots ohne Löschung; veralteter Writer abgewiesen. Zwei parallele Wartungen
+löschen zusammen genau einen verwaisten Payload, erhalten Current/Previous/Fremdprojekt.
+Zwei unabhängige Katalog-/Writerinstanzen mit getrennten DB-Verbindungen in einer Seite,
+kein echter Mehrtab-/Prozessnachweis. Typecheck/ESLint/Build bestanden. Nächster Auftrag:
+verbleibende Belastungs-/Release-Gates risikobasiert einordnen, siehe Masterplan.
