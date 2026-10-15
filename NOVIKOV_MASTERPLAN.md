@@ -504,8 +504,9 @@ sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Ei
 PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil 7 unten.
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
-Nächster Einzelauftrag: Seitenstrecken von Schraffuren über denselben vorbereiteten
-Application-Vertrag begrenzen, einschließlich Cap und vollständigem Vergleich.
+PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
+Nächster Einzelauftrag: Schraffur-Offset über denselben vorbereiteten Vertrag begrenzen;
+vorhandene Mindestgröße/Cap-Regel und vollständigen Prüfpfad vergleichen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1339,3 +1340,44 @@ versuchen, abbrechen oder gültig platzieren; einmal Undo stellt Ausgangszustand
 Einziger Folgeauftrag: Seitenstrecken von Schraffuren auf denselben vorbereiteten
 Application-Vertrag begrenzen, einschließlich Cap/Vorschau und Vollpfadvergleich.
 AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen weiterhin danach.
+
+
+### AUD14-04 Teil 10 – Vorbereitete Schraffur-Seitenstreckung (15.10.2026)
+
+PR331 nach expliziter Freigabe und grüner CI gemergt (1834600).
+Der vorhandene Schraffur-Adapter verarbeitet Punkt und Seite über denselben
+Application-Vertrag. prepareContourEdgeEdit kapselt die bestehende Cap-Berechnung
+und die bestehende Prüfung veränderter Polygonkanten. Target-Cap und Vorschaugeometrie
+verwenden dieselbe Sitzungsvorbereitung mit letztem Eingabe-/Ausgabepunkt; ein bereits
+begrenzter Punkt wird nicht erneut verschoben. Die Cap-Algorithmik bleibt unverändert.
+Auch Linien verwenden die gemeinsame Cap-Vorbereitung, ihre Projektvorschau bleibt
+jedoch Legacy. Keine neue Renderer-Typabfrage oder separate Fang-/Formularlogik.
+
+Eigener validierter Snapshot fixiert die übrigen Schraffurfelder. Eine vorgewärmte
+Cap-Basis wird bei Vorbereitung gegen die eigenen Konturpunkte abgeglichen, damit
+keine ältere Kontur übernommen wird. Ausgabe mutiert die Basis nicht. Platzieren
+bleibt editAtPointer/fullEdit mit vollständiger Kontur-/Projektprüfung und einem Undo.
+
+1010 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Vergleich
+mit vollständiger Aktion und ursprünglichem prepareContourEdge: Rechteck, spitzes
+Dreieck, konkave Kontur, beide Umlaufrichtungen, erste/letzte Seite, 500 Punkte,
+rohe/bereits begrenzte Ziele, Rückbewegung, falscher Kontext, nicht endliche Eingaben,
+veränderte vorgewärmte Basis, Muster-/Planszene, Abbruch und ein Undo. Ungültiger
+unbetroffener Projektinhalt blockiert weiterhin die Bestätigung. Keine Renderingänderung
+und kein neuer visueller Browsernachweis für diesen internen Vorschaufix behauptet.
+
+Rohdaten: benchmarks/hatch-edge-results.json. Node, unabhängige Sitzungs-/Cap-Caches
+für beide Pfade, wechselnde Reihenfolge, ein erster und acht warme Zielwerte;
+Vorbereitung separat, Cap-Arbeit eingeschlossen. Warme Mediane Vollpfad → Vorschau:
+- eine 500-Punkt-Schraffur: 18,62 → 10,52 ms; Vorbereitung 12,10 ms.
+- 100 Schraffuren mit je 100 Punkten: 77,69 → 1,71 ms; Vorbereitung 45,90 ms.
+- 500 Vierecke: 16,25 → 0,12 ms; Vorbereitung 8,17 ms.
+Keine Gesamtframe-/GPU-Garantie. Konturgröße, Kontakt-/Cap-Ereignisse, Projektmaterialisierung
+und Darstellung bleiben Kosten. Der dichte Cap-Fall wird nicht als konstant schnell erklärt.
+
+Abnahme: Seite einer spitzen/konkaven Musterschraffur weit über den zulässigen Bereich
+ziehen; Vorschau bleibt am bisherigen Cap, Zurückziehen funktioniert. Abbrechen oder
+platzieren und einmal Undo. Muster und andere Elemente müssen erhalten bleiben.
+Einziger Folgeauftrag: Offset-Vorschau von Schraffuren über denselben vorbereiteten
+Application-Vertrag begrenzen, vorhandene Mindestgröße/Cap-Regel und Vollpfad vergleichen.
+AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen danach.

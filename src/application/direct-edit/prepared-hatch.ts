@@ -1,3 +1,4 @@
+import { prepareSessionContourEdge } from "./contour.ts";
 import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
@@ -7,11 +8,11 @@ import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
-/** Point edits change only a contour vertex. A validated owned snapshot fixes all
+/** Point/edge edits change only declared contour vertices. A validated owned snapshot fixes all
  * other hatch fields; shared prepared polygon validation checks the changed edges.
  */
-export function prepareHatchPointPreview(session: EditSession): PreparedDirectEditPreview {
-  if (session.target.kind !== "hatch" || session.action !== "point")
+export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
+  if (session.target.kind !== "hatch" || !["point", "edge"].includes(session.action))
     throw Error("Unsupported hatch preview");
   const source = session.base,
     base = createProjectSnapshot(source),
@@ -25,22 +26,29 @@ export function prepareHatchPointPreview(session: EditSession): PreparedDirectEd
   )
     throw Error("Invalid hatch grip");
   const index = session.index;
-  const contour = preparePolygonVertexEdit(hatch.points, [index]);
+  const edge = session.action === "edge" ? prepareSessionContourEdge(session, hatch.points) : null;
+  const contour = edge ? null : preparePolygonVertexEdit(hatch.points, [index]);
   const target = Object.freeze({ ...session.target });
   const anchor = Object.freeze({ ...session.anchor });
   const replacedIds = Object.freeze([hatch.id]);
   function resolve(current: Project, selection: ElementTarget | null, point: Point) {
     if (current !== source || selection?.id !== target.id || selection.kind !== target.kind)
       throw Error("Bearbeitungskontext geaendert.");
-    const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
-    if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
-      throw Error("Ungueltige Zielposition.");
-    const points = hatch!.points.map((p, i) =>
-      i === index ? Object.freeze(translatePoint(p, delta)) : p,
-    );
-    const result = contour.validate(points);
-    if (!result.valid)
-      throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
+    let points: Point[];
+    if (edge) {
+      points = edge.edit(point);
+      points.forEach(Object.freeze);
+    } else {
+      const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
+      if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
+        throw Error("Ungueltige Zielposition.");
+      points = hatch!.points.map((p, i) =>
+        i === index ? Object.freeze(translatePoint(p, delta)) : p,
+      );
+      const result = contour!.validate(points);
+      if (!result.valid)
+        throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
+    }
     Object.freeze(points);
     return Object.freeze({ ...hatch!, points });
   }
