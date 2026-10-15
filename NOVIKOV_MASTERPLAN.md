@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR335 gemergt (13a06c6); Linienpunkt-Vorschau vorbereitet und verglichen (Teil 14 unten).
-Nächster Einzelauftrag: bestehenden Fenster-Achsadapter auch für direkte 2D-Vorschau
-materialisieren; Host-/Anschlussregeln und vollständige Commitprüfung erhalten.
+PR336 gemergt (97913b7); gemeinsamer Fensteradapter auch in 2D geprüft (Teil 15 unten).
+Nächster Einzelauftrag: Seitenstreckung geschlossener Polylinien über die gemeinsame
+vorbereitete Kontur-/Cap-Berechnung anbinden und gegen den Vollpfad messen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1555,3 +1555,48 @@ direkte 2D-Projektvorschau nutzbar machen (gemeinsame Registrierung/Materialisie
 Keine zweite Fensterlogik; Hostgrenzen, T-Anschlüsse, Höhen, Musterfremdinhalte,
 Kontextwechsel und Commit/Undo gegen Vollpfad prüfen; 50/500-Wände-Szenen vergleichen.
 AUD14-04 bleibt offen, übrige Restpfade aus Teil 13 und AUD14-05/06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 15 – Gemeinsame Fenster-Achsvorschau in 2D (15.10.2026)
+
+PR336 nach ausdrücklicher Freigabe und grüner CI gemergt (97913b7).
+Der vorhandene Fensteradapter ist jetzt auch für projectView registriert. evaluate
+und materialize verwenden dieselbe resolve-Funktion mit bestehender Vollaktion auf
+der vorbereiteten Anschlussgruppe. Keine neue Fenster-, Cap-, T- oder Höhenlogik.
+Die Materialisierung übernimmt ausschließlich das bewegte Fenster in die vollständige
+eigene Basis; updateWindow verändert bei dieser Aktion nur dessen relative Position.
+Alle anderen Geschosse, Bauteile, Zeichnungen, Muster und Assets bleiben in der Basis.
+Keine lokalen Scope-Projekte als vollständiges Projekt publizieren. Commit bleibt
+unverändert fullEdit mit vollständiger Projektprüfung und einem Undo.
+
+1020 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Bestehende
+3D-Geometrie-/Konturvergleiche um exakte 2D-Projekt-/Planszenen-/Controllervergleiche
+für Wandgrenzen, Ecken, Doppel-T, schrägen Verlauf und anderes Arbeitsgeschoss mit
+Höhenversatz erweitert. Unbetroffene Musterschraffuren, Kontextwechsel, ungültige
+Ziele, Basis-/Ausgabeschutz, Abbruch, ein Undo und vollständige Commit-Ablehnung
+bleiben geprüft. Kein Rendering geändert, keine neue visuelle Browserabnahme behauptet.
+
+Rohdaten benchmarks/window-plan-results.json, Runner window-plan-profile.ts:
+ein erster und acht warme Werte, Vollpfad/Vorschau-Reihenfolge alterniert,
+Vorbereitung und Planableitung separat, Projektgleichheit außerhalb der Zeitmessung.
+- 5 Geschosse, 50 Wände + 50 Fenster: Vollpfad 0,80 → Vorschau 0,18 ms;
+  Vorbereitung 1,88 ms, Planableitung 0,17 ms.
+- 5 Geschosse, 500 Wände + 500 Fenster: Vollpfad 3,28 → Vorschau 0,13 ms;
+  Vorbereitung 5,99 ms, Planableitung 0,43 ms.
+Unverbundene synthetische Gebäude; keine Garantie für Gesamtframes, GPU, Fangarbeit
+oder große Anschlussnetze. Letztere bleiben AUD14-05. Die materialisierte Fensterliste
+und globale Planableitung bleiben Kosten; die vorhandene Anschlussgruppe wird weiter
+pro Ziel vollständig geprüft.
+
+Abnahme: Fenster in 2D über zwei T-Anschlüsse und bis über beide Wandenden ziehen.
+Es bleibt auf seiner Wand, begrenzt an deren zulässigen Endpositionen. Abbruch,
+Platzierung und ein Undo prüfen; anschließend 3D vergleichen.
+
+Einziger Folgeauftrag: Seitenstreckung geschlossener Polylinien über den gemeinsamen
+vorbereiteten Linienadapter anbinden. Die für Schraffuren geprüfte gemeinsame
+prepareSessionContourEdge-/Cap-Berechnung wiederverwenden, Schließpunkt erhalten,
+Vollpfad/Plan/Commit/Undo und spitze/konkave Konturen vergleichen; mit derselben
+unveränderten Schraffur-Hintergrundlast messen. Kein neuer Renderer-/Fangzweig.
+Diese Aktion nutzt laut Teil 13 noch updateLine mit globaler Validierung; ihre genaue
+Kostenhöhe ist vor Umsetzung zu messen, nicht aus der Linienpunktmessung zu behaupten.
+AUD14-04 bleibt offen; andere Restpfade und AUD14-05/06/07 bleiben erhalten.

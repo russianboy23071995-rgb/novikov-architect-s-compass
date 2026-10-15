@@ -41,10 +41,10 @@ function prepareCapability(
     return prepareHatchContourPreview(session);
   if (session.target.kind === "line" && session.action === "point")
     return prepareLinePointPreview(session);
-  // Remaining registered adapters currently expose geometry patches only.
-  if (projectView) return null;
   if (session.target.kind === "window" && session.action === "axis")
     return prepareWindowAxisPreview(session);
+  // Remaining registered adapters currently expose geometry patches only.
+  if (projectView) return null;
   return prepareWallEndpointPreview(session);
 }
 
