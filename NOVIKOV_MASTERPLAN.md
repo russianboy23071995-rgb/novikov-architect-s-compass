@@ -2429,3 +2429,77 @@ Nächste drei Schritte (nur Schritt 1 aktiv):
 2. Diese Steuerung über den gemeinsamen Wartungsport mit deterministischen Tests implementieren; grobe Heap-Werte nicht als Auslöser verwenden.
 3. Integration praktisch auf Unterbrechung, Wiederanlauf und unveränderte Sicherungen abnehmen; Stunden-/Quota-/Prozessmessungen als offene Belastungsnachweise weiterführen.
 Automatische Wartung bleibt in diesem Schritt aus.
+
+### AUD14-06 – Vertrag für automatische Wartung, erster Pilot (15.10.2026)
+
+#356 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+Dieser Schritt legt den technisch ausführbaren Vertrag fest; keine automatische Löschung
+aktiviert und keine Produktionsdatei geändert. Die folgenden Zeiten sind konservative
+Pilotparameter, keine aus zwei Browserläufen abgeleiteten Leistungsgrenzen.
+
+**Verbindliche Architektur und Sicherheitsgrenze:**
+- Ein Application-Koordinator je laufender Anwendung verwaltet manuelle und automatische
+  Wartung über denselben RecoveryMaintenanceStorage-Port. Keine zweite Löschlogik und
+  keine Wartung pro Werkzeug, Projektkomponente oder geöffnetem Einstellungsfenster.
+- Bestehender Dialog erstellt heute einen eigenen Controller und beendet ihn beim Unmount.
+  Integration muss diesen Besitz in einen langlebigen Recovery-Service verlagern. Schließen
+  des Dialogs beendet weiterhin einen dort gestarteten manuellen Lauf; es darf keinen
+  zweiten automatischen Controller erzeugen. Erfolgreicher Storage-Commit bleibt auch
+  bei spätem Abbruch Erfolg. Bestehende Schutzaussagen des Collectors bleiben unverändert.
+- Automatische Wartung läuft nur bei aktivierter, fehlerfreier lokaler Autosicherung.
+  Ausschalten, Dispose, Kontextwechsel, verborgenes Dokument oder neue Benutzeraktivität
+  verwirft den geplanten Timer bzw. signalisiert Abort für laufende Wartung. Automatische
+  Wartung verändert weder Modell, Undo-History noch die Autosicherungspräferenz.
+- Start nur ohne laufende Sicherung, Import/Wiederherstellung, Migration, manuelle Wartung
+  oder aktive Zeichen-/Bearbeitungs-/Kamerageste. Autosicherung hat Vorrang: Wartung
+  abbrechen, nicht die Sicherung wegen Wartung ablehnen. Sicherheitsprüfung und atomarer
+  Root-Vergleich bleiben auch bei konkurrierenden Tabs zwingend.
+- Ein laufender Aufruf bleibt bis zum Settlen belegt; Abort allein erlaubt keinen zweiten
+  Aufruf. Ein später Callback aus altem Kontext darf keinen neuen Kontext reaktivieren.
+  Tabübergreifende Deduplizierung ist nicht durch einen React-Singleton bewiesen; zunächst
+  verhindert der Storage-Vertrag Datenverlust, eine globale Laufzeit-Sperre bleibt ein
+  gesondert zu prüfender Adapterbedarf. Keine Parallelitätsgarantie über Prozesse behaupten.
+
+**Pilotregeln für Auslösung und Wiederholung:**
+1. Nach einem tatsächlich erfolgreich publizierten V2-Sicherungsstand Bedarf vormerken.
+   Kein Bedarf aus Pointer-Preview, No-op-Save, fehlgeschlagenem Save oder bloßem Start.
+   Ereignis nach publish/Commit liefern, nicht aus busy=false ableiten (auch Fehler/No-op).
+   Für den ersten Pilot genügt dieses konservative Signal; es bedeutet mögliche verwaiste
+   Daten, nicht nachgewiesene. Keine zusätzlichen Hash-/Bild-/Gesamtmodellscans pro Eingabe.
+2. Ein vorgemerkter Bedarf darf nach 30 s ohne Eingabe und ohne aktive Operation starten,
+   wenn seit dem letzten automatischen Versuch mindestens 5 min vergangen sind. Für den
+   ersten Versuch gilt nur die Ruhephase. Eingaben setzen die Ruhephase neu. Kein Polling
+   aller Projekte im Sekundentakt; ein injizierbarer Timer und zusammengefasster Bedarf.
+3. Jeder automatische Start zählt für die 5-min-Sperre, auch Abbruch, Skip und Fehler.
+   Maximal ein unterbrochener Versuch darf für denselben Bedarf nach neuer Ruhephase und
+   Sperrfrist erneut starten. Danach erst ein neuer erfolgreicher V2-Commit oder bewusster
+   manueller Auftrag. Somit kein unbegrenzter Abbruch-/Retry-Kreis ohne neue Arbeit.
+4. success konsumiert den beim Start erfassten Bedarf. Neuere Bedarfsgeneration bleibt
+   erhalten; ein alter Abschluss darf sie nicht löschen. changed-roots erlaubt höchstens
+   denselben einen verzögerten Wiederholungsversuch. unreadable-roots/unreadable-legacy,
+   Quota- und andere Storage-Fehler sperren weitere Automatik in dieser Sitzung bis zu
+   einer erfolgreichen manuellen Wartung. Kein sofortiges Bereinigen als Quota-Rettung.
+5. Manueller Auftrag bleibt verfügbar, ignoriert die automatische Zeit-Sperre, läuft aber
+   niemals parallel. Er beendet/ersetzt einen Timer. Ist bereits ein Lauf aktiv, wird
+   dessen Zustand gezeigt statt ein zweiter gestartet. Abbrechen gilt für diesen Lauf;
+   manueller Abbruch startet keinen automatischen Wiederholungsversuch desselben Bedarfs.
+6. Keine Erfolgs-Popups bei normalen Hintergrundläufen. Fehler/Skip verständlich im
+   vorhandenen Recovery-Status darstellen; nicht als erfolgreiche Sicherung ausgeben.
+   Abort ist kooperativ an vorhandenen Checkpoints, keine garantierte harte Millisekunden-
+   Grenze. Grobe Heap-/Origin-Quota-Messungen sind keine automatischen Löschkriterien.
+
+**Genau ein ausführbarer Folgeauftrag:**
+Den frameworkfreien Application-Koordinator mit injiziertem Timer, Aktivitäts-/Busy-
+Signalen, monotoner Bedarfsgeneration und bestehendem Storage-Port implementieren.
+Noch keine UI-Aktivierung. Bestehenden manuellen Vertrag erhalten oder gezielt darauf
+umstellen; keine DOM-Ereignisse im Application-Kern. Deterministische Tests: Commit vs.
+No-op/Fehler, 30-s-Ruhe, 5-min-Sperre, Coalescing, aktive Geste, Save-Priorität, Dispose/
+Kontextwechsel, verspäteter Erfolg, manueller Konkurrenzstart, begrenzter Retry, Fehler-
+Sperre und erfolgreiche manuelle Entsperrung. Prüfen, dass alle Pfade denselben Port nutzen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Gemeinsamen Koordinator gemäß obigem Vertrag implementieren und deterministisch testen.
+2. Autosave-Commit-Ereignis und zentrale UI-Aktivität anbinden; manuellen Dialog als Consumer
+   derselben Instanz betreiben. Automatik erst nach bestandenen Integrationstests aktivieren.
+3. Browserabnahme mit Speichern, Bearbeiten, Abbruch und Mehrprojekt-Sicherungsvergleich;
+   Stunden-/Quota-/Prozessmessungen als ausdrücklich offene Belastungsnachweise fortführen.
