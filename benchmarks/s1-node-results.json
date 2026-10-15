@@ -1,0 +1,317 @@
+{
+  "status": "PASS",
+  "bytes": 174874,
+  "assets": 0,
+  "logicalPixels": 0,
+  "rows": [
+    {
+      "kind": "XY-11",
+      "iteration": 0,
+      "prepareMs": 24.657600000000002,
+      "pointerMs": 5.6486999999999625,
+      "commitMs": 62.3596
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 0,
+      "prepareMs": 29.828899999999976,
+      "pointerMs": 0.35389999999995325,
+      "commitMs": 62.433700000000044
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 1,
+      "prepareMs": 21.460600000000113,
+      "pointerMs": 2.6301999999998316,
+      "commitMs": 44.64610000000016
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 1,
+      "prepareMs": 22.308199999999943,
+      "pointerMs": 0.05900000000019645,
+      "commitMs": 41.37299999999982
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 2,
+      "prepareMs": 21.847499999999854,
+      "pointerMs": 2.554700000000139,
+      "commitMs": 46.39260000000013
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 2,
+      "prepareMs": 23.56190000000015,
+      "pointerMs": 0.1089999999999236,
+      "commitMs": 49.77629999999999
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 3,
+      "prepareMs": 20.867099999999937,
+      "pointerMs": 3.0920999999998457,
+      "commitMs": 45.60620000000017
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 3,
+      "prepareMs": 21.227100000000064,
+      "pointerMs": 0.049799999999777356,
+      "commitMs": 42.65020000000004
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 4,
+      "prepareMs": 23.445600000000013,
+      "pointerMs": 4.651299999999992,
+      "commitMs": 49.43289999999979
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 4,
+      "prepareMs": 21.045899999999165,
+      "pointerMs": 0.059799999999995634,
+      "commitMs": 43.10440000000017
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 5,
+      "prepareMs": 22.57549999999992,
+      "pointerMs": 2.930500000000393,
+      "commitMs": 52.11059999999998
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 5,
+      "prepareMs": 21.087400000000343,
+      "pointerMs": 0.044399999999768625,
+      "commitMs": 46.44579999999951
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 6,
+      "prepareMs": 19.584199999999328,
+      "pointerMs": 2.907600000000457,
+      "commitMs": 40.7518
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 6,
+      "prepareMs": 30.34979999999996,
+      "pointerMs": 0.07300000000032014,
+      "commitMs": 65.34310000000005
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 7,
+      "prepareMs": 19.69459999999981,
+      "pointerMs": 2.683799999999792,
+      "commitMs": 41.641999999999825
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 7,
+      "prepareMs": 19.519500000000335,
+      "pointerMs": 0.041099999999460124,
+      "commitMs": 45.41240000000016
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 8,
+      "prepareMs": 18.113900000000285,
+      "pointerMs": 2.4349999999994907,
+      "commitMs": 38.75750000000062
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 8,
+      "prepareMs": 19.30999999999949,
+      "pointerMs": 0.0452000000004773,
+      "commitMs": 40.80369999999948
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 9,
+      "prepareMs": 19.159200000000055,
+      "pointerMs": 2.431999999999789,
+      "commitMs": 40.35660000000007
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 9,
+      "prepareMs": 18.342599999999948,
+      "pointerMs": 0.06859999999960564,
+      "commitMs": 38.82470000000012
+    },
+    {
+      "kind": "XY-11",
+      "iteration": 10,
+      "prepareMs": 21.07890000000043,
+      "pointerMs": 2.671699999998964,
+      "commitMs": 42.13080000000082
+    },
+    {
+      "kind": "Z-11",
+      "iteration": 10,
+      "prepareMs": 18.951599999998507,
+      "pointerMs": 0.06270000000040454,
+      "commitMs": 39.68260000000009
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 0,
+      "prepareMs": 19.622699999999895,
+      "pointerMs": 2.959999999999127,
+      "commitMs": 38.628099999999904
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 0,
+      "prepareMs": 19.374900000000707,
+      "pointerMs": 0.04659999999967113,
+      "commitMs": 39.1867000000002
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 1,
+      "prepareMs": 21.49079999999958,
+      "pointerMs": 2.365700000000288,
+      "commitMs": 37.88169999999991
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 1,
+      "prepareMs": 20.78139999999985,
+      "pointerMs": 0.03139999999984866,
+      "commitMs": 39.504800000000614
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 2,
+      "prepareMs": 28.17399999999907,
+      "pointerMs": 4.283800000001065,
+      "commitMs": 83.36360000000059
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 2,
+      "prepareMs": 25.577800000000934,
+      "pointerMs": 0.04869999999937136,
+      "commitMs": 43.29609999999957
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 3,
+      "prepareMs": 20.653199999998833,
+      "pointerMs": 2.290100000000166,
+      "commitMs": 42.11729999999989
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 3,
+      "prepareMs": 22.83060000000114,
+      "pointerMs": 0.031299999998736894,
+      "commitMs": 44.713300000001254
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 4,
+      "prepareMs": 21.639900000000125,
+      "pointerMs": 2.202900000000227,
+      "commitMs": 43.511500000000524
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 4,
+      "prepareMs": 19.73700000000099,
+      "pointerMs": 0.032199999999647844,
+      "commitMs": 44.5025999999998
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 5,
+      "prepareMs": 19.86529999999948,
+      "pointerMs": 2.1249000000007072,
+      "commitMs": 37.11939999999959
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 5,
+      "prepareMs": 20.604999999999563,
+      "pointerMs": 0.03440000000045984,
+      "commitMs": 48.83039999999892
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 6,
+      "prepareMs": 19.232700000000477,
+      "pointerMs": 2.0789000000004307,
+      "commitMs": 40.20219999999972
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 6,
+      "prepareMs": 19.514600000000428,
+      "pointerMs": 0.05249999999978172,
+      "commitMs": 39.01970000000074
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 7,
+      "prepareMs": 21.398799999999028,
+      "pointerMs": 2.104800000000978,
+      "commitMs": 38.9429999999993
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 7,
+      "prepareMs": 19.866899999999077,
+      "pointerMs": 0.030099999999947613,
+      "commitMs": 39.107200000000375
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 8,
+      "prepareMs": 19.389099999998507,
+      "pointerMs": 2.0829000000012456,
+      "commitMs": 37.743099999999686
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 8,
+      "prepareMs": 22.93209999999999,
+      "pointerMs": 0.03240000000005239,
+      "commitMs": 34.383200000000215
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 9,
+      "prepareMs": 23.811999999999898,
+      "pointerMs": 2.1820999999999913,
+      "commitMs": 41.78479999999945
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 9,
+      "prepareMs": 19.088199999998324,
+      "pointerMs": 0.03180000000065775,
+      "commitMs": 39.447799999999916
+    },
+    {
+      "kind": "XY-2",
+      "iteration": 10,
+      "prepareMs": 21.32259999999951,
+      "pointerMs": 2.992000000002008,
+      "commitMs": 41.76310000000012
+    },
+    {
+      "kind": "Z-2",
+      "iteration": 10,
+      "prepareMs": 24.655299999998533,
+      "pointerMs": 0.04379999999946449,
+      "commitMs": 39.709600000001956
+    }
+  ],
+  "limits": "First iteration is process-warm, not browser cold. Codec roundtrip is not persisted autosave. IFC external acceptance separate."
+}

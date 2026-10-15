@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – AUD14-07 Bestandsabgleich abgeschlossen, Gesamtprüfprofil festgelegt (jüngster Abschnitt AUD14-07). Genau ein nächster Auftrag: dieses Profil als reproduzierbare Fixture und gemeinsamen Prüflauf umsetzen und ausführen. Recovery-Release-Gates bleiben offen. Historische Nachträge sind Belege, keine konkurrierenden Arbeitsaufträge.
+Aktueller Arbeitsauftrag: 15.10.2026 – S1-Modellvergleich und erster Produktions-Workspace-Lauf abgeschlossen, Gesamtabnahme bleibt offen. Genau ein nächster Auftrag: gemessene Geschoss-/Abbildwechselpausen phasenweise reproduzieren und den dominanten belegten Pfad korrigieren (jüngster AUD14-07-Abschnitt). Recovery-Release-Gates bleiben erhalten.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2774,3 +2774,78 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    andernfalls Audit-Abnahme mit offenen Release-/Kapazitätsgrenzen dokumentieren.
 3. Nach diesem Statusabgleich genau einen nächsten fachlichen CAD-Schritt auswählen.
    Die zurückgestellte Speichererweiterung und Recovery-Release-Gates bleiben vorgemerkt.
+
+### AUD14-07 – S1 erster kombinierter Nachweis, Restabnahme offen (15.10.2026)
+
+#364 nach grüner CI ausdrücklich freigegeben gemergt; Basis main 2228770.
+Nur Prüfcode/Prüfkonfiguration, Tests und Dokumentation geändert. Keine neue Produktlogik.
+`s1-fixture.ts` erzeugt fünf Geschosse mit 300 Wänden, 200 Fenstern, 50 achteckigen
+Schraffuren, 500 Linien und fünf Abbildern. Je Geschoss eine Ecke und zehn T-Anschlüsse.
+G: 174.874 portable Bytes; GB: 63.016.967 Bytes mit 20 verschiedenen echten PNGs,
+20.971.520 logische Pixel. Synthetische Stresstestgeometrie, kein fertiger Schulentwurf.
+
+`s1-check.ts` / `s1.test.ts`: pro Variante zwei Auswahlfälle (11-Wand-T-Gruppe und zwei
+Wände über EG/4. OG), je elf XY/Z-Vergleiche, insgesamt 44 Bewegungsfälle je Variante.
+Vollpfad-XY und explizites vollständig validiertes Z-Erwartungsmodell stimmen mit Commit
+überein. Vorschauflächen als exakte Multimenge verglichen (Patchkomposition ändert die
+Reihenfolge), inklusive stationärer Nachbarn bei gelösten Anschlüssen. Ein Historyschritt,
+Undo/Redo-Inhalt, unveränderte Basis nach verworfener Vorschau, verbundener Endpunkt,
+portable Rundreise, Recovery-Codec-Rundreise und IFC-Rundreise/300 Wände/200 Fenster/
+fünf Geschosse bestanden. Dies ersetzt keine externe IFC-Abnahme oder Pixelvergleich.
+Zusätzliche 51-Wand-Gruppe mit 100 Fremdwänden erneut vollständig gegen Vollpfad geprüft:
+Vorbereitung 14,009 ms, sieben Vorschauen 11,756–16,319 ms. Kein Browsergruppen-Nachweis.
+
+Echter CadWorkspace im separaten Produktionsbuild auf Port8085: alle Geschosse in G/GB
+gewechselt, alle fünf Abbilder in G geöffnet, Gesamtgebäude in 3D, Orbit/Pan/Einpassen
+bedient. In GB Einzelwand per On-Demand-Präzision 0,2 m bei 90 Grad bewegt, Undo/Redo,
+Datei gespeichert, über Dateidialog nach Prüfung übernommen, IFC exportiert. Lokalen
+Snapshot tatsächlich geprüft/wiederaufgenommen und erneut gespeichert: vollständiger
+serializeProject-Vergleich der beiden Downloads identisch, 20 Bilder erhalten,
+Wandanfang (1; 5,2), zehn externe T-Anschlüsse wie vorgesehen gelöst. Vorhandene fremde
+Testslots nicht gelöscht. Nutzeranwendung Port8080 unangetastet.
+
+Umgebung: Windows, Ryzen 5 3600, ca. 16 GiB physischer RAM (17.128.132.608 Bytes),
+RTX4070, Chrome155/IAB, Node24.19.0. Browser-Startviewport 1280×720 DPR1;
+Browserwerkzeuge änderten die sichtbare Fläche später (Screenshot 1738×1266).
+Deshalb kein kontrollierter Viewport-/Gerätevergleich. Keine Prozess-/GPU-Spitzenmessung.
+Rohdaten: s1-node-results, s1-browser-g/gb-results, s1-workspace-g/gb-results,
+s1-group-results und s1-ui-recovery-results (je .json im benchmarks-Verzeichnis).
+
+| Browseraktion | G | GB | Aussage |
+| --- | --- | --- | --- |
+| XY T-Gruppe, warme Pointer Median / Maximum | 2,35 / 3,20 ms | 1,40 / 17,50 ms | Zehn warme Application-Proben, keine Framezeit; Reihenfolge/JIT/GC nicht kontrolliert. |
+| XY T-Gruppe, warmer Commit Median / Maximum | 42,95 / 49,10 ms | 24,70 / 46,20 ms | Vollprüfung bleibt erhalten; kein Nachweis, dass Bilder beschleunigen. |
+| Geschosswechsel, beobachtete lange Tasks | 90–118 ms | 120–206 ms | Je fünf Wechsel, zeitlich dem Klick zugeordnet; Ursache noch nicht phasenweise isoliert. |
+| Frühe lange Tasks | bis 289 ms | bis 2024 ms | GB enthält PNG-Erzeugung im Harness; nicht als Dateiladezeit ausgeben. |
+
+**Offene S1-Abnahme:** zehn wiederholte UI-Gesten je Fall, kontrollierter Kaltstart,
+Maus/Shift-Vergleich der Gruppenbewegungen XY/Z und Endpunkt im realen Workspace,
+GB-Abbild-/Kameratrace, vollständiger IFC-Höhen-/Containment-Nachweis und Browser-Neustart
+mit Wiederaufnahme fehlen noch. Modellvergleich läuft synchron und serialisiert für
+Gleichheitsbelege große Daten; seine Pausen gehören zum Harness. UI-Trace wurde vor diesem
+Vergleich beendet. Kein Browserabsturz-/Lagbeleg aus diesem Testvergleich ableiten.
+Statusanzeige des ursprünglichen Rohreports bleibt oben 'running'; `model.status=PASS`
+ist der Abschlussbeleg. Harness zeigt künftig zusätzlich 'complete'.
+
+Aktuelle Auditzuordnung (keine pauschale Erledigung): AUD14-01 gemeinsamer Budgetvertrag
+fokussiert belegt; AUD14-02 gemeinsame Snapshots jetzt zusätzlich in S1 verglichen;
+AUD14-03 Ressourcenteilbelege erhalten, S1-GPU-Gesamtabnahme offen; AUD14-04 Legacy-Pfade,
+globale Ableitung und nun Wechselpausen offen; AUD14-05 große Gruppen/Kameravorbereitung
+offen; AUD14-06 Inhaltsschutz zusätzlich über echte S1-Wiederaufnahme belegt, frühere
+Release-Gates unverändert offen; AUD14-07 Gesamtgate offen. Zusätzlich zeigt der erste
+Recovery-Prüfdialog nur 60 Wände/40 Fenster des Arbeitsgeschosses, der Übernahmedialog
+korrekt 300/200: Darstellungsnachtrag P2, kein Datenverlust (vollständig verglichen).
+
+Verifikation: 1084 Tests bestanden, Benchmark-Typecheck, gezieltes ESLint, regulärer
+Build und isolierter Produktionsbuild bestanden. Sandbox-Teststart konnte Unterprozesse
+nicht erzeugen; unveränderte Suite außerhalb der Sandbox erfolgreich. Keine Testausfälle
+als Produktfehler interpretiert. Ein neuer S1-Regressionstest ist Teil von `npm test`.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Geschoss-/Abbildwechsel in S1 phasenweise instrumentieren (Application, Ableitung,
+   React/DOM und Bilddarstellung), wiederholt mit festem Viewport messen. Genau den
+   dominanten reproduzierten Pfad korrigieren, sofern isoliert; sonst Diagnose begrenzen.
+2. Danach offene S1-UI-/Shift-/Kaltstart-/IFC-Höhenprüfungen abschließen und den kleinen
+   Recovery-Anzeigebefund korrigieren. Große Gruppen bleiben gesondert messpflichtig.
+3. Auditstatus erneut abgleichen und nächsten fachlichen CAD-Auftrag auswählen;
+   Speichererweiterung zurückgestellt, Langzeit-/Quota-/Mehrtab-Release-Gates offen.

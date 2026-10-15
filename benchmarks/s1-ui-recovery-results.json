@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "workflow": "GB: wall s0-w0 moved 0.2m at 90 degrees, Undo, Redo, save, reopen confirmed, local snapshot restored and saved; full serialized content equal",
+  "counts": {
+    "IFCWALL": 300,
+    "IFCWINDOW": 200,
+    "IFCBUILDINGSTOREY": 5
+  },
+  "wallStart": {
+    "x": 1,
+    "y": 5.2
+  },
+  "remainingGroundTees": 0,
+  "images": 20,
+  "limitations": "IFC external Archicad check not repeated. Restore tested in current document, not cold reload."
+}
