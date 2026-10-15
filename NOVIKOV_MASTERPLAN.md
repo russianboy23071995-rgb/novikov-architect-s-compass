@@ -501,8 +501,9 @@ gemergt), Fenster-Achsvorschau PR325 gemergt (f734413). Gemeinsamer Application-
 und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzelauftrag:
 PR327 ist gemergt (035052c). Beide Wandachsenden, Kürzen und schräge Punktbewegung
 sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Einzelauftrag:
-verbleibende Schraffur-Geometrieprüfungen in der Mausvorschau messen und gegen die
-vorbereitete gemeinsame Basis abgrenzen; kein neues Werkzeug und kein Rendererumbau.
+PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil 7 unten.
+Nächster Einzelauftrag: direkte Schraffur-Punktvorschau auf die gemeinsame vorbereitete
+Basis begrenzen und gegen den vollständigen Pfad vergleichen; kein Renderer-Typschalter.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1227,3 +1228,37 @@ kein GPU-/Heap-/Gesamtframenachweis. Frühere Pilotmessung separat erhalten.
 Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen im Pointerpfad messen und
 sicher vorbereiten (AUD14-04). Weitere Wandgesten bleiben dokumentierte Migrationsschuld;
 AUD14-05/06/07 sind weiterhin offen.
+
+
+### AUD14-04 Teil 7 – Räumliche Konturprüfung (15.10.2026)
+
+PR328 nach ausdrücklicher Freigabe und grüner CI gemergt (6e4df27).
+Befund: prepareStoreyTranslation prüft verschobene Schraffuren je Ziel mit hatchSchema;
+auch direkte Konturaktionen erreichen validateSimplePolygon. Dessen Bounds-Vorfilter
+wurde bisher erst nach Bildung jedes Kantenpaares angewendet.
+
+Gemeinsamer Fix in Geometry: vorhandener createBoxIndex begrenzt Kandidaten für
+Konturen über 128 Punkte. Modelltoleranz plus Rundungsreserve erweitern die Suche;
+unveränderte exakte Kontaktprädikate und Paarreihenfolge erhalten das Ergebnis
+inklusive erster Fehlerstelle. Kleine Konturen behalten den einfachen Pfad.
+Keine Werkzeugkopie, keine Rendereränderung, keine ungeprüfte Translationsannahme:
+bei großen Koordinaten kann auch verschobene Geometrie kollabieren. Vollständige
+Commit-Prüfung und History bleiben erhalten. Indexaufbau weiterhin pro Prüfung.
+
+Nachweis: 1002 Tests, beide Typechecks, fokussiertes Lint und Produktionsbuild.
+Eingefrorener bisheriger Validator als Oracle für konvexe/konkave, berührende,
+vertauschte, kollabierende und nicht endliche Konturen. Große Schraffurbewegung:
+Vorschau/Projektvergleich, stale Kontext, numerischer Kollaps und genau ein Undo.
+Keine neue visuelle Browserabnahme für diesen internen Geometriefix behauptet.
+
+Messung: benchmarks/polygon-validation-results.json; reine Polygonprüfung inklusive
+Indexaufbau, ein erster und acht warme Werte, alternierende Reihenfolge.
+500 Punkte warme Mediane: konvex 4,84 → 1,83 ms, gezackt 6,58 → 4,09 ms.
+2000 Punkte: 67,24 → 4,15 ms bzw. 119,38 → 64,75 ms. Kleine Fälle sind
+rausch-/Overhead-empfindlich. Keine Gesamtframegarantie; dicht überlappende Bounds
+bleiben quadratisch, Kandidaten werden nicht abgeschnitten. Wiederholte Prüfungen
+unveränderter Schraffuren im vollständigen Legacy-Projektpfad bleiben offen.
+
+Einziger Folgeauftrag: direkte Schraffur-Punktvorschau über gemeinsamen vorbereiteten
+Application-Einstieg begrenzen; Vollpfad-/Commit-/Undo-Gleichheit und Pointerarbeit
+messen. AUD14-04 bleibt offen, AUD14-05/06/07 folgen danach. A04 gilt weiter.

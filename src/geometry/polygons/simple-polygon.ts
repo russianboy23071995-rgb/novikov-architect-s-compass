@@ -1,3 +1,4 @@
+import { createBoxIndex, type Box2 } from "../spatial/box-index.ts";
 import type { Point2 } from "../primitives/point.ts";
 import { intersectSegments } from "../intersections/segments.ts";
 import { projectDirection } from "../projections/direction.ts";
@@ -39,15 +40,46 @@ function onSegment(point: Point2, a: Point2, b: Point2): boolean {
  * One simple, implicitly closed ring in metres, with no repeated closing vertex.
  * No repair, reordering or mutation. Both windings and redundant straight vertices
  * are allowed; holes, self-touching and overlapping edges are not.
- * Uses model compatibility (never screen snap tolerance). O(n²), for validation
+ * Uses model compatibility (never screen snap tolerance). Indexed candidates, for validation
  * at action boundaries, not pointer-time snapping. Unrepresentable arithmetic fails closed.
  */
 export function validateSimplePolygon(vertices: readonly Point2[]): PolygonValidation {
-  return validatePolygon(vertices, allEdgePairs(vertices.length));
+  return validatePolygon(vertices);
 }
 
 function* allEdgePairs(count: number): Generator<readonly [number, number]> {
   for (let i = 0; i < count; i++) for (let j = i + 1; j < count; j++) yield [i, j];
+}
+
+/** Conservative candidate search; exact predicates below still decide every contact.
+ * Ordered per source edge to retain the historical first-error diagnostics.
+ * Dense overlapping bounds can still require O(n²) work; no pairs are truncated.
+ */
+function* nearbyEdgePairs(bounds: readonly Box2[]): Generator<readonly [number, number]> {
+  if (bounds.length <= 128) {
+    yield* allEdgePairs(bounds.length);
+    return;
+  }
+  const index = createBoxIndex(bounds.map((box, value) => ({ box, value })));
+  for (let i = 0; i < bounds.length; i++) {
+    const box = bounds[i]!;
+    // Round outward conservatively even at large coordinates. Clamp overflow;
+    // the source boxes are finite, so an infinite search extent is unnecessary.
+    const margin =
+      2 * MAX_MODEL_TOLERANCE_METRES +
+      4 * Number.EPSILON * Math.max(1, ...Object.values(box).map(Math.abs));
+    const query = {
+      minX: Math.max(-Number.MAX_VALUE, box.minX - margin),
+      minY: Math.max(-Number.MAX_VALUE, box.minY - margin),
+      maxX: Math.min(Number.MAX_VALUE, box.maxX + margin),
+      maxY: Math.min(Number.MAX_VALUE, box.maxY + margin),
+    };
+    for (const j of index
+      .query(query)
+      .filter((j) => j > i)
+      .sort((a, b) => a - b))
+      yield [i, j];
+  }
 }
 
 /** Only pairs incident to a changed vertex can gain a new contact. O(k*n). */
@@ -86,7 +118,7 @@ export function preparePolygonVertexEdit(input: readonly Point2[], indices: read
 
 function validatePolygon(
   vertices: readonly Point2[],
-  pairs: Iterable<readonly [number, number]>,
+  pairs?: Iterable<readonly [number, number]>,
 ): PolygonValidation {
   const fail = (
     reason: Extract<PolygonValidation, { valid: false }>["reason"],
@@ -131,7 +163,7 @@ function validatePolygon(
     };
   });
   const margin = 2 * MAX_MODEL_TOLERANCE_METRES;
-  for (const [i, j] of pairs) {
+  for (const [i, j] of pairs ?? nearbyEdgePairs(bounds)) {
     const first = bounds[i]!,
       second = bounds[j]!;
     if (
