@@ -1,0 +1,152 @@
+{
+  "name": "novikov-recovery-v2-pilot-retention-6aee09eb-5b97-416e-9514-463ad1b535f2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "started": "2026-10-15T15:58:49.598Z",
+  "snapshots": [
+    {
+      "scenario": "stable",
+      "step": 1,
+      "past": 1,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 26261926,
+        "total": 56482834
+      }
+    },
+    {
+      "scenario": "stable",
+      "step": 10,
+      "past": 10,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 30852022,
+        "total": 65473202
+      }
+    },
+    {
+      "scenario": "stable",
+      "step": 50,
+      "past": 50,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 74302479,
+        "total": 126299759
+      }
+    },
+    {
+      "scenario": "stable",
+      "step": 100,
+      "past": 100,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 106928017,
+        "total": 173715329
+      }
+    },
+    {
+      "scenario": "stable",
+      "step": 110,
+      "past": 100,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 92653613,
+        "total": 173721913
+      }
+    },
+    {
+      "scenario": "replacement",
+      "step": 1,
+      "past": 1,
+      "handles": 1,
+      "uniquePayloads": 1,
+      "logicalBase64Characters": 224368,
+      "storedPayloads": 1,
+      "heapSample": {
+        "used": 78747801,
+        "total": 139894301
+      }
+    },
+    {
+      "scenario": "replacement",
+      "step": 10,
+      "past": 10,
+      "handles": 2,
+      "uniquePayloads": 2,
+      "logicalBase64Characters": 448384,
+      "storedPayloads": 2,
+      "heapSample": {
+        "used": 97470484,
+        "total": 148248136
+      }
+    },
+    {
+      "scenario": "replacement",
+      "step": 50,
+      "past": 50,
+      "handles": 6,
+      "uniquePayloads": 6,
+      "logicalBase64Characters": 1345216,
+      "storedPayloads": 6,
+      "heapSample": {
+        "used": 138403018,
+        "total": 183046234
+      }
+    },
+    {
+      "scenario": "replacement",
+      "step": 100,
+      "past": 100,
+      "handles": 11,
+      "uniquePayloads": 11,
+      "logicalBase64Characters": 2466316,
+      "storedPayloads": 11,
+      "heapSample": {
+        "used": 175450478,
+        "total": 237495050
+      }
+    },
+    {
+      "scenario": "replacement",
+      "step": 110,
+      "past": 100,
+      "handles": 11,
+      "uniquePayloads": 11,
+      "logicalBase64Characters": 2466004,
+      "storedPayloads": 12,
+      "heapSample": {
+        "used": 114665356,
+        "total": 219614468
+      }
+    }
+  ],
+  "disk": {
+    "heads": 2,
+    "payloads": 12,
+    "currentPreviousKeys": 3,
+    "notReferencedByV2Heads": 9,
+    "logicalPayloadJsonBytes": 2691213
+  },
+  "status": "PASS",
+  "checks": [
+    "100 history entries",
+    "100 Undo/Redo each scenario",
+    "stale writers rejected",
+    "both project heads restored after reopen"
+  ],
+  "finished": "2026-10-15T15:58:53.117Z"
+}

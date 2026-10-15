@@ -12085,3 +12085,22 @@ nachgewiesen; vollständige Abhängigkeiten bleiben Pflicht. Kein Frame-/p95-Nac
 Priorisierung: nun AUD14-06 Langsitzungs-/History-/Bild-/Recovery-Messung, danach sichere
 Aufbewahrung, anschließend AUD14-07 Gesamtgate. Großer Gruppenrest aus AUD14-05 und
 AUD14-04-Restschuld werden nicht geschlossen oder durch ein Gruppenlimit kaschiert.
+
+
+### AUD14-06 – Messnachweis und begrenzter Folgeauftrag (15.10.2026)
+PR346 gemergt (9c38ffc). session-retention.html/.ts und session-retention-results.json:
+220 Modelländerungen, zwei isolierte Projektslots, 1/10/50/100/110 History-Tiefen.
+Unveränderte Bilder teilen einen Handle; wechselnde Bilder halten bei 110 Schritten elf
+Handles in past/present. V2 hält zwölf Payloads, drei davon durch current/previous beider
+Slots referenziert, neun nicht. Keine Löschung und kein nachgewiesenes JS-Speicherleck.
+Je 100 Undo/Redo, konkreter CAS-Konflikt auf zweiter Verbindung sowie DB-Neuöffnung mit
+Höhen-/Bildvergleich bestanden. Benchmark-Typecheck, Lint und App-Build bestanden.
+Keine reale Langzeit-/Prozess-/GPU-/Quota-Messung; Bildentfernung und Browserrestart offen.
+Die Heap-Stichproben enthalten Messcode und unkontrollierte GC, sind keine Retained-Heap-Zusage.
+
+Nächster einziger Auftrag: transaktionaler V2-Bereinigungspilot ausschließlich in isolierter
+Testdatenbank. Alle aktuellen/vorherigen Slots, V1-Originale, unbekannte/beschädigte Roots,
+konkurrierende Writer und Undo-Payload-Wiederbereitstellung schützen. Root-Abfrage und
+Löschung müssen atomar gegen Veröffentlichung/Migration sein. Erst danach getrennte
+Produktionsanbindung mit Quota/Abbruch/Langlaufnachweis. Detaillierte Schutzgrenze und drei
+Folgeschritte im Masterplan AUD14-06 Teil 1. AUD14-06 insgesamt bleibt teilweise/offen.
