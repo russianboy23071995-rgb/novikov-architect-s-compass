@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR337 gemergt (744eafc); PR338 offen. Polylinien-Offset auf dessen Stand geprüft (Teil 17).
-Nächster Einzelauftrag: Knicken geschlossener Polylinien über gemeinsame Kontureinfügung
-vorbereiten; Punktanzahl einschließlich Schließpunkt und vollständige Commitprüfung erhalten.
+PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglichen (Teil 18).
+Nächster Einzelauftrag: direktes Wand-Strecken messen und im gemeinsamen Endpunktadapter
+begrenzen; Fenster-/Anschlussabhängigkeiten und vollständige Commitprüfung erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1690,3 +1690,47 @@ Nur Schritt 1 ist aktiv; 2 und 3 sind Ausblick, keine parallelen Aufträge:
 3. Lokale räumliche 3D-Fangsuche (AUD14-05), sobald AUD14-04 samt Restbefunden abgenommen
    ist; Quellen-/Kamera-/Sichtbarkeitskontext und vollständige Anschlussgruppe bewahren.
 AUD14-04 bleibt offen. Restpfade aus Teil 13 und AUD14-06/07 werden nicht gestrichen.
+
+
+### AUD14-04 Teil 18 – Vorbereitetes Polylinien-Knicken (15.10.2026)
+
+PR338 (fe9f83e) und anschließend PR339 (395b458) nach ausdrücklicher gemeinsamer
+Freigabe und jeweils grüner CI in main gemergt. #339 zuvor auf main umgestellt.
+
+Vorhandener Linienadapter verarbeitet jetzt insert über prepareContourInsertion,
+dieselbe Geometrievorbereitung wie bei Schraffuren. Vollständige Zielkonturprüfung
+inklusive Umlaufrichtung bleibt aktiv; der Linien-Schließpunkt wird wieder angefügt,
+validateLineGeometry prüft anschließend die Linie. Keine neue Geometrie-/Fang-/Rendererlogik.
+MAX_LINE_POINTS ist die gemeinsame unveränderte Schema-/Vorbereitungsgrenze 10000.
+Sie zählt bei geschlossenen Polylinien den doppelten Schließpunkt mit: 9999 gespeicherte
+Punkte können auf 10000 wachsen, 10000 nicht auf 10001. Offene Pfade und der doppelte
+Schließgriff als Kantenindex bleiben ausgeschlossen. Commit vollständig, ein Undo.
+
+1032 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Exakte
+Projekt-/Patch-/Planszenenvergleiche für konkave Konturen, beide Umlaufrichtungen,
+erste/letzte Kante, absolute Ziele unabhängig vom Ursprung, eigene festfarbige Linienart,
+Nullkanten/Selbstschnitt/nicht endliche Ziele, Kontextwechsel, Punktgrenze einschließlich
+Schließpunkt, offene Pfade, Abbruch und Undo. Ungültige fremde Schraffur blockiert Commit.
+Keine neue visuelle Browserabnahme behauptet.
+
+Rohdaten line-insert-results.json / Runner line-insert-profile.ts. Ein erster und acht
+warme Werte, alternierende Vollpfad-/Vorschaureihenfolge, Vorbereitung separat, exakte
+Projektgleichheit je Ziel außerhalb der Zeitmessung. Vollpfad → Vorschau:
+- 100 Schraffuren à 100 Punkte: 37,83 → 0,294 ms; Vorbereitung 40,59 ms.
+- 10 Schraffuren à 100 Punkte: 4,24 → 0,275 ms; Vorbereitung 3,96 ms.
+- 500 Konturpunkte + eine Hintergrundschraffur: 4,65 → 1,20 ms; Vorbereitung 8,49 ms.
+Zielkontur-/Linienprüfung, Vorbereitung, Materialisierung und Planableitung bleiben
+Kosten; keine Frame-/GPU-Garantie oder universelle Skalierungszusage.
+
+Abnahme: geschlossene Polylinie → Knicken an erster/letzter Seite → Punkt bewegen →
+abbrechen oder platzieren → einmal Undo; Schließpunkt und eigene Linienart erhalten.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Direktes Wand-Strecken messen und den gemeinsamen Endpunktadapter dafür erweitern,
+   soweit die Geometrie-/Abhängigkeitsvergleiche das tragen. Fenster, gelöste Anschlüsse,
+   Nachbarwände, Körpergriffe und fremde Endpunkte gegen den Vollpfad prüfen.
+2. AUD14-05: räumliche lokale 3D-Fangsuche und große Anschlussgruppen nach Abnahme der
+   verbleibenden AUD14-04-Befunde; Kamera-/Sichtbarkeitskontext und Rangfolge erhalten.
+3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung prüfen; gültige Sicherungen,
+   Undo-Stände und konkurrierende Schreiber bei jeder Bereinigung schützen.
+AUD14-04 bleibt offen. Weitere Restpfade aus Teil 13 sowie AUD14-07 bleiben dokumentiert.

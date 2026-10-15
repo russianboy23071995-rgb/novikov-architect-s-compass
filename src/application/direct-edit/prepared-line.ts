@@ -1,3 +1,5 @@
+import { MAX_LINE_POINTS } from "../../domain/project/schema.ts";
+import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { closedContour, prepareSessionContourEdge } from "./contour.ts";
 import { replacePathVertex, translatePoint } from "../../geometry/primitives/point.ts";
@@ -11,7 +13,10 @@ import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
 /** Snapshot validates fixed style/scope fields once. Every target retains all line geometry rules. */
 export function prepareLinePreview(session: EditSession): PreparedDirectEditPreview {
-  if (session.target.kind !== "line" || !["point", "edge", "offset"].includes(session.action))
+  if (
+    session.target.kind !== "line" ||
+    !["point", "edge", "offset", "insert"].includes(session.action)
+  )
     throw Error("Unsupported line preview");
   const source = session.base,
     base = createProjectSnapshot(source),
@@ -20,10 +25,15 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
     index = session.index ?? (session.action === "offset" ? 0 : null);
   if (!line || index === null || !Number.isInteger(index) || !line.points[index])
     throw Error("Invalid line grip");
-  const ring = session.action === "edge" ? closedContour(base, session.target) : null;
-  if (session.action === "edge" && !ring)
+  const ring = ["edge", "insert"].includes(session.action)
+    ? closedContour(base, session.target)
+    : null;
+  if (["edge", "insert"].includes(session.action) && !ring)
     throw Error("Zuerst eine geschlossene Konturkante auswählen.");
-  const edge = ring ? prepareSessionContourEdge(session, ring) : null;
+  const edge = session.action === "edge" && ring ? prepareSessionContourEdge(session, ring) : null;
+  if (session.action === "insert" && line.points.length >= MAX_LINE_POINTS)
+    throw Error("Maximale Anzahl der Linienpunkte erreicht.");
+  const insert = session.action === "insert" && ring ? prepareContourInsertion(ring, index) : null;
   const target = Object.freeze({ ...session.target }),
     anchor = Object.freeze({ ...session.anchor });
   const pinned: EditSession = Object.freeze({ ...session, base, target, anchor });
@@ -34,7 +44,10 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
     if (current !== source || selection?.id !== target.id || selection.kind !== target.kind)
       throw Error("Bearbeitungskontext geändert.");
     let points: Point[];
-    if (offset) {
+    if (insert) {
+      const contour = insert(point);
+      points = [...contour, { ...contour[0]! }];
+    } else if (offset) {
       const contour = offsetContourPoints(pinned, point);
       points = [...contour, { ...contour[0]! }];
     } else if (edge) {

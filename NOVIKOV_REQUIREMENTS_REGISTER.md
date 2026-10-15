@@ -11972,3 +11972,17 @@ Einziger nächster Auftrag: Knicken geschlossener Polylinien vorbereiten mit gem
 Kontureinfügung und korrekter Punktgrenze einschließlich Schließpunkt. Ausblick danach:
 Wand-Strecken, dann AUD14-05 nach AUD14-04-Abnahme. Abschlussberichte nennen künftig
 immer drei Schritte; nur einer aktiv. Andere Restpfade/AUD14-06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 18 – Polylinien-Knicken (15.10.2026)
+PR338/339 nach ausdrücklicher Freigabe gemergt (fe9f83e/395b458). Gemeinsamer Linienadapter
+nutzt prepareContourInsertion, vollständige Zielkontur-/Linienprüfung, Schließpunkt,
+Vollcommit und ein Undo. MAX_LINE_POINTS=10000 gemeinsam mit Schema; Schließpunkt zählt mit.
+1032 Tests, beide Typechecks, Lint und Build bestanden; Projekt-/Patch-/Planszenenvergleich,
+konkave Konturen, beide Umlaufrichtungen, eigene Linienart, ungültige Ziele, Punktgrenze,
+Kontext, Abbruch und Undo. Keine neue Browserabnahme. line-insert-results.json:
+100 fremde 100-Punkt-Schraffuren: 37,83 → 0,294 ms warm; Vorbereitung 40,59 ms separat.
+Keine Framegarantie. Aktiver Folgeauftrag: direktes Wand-Strecken messen und gemeinsam
+vorbereiten mit vollständigem Fenster-/Anschluss-/Commitvergleich. Ausblick danach
+AUD14-05 lokale 3D-Fangsuche (nach AUD14-04-Abnahme), dann AUD14-06 Langzeitspeicher/Recovery.
+Andere Restpfade und AUD14-07 bleiben offen.
