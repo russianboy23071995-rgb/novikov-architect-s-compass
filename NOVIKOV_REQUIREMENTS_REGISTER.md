@@ -12281,3 +12281,15 @@ löschen zusammen genau einen verwaisten Payload, erhalten Current/Previous/Frem
 Zwei unabhängige Katalog-/Writerinstanzen mit getrennten DB-Verbindungen in einer Seite,
 kein echter Mehrtab-/Prozessnachweis. Typecheck/ESLint/Build bestanden. Nächster Auftrag:
 verbleibende Belastungs-/Release-Gates risikobasiert einordnen, siehe Masterplan.
+
+### AUD14-06 / AUD14-07 – Restnachweise risikobasiert eingeordnet (15.10.2026)
+
+#361 gemergt. Recovery nicht pauschal abgeschlossen. Unmittelbar noch echter Zwei-Tab-
+Lifecycle in isolierter DB; vorhandener Einseiten-Konkurrenznachweis ersetzt ihn nicht.
+Stundenbetrieb, echte Quota-Erschöpfung im wegwerfbaren Profil sowie Prozess-/Raster-/GPU-
+Messung bleiben Release-/Kapazitätsgates vor Public Beta. Initiales zweistündiges Testprofil
+ist eine Prüfplanung, keine garantierte Nutzungsdauer. Keine Nutzer-Origin absichtlich füllen.
+Konkreter Verlust gültiger Sicherungen/falscher Commit-Erfolg/Retry-Sturm bleibt P0-Stop.
+Fehlende Extremmessung allein rechtfertigt keinen Speicherausbau und blockiert nicht alle
+CAD-Aufträge. Danach AUD14-07 Gesamt-Abnahme, keine beliebige neue Feature-Etappe.
+Abnahmekriterien und genau ein Folgeauftrag stehen im jüngsten Masterplanabschnitt.
