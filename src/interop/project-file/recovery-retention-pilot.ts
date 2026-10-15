@@ -1,3 +1,5 @@
+import type { RetentionResult } from "../../application/project-files/recovery-maintenance.ts";
+export type { RetentionResult } from "../../application/project-files/recovery-maintenance.ts";
 import {
   parseRecoveryRecord,
   prepareRecoverySnapshot,
@@ -39,9 +41,6 @@ function stored(record: RecoveryRecordV2) {
     ...(record.previous ? { previous: strip(record.previous) } : {}),
   };
 }
-export type RetentionResult =
-  | { status: "collected"; deleted: number; retained: number }
-  | { status: "skipped"; reason: "unreadable-roots" | "changed-roots" | "unreadable-legacy" };
 /** Diagnostic-only entry point. No production caller. Validation may yield; deletion never
  * trusts that old read: all heads are compared again inside the serializable write transaction.
  * Valid V1 snapshots embed their image bytes and remain untouched. Unknown legacy data blocks GC.

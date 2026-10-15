@@ -12139,3 +12139,16 @@ Frame-/p95-/Langlaufnachweis, kleine Bilder; Kosten nicht mit schweren BIM-Model
 Nächster Auftrag: explizite abbrechbare Wartungsaktion über Application-/Storage-Port samt
 Quota-/Abbruchschutz; keine Bereinigung pro Autosave. Danach Langsitzungs-/Speicherprofil,
 anschließend AUD14-07-Gesamtgate. Gesamtabnahme AUD14-06 bleibt offen.
+
+
+### AUD14-06 – Wartungssteuerung, Freigabegrenze (15.10.2026)
+PR348 ist bereits gemergt; erneute Freigabe dafür umfasst keinen Merge von PR349.
+RecoveryMaintenanceStorage/Application-Controller und port-injizierte Bedienelemente
+vorbereitet, aber keine Produktanbindung. Diagnose-Schranke und Löschlogik unverändert.
+Automatische Freigabeprüfung blockiert deren Produktionsaktivierung wegen vergrößertem
+Datenverlustrisiko; ausdrückliche Nutzerfreigabe ausstehend. Keine Umgehung.
+1063 Tests einschließlich sechs neuer Controllerfälle (Doppelstart, Abort/Commit-Rennen,
+Quota/Fehler ohne Retry, Dispose, Skip und Observerfehler), Typecheck, Lint und Build bestanden.
+Browserbedienung mit gekennzeichnetem simulierten Port: Start/Abbruch/Neustart/Erfolg geprüft,
+kein Datenbankzugriff. Noch keine Zusage produktiver Wartung. Nächster Auftrag bleibt echte
+kontrollierte Anbindung nach Freigabe, danach Langlauf/Speicher und AUD14-07-Gesamtgate.

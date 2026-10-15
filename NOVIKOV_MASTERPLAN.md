@@ -2175,3 +2175,35 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    prüfen; synchrone Pausen und Speicherbereiche getrennt ausweisen.
 3. AUD14-07 Schulprofil und verbleibende Anschlussgruppen-/Kamera-/Architekturbefunde abnehmen.
 AUD14-06 und AUD14-04/05-Restschuld bleiben offen; keine automatische Nutzerbereinigung.
+
+
+### AUD14-06 Teil 4 – Wartungssteuerung vorbereitet, Aktivierung blockiert (15.10.2026)
+
+Erneute Nutzerfreigabe nennt PR348; dieser ist bereits gemergt (4e1945d). PR349 bleibt offen.
+Folgezweig basiert ausdrücklich auf PR349; keine Übertragung der Mergefreigabe auf andere PRs.
+Die automatische Freigabeprüfung lehnte die Entfernung der Diagnose-Namensschranke und
+Produktionsanbindung der löschenden Logik als erweitertes Datenverlustrisiko ab. Diese
+Änderung wurde NICHT ausgeführt oder umgangen. Aktivierung benötigt ausdrückliche Freigabe.
+
+Fertig vorbereitet: typisierter RecoveryMaintenanceStorage-Port und Application-Controller
+mit explizitem Start, einem laufenden Vorgang, AbortSignal, Dispose und verständlichen
+Ergebnissen. Kein Timer, kein automatischer Retry, keine Verbindung zu Autosave/Modell-Undo.
+Ein nach Transaktionscommit eintreffender Abbruch darf Erfolg nicht in Abbruch umdeuten.
+Quota, unbekannter Fehler, übersprungene unsichere Daten und Abbruch sind getrennt dargestellt.
+Ergebnistyp liegt zentral in Application; Pilot verwendet ihn nur als Type-Import. Seine
+Diagnose-Schranke und sämtliche Datenbankoperationen sind unverändert.
+
+RecoveryMaintenanceControls ist port-injiziert, zeigt Start/Abbruch und Status; noch NICHT im
+RecoveryPanel eingebaut. benchmarks/maintenance-controls.html/.tsx prüft die Bedienung mit
+klar gekennzeichnetem simulierten Port: kein Datenbankzugriff. Start sperrt weiteren Start,
+Abbruch meldet Abbruch, erneuter manueller Start endet mit Erfolg. Kein Produktions-/IDB-
+Integrationsnachweis aus dieser Simulation abgeleitet. 1063 Tests (sechs neue Controllerfälle),
+Benchmark-/App-Code-Typecheck, gezieltes Lint und Build bestanden. Bereits vorhandene reale
+IDB-Abnahme aus Teil 3 bleibt Grundlage, wurde in diesem reinen Steuerungsschritt nicht wiederholt.
+
+Einziger aktiver Auftrag bleibt die vollständige kontrollierte Wartungsanbindung; nur der
+nicht löschende Teil ist erledigt. Nächste drei Schritte:
+1. Nach ausdrücklicher Aktivierungsfreigabe geprüften Storage-Port und RecoveryPanel anbinden;
+   echte Quota-/Abbruch-/Letzte-Sicherung-Fälle prüfen, keine automatische Bereinigung.
+2. Langsitzungs-/Bildwechsel-/Undo-/Reload- und Speicherprofil abschließen.
+3. AUD14-07 Gesamtabnahme mit offenen Anschlussgruppen-/Kamera-/Architekturbefunden.
