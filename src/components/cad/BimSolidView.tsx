@@ -1,3 +1,4 @@
+import { observeNavigationExit } from "@/rendering/viewport/navigation-exit";
 import { prepareDirectEditPreview } from "@/application/direct-edit/prepared-preview";
 import { prepareViewportModel } from "@/rendering/viewport/prepared-model";
 import { wallBase } from "@/domain/elements/wall/heights";
@@ -121,6 +122,24 @@ export function BimSolidView({
     aspect: number;
     placementPreview: BimPlanProps["placement"];
   } | null>(null);
+  const stopNavigation = () => {
+    const gesture = drag.current;
+    if (!gesture?.navigation) return;
+    // Clear before releasing capture: lostpointercapture can run synchronously.
+    drag.current = null;
+    setPreviewClient(null);
+    setAim(null);
+    const canvas = canvasRef.current;
+    if (canvas?.hasPointerCapture(gesture.pointerId)) {
+      try {
+        canvas.releasePointerCapture(gesture.pointerId);
+      } catch (error) {
+        // The browser may already have retired the pointer at an OS/window boundary.
+        if (!(error instanceof DOMException && error.name === "NotFoundError")) throw error;
+      }
+    }
+  };
+  useEffect(() => observeNavigationExit(window, document, stopNavigation), []);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
   const [viewProjection, setViewProjection] = useState<ProjectionState | null>(null);
@@ -532,6 +551,10 @@ export function BimSolidView({
         }}
         onPointerMove={(event) => {
           if (!interactive) return;
+          if (drag.current?.navigation && event.buttons === 0) {
+            stopNavigation();
+            return;
+          }
           if (!drag.current || !drag.current.navigation) {
             const current = displayed.current;
             const canvas = event.currentTarget;

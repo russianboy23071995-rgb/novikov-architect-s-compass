@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { BimSolidView } from "../src/components/cad/BimSolidView";
@@ -43,6 +43,30 @@ HTMLCanvasElement.prototype.getContext = function (
 } as typeof original;
 export function App() {
   const [camera, setCamera] = useState(initialCamera);
+  const moves = useRef(0);
+  function boundaryTest() {
+    setResult("Armed: drag across the canvas. A simulated browser exit occurs during capture.");
+    const canvas = document.querySelector("canvas")!;
+    canvas.addEventListener(
+      "pointerdown",
+      () => {
+        setTimeout(() => {
+          document.dispatchEvent(new PointerEvent("pointerout", { relatedTarget: null }));
+          const count = moves.current;
+          setTimeout(
+            () =>
+              setResult(
+                moves.current === count
+                  ? "PASS: no camera updates after simulated browser exit"
+                  : "FAIL: camera continued after exit",
+              ),
+            700,
+          );
+        }, 10);
+      },
+      { once: true },
+    );
+  }
   const [result, setResult] = useState(
     "Ready: one wall with opening; slow orbit and pan, 160 frames.",
   );
@@ -81,13 +105,19 @@ export function App() {
       <button onClick={() => void run()} disabled={busy}>
         Run slow camera test
       </button>
+      <button onClick={boundaryTest} disabled={busy}>
+        Arm boundary test
+      </button>
       <pre role="status">{result}</pre>
       <div style={{ position: "relative", width: 900, height: 500 }}>
         <BimSolidView
           project={project}
           selection={null}
           camera={camera}
-          onCamera={setCamera}
+          onCamera={(next) => {
+            moves.current++;
+            setCamera(next);
+          }}
           projectionFrame={frame}
           pan={false}
           ortho={false}

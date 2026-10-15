@@ -2304,3 +2304,26 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 AUD14-07 Schulprofil bleibt anschließend vorgemerkt.
 
 Validierung des Kamera-Teilfixes: 1067 Tests, Typecheck, gezieltes ESLint und Build bestanden.
+
+### Kamerageste am Browserrand – Nutzerpräzisierung (15.10.2026)
+
+Langsames Flackern vom Nutzer bestätigt behoben. Neuer Befund wurde präzisiert: Fehlerseite
+beim Cursor außerhalb des Browsers, nicht allein durch schnelles Drehen. Route-Fehlerseite
+beobachtet; konkrete Exception in verfügbaren Browserlogs nicht enthalten. 26 interne
+Orbitgesten ohne Fehler. Browserautomation erlaubt keine Koordinaten außerhalb des Tabs;
+daher keine Behauptung einer vollständigen Reproduktion des ursprünglichen Absturzes.
+
+PR352 ergänzt: gemeinsamer Navigation-Exit-Beobachter beendet nur transiente Kameragesten
+bei document.pointerout ohne relatedTarget, window.blur und verborgenem Dokument. Ref wird
+vor Capture-Freigabe gelöscht; bereits verlorene Pointer-ID (NotFoundError) toleriert. Fehlender
+buttons-Zustand stoppt eine noch offene Navigation. Kein Modellcommit und keine Abbruchlogik
+für Modellaktionen erfunden. Listener werden beim Unmount entfernt.
+
+1068 Tests, Typecheck, Build bestanden. Isolierter Browserharness mit echter Drag-Geste und
+simuliertem Browseraustritt während Capture: keine Kameraänderungen nach Abbruch. Anschließend
+160 Synchronisierungsschritte weiterhin PASS, 0 veraltete GPU-Matrizen, WebGL-Fehler 0.
+Das ist ein geprüfter Lifecycle-Schutz, kein Beweis für die Ursache der gemeldeten Fehlerseite.
+
+Nächste drei Schritte, nur erster aktiv: (1) echten Browserrand-Ablauf praktisch abnehmen,
+bei Wiederauftreten konkrete Exception erfassen; (2) Langsitzungs-/Speicherlastprüfung;
+(3) bedarfsgesteuerte automatische Wartung nach Belastungsnachweis. Kein Merge dieser PRs.

@@ -12187,3 +12187,8 @@ projizierte Kamera gebunden. Isolierter Browservergleich 160 kleine Kameraschrit
 160 veraltete Matrizen, nachher 0, keine WebGL-Fehler. Keine Geometrie-/Speichermodelländerung.
 Praktische Nutzerabnahme offen, keine allgemeine Performancegarantie aus Commit-Prüfung.
 Danach zurück zur Langsitzungsprüfung und erst anschließend automatischer Wartung.
+
+AUD14-07 Nutzerpräzisierung 15.10.2026: langsames Flackern behoben bestätigt; Fehlerseite beim
+Verlassen des Browserbereichs. Navigation-Exit-Lifecycle und fehlende Maustasten abgesichert,
+1068 Tests und isolierte Browser-Abbruchprobe bestanden. Ursache der ursprünglichen Exception
+noch nicht belegt; echte Fensterrand-Abnahme offen. PR352 um Schutz ergänzt, nicht gemergt.
