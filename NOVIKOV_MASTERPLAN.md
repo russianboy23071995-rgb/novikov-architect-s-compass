@@ -465,9 +465,10 @@ begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigege
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
 Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
 implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
-ist im unten begrenzten Umfang geprüft. Nächster Einzelauftrag AUD14-04: zunächst
-Aufruf-/Kopier-/Geometriearbeit bei Geschoss-/Ansichtswechsel messen und die
-Gebäudeableitung vom bloßen Ansichtskontext trennen, ohne Validierungsgrenzen zu lockern.
+ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
+AUD14-04 bleibt aktiv: erster Teil Gebäudeableitung bei Ansichtssnapshotwechsel geprüft.
+Nächster Einzelauftrag: Ownership-/Mutationsvertrag des bestehenden Identitätscaches
+und doppelte Validierungen an Ansichtseinstellungsgrenzen prüfen, bevor Prüfungen entfallen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -948,3 +949,41 @@ geprüft, PR-Abnahme offen. Nächster aktiver Auftrag AUD14-02.
   und stehende Nachbarwand müssen unverändert aussehen. Danach mit Shift platzieren und Undo.
 - Nächster Einzelauftrag AUD14-04: Aufruf-/Kopierarbeit bei Geschoss-/Ansichtswechsel
   messen und unveränderte Gebäudeableitungen wiederverwenden.
+
+
+### AUD14-04, Teil 1 – Gebäudeableitung über Arbeitsgeschosswechsel teilen (15.10.2026)
+
+- Der bisherige Cache in `lib/bim/geometry.ts` galt nur für eine Projektidentität;
+  `selectWorkingStorey` erstellt nach vollständiger Validierung einen neuen Kontext.
+  Deshalb wurden alle Geschossflächen nach jedem Wechsel erneut abgeleitet.
+- Neue Snapshotidentitäten werden weiterhin vollständig validiert. Der vorhandene
+  konservative `sameProjectModel`-Vergleich kann danach eine unveränderte Gebäudeszene
+  teilen. Sichtbarkeit und Arbeitsmaßstab bleiben separate Ansichtseinstellungen.
+  Wand-/Fenster-/Höhen-/Datum-/Anschlussänderungen werden nicht so übergangen.
+- Genau ein schwach referenzierter letzter Kandidat, kein Projekt-ID-Register und
+  keine zusätzliche dauerhaft gehaltene Szenenhistory. Freigabe durch GC darf einen
+  Cachemiss verursachen. Geteilte Szenen/Flächen/Vertices sind eingefroren, damit eine
+  Änderung abgeleiteter Darstellungsdaten keine andere Ansicht beschädigen kann.
+- Grenzen: bestehender Identitätscache setzt weiterhin immutable Snapshots voraus;
+  keine neue öffentliche In-place-Mutationsgarantie behauptet. Für **neue** öffentliche
+  Snapshots bleibt die Vollprüfung vor Wiederverwendung erhalten. Deren Validierung
+  kopiert weiterhin Daten und prüft Anschlüsse; eine vollständig eigene geprüfte
+  Snapshot-/Revisionsgrenze und weniger doppelte Validierungen sind noch offen.
+- Profil Basis `81138b3`, Windows Node 24.19.0, fünf Geschosse mit je 10/50/100
+  unabhängigen Wänden und Fenstern; sieben Geschosswechsel, erster separat und
+  sechs warme Läufe. Bei 500 Wänden/Fenstern Gebäudeableitung inkl. Prüfung:
+  warmer Median 29,263 → 4,866 ms. Geschossaktion selbst 3,768 → 3,919 ms;
+  sie wurde nicht optimiert. Keine gesamte Framezeit-/p95-Behauptung.
+- Chromium 155: sieben Geschosswechsel mit 500 Wänden/Fenstern, neuer Kontext bei
+  gleicher Szene und **exakt gleichen WebGL-Pixeln**. Rohwerte/Methodik unter
+  `benchmarks/building-view-results.json`, Browserentry `benchmarks/building-view.html`.
+- 984 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Produktionsbuild bestanden.
+  Neue Tests: Kontextveraltung, Sichtbarkeit, Szenenimmutabilität, Änderung von
+  Wand/Fenster/Höhe/Datum und ungültige neue Snapshots. UI/Projektformat bleiben gleich.
+- Praktische Abnahme: zwischen vorhandenen Geschossen wechseln; Grundriss und aktive
+  Zeichenebene wechseln, die gemeinsame 3D-Gebäudegeometrie bleibt unverändert.
+  Wand anschließend ändern: 3D muss aktualisiert werden.
+- **AUD14-04 ist teilweise, nicht vollständig erledigt.** Nächster einzelner Auftrag:
+  bestehende Snapshot-Ownership und Identitätscache-Mutationsannahme absichern und
+  doppelte Validierung an Ansichtseinstellungsgrenzen messen/begrenzt reduzieren.
+  Danach verbleibende 3D-Vorschaupfade/Schraffurprüfungen; erst dann AUD14-05.

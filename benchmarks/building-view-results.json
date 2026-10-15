@@ -1,0 +1,297 @@
+{
+  "before": [
+    {
+      "storeys": 5,
+      "wallsPerStorey": 10,
+      "first": {
+        "switchMs": 1.6333000000000197,
+        "deriveMs": 8.683999999999969,
+        "reused": false
+      },
+      "warm": [
+        {
+          "switchMs": 1.6789999999999736,
+          "deriveMs": 9.273399999999981,
+          "reused": false
+        },
+        {
+          "switchMs": 0.9152000000000271,
+          "deriveMs": 6.948999999999955,
+          "reused": false
+        },
+        {
+          "switchMs": 1.8058999999999514,
+          "deriveMs": 3.926300000000026,
+          "reused": false
+        },
+        {
+          "switchMs": 0.8501999999999725,
+          "deriveMs": 4.028200000000027,
+          "reused": false
+        },
+        {
+          "switchMs": 0.7227000000000317,
+          "deriveMs": 3.4628000000000156,
+          "reused": false
+        },
+        {
+          "switchMs": 1.188699999999983,
+          "deriveMs": 3.0516999999999825,
+          "reused": false
+        }
+      ]
+    },
+    {
+      "storeys": 5,
+      "wallsPerStorey": 50,
+      "first": {
+        "switchMs": 3.488399999999956,
+        "deriveMs": 16.5231,
+        "reused": false
+      },
+      "warm": [
+        {
+          "switchMs": 2.3892000000000166,
+          "deriveMs": 17.408399999999972,
+          "reused": false
+        },
+        {
+          "switchMs": 2.671800000000019,
+          "deriveMs": 11.85730000000001,
+          "reused": false
+        },
+        {
+          "switchMs": 2.009299999999996,
+          "deriveMs": 13.08359999999999,
+          "reused": false
+        },
+        {
+          "switchMs": 2.0699000000000183,
+          "deriveMs": 16.435099999999977,
+          "reused": false
+        },
+        {
+          "switchMs": 1.8793999999999755,
+          "deriveMs": 22.114100000000008,
+          "reused": false
+        },
+        {
+          "switchMs": 1.8777000000000044,
+          "deriveMs": 16.42859999999996,
+          "reused": false
+        }
+      ]
+    },
+    {
+      "storeys": 5,
+      "wallsPerStorey": 100,
+      "first": {
+        "switchMs": 3.6310000000000855,
+        "deriveMs": 28.760800000000017,
+        "reused": false
+      },
+      "warm": [
+        {
+          "switchMs": 3.797300000000064,
+          "deriveMs": 21.66719999999998,
+          "reused": false
+        },
+        {
+          "switchMs": 6.500800000000027,
+          "deriveMs": 27.685100000000034,
+          "reused": false
+        },
+        {
+          "switchMs": 3.094000000000051,
+          "deriveMs": 27.175399999999968,
+          "reused": false
+        },
+        {
+          "switchMs": 5.106600000000071,
+          "deriveMs": 31.253799999999956,
+          "reused": false
+        },
+        {
+          "switchMs": 3.2794999999999845,
+          "deriveMs": 30.84019999999998,
+          "reused": false
+        },
+        {
+          "switchMs": 3.738899999999944,
+          "deriveMs": 37.10940000000005,
+          "reused": false
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "storeys": 5,
+      "wallsPerStorey": 10,
+      "first": {
+        "switchMs": 1.0626000000000033,
+        "deriveMs": 1.7006999999999834,
+        "reused": true
+      },
+      "warm": [
+        {
+          "switchMs": 1.2578000000000031,
+          "deriveMs": 1.0886999999999887,
+          "reused": true
+        },
+        {
+          "switchMs": 0.7023000000000081,
+          "deriveMs": 1.2734000000000094,
+          "reused": true
+        },
+        {
+          "switchMs": 1.4774000000000171,
+          "deriveMs": 4.4824999999999875,
+          "reused": true
+        },
+        {
+          "switchMs": 0.7706000000000017,
+          "deriveMs": 0.793200000000013,
+          "reused": true
+        },
+        {
+          "switchMs": 0.5377999999999759,
+          "deriveMs": 1.1966000000000179,
+          "reused": true
+        },
+        {
+          "switchMs": 1.044300000000021,
+          "deriveMs": 1.016399999999976,
+          "reused": true
+        }
+      ]
+    },
+    {
+      "storeys": 5,
+      "wallsPerStorey": 50,
+      "first": {
+        "switchMs": 2.0459000000000174,
+        "deriveMs": 3.9085000000000036,
+        "reused": true
+      },
+      "warm": [
+        {
+          "switchMs": 2.8636999999999944,
+          "deriveMs": 4.6828000000000145,
+          "reused": true
+        },
+        {
+          "switchMs": 2.1973999999999876,
+          "deriveMs": 4.175300000000021,
+          "reused": true
+        },
+        {
+          "switchMs": 2.7608999999999924,
+          "deriveMs": 3.248299999999972,
+          "reused": true
+        },
+        {
+          "switchMs": 1.664699999999982,
+          "deriveMs": 2.313199999999995,
+          "reused": true
+        },
+        {
+          "switchMs": 2.3228000000000293,
+          "deriveMs": 3.0369999999999777,
+          "reused": true
+        },
+        {
+          "switchMs": 1.8267999999999915,
+          "deriveMs": 2.6616000000000213,
+          "reused": true
+        }
+      ]
+    },
+    {
+      "storeys": 5,
+      "wallsPerStorey": 100,
+      "first": {
+        "switchMs": 7.70980000000003,
+        "deriveMs": 5.252499999999998,
+        "reused": true
+      },
+      "warm": [
+        {
+          "switchMs": 4.507000000000005,
+          "deriveMs": 9.500900000000001,
+          "reused": true
+        },
+        {
+          "switchMs": 4.406700000000001,
+          "deriveMs": 5.585100000000011,
+          "reused": true
+        },
+        {
+          "switchMs": 4.194999999999993,
+          "deriveMs": 4.9517999999999915,
+          "reused": true
+        },
+        {
+          "switchMs": 3.643299999999954,
+          "deriveMs": 4.116800000000012,
+          "reused": true
+        },
+        {
+          "switchMs": 3.211500000000001,
+          "deriveMs": 4.7801000000000045,
+          "reused": true
+        },
+        {
+          "switchMs": 2.686399999999992,
+          "deriveMs": 4.445499999999981,
+          "reused": true
+        }
+      ]
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "storeys": 5,
+    "walls": 500,
+    "windows": 500,
+    "runs": [
+      {
+        "switchMs": 4.799999997019768,
+        "deriveMs": 6.5,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 3.7999999970197678,
+        "deriveMs": 5.100000001490116,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 3.9000000059604645,
+        "deriveMs": 4.5999999940395355,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 2.6999999955296516,
+        "deriveMs": 3.8000000044703484,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 3,
+        "deriveMs": 3.899999998509884,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 3.600000001490116,
+        "deriveMs": 3.7999999970197678,
+        "identicalPixels": true
+      },
+      {
+        "switchMs": 3,
+        "deriveMs": 4,
+        "identicalPixels": true
+      }
+    ]
+  },
+  "method": "Baseline 81138b3, Windows Node 24.19.0. Five storeys with 10/50/100 independent walls and windows each; 7 working-storey changes; first change separate, warm median of remaining six. Derived-scene duration includes full validation and conservative model comparison, excludes rendering. Browser Chromium 155: 500 walls/windows, actual production action and renderer, exact pixel equality. Not school profile, no frame/p95 claim."
+}
