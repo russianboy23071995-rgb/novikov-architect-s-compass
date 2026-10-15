@@ -2356,3 +2356,26 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Heap-/Prozess-/Rasterspitzen und Speichergrenzen getrennt messen; nur belegte Engpässe beheben.
 3. Bedarfsgesteuerte automatische Wartung über bestehenden Port nach bestandenen Gates anbinden.
 AUD14-07 großes Schulprofil bleibt anschließend offen.
+
+### AUD14-06 – Application-History und vollständiger Seitenreload (15.10.2026)
+
+PR #353 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+Neuer isolierter Prüfharness recovery-undo-reload.html/.ts: 1000 Linien, echtes
+1024×1024-PNG, acht Folgen Entfernen/Undo/Redo/Undo über editingReducer, insgesamt
+32 Sicherungen mit anschließender produktiver Wartung in eigener UUID-Testdatenbank.
+Nach jeder Sicherung werden Current, Previous und ein fremdes Projekt vollständig
+serialisiert und per SHA-256 gegen die erwarteten Inhalte verglichen. Application-
+History zusätzlich gegen erwartetes Modell geprüft. Anschließend kompletter Seitenreload:
+RELOAD_PASS, navigationType=reload; alle drei Inhalte unverändert. Erwartungswerte
+liegen nur als Hashes und Testdatenbankname in sessionStorage, keine Bildkopien dort.
+Typecheck, gezieltes ESLint und Build bestanden. Produktionscode unverändert.
+
+Grenzen: beschleunigter Test, keine UI-Tastaturgesten, kein Prozess-/Browserneustart,
+keine persistierte Undo-History zugesagt. PNG ist komprimierbare einfarbige Testgrafik;
+die vorherige Prüfung mit Rauschbildern bleibt ergänzender Lastnachweis. Stundenlauf,
+Quota-Vollzustand und Heap-/Prozessspitzen bleiben offen. Automatische Wartung bleibt aus.
+
+Nächste drei Schritte (nur Schritt 1 aktiv):
+1. Längeren Belastungslauf mit Bildwechsel und getrennten Heap-/Prozess-/Rastermessungen vorbereiten und ausführen.
+2. Aus Messungen sichere Wartungsauslöser und Speichergrenzen ableiten; nur belegte Engpässe korrigieren.
+3. Bedarfsgesteuerte automatische Wartung über den bestehenden Port nach bestandenen Gates anbinden.

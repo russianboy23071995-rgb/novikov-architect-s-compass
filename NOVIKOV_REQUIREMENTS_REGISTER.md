@@ -12202,3 +12202,13 @@ Zweiter Lauf: 12 Wartungen 109–231 ms Gesamtzeit; 14 globale Long Tasks, keine
 Nächster Auftrag: reale längere Sitzung/Application-Undo/Reload; danach getrennte Speicher-
 spitzen-/Grenzmessung, dann automatisierte Wartung. Kamera-/Browserrand praktisch abgenommen,
 PR351/352 mit ausdrücklicher Freigabe gemergt. Kein weiterer Merge autorisiert.
+
+### AUD14-06 Nachweis: Application Undo/Redo und Reload (15.10.2026)
+
+recovery-undo-reload: acht Application-Folgen Entfernen/Undo/Redo/Undo mit 32
+Sicherungen und produktiver Wartung in isolierter Testdatenbank. Current/Previous/
+fremdes Projekt per vollständiger Serialisierung und SHA-256 identisch, auch nach
+vollständigem Seitenreload (RELOAD_PASS). Typecheck/ESLint/Build bestanden.
+Keine Aussage über Stundenbetrieb, Browserprozess-Neustart, persistente Undo-History
+oder maximalen Speicherverbrauch. Folgeschritte gemäß aktuellem Masterplan;
+automatische Wartung weiterhin nicht aktiviert. Keine Nutzerdaten verändert.
