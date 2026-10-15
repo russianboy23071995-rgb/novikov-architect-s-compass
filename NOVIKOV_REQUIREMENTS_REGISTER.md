@@ -11893,3 +11893,19 @@ Einziger Folgeauftrag: AUD14-04-Abschlussprüfung der verbliebenen Legacy-Vorsch
 mit einer konkreten Pfad-/Kostenliste und priorisiertem Restbefund. Dabei keine neuen
 Werkzeugmigrationen beginnen; daraus den nächsten begrenzten Fix oder AUD14-05 ableiten.
 AUD14-04 bleibt bis zu dieser Prüfung offen; AUD14-05/06/07 bleiben erhalten.
+
+
+### AUD14-04 Teil 13 – Restpfadprüfung (15.10.2026)
+PR334 gemergt (bbcefef). Keine Produktänderung. Codepfad-/Kostenliste im Masterplan
+Teil 13, reproduzierbare Messung benchmarks/remaining-preview-profile.ts und Rohdaten
+remaining-preview-results.json. Direkte Linienpunktvorschau prüft über updateLine das
+Gesamtprojekt: mit 10/100 unbetroffenen 100-Punkt-Schraffuren 3,85/35,89 ms warm.
+Fensterachse in 2D noch Vollpfad (500 Wände/Fenster: 3,16 ms gegenüber 0,11 ms Patch).
+Grundrissableitung bleibt global, ist in diesen Szenarien kleiner als die Validierung.
+Wand-Strecken, andere Linienkonturaktionen und längere Wandketten bleiben Restschuld;
+fremde Endpunkte/große Anschlussgruppen bleiben AUD14-05. Keine Framegarantie.
+1016 Tests und Build, Diagnose-Typecheck/Lint bestanden. Keine neue Browserabnahme.
+Einziger Folgeauftrag: vorbereitete Linienpunkt-Vorschau für offene Linie/geschlossene
+Polyline im gemeinsamen Application-Vertrag, Schließpunkt und Linienregeln erhalten,
+Vollpfad-/Planszenen-/Commit-/Undo-Vergleich und dieselbe Hintergrundlast messen.
+AUD14-04 bleibt offen. AUD14-05/06/07 werden dadurch nicht gestrichen.
