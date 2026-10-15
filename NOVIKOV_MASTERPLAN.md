@@ -159,6 +159,10 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
+Aktuelle AUD14-06-Teilevidenz: reproduzierbare History-/Recovery-Aufbewahrungsmessung
+mit zwei isolierten Projektslots; alte V2-Bildpayloads bleiben nach Bildwechseln gespeichert.
+Kein Nachweis eines JS-Speicherlecks und noch keine automatische Bereinigung; Details unten.
+
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
 
 **Doppelte Exportgrößenprüfung entfernt (12.10.2026):** PR280 nach expliziter Freigabe/grüner CI nach main übernommen. Zwei produktionsnahe Exporte zeigten zwei identische UTF-8-Kopien für Größenprüfung (zusammen 562–615 ms). requestProjectDownload vertraut jetzt auf die weiterhin vollständige Prüfung in serializeProject. Nachher 620–710 statt 974–1126 ms Export-Task; vier Dateien byteidentisch. 908 Tests, Typecheck/Lint, isolierter und normaler Build bestanden. [Messgrenzen/Rohdaten](docs/performance/ASSET_RECOVERY_PILOT.md). Restliche Export-/Ladepausen bleiben offen.
@@ -489,7 +493,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-06 – Langsitzungs-Speicher und Recovery-Aufbewahrung zunächst vermessen.**
+**Genau ein aktiver Schritt: AUD14-06 – transaktionale Recovery-Bereinigung als isolierten Piloten implementieren und gegen konkurrierende Schreiber prüfen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -512,8 +516,9 @@ PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in 
 PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis AUD14-05 Teil 1.
 PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiesen (AUD14-05 Teil 2).
 PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktprüfung in AUD14-05 Teil 3.
-Nächster Einzelauftrag: AUD14-06 Langsitzung mit History und Referenzbildern vermessen;
-Recovery-Referenzen/Schreiber und tatsächliche Aufbewahrung vor jeder Bereinigung erfassen.
+PR346 gemergt (9c38ffc); AUD14-06-Messung mit 220 Modelländerungen dokumentiert unten.
+Nächster Einzelauftrag: isolierter Bereinigungspilot mit vollständigen Referenzen aller Slots
+und atomarem Transaktionsschutz; noch keine automatische Produktionsbereinigung.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -2012,3 +2017,59 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 3. AUD14-07 gemischtes Schulprofil einschließlich großer Anschlussgruppen/Kamerawechsel
    prüfen und offene Leistungs-/Architekturbefunde als Abschlussgate behandeln.
 AUD14-04-Restschuld, großer Anschlussgruppenrest und AUD14-07 bleiben ausdrücklich offen.
+
+
+### AUD14-06 Teil 1 – History- und Recovery-Aufbewahrung (15.10.2026)
+
+PR346 nach ausdrücklicher Freigabe und grüner CI in main gemergt (9c38ffc).
+Neue Diagnose session-retention.html/.ts verwendet die echte History, den Produktionscodec
+und denselben V2-Storageadapter mit isolierten Store-Namen. Keine Nutzerdatenbank verändert.
+Zwei Projekte mit je 1000 Linien, Wand/Fenster/Referenzbild; je 110 echte Wandhöhenänderungen,
+Recovery am Start, nach Schritt 1 und jedem zehnten Schritt. Ein Projekt behält sein Bild,
+das andere ersetzt es alle zehn Schritte durch ein neues synthetisches 256×256-PNG.
+Beide Projekte teilen zunächst denselben Bildinhalt. Messpunkte 1/10/50/100/110.
+
+Browsernachweis session-retention-results.json (Windows IAB Chrome/155): PASS.
+- Unverändertes Bild: ein gemeinsamer Handle/Payload bei allen History-Tiefen.
+- Bildwechsel: bei 110 Änderungen 100 frühere Stände plus Gegenwart, elf unterschiedliche
+  Bildhandles in dieser History; der älteste Bildstand ist aus dieser History gefallen.
+- Recovery behält zwölf Payloads. Current/previous beider Projektslots referenzieren drei
+  unterschiedliche Schlüssel; neun Payloads haben keine Referenz aus diesen V2-Heads.
+  Logische JSON-Nutzlast 2.691.213 Bytes, keine physische IndexedDB-/Quota-Messung.
+- Je Szenario 100 Undo und 100 Redo mit Endhöhen-/Bildvergleich bestanden; veralteter
+  Schreiber auf zweiter Datenbankverbindung mit konkretem Revisionskonflikt abgewiesen.
+  Beide Slots nach Schließen/Neuöffnen der DB mit korrekter Höhe und Bildinhalt restauriert.
+- Benchmark-Typecheck, gezieltes ESLint und App-Build bestanden. Produktcode unverändert;
+  die 1057 Modelltests aus PR346 sind Basisevidenz, in diesem Dokumentationslauf nicht erneut ausgeführt.
+
+Einordnung: beschleunigte 220-Änderungen-Sequenz, kein stundenlanger UI-Lauf und kein
+Browser-/OS-Neustart. performance.memory-Stichproben ohne erzwungene GC sind im Rohbericht,
+aber keine Retained-Heap-/Leak-Analyse. Der Messcode selbst liest Payloads und hält erwartete
+Bildstrings; daraus folgt kein Produkt-Peakspeicherwert. Dekodierte Raster/GPU, Kamerawechsel,
+Bildentfernung, Quota und echte Langsitzung bleiben gesonderte Abnahme. Diagnose-DBs bleiben
+isoliert erhalten; jeder erneute Start erzeugt eine neue Diagnose-DB.
+
+Codeprüfung: history.ts begrenzt past auf 100; geprüfte Bildhandles und Payloadstrings
+werden bei unveränderten Bildern geteilt. URL-/Codec-WeakMaps können erst mit ihren lebenden
+Handles freigegeben werden; History ist daher ein legitimer Halter. V2 publish fügt Payloads
+hinzu, rotiert current/previous und prüft CAS, entfernt aber keine verwaisten Payloads.
+Die Messung begründet gezielte persistente Aufbewahrung, keinen History-/Renderer-Umbau.
+
+Verbindliche Schutzgrenze für den nächsten Piloten: keine Löschung aus einer vorab gelesenen,
+später veralteten Referenzliste. Root-Ermittlung und Löschung gemeinsam in einer atomaren
+Transaktion über alle betroffenen Stores, serialisiert gegen publish/Migration. Alle Slots,
+current UND previous schützen; keine Löschung von Heads oder V1-Migrationsoriginalen.
+Unbekannte/beschädigte Root-Strukturen müssen Bereinigung konservativ verhindern, statt
+scheinbar freie Payloads zu erraten. Ein In-Memory-Undo braucht beim nächsten Save erneut
+bereitstellbare Payloads; stale Writer dürfen weiterhin nur über CAS veröffentlichen.
+Das genaue API und ein Produktions-Auslösezeitpunkt sind noch Entwurfsentscheidungen;
+keine automatische Produktionsbereinigung in diesem Schritt freigegeben/implementiert.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Isolierten transaktionalen V2-Bereinigungspiloten implementieren: geteilte Bilder über
+   mehrere Slots, current/previous, unbekannte/beschädigte Heads, Schreiberkonkurrenz und
+   Wiederbereitstellung eines aus Undo stammenden Bilds prüfen; Produktionsdaten unberührt.
+2. Nach bestandenem Piloten Produktionsanbindung mit Quota-/Abbruch-/Migrations- und
+   Langlaufnachweisen begrenzt abnehmen; Auslösezeitpunkt und Rest-Speicherprofil festlegen.
+3. AUD14-07 Schulprofil inklusive großer Anschlussgruppen, Kamerawechselkosten und offener
+   Architektur-/Statuskorrekturen abnehmen. AUD14-04/05-Restschuld bleibt sichtbar.
