@@ -1,3 +1,4 @@
+import { prepareProjectSnapshot } from "../../domain/project/prepared-snapshot.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
@@ -27,8 +28,8 @@ export function prepareZTranslation(
   assertMovableSelection(source, targets, visibility);
   if (targets.some((t) => t.kind !== "wall" && t.kind !== "window"))
     throw new Error("Z-Bewegung unterstÃƒÂ¼tzt zunÃƒÂ¤chst WÃƒÂ¤nde mit ihren Fenstern.");
-  const base = freeze(validateProject(source));
-  const fingerprint = JSON.stringify(base);
+  const snapshot = prepareProjectSnapshot(source);
+  const base = snapshot.base;
   const selection = targets.map((t) => ({ ...t }));
   const moving = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (!moving.size) throw new Error("Mindestens eine Wand auswÃƒÂ¤hlen.");
@@ -127,8 +128,7 @@ export function prepareZTranslation(
   };
   const materialize = (current: Project, currentTargets: SelectionSet, delta: number): Project => {
     const preview = evaluate(current, currentTargets, delta);
-    if (JSON.stringify(validateProject(current)) !== fingerprint)
-      throw new Error("Modell geÃƒÂ¤ndert. Z-Bewegung erneut beginnen.");
+    snapshot.assertCurrent(current);
     if (delta === 0) return current;
     const patches = new Map(preview.storeyPatches!.map((p) => [p.storeyId, p]));
     return validateProject({

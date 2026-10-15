@@ -1,3 +1,4 @@
+import { sameProjectContent } from "../../domain/project/model-equality.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { patternSize } from "./pattern-size.ts";
 import { samePattern } from "../../domain/elements/hatch/revision.ts";
@@ -128,7 +129,7 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
     hatchPatterns:
       definition && !existing ? [...project.hatchPatterns, definition] : project.hatchPatterns,
   });
-  return JSON.stringify(next) === JSON.stringify(project) ? current : next;
+  return sameProjectContent(next, project) ? current : next;
 }
 
 export function commitHatch(
