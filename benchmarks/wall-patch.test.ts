@@ -21,16 +21,23 @@ import { createProjectionState } from "../src/rendering/viewport/projection-stat
 import type { Project, Point } from "../src/lib/bim/model.ts";
 import type { SnapCandidate } from "../src/constraints/snapping/engine.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
-const sessionOf = (base: Project): EditSession => ({
+const sessionOf = (base: Project, index: 0 | 1 = 1, id = "wall-1"): EditSession => ({
   base,
-  target,
+  target: { kind: "wall", id },
   action: "point",
-  index: 1,
-  anchor: { ...storeyOf(base).walls.find((w) => w.id === target.id)!.end },
+  index,
+  anchor: { ...storeyOf(base).walls.find((w) => w.id === id)![index === 0 ? "start" : "end"] },
 });
 const canonical = (items: unknown[]) => items.map((i) => JSON.stringify(i)).sort();
-function compare(p: Project, point: Point, candidate?: SnapCandidate) {
-  const session = sessionOf(p),
+function compare(
+  p: Project,
+  point: Point,
+  candidate?: SnapCandidate,
+  index: 0 | 1 = 1,
+  id = "wall-1",
+) {
+  const session = sessionOf(p, index, id),
+    target = session.target,
     prepared = prepareDirectEditPreview(session)!;
   assert.ok(prepared);
   let full: Project;
@@ -40,6 +47,11 @@ function compare(p: Project, point: Point, candidate?: SnapCandidate) {
     assert.throws(() => prepared.evaluate(p, target, point, candidate));
     return;
   }
+  assert.deepEqual(
+    prepareEndpoint(p, id, index).evaluate(point).project,
+    editAtPointer(session, p, point),
+    "legacy project preview must retain every stationary relation",
+  );
   const base = buildBuildingSolid(p),
     patch = prepared.evaluate(p, target, point, candidate);
   const derived = selectionMoveSurfaces(base, p, patch);
@@ -175,5 +187,61 @@ test("corner dependencies and double T retain stationary partner contours", () =
       { x: 8, y: 1 },
     ])
       compare(p, point);
-  assert.equal(prepareEndpoint(corner, "wall-1").evaluateGeometry({ x: 8, y: 0 }).path, "full");
+  assert.equal(prepareEndpoint(corner, "wall-1").evaluateGeometry({ x: 8, y: 0 }).path, "local");
+});
+
+test("both axis ends share local preview for shortening, oblique motion and detached neighbours", () => {
+  for (const p of [tPairFixture(), wallPatchFixture()])
+    for (const id of ["wall-1", "wall-2"])
+      for (const index of [0, 1] as const) {
+        const anchor = sessionOf(p, index, id).anchor;
+        for (const [dx, dy] of [
+          [-2, 0],
+          [1.25, 0.45],
+          [0, -1],
+          [0.125, 0.875],
+        ]) {
+          const point = { x: anchor.x + dx!, y: anchor.y + dy! };
+          compare(p, point, undefined, index, id);
+        }
+      }
+  const p = tPairFixture();
+  const shortened = prepareEndpoint(p, "wall-1").evaluateGeometry({ x: 2, y: 0 });
+  assert.equal(shortened.path, "local");
+  assert.equal(storeyOf(shortened.patch.geometry).wallTJunctions.length, 0);
+  assert.ok(shortened.patch.replacedIds.includes("wall-2"));
+  assert.equal(prepareEndpoint(p, "wall-1", 0).evaluateGeometry({ x: -2, y: 1 }).path, "local");
+});
+
+test("materialized relations preserve order across separate connected components", () => {
+  const p = tPairFixture(),
+    s = storeyOf(p);
+  for (const w of [...s.walls])
+    s.walls.push({
+      ...w,
+      id: `copy-${w.id}`,
+      start: { x: w.start.x + 20, y: w.start.y },
+      end: { x: w.end.x + 20, y: w.end.y },
+    });
+  s.wallTJunctions.push({
+    hostWallId: "copy-wall-1",
+    incoming: { wallId: "copy-wall-2", endpoint: 1 },
+  });
+  const valid = validateProject(p);
+  compare(valid, { x: 8, y: 0 });
+  compare(valid, { x: 2, y: 0 });
+  compare(valid, { x: -2, y: 1 }, undefined, 0);
+});
+
+test("unconnected walls also use the shared axis endpoint capability", () => {
+  const p = tPairFixture();
+  storeyOf(p).wallTJunctions = [];
+  for (const index of [0, 1] as const) {
+    compare(p, { x: index === 0 ? -0.7 : 7.3, y: 0.9 }, undefined, index);
+    assert.equal(
+      prepareEndpoint(p, "wall-1", index).evaluateGeometry({ x: index === 0 ? -1 : 7, y: 0.5 })
+        .path,
+      "local",
+    );
+  }
 });

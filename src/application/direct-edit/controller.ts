@@ -113,14 +113,13 @@ export function previewEdit(
   if (
     wall &&
     session.action === "point" &&
-    session.index === 1 &&
-    session.anchor.x === wall.end.x &&
-    session.anchor.y === wall.end.y &&
-    storeyOf(project).wallTJunctions.some((t) => t.hostWallId === wall.id)
+    (session.index === 0 || session.index === 1) &&
+    session.anchor.x === (session.index === 0 ? wall.start.x : wall.end.x) &&
+    session.anchor.y === (session.index === 0 ? wall.start.y : wall.end.y)
   ) {
     let prepared = endpointPreviews.get(session);
     if (!prepared) {
-      prepared = prepareEndpoint(project, wall.id);
+      prepared = prepareEndpoint(project, wall.id, session.index);
       endpointPreviews.set(session, prepared);
     }
     return connectSnappedT(session, prepared.evaluate(point).project, point, candidate);

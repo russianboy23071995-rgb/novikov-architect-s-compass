@@ -11657,3 +11657,15 @@ Noch kein allgemeiner lokaler Wand-Endpunktadapter: Anfang/Kürzen/schräge Bewe
 neue Anschlüsse und große Anschlussgruppen bleiben ausdrücklich offen.
 Nächster einzelner Auftrag: diese verbleibenden Wand-Endpunktfälle messen und ihren
 sicheren Abhängigkeitsumfang für denselben Adapter bestimmen.
+
+### AUD14-04 Teil 6 – Gemeinsame Wandachsenden, 15.10.2026
+
+PR327 gemergt (035052c). Derselbe vorbereitete Adapter übernimmt Anfang/Ende, Kürzen und
+schräge Punktbewegung in 2D/3D. Die ursprüngliche komplette Anschlussgruppe bleibt auch
+nach Lösen erhalten; stationäre Konturen, Fenster und unabhängige Beziehungen werden gegen
+die Vollaktion geprüft. Fremdkontakte/neuer T-Fang behalten Vollpfad. Körper-Eckgriffe und
+Stretch bleiben Legacy; keine allgemeine Performancegarantie. 999 Tests, Typechecks, Lint,
+Build und 16 Browser-Pixel-/Achsenvergleiche bestanden. Rohdaten:
+benchmarks/shared-endpoints-results.json; Details Masterplan Teil 6.
+Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen in AUD14-04 messen und
+sicher vorbereiten; keine neue werkzeugspezifische Fangengine.

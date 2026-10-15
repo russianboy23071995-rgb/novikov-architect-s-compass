@@ -25,7 +25,7 @@ test("local axial host preview matches full operation, windows, neighbours and h
     }
   }
 });
-test("shortening and oblique targets fall back with same acceptance and geometry", () => {
+test("shortening and oblique targets stay local with same acceptance and geometry", () => {
   const p = tPairFixture(),
     pilot = prepareEndpoint(p, "wall-1");
   for (const end of [
@@ -42,7 +42,7 @@ test("shortening and oblique targets fall back with same acceptance and geometry
       continue;
     }
     const result = pilot.evaluate(end);
-    assert.equal(result.path, "full");
+    assert.equal(result.path, "local");
     assert.deepEqual(result.project, full);
   }
 });

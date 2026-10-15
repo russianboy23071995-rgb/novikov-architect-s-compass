@@ -499,10 +499,10 @@ ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gem
 AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership und 3D-Abfragebasis (PR322–324
 gemergt), Fenster-Achsvorschau PR325 gemergt (f734413). Gemeinsamer Application-Einstieg
 und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzelauftrag:
-Nach PR326 (gemergt, f946825) ist die axiale T-Hauptwand-Endpunktvorschau über den
-Application-Einstieg als Geometriepatch geprüft. Nächster Einzelauftrag: die noch vollständigen
-Wand-Endpunktfälle (Anfang, Kürzen, schräge Bewegung) messen und die fachlich sichere
-Abhängigkeitsgrenze für denselben Adapter bestimmen; keine Renderer-Sonderzweige.
+PR327 ist gemergt (035052c). Beide Wandachsenden, Kürzen und schräge Punktbewegung
+sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Einzelauftrag:
+verbleibende Schraffur-Geometrieprüfungen in der Mausvorschau messen und gegen die
+vorbereitete gemeinsame Basis abgrenzen; kein neues Werkzeug und kein Rendererumbau.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1196,3 +1196,34 @@ Globale Komposition und Fremdendpunktsuche sowie breite Anschlussgruppen bleiben
 Einziger Folgeauftrag: die noch vollständigen Wand-Endpunktfälle (Anfang/Kürzen/schräg)
 gegen denselben Vertrag und ihre Abhängigkeitsgrenze prüfen. Danach verbleibende
 Schraffurprüfungen in AUD14-04; AUD14-05/06/07 bleiben offen.
+
+### AUD14-04, Teil 6 – Beide Wandachsenden und gelöste Anschlüsse (15.10.2026)
+
+PR327 nach erfolgreicher CI und Freigabe gemergt (035052c). Der vorhandene prepareEndpoint-
+Pfad verarbeitet beide Achsenden einschließlich Kürzen/schräger Punktbewegung, Einzelwände,
+Haupt-/Nebenwände und Eckanschlussgruppen. 2D-Projektvorschau und 3D-GeometryPreview nutzen
+dieselbe Vorbereitung und editAtPointer als Fachoperation. Keine neue Renderer-Typentscheidung.
+Die ursprüngliche vollständige Anschlussgruppe bleibt nach Lösen erhalten: stationäre Partner
+bekommen ihre korrekte Kontur. Unabhängige Beziehungen und ihre Reihenfolge bleiben im
+materialisierten 2D-Projekt erhalten. Fenster, vollständiger Commit und ein Undo unverändert.
+
+Fremdkontakte werden anhand tatsächlich berechneter Achsenden erkannt. Fremde Endpunkte,
+neuer T-Fang und lokale Berechnungsfehler verwenden weiter den Vollpfad. Körper-Eckgriffe,
+Stretch und andere Gesten bleiben Legacy. Fremdendpunktsuche und Komposition sind noch
+global; große Anschlussgruppen bleiben mögliche Kosten. Keine allgemeine Performancezusage.
+
+Nachweis: 999 Tests, beide Typechecks, gezieltes Lint und Build bestanden. Vergleich der
+2D-Projektinhalte, 3D-Flächen/Fenster und markierten Achse mit der vollständigen Operation:
+beide Enden, Kürzen/schräg, T/Doppel-T/Ecke, Mehrgeschosse/Höhenversatz, fremde Knoten,
+T-Fang, ungültige/stale Ziele, Abbruch und Undo. Chromium155: 16 exakte Pixel-/Achsenvergleiche.
+
+Vollaktion + Gebäudeableitung gegen Patch + Komposition, warme Mediane:
+- start, 502 Wände/Fenster: 34.12 → 12.32 ms.
+- shorten, 502 Wände/Fenster: 32.78 → 10.05 ms.
+- oblique, 502 Wände/Fenster: 30.49 → 9.15 ms.
+Methodik/Rohdaten: benchmarks/shared-endpoints-results.json. Ein erster und acht warme Werte
+je Profil, Reihenfolge alterniert; Vorbereitung separat. Kein historischer Commitvergleich,
+kein GPU-/Heap-/Gesamtframenachweis. Frühere Pilotmessung separat erhalten.
+Einziger Folgeauftrag: verbleibende Schraffur-Geometrieprüfungen im Pointerpfad messen und
+sicher vorbereiten (AUD14-04). Weitere Wandgesten bleiben dokumentierte Migrationsschuld;
+AUD14-05/06/07 sind weiterhin offen.

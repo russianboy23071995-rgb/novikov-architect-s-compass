@@ -22,67 +22,69 @@ document.querySelector("#run")!.addEventListener("click", () => {
   try {
     const p = wallPatchFixture(2),
       target = { kind: "wall" as const, id: "wall-1" };
-    const session: EditSession = {
-      base: p,
-      target,
-      action: "point",
-      index: 1,
-      anchor: { x: 6, y: -10 },
-    };
-    const prepared = prepareDirectEditPreview(session)!,
-      base = buildBuildingSolid(p),
-      windows = buildingWindowSelectionSurfaces(p, () => true);
-    const selected = new Set([target.id]);
     let comparisons = 0;
-    const read = () => {
-      const gl = canvas.getContext("webgl")!,
-        pixels = new Uint8Array(600 * 400 * 4);
-      gl.readPixels(0, 0, 600, 400, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      return pixels;
-    };
-    for (const yaw of [0, 0.8])
-      for (const dx of [-4, 0.5, 2, 4]) {
-        const view = createProjectionState(
-          createProjectionFrame(base),
-          { ...initialCamera, yaw, pitch: 0.4 },
-          { left: 0, top: 0, width: 600, height: 400 },
-          { width: 600, height: 400 },
-        )!;
-        const point = { x: session.anchor.x + dx, y: session.anchor.y };
-        const patch = prepared.evaluate(p, target, point),
-          full = editAtPointer(session, p, point);
-        const derived = selectionMoveSurfaces(base, p, patch);
-        const complete = buildBuildingSolid(full);
-        if (
-          JSON.stringify(selectedWallAxis(p, target, () => true, view, patch)) !==
-          JSON.stringify(selectedWallAxis(full, target, () => true, view))
-        )
-          throw Error("Axis mismatch");
-        renderer.draw(
-          derived,
-          view,
-          selected,
-          selectionEdges(derived.faces.filter((f) => f.wallId === target.id)),
-          windowSelectionEdges(
-            selectionMoveWindows(windows, p, patch, () => true),
+    for (const index of [0, 1] as const) {
+      const session: EditSession = {
+        base: p,
+        target,
+        action: "point",
+        index,
+        anchor: { x: index === 0 ? 0 : 6, y: -10 },
+      };
+      const prepared = prepareDirectEditPreview(session)!,
+        base = buildBuildingSolid(p),
+        windows = buildingWindowSelectionSurfaces(p, () => true);
+      const selected = new Set([target.id]);
+      const read = () => {
+        const gl = canvas.getContext("webgl")!,
+          pixels = new Uint8Array(600 * 400 * 4);
+        gl.readPixels(0, 0, 600, 400, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        return pixels;
+      };
+      for (const yaw of [0, 0.8])
+        for (const dx of [-1, 0.5, 1, 2]) {
+          const view = createProjectionState(
+            createProjectionFrame(base),
+            { ...initialCamera, yaw, pitch: 0.4 },
+            { left: 0, top: 0, width: 600, height: 400 },
+            { width: 600, height: 400 },
+          )!;
+          const point = { x: session.anchor.x + dx, y: session.anchor.y + (dx === 0.5 ? 0.4 : 0) };
+          const patch = prepared.evaluate(p, target, point),
+            full = editAtPointer(session, p, point);
+          const derived = selectionMoveSurfaces(base, p, patch);
+          const complete = buildBuildingSolid(full);
+          if (
+            JSON.stringify(selectedWallAxis(p, target, () => true, view, patch)) !==
+            JSON.stringify(selectedWallAxis(full, target, () => true, view))
+          )
+            throw Error("Axis mismatch");
+          renderer.draw(
+            derived,
+            view,
             selected,
-          ),
-        );
-        const pixels = read();
-        if (!pixels.some((v) => v)) throw Error("Empty frame");
-        renderer.draw(
-          complete,
-          view,
-          selected,
-          selectionEdges(complete.faces.filter((f) => f.wallId === target.id)),
-          windowSelectionEdges(
-            buildingWindowSelectionSurfaces(full, () => true),
+            selectionEdges(derived.faces.filter((f) => f.wallId === target.id)),
+            windowSelectionEdges(
+              selectionMoveWindows(windows, p, patch, () => true),
+              selected,
+            ),
+          );
+          const pixels = read();
+          if (!pixels.some((v) => v)) throw Error("Empty frame");
+          renderer.draw(
+            complete,
+            view,
             selected,
-          ),
-        );
-        if (read().some((v, i) => v !== pixels[i])) throw Error(`Pixel mismatch ${yaw}/${dx}`);
-        comparisons++;
-      }
+            selectionEdges(complete.faces.filter((f) => f.wallId === target.id)),
+            windowSelectionEdges(
+              buildingWindowSelectionSurfaces(full, () => true),
+              selected,
+            ),
+          );
+          if (read().some((v, i) => v !== pixels[i])) throw Error(`Pixel mismatch ${yaw}/${dx}`);
+          comparisons++;
+        }
+    }
     output.textContent = JSON.stringify(
       { status: "PASS", userAgent: navigator.userAgent, pixelComparisons: comparisons },
       null,
