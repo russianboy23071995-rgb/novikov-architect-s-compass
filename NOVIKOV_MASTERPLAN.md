@@ -505,9 +505,9 @@ PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
 PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR334 gemergt (bbcefef); verbliebene Vorschaupfade geprüft und gemessen (Teil 13 unten).
-Nächster Einzelauftrag: vorbereitete Linienpunkt-Vorschau für offene Linien und
-geschlossene Polylinien; vollständige Commitprüfung und gemeinsame Registrierung erhalten.
+PR335 gemergt (13a06c6); Linienpunkt-Vorschau vorbereitet und verglichen (Teil 14 unten).
+Nächster Einzelauftrag: bestehenden Fenster-Achsadapter auch für direkte 2D-Vorschau
+materialisieren; Host-/Anschlussregeln und vollständige Commitprüfung erhalten.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1508,3 +1508,50 @@ Exakte Projekt-/Planszenenvergleiche inklusive ungültiger Ziele, Linienarten un
 unbetroffener ungültiger Elemente; wieder dieselbe 10/100-Schraffuren-Messung.
 Keine Renderer-Typabfrage, keine neuen Eingabe-/Fangregeln und kein Ausweiten auf
 Linien-Offset/Seitenstreckung in diesem Einzelauftrag.
+
+
+### AUD14-04 Teil 14 – Vorbereitete Linienpunkt-Vorschau (15.10.2026)
+
+PR335 nach ausdrücklicher Freigabe und grüner CI gemergt (13a06c6).
+prepareLinePointPreview ist im gemeinsamen Application-Vertrag registriert. Offene
+Linien und Polylinien verwenden einen eigenen validierten Snapshot; feste Angaben
+wie Ebene, Linienart, Muster, Farbe und Punktanzahl werden bei der Vorbereitung
+geprüft. Pro Ziel bleibt validateLineGeometry vollständig aktiv: keine Nullsegmente,
+endliche positive Segmentlängen und endliche Gesamtlänge. Es werden keine neuen
+Polygon-Selbstschnittregeln für Linien erfunden.
+
+replacePathVertex ist die gemeinsame Geometrieableitung für Vollaktion und Vorschau.
+Bei zuvor geschlossenem Pfad bewegen sich beide identischen Schließpunkte gemeinsam.
+translatePoint erhält die Rechenreihenfolge auch bei großen Koordinaten. Kontextwechsel
+werden abgewiesen, Basis und Ausgabe geschützt; direkte 2D-Projektansicht und lokaler
+Geometriepatch sind abgeleitet. Kein Renderer-/Fang-/Eingabezweig ergänzt. Commit bleibt
+vollständig geprüft und ein Undo. Linien-Offset/Seitenstreckung nicht erweitert.
+
+1019 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Exakte
+Projekt-/Planszenen-/Patchvergleiche für alle Griffe offener und geschlossener Pfade,
+eigene festfarbige Linienart, Koordinaten bis 1e9, vom Griff versetzter Ursprung,
+Nullbewegung, ungültige/überlaufende Ziele, ungültige Griffe und Kontext. Besitzschutz,
+aktives Obergeschoss, Abbruch, ein Undo und Commit-Ablehnung bei ungültiger unbetroffener
+Schraffur geprüft. Keine neue visuelle Browserabnahme behauptet.
+
+Messung: benchmarks/line-point-profile.ts / line-point-results.json, gleiche Szenen
+wie Teil 13. Erster und acht warme Werte, Projekt-/Patch-Reihenfolge alterniert,
+Vollaktion separat danach gemessen, Ergebnisgleichheit außerhalb der Zeiten.
+- 10 Schraffuren à 100 Punkte: Vollaktion 4,42 ms, Projektvorschau 0,014 ms,
+  Vorbereitung separat 4,66 ms.
+- 100 Schraffuren à 100 Punkte: Vollaktion 38,14 ms, Projektvorschau 0,015 ms,
+  Vorbereitung separat 40,88 ms.
+Keine Gesamtframe-/GPU-Garantie. Vorbereitung skaliert weiterhin mit der Basis;
+Punktkopie und Linienprüfung mit der Pfadlänge, Projektmaterialisierung mit der Anzahl
+Linien im Geschoss. Globale Planableitung bleibt bestehen. Andere Profilfälle dienen
+als Kontext; daraus keine neuen Optimierungsbehauptungen ableiten.
+
+Abnahme: offene Linie und geschlossene Polylinie mit eigener Linienart zeichnen;
+ersten/letzten Punkt bewegen, abbrechen beziehungsweise platzieren und einmal Undo.
+Geschlossene Kontur bleibt geschlossen, Muster/Farbe erhalten.
+
+Einziger Folgeauftrag: den bestehenden vorbereiteten Fenster-Achsadapter auch für die
+direkte 2D-Projektvorschau nutzbar machen (gemeinsame Registrierung/Materialisierung).
+Keine zweite Fensterlogik; Hostgrenzen, T-Anschlüsse, Höhen, Musterfremdinhalte,
+Kontextwechsel und Commit/Undo gegen Vollpfad prüfen; 50/500-Wände-Szenen vergleichen.
+AUD14-04 bleibt offen, übrige Restpfade aus Teil 13 und AUD14-05/06/07 bleiben erhalten.

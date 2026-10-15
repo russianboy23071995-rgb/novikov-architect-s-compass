@@ -11909,3 +11909,19 @@ Einziger Folgeauftrag: vorbereitete Linienpunkt-Vorschau für offene Linie/gesch
 Polyline im gemeinsamen Application-Vertrag, Schließpunkt und Linienregeln erhalten,
 Vollpfad-/Planszenen-/Commit-/Undo-Vergleich und dieselbe Hintergrundlast messen.
 AUD14-04 bleibt offen. AUD14-05/06/07 werden dadurch nicht gestrichen.
+
+
+### AUD14-04 Teil 14 – Linienpunkt-Vorschau (15.10.2026)
+PR335 gemergt (13a06c6). Gemeinsamer Application-Adapter prepared-line.ts für action=point,
+eigener unveränderlicher Snapshot, gemeinsame replacePathVertex-/translatePoint-Ableitung.
+Schließpunktkopplung erhalten; validateLineGeometry prüft weiterhin jede Ziellinie vollständig.
+Feste Darstellung/Zuordnung in validierter Basis, Commit voll geprüft mit einem Undo.
+1019 Tests, beide Typechecks, Lint und Build bestanden; exakte Projekt-/Patch-/Planszenen-
+Vergleiche, eigene Linienarten, große Koordinaten, Kontext/Besitzschutz, Abbruch/Undo und
+ungültige unbetroffene Elemente beim Commit. Keine neue Browserabnahme.
+Rohdaten benchmarks/line-point-results.json: 100 unveränderte 100-Punkt-Schraffuren,
+Vollaktion warm 38,14 ms → Projektvorschau 0,015 ms, Vorbereitung 40,88 ms separat.
+Kein Frameversprechen; Pfadlänge und Vorbereitung bleiben Kosten, globale Planableitung offen.
+Einziger Folgeauftrag: vorhandenen Fenster-Achsadapter für direkte 2D-Vorschau wiederverwenden,
+Vollpfad-/Commit-/Undo-Vergleich und 50/500-Wände-Messung. Restpfade Teil 13 bleiben offen;
+AUD14-04 sowie nachgeordnet AUD14-05/06/07 nicht als abgeschlossen behandeln.

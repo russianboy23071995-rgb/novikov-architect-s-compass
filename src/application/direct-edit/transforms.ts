@@ -1,3 +1,4 @@
+import { replacePathVertex } from "../../geometry/primitives/point.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
@@ -68,19 +69,11 @@ export function moveElementPoint(
   index: number,
   position: Point,
 ): Project {
-  const points = editablePoints(project, target);
-  if (!Number.isInteger(index) || index < 0 || index >= points.length)
-    throw new Error("Ungültiger Punkt.");
-  // A closed polyline represents its shared first/last vertex twice; keep closure.
-  const last = points.length - 1;
-  const closed =
-    points.length > 2 && points[0]!.x === points[last]!.x && points[0]!.y === points[last]!.y;
-  points[index] = { ...position };
-  if (closed && (index === 0 || index === last)) {
-    points[0] = { ...position };
-    points[last] = { ...position };
-  }
-  return applyPoints(project, target, points);
+  return applyPoints(
+    project,
+    target,
+    replacePathVertex(editablePoints(project, target), index, position),
+  );
 }
 
 /** Set the terminal segment's length, retaining its direction and the other endpoint. */

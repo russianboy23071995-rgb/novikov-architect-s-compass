@@ -1,3 +1,4 @@
+import { prepareLinePointPreview } from "./prepared-line.ts";
 import { prepareHatchContourPreview } from "./prepared-hatch.ts";
 import { prepareWallEndpointPreview } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
@@ -38,6 +39,8 @@ function prepareCapability(
     ["point", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareHatchContourPreview(session);
+  if (session.target.kind === "line" && session.action === "point")
+    return prepareLinePointPreview(session);
   // Remaining registered adapters currently expose geometry patches only.
   if (projectView) return null;
   if (session.target.kind === "window" && session.action === "axis")
