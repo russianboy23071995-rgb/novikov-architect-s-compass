@@ -1,3 +1,4 @@
+import { translatePoint } from "../../geometry/primitives/point.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewContourOffset } from "../../application/direct-edit/offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -90,10 +91,7 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
         }
       }
     }
-    return moveElementPoint(base, entity, i, {
-      x: points[i]!.x + delta.x,
-      y: points[i]!.y + delta.y,
-    });
+    return moveElementPoint(base, entity, i, translatePoint(points[i]!, delta));
   }
   return moveElement(base, entity, delta);
 }

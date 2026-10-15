@@ -503,8 +503,9 @@ PR327 ist gemergt (035052c). Beide Wandachsenden, Kürzen und schräge Punktbewe
 sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Einzelauftrag:
 PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil 7 unten.
 PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
-Nächster Einzelauftrag: vorhandene vorbereitete Prüfung veränderter Polygonkanten für
-diese Punktvorschau sicher wiederverwenden, mit Vollvalidierung vergleichen und messen.
+PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
+Nächster Einzelauftrag: Seitenstrecken von Schraffuren über denselben vorbereiteten
+Application-Vertrag begrenzen, einschließlich Cap und vollständigem Vergleich.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1299,3 +1300,42 @@ ein Undo stellt die Ausgangskontur wieder her.
 Einziger Folgeauftrag: bereits vorhandene vorbereitete Prüfung veränderter Polygonkanten
 für die Schraffur-Punktvorschau auf sichere Wiederverwendung prüfen, integrieren und mit
 vollständiger Konturvalidierung vergleichen/messen. AUD14-04 bleibt offen; danach 05/06/07.
+
+
+### AUD14-04 Teil 9 – Veränderte Schraffurkanten prüfen (15.10.2026)
+
+PR330 nach ausdrücklicher Freigabe und grüner CI gemergt (0a159ef).
+Der bestehende vorbereitete Schraffur-Punktadapter nutzt preparePolygonVertexEdit.
+Diese gemeinsame Geometry-Funktion validiert die Ausgangskontur einmal und prüft
+je Ziel nur Kontaktpaare mit den beiden veränderten Kanten. Endlichkeit, Nullkanten,
+Fläche und numerischer Bereich bleiben konturweit geprüft. Keine separate Kontakt-
+oder Toleranzregel. translatePoint bewahrt die arithmetische Reihenfolge im Vollpfad
+und vorbereiteten Pfad. Nichtgeometrische Schraffurfelder sind durch den eigenen
+validierten, unveränderlichen Projektsnapshot festgelegt; Musterursprung/-rotation,
+Ebene, ID und Darstellung ändern sich nicht. Zurückgegebene Schraffurdaten sind
+unveränderlich. Kein lokales Teilprojekt und keine Gesamtprojektprüfung je Pointer.
+
+Vollständige Platzierung weiter über fullEdit/commitProject, genau ein Undo.
+1007 Tests bestanden, beide Typechecks, gezieltes Lint, Produktionsbuild bestanden.
+Zusätzliche Vollpfadvergleiche: konkave Konturen, zufällige gültige/ungültige Ziele,
+Selbstüberschneidung, erste/innere/letzte Ecke, große Koordinaten, abweichender Ursprung,
+Mutation des Aufrufers/der Vorschau. Vorhandene Muster-/Planszenen-/Abbruch-/Undo-
+und vollständige Commit-Tests bleiben bestehen. Keine Renderingänderung und kein
+neuer visueller Browsernachweis für diesen internen Prüfpfad behauptet.
+
+benchmarks/hatch-contour-results.json: Node; Vorbereitung separat, ein erster und
+acht warme Ziele, wechselnde Reihenfolge. Im selben Lauf Vergleich mit vollständiger
+Projektaktion und vorherigem Pilot (Vollkonturprüfung auf einer einzelnen Schraffur).
+500-Punkt-Einzelschraffur: vorheriger Pilot 3,26 ms → 0,32 ms Projektvorschau,
+Patch 0,23 ms; Vorbereitung 11,11 ms. 100 Schraffuren/je 100 Punkte: 0,96 → 0,03 ms;
+500 Vierecke: 0,21 → 0,03 ms. Keine Gesamtframe-/GPU-Garantie. Frühere Messdatei
+hatch-point-results.json bleibt als historischer Nachweis erhalten.
+
+Grenzen: Konturkopie, globale Konturkennwerte, Prüfpaare und Legacy-Projektansicht
+bleiben proportional zur jeweiligen Datenmenge; Darstellung bleibt separat.
+Seitenstrecken/Offset sind noch nicht migriert. Keine pauschale A04-Gesamtfreigabe.
+Abnahme: komplexe Musterschraffur an einer Ecke bewegen, ungültige Überkreuzung
+versuchen, abbrechen oder gültig platzieren; einmal Undo stellt Ausgangszustand her.
+Einziger Folgeauftrag: Seitenstrecken von Schraffuren auf denselben vorbereiteten
+Application-Vertrag begrenzen, einschließlich Cap/Vorschau und Vollpfadvergleich.
+AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen weiterhin danach.

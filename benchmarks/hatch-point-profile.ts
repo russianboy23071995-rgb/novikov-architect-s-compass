@@ -1,3 +1,4 @@
+import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import assert from "node:assert/strict";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
@@ -20,11 +21,21 @@ for (const [count, vertices] of [
   const start = performance.now(),
     prepared = prepareDirectEditPreview(edit)!;
   const preparationMs = performance.now() - start;
+  // Previous pilot: full operation on a one-hatch scope, prepared once.
+  const local = createProjectSnapshot({
+    ...base,
+    storeys: base.storeys.map((s) => ({
+      ...s,
+      hatches: s.hatches.filter((h) => h.id === "h0"),
+    })),
+  });
+  const localEdit = { ...edit, base: local };
   const samples: Record<string, number>[] = [];
   for (let i = 0; i < 9; i++) {
     const point = { x: edit.anchor.x + (i + 1) * 0.01, y: edit.anchor.y };
     const runs: [string, () => unknown][] = [
       ["full", () => editAtPointer(edit, base, point)],
+      ["scopedFullContour", () => editAtPointer(localEdit, local, point)],
       ["preparedProject", () => prepared.materialize!(base, edit.target, point)],
       ["patch", () => prepared.evaluate(base, edit.target, point)],
     ];
@@ -55,6 +66,7 @@ for (const [count, vertices] of [
     samples,
     warmMedianMs: {
       full: median("full"),
+      scopedFullContour: median("scopedFullContour"),
       preparedProject: median("preparedProject"),
       patch: median("patch"),
     },
@@ -64,7 +76,7 @@ console.log(
   JSON.stringify(
     {
       method:
-        "Node; preparation separate; one first plus eight warm targets; alternating order; exact full-project equality. Validation/materialization only, no rendering/frame guarantee. Target contour is still fully validated, metadata/pattern library retained.",
+        "Node; preparation separate; one first plus eight warm targets; alternating order; exact full-project equality. Validation/materialization only, no rendering/frame guarantee. Target contour uses prepared changed-edge checks; full comparison retains complete project validation.",
       profiles,
     },
     null,

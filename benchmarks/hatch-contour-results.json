@@ -1,0 +1,206 @@
+{
+  "method": "Node; preparation separate; one first plus eight warm targets; alternating order; exact full-project equality. Validation/materialization only, no rendering/frame guarantee. Target contour uses prepared changed-edge checks; full comparison retains complete project validation.",
+  "profiles": [
+    {
+      "count": 1,
+      "vertices": 500,
+      "preparationMs": 11.111400000000003,
+      "samples": [
+        {
+          "full": 11.716200000000015,
+          "scopedFullContour": 7.899300000000011,
+          "preparedProject": 0.9211999999999989,
+          "patch": 0.6761000000000195
+        },
+        {
+          "patch": 0.39289999999999736,
+          "preparedProject": 0.345799999999997,
+          "scopedFullContour": 6.809100000000001,
+          "full": 4.221900000000005
+        },
+        {
+          "full": 5.134500000000003,
+          "scopedFullContour": 4.885200000000026,
+          "preparedProject": 0.16430000000002565,
+          "patch": 0.154200000000003
+        },
+        {
+          "patch": 0.1563000000000443,
+          "preparedProject": 0.15390000000002146,
+          "scopedFullContour": 3.377999999999986,
+          "full": 3.495999999999981
+        },
+        {
+          "full": 3.619799999999998,
+          "scopedFullContour": 3.4499000000000137,
+          "preparedProject": 0.302599999999984,
+          "patch": 0.21289999999999054
+        },
+        {
+          "patch": 0.19529999999997472,
+          "preparedProject": 0.11850000000004002,
+          "scopedFullContour": 2.6467999999999847,
+          "full": 4.3332000000000335
+        },
+        {
+          "full": 3.261700000000019,
+          "scopedFullContour": 2.9852000000000203,
+          "preparedProject": 0.5894999999999868,
+          "patch": 0.25209999999998445
+        },
+        {
+          "patch": 0.26670000000001437,
+          "preparedProject": 0.7493999999999801,
+          "scopedFullContour": 2.9728000000000065,
+          "full": 3.6245999999999867
+        },
+        {
+          "full": 3.294499999999971,
+          "scopedFullContour": 3.1456000000000017,
+          "preparedProject": 0.5480000000000018,
+          "patch": 0.3643999999999892
+        }
+      ],
+      "warmMedianMs": {
+        "full": 3.6221999999999923,
+        "scopedFullContour": 3.261799999999994,
+        "preparedProject": 0.3241999999999905,
+        "patch": 0.2324999999999875
+      }
+    },
+    {
+      "count": 100,
+      "vertices": 100,
+      "preparationMs": 43.30679999999995,
+      "samples": [
+        {
+          "full": 90.33960000000002,
+          "scopedFullContour": 0.9459000000000515,
+          "preparedProject": 0.04219999999997981,
+          "patch": 0.04179999999996653
+        },
+        {
+          "patch": 0.0585999999999558,
+          "preparedProject": 0.049600000000054933,
+          "scopedFullContour": 1.0493999999999915,
+          "full": 90.53059999999994
+        },
+        {
+          "full": 85.75649999999996,
+          "scopedFullContour": 0.9283000000000357,
+          "preparedProject": 0.06700000000000728,
+          "patch": 0.026000000000067303
+        },
+        {
+          "patch": 0.039099999999962165,
+          "preparedProject": 0.031899999999950523,
+          "scopedFullContour": 1.2072000000000571,
+          "full": 82.66039999999998
+        },
+        {
+          "full": 84.98610000000008,
+          "scopedFullContour": 0.9126999999998588,
+          "preparedProject": 0.031800000000203,
+          "patch": 0.022900000000163345
+        },
+        {
+          "patch": 0.03739999999993415,
+          "preparedProject": 0.03150000000005093,
+          "scopedFullContour": 0.9782000000000153,
+          "full": 88.17980000000011
+        },
+        {
+          "full": 84.64709999999991,
+          "scopedFullContour": 0.9336000000000695,
+          "preparedProject": 0.03220000000010259,
+          "patch": 0.02430000000003929
+        },
+        {
+          "patch": 0.04020000000014079,
+          "preparedProject": 0.03029999999989741,
+          "scopedFullContour": 1.0062000000000353,
+          "full": 90.9253000000001
+        },
+        {
+          "full": 83.25970000000007,
+          "scopedFullContour": 0.9510000000000218,
+          "preparedProject": 0.034300000000030195,
+          "patch": 0.024599999999963984
+        }
+      ],
+      "warmMedianMs": {
+        "full": 85.37130000000002,
+        "scopedFullContour": 0.9646000000000186,
+        "preparedProject": 0.03205000000002656,
+        "patch": 0.03170000000000073
+      }
+    },
+    {
+      "count": 500,
+      "vertices": 4,
+      "preparationMs": 9.027599999999893,
+      "samples": [
+        {
+          "full": 19.68060000000014,
+          "scopedFullContour": 0.21800000000030195,
+          "preparedProject": 0.046600000000125874,
+          "patch": 0.012699999999767897
+        },
+        {
+          "patch": 0.03760000000011132,
+          "preparedProject": 0.028399999999692227,
+          "scopedFullContour": 0.22580000000016298,
+          "full": 17.010299999999916
+        },
+        {
+          "full": 15.809799999999996,
+          "scopedFullContour": 0.1821999999997388,
+          "preparedProject": 0.027000000000043656,
+          "patch": 0.007699999999658758
+        },
+        {
+          "patch": 0.02430000000003929,
+          "preparedProject": 0.024100000000089494,
+          "scopedFullContour": 0.2055000000000291,
+          "full": 15.29950000000008
+        },
+        {
+          "full": 19.302700000000186,
+          "scopedFullContour": 0.23010000000022046,
+          "preparedProject": 0.028000000000247383,
+          "patch": 0.008100000000013097
+        },
+        {
+          "patch": 0.028599999999642023,
+          "preparedProject": 0.024899999999888678,
+          "scopedFullContour": 0.20659999999998035,
+          "full": 13.016499999999724
+        },
+        {
+          "full": 13.363299999999981,
+          "scopedFullContour": 0.1835999999998421,
+          "preparedProject": 0.028399999999692227,
+          "patch": 0.01389999999992142
+        },
+        {
+          "patch": 0.0316000000002532,
+          "preparedProject": 0.02570000000014261,
+          "scopedFullContour": 0.2242999999998574,
+          "full": 13.635999999999967
+        },
+        {
+          "full": 13.299299999999675,
+          "scopedFullContour": 0.19549999999981083,
+          "preparedProject": 0.027999999999792635,
+          "patch": 0.009199999999964348
+        }
+      ],
+      "warmMedianMs": {
+        "full": 14.467750000000024,
+        "scopedFullContour": 0.20605000000000473,
+        "preparedProject": 0.027499999999918145,
+        "patch": 0.019099999999980355
+      }
+    }
+  ]
+}

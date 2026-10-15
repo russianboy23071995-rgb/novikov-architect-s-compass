@@ -1,12 +1,14 @@
+import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
+import { translatePoint } from "../../geometry/primitives/point.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
-/** Point edits have no neighbour dependencies. Run the existing operation on the
- * single hatch, retaining project metadata/pattern definitions. Never commit this scope.
+/** Point edits change only a contour vertex. A validated owned snapshot fixes all
+ * other hatch fields; shared prepared polygon validation checks the changed edges.
  */
 export function prepareHatchPointPreview(session: EditSession): PreparedDirectEditPreview {
   if (session.target.kind !== "hatch" || session.action !== "point")
@@ -22,37 +24,42 @@ export function prepareHatchPointPreview(session: EditSession): PreparedDirectEd
     !hatch.points[session.index]
   )
     throw Error("Invalid hatch grip");
-  const local = createProjectSnapshot({
-    ...base,
-    assets: [],
-    storeys: base.storeys.map((s) => ({
-      ...s,
-      walls: [],
-      windows: [],
-      wallJoins: [],
-      wallTJunctions: [],
-      lines: [],
-      hatches: s.id === level.id ? [hatch] : [],
-      references: [],
-    })),
-  });
+  const index = session.index;
+  const contour = preparePolygonVertexEdit(hatch.points, [index]);
   const target = Object.freeze({ ...session.target });
-  const pinned: EditSession = Object.freeze({
-    ...session,
-    base: local,
-    target,
-    anchor: Object.freeze({ ...session.anchor }),
-  });
+  const anchor = Object.freeze({ ...session.anchor });
   const replacedIds = Object.freeze([hatch.id]);
   function resolve(current: Project, selection: ElementTarget | null, point: Point) {
     if (current !== source || selection?.id !== target.id || selection.kind !== target.kind)
       throw Error("Bearbeitungskontext geaendert.");
-    return editAtPointer(pinned, local, point);
+    const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
+    if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
+      throw Error("Ungueltige Zielposition.");
+    const points = hatch!.points.map((p, i) =>
+      i === index ? Object.freeze(translatePoint(p, delta)) : p,
+    );
+    const result = contour.validate(points);
+    if (!result.valid)
+      throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
+    Object.freeze(points);
+    return Object.freeze({ ...hatch!, points });
   }
   return Object.freeze({
     evaluate(current, selection, point) {
-      const next = resolve(current, selection, point);
-      const geometry = { storey: storeyOf(next), assets: [] };
+      const changed = resolve(current, selection, point);
+      const geometry = {
+        storey: {
+          ...level,
+          walls: [],
+          windows: [],
+          lines: [],
+          wallJoins: [],
+          wallTJunctions: [],
+          references: [],
+          hatches: [changed],
+        },
+        assets: [],
+      };
       return {
         geometry,
         replacedIds,
@@ -60,7 +67,7 @@ export function prepareHatchPointPreview(session: EditSession): PreparedDirectEd
       };
     },
     materialize(current, selection, point) {
-      const changed = storeyOf(resolve(current, selection, point)).hatches[0]!;
+      const changed = resolve(current, selection, point);
       // Legacy 2D consumer still needs a Project-shaped derived view. Reuse every
       // unaffected entity; validation/publication remains exclusively at fullEdit.
       return replaceStorey(base, {
