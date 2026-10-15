@@ -12420,3 +12420,10 @@ Exportvergleich und ein Undo bestanden. Beleg benchmarks/s1-gb-movement-ui-evide
 Kontinuierlicher Shift-Maustest und unabhängiger Vorschauflächenvergleich weiter offen;
 Codex-Prozessabsturz/Hänger im Windows-Protokoll, Ursache ungeklärt. Kein belegter
 NOVIKOV-Geometrieabsturz und keine Lag-Freigabe. Details und genau ein Folgeauftrag im Masterplan.
+
+### AUD14-07 – Vorschaugleichheit / manuelle Shift-Abnahme (15.10.2026)
+S1-GB-Exportvergleich XY/Z: jeweils 7050 Flächen stimmen mit vollständigem Aufbau überein
+(Reihenfolge neutralisiert, Rundung 1e-10). 24 fokussierte Tests, Typecheck, ESLint bestanden.
+Beleg benchmarks/s1-export-preview-evidence.json; reproduzierbares Prüfskript daneben.
+Praktische Shift-Dauerbewegung wartet weiterhin auf Nutzer („Noch nicht getestet“).
+Kein GPU-/Lag-Nachweis. Nächster unabhängiger technischer Auftrag: IFC-Höhen/Zuordnung.
