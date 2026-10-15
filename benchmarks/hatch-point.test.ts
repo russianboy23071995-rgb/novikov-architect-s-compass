@@ -80,7 +80,7 @@ test("invalid contours, stale contexts and unsupported gestures retain full-path
   assert.throws(() => prepared.evaluate({ ...base }, edit.target, edit.anchor));
   assert.throws(() => prepared.evaluate(base, { kind: "hatch", id: "h1" }, edit.anchor));
   assert.throws(() => prepareDirectEditPreview({ ...edit, index: 99 }));
-  assert.equal(prepareDirectEditPreview({ ...edit, action: "offset" }), null);
+  assert.equal(prepareDirectEditPreview({ ...edit, action: "insert" }), null);
 });
 test("hatch preview is disposable and placement retains full validation and one undo", () => {
   let state = createEditingState(hatchPointFixture(3, 100));

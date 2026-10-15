@@ -11819,3 +11819,42 @@ platzieren und einmal Undo. Muster und andere Elemente müssen erhalten bleiben.
 Einziger Folgeauftrag: Offset-Vorschau von Schraffuren über denselben vorbereiteten
 Application-Vertrag begrenzen, vorhandene Mindestgröße/Cap-Regel und Vollpfad vergleichen.
 AUD14-04 bleibt aktiv; AUD14-05/06/07 folgen danach.
+
+
+### AUD14-04 Teil 11 – Vorbereitete Schraffur-Offsetvorschau (15.10.2026)
+
+PR332 nach ausdrücklicher Freigabe und grüner CI gemergt (ee48dbe).
+Der vorhandene Schraffur-Adapter verarbeitet jetzt auch Offset. offsetContourPoints
+ist die gemeinsame Punktableitung für Vollaktion und Vorschau; die bestehende
+prepareConvexOffset-Berechnung einschließlich konvexer Fähigkeitsgrenze, numerischem
+Boden und 1-%-Mindestlänge je Kante bleibt unverändert. Kein proportionaler BIM-Scale.
+
+Weil Offset jeden Punkt verändert, wird die vollständige resultierende Kontur weiterhin
+mit validateSimplePolygon geprüft. Gespart werden erneute Prüfungen unveränderter
+Projektteile und Schraffureigenschaften; deren Gültigkeit ist im eigenen unveränderlichen
+Snapshot festgelegt. Keine neue Renderer-Typabfrage, keine zweite Offset-/Fanglogik.
+Nullindex entspricht wie im Vollpfad Kante 0. Musterursprung/-rotation, Modell-/Papiermaß,
+Layer/ID und Darstellung bleiben erhalten. Platzierung weiterhin vollständig validiert,
+atomar und mit genau einem Undo; Vorschau bleibt abgeleitet und verwerfbar.
+
+1013 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Exakte
+Projekt-/Planszenenvergleiche: beide Umlaufrichtungen, kleine Konturen bis 0,00001-facher
+Größe, große Koordinaten, rohe und begrenzte Ziele, wiederholte Mindestgrenze/Rückweg,
+Papiermuster, anderes Arbeitsgeschoss, ungültige/konkave/nicht endliche Ziele und Kontext,
+Abbruch/Undo sowie vollständige Commit-Prüfung unbetroffener Elemente. Keine Änderung
+am Rendering und keine neue visuelle Browserabnahme behauptet.
+
+Rohdaten benchmarks/hatch-offset-results.json: unabhängige Sitzungs-/Cap-Caches,
+Vorbereitung separat, ein erster und acht warme Werte mit wechselnder Reihenfolge;
+exakte Projektgleichheit je Ziel. Warme Mediane Vollpfad → vorbereitete Projektvorschau:
+- einzelne 500-Punkt-Kontur: 5,12 → 1,39 ms; Vorbereitung 14,35 ms.
+- 100 Schraffuren mit je 100 Punkten: 69,17 → 0,27 ms; Vorbereitung 43,26 ms.
+- 500 Vierecke: 16,61 → 0,03 ms; Vorbereitung 8,81 ms.
+Keine Gesamtframe-/GPU-Garantie. Vollständige Zielkonturprüfung, materialisierte
+Projektansicht und Darstellung bleiben Kosten; keine konstante Komplexität behauptet.
+
+Abnahme: Musterschraffur nach innen über die Mindestgröße ziehen, wieder nach außen,
+abbrechen oder platzieren und einmal Undo; Musterlage und übrige Elemente erhalten.
+Einziger Folgeauftrag: Schraffur-„Knicken“ (Punkt einfügen) im gemeinsamen vorbereiteten
+Vertrag begrenzen; Punktanzahlgrenze und vollständige Kontur-/Commitprüfung erhalten.
+AUD14-04 bleibt aktiv, AUD14-05/06/07 folgen danach. Andere Legacy-Pfade bleiben offen.

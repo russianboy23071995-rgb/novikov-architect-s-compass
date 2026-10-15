@@ -20,11 +20,16 @@ function prepared(session: EditSession) {
 export function offsetDirection(session: EditSession) {
   return prepared(session).normal(session.index ?? 0);
 }
-export function previewContourOffset(session: EditSession, pointer: Point) {
+/** Shared point derivation for full actions and prepared hatch previews. */
+export function offsetContourPoints(session: EditSession, pointer: Point) {
   const normal = offsetDirection(session);
   const distance =
     (pointer.x - session.anchor.x) * normal.x + (pointer.y - session.anchor.y) * normal.y;
-  const points = prepared(session).at(distance);
+  return prepared(session).at(distance);
+}
+
+export function previewContourOffset(session: EditSession, pointer: Point) {
+  const points = offsetContourPoints(session, pointer);
   return session.target.kind === "hatch"
     ? previewHatch(session.base, session.base, {
         projectId: session.base.id,
