@@ -12070,3 +12070,18 @@ Sichtbarkeitsmigration behauptet; übrige Picking-/Visibility-Consumer unveränd
 Nächster Auftrag: große Anschlussgruppen/Fremdendpunktprüfung messen und sicher begrenzen.
 Danach AUD14-06, anschließend AUD14-07 einschließlich Kamerawechselkosten und Schulprofil.
 AUD14-05 sowie AUD14-04-Restschuld bleiben offen.
+
+
+### AUD14-05 Teil 3 – Fremdendpunktindex / große Gruppen
+PR345 gemergt (cb895cc). Gemeinsamer geometrischer Punktindex grenzt fremde Wandenden ein;
+pointsCompatible bleibt unverändert, vollständige Gruppe/Fenster/Commit erhalten.
+1057 Tests, beide Typechecks, Lint/Build bestanden. Toleranz-/Ownershiptests und exakte
+51-Wand-Gruppenvergleiche. Browser: 48 Pixel-/Projekt-/Commit-/Undo-/Abbruchvergleiche
+bei 502 Wänden mit T-Paar bestanden, kein Browsernachweis für die große Gruppe.
+connection-group-before/results.json: zwei verbundene plus 1000 fremde Wände warm
+1,014 → 0,878 ms, Vorbereitung 9,007 → 15,874 ms. 51 verbundene plus 100 fremde Wände
+14,930 → 14,618 ms: dominanter Gruppenrest bleibt offen. Keine sichere fachliche Kürzung
+nachgewiesen; vollständige Abhängigkeiten bleiben Pflicht. Kein Frame-/p95-Nachweis.
+Priorisierung: nun AUD14-06 Langsitzungs-/History-/Bild-/Recovery-Messung, danach sichere
+Aufbewahrung, anschließend AUD14-07 Gesamtgate. Großer Gruppenrest aus AUD14-05 und
+AUD14-04-Restschuld werden nicht geschlossen oder durch ein Gruppenlimit kaschiert.

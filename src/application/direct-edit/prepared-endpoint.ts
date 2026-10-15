@@ -4,7 +4,7 @@ import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { Project, Point } from "../../lib/bim/model.ts";
 import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
-import { pointsCompatible } from "../../geometry/tolerances/model.ts";
+import { createCompatiblePointIndex } from "../../geometry/spatial/compatible-point-index.ts";
 
 function freeze<T>(value: T): T {
   if (value && typeof value === "object" && !Object.isFrozen(value)) {
@@ -55,7 +55,9 @@ export function prepareEndpoint(
     [...storeyOf(scoped).walls, ...storeyOf(scoped).windows].map((e) => e.id),
   );
   const fullIds = Object.freeze([...s.walls, ...s.windows].map((e) => e.id));
-  const foreign = s.walls.filter((w) => !ids.has(w.id)).flatMap((w) => [w.start, w.end]);
+  const foreign = createCompatiblePointIndex(
+    s.walls.filter((w) => !ids.has(w.id)).flatMap((w) => [w.start, w.end]),
+  );
   const session: EditSession = Object.freeze({
     base,
     target: { kind: "wall" as const, id },
@@ -77,8 +79,7 @@ export function prepareEndpoint(
     }
     const moved = storeyOf(next).walls.find((w) => w.id === id)!;
     // New contacts may affect another component or an occupied node. Never hide that context.
-    if (foreign.some((p) => pointsCompatible(p, moved.start) || pointsCompatible(p, moved.end)))
-      return full(point);
+    if (foreign.has(moved.start) || foreign.has(moved.end)) return full(point);
     return { project: next, path: "local" };
   };
   return {

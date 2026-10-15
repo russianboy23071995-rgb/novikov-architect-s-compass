@@ -1,0 +1,177 @@
+{
+  "method": "7 targets; prepared then full; exact project comparison outside timing; preparation separate; connected branches each host a window",
+  "runs": [
+    {
+      "branches": 1,
+      "foreign": 0,
+      "affectedWalls": 2,
+      "preparationMs": 1.991800000000012,
+      "samples": [
+        {
+          "previewMs": 2.5988000000000113,
+          "fullMs": 1.575099999999992,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.4029000000000167,
+          "fullMs": 1.164999999999992,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.9599000000000046,
+          "fullMs": 1.484499999999997,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.2626999999999953,
+          "fullMs": 1.0937000000000126,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.384600000000006,
+          "fullMs": 1.650100000000009,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.0117999999999938,
+          "fullMs": 0.8136000000000081,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.0051000000000272,
+          "fullMs": 0.8263999999999783,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 1,
+      "foreign": 1000,
+      "affectedWalls": 2,
+      "preparationMs": 9.00709999999998,
+      "samples": [
+        {
+          "previewMs": 1.8730999999999938,
+          "fullMs": 8.612000000000023,
+          "path": "local"
+        },
+        {
+          "previewMs": 2.2560000000000002,
+          "fullMs": 6.512200000000007,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.004099999999994,
+          "fullMs": 5.424000000000007,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.1385999999999967,
+          "fullMs": 5.473299999999995,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.9368000000000052,
+          "fullMs": 5.990899999999954,
+          "path": "local"
+        },
+        {
+          "previewMs": 0.8938999999999737,
+          "fullMs": 5.581999999999994,
+          "path": "local"
+        },
+        {
+          "previewMs": 1.0234000000000378,
+          "fullMs": 5.872799999999984,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 10,
+      "foreign": 100,
+      "affectedWalls": 11,
+      "preparationMs": 4.966099999999983,
+      "samples": [
+        {
+          "previewMs": 3.3725000000000023,
+          "fullMs": 4.051499999999976,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.478399999999965,
+          "fullMs": 6.061300000000017,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.1036000000000286,
+          "fullMs": 3.8958000000000084,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.0249000000000024,
+          "fullMs": 5.263300000000015,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.1358999999999924,
+          "fullMs": 5.124699999999962,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.8561000000000263,
+          "fullMs": 4.380400000000009,
+          "path": "local"
+        },
+        {
+          "previewMs": 3.442700000000002,
+          "fullMs": 4.72890000000001,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 50,
+      "foreign": 100,
+      "affectedWalls": 51,
+      "preparationMs": 17.28340000000003,
+      "samples": [
+        {
+          "previewMs": 13.837099999999964,
+          "fullMs": 16.11840000000001,
+          "path": "local"
+        },
+        {
+          "previewMs": 15.488900000000001,
+          "fullMs": 15.460899999999981,
+          "path": "local"
+        },
+        {
+          "previewMs": 15.790399999999977,
+          "fullMs": 13.7543,
+          "path": "local"
+        },
+        {
+          "previewMs": 14.370100000000036,
+          "fullMs": 11.503600000000006,
+          "path": "local"
+        },
+        {
+          "previewMs": 21.45890000000003,
+          "fullMs": 12.917299999999955,
+          "path": "local"
+        },
+        {
+          "previewMs": 12.544999999999959,
+          "fullMs": 11.434400000000096,
+          "path": "local"
+        },
+        {
+          "previewMs": 12.941700000000083,
+          "fullMs": 12.301899999999932,
+          "path": "local"
+        }
+      ]
+    }
+  ]
+}
