@@ -4,7 +4,7 @@ import type { Project, Point } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
 import { selectionEdges } from "./selection-outline.ts";
-import { classifyAnchorVisibility } from "./anchor-visibility.ts";
+import { prepareAnchorVisibility } from "./anchor-visibility.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 
@@ -45,6 +45,7 @@ export function createMovementOriginQuery(
 ) {
   const model = viewportModel(project, prepared);
   const solid = visibleSurfaces(buildBuildingSolid(model), allows);
+  const visibility = prepareAnchorVisibility(solid, projection);
   const projected = movementCorners(model)
     .filter((c) => allows(c.id))
     .map((c) => {
@@ -89,7 +90,7 @@ export function createMovementOriginQuery(
             c.distance <= radius && (height === undefined || Math.abs(c.point[2] - height) < 1e-8),
         )
         .sort((a, b) => a.distance - b.distance)
-        .find((c) => classifyAnchorVisibility(solid, projection, c.point) === "visible") ?? null
+        .find((c) => visibility(c.point) === "visible") ?? null
     );
   };
 }

@@ -12054,3 +12054,19 @@ Einziger nächster Auftrag: Verdeckungsprüfung phasenweise messen und gemeinsch
 vorbereitet räumlich begrenzen, bei identischer Tiefen-/Sichtbarkeitspolitik. Danach
 Anschlussgruppen/Fremdendpunkte, dann AUD14-06. AUD14-05 und Restschuld aus AUD14-04
 sowie Gesamtabnahme AUD14-07 bleiben offen.
+
+
+### AUD14-05 Teil 2 – Gemeinsame vorbereitete Tiefenabfrage
+PR344 gemergt (c0abb7f). prepareNearestWallSurface projiziert einmal und nutzt gemeinsamen
+Boxindex, originale Reihenfolge und triangleDepth einschließlich Toleranzen. Konservative
+Bounds, extreme Fälle als vollständige Kandidaten. prepareAnchorVisibility teilt die
+Klassifikation mit dem Vollpfad; nur movement-origin angebunden, kein neuer globaler Cache.
+1054 Tests, beide Typechecks, Lint und Build bestanden. Browser: sechs Pixelvergleiche,
+48 gleiche Fangresultate bei 500 Wänden/500 Fenstern. depth-*.json und depth-profile.ts.
+Reine Tiefe 11,589 → 0,059 ms median, Vorbereitung 76,417 ms separat. Gesamtquery gemischt
+13,759 → 0,069 ms; dicht 15,265 → 4,927 ms. Keine Frame-/p95-/faire Kaltstartgarantie.
+Kamerawechselvorbereitung und dichte Überschneidungen bleiben Kosten. Keine universelle
+Sichtbarkeitsmigration behauptet; übrige Picking-/Visibility-Consumer unverändert.
+Nächster Auftrag: große Anschlussgruppen/Fremdendpunktprüfung messen und sicher begrenzen.
+Danach AUD14-06, anschließend AUD14-07 einschließlich Kamerawechselkosten und Schulprofil.
+AUD14-05 sowie AUD14-04-Restschuld bleiben offen.
