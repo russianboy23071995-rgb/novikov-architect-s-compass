@@ -11487,7 +11487,7 @@ Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlau
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status: offen, P1. Bezug: A01–A05/A11.
+Status: teilweise umgesetzt, Teil 1 am 15.10.2026 geprüft; weitere Teilaufträge offen, P1. Bezug: A01–A05/A11.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -11579,3 +11579,14 @@ Abbruch, großen Weltkoordinaten, plus Kontextwiederherstellung bestanden.
 Rohzahlen und Grenzen in `benchmarks/solid-resource-results.json` und Masterplan.
 Keine GPU-/Gesamtframezeitgarantie. Nächster Einzelauftrag AUD14-04; schweres
 Mehrgeschoss-/Langsession-Abschlussgate bleibt offen.
+
+
+### AUD14-04 Teil 1 – Nachweis 15.10.2026
+Neue Ansichtssnapshots teilen nach vollständiger Validierung und konservativem
+Modellvergleich die eingefrorene Gebäudeableitung; nur ein schwacher letzter
+Kandidat, kein unbegrenzter Szenenbestand. 984 Tests, Typechecks, Lint und Build;
+Browsernachweis sieben exakte Pixelvergleiche bei fünf Geschossen/500 Wänden/Fenstern.
+Rohwerte `benchmarks/building-view-results.json`; Detailgrenzen im Masterplan.
+Bestehende Identitätscache-Annahme immutable Snapshots nicht ausgeweitet:
+Ownership/Mutationsabsicherung sowie doppelte Validierungen sind der nächste
+Einzelauftrag innerhalb AUD14-04. Der Gesamtpunkt bleibt ausdrücklich offen.

@@ -1,3 +1,4 @@
+import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
@@ -189,12 +190,34 @@ export function projectPoint(point: Vec3, solid: Solid, camera: Camera, aspect: 
   return projectOrthographic(point, createProjectionFrame(solid), camera, aspect);
 }
 
-const buildings = new WeakMap<Project, Solid>();
+type BuildingEntry = { project: Project; result: Solid };
+const buildings = new WeakMap<Project, BuildingEntry>();
+// Only one weak recent candidate: no project-ID registry or retained scene history.
+let recentBuilding: WeakRef<BuildingEntry> | null = null;
+function freezeBuilding(result: Solid): Solid {
+  for (const face of result.faces) {
+    for (const point of face.vertices) Object.freeze(point);
+    Object.freeze(face.vertices);
+    Object.freeze(face.normal);
+    Object.freeze(face);
+  }
+  Object.freeze(result.faces);
+  Object.freeze(result.min);
+  Object.freeze(result.max);
+  return Object.freeze(result);
+}
 /** One derived building scene. Storeys remain authoritative; working selection is not a filter. */
 export function buildBuildingSolid(input: Project): Solid {
   const cached = buildings.get(input);
-  if (cached) return cached;
+  if (cached) return cached.result;
   const project = validateProject(input);
+  const recent = recentBuilding?.deref();
+  // Every new public snapshot is fully validated before any cross-view reuse.
+  // Conservative model equality includes geometry, storey heights, datum and joins.
+  if (recent && sameProjectModel(project, recent.project)) {
+    buildings.set(input, recent);
+    return recent.result;
+  }
   const parts = project.storeys
     .filter((s) => s.walls.length > 0)
     .map((s) =>
@@ -213,6 +236,8 @@ export function buildBuildingSolid(input: Project): Solid {
       ? ([0, 1, 2].map((i) => Math.max(...parts.map((p) => p.max[i]!))) as Vec3)
       : [1, 1, 1],
   };
-  buildings.set(input, result);
-  return result;
+  const entry = { project, result: freezeBuilding(result) };
+  buildings.set(input, entry);
+  recentBuilding = new WeakRef(entry);
+  return entry.result;
 }
