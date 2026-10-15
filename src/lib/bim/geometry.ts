@@ -1,3 +1,4 @@
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
@@ -209,10 +210,13 @@ function freezeBuilding(result: Solid): Solid {
 /** One derived building scene. Storeys remain authoritative; working selection is not a filter. */
 export function buildBuildingSolid(input: Project): Solid {
   const cached = buildings.get(input);
-  if (cached) return cached.result;
-  const project = validateProject(input);
+  const immutable = isOwnedProjectSnapshot(input);
+  if (cached && immutable) return cached.result;
+  // Mutable public inputs always pass full validation, including same-identity calls.
+  const project = immutable ? input : validateProject(input);
+  if (cached && sameProjectModel(project, cached.project)) return cached.result;
   const recent = recentBuilding?.deref();
-  // Every new public snapshot is fully validated before any cross-view reuse.
+  // Only factory-owned snapshots may reuse their prior validation.
   // Conservative model equality includes geometry, storey heights, datum and joins.
   if (recent && sameProjectModel(project, recent.project)) {
     buildings.set(input, recent);

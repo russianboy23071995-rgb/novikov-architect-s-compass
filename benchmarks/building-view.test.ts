@@ -1,3 +1,7 @@
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+} from "../src/domain/project/owned-snapshot.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildingViewFixture } from "./building-view-fixture.ts";
@@ -59,4 +63,53 @@ test("new snapshots validate and rebuild for walls, windows, heights and datum; 
   const bad = structuredClone(p);
   bad.storeys[0]!.walls[0]!.height = -1;
   assert.throws(() => buildBuildingSolid(bad));
+});
+
+test("mutable identity cannot return stale geometry or bypass validation", () => {
+  const p = buildingViewFixture(1);
+  const before = buildBuildingSolid(p);
+  p.storeys[0]!.walls[0]!.height = 3.5;
+  const after = buildBuildingSolid(p);
+  assert.notEqual(after, before);
+  assert.deepEqual(after, buildBuildingSolid(structuredClone(p)));
+  p.storeys[0]!.windows[0]!.width = 99;
+  assert.throws(() => buildBuildingSolid(p));
+});
+
+test("owned snapshots detach caller data, are immutable and retain fast scene identity", () => {
+  const source = buildingViewFixture(1);
+  const snapshot = createProjectSnapshot(source);
+  assert.ok(isOwnedProjectSnapshot(snapshot));
+  assert.equal(createProjectSnapshot(snapshot), snapshot);
+  assert.ok(!isOwnedProjectSnapshot(source));
+  const scene = buildBuildingSolid(snapshot);
+  source.storeys[0]!.walls[0]!.height = 4;
+  assert.equal(snapshot.storeys[0]!.walls[0]!.height, 2.8);
+  assert.throws(() => {
+    snapshot.storeys[0]!.walls[0]!.height = 4;
+  });
+  assert.throws(() => {
+    snapshot.storeys.push(source.storeys[0]!);
+  });
+  buildBuildingSolid(source); // another scene must not evict this identity entry
+  assert.equal(buildBuildingSolid(snapshot), scene);
+  const mutableCopy = validateProject(snapshot);
+  mutableCopy.storeys[0]!.walls[0]!.height = 5;
+  assert.ok(!isOwnedProjectSnapshot(mutableCopy));
+  assert.notEqual(buildBuildingSolid(mutableCopy), scene);
+  assert.ok(isOwnedProjectSnapshot(selectWorkingStorey(snapshot, snapshot, "s1")));
+});
+
+test("caller freeze and snapshot spreading do not grant validation bypass", () => {
+  const source = Object.freeze(buildingViewFixture(1));
+  const before = buildBuildingSolid(source);
+  source.storeys[0]!.windows[0]!.width = 1.6;
+  assert.notEqual(buildBuildingSolid(source), before);
+  source.storeys[0]!.walls[0]!.height = -1;
+  assert.throws(() => buildBuildingSolid(source));
+  assert.throws(() => createProjectSnapshot(source));
+  const snapshot = createProjectSnapshot(buildingViewFixture(1));
+  const spread = { ...snapshot, workingStoreyId: "missing" };
+  assert.ok(!isOwnedProjectSnapshot(spread));
+  assert.throws(() => buildBuildingSolid(spread));
 });
