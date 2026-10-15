@@ -507,8 +507,9 @@ PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Tei
 PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
 PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglichen (Teil 18).
 PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und verglichen (Teil 19).
-Nächster Einzelauftrag: freie Wandkörper-Eckbewegung gegen Achsgriff unterscheiden,
-messen und im gemeinsamen Endpunktadapter vorbereiten; Körperoffset und Anschlüsse erhalten.
+PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Teil 20).
+Nächster Einzelauftrag: zusammenhängende AUD14-04-Restabnahme mit Browser-/Mehrgeschossprofil
+und aktuellem Restpfadabgleich; danach begrenzten Übergang zur lokalen 3D-Fangsuche festlegen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1776,3 +1777,43 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    AUD14-04-Abnahme; Kontext und Fangrangfolge erhalten.
 3. AUD14-06: Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
 AUD14-04 bleibt offen; weitere Restpfade aus Teil 13 und AUD14-07 bleiben dokumentiert.
+
+
+### AUD14-04 Teil 20 – Freie Wandkörper-Eckbewegung (15.10.2026)
+
+PR341 nach ausdrücklicher Freigabe und erfolgreicher CI in main gemergt (0a093f6).
+Der gemeinsame Endpunktadapter erhält nun neben der Aktion auch den ursprünglichen
+Körpergriff. Er verwendet unverändert editAtPointer und dessen endpointAtOffsetTarget,
+also keine zweite Formel für Körperoffset, Achslage oder Anschlüsse. Punkt-/Streckaktionen
+sind gemeinsam für 2D-Projektmaterialisierung und 3D-Patches registriert. Neue fremde
+Endkontakte und T-Ziele behalten den Vollpfad; Commit und ein Undo bleiben unverändert.
+
+1048 Tests, App-/Benchmark-Typecheck, gezieltes Lint und Build bestanden. Acht neue
+Vergleichstests: Projekte, 3D-Wand-/Fensterflächen und Auswahlachsen gegen Vollpfad,
+beide Enden und Körperseiten, schräge Wände, Nullbewegung/ungültige Ziele, Fenster,
+Eck-/Doppel-T-Verbindungen, gelöste Nachbarn, fremde Endkontakte und belegte Knoten,
+T-Kandidaten, Kontextwechsel, Abbruch und Vollcommit/Undo. Unzulässiger Mehrfachanschluss
+wird weiterhin abgewiesen. Keine neue visuelle Browserabnahme behauptet.
+
+wall-body-point-profile.ts sowie before/results.json enthalten fünf Geschosse plus
+T-Paar mit Fenstern. Tatsächlicher Griff aus wallBody.corner; erster und acht warme
+Ziele, Reihenfolge alternierend, exakte Projektgleichheit außerhalb der Messung.
+Nachherlauf Vollpfad → vorbereitete Projektansicht, Anfang/Ende:
+- 52 Wände: 0,970 → 0,253 ms / 0,557 → 0,184 ms.
+- 502 Wände: 3,439 → 0,191 ms / 3,507 → 0,220 ms.
+Vorbereitung bei 502 Wänden separat 5,932 / 5,070 ms. Vorherige Vorschau ohne Capability
+4,183 / 3,523 ms. Synthetische Node-Messung, keine Bildschirm-/GPU-/p95-Garantie.
+Fremdpunktliste, große vollständige Anschlussgruppen, Materialisierung und Planableitung
+bleiben Kosten; übrige Altpfade aus Teil 13 werden nicht dadurch als erledigt behandelt.
+
+Abnahme: Körperkante einer Wand mit Fenster greifen, frei seitlich und längs bewegen,
+auch bei schräger Achse und T-/Eckanschluss; Vorschau/Platzierung/Undo vergleichen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. AUD14-04 zusammenhängend abnehmen: aktuelles Mehrgeschoss-/Browserprofil und Restpfade
+   mit dem heutigen Stand abgleichen, verbleibende Engpässe messen und Übergang begründen.
+   Keine weitere pauschale Werkzeugmigration ohne gemessenen Befund.
+2. AUD14-05 lokale räumliche 3D-Ursprungsfangsuche; große Anschlussgruppen, Kamera- und
+   Sichtbarkeitskontext sowie Fangrangfolge ausdrücklich mitprüfen.
+3. AUD14-06 Langsitzungs-Speicher und Recovery-Aufbewahrung sicher begrenzen.
+AUD14-04 ist bis zur Restabnahme nicht geschlossen; AUD14-07 bleibt Abschlussgate.

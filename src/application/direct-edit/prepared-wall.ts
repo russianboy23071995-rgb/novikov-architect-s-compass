@@ -6,28 +6,23 @@ import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
-/** Shared axis endpoints and constrained stretching; free body-corner edits remain legacy. */
+/** Shared axis/body endpoint gestures and constrained stretching retain their original anchor. */
 export function prepareWallEndpointPreview(session: EditSession): PreparedDirectEditPreview | null {
   const s = storeyOf(session.base);
   const wall = s.walls.find((w) => w.id === session.target.id);
   if (
     session.target.kind !== "wall" ||
-    !["point", "stretch"].includes(session.action) ||
+    (session.action !== "point" && session.action !== "stretch") ||
     (session.index !== 0 && session.index !== 1) ||
-    !wall ||
-    (session.action === "point" &&
-      (session.anchor.x !== (session.index === 0 ? wall.start.x : wall.end.x) ||
-        session.anchor.y !== (session.index === 0 ? wall.start.y : wall.end.y)))
+    !wall
   )
     return null;
   const source = session.base;
   const base = createProjectSnapshot(source);
-  const prepared = prepareEndpoint(
-    base,
-    wall.id,
-    session.index,
-    session.action === "stretch" ? { anchor: session.anchor } : undefined,
-  );
+  const prepared = prepareEndpoint(base, wall.id, session.index, {
+    anchor: session.anchor,
+    action: session.action,
+  });
   const replacedIds = [...storeyOf(base).walls, ...storeyOf(base).windows].map((e) => e.id);
   const pinned = Object.freeze({
     ...session,
