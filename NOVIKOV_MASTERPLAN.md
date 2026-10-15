@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – wiederholte Vollvalidierung beim Geschosswechsel korrigiert und in S1 G gemessen. Genau ein nächster Auftrag: denselben Fix bei S1 GB und Abbildwechseln phasenweise nachprüfen, einschließlich verbleibender langer Tasks. Keine pauschale Performance-Abnahme; Recovery-Release-Gates bleiben erhalten.
+Aktueller Arbeitsauftrag: 15.10.2026 – #366 gemergt; S1 GB-Geschosswechsel und G/GB-Abbildwechsel gemessen. Gemeinsame Snapshot-Wiederverwendung bestätigt. Genau nächster Auftrag: verbleibende bildbezogene Abbildwechselpausen auf Browser-/DOM-Darstellung eingrenzen, bevor ein weiterer Produktfix gewählt wird. Release-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -2902,3 +2902,58 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Offene S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Audit-/Folgeauftrag abgleichen.
 Langzeit/Quota/Mehrtab und Gesamt-GPU-Gates bleiben offen; Speichererweiterung zurückgestellt.
+
+### AUD14-07 – S1 GB und Abbildwechsel nach #366 (15.10.2026)
+PR #366 nach erfolgreicher GitHub-CI ausdrücklich freigegeben und gemergt: 67518da.
+Dieser Folgeauftrag ändert ausschließlich Diagnoseharness und Prüfnachweise, keine
+Produktlogik. Das Harness kann den Messbereich nach Initialisierung neu starten und
+zeichnet nun auch die echten Doppelklicks auf Navigator-Treeitems auf.
+
+Isolierter instrumentierter Produktionsbuild auf Port8085, fest 1280×720 DPR1, gleiche
+S1-Fixture: G ohne Bilder; GB mit 20 PNGs, rund 63 MB portable Daten. Autosicherung vor
+Messbeginn als aktuell abgewartet. Keine Recovery-Daten gelöscht oder manuell übernommen;
+Nutzeranwendung Port8080 bleibt unberührt. Initiale Bildgenerierung ist nicht Teil der
+Messung. Viewportoverride anschließend zurückgesetzt.
+
+| Sequenz (je 20 Wechsel OG/EG) | Vollprüfungen | Geschoss-Reducer Summe | Lange Tasks |
+| --- | --- | --- | --- |
+| GB Geschosse, erster Wechsel inklusive | 1 / 25,6 ms | 26,7 ms | 11, Maximum 149 ms |
+| GB Abbilder, bereits warme Basis/Bilder | 0 | 0,3 ms | 20, 54–76 ms |
+| G Abbilder, erste Öffnung inklusive | 2 / 48,1 ms | 27,2 ms | 3, Maximum 106 ms |
+
+Rohdaten: benchmarks/storey-switch-gb.json, document-switch-gb.json und
+ document-switch-g.json. Auswertung innerhalb measurementStart/measurementEnd.
+20 working-storey-Reducerereignisse je Sequenz, 20 dblclick-Ereignisse je Abbildsequenz.
+G erster Abbildwechsel validiert zweimal: vorbereitender selectWorkingStorey-Aufruf
+in CadWorkspace verwirft sein Ergebnis, danach Reducer. Weitere Wechsel nutzen die
+registrierte Basis; kein dauerhaft wiederkehrender Vollprüfungsfehler.
+
+GB Geschosse: 80 image-url-total-Aufrufe zusammen 14,6 ms, vier erstmalige atob-Aufrufe
+zusammen 14,3 ms. GB warme Abbilder: 80 URL-Aufrufe zusammen unter Messauflösung, kein
+atob und keine Vollvalidierung. Bilddekodierung, SVG/DOM-Reconciliation, Layout/Paint
+und GPU-Zeit werden durch diese Funktionswrapper NICHT gemessen. Die verbleibenden
+Abbildpausen dürfen deshalb weder als erneutes Base64-Problem noch als nachgewiesener
+Rendererfehler ausgegeben werden. Fangvorbereitung bleibt pro Wechsel vorhanden:
+GB Abbilder projectSnapPrimitives 107,6 ms gesamt und Indexbau 79,8 ms gesamt; diese
+Teilzeiten erklären die gesamten 20 langen Tasks nicht allein. Verschachtelte Phasen
+nicht addieren. G/GB unterscheiden sich im Warmzustand und sichtbarer Geometrieausdehnung;
+kein kausaler Benchmark allein durch Subtraktion.
+
+Erster Abbildmessversuch wurde vom aufgeklappten Diagnosepanel verdeckt (0 Wechsel),
+verworfen. Zweiter Versuch mit Inspektionspause enthielt Hintergrundarbeit und wurde
+nicht als endgültiger Report verwendet. Endgültige 20 Doppelklicks wurden kontinuierlich
+mit geschlossenem Diagnosepanel ausgeführt; abschließend Abbild-EG ausgewählt und
+Abbildmaßstab sichtbar. Screenshot outputs/s1-gb-views.png zeigt die erfolgreiche
+Abbildöffnung aus dem funktionalen Vorlauf, nicht die Zeitmessung selbst.
+
+Verifikation: Benchmark-Typecheck, gezieltes ESLint und isolierter Produktions-
+Diagnosebuild bestanden; #366 CI bestätigt 1086 Tests und regulären Build. Vollsuite
+in diesem reinen Harness-/Nachweisauftrag nicht erneut ausgeführt. Keine neue Aussage
+zur vollständigen S1-/GPU-/Langzeitabnahme.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** verbleibende bildbezogene Abbildwechselpausen auf DOM-/Bilddarstellung
+   eingrenzen; erst nach isolierter Ursache ein begrenzter Fix, kein Rendererwechsel.
+2. S1-Gruppen-/Shift-UI-Abnahme und IFC-Höhen-/Containment-Nachweis abschließen.
+3. Recovery-Zusammenfassung für alle Geschosse korrigieren und Auditfolge abgleichen.
+Speichererweiterung bleibt zurückgestellt; Langzeit/Quota/Mehrtab-Gates bleiben offen.

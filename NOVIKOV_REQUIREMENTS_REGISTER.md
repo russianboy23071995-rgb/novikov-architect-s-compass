@@ -12354,3 +12354,14 @@ Abbilder 10× funktional geöffnet, noch kein phasenweiser Abbild-/GB-Vergleich.
 Genau nächster Auftrag: GB und Abbildwechsel messen, verbleibende lange Tasks eingrenzen.
 AUD14-04/05/06/07 bleiben teilweise offen; S1-Gruppen/Shift/IFC-Höhen, Recovery-Anzeige
 und bekannte Release-Gates bleiben erhalten.
+
+### AUD14-07 – GB-/Abbildwechsel-Nachweis (15.10.2026)
+#366 auf 67518da gemergt (CI grün). Je 20 echte Wechsel: GB Geschosse eine anfängliche
+Vollprüfung, GB warme Abbilder keine, G erste Abbildöffnung zwei durch Preflight/Reducer.
+Gemeinsamer Snapshot-Fix bestätigt. GB-Abbildwechsel weiterhin 20 lange Tasks von
+54–76 ms, obwohl 80 Bild-URL-Abfragen ohne erneutes atob/Vollprüfung laufen. Browser-
+Dekodierung/DOM/Paint/GPU noch nicht isoliert; kein spekulativer Produktfix.
+Rohdaten document-switch-g/gb.json und storey-switch-gb.json, Methodik im Masterplan.
+Nur Harness/Nachweise geändert; Typecheck/Lint/Diagnosebuild bestanden, #366 CI grün.
+Nächster Einzelauftrag: DOM-/Bilddarstellung des Abbildwechsels eingrenzen. Alle übrigen
+S1-/Recovery-/AUD14-Gates bleiben erhalten, kein Gesamtabschluss.
