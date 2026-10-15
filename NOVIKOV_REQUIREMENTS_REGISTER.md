@@ -12167,3 +12167,14 @@ erneut nachgewiesen. UI-Button sichtbar, Benutzerbereinigung nicht für Tests au
 Gesamtmessung bei 10000 Linien ca. 517,5 ms Median, drei Läufe, keine Frame-/Langzeitgarantie.
 Nächster Auftrag: Langsitzung/Bildwechsel/Undo/Reload/Speicherlast; danach gemessene Pausen/
 Speicherengpässe und AUD14-07 Gesamtgate. AUD14-06 bleibt teilweise/offen.
+
+### AUD14-06 – Autosicherung standardmäßig aktiv (15.10.2026)
+
+Neue Nutzerentscheidung: automatische lokale Sicherung standardmäßig an; bewusste Deaktivierung
+bei Neustart/Projektwechsel erhalten. Browserpräferenz außerhalb Projekt/Undo implementiert,
+Speicherfehler sichtbar, bei unlesbarer Präferenz sicherheitshalber ausdrückliche Aktivierung nötig.
+Keine Persistenz alter sitzungsbezogener Entscheidungen vorhanden. Automatische Bereinigung als
+Ziel angenommen, aber bis Langsitzungs-/Pausennachweis nicht aktiviert; manuelle Wartung bleibt.
+Nächster aktiver Auftrag: Langsitzungs-/Bild-/Undo-/Reload- und Speicherprofil, danach bedarfs-
+gesteuerte Wartung über gemeinsamen Port, anschließend AUD14-07. Keine ungemessene Wartung
+nach jeder Autosicherung; keine Zusage einer externen Datensicherung.

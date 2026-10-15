@@ -121,12 +121,14 @@ export function RecoveryPanel({
             checked={autosave.state.enabled}
             onChange={(event) => autosave.setEnabled(event.target.checked)}
           />
-          Automatisch lokal sichern (dieses geöffnete Projekt)
+          Automatisch lokal sichern
         </label>
         <p>
-          Nach 2 Sekunden Bearbeitungspause. Nach Projektwechsel oder Neustart wieder ausgeschaltet.
-          Eine bereits gestartete Transaktion kann noch abschließen.
+          Nach 2 Sekunden Bearbeitungspause. Standardmäßig aktiv. Deine Auswahl bleibt bei
+          Projektwechsel und Neustart in diesem Browser gespeichert. Eine bereits gestartete
+          Transaktion kann noch abschließen.
         </p>
+        {autosave.preferenceError && <p role="alert">{autosave.preferenceError}</p>}
         {autosave.state.busy && <p role="status">Lokaler Snapshot wird geschrieben…</p>}
         {autosave.state.error && (
           <p role="alert">

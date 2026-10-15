@@ -2249,3 +2249,31 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 2. Synchrone Pausen, Heap/Prozess-/Rasterbedarf auswerten und nur gemessene Engpässe begrenzen.
 3. AUD14-07 Schulprofil einschließlich Anschlussgruppen, Kamerawechsel und Architekturrestschuld
    abnehmen. AUD14-06-Gesamtabnahme bleibt bis zum Langzeit-/Speichernachweis offen.
+
+### AUD14-06 – Standardaktivierung und Wartungsreihenfolge (15.10.2026)
+
+Nutzerfreigabe: #349 und #350 ausdrücklich in main übernommen (26f98dd). Neuer begrenzter
+Schritt: lokale Autosicherung für neue Browserprofile standardmäßig aktiv; explizites Ein/Aus
+wird als Browserpräferenz getrennt vom Projekt und Modell-Undo gespeichert. Projekt-/Kontextwechsel
+übernehmen diese Entscheidung, erneutes Laden liest sie wieder. Unlesbarer Präferenzspeicher
+aktiviert nicht ungefragt, sondern zeigt im RecoveryPanel einen Hinweis; fehlgeschlagenes Speichern
+der Einstellung wird ebenfalls angezeigt. Die bisherige sitzungsbezogene Entscheidung war nicht
+persistiert und kann nachträglich nicht rekonstruiert werden. Bestehende Sicherungen bleiben erhalten.
+Der bestehende serielle Controller, 2-Sekunden-Entprellung, CAS/Fehlerpause und manuelle Sicherung
+bleiben gemeinsame Basis. Keine zweite Schreiblogik. Alte Controller-Verbraucher ohne explizite
+Profilpräferenz behalten ihren bisherigen Opt-in-Vertrag.
+
+Automatische Wartung ist als Ziel freigegeben, aber noch NICHT aktiviert: gemeinsame Logik,
+bedarfsabhängig nach erfolgreicher Sicherung, kein Start während aktiver Bearbeitung, kein
+automatischer Retry bei Fehler/Konflikt. Bedienpause allein genügt nicht gegen synchrone Pausen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Langsitzungen mit Bildwechsel, Undo/Reload, Speicherlast und synchronen Wartungspausen messen.
+2. Bedarfsgesteuerte automatische Wartung über denselben Port mit Bearbeitungssperre/Abbruch
+   umsetzen, sobald die Belastungsprüfung eine vertretbare Ausführung belegt.
+3. AUD14-07 Schulprofil mit Gruppen, Kamerabewegung und Architekturrestschuld abnehmen.
+
+Nachweis dieses Schritts: 1067 Tests bestanden, Benchmark-/Application-Typecheck, gezieltes
+ESLint und Build erfolgreich. Neue Tests prüfen Default, gespeicherte Ein/Aus-Entscheidung,
+Speicherfehler und automatisches Sichern über Projektwechsel. Keine neue visuelle Browserabnahme
+und keine Langsitzungs- oder automatische Bereinigungsabnahme aus diesen Tests abgeleitet.
