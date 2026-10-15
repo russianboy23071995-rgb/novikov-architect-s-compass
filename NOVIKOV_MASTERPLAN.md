@@ -2569,3 +2569,33 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    verbleibende Einschränkungen getrennt von gemessenen Produktfehlern dokumentieren.
 3. Nach Abnahme Recovery-Etappe abschließen und nächsten priorisierten CAD-Auftrag
    aus dem Masterplan auswählen; große Speichererweiterung bleibt separat vorgemerkt.
+
+### AUD14-06 – Automatischer Browserlauf mit echter Datenbank (15.10.2026)
+
+#359 nach erfolgreicher CI ausdrücklich freigegeben und in main übernommen.
+recovery-automatic.html/.ts nutzt createRecoverySession, produktiven Storage-Adapter,
+echte Browser-Timer und eine eigene UUID-Testdatenbank. Drei Sicherungen des aktiven
+Projekts plus fremdes Projekt, 1000 Linien und 1024x1024-Rauschbilder. Kein Nutzerprojekt.
+Aktivitätssignal nach 3 s setzt Ruhephase zurück; nach weiteren 28 s noch kein Lauf.
+Automatischer Start nach 30005 ms seit Aktivität. Lauf entfernt exakt einen verwaisten
+Payload, erhält drei benötigte. Current/Previous/fremdes Projekt vollständig serialisiert
+und gegen erwartete Inhalte verglichen. Danach neuer Save, manuell gestartete Wartung
+mit programmatischer Aktivität nach 10 ms abgebrochen; alle Inhalte und Payloadanzahl
+unverändert. Manueller Wiederanlauf erfolgreich, wieder genau drei geschützte Payloads.
+
+Browser PASS nach 35,53 s. Ereignisfolge running/success, running/cancelled,
+running/success dokumentiert in recovery-automatic-results.json. Typecheck, gezieltes
+ESLint und Build bestanden. Produktionscode unverändert; Basis zuletzt 1083 Tests und CI grün.
+
+Grenzen: Aktivität ist ein programmatisches Service-Signal, keine durchgespielte CAD-Geste.
+Wiederanlauf nach Abort bewusst manuell; reale Fünf-Minuten-Wartezeit nicht durchlaufen,
+weiterhin deterministische Testabdeckung. Kein Prozessneustart, Mehrtab-/Stunden-/Quota-
+Volltest und keine Prozess-/GPU-Messung. Kein globaler Abschluss der Belastungsnachweise.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Zwei gleichzeitige Recovery-Sitzungen auf derselben isolierten Browserdatenbank prüfen:
+   konkurrierender Save/Wartung, Root-Wechsel, unveränderte Current/Previous/Fremdprojekte.
+2. Offene Stunden-/Quota-/Prozess-Nachweise nach Risiko eingrenzen und getrennt planen;
+   nur tatsächlich gemessene Produktfehler beheben, keine pauschalen Leistungszusagen.
+3. Nach dieser Abnahme den nächsten priorisierten CAD-Auftrag im Masterplan auswählen;
+   größere Speichererweiterung bleibt gesondert vorgemerkt.

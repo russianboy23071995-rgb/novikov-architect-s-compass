@@ -1,0 +1,64 @@
+{
+  "events": [
+    {
+      "ms": 34244.69999998808,
+      "state": {
+        "status": "running",
+        "message": "Sicherungsstände werden geprüft und ungenutzte Bilddaten bereinigt…"
+      }
+    },
+    {
+      "ms": 34461.09999999404,
+      "state": {
+        "status": "success",
+        "message": "1 ungenutzte Bilddaten entfernt; 3 benötigte Bilddaten erhalten."
+      }
+    },
+    {
+      "ms": 35010.09999999404,
+      "state": {
+        "status": "running",
+        "message": "Sicherungsstände werden geprüft und ungenutzte Bilddaten bereinigt…"
+      }
+    },
+    {
+      "ms": 35028.89999999106,
+      "state": {
+        "status": "cancelled",
+        "message": "Wartung abgebrochen. Vorhandene Sicherungen bleiben erhalten."
+      }
+    },
+    {
+      "ms": 35219.19999998808,
+      "state": {
+        "status": "running",
+        "message": "Sicherungsstände werden geprüft und ungenutzte Bilddaten bereinigt…"
+      }
+    },
+    {
+      "ms": 35350.09999999404,
+      "state": {
+        "status": "success",
+        "message": "1 ungenutzte Bilddaten entfernt; 3 benötigte Bilddaten erhalten."
+      }
+    }
+  ],
+  "limitations": "Real 30-second idle time and IndexedDB. Programmatic activity signal; manual retry after abort. Five-minute automatic retry remains deterministic unit-test evidence, not waited here. No user database.",
+  "name": "novikov-recovery-v2-pilot-automatic-12bc737c-0922-46c1-9b10-72b610dcb30d",
+  "before": {
+    "count": 4,
+    "base64Characters": 12564972
+  },
+  "quietBeforeStartMs": 30005,
+  "afterAutomatic": {
+    "count": 3,
+    "base64Characters": 9422940
+  },
+  "abort": "PASS: all current/previous/foreign contents preserved",
+  "afterRetry": {
+    "count": 3,
+    "base64Characters": 9423456
+  },
+  "status": "PASS",
+  "elapsedMs": 35529.39999999106
+}

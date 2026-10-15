@@ -12263,3 +12263,12 @@ No-op/Fehler, Save-Vorrang, unabhängige Holds, Kontext/Opt-out, Dialogbesitz un
 Cleanup: insgesamt 1083 bestanden. Typecheck/ESLint/Build bestanden; Browser-Dialog
 mit Test-Port erfolgreich. Echte automatische Browser-Datenbankabnahme ist nächster
 begrenzter Auftrag, nicht bereits nachgewiesen. Ausführliche Grenzen im Masterplan.
+
+### AUD14-06 – Automatischer realer Browser-/Storage-Lauf (15.10.2026)
+
+recovery-automatic: PASS, automatischer Start 30005 ms nach letztem Service-Aktivitätssignal,
+vier auf drei Payloads; alle Current/Previous/Fremdprojekt-Inhalte identisch. Nach neuem
+Save Wartung durch Aktivität abgebrochen: keine Veränderung. Manueller Wiederanlauf PASS.
+Eigene UUID-Testdatenbank, keine Nutzerdaten. Typecheck/ESLint/Build bestanden.
+Keine reale CAD-Geste oder Fünf-Minuten-Retry-Abnahme behauptet. Nächster begrenzter
+Auftrag: konkurrierende Sitzungen auf derselben Testdatenbank (siehe Masterplan).
