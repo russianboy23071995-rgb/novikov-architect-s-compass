@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #372 gemergt; S1-GB-Vorschauvergleich XY/Z bestanden. Praktische Shift-Dauerbewegung wartet auf Nutzerabnahme. Genau nächster technischer Auftrag: IFC-Höhen und Geschosszuordnung nachweisen; Abbildwechsel-Performancebefund bleibt offen.
+Aktueller Arbeitsauftrag: 15.10.2026 – #373 gemergt; IFC-Höhen/Zuordnung für KG/EG/OG automatisiert nachgewiesen. Z per Hilfseingabe vom Nutzer bestätigt; mausgesteuerte Shift-Dauerbewegung separat offen. Genau nächster Auftrag: Recovery-Zusammenfassung aller Geschosse prüfen; Abbildwechsel-Performancebefund bleibt offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3200,3 +3200,31 @@ Nächste drei Schritte, nur Schritt 1 als nächster technischer Auftrag:
    praktische Shift-Rückmeldung parallel offen halten.
 2. Recovery-Zusammenfassung aller Geschosse prüfen und gegebenenfalls korrigieren.
 3. Abbildwechsel-Performancebefund und verbleibende S1-/Release-Gates gezielt abarbeiten.
+
+### AUD14-07 – IFC-Höhen/Zuordnung und korrigierte Z-Abnahme (15.10.2026)
+PR #373 nach erfolgreicher CI ausdrücklich freigegeben und gemergt (11029aa).
+Nutzer bestätigt wiederholte Z-Verschiebung zweier angewinkelt verbundener Wände sowie
+Einzelbewegung mit gelöster Verbindung. Z wurde über die Hilfseingabe ausdrücklich
+gewählt. Dafür ist Shift nicht erforderlich; die frühere Aufforderung zu einer
+„Z-Shift-Abnahme“ war unpassend. Mausgesteuerte XY-/Elementrichtungs-Sperre mit dauerhaft
+gehaltenem Shift bleibt separat offen. Keine automatische Z-Anwahl durch Shift behaupten.
+
+Neuer Integrationstest in src/lib/bim/ifc.test.ts: KG/EG/OG mit Höhen -2,6/0/3,2 m,
+signierten Wandversätzen und je einem Fenster. Exportierte IFC-Platzierungsketten werden
+unabhängig aufgelöst, Geschoss-Elevation und exakte Containment-Mengen geprüft, außerdem
+Öffnungs-/Fensterbeziehungen. OG-Wand um -4 m versetzt: gehört weiterhin zum OG.
+Nach EG-/KG-Höhenänderung gelten -3/0/4 m; Wandversatz und Brüstung werden genau einmal
+addiert. Projekt-Roundtrip, ein Undo und stabile GlobalIds sind geprüft. Absolute
+EG-Bezugskote 100 m bleibt gemäß bestehendem Vertrag Annotation; Modell und IFC bleiben
+EG-relativ. Kein neues Georeferenzierungsverhalten eingeführt.
+
+23 fokussierte Tests (IFC, Wandhöhen, Z-Translation), TypeScript und fokussiertes ESLint
+bestanden. Nur Test-/Dokumentationsänderungen, kein Produktfix erforderlich; daher kein
+erneuter Produktbuild oder Vollsuite. Dies ist ein Exportstruktur-Nachweis, keine neue
+Abnahme in Archicad oder einem unabhängigen IFC-Validator. Bestehende externe Abnahmen
+bleiben erhalten, werden aber nicht auf diese neue Testkombination übertragen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** Recovery-Zusammenfassung über alle Geschosse prüfen und bei Bedarf korrigieren.
+2. Offenen Abbildwechsel-Performancebefund gezielt messen und eingrenzen.
+3. Verbleibende S1-/Release-Gates abgleichen; praktische XY-Shift-Abnahme separat nachtragen.

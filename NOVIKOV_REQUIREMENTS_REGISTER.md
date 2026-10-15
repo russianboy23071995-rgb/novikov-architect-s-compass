@@ -12427,3 +12427,13 @@ S1-GB-Exportvergleich XY/Z: jeweils 7050 Flächen stimmen mit vollständigem Auf
 Beleg benchmarks/s1-export-preview-evidence.json; reproduzierbares Prüfskript daneben.
 Praktische Shift-Dauerbewegung wartet weiterhin auf Nutzer („Noch nicht getestet“).
 Kein GPU-/Lag-Nachweis. Nächster unabhängiger technischer Auftrag: IFC-Höhen/Zuordnung.
+
+### AUD14-07 – Mehrgeschossiger IFC-Nachweis / Z-Nutzerabnahme (15.10.2026)
+#373 gemergt. IFC-Integrationstest für KG/EG/OG prüft aufgelöste Höhen, signierte
+Wandversätze, Fenster/Öffnungen, genaue Geschosszuordnung auch bei Z-Bewegung über die
+Geschossgrenze, Höhenänderungen, Roundtrip, Undo und stabile IDs. 23 fokussierte Tests,
+TypeScript und ESLint bestanden; kein neuer externer IFC-Importnachweis.
+Nutzer bestätigt Z per Hilfseingabe und Auflösen bei Einzelbewegung verbundener Wände.
+Z ist ausdrücklich achsgebunden, kein Shift-Test nötig. Mausgesteuerte XY-/Elementrichtung
+mit dauerhaftem Shift bleibt offen. Keine automatische Shift-Z-Anwahl zugesagt.
+Nächster begrenzter Auftrag: Recovery-Zusammenfassung aller Geschosse.
