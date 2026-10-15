@@ -31,6 +31,9 @@ import {
 } from "../elements/hatch/model.ts";
 import { layerSchema, defaultLayerIdsSchema } from "../layers/model.ts";
 
+/** Includes a duplicated closing point for closed polylines. */
+export const MAX_LINE_POINTS = 10000;
+
 const id = z.string().trim().min(1);
 const positive = z.number().finite().positive();
 const pointSchema = z.object({ x: z.number().finite(), y: z.number().finite() }).strict();
@@ -38,7 +41,7 @@ const lineSchema = z
   .object({
     id,
     kind: z.enum(["line", "polyline"]),
-    points: z.array(pointSchema).min(2).max(10000),
+    points: z.array(pointSchema).min(2).max(MAX_LINE_POINTS),
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     // Pen width is a display attribute in millimetres; geometry remains metres.
     penWidth: z.number().finite().min(0.05).max(2),
