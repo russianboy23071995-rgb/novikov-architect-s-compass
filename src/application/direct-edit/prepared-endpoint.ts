@@ -2,114 +2,120 @@ import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallDependencyClosure } from "../../domain/elements/wall/dependency-closure.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-/** Owned calculation scope for the bounded axial T-host endpoint preview. */
-import { updateWall, type Project, type Point } from "../../lib/bim/model.ts";
+import type { Project, Point } from "../../lib/bim/model.ts";
+import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
-function freeze<T>(v: T): T {
-  if (v && typeof v === "object" && !Object.isFrozen(v)) {
-    for (const c of Object.values(v)) freeze(c);
-    Object.freeze(v);
+
+function freeze<T>(value: T): T {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
   }
-  return v;
+  return value;
 }
-export function prepareEndpoint(source: Project, id: string) {
+/** Retain original relation order in the legacy materialized project view. */
+function replaceRelations<T>(all: T[], before: T[], after: T[]): T[] {
+  const oldKeys = new Set(before.map((r) => JSON.stringify(r)));
+  const newKeys = new Set(after.map((r) => JSON.stringify(r)));
+  const allKeys = new Set(all.map((r) => JSON.stringify(r)));
+  return [
+    ...all.filter((r) => !oldKeys.has(JSON.stringify(r)) || newKeys.has(JSON.stringify(r))),
+    ...after.filter((r) => !allKeys.has(JSON.stringify(r))),
+  ];
+}
+
+/** Complete original join/T component, including partners whose joins may detach. */
+export function prepareEndpoint(source: Project, id: string, index: 0 | 1 = 1) {
   const base = createProjectSnapshot(source),
-    s = storeyOf(base),
-    wall = s.walls.find((w) => w.id === id);
+    s = storeyOf(base);
+  const wall = s.walls.find((w) => w.id === id);
   if (!wall) throw Error("Unknown wall");
   const ids = wallDependencyClosure(base, [id]);
-  const supported =
-    s.wallTJunctions.some((t) => t.hostWallId === id) &&
-    !s.wallJoins.some((j) => ids.has(j.first.wallId) || ids.has(j.second.wallId));
-  const local = freeze({
-    ...replaceStorey(base, {
-      ...s,
-      walls: s.walls.filter((w) => ids.has(w.id)),
-      windows: s.windows.filter((w) => ids.has(w.wallId)),
-      wallJoins: s.wallJoins.filter((j) => ids.has(j.first.wallId)),
-      wallTJunctions: s.wallTJunctions.filter((j) => ids.has(j.hostWallId)),
+  const scoped = freeze({
+    ...base,
+    assets: [],
+    storeys: base.storeys.map((level) => ({
+      ...level,
+      walls: level.id === s.id ? level.walls.filter((w) => ids.has(w.id)) : [],
+      windows: level.id === s.id ? level.windows.filter((w) => ids.has(w.wallId)) : [],
+      wallJoins: level.id === s.id ? level.wallJoins.filter((j) => ids.has(j.first.wallId)) : [],
+      wallTJunctions:
+        level.id === s.id ? level.wallTJunctions.filter((j) => ids.has(j.hostWallId)) : [],
       lines: [],
       hatches: [],
       references: [],
-    }),
-    assets: [],
+    })),
   });
-  const scoped = {
-    ...local,
-    storeys: local.storeys.map((level) =>
-      level.id === s.id
-        ? level
-        : {
-            ...level,
-            walls: [],
-            windows: [],
-            wallJoins: [],
-            wallTJunctions: [],
-            lines: [],
-            hatches: [],
-            references: [],
-          },
-    ),
-  };
-  const patch = (project: Project, path: "local" | "full"): GeometryPreview => {
-    const level = storeyOf(project);
-    const replacedIds =
-      path === "local"
-        ? [...storeyOf(local).walls, ...storeyOf(local).windows].map((e) => e.id)
-        : [...s.walls, ...s.windows].map((e) => e.id);
-    const geometry = { storey: level, assets: [] };
-    return { geometry, replacedIds, storeyPatches: [{ storeyId: s.id, geometry, replacedIds }] };
-  };
+  const localIds = Object.freeze(
+    [...storeyOf(scoped).walls, ...storeyOf(scoped).windows].map((e) => e.id),
+  );
+  const fullIds = Object.freeze([...s.walls, ...s.windows].map((e) => e.id));
   const foreign = s.walls.filter((w) => !ids.has(w.id)).flatMap((w) => [w.start, w.end]);
-  const dx = wall.end.x - wall.start.x,
-    dy = wall.end.y - wall.start.y;
+  const session: EditSession = Object.freeze({
+    base,
+    target: { kind: "wall" as const, id },
+    action: "point",
+    index,
+    anchor: index === 0 ? wall.start : wall.end,
+  });
+  const localSession: EditSession = Object.freeze({ ...session, base: scoped });
+  const full = (point: Point) => ({
+    project: editAtPointer(session, base, point),
+    path: "full" as const,
+  });
   const calculate = (point: Point): { project: Project; path: "local" | "full" } => {
-    const x = point.x - wall.start.x,
-      y = point.y - wall.start.y;
-    const axial =
-      Number.isFinite(x) &&
-      Number.isFinite(y) &&
-      x * dy - y * dx === 0 &&
-      x * dx + y * dy >= dx * dx + dy * dy;
-    // Foreign endpoints can create a corner or invalidate an unrelated occupied node.
-    if (
-      !supported ||
-      !axial ||
-      foreign.some((p) => pointsCompatible(p, point) || pointsCompatible(p, wall.start))
-    )
-      return { project: updateWall(base, id, { end: point }), path: "full" };
-    const next = updateWall(scoped, id, { end: point });
-    if (
-      JSON.stringify(storeyOf(next).wallTJunctions) !==
-        JSON.stringify(storeyOf(local).wallTJunctions) ||
-      JSON.stringify(storeyOf(next).wallJoins) !== JSON.stringify(storeyOf(local).wallJoins)
-    )
-      return { project: updateWall(base, id, { end: point }), path: "full" };
+    let next: Project;
+    try {
+      next = editAtPointer(localSession, scoped, point);
+    } catch {
+      return full(point);
+    }
+    const moved = storeyOf(next).walls.find((w) => w.id === id)!;
+    // New contacts may affect another component or an occupied node. Never hide that context.
+    if (foreign.some((p) => pointsCompatible(p, moved.start) || pointsCompatible(p, moved.end)))
+      return full(point);
     return { project: next, path: "local" };
   };
   return {
     affectedWalls: ids.size,
-    evaluateGeometry(point: Point) {
+    evaluateGeometry(point: Point): { patch: GeometryPreview; path: "local" | "full" } {
       const result = calculate(point);
-      return { patch: patch(result.project, result.path), path: result.path };
+      const geometry = { storey: storeyOf(result.project), assets: [] };
+      const replacedIds = result.path === "local" ? localIds : fullIds;
+      return {
+        path: result.path,
+        patch: {
+          geometry,
+          replacedIds,
+          storeyPatches: [{ storeyId: s.id, geometry, replacedIds }],
+        },
+      };
     },
     evaluate(point: Point): { project: Project; path: "local" | "full" } {
       const result = calculate(point);
       if (result.path === "full") return result;
-      const byId = new Map(storeyOf(result.project).walls.map((w) => [w.id, w]));
+      const next = storeyOf(result.project),
+        local = storeyOf(scoped);
+      const byId = new Map(next.walls.map((w) => [w.id, w]));
       return {
         path: "local",
         project: freeze(
           replaceStorey(base, {
             ...s,
             walls: s.walls.map((w) => byId.get(w.id) ?? w),
+            wallJoins: replaceRelations(s.wallJoins, local.wallJoins, next.wallJoins),
+            wallTJunctions: replaceRelations(
+              s.wallTJunctions,
+              local.wallTJunctions,
+              next.wallTJunctions,
+            ),
           }),
         ),
       };
     },
-    // Confirmation explicitly uses the authoritative full operation.
+    // Confirmation explicitly uses the complete authoritative operation.
     confirm(point: Point) {
-      return updateWall(base, id, { end: point });
+      return full(point).project;
     },
   };
 }

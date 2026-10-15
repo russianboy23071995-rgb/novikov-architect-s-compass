@@ -1,0 +1,358 @@
+{
+  "date": "2026-10-15",
+  "method": "Current full editAtPointer plus buildBuildingSolid versus prepared endpoint patch plus composition. Five storeys; alternating order, one first and eight warm samples per mode. Base scene outside timing; preparation separate. No historical-commit, GPU, snap/picking, React, heap or full-frame measurement. oldMs denotes full action, not the PR327 previewEdit baseline.",
+  "profiles": [
+    {
+      "mode": "start",
+      "walls": 52,
+      "windows": 52,
+      "preparationMs": 2.8840999999999894,
+      "first": {
+        "oldMs": 16.210800000000006,
+        "preparedMs": 6.91119999999998,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 16.495600000000024,
+          "preparedMs": 4.987899999999996,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 11.096299999999985,
+          "preparedMs": 4.159599999999955,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 11.543700000000001,
+          "preparedMs": 3.7524999999999977,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 12.662199999999984,
+          "preparedMs": 4.008100000000013,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 10.355099999999993,
+          "preparedMs": 6.0674999999999955,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 9.965899999999976,
+          "preparedMs": 2.88779999999997,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 7.678600000000017,
+          "preparedMs": 2.8488000000000397,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.4003999999999905,
+          "preparedMs": 2.353800000000035,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 10.72569999999999,
+        "preparedMs": 3.8803000000000054
+      }
+    },
+    {
+      "mode": "shorten",
+      "walls": 52,
+      "windows": 52,
+      "preparationMs": 1.1589999999999918,
+      "first": {
+        "oldMs": 7.529200000000003,
+        "preparedMs": 4.598700000000008,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 5.704499999999996,
+          "preparedMs": 6.955599999999947,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.920999999999992,
+          "preparedMs": 3.301499999999976,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.415700000000015,
+          "preparedMs": 3.1761000000000195,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 7.166699999999992,
+          "preparedMs": 2.9893000000000143,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.7993000000000166,
+          "preparedMs": 2.638400000000047,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.530200000000036,
+          "preparedMs": 2.797800000000052,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.950499999999977,
+          "preparedMs": 4.505400000000009,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.245999999999981,
+          "preparedMs": 3.1860000000000355,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 5.751900000000006,
+        "preparedMs": 3.1810500000000275
+      }
+    },
+    {
+      "mode": "oblique",
+      "walls": 52,
+      "windows": 52,
+      "preparationMs": 1.3771999999999593,
+      "first": {
+        "oldMs": 7.253899999999987,
+        "preparedMs": 1.4020999999999617,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 5.699200000000019,
+          "preparedMs": 1.6445999999999685,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 6.0972000000000435,
+          "preparedMs": 1.6240999999999985,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 5.6322999999999865,
+          "preparedMs": 1.7133999999999787,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 3.782299999999964,
+          "preparedMs": 1.2420000000000186,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 3.849900000000048,
+          "preparedMs": 1.1941000000000486,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 4.732199999999921,
+          "preparedMs": 2.4642000000000053,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 6.4599000000000615,
+          "preparedMs": 2.0019999999999527,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 3.939700000000016,
+          "preparedMs": 1.2250999999999976,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 5.182249999999954,
+        "preparedMs": 1.6343499999999835
+      }
+    },
+    {
+      "mode": "start",
+      "walls": 502,
+      "windows": 502,
+      "preparationMs": 4.393399999999929,
+      "first": {
+        "oldMs": 43.53359999999998,
+        "preparedMs": 15.706900000000019,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 34.80919999999992,
+          "preparedMs": 14.669300000000021,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 45.09109999999998,
+          "preparedMs": 11.580299999999966,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 41.5154,
+          "preparedMs": 11.935699999999997,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 32.612300000000005,
+          "preparedMs": 16.985500000000002,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 40.37130000000002,
+          "preparedMs": 12.574200000000019,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 31.50350000000003,
+          "preparedMs": 11.357399999999984,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 30.553800000000024,
+          "preparedMs": 14.472200000000043,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 33.42109999999991,
+          "preparedMs": 12.075000000000045,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 34.115149999999915,
+        "preparedMs": 12.324600000000032
+      }
+    },
+    {
+      "mode": "shorten",
+      "walls": 502,
+      "windows": 502,
+      "preparationMs": 4.27559999999994,
+      "first": {
+        "oldMs": 34.15730000000008,
+        "preparedMs": 11.050700000000006,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 33.845600000000104,
+          "preparedMs": 10.19360000000006,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 32.0326,
+          "preparedMs": 10.060799999999972,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 33.789400000000114,
+          "preparedMs": 9.279700000000048,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 28.21659999999997,
+          "preparedMs": 13.61200000000008,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 28.19719999999984,
+          "preparedMs": 9.373399999999947,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 36.9532999999999,
+          "preparedMs": 10.048399999999901,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 32.93020000000001,
+          "preparedMs": 10.542699999999968,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 32.62189999999987,
+          "preparedMs": 9.332300000000032,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 32.77604999999994,
+        "preparedMs": 10.054599999999937
+      }
+    },
+    {
+      "mode": "oblique",
+      "walls": 502,
+      "windows": 502,
+      "preparationMs": 9.655499999999847,
+      "first": {
+        "oldMs": 71.21270000000004,
+        "preparedMs": 12.892200000000003,
+        "affectedWalls": 2
+      },
+      "warm": [
+        {
+          "oldMs": 41.06060000000002,
+          "preparedMs": 9.486599999999953,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 26.22999999999979,
+          "preparedMs": 13.981899999999996,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 28.167799999999943,
+          "preparedMs": 9.700599999999895,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 31.509199999999964,
+          "preparedMs": 8.586500000000115,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 29.477499999999964,
+          "preparedMs": 8.6396000000002,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 36.27119999999991,
+          "preparedMs": 8.819899999999961,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 31.640099999999848,
+          "preparedMs": 8.346699999999828,
+          "affectedWalls": 2
+        },
+        {
+          "oldMs": 28.74239999999986,
+          "preparedMs": 13.32529999999997,
+          "affectedWalls": 2
+        }
+      ],
+      "warmMedianMs": {
+        "oldMs": 30.493349999999964,
+        "preparedMs": 9.153249999999957
+      }
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "pixelComparisons": 16
+  },
+  "limits": [
+    "Exact axis endpoint point gesture only; body-corner and stretch remain legacy.",
+    "Foreign endpoints, new T snap and local calculation errors use full action.",
+    "Original dependency component retained; global foreign scan and scene composition remain."
+  ]
+}

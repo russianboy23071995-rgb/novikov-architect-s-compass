@@ -5,23 +5,22 @@ import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
-/** The already verified axial T-host end pilot; other sessions remain explicit legacy. */
+/** Shared axis-endpoint edits; body-corner and other gestures remain explicit legacy. */
 export function prepareWallEndpointPreview(session: EditSession): PreparedDirectEditPreview | null {
   const s = storeyOf(session.base);
   const wall = s.walls.find((w) => w.id === session.target.id);
   if (
     session.target.kind !== "wall" ||
     session.action !== "point" ||
-    session.index !== 1 ||
+    (session.index !== 0 && session.index !== 1) ||
     !wall ||
-    session.anchor.x !== wall.end.x ||
-    session.anchor.y !== wall.end.y ||
-    !s.wallTJunctions.some((t) => t.hostWallId === wall.id)
+    session.anchor.x !== (session.index === 0 ? wall.start.x : wall.end.x) ||
+    session.anchor.y !== (session.index === 0 ? wall.start.y : wall.end.y)
   )
     return null;
   const source = session.base;
   const base = createProjectSnapshot(source);
-  const prepared = prepareEndpoint(base, wall.id);
+  const prepared = prepareEndpoint(base, wall.id, session.index);
   const replacedIds = [...storeyOf(base).walls, ...storeyOf(base).windows].map((e) => e.id);
   const pinned = Object.freeze({
     ...session,
