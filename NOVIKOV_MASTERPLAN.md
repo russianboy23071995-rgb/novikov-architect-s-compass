@@ -161,6 +161,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 Aktuelle AUD14-06-Teilevidenz: reproduzierbare History-/Recovery-Aufbewahrungsmessung
 mit zwei isolierten Projektslots; alte V2-Bildpayloads bleiben nach Bildwechseln gespeichert.
+Isolierter transaktionaler Bereinigungspilot bestanden (AUD14-06 Teil 2).
 Kein Nachweis eines JS-Speicherlecks und noch keine automatische Bereinigung; Details unten.
 
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
@@ -493,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-06 – transaktionale Recovery-Bereinigung als isolierten Piloten implementieren und gegen konkurrierende Schreiber prüfen.**
+**Genau ein aktiver Schritt: AUD14-06 – Bereinigungspilot im produktiven Store-Layout mit V1-Migrationsschutz und Vorbereitungskosten isoliert prüfen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -517,8 +518,9 @@ PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis 
 PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiesen (AUD14-05 Teil 2).
 PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktprüfung in AUD14-05 Teil 3.
 PR346 gemergt (9c38ffc); AUD14-06-Messung mit 220 Modelländerungen dokumentiert unten.
-Nächster Einzelauftrag: isolierter Bereinigungspilot mit vollständigen Referenzen aller Slots
-und atomarem Transaktionsschutz; noch keine automatische Produktionsbereinigung.
+PR347 gemergt (aeddaec); transaktionaler Bereinigungspilot und Browsernachweis unten.
+Nächster Einzelauftrag: produktives Store-Layout/Migrationsfälle und Vorbereitungskosten
+weiter isoliert prüfen; noch keine automatische Produktionsbereinigung.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -2073,3 +2075,59 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    Langlaufnachweisen begrenzt abnehmen; Auslösezeitpunkt und Rest-Speicherprofil festlegen.
 3. AUD14-07 Schulprofil inklusive großer Anschlussgruppen, Kamerawechselkosten und offener
    Architektur-/Statuskorrekturen abnehmen. AUD14-04/05-Restschuld bleibt sichtbar.
+
+
+### AUD14-06 Teil 2 – Transaktionaler Bereinigungspilot (15.10.2026)
+
+PR347 nach ausdrücklicher Freigabe und grüner CI in main gemergt (aeddaec).
+collectRecoveryV2Pilot in Interop akzeptiert ausschließlich Diagnose-Datenbanknamen.
+Keine produktive Anbindung, keine UI-Änderung, keine Nutzerdaten gelöscht. Der Pilot
+verwendet den vorhandenen Storageadapter und die vollständige Recovery-Prüfung beider
+Kandidaten einzeln; ein funktionierender Vorgänger darf einen beschädigten current nicht
+als Bereinigungserlaubnis verdecken. Unbekannte/abweichende Root-Strukturen führen zum Skip.
+
+Vorbereitung liest Heads und validiert Modelle/Bildintegrität asynchron außerhalb einer
+Schreibtransaktion. Danach werden ALLE Heads inklusive Slotkeys innerhalb einer gemeinsamen
+readwrite-Transaktion über legacy/heads/assets erneut vollständig mit der geprüften Basis
+verglichen. Jede Abweichung verhindert Löschung. Erst nach diesem atomaren Vergleich darf
+die vollständige Referenzmenge current/previous aller Slots verwendet werden. Publish und
+Migration verwenden überlappende Store-Sperren und laufen daher vor oder nach dem Löschen.
+Kein bloßer Revisionsvergleich, keine ungeschützte stale Root-Liste. Der Löschlauf liest nur
+Payloadschlüssel; validierte Bildstrings werden nicht über sämtliche Slots gesammelt gehalten.
+
+V1-Präsenz blockiert diesen ersten Piloten konservativ komplett – auch gültige bereits
+migrierte Originale. Das erhält sie bytegleich, ist aber ausdrücklich noch keine brauchbare
+Produktionspolitik für migrierte Installationen. Heads werden niemals entfernt. Abbruch vor
+Commit rollt die Transaktion zurück; Erfolg wird erst mit oncomplete gemeldet.
+
+Browser: recovery-retention.html/.ts, Rohbericht recovery-retention-results.json,
+Windows IAB Chrome/155, 16 bestandene Assertions mit zwei echten IDB-Verbindungen:
+- Vier unterschiedliche Bildpayloads über zwei Projektslots → genau ein verwaistes Bild
+  gelöscht, drei durch current/previous/fremden Slot benötigte Bilder erhalten.
+- Beschädigter current und previous, unbekannte Version, V1-Präsenz verhindern Löschung.
+  Gültiger Vorgänger und anderes Projekt vollständig per serializeProject verglichen.
+- Bereits bereinigtes Bild aus älterem Modellstand lässt sich beim Speichern wieder
+  bereitstellen; veralteter Writer bleibt mit konkretem CAS-Revisionsfehler abgewiesen.
+- Deterministisch pausierte Validierung plus Veröffentlichung auf zweiter Verbindung:
+  Bereinigung übersprungen. Zusätzlich konkurrierendes Save/Collect mit gültigem Endstand.
+- Abbruch vor Start und deterministischer Abbruch NACH erfolgreicher einzelner IDB-Löschung,
+  aber VOR Transaktionscommit: gesamter Payloadbestand erhalten. Fehler-Injektion nur Runner.
+- Bildentfernung nach zweimaligem Speichern entfernt nur nicht mehr benötigte Payloads;
+  fremder current/previous bleibt. DB-Neuöffnung mit vollständigem Modellvergleich bestanden.
+
+1057 Modelltests, App-/Benchmark-Typecheck, gezieltes ESLint und App-Build bestanden.
+Browser-Assertions sind separate echte IndexedDB-Prüfungen, keine zusätzlichen Node-Tests.
+Keine OS-/Browser-Neustart-, Langlauf-, Quota- oder Produktions-Migrationsabnahme behauptet.
+Vollprüfung und vollständiger Headvergleich können bei großen Projekten teuer sein. Dieser
+Pilot darf deshalb nicht ungeprüft nach jedem Autosave laufen. Vorbereitungskosten und
+Kopien sind vor Aktivierung zu messen; der spätere Auslösezeitpunkt bleibt Entwurfsarbeit.
+Kein Wechsel zu Delta-History, kein Rendererumbau und keine Aufweichung der Sicherungsgrenze.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Gemeinsamen Bereinigungspiloten auf produktives Store-Layout übertragen und weiterhin
+   isoliert mit echten V1-Migrationsoriginalen, unbekannten Altständen und größeren Heads
+   prüfen; Vorbereitungskosten messen und begrenzten Auslösezeitpunkt begründen.
+2. Erst danach kontrolliert anbinden; Quota-/Retry-/Abbruch- und Langlaufnachweise inklusive
+   Bildentfernung/Undo/Reload abschließen. Gültige letzte Sicherung bleibt unangetastet.
+3. AUD14-07 Schulprofil, große Anschlussgruppen/Kamerawechsel und Architektur-/Statuskorrekturen
+   abnehmen. AUD14-04/05-Restschuld und AUD14-06-Gesamtabnahme bleiben offen.

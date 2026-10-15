@@ -12104,3 +12104,23 @@ konkurrierende Writer und Undo-Payload-Wiederbereitstellung schützen. Root-Abfr
 Löschung müssen atomar gegen Veröffentlichung/Migration sein. Erst danach getrennte
 Produktionsanbindung mit Quota/Abbruch/Langlaufnachweis. Detaillierte Schutzgrenze und drei
 Folgeschritte im Masterplan AUD14-06 Teil 1. AUD14-06 insgesamt bleibt teilweise/offen.
+
+
+### AUD14-06 – Isolierter Bereinigungspilot (15.10.2026)
+PR347 gemergt (aeddaec). Interop collectRecoveryV2Pilot nur für Diagnose-DBs, kein Produktaufruf.
+Vorhandener Codec prüft jeden current/previous einzeln. Danach atomarer vollständiger
+Head-/Slotvergleich und Schlüsselbereinigung in derselben readwrite-Transaktion wie die
+Publish/Migrations-Store-Sperren. Unbekannte/beschädigte Roots oder Änderungen → keine
+Löschung. V1-Präsenz blockiert konservativ den gesamten Piloten; Migrationsoriginale erhalten.
+16 Browser-Assertions mit echten zwei IDB-Verbindungen bestanden: andere Slots/geteilte
+Bilder, Rückfall auf Vorgänger, Wiederbereitstellung älterer Bilder, CAS, deterministisch
+konkurrierende Vorbereitung/Publikation, Rollback nach ausgeführter Löschung, Bildentfernung
+und DB-Neuöffnung mit Inhaltsvergleich. Runner/Rohdaten benchmarks/recovery-retention.*
+1057 Modelltests, beide Typechecks, gezieltes Lint und Build bestanden.
+
+Grenzen: keine automatische Produktbereinigung, kein Quota-/Langlauf-/Prozessprofil.
+V1-Pauschalsperre muss vor Produktanbindung anhand echter Migrationsdaten präzisiert werden;
+vollständige Vorbereitung/Headkopien vor Aktivierung messen, nicht an jeden Autosave hängen.
+Nächster einzelner Auftrag: produktives Store-Layout/Migrationsfälle und Kosten isoliert
+prüfen. Anschließend kontrollierte Anbindung/Fehlerabnahme, danach AUD14-07-Gesamtgate.
+AUD14-06 bleibt teilweise/offen, ebenso AUD14-04/05-Restbefunde.
