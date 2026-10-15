@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { validateProject } from "../../domain/project/schema.ts";
+import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 
 const scopeSchema = z.discriminatedUnion("kind", [
@@ -39,7 +39,7 @@ export type LayerEligibility =
  * All current drawing elements are shared; each view supplies its own layer filter.
  */
 export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilityContext) {
-  const project = validateProject(base);
+  const project = createProjectSnapshot(base);
   const scope = Object.freeze(scopeSchema.parse(input.scope));
   const layerIds = new Set(project.layers.map((layer) => layer.id));
   const hidden = new Set(input.hiddenLayerIds);

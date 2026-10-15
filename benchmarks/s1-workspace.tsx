@@ -1,4 +1,5 @@
 import React from "react";
+import { workspacePhases } from "./workspace-load-trace";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
 import { s1Fixture } from "./s1-fixture";
@@ -52,6 +53,7 @@ const report: Record<string, unknown> = {
   viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
   events,
   longtasks,
+  workspacePhases,
 };
 const show = () => {
   panel.querySelector("#s1-result")!.textContent = JSON.stringify(report, null, 2);

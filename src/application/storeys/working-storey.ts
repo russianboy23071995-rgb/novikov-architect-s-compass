@@ -1,4 +1,4 @@
-import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import { snapshotWithWorkingStorey } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 /** View setting, outside model Undo. Snapshot identity invalidates old editing sessions. */
@@ -11,7 +11,7 @@ export function selectWorkingStorey(base: Project, current: Project, storeyId: s
   if (level.elevation === null)
     throw new Error("Zunächst die Geschosshöhen bis zu diesem Geschoss festlegen.");
   if ((current.workingStoreyId ?? current.groundStoreyId) === storeyId) return current;
-  return createProjectSnapshot({ ...current, workingStoreyId: storeyId });
+  return snapshotWithWorkingStorey(current, storeyId);
 }
 
 /** Resolve a picked BIM target by stable ID before invoking the existing storey-bound actions. */
