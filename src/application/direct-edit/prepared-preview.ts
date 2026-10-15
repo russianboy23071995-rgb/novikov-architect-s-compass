@@ -1,3 +1,4 @@
+import { prepareHatchPointPreview } from "./prepared-hatch.ts";
 import { prepareWallEndpointPreview } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { prepareWindowAxisPreview } from "./prepared-window.ts";
@@ -10,6 +11,8 @@ import type { ElementTarget } from "../selection/target.ts";
  * Prepare once per edit session. Adapters own dependency scope, not the renderer.
  */
 export interface PreparedDirectEditPreview {
+  /** Derived Project view for legacy 2D consumers; never a commit capability. */
+  materialize?(current: Project, selection: ElementTarget | null, point: Point): Project;
   evaluate(
     current: Project,
     selection: ElementTarget | null,
@@ -23,7 +26,30 @@ export interface PreparedDirectEditPreview {
  * New adapters require the A04 admission evidence before registration.
  */
 export function prepareDirectEditPreview(session: EditSession): PreparedDirectEditPreview | null {
+  return prepareCapability(session, false);
+}
+
+function prepareCapability(
+  session: EditSession,
+  projectView: boolean,
+): PreparedDirectEditPreview | null {
+  if (session.target.kind === "hatch" && session.action === "point")
+    return prepareHatchPointPreview(session);
+  // Remaining registered adapters currently expose geometry patches only.
+  if (projectView) return null;
   if (session.target.kind === "window" && session.action === "axis")
     return prepareWindowAxisPreview(session);
   return prepareWallEndpointPreview(session);
+}
+
+const projectPreviews = new WeakMap<EditSession, PreparedDirectEditPreview | null>();
+/** Application registry for legacy project-shaped consumers. No renderer type dispatch. */
+export function preparedProjectPreview(
+  session: EditSession,
+  project: Project,
+  selection: ElementTarget | null,
+  point: Point,
+): Project | null {
+  if (!projectPreviews.has(session)) projectPreviews.set(session, prepareCapability(session, true));
+  return projectPreviews.get(session)?.materialize?.(project, selection, point) ?? null;
 }

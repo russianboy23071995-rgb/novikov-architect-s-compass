@@ -1,0 +1,176 @@
+{
+  "method": "Node; preparation separate; one first plus eight warm targets; alternating order; exact full-project equality. Validation/materialization only, no rendering/frame guarantee. Target contour is still fully validated, metadata/pattern library retained.",
+  "profiles": [
+    {
+      "count": 1,
+      "vertices": 500,
+      "preparationMs": 14.106700000000018,
+      "samples": [
+        {
+          "full": 6.453400000000016,
+          "preparedProject": 4.9024,
+          "patch": 5.3245000000000005
+        },
+        {
+          "patch": 4.847199999999987,
+          "preparedProject": 5.9007000000000005,
+          "full": 3.5307999999999993
+        },
+        {
+          "full": 4.439800000000048,
+          "preparedProject": 3.0733999999999924,
+          "patch": 3.4167999999999665
+        },
+        {
+          "patch": 3.568499999999972,
+          "preparedProject": 3.443299999999965,
+          "full": 3.094500000000039
+        },
+        {
+          "full": 2.939899999999966,
+          "preparedProject": 3.5966999999999985,
+          "patch": 3.5556000000000267
+        },
+        {
+          "patch": 4.5586999999999875,
+          "preparedProject": 3.5334000000000287,
+          "full": 3.5050999999999704
+        },
+        {
+          "full": 2.9711000000000354,
+          "preparedProject": 3.8308000000000106,
+          "patch": 4.520800000000008
+        },
+        {
+          "patch": 4.122199999999964,
+          "preparedProject": 5.3822999999999865,
+          "full": 3.617800000000045
+        },
+        {
+          "full": 3.3945999999999685,
+          "preparedProject": 3.921199999999999,
+          "patch": 3.6648999999999887
+        }
+      ],
+      "warmMedianMs": {
+        "full": 3.4498499999999694,
+        "preparedProject": 3.7137500000000045,
+        "patch": 3.8935499999999763
+      }
+    },
+    {
+      "count": 100,
+      "vertices": 100,
+      "preparationMs": 43.12299999999999,
+      "samples": [
+        {
+          "full": 86.79499999999996,
+          "preparedProject": 1.1527000000000953,
+          "patch": 0.9961999999999307
+        },
+        {
+          "patch": 1.123899999999935,
+          "preparedProject": 1.011600000000044,
+          "full": 73.04550000000006
+        },
+        {
+          "full": 70.70499999999993,
+          "preparedProject": 1.9528999999999996,
+          "patch": 1.1123000000000047
+        },
+        {
+          "patch": 0.9886000000000195,
+          "preparedProject": 0.7794000000000096,
+          "full": 66.51779999999997
+        },
+        {
+          "full": 71.32719999999995,
+          "preparedProject": 0.9827999999999975,
+          "patch": 0.7557999999999083
+        },
+        {
+          "patch": 0.8473999999998796,
+          "preparedProject": 0.7565999999999349,
+          "full": 67.60719999999992
+        },
+        {
+          "full": 69.99939999999992,
+          "preparedProject": 0.775899999999865,
+          "patch": 0.8989000000001397
+        },
+        {
+          "patch": 0.8079000000000178,
+          "preparedProject": 0.7416000000000622,
+          "full": 64.5818999999999
+        },
+        {
+          "full": 68.6893,
+          "preparedProject": 0.7659000000001015,
+          "patch": 0.731899999999996
+        }
+      ],
+      "warmMedianMs": {
+        "full": 69.34434999999996,
+        "preparedProject": 0.7776499999999373,
+        "patch": 0.8731500000000096
+      }
+    },
+    {
+      "count": 500,
+      "vertices": 4,
+      "preparationMs": 6.9444999999998345,
+      "samples": [
+        {
+          "full": 13.08459999999991,
+          "preparedProject": 0.26870000000008076,
+          "patch": 0.33569999999986067
+        },
+        {
+          "patch": 0.20450000000005275,
+          "preparedProject": 0.1516999999998916,
+          "full": 11.831900000000132
+        },
+        {
+          "full": 11.405700000000024,
+          "preparedProject": 0.189200000000028,
+          "patch": 0.13850000000002183
+        },
+        {
+          "patch": 0.2514000000001033,
+          "preparedProject": 0.15579999999999927,
+          "full": 14.589999999999918
+        },
+        {
+          "full": 14.573599999999942,
+          "preparedProject": 0.19059999999990396,
+          "patch": 0.13679999999999382
+        },
+        {
+          "patch": 0.18479999999999563,
+          "preparedProject": 0.14949999999998909,
+          "full": 13.500700000000052
+        },
+        {
+          "full": 11.483999999999924,
+          "preparedProject": 0.19460000000003674,
+          "patch": 0.14010000000007494
+        },
+        {
+          "patch": 0.1902999999997519,
+          "preparedProject": 0.15299999999979264,
+          "full": 11.54760000000033
+        },
+        {
+          "full": 11.280300000000352,
+          "preparedProject": 0.181999999999789,
+          "patch": 0.1289999999999054
+        }
+      ],
+      "warmMedianMs": {
+        "full": 11.689750000000231,
+        "preparedProject": 0.16889999999989413,
+        "patch": 0.1624500000000353
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { preparedProjectPreview } from "./prepared-preview.ts";
 import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { changeBuilding, type BuildingChange } from "../storeys/actions.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -106,6 +107,8 @@ export function previewEdit(
     throw new Error("Die Auswahl wurde geändert. Bearbeitung erneut starten.");
   if (project !== session.base)
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
+  const preparedProject = preparedProjectPreview(session, project, selection, point);
+  if (preparedProject) return preparedProject;
   const wall =
     session.target.kind === "wall"
       ? storeyOf(project).walls.find((w) => w.id === session.target.id)

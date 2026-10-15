@@ -502,8 +502,9 @@ und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzel
 PR327 ist gemergt (035052c). Beide Wandachsenden, Kürzen und schräge Punktbewegung
 sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Einzelauftrag:
 PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil 7 unten.
-Nächster Einzelauftrag: direkte Schraffur-Punktvorschau auf die gemeinsame vorbereitete
-Basis begrenzen und gegen den vollständigen Pfad vergleichen; kein Renderer-Typschalter.
+PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
+Nächster Einzelauftrag: vorhandene vorbereitete Prüfung veränderter Polygonkanten für
+diese Punktvorschau sicher wiederverwenden, mit Vollvalidierung vergleichen und messen.
 
 
 Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
@@ -1262,3 +1263,39 @@ unveränderter Schraffuren im vollständigen Legacy-Projektpfad bleiben offen.
 Einziger Folgeauftrag: direkte Schraffur-Punktvorschau über gemeinsamen vorbereiteten
 Application-Einstieg begrenzen; Vollpfad-/Commit-/Undo-Gleichheit und Pointerarbeit
 messen. AUD14-04 bleibt offen, AUD14-05/06/07 folgen danach. A04 gilt weiter.
+
+
+### AUD14-04 Teil 8 – Vorbereitete Schraffur-Punktvorschau (15.10.2026)
+
+PR329 nach expliziter Freigabe und erfolgreicher CI gemergt (563c424).
+prepareDirectEditPreview registriert die Punktbearbeitung einer Schraffur. Einmalig
+validierter eigener Snapshot, lokaler Berechnungsumfang genau diese Schraffur;
+Geschoss-/Ansichtsmetadaten und Musterdefinitionen bleiben erhalten. Die unveränderte
+Fachoperation editAtPointer berechnet und validiert den Zielpunkt. Keine neue Punkt-,
+Muster-, Fang- oder UI-Logik. Der gemeinsame Vertrag bietet optional eine abgeleitete
+Projektansicht für Legacy-2D-Verbraucher; der Controller nutzt sie sitzungsgebunden.
+Keine Renderer-Typabfrage hinzugefügt. Unbetroffene Elemente und andere Geschosse
+bleiben referenziell erhalten. Platzieren bleibt fullEdit mit Gesamtprojektprüfung,
+atomarer History und einem Undo; der lokale Projektumfang wird niemals veröffentlicht.
+
+Nachweis: 1005 Tests, App-/Benchmark-Typecheck, fokussiertes Lint und Build bestanden.
+Exakter Projekt-/Planszenenvergleich bei 4/129/500 Punkten, erster/innerer/letzter Griff,
+Musterrotation/-ursprung, andere Schraffuren und Geschoss, ungültige Konturen/Ziele,
+stale Kontext, Abbruch, ein Undo und ungültiger unbetroffener Inhalt beim Commit.
+Keine Renderingänderung und keine neue visuelle Browserabnahme behauptet.
+
+Messung: benchmarks/hatch-point-results.json, Node, Vorbereitung separat, ein erster
+plus acht warme Ziele, Reihenfolge alterniert. Reine Vorschau ohne Rendering:
+100 Schraffuren mit je 100 Punkten: Vollpfad 69,34 ms → vorbereitete Projektansicht
+0,78 ms (Patch 0,87 ms), Vorbereitung 43,12 ms. 500 Vierecke: 11,69 → 0,17 ms.
+Eine einzelne 500-Punkt-Kontur: 3,45 → 3,71 ms, also KEIN Gewinn für diesen Fall.
+Der Zielpolygon wird weiterhin vollständig geprüft; Metadaten/Musterbibliothek,
+Projektmaterialisierung und Darstellung können weiter skalierende Kosten enthalten.
+Keine allgemeine Framezeitgarantie. Seitenstrecken/Offset/weitere Gesten bleiben Legacy.
+
+Abnahme: Schraffur mit Muster markieren, ersten und letzten Eckgriff bewegen, abbrechen,
+erneut bewegen und platzieren. Musterlage und übrige Elemente müssen erhalten bleiben;
+ein Undo stellt die Ausgangskontur wieder her.
+Einziger Folgeauftrag: bereits vorhandene vorbereitete Prüfung veränderter Polygonkanten
+für die Schraffur-Punktvorschau auf sichere Wiederverwendung prüfen, integrieren und mit
+vollständiger Konturvalidierung vergleichen/messen. AUD14-04 bleibt offen; danach 05/06/07.
