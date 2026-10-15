@@ -201,3 +201,22 @@ test("storage errors latch; dispose prevents timers and late notification", asyn
   assert.equal(timers.size, 0);
   assert.equal(calls.length, 2);
 });
+
+test("closing dialog only cancels its manual run, not later automatic work", async () => {
+  const { c, calls, tick } = fixture();
+  c.update(ready);
+  const manual = c.runManual();
+  calls[0]!.resolve(ok);
+  await manual;
+  c.committed();
+  await tick(30000);
+  c.closeManual();
+  assert.equal(calls[1]!.signal.aborted, false);
+  calls[1]!.resolve(ok);
+  await flush();
+  const next = c.runManual();
+  c.closeManual();
+  assert.equal(calls[2]!.signal.aborted, true);
+  calls[2]!.reject(abort());
+  await next;
+});

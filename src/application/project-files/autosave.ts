@@ -32,6 +32,7 @@ export function createAutosaveController(
   notify: (state: AutosaveState) => void,
   clock: RecoveryTimer = timer,
   initialPreference?: boolean,
+  onV2Committed?: () => void,
 ) {
   let state: AutosaveState = { enabled: false, busy: false, error: null };
   let preference = initialPreference;
@@ -77,7 +78,16 @@ export function createAutosaveController(
       if (!current()) throw new Error("Projekt oder Autosicherung wurde gewechselt.");
       if (!manual && active.project && sameRecoveryContent(captured, active.project)) return null;
       const result = await active.save(captured, current);
-      if (current()) publish({ error: null });
+      if (current()) {
+        publish({ error: null });
+        if (catalog.v2) {
+          try {
+            onV2Committed?.();
+          } catch {
+            /* Maintenance cannot invalidate a committed save. */
+          }
+        }
+      }
       return result;
     } catch (error) {
       if (current())

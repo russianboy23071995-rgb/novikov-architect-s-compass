@@ -12253,3 +12253,13 @@ führt Timer/Bedarf/Retry/Fehlersperre/Kontextschutz gemeinsam. Neun neue Tests,
 automatischer Produktlauf. Folgeschritt: echte erfolgreiche V2-Publishes, Aktivität,
 Busy-Zustände und Wartungsdialog mit einer langlebigen Instanz verbinden; No-op/Fehler-
 Filter und Dialog-Lifecycle dort absichern. Vollständiger Status im Masterplan.
+
+### AUD14-06 – Automatik integriert (15.10.2026)
+
+Langlebiger Recovery-Service verbindet erfolgreichen V2-Commit, Autosave-Busy,
+Aktivität und manuelle Wartung mit einer Instanz. Dialogschließen beendet nur manuelle
+Wartung. Nicht-Select-Werkzeuge blockieren Automatik konservativ. Neue Tests für
+No-op/Fehler, Save-Vorrang, unabhängige Holds, Kontext/Opt-out, Dialogbesitz und Input-
+Cleanup: insgesamt 1083 bestanden. Typecheck/ESLint/Build bestanden; Browser-Dialog
+mit Test-Port erfolgreich. Echte automatische Browser-Datenbankabnahme ist nächster
+begrenzter Auftrag, nicht bereits nachgewiesen. Ausführliche Grenzen im Masterplan.
