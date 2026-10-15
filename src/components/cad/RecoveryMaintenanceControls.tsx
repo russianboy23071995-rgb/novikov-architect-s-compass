@@ -5,7 +5,7 @@ import {
   type RecoveryMaintenanceStorage,
 } from "@/application/project-files/recovery-maintenance";
 import { Button } from "@/components/ui/button";
-/** Port-injected controls. Production mounting awaits explicit storage-activation approval. */
+/** Port-injected controls. Unmount aborts pending work; only a user click starts maintenance. */
 export function RecoveryMaintenanceControls({ storage }: { storage: RecoveryMaintenanceStorage }) {
   const [state, setState] = useState<MaintenanceState>({ status: "idle", message: "" });
   const controller = useRef<ReturnType<typeof createRecoveryMaintenance> | null>(null);

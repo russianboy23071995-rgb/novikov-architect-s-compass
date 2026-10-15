@@ -12152,3 +12152,18 @@ Quota/Fehler ohne Retry, Dispose, Skip und Observerfehler), Typecheck, Lint und 
 Browserbedienung mit gekennzeichnetem simulierten Port: Start/Abbruch/Neustart/Erfolg geprüft,
 kein Datenbankzugriff. Noch keine Zusage produktiver Wartung. Nächster Auftrag bleibt echte
 kontrollierte Anbindung nach Freigabe, danach Langlauf/Speicher und AUD14-07-Gesamtgate.
+
+
+### AUD14-06 – Freigegebene manuelle Wartungsanbindung (15.10.2026)
+Ausdrückliche Nutzerfreigabe für echte lokale Daten ausschließlich über „Speicher warten“;
+Blockade aus Teil 4 damit für diese Anbindung aufgehoben. PR350 auf Basis PR349 vervollständigt,
+keine Mergefreigabe impliziert. Ein gemeinsamer Collector für Diagnose und Produktionsadapter;
+separater Diagnose-Wrapper behält Namensschutz. UI in RecoveryPanel, Signalabbruch/Unmount,
+Verbindungsschluss bei Erfolg/Fehler, keine Autosave-/History-/Timer-/Retry-Kopplung.
+1063 Tests, Typecheck, Lint und Build grün; 17 Integrations- plus 16 reale IDB-Regressions-
+assertions bestanden. QuotaExceededError am Öffnungsport injiziert, keine tatsächliche volle
+Platte behauptet. Letzte Sicherung danach identisch; Rollback und Fremdslot-/Vorgängerschutz
+erneut nachgewiesen. UI-Button sichtbar, Benutzerbereinigung nicht für Tests ausgeführt.
+Gesamtmessung bei 10000 Linien ca. 517,5 ms Median, drei Läufe, keine Frame-/Langzeitgarantie.
+Nächster Auftrag: Langsitzung/Bildwechsel/Undo/Reload/Speicherlast; danach gemessene Pausen/
+Speicherengpässe und AUD14-07 Gesamtgate. AUD14-06 bleibt teilweise/offen.

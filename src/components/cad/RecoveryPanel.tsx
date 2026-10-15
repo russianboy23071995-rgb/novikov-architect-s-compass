@@ -1,3 +1,5 @@
+import { RecoveryMaintenanceControls } from "./RecoveryMaintenanceControls";
+import { browserRecoveryMaintenance } from "@/interop/project-file/recovery-maintenance-storage";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { useLocalAutosave } from "./useLocalAutosave";
 import { useEffect, useRef, useState } from "react";
@@ -138,6 +140,7 @@ export function RecoveryPanel({
             Snapshot erstellen
           </Button>
         </div>
+        <RecoveryMaintenanceControls storage={browserRecoveryMaintenance} />
         {warnings.map((warning, index) => (
           <p key={index} role="alert">
             {warning}

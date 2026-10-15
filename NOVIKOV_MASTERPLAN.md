@@ -495,7 +495,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 
 **Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
 
-**Genau ein aktiver Schritt: AUD14-06 – explizite abbrechbare Recovery-Wartungsaktion hinter dem Application-/Storage-Port anbinden und gegen Quota-/Abbruchfälle prüfen.**
+**Genau ein aktiver Schritt: AUD14-06 – längere Sitzungen mit Bildwechseln, Undo/Reload und Speicherlast prüfen; reale Quota- und synchrone Pausen getrennt nachweisen.**
 AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
 begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
 bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
@@ -521,7 +521,8 @@ PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktpr�
 PR346 gemergt (9c38ffc); AUD14-06-Messung mit 220 Modelländerungen dokumentiert unten.
 PR347 gemergt (aeddaec); transaktionaler Bereinigungspilot und Browsernachweis unten.
 PR348 gemergt (4e1945d); produktives Layout und V1-Schutz isoliert geprüft, siehe Teil 3.
-Nächster Einzelauftrag: explizite abbrechbare Wartungsaktion, keine Bereinigung pro Autosave.
+Manuelle Wartungsaktion nach ausdrücklicher Aktivierungsfreigabe angebunden (Teil 5).
+Nächster Einzelauftrag: Langsitzung/Speicherprofil; keine Bereinigung pro Autosave.
 AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
 
 
@@ -2207,3 +2208,44 @@ nicht löschende Teil ist erledigt. Nächste drei Schritte:
    echte Quota-/Abbruch-/Letzte-Sicherung-Fälle prüfen, keine automatische Bereinigung.
 2. Langsitzungs-/Bildwechsel-/Undo-/Reload- und Speicherprofil abschließen.
 3. AUD14-07 Gesamtabnahme mit offenen Anschlussgruppen-/Kamera-/Architekturbefunden.
+
+
+### AUD14-06 Teil 5 – Manuelle Produktanbindung ausdrücklich freigegeben (15.10.2026)
+
+Nutzer gibt Bereinigung echter lokaler Wiederherstellungsdaten ausdrücklich frei, nur über
+„Speicher warten“, mit Abbruch und Schutz benötigter Sicherungen. Damit ist die Sperre aus
+Teil 4 für genau diese Anbindung aufgehoben; automatische Freigabeprüfung lässt den nun
+konkret autorisierten Schritt zu. Keine zusätzliche Mergefreigabe für PR349/350 abgeleitet.
+Bestehender Entwurf PR350 wird um die vollständige Anbindung ergänzt, Basis bleibt PR349.
+
+Gemeinsamer Collector nach recovery-retention.ts verschoben; identische Root-/V1-/CAS-/
+Transaktionsprüfung. Diagnose-Wrapper bleibt mit Namensschutz erhalten und ruft denselben
+Collector auf. Neuer RecoveryMaintenanceStorage-Adapter öffnet den produktiven Speicher nur
+auf collect-Aufruf und schließt seine Verbindung auch bei Fehler/Abbruch. RecoveryPanel
+montiert die vorbereiteten port-injizierten Controls. Klick startet, Abbrechen/Unmount beendet
+vor Commit; spätes Abort überschreibt Erfolg nicht. Keine Kopplung an Autosave oder Modell-
+History, kein Hintergrundtimer/Retry. Alle Slots/current/previous und V1-Originale bleiben
+wie im geprüften Collector geschützt. Bei konkurrierender Änderung wird übersprungen.
+
+Nachweis: 1063 Tests, Benchmark-/App-Code-Typecheck, gezieltes Lint, Build bestanden.
+17 Browser-Integrationsassertions über tatsächlichen Produktionsadapter in isolierter DB
+(maintenance-activation-results.json), zusätzlich 16 ursprüngliche Collector-Schutzfälle
+(maintenance-activation-regression.json). Faules Öffnen, echter Action-/Adapterlauf,
+Vorab-Abbruch ohne DB-Öffnung, simulierter QuotaExceededError am Öffnungsport ohne Retry und
+anschließend vollständiger Vergleich der letzten Sicherung geprüft. Rollback nach bereits
+getätigter Löschung und Schreibkonflikte erneut im realen IDB-Collector geprüft. Kein echter
+Datenträger-/Browserquota-Vollzustand behauptet; dieser bleibt separat offen.
+
+UI im laufenden 8080-Programm: Wiederherstellungsstatus unten links → Lokale Wiederherstellung
+zeigt „Speicher warten“. Benutzerprojekt nicht geändert und dessen Bereinigung nicht ausgelöst;
+Löschtests ausschließlich isoliert. Frühere Bedienungssimulation belegt zusätzlich Abbrechen.
+Messwiederholung 1000/10000 Linien: Median ca. 49,5/517,5 ms Gesamtzeit (je drei Läufe), keine
+Frame-/p95-/Peakgarantie. Ein expliziter Wartungslauf kann weiterhin synchrone Pausen verursachen;
+„abbrechbar“ heißt an den vorhandenen asynchronen Grenzen, nicht Unterbrechung eines JS-Aufrufs.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. Längere Sitzungen mit Bildwechsel/Entfernung, Undo/Reload und realistischen Speicherlasten
+   prüfen; Quota-Injektion und tatsächlich erreichte Speichergrenze unterscheiden.
+2. Synchrone Pausen, Heap/Prozess-/Rasterbedarf auswerten und nur gemessene Engpässe begrenzen.
+3. AUD14-07 Schulprofil einschließlich Anschlussgruppen, Kamerawechsel und Architekturrestschuld
+   abnehmen. AUD14-06-Gesamtabnahme bleibt bis zum Langzeit-/Speichernachweis offen.
