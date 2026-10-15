@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #368 gemergt; Browser-Frame-Zuordnung abgeschlossen als begrenzter Diagnosebeleg, schwankender Abbildwechsel-Restbefund bleibt offen. Genau nächster Auftrag: S1-Gruppenbewegungen XY/Z mit und ohne Shift im realen Workspace praktisch vergleichen; keine weitere spekulative Bildoptimierung.
+Aktueller Arbeitsauftrag: 15.10.2026 – #369 gemergt; S1-Gruppenprüfung liefert bestandene numerische XY-Commits, aber Z ist im echten Workspace weiterhin gesperrt. Genau nächster Auftrag: vorhandene vorbereitete Z-Aktion an die gemeinsame 3D-Gruppenbedienung anbinden und abnehmen. Shift-Dauerbewegung und Performance-Restbefund bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3053,3 +3053,40 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
    vergleichen; Anschlüsse, Fenster und genau einen Undo-Schritt praktisch prüfen.
 2. IFC-Höhen/Containment für mehrere Geschosse nachweisen.
 3. Recovery-Zusammenfassung für alle Geschosse korrigieren und offene Audit-Gates abgleichen.
+
+### AUD14-07 – Praktische Gruppenprüfung: XY-Teilnachweis, Z-Anbindung fehlt (15.10.2026)
+#369 nach erfolgreicher CI in main übernommen (55bf7a9). Der wechselhafte Performance-
+Restbefund beim Abbildwechsel wird NICHT geschlossen. Vor Gesamtfreigabe erneut kontrolliert
+reproduzieren und bei Auftreten per CPU-Sampling einschließlich Commit untersuchen; ein
+unauffälliger Einzellauf oder die Funktionsprüfung ist kein Behebungsnachweis.
+
+Isolierter Produktions-Workspace Port8085, S1 G mit fünf Geschossen, 300 Wänden und
+200 Fenstern; Nutzerprojekt Port8080 unberührt. Beleg benchmarks/s1-group-ui-evidence.json.
+- 2D: s0-w0/w1 auswählen, Ursprung klicken, 90 Grad und 0,2 m eingeben, Enter.
+- 3D: s4-w0/w1 per Klick/Strg-Klick wählen, Ursprung klicken, X wählen, 0,2 m, Enter.
+- Jeweils genau zwei Wände versetzt, interner T-Anschluss bleibt, neun externe T-Anschlüsse
+  gelöst. Fenster behalten Host/Relativwerte; alle übrigen Elemente unverändert. Vollständige
+  exportierte Projekte gegen erwartete Änderungen verglichen (Koordinatentoleranz 1e-12).
+- Je ein Undo leert die History und stellt das Modell wieder her; 2D sogar vollständiges
+  JSON identisch. 3D-Arbeitsgeschoss durch Auswahl geändert, deshalb Undo-Vergleich aller
+  Geschossdaten; 3D-Redo liefert wieder exakt das vorher exportierte Projekt.
+
+Wichtiger neuer Abnahmebefund: Z bleibt in MovementAxisControls.tsx ausdrücklich disabled,
+MovementOriginAxes zeigt nur Orientierung. prepareZTranslation hat keinen produktiven
+UI-Aufrufer (nur Tests/Benchmark). Eine Modellprüfung der Höhenaktion ist daher keine
+praktische Z-Abnahme. Screenshot outputs/s1-group-z-blocked.png. Nicht einfach den Button
+entsperren: eigene Z-Interaktion über gemeinsame Runtime, vorbereitete Geometrie und
+validierten Commit anschließen; keine horizontale Winkelumrechnung für Z verwenden.
+
+Nicht geprüft: kontinuierliche Mausbewegung mit gehaltener Shift-Taste, GB-Gruppengesten,
+Vorschau-Framevergleich und Z im Workspace. Die verfügbare Browsersteuerung liefert hier
+keine dokumentierte Kombination aus gehaltener Shift-Taste und fortlaufender Mausbewegung;
+numerische Eingabe darf diesen Nachweis nicht ersetzen. S1 bleibt teilweise offen.
+Keine Produktänderung; kein erneuter lokaler Vollsuite-/Build-Lauf für diesen Prüfbericht.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** Z-Gruppenbewegung an bestehende gemeinsame 3D-Interaktion anbinden;
+   numerische Eingabe, Vorschau, Platzieren/Abbruch, Fenster/Anschlüsse und ein Undo prüfen.
+2. Verbleibende S1-Maus-/Shift-Gruppenabnahme und IFC-Höhen/Containment abschließen.
+3. Recovery-Zusammenfassung aller Geschosse korrigieren und offene Performance-/Release-
+   Nachweise abgleichen. Speichererweiterung bleibt wie vereinbart zurückgestellt.

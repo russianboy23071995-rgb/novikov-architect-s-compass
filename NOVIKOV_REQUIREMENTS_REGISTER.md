@@ -12388,3 +12388,16 @@ Reproduktion nötig. Diagnoseetappe begrenzt beendet, keine spekulative Produkt�
 Typecheck/Lint/Diagnosebuild bestanden, Basis-CI grün.
 Nächster einziger Auftrag: S1-Gruppenbewegungen XY/Z mit/ohne Shift praktisch abnehmen;
 danach IFC-Höhen/Containment und Recovery-Zusammenfassung. Release-Gates bleiben offen.
+
+### AUD14-07 – Gruppen-UI ist nur teilweise abgenommen (15.10.2026)
+#369 gemergt (55bf7a9). benchmarks/s1-group-ui-evidence.json dokumentiert zwei echte
+numerische Gruppencommits: 2D s0-w0/w1 um +0,2 m Y; 3D s4-w0/w1 um +0,2 m X.
+Interne T-Verbindung erhalten, neun externe gelöst, relative Fensterdaten und restliches
+Projekt unverändert; je ein Undo, 3D-Redo ebenfalls exakt verglichen.
+Z-Button ist noch deaktiviert. prepareZTranslation wird nur durch Tests/Benchmark benutzt;
+keine praktische Höhenbewegung im Workspace nachgewiesen. Nächster begrenzter Auftrag:
+vorhandene Z-Aktion in gemeinsame 3D-Interaktion integrieren, ohne Renderer-Sonderlogik
+oder Vollprüfung im Pointerpfad; vollständige Platzierungsprüfung und ein Undo erhalten.
+Kontinuierliche Shift-Mausbewegung, GB-Gruppen und Vorschauvergleich bleiben offen.
+Abbildwechsel-Performancebefund bleibt offen und vor Gesamtfreigabe erneut zu prüfen;
+fehlende Reproduktion ist keine Behebung. IFC/Recovery/Release-Gates bleiben bestehen.
