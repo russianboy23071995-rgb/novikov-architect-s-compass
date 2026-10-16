@@ -1,13 +1,13 @@
 import { RecoveryMaintenanceControls } from "./RecoveryMaintenanceControls";
 
-import { storeyOf } from "../../domain/storeys/access.ts";
 import type { useLocalAutosave } from "./useLocalAutosave";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import {
   readProjectRecovery,
   listRecoveryProjects,
   queryRecoveryProjects,
+  recoveryContentSummary,
   type RecoverySummary,
 } from "@/application/project-files/recovery-catalog";
 import {
@@ -35,6 +35,10 @@ export function RecoveryPanel({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [candidate, setCandidate] = useState<Awaited<ReturnType<typeof readProjectRecovery>>>(null);
+  const content = useMemo(
+    () => (candidate ? recoveryContentSummary(candidate.project) : null),
+    [candidate],
+  );
   const [projects, setProjects] = useState<RecoverySummary[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const generation = useRef({ value: 0 });
@@ -191,7 +195,7 @@ export function RecoveryPanel({
         {!busy && projects.length === 0 && !error && <p>Noch keine gesicherten Projekte.</p>}
         {message && <p role="status">{message}</p>}
         {error && <p role="alert">{error}</p>}
-        {candidate && (
+        {candidate && content && (
           <div className="space-y-3 rounded border p-3">
             <p>
               {candidate.fallback
@@ -200,8 +204,8 @@ export function RecoveryPanel({
               · {new Date(candidate.savedAt).toLocaleString()}
             </p>
             <p>
-              Projekt: {candidate.project.id} · {storeyOf(candidate.project).walls.length} Wände ·{" "}
-              {storeyOf(candidate.project).windows.length} Fenster
+              Projekt: {candidate.project.id} · {content.storeys} Geschosse · {content.walls} Wände
+              · {content.windows} Fenster (gesamtes Projekt)
             </p>
             <Button
               size="sm"

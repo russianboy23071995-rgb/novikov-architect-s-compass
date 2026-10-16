@@ -17,6 +17,19 @@ import {
 } from "./recovery.ts";
 
 export type RecoverySummary = { projectId: string; savedAt: string };
+/** Counts the loaded recovery candidate, independent of active storey and visibility.
+ * Reads array lengths only: no geometry, asset decoding or storage access.
+ */
+export function recoveryContentSummary(project: Project) {
+  let walls = 0;
+  let windows = 0;
+  for (const storey of project.storeys) {
+    walls += storey.walls.length;
+    windows += storey.windows.length;
+  }
+  return { storeys: project.storeys.length, walls, windows };
+}
+
 export interface RecoveryCatalog {
   v2?: { codec: RecoveryV2Codec; project(id: string): RecoveryV2Storage };
   legacy: RecoveryStorage;

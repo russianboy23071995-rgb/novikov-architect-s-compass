@@ -2,7 +2,9 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject, createProject, addWall, addWindow } from "../../lib/bim/model.ts";
+import { addStorey, setStoreyHeight } from "../storeys/actions.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
 import { createEditingState } from "../direct-edit/controller.ts";
 import {
   listRecoveryProjects,
@@ -10,6 +12,7 @@ import {
   queryRecoveryProjects,
   readProjectRecovery,
   saveProjectRecovery,
+  recoveryContentSummary,
   type RecoveryCatalog,
 } from "./recovery-catalog.ts";
 import { saveRecovery, type RecoveryStorage } from "./recovery.ts";
@@ -40,6 +43,58 @@ function memory() {
 const a = { ...createExampleProject(), id: "A" };
 const b = { ...createExampleProject(), id: "B" };
 const date = new Date("2026-10-10T12:00:00Z");
+
+test("loaded recovery summary counts all storeys even when the active storey is empty", async () => {
+  let project = createProject("multi-floor-recovery", "eg");
+  assert.deepEqual(recoveryContentSummary(project), { storeys: 1, walls: 0, windows: 0 });
+  project = setStoreyHeight(project, project, { projectId: project.id, storeyId: "eg", height: 3 });
+  project = addStorey(project, project, {
+    projectId: project.id,
+    storeyId: "eg",
+    side: "above",
+    id: "og",
+    height: 3,
+  });
+  project = addStorey(project, project, {
+    projectId: project.id,
+    storeyId: "eg",
+    side: "below",
+    id: "kg",
+    height: 2.5,
+  });
+  for (const id of ["kg", "og"]) {
+    project = selectWorkingStorey(project, project, id);
+    project = addWall(project, {
+      id: `${id}-wall`,
+      start: { x: 0, y: 0 },
+      end: { x: 3, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+    });
+    project = addWindow(project, {
+      id: `${id}-window`,
+      wallId: `${id}-wall`,
+      width: 1.2,
+      height: 1.2,
+      sillHeight: 0.9,
+      position: 0.5,
+    });
+  }
+  project = selectWorkingStorey(project, project, "eg");
+  const { catalog, records } = memory();
+  await saveProjectRecovery(project, catalog, date);
+  const candidate = await readProjectRecovery(catalog, project.id);
+  assert.ok(candidate);
+  const before = serializeProject(candidate.project);
+  const stored = records.get(project.id);
+  assert.deepEqual(recoveryContentSummary(candidate.project), { storeys: 3, walls: 2, windows: 2 });
+  assert.deepEqual(
+    recoveryContentSummary(selectWorkingStorey(candidate.project, candidate.project, "kg")),
+    { storeys: 3, walls: 2, windows: 2 },
+  );
+  assert.equal(serializeProject(candidate.project), before);
+  assert.equal(records.get(project.id), stored);
+});
 
 test("independent project records keep a valid predecessor each and list dates", async () => {
   const { catalog, records } = memory();

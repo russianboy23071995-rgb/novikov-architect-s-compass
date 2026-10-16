@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #373 gemergt; IFC-Höhen/Zuordnung für KG/EG/OG automatisiert nachgewiesen. Z per Hilfseingabe vom Nutzer bestätigt; mausgesteuerte Shift-Dauerbewegung separat offen. Genau nächster Auftrag: Recovery-Zusammenfassung aller Geschosse prüfen; Abbildwechsel-Performancebefund bleibt offen.
+Aktueller Arbeitsauftrag: 15.10.2026 – #374 gemergt; Recovery-Zusammenfassung zählt jetzt alle Geschosse. Z per Hilfseingabe vom Nutzer bestätigt; mausgesteuerte Shift-Dauerbewegung separat offen. Genau nächster Auftrag: offenen Abbildwechsel-Performancebefund messen und eingrenzen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3228,3 +3228,26 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 1. **Unmittelbar:** Recovery-Zusammenfassung über alle Geschosse prüfen und bei Bedarf korrigieren.
 2. Offenen Abbildwechsel-Performancebefund gezielt messen und eingrenzen.
 3. Verbleibende S1-/Release-Gates abgleichen; praktische XY-Shift-Abnahme separat nachtragen.
+
+### AUD14-07 – Recovery-Zusammenfassung über alle Geschosse (15.10.2026)
+PR #374 nach erfolgreicher CI und ausdrücklicher Freigabe gemergt (10ed3a9).
+Befund: RecoveryPanel zeigte bei „Stand prüfen“ nur Wände/Fenster des aktiven Geschosses.
+Die gespeicherten Daten enthielten bereits das gesamte Projekt; kein Datenverlustbefund.
+Die gemeinsame read-only Application-Abfrage recoveryContentSummary zählt nun Geschosse
+und summiert Wand-/Fenster-Arraylängen über alle Geschosse. Die Anzeige kennzeichnet
+„gesamtes Projekt“. Keine Geometrieberechnung, Assetdecodierung oder Speicherzugriffe
+für die Zusammenfassung; O(Geschosse), im Panel pro Kandidat memoisiert.
+Speicherformat, Autosicherung, Wartung und Wiederaufnahme bleiben unverändert.
+
+Regression: leeres aktives EG, Wände/Fenster in KG und OG, echter Recovery-Schreib-/Leseweg
+mit In-Memory-Port. Erwartet 3 Geschosse, 2 Wände, 2 Fenster, unabhängig vom aktiven
+Geschoss; Zusammenfassung verändert weder Projekt noch gespeicherten Stand. 24 fokussierte
+Recovery-Tests, TypeScript, ESLint und Produktionsbuild bestanden. Keine visuelle
+Browserabnahme in diesem Schritt; vorhandene echte lokale Sicherungen wurden nicht verändert.
+Praktische Abnahme: Projekt mit mehreren Geschossen sichern → Lokale Wiederherstellung →
+Stand prüfen. Die Gesamtzahl muss auch bei leerem aktivem Geschoss stimmen.
+
+Nächste drei Schritte, nur Schritt 1 aktiv:
+1. **Unmittelbar:** Abbildwechsel-Performancebefund mit isoliertem Testprojekt erneut messen und eingrenzen.
+2. Aus der Messung eine begrenzte Korrektur ableiten und gegen unveränderte Modell-/Ansichtsdaten prüfen.
+3. Verbleibende S1-/Release-Gates abgleichen; mausgesteuerte XY-Shift-Abnahme separat nachtragen.
