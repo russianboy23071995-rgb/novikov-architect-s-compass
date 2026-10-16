@@ -1,6 +1,7 @@
 import { recoveryReadInstrumentation } from "./recovery-read-instrumentation";
 import { workspaceLoadInstrumentation } from "./workspace-load-instrumentation";
 import { exportInstrumentation } from "./export-instrumentation";
+import { imageResourceInstrumentation } from "./image-resource-instrumentation";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwind from "@tailwindcss/vite";
@@ -11,7 +12,10 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     ...(mode === "recovery-profile" ? [recoveryReadInstrumentation()] : []),
     ...(mode === "export-profile" ? [exportInstrumentation()] : []),
-    ...(mode === "load-profile" ? [workspaceLoadInstrumentation(true)] : []),
+    ...(["load-profile", "image-resources"].includes(mode)
+      ? [workspaceLoadInstrumentation(true)]
+      : []),
+    ...(mode === "image-resources" ? [imageResourceInstrumentation()] : []),
     react(),
     tailwind(),
   ],
