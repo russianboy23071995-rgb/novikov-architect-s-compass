@@ -12474,3 +12474,14 @@ Rohtrace/URLs nicht veröffentlicht, zwei Skripttests bestanden. Keine Produktä
 Nächster einzelner Pilot: stabile, begrenzt gehaltene Bildressourcen mit expliziter
 Lebensdauer statt großer Data-URL-Wiederverarbeitung; Gegenmessung und Modell-/Asset-
 Invalidierung vor Produktübernahme. Vollständige Abbilder nicht unbegrenzt cachen.
+
+
+### AUD14-07 – Bildressourcen-Pilot mit Budget (16.10.2026)
+#377/#378 gemergt. Nur isolierter Build-Modus image-resources: 64 MiB/64 Blob-Einträge,
+aktive Leases geschützt, LRU nur idle, Überbudget mit bestehendem Data-URL-Fallback.
+Factory-owned Handles und Bildheader geprüft; Quellenwechsel über Objektidentität,
+Assetbestand/Lebensdauer am Workspace, kein zweites Modell und keine Persistenzänderung.
+S1-Browser: 20 Anlagen über fünf Abbilder, 16 warme Wiederverwendungen; Sichtbarkeits-
+Undo weitere vier Hits ohne Neuanlage. 47.127.963 Blob-Bytes; kein Gesamt-RAM-Limit.
+1099 Tests, Typecheck, ESLint und Builds bestanden. Funktionaler Browsernachweis liegt
+vor; CPU-/Frame-Gegenmessung weiterhin offen, keine Produktübernahme oder P2-Schließung.

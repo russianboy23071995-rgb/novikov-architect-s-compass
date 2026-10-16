@@ -1,0 +1,43 @@
+{
+  "scope": "Functional browser verification only; not CPU or frame performance proof",
+  "sequence": ["EG", "OG1", "OG2", "OG3", "OG4", "EG", "OG1", "OG2"],
+  "resources": {
+    "enabled": true,
+    "entries": 20,
+    "bytes": 47127963,
+    "active": 4,
+    "created": 20,
+    "hits": 16,
+    "revoked": 0,
+    "fallbacks": 0
+  },
+  "images": [
+    {
+      "kind": "blob",
+      "label": "Select reference s2-r0"
+    },
+    {
+      "kind": "blob",
+      "label": "Select reference s2-r1"
+    },
+    {
+      "kind": "blob",
+      "label": "Select reference s2-r2"
+    },
+    {
+      "kind": "blob",
+      "label": "Select reference s2-r3"
+    }
+  ],
+  "afterHideAndVisibilityUndo": {
+    "enabled": true,
+    "entries": 20,
+    "bytes": 47127963,
+    "active": 4,
+    "created": 20,
+    "hits": 20,
+    "revoked": 0,
+    "fallbacks": 0
+  },
+  "browserErrors": []
+}

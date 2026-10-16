@@ -1,4 +1,5 @@
 import React from "react";
+import { imageResourcePilotStats } from "./image-resource-pilot";
 import { workspacePhases } from "./workspace-load-trace";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
@@ -13,6 +14,8 @@ const nativeSetAttribute = Element.prototype.setAttribute;
 // Counterfactual confined to this disposable fixture page. Never a product cache:
 // intentionally retained for the run, all URLs revoked when leaving this page.
 const shortImageUrls = new URLSearchParams(location.search).get("imageUrls") === "blob";
+if (shortImageUrls && new URLSearchParams(location.search).get("imageResources") === "bounded")
+  throw Error("Do not combine the bounded pilot with the old blob counterfactual");
 const hideImages = new URLSearchParams(location.search).get("imagePaint") === "hidden";
 if (hideImages) {
   const style = document.createElement("style");
@@ -125,6 +128,7 @@ const report: Record<string, unknown> = {
   workspacePhases,
 };
 const show = () => {
+  report["imageResources"] = imageResourcePilotStats();
   panel.querySelector("#s1-result")!.textContent = JSON.stringify(report, null, 2);
 };
 panel.querySelector("#s1-start")!.addEventListener("click", () => {

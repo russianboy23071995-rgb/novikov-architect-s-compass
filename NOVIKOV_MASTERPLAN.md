@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – Dritter Nutzertrace bestätigt wiederholte Verarbeitung eingebetteter Bildquellen beim Abbildwechsel. Recovery-Fix #377 bleibt offen mit grüner CI. Nächster begrenzter Auftrag: Bildressourcen-Pilot mit kontrollierter Lebensdauer und Browser-Gegenmessung; P2 und XY-Shift-Abnahme bleiben offen.
+Aktueller Arbeitsauftrag: 16.10.2026 – #377/#378 freigegeben und gemergt. Begrenzter Bildressourcen-Pilot im isolierten Diagnosebuild umgesetzt; fünf Abbilder und Sichtbarkeits-Undo geprüft. Nächster Auftrag: kontrollierte Browser-Performance-Gegenmessung, noch keine Produktübernahme/P2-Schließung.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3368,3 +3368,55 @@ Nächste drei Schritte:
    nur bei belegter Verbesserung produktiv übernehmen.
 3. P2-Restbefund und übrige S1-Gates abgleichen; initialen Ausreißer sowie praktische
    XY-Shift-Abnahme getrennt offenhalten.
+
+
+### AUD14-07 – Begrenzter Bildressourcen-Pilot (16.10.2026)
+#377 (42bd85b) und #378 (4bdbd1a) nach expliziter Freigabe mit grünen Checks per
+Merge-Commit in main übernommen. Kein Rewrite veröffentlichter Historie.
+
+createImageResourcePool im Image-Plattformadapter erzeugt bei Bedarf Blob-Ressourcen
+nur aus factory-owned unveränderlichen Asset-Handles, mit erneuter Header-/Metadaten-
+Prüfung. IDs, Hashes oder Object.freeze allein erlauben keine Wiederverwendung.
+Die Binärbytes bleiben exakt; Persistenz, Recovery, Modell und Undo sind unverändert.
+64 MiB komprimierte Blob-Nutzdaten und 64 Einträge begrenzen diesen Pilotpool. Aktive
+Leases zählen mit und werden nicht verdrängt; bei voller aktiver Kapazität, ungültigen
+Eingaben oder Allokationsfehlern bleibt der bisherige geprüfte Data-URL-Pfad verfügbar.
+LRU verdrängt nur ungenutzte Ressourcen. Aktueller Assetbestand entfernt gelöschte/
+ersetzte Quellen nach Freigabe des letzten Benutzers; Undo kann sie neu erzeugen.
+Clear widerruft sofort ungenutzte Quellen, aktive erst nach letzter Freigabe.
+Browser-Decoding, GPU-Speicher, ursprüngliche Base64-Daten und temporäre Konvertierung
+sind nicht Teil dieses 64-MiB-Wertes. Kein Versprechen einer Gesamt-RAM-Grenze.
+
+Ein explizites Vite-Plugin bindet den Pool nur im Modus image-resources ein. Es ersetzt
+im Diagnosebuild den SVG-Bildknoten durch einen Lease-Consumer und bindet den
+Asset-Lebenszyklus an den Workspace, nicht an die beim Abbildwechsel neu montierte
+Ansicht. Der erste Browserlauf erkannte genau diese zu kurze Lebensdauer; korrigiert
+und erneut geprüft. Produktquellen von Workspace/PlanSceneRun bleiben unverändert.
+Der Pilot besitzt einen Pool pro isolierter Diagnoseseite; Mehr-Workspace-Integration
+ist damit noch kein Produktvertrag. Normale Produktbundles enthalten den Piloten nicht.
+
+Build: node node_modules/vite/bin/vite.js build --config benchmarks/production-workspace.config.ts --mode image-resources
+Pilot: http://127.0.0.1:8085/benchmarks/s1-workspace.html?variant=GB&imageResources=bounded
+Kontrolle: dieselbe Seite ohne imageResources. Nicht mit altem imageUrls=blob kombinieren.
+
+Browsernachweis im S1-GB-Workspace: EG → OG1 → OG2 → OG3 → OG4 → EG → OG1 → OG2.
+20 Anlagen, 16 Wiederverwendungen, 47.127.963 Blob-Bytes, vier aktive Ressourcen,
+keine Verdrängung und kein Fallback. Danach Ebenen ausblenden und Sichtbarkeits-Undo:
+Bilder 0 → 4, Anlagen bleiben 20, Wiederverwendungen steigen auf 20. Vier echte blob-
+hrefs, Bilder sichtbar, keine Browser-Console-Errors. Aggregat in
+benchmarks/image-resource-pilot-evidence.json. Kein CPU-/Frame-Lagfrei-Nachweis.
+
+Sieben neue Pooltests: fünf Ansichten/zwanzig Quellen und exakte Bytes, Byte-/Eintrags-
+Budget, aktive Pins/LRU, gleiche ID mit anderem Inhalt, Entfernen/Undo, ungültige Header,
+Clear/mehrfache Freigabe und Allokationsfehler. Insgesamt 1099 Tests bestanden;
+TypeScript einschließlich Benchmarks, fokussierter ESLint, Produkt- und Pilotbuild bestanden.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** kontrollierte CPU-/Frame-Gegenmessung
+   desselben S1-GB-Abbildablaufs mit und ohne imageResources=bounded. Alle fünf
+   Abbilder vorwärmen; Kaltkonvertierung separat, keine Automationsabfragen während
+   der Aufnahme. Ressourcenrequests/PNG-Decoding, Speicher und warme Frames vergleichen.
+2. Bei nachgewiesenem Nutzen den Adapter mit projekt-/fensterbezogenem Besitzer in
+   den Produktpfad übernehmen; sonst Pilot gezielt nach dem Trace überarbeiten.
+3. Restkosten einschließlich initialem Ausreißer und separater XY-Shift-Abnahme prüfen;
+   P2 erst nach belastbarem Nachweis schließen.
