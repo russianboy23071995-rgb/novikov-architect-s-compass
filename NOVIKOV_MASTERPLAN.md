@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #377/#378 freigegeben und gemergt. Begrenzter Bildressourcen-Pilot im isolierten Diagnosebuild umgesetzt; fünf Abbilder und Sichtbarkeits-Undo geprüft. Nächster Auftrag: kontrollierte Browser-Performance-Gegenmessung, noch keine Produktübernahme/P2-Schließung.
+Aktueller Arbeitsauftrag: 16.10.2026 – #379 gemergt. Vier kontrollierte synthetische UI-Läufe (B-A-A-B) zeigen Wiederverwendung, aber keinen stabilen p95-Vorteil. Pilot bleibt isoliert; nächste Aufgabe ist der CPU-/Native-Eingabe-Abgleich der verbleibenden langen Frames. Keine Produktübernahme/P2-Schließung.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3420,3 +3420,59 @@ Nächste drei Schritte:
    den Produktpfad übernehmen; sonst Pilot gezielt nach dem Trace überarbeiten.
 3. Restkosten einschließlich initialem Ausreißer und separater XY-Shift-Abnahme prüfen;
    P2 erst nach belastbarem Nachweis schließen.
+
+
+### AUD14-07 – Bildressourcen-Gegenmessung B-A-A-B (16.10.2026)
+#379 nach ausdrücklicher Freigabe und grüner CI in main gemergt (c65455f).
+benchmarks/image-switch-comparison.ts ergänzt ausschließlich die isolierte S1-Seite:
+25 synthetische Doppelklicks durch den echten Abbild-Öffnungshandler, EG/OG1/OG2/OG3/OG4
+zuerst einmal, dann vier Wiederholungen. Postcondition aria-selected nach jedem Wechsel;
+alle 100 Wechsel der vier Läufe erfolgreich. 200 ms Pause zwischen Schritten, ein
+RAF vor Dispatch, zwei RAF danach. Erstpass ist nicht vollständig kalt: EG war beim
+Seitenstart sichtbar; Browser-/GPU-Caches werden nicht künstlich geleert. Jede Variante
+frisch navigiert/geladen. Eingabe oder Sichtbarkeitswechsel bricht die Messung ab.
+Kein Recoverybestand gelöscht oder Einstellungen zur Messung deaktiviert.
+
+Während der vier Läufe keine Browser-Automationsabfragen; Start per sichtbarem Button,
+Ergebnisse erst nach Ablauf ausgelesen. Reihenfolge begrenzter Pool B, Kontrolle A,
+Kontrolle A, begrenzter Pool B. Identischer Build styles-D_4ueobp.js,
+s1-workspace-C_3dw2co.js; Pilot nur per Query aktiv. Aggregat und Rohmesswerte ohne
+Projekt-/Bildpayloads in benchmarks/image-switch-comparison-evidence.json.
+
+| Lauf | Warmer Median / p95 / Maximum bis zwei RAF (ms) | Lange Tasks / lange Frames im warmen Zeitfenster |
+| --- | --- | --- |
+| B1 | 39,8 / 55,2 / 66,7 | 0 / 0 |
+| A1 | 42,8 / 64,3 / 119,7 | 4 / 4 |
+| A2 | 42,3 / 51,4 / 75,1 | 1 / 2 |
+| B2 | 39,0 / 58,9 / 73,7 | 1 / 2 |
+
+20 warme Samples pro Lauf. Erstpass-Maxima B1 170,6; A1 175,5; A2 175,1; B2 207,3 ms.
+In beiden Pilotläufen genau 20 Ressourcenanlagen, 84 Wiederverwendungen, 47.127.963
+Blob-Bytes, vier aktiv, null Fallbacks/Verdrängungen. Keine weiteren Anlagen durch warme
+Abbildwechsel. Die Werte zählen komprimierte Blob-Nutzdaten, nicht Gesamt-RAM/Decoding.
+
+Bewertung: geringer Medianvorteil, aber p95-Bereiche überlappen; B2 besitzt weiterhin
+einen langen Frame (103,7 ms). Keine robuste Aussage, dass der Nutzerbefund behoben ist.
+Zwei RAF messen weder exklusive CPU-Zeit noch garantierte Bilddekodierung/physisches
+Bildschirm-Paint. Lange Tasks/Frames werden im warmen Zeitfenster gezählt, inklusive
+Zwischenpausen; sie werden nicht einzelnen Abbildwechseln kausal zugeschrieben. Die
+synthetischen Events ersetzen nicht den Native-Eingabe-Trace des Nutzers. Kein Vergleich
+der alten Trace-EventDispatch-Werte mit den neuen Zwei-RAF-Zeiten als gleiche Metrik.
+Die Browsersteuerung bietet keinen DevTools-CPU-Profiler. PNG-Decode-/GPU-Cachekosten und
+Gesamt-Speicherverbrauch bleiben damit ungeprüft; keine erfundene CPU-Gegenmessung.
+
+Validierung: 100 erfolgreiche UI-Wechsel, beide Varianten vollständig ausgeführt,
+TypeScript für Benchmarks/Produkt und fokussierter ESLint bestanden, isolierter Build
+bestanden. Kein Produktcode geändert; volle Produkttests/Produktbuild nicht wiederholt.
+1099 bestandene Tests gehören zum unveränderten Vorgänger #379, nicht zu einem neuen Lauf.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** Native-Eingabe-/CPU-Aufnahmen beider Varianten
+   am gleichen Diagnosebuild vergleichen (fünf Abbilder vorwärmen, gleiche Reihenfolge).
+   Insbesondere lange Pilotframes und erneutes PNG-Decoding lokalisieren. Dafür wird ein
+   verfügbarer CPU-Profiler oder eine lokale Nutzeraufnahme benötigt; kein weiterer bloßer
+   Longtask-Durchlauf als Ersatz. Ohne diesen Nachweis bleibt der Pilot isoliert.
+2. Nur die dadurch belegte Restursache gezielt korrigieren; danach denselben Vergleich
+   wiederholen und erst bei belastbarem Nutzen über Produktübernahme entscheiden.
+3. P2 und übrige S1-Gates einschließlich separater XY-Shift-Abnahme abschließen, sobald
+   ihre jeweiligen Nachweise tatsächlich vorliegen.
