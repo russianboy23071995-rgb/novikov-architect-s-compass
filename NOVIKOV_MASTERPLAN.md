@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #376 gemergt; Nutzer-CPU-Trace identifiziert Recovery-Inhaltsvergleich als dominanten Sampleanteil beim Abbildwechsel. Exakter Snapshot-Cache umgesetzt und getestet; nächste Aufgabe ist die Browser-Gegenmessung. Kein Lagfrei-Nachweis; XY-Shift-Abnahme separat offen.
+Aktueller Arbeitsauftrag: 16.10.2026 – Dritter Nutzertrace bestätigt wiederholte Verarbeitung eingebetteter Bildquellen beim Abbildwechsel. Recovery-Fix #377 bleibt offen mit grüner CI. Nächster begrenzter Auftrag: Bildressourcen-Pilot mit kontrollierter Lebensdauer und Browser-Gegenmessung; P2 und XY-Shift-Abnahme bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3321,3 +3321,50 @@ Nächste drei Schritte:
    CPU-Zeit/Frames mit dem Nutzertrace vergleichen. P2 bis dahin offen.
 2. Verbleibende Kosten anhand dieser Gegenmessung eingrenzen, nur bei Befund weiter korrigieren.
 3. S1-/Release-Gates einschließlich separater XY-Shift-Abnahme abgleichen.
+
+
+### AUD14-07 – Wiederholte Bildressourcen im dritten Nutzertrace (16.10.2026)
+Die gzip-Datei 3Trace-20261016T144923.json gehört zum Diagnosebuild mit Recovery-Fix
+(styles-BrSjtsLt.js / s1-workspace-DM3qbuE6.js). 32 Doppelklickereignisse; viele liegen
+bei 22–28 ms, neun bei 67–77 ms, einmal 471,557 ms. Das erste lange Ereignis ist
+separat und wird durch den nachfolgenden Bildbefund nicht erklärt. Ereignisdauer ist
+keine Framezeit; umgebende Tasks können länger sein.
+
+Alle neun Ereignisse zwischen 50 und 200 ms enthalten jeweils vier data:image-
+Anforderungen, insgesamt 36 Anforderungen auf 16 verschiedene Quellen. Bei fünf
+Wechseln sind alle vier Quellen bereits zuvor in derselben Aufnahme angefordert
+worden (exakter SHA-256 der Quelle zur Diagnose, keine Produkt-Vertrauensprüfung).
+Die jeweiligen vier AsyncTaskRun-Spannen enthalten diese Bildanforderungen und
+belegen zusammen 41,603–47,049 ms bei den fünf wiederholten Wechseln. Das ist
+keine exklusive Decoder-CPU-Zeit. Beispiel Ereignis 14: 66,963 ms, davon vier
+bildanforderungshaltige Async-Spannen mit zusammen 44,624 ms; anschließend vier
+PNG-Decode-Tasks auf Workerthreads (ca. 18–20 ms pro Task, parallel, nicht addieren).
+ResourceReceiveResponse nennt protocol=data: kein externer Netzwerkdownload.
+
+Damit ist die Nutzerbeobachtung wiederkehrender Bildarbeit bestätigt. Nicht belegt
+ist eine bestimmte Browser-Cachegröße oder deren Verdrängungsstrategie. Der
+achtteilige checkedImageUrl-Fallback ist nicht einfach auf alle Abbilder zu erweitern:
+verifizierte Asset-Handles haben bereits einen eigenen WeakMap-URL-Pfad. Dieser
+speichert die geprüfte Data-URL, nicht die decodierte Browser-Bildressource. Ein
+useMemo speichert außerdem nur die aktuelle Planableitung. Kein Grund, vollständige
+Abbilder oder eine zweite Modellkopie dauerhaft zu halten.
+
+Reproduzierbar mit node benchmarks/trace-image-reloads.mjs <lokale Trace-Datei>.
+Aggregatnachweis: benchmarks/trace-image-reloads-evidence.json. Rohtrace und URLs
+bleiben lokal. Zwei Tests prüfen JSON/gzip, Wiederholungen, Threadfilter, verschachtelte
+Spannen und Payload-Redaktion. Beide bestanden. Keine Produktänderung, daher kein
+Produktbuild oder vollständiger Regressionstest wiederholt. #377 ist noch nicht gemergt.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Implementierungsauftrag:** begrenzter Bildressourcen-Pilot
+   im Rendering-/Plattformadapter. Stabile Blob-URLs aus geprüften unveränderlichen
+   Assets statt wiederholter großer Data-URLs untersuchen; explizite Freigabe bei
+   Projekt-/Assetwechsel, begrenzter Speicher, keine ungültigen/alten Bildinhalte und
+   kein Ändern von Projektdatei oder Recovery. Aktive Ressourcen nicht vorzeitig
+   widerrufen. Kein pauschales Vorladen aller Abbilder. Zunächst isolierter Pilot.
+2. Dieselbe Sequenz mit mindestens drei Abbildern vor/nach Pilot messen: Bildrequests,
+   Dekodierung, erste/warme Wechsel, Framezeiten und Speicher; Austausch, Löschen,
+   Undo und Sichtbarkeit prüfen. Blob-URLs garantieren keinen dauerhaften Decode-Cache;
+   nur bei belegter Verbesserung produktiv übernehmen.
+3. P2-Restbefund und übrige S1-Gates abgleichen; initialen Ausreißer sowie praktische
+   XY-Shift-Abnahme getrennt offenhalten.

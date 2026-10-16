@@ -1,0 +1,296 @@
+{
+  "traceSha256": "b7761b9e7c9819592be4121fd5637469f1156b97e6eb2e405a42d5d748e9c139",
+  "scope": "EventDispatch durations, not frame times. Async spans contain image requests but are not exclusive decoder CPU time. Repeated means observed earlier in this trace only.",
+  "distinctImageSources": 16,
+  "embeddedImageRequests": 36,
+  "rows": [
+    {
+      "index": 1,
+      "eventMs": 471.557,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 2,
+      "eventMs": 76.884,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 12569360,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 51.276
+    },
+    {
+      "index": 3,
+      "eventMs": 24.295,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 4,
+      "eventMs": 23.774,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 5,
+      "eventMs": 23.19,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 6,
+      "eventMs": 24.12,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 7,
+      "eventMs": 25.441,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 8,
+      "eventMs": 22.005,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 9,
+      "eventMs": 22.583,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 10,
+      "eventMs": 21.593,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 11,
+      "eventMs": 23.942,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 12,
+      "eventMs": 22.286,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 13,
+      "eventMs": 22.481,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 14,
+      "eventMs": 66.963,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 12569516,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 44.624
+    },
+    {
+      "index": 15,
+      "eventMs": 22.738,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 16,
+      "eventMs": 68.474,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 4,
+      "sourceCharacters": 12569516,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 41.603
+    },
+    {
+      "index": 17,
+      "eventMs": 6.904,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 18,
+      "eventMs": 25.217,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 19,
+      "eventMs": 24.337,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 20,
+      "eventMs": 67.673,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 4,
+      "sourceCharacters": 12569360,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 43.989
+    },
+    {
+      "index": 21,
+      "eventMs": 70.865,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 12568560,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 44.286
+    },
+    {
+      "index": 22,
+      "eventMs": 70.114,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 12565316,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 44.911
+    },
+    {
+      "index": 23,
+      "eventMs": 22.648,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 24,
+      "eventMs": 74.212,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 4,
+      "sourceCharacters": 12565316,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 45.201
+    },
+    {
+      "index": 25,
+      "eventMs": 25.157,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 26,
+      "eventMs": 27.508,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 27,
+      "eventMs": 24.705,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 28,
+      "eventMs": 70.485,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 4,
+      "sourceCharacters": 12569516,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 45.806
+    },
+    {
+      "index": 29,
+      "eventMs": 23.282,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 30,
+      "eventMs": 73.335,
+      "imageRequests": 4,
+      "previouslyRequestedInTrace": 4,
+      "sourceCharacters": 12569360,
+      "imageContainingAsyncSpans": 4,
+      "imageContainingAsyncMs": 47.052
+    },
+    {
+      "index": 31,
+      "eventMs": 23.589,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    },
+    {
+      "index": 32,
+      "eventMs": 25.01,
+      "imageRequests": 0,
+      "previouslyRequestedInTrace": 0,
+      "sourceCharacters": 0,
+      "imageContainingAsyncSpans": 0,
+      "imageContainingAsyncMs": 0
+    }
+  ]
+}
