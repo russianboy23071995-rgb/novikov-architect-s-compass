@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 15.10.2026 – #374 gemergt; Recovery-Zusammenfassung zählt jetzt alle Geschosse. Z per Hilfseingabe vom Nutzer bestätigt; mausgesteuerte Shift-Dauerbewegung separat offen. Genau nächster Auftrag: offenen Abbildwechsel-Performancebefund messen und eingrenzen.
+Aktueller Arbeitsauftrag: 16.10.2026 – #375 gemergt. Abbildwechsel-P2 bleibt offen; für die Ursachenzuordnung fehlt eine CPU-Performance-Aufnahme (aktuelle Browsersteuerung bietet keinen Profiler). Kein Fix auf Verdacht. Z per Hilfseingabe bestätigt; XY-Shift-Abnahme separat offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3251,3 +3251,36 @@ Nächste drei Schritte, nur Schritt 1 aktiv:
 1. **Unmittelbar:** Abbildwechsel-Performancebefund mit isoliertem Testprojekt erneut messen und eingrenzen.
 2. Aus der Messung eine begrenzte Korrektur ableiten und gegen unveränderte Modell-/Ansichtsdaten prüfen.
 3. Verbleibende S1-/Release-Gates abgleichen; mausgesteuerte XY-Shift-Abnahme separat nachtragen.
+
+### AUD14-07 – Abbildwechsel: Diagnosegrenze erneut geprüft (16.10.2026)
+PR #375 nach erfolgreicher CI und Nutzerfreigabe gemergt (818a096).
+Vor erneuten Messserien wurden die Belege aus #367/#368 und der aktuelle Öffnungspfad
+(CadWorkspace.onOpenDocument → selectWorkingStorey/working-storey → Ansichtskontext)
+abgeglichen. Die bisherigen Funktionswrapper erfassen nicht den gesamten React-Commit.
+Native Bild-href-Zuweisung und erzwungenes Layout erklären die dokumentierten Pausen
+nicht allein. Lange Frames sind dem synchronen Doppelklickereignis zugeordnet; daraus
+folgt keine belastbare Zuordnung zu einem inneren Funktionsaufruf.
+
+Die aktuell angebotenen Browserfähigkeiten wurden geprüft: Sichtbarkeit, Viewport,
+Seitenassets und WebMCP; kein CPU-Sampling/Performance-Trace oder DevTools-Zugriff.
+Deshalb keine erneute Longtask-Serie als vermeintlicher Ursachenbeleg, kein Produktfix
+auf Verdacht und kein Abschluss des Befunds. In diesem Schritt gab es keine neue
+Laufzeitmessung. Nutzerprojekt, Browserzustand und lokale Sicherungen unverändert.
+Nur Dokumentation; keine Tests oder Builds erneut ausgeführt.
+
+Genau nächster Auftrag ist ein CPU-Profil des reproduzierten warmen Abbildwechsels:
+- Isolierten S1-GB-Produktionsworkspace verwenden, EG/OG-Abbilder vorwärmen.
+- DevTools Performance-Aufnahme starten, mehrfach zwischen den Abbildern wechseln,
+  danach stoppen. Während der Messung keine Automationsabfragen durchführen.
+- Aufnahme mit auftretender Pause lokal sichern; Event-Callstack, Scripting,
+  React-Commit, GC und Layout/Paint auswerten. Nicht additiv interpretieren, wenn
+  gemessene Phasen ineinander verschachtelt sind.
+- Erst bei belegter Ursache einen begrenzten Fix auswählen. Ein Lauf ohne Pause ist
+  kein Behebungsnachweis. Kein Hochladen privater Projektinhalte für diesen Nachweis.
+Diese Aufzeichnung benötigt eine verfügbare Profilerschnittstelle oder eine vom Nutzer
+lokal erstellte Aufnahme; beides liegt derzeit nicht vor. Befund bleibt P2 offen.
+
+Nächste drei Schritte:
+1. **Unmittelbar:** CPU-Aufnahme eines ruckelnden warmen Abbildwechsels beschaffen und auswerten.
+2. Nur auf Basis der identifizierten Ursache eine begrenzte Korrektur mit Gegenmessung umsetzen.
+3. Übrige S1-/Release-Gates abgleichen; XY-Shift-Nutzerabnahme bleibt separat offen.

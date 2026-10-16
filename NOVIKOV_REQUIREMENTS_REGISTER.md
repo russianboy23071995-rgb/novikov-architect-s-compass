@@ -12446,3 +12446,10 @@ UI zeigt Geschossanzahl und kennzeichnet die Wand-/Fenstersumme als gesamtes Pro
 leerem EG und Inhalten in KG/OG über echten Recovery-Code samt In-Memory-Port; keine
 Änderung echter Sicherungen. Visuelle Abnahme noch nicht durchgeführt.
 Nächster Auftrag: offenen Abbildwechsel-Performancebefund messen und eingrenzen.
+
+### AUD14-07 – Abbildwechsel: offener CPU-Nachweis (16.10.2026)
+#375 gemergt. Historische Messungen und aktueller Öffnungspfad abgeglichen; kein neuer
+Messlauf und kein Fix. Die verfügbare Browsersteuerung bietet keinen CPU-Profiler.
+Der P2-Restbefund bleibt offen: benötigt wird eine echte Performance-Aufnahme mit
+Callstack/React-Commit-Zuordnung und Gegenprobe ohne Automationsabfragen. Weitere
+Longtask-Zähler allein ersetzen diesen Nachweis nicht. Details im Masterplan.
