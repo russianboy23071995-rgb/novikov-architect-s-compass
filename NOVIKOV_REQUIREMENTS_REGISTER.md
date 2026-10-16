@@ -12495,3 +12495,17 @@ lange Frames auch mit Pilot. Beide B-Läufe 20 Anlagen/84 Reuses, 47.127.963 Blo
 Payloadfreier Nachweis in benchmarks/image-switch-comparison-evidence.json. Typecheck,
 ESLint und Diagnosebuild bestanden. Keine Produktübernahme und keine P2-Schließung.
 CPU-/Native-Eingabe-/Decode-Abgleich weiterhin nötig; RAF-Latenz ist kein CPU-Profil.
+
+### N22 / R26-03 – UK-Rohdeckenbindung, Rechenvertrag (16.10.2026)
+Nutzer präzisiert: Wandoberkante bis UK Rohdecke; vorläufig 20 cm Stärke.
+Domain resolveWallHeightRule unterstützt feste Höhe oder expliziten oberen
+Rohdeckenbezug mit Stärke und Versatz. Kein implizites aktives Geschoss, kein
+Fallback bei fehlender Referenz. Feste Bestandswände bleiben unverändert.
+11 Höhen-Tests bestanden einschließlich Migration, IFC/Anschlüsse bestehender
+fester Wände sowie 3 neuer Fälle für UK-Berechnung, feste Höhe und ungültige Bezüge.
+Noch keine gespeicherte Bindung oder UI-Option. Nächster Auftrag und offene
+Referenzentscheidungen siehe aktuellen N22-Abschnitt im Masterplan.
+AUD14-07: weitere Performance-Aufnahme vom Nutzer vertagt; #380 gemergt,
+kein Performance-Abschluss und keine produktive Übernahme des Bildressourcen-Piloten.
+Die vollständige Suite dieses Commits besteht mit 1102 Tests; Typecheck,
+fokussierter Lint und Produktbuild ebenfalls bestanden.

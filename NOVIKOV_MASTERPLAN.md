@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #379 gemergt. Vier kontrollierte synthetische UI-Läufe (B-A-A-B) zeigen Wiederverwendung, aber keinen stabilen p95-Vorteil. Pilot bleibt isoliert; nächste Aufgabe ist der CPU-/Native-Eingabe-Abgleich der verbleibenden langen Frames. Keine Produktübernahme/P2-Schließung.
+Aktueller Arbeitsauftrag: 16.10.2026 – #380 in main (387a011). Weitere Performance-Aufnahmen auf Nutzerwunsch verschoben, Befund offen und Bildressourcen-Pilot isoliert. Fachschritt: gemeinsame Wandhöhenauflösung bis UK Rohdecke vorbereiten; anschließend atomare Modellintegration.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3476,3 +3476,39 @@ Nächste drei Schritte:
    wiederholen und erst bei belastbarem Nutzen über Produktübernahme entscheiden.
 3. P2 und übrige S1-Gates einschließlich separater XY-Shift-Abnahme abschließen, sobald
    ihre jeweiligen Nachweise tatsächlich vorliegen.
+
+### N22 – Wandoberkante bis UK Rohdecke (16.10.2026)
+Verbindliche Nutzerentscheidung: optional bis **Unterkante** Rohdecke, nicht Oberkante.
+Vorläufige Rohdeckenstärke 0,20 m; sie ist eine fachliche Annahme, keine erzeugte Decke.
+Gemeinsame Berechnung: Oberkante Wand = OK obere Rohdecke − Stärke + oberer Versatz;
+Wandhöhe = Oberkante Wand − (Geschosskote + Wandfußversatz). Gleicher Höhenraum für
+alle Eingaben; absoluter Gebäudebezug darf nicht doppelt addiert werden.
+
+Umgesetzt ist ausschließlich der getestete Domain-Rechenvertrag in wall/heights.ts.
+Die obere Referenz und ihre Stärke werden ausdrücklich übergeben. Fehlende oder
+numerisch ungültige Bezüge werden abgewiesen. Keine Schema-/UI-Umstellung und noch
+keine auswählbare Höhenbindung. Vorhandene feste Wandhöhen bleiben unverändert.
+
+Integrationsvertrag: bestehende Dateien bleiben fest; neue Bindung ausdrücklich
+wählen und mit stabiler Referenz speichern. Keine redundant editierbare berechnete
+Höhe. Geschossänderungen müssen betroffene Wände, Fenster und Anschlüsse gemeinsam
+prüfen und atomar veröffentlichen; ein Undo. Alle Darstellungen und IFC lesen dieselbe
+Auflösung, AI/Text/Voice dieselbe Application-Aktion. Keine Berechnung pro Pointerframe.
+Noch zu entscheiden vor entsprechender Bedienung: Ziel ohne oberes Geschoss und
+Verhalten beim Entfernen/Einfügen des referenzierten Geschosses. Keine stille Ersatzbindung.
+Spätere echte Decken liefern dieselbe Referenz; keine zweite Höhenlogik im Renderer.
+
+Performance-Priorität ausdrücklich geändert: weitere AUD14-07-Aufnahme und Promotion
+auf Nutzerwunsch vertagt. Vorhandene Nachweise und offene P2-/Abnahmegates bleiben
+bestehen. Frühere nächste Aufträge sind hierdurch ersetzt, nicht als bestanden markiert.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** persistierten Höhenvertrag und zentrale
+   Modellauflösung integrieren, mit Altdatei-Migration, Fenster-/Anschlussprüfung und
+   Gleichheit von Geometrie/IFC; noch keine breite UI-Erweiterung.
+2. Eigenschaftenwahl feste Höhe/UK Rohdecke über dieselbe Application-Aktion anbinden.
+3. Mehrgeschossigen Ablauf mit Höhenänderung, Undo, Speichern und IFC praktisch abnehmen.
+
+Validierung dieses Schritts: vollständige Suite 1102/1102, TypeScript, fokussierter
+ESLint und Produktbuild bestanden. Keine Browserabnahme erforderlich: keine UI-
+oder produktive Verhaltensänderung, reine Domain-Vorbereitung.

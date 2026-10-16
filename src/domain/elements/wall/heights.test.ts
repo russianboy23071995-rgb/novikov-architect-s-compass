@@ -188,3 +188,56 @@ test("prepared XY move ignores coincident join nodes at different heights", () =
   const preview = selectionMoveSurfaces(buildBuildingSolid(p), p, action.evaluate(delta));
   assert.deepEqual(preview.faces, buildBuildingSolid(action.materialize(p, delta)).faces);
 });
+
+import { DEFAULT_RAW_SLAB_THICKNESS, resolveWallHeightRule } from "./heights.ts";
+
+test("underside binding subtracts slab thickness, includes both offsets and follows storeys", () => {
+  const rule = { kind: "slab-underside", topOffset: -0.1 } as const;
+  for (const floor of [-3, 0, 3]) {
+    const result = resolveWallHeightRule({ baseOffset: 0.1 }, floor, rule, {
+      topElevation: floor + 3,
+      thickness: DEFAULT_RAW_SLAB_THICKNESS,
+    });
+    assert.ok(Math.abs(result.height - 2.6) < 1e-12);
+    assert.ok(Math.abs(result.top - (floor + 2.7)) < 1e-12);
+  }
+  const taller = resolveWallHeightRule(
+    {},
+    0,
+    { kind: "slab-underside", topOffset: 0 },
+    {
+      topElevation: 4,
+      thickness: 0.3,
+    },
+  );
+  assert.equal(taller.height, 3.7);
+});
+
+test("fixed rule preserves legacy height regardless of upper slab", () => {
+  assert.deepEqual(resolveWallHeightRule({ baseOffset: 0.5 }, 3, { kind: "fixed", height: 2.8 }), {
+    bottom: 3.5,
+    top: 6.3,
+    height: 2.8,
+  });
+});
+
+test("underside rule rejects missing, invalid or collapsed references instead of guessing", () => {
+  const rule = { kind: "slab-underside", topOffset: 0 } as const;
+  assert.throws(() => resolveWallHeightRule({}, 0, rule));
+  for (const thickness of [0, -0.2, NaN, Infinity])
+    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation: 3, thickness }));
+  for (const topElevation of [0.2, -1, NaN, Infinity, Number.MAX_VALUE])
+    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation, thickness: 0.2 }));
+  for (const topOffset of [NaN, Infinity, -3])
+    assert.throws(() =>
+      resolveWallHeightRule(
+        {},
+        0,
+        { ...rule, topOffset },
+        {
+          topElevation: 3,
+          thickness: 0.2,
+        },
+      ),
+    );
+});
