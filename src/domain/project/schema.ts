@@ -1,4 +1,5 @@
 import { wallHeights } from "../elements/wall/heights.ts";
+import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -252,10 +253,23 @@ export const projectV24Schema = projectV23Schema.omit({ storey: true }).extend({
   storeys: z.array(projectV22Schema.shape.storey).min(1),
 });
 const raisedWallSchema = offsetWallSchema.extend({ baseOffset: z.number().finite().optional() });
-const projectSchema = projectV24Schema.extend({
+export const projectV25Schema = projectV24Schema.extend({
   schemaVersion: z.literal(25),
   storeys: z
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(raisedWallSchema) }))
+    .min(1),
+});
+const boundWallSchema = raisedWallSchema
+  .extend({
+    height: positive.optional(),
+    topBinding: wallTopBindingSchema.optional(),
+  })
+  .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
+  .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
+const projectSchema = projectV25Schema.extend({
+  schemaVersion: z.literal(26),
+  storeys: z
+    .array(projectV22Schema.shape.storey.extend({ walls: z.array(boundWallSchema) }))
     .min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
@@ -437,7 +451,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof raisedWallSchema>;
+export type Wall = z.infer<typeof boundWallSchema>;
 export type BimWindow = z.infer<typeof currentWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
@@ -449,7 +463,7 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 
 /** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
 export function validateProject(value: unknown): Project {
-  const project = projectSchema.parse(value);
+  const project = resolveBoundWallHeights(projectSchema.parse(value));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
     project.workingStoreyId &&

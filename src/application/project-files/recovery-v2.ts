@@ -1,9 +1,12 @@
+import type { StoredProject } from "../../domain/project/storage-data.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ImageAsset } from "../../domain/elements/reference/model.ts";
 import { parseRecoveryRecord, prepareRecoverySnapshot } from "./recovery.ts";
 
 export type RecoveryPayload = Omit<ImageAsset, "id">;
-export type RecoveryManifest = Omit<Project, "assets"> & { assets: { id: string; key: string }[] };
+export type RecoveryManifest = Omit<StoredProject, "assets"> & {
+  assets: { id: string; key: string }[];
+};
 export type RecoveryDocument = {
   model: RecoveryManifest;
   blobs: Readonly<Record<string, Readonly<RecoveryPayload>>>;

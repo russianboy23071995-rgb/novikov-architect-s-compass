@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #380 in main (387a011). Weitere Performance-Aufnahmen auf Nutzerwunsch verschoben, Befund offen und Bildressourcen-Pilot isoliert. Fachschritt: gemeinsame Wandhöhenauflösung bis UK Rohdecke vorbereiten; anschließend atomare Modellintegration.
+Aktueller Arbeitsauftrag: 16.10.2026 – #381 in main (542bc7e). Optionale Wandhöhenbindung bis UK Rohdecke im Modell integriert, Schema 26, atomare Validierung und gemeinsame Dateidarstellung. Nächster Auftrag: Eigenschaftenbedienung über die Höhenaktion. Weitere AUD14-07-Aufnahme bleibt ausdrücklich verschoben.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3512,3 +3512,59 @@ Nächste drei Schritte:
 Validierung dieses Schritts: vollständige Suite 1102/1102, TypeScript, fokussierter
 ESLint und Produktbuild bestanden. Keine Browserabnahme erforderlich: keine UI-
 oder produktive Verhaltensänderung, reine Domain-Vorbereitung.
+
+### N22 – Gespeicherte Wandhöhenbindung (16.10.2026)
+#381 nach grüner CI und ausdrücklicher Nutzerfreigabe in main (542bc7e).
+Schema 26 erweitert Wände optional um topBinding: kind slab-underside, stabile obere
+Geschoss-ID, slabThickness in m (Vorgabe 0,20), topOffset in m. Die Stärke ist vorläufig
+Teil der Referenzannahme und erzeugt kein Deckenbauteil. V1–V25 migrieren weiterhin
+auf feste Wandhöhen; V25 lehnt eingeschmuggelte Bindungsfelder ab.
+
+Domain height-binding löst einmal an der vollständigen Validierungsgrenze auf.
+Die bestehende numerische height ist bei gebundenen Wänden nur abgeleitete Laufzeit-
+Kompatibilität für Geometrie, Fensterprüfung, Anschlüsse und IFC. Sie wird nicht als
+zweite editierbare Größe gespeichert: gemeinsames projectStorageData entfernt sie
+für Projektdatei, Recovery und Dateigrößenprüfung. Bei einem eingehenden Laufzeit-
+Snapshot wird ein mitgelieferter Zahlenwert neu berechnet, niemals als Wahrheit
+übernommen. Keine Getter/toJSON-Tricks, keine Renderer-Sonderlogik, kein zweites Modell.
+Die kanonische Schlüsselreihenfolge bleibt auch nach Datei/Recovery stabil.
+
+Application setWallHeightRule bindet Projekt-/Geschoss-/Wand-IDs und Ausgangsobjekt;
+mehrere Wände werden gemeinsam validiert. Zurück zu fester Höhe ist ausdrücklich
+möglich. updateWall erlaubt keine unabhängige Änderung einer gebundenen height.
+Geschossänderung berechnet alle betroffenen Höhen vor Fenster-/Anschlussprüfung neu;
+bei Konflikten wird nichts veröffentlicht. Ein commitProject erzeugt einen Undo-Schritt.
+Der vorhandene Gleichhöhenvertrag für Anschlüsse bleibt bestehen: gemischt feste und
+gebundene verbundene Wände können eine Geschosshöhenänderung deshalb ablehnen.
+
+Vorläufige Sicherheitsgrenze bis zur Produktentscheidung: Bezug nur auf das tatsächlich
+vorhandene unmittelbar obere Geschoss. Kein oberes Geschoss, unbekannte Koten,
+Entfernen des Zielgeschosses oder Einfügen dazwischen werden verständlich abgewiesen;
+keine automatische Zielwahl oder Ersatzzielbindung. UI zur Bindung folgt separat.
+
+Starre Z-Bewegung ändert Fuß- und oberen Versatz gemeinsam, behält Referenz und
+Wandlänge in Z. Vorbereitete Vorschau löst nur betroffene Wände anhand der einmal
+vorbereiteten Koten auf und prüft deren Fenster; Commit bleibt vollständig validiert.
+XY übernimmt die bereits aufgelöste Höhe. Tests vergleichen Vorschau/Commit inklusive
+Eck- und T-Geometrie. Kein vollständiger Modellscan im Pointerpfad hinzugefügt.
+
+Lokale Rechenmessung (benchmarks/wall-height-binding.ts, Rohwerte in gleichnamiger
+-evidence.json): je 200 Warmup-/1000 Messaufrufe, zwei gebundene Eckwände mit zwei
+Fenstern. Z-evaluate p95 0,0211 ms mit 2 Wänden, 0,0108 ms mit 2002 Wänden; Maxima
+1,824/0,851 ms. Nur vorbereitete Rechenfunktion, kein Browser-/Render-/Commitnachweis,
+keine Aussage über AUD14 oder gesamte Framezeiten. Gesamte Modellvalidierung bei
+Vorbereitung/Commit bleibt bewusst projektweit.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** Wahl feste Höhe/UK Rohdecke, Ziel und Versatz
+   in Werkzeugeigenschaften an die geprüfte gemeinsame Höhenaktion anbinden.
+2. Mehrgeschossigen Ablauf mit Fenster, Anschlüssen, Undo, Datei und IFC praktisch abnehmen.
+3. Fehlenden oberen Bezug und Einfügen zwischen gebundene Geschosse fachlich entscheiden,
+   bevor diese bislang gesperrten Fälle erweitert werden.
+
+Validierung: 1109/1109 Tests bestanden, Produkt- und Benchmark-Typecheck,
+fokussierter ESLint, git diff --check und Produktbuild bestanden. Sieben zusätzliche
+Integrationsfälle in heights.test.ts prüfen Datei/Recovery, V25-Migration, Kontext,
+Fenstergrenzen, feste Rückschaltung, Eck-/T-Geometrie, Z-/XY-Vorschau und Undo.
+Bestehende Migrationserwartungen sind lediglich von Version 25 auf 26 angehoben.
+Praktische Abnahme folgt nach der UI-Anbindung; kein bereits bedienbarer Schalter behauptet.
