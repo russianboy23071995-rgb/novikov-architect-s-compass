@@ -12461,3 +12461,16 @@ factory-owned immutable Snapshots; mutable Eingaben ungecacht. Neue gelesene Sic
 verwirft alte Vergleiche. Keine Status-/Speicherformat-/Autosave-Regel geändert.
 1092 Tests, TypeScript, ESLint, beide Builds bestanden. S1 GB Node p95 7,294 → 0,0234 ms
 für warme Inhaltsvergleiche; Initialkosten und Browser-Gegenmessung separat. P2 noch offen.
+
+
+### AUD14-07 – Wiederholte Bildarbeit belegt (16.10.2026)
+Dritter Nutzertrace nach Recovery-Fix: neun langsame Abbild-Doppelklicks enthalten
+je vier eingebettete Bildanforderungen; bei fünf davon wurden alle vier Quellen
+bereits zuvor in derselben Aufnahme angefordert. Bildanforderungshaltige Async-Spannen
+belegen dort 41,603–47,049 ms. Anschließendes PNG-Decoding ebenfalls im Trace sichtbar.
+Keine Behauptung über konkrete Browser-Verdrängungsregeln, keine Frame-/Samplezeit-
+Vermischung. Aggregierter reproduzierbarer Nachweis in benchmarks/trace-image-reloads*;
+Rohtrace/URLs nicht veröffentlicht, zwei Skripttests bestanden. Keine Produktänderung.
+Nächster einzelner Pilot: stabile, begrenzt gehaltene Bildressourcen mit expliziter
+Lebensdauer statt großer Data-URL-Wiederverarbeitung; Gegenmessung und Modell-/Asset-
+Invalidierung vor Produktübernahme. Vollständige Abbilder nicht unbegrenzt cachen.
