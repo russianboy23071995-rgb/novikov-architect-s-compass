@@ -12453,3 +12453,11 @@ Messlauf und kein Fix. Die verfügbare Browsersteuerung bietet keinen CPU-Profil
 Der P2-Restbefund bleibt offen: benötigt wird eine echte Performance-Aufnahme mit
 Callstack/React-Commit-Zuordnung und Gegenprobe ohne Automationsabfragen. Weitere
 Longtask-Zähler allein ersetzen diesen Nachweis nicht. Details im Masterplan.
+
+### AUD14-07 – Exakter Recovery-Snapshotvergleich (16.10.2026)
+Nutzertrace identifiziert sameRecoveryContent als größten Sampleanteil der langsamen
+Abbild-Doppelklicks. Sitzungs-/Baseline-Comparator verwendet WeakMap-Paarcache nur für
+factory-owned immutable Snapshots; mutable Eingaben ungecacht. Neue gelesene Sicherung
+verwirft alte Vergleiche. Keine Status-/Speicherformat-/Autosave-Regel geändert.
+1092 Tests, TypeScript, ESLint, beide Builds bestanden. S1 GB Node p95 7,294 → 0,0234 ms
+für warme Inhaltsvergleiche; Initialkosten und Browser-Gegenmessung separat. P2 noch offen.

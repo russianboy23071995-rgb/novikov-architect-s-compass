@@ -1,7 +1,15 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createRecoveryStatusTracker, type RecoveryStatus } from "./recovery-status.ts";
+import {
+  createRecoveryStatusTracker,
+  createRecoveryContentComparator,
+  sameRecoveryContent,
+  type RecoveryStatus,
+} from "./recovery-status.ts";
+import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
+import { s1Fixture } from "../../../benchmarks/s1-fixture.ts";
 import { saveProjectRecovery, type RecoveryCatalog } from "./recovery-catalog.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { ensureDocumentFolder } from "../views/documents.ts";
@@ -46,6 +54,48 @@ function fixture() {
 }
 const project = ensureDocumentFolder(createExampleProject());
 const instant = new Date("2026-10-10T12:00:00Z");
+
+test("cached recovery comparison matches full comparison through shared view transitions and edits", () => {
+  const base = createProjectSnapshot(s1Fixture());
+  const saved = JSON.parse(JSON.stringify(base));
+  const compare = createRecoveryContentComparator(saved);
+  let current = base;
+  for (let i = 0; i < 30; i++) {
+    current = selectWorkingStorey(current, current, base.storeys[i % base.storeys.length]!.id);
+    assert.equal(compare(current), sameRecoveryContent(current, saved));
+  }
+  const changed = createProjectSnapshot(
+    replaceStorey(base, {
+      ...storeyOf(base),
+      walls: storeyOf(base).walls.map((w) => ({ ...w, height: w.height + 0.1 })),
+    }),
+  );
+  const scaled = createProjectSnapshot(
+    changeProjectScale(base, projectScaleContext(base).view, 50),
+  );
+  const hidden = createProjectSnapshot({
+    ...base,
+    bimVisibility: { hiddenLayerIds: [base.layers![0]!.id] },
+  });
+  for (const next of [changed, scaled, hidden, base, changed, base]) {
+    assert.equal(compare(next), sameRecoveryContent(next, saved));
+  }
+  assert.equal(compare(base), true);
+  assert.equal(createRecoveryContentComparator(changed)(base), false);
+});
+
+test("mutable and shallow-frozen callers cannot reuse stale equality; saved input is owned", () => {
+  const saved = JSON.parse(JSON.stringify(project));
+  const compare = createRecoveryContentComparator(saved);
+  saved.storeys[0].walls[0].height += 1;
+  const mutable = JSON.parse(JSON.stringify(project));
+  assert.equal(compare(mutable), true);
+  Object.freeze(mutable);
+  mutable.storeys[0].walls[0].height += 1;
+  assert.equal(compare(mutable), false);
+  mutable.storeys[0].walls[0].height -= 1;
+  assert.equal(compare(mutable), true);
+});
 
 test("missing snapshot, committed save and content-equal reload are distinguished", async () => {
   const f = fixture();

@@ -1,0 +1,19 @@
+{
+  "iterations": 100,
+  "storeys": 5,
+  "assets": 20,
+  "prepareMs": 24.807199999999966,
+  "coldWithOracleMs": 17.55899999999997,
+  "full": {
+    "p50Ms": 5.185200000000123,
+    "p95Ms": 7.293899999999894,
+    "maxMs": 11.300799999999981
+  },
+  "cached": {
+    "p50Ms": 0.017200000000002547,
+    "p95Ms": 0.02339999999981046,
+    "maxMs": 0.07760000000007494
+  },
+  "scope": "Node equality only; not browser frames",
+  "allResultsEqual": true
+}

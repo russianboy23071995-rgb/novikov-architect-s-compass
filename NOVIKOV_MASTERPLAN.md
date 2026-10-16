@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #375 gemergt. Abbildwechsel-P2 bleibt offen; für die Ursachenzuordnung fehlt eine CPU-Performance-Aufnahme (aktuelle Browsersteuerung bietet keinen Profiler). Kein Fix auf Verdacht. Z per Hilfseingabe bestätigt; XY-Shift-Abnahme separat offen.
+Aktueller Arbeitsauftrag: 16.10.2026 – #376 gemergt; Nutzer-CPU-Trace identifiziert Recovery-Inhaltsvergleich als dominanten Sampleanteil beim Abbildwechsel. Exakter Snapshot-Cache umgesetzt und getestet; nächste Aufgabe ist die Browser-Gegenmessung. Kein Lagfrei-Nachweis; XY-Shift-Abnahme separat offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3284,3 +3284,40 @@ Nächste drei Schritte:
 1. **Unmittelbar:** CPU-Aufnahme eines ruckelnden warmen Abbildwechsels beschaffen und auswerten.
 2. Nur auf Basis der identifizierten Ursache eine begrenzte Korrektur mit Gegenmessung umsetzen.
 3. Übrige S1-/Release-Gates abgleichen; XY-Shift-Nutzerabnahme bleibt separat offen.
+
+### AUD14-07 – Recovery-Vergleich nach Nutzer-CPU-Trace (16.10.2026)
+#376 gemergt (04ae601). Nutzerdatei 2Trace-20261016T144019.json ist gzip-komprimiert;
+41 Doppelklicks, davon 39 langsame Ereignisse mit ca. 56–115 ms. CPU-Funktion po im
+exakt passenden Bundle styles-CI2XsJYD.js entspricht sameRecoveryContent. Rund 55 %
+der ausgewerteten Samplezeit der langsamen Doppelklicks entfällt direkt darauf.
+Kein Bildrenderer-Ursachennachweis. Rohtrace bleibt lokal, keine Veröffentlichung
+von Trace-/Screenshot-/Bildpayloads im Repository.
+
+Korrektur: RecoveryStatusTracker besitzt einen exakten Comparator pro gelesener Baseline.
+Er übernimmt diese über createProjectSnapshot; nur bereits factory-owned, tief immutable
+aktuelle Snapshots dürfen Teilbaum-Paarergebnisse wiederverwenden. Veränderliche oder nur
+vom Aufrufer eingefrorene Eingaben bleiben uncached. WeakMaps halten alte History-Snapshots
+nicht fest. Neue Baseline, Kontextwechsel und Dispose verwerfen den Comparator. Fehler,
+verspätete Reads und laufende Saves behalten die vorhandenen Statusregeln. Alle persistierten
+Felder einschließlich Ansichtseinstellungen werden verglichen, keine Hashkollisionen,
+keine ausgelassenen Bilder. Allgemeiner sameRecoveryContent/Autosave-Pfad bleibt uncached.
+Initiale Snapshot-Übernahme/Validierung und Kaltvergleich bleiben vollständige Arbeit.
+
+Regressionen: geteilter Geschosswechsel, Modelländerung, Maßstab/Sichtbarkeit, Rückkehr zur
+Baseline, anderer Sicherungsstand, mutable/shallow-frozen Eingaben. Bestehende Tests prüfen
+Undo/Redo, fehlgeschlagene Saves, externe Ersetzung, Kontextwechsel und verspätete Reads.
+1092 Gesamttests, 30 fokussierte Tests, TypeScript (Produkt und Benchmarks), ESLint sowie
+Produktions- und isolierter Diagnosebuild bestanden.
+
+benchmarks/recovery-comparison.ts: 100 Wechsel im synthetischen S1-GB-Export (5 Geschosse,
+20 Bildassets), alle Ergebnisse exakt wie vollständiger Vergleich. p95 vollständig
+7,294 ms, warm gecacht 0,0234 ms; Vorbereitung 24,807 ms, erster Vergleich inklusive
+vollständigem Kontrollvergleich 17,559 ms. Details recovery-comparison-evidence.json.
+Dies sind Node-Vergleichszeiten, keine Browser-Framezeiten. Die alte Browser-Samplezeit
+und diese Node-Messung dürfen nicht als direkter Vorher/Nachher-Framevergleich gelten.
+
+Nächste drei Schritte:
+1. **Unmittelbar:** Diagnose-Seite neu laden und Abbildwechsel mit DevTools erneut aufnehmen;
+   CPU-Zeit/Frames mit dem Nutzertrace vergleichen. P2 bis dahin offen.
+2. Verbleibende Kosten anhand dieser Gegenmessung eingrenzen, nur bei Befund weiter korrigieren.
+3. S1-/Release-Gates einschließlich separater XY-Shift-Abnahme abgleichen.
