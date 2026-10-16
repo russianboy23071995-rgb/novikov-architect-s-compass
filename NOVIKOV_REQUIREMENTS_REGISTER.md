@@ -12485,3 +12485,13 @@ S1-Browser: 20 Anlagen über fünf Abbilder, 16 warme Wiederverwendungen; Sichtb
 Undo weitere vier Hits ohne Neuanlage. 47.127.963 Blob-Bytes; kein Gesamt-RAM-Limit.
 1099 Tests, Typecheck, ESLint und Builds bestanden. Funktionaler Browsernachweis liegt
 vor; CPU-/Frame-Gegenmessung weiterhin offen, keine Produktübernahme oder P2-Schließung.
+
+
+### AUD14-07 – Gegenmessung ohne pauschale Produktfreigabe (16.10.2026)
+#379 gemergt. Isolierte synthetische UI-Gegenmessung B-A-A-B: je 5 Erstpass-/20 warme
+Wechsel, insgesamt 100 erfolgreiche Postconditions. Warmer Median A 42,3–42,8 ms,
+B 39,0–39,8 ms bis zwei RAF; p95 A 51,4–64,3, B 55,2–58,9 ms. Kein stabiler p95-Vorteil;
+lange Frames auch mit Pilot. Beide B-Läufe 20 Anlagen/84 Reuses, 47.127.963 Blob-Bytes.
+Payloadfreier Nachweis in benchmarks/image-switch-comparison-evidence.json. Typecheck,
+ESLint und Diagnosebuild bestanden. Keine Produktübernahme und keine P2-Schließung.
+CPU-/Native-Eingabe-/Decode-Abgleich weiterhin nötig; RAF-Latenz ist kein CPU-Profil.

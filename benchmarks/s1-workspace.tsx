@@ -1,5 +1,6 @@
 import React from "react";
 import { imageResourcePilotStats } from "./image-resource-pilot";
+import { compareImageSwitches } from "./image-switch-comparison";
 import { workspacePhases } from "./workspace-load-trace";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
@@ -114,6 +115,23 @@ panel.style.cssText =
 panel.innerHTML =
   '<summary>S1 Diagnose</summary><button id="s1-start">Messung neu starten</button> <button id="s1-check">Modellvergleich ausführen</button> <button id="s1-trace">Messung abschließen</button><pre id="s1-result"></pre>';
 document.body.append(panel);
+const comparisonButton = document.createElement("button");
+comparisonButton.textContent = "Abbild-Gegenmessung starten";
+panel.insertBefore(comparisonButton, panel.querySelector("pre"));
+comparisonButton.addEventListener("click", async () => {
+  comparisonButton.disabled = true;
+  comparisonButton.textContent = "Gegenmessung läuft – bitte nicht bedienen";
+  try {
+    const result = await compareImageSwitches();
+    panel.querySelector("pre")!.textContent = JSON.stringify(result, null, 2);
+    comparisonButton.textContent = "Gegenmessung abgeschlossen";
+  } catch (error) {
+    panel.querySelector("pre")!.textContent = String(error);
+    comparisonButton.textContent = "Gegenmessung fehlgeschlagen";
+  } finally {
+    comparisonButton.disabled = false;
+  }
+});
 const report: Record<string, unknown> = {
   variant: mixed ? "GB" : "G",
   imageUrls: shortImageUrls ? "diagnostic-blob" : "production-data",
