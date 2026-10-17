@@ -7,8 +7,65 @@ import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
-import { composeSurfacePatch } from "../src/rendering/viewport/surface-patch.ts";
+import { composeSurfacePatch, surfaceFaces } from "../src/rendering/viewport/surface-patch.ts";
+import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
+
+test("indexed outlines match full scans for movement, removal, visibility and cancel", () => {
+  const project = boundHeightFixture();
+  const base = buildBuildingSolid(project);
+  const action = prepareSelectionTranslation(project, ["eg-a", "eg-b"]);
+  const moved = selectionMoveSurfaces(base, project, action.evaluate({ x: 20, y: -30 }));
+  const removed = composeSurfacePatch(base, new Set(["eg-a"]), [], base.min, base.max);
+  const hidden = visibleSurfaces(moved, (id) => id !== "eg-b");
+  for (const solid of [base, moved, removed, hidden, base]) {
+    for (const id of ["eg-a", "eg-b", "og-a", "missing"]) {
+      assert.deepEqual(
+        selectionEdges(surfaceFaces(solid, id)),
+        selectionEdges(solid.faces.filter((f) => f.wallId === id)),
+      );
+    }
+  }
+  assert.equal(surfaceFaces(removed, "eg-a").length, 0);
+});
+
+test("warm outline queries read no stationary IDs and never materialize patch faces", () => {
+  for (const count of [10, 1000, 5000]) {
+    const fixture = resourceFixture(count);
+    let reads = 0;
+    const base = {
+      ...fixture,
+      faces: fixture.faces.map((face) => ({
+        ...face,
+        get wallId() {
+          reads++;
+          return face.wallId;
+        },
+      })),
+    };
+    surfaceFaces(base, "w1"); // one cold shared index build
+    const patch = composeSurfacePatch(
+      base,
+      new Set(["w0"]),
+      [fixture.faces[0]!],
+      base.min,
+      base.max,
+    );
+    Object.defineProperty(patch, "faces", {
+      get() {
+        throw new Error("global patch materialization");
+      },
+    });
+    reads = 0;
+    for (const id of ["w0", "w1", "missing"]) {
+      assert.deepEqual(
+        selectionEdges(surfaceFaces(patch, id)),
+        selectionEdges(fixture.faces.filter((f) => f.wallId === id)),
+      );
+    }
+    assert.equal(reads, 0);
+  }
+});
 
 test("patch buffers match full packing across closure changes, cancel, visibility and topology", () => {
   const base = resourceFixture(20);

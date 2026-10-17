@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, main `b29e8d4` nach Merge von PR386. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 17.10.2026, main `b691e6e` nach Merge von PR387. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – Auswahlumrandung in BimSolidView an den gemeinsamen Flächen-/Patchindex anbinden, statt pro ausgewählter Wand alle Flächen zu filtern; Kantengleichheit und begrenzte warme Arbeit bei wachsendem Restgebäude nachweisen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – verbleibende Gesamtflächenmaterialisierung durch Leerdarstellungsprüfung und Orbit-Pivot in BimSolidView über gemeinsame Snapshot-/Patchabfragen begrenzen; Ergebnisgleichheit prüfen, Pointerframe und Pointerdown getrennt messen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -3774,3 +3774,35 @@ baut seinen Service während aktiver Bewegung dagegen nicht neu auf (enabled=fal
 Diese unterschiedlichen Frequenzen nicht als einen gemeinsamen Pointerbefund
 vermischen. Nächster Auftrag ausschließlich §9: begrenzte Umrandungsabfrage über
 den vorhandenen gemeinsamen Index, keine neue werkzeugspezifische Geometrie.
+
+
+### AUD14-03/04 – indexierte Auswahlumrandung (17.10.2026)
+
+Basis main b691e6e nach genehmigtem Merge PR387. Branch perf/indexed-selection-outline.
+Die Umrandung in BimSolidView verwendet surfaceFaces aus dem gemeinsamen
+surface-patch-Modul statt eines Gesamtscans je ausgewählter Wand. Die Abfrage
+liest Ersatzflächen direkt aus dem Patch, unveränderte Flächen aus dem geteilten
+Basisindex. Ein ersetztes, aber nicht mehr vorhandenes Element liefert keine
+alten Basisflächen. Keine Änderung an Kantenerzeugung, Linienbreite, Farbe,
+Sichtbarkeit, Modellaktionen, Commit oder Undo.
+
+1121 Tests bestanden, Typecheck, gezieltes ESLint und Produktbuild erfolgreich.
+Zwei neue Regressionen vergleichen exakte Kanten für gebundene verbundene Wände
+mit Fenster, Bewegung, entfernte/ausgeblendete/unbekannte Ziele und Abbruch.
+Bei 10/1000/5000 Flächen: null stationäre ID-Zugriffe nach Indexvorbereitung,
+Patch-Gesamtflächengetter darf werfen und wird bei der Umrandungsabfrage nicht
+aufgerufen. Gemeinsame Indizes bleiben abgeleitet und per WeakMap entsorgbar.
+
+Node v24.19.0/Windows/Ryzen 5 3600, 100 Aufwärm- und 300 Messdurchläufe,
+zwei ausgewählte EG-Wände. 4/104/1004 Wände: indexierte Umrandung Median
+0,1862/0,1967/0,1842 ms; bisheriger Scan im selben Lauf
+0,1814/0,1980/0,3184 ms. Bei 1004 Wänden p95 0,2448 statt 0,5032 ms.
+Jeder Durchlauf vergleicht die Kantenergebnisse exakt. Rohlog lokal:
+outputs/indexed-outline-measurement.jsonl. Keine GPU-/Native-/Framegarantie;
+Messreihenfolge indexiert vor Scan, kein statistischer Gesamtperformanceclaim.
+
+Rest: kalter Basisindex linear; leere Darstellung verwendet noch solid.faces.length,
+Orbit-Pivot scannt beim Pointerdown. Deshalb keine Behauptung, der gesamte
+Vorschauframe sei unabhängig von der Gebäudegröße. Browserabnahme aus PR387 ist
+Basisnachweis, keine neue praktische Abnahme dieser Änderung. Aktive Fortsetzung
+nur §9; danach Anschlussgruppen/Legacy und CPU-/Native-Bildressourcenvergleich.

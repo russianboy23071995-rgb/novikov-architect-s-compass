@@ -23,6 +23,19 @@ export function surfaceGroups(solid: DisplaySurfaces) {
 
 export const surfacePatch = (solid: DisplaySurfaces) => patches.get(solid);
 
+const noFaces: readonly Face[] = Object.freeze([]);
+/** Resolve one entity against the same snapshot/patch used by the buffer.
+ * A replaced but absent group is removed, never a reason to revive base faces. */
+export function surfaceFaces(solid: DisplaySurfaces, id: string): readonly Face[] {
+  const patch = patches.get(solid);
+  if (patch) {
+    return patch.replaced.has(id)
+      ? (patch.groups.get(id) ?? noFaces)
+      : surfaceFaces(patch.base, id);
+  }
+  return surfaceGroups(solid).get(id) ?? noFaces;
+}
+
 /** Keep the legacy flat-face view lazy for picking/outlines. The buffer consumes
  * the replacement groups directly. Retain only one stationary partition per base. */
 export function composeSurfacePatch(
