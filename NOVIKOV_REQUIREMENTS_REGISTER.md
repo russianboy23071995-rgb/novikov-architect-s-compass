@@ -12533,6 +12533,16 @@ Fenster-/Anschlussfehler bewahren Modell und History. Isolierter Browsernachweis
 echter Inspector-/History-Komponente bestanden; Details, Einschränkungen und nächster
 Gesamtworkflow-Auftrag im Masterplan. 1109 bestehende Tests bestanden.
 
+
+### N22 – Gesamtworkflow-Nachweis (17.10.2026)
+Gebundene Eckwände und Fenster auf zwei bebauten Geschossen im echten CadWorkspace
+geprüft: Geschosshöhe, Eigenschaften, 3D, Undo/Redo, Speichern/Öffnen, IFC-Download.
+Gemeinsame Browser-/Regression-Fixture unter benchmarks/bound-height-*.
+IFC-Koten 0/4/7 m, Wandhöhen 3,8/2,8 m; kein neuer externer Archicad-Nachweis.
+Offen bleibt ein 3D-onPointerMove-React-Updatefehler aus dem Entwicklungsprotokoll;
+HMR-Einfluss nicht geklärt. Reproduktion ohne HMR hat Vorrang vor weiterer Anbindung.
+Genau ein Folgeauftrag und Abnahmegrenzen im aktuellen N22-Masterplan.
+
 ### Zielabgleich und Korrekturfreigabe 17.10.2026, 10:37 Europe/Berlin
 
 Quelle: Nutzer verlangt den Abgleich mit den besprochenen Zielen und bei Abweichungen Fehlerbehebung und Codebereinigung gemäß Reviewempfehlung.
@@ -12543,3 +12553,15 @@ Der Code folgt der gemeinsamen Modell-/Application-/Vorschauarchitektur weitgehe
 Erster aktiver Schritt: produktive mehrgeschossige Höhenworkflow-Abnahme nach gemergtem PR383 mit Fenstern/Anschlüssen, Versätzen, Konfliktatomarität, Undo/Redo, Projektdatei/Recovery und IFC. Weitere konkrete Korrekturen: globale 3D-Komposition/Bounds/Gruppierung, große Anschlussgruppen/Legacy-Pfade, gemeinsamer sicherer Validierungs-/Ownershippfad, gezielte Koordinationsbereinigung, veraltete Runtime-Formatmeldung (history.ts nennt Version25 statt26). CPU-/Native-Bildpilot nur bei belastbarer Gegenmessung übernehmen; bei fehlender Messumgebung Gate offen lassen und unabhängig ausführbare Korrekturen fortsetzen.
 
 Alle Erfüllungsaussagen brauchen Codepfad und konkrete Nachweise. Keine neue Featurekette vor diesen Restarbeiten starten, keine Fachprüfungen auf Verdacht schwächen, keine Messserien als Ersatz für gefordertes CPU-Sampling, kein Produktcache auf bloßen Medianvorteil. Fehlende Referenz-/Produktentscheidungen und echte Plattformzugriffsgrenzen sind konkrete Blocker, keine stillen Freigaben. Gemeinsames Ziel bleibt leistungsfähiges AI-CAD für das fünfgeschossige Schulprofil, sichere Daten und skalierbare gemeinsame Aktionen.
+
+
+### N22 / AUD14-06/07 – §9-Korrektur und produktiver Recovery-Nachweis (17.10.2026)
+PR384 ergänzt um KG/EG/OG, signierte Wandversätze, gemischte feste/gebundene Anschlüsse,
+Konfliktatomarität und tatsächliche Recovery-Wiederaufnahme im statischen Produktbuild.
+Dabei P0-Startüberschreiben reproduziert und mit gemeinsamer Application-Startsperre
+behoben; aktueller und vorheriger Snapshot bleiben bis zur bewussten Entscheidung
+unverändert. Keine Löschung, kein neues Recoveryformat. UI-Abfrage und Autosicherung
+teilen den Startlebenszyklus; verspätete Reads/Opt-in umgehen die Sperre nicht.
+1115 Tests/Typecheck/Lint/Build bestanden, Datei/IFC/KG-Koten geprüft. Der einzelne
+3D-Entwicklungsfehler trat bei vier Produktbuild-Orbitgesten nicht auf; kein Fix behauptet.
+Keine externe Archicad-, Langsession- oder Leistungsfreigabe. Aktive Reihenfolge §9.

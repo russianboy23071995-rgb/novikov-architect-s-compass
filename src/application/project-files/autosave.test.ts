@@ -11,6 +11,7 @@ import {
 import { type RecoveryCatalog, readProjectRecovery } from "./recovery-catalog.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { ensureDocumentFolder } from "../views/documents.ts";
+import { createRecoveryStartup } from "./recovery-startup.ts";
 import { changeProjectScale, projectScaleContext } from "../views/project-scale.ts";
 const project = ensureDocumentFolder(createExampleProject());
 const changed = (height: number) => ({
@@ -82,6 +83,44 @@ function setup(store = memory()) {
   controller.update(project, 0);
   return { ...store, timer, states, controller, last: () => states.at(-1)! };
 }
+
+test("startup preserves current and previous slots until recovery is explicitly resolved", async () => {
+  const store = memory(),
+    timer = clock();
+  const writer = createAutosaveController(store.catalog, () => {}, timer.port, true);
+  writer.update(changed(4), 1);
+  await writer.saveNow();
+  writer.update(changed(5), 1);
+  await writer.saveNow();
+  writer.dispose();
+  const before = store.records.get(project.id);
+  store.catalog.list = async () => [{ projectId: project.id, savedAt: "2026-10-17T00:00:00Z" }];
+  const controller = createAutosaveController(store.catalog, () => {}, timer.port, true);
+  const startup = createRecoveryStartup(store.catalog, controller.setStartupPending, () => {});
+  controller.update(project, "startup");
+  await startup.done;
+  await timer.fire();
+  controller.update(changed(3), "startup");
+  await timer.fire();
+  controller.setEnabled(false);
+  controller.setEnabled(true);
+  await timer.fire();
+  await assert.rejects(() => controller.saveNow(), /Wiederherstellungsstand/);
+  assert.equal(store.records.get(project.id), before);
+  const recovered = await readProjectRecovery(store.catalog, project.id);
+  assert.ok(recovered);
+  controller.update(recovered.project, "loaded");
+  startup.resolve();
+  await timer.fire();
+  assert.equal(store.records.get(project.id), before);
+  controller.update(changed(6), "loaded");
+  await timer.fire();
+  assert.equal(
+    storeyOf((await readProjectRecovery(store.catalog, project.id))!.project).walls[0]!.height,
+    6,
+  );
+  controller.dispose();
+});
 
 test("off by default; activation and coalesced edits write only the latest committed state", async () => {
   const f = setup();

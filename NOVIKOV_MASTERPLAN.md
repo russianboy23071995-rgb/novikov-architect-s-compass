@@ -159,6 +159,8 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
+17.10.2026: Höhen-Gesamtworkflow und Recovery-Startschutz in PR384 nachgewiesen. 1115 Tests und Produktbuild bestanden. Einzelheiten im datierten Nachweis, aktive Fortsetzung ausschließlich §9.
+
 Aktuelle Kurzfassung und offene Grenzen: siehe Statusmatrix in §9 (17.10.2026). Mehrgeschossmodell, gemeinsame vorbereitete Vorschauen, begrenzte GPU-Uploads und lokale Fangabfragen sind produktiv. Recovery besitzt inzwischen manuelle und automatische sichere Wartung. Wandhöhenbindung und Eigenschaftenbedienung sind nach PR383 vorhanden; ihre Gesamtworkflow-Abnahme steht aus. Die folgenden datierten Einträge sind historische Teilevidenz, keine aktuelle Prioritätenliste.
 
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
@@ -492,8 +494,10 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-07 / N22 – den produktiven mehrgeschossigen Wandhöhen-Workflow nach PR383 vollständig abnehmen und dabei reproduzierte Fehler beheben.**
-PR383 ist inzwischen gemergt; seine reine Komponentenabnahme reicht nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – globale 3D-Vorschaukomposition/Bounds/Gruppierung bei fester kleiner Auswahl und wachsendem Restgebäude messen und begrenzt korrigieren.**
+
+AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
+Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
 
 **Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
 1. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
@@ -512,8 +516,8 @@ PR383 ist inzwischen gemergt; seine reine Komponentenabnahme reicht nicht als Ge
 | AUD14-03 | Shader-/Pufferlebensdauer und begrenzte Uploads umgesetzt | Gesamtflächenkomposition, Bounds/Gruppierung und schwere Gesamtframes offen |
 | AUD14-04 | Viele gemeinsame vorbereitete Wand/Fenster/Linien/Schraffuradapter, Ownership und Ansichtsbasis umgesetzt | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
 | AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen umgesetzt | Große zusammenhängende Gruppen sowie Kamera-/Indexvorbereitung offen |
-| AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots und begrenzte Sitzungen nachgewiesen | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
-| AUD14-07 | S1 G/GB mit fünf Geschossen, 300 Wänden/200 Fenstern/20 Bildern und Teilworkflow-Nachweisen | Höhen-Gesamtworkflow, Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Statuspflege offen |
+| AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
+| AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
 **Abschluss- und Arbeitsregeln:** Die Freigabe umfasst Diagnose, begrenzte Fehlerbehebung, Codebereinigung und passende Verifikation. Nach einem belegten Abschluss unmittelbar den nächsten offenen Schritt beginnen. Reproduzierter Sicherungsverlust/falsche Maße/fehlerhafter Commit-Erfolg ist P0 und zieht vor. Erfolgreiche CI ist erforderlich, ersetzt aber keine praktische Abnahme. Mikrobenchmark, Programmlauf, Browserframe, CPU-Sampling und tatsächliche native Geste getrennt benennen. Referenzhardware/Browser/Commit, Fixtures und Grenzen mitführen. Kein Compiler-/Renderer-/Frameworkwechsel, keine pauschale Grenzerhöhung und keine Kürzung fachlicher Prüfungen auf Verdacht.
 
@@ -3589,3 +3593,86 @@ Nächste drei Schritte:
    dem Nutzer festlegen; bis dahin bleiben diese Bindungsfälle gesperrt.
 3. Erst danach die zugehörige gemeinsame Höhenaktion für Text-/Sprachbefehle anbinden,
    mit stabilen ausgewählten Wand- und Geschoss-IDs.
+
+### N22 – Mehrgeschossiger Gesamtworkflow (17.10.2026)
+PR #383 nach bestandener GitHub-CI und ausdrücklicher Freigabe in main übernommen.
+Reproduzierbare Fixture: benchmarks/bound-height-workspace.html (separater Port 8087,
+keine Nutzung des Projekts/Recovery auf 8080), gemeinsame Fixture mit Regressionstest.
+Drei Geschosse, davon zwei mit jeweils zwei eckverbundenen, gebundenen Wänden und
+je einem Fenster. Keine neue Produktfunktion oder eigene Berechnungslogik.
+
+Browsernachweis im tatsächlichen CadWorkspace: EG-Geschosshöhe 3 → 4 m im
+Gebäudestrukturfenster; Wand-Eigenschaften zeigen 3,8 m. 3D zeigt beide bebauten
+Geschosse einschließlich Fenster. Save project → JSON-Download → Open project →
+Bestätigung → Wand weiterhin gebunden mit 3,8 m. Ein Undo ergibt 2,8 m; Redo stellt
+den geänderten Zustand wieder her. OG-Wand bleibt 2,8 m. IFC-Download geprüft:
+Geschosskoten 0 / 4 / 7 m, zweimal Wandextrusion 3,8 m und zweimal 2,8 m, zwei Fenster.
+JSON enthält Bindungsregeln, keine zweite gespeicherte Wandhöhe. Kein Archicad-Import
+in diesem Auftrag. T-Anschlüsse sind durch bestehende Modelltests abgedeckt, nicht
+als zusätzliche Browserabnahme dieses Eckanschluss-Beispiels ausgegeben.
+
+Regression benchmarks/bound-height-workflow.test.ts prüft denselben Bestand,
+Geschosskoten, unveränderte Fenster/Anschlüsse, Solid-Höhe 6,8 m, genau ein Undo,
+Redo, Datei-Roundtrip, identischen IFC-Export und atomare Ablehnung einer Kürzung,
+die das Fenster verletzt. Screenshot: outputs/bound-height-workspace.png außerhalb
+Git; lokale Downloads novikov-project (60).json und novikov-project (12).ifc.
+
+Offener Browserbefund: Im Entwicklungsserver-Protokoll um 08:37:59 UTC erschien
+„Maximum update depth exceeded“ mit onPointerMove in BimSolidView. Die Seite blieb
+anschließend bedienbar; während dieser Abnahme gab es auch Dateiänderungen/HMR.
+Ursache und Reproduzierbarkeit im unveränderten Produktbuild sind NICHT nachgewiesen.
+Daher keine uneingeschränkte Aussage „Browser fehlerfrei“. Keine spekulative Änderung
+am Pointer-/Inference-Pfad aufgrund dieses einzelnen Protokolleintrags.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** den protokollierten 3D-Update-Fehler ohne
+   HMR im Produktbuild reproduzieren und eingrenzen; bei Nachweis gezielt beheben,
+   mit bestehender gemeinsamer Inference-/Preview-Architektur.
+2. Fehlenden oberen Bezug und Einfügen zwischen gebundene Geschosse mit dem Nutzer
+   entscheiden; bislang gesperrte Fälle nicht stillschweigend freischalten.
+3. Anschließend Höhenbindung als Adapter der geprüften gemeinsamen Aktion für
+   Text-/Sprachbefehle mit stabilen Ziel-IDs anbinden.
+
+Validierung dieses Nachweises: 1110/1110 Tests bestanden, Benchmark-/Produkt-Typecheck,
+fokussierter ESLint, git diff --check und Produktbuild bestanden. #383 Merge: 0fe21549.
+
+### §9 Korrekturauftrag – Höhenworkflow und P0-Startschutz (17.10.2026)
+Quelle: aktueller main a1df84b; mit vorhandenem PR384 zusammengeführt, beide
+Register-Ergänzungen erhalten. Keine Freigabe/Übernahme von PR318 oder PR384 behauptet.
+
+Statischer minifizierter Produkt-Workspace mit sieben Wänden/drei Fenstern in KG/EG/OG,
+leerem oberen Bezugsgeschoss; isolierte Origin 127.0.0.1:8087. Konfiguration
+benchmarks/height-acceptance.config.ts ohne HMR/Diagnoseinstrumentierung. Gleiche
+CadWorkspace-/Application-/Domain-/Storage-Pfade wie im Produkt.
+Nachweise: EG 3→4 m, KG 3→3,5 m; EG-Eckwände 3,8 m; separate EG-Wand mit Fuß +0,1
+und oberem Versatz +0,2 ergibt 3,9 m. KG-Wände mit Fuß −0,1 und oberem Versatz −0,1
+werden 3,3 m hoch, Kote −3,5 m; EG bleibt 0. OG enthält einen gültigen gemischten
+fest/gebundenen Eckanschluss. OG 3→4 wird wegen ungleicher Anschlusshöhe atomar
+abgelehnt. EG 3→2 verletzt Fensterhöhe und wird atomar abgelehnt. Beide zunächst
+ohne aktiviertes Undo. Gültige Änderung exakt ein Undo, Redo stellt sie wieder her.
+
+P0 reproduziert: bisher schrieb der Startbestand während des offenen Startangebots
+in denselben Recovery-Slot; nach Reload zeigte Wiederaufnahme 2,8/2,9 statt 3,3/3,9 m.
+Korrektur in Application createRecoveryStartup/createAutosaveController: vor erstem
+Update sperren, fehlender Speicher gibt frei; vorhandene/fehlerhafte Angebote warten
+auf bewusste Fortsetzung oder bestätigten Projektlade-Kontext. Reine Modell-/Ansichts-
+updates und Öffnen/Abbrechen des Dialogs lösen die Sperre nicht. Verspätete Abfragen
+können sie nach bestätigter Wiederaufnahme nicht erneut setzen. Aktuelle/vorherige
+Snapshots und Optimistic-Concurrency-Prüfung bleiben erhalten; keine Daten gelöscht.
+UI ist dünner Adapter derselben Abfrage; Status zeigt währenddessen pausiert.
+
+Gegenprobe nach Reload, mehr als 2 Sekunden Wartezeit, Stand prüfen und bestätigtem
+Laden: KG 3,3 und EG 3,9 bleiben erhalten, Autosicherung wieder aktiv. Danach echter
+JSON-Download/-Upload und IFC-Download. IFC: Geschosskoten −3,5/0/4/7 m, drei Fenster,
+zwei KG-Wandhöhen 3,3 m, EG-Versatzwand 3,9 m; stabile Geschosszuordnung. Lokale
+Artefakte outputs/height-recovery-corrected.png, Downloads novikov-project (61).json
+und novikov-project (13).ifc. Kein neuer Archicad-Import, keine echte Decke erzeugt.
+
+Schema-/Erzeugungs-/Lesepfad und Fehlermeldung beziehen aktuelle Version aus
+src/domain/project/format.ts. Historische Migrationsstufen bleiben explizit.
+Größen-/UTF-8-/Geometrieprüfungen unverändert. 1115 Tests, beide Typechecks über
+Benchmarkkonfiguration, fokussierter Lint und Produktbuild bestanden.
+Vier Orbit-Drag-Gesten im statischen Build ohne Konsolenfehler; der frühere einzelne
+Entwicklungsfehler bleibt damit nicht reproduziert, keinesfalls als behoben behauptet.
+Keine Langsession-/Framegarantie aus diesem kleinen funktionalen Beispiel.
+Fortsetzung ausschließlich §9; kein eigener neuer Featureauftrag.

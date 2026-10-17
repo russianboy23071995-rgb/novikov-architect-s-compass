@@ -1,3 +1,4 @@
+import { PROJECT_MIN_READ_VERSION, PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { assertRasterBudgetChange } from "../../domain/project/raster-budget.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { sameProjectModel, sameProjectContent } from "../../domain/project/model-equality.ts";
@@ -58,7 +59,7 @@ export function readProjectFile(text: string): Project {
   } catch (error) {
     if (error instanceof ProjectFileSizeError) throw error;
     throw new Error(
-      "Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version 1 bis 25, Meter) mit gültigen Bauteilen.",
+      `Ungültige Projektdatei: erwartet wird ein NOVIKOV-JSON-Projekt (Version ${PROJECT_MIN_READ_VERSION} bis ${PROJECT_SCHEMA_VERSION}, Meter) mit gültigen Bauteilen.`,
     );
   }
 }

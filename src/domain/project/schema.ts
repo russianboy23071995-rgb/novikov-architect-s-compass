@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "./format.ts";
 import { wallHeights } from "../elements/wall/heights.ts";
 import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
@@ -267,7 +268,7 @@ const boundWallSchema = raisedWallSchema
   .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
   .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
 const projectSchema = projectV25Schema.extend({
-  schemaVersion: z.literal(26),
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(boundWallSchema) }))
     .min(1),

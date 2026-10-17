@@ -61,26 +61,28 @@ export function LocalRecoveryStatus({
   const budgetWarning = rasterBudgetWarning(project);
   const text = budgetWarning
     ? "Lokale Sicherung nicht möglich: Bildpixelbudget überschritten"
-    : autosave.enabled && autosave.error
-      ? "Autosicherung pausiert"
-      : autosave.busy
-        ? "Snapshot wird geschrieben…"
-        : status.kind === "current"
-          ? "Lokaler Snapshot aktuell"
-          : status.kind === "changed"
-            ? "Änderungen seit Snapshot"
-            : status.kind === "missing"
-              ? "Kein lokaler Snapshot"
-              : status.kind === "unavailable"
-                ? "Sicherungsstatus unbekannt"
-                : "Snapshot wird geprüft…";
+    : autosave.startupPending
+      ? "Wiederherstellungsentscheidung ausstehend"
+      : autosave.enabled && autosave.error
+        ? "Autosicherung pausiert"
+        : autosave.busy
+          ? "Snapshot wird geschrieben…"
+          : status.kind === "current"
+            ? "Lokaler Snapshot aktuell"
+            : status.kind === "changed"
+              ? "Änderungen seit Snapshot"
+              : status.kind === "missing"
+                ? "Kein lokaler Snapshot"
+                : status.kind === "unavailable"
+                  ? "Sicherungsstatus unbekannt"
+                  : "Snapshot wird geprüft…";
   const detail =
     status.kind === "current" || status.kind === "changed"
       ? `Stand: ${new Date(status.savedAt).toLocaleString()}. `
       : status.kind === "unavailable"
         ? `${status.message} `
         : "";
-  const active = autosave.enabled && !autosave.error && !budgetWarning;
+  const active = autosave.enabled && !autosave.error && !autosave.startupPending && !budgetWarning;
   const automation = active
     ? "Autosicherung aktiv"
     : autosave.enabled

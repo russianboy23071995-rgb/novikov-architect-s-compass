@@ -8,7 +8,12 @@ import { prepareRecoveryWriter } from "./recovery.ts";
 import { sameRecoveryContent } from "./recovery-status.ts";
 
 export const AUTOSAVE_DELAY_MS = 2000;
-export type AutosaveState = { enabled: boolean; busy: boolean; error: string | null };
+export type AutosaveState = {
+  enabled: boolean;
+  busy: boolean;
+  error: string | null;
+  startupPending?: boolean;
+};
 export interface RecoveryTimer {
   schedule(callback: () => void, delay: number): () => void;
 }
@@ -52,7 +57,8 @@ export function createAutosaveController(
   }
   function schedule() {
     cancel();
-    if (!state.enabled || state.busy || state.error || !project || disposed) return;
+    if (!state.enabled || state.busy || state.error || state.startupPending || !project || disposed)
+      return;
     cancelTimer = clock.schedule(() => {
       cancelTimer = undefined;
       void save(false).catch(() => {});
@@ -66,6 +72,10 @@ export function createAutosaveController(
   }
   async function save(manual: boolean) {
     if (disposed || !project) throw new Error("Kein aktives Projekt.");
+    if (state.startupPending)
+      throw new Error(
+        "Bitte zuerst den Wiederherstellungsstand wählen oder ausdrücklich weiterarbeiten.",
+      );
     if (state.busy) throw new Error("Eine lokale Sicherung läuft bereits.");
     cancel();
     const captured = project,
@@ -103,6 +113,13 @@ export function createAutosaveController(
     }
   }
   return {
+    setStartupPending(pending: boolean) {
+      if (disposed || !!state.startupPending === pending) return;
+      generation++;
+      cancel();
+      publish({ startupPending: pending });
+      if (!pending) schedule();
+    },
     update(next: Project, nextContext: unknown) {
       if (disposed) return;
       const switched = !project || next.id !== project.id || context !== nextContext;
