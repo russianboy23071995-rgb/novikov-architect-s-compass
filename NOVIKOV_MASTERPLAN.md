@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, main `95a34b6` nach Merge von PR389. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 17.10.2026, main `fa41154` nach Merge von PR390. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – begrenzten Wiederverwendungs-Piloten für unveränderte lokale Wandextrusionen im vorbereiteten Endpunktpfad entwerfen und umsetzen; vorhandenen exakten Deriver nutzen, vollständige Anschlussgruppe und Commitvalidierung erhalten, gegen Vollpfad und aktuelle Gruppenmessung vergleichen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – Endpunkt-Extrusionspiloten im Produktbrowser an großer Anschlussgruppe prüfen; verbleibende Arbeit und Legacy-Verbraucher anhand derselben vorbereiteten Grenze einordnen. Kontinuierliche Native-/Frame-Gates ausdrücklich offen halten, falls nicht bedienbar.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -3878,3 +3878,42 @@ vollständig behandeln. Vollständiger confirm und atomare History bleiben Pflic
 Die Messung/Assertions, Typecheck und gezieltes Lint bestanden. Produktcode blieb
 unverändert; kein erneuter Produktbuild oder Volltestsuite für diesen Diagnose-
 und Planungsauftrag behauptet. Aktive Reihenfolge ausschließlich §9.
+
+
+### AUD14-04/05 – vorbereitete Endpunkt-Extrusion wiederverwenden (17.10.2026)
+
+Basis main fa41154 nach genehmigtem Merge PR390. prepareEndpoint besitzt nun
+pro Lebenszyklus eine opaque WallSolidReuse-Capability. Sie erlaubt ausschließlich
+den vorhandenen createWallContourSolidDeriver (exakte lokale Eingaben, höchstens
+ein Cacheeintrag je zugelassener Wand), keine fremde Validierungsfunktion.
+Die Capability wird explizit über editAtPointer, moveElementPoint, updateWall und
+validateProject bis zur Körperableitung weitergegeben; kein globaler temporärer
+Kontext. Sämtliche Schema-/Geometrie-/Anschluss-/Öffnungsprüfungen bleiben aktiv.
+Öffentliche Standardaufrufe ohne Capability, vollständiger Fremdkontakt-Fallback
+und confirm behalten den unabhängigen vollständigen Pfad.
+
+Die lokal abgeleiteten Körper werden zusätzlich unter der exakten unveränderlichen
+Geometriescope-Identität veröffentlicht, die der Renderer bekommt. Die zweite
+Weltkoordinatenableitung bleibt derzeit vorhanden, wiederholt aber bei gleichen
+Eingaben keine lokale Öffnungsextrusion. Keine Nachbarn aus der Closure entfernt,
+keine Modellkopie oder History im Renderer, kein unkontrollierter ID-only-Cache.
+Token/Cache werden mit dem vorbereiteten Bearbeitungsvorgang entsorgt (WeakMap).
+
+1125 Tests, Typecheck, gezieltes ESLint und Produktbuild bestanden. Neue Regressionen:
+exakte Frischableitung nach Fensterbreiten-, Höhen- und Stärkenänderungen sowie
+Rückkehr zur Basis; ungültige Öffnung trotz warmem Cache abgewiesen. 51-Wand-Gruppe
+mit fremden Wänden: Verlängerung, Verkürzung, gelöste T-Anschlüsse, Rückkehr,
+Patchflächen und confirm exakt gleich zum Vollpfad; Ausgabe unveränderlich,
+Quelle unverändert. Vorhandene Fremdkontakt-, Eckgriff-, Undo-/Redo-Tests erhalten.
+
+Gegenmessung gleiche Fixture/Node v24.19.0/Windows/Ryzen 5 3600, 7 warm + 21 Ziele:
+51/100 fremde: evaluateGeometry Median/p95 5,999/8,854 statt 11,915/15,805 ms;
+51/1000 fremde: 7,989/10,591 statt 15,996/17,944 ms. Rohdaten
+benchmarks/endpoint-extrusion-reuse-results.json gegen connection-group-audit-results.json.
+Jeder Lauf prüft Projekt-/Flächengleichheit sowie Bestätigung und Grenzfälle.
+Frühe Zwischenmessung ohne Veröffentlichung der Renderer-Scope-Körper (3,7–4,2 ms)
+ist nicht das Endergebnis. Unterschiedliche Läufe, keine statistische Garantie.
+
+Grenzen: weiterhin vollständige lokale Fachoperation/Parsing/Konturen und zweite
+Weltkoordinatenableitung. Kein Browser-/Native-/Frame-/GPU-Nachweis dieses Piloten,
+keine Gesamtfreigabe AUD14. Nächster begrenzter Auftrag ausschließlich §9.

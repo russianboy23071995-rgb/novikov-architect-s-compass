@@ -19,7 +19,7 @@ import {
   imageReferenceSchema,
   validateReferenceExtent,
 } from "../elements/reference/model.ts";
-import { connectedWallSolids } from "../elements/wall/connections.ts";
+import { connectedWallSolids, type WallSolidReuse } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { z } from "zod";
 import {
@@ -463,7 +463,7 @@ export function wallLength(wall: { start: Point; end: Point }): number {
 }
 
 /** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
-export function validateProject(value: unknown): Project {
+export function validateProject(value: unknown, reuse?: WallSolidReuse): Project {
   const project = resolveBoundWallHeights(projectSchema.parse(value));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
@@ -521,13 +521,17 @@ export function validateProject(value: unknown): Project {
         modelViews?.some((v) => v.id === d.modelViewId),
       ),
     };
-    const scope = validateStoreyScope(scopeInput, scopeInput);
+    const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
   }
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }
 
-function validateStoreyScope(value: unknown, parsed?: SingleProject): SingleProject {
+function validateStoreyScope(
+  value: unknown,
+  parsed?: SingleProject,
+  reuse?: WallSolidReuse,
+): SingleProject {
   const project = parsed ?? projectV23Schema.parse(value);
   resolveStoreyLevels([project.storey], project.storey.id, project.groundDatum);
   if (project.workingViews?.some((view) => view.storeyId !== project.storey.id))
@@ -546,7 +550,7 @@ function validateStoreyScope(value: unknown, parsed?: SingleProject): SingleProj
       throw new Error("Ungültige Ebenensichtbarkeit im Abbild.");
   }
   validateGeometry(project);
-  connectedWallSolids(project);
+  connectedWallSolids(project, reuse);
   validateLayers(project);
   validateVisibility(project);
   const assets = new Map(project.assets.map((a) => [a.id, a]));

@@ -12738,3 +12738,41 @@ vollständig behandeln. Vollständiger confirm und atomare History bleiben Pflic
 Die Messung/Assertions, Typecheck und gezieltes Lint bestanden. Produktcode blieb
 unverändert; kein erneuter Produktbuild oder Volltestsuite für diesen Diagnose-
 und Planungsauftrag behauptet. Aktive Reihenfolge ausschließlich §9.
+
+### AUD14-04/05 – vorbereitete Endpunkt-Extrusion wiederverwenden (17.10.2026)
+
+Basis main fa41154 nach genehmigtem Merge PR390. prepareEndpoint besitzt nun
+pro Lebenszyklus eine opaque WallSolidReuse-Capability. Sie erlaubt ausschließlich
+den vorhandenen createWallContourSolidDeriver (exakte lokale Eingaben, höchstens
+ein Cacheeintrag je zugelassener Wand), keine fremde Validierungsfunktion.
+Die Capability wird explizit über editAtPointer, moveElementPoint, updateWall und
+validateProject bis zur Körperableitung weitergegeben; kein globaler temporärer
+Kontext. Sämtliche Schema-/Geometrie-/Anschluss-/Öffnungsprüfungen bleiben aktiv.
+Öffentliche Standardaufrufe ohne Capability, vollständiger Fremdkontakt-Fallback
+und confirm behalten den unabhängigen vollständigen Pfad.
+
+Die lokal abgeleiteten Körper werden zusätzlich unter der exakten unveränderlichen
+Geometriescope-Identität veröffentlicht, die der Renderer bekommt. Die zweite
+Weltkoordinatenableitung bleibt derzeit vorhanden, wiederholt aber bei gleichen
+Eingaben keine lokale Öffnungsextrusion. Keine Nachbarn aus der Closure entfernt,
+keine Modellkopie oder History im Renderer, kein unkontrollierter ID-only-Cache.
+Token/Cache werden mit dem vorbereiteten Bearbeitungsvorgang entsorgt (WeakMap).
+
+1125 Tests, Typecheck, gezieltes ESLint und Produktbuild bestanden. Neue Regressionen:
+exakte Frischableitung nach Fensterbreiten-, Höhen- und Stärkenänderungen sowie
+Rückkehr zur Basis; ungültige Öffnung trotz warmem Cache abgewiesen. 51-Wand-Gruppe
+mit fremden Wänden: Verlängerung, Verkürzung, gelöste T-Anschlüsse, Rückkehr,
+Patchflächen und confirm exakt gleich zum Vollpfad; Ausgabe unveränderlich,
+Quelle unverändert. Vorhandene Fremdkontakt-, Eckgriff-, Undo-/Redo-Tests erhalten.
+
+Gegenmessung gleiche Fixture/Node v24.19.0/Windows/Ryzen 5 3600, 7 warm + 21 Ziele:
+51/100 fremde: evaluateGeometry Median/p95 5,999/8,854 statt 11,915/15,805 ms;
+51/1000 fremde: 7,989/10,591 statt 15,996/17,944 ms. Rohdaten
+benchmarks/endpoint-extrusion-reuse-results.json gegen connection-group-audit-results.json.
+Jeder Lauf prüft Projekt-/Flächengleichheit sowie Bestätigung und Grenzfälle.
+Frühe Zwischenmessung ohne Veröffentlichung der Renderer-Scope-Körper (3,7–4,2 ms)
+ist nicht das Endergebnis. Unterschiedliche Läufe, keine statistische Garantie.
+
+Grenzen: weiterhin vollständige lokale Fachoperation/Parsing/Konturen und zweite
+Weltkoordinatenableitung. Kein Browser-/Native-/Frame-/GPU-Nachweis dieses Piloten,
+keine Gesamtfreigabe AUD14. Nächster begrenzter Auftrag ausschließlich §9.
