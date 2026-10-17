@@ -1,4 +1,8 @@
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import {
+  createWallSolidReuse,
+  connectedWallSolids,
+} from "../../domain/elements/wall/connections.ts";
 import { wallDependencyClosure } from "../../domain/elements/wall/dependency-closure.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
@@ -36,6 +40,7 @@ export function prepareEndpoint(
   const wall = s.walls.find((w) => w.id === id);
   if (!wall) throw Error("Unknown wall");
   const ids = wallDependencyClosure(base, [id]);
+  const solidReuse = createWallSolidReuse([...ids]);
   const scoped = freeze({
     ...base,
     assets: [],
@@ -73,7 +78,7 @@ export function prepareEndpoint(
   const calculate = (point: Point): { project: Project; path: "local" | "full" } => {
     let next: Project;
     try {
-      next = editAtPointer(localSession, scoped, point);
+      next = editAtPointer(localSession, scoped, point, solidReuse);
     } catch {
       return full(point);
     }
@@ -86,7 +91,10 @@ export function prepareEndpoint(
     affectedWalls: ids.size,
     evaluateGeometry(point: Point): { patch: GeometryPreview; path: "local" | "full" } {
       const result = calculate(point);
-      const geometry = { storey: storeyOf(result.project), assets: [] };
+      const geometry = freeze({ storey: storeyOf(result.project), assets: [] });
+      // Publish the same derived solids under the exact display scope identity.
+      // Full fallback/confirmation remain independent of this session cache.
+      if (result.path === "local") connectedWallSolids(geometry, solidReuse);
       const replacedIds = result.path === "local" ? localIds : fullIds;
       return {
         path: result.path,

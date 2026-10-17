@@ -1,0 +1,786 @@
+{
+  "method": "7 warm + 21 measured targets, alternating extension/shortening; geometry then materialized then full; exact faces/project and confirmation outside pointer timings; preparation separate; Node CPU only, no browser/native/frame evidence",
+  "runs": [
+    {
+      "branches": 1,
+      "foreign": 0,
+      "affectedWalls": 2,
+      "preparationMs": 2.1610000000000014,
+      "confirmMs": 0.8470000000000368,
+      "edgeCases": [
+        {
+          "name": "detach distant T junctions",
+          "rejected": false
+        }
+      ],
+      "geometry": {
+        "median": 0.695699999999988,
+        "p95": 1.1923999999999921
+      },
+      "materialized": {
+        "median": 0.287399999999991,
+        "p95": 0.4992000000000303
+      },
+      "full": {
+        "median": 0.6630000000000109,
+        "p95": 1.1921999999999855
+      },
+      "samples": [
+        {
+          "geometryMs": 1.0805000000000007,
+          "materializedMs": 0.45129999999997494,
+          "fullMs": 0.8152000000000044,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8000999999999863,
+          "materializedMs": 0.39809999999999945,
+          "fullMs": 0.7363,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.667900000000003,
+          "materializedMs": 0.3012999999999977,
+          "fullMs": 1.1807000000000016,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6850000000000023,
+          "materializedMs": 0.28249999999999886,
+          "fullMs": 0.8426999999999794,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.1923999999999921,
+          "materializedMs": 0.2745000000000175,
+          "fullMs": 0.676400000000001,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.0264999999999986,
+          "materializedMs": 0.4005000000000223,
+          "fullMs": 1.1921999999999855,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6948999999999899,
+          "materializedMs": 0.2574999999999932,
+          "fullMs": 0.6391000000000133,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.5725999999999942,
+          "materializedMs": 0.843199999999996,
+          "fullMs": 0.6283000000000243,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.5559999999999832,
+          "materializedMs": 0.254099999999994,
+          "fullMs": 0.6190000000000282,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.7033000000000129,
+          "materializedMs": 0.29340000000001965,
+          "fullMs": 0.6559999999999491,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6983999999999924,
+          "materializedMs": 0.29129999999997835,
+          "fullMs": 0.8711999999999875,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.7098999999999478,
+          "materializedMs": 0.2499000000000251,
+          "fullMs": 0.646000000000015,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.5694000000000301,
+          "materializedMs": 0.27729999999996835,
+          "fullMs": 0.6630000000000109,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.695699999999988,
+          "materializedMs": 0.2798000000000229,
+          "fullMs": 0.7040999999999826,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.572400000000016,
+          "materializedMs": 0.3376999999999839,
+          "fullMs": 0.6286000000000058,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6924000000000206,
+          "materializedMs": 0.26380000000000337,
+          "fullMs": 0.6585000000000036,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.5525000000000091,
+          "materializedMs": 0.24160000000000537,
+          "fullMs": 0.6351999999999975,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8340000000000032,
+          "materializedMs": 0.3129999999999882,
+          "fullMs": 1.3740999999999985,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8829000000000065,
+          "materializedMs": 0.4992000000000303,
+          "fullMs": 0.6197999999999979,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.5276000000000067,
+          "materializedMs": 0.287399999999991,
+          "fullMs": 0.5701999999999998,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.571200000000033,
+          "materializedMs": 0.2407000000000039,
+          "fullMs": 0.7968999999999937,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 1,
+      "foreign": 1000,
+      "affectedWalls": 2,
+      "preparationMs": 24.671600000000012,
+      "confirmMs": 11.379800000000046,
+      "edgeCases": [
+        {
+          "name": "detach distant T junctions",
+          "rejected": false
+        },
+        {
+          "name": "foreign endpoint",
+          "rejected": true
+        }
+      ],
+      "geometry": {
+        "median": 0.8423999999999978,
+        "p95": 1.542699999999968
+      },
+      "materialized": {
+        "median": 0.3630000000000564,
+        "p95": 0.6362000000000307
+      },
+      "full": {
+        "median": 7.899000000000001,
+        "p95": 11.205500000000029
+      },
+      "samples": [
+        {
+          "geometryMs": 0.6797000000000253,
+          "materializedMs": 0.2652999999999679,
+          "fullMs": 6.534400000000005,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.9360000000000355,
+          "materializedMs": 0.4132999999999356,
+          "fullMs": 7.694899999999961,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.7223000000000184,
+          "materializedMs": 0.3123000000000502,
+          "fullMs": 7.899000000000001,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.0614000000000487,
+          "materializedMs": 0.3630000000000564,
+          "fullMs": 9.676599999999894,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.195100000000025,
+          "materializedMs": 0.7767999999999802,
+          "fullMs": 11.205500000000029,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.1032999999999902,
+          "materializedMs": 0.6362000000000307,
+          "fullMs": 12.111899999999991,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8052000000000135,
+          "materializedMs": 0.5918000000000347,
+          "fullMs": 8.486800000000017,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.7472999999999956,
+          "materializedMs": 0.46659999999997126,
+          "fullMs": 10.50750000000005,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.058999999999969,
+          "materializedMs": 0.38009999999997035,
+          "fullMs": 10.95410000000004,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.033800000000042,
+          "materializedMs": 0.43619999999998527,
+          "fullMs": 10.500400000000013,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.542699999999968,
+          "materializedMs": 0.6180000000000518,
+          "fullMs": 9.158900000000017,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.7240000000000464,
+          "materializedMs": 0.3288000000000011,
+          "fullMs": 6.3759000000000015,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.706600000000094,
+          "materializedMs": 0.2844000000000051,
+          "fullMs": 6.403599999999983,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.7292999999999665,
+          "materializedMs": 0.28779999999994743,
+          "fullMs": 10.279300000000035,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8423999999999978,
+          "materializedMs": 0.32590000000004693,
+          "fullMs": 6.527600000000007,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.2448000000000548,
+          "materializedMs": 0.6216999999999189,
+          "fullMs": 7.765700000000038,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.872600000000034,
+          "materializedMs": 0.38850000000002183,
+          "fullMs": 6.45029999999997,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.8152000000000044,
+          "materializedMs": 0.290300000000002,
+          "fullMs": 6.693200000000047,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6761000000000195,
+          "materializedMs": 0.27290000000004966,
+          "fullMs": 9.345899999999915,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6699000000000979,
+          "materializedMs": 0.2880000000000109,
+          "fullMs": 7.5320999999999,
+          "path": "local"
+        },
+        {
+          "geometryMs": 0.6813000000000784,
+          "materializedMs": 0.2758000000000038,
+          "fullMs": 7.776200000000017,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 10,
+      "foreign": 100,
+      "affectedWalls": 11,
+      "preparationMs": 5.013400000000047,
+      "confirmMs": 3.8776000000000295,
+      "edgeCases": [
+        {
+          "name": "detach distant T junctions",
+          "rejected": false
+        },
+        {
+          "name": "foreign endpoint",
+          "rejected": true
+        }
+      ],
+      "geometry": {
+        "median": 1.7597000000000662,
+        "p95": 2.2951000000000477
+      },
+      "materialized": {
+        "median": 0.837400000000116,
+        "p95": 1.1166999999998097
+      },
+      "full": {
+        "median": 3.340099999999893,
+        "p95": 3.983699999999999
+      },
+      "samples": [
+        {
+          "geometryMs": 1.9572000000000571,
+          "materializedMs": 0.8884000000000469,
+          "fullMs": 3.983699999999999,
+          "path": "local"
+        },
+        {
+          "geometryMs": 2.0455000000001746,
+          "materializedMs": 0.803899999999885,
+          "fullMs": 3.953700000000026,
+          "path": "local"
+        },
+        {
+          "geometryMs": 2.1897999999998774,
+          "materializedMs": 1.3945000000001073,
+          "fullMs": 3.340099999999893,
+          "path": "local"
+        },
+        {
+          "geometryMs": 2.1877999999999247,
+          "materializedMs": 1.0377000000000862,
+          "fullMs": 3.295599999999922,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.8362999999999374,
+          "materializedMs": 0.7937000000001717,
+          "fullMs": 3.267699999999877,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.756399999999985,
+          "materializedMs": 0.775899999999865,
+          "fullMs": 3.4208000000000993,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.7597000000000662,
+          "materializedMs": 0.7444000000000415,
+          "fullMs": 3.205099999999902,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.511700000000019,
+          "materializedMs": 0.7247999999999593,
+          "fullMs": 3.3455999999998767,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.913300000000163,
+          "materializedMs": 0.866800000000012,
+          "fullMs": 3.1580999999998767,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.9934000000000651,
+          "materializedMs": 0.886600000000044,
+          "fullMs": 3.2937999999999192,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.6922000000001844,
+          "materializedMs": 0.7851999999998043,
+          "fullMs": 5.328300000000127,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.5930000000000746,
+          "materializedMs": 0.7493999999999232,
+          "fullMs": 3.3450000000000273,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.4952999999998156,
+          "materializedMs": 0.9506000000001222,
+          "fullMs": 3.2999999999999545,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.5429999999998927,
+          "materializedMs": 1.0199999999999818,
+          "fullMs": 3.18730000000005,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.5516999999999825,
+          "materializedMs": 0.837400000000116,
+          "fullMs": 3.465400000000045,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.5091999999999643,
+          "materializedMs": 0.7229999999999563,
+          "fullMs": 3.373199999999997,
+          "path": "local"
+        },
+        {
+          "geometryMs": 3.9610999999999876,
+          "materializedMs": 0.8096000000000458,
+          "fullMs": 3.678000000000111,
+          "path": "local"
+        },
+        {
+          "geometryMs": 2.2951000000000477,
+          "materializedMs": 1.1166999999998097,
+          "fullMs": 3.32100000000014,
+          "path": "local"
+        },
+        {
+          "geometryMs": 2.0517999999999574,
+          "materializedMs": 0.8716999999999189,
+          "fullMs": 3.0207000000000335,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.4950999999998658,
+          "materializedMs": 0.7108000000000629,
+          "fullMs": 3.2338999999999487,
+          "path": "local"
+        },
+        {
+          "geometryMs": 1.4567999999999302,
+          "materializedMs": 1.0766000000000986,
+          "fullMs": 3.3917999999998756,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 50,
+      "foreign": 100,
+      "affectedWalls": 51,
+      "preparationMs": 12.445200000000114,
+      "confirmMs": 12.693699999999808,
+      "edgeCases": [
+        {
+          "name": "detach distant T junctions",
+          "rejected": false
+        },
+        {
+          "name": "foreign endpoint",
+          "rejected": true
+        }
+      ],
+      "geometry": {
+        "median": 5.998599999999897,
+        "p95": 8.853900000000067
+      },
+      "materialized": {
+        "median": 3.115099999999984,
+        "p95": 5.458399999999983
+      },
+      "full": {
+        "median": 12.34979999999996,
+        "p95": 16.320600000000013
+      },
+      "samples": [
+        {
+          "geometryMs": 6.689000000000078,
+          "materializedMs": 3.267900000000054,
+          "fullMs": 12.143499999999904,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.853900000000067,
+          "materializedMs": 3.195600000000013,
+          "fullMs": 12.224699999999984,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.341900000000123,
+          "materializedMs": 3.190499999999929,
+          "fullMs": 11.490099999999984,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.934399999999869,
+          "materializedMs": 3.0597000000000207,
+          "fullMs": 11.465599999999995,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.155700000000024,
+          "materializedMs": 5.8228999999998905,
+          "fullMs": 13.263300000000072,
+          "path": "local"
+        },
+        {
+          "geometryMs": 14.203300000000127,
+          "materializedMs": 3.9968999999998687,
+          "fullMs": 13.806400000000167,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.23680000000013,
+          "materializedMs": 4.049399999999878,
+          "fullMs": 20.250999999999976,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.735900000000129,
+          "materializedMs": 2.925000000000182,
+          "fullMs": 12.446799999999712,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.998599999999897,
+          "materializedMs": 2.869999999999891,
+          "fullMs": 14.513100000000122,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.933599999999842,
+          "materializedMs": 2.871299999999792,
+          "fullMs": 16.320600000000013,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.957300000000032,
+          "materializedMs": 3.115099999999984,
+          "fullMs": 12.34979999999996,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.330899999999929,
+          "materializedMs": 2.8587000000002263,
+          "fullMs": 12.249899999999798,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.473700000000008,
+          "materializedMs": 2.8072000000001935,
+          "fullMs": 15.380799999999908,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.650900000000092,
+          "materializedMs": 3.031300000000101,
+          "fullMs": 12.899799999999686,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.943200000000161,
+          "materializedMs": 5.458399999999983,
+          "fullMs": 10.864999999999782,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.462800000000243,
+          "materializedMs": 2.9906999999998334,
+          "fullMs": 10.631600000000162,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.265200000000277,
+          "materializedMs": 2.831199999999626,
+          "fullMs": 10.94340000000011,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.222099999999955,
+          "materializedMs": 2.8315999999999804,
+          "fullMs": 12.915399999999863,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.388100000000122,
+          "materializedMs": 3.13359999999966,
+          "fullMs": 11.834200000000237,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.291700000000219,
+          "materializedMs": 3.7455999999997402,
+          "fullMs": 12.585199999999986,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.696600000000217,
+          "materializedMs": 3.633600000000115,
+          "fullMs": 11.998299999999745,
+          "path": "local"
+        }
+      ]
+    },
+    {
+      "branches": 50,
+      "foreign": 1000,
+      "affectedWalls": 51,
+      "preparationMs": 21.069600000000264,
+      "confirmMs": 23.970299999999952,
+      "edgeCases": [
+        {
+          "name": "detach distant T junctions",
+          "rejected": false
+        },
+        {
+          "name": "foreign endpoint",
+          "rejected": true
+        }
+      ],
+      "geometry": {
+        "median": 7.988600000000133,
+        "p95": 10.5908000000004
+      },
+      "materialized": {
+        "median": 4.448699999999917,
+        "p95": 5.213400000000092
+      },
+      "full": {
+        "median": 24.10110000000077,
+        "p95": 29.633899999999812
+      },
+      "samples": [
+        {
+          "geometryMs": 7.38799999999992,
+          "materializedMs": 2.999499999999898,
+          "fullMs": 22.370600000000195,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.198499999999967,
+          "materializedMs": 4.543700000000172,
+          "fullMs": 27.844900000000052,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.31880000000001,
+          "materializedMs": 3.763500000000022,
+          "fullMs": 24.026499999999942,
+          "path": "local"
+        },
+        {
+          "geometryMs": 10.277800000000298,
+          "materializedMs": 4.842699999999695,
+          "fullMs": 30.777199999999993,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.215900000000147,
+          "materializedMs": 4.030099999999948,
+          "fullMs": 29.29469999999992,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.25630000000001,
+          "materializedMs": 4.574500000000171,
+          "fullMs": 27.521200000000135,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.988600000000133,
+          "materializedMs": 4.188599999999951,
+          "fullMs": 27.528999999999996,
+          "path": "local"
+        },
+        {
+          "geometryMs": 9.45219999999972,
+          "materializedMs": 5.213400000000092,
+          "fullMs": 28.220299999999952,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.363100000000031,
+          "materializedMs": 3.7224999999998545,
+          "fullMs": 21.97759999999971,
+          "path": "local"
+        },
+        {
+          "geometryMs": 10.5908000000004,
+          "materializedMs": 3.845100000000002,
+          "fullMs": 26.455399999999827,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.610000000000127,
+          "materializedMs": 4.902399999999943,
+          "fullMs": 24.551699999999983,
+          "path": "local"
+        },
+        {
+          "geometryMs": 5.784200000000055,
+          "materializedMs": 4.413900000000012,
+          "fullMs": 29.633899999999812,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.5621000000001,
+          "materializedMs": 4.48700000000008,
+          "fullMs": 23.80829999999969,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.8729000000003,
+          "materializedMs": 3.8795000000000073,
+          "fullMs": 24.8466999999996,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.43349999999964,
+          "materializedMs": 3.6503999999999905,
+          "fullMs": 24.08699999999999,
+          "path": "local"
+        },
+        {
+          "geometryMs": 6.441499999999905,
+          "materializedMs": 3.9872999999997774,
+          "fullMs": 21.84429999999975,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.195000000000618,
+          "materializedMs": 4.582499999999527,
+          "fullMs": 22.88130000000001,
+          "path": "local"
+        },
+        {
+          "geometryMs": 8.643700000000536,
+          "materializedMs": 4.684699999999793,
+          "fullMs": 20.733400000000074,
+          "path": "local"
+        },
+        {
+          "geometryMs": 16.357099999999264,
+          "materializedMs": 6.435500000000502,
+          "fullMs": 24.08339999999953,
+          "path": "local"
+        },
+        {
+          "geometryMs": 7.8364999999994325,
+          "materializedMs": 4.448699999999917,
+          "fullMs": 24.10110000000077,
+          "path": "local"
+        },
+        {
+          "geometryMs": 9.671400000000176,
+          "materializedMs": 5.075799999999617,
+          "fullMs": 24.041299999999865,
+          "path": "local"
+        }
+      ]
+    }
+  ]
+}

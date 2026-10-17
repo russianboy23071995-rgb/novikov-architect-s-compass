@@ -1,4 +1,5 @@
 import { translatePoint } from "../../geometry/primitives/point.ts";
+import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewContourOffset } from "../../application/direct-edit/offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
@@ -34,7 +35,12 @@ export function editAnchor(project: Project, target: EditTarget): Point {
 }
 
 /** Always derive the preview from the pinned original, never from the preceding preview. */
-export function editAtPointer(session: EditSession, current: Project, pointer: Point): Project {
+export function editAtPointer(
+  session: EditSession,
+  current: Project,
+  pointer: Point,
+  reuse?: WallSolidReuse,
+): Project {
   if (current !== session.base)
     throw new Error("Das Modell wurde geändert. Bearbeitung erneut starten.");
   if (session.action === "offset") return previewContourOffset(session, pointer);
@@ -87,11 +93,11 @@ export function editAtPointer(session: EditSession, current: Project, pointer: P
             delta.x === 0 && delta.y === 0
               ? points[i]!
               : endpointAtOffsetTarget(next, pointer, offset);
-          return moveElementPoint(base, entity, i, position);
+          return moveElementPoint(base, entity, i, position, reuse);
         }
       }
     }
-    return moveElementPoint(base, entity, i, translatePoint(points[i]!, delta));
+    return moveElementPoint(base, entity, i, translatePoint(points[i]!, delta), reuse);
   }
   return moveElement(base, entity, delta);
 }

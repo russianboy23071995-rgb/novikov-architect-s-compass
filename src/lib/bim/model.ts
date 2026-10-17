@@ -7,6 +7,7 @@ import { reconcileWallJoins } from "../../domain/elements/wall/connections.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { assertAxisInside, offsetAtThickness } from "../../domain/elements/wall/axis-position.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
+import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import type { Project, Wall, BimWindow, DrawingLine, Point } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 export { validateProject, wallLength } from "../../domain/project/schema.ts";
@@ -68,6 +69,7 @@ export function updateWall(
   wallId: string,
   changes: Partial<Omit<Wall, "id" | "topBinding">>,
   intent: "reshape" | "move" = "reshape",
+  reuse?: WallSolidReuse,
 ): Project {
   const previous = storeyOf(project).walls.find((wall) => wall.id === wallId);
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
@@ -108,6 +110,7 @@ export function updateWall(
   const reconciled = axisChanged ? reconcileTJunctions(proposed, wallId, intent) : proposed;
   return validateProject(
     axisChanged ? reconcileWallJoins(reconciled, wallId, previous, tPartners) : reconciled,
+    reuse,
   );
 }
 

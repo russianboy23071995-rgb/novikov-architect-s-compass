@@ -4,6 +4,7 @@ import { boundedWindowPosition } from "../../domain/elements/wall/window-range.t
 import { previewHatch } from "../hatches/actions.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
+import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 
 export type TransformTarget = { kind: "wall" | "line" | "hatch"; id: string };
 
@@ -26,6 +27,7 @@ function applyPoints(
   target: TransformTarget,
   points: Point[],
   intent: "reshape" | "move" = "reshape",
+  reuse?: WallSolidReuse,
 ): Project {
   if (target.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === target.id)!;
@@ -47,7 +49,7 @@ function applyPoints(
     });
   }
   return target.kind === "wall"
-    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent)
+    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent, reuse)
     : updateLine(project, target.id, { points });
 }
 
@@ -68,11 +70,14 @@ export function moveElementPoint(
   target: TransformTarget,
   index: number,
   position: Point,
+  reuse?: WallSolidReuse,
 ): Project {
   return applyPoints(
     project,
     target,
     replacePathVertex(editablePoints(project, target), index, position),
+    "reshape",
+    reuse,
   );
 }
 

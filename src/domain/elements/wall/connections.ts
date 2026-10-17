@@ -163,8 +163,20 @@ function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wa
   return result;
 }
 
-export function connectedWallSolids(project: WallGeometry) {
-  return deriveConnectedWallSolids(project, wallContourSolid);
+const reuseDerivers = new WeakMap<object, typeof wallContourSolid>();
+declare const reuseBrand: unique symbol;
+export type WallSolidReuse = { readonly [reuseBrand]: true };
+/** Session-owned capability: no caller-supplied validator/geometry callback. */
+export function createWallSolidReuse(ids: readonly string[]): WallSolidReuse {
+  const token = Object.freeze({}) as WallSolidReuse;
+  reuseDerivers.set(token, createWallContourSolidDeriver(ids));
+  return token;
+}
+export function connectedWallSolids(project: WallGeometry, reuse?: WallSolidReuse) {
+  return deriveConnectedWallSolids(
+    project,
+    (reuse && reuseDerivers.get(reuse)) || wallContourSolid,
+  );
 }
 
 /** Prepared translation owns this bounded local-extrusion reuse lifetime. */
