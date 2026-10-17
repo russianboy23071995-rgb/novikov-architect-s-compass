@@ -12696,3 +12696,45 @@ Rohlog lokal outputs/surface-queries-measurement.jsonl. Keine Aussage über
 Gesamtframes, native Shift-Gesten oder GPU-Zeit; keine neue Browser-Abnahme.
 Fenster-Pivot-Scan bleibt unverändert und ist nicht durch diese Wandmessung belegt.
 Aktiver Folgeauftrag ausschließlich §9: große Anschlussgruppen/Legacy-Rest.
+
+### AUD14-04/05 – Anschlussgruppen erneut geprüft (17.10.2026)
+
+Basis main 95a34b6 nach genehmigtem Merge PR389. Kein Produktfix in dieser Prüfung.
+connection-group-profile.ts misst nun evaluateGeometry, materialisierte evaluate-
+Projektansicht und vollständiges editAtPointer separat. Fünf Fälle: 2/11/51
+verbundene Wände, bis 1000 fremde Wände; jede Nebenwand besitzt ein Fenster.
+7 warme + 21 gemessene wechselnde Verlängerungs-/Verkürzungsziele je Fall.
+Jeder Durchlauf vergleicht vollständiges Projekt und Patchflächen exakt gegen
+Vollpfad, außerhalb der Zeitmessung. confirm separat vollständig verglichen;
+Null-Länge abgewiesen, entfernte T-Anschlüsse beim starken Kürzen und fremder
+Endpunkt zusätzlich auf identische Ergebnisse/Ablehnung geprüft.
+
+Aktueller Rohbeleg: benchmarks/connection-group-audit-results.json.
+Node v24.19.0, Windows/Ryzen 5 3600. Geometrievorschau Median/p95 ms:
+2 Wände/0 fremde 0,694/1,112; 2/1000 0,834/1,197;
+11/100 3,034/3,608; 51/100 11,915/15,805; 51/1000 15,996/17,944.
+51/1000: materialisierte Vorschau Median 14,551 ms, Vollpfad 23,444 ms;
+Vorbereitung 35,071 ms, einzelner confirm 20,909 ms. Laufstreuung relevant:
+vorheriger Lauf desselben erweiterten Vergleichs ergab 51/100 etwa 15,011 ms.
+Kein Vorher/Nachher-Fix und keine Browser-/GPU-/Native-/Framegarantie.
+
+Befund: prepareEndpoint.calculate ruft editAtPointer weiterhin auf dem gesamten
+lokalen Anschlussprojekt auf. evaluateGeometry vermeidet zwar die anschließende
+Gesamtprojektzusammensetzung, aber nicht diese lokale Fachoperation. Die große
+Closure ist deshalb selbst teuer; fremde Wände allein erklären den Befund nicht.
+Ein separater Node-CPU-Samplinglauf des alten Sieben-Ziele-Vergleichs zeigt
+extrudeProfileWithOpenings als größte Self-Time (~157 ms aggregiert); dieser
+Lauf mischt Vorbereitung, lokale und vollständige Operation plus Vergleich.
+Er beweist keine alleinige Ursache im Pointerpfad. Rohprofil lokal
+outputs/connection-group-current.cpuprofile, nicht Browser-Trace.
+
+Abgeleiteter nächster begrenzter Pilot: vorhandenen createWallContourSolidDeriver
+(exakte lokale Kontur-/Öffnungseingaben, eine private Cacheposition je Wand)
+im vorbereiteten Endpunkt-Lebenszyklus wiederverwenden. Erst prüfen, an welcher
+validierten Grenze er ohne doppelte Ableitung eingesetzt werden kann; keinen
+Cache auf mutable öffentliche Modelle kleben. Alle Nachbarn/Fenster und gelöste
+Anschlüsse behalten, geänderte Eingaben invalidieren, fremde Kontakte weiterhin
+vollständig behandeln. Vollständiger confirm und atomare History bleiben Pflicht.
+Die Messung/Assertions, Typecheck und gezieltes Lint bestanden. Produktcode blieb
+unverändert; kein erneuter Produktbuild oder Volltestsuite für diesen Diagnose-
+und Planungsauftrag behauptet. Aktive Reihenfolge ausschließlich §9.
