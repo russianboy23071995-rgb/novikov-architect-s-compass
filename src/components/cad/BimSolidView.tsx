@@ -42,6 +42,7 @@ import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges } from "@/rendering/viewport/selection-outline";
+import { surfaceFaces } from "@/rendering/viewport/surface-patch";
 import { useSolidInference } from "./useSolidInference";
 import { previewEdit, supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { axisTarget } from "@/rendering/viewport/axis-target";
@@ -288,10 +289,7 @@ export function BimSolidView({
     [selections, selection],
   );
   const outline = useMemo(
-    () =>
-      [...selectedWalls].flatMap((id) =>
-        selectionEdges(solid.faces.filter((face) => face.wallId === id)),
-      ),
+    () => [...selectedWalls].flatMap((id) => selectionEdges(surfaceFaces(solid, id))),
     [solid, selectedWalls],
   );
   const windowOutline = useMemo(

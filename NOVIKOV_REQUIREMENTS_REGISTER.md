@@ -12637,3 +12637,34 @@ baut seinen Service während aktiver Bewegung dagegen nicht neu auf (enabled=fal
 Diese unterschiedlichen Frequenzen nicht als einen gemeinsamen Pointerbefund
 vermischen. Nächster Auftrag ausschließlich §9: begrenzte Umrandungsabfrage über
 den vorhandenen gemeinsamen Index, keine neue werkzeugspezifische Geometrie.
+
+### AUD14-03/04 – indexierte Auswahlumrandung (17.10.2026)
+
+Basis main b691e6e nach genehmigtem Merge PR387. Branch perf/indexed-selection-outline.
+Die Umrandung in BimSolidView verwendet surfaceFaces aus dem gemeinsamen
+surface-patch-Modul statt eines Gesamtscans je ausgewählter Wand. Die Abfrage
+liest Ersatzflächen direkt aus dem Patch, unveränderte Flächen aus dem geteilten
+Basisindex. Ein ersetztes, aber nicht mehr vorhandenes Element liefert keine
+alten Basisflächen. Keine Änderung an Kantenerzeugung, Linienbreite, Farbe,
+Sichtbarkeit, Modellaktionen, Commit oder Undo.
+
+1121 Tests bestanden, Typecheck, gezieltes ESLint und Produktbuild erfolgreich.
+Zwei neue Regressionen vergleichen exakte Kanten für gebundene verbundene Wände
+mit Fenster, Bewegung, entfernte/ausgeblendete/unbekannte Ziele und Abbruch.
+Bei 10/1000/5000 Flächen: null stationäre ID-Zugriffe nach Indexvorbereitung,
+Patch-Gesamtflächengetter darf werfen und wird bei der Umrandungsabfrage nicht
+aufgerufen. Gemeinsame Indizes bleiben abgeleitet und per WeakMap entsorgbar.
+
+Node v24.19.0/Windows/Ryzen 5 3600, 100 Aufwärm- und 300 Messdurchläufe,
+zwei ausgewählte EG-Wände. 4/104/1004 Wände: indexierte Umrandung Median
+0,1862/0,1967/0,1842 ms; bisheriger Scan im selben Lauf
+0,1814/0,1980/0,3184 ms. Bei 1004 Wänden p95 0,2448 statt 0,5032 ms.
+Jeder Durchlauf vergleicht die Kantenergebnisse exakt. Rohlog lokal:
+outputs/indexed-outline-measurement.jsonl. Keine GPU-/Native-/Framegarantie;
+Messreihenfolge indexiert vor Scan, kein statistischer Gesamtperformanceclaim.
+
+Rest: kalter Basisindex linear; leere Darstellung verwendet noch solid.faces.length,
+Orbit-Pivot scannt beim Pointerdown. Deshalb keine Behauptung, der gesamte
+Vorschauframe sei unabhängig von der Gebäudegröße. Browserabnahme aus PR387 ist
+Basisnachweis, keine neue praktische Abnahme dieser Änderung. Aktive Fortsetzung
+nur §9; danach Anschlussgruppen/Legacy und CPU-/Native-Bildressourcenvergleich.

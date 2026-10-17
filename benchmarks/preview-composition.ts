@@ -4,6 +4,9 @@ import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { createSolidBufferCache } from "../src/rendering/viewport/solid-buffer.ts";
+import { surfaceFaces } from "../src/rendering/viewport/surface-patch.ts";
+import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
+import assert from "node:assert/strict";
 const summary = (xs: number[]) => {
   xs.sort((a, b) => a - b);
   return { median: xs[Math.floor(xs.length / 2)], p95: xs[Math.floor(xs.length * 0.95)] };
@@ -38,7 +41,9 @@ for (const count of [0, 100, 1000]) {
   const preparationMs = performance.now() - prepStart;
   const evaluation: number[] = [],
     composition: number[] = [],
-    grouping: number[] = [];
+    grouping: number[] = [],
+    indexedOutline: number[] = [],
+    scannedOutline: number[] = [];
   let uploadBytes = 0;
   for (let i = 0; i < 400; i++) {
     const a = performance.now();
@@ -48,10 +53,19 @@ for (const count of [0, 100, 1000]) {
     const c = performance.now();
     const packed = cache.update(display, [0, 0, 0], selected);
     const d = performance.now();
+    const indexed = [...selected].flatMap((id) => selectionEdges(surfaceFaces(display, id)));
+    const e = performance.now();
+    const scanned = [...selected].flatMap((id) =>
+      selectionEdges(display.faces.filter((f) => f.wallId === id)),
+    );
+    const f = performance.now();
+    assert.deepEqual(indexed, scanned);
     if (i >= 100) {
       evaluation.push(b - a);
       composition.push(c - b);
       grouping.push(d - c);
+      indexedOutline.push(e - d);
+      scannedOutline.push(f - e);
     }
     uploadBytes =
       packed.full?.byteLength ?? packed.patches.reduce((n, p) => n + p.data.byteLength, 0);
@@ -64,6 +78,8 @@ for (const count of [0, 100, 1000]) {
       evaluation: summary(evaluation),
       composition: summary(composition),
       grouping: summary(grouping),
+      indexedOutline: summary(indexedOutline),
+      scannedOutline: summary(scannedOutline),
       uploadBytes,
       scope: "Node CPU + planned upload bytes; no GPU/native/frame measurement",
     }),
