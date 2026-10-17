@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, main `b691e6e` nach Merge von PR387. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 17.10.2026, main `bba1443` nach Merge von PR388. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – verbleibende Gesamtflächenmaterialisierung durch Leerdarstellungsprüfung und Orbit-Pivot in BimSolidView über gemeinsame Snapshot-/Patchabfragen begrenzen; Ergebnisgleichheit prüfen, Pointerframe und Pointerdown getrennt messen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – große Anschlussgruppen aus der bestehenden Pfadinventur erneut messen und einen begrenzten gemeinsamen Vorschau-Fix ableiten; vollständige stationäre Nachbarn, Fenster und Commitgleichheit erhalten.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -3806,3 +3806,32 @@ Orbit-Pivot scannt beim Pointerdown. Deshalb keine Behauptung, der gesamte
 Vorschauframe sei unabhängig von der Gebäudegröße. Browserabnahme aus PR387 ist
 Basisnachweis, keine neue praktische Abnahme dieser Änderung. Aktive Fortsetzung
 nur §9; danach Anschlussgruppen/Legacy und CPU-/Native-Bildressourcenvergleich.
+
+
+### AUD14-03/04 – Leeranzeige und Orbit-Pivot ohne Gesamtflächenzugriff (17.10.2026)
+
+Basis main bba1443 nach genehmigtem Merge PR388, Branch perf/viewport-surface-queries.
+Die gemeinsame Patchmetadatenstruktur speichert die exakte Anzahl aus stationären
+und neuen Flächen. surfaceFaceCount vermeidet die flache Vorschauliste bei der
+Leeranzeige. Der Wandanteil des Orbit-Pivots verwendet surfaceFaces für ausgewählte
+IDs. Fensterflächen und cameraFocus-Rückfall bleiben unverändert, ebenso
+Kamera-, Modell- und History-Regeln. BimSolidView greift nicht mehr direkt auf
+solid.faces zu. Kalte Basisindexierung und Erstpartitionierung bleiben linear.
+
+1123 Tests, Produktbuild, Typecheck und gezieltes ESLint bestanden. Neue Regressionen:
+Anzahl bei leerer Basis, vollständiger/teilweiser Entfernung und neu hinzugefügten
+Flächen; Getter darf bei der Patchzählung nicht materialisiert werden. Auswahlgrenzen
+identisch zum Vollscan für Bewegung, Abbruch, ausgeblendete/fehlende Ziele und
+Mehrfachauswahl. Warme gemeinsame Abfragen bei 10/1000/5000 Flächen lesen keine
+stationären IDs. Bestehende Fenster-/Kameratests bleiben Bestandteil der Suite.
+
+Node v24.19.0 / Windows / Ryzen 5 3600; zwei ausgewählte Wände, 100 warm + 300
+Messdurchläufe. Leerabfrage pro Renderpfad bei 4/104/1004 Wänden Median
+0,0006/0,0005/0,0005 ms (nahe Timerauflösung, keine belastbare Beschleunigungsquote).
+Wandgrenzenabfrage für Pointerdown separat 0,0110/0,0095/0,0098 ms; bei 1004
+Wänden p95 0,0146 ms. Der Probe berechnet dieselben Grenzen und prüft sie in jedem
+Durchlauf gegen den Vollscan. Geplante Uploadmenge weiterhin 6336 Byte.
+Rohlog lokal outputs/surface-queries-measurement.jsonl. Keine Aussage über
+Gesamtframes, native Shift-Gesten oder GPU-Zeit; keine neue Browser-Abnahme.
+Fenster-Pivot-Scan bleibt unverändert und ist nicht durch diese Wandmessung belegt.
+Aktiver Folgeauftrag ausschließlich §9: große Anschlussgruppen/Legacy-Rest.

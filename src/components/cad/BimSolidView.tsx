@@ -42,7 +42,7 @@ import { isSelectionClick } from "@/lib/bim/picking";
 import { SolidSnapPreview } from "./SolidSnapPreview";
 import { orientationFloor } from "@/rendering/viewport/orientation-floor";
 import { selectionEdges } from "@/rendering/viewport/selection-outline";
-import { surfaceFaces } from "@/rendering/viewport/surface-patch";
+import { surfaceFaces, surfaceFaceCount } from "@/rendering/viewport/surface-patch";
 import { useSolidInference } from "./useSolidInference";
 import { previewEdit, supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { axisTarget } from "@/rendering/viewport/axis-target";
@@ -550,7 +550,8 @@ export function BimSolidView({
                 max[i] = Math.max(max[i]!, v[i]);
               }
           };
-          for (const face of solid.faces) if (selectedIds.has(face.wallId)) include(face.vertices);
+          for (const id of selectedIds)
+            for (const face of surfaceFaces(solid, id)) include(face.vertices);
           for (const face of windowSurfaces) if (selectedIds.has(face.id)) include(face.vertices);
           const aspect =
             displayed.current?.projection.aspect ??
@@ -827,7 +828,7 @@ export function BimSolidView({
           {error}
         </p>
       )}
-      {!solid.faces.length && !error && (
+      {!surfaceFaceCount(solid) && !error && (
         <p className="absolute left-4 top-16 text-sm">No solid wall material to display.</p>
       )}
     </>

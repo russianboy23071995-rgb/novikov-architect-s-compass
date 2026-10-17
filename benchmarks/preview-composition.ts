@@ -4,7 +4,7 @@ import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { createSolidBufferCache } from "../src/rendering/viewport/solid-buffer.ts";
-import { surfaceFaces } from "../src/rendering/viewport/surface-patch.ts";
+import { surfaceFaces, surfaceFaceCount } from "../src/rendering/viewport/surface-patch.ts";
 import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import assert from "node:assert/strict";
 const summary = (xs: number[]) => {
@@ -43,7 +43,9 @@ for (const count of [0, 100, 1000]) {
     composition: number[] = [],
     grouping: number[] = [],
     indexedOutline: number[] = [],
-    scannedOutline: number[] = [];
+    scannedOutline: number[] = [],
+    emptyQuery: number[] = [],
+    pivotQuery: number[] = [];
   let uploadBytes = 0;
   for (let i = 0; i < 400; i++) {
     const a = performance.now();
@@ -53,6 +55,20 @@ for (const count of [0, 100, 1000]) {
     const c = performance.now();
     const packed = cache.update(display, [0, 0, 0], selected);
     const d = performance.now();
+    const faceCount = surfaceFaceCount(display);
+    const emptyEnd = performance.now();
+    const pivotFaces = [...selected].flatMap((id) => [...surfaceFaces(display, id)]);
+    const pivotBounds = [0, 1, 2].map((axis) => {
+      let min = Infinity,
+        max = -Infinity;
+      for (const face of pivotFaces)
+        for (const point of face.vertices) {
+          min = Math.min(min, point[axis]!);
+          max = Math.max(max, point[axis]!);
+        }
+      return [min, max];
+    });
+    const pivotEnd = performance.now();
     const indexed = [...selected].flatMap((id) => selectionEdges(surfaceFaces(display, id)));
     const e = performance.now();
     const scanned = [...selected].flatMap((id) =>
@@ -60,11 +76,23 @@ for (const count of [0, 100, 1000]) {
     );
     const f = performance.now();
     assert.deepEqual(indexed, scanned);
+    assert.equal(faceCount, display.faces.length);
+    assert.deepEqual(
+      pivotBounds,
+      [0, 1, 2].map((axis) => {
+        const values = display.faces
+          .filter((face) => selected.has(face.wallId))
+          .flatMap((face) => face.vertices.map((point) => point[axis]!));
+        return [Math.min(...values), Math.max(...values)];
+      }),
+    );
     if (i >= 100) {
       evaluation.push(b - a);
       composition.push(c - b);
       grouping.push(d - c);
-      indexedOutline.push(e - d);
+      indexedOutline.push(e - pivotEnd);
+      emptyQuery.push(emptyEnd - d);
+      pivotQuery.push(pivotEnd - emptyEnd);
       scannedOutline.push(f - e);
     }
     uploadBytes =
@@ -80,6 +108,8 @@ for (const count of [0, 100, 1000]) {
       grouping: summary(grouping),
       indexedOutline: summary(indexedOutline),
       scannedOutline: summary(scannedOutline),
+      emptyQueryPerFrame: summary(emptyQuery),
+      wallPivotQueryPerPointerDown: summary(pivotQuery),
       uploadBytes,
       scope: "Node CPU + planned upload bytes; no GPU/native/frame measurement",
     }),
