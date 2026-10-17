@@ -12565,3 +12565,11 @@ teilen den Startlebenszyklus; verspätete Reads/Opt-in umgehen die Sperre nicht.
 1115 Tests/Typecheck/Lint/Build bestanden, Datei/IFC/KG-Koten geprüft. Der einzelne
 3D-Entwicklungsfehler trat bei vier Produktbuild-Orbitgesten nicht auf; kein Fix behauptet.
 Keine externe Archicad-, Langsession- oder Leistungsfreigabe. Aktive Reihenfolge §9.
+
+### AUD14-03/04 – Vorschau-Bounds (17.10.2026)
+Gemeinsame selectionMoveSurfaces erweitert konservative Basis-Bounds nur noch mit
+Patchvertices, ohne unveränderte Vertices erneut zu scannen. Keine neue Fachlogik,
+stationäre Flächenreferenzen und Shader-/Pufferreuse erhalten. Regression gegen
+Vollscan/Vollmodell. Node-Median Zusammensetzung bei 1004 Wänden 3,11→0,59 ms;
+Gruppierung/Flächenfilterung weiterhin global. Keine GPU-/Gesamtframegarantie.
+Messaufbau und Restgrenzen im Masterplan; einzige aktive Reihenfolge dort §9.

@@ -3,6 +3,58 @@ import assert from "node:assert/strict";
 import { createSolidBufferCache, packSolidFaces } from "../src/rendering/viewport/solid-buffer.ts";
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { recordingCanvas, resourceFixture, resourceProjection } from "./solid-resource-fixture.ts";
+import { boundHeightFixture } from "./bound-height-fixture.ts";
+import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
+import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
+
+test("preview bounds preserve the full-scan result without reading unchanged vertices", () => {
+  const project = boundHeightFixture();
+  const base = buildBuildingSolid(project);
+  const action = prepareSelectionTranslation(project, ["eg-a", "eg-b"]);
+  for (const delta of [
+    { x: 0, y: 0 },
+    { x: 20, y: -30 },
+    { x: -40, y: 50 },
+  ]) {
+    const patch = action.evaluate(delta);
+    let stationaryReads = 0;
+    const watched = {
+      ...base,
+      faces: base.faces.map((face) =>
+        face.wallId.startsWith("og-")
+          ? {
+              ...face,
+              get vertices() {
+                stationaryReads++;
+                return face.vertices;
+              },
+            }
+          : face,
+      ),
+    };
+    const result = selectionMoveSurfaces(watched, project, patch);
+    assert.equal(stationaryReads, 0);
+    const min = [...base.min],
+      max = [...base.max];
+    for (const face of result.faces)
+      for (const point of face.vertices)
+        for (const i of [0, 1, 2]) {
+          min[i] = Math.min(min[i]!, point[i]!);
+          max[i] = Math.max(max[i]!, point[i]!);
+        }
+    assert.deepEqual(result.min, min);
+    assert.deepEqual(result.max, max);
+    for (const face of watched.faces.filter((f) => f.wallId.startsWith("og-")))
+      assert.ok(result.faces.includes(face));
+    const byWall = (a: (typeof base.faces)[number], b: (typeof base.faces)[number]) =>
+      a.wallId.localeCompare(b.wallId);
+    assert.deepEqual(
+      [...result.faces].sort(byWall),
+      [...buildBuildingSolid(action.materialize(project, delta)).faces].sort(byWall),
+    );
+  }
+});
 
 test("selection and small movement retain program/buffers with bounded uploads as rest grows", () => {
   for (const count of [10, 1000, 5000]) {
