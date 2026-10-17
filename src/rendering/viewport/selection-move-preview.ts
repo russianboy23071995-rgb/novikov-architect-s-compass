@@ -15,19 +15,22 @@ export function selectionMoveSurfaces(
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
   const removed = new Set(patches.flatMap((p) => [...p.replacedIds]));
   const faces = base.faces.filter((f) => !removed.has(f.wallId));
+  const min = [...base.min] as [number, number, number],
+    max = [...base.max] as [number, number, number];
   for (const p of patches) {
     const elevation = levels.find((l) => l.storeyId === p.storeyId)?.elevation;
     if (elevation == null) throw new Error("Unaufgelöste Vorschauhöhe.");
-    faces.push(...buildPreviewSolid(p.geometry, elevation).faces);
+    const changed = buildPreviewSolid(p.geometry, elevation).faces;
+    faces.push(...changed);
+    // The stable base bounds already contain every unchanged vertex. Preserve
+    // the existing conservative bounds, extending only with replacement faces.
+    for (const face of changed)
+      for (const point of face.vertices)
+        for (const i of [0, 1, 2] as const) {
+          min[i] = Math.min(min[i], point[i]);
+          max[i] = Math.max(max[i], point[i]);
+        }
   }
-  const min = [...base.min] as [number, number, number],
-    max = [...base.max] as [number, number, number];
-  for (const face of faces)
-    for (const point of face.vertices)
-      for (const i of [0, 1, 2] as const) {
-        min[i] = Math.min(min[i], point[i]);
-        max[i] = Math.max(max[i], point[i]);
-      }
   return { faces, min, max };
 }
 

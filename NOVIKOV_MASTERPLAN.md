@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – globale 3D-Vorschaukomposition/Bounds/Gruppierung bei fester kleiner Auswahl und wachsendem Restgebäude messen und begrenzt korrigieren.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – verbliebene globale Flächenfilterung und Puffergruppierung hinter der gemeinsamen Vorschau-Patchgrenze begrenzen; unveränderte Flächen/Indexe teilen und Geometrie-/Uploadgleichheit nachweisen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -513,7 +513,7 @@ Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR3
 | --- | --- | --- |
 | AUD14-01 | Gemeinsames 128-Millionen-Pixelbudget pro Asset-ID; normale Aufnahme und Recovery konsistent, warnender Altdatei-Übergang | Übergang bewusst unsicherbarer Altdateien erhalten; Ressourcen-/Release-Nachweise kein pauschales Größenversprechen |
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
-| AUD14-03 | Shader-/Pufferlebensdauer und begrenzte Uploads umgesetzt | Gesamtflächenkomposition, Bounds/Gruppierung und schwere Gesamtframes offen |
+| AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds-Erweiterung liest nur Patchvertices (Folge-PR zu 384) | Globale Flächenfilterung/Gruppierung und schwere Gesamtframes offen |
 | AUD14-04 | Viele gemeinsame vorbereitete Wand/Fenster/Linien/Schraffuradapter, Ownership und Ansichtsbasis umgesetzt | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
 | AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen umgesetzt | Große zusammenhängende Gruppen sowie Kamera-/Indexvorbereitung offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
@@ -3676,3 +3676,36 @@ Vier Orbit-Drag-Gesten im statischen Build ohne Konsolenfehler; der frühere ein
 Entwicklungsfehler bleibt damit nicht reproduziert, keinesfalls als behoben behauptet.
 Keine Langsession-/Framegarantie aus diesem kleinen funktionalen Beispiel.
 Fortsetzung ausschließlich §9; kein eigener neuer Featureauftrag.
+
+### AUD14-03/04 – begrenzte Bounds-Korrektur nach Höhenabnahme (17.10.2026)
+Nach Abschluss der Höhen-/Recovery-Korrektur unmittelbar gemäß §9 begonnen.
+Basis 1c9416e, Windows, AMD Ryzen 5 3600, Node 24.19.0. Reproduzierbar:
+node --experimental-strip-types benchmarks/preview-composition.ts.
+Zwei ausgewählte EG-Eckwände mit Fenster, übrige Wände 4/104/1004 insgesamt,
+100 Aufwärmschritte und 300 Messungen. Vorbereitung, Application-evaluate,
+Zusammensetzung und Buffer-Cache-Gruppierung separat; vorgesehene Uploadbytes,
+keine GPU-/Native-/Gesamtframe-Messung.
+
+Befund: selectionMoveSurfaces filterte alle Basisflächen und las anschließend
+zusätzlich sämtliche unveränderten Vertices für Bounds. Die konservativen Basis-
+Bounds enthalten diese bereits. Jetzt werden ausschließlich die neuen Patchvertices
+zur Erweiterung gelesen; Faces, Normalen, Höhenbezüge, Reihenfolge, Commitvalidierung
+und Shader-/Pufferreuse unverändert. Unveränderte Faces bleiben dieselben Objekte.
+
+Node-Zusammensetzung Median/p95 ms vor→nach:
+4 Wände 0,1095/0,2875 → 0,0754/0,2126;
+104 Wände 0,4298/0,8273 → 0,1063/0,1615;
+1004 Wände 3,1062/3,8841 → 0,5927/0,7898.
+Bei 1004 Wänden Gruppierung danach Median 0,5031/p95 0,9163 ms weiterhin global.
+Vorgesehene Patchuploads unverändert 6336 Bytes; Vorbereitung separat ca.70 ms.
+Lokale Vorher-/Nachherläufe sind kein allgemeines Leistungsversprechen.
+
+Regression prüft identische konservative Bounds zum bisherigen Vollscan,
+Geometriegleichheit mit vollständig materialisiertem Modell (nach Wand-ID geordnet),
+Referenzidentität stationärer Faces und null Vertexzugriffe auf stationäres OG.
+Bestehende Ressourcenchecks sichern Shader-/Bufferreuse, Reorder/Selection/Topology.
+Globale Flächenfilterung/Neugruppierung verbleiben explizit; noch keine abgeschlossene
+AUD14-03/04- oder Browserframe-Freigabe. Aktive Fortsetzung ausschließlich §9.
+Validierung dieses begrenzten Schritts: 1116/1116 Tests, Typecheck, fokussierter ESLint,
+git diff --check und Produktbuild bestanden. Kein zusätzlicher Browserframe-Test
+für diese geometrisch äquivalente Bounds-Änderung behauptet.
