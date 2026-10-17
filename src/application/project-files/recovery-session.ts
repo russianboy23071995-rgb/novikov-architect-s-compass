@@ -23,7 +23,7 @@ export function createRecoverySession(
       enabled: save.enabled,
       healthy: !save.error,
       visible,
-      busy: save.busy || holds.size > 0,
+      busy: save.busy || !!save.startupPending || holds.size > 0,
     });
   const autosave = createAutosaveController(
     catalog,
@@ -50,6 +50,7 @@ export function createRecoverySession(
       autosave.setEnabled(value);
     },
     saveNow: autosave.saveNow,
+    setStartupPending: autosave.setStartupPending,
     hold(reason: string, value: boolean) {
       if (value) holds.add(reason);
       else holds.delete(reason);

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { startRecoveryOffer, type RecoveryOffer } from "./recovery-offer.ts";
+import { createRecoveryStartup } from "./recovery-startup.ts";
 import type { RecoveryStorage } from "./recovery.ts";
 import type { RecoveryCatalog } from "./recovery-catalog.ts";
 const catalog = (legacy: RecoveryStorage): RecoveryCatalog => ({
@@ -18,6 +19,46 @@ const raw = JSON.stringify({
 const noWrites = async () => {
   assert.fail("Startup must never write to recovery storage");
 };
+
+test("startup gate releases only empty stores or explicit choice, never a read failure", async () => {
+  for (const rawValue of [null, "{broken", raw]) {
+    const pending: boolean[] = [];
+    const gate = createRecoveryStartup(
+      catalog({ read: async () => rawValue, replace: noWrites }),
+      (v) => pending.push(v),
+      () => {},
+    );
+    await gate.done;
+    assert.deepEqual(pending, rawValue === null ? [true, false] : [true]);
+    gate.resolve();
+    assert.deepEqual(pending, [true, false]);
+    gate.resolve();
+    assert.equal(pending.length, 2);
+  }
+});
+
+test("late startup result cannot re-lock a confirmed project replacement", async () => {
+  let release!: (v: string) => void;
+  const pending: boolean[] = [];
+  const offers: (RecoveryOffer | null)[] = [];
+  const gate = createRecoveryStartup(
+    catalog({
+      read: () =>
+        new Promise((r) => {
+          release = r;
+        }),
+      replace: noWrites,
+    }),
+    (v) => pending.push(v),
+    (o) => offers.push(o),
+  );
+  gate.resolve();
+  await Promise.resolve();
+  release(raw);
+  await gate.done;
+  assert.deepEqual(pending, [true, false]);
+  assert.deepEqual(offers, [null]);
+});
 
 test("startup offers a validated snapshot without publishing it or writing storage", async () => {
   const offers: RecoveryOffer[] = [];

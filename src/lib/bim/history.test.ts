@@ -1,4 +1,5 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
+import { PROJECT_MIN_READ_VERSION, PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -70,6 +71,19 @@ test("invalid files and geometry reject without modifying history", () => {
   assert.equal(serializeProject(h.present), before);
   assert.equal(h.past.length, 0);
   assert.throws(() => readProjectFile(" ".repeat(PROJECT_FILE_LIMIT + 1)), /128 MiB/);
+});
+
+test("file error names the current format contract used by model and loader", () => {
+  const project = createExampleProject();
+  assert.equal(project.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.deepEqual(readProjectFile(serializeProject(project)), project);
+  assert.throws(
+    () => readProjectFile("{}"),
+    new RegExp(`Version ${PROJECT_MIN_READ_VERSION} bis ${PROJECT_SCHEMA_VERSION}, Meter`),
+  );
+  assert.throws(() =>
+    readProjectFile(JSON.stringify({ ...project, schemaVersion: PROJECT_SCHEMA_VERSION + 1 })),
+  );
 });
 test("history is bounded and initial/last navigation is a no-op", () => {
   let h = createHistory(createExampleProject());

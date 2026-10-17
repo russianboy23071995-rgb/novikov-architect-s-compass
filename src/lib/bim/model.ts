@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { projectStorageData } from "../../domain/project/storage-data.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
@@ -15,7 +16,7 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 26,
+    schemaVersion: PROJECT_SCHEMA_VERSION,
     groundStoreyId: storeyId,
     groundDatum: 0,
     hatchPatterns: [],

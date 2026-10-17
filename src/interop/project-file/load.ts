@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
 import { assertProjectFileSize } from "./size.ts";
 import { defaultHatchAppearance } from "../../domain/elements/hatch/model.ts";
@@ -43,7 +44,7 @@ export function loadProjectData(value: unknown): Project {
     "schemaVersion" in value &&
     typeof value.schemaVersion === "number" &&
     value.schemaVersion >= 9 &&
-    value.schemaVersion <= 26 &&
+    value.schemaVersion <= PROJECT_SCHEMA_VERSION &&
     "assets" in value &&
     Array.isArray(value.assets)
   ) {
@@ -136,7 +137,7 @@ export function migrateProjectData(value: unknown): Project {
   }
   if (value.schemaVersion === 25)
     return validateProject({ ...projectV25Schema.parse(value), schemaVersion: 26 });
-  if (value.schemaVersion === 26) return validateProject(value);
+  if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);
     return migrateProjectData({

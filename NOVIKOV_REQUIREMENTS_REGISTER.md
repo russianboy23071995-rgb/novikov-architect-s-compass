@@ -12554,3 +12554,14 @@ Erster aktiver Schritt: produktive mehrgeschossige Höhenworkflow-Abnahme nach g
 
 Alle Erfüllungsaussagen brauchen Codepfad und konkrete Nachweise. Keine neue Featurekette vor diesen Restarbeiten starten, keine Fachprüfungen auf Verdacht schwächen, keine Messserien als Ersatz für gefordertes CPU-Sampling, kein Produktcache auf bloßen Medianvorteil. Fehlende Referenz-/Produktentscheidungen und echte Plattformzugriffsgrenzen sind konkrete Blocker, keine stillen Freigaben. Gemeinsames Ziel bleibt leistungsfähiges AI-CAD für das fünfgeschossige Schulprofil, sichere Daten und skalierbare gemeinsame Aktionen.
 
+
+### N22 / AUD14-06/07 – §9-Korrektur und produktiver Recovery-Nachweis (17.10.2026)
+PR384 ergänzt um KG/EG/OG, signierte Wandversätze, gemischte feste/gebundene Anschlüsse,
+Konfliktatomarität und tatsächliche Recovery-Wiederaufnahme im statischen Produktbuild.
+Dabei P0-Startüberschreiben reproduziert und mit gemeinsamer Application-Startsperre
+behoben; aktueller und vorheriger Snapshot bleiben bis zur bewussten Entscheidung
+unverändert. Keine Löschung, kein neues Recoveryformat. UI-Abfrage und Autosicherung
+teilen den Startlebenszyklus; verspätete Reads/Opt-in umgehen die Sperre nicht.
+1115 Tests/Typecheck/Lint/Build bestanden, Datei/IFC/KG-Koten geprüft. Der einzelne
+3D-Entwicklungsfehler trat bei vier Produktbuild-Orbitgesten nicht auf; kein Fix behauptet.
+Keine externe Archicad-, Langsession- oder Leistungsfreigabe. Aktive Reihenfolge §9.

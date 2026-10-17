@@ -1335,7 +1335,8 @@ export function CadWorkspace({
                   <RasterBudgetNotice project={project} />
                 </div>
                 <RecoveryStartupNotice
-                  context={editing.projectLoad ?? project.id}
+                  offer={autosave.startupOffer}
+                  onContinue={autosave.continueStartup}
                   onOpen={() => setRecoveryOpen(true)}
                 />
                 {layerActivation && (
