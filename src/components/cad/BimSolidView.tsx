@@ -220,14 +220,17 @@ export function BimSolidView({
     }
   }, [placement?.geometryPreview, placementTarget]);
   const geometryPatch = placementPatch ?? editPatch;
-  const previewSolid = useMemo(() => {
-    if (geometryPatch) return selectionMoveSurfaces(baseSolid, project, geometryPatch);
-    return previewProject === project ? baseSolid : buildBuildingSolid(previewProject);
-  }, [previewProject, project, baseSolid, geometryPatch]);
-  const solid = useMemo(
-    () => visibleSurfaces(previewSolid, (id) => isLayerVisible(project, visibility, id)),
-    [previewSolid, project, visibility],
+  const visibleBase = useMemo(
+    () => visibleSurfaces(baseSolid, (id) => isLayerVisible(project, visibility, id)),
+    [baseSolid, project, visibility],
   );
+  const solid = useMemo(() => {
+    const allows = (id: string) => isLayerVisible(project, visibility, id);
+    if (geometryPatch) return selectionMoveSurfaces(visibleBase, project, geometryPatch, allows);
+    return previewProject === project
+      ? visibleBase
+      : visibleSurfaces(buildBuildingSolid(previewProject), allows);
+  }, [previewProject, project, visibleBase, geometryPatch, visibility]);
   const depthRadius = Math.max(
     projectionDepthRadius(frame, baseSolid),
     projectionDepthRadius(frame, solid),

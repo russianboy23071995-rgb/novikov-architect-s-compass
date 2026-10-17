@@ -7,6 +7,114 @@ import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
+import { composeSurfacePatch } from "../src/rendering/viewport/surface-patch.ts";
+import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
+
+test("patch buffers match full packing across closure changes, cancel, visibility and topology", () => {
+  const base = resourceFixture(20);
+  const cache = createSolidBufferCache();
+  const moved = (id: string) =>
+    base.faces
+      .filter((f) => f.wallId === id)
+      .map((f) => ({
+        ...f,
+        vertices: f.vertices.map(([x, y, z]) => [x + 2, y, z] as [number, number, number]),
+      }));
+  const patch = (id: string) =>
+    composeSurfacePatch(base, new Set([id]), moved(id), base.min, base.max);
+  const smaller = visibleSurfaces(base, (id) => id !== "w0");
+  const topology = composeSurfacePatch(
+    base,
+    new Set(["w0"]),
+    moved("w0").map((f) => ({ ...f, vertices: f.vertices.slice(0, 3) })),
+    base.min,
+    base.max,
+  );
+  let gpu: Float32Array = new Float32Array();
+  let order: string[] = [];
+  for (const solid of [
+    base,
+    patch("w0"),
+    patch("w1"),
+    base,
+    topology,
+    patch("w0"),
+    smaller,
+    base,
+  ]) {
+    const selected = new Set([solid === base ? "w2" : "w1"]);
+    const update = cache.update(solid, [0, 0, 0], selected);
+    if (update.full) gpu = update.full;
+    for (const p of update.patches) gpu.set(p.data, p.offset / 4);
+    const ids = new Set(solid.faces.map((f) => f.wallId));
+    order = [...order.filter((id) => ids.has(id)), ...[...ids].filter((id) => !order.includes(id))];
+    const expected = new Float32Array(
+      order.flatMap((id) =>
+        Array.from(
+          packSolidFaces(
+            solid.faces.filter((f) => f.wallId === id),
+            [0, 0, 0],
+            selected.has(id),
+          ),
+        ),
+      ),
+    );
+    assert.deepEqual(gpu, expected);
+  }
+});
+
+test("warm patch composition and packing do not traverse stationary faces", () => {
+  for (const count of [10, 1000, 5000]) {
+    const fixture = resourceFixture(count);
+    let reads = 0;
+    const base = {
+      ...fixture,
+      faces: fixture.faces.map((face) => ({
+        ...face,
+        get wallId() {
+          reads++;
+          return face.wallId;
+        },
+      })),
+    };
+    const cache = createSolidBufferCache();
+    cache.update(base, [0, 0, 0], new Set());
+    const make = (x: number) =>
+      composeSurfacePatch(
+        base,
+        new Set(["w0"]),
+        [
+          {
+            ...fixture.faces[0]!,
+            vertices: fixture.faces[0]!.vertices.map((p) => [p[0] + x, p[1], p[2]]),
+          },
+        ],
+        base.min,
+        base.max,
+      );
+    cache.update(make(1), [0, 0, 0], new Set());
+    reads = 0;
+    const update = cache.update(make(2), [0, 0, 0], new Set());
+    assert.equal(reads, 0);
+    assert.equal(update.full, null);
+    assert.equal(
+      update.patches.reduce((n, p) => n + p.data.byteLength, 0),
+      144,
+    );
+  }
+});
+
+test("filtering before the shared patch preserves visible geometry and conservative bounds", () => {
+  const project = boundHeightFixture();
+  const base = buildBuildingSolid(project);
+  const action = prepareSelectionTranslation(project, ["eg-a", "eg-b"]);
+  const patch = action.evaluate({ x: 20, y: -30 });
+  const allows = (id: string) => id !== "eg-a" && id !== "og-a";
+  assert.deepEqual(
+    selectionMoveSurfaces(visibleSurfaces(base, allows), project, patch, allows),
+    visibleSurfaces(selectionMoveSurfaces(base, project, patch), allows),
+  );
+});
 
 test("preview bounds preserve the full-scan result without reading unchanged vertices", () => {
   const project = boundHeightFixture();

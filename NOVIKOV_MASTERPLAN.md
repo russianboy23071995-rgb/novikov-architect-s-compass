@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, Abgleich auf main `0fe21549c4525c51a1e6ff872868ef4377bdc744` nach Merge von PR383. Modell und Eigenschaftenwahl für Wandhöhenbindung vorhanden; Gesamtworkflow noch nicht abgenommen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 17.10.2026, main `ac11f33` nach Merge von PR384 und PR385. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Folgebranch lokal geprüft; Browserframe-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -161,7 +161,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 17.10.2026: Höhen-Gesamtworkflow und Recovery-Startschutz in PR384 nachgewiesen. 1115 Tests und Produktbuild bestanden. Einzelheiten im datierten Nachweis, aktive Fortsetzung ausschließlich §9.
 
-Aktuelle Kurzfassung und offene Grenzen: siehe Statusmatrix in §9 (17.10.2026). Mehrgeschossmodell, gemeinsame vorbereitete Vorschauen, begrenzte GPU-Uploads und lokale Fangabfragen sind produktiv. Recovery besitzt inzwischen manuelle und automatische sichere Wartung. Wandhöhenbindung und Eigenschaftenbedienung sind nach PR383 vorhanden; ihre Gesamtworkflow-Abnahme steht aus. Die folgenden datierten Einträge sind historische Teilevidenz, keine aktuelle Prioritätenliste.
+Aktuelle Kurzfassung und offene Grenzen: siehe Statusmatrix in §9 (17.10.2026). Mehrgeschossmodell, gemeinsame vorbereitete Vorschauen, begrenzte GPU-Uploads und lokale Fangabfragen sind produktiv. Recovery besitzt manuelle und automatische sichere Wartung. Wandhöhenbindung einschließlich Gesamtworkflow ist in PR384 nachgewiesen. Gemeinsame Flächenpartition/Pufferpatches lokal mit 1119 Tests, Typecheck, Lint und Produktbuild geprüft; keine neue native Frame-Abnahme. Die folgenden datierten Einträge sind historische Teilevidenz, keine aktuelle Prioritätenliste.
 
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
 
@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – verbliebene globale Flächenfilterung und Puffergruppierung hinter der gemeinsamen Vorschau-Patchgrenze begrenzen; unveränderte Flächen/Indexe teilen und Geometrie-/Uploadgleichheit nachweisen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – gemeinsame Flächen-/Pufferpatches im Produktbrowser abnehmen; verbliebene flache Gesamtflächen-Verbraucher (Umrandung/Picking) und Gesamtframes bei fester kleiner Auswahl und wachsendem Restgebäude prüfen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -513,7 +513,7 @@ Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR3
 | --- | --- | --- |
 | AUD14-01 | Gemeinsames 128-Millionen-Pixelbudget pro Asset-ID; normale Aufnahme und Recovery konsistent, warnender Altdatei-Übergang | Übergang bewusst unsicherbarer Altdateien erhalten; Ressourcen-/Release-Nachweise kein pauschales Größenversprechen |
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
-| AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds-Erweiterung liest nur Patchvertices (Folge-PR zu 384) | Globale Flächenfilterung/Gruppierung und schwere Gesamtframes offen |
+| AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
 | AUD14-04 | Viele gemeinsame vorbereitete Wand/Fenster/Linien/Schraffuradapter, Ownership und Ansichtsbasis umgesetzt | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
 | AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen umgesetzt | Große zusammenhängende Gruppen sowie Kamera-/Indexvorbereitung offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
@@ -3709,3 +3709,33 @@ AUD14-03/04- oder Browserframe-Freigabe. Aktive Fortsetzung ausschließlich §9.
 Validierung dieses begrenzten Schritts: 1116/1116 Tests, Typecheck, fokussierter ESLint,
 git diff --check und Produktbuild bestanden. Kein zusätzlicher Browserframe-Test
 für diese geometrisch äquivalente Bounds-Änderung behauptet.
+
+### AUD14-03/04 – gemeinsame Flächenpartition und Pufferpatches (17.10.2026)
+
+Branch `perf/preview-surface-sharing`, Basis main `ac11f33` (PR384/385 gemergt).
+`surface-patch.ts` hält abgeleitete immutable Basisindizes per WeakMap und maximal
+ eine stationäre Partition pro Basis. Die flache Flächenliste wird erst für
+bestehende Verbraucher aufgebaut. BimSolidView filtert die stabile Basis einmal
+pro Modell-/Sichtbarkeitskontext, neue Patchflächen mit derselben Sichtbarkeitsregel.
+Pufferaktualisierung betrachtet die Vereinigung vorheriger/neuer Ersatz- und
+Auswahl-IDs. Abbruch und Closurewechsel stellen alte Flächen wieder her.
+Topologie, Sichtbarkeit, neue Basis oder Ursprung führen weiterhin zum vollständigen
+sicheren Aufbau; Modellvalidierung, Commit und Undo wurden nicht geändert.
+
+Nachweis: 1119 Tests bestanden (gesamte Suite ohne Test-Unterprozess-Isolation),
+Typecheck, gezieltes ESLint und Produktbuild bestanden. Drei neue Regressionen:
+exakte Float32-Puffergleichheit inklusive Abbruch/Closure-/Topologiewechsel;
+null stationäre ID-Lesungen im warmen Patchpfad bei 10/1000/5000 Wänden;
+Sichtbarkeitsreihenfolge geometrisch einschließlich Bounds identisch.
+Node v24.19.0, Windows/Ryzen 5 3600, 100 warme + 300 gemessene Iterationen,
+zwei ausgewählte EG-Wände: bei 4/104/1004 Gesamtwänden Komposition Median
+0,0724/0,0547/0,0560 ms, Pufferaktualisierung 0,1138/0,1115/0,1154 ms;
+1004 Wände p95 0,0971/0,1915 ms. Geplante Uploadmenge konstant 6336 Byte.
+Vorbereitung bei 1004 Wänden 78,89 ms. Rohlog lokal:
+`outputs/preview-surface-composition.jsonl` (außerhalb Repository).
+
+Grenzen: kein GPU-/Browserframe-/Native-Nachweis. Erstaufteilung und wechselnde
+Ersatzmengen dürfen die Basis noch filtern. Die flache Liste für Picking/Umrandung
+ist weiterhin linear und nicht als insgesamt begrenzter Pointerpfad freigegeben.
+CI und praktische Abnahme des Folge-PR bleiben eigenständige Gates. §9 ist die
+alleinige aktive Fortsetzung.
