@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, main `ac11f33` nach Merge von PR384 und PR385. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Folgebranch lokal geprüft; Browserframe-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 17.10.2026, main `b29e8d4` nach Merge von PR386. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -494,7 +494,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – gemeinsame Flächen-/Pufferpatches im Produktbrowser abnehmen; verbliebene flache Gesamtflächen-Verbraucher (Umrandung/Picking) und Gesamtframes bei fester kleiner Auswahl und wachsendem Restgebäude prüfen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-03/04 – Auswahlumrandung in BimSolidView an den gemeinsamen Flächen-/Patchindex anbinden, statt pro ausgewählter Wand alle Flächen zu filtern; Kantengleichheit und begrenzte warme Arbeit bei wachsendem Restgebäude nachweisen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -3739,3 +3739,38 @@ Ersatzmengen dürfen die Basis noch filtern. Die flache Liste für Picking/Umran
 ist weiterhin linear und nicht als insgesamt begrenzter Pointerpfad freigegeben.
 CI und praktische Abnahme des Folge-PR bleiben eigenständige Gates. §9 ist die
 alleinige aktive Fortsetzung.
+
+
+### AUD14-03/04 – Browserprüfung nach PR386 (17.10.2026)
+
+Geprüfter main-Commit `b29e8d4`, statischer minifizierter Produkt-Workspace
+`bound-height-workspace` auf isoliertem Port 8087, IAB 1230 × 692 CSS-Pixel.
+Build: `vite build --config benchmarks/height-acceptance.config.ts` bestanden,
+Asset `bound-height-workspace-c81ln4Lq.js`. Keine Nutzerdaten auf 8080 verändert.
+
+Praktisch per Browserbedienung geprüft: EG-Eckwände eg-a/eg-b per Strg-Klick
+markiert, 3D geöffnet, On-Demand „Auswahl frei bewegen“, sichtbare Wandecke als
+Ursprung gewählt. X-Achse und 2 m eingegeben: Vorschau bewegt beide Wände und
+Fenster, OG/KG und unabhängige Wand bleiben stehen. Abbrechen stellt Ausgangslage
+wieder her, Undo bleibt deaktiviert. Wiederholt und übernommen: Undo aktiv;
+ein Undo nimmt die gesamte Bewegung zurück, Undo danach deaktiviert. Redo stellt
+sie wieder her. Alle Ebenen ausgeblendet: keine Wandflächen. Ebenen-Undo stellt
+Darstellung wieder her. Orbit per Drag funktioniert; Fenster-Picking danach
+zeigt eg-window an eg-a mit unveränderten 1,2 × 1,2 m, Brüstung 0,9 m und Position
+0,5. Browser-Konsole: keine Fehler. Screenshot lokal:
+`outputs/pr386-browser-acceptance.png` (außerhalb Repository).
+
+Kein neuer Produktcode in dieser Abnahme. Bestehende 1119 Tests/CI von PR386
+bleiben der automatisierte Nachweis. Keine kontinuierliche Shift-Geste oder
+Framezeit behauptet: Browser-API bietet keinen freien Pointermove mit gehaltenem
+Modifier. Zahlenfelder prüfen den echten Vorschau-/Commitpfad, ersetzen diese
+Geste aber nicht. Schwere Gesamtframes und Native-/GPU-Abnahme bleiben offen.
+
+Codeprüfung: BimSolidView erstellt Umrandungen mit
+`selectedWalls.flatMap(id => selectionEdges(solid.faces.filter(...)))` und erzwingt
+so globale Flächenmaterialisierung und je Auswahl-ID einen Gesamtscan. Der
+Orbit-Pivot liest beim Pointerdown ebenfalls die Gesamtflächen. useSolidPicking
+baut seinen Service während aktiver Bewegung dagegen nicht neu auf (enabled=false).
+Diese unterschiedlichen Frequenzen nicht als einen gemeinsamen Pointerbefund
+vermischen. Nächster Auftrag ausschließlich §9: begrenzte Umrandungsabfrage über
+den vorhandenen gemeinsamen Index, keine neue werkzeugspezifische Geometrie.
