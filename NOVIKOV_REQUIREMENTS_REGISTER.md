@@ -12573,3 +12573,33 @@ stationäre Flächenreferenzen und Shader-/Pufferreuse erhalten. Regression gege
 Vollscan/Vollmodell. Node-Median Zusammensetzung bei 1004 Wänden 3,11→0,59 ms;
 Gruppierung/Flächenfilterung weiterhin global. Keine GPU-/Gesamtframegarantie.
 Messaufbau und Restgrenzen im Masterplan; einzige aktive Reihenfolge dort §9.
+
+### AUD14-03/04 – gemeinsame Flächenpartition und Pufferpatches (17.10.2026)
+
+Branch `perf/preview-surface-sharing`, Basis main `ac11f33` (PR384/385 gemergt).
+`surface-patch.ts` hält abgeleitete immutable Basisindizes per WeakMap und maximal
+ eine stationäre Partition pro Basis. Die flache Flächenliste wird erst für
+bestehende Verbraucher aufgebaut. BimSolidView filtert die stabile Basis einmal
+pro Modell-/Sichtbarkeitskontext, neue Patchflächen mit derselben Sichtbarkeitsregel.
+Pufferaktualisierung betrachtet die Vereinigung vorheriger/neuer Ersatz- und
+Auswahl-IDs. Abbruch und Closurewechsel stellen alte Flächen wieder her.
+Topologie, Sichtbarkeit, neue Basis oder Ursprung führen weiterhin zum vollständigen
+sicheren Aufbau; Modellvalidierung, Commit und Undo wurden nicht geändert.
+
+Nachweis: 1119 Tests bestanden (gesamte Suite ohne Test-Unterprozess-Isolation),
+Typecheck, gezieltes ESLint und Produktbuild bestanden. Drei neue Regressionen:
+exakte Float32-Puffergleichheit inklusive Abbruch/Closure-/Topologiewechsel;
+null stationäre ID-Lesungen im warmen Patchpfad bei 10/1000/5000 Wänden;
+Sichtbarkeitsreihenfolge geometrisch einschließlich Bounds identisch.
+Node v24.19.0, Windows/Ryzen 5 3600, 100 warme + 300 gemessene Iterationen,
+zwei ausgewählte EG-Wände: bei 4/104/1004 Gesamtwänden Komposition Median
+0,0724/0,0547/0,0560 ms, Pufferaktualisierung 0,1138/0,1115/0,1154 ms;
+1004 Wände p95 0,0971/0,1915 ms. Geplante Uploadmenge konstant 6336 Byte.
+Vorbereitung bei 1004 Wänden 78,89 ms. Rohlog lokal:
+`outputs/preview-surface-composition.jsonl` (außerhalb Repository).
+
+Grenzen: kein GPU-/Browserframe-/Native-Nachweis. Erstaufteilung und wechselnde
+Ersatzmengen dürfen die Basis noch filtern. Die flache Liste für Picking/Umrandung
+ist weiterhin linear und nicht als insgesamt begrenzter Pointerpfad freigegeben.
+CI und praktische Abnahme des Folge-PR bleiben eigenständige Gates. §9 ist die
+alleinige aktive Fortsetzung.

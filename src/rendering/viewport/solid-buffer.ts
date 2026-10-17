@@ -1,6 +1,7 @@
 import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
+import { surfaceGroups, surfacePatch } from "./surface-patch.ts";
 type Face = DisplaySurfaces["faces"][number];
 type Chunk = { faces: Face[]; selected: boolean; offset: number; data: Float32Array };
 const sameFaces = (a: Face[], b: Face[]) =>
@@ -55,12 +56,50 @@ export function createSolidBufferCache() {
         previousSelected = new Set(selected);
         return { full: null, patches, vertexCount };
       }
-      const groups = new Map<string, Face[]>();
-      for (const face of solid.faces) {
-        const group = groups.get(face.wallId);
-        if (group) group.push(face);
-        else groups.set(face.wallId, [face]);
+      const patch = surfacePatch(solid);
+      const priorPatch = previous && surfacePatch(previous);
+      const base = patch?.base ?? solid;
+      // Both frames must share the exact immutable base, including visibility.
+      // Include previous replacements to restore walls when the closure changes.
+      if (!rebase && previous && (priorPatch?.base ?? previous) === base) {
+        const ids = new Set([
+          ...(patch?.replaced ?? []),
+          ...(priorPatch?.replaced ?? []),
+          ...previousSelected,
+          ...selected,
+        ]);
+        const baseGroups = surfaceGroups(base);
+        const updates: { id: string; chunk: Chunk }[] = [];
+        let compatible = true;
+        for (const id of ids) {
+          const faces = patch?.replaced.has(id) ? patch.groups.get(id) : baseGroups.get(id);
+          const old = chunks.get(id);
+          if (!faces && !old) continue;
+          if (!faces || !old) {
+            compatible = false;
+            break;
+          }
+          const active = selected.has(id);
+          if (old.selected === active && sameFaces(old.faces, faces)) continue;
+          const data = packSolidFaces(faces, nextOrigin, active);
+          if (data.length !== old.data.length) {
+            compatible = false;
+            break;
+          }
+          updates.push({ id, chunk: { faces, selected: active, offset: old.offset, data } });
+        }
+        if (compatible) {
+          for (const update of updates) chunks.set(update.id, update.chunk);
+          previous = solid;
+          previousSelected = new Set(selected);
+          return {
+            full: null,
+            patches: updates.map(({ chunk }) => ({ offset: chunk.offset * 4, data: chunk.data })),
+            vertexCount,
+          };
+        }
       }
+      const groups = surfaceGroups(solid);
       let rebuild = rebase || chunks.size !== groups.size;
       const next = new Map<string, Chunk>();
       // Preserve range order even when preview composition puts changed walls at the end.
