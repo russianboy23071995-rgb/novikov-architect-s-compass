@@ -1,3 +1,4 @@
+import { projectStorageData } from "../../domain/project/storage-data.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
 import { reconcileTJunctions } from "../../domain/elements/wall/t-relations.ts";
@@ -14,7 +15,7 @@ type Creation<T extends { layerId: string }> = Omit<T, "layerId"> & { layerId?: 
 
 export function createProject(projectId: string, storeyId: string): Project {
   return validateProject({
-    schemaVersion: 25,
+    schemaVersion: 26,
     groundStoreyId: storeyId,
     groundDatum: 0,
     hatchPatterns: [],
@@ -64,11 +65,15 @@ export function addWall(
 export function updateWall(
   project: Project,
   wallId: string,
-  changes: Partial<Omit<Wall, "id">>,
+  changes: Partial<Omit<Wall, "id" | "topBinding">>,
   intent: "reshape" | "move" = "reshape",
 ): Project {
   const previous = storeyOf(project).walls.find((wall) => wall.id === wallId);
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
+  if ("topBinding" in changes)
+    throw new Error("Höhenbindung über die gemeinsame Höhenaktion ändern.");
+  if (previous.topBinding && changes.height !== undefined && changes.height !== previous.height)
+    throw new Error("Gebundene Wandhöhe über die gemeinsame Höhenaktion ändern.");
   const bodyOffset =
     changes.bodyOffset ??
     (changes.thickness !== undefined && changes.thickness !== previous.thickness
@@ -149,7 +154,7 @@ export function windowCentre(project: Project, windowId: string): Point {
 export function serializeProject(project: Project): string {
   const checked = validateProject(project);
   assertValidatedProjectSize(checked);
-  return JSON.stringify(checked);
+  return JSON.stringify(projectStorageData(checked));
 }
 
 export function addLine(project: Project, line: Creation<DrawingLine>): Project {

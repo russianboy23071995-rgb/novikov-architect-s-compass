@@ -1,3 +1,4 @@
+import { projectStorageData } from "../../domain/project/storage-data.ts";
 import {
   PROJECT_RASTER_PIXEL_LIMIT,
   assertProjectRasterBudget,
@@ -141,7 +142,7 @@ export function createAssetPreparation({
         blobs[entry.key] = entry.payload;
         assets.push({ id: asset.id, key: entry.key });
       }
-      return { model: { ...project, assets }, blobs };
+      return { model: { ...projectStorageData(project), assets }, blobs };
     },
   };
 }

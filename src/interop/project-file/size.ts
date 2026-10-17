@@ -1,3 +1,4 @@
+import { projectStorageData } from "../../domain/project/storage-data.ts";
 import type { Project } from "../../domain/project/schema.ts";
 /** Aggregate portable project budget; independent from individual image ingress. */
 export const PROJECT_FILE_LIMIT = 128 * 1024 * 1024;
@@ -20,7 +21,7 @@ export function assertProjectFileSize(text: string): void {
  */
 export function validatedProjectByteLength(project: Project): number {
   const structure = {
-    ...project,
+    ...projectStorageData(project),
     assets: project.assets.map((asset) => ({ ...asset, data: "" })),
   };
   return (

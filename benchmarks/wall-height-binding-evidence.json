@@ -1,0 +1,20 @@
+{
+  "scope": "Prepared Z evaluate only, two selected bound corner walls and two windows; 200 warmup samples. No render/commit timing, no browser performance claim.",
+  "date": "2026-10-16",
+  "runs": [
+    {
+      "walls": 2,
+      "samples": 1000,
+      "medianMs": 0.00529999999997699,
+      "p95Ms": 0.021100000000018326,
+      "maxMs": 1.8238000000000056
+    },
+    {
+      "walls": 2002,
+      "samples": 1000,
+      "medianMs": 0.005899999999996908,
+      "p95Ms": 0.010800000000017462,
+      "maxMs": 0.8505000000000109
+    }
+  ]
+}

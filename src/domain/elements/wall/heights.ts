@@ -32,7 +32,7 @@ export type WallTopRule =
  * No active-storey fallback and no stored derived height. Both elevations share a datum.
  */
 export function resolveWallHeightRule(
-  wall: Readonly<{ baseOffset?: number }>,
+  wall: Readonly<{ baseOffset?: number | undefined }>,
   storeyElevation: number,
   rule: WallTopRule,
   upperSlab?: Readonly<{ topElevation: number; thickness: number }>,

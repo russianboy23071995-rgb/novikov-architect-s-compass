@@ -12509,3 +12509,18 @@ AUD14-07: weitere Performance-Aufnahme vom Nutzer vertagt; #380 gemergt,
 kein Performance-Abschluss und keine produktive Übernahme des Bildressourcen-Piloten.
 Die vollständige Suite dieses Commits besteht mit 1102 Tests; Typecheck,
 fokussierter Lint und Produktbuild ebenfalls bestanden.
+
+### N22 / R26-03 – Modellintegration UK Rohdecke (16.10.2026)
+Schema 26: stabile obere Geschoss-ID + vorläufige Rohdeckenstärke (Standard 0,20 m)
++ oberer Versatz. Bestehende Dateien bleiben fest. Domain löst gebundene Höhe neu auf;
+Datei und Recovery speichern keine redundante berechnete Höhe. Gemeinsame
+Application-Aktion unterstützt mehrere Wände atomar und Rückkehr zu fester Höhe.
+Fenster/Anschlüsse prüfen die aufgelöste Höhe; Konflikte verhindern die gesamte
+Änderung. Geometrie/IFC lesen dieselbe Auflösung. Starre Z-Bewegung verändert beide
+Versätze und bewahrt die Bindung; vorbereitete Vorschau nur über lokale Ziele.
+UI-Wahl noch nicht enthalten. Fehlender/nicht unmittelbar oberer Bezug bleibt gesperrt;
+Einfügen dazwischen und oberstes Geschoss benötigen spätere Produktentscheidung.
+Nachweise/Leistungsgrenzen und genau ein nächster Auftrag im aktuellen N22-Masterplan.
+Nachweis: 1109 Tests, Produkt-/Benchmark-Typecheck, fokussierter Lint und Produktbuild
+bestanden; sieben neue Integrationsfälle. Reproduzierbare lokale Z-Rechenprobe unter
+benchmarks/wall-height-binding.ts. Praktische UI-Abnahme folgt mit dem nächsten Schritt.

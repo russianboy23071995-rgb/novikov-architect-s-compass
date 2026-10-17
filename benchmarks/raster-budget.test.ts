@@ -123,7 +123,7 @@ test("legacy migration preserves oversized assets; shared references do not cons
     size: Buffer.byteLength(text),
     text: async () => text,
   });
-  assert.equal(opened.project.schemaVersion, 25);
+  assert.equal(opened.project.schemaVersion, 26);
   assert.deepEqual(opened.project.assets, nine.assets);
   const shared = {
     ...eight,

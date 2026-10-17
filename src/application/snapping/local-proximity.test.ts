@@ -20,7 +20,7 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 25,
+    schemaVersion: 26,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

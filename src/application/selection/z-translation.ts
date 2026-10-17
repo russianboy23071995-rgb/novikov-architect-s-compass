@@ -1,8 +1,13 @@
 import { prepareProjectSnapshot } from "../../domain/project/prepared-snapshot.ts";
+import { validateWindowGeometry } from "../../domain/project/geometry-validation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
-import { wallBase, wallHeights } from "../../domain/elements/wall/heights.ts";
+import {
+  wallBase,
+  wallHeights,
+  resolveWallHeightRule,
+} from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
 import { type SelectionSet } from "./state.ts";
@@ -92,7 +97,23 @@ export function prepareZTranslation(
     elevation: number,
   ) => {
     if (!moving.has(wall.id) || delta === 0) return wall;
-    const next = { ...wall, baseOffset: wallBase(wall) + delta };
+    // A rigid translation moves both ends, retaining the reference and changing its offset.
+    // Height itself stays unchanged, so prepared preview and full commit remain identical.
+    const next = {
+      ...wall,
+      baseOffset: wallBase(wall) + delta,
+      ...(wall.topBinding
+        ? { topBinding: { ...wall.topBinding, topOffset: wall.topBinding.topOffset + delta } }
+        : {}),
+    };
+    if (next.topBinding) {
+      const upper = levels.get(next.topBinding.storeyId);
+      if (upper == null) throw new Error("Der Rohdeckenbezug fehlt.");
+      next.height = resolveWallHeightRule(next, elevation, next.topBinding, {
+        topElevation: upper,
+        thickness: next.topBinding.slabThickness,
+      }).height;
+    }
     wallHeights(next, elevation);
     if (wallBase(next) === wallBase(wall))
       throw new Error("Z-Bewegung ist bei dieser Höhe nicht darstellbar.");
@@ -125,6 +146,11 @@ export function prepareZTranslation(
         },
       },
     }));
+    for (const patch of patches) {
+      const walls = new Map(patch.geometry.storey.walls.map((w) => [w.id, w]));
+      for (const opening of patch.geometry.storey.windows)
+        validateWindowGeometry(opening, walls.get(opening.wallId)!);
+    }
     return freeze({ ...patches[0]!, storeyPatches: patches });
   };
   const materialize = (current: Project, currentTargets: SelectionSet, delta: number): Project => {
