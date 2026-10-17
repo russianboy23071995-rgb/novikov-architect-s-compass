@@ -12603,3 +12603,37 @@ Ersatzmengen dürfen die Basis noch filtern. Die flache Liste für Picking/Umran
 ist weiterhin linear und nicht als insgesamt begrenzter Pointerpfad freigegeben.
 CI und praktische Abnahme des Folge-PR bleiben eigenständige Gates. §9 ist die
 alleinige aktive Fortsetzung.
+
+### AUD14-03/04 – Browserprüfung nach PR386 (17.10.2026)
+
+Geprüfter main-Commit `b29e8d4`, statischer minifizierter Produkt-Workspace
+`bound-height-workspace` auf isoliertem Port 8087, IAB 1230 × 692 CSS-Pixel.
+Build: `vite build --config benchmarks/height-acceptance.config.ts` bestanden,
+Asset `bound-height-workspace-c81ln4Lq.js`. Keine Nutzerdaten auf 8080 verändert.
+
+Praktisch per Browserbedienung geprüft: EG-Eckwände eg-a/eg-b per Strg-Klick
+markiert, 3D geöffnet, On-Demand „Auswahl frei bewegen“, sichtbare Wandecke als
+Ursprung gewählt. X-Achse und 2 m eingegeben: Vorschau bewegt beide Wände und
+Fenster, OG/KG und unabhängige Wand bleiben stehen. Abbrechen stellt Ausgangslage
+wieder her, Undo bleibt deaktiviert. Wiederholt und übernommen: Undo aktiv;
+ein Undo nimmt die gesamte Bewegung zurück, Undo danach deaktiviert. Redo stellt
+sie wieder her. Alle Ebenen ausgeblendet: keine Wandflächen. Ebenen-Undo stellt
+Darstellung wieder her. Orbit per Drag funktioniert; Fenster-Picking danach
+zeigt eg-window an eg-a mit unveränderten 1,2 × 1,2 m, Brüstung 0,9 m und Position
+0,5. Browser-Konsole: keine Fehler. Screenshot lokal:
+`outputs/pr386-browser-acceptance.png` (außerhalb Repository).
+
+Kein neuer Produktcode in dieser Abnahme. Bestehende 1119 Tests/CI von PR386
+bleiben der automatisierte Nachweis. Keine kontinuierliche Shift-Geste oder
+Framezeit behauptet: Browser-API bietet keinen freien Pointermove mit gehaltenem
+Modifier. Zahlenfelder prüfen den echten Vorschau-/Commitpfad, ersetzen diese
+Geste aber nicht. Schwere Gesamtframes und Native-/GPU-Abnahme bleiben offen.
+
+Codeprüfung: BimSolidView erstellt Umrandungen mit
+`selectedWalls.flatMap(id => selectionEdges(solid.faces.filter(...)))` und erzwingt
+so globale Flächenmaterialisierung und je Auswahl-ID einen Gesamtscan. Der
+Orbit-Pivot liest beim Pointerdown ebenfalls die Gesamtflächen. useSolidPicking
+baut seinen Service während aktiver Bewegung dagegen nicht neu auf (enabled=false).
+Diese unterschiedlichen Frequenzen nicht als einen gemeinsamen Pointerbefund
+vermischen. Nächster Auftrag ausschließlich §9: begrenzte Umrandungsabfrage über
+den vorhandenen gemeinsamen Index, keine neue werkzeugspezifische Geometrie.
