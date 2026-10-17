@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 16.10.2026 – #381 in main (542bc7e). Optionale Wandhöhenbindung bis UK Rohdecke im Modell integriert, Schema 26, atomare Validierung und gemeinsame Dateidarstellung. Nächster Auftrag: Eigenschaftenbedienung über die Höhenaktion. Weitere AUD14-07-Aufnahme bleibt ausdrücklich verschoben.
+Aktueller Arbeitsauftrag: 17.10.2026 – #382 in main (f58daba). Höhenbindung für ausgewählte Einzelwände in Werkzeugeigenschaften angebunden; isolierte Browserabnahme bestanden. Nächster Auftrag: mehrgeschossige Gesamtworkflow-Abnahme. AUD14-07-Aufnahme weiterhin verschoben.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -3568,3 +3568,43 @@ Integrationsfälle in heights.test.ts prüfen Datei/Recovery, V25-Migration, Kon
 Fenstergrenzen, feste Rückschaltung, Eck-/T-Geometrie, Z-/XY-Vorschau und Undo.
 Bestehende Migrationserwartungen sind lediglich von Version 25 auf 26 angehoben.
 Praktische Abnahme folgt nach der UI-Anbindung; kein bereits bedienbarer Schalter behauptet.
+
+### N22 – Höhenbindung in Werkzeugeigenschaften (17.10.2026)
+#382 nach grüner CI und ausdrücklicher Freigabe in main (f58daba).
+WallHeightProperties ist ein kleiner UI-Adapter für setWallHeightRule. Feste Höhe
+und UK Rohdecke werden ausschließlich dort bearbeitet; die bisherige direkte
+Wandhöhe im allgemeinen Maßformular entfällt. Fenstermaße bleiben unverändert.
+Wahl übernimmt sofort, Zahleneingaben bei Enter/Feldverlassen über PropertyForm.
+Rückkehr zu fest behält die berechnete Höhe. Keine neue Fachberechnung/History.
+
+Gebundene Wand zeigt den Namen des unmittelbar oberen Geschosses, die gespeicherte
+Rohdeckenstärke als Annahme und die berechnete Höhe. Oberer Versatz ist bearbeitbar.
+Das Bezugsgeschoss ist gemäß aktuellem Modellvertrag eindeutig; keine Auswahl eines
+beliebigen Geschosses. Ohne oberen/aufgelösten Bezug ist Bindung deaktiviert mit Hinweis.
+Konflikte belassen Modell und Undo unverändert; die Fehlermeldung verschwindet auch
+bei Korrektur auf den unveränderten gültigen Wert. Höhenkontext ist pro Projekt/ID
+memoisiert; keine wiederholte Projektsuche durch bloße Präsentationsrenders.
+
+Isolierte Browserabnahme über benchmarks/wall-height-properties.html mit echtem
+BimInspector/PropertyForm/History: fest 2,8 → gebunden 2,8 → Geschoss 4,0 / Wand 3,8;
+Versatz -0,1 → 3,7; Undo/Redo; Rückkehr fest erhält Höhe. Ungültiger Versatz -2 bei
+3-m-Geschoss weist Fensterkonflikt ab, Undo bleibt 1; Korrektur auf 0 entfernt Fehler
+ohne Undo-Eintrag. Variante ?noUpper zeigt deaktivierte Bindung. Kein Nutzerprojekt
+oder Wiederherstellungsspeicher verändert. Screenshot in outputs/wall-height-properties.png.
+1109 Tests bestanden. Typecheck (einschließlich Benchmark), fokussierter Lint und
+Produktbuild geprüft. Diese Komponentenabnahme ersetzt noch keine Gesamtworkflow-
+oder externe Archicad-Abnahme.
+
+Praktisch testen: Im EG eine Wand wählen, darüber ein Geschoss mit bekannter Höhe
+anlegen. Höhenmodus UK Rohdecke wählen; bei 3,00 m Geschosshöhe und 0,20 m Rohdecke
+muss die Wand ohne Versätze 2,80 m hoch sein. Oberen Versatz -0,10 eingeben → 2,70 m.
+Undo prüfen, anschließend feste Höhe wählen. Mehrfachauswahl-Eigenschaften bleiben
+unverändert; die Application-Aktion unterstützt bereits atomare mehrere Ziele.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** mehrgeschossigen Gesamtworkflow im Produkt
+   mit Fenster, Anschlüssen, Höhenänderung, Undo/Redo, Datei und IFC abnehmen.
+2. Verhalten ohne oberes Geschoss und beim Einfügen zwischen gebundene Geschosse mit
+   dem Nutzer festlegen; bis dahin bleiben diese Bindungsfälle gesperrt.
+3. Erst danach die zugehörige gemeinsame Höhenaktion für Text-/Sprachbefehle anbinden,
+   mit stabilen ausgewählten Wand- und Geschoss-IDs.

@@ -12524,3 +12524,11 @@ Nachweise/Leistungsgrenzen und genau ein nächster Auftrag im aktuellen N22-Mast
 Nachweis: 1109 Tests, Produkt-/Benchmark-Typecheck, fokussierter Lint und Produktbuild
 bestanden; sieben neue Integrationsfälle. Reproduzierbare lokale Z-Rechenprobe unter
 benchmarks/wall-height-binding.ts. Praktische UI-Abnahme folgt mit dem nächsten Schritt.
+
+### N22 – Eigenschaftenbedienung (17.10.2026)
+Ausgewählte Einzelwand: feste Höhe oder UK Rohdecke, oberer Versatz, Bezugsgeschoss
+und vorläufige Deckenstärke sichtbar. Gemeinsame Höhenaktion, sofortige Auswahl bzw.
+Enter/Blur-Zahlencommit. Keine zweite Höhenlogik. Fehlender Bezug deaktiviert Bindung;
+Fenster-/Anschlussfehler bewahren Modell und History. Isolierter Browsernachweis mit
+echter Inspector-/History-Komponente bestanden; Details, Einschränkungen und nächster
+Gesamtworkflow-Auftrag im Masterplan. 1109 bestehende Tests bestanden.
