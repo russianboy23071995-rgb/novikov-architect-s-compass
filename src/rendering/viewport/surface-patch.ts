@@ -1,7 +1,12 @@
 import type { DisplaySurfaces } from "./layer-display.ts";
 
 type Face = DisplaySurfaces["faces"][number];
-type Patch = { base: DisplaySurfaces; replaced: ReadonlySet<string>; groups: Map<string, Face[]> };
+type Patch = {
+  base: DisplaySurfaces;
+  replaced: ReadonlySet<string>;
+  groups: Map<string, Face[]>;
+  faceCount: number;
+};
 const patches = new WeakMap<DisplaySurfaces, Patch>();
 const indices = new WeakMap<DisplaySurfaces, Map<string, Face[]>>();
 const stationary = new WeakMap<DisplaySurfaces, { ids: ReadonlySet<string>; faces: Face[] }>();
@@ -22,6 +27,10 @@ export function surfaceGroups(solid: DisplaySurfaces) {
 }
 
 export const surfacePatch = (solid: DisplaySurfaces) => patches.get(solid);
+
+/** Constant-time empty-state query, without flattening a composed preview. */
+export const surfaceFaceCount = (solid: DisplaySurfaces) =>
+  patches.get(solid)?.faceCount ?? solid.faces.length;
 
 const noFaces: readonly Face[] = Object.freeze([]);
 /** Resolve one entity against the same snapshot/patch used by the buffer.
@@ -67,6 +76,11 @@ export function composeSurfacePatch(
     },
   };
   const groups = surfaceGroups({ faces: changed, min, max });
-  patches.set(result, { base, replaced: new Set(replaced), groups });
+  patches.set(result, {
+    base,
+    replaced: new Set(replaced),
+    groups,
+    faceCount: retained.length + changed.length,
+  });
   return result;
 }

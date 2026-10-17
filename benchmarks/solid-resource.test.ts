@@ -7,9 +7,54 @@ import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
-import { composeSurfacePatch, surfaceFaces } from "../src/rendering/viewport/surface-patch.ts";
+import {
+  composeSurfacePatch,
+  surfaceFaces,
+  surfaceFaceCount,
+} from "../src/rendering/viewport/surface-patch.ts";
 import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
+
+test("empty-state counts match flat faces without materializing replacement previews", () => {
+  const base = resourceFixture(2);
+  const empty = { ...base, faces: [] };
+  for (const solid of [
+    base,
+    empty,
+    composeSurfacePatch(base, new Set(["w0", "w1"]), [], base.min, base.max),
+    composeSurfacePatch(empty, new Set(["w0"]), [base.faces[0]!], base.min, base.max),
+    composeSurfacePatch(base, new Set(["w0"]), [], base.min, base.max),
+  ]) {
+    const expected = solid.faces.length;
+    if (solid !== base && solid !== empty)
+      Object.defineProperty(solid, "faces", {
+        get() {
+          throw new Error("flattened");
+        },
+      });
+    assert.equal(surfaceFaceCount(solid), expected);
+  }
+});
+
+test("indexed pivot vertices preserve full-scan bounds including missing and hidden targets", () => {
+  const project = boundHeightFixture();
+  const base = buildBuildingSolid(project);
+  const action = prepareSelectionTranslation(project, ["eg-a", "eg-b"]);
+  const moved = selectionMoveSurfaces(base, project, action.evaluate({ x: -20, y: 30 }));
+  const bounds = (faces: readonly (typeof base.faces)[number][]) =>
+    [0, 1, 2].map((axis) => {
+      const values = faces.flatMap((face) => face.vertices.map((v) => v[axis]!));
+      return [Math.min(...values), Math.max(...values)];
+    });
+  for (const solid of [base, moved, visibleSurfaces(moved, (id) => id !== "eg-a"), base]) {
+    for (const ids of [[], ["missing"], ["eg-a"], ["eg-b", "eg-a", "og-a"]]) {
+      assert.deepEqual(
+        bounds(ids.flatMap((id) => [...surfaceFaces(solid, id)])),
+        bounds(solid.faces.filter((face) => ids.includes(face.wallId))),
+      );
+    }
+  }
+});
 
 test("indexed outlines match full scans for movement, removal, visibility and cancel", () => {
   const project = boundHeightFixture();
@@ -57,6 +102,7 @@ test("warm outline queries read no stationary IDs and never materialize patch fa
       },
     });
     reads = 0;
+    assert.equal(surfaceFaceCount(patch), count);
     for (const id of ["w0", "w1", "missing"]) {
       assert.deepEqual(
         selectionEdges(surfaceFaces(patch, id)),
