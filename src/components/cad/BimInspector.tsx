@@ -1,3 +1,4 @@
+import { WallHeightProperties } from "./WallHeightProperties";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { PropertyForm } from "./PropertyForm";
 import { defaultDrawingWindow } from "@/application/drawing/window-placement";
@@ -59,7 +60,6 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     ? ([
         ["length", "Length (m)", wallLength(wall)],
         ["thickness", "Thickness (m)", wall.thickness],
-        ["height", "Height (m)", wall.height],
       ] as const)
     : ([
         ["width", "Width (m)", opening!.width],
@@ -105,7 +105,6 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
               ? updateWall(project, wall.id, {
                   end: endAtLength(wall, number("length")),
                   thickness: number("thickness"),
-                  height: number("height"),
                 })
               : updateWindow(project, opening!.id, {
                   width: number("width"),
@@ -132,6 +131,13 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
           </label>
         ))}
       </PropertyForm>
+      {wall && (
+        <WallHeightProperties
+          project={project}
+          wall={wall}
+          onChange={(next) => onChange(next, selection)}
+        />
+      )}
       {wall && (
         <PropertyForm
           aria-label="Wandfußhöhe"
