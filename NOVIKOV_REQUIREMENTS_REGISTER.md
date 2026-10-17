@@ -12532,3 +12532,12 @@ Enter/Blur-Zahlencommit. Keine zweite Höhenlogik. Fehlender Bezug deaktiviert B
 Fenster-/Anschlussfehler bewahren Modell und History. Isolierter Browsernachweis mit
 echter Inspector-/History-Komponente bestanden; Details, Einschränkungen und nächster
 Gesamtworkflow-Auftrag im Masterplan. 1109 bestehende Tests bestanden.
+
+### N22 – Gesamtworkflow-Nachweis (17.10.2026)
+Gebundene Eckwände und Fenster auf zwei bebauten Geschossen im echten CadWorkspace
+geprüft: Geschosshöhe, Eigenschaften, 3D, Undo/Redo, Speichern/Öffnen, IFC-Download.
+Gemeinsame Browser-/Regression-Fixture unter benchmarks/bound-height-*.
+IFC-Koten 0/4/7 m, Wandhöhen 3,8/2,8 m; kein neuer externer Archicad-Nachweis.
+Offen bleibt ein 3D-onPointerMove-React-Updatefehler aus dem Entwicklungsprotokoll;
+HMR-Einfluss nicht geklärt. Reproduktion ohne HMR hat Vorrang vor weiterer Anbindung.
+Genau ein Folgeauftrag und Abnahmegrenzen im aktuellen N22-Masterplan.

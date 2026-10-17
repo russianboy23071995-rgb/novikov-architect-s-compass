@@ -3608,3 +3608,45 @@ Nächste drei Schritte:
    dem Nutzer festlegen; bis dahin bleiben diese Bindungsfälle gesperrt.
 3. Erst danach die zugehörige gemeinsame Höhenaktion für Text-/Sprachbefehle anbinden,
    mit stabilen ausgewählten Wand- und Geschoss-IDs.
+
+### N22 – Mehrgeschossiger Gesamtworkflow (17.10.2026)
+PR #383 nach bestandener GitHub-CI und ausdrücklicher Freigabe in main übernommen.
+Reproduzierbare Fixture: benchmarks/bound-height-workspace.html (separater Port 8087,
+keine Nutzung des Projekts/Recovery auf 8080), gemeinsame Fixture mit Regressionstest.
+Drei Geschosse, davon zwei mit jeweils zwei eckverbundenen, gebundenen Wänden und
+je einem Fenster. Keine neue Produktfunktion oder eigene Berechnungslogik.
+
+Browsernachweis im tatsächlichen CadWorkspace: EG-Geschosshöhe 3 → 4 m im
+Gebäudestrukturfenster; Wand-Eigenschaften zeigen 3,8 m. 3D zeigt beide bebauten
+Geschosse einschließlich Fenster. Save project → JSON-Download → Open project →
+Bestätigung → Wand weiterhin gebunden mit 3,8 m. Ein Undo ergibt 2,8 m; Redo stellt
+den geänderten Zustand wieder her. OG-Wand bleibt 2,8 m. IFC-Download geprüft:
+Geschosskoten 0 / 4 / 7 m, zweimal Wandextrusion 3,8 m und zweimal 2,8 m, zwei Fenster.
+JSON enthält Bindungsregeln, keine zweite gespeicherte Wandhöhe. Kein Archicad-Import
+in diesem Auftrag. T-Anschlüsse sind durch bestehende Modelltests abgedeckt, nicht
+als zusätzliche Browserabnahme dieses Eckanschluss-Beispiels ausgegeben.
+
+Regression benchmarks/bound-height-workflow.test.ts prüft denselben Bestand,
+Geschosskoten, unveränderte Fenster/Anschlüsse, Solid-Höhe 6,8 m, genau ein Undo,
+Redo, Datei-Roundtrip, identischen IFC-Export und atomare Ablehnung einer Kürzung,
+die das Fenster verletzt. Screenshot: outputs/bound-height-workspace.png außerhalb
+Git; lokale Downloads novikov-project (60).json und novikov-project (12).ifc.
+
+Offener Browserbefund: Im Entwicklungsserver-Protokoll um 08:37:59 UTC erschien
+„Maximum update depth exceeded“ mit onPointerMove in BimSolidView. Die Seite blieb
+anschließend bedienbar; während dieser Abnahme gab es auch Dateiänderungen/HMR.
+Ursache und Reproduzierbarkeit im unveränderten Produktbuild sind NICHT nachgewiesen.
+Daher keine uneingeschränkte Aussage „Browser fehlerfrei“. Keine spekulative Änderung
+am Pointer-/Inference-Pfad aufgrund dieses einzelnen Protokolleintrags.
+
+Nächste drei Schritte:
+1. **Unmittelbar / einziger Folgeauftrag:** den protokollierten 3D-Update-Fehler ohne
+   HMR im Produktbuild reproduzieren und eingrenzen; bei Nachweis gezielt beheben,
+   mit bestehender gemeinsamer Inference-/Preview-Architektur.
+2. Fehlenden oberen Bezug und Einfügen zwischen gebundene Geschosse mit dem Nutzer
+   entscheiden; bislang gesperrte Fälle nicht stillschweigend freischalten.
+3. Anschließend Höhenbindung als Adapter der geprüften gemeinsamen Aktion für
+   Text-/Sprachbefehle mit stabilen Ziel-IDs anbinden.
+
+Validierung dieses Nachweises: 1110/1110 Tests bestanden, Benchmark-/Produkt-Typecheck,
+fokussierter ESLint, git diff --check und Produktbuild bestanden. #383 Merge: 0fe21549.

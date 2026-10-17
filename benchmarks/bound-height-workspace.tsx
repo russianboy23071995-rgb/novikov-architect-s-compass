@@ -1,0 +1,9 @@
+import { createRoot } from "react-dom/client";
+import { CadWorkspace } from "../src/components/cad/CadWorkspace";
+import { boundHeightFixture } from "./bound-height-fixture";
+import "../src/styles.css";
+// Separate disposable origin: never replace the user's workspace/recovery on 8080.
+if (location.port !== "8087") throw new Error("Höhenabnahme nur isoliert auf Port 8087 öffnen.");
+createRoot(document.getElementById("root")!).render(
+  <CadWorkspace initialProject={boundHeightFixture()} />,
+);
