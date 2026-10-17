@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Stand 10.10.2026, main 6abcf7c32821d1cf92237c3cdffe92a4312fe6a9 (PR237).
+Aktueller Abgleich: 17.10.2026, main `0fe21549c4525c51a1e6ff872868ef4377bdc744` nach PR383. Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -23,7 +23,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N01 – Gemeinsames BIM-Modell für komplexe geometrische Entwürfe
 
-- **Stand:** Teilweise: ein autoritatives Modell, aber ein Geschoss und begrenzte Bauteilfamilien.
+- **Stand:** Teilweise: ein autoritatives Mehrgeschossmodell mit Wänden/Fenstern, relativen Höhen und optionaler Wandoberkantenbindung; Räume/Decken/Dächer und vollständiger autonomer Entwurf bleiben offen. Aktueller Prüf-/Reststatus: Masterplan §9.
 - **Zuständigkeit:** M, E → domain/project, geometry/solids
 - **Altzuordnung:** Architekturvertrag; Stage 1
 - **Abnahme/Abhängigkeiten:** Neue Elementverträge, robuste Geometrie, Migration; keine Leistungszusage für Großprojekte. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -12532,3 +12532,14 @@ Enter/Blur-Zahlencommit. Keine zweite Höhenlogik. Fehlender Bezug deaktiviert B
 Fenster-/Anschlussfehler bewahren Modell und History. Isolierter Browsernachweis mit
 echter Inspector-/History-Komponente bestanden; Details, Einschränkungen und nächster
 Gesamtworkflow-Auftrag im Masterplan. 1109 bestehende Tests bestanden.
+
+### Zielabgleich und Korrekturfreigabe 17.10.2026, 10:37 Europe/Berlin
+
+Quelle: Nutzer verlangt den Abgleich mit den besprochenen Zielen und bei Abweichungen Fehlerbehebung und Codebereinigung gemäß Reviewempfehlung.
+Bezug: A01–A05/A10–A12, N01/N21/N22, AI01–AI35, AUD14-01 bis AUD14-07; keine Umnummerierung oder Erledigung offener Anforderungen.
+
+Der Code folgt der gemeinsamen Modell-/Application-/Vorschauarchitektur weitgehend. Die festgestellte operative Abweichung sind widersprüchliche aktive Fortsetzungsaufträge und noch nicht geschlossene Leistungs-/Abnahmegates. Masterplan-Kopf/§4/§9 und AGENTS wurden auf einen aktuellen Vertrag ausgerichtet; historische Nachweise und frühere Nutzervertagung bleiben erhalten. Aktive Reihenfolge ausschließlich Masterplan §9, nicht hier duplizieren.
+
+Erster aktiver Schritt: produktive mehrgeschossige Höhenworkflow-Abnahme nach gemergtem PR383 mit Fenstern/Anschlüssen, Versätzen, Konfliktatomarität, Undo/Redo, Projektdatei/Recovery und IFC. Weitere konkrete Korrekturen: globale 3D-Komposition/Bounds/Gruppierung, große Anschlussgruppen/Legacy-Pfade, gemeinsamer sicherer Validierungs-/Ownershippfad, gezielte Koordinationsbereinigung, veraltete Runtime-Formatmeldung (history.ts nennt Version25 statt26). CPU-/Native-Bildpilot nur bei belastbarer Gegenmessung übernehmen; bei fehlender Messumgebung Gate offen lassen und unabhängig ausführbare Korrekturen fortsetzen.
+
+Alle Erfüllungsaussagen brauchen Codepfad und konkrete Nachweise. Keine neue Featurekette vor diesen Restarbeiten starten, keine Fachprüfungen auf Verdacht schwächen, keine Messserien als Ersatz für gefordertes CPU-Sampling, kein Produktcache auf bloßen Medianvorteil. Fehlende Referenz-/Produktentscheidungen und echte Plattformzugriffsgrenzen sind konkrete Blocker, keine stillen Freigaben. Gemeinsames Ziel bleibt leistungsfähiges AI-CAD für das fünfgeschossige Schulprofil, sichere Daten und skalierbare gemeinsame Aktionen.

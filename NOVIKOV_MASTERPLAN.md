@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Arbeitsauftrag: 17.10.2026 – #382 in main (f58daba). Höhenbindung für ausgewählte Einzelwände in Werkzeugeigenschaften angebunden; isolierte Browserabnahme bestanden. Nächster Auftrag: mehrgeschossige Gesamtworkflow-Abnahme. AUD14-07-Aufnahme weiterhin verschoben.
+Aktueller Stand: 17.10.2026, Abgleich auf main `0fe21549c4525c51a1e6ff872868ef4377bdc744` nach Merge von PR383. Modell und Eigenschaftenwahl für Wandhöhenbindung vorhanden; Gesamtworkflow noch nicht abgenommen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,11 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-Aktuelle AUD14-06-Teilevidenz: reproduzierbare History-/Recovery-Aufbewahrungsmessung
-mit zwei isolierten Projektslots; alte V2-Bildpayloads bleiben nach Bildwechseln gespeichert.
-Isolierter transaktionaler Bereinigungspilot inklusive produktivem Store-Layout und
-V1-Migrationsoriginalen bestanden (AUD14-06 Teile 2/3).
-Kein Nachweis eines JS-Speicherlecks und noch keine automatische Bereinigung; Details unten.
+Aktuelle Kurzfassung und offene Grenzen: siehe Statusmatrix in §9 (17.10.2026). Mehrgeschossmodell, gemeinsame vorbereitete Vorschauen, begrenzte GPU-Uploads und lokale Fangabfragen sind produktiv. Recovery besitzt inzwischen manuelle und automatische sichere Wartung. Wandhöhenbindung und Eigenschaftenbedienung sind nach PR383 vorhanden; ihre Gesamtworkflow-Abnahme steht aus. Die folgenden datierten Einträge sind historische Teilevidenz, keine aktuelle Prioritätenliste.
 
 **Serializer nutzt exakte strukturelle Größenprüfung (12.10.2026):** PR281 nach expliziter Freigabe/grüner CI nach main übernommen. serializeProject validiert vollständig, prüft dann mit bestehendem assertValidatedProjectSize und serialisiert unverändert. 128-MiB-Grenze bleibt. Zwei produktionsnahe Exporte: Größe 11–16 statt 259–273 ms, Export-Tasks 412–511 statt 620–710 ms. Downloads byteidentisch; 910 Tests einschließlich exakter Grenze/Unicode/Escaping, Typecheck/Lint und Builds bestanden. [Nachweis](docs/performance/ASSET_RECOVERY_PILOT.md). Blob- und Ladepausen bleiben offen.
 
@@ -493,60 +489,45 @@ Jeder Eintrag hat stabile ID, Status (vorhanden im genannten Umfang / teilweise 
 
 Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisieren: Commit/PR, Test-/Browserbeleg, Einschränkungen und nächster Einzelauftrag. Alte Entwicklungslogs sind optionale Evidenz, keine weitere Reihenfolgenquelle. Ein Feature-Detailvertrag darf keine eigene widersprüchliche Prioritätenliste mehr führen. Anforderungen nicht nur in PR-Kommentaren oder Chat belassen.
 
-**Verbindlicher Nutzerauftrag vom 14.10.2026, 21:01 Europe/Berlin: alle sieben Reviewpunkte sofort, einzeln und in der unten festgelegten Reihenfolge bearbeiten.**
+**Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
+Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein aktiver Schritt: AUD14-06 – längere Sitzungen mit Bildwechseln, Undo/Reload und Speicherlast prüfen; reale Quota- und synchrone Pausen getrennt nachweisen.**
-AUD14-01 ist begrenzt implementiert und fokussiert geprüft; Nachweis und ausdrücklich
-begrenzter Altdatei-Übergangsvertrag am Dateiende. PR319 am 15.10.2026 freigegeben und gemergt. PR318
-bleibt separat erhalten; dessen historische Fortsetzungsplanung ersetzt AUD14 nicht.
-Keine neuen Features vor diesem Reviewblock. AUD14-02 ist im unten dokumentierten Umfang
-implementiert und geprüft; PR320 am 15.10.2026 freigegeben und gemergt. AUD14-03
-ist im unten begrenzten Umfang geprüft; PR321 am 15.10.2026 freigegeben und gemergt.
-AUD14-04 bleibt aktiv: Gebäudeableitung/Ownership und 3D-Abfragebasis (PR322–324
-gemergt), Fenster-Achsvorschau PR325 gemergt (f734413). Gemeinsamer Application-Einstieg
-und verbindliches Adapter-Abnahmegate ergänzen die Pilotbasis. Nächster Einzelauftrag:
-PR327 ist gemergt (035052c). Beide Wandachsenden, Kürzen und schräge Punktbewegung
-sind über denselben vorbereiteten Adapter verglichen und gemessen. Nächster Einzelauftrag:
-PR328 ist gemergt (6e4df27). Gemeinsame räumliche Konturprüfung: Nachweis Teil 7 unten.
-PR329 gemergt (563c424); direkte Schraffur-Punktvorschau vorbereitet (Teil 8 unten).
-PR330 gemergt (0a159ef); inkrementelle Schraffur-Punktprüfung nachgewiesen (Teil 9).
-PR331 gemergt (1834600); Schraffur-Seitenstreckung vorbereitet (Teil 10 unten).
-PR338/339 gemergt (fe9f83e/395b458); Polylinien-Knicken vorbereitet und verglichen (Teil 18).
-PR340 gemergt (ff4af16); direktes Wand-Strecken gemeinsam vorbereitet und verglichen (Teil 19).
-PR341 gemergt (0a093f6); freie Wandkörper-Eckbewegung gemeinsam vorbereitet (Teil 20).
-PR342 gemergt (a40bc22); begrenzte Mehrgeschoss-/Browserabnahme dokumentiert in Teil 21.
-PR343 gemergt (180320a); lokale 3D-Ursprungsfangabfrage implementiert, Nachweis AUD14-05 Teil 1.
-PR344 gemergt (c0abb7f); vorbereitete räumliche Verdeckungsprüfung nachgewiesen (AUD14-05 Teil 2).
-PR345 gemergt (cb895cc); Anschlussgruppenmessung und räumliche Fremdendpunktprüfung in AUD14-05 Teil 3.
-PR346 gemergt (9c38ffc); AUD14-06-Messung mit 220 Modelländerungen dokumentiert unten.
-PR347 gemergt (aeddaec); transaktionaler Bereinigungspilot und Browsernachweis unten.
-PR348 gemergt (4e1945d); produktives Layout und V1-Schutz isoliert geprüft, siehe Teil 3.
-Manuelle Wartungsaktion nach ausdrücklicher Aktivierungsfreigabe angebunden (Teil 5).
-Nächster Einzelauftrag: Langsitzung/Speicherprofil; keine Bereinigung pro Autosave.
-AUD14-04 bleibt mit Restschuld offen; diese Übergangsentscheidung ist keine Gesamtfreigabe.
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-07 / N22 – den produktiven mehrgeschossigen Wandhöhen-Workflow nach PR383 vollständig abnehmen und dabei reproduzierte Fehler beheben.**
+PR383 ist inzwischen gemergt; seine reine Komponentenabnahme reicht nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
 
+**Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
+1. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
+2. AUD14-04/05: große Anschlussgruppen und verbliebene Legacy-Aktionen aus der vorhandenen Pfadinventur bearbeiten. Der 51-Wand-Gruppenrest (~14,6 ms in früherer reiner Vorschau) bleibt offen. Fachlich vollständige stationäre Nachbarn erhalten; Abhängigkeiten nicht blind kürzen. Wiederholte globale Validierung und Wand/Fenster-Scans nur mit nachgewiesenem Nutzen sicher begrenzen. Neue Werkzeuge dürfen keine Legacy-Vollpfade als Standard übernehmen.
+3. AUD14-07: Abbildwechsel/Recovery-Vergleich und Bildressourcen-Pilot am selben Build mit vorhandenen Tracewerkzeugen erneut prüfen, sobald eine tatsächliche CPU-/Native-Aufnahme möglich ist. Die Nutzervertagung vom 16.10. bleibt als historische Prioritätsentscheidung erhalten; diese erneute Korrekturfreigabe reaktiviert die unabhängig ausführbare Arbeit. Fehlender Profiler bleibt eine konkrete Beleggrenze, kein erfundener Fix. Keine weitere reine Longtask-Serie als Ersatz und keine Produktpromotion des Pools ohne belastbaren Nutzen. Bei dieser Werkzeuggrenze die anderen unabhängigen Bereinigungen fortsetzen.
+4. AUD14-06/07: schwere kombinierte S1-Abnahme, kontinuierliche Maus-/Shift-Gesten, kontrollierte Kaltstarts, Kamera-/Ansichtswechsel und Langsession fortsetzen. Echte Quota, Tab-Hidden/Fokus/Abbruch während aktiver Arbeit und Prozess-/Raster-/GPU-Spitzen bleiben Release-/Kapazitätsgates. Nur isolierte wegwerfbare Testdaten verwenden, niemals Nutzersicherungen oder Systemdatenträger absichtlich füllen. Fehlende Umgebung/Native-Bedienmöglichkeit konkret als offen dokumentieren.
+5. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
+6. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-Die Freigabe umfasst Diagnose, begrenzte Umsetzung und passende Verifikation aller Punkte. Nicht nach jedem abgeschlossenen Punkt erneut fragen, ob der nächste begonnen werden soll. Nach grünem Abschluss den nächsten offenen Punkt unmittelbar übernehmen; nur bei einer tatsächlich fehlenden Produktentscheidung oder Zugriffssperre konkret eskalieren. Es werden keine pauschale Grenzerhöhung, kein Renderer-/Sprachwechsel und keine breite Neuimplementierung vorausgesetzt.
+**Aktueller AUD14-Status (17.10.2026, Code-/Nachweisabgleich nach PR383):**
 
-| Reihenfolge | ID | Priorität | Ausführbarer Auftrag |
-| --- | --- | --- | --- |
-| 1 | AUD14-01 | P0 | Datei-/Modellzulässigkeit und Recovery-Gesamtpixelbudget abgleichen, Grenzfall reproduzieren und konsistent lösen. |
-| 2 | AUD14-02 | P1 | Vollständige Projekt-/Bildserialisierung aus XY-/Z-Bewegung und weiteren betroffenen Änderungsvergleichen entfernen; Snapshot-/Mutationsschutz erhalten. |
-| 3 | AUD14-03 | P1 | 3D-Ressourcen für unveränderte Geometrie wiederverwenden; Vorschau und Auswahl begrenzt aktualisieren. |
-| 4 | AUD14-04 | P1 | Wiederholte globale Validierung/Ableitung begrenzen, Ansichtskontext von Modelländerung trennen und verbleibende direkte 3D-Vorschauen vorbereiten. |
-| 5 | AUD14-05 | P1 | Neuen räumlichen 3D-Ursprungsfang lokal abfragen; große Anschlussgruppen mitmessen und betroffene Menge fachlich sicher begrenzen. |
-| 6 | AUD14-06 | P1 | Recovery-Aufbewahrung, Langhistory, Bild-/Geometrie-Caches und reale Speicher-/Quota-Grenzen über lange Sitzungen prüfen und sicher begrenzen. |
-| 7 | AUD14-07 | P2 / Abschlussgate | Aktuellen Dokumentationsstatus, UTF-8-Texte und Zuständigkeiten bereinigen; gesamten Block mit schwerem Mehrgeschossprofil abnehmen. |
+| ID | Verifizierter Teilstand | Verbleibende Arbeit |
+| --- | --- | --- |
+| AUD14-01 | Gemeinsames 128-Millionen-Pixelbudget pro Asset-ID; normale Aufnahme und Recovery konsistent, warnender Altdatei-Übergang | Übergang bewusst unsicherbarer Altdateien erhalten; Ressourcen-/Release-Nachweise kein pauschales Größenversprechen |
+| AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
+| AUD14-03 | Shader-/Pufferlebensdauer und begrenzte Uploads umgesetzt | Gesamtflächenkomposition, Bounds/Gruppierung und schwere Gesamtframes offen |
+| AUD14-04 | Viele gemeinsame vorbereitete Wand/Fenster/Linien/Schraffuradapter, Ownership und Ansichtsbasis umgesetzt | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen umgesetzt | Große zusammenhängende Gruppen sowie Kamera-/Indexvorbereitung offen |
+| AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots und begrenzte Sitzungen nachgewiesen | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
+| AUD14-07 | S1 G/GB mit fünf Geschossen, 300 Wänden/200 Fenstern/20 Bildern und Teilworkflow-Nachweisen | Höhen-Gesamtworkflow, Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Statuspflege offen |
 
-Alle IDs beginnen als **offen / zur sofortigen Bearbeitung freigegeben**, nicht als implementiert. Details, konkrete Codebefunde und Abnahmekriterien stehen im Register unter diesen IDs. Für jeden Punkt: aktuellen main und offene PRs abgleichen; Vorhermessung/Reproduktion; kleinster sinnvoller Fix; Fach-/Fehlerregression; App-/Benchmark-Typecheck, relevantes Lint/Build und produktionsnaher Browsernachweis. Verschachtelte Zeiten nicht addieren, Einzelmessungen nicht als p95 ausgeben. Nachweise auf Commit/Fixture beziehen; Status und nächsten aktiven Schritt hier aktualisieren. Nur Messinstrumentierung ohne Erfüllung des Abnahmekriteriums schließt einen Punkt nicht.
+**Abschluss- und Arbeitsregeln:** Die Freigabe umfasst Diagnose, begrenzte Fehlerbehebung, Codebereinigung und passende Verifikation. Nach einem belegten Abschluss unmittelbar den nächsten offenen Schritt beginnen. Reproduzierter Sicherungsverlust/falsche Maße/fehlerhafter Commit-Erfolg ist P0 und zieht vor. Erfolgreiche CI ist erforderlich, ersetzt aber keine praktische Abnahme. Mikrobenchmark, Programmlauf, Browserframe, CPU-Sampling und tatsächliche native Geste getrennt benennen. Referenzhardware/Browser/Commit, Fixtures und Grenzen mitführen. Kein Compiler-/Renderer-/Frameworkwechsel, keine pauschale Grenzerhöhung und keine Kürzung fachlicher Prüfungen auf Verdacht.
 
-Gemeinsamer Akzeptanzkontext: Schule etwa 1.000 m² je Geschoss, fünf Geschosse, viele Wände/Fenster/Eck-/T-Anschlüsse, Linien/Schraffuren/Polygonpunkte, mehrere Abbilder und bis zu 20 Referenzpläne als Prüfrichtwert. 128 MiB bleibt der derzeitige portable Dateivertrag; größere Kapazität ist keine Voraussetzung dieser Korrekturen. Schwere BIM- und Bildprofile getrennt sowie kombiniert messen. Referenzhardware/Browser, kalte und warme Läufe, Wiederholungen, Pointer/Commit/Undo, 2D/3D, Export/Recovery, Peak-Speicher und Grenzen dokumentieren. Verfügbare Fachfunktionen verwenden; fehlende Räume/Decken/Dächer nicht durch Testbehauptungen ersetzen. Die Archicad-Bachelorarbeit erst später mit passendem Importadapter, keine PLN-/IFC-Importfähigkeit behaupten.
+Gemeinsamer Akzeptanzkontext bleibt die Schule mit etwa 1.000 m² je Geschoss und fünf Geschossen, vielen Details und bis zu 20 Referenzplänen als Richtwert. Aktuell 128 MiB Datei/128 Millionen Bildpixel; 20 Bilder in S1 mit ~21 Millionen Pixeln beweisen nicht 20 maximal aufgelöste Pläne. Echte Räume/Decken/Dächer und Archicad-/IFC-Importfähigkeit bleiben eigene noch fehlende Fähigkeiten. Die AI-Zielarchitektur wird durch gemeinsame Commands/Queries weiter vorbereitet; kein bloßes Renderer-Mesh oder Bild als editierbares BIM ausgeben.
+
+**Eindeutige Pflege:** Nur dieser §9 enthält aktive Priorität und nächsten Auftrag. Kopfzeile, AGENTS und Register verweisen darauf. Nach jeder Aufgabe diese Statusmatrix und den aktiven Einzelschritt aktualisieren, drei nächste konkrete Schritte mit genau einem unmittelbaren nennen. Chronologische Nachweise nach §10 enthalten historische Entscheidungen und behalten ihre Quellen, haben aber keine ausführbare Priorität. Keine parallele Roadmap oder ständig neue Diagnose-Ersatzaufträge.
 
 **Startprompt für Codex:** Lies AGENTS.md und NOVIKOV_MASTERPLAN.md. Lies im NOVIKOV_REQUIREMENTS_REGISTER.md nur die IDs/Detailverträge des aktiven Auftrags. Vergleiche aktuellen main, offenen PR und lokale Änderungen. Erhalte fremde Arbeit. Nenne zuständige Schicht, Action/Query, Kontext, Abhängigkeiten und Abnahme. Setze genau einen begrenzten Auftrag um. Verwende bestehende Modell-, Snap-, ToolInteraction- und History-Grenzen. Dokumentiere ausgeführte Prüfungen und Einschränkungen, aktualisiere diese zwei Dateien und ende mit dem nächsten konkreten Schritt.
 
 ## 10. Verwaltung und persönliche Ablage
 
 GitHub bleibt die technische Quelle. Für kommende Arbeitsaufträge genügen diese zwei Dateien plus fokussierte Code-/Test-/Diagnoselesung. GitHub Issues/Projects können später IDs, Prioritäten und Status abbilden; kein weiterer Plugin-Anschluss ist dafür Voraussetzung. Ein zusätzliches Notion-/Linear-System ist optional, würde aber eine klar geregelte Synchronisierung benötigen. Die PDF ist ein datierter Fahrplan für die persönliche Ablage und keine dritte laufend gepflegte Quelle.
+
+> **Historisches Statusprotokoll ab hier:** Datierte Nachweise und damalige Nutzerentscheidungen bleiben erhalten. Frühere Formulierungen „aktiv“, „nächster Auftrag“, „noch kein …“ und frühere PR-Zuordnungen gelten ausschließlich für ihren damaligen Stand. Aktuelle Verfügbarkeit und ausführbare Reihenfolge bestimmt allein §9.
 
 ### Ergänzung zum aktiven Geschossauftrag (Nutzerentscheidung 13.10.2026)
 Der Architekturauftrag aus §9 berücksichtigt den neuen Nutzervertrag unter
