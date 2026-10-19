@@ -55,6 +55,7 @@ for (const foreign of [0, 100, 1000]) {
   const preparationMs = performance.now() - start;
   const solid = buildBuildingSolid(base);
   const samples = [];
+  let firstTargetMs = 0;
   for (let i = 0; i < 28; i++) {
     // Fixed target: repeated pointer events can resolve to the same snapped point.
     const candidate = candidateFor(8),
@@ -62,6 +63,7 @@ for (const foreign of [0, 100, 1000]) {
     const t = performance.now();
     const patch = prepared.evaluate(base, session.target, point, candidate);
     const a = performance.now();
+    if (i === 0) firstTargetMs = a - t;
     const derived = selectionMoveSurfaces(solid, base, patch);
     const b = performance.now();
     const moved = editAtPointer(session, base, point);
@@ -84,11 +86,14 @@ for (const foreign of [0, 100, 1000]) {
       });
   }
   // Target change and return must not reuse another host's geometry.
+  const changedTargetMs = [];
   for (const x of [10, 8]) {
     const candidate = candidateFor(x),
       point = candidate.worldPoint;
     const full = connectSnappedT(session, editAtPointer(session, base, point), point, candidate);
+    const before = performance.now();
     const patch = prepared.evaluate(base, session.target, point, candidate);
+    changedTargetMs.push(performance.now() - before);
     assert.deepEqual(storeyOf(patch.geometry), storeyOf(full));
     assert.deepEqual(
       canonical(selectionMoveSurfaces(solid, base, patch).faces),
@@ -139,6 +144,8 @@ for (const foreign of [0, 100, 1000]) {
   runs.push({
     foreign,
     preparationMs,
+    firstTargetMs,
+    changedTargetMs,
     walls: storeyOf(base).walls.length,
     preview: summary(samples.map((s) => s.previewMs)),
     composition: summary(samples.map((s) => s.compositionMs)),

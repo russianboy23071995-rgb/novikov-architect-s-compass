@@ -5,6 +5,7 @@ import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
+import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 
 /** Shared axis/body endpoint gestures and constrained stretching retain their original anchor. */
 export function prepareWallEndpointPreview(session: EditSession): PreparedDirectEditPreview | null {
@@ -23,7 +24,20 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
     anchor: session.anchor,
     action: session.action,
   });
-  const replacedIds = [...storeyOf(base).walls, ...storeyOf(base).windows].map((e) => e.id);
+  const replacedIds = Object.freeze(
+    [...storeyOf(base).walls, ...storeyOf(base).windows].map((e) => e.id),
+  );
+  // One disposable result per capability, never a global model/ID cache.
+  let lastT:
+    | {
+        host: string | null;
+        x: number;
+        y: number;
+        snapX: number;
+        snapY: number;
+        patch: GeometryPreview;
+      }
+    | undefined;
   const pinned = Object.freeze({
     ...session,
     base,
@@ -47,16 +61,40 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
       assertContext(current, selection);
       // New snapped relations may reach beyond the prepared dependency component.
       if (candidate?.sourceFeature === "t-axis") {
+        if (
+          lastT &&
+          lastT.host === candidate.sourceEntityId &&
+          lastT.x === point.x &&
+          lastT.y === point.y &&
+          lastT.snapX === candidate.worldPoint.x &&
+          lastT.snapY === candidate.worldPoint.y
+        )
+          return lastT.patch;
+        // A failed/changed target must not retain an older successful result.
+        lastT = undefined;
         const next = connectSnappedT(pinned, editAtPointer(pinned, base, point), point, candidate);
-        const level = storeyOf(next);
+        // Use the established ownership boundary: callers cannot mutate a cached
+        // result or freeze their own project to acquire validation provenance.
+        const level = storeyOf(createProjectSnapshot(next));
         const geometry = { storey: level, assets: [] };
-
-        return {
+        Object.freeze(geometry.assets);
+        Object.freeze(geometry);
+        const patch: GeometryPreview = Object.freeze({
           geometry,
           replacedIds,
-          storeyPatches: [{ storeyId: s.id, geometry, replacedIds }],
+          storeyPatches: Object.freeze([Object.freeze({ storeyId: s.id, geometry, replacedIds })]),
+        });
+        lastT = {
+          host: candidate.sourceEntityId,
+          x: point.x,
+          y: point.y,
+          snapX: candidate.worldPoint.x,
+          snapY: candidate.worldPoint.y,
+          patch,
         };
+        return patch;
       }
+      lastT = undefined;
       return prepared.evaluateGeometry(point).patch;
     },
   } satisfies PreparedDirectEditPreview);

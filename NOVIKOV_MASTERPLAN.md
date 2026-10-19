@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 19.10.2026, main `064afe2` nach Merge von PR392. Große Anschlussgruppe funktional im Browser geprüft; vollständiger T-Fremdkontaktpfad mit wachsendem Restgeschoss gemessen. Wiederholte gleiche Ziele und Gesamtgeschosskomposition bleiben teuer. Maßgeblicher Auftrag und offene Native-/Frame-Gates ausschließlich §9.
+Aktueller Stand: 19.10.2026, main `064afe2` nach PR392. PR393 ausdrücklich freigegeben, CI/Merge noch ausstehend. Sicherer Eintragscache für vollständig geprüfte T-Fangziele lokal implementiert und mit 1128 Tests geprüft; erste/geänderte Ziele und Gesamtkomposition bleiben proportional. Aktiver Auftrag und offene Native-/Frame-Gates ausschließlich §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+19.10.2026: Sichere T-Zielwiederverwendung im gemeinsamen Wandadapter lokal umgesetzt. 1128 Tests und Produktionsbuild bestanden. Wiederholte gleiche Ziele unter 0,01 ms im Node-Parcours; Erst-/Wechselkosten und Komposition ausdrücklich offen. Noch keine neue Browserabnahme.
 
 19.10.2026: T-Fremdkontakt mit festem Ziel und 0/100/1000 fremden Wänden gemessen; Projekt-/Flächengleichheit und vollständiger Commit mit Undo/Redo nachgewiesen. Noch keine produktive Optimierung dieses Pfads. Details im datierten Nachweis.
 
@@ -498,7 +500,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – im gemeinsamen vorbereiteten Wandadapter ein unveränderliches, vollständig geprüftes T-Zielergebnis innerhalb derselben Sitzung wiederverwenden (höchstens ein Eintrag). Kontextprüfung vor jedem Treffer, semantischer Zielschlüssel, vollständiger unabhängiger Commit; Ziel-/Hostwechsel, ungültige Kandidaten und Mutationsschutz testen und am gleichen Diagnoseparcours gegenmessen. Erste/geänderte Ziele und Gesamtkomposition bleiben offen.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – T-Vorschaukomposition auf die vollständige Vereinigung der betroffenen Vorher-/Nachher-Anschlussgruppen begrenzen. Stationäre und gelöste Nachbarn sowie Fenster erhalten; Projekt-/Flächengleichheit, neue/wechselnde Hosts und fremde Kontakte gegen den Vollpfad prüfen. Erste/geänderte Zielvalidierung bleibt vollständig. Ausstehende CI/Merge-Gates der Basis vorher abschließen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -519,7 +521,7 @@ Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR3
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
 | AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
 | AUD14-04 | Gemeinsame vorbereitete Adapter, Ownership und Ansichtsbasis; PR391-Extrusionsreuse an 51-Wand-Gruppe im Produktbrowser mit Vollpfad-Exportgleichheit geprüft | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
-| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft | Neuer t-axis-Vollpfad bei 0/100/1000 Fremdwänden gemessen, noch nicht optimiert; Restkosten großer Gruppen sowie Kamera-/Indexvorbereitung und Native-Frames offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft | T-Zielwiederverwendung lokal mit 1128 Tests geprüft; Erst-/Wechselkosten und volle Geschosskomposition bleiben offen, ebenso Kamera-/Indexvorbereitung und Native-Frames |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
 | AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
@@ -4011,3 +4013,49 @@ Ziele und Gesamtgeschosskomposition bleiben proportional und werden ausdrücklic
 nicht als skaliert freigegeben. Danach vollständige Vorher-/Nachher-Abhängigkeits-
 menge für begrenzte Komposition prüfen; keine stationären Nachbarn abschneiden.
 Aktive Reihenfolge ausschließlich §9.
+
+### AUD14-04/05 – sichere Wiederverwendung eines T-Fangziels (19.10.2026)
+
+Auf dem geprüften Diagnosecode aus PR393 implementiert; dessen Mergefreigabe
+liegt ausdrücklich vor, die GitHub-CI war bei diesem Nachweis noch in_progress
+(ohne gestartete Jobschritte). Kein erfolgreicher Merge vorweggenommen.
+
+prepared-wall.ts hält je vorbereiteter Application-Capability höchstens ein
+T-Ergebnis. Vor jedem Treffer wird der bestehende Projekt-/Auswahlkontext geprüft.
+Der Schlüssel speichert Werte statt Kandidatenobjekte: Host-ID, exaktes Ziel x/y
+und Kandidatenweltpunkt x/y; nur sourceFeature t-axis gelangt in diesen Pfad.
+Andere/ungültige Ziele sowie Verlassen des T-Fangs verwerfen den Eintrag.
+Neue Kandidatenobjekte mit gleichem semantischen Ziel dürfen ihn wiederverwenden.
+
+Das erste Ergebnis läuft weiterhin über editAtPointer und connectSnappedT.
+createProjectSnapshot übernimmt danach die bestehende validierte Ownershipgrenze;
+Geometriescope, Patch, Patchliste und IDs sind ebenfalls eingefroren. Diese zusätzliche
+Snapshotprüfung kostet beim ersten/geänderten Ziel Arbeit, verhindert aber mutable
+Cacheausgaben ohne einen neuen Vertrauensweg zu erfinden. Keine fremden Modelldaten
+werden eingefroren. Kein globaler Cache, kein Renderer-Sonderpfad. Confirm bleibt
+unverändert unabhängig und vollständig; der Cache schreibt keine History.
+
+1128 Tests einschließlich drei neuer Regressionen, Typecheck, fokussiertes Lint,
+Formatprüfung und Produktionsbuild bestanden. Regressionen: semantischer Treffer,
+Mutationsversuche, stale Projekt/Auswahl, Hostwechsel/Rückkehr, fehlender Host,
+abweichender Kandidatenpunkt, Verlassen des Fangs, neue Capability nach Abbruch,
+Commit-/Undo-/Redo-Gleichheit und invalides Modell trotz warmer Vorschau abgewiesen.
+
+Gegenmessung mit unverändertem 0/100/1000-Fremdwände-Parcours und exaktem Projekt-/
+Flächenvergleich: wiederholte Vorschau Median 0,0023/0,0024/0,0027 ms statt
+0,72/2,21/19,25 ms. Bei 1000 fremden Wänden p95 0,0031 ms; Komposition weiterhin
+5,59 ms. Erstes Ziel 27,51 ms, zwei Hostwechsel 21,99/26,15 ms (Einzelwerte, kein
+Kaltstart-Quantil). Vorbereitung separat. Ergebnisdatei:
+benchmarks/t-axis-target-reuse-results.json; Baseline t-axis-contact-results.json.
+Messskript ergänzt Erst-/Wechselkosten, damit warme Treffer keinen vollständigen
+Skalierungsnachweis vortäuschen. Node CPU, keine Browser-/Native-/Frame-Garantie.
+
+Praktische Abnahme: Wandachsende an die Achse einer unverbundenen Wand führen,
+T-Fang halten, verlassen und erneut anfahren, anderen Host anfahren, abbrechen
+bzw. platzieren; ein Undo nimmt die Platzierung zurück. Dieser Auftrag beansprucht
+keine neue Browserabnahme; Produktbrowsernachweis aus PR392 bleibt separat.
+
+Rest: alle Geschosselemente werden weiterhin in den Patch aufgenommen; neue Ziele
+bleiben vollständig und proportional geprüft. Nächster begrenzter Auftrag gemäß §9:
+T-Vorschaukomposition über vollständige Vorher-/Nachher-Abhängigkeitsgruppen
+begrenzen, gegen unveränderten Vollpfad inklusive gelöster Nachbarn vergleichen.
