@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Aktueller Stand: 17.10.2026, main `fa41154` nach Merge von PR390. Höhen-Gesamtworkflow mit Recovery-Startschutz nachgewiesen. Gemeinsame Flächen-/Pufferpatches im Produktbrowser funktional geprüft; kontinuierliche Shift-/Frame-Abnahme bleibt offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
+Aktueller Stand: 19.10.2026, main `4e0864c` nach Merge von PR391. Endpunkt-Extrusionspilot an großer Anschlussgruppe im Produktbrowser funktional geprüft; Exportstände exakt gleich zum Vollpfad. Kontinuierliche Shift-/Frame-Gates bleiben offen. Maßgeblicher Arbeitsauftrag und AUD14-Reststatus stehen ausschließlich in §9. Historische Fortsetzungssätze im Statusprotokoll sind keine aktiven Aufträge.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+19.10.2026: Große Anschlussgruppe (51 + 100 Wände, 51 Fenster) in 2D/3D funktional abgenommen; Abbruch, Platzierung, Undo/Redo und vier vollständige Exportvergleiche bestanden. Keine kontinuierliche Native-/Frame-Freigabe. Details im datierten Nachweis.
 
 17.10.2026: Höhen-Gesamtworkflow und Recovery-Startschutz in PR384 nachgewiesen. 1115 Tests und Produktbuild bestanden. Einzelheiten im datierten Nachweis, aktive Fortsetzung ausschließlich §9.
 
@@ -494,7 +496,7 @@ Nach jeder Aufgabe Masterplan §4/§9 und betroffene Registereinträge aktualisi
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – Endpunkt-Extrusionspiloten im Produktbrowser an großer Anschlussgruppe prüfen; verbleibende Arbeit und Legacy-Verbraucher anhand derselben vorbereiteten Grenze einordnen. Kontinuierliche Native-/Frame-Gates ausdrücklich offen halten, falls nicht bedienbar.**
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – den vollständigen t-axis-Fremdkontaktpfad in prepared-wall.ts bei festem Ziel und wachsendem Restgeschoss messen, mit dem Vollpfad auf Projekt-/Flächengleichheit vergleichen und eine sichere begrenzte Wiederverwendung anhand des Befunds festlegen. Keine Anschlussprüfungen kürzen; kontinuierliche Native-/Frame-Gates bleiben offen.**
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR383 ist gemergt; seine reine Komponentenabnahme reichte nicht als Gesamtworkflow. EG/OG/KG, Wand mit Fenster, feste/gebundene angeschlossene Wände, positive/negative Fuß- und obere Versätze, Geschosshöhenänderung und abgewiesene Konflikte prüfen. Genau ein Undo, Redo, JSON-Dateirundlauf, produktive Recovery-Wiederaufnahme und IFC-Höhen/Zuordnung nachweisen. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Gesperrte Fälle ohne oberes Geschoss/Einfügen zwischen gebundene Geschosse nicht eigenmächtig erweitern. Konkrete kleine Codealtlast mitbereinigen: Fehlermeldung in lib/bim/history.ts nennt noch Version 1 bis 25, tatsächlich ist Schema26 vorhanden; Formatangaben an einem gemeinsamen aktuellen Vertrag ausrichten, bestehende Fehler-/Größenprüfung erhalten.
@@ -507,15 +509,15 @@ Abgeschlossener Prüfauftrag (Nachweis unten; kein zweiter aktiver Auftrag): PR3
 5. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
 6. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-**Aktueller AUD14-Status (17.10.2026, Code-/Nachweisabgleich nach PR383):**
+**Aktueller AUD14-Status (19.10.2026, Code-/Nachweisabgleich nach PR391 und Browser-Abnahme):**
 
 | ID | Verifizierter Teilstand | Verbleibende Arbeit |
 | --- | --- | --- |
 | AUD14-01 | Gemeinsames 128-Millionen-Pixelbudget pro Asset-ID; normale Aufnahme und Recovery konsistent, warnender Altdatei-Übergang | Übergang bewusst unsicherbarer Altdateien erhalten; Ressourcen-/Release-Nachweise kein pauschales Größenversprechen |
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
 | AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
-| AUD14-04 | Viele gemeinsame vorbereitete Wand/Fenster/Linien/Schraffuradapter, Ownership und Ansichtsbasis umgesetzt | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
-| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen umgesetzt | Große zusammenhängende Gruppen sowie Kamera-/Indexvorbereitung offen |
+| AUD14-04 | Gemeinsame vorbereitete Adapter, Ownership und Ansichtsbasis; PR391-Extrusionsreuse an 51-Wand-Gruppe im Produktbrowser mit Vollpfad-Exportgleichheit geprüft | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft | Neuer t-axis-Vollpfad, Restkosten großer Gruppen sowie Kamera-/Indexvorbereitung und Native-Frames offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
 | AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
@@ -3917,3 +3919,42 @@ ist nicht das Endergebnis. Unterschiedliche Läufe, keine statistische Garantie.
 Grenzen: weiterhin vollständige lokale Fachoperation/Parsing/Konturen und zweite
 Weltkoordinatenableitung. Kein Browser-/Native-/Frame-/GPU-Nachweis dieses Piloten,
 keine Gesamtfreigabe AUD14. Nächster begrenzter Auftrag ausschließlich §9.
+
+### AUD14-04/05 – große Anschlussgruppe im Produktbrowser (19.10.2026)
+
+PR391 ist in main 4e0864c übernommen. Isolierter statischer CadWorkspace auf
+127.0.0.1:8087, ohne HMR oder Zustandsinjektion; bestehende Anschlussgruppen-Fixture
+mit 51 verbundenen Wänden, 51 Fenstern und 100 fremden Wänden per Query auswählbar.
+Nutzerprojekt und Recovery auf 8080 unberührt. Nach Serverneustart Browserzugriff
+wieder möglich; vorherige Werkzeugblockade ist kein Produktfehler.
+
+Bestanden: Hauptwand-Endpunkt über On-Demand „Punkt in Flucht strecken“ in 2D
+153 → 155 m vorschauen, abbrechen (Achse wieder 153, Undo weiterhin deaktiviert),
+erneut platzieren, genau ein Undo und Redo. Anschließend im 3D-Renderer dieselbe
+Aktion 155 → 4,5 m: Vorschau und Platzierung lösen 49 der 50 T-Anschlüsse, alle
+151 Wände und 51 Fenster bleiben erhalten. Undo stellt alle 50 Anschlüsse wieder
+her; Redo/Undo erneut bedienbar. Zwei native Orbit-Drags und Zoom geprüft,
+keine erfassten Browser-Konsolenfehler. Vier reale JSON-Downloads (Verlängerung,
+Redo, starke Verkürzung, deren Undo) sind vollständig gleich zum unabhängigen
+editAtPointer-Vollpfad. Ausgangsfixture berücksichtigt den regulär vom Workspace
+angelegten Standardordner Abbildsammlung; keine Bauteilfelder herausgefiltert.
+Hashes und Ergebnisse: benchmarks/large-group-browser-evidence.json.
+
+Praktischer Wiederholtest: Testbuild auf 8087 mit ?connectionGroup=large öffnen,
+rechtes Ende der vorausgewählten Hauptwand anklicken → Punkt in Flucht strecken
+→ Länge 2 → Abbrechen bzw. Übernehmen; Undo/Redo. In 3D bei 500 % Hauptwandende
+wählen → dieselbe Aktion → Länge -150.5 → Übernehmen → Undo.
+
+Beleggrenze: numerische Eingabe durch das echte Hilfseingabefenster prüft den
+Produktvorschau-/Commitpfad, nicht kontinuierliche native Shift-Zielwechsel.
+Keine Frame-, GPU- oder CPU-Sampling-Abnahme und kein Stundenlauf behauptet.
+Die 1125 Tests aus PR391 bleiben historische Codeevidenz; dieser Auftrag ergänzt
+Browser-/Exportnachweis, Typecheck, fokussiertes Lint und isolierten Build.
+
+Codeeinordnung: prepared-preview.ts zentralisiert registrierte Adapter; null
+bleibt ausdrücklich Legacy, materialize bleibt 2D-Kompatibilitätsweg. Im
+prepared-wall.ts führt ein neuer t-axis-Kandidat weiterhin editAtPointer plus
+connectSnappedT vollständig aus und ersetzt das ganze Geschoss. Dieser sichere
+Fremdkontaktpfad wurde durch den Extrusionspiloten nicht optimiert. Lokales Parsing,
+Konturen und zweite Weltkoordinatenableitung bleiben ebenfalls Restarbeit.
+Aktiver Folgeauftrag steht ausschließlich in §9.

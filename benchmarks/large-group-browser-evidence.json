@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-19",
+  "baseCommit": "4e0864cca5c1e9f888c89d039c50bf8a1e83dd32",
+  "url": "http://127.0.0.1:8087/benchmarks/bound-height-workspace.html?connectionGroup=large",
+  "build": "bound-height-workspace-C8eBeTW_.js",
+  "method": "Real CadWorkspace static production build; UI input and downloads through in-app browser. Full editAtPointer comparison against fixture plus normal workspace default Abbildsammlung folder. No injected application state.",
+  "fixture": {
+    "connectedWalls": 51,
+    "foreignWalls": 100,
+    "windows": 51
+  },
+  "cancel": {
+    "previewEndX": 155,
+    "afterCancelEndX": 153,
+    "undoEnabled": false
+  },
+  "singleUndoAfterFirstCommit": true,
+  "consoleErrors": 0,
+  "cases": [
+    {
+      "name": "extend",
+      "sha256": "f54e2515d2d83a028c5a4c24e1a6670fff5579f449b74aa35cfd3c2e184629e1",
+      "exactFullProjectEquality": true,
+      "wallCount": 151,
+      "windowCount": 51,
+      "tJunctionCount": 50,
+      "hostEnd": {
+        "x": 155,
+        "y": 0
+      }
+    },
+    {
+      "name": "redo",
+      "sha256": "f54e2515d2d83a028c5a4c24e1a6670fff5579f449b74aa35cfd3c2e184629e1",
+      "exactFullProjectEquality": true,
+      "wallCount": 151,
+      "windowCount": 51,
+      "tJunctionCount": 50,
+      "hostEnd": {
+        "x": 155,
+        "y": 0
+      }
+    },
+    {
+      "name": "shorten",
+      "sha256": "53387caf32e6aa5d054e2f397f84001fa86dba158fe6a8f8d3fb36fd70fecf0b",
+      "exactFullProjectEquality": true,
+      "wallCount": 151,
+      "windowCount": 51,
+      "tJunctionCount": 1,
+      "hostEnd": {
+        "x": 4.5,
+        "y": 0
+      }
+    },
+    {
+      "name": "undoShorten",
+      "sha256": "f54e2515d2d83a028c5a4c24e1a6670fff5579f449b74aa35cfd3c2e184629e1",
+      "exactFullProjectEquality": true,
+      "wallCount": 151,
+      "windowCount": 51,
+      "tJunctionCount": 50,
+      "hostEnd": {
+        "x": 155,
+        "y": 0
+      }
+    }
+  ],
+  "limits": [
+    "No continuous held-Shift native pointer gesture",
+    "No CPU sampling, GPU trace or frame-time acceptance",
+    "Two supported native orbit drags, no long-session proof"
+  ]
+}
