@@ -12815,3 +12815,54 @@ connectSnappedT vollständig aus und ersetzt das ganze Geschoss. Dieser sichere
 Fremdkontaktpfad wurde durch den Extrusionspiloten nicht optimiert. Lokales Parsing,
 Konturen und zweite Weltkoordinatenableitung bleiben ebenfalls Restarbeit.
 Aktiver Folgeauftrag steht ausschließlich in §9.
+
+### AUD14-04/05 – neuer T-Fangkontakt, Diagnose (19.10.2026)
+
+PR392 mit grüner CI und ausdrücklicher Freigabe in main 064afe2 übernommen.
+Neuer reproduzierbarer Node-Prüflauf: benchmarks/t-axis-contact-profile.ts;
+Rohwerte und Hardware/Runtime: benchmarks/t-axis-contact-results.json.
+Vier feste Wände (bewegte Wand, zwei mögliche neue Hosts, stationäre Wand), zwei
+Fenster; 0/100/1000 fremde Wände. Das Ziel (8,0) bleibt in allen 28 Abfragen gleich.
+7 Aufwärmungen, 21 Messwerte; Vorbereitung separat. Messreihenfolge immer
+Vorschau → Komposition → unabhängige vollständige Bewegung → T-Verbindung;
+Vergleiche und Referenzextrusion außerhalb der Messintervalle. Reihenfolge-/JIT-
+Einfluss möglich, keine statistische oder Browserframe-Garantie.
+
+| Fremde Wände | Vorschau Median/p95 ms | Komposition Median ms | Vollbewegung Median ms | T-Verbindung Median ms |
+| --- | --- | --- | --- | --- |
+| 0 | 0.72 / 1.08 | 0.68 | 0.13 | 0.55 |
+| 100 | 2.21 / 5.02 | 1.12 | 0.64 | 1.52 |
+| 1000 | 19.25 / 22.70 | 7.36 | 5.73 | 11.90 |
+
+Vorschau ersetzt trotz gleichen Ziels 6/106/1006 IDs (Wände und Fenster).
+Die neue Verbindung führt nach editAtPointer in previewTConnection erneut eine
+vollständige Prüfung vor und nach dem Einfügen der Relation aus; der Renderer
+bekommt das ganze Geschoss. Die Extrusionswiederverwendung aus PR391 betrifft
+diesen Fremdkontaktpfad nicht. Messung isoliert keine einzelnen Validatoren:
+fullConnect misst die gesamte connectSnappedT-Operation.
+
+Bestanden: exakte Projekt- und komponierte Flächengleichheit zum Vollpfad,
+tatsächlich vorhandene neue T-Relation, Hostwechsel 8 → 10 → 8, fehlender Host,
+veralteter Kontext, unveränderte Quelle, vollständiger Commit und ein Undo/Redo.
+Der unterstützte Erfolgsfall beginnt ohne bestehende T-Relation: Hauptwand und
+zugleich Nebenwand ist weiterhin fachlich gesperrt. Ein erster Fixtureversuch
+mit dieser Kombination wurde korrekt abgewiesen und nicht als Erfolgszeit gezählt.
+Typecheck, gezieltes Lint und bestehende wall-patch-Regressionen geprüft.
+Kein Produktcode geändert; kein neuer Produktbuild oder Browser-/Framebeleg nötig
+bzw. behauptet. Der letzte Browserbeleg bleibt PR392.
+
+Begrenzte Folgelösung: innerhalb der vorhandenen Application-Capability höchstens
+EIN vollständig geprüftes T-Zielergebnis wiederverwenden. Schlüssel: unveränderte
+Snapshot-/Sitzungs-/Auswahlbindung, exakte Zielkoordinaten und semantische
+Fangreferenz (Host-ID, t-axis); nicht Objektidentität des pro Event neuen Kandidaten.
+Kontext vor jedem Treffer prüfen; unveränderliche Ausgabe, keine mutable öffentliche
+Projektcache. Ziel-/Host-/Kontextwechsel muss neu prüfen oder abweisen; ungültige
+Ergebnisse nicht als Erfolg cachen. Bestätigung bleibt unabhängig vollständig.
+Test: gleiches Ziel mit neuen Kandidatenobjekten, Hostwechsel/Rückkehr, Abbruch,
+Mutationsversuch, ungültiger Host und vollständiger Commitvergleich.
+
+Das reduziert nur wiederholte Abfragen desselben Fangziels. Erste bzw. geänderte
+Ziele und Gesamtgeschosskomposition bleiben proportional und werden ausdrücklich
+nicht als skaliert freigegeben. Danach vollständige Vorher-/Nachher-Abhängigkeits-
+menge für begrenzte Komposition prüfen; keine stationären Nachbarn abschneiden.
+Aktive Reihenfolge ausschließlich §9.
