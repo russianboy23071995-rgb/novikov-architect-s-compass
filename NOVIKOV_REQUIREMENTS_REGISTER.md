@@ -12776,3 +12776,42 @@ ist nicht das Endergebnis. Unterschiedliche Läufe, keine statistische Garantie.
 Grenzen: weiterhin vollständige lokale Fachoperation/Parsing/Konturen und zweite
 Weltkoordinatenableitung. Kein Browser-/Native-/Frame-/GPU-Nachweis dieses Piloten,
 keine Gesamtfreigabe AUD14. Nächster begrenzter Auftrag ausschließlich §9.
+
+### AUD14-04/05 – große Anschlussgruppe im Produktbrowser (19.10.2026)
+
+PR391 ist in main 4e0864c übernommen. Isolierter statischer CadWorkspace auf
+127.0.0.1:8087, ohne HMR oder Zustandsinjektion; bestehende Anschlussgruppen-Fixture
+mit 51 verbundenen Wänden, 51 Fenstern und 100 fremden Wänden per Query auswählbar.
+Nutzerprojekt und Recovery auf 8080 unberührt. Nach Serverneustart Browserzugriff
+wieder möglich; vorherige Werkzeugblockade ist kein Produktfehler.
+
+Bestanden: Hauptwand-Endpunkt über On-Demand „Punkt in Flucht strecken“ in 2D
+153 → 155 m vorschauen, abbrechen (Achse wieder 153, Undo weiterhin deaktiviert),
+erneut platzieren, genau ein Undo und Redo. Anschließend im 3D-Renderer dieselbe
+Aktion 155 → 4,5 m: Vorschau und Platzierung lösen 49 der 50 T-Anschlüsse, alle
+151 Wände und 51 Fenster bleiben erhalten. Undo stellt alle 50 Anschlüsse wieder
+her; Redo/Undo erneut bedienbar. Zwei native Orbit-Drags und Zoom geprüft,
+keine erfassten Browser-Konsolenfehler. Vier reale JSON-Downloads (Verlängerung,
+Redo, starke Verkürzung, deren Undo) sind vollständig gleich zum unabhängigen
+editAtPointer-Vollpfad. Ausgangsfixture berücksichtigt den regulär vom Workspace
+angelegten Standardordner Abbildsammlung; keine Bauteilfelder herausgefiltert.
+Hashes und Ergebnisse: benchmarks/large-group-browser-evidence.json.
+
+Praktischer Wiederholtest: Testbuild auf 8087 mit ?connectionGroup=large öffnen,
+rechtes Ende der vorausgewählten Hauptwand anklicken → Punkt in Flucht strecken
+→ Länge 2 → Abbrechen bzw. Übernehmen; Undo/Redo. In 3D bei 500 % Hauptwandende
+wählen → dieselbe Aktion → Länge -150.5 → Übernehmen → Undo.
+
+Beleggrenze: numerische Eingabe durch das echte Hilfseingabefenster prüft den
+Produktvorschau-/Commitpfad, nicht kontinuierliche native Shift-Zielwechsel.
+Keine Frame-, GPU- oder CPU-Sampling-Abnahme und kein Stundenlauf behauptet.
+Die 1125 Tests aus PR391 bleiben historische Codeevidenz; dieser Auftrag ergänzt
+Browser-/Exportnachweis, Typecheck, fokussiertes Lint und isolierten Build.
+
+Codeeinordnung: prepared-preview.ts zentralisiert registrierte Adapter; null
+bleibt ausdrücklich Legacy, materialize bleibt 2D-Kompatibilitätsweg. Im
+prepared-wall.ts führt ein neuer t-axis-Kandidat weiterhin editAtPointer plus
+connectSnappedT vollständig aus und ersetzt das ganze Geschoss. Dieser sichere
+Fremdkontaktpfad wurde durch den Extrusionspiloten nicht optimiert. Lokales Parsing,
+Konturen und zweite Weltkoordinatenableitung bleiben ebenfalls Restarbeit.
+Aktiver Folgeauftrag steht ausschließlich in §9.
