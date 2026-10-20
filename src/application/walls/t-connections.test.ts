@@ -34,6 +34,10 @@ import {
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+} from "../../domain/project/owned-snapshot.ts";
 const relation = { hostWallId: "host", incoming: { wallId: "incoming", endpoint: 1 as const } };
 const request = { projectId: "p", kind: "connect" as const, relation };
 function pair(offset = 0, reverse = false) {
@@ -59,6 +63,46 @@ const connected = () => {
   const p = pair();
   return previewTConnection(p, p, request);
 };
+
+test("owned T inputs retain full result validation, equality and immutable ownership", () => {
+  const mutable = pair();
+  const base = createProjectSnapshot(mutable);
+  const req = structuredClone(request);
+  const result = previewTConnection(base, base, req);
+  assert.deepEqual(result, previewTConnection(mutable, mutable, request));
+  assert.ok(isOwnedProjectSnapshot(result));
+  assert.equal(createProjectSnapshot(result), result);
+  req.relation.hostWallId = "changed";
+  assert.equal(storeyOf(result).wallTJunctions[0]!.hostWallId, "host");
+  assert.throws(() => {
+    storeyOf(result).walls[0]!.height = 0;
+  }, TypeError);
+  assert.equal(storeyOf(base).wallTJunctions.length, 0);
+  const detached = previewTConnection(result, result, { ...request, kind: "disconnect" });
+  assert.deepEqual(detached, base);
+  assert.throws(() =>
+    previewTConnection(base, base, {
+      ...request,
+      relation: { ...relation, hostWallId: "missing" },
+    }),
+  );
+  assert.throws(() => previewTConnection(base, { ...base }, request), /geändert/);
+});
+
+test("freezing or copying cannot forge T input provenance; mutable results stay mutable", () => {
+  const invalid = pair();
+  storeyOf(invalid).walls[0]!.height = -1;
+  Object.freeze(invalid);
+  assert.equal(isOwnedProjectSnapshot(invalid), false);
+  assert.throws(() => previewTConnection(invalid, invalid, request));
+  const base = pair();
+  const result = previewTConnection(base, base, request);
+  assert.equal(isOwnedProjectSnapshot(result), false);
+  storeyOf(result).walls[0]!.height = 3;
+  assert.equal(storeyOf(base).walls[0]!.height, 2.8);
+  const copied = { ...createProjectSnapshot(base) };
+  assert.equal(isOwnedProjectSnapshot(copied), false);
+});
 
 test("persistent T preview, one history commit, disconnect and undo/redo preserve exact IDs", () => {
   let h = createHistory(pair());

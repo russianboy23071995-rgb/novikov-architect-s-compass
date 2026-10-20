@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `8201f8d` nach PR396 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 20.10.2026, main `81a5b17` nach PR397 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12940,3 +12940,14 @@ Größter Anteil Anschlussaktion (circa 12,6 ms), Snapshot circa 6,8 ms; Scope c
 0,25 ms. 336 erfolgreiche Fallvergleiche gegen echten Produktionsadapter; Rohdaten
 und Grenzen im Masterplan. Keine Produktoptimierung oder Framefreigabe in diesem
 Schritt. Folgeschritt ausschließlich §9: redundante Eingangsprüfung sicher begrenzen.
+
+
+### AUD14-04/05 – T-Snapshot-Wiederverwendung (20.10.2026)
+PR397 in main 81a5b17; Folgebranch nutzt ausschließlich private Snapshot-Provenienz
+für die Eingangsreuse. Geändertes Anschlussresultat vollständig validiert und
+immutable; mutable öffentliche Aufrufe und unabhängiger Commit unverändert.
+Netto eine vollständige Prüfung weniger, keine neue vom Aufrufer setzbare Marke.
+1132 Tests, Typprüfung, Lint, Build bestanden. Zwei direkte Node-Vergleiche bei
+1000 Fremdwänden: Erstziel rund 24–25 statt 29–30 ms, Hostwechsel rund 20 statt
+30 ms. Rohdaten/Vertragsgrenzen im Masterplan. Browser-/Native-/Frame-Abnahme
+bleibt offen; einziger Folgeauftrag ausschließlich §9.

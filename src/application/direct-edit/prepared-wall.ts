@@ -70,7 +70,8 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
           return lastT.patch;
         // A failed/changed target must not retain an older successful result.
         lastT = undefined;
-        const next = connectSnappedT(pinned, editAtPointer(pinned, base, point), point, candidate);
+        const moved = createProjectSnapshot(editAtPointer(pinned, base, point));
+        const next = connectSnappedT(pinned, moved, point, candidate);
         // Use the established ownership boundary: callers cannot mutate a cached
         // result or freeze their own project to acquire validation provenance.
         const patch = wallTransitionPatch(base, createProjectSnapshot(next), wall.id);

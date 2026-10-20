@@ -1,0 +1,1919 @@
+{
+  "node": "v24.19.0",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "platform": "win32",
+  "method": "7 warmup + 21 samples per first/changed target; owned base, fresh capability per pair; changed host from new-host to alternate-host; production phase order reconstructed, equality against actual evaluator; no frame/native claim; first is session-cold, not process-cold; phase and actual times are separate executions",
+  "runs": [
+    {
+      "foreign": 0,
+      "summary": {
+        "first": {
+          "preparationMs": {
+            "median": 0.045200000000022555,
+            "p95": 0.091700000000003
+          },
+          "moveMs": {
+            "median": 0.41620000000000346,
+            "p95": 0.8192999999999984
+          },
+          "inputSnapshotMs": {
+            "median": 0.40610000000003765,
+            "p95": 0.5699000000000183
+          },
+          "connectMs": {
+            "median": 0.6173000000000002,
+            "p95": 1.0437000000000012
+          },
+          "snapshotMs": {
+            "median": 0.0006000000000199179,
+            "p95": 0.0007000000000516593
+          },
+          "scopeMs": {
+            "median": 0.02039999999999509,
+            "p95": 0.0514999999999759
+          },
+          "phasedTotalMs": {
+            "median": 1.6657999999999902,
+            "p95": 2.161699999999996
+          },
+          "actualEvaluateMs": {
+            "median": 1.559599999999989,
+            "p95": 2.410000000000025
+          },
+          "warmMs": {
+            "median": 0.0011000000000080945,
+            "p95": 0.0017000000000280124
+          },
+          "legacyMs": {
+            "median": 2.117400000000032,
+            "p95": 2.7883000000000493
+          }
+        },
+        "changed": {
+          "preparationMs": {
+            "median": 0.045200000000022555,
+            "p95": 0.091700000000003
+          },
+          "moveMs": {
+            "median": 0.4175000000000182,
+            "p95": 0.9533999999999878
+          },
+          "inputSnapshotMs": {
+            "median": 0.35660000000001446,
+            "p95": 0.5116999999999621
+          },
+          "connectMs": {
+            "median": 0.7160999999999831,
+            "p95": 0.9307999999999765
+          },
+          "snapshotMs": {
+            "median": 0.0005999999999630745,
+            "p95": 0.0008000000000265572
+          },
+          "scopeMs": {
+            "median": 0.02030000000002019,
+            "p95": 0.0625
+          },
+          "phasedTotalMs": {
+            "median": 1.5254000000000474,
+            "p95": 2.0562999999999647
+          },
+          "actualEvaluateMs": {
+            "median": 1.5559000000000083,
+            "p95": 1.8102999999999838
+          },
+          "warmMs": {
+            "median": 0.0011000000000080945,
+            "p95": 0.0020999999999844476
+          },
+          "legacyMs": {
+            "median": 2.3863999999999805,
+            "p95": 3.1575000000000273
+          }
+        }
+      },
+      "samples": [
+        {
+          "kind": "first",
+          "preparationMs": 0.091700000000003,
+          "moveMs": 0.621599999999944,
+          "inputSnapshotMs": 0.38470000000000937,
+          "connectMs": 0.6372000000000071,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.04750000000001364,
+          "phasedTotalMs": 1.691599999999994,
+          "actualEvaluateMs": 1.6684999999999945,
+          "warmMs": 0.0011000000000080945,
+          "legacyMs": 3.250099999999975
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.091700000000003,
+          "moveMs": 0.49809999999996535,
+          "inputSnapshotMs": 0.3783000000000243,
+          "connectMs": 1.0156000000000063,
+          "snapshotMs": 0.0006999999999948159,
+          "scopeMs": 0.02729999999996835,
+          "phasedTotalMs": 1.919999999999959,
+          "actualEvaluateMs": 1.771000000000015,
+          "warmMs": 0.0020999999999844476,
+          "legacyMs": 3.482599999999991
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.08269999999998845,
+          "moveMs": 0.41620000000000346,
+          "inputSnapshotMs": 0.40610000000003765,
+          "connectMs": 0.8365999999999758,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.02549999999996544,
+          "phasedTotalMs": 1.6850000000000023,
+          "actualEvaluateMs": 1.8092000000000326,
+          "warmMs": 0.0014999999999645297,
+          "legacyMs": 2.3081000000000245
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.08269999999998845,
+          "moveMs": 0.5387000000000057,
+          "inputSnapshotMs": 0.44830000000001746,
+          "connectMs": 0.8541999999999916,
+          "snapshotMs": 0.0006999999999948159,
+          "scopeMs": 0.13139999999998508,
+          "phasedTotalMs": 1.9732999999999947,
+          "actualEvaluateMs": 1.6201000000000363,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 2.3863999999999805
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.08239999999995007,
+          "moveMs": 0.5277000000000385,
+          "inputSnapshotMs": 0.6030999999999835,
+          "connectMs": 0.6782000000000039,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.02709999999996171,
+          "phasedTotalMs": 1.8367000000000075,
+          "actualEvaluateMs": 1.559599999999989,
+          "warmMs": 0.0010000000000331966,
+          "legacyMs": 2.7162999999999897
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.08239999999995007,
+          "moveMs": 0.46050000000002456,
+          "inputSnapshotMs": 0.46550000000002,
+          "connectMs": 0.7069999999999936,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.023200000000031196,
+          "phasedTotalMs": 1.6568000000000325,
+          "actualEvaluateMs": 3.4343999999999824,
+          "warmMs": 0.001599999999996271,
+          "legacyMs": 2.620400000000018
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.050399999999967804,
+          "moveMs": 0.39220000000000255,
+          "inputSnapshotMs": 0.4199999999999591,
+          "connectMs": 0.6442000000000121,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.022999999999967713,
+          "phasedTotalMs": 1.4799999999999613,
+          "actualEvaluateMs": 1.6036000000000286,
+          "warmMs": 0.001699999999971169,
+          "legacyMs": 2.5377000000000294
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.050399999999967804,
+          "moveMs": 0.441599999999994,
+          "inputSnapshotMs": 0.41550000000000864,
+          "connectMs": 0.7160999999999831,
+          "snapshotMs": 0.00050000000004502,
+          "scopeMs": 0.03409999999996671,
+          "phasedTotalMs": 1.6077999999999975,
+          "actualEvaluateMs": 1.6437999999999988,
+          "warmMs": 0.0012000000000398359,
+          "legacyMs": 2.35329999999999
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04399999999998272,
+          "moveMs": 0.6379000000000019,
+          "inputSnapshotMs": 0.37069999999999936,
+          "connectMs": 0.5892000000000053,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.02410000000003265,
+          "phasedTotalMs": 1.6225000000000023,
+          "actualEvaluateMs": 1.5043000000000006,
+          "warmMs": 0.0011999999999829924,
+          "legacyMs": 1.8795999999999822
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04399999999998272,
+          "moveMs": 0.40650000000005093,
+          "inputSnapshotMs": 0.6825999999999794,
+          "connectMs": 0.9307999999999765,
+          "snapshotMs": 0.0008000000000265572,
+          "scopeMs": 0.03129999999998745,
+          "phasedTotalMs": 2.052000000000021,
+          "actualEvaluateMs": 1.752900000000011,
+          "warmMs": 0.0011999999999829924,
+          "legacyMs": 2.4639999999999986
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.17109999999996717,
+          "moveMs": 0.8192999999999984,
+          "inputSnapshotMs": 0.37740000000002283,
+          "connectMs": 0.5750999999999635,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.0514999999999759,
+          "phasedTotalMs": 1.8238999999999805,
+          "actualEvaluateMs": 2.410000000000025,
+          "warmMs": 0.001599999999996271,
+          "legacyMs": 2.1435000000000173
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.17109999999996717,
+          "moveMs": 0.4046999999999912,
+          "inputSnapshotMs": 0.35679999999996426,
+          "connectMs": 0.6245000000000118,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.02339999999998099,
+          "phasedTotalMs": 1.4099999999999682,
+          "actualEvaluateMs": 1.4454999999999814,
+          "warmMs": 0.0012000000000398359,
+          "legacyMs": 2.51419999999996
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04770000000002028,
+          "moveMs": 0.4729000000000383,
+          "inputSnapshotMs": 0.43079999999997654,
+          "connectMs": 0.7366000000000099,
+          "snapshotMs": 0.0006999999999948159,
+          "scopeMs": 0.024799999999970623,
+          "phasedTotalMs": 1.6657999999999902,
+          "actualEvaluateMs": 1.7986999999999966,
+          "warmMs": 0.001599999999996271,
+          "legacyMs": 2.5836000000000467
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04770000000002028,
+          "moveMs": 1.265800000000013,
+          "inputSnapshotMs": 0.39809999999999945,
+          "connectMs": 0.6505000000000223,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.0625,
+          "phasedTotalMs": 2.3774999999999977,
+          "actualEvaluateMs": 1.6546000000000163,
+          "warmMs": 0.032300000000020646,
+          "legacyMs": 2.2210000000000036
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04279999999999973,
+          "moveMs": 0.6838999999999942,
+          "inputSnapshotMs": 0.36520000000001573,
+          "connectMs": 0.5946999999999889,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.02039999999999509,
+          "phasedTotalMs": 1.664699999999982,
+          "actualEvaluateMs": 1.7204000000000406,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 2.117400000000032
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04279999999999973,
+          "moveMs": 0.3756999999999948,
+          "inputSnapshotMs": 0.35969999999997526,
+          "connectMs": 0.8757000000000517,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.019000000000005457,
+          "phasedTotalMs": 1.6306999999999903,
+          "actualEvaluateMs": 1.5559000000000083,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 3.0855000000000246
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.06599999999997408,
+          "moveMs": 0.5201000000000136,
+          "inputSnapshotMs": 0.3547999999999547,
+          "connectMs": 0.5901000000000067,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.017899999999997362,
+          "phasedTotalMs": 1.4834999999999923,
+          "actualEvaluateMs": 1.288499999999999,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 1.9266000000000076
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.06599999999997408,
+          "moveMs": 0.3815999999999917,
+          "inputSnapshotMs": 0.3534999999999968,
+          "connectMs": 0.612199999999973,
+          "snapshotMs": 0.00050000000004502,
+          "scopeMs": 0.017599999999958982,
+          "phasedTotalMs": 1.3653999999999655,
+          "actualEvaluateMs": 1.3659000000000106,
+          "warmMs": 0.0010000000000331966,
+          "legacyMs": 2.0283999999999764
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.05360000000001719,
+          "moveMs": 0.39440000000001874,
+          "inputSnapshotMs": 0.5070999999999799,
+          "connectMs": 0.8367000000000075,
+          "snapshotMs": 0.0006999999999948159,
+          "scopeMs": 0.022699999999986176,
+          "phasedTotalMs": 1.7615999999999872,
+          "actualEvaluateMs": 3.04219999999998,
+          "warmMs": 0.0017000000000280124,
+          "legacyMs": 1.908399999999972
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.05360000000001719,
+          "moveMs": 0.38079999999996517,
+          "inputSnapshotMs": 0.35470000000003665,
+          "connectMs": 0.6089999999999804,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.019400000000018736,
+          "phasedTotalMs": 1.3643999999999892,
+          "actualEvaluateMs": 1.4116999999999962,
+          "warmMs": 0.0011999999999829924,
+          "legacyMs": 2.0955000000000155
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.061199999999985266,
+          "moveMs": 0.8293000000000461,
+          "inputSnapshotMs": 0.5663999999999874,
+          "connectMs": 1.0437000000000012,
+          "snapshotMs": 0.0007999999999697138,
+          "scopeMs": 0.08690000000001419,
+          "phasedTotalMs": 2.5271000000000186,
+          "actualEvaluateMs": 1.9716000000000236,
+          "warmMs": 0.0012999999999578904,
+          "legacyMs": 2.7883000000000493
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.061199999999985266,
+          "moveMs": 0.5455000000000041,
+          "inputSnapshotMs": 0.5116999999999621,
+          "connectMs": 0.9140000000000441,
+          "snapshotMs": 0.0006999999999948159,
+          "scopeMs": 0.02559999999999718,
+          "phasedTotalMs": 1.9975000000000023,
+          "actualEvaluateMs": 1.641300000000001,
+          "warmMs": 0.0011000000000080945,
+          "legacyMs": 2.541999999999973
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.039299999999968804,
+          "moveMs": 0.49289999999996326,
+          "inputSnapshotMs": 0.5699000000000183,
+          "connectMs": 0.6143999999999892,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.018200000000035743,
+          "phasedTotalMs": 1.6958999999999946,
+          "actualEvaluateMs": 1.377299999999991,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 2.508700000000033
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.039299999999968804,
+          "moveMs": 0.4175000000000182,
+          "inputSnapshotMs": 0.35660000000001446,
+          "connectMs": 0.7303999999999746,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.02030000000002019,
+          "phasedTotalMs": 1.5254000000000474,
+          "actualEvaluateMs": 1.522799999999961,
+          "warmMs": 0.0010000000000331966,
+          "legacyMs": 2.66719999999998
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.03849999999999909,
+          "moveMs": 0.3727000000000089,
+          "inputSnapshotMs": 0.34410000000002583,
+          "connectMs": 0.6165999999999485,
+          "snapshotMs": 0.0006000000000199179,
+          "scopeMs": 0.018100000000004002,
+          "phasedTotalMs": 1.3521000000000072,
+          "actualEvaluateMs": 1.5126000000000204,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 2.2536999999999807
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.03849999999999909,
+          "moveMs": 0.49749999999994543,
+          "inputSnapshotMs": 0.3491000000000213,
+          "connectMs": 0.6066999999999325,
+          "snapshotMs": 0.0006000000000767614,
+          "scopeMs": 0.046699999999987085,
+          "phasedTotalMs": 1.500599999999963,
+          "actualEvaluateMs": 1.3967999999999847,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 1.8885999999999967
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.03719999999998436,
+          "moveMs": 0.39400000000000546,
+          "inputSnapshotMs": 0.3894999999999982,
+          "connectMs": 1.2962999999999738,
+          "snapshotMs": 0.0006999999999379725,
+          "scopeMs": 0.019400000000018736,
+          "phasedTotalMs": 2.099899999999934,
+          "actualEvaluateMs": 1.3559000000000196,
+          "warmMs": 0.004000000000019099,
+          "legacyMs": 1.8561999999999443
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.03719999999998436,
+          "moveMs": 0.3813000000000102,
+          "inputSnapshotMs": 0.3451000000000022,
+          "connectMs": 0.6125999999999294,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.018700000000080763,
+          "phasedTotalMs": 1.3582000000000107,
+          "actualEvaluateMs": 1.390800000000013,
+          "warmMs": 0.0008999999998877684,
+          "legacyMs": 1.9797000000000935
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04140000000006694,
+          "moveMs": 0.37619999999992615,
+          "inputSnapshotMs": 0.4196000000000595,
+          "connectMs": 0.9307999999999765,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.01999999999998181,
+          "phasedTotalMs": 1.747199999999907,
+          "actualEvaluateMs": 1.4820000000000846,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 1.9759000000000242
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04140000000006694,
+          "moveMs": 0.3669999999999618,
+          "inputSnapshotMs": 0.34349999999994907,
+          "connectMs": 0.7314999999999827,
+          "snapshotMs": 0.0017000000000280124,
+          "scopeMs": 0.027400000000056934,
+          "phasedTotalMs": 1.4710999999999785,
+          "actualEvaluateMs": 1.5024999999999409,
+          "warmMs": 0.0013999999999896318,
+          "legacyMs": 2.0704000000000633
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.03749999999990905,
+          "moveMs": 0.3692000000000917,
+          "inputSnapshotMs": 0.3350999999998976,
+          "connectMs": 0.54950000000008,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.016899999999964166,
+          "phasedTotalMs": 1.2712000000000216,
+          "actualEvaluateMs": 1.3417000000000598,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 1.7817999999999756
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.03749999999990905,
+          "moveMs": 0.36549999999999727,
+          "inputSnapshotMs": 0.3451000000000022,
+          "connectMs": 0.6472999999999729,
+          "snapshotMs": 0.0006000000000767614,
+          "scopeMs": 0.017200000000002547,
+          "phasedTotalMs": 1.3757000000000517,
+          "actualEvaluateMs": 1.3309999999999036,
+          "warmMs": 0.0013000000000147338,
+          "legacyMs": 2.630200000000059
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.03710000000000946,
+          "moveMs": 0.3630999999999176,
+          "inputSnapshotMs": 0.33760000000006585,
+          "connectMs": 0.5526999999999589,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.016600000000039472,
+          "phasedTotalMs": 1.27049999999997,
+          "actualEvaluateMs": 1.2522000000000162,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 2.08299999999997
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.03710000000000946,
+          "moveMs": 0.44039999999995416,
+          "inputSnapshotMs": 0.3550000000000182,
+          "connectMs": 0.6538000000000466,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.01880000000005566,
+          "phasedTotalMs": 1.4686000000000377,
+          "actualEvaluateMs": 1.3802999999999201,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 1.9120000000000346
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04110000000002856,
+          "moveMs": 0.3664999999999736,
+          "inputSnapshotMs": 0.3871000000000322,
+          "connectMs": 0.6173000000000002,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.0181999999999789,
+          "phasedTotalMs": 1.389599999999973,
+          "actualEvaluateMs": 1.9212999999999738,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 1.9177000000000817
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04110000000002856,
+          "moveMs": 0.3910999999999376,
+          "inputSnapshotMs": 0.33939999999995507,
+          "connectMs": 0.7305000000000064,
+          "snapshotMs": 0.0006000000000767614,
+          "scopeMs": 0.01779999999996562,
+          "phasedTotalMs": 1.4793999999999414,
+          "actualEvaluateMs": 1.3840999999999894,
+          "warmMs": 0.0009000000000014552,
+          "legacyMs": 1.8807000000000471
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.04130000000009204,
+          "moveMs": 0.35779999999999745,
+          "inputSnapshotMs": 0.4391000000000531,
+          "connectMs": 0.5842999999999847,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.018000000000029104,
+          "phasedTotalMs": 1.3998000000000275,
+          "actualEvaluateMs": 1.4470999999999776,
+          "warmMs": 0.001100000000064938,
+          "legacyMs": 1.9125999999999976
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.04130000000009204,
+          "moveMs": 0.9533999999999878,
+          "inputSnapshotMs": 0.3425999999999476,
+          "connectMs": 0.7413000000000238,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.01850000000001728,
+          "phasedTotalMs": 2.0562999999999647,
+          "actualEvaluateMs": 1.8102999999999838,
+          "warmMs": 0.0013000000000147338,
+          "legacyMs": 3.1575000000000273
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.0524000000000342,
+          "moveMs": 0.6965999999999894,
+          "inputSnapshotMs": 0.5510000000000446,
+          "connectMs": 0.8900999999999613,
+          "snapshotMs": 0.0007000000000516593,
+          "scopeMs": 0.02329999999994925,
+          "phasedTotalMs": 2.161699999999996,
+          "actualEvaluateMs": 2.08929999999998,
+          "warmMs": 0.0012000000000398359,
+          "legacyMs": 2.6902000000000044
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.0524000000000342,
+          "moveMs": 0.35609999999996944,
+          "inputSnapshotMs": 0.3327000000000453,
+          "connectMs": 0.7278999999999769,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.016899999999964166,
+          "phasedTotalMs": 1.4341999999999189,
+          "actualEvaluateMs": 1.5852000000000999,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 2.6340999999999894
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.045200000000022555,
+          "moveMs": 0.3890999999999849,
+          "inputSnapshotMs": 0.4694000000000642,
+          "connectMs": 0.5584999999999809,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.01700000000005275,
+          "phasedTotalMs": 1.434500000000071,
+          "actualEvaluateMs": 1.2776000000000067,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 1.7749000000000024
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.045200000000022555,
+          "moveMs": 0.5851999999999862,
+          "inputSnapshotMs": 0.36099999999999,
+          "connectMs": 0.6696000000000595,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.01779999999996562,
+          "phasedTotalMs": 1.6341999999999643,
+          "actualEvaluateMs": 1.5778000000000247,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 2.3052000000000135
+        }
+      ]
+    },
+    {
+      "foreign": 100,
+      "summary": {
+        "first": {
+          "preparationMs": {
+            "median": 0.24410000000011678,
+            "p95": 0.3486000000000331
+          },
+          "moveMs": {
+            "median": 1.0066000000001623,
+            "p95": 1.2461000000000695
+          },
+          "inputSnapshotMs": {
+            "median": 0.9090000000001055,
+            "p95": 1.2279000000000906
+          },
+          "connectMs": {
+            "median": 1.1979999999998654,
+            "p95": 1.5369000000000597
+          },
+          "snapshotMs": {
+            "median": 0.0005000000001018634,
+            "p95": 0.0005999999999630745
+          },
+          "scopeMs": {
+            "median": 0.04250000000001819,
+            "p95": 0.047100000000000364
+          },
+          "phasedTotalMs": {
+            "median": 3.2264999999999873,
+            "p95": 4.0072999999999865
+          },
+          "actualEvaluateMs": {
+            "median": 3.039800000000014,
+            "p95": 3.50870000000009
+          },
+          "warmMs": {
+            "median": 0.001099999999951251,
+            "p95": 0.0015999999998257408
+          },
+          "legacyMs": {
+            "median": 4.186699999999973,
+            "p95": 9.117700000000013
+          }
+        },
+        "changed": {
+          "preparationMs": {
+            "median": 0.24410000000011678,
+            "p95": 0.3486000000000331
+          },
+          "moveMs": {
+            "median": 0.8953000000001339,
+            "p95": 1.218599999999924
+          },
+          "inputSnapshotMs": {
+            "median": 0.920699999999897,
+            "p95": 1.125300000000152
+          },
+          "connectMs": {
+            "median": 1.2636999999999716,
+            "p95": 1.5494000000001051
+          },
+          "snapshotMs": {
+            "median": 0.0005000000001018634,
+            "p95": 0.0017000000000280124
+          },
+          "scopeMs": {
+            "median": 0.04539999999997235,
+            "p95": 0.07519999999999527
+          },
+          "phasedTotalMs": {
+            "median": 3.243299999999863,
+            "p95": 3.591699999999946
+          },
+          "actualEvaluateMs": {
+            "median": 3.216699999999946,
+            "p95": 3.9775000000000773
+          },
+          "warmMs": {
+            "median": 0.001399999999875945,
+            "p95": 0.0019999999999527063
+          },
+          "legacyMs": {
+            "median": 4.467600000000061,
+            "p95": 8.355199999999968
+          }
+        }
+      },
+      "samples": [
+        {
+          "kind": "first",
+          "preparationMs": 0.33749999999997726,
+          "moveMs": 1.0601999999998952,
+          "inputSnapshotMs": 0.8798000000000457,
+          "connectMs": 1.2263000000000375,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.04409999999995762,
+          "phasedTotalMs": 3.210999999999899,
+          "actualEvaluateMs": 3.5224000000000615,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 5.663900000000012
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.33749999999997726,
+          "moveMs": 1.1113000000000284,
+          "inputSnapshotMs": 1.0684999999999718,
+          "connectMs": 1.3649000000000342,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.0464999999999236,
+          "phasedTotalMs": 3.591699999999946,
+          "actualEvaluateMs": 3.9775000000000773,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 5.26260000000002
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.3345000000000482,
+          "moveMs": 0.9377999999999247,
+          "inputSnapshotMs": 0.8770000000000664,
+          "connectMs": 1.1000999999999976,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.044599999999945794,
+          "phasedTotalMs": 2.9599999999999227,
+          "actualEvaluateMs": 2.9821000000000595,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 4.057300000000055
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.3345000000000482,
+          "moveMs": 0.8898999999998978,
+          "inputSnapshotMs": 0.8608000000000402,
+          "connectMs": 1.348799999999983,
+          "snapshotMs": 0.0006000000000767614,
+          "scopeMs": 0.045699999999897045,
+          "phasedTotalMs": 3.1457999999998947,
+          "actualEvaluateMs": 3.0730000000000928,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 4.428200000000061
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.3704999999999927,
+          "moveMs": 1.0918000000000347,
+          "inputSnapshotMs": 0.9220000000000255,
+          "connectMs": 1.3804999999999836,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.045600000000035834,
+          "phasedTotalMs": 3.4405000000000427,
+          "actualEvaluateMs": 3.117999999999938,
+          "warmMs": 0.00100000000009004,
+          "legacyMs": 4.236599999999953
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.3704999999999927,
+          "moveMs": 0.9776000000000522,
+          "inputSnapshotMs": 1.0393999999998869,
+          "connectMs": 1.158200000000079,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.04660000000001219,
+          "phasedTotalMs": 3.2223999999999933,
+          "actualEvaluateMs": 2.9569000000000187,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 4.467600000000061
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24139999999999873,
+          "moveMs": 1.078300000000013,
+          "inputSnapshotMs": 0.9064999999999372,
+          "connectMs": 1.2204000000000406,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.043800000000032924,
+          "phasedTotalMs": 3.2495999999999867,
+          "actualEvaluateMs": 2.8442000000000007,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 4.166100000000029
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24139999999999873,
+          "moveMs": 0.8806999999999334,
+          "inputSnapshotMs": 0.8917999999999893,
+          "connectMs": 1.2833000000000538,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.04539999999997235,
+          "phasedTotalMs": 3.101699999999937,
+          "actualEvaluateMs": 3.3011000000000195,
+          "warmMs": 0.0013000000000147338,
+          "legacyMs": 8.567999999999984
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24130000000002383,
+          "moveMs": 1.0387999999999238,
+          "inputSnapshotMs": 0.8534000000000788,
+          "connectMs": 1.1206999999999425,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.043800000000032924,
+          "phasedTotalMs": 3.057299999999941,
+          "actualEvaluateMs": 3.2620000000000573,
+          "warmMs": 0.0027999999999792635,
+          "legacyMs": 4.186699999999973
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24130000000002383,
+          "moveMs": 0.8774999999999409,
+          "inputSnapshotMs": 1.004000000000019,
+          "connectMs": 1.1163000000000238,
+          "snapshotMs": 0.0004999999999881766,
+          "scopeMs": 0.04470000000003438,
+          "phasedTotalMs": 3.0430000000000064,
+          "actualEvaluateMs": 3.216699999999946,
+          "warmMs": 0.0012000000000398359,
+          "legacyMs": 4.168699999999944
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24500000000000455,
+          "moveMs": 0.9972999999999956,
+          "inputSnapshotMs": 1.4254999999999427,
+          "connectMs": 1.5369000000000597,
+          "snapshotMs": 0.0005999999999630745,
+          "scopeMs": 0.047000000000025466,
+          "phasedTotalMs": 4.0072999999999865,
+          "actualEvaluateMs": 3.170400000000086,
+          "warmMs": 0.0015999999998257408,
+          "legacyMs": 9.117700000000013
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24500000000000455,
+          "moveMs": 0.8953000000001339,
+          "inputSnapshotMs": 1.1678999999999178,
+          "connectMs": 1.3495000000000346,
+          "snapshotMs": 0.0007000000000516593,
+          "scopeMs": 0.09969999999998436,
+          "phasedTotalMs": 3.5131000000001222,
+          "actualEvaluateMs": 3.308999999999969,
+          "warmMs": 0.0019999999999527063,
+          "legacyMs": 4.73739999999998
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24579999999991742,
+          "moveMs": 0.9835000000000491,
+          "inputSnapshotMs": 1.1877999999999247,
+          "connectMs": 1.081899999999905,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.04140000000006694,
+          "phasedTotalMs": 3.2951000000000477,
+          "actualEvaluateMs": 3.037499999999909,
+          "warmMs": 0.0009000000000014552,
+          "legacyMs": 4.3069000000000415
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24579999999991742,
+          "moveMs": 0.8852000000001681,
+          "inputSnapshotMs": 0.8833999999999378,
+          "connectMs": 1.5016000000000531,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.041600000000016735,
+          "phasedTotalMs": 3.31230000000005,
+          "actualEvaluateMs": 3.069300000000112,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 8.218699999999899
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24309999999991305,
+          "moveMs": 1.2461000000000695,
+          "inputSnapshotMs": 0.9793999999999414,
+          "connectMs": 1.189200000000028,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.04250000000001819,
+          "phasedTotalMs": 3.457700000000159,
+          "actualEvaluateMs": 3.1913999999999305,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 4.10310000000004
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24309999999991305,
+          "moveMs": 1.2752000000000407,
+          "inputSnapshotMs": 1.1179999999999382,
+          "connectMs": 1.1295000000000073,
+          "snapshotMs": 0.00040000000012696546,
+          "scopeMs": 0.059599999999818465,
+          "phasedTotalMs": 3.5826999999999316,
+          "actualEvaluateMs": 2.957600000000184,
+          "warmMs": 0.0018000000000029104,
+          "legacyMs": 4.528999999999996
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.2403999999999087,
+          "moveMs": 1.0609999999999218,
+          "inputSnapshotMs": 0.9090000000001055,
+          "connectMs": 1.2146000000000186,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.04140000000006694,
+          "phasedTotalMs": 3.2264999999999873,
+          "actualEvaluateMs": 2.9050999999999476,
+          "warmMs": 0.0012000000001535227,
+          "legacyMs": 8.231399999999894
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.2403999999999087,
+          "moveMs": 0.9248000000000047,
+          "inputSnapshotMs": 0.8718999999998687,
+          "connectMs": 1.1429000000000542,
+          "snapshotMs": 0.00040000000012696546,
+          "scopeMs": 0.04049999999983811,
+          "phasedTotalMs": 2.9804999999998927,
+          "actualEvaluateMs": 2.9386000000001786,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 3.9791000000000167
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24450000000001637,
+          "moveMs": 1.062599999999975,
+          "inputSnapshotMs": 0.8764000000001033,
+          "connectMs": 1.094899999999825,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.040500000000065484,
+          "phasedTotalMs": 3.0749000000000706,
+          "actualEvaluateMs": 2.838399999999865,
+          "warmMs": 0.0009000000000014552,
+          "legacyMs": 3.98070000000007
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24450000000001637,
+          "moveMs": 0.9234999999998763,
+          "inputSnapshotMs": 1.125300000000152,
+          "connectMs": 1.1541999999999462,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.039800000000013824,
+          "phasedTotalMs": 3.243299999999863,
+          "actualEvaluateMs": 3.0950000000000273,
+          "warmMs": 0.0012000000001535227,
+          "legacyMs": 7.9771999999998116
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.2415000000000873,
+          "moveMs": 0.9184000000000196,
+          "inputSnapshotMs": 0.9061000000001513,
+          "connectMs": 1.1979999999998654,
+          "snapshotMs": 0.0006000000000767614,
+          "scopeMs": 0.04009999999993852,
+          "phasedTotalMs": 3.0632000000000517,
+          "actualEvaluateMs": 3.50870000000009,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 3.853399999999965
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.2415000000000873,
+          "moveMs": 1.218599999999924,
+          "inputSnapshotMs": 0.9715000000001055,
+          "connectMs": 1.2636999999999716,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.04060000000004038,
+          "phasedTotalMs": 3.494899999999916,
+          "actualEvaluateMs": 3.2704000000001088,
+          "warmMs": 0.0017000000000280124,
+          "legacyMs": 4.234199999999873
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.28749999999990905,
+          "moveMs": 0.926300000000083,
+          "inputSnapshotMs": 0.9103000000000065,
+          "connectMs": 1.0799999999999272,
+          "snapshotMs": 0.00040000000012696546,
+          "scopeMs": 0.03929999999991196,
+          "phasedTotalMs": 2.9563000000000557,
+          "actualEvaluateMs": 2.9863000000000284,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 8.246699999999919
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.28749999999990905,
+          "moveMs": 0.8886999999999716,
+          "inputSnapshotMs": 0.9090000000001055,
+          "connectMs": 1.8181999999999334,
+          "snapshotMs": 0.0018999999999778083,
+          "scopeMs": 0.055000000000063665,
+          "phasedTotalMs": 3.672800000000052,
+          "actualEvaluateMs": 3.9987999999998465,
+          "warmMs": 0.00200000000018008,
+          "legacyMs": 4.587199999999939
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24340000000006512,
+          "moveMs": 1.0489000000000033,
+          "inputSnapshotMs": 0.9398999999998523,
+          "connectMs": 1.1041000000000167,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.03960000000006403,
+          "phasedTotalMs": 3.133000000000038,
+          "actualEvaluateMs": 3.1007999999999356,
+          "warmMs": 0.001299999999901047,
+          "legacyMs": 3.865099999999984
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24340000000006512,
+          "moveMs": 0.8537000000001171,
+          "inputSnapshotMs": 0.920699999999897,
+          "connectMs": 1.154700000000048,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.039800000000013824,
+          "phasedTotalMs": 2.969400000000178,
+          "actualEvaluateMs": 3.123199999999997,
+          "warmMs": 0.001399999999875945,
+          "legacyMs": 8.212800000000016
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.23659999999995307,
+          "moveMs": 1.0286000000000968,
+          "inputSnapshotMs": 0.875,
+          "connectMs": 1.299099999999953,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.03919999999993706,
+          "phasedTotalMs": 3.2424000000000888,
+          "actualEvaluateMs": 2.7940000000000964,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 3.9575999999999567
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.23659999999995307,
+          "moveMs": 0.8575000000000728,
+          "inputSnapshotMs": 0.8557999999998174,
+          "connectMs": 1.5494000000001051,
+          "snapshotMs": 0.0017000000000280124,
+          "scopeMs": 0.05099999999993088,
+          "phasedTotalMs": 3.315399999999954,
+          "actualEvaluateMs": 3.289099999999962,
+          "warmMs": 0.0018000000000029104,
+          "legacyMs": 4.189100000000053
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.24410000000011678,
+          "moveMs": 1.0066000000001623,
+          "inputSnapshotMs": 0.9483999999999924,
+          "connectMs": 1.440900000000056,
+          "snapshotMs": 0.0005999999998493877,
+          "scopeMs": 0.04809999999997672,
+          "phasedTotalMs": 3.4446000000000367,
+          "actualEvaluateMs": 2.9505000000001473,
+          "warmMs": 0.001099999999951251,
+          "legacyMs": 13.871599999999944
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.24410000000011678,
+          "moveMs": 1.0615000000000236,
+          "inputSnapshotMs": 0.8787999999999556,
+          "connectMs": 1.3233999999999924,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.07519999999999527,
+          "phasedTotalMs": 3.3394000000000688,
+          "actualEvaluateMs": 2.983400000000074,
+          "warmMs": 0.001399999999875945,
+          "legacyMs": 4.703099999999949
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.3486000000000331,
+          "moveMs": 0.9574999999999818,
+          "inputSnapshotMs": 1.1523999999999432,
+          "connectMs": 1.1467000000000098,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.04289999999991778,
+          "phasedTotalMs": 3.2999999999999545,
+          "actualEvaluateMs": 3.0779999999999745,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 4.136300000000119
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.3486000000000331,
+          "moveMs": 0.8887999999999465,
+          "inputSnapshotMs": 0.8916000000001532,
+          "connectMs": 1.4153999999998632,
+          "snapshotMs": 0.0012000000001535227,
+          "scopeMs": 0.06829999999990832,
+          "phasedTotalMs": 3.2653000000000247,
+          "actualEvaluateMs": 3.3728000000000975,
+          "warmMs": 0.0014999999998508429,
+          "legacyMs": 4.208000000000084
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.28520000000003165,
+          "moveMs": 4.744899999999916,
+          "inputSnapshotMs": 0.9581000000000586,
+          "connectMs": 1.6539000000000215,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.047100000000000364,
+          "phasedTotalMs": 7.404500000000098,
+          "actualEvaluateMs": 3.366899999999987,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 4.390100000000075
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.28520000000003165,
+          "moveMs": 0.9740999999999076,
+          "inputSnapshotMs": 1.0062000000000353,
+          "connectMs": 1.1679999999998927,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.04369999999994434,
+          "phasedTotalMs": 3.1924999999998818,
+          "actualEvaluateMs": 2.949000000000069,
+          "warmMs": 0.001299999999901047,
+          "legacyMs": 3.9732000000001335
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.2781999999999698,
+          "moveMs": 0.9376999999999498,
+          "inputSnapshotMs": 1.2279000000000906,
+          "connectMs": 1.2536000000000058,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.044599999999945794,
+          "phasedTotalMs": 3.4642999999998665,
+          "actualEvaluateMs": 2.9036000000000968,
+          "warmMs": 0.0009999999999763531,
+          "legacyMs": 3.9437000000000353
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.2781999999999698,
+          "moveMs": 0.9404999999999291,
+          "inputSnapshotMs": 0.8703000000000429,
+          "connectMs": 1.1631999999999607,
+          "snapshotMs": 0.00040000000012696546,
+          "scopeMs": 0.06909999999993488,
+          "phasedTotalMs": 3.0434999999999945,
+          "actualEvaluateMs": 3.2981999999999516,
+          "warmMs": 0.0015000000000782165,
+          "legacyMs": 4.0236999999999625
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.1936000000000604,
+          "moveMs": 0.8921000000000276,
+          "inputSnapshotMs": 0.8717999999998938,
+          "connectMs": 1.115099999999984,
+          "snapshotMs": 0.00040000000012696546,
+          "scopeMs": 0.04009999999993852,
+          "phasedTotalMs": 2.919499999999971,
+          "actualEvaluateMs": 3.0471999999999753,
+          "warmMs": 0.0014000000001033186,
+          "legacyMs": 4.073199999999815
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.1936000000000604,
+          "moveMs": 0.8824999999999363,
+          "inputSnapshotMs": 0.9945999999999913,
+          "connectMs": 1.1451999999999316,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.040400000000090586,
+          "phasedTotalMs": 3.0632000000000517,
+          "actualEvaluateMs": 3.8772999999998774,
+          "warmMs": 0.0017000000000280124,
+          "legacyMs": 8.355199999999968
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.18910000000005311,
+          "moveMs": 0.8998999999998887,
+          "inputSnapshotMs": 0.8614000000000033,
+          "connectMs": 1.2744000000000142,
+          "snapshotMs": 0.0005000000001018634,
+          "scopeMs": 0.039800000000013824,
+          "phasedTotalMs": 3.076000000000022,
+          "actualEvaluateMs": 3.039800000000014,
+          "warmMs": 0.0009000000000014552,
+          "legacyMs": 4.552300000000059
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.18910000000005311,
+          "moveMs": 0.8920000000000528,
+          "inputSnapshotMs": 0.8636999999998807,
+          "connectMs": 1.3393000000000939,
+          "snapshotMs": 0.0006999999998242856,
+          "scopeMs": 0.04240000000004329,
+          "phasedTotalMs": 3.138099999999895,
+          "actualEvaluateMs": 3.300899999999956,
+          "warmMs": 0.0010000000002037268,
+          "legacyMs": 4.419199999999819
+        },
+        {
+          "kind": "first",
+          "preparationMs": 0.20700000000010732,
+          "moveMs": 0.9114999999999327,
+          "inputSnapshotMs": 0.8878999999999451,
+          "connectMs": 1.1535000000001219,
+          "snapshotMs": 0.0004999999998744897,
+          "scopeMs": 0.042200000000093496,
+          "phasedTotalMs": 2.9955999999999676,
+          "actualEvaluateMs": 2.9781000000000404,
+          "warmMs": 0.001199999999926149,
+          "legacyMs": 8.066100000000006
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 0.20700000000010732,
+          "moveMs": 1.0177000000001044,
+          "inputSnapshotMs": 1.045799999999872,
+          "connectMs": 1.1610000000000582,
+          "snapshotMs": 0.0003999999998995918,
+          "scopeMs": 0.04259999999999309,
+          "phasedTotalMs": 3.2674999999999272,
+          "actualEvaluateMs": 2.9830000000001746,
+          "warmMs": 0.0018000000000029104,
+          "legacyMs": 4.088599999999815
+        }
+      ]
+    },
+    {
+      "foreign": 1000,
+      "summary": {
+        "first": {
+          "preparationMs": {
+            "median": 1.9613000000003922,
+            "p95": 7.311299999999392
+          },
+          "moveMs": {
+            "median": 6.859299999999621,
+            "p95": 11.281599999999344
+          },
+          "inputSnapshotMs": {
+            "median": 6.36869999999999,
+            "p95": 8.093199999999342
+          },
+          "connectMs": {
+            "median": 6.237699999999677,
+            "p95": 7.798300000000381
+          },
+          "snapshotMs": {
+            "median": 0.0011999999996987754,
+            "p95": 0.001799999999548163
+          },
+          "scopeMs": {
+            "median": 0.2624000000000706,
+            "p95": 0.39509999999972933
+          },
+          "phasedTotalMs": {
+            "median": 22.263500000000022,
+            "p95": 24.265499999999975
+          },
+          "actualEvaluateMs": {
+            "median": 25.05099999999993,
+            "p95": 29.733000000000175
+          },
+          "warmMs": {
+            "median": 0.002100000000154978,
+            "p95": 0.003200000000106229
+          },
+          "legacyMs": {
+            "median": 29.221199999999953,
+            "p95": 38.03859999999986
+          }
+        },
+        "changed": {
+          "preparationMs": {
+            "median": 1.9613000000003922,
+            "p95": 7.311299999999392
+          },
+          "moveMs": {
+            "median": 5.945299999999406,
+            "p95": 7.588600000000042
+          },
+          "inputSnapshotMs": {
+            "median": 6.797700000000077,
+            "p95": 14.723799999999756
+          },
+          "connectMs": {
+            "median": 8.567699999999604,
+            "p95": 12.399500000000444
+          },
+          "snapshotMs": {
+            "median": 0.0014000000001033186,
+            "p95": 0.0018000000000029104
+          },
+          "scopeMs": {
+            "median": 0.2767999999996391,
+            "p95": 0.429800000000796
+          },
+          "phasedTotalMs": {
+            "median": 24.562799999999697,
+            "p95": 29.66730000000007
+          },
+          "actualEvaluateMs": {
+            "median": 20.324899999999616,
+            "p95": 23.903200000000652
+          },
+          "warmMs": {
+            "median": 0.002300000000104774,
+            "p95": 0.0036999999992985977
+          },
+          "legacyMs": {
+            "median": 30.468399999999747,
+            "p95": 39.486399999999776
+          }
+        }
+      },
+      "samples": [
+        {
+          "kind": "first",
+          "preparationMs": 1.7572000000000116,
+          "moveMs": 5.600200000000314,
+          "inputSnapshotMs": 6.36869999999999,
+          "connectMs": 5.881099999999606,
+          "snapshotMs": 0.0013000000003557943,
+          "scopeMs": 0.25090000000000146,
+          "phasedTotalMs": 18.102200000000266,
+          "actualEvaluateMs": 22.83069999999998,
+          "warmMs": 0.0016999999998006388,
+          "legacyMs": 29.221199999999953
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.7572000000000116,
+          "moveMs": 5.345699999999852,
+          "inputSnapshotMs": 9.66359999999986,
+          "connectMs": 6.54930000000013,
+          "snapshotMs": 0.001299999999901047,
+          "scopeMs": 0.25109999999995125,
+          "phasedTotalMs": 21.810999999999694,
+          "actualEvaluateMs": 19.222999999999956,
+          "warmMs": 0.002800000000206637,
+          "legacyMs": 28.617899999999736
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.4982999999997446,
+          "moveMs": 5.730600000000322,
+          "inputSnapshotMs": 5.88169999999991,
+          "connectMs": 5.842200000000048,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.2624000000000706,
+          "phasedTotalMs": 17.71810000000005,
+          "actualEvaluateMs": 30.984400000000278,
+          "warmMs": 0.002199999999902502,
+          "legacyMs": 30.829499999999825
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.4982999999997446,
+          "moveMs": 6.242600000000039,
+          "inputSnapshotMs": 7.5615999999999985,
+          "connectMs": 11.158200000000306,
+          "snapshotMs": 0.001099999999951251,
+          "scopeMs": 0.25189999999975043,
+          "phasedTotalMs": 25.215400000000045,
+          "actualEvaluateMs": 17.777000000000044,
+          "warmMs": 0.0039000000001578883,
+          "legacyMs": 31.45550000000003
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.29320000000007,
+          "moveMs": 6.05829999999969,
+          "inputSnapshotMs": 6.0163000000002285,
+          "connectMs": 6.154199999999946,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.28629999999975553,
+          "phasedTotalMs": 18.516499999999724,
+          "actualEvaluateMs": 24.547300000000178,
+          "warmMs": 0.0025000000000545697,
+          "legacyMs": 30.45179999999982
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.29320000000007,
+          "moveMs": 5.70470000000023,
+          "inputSnapshotMs": 10.365099999999984,
+          "connectMs": 6.052999999999884,
+          "snapshotMs": 0.0014999999998508429,
+          "scopeMs": 0.2549000000003616,
+          "phasedTotalMs": 22.37920000000031,
+          "actualEvaluateMs": 19.966099999999642,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 29.103799999999865
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.657799999999952,
+          "moveMs": 5.891900000000078,
+          "inputSnapshotMs": 6.480199999999968,
+          "connectMs": 7.384199999999964,
+          "snapshotMs": 0.0015000000003055902,
+          "scopeMs": 0.2555999999999585,
+          "phasedTotalMs": 20.013400000000274,
+          "actualEvaluateMs": 26.302999999999884,
+          "warmMs": 0.002100000000154978,
+          "legacyMs": 29.768899999999576
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.657799999999952,
+          "moveMs": 7.221099999999751,
+          "inputSnapshotMs": 13.077999999999975,
+          "connectMs": 7.144900000000234,
+          "snapshotMs": 0.002300000000104774,
+          "scopeMs": 0.2875999999996566,
+          "phasedTotalMs": 27.73389999999972,
+          "actualEvaluateMs": 22.935899999999947,
+          "warmMs": 0.0024000000003070454,
+          "legacyMs": 39.486399999999776
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.3717000000001462,
+          "moveMs": 6.564800000000105,
+          "inputSnapshotMs": 6.302799999999934,
+          "connectMs": 7.496000000000095,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.37940000000025975,
+          "phasedTotalMs": 20.74420000000009,
+          "actualEvaluateMs": 25.273599999999988,
+          "warmMs": 0.0020999999997002305,
+          "legacyMs": 34.29140000000007
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.3717000000001462,
+          "moveMs": 6.569800000000214,
+          "inputSnapshotMs": 6.507200000000012,
+          "connectMs": 11.565799999999854,
+          "snapshotMs": 0.001299999999901047,
+          "scopeMs": 0.2658000000001266,
+          "phasedTotalMs": 24.909900000000107,
+          "actualEvaluateMs": 21.729899999999816,
+          "warmMs": 0.0025000000000545697,
+          "legacyMs": 33.39850000000024
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.870300000000043,
+          "moveMs": 6.542400000000271,
+          "inputSnapshotMs": 8.427499999999782,
+          "connectMs": 8.65689999999995,
+          "snapshotMs": 0.002100000000154978,
+          "scopeMs": 0.6365999999998166,
+          "phasedTotalMs": 24.265499999999975,
+          "actualEvaluateMs": 29.45560000000023,
+          "warmMs": 0.0032999999998537533,
+          "legacyMs": 37.42630000000008
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.870300000000043,
+          "moveMs": 8.0621000000001,
+          "inputSnapshotMs": 13.349300000000312,
+          "connectMs": 7.9284999999999854,
+          "snapshotMs": 0.0018000000000029104,
+          "scopeMs": 0.3255999999996675,
+          "phasedTotalMs": 29.66730000000007,
+          "actualEvaluateMs": 21.02430000000004,
+          "warmMs": 0.0027000000000043656,
+          "legacyMs": 33.35010000000011
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.9613000000003922,
+          "moveMs": 6.859299999999621,
+          "inputSnapshotMs": 6.854400000000169,
+          "connectMs": 7.581500000000233,
+          "snapshotMs": 0.001799999999548163,
+          "scopeMs": 0.31890000000021246,
+          "phasedTotalMs": 21.615899999999783,
+          "actualEvaluateMs": 25.05099999999993,
+          "warmMs": 0.002100000000154978,
+          "legacyMs": 29.67970000000014
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.9613000000003922,
+          "moveMs": 5.995499999999993,
+          "inputSnapshotMs": 14.723799999999756,
+          "connectMs": 7.831100000000333,
+          "snapshotMs": 0.0013999999996485712,
+          "scopeMs": 0.3543000000004213,
+          "phasedTotalMs": 28.90610000000015,
+          "actualEvaluateMs": 19.697899999999663,
+          "warmMs": 0.002100000000154978,
+          "legacyMs": 40.93610000000035
+        },
+        {
+          "kind": "first",
+          "preparationMs": 6.8103000000000975,
+          "moveMs": 7.990400000000591,
+          "inputSnapshotMs": 8.093199999999342,
+          "connectMs": 6.544300000000476,
+          "snapshotMs": 0.0010000000002037268,
+          "scopeMs": 0.39509999999972933,
+          "phasedTotalMs": 23.024000000000342,
+          "actualEvaluateMs": 29.733000000000175,
+          "warmMs": 0.003200000000106229,
+          "legacyMs": 38.064399999999296
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 6.8103000000000975,
+          "moveMs": 6.8835999999992055,
+          "inputSnapshotMs": 7.065200000000004,
+          "connectMs": 12.155500000000757,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.2767999999996391,
+          "phasedTotalMs": 26.38249999999971,
+          "actualEvaluateMs": 21.975400000000263,
+          "warmMs": 0.0036999999992985977,
+          "legacyMs": 32.947000000000116
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.0789000000004307,
+          "moveMs": 6.825600000000122,
+          "inputSnapshotMs": 7.401100000000042,
+          "connectMs": 7.798300000000381,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.3036999999994805,
+          "phasedTotalMs": 22.33010000000013,
+          "actualEvaluateMs": 26.820600000000013,
+          "warmMs": 0.0020999999997002305,
+          "legacyMs": 32.487700000000586
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.0789000000004307,
+          "moveMs": 6.160499999999956,
+          "inputSnapshotMs": 11.783200000000761,
+          "connectMs": 7.155299999999443,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.2585000000008222,
+          "phasedTotalMs": 25.35870000000068,
+          "actualEvaluateMs": 19.41449999999986,
+          "warmMs": 0.001900000000205182,
+          "legacyMs": 33.076499999999214
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.189300000000003,
+          "moveMs": 6.933800000000701,
+          "inputSnapshotMs": 7.330399999999827,
+          "connectMs": 7.746599999999489,
+          "snapshotMs": 0.00120000000060827,
+          "scopeMs": 0.2514999999993961,
+          "phasedTotalMs": 22.263500000000022,
+          "actualEvaluateMs": 25.201600000000326,
+          "warmMs": 0.0018000000000029104,
+          "legacyMs": 38.03859999999986
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.189300000000003,
+          "moveMs": 5.964400000000751,
+          "inputSnapshotMs": 17.229599999999664,
+          "connectMs": 8.567699999999604,
+          "snapshotMs": 0.0016000000005078618,
+          "scopeMs": 0.4557999999997264,
+          "phasedTotalMs": 32.21910000000025,
+          "actualEvaluateMs": 23.025300000000243,
+          "warmMs": 0.0024999999995998223,
+          "legacyMs": 34.902900000000045
+        },
+        {
+          "kind": "first",
+          "preparationMs": 8.716899999999441,
+          "moveMs": 6.380199999999604,
+          "inputSnapshotMs": 7.565599999999904,
+          "connectMs": 7.347700000000259,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.3014000000002852,
+          "phasedTotalMs": 21.59609999999975,
+          "actualEvaluateMs": 27.01209999999992,
+          "warmMs": 0.0024000000003070454,
+          "legacyMs": 33.34769999999935
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 8.716899999999441,
+          "moveMs": 5.755400000000009,
+          "inputSnapshotMs": 6.261700000000019,
+          "connectMs": 12.102399999999761,
+          "snapshotMs": 0.0017000000007101335,
+          "scopeMs": 0.30539999999928114,
+          "phasedTotalMs": 24.42659999999978,
+          "actualEvaluateMs": 23.903200000000652,
+          "warmMs": 0.003299999999399006,
+          "legacyMs": 33.330800000000636
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.6931000000004133,
+          "moveMs": 5.4340000000001965,
+          "inputSnapshotMs": 6.7391999999999825,
+          "connectMs": 5.943600000000515,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.2507999999997992,
+          "phasedTotalMs": 18.368800000000192,
+          "actualEvaluateMs": 22.489400000000387,
+          "warmMs": 0.001999999999497959,
+          "legacyMs": 28.93960000000061
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.6931000000004133,
+          "moveMs": 5.2763999999997395,
+          "inputSnapshotMs": 5.734999999999673,
+          "connectMs": 11.201700000000528,
+          "snapshotMs": 0.001299999999901047,
+          "scopeMs": 0.2556000000004133,
+          "phasedTotalMs": 22.470000000000255,
+          "actualEvaluateMs": 19.708799999999428,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 28.34900000000016
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.4651000000003478,
+          "moveMs": 5.529399999999441,
+          "inputSnapshotMs": 6.041500000000269,
+          "connectMs": 6.182300000000396,
+          "snapshotMs": 0.0010999999994965037,
+          "scopeMs": 0.26569999999992433,
+          "phasedTotalMs": 18.019999999999527,
+          "actualEvaluateMs": 28.140000000000327,
+          "warmMs": 0.002199999999902502,
+          "legacyMs": 24.950700000000325
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.4651000000003478,
+          "moveMs": 6.361100000000079,
+          "inputSnapshotMs": 7.022500000000036,
+          "connectMs": 11.773599999999533,
+          "snapshotMs": 0.0015000000003055902,
+          "scopeMs": 0.31419999999980064,
+          "phasedTotalMs": 25.472899999999754,
+          "actualEvaluateMs": 18.112100000000282,
+          "warmMs": 0.001999999999497959,
+          "legacyMs": 27.990600000000086
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.3401999999996406,
+          "moveMs": 11.023699999999735,
+          "inputSnapshotMs": 5.856700000000274,
+          "connectMs": 6.011599999999817,
+          "snapshotMs": 0.0011000000004059984,
+          "scopeMs": 0.259900000000016,
+          "phasedTotalMs": 23.153000000000247,
+          "actualEvaluateMs": 22.909700000000157,
+          "warmMs": 0.0018999999992956873,
+          "legacyMs": 28.82590000000073
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.3401999999996406,
+          "moveMs": 5.516099999999824,
+          "inputSnapshotMs": 6.32129999999961,
+          "connectMs": 12.399500000000444,
+          "snapshotMs": 0.0014999999993960955,
+          "scopeMs": 0.32440000000042346,
+          "phasedTotalMs": 24.562799999999697,
+          "actualEvaluateMs": 20.324899999999616,
+          "warmMs": 0.002300000000104774,
+          "legacyMs": 28.700800000000527
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.6100999999998749,
+          "moveMs": 10.488800000000083,
+          "inputSnapshotMs": 5.528299999999945,
+          "connectMs": 5.839500000000044,
+          "snapshotMs": 0.0007999999997991836,
+          "scopeMs": 0.2556000000004133,
+          "phasedTotalMs": 22.113000000000284,
+          "actualEvaluateMs": 22.07089999999971,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 29.0658999999996
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.6100999999998749,
+          "moveMs": 5.722199999999248,
+          "inputSnapshotMs": 5.57050000000072,
+          "connectMs": 10.303799999999683,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.25609999999960564,
+          "phasedTotalMs": 21.85399999999936,
+          "actualEvaluateMs": 17.60019999999986,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 28.398799999999937
+        },
+        {
+          "kind": "first",
+          "preparationMs": 7.311299999999392,
+          "moveMs": 9.34520000000066,
+          "inputSnapshotMs": 7.014199999999619,
+          "connectMs": 6.4638999999997395,
+          "snapshotMs": 0.00120000000060827,
+          "scopeMs": 0.35429999999996653,
+          "phasedTotalMs": 23.178800000000592,
+          "actualEvaluateMs": 22.859599999999773,
+          "warmMs": 0.001900000000205182,
+          "legacyMs": 23.922199999999975
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 7.311299999999392,
+          "moveMs": 5.945299999999406,
+          "inputSnapshotMs": 5.827900000000227,
+          "connectMs": 7.595400000000154,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.3705999999992855,
+          "phasedTotalMs": 19.740599999999176,
+          "actualEvaluateMs": 25.781700000000455,
+          "warmMs": 0.0027000000000043656,
+          "legacyMs": 30.468399999999747
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.2395000000005894,
+          "moveMs": 11.867299999999886,
+          "inputSnapshotMs": 7.160799999999654,
+          "connectMs": 6.6840000000001965,
+          "snapshotMs": 0.0011000000004059984,
+          "scopeMs": 0.25239999999939755,
+          "phasedTotalMs": 25.96559999999954,
+          "actualEvaluateMs": 24.37630000000081,
+          "warmMs": 0.002299999999195279,
+          "legacyMs": 24.03980000000047
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.2395000000005894,
+          "moveMs": 5.694599999999809,
+          "inputSnapshotMs": 5.819800000000214,
+          "connectMs": 11.573699999999917,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.23950000000058935,
+          "phasedTotalMs": 23.32880000000023,
+          "actualEvaluateMs": 18.578599999999824,
+          "warmMs": 0.0027000000000043656,
+          "legacyMs": 30.79359999999997
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.4939999999996871,
+          "moveMs": 11.02810000000045,
+          "inputSnapshotMs": 5.975599999999758,
+          "connectMs": 6.237699999999677,
+          "snapshotMs": 0.0011000000004059984,
+          "scopeMs": 0.28549999999995634,
+          "phasedTotalMs": 23.528000000000247,
+          "actualEvaluateMs": 25.92109999999957,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 28.349099999999453
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.4939999999996871,
+          "moveMs": 5.493899999999485,
+          "inputSnapshotMs": 5.938700000000608,
+          "connectMs": 16.732299999999668,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.429800000000796,
+          "phasedTotalMs": 28.595900000000256,
+          "actualEvaluateMs": 18.69509999999991,
+          "warmMs": 0.0018000000000029104,
+          "legacyMs": 27.105399999999463
+        },
+        {
+          "kind": "first",
+          "preparationMs": 2.3679000000001906,
+          "moveMs": 10.73030000000017,
+          "inputSnapshotMs": 6.352199999999357,
+          "connectMs": 5.996600000000399,
+          "snapshotMs": 0.0015999999995983671,
+          "scopeMs": 0.2485000000006039,
+          "phasedTotalMs": 23.329200000000128,
+          "actualEvaluateMs": 23.40229999999974,
+          "warmMs": 0.0027000000000043656,
+          "legacyMs": 23.4979000000003
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 2.3679000000001906,
+          "moveMs": 5.802599999999984,
+          "inputSnapshotMs": 5.80120000000079,
+          "connectMs": 5.919399999999769,
+          "snapshotMs": 0.0011999999996987754,
+          "scopeMs": 0.25860000000011496,
+          "phasedTotalMs": 17.783000000000357,
+          "actualEvaluateMs": 23.69719999999961,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 28.82669999999962
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.6453000000001339,
+          "moveMs": 11.281599999999344,
+          "inputSnapshotMs": 6.1723000000001775,
+          "connectMs": 5.939900000000307,
+          "snapshotMs": 0.0014999999993960955,
+          "scopeMs": 0.2510000000002037,
+          "phasedTotalMs": 23.646299999999428,
+          "actualEvaluateMs": 24.612100000000282,
+          "warmMs": 0.002199999999902502,
+          "legacyMs": 23.846800000000258
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.6453000000001339,
+          "moveMs": 5.26260000000002,
+          "inputSnapshotMs": 5.717099999999846,
+          "connectMs": 6.352000000000771,
+          "snapshotMs": 0.001299999999901047,
+          "scopeMs": 0.27549999999973807,
+          "phasedTotalMs": 17.608500000000276,
+          "actualEvaluateMs": 22.698599999999715,
+          "warmMs": 0.0021000000006097252,
+          "legacyMs": 27.366399999999885
+        },
+        {
+          "kind": "first",
+          "preparationMs": 1.577900000000227,
+          "moveMs": 10.732100000000173,
+          "inputSnapshotMs": 5.522800000000643,
+          "connectMs": 5.918599999999969,
+          "snapshotMs": 0.0010999999994965037,
+          "scopeMs": 0.2478000000000975,
+          "phasedTotalMs": 22.42240000000038,
+          "actualEvaluateMs": 22.90899999999965,
+          "warmMs": 0.0020000000004074536,
+          "legacyMs": 23.420100000000275
+        },
+        {
+          "kind": "changed",
+          "preparationMs": 1.577900000000227,
+          "moveMs": 7.588600000000042,
+          "inputSnapshotMs": 6.797700000000077,
+          "connectMs": 7.763799999999719,
+          "snapshotMs": 0.0014000000001033186,
+          "scopeMs": 0.39249999999992724,
+          "phasedTotalMs": 22.54399999999987,
+          "actualEvaluateMs": 21.958400000000438,
+          "warmMs": 0.002300000000104774,
+          "legacyMs": 29.69419999999991
+        }
+      ]
+    }
+  ]
+}
