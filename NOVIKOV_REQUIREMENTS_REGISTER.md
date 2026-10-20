@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `9caaea8` nach PR395 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 20.10.2026, main `8201f8d` nach PR396 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12931,3 +12931,12 @@ dem Vollpfad. Gemeinsame Fixture und ausführbares Exportvergleichsskript sicher
 Reproduktion; zwölf Patchtests, Typecheck, Lint und statischer Browserbuild bestanden.
 Statischer 3D-Zielzustand visuell geprüft. Kontinuierliche 3D-Patchvorschau, Native-/Shift-
 und Frame-Gates bleiben offen. Detailnachweis im Masterplan; aktive Reihenfolge nur §9.
+
+
+### AUD14-04/05 – T-Zielphasen gemessen (20.10.2026)
+PR396 in main 8201f8d. Zwei Node-Läufe, je 0/100/1000 Fremdwände und erste/gewechselte
+Hosts: bei 1000 Fremdwänden circa 29 ms evaluate, circa 0,002 ms identischer Treffer.
+Größter Anteil Anschlussaktion (circa 12,6 ms), Snapshot circa 6,8 ms; Scope circa
+0,25 ms. 336 erfolgreiche Fallvergleiche gegen echten Produktionsadapter; Rohdaten
+und Grenzen im Masterplan. Keine Produktoptimierung oder Framefreigabe in diesem
+Schritt. Folgeschritt ausschließlich §9: redundante Eingangsprüfung sicher begrenzen.
