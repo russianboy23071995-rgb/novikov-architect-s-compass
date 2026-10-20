@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `81a5b17` nach PR397 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 20.10.2026, main `5c709ee` nach PR398 (grüne CI und funktionaler Browserabnahme der Snapshot-Wiederverwendung). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12951,3 +12951,12 @@ Netto eine vollständige Prüfung weniger, keine neue vom Aufrufer setzbare Mark
 1000 Fremdwänden: Erstziel rund 24–25 statt 29–30 ms, Hostwechsel rund 20 statt
 30 ms. Rohdaten/Vertragsgrenzen im Masterplan. Browser-/Native-/Frame-Abnahme
 bleibt offen; einziger Folgeauftrag ausschließlich §9.
+
+
+### AUD14-04/05 – Snapshot-Pfad im Produktbrowser abgenommen (20.10.2026)
+PR398 nach grüner CI in main 5c709ee. Frischer statischer Build, reale
+Endpunktplatzierung von alter auf neue T-Gruppe; Nachbar und Fenster erhalten.
+Ein Undo/Redo und Abbruch geprüft. Alle fünf vollständigen Browserexporte
+entsprechen dem unabhängigen Vollpfad. Statischer 3D-Zielzustand kontrolliert;
+keine erfassten Konsolenfehler. Keine neue Native-/Shift-/Frame-Freigabe.
+Detailnachweis im Masterplan; einzige aktive Fortsetzung §9.
