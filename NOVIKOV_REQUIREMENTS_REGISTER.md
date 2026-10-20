@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `b27f712` nach PR393 und Architekturabgleich; PR394 offen (Funktions-/Browserabnahme 20.10. bestanden, erneute CI nach Konfliktauflösung ausstehend). Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
+Geprüfte Code-Basis: 20.10.2026, main `df423af` nach PR394 (grüne CI und funktionale Browserabnahme). Begrenzte T-Komposition im Folgebranch automatisiert geprüft, praktische Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -16,7 +16,7 @@ Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und
 
 Für einen Auftrag nur seine Kennungen/Detailkapsel lesen; nicht das ganze Register in jeden Kontext laden. Neue Entscheidungen/Status direkt im betreffenden Eintrag aktualisieren. Altkennungen nicht neu vergeben. Historische FEATURE_ROADMAP-F-Kennungen sind ausdrücklich von Guide-F-Kennungen verschieden.
 
-**Pflege- und Prioritätsregel (20.10.2026):** Die Live-Stände im oberen N-Katalog müssen nach einschlägigen PRs mit Code, Masterplan §4/§9 und Dateiformat abgeglichen werden. Historische Quellenkapseln werden nicht als aktuelle Implementierungsanweisung gelesen. Bewertete Risiken und Reihenfolge stehen nur im Masterplan §9: P0 bei Datenverlust/fehlerhaften Ergebnissen, vor Release offene Recovery-/Kapazitätsgates, P1 konsistente Dokumentationsquelle und gemessene T-/Großmodell-Pfade, P2 fokussierte Verantwortungsbereinigung. PR394 bleibt offen; seine Messungen/Tests sind kein main- oder Native-Nachweis. Die frühere Prototyp-README wurde ausdrücklich historisch markiert. Historische Anforderungen vor jeder Zusammenführung inventarisieren; keine einzelne noch größere Registerdatei erzeugen.
+**Pflege- und Prioritätsregel (20.10.2026):** Die Live-Stände im oberen N-Katalog müssen nach einschlägigen PRs mit Code, Masterplan §4/§9 und Dateiformat abgeglichen werden. Historische Quellenkapseln werden nicht als aktuelle Implementierungsanweisung gelesen. Bewertete Risiken und Reihenfolge stehen nur im Masterplan §9: P0 bei Datenverlust/fehlerhaften Ergebnissen, vor Release offene Recovery-/Kapazitätsgates, P1 konsistente Dokumentationsquelle und gemessene T-/Großmodell-Pfade, P2 fokussierte Verantwortungsbereinigung. PR394 ist nach grüner CI und funktionaler Browserabnahme integriert; seine Node-Messungen sind weiterhin kein Native-/Frame-Nachweis. Die frühere Prototyp-README wurde ausdrücklich historisch markiert. Historische Anforderungen vor jeder Zusammenführung inventarisieren; keine einzelne noch größere Registerdatei erzeugen.
 
 ## 1. N01–N60 – aktuelle Einordnung
 
@@ -12918,3 +12918,7 @@ begrenzen, gegen unveränderten Vollpfad inklusive gelöster Nachbarn vergleiche
 
 ### AUD14-04/05 – PR394-Abnahme 20.10.2026
 Produktbrowser auf isoliertem Port 8087: T-Platzierungen an zwei Hosts, vollständige Geschossdaten identisch zum unabhängigen Modellpfad, Undo/Redo und 3D-Darstellung geprüft. Zehn Regressionstests sichern Warmcache, Kontextbindung, Unveränderlichkeit und unabhängigen Commit. Native Dauerhover-/Shift-/Frame-Nachweis bleibt offen. Fixture und Grenzen siehe Masterplan-Abnahmeprotokoll; aktive Reihenfolge ausschließlich §9. Neuere Architekturvorgaben b27f712 erhalten. Berichtsvorgabe für geschätzte Aufwandsanteile in AGENTS.md ergänzt.
+
+
+### AUD14-04/05 – Vorher-/Nachher-Komposition 20.10.2026
+PR394 in main df423af gemergt. Folgebranch begrenzt den T-Geometriepatch auf die vollständige Zusammenhangskomponente der vereinigten alten/neuen Anschlussrelationen; gelöste Partner und Fenster bleiben enthalten. Zwölf gezielte Regressionen bestanden. 1000 Fremdwände: 3 Ersatz-IDs, Node-Kompositionsmedian 0,100 ms; erster Zielaufruf weiterhin 25,52 ms. Rohdaten und Messgrenzen im Masterplan-Nachweis. Praktische Patch-Abnahme als einziger aktiver Folgeauftrag in §9; keine pauschale AUD14-Freigabe.

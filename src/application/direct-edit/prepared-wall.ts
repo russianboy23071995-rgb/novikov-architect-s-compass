@@ -6,6 +6,7 @@ import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
+import { wallTransitionPatch } from "./wall-transition-patch.ts";
 
 /** Shared axis/body endpoint gestures and constrained stretching retain their original anchor. */
 export function prepareWallEndpointPreview(session: EditSession): PreparedDirectEditPreview | null {
@@ -24,9 +25,6 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
     anchor: session.anchor,
     action: session.action,
   });
-  const replacedIds = Object.freeze(
-    [...storeyOf(base).walls, ...storeyOf(base).windows].map((e) => e.id),
-  );
   // One disposable result per capability, never a global model/ID cache.
   let lastT:
     | {
@@ -75,15 +73,7 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
         const next = connectSnappedT(pinned, editAtPointer(pinned, base, point), point, candidate);
         // Use the established ownership boundary: callers cannot mutate a cached
         // result or freeze their own project to acquire validation provenance.
-        const level = storeyOf(createProjectSnapshot(next));
-        const geometry = { storey: level, assets: [] };
-        Object.freeze(geometry.assets);
-        Object.freeze(geometry);
-        const patch: GeometryPreview = Object.freeze({
-          geometry,
-          replacedIds,
-          storeyPatches: Object.freeze([Object.freeze({ storeyId: s.id, geometry, replacedIds })]),
-        });
+        const patch = wallTransitionPatch(base, createProjectSnapshot(next), wall.id);
         lastT = {
           host: candidate.sourceEntityId,
           x: point.x,

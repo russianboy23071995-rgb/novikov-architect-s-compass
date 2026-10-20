@@ -318,6 +318,69 @@ test("T target cache retains at most one result and never masks invalid candidat
   assert.notEqual(run(), warm, "leaving T snapping drops the result");
 });
 
+test("T patches exclude unrelated walls and retain stationary surface identity", () => {
+  for (const count of [0, 100, 1000]) {
+    const p = tTargetFixture(),
+      s = storeyOf(p);
+    for (let i = 0; i < count; i++)
+      s.walls.push({
+        ...s.walls[0]!,
+        id: `unrelated-${i}`,
+        start: { x: i * 3, y: 30 },
+        end: { x: i * 3, y: 33 },
+      });
+    const base = validateProject(p),
+      session = sessionOf(base);
+    const patch = prepareDirectEditPreview(session)!.evaluate(
+      base,
+      target,
+      { x: 8, y: 0 },
+      tCandidate(),
+    );
+    assert.deepEqual([...patch.replacedIds].sort(), ["host-8", "wall-1", "window-0"]);
+    assert.equal(storeyOf(patch.geometry).walls.length, 2);
+    assert.equal(storeyOf(patch.geometry).windows.length, 1);
+    compare(base, { x: 8, y: 0 }, tCandidate());
+  }
+});
+
+test("T host change includes detached old group, new host group and all their windows", () => {
+  const p = tPairFixture(),
+    s = storeyOf(p);
+  s.walls.push(
+    { ...s.walls[0]!, id: "new-host", start: { x: 0, y: 3 }, end: { x: 6, y: 3 } },
+    { ...s.walls[1]!, id: "new-neighbour", start: { x: 5, y: 6 }, end: { x: 5, y: 3 } },
+    { ...s.walls[0]!, id: "unrelated", start: { x: 20, y: 0 }, end: { x: 26, y: 0 } },
+  );
+  s.wallTJunctions.push({
+    hostWallId: "new-host",
+    incoming: { wallId: "new-neighbour", endpoint: 1 },
+  });
+  s.windows.push({ ...s.windows[0]!, id: "new-window", wallId: "new-host" });
+  const base = validateProject(p),
+    session = sessionOf(base, 1, "wall-2"),
+    point = { x: 3, y: 3 };
+  const candidate = { ...tCandidate(), worldPoint: point, sourceEntityId: "new-host" };
+  const full = connectSnappedT(session, editAtPointer(session, base, point), point, candidate);
+  assert.ok(
+    storeyOf(full).wallTJunctions.some(
+      (j) => j.hostWallId === "new-host" && j.incoming.wallId === "wall-2",
+    ),
+  );
+  assert.ok(!storeyOf(full).wallTJunctions.some((j) => j.hostWallId === "wall-1"));
+  const patch = prepareDirectEditPreview(session)!.evaluate(base, session.target, point, candidate);
+  assert.deepEqual([...patch.replacedIds].sort(), [
+    "new-host",
+    "new-neighbour",
+    "new-window",
+    "wall-1",
+    "wall-2",
+    "window-0",
+    "window-1",
+  ]);
+  compare(base, point, candidate, 1, "wall-2");
+});
+
 test("warm T preview cannot bypass full confirmation and cancellation owns no history", () => {
   const p = tTargetFixture();
   const state = editingReducer(createEditingState(p), {
