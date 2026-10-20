@@ -1,4 +1,13 @@
-# Novikov Architect's Compass
+# NOVIKOV CAD
+
+NOVIKOV CAD ist ein in Entwicklung befindliches Architektur-CAD mit einem gemeinsamen Mehrgeschoss-Projektmodell, 2D-/3D-Ansicht, Wänden/Fenstern, Zeichnungen, Datei-/Recovery-Pfaden und begrenzten Text-/Sprachaktionen. Autonomes AI-CAD, Räume/Decken/Dächer, vollständige IFC-/Archicad-Importe und eine Freigabe für große Langzeitprojekte sind **noch nicht** umgesetzt oder abgenommen. Browser oder installierbare Desktop-App ist nicht entschieden; Windows und macOS bleiben Zielplattformen.
+
+Verbindliche Lesereihenfolge für Codex und UI-Arbeit: [AGENTS.md](AGENTS.md) → [Masterplan §9](NOVIKOV_MASTERPLAN.md#9-pflegevertrag-und-codex-arbeitsauftrag) für den einzigen aktiven Schritt → passende IDs im [Anforderungsregister](NOVIKOV_REQUIREMENTS_REGISTER.md) → nur bei Bedarf datierte Quellen unter `docs/`. Prüfe den aktuellen Code und offene PRs, bevor du einen Status übernimmst. Für UI-Änderungen aus Lovable gilt: keine veröffentlichten Commits umschreiben; reine Gestaltung darf Modell- und Application-Logik nicht ersetzen.
+
+Das Projekt nutzt TypeScript/React. Der reguläre Prüfpfad steht in [GitHub Checks](.github/workflows/checks.yml): Tests, App-/Benchmark-Typprüfung, Lint und Build. Erfolgreiche CI belegt weder native Flüssigkeit noch Speichersicherheit bei echten Langzeit-/Quota-Grenzen. Zum Start lokal: `npm i`, `npm run dev`.
+
+<details>
+<summary>Historischer Lovable-UI-Prototypauftrag vom 29.09.2026 (nicht die aktuelle Implementierungsanweisung)</summary>
 
 # NOVIKOV CAD – Professional Architecture CAD Interface
 
@@ -404,6 +413,8 @@ Positionierung:
 **AI-native professional architecture CAD workspace**
 
 Die Oberfläche soll vermitteln, dass klassische präzise CAD-Modellierung und moderne natürliche Sprachsteuerung gleichberechtigte Bedienformen desselben Systems sind.
+
+</details>
 
 This project was built with [Lovable](https://lovable.dev).
 
