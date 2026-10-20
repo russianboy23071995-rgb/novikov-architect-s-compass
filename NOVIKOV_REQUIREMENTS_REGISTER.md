@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `df423af` nach PR394 (grüne CI und funktionale Browserabnahme). Begrenzte T-Komposition im Folgebranch automatisiert geprüft, praktische Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 20.10.2026, main `9caaea8` nach PR395 (grüne CI). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12922,3 +12922,12 @@ Produktbrowser auf isoliertem Port 8087: T-Platzierungen an zwei Hosts, vollstä
 
 ### AUD14-04/05 – Vorher-/Nachher-Komposition 20.10.2026
 PR394 in main df423af gemergt. Folgebranch begrenzt den T-Geometriepatch auf die vollständige Zusammenhangskomponente der vereinigten alten/neuen Anschlussrelationen; gelöste Partner und Fenster bleiben enthalten. Zwölf gezielte Regressionen bestanden. 1000 Fremdwände: 3 Ersatz-IDs, Node-Kompositionsmedian 0,100 ms; erster Zielaufruf weiterhin 25,52 ms. Rohdaten und Messgrenzen im Masterplan-Nachweis. Praktische Patch-Abnahme als einziger aktiver Folgeauftrag in §9; keine pauschale AUD14-Freigabe.
+
+### AUD14-04/05 – Browser-Hostwechsel nach PR395 (20.10.2026)
+PR395 nach grüner CI in main 9caaea8. Isolierter Produktbrowser: Wechsel von alter
+zu neuer T-Gruppe mit stationärem Nachbarn und drei Fenstern; Platzierung, ein Undo,
+Redo und Abbruch. Fünf exportierte vollständige Geschossstände entsprechen unabhängig
+dem Vollpfad. Gemeinsame Fixture und ausführbares Exportvergleichsskript sichern die
+Reproduktion; zwölf Patchtests, Typecheck, Lint und statischer Browserbuild bestanden.
+Statischer 3D-Zielzustand visuell geprüft. Kontinuierliche 3D-Patchvorschau, Native-/Shift-
+und Frame-Gates bleiben offen. Detailnachweis im Masterplan; aktive Reihenfolge nur §9.

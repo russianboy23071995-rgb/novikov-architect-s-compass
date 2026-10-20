@@ -3,6 +3,7 @@ import { CadWorkspace } from "../src/components/cad/CadWorkspace";
 import { fullHeightFixture } from "./bound-height-fixture";
 import { connectionGroupFixture } from "./connection-group-fixture";
 import { tPairFixture } from "./t-pair-fixture";
+import { tTransitionFixture } from "./t-transition-fixture";
 import { storeyOf } from "../src/domain/storeys/access";
 import { validateProject } from "../src/lib/bim/model";
 import "../src/styles.css";
@@ -25,11 +26,13 @@ function tTargetFixture() {
 createRoot(document.getElementById("root")!).render(
   <CadWorkspace
     initialProject={
-      params.has("tTarget")
-        ? tTargetFixture()
-        : params.has("connectionGroup")
-          ? connectionGroupFixture(50, 100)
-          : fullHeightFixture()
+      params.has("tTransition")
+        ? tTransitionFixture()
+        : params.has("tTarget")
+          ? tTargetFixture()
+          : params.has("connectionGroup")
+            ? connectionGroupFixture(50, 100)
+            : fullHeightFixture()
     }
   />,
 );
