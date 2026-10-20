@@ -4,6 +4,10 @@ import type { Project } from "../../domain/project/schema.ts";
 import type { TJunction } from "../../domain/elements/wall/t-relations.ts";
 import { commitProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+} from "../../domain/project/owned-snapshot.ts";
 
 export type TConnectionRequest = {
   projectId: string;
@@ -19,7 +23,10 @@ export function previewTConnection(
 ): Project {
   if (base !== current || request.projectId !== current.id)
     throw new Error("Das Projekt wurde geändert. Anschluss erneut beginnen.");
-  const project = validateProject(current);
+  // Only private factory provenance permits reuse, never caller-side freezing.
+  // Mutable public inputs retain their full validation and mutable-copy contract.
+  const owned = isOwnedProjectSnapshot(current);
+  const project = owned ? current : validateProject(current);
   const relations = storeyOf(project).wallTJunctions;
   const match = relations.findIndex(
     (r) =>
@@ -29,7 +36,7 @@ export function previewTConnection(
   );
   if (request.kind === "disconnect" && match < 0)
     throw new Error("Die T-Verbindung existiert nicht mehr.");
-  return validateProject({
+  const next = {
     ...replaceStorey(project, {
       ...storeyOf(project),
       wallTJunctions:
@@ -37,7 +44,10 @@ export function previewTConnection(
           ? [...relations, request.relation]
           : relations.filter((_, i) => i !== match),
     }),
-  });
+  };
+  // Validate the entire changed model before publishing it. An owned result can
+  // then pass the preview boundary without another identical validation.
+  return owned ? createProjectSnapshot(next) : validateProject(next);
 }
 
 export function commitTConnection(

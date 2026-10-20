@@ -14,12 +14,14 @@ type Sample = {
   kind: "first" | "changed";
   preparationMs: number;
   moveMs: number;
+  inputSnapshotMs: number;
   connectMs: number;
   snapshotMs: number;
   scopeMs: number;
   phasedTotalMs: number;
   actualEvaluateMs: number;
   warmMs: number;
+  legacyMs: number;
 };
 const stats = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -77,7 +79,9 @@ for (const foreign of [0, 100, 1000]) {
       const start = performance.now();
       const moved = editAtPointer(session, base, point);
       const a = performance.now();
-      const connected = connectSnappedT(session, moved, point, candidate);
+      const movedSnapshot = createProjectSnapshot(moved);
+      const a2 = performance.now();
+      const connected = connectSnappedT(session, movedSnapshot, point, candidate);
       const b = performance.now();
       const owned = createProjectSnapshot(connected);
       const c = performance.now();
@@ -87,7 +91,17 @@ for (const foreign of [0, 100, 1000]) {
       const e = performance.now();
       const warm = prepared.evaluate(base, session.target, point, candidate);
       const f = performance.now();
+      const legacy = wallTransitionPatch(
+        base,
+        createProjectSnapshot(
+          connectSnappedT(session, editAtPointer(session, base, point), point, candidate),
+        ),
+        "wall-2",
+      );
+      const g = performance.now();
       assert.deepEqual(actual, patch);
+      assert.deepEqual(actual, legacy);
+      assert.deepEqual(connected, connectSnappedT(session, moved, point, candidate));
       assert.equal(warm, actual);
       assert.equal(patch.replacedIds.length, kind === "first" ? 7 : 5);
       assert.equal(storeyOf(connected).windows.length, 3);
@@ -97,12 +111,14 @@ for (const foreign of [0, 100, 1000]) {
           kind,
           preparationMs,
           moveMs: a - start,
-          connectMs: b - a,
+          inputSnapshotMs: a2 - a,
+          connectMs: b - a2,
           snapshotMs: c - b,
           scopeMs: d - c,
           phasedTotalMs: d - start,
           actualEvaluateMs: e - d,
           warmMs: f - e,
+          legacyMs: g - f,
         });
     }
   }
@@ -114,12 +130,14 @@ for (const foreign of [0, 100, 1000]) {
         [
           "preparationMs",
           "moveMs",
+          "inputSnapshotMs",
           "connectMs",
           "snapshotMs",
           "scopeMs",
           "phasedTotalMs",
           "actualEvaluateMs",
           "warmMs",
+          "legacyMs",
         ].map((key) => [
           key,
           stats(
