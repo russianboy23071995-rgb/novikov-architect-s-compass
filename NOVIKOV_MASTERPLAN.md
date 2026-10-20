@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 20.10.2026, main `6093048` nach Merge von PR393; PR394 ist offen und hat grüne CI, aber noch keine Browser-/Native-Abnahme. T-Zielwiederverwendung ist daher nicht Teil von main; erste/geänderte Ziele und Gesamtgeschosskomposition bleiben teuer. Maßgeblicher Auftrag und offene Gates ausschließlich §9.
+Geprüfte Code-Basis: 20.10.2026, main `b27f712` nach PR393 und Architekturabgleich; PR394 ist offen. Funktions-/Browserabnahme am 20.10. bestanden, erneute CI nach Konfliktauflösung ausstehend; Native-/Frame-Abnahme offen. T-Zielwiederverwendung ist daher nicht Teil von main; erste/geänderte Ziele und Gesamtgeschosskomposition bleiben teuer. Maßgeblicher Auftrag und offene Gates ausschließlich §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+20.10.2026: PR394 gegen neueren Architekturabgleich konfliktbereinigt. Zehn gezielte Regressionstests bestanden; isolierter Produktbrowser auf Port 8087: T-Platzierung an host-8, Undo/Redo, Wechsel zu host-10 und 3D-Darstellung geprüft. Alle Geschossdaten der Exporte entsprechen dem unabhängigen Vollpfad. Native Dauerhover-/Shift- und Frame-Nachweise bleiben offen. Details im datierten Abnahmeprotokoll am Dokumentende.
 
 20.10.2026: Dokumentations-/Codeabgleich auf main `6093048` und offenem PR394. Die zentrale Anweisung wurde um Lese- und Aktualitätsregeln ergänzt; README und live N21/N22 korrigiert. PR394 mit 1128 Tests/grüner CI beschleunigt warme gleiche T-Ziele nur im offenen Branch. Keine neue Produktcodeänderung oder Browser-/Native-Abnahme durch diesen Dokumentationsauftrag.
 
@@ -536,7 +538,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
 | AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
 | AUD14-04 | Gemeinsame vorbereitete Adapter, Ownership und Ansichtsbasis; PR391-Extrusionsreuse an 51-Wand-Gruppe im Produktbrowser mit Vollpfad-Exportgleichheit geprüft | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
-| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR394 zeigt sichere Wiederverwendung warmer gleicher T-Ziele im offenen Branch (1128 Tests, grüne CI) | Browser-/Native-Abnahme von PR394, erste/geänderte Ziele, volle Geschosskomposition, Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR394 zeigt sichere Wiederverwendung warmer gleicher T-Ziele im offenen Branch (1128 Tests, grüne CI) | Erneute CI/Integration von PR394, Native-/Frame-Abnahme, erste/geänderte Ziele, volle Geschosskomposition, Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
 | AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
@@ -4028,3 +4030,60 @@ Ziele und Gesamtgeschosskomposition bleiben proportional und werden ausdrücklic
 nicht als skaliert freigegeben. Danach vollständige Vorher-/Nachher-Abhängigkeits-
 menge für begrenzte Komposition prüfen; keine stationären Nachbarn abschneiden.
 Aktive Reihenfolge ausschließlich §9.
+
+### AUD14-04/05 – sichere Wiederverwendung eines T-Fangziels (19.10.2026)
+
+Auf dem geprüften Diagnosecode aus PR393 implementiert; dessen Mergefreigabe
+liegt ausdrücklich vor, die GitHub-CI war bei diesem Nachweis noch in_progress
+(ohne gestartete Jobschritte). Kein erfolgreicher Merge vorweggenommen.
+
+prepared-wall.ts hält je vorbereiteter Application-Capability höchstens ein
+T-Ergebnis. Vor jedem Treffer wird der bestehende Projekt-/Auswahlkontext geprüft.
+Der Schlüssel speichert Werte statt Kandidatenobjekte: Host-ID, exaktes Ziel x/y
+und Kandidatenweltpunkt x/y; nur sourceFeature t-axis gelangt in diesen Pfad.
+Andere/ungültige Ziele sowie Verlassen des T-Fangs verwerfen den Eintrag.
+Neue Kandidatenobjekte mit gleichem semantischen Ziel dürfen ihn wiederverwenden.
+
+Das erste Ergebnis läuft weiterhin über editAtPointer und connectSnappedT.
+createProjectSnapshot übernimmt danach die bestehende validierte Ownershipgrenze;
+Geometriescope, Patch, Patchliste und IDs sind ebenfalls eingefroren. Diese zusätzliche
+Snapshotprüfung kostet beim ersten/geänderten Ziel Arbeit, verhindert aber mutable
+Cacheausgaben ohne einen neuen Vertrauensweg zu erfinden. Keine fremden Modelldaten
+werden eingefroren. Kein globaler Cache, kein Renderer-Sonderpfad. Confirm bleibt
+unverändert unabhängig und vollständig; der Cache schreibt keine History.
+
+1128 Tests einschließlich drei neuer Regressionen, Typecheck, fokussiertes Lint,
+Formatprüfung und Produktionsbuild bestanden. Regressionen: semantischer Treffer,
+Mutationsversuche, stale Projekt/Auswahl, Hostwechsel/Rückkehr, fehlender Host,
+abweichender Kandidatenpunkt, Verlassen des Fangs, neue Capability nach Abbruch,
+Commit-/Undo-/Redo-Gleichheit und invalides Modell trotz warmer Vorschau abgewiesen.
+
+Gegenmessung mit unverändertem 0/100/1000-Fremdwände-Parcours und exaktem Projekt-/
+Flächenvergleich: wiederholte Vorschau Median 0,0023/0,0024/0,0027 ms statt
+0,72/2,21/19,25 ms. Bei 1000 fremden Wänden p95 0,0031 ms; Komposition weiterhin
+5,59 ms. Erstes Ziel 27,51 ms, zwei Hostwechsel 21,99/26,15 ms (Einzelwerte, kein
+Kaltstart-Quantil). Vorbereitung separat. Ergebnisdatei:
+benchmarks/t-axis-target-reuse-results.json; Baseline t-axis-contact-results.json.
+Messskript ergänzt Erst-/Wechselkosten, damit warme Treffer keinen vollständigen
+Skalierungsnachweis vortäuschen. Node CPU, keine Browser-/Native-/Frame-Garantie.
+
+Praktische Abnahme: Wandachsende an die Achse einer unverbundenen Wand führen,
+T-Fang halten, verlassen und erneut anfahren, anderen Host anfahren, abbrechen
+bzw. platzieren; ein Undo nimmt die Platzierung zurück. Dieser Auftrag beansprucht
+keine neue Browserabnahme; Produktbrowsernachweis aus PR392 bleibt separat.
+
+Rest: alle Geschosselemente werden weiterhin in den Patch aufgenommen; neue Ziele
+bleiben vollständig und proportional geprüft. Nächster begrenzter Auftrag gemäß §9:
+T-Vorschaukomposition über vollständige Vorher-/Nachher-Abhängigkeitsgruppen
+begrenzen, gegen unveränderten Vollpfad inklusive gelöster Nachbarn vergleichen.
+
+### PR394 – Funktionsabnahme und Konfliktauflösung (20.10.2026)
+
+Basis: Produktcode be40398 (= 34dc8e4 plus leerer CI-Neustart), neuer Architekturabgleich b27f712 vollständig erhalten. Nur Abnahme-Fixture und Dokumentation ergänzt; keine Fachlogik geändert. Reproduzierbar mit `benchmarks/height-acceptance.config.ts`, Port 8087, `/benchmarks/bound-height-workspace.html?tTarget=1`.
+
+Vier Wände, zwei Fenster, zunächst keine T-Relation. Im produktiven Grundriss Wandachse Ende → Punkt frei bewegen → Host bei x=8: 8-m-Wand und echte T-Relation gespeichert. Ein Undo liefert exakt ursprüngliche Geschossdaten; Redo stellt den Anschluss wieder her. Danach Host bei x=10: 10-m-Wand, alter Anschluss gelöst, neuer Anschluss gespeichert. Exporte 67/68/70 lokal mit unabhängigen editAtPointer/connectSnappedT-Ergebnissen über sämtliche Geschossdaten verglichen: identisch. Beide Fenster und stationäre Wände enthalten. 3D nach Platzierung und Hostwechsel kontrolliert; Screenshot outputs/pr394-t-host-browser.png. Test-Fixture ist wegwerfbar und vom Nutzer-Workspace auf 8080 getrennt.
+
+Fangtest bei 25 CSS-px/m; bei größerem Zoom ist ein Klick auf die Mitte des Wandkörpers nicht automatisch ein Klick auf die steuernde Achse. Ein erster unscharfer Koordinatenversuch wurde per Undo zurückgenommen und nicht als T-Abnahme gewertet. Zehn Regressionstests prüfen zusätzlich semantischen Warmcache, Hostwechsel, ungültige Ziele, unveränderliche Ausgabe, veralteten Kontext und unabhängigen Commit/Undo. Kein Nachweis kontinuierlicher nativer Hover-/Shift-Gesten oder Gesamtframes durch diese Browseraktionen. Nach erneuter grüner CI ist die bereits erteilte Mergefreigabe anwendbar; danach folgt die begrenzte Vorher-/Nachher-Komposition aus §9.
+
+Berichtspräferenz: künftig geschätzte Aufwandsprozente für Prüfung, Umsetzung, Dokumentation und nächste Schritte angeben; keine exakte Token-/Energiemessung behaupten. In AGENTS.md dauerhaft hinterlegt.
+Erneute lokale Prüfung nach Konfliktauflösung: 1128/1128 Tests bestanden; Benchmark-Typecheck, fokussiertes Lint und statischer Produktbrowser-Build bestanden. Bekannte Bundlegrößenwarnung bleibt bestehen.

@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `60930488b77c2bab76b01ce75dce336200f4820e` nach PR393; PR394 offen (CI grün, noch nicht in main). Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
+Geprüfte Code-Basis: 20.10.2026, main `b27f712` nach PR393 und Architekturabgleich; PR394 offen (Funktions-/Browserabnahme 20.10. bestanden, erneute CI nach Konfliktauflösung ausstehend). Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12868,3 +12868,53 @@ Ziele und Gesamtgeschosskomposition bleiben proportional und werden ausdrücklic
 nicht als skaliert freigegeben. Danach vollständige Vorher-/Nachher-Abhängigkeits-
 menge für begrenzte Komposition prüfen; keine stationären Nachbarn abschneiden.
 Aktive Reihenfolge ausschließlich §9.
+
+### AUD14-04/05 – sichere Wiederverwendung eines T-Fangziels (19.10.2026)
+
+Auf dem geprüften Diagnosecode aus PR393 implementiert; dessen Mergefreigabe
+liegt ausdrücklich vor, die GitHub-CI war bei diesem Nachweis noch in_progress
+(ohne gestartete Jobschritte). Kein erfolgreicher Merge vorweggenommen.
+
+prepared-wall.ts hält je vorbereiteter Application-Capability höchstens ein
+T-Ergebnis. Vor jedem Treffer wird der bestehende Projekt-/Auswahlkontext geprüft.
+Der Schlüssel speichert Werte statt Kandidatenobjekte: Host-ID, exaktes Ziel x/y
+und Kandidatenweltpunkt x/y; nur sourceFeature t-axis gelangt in diesen Pfad.
+Andere/ungültige Ziele sowie Verlassen des T-Fangs verwerfen den Eintrag.
+Neue Kandidatenobjekte mit gleichem semantischen Ziel dürfen ihn wiederverwenden.
+
+Das erste Ergebnis läuft weiterhin über editAtPointer und connectSnappedT.
+createProjectSnapshot übernimmt danach die bestehende validierte Ownershipgrenze;
+Geometriescope, Patch, Patchliste und IDs sind ebenfalls eingefroren. Diese zusätzliche
+Snapshotprüfung kostet beim ersten/geänderten Ziel Arbeit, verhindert aber mutable
+Cacheausgaben ohne einen neuen Vertrauensweg zu erfinden. Keine fremden Modelldaten
+werden eingefroren. Kein globaler Cache, kein Renderer-Sonderpfad. Confirm bleibt
+unverändert unabhängig und vollständig; der Cache schreibt keine History.
+
+1128 Tests einschließlich drei neuer Regressionen, Typecheck, fokussiertes Lint,
+Formatprüfung und Produktionsbuild bestanden. Regressionen: semantischer Treffer,
+Mutationsversuche, stale Projekt/Auswahl, Hostwechsel/Rückkehr, fehlender Host,
+abweichender Kandidatenpunkt, Verlassen des Fangs, neue Capability nach Abbruch,
+Commit-/Undo-/Redo-Gleichheit und invalides Modell trotz warmer Vorschau abgewiesen.
+
+Gegenmessung mit unverändertem 0/100/1000-Fremdwände-Parcours und exaktem Projekt-/
+Flächenvergleich: wiederholte Vorschau Median 0,0023/0,0024/0,0027 ms statt
+0,72/2,21/19,25 ms. Bei 1000 fremden Wänden p95 0,0031 ms; Komposition weiterhin
+5,59 ms. Erstes Ziel 27,51 ms, zwei Hostwechsel 21,99/26,15 ms (Einzelwerte, kein
+Kaltstart-Quantil). Vorbereitung separat. Ergebnisdatei:
+benchmarks/t-axis-target-reuse-results.json; Baseline t-axis-contact-results.json.
+Messskript ergänzt Erst-/Wechselkosten, damit warme Treffer keinen vollständigen
+Skalierungsnachweis vortäuschen. Node CPU, keine Browser-/Native-/Frame-Garantie.
+
+Praktische Abnahme: Wandachsende an die Achse einer unverbundenen Wand führen,
+T-Fang halten, verlassen und erneut anfahren, anderen Host anfahren, abbrechen
+bzw. platzieren; ein Undo nimmt die Platzierung zurück. Dieser Auftrag beansprucht
+keine neue Browserabnahme; Produktbrowsernachweis aus PR392 bleibt separat.
+
+Rest: alle Geschosselemente werden weiterhin in den Patch aufgenommen; neue Ziele
+bleiben vollständig und proportional geprüft. Nächster begrenzter Auftrag gemäß §9:
+T-Vorschaukomposition über vollständige Vorher-/Nachher-Abhängigkeitsgruppen
+begrenzen, gegen unveränderten Vollpfad inklusive gelöster Nachbarn vergleichen.
+
+
+### AUD14-04/05 – PR394-Abnahme 20.10.2026
+Produktbrowser auf isoliertem Port 8087: T-Platzierungen an zwei Hosts, vollständige Geschossdaten identisch zum unabhängigen Modellpfad, Undo/Redo und 3D-Darstellung geprüft. Zehn Regressionstests sichern Warmcache, Kontextbindung, Unveränderlichkeit und unabhängigen Commit. Native Dauerhover-/Shift-/Frame-Nachweis bleibt offen. Fixture und Grenzen siehe Masterplan-Abnahmeprotokoll; aktive Reihenfolge ausschließlich §9. Neuere Architekturvorgaben b27f712 erhalten. Berichtsvorgabe für geschätzte Aufwandsanteile in AGENTS.md ergänzt.

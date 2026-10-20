@@ -13,6 +13,8 @@
 
 ## Architecture decisions
 
+- End each task report with an approximate percentage breakdown of effort spent on inspection/testing, implementation, documentation and planning next steps. Label it as an estimate, never exact token or energy accounting (user decision 2026-10-20).
+
 - End each completed task report with the next three concrete development steps, marking the immediate next step; keep exactly one implementation task active (user update 2026-10-15).
 
 - Start with `NOVIKOV_MASTERPLAN.md`: this is the consolidated mission, architectural contract, verified status, priorities and one active next task (user request 2026-10-10).

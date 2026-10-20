@@ -1,0 +1,527 @@
+{
+  "node": "v24.19.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "method": "7 warm + 21 measured fixed-target calls; prepare separately; preview/composition/full move/full connect sequentially; assertions outside timing; Node CPU only, not native/frame/GPU",
+  "runs": [
+    {
+      "foreign": 0,
+      "preparationMs": 1.5107000000000141,
+      "firstTargetMs": 3.7353999999999985,
+      "changedTargetMs": [1.134900000000016, 1.0129999999999768],
+      "walls": 4,
+      "preview": {
+        "median": 0.002299999999991087,
+        "p95": 0.004300000000000637
+      },
+      "composition": {
+        "median": 0.23939999999998918,
+        "p95": 0.38870000000002847
+      },
+      "fullMove": {
+        "median": 0.144299999999987,
+        "p95": 0.33660000000000423
+      },
+      "fullConnect": {
+        "median": 0.6005000000000109,
+        "p95": 1.262299999999982
+      },
+      "samples": [
+        {
+          "previewMs": 0.0023999999999944066,
+          "compositionMs": 0.29009999999999536,
+          "fullMoveMs": 0.33660000000000423,
+          "fullConnectMs": 0.65979999999999,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0024999999999977263,
+          "compositionMs": 0.24440000000001305,
+          "fullMoveMs": 0.18680000000000518,
+          "fullConnectMs": 0.9908999999999821,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.003199999999992542,
+          "compositionMs": 0.24109999999998877,
+          "fullMoveMs": 0.15630000000001587,
+          "fullConnectMs": 0.801400000000001,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0023999999999944066,
+          "compositionMs": 0.23279999999999745,
+          "fullMoveMs": 0.1401000000000181,
+          "fullConnectMs": 0.5999999999999943,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0020000000000095497,
+          "compositionMs": 0.23939999999998918,
+          "fullMoveMs": 0.13689999999999714,
+          "fullConnectMs": 0.5699999999999932,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.00190000000000623,
+          "compositionMs": 0.23990000000000578,
+          "fullMoveMs": 0.1268999999999778,
+          "fullConnectMs": 0.5986000000000047,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0037999999999556167,
+          "compositionMs": 0.2663000000000011,
+          "fullMoveMs": 0.17380000000002838,
+          "fullConnectMs": 0.6263999999999896,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0033999999999991815,
+          "compositionMs": 0.248800000000017,
+          "fullMoveMs": 0.14709999999996626,
+          "fullConnectMs": 0.6005000000000109,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0018999999999778083,
+          "compositionMs": 0.22730000000001382,
+          "fullMoveMs": 0.5215000000000032,
+          "fullConnectMs": 0.5387999999999806,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0020999999999844476,
+          "compositionMs": 0.38870000000002847,
+          "fullMoveMs": 0.14629999999999654,
+          "fullConnectMs": 0.5550999999999817,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.002299999999991087,
+          "compositionMs": 0.22359999999997626,
+          "fullMoveMs": 0.1271000000000413,
+          "fullConnectMs": 1.262299999999982,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0020999999999844476,
+          "compositionMs": 0.22690000000000055,
+          "fullMoveMs": 0.13040000000000873,
+          "fullConnectMs": 0.5084999999999695,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0018999999999778083,
+          "compositionMs": 0.23239999999998417,
+          "fullMoveMs": 0.1471000000000231,
+          "fullConnectMs": 0.827699999999993,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0033000000000242835,
+          "compositionMs": 0.27359999999998763,
+          "fullMoveMs": 0.1372000000000071,
+          "fullConnectMs": 0.6469000000000165,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0017000000000280124,
+          "compositionMs": 0.25619999999997844,
+          "fullMoveMs": 0.1922999999999888,
+          "fullConnectMs": 0.8903000000000247,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0020000000000095497,
+          "compositionMs": 0.21170000000000755,
+          "fullMoveMs": 0.13880000000000337,
+          "fullConnectMs": 1.6345999999999776,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.003500000000030923,
+          "compositionMs": 0.17149999999998045,
+          "fullMoveMs": 0.144299999999987,
+          "fullConnectMs": 0.5854000000000497,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.004300000000000637,
+          "compositionMs": 0.1461999999999648,
+          "fullMoveMs": 0.1149000000000342,
+          "fullConnectMs": 0.5799000000000092,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0072000000000116415,
+          "compositionMs": 0.1893999999999778,
+          "fullMoveMs": 0.12860000000000582,
+          "fullConnectMs": 0.5848000000000297,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0015000000000213731,
+          "compositionMs": 0.23159999999995762,
+          "fullMoveMs": 0.1633000000000493,
+          "fullConnectMs": 0.8143999999999778,
+          "replacedIds": 6
+        },
+        {
+          "previewMs": 0.0020000000000095497,
+          "compositionMs": 0.6913999999999874,
+          "fullMoveMs": 0.11759999999998172,
+          "fullConnectMs": 0.5577000000000112,
+          "replacedIds": 6
+        }
+      ],
+      "checks": "exact project and composed faces; new relation exists; host switch/return; invalid host; stale context; full commit; one Undo/Redo; source unchanged"
+    },
+    {
+      "foreign": 100,
+      "preparationMs": 1.580500000000029,
+      "firstTargetMs": 5.398700000000019,
+      "changedTargetMs": [3.0599999999999454, 3.0475999999999885],
+      "walls": 104,
+      "preview": {
+        "median": 0.0024000000000228283,
+        "p95": 0.0030000000000427463
+      },
+      "composition": {
+        "median": 1.0294000000000096,
+        "p95": 2.66760000000005
+      },
+      "fullMove": {
+        "median": 0.7423999999999751,
+        "p95": 0.9340000000000259
+      },
+      "fullConnect": {
+        "median": 1.70150000000001,
+        "p95": 3.342899999999986
+      },
+      "samples": [
+        {
+          "previewMs": 0.002200000000016189,
+          "compositionMs": 1.022800000000018,
+          "fullMoveMs": 0.7500999999999749,
+          "fullConnectMs": 2.001199999999983,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0027999999999792635,
+          "compositionMs": 2.66760000000005,
+          "fullMoveMs": 0.7295999999999481,
+          "fullConnectMs": 1.5581999999999994,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0033999999999991815,
+          "compositionMs": 1.1843000000000075,
+          "fullMoveMs": 0.8007999999999811,
+          "fullConnectMs": 1.7623000000000388,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0018999999999778083,
+          "compositionMs": 1.974800000000016,
+          "fullMoveMs": 0.9168999999999983,
+          "fullConnectMs": 1.8285999999999945,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002399999999965985,
+          "compositionMs": 1.5499000000000365,
+          "fullMoveMs": 0.6875,
+          "fullConnectMs": 1.70150000000001,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0024999999999977263,
+          "compositionMs": 1.3607000000000085,
+          "fullMoveMs": 0.9725999999999999,
+          "fullConnectMs": 2.3000999999999863,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0024000000000228283,
+          "compositionMs": 1.3126999999999498,
+          "fullMoveMs": 0.8507000000000176,
+          "fullConnectMs": 5.540900000000022,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002599999999972624,
+          "compositionMs": 1.0474000000000387,
+          "fullMoveMs": 0.6795999999999935,
+          "fullConnectMs": 1.6207999999999743,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0028999999999541615,
+          "compositionMs": 1.1691000000000145,
+          "fullMoveMs": 0.8093999999999824,
+          "fullConnectMs": 1.7982000000000085,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002299999999991087,
+          "compositionMs": 1.3636000000000195,
+          "fullMoveMs": 0.8528999999999769,
+          "fullConnectMs": 1.8811000000000035,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0027000000000043656,
+          "compositionMs": 2.911800000000028,
+          "fullMoveMs": 0.8204999999999814,
+          "fullConnectMs": 1.7484999999999786,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0018999999999778083,
+          "compositionMs": 1.0294000000000096,
+          "fullMoveMs": 0.7551000000000272,
+          "fullConnectMs": 1.4022999999999683,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002100000000041291,
+          "compositionMs": 1.0009999999999764,
+          "fullMoveMs": 0.6415000000000077,
+          "fullConnectMs": 1.583500000000015,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0020999999999844476,
+          "compositionMs": 0.9805000000000064,
+          "fullMoveMs": 0.9340000000000259,
+          "fullConnectMs": 3.2732999999999493,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002900000000011005,
+          "compositionMs": 0.7606999999999857,
+          "fullMoveMs": 0.6788999999999987,
+          "fullConnectMs": 1.4636999999999603,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0017000000000280124,
+          "compositionMs": 0.6019999999999186,
+          "fullMoveMs": 0.6492000000000644,
+          "fullConnectMs": 1.6259000000000015,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.002000000000066393,
+          "compositionMs": 0.6110999999999649,
+          "fullMoveMs": 0.5950000000000273,
+          "fullConnectMs": 1.550799999999981,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0018000000000029104,
+          "compositionMs": 0.6168999999999869,
+          "fullMoveMs": 0.5830000000000837,
+          "fullConnectMs": 3.342899999999986,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0025000000000545697,
+          "compositionMs": 0.6204999999999927,
+          "fullMoveMs": 0.6134999999999309,
+          "fullConnectMs": 1.4562000000000808,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0029999999999290594,
+          "compositionMs": 0.6712999999999738,
+          "fullMoveMs": 0.6369000000000824,
+          "fullConnectMs": 1.5353999999999814,
+          "replacedIds": 106
+        },
+        {
+          "previewMs": 0.0030000000000427463,
+          "compositionMs": 0.7331000000000358,
+          "fullMoveMs": 0.7423999999999751,
+          "fullConnectMs": 1.561399999999935,
+          "replacedIds": 106
+        }
+      ],
+      "checks": "exact project and composed faces; new relation exists; host switch/return; invalid host; stale context; full commit; one Undo/Redo; source unchanged"
+    },
+    {
+      "foreign": 1000,
+      "preparationMs": 10.442900000000009,
+      "firstTargetMs": 27.51139999999998,
+      "changedTargetMs": [21.98590000000013, 26.15119999999979],
+      "walls": 1004,
+      "preview": {
+        "median": 0.0027000000000043656,
+        "p95": 0.003100000000131331
+      },
+      "composition": {
+        "median": 5.589099999999917,
+        "p95": 9.642900000000054
+      },
+      "fullMove": {
+        "median": 5.606600000000071,
+        "p95": 10.689100000000053
+      },
+      "fullConnect": {
+        "median": 14.286399999999958,
+        "p95": 16.40039999999999
+      },
+      "samples": [
+        {
+          "previewMs": 0.0028999999999541615,
+          "compositionMs": 5.385899999999992,
+          "fullMoveMs": 5.606600000000071,
+          "fullConnectMs": 14.627500000000055,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0029999999999290594,
+          "compositionMs": 5.993400000000065,
+          "fullMoveMs": 7.259299999999939,
+          "fullConnectMs": 15.158899999999903,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0029999999999290594,
+          "compositionMs": 5.323599999999942,
+          "fullMoveMs": 5.280700000000024,
+          "fullConnectMs": 14.543699999999944,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.002399999999852298,
+          "compositionMs": 5.475300000000061,
+          "fullMoveMs": 9.112300000000005,
+          "fullConnectMs": 10.880799999999908,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0026000000000294676,
+          "compositionMs": 6.093499999999949,
+          "fullMoveMs": 19.25070000000005,
+          "fullConnectMs": 11.859300000000076,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0027000000000043656,
+          "compositionMs": 21.35089999999991,
+          "fullMoveMs": 5.789999999999964,
+          "fullConnectMs": 11.73960000000011,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.003000000000156433,
+          "compositionMs": 7.681599999999889,
+          "fullMoveMs": 5.673400000000129,
+          "fullConnectMs": 10.655199999999923,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0026000000000294676,
+          "compositionMs": 8.757499999999936,
+          "fullMoveMs": 6.029300000000148,
+          "fullConnectMs": 14.286399999999958,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0024000000000796717,
+          "compositionMs": 5.361499999999978,
+          "fullMoveMs": 5.5534999999999854,
+          "fullConnectMs": 15.03670000000011,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0027000000000043656,
+          "compositionMs": 4.888599999999997,
+          "fullMoveMs": 5.505700000000161,
+          "fullConnectMs": 16.40039999999999,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.002300000000104774,
+          "compositionMs": 4.876499999999851,
+          "fullMoveMs": 5.1115000000002055,
+          "fullConnectMs": 13.737899999999854,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0028999999999541615,
+          "compositionMs": 4.765699999999924,
+          "fullMoveMs": 8.410000000000082,
+          "fullConnectMs": 10.135300000000143,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0027999999999792635,
+          "compositionMs": 5.157699999999977,
+          "fullMoveMs": 10.548000000000002,
+          "fullConnectMs": 11.292199999999866,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0022999999998774,
+          "compositionMs": 9.000400000000127,
+          "fullMoveMs": 5.151299999999992,
+          "fullConnectMs": 10.068299999999908,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0026000000000294676,
+          "compositionMs": 9.642900000000054,
+          "fullMoveMs": 5.095199999999977,
+          "fullConnectMs": 10.518800000000056,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.0025000000000545697,
+          "compositionMs": 5.104399999999941,
+          "fullMoveMs": 4.9879000000000815,
+          "fullConnectMs": 11.35590000000002,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.07839999999987413,
+          "compositionMs": 8.329700000000003,
+          "fullMoveMs": 5.3677000000000135,
+          "fullConnectMs": 14.60940000000005,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.003100000000131331,
+          "compositionMs": 5.589099999999917,
+          "fullMoveMs": 5.202399999999898,
+          "fullConnectMs": 14.691200000000208,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.002599999999802094,
+          "compositionMs": 5.622100000000046,
+          "fullMoveMs": 5.627500000000055,
+          "fullConnectMs": 16.012499999999818,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.00279999999975189,
+          "compositionMs": 6.303200000000288,
+          "fullMoveMs": 5.46309999999994,
+          "fullConnectMs": 15.548699999999826,
+          "replacedIds": 1006
+        },
+        {
+          "previewMs": 0.002800000000206637,
+          "compositionMs": 5.306999999999789,
+          "fullMoveMs": 10.689100000000053,
+          "fullConnectMs": 20.3433,
+          "replacedIds": 1006
+        }
+      ],
+      "checks": "exact project and composed faces; new relation exists; host switch/return; invalid host; stale context; full commit; one Undo/Redo; source unchanged"
+    }
+  ]
+}

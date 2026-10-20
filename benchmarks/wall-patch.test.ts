@@ -245,3 +245,126 @@ test("unconnected walls also use the shared axis endpoint capability", () => {
     );
   }
 });
+
+function tTargetFixture() {
+  const p = tPairFixture(),
+    s = storeyOf(p);
+  s.wallTJunctions = [];
+  for (const x of [8, 10])
+    s.walls.push({ ...s.walls[0]!, id: `host-${x}`, start: { x, y: -3 }, end: { x, y: 3 } });
+  return validateProject(p);
+}
+const tCandidate = (x = 8): SnapCandidate => ({
+  kind: "endpoint",
+  worldPoint: { x, y: 0 },
+  sourceEntityId: `host-${x}`,
+  sourceFeature: "t-axis",
+  distanceOnScreen: 0,
+  priority: 0,
+});
+
+test("T target reuse is semantic, immutable and checked against the pinned context", () => {
+  const p = tTargetFixture(),
+    original = structuredClone(p),
+    session = sessionOf(p);
+  const preview = prepareDirectEditPreview(session)!;
+  const first = preview.evaluate(p, target, { x: 8, y: 0 }, tCandidate());
+  assert.equal(
+    preview.evaluate(p, { ...target }, { x: 8, y: 0 }, { ...tCandidate(), priority: 9 }),
+    first,
+  );
+  assert.throws(() => {
+    storeyOf(first.geometry).walls[0]!.end.x = 100;
+  });
+  assert.throws(() => {
+    (first.replacedIds as string[]).push("fake");
+  });
+  assert.throws(() => {
+    first.geometry = { storey: storeyOf(p), assets: [] };
+  });
+  assert.ok(Object.isFrozen(first.storeyPatches));
+  assert.ok(Object.isFrozen(first.storeyPatches![0]));
+  assert.throws(() => preview.evaluate({ ...p }, target, { x: 8, y: 0 }, tCandidate()));
+  assert.throws(() => preview.evaluate(p, null, { x: 8, y: 0 }, tCandidate()));
+  assert.throws(() =>
+    preview.evaluate(p, { kind: "window", id: target.id }, { x: 8, y: 0 }, tCandidate()),
+  );
+  assert.deepEqual(p, original);
+  compare(p, { x: 8, y: 0 }, tCandidate());
+});
+
+test("T target cache retains at most one result and never masks invalid candidates", () => {
+  const p = tTargetFixture(),
+    preview = prepareDirectEditPreview(sessionOf(p))!;
+  const run = (x = 8) => preview.evaluate(p, target, { x, y: 0 }, tCandidate(x));
+  const first = run();
+  const other = run(10);
+  assert.notEqual(other, first);
+  assert.equal(storeyOf(other.geometry).wallTJunctions[0]!.hostWallId, "host-10");
+  const returned = run();
+  assert.notEqual(returned, first);
+  assert.deepEqual(returned, first);
+  for (const candidate of [
+    { ...tCandidate(), sourceEntityId: "missing" },
+    { ...tCandidate(), sourceEntityId: null },
+    { ...tCandidate(), worldPoint: { x: 10, y: 0 } },
+  ]) {
+    assert.throws(() => preview.evaluate(p, target, { x: 8, y: 0 }, candidate));
+    assert.notEqual(run(), returned);
+  }
+  assert.throws(() => preview.evaluate(p, target, { x: 8, y: 1 }, tCandidate()));
+  const warm = run();
+  preview.evaluate(p, target, { x: 7, y: 0 });
+  assert.notEqual(run(), warm, "leaving T snapping drops the result");
+});
+
+test("warm T preview cannot bypass full confirmation and cancellation owns no history", () => {
+  const p = tTargetFixture();
+  const state = editingReducer(createEditingState(p), {
+    type: "begin",
+    target,
+    action: "point",
+    index: 1,
+    anchor: { x: 6, y: 0 },
+  });
+  const session = state.session!,
+    base = state.history.present;
+  const preview = prepareDirectEditPreview(session)!;
+  const point = { x: 8, y: 0 },
+    candidate = tCandidate();
+  const patch = preview.evaluate(base, target, point, candidate);
+  assert.equal(preview.evaluate(base, target, point, tCandidate()), patch);
+  assert.equal(editingReducer(state, { type: "cancel" }).history, state.history);
+  assert.notEqual(
+    prepareDirectEditPreview(session)!.evaluate(base, target, point, candidate),
+    patch,
+  );
+  const confirmed = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: target,
+    point,
+    candidate,
+  });
+  assert.equal(confirmed.error, "");
+  assert.equal(confirmed.history.past.length, 1);
+  assert.deepEqual(
+    confirmed.history.present,
+    connectSnappedT(session, editAtPointer(session, base, point), point, candidate),
+  );
+  assert.deepEqual(editingReducer(confirmed, { type: "undo" }).history.present, base);
+  assert.deepEqual(
+    editingReducer(editingReducer(confirmed, { type: "undo" }), { type: "redo" }).history.present,
+    confirmed.history.present,
+  );
+  storeyOf(base).windows[0]!.width = 100;
+  const rejected = editingReducer(state, {
+    type: "confirm",
+    session,
+    selection: target,
+    point,
+    candidate,
+  });
+  assert.notEqual(rejected.error, "");
+  assert.equal(rejected.history, state.history);
+});
