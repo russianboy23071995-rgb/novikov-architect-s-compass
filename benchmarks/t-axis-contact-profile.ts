@@ -5,7 +5,7 @@ import { prepareDirectEditPreview } from "../src/application/direct-edit/prepare
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { validateProject } from "../src/lib/bim/model.ts";
-import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
+import { storeyOf } from "../src/domain/storeys/access.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
@@ -71,8 +71,17 @@ for (const foreign of [0, 100, 1000]) {
     const full = connectSnappedT(session, moved, point, candidate);
     const d = performance.now();
     // Assertions and full reference extrusion are outside timing intervals.
-    assert.deepEqual(storeyOf(patch.geometry), storeyOf(full));
-    assert.deepEqual(replaceStorey(base, storeyOf(patch.geometry)), full);
+    const replacements = new Map(storeyOf(patch.geometry).walls.map((w) => [w.id, w]));
+    const windows = new Map(storeyOf(patch.geometry).windows.map((w) => [w.id, w]));
+    assert.deepEqual(
+      storeyOf(base).walls.map((w) => replacements.get(w.id) ?? w),
+      storeyOf(full).walls,
+    );
+    assert.deepEqual(
+      storeyOf(base).windows.map((w) => windows.get(w.id) ?? w),
+      storeyOf(full).windows,
+    );
+    assert.deepEqual(storeyOf(patch.geometry).wallTJunctions, storeyOf(full).wallTJunctions);
     assert.deepEqual(canonical(derived.faces), canonical(buildBuildingSolid(full).faces));
     assert.ok(storeyOf(full).wallTJunctions.some((r) => r.hostWallId === "host-8"));
     assert.equal(storeyOf(full).windows.length, 2);
@@ -94,7 +103,10 @@ for (const foreign of [0, 100, 1000]) {
     const before = performance.now();
     const patch = prepared.evaluate(base, session.target, point, candidate);
     changedTargetMs.push(performance.now() - before);
-    assert.deepEqual(storeyOf(patch.geometry), storeyOf(full));
+    assert.deepEqual(
+      storeyOf(patch.geometry).walls,
+      storeyOf(full).walls.filter((w) => patch.replacedIds.includes(w.id)),
+    );
     assert.deepEqual(
       canonical(selectionMoveSurfaces(solid, base, patch).faces),
       canonical(buildBuildingSolid(full).faces),
