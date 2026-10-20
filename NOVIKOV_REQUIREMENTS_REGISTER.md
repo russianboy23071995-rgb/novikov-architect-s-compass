@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Aktueller Abgleich: 17.10.2026, main `0fe21549c4525c51a1e6ff872868ef4377bdc744` nach PR383. Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
+Geprüfte Code-Basis: 20.10.2026, main `60930488b77c2bab76b01ce75dce336200f4820e` nach PR393; PR394 offen (CI grün, noch nicht in main). Ursprungskonsolidierung: 10.10.2026 / PR237. Aktuelle AUD14-Statusmatrix und einziger aktiver Arbeitsauftrag: NOVIKOV_MASTERPLAN.md §9; historische Detailkapseln bleiben Quellen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -15,6 +15,8 @@ Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und
 7. Quelleninventar und historische offene Prüfkandidaten. Alle ursprünglichen Quellen bleiben erhalten.
 
 Für einen Auftrag nur seine Kennungen/Detailkapsel lesen; nicht das ganze Register in jeden Kontext laden. Neue Entscheidungen/Status direkt im betreffenden Eintrag aktualisieren. Altkennungen nicht neu vergeben. Historische FEATURE_ROADMAP-F-Kennungen sind ausdrücklich von Guide-F-Kennungen verschieden.
+
+**Pflege- und Prioritätsregel (20.10.2026):** Die Live-Stände im oberen N-Katalog müssen nach einschlägigen PRs mit Code, Masterplan §4/§9 und Dateiformat abgeglichen werden. Historische Quellenkapseln werden nicht als aktuelle Implementierungsanweisung gelesen. Bewertete Risiken und Reihenfolge stehen nur im Masterplan §9: P0 bei Datenverlust/fehlerhaften Ergebnissen, vor Release offene Recovery-/Kapazitätsgates, P1 konsistente Dokumentationsquelle und gemessene T-/Großmodell-Pfade, P2 fokussierte Verantwortungsbereinigung. PR394 bleibt offen; seine Messungen/Tests sind kein main- oder Native-Nachweis. Die frühere Prototyp-README wurde ausdrücklich historisch markiert. Historische Anforderungen vor jeder Zusammenführung inventarisieren; keine einzelne noch größere Registerdatei erzeugen.
 
 ## 1. N01–N60 – aktuelle Einordnung
 
@@ -203,7 +205,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N21 – Geschosse im Navigator frei erstellen und Höhen definieren
 
-- **Stand:** Teilweise: Schema21 besitzt genau ein benennbares storey, gemeinsame Umbenennungsaktion, Undo und Migration. Freie Mehrgeschossanlage/Höhen noch nicht implementiert.
+- **Stand:** Teilweise: aktuelles Schema26 mit mehreren benennbaren Geschossen, relativen Höhen, Navigator-/Arbeitsgeschosswahl und gemeinsamer Aktion samt Undo/Migration; nur aufgelöste Höhen können aktiv bearbeitet werden. Geschossanlage ist vorhanden, aber vollständige Bearbeitung aller künftigen Bauteile, schwierige Bindungs-/Einfügefälle und schwere Großprojekt-/Release-Abnahme bleiben offen. Nachweis: PR300–317, PR381–384; aktueller Reststatus Masterplan §9.
 - **Zuständigkeit:** M, UI/Navigator → domain/storeys
 - **Altzuordnung:** Gespräch mehrere Geschosse
 - **Abnahme/Abhängigkeiten:** Migration Schema 1, Namen/Höhen/Bezüge, N16; 2D/3D/IFC-Rundlauf. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -212,7 +214,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N22 – Wände, Stützen und andere Bauteile kennen Geschosshöhen
 
-- **Stand:** Geplant: feste/geschossgebundene Höhen und Stützen; Migration erhält bisher feste Höhe.
+- **Stand:** Teilweise: Wände haben feste oder an die Unterseite der Rohdecke des unmittelbar oberen Geschosses gebundene Höhe (Schema26), mit Fuß-/Oberkantenversätzen; Fenster/Anschlüsse werden gemeinsam geprüft. KG/EG/OG, Datei/Recovery/IFC und Undo/Redo im produktiven Höhenworkflow nach PR384 abgenommen. Rohdeckenstärke 0,20 m ist eine ausdrücklich vorläufige Eingabe, kein modelliertes Deckenbauteil. Stützen, echte Decken, frei allgemeine Höhenbindung und gesperrte Einfüge-/Konfliktfälle bleiben offen; weitere Native-/Langzeit-Gates Masterplan §9.
 - **Zuständigkeit:** M → domain/height-binding
 - **Altzuordnung:** Gespräch Geschosse/Höhen
 - **Abnahme/Abhängigkeiten:** N21, fester vs gebundener Modus, atomare Prüfung abhängiger Öffnungen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
