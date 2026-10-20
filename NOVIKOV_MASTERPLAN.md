@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 20.10.2026, main `5c709ee` nach grüner CI und Merge von PR398. Begrenzte T-Komposition integriert; funktionaler Hostwechsel im Produktbrowser mit vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Gates bleiben offen. Einziger aktiver Auftrag: §9.
+Geprüfte Code-Basis: 20.10.2026, main `06a9dc0` nach grüner CI und Merge von PR399. Im Folgebranch `perf/owned-wall-movement` ist die gemeinsame Bewegungs-/Snapshot-Prüfung zusammengeführt und automatisiert verglichen; Browserabnahme dieser Änderung offen. Kontinuierliche 3D-/Native-/Frame-Gates bleiben offen. Einziger aktiver Auftrag: §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+20.10.2026: PR399 nach grünem CI-Lauf 39488905253 in main 06a9dc0 integriert. Folgebranch perf/owned-wall-movement führt die vollständige Prüfung des Bewegungsergebnisses und dessen Snapshot-Übernahme zusammen. 1134 Tests, Typprüfung, gezieltes Lint und Produktbuild bestanden; zwei direkte Vergleichsläufe mit exakter Ergebnisgleichheit. Vollständige Anschluss-/Commitprüfung bleibt erhalten. Browserabnahme des neuen Pfads ist der einzelne Folgeauftrag gemäß §9. Frühere Absatzstände darunter sind datierte Nachweise.
 
 20.10.2026: PR395 in main 9caaea8 integriert. T-Komposition hinter dem gemeinsamen Application-Vertrag auf die vollständige Zusammenhangskomponente im vereinigten Vorher-/Nachher-Anschlussgraphen begrenzt. Alte gelöste Nachbarn, neue Hostgruppen und Fenster erhalten; fachliche Validierung und Commit unverändert vollständig. Automatisierte Gleichheit und CPU-Messung sowie funktionaler Browser-Hostwechsel siehe Nachweise am Ende. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme bleibt offen.
 
@@ -524,13 +526,13 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – die Bewegungs-/Snapshot-Grenze im neuen T-Zielpfad sicher zusammenführen.** Nach der Browserabnahme von PR398 bleiben editAtPointer und die anschließende Snapshot-Übernahme als zwei vollständige Prüfungen desselben Zwischenstands. Einen eng begrenzten gemeinsamen Weg für ein vollständig geprüftes, unveränderliches Bewegungsergebnis untersuchen und bei belegbarem Nutzen umsetzen. Keine öffentlich setzbare Provenienz und kein Überspringen der endgültigen Anschluss-/Commitprüfung. Gegen bisherigen Vollpfad, Mutation und fehlerhafte Eingaben prüfen; dieselbe direkte Vergleichsmessung wiederholen. Kontinuierliche 3D-/Native-/Shift-/Frame-Gates bleiben offen.
+**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – Browserabnahme der gemeinsamen Bewegungs-/Snapshot-Prüfung.** Nach grüner CI und freigegebener Übernahme den neuen Pfad im frischen Produktbuild prüfen: erstes und wechselndes T-Fangziel, alte gelöste und neue stationäre Nachbarn, Fenster, Abbruch, ein Undo/Redo und vollständige Exportgleichheit zum unabhängigen Vollpfad. Automatisierte Gleichheit und Node-Vergleich liegen im Folgebranch vor. Kontinuierliche 3D-/Native-/Shift-/Frame-Gates getrennt behandeln; nicht aus Node-Zeiten oder einzelnen Platzierungen ableiten.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
 
 **Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
-1. AUD14-04/05: Begrenzte T-Komposition ist integriert und funktionaler Browser-Hostwechsel nachgewiesen. Phasenmessung neuer/gewechselter Ziele liegt vor; Snapshot-Wiederverwendung im Anschlussweg ist integriert und funktional abgenommen; verbleibende Bewegungs-/Snapshot-Grenze gezielt bearbeiten. Kontinuierliche 3D-Vorschau, volle Browserframes und unabhängigen Commit weiterhin getrennt prüfen.
+1. AUD14-04/05: Begrenzte T-Komposition ist integriert und funktionaler Browser-Hostwechsel nachgewiesen. Phasenmessung neuer/gewechselter Ziele liegt vor; Snapshot-Wiederverwendung im Anschlussweg ist integriert und funktional abgenommen; Bewegungs-/Snapshot-Grenze im Folgebranch zusammengeführt und automatisiert verglichen, funktionale Browserabnahme folgt. Kontinuierliche 3D-Vorschau, volle Browserframes und unabhängigen Commit weiterhin getrennt prüfen.
 2. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
 3. AUD14-04/05: große Anschlussgruppen und verbliebene Legacy-Aktionen aus der vorhandenen Pfadinventur bearbeiten. Der 51-Wand-Gruppenrest (~14,6 ms in früherer reiner Vorschau) bleibt offen. Fachlich vollständige stationäre Nachbarn erhalten; Abhängigkeiten nicht blind kürzen. Wiederholte globale Validierung und Wand/Fenster-Scans nur mit nachgewiesenem Nutzen sicher begrenzen. Neue Werkzeuge dürfen keine Legacy-Vollpfade als Standard übernehmen.
 4. AUD14-07: Abbildwechsel/Recovery-Vergleich und Bildressourcen-Pilot am selben Build mit vorhandenen Tracewerkzeugen erneut prüfen, sobald eine tatsächliche CPU-/Native-Aufnahme möglich ist. Die Nutzervertagung vom 16.10. bleibt als historische Prioritätsentscheidung erhalten; diese erneute Korrekturfreigabe reaktiviert die unabhängig ausführbare Arbeit. Fehlender Profiler bleibt eine konkrete Beleggrenze, kein erfundener Fix. Keine weitere reine Longtask-Serie als Ersatz und keine Produktpromotion des Pools ohne belastbaren Nutzen. Bei dieser Werkzeuggrenze die anderen unabhängigen Bereinigungen fortsetzen.
@@ -538,7 +540,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 6. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
 7. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-**Aktueller AUD14-Status (20.10.2026, main PR398; Snapshot-Wiederverwendung funktional im Browser geprüft):**
+**Aktueller AUD14-Status (20.10.2026, main PR399; gemeinsamer Bewegungs-/Snapshot-Pfad im Folgebranch automatisiert geprüft, Browserabnahme offen):**
 
 | ID | Verifizierter Teilstand | Verbleibende Arbeit |
 | --- | --- | --- |
@@ -546,7 +548,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
 | AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
 | AUD14-04 | Gemeinsame vorbereitete Adapter, Ownership und Ansichtsbasis; PR391-Extrusionsreuse an 51-Wand-Gruppe im Produktbrowser mit Vollpfad-Exportgleichheit geprüft | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
-| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR395 integriert: begrenzte T-Komposition mit automatisierter Flächen-/Fenster-/Achsgleichheit. Browser-Hostwechsel, vollständige Exportgleichheit, Undo/Redo und Abbruch geprüft | Kontinuierliche 3D-Patchvorschau/Native-/Frame-Abnahme, erste/geänderte Ziele gemessen, Snapshot-Wiederverwendung automatisiert und funktional im Browser geprüft; Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR395 integriert: begrenzte T-Komposition mit automatisierter Flächen-/Fenster-/Achsgleichheit. Browser-Hostwechsel, vollständige Exportgleichheit, Undo/Redo und Abbruch geprüft | Kontinuierliche 3D-Patchvorschau/Native-/Frame-Abnahme, erste/geänderte Ziele gemessen, Snapshot-Wiederverwendung automatisiert und funktional im Browser geprüft; weitere zusammengeführte Bewegungsprüfung automatisiert verglichen, Browserabnahme offen; Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
 | AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
@@ -4234,3 +4236,48 @@ UI-Platzierung im Grundriss und statische 3D-Darstellung; keine kontinuierliche
 Die 1132 Tests, Typprüfung, Lint und Produktbuild aus PR398/CI bleiben gültige
 Basis; für diesen reinen Dokumentationsschritt nicht erneut ausgeführt.
 Nächster begrenzter Auftrag ausschließlich §9.
+
+
+### AUD14-04/05 – Bewegung und Snapshot gemeinsam prüfen (20.10.2026)
+
+Basis main 06a9dc0 (PR399), Umsetzung Branch perf/owned-wall-movement.
+Die gemeinsame Wandaktion kann statt einer veränderlichen Kopie direkt einen
+vollständig validierten, tief unveränderlichen Snapshot liefern. Die private
+WeakSet-Provenienz wird weiterhin ausschließlich durch createProjectSnapshot
+vergeben. Der Ausgabemodus ist keine Vertrauensmarke: Auch fremde oder nur vom
+Aufrufer eingefrorene Daten werden vollständig geprüft. Öffentliche mutable
+Aufrufe behalten ihren bisherigen Vertrag; keine zweite Geometrieimplementierung.
+Nur der vorbereitete T-Wandendpunktpfad verwendet die neue Ausgabe. Andere
+Aktionszweige bleiben unverändert. Geändertes Anschlussresultat und unabhängiger
+Commit werden weiterhin vollständig geprüft; kein Schema-, History-, Recovery-
+oder Exportformatwechsel. Im erfolgreichen neuen T-Pfad entfallen drei zugunsten
+von zwei vollständigen Prüfungen (Bewegung und Anschlussresultat).
+
+Nachweise: 1134/1134 Tests, darunter 14 wall-patch-Tests; Benchmark-Typecheck,
+gezieltes ESLint aller sieben geänderten TS-Dateien und Produktbuild bestanden.
+Bekannte Buildhinweise zu Chunkgröße/inlineDynamicImports bleiben. Neue Tests:
+Achspunkt, Körperkante und Strecken gegen mutable Vollpfad, Mutationsschutz,
+unveränderte Quelle, ungültige Fremdwand, veralteter Kontext und NaN-Ziel.
+
+Direkter Node-v24.19.0-Vergleich auf Windows, AMD Ryzen 5 3600, zweimal
+7 Aufwärm- und 21 aufgezeichnete Fälle je Erstziel/Hostwechsel und 0/100/1000
+Fremdwände. Insgesamt 336 Fallvergleiche inklusive Warmup, 252 Messfälle.
+actualEvaluateMs: echter vorbereiteter Adapter; previousMs: expliziter bisheriger
+PR398/399-Pfad mit separater Bewegungs-/Snapshot-Prüfung; legacyMs: älterer
+Vier-Prüfungen-Pfad. Identische Patches gegen beide Vergleichspfade; drei Fenster,
+Anschlüsse, begrenzte Ersatz-IDs und unveränderte Basis geprüft.
+
+| 1000 Fremdwände, Median ms | bisher / neu Lauf 1 | bisher / neu Lauf 2 |
+| --- | --- | --- |
+| Erstes T-Ziel | 24,537 / 15,584 | 25,276 / 20,546 |
+| Wechselndes T-Ziel | 20,443 / 17,211 | 27,821 / 15,656 |
+
+Rohdaten: benchmarks/t-target-owned-move-results.json und
+benchmarks/t-target-owned-move-repeat-results.json; reproduzierbar über
+node --experimental-strip-types benchmarks/t-target-phase-profile.ts.
+Messreihenfolge fest; JIT/GC und deutliche Schwankungen begrenzen die Aussage.
+Bei 100 Fremdwänden P95 des neuen Erstziels teilweise schlechter; kein
+allgemeines Latenz- oder Frameversprechen. Phasen/actual/previous sind getrennte
+Ausführungen; Phasenmediane nicht addieren. Erste Ziele sind sitzungs-, nicht
+prozesskalt. Zwei volle Modellprüfungen und Restscans bleiben globale Arbeit.
+Keine neue Browser-, Native-, Shift- oder Frameabnahme. Aktiver Folgeauftrag §9.
