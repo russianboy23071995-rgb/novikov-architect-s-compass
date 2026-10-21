@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="UTF-8" /><title>Wandressourcen · Browservergleich</title
+  ><style>
+    body {
+      font: 15px system-ui;
+      max-width: 1100px;
+      margin: 36px auto;
+      background: #eef1f3;
+      color: #24313c;
+    }
+    button {
+      padding: 10px 16px;
+      margin-right: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: white;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      background: white;
+    }
+    td,
+    th {
+      padding: 8px 14px;
+      border: 1px solid #cbd2d7;
+    }
+  </style>
+  <h1>Wandressourcen · isolierter Browservergleich</h1>
+  <p>
+    Produktion gegen archivierten Kandidaten. Wechselnde Reihenfolge, vollständiger
+    Geometrievergleich. Keine Projektdateien oder Recovery-Speicher.
+  </p>
+  <button id="run">Vergleich starten</button
+  ><button id="save" disabled>Messdaten speichern</button>
+  <p id="status">Bereit</p>
+  <div id="summary"></div>
+  <details>
+    <summary>Rohdaten</summary>
+    <pre id="report"></pre>
+  </details>
+  <script type="module" src="./wall-resource-browser.ts"></script>
+</html>
