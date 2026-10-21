@@ -22,8 +22,8 @@ replace(
   "  const joinedStart = performance.now();\n  const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w]));\n  addTime('connectionsMs', joinedStart);\n  const wallsStart = performance.now();",
 );
 replace(
-  "    const openings = storeyOf(project)",
-  "    const openingsStart = performance.now();\n    const openings = storeyOf(project)",
+  "    const openings = (windowsByHost.get(wall.id) ?? [])",
+  "    const openingsStart = performance.now();\n    const openings = (windowsByHost.get(wall.id) ?? [])",
 );
 replace(
   "    const sorted = (values: number[])",
