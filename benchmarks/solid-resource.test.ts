@@ -15,6 +15,58 @@ import {
 import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
 
+// Frozen pre-optimization oracle: retain the previous double arithmetic and
+// final conversion; do not use the new packer to generate its own expectation.
+function previousPack(
+  faces: Parameters<typeof packSolidFaces>[0],
+  origin: Parameters<typeof packSolidFaces>[1],
+  selected: boolean,
+) {
+  const data: number[] = [];
+  for (const face of faces) {
+    const light =
+      0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
+    const tint = selected ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
+    for (let i = 1; i + 1 < face.vertices.length; i++)
+      for (const index of [0, i, i + 1])
+        data.push(
+          ...face.vertices[index]!.map((v, k) => v - origin[k]!),
+          ...tint.map((v) => v * light),
+        );
+  }
+  return new Float32Array(data);
+}
+
+test("direct packing is byte-identical to previous packing for polygon fans and rebasing", () => {
+  const faces = Array.from({ length: 33 }, (_, n) => ({
+    wallId: `polygon-${n}`,
+    normal: [Math.sin(n), Math.cos(n), n % 2 ? -0 : 1] as [number, number, number],
+    vertices: Array.from(
+      { length: n },
+      (_, i) =>
+        [
+          1e9 + Math.cos((i * Math.PI * 2) / n) / 7,
+          -1e8 + Math.sin((i * Math.PI * 2) / n) * 12,
+          n / 11,
+        ] as [number, number, number],
+    ),
+  }));
+  const building = buildBuildingSolid(boundHeightFixture());
+  const original = structuredClone(faces);
+  for (const input of [[], faces, building.faces])
+    for (const origin of [
+      [0, 0, 0],
+      [1e9, -1e8, 0.1],
+      [-0, 0, -0],
+    ] as [number, number, number][])
+      for (const selected of [false, true]) {
+        const actual = packSolidFaces(input, origin, selected);
+        const expected = previousPack(input, origin, selected);
+        assert.deepEqual(new Uint8Array(actual.buffer), new Uint8Array(expected.buffer));
+      }
+  assert.deepEqual(faces, original);
+});
+
 test("empty-state counts match flat faces without materializing replacement previews", () => {
   const base = resourceFixture(2);
   const empty = { ...base, faces: [] };

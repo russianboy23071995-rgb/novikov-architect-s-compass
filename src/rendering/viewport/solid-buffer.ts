@@ -16,19 +16,30 @@ const sameFaces = (a: Face[], b: Face[]) =>
     );
   });
 export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected: boolean) {
-  const data: number[] = [];
+  // Convex fan: n-2 triangles, three vertices, XYZ + RGB. Round to Float32
+  // only at the final write, exactly as the previous array conversion did.
+  let length = 0;
+  for (const face of faces) length += Math.max(0, face.vertices.length - 2) * 18;
+  const data = new Float32Array(length);
+  let offset = 0;
   for (const face of faces) {
     const light =
       0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-    const tint = selected ? [0.38, 0.65, 0.78] : [0.72, 0.75, 0.79];
+    const r = (selected ? 0.38 : 0.72) * light;
+    const g = (selected ? 0.65 : 0.75) * light;
+    const b = (selected ? 0.78 : 0.79) * light;
     for (const triangle of faceTriangles(face.vertices.length))
-      for (const index of triangle)
-        data.push(
-          ...face.vertices[index]!.map((v, i) => v - origin[i]!),
-          ...tint.map((v) => v * light),
-        );
+      for (const index of triangle) {
+        const point = face.vertices[index]!;
+        data[offset++] = point[0] - origin[0];
+        data[offset++] = point[1] - origin[1];
+        data[offset++] = point[2] - origin[2];
+        data[offset++] = r;
+        data[offset++] = g;
+        data[offset++] = b;
+      }
   }
-  return new Float32Array(data);
+  return data;
 }
 /** Disposable render cache. One combined GPU buffer, stable wall ranges, no model ownership.
  * A topology/visibility change rebuilds the layout; fixed-layout edits upload only changed ranges.

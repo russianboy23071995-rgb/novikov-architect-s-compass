@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `0dc7fab` nach PR406 (grüne CI). Kalte 3D-Vorbereitung im Folgebranch perf/cold-preview-profile gemessen; mutable/owned und Szenen-/Gestenlebensdauer getrennt. Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `bb53387` nach PR407 (grüne CI). Folgebranch perf/direct-solid-packing: direkte Float32-Pufferpackung bei bytegleichem Ergebnis, 1136 Tests bestanden. Browser-/Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11482,7 +11482,7 @@ Auftrag: gemeinsame sichere Snapshot-/Revisions-/Ownership-Grenze und vorhandene
 Abnahme: Einzelwand sowie 2/5 Geschosse, große Bilder mit unveränderter Auswahlgröße, Vorbereitung/Pointer/Commit getrennt; stale/mutierte Basis, No-op, externe/interne Anschlüsse, Fenster einmal mitnehmen, ein Undo/Redo und Datei-/Recoverygleichheit. Messung und Instrumentierung belegen entfernte Payloadserialisierung; Integrität bleibt erhalten.
 
 ### AUD14-03 – 3D-Ressourcen lokal aktualisieren
-Status 21.10.2026: stabile Ressourcen, Patchuploads und Fensterbasis bis PR406 integriert; kalte Vorbereitung separat vermessen (Nachweis unten). Pufferpackung, Gebäudeaufbau und erste/gewechselte Partition bleiben Kostenblöcke; Native-/Frame-Gates offen, P1. Bezug: A02/A04/A05.
+Status 21.10.2026: stabile Ressourcen, Patchuploads und Fensterbasis bis PR406 integriert; kalte Vorbereitung separat vermessen (Nachweis unten). Pufferpackung im Folgebranch perf/direct-solid-packing ohne neue Cache-Schicht reduziert und bytegleich geprüft; Gebäudeaufbau und erste/gewechselte Partition bleiben Kostenblöcke; Native-/Frame-Gates offen, P1. Bezug: A02/A04/A05.
 Code: rendering/viewport/selection-move-preview.ts, rendering/viewport/solid-renderer.ts, components/cad/BimSolidView.tsx.
 Befund: vorbereitete Geometriepatches werden wieder zu Gesamtflächen komponiert. Neue Solididentität oder andere Wandauswahl führt im Renderer zu vollständiger Ressourcenentsorgung/-erstellung, Shaderkompilierung, Dreieckspackung und GPU-Upload. Reine Kamerabewegung verwendet Ressourcen bereits weiter.
 Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlaufzeit, unveränderte Geometriepuffer wiederverwenden; Auswahl und betroffene Vorschauflächen separat bzw. begrenzt aktualisieren. Kein zusätzlicher autoritativer Meshbestand, kein pauschaler Rendererwechsel. Verdeckung, Fenster, Präzision großer Koordinaten, DPR, Verlust/Wiederherstellung des WebGL-Kontexts erhalten.
@@ -13062,3 +13062,15 @@ Masterplan-Nachweis. Größter Szenenblock bleibt Solidaufbau; isolierte Packung
 ist nächster begrenzter Ansatz gemäß §9, keine Cache-Ausweitung. Native-/Frames
 und Gesamtfreigabe bleiben offen; Fenster bleiben ableitbare Objekt-/zukünftige
 Bibliotheksrepräsentationen, unveränderter Schema-/Hostvertrag.
+
+
+### AUD14-03 – Direkte Pufferpackung, 21.10.2026
+PR407 grün in main bb53387. Folgebranch perf/direct-solid-packing ersetzt nur
+temporäre Number-Arrays durch direkte Float32-Ausgabe mit identischer Arithmetik,
+Winding und Reihenfolge. Vorher-Oracle bytegleich für mehrseitige Flächen,
+Fensterbestand, Auswahlfarben und große Rebase-Ursprünge. 1136 Tests, Typen,
+Lint/Architektur und Build bestanden. Zwei serielle Messläufe: initialer Puffer
+108,739/91,188 -> 19,123/22,027 ms (1004 Wände/1002 Fenster, owned).
+Keine Cache-Erweiterung, Modell-/Datei-/Undo-/IFC-Änderung oder Fenster-Sonderlogik.
+CPU-Beleg, keine Browser-/Frame-/Native-Freigabe. Größerer Gebäudeaufbau bleibt
+offen; Methoden/Änderungskarte im Masterplan, einziger Folgeauftrag dort §9.
