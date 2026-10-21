@@ -10,6 +10,86 @@ import { selectWorkingStorey } from "../src/application/storeys/working-storey.t
 import { workingStoreyElevation } from "../src/domain/storeys/elevation.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 
+test("building solid matches uncached scopes across geometry, hosts and connections", () => {
+  const check = (input: ReturnType<typeof buildingViewFixture>) => {
+    const p = createProjectSnapshot(input);
+    const parts = p.storeys
+      .filter((s) => s.walls.length)
+      .map((s) =>
+        buildPreviewSolid(
+          { storey: s, assets: p.assets },
+          workingStoreyElevation({ ...p, workingStoreyId: s.id }),
+        ),
+      );
+    const expected = {
+      faces: parts.flatMap((s) => s.faces),
+      volume: parts.reduce((n, s) => n + s.volume, 0),
+      min: [0, 1, 2].map((i) => Math.min(...parts.map((s) => s.min[i]!))),
+      max: [0, 1, 2].map((i) => Math.max(...parts.map((s) => s.max[i]!))),
+    };
+    const actual = buildBuildingSolid(p);
+    assert.deepEqual(actual, expected);
+    assert.ok(Object.isFrozen(actual.faces[0]!.vertices[0]));
+    return actual;
+  };
+  for (const mutate of [
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.walls[0]!.end.y += 0.75;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.walls[0]!.thickness = 0.5;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.walls[0]!.bodyOffset = 0.1;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.walls[0]!.baseOffset = -0.2;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.walls[0]!.height = 4;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.groundDatum = 10;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.height = (p.storeys[0]!.height ?? 3) + 0.5;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.windows[0]!.width = 1.4;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.windows[0]!.wallId = p.storeys[0]!.walls[1]!.id;
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.windows.reverse();
+    },
+    (p: ReturnType<typeof buildingViewFixture>) => {
+      p.storeys[0]!.windows = [];
+    },
+  ]) {
+    const base = buildingViewFixture(3);
+    check(base);
+    const changed = structuredClone(base);
+    mutate(changed);
+    check(changed);
+    check(base); // Undo-like return must not retain the changed extrusion.
+  }
+  const base = buildingViewFixture(3);
+  const s = base.storeys[0]!;
+  s.walls[1]!.start = { ...s.walls[0]!.end };
+  s.walls[1]!.end = { x: s.walls[0]!.end.x, y: s.walls[0]!.end.y + 4 };
+  check(base);
+  const connected = structuredClone(base);
+  connected.storeys[0]!.wallJoins = [
+    {
+      first: { wallId: s.walls[0]!.id, endpoint: 1 },
+      second: { wallId: s.walls[1]!.id, endpoint: 0 },
+    },
+  ];
+  check(connected);
+  check(base); // A formerly connected wall must not consume an old free entry.
+});
+
 test("host grouping preserves isolated wall results and refreshes after reassignment", () => {
   const p = structuredClone(buildingViewFixture(3));
   const storey = p.storeys[0]!;
