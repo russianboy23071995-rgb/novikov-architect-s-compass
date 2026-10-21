@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `e927cf9` nach PR414 (grüne CI). Isolierter Bounds-Pilot exaktgleich, mangels robustem Gewinn nicht übernommen. 54 Vergleichsfälle bestanden; Produkt unverändert. Native-/Frame-Gates offen; einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `b218a19` nach PR415 (grüne CI). Einzeländerungs-Neuaufbau gemessen; 168 Exaktvergleiche bestanden, Höhengegenprobe erfasst. Produkt unverändert; Native-/Frame-Gates offen, einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13115,3 +13115,7 @@ Zwei kalte Läufe: insgesamt 336 Wand-/Fenstervergleichsfälle und 84 exakte Puf
 ### AUD14-03/04 – Isolierter XYZ-Bounds-Pilot, 21.10.2026
 
 Zwei serielle uninstrumentierte Vergleichsläufe, 54 vollständige Vergleichsfälle bestanden. Große Szene rund 1 bzw. 32 % Gewinn, kleine Szenen mit wechselndem Vorzeichen. Kein robuster Vorteil; Kandidat nur im temporären Diagnosemodul, Produkt unverändert. Typen/Lint bestanden. Nachweis und Änderungskarte: docs/wall-xyz-bounds-pilot.md. Nächster Einzelauftrag §9 untersucht Neuaufbau unveränderter Extrusionen nach einzelner Wand-/Fensteränderung; keine neue Cachelogik vor gemessenem Invalidierungsumfang.
+
+### AUD14-03/04 – Neuaufbau nach Einzeländerung, 21.10.2026
+
+Große Fixture 1005 Wände: Wand-/Fenstereinzeländerung baut alle neu, obwohl nur eine Weltgeometrie abweicht. 1000–1001 freie Extrusionen bleiben gleich; Geschosshöhengegenprobe ändert alle 1005. Zwei Läufe, 168 vollständige Vergleiche bestanden, Typen/Lint grün. Instrumentierungsgrenzen und Änderungskarte: docs/geometry-rebuild-measurement.md. Produkt unverändert. Einziger Folgepilot §9: begrenzte Wiederverwendung mit vollständigem geometrischem Kontext, kein ID-only-Cache und keine ungeprüfte Höhen-/Anschlussübernahme.
