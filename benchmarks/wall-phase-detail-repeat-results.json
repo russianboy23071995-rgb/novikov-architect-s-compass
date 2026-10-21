@@ -1,0 +1,1072 @@
+{
+  "runtime": "v24.19.0",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "basis": "PR413 74dcdd5; unchanged product geometry from main dacfee1",
+  "method": "Two window densities; 0/100/1000 extra walls; 7 fresh owned scenes. Instrumented original algorithm in temporary sibling; production source unchanged. Nested wallLoop/parts phases must not be summed. Window lookup includes host Map lookup+map; grouping construction remains in inclusive wall loop. Control/probe alternate order. Fine timers per face perturb hot paths; total minus control is observed instrumentation/order/JIT/GC difference, not a pure timer correction. Shared lower-level caches remain. Trial angle varies 0/1/2 m and base offset -0.2/0.15 m. Not a paired optimization comparison. Snapshot preparation excluded. CPU only, no browser/GPU/frame/native claim. Full faces, volume, bounds equivalence in all 42 cases; fixed order, timer overhead/JIT/GC uncontrolled.",
+  "rows": [
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 2.5053999999999803,
+      "overheadMs": -0.5005000000000166,
+      "controlMs": 3.005899999999997,
+      "phases": {
+        "connectionsMs": 1.1480999999999995,
+        "wallLoopInclusiveMs": 0.32789999999999964,
+        "heightMs": 0.19069999999999254,
+        "partsInclusiveMs": 2.1162000000000205,
+        "aggregateMs": 0.05660000000000309,
+        "freezeMs": 0.16919999999998936
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 1.5911999999999864,
+      "overheadMs": 0.16169999999996776,
+      "controlMs": 1.4295000000000186,
+      "phases": {
+        "connectionsMs": 0.8514999999999873,
+        "wallLoopInclusiveMs": 0.47920000000002005,
+        "heightMs": 0.08690000000001419,
+        "partsInclusiveMs": 1.4481999999999857,
+        "aggregateMs": 0.017200000000002547,
+        "freezeMs": 0.09080000000000155
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.2238000000000113,
+      "overheadMs": 0.025200000000012324,
+      "controlMs": 1.198599999999999,
+      "phases": {
+        "connectionsMs": 0.7939000000000078,
+        "wallLoopInclusiveMs": 0.19200000000000728,
+        "heightMs": 0.08079999999998222,
+        "partsInclusiveMs": 1.0955999999999904,
+        "aggregateMs": 0.011500000000012278,
+        "freezeMs": 0.08310000000000173
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 2.9300999999999817,
+      "overheadMs": 0.9917999999999836,
+      "controlMs": 1.9382999999999981,
+      "phases": {
+        "connectionsMs": 2.4746999999999844,
+        "wallLoopInclusiveMs": 0.19140000000001578,
+        "heightMs": 0.08710000000002083,
+        "partsInclusiveMs": 2.7887000000000057,
+        "aggregateMs": 0.014299999999991542,
+        "freezeMs": 0.08240000000000691
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.6610000000000014,
+      "overheadMs": 0.29220000000003665,
+      "controlMs": 1.3687999999999647,
+      "phases": {
+        "connectionsMs": 1.1727000000000203,
+        "wallLoopInclusiveMs": 0.23570000000000846,
+        "heightMs": 0.05489999999997508,
+        "partsInclusiveMs": 1.4975999999999772,
+        "aggregateMs": 0.015199999999992997,
+        "freezeMs": 0.10160000000001901
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 1.387900000000002,
+      "overheadMs": -0.4814000000000078,
+      "controlMs": 1.8693000000000097,
+      "phases": {
+        "connectionsMs": 0.9042999999999779,
+        "wallLoopInclusiveMs": 0.23749999999995453,
+        "heightMs": 0.057999999999992724,
+        "partsInclusiveMs": 1.2232000000000198,
+        "aggregateMs": 0.011700000000018917,
+        "freezeMs": 0.10509999999999309
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 0,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.220700000000022,
+      "overheadMs": -0.363900000000001,
+      "controlMs": 1.584600000000023,
+      "phases": {
+        "connectionsMs": 0.7860000000000014,
+        "wallLoopInclusiveMs": 0.19800000000003593,
+        "heightMs": 0.05040000000002465,
+        "partsInclusiveMs": 1.0568000000000097,
+        "aggregateMs": 0.013199999999983447,
+        "freezeMs": 0.08780000000001564
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 6.82650000000001,
+      "overheadMs": 2.586500000000001,
+      "controlMs": 4.240000000000009,
+      "phases": {
+        "connectionsMs": 1.2270000000000323,
+        "openingLookupMs": 0.038199999999733336,
+        "openingGridMs": 0.3733000000005404,
+        "transformMs": 0.6942000000003645,
+        "boundsMs": 1.2250999999997703,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 4.312700000000007,
+        "heightMs": 0.8055999999999699,
+        "partsInclusiveMs": 6.400300000000016,
+        "aggregateMs": 0.022699999999986176,
+        "freezeMs": 0.36470000000002756
+      },
+      "wallLoopExclusiveMs": 4.274500000000273,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 4.769100000000037,
+      "overheadMs": 1.086400000000026,
+      "controlMs": 3.682700000000011,
+      "phases": {
+        "connectionsMs": 0.9243999999999915,
+        "openingLookupMs": 0.024000000000057753,
+        "openingGridMs": 0.15049999999968122,
+        "transformMs": 0.7378000000002771,
+        "boundsMs": 1.0086999999994646,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 2.7737000000000194,
+        "heightMs": 0.6222000000000207,
+        "partsInclusiveMs": 4.343599999999981,
+        "aggregateMs": 0.02030000000002019,
+        "freezeMs": 0.356899999999996
+      },
+      "wallLoopExclusiveMs": 2.7496999999999616,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 5.891599999999983,
+      "overheadMs": 0.180499999999995,
+      "controlMs": 5.711099999999988,
+      "phases": {
+        "connectionsMs": 1.0679000000000087,
+        "openingLookupMs": 0.047599999999590636,
+        "openingGridMs": 0.3814000000001556,
+        "transformMs": 0.46580000000068367,
+        "boundsMs": 1.0956000000009567,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 3.2142000000000053,
+        "heightMs": 1.180499999999995,
+        "partsInclusiveMs": 5.505800000000022,
+        "aggregateMs": 0.02949999999998454,
+        "freezeMs": 0.3058000000000334
+      },
+      "wallLoopExclusiveMs": 3.1666000000004146,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 4.971000000000004,
+      "overheadMs": -0.6509999999999536,
+      "controlMs": 5.621999999999957,
+      "phases": {
+        "connectionsMs": 1.3512000000000057,
+        "openingLookupMs": 0.02939999999966858,
+        "openingGridMs": 0.1484000000002652,
+        "transformMs": 0.28570000000058826,
+        "boundsMs": 1.1454999999997426,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 2.4020999999999617,
+        "heightMs": 0.7534999999999741,
+        "partsInclusiveMs": 4.538399999999967,
+        "aggregateMs": 0.02159999999997808,
+        "freezeMs": 0.3462999999999852
+      },
+      "wallLoopExclusiveMs": 2.372700000000293,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 3.7749000000000024,
+      "overheadMs": 0.6076999999999657,
+      "controlMs": 3.1672000000000367,
+      "phases": {
+        "connectionsMs": 1.1303000000000338,
+        "openingLookupMs": 0.020799999999780994,
+        "openingGridMs": 0.13029999999992015,
+        "transformMs": 0.30289999999945394,
+        "boundsMs": 0.608599999999285,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 1.678799999999967,
+        "heightMs": 0.5391999999999939,
+        "partsInclusiveMs": 3.376800000000003,
+        "aggregateMs": 0.01650000000000773,
+        "freezeMs": 0.3509999999999991
+      },
+      "wallLoopExclusiveMs": 1.658000000000186,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 2.637200000000007,
+      "overheadMs": 0.3235000000000241,
+      "controlMs": 2.313699999999983,
+      "phases": {
+        "connectionsMs": 0.7728999999999928,
+        "openingLookupMs": 0.017300000000147975,
+        "openingGridMs": 0.11149999999992133,
+        "transformMs": 0.15660000000013952,
+        "boundsMs": 0.4807000000006383,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 1.1581000000000472,
+        "heightMs": 0.376700000000028,
+        "partsInclusiveMs": 2.3250999999999635,
+        "aggregateMs": 0.012999999999976808,
+        "freezeMs": 0.279700000000048
+      },
+      "wallLoopExclusiveMs": 1.1407999999998992,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 100,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 2.8115000000000236,
+      "overheadMs": -0.8913000000000011,
+      "controlMs": 3.7028000000000247,
+      "phases": {
+        "connectionsMs": 0.8048999999999751,
+        "openingLookupMs": 0.017899999999997362,
+        "openingGridMs": 0.09950000000003456,
+        "transformMs": 0.16730000000029577,
+        "boundsMs": 0.5290999999999713,
+        "faceCount": 600,
+        "wallLoopInclusiveMs": 1.224299999999971,
+        "heightMs": 0.44680000000005293,
+        "partsInclusiveMs": 2.4945000000000164,
+        "aggregateMs": 0.013199999999983447,
+        "freezeMs": 0.28019999999997935
+      },
+      "wallLoopExclusiveMs": 1.2063999999999737,
+      "faces": 692
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 28.264599999999973,
+      "overheadMs": 2.83239999999995,
+      "controlMs": 25.432200000000023,
+      "phases": {
+        "connectionsMs": 1.7865000000000464,
+        "openingLookupMs": 0.17580000000003793,
+        "openingGridMs": 1.0250999999988721,
+        "transformMs": 3.8387999999953877,
+        "boundsMs": 5.932999999995616,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 14.746100000000013,
+        "heightMs": 7.660599999999988,
+        "partsInclusiveMs": 24.24599999999998,
+        "aggregateMs": 0.13260000000002492,
+        "freezeMs": 3.853399999999965
+      },
+      "wallLoopExclusiveMs": 14.570299999999975,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 14.302000000000021,
+      "overheadMs": 1.4165000000000418,
+      "controlMs": 12.885499999999979,
+      "phases": {
+        "connectionsMs": 1.6574000000000524,
+        "openingLookupMs": 0.1724000000003798,
+        "openingGridMs": 0.9659000000018523,
+        "transformMs": 1.1072999999984177,
+        "boundsMs": 1.0079999999964002,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 6.124300000000062,
+        "heightMs": 3.584899999999948,
+        "partsInclusiveMs": 11.420200000000023,
+        "aggregateMs": 0.07459999999991851,
+        "freezeMs": 2.751700000000028
+      },
+      "wallLoopExclusiveMs": 5.951899999999682,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 19.629800000000046,
+      "overheadMs": 3.6414000000000897,
+      "controlMs": 15.988399999999956,
+      "phases": {
+        "connectionsMs": 2.8415999999999713,
+        "openingLookupMs": 0.20010000000036143,
+        "openingGridMs": 1.038999999998964,
+        "transformMs": 3.1612999999954354,
+        "boundsMs": 1.1549000000004526,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 8.713899999999967,
+        "heightMs": 4.903400000000033,
+        "partsInclusiveMs": 16.52120000000002,
+        "aggregateMs": 0.07500000000004547,
+        "freezeMs": 2.941100000000006
+      },
+      "wallLoopExclusiveMs": 8.513799999999605,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 28.007799999999975,
+      "overheadMs": 13.469999999999914,
+      "controlMs": 14.537800000000061,
+      "phases": {
+        "connectionsMs": 2.531500000000051,
+        "openingLookupMs": 0.22120000000097662,
+        "openingGridMs": 1.4341999999990094,
+        "transformMs": 1.4194999999979245,
+        "boundsMs": 1.0498999999982743,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 12.833200000000033,
+        "heightMs": 8.844600000000014,
+        "partsInclusiveMs": 24.284099999999967,
+        "aggregateMs": 0.07309999999995398,
+        "freezeMs": 3.5862999999999374
+      },
+      "wallLoopExclusiveMs": 12.611999999999057,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 15.5304000000001,
+      "overheadMs": -22.08169999999984,
+      "controlMs": 37.61209999999994,
+      "phases": {
+        "connectionsMs": 1.7735999999999876,
+        "openingLookupMs": 0.17979999999965912,
+        "openingGridMs": 1.3935000000000173,
+        "transformMs": 1.4121999999938453,
+        "boundsMs": 0.9969000000080541,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 7.11200000000008,
+        "heightMs": 4.386199999999917,
+        "partsInclusiveMs": 13.311400000000049,
+        "aggregateMs": 0.10460000000000491,
+        "freezeMs": 2.066599999999994
+      },
+      "wallLoopExclusiveMs": 6.932200000000421,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 16.543300000000045,
+      "overheadMs": 4.85329999999999,
+      "controlMs": 11.690000000000055,
+      "phases": {
+        "connectionsMs": 2.359399999999937,
+        "openingLookupMs": 0.18629999999757274,
+        "openingGridMs": 1.5439000000019405,
+        "transformMs": 1.30530000000158,
+        "boundsMs": 1.263699999996561,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 7.747600000000148,
+        "heightMs": 3.7894000000000005,
+        "partsInclusiveMs": 13.944299999999998,
+        "aggregateMs": 0.07290000000000418,
+        "freezeMs": 2.483000000000061
+      },
+      "wallLoopExclusiveMs": 7.561300000002575,
+      "faces": 6092
+    },
+    {
+      "windows": false,
+      "extra": 1000,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 14.17509999999993,
+      "overheadMs": 3.030899999999974,
+      "controlMs": 11.144199999999955,
+      "phases": {
+        "connectionsMs": 1.6334000000000515,
+        "openingLookupMs": 0.1581999999995105,
+        "openingGridMs": 1.009900000000357,
+        "transformMs": 1.0142999999986841,
+        "boundsMs": 1.031400000004055,
+        "faceCount": 6000,
+        "wallLoopInclusiveMs": 5.789499999999975,
+        "heightMs": 4.0837999999999965,
+        "partsInclusiveMs": 11.545599999999922,
+        "aggregateMs": 0.0726999999999407,
+        "freezeMs": 2.5265999999999167
+      },
+      "wallLoopExclusiveMs": 5.631300000000465,
+      "faces": 6092
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.2654999999999745,
+      "overheadMs": 0.17980000000000018,
+      "controlMs": 1.0856999999999744,
+      "phases": {
+        "connectionsMs": 1.0001999999999498,
+        "wallLoopInclusiveMs": 0.07579999999995835,
+        "heightMs": 0.02250000000003638,
+        "partsInclusiveMs": 1.1277999999999793,
+        "aggregateMs": 0.0061999999999216016,
+        "freezeMs": 0.06480000000010477
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 0.8921000000000276,
+      "overheadMs": -0.04099999999993997,
+      "controlMs": 0.9330999999999676,
+      "phases": {
+        "connectionsMs": 0.7069000000000187,
+        "wallLoopInclusiveMs": 0.06839999999999691,
+        "heightMs": 0.024900000000002365,
+        "partsInclusiveMs": 0.8131000000000768,
+        "aggregateMs": 0.0049999999999954525,
+        "freezeMs": 0.05319999999994707
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 0.8851999999999407,
+      "overheadMs": 0.006999999999948159,
+      "controlMs": 0.8781999999999925,
+      "phases": {
+        "connectionsMs": 0.6949000000000751,
+        "wallLoopInclusiveMs": 0.07070000000010168,
+        "heightMs": 0.0244999999998754,
+        "partsInclusiveMs": 0.8029999999999973,
+        "aggregateMs": 0.005400000000008731,
+        "freezeMs": 0.05309999999997217
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 0.8547000000000935,
+      "overheadMs": -0.014599999999973079,
+      "controlMs": 0.8693000000000666,
+      "phases": {
+        "connectionsMs": 0.6742000000000417,
+        "wallLoopInclusiveMs": 0.06769999999994525,
+        "heightMs": 0.024700000000166256,
+        "partsInclusiveMs": 0.7772999999999683,
+        "aggregateMs": 0.004800000000045657,
+        "freezeMs": 0.05260000000009768
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.0978999999999814,
+      "overheadMs": -0.12050000000010641,
+      "controlMs": 1.2184000000000879,
+      "phases": {
+        "connectionsMs": 0.8484999999999445,
+        "wallLoopInclusiveMs": 0.08720000000005257,
+        "heightMs": 0.02470000000005257,
+        "partsInclusiveMs": 0.9755999999999858,
+        "aggregateMs": 0.0072000000000116415,
+        "freezeMs": 0.08180000000004384
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 1.1082000000000107,
+      "overheadMs": 0.053200000000060754,
+      "controlMs": 1.05499999999995,
+      "phases": {
+        "connectionsMs": 0.8789000000000442,
+        "wallLoopInclusiveMs": 0.08789999999999054,
+        "heightMs": 0.024400000000014188,
+        "partsInclusiveMs": 1.0108999999999924,
+        "aggregateMs": 0.005999999999971806,
+        "freezeMs": 0.06500000000005457
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 0,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 1.1164999999999736,
+      "overheadMs": 0.0020999999999276042,
+      "controlMs": 1.114400000000046,
+      "phases": {
+        "connectionsMs": 0.8486000000000331,
+        "wallLoopInclusiveMs": 0.0844000000000733,
+        "heightMs": 0.029599999999959437,
+        "partsInclusiveMs": 0.9775999999999385,
+        "aggregateMs": 0.00760000000002492,
+        "freezeMs": 0.09559999999999036
+      },
+      "wallLoopExclusiveMs": null,
+      "faces": 92
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 14.237099999999941,
+      "overheadMs": 5.3781999999999925,
+      "controlMs": 8.858899999999949,
+      "phases": {
+        "connectionsMs": 1.0979999999999563,
+        "openingLookupMs": 0.1835000000000946,
+        "openingGridMs": 0.7092000000000098,
+        "transformMs": 5.360300000003349,
+        "boundsMs": 0.7808999999996331,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 9.836100000000101,
+        "heightMs": 1.1405999999999494,
+        "partsInclusiveMs": 12.138399999999933,
+        "aggregateMs": 0.052900000000022374,
+        "freezeMs": 2.0077999999999747
+      },
+      "wallLoopExclusiveMs": 9.652600000000007,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 6.177500000000009,
+      "overheadMs": 1.3024000000000342,
+      "controlMs": 4.875099999999975,
+      "phases": {
+        "connectionsMs": 0.8946999999998297,
+        "openingLookupMs": 0.042599999998628846,
+        "openingGridMs": 0.3114000000011856,
+        "transformMs": 0.5764999999976226,
+        "boundsMs": 0.5595999999961805,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 2.7623000000000957,
+        "heightMs": 1.3590999999998985,
+        "partsInclusiveMs": 5.041699999999992,
+        "aggregateMs": 0.04309999999986758,
+        "freezeMs": 1.0533000000000357
+      },
+      "wallLoopExclusiveMs": 2.719700000001467,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 5.786599999999908,
+      "overheadMs": 0.6913999999999305,
+      "controlMs": 5.095199999999977,
+      "phases": {
+        "connectionsMs": 0.8297999999999774,
+        "openingLookupMs": 0.038300000000390355,
+        "openingGridMs": 0.3136999999994714,
+        "transformMs": 0.5679999999979373,
+        "boundsMs": 0.5528000000010707,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 2.5248999999998887,
+        "heightMs": 1.3031999999998334,
+        "partsInclusiveMs": 4.676500000000033,
+        "aggregateMs": 0.04219999999986612,
+        "freezeMs": 1.0382999999999356
+      },
+      "wallLoopExclusiveMs": 2.4865999999994983,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 6.09069999999997,
+      "overheadMs": 1.000400000000127,
+      "controlMs": 5.090299999999843,
+      "phases": {
+        "connectionsMs": 0.8855999999998403,
+        "openingLookupMs": 0.04389999999943939,
+        "openingGridMs": 0.3269999999997708,
+        "transformMs": 0.6519999999973152,
+        "boundsMs": 0.5677999999979875,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 2.6510000000000673,
+        "heightMs": 1.402900000000045,
+        "partsInclusiveMs": 4.969700000000103,
+        "aggregateMs": 0.04490000000009786,
+        "freezeMs": 1.0424000000000433
+      },
+      "wallLoopExclusiveMs": 2.607100000000628,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 6.7509000000000015,
+      "overheadMs": 2.0260000000000673,
+      "controlMs": 4.724899999999934,
+      "phases": {
+        "connectionsMs": 0.9342999999996664,
+        "openingLookupMs": 0.04910000000063519,
+        "openingGridMs": 0.36990000000014334,
+        "transformMs": 0.7112000000004173,
+        "boundsMs": 0.6820999999999913,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 3.1601000000000568,
+        "heightMs": 1.5050000000001091,
+        "partsInclusiveMs": 5.628100000000131,
+        "aggregateMs": 0.04280000000017026,
+        "freezeMs": 1.032799999999952
+      },
+      "wallLoopExclusiveMs": 3.1109999999994216,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 7.329200000000128,
+      "overheadMs": -1.7576999999996588,
+      "controlMs": 9.086899999999787,
+      "phases": {
+        "connectionsMs": 0.9447999999997592,
+        "openingLookupMs": 0.048400000000810905,
+        "openingGridMs": 0.30570000000057007,
+        "transformMs": 0.5932000000025255,
+        "boundsMs": 0.5844000000024607,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 2.598299999999881,
+        "heightMs": 1.5784000000001015,
+        "partsInclusiveMs": 5.16150000000016,
+        "aggregateMs": 0.043400000000019645,
+        "freezeMs": 2.0885000000000673
+      },
+      "wallLoopExclusiveMs": 2.54989999999907,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 100,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 5.993199999999888,
+      "overheadMs": 1.2075999999999567,
+      "controlMs": 4.785599999999931,
+      "phases": {
+        "connectionsMs": 0.8264000000001488,
+        "openingLookupMs": 0.023500000000240107,
+        "openingGridMs": 0.30840000000057444,
+        "transformMs": 0.5764000000017404,
+        "boundsMs": 0.5610000000060609,
+        "faceCount": 3200,
+        "wallLoopInclusiveMs": 2.5389000000000124,
+        "heightMs": 1.4752000000000862,
+        "partsInclusiveMs": 4.866899999999987,
+        "aggregateMs": 0.04490000000009786,
+        "freezeMs": 1.0471000000000004
+      },
+      "wallLoopExclusiveMs": 2.5153999999997723,
+      "faces": 3292
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 0,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 63.00670000000014,
+      "overheadMs": 0.5260000000000673,
+      "controlMs": 62.48070000000007,
+      "phases": {
+        "connectionsMs": 2.120300000000043,
+        "openingLookupMs": 0.33640000000218606,
+        "openingGridMs": 2.7701999999999316,
+        "transformMs": 5.680899999995518,
+        "boundsMs": 5.522500000001628,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 24.16599999999994,
+        "heightMs": 22.883399999999938,
+        "partsInclusiveMs": 49.25689999999986,
+        "aggregateMs": 0.5475000000001273,
+        "freezeMs": 13.16009999999983
+      },
+      "wallLoopExclusiveMs": 23.829599999997754,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 1,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 71.01800000000003,
+      "overheadMs": 14.330000000000155,
+      "controlMs": 56.687999999999874,
+      "phases": {
+        "connectionsMs": 2.3825999999999112,
+        "openingLookupMs": 0.5126000000029762,
+        "openingGridMs": 4.041800000000876,
+        "transformMs": 7.574300000020003,
+        "boundsMs": 7.40440000000649,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 41.490600000000086,
+        "heightMs": 15.183500000000095,
+        "partsInclusiveMs": 59.15239999999994,
+        "aggregateMs": 0.4621999999999389,
+        "freezeMs": 11.34960000000001
+      },
+      "wallLoopExclusiveMs": 40.97799999999711,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 2,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 58.83689999999979,
+      "overheadMs": 4.411999999999807,
+      "controlMs": 54.42489999999998,
+      "phases": {
+        "connectionsMs": 1.8251000000002477,
+        "openingLookupMs": 0.39499999999520696,
+        "openingGridMs": 2.649200000003475,
+        "transformMs": 5.811400000009144,
+        "boundsMs": 5.702700000007553,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 32.70640000000003,
+        "heightMs": 12.06820000000016,
+        "partsInclusiveMs": 46.65099999999984,
+        "aggregateMs": 0.5571999999999662,
+        "freezeMs": 11.58179999999993
+      },
+      "wallLoopExclusiveMs": 32.311400000004824,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 3,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 95.50540000000001,
+      "overheadMs": -52.06089999999995,
+      "controlMs": 147.56629999999996,
+      "phases": {
+        "connectionsMs": 2.7937000000001717,
+        "openingLookupMs": 0.7109999999915999,
+        "openingGridMs": 12.491200000002664,
+        "transformMs": 11.722300000025825,
+        "boundsMs": 14.81790000005958,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 55.88929999999982,
+        "heightMs": 22.66919999999982,
+        "partsInclusiveMs": 81.44549999999981,
+        "aggregateMs": 0.4933000000000902,
+        "freezeMs": 13.51870000000008
+      },
+      "wallLoopExclusiveMs": 55.17830000000822,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 4,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 72.22249999999985,
+      "overheadMs": 16.12009999999964,
+      "controlMs": 56.102400000000216,
+      "phases": {
+        "connectionsMs": 2.0174000000001797,
+        "openingLookupMs": 0.6339999999936481,
+        "openingGridMs": 3.18699999999626,
+        "transformMs": 13.955100000002858,
+        "boundsMs": 6.4987000000423905,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 36.54139999999961,
+        "heightMs": 19.79569999999967,
+        "partsInclusiveMs": 58.465000000000146,
+        "aggregateMs": 0.4658999999996922,
+        "freezeMs": 13.246399999999994
+      },
+      "wallLoopExclusiveMs": 35.907400000005964,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 5,
+      "order": [
+        "control",
+        "probe"
+      ],
+      "totalMs": 68.9394000000002,
+      "overheadMs": 18.28480000000036,
+      "controlMs": 50.654599999999846,
+      "phases": {
+        "connectionsMs": 1.9590000000002874,
+        "openingLookupMs": 0.48119999999744323,
+        "openingGridMs": 2.796599999998307,
+        "transformMs": 7.973500000007334,
+        "boundsMs": 5.452299999985826,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 29.461099999999988,
+        "heightMs": 25.090000000000146,
+        "partsInclusiveMs": 56.606500000000324,
+        "aggregateMs": 0.44529999999986103,
+        "freezeMs": 11.839100000000144
+      },
+      "wallLoopExclusiveMs": 28.979900000002544,
+      "faces": 32092
+    },
+    {
+      "windows": true,
+      "extra": 1000,
+      "trial": 6,
+      "order": [
+        "probe",
+        "control"
+      ],
+      "totalMs": 66.25390000000016,
+      "overheadMs": 19.703500000000076,
+      "controlMs": 46.55040000000008,
+      "phases": {
+        "connectionsMs": 1.9556000000002314,
+        "openingLookupMs": 0.6491000000060012,
+        "openingGridMs": 2.910799999998744,
+        "transformMs": 8.958800000017618,
+        "boundsMs": 5.698899999980313,
+        "faceCount": 32000,
+        "wallLoopInclusiveMs": 34.603399999999965,
+        "heightMs": 17.64850000000024,
+        "partsInclusiveMs": 54.299299999999675,
+        "aggregateMs": 0.4673000000002503,
+        "freezeMs": 11.449100000000271
+      },
+      "wallLoopExclusiveMs": 33.954299999993964,
+      "faces": 32092
+    }
+  ]
+}
