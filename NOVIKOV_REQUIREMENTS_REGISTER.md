@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `926c720` nach PR421, Folgebranch refactor/single-selection-move. Einzel-Linie/Schraffur frei bewegen im Grundriss gemeinsam angebunden; 1140 Tests, Typen/Architektur/Lint/Build und 2D-Browserablauf bestanden. Details unten AUD14-04/05, aktiver Auftrag nur Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `28db1af` nach PR422, grüne CI39654061739. Achsen-Inventur: feste signierte Achsen weiterhin Vollpfad; Kandidatenvergleich zeigt numerische Rechenreihenfolgeabweichungen. Keine Produktänderung. Details AUD14-04/05 unten, einziger Auftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13144,3 +13144,7 @@ Historische Restangaben für Linienpunkt/-kontur, Fenster2D und Wandkörpergriff
 ### AUD14-04/05 – Gemeinsame freie Einzelbewegung, 21.10.2026
 
 PR421 grün in main 926c720. Folgebranch bindet einzelne Linien/Schraffuren in 2D an vorhandene Auswahlbewegung an; nur UI-Routing, keine neue Domain-/Rendererlogik. Gewählter Ursprung, ToolInteraction, Musterursprung, Stil/Ebene und vollständiger Commit erhalten. 1140 Tests, Typechecks, Architektur, gezieltes Lint und Build bestanden. Browser: Linie per Canvas-Klick, Mauerwerk-Schraffur mit Winkel/Tab/Länge/Enter, Undo/Redo und Abbruch. API-Wiederholung 36 vollständige Projekte und36 Zielgeometrien exaktgleich. Keine native Frame-/Recovery-/IFC-Gesamtfreigabe. Details docs/single-drawing-move.md. Einziger Folgeauftrag Masterplan §9: direkte axis/x/y für Linien/Schraffuren abgleichen und messen; nicht parallel implementieren.
+
+### AUD14-04/05 – Feste Achsen: Abgleich und numerisches Gate, 21.10.2026
+
+PR422 nach CI39654061739 grün in main28db1af. axis/x/y bleiben im DirectEdit-Vollpfad; feste signierte Gerade und gewählte Konturseite dürfen nicht durch frei änderbaren Polarwinkel/Halbgerade ersetzt werden. Zweimal108 Mausprojekte/108 scoped Ziele/108 Numeric-Projekte verglichen: je44 Mausprojekte und38 Numeric-Projekte in letzten Nachkommastellen verschieden, maximal1,7763568394002505e-15 m; keine strukturelle Abweichung. Je12 reale DirectEdit-Commits entsprechen der Vorschau inklusive Undo/Redo. Ursachen: zweite schräge Achsprojektion und unterschiedliche Rechenreihenfolge des Schraffurmuster-Ursprungs. Der zweite Befund betrifft auch freie Translation; bisher bestandene Fixtures belegen keine universelle Bitgleichheit. 101 gezielte Tests, Benchmark-Typecheck/Lint bestanden. Keine Produktänderung; keine Frame-/Native-Abnahme. Details und Zeiten docs/drawing-axis-inventory.md. Einziger Folgeauftrag §9: gemeinsame numerische Musterverschiebung vereinheitlichen; erst danach feste Achsen anbinden.
