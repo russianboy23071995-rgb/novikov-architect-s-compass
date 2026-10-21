@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `11a13b1` nach PR416 (grüne CI). Extrusionsreuse-Pilot exaktgleich, mangels tragfähiger Vollinvalidierung nicht übernommen. Produkt unverändert; Diagnose/Geometrieregression erhalten. Einziger aktiver Auftrag §9; Native-/Frame-Gates offen.
+Geprüfte Code-Basis: 21.10.2026, main `0e1edd0` nach PR417 (grüne CI). Archivierte Cachekosten getrennt gemessen, 224 geänderte Vollpfadvergleiche bestanden. Produkt unverändert. Kalt-/Frame-/Native-Gates offen; einziger aktiver Auftrag §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13123,3 +13123,7 @@ Große Fixture 1005 Wände: Wand-/Fenstereinzeländerung baut alle neu, obwohl n
 ### AUD14-03/04 – Extrusionsreuse-Pilot nicht übernommen, 21.10.2026
 
 Vollständige Signaturen und begrenzte schwache Ressourcenzuordnung erhalten Exaktgleichheit. Fensterfälle profitieren, Wandfälle schwanken, Höheninvalidierung wird deutlich teurer. Produkt zurückgenommen; Kandidat und Rohdaten nur Diagnose. Nachweise, Fassungsgrenzen und Änderungskarte: docs/free-wall-reuse-pilot.md. Neue unabhängige Regression für Geometrie-/Host-/Höhen-/Anschlusswechsel. Nächster Einzelauftrag §9 misst Cachepflege und Vollinvalidierung, bevor eine weitere Produktübernahme erwogen wird.
+
+### AUD14-03/04 – Cachepflege und Vollinvalidierung getrennt, 21.10.2026
+
+Zwei Läufe, 224 geänderte Vollpfadvergleiche bestanden; Benchmark-Typen/Lint grün. Signaturaufbau rund 1–2 ms, Vollinvalidierung bezahlt zusätzliche Metadaten-/Höhen-/Freeze-Arbeit. Zähler bestätigen 1000 Hits/1 Miss bei freien Einzeländerungen, 0/1001 bei Höhe. Instrumentierung beeinflusst Laufzeiten erheblich, Kaltaufbau separat offen. Nachweis/Änderungskarte/Budget: docs/extrusion-cache-costs.md. Einziger Folgeauftrag §9 prüft pro Wand gebündelte Ressourcen mit Vollinvalidierungsfallback; keine Produktübernahme aus Trefferzahl allein.
