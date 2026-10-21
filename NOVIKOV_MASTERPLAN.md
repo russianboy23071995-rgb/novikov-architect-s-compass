@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `6314460` nach PR402 (grüne CI 39623523765). Architekturgrenzen-Gate integriert. Im Folgebranch refactor/contour-source ist der contour/offset-Zyklus entfernt und lokal/funktional geprüft; GitHub-CI und Integration folgen. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `738ce18` nach PR403 (grüne CI 39625074883). Konturzyklus entfernt. Im Folgebranch perf/global-preview-profile sind globale 3D-Vorschaudienste zweimal gemessen; keine Produktänderung. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR403 nach grüner CI in main 738ce18 integriert. Zwei reproduzierbare Node-Läufe der globalen 3D-Vorschaudienste mit zwei ausgewählten Wänden und 0/100/1000 Fremdwänden, jeweils mit/ohne zusätzliche Fenster. Warme Flächen-/Pufferkomposition stabil, geplante Wand-Uploads konstant 6336 Byte. Wiederholter Gebäude-Fensterbasisaufbau wächst bis ca. 1,11 ms Median bei 1002 Fenstern. Vollmodell-Flächen/Fenster und konservative Bounds geprüft; kein GPU-/Gesamtframebeleg. Details im datierten Messnachweis.
 
 21.10.2026: PR402 nach grüner CI in main 6314460 integriert. Branch refactor/contour-source löst den contour/offset-Zyklus durch eine unveränderte gemeinsame Leseabfrage. Architekturgraph: 377 Dateien, 1486 interne Kanten, null zyklische Laufzeitkanten; 104 andere Grenzabweichungen bleiben offen. 1134 Produkttests, acht Guard-Tests, Typprüfungen/Lint/Build bestanden. Produktbrowser: Linien-/Schraffur-Offset, Undo/Redo und Abbruch; vier Exporte vollständig in Geschossdaten geprüft. Details im datierten Nachweis.
 
@@ -540,7 +542,7 @@ Gilt **ab jetzt für jede Funktion, Aufgabe, Korrektur und Erweiterung**, auch f
 
 **Nach jedem begrenzten Schritt – Abschlusskarte vor Merge:** Geänderte Module/Importpfeile und tatsächliche Verantwortung gegen die Änderungskarte prüfen; neue Laufzeitzyklen, Schicht-Rückgriffe und Modellkopien ausschließen. Ergebnis der passenden Tests, Typecheck/Lint/Build, gegebenenfalls Produktbrowser, Export-Dateivergleich, Recovery und Laufzeitmessung mit Basis/Commit nennen. Ein Szenario mit Nachbarn, ungültiger Eingabe, Abbruch und Undo prüfen, sofern das Werkzeug sie berührt. Fehlende Native-/Langsession-Gates offen lassen. Nur wenn Ziel, Code, Prüfbeleg und Dokumentationsstatus übereinstimmen, den PR abschließen; sonst denselben Auftrag korrigieren, nicht ein neues Feature beginnen.
 
-**Dauerhafte Sicherung (PR402 in main):** npm run check:architecture prüft in CI exakte Schichtgrenzen und Laufzeitzyklen. 104 bestehende Grenzabweichungen bleiben mit Eigentümer/Abbauziel dokumentiert. Im Folgebranch refactor/contour-source ist der einzige bekannte contour/offset-Zyklus beseitigt, seine zwei Ausnahmen entfernt. Neue verbotene Pfeile, Zyklen und veraltete Ausnahmen lassen das Gate scheitern. Keine automatische Ausnahmen-Erweiterung; fachliche Browserabnahme bleibt zusätzlich erforderlich.
+**Dauerhafte Sicherung (PR402/403 in main):** npm run check:architecture prüft in CI exakte Schichtgrenzen und Laufzeitzyklen. 104 bestehende Grenzabweichungen bleiben mit Eigentümer/Abbauziel dokumentiert. Der contour/offset-Zyklus und seine zwei Ausnahmen sind entfernt. Neue verbotene Pfeile, Zyklen und veraltete Ausnahmen lassen das Gate scheitern. Keine automatische Ausnahmen-Erweiterung; fachliche Browserabnahme bleibt zusätzlich erforderlich.
 
 ### Qualitäts- und Dokumentationsabgleich vom 20.10.2026
 
@@ -559,14 +561,14 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag nach Integration der geprüften Zyklusauflösung: AUD14-03/04, verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen.** Eine feste kleine Auswahl bei wachsendem Restgebäude in selection-move-preview.ts, solid-buffer.ts und BimSolidView verfolgen; Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt ausweisen. Bestehende Flächen-/Pufferreuse erhalten. Erst den größten reproduzierten Rest bestimmen, noch keinen breiten Umbau beginnen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: die unveränderte Gebäude-Fensterbasis in der 3D-Vorschau sicher wiederverwenden (AUD14-03/04).** Den erneuten buildingWindowSelectionSurfaces-Aufbau bei jedem geometryPatch aus BimSolidView lösen; Quelle bleibt der unveränderte Modell-/Sichtbarkeitskontext. Den gemeinsamen Renderdienst verwenden, keine Fachregel oder zweite Modellkopie. Modell-, Sichtbarkeits-, Geschoss-/Höhenwechsel und Legacy-Vorschau müssen korrekt invalidieren. Patch-/Abbruch-/Auswahl-/Fenster- und Vollmodellgleichheit plus Gegenmessung belegen. Lineare Fensterlistenkomposition und kalte Vorbereitung bleiben getrennte Restbefunde; kein gleichzeitiger breiter Rendererumbau.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
 
 **Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
 1. Erledigt/in main: Architekturgrenzen-Gate PR402. Exakte Altlasten und Negativprobe; keine automatische Erweiterung der Ausnahmenliste.
-2. Im Folgebranch refactor/contour-source abgeschlossen: contour/offset-Zyklus entfernt; gemeinsame Konturabfrage, keine Geometrieänderung. Tests und Browser-/Dateivergleich bestanden; CI/Integration offen. Weitere lib/bim-Rückgriffe bleiben gesonderte Abbauschuld.
+2. Erledigt/in main: PR403 löst contour/offset über die gemeinsame Leseabfrage; null Laufzeitzyklen, gültige/ungültige Pfade und Browser-/Dateivergleich belegt. Weitere lib/bim-Rückgriffe bleiben gesonderte Schuld.
 3. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
 4. AUD14-04/05: große Anschlussgruppen und verbliebene Legacy-Aktionen aus der vorhandenen Pfadinventur bearbeiten. Der 51-Wand-Gruppenrest (~14,6 ms in früherer reiner Vorschau) bleibt offen. Fachlich vollständige stationäre Nachbarn erhalten; Abhängigkeiten nicht blind kürzen. Wiederholte globale Validierung und Wand/Fenster-Scans nur mit nachgewiesenem Nutzen sicher begrenzen. Neue Werkzeuge dürfen keine Legacy-Vollpfade als Standard übernehmen.
 5. AUD14-07: Abbildwechsel/Recovery-Vergleich und Bildressourcen-Pilot am selben Build mit vorhandenen Tracewerkzeugen erneut prüfen, sobald eine tatsächliche CPU-/Native-Aufnahme möglich ist. Die Nutzervertagung vom 16.10. bleibt als historische Prioritätsentscheidung erhalten; diese erneute Korrekturfreigabe reaktiviert die unabhängig ausführbare Arbeit. Fehlender Profiler bleibt eine konkrete Beleggrenze, kein erfundener Fix. Keine weitere reine Longtask-Serie als Ersatz und keine Produktpromotion des Pools ohne belastbaren Nutzen. Bei dieser Werkzeuggrenze die anderen unabhängigen Bereinigungen fortsetzen.
@@ -574,7 +576,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 7. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
 8. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-**Aktueller AUD14-Status (21.10.2026, main PR401; gemeinsamer Bewegungs-/Snapshot-Pfad automatisiert und funktional im Produktbrowser geprüft):**
+**Aktueller AUD14-Status (21.10.2026, main PR403; globale Vorschaudienste im Folgebranch gemessen, Fensterbasisaufbau als nächster begrenzter Rest):**
 
 | ID | Verifizierter Teilstand | Verbleibende Arbeit |
 | --- | --- | --- |
@@ -4457,3 +4459,66 @@ Keine Interaktionsänderung und keine neue Geschwindigkeitsbehauptung. 3D-/IFC-/
 Recoverycode und Schema unberührt; keine neue Native-/Frame-/Recovery-Abnahme.
 Bestehende automatisierte Ableitungs-/Exportprüfungen grün. Weitere AUD14-Gates
 bleiben offen; genau ein nächster Auftrag ausschließlich §9.
+
+
+### AUD14-03/04 – Globale 3D-Vorschaudienste gemessen (21.10.2026)
+
+Änderungskarte vor Umsetzung: Basis main 738ce18/PR403, Branch
+perf/global-preview-profile. Nutzerziel: Restarbeit vor einer weiteren Optimierung
+belegen. Nur Diagnose unter benchmarks/, keine neue Produktregel/Abhängigkeit.
+Zwei ausgewählte EG-Wände und mitbewegtes Fenster bleiben konstant; 0/100/1000
+unbeteiligte EG-Wände, zweite Serie zusätzlich je ein Fenster. Drei Geschosse,
+weitere OG-Wände/Fenster unverändert. Eigentümer Modell/Validierung bleibt Domain,
+gemeinsame vorbereitete Bewegung Application, Ableitung und Puffer Rendering.
+Stabile IDs, Geschosshöhen, Meter, ein Modell; keine UI-/AI-Mutation.
+
+Reproduktion: node --experimental-strip-types benchmarks/global-preview-profile.ts
+Zwei frische Node-v24.19.0-Prozesse, Windows/AMD Ryzen 5 3600; Rohdaten
+benchmarks/global-preview-results.json und global-preview-repeat-results.json.
+Je sechs Fälle, je 200 Vorschauen: erste separat, 50 Warmup, 150 warme Messwerte.
+Feste Fall-/Phasenreihenfolge; GC/JIT und Betriebssystemlast begrenzen Aussagen.
+Vorbereitung ist sitzungskalt, nicht prozesskalt für jeden Fall.
+
+| Warmer Median, zusätzliche Fenster mitwachsend | 2 Fenster Lauf1/2 | 102 Fenster Lauf1/2 | 1002 Fenster Lauf1/2 |
+| --- | --- | --- | --- |
+| Gebäude-Fensterbasis neu (ms) | 0,0150 / 0,0145 | 0,1413 / 0,1721 | 1,1134 / 1,1071 |
+| Wandflächen-Komposition (ms) | 0,0521 / 0,0738 | 0,0532 / 0,0532 | 0,0296 / 0,0302 |
+| Wandpuffer-Update (ms) | 0,1036 / 0,1050 | 0,1026 / 0,1038 | 0,1079 / 0,1102 |
+
+1002 Fenster: Fensterbasis P95 2,433/2,253 ms. Diagnose mit einmalig
+vorbereiteter Fensterbasis: verbleibende Listenkomposition 0,0295/0,0329 ms
+Median; weiterhin linearer Filter, keine behauptete O(1)-Gesamtlösung.
+Wandumrandung/Leerabfrage ca. 0,181/0,183 ms. Ohne zusätzliche Fenster wächst
+die Basis wegen des Wandindex-Aufbaus von ca. 0,015 auf 0,067/0,068 ms.
+
+Kaltes Restproblem getrennt: bei 1004 Wänden/1002 Fenstern Vorbereitung
+Aktion 21,37/15,25 ms, Solid 69,23/64,26 ms, initialer Puffer 89,89/81,74 ms;
+erste Flächenkomposition 5,20/5,00 ms. Keine Vermischung mit warmen Pointerkosten.
+Geplante initiale Wand-Uploads 4620672 Byte, warme 6336 Byte in allen Fällen,
+keine vollen Pufferrebuilds während der 200 Vorschauen. Dies sind CPU-seitig
+geplante Wandpufferbytes, keine GPU-Messung; Umrandungsuploads nicht enthalten.
+
+Codebefund BimSolidView: windowSurfaces-useMemo hängt an geometryPatch und ruft
+dabei buildingWindowSelectionSurfaces(previewProject, allows) erneut auf. Im
+vorbereiteten Pfad bleibt previewProject das unveränderte Projekt. Dagegen
+arbeiten selectionMoveSurfaces/solid-buffer warm auf der gemeinsamen Basis.
+Der nächste begrenzte Eingriff ist deshalb Wiederverwendung der Fensterbasis,
+nicht erneuter Austausch der bereits begrenzten Wandflächenkomposition.
+
+Abnahme: pro Fall vollständige Wandflächen/Fenster-Auswahlflächen gegen das
+materialisierte und vollständig validierte Projekt verglichen, konservative
+Vorschaubounds umfassen alle Vollmodellvertices. Vergleich außerhalb der Timings;
+kein Zugriff auf den lazy Gesamtflächen-Getter im Messloop. Das ist Ableitungs-
+gleichheit zur materialisierten Aktion, kein unabhängiger Nachweis ihrer Fachregel.
+Benchmark-Typecheck, gezieltes Lint und Architektur-Gate bestanden. Keine src-/
+CI-/Paketänderung, keine zusätzlichen Zyklen oder Modellkopien im Produkt.
+Bestehende 1134 Produkt-/acht Guard-Tests am Basiscommit in CI grün; nicht erneut
+lokal für reine Diagnose ausgeführt. Keine UI-Änderung, daher keine neue
+Interaktions-/Undo-/IFC-/Recovery-Browserabnahme in diesem Schritt.
+
+Grenzen: all-visible Predicate, synthetische unverbundene Restwände, eine feste
+Auswahl und stabile Closure. Keine React-Scheduler-, Projektion-, Snap-,
+Pointerereignis-, GPU-/Native-/Gesamtframezeiten; tatsächliche Sichtbarkeit,
+Closure-/Topologiewechsel und komplette S1-Szene nicht als gemessen darstellen.
+Keine allgemeine Performancefreigabe; AUD14 bleibt teilweise offen. §9 führt
+allein den nächsten ausführbaren Auftrag.
