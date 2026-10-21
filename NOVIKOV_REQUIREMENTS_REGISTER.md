@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `b218a19` nach PR415 (grüne CI). Einzeländerungs-Neuaufbau gemessen; 168 Exaktvergleiche bestanden, Höhengegenprobe erfasst. Produkt unverändert; Native-/Frame-Gates offen, einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `11a13b1` nach PR416 (grüne CI). Extrusionsreuse-Pilot exaktgleich, mangels tragfähiger Vollinvalidierung nicht übernommen. Produkt unverändert; Diagnose/Geometrieregression erhalten. Einziger aktiver Auftrag §9; Native-/Frame-Gates offen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13119,3 +13119,7 @@ Zwei serielle uninstrumentierte Vergleichsläufe, 54 vollständige Vergleichsfä
 ### AUD14-03/04 – Neuaufbau nach Einzeländerung, 21.10.2026
 
 Große Fixture 1005 Wände: Wand-/Fenstereinzeländerung baut alle neu, obwohl nur eine Weltgeometrie abweicht. 1000–1001 freie Extrusionen bleiben gleich; Geschosshöhengegenprobe ändert alle 1005. Zwei Läufe, 168 vollständige Vergleiche bestanden, Typen/Lint grün. Instrumentierungsgrenzen und Änderungskarte: docs/geometry-rebuild-measurement.md. Produkt unverändert. Einziger Folgepilot §9: begrenzte Wiederverwendung mit vollständigem geometrischem Kontext, kein ID-only-Cache und keine ungeprüfte Höhen-/Anschlussübernahme.
+
+### AUD14-03/04 – Extrusionsreuse-Pilot nicht übernommen, 21.10.2026
+
+Vollständige Signaturen und begrenzte schwache Ressourcenzuordnung erhalten Exaktgleichheit. Fensterfälle profitieren, Wandfälle schwanken, Höheninvalidierung wird deutlich teurer. Produkt zurückgenommen; Kandidat und Rohdaten nur Diagnose. Nachweise, Fassungsgrenzen und Änderungskarte: docs/free-wall-reuse-pilot.md. Neue unabhängige Regression für Geometrie-/Host-/Höhen-/Anschlusswechsel. Nächster Einzelauftrag §9 misst Cachepflege und Vollinvalidierung, bevor eine weitere Produktübernahme erwogen wird.
