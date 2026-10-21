@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `c18c64b` nach PR405 (grüne CI 39628250370). Kombinierte funktionale Fensterbasis-Browserabnahme im Folgebranch test/window-base-browser bestanden; fünf regulär geladene Exporte vollständig verglichen. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `0dc7fab` nach PR406 (grüne CI 39629987853). Kalte 3D-Vorbereitung im Folgebranch perf/cold-preview-profile in zwei CPU-Läufen getrennt nach Szenenaufbau, Aktionsvorbereitung und A/A/B/A-Flächenpartition vermessen. Keine Produktcodeänderung; genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR406 grün in main 0dc7fab integriert. Kalte 3D-Dienste mit 4/104/1004 Wänden und 2/102/1002 Fenstern, mutable und owned Eingängen, je sieben frischen Szenen in zwei Prozessen gemessen. Szenenaufbau nicht als wiederkehrende Bewegungskosten zählen. 336 vollständige Wand-/Fenstervergleiche und 84 exakte Puffervergleiche bestanden. Einzelheiten im datierten Nachweis am Ende; keine neue Browser-/Frameabnahme.
 
 21.10.2026: PR405 nach grüner CI in main c18c64b integriert. Frischer statischer Produktbrowser: zwei EG-Wände mit Fenster, drei Zahlenvorschauziele, Platzierung, Undo/Redo, erneute Vorschau/Abbruch; Fensterebene aus/ein, EG-Höhe 3,0 auf 3,5 m, OG-Wechsel und Fensterauswahl. Fünf regulär geladene Projektdateien entsprechen vollständig den Geschossdaten und Arbeits-/EG-Kontexten der gemeinsamen Vollprojektaktionen. Keine Konsolenfehler; kein kontinuierlicher Pointer-/Framebeleg.
 
@@ -565,7 +567,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: kalte Vorbereitung und erste Flächenpartition der 3D-Vorschau gezielt aufschlüsseln (AUD14-03/04).** Auf Basis des global-preview-Profils Aktion/Solid/initialen Puffer und erste Komposition bei fester kleiner Auswahl und wachsendem Restgebäude getrennt untersuchen; stabile und wechselnde Ersatzmengen unterscheiden. Erst den größten reproduzierten Abschnitt benennen, keine Cache-Ausweitung oder breiten Rendererumbau auf Verdacht. Warme Flächen-/Fensterbasisreuse, Modellvalidierung und Commit bleiben erhalten. Native-/Frame-Abnahme weiterhin offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: CPU-Pufferpackung ohne zusätzliche Cache-Schicht begrenzt reduzieren (AUD14-03).** packSolidFaces ist im kalten Pufferpfad separat als großer Kostenblock nachgewiesen. Temporäre Arrays/Spreads nur bei exakt gleichem Float32-Ergebnis reduzieren; beliebige Flächen, Auswahlfarben, Origin-Rebase und vorhandene Patch-/Full-Rebuild-Verträge erhalten. Vorher/Nachher mit cold-preview-profile und gezielten Puffertests vergleichen. Gebäudeaufbau bleibt der größte gemessene Szenenblock (~112 ms); dessen Ableitung ist danach gesondert zu bearbeiten, nicht als durch Pufferarbeit erledigt werten. Kein Rendererwechsel, keine Validierungslockerung. Native-/Frame-Abnahme bleibt offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4617,3 +4619,71 @@ Grenzen: tatsächliche Zahlenvorschauen/Platzierung, keine kontinuierlich
 aufgezeichnete Mousemove-/Shift-/Native-Geste, kein GPU-/Gesamtframebeleg.
 Sichtbarkeit funktional bedient; kein GPU-Picking-Lasttest. Kein Anspruch auf
 vollständige AUD14-Abnahme. Nächster Einzelauftrag ausschließlich §9.
+
+### AUD14-03/04 – Kalte 3D-Vorbereitung und Auswahlwechsel (21.10.2026)
+
+Basis main 0dc7fab, PR406 nach grünem Lauf 39629987853 zusammengeführt.
+Änderungskarte vor Code: ausschließlich Diagnose unter benchmarks, keine neue
+Produktregel oder Importkante in src. Ziel: erste Szene von neuer Bewegung
+trennen; normale feste Auswahl A/A und Grenzfall wechselnde Ersatzmengen A/B/A
+bei wachsendem Restgebäude. Eine autoritative Projektbasis mit stabilen IDs,
+Metern und Geschoss-/Hostkontext; alle Ebenen sichtbar. Gemeinsame
+prepareSelectionTranslation/evaluate/materialize-Dienste und vorhandene
+Renderadapter, kein zweiter editierbarer Modellbestand. Finaler Commit,
+Validierung, Undo/Abbruch, 2D, Datei/Recovery, IFC und AI unverändert; daher keine
+erneute vollständige Bedienabnahme für diese reine Messung.
+
+Reproduktion: `node --experimental-strip-types benchmarks/cold-preview-profile.ts`.
+Rohdaten: benchmarks/cold-preview-results.json und cold-preview-repeat-results.json.
+Zwei getrennte Node-Prozesse; je sieben frische Szenen pro Größen-/Provenienzfall,
+4/104/1004 Wände und 2/102/1002 Fenster. Erst mutable, dann factory-owned Input;
+owned-Erzeugung liegt außerhalb als vorausgegangener Lade-/Commit-Schritt.
+Je Szene einmal Query/Solid/Sichtbarkeit/Puffer/Fensterbasis, danach vier neue
+Gesten A/A/B/A mit unterschiedlichen Zielvektoren. A: zwei EG-Wände/ein Fenster;
+B: zwei Restwände/zwei Fenster (kleiner Basisfall: zwei OG-Wände/ein Fenster).
+Vergleich der Komposition ist daher kein identischer Anschlussfall A gegen B.
+Unabhängige Gruppierungs-/Pack-/Kopierproben laufen erst danach und sind **keine
+addierbaren Teilzeiten** des zuvor gemessenen initialen Puffers.
+
+Median in ms, größter Fall, owned; Lauf 1 / Lauf 2:
+
+| Abschnitt | Lauf 1 | Lauf 2 |
+| --- | ---: | ---: |
+| Szenen-Solid | 111,519 | 112,249 |
+| Initialer Puffer | 108,739 | 91,188 |
+| Erste Aktionsvorbereitung A | 1,682 | 1,380 |
+| Erste Flächenkomposition A | 3,463 | 3,405 |
+| Gleiche Ersatzmenge A, neues Ziel | 0,068 | 0,065 |
+| Andere Ersatzmenge B | 3,347 | 3,150 |
+| Rückwechsel A | 3,087 | 2,717 |
+| Erste Pufferaktualisierung A | 0,157 | 0,134 |
+| Unabhängige Packprobe | 94,492 | 86,702 |
+| Unabhängige Gruppierung | 3,035 | 3,051 |
+| Unabhängiges Zusammenkopieren | 1,468 | 1,416 |
+
+Die öffentliche mutable Aktionsvorbereitung kostet im selben Größenfall
+11–15 ms; owned dagegen rund 1,2–1,7 ms. Diese beiden Provenienzen nicht
+vermischen oder daraus ungeprüft einen bestimmten UI-Eingang ableiten.
+BimSolidView memoisiert Grundsolid und sichtbare Basis nach Projekt/Kontext;
+Szenenaufbau und initialer Puffer gehören nicht auf jede Pointerbewegung.
+Der größte reproduzierte Szenenblock ist buildBuildingSolid; separat belegt ist
+packSolidFaces als großer Teil der Pufferkosten. Die stationäre Partition hält
+absichtlich nur eine Ersatzmenge pro Basis: ein Rückwechsel partitioniert neu,
+kein verschwundener Modellinhalt und kein Anlass für einen unbeschränkten Cache.
+
+Abnahme: zwei erfolgreiche Messläufe mit insgesamt 336 vollständigen
+Wandflächen-/Fenstervergleichen gegen materialisierte validierte Projekte und
+84 exakten Float32-Puffervergleichen. Alle Vergleiche nach den Zeitphasen;
+keine Materialisierung beeinflusst den A/A/B/A-Abschnitt. Benchmark-Typecheck,
+gezieltes Lint und Architekturgrenze bestanden. Typinferenz der dynamischen
+Zielwerte explizit annotiert; keine Laufzeitänderung durch diese Korrektur.
+Keine Änderung in src oder an Test-/CI-Konfiguration. Keine Browser-, GPU-,
+Frame-, native Shift-, IFC- oder neue Recoveryabnahme; keine gesamte AUD14-Freigabe.
+Feste Fallreihenfolge, JIT/GC/Hintergrundlast unkontrolliert; sieben Samples
+rechtfertigen keine p95-Zusage. Vergleichbare warme Dienste bleiben erhalten.
+
+Entscheidung: Als begrenzten nächsten Eingriff die isoliert nachgewiesene
+Pufferpackung ohne Cache-Erweiterung verbessern, weil das vollständige
+Float32-Ergebnis exakt vergleichbar ist. Der etwas größere Solidaufbau enthält
+mehrere fachliche Ableitungen und bleibt ausdrücklich separat offen. Aktiver
+Einzelauftrag ausschließlich §9.

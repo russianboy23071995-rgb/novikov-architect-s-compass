@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `0b61be1` nach PR401 (grüne CI). Architekturgrenzen-Gate im Folgebranch test/architecture-boundaries lokal geprüft; keine Produktcodeänderung. Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `0dc7fab` nach PR406 (grüne CI). Kalte 3D-Vorbereitung im Folgebranch perf/cold-preview-profile gemessen; mutable/owned und Szenen-/Gestenlebensdauer getrennt. Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11482,14 +11482,14 @@ Auftrag: gemeinsame sichere Snapshot-/Revisions-/Ownership-Grenze und vorhandene
 Abnahme: Einzelwand sowie 2/5 Geschosse, große Bilder mit unveränderter Auswahlgröße, Vorbereitung/Pointer/Commit getrennt; stale/mutierte Basis, No-op, externe/interne Anschlüsse, Fenster einmal mitnehmen, ein Undo/Redo und Datei-/Recoverygleichheit. Messung und Instrumentierung belegen entfernte Payloadserialisierung; Integrität bleibt erhalten.
 
 ### AUD14-03 – 3D-Ressourcen lokal aktualisieren
-Status: begrenzter Renderer-Fix implementiert und geprüft am 15.10.2026; PR-Abnahme offen, P1. Bezug: A02/A04/A05.
+Status 21.10.2026: stabile Ressourcen, Patchuploads und Fensterbasis bis PR406 integriert; kalte Vorbereitung separat vermessen (Nachweis unten). Pufferpackung, Gebäudeaufbau und erste/gewechselte Partition bleiben Kostenblöcke; Native-/Frame-Gates offen, P1. Bezug: A02/A04/A05.
 Code: rendering/viewport/selection-move-preview.ts, rendering/viewport/solid-renderer.ts, components/cad/BimSolidView.tsx.
 Befund: vorbereitete Geometriepatches werden wieder zu Gesamtflächen komponiert. Neue Solididentität oder andere Wandauswahl führt im Renderer zu vollständiger Ressourcenentsorgung/-erstellung, Shaderkompilierung, Dreieckspackung und GPU-Upload. Reine Kamerabewegung verwendet Ressourcen bereits weiter.
 Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlaufzeit, unveränderte Geometriepuffer wiederverwenden; Auswahl und betroffene Vorschauflächen separat bzw. begrenzt aktualisieren. Kein zusätzlicher autoritativer Meshbestand, kein pauschaler Rendererwechsel. Verdeckung, Fenster, Präzision großer Koordinaten, DPR, Verlust/Wiederherstellung des WebGL-Kontexts erhalten.
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status: teilweise umgesetzt, Teil 1 am 15.10.2026 geprüft; weitere Teilaufträge offen, P1. Bezug: A01–A05/A11.
+Status 21.10.2026: teilweise umgesetzt bis PR406, gemeinsame vorbereitete Pfade und Fensterbasis funktional abgenommen. Cold-Profil trennt mutable Eingangsprüfung von owned Aktionsvorbereitung; keine allgemeine Performancefreigabe, P1. Bezug: A01–A05/A11.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -13048,3 +13048,17 @@ Checker/Evidenz: benchmarks/window-base-browser-check.ts und
 window-base-browser-evidence.json. Keine Konsolenfehler. Kontinuierliche Maus-/
 Shift-, GPU-/Frame-Gates bleiben offen; Details im datierten Masterplan-Nachweis.
 Nur §9 führt den nächsten Auftrag: kalte Vorbereitung/erste Partition messen.
+
+### AUD14-03/04 – Kalte 3D-Vorbereitung, 21.10.2026
+Basis main 0dc7fab/PR406. cold-preview-profile.ts und zwei Rohdatendateien
+trennen Szenenaufbau, mutable/owned Aktionseingang und A/A/B/A-Ersatzmengen.
+1004 Wände/1002 Fenster, owned-Mediane: Solid ~112 ms, initialer Puffer
+91–109 ms; Aktionsvorbereitung 1,2–1,7 ms, erste/gewechselte Komposition
+2,7–3,5 ms, gleiche Ersatzmenge ~0,07 ms. Mutable Eingangsprüfung ~11–15 ms
+nicht als owned Kosten ausgeben. 336 vollständige Geometrievergleiche und
+84 exakte Puffervergleiche in zwei Läufen bestanden. Keine Produktänderung;
+Typprüfung/Lint/Architekturgrenze bestanden. Vollständige Methode/Grenzen im
+Masterplan-Nachweis. Größter Szenenblock bleibt Solidaufbau; isolierte Packung
+ist nächster begrenzter Ansatz gemäß §9, keine Cache-Ausweitung. Native-/Frames
+und Gesamtfreigabe bleiben offen; Fenster bleiben ableitbare Objekt-/zukünftige
+Bibliotheksrepräsentationen, unveränderter Schema-/Hostvertrag.
