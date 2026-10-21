@@ -71,6 +71,49 @@ function joined(tee: boolean) {
   return p;
 }
 const canonical = (faces: unknown[]) => faces.map((f) => JSON.stringify(f)).sort();
+
+test("reused window basis stays unchanged across patches and refreshes from model/visibility", () => {
+  const base = joined(true);
+  const target = { kind: "window" as const, id: "window" };
+  const session: EditSession = {
+    base,
+    target,
+    action: "axis",
+    index: null,
+    anchor: editAnchor(base, target),
+  };
+  const prepared = prepareWindowAxisPreview(session);
+  const basis = buildingWindowSelectionSurfaces(base, () => true);
+  const original = structuredClone(basis);
+  for (const x of [2, 3, 4, 2]) {
+    const point = { x, y: 0 };
+    const patch = prepared.evaluate(base, target, point);
+    const shown = selectionMoveWindows(basis, base, patch, () => true);
+    const full = editAtPointer(session, base, point);
+    assert.deepEqual(
+      canonical(shown),
+      canonical(buildingWindowSelectionSurfaces(full, () => true)),
+    );
+    assert.deepEqual(basis, original); // Cancel can return the exact committed basis.
+    // Connected neighbours can belong to the patch closure; compare their
+    // geometry above, rather than requiring stationary object identity.
+  }
+  const changed = editAtPointer(session, base, { x: 4, y: 0 });
+  assert.notDeepEqual(
+    buildingWindowSelectionSurfaces(changed, () => true),
+    basis,
+  );
+  const hiddenHost = buildingWindowSelectionSurfaces(changed, (id) => id !== "host");
+  assert.deepEqual(
+    hiddenHost.map((w) => w.id),
+    ["neighbour-window"],
+  );
+  const hiddenWindow = buildingWindowSelectionSurfaces(changed, (id) => id !== "window");
+  assert.deepEqual(
+    hiddenWindow.map((w) => w.id),
+    ["neighbour-window"],
+  );
+});
 test("window patch matches full geometry, outlines and caps across corners, double T and storeys", () => {
   const multi = buildingViewFixture(2);
   multi.workingStoreyId = "s2";

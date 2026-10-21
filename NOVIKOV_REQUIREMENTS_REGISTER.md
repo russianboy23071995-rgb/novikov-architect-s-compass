@@ -13023,3 +13023,16 @@ global-preview-profile.ts. Vollmodell-Ableitungsgleichheit außerhalb Messung
 bestanden. Keine Produktänderung; kein GPU-/Gesamtframe-/Native-Nachweis,
 all-visible synthetischer Fall. Details/Änderungskarte im datierten Masterplan-
 Nachweis; nächster Einzelauftrag nur §9: unveränderte Fensterbasis wiederverwenden.
+
+
+### AUD14-03/04 – Fensterobjekt-Basis, 21.10.2026
+
+Nutzer bestätigt flexible Fensterdarstellung als künftiges Bibliothekselement.
+Objekt-ID/Host/fachliche Daten bleiben autoritativ; Hit-/Outlineflächen abgeleitet.
+Spätere Darstellungs-/Bibliotheksrevision muss invalidieren, kein vorweggenommenes
+Schema. BimSolidView im Branch perf/stable-window-preview-base trennt Fensterbasis
+von Patch-Memoisierung. Modell/Sichtbarkeit/Legacy-Vorschau berechnen neu.
+Regressionen, Typchecks/Lint/Gate/Builds und begrenzter 3D-Browser-Smoke bestanden.
+Bei 1002 Fenstern entfällt Basisaufbau ~1,08 ms Median, Komposition ~0,033 ms;
+CPU-Dienste, keine Framegarantie. Details/Grenzen und Änderungskarte im datierten
+Masterplan-Nachweis. Kombinierte Mehrfachbewegungsabnahme allein nach §9 offen.

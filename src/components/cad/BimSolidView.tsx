@@ -269,11 +269,24 @@ export function BimSolidView({
       ),
     [selections, selection, project, visibility],
   );
-  const windowSurfaces = useMemo(() => {
-    const allows = (id: string) => isLayerVisible(project, visibility, id);
-    const base = buildingWindowSelectionSurfaces(previewProject, allows);
-    return geometryPatch ? selectionMoveWindows(base, project, geometryPatch, allows) : base;
-  }, [previewProject, project, visibility, geometryPatch]);
+  // Disposable object hit/outline representation, not the future library model.
+  // A prepared movement changes its patch, not the committed object basis.
+  const windowBase = useMemo(
+    () =>
+      buildingWindowSelectionSurfaces(previewProject, (id) =>
+        isLayerVisible(project, visibility, id),
+      ),
+    [previewProject, project, visibility],
+  );
+  const windowSurfaces = useMemo(
+    () =>
+      geometryPatch
+        ? selectionMoveWindows(windowBase, project, geometryPatch, (id) =>
+            isLayerVisible(project, visibility, id),
+          )
+        : windowBase,
+    [windowBase, project, visibility, geometryPatch],
+  );
   const pickDisplayed = useSolidPicking(
     solid,
     windowSurfaces,

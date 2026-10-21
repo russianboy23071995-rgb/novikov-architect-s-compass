@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `738ce18` nach PR403 (grüne CI 39625074883). Konturzyklus entfernt. Im Folgebranch perf/global-preview-profile sind globale 3D-Vorschaudienste zweimal gemessen; keine Produktänderung. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `bf543d0` nach PR404 (grüne CI 39626453771). Im Folgebranch perf/stable-window-preview-base wird die unveränderte Fensterbasis getrennt wiederverwendet; Regression, Gegenmessung und begrenzter Produktbrowser-Smoke bestanden. CI/Integration folgen. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR404 nach grüner CI in main bf543d0 integriert. BimSolidView berechnet im Folgebranch die Gebäude-Fensterbasis nur bei Modell-/Sichtbarkeitsänderung neu; geometryPatch setzt auf der gemeinsamen unveränderten Basis auf. 1134 bestehende Tests plus neue Basisregression bestanden, Typprüfung/Lint/Architektur und Builds grün. CPU-Gegenmessung bei 1002 Fenstern: bisheriger Basisaufbau 1,0825 ms Median entfällt; verbleibende Komposition 0,0327 ms. Funktionaler Browser-Smoke: Fenster in 3D bewegen, Undo/Redo, Sichtbarkeit und Abbruch. Noch keine kontinuierliche Mehrfachbewegungs-/Frameabnahme.
 
 21.10.2026: PR403 nach grüner CI in main 738ce18 integriert. Zwei reproduzierbare Node-Läufe der globalen 3D-Vorschaudienste mit zwei ausgewählten Wänden und 0/100/1000 Fremdwänden, jeweils mit/ohne zusätzliche Fenster. Warme Flächen-/Pufferkomposition stabil, geplante Wand-Uploads konstant 6336 Byte. Wiederholter Gebäude-Fensterbasisaufbau wächst bis ca. 1,11 ms Median bei 1002 Fenstern. Vollmodell-Flächen/Fenster und konservative Bounds geprüft; kein GPU-/Gesamtframebeleg. Details im datierten Messnachweis.
 
@@ -561,7 +563,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: die unveränderte Gebäude-Fensterbasis in der 3D-Vorschau sicher wiederverwenden (AUD14-03/04).** Den erneuten buildingWindowSelectionSurfaces-Aufbau bei jedem geometryPatch aus BimSolidView lösen; Quelle bleibt der unveränderte Modell-/Sichtbarkeitskontext. Den gemeinsamen Renderdienst verwenden, keine Fachregel oder zweite Modellkopie. Modell-, Sichtbarkeits-, Geschoss-/Höhenwechsel und Legacy-Vorschau müssen korrekt invalidieren. Patch-/Abbruch-/Auswahl-/Fenster- und Vollmodellgleichheit plus Gegenmessung belegen. Lineare Fensterlistenkomposition und kalte Vorbereitung bleiben getrennte Restbefunde; kein gleichzeitiger breiter Rendererumbau.
+**Genau ein unmittelbarer aktiver Folgeauftrag nach Integration: Browser-Abnahme der wiederverwendeten Fensterbasis (AUD14-03/04).** Mehrfachbewegung zweier Wände mit Fenstern über mehrere Vorschauziele, Abbruch und Undo/Redo; anschließend Ebenensichtbarkeit, Geschoss-/Höhenänderung und erneute Auswahl prüfen. Vollständige exportierte Geschossdaten mit dem gemeinsamen Vollpfad vergleichen. Bestehender Smoke ersetzt diesen kombinierten Workflow nicht. Keine weitere Produktoptimierung im selben Auftrag; verbleibende lineare Fensterlisten und kalte Vorbereitung bleiben separat offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4522,3 +4524,50 @@ Pointerereignis-, GPU-/Native-/Gesamtframezeiten; tatsächliche Sichtbarkeit,
 Closure-/Topologiewechsel und komplette S1-Szene nicht als gemessen darstellen.
 Keine allgemeine Performancefreigabe; AUD14 bleibt teilweise offen. §9 führt
 allein den nächsten ausführbaren Auftrag.
+
+
+### AUD14-03/04 – Stabile Fensterbasis und Objektvertrag (21.10.2026)
+
+Nutzerentscheidung: Fenster als Objekte beziehungsweise künftige Bibliothekselemente
+behandeln. Stabile IDs, Host-/Geschosszuordnung und fachliche Maße bleiben im Modell;
+Darstellung darf künftig flexibel ersetzt werden. Aktuelle Hit-/Outline-Flächen
+sind wegwerfbare Ableitungen, kein festgeschriebenes Bibliotheksformat. Ein späterer
+Bibliotheksdefinitions-/Darstellungsversionswechsel muss die abgeleitete Basis
+invalidieren; ein heute noch nicht existierendes Versionsschema wird nicht erfunden.
+
+Änderungskarte vor Code: Basis bf543d0/PR404, Branch perf/stable-window-preview-base.
+Bestehende gemeinsame buildingWindowSelectionSurfaces-Abfrage bleibt Eigentümer
+der Renderableitung. BimSolidView trennt lediglich zwei useMemo-Lebensdauern:
+windowBase hängt an previewProject, project und visibility; windowSurfaces zusätzlich
+an geometryPatch. Bei vorbereiteter Bewegung bleibt previewProject die Basis,
+bei Legacy-Vorschau ändert es sich und wird neu abgeleitet. Modell-/Höhen-/
+Geschossänderungen liefern ein neues Projekt; Sichtbarkeitswechsel eigene Policy.
+Kein globaler Cache, keine unbeschränkte Historie, kein neuer Import oder Renderer-
+Fachzweig; keine Fachgeometrie dupliziert. React darf Memoisierung verwerfen, ohne
+Korrektheit zu ändern. Kein Schema-/IFC-/Recovery-/AI-/Undo-Eingriff.
+
+Neue Regression: Fensterbasis über vier Patchziele unverändert, vollständige
+Fensterflächen gegen materialisierte gemeinsame Aktion, geändertes Modell,
+ausgeblendeter Host und ausgeblendetes Fenster. Verbundene Nachbarn können Teil
+der Patch-Closure sein: Geometriegleichheit statt falscher Referenzidentität.
+Gesamtlauf: 1134 bisherige Tests bestanden; anfänglich eine neue Testannahme zur
+Nachbaridentität korrigiert, danach alle fünf window-preview-Tests grün. Beide
+Typechecks, gezieltes Lint, Architektur-Gate (null Zyklen), Produkt-/Abnahmebuild
+bestanden. Bekannte Buildhinweise bleiben. Nur BimSolidView als Produktdiff,
+keine Rückabhängigkeit, Modellkopie oder neue Mutationsregel.
+
+Gegenmessung benchmarks/stable-window-base-results.json, gleicher Aufbau wie
+PR404, node --experimental-strip-types benchmarks/global-preview-profile.ts.
+Alter Basisaufbau/alte Patchkomposition und neuer Pfad getrennt gemessen.
+1002 Fenster: Basis alt 1,0825 ms Median / 2,1518 ms P95, alte Komposition
+0,0381 ms Median; neue Komposition mit wiederverwendeter Basis 0,0327 ms Median /
+0,0457 ms P95. Phasenmediane nicht als gemessenen Gesamtrahmen addieren.
+Weiterhin linearer Fensterlistenfilter; keine O(1)-Behauptung. Sechs synthetische
+all-visible Fälle, feste Auswahl/Closure; GPU/React/Native/Frame nicht gemessen.
+
+Frischer statischer Produktbrowser auf isoliertem Port8087: EG-Fenster in 2D
+ausgewählt, in 3D entlang der Wand von Position 0,5 auf 0,725 platziert; Undo/Redo,
+erneute Auswahl, Fensterebene aus und über Ebenen-Undo wieder ein. Vorschau erneut
+begonnen und abgebrochen; Position 0,725 erhalten, keine Konsolenfehler. Screenshot
+outputs/stable-window-browser.png. Kein kontinuierlicher Pointer-/Mehrfachwand-
+oder Exportvergleich in diesem Smoke; kombinierte Abnahme ist nächster §9-Auftrag.
