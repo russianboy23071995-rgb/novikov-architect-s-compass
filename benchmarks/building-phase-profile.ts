@@ -109,9 +109,9 @@ try {
       {
         runtime: process.version,
         cpu: cpus()[0]?.model,
-        basis: "PR408 7bcfad3",
+        basis: "main 85c3581 (PR411; window host grouping)",
         method:
-          "Two window densities; 0/100/1000 extra walls; 7 fresh owned scenes. Instrumented original algorithm in temporary sibling; production source unchanged. Nested wallLoop/parts phases must not be summed. Window lookup includes filter+map. Controls run after probe with shared lower-level caches; not a paired optimization comparison. Snapshot preparation excluded. CPU only, no browser/GPU/frame/native claim. Full faces, volume, bounds equivalence in all 42 cases; fixed order, timer overhead/JIT/GC uncontrolled.",
+          "Two window densities; 0/100/1000 extra walls; 7 fresh owned scenes. Instrumented original algorithm in temporary sibling; production source unchanged. Nested wallLoop/parts phases must not be summed. Window lookup includes host Map lookup+map; grouping construction remains in inclusive wall loop. Controls run after probe with shared lower-level caches; not a paired optimization comparison. Snapshot preparation excluded. CPU only, no browser/GPU/frame/native claim. Full faces, volume, bounds equivalence in all 42 cases; fixed order, timer overhead/JIT/GC uncontrolled.",
         rows,
       },
       null,

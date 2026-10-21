@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `827d17a` nach PR410 (grüne CI 39634173220). Pufferpackung und Fenster-Hostgruppierung kombiniert im frischen Produktbrowser abgenommen; sechs reguläre Exporte vollständig modellgleich. Native-/Frame-Gates bleiben offen. Genau ein aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 21.10.2026, main `85c3581` nach PR411 (grüne CI 39636013571). Aktuelle Restkosten in zwei kalten Messläufen und zusätzlicher Gebäudezerlegung erhoben; Gleichheitsprüfungen bestanden. Kein Produktcode geändert. Native-/Frame-Gates bleiben offen; genau ein aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-21.10.2026: PR410 grün in main 827d17a integriert. Kombinierte Browserabnahme der direkten Pufferpackung und lokalen Fenster-Hostgruppierung bestanden: Bewegung, Undo/Redo/Abbruch, Geschosshöhe, Geschosswechsel, Fensterbreite und Ebenensichtbarkeit. Sechs Exportvergleiche bestanden; kein neuer Frame-/Native-Nachweis. Nachweis: docs/solid-host-browser-acceptance.md.
+21.10.2026: PR411 in main 85c3581 integriert. Kombinierte Browserabnahme belegt; Restkosten neu gemessen: große Owned-Szene Gebäude 37–46 ms, Erstpuffer 21–27 ms, Aktionsvorbereitung 1,4–1,9 ms. Größter Abschnitt freie Wandextrusion, siehe docs/remaining-preview-costs.md. Kein neuer GPU-/Frame-Nachweis.
 
 21.10.2026: PR408 grün in main 1471a31 integriert. Zwei Gebäude-Phasenmessungen mit 84 vollständigen Flächen-/Volumen-/Bounds-Vergleichen bestanden. Bei 1004 Wänden/1002 Fenstern entfallen 71–73 ms von 105–113 ms instrumentierter Gesamtzeit auf wiederholte Fensterzuordnung. Kein Produktfix in diesem Messauftrag.
 
@@ -573,7 +573,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: aktuelle Restkosten der erstmaligen 3D-Vorschauvorbereitung nach beiden Optimierungen messen (AUD14-03/04).** Bestehenden kalten Messstand auf aktueller Basis wiederholen: feste kleine Auswahl bei wachsendem Restmodell; Gebäudeableitung, Pufferpackung, Application-Vorbereitung und erste/geänderte Komposition getrennt ausweisen. Vollpfadgleichheit erhalten. Genau einen verbleibenden messbaren Engpass für den Folgeauftrag benennen; keine weitere Optimierung allein aus historischen Zahlen. Browser-Frame/GPU und Native bleiben eigene offene Gates.
+**Genau ein unmittelbarer aktiver Folgeauftrag: temporäre Allokationen der freien Wand-Flächenerzeugung begrenzt reduzieren (AUD14-03/04).** Aktuelle Gebäudezerlegung zeigt 22,8 ms im Wandloop ohne Fensterlookup. Koordinatentransformation/Bounds in bestehender Solidableitung prüfen und ohne temporäre Hilfsarrays ausführen, soweit exakt gleiche Werte und Reihenfolge erhalten bleiben. Vorher-/Nachher-Oracle für vollständige Flächen, Normalen, Volumen und Bounds einschließlich schräger Wände, Öffnungen und Höhenversätze; zwei serielle Messläufe. Kein Entfernen von Freeze/Ownership, keine Geometrievereinfachung oder neue Modellkopie. Nutzen nachweisen; andernfalls Pilot verwerfen. Anschließend kombinierte funktionale Browserabnahme; Frame-/Native-Gates separat offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.

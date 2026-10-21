@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `827d17a` nach PR410 (grüne CI). Kombinierte Browserabnahme bestanden, sechs vollständige Modellvergleiche; Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `85c3581` nach PR411 (grüne CI). Restkosten nach beiden Optimierungen gemessen, vollständige Vergleichsprüfungen bestanden. Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13099,3 +13099,7 @@ ist der einzelne nächste Auftrag §9, kein Frame-/Native-Nachweis.
 ### AUD14-03/04 – Kombinierte Browserabnahme, 21.10.2026
 
 PR410 in main 827d17a; frischer Produktbuild auf isoliertem Port 8087. Auswahl und Bewegung des EG-Wandpaars, Platzieren, Undo/Redo/Abbruch, EG-Höhe 3,5 m, Wechsel ins OG, Fensterbreite 1,5 m sowie Ebenensichtbarkeit geprüft. Sechs reguläre Exporte stimmen vollständig in Geschossen, Arbeits-/Basisgeschoss und Sichtbarkeit mit dem Referenzpfad überein. Null protokollierte Browserfehler. Nachweis/Änderungskarte: docs/solid-host-browser-acceptance.md. Keine neue Recovery-, IFC-, GPU-/Frame- oder Native-Abnahme; historische CPU-Vorteile sind keine Bildratenzusage. Nächster Einzelauftrag ausschließlich §9.
+
+### AUD14-03/04 – Aktuelle Restkosten nach PR411, 21.10.2026
+
+Zwei kalte Läufe: insgesamt 336 Wand-/Fenstervergleichsfälle und 84 exakte Puffervergleiche; zusätzliche 42 Gebäudephasenvergleiche bestanden. Große Owned-Szene: Gebäude 37–46 ms, Erstpuffer 21–27 ms, Aktion 1,4–1,9 ms, Wiederholungskomposition rund 0,13 ms. Wandloop ohne Fensterlookup 22,8 ms, Freeze 11,0 ms, Lookup 0,47 ms. Nachweis und Änderungskarte: docs/remaining-preview-costs.md. Nur Messmetadaten/Rohdaten/Dokumentation verändert, keine Produktoptimierung behauptet. Nächster Pilot gemäß §9 begrenzt temporäre Arrays der freien Flächenerzeugung; Ownership und Exaktgleichheit bleiben verbindlich.

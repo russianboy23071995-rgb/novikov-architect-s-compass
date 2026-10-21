@@ -135,7 +135,7 @@ for (const ownership of ["mutable", "owned"] as const) {
 console.log(
   JSON.stringify(
     {
-      basis: "main 0dc7fab (PR406)",
+      basis: "main 85c3581 (PR411; direct packing and window host grouping)",
       runtime: process.version,
       cpu: cpus()[0]?.model,
       method:
