@@ -13036,3 +13036,15 @@ Regressionen, Typchecks/Lint/Gate/Builds und begrenzter 3D-Browser-Smoke bestand
 Bei 1002 Fenstern entfällt Basisaufbau ~1,08 ms Median, Komposition ~0,033 ms;
 CPU-Dienste, keine Framegarantie. Details/Grenzen und Änderungskarte im datierten
 Masterplan-Nachweis. Kombinierte Mehrfachbewegungsabnahme allein nach §9 offen.
+
+
+### AUD14-03/04 – Fensterbasis kombiniert abgenommen, 21.10.2026
+
+PR405 in main c18c64b. Frischer Produktbrowser: zwei Wände/Fenster gemeinsam
+bewegen, drei Zahlenvorschauziele, Platzierung, Undo/Redo, Abbruch, Fensterebene
+aus/ein, EG-Höhenänderung und erneute OG-Fensterauswahl. Fünf Exporte über
+regulären Lader vollständig gegen gemeinsame Vollprojektaktionen verglichen.
+Checker/Evidenz: benchmarks/window-base-browser-check.ts und
+window-base-browser-evidence.json. Keine Konsolenfehler. Kontinuierliche Maus-/
+Shift-, GPU-/Frame-Gates bleiben offen; Details im datierten Masterplan-Nachweis.
+Nur §9 führt den nächsten Auftrag: kalte Vorbereitung/erste Partition messen.
