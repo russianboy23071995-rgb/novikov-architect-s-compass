@@ -15,9 +15,14 @@ import { editDirection } from "../src/application/direct-edit/snapping.ts";
 import { numericMoveAxis, previewNumericMove } from "../src/application/direct-edit/numeric.ts";
 import { projectDirection } from "../src/geometry/projections/direction.ts";
 import {
+  createLayerVisibilityPolicy,
+  ALL_LAYERS_VISIBLE,
+} from "../src/application/layers/visibility.ts";
+import {
   beginSelectionMove,
   previewSelectionMove,
   previewSelectionGeometry,
+  selectionMoveInteraction,
 } from "../src/application/selection/move.ts";
 const timed = <T>(fn: () => T) => {
   const start = performance.now();
@@ -25,6 +30,8 @@ const timed = <T>(fn: () => T) => {
   return { value, ms: performance.now() - start };
 };
 const rows = [];
+const fixedAdapters = process.argv.includes("--fixed-adapter");
+const actions: readonly ("x" | "y" | "axis")[] = fixedAdapters ? ["x", "y"] : ["x", "y", "axis"];
 function numericDifference(a: unknown, b: unknown): number {
   if (Object.is(a, b)) return 0;
   if (typeof a === "number" && typeof b === "number") {
@@ -45,7 +52,7 @@ function numericDifference(a: unknown, b: unknown): number {
 }
 for (const size of [10, 100])
   for (const kind of ["line", "hatch"] as const)
-    for (const action of ["x", "y", "axis"] as const) {
+    for (const action of actions) {
       const input = hatchPointFixture(size, 100);
       storeyOf(input).lines!.push({
         id: "line",
@@ -65,6 +72,24 @@ for (const size of [10, 100])
       const direction = editDirection(session)!;
       const axis = numericMoveAxis(session)!;
       const preparation = timed(() => beginSelectionMove(base, [target], anchor));
+      let published: typeof base | null = null;
+      const policy = createLayerVisibilityPolicy(base, ALL_LAYERS_VISIBLE);
+      const adapterPreparation = timed(() =>
+        fixedAdapters && action !== "axis"
+          ? selectionMoveInteraction(
+              preparation.value,
+              base,
+              [target],
+              policy,
+              (next) => {
+                published = next;
+              },
+              () => {},
+              action,
+            )
+          : null,
+      );
+      const adapter = adapterPreparation.value;
       const samples = [];
       let projectMismatches = 0,
         targetMismatches = 0,
@@ -84,7 +109,9 @@ for (const size of [10, 100])
             fullMs = r.ms;
           } else {
             const r = timed(() =>
-              previewSelectionGeometry(preparation.value, base, [target], projected),
+              adapter
+                ? adapter.geometryPreview!.evaluate(projected)
+                : previewSelectionGeometry(preparation.value, base, [target], projected),
             );
             patch = r.value;
             patchMs = r.ms;
@@ -100,6 +127,8 @@ for (const size of [10, 100])
         if (!projectEqual) projectMismatches++;
         if (!targetEqual) targetMismatches++;
         const numeric = previewNumericMove(session, base, target, String((i - 4) * 0.17));
+        if (adapter)
+          assert.deepEqual(adapter.preview("", String((i - 4) * 0.17), null).point, numeric.point);
         if (
           !equal(
             previewSelectionMove(preparation.value, base, [target], numeric.point),
@@ -135,6 +164,10 @@ for (const size of [10, 100])
           const undone = editingReducer(committed, { type: "undo" });
           assert.deepEqual(undone.history.present, base);
           assert.deepEqual(editingReducer(undone, { type: "redo" }).history.present, full);
+          if (adapter) {
+            adapter.confirm!(projected);
+            assert.deepEqual(published, full);
+          }
         }
         samples.push({
           order,
@@ -157,6 +190,7 @@ for (const size of [10, 100])
         direction,
         numericAxis: axis,
         preparationMs: preparation.ms,
+        adapterPreparationMs: adapterPreparation.ms,
         fullWarmMedianMs: median(samples.map((s) => s.fullMs)),
         patchWarmMedianMs: median(samples.map((s) => s.patchMs)),
         projectMismatches,
@@ -168,7 +202,10 @@ for (const size of [10, 100])
 console.log(
   JSON.stringify(
     {
-      basis: "main 28db1af after PR422 (CI39654061739 green)",
+      basis: fixedAdapters
+        ? "main be0c9b4 after PR424 plus shared fixed XY adapter"
+        : "Current working tree; original PR423 comparison protocol",
+      fixedAdapters,
       runtime: process.version,
       method:
         "Projected mouse targets and signed numeric targets; index1, arbitrary origin. Full path reprojects axis targets as production does. Exact comparisons outside timings, axis mismatches explicitly retained. One preparation, first+8 warm, alternating path order. API only, no snap/React/render/commit/frame timing.",

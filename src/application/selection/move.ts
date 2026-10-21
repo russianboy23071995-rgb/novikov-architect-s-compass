@@ -1,4 +1,7 @@
 import { selectionMovementAxes } from "../input/movement-axes.ts";
+import { projectDirection } from "../../geometry/projections/direction.ts";
+import { parseMetres } from "../../core/units/metres.ts";
+import { querySnap } from "../../constraints/snapping/engine.ts";
 import { prepareSelectionTranslation as prepareTranslation } from "./storey-translation.ts";
 import { createPointPreview } from "../tools/point-preview.ts";
 import { type Project, type Point } from "../../domain/project/schema.ts";
@@ -14,6 +17,7 @@ export type SelectionMove = {
   origin: Point;
   snapping: AnchoredSnapPolicy;
 };
+export type FixedPlanMoveAxis = "x" | "y";
 const preparations = new WeakMap<
   SelectionMove,
   {
@@ -142,10 +146,19 @@ export function selectionMoveInteraction(
   visibility: LayerVisibilityPolicy,
   commit: (project: Project) => void,
   cancel: () => void,
+  fixedAxis?: FixedPlanMoveAxis,
 ): AnchoredToolInteraction {
+  if (fixedAxis !== undefined && fixedAxis !== "x" && fixedAxis !== "y")
+    throw new Error("Ungültige feste Bewegungsachse.");
   const origin = { ...session.origin };
+  const direction = fixedAxis ? (fixedAxis === "x" ? { x: 1, y: 0 } : { x: 0, y: 1 }) : null;
+  // Already constrained targets retain their exact snapped/numeric coordinate.
+  const constrain = (point: Point) =>
+    !direction || (fixedAxis === "x" ? point.y === origin.y : point.x === origin.x)
+      ? point
+      : projectDirection(point, origin, direction)!;
   const evaluateProject = (point: Point) =>
-    previewSelectionMove(session, current, targets, point, visibility);
+    previewSelectionMove(session, current, targets, constrain(point), visibility);
   const assertContext = () => {
     if (
       session.base !== current ||
@@ -161,6 +174,7 @@ export function selectionMoveInteraction(
     (point) => previewSelectionGeometry(session, current, targets, point, visibility),
     assertContext,
   );
+  const geometry = (point: Point) => preview.get(constrain(point));
   const confirm = (point: Point) => {
     preview.clear();
     assertContext();
@@ -170,15 +184,46 @@ export function selectionMoveInteraction(
   return {
     identity: session,
     origin: session.origin,
-    snapping: session.snapping,
-    input: { axisLabel: null, degrees: null },
+    snapping: direction
+      ? {
+          ...session.snapping,
+          origin: { ...session.snapping.origin, directions: [direction] },
+          resolve: (point, context) =>
+            querySnap(point, {
+              ...context,
+              fixedAxis: { origin, direction },
+              orthoOrigin: null,
+              angleOrigin: null,
+            }),
+        }
+      : session.snapping,
+    input: fixedAxis
+      ? {
+          axisLabel: fixedAxis === "x" ? "+X (rechts)" : "+Y (oben)",
+          degrees: fixedAxis === "x" ? 0 : 90,
+        }
+      : { axisLabel: null, degrees: null },
     click: "confirm",
     preview: (angle, length, aim) => {
+      if (direction) {
+        if (!length.trim() && !aim) throw new Error("Länge eingeben oder mit der Maus bestimmen.");
+        const metresInput = length.trim() ? parseMetres(length) : null;
+        const point =
+          metresInput !== null
+            ? {
+                x: origin.x + metresInput * direction.x,
+                y: origin.y + metresInput * direction.y,
+              }
+            : constrain(aim!);
+        const metres = (point.x - origin.x) * direction.x + (point.y - origin.y) * direction.y;
+        geometry(point);
+        return { point, metres, degrees: fixedAxis === "x" ? 0 : 90 };
+      }
       const value = precisionTarget(session.origin, aim, angle, length);
       preview.get(value.point);
       return value;
     },
-    geometryPreview: { replacedIds: prepared.action.replacedIds, evaluate: preview.get },
+    geometryPreview: { replacedIds: prepared.action.replacedIds, evaluate: geometry },
     validate: (point) => {
       preview.clear();
       assertContext();

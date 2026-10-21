@@ -5,6 +5,7 @@ import {
   sameTargets,
   selectionMoveInteraction,
   type SelectionMove,
+  type FixedPlanMoveAxis,
 } from "@/application/selection/move";
 import type { SelectionSet } from "@/application/selection/state";
 import type { Project, Point } from "@/domain/project/schema";
@@ -25,6 +26,7 @@ export function useSelectionMove(
     session: SelectionMove | null;
     axis: "xy" | "z";
     direction?: string;
+    fixedAxis?: FixedPlanMoveAxis;
   } | null>(null);
   const latest = useRef({ project, targets, visibility, pending });
   latest.current = { project, targets, visibility, pending };
@@ -63,19 +65,21 @@ export function useSelectionMove(
       visibility,
       publish,
       cancel,
+      active.fixedAxis,
     );
     return { ...xy, initialAngle: active.direction ?? "" };
   }, [active, project, targets, visibility, cancel]);
   return {
     active: !!active,
     pickingOrigin: !!active && !active.session,
-    begin: (origin?: Point) => {
+    begin: (origin?: Point, fixedAxis?: FixedPlanMoveAxis) => {
       assertMovableSelection(project, targets, visibility);
       setPending({
         axis: "xy",
         base: project,
         targets: targets.map((t) => ({ ...t })),
         visibility,
+        ...(fixedAxis ? { fixedAxis } : {}),
         session: origin ? beginSelectionMove(project, targets, origin, visibility) : null,
       });
     },
