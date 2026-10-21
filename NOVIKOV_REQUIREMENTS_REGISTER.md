@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `06a9dc0` nach PR399 (grüne CI). Im Folgebranch perf/owned-wall-movement gemeinsame Bewegungs-/Snapshot-Prüfung automatisiert verglichen; Browserabnahme offen. Kontinuierliche 3D-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `b567902` nach PR400 (grüne CI). Gemeinsame Bewegungs-/Snapshot-Prüfung automatisiert und funktional im Produktbrowser abgenommen. Kontinuierliche 3D-/Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12972,3 +12972,15 @@ Erstziel-Mediane 15,6–20,5 statt 24,5–25,3 ms; Hostwechsel 15,7–17,2 statt
 20,4–27,8 ms. Keine Frameaussage, P95 teilweise schlechter; globale Restarbeit
 bleibt. Rohdaten und genaue Grenzen im Masterplan-Nachweis gleichen Datums.
 Browserabnahme des neuen Pfads offen; einziger aktiver Folgeauftrag Masterplan §9.
+
+
+### AUD14-04/05 – PR400 funktional abgenommen (21.10.2026)
+Main b567902, CI39621656423 grün; Head dc385a1 als frischer statischer Build
+im Produktbrowser geprüft. Sechs vollständige Geschossdaten-Exportvergleiche:
+Ausgang, neuer T-Host, ein Undo, Redo, Abbruch, Rückwechsel. Alle entsprechen
+dem unabhängigen mutable Vollpfad; Nachbarn/Fenster erhalten. Statisches 3D
+kontrolliert, keine erfassten Konsolenfehler. Neue Importpfeile ohne Zyklus;
+vorhandener contour/offset-Zyklus ausdrücklich offen. Neue MD-Vorgaben aus
+a70a386 erhalten. Dauerhafter Architekturgrenzen-Test als nächster Einzelauftrag
+in §9, danach Zyklusabbau. Keine neue kontinuierliche 3D/Shift/Native/Frame-,
+Recovery- oder IFC-Freigabe; Detail- und Architekturkarte im Masterplan.
