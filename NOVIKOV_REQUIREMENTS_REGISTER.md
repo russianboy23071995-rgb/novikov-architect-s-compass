@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `5d0ca31` nach PR418 (grüne CI). Gebündelter Ressourcenpilot exaktgleich, Kaltbudget nicht bestanden; nicht produktiv übernommen. Diagnose erhalten; einziger aktiver Auftrag §9, Frame-/Native-Gates offen.
+Geprüfte Code-Basis: 21.10.2026, main `52c74e4` nach PR419 (grüne CI). 336 Browser-Geometrievergleiche bestanden; konkreter Ressourcen-Kandidat wegen Gesamtbudget geparkt. Produkt unverändert. Einziger aktiver Auftrag §9; Frame-/Native-/Speichergates offen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13131,3 +13131,7 @@ Zwei Läufe, 224 geänderte Vollpfadvergleiche bestanden; Benchmark-Typen/Lint g
 ### AUD14-03/04 – Gebündelte Wandressourcen nicht übernommen, 21.10.2026
 
 Ressourcenvergleich mit vollständigem Kontext und Höhenfallback liefert exakte Geometrie/Sharing, aber Kaltaufbau in beiden Abschlussläufen 12–16 % langsamer, Wandvorteil instabil. Produkt vollständig zurückgenommen. Kandidat und Rohdaten ausschließlich Diagnose. Änderungskarte/Fassungsgrenzen: docs/wall-resource-bundle-pilot.md. Nächster Einzelauftrag §9 vergleicht Produktion und archivierten Kandidaten im tatsächlichen isolierten Browserpfad; keine weiteren Node-Mikrovarianten davor.
+
+### AUD14-03/04 – Ressourcen-Kandidat im Browser verglichen/geparkt, 21.10.2026
+
+Zwei Läufe mit wechselnder/invertierter Reihenfolge, 336 vollständige Kalt-/Änderungsvergleiche bestanden, keine Browserfehler. Große Einzeländerungen schneller, Kalt-/Höhenmehrkosten bleiben; konkreten Kandidaten parken. Browser-CPU ist kein CadWorkspace-/GPU-/Gesamtframe-/Speicherbeleg. Typen/Lint/frischer statischer Build bestanden. Rohdaten, Änderungskarte und Grenzen: docs/wall-resource-browser-comparison.md. Einziger Folgeauftrag §9: vorhandene Legacy-Bewegungs-/Anschlussinventur gegen aktuellen main abgleichen und genau einen offenen Pfad bestimmen.
