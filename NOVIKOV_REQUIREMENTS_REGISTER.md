@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `bb53387` nach PR407 (grüne CI). Folgebranch perf/direct-solid-packing: direkte Float32-Pufferpackung bei bytegleichem Ergebnis, 1136 Tests bestanden. Browser-/Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `1471a31` nach PR408 (grüne CI). Gebäudeaufbau im Folgebranch perf/building-phase-profile vermessen, 84 vollständige Ergebnisvergleiche bestanden; Fenster-Hostsuche als redundanter Hauptblock lokalisiert. Browser-/Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13074,3 +13074,14 @@ Lint/Architektur und Build bestanden. Zwei serielle Messläufe: initialer Puffer
 Keine Cache-Erweiterung, Modell-/Datei-/Undo-/IFC-Änderung oder Fenster-Sonderlogik.
 CPU-Beleg, keine Browser-/Frame-/Native-Freigabe. Größerer Gebäudeaufbau bleibt
 offen; Methoden/Änderungskarte im Masterplan, einziger Folgeauftrag dort §9.
+
+
+### AUD14-03/04 – Gebäude-Phasenmessung, 21.10.2026
+PR408 in main 1471a31. Zwei CPU-Läufe, je sieben Szenen pro Größe/Fensterdichte:
+1004 Wände/1002 Fenster, Fenster-Hostsuche 71–73 ms von 105–113 ms Gesamt.
+84 vollständige Vergleiche mit uninstrumentierter Ableitung bestanden. Temporäre
+Instrumentierung mit eindeutigen Ankern/exklusiver Erstellung/finally-Cleanup,
+keine Produktänderung. Typecheck/Lint/Architektur bestanden. Methoden, Grenzen
+und Änderungskarte im Masterplan. Lokale Hostgruppierung ist nächster Einzelauftrag
+gemäß §9; kein dauerhafter Cache, keine neue Fenster-/Bibliotheksdefinition.
+Native-/Frame-/Browser-Gates bleiben offen.

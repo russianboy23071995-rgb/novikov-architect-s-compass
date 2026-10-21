@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `bb53387` nach PR407 (grüne CI 39631732272). Folgebranch perf/direct-solid-packing reduziert temporäre Packarrays bei bytegleichem Float32-Ergebnis; 1136 Tests, Typprüfungen, Lint, Architekturgrenze und Build bestanden. Genau ein aktiver Folgeauftrag: §9. Browser-/Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `1471a31` nach PR408 (grüne CI 39632694692). Gebäudeaufbau im Folgebranch perf/building-phase-profile aufgeschlüsselt: wiederholte Fenster-Hostsuche ist der größte reproduzierte Abschnitt. Keine Produktcodeänderung; genau ein aktiver Folgeauftrag §9. Browser-/Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR408 grün in main 1471a31 integriert. Zwei Gebäude-Phasenmessungen mit 84 vollständigen Flächen-/Volumen-/Bounds-Vergleichen bestanden. Bei 1004 Wänden/1002 Fenstern entfallen 71–73 ms von 105–113 ms instrumentierter Gesamtzeit auf wiederholte Fensterzuordnung. Kein Produktfix in diesem Messauftrag.
 
 21.10.2026: PR407 nach grüner CI in main bb53387 integriert. Pufferpacker im Folgebranch schreibt direkt in einen passend dimensionierten Float32Array. Unveränderte Fan-Triangulierung und Double-Arithmetik bis zum finalen Schreibzugriff; bytegleicher Vergleich gegen vorigen Algorithmus einschließlich mehrseitiger Flächen, großer Koordinaten und Auswahlfarben. 1136 Tests und Produktionsbuild bestanden. Nachmessung und Grenzen im datierten Nachweis am Ende.
 
@@ -569,7 +571,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: kalten Gebäude-Solidaufbau gezielt aufschlüsseln (AUD14-03/04).** Nach begrenzter Pufferpackung verbleibt buildBuildingSolid als größter gemessener Szenenblock. Anschlussableitung, freie Wandextrusion/Fensterzuordnung und abschließendes Freezing getrennt untersuchen; nur einen reproduzierten redundanten Abschnitt zur nächsten Korrektur auswählen. Bestehende Snapshot-Provenienz, unveränderte Wandextrusionsreuse, flexible Fensterobjekte und vollständige Commitprüfung bewahren. Keine Geometrievereinfachung oder zusätzlichen Cache-Schichten auf Verdacht. Kombinierte Browser-/Native-/Frame-Abnahme bleibt offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: wiederholte globale Fenster-Hostsuche im Solidaufbau begrenzen (AUD14-03/04).** Pro Geometrieableitung Fenster einmal nach wallId gruppieren und freie Wände über diese lokale Zuordnung versorgen. Reihenfolge, vollständige Fenstergeometrie, Öffnungsvereinigung, Anschlüsse und Heights/Bounds exakt erhalten; keine persistente Cache-Schicht und kein neuer Modellbestand. Gegen bisherigen Vollpfad mit mehreren Fenstern, leeren Hosts, Höhen und großen Restmodellen vergleichen; kalte Gegenmessung. Flexible Fensterobjekte bleiben unverändert. Danach kombinierte Browserabnahme der Puffer-/Solidänderung; Native-/Frame-Gates bleiben offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4742,3 +4744,60 @@ abbrechen/Undo und stark verschobenen Ursprung prüfen; Darstellung/Farben
 müssen unverändert sein. Exakte Pufferprüfung ersetzt keine Gesamtframeabnahme.
 Abschlusskarte: tatsächlicher Produktdiff nur der Packer; keine neuen
 Abhängigkeiten/Zyklen oder Modellkopien. Aktiver Einzelauftrag ausschließlich §9.
+
+
+### AUD14-03/04 – Gebäudeaufbau phasenweise gemessen (21.10.2026)
+Änderungskarte: Basis PR408 7bcfad3, nach grüner CI 39632694692 in main
+1471a31 integriert. Diagnosecode unter benchmarks, keine Produktänderung.
+Ziel: feste kleine verbundene Wandgruppe plus 0/100/1000 freie Restwände,
+mit nur zwei bzw. bis zu 1002 Fenstern. Source of truth bleibt der geprüfte
+owned Projekt-Snapshot; Meter, Geschoss/Host und alle sichtbaren Ebenen.
+Bestehende buildBuildingSolid/buildPreviewSolid-Ableitung, keine neue Action;
+Vorschau/Commit/Undo/Abbruch, 2D, Speicher/Recovery/IFC und AI nicht verändert.
+
+Methode: building-phase-profile.ts erzeugt exklusiv eine temporäre Geschwisterdatei
+zur echten geometry.ts mit identischen Imports/Algorithmus und Zeitmarken.
+Jeder Textanker muss genau einmal existieren; finally entfernt die Datei auch
+bei Fehlern. Produktquelle wird nie überschrieben. Instrumentierte Anschluss-,
+Wandloop-, Fenster-filter/map-, Höhen-, Aggregations- und Freeze-Abschnitte.
+Verschachtelte Teile nicht aufsummieren; Timerkosten eingeschlossen. Sieben
+frische Szenen je Größen-/Fensterfall in fester Reihenfolge, zwei Prozesse.
+Beide verbundenen Ausgangswände erhalten je Versuch dieselbe leicht variierte
+Stärke, um Modellgleichheitsreuse zu vermeiden; ein zunächst nur einseitig
+veränderter Testaufbau wurde von der bestehenden Fachvalidierung korrekt
+abgewiesen und vor den erfolgreichen Messläufen korrigiert.
+
+Rohdaten: benchmarks/building-phase-results.json und building-phase-repeat-results.json.
+Reproduktion: node --experimental-strip-types benchmarks/building-phase-profile.ts.
+Median in ms bei 1004 Wänden/1002 Fenstern, Lauf 1 / 2:
+
+| Abschnitt | Lauf 1 | Lauf 2 |
+| --- | ---: | ---: |
+| Instrumentierter Gesamtaufbau | 105,403 | 113,236 |
+| Uninstrumentierter Kontrollaufbau | 101,744 | 107,512 |
+| Anschlussableitung | 1,889 | 2,311 |
+| Fensterzuordnung filter + map | 71,093 | 73,154 |
+| Wandloop ohne Fensterzuordnung | 22,998 | 25,930 |
+| Höhenversatz | 0,249 | 0,263 |
+| Aggregation | 0,454 | 0,503 |
+| Abschließendes Freeze | 10,813 | 11,620 |
+
+Bei gleich vielen Wänden und nur zwei Fenstern: Gesamt 10,661/9,677 ms,
+Fensterzuordnung 0,422/0,429 ms. Die freie Wandextrusion durchsucht pro Wand
+alle Fenster (windows.filter(wallId)); dies ist der größte reproduzierte
+redundante Abschnitt. Nächster Fix: ableitungs-lokale Hostgruppierung, nicht
+Snapshotvertrauen lockern oder Freeze entfernen. Flexible Fenster-/zukünftige
+Bibliotheksrepräsentationen bleiben erhalten; kein Formschema aus diesem
+Messfixture ableiten.
+
+Abnahme: 84 vollständige Vergleiche gegen uninstrumentierten Produktionspfad,
+einschließlich Flächen, Volume und Bounds, bestanden; alle Fälle nachweislich
+Cache-Miss im instrumentierten Gebäudeaufbau. Frozen-Ausgabe geprüft.
+Benchmark-Typecheck, gezieltes Lint, Architekturgrenze und Diffprüfung bestanden;
+kein Produktionsdiff, daher keine erneute vollständige Produktsuite/Build.
+Kontrolllauf folgt dem Instrumentierungslauf und teilt niedrigere Modulcaches;
+er dient der Ergebnisprüfung, nicht als kontrollierter Speedup-Beleg. Owned-
+Snapshot-Erzeugung außerhalb der Zeit. Timer/JIT/GC/Systemlast nicht isoliert,
+kein p95-/Browser-/GPU-/Frame-/Native-Nachweis. Keine neue IFC-/Recoveryabnahme.
+Abschlusskarte: keine produktiven Importkanten oder Modellkopien; Testquellen
+nach Ausführung entfernt. Einziger aktiver Folgeauftrag ausschließlich §9.
