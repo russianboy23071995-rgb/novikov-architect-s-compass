@@ -4,6 +4,9 @@ import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { editAtPointer } from "../../lib/bim/direct-edit.ts";
+import { resolveToolSnap } from "../tools/snapping.ts";
+import { resolveEditSnap } from "../direct-edit/snapping.ts";
+import { previewNumericMove } from "../direct-edit/numeric.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -132,6 +135,157 @@ function fixture() {
     fill: defaultHatchFill,
   });
 }
+for (const kind of ["line", "hatch"] as const)
+  for (const axis of ["x", "y"] as const)
+    test(`shared fixed ${axis} ${kind}: signed input, constrained snap/patch/commit and history`, () => {
+      const p = fixture(),
+        target = { kind, id: kind === "line" ? "L" : "S" };
+      p.hatchPatterns.push({
+        id: "fixed-pattern",
+        name: "Fixed",
+        width: 1,
+        height: 1,
+        lines: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }],
+      });
+      storeyOf(p).hatches[0]!.pattern = {
+        patternId: "fixed-pattern",
+        mode: "model",
+        origin: { x: 0.13, y: 0.27 },
+        rotation: 37,
+        modelWidthMetres: 0.75,
+      };
+      const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+      const anchor = { x: -2.25, y: 1.75 };
+      const session = beginSelectionMove(p, [target], anchor, policy);
+      const old = { base: p, target, action: axis, index: null, anchor };
+      const before = serializeProject(p);
+      let history = createHistory(p),
+        cancels = 0,
+        commits = 0;
+      const adapter = selectionMoveInteraction(
+        session,
+        p,
+        [target],
+        policy,
+        (next) => {
+          history = commitProject(history, next);
+          commits++;
+        },
+        () => cancels++,
+        axis,
+      );
+      assert.equal(adapter.input!.degrees, axis === "x" ? 0 : 90);
+      assert.ok(adapter.input!.axisLabel);
+      assert.equal(
+        adapter.axisConstraint,
+        undefined,
+        "2D targets remain model coordinates, never Z-local encoding",
+      );
+      for (const text of ["-0.68", "0", "0.68"]) {
+        const expected = previewNumericMove(old, p, target, text);
+        const value = adapter.preview("566", text, null); // fixed axis ignores arbitrary polar input
+        assert.deepEqual(value.point, expected.point);
+        const patch = adapter.geometryPreview!.evaluate(value.point);
+        assert.deepEqual(
+          storeyOf(patch.geometry)[kind === "line" ? "lines" : "hatches"]?.[0],
+          storeyOf(expected.project)[kind === "line" ? "lines" : "hatches"]?.[0],
+        );
+        assert.equal(commits, 0);
+      }
+      assert.throws(() => adapter.preview("", "Infinity", null));
+      assert.throws(() => adapter.confirm!({ x: NaN, y: NaN }));
+      assert.equal(commits, 0);
+      for (const featureSnap of [false, true])
+        for (const sign of [-1, 1]) {
+          const cursor =
+            axis === "x"
+              ? { x: anchor.x + sign * 3, y: anchor.y + 25 }
+              : { x: anchor.x + 25, y: anchor.y + sign * 3 };
+          const context = {
+            references: [],
+            pixelsPerMetre: 100,
+            endpointRadiusPx: 12,
+            gridSpacing: null,
+            enabled: featureSnap,
+            angleDirection: { x: 1, y: 1 },
+          };
+          const snapped = resolveToolSnap(adapter.snapping, cursor, context, {
+            featureSnap,
+            shift: true,
+            ortho: true,
+          });
+          const legacy = resolveEditSnap(old, cursor, {
+            ...context,
+            orthoOrigin: anchor,
+            angleOrigin: anchor,
+          });
+          assert.deepEqual(snapped.point, legacy.point);
+          const value = adapter.preview("", "", snapped.point);
+          assert.deepEqual(value.point, legacy.point);
+          assert.equal(Math.sign(value.metres), sign);
+        }
+      adapter.cancel();
+      assert.equal(cancels, 1);
+      assert.equal(serializeProject(p), before);
+      const restarted = selectionMoveInteraction(
+        beginSelectionMove(p, [target], anchor),
+        p,
+        [target],
+        policy,
+        (next) => {
+          history = commitProject(history, next);
+          commits++;
+        },
+        () => {},
+        axis,
+      );
+      const point = restarted.preview("", "-0.68", null).point;
+      restarted.confirm!(point);
+      assert.equal(commits, 1);
+      let zeroHistory = createHistory(p);
+      selectionMoveInteraction(
+        beginSelectionMove(p, [target], anchor),
+        p,
+        [target],
+        policy,
+        (next) => {
+          zeroHistory = commitProject(zeroHistory, next);
+        },
+        () => {},
+        axis,
+      ).confirm!(anchor);
+      assert.equal(zeroHistory.past.length, 0);
+      assert.deepEqual(history.present, editAtPointer(old, p, point));
+      assert.deepEqual(deserializeProject(serializeProject(history.present)), history.present);
+      assert.deepEqual(undoProject(history).present, p);
+      assert.deepEqual(redoProject(undoProject(history)).present, history.present);
+      const hidden = createLayerVisibilityPolicy(p, {
+        scope: { kind: "bim-project" },
+        hiddenLayerIds: [p.defaultLayerIds.line],
+      });
+      const invisible = selectionMoveInteraction(
+        session,
+        p,
+        [target],
+        hidden,
+        () => commits++,
+        () => {},
+        axis,
+      );
+      assert.throws(() => invisible.geometryPreview!.evaluate(point));
+      assert.throws(() => invisible.confirm!(point));
+      const stale = selectionMoveInteraction(
+        session,
+        { ...p },
+        [target],
+        policy,
+        () => commits++,
+        () => {},
+        axis,
+      );
+      assert.throws(() => stale.confirm!(point));
+      assert.equal(commits, 1);
+    });
 for (const mode of ["model", "paper"] as const)
   for (const coordinate of [0, 1e9])
     test(`hatch translation preserves exact pattern delta: ${mode}, coordinate ${coordinate}`, () => {

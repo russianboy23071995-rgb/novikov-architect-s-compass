@@ -492,14 +492,18 @@ export function CadWorkspace({
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
-      action === "move" &&
-      (selection.kind === "wall" ||
-        (!inSolid && (selection.kind === "line" || selection.kind === "hatch")))
+      (action === "move" && selection.kind === "wall") ||
+      (!inSolid &&
+        (selection.kind === "line" || selection.kind === "hatch") &&
+        (action === "move" || action === "x" || action === "y"))
     ) {
       const origin = pickedPoint.anchor ?? editAnchor(project, selection);
       cancelInteraction();
       try {
-        groupMove.begin(inSolid ? undefined : origin);
+        groupMove.begin(
+          inSolid ? undefined : origin,
+          action === "x" || action === "y" ? action : undefined,
+        );
         if (layout === "single" && !inSolid) setMode("2D");
         setModelError("");
       } catch (error) {
