@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `bf543d0` nach PR404 (grüne CI 39626453771). Im Folgebranch perf/stable-window-preview-base wird die unveränderte Fensterbasis getrennt wiederverwendet; Regression, Gegenmessung und begrenzter Produktbrowser-Smoke bestanden. CI/Integration folgen. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates offen.
+Geprüfte Code-Basis: 21.10.2026, main `c18c64b` nach PR405 (grüne CI 39628250370). Kombinierte funktionale Fensterbasis-Browserabnahme im Folgebranch test/window-base-browser bestanden; fünf regulär geladene Exporte vollständig verglichen. Genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR405 nach grüner CI in main c18c64b integriert. Frischer statischer Produktbrowser: zwei EG-Wände mit Fenster, drei Zahlenvorschauziele, Platzierung, Undo/Redo, erneute Vorschau/Abbruch; Fensterebene aus/ein, EG-Höhe 3,0 auf 3,5 m, OG-Wechsel und Fensterauswahl. Fünf regulär geladene Projektdateien entsprechen vollständig den Geschossdaten und Arbeits-/EG-Kontexten der gemeinsamen Vollprojektaktionen. Keine Konsolenfehler; kein kontinuierlicher Pointer-/Framebeleg.
 
 21.10.2026: PR404 nach grüner CI in main bf543d0 integriert. BimSolidView berechnet im Folgebranch die Gebäude-Fensterbasis nur bei Modell-/Sichtbarkeitsänderung neu; geometryPatch setzt auf der gemeinsamen unveränderten Basis auf. 1134 bestehende Tests plus neue Basisregression bestanden, Typprüfung/Lint/Architektur und Builds grün. CPU-Gegenmessung bei 1002 Fenstern: bisheriger Basisaufbau 1,0825 ms Median entfällt; verbleibende Komposition 0,0327 ms. Funktionaler Browser-Smoke: Fenster in 3D bewegen, Undo/Redo, Sichtbarkeit und Abbruch. Noch keine kontinuierliche Mehrfachbewegungs-/Frameabnahme.
 
@@ -563,7 +565,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag nach Integration: Browser-Abnahme der wiederverwendeten Fensterbasis (AUD14-03/04).** Mehrfachbewegung zweier Wände mit Fenstern über mehrere Vorschauziele, Abbruch und Undo/Redo; anschließend Ebenensichtbarkeit, Geschoss-/Höhenänderung und erneute Auswahl prüfen. Vollständige exportierte Geschossdaten mit dem gemeinsamen Vollpfad vergleichen. Bestehender Smoke ersetzt diesen kombinierten Workflow nicht. Keine weitere Produktoptimierung im selben Auftrag; verbleibende lineare Fensterlisten und kalte Vorbereitung bleiben separat offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: kalte Vorbereitung und erste Flächenpartition der 3D-Vorschau gezielt aufschlüsseln (AUD14-03/04).** Auf Basis des global-preview-Profils Aktion/Solid/initialen Puffer und erste Komposition bei fester kleiner Auswahl und wachsendem Restgebäude getrennt untersuchen; stabile und wechselnde Ersatzmengen unterscheiden. Erst den größten reproduzierten Abschnitt benennen, keine Cache-Ausweitung oder breiten Rendererumbau auf Verdacht. Warme Flächen-/Fensterbasisreuse, Modellvalidierung und Commit bleiben erhalten. Native-/Frame-Abnahme weiterhin offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4571,3 +4573,47 @@ erneute Auswahl, Fensterebene aus und über Ebenen-Undo wieder ein. Vorschau ern
 begonnen und abgebrochen; Position 0,725 erhalten, keine Konsolenfehler. Screenshot
 outputs/stable-window-browser.png. Kein kontinuierlicher Pointer-/Mehrfachwand-
 oder Exportvergleich in diesem Smoke; kombinierte Abnahme ist nächster §9-Auftrag.
+
+
+### AUD14-03/04 – Kombinierte Fensterbasis-Browserabnahme (21.10.2026)
+
+Basis c18c64b/PR405, CI 39628250370 grün vor Merge. Änderungskarte: ausschließlich
+Abnahme/Diagnose im Branch test/window-base-browser. Gemeinsame Application-
+Bewegung und Geschossaktionen sind Vergleichsquelle; Fenster bleiben Objekte,
+Darstellung abgeleitet. Keine Produkt-/Modell-/Schema-/Recovery-/IFC-Änderung.
+Vorher/Nachher-Regeln: Mehrfachbewegung mit mitgehendem Fenster und unveränderten
+Nachbarn, Abbruch, Undo/Redo, Sichtbarkeit, Geschoss- und Höhenwechsel.
+
+Frischer height-acceptance-Build, statisch Port8087, Asset
+bound-height-workspace-DaOF-0p4.js. Nutzerprojekt Port8080 unberührt; vorhandene
+Recovery-Angebote nicht übernommen oder gelöscht. fullHeightFixture: KG/EG/OG
+und oberes Bezugsgeschoss, sieben Wände/drei Fenster.
+
+UI: eg-a und eg-b per Enter/Strg+Enter gewählt, zu 3D gewechselt, Auswahl frei
+bewegen, Ursprung an Wandecke geklickt. Winkel 0°, Länge nacheinander 1/2/0,5 m;
+Vorschau mit mitgehendem Fenster sichtbar, bei 0,5 m platziert. Export91, ein
+Undo Export92, Redo, erneute Gruppenbewegung 90°/1 m und Abbruch Export93.
+Fensterebene in 3D ausgeblendet und per Ebenen-Undo wieder eingeblendet.
+Gebäudeeinstellungen: EG-Höhe 3,0 -> 3,5 m; OG-Kote 3,5/DG 6,5 m sichtbar,
+Export94. Arbeitsgeschoss OG gewählt, dort Fenster im Grundriss gewählt und
+in 3D hervorgehoben; Export95. Keine erfassten Konsolenfehler. Screenshot lokal
+outputs/window-base-combined.png.
+
+benchmarks/window-base-browser-check.ts erhält die fünf realen Exportpfade als
+Argumente. Vollständige Geschossdaten und workingStoreyId/groundStoreyId gegen
+beginSelectionMove/previewSelectionMove, setStoreyHeight und selectWorkingStorey
+verglichen: alle fünf bestanden. Regulärer deserializeProject-Lader erforderlich:
+gebundene Wandhöhen werden im Dateiformat absichtlich nicht redundant gespeichert,
+sondern beim Laden hergeleitet. Keine Abweichung durch Entfernen von Modellfeldern
+kaschiert. Hashes/Dateinamen und Basis in window-base-browser-evidence.json.
+
+Abschlussdiff: nur Checker/Evidenz und Dokumentation, kein neuer Produktimport,
+Laufzeitzyklus oder Modellbesitzer. Benchmark-Typecheck und gezieltes Lint sowie
+frischer Abnahmebuild bestanden. Produktprüfung (1135 Tests plus Architektur-Gate,
+Typechecks/Lint/Build) am PR405-Head in CI grün; ohne Produktänderung nicht lokal
+wiederholt. Kein neuer IFC-/Recoveryrundlauf notwendig; vorhandene Gates erhalten.
+
+Grenzen: tatsächliche Zahlenvorschauen/Platzierung, keine kontinuierlich
+aufgezeichnete Mousemove-/Shift-/Native-Geste, kein GPU-/Gesamtframebeleg.
+Sichtbarkeit funktional bedient; kein GPU-Picking-Lasttest. Kein Anspruch auf
+vollständige AUD14-Abnahme. Nächster Einzelauftrag ausschließlich §9.

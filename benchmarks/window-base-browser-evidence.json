@@ -1,0 +1,35 @@
+{
+  "base": "c18c64b",
+  "date": "2026-10-21",
+  "build": "bound-height-workspace-DaOF-0p4.js",
+  "fixture": "fullHeightFixture",
+  "result": "Five complete deserialized storey/context comparisons passed",
+  "stages": [
+    {
+      "stage": "placed",
+      "file": "novikov-project (91).json",
+      "sha256": "4a051800c1ccc23c6fae2be9148f25b1515ab939882af978b4becb1a8c1590b1"
+    },
+    {
+      "stage": "undo",
+      "file": "novikov-project (92).json",
+      "sha256": "186ebe3426c1740e2383b581220a1a3b9d14c1676dd6994c6b032ea368ea1754"
+    },
+    {
+      "stage": "redo-and-cancel",
+      "file": "novikov-project (93).json",
+      "sha256": "4a051800c1ccc23c6fae2be9148f25b1515ab939882af978b4becb1a8c1590b1"
+    },
+    {
+      "stage": "height",
+      "file": "novikov-project (94).json",
+      "sha256": "f8f7567249beabb249c93363072b6aee0a44561450b24d5059219c9fd6bbda46"
+    },
+    {
+      "stage": "storey-switch",
+      "file": "novikov-project (95).json",
+      "sha256": "66ce93add25fdc7ab2fd2a99f93c47c1086d67d022888c3e5ace778a7c204aec"
+    }
+  ],
+  "limits": "Numeric preview targets and placement, no continuous native mouse/Shift or GPU/frame measurement"
+}
