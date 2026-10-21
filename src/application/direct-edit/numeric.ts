@@ -33,6 +33,7 @@ export function numericMoveAxis(session: EditSession) {
               ? "+Y (oben)"
               : "+ Richtung Punkt " + (i === 0 ? 2 : i) + " → " + (i + 1);
   return {
+    rawDirection: { ...direction },
     direction: { x: direction.x / length, y: direction.y / length },
     label,
     degrees: resolvePolarInput({ x: 0, y: 0 }, direction, null, 0).degrees,

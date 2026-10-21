@@ -61,6 +61,7 @@ import { InteractionInput } from "./InteractionInput";
 import { useToolInteraction } from "./useToolInteraction";
 import {
   editInteraction,
+  editMovementAxis,
   drawingInteraction,
   wallStartSnapPolicy,
 } from "@/application/tools/adapters";
@@ -495,14 +496,25 @@ export function CadWorkspace({
       (action === "move" && selection.kind === "wall") ||
       (!inSolid &&
         (selection.kind === "line" || selection.kind === "hatch") &&
-        (action === "move" || action === "x" || action === "y"))
+        (action === "move" || action === "x" || action === "y" || action === "axis"))
     ) {
       const origin = pickedPoint.anchor ?? editAnchor(project, selection);
       cancelInteraction();
       try {
+        const axis =
+          action === "axis"
+            ? editMovementAxis({
+                base: project,
+                target: selection,
+                action,
+                index: pickedPoint.index,
+                anchor: origin,
+              })
+            : undefined;
+        if (action === "axis" && !axis) throw new Error("Keine gültige Bewegungsachse verfügbar.");
         groupMove.begin(
           inSolid ? undefined : origin,
-          action === "x" || action === "y" ? action : undefined,
+          action === "x" || action === "y" ? action : (axis ?? undefined),
         );
         if (layout === "single" && !inSolid) setMode("2D");
         setModelError("");

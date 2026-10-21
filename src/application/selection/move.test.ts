@@ -8,6 +8,7 @@ import { resolveToolSnap } from "../tools/snapping.ts";
 import { resolveEditSnap, editDirection } from "../direct-edit/snapping.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
 import { previewNumericMove } from "../direct-edit/numeric.ts";
+import { editMovementAxis } from "../tools/adapters.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -94,6 +95,95 @@ for (const kind of ["line", "hatch"] as const)
     history = redoProject(history);
     assert.deepEqual(history.present, expected);
   });
+test("element-axis binding pins its query, rejects foreign context and cancels without publication", () => {
+  const p = fixture(),
+    target = { kind: "line" as const, id: "L" },
+    anchor = { x: -2.25, y: 1.75 };
+  const edit = { base: p, target, action: "axis" as const, index: 1, anchor };
+  const binding = editMovementAxis(edit)!;
+  const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+  const session = beginSelectionMove(p, [target], anchor, visibility);
+  let commits = 0,
+    cancels = 0;
+  const adapter = selectionMoveInteraction(
+    session,
+    p,
+    [target],
+    visibility,
+    () => commits++,
+    () => cancels++,
+    binding,
+  );
+  const point = previewNumericMove(edit, p, target, "-0.68").point;
+  const expected = adapter.geometryPreview!.evaluate(point);
+  binding.rawDirection.x = 999;
+  binding.direction.x = -999;
+  binding.label = "changed";
+  assert.deepEqual(adapter.geometryPreview!.evaluate(point), expected);
+  assert.throws(() => {
+    (binding.snapping.origin.point as { x: number }).x = 999;
+  });
+  assert.throws(() =>
+    selectionMoveInteraction(
+      session,
+      p,
+      [target],
+      visibility,
+      () => commits++,
+      () => {},
+      binding,
+    ),
+  );
+  const good = editMovementAxis(edit)!;
+  for (const bad of [
+    { ...good, base: { ...p } },
+    { ...good, target: { kind: "line" as const, id: "missing" } },
+    { ...good, degrees: NaN },
+    { ...good, direction: { x: 1, y: 1 } },
+    { ...good, label: "" },
+  ])
+    assert.throws(() =>
+      selectionMoveInteraction(
+        session,
+        p,
+        [target],
+        visibility,
+        () => commits++,
+        () => {},
+        bad,
+      ),
+    );
+  assert.throws(() =>
+    selectionMoveInteraction(
+      beginSelectionMove(p, [target], { x: 0, y: 0 }),
+      p,
+      [target],
+      visibility,
+      () => commits++,
+      () => {},
+      good,
+    ),
+  );
+  adapter.cancel();
+  assert.equal(cancels, 1);
+  assert.equal(commits, 0);
+  const hidden = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [p.defaultLayerIds.line],
+  });
+  const invisible = selectionMoveInteraction(
+    session,
+    p,
+    [target],
+    hidden,
+    () => commits++,
+    () => {},
+    good,
+  );
+  assert.throws(() => invisible.confirm!(point));
+  assert.equal(commits, 0);
+  assert.equal(editMovementAxis({ ...edit, action: "stretch" }), null);
+});
 function fixture() {
   let p = createProject("p", "s");
   for (const [id, start, end] of [
@@ -171,6 +261,36 @@ for (const kind of ["line", "hatch"] as const)
         const edit = { base: p, target, action: "axis" as const, index, anchor };
         const direction = editDirection(edit)!;
         const session = beginSelectionMove(p, [target], anchor, visibility);
+        const binding = editMovementAxis(edit)!;
+        assert.ok(binding);
+        for (const sign of [-1, 1]) {
+          const cursor = { x: anchor.x + sign * 20, y: anchor.y - 3 };
+          const context = {
+            references: [],
+            pixelsPerMetre: 100,
+            endpointRadiusPx: 12,
+            gridSpacing: null,
+            enabled: true,
+            angleDirection: { x: 1, y: 1 },
+          };
+          const tool = selectionMoveInteraction(
+            session,
+            p,
+            [target],
+            visibility,
+            () => {},
+            () => {},
+            binding,
+          );
+          assert.deepEqual(
+            resolveToolSnap(tool.snapping, cursor, context, {
+              featureSnap: true,
+              ortho: true,
+              shift: true,
+            }),
+            resolveEditSnap(edit, cursor, { ...context, orthoOrigin: anchor, angleOrigin: anchor }),
+          );
+        }
         for (const metres of [-0.68, 0, 0.68])
           for (const numeric of [false, true]) {
             const point = numeric
@@ -199,8 +319,31 @@ for (const kind of ["line", "hatch"] as const)
             );
             const shared = previewSelectionMove(session, p, [target], point, visibility, direction);
             assert.deepEqual(shared, expected);
+            let published: typeof p | null = null;
+            const adapter = selectionMoveInteraction(
+              session,
+              p,
+              [target],
+              visibility,
+              (next) => {
+                published = next;
+              },
+              () => {},
+              binding,
+            );
+            assert.deepEqual(
+              adapter.preview("566", numeric ? String(metres) : "", numeric ? null : point).point,
+              point,
+            );
+            assert.deepEqual(adapter.input, { axisLabel: binding.label, degrees: binding.degrees });
             const field = kind === "line" ? "lines" : "hatches";
             assert.deepEqual(storeyOf(patch.geometry)[field]?.[0], storeyOf(expected)[field]?.[0]);
+            assert.deepEqual(
+              storeyOf(adapter.geometryPreview!.evaluate(point).geometry)[field]?.[0],
+              storeyOf(expected)[field]?.[0],
+            );
+            adapter.confirm!(point);
+            assert.deepEqual(published, expected);
             assert.deepEqual(deserializeProject(serializeProject(shared)), expected);
             const history = commitProject(createHistory(p), shared);
             assert.equal(history.past.length, metres === 0 ? 0 : 1);

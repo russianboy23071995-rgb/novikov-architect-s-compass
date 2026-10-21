@@ -17,7 +17,18 @@ export type SelectionMove = {
   origin: Point;
   snapping: AnchoredSnapPolicy;
 };
-export type FixedPlanMoveAxis = "x" | "y";
+export type FixedPlanMoveAxis =
+  | "x"
+  | "y"
+  | Readonly<{
+      rawDirection: Readonly<Point>;
+      direction: Readonly<Point>;
+      label: string;
+      degrees: number;
+      base: Project;
+      target: SelectionSet[number];
+      snapping: AnchoredSnapPolicy;
+    }>;
 const preparations = new WeakMap<
   SelectionMove,
   {
@@ -150,17 +161,59 @@ export function selectionMoveInteraction(
   cancel: () => void,
   fixedAxis?: FixedPlanMoveAxis,
 ): AnchoredToolInteraction {
-  if (fixedAxis !== undefined && fixedAxis !== "x" && fixedAxis !== "y")
+  if (
+    fixedAxis !== undefined &&
+    fixedAxis !== "x" &&
+    fixedAxis !== "y" &&
+    (typeof fixedAxis !== "object" || fixedAxis === null)
+  )
     throw new Error("Ungültige feste Bewegungsachse.");
   const origin = { ...session.origin };
-  const direction = fixedAxis ? (fixedAxis === "x" ? { x: 1, y: 0 } : { x: 0, y: 1 }) : null;
+  const binding =
+    typeof fixedAxis === "object"
+      ? {
+          rawDirection: Object.freeze({ ...fixedAxis.rawDirection }),
+          direction: Object.freeze({ ...fixedAxis.direction }),
+          label: fixedAxis.label,
+          degrees: fixedAxis.degrees,
+          base: fixedAxis.base,
+          target: { ...fixedAxis.target },
+          snapping: fixedAxis.snapping,
+        }
+      : null;
+  if (binding) {
+    const raw = binding.rawDirection,
+      unit = binding.direction,
+      length = Math.hypot(raw.x, raw.y);
+    if (
+      ![raw.x, raw.y, unit.x, unit.y, binding.degrees, length].every(Number.isFinite) ||
+      length === 0 ||
+      unit.x !== raw.x / length ||
+      unit.y !== raw.y / length ||
+      binding.degrees < 0 ||
+      binding.degrees > 360 ||
+      typeof binding.label !== "string" ||
+      !binding.label.trim() ||
+      binding.base !== current ||
+      !sameTargets([binding.target], targets) ||
+      !binding.snapping?.origin ||
+      binding.snapping.origin.point.x !== origin.x ||
+      binding.snapping.origin.point.y !== origin.y
+    )
+      throw new Error("Ungültige feste Bewegungsachse.");
+  }
+  const direction =
+    binding?.direction ??
+    (fixedAxis ? (fixedAxis === "x" ? { x: 1, y: 0 } : { x: 0, y: 1 }) : null);
+  const rawDirection = binding?.rawDirection;
+  const snapDirection = rawDirection ?? direction;
   // Already constrained targets retain their exact snapped/numeric coordinate.
   const constrain = (point: Point) =>
-    !direction || (fixedAxis === "x" ? point.y === origin.y : point.x === origin.x)
+    binding || !direction || (fixedAxis === "x" ? point.y === origin.y : point.x === origin.x)
       ? point
       : projectDirection(point, origin, direction)!;
   const evaluateProject = (point: Point) =>
-    previewSelectionMove(session, current, targets, constrain(point), visibility);
+    previewSelectionMove(session, current, targets, constrain(point), visibility, rawDirection);
   const assertContext = () => {
     if (
       session.base !== current ||
@@ -173,7 +226,7 @@ export function selectionMoveInteraction(
   };
   const prepared = preparation(session);
   const preview = createPointPreview(
-    (point) => previewSelectionGeometry(session, current, targets, point, visibility),
+    (point) => previewSelectionGeometry(session, current, targets, point, visibility, rawDirection),
     assertContext,
   );
   const geometry = (point: Point) => preview.get(constrain(point));
@@ -186,23 +239,25 @@ export function selectionMoveInteraction(
   return {
     identity: session,
     origin: session.origin,
-    snapping: direction
-      ? {
-          ...session.snapping,
-          origin: { ...session.snapping.origin, directions: [direction] },
-          resolve: (point, context) =>
-            querySnap(point, {
-              ...context,
-              fixedAxis: { origin, direction },
-              orthoOrigin: null,
-              angleOrigin: null,
-            }),
-        }
-      : session.snapping,
+    snapping: binding
+      ? binding.snapping
+      : snapDirection
+        ? {
+            ...session.snapping,
+            origin: { ...session.snapping.origin, directions: [snapDirection] },
+            resolve: (point, context) =>
+              querySnap(point, {
+                ...context,
+                fixedAxis: { origin, direction: snapDirection },
+                orthoOrigin: null,
+                angleOrigin: null,
+              }),
+          }
+        : session.snapping,
     input: fixedAxis
       ? {
-          axisLabel: fixedAxis === "x" ? "+X (rechts)" : "+Y (oben)",
-          degrees: fixedAxis === "x" ? 0 : 90,
+          axisLabel: binding?.label ?? (fixedAxis === "x" ? "+X (rechts)" : "+Y (oben)"),
+          degrees: binding?.degrees ?? (fixedAxis === "x" ? 0 : 90),
         }
       : { axisLabel: null, degrees: null },
     click: "confirm",
@@ -219,7 +274,7 @@ export function selectionMoveInteraction(
             : constrain(aim!);
         const metres = (point.x - origin.x) * direction.x + (point.y - origin.y) * direction.y;
         geometry(point);
-        return { point, metres, degrees: fixedAxis === "x" ? 0 : 90 };
+        return { point, metres, degrees: binding?.degrees ?? (fixedAxis === "x" ? 0 : 90) };
       }
       const value = precisionTarget(session.origin, aim, angle, length);
       preview.get(value.point);
