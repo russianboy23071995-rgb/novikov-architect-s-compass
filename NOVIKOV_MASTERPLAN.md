@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `dacfee1` nach PR412 (CI39638854913 grün). Arrayreduktionspilot exakt geometriegleich, aber Laufzeitnutzen nicht robust; Produktänderung verworfen. Reproduzierbarer Diagnosekandidat/Rohdaten erhalten. Genau ein Folgeauftrag §9; Native-/Frame-Gates offen.
+Geprüfte Code-Basis: 21.10.2026, main `b158e48` nach PR413 (CI39643599075 grün). Getrennte Wandphasen gemessen, 84 vollständige Vergleichsfälle bestanden; Instrumentierungseinfluss ausdrücklich ausgewiesen. Produktcode unverändert. Genau ein Folgeauftrag §9; Native-/Frame-Gates offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-21.10.2026: PR412 in main dacfee1 integriert. Arrayreduktionspilot der Wandflächen geprüft und wegen schwankendem Nutzen/kleiner Regression nicht übernommen. 1137 Tests und Exaktvergleiche bestanden; Produktcode unverändert. Details: docs/wall-face-allocation-pilot.md.
+21.10.2026: PR413 in main b158e48 integriert. Öffnungsraster/Transformation/Bounds getrennt gemessen: große Fensterfixture instrumentiert rund 3,2–3,3 / 7–9 / 6,5–6,7 ms. Erheblicher Messaufwand verhindert direkte Produktionszeit-/Gewinnzusage. 84 vollständige Geometrievergleiche bestanden. Nachweis: docs/wall-phase-detail.md.
 
 21.10.2026: PR408 grün in main 1471a31 integriert. Zwei Gebäude-Phasenmessungen mit 84 vollständigen Flächen-/Volumen-/Bounds-Vergleichen bestanden. Bei 1004 Wänden/1002 Fenstern entfallen 71–73 ms von 105–113 ms instrumentierter Gesamtzeit auf wiederholte Fensterzuordnung. Kein Produktfix in diesem Messauftrag.
 
@@ -573,7 +573,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: freie Wandextrusion vor neuem Pilot feiner messen (AUD14-03/04).** Der Arrayreduktionspilot wurde trotz Exaktgleichheit wegen nicht robustem Gewinn verworfen. Vorhandenen Phasenmesser gezielt um Öffnungsraster, Flächentransformation und Bounds-Anteil ergänzen; Instrumentierungsaufwand mit unverändertem Kontrollpfad ausweisen. Feste Szenen mit/ohne Öffnungen, schrägen Wänden und Höhenversätzen; vollständige Ergebnisgleichheit. Genau einen messbaren nächsten Ansatz ableiten, noch keine weitere Produktoptimierung. Freeze/Ownership und finale Validierung erhalten; Browser-/Frame-/Native-Gates bleiben separat offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: isolierter Pilot der XYZ-Grenzberechnung freier Wandflächen (AUD14-03/04).** Ausschließlich die bestehende Achsenarray-Iteration pro Weltpunkt durch explizite Math.min/Math.max-Zuweisungen ersetzen; Punkterzeugung, Transformation, Topologie, Rechen-/Flächenreihenfolge, Freeze und Validierung unverändert. Vollständige Exaktvergleiche einschließlich schräger Wände, Öffnungen und Höhenversätze; zwei uninstrumentierte serielle Vergleichsläufe mit kleinen und großen Szenen. Nur bei robustem Nutzen übernehmen, andernfalls verwerfen. Feinmesswerte sind wegen erheblicher Instrumentierung kein Gewinnversprechen. Danach funktionale Browserabnahme einer übernommenen Änderung; Frame-/Native-Gates offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
