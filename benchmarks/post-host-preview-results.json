@@ -1,0 +1,2528 @@
+{
+  "basis": "main 85c3581 (PR411; direct packing and window host grouping)",
+  "runtime": "v24.19.0",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "method": "7 fresh scene identities per size and input provenance, fixed mutable then owned, 0/100/1000 extra walls+windows. Owned snapshot creation excluded as prior commit/load; mutable input checks included in each public preparation. Scene setup once, then four new gestures: A/A/B/A with distinct deltas, same immutable display base and retained GPU-buffer plan. B is two rest walls (baseline: OG pair); B has two hosted windows versus A one. Independent pack probes run afterward and are not additive initial-buffer phases. 168 full wall/window comparisons and 42 exact packed-buffer comparisons outside timing. Node CPU only, no React/snapping/GPU/frame/native measurement; process-cold/JIT/GC effects uncontrolled. Raw samples retained; no percentile claim from seven trials.",
+  "rows": [
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 0,
+      "scene": {
+        "queryMs": 1.3073000000000263,
+        "solidMs": 2.9291000000000054,
+        "visibleMs": 0.06280000000000996,
+        "initialBufferMs": 0.6661000000000001,
+        "windowBaseMs": 0.31860000000000355,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.766699999999986,
+          "evaluateMs": 1.0960999999999785,
+          "compositionMs": 0.700099999999992,
+          "bufferMs": 0.16839999999999122,
+          "windowsMs": 0.1641999999999939,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.8107000000000255,
+          "evaluateMs": 0.6770000000000209,
+          "compositionMs": 0.2436999999999898,
+          "bufferMs": 0.1858000000000004,
+          "windowsMs": 0.030200000000007776,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 2.1199000000000012,
+          "evaluateMs": 0.8427000000000078,
+          "compositionMs": 0.3412000000000148,
+          "bufferMs": 0.28359999999997854,
+          "windowsMs": 0.03669999999999618,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.7827000000000055,
+          "evaluateMs": 0.6308999999999969,
+          "compositionMs": 0.2313999999999794,
+          "bufferMs": 0.19379999999998176,
+          "windowsMs": 0.027899999999988268,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.04550000000000409,
+        "packMs": 0.35549999999997794,
+        "concatenateMs": 0.07529999999999859
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 1,
+      "scene": {
+        "queryMs": 1.172300000000007,
+        "solidMs": 1.3681000000000267,
+        "visibleMs": 0.012400000000013733,
+        "initialBufferMs": 0.14889999999996917,
+        "windowBaseMs": 0.034199999999998454,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.3285999999999945,
+          "evaluateMs": 0.5650999999999726,
+          "compositionMs": 0.7520999999999844,
+          "bufferMs": 0.07019999999999982,
+          "windowsMs": 0.036500000000046384,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.408900000000017,
+          "evaluateMs": 0.4311999999999898,
+          "compositionMs": 0.21709999999995944,
+          "bufferMs": 0.04529999999999745,
+          "windowsMs": 0.020000000000038654,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.1200000000000045,
+          "evaluateMs": 0.4123000000000161,
+          "compositionMs": 0.2658999999999878,
+          "bufferMs": 0.0875000000000341,
+          "windowsMs": 0.019900000000006912,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.4549000000000092,
+          "evaluateMs": 0.7291000000000167,
+          "compositionMs": 0.3158999999999992,
+          "bufferMs": 0.07900000000000773,
+          "windowsMs": 0.04650000000003729,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.009500000000002728,
+        "packMs": 0.0856000000000563,
+        "concatenateMs": 0.014100000000041746
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 2,
+      "scene": {
+        "queryMs": 1.6567000000000007,
+        "solidMs": 1.2495000000000118,
+        "visibleMs": 0.01470000000000482,
+        "initialBufferMs": 0.11050000000000182,
+        "windowBaseMs": 0.028099999999994907,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.056699999999978,
+          "evaluateMs": 0.6252999999999815,
+          "compositionMs": 0.2033999999999878,
+          "bufferMs": 0.05769999999995434,
+          "windowsMs": 0.025899999999978718,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.3540000000000418,
+          "evaluateMs": 0.38810000000000855,
+          "compositionMs": 0.1530999999999949,
+          "bufferMs": 0.03899999999998727,
+          "windowsMs": 0.017499999999984084,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.5342999999999734,
+          "evaluateMs": 0.4803999999999746,
+          "compositionMs": 0.4434999999999718,
+          "bufferMs": 0.10659999999995762,
+          "windowsMs": 0.023700000000019372,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.8552000000000248,
+          "evaluateMs": 0.38889999999997826,
+          "compositionMs": 0.11639999999999873,
+          "bufferMs": 0.06560000000001764,
+          "windowsMs": 0.01599999999996271,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.0034999999999740794,
+        "packMs": 0.05099999999998772,
+        "concatenateMs": 0.013499999999964984
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 3,
+      "scene": {
+        "queryMs": 1.1576000000000022,
+        "solidMs": 1.4775999999999954,
+        "visibleMs": 0.01830000000001064,
+        "initialBufferMs": 0.07159999999998945,
+        "windowBaseMs": 0.02869999999995798,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.1745000000000232,
+          "evaluateMs": 0.5894999999999868,
+          "compositionMs": 0.10849999999999227,
+          "bufferMs": 0.052500000000009095,
+          "windowsMs": 0.01630000000000109,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.9635999999999854,
+          "evaluateMs": 0.4019999999999868,
+          "compositionMs": 0.22239999999999327,
+          "bufferMs": 0.03699999999997772,
+          "windowsMs": 0.01630000000000109,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.891999999999996,
+          "evaluateMs": 0.4315000000000282,
+          "compositionMs": 0.11429999999995744,
+          "bufferMs": 0.0766999999999598,
+          "windowsMs": 0.028199999999969805,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.9394000000000347,
+          "evaluateMs": 0.4692999999999756,
+          "compositionMs": 0.11059999999997672,
+          "bufferMs": 0.08289999999999509,
+          "windowsMs": 0.01630000000000109,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.004700000000013915,
+        "packMs": 0.052199999999970714,
+        "concatenateMs": 0.024399999999957345
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 4,
+      "scene": {
+        "queryMs": 1.1059999999999945,
+        "solidMs": 1.2807000000000244,
+        "visibleMs": 0.01830000000001064,
+        "initialBufferMs": 0.234800000000007,
+        "windowBaseMs": 0.029699999999991178,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.9753000000000043,
+          "evaluateMs": 0.3719000000000392,
+          "compositionMs": 0.2358000000000402,
+          "bufferMs": 0.09030000000001337,
+          "windowsMs": 0.015899999999987813,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.0400000000000205,
+          "evaluateMs": 0.41800000000000637,
+          "compositionMs": 0.41819999999995616,
+          "bufferMs": 0.12880000000001246,
+          "windowsMs": 0.021199999999964803,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.439300000000003,
+          "evaluateMs": 0.42549999999999955,
+          "compositionMs": 0.2949999999999591,
+          "bufferMs": 0.18909999999999627,
+          "windowsMs": 0.016099999999994452,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.2695999999999685,
+          "evaluateMs": 0.424699999999973,
+          "compositionMs": 0.22719999999998208,
+          "bufferMs": 0.17589999999995598,
+          "windowsMs": 0.018000000000029104,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.006799999999998363,
+        "packMs": 0.20760000000001355,
+        "concatenateMs": 0.018799999999998818
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 5,
+      "scene": {
+        "queryMs": 0.8156999999999925,
+        "solidMs": 1.233000000000004,
+        "visibleMs": 0.05700000000001637,
+        "initialBufferMs": 0.10910000000001219,
+        "windowBaseMs": 0.06379999999995789,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.0277000000000385,
+          "evaluateMs": 0.36789999999996326,
+          "compositionMs": 0.15279999999995653,
+          "bufferMs": 0.03440000000000509,
+          "windowsMs": 0.013299999999958345,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.8339000000000283,
+          "evaluateMs": 0.35779999999999745,
+          "compositionMs": 0.14480000000003201,
+          "bufferMs": 0.036200000000008004,
+          "windowsMs": 0.01290000000000191,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.9544999999999959,
+          "evaluateMs": 0.38749999999998863,
+          "compositionMs": 0.2417000000000371,
+          "bufferMs": 0.09420000000000073,
+          "windowsMs": 0.043800000000032924,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.0107999999999606,
+          "evaluateMs": 0.3783000000000243,
+          "compositionMs": 0.17169999999998709,
+          "bufferMs": 0.0685999999999467,
+          "windowsMs": 0.020699999999976626,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.006500000000016826,
+        "packMs": 0.05420000000003711,
+        "concatenateMs": 0.03200000000003911
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 0,
+      "trial": 6,
+      "scene": {
+        "queryMs": 1.049699999999973,
+        "solidMs": 1.2127000000000407,
+        "visibleMs": 0.01670000000001437,
+        "initialBufferMs": 0.07979999999997744,
+        "windowBaseMs": 0.03120000000001255,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.227299999999957,
+          "evaluateMs": 0.7999999999999545,
+          "compositionMs": 0.17770000000001573,
+          "bufferMs": 0.043200000000013006,
+          "windowsMs": 0.02019999999998845,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.1595000000000368,
+          "evaluateMs": 0.5071000000000367,
+          "compositionMs": 0.1490999999999758,
+          "bufferMs": 0.03999999999996362,
+          "windowsMs": 0.013300000000015189,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.9864000000000033,
+          "evaluateMs": 0.5498000000000047,
+          "compositionMs": 0.1997000000000071,
+          "bufferMs": 0.059499999999957254,
+          "windowsMs": 0.012600000000020373,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.1578000000000088,
+          "evaluateMs": 0.5163000000000011,
+          "compositionMs": 0.1272000000000162,
+          "bufferMs": 0.08920000000000528,
+          "windowsMs": 0.017200000000002547,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.0070999999999799,
+        "packMs": 0.05529999999998836,
+        "concatenateMs": 0.004300000000000637
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 0,
+      "scene": {
+        "queryMs": 2.914800000000014,
+        "solidMs": 16.702099999999973,
+        "visibleMs": 0.26890000000003056,
+        "initialBufferMs": 3.0212999999999965,
+        "windowBaseMs": 0.47509999999999764,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.0738000000000056,
+          "evaluateMs": 0.49090000000001055,
+          "compositionMs": 1.6172000000000253,
+          "bufferMs": 0.04529999999999745,
+          "windowsMs": 0.028999999999996362,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.6802999999999884,
+          "evaluateMs": 0.4318000000000666,
+          "compositionMs": 0.15819999999996526,
+          "bufferMs": 0.0524000000000342,
+          "windowsMs": 0.022199999999998,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.9353999999999587,
+          "evaluateMs": 0.023899999999912325,
+          "compositionMs": 0.3828000000000884,
+          "bufferMs": 0.08100000000001728,
+          "windowsMs": 0.020200000000045293,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.1082999999999856,
+          "evaluateMs": 0.38229999999998654,
+          "compositionMs": 0.2939000000000078,
+          "bufferMs": 0.0885000000000673,
+          "windowsMs": 0.018699999999967076,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.07730000000003656,
+        "packMs": 2.4849000000000387,
+        "concatenateMs": 0.2116000000000895
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 1,
+      "scene": {
+        "queryMs": 1.8921000000000276,
+        "solidMs": 4.00139999999999,
+        "visibleMs": 0.30299999999999727,
+        "initialBufferMs": 2.1281000000000176,
+        "windowBaseMs": 0.251700000000028,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.0842999999999847,
+          "evaluateMs": 0.38610000000005584,
+          "compositionMs": 0.5606999999999971,
+          "bufferMs": 0.06500000000005457,
+          "windowsMs": 0.07619999999997162,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.245300000000043,
+          "evaluateMs": 0.5973999999999933,
+          "compositionMs": 0.14769999999998618,
+          "bufferMs": 0.07290000000000418,
+          "windowsMs": 0.02729999999996835,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 3.3754000000000133,
+          "evaluateMs": 0.024200000000064392,
+          "compositionMs": 0.404700000000048,
+          "bufferMs": 0.07190000000002783,
+          "windowsMs": 0.019499999999993634,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.9505000000000337,
+          "evaluateMs": 0.5302000000000362,
+          "compositionMs": 0.5496000000000549,
+          "bufferMs": 0.13199999999994816,
+          "windowsMs": 0.036599999999907595,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.10869999999999891,
+        "packMs": 1.7105999999999995,
+        "concatenateMs": 0.11149999999997817
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 2,
+      "scene": {
+        "queryMs": 2.32770000000005,
+        "solidMs": 9.812399999999911,
+        "visibleMs": 0.3341000000000349,
+        "initialBufferMs": 1.9470999999999776,
+        "windowBaseMs": 0.7159000000000333,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.2182999999999993,
+          "evaluateMs": 0.4055999999999358,
+          "compositionMs": 0.5126999999999953,
+          "bufferMs": 0.03419999999994161,
+          "windowsMs": 0.030300000000011096,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 3.5839999999999463,
+          "evaluateMs": 0.6958999999999378,
+          "compositionMs": 0.14979999999991378,
+          "bufferMs": 0.12970000000007076,
+          "windowsMs": 0.02640000000008058,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 2.2759000000000924,
+          "evaluateMs": 0.030700000000024374,
+          "compositionMs": 0.33360000000004675,
+          "bufferMs": 0.059499999999957254,
+          "windowsMs": 0.025300000000015643,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.0854000000000497,
+          "evaluateMs": 0.4148000000000138,
+          "compositionMs": 0.3931999999999789,
+          "bufferMs": 0.08709999999996398,
+          "windowsMs": 0.03019999999992251,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.11140000000000327,
+        "packMs": 1.5786000000000513,
+        "concatenateMs": 0.1307000000000471
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 3,
+      "scene": {
+        "queryMs": 1.8147000000000162,
+        "solidMs": 8.982799999999997,
+        "visibleMs": 0.6675999999999931,
+        "initialBufferMs": 2.6697000000000344,
+        "windowBaseMs": 0.29939999999999145,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.2432999999999765,
+          "evaluateMs": 0.4256999999998925,
+          "compositionMs": 0.3402999999999565,
+          "bufferMs": 0.03139999999996235,
+          "windowsMs": 0.024599999999963984,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.9098999999999933,
+          "evaluateMs": 0.4130999999999858,
+          "compositionMs": 0.10940000000005057,
+          "bufferMs": 0.041299999999978354,
+          "windowsMs": 0.028400000000033288,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.9616999999999507,
+          "evaluateMs": 0.025300000000015643,
+          "compositionMs": 0.3955000000000837,
+          "bufferMs": 0.1350999999999658,
+          "windowsMs": 0.027100000000018554,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.2458999999998923,
+          "evaluateMs": 0.5704999999999245,
+          "compositionMs": 0.42449999999996635,
+          "bufferMs": 0.08019999999999072,
+          "windowsMs": 0.04949999999996635,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.13750000000004547,
+        "packMs": 1.7563000000000102,
+        "concatenateMs": 0.12150000000008276
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 4,
+      "scene": {
+        "queryMs": 1.91800000000012,
+        "solidMs": 7.836700000000064,
+        "visibleMs": 0.38799999999991996,
+        "initialBufferMs": 2.2846000000001823,
+        "windowBaseMs": 0.42020000000002256,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.9290000000000873,
+          "evaluateMs": 0.7553000000000338,
+          "compositionMs": 0.5752999999999702,
+          "bufferMs": 0.0466999999998734,
+          "windowsMs": 0.041600000000016735,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.4659999999998945,
+          "evaluateMs": 0.47250000000008185,
+          "compositionMs": 0.16140000000018517,
+          "bufferMs": 0.040400000000090586,
+          "windowsMs": 0.03260000000000218,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 3.2393999999999323,
+          "evaluateMs": 0.06430000000000291,
+          "compositionMs": 0.5838000000001102,
+          "bufferMs": 0.07500000000004547,
+          "windowsMs": 0.04130000000009204,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.5517999999999574,
+          "evaluateMs": 0.6392000000000735,
+          "compositionMs": 0.4759999999998854,
+          "bufferMs": 0.09149999999999636,
+          "windowsMs": 0.03219999999987522,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.14959999999996398,
+        "packMs": 2.623700000000099,
+        "concatenateMs": 0.20190000000002328
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 5,
+      "scene": {
+        "queryMs": 5.860800000000154,
+        "solidMs": 4.404999999999973,
+        "visibleMs": 0.2644999999999982,
+        "initialBufferMs": 1.8962000000001353,
+        "windowBaseMs": 0.3105000000000473,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.944400000000087,
+          "evaluateMs": 0.41089999999985594,
+          "compositionMs": 0.3632000000000062,
+          "bufferMs": 0.0521000000001095,
+          "windowsMs": 0.030799999999999272,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.1766999999999825,
+          "evaluateMs": 0.4272999999998319,
+          "compositionMs": 0.10669999999981883,
+          "bufferMs": 0.038000000000010914,
+          "windowsMs": 0.025400000000217915,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.8898000000001502,
+          "evaluateMs": 0.022399999999834108,
+          "compositionMs": 0.399599999999964,
+          "bufferMs": 0.06759999999985666,
+          "windowsMs": 0.024299999999811916,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.022899999999936,
+          "evaluateMs": 0.48040000000014516,
+          "compositionMs": 0.3953999999998814,
+          "bufferMs": 0.07209999999986394,
+          "windowsMs": 0.03220000000010259,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.09350000000017644,
+        "packMs": 1.7259000000001379,
+        "concatenateMs": 0.09259999999994761
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 100,
+      "trial": 6,
+      "scene": {
+        "queryMs": 2.1948999999999614,
+        "solidMs": 4.341999999999871,
+        "visibleMs": 0.29310000000009495,
+        "initialBufferMs": 2.5253000000000156,
+        "windowBaseMs": 0.2644000000000233,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.9406000000001313,
+          "evaluateMs": 0.3829999999998108,
+          "compositionMs": 0.25870000000008986,
+          "bufferMs": 0.028800000000046566,
+          "windowsMs": 0.019000000000005457,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.1788000000001375,
+          "evaluateMs": 0.634900000000016,
+          "compositionMs": 0.24660000000017135,
+          "bufferMs": 0.0702000000001135,
+          "windowsMs": 0.048199999999951615,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 2.482699999999795,
+          "evaluateMs": 0.02490000000011605,
+          "compositionMs": 0.5092000000001917,
+          "bufferMs": 0.0727999999999156,
+          "windowsMs": 0.03760000000011132,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.9127000000000862,
+          "evaluateMs": 0.4457999999999629,
+          "compositionMs": 0.42000000000007276,
+          "bufferMs": 0.08179999999993015,
+          "windowsMs": 0.034799999999904685,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.09249999999997272,
+        "packMs": 1.822800000000143,
+        "concatenateMs": 0.14520000000015898
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 0,
+      "scene": {
+        "queryMs": 11.15339999999992,
+        "solidMs": 37.69319999999993,
+        "visibleMs": 4.5090000000000146,
+        "initialBufferMs": 26.59089999999992,
+        "windowBaseMs": 2.581399999999803,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 11.758499999999913,
+          "evaluateMs": 0.40170000000011896,
+          "compositionMs": 3.174600000000055,
+          "bufferMs": 0.055499999999938154,
+          "windowsMs": 0.17549999999982901,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 11.044200000000046,
+          "evaluateMs": 0.5764000000001488,
+          "compositionMs": 0.11820000000011532,
+          "bufferMs": 0.049999999999954525,
+          "windowsMs": 0.2118000000000393,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 15.919000000000096,
+          "evaluateMs": 0.028299999999944703,
+          "compositionMs": 3.6306999999999334,
+          "bufferMs": 0.08899999999994179,
+          "windowsMs": 0.09549999999990177,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 12.7032999999999,
+          "evaluateMs": 0.4356999999999971,
+          "compositionMs": 3.047800000000052,
+          "bufferMs": 0.09120000000007167,
+          "windowsMs": 0.10229999999978645,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 2.3238000000001193,
+        "packMs": 18.05340000000001,
+        "concatenateMs": 1.013700000000199
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 1,
+      "scene": {
+        "queryMs": 15.007500000000164,
+        "solidMs": 33.34979999999996,
+        "visibleMs": 5.023200000000088,
+        "initialBufferMs": 21.220299999999952,
+        "windowBaseMs": 2.6562000000003536,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 16.25520000000006,
+          "evaluateMs": 0.5219999999999345,
+          "compositionMs": 3.0476999999996224,
+          "bufferMs": 0.07880000000022847,
+          "windowsMs": 0.10960000000022774,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 12.14810000000034,
+          "evaluateMs": 0.38770000000022264,
+          "compositionMs": 0.1635999999998603,
+          "bufferMs": 0.0375000000003638,
+          "windowsMs": 0.06470000000035725,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 13.993399999999838,
+          "evaluateMs": 0.029899999999997817,
+          "compositionMs": 3.4711999999999534,
+          "bufferMs": 0.06859999999960564,
+          "windowsMs": 0.09859999999980573,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 18.856500000000324,
+          "evaluateMs": 1.0042999999996027,
+          "compositionMs": 3.608100000000377,
+          "bufferMs": 0.1008999999999105,
+          "windowsMs": 0.14370000000008076,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 3.88359999999966,
+        "packMs": 23.282500000000255,
+        "concatenateMs": 1.350500000000011
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 2,
+      "scene": {
+        "queryMs": 13.424399999999878,
+        "solidMs": 37.05400000000009,
+        "visibleMs": 4.6215000000001965,
+        "initialBufferMs": 21.21539999999959,
+        "windowBaseMs": 1.4850000000001273,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 12.88819999999987,
+          "evaluateMs": 0.39809999999988577,
+          "compositionMs": 2.838799999999992,
+          "bufferMs": 0.0545999999999367,
+          "windowsMs": 0.0725999999999658,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 17.923299999999927,
+          "evaluateMs": 0.5621000000001004,
+          "compositionMs": 0.2220999999999549,
+          "bufferMs": 0.04110000000036962,
+          "windowsMs": 0.045900000000074215,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 11.159799999999905,
+          "evaluateMs": 0.03940000000011423,
+          "compositionMs": 2.931999999999789,
+          "bufferMs": 0.06629999999995562,
+          "windowsMs": 0.051300000000082946,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 10.843499999999949,
+          "evaluateMs": 0.41640000000006694,
+          "compositionMs": 2.9495999999999185,
+          "bufferMs": 0.08719999999993888,
+          "windowsMs": 0.06750000000010914,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 2.4065999999997985,
+        "packMs": 17.442299999999705,
+        "concatenateMs": 0.9996000000001004
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 3,
+      "scene": {
+        "queryMs": 14.637899999999718,
+        "solidMs": 36.9320000000007,
+        "visibleMs": 3.922599999999875,
+        "initialBufferMs": 21.135400000000118,
+        "windowBaseMs": 1.3773999999993976,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 16.428399999999783,
+          "evaluateMs": 0.4657999999999447,
+          "compositionMs": 3.3794000000007145,
+          "bufferMs": 0.05040000000008149,
+          "windowsMs": 0.07380000000011933,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 14.480000000000473,
+          "evaluateMs": 0.6421000000000276,
+          "compositionMs": 0.1760999999996784,
+          "bufferMs": 0.06670000000030996,
+          "windowsMs": 0.08299999999962893,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 13.324800000000323,
+          "evaluateMs": 0.03279999999995198,
+          "compositionMs": 3.2478999999993903,
+          "bufferMs": 0.07240000000001601,
+          "windowsMs": 0.06410000000050786,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 16.793299999999363,
+          "evaluateMs": 0.542899999999463,
+          "compositionMs": 2.9243999999998778,
+          "bufferMs": 0.08780000000024302,
+          "windowsMs": 0.0650999999998021,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 1.2371000000002823,
+        "packMs": 22.360899999999674,
+        "concatenateMs": 1.926499999999578
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 4,
+      "scene": {
+        "queryMs": 9.759799999999814,
+        "solidMs": 36.15689999999995,
+        "visibleMs": 4.946100000000115,
+        "initialBufferMs": 23.017800000000534,
+        "windowBaseMs": 2.4385000000002037,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 11.554199999999582,
+          "evaluateMs": 0.5370000000002619,
+          "compositionMs": 3.4607999999998356,
+          "bufferMs": 0.04610000000047876,
+          "windowsMs": 0.10640000000057626,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 10.914999999999964,
+          "evaluateMs": 0.42889999999988504,
+          "compositionMs": 0.16280000000006112,
+          "bufferMs": 0.0375000000003638,
+          "windowsMs": 0.07330000000001746,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 19.051900000000387,
+          "evaluateMs": 0.04219999999986612,
+          "compositionMs": 2.8944000000001324,
+          "bufferMs": 0.07200000000011642,
+          "windowsMs": 0.16439999999965949,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 12.095400000000154,
+          "evaluateMs": 0.4856999999992695,
+          "compositionMs": 2.545100000000275,
+          "bufferMs": 0.08759999999983847,
+          "windowsMs": 0.09479999999985012,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 2.702400000000125,
+        "packMs": 17.219100000000253,
+        "concatenateMs": 1.0228000000006432
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 5,
+      "scene": {
+        "queryMs": 19.129399999999805,
+        "solidMs": 41.83429999999953,
+        "visibleMs": 4.421599999999671,
+        "initialBufferMs": 20.610200000000077,
+        "windowBaseMs": 1.5509000000001834,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 18.703999999999724,
+          "evaluateMs": 0.917699999999968,
+          "compositionMs": 3.100300000000061,
+          "bufferMs": 0.03989999999976135,
+          "windowsMs": 0.056199999999989814,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 12.016399999999521,
+          "evaluateMs": 0.691000000000713,
+          "compositionMs": 0.18500000000040018,
+          "bufferMs": 0.0400999999992564,
+          "windowsMs": 0.053399999999783176,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 15.74119999999948,
+          "evaluateMs": 0.049200000000382715,
+          "compositionMs": 3.9162999999998647,
+          "bufferMs": 0.08570000000054279,
+          "windowsMs": 0.09020000000055006,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 19.34479999999985,
+          "evaluateMs": 0.6091999999998734,
+          "compositionMs": 2.802900000000591,
+          "bufferMs": 0.0897000000004482,
+          "windowsMs": 0.0646999999999025,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 3.205300000000534,
+        "packMs": 21.05450000000019,
+        "concatenateMs": 1.7800999999999476
+      }
+    },
+    {
+      "ownership": "mutable",
+      "extra": 1000,
+      "trial": 6,
+      "scene": {
+        "queryMs": 10.9354000000003,
+        "solidMs": 46.710799999999836,
+        "visibleMs": 5.952299999999923,
+        "initialBufferMs": 31.917199999999866,
+        "windowBaseMs": 2.1167999999997846,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 13.360899999999674,
+          "evaluateMs": 0.4236000000000786,
+          "compositionMs": 3.6085999999995693,
+          "bufferMs": 0.04869999999937136,
+          "windowsMs": 0.07840000000032887,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 16.864299999999275,
+          "evaluateMs": 0.39459999999962747,
+          "compositionMs": 0.08849999999983993,
+          "bufferMs": 0.04489999999987049,
+          "windowsMs": 0.05050000000028376,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 11.454900000000634,
+          "evaluateMs": 0.028299999999944703,
+          "compositionMs": 3.295999999999367,
+          "bufferMs": 0.10509999999976571,
+          "windowsMs": 0.06759999999940192,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 13.072199999999611,
+          "evaluateMs": 0.5300999999999476,
+          "compositionMs": 3.6599999999998545,
+          "bufferMs": 0.08669999999983702,
+          "windowsMs": 0.0816000000004351,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 3.527799999999843,
+        "packMs": 29.465799999999945,
+        "concatenateMs": 1.5639000000010128
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 0,
+      "scene": {
+        "queryMs": 0.007599999999001739,
+        "solidMs": 2.92699999999968,
+        "visibleMs": 0.01869999999871652,
+        "initialBufferMs": 0.10320000000137952,
+        "windowBaseMs": 0.37440000000060536,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.06860000000051514,
+          "evaluateMs": 0.6021999999993568,
+          "compositionMs": 0.3129999999982829,
+          "bufferMs": 0.041199999999662396,
+          "windowsMs": 0.023300000000745058,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.02930000000014843,
+          "evaluateMs": 0.3926999999985128,
+          "compositionMs": 0.27119999999922584,
+          "bufferMs": 0.05429999999978463,
+          "windowsMs": 0.03479999999944994,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.04399999999986903,
+          "evaluateMs": 0.573500000000422,
+          "compositionMs": 0.3930000000000291,
+          "bufferMs": 0.055099999999583815,
+          "windowsMs": 0.014999999999417923,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.030899999999746797,
+          "evaluateMs": 0.4953000000004977,
+          "compositionMs": 0.238999999999578,
+          "bufferMs": 0.05860000000029686,
+          "windowsMs": 0.013199999999415013,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.005299999998896965,
+        "packMs": 0.049299999998766,
+        "concatenateMs": 0.004399999999805004
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 1,
+      "scene": {
+        "queryMs": 0.003899999999703141,
+        "solidMs": 1.28519999999844,
+        "visibleMs": 0.014400000000023283,
+        "initialBufferMs": 0.0805000000000291,
+        "windowBaseMs": 0.03540000000066357,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.05050000000119326,
+          "evaluateMs": 0.6905000000006112,
+          "compositionMs": 0.2745999999988271,
+          "bufferMs": 0.037299999999959255,
+          "windowsMs": 0.020399999999426655,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.0352999999995518,
+          "evaluateMs": 0.4607000000014523,
+          "compositionMs": 0.23669999999947322,
+          "bufferMs": 0.03630000000157452,
+          "windowsMs": 0.014400000000023283,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.030099999999947613,
+          "evaluateMs": 0.4717999999993481,
+          "compositionMs": 0.3629000000000815,
+          "bufferMs": 0.05400000000008731,
+          "windowsMs": 0.01330000000052678,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.028499999998530257,
+          "evaluateMs": 0.47479999999995925,
+          "compositionMs": 0.27330000000074506,
+          "bufferMs": 0.06589999999960128,
+          "windowsMs": 0.01599999999962165,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.006199999999807915,
+        "packMs": 0.05140000000028522,
+        "concatenateMs": 0.004899999999906868
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 2,
+      "scene": {
+        "queryMs": 0.0036000000000058208,
+        "solidMs": 1.0511999999998807,
+        "visibleMs": 0.01089999999931024,
+        "initialBufferMs": 0.06730000000061409,
+        "windowBaseMs": 0.023600000000442378,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.038199999999051215,
+          "evaluateMs": 0.6015999999999622,
+          "compositionMs": 0.180900000001202,
+          "bufferMs": 0.03250000000116415,
+          "windowsMs": 0.013499999999112333,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.03149999999914144,
+          "evaluateMs": 0.42049999999835563,
+          "compositionMs": 0.18119999999908032,
+          "bufferMs": 0.03469999999833817,
+          "windowsMs": 0.011899999999513966,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.026400000000649015,
+          "evaluateMs": 0.9093000000011671,
+          "compositionMs": 0.5177999999996246,
+          "bufferMs": 0.09529999999904248,
+          "windowsMs": 0.030099999999947613,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.053899999998975545,
+          "evaluateMs": 0.728000000000975,
+          "compositionMs": 0.10909999999967113,
+          "bufferMs": 0.057500000000800355,
+          "windowsMs": 0.02109999999993306,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.007400000000416185,
+        "packMs": 0.04830000000038126,
+        "concatenateMs": 0.006500000001324224
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 3,
+      "scene": {
+        "queryMs": 0.007600000000820728,
+        "solidMs": 1.2980999999999767,
+        "visibleMs": 0.01389999999992142,
+        "initialBufferMs": 0.09050000000024738,
+        "windowBaseMs": 0.03330000000096334,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.04790000000139116,
+          "evaluateMs": 0.543999999999869,
+          "compositionMs": 0.15450000000055297,
+          "bufferMs": 0.039399999999659485,
+          "windowsMs": 0.018799999999828287,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.03319999999985157,
+          "evaluateMs": 0.536099999999351,
+          "compositionMs": 0.14350000000013097,
+          "bufferMs": 0.04100000000107684,
+          "windowsMs": 0.016099999998914427,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.03360000000066066,
+          "evaluateMs": 0.5628999999989901,
+          "compositionMs": 0.19499999999970896,
+          "bufferMs": 0.06849999999940337,
+          "windowsMs": 0.01540000000022701,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.02989999999954307,
+          "evaluateMs": 0.5057999999989988,
+          "compositionMs": 0.14279999999962456,
+          "bufferMs": 0.07049999999981083,
+          "windowsMs": 0.0136000000002241,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.006400000000212458,
+        "packMs": 0.0632000000005064,
+        "concatenateMs": 0.004500000000916771
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 4,
+      "scene": {
+        "queryMs": 0.007099999998899875,
+        "solidMs": 1.3725000000013097,
+        "visibleMs": 0.01389999999992142,
+        "initialBufferMs": 0.08439999999973224,
+        "windowBaseMs": 0.03269999999974971,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.04709999999977299,
+          "evaluateMs": 0.5955999999987398,
+          "compositionMs": 0.1635999999998603,
+          "bufferMs": 0.03930000000036671,
+          "windowsMs": 0.01900000000023283,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.032499999999345164,
+          "evaluateMs": 0.5339999999996508,
+          "compositionMs": 0.1298000000006141,
+          "bufferMs": 0.04010000000016589,
+          "windowsMs": 0.022199999999429565,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.031899999999950523,
+          "evaluateMs": 0.5385999999998603,
+          "compositionMs": 0.18400000000110595,
+          "bufferMs": 0.06480000000010477,
+          "windowsMs": 0.01959999999962747,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.0338000000010652,
+          "evaluateMs": 0.4771999999993568,
+          "compositionMs": 0.10359999999855063,
+          "bufferMs": 0.04730000000017753,
+          "windowsMs": 0.011099999999714782,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.004600000000209548,
+        "packMs": 0.04469999999855645,
+        "concatenateMs": 0.004600000000209548
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 5,
+      "scene": {
+        "queryMs": 0.004000000000814907,
+        "solidMs": 0.816899999999805,
+        "visibleMs": 0.008599999999205465,
+        "initialBufferMs": 0.058100000000194996,
+        "windowBaseMs": 0.019399999999222928,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.030600000000049477,
+          "evaluateMs": 0.350800000000163,
+          "compositionMs": 0.10409999999865249,
+          "bufferMs": 0.024400000000241562,
+          "windowsMs": 0.01239999999961583,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.02899999999863212,
+          "evaluateMs": 0.3541000000004715,
+          "compositionMs": 0.09860000000116997,
+          "bufferMs": 0.026400000000649015,
+          "windowsMs": 0.010700000000724685,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.02269999999953143,
+          "evaluateMs": 0.3533000000006723,
+          "compositionMs": 0.138199999999415,
+          "bufferMs": 0.043300000001181616,
+          "windowsMs": 0.014100000000325963,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.02359999999862339,
+          "evaluateMs": 0.428699999998571,
+          "compositionMs": 0.10030000000006112,
+          "bufferMs": 0.04320000000006985,
+          "windowsMs": 0.011200000000826549,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.006099999998696148,
+        "packMs": 0.03950000000077125,
+        "concatenateMs": 0.0033999999996012775
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 0,
+      "trial": 6,
+      "scene": {
+        "queryMs": 0.004100000000107684,
+        "solidMs": 1.2234000000007654,
+        "visibleMs": 0.010900000001129229,
+        "initialBufferMs": 0.0702000000001135,
+        "windowBaseMs": 0.023700000001554145,
+        "bytes": 12672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.03659999999945285,
+          "evaluateMs": 0.42449999999917054,
+          "compositionMs": 0.12739999999939755,
+          "bufferMs": 0.02930000000014843,
+          "windowsMs": 0.013400000001638546,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.026499999999941792,
+          "evaluateMs": 0.5020999999997002,
+          "compositionMs": 0.14350000000013097,
+          "bufferMs": 0.04870000000119035,
+          "windowsMs": 0.02139999999963038,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.02959999999984575,
+          "evaluateMs": 0.46480000000155997,
+          "compositionMs": 0.16610000000036962,
+          "bufferMs": 0.09100000000034925,
+          "windowsMs": 0.02449999999953434,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.04039999999986321,
+          "evaluateMs": 3.7137999999995372,
+          "compositionMs": 0.2217000000000553,
+          "bufferMs": 0.0820000000003347,
+          "windowsMs": 0.030699999999342253,
+          "fullUpload": false,
+          "plannedBytes": 12672
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.009199999998600106,
+        "packMs": 0.07060000000092259,
+        "concatenateMs": 0.009299999999711872
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 0,
+      "scene": {
+        "queryMs": 0.004300000000512227,
+        "solidMs": 4.558800000000701,
+        "visibleMs": 0.23700000000098953,
+        "initialBufferMs": 1.8627999999989697,
+        "windowBaseMs": 0.2510999999994965,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.1393000000007305,
+          "evaluateMs": 0.3698999999996886,
+          "compositionMs": 0.1996999999992113,
+          "bufferMs": 0.02510000000074797,
+          "windowsMs": 0.015000000001236913,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.11779999999998836,
+          "evaluateMs": 0.3298999999988155,
+          "compositionMs": 0.09599999999954889,
+          "bufferMs": 0.02600000000165892,
+          "windowsMs": 0.013799999998809653,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.11999999999898137,
+          "evaluateMs": 0.019200000000637374,
+          "compositionMs": 0.2655000000013388,
+          "bufferMs": 0.05439999999907741,
+          "windowsMs": 0.0474000000012893,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.11820000000079744,
+          "evaluateMs": 0.3394000000007509,
+          "compositionMs": 0.2091999999993277,
+          "bufferMs": 0.05169999999998254,
+          "windowsMs": 0.013699999999516876,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.08460000000013679,
+        "packMs": 1.638199999999415,
+        "concatenateMs": 0.15350000000034925
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 1,
+      "scene": {
+        "queryMs": 0.008499999999912689,
+        "solidMs": 4.882299999999304,
+        "visibleMs": 0.2381999999997788,
+        "initialBufferMs": 1.9943999999995867,
+        "windowBaseMs": 0.23099999999976717,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.14869999999973516,
+          "evaluateMs": 0.4433000000008178,
+          "compositionMs": 0.27779999999984284,
+          "bufferMs": 0.026799999999639113,
+          "windowsMs": 0.0136000000002241,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.12050000000090222,
+          "evaluateMs": 0.3510000000005675,
+          "compositionMs": 0.1455999999998312,
+          "bufferMs": 0.026099999999132706,
+          "windowsMs": 0.011700000000928412,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.16110000000116997,
+          "evaluateMs": 0.05700000000069849,
+          "compositionMs": 0.4264000000002852,
+          "bufferMs": 0.06530000000020664,
+          "windowsMs": 0.024400000000241562,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.2253999999993539,
+          "evaluateMs": 0.478000000000975,
+          "compositionMs": 0.3085000000010041,
+          "bufferMs": 0.06869999999980791,
+          "windowsMs": 0.02480000000105065,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.1238999999986845,
+        "packMs": 2.136800000000221,
+        "concatenateMs": 0.16439999999965949
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 2,
+      "scene": {
+        "queryMs": 0.0033000000003085006,
+        "solidMs": 4.443600000000515,
+        "visibleMs": 0.2603999999992084,
+        "initialBufferMs": 1.6520000000000437,
+        "windowBaseMs": 0.19050000000061118,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.1485000000011496,
+          "evaluateMs": 4.058199999999488,
+          "compositionMs": 0.4452999999994063,
+          "bufferMs": 0.03620000000046275,
+          "windowsMs": 0.019800000000032014,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.1558999999997468,
+          "evaluateMs": 0.35869999999886204,
+          "compositionMs": 0.1433999999990192,
+          "bufferMs": 0.02599999999983993,
+          "windowsMs": 0.011599999999816646,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.12420000000020082,
+          "evaluateMs": 0.01989999999932479,
+          "compositionMs": 0.26229999999850406,
+          "bufferMs": 0.05109999999876891,
+          "windowsMs": 0.01389999999992142,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.21709999999984575,
+          "evaluateMs": 0.5194000000010419,
+          "compositionMs": 0.2323000000014872,
+          "bufferMs": 0.05500000000029104,
+          "windowsMs": 0.014099999998506973,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.08519999999953143,
+        "packMs": 1.6211999999995896,
+        "concatenateMs": 0.17419999999947322
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 3,
+      "scene": {
+        "queryMs": 0.004800000000614091,
+        "solidMs": 5.440200000000914,
+        "visibleMs": 0.31489999999939755,
+        "initialBufferMs": 2.3127999999996973,
+        "windowBaseMs": 0.2716999999993277,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.28839999999945576,
+          "evaluateMs": 0.7492999999994936,
+          "compositionMs": 0.4482000000007247,
+          "bufferMs": 0.03510000000096625,
+          "windowsMs": 0.024600000000646105,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.24499999999898137,
+          "evaluateMs": 0.6666999999997643,
+          "compositionMs": 0.11989999999968859,
+          "bufferMs": 0.03570000000036089,
+          "windowsMs": 0.04079999999885331,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.22590000000127475,
+          "evaluateMs": 0.03499999999985448,
+          "compositionMs": 0.4444000000003143,
+          "bufferMs": 0.06769999999960419,
+          "windowsMs": 0.023100000000340515,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.1532999999999447,
+          "evaluateMs": 0.42959999999948195,
+          "compositionMs": 0.2135999999991327,
+          "bufferMs": 0.06620000000111759,
+          "windowsMs": 0.014600000000427826,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.10210000000006403,
+        "packMs": 2.1664999999993597,
+        "concatenateMs": 0.2224000000005617
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 4,
+      "scene": {
+        "queryMs": 0.004499999999097781,
+        "solidMs": 4.039499999998952,
+        "visibleMs": 0.236799999998766,
+        "initialBufferMs": 1.820400000000518,
+        "windowBaseMs": 0.16830000000118162,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.1401000000005297,
+          "evaluateMs": 0.3513999999995576,
+          "compositionMs": 0.17870000000039,
+          "bufferMs": 0.02419999999983702,
+          "windowsMs": 0.013399999999819556,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.1396999999997206,
+          "evaluateMs": 0.3320000000003347,
+          "compositionMs": 0.09530000000086147,
+          "bufferMs": 0.026200000000244472,
+          "windowsMs": 0.011200000000826549,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.12459999999919091,
+          "evaluateMs": 0.018500000000130967,
+          "compositionMs": 0.18350000000100408,
+          "bufferMs": 0.04950000000098953,
+          "windowsMs": 0.012000000000625732,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.11539999999877182,
+          "evaluateMs": 0.3330000000005384,
+          "compositionMs": 0.17150000000037835,
+          "bufferMs": 0.05760000000009313,
+          "windowsMs": 0.011500000000523869,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.08619999999973516,
+        "packMs": 1.6784000000006927,
+        "concatenateMs": 0.14880000000084692
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 5,
+      "scene": {
+        "queryMs": 0.004600000000209548,
+        "solidMs": 4.752199999998993,
+        "visibleMs": 0.446300000001429,
+        "initialBufferMs": 2.0643999999992957,
+        "windowBaseMs": 0.2165000000004511,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.14459999999962747,
+          "evaluateMs": 0.39279999999962456,
+          "compositionMs": 0.3364999999994325,
+          "bufferMs": 0.027700000000550062,
+          "windowsMs": 0.01330000000052678,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.12039999999979045,
+          "evaluateMs": 0.5588000000007014,
+          "compositionMs": 0.13589999999931024,
+          "bufferMs": 0.03809999999975844,
+          "windowsMs": 0.020899999999528518,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.617099999999482,
+          "evaluateMs": 0.04160000000047148,
+          "compositionMs": 0.625,
+          "bufferMs": 0.10600000000158616,
+          "windowsMs": 0.03080000000045402,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.21739999999954307,
+          "evaluateMs": 0.49760000000060245,
+          "compositionMs": 0.2356999999992695,
+          "bufferMs": 0.0738999999994121,
+          "windowsMs": 0.015799999999217107,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.10080000000016298,
+        "packMs": 2.162900000001173,
+        "concatenateMs": 0.254399999999805
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 100,
+      "trial": 6,
+      "scene": {
+        "queryMs": 0.005600000000413274,
+        "solidMs": 4.290200000001278,
+        "visibleMs": 0.25280000000020664,
+        "initialBufferMs": 1.629399999999805,
+        "windowBaseMs": 0.21680000000014843,
+        "bytes": 473472
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.1492999999991298,
+          "evaluateMs": 0.38800000000082946,
+          "compositionMs": 0.21930000000065775,
+          "bufferMs": 0.026200000000244472,
+          "windowsMs": 0.012600000000020373,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 0.11980000000039581,
+          "evaluateMs": 0.3383000000012544,
+          "compositionMs": 0.0963000000010652,
+          "bufferMs": 0.027599999999438296,
+          "windowsMs": 0.011800000000221189,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.12449999999989814,
+          "evaluateMs": 0.01900000000023283,
+          "compositionMs": 0.1929999999993015,
+          "bufferMs": 0.05040000000008149,
+          "windowsMs": 0.012000000000625732,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.11340000000018335,
+          "evaluateMs": 0.33550000000104774,
+          "compositionMs": 0.16700000000128057,
+          "bufferMs": 0.053299999999580905,
+          "windowsMs": 0.010800000000017462,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 0.08400000000074215,
+        "packMs": 1.584100000000035,
+        "concatenateMs": 0.17670000000180153
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 0,
+      "scene": {
+        "queryMs": 0.006199999999807915,
+        "solidMs": 37.388599999998405,
+        "visibleMs": 5.343699999999444,
+        "initialBufferMs": 306.8240999999998,
+        "windowBaseMs": 6.789999999999054,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.1182999999982712,
+          "evaluateMs": 0.7088000000003376,
+          "compositionMs": 5.671399999999267,
+          "bufferMs": 0.09430000000065775,
+          "windowsMs": 0.29539999999906286,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.3611000000000786,
+          "evaluateMs": 0.5146999999997206,
+          "compositionMs": 0.09220000000095752,
+          "bufferMs": 0.042400000000270666,
+          "windowsMs": 0.18840000000091095,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.2197999999989406,
+          "evaluateMs": 0.03949999999895226,
+          "compositionMs": 5.1085000000002765,
+          "bufferMs": 0.14589999999952852,
+          "windowsMs": 0.26899999999841384,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 2.046299999999974,
+          "evaluateMs": 0.8004999999993743,
+          "compositionMs": 5.810199999999895,
+          "bufferMs": 0.14930000000094878,
+          "windowsMs": 0.2620999999999185,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 4.105299999999261,
+        "packMs": 21.973400000000765,
+        "concatenateMs": 1.4629000000004453
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 1,
+      "scene": {
+        "queryMs": 0.007099999998899875,
+        "solidMs": 34.65769999999975,
+        "visibleMs": 5.583000000000538,
+        "initialBufferMs": 19.8208999999988,
+        "windowBaseMs": 2.227199999999357,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.8889999999992142,
+          "evaluateMs": 0.6589999999996508,
+          "compositionMs": 4.2674000000006345,
+          "bufferMs": 0.05159999999887077,
+          "windowsMs": 0.2334999999984575,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 2.107299999999668,
+          "evaluateMs": 0.5259999999998399,
+          "compositionMs": 0.20669999999881838,
+          "bufferMs": 0.03770000000076834,
+          "windowsMs": 0.0853000000006432,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.3065000000005966,
+          "evaluateMs": 0.023799999999027932,
+          "compositionMs": 3.258800000001429,
+          "bufferMs": 0.0694999999996071,
+          "windowsMs": 0.11620000000038999,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.6931000000004133,
+          "evaluateMs": 0.6226000000006024,
+          "compositionMs": 3.420799999999872,
+          "bufferMs": 0.08240000000114378,
+          "windowsMs": 0.11310000000048603,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 3.390400000000227,
+        "packMs": 20.303899999998976,
+        "concatenateMs": 2.102600000000166
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 2,
+      "scene": {
+        "queryMs": 0.006300000000919681,
+        "solidMs": 51.277899999999136,
+        "visibleMs": 4.667699999999968,
+        "initialBufferMs": 24.030399999999645,
+        "windowBaseMs": 2.663800000000265,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.6194999999988795,
+          "evaluateMs": 0.6213000000007014,
+          "compositionMs": 3.432600000000093,
+          "bufferMs": 0.050599999998667045,
+          "windowsMs": 0.0750000000007276,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.1550999999999476,
+          "evaluateMs": 0.4633000000012544,
+          "compositionMs": 0.16970000000037544,
+          "bufferMs": 0.04079999999885331,
+          "windowsMs": 0.044499999999970896,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.0839999999989232,
+          "evaluateMs": 0.03830000000016298,
+          "compositionMs": 3.5780999999988126,
+          "bufferMs": 0.09169999999903666,
+          "windowsMs": 0.07810000000063155,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.204699999998411,
+          "evaluateMs": 0.585399999999936,
+          "compositionMs": 3.8496999999988475,
+          "bufferMs": 0.12559999999939464,
+          "windowsMs": 0.11499999999978172,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 3.783899999998539,
+        "packMs": 19.35030000000006,
+        "concatenateMs": 2.124499999999898
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 3,
+      "scene": {
+        "queryMs": 0.008799999999610009,
+        "solidMs": 48.57079999999951,
+        "visibleMs": 4.27599999999984,
+        "initialBufferMs": 23.743500000000495,
+        "windowBaseMs": 1.5007000000005064,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 0.98109999999906,
+          "evaluateMs": 0.4232000000010885,
+          "compositionMs": 3.6111999999993714,
+          "bufferMs": 0.052999999999883585,
+          "windowsMs": 0.12099999999918509,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.2836000000006607,
+          "evaluateMs": 0.4820999999992637,
+          "compositionMs": 0.12569999999868742,
+          "bufferMs": 0.03390000000035798,
+          "windowsMs": 0.0433999999986554,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.0398999999997613,
+          "evaluateMs": 0.021000000000640284,
+          "compositionMs": 3.091099999999642,
+          "bufferMs": 0.06610000000000582,
+          "windowsMs": 0.0555000000003929,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 0.9659999999985303,
+          "evaluateMs": 0.4252999999989697,
+          "compositionMs": 2.341200000000754,
+          "bufferMs": 0.06199999999989814,
+          "windowsMs": 0.04380000000128348,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 2.353800000000774,
+        "packMs": 17.664199999999255,
+        "concatenateMs": 1.8349999999991269
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 4,
+      "scene": {
+        "queryMs": 0.0072000000000116415,
+        "solidMs": 43.710800000000745,
+        "visibleMs": 4.602000000000771,
+        "initialBufferMs": 473.14140000000043,
+        "windowBaseMs": 6.675800000000891,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 2.0692999999992026,
+          "evaluateMs": 0.859599999999773,
+          "compositionMs": 5.307800000000498,
+          "bufferMs": 0.07980000000134169,
+          "windowsMs": 0.2617000000009284,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.4390999999995984,
+          "evaluateMs": 0.5474999999987631,
+          "compositionMs": 0.0853000000006432,
+          "bufferMs": 0.033999999999650754,
+          "windowsMs": 0.13190000000031432,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.2990000000008877,
+          "evaluateMs": 0.03210000000035507,
+          "compositionMs": 5.095499999999447,
+          "bufferMs": 0.10759999999936554,
+          "windowsMs": 0.22400000000016007,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.699399999999514,
+          "evaluateMs": 0.7966999999989639,
+          "compositionMs": 5.711100000000442,
+          "bufferMs": 0.10199999999895226,
+          "windowsMs": 0.2249999999985448,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 4.371900000000096,
+        "packMs": 25.005099999998492,
+        "concatenateMs": 1.2980999999999767
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 5,
+      "scene": {
+        "queryMs": 0.006100000000515138,
+        "solidMs": 45.80579999999827,
+        "visibleMs": 5.547599999999875,
+        "initialBufferMs": 26.74109999999928,
+        "windowBaseMs": 2.558100000000195,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.6486000000004424,
+          "evaluateMs": 0.5987999999997555,
+          "compositionMs": 3.5692999999992026,
+          "bufferMs": 0.05860000000029686,
+          "windowsMs": 0.1334999999999127,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.0625999999992928,
+          "evaluateMs": 0.4162999999989552,
+          "compositionMs": 0.07579999999870779,
+          "bufferMs": 0.03210000000035507,
+          "windowsMs": 0.03499999999985448,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 0.9659000000010565,
+          "evaluateMs": 0.01779999999962456,
+          "compositionMs": 2.9575000000004366,
+          "bufferMs": 0.06960000000071886,
+          "windowsMs": 0.06500000000050932,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.033499999999549,
+          "evaluateMs": 0.4095999999990454,
+          "compositionMs": 2.4575999999997293,
+          "bufferMs": 0.06819999999970605,
+          "windowsMs": 0.04650000000037835,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 1.6218000000008033,
+        "packMs": 21.91699999999946,
+        "concatenateMs": 1.2587000000003172
+      }
+    },
+    {
+      "ownership": "owned",
+      "extra": 1000,
+      "trial": 6,
+      "scene": {
+        "queryMs": 0.008499999999912689,
+        "solidMs": 43.19930000000022,
+        "visibleMs": 4.528999999998632,
+        "initialBufferMs": 23.00040000000081,
+        "windowBaseMs": 2.6944000000003143,
+        "bytes": 4620672
+      },
+      "phases": [
+        {
+          "label": "firstA",
+          "actionMs": 1.5275000000001455,
+          "evaluateMs": 0.6317000000017288,
+          "compositionMs": 3.7572000000000116,
+          "bufferMs": 0.053299999999580905,
+          "windowsMs": 0.09130000000004657,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "sameA",
+          "actionMs": 1.2476000000024214,
+          "evaluateMs": 0.530799999996816,
+          "compositionMs": 0.10389999999824795,
+          "bufferMs": 0.05169999999998254,
+          "windowsMs": 0.069100000000617,
+          "fullUpload": false,
+          "plannedBytes": 6336
+        },
+        {
+          "label": "switchB",
+          "actionMs": 1.1313999999983935,
+          "evaluateMs": 0.02509999999892898,
+          "compositionMs": 3.0298000000002503,
+          "bufferMs": 0.0724000000009255,
+          "windowsMs": 0.11040000000139116,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        },
+        {
+          "label": "returnA",
+          "actionMs": 1.4552000000003318,
+          "evaluateMs": 0.6000999999996566,
+          "compositionMs": 3.628899999999703,
+          "bufferMs": 0.11170000000129221,
+          "windowsMs": 0.0797999999995227,
+          "fullUpload": false,
+          "plannedBytes": 15552
+        }
+      ],
+      "independentProbes": {
+        "groupMs": 2.784700000000157,
+        "packMs": 17.042999999997846,
+        "concatenateMs": 1.6780999999973574
+      }
+    }
+  ]
+}
