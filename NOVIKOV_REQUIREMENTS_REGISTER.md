@@ -13009,3 +13009,17 @@ Lint/Build bestanden. Produktbrowser: Linie/Schraffur +0,5 m Offset, Undo/Redo,
 Abbruch; vier vollständige Geschoss-Exportvergleiche identisch. Keine neue
 Frame-/Native-/Recoveryabnahme. Änderungskarte und Details: Masterplan, datierter
 Nachweis „Konturzyklus entfernt“. Folgeauftrag allein §9; AUD14 nicht abgeschlossen.
+
+
+### AUD14-03/04 – Globale Vorschaudienste, 21.10.2026
+
+Basis main 738ce18/PR403; Diagnosebranch perf/global-preview-profile. Zwei
+Node-Läufe mit fester Zwei-Wand-Auswahl und 0/100/1000 Restwänden, mit/ohne
+zusätzliche Fenster. Warme Flächen/Puffer stabil, geplante Wand-Uploads 6336 Byte.
+Gebäude-Fensterbasis wird pro Patch erneut aufgebaut: bei 1002 Fenstern Median
+1,113/1,107 ms, P95 2,433/2,253 ms. Kalte Vorbereitung bleibt eigener Rest.
+Rohdaten benchmarks/global-preview{-repeat}-results.json, Reproduktion mit
+global-preview-profile.ts. Vollmodell-Ableitungsgleichheit außerhalb Messung
+bestanden. Keine Produktänderung; kein GPU-/Gesamtframe-/Native-Nachweis,
+all-visible synthetischer Fall. Details/Änderungskarte im datierten Masterplan-
+Nachweis; nächster Einzelauftrag nur §9: unveränderte Fensterbasis wiederverwenden.
