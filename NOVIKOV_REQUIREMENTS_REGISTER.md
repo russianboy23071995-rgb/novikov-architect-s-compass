@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `b158e48` nach PR413 (grüne CI). Getrennte Wandphasen gemessen; 84 Exaktvergleiche bestanden, Instrumentierungseinfluss ausgewiesen. Produkt unverändert, Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `e927cf9` nach PR414 (grüne CI). Isolierter Bounds-Pilot exaktgleich, mangels robustem Gewinn nicht übernommen. 54 Vergleichsfälle bestanden; Produkt unverändert. Native-/Frame-Gates offen; einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13111,3 +13111,7 @@ Zwei kalte Läufe: insgesamt 336 Wand-/Fenstervergleichsfälle und 84 exakte Puf
 ### AUD14-03/04 – Getrennte Wandphasen, 21.10.2026
 
 Öffnungsraster, Transformation und Bounds in temporärem Diagnosemodul getrennt. Zwei serielle Läufe, 84 vollständige Vergleiche bestanden; Typen/Lint grün. Große Fensterfixture instrumentiert 3,2–3,3 / 7–9 / 6,5–6,7 ms; gepaarter Gesamteinfluss der Instrumentierung/Reihenfolge rund 12–16 ms, daher keine direkte Produktionskostenzusage. Produkt unverändert. Nachweis/Änderungskarte: docs/wall-phase-detail.md. Einziger Folgepilot gemäß §9 isoliert XYZ-Grenziteration, kein erneuter kombinierter Arrayumbau.
+
+### AUD14-03/04 – Isolierter XYZ-Bounds-Pilot, 21.10.2026
+
+Zwei serielle uninstrumentierte Vergleichsläufe, 54 vollständige Vergleichsfälle bestanden. Große Szene rund 1 bzw. 32 % Gewinn, kleine Szenen mit wechselndem Vorzeichen. Kein robuster Vorteil; Kandidat nur im temporären Diagnosemodul, Produkt unverändert. Typen/Lint bestanden. Nachweis und Änderungskarte: docs/wall-xyz-bounds-pilot.md. Nächster Einzelauftrag §9 untersucht Neuaufbau unveränderter Extrusionen nach einzelner Wand-/Fensteränderung; keine neue Cachelogik vor gemessenem Invalidierungsumfang.
