@@ -1,0 +1,1603 @@
+{
+  "basis": "main f9d47b3 after PR423 plus shared hatch translation fix",
+  "runtime": "v24.19.0",
+  "method": "Projected mouse targets and signed numeric targets; index1, arbitrary origin. Full path reprojects axis targets as production does. Exact comparisons outside timings, axis mismatches explicitly retained. One preparation, first+8 warm, alternating path order. API only, no snap/React/render/commit/frame timing. Post-fix repeat: 72/72 X/Y complete mouse projects, targets and numeric projects exact. Oblique projection mismatches remain reported. 12 direct commits/Undo/Redo exact.",
+  "rows": [
+    {
+      "size": 10,
+      "kind": "line",
+      "action": "x",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "label": "+X (rechts)",
+        "degrees": 0
+      },
+      "preparationMs": 1.523699999999991,
+      "fullWarmMedianMs": 4.459900000000005,
+      "patchWarmMedianMs": 0.04400000000001114,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 9.110900000000015,
+          "patchMs": 0.6465000000000032,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.424599999999998,
+          "patchMs": 0.056199999999989814,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.88069999999999,
+          "patchMs": 0.045600000000035834,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.662199999999984,
+          "patchMs": 0.037399999999990996,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.560200000000009,
+          "patchMs": 0.028800000000046566,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.495200000000011,
+          "patchMs": 0.04239999999998645,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.367900000000077,
+          "patchMs": 0.05389999999999873,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 3.7770000000000437,
+          "patchMs": 0.03409999999996671,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.421100000000024,
+          "patchMs": 0.04570000000001073,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "action": "y",
+      "direction": {
+        "x": 0,
+        "y": 1
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0,
+          "y": 1
+        },
+        "label": "+Y (oben)",
+        "degrees": 90
+      },
+      "preparationMs": 0.1650000000000773,
+      "fullWarmMedianMs": 4.4089499999999475,
+      "patchWarmMedianMs": 0.037849999999991724,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.850500000000011,
+          "patchMs": 0.0664000000000442,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 5.253400000000056,
+          "patchMs": 0.09969999999998436,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.606199999999944,
+          "patchMs": 0.029899999999997817,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 3.7924000000000433,
+          "patchMs": 0.03370000000006712,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.211699999999951,
+          "patchMs": 0.03669999999999618,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.657000000000039,
+          "patchMs": 0.04060000000004038,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.055500000000052,
+          "patchMs": 0.04660000000001219,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.845800000000054,
+          "patchMs": 0.03899999999998727,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 3.8036000000001877,
+          "patchMs": 0.025699999999915235,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "action": "axis",
+      "direction": {
+        "x": 3,
+        "y": 4
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0.6,
+          "y": 0.8
+        },
+        "label": "+ Richtung Punkt 1 → 2",
+        "degrees": 53.13010235415595
+      },
+      "preparationMs": 0.1270999999999276,
+      "fullWarmMedianMs": 4.314800000000105,
+      "patchWarmMedianMs": 0.035750000000007276,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.725200000000086,
+          "patchMs": 0.034300000000030195,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 6.938893903907228E-17,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 5.120599999999968,
+          "patchMs": 0.04039999999986321,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.6653345369377348E-16,
+          "numericMaxDifference": 1.1102230246251565E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 3.8072000000001935,
+          "patchMs": 0.03669999999988249,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.4224732503009818E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.002399999999852,
+          "patchMs": 0.03089999999997417,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.3877787807814457E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.132900000000063,
+          "patchMs": 0.03139999999984866,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.852100000000064,
+          "patchMs": 0.03700000000003456,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 6.938893903907228E-17,
+          "numericMaxDifference": 1.3877787807814457E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.496700000000146,
+          "patchMs": 0.032999999999901775,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 4.0945999999999,
+          "patchMs": 0.03480000000013206,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.4137996329210978E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 4.745499999999993,
+          "patchMs": 0.03759999999988395,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 4.440892098500626E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "action": "x",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "label": "+X (rechts)",
+        "degrees": 0
+      },
+      "preparationMs": 0.15180000000009386,
+      "fullWarmMedianMs": 9.206750000000056,
+      "patchWarmMedianMs": 0.46214999999995143,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 10.01079999999979,
+          "patchMs": 0.8408999999999196,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 9.160499999999956,
+          "patchMs": 0.5179999999998017,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 9.55560000000014,
+          "patchMs": 0.5451000000000477,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 10.172900000000027,
+          "patchMs": 0.4050999999999476,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 9.41190000000006,
+          "patchMs": 0.02320000000008804,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 8.486699999999928,
+          "patchMs": 0.39560000000005857,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 9.253000000000156,
+          "patchMs": 0.8867000000000189,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 7.959599999999682,
+          "patchMs": 0.6057000000000698,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 8.106700000000274,
+          "patchMs": 0.40630000000010114,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "action": "y",
+      "direction": {
+        "x": 0,
+        "y": 1
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0,
+          "y": 1
+        },
+        "label": "+Y (oben)",
+        "degrees": 90
+      },
+      "preparationMs": 0.1811999999999898,
+      "fullWarmMedianMs": 7.996899999999869,
+      "patchWarmMedianMs": 0.43810000000007676,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 8.15899999999965,
+          "patchMs": 0.4126000000001113,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 7.997699999999895,
+          "patchMs": 0.39620000000013533,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 7.788800000000265,
+          "patchMs": 0.40439999999989595,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 8.171900000000278,
+          "patchMs": 0.5303000000003522,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 8.221099999999751,
+          "patchMs": 0.4549000000001797,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 9.07910000000038,
+          "patchMs": 0.5068999999998596,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 7.996099999999842,
+          "patchMs": 0.560099999999693,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 7.690900000000056,
+          "patchMs": 0.4023000000001957,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 7.834899999999834,
+          "patchMs": 0.4212999999999738,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "action": "axis",
+      "direction": {
+        "x": -0.019732715717283966,
+        "y": 0.6279051952931337
+      },
+      "numericAxis": {
+        "direction": {
+          "x": -0.03141075907812764,
+          "y": 0.9995065603657315
+        },
+        "label": "+ Richtung Punkt 1 → 2",
+        "degrees": 91.79999999999995
+      },
+      "preparationMs": 0.10379999999986467,
+      "fullWarmMedianMs": 8.211549999999988,
+      "patchWarmMedianMs": 0.4248999999999796,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 8,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 7.438100000000304,
+          "patchMs": 0.4491000000002714,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.7763568394002505E-15,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 7.461099999999988,
+          "patchMs": 0.4411000000000058,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 7.6744000000003325,
+          "patchMs": 0.40519999999969514,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.1102230246251565E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 8.933199999999943,
+          "patchMs": 0.4272000000000844,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 4.5102810375396984E-17,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 9.57950000000028,
+          "patchMs": 0.4094000000000051,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 7.928200000000288,
+          "patchMs": 0.4050000000002001,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 8.14390000000003,
+          "patchMs": 0.42259999999987485,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 8.44780000000037,
+          "patchMs": 0.5875999999998385,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 8.279199999999946,
+          "patchMs": 0.6392000000000735,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "action": "x",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "label": "+X (rechts)",
+        "degrees": 0
+      },
+      "preparationMs": 0.24809999999979482,
+      "fullWarmMedianMs": 40.17709999999988,
+      "patchWarmMedianMs": 0.05045000000018263,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 42.95020000000022,
+          "patchMs": 0.05490000000008877,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 41.534400000000005,
+          "patchMs": 0.05850000000009459,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 38.985999999999876,
+          "patchMs": 0.028900000000248838,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 41.80230000000029,
+          "patchMs": 0.05760000000009313,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 39.22389999999996,
+          "patchMs": 0.020300000000133878,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 40.7457000000004,
+          "patchMs": 0.07010000000082073,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 38.782500000000255,
+          "patchMs": 0.03510000000005675,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 39.60849999999937,
+          "patchMs": 0.04960000000028231,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 55.73099999999977,
+          "patchMs": 0.051300000000082946,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "action": "y",
+      "direction": {
+        "x": 0,
+        "y": 1
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0,
+          "y": 1
+        },
+        "label": "+Y (oben)",
+        "degrees": 90
+      },
+      "preparationMs": 0.13949999999931606,
+      "fullWarmMedianMs": 39.258749999999964,
+      "patchWarmMedianMs": 0.04974999999922147,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 39.17270000000008,
+          "patchMs": 0.04199999999946158,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 39.52950000000055,
+          "patchMs": 0.05580000000009022,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 38.50540000000001,
+          "patchMs": 0.04919999999947322,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 38.991799999999785,
+          "patchMs": 0.050299999998969724,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 44.20269999999982,
+          "patchMs": 0.036100000001169974,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 39.816899999999805,
+          "patchMs": 0.06570000000101572,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 38.51850000000013,
+          "patchMs": 0.0316000000002532,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 38.285400000000664,
+          "patchMs": 0.052999999999883585,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 39.52570000000014,
+          "patchMs": 0.033699999999953434,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "action": "axis",
+      "direction": {
+        "x": 3,
+        "y": 4
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0.6,
+          "y": 0.8
+        },
+        "label": "+ Richtung Punkt 1 → 2",
+        "degrees": 53.13010235415595
+      },
+      "preparationMs": 0.21960000000035507,
+      "fullWarmMedianMs": 46.74040000000059,
+      "patchWarmMedianMs": 0.052100000000791624,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 45.446100000001024,
+          "patchMs": 0.033699999999953434,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 6.938893903907228E-17,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 57.28809999999976,
+          "patchMs": 0.0787000000000262,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.6653345369377348E-16,
+          "numericMaxDifference": 1.1102230246251565E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 54.6869999999999,
+          "patchMs": 0.05230000000119617,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.4224732503009818E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 50.16140000000087,
+          "patchMs": 0.05980000000090513,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.3877787807814457E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 47.844199999999546,
+          "patchMs": 0.03600000000005821,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 45.636600000001636,
+          "patchMs": 0.057800000000497676,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 6.938893903907228E-17,
+          "numericMaxDifference": 1.3877787807814457E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 41.9333000000006,
+          "patchMs": 0.03019999999924039,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 38.4343000000008,
+          "patchMs": 0.05190000000038708,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.4137996329210978E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 39.66749999999956,
+          "patchMs": 0.03889999999955762,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 4.440892098500626E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "action": "x",
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "label": "+X (rechts)",
+        "degrees": 0
+      },
+      "preparationMs": 0.24659999999857973,
+      "fullWarmMedianMs": 78.8090000000011,
+      "patchWarmMedianMs": 0.41925000000082946,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 78.27960000000166,
+          "patchMs": 0.41449999999895226,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 77.57459999999992,
+          "patchMs": 0.45019999999931315,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 86.7619999999988,
+          "patchMs": 0.6369999999988067,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 77.77909999999974,
+          "patchMs": 0.4197999999996682,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 80.43799999999828,
+          "patchMs": 0.043300000001181616,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 79.83890000000247,
+          "patchMs": 0.48579999999856227,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 76.11360000000059,
+          "patchMs": 0.38699999999880674,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 81.04339999999866,
+          "patchMs": 0.4187000000019907,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 74.49170000000231,
+          "patchMs": 0.3764999999984866,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "action": "y",
+      "direction": {
+        "x": 0,
+        "y": 1
+      },
+      "numericAxis": {
+        "direction": {
+          "x": 0,
+          "y": 1
+        },
+        "label": "+Y (oben)",
+        "degrees": 90
+      },
+      "preparationMs": 0.20830000000205473,
+      "fullWarmMedianMs": 77.99399999999878,
+      "patchWarmMedianMs": 0.49725000000216824,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 74.19479999999749,
+          "patchMs": 0.3820999999988999,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 72.20620000000054,
+          "patchMs": 0.42330000000220025,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 74.02430000000095,
+          "patchMs": 0.36920000000100117,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 83.22950000000128,
+          "patchMs": 0.4628000000011525,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 86.20400000000154,
+          "patchMs": 0.50970000000234,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 70.9382000000005,
+          "patchMs": 0.5097999999998137,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 88.54360000000088,
+          "patchMs": 0.6261000000013155,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 81.54689999999755,
+          "patchMs": 0.6358000000000175,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 74.4411,
+          "patchMs": 0.4848000000019965,
+          "projectEqual": true,
+          "targetEqual": true,
+          "maxNumericDifference": 0,
+          "numericMaxDifference": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "action": "axis",
+      "direction": {
+        "x": -0.019732715717283966,
+        "y": 0.6279051952931337
+      },
+      "numericAxis": {
+        "direction": {
+          "x": -0.03141075907812764,
+          "y": 0.9995065603657315
+        },
+        "label": "+ Richtung Punkt 1 → 2",
+        "degrees": 91.79999999999995
+      },
+      "preparationMs": 0.11629999999786378,
+      "fullWarmMedianMs": 74.77245000000039,
+      "patchWarmMedianMs": 0.45499999999992724,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 8,
+      "samples": [
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 73.8786,
+          "patchMs": 0.38880000000062864,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.7763568394002505E-15,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 94.4272000000019,
+          "patchMs": 0.5923999999977241,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 84.16310000000158,
+          "patchMs": 0.37620000000242726,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 1.1102230246251565E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 72.6208000000006,
+          "patchMs": 0.5704999999979918,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 4.5102810375396984E-17,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 72.8563000000031,
+          "patchMs": 0.5282000000006519,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 0
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 79.14510000000155,
+          "patchMs": 0.3838999999970838,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 75.22350000000006,
+          "patchMs": 0.49020000000018626,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "patch",
+            "full"
+          ],
+          "fullMs": 73.19640000000072,
+          "patchMs": 0.39470000000073924,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 1.7763568394002505E-15
+        },
+        {
+          "order": [
+            "full",
+            "patch"
+          ],
+          "fullMs": 74.32140000000072,
+          "patchMs": 0.4197999999996682,
+          "projectEqual": false,
+          "targetEqual": false,
+          "maxNumericDifference": 8.881784197001252E-16,
+          "numericMaxDifference": 8.881784197001252E-16
+        }
+      ]
+    }
+  ]
+}
