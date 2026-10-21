@@ -1,4 +1,4 @@
-import { replacePathVertex } from "../../geometry/primitives/point.ts";
+import { replacePathVertex, translatePoint } from "../../geometry/primitives/point.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
@@ -27,20 +27,17 @@ function applyPoints(
   project: Project,
   target: TransformTarget,
   points: Point[],
-  intent: "reshape" | "move" = "reshape",
+  offset: Point | null = null,
   reuse?: WallSolidReuse,
   resultMode: ProjectResultMode = "mutable",
 ): Project {
   if (target.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === target.id)!;
     const pattern =
-      intent === "move" && hatch.pattern
+      offset && hatch.pattern
         ? {
             ...hatch.pattern,
-            origin: {
-              x: hatch.pattern.origin.x + points[0]!.x - hatch.points[0]!.x,
-              y: hatch.pattern.origin.y + points[0]!.y - hatch.points[0]!.y,
-            },
+            origin: translatePoint(hatch.pattern.origin, offset),
           }
         : hatch.pattern;
     return previewHatch(project, project, {
@@ -55,7 +52,7 @@ function applyPoints(
         project,
         target.id,
         { start: points[0]!, end: points[1]! },
-        intent,
+        offset ? "move" : "reshape",
         reuse,
         resultMode,
       )
@@ -69,8 +66,8 @@ export function moveElement(project: Project, target: TransformTarget, offset: P
   return applyPoints(
     project,
     target,
-    editablePoints(project, target).map((p) => ({ x: p.x + offset.x, y: p.y + offset.y })),
-    "move",
+    editablePoints(project, target).map((p) => translatePoint(p, offset)),
+    offset,
   );
 }
 
@@ -86,7 +83,7 @@ export function moveElementPoint(
     project,
     target,
     replacePathVertex(editablePoints(project, target), index, position),
-    "reshape",
+    null,
     reuse,
     resultMode,
   );

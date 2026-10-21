@@ -1,3 +1,4 @@
+import { translatePoint } from "../../geometry/primitives/point.ts";
 import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
 import { wallBase } from "../elements/wall/heights.ts";
@@ -122,7 +123,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       throw new Error("Ungültige Bewegung.");
     if (delta.x === 0 && delta.y === 0) return freeze({ geometry: affected, replacedIds });
     const translate = (p: Point) => {
-      const next = { x: p.x + delta.x, y: p.y + delta.y };
+      const next = translatePoint(p, delta);
       if (!Number.isFinite(next.x) || !Number.isFinite(next.y))
         throw new Error("Ungültige Bewegung.");
       return next;

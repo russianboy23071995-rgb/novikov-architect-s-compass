@@ -132,6 +132,62 @@ function fixture() {
     fill: defaultHatchFill,
   });
 }
+for (const mode of ["model", "paper"] as const)
+  for (const coordinate of [0, 1e9])
+    test(`hatch translation preserves exact pattern delta: ${mode}, coordinate ${coordinate}`, () => {
+      const p = fixture();
+      p.hatchPatterns.push({
+        id: "translation-pattern",
+        name: "Translation",
+        width: 1,
+        height: 1,
+        lines: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }],
+      });
+      const hatch = storeyOf(p).hatches[0]!;
+      hatch.points = [
+        { x: coordinate + 10, y: coordinate },
+        { x: coordinate + 18, y: coordinate },
+        { x: coordinate + 18, y: coordinate + 8 },
+        { x: coordinate + 10, y: coordinate + 8 },
+      ];
+      hatch.pattern = {
+        patternId: "translation-pattern",
+        origin: { x: coordinate + 0.13, y: coordinate + 0.27 },
+        rotation: 37,
+        ...(mode === "model"
+          ? { mode, modelWidthMetres: 0.75 }
+          : { mode, paperWidthMetres: 0.003 }),
+      };
+      const target = { kind: "hatch" as const, id: hatch.id };
+      const anchor = { x: -2.25, y: 1.75 };
+      const before = serializeProject(p);
+      for (const action of ["move", "x", "y"] as const)
+        for (const metres of [-0.68, 0, 0.68]) {
+          const point = {
+            x: anchor.x + (action === "y" ? 0 : metres),
+            y: anchor.y + (action === "x" ? 0 : metres),
+          };
+          const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
+          const legacy = editAtPointer({ base: p, target, action, index: null, anchor }, p, point);
+          const session = beginSelectionMove(p, [target], anchor);
+          const patch = previewSelectionGeometry(session, p, [target], point);
+          const shared = previewSelectionMove(session, p, [target], point);
+          assert.deepEqual(shared, legacy);
+          const actual = storeyOf(patch.geometry).hatches[0]!;
+          assert.deepEqual(actual, storeyOf(legacy).hatches[0]);
+          assert.deepEqual(actual.pattern, {
+            ...hatch.pattern,
+            origin: { x: hatch.pattern.origin.x + delta.x, y: hatch.pattern.origin.y + delta.y },
+          });
+          assert.deepEqual(deserializeProject(serializeProject(shared)), shared);
+          const history = createHistory(p),
+            committed = commitProject(history, shared);
+          assert.equal(committed.past.length, metres === 0 ? 0 : 1);
+          assert.deepEqual(undoProject(committed).present, p);
+          if (metres !== 0) assert.deepEqual(redoProject(undoProject(committed)).present, shared);
+          assert.equal(serializeProject(p), before);
+        }
+    });
 test("atomic mixed translation keeps internal corner/T, host window parameters and source snapshot", () => {
   const p = fixture(),
     targets = [...selectionIndex(p).values()],
