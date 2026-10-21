@@ -73,7 +73,7 @@ for (const withWindows of [false, true]) {
       mark("surfaceCompositionMs");
       const packed = cache.update(display, [0, 0, 0], selected);
       mark("bufferUpdateMs");
-      // Current BimSolidView recomputes this base when geometryPatch changes.
+      // Previous BimSolidView path: rebuild on every geometryPatch (comparison).
       const windows = buildingWindowSelectionSurfaces(project, allows);
       mark("windowBaseMs");
       const shown = selectionMoveWindows(windows, project, patch, allows);
@@ -83,7 +83,7 @@ for (const withWindows of [false, true]) {
       for (const id of selected) selectionEdges(surfaceFaces(display, id));
       surfaceFaceCount(display);
       mark("wallOutlineAndEmptyMs");
-      // Separate diagnostic: cost remaining if only the base were memoized.
+      // Current BimSolidView: reuse the memoized basis, compose only the patch.
       selectionMoveWindows(stableWindows, project, patch, allows);
       mark("stableWindowCompositionMs");
       samples.push(times);
@@ -149,7 +149,7 @@ console.log(
       platform: platform(),
       cpu: cpus()[0]?.model,
       method:
-        "Fixed two-wall selection; 200 samples, first separately, 50 warmup then 150 measured. Six synthetic cases in fixed order. Preparations are session-cold, not process-cold. CPU service timings and planned upload bytes only; no React, snapping, GPU, native or frame claim. stableWindowCompositionMs is a separate diagnostic, not part of current path. Validation outside timing.",
+        "Fixed two-wall selection; 200 samples, first separately, 50 warmup then 150 measured. Six synthetic cases in fixed order. Preparations are session-cold, not process-cold. CPU service timings and planned upload bytes only; no React, snapping, GPU, native or frame claim. windowBaseMs plus windowCompositionMs measure the previous rebuild path; stableWindowCompositionMs measures the current composition with a reused basis, separately. Validation outside timing.",
       rows,
     },
     null,
