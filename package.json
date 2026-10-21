@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "benchmark:browser": "vite --config benchmarks/vite.config.ts"
+    "benchmark:browser": "vite --config benchmarks/vite.config.ts",
+    "check:architecture": "node --test scripts/architecture-graph.test.mjs && node scripts/check-architecture.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
