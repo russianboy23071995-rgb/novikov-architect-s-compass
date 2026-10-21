@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `df3dcd5` nach PR420 (grüne CI). Legacy-Inventur aktualisiert, Einzel-Linie/Schraffur move als noch voller Vorschaupfad belegt. 69 Tests, zwei Vergleichsläufe bestanden. Produkt unverändert; einziger aktiver Auftrag §9.
+Geprüfte Code-Basis: 21.10.2026, main `926c720` nach PR421, Folgebranch refactor/single-selection-move. Einzel-Linie/Schraffur frei bewegen im Grundriss gemeinsam angebunden; 1140 Tests, Typen/Architektur/Lint/Build und 2D-Browserablauf bestanden. Details unten AUD14-04/05, aktiver Auftrag nur Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13136,6 +13136,11 @@ Ressourcenvergleich mit vollständigem Kontext und Höhenfallback liefert exakte
 
 Zwei Läufe mit wechselnder/invertierter Reihenfolge, 336 vollständige Kalt-/Änderungsvergleiche bestanden, keine Browserfehler. Große Einzeländerungen schneller, Kalt-/Höhenmehrkosten bleiben; konkreten Kandidaten parken. Browser-CPU ist kein CadWorkspace-/GPU-/Gesamtframe-/Speicherbeleg. Typen/Lint/frischer statischer Build bestanden. Rohdaten, Änderungskarte und Grenzen: docs/wall-resource-browser-comparison.md. Einziger Folgeauftrag §9: vorhandene Legacy-Bewegungs-/Anschlussinventur gegen aktuellen main abgleichen und genau einen offenen Pfad bestimmen.
 
-### AUD14-04/05 – Aktuelle Legacy-Inventur, 21.10.2026
+### AUD14-04/05 – Historische Legacy-Inventur vor Einzelbewegungsanbindung, 21.10.2026
 
 Historische Restangaben für Linienpunkt/-kontur, Fenster2D und Wandkörpergriff/Endstrecken gegen heutige Adapter korrigiert. Einzel-Linie/Schraffur move erreicht weiterhin vollständige Projektvorschau, obwohl gemeinsame Auswahlbewegung unterstützt. Zwei Diagnoseprozesse: insgesamt 72 vollständige Projekte und 72 Zielgeometrien gleich, einschließlich Musterursprung; große direkte Vorschau Linie37–53 ms/Schraffur73–99 ms gegenüber lokalem Auswahlpatch0,05–0,09/0,42–0,59 ms. Kein Gesamtframevergleich. 69 fokussierte Tests und Typen/Lint bestanden. Änderungskarte, Quellen und Grenzen: docs/legacy-movement-inventory-2026-10-21.md. Einziger Folgeauftrag §9: freie Einzelbewegung im Grundriss gemeinsam routen, keine separate Werkzeuglogik.
+
+
+### AUD14-04/05 – Gemeinsame freie Einzelbewegung, 21.10.2026
+
+PR421 grün in main 926c720. Folgebranch bindet einzelne Linien/Schraffuren in 2D an vorhandene Auswahlbewegung an; nur UI-Routing, keine neue Domain-/Rendererlogik. Gewählter Ursprung, ToolInteraction, Musterursprung, Stil/Ebene und vollständiger Commit erhalten. 1140 Tests, Typechecks, Architektur, gezieltes Lint und Build bestanden. Browser: Linie per Canvas-Klick, Mauerwerk-Schraffur mit Winkel/Tab/Länge/Enter, Undo/Redo und Abbruch. API-Wiederholung 36 vollständige Projekte und36 Zielgeometrien exaktgleich. Keine native Frame-/Recovery-/IFC-Gesamtfreigabe. Details docs/single-drawing-move.md. Einziger Folgeauftrag Masterplan §9: direkte axis/x/y für Linien/Schraffuren abgleichen und messen; nicht parallel implementieren.
