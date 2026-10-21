@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `1471a31` nach PR408 (grüne CI 39632694692). Gebäudeaufbau im Folgebranch perf/building-phase-profile aufgeschlüsselt: wiederholte Fenster-Hostsuche ist der größte reproduzierte Abschnitt. Keine Produktcodeänderung; genau ein aktiver Folgeauftrag §9. Browser-/Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `84114d1` nach PR409 (grüne CI 39633339514). Folgebranch perf/window-host-grouping gruppiert Fenster einmal pro Solidableitung nach Host. Exakte Vergleichsgeometrie, 1137 Tests, Typprüfungen, Lint, Architektur und Build bestanden. Genau ein aktiver Folgeauftrag §9; kombinierte Browser-/Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR409 grün in main 84114d1 integriert. Lokale Fenster-Hostgruppierung im Folgebranch ersetzt wiederholte globale Filtersuche. Zwei alternierende Vorher-/Nachher-Läufe: 1004 Wände/1002 Fenster, vollständiger Gebäudeaufbau 129–134 auf 43–45 ms. Geometrie exakt gleich, 1137 Tests bestanden. Keine Browser-/Framefreigabe.
 
 21.10.2026: PR408 grün in main 1471a31 integriert. Zwei Gebäude-Phasenmessungen mit 84 vollständigen Flächen-/Volumen-/Bounds-Vergleichen bestanden. Bei 1004 Wänden/1002 Fenstern entfallen 71–73 ms von 105–113 ms instrumentierter Gesamtzeit auf wiederholte Fensterzuordnung. Kein Produktfix in diesem Messauftrag.
 
@@ -571,7 +573,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: wiederholte globale Fenster-Hostsuche im Solidaufbau begrenzen (AUD14-03/04).** Pro Geometrieableitung Fenster einmal nach wallId gruppieren und freie Wände über diese lokale Zuordnung versorgen. Reihenfolge, vollständige Fenstergeometrie, Öffnungsvereinigung, Anschlüsse und Heights/Bounds exakt erhalten; keine persistente Cache-Schicht und kein neuer Modellbestand. Gegen bisherigen Vollpfad mit mehreren Fenstern, leeren Hosts, Höhen und großen Restmodellen vergleichen; kalte Gegenmessung. Flexible Fensterobjekte bleiben unverändert. Danach kombinierte Browserabnahme der Puffer-/Solidänderung; Native-/Frame-Gates bleiben offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: kombinierte Browser-Abnahme von Pufferpackung und Fenster-Hostgruppierung (AUD14-03/04).** Frischen Produktbuild mit mehreren Geschossen/Wänden/Fenstern prüfen: Auswahl, gemeinsame Bewegung, Platzieren, Undo/Redo und Abbruch, Sichtbarkeit sowie Höhen-/Fensteränderungen. Reguläre Projektdateien mit gemeinsamem Vollpfad vergleichen; Darstellung und Umrandung erhalten. CPU-Messungen nicht als GPU-/Gesamtframebeleg ausgeben. Native-/Frame-Gates bleiben ausdrücklich offen; danach verbleibende Kosten anhand aktueller Profile priorisieren.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4801,3 +4803,48 @@ Snapshot-Erzeugung außerhalb der Zeit. Timer/JIT/GC/Systemlast nicht isoliert,
 kein p95-/Browser-/GPU-/Frame-/Native-Nachweis. Keine neue IFC-/Recoveryabnahme.
 Abschlusskarte: keine produktiven Importkanten oder Modellkopien; Testquellen
 nach Ausführung entfernt. Einziger aktiver Folgeauftrag ausschließlich §9.
+
+
+### AUD14-03/04 – Ableitungs-lokale Fenster-Hostgruppierung (21.10.2026)
+Änderungskarte vor Code: Basis PR409 6258a2c, grün nach main 84114d1 übernommen.
+Ziel: unveränderte freie Wandextrusion ohne Fenster-Gesamtscan je Wand. Normale
+mehrfenstrige Wand, leere Hosts, Neuzuordnung sowie überlappende Öffnungen im
+Geometriescope; bestehende Anschlussregeln bleiben erhalten. Eigentümer ist die
+bestehende gemeinsame Solidableitung in lib/bim/geometry.ts (Übergangsbaustein),
+kein neuer generischer Dienst in lib/bim. Quelle ist der geprüfte Geometriescope,
+window.wallId, Geschosshöhe und unveränderte Fensterobjekte. Keine neue Application-
+Aktion: Vorschau/Commit/Undo/Abbruch nutzen weiter dieselben validierten Wege.
+
+Map je Ableitung einmal aufbauen, Originalobjekte/Reihenfolge pro Host erhalten;
+keine persistente Registry, keine Projektkopie, keine neue Importkante. Gemeinsamer
+Rendererpfad erbt dies für alle Verbraucher; keine werkzeugweisen Anpassungen.
+Fenster bleiben flexible Objekte/zukünftige Bibliothekselemente; Öffnungsgeometrie
+unverändert. 2D, Format/Recovery/IFC und AI besitzen keine geänderten Verträge.
+
+Abnahme: neuer permanenter Geometriestest vergleicht mehrere/überlappende Fenster
+und leere Hosts mit isolierten Wänden bei 3,5 m Geschosshöhe/-0,2 m Versatz;
+Hostwechsel bei derselben Eingabe wird neu abgeleitet. Vollsuite 1137/1137,
+App-/Benchmark-Typecheck, fokussiertes Lint, Architekturgrenze und Build bestanden.
+Vorher-Oracle im window-host-comparison.ts stellt ausschließlich die alte
+Filtersuche in temporärem Modul wieder her (eindeutige Anker, exklusive Datei,
+finally-Cleanup); alte und neue Pfade erhalten denselben Snapshot. Sieben
+unterschiedliche Szenen pro Größe, Reihenfolge alternierend; zwei Prozesse.
+42 vollständige Flächen-/Volumen-/Bounds-Vergleiche bestanden. Zusätzlich 42
+Vergleiche im aktualisierten Phasenmessstand; Fenster-lookup misst nun lokale
+Map-Abfrage + Transformation, Gruppierungsaufbau liegt im inklusiven Wandloop.
+
+Rohdaten window-host-results.json, window-host-repeat-results.json und
+window-host-phase-results.json. Median des vollständigen kalten Gebäudeaufbaus,
+1004 Wände/1002 Fenster: alt 133,629 / 129,010 ms, neu 42,996 / 45,166 ms;
+rund 65–68 % weniger CPU-Zeit. Kleines 4-Wand-Fixture alt 1,30/1,58 ms, neu
+1,51/1,78 ms: keine pauschale Beschleunigung für jede Größe behaupten. 104-Wand-
+Fall alt 7,79/11,70, neu 6,47/7,21 ms. Shared untere Caches, JIT/GC/Systemlast
+bleiben Grenzen; kein Browser-, GPU-, Frame- oder Native-Beleg. Validierung und
+Snapshotaufbau außerhalb des kalten Rendervergleichs. Gegenüber älteren
+Messungen keine kausalen Vergleiche über unterschiedliche Last ableiten.
+
+Abschlusskarte: Produktdiff nur lokale Zuordnung und Lookup; keine neue
+Abhängigkeit, Modellregel, Persistenz oder History. Veränderte Diagnoseanker
+mitgepflegt; temporäre Module nachweislich entfernt. Kombinierte praktische
+Abnahme folgt ausschließlich §9. Nutzer-Test: mehrere Wände mit Fenstern in 3D
+bewegen, platzieren, Undo/Redo/Abbruch; Öffnungen und Auswahl müssen stabil bleiben.

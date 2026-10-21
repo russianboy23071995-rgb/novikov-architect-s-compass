@@ -36,6 +36,14 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     max: [-Infinity, -Infinity, -Infinity],
   };
   const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w]));
+  // Derivation-local index: preserve window order and objects, never retain a
+  // stale host assignment across model/preview changes.
+  const windowsByHost = new Map<string, Project["storeys"][number]["windows"]>();
+  for (const window of storeyOf(project).windows) {
+    const group = windowsByHost.get(window.wallId);
+    if (group) group.push(window);
+    else windowsByHost.set(window.wallId, [window]);
+  }
   for (const wall of storeyOf(project).walls) {
     const connection = joined.get(wall.id);
     if (connection) {
@@ -53,14 +61,12 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     const body = wallBody(wall);
     const ux = (wall.end.x - wall.start.x) / length;
     const uy = (wall.end.y - wall.start.y) / length;
-    const openings = storeyOf(project)
-      .windows.filter((w) => w.wallId === wall.id)
-      .map((w) => ({
-        left: w.position * length - w.width / 2,
-        right: w.position * length + w.width / 2,
-        bottom: w.sillHeight,
-        top: w.sillHeight + w.height,
-      }));
+    const openings = (windowsByHost.get(wall.id) ?? []).map((w) => ({
+      left: w.position * length - w.width / 2,
+      right: w.position * length + w.width / 2,
+      bottom: w.sillHeight,
+      top: w.sillHeight + w.height,
+    }));
     const sorted = (values: number[]) => [...new Set(values)].sort((a, b) => a - b);
     const xs = sorted([0, length, ...openings.flatMap((w) => [w.left, w.right])]);
     const zs = sorted([0, wall.height, ...openings.flatMap((w) => [w.bottom, w.top])]);

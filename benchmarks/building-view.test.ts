@@ -10,6 +10,42 @@ import { selectWorkingStorey } from "../src/application/storeys/working-storey.t
 import { workingStoreyElevation } from "../src/domain/storeys/elevation.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 
+test("host grouping preserves isolated wall results and refreshes after reassignment", () => {
+  const p = structuredClone(buildingViewFixture(3));
+  const storey = p.storeys[0]!;
+  const first = storey.windows[0]!;
+  storey.windows = [
+    { ...first, id: "second", position: 0.7, width: 0.5 },
+    { ...first, width: 0.5, position: 0.2 },
+    { ...first, id: "overlapping", width: 0.4, position: 0.22 },
+  ];
+  for (const wall of storey.walls) wall.baseOffset = -0.2;
+  for (const reassign of [false, true]) {
+    if (reassign) storey.windows[0]!.wallId = storey.walls[1]!.id;
+    const combined = buildPreviewSolid({ storey, assets: p.assets }, 3.5);
+    let volume = 0;
+    for (const wall of storey.walls) {
+      const isolated = buildPreviewSolid(
+        {
+          storey: {
+            ...storey,
+            walls: [wall],
+            windows: storey.windows.filter((w) => w.wallId === wall.id),
+          },
+          assets: p.assets,
+        },
+        3.5,
+      );
+      assert.deepEqual(
+        combined.faces.filter((f) => f.wallId === wall.id),
+        isolated.faces,
+      );
+      volume += isolated.volume;
+    }
+    assert.equal(combined.volume, volume);
+  }
+});
+
 test("working storey and visibility preserve shared scene but invalidate editing context", () => {
   const p = buildingViewFixture(2),
     scene = buildBuildingSolid(p);

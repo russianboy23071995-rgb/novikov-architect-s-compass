@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `1471a31` nach PR408 (grüne CI). Gebäudeaufbau im Folgebranch perf/building-phase-profile vermessen, 84 vollständige Ergebnisvergleiche bestanden; Fenster-Hostsuche als redundanter Hauptblock lokalisiert. Browser-/Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `84114d1` nach PR409 (grüne CI). Fenster-Hostgruppierung im Folgebranch perf/window-host-grouping implementiert, 1137 Tests und exakte Geometrievergleiche bestanden. Kombinierte Browser-/Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13085,3 +13085,13 @@ keine Produktänderung. Typecheck/Lint/Architektur bestanden. Methoden, Grenzen
 und Änderungskarte im Masterplan. Lokale Hostgruppierung ist nächster Einzelauftrag
 gemäß §9; kein dauerhafter Cache, keine neue Fenster-/Bibliotheksdefinition.
 Native-/Frame-/Browser-Gates bleiben offen.
+
+
+### AUD14-03/04 – Lokale Fenster-Hostgruppierung, 21.10.2026
+PR409 in main 84114d1. Folgebranch ersetzt Fenster-Gesamtsuche je freier Wand
+durch einmalige ableitungs-lokale Map, Originalobjekte/Reihenfolge unverändert.
+Kein dauerhafter Cache und keine Bibliotheks-/Schemaentscheidung. 1137 Tests,
+Typen/Lint/Architektur/Build bestanden; 42 Vorher-Oracle- und 42 Phasenvergleiche
+mit vollständiger Geometriegleichheit. Größter Fall: kalter Gebäudeaufbau
+129–134 auf 43–45 ms. Grenzen und Änderungskarte im Masterplan; Browserabnahme
+ist der einzelne nächste Auftrag §9, kein Frame-/Native-Nachweis.
