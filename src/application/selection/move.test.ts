@@ -5,7 +5,8 @@ import { previewSelectionCommand, applySelectionCommand } from "../commands/sele
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { editAtPointer } from "../../lib/bim/direct-edit.ts";
 import { resolveToolSnap } from "../tools/snapping.ts";
-import { resolveEditSnap } from "../direct-edit/snapping.ts";
+import { resolveEditSnap, editDirection } from "../direct-edit/snapping.ts";
+import { moveElement } from "../direct-edit/transforms.ts";
 import { previewNumericMove } from "../direct-edit/numeric.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -135,6 +136,102 @@ function fixture() {
     fill: defaultHatchFill,
   });
 }
+for (const kind of ["line", "hatch"] as const)
+  for (const coordinate of [0, 1e9])
+    test(`shared oblique offset equals independent original arithmetic: ${kind}, ${coordinate}`, () => {
+      const p = fixture(),
+        target = { kind, id: kind === "line" ? "L" : "S" };
+      const ring = [
+        { x: coordinate, y: coordinate },
+        { x: coordinate + 3, y: coordinate + 4 },
+        { x: coordinate + 7, y: coordinate + 1 },
+        { x: coordinate + 4, y: coordinate - 3 },
+      ];
+      if (kind === "line") storeyOf(p).lines![0]!.points = ring;
+      else {
+        storeyOf(p).hatches[0]!.points = ring;
+        p.hatchPatterns.push({
+          id: "oblique",
+          name: "Oblique",
+          width: 1,
+          height: 1,
+          lines: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }],
+        });
+        storeyOf(p).hatches[0]!.pattern = {
+          patternId: "oblique",
+          mode: "model",
+          origin: { x: coordinate + 0.13, y: coordinate + 0.27 },
+          rotation: 37,
+        };
+      }
+      const anchor = { x: coordinate - 0.25, y: coordinate + 1.75 },
+        before = serializeProject(p);
+      const visibility = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+      for (const index of [0, 1, 2]) {
+        const edit = { base: p, target, action: "axis" as const, index, anchor };
+        const direction = editDirection(edit)!;
+        const session = beginSelectionMove(p, [target], anchor, visibility);
+        for (const metres of [-0.68, 0, 0.68])
+          for (const numeric of [false, true]) {
+            const point = numeric
+              ? previewNumericMove(edit, p, target, String(metres)).point
+              : metres === 0
+                ? anchor
+                : { x: anchor.x + metres, y: anchor.y + 2 * metres + 0.37 };
+            // Independent pre-extraction full path formula: no shared helper in oracle.
+            const dx = point.x - anchor.x,
+              dy = point.y - anchor.y;
+            const length = Math.hypot(direction.x, direction.y);
+            const distance = (dx * direction.x + dy * direction.y) / length;
+            const delta = {
+              x: (direction.x / length) * distance,
+              y: (direction.y / length) * distance,
+            };
+            const expected = moveElement(p, target, delta);
+            assert.deepEqual(editAtPointer(edit, p, point), expected);
+            const patch = previewSelectionGeometry(
+              session,
+              p,
+              [target],
+              point,
+              visibility,
+              direction,
+            );
+            const shared = previewSelectionMove(session, p, [target], point, visibility, direction);
+            assert.deepEqual(shared, expected);
+            const field = kind === "line" ? "lines" : "hatches";
+            assert.deepEqual(storeyOf(patch.geometry)[field]?.[0], storeyOf(expected)[field]?.[0]);
+            assert.deepEqual(deserializeProject(serializeProject(shared)), expected);
+            const history = commitProject(createHistory(p), shared);
+            assert.equal(history.past.length, metres === 0 ? 0 : 1);
+            assert.deepEqual(undoProject(history).present, p);
+            if (metres !== 0) assert.deepEqual(redoProject(undoProject(history)).present, expected);
+          }
+        for (const invalid of [
+          { x: 0, y: 0 },
+          { x: NaN, y: 1 },
+          { x: Infinity, y: 0 },
+        ]) {
+          assert.throws(() =>
+            previewSelectionGeometry(session, p, [target], anchor, visibility, invalid),
+          );
+          assert.throws(() =>
+            previewSelectionMove(session, p, [target], anchor, visibility, invalid),
+          );
+        }
+        assert.throws(() =>
+          previewSelectionMove(session, { ...p }, [target], anchor, visibility, direction),
+        );
+        const hidden = createLayerVisibilityPolicy(p, {
+          scope: { kind: "bim-project" },
+          hiddenLayerIds: [p.defaultLayerIds.line],
+        });
+        assert.throws(() =>
+          previewSelectionGeometry(session, p, [target], anchor, hidden, direction),
+        );
+      }
+      assert.equal(serializeProject(p), before);
+    });
 for (const kind of ["line", "hatch"] as const)
   for (const axis of ["x", "y"] as const)
     test(`shared fixed ${axis} ${kind}: signed input, constrained snap/patch/commit and history`, () => {

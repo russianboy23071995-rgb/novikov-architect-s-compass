@@ -1,4 +1,5 @@
 import { translatePoint } from "../../geometry/primitives/point.ts";
+import { directionOffset } from "../../geometry/projections/direction.ts";
 import {
   createProjectSnapshot,
   type ProjectResultMode,
@@ -90,7 +91,12 @@ function evaluatePointer(
   if (!Number.isInteger(i) || !points[i]) throw new Error("Ungültiger Griff.");
   const next = points[i === 0 ? 1 : i - 1]!;
   const vector = { x: points[i]!.x - next.x, y: points[i]!.y - next.y };
-  if (action === "axis" || action === "stretch") {
+  if (action === "axis") {
+    const offset = directionOffset(pointer, anchor, vector);
+    if (!offset) throw new Error("Ungültige Bewegungsachse oder Zielposition.");
+    Object.assign(delta, offset);
+  }
+  if (action === "stretch") {
     const length = Math.hypot(vector.x, vector.y);
     const distance = (delta.x * vector.x + delta.y * vector.y) / length;
     delta.x = (vector.x / length) * distance;
