@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `0e1edd0` nach PR417 (grüne CI). Archivierte Cachekosten getrennt gemessen, 224 geänderte Vollpfadvergleiche bestanden. Produkt unverändert. Kalt-/Frame-/Native-Gates offen; einziger aktiver Auftrag §9.
+Geprüfte Code-Basis: 21.10.2026, main `5d0ca31` nach PR418 (grüne CI). Gebündelter Ressourcenpilot exaktgleich, Kaltbudget nicht bestanden; nicht produktiv übernommen. Diagnose erhalten; einziger aktiver Auftrag §9, Frame-/Native-Gates offen.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13127,3 +13127,7 @@ Vollständige Signaturen und begrenzte schwache Ressourcenzuordnung erhalten Exa
 ### AUD14-03/04 – Cachepflege und Vollinvalidierung getrennt, 21.10.2026
 
 Zwei Läufe, 224 geänderte Vollpfadvergleiche bestanden; Benchmark-Typen/Lint grün. Signaturaufbau rund 1–2 ms, Vollinvalidierung bezahlt zusätzliche Metadaten-/Höhen-/Freeze-Arbeit. Zähler bestätigen 1000 Hits/1 Miss bei freien Einzeländerungen, 0/1001 bei Höhe. Instrumentierung beeinflusst Laufzeiten erheblich, Kaltaufbau separat offen. Nachweis/Änderungskarte/Budget: docs/extrusion-cache-costs.md. Einziger Folgeauftrag §9 prüft pro Wand gebündelte Ressourcen mit Vollinvalidierungsfallback; keine Produktübernahme aus Trefferzahl allein.
+
+### AUD14-03/04 – Gebündelte Wandressourcen nicht übernommen, 21.10.2026
+
+Ressourcenvergleich mit vollständigem Kontext und Höhenfallback liefert exakte Geometrie/Sharing, aber Kaltaufbau in beiden Abschlussläufen 12–16 % langsamer, Wandvorteil instabil. Produkt vollständig zurückgenommen. Kandidat und Rohdaten ausschließlich Diagnose. Änderungskarte/Fassungsgrenzen: docs/wall-resource-bundle-pilot.md. Nächster Einzelauftrag §9 vergleicht Produktion und archivierten Kandidaten im tatsächlichen isolierten Browserpfad; keine weiteren Node-Mikrovarianten davor.
