@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `06a9dc0` nach PR399 (grüne CI); PR400 ist offen, CI grün, Browserabnahme seines neuen Bewegungs-/Snapshot-Pfads ausstehend. Verbindlicher Änderungs-Gate und genau ein aktiver Auftrag: §9. Kontinuierliche 3D-/Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `b567902` nach PR400 (grüne CI). Gemeinsamer Bewegungs-/Snapshot-Pfad im frischen Produktbrowser funktional abgenommen; sechs Exporte gegen Vollpfad geprüft. Verbindlicher Änderungs-Gate und genau ein aktiver Auftrag: §9. Kontinuierliche 3D-/Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR400 nach Konfliktabgleich mit dem Architekturvertrag a70a386 und grüner CI 39621656423 in main b567902 integriert. Frischer statischer Produktbuild dc385a1: T-Hostwechsel und Rückwechsel, Fenster/Nachbarn, ein Undo/Redo und Abbruch funktional geprüft. Sechs Browserexports entsprechen vollständig in ihren Geschossdaten dem unabhängigen mutable Vollpfad. Neue Importpfeile ohne Rückweg/Zyklus; vorhandener contour/offset-Zyklus bleibt offen. Aktiver Folgeauftrag: Architekturgrenzen-Test gemäß §9.
 
 21.10.2026: Verbindlichen Änderungs-Gate für jede Funktion/Korrektur in AGENTS.md und §9 dokumentiert: Änderungskarte vor Code, Verantwortungs-/Importprüfung und risikobezogene Abnahme nach jedem begrenzten Schritt. Dokumentationsänderung ohne Produktcode; PR400 ist noch offen und bleibt der einzige aktive Produktauftrag. Die Importgraph-CI-Sicherung ist erst nach dessen Browserabnahme/Integration als eigenständiger Schritt geplant, nicht bereits implementiert.
 
@@ -553,7 +555,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: AUD14-04/05 – den bereits in PR400 implementierten gemeinsamen Bewegungs-/Snapshot-Pfad unabhängig im Produktbrowser abnehmen und nach grüner CI regulär integrieren.** Neues und gewechseltes T-Fangziel mit Host, Nachbarn und Fenstern prüfen; Abbruch, genau ein Undo/Redo und vollständigen Projekt-/Flächen-/Exportvergleich gegen den unabhängigen Vollpfad nachweisen. Mutations- und Fehlerfälle sowie private Snapshot-Provenienz bleiben Pflicht. PR400 hat 1134 Tests/grüne CI und Node-Phasenwerte, aber noch keine neue Browser-/Native-/Frame-Abnahme. Keine zweite Implementierung parallel auf main.
+**Genau ein unmittelbarer aktiver Auftrag: Architekturgrenzen-Test in CI einführen.** Nach grüner CI und funktionaler Browserabnahme ist PR400 integriert. Auf der aktuellen produktiven Importinventur einen reproduzierbaren Gate gegen neue verbotene Schichtpfeile und neue Laufzeitzyklen implementieren. Bestehende Ausnahmen mit Eigentümer und Abbaufolge explizit erfassen; absichtliche Negativprobe und vollständige CI nachweisen. Keine gleichzeitige Behebung des contour/offset-Zyklus oder weiterer Produktfunktionen. Dessen gezielter Abbau folgt danach.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -568,7 +570,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 7. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
 8. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-**Aktueller AUD14-Status (20.10.2026, main PR399; gemeinsamer Bewegungs-/Snapshot-Pfad im Folgebranch automatisiert geprüft, Browserabnahme offen):**
+**Aktueller AUD14-Status (21.10.2026, main PR400; gemeinsamer Bewegungs-/Snapshot-Pfad automatisiert und funktional im Produktbrowser geprüft):**
 
 | ID | Verifizierter Teilstand | Verbleibende Arbeit |
 | --- | --- | --- |
@@ -576,7 +578,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 | AUD14-02 | XY/Z und Schraffurvergleich ohne vollständige Bildserialisierung; gemeinsame geprüfte Snapshots | Regressionsschutz bei allen neuen Verbrauchern; globale Commitvalidierung bleibt getrennt |
 | AUD14-03 | Shader-/Pufferlebensdauer, begrenzte Uploads; Bounds nur Patchvertices (PR385); gemeinsame stationäre Partition und begrenzte Pufferpatches lokal geprüft | Kalte Vorbereitung/Closurewechsel, flache Gesamtflächen für weitere Verbraucher sowie Browser-/Gesamtframes offen |
 | AUD14-04 | Gemeinsame vorbereitete Adapter, Ownership und Ansichtsbasis; PR391-Extrusionsreuse an 51-Wand-Gruppe im Produktbrowser mit Vollpfad-Exportgleichheit geprüft | Legacy-Pfade, globale Modell-/Planableitung und begrenzte Verantwortungsbereinigung offen |
-| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR395 integriert: begrenzte T-Komposition mit automatisierter Flächen-/Fenster-/Achsgleichheit. Browser-Hostwechsel, vollständige Exportgleichheit, Undo/Redo und Abbruch geprüft | Kontinuierliche 3D-Patchvorschau/Native-/Frame-Abnahme, erste/geänderte Ziele gemessen, Snapshot-Wiederverwendung automatisiert und funktional im Browser geprüft; weitere zusammengeführte Bewegungsprüfung automatisiert verglichen, Browserabnahme offen; Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
+| AUD14-05 | Lokale Ursprungs-, Tiefen- und Fremdendpunktabfragen; große Gruppe mit gelösten T-Anschlüssen funktional geprüft. PR395 integriert: begrenzte T-Komposition mit automatisierter Flächen-/Fenster-/Achsgleichheit. Browser-Hostwechsel, vollständige Exportgleichheit, Undo/Redo und Abbruch geprüft | Kontinuierliche 3D-Patchvorschau/Native-/Frame-Abnahme, erste/geänderte Ziele gemessen, Snapshot-Wiederverwendung automatisiert und funktional im Browser geprüft; zusammengeführte Bewegungsprüfung automatisiert und im Produktbrowser verglichen; Restkosten großer Gruppen und Kamera-/Indexvorbereitung offen |
 | AUD14-06 | Transaktionaler Collector, manuelle/automatische Koordination, aktuelle/vorherige/fremde Slots; Recovery-Startentscheidung vor Autosave geschützt (PR384) | Stundenlauf, echte Quota, aktive Mehrtab-/Fokusabbrüche und Prozess-/GPU-Peaks offen |
 | AUD14-07 | S1 G/GB und Teilworkflows; KG/EG/OG-Höhenworkflow einschließlich produktiver Recovery/Datei/IFC nachgewiesen (PR384) | Schwere Native-/Shift-/Kaltstart-/Frame-/Release-Gates und Langsession bleiben offen |
 
@@ -4309,3 +4311,47 @@ allgemeines Latenz- oder Frameversprechen. Phasen/actual/previous sind getrennte
 Ausführungen; Phasenmediane nicht addieren. Erste Ziele sind sitzungs-, nicht
 prozesskalt. Zwei volle Modellprüfungen und Restscans bleiben globale Arbeit.
 Keine neue Browser-, Native-, Shift- oder Frameabnahme. Aktiver Folgeauftrag §9.
+
+
+### AUD14-04/05 – Browser- und Architekturabnahme PR400 (21.10.2026)
+
+PR400 nach grüner CI 39621656423 am geprüften Head dc385a1 in main b567902
+integriert. Nur Dokumentationskonflikte mit a70a386 gelöst; neuer Änderungs-Gate
+und aktualisierte Folgeprioritäten vollständig erhalten. Keine Produktänderung
+in diesem Abnahmeschritt. 1134 Tests, beide Typprüfungen, Lint und Build in CI
+bestanden. Frischer statischer Abnahmebuild mit height-acceptance.config.ts;
+bekannter Chunkgrößenhinweis, keine neue Produktwarnung.
+
+Änderungskarte / Abschlusskarte zum neuen §9 (auch im PR vor Merge dokumentiert):
+- Nutzerziel AUD14-04/05: dieselbe T-Endpunktbewegung mit weniger Doppelprüfung.
+  Normal: wall-2 von wall-1 auf new-host. Grenzfall: zurück zum alten Host,
+  gelöste Nachbarn/Fenster, Abbruch und ein Undo/Redo. Keine neue Funktion.
+- Eigentümer: Domain-Factory validiert/private Provenienz; gemeinsame Wandaktion
+  besitzt Regeln, prepared-wall koordiniert Patch. Ein BIM-Modell, stabile IDs,
+  bestehender Geschosskontext und Meter. Keine UI-Modellkopie.
+- Gemeinsamer Weg: editAtPointerSnapshot und mutable editAtPointer verwenden
+  denselben Evaluator/updateWall. Unabhängiger Commit vollständig; kein AI-
+  Sonderpfad. Schema/Recovery/IFC-Format, Windows/macOS-Adapter unverändert.
+- AST-Importprüfung von 376 produktiven Dateien: neue Laufzeitpfeile model.ts
+  und direct-edit.ts zu domain/project/owned-snapshot.ts besitzen keinen
+  Rückweg. domain/geometry/constraints ohne UI/Renderer/Interop/Application-
+  Import. Existierender contour/offset-Laufzeitzyklus bestätigt, nicht behoben.
+  Das ist ein einmaliger Abgleich, noch kein dauerhafter CI-Gate.
+
+Browser: isolierter Port8087, bound-height-workspace.html?tTransition=1.
+Fünf Wände/drei Fenster, alte und neue T-Gruppe sowie unbeteiligte Wand.
+Reale UI-Auswahl über Wand/Endpunkt und Punkt frei bewegen, Ziel (3,3) geklickt.
+Downloads novikov-project (81) bis (85).json in Downloads: vorher, platziert,
+ein Undo, Redo, erneuter Bearbeitungsbeginn/Abbruch. Bestehender Checker
+benchmarks/t-transition-export-check.ts vergleicht alle Geschossdaten gegen
+Ausgangsfixture und unabhängige mutable Aktion: alle fünf bestanden.
+Danach realer Rückwechsel von (3,3) auf (3,0) an wall-1; Export (86).json
+entspricht vollständig in den Geschossdaten connectSnappedT(editAtPointer(...))
+aus dem exportierten Redo-Zustand, nicht bloß der bewegten Wand.
+
+Statischer 3D-Zielzustand visuell kontrolliert, keine erfassten Konsolenfehler.
+Screenshot lokal outputs/owned-move-browser-3d.png. Dokumentierte Grenzen:
+kein kontinuierlicher Mousemove-/Shift-/Native-/Frame-Nachweis; UI-Platzierung
+ist kein direkter Beleg jedes Zwischenframes. Kein neuer IFC- oder Recovery-
+Rundlauf, da deren Code/Format unverändert; bestehende Nachweise erhalten.
+Keine pauschale AUD14-Gesamtfreigabe. Nächster Einzelauftrag ausschließlich §9.
