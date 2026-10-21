@@ -1,5 +1,5 @@
 import { selectionMovementAxes } from "../input/movement-axes.ts";
-import { projectDirection } from "../../geometry/projections/direction.ts";
+import { projectDirection, directionOffset } from "../../geometry/projections/direction.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import { prepareSelectionTranslation as prepareTranslation } from "./storey-translation.ts";
@@ -100,15 +100,19 @@ export function previewSelectionMove(
   targets: SelectionSet,
   point: Point,
   visibility?: LayerVisibilityPolicy,
+  direction?: Point,
 ): Project {
   if (session.base !== current || !sameTargets(session.targets, targets))
     throw new Error("Modell oder Auswahl geändert. Bewegung erneut beginnen.");
   assertMovableSelection(current, targets, visibility);
   const prepared = preparation(session);
-  return prepared.action.materialize(current, {
-    x: point.x - prepared.origin.x,
-    y: point.y - prepared.origin.y,
-  });
+  return prepared.action.materialize(current, movementOffset(point, prepared.origin, direction));
+}
+function movementOffset(point: Point, origin: Point, direction?: Point): Point {
+  if (!direction) return { x: point.x - origin.x, y: point.y - origin.y };
+  const offset = directionOffset(point, origin, direction);
+  if (!offset) throw new Error("Ungültige Bewegungsachse oder Zielposition.");
+  return offset;
 }
 function preparation(session: SelectionMove) {
   const prepared = preparations.get(session);
@@ -128,15 +132,13 @@ export function previewSelectionGeometry(
   targets: SelectionSet,
   point: Point,
   visibility?: LayerVisibilityPolicy,
+  direction?: Point,
 ) {
   if (session.base !== current || !sameTargets(session.targets, targets))
     throw new Error("Modell oder Auswahl geändert. Bewegung erneut beginnen.");
   assertMovableSelection(current, targets, visibility);
   const prepared = preparation(session);
-  return prepared.action.evaluate({
-    x: point.x - prepared.origin.x,
-    y: point.y - prepared.origin.y,
-  });
+  return prepared.action.evaluate(movementOffset(point, prepared.origin, direction));
 }
 
 export function selectionMoveInteraction(

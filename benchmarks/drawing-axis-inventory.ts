@@ -31,6 +31,8 @@ const timed = <T>(fn: () => T) => {
 };
 const rows = [];
 const fixedAdapters = process.argv.includes("--fixed-adapter");
+const sharedAxis = process.argv.includes("--shared-axis");
+assert.ok(!fixedAdapters || !sharedAxis, "Choose one protocol variant");
 const actions: readonly ("x" | "y" | "axis")[] = fixedAdapters ? ["x", "y"] : ["x", "y", "axis"];
 function numericDifference(a: unknown, b: unknown): number {
   if (Object.is(a, b)) return 0;
@@ -90,6 +92,10 @@ for (const size of [10, 100])
           : null,
       );
       const adapter = adapterPreparation.value;
+      // Preserve the raw pinned contour vector; pre-normalizing changes exact arithmetic.
+      const axisDirection = sharedAxis && action === "axis" ? direction : undefined;
+      const sharedProject = (point: typeof anchor) =>
+        previewSelectionMove(preparation.value, base, [target], point, undefined, axisDirection);
       const samples = [];
       let projectMismatches = 0,
         targetMismatches = 0,
@@ -111,7 +117,14 @@ for (const size of [10, 100])
             const r = timed(() =>
               adapter
                 ? adapter.geometryPreview!.evaluate(projected)
-                : previewSelectionGeometry(preparation.value, base, [target], projected),
+                : previewSelectionGeometry(
+                    preparation.value,
+                    base,
+                    [target],
+                    projected,
+                    undefined,
+                    axisDirection,
+                  ),
             );
             patch = r.value;
             patchMs = r.ms;
@@ -119,29 +132,17 @@ for (const size of [10, 100])
         }
         const equal = isDeepStrictEqual;
         const field = kind === "line" ? "lines" : "hatches";
-        const projectEqual = equal(
-          previewSelectionMove(preparation.value, base, [target], projected),
-          full,
-        );
+        const projectEqual = equal(sharedProject(projected), full);
         const targetEqual = equal(storeyOf(patch.geometry)[field]?.[0], storeyOf(full)[field]?.[0]);
         if (!projectEqual) projectMismatches++;
         if (!targetEqual) targetMismatches++;
         const numeric = previewNumericMove(session, base, target, String((i - 4) * 0.17));
         if (adapter)
           assert.deepEqual(adapter.preview("", String((i - 4) * 0.17), null).point, numeric.point);
-        if (
-          !equal(
-            previewSelectionMove(preparation.value, base, [target], numeric.point),
-            numeric.project,
-          )
-        )
-          numericMismatches++;
-        const maxNumericDifference = numericDifference(
-          previewSelectionMove(preparation.value, base, [target], projected),
-          full,
-        );
+        if (!equal(sharedProject(numeric.point), numeric.project)) numericMismatches++;
+        const maxNumericDifference = numericDifference(sharedProject(projected), full);
         const numericMaxDifference = numericDifference(
-          previewSelectionMove(preparation.value, base, [target], numeric.point),
+          sharedProject(numeric.point),
           numeric.project,
         );
         if (i === 8) {
@@ -178,6 +179,11 @@ for (const size of [10, 100])
           maxNumericDifference,
           numericMaxDifference,
         });
+        if (sharedAxis) {
+          assert.ok(projectEqual);
+          assert.ok(targetEqual);
+          assert.deepEqual(sharedProject(numeric.point), numeric.project);
+        }
       }
       const median = (values: number[]) => {
         const sorted = values.slice(1).sort((a, b) => a - b);
@@ -204,8 +210,11 @@ console.log(
     {
       basis: fixedAdapters
         ? "main be0c9b4 after PR424 plus shared fixed XY adapter"
-        : "Current working tree; original PR423 comparison protocol",
+        : sharedAxis
+          ? "main 4020047 after PR425 plus common direction-offset calculation"
+          : "Current working tree; original PR423 comparison protocol",
       fixedAdapters,
+      sharedAxis,
       runtime: process.version,
       method:
         "Projected mouse targets and signed numeric targets; index1, arbitrary origin. Full path reprojects axis targets as production does. Exact comparisons outside timings, axis mismatches explicitly retained. One preparation, first+8 warm, alternating path order. API only, no snap/React/render/commit/frame timing.",
