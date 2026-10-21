@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `0dc7fab` nach PR406 (grüne CI 39629987853). Kalte 3D-Vorbereitung im Folgebranch perf/cold-preview-profile in zwei CPU-Läufen getrennt nach Szenenaufbau, Aktionsvorbereitung und A/A/B/A-Flächenpartition vermessen. Keine Produktcodeänderung; genau ein aktiver Folgeauftrag: §9. Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `bb53387` nach PR407 (grüne CI 39631732272). Folgebranch perf/direct-solid-packing reduziert temporäre Packarrays bei bytegleichem Float32-Ergebnis; 1136 Tests, Typprüfungen, Lint, Architekturgrenze und Build bestanden. Genau ein aktiver Folgeauftrag: §9. Browser-/Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR407 nach grüner CI in main bb53387 integriert. Pufferpacker im Folgebranch schreibt direkt in einen passend dimensionierten Float32Array. Unveränderte Fan-Triangulierung und Double-Arithmetik bis zum finalen Schreibzugriff; bytegleicher Vergleich gegen vorigen Algorithmus einschließlich mehrseitiger Flächen, großer Koordinaten und Auswahlfarben. 1136 Tests und Produktionsbuild bestanden. Nachmessung und Grenzen im datierten Nachweis am Ende.
 
 21.10.2026: PR406 grün in main 0dc7fab integriert. Kalte 3D-Dienste mit 4/104/1004 Wänden und 2/102/1002 Fenstern, mutable und owned Eingängen, je sieben frischen Szenen in zwei Prozessen gemessen. Szenenaufbau nicht als wiederkehrende Bewegungskosten zählen. 336 vollständige Wand-/Fenstervergleiche und 84 exakte Puffervergleiche bestanden. Einzelheiten im datierten Nachweis am Ende; keine neue Browser-/Frameabnahme.
 
@@ -567,7 +569,7 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag: CPU-Pufferpackung ohne zusätzliche Cache-Schicht begrenzt reduzieren (AUD14-03).** packSolidFaces ist im kalten Pufferpfad separat als großer Kostenblock nachgewiesen. Temporäre Arrays/Spreads nur bei exakt gleichem Float32-Ergebnis reduzieren; beliebige Flächen, Auswahlfarben, Origin-Rebase und vorhandene Patch-/Full-Rebuild-Verträge erhalten. Vorher/Nachher mit cold-preview-profile und gezielten Puffertests vergleichen. Gebäudeaufbau bleibt der größte gemessene Szenenblock (~112 ms); dessen Ableitung ist danach gesondert zu bearbeiten, nicht als durch Pufferarbeit erledigt werten. Kein Rendererwechsel, keine Validierungslockerung. Native-/Frame-Abnahme bleibt offen.
+**Genau ein unmittelbarer aktiver Folgeauftrag: kalten Gebäude-Solidaufbau gezielt aufschlüsseln (AUD14-03/04).** Nach begrenzter Pufferpackung verbleibt buildBuildingSolid als größter gemessener Szenenblock. Anschlussableitung, freie Wandextrusion/Fensterzuordnung und abschließendes Freezing getrennt untersuchen; nur einen reproduzierten redundanten Abschnitt zur nächsten Korrektur auswählen. Bestehende Snapshot-Provenienz, unveränderte Wandextrusionsreuse, flexible Fensterobjekte und vollständige Commitprüfung bewahren. Keine Geometrievereinfachung oder zusätzlichen Cache-Schichten auf Verdacht. Kombinierte Browser-/Native-/Frame-Abnahme bleibt offen.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
@@ -4687,3 +4689,56 @@ Pufferpackung ohne Cache-Erweiterung verbessern, weil das vollständige
 Float32-Ergebnis exakt vergleichbar ist. Der etwas größere Solidaufbau enthält
 mehrere fachliche Ableitungen und bleibt ausdrücklich separat offen. Aktiver
 Einzelauftrag ausschließlich §9.
+
+
+### AUD14-03 – Direkte CPU-Pufferpackung (21.10.2026)
+Änderungskarte vor Code: PR407 d0b21a4, nach grüner CI 39631732272 in main
+bb53387 integriert. Ziel: gleiche sichtbare Geometrie mit weniger Packarbeit;
+normaler Quad/Fensterbestand sowie mehrseitige Flächen, Auswahlfarben und große
+Koordinaten beim Rebase. Eigentümer ausschließlich rendering/viewport/solid-buffer.ts;
+Quelle bleibt die unveränderliche abgeleitete Flächenbasis mit stabilen wallIds.
+Keine neue Application-Aktion, kein Modellzustand, keine Migration, keine
+Fachregel in der UI. Vorschau/Commit/Undo/Abbruch und Datei/Recovery/IFC/AI
+verwenden unverändert ihre gemeinsamen Verträge. 2D nicht betroffen.
+
+Umsetzung: Ausgabegröße aus der bestehenden konvexen Fan-Triangulierung
+ermitteln; Float32Array einmal anlegen, XYZ/RGB direkt schreiben. Licht/Farbe
+weiter in Double berechnen und erst beim Schreibzugriff auf Float32 runden.
+faceTriangles bleibt die gemeinsame Quelle für Winding und Dreiecksreihenfolge.
+Keine neue Cache-Schicht, keine Persistenz, keine neue Importkante. Bestehende
+Pufferlayout-/Patch-/Rebase-/Topologieverträge unverändert. Fenster bleiben
+flexible abgeleitete Objekte, nicht im Packer als Spezialtyp kodiert.
+
+Abnahme: eingefrorener Vorher-Algorithmus im Regressionstest; Bytevergleich
+für leere Eingaben, 0–32-Eck-Flächen, echtes Gebäude mit Fenster, Auswahlfarben,
+Ursprünge bei 1e9/-1e8 und signierte Null, keine Eingabemutation. Bestehende
+Ressourcentests prüfen Patchuploads, Auswahlwechsel, Topologie/Sichtbarkeit,
+Abbruch und Rebase. Vollsuite: 1136/1136. App-/Benchmark-Typecheck, fokussiertes
+Lint, Architekturgrenze (377 Dateien/1486 Kanten/kein Zyklus), Build und Diffprüfung
+bestanden. Sandbox-spawn-EPERM durch regulären eskalierten Testlauf gelöst;
+Build direkt mit lokalem Vite, da npm nicht im Runtimepfad. Bekannte Buildwarnungen
+zu Chunkgröße, vite-tsconfig-paths und inlineDynamicImports bleiben.
+
+Zwei abschließende serielle cold-preview-profile-Läufe nach Test/Build, gleiche
+Methode wie PR407; Rohdaten direct-packing-results.json und
+ direct-packing-repeat-results.json. Frühere mit Tests überlappende Messungen
+verworfen. Bei 1004 Wänden/1002 Fenstern, owned-Median in ms:
+
+| CPU-Abschnitt | Vorher (PR407, zwei Läufe) | Nachher (zwei Läufe) |
+| --- | --- | --- |
+| Initialer Puffer | 108,739 / 91,188 | 19,123 / 22,027 |
+| Unabhängige Packprobe | 94,492 / 86,702 | 18,941 / 16,909 |
+| Gebäude-Solid | 111,519 / 112,249 | 107,107 / 103,003 |
+
+Rund 76–82 % weniger initiale Puffer-CPU-Zeit im jeweiligen Laufvergleich;
+keine statistische oder Framegarantie. Unabhängige Proben sind keine addierbaren
+Teilzeiten. Insgesamt erneut 336 vollständige Geometrievergleiche und 84
+Pufferzusammensetzungsvergleiche bestanden. Keine kontrollierte Systemlast,
+JIT/GC nicht isoliert, sieben Samples je Fall. Solidaufbau unverändert; kleinere
+Messunterschiede dort sind kein diesem Fix zugeschriebener Gewinn.
+Keine neue Browser-, native Shift-, IFC- oder Recovery-Abnahme. Praktischer
+Abnahmetest nach Integration: 3D-Wände mit Fenster ansehen, auswählen, bewegen,
+abbrechen/Undo und stark verschobenen Ursprung prüfen; Darstellung/Farben
+müssen unverändert sein. Exakte Pufferprüfung ersetzt keine Gesamtframeabnahme.
+Abschlusskarte: tatsächlicher Produktdiff nur der Packer; keine neuen
+Abhängigkeiten/Zyklen oder Modellkopien. Aktiver Einzelauftrag ausschließlich §9.
