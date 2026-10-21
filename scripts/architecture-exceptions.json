@@ -214,15 +214,5 @@
       ]
     }
   ],
-  "cycles": [
-    {
-      "owner": "src/application/direct-edit",
-      "reason": "Existing contour.ts <-> offset.ts runtime cycle; not fixed by this gate.",
-      "removal": "Immediate next bounded implementation after this gate: extract the shared contour helper, preserving preview/commit/full-path equivalence.",
-      "edges": [
-        "src/application/direct-edit/contour.ts -> src/application/direct-edit/offset.ts",
-        "src/application/direct-edit/offset.ts -> src/application/direct-edit/contour.ts"
-      ]
-    }
-  ]
+  "cycles": []
 }

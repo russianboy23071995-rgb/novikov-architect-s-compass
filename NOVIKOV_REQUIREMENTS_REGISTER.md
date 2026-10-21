@@ -12996,3 +12996,16 @@ Kanten/Zyklen und veraltete Ausnahmen werden abgewiesen. Keine neue CAD-Aktion
 oder Änderungen an Modell/Preview/Commit/Undo/Datei/Recovery/IFC. Semantische
 Verantwortung bleibt Reviewpflicht; Gate ist kein vollständiger Architekturbeweis.
 Änderungs-/Abschlusskarte und Prüfgrenzen im Masterplan-Nachweis; aktiver Auftrag §9.
+
+
+### Architekturvertrag / AUD14-04 – Konturzyklus entfernt (21.10.2026)
+
+Basis main 6314460/PR402; Branch refactor/contour-source. closedContour unverändert
+in gemeinsame Application-Leseabfrage extrahiert; kompatibler Reexport erhalten.
+Beide Zyklusausnahmen entfernt, null zyklische Laufzeitkanten. Die 104 anderen
+Grenzabweichungen bleiben offen. Kein neuer Modell-/Geometrie-/Historypfad.
+14 fachliche Tests vor/nach, 1134 Gesamttests, acht Guard-Tests, Typprüfungen,
+Lint/Build bestanden. Produktbrowser: Linie/Schraffur +0,5 m Offset, Undo/Redo,
+Abbruch; vier vollständige Geschoss-Exportvergleiche identisch. Keine neue
+Frame-/Native-/Recoveryabnahme. Änderungskarte und Details: Masterplan, datierter
+Nachweis „Konturzyklus entfernt“. Folgeauftrag allein §9; AUD14 nicht abgeschlossen.

@@ -2,7 +2,7 @@ import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Point } from "../../lib/bim/model.ts";
 import { updateLine } from "../../lib/bim/model.ts";
-import { closedContour } from "./contour.ts";
+import { closedContour } from "./contour-source.ts";
 import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
 import { previewHatch } from "../hatches/actions.ts";
 
