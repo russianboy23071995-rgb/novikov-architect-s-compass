@@ -1,0 +1,259 @@
+{
+  "runtime": "v24.19.0",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "method": "Old face construction restored from main dacfee1 in exclusive temporary sibling; finally cleanup. Six untimed scope comparisons cover empty/single/overlapping openings, oblique walls, large coordinates, height offset and nonmutation. 7 distinct owned scenes per size, alternating execution order, 21 complete faces/volume/bounds comparisons. Snapshot preparation outside timing. Shared lower-level caches/JIT/GC uncontrolled; CPU not browser/frame/GPU.",
+  "rows": [
+    {
+      "extra": 0,
+      "trial": 0,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 2.9261999999999944,
+        "new": 2.089499999999987
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 1,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 1.718199999999996,
+        "old": 1.9098999999999933
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 2,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 1.3439000000000192,
+        "new": 1.808099999999996
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 3,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 1.2169000000000096,
+        "old": 1.1762000000000228
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 4,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 1.881400000000042,
+        "new": 1.7921999999999798
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 5,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 1.8314000000000306,
+        "old": 2.301400000000001
+      }
+    },
+    {
+      "extra": 0,
+      "trial": 6,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 1.5437000000000012,
+        "new": 1.2722000000000548
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 0,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 20.84190000000001,
+        "new": 15.155500000000018
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 1,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 6.845399999999984,
+        "old": 12.14749999999998
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 2,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 8.8091,
+        "new": 5.337999999999965
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 3,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 14.249900000000025,
+        "old": 6.870400000000018
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 4,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 7.379799999999989,
+        "new": 8.231499999999983
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 5,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 4.883999999999901,
+        "old": 7.9565000000000055
+      }
+    },
+    {
+      "extra": 100,
+      "trial": 6,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 5.361499999999978,
+        "new": 5.327599999999961
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 0,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 109.21680000000003,
+        "new": 92.73199999999997
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 1,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 60.594299999999976,
+        "old": 96.6640000000001
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 2,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 64.86689999999999,
+        "new": 52.61079999999993
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 3,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 53.131399999999985,
+        "old": 82.83640000000014
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 4,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 91.96730000000002,
+        "new": 76.30419999999981
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 5,
+      "paths": [
+        "new",
+        "old"
+      ],
+      "times": {
+        "new": 72.0306999999998,
+        "old": 176.59000000000015
+      }
+    },
+    {
+      "extra": 1000,
+      "trial": 6,
+      "paths": [
+        "old",
+        "new"
+      ],
+      "times": {
+        "old": 68.36790000000019,
+        "new": 73.98029999999972
+      }
+    }
+  ]
+}

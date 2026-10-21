@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `85c3581` nach PR411 (grüne CI). Restkosten nach beiden Optimierungen gemessen, vollständige Vergleichsprüfungen bestanden. Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `dacfee1` nach PR412 (grüne CI). Arrayreduktionspilot geprüft, mangels robustem Gewinn verworfen; Produkt unverändert. Exaktvergleiche/Tests bestanden, Native-/Frame-Gates offen. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -13103,3 +13103,7 @@ PR410 in main 827d17a; frischer Produktbuild auf isoliertem Port 8087. Auswahl u
 ### AUD14-03/04 – Aktuelle Restkosten nach PR411, 21.10.2026
 
 Zwei kalte Läufe: insgesamt 336 Wand-/Fenstervergleichsfälle und 84 exakte Puffervergleiche; zusätzliche 42 Gebäudephasenvergleiche bestanden. Große Owned-Szene: Gebäude 37–46 ms, Erstpuffer 21–27 ms, Aktion 1,4–1,9 ms, Wiederholungskomposition rund 0,13 ms. Wandloop ohne Fensterlookup 22,8 ms, Freeze 11,0 ms, Lookup 0,47 ms. Nachweis und Änderungskarte: docs/remaining-preview-costs.md. Nur Messmetadaten/Rohdaten/Dokumentation verändert, keine Produktoptimierung behauptet. Nächster Pilot gemäß §9 begrenzt temporäre Arrays der freien Flächenerzeugung; Ownership und Exaktgleichheit bleiben verbindlich.
+
+### AUD14-03/04 – Arrayreduktionspilot verworfen, 21.10.2026
+
+135 Vergleichsfälle der gespeicherten Läufe und 1137 Tests bestanden. Gewinn schwankte, kleine Szenen regressierten; Produktänderung zurückgenommen. Kandidat nur als Diagnosefixture, kein Produktimport. Rohdaten, Grenzen und Änderungskarte: docs/wall-face-allocation-pilot.md. Kein Performancegate geschlossen. Nächster begrenzter Messauftrag ausschließlich §9.

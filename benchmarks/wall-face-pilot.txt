@@ -1,0 +1,39 @@
+    const world = (x: number, y: number, z: number): Vec3 => {
+      const wx = body.start.x + ux * x - uy * y;
+      const wy = body.start.y + uy * x + ux * y;
+      solid.min[0] = Math.min(solid.min[0], wx);
+      solid.max[0] = Math.max(solid.max[0], wx);
+      solid.min[1] = Math.min(solid.min[1], wy);
+      solid.max[1] = Math.max(solid.max[1], wy);
+      solid.min[2] = Math.min(solid.min[2], z);
+      solid.max[2] = Math.max(solid.max[2], z);
+      return [wx, wy, z];
+    };
+    const face = (p0: Vec3, p1: Vec3, p2: Vec3, p3: Vec3, nx: number, ny: number, nz: number) => {
+      solid.faces.push({
+        wallId: wall.id,
+        vertices: [p0, p1, p2, p3],
+        normal: [ux * nx - uy * ny, uy * nx + ux * ny, nz],
+      });
+    };
+    const a = -wall.thickness / 2,
+      b = wall.thickness / 2;
+    for (let i = 0; i < xs.length - 1; i++)
+      for (let j = 0; j < zs.length - 1; j++) {
+        if (!occupied[i]?.[j]) continue;
+        const l = xs[i]!,
+          r = xs[i + 1]!,
+          d = zs[j]!,
+          u = zs[j + 1]!;
+        solid.volume += (r - l) * (u - d) * wall.thickness;
+        face(world(l, a, d), world(r, a, d), world(r, a, u), world(l, a, u), 0, -1, 0);
+        face(world(r, b, d), world(l, b, d), world(l, b, u), world(r, b, u), 0, 1, 0);
+        if (!occupied[i - 1]?.[j])
+          face(world(l, b, d), world(l, a, d), world(l, a, u), world(l, b, u), -1, 0, 0);
+        if (!occupied[i + 1]?.[j])
+          face(world(r, a, d), world(r, b, d), world(r, b, u), world(r, a, u), 1, 0, 0);
+        if (!occupied[i]?.[j - 1])
+          face(world(l, b, d), world(r, b, d), world(r, a, d), world(l, a, d), 0, 0, -1);
+        if (!occupied[i]?.[j + 1])
+          face(world(l, a, u), world(r, a, u), world(r, b, u), world(l, b, u), 0, 0, 1);
+      }
