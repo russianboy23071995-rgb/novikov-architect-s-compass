@@ -491,7 +491,11 @@ export function CadWorkspace({
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
-    if (selection.kind === "wall" && action === "move") {
+    if (
+      action === "move" &&
+      (selection.kind === "wall" ||
+        (!inSolid && (selection.kind === "line" || selection.kind === "hatch")))
+    ) {
       const origin = pickedPoint.anchor ?? editAnchor(project, selection);
       cancelInteraction();
       try {

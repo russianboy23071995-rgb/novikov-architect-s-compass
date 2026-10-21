@@ -3,6 +3,7 @@ import { createPointPreview } from "../tools/point-preview.ts";
 import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
+import { editAtPointer } from "../../lib/bim/direct-edit.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -25,6 +26,70 @@ import { buildSolid } from "../../lib/bim/geometry.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 const origin = { x: 0, y: 0 },
   target = { x: 2, y: -1 };
+for (const kind of ["line", "hatch"] as const)
+  test(`single ${kind} shared interaction preserves picked origin, full-path result and atomic history`, () => {
+    const p = fixture();
+    p.hatchPatterns.push({
+      id: "diagonal",
+      name: "Diagonal",
+      width: 1,
+      height: 1,
+      lines: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }],
+    });
+    storeyOf(p).hatches[0]!.pattern = {
+      patternId: "diagonal",
+      mode: "model",
+      origin: { x: 3.25, y: 4.75 },
+      rotation: 35,
+    };
+    const selected = { kind, id: kind === "line" ? "L" : "S" };
+    const anchor = { x: -4, y: 7 };
+    const point = { x: -2, y: 6 };
+    const policy = createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE);
+    const before = serializeProject(p);
+    let history = createHistory(p),
+      cancels = 0,
+      commits = 0;
+    const make = () =>
+      selectionMoveInteraction(
+        beginSelectionMove(p, [selected], anchor, policy),
+        p,
+        [selected],
+        policy,
+        (next) => {
+          history = commitProject(history, next);
+          commits++;
+        },
+        () => cancels++,
+      );
+    const cancelled = make();
+    assert.deepEqual(cancelled.origin, anchor);
+    cancelled.geometryPreview!.evaluate(point);
+    cancelled.cancel();
+    assert.equal(cancels, 1);
+    assert.equal(commits, 0);
+    assert.equal(serializeProject(p), before);
+    const adapter = make();
+    assert.equal(adapter.click, "confirm");
+    const expected = editAtPointer(
+      { base: p, target: selected, action: "move", index: null, anchor },
+      p,
+      point,
+    );
+    const patch = adapter.geometryPreview!.evaluate(point);
+    assert.deepEqual(
+      storeyOf(patch.geometry)[kind === "line" ? "lines" : "hatches"]?.[0],
+      storeyOf(expected)[kind === "line" ? "lines" : "hatches"]?.[0],
+    );
+    adapter.confirm!(point);
+    assert.equal(commits, 1);
+    assert.deepEqual(history.present, expected);
+    assert.deepEqual(deserializeProject(serializeProject(history.present)), expected);
+    history = undoProject(history);
+    assert.equal(serializeProject(history.present), before);
+    history = redoProject(history);
+    assert.deepEqual(history.present, expected);
+  });
 function fixture() {
   let p = createProject("p", "s");
   for (const [id, start, end] of [

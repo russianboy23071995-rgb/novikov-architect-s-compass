@@ -1,0 +1,332 @@
+{
+  "basis": "main 926c720 (PR421) plus single-selection-move routing",
+  "runtime": "v24.19.0",
+  "cpu": "AMD Ryzen 5 3600 6-Core Processor              ",
+  "method": "Repeat of the unchanged API inventory probe after UI routing change; legacy API retained as independent comparator. 10/100 hatches x100 points plus one line. Owned input, one preparation, first+8 warm samples; order alternates. 36 complete projects and 36 scoped targets equal, including hatch pattern origin. No plan/React/snapping/commit/GPU/frame/browser claim. Node/JIT/GC/fixed fixture limits.",
+  "rows": [
+    {
+      "kind": "line",
+      "size": 10,
+      "preparationMs": 1.2262000000000057,
+      "legacyWarmMedianMs": 4.92674999999997,
+      "sharedPatchWarmMedianMs": 0.06499999999999773,
+      "samples": [
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 9.274100000000004,
+          "patchMs": 0.5781999999999812
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 6.3408000000000015,
+          "patchMs": 0.07679999999999154
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 6.09190000000001,
+          "patchMs": 0.0664000000000442
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 5.325500000000034,
+          "patchMs": 0.06359999999995125
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 4.842099999999959,
+          "patchMs": 0.07609999999999673
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 5.0113999999999805,
+          "patchMs": 0.047100000000000364
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 3.8449999999999704,
+          "patchMs": 0.04390000000000782
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 4.074700000000007,
+          "patchMs": 0.04240000000004329
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 4.489600000000053,
+          "patchMs": 0.4893999999999892
+        }
+      ]
+    },
+    {
+      "kind": "hatch",
+      "size": 10,
+      "preparationMs": 0.1530999999999949,
+      "legacyWarmMedianMs": 8.116600000000005,
+      "sharedPatchWarmMedianMs": 0.43334999999999013,
+      "samples": [
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 9.14100000000002,
+          "patchMs": 0.5049999999999955
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 8.588499999999954,
+          "patchMs": 0.7565000000000168
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 9.123499999999979,
+          "patchMs": 0.4218999999999937
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 7.405599999999993,
+          "patchMs": 0.6194000000000415
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 8.192900000000009,
+          "patchMs": 0.4030999999999949
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 7.557100000000048,
+          "patchMs": 0.39229999999997744
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 7.2316999999999325,
+          "patchMs": 0.5144999999999982
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 8.040300000000002,
+          "patchMs": 0.3523999999999887
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 8.550200000000018,
+          "patchMs": 0.44479999999998654
+        }
+      ]
+    },
+    {
+      "kind": "line",
+      "size": 100,
+      "preparationMs": 0.1636999999999489,
+      "legacyWarmMedianMs": 33.578599999999994,
+      "sharedPatchWarmMedianMs": 0.039700000000038926,
+      "samples": [
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 38.06459999999993,
+          "patchMs": 0.04390000000000782
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 33.52710000000002,
+          "patchMs": 0.043000000000006366
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 33.63009999999997,
+          "patchMs": 0.03599999999994452
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 34.88260000000014,
+          "patchMs": 0.042099999999891224
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 33.44579999999996,
+          "patchMs": 0.03730000000018663
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 34.53880000000004,
+          "patchMs": 0.036100000000033106
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 32.59249999999997,
+          "patchMs": 0.035999999999830834
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 40.51299999999992,
+          "patchMs": 0.04419999999981883
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 31.47420000000011,
+          "patchMs": 0.04280000000017026
+        }
+      ]
+    },
+    {
+      "kind": "hatch",
+      "size": 100,
+      "preparationMs": 0.15270000000009532,
+      "legacyWarmMedianMs": 65.64574999999991,
+      "sharedPatchWarmMedianMs": 0.3783000000000811,
+      "samples": [
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 71.61740000000009,
+          "patchMs": 0.3568000000000211
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 65.83469999999988,
+          "patchMs": 0.38789999999994507
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 76.35490000000027,
+          "patchMs": 0.37279999999964275
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 65.45679999999993,
+          "patchMs": 0.43010000000003856
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 69.69589999999971,
+          "patchMs": 0.36959999999999127
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 66.55000000000018,
+          "patchMs": 0.3688999999999396
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 63.134900000000016,
+          "patchMs": 0.38229999999975917
+        },
+        {
+          "order": [
+            "patch",
+            "legacy"
+          ],
+          "legacyMs": 62.7514000000001,
+          "patchMs": 0.3764000000001033
+        },
+        {
+          "order": [
+            "legacy",
+            "patch"
+          ],
+          "legacyMs": 64.8714,
+          "patchMs": 0.38020000000005894
+        }
+      ]
+    }
+  ]
+}
