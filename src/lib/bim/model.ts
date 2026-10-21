@@ -1,4 +1,8 @@
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
+import {
+  createProjectSnapshot,
+  type ProjectResultMode,
+} from "../../domain/project/owned-snapshot.ts";
 import { projectStorageData } from "../../domain/project/storage-data.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { assertValidatedProjectSize } from "../../interop/project-file/size.ts";
@@ -70,6 +74,7 @@ export function updateWall(
   changes: Partial<Omit<Wall, "id" | "topBinding">>,
   intent: "reshape" | "move" = "reshape",
   reuse?: WallSolidReuse,
+  resultMode: ProjectResultMode = "mutable",
 ): Project {
   const previous = storeyOf(project).walls.find((wall) => wall.id === wallId);
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
@@ -108,7 +113,8 @@ export function updateWall(
         : [],
   );
   const reconciled = axisChanged ? reconcileTJunctions(proposed, wallId, intent) : proposed;
-  return validateProject(
+  // Output ownership never skips validation; the factory validates and owns in one step.
+  return (resultMode === "owned" ? createProjectSnapshot : validateProject)(
     axisChanged ? reconcileWallJoins(reconciled, wallId, previous, tPartners) : reconciled,
     reuse,
   );

@@ -3,7 +3,11 @@ import os from "node:os";
 import { tTransitionFixture } from "./t-transition-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAtPointer,
+  editAtPointerSnapshot,
+  type EditSession,
+} from "../src/lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { wallTransitionPatch } from "../src/application/direct-edit/wall-transition-patch.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
@@ -22,6 +26,7 @@ type Sample = {
   actualEvaluateMs: number;
   warmMs: number;
   legacyMs: number;
+  previousMs: number;
 };
 const stats = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -77,7 +82,7 @@ for (const foreign of [0, 100, 1000]) {
       };
       // Reproduce production phase order with public functions, no production timers.
       const start = performance.now();
-      const moved = editAtPointer(session, base, point);
+      const moved = editAtPointerSnapshot(session, base, point);
       const a = performance.now();
       const movedSnapshot = createProjectSnapshot(moved);
       const a2 = performance.now();
@@ -99,6 +104,20 @@ for (const foreign of [0, 100, 1000]) {
         "wall-2",
       );
       const g = performance.now();
+      const previous = wallTransitionPatch(
+        base,
+        createProjectSnapshot(
+          connectSnappedT(
+            session,
+            createProjectSnapshot(editAtPointer(session, base, point)),
+            point,
+            candidate,
+          ),
+        ),
+        "wall-2",
+      );
+      const h = performance.now();
+      assert.deepEqual(actual, previous);
       assert.deepEqual(actual, patch);
       assert.deepEqual(actual, legacy);
       assert.deepEqual(connected, connectSnappedT(session, moved, point, candidate));
@@ -119,6 +138,7 @@ for (const foreign of [0, 100, 1000]) {
           actualEvaluateMs: e - d,
           warmMs: f - e,
           legacyMs: g - f,
+          previousMs: h - g,
         });
     }
   }
@@ -138,6 +158,7 @@ for (const foreign of [0, 100, 1000]) {
           "actualEvaluateMs",
           "warmMs",
           "legacyMs",
+          "previousMs",
         ].map((key) => [
           key,
           stats(

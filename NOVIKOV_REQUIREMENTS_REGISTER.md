@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 20.10.2026, main `5c709ee` nach PR398 (grüne CI und funktionaler Browserabnahme der Snapshot-Wiederverwendung). Begrenzte T-Komposition integriert; funktionaler Browser-Hostwechsel samt vollständiger Exportgleichheit, Undo/Redo und Abbruch geprüft. Kontinuierliche 3D-Vorschau-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 20.10.2026, main `06a9dc0` nach PR399 (grüne CI). Im Folgebranch perf/owned-wall-movement gemeinsame Bewegungs-/Snapshot-Prüfung automatisiert verglichen; Browserabnahme offen. Kontinuierliche 3D-/Native-/Frame-Abnahme offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12960,3 +12960,15 @@ Ein Undo/Redo und Abbruch geprüft. Alle fünf vollständigen Browserexporte
 entsprechen dem unabhängigen Vollpfad. Statischer 3D-Zielzustand kontrolliert;
 keine erfassten Konsolenfehler. Keine neue Native-/Shift-/Frame-Freigabe.
 Detailnachweis im Masterplan; einzige aktive Fortsetzung §9.
+
+
+### AUD14-04/05 – Gemeinsame Bewegungs-/Snapshot-Prüfung (20.10.2026)
+PR399 in main 06a9dc0 übernommen. Folgebranch perf/owned-wall-movement liefert
+aus derselben Wandaktion wahlweise direkt einen vollständig validierten privaten
+Snapshot. Prepared-T-Pfad nutzt ihn; mutable API, Anschluss-/Commitprüfung erhalten.
+1134 Tests, Typprüfung, Lint, Build bestanden. Zwei direkte Node-Vergleiche gegen
+PR398/399 und älteren Vollpfad mit exakter Patchgleichheit: 1000 Fremdwände,
+Erstziel-Mediane 15,6–20,5 statt 24,5–25,3 ms; Hostwechsel 15,7–17,2 statt
+20,4–27,8 ms. Keine Frameaussage, P95 teilweise schlechter; globale Restarbeit
+bleibt. Rohdaten und genaue Grenzen im Masterplan-Nachweis gleichen Datums.
+Browserabnahme des neuen Pfads offen; einziger aktiver Folgeauftrag Masterplan §9.

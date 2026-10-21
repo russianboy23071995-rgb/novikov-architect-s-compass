@@ -1,7 +1,7 @@
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
-import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
+import { editAtPointerSnapshot, type EditSession } from "../../lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
@@ -70,7 +70,7 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
           return lastT.patch;
         // A failed/changed target must not retain an older successful result.
         lastT = undefined;
-        const moved = createProjectSnapshot(editAtPointer(pinned, base, point));
+        const moved = editAtPointerSnapshot(pinned, base, point);
         const next = connectSnappedT(pinned, moved, point, candidate);
         // Use the established ownership boundary: callers cannot mutate a cached
         // result or freeze their own project to acquire validation provenance.

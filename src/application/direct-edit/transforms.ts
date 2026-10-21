@@ -5,6 +5,7 @@ import { previewHatch } from "../hatches/actions.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
+import type { ProjectResultMode } from "../../domain/project/owned-snapshot.ts";
 
 export type TransformTarget = { kind: "wall" | "line" | "hatch"; id: string };
 
@@ -28,6 +29,7 @@ function applyPoints(
   points: Point[],
   intent: "reshape" | "move" = "reshape",
   reuse?: WallSolidReuse,
+  resultMode: ProjectResultMode = "mutable",
 ): Project {
   if (target.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === target.id)!;
@@ -49,7 +51,14 @@ function applyPoints(
     });
   }
   return target.kind === "wall"
-    ? updateWall(project, target.id, { start: points[0]!, end: points[1]! }, intent, reuse)
+    ? updateWall(
+        project,
+        target.id,
+        { start: points[0]!, end: points[1]! },
+        intent,
+        reuse,
+        resultMode,
+      )
     : updateLine(project, target.id, { points });
 }
 
@@ -71,6 +80,7 @@ export function moveElementPoint(
   index: number,
   position: Point,
   reuse?: WallSolidReuse,
+  resultMode: ProjectResultMode = "mutable",
 ): Project {
   return applyPoints(
     project,
@@ -78,6 +88,7 @@ export function moveElementPoint(
     replacePathVertex(editablePoints(project, target), index, position),
     "reshape",
     reuse,
+    resultMode,
   );
 }
 

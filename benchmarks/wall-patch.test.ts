@@ -5,7 +5,15 @@ import { tPairFixture } from "./t-pair-fixture.ts";
 import { tTransitionFixture } from "./t-transition-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAtPointer,
+  editAtPointerSnapshot,
+  type EditSession,
+} from "../src/lib/bim/direct-edit.ts";
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+} from "../src/domain/project/owned-snapshot.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { addWall, validateProject } from "../src/lib/bim/model.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
@@ -419,4 +427,38 @@ test("warm T preview cannot bypass full confirmation and cancellation owns no hi
   });
   assert.notEqual(rejected.error, "");
   assert.equal(rejected.history, state.history);
+});
+
+test("owned wall movement matches mutable full path for axis, body corner and stretch", () => {
+  for (const action of ["point", "stretch"] as const) {
+    for (const anchor of [
+      { x: 3, y: 0 },
+      { x: 2.64, y: 0 },
+    ]) {
+      const base = tTransitionFixture();
+      const original = structuredClone(base);
+      const session = { ...sessionOf(base, 1, "wall-2"), action, anchor };
+      const point = { x: anchor.x, y: 3 };
+      const owned = editAtPointerSnapshot(session, base, point);
+      assert.deepEqual(owned, editAtPointer(session, base, point));
+      assert.ok(isOwnedProjectSnapshot(owned));
+      assert.equal(createProjectSnapshot(owned), owned);
+      assert.throws(() => {
+        storeyOf(owned).walls[0]!.height = 0;
+      }, TypeError);
+      assert.deepEqual(base, original);
+      assert.equal(Object.isFrozen(base), false);
+    }
+  }
+});
+
+test("owned movement rejects invalid foreign data, stale context and invalid pointer", () => {
+  const base = tTransitionFixture();
+  const session = sessionOf(base, 1, "wall-2");
+  assert.throws(() => editAtPointerSnapshot(session, { ...base }, { x: 3, y: 3 }));
+  assert.throws(() => editAtPointerSnapshot(session, base, { x: NaN, y: 3 }));
+  storeyOf(base).walls.find((w) => w.id === "unrelated")!.height = -1;
+  Object.freeze(base);
+  assert.throws(() => editAtPointerSnapshot(session, base, { x: 3, y: 3 }));
+  assert.equal(isOwnedProjectSnapshot(base), false);
 });
