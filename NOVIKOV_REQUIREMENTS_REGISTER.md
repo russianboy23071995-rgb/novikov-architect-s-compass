@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 21.10.2026, main `b567902` nach PR400 (grüne CI). Gemeinsame Bewegungs-/Snapshot-Prüfung automatisiert und funktional im Produktbrowser abgenommen. Kontinuierliche 3D-/Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
+Geprüfte Code-Basis: 21.10.2026, main `0b61be1` nach PR401 (grüne CI). Architekturgrenzen-Gate im Folgebranch test/architecture-boundaries lokal geprüft; keine Produktcodeänderung. Native-/Frame-Gates offen. Ursprungskonsolidierung: 10.10.2026 / PR237. Einziger aktiver Auftrag: Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -12984,3 +12984,15 @@ vorhandener contour/offset-Zyklus ausdrücklich offen. Neue MD-Vorgaben aus
 a70a386 erhalten. Dauerhafter Architekturgrenzen-Test als nächster Einzelauftrag
 in §9, danach Zyklusabbau. Keine neue kontinuierliche 3D/Shift/Native/Frame-,
 Recovery- oder IFC-Freigabe; Detail- und Architekturkarte im Masterplan.
+
+
+### Architekturvertrag / AUD14-04/05 – CI-Importgrenzen (21.10.2026)
+PR401 in main 0b61be1. Folgebranch ergänzt AST-Importprüfung und Laufzeitzyklen-
+Gate in CI, acht Tests plus echte negative CLI-Probe. 376 produktive Dateien,
+1484 eindeutige interne Kanten; 104 bestehende Schichtabweichungen mit exakten
+Ausnahmen und 16 Modulzuständigkeiten/Abbauzielen. contour/offset-Zyklus bleibt
+mit zwei Kanten sichtbar und wird als nächster Einzelauftrag abgebaut. Neue
+Kanten/Zyklen und veraltete Ausnahmen werden abgewiesen. Keine neue CAD-Aktion
+oder Änderungen an Modell/Preview/Commit/Undo/Datei/Recovery/IFC. Semantische
+Verantwortung bleibt Reviewpflicht; Gate ist kein vollständiger Architekturbeweis.
+Änderungs-/Abschlusskarte und Prüfgrenzen im Masterplan-Nachweis; aktiver Auftrag §9.

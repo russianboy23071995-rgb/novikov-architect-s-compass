@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 21.10.2026, main `b567902` nach PR400 (grüne CI). Gemeinsamer Bewegungs-/Snapshot-Pfad im frischen Produktbrowser funktional abgenommen; sechs Exporte gegen Vollpfad geprüft. Verbindlicher Änderungs-Gate und genau ein aktiver Auftrag: §9. Kontinuierliche 3D-/Native-/Frame-Gates bleiben offen.
+Geprüfte Code-Basis: 21.10.2026, main `0b61be1` nach PR401 (grüne CI). Funktionale PR400-Browserabnahme integriert. Architekturgrenzen-Gate im Folgebranch test/architecture-boundaries implementiert und lokal geprüft; GitHub-CI-Nachweis folgt. Genau ein aktiver Auftrag: §9. Native-/Frame-Gates bleiben offen.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -158,6 +158,8 @@ CAD-Fenster verwenden FloatingPanel: beweglich, nicht modal, kein ausgegrauter H
 Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, Undo, Darstellung, Persistenz/Migration, Exportwirkung und Abnahme bestimmen. Passende deterministische Tests, Typprüfung, Lint, Build und konkreter Bedienversuch. Mikrofonerkennung, Bediengefühl, schwere reale Daten, Ausdruckmaß und externe Austauschprogramme brauchen eigene praktische Nachweise. Nur tatsächlich ausgeführte Prüfungen behaupten. Fortschritt, Grenzen und genau einen nächsten Auftrag dokumentieren.
 
 ## 4. Bestätigter Entwicklungsstand
+
+21.10.2026: PR401 nach grüner CI 39622229489 in main 0b61be1 integriert. Folgebranch test/architecture-boundaries ergänzt den CI-Befehl check:architecture: AST-basierte Schichtprüfung, Laufzeitzyklen aus emittierten Importen, exakte Ausnahmen mit Zuständigkeit/Abbauziel und Entfernung veralteter Einträge. Inventar: 376 Dateien, 1484 eindeutige interne Kanten, 104 bestehende Grenzabweichungen, zwei zyklische Kanten des bekannten contour/offset-Zyklus. Acht Guard-Tests und echte negative CLI-Probe bestanden. Keine Produktcodeänderung.
 
 21.10.2026: PR400 nach Konfliktabgleich mit dem Architekturvertrag a70a386 und grüner CI 39621656423 in main b567902 integriert. Frischer statischer Produktbuild dc385a1: T-Hostwechsel und Rückwechsel, Fenster/Nachbarn, ein Undo/Redo und Abbruch funktional geprüft. Sechs Browserexports entsprechen vollständig in ihren Geschossdaten dem unabhängigen mutable Vollpfad. Neue Importpfeile ohne Rückweg/Zyklus; vorhandener contour/offset-Zyklus bleibt offen. Aktiver Folgeauftrag: Architekturgrenzen-Test gemäß §9.
 
@@ -536,7 +538,7 @@ Gilt **ab jetzt für jede Funktion, Aufgabe, Korrektur und Erweiterung**, auch f
 
 **Nach jedem begrenzten Schritt – Abschlusskarte vor Merge:** Geänderte Module/Importpfeile und tatsächliche Verantwortung gegen die Änderungskarte prüfen; neue Laufzeitzyklen, Schicht-Rückgriffe und Modellkopien ausschließen. Ergebnis der passenden Tests, Typecheck/Lint/Build, gegebenenfalls Produktbrowser, Export-Dateivergleich, Recovery und Laufzeitmessung mit Basis/Commit nennen. Ein Szenario mit Nachbarn, ungültiger Eingabe, Abbruch und Undo prüfen, sofern das Werkzeug sie berührt. Fehlende Native-/Langsession-Gates offen lassen. Nur wenn Ziel, Code, Prüfbeleg und Dokumentationsstatus übereinstimmen, den PR abschließen; sonst denselben Auftrag korrigieren, nicht ein neues Feature beginnen.
 
-**Dauerhafte Sicherung, ein Schritt nach dem laufenden PR400:** reproduzierbaren Importgraphen und Test für Architekturgrenzen in CI aufnehmen. Startinventar 20.10.: 376 produktive TS/TSX-Dateien, 1.607 aufgelöste interne Importe; `domain/geometry/constraints` importieren keine UI-/Render-/Interop-/Application-Module. Bestehende Rückbezüge über `lib/bim`/Recovery und der echte Laufzeitzyklus `direct-edit/contour.ts` ↔ `direct-edit/offset.ts` sind getrennt als Ausnahmen mit Eigentümer und Abbaufolge zu erfassen. Der Gate-Test verhindert neue verbotene Pfeile und neue Laufzeitzyklen; bekannte Ausnahmen werden nicht still genehmigt. Danach genau einen Zyklus/Verantwortungsknoten pro PR beseitigen und beobachtbares Verhalten gegen den bisherigen Vollpfad vergleichen. Dieser Gate ergänzt die bestehende CI, er ersetzt keine fachliche Browserabnahme.
+**Dauerhafte Sicherung (im Folgebranch nach PR401 implementiert, CI-Integration noch offen):** reproduzierbaren Importgraphen und Test für Architekturgrenzen in CI aufnehmen. Startinventar 20.10.: 376 produktive TS/TSX-Dateien, 1.607 aufgelöste interne Importe; `domain/geometry/constraints` importieren keine UI-/Render-/Interop-/Application-Module. Bestehende Rückbezüge über `lib/bim`/Recovery und der echte Laufzeitzyklus `direct-edit/contour.ts` ↔ `direct-edit/offset.ts` sind getrennt als Ausnahmen mit Eigentümer und Abbaufolge zu erfassen. Der Gate-Test verhindert neue verbotene Pfeile und neue Laufzeitzyklen; bekannte Ausnahmen werden nicht still genehmigt. Danach genau einen Zyklus/Verantwortungsknoten pro PR beseitigen und beobachtbares Verhalten gegen den bisherigen Vollpfad vergleichen. Dieser Gate ergänzt die bestehende CI, er ersetzt keine fachliche Browserabnahme.
 
 ### Qualitäts- und Dokumentationsabgleich vom 20.10.2026
 
@@ -555,13 +557,13 @@ Dokumentationsstruktur: AGENTS.md kurz, dieser Masterplan mit ausschließlich §
 **Verbindlicher Zielabgleich vom 17.10.2026, 10:37 Europe/Berlin.**
 Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebung/Bereinigung von Abweichungen. Die Architekturziele bleiben: leistungsstarkes autonom steuerbares AI-CAD, ein BIM-Modell, gemeinsame typisierte Aktionen für Maus/Eigenschaften/Text/Sprache/AI, keine proportionale BIM-Skalierung, sichere Datei/Recovery, Mehrgeschossigkeit sowie Windows/macOS ohne vorweggenommene Desktopentscheidung.
 
-**Genau ein unmittelbarer aktiver Auftrag: Architekturgrenzen-Test in CI einführen.** Nach grüner CI und funktionaler Browserabnahme ist PR400 integriert. Auf der aktuellen produktiven Importinventur einen reproduzierbaren Gate gegen neue verbotene Schichtpfeile und neue Laufzeitzyklen implementieren. Bestehende Ausnahmen mit Eigentümer und Abbaufolge explizit erfassen; absichtliche Negativprobe und vollständige CI nachweisen. Keine gleichzeitige Behebung des contour/offset-Zyklus oder weiterer Produktfunktionen. Dessen gezielter Abbau folgt danach.
+**Genau ein unmittelbarer aktiver Auftrag: den bestehenden contour/offset-Laufzeitzyklus gezielt beseitigen, nach grüner CI und Integration des Architekturgrenzen-Gates.** Den gemeinsam zuständigen fachlichen Helfer aus application/direct-edit/contour.ts und offset.ts herauslösen, ohne geometrische Regeln oder Preview/Commit zu duplizieren. Die beiden entfallenden Zyklus-Ausnahmen entfernen; Gate, gültige/ungültige Linien-/Schraffurpfade, Abbruch/Undo und betroffene Datei-/3D-Folgen belegen. Kein gleichzeitiger breiter lib/bim-Umbau.
 
 AUD14-07/N22 Höhen-Gesamtworkflow nach PR383 am 17.10. im statischen Produkt-Workspace geprüft (PR384 erweitert): KG/EG/OG, feste/gebundene Eckwände, Fenster, signierte Versätze, Konfliktatomarität, Undo/Redo, JSON, produktive Recovery und IFC. Dabei reproduzierten P0-Startfehler behoben: Autosicherung überschreibt vor der Wiederherstellungsentscheidung nicht mehr den vorhandenen aktuellen Stand. Application-Startsperre schützt aktuelle/vorherige Slots; Abbruch/Lesefehler geben sie nicht frei. Formattext folgt gemeinsamem Schema-Vertrag. 1115 Tests, Typecheck, Lint und Build bestanden; Detailnachweis im datierten Protokoll. Keine Gesamtfreigabe aller AUD14-Gates.
 Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nach PR383 wurden EG/OG/KG, Fenster, feste und gebundene Anschlüsse, signierte Versätze, Geschossänderung, Konfliktatomarität, ein Undo/Redo, JSON-Dateirundlauf, produktive Recovery und IFC-Höhen/Zuordnung geprüft. Die frühere Formatfehlermeldung „Version 1 bis 25“ wurde an den gemeinsamen aktuellen Vertrag für Schema26 angepasst. Vorläufige Rohdeckenstärke 0,20 m bleibt als Annahme gekennzeichnet; kein echtes Deckenbauteil vortäuschen. Fälle ohne oberes Geschoss und Einfügen zwischen gebundene Geschosse bleiben gesperrt und brauchen eine eigene Fachentscheidung.
 
 **Danach diese Korrekturfolge ohne erneute Startfreigabe fortsetzen, jeweils nur ein begrenzter Implementierungsschritt aktiv:**
-1. Nach der PR400-Abnahme den Architekturgrenzen-Test auf der aktuellen Importinventur als eigenständigen CI-Auftrag einführen. Bestehende Ausnahmen belegen, keine neuen Rückgriffe/Laufzeitzyklen zulassen; absichtliche Negativprobe des Gates und bestehende vollständige CI nachweisen. Der oben definierte Vorher-/Nachher-Gate gilt schon jetzt.
+1. Architekturgrenzen-Test im Folgebranch nach PR401 umgesetzt: exakte Altlasten, Negativprobe und vollständige vorhandene Prüfungen; nach grüner CI regulär integrieren. Keine automatische Erweiterung der Ausnahmenliste. Der Vorher-/Nachher-Gate gilt zusätzlich weiterhin.
 2. Den realen Laufzeitzyklus `application/direct-edit/contour.ts` ↔ `offset.ts` über einen gemeinsam zuständigen fachlichen Helfer beseitigen, ohne geometrische Regeln oder Preview/Commit zu duplizieren. Vorher/Nachher für Linie/Schraffur, gültig/ungültig, Abbruch/Undo und Datei-/3D-Folgen vergleichen; weiteren `lib/bim`-Rückgriff erst nach gesonderter Pfadprüfung abbauen.
 3. AUD14-03/04: verbleibende globale 3D-Vorschaukomposition/Bounds/Gruppierung messen und begrenzt korrigieren. Codeorte selection-move-preview.ts, solid-buffer.ts und BimSolidView; feste kleine Auswahl bei wachsendem Restgebäude. Bestehendes Shader-/Pufferreuse erhalten; keine erneute Gesamtgeometrie oder Fachregeln pro Werkzeug implementieren. Unveränderte Flächen/Indexe teilen, gemeinsame Patchgrenze verwenden. Vorbereitung, Pointerarbeit, Uploads und Gesamtframes getrennt belegen.
 4. AUD14-04/05: große Anschlussgruppen und verbliebene Legacy-Aktionen aus der vorhandenen Pfadinventur bearbeiten. Der 51-Wand-Gruppenrest (~14,6 ms in früherer reiner Vorschau) bleibt offen. Fachlich vollständige stationäre Nachbarn erhalten; Abhängigkeiten nicht blind kürzen. Wiederholte globale Validierung und Wand/Fenster-Scans nur mit nachgewiesenem Nutzen sicher begrenzen. Neue Werkzeuge dürfen keine Legacy-Vollpfade als Standard übernehmen.
@@ -570,7 +572,7 @@ Abgeschlossener Prüfauftrag (Nachweis PR384, kein zweiter aktiver Auftrag): Nac
 7. Codequalität entlang dieser Änderungen bereinigen: wachsende Koordination aus CadWorkspace/BimSolidView fokussiert hinter vorhandene Application-Verträge verlagern; gemeinsame Snapshot-/Abhängigkeits-/Vorschau-/Eingabedienste wiederverwenden; veraltete Formattexte/UTF-8/unerreichbare oder doppelte aktive Pfade gezielt korrigieren. Kein Umbau nach Zeilenzahl, keine breite Neuimplementierung. Alten offenen PR318 vor einer möglichen Übernahme auf Überschneidung mit produktiver Z-Anbindung aus PR371 prüfen; nichts blind mergen oder historische Arbeit löschen.
 8. Alle sieben AUD14-IDs mit konkretem Commit, Szenario und Restgrenze abgleichen. Erst danach neue unabhängige Fachfeatures planen; eine tatsächliche fehlende Produktentscheidung oder ein externes Abnahmegate darf nicht still als erfüllt markiert werden.
 
-**Aktueller AUD14-Status (21.10.2026, main PR400; gemeinsamer Bewegungs-/Snapshot-Pfad automatisiert und funktional im Produktbrowser geprüft):**
+**Aktueller AUD14-Status (21.10.2026, main PR401; gemeinsamer Bewegungs-/Snapshot-Pfad automatisiert und funktional im Produktbrowser geprüft):**
 
 | ID | Verifizierter Teilstand | Verbleibende Arbeit |
 | --- | --- | --- |
@@ -4355,3 +4357,62 @@ kein kontinuierlicher Mousemove-/Shift-/Native-/Frame-Nachweis; UI-Platzierung
 ist kein direkter Beleg jedes Zwischenframes. Kein neuer IFC- oder Recovery-
 Rundlauf, da deren Code/Format unverändert; bestehende Nachweise erhalten.
 Keine pauschale AUD14-Gesamtfreigabe. Nächster Einzelauftrag ausschließlich §9.
+
+
+### Architekturgrenzen-Gate – Änderungskarte und Nachweis (21.10.2026)
+
+Basis main 0b61be1/PR401; Branch test/architecture-boundaries. Betroffener Vertrag:
+§9 Änderungs-Gate, A04/gemeinsame Aktionen, AUD14-04/05 Wartbarkeit.
+Ziel: neue verbotene Importpfeile und neue Laufzeitzyklen vor Übernahme erkennen.
+Normalfall: Component -> Application -> Domain besteht. Negativfall: Domain ->
+Component oder ein zusätzlicher Laufzeitzyklus scheitert. Bestehende Ausnahmen
+sind dokumentierte Abbauschuld, keine Zielarchitektur.
+
+Eigentümer ist Build-/CI-Tooling unter scripts/, Quelle sind produktive
+src/**/*.ts/tsx und tsconfig.json. Keine Modell-/UI-Daten werden geladen oder
+Produktmodule ausgeführt. Stabile Bauteil-IDs, Geschosse, Maße/Sichtbarkeit sind
+nicht betroffen. Keine neue Application-Aktion: Maus/AI/Preview/Commit/Undo,
+2D/3D, Datei/Recovery/IFC und Plattformadapter bleiben bytegleich unverändert.
+Daher keine erneute Browser-/Export-/Recovery-Abnahme für diesen Tooling-Schritt.
+Keine zusätzliche Paketabhängigkeit: vorhandener TypeScript-Compiler wird genutzt.
+
+Befehl npm run check:architecture führt acht Tests und den tatsächlichen
+Repository-Check aus, als eigener CI-Schritt vor npm test. Der Parser erfasst
+Importe, Re-Exports, import-Typen, require und literale dynamische Importe.
+TypeScript-Auflösung berücksichtigt @/, Endungen und Indexmodule. Laufzeitgraph
+nutzt emittierte JS-Importe, Typkanten bleiben für Schichtprüfung relevant.
+Nichtliterale dynamische Importe, unauflösbare lokale Module und Produktions-
+importe in ausgeschlossene Tests werden abgewiesen. CSS/Bild-/Font-Assets
+werden nicht als TS-Module behandelt.
+
+Regeln: Kernschichten dürfen keine äußeren internen Schichten importieren;
+React/UI-Pakete in Kern/Application/Interop/Legacy gesperrt. Application ->
+Interop sowie neue lib/bim-Konsumenten/Rückgriffe sind begrenzt. Interop darf
+Application-Typports referenzieren; Laufzeitaufrufe benötigen explizite Ausnahme.
+Rendering/Components-Fachverantwortung oder direkte Browser-Globalnutzung lässt
+sich aus Importkanten nicht vollständig beweisen und bleibt Gegenstand des
+Änderungs-/Abschlussreviews. Kein allgemeiner Architekturkorrektheitsbeweis.
+
+Inventar: 376 produktive Dateien, 1484 eindeutige interne Quelle-Ziel-Kanten
+(anders als die historische Zahl einzelner Importdeklarationen). 104 bestehende
+Grenzabweichungen in 16 Zuständigkeitsgruppen; jede Kante exakt in
+scripts/architecture-exceptions.json, mit Begründung/Eigentümer/Abbauziel.
+Zwei zyklische Kanten contour <-> offset separat erfasst. Keine Wildcards,
+kein Regenerationsbefehl im Gate; neue/erweiterte Zyklen, veraltete oder doppelte
+Ausnahmen und fehlende Metadaten scheitern. Typ-only -> Runtime am selben
+zulässigen Typport wird erneut geprüft. Weitere semantische Prüfungen bleiben
+bei Typecheck und fachlichem Review.
+
+Abnahme: acht Tests für erlaubte Schichtung, negative Grenzen, Typ-/Mischimporte,
+Aliase desselben Ziels, dynamische Importe, fehlende Module, Zykluserweiterung
+und veraltete Ausnahmen. Zusätzlich echte kurzlebige Probe in src/domain:
+Import der CadWorkspace-Komponente führte im tatsächlichen CLI zu Exit1.
+Probe unmittelbar entfernt, danach Gate grün. 1134 vorhandene Tests und beide
+Typprüfungen, fokussiertes Lint der neuen MJS-Dateien und Produktbuild bestanden.
+Vollständiges lokales Lint meldet 1967 CRLF-Formatfehler in unveränderten
+Altdateien sowie sechs bekannte Warnungen; lokale generierte dist-*-Verzeichnisse
+wurden ausgeschlossen. Kein Massenformatieren. Linux-CI prüft den Git-Stand
+vollständig; Ergebnis separat im PR. Bekannte Buildhinweise unverändert.
+Produktdateien unverändert; neuer Checker importiert nur Node/TypeScript, keine
+Produktabhängigkeit auf den Checker. Bekannter contour/offset-Zyklus bewusst
+nicht behoben; nächster Einzelauftrag §9.

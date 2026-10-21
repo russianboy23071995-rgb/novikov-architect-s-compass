@@ -22,6 +22,7 @@ jobs:
           package-manager-cache: false
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      - run: npm run check:architecture
       - run: npm test
       - run: npx tsc --noEmit
       - run: npx tsc --noEmit -p benchmarks/tsconfig.json
