@@ -1,5 +1,5 @@
 import { translatePoint } from "../../geometry/primitives/point.ts";
-import { directionOffset } from "../../geometry/projections/direction.ts";
+import { directionOffset, stretchOffset } from "../../geometry/projections/direction.ts";
 import {
   createProjectSnapshot,
   type ProjectResultMode,
@@ -97,12 +97,7 @@ function evaluatePointer(
     Object.assign(delta, offset);
   }
   if (action === "stretch") {
-    const length = Math.hypot(vector.x, vector.y);
-    const distance = (delta.x * vector.x + delta.y * vector.y) / length;
-    delta.x = (vector.x / length) * distance;
-    delta.y = (vector.y / length) * distance;
-    if (action === "stretch" && length + distance <= 1e-9)
-      throw new Error("Der Punkt darf seinen Nachbarpunkt nicht überqueren.");
+    Object.assign(delta, stretchOffset(pointer, anchor, vector));
   }
   if (action === "x") delta.y = 0;
   if (action === "y") delta.x = 0;

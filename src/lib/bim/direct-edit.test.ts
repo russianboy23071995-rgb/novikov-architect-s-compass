@@ -1,4 +1,5 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
+import { stretchOffset, directionOffset } from "../../geometry/projections/direction.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -15,6 +16,49 @@ import { editAtPointer, editAnchor } from "./direct-edit.ts";
 import type { EditSession } from "./direct-edit.ts";
 import { createHistory, commitProject, undoProject } from "./history.ts";
 const base = createExampleProject();
+
+test("shared stretch preserves original arithmetic and neighbour boundary exactly", () => {
+  for (const origin of [
+    { x: 0, y: 0 },
+    { x: 0.125, y: -0.25 },
+    { x: 1e9, y: -1e9 },
+  ])
+    for (const vector of [
+      { x: 3, y: 1 },
+      { x: -3, y: -1 },
+      { x: 1.5, y: -2 },
+      { x: 0, y: 4 },
+    ])
+      for (const step of [-8, -3, -0.037, 0, 0.037, 4]) {
+        const pointer = { x: origin.x + step, y: origin.y + step * 0.17 };
+        const dx = pointer.x - origin.x,
+          dy = pointer.y - origin.y;
+        const length = Math.hypot(vector.x, vector.y);
+        const distance = (dx * vector.x + dy * vector.y) / length;
+        const old = { x: (vector.x / length) * distance, y: (vector.y / length) * distance };
+        assert.deepEqual(directionOffset(pointer, origin, vector), old);
+        if (length + distance <= 1e-9)
+          assert.throws(() => stretchOffset(pointer, origin, vector), /Nachbarpunkt/);
+        else assert.deepEqual(stretchOffset(pointer, origin, vector), old);
+      }
+  for (const remainder of [0, 0.5e-9, 1e-9, 2e-9]) {
+    const pointer = { x: -1 + remainder, y: 0 };
+    if (1 + pointer.x <= 1e-9)
+      assert.throws(() => stretchOffset(pointer, { x: 0, y: 0 }, { x: 1, y: 0 }), /Nachbarpunkt/);
+    else
+      assert.deepEqual(stretchOffset(pointer, { x: 0, y: 0 }, { x: 1, y: 0 }), {
+        x: pointer.x,
+        y: -0,
+      });
+  }
+  for (const vector of [
+    { x: 0, y: 0 },
+    { x: Infinity, y: 0 },
+    { x: NaN, y: 1 },
+  ])
+    assert.throws(() => stretchOffset({ x: 1, y: 2 }, { x: 0, y: 0 }, vector));
+  assert.throws(() => stretchOffset({ x: NaN, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }));
+});
 const session: EditSession = {
   base,
   target: { kind: "wall", id: "wall-1" },
