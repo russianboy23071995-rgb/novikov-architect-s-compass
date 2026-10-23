@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `ad0261d` nach PR430 (CI40033192207 grün). Getrennte 2D-Punktstreckmessung im Folgebranch diagnostics/plan-stretch-phases: 108 exakte Vergleiche bestanden. Warme Planableitung in dieser Konturfixture unter 0,5ms; kalter Fangindex bei1000 Konturen etwa1s. Kein Gesamtframe-Nachweis. Details docs/plan-stretch-phases.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `da58c83` nach PR431 (CI40033649336 grün). Kalter Fangindex im Folgebranch diagnostics/snap-index-build phasenweise gemessen: 72 lokale Abfragevergleiche exakt. Einfrieren und räumlicher Aufbau wesentliche Kostenblöcke; noch keine Optimierung. Details docs/snap-index-build.md; einziger Folgeauftrag §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11489,7 +11489,7 @@ Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlau
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status 24.10.2026: teilweise umgesetzt bis main PR430. Vorbereitete Linien-/Schraffur-Streckadapter in main. Getrennte 2D-Phasen im Folgebranch mit108 exakten Vergleichen; kalter Fangindex als nächster Messauftrag. React/SVG/Frames, Wandachsen-/Kettenreste und allgemeine Performancefreigabe offen. Einziger Auftrag Masterplan §9. Bezug A01–A05/A11.
+Status 24.10.2026: teilweise umgesetzt bis main PR431. Kalter Fangindex phasenweise gemessen; 72 Abfragen exakt, Quellen und Cacheidentität erhalten. Redundantes Einfrieren als nächster begrenzter Kandidat, kein bereits belegter Performancegewinn. Baum/Lookup, React/SVG/Frames und Wandachsen-/Kettenreste offen. Einziger Auftrag Masterplan §9.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -13185,3 +13185,8 @@ PR425 nach CI39657525588 grün in main4020047. Folgebranch fix/shared-oblique-ax
 ### AUD14-04 – Getrennte 2D-Phasen, 24.10.2026
 
 24.10.2026: PR430 nach grüner CI40033192207 in mainad0261d integriert. Diagnose trennt Adaptervorbereitung, lokalen Patch, Materialisierung, Sichtbarkeit, Planableitung, Runs und Fangquellen. 108 Vollpfadvergleiche exakt. Warme Planableitung bei1000 unbeteiligten100-Punkt-Konturen0,15–0,40ms, lokale Quellenabfrage etwa0,09ms; kalter Fangindex1017–1162ms, warm identisches Indexobjekt. Keine Produktänderung. React/SVG/Frames nicht gemessen; Nachweis docs/plan-stretch-phases.md. Nächster Einzelauftrag: kalten Fangindex aufschlüsseln.
+
+
+### AUD14-04 – Kalter Fangindex, 24.10.2026
+
+24.10.2026: PR431 nach grüner CI in mainda58c83 übernommen. Optionaler synchroner Messwrapper trennt Primitive, Referenz-/Segment-Freeze, Lookup und Punkt-/Segmentindex. Drei frische Fixtures je10/100/1000 Konturen; 72 Abfragen exakt, Segmentdaten und Cacheidentität erhalten. Bei1000: Freeze gesamt302–513ms, räumlicher Aufbau374–594ms. Kein Produktgewinn behauptet. Nachweis docs/snap-index-build.md; nächster begrenzter Kandidat: mehrfaches Traversieren gemeinsam verwendeter Objekte beim Einfrieren vermeiden.

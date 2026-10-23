@@ -1,0 +1,134 @@
+{
+  "basis": "PR43196d9639",
+  "runtime": "v24.19.0",
+  "method": "Three fresh fixtures per size; no forced GC. Identical production index builder with optional phase measurement. Four local queries, each visible/filtered, compared to normal cached production path. Index mapping and tree construction grouped together. Node CPU measurements, not frames.",
+  "queryComparisons": 72,
+  "rows": [
+    {
+      "size": 10,
+      "repeat": 0,
+      "sourceCount": 2000,
+      "segmentCount": 1000,
+      "phases": {
+        "primitives": 3.424599999999998,
+        "freeze-references": 3.5413999999999817,
+        "freeze-segments": 2.4465000000000146,
+        "lookup": 2.5771000000000015,
+        "point-index": 7.803899999999999,
+        "segment-index": 3.4729999999999848
+      }
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "sourceCount": 2000,
+      "segmentCount": 1000,
+      "phases": {
+        "primitives": 1.5135999999999967,
+        "freeze-references": 1.634900000000016,
+        "freeze-segments": 0.9602999999999895,
+        "lookup": 1.4029999999999916,
+        "point-index": 3.739699999999999,
+        "segment-index": 1.309899999999999
+      }
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "sourceCount": 2000,
+      "segmentCount": 1000,
+      "phases": {
+        "primitives": 4.6270999999999844,
+        "freeze-references": 1.7818000000000325,
+        "freeze-segments": 1.018199999999979,
+        "lookup": 1.6061000000000263,
+        "point-index": 2.3232000000000426,
+        "segment-index": 1.2017999999999915
+      }
+    },
+    {
+      "size": 100,
+      "repeat": 0,
+      "sourceCount": 20000,
+      "segmentCount": 10000,
+      "phases": {
+        "primitives": 17.786200000000008,
+        "freeze-references": 21.504599999999982,
+        "freeze-segments": 12.847100000000012,
+        "lookup": 21.411899999999946,
+        "point-index": 20.47520000000003,
+        "segment-index": 15.469600000000014
+      }
+    },
+    {
+      "size": 100,
+      "repeat": 1,
+      "sourceCount": 20000,
+      "segmentCount": 10000,
+      "phases": {
+        "primitives": 23.857899999999972,
+        "freeze-references": 18.955400000000054,
+        "freeze-segments": 12.01769999999999,
+        "lookup": 18.4384,
+        "point-index": 30.382799999999975,
+        "segment-index": 10.173800000000028
+      }
+    },
+    {
+      "size": 100,
+      "repeat": 2,
+      "sourceCount": 20000,
+      "segmentCount": 10000,
+      "phases": {
+        "primitives": 10.987700000000018,
+        "freeze-references": 17.025600000000054,
+        "freeze-segments": 13.976800000000026,
+        "lookup": 25.541600000000017,
+        "point-index": 20.126599999999826,
+        "segment-index": 7.81029999999987
+      }
+    },
+    {
+      "size": 1000,
+      "repeat": 0,
+      "sourceCount": 200000,
+      "segmentCount": 100000,
+      "phases": {
+        "primitives": 189.89229999999998,
+        "freeze-references": 394.8579,
+        "freeze-segments": 117.64430000000038,
+        "lookup": 214.69720000000007,
+        "point-index": 269.20069999999987,
+        "segment-index": 114.89900000000034
+      }
+    },
+    {
+      "size": 1000,
+      "repeat": 1,
+      "sourceCount": 200000,
+      "segmentCount": 100000,
+      "phases": {
+        "primitives": 186.30040000000008,
+        "freeze-references": 196.03499999999985,
+        "freeze-segments": 110.86929999999938,
+        "lookup": 200.35780000000068,
+        "point-index": 464.0003999999999,
+        "segment-index": 129.8072999999995
+      }
+    },
+    {
+      "size": 1000,
+      "repeat": 2,
+      "sourceCount": 200000,
+      "segmentCount": 100000,
+      "phases": {
+        "primitives": 177.44730000000072,
+        "freeze-references": 191.77550000000065,
+        "freeze-segments": 122.19949999999972,
+        "lookup": 208.21689999999944,
+        "point-index": 259.16829999999936,
+        "segment-index": 112.6221999999998
+      }
+    }
+  ]
+}
