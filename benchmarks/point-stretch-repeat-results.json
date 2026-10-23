@@ -1,0 +1,1882 @@
+{
+  "basis": "main38e9b9f after PR427",
+  "runtime": "v24.19.0",
+  "method": "Existing full stretch vs diagnostic bridge into existing prepared point action. Fixed five-vertex concave target, 10/100 unrelated 100-vertex hatches. Preparation separate; first plus eight warm alternating calls. Exact checks outside timing. No product changes or frame claim.",
+  "comparisons": 216,
+  "commits": 24,
+  "invalidChecks": 72,
+  "rows": [
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.13419999999999277,
+      "fullWarmMedianMs": 4.393899999999974,
+      "patchWarmMedianMs": 0.0191000000000372,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 18.782699999999977,
+          "patchMs": 0.21760000000000446,
+          "projectEqual": false,
+          "targetEqual": false,
+          "expectedPoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            },
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            }
+          ],
+          "candidatePoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            },
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            }
+          ]
+        },
+        {
+          "fullMs": 4.711200000000019,
+          "patchMs": 0.01859999999999218,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 6.81699999999995,
+          "patchMs": 0.02539999999999054,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 5.397100000000023,
+          "patchMs": 0.02810000000005175,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 4.393899999999974,
+          "patchMs": 0.0191000000000372,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 3.3987000000000194,
+          "patchMs": 0.013199999999983447,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 3.3699000000000296,
+          "patchMs": 0.01470000000000482,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 3.7626999999999953,
+          "patchMs": 0.012299999999981992,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 3.734199999999987,
+          "patchMs": 0.02960000000001628,
+          "projectEqual": false,
+          "targetEqual": false
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.016799999999989268,
+      "fullWarmMedianMs": 3.727899999999977,
+      "patchWarmMedianMs": 0.008699999999976171,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 4.059699999999964,
+          "patchMs": 0.022800000000017917,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.879799999999989,
+          "patchMs": 0.006000000000028649,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.5955000000000155,
+          "patchMs": 0.00889999999998281,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.8572999999999524,
+          "patchMs": 0.008699999999976171,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.321799999999996,
+          "patchMs": 0.008800000000007913,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.822399999999959,
+          "patchMs": 0.006100000000003547,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.727899999999977,
+          "patchMs": 0.011099999999942156,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.715099999999893,
+          "patchMs": 0.005100000000084037,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.062999999999988,
+          "patchMs": 0.00659999999993488,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.024099999999975807,
+      "fullWarmMedianMs": 3.713799999999992,
+      "patchWarmMedianMs": 0.005999999999971806,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 3.420900000000074,
+          "patchMs": 0.008899999999925967,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.9605999999999995,
+          "patchMs": 0.005999999999971806,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.77679999999998,
+          "patchMs": 0.010400000000004184,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.9120000000000346,
+          "patchMs": 0.005600000000072214,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.0084000000000515,
+          "patchMs": 0.00580000000002201,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.529899999999998,
+          "patchMs": 0.005999999999971806,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 2.981400000000008,
+          "patchMs": 0.005300000000033833,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.713799999999992,
+          "patchMs": 0.006700000000023465,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.6259999999999764,
+          "patchMs": 0.008299999999962893,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.018100000000004002,
+      "fullWarmMedianMs": 3.640100000000075,
+      "patchWarmMedianMs": 0.007400000000075124,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 3.7302000000000817,
+          "patchMs": 0.008699999999976171,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.0048000000000457,
+          "patchMs": 0.004900000000020555,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.0674999999999955,
+          "patchMs": 0.006200000000035288,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.0679999999999836,
+          "patchMs": 0.0072000000000116415,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.640100000000075,
+          "patchMs": 0.008100000000013097,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.9910999999999603,
+          "patchMs": 0.007400000000075124,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.5948999999999387,
+          "patchMs": 0.00909999999998945,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.903799999999933,
+          "patchMs": 0.005799999999908323,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.96670000000006,
+          "patchMs": 0.011199999999917054,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.020199999999931606,
+      "fullWarmMedianMs": 3.169999999999959,
+      "patchWarmMedianMs": 0.008000000000038199,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 3.8168000000000575,
+          "patchMs": 0.009199999999964348,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.8426000000000613,
+          "patchMs": 0.006399999999985084,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 4.1544999999999845,
+          "patchMs": 0.010300000000029286,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.7404000000000224,
+          "patchMs": 0.005499999999983629,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.011799999999994,
+          "patchMs": 0.007399999999961437,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.000499999999988,
+          "patchMs": 0.005599999999958527,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.1254000000000133,
+          "patchMs": 0.008000000000038199,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.070100000000025,
+          "patchMs": 0.011200000000030741,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.169999999999959,
+          "patchMs": 0.008199999999987995,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.026399999999966894,
+      "fullWarmMedianMs": 3.209600000000137,
+      "patchWarmMedianMs": 0.00659999999993488,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 3.011099999999942,
+          "patchMs": 0.007899999999835927,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.1835000000000946,
+          "patchMs": 0.005699999999933425,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.0420999999998912,
+          "patchMs": 0.00659999999993488,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 2.9850000000001273,
+          "patchMs": 0.00659999999993488,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.4809000000000196,
+          "patchMs": 0.009000000000014552,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.2181000000000495,
+          "patchMs": 0.005599999999958527,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 2.9072000000001026,
+          "patchMs": 0.005000000000109139,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.209600000000137,
+          "patchMs": 0.0072999999999865395,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 3.5751000000000204,
+          "patchMs": 0.009999999999990905,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.5890999999999167,
+      "fullWarmMedianMs": 7.858300000000099,
+      "patchWarmMedianMs": 0.03279999999995198,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 12.12220000000002,
+          "patchMs": 0.4614999999998872,
+          "projectEqual": false,
+          "targetEqual": false,
+          "expectedPoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            }
+          ],
+          "candidatePoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "fullMs": 8.045200000000023,
+          "patchMs": 0.018600000000105865,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 6.677700000000186,
+          "patchMs": 0.03880000000003747,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 6.16359999999986,
+          "patchMs": 0.030099999999947613,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 7.858300000000099,
+          "patchMs": 0.04729999999995016,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 9.089899999999943,
+          "patchMs": 0.024400000000014188,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 8.403800000000047,
+          "patchMs": 0.03279999999995198,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 6.627799999999979,
+          "patchMs": 0.024699999999938882,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 6.195899999999938,
+          "patchMs": 0.0364999999999327,
+          "projectEqual": false,
+          "targetEqual": false
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.06309999999984939,
+      "fullWarmMedianMs": 8.002700000000004,
+      "patchWarmMedianMs": 0.02229999999985921,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 11.290099999999939,
+          "patchMs": 0.08029999999985193,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 8.945600000000013,
+          "patchMs": 0.025599999999940337,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 8.002700000000004,
+          "patchMs": 0.019700000000057116,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.421900000000051,
+          "patchMs": 0.01689999999985048,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.6780999999998585,
+          "patchMs": 0.028500000000121872,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 8.155899999999974,
+          "patchMs": 0.017800000000079308,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.87259999999992,
+          "patchMs": 0.02229999999985921,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 9.458200000000033,
+          "patchMs": 0.01840000000015607,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.702099999999973,
+          "patchMs": 0.024999999999863576,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.060400000000072396,
+      "fullWarmMedianMs": 6.359300000000076,
+      "patchWarmMedianMs": 0.01410000000009859,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 14.310200000000123,
+          "patchMs": 0.022099999999909414,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.0090000000000146,
+          "patchMs": 0.009600000000091313,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.20880000000011,
+          "patchMs": 0.019199999999955253,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.359300000000076,
+          "patchMs": 0.013500000000021828,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.06860000000006,
+          "patchMs": 0.020199999999931606,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.84050000000002,
+          "patchMs": 0.011400000000094224,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.001399999999876,
+          "patchMs": 0.015199999999822467,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.215599999999995,
+          "patchMs": 0.012799999999970169,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 5.983799999999974,
+          "patchMs": 0.01410000000009859,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.04619999999999891,
+      "fullWarmMedianMs": 6.663499999999885,
+      "patchWarmMedianMs": 0.01759999999990214,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 7.304100000000062,
+          "patchMs": 0.018100000000004002,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.078500000000076,
+          "patchMs": 0.01689999999985048,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.663499999999885,
+          "patchMs": 0.01759999999990214,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.561899999999923,
+          "patchMs": 0.009600000000091313,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.8677000000000135,
+          "patchMs": 0.020300000000133878,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.039800000000014,
+          "patchMs": 0.009799999999813735,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.511999999999716,
+          "patchMs": 0.15619999999989886,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.013600000000224,
+          "patchMs": 0.0409999999997126,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 5.941499999999905,
+          "patchMs": 0.016599999999925785,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.04790000000002692,
+      "fullWarmMedianMs": 6.164000000000215,
+      "patchWarmMedianMs": 0.014800000000377622,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 7.429099999999835,
+          "patchMs": 0.016999999999825377,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.981499999999869,
+          "patchMs": 0.012499999999818101,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.017499999999927,
+          "patchMs": 0.014800000000377622,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.164000000000215,
+          "patchMs": 0.009299999999711872,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 5.965400000000045,
+          "patchMs": 0.013800000000173895,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.353399999999965,
+          "patchMs": 0.010499999999865395,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 5.940299999999752,
+          "patchMs": 0.022199999999884312,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.041299999999865,
+          "patchMs": 0.019399999999677675,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.04760000000033,
+          "patchMs": 0.016000000000076398,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.03830000000016298,
+      "fullWarmMedianMs": 6.739500000000135,
+      "patchWarmMedianMs": 0.014500000000225555,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 8.282500000000255,
+          "patchMs": 0.024899999999888678,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.034100000000308,
+          "patchMs": 0.011600000000271393,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.18560000000025,
+          "patchMs": 0.015899999999874126,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 7.292300000000068,
+          "patchMs": 0.009500000000116415,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 8.9371000000001,
+          "patchMs": 0.028399999999692227,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.501800000000003,
+          "patchMs": 0.008299999999962893,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.739500000000135,
+          "patchMs": 0.014600000000427826,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 6.893299999999726,
+          "patchMs": 0.009900000000016007,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 5.92450000000008,
+          "patchMs": 0.014500000000225555,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.023199999999633292,
+      "fullWarmMedianMs": 35.284200000000055,
+      "patchWarmMedianMs": 0.011500000000069122,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 35.154599999999846,
+          "patchMs": 0.018500000000130967,
+          "projectEqual": false,
+          "targetEqual": false,
+          "expectedPoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            },
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            }
+          ],
+          "candidatePoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            },
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            }
+          ]
+        },
+        {
+          "fullMs": 36.246399999999994,
+          "patchMs": 0.007000000000061846,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 34.83120000000008,
+          "patchMs": 0.011899999999968713,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 35.284200000000055,
+          "patchMs": 0.005799999999908323,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 36.44120000000021,
+          "patchMs": 0.011700000000018917,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 34.74260000000004,
+          "patchMs": 0.011700000000018917,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 34.62980000000016,
+          "patchMs": 0.011500000000069122,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 35.23739999999998,
+          "patchMs": 0.005000000000109139,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 39.48419999999987,
+          "patchMs": 0.009900000000016007,
+          "projectEqual": false,
+          "targetEqual": false
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.023800000000392174,
+      "fullWarmMedianMs": 37.011099999999715,
+      "patchWarmMedianMs": 0.0169000000005326,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 36.47890000000007,
+          "patchMs": 0.009799999999813735,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 37.011099999999715,
+          "patchMs": 0.0169000000005326,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 40.55320000000029,
+          "patchMs": 0.026200000000244472,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.98949999999968,
+          "patchMs": 0.016200000000026193,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.02950000000055,
+          "patchMs": 0.010800000000017462,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 40.46360000000004,
+          "patchMs": 0.01710000000002765,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 37.326500000000124,
+          "patchMs": 0.009500000000116415,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.63539999999921,
+          "patchMs": 0.021199999999225838,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.66429999999946,
+          "patchMs": 0.009599999999409192,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 0,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.06369999999969878,
+      "fullWarmMedianMs": 36.147400000000744,
+      "patchWarmMedianMs": 0.010700000000724685,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 35.319800000000214,
+          "patchMs": 0.015300000000024738,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.63730000000032,
+          "patchMs": 0.01890000000003056,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.3127999999997,
+          "patchMs": 0.010700000000724685,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.6887999999999,
+          "patchMs": 0.00860000000011496,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 34.844999999999345,
+          "patchMs": 0.01040000000011787,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.147400000000744,
+          "patchMs": 0.018599999999423744,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.27649999999994,
+          "patchMs": 0.01040000000011787,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.93089999999938,
+          "patchMs": 0.019800000000032014,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.001499999999396,
+          "patchMs": 0.009900000000016007,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.03600000000005821,
+      "fullWarmMedianMs": 42.84990000000016,
+      "patchWarmMedianMs": 0.015000000000327418,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 38.295099999999366,
+          "patchMs": 0.011899999999513966,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 43.25380000000041,
+          "patchMs": 0.02080000000023574,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 34.42489999999998,
+          "patchMs": 0.01069999999981519,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 37.044599999999264,
+          "patchMs": 0.01860000000033324,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.193099999999504,
+          "patchMs": 0.011099999999714782,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 38.70130000000063,
+          "patchMs": 0.015000000000327418,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 42.873899999999594,
+          "patchMs": 0.010199999999713327,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 42.84990000000016,
+          "patchMs": 0.01769999999942229,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 43.12840000000051,
+          "patchMs": 0.014900000000125146,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.01629999999931897,
+      "fullWarmMedianMs": 36.31790000000001,
+      "patchWarmMedianMs": 0.015600000000631553,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 35.370999999999185,
+          "patchMs": 0.01119999999900756,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.94680000000153,
+          "patchMs": 0.015600000000631553,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 39.32799999999952,
+          "patchMs": 0.014099999998506973,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 36.31790000000001,
+          "patchMs": 0.021899999999732245,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 43.38050000000112,
+          "patchMs": 0.009900000000925502,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 41.16100000000006,
+          "patchMs": 0.017100000000937143,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.63349999999991,
+          "patchMs": 0.0136000000002241,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 33.735099999999875,
+          "patchMs": 0.016800000001239823,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.26190000000133,
+          "patchMs": 0.011700000000928412,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "coordinate": 1000000000,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.009199999998600106,
+      "fullWarmMedianMs": 38.99839999999858,
+      "patchWarmMedianMs": 0.01599999999962165,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 35.96669999999904,
+          "patchMs": 0.013499999999112333,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.68169999999918,
+          "patchMs": 0.01599999999962165,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 34.38539999999921,
+          "patchMs": 0.021600000000034925,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 41.207800000000134,
+          "patchMs": 0.01659999999901629,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 44.783400000000256,
+          "patchMs": 0.009599999999409192,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 41.27719999999863,
+          "patchMs": 0.021899999999732245,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 38.99839999999858,
+          "patchMs": 0.009799999999813735,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 35.899499999999534,
+          "patchMs": 0.01449999999931606,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 37.44579999999951,
+          "patchMs": 0.010399999999208376,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.05850000000100408,
+      "fullWarmMedianMs": 85.21190000000024,
+      "patchWarmMedianMs": 0.017899999998917338,
+      "projectMismatches": 9,
+      "targetMismatches": 9,
+      "numericMismatches": 7,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 73.16339999999946,
+          "patchMs": 0.03780000000006112,
+          "projectEqual": false,
+          "targetEqual": false,
+          "expectedPoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.04869999999999999
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            }
+          ],
+          "candidatePoints": [
+            {
+              "x": -0.14609999999999998,
+              "y": -0.048699999999999966
+            },
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 1.5,
+              "y": 2
+            },
+            {
+              "x": 0,
+              "y": 4
+            }
+          ]
+        },
+        {
+          "fullMs": 85.21190000000024,
+          "patchMs": 0.010000000000218279,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 72.28849999999875,
+          "patchMs": 0.018800000001647277,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 73.11570000000029,
+          "patchMs": 0.009799999999813735,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 74.77090000000135,
+          "patchMs": 0.017899999998917338,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 91.33430000000044,
+          "patchMs": 0.01540000000022701,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 84.40730000000076,
+          "patchMs": 0.026499999999941792,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 98.1826000000001,
+          "patchMs": 0.008799999999610009,
+          "projectEqual": false,
+          "targetEqual": false
+        },
+        {
+          "fullMs": 86.0611000000008,
+          "patchMs": 0.07250000000021828,
+          "projectEqual": false,
+          "targetEqual": false
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.05019999999967695,
+      "fullWarmMedianMs": 77.45250000000124,
+      "patchWarmMedianMs": 0.02419999999983702,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 74.49749999999949,
+          "patchMs": 0.016500000001542503,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 76.8721999999998,
+          "patchMs": 0.03349999999954889,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.40740000000005,
+          "patchMs": 0.016200000000026193,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 75.91949999999997,
+          "patchMs": 0.025900000000547152,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 79.03740000000107,
+          "patchMs": 0.014999999999417923,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 74.50410000000011,
+          "patchMs": 0.03359999999884167,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 74.10859999999957,
+          "patchMs": 0.01720000000022992,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 77.45250000000124,
+          "patchMs": 0.02419999999983702,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 109.7536,
+          "patchMs": 0.016499999999723514,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 0,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.0790000000015425,
+      "fullWarmMedianMs": 76.92190000000119,
+      "patchWarmMedianMs": 0.02080000000205473,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 3,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 85.2435000000005,
+          "patchMs": 0.021199999999225838,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.49729999999909,
+          "patchMs": 0.02630000000135624,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 76.75120000000243,
+          "patchMs": 0.016800000001239823,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 74.43079999999827,
+          "patchMs": 0.013800000000628643,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.1101000000017,
+          "patchMs": 0.019100000001344597,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 74.13400000000183,
+          "patchMs": 0.025799999999435386,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 76.92190000000119,
+          "patchMs": 0.02080000000205473,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 75.39420000000246,
+          "patchMs": 0.025499999999738066,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 81.1359999999986,
+          "patchMs": 0.02020000000266009,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 0,
+      "preparedStretch": false,
+      "preparationMs": 0.07519999999931315,
+      "fullWarmMedianMs": 78.84990000000107,
+      "patchWarmMedianMs": 0.0220999999983178,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 87.54969999999958,
+          "patchMs": 0.0220999999983178,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.84990000000107,
+          "patchMs": 0.020399999997607665,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 80.3813999999984,
+          "patchMs": 0.017100000000937143,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 73.84590000000026,
+          "patchMs": 0.025900000000547152,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 74.0789999999979,
+          "patchMs": 0.01689999999871361,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.77289999999994,
+          "patchMs": 0.0220999999983178,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 79.23830000000089,
+          "patchMs": 0.022100000001955777,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.70490000000063,
+          "patchMs": 0.030099999999947613,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 79.86449999999968,
+          "patchMs": 0.01959999999962747,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 1,
+      "preparedStretch": false,
+      "preparationMs": 0.02750000000014552,
+      "fullWarmMedianMs": 81.71879999999874,
+      "patchWarmMedianMs": 0.021300000000337604,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": false,
+      "samples": [
+        {
+          "fullMs": 78.71130000000267,
+          "patchMs": 0.016100000000733417,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 86.24629999999888,
+          "patchMs": 0.028200000000651926,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 88.12950000000274,
+          "patchMs": 0.017100000000937143,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 81.71879999999874,
+          "patchMs": 0.02749999999650754,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 80.39689999999973,
+          "patchMs": 0.01900000000023283,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 80.1856000000007,
+          "patchMs": 0.01840000000083819,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.51239999999962,
+          "patchMs": 0.01750000000174623,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 78.07679999999891,
+          "patchMs": 0.03659999999945285,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 81.89670000000115,
+          "patchMs": 0.021300000000337604,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "coordinate": 1000000000,
+      "index": 3,
+      "preparedStretch": false,
+      "preparationMs": 0.021899999999732245,
+      "fullWarmMedianMs": 82.28529999999955,
+      "patchWarmMedianMs": 0.02989999999772408,
+      "projectMismatches": 0,
+      "targetMismatches": 0,
+      "numericMismatches": 0,
+      "unconstrainedPointAcceptsCrossing": true,
+      "samples": [
+        {
+          "fullMs": 82.60180000000037,
+          "patchMs": 0.018299999999726424,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 83.58550000000105,
+          "patchMs": 0.03020000000105938,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 72.71630000000005,
+          "patchMs": 0.014999999999417923,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 75.69710000000123,
+          "patchMs": 0.025799999999435386,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 77.53800000000047,
+          "patchMs": 0.025600000000849832,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 84.65449999999691,
+          "patchMs": 0.030699999999342253,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 83.23140000000058,
+          "patchMs": 0.02260000000023865,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 81.8752999999997,
+          "patchMs": 0.02989999999772408,
+          "projectEqual": true,
+          "targetEqual": true
+        },
+        {
+          "fullMs": 82.28529999999955,
+          "patchMs": 0.03379999999742722,
+          "projectEqual": true,
+          "targetEqual": true
+        }
+      ]
+    }
+  ]
+}
