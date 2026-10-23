@@ -1,56 +1,76 @@
-import assert from "node:assert/strict";
-import { hatchPointFixture } from "./hatch-point-fixture.ts";
+/** Diagnostic only: isolate the four existing cold-index preparation phases. */
+import { readFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
 import { projectSnapPrimitives } from "../src/application/snapping/project-references.ts";
-import { createPrimitiveSourceIndex } from "../src/constraints/snapping/local-source-index.ts";
-import { getLocalSnapSources } from "../src/application/snapping/local-sources.ts";
-const rows = [];
-for (const size of [10, 100, 1000])
-  for (let repeat = 0; repeat < 3; repeat++) {
-    const base = hatchPointFixture(size, 100);
-    const phases: Record<string, number> = {};
-    const measure = <T>(name: string, run: () => T): T => {
-      const start = performance.now();
-      const value = run();
-      phases[name] = performance.now() - start;
-      return value;
-    };
-    const primitives = measure("primitives", () => projectSnapPrimitives(base));
-    const measured = createPrimitiveSourceIndex(primitives, measure);
-    const normal = getLocalSnapSources(base);
-    assert.equal(getLocalSnapSources(base), normal);
-    assert.equal(measured.sourceCount, normal.sourceCount);
-    assert.equal(measured.segmentCount, normal.segmentCount);
-    assert.deepEqual(measured.allSegments, normal.allSegments);
-    for (const cursor of [
-      { x: 10, y: 0 },
-      { x: 0, y: 10 },
-      { x: 5, y: 5 },
-      { x: 30 * (size - 1) + 10, y: 0 },
-    ])
-      for (const hidden of [false, true]) {
-        const allowed = (r: { entityId: string }) => !hidden || r.entityId !== "h0";
-        assert.deepEqual(
-          measured.query(cursor, 200, 12, allowed),
-          normal.query(cursor, 200, 12, allowed),
-        );
-      }
-    rows.push({
-      size,
-      repeat,
-      sourceCount: measured.sourceCount,
-      segmentCount: measured.segmentCount,
-      phases,
-    });
-  }
+import { referenceKey } from "../src/constraints/inference/construction-reference.ts";
+import { createBoxIndex } from "../src/geometry/spatial/box-index.ts";
+import { createBoxIndex as baseline } from "./box-index-baseline.ts";
+
+function freeze(value: object): void {
+  for (const nested of Object.values(value))
+    if (nested && typeof nested === "object") freeze(nested);
+  Object.freeze(value);
+}
+function measure(
+  index: typeof createBoxIndex,
+  project: Parameters<typeof projectSnapPrimitives>[0],
+) {
+  const { references, segments } = projectSnapPrimitives(project);
+  const t = [performance.now()];
+  freeze(references);
+  freeze(segments);
+  t.push(performance.now());
+  const lookup = new Map(references.map((r) => [referenceKey(r), r]));
+  t.push(performance.now());
+  const points = index(
+    references.map((r, value) => ({
+      value,
+      box: {
+        minX: r.point.x,
+        maxX: r.point.x,
+        minY: r.point.y,
+        maxY: r.point.y,
+      },
+    })),
+  );
+  t.push(performance.now());
+  const lines = index(
+    segments.map((s, value) => ({
+      value,
+      box: {
+        minX: Math.min(s.start.x, s.end.x),
+        maxX: Math.max(s.start.x, s.end.x),
+        minY: Math.min(s.start.y, s.end.y),
+        maxY: Math.max(s.start.y, s.end.y),
+      },
+    })),
+  );
+  t.push(performance.now());
+  // Consume the structures outside the measured preparation intervals.
+  const box = { minX: -1, minY: -1, maxX: 1, maxY: 1 };
+  return {
+    phasesMs: t.slice(1).map((v, i) => v - t[i]!),
+    counts: [lookup.size, points.query(box).length, lines.query(box).length],
+  };
+}
+const path = process.argv[2];
+if (!path) throw new Error("Pass a project JSON fixture path");
+const project = JSON.parse(readFileSync(path, "utf8"));
 console.log(
   JSON.stringify(
     {
-      basis: "PR43196d9639",
-      runtime: process.version,
-      method:
-        "Three fresh fixtures per size; no forced GC. Identical production index builder with optional phase measurement. Four local queries, each visible/filtered, compared to normal cached production path. Index mapping and tree construction grouped together. Node CPU measurements, not frames.",
-      queryComparisons: 72,
-      rows,
+      phaseOrder: ["freeze", "lookup", "points", "segments"],
+      runs: Array.from({ length: 7 }, (_, i) => {
+        // Alternate order to reduce systematic first-run advantage.
+        if (i % 2) {
+          const optimized = measure(createBoxIndex, project);
+          return { baseline: measure(baseline, project), optimized };
+        }
+        return {
+          baseline: measure(baseline, project),
+          optimized: measure(createBoxIndex, project),
+        };
+      }),
     },
     null,
     2,

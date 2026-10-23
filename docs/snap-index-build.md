@@ -43,3 +43,5 @@ Keine neue Produktionsabhängigkeit, Modellkopie oder geänderte Fachaktion.
 1155 Tests, Benchmark-/App-Typen, Architektur, gezielter Lint und Build bestanden.
 Keine UI-Verhaltensänderung; Browserabnahme daher hier nicht wiederholt.
 Commit/Undo/Recovery/IFC unverändert. Einziger Folgeauftrag Masterplan §9.
+
+Reproduktion: node --experimental-strip-types benchmarks/snap-index-phases.ts. Der ältere Diagnoseweg snap-index-build.ts mit box-index-baseline bleibt unverändert erhalten.
