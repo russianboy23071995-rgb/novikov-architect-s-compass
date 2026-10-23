@@ -1,0 +1,79 @@
+{
+  "basis": "PR4322b4763e",
+  "runtime": "v24.19.0",
+  "method": "Four fresh builds per size, alternating order. Primitive creation excluded; optional explicit GC before build. Heap delta is transient allocation observation, not peak or retained memory. Deep equality of segments and48 filtered/local queries; shallow-frozen parent mutation probes.",
+  "rows": [
+    {
+      "size": 100,
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 120.6918,
+      "candidateMs": 112.93379999999996,
+      "baselineHeapDelta": 24189304,
+      "candidateHeapDelta": 41510208
+    },
+    {
+      "size": 100,
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 80.17169999999999,
+      "candidateMs": 95.47719999999993,
+      "baselineHeapDelta": 66669928,
+      "candidateHeapDelta": 69818296
+    },
+    {
+      "size": 100,
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 77.63629999999989,
+      "candidateMs": 110.85940000000005,
+      "baselineHeapDelta": 66301160,
+      "candidateHeapDelta": 69239784
+    },
+    {
+      "size": 100,
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 92.33269999999993,
+      "candidateMs": 88.12079999999992,
+      "baselineHeapDelta": 66407360,
+      "candidateHeapDelta": 69632136
+    },
+    {
+      "size": 1000,
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 902.2956000000004,
+      "candidateMs": 1484.7619,
+      "baselineHeapDelta": 188465960,
+      "candidateHeapDelta": 323562480
+    },
+    {
+      "size": 1000,
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 959.2718000000004,
+      "candidateMs": 1335.2844999999998,
+      "baselineHeapDelta": 190149008,
+      "candidateHeapDelta": 323291832
+    },
+    {
+      "size": 1000,
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 901.9760999999999,
+      "candidateMs": 1428.2775999999994,
+      "baselineHeapDelta": 234419032,
+      "candidateHeapDelta": 322614632
+    },
+    {
+      "size": 1000,
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 946.3322999999982,
+      "candidateMs": 1388.4475999999995,
+      "baselineHeapDelta": 186766784,
+      "candidateHeapDelta": 322432968
+    }
+  ]
+}
