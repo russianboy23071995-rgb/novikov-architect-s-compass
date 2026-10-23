@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `ea69b0c` nach PR434 (CI40034923425 grün). Einmalige Sortiermittelpunkte im Folgebranch perf/spatial-sort-centres verglichen: Punkte etwas schneller, Segmente langsamer, höherer Heapdelta. Kandidat nicht produktiv übernommen. Details docs/spatial-sort-centres.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `aab56c7` nach PR435 (CI40035319650 grün). Folgebranch diagnostics/snap-index-invalidation belegt vollständigen Fangindex-Neuaufbau nach kleiner Linien-/Schraffuränderung trotz über 99,99 % identischer Referenzdaten bei großer Fixture. Produktion unverändert; Details docs/snap-index-invalidation.md. Einziger Folgeauftrag §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11489,7 +11489,7 @@ Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlau
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status 24.10.2026: teilweise umgesetzt bis main PR434. Sortiermittelpunkt-Kandidat trotz exakter Ergebnisse mangels ausreichendem Nutzen verworfen. Produktion unverändert. Invalidierung nach Einzeländerungen als nächsten Messauftrag prüfen. Frame-/Native- und Wandachsen-/Kettenreste offen; einziger Auftrag Masterplan §9.
+Status 24.10.2026: teilweise umgesetzt bis main PR435. Diagnose im Folgebranch belegt vollständigen Indexneuaufbau nach kleiner Änderung trotz nahezu gleicher Referenzen. Objektidentitäten durch Commitkopien ungeeignet. Produktion unverändert; nächster begrenzter Primitive-Reuse-Kandidat nur gemäß §9. Frame-/Native- und Wandachsen-/Kettenreste offen.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -13205,3 +13205,8 @@ PR425 nach CI39657525588 grün in main4020047. Folgebranch fix/shared-oblique-ax
 ### AUD14-04 – Sortiermittelpunkte nicht übernommen, 24.10.2026
 
 24.10.2026: PR434 nach grüner CI in mainea69b0c integriert. Mittelpunkt-Kandidat erhält geordnete Ergebnisse, bringt aber gemischte Gesamtzeiten und höheren Speicherbedarf. 64 Vergleiche plus720 bestehende Query-Fälle und Grenzchecks bestanden; Benchmark-Typen/Lint grün. Produktion unverändert. Nachweis docs/spatial-sort-centres.md. Nächster Einzelauftrag: Indexinvalidierung bei kleinen Modelländerungen messen statt weiterer unbelegter Mikrooptimierung.
+
+
+### AUD14-04 – Fangindex nach kleinen Modelländerungen, 24.10.2026
+
+24.10.2026: PR435 grün in main aab56c7 übernommen. Sechs echte Streck-Commits zeigen neuen vollständigen Fangindex; bei 1.000 unveränderten Schraffuren je 100 Punkten rund 1,1 s Neuaufbau und nur fünf geänderte/neue Referenzen. Vorschau-/Filterkontrollen und Undo/Redo behalten ihren Index; alte Vorschau wird abgewiesen. Unveränderte Elementobjekte werden beim Commit kopiert. Benchmark-Typen/Lint und Diagnoseassertionen bestanden. Produktion unverändert, Einzelmessungen ohne Frame-/Browsergarantie. Nachweis docs/snap-index-invalidation.md; Folgeauftrag ausschließlich §9.
