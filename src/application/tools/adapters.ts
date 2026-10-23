@@ -28,6 +28,29 @@ function editSnapPolicy(session: EditSession): AnchoredSnapPolicy {
   }
   return policy;
 }
+/** Pin the existing edit-axis query and snap policy for shared selection movement. */
+export function editMovementAxis(session: EditSession) {
+  if (session.action !== "axis" || !["line", "hatch"].includes(session.target.kind)) return null;
+  const pinned = Object.freeze({
+    ...session,
+    target: Object.freeze({ ...session.target }),
+    anchor: Object.freeze({ ...session.anchor }),
+  });
+  const axis = numericMoveAxis(pinned);
+  if (!axis) return null;
+  const policy = editSnapPolicy(pinned);
+  const snapping = Object.freeze({
+    ...policy,
+    origin: Object.freeze({
+      ...policy.origin,
+      point: Object.freeze({ ...policy.origin.point }),
+      directions: Object.freeze(
+        (policy.origin.directions ?? []).map((direction) => Object.freeze({ ...direction })),
+      ),
+    }),
+  });
+  return { ...axis, base: pinned.base, target: pinned.target, snapping };
+}
 export function editInteraction(
   session: EditSession,
   current: Project,

@@ -14,6 +14,7 @@ import {
 import { editDirection } from "../src/application/direct-edit/snapping.ts";
 import { numericMoveAxis, previewNumericMove } from "../src/application/direct-edit/numeric.ts";
 import { projectDirection } from "../src/geometry/projections/direction.ts";
+import { editMovementAxis } from "../src/application/tools/adapters.ts";
 import {
   createLayerVisibilityPolicy,
   ALL_LAYERS_VISIBLE,
@@ -32,8 +33,16 @@ const timed = <T>(fn: () => T) => {
 const rows = [];
 const fixedAdapters = process.argv.includes("--fixed-adapter");
 const sharedAxis = process.argv.includes("--shared-axis");
-assert.ok(!fixedAdapters || !sharedAxis, "Choose one protocol variant");
-const actions: readonly ("x" | "y" | "axis")[] = fixedAdapters ? ["x", "y"] : ["x", "y", "axis"];
+const elementAdapters = process.argv.includes("--element-adapter");
+assert.ok(
+  [fixedAdapters, sharedAxis, elementAdapters].filter(Boolean).length <= 1,
+  "Choose one protocol variant",
+);
+const actions: readonly ("x" | "y" | "axis")[] = fixedAdapters
+  ? ["x", "y"]
+  : elementAdapters
+    ? ["axis"]
+    : ["x", "y", "axis"];
 function numericDifference(a: unknown, b: unknown): number {
   if (Object.is(a, b)) return 0;
   if (typeof a === "number" && typeof b === "number") {
@@ -77,7 +86,7 @@ for (const size of [10, 100])
       let published: typeof base | null = null;
       const policy = createLayerVisibilityPolicy(base, ALL_LAYERS_VISIBLE);
       const adapterPreparation = timed(() =>
-        fixedAdapters && action !== "axis"
+        (fixedAdapters && action !== "axis") || elementAdapters
           ? selectionMoveInteraction(
               preparation.value,
               base,
@@ -87,13 +96,14 @@ for (const size of [10, 100])
                 published = next;
               },
               () => {},
-              action,
+              action === "axis" ? editMovementAxis(session)! : action,
             )
           : null,
       );
       const adapter = adapterPreparation.value;
       // Preserve the raw pinned contour vector; pre-normalizing changes exact arithmetic.
-      const axisDirection = sharedAxis && action === "axis" ? direction : undefined;
+      const axisDirection =
+        (sharedAxis || elementAdapters) && action === "axis" ? direction : undefined;
       const sharedProject = (point: typeof anchor) =>
         previewSelectionMove(preparation.value, base, [target], point, undefined, axisDirection);
       const samples = [];
@@ -179,7 +189,7 @@ for (const size of [10, 100])
           maxNumericDifference,
           numericMaxDifference,
         });
-        if (sharedAxis) {
+        if (sharedAxis || elementAdapters) {
           assert.ok(projectEqual);
           assert.ok(targetEqual);
           assert.deepEqual(sharedProject(numeric.point), numeric.project);
@@ -208,13 +218,16 @@ for (const size of [10, 100])
 console.log(
   JSON.stringify(
     {
-      basis: fixedAdapters
-        ? "main be0c9b4 after PR424 plus shared fixed XY adapter"
-        : sharedAxis
-          ? "main 4020047 after PR425 plus common direction-offset calculation"
-          : "Current working tree; original PR423 comparison protocol",
+      basis: elementAdapters
+        ? "main 3fb1943 after PR426 plus shared element-axis adapter"
+        : fixedAdapters
+          ? "main be0c9b4 after PR424 plus shared fixed XY adapter"
+          : sharedAxis
+            ? "main 4020047 after PR425 plus common direction-offset calculation"
+            : "Current working tree; original PR423 comparison protocol",
       fixedAdapters,
       sharedAxis,
+      elementAdapters,
       runtime: process.version,
       method:
         "Projected mouse targets and signed numeric targets; index1, arbitrary origin. Full path reprojects axis targets as production does. Exact comparisons outside timings, axis mismatches explicitly retained. One preparation, first+8 warm, alternating path order. API only, no snap/React/render/commit/frame timing.",
