@@ -1,0 +1,167 @@
+{
+  "basis": "PR43489a391e",
+  "runtime": "v24.19.0",
+  "method": "Four fresh trees per size/type; alternating order, GC before build. Heap delta is transient observation, not retained/peak. 64 ordered queries plus ties/large/input-mutation/invalid checks. No frame/native claim.",
+  "rows": [
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 29.0351,
+      "candidateMs": 22.316400000000044,
+      "baselineHeapDelta": 7130824,
+      "candidateHeapDelta": 31548120
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 29.623000000000047,
+      "candidateMs": 32.72140000000002,
+      "baselineHeapDelta": 7548880,
+      "candidateHeapDelta": 8734928
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 17.52789999999999,
+      "candidateMs": 20.146600000000035,
+      "baselineHeapDelta": 22856824,
+      "candidateHeapDelta": 23557144
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 15.644400000000019,
+      "candidateMs": 18.818300000000022,
+      "baselineHeapDelta": 22849352,
+      "candidateHeapDelta": 23379192
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 7.70150000000001,
+      "candidateMs": 10.115000000000009,
+      "baselineHeapDelta": 11935664,
+      "candidateHeapDelta": 12378120
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 8.79359999999997,
+      "candidateMs": 8.979800000000068,
+      "baselineHeapDelta": 11905472,
+      "candidateHeapDelta": 12201176
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 9.0077,
+      "candidateMs": 9.441100000000006,
+      "baselineHeapDelta": 11863112,
+      "candidateHeapDelta": 11869992
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 8.267100000000028,
+      "candidateMs": 8.753100000000018,
+      "baselineHeapDelta": 11905472,
+      "candidateHeapDelta": 12182464
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 211.4451999999999,
+      "candidateMs": 210.04780000000005,
+      "baselineHeapDelta": 70691664,
+      "candidateHeapDelta": 88010992
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 228.11319999999978,
+      "candidateMs": 221.47999999999956,
+      "baselineHeapDelta": 73481600,
+      "candidateHeapDelta": 92445032
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 227.61410000000024,
+      "candidateMs": 201.47479999999996,
+      "baselineHeapDelta": 73236584,
+      "candidateHeapDelta": 93255096
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 221.7239000000004,
+      "candidateMs": 211.01429999999982,
+      "baselineHeapDelta": 73641200,
+      "candidateHeapDelta": 90073840
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 0,
+      "candidateFirst": false,
+      "baselineMs": 107.09410000000025,
+      "candidateMs": 114.05200000000059,
+      "baselineHeapDelta": 50186208,
+      "candidateHeapDelta": 64117616
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 1,
+      "candidateFirst": true,
+      "baselineMs": 105.82269999999971,
+      "candidateMs": 110.41070000000036,
+      "baselineHeapDelta": 49727904,
+      "candidateHeapDelta": 60732424
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 2,
+      "candidateFirst": false,
+      "baselineMs": 99.72839999999997,
+      "candidateMs": 108.0648000000001,
+      "baselineHeapDelta": 49729864,
+      "candidateHeapDelta": 62581416
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 3,
+      "candidateFirst": true,
+      "baselineMs": 100.85769999999957,
+      "candidateMs": 103.01479999999992,
+      "baselineHeapDelta": 50119008,
+      "candidateHeapDelta": 61129168
+    }
+  ]
+}
