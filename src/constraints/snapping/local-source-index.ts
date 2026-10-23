@@ -23,32 +23,39 @@ function freezeData(value: object): void {
 }
 
 /** Cold build contains primitive sources only, never all model intersections. */
-export function createPrimitiveSourceIndex({
-  references,
-  segments,
-}: {
-  references: SnapReference[];
-  segments: SnapSegment[];
-}) {
-  freezeData(references);
-  freezeData(segments);
-  const lookup = new Map(references.map((r) => [referenceKey(r), r]));
-  const points = createBoxIndex(
-    references.map((r, value) => ({
-      value,
-      box: { minX: r.point.x, maxX: r.point.x, minY: r.point.y, maxY: r.point.y },
-    })),
+export function createPrimitiveSourceIndex(
+  {
+    references,
+    segments,
+  }: {
+    references: SnapReference[];
+    segments: SnapSegment[];
+  },
+  measure: <T>(phase: string, run: () => T) => T = (_phase, run) => run(),
+) {
+  measure("freeze-references", () => freezeData(references));
+  measure("freeze-segments", () => freezeData(segments));
+  const lookup = measure("lookup", () => new Map(references.map((r) => [referenceKey(r), r])));
+  const points = measure("point-index", () =>
+    createBoxIndex(
+      references.map((r, value) => ({
+        value,
+        box: { minX: r.point.x, maxX: r.point.x, minY: r.point.y, maxY: r.point.y },
+      })),
+    ),
   );
-  const lines = createBoxIndex(
-    segments.map((s, value) => ({
-      value,
-      box: {
-        minX: Math.min(s.start.x, s.end.x),
-        maxX: Math.max(s.start.x, s.end.x),
-        minY: Math.min(s.start.y, s.end.y),
-        maxY: Math.max(s.start.y, s.end.y),
-      },
-    })),
+  const lines = measure("segment-index", () =>
+    createBoxIndex(
+      segments.map((s, value) => ({
+        value,
+        box: {
+          minX: Math.min(s.start.x, s.end.x),
+          maxX: Math.max(s.start.x, s.end.x),
+          minY: Math.min(s.start.y, s.end.y),
+          maxY: Math.max(s.start.y, s.end.y),
+        },
+      })),
+    ),
   );
   return Object.freeze({
     query(
