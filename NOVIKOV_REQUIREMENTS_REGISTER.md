@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `19a6ddc` nach PR436 (CI40036034331 grün). Folgebranch perf/drawing-primitive-reuse: begrenzter Primitive-Kandidat liefert exakte Ergebnisse und schnellere kleine Änderungen, aber langsameren Kaltaufbau. Noch nicht produktiv übernommen. Nachweis docs/drawing-primitive-reuse.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `831a8a5` nach PR437 (CI40036777290 grün). Folgebranch perf/primitive-cold-seeding: einmalige sichere Kaltbefüllung korrekt; Änderungen schneller, Kalt-/Vollinvalidierungskosten weiterhin uneindeutig. Keine Produktübernahme. Nachweis docs/primitive-cold-seeding.md; einziger Folgeauftrag §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11489,7 +11489,7 @@ Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlau
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status 24.10.2026: teilweise umgesetzt bis main PR436. Begrenzter Primitive-Reuse-Kandidat exakt und bei Änderungen schneller, wegen Kaltmehrkosten nicht produktiv. Nächster Kaltbefüllungskandidat ausschließlich §9. Räumlicher Neuaufbau, Commitvalidierung, Frame-/Native- und Wandachsen-/Kettenreste offen.
+Status 24.10.2026: teilweise umgesetzt bis main PR437. Einmalige Primitive-Kaltbefüllung korrekt und bei Änderungen schneller, wegen uneindeutiger Kalt-/Invalidierungskosten noch nicht produktiv. Isolierter Browservergleich ausschließlich §9. Räumlicher Neuaufbau, Commitvalidierung und Frame-/Native-Gates offen.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -13215,3 +13215,8 @@ PR425 nach CI39657525588 grün in main4020047. Folgebranch fix/shared-oblique-ax
 ### AUD14-04 – Begrenzter Primitive-Reuse-Kandidat, 24.10.2026
 
 24.10.2026: PR436 grün in main19a6ddc integriert. Begrenzter Linien-/Schraffur-Primitive-Kandidat mit exaktem Punktvergleich statt Objektidentität geprüft: 400 geordnete Queries sowie vollständige Daten/Lookup-Vergleiche exakt, neun zusätzliche Sicherheitsvergleiche bestanden. Änderungen 10–32 % schneller, Kaltaufbau 2–28 % langsamer; zusätzlicher Cacheheap offen ausgewiesen. Daher keine Produktübernahme. Benchmark-Typen/Lint bestanden, keine Browser-/Framefreigabe. Nachweis docs/drawing-primitive-reuse.md; nächste Kaltbefüllungsvariante ausschließlich §9.
+
+
+### AUD14-04 – Sichere einmalige Cache-Kaltbefüllung, 24.10.2026
+
+24.10.2026: PR437 grün in main831a8a5 integriert. Einmalige gemeinsame Cache-Kaltbefüllung nach erfolgreichem vollständigem Indexaufbau geprüft;464 geordnete Queries und zusätzliche Sicherheitsvergleiche exakt. Kleine Änderungen in16/16 Vergleichen22–34 % schneller, Kaltaufbau in13/16 und Vollinvalidierung in12/16 langsamer. Produktion unverändert; Typen/Lint bestanden. Heapdeltas sind keine Gesamt-/Peakmessung. Nachweis docs/primitive-cold-seeding.md. Nächster Einzelauftrag §9: isolierter Browservergleich des unveränderten Kandidaten.
