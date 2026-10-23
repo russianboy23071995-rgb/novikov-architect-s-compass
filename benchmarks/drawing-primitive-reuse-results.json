@@ -1,0 +1,840 @@
+{
+  "basis": "PR436 7cd7145",
+  "runtime": "v24.19.0",
+  "comparisons": 400,
+  "method": "Full primitive + spatial index build; four alternating orders per phase/type/size. Separate GC retained heap delta, not peak RAM. No browser/frame claim. Exact full data, lookup and ordered local queries; real commit/undo/redo, deletion/context/mutation/budget checks.",
+  "rows": [
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 0,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 112.47870000000012,
+          "allocatedHeapDelta": 57987984,
+          "retainedHeapDelta": 22943008
+        },
+        {
+          "candidate": true,
+          "ms": 126.8430999999996,
+          "allocatedHeapDelta": 29849808,
+          "retainedHeapDelta": 24208072
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 0,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 105.23350000000028,
+          "allocatedHeapDelta": 56089360,
+          "retainedHeapDelta": 22941064
+        },
+        {
+          "candidate": true,
+          "ms": 77.77320000000009,
+          "allocatedHeapDelta": 21101472,
+          "retainedHeapDelta": 10868968
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 1,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 130.36539999999968,
+          "allocatedHeapDelta": 29935840,
+          "retainedHeapDelta": 24234200
+        },
+        {
+          "candidate": false,
+          "ms": 107.47040000000015,
+          "allocatedHeapDelta": 55123280,
+          "retainedHeapDelta": 22942552
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 1,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 76.43370000000004,
+          "allocatedHeapDelta": 21210456,
+          "retainedHeapDelta": 10866488
+        },
+        {
+          "candidate": false,
+          "ms": 106.97950000000037,
+          "allocatedHeapDelta": 55648368,
+          "retainedHeapDelta": 22941080
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 2,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 104.02509999999984,
+          "allocatedHeapDelta": 56848088,
+          "retainedHeapDelta": 22940872
+        },
+        {
+          "candidate": true,
+          "ms": 133.38779999999997,
+          "allocatedHeapDelta": 29158616,
+          "retainedHeapDelta": 24227184
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 2,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 103.22390000000041,
+          "allocatedHeapDelta": 55388416,
+          "retainedHeapDelta": 22942376
+        },
+        {
+          "candidate": true,
+          "ms": 78.04739999999993,
+          "allocatedHeapDelta": 21007840,
+          "retainedHeapDelta": 10866392
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 3,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 127.46209999999974,
+          "allocatedHeapDelta": 28877800,
+          "retainedHeapDelta": 24255344
+        },
+        {
+          "candidate": false,
+          "ms": 102.04199999999992,
+          "allocatedHeapDelta": 55051848,
+          "retainedHeapDelta": 22940872
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "repeat": 3,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 76.40470000000005,
+          "allocatedHeapDelta": 21076408,
+          "retainedHeapDelta": 10867472
+        },
+        {
+          "candidate": false,
+          "ms": 111.79349999999977,
+          "allocatedHeapDelta": 55699096,
+          "retainedHeapDelta": 22941080
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10005
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 0,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 110.26309999999921,
+          "allocatedHeapDelta": 54864952,
+          "retainedHeapDelta": 22870232
+        },
+        {
+          "candidate": true,
+          "ms": 124.08060000000023,
+          "allocatedHeapDelta": 29090448,
+          "retainedHeapDelta": 24204408
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 0,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 109.53449999999975,
+          "allocatedHeapDelta": 55382680,
+          "retainedHeapDelta": 22947432
+        },
+        {
+          "candidate": true,
+          "ms": 76.76969999999983,
+          "allocatedHeapDelta": 21205856,
+          "retainedHeapDelta": 10885360
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 1,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 129.7465999999995,
+          "allocatedHeapDelta": 28826240,
+          "retainedHeapDelta": 24226456
+        },
+        {
+          "candidate": false,
+          "ms": 107.82530000000042,
+          "allocatedHeapDelta": 54859808,
+          "retainedHeapDelta": 22941384
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 1,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 79.77150000000074,
+          "allocatedHeapDelta": 21190672,
+          "retainedHeapDelta": 10866360
+        },
+        {
+          "candidate": false,
+          "ms": 106.92449999999917,
+          "allocatedHeapDelta": 54577520,
+          "retainedHeapDelta": 22940520
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 2,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 103.22839999999997,
+          "allocatedHeapDelta": 56153344,
+          "retainedHeapDelta": 22940360
+        },
+        {
+          "candidate": true,
+          "ms": 124.54739999999947,
+          "allocatedHeapDelta": 28874696,
+          "retainedHeapDelta": 24223992
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 2,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 115.6238000000003,
+          "allocatedHeapDelta": 55161272,
+          "retainedHeapDelta": 22940520
+        },
+        {
+          "candidate": true,
+          "ms": 91.3742000000002,
+          "allocatedHeapDelta": 20613296,
+          "retainedHeapDelta": 10873224
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 3,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 134.14059999999972,
+          "allocatedHeapDelta": 29146752,
+          "retainedHeapDelta": 24223960
+        },
+        {
+          "candidate": false,
+          "ms": 117.83830000000034,
+          "allocatedHeapDelta": 55647760,
+          "retainedHeapDelta": 22940184
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 101,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "repeat": 3,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 75.3157999999994,
+          "allocatedHeapDelta": 20675248,
+          "retainedHeapDelta": 10866360
+        },
+        {
+          "candidate": false,
+          "ms": 104.55469999999968,
+          "allocatedHeapDelta": 54073264,
+          "retainedHeapDelta": 22942464
+        }
+      ],
+      "cache": {
+        "hits": 100,
+        "misses": 1,
+        "entries": 101,
+        "points": 10004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 0,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1218.6169999999984,
+          "allocatedHeapDelta": 333395520,
+          "retainedHeapDelta": 222044280
+        },
+        {
+          "candidate": true,
+          "ms": 1242.9194000000025,
+          "allocatedHeapDelta": 345378632,
+          "retainedHeapDelta": 239522464
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 0,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1085.8009999999995,
+          "allocatedHeapDelta": 361156136,
+          "retainedHeapDelta": 226782680
+        },
+        {
+          "candidate": true,
+          "ms": 843.0938999999998,
+          "allocatedHeapDelta": 217925280,
+          "retainedHeapDelta": 102871952
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 1,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 1289.085799999997,
+          "allocatedHeapDelta": 344231496,
+          "retainedHeapDelta": 239607752
+        },
+        {
+          "candidate": false,
+          "ms": 1080.5411999999997,
+          "allocatedHeapDelta": 360496848,
+          "retainedHeapDelta": 226782408
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 1,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 856.7016000000003,
+          "allocatedHeapDelta": 219373464,
+          "retainedHeapDelta": 102871936
+        },
+        {
+          "candidate": false,
+          "ms": 1112.0249999999942,
+          "allocatedHeapDelta": 361289936,
+          "retainedHeapDelta": 226782616
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 2,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1070.9378999999972,
+          "allocatedHeapDelta": 360537856,
+          "retainedHeapDelta": 226782440
+        },
+        {
+          "candidate": true,
+          "ms": 1245.6048999999985,
+          "allocatedHeapDelta": 345955520,
+          "retainedHeapDelta": 239604024
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 2,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1056.2546999999977,
+          "allocatedHeapDelta": 361517576,
+          "retainedHeapDelta": 226782616
+        },
+        {
+          "candidate": true,
+          "ms": 834.4317999999985,
+          "allocatedHeapDelta": 219311208,
+          "retainedHeapDelta": 102873000
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 3,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 1292.5130000000063,
+          "allocatedHeapDelta": 345937272,
+          "retainedHeapDelta": 239603824
+        },
+        {
+          "candidate": false,
+          "ms": 1085.8548999999985,
+          "allocatedHeapDelta": 360789696,
+          "retainedHeapDelta": 226782408
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "repeat": 3,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 826.4435000000012,
+          "allocatedHeapDelta": 218145896,
+          "retainedHeapDelta": 102871704
+        },
+        {
+          "candidate": false,
+          "ms": 1136.9698999999964,
+          "allocatedHeapDelta": 361475752,
+          "retainedHeapDelta": 226782616
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100005
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 0,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1250.9616999999998,
+          "allocatedHeapDelta": 337337112,
+          "retainedHeapDelta": 226632352
+        },
+        {
+          "candidate": true,
+          "ms": 1303.5773000000045,
+          "allocatedHeapDelta": 346636224,
+          "retainedHeapDelta": 239605808
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 0,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1071.5464999999967,
+          "allocatedHeapDelta": 361697488,
+          "retainedHeapDelta": 226782296
+        },
+        {
+          "candidate": true,
+          "ms": 877.1830999999947,
+          "allocatedHeapDelta": 218474080,
+          "retainedHeapDelta": 102871744
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 1,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 1302.393299999996,
+          "allocatedHeapDelta": 346286608,
+          "retainedHeapDelta": 239603240
+        },
+        {
+          "candidate": false,
+          "ms": 1102.2544999999955,
+          "allocatedHeapDelta": 361423008,
+          "retainedHeapDelta": 226781720
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 1,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 951.1147000000055,
+          "allocatedHeapDelta": 219083144,
+          "retainedHeapDelta": 102871744
+        },
+        {
+          "candidate": false,
+          "ms": 1062.5053999999946,
+          "allocatedHeapDelta": 361654160,
+          "retainedHeapDelta": 226782056
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 2,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1135.6266000000032,
+          "allocatedHeapDelta": 361014256,
+          "retainedHeapDelta": 226781720
+        },
+        {
+          "candidate": true,
+          "ms": 1268.6447999999946,
+          "allocatedHeapDelta": 346629264,
+          "retainedHeapDelta": 239603040
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 2,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": false,
+          "ms": 1134.0743000000075,
+          "allocatedHeapDelta": 361227736,
+          "retainedHeapDelta": 226782296
+        },
+        {
+          "candidate": true,
+          "ms": 907.0561000000016,
+          "allocatedHeapDelta": 217400840,
+          "retainedHeapDelta": 102871808
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 3,
+      "phase": "cold",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 1379.2019,
+          "allocatedHeapDelta": 344352184,
+          "retainedHeapDelta": 239605224
+        },
+        {
+          "candidate": false,
+          "ms": 1112.393200000006,
+          "allocatedHeapDelta": 361527928,
+          "retainedHeapDelta": 226781928
+        }
+      ],
+      "cache": {
+        "hits": 0,
+        "misses": 1001,
+        "entries": 1001,
+        "points": 100004
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "repeat": 3,
+      "phase": "changed",
+      "measured": [
+        {
+          "candidate": true,
+          "ms": 866.0302999999985,
+          "allocatedHeapDelta": 219501640,
+          "retainedHeapDelta": 102871744
+        },
+        {
+          "candidate": false,
+          "ms": 1123.584400000007,
+          "allocatedHeapDelta": 361631496,
+          "retainedHeapDelta": 226782056
+        }
+      ],
+      "cache": {
+        "hits": 1000,
+        "misses": 1,
+        "entries": 1001,
+        "points": 100004
+      }
+    }
+  ]
+}
