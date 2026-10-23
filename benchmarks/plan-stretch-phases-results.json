@@ -1,0 +1,1424 @@
+{
+  "basis": "PR430 a64ae44",
+  "runtime": "v24.19.0",
+  "method": "Actual BimPlan queries on committed base and materialized preview; fixed four-point target, 10/100/1000 unrelated 100-point patterned hatches. First plus eight warm calls. Exact full-path comparisons outside timing. Source query uses neutral tool policy, not complete inference/Shift. No React reconciliation, SVG paint, GPU or frame timing. No production changes.",
+  "comparisons": 108,
+  "rows": [
+    {
+      "size": 10,
+      "kind": "line",
+      "hidden": false,
+      "prepareMs": 0.37110000000001264,
+      "visibilityPreparationMs": 0.3231000000000108,
+      "snapIndexPreparationMs": 34.14609999999999,
+      "medians": {
+        "cachedSourcesMs": 0.0036999999999807187,
+        "snapQueryMs": 0.14350000000001728,
+        "patchMs": 0.021399999999971442,
+        "materializeMs": 0.01630000000000109,
+        "visibilityMs": 0.00580000000002201,
+        "sceneMs": 0.04609999999996717,
+        "runsMs": 0.005100000000027194
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0141999999999598,
+          "snapQueryMs": 0.9902999999999906,
+          "patchMs": 0.31270000000000664,
+          "materializeMs": 0.2725000000000364,
+          "visibilityMs": 0.08429999999998472,
+          "sceneMs": 0.6214999999999691,
+          "runsMs": 0.10040000000003602,
+          "visibleHatches": 10,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0036999999999807187,
+          "snapQueryMs": 0.539100000000019,
+          "patchMs": 0.02559999999999718,
+          "materializeMs": 0.021500000000003183,
+          "visibilityMs": 0.006199999999978445,
+          "sceneMs": 0.0474999999999568,
+          "runsMs": 0.023000000000024556,
+          "visibleHatches": 10,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.004399999999975535,
+          "snapQueryMs": 0.21839999999997417,
+          "patchMs": 0.028999999999996362,
+          "materializeMs": 0.023199999999974352,
+          "visibilityMs": 0.005700000000047112,
+          "sceneMs": 0.040000000000020464,
+          "runsMs": 0.004300000000000637,
+          "visibleHatches": 10,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.001599999999996271,
+          "snapQueryMs": 0.14160000000003947,
+          "patchMs": 0.03120000000001255,
+          "materializeMs": 0.014200000000016644,
+          "visibilityMs": 0.004300000000000637,
+          "sceneMs": 0.03319999999996526,
+          "runsMs": 0.004000000000019099,
+          "visibleHatches": 10,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0018999999999778083,
+          "snapQueryMs": 0.14350000000001728,
+          "patchMs": 0.021399999999971442,
+          "materializeMs": 0.03660000000002128,
+          "visibilityMs": 0.007599999999968077,
+          "sceneMs": 0.05969999999996389,
+          "runsMs": 0.005400000000008731,
+          "visibleHatches": 10,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.002200000000016189,
+          "snapQueryMs": 0.14339999999998554,
+          "patchMs": 0.01809999999994716,
+          "materializeMs": 0.011300000000005639,
+          "visibilityMs": 0.008600000000001273,
+          "sceneMs": 0.04609999999996717,
+          "runsMs": 0.005100000000027194,
+          "visibleHatches": 10,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005200000000002092,
+          "snapQueryMs": 0.1309999999999718,
+          "patchMs": 0.020800000000008367,
+          "materializeMs": 0.011300000000005639,
+          "visibilityMs": 0.00380000000001246,
+          "sceneMs": 0.05110000000001946,
+          "runsMs": 0.004599999999982174,
+          "visibleHatches": 10,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0027000000000043656,
+          "snapQueryMs": 0.17910000000000537,
+          "patchMs": 0.020499999999969987,
+          "materializeMs": 0.013599999999996726,
+          "visibilityMs": 0.00580000000002201,
+          "sceneMs": 0.03180000000003247,
+          "runsMs": 0.006100000000003547,
+          "visibleHatches": 10,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.005200000000002092,
+          "snapQueryMs": 0.0817000000000121,
+          "patchMs": 0.020000000000038654,
+          "materializeMs": 0.01630000000000109,
+          "visibilityMs": 0.004099999999993997,
+          "sceneMs": 0.026800000000037016,
+          "runsMs": 0.004900000000020555,
+          "visibleHatches": 10,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "line",
+      "hidden": true,
+      "prepareMs": 0.02740000000000009,
+      "visibilityPreparationMs": 0.05059999999997444,
+      "snapIndexPreparationMs": 11.321199999999976,
+      "medians": {
+        "cachedSourcesMs": 0.0017000000000280124,
+        "snapQueryMs": 0.0968000000000302,
+        "patchMs": 0.010099999999965803,
+        "materializeMs": 0.011000000000024102,
+        "visibilityMs": 0.002800000000036107,
+        "sceneMs": 0.01859999999999218,
+        "runsMs": 0.0027000000000043656
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0013000000000147338,
+          "snapQueryMs": 0.13759999999996353,
+          "patchMs": 0.027200000000050295,
+          "materializeMs": 0.04099999999999682,
+          "visibilityMs": 0.005400000000008731,
+          "sceneMs": 0.03390000000001692,
+          "runsMs": 0.005499999999983629,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0024000000000228283,
+          "snapQueryMs": 0.12880000000001246,
+          "patchMs": 0.017099999999970805,
+          "materializeMs": 0.014799999999979718,
+          "visibilityMs": 0.005300000000033833,
+          "sceneMs": 0.02889999999996462,
+          "runsMs": 0.004300000000000637,
+          "visibleHatches": 0,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0014999999999645297,
+          "snapQueryMs": 0.08690000000001419,
+          "patchMs": 0.00909999999998945,
+          "materializeMs": 0.009500000000002728,
+          "visibilityMs": 0.002800000000036107,
+          "sceneMs": 0.017499999999984084,
+          "runsMs": 0.002900000000011005,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0013000000000147338,
+          "snapQueryMs": 0.10330000000004702,
+          "patchMs": 0.010300000000029286,
+          "materializeMs": 0.010699999999985721,
+          "visibilityMs": 0.0030000000000427463,
+          "sceneMs": 0.018100000000004002,
+          "runsMs": 0.0027000000000043656,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.0968000000000302,
+          "patchMs": 0.008700000000033015,
+          "materializeMs": 0.009799999999984266,
+          "visibilityMs": 0.0027999999999792635,
+          "sceneMs": 0.01839999999998554,
+          "runsMs": 0.0027000000000043656,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.11149999999997817,
+          "patchMs": 0.01290000000000191,
+          "materializeMs": 0.012200000000007094,
+          "visibilityMs": 0.004500000000007276,
+          "sceneMs": 0.03100000000000591,
+          "runsMs": 0.004500000000007276,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0015000000000213731,
+          "snapQueryMs": 0.07789999999999964,
+          "patchMs": 0.008600000000001273,
+          "materializeMs": 0.009199999999964348,
+          "visibilityMs": 0.0026000000000294676,
+          "sceneMs": 0.019399999999961892,
+          "runsMs": 0.002399999999965985,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0015000000000213731,
+          "snapQueryMs": 0.04800000000000182,
+          "patchMs": 0.007699999999999818,
+          "materializeMs": 0.011000000000024102,
+          "visibilityMs": 0.0020999999999844476,
+          "sceneMs": 0.014099999999984902,
+          "runsMs": 0.002100000000041291,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0020000000000095497,
+          "snapQueryMs": 0.05500000000000682,
+          "patchMs": 0.010099999999965803,
+          "materializeMs": 0.011200000000030741,
+          "visibilityMs": 0.002399999999965985,
+          "sceneMs": 0.01859999999999218,
+          "runsMs": 0.002200000000016189,
+          "visibleHatches": 0,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "hidden": false,
+      "prepareMs": 0.47629999999998063,
+      "visibilityPreparationMs": 0.04009999999999536,
+      "snapIndexPreparationMs": 11.40379999999999,
+      "medians": {
+        "cachedSourcesMs": 0.0017000000000280124,
+        "snapQueryMs": 0.07690000000002328,
+        "patchMs": 0.035799999999994725,
+        "materializeMs": 0.020699999999919783,
+        "visibilityMs": 0.003399999999942338,
+        "sceneMs": 0.020800000000008367,
+        "runsMs": 0.004400000000032378
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0007000000000516593,
+          "snapQueryMs": 0.09669999999994161,
+          "patchMs": 0.34989999999993415,
+          "materializeMs": 0.23309999999992215,
+          "visibilityMs": 0.005199999999945248,
+          "sceneMs": 0.03809999999998581,
+          "runsMs": 0.005499999999983629,
+          "visibleHatches": 11,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0015999999999394277,
+          "snapQueryMs": 0.07690000000002328,
+          "patchMs": 0.08830000000000382,
+          "materializeMs": 0.020699999999919783,
+          "visibilityMs": 0.003399999999942338,
+          "sceneMs": 0.020800000000008367,
+          "runsMs": 0.004699999999957072,
+          "visibleHatches": 11,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.002200000000016189,
+          "snapQueryMs": 0.09429999999997563,
+          "patchMs": 0.1188000000000784,
+          "materializeMs": 0.02400000000000091,
+          "visibilityMs": 0.004399999999918691,
+          "sceneMs": 0.02800000000002001,
+          "runsMs": 0.004599999999982174,
+          "visibleHatches": 11,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.10119999999994889,
+          "patchMs": 0.032500000000027285,
+          "materializeMs": 0.015899999999987813,
+          "visibilityMs": 0.0024000000000796717,
+          "sceneMs": 0.01779999999996562,
+          "runsMs": 0.004000000000019099,
+          "visibleHatches": 11,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.002399999999965985,
+          "snapQueryMs": 0.09500000000002728,
+          "patchMs": 0.035799999999994725,
+          "materializeMs": 0.023700000000076216,
+          "visibilityMs": 0.003100000000017644,
+          "sceneMs": 0.02039999999999509,
+          "runsMs": 0.004400000000032378,
+          "visibleHatches": 11,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0016999999999143256,
+          "snapQueryMs": 0.07389999999998054,
+          "patchMs": 0.0322999999999638,
+          "materializeMs": 0.015600000000063119,
+          "visibilityMs": 0.00430000000005748,
+          "sceneMs": 0.08590000000003783,
+          "runsMs": 0.006499999999959982,
+          "visibleHatches": 11,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0018000000000029104,
+          "snapQueryMs": 0.07389999999998054,
+          "patchMs": 0.03769999999997253,
+          "materializeMs": 0.016199999999912507,
+          "visibilityMs": 0.004099999999993997,
+          "sceneMs": 0.03959999999995034,
+          "runsMs": 0.004400000000032378,
+          "visibleHatches": 11,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0015999999999394277,
+          "snapQueryMs": 0.05229999999994561,
+          "patchMs": 0.031099999999923966,
+          "materializeMs": 0.023800000000051114,
+          "visibilityMs": 0.0029999999999290594,
+          "sceneMs": 0.01749999999992724,
+          "runsMs": 0.004199999999968895,
+          "visibleHatches": 11,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0015999999999394277,
+          "snapQueryMs": 0.02479999999991378,
+          "patchMs": 0.030300000000011096,
+          "materializeMs": 0.016900000000077853,
+          "visibilityMs": 0.002399999999965985,
+          "sceneMs": 0.013199999999983447,
+          "runsMs": 0.003100000000017644,
+          "visibleHatches": 11,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "hidden": true,
+      "prepareMs": 0.06619999999998072,
+      "visibilityPreparationMs": 0.032999999999901775,
+      "snapIndexPreparationMs": 13.12009999999998,
+      "medians": {
+        "cachedSourcesMs": 0.0017000000000280124,
+        "snapQueryMs": 0.06810000000007221,
+        "patchMs": 0.014000000000010004,
+        "materializeMs": 0.01340000000004693,
+        "visibilityMs": 0.0027000000000043656,
+        "sceneMs": 0.01410000000009859,
+        "runsMs": 0.0027000000000043656
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0009000000000014552,
+          "snapQueryMs": 0.04930000000001655,
+          "patchMs": 0.04250000000001819,
+          "materializeMs": 0.07119999999997617,
+          "visibilityMs": 0.004800000000045657,
+          "sceneMs": 0.027899999999931424,
+          "runsMs": 0.004699999999957072,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0028000000000929504,
+          "snapQueryMs": 0.10140000000001237,
+          "patchMs": 0.03300000000001546,
+          "materializeMs": 0.024400000000014188,
+          "visibilityMs": 0.004099999999993997,
+          "sceneMs": 0.023500000000012733,
+          "runsMs": 0.0036999999999807187,
+          "visibleHatches": 1,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0014999999999645297,
+          "snapQueryMs": 0.0706000000000131,
+          "patchMs": 0.014399999999909596,
+          "materializeMs": 0.013300000000072032,
+          "visibilityMs": 0.0027000000000043656,
+          "sceneMs": 0.014400000000023283,
+          "runsMs": 0.0027000000000043656,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.06400000000007822,
+          "patchMs": 0.013199999999983447,
+          "materializeMs": 0.013199999999983447,
+          "visibilityMs": 0.0025000000000545697,
+          "sceneMs": 0.012800000000083855,
+          "runsMs": 0.0026999999998906787,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0039000000000442014,
+          "snapQueryMs": 0.09729999999990468,
+          "patchMs": 0.019900000000006912,
+          "materializeMs": 0.017600000000015825,
+          "visibilityMs": 0.003199999999992542,
+          "sceneMs": 0.02039999999999509,
+          "runsMs": 0.0039999999999054126,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0015000000000782165,
+          "snapQueryMs": 0.06499999999994088,
+          "patchMs": 0.013199999999983447,
+          "materializeMs": 0.01340000000004693,
+          "visibilityMs": 0.0027000000000043656,
+          "sceneMs": 0.013200000000097134,
+          "runsMs": 0.002499999999940883,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.06810000000007221,
+          "patchMs": 0.014000000000010004,
+          "materializeMs": 0.012799999999970169,
+          "visibilityMs": 0.0027000000000043656,
+          "sceneMs": 0.013500000000021828,
+          "runsMs": 0.002599999999915781,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0013000000000147338,
+          "snapQueryMs": 0.050299999999992906,
+          "patchMs": 0.013000000000033651,
+          "materializeMs": 0.017699999999990723,
+          "visibilityMs": 0.0026000000000294676,
+          "sceneMs": 0.01410000000009859,
+          "runsMs": 0.0027000000000043656,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0013000000000147338,
+          "snapQueryMs": 0.02460000000007767,
+          "patchMs": 0.01389999999992142,
+          "materializeMs": 0.012200000000007094,
+          "visibilityMs": 0.0027000000000043656,
+          "sceneMs": 0.013900000000035106,
+          "runsMs": 0.0025000000000545697,
+          "visibleHatches": 1,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "hidden": false,
+      "prepareMs": 0.04480000000000928,
+      "visibilityPreparationMs": 0.052800000000047476,
+      "snapIndexPreparationMs": 92.15160000000003,
+      "medians": {
+        "cachedSourcesMs": 0.003200000000106229,
+        "snapQueryMs": 0.0787000000000262,
+        "patchMs": 0.010500000000092768,
+        "materializeMs": 0.01069999999981519,
+        "visibilityMs": 0.004200000000082582,
+        "sceneMs": 0.0647999999998774,
+        "runsMs": 0.012199999999893407
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0008000000000265572,
+          "snapQueryMs": 0.062399999999911415,
+          "patchMs": 0.011700000000018917,
+          "materializeMs": 0.04200000000003001,
+          "visibilityMs": 0.00479999999993197,
+          "sceneMs": 0.07019999999999982,
+          "runsMs": 0.01520000000004984,
+          "visibleHatches": 100,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0027000000000043656,
+          "snapQueryMs": 0.07459999999991851,
+          "patchMs": 0.00909999999998945,
+          "materializeMs": 0.00980000000004111,
+          "visibilityMs": 0.00430000000005748,
+          "sceneMs": 0.057999999999992724,
+          "runsMs": 0.014400000000023283,
+          "visibleHatches": 100,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.003200000000106229,
+          "snapQueryMs": 0.0986000000000331,
+          "patchMs": 0.009600000000091313,
+          "materializeMs": 0.01069999999981519,
+          "visibilityMs": 0.0039999999999054126,
+          "sceneMs": 0.06150000000002365,
+          "runsMs": 0.012199999999893407,
+          "visibleHatches": 100,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005100000000084037,
+          "snapQueryMs": 0.0988999999999578,
+          "patchMs": 0.014699999999947977,
+          "materializeMs": 0.011500000000069122,
+          "visibilityMs": 0.004200000000082582,
+          "sceneMs": 0.12100000000009459,
+          "runsMs": 0.015799999999899228,
+          "visibleHatches": 100,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0027000000000043656,
+          "snapQueryMs": 0.07829999999989923,
+          "patchMs": 0.009299999999939246,
+          "materializeMs": 0.022300000000086584,
+          "visibilityMs": 0.004200000000082582,
+          "sceneMs": 0.0626999999999498,
+          "runsMs": 0.022799999999961074,
+          "visibleHatches": 100,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0027000000000043656,
+          "snapQueryMs": 0.0787000000000262,
+          "patchMs": 0.009799999999813735,
+          "materializeMs": 0.010099999999965803,
+          "visibilityMs": 0.0038999999999305146,
+          "sceneMs": 0.0647999999998774,
+          "runsMs": 0.003399999999828651,
+          "visibleHatches": 100,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.003400000000056025,
+          "snapQueryMs": 0.12770000000000437,
+          "patchMs": 0.012600000000020373,
+          "materializeMs": 0.011799999999993815,
+          "visibilityMs": 0.005499999999983629,
+          "sceneMs": 0.07459999999991851,
+          "runsMs": 0.004999999999881766,
+          "visibleHatches": 100,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0039999999999054126,
+          "snapQueryMs": 0.07309999999984029,
+          "patchMs": 0.011400000000094224,
+          "materializeMs": 0.010500000000092768,
+          "visibilityMs": 0.004400000000032378,
+          "sceneMs": 0.06439999999997781,
+          "runsMs": 0.0036000000000058208,
+          "visibleHatches": 100,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.002599999999802094,
+          "snapQueryMs": 0.03870000000006257,
+          "patchMs": 0.010500000000092768,
+          "materializeMs": 0.009400000000141517,
+          "visibilityMs": 0.0036999999999807187,
+          "sceneMs": 0.06520000000000437,
+          "runsMs": 0.003400000000056025,
+          "visibleHatches": 100,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "hidden": true,
+      "prepareMs": 0.03590000000008331,
+      "visibilityPreparationMs": 0.051899999999932334,
+      "snapIndexPreparationMs": 108.65440000000012,
+      "medians": {
+        "cachedSourcesMs": 0.0017000000000280124,
+        "snapQueryMs": 0.07150000000001455,
+        "patchMs": 0.009299999999939246,
+        "materializeMs": 0.00889999999981228,
+        "visibilityMs": 0.002499999999827196,
+        "sceneMs": 0.03520000000003165,
+        "runsMs": 0.0009000000000014552
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0006999999998242856,
+          "snapQueryMs": 0.05709999999999127,
+          "patchMs": 0.010499999999865395,
+          "materializeMs": 0.030600000000049477,
+          "visibilityMs": 0.004500000000007276,
+          "sceneMs": 0.04800000000000182,
+          "runsMs": 0.0018999999999778083,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0017000000000280124,
+          "snapQueryMs": 0.09279999999989741,
+          "patchMs": 0.016699999999900683,
+          "materializeMs": 0.01520000000004984,
+          "visibilityMs": 0.0036000000000058208,
+          "sceneMs": 0.05089999999995598,
+          "runsMs": 0.0014000000001033186,
+          "visibleHatches": 0,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0018999999999778083,
+          "snapQueryMs": 0.07099999999991269,
+          "patchMs": 0.00839999999993779,
+          "materializeMs": 0.0072999999999865395,
+          "visibilityMs": 0.0025000000000545697,
+          "sceneMs": 0.03480000000013206,
+          "runsMs": 0.0008000000000265572,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0016999999998006388,
+          "snapQueryMs": 0.06729999999993197,
+          "patchMs": 0.008000000000038199,
+          "materializeMs": 0.008199999999987995,
+          "visibilityMs": 0.002300000000104774,
+          "sceneMs": 0.036599999999907595,
+          "runsMs": 0.0008000000000265572,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0020999999999276042,
+          "snapQueryMs": 0.07759999999984757,
+          "patchMs": 0.008000000000038199,
+          "materializeMs": 0.008199999999987995,
+          "visibilityMs": 0.002499999999827196,
+          "sceneMs": 0.03520000000003165,
+          "runsMs": 0.0009000000000014552,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0015000000000782165,
+          "snapQueryMs": 0.07150000000001455,
+          "patchMs": 0.009299999999939246,
+          "materializeMs": 0.00889999999981228,
+          "visibilityMs": 0.0024000000000796717,
+          "sceneMs": 0.0341000000000804,
+          "runsMs": 0.0007000000000516593,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0024000000000796717,
+          "snapQueryMs": 0.07880000000000109,
+          "patchMs": 0.009600000000091313,
+          "materializeMs": 0.010099999999965803,
+          "visibilityMs": 0.002800000000206637,
+          "sceneMs": 0.04349999999999454,
+          "runsMs": 0.0009999999999763531,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0016000000000531145,
+          "snapQueryMs": 0.0545999999999367,
+          "patchMs": 0.009000000000014552,
+          "materializeMs": 0.007799999999861029,
+          "visibilityMs": 0.0020999999999276042,
+          "sceneMs": 0.03440000000000509,
+          "runsMs": 0.0012000000001535227,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0016000000000531145,
+          "snapQueryMs": 0.031199999999898864,
+          "patchMs": 0.010199999999940701,
+          "materializeMs": 0.008900000000039654,
+          "visibilityMs": 0.002200000000129876,
+          "sceneMs": 0.03389999999990323,
+          "runsMs": 0.0008000000000265572,
+          "visibleHatches": 0,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "hidden": false,
+      "prepareMs": 0.12120000000004438,
+      "visibilityPreparationMs": 0.05709999999999127,
+      "snapIndexPreparationMs": 82.70920000000024,
+      "medians": {
+        "cachedSourcesMs": 0.002100000000154978,
+        "snapQueryMs": 0.0820000000003347,
+        "patchMs": 0.0181999999999789,
+        "materializeMs": 0.01389999999992142,
+        "visibilityMs": 0.004200000000309956,
+        "sceneMs": 0.05150000000003274,
+        "runsMs": 0.0036000000000058208
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0005999999998493877,
+          "snapQueryMs": 0.06410000000005311,
+          "patchMs": 0.02639999999973952,
+          "materializeMs": 0.07000000000016371,
+          "visibilityMs": 0.003899999999703141,
+          "sceneMs": 0.05180000000018481,
+          "runsMs": 0.005400000000008731,
+          "visibleHatches": 101,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.002100000000154978,
+          "snapQueryMs": 0.07969999999977517,
+          "patchMs": 0.016499999999723514,
+          "materializeMs": 0.01470000000017535,
+          "visibilityMs": 0.004299999999602733,
+          "sceneMs": 0.049799999999777356,
+          "runsMs": 0.0036000000000058208,
+          "visibleHatches": 101,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.002100000000154978,
+          "snapQueryMs": 0.08249999999998181,
+          "patchMs": 0.016900000000077853,
+          "materializeMs": 0.014000000000123691,
+          "visibilityMs": 0.00400000000036016,
+          "sceneMs": 0.050300000000333966,
+          "runsMs": 0.003499999999803549,
+          "visibleHatches": 101,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0028999999999541615,
+          "snapQueryMs": 0.09659999999985303,
+          "patchMs": 0.019200000000182627,
+          "materializeMs": 0.06660000000010768,
+          "visibilityMs": 0.004799999999704596,
+          "sceneMs": 0.052000000000134605,
+          "runsMs": 0.003699999999753345,
+          "visibleHatches": 101,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0019999999999527063,
+          "snapQueryMs": 0.08039999999982683,
+          "patchMs": 0.01790000000028158,
+          "materializeMs": 0.01389999999992142,
+          "visibilityMs": 0.0036000000000058208,
+          "sceneMs": 0.10399999999981446,
+          "runsMs": 0.0036000000000058208,
+          "visibleHatches": 101,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.002100000000154978,
+          "snapQueryMs": 0.08320000000003347,
+          "patchMs": 0.017500000000381988,
+          "materializeMs": 0.013000000000374712,
+          "visibilityMs": 0.004200000000309956,
+          "sceneMs": 0.05150000000003274,
+          "runsMs": 0.0036000000000058208,
+          "visibleHatches": 101,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.002300000000104774,
+          "snapQueryMs": 0.0820000000003347,
+          "patchMs": 0.018500000000130967,
+          "materializeMs": 0.013399999999819556,
+          "visibilityMs": 0.00430000000005748,
+          "sceneMs": 0.050200000000131695,
+          "runsMs": 0.0032999999998537533,
+          "visibleHatches": 101,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0019999999999527063,
+          "snapQueryMs": 0.06809999999995853,
+          "patchMs": 0.0181999999999789,
+          "materializeMs": 0.01319999999986976,
+          "visibilityMs": 0.004100000000107684,
+          "sceneMs": 0.04779999999982465,
+          "runsMs": 0.004500000000007276,
+          "visibleHatches": 101,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0028999999999541615,
+          "snapQueryMs": 0.04120000000011714,
+          "patchMs": 0.01929999999993015,
+          "materializeMs": 0.01319999999986976,
+          "visibilityMs": 0.0039999999999054126,
+          "sceneMs": 0.05370000000038999,
+          "runsMs": 0.0032999999998537533,
+          "visibleHatches": 101,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "hidden": true,
+      "prepareMs": 0.07439999999996871,
+      "visibilityPreparationMs": 0.0682000000001608,
+      "snapIndexPreparationMs": 97.18859999999995,
+      "medians": {
+        "cachedSourcesMs": 0.0031999999996514816,
+        "snapQueryMs": 0.08210000000008222,
+        "patchMs": 0.024399999999786814,
+        "materializeMs": 0.014300000000275759,
+        "visibilityMs": 0.0028999999999541615,
+        "sceneMs": 0.027700000000095315,
+        "runsMs": 0.0010000000002037268
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0007000000000516593,
+          "snapQueryMs": 0.06559999999990396,
+          "patchMs": 0.023500000000240107,
+          "materializeMs": 0.07960000000002765,
+          "visibilityMs": 0.004099999999652937,
+          "sceneMs": 0.05250000000023647,
+          "runsMs": 0.0022000000003572495,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.0032999999998537533,
+          "snapQueryMs": 0.12310000000024957,
+          "patchMs": 0.033800000000155705,
+          "materializeMs": 0.01890000000003056,
+          "visibilityMs": 0.0033999999996012775,
+          "sceneMs": 0.04010000000016589,
+          "runsMs": 0.001299999999901047,
+          "visibleHatches": 1,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0016000000000531145,
+          "snapQueryMs": 0.07399999999961437,
+          "patchMs": 0.01650000000017826,
+          "materializeMs": 0.01110000000016953,
+          "visibilityMs": 0.0024000000003070454,
+          "sceneMs": 0.07439999999996871,
+          "runsMs": 0.0012000000001535227,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.001900000000205182,
+          "snapQueryMs": 0.08170000000018263,
+          "patchMs": 0.017800000000079308,
+          "materializeMs": 0.012500000000272848,
+          "visibilityMs": 0.002300000000104774,
+          "sceneMs": 0.023999999999887223,
+          "runsMs": 0.0009000000000014552,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0020999999997002305,
+          "snapQueryMs": 0.09990000000016153,
+          "patchMs": 0.022000000000389264,
+          "materializeMs": 0.014300000000275759,
+          "visibilityMs": 0.0028999999999541615,
+          "sceneMs": 0.02570000000014261,
+          "runsMs": 0.0009000000000014552,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0022999999996500264,
+          "snapQueryMs": 0.0907999999999447,
+          "patchMs": 0.024399999999786814,
+          "materializeMs": 0.015000000000327418,
+          "visibilityMs": 0.002900000000408909,
+          "sceneMs": 0.026499999999941792,
+          "runsMs": 0.0010000000002037268,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0031999999996514816,
+          "snapQueryMs": 0.08210000000008222,
+          "patchMs": 0.031199999999898864,
+          "materializeMs": 0.013599999999769352,
+          "visibilityMs": 0.0031000000003587047,
+          "sceneMs": 0.027700000000095315,
+          "runsMs": 0.0009000000000014552,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005200000000058935,
+          "snapQueryMs": 0.06419999999980064,
+          "patchMs": 0.018000000000029104,
+          "materializeMs": 0.011799999999766442,
+          "visibilityMs": 0.002300000000104774,
+          "sceneMs": 0.024999999999636202,
+          "runsMs": 0.0007999999997991836,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.003400000000056025,
+          "snapQueryMs": 0.06939999999985957,
+          "patchMs": 0.030499999999847205,
+          "materializeMs": 0.01710000000002765,
+          "visibilityMs": 0.002599999999802094,
+          "sceneMs": 0.03470000000015716,
+          "runsMs": 0.0015000000003055902,
+          "visibleHatches": 1,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "hidden": false,
+      "prepareMs": 0.07330000000001746,
+      "visibilityPreparationMs": 0.32079999999950815,
+      "snapIndexPreparationMs": 1162.3795999999993,
+      "medians": {
+        "cachedSourcesMs": 0.0072000000000116415,
+        "snapQueryMs": 0.09140000000024884,
+        "patchMs": 0.010800000000017462,
+        "materializeMs": 0.010800000000017462,
+        "visibilityMs": 0.004100000000107684,
+        "sceneMs": 0.40169999999943684,
+        "runsMs": 0.0261000000000422
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0009000000000014552,
+          "snapQueryMs": 0.09749999999985448,
+          "patchMs": 0.01419999999961874,
+          "materializeMs": 0.0543999999999869,
+          "visibilityMs": 0.004799999999704596,
+          "sceneMs": 0.49680000000080327,
+          "runsMs": 0.026499999999941792,
+          "visibleHatches": 1000,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.002899999999499414,
+          "snapQueryMs": 0.08919999999943684,
+          "patchMs": 0.009599999999409192,
+          "materializeMs": 0.00980000000072323,
+          "visibilityMs": 0.003800000000410364,
+          "sceneMs": 0.5478000000002794,
+          "runsMs": 0.032599999999547435,
+          "visibleHatches": 1000,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.008499999999912689,
+          "snapQueryMs": 0.08929999999963911,
+          "patchMs": 0.010099999999511056,
+          "materializeMs": 0.010299999999915599,
+          "visibilityMs": 0.004500000000007276,
+          "sceneMs": 0.8117999999994936,
+          "runsMs": 0.03930000000036671,
+          "visibleHatches": 1000,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.006699999999909778,
+          "snapQueryMs": 0.0929999999998472,
+          "patchMs": 0.011700000000018917,
+          "materializeMs": 0.011200000000826549,
+          "visibilityMs": 0.003800000000410364,
+          "sceneMs": 0.40169999999943684,
+          "runsMs": 0.0261000000000422,
+          "visibleHatches": 1000,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.007100000000718865,
+          "snapQueryMs": 0.09140000000024884,
+          "patchMs": 0.010000000000218279,
+          "materializeMs": 0.010199999999713327,
+          "visibilityMs": 0.0039999999999054126,
+          "sceneMs": 0.3672000000005937,
+          "runsMs": 0.025399999999535794,
+          "visibleHatches": 1000,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0072000000000116415,
+          "snapQueryMs": 0.10100000000056752,
+          "patchMs": 0.011200000000826549,
+          "materializeMs": 0.011599999999816646,
+          "visibilityMs": 0.004199999999400461,
+          "sceneMs": 0.3687000000008993,
+          "runsMs": 0.0316000000002532,
+          "visibleHatches": 1000,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.007599999999001739,
+          "snapQueryMs": 0.09729999999944994,
+          "patchMs": 0.010199999998803833,
+          "materializeMs": 0.010800000000017462,
+          "visibilityMs": 0.004100000000107684,
+          "sceneMs": 0.3055999999996857,
+          "runsMs": 0.024900000000343425,
+          "visibleHatches": 1000,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.007400000000416185,
+          "snapQueryMs": 0.08339999999952852,
+          "patchMs": 0.012499999998908606,
+          "materializeMs": 0.011099999999714782,
+          "visibilityMs": 0.004399999999805004,
+          "sceneMs": 0.2760999999991327,
+          "runsMs": 0.024400000000241562,
+          "visibleHatches": 1000,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.006900000000314321,
+          "snapQueryMs": 0.048400000001493027,
+          "patchMs": 0.010800000000017462,
+          "materializeMs": 0.010099999999511056,
+          "visibilityMs": 0.003500000000713044,
+          "sceneMs": 1.0498000000006869,
+          "runsMs": 0.025799999999435386,
+          "visibleHatches": 1000,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "hidden": true,
+      "prepareMs": 0.1202000000012049,
+      "visibilityPreparationMs": 0.39429999999993015,
+      "snapIndexPreparationMs": 1075.4372000000003,
+      "medians": {
+        "cachedSourcesMs": 0.008200000000215368,
+        "snapQueryMs": 0.0874999999996362,
+        "patchMs": 0.009700000000520959,
+        "materializeMs": 0.008199999998396379,
+        "visibilityMs": 0.0023999999993975507,
+        "sceneMs": 0.17879999999968277,
+        "runsMs": 0.0008999999990919605
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.000499999998282874,
+          "snapQueryMs": 0.07070000000021537,
+          "patchMs": 0.014400000000023283,
+          "materializeMs": 0.05559999999968568,
+          "visibilityMs": 0.004300000000512227,
+          "sceneMs": 0.25020000000040454,
+          "runsMs": 0.0018000000000029104,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.003400000001420267,
+          "snapQueryMs": 0.09989999999925203,
+          "patchMs": 0.011300000000119326,
+          "materializeMs": 0.009199999998600106,
+          "visibilityMs": 0.0023999999993975507,
+          "sceneMs": 0.18179999999847496,
+          "runsMs": 0.0010999999994965037,
+          "visibleHatches": 0,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0036999999992985977,
+          "snapQueryMs": 0.10390000000006694,
+          "patchMs": 0.009000000000014552,
+          "materializeMs": 0.008199999998396379,
+          "visibilityMs": 0.002500000000509317,
+          "sceneMs": 0.17879999999968277,
+          "runsMs": 0.013999999999214197,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.0029000000013184035,
+          "snapQueryMs": 0.08220000000073924,
+          "patchMs": 0.009599999999409192,
+          "materializeMs": 0.008100000000922591,
+          "visibilityMs": 0.0020000000004074536,
+          "sceneMs": 0.1753000000007887,
+          "runsMs": 0.0007999999997991836,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008099999999103602,
+          "snapQueryMs": 0.0874999999996362,
+          "patchMs": 0.009200000000419095,
+          "materializeMs": 0.007999999999810825,
+          "visibilityMs": 0.0023999999993975507,
+          "sceneMs": 0.17640000000028522,
+          "runsMs": 0.0007999999997991836,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.010199999998803833,
+          "snapQueryMs": 0.13119999999980791,
+          "patchMs": 0.014400000000023283,
+          "materializeMs": 0.012000000000625732,
+          "visibilityMs": 0.004300000000512227,
+          "sceneMs": 0.3364000000001397,
+          "runsMs": 0.0017000000007101335,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008200000000215368,
+          "snapQueryMs": 0.08660000000054424,
+          "patchMs": 0.009200000000419095,
+          "materializeMs": 0.007700000000113505,
+          "visibilityMs": 0.0020999999997002305,
+          "sceneMs": 0.17640000000028522,
+          "runsMs": 0.0007999999997991836,
+          "visibleHatches": 0,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008200000000215368,
+          "snapQueryMs": 0.07030000000122527,
+          "patchMs": 0.009700000000520959,
+          "materializeMs": 0.008199999998396379,
+          "visibilityMs": 0.0018999999992956873,
+          "sceneMs": 0.17580000000089058,
+          "runsMs": 0.0008999999990919605,
+          "visibleHatches": 0,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.009200000000419095,
+          "snapQueryMs": 0.04989999999997963,
+          "patchMs": 0.011500000000523869,
+          "materializeMs": 0.007700000000113505,
+          "visibilityMs": 0.002300000000104774,
+          "sceneMs": 0.1805000000003929,
+          "runsMs": 0.0007999999997991836,
+          "visibleHatches": 0,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "hidden": false,
+      "prepareMs": 0.3738000000012107,
+      "visibilityPreparationMs": 0.19460000000253785,
+      "snapIndexPreparationMs": 1017.280999999999,
+      "medians": {
+        "cachedSourcesMs": 0.009300000001530861,
+        "snapQueryMs": 0.09050000000206637,
+        "patchMs": 0.01840000000083819,
+        "materializeMs": 0.03840000000127475,
+        "visibilityMs": 0.003899999999703141,
+        "sceneMs": 0.19570000000021537,
+        "runsMs": 0.02530000000115251
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0005999999993946403,
+          "snapQueryMs": 0.0643000000018219,
+          "patchMs": 0.027099999999336433,
+          "materializeMs": 0.23540000000139116,
+          "visibilityMs": 0.003399999997782288,
+          "sceneMs": 0.19499999999970896,
+          "runsMs": 0.02809999999954016,
+          "visibleHatches": 1001,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.009300000001530861,
+          "snapQueryMs": 0.08599999999933061,
+          "patchMs": 0.016999999999825377,
+          "materializeMs": 0.039699999997537816,
+          "visibilityMs": 0.0037999999985913746,
+          "sceneMs": 0.19180000000051223,
+          "runsMs": 0.024999999997817213,
+          "visibleHatches": 1001,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.0036000000000058208,
+          "snapQueryMs": 0.10540000000037253,
+          "patchMs": 0.01749999999810825,
+          "materializeMs": 0.03719999999884749,
+          "visibilityMs": 0.004099999998288695,
+          "sceneMs": 0.19490000000223517,
+          "runsMs": 0.02470000000175787,
+          "visibleHatches": 1001,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005800000002636807,
+          "snapQueryMs": 0.08220000000073924,
+          "patchMs": 0.017099999997299165,
+          "materializeMs": 0.037899999999353895,
+          "visibilityMs": 0.003700000001117587,
+          "sceneMs": 0.19149999999717693,
+          "runsMs": 0.02509999999892898,
+          "visibleHatches": 1001,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.007400000002235174,
+          "snapQueryMs": 0.08750000000145519,
+          "patchMs": 0.01750000000174623,
+          "materializeMs": 0.037599999999656575,
+          "visibilityMs": 0.0037999999985913746,
+          "sceneMs": 0.19359999999869615,
+          "runsMs": 0.025200000000040745,
+          "visibleHatches": 1001,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.009600000001228182,
+          "snapQueryMs": 0.09089999999923748,
+          "patchMs": 0.01840000000083819,
+          "materializeMs": 0.03840000000127475,
+          "visibilityMs": 0.003899999999703141,
+          "sceneMs": 0.3333999999995285,
+          "runsMs": 0.025700000001961598,
+          "visibleHatches": 1001,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008799999999610009,
+          "snapQueryMs": 0.09050000000206637,
+          "patchMs": 0.01900000000023283,
+          "materializeMs": 0.03770000000076834,
+          "visibilityMs": 0.0037999999985913746,
+          "sceneMs": 0.19570000000021537,
+          "runsMs": 0.02530000000115251,
+          "visibleHatches": 1001,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.011299999998300336,
+          "snapQueryMs": 0.10870000000068103,
+          "patchMs": 0.030899999997927807,
+          "materializeMs": 0.06620000000111759,
+          "visibilityMs": 0.006900000000314321,
+          "sceneMs": 0.27779999999984284,
+          "runsMs": 0.03419999999823631,
+          "visibleHatches": 1001,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.009899999997287523,
+          "snapQueryMs": 0.05730000000039581,
+          "patchMs": 0.0220999999983178,
+          "materializeMs": 0.08460000000195578,
+          "visibilityMs": 0.005600000000413274,
+          "sceneMs": 0.25820000000021537,
+          "runsMs": 0.0272000000004482,
+          "visibleHatches": 1001,
+          "snapReferences": 0
+        }
+      ]
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "hidden": true,
+      "prepareMs": 0.21500000000014552,
+      "visibilityPreparationMs": 0.17780000000129803,
+      "snapIndexPreparationMs": 1109.7891999999993,
+      "medians": {
+        "cachedSourcesMs": 0.006199999999807915,
+        "snapQueryMs": 0.08770000000004075,
+        "patchMs": 0.02089999999589054,
+        "materializeMs": 0.023400000005494803,
+        "visibilityMs": 0.0026999999972758815,
+        "sceneMs": 0.1455000000059954,
+        "runsMs": 0.0012999999962630682
+      },
+      "samples": [
+        {
+          "cachedSourcesMs": 0.0006999999968684278,
+          "snapQueryMs": 0.07619999999951688,
+          "patchMs": 0.024000000001251465,
+          "materializeMs": 0.21829999999681604,
+          "visibilityMs": 0.004300000000512227,
+          "sceneMs": 0.13869999999951688,
+          "runsMs": 0.001999999996769475,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.008900000000721775,
+          "snapQueryMs": 0.11639999999897555,
+          "patchMs": 0.028200000000651926,
+          "materializeMs": 0.03780000000188011,
+          "visibilityMs": 0.0036000000000058208,
+          "sceneMs": 0.17529999999896972,
+          "runsMs": 0.0014000000010128133,
+          "visibleHatches": 1,
+          "snapReferences": 2
+        },
+        {
+          "cachedSourcesMs": 0.006199999999807915,
+          "snapQueryMs": 0.08480000000054133,
+          "patchMs": 0.016500000001542503,
+          "materializeMs": 0.022299999996903352,
+          "visibilityMs": 0.002300000000104774,
+          "sceneMs": 0.11599999999816646,
+          "runsMs": 0.0010000000002037268,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008099999999103602,
+          "snapQueryMs": 0.08770000000004075,
+          "patchMs": 0.02140000000144937,
+          "materializeMs": 0.023100000002159504,
+          "visibilityMs": 0.0027000000009138603,
+          "sceneMs": 0.1143000000010943,
+          "runsMs": 0.002599999999802094,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005799999998998828,
+          "snapQueryMs": 0.11170000000129221,
+          "patchMs": 0.027399999999033753,
+          "materializeMs": 0.04139999999824795,
+          "visibilityMs": 0.0036999999974796083,
+          "sceneMs": 0.16389999999955762,
+          "runsMs": 0.001299999999901047,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005599999996775296,
+          "snapQueryMs": 0.08179999999993015,
+          "patchMs": 0.01720000000204891,
+          "materializeMs": 0.023400000005494803,
+          "visibilityMs": 0.002400000004854519,
+          "sceneMs": 0.27040000000124564,
+          "runsMs": 0.000999999996565748,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.008399999998800922,
+          "snapQueryMs": 0.10410000000410946,
+          "patchMs": 0.02089999999589054,
+          "materializeMs": 0.024299999997310806,
+          "visibilityMs": 0.0026999999972758815,
+          "sceneMs": 0.1455000000059954,
+          "runsMs": 0.0008999999990919605,
+          "visibleHatches": 1,
+          "snapReferences": 4
+        },
+        {
+          "cachedSourcesMs": 0.005700000001525041,
+          "snapQueryMs": 0.06590000000142027,
+          "patchMs": 0.018200000005890615,
+          "materializeMs": 0.022100000001955777,
+          "visibilityMs": 0.0022000000026309863,
+          "sceneMs": 0.11770000000251457,
+          "runsMs": 0.0009000000063679181,
+          "visibleHatches": 1,
+          "snapReferences": 1
+        },
+        {
+          "cachedSourcesMs": 0.004300000000512227,
+          "snapQueryMs": 0.04170000000158325,
+          "patchMs": 0.017699999996693805,
+          "materializeMs": 0.022299999996903352,
+          "visibilityMs": 0.0022000000026309863,
+          "sceneMs": 0.11119999999937136,
+          "runsMs": 0.0012999999962630682,
+          "visibleHatches": 1,
+          "snapReferences": 0
+        }
+      ]
+    }
+  ]
+}
