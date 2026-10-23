@@ -40,6 +40,50 @@ function fixture(points: DrawingLine["points"], custom = false) {
   ];
   return validateProject(base);
 }
+
+test("prepared drawing stretch matches full path at every concave/closing grip and rejects invalid context", () => {
+  for (const kind of ["line", "hatch"] as const)
+    for (const offset of [0, 1e9]) {
+      const points = [
+        { x: 0, y: 0 },
+        { x: 3, y: 1 },
+        { x: 3, y: 4 },
+        { x: 1.5, y: 2 },
+        { x: 0, y: 4 },
+      ].map((p) => ({ x: p.x + offset, y: p.y - offset }));
+      const input = fixture([...points, { ...points[0]! }], true);
+      storeyOf(input).hatches[0]!.points = points;
+      const base = validateProject(input);
+      const target = { kind, id: kind === "line" ? "l" : "h0" };
+      const contour = kind === "line" ? storeyOf(base).lines![0]!.points : points;
+      for (let index = 0; index < contour.length; index++) {
+        const anchor = { x: contour[index]!.x + 0.125, y: contour[index]!.y - 0.25 };
+        const session: EditSession = { base, target, action: "stretch", index, anchor };
+        const prepared = prepareDirectEditPreview(session)!;
+        assert.ok(prepared);
+        for (const delta of [-0.03, 0, 0.03]) {
+          const point = { x: anchor.x + delta, y: anchor.y + delta * 0.7 };
+          const full = editAtPointer(session, base, point);
+          assert.deepEqual(prepared.materialize!(base, target, point), full);
+          assert.deepEqual(previewEdit(session, base, target, point), full);
+          const collection = kind === "line" ? "lines" : "hatches";
+          const actual = storeyOf(prepared.evaluate(base, target, point).geometry)[collection]!;
+          assert.deepEqual(actual, [storeyOf(full)[collection]!.find((v) => v.id === target.id)]);
+        }
+        const neighbour = contour[index === 0 ? 1 : index - 1]!;
+        const crossing = {
+          x: anchor.x - 2 * (contour[index]!.x - neighbour.x),
+          y: anchor.y - 2 * (contour[index]!.y - neighbour.y),
+        };
+        assert.throws(() => editAtPointer(session, base, crossing));
+        assert.throws(() => prepared.evaluate(base, target, crossing));
+        assert.throws(() => prepared.materialize!(base, target, crossing));
+        assert.throws(() => prepared.evaluate({ ...base }, target, anchor));
+        assert.throws(() => prepared.evaluate(base, { ...target, id: "missing" }, anchor));
+        assert.throws(() => prepared.evaluate(base, target, { x: NaN, y: 0 }));
+      }
+    }
+});
 test("prepared line points match full action and scene including both closing grips and custom styles", () => {
   for (const custom of [false, true])
     for (const offset of [0, 1e9])

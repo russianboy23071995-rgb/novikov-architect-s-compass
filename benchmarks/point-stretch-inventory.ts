@@ -24,6 +24,7 @@ const median = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.floor(sorted.length / 2)]!;
 };
+const preparedStretch = process.argv.includes("--prepared-stretch");
 const rows = [];
 let comparisons = 0,
   commits = 0,
@@ -53,14 +54,17 @@ for (const size of [10, 100])
         const target = { kind, id: kind === "line" ? "target" : "h0" };
         const anchor = { x: points[index]!.x + 0.125, y: points[index]!.y - 0.25 };
         const session: EditSession = { base, target, action: "stretch", index, anchor };
-        assert.equal(prepareDirectEditPreview(session), null);
-        const preparation = timed(() => prepareDirectEditPreview({ ...session, action: "point" })!);
+        assert.equal(!!prepareDirectEditPreview(session), true);
+        const preparation = timed(() =>
+          prepareDirectEditPreview({ ...session, action: preparedStretch ? "stretch" : "point" })!,
+        );
         const candidate = preparation.value;
         const direction = editDirection(session)!;
         const norm = Math.hypot(direction.x, direction.y);
         // Diagnostic bridge only: reproduces original stretch arithmetic, including its guard.
         // The extra absolute-target round trip is deliberately tested, not assumed exact.
         const bridge = (cursor: Point) => {
+          if (preparedStretch) return cursor;
           const distance =
             ((cursor.x - anchor.x) * direction.x + (cursor.y - anchor.y) * direction.y) / norm;
           if (!Number.isFinite(distance) || norm + distance <= 1e-9)
@@ -76,14 +80,15 @@ for (const size of [10, 100])
           numericMismatches = 0;
         for (let i = 0; i < 9; i++) {
           const cursor = { x: anchor.x + (i - 4) * 0.037, y: anchor.y + (i % 2 ? 0.029 : -0.043) };
-          const fullRun = () => timed(() => previewEdit(session, base, target, cursor));
+          const fullRun = () => timed(() => editAtPointer(session, base, cursor));
           const patchRun = () => timed(() => candidate.evaluate(base, target, bridge(cursor)));
           const first = i % 2 ? patchRun() : fullRun();
           const second = i % 2 ? fullRun() : patchRun();
           const full = (i % 2 ? second : first) as ReturnType<typeof fullRun>;
           const patch = (i % 2 ? first : second) as ReturnType<typeof patchRun>;
           assert.deepEqual(full.value, editAtPointer(session, base, cursor));
-          const materialized = candidate.materialize!(base, target, bridge(cursor));
+          const materializeRun = timed(() => candidate.materialize!(base, target, bridge(cursor)));
+          const materialized = materializeRun.value;
           const collection = kind === "line" ? "lines" : "hatches";
           const expected = storeyOf(full.value)[collection]!.find((v) => v.id === target.id);
           const actual = storeyOf(patch.value.geometry)[collection]!.find(
@@ -92,6 +97,8 @@ for (const size of [10, 100])
           projectMismatches += Number(!equal(materialized, full.value));
           targetMismatches += Number(!equal(actual, expected));
           const numeric = previewNumericMove(session, base, target, String((i - 4) * 0.037));
+          if (preparedStretch)
+            assert.deepEqual(numeric.project, editAtPointer(session, base, numeric.point));
           numericMismatches += Number(
             !equal(candidate.materialize!(base, target, bridge(numeric.point)), numeric.project),
           );
@@ -99,6 +106,7 @@ for (const size of [10, 100])
           samples.push({
             fullMs: full.ms,
             patchMs: patch.ms,
+            materializeMs: materializeRun.ms,
             projectEqual: equal(materialized, full.value),
             targetEqual: equal(actual, expected),
             ...(i === 0 && !equal(actual, expected)
@@ -131,7 +139,8 @@ for (const size of [10, 100])
         }
         const crossing = { x: anchor.x - direction.x * 2, y: anchor.y - direction.y * 2 };
         assert.throws(() => previewEdit(session, base, target, crossing));
-        assert.throws(() => bridge(crossing));
+        if (preparedStretch) assert.throws(() => candidate.evaluate(base, target, crossing));
+        else assert.throws(() => bridge(crossing));
         let unconstrainedPointAcceptsCrossing = true;
         try {
           candidate.evaluate(base, target, crossing);
@@ -141,15 +150,22 @@ for (const size of [10, 100])
         assert.throws(() => previewEdit(session, base, target, { x: NaN, y: 0 }));
         assert.throws(() => candidate.evaluate({ ...base }, target, anchor));
         invalidChecks += 3;
+        if (preparedStretch) {
+          assert.equal(projectMismatches, 0);
+          assert.equal(targetMismatches, 0);
+          assert.equal(numericMismatches, 0);
+          assert.equal(unconstrainedPointAcceptsCrossing, false);
+        }
         rows.push({
           size,
           kind,
           coordinate,
           index,
-          preparedStretch: false,
+          preparedStretch,
           preparationMs: preparation.ms,
           fullWarmMedianMs: median(samples.slice(1).map((s) => s.fullMs)),
           patchWarmMedianMs: median(samples.slice(1).map((s) => s.patchMs)),
+          materializeWarmMedianMs: median(samples.slice(1).map((s) => s.materializeMs)),
           projectMismatches,
           targetMismatches,
           numericMismatches,
@@ -160,10 +176,13 @@ for (const size of [10, 100])
 console.log(
   JSON.stringify(
     {
-      basis: "main38e9b9f after PR427",
+      basis: preparedStretch
+        ? "PR429 plus prepared drawing stretch"
+        : "legacy bridge replay after PR429",
       runtime: process.version,
-      method:
-        "Existing full stretch vs diagnostic bridge into existing prepared point action. Fixed five-vertex concave target, 10/100 unrelated 100-vertex hatches. Preparation separate; first plus eight warm alternating calls. Exact checks outside timing. No product changes or frame claim.",
+      method: preparedStretch
+        ? "Full stretch vs actual prepared stretch adapter. Fixed five-vertex concave target, 10/100 unrelated 100-vertex hatches; preparation, patch and materialization separately. First plus eight warm calls, alternating full/patch order. Exact mouse and numeric checks against full path outside timing. No frame claim."
+        : "Existing full stretch vs diagnostic bridge into existing prepared point action. Fixed five-vertex concave target, 10/100 unrelated 100-vertex hatches. Preparation separate; first plus eight warm alternating calls. Exact checks outside timing. No product changes or frame claim.",
       comparisons,
       commits,
       invalidChecks,
