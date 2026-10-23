@@ -1,3 +1,5 @@
+import { stretchOffset } from "../../geometry/projections/direction.ts";
+import { editDirection } from "./snapping.ts";
 import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
@@ -17,7 +19,7 @@ import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
   if (
     session.target.kind !== "hatch" ||
-    !["point", "edge", "offset", "insert"].includes(session.action)
+    !["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     throw Error("Unsupported hatch preview");
   const source = session.base,
@@ -31,11 +33,13 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
     throw Error("Maximale Anzahl der Schraffurpunkte erreicht.");
   const insert = session.action === "insert" ? prepareContourInsertion(hatch.points, index) : null;
   const edge = session.action === "edge" ? prepareSessionContourEdge(session, hatch.points) : null;
-  const contour =
-    session.action === "point" ? preparePolygonVertexEdit(hatch.points, [index]) : null;
+  const contour = ["point", "stretch"].includes(session.action)
+    ? preparePolygonVertexEdit(hatch.points, [index])
+    : null;
   const target = Object.freeze({ ...session.target });
   const anchor = Object.freeze({ ...session.anchor });
   const pinned: EditSession = Object.freeze({ ...session, base, target, anchor });
+  const stretchDirection = session.action === "stretch" ? editDirection(pinned) : null;
   const offset = session.action === "offset";
   if (offset) offsetDirection(pinned); // Prepare the existing geometry once; reject unsupported contours now.
   const replacedIds = Object.freeze([hatch.id]);
@@ -53,7 +57,9 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
       points = edge.edit(point);
       points.forEach(Object.freeze);
     } else {
-      const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
+      const delta = stretchDirection
+        ? stretchOffset(point, anchor, stretchDirection)
+        : { x: point.x - anchor.x, y: point.y - anchor.y };
       if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
         throw Error("Ungueltige Zielposition.");
       points = hatch!.points.map((p, i) =>

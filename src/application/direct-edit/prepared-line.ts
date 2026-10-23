@@ -1,3 +1,5 @@
+import { stretchOffset } from "../../geometry/projections/direction.ts";
+import { editDirection } from "./snapping.ts";
 import { MAX_LINE_POINTS } from "../../domain/project/schema.ts";
 import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
@@ -15,7 +17,7 @@ import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 export function prepareLinePreview(session: EditSession): PreparedDirectEditPreview {
   if (
     session.target.kind !== "line" ||
-    !["point", "edge", "offset", "insert"].includes(session.action)
+    !["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     throw Error("Unsupported line preview");
   const source = session.base,
@@ -37,6 +39,7 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
   const target = Object.freeze({ ...session.target }),
     anchor = Object.freeze({ ...session.anchor });
   const pinned: EditSession = Object.freeze({ ...session, base, target, anchor });
+  const stretchDirection = session.action === "stretch" ? editDirection(pinned) : null;
   const offset = session.action === "offset";
   if (offset) offsetDirection(pinned);
   const replacedIds = Object.freeze([line.id]);
@@ -54,7 +57,9 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
       const contour = edge.edit(point);
       points = [...contour, { ...contour[0]! }];
     } else {
-      const delta = { x: point.x - anchor.x, y: point.y - anchor.y };
+      const delta = stretchDirection
+        ? stretchOffset(point, anchor, stretchDirection)
+        : { x: point.x - anchor.x, y: point.y - anchor.y };
       if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
         throw Error("Ungültige Zielposition.");
       points = replacePathVertex(

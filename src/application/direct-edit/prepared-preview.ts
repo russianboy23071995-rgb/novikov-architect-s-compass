@@ -36,12 +36,12 @@ function prepareCapability(
 ): PreparedDirectEditPreview | null {
   if (
     session.target.kind === "hatch" &&
-    ["point", "edge", "offset", "insert"].includes(session.action)
+    ["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareHatchContourPreview(session);
   if (
     session.target.kind === "line" &&
-    ["point", "edge", "offset", "insert"].includes(session.action)
+    ["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareLinePreview(session);
   if (session.target.kind === "window" && session.action === "axis")
