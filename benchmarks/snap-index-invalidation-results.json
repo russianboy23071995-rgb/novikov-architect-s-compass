@@ -1,0 +1,133 @@
+{
+  "basis": "PR4350fa04f0",
+  "runtime": "v24.19.0",
+  "method": "One real EditingReducer stretch commit per size/type. Index build measured separately from commit; reference comparison outside timing. Same-base preview/tool/visibility controls; undo/redo identity, stale preview rejection. Synthetic valid upper-storey context is empty; not a building-height action test. No browser/frame/peak-memory claim.",
+  "rows": [
+    {
+      "size": 10,
+      "kind": "line",
+      "initialMs": 28.148499999999956,
+      "commitMs": 18.81989999999996,
+      "rebuildMs": 14.8596,
+      "previewBaseCacheMs": [
+        0.011200000000030741,
+        0.0017000000000280124,
+        0.0014000000000464752
+      ],
+      "sourceCount": 2009,
+      "unchangedSources": 2004,
+      "unchangedOtherSources": 2000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.09070000000002665,
+      "undoReuses": true,
+      "redoReuses": true
+    },
+    {
+      "size": 10,
+      "kind": "hatch",
+      "initialMs": 13.663500000000056,
+      "commitMs": 23.678200000000004,
+      "rebuildMs": 12.063300000000027,
+      "previewBaseCacheMs": [
+        0.0036999999999807187,
+        0.0028999999999541615,
+        0.0027000000000043656
+      ],
+      "sourceCount": 2008,
+      "unchangedSources": 2003,
+      "unchangedOtherSources": 2000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.03879999999998063,
+      "undoReuses": true,
+      "redoReuses": true
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "initialMs": 106.6001,
+      "commitMs": 132.31960000000004,
+      "rebuildMs": 101.61580000000004,
+      "previewBaseCacheMs": [
+        0.0030999999999039574,
+        0.0004000000000132786,
+        0.0008000000000265572
+      ],
+      "sourceCount": 20009,
+      "unchangedSources": 20004,
+      "unchangedOtherSources": 20000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.05410000000006221,
+      "undoReuses": true,
+      "redoReuses": true
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "initialMs": 102.9248,
+      "commitMs": 162.05870000000004,
+      "rebuildMs": 88.80459999999994,
+      "previewBaseCacheMs": [
+        0.003000000000156433,
+        0.0003999999998995918,
+        0.0003000000001520675
+      ],
+      "sourceCount": 20008,
+      "unchangedSources": 20003,
+      "unchangedOtherSources": 20000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.09110000000009677,
+      "undoReuses": true,
+      "redoReuses": true
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "initialMs": 1181.3902000000003,
+      "commitMs": 1209.5223999999998,
+      "rebuildMs": 1098.2642999999998,
+      "previewBaseCacheMs": [
+        0.0024000000003070454,
+        0.0005000000001018634,
+        0.00029999999969732016
+      ],
+      "sourceCount": 200009,
+      "unchangedSources": 200004,
+      "unchangedOtherSources": 200000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.03299999999944703,
+      "undoReuses": true,
+      "redoReuses": true
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "initialMs": 1099.1697000000004,
+      "commitMs": 1672.4035000000003,
+      "rebuildMs": 1112.2577999999994,
+      "previewBaseCacheMs": [
+        0.0026000000016210834,
+        0.0005000000001018634,
+        0.0003999999989900971
+      ],
+      "sourceCount": 200008,
+      "unchangedSources": 200003,
+      "unchangedOtherSources": 200000,
+      "changedOrNewSources": 5,
+      "targetChanged": 5,
+      "unchangedHatchObjectIdentities": 0,
+      "upperMs": 0.03289999999833526,
+      "undoReuses": true,
+      "redoReuses": true
+    }
+  ]
+}
