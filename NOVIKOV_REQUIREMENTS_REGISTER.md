@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `e2be47e` nach PR432 (CI40034074030 grün). Zwei Freeze-Kandidaten im Folgebranch perf/snap-freeze-once geprüft und mangels verlässlichem Nutzen verworfen. Produktionscode unverändert. Details docs/snap-freeze-once.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `bc17460` nach PR433 (CI40034563383 grün). Räumlicher Index im Folgebranch diagnostics/spatial-index-phases aufgeschlüsselt; 90 geordnete Abfragen exakt. Wiederholte Sortierung ist größter gemessener Punktbaum-Anteil. Keine Produktänderung. Details docs/spatial-index-phases.md; einziger Folgeauftrag §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -11489,7 +11489,7 @@ Auftrag: vorhandenen Renderer inkrementell weiterentwickeln: stabile Programmlau
 Abnahme: Auswahlwechsel und Pointervorschau mit fest kleiner Auswahl bei wachsendem Restgebäude; Ressourcen-/Uploadzähler und CPU-/Framezeiten; korrekte stehende Nachbarn, Fenster-Hitflächen, Umrandung, Abbruch und Vorschau-Commit-Vergleich.
 
 ### AUD14-04 – Validierung, Ansichtskontext und verbleibende Vorschauen
-Status 24.10.2026: teilweise umgesetzt bis main PR432. Zwei Freeze-Kandidaten ohne belastbaren Nutzen verworfen; Mutationsschutz und lokale Ergebnisse exakt. Produktionscode unverändert. Räumlichen Indexaufbau als nächsten Messauftrag festgelegt; Frame-/Native- und Wandachsen-/Kettenreste offen. Einziger Auftrag Masterplan §9.
+Status 24.10.2026: teilweise umgesetzt bis main PR433. Freeze-Kandidaten verworfen, räumliche Indexphasen im Folgebranch gemessen; 90 geordnete Abfragen exakt. Einmalige Sortiermittelpunkte als nächsten begrenzten Kandidaten vergleichen. Keine neue Produktoptimierung oder Framefreigabe. Einziger Auftrag Masterplan §9.
 Code: domain/project/schema.ts, lib/bim/history.ts, application/storeys/working-storey.ts, lib/bim/geometry.ts, application/direct-edit/controller.ts, components/cad/BimSolidView.tsx.
 Befund: vollständige Modellvalidierung kopiert Struktur und leitet Anschlussgeometrie für alle Geschosse ab. Aktionen und History prüfen teilweise mehrfach; Ansichtsschalter erzeugen eine neue Gesamtprojektidentität und entwerten nach dieser Identität gecachte unveränderte Gebäudedarstellung. Direkte Fenster-/Punkt-/Achsenbearbeitungen können weiterhin vollständige Projektvorschauen erzeugen. Schraffurvalidierung prüft Muster je Schraffur und Abbild.
 Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenzen. Dateieingang, untrusted öffentliche Grenzen und finaler Commit bleiben fachlich vollständig abgesichert. Modellrevision von bloßem Ansichtskontext sauber trennen, immutable Daten/Indexe teilen und Geometrie nicht nur wegen Geschosswahl neu aufbauen. Verbleibende direkte 3D-Verbraucher auf gemeinsame vorbereitete Vorschauverträge anschließen, keine eigene Werkzeug-History/Fang-/Präzisionslogik. Schraffuren×Abbilder und Wand×Fenster-Scans gezielt prüfen; nicht auf Verdacht ganze Schichten ersetzen.
@@ -13195,3 +13195,8 @@ PR425 nach CI39657525588 grün in main4020047. Folgebranch fix/shared-oblique-ax
 ### AUD14-04 – Freeze-Kandidaten abgelehnt, 24.10.2026
 
 24.10.2026: PR432 nach grüner CI in maine2be47e übernommen. Allgemeine WeakSet-Besuchsmenge langsamer und allokationsintensiver; engere Referenzmenge bei1000 Konturen in3/4 Paaren langsamer. Je48 Abfragen exakt, tiefer Mutationsschutz erhalten. Keine Produktübernahme; Diagnosekandidaten und Messwerte erhalten. Details docs/snap-freeze-once.md. Nächster Einzelauftrag: räumlichen Indexaufbau aufschlüsseln.
+
+
+### AUD14-04 – Räumliche Indexphasen, 24.10.2026
+
+24.10.2026: PR433 nach grüner CI in mainbc17460 übernommen. Builder aus aktuellem Quelltext mit geprüften Instrumentierungsankern in Memory gemessen. 90 Abfragen exakt; Benchmark-Typen/Lint bestanden. Bei200000 Punkten normaler Aufbau218–231ms, instrumentierte Sortierung139–146ms; bei100000 Segmenten normal97–104ms. Instrumentierungs-/Allokationseinfluss ausdrücklich begrenzt; keine Frameaussage. Details docs/spatial-index-phases.md. Nächster Kandidat: gleiche Sortiermittelpunkte einmal je Eintrag berechnen.

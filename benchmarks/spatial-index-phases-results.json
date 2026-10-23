@@ -1,0 +1,332 @@
+{
+  "basis": "PR433 eaeb885",
+  "sourceHash": "cf06b14d660c1794112692206245eb78758ff9120040bfa698a39c316c078685",
+  "runtime": "v24.19.0",
+  "method": "Current production source instrumented in memory using unique checked anchors. Three fresh trees per size/type, alternating normal/profiled order. Optional GC before each build. Bounds entries separate; copying includes validation. Per-node timers perturb measured phases; compare uninstrumented total. Partition slices moved before recursion only in probe; no product changes. 90 ordered query comparisons incl full/empty bounds. No browser/frame/native claim.",
+  "rows": [
+    {
+      "size": 10,
+      "kind": "points",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 2000,
+      "entriesMs": 0.6096000000000004,
+      "normalMs": 6.0966999999999985,
+      "instrumentedMs": 5.049900000000008,
+      "phases": {
+        "boundsMs": 2.5049000000001627,
+        "sortMs": 1.174100000000152,
+        "partitionMs": 0.07560000000006539,
+        "copyMs": 0.822100000000006,
+        "nodes": 511,
+        "sortItems": 16000
+      }
+    },
+    {
+      "size": 10,
+      "kind": "points",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 2000,
+      "entriesMs": 0.5126999999999953,
+      "normalMs": 4.031499999999994,
+      "instrumentedMs": 5.261600000000016,
+      "phases": {
+        "boundsMs": 2.3693000000000097,
+        "sortMs": 1.4890000000002601,
+        "partitionMs": 0.07979999999977849,
+        "copyMs": 1.0662000000000091,
+        "nodes": 511,
+        "sortItems": 16000
+      }
+    },
+    {
+      "size": 10,
+      "kind": "points",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 2000,
+      "entriesMs": 0.4621999999999957,
+      "normalMs": 3.0880000000000223,
+      "instrumentedMs": 3.3693000000000097,
+      "phases": {
+        "boundsMs": 1.0025000000007367,
+        "sortMs": 1.5130000000000337,
+        "partitionMs": 0.051600000000576074,
+        "copyMs": 0.646000000000015,
+        "nodes": 511,
+        "sortItems": 16000
+      }
+    },
+    {
+      "size": 10,
+      "kind": "segments",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 1000,
+      "entriesMs": 0.5809999999999604,
+      "normalMs": 1.9758999999999673,
+      "instrumentedMs": 2.282600000000002,
+      "phases": {
+        "boundsMs": 0.43480000000016616,
+        "sortMs": 1.273499999999899,
+        "partitionMs": 0.026500000000112323,
+        "copyMs": 0.4597999999999729,
+        "nodes": 255,
+        "sortItems": 7000
+      }
+    },
+    {
+      "size": 10,
+      "kind": "segments",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 1000,
+      "entriesMs": 0.308400000000006,
+      "normalMs": 1.4354000000000156,
+      "instrumentedMs": 2.1236000000000104,
+      "phases": {
+        "boundsMs": 0.5188999999988937,
+        "sortMs": 1.1038999999995553,
+        "partitionMs": 0.03060000000027685,
+        "copyMs": 0.37290000000001555,
+        "nodes": 255,
+        "sortItems": 7000
+      }
+    },
+    {
+      "size": 10,
+      "kind": "segments",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 1000,
+      "entriesMs": 0.29869999999999663,
+      "normalMs": 1.3559999999999945,
+      "instrumentedMs": 1.6981999999999857,
+      "phases": {
+        "boundsMs": 0.42730000000051405,
+        "sortMs": 0.7362000000001103,
+        "partitionMs": 0.025900000000262935,
+        "copyMs": 0.401800000000037,
+        "nodes": 255,
+        "sortItems": 7000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 20000,
+      "entriesMs": 3.9350000000000023,
+      "normalMs": 20.63280000000003,
+      "instrumentedMs": 34.170300000000054,
+      "phases": {
+        "boundsMs": 11.831499999997504,
+        "sortMs": 13.401199999998028,
+        "partitionMs": 1.318500000000597,
+        "copyMs": 5.54770000000002,
+        "nodes": 8191,
+        "sortItems": 240000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 20000,
+      "entriesMs": 2.5609000000000037,
+      "normalMs": 17.793800000000033,
+      "instrumentedMs": 21.212499999999977,
+      "phases": {
+        "boundsMs": 2.927100000004316,
+        "sortMs": 9.791699999997832,
+        "partitionMs": 0.5755999999975074,
+        "copyMs": 6.831900000000019,
+        "nodes": 8191,
+        "sortItems": 240000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "points",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 20000,
+      "entriesMs": 2.181699999999978,
+      "normalMs": 17.62850000000003,
+      "instrumentedMs": 20.4923,
+      "phases": {
+        "boundsMs": 3.2680000000002565,
+        "sortMs": 10.023499999999103,
+        "partitionMs": 0.6044000000024425,
+        "copyMs": 5.409899999999993,
+        "nodes": 8191,
+        "sortItems": 240000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 10000,
+      "entriesMs": 3.201599999999985,
+      "normalMs": 8.406999999999925,
+      "instrumentedMs": 9.559099999999944,
+      "phases": {
+        "boundsMs": 1.1509999999994989,
+        "sortMs": 4.7212999999987915,
+        "partitionMs": 0.29499999999688953,
+        "copyMs": 2.805099999999925,
+        "nodes": 4095,
+        "sortItems": 110000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 10000,
+      "entriesMs": 2.41070000000002,
+      "normalMs": 8.447400000000016,
+      "instrumentedMs": 9.47460000000001,
+      "phases": {
+        "boundsMs": 1.2039999999974498,
+        "sortMs": 5.0397999999979675,
+        "partitionMs": 0.2888000000015154,
+        "copyMs": 2.363900000000058,
+        "nodes": 4095,
+        "sortItems": 110000
+      }
+    },
+    {
+      "size": 100,
+      "kind": "segments",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 10000,
+      "entriesMs": 3.714599999999905,
+      "normalMs": 8.426400000000058,
+      "instrumentedMs": 9.194400000000087,
+      "phases": {
+        "boundsMs": 1.1380000000029895,
+        "sortMs": 4.415900000001784,
+        "partitionMs": 0.3117999999992662,
+        "copyMs": 2.7749000000000024,
+        "nodes": 4095,
+        "sortItems": 110000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 200000,
+      "entriesMs": 28.98960000000011,
+      "normalMs": 218.0091,
+      "instrumentedMs": 234.17540000000008,
+      "phases": {
+        "boundsMs": 29.374299999973573,
+        "sortMs": 139.0347999999924,
+        "partitionMs": 6.085000000017544,
+        "copyMs": 49.493200000000115,
+        "nodes": 65535,
+        "sortItems": 3000000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 200000,
+      "entriesMs": 26.577600000000075,
+      "normalMs": 230.68309999999974,
+      "instrumentedMs": 240.35449999999992,
+      "phases": {
+        "boundsMs": 31.454699999932473,
+        "sortMs": 145.7212999999747,
+        "partitionMs": 6.610300000004827,
+        "copyMs": 46.10100000000011,
+        "nodes": 65535,
+        "sortItems": 3000000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "points",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 200000,
+      "entriesMs": 28.18820000000005,
+      "normalMs": 231.25570000000016,
+      "instrumentedMs": 238.26990000000023,
+      "phases": {
+        "boundsMs": 30.996499999979733,
+        "sortMs": 145.50729999999612,
+        "partitionMs": 6.089199999954872,
+        "copyMs": 45.2213999999999,
+        "nodes": 65535,
+        "sortItems": 3000000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 0,
+      "instrumentedFirst": false,
+      "count": 100000,
+      "entriesMs": 12.501900000000205,
+      "normalMs": 103.64040000000023,
+      "instrumentedMs": 116.50059999999985,
+      "phases": {
+        "boundsMs": 18.34670000001188,
+        "sortMs": 48.0392000000229,
+        "partitionMs": 17.409800000005816,
+        "copyMs": 27.51379999999972,
+        "nodes": 32767,
+        "sortItems": 1400000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 1,
+      "instrumentedFirst": true,
+      "count": 100000,
+      "entriesMs": 11.764400000000023,
+      "normalMs": 97.23499999999967,
+      "instrumentedMs": 114.77340000000004,
+      "phases": {
+        "boundsMs": 18.45490000003474,
+        "sortMs": 60.696999999974196,
+        "partitionMs": 3.0190999999763335,
+        "copyMs": 27.183600000000297,
+        "nodes": 32767,
+        "sortItems": 1400000
+      }
+    },
+    {
+      "size": 1000,
+      "kind": "segments",
+      "repeat": 2,
+      "instrumentedFirst": false,
+      "count": 100000,
+      "entriesMs": 9.726400000000467,
+      "normalMs": 104.3706000000002,
+      "instrumentedMs": 121.21810000000005,
+      "phases": {
+        "boundsMs": 19.510599999865917,
+        "sortMs": 63.61010000006263,
+        "partitionMs": 3.4705000000039945,
+        "copyMs": 28.768300000000636,
+        "nodes": 32767,
+        "sortItems": 1400000
+      }
+    }
+  ]
+}
