@@ -39,7 +39,7 @@ und primitive-cold-safety.ts.
 | --- | --- |
 | Kleine Änderung | alle16 schneller, ca.22–34 % |
 | Kaltaufbau | 13/16 langsamer; Bandbreite ca.9 % schneller bis22 % langsamer |
-| Vollständige Invalidierung | 12/16 langsamer; ca.10 % schneller bis17 % langsamer |
+| Vollständige Invalidierung | 13/16 langsamer; ca.10 % schneller bis17 % langsamer |
 
 Bei1.000 Restschraffuren: Änderung Produktion1.073–1.205ms, Kandidat800–903ms.
 Kalt Produktion1.062–1.405ms, Kandidat1.087–1.335ms; kein stabiler Kaltvorteil.
