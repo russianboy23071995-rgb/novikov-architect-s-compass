@@ -405,9 +405,26 @@ jeder Stichprobe identisch. Rohdaten: [node.json](remaining-actions-2026-10-24/n
 Ebenenänderungen sind projektweit und lösen bewusst eine volle Prüfung aller Geschosse aus,
 jetzt einmal statt drei- bis viermal. Keine Browsermessung für diese Stufe.
 
+## Bedienabnahme im Produkt (24.10.2026)
+
+CadWorkspace (Port 8080, Beispielprojekt, Fenster sichtbar):
+
+- **Geschoss:** Navigator-Doppelklick, „Level 01“ → „Erdgeschoss“; Kopfzeile, Plan, Navigator
+  und Statusleiste aktualisiert. Undo → „Level 01“, Redo → „Erdgeschoss“.
+- **Ebenen:** Organisation → Ebenen → Ebene hinzufügen („Neue Ebene“) → umbenannt in „Bestand“.
+  Umbenennen in den vorhandenen Namen „Decke“ abgelehnt („Dieser Ebenenname ist bereits
+  vergeben.“), kein Undo-Schritt. Undo → „Neue Ebene“, Undo → Ebene entfernt, zweimal Redo →
+  „Bestand“.
+- **Schraffur:** Werkzeug Schraffur, Polygon per Klick (Doppelklick schließt, 3 Eckpunkte):
+  Modellelemente 2 → 3; Undo → 2; Redo → 3.
+- Keine Konsolenfehler. Wiederherstellungsdialog bewusst nicht bedient.
+- **Beobachtung (nicht geändert, nicht gegen main geprüft):** Nach der abgelehnten
+  Umbenennung und Escape zeigte das Namensfeld weiter „Decke“, das Modell blieb „Bestand“
+  (Undo bestätigt das). Reine Darstellungsfrage des Eingabefelds.
+
 ## Offen
 
-- **Bedienabnahme offen:** Das Fenster war während der Prüfung nicht sichtbar; Geschoss
-  umbenennen, Ebene anlegen/umbenennen, Schraffur setzen mit Undo/Redo stehen aus.
 - Ebenen-/Musteränderungen bleiben teuer (volle Prüfung); feinere Abhängigkeiten wären eine
   eigene Entscheidung.
+- Kalibrierung, Z-Verschiebung und T-Anschluss nicht praktisch in der UI geprüft (bestehende
+  Tests).
