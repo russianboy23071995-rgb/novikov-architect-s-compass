@@ -1,3 +1,4 @@
+import { patchOverlapHint, previewOverlapHint } from "@/application/openings/overlap-hint";
 import { observeNavigationExit } from "@/rendering/viewport/navigation-exit";
 import { prepareDirectEditPreview } from "@/application/direct-edit/prepared-preview";
 import { prepareViewportModel } from "@/rendering/viewport/prepared-model";
@@ -222,6 +223,14 @@ export function BimSolidView({
     }
   }, [placement?.geometryPreview, placementTarget]);
   const geometryPatch = placementPatch ?? editPatch;
+  // Overlapping openings stay allowed; the preview only shows a hint.
+  const overlapHint = useMemo(
+    () =>
+      geometryPatch
+        ? patchOverlapHint(project, geometryPatch)
+        : previewOverlapHint(project, previewProject),
+    [geometryPatch, project, previewProject],
+  );
   const visibleBase = useMemo(
     () => visibleSurfaces(baseSolid, (id) => isLayerVisible(project, visibility, id)),
     [baseSolid, project, visibility],
@@ -860,6 +869,14 @@ export function BimSolidView({
           className="absolute inset-x-4 top-16 rounded bg-popover p-3 text-sm text-destructive"
         >
           {error}
+        </p>
+      )}
+      {overlapHint && !error && (
+        <p
+          role="status"
+          className="absolute inset-x-4 top-16 rounded bg-popover p-3 text-sm text-amber-700"
+        >
+          {overlapHint}
         </p>
       )}
       {!surfaceFaceCount(solid) && !error && (

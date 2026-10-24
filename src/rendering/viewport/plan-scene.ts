@@ -3,6 +3,8 @@ import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
+import { openingOverlaps } from "../../domain/elements/wall/opening-overlaps.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
 
 export function derivePlanScene(
   geometry: ModelGeometry,
@@ -20,9 +22,13 @@ export function derivePlanScene(
     if (!doors.has(door.wallId)) doors.set(door.wallId, []);
     doors.get(door.wallId)!.push(door);
   }
+  // Overlaps stay allowed; the plan marks every involved window or door as a hint.
+  const storey = "storeys" in geometry ? storeyOf(geometry) : geometry.storey;
+  const overlapping = new Set(openingOverlaps(storey).flatMap((o) => [o.first, o.second]));
   return {
     plan,
     doors,
+    overlapping,
     hatchPatterns: new Map(patterns.map((p) => [p.id, p])),
     openings,
     assets: new Map(geometry.assets.map((a) => [a.id, a])),

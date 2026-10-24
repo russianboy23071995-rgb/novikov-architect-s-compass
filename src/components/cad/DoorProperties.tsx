@@ -3,9 +3,11 @@ import { storeyOf } from "@/domain/storeys/access";
 import { ELEMENT_KINDS } from "@/domain/elements/registry";
 import type { Door } from "@/domain/elements/door/model";
 import { updateDoor } from "@/application/doors/actions";
+import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import type { Project } from "@/domain/project/schema";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
+import { OverlapHint } from "./OverlapHint";
 import type { Selection } from "./bim-view";
 
 const numbers = [
@@ -46,6 +48,7 @@ export function DoorProperties({
       <h2 className="text-sm font-semibold">{ELEMENT_KINDS.door.label}</h2>
       <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">{door.id}</p>
       <p className="max-w-48 truncate text-xs text-muted-foreground">Wand: {wall?.id}</p>
+      <OverlapHint text={openingOverlapHintFor(project, door.id)} />
       <PropertyForm
         key={`${door.id}:${door.width}:${door.height}:${door.zOffset}:${door.position}`}
         onSubmit={(event) => {

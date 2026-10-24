@@ -1,3 +1,4 @@
+import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import { WallHeightProperties } from "./WallHeightProperties";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { PropertyForm } from "./PropertyForm";
@@ -12,6 +13,7 @@ import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
 import { DoorProperties } from "./DoorProperties";
+import { OverlapHint } from "./OverlapHint";
 
 type Props = {
   project: Project;
@@ -101,6 +103,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       {opening && (
         <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
+      {opening && <OverlapHint text={openingOverlapHintFor(project, opening.id)} />}
       <PropertyForm
         onSubmit={(event) => {
           event.preventDefault();
