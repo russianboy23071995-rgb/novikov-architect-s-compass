@@ -137,8 +137,8 @@ export const ReferencesIcon = () => (
 export const PropertiesIcon = () => (
   <Svg>
     <path d="M3 6 H21 M3 12 H21 M3 18 H21" stroke={muted} />
-    <circle cx={15} cy={6} r={2} fill="currentColor" stroke="none" />
-    <circle cx={8} cy={12} r={2} fill="currentColor" stroke="none" />
-    <circle cx={17} cy={18} r={2} fill="currentColor" stroke="none" />
+    <circle cx={15} cy={6} r={1.7} fill="currentColor" stroke="none" />
+    <circle cx={8} cy={12} r={1.7} fill="currentColor" stroke="none" />
+    <circle cx={17} cy={18} r={1.7} fill="currentColor" stroke="none" />
   </Svg>
 );
