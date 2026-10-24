@@ -163,7 +163,8 @@ export function DemandMenu({
       </button>
 
       {calibrationControls && <div className="mb-1.5 grid gap-1">{calibrationControls}</div>}
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-4 gap-1.5">
+        {/* 1. Bewegen */}
         {onMoveSelection && (
           <IconButton
             label={selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
@@ -172,41 +173,16 @@ export function DemandMenu({
             <ElementMoveIcon />
           </IconButton>
         )}
-        {onReferences && (
-          <IconButton label="Referenzen auswählen" onClick={onReferences}>
-            <ReferencesIcon />
-          </IconButton>
-        )}
         {selection && selection.kind !== "reference" && summary && (
           <>
-            {closedContour(project, selection) && (
-              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
-                <OffsetIcon />
-              </IconButton>
-            )}
-            {edgeIndex != null && (
-              <>
-                <IconButton label="Knicken" onClick={() => onAction("insert")}>
-                  <KinkIcon />
-                </IconButton>
-                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
-                  <EdgeStretchIcon />
-                </IconButton>
-              </>
-            )}
-            {selection.kind !== "window" && pointIndex !== null && (
-              <>
-                <IconButton label="Punkt frei bewegen" onClick={() => onAction("point")}>
-                  <PointMoveIcon />
-                </IconButton>
-                <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
-                  <PointStretchIcon />
-                </IconButton>
-              </>
-            )}
             {selection.kind !== "window" && (
               <IconButton label="Element frei bewegen" onClick={() => onAction("move")}>
                 <ElementMoveIcon />
+              </IconButton>
+            )}
+            {selection.kind !== "window" && pointIndex !== null && (
+              <IconButton label="Punkt frei bewegen" onClick={() => onAction("point")}>
+                <PointMoveIcon />
               </IconButton>
             )}
             {edgeIndex == null && (
@@ -227,10 +203,39 @@ export function DemandMenu({
                 </IconButton>
               </>
             )}
-            <IconButton label="Werkzeugeigenschaften" onClick={onInfo}>
-              <PropertiesIcon />
-            </IconButton>
+            {/* 2. Manipulieren */}
+            {closedContour(project, selection) && (
+              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
+                <OffsetIcon />
+              </IconButton>
+            )}
+            {edgeIndex != null && (
+              <>
+                <IconButton label="Knicken" onClick={() => onAction("insert")}>
+                  <KinkIcon />
+                </IconButton>
+                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
+                  <EdgeStretchIcon />
+                </IconButton>
+              </>
+            )}
+            {selection.kind !== "window" && pointIndex !== null && (
+              <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
+                <PointStretchIcon />
+              </IconButton>
+            )}
           </>
+        )}
+        {/* 3. Referenzen und Eigenschaften */}
+        {onReferences && (
+          <IconButton label="Referenzen auswählen" onClick={onReferences}>
+            <ReferencesIcon />
+          </IconButton>
+        )}
+        {selection && selection.kind !== "reference" && summary && (
+          <IconButton label="Werkzeugeigenschaften" onClick={onInfo}>
+            <PropertiesIcon />
+          </IconButton>
         )}
       </div>
     </div>
