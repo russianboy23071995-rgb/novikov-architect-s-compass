@@ -54,7 +54,7 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRail
                   className={cn(
                     "relative h-11 w-11 rounded-md border border-transparent text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-foreground",
                     active &&
-                      "border-primary bg-primary text-primary-foreground shadow-[0_6px_16px_color-mix(in_oklab,var(--primary)_22%,transparent)] hover:bg-primary/90 hover:text-primary-foreground",
+                      "active-shimmer text-foreground hover:text-foreground",
                   )}
                 >
                   {active && <span className="absolute -left-1.5 h-5 w-0.5 rounded-r bg-primary" />}
