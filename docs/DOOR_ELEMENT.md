@@ -219,3 +219,46 @@ Basis: feat/door-part-b2 (PR448, noch nicht gemergt). Änderungskarte vom Nutzer
 - Andere vorbereitete Vorschauen (Wandendpunkt, Auswahlbewegung, Z-Verschiebung) lassen Türen
   noch aus ihrem Ausschnitt; geprüft und korrigiert werden sie in einem eigenen Schritt.
 - Externe IFC-Prüfung, Löschen, DIN-Bezeichnung wie zuvor.
+
+# Türen in den übrigen vorbereiteten Vorschauen (24.10.2026)
+
+Basis: feat/door-part-b3 (PR449, noch nicht gemergt). Änderungskarte freigegeben mit
+**Nutzerentscheidung Variante B:** Bei einer Z-Verschiebung bewegen sich Türen mit ihrer Wand;
+der geschossbezogene Z-Versatz ändert sich um die Änderung des Wandfußes.
+
+## Änderungen
+
+1. **Wandendpunkt/Strecken** (`application/direct-edit/prepared-endpoint.ts`): Türen der
+   betroffenen Wände im Ausschnitt und in den ersetzten IDs (lokaler und voller Pfad).
+2. **Auswahlbewegung XY** (`domain/project/prepared-translation.ts`): Türen der betroffenen
+   Wände im Ausschnitt und in den ersetzten IDs; Maßprüfung wie bei Fenstern.
+3. **Z-Verschiebung** (`application/selection/z-translation.ts`): Türen der bewegten Wände
+   erhalten `zOffset + (neuer − alter Wandfuß)`; Vorschau prüft Türen wie Fenster; die
+   Bestätigung schreibt die Türen mit und prüft das ganze Projekt. Türen unbewegter Wände
+   bleiben unverändert.
+4. **Nicht enthalten:** Türen in freier Gruppenauswahl, Überlappungsprüfung.
+
+## Nachweis
+
+- `benchmarks/door-scopes.test.ts`: Endpunkt (T-Anschluss und frei, Strecken und Kürzen),
+  XY-Bewegung (einzelne Wand, Wandgruppen) und Z-Bewegung (−0,4/0/+0,7 m, mehrgeschossig mit
+  Rohdeckenbezug): Vorschau = volle Operation in 3D-Flächen und Öffnungsumrissen; Z-Versatz der
+  Türen folgt dem Wandfuß; Türen unbewegter Wände unverändert; ein Undo-Schritt.
+- Gegenproben je Ausschnitt (Türen entfernt bzw. Z nicht angepasst): 1, 1 und 3 Tests
+  scheitern.
+- 1216 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+- **Messung** (`benchmarks/door-scopes-profile.ts`, Rohdaten `door-scopes-results.json`;
+  500 Wände/Fenster auf fünf Geschossen, ohne und mit 500 Türen, eine Wand, warmer Median,
+  drei Läufe): vorbereitete Vorschau mit Türen 0,27–0,57 ms (ohne Türen 0,28–0,71 ms), volle
+  Operation 64–116 ms (ohne Türen 47–62 ms). Kein messbarer Mehraufwand durch Türen im
+  Ausschnitt.
+- **Bedienabnahme:** Wand mit Tür in 3D um 1 m verschoben, Öffnung in der Vorschau
+  erhalten; Z-Verschiebung +0,5 m: Öffnung fährt in der Vorschau mit, danach Wand und Tür
+  Z-Versatz 0,5. Server-Log ohne neue Fehler.
+
+## Beobachtungen
+
+- Eine Tür genau so hoch wie ihre Wand (Oberkante bündig) scheitert in der Volumenbildung
+  („Geometriegrenzen numerisch nicht trennbar“); das gilt bereits vor diesem Schritt und
+  betrifft die gemeinsame Öffnungsgeometrie.
+- Beim Setzen landet eine Tür auch über einem Fenster (Überlappung, Entscheidung offen).
