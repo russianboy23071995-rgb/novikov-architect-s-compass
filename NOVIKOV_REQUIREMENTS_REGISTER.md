@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `19733c1` nach PR445. Branch feat/door-element-registry: Tür Teil A (R26-03), Bauteiltyp-Registry, Schema 27; einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 24.10.2026, main `6acc8e4` nach PR446. Branch feat/door-part-b: Tür Teil B1 (R26-03, N19); einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -1451,6 +1451,8 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 | V09 | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell. |
 
 ### R26-01–08
+
+**R26-03 / N19 · Tür, Teil B1 (24.10.2026, feat/door-part-b, Basis main 6acc8e4):** Teilweise, noch nicht gemergt. IFC: IfcDoor mit eigener Öffnung (Void/Fill), OperationType nach IFC4-Konvention plus Eigenschaften Hinge/OpensTo/ZOffset; Text/Sprache: Türbreite/-höhe/Z-Versatz, Tür zentrieren, Anschlag, Aufschlag über den gemeinsamen Befehlsweg; 3D-Auswahl über gemeinsame Öffnungs-Trefferflächen. 1202 Tests. Offen: Teil B2 (3D-Türblatt, Verschieben, Fang), externe IFC-Prüfung. Nachweis docs/DOOR_ELEMENT.md.
 
 **R26-03 · Tür, Teil A (24.10.2026, feat/door-element-registry, Basis main 19733c1):** Teilweise, noch nicht gemergt. Nutzerentscheidungen: einflügelige Drehtür; Breite/Höhe frei, Standard Rohbaumaß 1,01 × 2,135 m (Wandöffnung); Tür gehört zum Geschoss, Z-Versatz zur Geschossoberkante (Standard 0); Anschlag und Aufschlag einstellbar; Grundriss Türblatt mit 90°-Bogen, 3D Öffnung mit geschlossenem Türblatt; **neue Anforderung:** Darstellungsdetailstufen je Planungsphase (Entwurf/Ausführung) – Symbol daher nur abgeleitet. Umgesetzt: Registry der Bauteilarten, Schema 27 mit Migration, gemeinsame Öffnungsregeln und Platzierung mit dem Fenster, Werkzeug, Eigenschaften, Grundrisssymbol, 3D-Öffnung. Offen (Teil B): 3D-Türblatt, 3D-Auswahl, IFC, Text/Sprache (N19), direkte Bearbeitung, Fang; offene Fachentscheidung Überlappung von Öffnungen; Löschen fehlt für alle Bauteile. Nachweis docs/DOOR_ELEMENT.md.
 

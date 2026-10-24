@@ -4,6 +4,7 @@ import {
   type CalibrationContext,
 } from "../references/calibration.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewDoorCommand } from "../doors/command.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { eligibleSelection, singleTarget, type SelectionSet } from "../selection/state.ts";
 import { beginSelectionMove, previewSelectionMove, sameTargets } from "../selection/move.ts";
@@ -89,7 +90,8 @@ export function previewSelectionCommand(
       throw new Error(
         "Dieser Befehl benötigt genau ein Element. Gruppenbefehl: Auswahl um 2 m bei 90 Grad verschieben.",
       );
-    const legacy = previewCommand(project, target, text);
+    const door = previewDoorCommand(project, target, text);
+    const legacy = door ?? previewCommand(project, target, text);
     result = legacy.result;
     summary = legacy.summary;
   }

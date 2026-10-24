@@ -47,7 +47,7 @@ export function* buildWorldPicking(
       [0, 1, 2],
       [0, 2, 3],
     ]) {
-      add([w.vertices[a!]!, w.vertices[b!]!, w.vertices[c!]!], { kind: "window", id: w.id });
+      add([w.vertices[a!]!, w.vertices[b!]!, w.vertices[c!]!], { kind: w.kind, id: w.id });
       yield;
     }
   const build = function* (list: Triangle[], depth = 0): Generator<void, Node, void> {
