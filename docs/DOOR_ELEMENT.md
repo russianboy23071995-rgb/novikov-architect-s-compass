@@ -166,3 +166,56 @@ abgetrennt (Teil B3), weil es nach A04 einen vorbereiteten Vorschauweg und Messu
 - **Teil B3:** Tür per Maus entlang der Wand verschieben (vorbereitete Vorschau, Messung).
 - Darstellungstiefe (Entwurf/Ausführung) und Blattdicke als spätere Einstellung.
 - Externe IFC-Prüfung, Überlappung von Öffnungen, Löschen, DIN-Bezeichnung wie zuvor.
+
+# Tür, Teil B3: Tür per Maus entlang der Wand verschieben (24.10.2026)
+
+Basis: feat/door-part-b2 (PR448, noch nicht gemergt). Änderungskarte vom Nutzer freigegeben.
+
+## Änderungskarte B3
+
+1. **Gemeinsame Verschiebung:** `application/direct-edit/transforms.ts` führt `moveOpeningAlongWall`,
+   `openingCentre` und `hostedOpening` für Fenster und Türen; `moveWindowAlongWall` ist nur
+   noch der Fensteraufruf dieser Regel. Bereich und Begrenzung bleiben `boundedWindowPosition`.
+2. **Bearbeitungssitzung:** `lib/bim/direct-edit.ts` kennt die Bauteilart „door“ und verteilt
+   Anker und Mausauswertung für beide Öffnungen an die gemeinsame Regel. Bewusste, freigegebene
+   Ausnahme: nur Verteilung, keine neue Logik in `lib/bim`; keine neue Abhängigkeit.
+3. **Vorbereitete Vorschau:** `prepared-window.ts` wird `prepared-opening.ts`
+   (`prepareOpeningAxisPreview`) für Fenster und Türen. Der Ausschnitt enthält jetzt auch die
+   Türen der betroffenen Wände. Das behebt einen Fehler aus Teil A: beim Ziehen eines Fensters
+   fehlte die Türöffnung derselben Wand in der Vorschau. Die Ausnahmenliste der
+   Architekturprüfung führt dieselbe Abhängigkeit unter dem neuen Dateinamen.
+4. **Angrenzend:** Fang schließt Tür und Wirtswand aus, Richtung entlang der Wand; keine freie
+   Zahleneingabe („Türen bleiben an ihre Wand gebunden“); Kontextmenü „Tür entlang Wand“ mit
+   Maßangaben; 3D-Arbeitsebene auf halber Türhöhe; Arbeitsgeschoss folgt einer gewählten Tür.
+
+## Nachweis B3
+
+- `benchmarks/door-preview.test.ts`: Fensterergebnis gleich der früheren Fensterregel;
+  Türanker und Bewegung nur entlang der Wand; vorbereitete Vorschau = volle Prüfung (Projekt,
+  Grundriss, 3D-Flächen, Öffnungsumrisse) für Tür, Nachbartür und Fenster über Ecke, T und
+  schräg gedrehte Wände; kein Commit in der Vorschau, Bestätigung als ein Undo-Schritt.
+  `demand-menu.test.ts`: Menüangaben der Tür. Gegenprobe: Türen aus dem Ausschnitt entfernt
+  → 2 Tests scheitern (Tür- und Fensterfall).
+- 1211 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+- **Messung** (`benchmarks/door-preview-profile.ts`, Rohdaten `door-preview-results.json`,
+  Node, 5 Geschosse, 500 Wände mit je Fenster und Tür, drei Läufe, warmer Median):
+
+  | Ziel    | Vorbereitung | volle Prüfung | vorbereitete Vorschau |
+  | ------- | ------------ | ------------- | --------------------- |
+  | Tür     | 8,7–16,0 ms  | 98–119 ms     | 0,79–1,24 ms          |
+  | Fenster | 5,3–7,8 ms   | 84–88 ms      | 0,55–0,66 ms          |
+
+  Kein Gesamtframe-/p95-Nachweis; React/UI/GC nicht enthalten.
+
+- **Bedienabnahme:** 2D: Menü „Tür entlang Wand“, Vorschau, Klick übernimmt (Position
+  0,1833 → 0,2833), ein Undo stellt sie wieder her. 3D: Tür wählen und entlang der Wand ziehen;
+  beim Ziehen des Fensters bleibt die Türöffnung erhalten. Server-Log ohne Fehler.
+
+## Offen
+
+- **Überlappung:** Eine Tür lässt sich wie bisher über ein Fenster schieben; Nutzerentscheidung
+  zu überlappenden Öffnungen steht aus.
+- Während einer Geometrievorschau fehlt das 3D-Türblatt (Teil B2: nur Darstellung ohne Vorschau).
+- Andere vorbereitete Vorschauen (Wandendpunkt, Auswahlbewegung, Z-Verschiebung) lassen Türen
+  noch aus ihrem Ausschnitt; geprüft und korrigiert werden sie in einem eigenen Schritt.
+- Externe IFC-Prüfung, Löschen, DIN-Bezeichnung wie zuvor.

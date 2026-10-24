@@ -10,18 +10,20 @@ import { previewContourOffset } from "../../application/direct-edit/offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { previewContourEdge } from "../../application/direct-edit/contour.ts";
 import type { Point, Project } from "./model.ts";
-import { wallLength, windowCentre } from "./model.ts";
+import { wallLength } from "./model.ts";
 import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import {
   editablePoints,
   moveElement,
   moveElementPoint,
-  moveWindowAlongWall,
+  hostedOpening,
+  moveOpeningAlongWall,
+  openingCentre,
 } from "./transforms.ts";
 export type EditAction =
   "point" | "stretch" | "move" | "axis" | "x" | "y" | "insert" | "edge" | "offset";
-export type EditTarget = { kind: "wall" | "line" | "window" | "hatch"; id: string };
+export type EditTarget = { kind: "wall" | "line" | "window" | "door" | "hatch"; id: string };
 export type EditSession = {
   base: Project;
   target: EditTarget;
@@ -31,12 +33,9 @@ export type EditSession = {
 };
 
 export function editAnchor(project: Project, target: EditTarget): Point {
-  if (target.kind !== "window")
-    return editablePoints(project, { kind: target.kind, id: target.id })[0]!;
-  const opening = storeyOf(project).windows.find((item) => item.id === target.id);
-  const wall = storeyOf(project).walls.find((item) => item.id === opening?.wallId);
-  if (!opening || !wall) throw new Error("Fenster nicht gefunden.");
-  return windowCentre(project, opening.id);
+  if (target.kind === "window" || target.kind === "door")
+    return openingCentre(project, { kind: target.kind, id: target.id });
+  return editablePoints(project, { kind: target.kind, id: target.id })[0]!;
 }
 
 /** Always derive the preview from the pinned original, never from the preceding preview. */
@@ -75,12 +74,12 @@ function evaluatePointer(
   const delta = { x: pointer.x - anchor.x, y: pointer.y - anchor.y };
   if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
     throw new Error("Ungültige Zielposition.");
-  if (target.kind === "window") {
-    const opening = storeyOf(base).windows.find((item) => item.id === target.id)!;
-    const wall = storeyOf(base).walls.find((item) => item.id === opening.wallId)!;
-    return moveWindowAlongWall(
+  if (target.kind === "window" || target.kind === "door") {
+    const opening = { kind: target.kind, id: target.id };
+    const { wall } = hostedOpening(base, opening);
+    return moveOpeningAlongWall(
       base,
-      target.id,
+      opening,
       (delta.x * (wall.end.x - wall.start.x) + delta.y * (wall.end.y - wall.start.y)) /
         wallLength(wall),
     );

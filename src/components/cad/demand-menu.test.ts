@@ -49,3 +49,14 @@ test("window and polyline information use correct entity and geometry", () => {
   assert.equal(selectionSummary(p, { kind: "window", id: "wall-1" }), null);
   assert.equal(selectionSummary(p, { kind: "line", id: "missing" }), null);
 });
+test("door information opens the along-wall menu with its own measures", async () => {
+  const { addDoor } = await import("../../application/doors/actions.ts");
+  const { DOOR_DEFAULTS } = await import("../../domain/elements/door/model.ts");
+  const wide = updateWall(createExampleProject(), "wall-1", { end: { x: 6, y: 0 } });
+  const p = addDoor(wide, { id: "d", wallId: "wall-1", position: 0.15, ...DOOR_DEFAULTS });
+  assert.deepEqual(selectionSummary(p, { kind: "door", id: "d" }), {
+    title: "Tür",
+    details: "Breite 1,01 m · Höhe 2,14 m · Z-Versatz 0,00 m",
+  });
+  assert.equal(selectionSummary(p, { kind: "door", id: "missing" }), null);
+});

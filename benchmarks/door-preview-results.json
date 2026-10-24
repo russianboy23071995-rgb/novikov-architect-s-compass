@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-24",
+  "baseline": "feat/door-part-b2 ec52568; full editAtPointer + buildBuildingSolid",
+  "runtime": "Windows Node 24.22.1",
+  "method": "door-preview-profile.ts, 500 walls with 500 windows and 500 doors across five storeys; full/prepared alternating at seven targets, first separate, six warm observations; three process runs. Includes scene composition; excludes React/UI/frame/GC guarantees.",
+  "runs": [
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "results": [
+        {
+          "kind": "door",
+          "affectedWalls": 1,
+          "preparationMs": 8.706700000000012,
+          "first": {
+            "fullMs": 22.811099999999954,
+            "preparedMs": 6.344200000000001
+          },
+          "warm": [
+            {
+              "fullMs": 118.21940000000001,
+              "preparedMs": 0.8573000000000093
+            },
+            {
+              "fullMs": 104.3639,
+              "preparedMs": 0.8070999999999913
+            },
+            {
+              "fullMs": 84.74549999999999,
+              "preparedMs": 0.6498000000000275
+            },
+            {
+              "fullMs": 96.08960000000002,
+              "preparedMs": 0.7597000000000662
+            },
+            {
+              "fullMs": 116.60749999999996,
+              "preparedMs": 1.619899999999916
+            },
+            {
+              "fullMs": 114.21379999999999,
+              "preparedMs": 0.6743999999998778
+            }
+          ]
+        },
+        {
+          "kind": "window",
+          "affectedWalls": 1,
+          "preparationMs": 7.767699999999877,
+          "first": {
+            "fullMs": 123.74350000000004,
+            "preparedMs": 0.6316000000001623
+          },
+          "warm": [
+            {
+              "fullMs": 80.40089999999987,
+              "preparedMs": 0.6730000000000018
+            },
+            {
+              "fullMs": 101.75609999999983,
+              "preparedMs": 0.608199999999897
+            },
+            {
+              "fullMs": 79.13339999999994,
+              "preparedMs": 0.5625
+            },
+            {
+              "fullMs": 83.83830000000012,
+              "preparedMs": 0.5076999999998861
+            },
+            {
+              "fullMs": 97.30619999999999,
+              "preparedMs": 0.527599999999893
+            },
+            {
+              "fullMs": 71.19290000000001,
+              "preparedMs": 0.5292999999999211
+            }
+          ]
+        }
+      ],
+      "warmMedian": [
+        {
+          "kind": "door",
+          "fullMs": 114.21379999999999,
+          "preparedMs": 0.8070999999999913
+        },
+        {
+          "kind": "window",
+          "fullMs": 83.83830000000012,
+          "preparedMs": 0.5625
+        }
+      ]
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "results": [
+        {
+          "kind": "door",
+          "affectedWalls": 1,
+          "preparationMs": 15.950400000000002,
+          "first": {
+            "fullMs": 25.036400000000015,
+            "preparedMs": 6.973799999999983
+          },
+          "warm": [
+            {
+              "fullMs": 126.07989999999995,
+              "preparedMs": 1.3192000000000235
+            },
+            {
+              "fullMs": 119.12850000000003,
+              "preparedMs": 0.8443999999999505
+            },
+            {
+              "fullMs": 91.83659999999998,
+              "preparedMs": 1.2993999999999915
+            },
+            {
+              "fullMs": 89.62180000000001,
+              "preparedMs": 1.2395999999999958
+            },
+            {
+              "fullMs": 83.7074,
+              "preparedMs": 0.8541999999999916
+            },
+            {
+              "fullMs": 142.87519999999995,
+              "preparedMs": 0.7823000000000775
+            }
+          ]
+        },
+        {
+          "kind": "window",
+          "affectedWalls": 1,
+          "preparationMs": 5.319299999999885,
+          "first": {
+            "fullMs": 135.54750000000013,
+            "preparedMs": 0.6065000000000964
+          },
+          "warm": [
+            {
+              "fullMs": 105.14740000000006,
+              "preparedMs": 0.594899999999825
+            },
+            {
+              "fullMs": 98.1585,
+              "preparedMs": 0.5797000000000025
+            },
+            {
+              "fullMs": 82.54399999999987,
+              "preparedMs": 0.4701999999999771
+            },
+            {
+              "fullMs": 82.98129999999992,
+              "preparedMs": 0.5186999999998534
+            },
+            {
+              "fullMs": 87.50520000000006,
+              "preparedMs": 0.5024000000000797
+            },
+            {
+              "fullMs": 73.44129999999996,
+              "preparedMs": 0.5482999999999265
+            }
+          ]
+        }
+      ],
+      "warmMedian": [
+        {
+          "kind": "door",
+          "fullMs": 119.12850000000003,
+          "preparedMs": 1.2395999999999958
+        },
+        {
+          "kind": "window",
+          "fullMs": 87.50520000000006,
+          "preparedMs": 0.5482999999999265
+        }
+      ]
+    },
+    {
+      "walls": 500,
+      "windows": 500,
+      "doors": 500,
+      "results": [
+        {
+          "kind": "door",
+          "affectedWalls": 1,
+          "preparationMs": 11.6755,
+          "first": {
+            "fullMs": 23.915599999999984,
+            "preparedMs": 6.1601
+          },
+          "warm": [
+            {
+              "fullMs": 121.28120000000007,
+              "preparedMs": 0.8437000000000126
+            },
+            {
+              "fullMs": 82.80130000000008,
+              "preparedMs": 0.6686000000000831
+            },
+            {
+              "fullMs": 93.35840000000007,
+              "preparedMs": 0.7674999999999272
+            },
+            {
+              "fullMs": 95.07539999999995,
+              "preparedMs": 0.874300000000062
+            },
+            {
+              "fullMs": 141.54920000000004,
+              "preparedMs": 0.7889000000000124
+            },
+            {
+              "fullMs": 98.39550000000008,
+              "preparedMs": 0.5681999999999334
+            }
+          ]
+        },
+        {
+          "kind": "window",
+          "affectedWalls": 1,
+          "preparationMs": 5.64689999999996,
+          "first": {
+            "fullMs": 90.72389999999996,
+            "preparedMs": 0.5803000000000793
+          },
+          "warm": [
+            {
+              "fullMs": 64.88650000000007,
+              "preparedMs": 0.6584000000000287
+            },
+            {
+              "fullMs": 79.39619999999991,
+              "preparedMs": 0.6942999999998847
+            },
+            {
+              "fullMs": 87.79210000000012,
+              "preparedMs": 0.44869999999991705
+            },
+            {
+              "fullMs": 83.82409999999982,
+              "preparedMs": 0.7056999999999789
+            },
+            {
+              "fullMs": 87.3746000000001,
+              "preparedMs": 0.49250000000006366
+            },
+            {
+              "fullMs": 78.79960000000005,
+              "preparedMs": 0.43219999999996617
+            }
+          ]
+        }
+      ],
+      "warmMedian": [
+        {
+          "kind": "door",
+          "fullMs": 98.39550000000008,
+          "preparedMs": 0.7889000000000124
+        },
+        {
+          "kind": "window",
+          "fullMs": 83.82409999999982,
+          "preparedMs": 0.6584000000000287
+        }
+      ]
+    }
+  ]
+}
