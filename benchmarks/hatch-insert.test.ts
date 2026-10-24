@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import {
@@ -110,8 +111,14 @@ test("insertion cancel, full commit guard and single undo remain intact", () => 
   assert.equal(placed.history.past.length, 1);
   assert.deepEqual(placed.history.present, preview);
   assert.deepEqual(editingReducer(placed, { type: "undo" }).history.present, base);
-  storeyOf(base).hatches[1]!.points[0]!.x = NaN;
-  const failed = editingReducer(state, { type: "confirm", session, selection: target, point });
+  assert.throws(() => (storeyOf(base).hatches[1]!.points[0]!.x = NaN), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).hatches[1]!.points[0]!.x = NaN));
+  const failed = editingReducer(tampered.state, {
+    type: "confirm",
+    session: tampered.session,
+    selection: target,
+    point,
+  });
   assert.ok(failed.error);
   assert.equal(failed.history.past.length, 0);
 });

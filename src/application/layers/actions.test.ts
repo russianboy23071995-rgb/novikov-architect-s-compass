@@ -144,7 +144,8 @@ test("layer management rejects empty/duplicate names, colliding IDs and stale co
 });
 
 test("existing duplicate display names remain loadable and can be disambiguated by stable ID", () => {
-  const p = fixture().present;
+  // Committed snapshots are frozen; prepare the legacy file content from a mutable copy.
+  const p = structuredClone(fixture().present);
   p.layers[0]!.name = "Bestand";
   p.layers[1]!.name = "Bestand";
   const h = createHistory(readProjectFile(serializeProject(p)));

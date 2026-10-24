@@ -11,7 +11,14 @@ import {
   HISTORY_LIMIT,
   PROJECT_FILE_LIMIT,
 } from "./history.ts";
-import { serializeProject, updateWall, addWindow, createProject } from "./model.ts";
+import {
+  serializeProject,
+  updateWall,
+  addWindow,
+  createProject,
+  validateProject,
+} from "./model.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 
 test("JSON file round-trip preserves IDs and remains editable", () => {
@@ -165,6 +172,30 @@ test("commit rechecks geometry and asset data even after an earlier successful c
   assert.throws(() => commitProject(committed, disconnected));
   assert.equal(committed.present.assets[0]!.data, "AAAA");
   assert.equal(committed.past.length, 1);
+});
+
+test("committed snapshots are frozen and share unchanged subtrees with the previous state", () => {
+  const h = createHistory(createExampleProject());
+  const input = addWindow(h.present, { ...storeyOf(h.present).windows[0]!, id: "window-2" });
+  const next = commitProject(h, input);
+  assert.ok(isOwnedProjectSnapshot(h.present) && isOwnedProjectSnapshot(next.present));
+  assert.throws(() => (storeyOf(next.present).walls[0]!.height = 9), TypeError);
+  // Exact content of the fully validated input, including serialized key order.
+  assert.equal(serializeProject(next.present), serializeProject(validateProject(input)));
+  assert.equal(storeyOf(next.present).walls, storeyOf(h.present).walls);
+  assert.equal(next.present.layers, h.present.layers);
+  assert.equal(storeyOf(next.present).windows[0], storeyOf(h.present).windows[0]);
+  assert.notEqual(storeyOf(next.present).windows, storeyOf(h.present).windows);
+  assert.equal(undoProject(next).present, h.present);
+});
+
+test("a present without owned provenance keeps the full previous-state validation", () => {
+  const h = createHistory(createExampleProject());
+  const input = updateWall(h.present, "wall-1", { height: 4 });
+  const foreign = structuredClone(h.present);
+  storeyOf(foreign).walls[0]!.height = -1;
+  assert.throws(() => commitProject({ ...h, present: foreign }, input));
+  assert.equal(commitProject(h, input).past.length, 1);
 });
 
 test("commit retains the UTF-8 file-size boundary without touching history on rejection", () => {

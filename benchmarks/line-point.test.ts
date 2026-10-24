@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import {
@@ -210,8 +211,14 @@ test("line commit validates unmodified elements, cancel and one undo on active u
   assert.equal(placed.history.past.length, 1);
   assert.deepEqual(placed.history.present, preview);
   assert.deepEqual(editingReducer(placed, { type: "undo" }).history.present, base);
-  base.storeys[0]!.hatches[0]!.points[0]!.x = NaN;
-  const failed = editingReducer(state, { type: "confirm", session, selection: target, point });
+  assert.throws(() => (base.storeys[0]!.hatches[0]!.points[0]!.x = NaN), TypeError);
+  const tampered = tamperedState(state, (p) => (p.storeys[0]!.hatches[0]!.points[0]!.x = NaN));
+  const failed = editingReducer(tampered.state, {
+    type: "confirm",
+    session: tampered.session,
+    selection: target,
+    point,
+  });
   assert.ok(failed.error);
   assert.equal(failed.history.past.length, 0);
 });

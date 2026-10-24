@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { wallPatchFixture } from "./wall-patch-fixture.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { tTransitionFixture } from "./t-transition-fixture.ts";
@@ -164,9 +165,15 @@ test("wall preview rejects stale context; cancel publishes nothing and commit re
   assert.equal(committed.history.past.length, 1);
   assert.deepEqual(committed.history.present, editAtPointer(session, base, point));
   assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, base);
-  storeyOf(base).windows[0]!.width = 100;
+  assert.throws(() => (storeyOf(base).windows[0]!.width = 100), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).windows[0]!.width = 100));
   assert.notEqual(
-    editingReducer(state, { type: "confirm", session, selection: target, point }).error,
+    editingReducer(tampered.state, {
+      type: "confirm",
+      session: tampered.session,
+      selection: target,
+      point,
+    }).error,
     "",
   );
 });
@@ -417,16 +424,17 @@ test("warm T preview cannot bypass full confirmation and cancellation owns no hi
     editingReducer(editingReducer(confirmed, { type: "undo" }), { type: "redo" }).history.present,
     confirmed.history.present,
   );
-  storeyOf(base).windows[0]!.width = 100;
-  const rejected = editingReducer(state, {
+  assert.throws(() => (storeyOf(base).windows[0]!.width = 100), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).windows[0]!.width = 100));
+  const rejected = editingReducer(tampered.state, {
     type: "confirm",
-    session,
+    session: tampered.session,
     selection: target,
     point,
     candidate,
   });
   assert.notEqual(rejected.error, "");
-  assert.equal(rejected.history, state.history);
+  assert.equal(rejected.history, tampered.state.history);
 });
 
 test("owned wall movement matches mutable full path for axis, body corner and stretch", () => {
