@@ -1054,7 +1054,7 @@ export function CadWorkspace({
         >
           <>
             <div className="mb-1 flex items-center gap-3">
-              <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
+              <h2 className="section-title">Werkzeugeigenschaften</h2>
               {tool === "select" && selection?.kind === "wall" && (
                 <Button
                   size="sm"
