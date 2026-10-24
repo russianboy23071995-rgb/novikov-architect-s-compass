@@ -68,6 +68,16 @@ export function createProjectSnapshot(
   return snapshot;
 }
 
+/** Commands keep their input's ownership: an owned input yields an owned result sharing its
+ * unchanged parts, so a following commit need not validate again. Any other input keeps
+ * validateProject's mutable copy. Both paths run the same full validation.
+ */
+export function validateLike(input: Project, proposed: Project, reuse?: WallSolidReuse): Project {
+  return owned.has(input)
+    ? createProjectSnapshot(proposed, reuse, input)
+    : validateProject(proposed, reuse);
+}
+
 /** Only factory-owned, deeply immutable and fully validated projects qualify. */
 export function isOwnedProjectSnapshot(source: Project): boolean {
   return owned.has(source);

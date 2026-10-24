@@ -9,7 +9,8 @@ const stats = (values: number[]) => {
 };
 
 /** Same base history per sample; legacy/current order alternates. The action that produces the
- * input (itself a full validation) is timed separately and is identical for both paths.
+ * input (itself a full validation) is timed separately: legacy actions run on a mutable
+ * present, current actions on an owned one, so their difference is the owned-result overhead.
  */
 export async function profileCommitSharing(options: {
   sizes: number[];
@@ -26,7 +27,14 @@ export async function profileCommitSharing(options: {
       current: paths.current.create(base),
     } satisfies Record<keyof typeof paths, ProjectHistory>;
     for (const op of ["wallReshape", "windowPlace"] as OperationName[]) {
-      const times = { action: [] as number[], legacy: [] as number[], current: [] as number[] };
+      const times = {
+        legacyAction: [] as number[],
+        currentAction: [] as number[],
+        legacy: [] as number[],
+        current: [] as number[],
+        legacyTotal: [] as number[],
+        currentTotal: [] as number[],
+      };
       let equivalent = true;
       const count = options.samples(size);
       for (let i = -1; i < count; i++) {
@@ -43,7 +51,8 @@ export async function profileCommitSharing(options: {
           const commit = options.now() - t;
           if (i >= 0) {
             times[path].push(commit);
-            if (path === "current") times.action.push(action);
+            times[`${path}Action`].push(action);
+            times[`${path}Total`].push(action + commit);
           }
           out[path] = JSON.stringify(next.present) + next.past.length;
         }
@@ -55,9 +64,12 @@ export async function profileCommitSharing(options: {
         storeys: base.storeys.length,
         operation: op,
         equivalent,
-        actionMs: stats(times.action),
+        legacyActionMs: stats(times.legacyAction),
+        currentActionMs: stats(times.currentAction),
         legacyCommitMs: stats(times.legacy),
         currentCommitMs: stats(times.current),
+        legacyTotalMs: stats(times.legacyTotal),
+        currentTotalMs: stats(times.currentTotal),
       });
     }
   }

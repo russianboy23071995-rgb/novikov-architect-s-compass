@@ -19,7 +19,7 @@ export const operations = {
   wallReshape: (p: Project, i: number) => {
     const wall = storeyOf(p).walls[1]!;
     return updateWall(p, wall.id, {
-      end: { x: wall.start.x, y: wall.start.y + (i % 2 ? 4.5 : 4) },
+      end: { x: wall.start.x, y: wall.start.y + (i % 2 ? 4.5 : 5) },
     });
   },
   windowPlace: (p: Project, i: number) =>

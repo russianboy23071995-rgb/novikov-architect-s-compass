@@ -108,10 +108,40 @@ test("caller mutation cannot change initial or committed snapshots", () => {
   const h = createHistory(p);
   storeyOf(p).walls[0]!.height = 99;
   assert.equal(storeyOf(h.present).walls[0]!.height, 2.8);
-  const input = updateWall(h.present, "wall-1", { height: 4 });
+  // A command on an owned snapshot returns an owned, frozen result that the commit adopts.
+  const owned = updateWall(h.present, "wall-1", { height: 4 });
+  assert.throws(() => (storeyOf(owned).walls[0]!.height = 100), TypeError);
+  assert.equal(commitProject(h, owned).present, owned);
+  // A command on caller data stays a mutable copy; the commit owns its own validated copy.
+  const input = updateWall(structuredClone(h.present), "wall-1", { height: 4 });
   const next = commitProject(h, input);
   storeyOf(input).walls[0]!.height = 100;
   assert.equal(storeyOf(next.present).walls[0]!.height, 4);
+});
+
+test("owned commands share unchanged parts and undo with view settings keeps sharing", () => {
+  const p = createExampleProject();
+  p.storeys.push({ ...structuredClone(storeyOf(p)), id: "upper", name: "OG", height: 3 });
+  for (const s of p.storeys.slice(1))
+    for (const list of [s.walls, s.windows]) list.forEach((e) => (e.id = `${s.id}-${e.id}`));
+  storeyOf(p).height = 3;
+  storeyOf(p).windows.forEach((w) => (w.wallId = "wall-1"));
+  p.storeys[1]!.windows.forEach((w) => (w.wallId = "upper-wall-1"));
+  const h = createHistory(p);
+  const changed = commitProject(h, updateWall(h.present, "wall-1", { height: 4 }));
+  assert.equal(changed.present.storeys[1], h.present.storeys[1]);
+  const hidden = commitProject(changed, {
+    ...changed.present,
+    bimVisibility: { hiddenLayerIds: [changed.present.defaultLayerIds.line] },
+  });
+  const undone = undoProject(hidden);
+  assert.equal(isOwnedProjectSnapshot(undone.present), false);
+  const after = commitProject(undone, updateWall(undone.present, "wall-1", { height: 5 }));
+  assert.equal(after.present.storeys[1], h.present.storeys[1]);
+  assert.equal(
+    serializeProject(after.present),
+    serializeProject(validateProject(updateWall(undone.present, "wall-1", { height: 5 }))),
+  );
 });
 
 test("normalized no-op preserves the exact history and redo branch", () => {
