@@ -17,10 +17,13 @@ export const HISTORY_LIMIT = 100;
 export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
 // Size is fixed for an owned immutable snapshot, so its budget check is needed only once.
 const sizeChecked = new WeakSet<Project>();
+// Byte lengths of deeply frozen storeys of owned snapshots; unchanged storeys are not re-encoded.
+const storeyBytes = new WeakMap<object, number>();
 function assertSnapshotSize(project: Project): void {
   if (sizeChecked.has(project)) return;
-  assertValidatedProjectSize(project);
-  if (isOwnedProjectSnapshot(project)) sizeChecked.add(project);
+  const owned = isOwnedProjectSnapshot(project);
+  assertValidatedProjectSize(project, owned ? storeyBytes : undefined);
+  if (owned) sizeChecked.add(project);
 }
 // Owned model snapshot behind an Undo/Redo result that only received current view settings.
 // Used solely as a sharing base; the result itself is never trusted without validation.

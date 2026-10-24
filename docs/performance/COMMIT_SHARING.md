@@ -281,3 +281,79 @@ Geschosse sind durch die Gegenprüfung und Messung abgedeckt, nicht praktisch in
 - **Pflicht für neue Regeln:** Liest eine Geschossprüfung künftig weitere Daten (z. B. Decken,
   Dächer, Treppen über Geschosse), müssen diese in `storeyKeys` aufgenommen und die
   Gegenprüfung um passende Änderungen erweitert werden.
+
+# Stufe 2b: Schema-Parsen und Größenprüfung geschossweise (24.10.2026)
+
+Basis: main `1f05fea` (PR442), Branch `audit/storey-parse-and-size`. Freigabe: Nutzer
+24.10.2026 („Schemaprüfung geschossweise und Größenprüfung schneller“).
+
+## Änderungskarte
+
+1. **Wunsch/Abnahme:** Schema-Parsen und 128-MiB-Größenprüfung kosten pro Änderung nur noch
+   das geänderte Geschoss. Ergebnis, Fehlermeldungen und Byte-Länge exakt gleich.
+   Ausgeschlossen: Lockerung von Regeln, Dateiformat.
+2. **Eigentümer:** `domain/project/schema.ts` (Wiederverwendung wird vor dem Parsen mit
+   derselben Bedingung wie Stufe 2 entschieden; wiederverwendete Geschosse werden mit leeren
+   Elementlisten geparst und danach durch ihr bereits validiertes eingefrorenes Objekt
+   ersetzt; die Entscheidung gilt nur, wenn der Schlüssel nach dem Parsen gleich bleibt).
+   `domain/project/storage-data.ts` (`storeyStorageData`, gemeinsame Speicherregel je
+   Geschoss). `interop/project-file/size.ts` (Byte-Länge = Projektrahmen + Geschosse +
+   Trennzeichen; optionaler Geschoss-Cache). `lib/bim/history.ts` (Cache nur für eigene,
+   tief eingefrorene Snapshots).
+3. **Gemeinsamer Weg:** wie Stufe 2 (`createProjectSnapshot`, Commit). Laden, Speichern,
+   Recovery, Export und Musterabgleich prüfen ohne Memo und ohne Cache.
+4. **Folgen:** keine Format- oder Grenzwertänderung; Recovery/Datei unberührt.
+5. **Abgrenzung:** projektweite Prüfungen und gebundene Wandhöhen weiter vollständig.
+
+## Gegenprüfung
+
+- Vergleichstest aus Stufe 2 erweitert: bei jedem gültigen der 600 Zufallsschritte ist die
+  zusammengesetzte, gecachte Byte-Länge gleich einem JSON-String des ganzen Projekts
+  (eingefrorene Kopie der alten Berechnung, `legacyProjectByteLength`); enthält Umlaute und
+  gebundene Wände. Ergebnis/Fehler weiter exakt wie volle Prüfung.
+- Gegenproben: ohne Trennzeichen in der Byte-Summe → Test scheitert (Schritt 2); ohne
+  Wiedereinsetzen des validierten Geschosses nach dem Parsen → beide Tests scheitern.
+- 1162 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+
+## Messung
+
+Node 24.22.1, gleicher Lauf, alter Vollpfad (vor Stufe 1) gegen jetzt; Ergebnis bei jeder
+Stichprobe identisch. Rohdaten: [node.json](storey-parse-size-2026-10-24/node.json).
+
+| Elemente | Vorgang        | Aktion alt → neu | Commit neu |  Summe alt → neu (Median / p95) |
+| -------: | -------------- | ---------------: | ---------: | ------------------------------: |
+|    1.000 | Wand ändern    |      44,5 → 10,2 |        0,3 |     142,0 / 153,6 → 10,4 / 13,4 |
+|    5.000 | Wand ändern    |     240,6 → 51,9 |        1,2 |     724,4 / 802,6 → 53,2 / 58,9 |
+|   20.000 | Wand ändern    |    977,1 → 219,8 |        5,2 | 3100,1 / 3214,9 → 224,9 / 257,1 |
+|   20.000 | Fenster setzen |    978,2 → 224,2 |        5,8 | 3011,5 / 3157,0 → 229,7 / 236,6 |
+
+Millisekunden. Gegenüber Stufe 2 (ähnlich langsamer Lauf, 388 ms bei 20.000) rund 42 %
+weniger; der Commit fällt von ≈ 28 auf ≈ 5 ms.
+
+Browser (Chromium 152, Vite-Dev, Bereich sichtbar). Rohdaten:
+[browser.json](storey-parse-size-2026-10-24/browser.json).
+
+| Elemente | Vorgang        | Aktion alt → neu | Commit neu |  Summe alt → neu (Median / p95) |
+| -------: | -------------- | ---------------: | ---------: | ------------------------------: |
+|    1.000 | Wand ändern    |       30,6 → 6,6 |        0,3 |        92,6 / 108,4 → 6,9 / 8,7 |
+|    5.000 | Wand ändern    |     138,9 → 30,3 |        1,2 |     406,0 / 465,1 → 31,3 / 39,3 |
+|   20.000 | Wand ändern    |    538,8 → 115,0 |        4,9 | 1646,0 / 1703,8 → 119,2 / 182,6 |
+|   20.000 | Fenster setzen |    509,7 → 125,1 |        5,5 | 1587,5 / 1683,6 → 130,6 / 167,6 |
+
+Gegenüber Stufe 2 (Browser 238 ms bei 20.000) etwa halbiert. Die verbleibende Zeit hängt
+an der Größe des geänderten Geschosses (rund 4.000 Elemente je Geschoss in dieser Fixture).
+
+## Bedienabnahme im Produkt (24.10.2026)
+
+CadWorkspace, Beispielprojekt: „Wandlänge auf 5 m“ → Übernehmen: 5 m; mittiges Fenster
+2 → 3 Elemente; zweimal Undo → 2; zweimal Redo → 3 Elemente, 5 m; „Wandhöhe auf 0,5 m“
+abgelehnt, Höhe 2,8 m und 3 Elemente unverändert. Keine Konsolenfehler. Mehrere Geschosse
+nur durch Gegenprüfung und Messung abgedeckt.
+
+## Grenzen
+
+- Verbleibende Kosten wachsen mit dem geänderten Geschoss; sehr dichte Geschosse bleiben
+  spürbar. Nächster Hebel wäre eine elementweise statt geschossweise Wiederverwendung
+  (eigene Entscheidung, berührt Anschluss-/Nachbarregeln).
+- Wechsel von Arbeitsgeschoss, Sichtbarkeit, Ebenen oder Mustern: einmalig volle Prüfung.
+- Fangindex-Neuaufbau und die übrigen Aktionsfamilien bleiben offen.

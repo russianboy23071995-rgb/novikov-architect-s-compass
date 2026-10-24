@@ -1,8 +1,21 @@
+import { projectStorageData } from "../src/domain/project/storage-data.ts";
 import { assertRasterBudgetChange } from "../src/domain/project/raster-budget.ts";
 import { sameProjectModel, sameProjectContent } from "../src/domain/project/model-equality.ts";
 import { assertValidatedProjectSize } from "../src/interop/project-file/size.ts";
 import { validateProject, type Project } from "../src/lib/bim/model.ts";
 import { HISTORY_LIMIT, type ProjectHistory } from "../src/lib/bim/history.ts";
+
+/** Frozen pre-cache size computation (main 1f05fea): one JSON string of the whole project. */
+export function legacyProjectByteLength(project: Project): number {
+  const structure = {
+    ...projectStorageData(project),
+    assets: project.assets.map((asset) => ({ ...asset, data: "" })),
+  };
+  return (
+    new TextEncoder().encode(JSON.stringify(structure)).byteLength +
+    project.assets.reduce((bytes, asset) => bytes + asset.data.length, 0)
+  );
+}
 
 /** Frozen pre-sharing commit (main 04bdd24) for same-session comparison; diagnostics only. */
 export function legacyCreateHistory(project: Project): ProjectHistory {

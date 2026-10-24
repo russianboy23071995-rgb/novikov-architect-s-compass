@@ -491,6 +491,47 @@ function storeyKeys(
   });
 }
 
+const sameKey = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((value, i) => Object.is(value, b[i]));
+
+/** Decide reuse before parsing, from the caller's storey objects and unparsed levels.
+ * Malformed input that cannot even yield levels simply parses in full.
+ */
+function reusableStoreys(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  memo: StoreyValidationMemo,
+) {
+  let keys: unknown[][];
+  try {
+    keys = storeyKeys(
+      input,
+      input.storeys as { id: string; height: number | null }[],
+      input["groundStoreyId"] as string,
+    );
+  } catch {
+    return undefined;
+  }
+  const known = input.storeys.map((storey, i) => memo.lookup(storey, keys[i]!));
+  return known.some(Boolean) ? { keys, known } : undefined;
+}
+
+/** Same storey identity and scalar fields for parsing, with its element lists left empty. */
+function withoutReusedContent(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  known: readonly (readonly string[] | undefined)[],
+) {
+  return {
+    ...input,
+    storeys: input.storeys.map((storey, i) =>
+      known[i]
+        ? Object.fromEntries(
+            Object.entries(storey as object).map(([k, v]) => [k, Array.isArray(v) ? [] : v]),
+          )
+        : storey,
+    ),
+  };
+}
+
 /** Keys of a validated project, for registering its storeys after validation. */
 export function storeyValidationKeys(project: Project): unknown[][] {
   return storeyKeys(project, project.storeys, project.groundStoreyId);
@@ -505,7 +546,16 @@ export function validateProject(
   reuse?: WallSolidReuse,
   memo?: StoreyValidationMemo,
 ): Project {
-  const project = resolveBoundWallHeights(projectSchema.parse(value));
+  // Identities come from the caller's value; parsing copies them.
+  const input = memo ? (value as Record<string, unknown> & { storeys: unknown[] }) : undefined;
+  const early = input && reusableStoreys(input, memo!);
+  const parsed = projectSchema.parse(early ? withoutReusedContent(input!, early.known) : value);
+  // A reused storey is the validated output of an identical earlier parse; put it back.
+  if (early)
+    parsed.storeys = parsed.storeys.map((storey, i) =>
+      early.known[i] ? (input!.storeys[i] as typeof storey) : storey,
+    );
+  const project = resolveBoundWallHeights(parsed);
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
     project.workingStoreyId &&
@@ -547,12 +597,11 @@ export function validateProject(
   const localLevels = new Map(
     resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
-  // Identities come from the caller's value; parsing copies them. Levels come from parsed data.
-  const input = memo ? (value as Record<string, unknown> & { storeys: unknown[] }) : undefined;
-  const keys = input && storeyKeys(input, storeys, project.groundStoreyId);
+  // The early decision used unparsed levels; it stands only if parsed levels give the same key.
+  const keys = early && storeyKeys(input!, storeys, project.groundStoreyId);
   for (const [index, storey] of storeys.entries()) {
-    const known = input && memo!.lookup(input.storeys[index], keys![index]!);
-    if (known) {
+    const known = early?.known[index];
+    if (known && sameKey(early!.keys[index]!, keys![index]!)) {
       known.forEach((id) => used.add(id));
       memo!.record(index, known);
       continue;

@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 24.10.2026, main `e11e681` nach PR441 (Stufe 1 und 1b). Branch audit/storey-validation-reuse (Stufe 2, Option B): Prüfergebnisse unveränderter Geschosse wiederverwendet, Gegenprüfung mit 600 Zufallsänderungen exakt gleich; Änderung bei 20.000 Elementen Browser 1631→238 ms gegenüber dem alten Vollpfad. A04 ergänzt. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `1f05fea` nach PR442 (Stufe 1, 1b, 2). Branch audit/storey-parse-and-size (Stufe 2b): Schema-Parsen und Größenprüfung geschossweise, Ergebnis und Byte-Länge exakt gleich; Änderung bei 20.000 Elementen Browser 1646→119 ms gegenüber dem alten Vollpfad. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -615,7 +615,9 @@ Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebu
 
 **Stufe 1b in main (PR441, e11e681).** **Stufe 2 (Option B, Nutzerentscheidung 24.10.2026)** umgesetzt auf audit/storey-validation-reuse: `storeyKeys`/`StoreyValidationMemo` in schema.ts, privates Verzeichnis geprüfter Geschosse in owned-snapshot.ts; nur `createProjectSnapshot` nutzt es. Gegenprüfung: 600 Zufallsänderungen inkl. geschossübergreifender und ungültiger, Ergebnis/Fehler exakt wie volle Prüfung; Gegenproben (Schlüssel ohne Projektwerte, ohne Musterliste) schlagen an. 1162 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node 20.000: 3120→388 ms; Browser 1631→238 ms. Bedienabnahme bestanden (ein Geschoss in der UI).
 
-**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Stufe 2 nach Nutzerfreigabe. Danach als eigene Aufträge: geschossweises Schema-Parsen und Größenprüfung (gemessen ≈ 80/22 ms bei 20.000), übrige Aktionsfamilien auf eigene Snapshots, dann Bauteiltyp-Registry vor Türen/Decken/Räumen.
+**Stufe 2 in main (PR442, 1f05fea).** **Stufe 2b** umgesetzt auf audit/storey-parse-and-size: wiederverwendete Geschosse werden mit leeren Elementlisten geparst und durch ihr validiertes Objekt ersetzt (Entscheidung vor dem Parsen, gilt nur bei gleichem Schlüssel danach); Byte-Länge aus Projektrahmen + gecachten Geschosslängen (`storeyStorageData`, Cache nur für eigene Snapshots). Gegenprüfung inkl. Byte-Länge gegen alte Berechnung, Gegenproben greifen. 1162 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node 20.000: 3100→225 ms; Browser 1646→119 ms; Commit ≈ 5 ms. Bedienabnahme bestanden.
+
+**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Stufe 2b nach Nutzerfreigabe. Danach als eigene Aufträge: übrige Aktionsfamilien (Geschosse, Ebenen, Abbilder, Schraffuren) auf eigene Snapshots, Fangindex-Neuaufbau begrenzen, dann Bauteiltyp-Registry vor Türen/Decken/Räumen.
 
 **Zurückgestellt (Nutzerentscheidung 24.10.2026), nicht aktiv: Verbliebene feste Wandachsenbewegungen x/y/axis abgleichen und messen (AUD14-04/05).** DemandMenu und CadWorkspace.startEdit gegen DirectEdit-/Auswahladapter prüfen. Feste kleine Wand bei wachsendem Restmodell, frei/verbunden und mit Fenstern; Maus/Numeric, signierte Achse, stationäre Nachbarn, Anschlusslösung, vollständiger Commit und ein Undo/Redo. Vollständige Ergebnisgleichheit und getrennte Vorbereitung/Vorschau messen. Keine erneute Endpunkt-/T-Migration, noch keine ungeprüfte Anbindung. Primitive-Cache-Kandidat nach Browservergleich geparkt; kein weiterer Sortier-/Freeze-Mikrokandidat.
 
