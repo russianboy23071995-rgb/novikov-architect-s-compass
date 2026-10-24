@@ -188,3 +188,96 @@ Recovery.
   nutzt; Fangindex-Neuaufbau bleibt offen.
 - Stufe 2 (Validierung nur betroffener Geschosse) berührt A04 und wird mit diesen Werten
   zur Entscheidung vorgelegt.
+
+# Stufe 2: Prüfergebnisse unveränderter Geschosse wiederverwenden (24.10.2026)
+
+Basis: main `e11e681` (PR441), Branch `audit/storey-validation-reuse`. Freigabe: Nutzer
+24.10.2026, Option B der Entscheidungsvorlage („Ergebnisse unveränderter Geschosse
+wiederverwenden, mit Gegenprüfung gegen die volle Prüfung“). A04 ergänzt (Masterplan).
+
+## Änderungskarte
+
+1. **Wunsch/Abnahme:** Eine Änderung in einem Geschoss prüft fachlich nur dieses Geschoss
+   neu; unveränderte Geschosse übernehmen ihr früheres Ergebnis. Ergebnis und Fehlermeldung
+   exakt wie bei voller Prüfung. Ausgeschlossen: Weglassen einer Regel, Dateiformat, neue
+   Bauteile.
+2. **Eigentümer:** `domain/project/schema.ts` (Abhängigkeitsschlüssel `storeyKeys`,
+   optionales `StoreyValidationMemo`), `owned-snapshot.ts` (privates Verzeichnis geprüfter,
+   eingefrorener Geschosse). Ein Modell, keine Kopie.
+3. **Gemeinsamer Weg:** nur `createProjectSnapshot` übergibt das Memo; damit profitieren alle
+   Aktionen auf eigenen Ständen und der Commit. Laden, Speichern, Recovery, IFC und alle
+   übrigen Aufrufer von `validateProject` prüfen weiter voll.
+4. **Folgen:** Schema-Parsen, gebundene Wandhöhen und projektweite Prüfungen (IDs,
+   Arbeitsgeschoss, Ansichten, Abbilder) laufen immer vollständig. Nur die
+   Geschoss-Fachprüfung (Geometrie, Wandkörper, Ebenen, Sichtbarkeit, Referenzen,
+   Schraffurmuster) wird bei identischem Geschossobjekt und identischem Schlüssel übersprungen.
+5. **Abgrenzung:** Schlüssel = eigene Höhenlage, nächstes Geschoss (ID, Höhenlage) und jeder
+   übrige Projektwert per Identität (Ebenen, Muster, Bilder, Ansichten, Abbilder, Ordner,
+   Sichtbarkeit, Arbeitsgeschoss, …). Jede Abweichung erzwingt volle Prüfung des Geschosses.
+
+## Gegenprüfung
+
+- `benchmarks/storey-validation-reuse.test.ts`: 600 zufällige Änderungen (fester Seed) auf
+  vier Geschossen mit gebundenen und festen Wänden, Anschlüssen, Fenstern und Musterschraffur:
+  Wandgeometrie/-höhe, Geschosshöhe, Fensterbreite, Ebenenname, Sichtbarkeit, doppelte IDs
+  über Geschosse, Musterbreite, Arbeitsgeschoss, Erdgeschosskote, Schraffurpunkte, No-op.
+  Bei jedem Schritt Ergebnis bzw. Fehlermeldung exakt wie `validateProject` ohne Memo; gültige
+  und ungültige Schritte kommen vor, die Wiederverwendung greift nachweislich (Zähler).
+- Gezielt: entferntes Muster, das nur ein unverändertes Geschoss nutzt, wird abgelehnt;
+  Musterliste wird über wiederverwendete und neu geprüfte Geschosse gleich gefiltert.
+- Gegenproben: Schlüssel ohne Projektwerte → beide Tests scheitern; Wiederverwendung ohne
+  gemerkte Muster → beide scheitern. Ohne Bezug auf eigene/nächste Höhenlage bleiben sie grün:
+  diese Teile sind nach heutigem Code überzählig (gebundene Höhen werden global geprüft,
+  Wandhöhen relativ) und bleiben als Sicherheitsreserve im Schlüssel.
+- 1162 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+
+## Messung
+
+Node 24.22.1, gleicher Lauf, alter Vollpfad (vor Stufe 1) gegen jetzt; Ergebnis bei jeder
+Stichprobe identisch. Rohdaten:
+[node.json](storey-validation-reuse-2026-10-24/node.json).
+
+| Elemente | Vorgang        | Aktion alt → neu |  Summe alt → neu (Median / p95) |
+| -------: | -------------- | ---------------: | ------------------------------: |
+|    1.000 | Wand ändern    |      40,9 → 14,7 |     126,4 / 158,1 → 15,9 / 22,3 |
+|    5.000 | Wand ändern    |     250,7 → 86,9 |    770,0 / 793,5 → 94,1 / 101,0 |
+|   20.000 | Wand ändern    |   1006,1 → 359,2 | 3120,0 / 3204,3 → 387,6 / 408,5 |
+|   20.000 | Fenster setzen |   1011,3 → 351,6 | 3063,6 / 3187,2 → 381,3 / 400,4 |
+
+Millisekunden. Rund 88 % weniger als der alte Vollpfad; gegenüber Stufe 1b (gleiche Maschine,
+früherer Lauf ≈ 1,04 s bei 20.000) etwa ein Drittel. Der Rechner war in diesem Lauf insgesamt
+langsamer als bei Stufe 1b; Vergleiche nur innerhalb eines Laufs.
+
+Browser (Chromium 152, Vite-Dev, Bereich durchgehend sichtbar). Rohdaten:
+[browser.json](storey-validation-reuse-2026-10-24/browser.json).
+
+| Elemente | Vorgang        | Aktion alt → neu |  Summe alt → neu (Median / p95) |
+| -------: | -------------- | ---------------: | ------------------------------: |
+|    1.000 | Wand ändern    |      29,1 → 12,6 |      85,2 / 109,6 → 13,6 / 16,4 |
+|    5.000 | Wand ändern    |     132,2 → 54,2 |     404,6 / 448,6 → 59,9 / 97,3 |
+|   20.000 | Wand ändern    |    542,8 → 216,4 | 1631,0 / 1770,7 → 238,3 / 282,6 |
+|   20.000 | Fenster setzen |    509,3 → 216,7 | 1583,4 / 1667,4 → 239,7 / 261,3 |
+
+Verbleibend pro Änderung bei 20.000 Elementen (Browser ≈ 240 ms): Schema-Parsen des ganzen
+Projekts (Node ≈ 80 ms), Fachprüfung des geänderten Geschosses, Teilen/Einfrieren und die
+globale Größenprüfung (≈ 22 ms).
+
+## Bedienabnahme im Produkt (24.10.2026)
+
+CadWorkspace, Beispielprojekt: „Wandlänge auf 5 m“ → Übernehmen: 5 m; mittiges Fenster
+2 → 3 Elemente; zweimal Undo → 2 Elemente, kurze Wand; zweimal Redo → 3 Elemente, 5 m;
+„Wandhöhe auf 0,5 m“ abgelehnt („… Fenster vollständig in die Wand passen“), Höhe 2,8 m und
+3 Elemente unverändert. Keine Konsolenfehler. Das Beispielprojekt hat ein Geschoss; mehrere
+Geschosse sind durch die Gegenprüfung und Messung abgedeckt, nicht praktisch in der UI.
+
+## Grenzen und Folgearbeit
+
+- Wechsel des Arbeitsgeschosses, Sichtbarkeit, Ebenen oder Muster ändern einen Projektwert
+  und führen einmalig zur vollen Prüfung aller Geschosse; danach greift die Wiederverwendung
+  wieder. Ob `workingStoreyId`/`bimVisibility` aus dem Schlüssel dürfen, ist eine eigene,
+  per Gegenprüfung zu belegende Verfeinerung.
+- Schema-Parsen bleibt global (≈ 80 ms bei 20.000); geschossweises Parsen ist der nächste
+  messbare Hebel. Größenprüfung und Fangindex-Neuaufbau bleiben offen.
+- **Pflicht für neue Regeln:** Liest eine Geschossprüfung künftig weitere Daten (z. B. Decken,
+  Dächer, Treppen über Geschosse), müssen diese in `storeyKeys` aufgenommen und die
+  Gegenprüfung um passende Änderungen erweitert werden.

@@ -1,0 +1,111 @@
+{
+  "runtime": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Claude/3.6556.2 Chrome/152.0.7977.167 Safari/537.36 MSIX",
+  "date": "2026-10-24T12:32:00.160Z",
+  "note": "Vite development server (npm run benchmark:browser), Claude desktop browser pane, displayed for the whole run.",
+  "timing": [
+    {
+      "size": 100,
+      "elements": 100,
+      "storeys": 5,
+      "operation": "wallReshape",
+      "equivalent": true,
+      "legacyActionMs": { "median": 3.4, "p95": 4.7, "n": 21 },
+      "currentActionMs": { "median": 1.7, "p95": 2.4, "n": 21 },
+      "legacyCommitMs": { "median": 7.8, "p95": 10, "n": 21 },
+      "currentCommitMs": { "median": 0.2, "p95": 0.3, "n": 21 },
+      "legacyTotalMs": { "median": 11.8, "p95": 13, "n": 21 },
+      "currentTotalMs": { "median": 2, "p95": 2.6, "n": 21 }
+    },
+    {
+      "size": 100,
+      "elements": 100,
+      "storeys": 5,
+      "operation": "windowPlace",
+      "equivalent": true,
+      "legacyActionMs": { "median": 3.7, "p95": 5.8, "n": 21 },
+      "currentActionMs": { "median": 1.8, "p95": 2.4, "n": 21 },
+      "legacyCommitMs": { "median": 7.8, "p95": 9.4, "n": 21 },
+      "currentCommitMs": { "median": 0.2, "p95": 0.3, "n": 21 },
+      "legacyTotalMs": { "median": 11.6, "p95": 15.1, "n": 21 },
+      "currentTotalMs": { "median": 1.9, "p95": 2.6, "n": 21 }
+    },
+    {
+      "size": 1000,
+      "elements": 1000,
+      "storeys": 5,
+      "operation": "wallReshape",
+      "equivalent": true,
+      "legacyActionMs": { "median": 29.1, "p95": 35.7, "n": 21 },
+      "currentActionMs": { "median": 12.6, "p95": 15, "n": 21 },
+      "legacyCommitMs": { "median": 57.7, "p95": 74, "n": 21 },
+      "currentCommitMs": { "median": 1.1, "p95": 1.4, "n": 21 },
+      "legacyTotalMs": { "median": 85.2, "p95": 109.6, "n": 21 },
+      "currentTotalMs": { "median": 13.6, "p95": 16.4, "n": 21 }
+    },
+    {
+      "size": 1000,
+      "elements": 1000,
+      "storeys": 5,
+      "operation": "windowPlace",
+      "equivalent": true,
+      "legacyActionMs": { "median": 28.2, "p95": 32.2, "n": 21 },
+      "currentActionMs": { "median": 10.9, "p95": 12.7, "n": 21 },
+      "legacyCommitMs": { "median": 57.8, "p95": 63.1, "n": 21 },
+      "currentCommitMs": { "median": 0.9, "p95": 1.4, "n": 21 },
+      "legacyTotalMs": { "median": 85.5, "p95": 94.1, "n": 21 },
+      "currentTotalMs": { "median": 12.1, "p95": 13.9, "n": 21 }
+    },
+    {
+      "size": 5000,
+      "elements": 5000,
+      "storeys": 5,
+      "operation": "wallReshape",
+      "equivalent": true,
+      "legacyActionMs": { "median": 132.2, "p95": 172, "n": 21 },
+      "currentActionMs": { "median": 54.2, "p95": 90.7, "n": 21 },
+      "legacyCommitMs": { "median": 265.9, "p95": 284.8, "n": 21 },
+      "currentCommitMs": { "median": 5.5, "p95": 6.6, "n": 21 },
+      "legacyTotalMs": { "median": 404.6, "p95": 448.6, "n": 21 },
+      "currentTotalMs": { "median": 59.9, "p95": 97.3, "n": 21 }
+    },
+    {
+      "size": 5000,
+      "elements": 5000,
+      "storeys": 5,
+      "operation": "windowPlace",
+      "equivalent": true,
+      "legacyActionMs": { "median": 131.2, "p95": 173.2, "n": 21 },
+      "currentActionMs": { "median": 53.6, "p95": 61, "n": 21 },
+      "legacyCommitMs": { "median": 264.3, "p95": 289.7, "n": 21 },
+      "currentCommitMs": { "median": 5.7, "p95": 7, "n": 21 },
+      "legacyTotalMs": { "median": 395.6, "p95": 443.6, "n": 21 },
+      "currentTotalMs": { "median": 58.7, "p95": 67.1, "n": 21 }
+    },
+    {
+      "size": 20000,
+      "elements": 20000,
+      "storeys": 5,
+      "operation": "wallReshape",
+      "equivalent": true,
+      "legacyActionMs": { "median": 542.8, "p95": 637.1, "n": 11 },
+      "currentActionMs": { "median": 216.4, "p95": 260.9, "n": 11 },
+      "legacyCommitMs": { "median": 1098.7, "p95": 1169.8, "n": 11 },
+      "currentCommitMs": { "median": 21.8, "p95": 24.1, "n": 11 },
+      "legacyTotalMs": { "median": 1631, "p95": 1770.7, "n": 11 },
+      "currentTotalMs": { "median": 238.3, "p95": 282.6, "n": 11 }
+    },
+    {
+      "size": 20000,
+      "elements": 20000,
+      "storeys": 5,
+      "operation": "windowPlace",
+      "equivalent": true,
+      "legacyActionMs": { "median": 509.3, "p95": 567.6, "n": 11 },
+      "currentActionMs": { "median": 216.7, "p95": 238.8, "n": 11 },
+      "legacyCommitMs": { "median": 1070.3, "p95": 1129.7, "n": 11 },
+      "currentCommitMs": { "median": 22.2, "p95": 29.8, "n": 11 },
+      "legacyTotalMs": { "median": 1583.4, "p95": 1667.4, "n": 11 },
+      "currentTotalMs": { "median": 239.7, "p95": 261.3, "n": 11 }
+    }
+  ]
+}
