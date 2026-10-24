@@ -60,7 +60,9 @@ export function editInteraction(
 ): AnchoredToolInteraction {
   const axis = numericMoveAxis(session);
   const polar =
-    ["move", "point", "insert"].includes(session.action) && session.target.kind !== "window";
+    ["move", "point", "insert"].includes(session.action) &&
+    session.target.kind !== "window" &&
+    session.target.kind !== "door";
   return {
     identity: session,
     snapping: editSnapPolicy(session),

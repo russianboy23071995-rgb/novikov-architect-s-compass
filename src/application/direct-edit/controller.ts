@@ -51,7 +51,7 @@ export function supportsHorizontalWorkplaneEdit(
   action: EditAction,
   index: number | null,
 ): boolean {
-  if (target.kind === "window") return action === "axis";
+  if (target.kind === "window" || target.kind === "door") return action === "axis";
   if (target.kind !== "wall") return false;
   if (action === "point" || action === "stretch") return index === 0 || index === 1;
   return ["move", "axis", "x", "y"].includes(action);

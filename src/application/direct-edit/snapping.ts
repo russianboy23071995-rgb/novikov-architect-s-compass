@@ -4,23 +4,26 @@ import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import { editablePoints } from "./transforms.ts";
+import { editablePoints, hostedOpening } from "./transforms.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 
 /** Exclude the original entity for this transaction; previews never supply snap sources.
- * A moving window also excludes its host, whose ends/corners are not independent targets.
+ * A moving opening also excludes its host, whose ends/corners are not independent targets.
  */
 export function editSnapReferences(
   session: EditSession,
   references: readonly SnapReference[],
 ): SnapReference[] {
+  const { kind, id } = session.target;
   const host =
-    session.target.kind === "window"
-      ? storeyOf(session.base).windows.find((w) => w.id === session.target.id)?.wallId
-      : null;
+    kind === "window"
+      ? storeyOf(session.base).windows.find((w) => w.id === id)?.wallId
+      : kind === "door"
+        ? storeyOf(session.base).doors?.find((d) => d.id === id)?.wallId
+        : null;
   return references.filter((r) =>
     [r, ...(r.dependencies ?? [])].every(
       (source) => source.entityId !== session.target.id && source.entityId !== host,
@@ -30,20 +33,20 @@ export function editSnapReferences(
 
 export function editDirection(session: EditSession): Point2 | null {
   if (session.action === "offset") return offsetDirection(session);
-  if (session.target.kind === "window") {
-    const window = storeyOf(session.base).windows.find((w) => w.id === session.target.id)!;
-    const wall = storeyOf(session.base).walls.find((w) => w.id === window.wallId)!;
+  const { kind, id } = session.target;
+  if (kind === "window" || kind === "door") {
+    const { wall } = hostedOpening(session.base, { kind, id });
     return { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
   }
   if (session.action === "edge") {
-    const ring = closedContour(session.base, session.target);
+    const ring = closedContour(session.base, { kind, id });
     if (!ring || session.index === null) throw new Error("Keine Konturkante gewählt.");
     return contourEdge(ring, session.index).normal;
   }
   if (session.action === "x") return { x: 1, y: 0 };
   if (session.action === "y") return { x: 0, y: 1 };
   if (session.action !== "axis" && session.action !== "stretch") return null;
-  const points = editablePoints(session.base, { kind: session.target.kind, id: session.target.id });
+  const points = editablePoints(session.base, { kind, id });
   const i = session.index ?? 0;
   const neighbour = points[i === 0 ? 1 : i - 1]!;
   return { x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y };
@@ -54,11 +57,9 @@ export function editOriginReference(session: EditSession): SnapReference {
   // Every movement owns the same pinned origin. Element adapters supply only directions.
   const fixedDirection = editDirection(session);
   let direction = fixedDirection;
-  if (!direction && session.target.kind !== "window") {
-    const points = editablePoints(session.base, {
-      kind: session.target.kind,
-      id: session.target.id,
-    });
+  const { kind, id } = session.target;
+  if (!direction && kind !== "window" && kind !== "door") {
+    const points = editablePoints(session.base, { kind, id });
     const i = session.index ?? 0;
     const neighbour = points[i === 0 ? 1 : i - 1]!;
     direction = { x: points[i]!.x - neighbour.x, y: points[i]!.y - neighbour.y };

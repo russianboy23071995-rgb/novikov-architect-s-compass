@@ -25,7 +25,9 @@ export function workingStoreyForTarget(
         ? s.walls.some((w) => w.id === target.id)
         : target.kind === "window"
           ? s.windows.some((w) => w.id === target.id)
-          : false,
+          : target.kind === "door"
+            ? (s.doors ?? []).some((d) => d.id === target.id)
+            : false,
     )?.id ?? null
   );
 }

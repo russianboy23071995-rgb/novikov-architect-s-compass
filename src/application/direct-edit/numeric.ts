@@ -12,6 +12,7 @@ import { previewEdit } from "./controller.ts";
 export function numericMoveAxis(session: EditSession) {
   if (
     session.target.kind === "window" ||
+    session.target.kind === "door" ||
     !["x", "y", "axis", "stretch", "edge", "offset"].includes(session.action)
   )
     return null;
@@ -86,6 +87,7 @@ export function previewMovementInput(
     };
   }
   if (session.target.kind === "window") throw new Error("Fenster bleiben an ihre Wand gebunden.");
+  if (session.target.kind === "door") throw new Error("Türen bleiben an ihre Wand gebunden.");
   const result = precisionTarget(session.anchor, aim, angleText, lengthText);
   return { ...result, project: previewEdit(session, project, selection, result.point) };
 }
