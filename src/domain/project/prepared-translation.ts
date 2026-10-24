@@ -6,6 +6,7 @@ import { storeyOf } from "../storeys/access.ts";
 import { validateProject, type Project, type Point } from "./schema.ts";
 import type { GeometryPreview, ModelGeometry } from "./geometry-scope.ts";
 import { validateLineGeometry, validateWindowGeometry } from "./geometry-validation.ts";
+import { doorOpening } from "../elements/door/model.ts";
 import {
   createPreparedWallSolids,
   prepareDetachedEndSolids,
@@ -47,6 +48,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     storey: {
       walls: s.walls.filter((w) => walls.has(w.id)),
       windows: s.windows.filter((w) => walls.has(w.wallId)),
+      // Doors stay hosted by relative position; they follow their walls like windows.
+      ...(s.doors ? { doors: s.doors.filter((d) => walls.has(d.wallId)) } : {}),
       wallJoins: s.wallJoins.filter((j) => walls.has(j.first.wallId)),
       wallTJunctions: s.wallTJunctions.filter((j) => walls.has(j.hostWallId)),
       lines: (s.lines ?? []).filter((l) => ids.has(l.id)),
@@ -83,6 +86,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     [
       ...storeyOf(affected).walls,
       ...storeyOf(affected).windows,
+      ...(storeyOf(affected).doors ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -109,6 +113,9 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ...storeyOf(affected),
           walls: storeyOf(affected).walls.filter((w) => w.id !== movingId),
           windows: storeyOf(affected).windows.filter((w) => w.wallId !== movingId),
+          ...(storeyOf(affected).doors
+            ? { doors: storeyOf(affected).doors!.filter((d) => d.wallId !== movingId) }
+            : {}),
           wallJoins: localJoins,
           wallTJunctions: localTees,
         },
@@ -178,6 +185,11 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
+    for (const door of storeyOf(geometry).doors ?? [])
+      if (!detachedEnd || door.wallId === movingId) {
+        const wall = localWalls.get(door.wallId)!;
+        validateWindowGeometry(doorOpening(door, wall), wall);
+      }
     for (const reference of storeyOf(geometry).references)
       validateReferenceExtent(reference, assets.get(reference.assetId)!);
     // The exact existing corner/T/opening/solid rules, applied to the dependency closure.

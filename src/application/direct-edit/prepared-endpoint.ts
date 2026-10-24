@@ -48,6 +48,9 @@ export function prepareEndpoint(
       ...level,
       walls: level.id === s.id ? level.walls.filter((w) => ids.has(w.id)) : [],
       windows: level.id === s.id ? level.windows.filter((w) => ids.has(w.wallId)) : [],
+      ...(level.doors
+        ? { doors: level.id === s.id ? level.doors.filter((d) => ids.has(d.wallId)) : [] }
+        : {}),
       wallJoins: level.id === s.id ? level.wallJoins.filter((j) => ids.has(j.first.wallId)) : [],
       wallTJunctions:
         level.id === s.id ? level.wallTJunctions.filter((j) => ids.has(j.hostWallId)) : [],
@@ -57,9 +60,11 @@ export function prepareEndpoint(
     })),
   });
   const localIds = Object.freeze(
-    [...storeyOf(scoped).walls, ...storeyOf(scoped).windows].map((e) => e.id),
+    [...storeyOf(scoped).walls, ...storeyOf(scoped).windows, ...(storeyOf(scoped).doors ?? [])].map(
+      (e) => e.id,
+    ),
   );
-  const fullIds = Object.freeze([...s.walls, ...s.windows].map((e) => e.id));
+  const fullIds = Object.freeze([...s.walls, ...s.windows, ...(s.doors ?? [])].map((e) => e.id));
   const foreign = createCompatiblePointIndex(
     s.walls.filter((w) => !ids.has(w.id)).flatMap((w) => [w.start, w.end]),
   );
