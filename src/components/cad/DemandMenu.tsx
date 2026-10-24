@@ -172,35 +172,12 @@ export function DemandMenu({
             <ElementMoveIcon />
           </IconButton>
         )}
-        {onReferences && (
-          <IconButton label="Referenzen auswählen" onClick={onReferences}>
-            <ReferencesIcon />
-          </IconButton>
-        )}
         {selection && selection.kind !== "reference" && summary && (
           <>
-            {closedContour(project, selection) && (
-              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
-                <OffsetIcon />
-              </IconButton>
-            )}
-            {edgeIndex != null && (
-              <>
-                <IconButton label="Knicken" onClick={() => onAction("insert")}>
-                  <KinkIcon />
-                </IconButton>
-                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
-                  <EdgeStretchIcon />
-                </IconButton>
-              </>
-            )}
             {selection.kind !== "window" && pointIndex !== null && (
               <>
                 <IconButton label="Punkt frei bewegen" onClick={() => onAction("point")}>
                   <PointMoveIcon />
-                </IconButton>
-                <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
-                  <PointStretchIcon />
                 </IconButton>
               </>
             )}
@@ -227,10 +204,37 @@ export function DemandMenu({
                 </IconButton>
               </>
             )}
+            {closedContour(project, selection) && (
+              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
+                <OffsetIcon />
+              </IconButton>
+            )}
+            {edgeIndex != null && (
+              <>
+                <IconButton label="Knicken" onClick={() => onAction("insert")}>
+                  <KinkIcon />
+                </IconButton>
+                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
+                  <EdgeStretchIcon />
+                </IconButton>
+              </>
+            )}
+            {selection.kind !== "window" && pointIndex !== null && (
+              <>
+                <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
+                  <PointStretchIcon />
+                </IconButton>
+              </>
+            )}
             <IconButton label="Werkzeugeigenschaften" onClick={onInfo}>
               <PropertiesIcon />
             </IconButton>
           </>
+        )}
+        {onReferences && (
+          <IconButton label="Referenzen auswählen" onClick={onReferences}>
+            <ReferencesIcon />
+          </IconButton>
         )}
       </div>
     </div>
