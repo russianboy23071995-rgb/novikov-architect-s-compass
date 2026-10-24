@@ -79,3 +79,53 @@ N19 (Türen per Text/Sprache, Teil B), N25 (kein proportionales Skalieren von BI
   (Seite Wandanfang/-ende, links/rechts der Wandrichtung); eine DIN-Bezeichnung wäre eine
   zusätzliche, fachlich zu prüfende Ableitung.
 - Darstellungsdetailstufen je Planungsphase (Anforderung, nicht umgesetzt).
+
+# Tür, Teil B1: IFC, Text/Sprache, 3D-Auswahl (24.10.2026)
+
+Basis: main `6acc8e4` (PR446), Branch `feat/door-part-b`. Freigabe: Nutzer („freigabe und go“).
+
+## Zuschnitt
+
+Teil B wurde geteilt. Die 3D-Flächen tragen fest eine Wand-ID, und mehrere 3D-Funktionen
+(Bewegungsvorschau, Pufferaufteilung, Fußkanten) schlagen jede Fläche als Wand nach. Ein
+Türblatt dort einzuhängen wäre riskant; es kommt in **Teil B2** als eigene Darstellungsschicht,
+zusammen mit Verschieben per Maus und Fang an Türkanten.
+
+## Änderungskarte B1
+
+1. **IFC (R26-06, A01):** `interop/ifc/writer.ts` exportiert jede Tür als `IfcDoor` mit eigener
+   `IfcOpeningElement`, `IfcRelVoidsElement` und `IfcRelFillsElement`, im Geschoss enthalten.
+   `OperationType` SINGLE_SWING_LEFT/RIGHT nach IFC4-Konvention (Tür-Platzierung +Y zeigt zur
+   Aufschlagseite, bei Aufschlag rechts um 180° gedreht; Anschlagseite von dort gesehen).
+   Zusätzlich eindeutige Eigenschaften `Hinge`, `OpensTo`, `ZOffset`, `RelativePosition`,
+   `WallId`. Öffnungsunterkante folgt dem Z-Versatz relativ zum Wandfuß.
+2. **Text und Sprache (N19):** `application/doors/command.ts`, eingehängt im gemeinsamen
+   Befehlsweg `application/commands/selection-command.ts` vor der bisherigen Grammatik:
+   „Türbreite/Türhöhe/Z-Versatz auf Zahl m/cm/mm“, „Tür zentrieren“, „Anschlag Wandanfang/
+   Wandende“, „Aufschlag (nach) links/rechts“. Vorschau mit Zusammenfassung, dann ein
+   Undo-Schritt; fremder Text bleibt der übrigen Grammatik überlassen.
+3. **3D-Auswahl:** Die Trefferflächen in Öffnungen (`window-selection.ts`) gelten für Fenster
+   und Türen und tragen ihre Bauteilart; Picking (`pickSolidElement`, `world-picking.ts`),
+   Umriss und Rahmenauswahl im Grundriss (`selection-shapes.ts`) kennen Türen.
+4. **Folgen:** keine Änderung an Wandkörpern, Mengen oder Dateiformat.
+
+## Nachweis
+
+- Neue Tests: `interop/ifc/door.test.ts` (OperationType für alle vier Kombinationen; IfcDoor
+  füllt eigene Öffnung; Eigenschaften; Containment; Öffnungsunterkante über angehobener
+  Wand), `application/doors/command.test.ts` (Maße mit Einheiten, Anschlag/Aufschlag,
+  Abgrenzung zur übrigen Grammatik, Ablehnung ungültiger Werte, gemeinsamer Befehlsweg),
+  `rendering/viewport/door-picking.test.ts` (Trefferfläche mit Z-Versatz, 3D-Klick wählt die
+  Tür, Rahmenauswahl).
+- 1202 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+- **Bedienabnahme:** Tür gesetzt; Befehl „Türbreite auf 1,26 m“ zeigt Vorschau 1,01 → 1,26 m
+  und übernimmt; in 3D wählt ein Klick auf die Wand die Wand und ein Klick in die
+  Türöffnung die Tür; keine Konsolenfehler nach frischem Laden.
+
+## Offen
+
+- **Teil B2:** Türblatt in 3D, Verschieben per Maus, Fang an Türkanten.
+- **IFC extern prüfen:** Die `OperationType`-Zuordnung folgt dem IFC4-Text, ist aber nicht in
+  einem externen Viewer oder mit IfcOpenShell geprüft (das Prüfskript des Projekts braucht
+  IfcOpenShell 0.8.5, lokal nicht installiert).
+- Überlappende Öffnungen, Löschen und DIN-Bezeichnung wie in Teil A.

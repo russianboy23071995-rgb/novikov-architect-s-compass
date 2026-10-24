@@ -21,7 +21,10 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
       target: { kind: "wall" as const, id: w.id },
       points: contours.get(w.id) ?? wallBody(w).corners,
     })),
-    ...storeyOf(project).windows.map((w) => {
+    ...[
+      ...storeyOf(project).windows.map((w) => ({ kind: "window" as const, w })),
+      ...(storeyOf(project).doors ?? []).map((w) => ({ kind: "door" as const, w })),
+    ].map(({ kind, w }) => {
       const host = walls.get(w.wallId)!;
       const length = Math.hypot(host.end.x - host.start.x, host.end.y - host.start.y);
       const at = (d: number) => ({
@@ -29,7 +32,7 @@ export function planSelectionShapes(project: Project): SelectionShape[] {
         y: host.start.y + ((host.end.y - host.start.y) * d) / length,
       });
       return {
-        target: { kind: "window" as const, id: w.id },
+        target: { kind, id: w.id },
         points: wallBody({
           ...host,
           start: at(w.position * length - w.width / 2),
