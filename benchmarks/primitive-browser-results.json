@@ -1,0 +1,711 @@
+{
+  "basis": "main658d390 / PR438 candidate unchanged",
+  "runtime": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "method": "Fresh iframe JS realm per variant/trial, sequential alternating order. Three complete index phases timed; exact data/lookup/queries afterwards. Retains phase indices symmetrically. No forced GC; no trustworthy isolated heap/process/GPU peak available. Browser CPU, not workspace/frame/native acceptance.",
+  "results": [
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 91.89999997615814
+        },
+        {
+          "phase": "changed",
+          "ms": 89.80000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 79.10000002384186
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 86.69999998807907
+        },
+        {
+          "phase": "changed",
+          "ms": 59.30000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 75.30000001192093
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 88.90000003576279
+        },
+        {
+          "phase": "changed",
+          "ms": 56.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 71.80000001192093
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 83.30000001192093
+        },
+        {
+          "phase": "changed",
+          "ms": 68.29999995231628
+        },
+        {
+          "phase": "invalidated",
+          "ms": 67.69999998807907
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 94.69999998807907
+        },
+        {
+          "phase": "changed",
+          "ms": 73.80000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 75.30000001192093
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 98
+        },
+        {
+          "phase": "changed",
+          "ms": 70.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 79.39999997615814
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 89
+        },
+        {
+          "phase": "changed",
+          "ms": 58.59999996423721
+        },
+        {
+          "phase": "invalidated",
+          "ms": 69.80000001192093
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 100,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 82.90000003576279
+        },
+        {
+          "phase": "changed",
+          "ms": 67.19999998807907
+        },
+        {
+          "phase": "invalidated",
+          "ms": 65.79999995231628
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 89.30000001192093
+        },
+        {
+          "phase": "changed",
+          "ms": 72.30000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 73.59999996423721
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 86.89999997615814
+        },
+        {
+          "phase": "changed",
+          "ms": 57.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 77.89999997615814
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 96.5
+        },
+        {
+          "phase": "changed",
+          "ms": 65.89999997615814
+        },
+        {
+          "phase": "invalidated",
+          "ms": 70.59999996423721
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 83.30000001192093
+        },
+        {
+          "phase": "changed",
+          "ms": 71.89999997615814
+        },
+        {
+          "phase": "invalidated",
+          "ms": 63.69999998807907
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 80.80000001192093
+        },
+        {
+          "phase": "changed",
+          "ms": 67.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 63.5
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 86.29999995231628
+        },
+        {
+          "phase": "changed",
+          "ms": 58.80000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 78.5
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 82.80000001192093
+        },
+        {
+          "phase": "changed",
+          "ms": 59.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 73.59999996423721
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 100,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 90.69999998807907
+        },
+        {
+          "phase": "changed",
+          "ms": 69.30000001192093
+        },
+        {
+          "phase": "invalidated",
+          "ms": 63.10000002384186
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 799
+        },
+        {
+          "phase": "changed",
+          "ms": 732.4000000357628
+        },
+        {
+          "phase": "invalidated",
+          "ms": 1180.699999988079
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 796.5999999642372
+        },
+        {
+          "phase": "changed",
+          "ms": 600.6000000238419
+        },
+        {
+          "phase": "invalidated",
+          "ms": 979.9000000357628
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 777.8999999761581
+        },
+        {
+          "phase": "changed",
+          "ms": 657.2999999523163
+        },
+        {
+          "phase": "invalidated",
+          "ms": 935.3000000119209
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 743.8999999761581
+        },
+        {
+          "phase": "changed",
+          "ms": 921.2999999523163
+        },
+        {
+          "phase": "invalidated",
+          "ms": 745.1999999880791
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 734
+        },
+        {
+          "phase": "changed",
+          "ms": 676.3000000119209
+        },
+        {
+          "phase": "invalidated",
+          "ms": 711.5999999642372
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 835.5999999642372
+        },
+        {
+          "phase": "changed",
+          "ms": 688.0999999642372
+        },
+        {
+          "phase": "invalidated",
+          "ms": 989.1000000238419
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 836
+        },
+        {
+          "phase": "changed",
+          "ms": 615.2999999523163
+        },
+        {
+          "phase": "invalidated",
+          "ms": 905.3000000119209
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 1000,
+      "kind": "line",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 747.3000000119209
+        },
+        {
+          "phase": "changed",
+          "ms": 1038.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 792.5
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 838.6000000238419
+        },
+        {
+          "phase": "changed",
+          "ms": 867.3999999761581
+        },
+        {
+          "phase": "invalidated",
+          "ms": 687.6999999880791
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 740.7000000476837
+        },
+        {
+          "phase": "changed",
+          "ms": 570.6999999880791
+        },
+        {
+          "phase": "invalidated",
+          "ms": 699.1000000238419
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 0
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 788.2000000476837
+        },
+        {
+          "phase": "changed",
+          "ms": 594.1000000238419
+        },
+        {
+          "phase": "invalidated",
+          "ms": 745.1000000238419
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 742.8000000119209
+        },
+        {
+          "phase": "changed",
+          "ms": 701.6000000238419
+        },
+        {
+          "phase": "invalidated",
+          "ms": 708.2999999523163
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 1
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 760.6000000238419
+        },
+        {
+          "phase": "changed",
+          "ms": 755
+        },
+        {
+          "phase": "invalidated",
+          "ms": 716.3000000119209
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 769.5999999642372
+        },
+        {
+          "phase": "changed",
+          "ms": 642.5
+        },
+        {
+          "phase": "invalidated",
+          "ms": 743.6999999880791
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 2
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "candidate",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 768.6000000238419
+        },
+        {
+          "phase": "changed",
+          "ms": 632.6999999880791
+        },
+        {
+          "phase": "invalidated",
+          "ms": 950.5999999642372
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    },
+    {
+      "size": 1000,
+      "kind": "hatch",
+      "path": "production",
+      "rows": [
+        {
+          "phase": "cold",
+          "ms": 903.8999999761581
+        },
+        {
+          "phase": "changed",
+          "ms": 753.3000000119209
+        },
+        {
+          "phase": "invalidated",
+          "ms": 956.1000000238419
+        }
+      ],
+      "queries": 48,
+      "exact": true,
+      "trial": 3
+    }
+  ]
+}

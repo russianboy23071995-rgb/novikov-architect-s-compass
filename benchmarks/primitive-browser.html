@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="UTF-8" /><title>Fangprimitive · Browservergleich</title>
+  <style>
+    body {
+      font: 15px system-ui;
+      max-width: 1100px;
+      margin: 30px auto;
+      background: #eef1f3;
+      color: #24313c;
+    }
+    button {
+      padding: 10px;
+      margin-right: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    table {
+      border-collapse: collapse;
+      background: white;
+    }
+    td,
+    th {
+      padding: 8px;
+      border: 1px solid #bac5cd;
+    }
+    iframe {
+      width: 10px;
+      height: 10px;
+      border: 0;
+    }
+  </style>
+  <h1>Fangprimitive · isolierter Browservergleich</h1>
+  <p>
+    Frischer Seitenkontext je Variante. Nur synthetische Daten; keine Projektdatei oder
+    Wiederherstellung. CPU-Vergleich, keine Gesamtframe-Abnahme.
+  </p>
+  <button id="run">Vergleich starten</button
+  ><button id="save" disabled>Messdaten speichern</button>
+  <p id="status">Bereit</p>
+  <div id="summary"></div>
+  <details>
+    <summary>Rohdaten</summary>
+    <pre id="report"></pre>
+  </details>
+  <script type="module" src="./primitive-browser.ts"></script>
+</html>
