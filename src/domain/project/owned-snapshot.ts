@@ -94,10 +94,18 @@ export function createProjectSnapshot(
  * unchanged parts, so a following commit need not validate again. Any other input keeps
  * validateProject's mutable copy. Both paths run the same full validation.
  */
-export function validateLike(input: Project, proposed: Project, reuse?: WallSolidReuse): Project {
+export function validateLike(input: Project, proposed: unknown, reuse?: WallSolidReuse): Project {
+  // Like validateProject, the proposal is unchecked data until validation below.
   return owned.has(input)
-    ? createProjectSnapshot(proposed, reuse, input)
+    ? createProjectSnapshot(proposed as Project, reuse, input)
     : validateProject(proposed, reuse);
+}
+
+/** A command's own input: an owned snapshot is already validated and immutable; any other
+ * input is validated into a mutable copy as before.
+ */
+export function validatedInput(project: Project): Project {
+  return owned.has(project) ? project : validateProject(project);
 }
 
 /** Only factory-owned, deeply immutable and fully validated projects qualify. */

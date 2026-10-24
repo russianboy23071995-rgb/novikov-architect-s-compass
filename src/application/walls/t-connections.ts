@@ -47,7 +47,7 @@ export function previewTConnection(
   };
   // Validate the entire changed model before publishing it. An owned result can
   // then pass the preview boundary without another identical validation.
-  return owned ? createProjectSnapshot(next) : validateProject(next);
+  return owned ? createProjectSnapshot(next, undefined, current) : validateProject(next);
 }
 
 export function commitTConnection(

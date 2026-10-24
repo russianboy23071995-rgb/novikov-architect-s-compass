@@ -1,7 +1,8 @@
 import { prepareProjectSnapshot } from "../../domain/project/prepared-snapshot.ts";
 import { validateWindowGeometry } from "../../domain/project/geometry-validation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import {
   wallBase,
@@ -158,7 +159,7 @@ export function prepareZTranslation(
     snapshot.assertCurrent(current);
     if (delta === 0) return current;
     const patches = new Map(preview.storeyPatches!.map((p) => [p.storeyId, p]));
-    return validateProject({
+    return validateLike(base, {
       ...base,
       storeys: base.storeys.map((s) => {
         const patch = patches.get(s.id),
