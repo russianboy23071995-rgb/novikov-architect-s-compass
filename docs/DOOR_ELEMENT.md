@@ -129,3 +129,40 @@ zusammen mit Verschieben per Maus und Fang an Türkanten.
   einem externen Viewer oder mit IfcOpenShell geprüft (das Prüfskript des Projekts braucht
   IfcOpenShell 0.8.5, lokal nicht installiert).
 - Überlappende Öffnungen, Löschen und DIN-Bezeichnung wie in Teil A.
+
+# Tür, Teil B2: 3D-Türblatt, 3D-Umriss, Fang an Laibungen (24.10.2026)
+
+Basis: feat/door-part-b (Teil B1, PR447 noch nicht gemergt). Verschieben per Maus ist
+abgetrennt (Teil B3), weil es nach A04 einen vorbereiteten Vorschauweg und Messung braucht.
+
+## Änderungskarte B2
+
+1. **3D-Türblatt (Darstellung):** `rendering/viewport/door-leaf.ts` leitet je sichtbarer Tür ein
+   geschlossenes Blatt ab (vorläufig 4 cm), bündig mit der Wandfläche auf der Aufschlagseite,
+   von Geschossoberkante + Z-Versatz bis zur Türhöhe. Reine Anzeigeflächen mit der Tür-ID:
+   kein Wandmaterial, keine Mengen, kein Export, kein Picking-Körper. `BimSolidView` hängt
+   sie nur an die gezeichnete Geometrie an (nicht während einer Geometrievorschau).
+2. **3D-Umriss:** Die ausgewählte Tür erhält denselben Öffnungsumriss wie ein Fenster.
+3. **Fang an Laibungen:** `application/snapping/project-references.ts` liefert je Tür vier
+   Laibungsecken (Anfang/Ende × beide Wandflächen) als Endpunkt-Referenzen mit Tür-ID und
+   Wandrichtung. Teilergebnis je Tür nur für eigene Snapshots zwischengespeichert und nur
+   wiederverwendet, wenn auch die Wand unverändert ist.
+4. **Folgen:** keine Änderung an Wandkörpern, Mengen, IFC oder Dateiformat.
+
+## Nachweis B2
+
+- Neue Tests: `rendering/viewport/door-leaf.test.ts` (Lage auf beiden Aufschlagseiten,
+  Z-Versatz und Geschosshöhe, Sichtbarkeit von Tür und Wand), `application/snapping/door-snap.test.ts`
+  (vier Laibungsecken, Fang am Laibungspunkt, Cache folgt geänderter Wand). Gegenprobe:
+  Cache ohne Wandvergleich lässt den Test scheitern.
+- 1206 Tests, Architektur-Check PASS, beide Typprüfungen, Lint, Build.
+- **Bedienabnahme:** Tür auf 6-m-Wand gesetzt; Linienwerkzeug zeigt an der Laibungsecke
+  „Endpunkt“; in 3D ist die Öffnung durch das Blatt geschlossen, Aufschlag links → Blatt
+  auf der hinteren, rechts → auf der vorderen Wandfläche; Klick in die Öffnung wählt die Tür
+  mit Umriss. Server-Log ohne Fehler nach den B2-Änderungen.
+
+## Offen
+
+- **Teil B3:** Tür per Maus entlang der Wand verschieben (vorbereitete Vorschau, Messung).
+- Darstellungstiefe (Entwurf/Ausführung) und Blattdicke als spätere Einstellung.
+- Externe IFC-Prüfung, Überlappung von Öffnungen, Löschen, DIN-Bezeichnung wie zuvor.

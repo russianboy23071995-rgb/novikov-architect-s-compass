@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 24.10.2026, main `6acc8e4` nach PR446 (Tür Teil A). Branch feat/door-part-b: Tür Teil B1 (IFC IfcDoor, Text-/Sprachbefehle, 3D-Auswahl). Details docs/DOOR_ELEMENT.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `6acc8e4` nach PR446 (Tür Teil A). Branch feat/door-part-b: Tür Teil B1 (IFC IfcDoor, Text-/Sprachbefehle, 3D-Auswahl), PR447 offen. Branch feat/door-part-b2: Tür Teil B2 (3D-Türblatt, 3D-Umriss, Laibungsfang). Details docs/DOOR_ELEMENT.md; einziger Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -623,9 +623,9 @@ Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebu
 
 **Stufe 4 in main (PR445, 19733c1).** **Tür, Teil A (Nutzerentscheidung 24.10.2026):** Registry mit erstem echten neuen Bauteil statt leerem Gerüst; einflügelige Drehtür, Rohbaumaß 1,01 × 2,135 m frei änderbar, Z-Versatz zur Geschossoberkante, Anschlag/Aufschlag einstellbar, Grundriss Türblatt + Bogen (abgeleitet), 3D-Öffnung. Schema 27 mit Migration. Fenster und Tür teilen Öffnungsregeln und Platzierungsablauf. 1192 Tests, Architektur-Check, Typprüfungen, Lint, Build; Bedienabnahme bestanden.
 
-**Tür Teil A in main (PR446, 6acc8e4).** **Tür Teil B1** umgesetzt auf feat/door-part-b: IfcDoor mit eigener Öffnung und eindeutigen Eigenschaften, Text-/Sprachbefehle (N19) im gemeinsamen Befehlsweg, 3D-Auswahl über gemeinsame Öffnungs-Trefferflächen. 1202 Tests, Architektur-Check, Typprüfungen, Lint, Build; Bedienabnahme bestanden. Externe IFC-Prüfung offen.
+**Tür Teil A in main (PR446, 6acc8e4).** **Tür Teil B1** umgesetzt auf feat/door-part-b: IfcDoor mit eigener Öffnung und eindeutigen Eigenschaften, Text-/Sprachbefehle (N19) im gemeinsamen Befehlsweg, 3D-Auswahl über gemeinsame Öffnungs-Trefferflächen. 1202 Tests, Architektur-Check, Typprüfungen, Lint, Build; Bedienabnahme bestanden. Externe IFC-Prüfung offen. **Tür Teil B2** umgesetzt auf feat/door-part-b2 (Basis B1): abgeleitetes 3D-Türblatt als reine Darstellungsschicht, 3D-Umriss der ausgewählten Tür, Fang an vier Laibungsecken je Tür mit Teilcache nur für eigene Snapshots. 1206 Tests, Architektur-Check, Typprüfungen, Lint, Build; Bedienabnahme bestanden.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Tür Teil B1 nach Nutzerfreigabe; danach Tür Teil B2 (3D-Türblatt als eigene Darstellungsschicht, Verschieben per Maus, Fang an Türkanten). Offene Fachentscheidung: Überlappung von Öffnungen.
+**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Tür Teil B1 (PR447) und danach Teil B2 nach Nutzerfreigabe; danach Tür Teil B3 (Verschieben per Maus mit vorbereiteter Vorschau und Messung). Offene Fachentscheidung: Überlappung von Öffnungen.
 
 **Zurückgestellt (Nutzerentscheidung 24.10.2026), nicht aktiv: Verbliebene feste Wandachsenbewegungen x/y/axis abgleichen und messen (AUD14-04/05).** DemandMenu und CadWorkspace.startEdit gegen DirectEdit-/Auswahladapter prüfen. Feste kleine Wand bei wachsendem Restmodell, frei/verbunden und mit Fenstern; Maus/Numeric, signierte Achse, stationäre Nachbarn, Anschlusslösung, vollständiger Commit und ein Undo/Redo. Vollständige Ergebnisgleichheit und getrennte Vorbereitung/Vorschau messen. Keine erneute Endpunkt-/T-Migration, noch keine ungeprüfte Anbindung. Primitive-Cache-Kandidat nach Browservergleich geparkt; kein weiterer Sortier-/Freeze-Mikrokandidat.
 
