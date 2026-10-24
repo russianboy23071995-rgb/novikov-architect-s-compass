@@ -8,11 +8,11 @@ function Svg({ children }: { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="34"
-      height="34"
+      width="20"
+      height="20"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.1}
+      strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -25,7 +25,7 @@ function Svg({ children }: { children: ReactNode }) {
 function Dot({ x, y }: { x: number; y: number }) {
   return (
     <>
-      <circle cx={x} cy={y} r={2.4} stroke={muted} strokeWidth={0.9} />
+      <circle cx={x} cy={y} r={2.4} stroke={muted} strokeWidth={1.1} />
       <circle cx={x} cy={y} r={1.4} fill="currentColor" stroke="none" />
     </>
   );
@@ -97,7 +97,7 @@ export const AlongAxisIcon = ({ window }: { window?: boolean }) => (
 
 export const AxisIcon = ({ axis }: { axis: "x" | "y" | "z" }) => {
   const line = (a: "x" | "y" | "z", d: string, head: string) => (
-    <g stroke={axis === a ? "currentColor" : muted} strokeWidth={axis === a ? 1.5 : 0.9}>
+    <g stroke={axis === a ? "currentColor" : muted} strokeWidth={axis === a ? 2 : 1.2}>
       <path d={d} />
       <path d={head} />
     </g>
@@ -106,8 +106,8 @@ export const AxisIcon = ({ axis }: { axis: "x" | "y" | "z" }) => {
     <text
       x={x}
       y={y}
-      fontSize={8.5}
-      fontWeight={500}
+      fontSize={6.5}
+      fontWeight={700}
       textAnchor="middle"
       stroke="none"
       fill={axis === a ? "currentColor" : muted}
@@ -120,9 +120,9 @@ export const AxisIcon = ({ axis }: { axis: "x" | "y" | "z" }) => {
       {line("z", "M4.5 19.5 V5", "M2.8 6.8 L4.5 5 L6.2 6.8")}
       {line("y", "M4.5 19.5 L15.5 9", "M12.8 9 H15.5 V11.7")}
       {line("x", "M4.5 19.5 H19", "M17.2 17.8 L19 19.5 L17.2 21.2")}
-      {axis === "z" && letter("z", 11, 8)}
-      {axis === "y" && letter("y", 19.5, 9)}
-      {axis === "x" && letter("x", 19, 15)}
+      {letter("z", 9, 6.5)}
+      {letter("y", 19.5, 9.5)}
+      {letter("x", 21.5, 16)}
     </Svg>
   );
 };
