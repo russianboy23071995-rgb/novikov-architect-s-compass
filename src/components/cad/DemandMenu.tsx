@@ -4,6 +4,40 @@ import type { Point, Project } from "../../lib/bim/model.ts";
 import type { Selection } from "./bim-view.ts";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import type { EditAction } from "@/lib/bim/direct-edit";
+import {
+  AlongAxisIcon,
+  AxisIcon,
+  EdgeStretchIcon,
+  ElementMoveIcon,
+  KinkIcon,
+  OffsetIcon,
+  PointMoveIcon,
+  PointStretchIcon,
+  PropertiesIcon,
+  ReferencesIcon,
+} from "./DemandMenuIcons";
+
+function IconButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: import("react").ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className="flex aspect-square items-center justify-center rounded-md border border-border bg-card/60 text-foreground transition-colors hover:bg-muted"
+    >
+      {children}
+    </button>
+  );
+}
 
 export function DemandMenu({
   calibrationControls,
@@ -128,116 +162,74 @@ export function DemandMenu({
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
-      <div className="grid gap-1">
-        {calibrationControls}
+      {calibrationControls && <div className="mb-1.5 grid gap-1">{calibrationControls}</div>}
+      <div className="grid grid-cols-4 gap-1">
         {onMoveSelection && (
-          <button
-            type="button"
-            className="rounded border p-1 text-left hover:bg-muted"
+          <IconButton
+            label={selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
             onClick={onMoveSelection}
           >
-            {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
-          </button>
+            <ElementMoveIcon />
+          </IconButton>
         )}
         {onReferences && (
-          <button
-            type="button"
-            className="rounded border p-1 text-left hover:bg-muted"
-            onClick={onReferences}
-          >
-            Referenzen auswählen
-          </button>
+          <IconButton label="Referenzen auswählen" onClick={onReferences}>
+            <ReferencesIcon />
+          </IconButton>
         )}
         {selection && selection.kind !== "reference" && summary && (
           <>
             {closedContour(project, selection) && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
-                onClick={() => onAction("offset")}
-              >
-                Kontur versetzen (Offset)
-              </button>
+              <IconButton label="Kontur versetzen (Offset)" onClick={() => onAction("offset")}>
+                <OffsetIcon />
+              </IconButton>
             )}
             {edgeIndex != null && (
               <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("insert")}
-                >
-                  Knicken
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("edge")}
-                >
-                  Seite strecken
-                </button>
+                <IconButton label="Knicken" onClick={() => onAction("insert")}>
+                  <KinkIcon />
+                </IconButton>
+                <IconButton label="Seite strecken" onClick={() => onAction("edge")}>
+                  <EdgeStretchIcon />
+                </IconButton>
               </>
             )}
             {selection.kind !== "window" && pointIndex !== null && (
               <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("point")}
-                >
-                  Punkt frei bewegen
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("stretch")}
-                >
-                  Punkt in Flucht strecken
-                </button>
+                <IconButton label="Punkt frei bewegen" onClick={() => onAction("point")}>
+                  <PointMoveIcon />
+                </IconButton>
+                <IconButton label="Punkt in Flucht strecken" onClick={() => onAction("stretch")}>
+                  <PointStretchIcon />
+                </IconButton>
               </>
             )}
             {selection.kind !== "window" && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
-                onClick={() => onAction("move")}
-              >
-                Element frei bewegen
-              </button>
+              <IconButton label="Element frei bewegen" onClick={() => onAction("move")}>
+                <ElementMoveIcon />
+              </IconButton>
             )}
             {edgeIndex == null && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
+              <IconButton
+                label={selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
                 onClick={() => onAction("axis")}
               >
-                {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
-              </button>
+                <AlongAxisIcon window={selection.kind === "window"} />
+              </IconButton>
             )}
             {selection.kind !== "window" && (
               <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("x")}
-                >
-                  Element auf X-Achse
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("y")}
-                >
-                  Element auf Y-Achse
-                </button>
+                <IconButton label="Element auf X-Achse" onClick={() => onAction("x")}>
+                  <AxisIcon axis="x" />
+                </IconButton>
+                <IconButton label="Element auf Y-Achse" onClick={() => onAction("y")}>
+                  <AxisIcon axis="y" />
+                </IconButton>
               </>
             )}
-            <button
-              type="button"
-              onClick={onInfo}
-              className="rounded border p-1 text-left hover:bg-muted"
-            >
-              Werkzeugeigenschaften
-            </button>
+            <IconButton label="Werkzeugeigenschaften" onClick={onInfo}>
+              <PropertiesIcon />
+            </IconButton>
           </>
         )}
       </div>
