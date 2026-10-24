@@ -41,40 +41,40 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.93 0.006 250);
-  --foreground: oklch(0.19 0.006 255);
-  --card: oklch(0.99 0.003 250 / 58%);
-  --card-foreground: oklch(0.19 0.006 255);
-  --popover: oklch(0.99 0.003 250 / 88%);
-  --popover-foreground: oklch(0.19 0.006 255);
-  --primary: oklch(0.23 0.006 255);
-  --primary-foreground: oklch(0.98 0.002 250);
-  --secondary: oklch(0.9 0.006 250 / 76%);
-  --secondary-foreground: oklch(0.24 0.006 255);
-  --muted: oklch(0.9 0.005 250 / 68%);
-  --muted-foreground: oklch(0.46 0.009 250);
-  --accent: oklch(0.84 0.007 250 / 78%);
-  --accent-foreground: oklch(0.18 0.006 255);
+  --radius: 0.75rem;
+  --background: oklch(0.975 0 0);
+  --foreground: oklch(0.19 0 0);
+  --card: oklch(0.99 0 0 / 58%);
+  --card-foreground: oklch(0.19 0 0);
+  --popover: oklch(0.99 0 0 / 88%);
+  --popover-foreground: oklch(0.19 0 0);
+  --primary: oklch(0.14 0 0);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.9 0 0 / 76%);
+  --secondary-foreground: oklch(0.24 0 0);
+  --muted: oklch(0.9 0 0 / 68%);
+  --muted-foreground: oklch(0.46 0 0);
+  --accent: oklch(0.84 0 0 / 78%);
+  --accent-foreground: oklch(0.18 0 0);
   --destructive: oklch(0.62 0.2 27);
   --destructive-foreground: oklch(0.96 0 0);
-  --border: oklch(0.25 0.008 250 / 15%);
-  --input: oklch(0.25 0.008 250 / 18%);
-  --ring: oklch(0.23 0.006 255);
-  --workspace: oklch(0.955 0.004 250);
-  --grid-minor: oklch(0.28 0.012 245 / 5%);
-  --grid-major: oklch(0.25 0.012 245 / 10%);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0.25 0 0 / 18%);
+  --ring: oklch(0.14 0 0);
+  --workspace: oklch(0.955 0 0);
+  --grid-minor: oklch(0.28 0 0 / 5%);
+  --grid-major: oklch(0.25 0 0 / 10%);
   --axis-x: oklch(0.68 0.18 28);
   --axis-z: oklch(0.72 0.14 160);
   --status-ok: oklch(0.72 0.15 150);
   --glass-highlight: oklch(1 0 0 / 78%);
-  --glass-deep: oklch(0.38 0.008 250 / 16%);
+  --glass-deep: oklch(0.38 0 0 / 16%);
   --glass-shadow:
-    0 24px 70px oklch(0.32 0.01 250 / 17%), inset 0 1px 0 var(--glass-highlight),
-    inset 0 -1px 0 oklch(0.3 0.008 250 / 6%);
+    0 20px 60px oklch(0 0 0 / 8%), 0 8px 24px oklch(0 0 0 / 4%), inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 0 oklch(0.3 0 0 / 6%);
   --glass-shadow-soft:
-    0 12px 36px oklch(0.32 0.01 250 / 12%), inset 0 1px 0 var(--glass-highlight),
-    inset 0 -1px 0 oklch(0.3 0.008 250 / 5%);
+    0 8px 32px oklch(0 0 0 / 6%), inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 0 oklch(0.3 0 0 / 5%);
 }
 
 * {
@@ -105,9 +105,9 @@ input {
   isolation: isolate;
   background: linear-gradient(
     135deg,
-    oklch(0.965 0.006 245),
-    oklch(0.9 0.009 255) 48%,
-    oklch(0.95 0.005 235)
+    oklch(0.965 0 0),
+    oklch(0.9 0 0) 48%,
+    oklch(0.95 0 0)
   );
 }
 .cad-shell::before {
@@ -120,36 +120,36 @@ input {
     118deg,
     oklch(1 0 0 / 50%),
     transparent 35%,
-    oklch(0.72 0.025 235 / 12%) 70%,
+    oklch(0.72 0 0 / 12%) 70%,
     transparent
   );
 }
 .glass-panel {
-  background: linear-gradient(145deg, oklch(1 0 0 / 72%), oklch(0.94 0.006 250 / 52%));
+  background: linear-gradient(145deg, oklch(1 0 0 / 72%), oklch(0.94 0 0 / 52%));
   border: 1px solid var(--border);
   box-shadow: var(--glass-shadow-soft);
   backdrop-filter: blur(30px) saturate(118%);
 }
 .glass-panel-strong {
-  background: linear-gradient(145deg, oklch(1 0 0 / 82%), oklch(0.93 0.006 250 / 64%));
+  background: linear-gradient(145deg, oklch(1 0 0 / 82%), oklch(0.93 0 0 / 64%));
   border: 1px solid var(--border);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(40px) saturate(122%);
 }
 .command-glass {
-  background: linear-gradient(135deg, oklch(1 0 0 / 86%), oklch(0.94 0.006 250 / 72%));
+  background: linear-gradient(135deg, oklch(1 0 0 / 86%), oklch(0.94 0 0 / 72%));
   box-shadow:
-    0 24px 60px oklch(0.32 0.01 250 / 20%),
+    0 24px 60px oklch(0.32 0 0 / 20%),
     inset 0 1px 0 var(--glass-highlight),
-    inset 0 -1px 0 oklch(0.3 0.008 250 / 6%);
+    inset 0 -1px 0 oklch(0.3 0 0 / 6%);
   backdrop-filter: blur(40px) saturate(125%);
 }
 .novikov-mark {
   position: relative;
-  background: linear-gradient(145deg, oklch(0.3 0.008 255), oklch(0.13 0.004 255));
+  background: linear-gradient(145deg, oklch(0.3 0 0), oklch(0.13 0 0));
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 24%),
-    0 8px 20px oklch(0.2 0.006 255 / 20%);
+    0 8px 20px oklch(0.2 0 0 / 20%);
 }
 .novikov-mark::after {
   content: "";
@@ -161,7 +161,7 @@ input {
 .cad-viewport {
   background: radial-gradient(
     ellipse 70% 62% at 50% 46%,
-    oklch(0.99 0.003 245),
+    oklch(0.99 0 0),
     var(--workspace) 74%
   );
 }
@@ -206,9 +206,9 @@ input {
 }
 
 .floor-plan {
-  color: oklch(0.27 0.014 245);
+  color: oklch(0.27 0 0);
   transform-origin: center;
-  filter: drop-shadow(0 14px 26px oklch(0.35 0.008 250 / 16%));
+  filter: drop-shadow(0 14px 26px oklch(0.35 0 0 / 16%));
 }
 .floor-plan-3d {
   transform: translate(-50%, -52%) rotateX(56deg) rotateZ(-28deg);
