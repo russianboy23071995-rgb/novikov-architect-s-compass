@@ -1,6 +1,8 @@
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import {
   createProjectSnapshot,
+  isOwnedProjectSnapshot,
+  validateLike,
   type ProjectResultMode,
 } from "../../domain/project/owned-snapshot.ts";
 import { projectStorageData } from "../../domain/project/storage-data.ts";
@@ -52,7 +54,8 @@ export function addWall(
   wall: Creation<Omit<Wall, "bodyOffset">> & { bodyOffset?: number },
 ): Project {
   assertAxisInside(wall.thickness, wall.bodyOffset ?? 0);
-  return validateProject(
+  return validateLike(
+    project,
     reconcileWallJoins(
       {
         ...replaceStorey(project, {
@@ -114,14 +117,16 @@ export function updateWall(
   );
   const reconciled = axisChanged ? reconcileTJunctions(proposed, wallId, intent) : proposed;
   // Output ownership never skips validation; the factory validates and owns in one step.
-  return (resultMode === "owned" ? createProjectSnapshot : validateProject)(
-    axisChanged ? reconcileWallJoins(reconciled, wallId, previous, tPartners) : reconciled,
-    reuse,
-  );
+  const result = axisChanged
+    ? reconcileWallJoins(reconciled, wallId, previous, tPartners)
+    : reconciled;
+  return resultMode === "owned"
+    ? createProjectSnapshot(result, reuse, isOwnedProjectSnapshot(project) ? project : undefined)
+    : validateLike(project, result, reuse);
 }
 
 export function addWindow(project: Project, opening: Creation<BimWindow>): Project {
-  return validateProject({
+  return validateLike(project, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       windows: [
@@ -139,7 +144,7 @@ export function updateWindow(
 ): Project {
   if (!storeyOf(project).windows.some((opening) => opening.id === windowId))
     throw new Error(`Unknown window: ${windowId}`);
-  return validateProject({
+  return validateLike(project, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       windows: storeyOf(project).windows.map((opening) =>
@@ -168,7 +173,7 @@ export function serializeProject(project: Project): string {
 }
 
 export function addLine(project: Project, line: Creation<DrawingLine>): Project {
-  return validateProject({
+  return validateLike(project, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       lines: [
@@ -186,7 +191,7 @@ export function updateLine(
 ): Project {
   if (!storeyOf(project).lines?.some((line) => line.id === lineId))
     throw new Error(`Unknown line: ${lineId}`);
-  return validateProject({
+  return validateLike(project, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       lines: storeyOf(project).lines!.map((line) =>

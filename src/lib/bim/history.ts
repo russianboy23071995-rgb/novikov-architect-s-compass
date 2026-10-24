@@ -22,6 +22,9 @@ function assertSnapshotSize(project: Project): void {
   assertValidatedProjectSize(project);
   if (isOwnedProjectSnapshot(project)) sizeChecked.add(project);
 }
+// Owned model snapshot behind an Undo/Redo result that only received current view settings.
+// Used solely as a sharing base; the result itself is never trusted without validation.
+const viewSource = new WeakMap<Project, Project>();
 export function createHistory(project: Project): ProjectHistory {
   return { past: [], present: createProjectSnapshot(project), future: [] };
 }
@@ -32,7 +35,8 @@ export function commitProject(
 ): ProjectHistory {
   // Only factory-owned snapshots skip re-validation; anything else keeps the full check.
   const owned = isOwnedProjectSnapshot(history.present) ? history.present : undefined;
-  const next = createProjectSnapshot(project, undefined, owned);
+  // A view-settings transition is not owned, but its model source may still be shared.
+  const next = createProjectSnapshot(project, undefined, owned ?? viewSource.get(history.present));
   assertSnapshotSize(next);
   const previous = owned ?? validateProject(history.present);
   assertSnapshotSize(previous);
@@ -102,11 +106,13 @@ function retainViewSettings(snapshot: Project, current: Project): Project {
   )
     return snapshot;
   const { workingViews: _previousViews, workingStoreyId: _previousStorey, ...model } = snapshot;
-  return {
+  const result = {
     ...model,
     ...(workingStoreyId ? { workingStoreyId } : {}),
     ...(drawingDocuments ? { drawingDocuments } : {}),
     ...(workingViews ? { workingViews } : {}),
     bimVisibility: { hiddenLayerIds },
   };
+  if (isOwnedProjectSnapshot(snapshot)) viewSource.set(result, snapshot);
+  return result;
 }
