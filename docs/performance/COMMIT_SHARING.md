@@ -70,13 +70,39 @@ Millisekunden. Vom Nutzer erlebte Summe bei 20.000 Elementen (Aktion + Commit): 
 2,36 s → 1,60 s. Dauerhaft belegter Heap nach 30 Wand-Commits (nach GC): 5.000 Elemente
 64,8 → 0,1 MiB, 20.000 Elemente 258,5 → 0,2 MiB.
 
-## Offene Gates und Grenzen
+### Browser-Messung
 
-- **Browsermessung offen:** Seite `benchmarks/commit-sharing.html` (über
-  `npm run benchmark:browser`, Port 8081) ist vorbereitet. Der Lauf am 24.10. war nicht
-  verwertbar, weil das Fenster verdeckt war (Animationsframes pausiert).
-- **Bedienabnahme im Produkt offen:** Wand ändern, Fenster setzen, Undo/Redo im echten
-  CadWorkspace mit sichtbarem Fenster.
+`npm run benchmark:browser` → `benchmarks/commit-sharing.html`, Chromium 152 im
+Browserbereich der Claude-Desktop-App, Vite-Entwicklungsserver, Windows, ein Lauf mit
+sichtbarem Fenster (gegen Ende kurz als ausgeblendet gemeldet). Gleiche Methode wie Node.
+Ergebnis bei jeder Stichprobe identisch. Rohdaten:
+[browser.json](commit-sharing-2026-10-24/browser.json).
+
+| Elemente | Vorgang            | Aktion (unverändert) | Commit alt Median/p95 | Commit neu Median/p95 |
+| -------: | ------------------ | -------------------: | --------------------: | --------------------: |
+|      100 | Wand ändern        |                  3,9 |            7,8 / 10,1 |             4,1 / 6,5 |
+|    1.000 | Wand ändern        |                 24,7 |           54,3 / 60,5 |           28,1 / 37,2 |
+|    5.000 | Wand ändern        |                119,6 |         236,7 / 268,7 |         125,2 / 133,3 |
+|   20.000 | Wand ändern        |                535,4 |       1126,6 / 1229,2 |         607,8 / 641,2 |
+|    5.000 | Fenster platzieren |                129,5 |         271,1 / 285,4 |         146,5 / 158,4 |
+|   20.000 | Fenster platzieren |                503,0 |       1029,2 / 1132,0 |         568,1 / 639,7 |
+
+Millisekunden; reine synchrone Aktion/Commit, ohne React-Rendering und Frames. Kein
+Heapnachweis im Browser (nur Node).
+
+### Bedienabnahme im Produkt (24.10.2026)
+
+Echter CadWorkspace (`bun run dev`, Port 8080, Beispielprojekt) im Browserbereich:
+Modellbefehl „Wandlänge auf 6 m“ → Vorschau 3 → 6 m → Übernehmen: Länge 6 m. Undo → 3 m,
+Redo → 6 m. „Add centred window“: Modellelemente 2 → 3; Undo → 2; Redo → 3 (Commit auf
+einem Stand nach Redo). „Wandhöhe auf 0,5 m“ abgelehnt mit „Änderung nicht möglich …
+Fenster vollständig in die Wand passen“; Höhe 2,8 m, Länge 6 m und 3 Elemente unverändert.
+Keine Konsolenfehler. Der offene Wiederherstellungsdialog wurde bewusst nicht bedient;
+die Autosicherung blieb pausiert, vorhandene Sicherungen unverändert. Nicht geprüft:
+3D-Ansicht, Dateispeichern/-laden im Browser, Recovery-Wiederaufnahme, Mausziehen.
+
+## Grenzen
+
 - Synthetische Schulgeometrie, kein realer Plan; ein Lauf, keine Hardwaregarantie.
 - Undo/Redo mit geänderter Sichtbarkeit erzeugt einen Stand ohne Herkunft; der nächste
   Commit nimmt dann sicher den vollen alten Weg und teilt nichts.
