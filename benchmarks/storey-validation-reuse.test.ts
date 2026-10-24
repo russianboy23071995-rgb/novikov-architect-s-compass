@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fullHeightFixture } from "./bound-height-fixture.ts";
+import { legacyProjectByteLength } from "./legacy-commit.ts";
+import { validatedProjectByteLength } from "../src/interop/project-file/size.ts";
 import { defaultHatchAppearance } from "../src/domain/elements/hatch/model.ts";
 import { validateProject, type Project } from "../src/lib/bim/model.ts";
 import {
@@ -132,6 +134,7 @@ test("storey scope reuse matches full validation on random edits, errors include
   const next = random(20261024);
   let current = createProjectSnapshot(fixture());
   const before = storeyValidationReuseCount();
+  const storeyBytes = new WeakMap<object, number>();
   let accepted = 0,
     rejected = 0;
   for (let step = 0; step < 600; step++) {
@@ -141,6 +144,12 @@ test("storey scope reuse matches full validation on random edits, errors include
     const reused = outcome(() => (snapshot = createProjectSnapshot(proposed, undefined, current)));
     assert.deepEqual(reused, full, `step ${step}`);
     if (snapshot) {
+      // Composed and cached byte length equals one JSON string of the whole project.
+      assert.equal(
+        validatedProjectByteLength(snapshot, storeyBytes),
+        legacyProjectByteLength(snapshot),
+        `bytes ${step}`,
+      );
       current = snapshot;
       accepted++;
     } else rejected++;
