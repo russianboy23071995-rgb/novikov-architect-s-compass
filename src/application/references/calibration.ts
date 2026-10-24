@@ -1,6 +1,6 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
-import { validateProject } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { SelectionSet } from "../selection/state.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { calibrationTransform } from "../../geometry/transforms/calibrate.ts";
@@ -41,7 +41,7 @@ export function previewCalibration(
   if (!r || !isLayerVisible(current, visibility, r.id))
     throw new Error("Bildreferenz nicht verfügbar.");
   const t = calibrationTransform(r.origin, request.first, request.second, request.metres);
-  return validateProject({
+  return validateLike(current, {
     ...replaceStorey(current, {
       ...storeyOf(current),
       references: storeyOf(current).references.map((item) =>

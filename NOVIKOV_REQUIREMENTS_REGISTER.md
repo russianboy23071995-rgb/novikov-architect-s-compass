@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `1f05fea` nach PR442. Branch audit/storey-parse-and-size: Stufe 2b (R26-01–08), Schema-Parsen und Größenprüfung geschossweise; einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 24.10.2026, main `41812ee` nach PR443. Branch audit/remaining-actions-owned: Stufe 3 (R26-01–08), übrige Aktionsfamilien auf eigene Snapshots; einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -1451,6 +1451,8 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 | V09 | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell. |
 
 ### R26-01–08
+
+**Übrige Aktionsfamilien auf eigene Snapshots, Stufe 3 (24.10.2026, audit/remaining-actions-owned, Basis main 41812ee):** Teilweise, noch nicht gemergt. Geschoss-, Abbild-, Maßstabs-, Ebenen-, Schraffur-, Referenz-, Kalibrier-, Z- und T-Anschluss-Aktionen prüfen pro Änderung einmal. Gegenprüfung 19 Fälle exakt gleich; 1181 Tests. Node 20.000: Geschoss umbenennen 2997→215 ms, Schraffur 4067→224 ms, Ebene 3951→1031 ms. Offen: Bedienabnahme, projektweite Änderungen weiter voll geprüft, Fangindex. Nachweis docs/performance/COMMIT_SHARING.md.
 
 **Schema-Parsen und Größenprüfung geschossweise, Stufe 2b (24.10.2026, audit/storey-parse-and-size, Basis main 1f05fea):** Teilweise, noch nicht gemergt. Wiederverwendete Geschosse überspringen auch das Schema-Parsen; die 128-MiB-Prüfung setzt die Byte-Länge aus Projektrahmen und gecachten Geschosslängen zusammen (nur eigene Snapshots). Gegenprüfung: Ergebnis, Fehler und Byte-Länge exakt gleich; Gegenproben greifen; 1162 Tests. Node 20.000: 3100→225 ms, Browser 1646→119 ms, Commit ≈ 5 ms. Offen: Kosten wachsen mit dem geänderten Geschoss, Fangindex, übrige Aktionsfamilien. Nachweis docs/performance/COMMIT_SHARING.md.
 

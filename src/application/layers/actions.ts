@@ -1,5 +1,5 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import { validateProject } from "../../domain/project/schema.ts";
+import { validateLike, validatedInput } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { commitProject } from "../../lib/bim/history.ts";
 import type { ProjectHistory } from "../../lib/bim/history.ts";
@@ -24,11 +24,11 @@ export function previewLayerManagement(
   request: ManageLayerRequest,
 ): Project {
   if (base !== current) throw new Error("Das Projekt wurde geändert. Vorgang erneut beginnen.");
-  const project = validateProject(current);
+  const project = validatedInput(current);
   if (request.kind === "delete") {
     const reason = layerDeletionBlock(project, request.id);
     if (reason) throw new Error(reason);
-    return validateProject({
+    return validateLike(current, {
       ...project,
       layers: project.layers.filter((layer) => layer.id !== request.id),
       ...(project.drawingDocuments
@@ -60,7 +60,7 @@ export function previewLayerManagement(
     )
   )
     throw new Error("Dieser Ebenenname ist bereits vergeben.");
-  return validateProject({
+  return validateLike(current, {
     ...project,
     ...(request.kind === "create" && project.drawingDocuments
       ? {
@@ -106,7 +106,7 @@ export function previewLayerAssignment(
 ): Project {
   if (base !== current || request.projectId !== current.id)
     throw new Error("Das Projekt wurde geändert. Ebenenzuordnung erneut beginnen.");
-  const project = validateProject(current);
+  const project = validatedInput(current);
   if (!project.layers.some((l) => l.id === request.layerId))
     throw new Error("Die Zielebene existiert nicht.");
   if (!request.elementIds.length) throw new Error("Keine Elemente ausgewählt.");
@@ -124,7 +124,7 @@ export function previewLayerAssignment(
   if (elements.every((e) => !targets.has(e.id) || e.layerId === request.layerId)) return current;
   const assign = <T extends { id: string; layerId: string }>(e: T): T =>
     targets.has(e.id) ? { ...e, layerId: request.layerId } : e;
-  return validateProject({
+  return validateLike(current, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       hatches: storeyOf(project).hatches.map(assign),

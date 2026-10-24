@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 24.10.2026, main `1f05fea` nach PR442 (Stufe 1, 1b, 2). Branch audit/storey-parse-and-size (Stufe 2b): Schema-Parsen und Größenprüfung geschossweise, Ergebnis und Byte-Länge exakt gleich; Änderung bei 20.000 Elementen Browser 1646→119 ms gegenüber dem alten Vollpfad. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `41812ee` nach PR443 (Stufen 1–2b). Branch audit/remaining-actions-owned (Stufe 3): übrige Aktionsfamilien auf eigene Snapshots; Geschoss umbenennen/Schraffur anlegen bei 20.000 Elementen ~3–4 s → ~0,22 s (Node), Ergebnis identisch. Bedienabnahme offen. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -617,7 +617,9 @@ Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebu
 
 **Stufe 2 in main (PR442, 1f05fea).** **Stufe 2b** umgesetzt auf audit/storey-parse-and-size: wiederverwendete Geschosse werden mit leeren Elementlisten geparst und durch ihr validiertes Objekt ersetzt (Entscheidung vor dem Parsen, gilt nur bei gleichem Schlüssel danach); Byte-Länge aus Projektrahmen + gecachten Geschosslängen (`storeyStorageData`, Cache nur für eigene Snapshots). Gegenprüfung inkl. Byte-Länge gegen alte Berechnung, Gegenproben greifen. 1162 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node 20.000: 3100→225 ms; Browser 1646→119 ms; Commit ≈ 5 ms. Bedienabnahme bestanden.
 
-**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Stufe 2b nach Nutzerfreigabe. Danach als eigene Aufträge: übrige Aktionsfamilien (Geschosse, Ebenen, Abbilder, Schraffuren) auf eigene Snapshots, Fangindex-Neuaufbau begrenzen, dann Bauteiltyp-Registry vor Türen/Decken/Räumen.
+**Stufe 2b in main (PR443, 41812ee).** **Stufe 3** umgesetzt auf audit/remaining-actions-owned: Geschoss-, Abbild-, Maßstabs-, Ebenen-, Schraffur-, Referenz-, Kalibrier-, Z- und T-Anschluss-Aktionen nutzen `validateLike`/`validatedInput`. Gegenprüfung 19 Fälle alt/neu inkl. ungültiger, Gegenprobe greift; 1181 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node 20.000: Geschoss umbenennen 2997→215 ms, Schraffur 4067→224 ms, Ebene 3951→1031 ms (projektweit, bewusst voll). Bedienabnahme offen (Fenster nicht sichtbar).
+
+**Genau ein unmittelbarer aktiver Folgeauftrag:** Bedienabnahme Stufe 3 und Review/Merge nach Nutzerfreigabe. Danach: Fangindex-Neuaufbau begrenzen, dann Bauteiltyp-Registry vor Türen/Decken/Räumen.
 
 **Zurückgestellt (Nutzerentscheidung 24.10.2026), nicht aktiv: Verbliebene feste Wandachsenbewegungen x/y/axis abgleichen und messen (AUD14-04/05).** DemandMenu und CadWorkspace.startEdit gegen DirectEdit-/Auswahladapter prüfen. Feste kleine Wand bei wachsendem Restmodell, frei/verbunden und mit Fenstern; Maus/Numeric, signierte Achse, stationäre Nachbarn, Anschlusslösung, vollständiger Commit und ein Undo/Redo. Vollständige Ergebnisgleichheit und getrennte Vorbereitung/Vorschau messen. Keine erneute Endpunkt-/T-Migration, noch keine ungeprüfte Anbindung. Primitive-Cache-Kandidat nach Browservergleich geparkt; kein weiterer Sortier-/Freeze-Mikrokandidat.
 

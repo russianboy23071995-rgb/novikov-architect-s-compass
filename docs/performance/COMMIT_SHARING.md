@@ -357,3 +357,57 @@ nur durch Gegenprüfung und Messung abgedeckt.
   (eigene Entscheidung, berührt Anschluss-/Nachbarregeln).
 - Wechsel von Arbeitsgeschoss, Sichtbarkeit, Ebenen oder Mustern: einmalig volle Prüfung.
 - Fangindex-Neuaufbau und die übrigen Aktionsfamilien bleiben offen.
+
+# Stufe 3: Übrige Aktionsfamilien auf eigene Snapshots (24.10.2026)
+
+Basis: main `41812ee` (PR443), Branch `audit/remaining-actions-owned`. Freigabe: Nutzer
+24.10.2026 („freigabe und go next“).
+
+## Änderungskarte
+
+1. **Wunsch/Abnahme:** Geschoss-, Abbild-, Maßstabs-, Ebenen-, Schraffur-, Referenz-,
+   Kalibrier-, Z-Verschiebungs- und T-Anschluss-Aktionen prüfen pro Änderung nur einmal und
+   teilen unveränderte Teile wie Wand/Fenster seit Stufe 1b. Ergebnis exakt gleich.
+2. **Eigentümer:** die Application-Aktionen; sie verwenden `validateLike` (Ergebnis) und den
+   neuen `validatedInput` (Eingang: eigener Snapshot direkt, sonst volle Prüfung) aus
+   `domain/project/owned-snapshot.ts`. `validateLike` nimmt wie `validateProject`
+   ungeprüfte Daten an.
+3. **Gemeinsamer Weg:** keine neue Fachlogik; derselbe Herkunftsvertrag.
+4. **Folgen:** Ergebnisse auf eigenen Ständen sind eingefroren; alle Aufrufer verarbeiten sie
+   nur lesend (Spread/Map). Ebenen- und Schraffuraktionen prüften ihren Eingang zusätzlich
+   voll; das entfällt für eigene Stände.
+5. **Abgrenzung:** Musterabgleich und Sichtbarkeitsverlauf setzen weiter direkt; Laden
+   unverändert.
+
+## Gegenprüfung
+
+- `benchmarks/remaining-actions.test.ts`: 19 Fälle (gültig und ungültig) für Geschosse,
+  Abbildordner, Maßstab, Ebenen, Ebenenzuordnung, Schraffur und Referenz: gleiches Ergebnis
+  bzw. gleiche Fehlermeldung wie mit veränderbarem Eingang; gültige Ergebnisse auf eigenem
+  Eingang sind eigene Snapshots. Gegenprobe (Geschossaktionen ohne Herkunft) → vier Fälle
+  scheitern. Kalibrierung, Z-Verschiebung und T-Anschluss durch bestehende Tests abgedeckt.
+- 1181 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+
+## Messung
+
+Node 24.22.1, gleicher Lauf, alter Vollpfad gegen jetzt, Aktion + Commit; Ergebnis bei
+jeder Stichprobe identisch. Rohdaten: [node.json](remaining-actions-2026-10-24/node.json).
+
+| Elemente | Vorgang             |          alt → neu (Median / p95) |
+| -------: | ------------------- | --------------------------------: |
+|    5.000 | Geschoss umbenennen |       731,9 / 812,3 → 53,7 / 58,8 |
+|    5.000 | Schraffur anlegen   |      983,2 / 1008,8 → 55,4 / 62,4 |
+|    5.000 | Ebene umbenennen    |   1009,8 / 1231,7 → 260,8 / 448,0 |
+|   20.000 | Geschoss umbenennen |   2996,8 / 3120,4 → 215,0 / 237,8 |
+|   20.000 | Schraffur anlegen   |   4067,0 / 4394,4 → 224,3 / 273,6 |
+|   20.000 | Ebene umbenennen    | 3950,8 / 5124,5 → 1031,1 / 1358,4 |
+
+Ebenenänderungen sind projektweit und lösen bewusst eine volle Prüfung aller Geschosse aus,
+jetzt einmal statt drei- bis viermal. Keine Browsermessung für diese Stufe.
+
+## Offen
+
+- **Bedienabnahme offen:** Das Fenster war während der Prüfung nicht sichtbar; Geschoss
+  umbenennen, Ebene anlegen/umbenennen, Schraffur setzen mit Undo/Redo stehen aus.
+- Ebenen-/Musteränderungen bleiben teuer (volle Prüfung); feinere Abhängigkeiten wären eine
+  eigene Entscheidung.

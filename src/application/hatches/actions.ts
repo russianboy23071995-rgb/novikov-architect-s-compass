@@ -12,7 +12,7 @@ import {
   hatchPatternSizeSchema,
   type HatchPatternSize,
 } from "../../domain/elements/hatch/model.ts";
-import { validateProject } from "../../domain/project/schema.ts";
+import { validateLike, validatedInput } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { commitProject } from "../../lib/bim/history.ts";
@@ -42,7 +42,7 @@ export type HatchRequest = {
 export function previewHatch(base: Project, current: Project, request: HatchRequest): Project {
   if (base !== current || request.projectId !== current.id)
     throw new Error("Das Projekt wurde geändert. Schraffurvorgang erneut beginnen.");
-  const project = validateProject(current);
+  const project = validatedInput(current);
   const hatches = storeyOf(project).hatches;
   if (request.kind === "update" && !hatches.some((h) => h.id === request.id))
     throw new Error("Die Schraffur existiert nicht mehr.");
@@ -105,7 +105,7 @@ export function previewHatch(base: Project, current: Project, request: HatchRequ
     const { rotation: _previous, ...unrotated } = pattern;
     assignment.pattern = rotation === 0 ? unrotated : { ...pattern, rotation };
   }
-  const next = validateProject({
+  const next = validateLike(current, {
     ...replaceStorey(project, {
       ...storeyOf(project),
       hatches:

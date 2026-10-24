@@ -1,6 +1,7 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "../../domain/views/documents.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { DocumentIdentity } from "../../domain/views/scale.ts";
 import { projectScaleContext } from "./project-scale.ts";
 export type DocumentAction =
@@ -37,7 +38,7 @@ export function changeDrawingDocument(
   if (base !== current) throw new Error("Das Projekt wurde geändert. Abbildaktion erneut starten.");
   const documents = current.drawingDocuments ?? [];
   if (action.kind === "create-folder")
-    return validateProject({
+    return validateLike(current, {
       ...current,
       documentFolders: [...(current.documentFolders ?? []), { id: action.id, name: action.name }],
     });
@@ -49,7 +50,7 @@ export function changeDrawingDocument(
   if (action.kind === "rename-folder") {
     if (!current.documentFolders?.some((f) => f.id === action.id))
       throw new Error("Der Abbildordner fehlt.");
-    return validateProject({
+    return validateLike(current, {
       ...current,
       documentFolders: current.documentFolders.map((f) =>
         f.id === action.id ? { ...f, name: action.name } : f,
@@ -61,7 +62,7 @@ export function changeDrawingDocument(
       throw new Error("Der Abbildordner fehlt.");
     if (documents.some((d) => d.folderId === action.id))
       throw new Error("Bitte die Abbilder zuerst aus dem Ordner verschieben.");
-    return validateProject({
+    return validateLike(current, {
       ...current,
       documentFolders: current.documentFolders.filter((f) => f.id !== action.id),
     });
@@ -75,7 +76,7 @@ export function changeDrawingDocument(
       kind: "floor-plan" as const,
       storeyId: storeyOf(current).id,
     };
-    return validateProject({
+    return validateLike(current, {
       ...current,
       modelViews: existing ? current.modelViews : [...(current.modelViews ?? []), source],
       drawingDocuments: [
@@ -96,7 +97,7 @@ export function changeDrawingDocument(
   if (action.kind === "assign-folder" || action.kind === "settings") {
     if (action.folderId !== null && !current.documentFolders?.some((f) => f.id === action.folderId))
       throw new Error("Der Abbildordner fehlt.");
-    return validateProject({
+    return validateLike(current, {
       ...current,
       drawingDocuments: documents.map((d) => {
         if (d.id !== target.id) return d;
@@ -110,13 +111,13 @@ export function changeDrawingDocument(
     });
   }
   if (action.kind === "delete")
-    return validateProject({
+    return validateLike(current, {
       ...current,
       drawingDocuments: documents.filter((d) => d.id !== target.id),
     });
   if (action.kind !== "rename" && action.kind !== "scale")
     throw new Error("Unbekannte Abbildaktion.");
-  return validateProject({
+  return validateLike(current, {
     ...current,
     drawingDocuments: documents.map((d) =>
       d.id !== target.id

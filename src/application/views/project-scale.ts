@@ -1,5 +1,6 @@
 import { defaultWorkingPlan, resolveViewStorey } from "../storeys/context.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import {
   workingPlanScale,
   positiveFinite,
@@ -29,7 +30,7 @@ export function changeProjectScale(
   const current = projectScaleContext(project, view);
   positiveFinite(denominator);
   if (current.denominator === denominator) return project;
-  return validateProject({
+  return validateLike(project, {
     ...project,
     workingViews: [{ kind: "working-plan", storeyId: view.storeyId, denominator }],
   });

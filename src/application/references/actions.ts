@@ -1,7 +1,8 @@
 import { assertProjectRasterBudget } from "../../domain/project/raster-budget.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { ImageAsset, ImageReference } from "../../domain/elements/reference/model.ts";
-import { validateProject, type Project } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
 export type CreateReferenceRequest = {
@@ -18,7 +19,7 @@ export function previewCreateReference(
   if (base !== current || current.id !== request.projectId)
     throw new Error("Das Projekt wurde geändert. Import erneut beginnen.");
   if (request.reference.assetId !== request.asset.id) throw new Error("Asset reference mismatch");
-  const next = validateProject({
+  const next = validateLike(current, {
     ...replaceStorey(current, {
       ...storeyOf(current),
       references: [...storeyOf(current).references, request.reference],
