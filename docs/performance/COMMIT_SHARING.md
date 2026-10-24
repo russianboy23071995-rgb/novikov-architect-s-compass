@@ -484,5 +484,7 @@ wird nicht als Gewinn behauptet. Verbleibend v. a. Nachschlagetabelle und Box-In
 ## Bedienabnahme (24.10.2026)
 
 CadWorkspace: Wandlänge 3 → 5 m übernommen, danach Linienwerkzeug: Fangmarke „Endpunkt“ am
-linken und am neuen rechten Wandende (nur nach der Änderung vorhanden). Keine
-Konsolenfehler. Die Probelinie wurde durch Escape abgebrochen und nicht angelegt.
+linken und am neuen rechten Wandende (nur nach der Änderung vorhanden). Frisches Laden des
+geprüften Stands ohne Fehler und ohne Vite-Fehlerüberlagerung. Die Konsole enthielt zuvor
+Vite-Neuladefehler von 15:53 Uhr: `project-references.ts` war zwischen zwei Bearbeitungsschritten
+kurz syntaktisch unvollständig, und der laufende Entwicklungsserver lud diesen Zwischenstand. Die Probelinie wurde durch Escape abgebrochen und nicht angelegt.
