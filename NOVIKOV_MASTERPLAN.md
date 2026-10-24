@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 24.10.2026, main `41812ee` nach PR443 (Stufen 1–2b). Branch audit/remaining-actions-owned (Stufe 3): übrige Aktionsfamilien auf eigene Snapshots; Geschoss umbenennen/Schraffur anlegen bei 20.000 Elementen ~3–4 s → ~0,22 s (Node), Ergebnis identisch. Bedienabnahme Geschoss/Ebenen/Schraffur bestanden. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
+Geprüfte Code-Basis: 24.10.2026, main `7f0cc91` nach PR444 (Stufen 1–3). Branch audit/snap-index-reuse (Stufe 4): Fangindex nach Commit nutzt Wandkonturen statt Wandkörper und eigene Teilergebnisse; Schule 20.000 Linie 375→49 ms, Wand 347→103 ms, 1.000 Schraffuren 1748→766 ms (Node), Ergebnisse identisch. Details docs/performance/COMMIT_SHARING.md; einziger Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -619,7 +619,9 @@ Der Nutzer verlangt den Abgleich mit den hier festgelegten Zielen und die Behebu
 
 **Stufe 2b in main (PR443, 41812ee).** **Stufe 3** umgesetzt auf audit/remaining-actions-owned: Geschoss-, Abbild-, Maßstabs-, Ebenen-, Schraffur-, Referenz-, Kalibrier-, Z- und T-Anschluss-Aktionen nutzen `validateLike`/`validatedInput`. Gegenprüfung 19 Fälle alt/neu inkl. ungültiger, Gegenprobe greift; 1181 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node 20.000: Geschoss umbenennen 2997→215 ms, Schraffur 4067→224 ms, Ebene 3951→1031 ms (projektweit, bewusst voll). Bedienabnahme bestanden (Geschoss umbenennen, Ebene anlegen/umbenennen/Duplikat abgelehnt, Schraffur; jeweils Undo/Redo).
 
-**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Stufe 3 nach Nutzerfreigabe. Danach: Fangindex-Neuaufbau begrenzen, dann Bauteiltyp-Registry vor Türen/Decken/Räumen.
+**Stufe 3 in main (PR444, 7f0cc91).** **Stufe 4 (Fangindex, AUD14-04)** umgesetzt auf audit/snap-index-reuse: `connectedWallContours` statt Wandkörper, Teilergebnisse je Linie/Schraffur und Wandsatz nur für eigene Snapshots, kein erneutes Einfrieren. Gegenprüfung gegen eingefrorene alte Ableitung (Punkte, Segmente, Abfragen), Gegenproben greifen; 1184 Tests, Architektur-Check, Typprüfungen, Lint, Build. Bedienabnahme: Fang an geänderter Wand. Rest: Nachschlagetabelle/Box-Index weiter voll.
+
+**Genau ein unmittelbarer aktiver Folgeauftrag:** Review/Merge von Stufe 4 nach Nutzerfreigabe. Danach: Bauteiltyp-Registry vor Türen/Decken/Räumen; schrittweiser Fangindex nur bei gemessenem Bedarf (große Schraffurmengen).
 
 **Zurückgestellt (Nutzerentscheidung 24.10.2026), nicht aktiv: Verbliebene feste Wandachsenbewegungen x/y/axis abgleichen und messen (AUD14-04/05).** DemandMenu und CadWorkspace.startEdit gegen DirectEdit-/Auswahladapter prüfen. Feste kleine Wand bei wachsendem Restmodell, frei/verbunden und mit Fenstern; Maus/Numeric, signierte Achse, stationäre Nachbarn, Anschlusslösung, vollständiger Commit und ein Undo/Redo. Vollständige Ergebnisgleichheit und getrennte Vorbereitung/Vorschau messen. Keine erneute Endpunkt-/T-Migration, noch keine ungeprüfte Anbindung. Primitive-Cache-Kandidat nach Browservergleich geparkt; kein weiterer Sortier-/Freeze-Mikrokandidat.
 

@@ -16,10 +16,14 @@ import { MAX_MODEL_TOLERANCE_METRES } from "../../geometry/tolerances/model.ts";
 import { referenceKey } from "../inference/construction-reference.ts";
 import { segmentIntersectionReferences } from "./segment-references.ts";
 
+// Objects this module froze deeply before; reused snap parts need no second walk.
+const deeplyFrozen = new WeakSet<object>();
 function freezeData(value: object): void {
+  if (deeplyFrozen.has(value)) return;
   for (const nested of Object.values(value))
     if (nested && typeof nested === "object") freezeData(nested);
   Object.freeze(value);
+  deeplyFrozen.add(value);
 }
 
 /** Cold build contains primitive sources only, never all model intersections. */
