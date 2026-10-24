@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 24.10.2026, main `0843506` nach PR440. Branch audit/action-owned-snapshots: Stufe 1b (R26-01–08), eine Vollvalidierung pro Wand-/Fensteränderung; einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 24.10.2026, main `e11e681` nach PR441. Branch audit/storey-validation-reuse: Stufe 2 (R26-01–08, A04-Ergänzung), Prüfergebnisse unveränderter Geschosse wiederverwendet; einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
@@ -1451,6 +1451,8 @@ Die ursprüngliche Anforderung/Abnahme bleibt erhalten. Historische Befundzahlen
 | V09 | 3D-Objekte vereinfacht trimmen, etwa Wand an Satteldach | N26/N27 und Dachfunktion verbinden. Fachliche Operation mit Abhängigkeiten, geprüfter Vorschau, einem Commit und Undo; kein ausschließlich im Renderer abgeschnittenes Ersatzmodell. |
 
 ### R26-01–08
+
+**Geschossweise Wiederverwendung der Prüfung, Stufe 2 (24.10.2026, audit/storey-validation-reuse, Basis main e11e681):** Teilweise, noch nicht gemergt. Eigene Snapshots merken je eingefrorenem Geschoss Abhängigkeitsschlüssel und genutzte Muster; bei identischem Geschoss und Schlüssel entfällt nur dessen Fachprüfung, projektweite Prüfungen laufen voll. Gegenprüfung mit 600 Zufallsänderungen exakt gleich, Gegenproben schlagen an; 1162 Tests. Node 20.000: 3120→388 ms, Browser 1631→238 ms. Offen: globales Schema-Parsen (~80 ms), Größenprüfung, Fangindex; Arbeitsgeschoss-/Sichtbarkeitswechsel lösen einmalig volle Prüfung aus. Nachweis docs/performance/COMMIT_SHARING.md.
 
 **Eine Vollvalidierung pro Änderung, Stufe 1b (24.10.2026, audit/action-owned-snapshots, Basis main 0843506):** Teilweise, noch nicht gemergt. Wand-, Fenster- und Linienaktionen auf eigenen Ständen liefern eigene, geteilte Snapshots; der Commit übernimmt sie ohne zweite Prüfung, andere Eingänge bleiben voll geprüft. Gleichheit alt/neu, 1160 Tests, Architektur-Check, Typprüfungen, Lint, Build. Node: Summe Aktion+Commit bei 20.000 Elementen 2906→1037 ms; Browser 1242→456 ms. Aktion 4–13 % teurer. Offen: weitere Aktionsfamilien, globale Größenprüfung (~20–28 ms bei 20.000), Fangindex, Maus-Endpunktziehen praktisch. Nachweis docs/performance/COMMIT_SHARING.md.
 

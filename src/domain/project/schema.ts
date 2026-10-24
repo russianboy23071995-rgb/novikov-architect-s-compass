@@ -462,8 +462,49 @@ export function wallLength(wall: { start: Point; end: Point }): number {
   return Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
 }
 
-/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied. */
-export function validateProject(value: unknown, reuse?: WallSolidReuse): Project {
+/** Reuse of a storey's scope result; only provenance-holding callers may provide one. */
+export type StoreyValidationMemo = {
+  /** Pattern IDs used by an identical, previously validated storey under the same key. */
+  lookup(storey: unknown, key: readonly unknown[]): readonly string[] | undefined;
+  record(index: number, used: readonly string[]): void;
+};
+
+/** Everything a storey's scope validation reads besides the storey itself: its own and the next
+ * storey's resolved levels (bound wall heights) and every other project value by identity.
+ * Any difference forces full validation of that storey. Extend this when a new rule reads more.
+ */
+function storeyKeys(
+  identity: Record<string, unknown>,
+  storeys: readonly { id: string; height: number | null }[],
+  groundStoreyId: string,
+): unknown[][] {
+  const levels = new Map(
+    resolveStoreyLevels(storeys, groundStoreyId).map((s) => [s.storeyId, s.elevation]),
+  );
+  const shared = Object.keys(identity)
+    .filter((name) => name !== "storeys")
+    .sort()
+    .flatMap((name) => [name, identity[name]]);
+  return storeys.map((storey, index) => {
+    const next = storeys[index + 1];
+    return [levels.get(storey.id), next?.id, next && levels.get(next.id), ...shared];
+  });
+}
+
+/** Keys of a validated project, for registering its storeys after validation. */
+export function storeyValidationKeys(project: Project): unknown[][] {
+  return storeyKeys(project, project.storeys, project.groundStoreyId);
+}
+
+/** Validates unknown data; owned immutable asset handles may be shared. Other data is copied.
+ * With a memo, project-wide checks still run in full; a storey's own scope result is reused
+ * only for the identical storey object under an identical key.
+ */
+export function validateProject(
+  value: unknown,
+  reuse?: WallSolidReuse,
+  memo?: StoreyValidationMemo,
+): Project {
   const project = resolveBoundWallHeights(projectSchema.parse(value));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
@@ -506,7 +547,16 @@ export function validateProject(value: unknown, reuse?: WallSolidReuse): Project
   const localLevels = new Map(
     resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
-  for (const storey of storeys) {
+  // Identities come from the caller's value; parsing copies them. Levels come from parsed data.
+  const input = memo ? (value as Record<string, unknown> & { storeys: unknown[] }) : undefined;
+  const keys = input && storeyKeys(input, storeys, project.groundStoreyId);
+  for (const [index, storey] of storeys.entries()) {
+    const known = input && memo!.lookup(input.storeys[index], keys![index]!);
+    if (known) {
+      known.forEach((id) => used.add(id));
+      memo!.record(index, known);
+      continue;
+    }
     const elevation = localLevels.get(storey.id);
     for (const wall of storey.walls) wallHeights(wall, elevation ?? 0);
     const modelViews = project.modelViews?.filter((v) => v.storeyId === storey.id);
@@ -523,6 +573,10 @@ export function validateProject(value: unknown, reuse?: WallSolidReuse): Project
     };
     const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
+    memo?.record(
+      index,
+      scope.hatchPatterns.map((p) => p.id),
+    );
   }
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
 }

@@ -1,4 +1,4 @@
-import { validateProject, type Project } from "./schema.ts";
+import { storeyValidationKeys, validateProject, type Project } from "./schema.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import type { WallSolidReuse } from "../elements/wall/connections.ts";
 
@@ -13,6 +13,15 @@ function freeze<T>(value: T): T {
   }
   return value;
 }
+
+// Frozen storeys of owned snapshots with the key their scope validation passed under and the
+// pattern IDs it used. Only these exact objects can skip their storey scope validation.
+const validStoreys = new WeakMap<object, { key: readonly unknown[]; used: readonly string[] }>();
+const sameKey = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((value, i) => Object.is(value, b[i]));
+let reusedStoreys = 0;
+/** Diagnostic count of skipped storey scope validations, for tests and measurements. */
+export const storeyValidationReuseCount = () => reusedStoreys;
 
 const hasId = (value: unknown): value is { id: string } =>
   !!value && typeof value === "object" && typeof (value as { id?: unknown }).id === "string";
@@ -60,11 +69,24 @@ export function createProjectSnapshot(
   base?: Project,
 ): Project {
   if (owned.has(source)) return source;
-  const validated = validateProject(source, reuse);
+  const used: (readonly string[])[] = [];
+  const validated = validateProject(source, reuse, {
+    lookup: (storey, key) => {
+      const entry = storey && typeof storey === "object" ? validStoreys.get(storey) : undefined;
+      if (!entry || !sameKey(entry.key, key)) return undefined;
+      reusedStoreys++;
+      return entry.used;
+    },
+    record: (index, patterns) => (used[index] = patterns),
+  });
   const snapshot = freeze(
     base && owned.has(base) ? (share(validated, base) as Project) : validated,
   );
   owned.add(snapshot);
+  const keys = storeyValidationKeys(snapshot);
+  snapshot.storeys.forEach((storey, i) =>
+    validStoreys.set(storey, { key: keys[i]!, used: used[i]! }),
+  );
   return snapshot;
 }
 
