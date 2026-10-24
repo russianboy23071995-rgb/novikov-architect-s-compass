@@ -138,7 +138,7 @@ function NavigatorContent({
     >
       <header className="flex h-10 items-center justify-between border-b border-border px-3">
         <div>
-          <p className="font-display text-[12px] font-semibold uppercase text-primary">Navigator</p>
+          <p className="section-title">Navigator</p>
           <p className="text-xs font-medium text-foreground">Project browser</p>
         </div>
         <Button
