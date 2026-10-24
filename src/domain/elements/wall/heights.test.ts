@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { wallBase, wallHeights } from "./heights.ts";
@@ -53,7 +54,7 @@ test("V24 migrates at zero with identical material and rejects forged legacy off
   old.schemaVersion = 24;
   delete old.storeys[0].walls[0].baseOffset;
   const restored = deserializeProject(JSON.stringify(old));
-  assert.equal(restored.schemaVersion, 26);
+  assert.equal(restored.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(wallBase(storeyOf(restored).walls[0]!), 0);
   assert.deepEqual(buildSolid(restored), buildSolid(p));
   old.storeys[0].walls[0].baseOffset = 2;
@@ -275,7 +276,7 @@ test("bound heights follow storeys atomically, serialize only source rule, undo 
   assert.equal(buildBuildingSolid(changed).max[2], 3.8);
   assert.match(await exportIfc(changed), /'Height',\$,IFCLENGTHMEASURE\(3\.8\)/);
   const raw = JSON.parse(serializeProject(changed));
-  assert.equal(raw.schemaVersion, 26);
+  assert.equal(raw.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(raw.storeys[0].walls[0].height, undefined);
   assert.deepEqual(deserializeProject(JSON.stringify(raw)), changed);
   const h = commitProject(createHistory(p), changed);

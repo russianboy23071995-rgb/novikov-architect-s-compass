@@ -1,4 +1,5 @@
-import type { Wall, BimWindow } from "../../project/schema.ts";
+import type { Wall } from "../../project/schema.ts";
+import type { WallOpening } from "./openings.ts";
 import { deriveRightAngleTJunction } from "./t-junction.ts";
 import { wallBody } from "./body.ts";
 import { wallContourSolid } from "./contour-solid.ts";
@@ -11,7 +12,7 @@ export type TPairEnd = { wall: Wall; endpoint: 0 | 1 };
  * from ONE snapshot, and validates membership/other relations. No Project or
  * validateProject dependency; safe to use during project geometry validation.
  */
-export function inspectTPair(host: Wall, incoming: TPairEnd, windows: readonly BimWindow[]) {
+export function inspectTPair(host: Wall, incoming: TPairEnd, windows: readonly WallOpening[]) {
   const wall = incoming.wall;
   const ids = new Set([host.id, wall.id]);
   const geometry = deriveRightAngleTJunction(host, { wall, endpoint: incoming.endpoint });
@@ -65,7 +66,7 @@ export function inspectTPair(host: Wall, incoming: TPairEnd, windows: readonly B
 }
 
 /** Same pair inspection and solids for project validation, previews and export. */
-export function deriveTPairSolids(host: Wall, incoming: TPairEnd, windows: readonly BimWindow[]) {
+export function deriveTPairSolids(host: Wall, incoming: TPairEnd, windows: readonly WallOpening[]) {
   const { geometry } = inspectTPair(host, incoming, windows);
   const wall = incoming.wall;
   const walls = [

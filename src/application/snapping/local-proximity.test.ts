@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -20,7 +21,7 @@ import {
 
 function fixture(pairs: [number, number, number, number][]): Project {
   return {
-    schemaVersion: 26,
+    schemaVersion: PROJECT_SCHEMA_VERSION,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

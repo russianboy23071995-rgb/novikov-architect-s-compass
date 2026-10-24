@@ -1,5 +1,6 @@
 import { PROJECT_SCHEMA_VERSION } from "./format.ts";
-import { wallHeights } from "../elements/wall/heights.ts";
+import { wallBase, wallHeights } from "../elements/wall/heights.ts";
+import { doorSchema } from "../elements/door/model.ts";
 import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
@@ -267,10 +268,22 @@ const boundWallSchema = raisedWallSchema
   })
   .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
   .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
-const projectSchema = projectV25Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV26Schema = projectV25Schema.extend({
+  schemaVersion: z.literal(26),
   storeys: z
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(boundWallSchema) }))
+    .min(1),
+});
+/** Schema 27 adds hosted single-leaf doors per storey (user decision 24.10.2026). */
+const projectSchema = projectV26Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        doors: z.array(doorSchema).optional(),
+      }),
+    )
     .min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
@@ -583,6 +596,7 @@ export function validateProject(
       s,
       ...s.walls,
       ...s.windows,
+      ...(s.doors ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -621,6 +635,7 @@ export function validateProject(
       ),
     };
     const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
+    validateStoreyDoors(storey, project.layers);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
     memo?.record(
       index,
@@ -628,6 +643,25 @@ export function validateProject(
     );
   }
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
+}
+
+/** Doors fit their host wall in length and height; underside is relative to the storey level. */
+function validateStoreyDoors(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.doors?.length) return;
+  const walls = new Map(storey.walls.map((w) => [w.id, w]));
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const door of storey.doors) {
+    const wall = walls.get(door.wallId);
+    if (!wall) throw new Error(`Tür ${door.id}: unbekannte Wand ${door.wallId}.`);
+    if (!layerIds.has(door.layerId)) throw new Error("Unknown layer: " + door.layerId);
+    const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+    const centre = door.position * length;
+    if (door.width > length || centre < door.width / 2 || length - centre < door.width / 2)
+      throw new Error(`Tür ${door.id} muss in die Wandlänge passen.`);
+    const bottom = door.zOffset - wallBase(wall);
+    if (bottom < 0 || bottom + door.height > wall.height)
+      throw new Error(`Tür ${door.id} muss in die Wandhöhe passen.`);
+  }
 }
 
 function validateStoreyScope(

@@ -30,6 +30,8 @@ export function visiblePlanGeometry(project: ModelGeometry, allows: (id: string)
     windows: storeyOf(project).windows.filter((w) => allows(w.id)),
     lines: (storeyOf(project).lines ?? []).filter((l) => allows(l.id)),
     openings: storeyOf(project).windows.filter((w) => wallIds.has(w.wallId)),
+    // Like window openings: present on visible host walls; the symbol itself follows allows().
+    doors: (storeyOf(project).doors ?? []).filter((d) => wallIds.has(d.wallId)),
   };
 }
 export function visibleSurfaces(
@@ -74,10 +76,12 @@ export function drawingWallVisibility(
       .walls.filter((w) => !existing.has(w.id))
       .map((w) => [w.id, w]),
   );
-  const existingWindows = new Set(storeyOf(base).windows.map((w) => w.id));
+  // New hosted openings (windows, doors) follow their host wall and their own layer.
+  const hosted = (p: Project) => [...storeyOf(p).windows, ...(storeyOf(p).doors ?? [])];
+  const existingWindows = new Set(hosted(base).map((w) => w.id));
   const newWindows = new Map(
-    storeyOf(draft)
-      .windows.filter((w) => !existingWindows.has(w.id))
+    hosted(draft)
+      .filter((w) => !existingWindows.has(w.id))
       .map((w) => [w.id, w]),
   );
   return (id: string) => {

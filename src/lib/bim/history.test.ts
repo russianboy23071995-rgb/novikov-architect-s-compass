@@ -69,7 +69,7 @@ test("invalid files and geometry reject without modifying history", () => {
   for (const text of [
     "oops",
     "{}",
-    before.replace('"schemaVersion":26', '"schemaVersion":99'),
+    before.replace(`"schemaVersion":${PROJECT_SCHEMA_VERSION}`, '"schemaVersion":99'),
     before.replace('"unit":"m"', '"unit":"cm"'),
     before.replace('"width":1.2', '"width":99'),
   ])

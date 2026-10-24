@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { addWall } from "../../lib/bim/model.ts";
@@ -209,7 +210,7 @@ test("strict document input rejects bad references, duplicate IDs, invalid names
 test("schema 16 migration preserves working state without inventing documents", () => {
   const old = { ...createExampleProject(), schemaVersion: 16 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(migrated.drawingDocuments, undefined);
   assert.equal(migrated.modelViews, undefined);
   assert.deepEqual(storeyOf(migrated), storeyOf(old));
@@ -289,7 +290,7 @@ test("captured view framing and folder survive project history and file roundtri
 test("schema 17 migration keeps existing documents without inventing crop or folders", () => {
   const legacy = { ...create(createExampleProject()), schemaVersion: 17 };
   const migrated = readProjectFile(legacyFixtureJSON(legacy));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(migrated.drawingDocuments, legacy.drawingDocuments);
   assert.equal(migrated.documentFolders, undefined);
   assert.throws(() => readProjectFile(legacyFixtureJSON({ ...legacy, documentFolders: [] })));
@@ -442,7 +443,7 @@ test("drawing creation rejects foreign/stale contexts and keeps shared geometry"
     storeyOf(scoped),
   );
   const legacy = readProjectFile(legacyFixtureJSON({ ...base, schemaVersion: 18 }));
-  assert.equal(legacy.schemaVersion, 26);
+  assert.equal(legacy.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(legacy), storeyOf(base));
   const wall = createDrawing(
     base,

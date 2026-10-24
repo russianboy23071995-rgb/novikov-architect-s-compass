@@ -12,6 +12,7 @@ import { wallLength } from "@/lib/bim/model";
 import { wallBody } from "@/domain/elements/wall/body";
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
+import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
 
 type Props = PlanRun & {
   scene: PlanScene;
@@ -227,6 +228,36 @@ export function PlanSceneContent({
                 />
               </g>
             ))}
+            {(scene.doors.get(wall.id) ?? []).map((door) => {
+              const shown = allowsShown(door.id),
+                selected = selectedIds.has(door.id);
+              const stroke = selected ? WALL_AXIS_COLOR : "var(--primary)";
+              return (
+                <g key={door.id} aria-label={`Tür ${door.id}`}>
+                  <rect
+                    {...(canPick(door.id) ? selectProps("door", door.id) : {})}
+                    x={door.position * length - door.width / 2}
+                    y={-wall.thickness / 2}
+                    width={door.width}
+                    height={wall.thickness}
+                    fill="var(--background)"
+                    stroke={shown ? stroke : "none"}
+                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                    className="outline-none"
+                    style={selected ? CAD_SHIMMER : undefined}
+                  />
+                  <path
+                    visibility={shown ? "visible" : "hidden"}
+                    d={doorPlanPath(doorPlanSymbol(door, { length, thickness: wall.thickness }))}
+                    fill="none"
+                    stroke={stroke}
+                    style={selected ? CAD_SHIMMER : undefined}
+                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                    pointerEvents="none"
+                  />
+                </g>
+              );
+            })}
           </g>
         );
       })}

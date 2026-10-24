@@ -1,3 +1,4 @@
+import { storeyOpenings } from "./openings.ts";
 import { storeyOf } from "../../storeys/access.ts";
 import { validateProject, type Project } from "../../project/schema.ts";
 import { deriveRightAngleCorner, type CornerEnd } from "./corner.ts";
@@ -21,8 +22,8 @@ export function inspectCornerOpenings(input: Project, first: CornerTarget, secon
     b = end(second),
     corner = deriveRightAngleCorner(a, b);
   const boundaries = ["side", "far-end", "side", "join"] as const;
-  const openings = storeyOf(project)
-    .windows.filter((w) => w.wallId === a.wall.id || w.wallId === b.wall.id)
+  const openings = storeyOpenings(storeyOf(project))
+    .filter((w) => w.wallId === a.wall.id || w.wallId === b.wall.id)
     .sort((x, y) => (x.id < y.id ? -1 : 1))
     .map((window) => {
       const wall = window.wallId === a.wall.id ? a.wall : b.wall;

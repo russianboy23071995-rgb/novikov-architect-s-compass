@@ -1,3 +1,5 @@
+import { defaultDoorDraft, type DoorSettingsDraft } from "@/application/drawing/door-placement";
+import { defaultDoorLayerId } from "@/application/doors/actions";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -65,6 +67,20 @@ export function useToolDefaults(project: Project) {
         : project.defaultLayerIds.window,
     };
   }, [project, windowState]);
+  const [doorState, setDoorState] = useState<{
+    projectId: string;
+    values: DoorSettingsDraft;
+  } | null>(null);
+  const doorDefaults = useMemo(() => {
+    const values = doorState?.projectId === project.id ? doorState.values : defaultDoorDraft;
+    return {
+      ...values,
+      layerId:
+        values.layerId && project.layers.some((l) => l.id === values.layerId)
+          ? values.layerId
+          : defaultDoorLayerId(project),
+    };
+  }, [project, doorState]);
   const [state, setState] = useState<{ projectId: string; hatch: HatchDefaults } | null>(null);
   const hatch =
     state?.projectId === project.id
@@ -99,6 +115,10 @@ export function useToolDefaults(project: Project) {
       setLineState({ projectId: project.id, values });
     },
     window: windowDefaults,
+    door: doorDefaults,
+    setDoor(values: DoorSettingsDraft) {
+      setDoorState({ projectId: project.id, values });
+    },
     setWindow(values: WindowDimensionDraft) {
       setWindowState({ projectId: project.id, values });
     },

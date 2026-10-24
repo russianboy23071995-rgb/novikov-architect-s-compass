@@ -123,6 +123,7 @@ test("hidden host removes plan symbols and solid surfaces but independent drawin
     lines: [],
     hatches: [],
     openings: [],
+    doors: [],
   });
   assert.equal(hidden.surfaces.faces.length, 0);
   assert.ok(hidden.surfaces.min.every(Number.isFinite));

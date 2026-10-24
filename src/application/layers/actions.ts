@@ -1,3 +1,4 @@
+import { allStoreyElements, ELEMENT_KINDS, elementKinds } from "../../domain/elements/registry.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { validateLike, validatedInput } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -83,9 +84,7 @@ export function layerDeletionBlock(project: Project, id: string): string | null 
   if (isStandardLayerId(id) || Object.values(project.defaultLayerIds).includes(id))
     return "Standardebenen können nicht gelöscht werden.";
   if (
-    project.storeys
-      .flatMap((s) => [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references])
-      .some((element) => element.layerId === id)
+    project.storeys.flatMap((s) => allStoreyElements(s)).some((element) => element.layerId === id)
   )
     return "Diese Ebene enthält Elemente und kann nicht gelöscht werden.";
   return null;
@@ -111,31 +110,22 @@ export function previewLayerAssignment(
     throw new Error("Die Zielebene existiert nicht.");
   if (!request.elementIds.length) throw new Error("Keine Elemente ausgewählt.");
   const targets = new Set(request.elementIds);
-  const elements = [
-    ...storeyOf(project).walls,
-    ...storeyOf(project).windows,
-    ...(storeyOf(project).lines ?? []),
-    ...storeyOf(project).hatches,
-    ...storeyOf(project).references,
-  ];
+  const elements = allStoreyElements(storeyOf(project));
   const knownIds = new Set(elements.map((e) => e.id));
   if ([...targets].some((id) => !knownIds.has(id)))
     throw new Error("Mindestens ein ausgewähltes Element existiert nicht mehr.");
   if (elements.every((e) => !targets.has(e.id) || e.layerId === request.layerId)) return current;
   const assign = <T extends { id: string; layerId: string }>(e: T): T =>
     targets.has(e.id) ? { ...e, layerId: request.layerId } : e;
-  return validateLike(current, {
-    ...replaceStorey(project, {
-      ...storeyOf(project),
-      hatches: storeyOf(project).hatches.map(assign),
-      references: storeyOf(project).references.map(assign),
-      walls: storeyOf(project).walls.map(assign),
-      windows: storeyOf(project).windows.map(assign),
-      ...(storeyOf(project).lines === undefined
-        ? {}
-        : { lines: storeyOf(project).lines!.map(assign) }),
-    }),
-  });
+  const storey = storeyOf(project);
+  // Every registered element list is reassigned; absent optional lists stay absent.
+  const lists = Object.fromEntries(
+    elementKinds
+      .map((kind) => ELEMENT_KINDS[kind].list)
+      .filter((list) => storey[list] !== undefined)
+      .map((list) => [list, (storey[list] as { id: string; layerId: string }[]).map(assign)]),
+  );
+  return validateLike(current, replaceStorey(project, { ...storey, ...lists }));
 }
 
 /** Same action for UI and future Text/Voice adapters; one atomic history step. */

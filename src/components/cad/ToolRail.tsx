@@ -1,5 +1,6 @@
 import {
   BoxSelect,
+  DoorOpen,
   PanelsTopLeft,
   PaintBucket,
   MousePointer2,
@@ -15,6 +16,7 @@ import type { CadTool, ToolId } from "./cad-types";
 
 const tools: CadTool[] = [
   { id: "window", label: "Fenster", shortcut: "", icon: PanelsTopLeft },
+  { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
   { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
