@@ -5,6 +5,7 @@ import {
 } from "../references/calibration.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { previewDoorCommand } from "../doors/command.ts";
+import { previewDeleteSelection } from "../elements/delete.ts";
 import { previewOverlapHint } from "../openings/overlap-hint.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { eligibleSelection, singleTarget, type SelectionSet } from "../selection/state.ts";
@@ -81,10 +82,12 @@ export function previewSelectionCommand(
       .flatMap((s) => s.windows)
       .filter((w) => hosts.has(w.wallId)).length;
     summary = `${targets.length} Elemente um ${length.toLocaleString("de-DE", { maximumFractionDigits: 10 })} m bei ${value.degrees.toLocaleString("de-DE")}° verschieben (0° = +X, 90° = +Y). ${windows} Fenster ${windows === 1 ? "folgt seiner Wand" : "folgen ihren Wänden"}; ${detached} externe Wandanschlüsse werden gelöst.`;
+  } else if (/^auswahl\s+(?:löschen|entfernen)$/iu.test(text.trim())) {
+    ({ result, summary } = previewDeleteSelection(project, targets, visibility));
   } else {
     if (/^auswahl\b/iu.test(text.trim()))
       throw new Error(
-        "Befehl: Auswahl um 2 m bei 90 Grad verschieben. Winkel 0 bis 360 Grad; Länge in m, cm oder mm.",
+        "Befehle: Auswahl um 2 m bei 90 Grad verschieben (Winkel 0 bis 360 Grad; Länge in m, cm oder mm) · Auswahl löschen.",
       );
     const target = singleTarget(targets);
     if (!target)

@@ -17,10 +17,13 @@ export function DemandMenu({
   onAction,
   onReferences,
   onMoveSelection,
+  onDeleteSelection,
   selectionCount = 0,
 }: {
   calibrationControls?: import("react").ReactNode;
   onMoveSelection?: (() => void) | undefined;
+  /** Shared delete operation for the current selection (single or multiple elements). */
+  onDeleteSelection?: (() => void) | undefined;
   selectionCount?: number;
   project: Project;
   selection: Selection;
@@ -63,7 +66,8 @@ export function DemandMenu({
   const summary = selectionSummary(project, selection);
   // Wall-hosted openings only move along their wall.
   const opening = selection?.kind === "window" || selection?.kind === "door";
-  if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
+  if (!summary && !onReferences && !onMoveSelection && !onDeleteSelection && !calibrationControls)
+    return null;
   return (
     <div
       ref={panel}
@@ -245,6 +249,15 @@ export function DemandMenu({
               Werkzeugeigenschaften
             </button>
           </>
+        )}
+        {onDeleteSelection && (
+          <button
+            type="button"
+            className="rounded border p-1 text-left text-destructive hover:bg-muted"
+            onClick={onDeleteSelection}
+          >
+            {selectionCount > 1 ? "Auswahl löschen" : "Löschen"} (Entf)
+          </button>
         )}
       </div>
     </div>
