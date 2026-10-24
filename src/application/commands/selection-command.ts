@@ -5,6 +5,7 @@ import {
 } from "../references/calibration.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { previewDoorCommand } from "../doors/command.ts";
+import { previewOverlapHint } from "../openings/overlap-hint.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { eligibleSelection, singleTarget, type SelectionSet } from "../selection/state.ts";
 import { beginSelectionMove, previewSelectionMove, sameTargets } from "../selection/move.ts";
@@ -95,6 +96,8 @@ export function previewSelectionCommand(
     result = legacy.result;
     summary = legacy.summary;
   }
+  const hint = previewOverlapHint(project, result);
+  if (hint) summary = `${summary} · ${hint}`;
   return {
     calibration,
     base: project,
