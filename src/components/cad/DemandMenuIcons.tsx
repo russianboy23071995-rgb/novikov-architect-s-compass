@@ -12,7 +12,7 @@ function Svg({ children }: { children: ReactNode }) {
       height="20"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.2}
+      strokeWidth={1.0}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -25,7 +25,7 @@ function Svg({ children }: { children: ReactNode }) {
 function Dot({ x, y }: { x: number; y: number }) {
   return (
     <>
-      <circle cx={x} cy={y} r={2.2} stroke={muted} strokeWidth={0.9} />
+      <circle cx={x} cy={y} r={2.2} stroke={muted} strokeWidth={0.75} />
       <circle cx={x} cy={y} r={1.2} fill="currentColor" stroke="none" />
     </>
   );
@@ -65,7 +65,7 @@ export const KinkIcon = () => (
 export const EdgeStretchIcon = () => (
   <Svg>
     <path d="M13 5 H4 V19 H13" stroke={muted} />
-    <path d="M13 5 V19" strokeWidth={1.7} />
+    <path d="M13 5 V19" strokeWidth={1.4} />
     <path d="M15.5 12 H21.5 M19.5 10 L21.5 12 L19.5 14" />
   </Svg>
 );
@@ -97,7 +97,7 @@ export const AlongAxisIcon = ({ window }: { window?: boolean }) => (
 
 export const AxisIcon = ({ axis }: { axis: "x" | "y" | "z" }) => {
   const line = (a: "x" | "y" | "z", d: string, head: string) => (
-    <g stroke={axis === a ? "currentColor" : muted} strokeWidth={axis === a ? 1.5 : 1}>
+    <g stroke={axis === a ? "currentColor" : muted} strokeWidth={axis === a ? 1.25 : 0.85}>
       <path d={d} />
       <path d={head} />
     </g>
