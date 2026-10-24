@@ -1,6 +1,7 @@
 import { previewEdit } from "../src/application/direct-edit/controller.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { wallPatchFixture } from "./wall-patch-fixture.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
@@ -160,9 +161,15 @@ test("wall preview rejects stale context; cancel publishes nothing and commit re
   assert.equal(committed.history.past.length, 1);
   assert.deepEqual(committed.history.present, editAtPointer(session, base, point));
   assert.deepEqual(editingReducer(committed, { type: "undo" }).history.present, base);
-  storeyOf(base).windows[0]!.width = 100;
+  assert.throws(() => (storeyOf(base).windows[0]!.width = 100), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).windows[0]!.width = 100));
   assert.notEqual(
-    editingReducer(state, { type: "confirm", session, selection: target, point }).error,
+    editingReducer(tampered.state, {
+      type: "confirm",
+      session: tampered.session,
+      selection: target,
+      point,
+    }).error,
     "",
   );
 });

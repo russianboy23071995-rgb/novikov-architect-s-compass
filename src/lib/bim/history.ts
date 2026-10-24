@@ -6,24 +6,36 @@ import {
   ProjectFileSizeError,
   assertValidatedProjectSize,
 } from "../../interop/project-file/size.ts";
+import {
+  createProjectSnapshot,
+  isOwnedProjectSnapshot,
+} from "../../domain/project/owned-snapshot.ts";
 import { deserializeProject, validateProject } from "./model.ts";
 import type { Project } from "./model.ts";
 export type ProjectHistory = { past: Project[]; present: Project; future: Project[] };
 export const HISTORY_LIMIT = 100;
 export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
+// Size is fixed for an owned immutable snapshot, so its budget check is needed only once.
+const sizeChecked = new WeakSet<Project>();
+function assertSnapshotSize(project: Project): void {
+  if (sizeChecked.has(project)) return;
+  assertValidatedProjectSize(project);
+  if (isOwnedProjectSnapshot(project)) sizeChecked.add(project);
+}
 export function createHistory(project: Project): ProjectHistory {
-  return { past: [], present: validateProject(project), future: [] };
+  return { past: [], present: createProjectSnapshot(project), future: [] };
 }
 export function commitProject(
   history: ProjectHistory,
   project: Project,
   options: { legacyFileOpen?: boolean } = {},
 ): ProjectHistory {
-  const next = validateProject(project);
-  assertValidatedProjectSize(next);
-  // Preserve the previous serialization boundary's validation of the existing snapshot.
-  const previous = validateProject(history.present);
-  assertValidatedProjectSize(previous);
+  // Only factory-owned snapshots skip re-validation; anything else keeps the full check.
+  const owned = isOwnedProjectSnapshot(history.present) ? history.present : undefined;
+  const next = createProjectSnapshot(project, undefined, owned);
+  assertSnapshotSize(next);
+  const previous = owned ?? validateProject(history.present);
+  assertSnapshotSize(previous);
   if (!options.legacyFileOpen) assertRasterBudgetChange(previous, next);
   if (sameProjectContent(next, previous)) return history;
   if (sameProjectModel(history.present, next)) return { ...history, present: next };

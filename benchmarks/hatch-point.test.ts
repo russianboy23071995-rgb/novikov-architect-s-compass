@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { tamperedState } from "./tampered-state.ts";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import {
@@ -108,10 +109,11 @@ test("hatch preview is disposable and placement retains full validation and one 
   assert.equal(placed.history.past.length, 1);
   assert.deepEqual(placed.history.present, editAtPointer(edit, base, point));
   assert.deepEqual(editingReducer(placed, { type: "undo" }).history.present, base);
-  storeyOf(base).hatches[1]!.points[0]!.x = NaN;
-  const invalid = editingReducer(state, {
+  assert.throws(() => (storeyOf(base).hatches[1]!.points[0]!.x = NaN), TypeError);
+  const tampered = tamperedState(state, (p) => (storeyOf(p).hatches[1]!.points[0]!.x = NaN));
+  const invalid = editingReducer(tampered.state, {
     type: "confirm",
-    session: edit,
+    session: tampered.session,
     selection: edit.target,
     point,
   });
