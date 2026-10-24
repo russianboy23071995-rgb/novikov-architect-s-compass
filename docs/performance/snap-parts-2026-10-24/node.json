@@ -1,0 +1,45 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-24T13:58:34.839Z",
+  "results": [
+    {
+      "scenario": "school20000-line",
+      "legacyMs": {
+        "median": 374.71,
+        "p95": 519.92,
+        "n": 9
+      },
+      "currentMs": {
+        "median": 49.46,
+        "p95": 751.84,
+        "n": 9
+      }
+    },
+    {
+      "scenario": "school20000-wall",
+      "legacyMs": {
+        "median": 346.87,
+        "p95": 433.82,
+        "n": 9
+      },
+      "currentMs": {
+        "median": 103.24,
+        "p95": 161.2,
+        "n": 9
+      }
+    },
+    {
+      "scenario": "hatches1000x100-point",
+      "legacyMs": {
+        "median": 1747.56,
+        "p95": 7816.84,
+        "n": 9
+      },
+      "currentMs": {
+        "median": 765.48,
+        "p95": 1519.22,
+        "n": 9
+      }
+    }
+  ]
+}

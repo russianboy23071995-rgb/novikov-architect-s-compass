@@ -428,3 +428,61 @@ CadWorkspace (Port 8080, Beispielprojekt, Fenster sichtbar):
   eigene Entscheidung.
 - Kalibrierung, Z-Verschiebung und T-Anschluss nicht praktisch in der UI geprüft (bestehende
   Tests).
+
+# Stufe 4: Fangindex nach Commit (24.10.2026)
+
+Basis: main `7f0cc91` (PR444), Branch `audit/snap-index-reuse`. Freigabe: Nutzer 24.10.2026
+(„freigabe und go“). Bezug: docs/snap-index-invalidation.md (PR435: vollständiger Neuaufbau,
+weil damals keine unveränderte Schraffur ihre Identität behielt). Seit Stufe 1 bleiben
+unveränderte Elemente dieselben eingefrorenen Objekte; darauf baut dieser Schritt auf.
+
+## Änderungskarte
+
+1. **Wunsch/Abnahme:** Fangindex nach einer Änderung schneller; Fangpunkte, Segmente,
+   Reihenfolge und Abfrageergebnisse exakt gleich. Ausgeschlossen: Fangregeln, UI.
+2. **Eigentümer:** `application/snapping/project-references.ts`: Wandfangpunkte aus der
+   gemeinsamen Domainfunktion `connectedWallContours` statt aus vollständigen 3D-Wandkörpern
+   (die Wandkörper übernehmen genau diese Kontur); Teilergebnisse nur für eigene Snapshots:
+   je Linie/Schraffur nach Objekt, alle Wände eines Geschosses solange Wände, Anschlüsse,
+   T-Anschlüsse und Fenster dieselben Objekte sind. `constraints/snapping/local-source-index.ts`:
+   bereits von dort tief eingefrorene Daten werden nicht erneut durchlaufen (privates
+   WeakSet, kein Vertrauen in fremdes Einfrieren).
+3. **Gemeinsamer Weg:** dieselbe Funktion für Maus, Referenzauswahl und Vorschau; fremde
+   Stände rechnen voll.
+4. **Folgen:** Nachschlagetabelle und Box-Indizes werden weiter vollständig gebaut (bewusster
+   Rest: ein schrittweiser Index würde die Trefferreihenfolge berühren).
+5. **Abgrenzung:** keine Fach-, Datei-, Recovery- oder IFC-Änderung.
+
+## Gegenprüfung
+
+- `benchmarks/snap-parts-reuse.test.ts`: je 250 Zufallsschritte auf Höhen- und T-Fixture
+  (Wandverschiebung, Schraffurpunkt, Linienpunkt, Fensterbreite, Linie löschen,
+  Sichtbarkeit): Fangpunkte und Segmente exakt gleich der eingefrorenen alten Ableitung
+  (`legacy-snap-primitives.ts`, mit Wandkörpern), Segmentquellen zeigen auf eigene
+  Referenzen, Abfragen an vier Cursorpositionen identisch. Unveränderte Wände behalten ihre
+  Teile; veränderbare Stände werden nie gecacht (Änderung an Ort und Stelle wirkt sofort).
+- Gegenproben: zu grober Wand-Schlüssel → T-Test scheitert; Cache auch für veränderbare
+  Stände → Test scheitert.
+- 1184 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+
+## Messung
+
+`node --experimental-strip-types benchmarks/snap-index-after-commit.ts`, Node 24.22.1,
+gleicher Lauf, Fangindex direkt nach einem echten Commit, alt (volle Ableitung mit
+Wandkörpern) gegen neu, 9 Stichproben. Rohdaten: [node.json](snap-parts-2026-10-24/node.json).
+
+| Szenario                                       | alt Median | neu Median |
+| ---------------------------------------------- | ---------: | ---------: |
+| Schule 20.000, Linie geändert                  |      374,7 |       49,5 |
+| Schule 20.000, Wand geändert                   |      346,9 |      103,2 |
+| 1.000 Schraffuren × 100 Punkte, Punkt geändert |     1747,6 |      765,5 |
+
+Millisekunden. p95 schwankt stark (Speicherbereinigung im gemeinsamen Prozess, n = 9) und
+wird nicht als Gewinn behauptet. Verbleibend v. a. Nachschlagetabelle und Box-Indizes
+(bei 1.000 Schraffuren der größte Teil).
+
+## Bedienabnahme (24.10.2026)
+
+CadWorkspace: Wandlänge 3 → 5 m übernommen, danach Linienwerkzeug: Fangmarke „Endpunkt“ am
+linken und am neuen rechten Wandende (nur nach der Änderung vorhanden). Keine
+Konsolenfehler. Die Probelinie wurde durch Escape abgebrochen und nicht angelegt.

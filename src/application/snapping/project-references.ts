@@ -1,5 +1,6 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
+import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import type { Project } from "../../lib/bim/model.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
@@ -55,17 +56,57 @@ export function projectSnapReferences(project: Project): SnapReference[] {
   return [...references, ...segmentIntersectionReferences(segments)];
 }
 
-/** No intersection enumeration; shared primitive adapter for old and local query paths. */
-export function projectSnapPrimitives(project: Project) {
-  const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w.contour]));
+type Part = { references: SnapReference[]; segments: SnapSegment[] };
+// Parts derived from deeply frozen elements of owned snapshots. Identity fixes their content,
+// so an unchanged line, hatch or wall set keeps its derived references across commits.
+const elementParts = new WeakMap<object, Part>();
+const wallParts = new WeakMap<object, { inputs: readonly object[]; part: Part }>();
+
+/** Collects one element's references and the midpoint segments that point at them. */
+function part(build: (midpoint: typeof midpointReference) => SnapReference[]): Part {
   const segments: SnapSegment[] = [];
-  const midpoint = (id: string, feature: string, start: Point2, end: Point2) => {
+  const references = build((id, feature, start, end) => {
     const refs = midpointReference(id, feature, start, end);
     if (refs[0]) segments.push({ start: { ...start }, end: { ...end }, source: refs[0] });
     return refs;
+  });
+  return { references, segments };
+}
+
+function remembered<T extends object>(owned: boolean, element: T, build: (e: T) => Part): Part {
+  if (!owned) return build(element);
+  let cached = elementParts.get(element);
+  if (!cached) elementParts.set(element, (cached = build(element)));
+  return cached;
+}
+
+/** No intersection enumeration; shared primitive adapter for old and local query paths. */
+export function projectSnapPrimitives(project: Project) {
+  const owned = isOwnedProjectSnapshot(project);
+  const storey = storeyOf(project);
+  const parts = [
+    wallsPart(project, owned),
+    ...storey.hatches.map((hatch) => remembered(owned, hatch, hatchPart)),
+    ...(storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
+  ];
+  return {
+    references: parts.flatMap((p) => p.references),
+    segments: parts.flatMap((p) => p.segments),
   };
-  const references: SnapReference[] = [
-    ...storeyOf(project).walls.flatMap((wall) => {
+}
+
+/** Wall references depend on joined contours: reuse only for the same walls, joins, T-joins
+ * and windows (contour checks read them); any other change derives all walls again.
+ */
+function wallsPart(project: Project, owned: boolean): Part {
+  const storey = storeyOf(project);
+  const inputs = [storey.walls, storey.wallJoins, storey.wallTJunctions, storey.windows];
+  const cached = owned ? wallParts.get(storey.walls) : undefined;
+  if (cached && cached.inputs.every((input, i) => input === inputs[i])) return cached.part;
+  // Snapping needs only the joined 2D contours, not the extruded solids.
+  const joined = connectedWallContours(project);
+  const result = part((midpoint) =>
+    storey.walls.flatMap((wall) => {
       const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
       const body = wallBody(wall);
       return [
@@ -90,36 +131,43 @@ export function projectSnapPrimitives(project: Project) {
         ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
     }),
-    ...storeyOf(project).hatches.flatMap((hatch) =>
-      hatch.points.flatMap((point, index) => {
-        const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;
-        const after = hatch.points[(index + 1) % hatch.points.length]!;
-        return [
-          {
-            point: { ...point },
-            entityId: hatch.id,
-            feature: `vertex-${index}`,
-            directions: [before, after].map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
-          },
-          ...midpoint(hatch.id, `segment-${index}-midpoint`, point, after),
-        ];
-      }),
-    ),
-    ...(storeyOf(project).lines ?? []).flatMap((line) => [
-      ...line.points.map((point, index) => ({
-        point: { ...point },
-        entityId: line.id,
-        feature: `vertex-${index}`,
-        directions: [line.points[index - 1], line.points[index + 1]]
-          .filter((p) => p !== undefined)
-          .map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
-      })),
-      ...line.points
-        .slice(1)
-        .flatMap((point, index) =>
-          midpoint(line.id, `segment-${index}-midpoint`, line.points[index]!, point),
-        ),
-    ]),
-  ];
-  return { references, segments };
+  );
+  if (owned) wallParts.set(storey.walls, { inputs, part: result });
+  return result;
+}
+
+function hatchPart(hatch: Project["storeys"][number]["hatches"][number]): Part {
+  return part((midpoint) =>
+    hatch.points.flatMap((point, index) => {
+      const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;
+      const after = hatch.points[(index + 1) % hatch.points.length]!;
+      return [
+        {
+          point: { ...point },
+          entityId: hatch.id,
+          feature: `vertex-${index}`,
+          directions: [before, after].map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
+        },
+        ...midpoint(hatch.id, `segment-${index}-midpoint`, point, after),
+      ];
+    }),
+  );
+}
+
+function linePart(line: NonNullable<Project["storeys"][number]["lines"]>[number]): Part {
+  return part((midpoint) => [
+    ...line.points.map((point, index) => ({
+      point: { ...point },
+      entityId: line.id,
+      feature: `vertex-${index}`,
+      directions: [line.points[index - 1], line.points[index + 1]]
+        .filter((p) => p !== undefined)
+        .map((p) => ({ x: p.x - point.x, y: p.y - point.y })),
+    })),
+    ...line.points
+      .slice(1)
+      .flatMap((point, index) =>
+        midpoint(line.id, `segment-${index}-midpoint`, line.points[index]!, point),
+      ),
+  ]);
 }
