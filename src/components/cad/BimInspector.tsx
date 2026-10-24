@@ -11,6 +11,7 @@ import type { Project } from "@/lib/bim/model";
 import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
+import { DoorProperties } from "./DoorProperties";
 
 type Props = {
   project: Project;
@@ -31,6 +32,14 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
       ? storeyOf(project).lines?.find((item) => item.id === selection.id)
       : undefined;
   if (line) return <LineInspector project={project} line={line} onChange={onChange} />;
+  const door =
+    selection?.kind === "door"
+      ? storeyOf(project).doors?.find((item) => item.id === selection.id)
+      : undefined;
+  if (door)
+    return (
+      <DoorProperties project={project} door={door} selection={selection} onChange={onChange} />
+    );
   const wall =
     selection?.kind === "wall"
       ? storeyOf(project).walls.find((item) => item.id === selection.id)
@@ -53,7 +62,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
+        Wand, Fenster, Tür, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
       </p>
     );
   const fields = wall

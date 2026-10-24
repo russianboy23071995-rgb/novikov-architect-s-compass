@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -160,7 +161,7 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   };
   const before = structuredClone(v3);
   const migrated = loadProjectData(legacyProjectFixture(v3));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated), {
     ...storey,
     references: [],
@@ -256,7 +257,7 @@ test("V4-V6 hatch migration preserves old fill, contours, layers and appearance 
       });
     const before = legacyFixtureJSON(old);
     const loaded = loadProjectData(legacyProjectFixture(old));
-    assert.equal(loaded.schemaVersion, 26);
+    assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
     assert.deepEqual(storeyOf(loaded).hatches, storeyOf(current).hatches);
     assert.equal(legacyFixtureJSON(old), before);
     storeyOf(old).hatches[0].contour = { visible: true, color: "#ffffff" };

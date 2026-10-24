@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -36,7 +37,7 @@ test("schema 11 preserves unknown provenance; schema 12 revisions roundtrip with
   const p = fixture(),
     old = { ...p, schemaVersion: 11 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(migrated.hatchPatterns[0]!.revision, undefined);
   assert.deepEqual(storeyOf(migrated), storeyOf(p));
   const updated = resolveProjectHatchPatterns(migrated, migrated, available).project;

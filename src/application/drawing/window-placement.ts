@@ -30,7 +30,8 @@ export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimens
   return { width, height, sillHeight };
 }
 
-function findWindowHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
+/** Nearest visible wall whose body contains the point; shared by every wall opening. */
+export function findOpeningHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
   const hosts = storeyOf(project)
     .walls.filter((w) => isLayerVisible(project, visibility, w.id))
     .flatMap((wall) => {
@@ -61,25 +62,18 @@ export function windowPlacementHost(
   visibility: LayerVisibilityPolicy,
   point: Point,
 ): string {
-  const host = findWindowHost(project, visibility, point);
+  const host = findOpeningHost(project, visibility, point);
   if (!host) throw new Error("Eine sichtbare Wand anklicken.");
   return host.wall.id;
 }
 
-/** Host projection is shared by preview and commit; no mutation or UI state. */
-export function placeWindow(
-  base: Project,
+/** Host and relative position for a placement: a fixed host keeps the pointer on its axis. */
+export function resolveOpeningHost(
   current: Project,
   visibility: LayerVisibilityPolicy,
-  id: string,
   point: Point,
-  dimensions: WindowDimensions = defaultDrawingWindow,
   hostId?: string,
-  layerId: string = current.defaultLayerIds.window,
-): Project {
-  if (base !== current || !visibility.isCurrent(current, visibility.context))
-    throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
-  if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
+) {
   const wall = hostId
     ? storeyOf(current).walls.find(
         (w) => w.id === hostId && isLayerVisible(current, visibility, w.id),
@@ -96,8 +90,26 @@ export function placeWindow(
               (point.y - body.start.y) * (wall.end.y - wall.start.y)) /
             wallLength(wall) ** 2,
         }
-      : findWindowHost(current, visibility, point);
+      : findOpeningHost(current, visibility, point);
   if (!host) throw new Error("Zum Platzieren eine sichtbare Wand anfahren.");
+  return host;
+}
+
+/** Host projection is shared by preview and commit; no mutation or UI state. */
+export function placeWindow(
+  base: Project,
+  current: Project,
+  visibility: LayerVisibilityPolicy,
+  id: string,
+  point: Point,
+  dimensions: WindowDimensions = defaultDrawingWindow,
+  hostId?: string,
+  layerId: string = current.defaultLayerIds.window,
+): Project {
+  if (base !== current || !visibility.isCurrent(current, visibility.context))
+    throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
+  if (![point.x, point.y].every(Number.isFinite)) throw new Error("Ungültige Fensterposition.");
+  const host = resolveOpeningHost(current, visibility, point, hostId);
   if (!current.layers.some((layer) => layer.id === layerId))
     throw new Error("Die Fensterebene existiert nicht mehr.");
   if (visibility.context.hiddenLayerIds.includes(layerId))
@@ -112,15 +124,18 @@ export function placeWindow(
 }
 
 /** Unanchored placement: the shared snap engine runs, but no artificial movement
- * origin or polar input is pinned before the host is chosen. */
-export function windowPlacementInteraction(
+ * origin or polar input is pinned before the host is chosen. Window and door share this
+ * lifecycle; only their placement action and labels differ.
+ */
+export function openingPlacementInteraction(
   base: Project,
   visibility: LayerVisibilityPolicy,
   id: string,
   current: () => { project: Project; visibility: LayerVisibilityPolicy },
+  place: (project: Project, point: Point) => Project,
   commit: (next: Project, id: string) => void,
   cancel: () => void,
-  settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
+  labels: { axis: string; mouse: string; origin: string },
   hostId?: string,
 ): ToolInteraction {
   const wall = hostId ? storeyOf(base).walls.find((w) => w.id === hostId) : null;
@@ -134,30 +149,18 @@ export function windowPlacementInteraction(
     const now = current();
     if (now.visibility !== visibility)
       throw new Error("Sichtbarkeit geändert. Werkzeug erneut starten.");
-    if (settings && settings.currentDraft() !== settings.draft)
-      throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
-    const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
-    return placeWindow(
-      base,
-      now.project,
-      visibility,
-      id,
-      point,
-      dimensions,
-      hostId,
-      settings?.draft.layerId,
-    );
+    return place(now.project, point);
   };
   return {
     identity: {},
     origin: body?.start ?? { x: 0, y: 0 },
-    input: body ? { axisLabel: "Fenstermitte ab Wandanfang", degrees } : null,
+    input: body ? { axisLabel: labels.axis, degrees } : null,
     click: "confirm",
     snapping: {
       origin:
         body && direction
           ? {
-              entityId: "@window-placement-origin",
+              entityId: labels.origin,
               feature: hostId!,
               point: body.start,
               directions: [direction],
@@ -165,7 +168,7 @@ export function windowPlacementInteraction(
           : null,
       sources: (refs) => [...refs],
       resolve: (cursor, context) => {
-        const host = wall ? { wall } : findWindowHost(base, visibility, cursor);
+        const host = wall ? { wall } : findOpeningHost(base, visibility, cursor);
         if (!host) return querySnap(cursor, context);
         const body = wallBody(host.wall);
         return querySnap(cursor, {
@@ -180,7 +183,7 @@ export function windowPlacementInteraction(
       },
     },
     preview: (_angle, length, aim) => {
-      if (!body || degrees === null) throw new Error("Fensterposition per Maus wählen.");
+      if (!body || degrees === null) throw new Error(labels.mouse);
       const result = precisionTarget(body.start, aim, String(degrees), length);
       preview(result.point);
       return result;
@@ -192,4 +195,45 @@ export function windowPlacementInteraction(
     commit: (point) => commit(preview(point), id),
     cancel,
   };
+}
+
+export function windowPlacementInteraction(
+  base: Project,
+  visibility: LayerVisibilityPolicy,
+  id: string,
+  current: () => { project: Project; visibility: LayerVisibilityPolicy },
+  commit: (next: Project, id: string) => void,
+  cancel: () => void,
+  settings?: { draft: WindowDimensionDraft; currentDraft: () => WindowDimensionDraft },
+  hostId?: string,
+): ToolInteraction {
+  return openingPlacementInteraction(
+    base,
+    visibility,
+    id,
+    current,
+    (project, point) => {
+      if (settings && settings.currentDraft() !== settings.draft)
+        throw new Error("Fenstermaße geändert. Aktuelle Vorschau verwenden.");
+      const dimensions = settings ? parseWindowDimensions(settings.draft) : defaultDrawingWindow;
+      return placeWindow(
+        base,
+        project,
+        visibility,
+        id,
+        point,
+        dimensions,
+        hostId,
+        settings?.draft.layerId,
+      );
+    },
+    commit,
+    cancel,
+    {
+      axis: "Fenstermitte ab Wandanfang",
+      mouse: "Fensterposition per Maus wählen.",
+      origin: "@window-placement-origin",
+    },
+    hostId,
+  );
 }

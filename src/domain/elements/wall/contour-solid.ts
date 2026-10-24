@@ -1,4 +1,5 @@
-import type { Wall, BimWindow } from "../../project/schema.ts";
+import type { Wall } from "../../project/schema.ts";
+import type { WallOpening } from "./openings.ts";
 import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { wallBody } from "./body.ts";
 import {
@@ -10,7 +11,7 @@ import { coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
 function deriveWallContourSolid(
   wall: Wall,
   points: Point2[],
-  windows: BimWindow[],
+  windows: readonly WallOpening[],
   clipOpeningsToProfile = false,
   extrude: typeof extrudeProfileWithOpenings = extrudeProfileWithOpenings,
 ) {
@@ -83,7 +84,7 @@ function deriveWallContourSolid(
 export function wallContourSolid(
   wall: Wall,
   points: Point2[],
-  windows: BimWindow[],
+  windows: readonly WallOpening[],
   clipOpeningsToProfile = false,
 ) {
   return deriveWallContourSolid(wall, points, windows, clipOpeningsToProfile);
@@ -96,7 +97,12 @@ export function createWallContourSolidDeriver(wallIds: readonly string[]) {
     string,
     { key: string; solid: ReturnType<typeof extrudeProfileWithOpenings> }
   >();
-  return (wall: Wall, points: Point2[], windows: BimWindow[], clipOpeningsToProfile = false) =>
+  return (
+    wall: Wall,
+    points: Point2[],
+    windows: readonly WallOpening[],
+    clipOpeningsToProfile = false,
+  ) =>
     deriveWallContourSolid(wall, points, windows, clipOpeningsToProfile, (...args) => {
       if (!allowed.has(wall.id)) return extrudeProfileWithOpenings(...args);
       const key = JSON.stringify(args);

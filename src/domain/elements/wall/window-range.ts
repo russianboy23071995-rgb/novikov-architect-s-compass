@@ -9,10 +9,11 @@ export function boundedWindowPosition(
   wall: Wall,
   width: number,
   position: number,
+  noun: "Fenster" | "Tür" = "Fenster",
 ) {
   const length = wallLength(wall);
   if (!Number.isFinite(position) || !Number.isFinite(width) || width <= 0 || width > length)
-    throw new Error("Fenster passt nicht in die Wand oder Position ist ungültig.");
+    throw new Error(`${noun} passt nicht in die Wand oder Position ist ungültig.`);
   const ux = (wall.end.x - wall.start.x) / length,
     uy = (wall.end.y - wall.start.y) / length;
   let min = width / 2,
@@ -38,7 +39,10 @@ export function boundedWindowPosition(
     if (end.endpoint === 0) min = Math.max(min, Math.max(...distances) + width / 2 + margin);
     else max = Math.min(max, Math.min(...distances) - width / 2 - margin);
   }
-  if (min > max) throw new Error("Kein zulässiger Fensterbereich auf dieser Wand.");
+  if (min > max)
+    throw new Error(
+      `Kein zulässiger ${noun === "Tür" ? "Türbereich" : "Fensterbereich"} auf dieser Wand.`,
+    );
   // Avoid roundoff at strict length checks when converting centre distance to a fraction.
   const inset = Math.min(1e-12 * Math.max(1, length), (max - min) / 2);
   return Math.max((min + inset) / length, Math.min((max - inset) / length, position));

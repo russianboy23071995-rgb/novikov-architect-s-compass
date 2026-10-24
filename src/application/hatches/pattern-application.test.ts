@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import { test } from "node:test";
@@ -72,7 +73,7 @@ test("schema 10 migrates existing solid hatches without a library", () => {
   });
   const { hatchPatterns: _unused, ...old } = p;
   const reopened = deserializeProject(legacyFixtureJSON({ ...old, schemaVersion: 10 }));
-  assert.equal(reopened.schemaVersion, 26);
+  assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(reopened.hatchPatterns, []);
   assert.deepEqual(storeyOf(reopened).hatches, storeyOf(p).hatches);
 });

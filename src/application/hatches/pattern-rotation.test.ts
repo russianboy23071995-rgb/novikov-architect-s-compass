@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -204,7 +205,7 @@ test("legacy schema 12 migrates with zero implied angle and retains strict old a
   const p = fixture(),
     old = { ...p, schemaVersion: 12 };
   const migrated = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(storeyOf(migrated).hatches[0]!.pattern!.rotation, undefined);
   assert.equal(
     hatchPatternTile(definition, storeyOf(migrated).hatches[0]!.pattern!)!.patternTransform,

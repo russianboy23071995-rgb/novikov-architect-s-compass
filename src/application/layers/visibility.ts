@@ -1,3 +1,4 @@
+import { allStoreyElements } from "../../domain/elements/registry.ts";
 import { z } from "zod";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -52,7 +53,7 @@ export function createLayerVisibilityPolicy(base: Project, input: LayerVisibilit
   // Build once per snapshot/context, not by scanning all elements on every pointer move.
   const elements = new Map(
     project.storeys
-      .flatMap((s) => [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references])
+      .flatMap((s) => allStoreyElements(s))
       .map((element) => [element.id, element] as const),
   );
   const walls = new Map(project.storeys.flatMap((s) => s.walls).map((wall) => [wall.id, wall]));

@@ -1,3 +1,4 @@
+import type { ElementKind } from "../../application/selection/target.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
@@ -584,7 +585,7 @@ export function BimPlan({
       pickupScope,
     ],
   );
-  const selectProps = (kind: "wall" | "window" | "line" | "hatch" | "reference", id: string) => ({
+  const selectProps = (kind: ElementKind, id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,

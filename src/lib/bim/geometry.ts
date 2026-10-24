@@ -5,6 +5,7 @@ import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
+import { storeyOpenings, type WallOpening } from "../../domain/elements/wall/openings.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import {
   createProjectionFrame,
@@ -38,8 +39,8 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   const joined = new Map(connectedWallSolids(project).map((w) => [w.wallId, w]));
   // Derivation-local index: preserve window order and objects, never retain a
   // stale host assignment across model/preview changes.
-  const windowsByHost = new Map<string, Project["storeys"][number]["windows"]>();
-  for (const window of storeyOf(project).windows) {
+  const windowsByHost = new Map<string, WallOpening[]>();
+  for (const window of storeyOpenings(storeyOf(project))) {
     const group = windowsByHost.get(window.wallId);
     if (group) group.push(window);
     else windowsByHost.set(window.wallId, [window]);

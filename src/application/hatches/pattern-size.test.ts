@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -106,7 +107,7 @@ test("size edits are one model undo step; view scale stays outside that history;
   assert.deepEqual(readProjectFile(serializeProject(history.present)), history.present);
   const old = { ...p, schemaVersion: 15 };
   const loaded = readProjectFile(legacyFixtureJSON(old));
-  assert.equal(loaded.schemaVersion, 26);
+  assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(loaded), storeyOf(p));
   assert.throws(() =>
     readProjectFile(legacyFixtureJSON({ ...history.present, schemaVersion: 15 })),

@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -121,7 +122,7 @@ test("strict schema 13 migration retains geometry and rejects future palette fie
   const p = createProject("p", "s");
   const old = { ...p, schemaVersion: 13 };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated), storeyOf(p));
   assert.equal(migrated.penSet, undefined);
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, penSet: defaultPenSet })));

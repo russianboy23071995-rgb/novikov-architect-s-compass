@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -25,7 +26,7 @@ test("density boundaries, hysteresis, interruption and exact return deadline", (
 });
 function fixture(n: number) {
   return validateProject({
-    schemaVersion: 26,
+    schemaVersion: PROJECT_SCHEMA_VERSION,
     groundStoreyId: "s",
     groundDatum: 0,
     hatchPatterns: [],

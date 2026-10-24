@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -54,7 +55,7 @@ for (const withLines of [false, true])
       const { layerId, ...rest } = e;
       return rest;
     };
-    assert.equal(migrated.schemaVersion, 26);
+    assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
     assert.deepEqual(
       storeyOf(migrated).walls.map(strip),
       storeyOf(input).walls.map((w) => ({ ...w, bodyOffset: 0 })),

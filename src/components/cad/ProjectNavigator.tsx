@@ -1,3 +1,4 @@
+import { allStoreyElements } from "@/domain/elements/registry";
 import type { BuildingChange } from "@/application/storeys/actions";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { BuildingSettings } from "./BuildingSettings";
@@ -235,11 +236,7 @@ function NavigatorContent({
         <div className="flex justify-between">
           <span>Model elements</span>
           <span className="font-mono text-foreground">
-            {storeyOf(project).walls.length +
-              storeyOf(project).windows.length +
-              storeyOf(project).hatches.length +
-              storeyOf(project).references.length +
-              (storeyOf(project).lines?.length ?? 0)}
+            {allStoreyElements(storeyOf(project)).length}
           </span>
         </div>
         <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">

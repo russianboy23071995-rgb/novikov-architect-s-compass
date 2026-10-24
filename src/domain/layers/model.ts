@@ -31,6 +31,18 @@ export function isStandardLayerId(id: string): boolean {
   );
 }
 
+/** The reserved standard layer of one key (stable ID namespace, never the editable name). */
+export function standardLayerId(
+  layers: readonly Layer[],
+  key: (typeof standards)[number][0],
+): string | undefined {
+  return layers.find(
+    (l) =>
+      l.id === `layer:${key}` ||
+      (l.id.startsWith(`layer:${key}:`) && /^[1-9]d*$/.test(l.id.slice(`layer:${key}:`.length))),
+  )?.id;
+}
+
 /** Shared by new projects and migration. Never infer defaults from editable names. */
 export function createStandardLayers(occupiedIds: Iterable<string>) {
   const occupied = new Set(occupiedIds);

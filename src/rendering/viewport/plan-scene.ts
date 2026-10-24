@@ -15,8 +15,14 @@ export function derivePlanScene(
     if (!openings.has(opening.wallId)) openings.set(opening.wallId, []);
     openings.get(opening.wallId)!.push(opening);
   }
+  const doors = new Map<string, typeof plan.doors>();
+  for (const door of plan.doors) {
+    if (!doors.has(door.wallId)) doors.set(door.wallId, []);
+    doors.get(door.wallId)!.push(door);
+  }
   return {
     plan,
+    doors,
     hatchPatterns: new Map(patterns.map((p) => [p.id, p])),
     openings,
     assets: new Map(geometry.assets.map((a) => [a.id, a])),

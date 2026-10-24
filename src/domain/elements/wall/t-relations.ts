@@ -1,3 +1,4 @@
+import { storeyOpenings } from "./openings.ts";
 import { assertSameWallBase } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
@@ -37,7 +38,7 @@ export function tConnectionContours(
     const result = inspectTPair(
       host,
       { wall: incoming, endpoint: relation.incoming.endpoint },
-      storeyOf(project).windows,
+      storeyOpenings(storeyOf(project)),
     );
     validateCornerTContact(
       project,

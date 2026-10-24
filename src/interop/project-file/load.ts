@@ -29,6 +29,7 @@ import {
   projectV23Schema,
   projectV24Schema,
   projectV25Schema,
+  projectV26Schema,
 } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
@@ -53,7 +54,7 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 26. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 27. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -136,7 +137,9 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData({ ...old, schemaVersion: 25, storeys: old.storeys });
   }
   if (value.schemaVersion === 25)
-    return validateProject({ ...projectV25Schema.parse(value), schemaVersion: 26 });
+    return migrateProjectData({ ...projectV25Schema.parse(value), schemaVersion: 26 });
+  if (value.schemaVersion === 26)
+    return validateProject({ ...projectV26Schema.parse(value), schemaVersion: 27 });
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

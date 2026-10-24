@@ -31,6 +31,8 @@ import { useReferenceCalibration } from "./useReferenceCalibration";
 import { useImageImport } from "./useImageImport";
 import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
+import { useDoorPlacement } from "./useDoorPlacement";
+import { DoorPlacementFields } from "./DoorPlacementFields";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
 import { selectionIndex, selectTargets, type SelectionSet } from "@/application/selection/state";
@@ -320,14 +322,22 @@ export function CadWorkspace({
         s: "slab",
         l: "line",
         h: "hatch",
+        t: "door",
       };
       const next = map[event.key.toLowerCase()];
       if (next) {
         cancelInteraction();
         setTool(next);
-        if (next === "window" || next === "line" || next === "hatch") setSelection(null);
+        if (next === "window" || next === "door" || next === "line" || next === "hatch")
+          setSelection(null);
         setModelError("");
-        if (next === "window" || next === "wall" || next === "line" || next === "hatch")
+        if (
+          next === "window" ||
+          next === "door" ||
+          next === "wall" ||
+          next === "line" ||
+          next === "hatch"
+        )
           setMode("2D");
       }
       if (event.key === "Escape") {
@@ -365,12 +375,14 @@ export function CadWorkspace({
   const selectTool = (next: ToolId) => {
     cancelInteraction();
     setTool(next);
-    if (next === "window" || next === "measure") setDemandOpen(false);
-    if (next === "window" || next === "line" || next === "hatch") setSelection(null);
+    if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
+    if (next === "window" || next === "door" || next === "line" || next === "hatch")
+      setSelection(null);
     setModelError("");
     if (
       next === "measure" ||
       next === "window" ||
+      next === "door" ||
       next === "wall" ||
       next === "line" ||
       next === "hatch"
@@ -488,7 +500,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Doors are edited through their properties until direct editing supports them.
+    if (!selection || selection.kind === "reference" || selection.kind === "door") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
@@ -699,6 +712,18 @@ export function CadWorkspace({
     toolDefaults.window,
     toolDefaults.setWindow,
   );
+  const doorTool = useDoorPlacement(
+    tool === "door",
+    project,
+    visibility,
+    (next, id) => {
+      changeProject(next, { kind: "door", id });
+      setTool("select");
+    },
+    () => selectTool("select"),
+    toolDefaults.door,
+    toolDefaults.setDoor,
+  );
   const imageTool = useImageImport(project, visibility, (next, id) =>
     changeProject(next, { kind: "reference", id }),
   );
@@ -734,7 +759,11 @@ export function CadWorkspace({
   );
   cancelMeasurement.current = measurement.reset;
   const windowPlacement =
-    measurement.adapter ?? calibration.adapter ?? imageTool.adapter ?? windowTool.adapter;
+    measurement.adapter ??
+    calibration.adapter ??
+    imageTool.adapter ??
+    windowTool.adapter ??
+    doorTool.adapter;
   const interaction = useToolInteraction(
     windowPlacement ??
       groupMove.adapter ??
@@ -1156,6 +1185,16 @@ export function CadWorkspace({
                 onPrecision={windowTool.setPrecision}
                 pickingHost={windowTool.pickingHost}
               />
+            ) : tool === "door" ? (
+              <DoorPlacementFields
+                layers={project.layers}
+                value={doorTool.dimensions}
+                onChange={doorTool.setDimensions}
+                error={doorTool.error}
+                precision={doorTool.precision}
+                onPrecision={doorTool.setPrecision}
+                pickingHost={doorTool.pickingHost}
+              />
             ) : tool === "hatch" && mode === "2D" ? (
               <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
                 <label className="text-xs">
@@ -1431,7 +1470,7 @@ export function CadWorkspace({
                               aim: interaction.draft.move,
                               pick: (point, candidate) => {
                                 interaction.pick(point, candidate);
-                                if (windowTool.pickingHost)
+                                if (windowTool.pickingHost || doorTool.pickingHost)
                                   setDemandPosition({
                                     x: lastPointer.current.x + 16,
                                     y: lastPointer.current.y + 16,
@@ -1475,7 +1514,8 @@ export function CadWorkspace({
                         tool === "measure" ||
                         tool === "select" ||
                         tool === "wall" ||
-                        tool === "window"
+                        tool === "window" ||
+                        tool === "door"
                       }
                       hoverDwellMs={hoverDwellMs}
                       start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
@@ -1500,7 +1540,7 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (target.kind === "reference") return;
+                        if (target.kind === "reference" || target.kind === "door") return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(

@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
@@ -129,7 +130,7 @@ test("schema 8 roundtrip and strict V7 migration retain geometry without discove
   const { assets, hatchPatterns, ...legacyRoot } = p;
   const old = { ...legacyRoot, schemaVersion: 7, storey };
   const migrated = loadProjectData(legacyProjectFixture(old));
-  assert.equal(migrated.schemaVersion, 26);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(storeyOf(migrated), { ...storey, references: [], wallTJunctions: [] });
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...p, schemaVersion: 7 })));
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 8 })));

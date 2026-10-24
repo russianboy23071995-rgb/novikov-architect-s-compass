@@ -1,3 +1,4 @@
+import { openingNoun, storeyOpenings } from "./openings.ts";
 import { wallBase, assertSameWallBase } from "./heights.ts";
 import { storeyOf, replaceStorey } from "../../storeys/access.ts";
 import type { WallGeometry } from "../../project/geometry-scope.ts";
@@ -115,7 +116,7 @@ export function connectedWallContours(project: WallGeometry) {
       throw new Error("Wand zwischen Anschlüssen zu kurz.");
     const wall = walls.get(id)!;
     const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
-    for (const opening of storeyOf(project).windows.filter((w) => w.wallId === id)) {
+    for (const opening of storeyOpenings(storeyOf(project)).filter((w) => w.wallId === id)) {
       const at = (d: number) => ({
         x: wall.start.x + ((wall.end.x - wall.start.x) * d) / length,
         y: wall.start.y + ((wall.end.y - wall.start.y) * d) / length,
@@ -134,7 +135,9 @@ export function connectedWallContours(project: WallGeometry) {
             (i === 3 && occupied.has(key({ wallId: id, endpoint: 0 })))) &&
             relation === "touching")
         )
-          throw new Error("Fenster darf einen Wandabschluss weder berühren noch überschreiten.");
+          throw new Error(
+            `${openingNoun(storeyOf(project), opening.id)} darf einen Wandabschluss weder berühren noch überschreiten.`,
+          );
       }
     }
   }
@@ -153,7 +156,7 @@ function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wa
       deriveSolid(
         w,
         contours.get(w.id)!,
-        storeyOf(project).windows,
+        storeyOpenings(storeyOf(project)),
         storeyOf(project).wallTJunctions.some(
           (t) => t.hostWallId === w.id || t.incoming.wallId === w.id,
         ),

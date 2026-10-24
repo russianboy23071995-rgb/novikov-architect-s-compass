@@ -1,3 +1,4 @@
+import { PROJECT_SCHEMA_VERSION } from "../src/domain/project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { rasterFixture } from "./raster-budget-fixture.ts";
@@ -123,7 +124,7 @@ test("legacy migration preserves oversized assets; shared references do not cons
     size: Buffer.byteLength(text),
     text: async () => text,
   });
-  assert.equal(opened.project.schemaVersion, 26);
+  assert.equal(opened.project.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual(opened.project.assets, nine.assets);
   const shared = {
     ...eight,
