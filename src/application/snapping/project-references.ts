@@ -86,6 +86,7 @@ export function projectSnapPrimitives(project: Project) {
   const storey = storeyOf(project);
   const parts = [
     wallsPart(project, owned),
+    ...doorsPart(storey, owned),
     ...storey.hatches.map((hatch) => remembered(owned, hatch, hatchPart)),
     ...(storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
   ];
@@ -93,6 +94,46 @@ export function projectSnapPrimitives(project: Project) {
     references: parts.flatMap((p) => p.references),
     segments: parts.flatMap((p) => p.segments),
   };
+}
+
+// Door jambs depend on the door and its host wall; reuse only while both are the same objects.
+const doorParts = new WeakMap<object, { wall: object; part: Part }>();
+
+/** The four jamb corners of each door (both wall faces at both opening edges). */
+function doorsPart(storey: Project["storeys"][number], owned: boolean): Part[] {
+  const walls = new Map(storey.walls.map((w) => [w.id, w]));
+  return (storey.doors ?? []).flatMap((door) => {
+    const wall = walls.get(door.wallId);
+    if (!wall) return [];
+    const cached = owned ? doorParts.get(door) : undefined;
+    if (cached?.wall === wall) return [cached.part];
+    const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+    const body = wallBody(wall);
+    const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
+    const at = (along: number, side: -1 | 1) => ({
+      x: body.start.x + (d.x / length) * along + (body.normal.x * side * wall.thickness) / 2,
+      y: body.start.y + (d.y / length) * along + (body.normal.y * side * wall.thickness) / 2,
+    });
+    const left = door.position * length - door.width / 2;
+    const result: Part = {
+      references: (
+        [
+          ["start", left],
+          ["end", left + door.width],
+        ] as const
+      ).flatMap(([edge, along]) =>
+        ([-1, 1] as const).map((side) => ({
+          point: at(along, side),
+          entityId: door.id,
+          feature: `jamb-${edge}-${side}`,
+          directions: [d],
+        })),
+      ),
+      segments: [],
+    };
+    if (owned) doorParts.set(door, { wall, part: result });
+    return [result];
+  });
 }
 
 /** Wall references depend on joined contours: reuse only for the same walls, joins, T-joins
