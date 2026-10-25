@@ -1,6 +1,6 @@
 import { PROJECT_SCHEMA_VERSION } from "./format.ts";
 import { wallBase, wallHeights } from "../elements/wall/heights.ts";
-import { doorSchema } from "../elements/door/model.ts";
+import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
 import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
@@ -89,6 +89,7 @@ const legacyProjectSchema = z
 
 const currentWallSchema = wallSchema.extend({ layerId: id });
 const currentWindowSchema = windowSchema.extend({ layerId: id });
+const markedWindowSchema = currentWindowSchema.extend({ mark: openingMarkSchema.optional() });
 const legacyCurrentLineSchema = lineSchema.extend({ layerId: id });
 const currentLineSchema = legacyCurrentLineSchema.extend({
   style: z.enum(["solid", "dashed", "break", "custom"]),
@@ -275,12 +276,25 @@ export const projectV26Schema = projectV25Schema.extend({
     .min(1),
 });
 /** Schema 27 adds hosted single-leaf doors per storey (user decision 24.10.2026). */
-const projectSchema = projectV26Schema.extend({
+export const projectV27Schema = projectV26Schema.extend({
+  schemaVersion: z.literal(27),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        doors: z.array(doorV27Schema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 28 adds optional position numbers to windows and doors (user decision 25.10.2026). */
+const projectSchema = projectV27Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
         walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
         doors: z.array(doorSchema).optional(),
       }),
     )
@@ -466,7 +480,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
 export type Wall = z.infer<typeof boundWallSchema>;
-export type BimWindow = z.infer<typeof currentWindowSchema>;
+export type BimWindow = z.infer<typeof markedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
 export type DrawingLine = z.infer<typeof currentLineSchema>;

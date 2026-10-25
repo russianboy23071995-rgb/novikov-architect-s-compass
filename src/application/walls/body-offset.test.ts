@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
@@ -175,7 +176,7 @@ test("strict V4 migration adds zero only at file boundary; V5 requires offset", 
     schemaVersion: 4,
     storey: { ...oldStorey, walls: storeyOf(current).walls.map(({ bodyOffset, ...w }) => w) },
   };
-  assert.deepEqual(loadProjectData(legacyProjectFixture(old)), current);
+  assert.deepEqual(withoutOpeningMarks(loadProjectData(legacyProjectFixture(old))), current);
   assert.throws(() => validateProject(old));
   assert.throws(() => loadProjectData(legacyProjectFixture({ ...old, schemaVersion: 5 })));
   assert.throws(() =>

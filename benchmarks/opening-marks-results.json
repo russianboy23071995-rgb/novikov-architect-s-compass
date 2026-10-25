@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-25",
+  "baseline": "feat/menu-avoid-commandbar b65ef5e",
+  "runtime": "Windows Node 24.22.1",
+  "method": "opening-marks-profile.ts; 500 walls with a window and a door each across five storeys; next number (median of 31), numbering all openings, reading a schema 27 file (migration) and a schema 28 file (median of 15); three process runs.",
+  "runs": [
+    {
+      "windows": 500,
+      "doors": 500,
+      "nextMarkMs": 0.25830000000001974,
+      "assignAllMs": 0.39560000000000173,
+      "loadV27Ms": 13.240000000000009,
+      "loadV28Ms": 7.742899999999963
+    },
+    {
+      "windows": 500,
+      "doors": 500,
+      "nextMarkMs": 0.255299999999977,
+      "assignAllMs": 0.397199999999998,
+      "loadV27Ms": 14.239300000000014,
+      "loadV28Ms": 8.336500000000001
+    },
+    {
+      "windows": 500,
+      "doors": 500,
+      "nextMarkMs": 0.2817000000000007,
+      "assignAllMs": 0.45970000000005484,
+      "loadV27Ms": 13.677599999999984,
+      "loadV28Ms": 7.5364999999999895
+    }
+  ]
+}

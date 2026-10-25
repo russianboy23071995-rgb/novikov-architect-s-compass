@@ -30,7 +30,9 @@ import {
   projectV24Schema,
   projectV25Schema,
   projectV26Schema,
+  projectV27Schema,
 } from "../../domain/project/schema.ts";
+import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
@@ -54,7 +56,7 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 27. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 28. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -139,7 +141,12 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 25)
     return migrateProjectData({ ...projectV25Schema.parse(value), schemaVersion: 26 });
   if (value.schemaVersion === 26)
-    return validateProject({ ...projectV26Schema.parse(value), schemaVersion: 27 });
+    return migrateProjectData({ ...projectV26Schema.parse(value), schemaVersion: 27 });
+  // Existing windows and doors receive position numbers in stored order (user decision 25.10.2026).
+  if (value.schemaVersion === 27)
+    return validateProject(
+      withOpeningMarks({ ...projectV27Schema.parse(value), schemaVersion: 28 }),
+    );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

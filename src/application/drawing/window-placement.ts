@@ -10,6 +10,7 @@ import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { isLayerVisible } from "../layers/visibility.ts";
 import type { ToolInteraction } from "../tools/interaction.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
+import { newOpeningMark } from "../openings/marks.ts";
 
 export const defaultDrawingWindow = { width: 1.2, height: 1.35, sillHeight: 0.9 } as const;
 
@@ -120,6 +121,7 @@ export function placeWindow(
     wallId: host.wall.id,
     position: boundedWindowPosition(current, host.wall, dimensions.width, host.position),
     ...dimensions,
+    mark: newOpeningMark(current, "window"),
   });
 }
 

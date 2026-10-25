@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
@@ -90,7 +91,7 @@ test("strict version-2 migration preserves geometry and membership and defaults 
   };
   const migrated = loadProjectData(legacyProjectFixture(v2));
   assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.deepEqual(storeyOf(migrated), {
+  assert.deepEqual(withoutOpeningMarks(storeyOf(migrated)), {
     ...oldStorey,
     references: [],
     hatches: [],
