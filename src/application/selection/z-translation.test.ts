@@ -4,10 +4,10 @@ import { prepareZTranslation } from "./z-translation.ts";
 import { createProject } from "../projects/create.ts";
 import { addWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
-import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

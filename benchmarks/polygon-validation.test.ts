@@ -54,7 +54,8 @@ test("large hatch movement keeps full-path geometry, context guards and one undo
   const { beginSelectionMove, previewSelectionGeometry, previewSelectionMove } =
     await import("../src/application/selection/move.ts");
   const { fullSelectionMove } = await import("./selection-move-oracle.ts");
-  const { createHistory, commitProject, undoProject } = await import("../src/lib/bim/history.ts");
+  const { createHistory, commitProject, undoProject } =
+    await import("../src/application/history/project-history.ts");
   const project = createProject("hatch-contact", "s");
   storeyOf(project).lines = [];
   storeyOf(project).hatches.push({

@@ -10,7 +10,7 @@ import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { windowCentre } from "../windows/actions.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { updateWall } from "./actions.ts";
-import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";
 import { editAtPointer, editAnchor } from "../../lib/bim/direct-edit.ts";

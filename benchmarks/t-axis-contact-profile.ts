@@ -7,7 +7,7 @@ import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import type { SnapCandidate } from "../src/constraints/snapping/engine.ts";
 

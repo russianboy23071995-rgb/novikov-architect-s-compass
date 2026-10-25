@@ -247,7 +247,7 @@ test("undoing the selected storey's creation returns to EG without a dangling vi
   assert.deepEqual(readProjectFile(serializeProject(state.history.present)), state.history.present);
 });
 
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import {
   buildingWindowSelectionSurfaces,
   pickSolidElement,

@@ -9,7 +9,12 @@ import { projectSnapReferences } from "./project-references.ts";
 import { createLocalSnapSources, getLocalSnapSources } from "./local-sources.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";
 import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 
 function fixture(pairs: number[][]) {
   return validateProject({

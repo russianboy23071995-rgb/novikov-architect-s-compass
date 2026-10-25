@@ -2,7 +2,12 @@ import { beginWallChain, appendWallChain } from "../src/application/drawing/wall
 import { capacityFixture, tick } from "./capacity";
 import { prepareWallDrawing } from "./prepared-wall-drawing";
 import { validateProject } from "../src/domain/project/schema.ts";
-import { commitProject, createHistory, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  commitProject,
+  createHistory,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;
 button.onclick = async () => {

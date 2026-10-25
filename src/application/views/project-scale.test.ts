@@ -8,12 +8,12 @@ import { createProject } from "../projects/create.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../walls/actions.ts";
 import {
-  readProjectFile,
   createHistory,
   commitProject,
   undoProject,
   redoProject,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { changeProjectScale, projectScaleContext } from "./project-scale.ts";
 

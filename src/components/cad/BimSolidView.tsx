@@ -36,7 +36,7 @@ import {
 } from "@/rendering/viewport/projection-state";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { buildBuildingSolid } from "@/lib/bim/geometry";
+import { buildBuildingSolid } from "@/rendering/viewport/building-solid";
 import type { Camera } from "@/lib/bim/geometry";
 import type { Project, Point } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";

@@ -1,6 +1,6 @@
 import { buildingDoorFixture } from "./building-view-fixture.ts";
 import { previewDeleteSelection } from "../src/application/elements/delete.ts";
-import { createHistory, commitProject } from "../src/lib/bim/history.ts";
+import { createHistory, commitProject } from "../src/application/history/project-history.ts";
 import { createLayerVisibilityPolicy } from "../src/application/layers/visibility.ts";
 import type { SelectionSet } from "../src/application/selection/state.ts";
 

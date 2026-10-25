@@ -3,7 +3,12 @@ import { capacityFixture, tick } from "./capacity";
 import { prepareEndpoint } from "./prepared-endpoint";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
-import { commitProject, createHistory, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  commitProject,
+  createHistory,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;
 button.onclick = async () => {

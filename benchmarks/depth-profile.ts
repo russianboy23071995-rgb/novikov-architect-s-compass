@@ -1,6 +1,6 @@
 import { originFixture } from "./local-origin-fixture.ts";
 import { movementCorners } from "../src/rendering/viewport/movement-origin.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import {
   nearestWallSurface,
   prepareNearestWallSurface,

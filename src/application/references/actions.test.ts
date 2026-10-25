@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
 import { validateProject } from "../../domain/project/schema.ts";
-import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";
 import { previewCreateReference, commitCreateReference } from "./actions.ts";

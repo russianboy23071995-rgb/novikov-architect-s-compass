@@ -17,7 +17,12 @@ import { CadWorkspace } from "../src/components/cad/CadWorkspace";
 import { serializeProject, deserializeProject } from "../src/lib/bim/model";
 import { createProject } from "../src/application/projects/create.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 import { beginSelectionMove, previewSelectionMove } from "../src/application/selection/move";
 import { beginWallChain, previewWallChain } from "../src/application/drawing/wall-chain";
 import { selectionIndex } from "../src/application/selection/state";

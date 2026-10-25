@@ -1,7 +1,7 @@
 import { buildingDoorFixture } from "./building-view-fixture.ts";
 import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 
 // 500 walls with 500 windows (centre) and 500 doors (left) across five storeys.

@@ -2,7 +2,7 @@ import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
 import { viewportModel, type PreparedViewportModel } from "./prepared-model.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "./building-solid.ts";
 import { selectionEdges } from "./selection-outline.ts";
 import { prepareAnchorVisibility } from "./anchor-visibility.ts";
 import type { ProjectionState } from "./projection-state.ts";

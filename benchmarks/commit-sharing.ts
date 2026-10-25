@@ -8,7 +8,7 @@ import {
   createHistory,
   undoProject,
   type ProjectHistory,
-} from "../src/lib/bim/history.ts";
+} from "../src/application/history/project-history.ts";
 import { legacyCommitProject, legacyCreateHistory } from "./legacy-commit.ts";
 
 type Commit = (history: ProjectHistory, project: Project) => ProjectHistory;

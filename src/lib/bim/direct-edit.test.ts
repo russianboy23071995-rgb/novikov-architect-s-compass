@@ -16,7 +16,11 @@ import { previewMovementInput } from "../../application/direct-edit/numeric.ts";
 import { defaultLineAppearance } from "./lines.ts";
 import { editAtPointer, editAnchor } from "./direct-edit.ts";
 import type { EditSession } from "./direct-edit.ts";
-import { createHistory, commitProject, undoProject } from "./history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+} from "../../application/history/project-history.ts";
 const base = createExampleProject();
 
 test("shared stretch preserves original arithmetic and neighbour boundary exactly", () => {

@@ -7,7 +7,12 @@ import { addLine, updateLine } from "../../application/lines/actions.ts";
 import { validateProject } from "./schema.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { createImageAssetHandle } from "../elements/reference/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../../application/history/project-history.ts";
 const oracle = (a: ReturnType<typeof createProject>, b: typeof a) => {
   const { bimVisibility: _a, ...x } = a,
     { bimVisibility: _b, ...y } = b;

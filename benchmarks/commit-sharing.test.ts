@@ -5,10 +5,10 @@ import { operations, scriptedRun } from "./commit-sharing.ts";
 import { serializeProject } from "../src/lib/bim/model.ts";
 import {
   commitProject,
-  readProjectFile,
   undoProject,
   redoProject,
-} from "../src/lib/bim/history.ts";
+} from "../src/application/history/project-history.ts";
+import { readProjectFile } from "../src/lib/bim/history.ts";
 import { isOwnedProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { exportIfc } from "../src/lib/bim/ifc.ts";
 

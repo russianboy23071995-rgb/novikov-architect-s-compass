@@ -11,8 +11,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "./history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "./history.ts";
 import { createExampleProject, planBounds, drawingPoint } from "../../components/cad/bim-view.ts";
 import { buildSolid } from "./geometry.ts";
 import { exportIfc } from "./ifc.ts";

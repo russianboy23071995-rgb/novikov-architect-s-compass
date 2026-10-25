@@ -15,8 +15,8 @@ import {
 import { validateLike, validatedInput } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { Hatch } from "../../domain/elements/hatch/model.ts";
-import { commitProject } from "../../lib/bim/history.ts";
-import type { ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject } from "../history/project-history.ts";
+import type { ProjectHistory } from "../history/project-history.ts";
 
 export type HatchRequest = {
   projectId: string;

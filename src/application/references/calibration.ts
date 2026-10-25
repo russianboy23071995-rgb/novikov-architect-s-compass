@@ -4,7 +4,7 @@ import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { SelectionSet } from "../selection/state.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../layers/visibility.ts";
 import { calibrationTransform } from "../../geometry/transforms/calibrate.ts";
-import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject, type ProjectHistory } from "../history/project-history.ts";
 export type CalibrationRequest = {
   projectId: string;
   referenceId: string;

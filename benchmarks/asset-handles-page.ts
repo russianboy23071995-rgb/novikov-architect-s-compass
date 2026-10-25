@@ -4,7 +4,12 @@ import { importImage } from "../src/interop/images/import";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
 import { updateLine } from "../src/application/lines/actions.ts";
 import { type Project } from "../src/domain/project/schema.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 const output = document.querySelector<HTMLPreElement>("#report")!,
   button = document.querySelector<HTMLButtonElement>("#run")!;
 button.onclick = async () => {

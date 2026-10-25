@@ -4,7 +4,7 @@ import type { ImageAsset, ImageReference } from "../../domain/elements/reference
 import type { Project } from "../../domain/project/schema.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
-import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject, type ProjectHistory } from "../history/project-history.ts";
 export type CreateReferenceRequest = {
   projectId: string;
   asset: ImageAsset;

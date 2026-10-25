@@ -20,7 +20,8 @@ import { validateProject } from "../src/domain/project/schema.ts";
 import { addWall } from "../src/application/walls/actions.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { initialCamera } from "../src/lib/bim/geometry.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

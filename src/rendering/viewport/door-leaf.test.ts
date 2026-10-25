@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject } from "../../application/projects/create.ts";
 import { addWall } from "../../application/walls/actions.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "./building-solid.ts";
 import { addDoor } from "../../application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { DOOR_LEAF_THICKNESS, doorLeafFaces } from "./door-leaf.ts";

@@ -123,7 +123,12 @@ import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { updateLine } from "../lines/actions.ts";
 import { updateWall } from "../walls/actions.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { addWindow } from "../windows/actions.ts";
 import { addLine } from "../lines/actions.ts";

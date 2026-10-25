@@ -25,7 +25,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
-import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { previewCreateReference } from "./actions.ts";
 import { previewCalibration, commitCalibration, parseCalibrationLength } from "./calibration.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";

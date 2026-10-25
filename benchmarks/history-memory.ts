@@ -8,7 +8,11 @@ import { fileURLToPath } from "node:url";
 import { schoolPlanFixture } from "./school-plan-fixture.ts";
 import { schoolFixture } from "./school-fixture.ts";
 import { snapshotWithWorkingStorey } from "../src/domain/project/owned-snapshot.ts";
-import { commitProject, createHistory, type ProjectHistory } from "../src/lib/bim/history.ts";
+import {
+  commitProject,
+  createHistory,
+  type ProjectHistory,
+} from "../src/application/history/project-history.ts";
 import {
   applySelectionCommand,
   previewSelectionCommand,
@@ -20,7 +24,7 @@ import {
 import { selectionIndex } from "../src/application/selection/state.ts";
 import { getLocalSnapSources } from "../src/application/snapping/local-sources.ts";
 import { getProjectSnapReferences } from "../src/application/snapping/project-references.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { getWallFootSources } from "../src/rendering/viewport/wall-foot-sources.ts";
 import { connectedWallSolids } from "../src/domain/elements/wall/connections.ts";
 import type { Project } from "../src/domain/project/schema.ts";

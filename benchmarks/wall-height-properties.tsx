@@ -6,7 +6,12 @@ import { propertyFormKey } from "../src/components/cad/property-form-key";
 import { createProject } from "../src/application/projects/create.ts";
 import { addWindow } from "../src/application/windows/actions.ts";
 import { addWall } from "../src/application/walls/actions.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 import { addStorey, setStoreyHeight } from "../src/application/storeys/actions";
 let initial = createProject("height-ui", "eg");
 initial = setStoreyHeight(initial, initial, { projectId: initial.id, storeyId: "eg", height: 3 });

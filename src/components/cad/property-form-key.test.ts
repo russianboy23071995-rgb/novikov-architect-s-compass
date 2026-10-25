@@ -3,7 +3,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { propertyFormKey } from "./property-form-key.ts";
 import { createExampleProject } from "./bim-view.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../../application/history/project-history.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 test("property drafts follow immutable revisions, selection and undo/redo without serializing data", () => {
   const p = createExampleProject(),

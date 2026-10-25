@@ -1,6 +1,6 @@
 import { schoolFixture, schoolElementCount } from "./school-fixture.ts";
 import { operations, paths, type OperationName } from "./commit-sharing.ts";
-import type { ProjectHistory } from "../src/lib/bim/history.ts";
+import type { ProjectHistory } from "../src/application/history/project-history.ts";
 
 const stats = (values: number[]) => {
   const sorted = [...values].sort((a, b) => a - b);

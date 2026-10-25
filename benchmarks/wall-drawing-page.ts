@@ -9,7 +9,12 @@ import { drawingInteraction } from "../src/application/tools/adapters";
 import { createShiftSnapLock } from "../src/application/tools/shift-lock";
 import { createToolSourceQuery } from "../src/application/tools/snapping";
 import { getLocalSnapSources } from "../src/application/snapping/local-sources";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 const button = document.querySelector<HTMLButtonElement>("#run")!;
 const output = document.querySelector<HTMLPreElement>("#report")!;
 const stats = (v: number[]) => {

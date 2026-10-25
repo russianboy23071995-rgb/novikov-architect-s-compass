@@ -3,7 +3,7 @@ import { prepareDirectEditPreview } from "../src/application/direct-edit/prepare
 import { editAtPointer } from "../src/lib/bim/direct-edit.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import type { EditSession } from "../src/lib/bim/direct-edit.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 for (const size of [10, 100]) {
   for (const mode of ["start", "shorten", "oblique"]) {

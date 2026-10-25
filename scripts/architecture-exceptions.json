@@ -17,7 +17,6 @@
       "edges": [
         "src/application/direct-edit/contour.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/controller.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/controller.ts -> src/lib/bim/history.ts",
         "src/application/direct-edit/numeric.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/offset.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-endpoint.ts -> src/lib/bim/direct-edit.ts",
@@ -39,19 +38,7 @@
       "owner": "src/application/hatches",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Move the referenced policy/port to its owning layer; retain independent storage/recovery validation.",
-      "edges": [
-        "src/application/hatches/actions.ts -> src/lib/bim/history.ts",
-        "src/application/hatches/pattern-resolution.ts -> src/interop/project-file/size.ts"
-      ]
-    },
-    {
-      "owner": "src/application/layers",
-      "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
-      "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/layers/actions.ts -> src/lib/bim/history.ts",
-        "src/application/layers/visibility-actions.ts -> src/lib/bim/history.ts"
-      ]
+      "edges": ["src/application/hatches/pattern-resolution.ts -> src/interop/project-file/size.ts"]
     },
     {
       "owner": "src/application/lines",
@@ -75,17 +62,7 @@
       "owner": "src/application/references",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/references/actions.ts -> src/lib/bim/history.ts",
-        "src/application/references/actions.ts -> src/lib/bim/model.ts",
-        "src/application/references/calibration.ts -> src/lib/bim/history.ts"
-      ]
-    },
-    {
-      "owner": "src/application/selection",
-      "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
-      "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": ["src/application/selection/z-translation.ts -> src/lib/bim/history.ts"]
+      "edges": ["src/application/references/actions.ts -> src/lib/bim/model.ts"]
     },
     {
       "owner": "src/application/tools",
@@ -97,11 +74,7 @@
       "owner": "src/application/walls",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/walls/body-offset.ts -> src/lib/bim/history.ts",
-        "src/application/walls/t-axis-snap.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/walls/t-connections.ts -> src/lib/bim/history.ts"
-      ]
+      "edges": ["src/application/walls/t-axis-snap.ts -> src/lib/bim/direct-edit.ts"]
     },
     {
       "owner": "src/components/cad",
@@ -157,13 +130,17 @@
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
       "edges": [
+        "src/rendering/viewport/building-solid.ts -> src/lib/bim/geometry.ts",
         "src/rendering/viewport/layer-display.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/movement-origin.ts -> src/lib/bim/geometry.ts",
         "src/rendering/viewport/selection-move-preview.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-foot-sources.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-point-candidates.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-preview-context.ts -> src/lib/bim/geometry.ts"
+        "src/rendering/viewport/wall-foot-sources.ts -> src/lib/bim/geometry.ts"
       ]
+    },
+    {
+      "owner": "src/application/history",
+      "reason": "Moved with the history from lib/bim/history.ts (25.10.2026): the size check of owned snapshots uses the portable project byte budget. Same debt as the former lib/bim edge, not new.",
+      "removal": "Move the validated byte-length budget from interop/project-file/size.ts to domain/project when the file bridge in lib/bim is dissolved.",
+      "edges": ["src/application/history/project-history.ts -> src/interop/project-file/size.ts"]
     }
   ],
   "cycles": []

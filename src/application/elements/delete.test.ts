@@ -7,7 +7,7 @@ import { createProject } from "../projects/create.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { addWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import { normalizeSpeech } from "../../lib/bim/voice.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";

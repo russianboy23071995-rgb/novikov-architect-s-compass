@@ -13,7 +13,7 @@ import { createProject } from "../projects/create.ts";
 import { addLine, updateLine } from "./actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import {
   linePatternLayout,
   linePatternStroke,

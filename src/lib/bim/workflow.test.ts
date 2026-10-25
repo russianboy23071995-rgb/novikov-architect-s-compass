@@ -11,8 +11,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "./history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "./history.ts";
 import { exportIfc } from "./ifc.ts";
 import { editAtPointer } from "./direct-edit.ts";
 import { buildSolid } from "./geometry.ts";

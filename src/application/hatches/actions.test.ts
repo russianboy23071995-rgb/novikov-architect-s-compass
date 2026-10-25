@@ -8,7 +8,8 @@ import { previewHatch, commitHatch } from "./actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
-import { createHistory, undoProject, redoProject, readProjectFile } from "../../lib/bim/history.ts";
+import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import {
   previewLayerAssignment,

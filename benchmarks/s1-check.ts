@@ -5,12 +5,12 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history.ts";
+} from "../src/application/history/project-history.ts";
+import { readProjectFile } from "../src/lib/bim/history.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";
 import { fullSelectionMove } from "./selection-move-oracle.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
 import { editAtPointer } from "../src/lib/bim/direct-edit.ts";

@@ -8,7 +8,12 @@ import { createImageAssetHandle } from "../src/domain/elements/reference/model";
 import { serializeProject } from "../src/lib/bim/model";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 import {
   prepareProjectOpen,
   requestProjectDownload,

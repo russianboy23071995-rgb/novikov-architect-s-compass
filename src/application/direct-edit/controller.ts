@@ -28,8 +28,13 @@ import {
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
 import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
 import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
-import { commitProject, createHistory, redoProject, undoProject } from "../../lib/bim/history.ts";
-import type { ProjectHistory } from "../../lib/bim/history.ts";
+import {
+  commitProject,
+  createHistory,
+  redoProject,
+  undoProject,
+} from "../history/project-history.ts";
+import type { ProjectHistory } from "../history/project-history.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import { commitLayerAssignment, commitLayerManagement } from "../layers/actions.ts";
 import type { ManageLayerRequest } from "../layers/actions.ts";
