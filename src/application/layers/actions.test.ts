@@ -1,11 +1,12 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { createProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { commitLayerManagement } from "./actions.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewLayerAssignment, commitLayerAssignment } from "./actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { createHistory, undoProject, redoProject, readProjectFile } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";

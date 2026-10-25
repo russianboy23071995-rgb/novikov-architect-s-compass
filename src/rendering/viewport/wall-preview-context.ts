@@ -12,7 +12,7 @@ import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
-import type { Project, Point } from "../../lib/bim/model.ts";
+import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ProjectionState } from "./projection-state.ts";
 import { createWallPointCandidates } from "./wall-point-candidates.ts";
 import {

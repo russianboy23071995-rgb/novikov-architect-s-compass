@@ -4,7 +4,7 @@ import { connectedFixture } from "./connected-fixture";
 import { fullSelectionMove } from "./selection-move-oracle";
 import { capacityFixture, tick } from "./capacity";
 import { prepareChainMove } from "./prepared-chain-move";
-import { validateProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { commitProject, createHistory, undoProject, redoProject } from "../src/lib/bim/history";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;

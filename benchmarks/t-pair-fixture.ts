@@ -1,5 +1,6 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { createProject, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 
 /** User regression: both walls of a T, two hosted windows, outer drawing axes. */
 export function tPairFixture() {

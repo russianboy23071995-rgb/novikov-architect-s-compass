@@ -5,7 +5,7 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../../application/selection/target.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { wallLength } from "../../lib/bim/model.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import type { Vector3 } from "../../geometry/projections/orthographic.ts";
 import { triangleDepth } from "../../geometry/projections/triangle-depth.ts";
 import { nearestWallSurface } from "./wall-depth.ts";

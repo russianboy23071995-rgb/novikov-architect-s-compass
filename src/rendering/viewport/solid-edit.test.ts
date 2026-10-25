@@ -19,7 +19,7 @@ import { evaluateInteraction, confirmInteraction } from "../../application/tools
 import { resolveToolSnap } from "../../application/tools/snapping.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import { exportIfc, stepReal } from "../../lib/bim/ifc.ts";
-import { wallLength } from "../../lib/bim/model.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import {
   projectSnapPrimitives,

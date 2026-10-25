@@ -1,6 +1,6 @@
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createPrimitiveSourceIndex } from "../../constraints/snapping/local-source-index.ts";
 import { selectionEdges } from "./selection-outline.ts";

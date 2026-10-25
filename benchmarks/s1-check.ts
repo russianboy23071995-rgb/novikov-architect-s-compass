@@ -1,4 +1,5 @@
-import { serializeProject, validateProject, type Project } from "../src/lib/bim/model.ts";
+import { serializeProject } from "../src/lib/bim/model.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import {
   createHistory,
   commitProject,

@@ -2,7 +2,9 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createDrawing, previewDrawingInput, defaultDrawingWall } from "./actions.ts";
-import { createProject, serializeProject, wallLength } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
@@ -315,7 +317,7 @@ test("pinned window host uses exact signed distance and retains its explicit hos
 });
 
 test("window tool in connected plan preserves preview, edits, history, reload and IFC", async () => {
-  const { updateWindow } = await import("../../lib/bim/model.ts");
+  const { updateWindow } = await import("../windows/actions.ts");
   const { addWall } = await import("../walls/actions.ts");
   const { windowPlacementInteraction } = await import("./window-placement.ts");
   const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");

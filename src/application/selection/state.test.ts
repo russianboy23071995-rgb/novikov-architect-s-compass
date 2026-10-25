@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, addWindow, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";

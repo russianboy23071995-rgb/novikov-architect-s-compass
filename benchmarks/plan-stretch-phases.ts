@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { previewEdit } from "../src/application/direct-edit/controller.ts";

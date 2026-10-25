@@ -1,4 +1,4 @@
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { selectedLayerElement } from "@/application/layers/selection";
 

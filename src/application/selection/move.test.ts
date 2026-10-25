@@ -11,12 +11,9 @@ import { previewNumericMove } from "../direct-edit/numeric.ts";
 import { editMovementAxis } from "../tools/adapters.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWindow,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";

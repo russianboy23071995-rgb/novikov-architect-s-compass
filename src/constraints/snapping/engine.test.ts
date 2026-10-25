@@ -172,7 +172,9 @@ test("Ortho accepts 0.3 endpoint against 0.1 + 0.2 without changing source coord
 });
 import type { SnapContext } from "./engine.ts";
 import { projectSnapReferences } from "../../application/snapping/project-references.ts";
-import { createProject, addLine, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addLine } from "../../application/lines/actions.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import {
   createHistory,

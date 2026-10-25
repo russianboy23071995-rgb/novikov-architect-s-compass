@@ -2,7 +2,10 @@ import { storeyOf } from "../src/domain/storeys/access.ts";
 import { largePointFixture } from "./large-point-fixture";
 import { prepareTranslation } from "../src/domain/project/prepared-translation";
 import { tPairFixture } from "./t-pair-fixture";
-import { createProject, validateProject, serializeProject, updateLine } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
+import { updateLine } from "../src/application/lines/actions.ts";
 import {
   createHistory,
   commitProject,

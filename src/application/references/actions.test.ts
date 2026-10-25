@@ -2,12 +2,9 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  serializeProject,
-  deserializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";

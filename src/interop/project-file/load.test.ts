@@ -4,13 +4,11 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadProjectData, deserializeProject } from "./load.ts";
-import {
-  createProject,
-  addWindow,
-  addLine,
-  validateProject,
-  serializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../../application/drawing/actions.ts";

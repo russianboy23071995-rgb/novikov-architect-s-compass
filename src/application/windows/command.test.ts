@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { updateWindow as legacyUpdateWindow } from "../../lib/bim/model.ts";
+import { updateWindow as legacyUpdateWindow } from "./actions.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewSelectionCommand } from "../commands/selection-command.ts";

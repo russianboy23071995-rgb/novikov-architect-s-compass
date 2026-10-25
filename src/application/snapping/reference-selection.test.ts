@@ -13,7 +13,7 @@ import {
 import { createLocalSnapSources } from "./local-sources.ts";
 import { createToolSourceQuery } from "../tools/snapping.ts";
 import { pickReferenceSegments } from "../../rendering/viewport/reference-picking.ts";
-import { validateProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import {
   createAffineScreenMetric,

@@ -8,13 +8,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { applyLineStyle } from "./appearance.ts";
 import { builtInLineStyles, deleteLineStyle } from "./style-library.ts";
-import {
-  createProject,
-  addLine,
-  serializeProject,
-  deserializeProject,
-  updateLine,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addLine, updateLine } from "./actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";

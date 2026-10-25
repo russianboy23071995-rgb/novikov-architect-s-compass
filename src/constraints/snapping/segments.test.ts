@@ -9,13 +9,10 @@ import {
   editingReducer,
   previewEdit,
 } from "../../application/direct-edit/controller.ts";
-import {
-  addLine,
-  addWindow,
-  createProject,
-  updateLine,
-  serializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine, updateLine } from "../../application/lines/actions.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";

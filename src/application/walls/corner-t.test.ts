@@ -8,13 +8,9 @@ import {
 import { drawingInteraction } from "../tools/adapters.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWindow,
-  updateWindow,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addWindow, updateWindow } from "../windows/actions.ts";
 import { addWall, updateWall } from "./actions.ts";
 import { previewTConnection } from "./t-connections.ts";
 import {

@@ -3,7 +3,8 @@ import { stretchOffset, directionOffset } from "../../geometry/projections/direc
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, serializeProject, deserializeProject } from "./model.ts";
+import { serializeProject, deserializeProject } from "./model.ts";
+import { addLine } from "../../application/lines/actions.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import { buildSolid } from "./geometry.ts";
 import {

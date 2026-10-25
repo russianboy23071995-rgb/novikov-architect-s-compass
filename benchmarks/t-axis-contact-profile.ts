@@ -4,7 +4,7 @@ import { connectionGroupFixture } from "./connection-group-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";

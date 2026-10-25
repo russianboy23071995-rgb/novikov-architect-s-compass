@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addWindow, createProject, serializeProject } from "../../../lib/bim/model.ts";
+import { serializeProject } from "../../../lib/bim/model.ts";
+import { addWindow } from "../../../application/windows/actions.ts";
+import { createProject } from "../../../application/projects/create.ts";
 import { addWall } from "../../../application/walls/actions.ts";
 import { readProjectFile } from "../../../lib/bim/history.ts";
 import { addStorey, setStoreyHeight } from "../../../application/storeys/actions.ts";

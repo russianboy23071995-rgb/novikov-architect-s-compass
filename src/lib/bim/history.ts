@@ -10,8 +10,9 @@ import {
   createProjectSnapshot,
   isOwnedProjectSnapshot,
 } from "../../domain/project/owned-snapshot.ts";
-import { deserializeProject, validateProject } from "./model.ts";
-import type { Project } from "./model.ts";
+import { deserializeProject } from "./model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
 export type ProjectHistory = { past: Project[]; present: Project; future: Project[] };
 export const HISTORY_LIMIT = 100;
 export { PROJECT_FILE_LIMIT } from "../../interop/project-file/size.ts";

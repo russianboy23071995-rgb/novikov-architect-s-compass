@@ -2,7 +2,7 @@ import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import { createLocalSnapSources } from "./local-sources.ts";
 import { projectSnapReferences, projectSnapPrimitives } from "./project-references.ts";
 import { segmentMayMeetBox } from "../../geometry/intersections/segment-box.ts";

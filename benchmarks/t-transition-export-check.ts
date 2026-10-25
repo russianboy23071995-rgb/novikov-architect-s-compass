@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { tTransitionFixture } from "./t-transition-fixture.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 
 // Browser downloads, in order: before, placed, undo, redo, cancelled.

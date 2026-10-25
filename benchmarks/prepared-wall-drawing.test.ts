@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { prepareWallDrawing } from "./prepared-wall-drawing.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { beginWallChain, appendWallChain } from "../src/application/drawing/wall-chain.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
 test("free first segment equals full path and preserves neighbours/windows/history", () => {
   const p = tPairFixture(),

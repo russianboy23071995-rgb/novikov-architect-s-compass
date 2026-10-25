@@ -1,4 +1,4 @@
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { closedContour } from "../direct-edit/contour.ts";
 import { previewMovementInput } from "../direct-edit/numeric.ts";

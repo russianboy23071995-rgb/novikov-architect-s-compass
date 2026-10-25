@@ -1,11 +1,11 @@
+import { createProject } from "../src/application/projects/create.ts";
 import {
-  createProject,
   validateProject,
   type DrawingLine,
   type Project,
   type Wall,
   type BimWindow,
-} from "../src/lib/bim/model.ts";
+} from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 
 /** Synthetic school-like model: equal storeys, each ten elements are two joined walls (an L),

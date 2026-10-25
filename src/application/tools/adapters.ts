@@ -4,7 +4,7 @@ import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { AnchoredToolInteraction } from "./interaction.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
 import { previewEdit } from "../direct-edit/controller.ts";
 import { previewDrawingInput } from "../drawing/actions.ts";

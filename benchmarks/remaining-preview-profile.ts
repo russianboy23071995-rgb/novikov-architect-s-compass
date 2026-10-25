@@ -7,7 +7,7 @@ import { editAtPointer, editAnchor, type EditSession } from "../src/lib/bim/dire
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 const profiles = [];
 for (const size of [10, 100])
   for (const kind of ["hatch-point", "line-point", "window-axis", "wall-stretch"] as const) {

@@ -47,7 +47,8 @@ test("index preserves tolerance contacts, precision collapse and overflow reject
 });
 
 test("large hatch movement keeps full-path geometry, context guards and one undo", async () => {
-  const { createProject, validateProject } = await import("../src/lib/bim/model.ts");
+  const { createProject } = await import("../src/application/projects/create.ts");
+  const { validateProject } = await import("../src/domain/project/schema.ts");
   const { storeyOf } = await import("../src/domain/storeys/access.ts");
   const { defaultHatchAppearance } = await import("../src/domain/elements/hatch/model.ts");
   const { beginSelectionMove, previewSelectionGeometry, previewSelectionMove } =

@@ -9,8 +9,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewContourOffset } from "../../application/direct-edit/offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { previewContourEdge } from "../../application/direct-edit/contour.ts";
-import type { Point, Project } from "./model.ts";
-import { wallLength } from "./model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import {

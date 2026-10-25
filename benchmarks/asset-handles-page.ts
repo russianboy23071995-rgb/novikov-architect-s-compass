@@ -2,7 +2,8 @@ import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile, tick } from "./capacity";
 import { importImage } from "../src/interop/images/import";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
-import { updateLine, type Project } from "../src/lib/bim/model";
+import { updateLine } from "../src/application/lines/actions.ts";
+import { type Project } from "../src/domain/project/schema.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
 const output = document.querySelector<HTMLPreElement>("#report")!,
   button = document.querySelector<HTMLButtonElement>("#run")!;

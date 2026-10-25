@@ -32,3 +32,24 @@ Basis: main ec9acf7 (nach Merge von PR447–PR457). Änderungskarte freigegeben,
 
 - `lib/bim/model.ts` enthält weiter `createProject`, Fenster- und Linienaktionen,
   `windowCentre` und `serializeProject`; weitere Schritte nach demselben Muster.
+
+## Nachtrag 25.10.2026: restliche Aktionen aus lib/bim/model.ts
+
+Änderungskarte freigegeben (Speichern/Laden bleibt vorerst als Brücke). Branch
+feat/model-actions-out-of-lib, Basis feat/wall-actions-out-of-lib.
+
+- **Verlegt (unverändert):** `createProject` → `application/projects/create.ts`; `addWindow`,
+  `windowCentre` → `application/windows/actions.ts` (das doppelte `updateWindow` aus `lib/bim`
+  entfällt); `addLine`, `updateLine` → `application/lines/actions.ts`.
+- **Weiterleitungen aufgelöst:** `validateProject`, `wallLength` und die Typen werden direkt aus
+  `domain/project/schema` importiert.
+- **Brücke:** `lib/bim/model.ts` enthält nur noch `serializeProject` und die Weiterleitung von
+  `deserializeProject` (13 Zeilen), weil die Anwendungsschicht nicht auf interop zugreifen darf.
+- **Importe:** 197 Dateien per Skript umgestellt (plus vier dynamische Importe von Hand).
+- **Architektur:** Ausnahmen von 103 auf 67 Kanten gesunken (36 entfallen, die Gruppe
+  `application/snapping` ganz); keine neue Ausnahme.
+- **Nachweis:** 39 Fälle vor dem Umzug festgehalten (Projekt anlegen inkl. leerer ID; Fenster
+  anlegen mit Ebene/Nummer, zu breit, ohne Wand, doppelte ID; Fenster ändern inkl. zu hoch,
+  Nummer, unbekannt; Fenstermitte; Linie anlegen/ungültig/ändern/unbekannt), danach 39/39
+  identisch inkl. 17 Ablehnungen; Gegenprobe (Ebenenvorgabe vertauscht): 2 Abweichungen.
+  1240 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.

@@ -10,7 +10,7 @@ import {
 } from "../src/application/direct-edit/controller.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject, type DrawingLine } from "../src/lib/bim/model.ts";
+import { validateProject, type DrawingLine } from "../src/domain/project/schema.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 function fixture(points: DrawingLine["points"], custom = false) {
   const base = hatchPointFixture(2, 4);

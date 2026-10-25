@@ -1,4 +1,5 @@
-import { createProject, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultHatchAppearance } from "../src/domain/elements/hatch/model.ts";
 export function hatchPointFixture(count = 4, vertices = 100) {
   const p = createProject("hatch-point", "s");

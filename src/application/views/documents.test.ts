@@ -29,7 +29,8 @@ import {
   undoProject,
   redoProject,
 } from "../../lib/bim/history.ts";
-import { serializeProject, validateProject, type Project } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { updateWall } from "../walls/actions.ts";
 import { resolveModelLength } from "../../domain/views/display-size.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";

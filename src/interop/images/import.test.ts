@@ -3,7 +3,7 @@ import { binaryBytes } from "./binary-bytes.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { imageHeader, checkedImageUrl } from "./import.ts";
-import { createProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
 import { previewCreateReference } from "../../application/references/actions.ts";
 import {
   selectionIndex,

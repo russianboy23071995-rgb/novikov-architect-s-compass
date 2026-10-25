@@ -2,12 +2,9 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
-import {
-  createProject,
-  addLine,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addLine } from "../lines/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";

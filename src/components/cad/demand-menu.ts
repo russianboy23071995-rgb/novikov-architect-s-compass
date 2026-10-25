@@ -1,6 +1,6 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { wallLength } from "../../lib/bim/model.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import { wallLength } from "../../domain/project/schema.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";

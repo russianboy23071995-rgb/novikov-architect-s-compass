@@ -1,6 +1,7 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewHatch } from "../../application/hatches/actions.ts";
-import { addLine, createProject } from "./model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { previewCommand, applyCommand } from "./commands.ts";

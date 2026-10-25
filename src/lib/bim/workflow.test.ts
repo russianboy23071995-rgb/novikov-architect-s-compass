@@ -1,7 +1,10 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, addWindow, serializeProject, wallLength } from "./model.ts";
+import { serializeProject } from "./model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";
 import {
   createHistory,

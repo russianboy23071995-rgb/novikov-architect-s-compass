@@ -8,7 +8,7 @@ import type { Point } from "@/domain/project/schema";
 import type { PlanScene, PlanRun } from "@/rendering/viewport/plan-scene";
 import type { CornerPreview } from "@/application/walls/corner-preview";
 import { checkedImageUrl } from "@/interop/images/import";
-import { wallLength } from "@/lib/bim/model";
+import { wallLength } from "@/domain/project/schema";
 import { wallBody } from "@/domain/elements/wall/body";
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";

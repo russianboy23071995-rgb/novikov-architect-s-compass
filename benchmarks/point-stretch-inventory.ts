@@ -3,7 +3,7 @@ import { isDeepStrictEqual as equal } from "node:util";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject, type Point } from "../src/lib/bim/model.ts";
+import { validateProject, type Point } from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import {

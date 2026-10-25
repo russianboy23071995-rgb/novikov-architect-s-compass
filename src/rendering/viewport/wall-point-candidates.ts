@@ -5,7 +5,7 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
 import { getLocalSnapSources } from "../../application/snapping/local-sources.ts";
 import { collectSnapCandidates } from "../../constraints/snapping/candidates.ts";

@@ -10,7 +10,8 @@ import {
 } from "./pattern-history.ts";
 import { resolveHatchPatternRevisions } from "./pattern-resolution.ts";
 import { validatePatternRevisions } from "../../domain/elements/hatch/revision.ts";
-import { createProject, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
 const pattern = {

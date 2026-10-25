@@ -1,5 +1,6 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { createProject, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 /** Valid, below-file-limit regression fixture: 20 polylines, 200,000 points. */
 export function largePointFixture() {

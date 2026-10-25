@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareViewportModel } from "../src/rendering/viewport/prepared-model.ts";

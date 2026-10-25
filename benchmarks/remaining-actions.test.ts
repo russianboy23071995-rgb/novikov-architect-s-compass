@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fullHeightFixture } from "./bound-height-fixture.ts";
-import { validateProject, type Project } from "../src/lib/bim/model.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import {
   createProjectSnapshot,
   isOwnedProjectSnapshot,

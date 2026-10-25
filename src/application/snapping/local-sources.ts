@@ -1,4 +1,4 @@
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import { projectSnapPrimitives } from "./project-references.ts";
 import { createPrimitiveSourceIndex } from "../../constraints/snapping/local-source-index.ts";
 export { completeLocalQuery } from "../../constraints/snapping/local-source-index.ts";

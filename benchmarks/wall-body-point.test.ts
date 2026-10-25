@@ -9,7 +9,7 @@ import { prepareDirectEditPreview } from "../src/application/direct-edit/prepare
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { addWall } from "../src/application/walls/actions.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
@@ -22,7 +22,7 @@ import { buildingWindowSelectionSurfaces } from "../src/rendering/viewport/windo
 import { selectedWallAxis } from "../src/rendering/viewport/wall-axis.ts";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic.ts";
 import { createProjectionState } from "../src/rendering/viewport/projection-state.ts";
-import type { Project, Point } from "../src/lib/bim/model.ts";
+import type { Project, Point } from "../src/domain/project/schema.ts";
 import type { SnapCandidate } from "../src/constraints/snapping/engine.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 const sessionOf = (base: Project, index: 0 | 1 = 1, id = "wall-1"): EditSession => ({

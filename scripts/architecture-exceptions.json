@@ -16,39 +16,24 @@
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
       "edges": [
         "src/application/direct-edit/contour.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/contour.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/controller.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/controller.ts -> src/lib/bim/history.ts",
-        "src/application/direct-edit/controller.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/numeric.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/numeric.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/offset.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/offset.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/prepared-endpoint.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/prepared-endpoint.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/prepared-hatch.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-line.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-opening.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-preview.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-wall.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/snapping.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/transforms.ts -> src/lib/bim/model.ts"
+        "src/application/direct-edit/snapping.ts -> src/lib/bim/direct-edit.ts"
       ]
     },
     {
       "owner": "src/application/drawing",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/drawing/actions.ts -> src/lib/bim/lines.ts",
-        "src/application/drawing/actions.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/offset-command.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/prepared-chain-corner.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/prepared-wall.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/wall-chain-actions.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/wall-chain.ts -> src/lib/bim/model.ts",
-        "src/application/drawing/window-placement.ts -> src/lib/bim/model.ts"
-      ]
+      "edges": ["src/application/drawing/actions.ts -> src/lib/bim/lines.ts"]
     },
     {
       "owner": "src/application/hatches",
@@ -103,22 +88,10 @@
       "edges": ["src/application/selection/z-translation.ts -> src/lib/bim/history.ts"]
     },
     {
-      "owner": "src/application/snapping",
-      "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
-      "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/snapping/local-sources.ts -> src/lib/bim/model.ts",
-        "src/application/snapping/project-references.ts -> src/lib/bim/model.ts"
-      ]
-    },
-    {
       "owner": "src/application/tools",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/tools/adapters.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/tools/adapters.ts -> src/lib/bim/model.ts"
-      ]
+      "edges": ["src/application/tools/adapters.ts -> src/lib/bim/direct-edit.ts"]
     },
     {
       "owner": "src/application/walls",
@@ -135,35 +108,19 @@
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
       "edges": [
-        "src/components/cad/AiCommandBar.tsx -> src/lib/bim/model.ts",
         "src/components/cad/AiCommandBar.tsx -> src/lib/bim/voice.ts",
-        "src/components/cad/bim-view.ts -> src/lib/bim/model.ts",
-        "src/components/cad/BimInspector.tsx -> src/lib/bim/model.ts",
         "src/components/cad/BimPlan.tsx -> src/lib/bim/direct-edit.ts",
         "src/components/cad/BimPlan.tsx -> src/lib/bim/lines.ts",
-        "src/components/cad/BimPlan.tsx -> src/lib/bim/model.ts",
         "src/components/cad/BimSolidView.tsx -> src/lib/bim/geometry.ts",
-        "src/components/cad/BimSolidView.tsx -> src/lib/bim/model.ts",
         "src/components/cad/BimSolidView.tsx -> src/lib/bim/picking.ts",
         "src/components/cad/CadViewport.tsx -> src/lib/bim/geometry.ts",
         "src/components/cad/CadWorkspace.tsx -> src/lib/bim/direct-edit.ts",
         "src/components/cad/CadWorkspace.tsx -> src/lib/bim/ifc.ts",
-        "src/components/cad/CadWorkspace.tsx -> src/lib/bim/model.ts",
         "src/components/cad/CameraAxes.tsx -> src/lib/bim/geometry.ts",
         "src/components/cad/demand-menu.ts -> src/lib/bim/lines.ts",
-        "src/components/cad/demand-menu.ts -> src/lib/bim/model.ts",
         "src/components/cad/DemandMenu.tsx -> src/lib/bim/direct-edit.ts",
-        "src/components/cad/DemandMenu.tsx -> src/lib/bim/model.ts",
-        "src/components/cad/LayerManager.tsx -> src/lib/bim/model.ts",
-        "src/components/cad/LayerProperties.tsx -> src/lib/bim/model.ts",
         "src/components/cad/LineControls.tsx -> src/lib/bim/lines.ts",
-        "src/components/cad/LineControls.tsx -> src/lib/bim/model.ts",
         "src/components/cad/PlanSceneRun.tsx -> src/lib/bim/lines.ts",
-        "src/components/cad/PlanSceneRun.tsx -> src/lib/bim/model.ts",
-        "src/components/cad/ProjectNavigator.tsx -> src/lib/bim/model.ts",
-        "src/components/cad/SolidSnapPreview.tsx -> src/lib/bim/model.ts",
-        "src/components/cad/useReferenceSelection.ts -> src/lib/bim/model.ts",
-        "src/components/cad/useSolidInference.ts -> src/lib/bim/model.ts",
         "src/components/cad/useToolDefaults.ts -> src/lib/bim/lines.ts"
       ]
     },
@@ -204,12 +161,8 @@
         "src/rendering/viewport/movement-origin.ts -> src/lib/bim/geometry.ts",
         "src/rendering/viewport/selection-move-preview.ts -> src/lib/bim/geometry.ts",
         "src/rendering/viewport/wall-foot-sources.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-foot-sources.ts -> src/lib/bim/model.ts",
         "src/rendering/viewport/wall-point-candidates.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-point-candidates.ts -> src/lib/bim/model.ts",
-        "src/rendering/viewport/wall-preview-context.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-preview-context.ts -> src/lib/bim/model.ts",
-        "src/rendering/viewport/window-selection.ts -> src/lib/bim/model.ts"
+        "src/rendering/viewport/wall-preview-context.ts -> src/lib/bim/geometry.ts"
       ]
     }
   ],

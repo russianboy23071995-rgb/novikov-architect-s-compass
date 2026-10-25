@@ -14,12 +14,9 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import "../src/styles.css";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
-import {
-  createProject,
-  validateProject,
-  serializeProject,
-  deserializeProject,
-} from "../src/lib/bim/model";
+import { serializeProject, deserializeProject } from "../src/lib/bim/model";
+import { createProject } from "../src/application/projects/create.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
 import { beginSelectionMove, previewSelectionMove } from "../src/application/selection/move";
 import { beginWallChain, previewWallChain } from "../src/application/drawing/wall-chain";
@@ -27,7 +24,7 @@ import { selectionIndex } from "../src/application/selection/state";
 import { defaultLineAppearance } from "../src/lib/bim/lines";
 import { connectedWallSolids } from "../src/domain/elements/wall/connections";
 import { propertyFormKey } from "../src/components/cad/property-form-key";
-import type { Project } from "../src/lib/bim/model";
+import type { Project } from "../src/domain/project/schema.ts";
 if (!import.meta.env.DEV) throw new Error("Development diagnostics only");
 const samples: Record<string, number[]> = {};
 const add = (key: string, value: number) => (samples[key] ??= []).push(value);

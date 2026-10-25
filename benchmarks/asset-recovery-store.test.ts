@@ -1,7 +1,7 @@
 import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model.ts";
 import {
