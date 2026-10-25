@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { isDeepStrictEqual } from "node:util";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { type EditSession } from "../src/lib/bim/direct-edit.ts";

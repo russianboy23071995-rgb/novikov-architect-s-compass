@@ -2,7 +2,7 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import type { Project } from "../../lib/bim/model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import { segmentMidpoint } from "../../geometry/primitives/segment.ts";

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { windowCentre } from "../../lib/bim/model.ts";
+import { windowCentre } from "../windows/actions.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { updateWall } from "./actions.ts";
 import { previewWallCommand } from "./command.ts";

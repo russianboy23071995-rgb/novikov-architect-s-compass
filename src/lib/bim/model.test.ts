@@ -1,17 +1,12 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-  addWindow,
-  createProject,
-  deserializeProject,
-  serializeProject,
-  updateWindow,
-  wallLength,
-  windowCentre,
-} from "./model.ts";
+import { deserializeProject, serializeProject } from "./model.ts";
+import { addWindow, updateWindow, windowCentre } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";
-import type { Wall, BimWindow } from "./model.ts";
+import type { Wall, BimWindow } from "../../domain/project/schema.ts";
 
 const wall: Wall = {
   bodyOffset: 0,
@@ -183,7 +178,7 @@ test("caller-owned inputs are detached from returned snapshots", () => {
 });
 
 test("serializer matches the full JSON oracle for Unicode, escapes and duplicate payloads", async () => {
-  const { validateProject } = await import("./model.ts");
+  const { validateProject } = await import("../../domain/project/schema.ts");
   const p = createProject("unicode", "level");
   p.layers[0]!.name = 'ä😀"\\\n' + String.fromCharCode(0xd800);
   p.assets = ["one", "two"].map((id) => ({

@@ -9,7 +9,7 @@ import { editInteraction } from "../src/application/tools/adapters";
 import { createShiftSnapLock } from "../src/application/tools/shift-lock";
 import { createToolSourceQuery } from "../src/application/tools/snapping";
 import { getLocalSnapSources } from "../src/application/snapping/local-sources";
-import { validateProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;
 button.onclick = async () => {

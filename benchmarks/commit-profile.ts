@@ -1,4 +1,5 @@
-import { validateProject, serializeProject, type Project } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import { commitProject, HISTORY_LIMIT, type ProjectHistory } from "../src/lib/bim/history";
 import { connectedWallSolids } from "../src/domain/elements/wall/connections";
 import { assertProjectFileSize } from "../src/interop/project-file/size";

@@ -2,7 +2,7 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import type { WallDefaults } from "../tools/pickup.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { assertDrawingContext, createDrawing, defaultDrawingWall } from "./actions.ts";
 
 /** Ephemeral transaction: only finishWallChain may supply the history commit. */

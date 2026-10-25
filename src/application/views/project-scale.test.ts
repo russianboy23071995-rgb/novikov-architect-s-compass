@@ -3,7 +3,9 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, serializeProject, validateProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../walls/actions.ts";
 import {
   readProjectFile,

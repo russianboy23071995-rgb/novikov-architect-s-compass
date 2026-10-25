@@ -12,8 +12,8 @@ import {
   projectOrthographic,
 } from "../../geometry/projections/orthographic.ts";
 import type { OrthographicCamera } from "../../geometry/projections/orthographic.ts";
-import { validateProject, wallLength } from "./model.ts";
-import type { Project } from "./model.ts";
+import { validateProject, wallLength } from "../../domain/project/schema.ts";
+import type { Project } from "../../domain/project/schema.ts";
 
 export type Vec3 = [number, number, number];
 export type Face = { wallId: string; vertices: Vec3[]; normal: Vec3 };

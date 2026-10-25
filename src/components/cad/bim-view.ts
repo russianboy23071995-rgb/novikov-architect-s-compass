@@ -3,9 +3,11 @@ import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { addWindow, createProject, wallLength } from "../../lib/bim/model.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { addWall } from "../../application/walls/actions.ts";
-import type { Point, Project, Wall } from "../../lib/bim/model.ts";
+import type { Point, Project, Wall } from "../../domain/project/schema.ts";
 
 export type Selection = import("../../application/selection/target.ts").ElementTarget | null;
 

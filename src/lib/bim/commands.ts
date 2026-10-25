@@ -1,6 +1,6 @@
 import { previewOffsetCommand } from "../../application/drawing/offset-command.ts";
 import { serializeProject } from "./model.ts";
-import type { Project } from "./model.ts";
+import type { Project } from "../../domain/project/schema.ts";
 
 export type CommandSelection = import("../../application/selection/target.ts").ElementTarget | null;
 export type CommandPreview = {

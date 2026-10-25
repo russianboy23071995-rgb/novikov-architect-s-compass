@@ -10,7 +10,8 @@ function prepareWindowAxisPreview(session: EditSession) {
   return prepared;
 }
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { createProject, addWindow } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
 import { addWall } from "../src/application/walls/actions.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
 import {

@@ -1,6 +1,6 @@
 import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 /** Isolated pilot: reuse existing translation after preparing a detached chain end. */
-import { validateProject, type Project, type Point } from "../src/lib/bim/model.ts";
+import { validateProject, type Project, type Point } from "../src/domain/project/schema.ts";
 import { prepareTranslation } from "../src/domain/project/prepared-translation.ts";
 function freeze<T>(v: T): T {
   if (v && typeof v === "object" && !Object.isFrozen(v)) {

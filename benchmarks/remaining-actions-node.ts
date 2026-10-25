@@ -2,7 +2,7 @@
 import { writeFileSync } from "node:fs";
 import { schoolFixture } from "./school-fixture.ts";
 import { paths } from "./commit-sharing.ts";
-import type { Project } from "../src/lib/bim/model.ts";
+import type { Project } from "../src/domain/project/schema.ts";
 import { renameStorey } from "../src/application/storeys/actions.ts";
 import { previewLayerManagement } from "../src/application/layers/actions.ts";
 import { previewHatch } from "../src/application/hatches/actions.ts";

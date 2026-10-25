@@ -5,7 +5,9 @@ import {
   createImageAssetHandle,
   imageAssetSchema,
 } from "../src/domain/elements/reference/model.ts";
-import { createProject, addLine, updateLine, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addLine, updateLine } from "../src/application/lines/actions.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { defaultLineAppearance } from "../src/lib/bim/lines.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
 const asset = {

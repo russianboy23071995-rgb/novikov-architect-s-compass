@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { advanceSnapDensity, emptySnapDensity } from "./density.ts";
 import { createLocalSnapSources, completeLocalQuery } from "./local-sources.ts";
 import { createToolSourceQuery, resolveToolSnap } from "../tools/snapping.ts";
-import { validateProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 
 test("density boundaries, hysteresis, interruption and exact return deadline", () => {

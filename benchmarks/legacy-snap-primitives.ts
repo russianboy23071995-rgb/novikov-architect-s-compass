@@ -1,7 +1,7 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { connectedWallSolids } from "../src/domain/elements/wall/connections.ts";
 import { wallBody } from "../src/domain/elements/wall/body.ts";
-import type { Project } from "../src/lib/bim/model.ts";
+import type { Project } from "../src/domain/project/schema.ts";
 import type { SnapReference } from "../src/constraints/snapping/engine.ts";
 import type { Point2 } from "../src/geometry/primitives/point.ts";
 import { segmentMidpoint } from "../src/geometry/primitives/segment.ts";

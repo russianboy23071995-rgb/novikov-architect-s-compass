@@ -5,7 +5,8 @@ import { assertProjectFileSize } from "../src/interop/project-file/size";
 import { sameProjectModel } from "../src/domain/project/model-equality";
 import { recoveryFixture } from "./recovery-capacity-fixture";
 import { createImageAssetHandle } from "../src/domain/elements/reference/model";
-import { serializeProject, validateProject } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history";
 import {

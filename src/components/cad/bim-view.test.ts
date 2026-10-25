@@ -3,13 +3,10 @@ import { largePointFixture } from "../../../benchmarks/large-point-fixture.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject, drawingPoint, endAtLength, planBounds } from "./bim-view.ts";
-import {
-  createProject,
-  windowCentre,
-  validateProject,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { windowCentre } from "../../application/windows/actions.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";
 
 test("UI example uses the agreed wall/window dimensions and stable initial IDs", () => {

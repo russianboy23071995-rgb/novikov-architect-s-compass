@@ -1,6 +1,6 @@
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 export function connectionGroupFixture(branches: number, foreign: number) {
   const p = tPairFixture(),
     s = storeyOf(p),

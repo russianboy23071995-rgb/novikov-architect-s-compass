@@ -1,5 +1,5 @@
 import type { EditingState } from "../src/application/direct-edit/controller.ts";
-import type { Project } from "../src/lib/bim/model.ts";
+import type { Project } from "../src/domain/project/schema.ts";
 
 /** Committed history snapshots are frozen and cannot be corrupted in place. Model a foreign
  * invalid present by a mutable copy with a session bound to it, so confirmation must take the

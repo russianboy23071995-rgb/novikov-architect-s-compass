@@ -2,12 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
-import {
-  createProject,
-  serializeProject,
-  validateProject,
-  type Project,
-} from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../walls/actions.ts";
 import {
   readProjectFile,

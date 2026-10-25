@@ -1,4 +1,5 @@
-import { createProject, addWindow } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
 import { addWall, updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight, addStorey, renameStorey } from "../src/application/storeys/actions.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";

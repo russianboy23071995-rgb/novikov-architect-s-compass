@@ -3,14 +3,10 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  addWindow,
-  updateWindow,
-  createProject,
-  serializeProject,
-  deserializeProject,
-  validateProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { addWindow, updateWindow } from "../windows/actions.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "./actions.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";

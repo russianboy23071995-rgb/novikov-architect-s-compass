@@ -2,12 +2,9 @@ import { PROJECT_SCHEMA_VERSION } from "../../project/format.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { wallBase, wallHeights } from "./heights.ts";
-import {
-  createProject,
-  addWindow,
-  serializeProject,
-  deserializeProject,
-} from "../../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../../lib/bim/model.ts";
+import { createProject } from "../../../application/projects/create.ts";
+import { addWindow } from "../../../application/windows/actions.ts";
 import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { validateProject } from "../../project/schema.ts";
 import { buildSolid, buildBuildingSolid } from "../../../lib/bim/geometry.ts";

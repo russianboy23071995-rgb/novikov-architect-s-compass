@@ -4,7 +4,9 @@ import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { hatchPatternTile } from "../../rendering/viewport/hatch-pattern.ts";
-import { createProject, serializeProject, validateProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import {
   createHistory,
   commitProject,

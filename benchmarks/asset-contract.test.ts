@@ -1,7 +1,8 @@
 import { storeyOf, replaceStorey } from "../src/domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, serializeProject } from "../src/lib/bim/model.ts";
+import { serializeProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
 import { readProjectFile } from "../src/lib/bim/history.ts";
 import {
   splitProject,

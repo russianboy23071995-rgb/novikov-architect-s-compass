@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
-import { validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
 import {

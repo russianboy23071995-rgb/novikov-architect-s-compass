@@ -5,7 +5,8 @@ import { advanceHoverReference, emptyHoverReference } from "./hover-reference.ts
 import { querySnap } from "../snapping/engine.ts";
 import type { SnapReference } from "../snapping/engine.ts";
 import { advanceGuideDirections } from "../guides/directions.ts";
-import { addLine, createProject } from "../../lib/bim/model.ts";
+import { addLine } from "../../application/lines/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { projectSnapReferences } from "../../application/snapping/project-references.ts";
 import {

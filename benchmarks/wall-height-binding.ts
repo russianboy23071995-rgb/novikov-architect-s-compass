@@ -1,4 +1,6 @@
-import { createProject, addWindow, validateProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { addWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight, addStorey } from "../src/application/storeys/actions.ts";
 import { setWallHeightRule } from "../src/application/walls/height-binding.ts";

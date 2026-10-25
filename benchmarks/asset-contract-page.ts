@@ -1,7 +1,8 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, sourceFile } from "./capacity";
 import { importImage } from "../src/interop/images/import";
-import { validateProject, serializeProject } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { splitProject, pack, unpack, restoreProject } from "./asset-contract";
 const output = document.querySelector<HTMLPreElement>("#report")!;
 const button = document.querySelector<HTMLButtonElement>("#run")!;

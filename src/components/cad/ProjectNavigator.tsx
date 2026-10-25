@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;

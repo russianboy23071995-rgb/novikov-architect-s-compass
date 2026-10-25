@@ -11,7 +11,7 @@ import {
 } from "@/application/commands/selection-command";
 import { singleTarget, type SelectionSet } from "@/application/selection/state";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 import { recognitionConstructor } from "@/lib/bim/voice";
 import { startSelectionVoice } from "@/application/commands/selection-voice";
 

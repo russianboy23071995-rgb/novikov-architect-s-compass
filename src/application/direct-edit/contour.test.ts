@@ -2,7 +2,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { boundedEdgeTarget } from "./contour.ts";
-import { createProject, addLine } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
+import { addLine } from "../lines/actions.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 const rectangle = (height: number) => [
   { x: 0, y: 0 },

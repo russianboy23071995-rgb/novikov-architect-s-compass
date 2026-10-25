@@ -4,9 +4,11 @@ import { boundedWindowPosition } from "../../domain/elements/wall/window-range.t
 import { previewHatch } from "../hatches/actions.ts";
 import { updateDoor } from "../doors/actions.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { updateLine, updateWindow, wallLength } from "../../lib/bim/model.ts";
+import { updateLine } from "../lines/actions.ts";
+import { updateWindow } from "../windows/actions.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { updateWall } from "../walls/actions.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import type { ProjectResultMode } from "../../domain/project/owned-snapshot.ts";
 

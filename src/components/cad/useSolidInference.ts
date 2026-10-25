@@ -2,7 +2,7 @@ import type { PreparedViewportModel } from "@/rendering/viewport/prepared-model"
 import { workingStoreyElevation } from "@/domain/storeys/elevation";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useMemo } from "react";
-import type { Project, Point } from "@/lib/bim/model";
+import type { Project, Point } from "@/domain/project/schema";
 import type { ProjectionState } from "@/rendering/viewport/projection-state";
 import { createWallPreviewContext } from "@/rendering/viewport/wall-preview-context";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";

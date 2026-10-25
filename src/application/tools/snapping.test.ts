@@ -119,16 +119,15 @@ import { acquisitionReference } from "../../constraints/inference/construction-r
 import { editInteraction } from "./adapters.ts";
 import { resolveEditSnap } from "../direct-edit/snapping.ts";
 import { projectSnapReferences, getProjectSnapReferences } from "../snapping/project-references.ts";
-import {
-  validateProject,
-  updateLine,
-  serializeProject,
-  deserializeProject,
-} from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
+import { updateLine } from "../lines/actions.ts";
 import { updateWall } from "../walls/actions.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { addWindow, addLine, createProject } from "../../lib/bim/model.ts";
+import { addWindow } from "../windows/actions.ts";
+import { addLine } from "../lines/actions.ts";
+import { createProject } from "../projects/create.ts";
 import { addWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";

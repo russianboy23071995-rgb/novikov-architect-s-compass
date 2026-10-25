@@ -1,6 +1,6 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 /** Owned prepared scope for the second free right-angle segment. */
-import { validateProject, type Point } from "../../lib/bim/model.ts";
+import { validateProject, type Point } from "../../domain/project/schema.ts";
 import { appendWallChain, type WallChain } from "./wall-chain-actions.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";

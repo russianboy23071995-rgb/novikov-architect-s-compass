@@ -11,7 +11,8 @@ import {
   createProjectRecoveryCodec,
   payloadKey,
 } from "../src/interop/project-file/recovery-codec.ts";
-import { serializeProject, createProject } from "../src/lib/bim/model.ts";
+import { serializeProject } from "../src/lib/bim/model.ts";
+import { createProject } from "../src/application/projects/create.ts";
 import {
   prepareProjectOpen,
   requestProjectDownload,

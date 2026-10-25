@@ -1,7 +1,8 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProject, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { createDrawing, defaultHatchFill, closedDrawingContour } from "./actions.ts";
 import { drawingInteraction } from "../tools/adapters.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";

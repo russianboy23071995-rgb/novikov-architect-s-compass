@@ -1,7 +1,7 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { WallDefaults } from "../tools/pickup.ts";
 /** Owned prepared scope for the first free wall segment only. */
-import { validateProject, type Project, type Point } from "../../lib/bim/model.ts";
+import { validateProject, type Project, type Point } from "../../domain/project/schema.ts";
 import { createDrawing, defaultDrawingWall } from "./actions.ts";
 import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";

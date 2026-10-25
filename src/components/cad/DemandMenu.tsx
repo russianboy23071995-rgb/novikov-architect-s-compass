@@ -1,6 +1,6 @@
 import { closedContour } from "@/application/direct-edit/contour";
 import { useEffect, useRef, useState } from "react";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import type { Selection } from "./bim-view.ts";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import type { EditAction } from "@/lib/bim/direct-edit";

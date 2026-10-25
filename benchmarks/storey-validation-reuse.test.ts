@@ -4,7 +4,7 @@ import { fullHeightFixture } from "./bound-height-fixture.ts";
 import { legacyProjectByteLength } from "./legacy-commit.ts";
 import { validatedProjectByteLength } from "../src/interop/project-file/size.ts";
 import { defaultHatchAppearance } from "../src/domain/elements/hatch/model.ts";
-import { validateProject, type Project } from "../src/lib/bim/model.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import {
   createProjectSnapshot,
   storeyValidationReuseCount,

@@ -6,7 +6,7 @@ import {
 import { wallDependencyClosure } from "../../domain/elements/wall/dependency-closure.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import type { Project, Point } from "../../lib/bim/model.ts";
+import type { Project, Point } from "../../domain/project/schema.ts";
 import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
 import { createCompatiblePointIndex } from "../../geometry/spatial/compatible-point-index.ts";
 

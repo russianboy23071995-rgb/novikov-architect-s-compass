@@ -1,5 +1,7 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { addWindow, updateLine, type Project } from "../src/lib/bim/model.ts";
+import { addWindow } from "../src/application/windows/actions.ts";
+import { updateLine } from "../src/application/lines/actions.ts";
+import { type Project } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
 import {
   commitProject,

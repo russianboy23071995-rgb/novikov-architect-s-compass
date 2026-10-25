@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import { createExampleProject } from "./bim-view.ts";
-import { addLine } from "../../lib/bim/model.ts";
+import { addLine } from "../../application/lines/actions.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { createProject } from "../../lib/bim/model.ts";
+import { createProject } from "../projects/create.ts";
 import { addWall } from "../walls/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { addDoor } from "./actions.ts";

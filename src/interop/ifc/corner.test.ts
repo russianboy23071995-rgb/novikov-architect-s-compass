@@ -1,7 +1,8 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addWindow, createProject } from "../../lib/bim/model.ts";
+import { addWindow } from "../../application/windows/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { exportCornerIfc } from "./corner.ts";

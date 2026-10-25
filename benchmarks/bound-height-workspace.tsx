@@ -5,7 +5,7 @@ import { connectionGroupFixture } from "./connection-group-fixture";
 import { tPairFixture } from "./t-pair-fixture";
 import { tTransitionFixture } from "./t-transition-fixture";
 import { storeyOf } from "../src/domain/storeys/access";
-import { validateProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/domain/project/schema.ts";
 import "../src/styles.css";
 // Separate disposable origin: never replace the user's workspace/recovery on 8080.
 if (location.port !== "8087") throw new Error("Höhenabnahme nur isoliert auf Port 8087 öffnen.");

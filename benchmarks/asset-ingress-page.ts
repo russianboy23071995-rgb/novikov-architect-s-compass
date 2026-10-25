@@ -8,7 +8,9 @@ import {
   redoProject,
   readProjectFile,
 } from "../src/lib/bim/history";
-import { updateLine, serializeProject, validateProject } from "../src/lib/bim/model";
+import { serializeProject } from "../src/lib/bim/model";
+import { updateLine } from "../src/application/lines/actions.ts";
+import { validateProject } from "../src/domain/project/schema.ts";
 import { addWall, updateWall } from "../src/application/walls/actions.ts";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;

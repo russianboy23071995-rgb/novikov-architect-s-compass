@@ -5,7 +5,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { assignPenSet, loadPens, savePenSet } from "./library.ts";
 import { defaultPenSet, penSetSchema } from "../../domain/pens/model.ts";
-import { addLine, createProject, serializeProject, updateLine } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addLine, updateLine } from "../lines/actions.ts";
+import { createProject } from "../projects/create.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 const memory = () => {

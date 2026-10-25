@@ -1,14 +1,10 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  addLine,
-  updateLine,
-  createProject,
-  serializeProject,
-  deserializeProject,
-} from "./model.ts";
-import type { DrawingLine } from "./model.ts";
+import { serializeProject, deserializeProject } from "./model.ts";
+import { addLine, updateLine } from "../../application/lines/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import type { DrawingLine } from "../../domain/project/schema.ts";
 import { defaultLineAppearance, lineLength, linePath, parsePenWidth } from "./lines.ts";
 import {
   createHistory,

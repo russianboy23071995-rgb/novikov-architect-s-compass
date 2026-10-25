@@ -6,7 +6,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { previewHatch, commitHatch } from "./actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { validateProject, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { validateProject } from "../../domain/project/schema.ts";
 import { createHistory, undoProject, redoProject, readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import {

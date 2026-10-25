@@ -3,7 +3,8 @@ import { boundedWindowPosition } from "../../domain/elements/wall/window-range.t
 import { precisionTarget } from "../input/precision.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
-import { addWindow, wallLength } from "../../lib/bim/model.ts";
+import { addWindow } from "../windows/actions.ts";
+import { wallLength } from "../../domain/project/schema.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";

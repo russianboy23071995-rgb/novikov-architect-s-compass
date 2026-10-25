@@ -2,7 +2,7 @@ import { boundedEdgeTarget } from "./contour.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
-import type { Point, Project } from "../../lib/bim/model.ts";
+import type { Point, Project } from "../../domain/project/schema.ts";
 import { parseMetres } from "../../core/units/metres.ts";
 import { precisionTarget } from "../input/precision.ts";
 import { editDirection } from "./snapping.ts";

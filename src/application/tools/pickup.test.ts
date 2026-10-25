@@ -89,7 +89,7 @@ test("double secondary requires same target/context, nearby rapid clicks and res
   assert.equal(g.click({ ...click, time: 1400, x: 30 }), false);
 });
 import { placeWindow, windowPlacementInteraction } from "../drawing/window-placement.ts";
-import { updateWindow } from "../../lib/bim/model.ts";
+import { updateWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
 
 test("window pickup copies creation defaults including layer, never host or position; new host and atomic undo", () => {
@@ -190,7 +190,7 @@ test("window placement checks chosen layer, host visibility and changed draft; p
     placeWindow(p, p, visibility, "wide", point, { width: 10, height: 1, sillHeight: 0.8 }),
   );
 });
-import { addLine } from "../../lib/bim/model.ts";
+import { addLine } from "../lines/actions.ts";
 
 test("line and polyline pickup transfer style and layer into independent new geometry, with one undo", () => {
   for (const sourceKind of ["line", "polyline"] as const) {

@@ -13,7 +13,7 @@ import type {
   ReferenceSelectionEvent,
 } from "@/application/snapping/reference-selection";
 import { getLocalSnapSources } from "@/application/snapping/local-sources";
-import type { Project } from "@/lib/bim/model";
+import type { Project } from "@/domain/project/schema";
 import type { SnapReference } from "@/constraints/snapping/engine";
 export function useReferenceSelection(
   project: Project,
