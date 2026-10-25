@@ -48,3 +48,20 @@ den drei Empfehlungen (Nutzerentscheidung 24.10.2026):
   Nicht nachstellbar (3D-Wechsel, Wand- und Z-Bewegung, Fenster-/Türziehen mit Überlappung,
   Löschen/Undo jeweils fehlerfrei); die Datei ist in diesen Schritten unverändert. Eigene
   Untersuchung empfohlen.
+
+## Nachtrag 25.10.2026: Kontextmenü verdeckt die Befehlsleiste nicht mehr
+
+Befund aus der Abnahme von DIN links/rechts: Das Kontextmenü (`z-50`) konnte über der
+Befehlsleiste (`z-30`) liegen; ein Klick ins Befehlsfeld traf „Löschen (Entf)“. Auf Wunsch des
+Nutzers in derselben Sitzung behoben (Branch feat/menu-avoid-commandbar, Basis
+feat/door-din-hand).
+
+- **Änderungskarte:** Die Befehlsleiste ist als Sperrbereich markiert (`data-menu-obstacle`).
+  `clampMenuPosition` (`components/cad/demand-menu.ts`) hält das Menü im Fenster und weicht
+  einem Sperrbereich aus – zuerst darüber, sonst links, sonst rechts davon; passt nichts, bleibt
+  die Position. Das Menü misst die Leiste mit `ResizeObserver` mit (sie wächst bei Vorschauen).
+  Ziehen und Pfeiltasten nutzen dieselbe Begrenzung. Keine Modell- oder Formatänderung.
+- **Nachweis:** Test in `demand-menu.test.ts` (über, links, rechts, unverändert ohne Konflikt,
+  Ziehen auf die Leiste); Gegenprobe ohne Ausweichen: 1 Test scheitert. 1231 Tests,
+  Architektur-Check, Typprüfungen, Lint (0 Fehler), Build. Bedienabnahme: Menü 30 Pfeilschritte
+  nach unten – bleibt 8 px über der Leiste, keine Überdeckung.

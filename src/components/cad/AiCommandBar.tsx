@@ -110,7 +110,10 @@ export function AiCommandBar({
     }
   };
   return (
-    <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2">
+    <div
+      data-menu-obstacle
+      className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2"
+    >
       <form
         onFocus={onFocus}
         className="flex items-center gap-1"
