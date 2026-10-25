@@ -47,3 +47,18 @@ export function doorOpening(door: Door, wall: { baseOffset?: number | undefined 
     sillHeight: door.zOffset - wallBase(wall),
   };
 }
+
+export type DinHand = "links" | "rechts";
+
+/** DIN 107 handing, derived only: seen from the side the leaf opens toward (the swing side),
+ * hinges on the left make a "DIN links" door. Facing the wall from the left of the wall
+ * direction, the wall end lies to the viewer's left; from the right side, the wall start.
+ */
+export function doorDinHand(door: Pick<Door, "hinge" | "opensTo">): DinHand {
+  return (door.hinge === "end") === (door.opensTo === "left") ? "links" : "rechts";
+}
+
+/** Set a DIN handing (user decision 24.10.2026): the swing side stays, the hinge jamb moves. */
+export function doorHingeForDinHand(door: Pick<Door, "opensTo">, hand: DinHand): Door["hinge"] {
+  return (hand === "links") === (door.opensTo === "left") ? "end" : "start";
+}

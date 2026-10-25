@@ -56,7 +56,7 @@ test("door information opens the along-wall menu with its own measures", async (
   const p = addDoor(wide, { id: "d", wallId: "wall-1", position: 0.15, ...DOOR_DEFAULTS });
   assert.deepEqual(selectionSummary(p, { kind: "door", id: "d" }), {
     title: "Tür",
-    details: "Breite 1,01 m · Höhe 2,14 m · Z-Versatz 0,00 m",
+    details: "Breite 1,01 m · Höhe 2,14 m · Z-Versatz 0,00 m · DIN rechts",
   });
   assert.equal(selectionSummary(p, { kind: "door", id: "missing" }), null);
 });

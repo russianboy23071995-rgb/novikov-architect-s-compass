@@ -1,6 +1,7 @@
 import type { Project } from "@/domain/project/schema";
 import type { DoorSettingsDraft } from "@/application/drawing/door-placement";
 import { Input } from "@/components/ui/input";
+import { doorDinHand, doorHingeForDinHand, type DinHand } from "@/domain/elements/door/model";
 
 const fields = [
   ["width", "Türbreite (m)"],
@@ -64,6 +65,20 @@ export function DoorPlacementFields({
         >
           <option value="left">links der Wandrichtung</option>
           <option value="right">rechts der Wandrichtung</option>
+        </select>
+      </label>
+      <label className="text-xs">
+        DIN
+        <select
+          aria-label="Tür DIN links/rechts"
+          className="block h-8 rounded border bg-background"
+          value={doorDinHand(value)}
+          onChange={(event) =>
+            onChange({ ...value, hinge: doorHingeForDinHand(value, event.target.value as DinHand) })
+          }
+        >
+          <option value="links">DIN links</option>
+          <option value="rechts">DIN rechts</option>
         </select>
       </label>
       <label className="text-xs">

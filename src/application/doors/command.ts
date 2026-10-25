@@ -1,6 +1,6 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import type { Door } from "../../domain/elements/door/model.ts";
+import { doorDinHand, doorHingeForDinHand, type Door } from "../../domain/elements/door/model.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { updateDoor } from "./actions.ts";
 
@@ -27,7 +27,8 @@ export function previewDoorCommand(
   const centre = /^tür\s+zentrieren$/iu.test(input);
   const hinge = /^anschlag\s+(?:auf\s+)?(wandanfang|wandende)$/iu.exec(input);
   const swing = /^aufschlag\s+(?:nach\s+)?(links|rechts)$/iu.exec(input);
-  if (!measure && !centre && !hinge && !swing) return null;
+  const din = /^tür\s+din\s+(links|rechts)$/iu.exec(input);
+  if (!measure && !centre && !hinge && !swing && !din) return null;
   if (target?.kind !== "door") throw new Error("Bitte zuerst eine Tür auswählen.");
   const door = storeyOf(project).doors?.find((d) => d.id === target.id);
   if (!door) throw new Error("Die ausgewählte Tür existiert nicht mehr.");
@@ -50,6 +51,11 @@ export function previewDoorCommand(
     const value = hinge[1]!.toLocaleLowerCase("de") === "wandanfang" ? "start" : "end";
     changes = { hinge: value };
     summary = `${door.id} · Anschlag: Seite ${value === "start" ? "Wandanfang" : "Wandende"}`;
+  } else if (din) {
+    // DIN 107 handing keeps the swing side and moves the hinge jamb (user decision 24.10.2026).
+    const hand = din[1]!.toLocaleLowerCase("de") as "links" | "rechts";
+    changes = { hinge: doorHingeForDinHand(door, hand) };
+    summary = `${door.id} · DIN ${doorDinHand(door)} → DIN ${hand}`;
   } else {
     const value = swing![1]!.toLocaleLowerCase("de") === "links" ? "left" : "right";
     changes = { opensTo: value };

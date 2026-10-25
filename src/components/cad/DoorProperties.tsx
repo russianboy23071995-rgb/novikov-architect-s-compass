@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { storeyOf } from "@/domain/storeys/access";
 import { ELEMENT_KINDS } from "@/domain/elements/registry";
-import type { Door } from "@/domain/elements/door/model";
+import {
+  doorDinHand,
+  doorHingeForDinHand,
+  type DinHand,
+  type Door,
+} from "@/domain/elements/door/model";
 import { updateDoor } from "@/application/doors/actions";
 import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import type { Project } from "@/domain/project/schema";
@@ -103,6 +108,20 @@ export function DoorProperties({
         >
           <option value="left">links der Wandrichtung</option>
           <option value="right">rechts der Wandrichtung</option>
+        </select>
+      </label>
+      <label className="text-xs">
+        DIN
+        <select
+          aria-label="Tür DIN links/rechts"
+          className="block h-8 rounded border bg-background"
+          value={doorDinHand(door)}
+          onChange={(event) =>
+            apply({ hinge: doorHingeForDinHand(door, event.target.value as DinHand) })
+          }
+        >
+          <option value="links">DIN links</option>
+          <option value="rechts">DIN rechts</option>
         </select>
       </label>
       {error && (

@@ -3,6 +3,7 @@ import { wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
+import { doorDinHand } from "../../domain/elements/door/model.ts";
 
 export function clampMenuPosition(
   point: Point,
@@ -46,7 +47,7 @@ export function selectionSummary(project: Project, selection: Selection) {
     return door
       ? {
           title: "Tür",
-          details: `Breite ${metres(door.width)} · Höhe ${metres(door.height)} · Z-Versatz ${metres(door.zOffset)}`,
+          details: `Breite ${metres(door.width)} · Höhe ${metres(door.height)} · Z-Versatz ${metres(door.zOffset)} · DIN ${doorDinHand(door)}`,
         }
       : null;
   }
