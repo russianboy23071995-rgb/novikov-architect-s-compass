@@ -2,16 +2,15 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  addWall,
   addWindow,
   createProject,
   deserializeProject,
   serializeProject,
-  updateWall,
   updateWindow,
   wallLength,
   windowCentre,
 } from "./model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import type { Wall, BimWindow } from "./model.ts";
 
 const wall: Wall = {

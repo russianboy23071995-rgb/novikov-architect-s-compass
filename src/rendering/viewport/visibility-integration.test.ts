@@ -10,7 +10,7 @@ import {
 import { createVisibleToolSourceQuery } from "../../application/tools/snapping.ts";
 import { createEditingState, editingReducer } from "../../application/direct-edit/controller.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { createWallPreviewContext } from "./wall-preview-context.ts";

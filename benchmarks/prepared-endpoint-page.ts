@@ -1,7 +1,8 @@
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { capacityFixture, tick } from "./capacity";
 import { prepareEndpoint } from "./prepared-endpoint";
-import { updateWall, validateProject } from "../src/lib/bim/model";
+import { validateProject } from "../src/lib/bim/model";
+import { updateWall } from "../src/application/walls/actions.ts";
 import { commitProject, createHistory, undoProject, redoProject } from "../src/lib/bim/history";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;

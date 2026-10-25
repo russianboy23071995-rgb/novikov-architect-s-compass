@@ -1,5 +1,5 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "./actions.ts";
 import { assertAxisInside } from "../../domain/elements/wall/axis-position.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";

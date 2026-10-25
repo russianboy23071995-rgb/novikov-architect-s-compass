@@ -2,7 +2,8 @@ import { storeyOf } from "../../storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { inspectCornerOpenings, type CornerTarget } from "./corner-openings.ts";
-import { createProject, addWall, addWindow, updateWall } from "../../../lib/bim/model.ts";
+import { createProject, addWindow } from "../../../lib/bim/model.ts";
+import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 
 const targets: [CornerTarget, CornerTarget] = [

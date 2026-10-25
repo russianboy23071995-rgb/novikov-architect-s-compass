@@ -4,14 +4,13 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createExampleProject, drawingPoint, endAtLength, planBounds } from "./bim-view.ts";
 import {
-  addWall,
   createProject,
-  updateWall,
   windowCentre,
   validateProject,
   serializeProject,
   deserializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 
 test("UI example uses the agreed wall/window dimensions and stable initial IDs", () => {
   const project = createExampleProject();

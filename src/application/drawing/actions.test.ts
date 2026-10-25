@@ -315,7 +315,8 @@ test("pinned window host uses exact signed distance and retains its explicit hos
 });
 
 test("window tool in connected plan preserves preview, edits, history, reload and IFC", async () => {
-  const { addWall, updateWindow } = await import("../../lib/bim/model.ts");
+  const { updateWindow } = await import("../../lib/bim/model.ts");
+  const { addWall } = await import("../walls/actions.ts");
   const { windowPlacementInteraction } = await import("./window-placement.ts");
   const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
   const { confirmInteraction } = await import("../tools/interaction.ts");

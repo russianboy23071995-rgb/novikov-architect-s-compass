@@ -5,7 +5,8 @@ import { evaluateInteraction, confirmInteraction } from "./interaction.ts";
 import { drawingInteraction, editInteraction } from "./adapters.ts";
 import { createDrawing, defaultDrawingWall } from "../drawing/actions.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { createProject, addWall, addLine, updateWall } from "../../lib/bim/model.ts";
+import { createProject, addLine } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 const origin = { x: 0, y: 0 };
 test("same lifecycle evaluates and commits both drawing adapters exactly once", () => {

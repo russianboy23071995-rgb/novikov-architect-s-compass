@@ -2,7 +2,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addLine, addWall, serializeProject, deserializeProject, updateWall } from "./model.ts";
+import { addLine, serializeProject, deserializeProject } from "./model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "./lines.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "./history.ts";
 import { buildSolid } from "./geometry.ts";
@@ -168,7 +169,8 @@ test("metre input accepts signed decimal comma/point and rejects incomplete inpu
 });
 
 test("window cap remains valid at both joined ends and preserves the base", async () => {
-  const { addWall, addWindow, createProject, validateProject } = await import("./model.ts");
+  const { addWindow, createProject, validateProject } = await import("./model.ts");
+  const { addWall } = await import("../../application/walls/actions.ts");
   let p = createProject("caps", "level");
   for (const wall of [
     { id: "host", start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },

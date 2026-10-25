@@ -5,13 +5,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createProject,
-  addWall,
   addLine,
-  updateWall,
   updateLine,
   serializeProject,
   validateProject,
 } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { loadProjectData } from "./load.ts";
 import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";

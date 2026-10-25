@@ -89,7 +89,8 @@ test("double secondary requires same target/context, nearby rapid clicks and res
   assert.equal(g.click({ ...click, time: 1400, x: 30 }), false);
 });
 import { placeWindow, windowPlacementInteraction } from "../drawing/window-placement.ts";
-import { addWall, updateWindow } from "../../lib/bim/model.ts";
+import { updateWindow } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 
 test("window pickup copies creation defaults including layer, never host or position; new host and atomic undo", () => {
   let p = createExampleProject();
@@ -275,7 +276,7 @@ import {
   finishWallChain,
   previewWallChain,
 } from "../drawing/wall-chain.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 
 test("wall pickup pins owned defaults through prepared preview and whole-chain history", () => {
   let p = createExampleProject();

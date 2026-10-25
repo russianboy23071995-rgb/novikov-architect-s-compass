@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildSolid, initialCamera, projectPoint } from "./geometry.ts";
 import type { Solid, Vec3 } from "./geometry.ts";
-import { addWall, addWindow, createProject, updateWall, updateWindow } from "./model.ts";
+import { addWindow, createProject, updateWindow } from "./model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 
 const wall = { id: "w", start: { x: 0, y: 0 }, end: { x: 3, y: 0 }, thickness: 0.36, height: 2.8 };
 const opening = { id: "o", wallId: "w", width: 1.2, height: 1.35, sillHeight: 0.9, position: 0.5 };

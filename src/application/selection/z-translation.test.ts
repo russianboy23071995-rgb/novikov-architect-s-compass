@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareZTranslation } from "./z-translation.ts";
-import { createProject, addWall, addWindow } from "../../lib/bim/model.ts";
+import { createProject, addWindow } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";

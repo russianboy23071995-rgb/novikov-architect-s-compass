@@ -10,13 +10,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createProject,
-  addWall,
   addWindow,
-  updateWall,
   updateWindow,
   serializeProject,
   deserializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "./actions.ts";
 import { previewTConnection } from "./t-connections.ts";
 import {
   connectedWallContours,

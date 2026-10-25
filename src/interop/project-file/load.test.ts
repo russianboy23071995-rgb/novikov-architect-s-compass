@@ -6,12 +6,12 @@ import assert from "node:assert/strict";
 import { loadProjectData, deserializeProject } from "./load.ts";
 import {
   createProject,
-  addWall,
   addWindow,
   addLine,
   validateProject,
   serializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../../application/drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";

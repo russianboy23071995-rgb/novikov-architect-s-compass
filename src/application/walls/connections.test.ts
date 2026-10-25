@@ -4,15 +4,14 @@ import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  addWall,
   addWindow,
-  updateWall,
   updateWindow,
   createProject,
   serializeProject,
   deserializeProject,
   validateProject,
 } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "./actions.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";

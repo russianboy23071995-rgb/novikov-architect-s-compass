@@ -4,7 +4,8 @@ import { isDeepStrictEqual } from "node:util";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { updateWall, updateWindow } from "../src/lib/bim/model.ts";
+import { updateWindow } from "../src/lib/bim/model.ts";
+import { updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { buildBuildingSolid, type Solid } from "../src/lib/bim/geometry.ts";
 

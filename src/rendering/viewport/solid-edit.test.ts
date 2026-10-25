@@ -3,7 +3,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { addWall, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { createWallPreviewContext } from "./wall-preview-context.ts";
@@ -18,7 +19,8 @@ import { evaluateInteraction, confirmInteraction } from "../../application/tools
 import { resolveToolSnap } from "../../application/tools/snapping.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import { exportIfc, stepReal } from "../../lib/bim/ifc.ts";
-import { updateWall, wallLength } from "../../lib/bim/model.ts";
+import { wallLength } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import {
   projectSnapPrimitives,
   wallEndpointIndex,

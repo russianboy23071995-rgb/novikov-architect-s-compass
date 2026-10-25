@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { addDoor } from "../../application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";

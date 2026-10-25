@@ -4,12 +4,11 @@ import assert from "node:assert/strict";
 import { wallBase, wallHeights } from "./heights.ts";
 import {
   createProject,
-  addWall,
   addWindow,
-  updateWall,
   serializeProject,
   deserializeProject,
 } from "../../../lib/bim/model.ts";
+import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { validateProject } from "../../project/schema.ts";
 import { buildSolid, buildBuildingSolid } from "../../../lib/bim/geometry.ts";
 import { storeyOf } from "../../storeys/access.ts";

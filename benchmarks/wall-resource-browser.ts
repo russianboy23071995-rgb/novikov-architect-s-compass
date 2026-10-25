@@ -3,7 +3,8 @@ import { buildBuildingSolid as candidate } from "./archived-wall-resource";
 import { buildBuildingSolid as production, type Solid } from "../src/lib/bim/geometry.ts";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { updateWall, updateWindow } from "../src/lib/bim/model.ts";
+import { updateWindow } from "../src/lib/bim/model.ts";
+import { updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 function equal(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;

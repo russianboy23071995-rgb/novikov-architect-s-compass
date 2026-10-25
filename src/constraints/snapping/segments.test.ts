@@ -11,12 +11,12 @@ import {
 } from "../../application/direct-edit/controller.ts";
 import {
   addLine,
-  addWall,
   addWindow,
   createProject,
   updateLine,
   serializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { querySnap } from "./engine.ts";

@@ -1,14 +1,8 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  updateWall,
-  serializeProject,
-  wallLength,
-} from "./model.ts";
+import { createProject, addWindow, serializeProject, wallLength } from "./model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import {
   createHistory,
   commitProject,

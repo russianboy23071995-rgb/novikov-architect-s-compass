@@ -1,6 +1,6 @@
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { createExampleProject } from "../src/components/cad/bim-view.ts";
-import { addWall } from "../src/lib/bim/model.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";

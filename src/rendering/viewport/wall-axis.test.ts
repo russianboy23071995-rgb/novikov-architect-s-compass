@@ -6,7 +6,7 @@ import { createProjectionState } from "./projection-state.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import {
   createEditingState,
   editingReducer,

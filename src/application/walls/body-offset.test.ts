@@ -7,12 +7,12 @@ import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { previewWallOffset, commitWallOffset } from "./body-offset.ts";
 import {
-  updateWall,
   windowCentre,
   serializeProject,
   deserializeProject,
   validateProject,
 } from "../../lib/bim/model.ts";
+import { updateWall } from "./actions.ts";
 import { createHistory, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";

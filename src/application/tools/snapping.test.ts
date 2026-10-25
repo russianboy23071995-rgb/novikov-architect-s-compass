@@ -122,13 +122,14 @@ import { projectSnapReferences, getProjectSnapReferences } from "../snapping/pro
 import {
   validateProject,
   updateLine,
-  updateWall,
   serializeProject,
   deserializeProject,
 } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { addWall, addWindow, addLine, createProject } from "../../lib/bim/model.ts";
+import { addWindow, addLine, createProject } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { sameHoverSession } from "../../constraints/inference/hover-reference.ts";
 import { createAffineScreenMetric } from "../../geometry/projections/screen-metric.ts";

@@ -2,12 +2,8 @@ import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  validateProject,
-  serializeProject,
-  deserializeProject,
-  updateWall,
-} from "../../lib/bim/model.ts";
+import { validateProject, serializeProject, deserializeProject } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import { projectSnapReferences } from "./project-references.ts";
 import { createLocalSnapSources, getLocalSnapSources } from "./local-sources.ts";
 import { referenceKey } from "../../constraints/inference/construction-reference.ts";

@@ -6,6 +6,7 @@ import {
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { previewDoorCommand } from "../doors/command.ts";
 import { previewWindowCommand } from "../windows/command.ts";
+import { previewWallCommand } from "../walls/command.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { previewOverlapHint } from "../openings/overlap-hint.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -96,7 +97,9 @@ export function previewSelectionCommand(
         "Dieser Befehl benötigt genau ein Element. Gruppenbefehl: Auswahl um 2 m bei 90 Grad verschieben.",
       );
     const element =
-      previewDoorCommand(project, target, text) ?? previewWindowCommand(project, target, text);
+      previewDoorCommand(project, target, text) ??
+      previewWindowCommand(project, target, text) ??
+      previewWallCommand(project, target, text);
     const legacy = element ?? previewCommand(project, target, text);
     result = legacy.result;
     summary = legacy.summary;

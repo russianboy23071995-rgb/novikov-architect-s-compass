@@ -4,7 +4,8 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { updateWall, serializeProject, validateProject } from "../../lib/bim/model.ts";
+import { serializeProject, validateProject } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import {
