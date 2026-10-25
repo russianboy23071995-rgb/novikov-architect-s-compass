@@ -14,6 +14,9 @@ import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
 
+/** Hint colour for overlapping openings (allowed, not an error). */
+const OVERLAP_COLOR = "#d97706";
+
 type Props = PlanRun & {
   scene: PlanScene;
   scaleContext: ScaleContext;
@@ -209,7 +212,9 @@ export function PlanSceneContent({
                       ? "none"
                       : selectedIds.has(opening.id)
                         ? WALL_AXIS_COLOR
-                        : "var(--primary)"
+                        : scene.overlapping.has(opening.id)
+                          ? OVERLAP_COLOR
+                          : "var(--primary)"
                   }
                   strokeWidth={wallOutlineWidth / pixelsPerMetre}
                   className="outline-none"
@@ -232,6 +237,7 @@ export function PlanSceneContent({
               const shown = allowsShown(door.id),
                 selected = selectedIds.has(door.id);
               const stroke = selected ? WALL_AXIS_COLOR : "var(--primary)";
+              const outline = !selected && scene.overlapping.has(door.id) ? OVERLAP_COLOR : stroke;
               return (
                 <g key={door.id} aria-label={`Tür ${door.id}`}>
                   <rect
@@ -241,7 +247,7 @@ export function PlanSceneContent({
                     width={door.width}
                     height={wall.thickness}
                     fill="var(--background)"
-                    stroke={shown ? stroke : "none"}
+                    stroke={shown ? outline : "none"}
                     strokeWidth={wallOutlineWidth / pixelsPerMetre}
                     className="outline-none"
                     style={selected ? CAD_SHIMMER : undefined}
