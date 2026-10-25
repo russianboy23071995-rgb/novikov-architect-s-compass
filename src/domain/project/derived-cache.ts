@@ -10,7 +10,11 @@ export function createDerivedCache<K extends object, V>(): WeakMap<K, V> {
   return cache;
 }
 
+let released = 0;
+/** Diagnostic count of dropped entries, for tests and measurements. */
+export const releasedDerivedCount = () => released;
+
 /** Drop every derived entry of a snapshot; the next request rebuilds it from the model. */
 export function releaseDerivedData(snapshot: object): void {
-  for (const cache of registry) cache.delete(snapshot);
+  for (const cache of registry) if (cache.delete(snapshot)) released++;
 }

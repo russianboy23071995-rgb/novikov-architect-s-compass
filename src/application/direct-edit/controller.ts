@@ -405,9 +405,15 @@ function reduceWithPatterns(
     const resolution = resolveProjectHatchPatterns(snapshot, snapshot, [...catalog.values()]);
     const next = reduceEditing(state, incoming ? { ...event, project: resolution.project } : event);
     if (next.error) return next;
+    // An incoming project was committed as the resolution, and a no-op resolution keeps the
+    // restored step: keep the history's owned snapshot then. Replacing it with the (possibly
+    // mutable) resolution object ended structural sharing for every later commit
+    // (docs/performance/HISTORY_MEMORY.md).
+    const present =
+      incoming || resolution.project === snapshot ? next.history.present : resolution.project;
     return {
       ...next,
-      history: { ...next.history, present: resolution.project },
+      history: { ...next.history, present },
       error: resolution.conflicts.length
         ? `Musterkonflikt: ${resolution.conflicts.join(", ")}. Eingebettete Darstellung erhalten.`
         : (event.patternLibraryError ?? ""),
