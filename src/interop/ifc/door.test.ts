@@ -71,3 +71,10 @@ test("the opening underside follows the door's storey-relative z offset over a r
   // Wall placement already sits at the wall base, so the opening starts at 0 above it.
   assert.match(point, /IFCCARTESIANPOINT\(\([-\d.E]+,0\.,0\.\)\)/);
 });
+
+test("the door carries its DIN 107 handing as an explicit property", async () => {
+  const ifc = await exportIfc(withDoor({ hinge: "end", opensTo: "left" }), date);
+  assert.ok(ifc.includes("'Handing',$,IFCLABEL('DIN links')"));
+  const right = await exportIfc(withDoor(), date);
+  assert.ok(right.includes("'Handing',$,IFCLABEL('DIN rechts')"));
+});

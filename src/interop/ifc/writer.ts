@@ -5,7 +5,7 @@ import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { doorOpening, type Door } from "../../domain/elements/door/model.ts";
+import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
 
 /** IFC4 IfcDoorTypeOperationEnum for a single swing leaf. Facing the swing side (door +Y),
  * the wall start lies left when the leaf opens to the left of the wall direction.
@@ -257,6 +257,8 @@ export async function writeIfc(
           ["RelativePosition", `IFCRATIOMEASURE(${real(door.position)})`],
           ["Hinge", `IFCLABEL(${text(door.hinge)})`],
           ["OpensTo", `IFCLABEL(${text(door.opensTo)})`],
+          // DIN 107 is seen from the swing side; IFC's operation type from the opposite side.
+          ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
         ]);
       }
     }

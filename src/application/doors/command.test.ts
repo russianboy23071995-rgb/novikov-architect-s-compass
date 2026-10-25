@@ -67,3 +67,15 @@ test("the shared selection command path previews door commands with a summary", 
   assert.equal(storeyOf(preview.result).doors![0]!.width, 1.26);
   assert.match(preview.summary, /Türbreite: 1,01 → 1,26 m/);
 });
+
+test("DIN links/rechts keeps the swing side and moves only the hinge", () => {
+  const p = project();
+  const before = storeyOf(p).doors![0]!;
+  assert.equal(before.hinge, "start");
+  const links = previewDoorCommand(p, door, "Tür DIN links")!;
+  assert.deepEqual(storeyOf(links.result).doors![0]!, { ...before, hinge: "end" });
+  assert.equal(links.summary, "d · DIN rechts → DIN links");
+  const same = previewDoorCommand(p, door, "tür din rechts")!;
+  assert.deepEqual(storeyOf(same.result).doors![0]!, before);
+  assert.equal(previewDoorCommand(p, door, "Tür DIN mitte"), null);
+});

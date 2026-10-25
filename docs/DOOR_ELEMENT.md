@@ -262,3 +262,41 @@ der geschossbezogene Z-Versatz ändert sich um die Änderung des Wandfußes.
   („Geometriegrenzen numerisch nicht trennbar“); das gilt bereits vor diesem Schritt und
   betrifft die gemeinsame Öffnungsgeometrie.
 - Beim Setzen landet eine Tür auch über einem Fenster (Überlappung, Entscheidung offen).
+
+# Tür: DIN links/rechts (25.10.2026)
+
+Basis: feat/element-delete (PR452, noch nicht gemergt). Änderungskarte freigegeben:
+**Anzeige und Eingabe**; beim Setzen von DIN bleibt die **Aufschlagseite**, nur der
+**Anschlag** wechselt; zusätzliche **IFC-Eigenschaft** ja.
+
+## Regel (DIN 107)
+
+Von der Seite betrachtet, zu der die Tür aufschlägt: Bänder links = DIN links. Im Modell:
+DIN links genau dann, wenn (Anschlag Wandende) = (Aufschlag links der Wandrichtung).
+Gespeichert bleiben Anschlag und Aufschlag; kein neues Feld, kein Formatwechsel.
+
+## Änderungen
+
+- `domain/elements/door/model.ts`: `doorDinHand`, `doorHingeForDinHand`.
+- Eigenschaften und Setzfelder der Tür: Auswahl „DIN links / DIN rechts“ neben Anschlag und
+  Aufschlag; Kontextmenü-Maße nennen die DIN-Angabe.
+- Text/Sprache: „Tür DIN links/rechts“ (Vorschau „DIN rechts → DIN links“, ein Undo-Schritt);
+  Befehlshilfe ergänzt.
+- IFC: Eigenschaft `Handing` = `DIN links`/`DIN rechts`. Die IFC-Öffnungsart wird von der
+  Gegenseite betrachtet: `SINGLE_SWING_LEFT` entspricht DIN rechts (Test hält das fest).
+
+## Nachweis
+
+- `src/domain/elements/door/din-hand.test.ts`: alle vier Kombinationen geometrisch am
+  Grundriss-Türsymbol geprüft (Betrachter auf der Aufschlagseite); Umschalten behält die
+  Aufschlagseite und ist umkehrbar; IFC-Spiegelung. Befehlstest und IFC-Eigenschaftstest
+  ergänzt. Gegenprobe mit vertauschter Regel: 6 Tests scheitern.
+- 1230 Tests, Architektur-Check PASS, beide Typprüfungen, Lint (0 Fehler), Build.
+- **Bedienabnahme:** Setzfelder DIN links → Anschlag „Seite Wandende“, Aufschlag unverändert,
+  Bänder im Symbol auf der Betrachterseite links; Eigenschaften DIN rechts → Bänder wechseln,
+  Aufschlag bleibt; Befehl „Tür DIN links“ mit Vorschau und Übernehmen. Server-Log ohne Fehler.
+
+## Beobachtung
+
+- Das Kontextmenü kann über der Befehlsleiste liegen; ein Klick ins Befehlsfeld traf dabei
+  „Löschen (Entf)“ (per Undo behoben). Menüposition gegenüber der Befehlsleiste prüfen.
