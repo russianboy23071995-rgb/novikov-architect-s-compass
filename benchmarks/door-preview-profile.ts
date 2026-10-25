@@ -1,26 +1,11 @@
-import { buildingViewFixture } from "./building-view-fixture.ts";
+import { buildingDoorFixture } from "./building-view-fixture.ts";
 import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
-import { validateProject } from "../src/domain/project/schema.ts";
-import { DOOR_DEFAULTS } from "../src/domain/elements/door/model.ts";
 
 // 500 walls with 500 windows (centre) and 500 doors (left) across five storeys.
-const fixture = buildingViewFixture(100);
-const p = validateProject({
-  ...fixture,
-  storeys: fixture.storeys.map((s) => ({
-    ...s,
-    doors: s.walls.map((w, i) => ({
-      id: `${s.id}-door${i}`,
-      wallId: w.id,
-      position: 0.2,
-      ...DOOR_DEFAULTS,
-      layerId: s.windows[0]!.layerId,
-    })),
-  })),
-});
+const p = buildingDoorFixture(100);
 
 function profile(kind: "door" | "window") {
   const storey = p.storeys[0]!;
