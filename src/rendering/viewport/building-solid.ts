@@ -3,10 +3,11 @@ import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { buildPreviewSolid, type Solid, type Vec3 } from "../../lib/bim/geometry.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 
 // Moved from lib/bim/geometry.ts (25.10.2026); the per-storey extrusion stays there for now.
 type BuildingEntry = { project: Project; result: Solid };
-const buildings = new WeakMap<Project, BuildingEntry>();
+const buildings = createDerivedCache<Project, BuildingEntry>();
 // Only one weak recent candidate: no project-ID registry or retained scene history.
 let recentBuilding: WeakRef<BuildingEntry> | null = null;
 function freezeBuilding(result: Solid): Solid {

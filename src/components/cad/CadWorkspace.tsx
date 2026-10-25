@@ -1014,6 +1014,7 @@ export function CadWorkspace({
             canRedoVisibility={Boolean(visibilityHistory?.future.length)}
             canUndo={history.past.length > 0}
             canRedo={history.future.length > 0}
+            historyTrimmed={Boolean(history.trimmed)}
           />
         )}
         <input

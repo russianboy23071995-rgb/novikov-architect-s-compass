@@ -155,9 +155,18 @@ test("snapshot lookup retains distant sources and changes correctly on load/hist
   const next = commitProject(h, updateWall(h.present, "w", { end: { x: 2, y: 2 } }));
   const changed = getLocalSnapSources(next.present);
   assert.notEqual(changed, original);
+  // Kept history steps hold no derived index; undo/redo rebuild an equal one and reuse it while
+  // the step stays present (docs/performance/HISTORY_MEMORY.md).
   const undo = undoProject(next);
-  assert.equal(getLocalSnapSources(undo.present), original);
-  assert.equal(getLocalSnapSources(redoProject(undo).present), changed);
+  const restored = getLocalSnapSources(undo.present);
+  assert.notEqual(restored, original);
+  assert.equal(getLocalSnapSources(undo.present), restored);
+  assert.deepEqual(restored.lookup(referenceKey(source)), original.lookup(referenceKey(source)));
+  const far = { x: 1e7, y: 1e7 };
+  assert.deepEqual(restored.query(far, 100, 10), original.query(far, 100, 10));
+  const redone = getLocalSnapSources(redoProject(undo).present);
+  assert.notEqual(redone, changed);
+  assert.deepEqual(redone.query({ x: 2, y: 2 }, 5, 10), changed.query({ x: 2, y: 2 }, 5, 10));
   assert.notEqual(getLocalSnapSources(deserializeProject(serializeProject(h.present))), original);
   assert.throws(() => {
     original.lookup(referenceKey(source))!.point.x = 99;
