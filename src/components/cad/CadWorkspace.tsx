@@ -500,8 +500,7 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Doors are edited through their properties until direct editing supports them.
-    if (!selection || selection.kind === "reference" || selection.kind === "door") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);

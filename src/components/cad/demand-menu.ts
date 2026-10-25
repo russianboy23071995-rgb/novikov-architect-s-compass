@@ -41,6 +41,15 @@ export function selectionSummary(project: Project, selection: Selection) {
         }
       : null;
   }
+  if (selection.kind === "door") {
+    const door = storeyOf(project).doors?.find((item) => item.id === selection.id);
+    return door
+      ? {
+          title: "Tür",
+          details: `Breite ${metres(door.width)} · Höhe ${metres(door.height)} · Z-Versatz ${metres(door.zOffset)}`,
+        }
+      : null;
+  }
   if (selection.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === selection.id);
     return hatch

@@ -61,6 +61,8 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
+  // Wall-hosted openings only move along their wall.
+  const opening = selection?.kind === "window" || selection?.kind === "door";
   if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
   return (
     <div
@@ -177,7 +179,7 @@ export function DemandMenu({
                 </button>
               </>
             )}
-            {selection.kind !== "window" && pointIndex !== null && (
+            {!opening && pointIndex !== null && (
               <>
                 <button
                   type="button"
@@ -195,7 +197,7 @@ export function DemandMenu({
                 </button>
               </>
             )}
-            {selection.kind !== "window" && (
+            {!opening && (
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"
@@ -210,10 +212,14 @@ export function DemandMenu({
                 className="rounded border p-1 text-left hover:bg-muted"
                 onClick={() => onAction("axis")}
               >
-                {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
+                {selection.kind === "window"
+                  ? "Fenster entlang Wand"
+                  : selection.kind === "door"
+                    ? "Tür entlang Wand"
+                    : "Element entlang Achse"}
               </button>
             )}
-            {selection.kind !== "window" && (
+            {!opening && (
               <>
                 <button
                   type="button"

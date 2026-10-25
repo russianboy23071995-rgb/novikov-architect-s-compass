@@ -324,6 +324,13 @@ export function BimSolidView({
         .find((w) => w.id === editSession.target.id);
       return wall ? wallBase(wall, workingStoreyElevation(project)) : undefined;
     }
+    if (editSession?.target.kind === "door") {
+      const door = project.storeys
+        .flatMap((s) => s.doors ?? [])
+        .find((d) => d.id === editSession.target.id);
+      // Doors stand on the storey level plus their own z offset, independent of the wall base.
+      return door ? workingStoreyElevation(project) + door.zOffset + door.height / 2 : undefined;
+    }
     if (editSession?.target.kind !== "window") return undefined;
     const opening = project.storeys
       .flatMap((s) => s.windows)
