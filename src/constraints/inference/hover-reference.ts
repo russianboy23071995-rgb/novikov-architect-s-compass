@@ -39,7 +39,24 @@ export function suspendHoverReference(
   state: HoverReferenceState,
   leaving: boolean,
 ): HoverReferenceState {
-  return { ...state, pending: null, consumed: leaving ? null : state.consumed };
+  const consumed = leaving ? null : state.consumed;
+  // Unchanged state keeps its identity so adapters can skip redundant renders.
+  if (!state.pending && state.consumed === consumed) return state;
+  return { ...state, pending: null, consumed };
+}
+
+/**
+ * Suspension step of a view adapter. `published` means `current` is already rendered for the
+ * same session; then only a changed acquisition state needs a render, never a new context identity.
+ */
+export function suspendHoverSnapshot<
+  T extends { context: HoverContext; value: HoverReferenceState },
+>(current: T, context: HoverContext, leaving: boolean, published: boolean) {
+  const value = suspendHoverReference(current.value, leaving);
+  return {
+    snapshot: { ...current, context, value },
+    changed: !published || value !== current.value,
+  };
 }
 
 export type HoverReferenceState = {
@@ -73,7 +90,8 @@ export function advanceHoverReference(
 ): HoverReferenceState {
   if (!Number.isFinite(now) || !Number.isFinite(dwellMs) || dwellMs < 0)
     throw new Error("Invalid hover timing");
-  if (!reference) return { ...state, pending: null, consumed: null };
+  if (!reference)
+    return !state.pending && !state.consumed ? state : { ...state, pending: null, consumed: null };
   // One toggle per continuous visit; a departure or different source rearms dwell.
   if (state.consumed && sameReference(state.consumed, reference)) return state;
   const pending =
@@ -83,7 +101,10 @@ export function advanceHoverReference(
           reference: { ...reference, point: { ...reference.point } },
           since: now,
         };
-  if (now - pending.since < dwellMs) return { ...state, pending, consumed: null };
+  if (now - pending.since < dwellMs)
+    return pending === state.pending && !state.consumed
+      ? state
+      : { ...state, pending, consumed: null };
   const remaining = state.references.filter((r) => !sameReference(r, pending.reference));
   const references =
     remaining.length < state.references.length
