@@ -2,7 +2,7 @@ import { prepareLinePreview } from "./prepared-line.ts";
 import { prepareHatchContourPreview } from "./prepared-hatch.ts";
 import { prepareWallEndpointPreview } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
-import { prepareWindowAxisPreview } from "./prepared-window.ts";
+import { prepareOpeningAxisPreview } from "./prepared-opening.ts";
 import type { EditSession } from "../../lib/bim/direct-edit.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
@@ -44,8 +44,11 @@ function prepareCapability(
     ["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
     return prepareLinePreview(session);
-  if (session.target.kind === "window" && session.action === "axis")
-    return prepareWindowAxisPreview(session);
+  if (
+    (session.target.kind === "window" || session.target.kind === "door") &&
+    session.action === "axis"
+  )
+    return prepareOpeningAxisPreview(session);
   if (session.target.kind === "wall" && ["point", "stretch"].includes(session.action))
     return prepareWallEndpointPreview(session);
   // Remaining registered adapters currently expose geometry patches only.

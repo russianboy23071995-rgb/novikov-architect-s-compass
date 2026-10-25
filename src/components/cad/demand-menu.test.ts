@@ -49,3 +49,39 @@ test("window and polyline information use correct entity and geometry", () => {
   assert.equal(selectionSummary(p, { kind: "window", id: "wall-1" }), null);
   assert.equal(selectionSummary(p, { kind: "line", id: "missing" }), null);
 });
+test("door information opens the along-wall menu with its own measures", async () => {
+  const { addDoor } = await import("../../application/doors/actions.ts");
+  const { DOOR_DEFAULTS } = await import("../../domain/elements/door/model.ts");
+  const wide = updateWall(createExampleProject(), "wall-1", { end: { x: 6, y: 0 } });
+  const p = addDoor(wide, { id: "d", wallId: "wall-1", position: 0.15, ...DOOR_DEFAULTS });
+  assert.deepEqual(selectionSummary(p, { kind: "door", id: "d" }), {
+    title: "Tür",
+    details: "Breite 1,01 m · Höhe 2,14 m · Z-Versatz 0,00 m · DIN rechts",
+  });
+  assert.equal(selectionSummary(p, { kind: "door", id: "missing" }), null);
+});
+
+test("the menu never covers the command bar: above, else left, else right of it", () => {
+  // 1000 × 700 viewport, command bar 190–810 × 560–680, menu 176 × 200.
+  const bar = { left: 190, top: 560, right: 810, bottom: 680 };
+  const bounds = { width: 1000, height: 700, menuWidth: 176, menuHeight: 200, obstacles: [bar] };
+  const covers = (p: { x: number; y: number }, b = bounds) =>
+    p.x < bar.right &&
+    p.x + b.menuWidth > bar.left &&
+    p.y < bar.bottom &&
+    p.y + b.menuHeight > bar.top;
+  // Clicked element just above the bar: the menu moves up to end 8 px above the bar.
+  assert.deepEqual(clampMenuPosition({ x: 400, y: 500 }, bounds), { x: 400, y: 352 });
+  // Away from the bar nothing changes.
+  assert.deepEqual(clampMenuPosition({ x: 400, y: 100 }, bounds), { x: 400, y: 100 });
+  // A tall menu that cannot fit above goes to the left of the bar.
+  const tall = { ...bounds, menuHeight: 600, obstacles: [{ ...bar, left: 300 }] };
+  assert.deepEqual(clampMenuPosition({ x: 400, y: 300 }, tall), { x: 300 - 176 - 8, y: 92 });
+  // No room left either: right of the bar.
+  const wideBar = { left: 100, top: 100, right: 700, bottom: 680 };
+  const right = clampMenuPosition({ x: 300, y: 300 }, { ...tall, obstacles: [wideBar] });
+  assert.equal(right.x, 708);
+  // Dragging onto the bar is clamped the same way.
+  for (const y of [520, 600, 650])
+    assert.equal(covers(clampMenuPosition({ x: 300, y }, bounds)), false);
+});

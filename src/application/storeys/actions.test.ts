@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
@@ -52,7 +53,9 @@ test("EG datum retains height and geometry with undo, file and recovery roundtri
   assert.deepEqual(await codec.restore(await codec.prepare(next)), next);
   const { groundDatum: _datum, ...old } = p;
   assert.deepEqual(
-    readProjectFile(JSON.stringify(legacyProjectFixture({ ...old, schemaVersion: 22 }))),
+    withoutOpeningMarks(
+      readProjectFile(JSON.stringify(legacyProjectFixture({ ...old, schemaVersion: 22 }))),
+    ),
     p,
   );
   assert.throws(() => readProjectFile(JSON.stringify({ ...p, schemaVersion: 22 })));
@@ -96,7 +99,7 @@ test("schema20 files and recovery migrate explicitly; current format stays stric
   const old = { ...legacyProject, schemaVersion: 20, storey };
   const before = JSON.stringify(old);
   const loaded = readProjectFile(before);
-  assert.deepEqual(loaded, p);
+  assert.deepEqual(withoutOpeningMarks(loaded), p);
   assert.equal(JSON.stringify(old), before);
   assert.throws(() => validateProject(old));
   assert.throws(() =>
@@ -115,7 +118,7 @@ test("schema20 files and recovery migrate explicitly; current format stays stric
     ...doc,
     model: { ...legacyModel, schemaVersion: 20, storey },
   } as unknown as RecoveryDocument;
-  assert.deepEqual(await codec.restore(legacy), p);
+  assert.deepEqual(withoutOpeningMarks(await codec.restore(legacy)), p);
   const key = legacy.model.assets[0]!.key;
   await assert.rejects(
     codec.restore({
@@ -184,7 +187,7 @@ test("schema21 migrates unknown storey height through file and recovery without 
   const { height: _height, ...storey } = storeyOf(p);
   const { groundDatum: _datum, storeys: _storeys, groundStoreyId: _ground, ...legacyProject } = p;
   const old = { ...legacyProject, schemaVersion: 21, storey };
-  assert.deepEqual(readProjectFile(JSON.stringify(old)), p);
+  assert.deepEqual(withoutOpeningMarks(readProjectFile(JSON.stringify(old))), p);
   assert.throws(() =>
     readProjectFile(JSON.stringify({ ...replaceStorey(old, { ...storey, height: 3 }) })),
   );
@@ -198,10 +201,12 @@ test("schema21 migrates unknown storey height through file and recovery without 
     ...legacyModel
   } = doc.model;
   assert.deepEqual(
-    await codec.restore({
-      ...doc,
-      model: { ...legacyModel, schemaVersion: 21, storey },
-    } as unknown as RecoveryDocument),
+    withoutOpeningMarks(
+      await codec.restore({
+        ...doc,
+        model: { ...legacyModel, schemaVersion: 21, storey },
+      } as unknown as RecoveryDocument),
+    ),
     p,
   );
 });

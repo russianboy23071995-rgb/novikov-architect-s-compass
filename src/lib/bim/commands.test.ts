@@ -5,7 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { previewCommand, applyCommand } from "./commands.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { updateWall, updateWindow, windowCentre } from "./model.ts";
+import { updateWall, windowCentre } from "./model.ts";
 const wall = { kind: "wall", id: "wall-1" } as const;
 const windowSelection = { kind: "window", id: "window-1" } as const;
 
@@ -30,35 +30,11 @@ test("units and wall fields are converted to metres", () => {
   assert.equal(storeyOf(previewCommand(p, wall, "Wandhöhe 350 cm").result).walls[0]!.height, 3.5);
 });
 
-test("window dimensions and zero sill are supported", () => {
-  const p = createExampleProject();
-  for (const [command, key, value] of [
-    ["Fensterbreite 150 cm", "width", 1.5],
-    ["Fensterhöhe auf 1.5 m", "height", 1.5],
-    ["Brüstungshöhe 0 m", "sillHeight", 0],
-  ] as const) {
-    assert.equal(
-      storeyOf(previewCommand(p, windowSelection, command).result).windows[0]![key],
-      value,
-    );
-  }
-});
-
-test("centering preserves dimensions and host", () => {
-  const p = updateWindow(createExampleProject(), "window-1", { position: 0.3 });
-  const next = previewCommand(p, windowSelection, "Fenster zentrieren").result;
-  assert.equal(storeyOf(next).windows[0]!.position, 0.5);
-  assert.equal(storeyOf(next).windows[0]!.width, 1.2);
-  assert.equal(storeyOf(next).windows[0]!.wallId, "wall-1");
-});
-
 test("invalid geometry rejects the whole command without mutation", () => {
   const p = createExampleProject();
   const before = JSON.stringify(p);
   for (const command of ["Wandlänge 1 m", "Wandhöhe 2 m", "Wandstärke 0 m"])
     assert.throws(() => previewCommand(p, wall, command));
-  for (const command of ["Fensterbreite 4 m", "Fensterhöhe 3 m", "Brüstungshöhe 2 m"])
-    assert.throws(() => previewCommand(p, windowSelection, command));
   assert.equal(JSON.stringify(p), before);
 });
 

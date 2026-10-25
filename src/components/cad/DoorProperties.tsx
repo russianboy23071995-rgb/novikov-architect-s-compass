@@ -1,11 +1,21 @@
 import { useState } from "react";
 import { storeyOf } from "@/domain/storeys/access";
 import { ELEMENT_KINDS } from "@/domain/elements/registry";
-import type { Door } from "@/domain/elements/door/model";
+import {
+  doorDinHand,
+  doorHingeForDinHand,
+  type DinHand,
+  type Door,
+} from "@/domain/elements/door/model";
 import { updateDoor } from "@/application/doors/actions";
+import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import type { Project } from "@/domain/project/schema";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
+import { OverlapHint } from "./OverlapHint";
+import { MarkField } from "./MarkField";
+import { setOpeningMark } from "@/application/openings/marks";
+import { duplicateMarkHint } from "@/domain/elements/wall/opening-marks";
 import type { Selection } from "./bim-view";
 
 const numbers = [
@@ -46,6 +56,19 @@ export function DoorProperties({
       <h2 className="text-sm font-semibold">{ELEMENT_KINDS.door.label}</h2>
       <p className="max-w-48 truncate font-mono text-[10px] text-muted-foreground">{door.id}</p>
       <p className="max-w-48 truncate text-xs text-muted-foreground">Wand: {wall?.id}</p>
+      <OverlapHint text={openingOverlapHintFor(project, door.id)} />
+      <MarkField
+        value={door.mark ?? ""}
+        hint={duplicateMarkHint(project, door.id)}
+        onApply={(mark) => {
+          try {
+            onChange(setOpeningMark(project, { kind: "door", id: door.id }, mark), selection);
+            setError("");
+          } catch (failure) {
+            setError(failure instanceof Error ? failure.message : "Nummer nicht übernommen.");
+          }
+        }}
+      />
       <PropertyForm
         key={`${door.id}:${door.width}:${door.height}:${door.zOffset}:${door.position}`}
         onSubmit={(event) => {
@@ -100,6 +123,20 @@ export function DoorProperties({
         >
           <option value="left">links der Wandrichtung</option>
           <option value="right">rechts der Wandrichtung</option>
+        </select>
+      </label>
+      <label className="text-xs">
+        DIN
+        <select
+          aria-label="Tür DIN links/rechts"
+          className="block h-8 rounded border bg-background"
+          value={doorDinHand(door)}
+          onChange={(event) =>
+            apply({ hinge: doorHingeForDinHand(door, event.target.value as DinHand) })
+          }
+        >
+          <option value="links">DIN links</option>
+          <option value="rechts">DIN rechts</option>
         </select>
       </label>
       {error && (

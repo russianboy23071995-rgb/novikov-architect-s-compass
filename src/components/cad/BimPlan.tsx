@@ -59,6 +59,7 @@ import { getLocalSnapSources } from "@/application/snapping/local-sources";
 import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
+import { previewOverlapHint } from "@/application/openings/overlap-hint";
 import type { EditSession } from "@/lib/bim/direct-edit";
 import type { Point, Project } from "@/lib/bim/model";
 import type { Selection } from "./bim-view";
@@ -499,6 +500,12 @@ export function BimPlan({
     drawingResult.project ??
     (drawing ? drawingPreview : null) ??
     project;
+  // Overlapping openings stay allowed; placement and edit previews only show a hint.
+  const overlapHint = useMemo(
+    () => (placementProject || preview ? previewOverlapHint(project, shown) : ""),
+    [placementProject, preview, project, shown],
+  );
+  const hintPoint = editSession ? resolvedEdit?.point : resolvedHover?.point;
   const allowsShown = useMemo(
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
@@ -1221,6 +1228,18 @@ export function BimPlan({
             strokeWidth={0.025}
             pointerEvents="none"
           />
+        )}
+        {overlapHint && !editError && hintPoint && (
+          <text
+            role="status"
+            x={hintPoint.x}
+            y={-hintPoint.y - 18 / camera.pixelsPerMetre}
+            fontSize={12 / camera.pixelsPerMetre}
+            fill="#b45309"
+            pointerEvents="none"
+          >
+            {overlapHint}
+          </text>
         )}
         {(drawingResult.error || (placement && editError)) && resolvedHover && (
           <text

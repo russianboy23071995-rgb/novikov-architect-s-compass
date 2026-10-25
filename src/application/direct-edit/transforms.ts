@@ -2,6 +2,8 @@ import { replacePathVertex, translatePoint } from "../../geometry/primitives/poi
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
+import { updateDoor } from "../doors/actions.ts";
+import { wallBody } from "../../domain/elements/wall/body.ts";
 import { updateLine, updateWall, updateWindow, wallLength } from "../../lib/bim/model.ts";
 import type { Point, Project } from "../../lib/bim/model.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
@@ -117,20 +119,53 @@ export function stretchEndpoint(
   });
 }
 
-/** Windows move along their existing host, never detach into free space. */
-export function moveWindowAlongWall(project: Project, id: string, distance: number): Project {
+/** Wall-hosted openings: windows and doors share one movement and range rule. */
+export type OpeningTarget = { kind: "window" | "door"; id: string };
+
+export function hostedOpening(project: Project, target: OpeningTarget) {
+  const storey = storeyOf(project);
+  const opening =
+    target.kind === "window"
+      ? storey.windows.find((item) => item.id === target.id)
+      : storey.doors?.find((item) => item.id === target.id);
+  const wall = storey.walls.find((item) => item.id === opening?.wallId);
+  if (!opening || !wall)
+    throw new Error(`${target.kind === "window" ? "Fenster" : "Tür"} oder zugehörige Wand fehlt.`);
+  return { opening, wall };
+}
+
+/** Opening centre on the wall's reference line; the anchor of every along-wall gesture. */
+export function openingCentre(project: Project, target: OpeningTarget): Point {
+  const { opening, wall } = hostedOpening(project, target);
+  const body = wallBody(wall);
+  return {
+    x: body.start.x + (wall.end.x - wall.start.x) * opening.position,
+    y: body.start.y + (wall.end.y - wall.start.y) * opening.position,
+  };
+}
+
+/** Openings move along their existing host, never detach into free space. */
+export function moveOpeningAlongWall(
+  project: Project,
+  target: OpeningTarget,
+  distance: number,
+): Project {
   if (!Number.isFinite(distance)) throw new Error("Abstand muss ein endlicher Meterwert sein.");
-  const window = storeyOf(project).windows.find((item) => item.id === id);
-  const wall = storeyOf(project).walls.find((item) => item.id === window?.wallId);
-  if (!window || !wall) throw new Error("Fenster oder zugehörige Wand fehlt.");
-  return updateWindow(project, id, {
-    position: boundedWindowPosition(
-      project,
-      wall,
-      window.width,
-      window.position + distance / wallLength(wall),
-    ),
-  });
+  const { opening, wall } = hostedOpening(project, target);
+  const position = boundedWindowPosition(
+    project,
+    wall,
+    opening.width,
+    opening.position + distance / wallLength(wall),
+    target.kind === "door" ? "Tür" : "Fenster",
+  );
+  return target.kind === "window"
+    ? updateWindow(project, target.id, { position })
+    : updateDoor(project, target.id, { position });
+}
+
+export function moveWindowAlongWall(project: Project, id: string, distance: number): Project {
+  return moveOpeningAlongWall(project, { kind: "window", id }, distance);
 }
 
 export { parseMetres } from "../../core/units/metres.ts";

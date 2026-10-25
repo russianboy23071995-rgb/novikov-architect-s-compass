@@ -1,3 +1,4 @@
+import { previewDeleteSelection } from "@/application/elements/delete";
 import { RasterBudgetNotice } from "./RasterBudgetNotice";
 import { MovementAxisControls } from "./MovementAxisControls";
 import { selectWorkingStorey, workingStoreyForTarget } from "@/application/storeys/working-storey";
@@ -340,6 +341,11 @@ export function CadWorkspace({
         )
           setMode("2D");
       }
+      if ((event.key === "Delete" || event.key === "Backspace") && deleteShortcut.current) {
+        event.preventDefault();
+        if (!event.repeat) deleteShortcut.current();
+        return;
+      }
       if (event.key === "Escape") {
         cancelInteraction();
         setDemandOpen(false);
@@ -500,8 +506,7 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Doors are edited through their properties until direct editing supports them.
-    if (!selection || selection.kind === "reference" || selection.kind === "door") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
@@ -564,6 +569,27 @@ export function CadWorkspace({
     if (layout === "single" && !solidMove) setMode("2D");
     setModelError("");
   };
+
+  // One shared delete operation for key and menu; text and voice use the command path.
+  const deleteSelection = () => {
+    try {
+      const { result, summary } = previewDeleteSelection(project, selections, visibility);
+      cancelInteraction();
+      setDemandOpen(false);
+      dispatchEditing({ type: "project", project: result });
+      showSelection(null);
+      selectCommitted(result, null);
+      setModelError("");
+      showNotice(summary);
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Löschen nicht möglich.");
+    }
+  };
+  const deleteShortcut = useRef<(() => void) | null>(null);
+  deleteShortcut.current =
+    tool === "select" && !editSession && !groupMove.active && selections.length
+      ? deleteSelection
+      : null;
 
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
@@ -1045,6 +1071,9 @@ export function CadWorkspace({
                       }
                     }
                   : undefined
+              }
+              onDeleteSelection={
+                tool === "select" && !editSession && selections.length ? deleteSelection : undefined
               }
               selection={tool === "select" && !editSession ? selection : null}
               position={demandPosition}

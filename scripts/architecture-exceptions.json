@@ -28,9 +28,9 @@
         "src/application/direct-edit/prepared-endpoint.ts -> src/lib/bim/model.ts",
         "src/application/direct-edit/prepared-hatch.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-line.ts -> src/lib/bim/direct-edit.ts",
+        "src/application/direct-edit/prepared-opening.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-preview.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/prepared-wall.ts -> src/lib/bim/direct-edit.ts",
-        "src/application/direct-edit/prepared-window.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/snapping.ts -> src/lib/bim/direct-edit.ts",
         "src/application/direct-edit/transforms.ts -> src/lib/bim/model.ts"
       ]

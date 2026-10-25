@@ -110,7 +110,10 @@ export function AiCommandBar({
     }
   };
   return (
-    <div className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2">
+    <div
+      data-menu-obstacle
+      className="command-glass absolute bottom-5 left-1/2 z-30 w-[min(620px,calc(100%-32px))] -translate-x-1/2 rounded-xl border border-border p-2"
+    >
       <form
         onFocus={onFocus}
         className="flex items-center gap-1"
@@ -174,7 +177,9 @@ export function AiCommandBar({
       </form>
       <p className="mt-1 text-[10px] text-muted-foreground">
         Wandlänge, Wandhöhe, Wandstärke, Fensterbreite, Fensterhöhe, Brüstungshöhe auf Zahl m/cm/mm
-        · Fenster zentrieren · Auswahl um 2 m bei 90 Grad verschieben
+        · Fenster zentrieren · Türbreite, Türhöhe, Z-Versatz auf Zahl · Tür zentrieren · Anschlag
+        Wandanfang/Wandende · Aufschlag links/rechts · Tür DIN links/rechts · Auswahl um 2 m bei 90
+        Grad verschieben · Auswahl löschen
       </p>
       <p className="mt-1 text-[10px] text-muted-foreground">
         {voiceAvailable

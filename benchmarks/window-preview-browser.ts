@@ -1,5 +1,5 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
-import { prepareWindowAxisPreview } from "../src/application/direct-edit/prepared-window.ts";
+import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";
 import {
@@ -27,7 +27,7 @@ document.querySelector("#run")!.addEventListener("click", () => {
       index: null,
       anchor: editAnchor(p, target),
     };
-    const prepared = prepareWindowAxisPreview(session),
+    const prepared = prepareOpeningAxisPreview(session),
       base = buildBuildingSolid(p),
       windows = buildingWindowSelectionSurfaces(p, () => true);
     const selected = new Set([target.id]);

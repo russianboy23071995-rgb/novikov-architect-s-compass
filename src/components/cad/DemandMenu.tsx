@@ -17,10 +17,13 @@ export function DemandMenu({
   onAction,
   onReferences,
   onMoveSelection,
+  onDeleteSelection,
   selectionCount = 0,
 }: {
   calibrationControls?: import("react").ReactNode;
   onMoveSelection?: (() => void) | undefined;
+  /** Shared delete operation for the current selection (single or multiple elements). */
+  onDeleteSelection?: (() => void) | undefined;
   selectionCount?: number;
   project: Project;
   selection: Selection;
@@ -34,13 +37,15 @@ export function DemandMenu({
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; pointer: Point; origin: Point } | null>(null);
-  const [bounds, setBounds] = useState({
+  const [bounds, setBounds] = useState<Parameters<typeof clampMenuPosition>[1]>({
     width: 1024,
     height: 768,
     menuWidth: 240,
     menuHeight: 160,
   });
   useEffect(() => {
+    // The command bar is an obstacle: the menu must never cover it (it grows with previews).
+    const obstacles = () => [...document.querySelectorAll("[data-menu-obstacle]")];
     const measure = () => {
       const rect = panel.current?.getBoundingClientRect();
       setBounds({
@@ -48,10 +53,15 @@ export function DemandMenu({
         height: window.innerHeight,
         menuWidth: rect?.width ?? 240,
         menuHeight: rect?.height ?? 160,
+        obstacles: obstacles().map((element) => {
+          const { left, top, right, bottom } = element.getBoundingClientRect();
+          return { left, top, right, bottom };
+        }),
       });
     };
     const observer = new ResizeObserver(measure);
     if (panel.current) observer.observe(panel.current);
+    for (const element of obstacles()) observer.observe(element);
     window.addEventListener("resize", measure);
     measure();
     return () => {
@@ -61,7 +71,10 @@ export function DemandMenu({
   }, []);
   const visible = clampMenuPosition(position, bounds);
   const summary = selectionSummary(project, selection);
-  if (!summary && !onReferences && !onMoveSelection && !calibrationControls) return null;
+  // Wall-hosted openings only move along their wall.
+  const opening = selection?.kind === "window" || selection?.kind === "door";
+  if (!summary && !onReferences && !onMoveSelection && !onDeleteSelection && !calibrationControls)
+    return null;
   return (
     <div
       ref={panel}
@@ -177,7 +190,7 @@ export function DemandMenu({
                 </button>
               </>
             )}
-            {selection.kind !== "window" && pointIndex !== null && (
+            {!opening && pointIndex !== null && (
               <>
                 <button
                   type="button"
@@ -195,7 +208,7 @@ export function DemandMenu({
                 </button>
               </>
             )}
-            {selection.kind !== "window" && (
+            {!opening && (
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"
@@ -210,10 +223,14 @@ export function DemandMenu({
                 className="rounded border p-1 text-left hover:bg-muted"
                 onClick={() => onAction("axis")}
               >
-                {selection.kind === "window" ? "Fenster entlang Wand" : "Element entlang Achse"}
+                {selection.kind === "window"
+                  ? "Fenster entlang Wand"
+                  : selection.kind === "door"
+                    ? "Tür entlang Wand"
+                    : "Element entlang Achse"}
               </button>
             )}
-            {selection.kind !== "window" && (
+            {!opening && (
               <>
                 <button
                   type="button"
@@ -239,6 +256,15 @@ export function DemandMenu({
               Werkzeugeigenschaften
             </button>
           </>
+        )}
+        {onDeleteSelection && (
+          <button
+            type="button"
+            className="rounded border p-1 text-left text-destructive hover:bg-muted"
+            onClick={onDeleteSelection}
+          >
+            {selectionCount > 1 ? "Auswahl löschen" : "Löschen"} (Entf)
+          </button>
         )}
       </div>
     </div>

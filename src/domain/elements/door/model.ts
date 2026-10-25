@@ -3,6 +3,8 @@ import { wallBase } from "../wall/heights.ts";
 
 const id = z.string().trim().min(1);
 const positive = z.number().finite().positive();
+/** Position number of a window or door, e.g. "T-EG-01" (schema 28, user decision 25.10.2026). */
+export const openingMarkSchema = z.string().trim().min(1).max(32);
 
 /** Single-leaf hinged door hosted in one wall (user decision 24.10.2026).
  * width/height: structural opening in the wall (Rohbaumaß), metres.
@@ -23,8 +25,11 @@ export const doorSchema = z
     zOffset: z.number().finite(),
     hinge: z.enum(["start", "end"]),
     opensTo: z.enum(["left", "right"]),
+    mark: openingMarkSchema.optional(),
   })
   .strict();
+/** Schema 27 doors carried no position number. */
+export const doorV27Schema = doorSchema.omit({ mark: true });
 export type Door = z.infer<typeof doorSchema>;
 
 /** Baurichtmaß nach DIN 18100 as the default structural opening (user decision 24.10.2026). */
@@ -46,4 +51,19 @@ export function doorOpening(door: Door, wall: { baseOffset?: number | undefined 
     position: door.position,
     sillHeight: door.zOffset - wallBase(wall),
   };
+}
+
+export type DinHand = "links" | "rechts";
+
+/** DIN 107 handing, derived only: seen from the side the leaf opens toward (the swing side),
+ * hinges on the left make a "DIN links" door. Facing the wall from the left of the wall
+ * direction, the wall end lies to the viewer's left; from the right side, the wall start.
+ */
+export function doorDinHand(door: Pick<Door, "hinge" | "opensTo">): DinHand {
+  return (door.hinge === "end") === (door.opensTo === "left") ? "links" : "rechts";
+}
+
+/** Set a DIN handing (user decision 24.10.2026): the swing side stays, the hinge jamb moves. */
+export function doorHingeForDinHand(door: Pick<Door, "opensTo">, hand: DinHand): Door["hinge"] {
+  return (hand === "links") === (door.opensTo === "left") ? "end" : "start";
 }

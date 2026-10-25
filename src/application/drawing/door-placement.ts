@@ -3,6 +3,7 @@ import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import { DOOR_DEFAULTS, type Door } from "../../domain/elements/door/model.ts";
 import { addDoor, defaultDoorLayerId } from "../doors/actions.ts";
+import { newOpeningMark } from "../openings/marks.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
 import type { ToolInteraction } from "../tools/interaction.ts";
 import { openingPlacementInteraction, resolveOpeningHost } from "./window-placement.ts";
@@ -58,6 +59,7 @@ export function placeDoor(
     wallId: host.wall.id,
     position: boundedWindowPosition(current, host.wall, settings.width, host.position, "Tür"),
     ...settings,
+    mark: newOpeningMark(current, "door"),
   });
 }
 

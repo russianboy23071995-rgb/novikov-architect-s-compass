@@ -5,6 +5,16 @@ import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
+
+/** IFC4 IfcDoorTypeOperationEnum for a single swing leaf. Facing the swing side (door +Y),
+ * the wall start lies left when the leaf opens to the left of the wall direction.
+ * Convention from the IFC4 enumeration text; not yet checked in an external IFC viewer.
+ */
+export function doorOperationType(door: Pick<Door, "hinge" | "opensTo">) {
+  const hingeLeft = (door.hinge === "start") === (door.opensTo === "left");
+  return hingeLeft ? "SINGLE_SWING_LEFT" : "SINGLE_SWING_RIGHT";
+}
 
 const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$";
 
@@ -50,7 +60,7 @@ export function stepReal(value: number): string {
 }
 
 /** IFC4 STEP export; validates and copies the snapshot before any asynchronous work.
- * Windows remain semantic elements without invented frame/glass geometry.
+ * Windows and doors remain semantic elements without invented frame/glass/leaf geometry.
  * Openings are separate swept solids linked with IfcRelVoidsElement / IfcRelFillsElement.
  */
 export async function writeIfc(
@@ -209,6 +219,46 @@ export async function writeIfc(
           ["WallId", `IFCTEXT(${text(window.wallId)})`],
           ["SillHeight", `IFCLENGTHMEASURE(${real(window.sillHeight)})`],
           ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
+        ]);
+      }
+      for (const door of (floor.doors ?? []).filter((item) => item.wallId === wall.id)) {
+        const opening = doorOpening(door, wall);
+        const openingPlacement = placement(
+          wallPlacement,
+          door.position * length - door.width / 2,
+          0,
+          opening.sillHeight,
+        );
+        const openingRef = add(
+          "IFCOPENINGELEMENT",
+          `${await guid("opening", door.id)},$,${label("Opening " + door.id)},$,$,${openingPlacement},${body(door.width, wall.thickness, door.height)},$,.OPENING.`,
+        );
+        add("IFCRELVOIDSELEMENT", `${await guid("void", door.id)},$,$,$,${wallRef},${openingRef}`);
+        // IFC4: the leaf opens toward +Y of the door placement; hinge side is seen along +Y.
+        // Opening to the right of the wall direction turns that placement by 180 degrees.
+        const turned = door.opensTo === "right";
+        const doorPlacement = placement(
+          openingPlacement,
+          turned ? door.width : 0,
+          0,
+          0,
+          turned ? -1 : 1,
+          0,
+        );
+        const doorRef = add(
+          "IFCDOOR",
+          `${await guid("door", door.id)},$,${label(door.id)},$,$,${doorPlacement},$,${label(door.id)},${real(door.height)},${real(door.width)},.DOOR.,.${doorOperationType(door)}.,$`,
+        );
+        add("IFCRELFILLSELEMENT", `${await guid("fill", door.id)},$,$,$,${openingRef},${doorRef}`);
+        elements.push(doorRef);
+        await properties(doorRef, "door", door.id, [
+          ["WallId", `IFCTEXT(${text(door.wallId)})`],
+          ["ZOffset", `IFCLENGTHMEASURE(${real(door.zOffset)})`],
+          ["RelativePosition", `IFCRATIOMEASURE(${real(door.position)})`],
+          ["Hinge", `IFCLABEL(${text(door.hinge)})`],
+          ["OpensTo", `IFCLABEL(${text(door.opensTo)})`],
+          // DIN 107 is seen from the swing side; IFC's operation type from the opposite side.
+          ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
         ]);
       }
     }
