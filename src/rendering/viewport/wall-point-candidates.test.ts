@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
-import { updateWall, addWall } from "../../lib/bim/model.ts";
+import { updateWall, addWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState, backbufferSize } from "./projection-state.ts";
 import { createWallPointCandidates } from "./wall-point-candidates.ts";

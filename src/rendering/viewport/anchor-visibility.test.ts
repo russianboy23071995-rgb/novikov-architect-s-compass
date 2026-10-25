@@ -1,7 +1,7 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addWall } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
 import type { Solid } from "../../lib/bim/geometry.ts";

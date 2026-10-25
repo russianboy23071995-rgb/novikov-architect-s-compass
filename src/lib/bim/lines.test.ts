@@ -20,7 +20,7 @@ import {
 import { createExampleProject, planBounds, drawingPoint } from "../../components/cad/bim-view.ts";
 import { buildSolid } from "./geometry.ts";
 import { exportIfc } from "./ifc.ts";
-import { previewCommand } from "./commands.ts";
+import { previewWallCommand } from "../../application/walls/command.ts";
 const line: DrawingLine = {
   id: "line-1",
   layerId: "layer:drawing",
@@ -160,7 +160,7 @@ test("2D lines do not become 3D solids or IFC walls and cannot receive wall comm
   const date = new Date("2026-01-01T00:00:00Z");
   assert.equal(await exportIfc(next, date), await exportIfc(p, date));
   assert.throws(
-    () => previewCommand(next, { kind: "line", id: line.id }, "Wandlänge 6 m"),
+    () => previewWallCommand(next, { kind: "line", id: line.id }, "Wandlänge 6 m"),
     /Wand auswählen/,
   );
 });

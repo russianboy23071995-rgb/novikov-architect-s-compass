@@ -6,10 +6,12 @@ import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { selectionIndex } from "../selection/state.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { addWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewWallCommand } from "../walls/command.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
 function fixture() {
   let p = createExampleProject();
@@ -133,7 +135,7 @@ test("existing singleton commands retain their original action and require visib
   const text = "Wandlänge auf 6 m";
   assert.deepEqual(
     previewSelectionCommand(p, [target], v, text).result,
-    previewCommand(p, target, text).result,
+    previewWallCommand(p, target, text)!.result,
   );
 });
 test("acceptance has one undo/redo; preview and cancellation require no model history", () => {

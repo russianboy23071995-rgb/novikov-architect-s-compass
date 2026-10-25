@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
 import { createExampleProject } from "./bim-view.ts";
-import { addLine, updateWall } from "../../lib/bim/model.ts";
+import { addLine } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 
 test("menu remains reachable at viewport edges and after viewport shrink", () => {

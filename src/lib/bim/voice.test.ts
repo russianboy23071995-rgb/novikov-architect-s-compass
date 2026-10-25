@@ -3,7 +3,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeSpeech, recognitionConstructor, startVoice } from "./voice.ts";
 import type { Recognition } from "./voice.ts";
-import { previewCommand } from "./commands.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 
 class FakeRecognition implements Recognition {
@@ -34,6 +33,14 @@ function session() {
   });
   return { r: FakeRecognition.latest, results, errors, cancel, ended: () => ended };
 }
+import { previewWallCommand } from "../../application/walls/command.ts";
+/** Wall grammar moved to application/walls/command.ts (25.10.2026). */
+function wallCommand(...args: Parameters<typeof previewWallCommand>) {
+  const preview = previewWallCommand(...args);
+  if (!preview) throw new Error("Unbekannter Befehl");
+  return preview;
+}
+
 test("feature detection supports standard and prefixed constructors without requiring a browser", () => {
   assert.equal(recognitionConstructor({}), undefined);
   assert.equal(
@@ -104,7 +111,7 @@ test("empty recognition and synchronous start errors do not leave recording acti
 test("spoken units, simple numbers and decimal commas use existing model validation", () => {
   const p = createExampleProject();
   assert.equal(normalizeSpeech("Wandhöhe auf drei Komma fünf Meter."), "wandhöhe auf 3,5 m");
-  const result = previewCommand(
+  const result = wallCommand(
     p,
     { kind: "wall", id: "wall-1" },
     normalizeSpeech("Wandlänge auf sechs Meter!"),
@@ -112,7 +119,7 @@ test("spoken units, simple numbers and decimal commas use existing model validat
   assert.equal(storeyOf(result.result).walls[0]!.end.x, 6);
   assert.equal(normalizeSpeech("Wandstärke 360 Millimeter"), "wandstärke 360 mm");
   assert.throws(() =>
-    previewCommand(
+    wallCommand(
       p,
       { kind: "wall", id: "wall-1" },
       normalizeSpeech("Wandlänge auf minus zwei Meter"),
@@ -129,7 +136,7 @@ test("hundreds of walls do not change the selected stable ID target", () => {
       start: { x: i * 5, y: 5 },
       end: { x: i * 5 + 3, y: 5 },
     });
-  const result = previewCommand(
+  const result = wallCommand(
     p,
     { kind: "wall", id: "extra-237" },
     normalizeSpeech("Wandhöhe vier Meter"),

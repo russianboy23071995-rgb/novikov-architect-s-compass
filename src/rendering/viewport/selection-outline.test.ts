@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { selectionEdges, outlineTriangles } from "./selection-outline.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { updateWall, addWall } from "../../lib/bim/model.ts";
+import { updateWall, addWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { nearestWallSurface } from "./wall-depth.ts";

@@ -8,7 +8,8 @@ import { prepareDirectEditPreview } from "../src/application/direct-edit/prepare
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
 import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
-import { addWall, validateProject } from "../src/lib/bim/model.ts";
+import { validateProject } from "../src/lib/bim/model.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";

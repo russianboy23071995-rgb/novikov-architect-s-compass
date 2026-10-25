@@ -2,7 +2,7 @@ import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON } from "../../test/legacy-project-fixture.ts";
-import { addWall } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { ensureDocumentFolder } from "./documents.ts";
 import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
 import { createDrawing } from "../drawing/actions.ts";
@@ -29,12 +29,8 @@ import {
   undoProject,
   redoProject,
 } from "../../lib/bim/history.ts";
-import {
-  updateWall,
-  serializeProject,
-  validateProject,
-  type Project,
-} from "../../lib/bim/model.ts";
+import { serializeProject, validateProject, type Project } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import { resolveModelLength } from "../../domain/views/display-size.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 const create = (p: Project, id = "doc-a", denominator = 50) =>

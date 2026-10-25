@@ -9,13 +9,8 @@ import {
   previewEdit,
 } from "../../application/direct-edit/controller.ts";
 import { editSnapReferences, resolveEditSnap } from "../../application/direct-edit/snapping.ts";
-import {
-  addLine,
-  addWall,
-  createProject,
-  serializeProject,
-  updateWall,
-} from "../../lib/bim/model.ts";
+import { addLine, createProject, serializeProject } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import {
   commitProject,

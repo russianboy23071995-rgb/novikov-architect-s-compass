@@ -11,13 +11,8 @@ import {
   HISTORY_LIMIT,
   PROJECT_FILE_LIMIT,
 } from "./history.ts";
-import {
-  serializeProject,
-  updateWall,
-  addWindow,
-  createProject,
-  validateProject,
-} from "./model.ts";
+import { serializeProject, addWindow, createProject, validateProject } from "./model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 

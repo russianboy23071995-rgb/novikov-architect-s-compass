@@ -6,7 +6,8 @@ import { legacySnapPrimitives } from "./legacy-snap-primitives.ts";
 import { createLocalSnapSources } from "../src/application/snapping/local-sources.ts";
 import { createPrimitiveSourceIndex } from "../src/constraints/snapping/local-source-index.ts";
 import { createHistory, commitProject } from "../src/lib/bim/history.ts";
-import { updateLine, updateWall, type Project } from "../src/lib/bim/model.ts";
+import { updateLine, type Project } from "../src/lib/bim/model.ts";
+import { updateWall } from "../src/application/walls/actions.ts";
 import { previewHatch } from "../src/application/hatches/actions.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 

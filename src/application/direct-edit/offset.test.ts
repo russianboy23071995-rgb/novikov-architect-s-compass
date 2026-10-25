@@ -5,10 +5,10 @@ import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
 import {
   createProject,
   addLine,
-  addWall,
   serializeProject,
   deserializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";
 import { previewNumericMove } from "./numeric.ts";

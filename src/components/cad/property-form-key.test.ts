@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { propertyFormKey } from "./property-form-key.ts";
 import { createExampleProject } from "./bim-view.ts";
 import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
-import { updateWall } from "../../lib/bim/model.ts";
+import { updateWall } from "../../application/walls/actions.ts";
 test("property drafts follow immutable revisions, selection and undo/redo without serializing data", () => {
   const p = createExampleProject(),
     s = { kind: "wall" as const, id: storeyOf(p).walls[0]!.id };

@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { createProject, addWall, addWindow, updateWindow } from "../src/lib/bim/model.ts";
+import { createProject, addWindow, updateWindow } from "../src/lib/bim/model.ts";
+import { addWall } from "../src/application/walls/actions.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
 import {
   previewEdit,

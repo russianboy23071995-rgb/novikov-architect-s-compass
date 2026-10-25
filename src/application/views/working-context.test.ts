@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { resolveWorkingView, assertWorkingViewCurrent } from "./working-context.ts";
 import { changeProjectScale } from "./project-scale.ts";
-import { updateWall, serializeProject } from "../../lib/bim/model.ts";
+import { serializeProject } from "../../lib/bim/model.ts";
+import { updateWall } from "../walls/actions.ts";
 import {
   createHistory,
   commitProject,

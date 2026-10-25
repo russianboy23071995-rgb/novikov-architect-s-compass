@@ -115,7 +115,7 @@ test("successive chain origins reuse the shared precision and snapping interacti
   assert.equal(storeyOf(chain.preview).wallJoins.length, 1);
 });
 
-import { addWall } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import type { SnapContext } from "../../constraints/snapping/engine.ts";
 
 function tDrawing() {

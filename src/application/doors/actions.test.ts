@@ -3,13 +3,12 @@ import assert from "node:assert/strict";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import {
-  addWall,
   createProject,
   serializeProject,
-  updateWall,
   validateProject,
   type Project,
 } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../walls/actions.ts";
 import {
   readProjectFile,
   createHistory,

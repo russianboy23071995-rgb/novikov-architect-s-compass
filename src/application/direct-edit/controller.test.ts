@@ -2,14 +2,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";
-import {
-  createProject,
-  addWall,
-  addWindow,
-  addLine,
-  serializeProject,
-  updateWall,
-} from "../../lib/bim/model.ts";
+import { createProject, addWindow, addLine, serializeProject } from "../../lib/bim/model.ts";
+import { addWall, updateWall } from "../walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";

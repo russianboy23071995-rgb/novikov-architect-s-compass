@@ -126,7 +126,6 @@
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
       "edges": [
         "src/application/walls/body-offset.ts -> src/lib/bim/history.ts",
-        "src/application/walls/body-offset.ts -> src/lib/bim/model.ts",
         "src/application/walls/t-axis-snap.ts -> src/lib/bim/direct-edit.ts",
         "src/application/walls/t-connections.ts -> src/lib/bim/history.ts"
       ]

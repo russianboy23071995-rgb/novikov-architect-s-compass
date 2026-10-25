@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addWall, createProject } from "../../lib/bim/model.ts";
+import { createProject } from "../../lib/bim/model.ts";
+import { addWall } from "../../application/walls/actions.ts";
 import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
 import { addDoor } from "../../application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";

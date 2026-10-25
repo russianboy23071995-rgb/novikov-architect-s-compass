@@ -13,11 +13,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createProject,
-  addWall,
   addWindow,
   serializeProject,
   deserializeProject,
 } from "../../lib/bim/model.ts";
+import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { beginSelectionMove, previewSelectionMove, selectionMoveInteraction } from "./move.ts";
