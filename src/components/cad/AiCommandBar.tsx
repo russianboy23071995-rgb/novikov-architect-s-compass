@@ -174,7 +174,8 @@ export function AiCommandBar({
       </form>
       <p className="mt-1 text-[10px] text-muted-foreground">
         Wandlänge, Wandhöhe, Wandstärke, Fensterbreite, Fensterhöhe, Brüstungshöhe auf Zahl m/cm/mm
-        · Fenster zentrieren · Auswahl um 2 m bei 90 Grad verschieben
+        · Fenster zentrieren · Türbreite, Türhöhe, Z-Versatz auf Zahl · Tür zentrieren · Anschlag
+        Wandanfang/Wandende · Aufschlag links/rechts · Auswahl um 2 m bei 90 Grad verschieben
       </p>
       <p className="mt-1 text-[10px] text-muted-foreground">
         {voiceAvailable
