@@ -49,3 +49,24 @@ Empfehlungen freigegeben (Nutzerentscheidung 25.10.2026):
 
 - Fensterbefehle (Altgrammatik in `lib/bim/commands.ts`) nennen weiter die Fenster-ID.
 - Umnummerieren auf Knopfdruck, Raumbezug und IFC-/Navigator-Anzeige sind nicht enthalten.
+
+## Nachtrag 25.10.2026: Fensterbefehle in der Anwendungsschicht
+
+Änderungskarte freigegeben (Zusammenfassung im Tür-Stil). Branch feat/window-commands, Basis
+feat/opening-marks.
+
+- **Neu:** `application/windows/command.ts` (`previewWindowCommand`) mit unveränderter
+  Grammatik (Fensterbreite/Fensterhöhe/Brüstungshöhe auf Zahl m/cm/mm, „Fenster zentrieren“),
+  Grenzen und Meldungen; `application/windows/actions.ts` (`updateWindow`, gleiche Regel wie
+  bisher, ohne Abhängigkeit zu `lib/bim`).
+- **Verteilung:** `selection-command.ts` fragt Tür, dann Fenster, dann die Altgrammatik.
+- **Rückbau:** `lib/bim/commands.ts` enthält nur noch Wand- und Versatzbefehle (−43 Zeilen);
+  die Fenstertests sind nach `application/windows/command.test.ts` umgezogen.
+- **Zusammenfassung:** „F-EG-01 · Fensterbreite: 1,2 → 1,5 m“ (Nummer, sonst ID).
+- **Nachweis:** Gleichheit des Modells gegen das unveränderte `updateWindow` aus `lib/bim` für
+  alle Befehle und Einheiten; Grenzen und Meldungen; Abgrenzung zu anderen Grammatiken;
+  Zusammenfassung über den gemeinsamen Befehlsweg. Gegenprobe (Brüstung auf Höhe abgebildet):
+  1 Test scheitert. 1237 Tests, Architektur-Check ohne neue Ausnahme, Typprüfungen, Lint
+  (0 Fehler), Build. Bedienprüfung im Browser nicht abgeschlossen (Ansicht zu klein, Element
+  außerhalb); der Oberflächenweg nutzt `previewSelectionCommand`, der im Test geprüft ist.
+- **Offen:** Wandbefehle bleiben in `lib/bim` (hängen an der Wandbearbeitung in `lib/bim/model.ts`).

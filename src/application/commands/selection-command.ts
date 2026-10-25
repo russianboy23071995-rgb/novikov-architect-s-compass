@@ -5,6 +5,7 @@ import {
 } from "../references/calibration.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { previewDoorCommand } from "../doors/command.ts";
+import { previewWindowCommand } from "../windows/command.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { previewOverlapHint } from "../openings/overlap-hint.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -94,8 +95,9 @@ export function previewSelectionCommand(
       throw new Error(
         "Dieser Befehl benötigt genau ein Element. Gruppenbefehl: Auswahl um 2 m bei 90 Grad verschieben.",
       );
-    const door = previewDoorCommand(project, target, text);
-    const legacy = door ?? previewCommand(project, target, text);
+    const element =
+      previewDoorCommand(project, target, text) ?? previewWindowCommand(project, target, text);
+    const legacy = element ?? previewCommand(project, target, text);
     result = legacy.result;
     summary = legacy.summary;
   }
