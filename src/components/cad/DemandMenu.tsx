@@ -37,13 +37,15 @@ export function DemandMenu({
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; pointer: Point; origin: Point } | null>(null);
-  const [bounds, setBounds] = useState({
+  const [bounds, setBounds] = useState<Parameters<typeof clampMenuPosition>[1]>({
     width: 1024,
     height: 768,
     menuWidth: 240,
     menuHeight: 160,
   });
   useEffect(() => {
+    // The command bar is an obstacle: the menu must never cover it (it grows with previews).
+    const obstacles = () => [...document.querySelectorAll("[data-menu-obstacle]")];
     const measure = () => {
       const rect = panel.current?.getBoundingClientRect();
       setBounds({
@@ -51,10 +53,15 @@ export function DemandMenu({
         height: window.innerHeight,
         menuWidth: rect?.width ?? 240,
         menuHeight: rect?.height ?? 160,
+        obstacles: obstacles().map((element) => {
+          const { left, top, right, bottom } = element.getBoundingClientRect();
+          return { left, top, right, bottom };
+        }),
       });
     };
     const observer = new ResizeObserver(measure);
     if (panel.current) observer.observe(panel.current);
+    for (const element of obstacles()) observer.observe(element);
     window.addEventListener("resize", measure);
     measure();
     return () => {
