@@ -23,7 +23,11 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist-production-workspace",
     rollupOptions: {
-      input: ["benchmarks/production-workspace.html", "benchmarks/s1-workspace.html"],
+      input: [
+        "benchmarks/production-workspace.html",
+        "benchmarks/s1-workspace.html",
+        "benchmarks/school-acceptance.html",
+      ],
     },
   },
   preview: { host: "127.0.0.1", port: 8085, strictPort: true },
