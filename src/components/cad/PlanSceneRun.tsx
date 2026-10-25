@@ -14,6 +14,45 @@ import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
 
+/** Position number beside an opening, on the side away from a door's swing; kept readable
+ * (never upside down) whatever the wall direction. Screen-constant size like other plan text.
+ */
+function MarkLabel({
+  text,
+  x,
+  side,
+  thickness,
+  angle,
+  pixelsPerMetre,
+  visible,
+}: {
+  text: string | undefined;
+  x: number;
+  side: 1 | -1;
+  thickness: number;
+  angle: number;
+  pixelsPerMetre: number;
+  visible: boolean;
+}) {
+  if (!text || !visible) return null;
+  const y = side * (thickness / 2 + 10 / pixelsPerMetre);
+  const flip = Math.cos((angle * Math.PI) / 180) < 0;
+  return (
+    <text
+      x={x}
+      y={y}
+      transform={flip ? `rotate(180 ${x} ${y})` : undefined}
+      fontSize={11 / pixelsPerMetre}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fill="var(--foreground)"
+      pointerEvents="none"
+    >
+      {text}
+    </text>
+  );
+}
+
 /** Hint colour for overlapping openings (allowed, not an error). */
 const OVERLAP_COLOR = "#d97706";
 
@@ -231,6 +270,15 @@ export function PlanSceneContent({
                   strokeWidth={wallOutlineWidth / pixelsPerMetre}
                   pointerEvents="none"
                 />
+                <MarkLabel
+                  text={opening.mark}
+                  x={opening.position * length}
+                  side={1}
+                  thickness={wall.thickness}
+                  angle={angle}
+                  pixelsPerMetre={pixelsPerMetre}
+                  visible={allowsShown(opening.id)}
+                />
               </g>
             ))}
             {(scene.doors.get(wall.id) ?? []).map((door) => {
@@ -260,6 +308,15 @@ export function PlanSceneContent({
                     style={selected ? CAD_SHIMMER : undefined}
                     strokeWidth={wallOutlineWidth / pixelsPerMetre}
                     pointerEvents="none"
+                  />
+                  <MarkLabel
+                    text={door.mark}
+                    x={door.position * length}
+                    side={door.opensTo === "left" ? 1 : -1}
+                    thickness={wall.thickness}
+                    angle={angle}
+                    pixelsPerMetre={pixelsPerMetre}
+                    visible={shown}
                   />
                 </g>
               );

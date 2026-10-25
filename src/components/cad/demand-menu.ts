@@ -72,7 +72,7 @@ export function selectionSummary(project: Project, selection: Selection) {
     const window = storeyOf(project).windows.find((item) => item.id === selection.id);
     return window
       ? {
-          title: "Fenster",
+          title: window.mark ? `Fenster ${window.mark}` : "Fenster",
           details: `Breite ${metres(window.width)} · Höhe ${metres(window.height)} · Brüstung ${metres(window.sillHeight)}`,
         }
       : null;
@@ -81,7 +81,7 @@ export function selectionSummary(project: Project, selection: Selection) {
     const door = storeyOf(project).doors?.find((item) => item.id === selection.id);
     return door
       ? {
-          title: "Tür",
+          title: door.mark ? `Tür ${door.mark}` : "Tür",
           details: `Breite ${metres(door.width)} · Höhe ${metres(door.height)} · Z-Versatz ${metres(door.zOffset)} · DIN ${doorDinHand(door)}`,
         }
       : null;

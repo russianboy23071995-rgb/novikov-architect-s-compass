@@ -14,6 +14,9 @@ import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
 import { DoorProperties } from "./DoorProperties";
 import { OverlapHint } from "./OverlapHint";
+import { MarkField } from "./MarkField";
+import { newOpeningMark, setOpeningMark } from "@/application/openings/marks";
+import { duplicateMarkHint } from "@/domain/elements/wall/opening-marks";
 
 type Props = {
   project: Project;
@@ -104,6 +107,20 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
         <p className="max-w-48 truncate text-xs text-muted-foreground">Wall: {opening.wallId}</p>
       )}
       {opening && <OverlapHint text={openingOverlapHintFor(project, opening.id)} />}
+      {opening && (
+        <MarkField
+          value={opening.mark ?? ""}
+          hint={duplicateMarkHint(project, opening.id)}
+          onApply={(mark) =>
+            run(() =>
+              onChange(
+                setOpeningMark(project, { kind: "window", id: opening.id }, mark),
+                selection,
+              ),
+            )
+          }
+        />
+      )}
       <PropertyForm
         onSubmit={(event) => {
           event.preventDefault();
@@ -271,6 +288,7 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
                   wallId: wall.id,
                   ...defaultDrawingWindow,
                   position: 0.5,
+                  mark: newOpeningMark(project, "window"),
                 }),
                 { kind: "window", id },
               );

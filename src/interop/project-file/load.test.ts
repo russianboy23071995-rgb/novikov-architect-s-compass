@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
@@ -60,7 +61,10 @@ for (const withLines of [false, true])
       storeyOf(migrated).walls.map(strip),
       storeyOf(input).walls.map((w) => ({ ...w, bodyOffset: 0 })),
     );
-    assert.deepEqual(storeyOf(migrated).windows.map(strip), storeyOf(input).windows);
+    assert.deepEqual(
+      storeyOf(withoutOpeningMarks(migrated)).windows.map(strip),
+      storeyOf(input).windows,
+    );
     assert.deepEqual(storeyOf(migrated).lines?.map(strip), storeyOf(input).lines);
     assert.equal(migrated.id, input.id);
     assert.equal(storeyOf(migrated).id, storeyOf(input).id);

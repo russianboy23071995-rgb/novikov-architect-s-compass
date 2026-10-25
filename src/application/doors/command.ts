@@ -3,6 +3,7 @@ import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorHingeForDinHand, type Door } from "../../domain/elements/door/model.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { updateDoor } from "./actions.ts";
+import { openingLabel } from "../../domain/elements/wall/opening-marks.ts";
 
 const units = { m: 1, cm: 100, mm: 1000 } as const;
 const measures = {
@@ -43,23 +44,23 @@ export function previewDoorCommand(
     if (!Number.isFinite(value) || (field.key !== "zOffset" && value <= 0))
       throw new Error("Breite und Höhe müssen größer als null sein; der Z-Versatz eine Zahl.");
     changes = { [field.key]: value };
-    summary = `${door.id} · ${field.label}: ${format(door[field.key])} → ${format(value)} m`;
+    summary = `${openingLabel(door)} · ${field.label}: ${format(door[field.key])} → ${format(value)} m`;
   } else if (centre) {
     changes = { position: 0.5 };
-    summary = `${door.id} · Relative Türmitte: ${format(door.position)} → 0,5`;
+    summary = `${openingLabel(door)} · Relative Türmitte: ${format(door.position)} → 0,5`;
   } else if (hinge) {
     const value = hinge[1]!.toLocaleLowerCase("de") === "wandanfang" ? "start" : "end";
     changes = { hinge: value };
-    summary = `${door.id} · Anschlag: Seite ${value === "start" ? "Wandanfang" : "Wandende"}`;
+    summary = `${openingLabel(door)} · Anschlag: Seite ${value === "start" ? "Wandanfang" : "Wandende"}`;
   } else if (din) {
     // DIN 107 handing keeps the swing side and moves the hinge jamb (user decision 24.10.2026).
     const hand = din[1]!.toLocaleLowerCase("de") as "links" | "rechts";
     changes = { hinge: doorHingeForDinHand(door, hand) };
-    summary = `${door.id} · DIN ${doorDinHand(door)} → DIN ${hand}`;
+    summary = `${openingLabel(door)} · DIN ${doorDinHand(door)} → DIN ${hand}`;
   } else {
     const value = swing![1]!.toLocaleLowerCase("de") === "links" ? "left" : "right";
     changes = { opensTo: value };
-    summary = `${door.id} · Aufschlag: ${value === "left" ? "links" : "rechts"} der Wandrichtung`;
+    summary = `${openingLabel(door)} · Aufschlag: ${value === "left" ? "links" : "rechts"} der Wandrichtung`;
   }
   try {
     return { result: updateDoor(project, door.id, changes), summary };

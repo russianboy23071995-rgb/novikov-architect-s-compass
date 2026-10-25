@@ -1,3 +1,4 @@
+import { withoutOpeningMarks } from "../../test/legacy-project-fixture.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { legacyFixtureJSON, legacyProjectFixture } from "../../test/legacy-project-fixture.ts";
@@ -162,7 +163,7 @@ test("strict V3 migration preserves visibility and model IDs and never repairs i
   const before = structuredClone(v3);
   const migrated = loadProjectData(legacyProjectFixture(v3));
   assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.deepEqual(storeyOf(migrated), {
+  assert.deepEqual(withoutOpeningMarks(storeyOf(migrated)), {
     ...storey,
     references: [],
     hatches: [],

@@ -50,7 +50,10 @@ export function openingOverlaps(storey: OpeningStorey): OpeningOverlap[] {
 export function openingOverlapHint(storey: OpeningStorey, ids: ReadonlySet<string>): string {
   const pairs = openingOverlaps(storey).filter((o) => ids.has(o.first) || ids.has(o.second));
   if (!pairs.length) return "";
-  const name = (id: string) => `${openingNoun(storey, id)} ${id}`;
+  const marks = new Map(
+    [...storey.windows, ...(storey.doors ?? [])].map((o) => [o.id, o.mark ?? o.id]),
+  );
+  const name = (id: string) => `${openingNoun(storey, id)} ${marks.get(id) ?? id}`;
   return `Hinweis: ${pairs.map((o) => `${name(o.first)} überlappt ${name(o.second)}`).join(" · ")}`;
 }
 
