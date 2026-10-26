@@ -94,16 +94,29 @@ Browser-Schullauf l, gleiche Sitzung, Reihenfolge main, neu, vor Teil A, neu:
 | Löschen                   | 467        | 460           | 327 / 280        |
 | 2D→3D + Szene + Türziehen | 2193       | 2678          | 2953 / 2738      |
 
+Browser-Schullauf s und x, eigene Sitzung bei sichtbarem Fenster (Bildschirm mit 136 Hz statt vorher 60 Hz; deshalb nur main gegen neu innerhalb dieser Sitzung):
+
+| Median ms                 | s main → neu    | x main → neu      |
+| ------------------------- | --------------- | ----------------- |
+| Bearbeitungszyklus        | 83 → 64 (−24 %) | 522 → 390 (−25 %) |
+| Bearbeitungszyklus p95    | 133 → 127       | 3748 → 547        |
+| Undo                      | 14 → 14         | 14 → 14           |
+| Redo                      | 83 → 78         | 387 → 295         |
+| Fang p95                  | 20 → 20         | 29 → 37           |
+| Wandlänge übernehmen      | 168 → 143       | 610 → 433         |
+| Löschen                   | 115 → 105       | 945 → 653         |
+| 2D→3D + Szene + Türziehen | 1591 → 1948     | 1208 → 1411       |
+
 ## Abnahme
 
 - **l ≥ 40 % schneller als vor Teil A:** Lauf 1 −37 %, Lauf 2 −47 %, Mittel 171 ms = −42 % – im Mittel erfüllt, ein Einzellauf darunter (die Läufe streuen am selben Rechner um ±15 %).
 - Undo/Redo nicht langsamer – erfüllt.
 - Ergebnisse identisch – erfüllt.
 - **3D nach Bearbeitung:** nicht verbessert. Das Gebäude wird zwar in Node 4–6× schneller neu aufgebaut, im Browser bleibt die Summe aus Umschalten, Szenenaufbau und Türziehen bei 2,2–3,0 s (große Streuung). Rest: Picking-Index, Bildprüfung der Autosicherung, Vorschau je Mausbewegung beim Türziehen. Eigener Auftrag.
-- **s und x im Browser: nicht gemessen.** Nach den l-Läufen war das App-Fenster verdeckt bzw. minimiert; der Browserbereich lieferte nur etwa ein Bild pro Sekunde, die Messseite wartete auf Bilder (kein Rechenaufwand, Profil zu 70 % untätig). Diese Läufe sind verworfen und stehen aus.
+- **s und x:** gegenüber Teil A je etwa ein Viertel schneller (s −24 %, x −25 %), alle Schritte ohne Fehler. Fang p95 bei x 29 → 37 ms (bildratengebunden, Einzellauf; beobachten). Ein erster Versuch bei verdecktem Fenster (etwa ein Bild pro Sekunde, Profil zu 70 % untätig) ist verworfen.
 
 ## Grenzen
 
-- Ein Rechner, nur Chromium, l zweimal, s und x im Browser ausstehend.
+- Ein Rechner, nur Chromium; l zweimal, s und x je einmal in einer zweiten Sitzung mit anderer Bildrate.
 - Der Picking-Index für 3D und die Bildprüfung der Autosicherung werden nach jeder Bearbeitung vollständig neu berechnet.
 - Größenberechnung des geänderten Geschosses bleibt vollständig (≈ 5 ms bei l).

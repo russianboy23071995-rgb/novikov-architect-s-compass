@@ -5,30 +5,83 @@
     "main": "b353e82 (Teil A)",
     "neu": "perf/edit-cycle-part-b 79a9a25"
   },
-  "notes": "Node: benchmarks/edit-cycle-profile.ts, median ms per wall length edit. Browser: school acceptance page size l, same machine and session, runs in the order main, neu, preTeilA, neu2. Sizes s and x in the browser are pending: the app window was hidden or covered afterwards and the page received about one frame per second (measurement invalid, aborted).",
+  "notes": "Node: benchmarks/edit-cycle-profile.ts, median ms per wall length edit. Browser: school acceptance page size l, same machine and session, runs in the order main, neu, preTeilA, neu2. Sizes s and x: separate session later the same day with the window visible (display at 136 Hz instead of 60 Hz before, so compare main and neu only within each session); main and neu alternating.",
   "node": {
-    "main": { "s": 35.6, "l": 105.7, "x": 309.8 },
-    "neu": { "s": 8.6, "l": 26.5, "x": 177.5 },
+    "main": {
+      "s": 35.6,
+      "l": 105.7,
+      "x": 309.8
+    },
+    "neu": {
+      "s": 8.6,
+      "l": 26.5,
+      "x": 177.5
+    },
     "phasesNeu": {
-      "s": { "preview": 5, "commit": 1.4, "wallSolids": 1.6, "localSnapSources": 0.6 },
-      "l": { "preview": 14.5, "commit": 4.9, "wallSolids": 5.4, "localSnapSources": 1.7 },
-      "x": { "preview": 68.7, "commit": 5.7, "wallSolids": 89.7, "localSnapSources": 13.4 }
+      "s": {
+        "preview": 5,
+        "commit": 1.4,
+        "wallSolids": 1.6,
+        "localSnapSources": 0.6
+      },
+      "l": {
+        "preview": 14.5,
+        "commit": 4.9,
+        "wallSolids": 5.4,
+        "localSnapSources": 1.7
+      },
+      "x": {
+        "preview": 68.7,
+        "commit": 5.7,
+        "wallSolids": 89.7,
+        "localSnapSources": 13.4
+      }
     },
     "phasesMain": {
-      "s": { "preview": 14, "commit": 1.6, "wallSolids": 2.1, "localSnapSources": 17.9 },
-      "l": { "preview": 36.5, "commit": 5.3, "wallSolids": 4.8, "localSnapSources": 59.1 },
-      "x": { "preview": 99.7, "commit": 5.3, "wallSolids": 93.7, "localSnapSources": 111.1 }
+      "s": {
+        "preview": 14,
+        "commit": 1.6,
+        "wallSolids": 2.1,
+        "localSnapSources": 17.9
+      },
+      "l": {
+        "preview": 36.5,
+        "commit": 5.3,
+        "wallSolids": 4.8,
+        "localSnapSources": 59.1
+      },
+      "x": {
+        "preview": 99.7,
+        "commit": 5.3,
+        "wallSolids": 93.7,
+        "localSnapSources": 111.1
+      }
     },
-    "buildingAfterEditL": { "main": "50–80", "neu": "9–17" }
+    "buildingAfterEditL": {
+      "main": "50–80",
+      "neu": "9–17"
+    }
   },
   "browserL": {
     "preTeilA": {
       "ok": true,
       "errors": 0,
-      "session": { "median": 295.7, "p95": 410 },
-      "undo": { "median": 14, "p95": 263.8 },
-      "redo": { "median": 211, "p95": 701.4 },
-      "snap": { "median": 18.9, "p95": 24.9 },
+      "session": {
+        "median": 295.7,
+        "p95": 410
+      },
+      "undo": {
+        "median": 14,
+        "p95": 263.8
+      },
+      "redo": {
+        "median": 211,
+        "p95": 701.4
+      },
+      "snap": {
+        "median": 18.9,
+        "p95": 24.9
+      },
       "commitWallLength": 338.8,
       "deleteLine": 467.3,
       "toggle3D": 391.4,
@@ -39,10 +92,22 @@
     "main": {
       "ok": true,
       "errors": 0,
-      "session": { "median": 263.5, "p95": 399.5 },
-      "undo": { "median": 13.9, "p95": 630.6 },
-      "redo": { "median": 197.1, "p95": 515.2 },
-      "snap": { "median": 14, "p95": 21.1 },
+      "session": {
+        "median": 263.5,
+        "p95": 399.5
+      },
+      "undo": {
+        "median": 13.9,
+        "p95": 630.6
+      },
+      "redo": {
+        "median": 197.1,
+        "p95": 515.2
+      },
+      "snap": {
+        "median": 14,
+        "p95": 21.1
+      },
       "commitWallLength": 286.5,
       "deleteLine": 460,
       "toggle3D": 805.4,
@@ -53,10 +118,22 @@
     "neu": {
       "ok": true,
       "errors": 0,
-      "session": { "median": 186.3, "p95": 312.2 },
-      "undo": { "median": 14, "p95": 427.4 },
-      "redo": { "median": 208.1, "p95": 564.8 },
-      "snap": { "median": 14, "p95": 21.2 },
+      "session": {
+        "median": 186.3,
+        "p95": 312.2
+      },
+      "undo": {
+        "median": 14,
+        "p95": 427.4
+      },
+      "redo": {
+        "median": 208.1,
+        "p95": 564.8
+      },
+      "snap": {
+        "median": 14,
+        "p95": 21.2
+      },
       "commitWallLength": 229.1,
       "deleteLine": 327.1,
       "toggle3D": 831.2,
@@ -67,16 +144,138 @@
     "neu2": {
       "ok": true,
       "errors": 0,
-      "session": { "median": 155.9, "p95": 268.8 },
-      "undo": { "median": 14, "p95": 190.5 },
-      "redo": { "median": 152.7, "p95": 414.1 },
-      "snap": { "median": 18.4, "p95": 25.4 },
+      "session": {
+        "median": 155.9,
+        "p95": 268.8
+      },
+      "undo": {
+        "median": 14,
+        "p95": 190.5
+      },
+      "redo": {
+        "median": 152.7,
+        "p95": 414.1
+      },
+      "snap": {
+        "median": 18.4,
+        "p95": 25.4
+      },
       "commitWallLength": 232.6,
       "deleteLine": 279.7,
       "toggle3D": 383,
       "scene3D": 1716,
       "drag3D": 639.4,
       "loadToRestoredMs": 1326
+    }
+  },
+  "browserSX": {
+    "s": {
+      "main": {
+        "ok": true,
+        "errors": 0,
+        "session": {
+          "median": 83.3,
+          "p95": 133.2
+        },
+        "undo": {
+          "median": 14,
+          "p95": 169.4
+        },
+        "redo": {
+          "median": 82.5,
+          "p95": 162.2
+        },
+        "snap": {
+          "median": 17.3,
+          "p95": 20.1
+        },
+        "commitWallLength": 167.7,
+        "deleteLine": 115.4,
+        "toggle3D": 440.2,
+        "scene3D": null,
+        "drag3D": 1150.7,
+        "loadToRestoredMs": 954
+      },
+      "neu": {
+        "ok": true,
+        "errors": 0,
+        "session": {
+          "median": 63.6,
+          "p95": 127.3
+        },
+        "undo": {
+          "median": 14,
+          "p95": 85.6
+        },
+        "redo": {
+          "median": 78.1,
+          "p95": 180
+        },
+        "snap": {
+          "median": 17.8,
+          "p95": 20
+        },
+        "commitWallLength": 142.7,
+        "deleteLine": 105.2,
+        "toggle3D": 448.4,
+        "scene3D": 690.3,
+        "drag3D": 809.1,
+        "loadToRestoredMs": 954
+      }
+    },
+    "x": {
+      "main": {
+        "ok": true,
+        "errors": 0,
+        "session": {
+          "median": 522.4,
+          "p95": 3748
+        },
+        "undo": {
+          "median": 13.9,
+          "p95": 605.2
+        },
+        "redo": {
+          "median": 386.9,
+          "p95": 959.3
+        },
+        "snap": {
+          "median": 16.3,
+          "p95": 28.9
+        },
+        "commitWallLength": 609.8,
+        "deleteLine": 944.6,
+        "toggle3D": 1190.4,
+        "scene3D": null,
+        "drag3D": 17.5,
+        "loadToRestoredMs": 2667
+      },
+      "neu": {
+        "ok": true,
+        "errors": 0,
+        "session": {
+          "median": 390.1,
+          "p95": 547
+        },
+        "undo": {
+          "median": 14,
+          "p95": 378.4
+        },
+        "redo": {
+          "median": 294.6,
+          "p95": 742.4
+        },
+        "snap": {
+          "median": 20.1,
+          "p95": 36.9
+        },
+        "commitWallLength": 432.7,
+        "deleteLine": 652.8,
+        "toggle3D": 907.6,
+        "scene3D": 491.1,
+        "drag3D": 12.7,
+        "loadToRestoredMs": 2424
+      }
     }
   }
 }
