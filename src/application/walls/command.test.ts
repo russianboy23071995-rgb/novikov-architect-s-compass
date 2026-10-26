@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { windowCentre } from "../windows/actions.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "../drawing/offset-command.ts";
 import { addWall, updateWall } from "./actions.ts";
 import { createProject } from "../projects/create.ts";
 import { previewWallCommand } from "./command.ts";
@@ -85,7 +85,7 @@ test("summary in door style; the legacy grammar keeps only the offset command", 
   const p = createExampleProject();
   assert.equal(wallCommand(p, wall, "Wandlänge auf 6 m").summary, "wall-1 · Wandlänge: 3 → 6 m");
   assert.equal(previewWallCommand(p, wall, "Fenster zentrieren"), null);
-  assert.throws(() => previewCommand(p, wall, "Wandlänge auf 6 m"), /Unbekannter Befehl/);
+  assert.equal(previewOffsetCommand(p, wall, "Wandlänge auf 6 m"), null);
 });
 
 test("a rejected wall command names the actual rule, not a generic window guess", () => {

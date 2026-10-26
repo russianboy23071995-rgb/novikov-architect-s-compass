@@ -13,7 +13,7 @@ import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
 import { selectedLayerElement } from "../layers/selection.ts";
 import { visiblePlanGeometry } from "../../rendering/viewport/layer-display.ts";
 import { planBounds } from "../../components/cad/bim-view.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "./offset-command.ts";
 const points = [
   { x: 0, y: 0 },
   { x: 3, y: 0 },
@@ -122,7 +122,7 @@ test("hatch selection supports layer assignment and plan extents without becomin
   assert.equal(storeyOf(assigned.history.present).hatches[0]!.layerId, layer);
   assert.equal(assigned.history.past.length, 1);
   assert.equal(planBounds(p), "-1.5 -3.5 6 5");
-  assert.throws(() => previewCommand(p, target, "Wandlänge auf 6 m"));
+  assert.equal(previewOffsetCommand(p, target, "Wandlänge auf 6 m"), null);
 });
 
 import { editAtPointer } from "../../lib/bim/direct-edit.ts";

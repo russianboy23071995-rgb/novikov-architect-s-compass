@@ -6,7 +6,6 @@
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
       "edges": [
-        "src/application/commands/selection-command.ts -> src/lib/bim/commands.ts",
         "src/application/commands/selection-voice.ts -> src/lib/bim/voice.ts"
       ]
     },
@@ -112,8 +111,6 @@
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Migrate the named existing facade/action to its domain or Application owner one bounded workflow at a time.",
       "edges": [
-        "src/lib/bim/commands.ts -> src/application/drawing/offset-command.ts",
-        "src/lib/bim/commands.ts -> src/application/selection/target.ts",
         "src/lib/bim/direct-edit.ts -> src/application/direct-edit/contour.ts",
         "src/lib/bim/direct-edit.ts -> src/application/direct-edit/offset.ts",
         "src/lib/bim/history.ts -> src/interop/project-file/size.ts",

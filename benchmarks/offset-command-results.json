@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-26",
+  "states": {
+    "main": "69e480c",
+    "neu": "perf/offset-command"
+  },
+  "notes": "Node, benchmarks/offset-command-profile.ts, Schulmodell mit fünf Bildern (je etwa 4,4 MB), Median aus 6 Läufen nach einem Aufwärmlauf; Polylinie und Schraffur des Arbeitsgeschosses. Ergebnisprojekte serialisiert byte-gleich zu main.",
+  "main": {
+    "s": {
+      "size": "s",
+      "line": {
+        "previewMs": 88,
+        "applyMs": 81.4
+      },
+      "hatch": {
+        "previewMs": 67.1,
+        "applyMs": 65.6
+      }
+    },
+    "l": {
+      "size": "l",
+      "line": {
+        "previewMs": 186.2,
+        "applyMs": 180.4
+      },
+      "hatch": {
+        "previewMs": 199.1,
+        "applyMs": 192.6
+      }
+    }
+  },
+  "neu": {
+    "s": {
+      "size": "s",
+      "line": {
+        "previewMs": 8,
+        "applyMs": 0
+      },
+      "hatch": {
+        "previewMs": 5.1,
+        "applyMs": 0
+      }
+    },
+    "l": {
+      "size": "l",
+      "line": {
+        "previewMs": 33.7,
+        "applyMs": 0
+      },
+      "hatch": {
+        "previewMs": 15.1,
+        "applyMs": 0
+      }
+    }
+  },
+  "equalResults": {
+    "s": true,
+    "l": true
+  }
+}

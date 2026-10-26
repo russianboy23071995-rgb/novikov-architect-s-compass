@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { updateWindow as legacyUpdateWindow } from "./actions.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "../drawing/offset-command.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { previewSelectionCommand } from "../commands/selection-command.ts";
 import { createLayerVisibilityPolicy } from "../layers/visibility.ts";
@@ -44,7 +44,7 @@ test("limits and messages are unchanged; other texts are left to other grammars"
     assert.equal(previewWindowCommand(p, target, text), null, text);
   assert.equal(JSON.stringify(p), before);
   // The legacy grammar no longer answers window commands.
-  assert.throws(() => previewCommand(p, target, "Fenster zentrieren"), /Unbekannter Befehl/);
+  assert.equal(previewOffsetCommand(p, target, "Fenster zentrieren"), null);
 });
 
 test("summary in door style names the position number, else the ID", () => {
