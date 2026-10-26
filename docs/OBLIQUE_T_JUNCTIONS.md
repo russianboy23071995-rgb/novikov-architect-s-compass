@@ -25,3 +25,10 @@ Weiterhin rechtwinklig bleiben: eine Ecke an einer T-Hauptwand (`corner-t-contac
 
 - Schräge Ecke an einer T-Hauptwand, Mehrfachknoten und IFC-Anschlussbeziehungen bleiben offen; Archicad-Abnahme der T-Anschlüsse steht weiterhin aus.
 - Browserabnahme des schrägen Zeichnens steht aus (Fang und Übernahme sind über dieselben Funktionen in Tests nachgewiesen).
+
+# Schräge Ecke an einer T-Hauptwand (26.10.2026)
+
+Folgeauftrag mit Nutzerfreigabe („go und freigabe“): Die Regel „Ecke und T benötigen vorerst eine rechtwinklige Ecke“ (`corner-t-contact.ts`) entfällt.
+
+- **Kurzkarte:** Die Kontaktprüfung setzt außer dem rechten Winkel nur voraus, dass die Ringkanten 0 und 2 die Längsseiten der Hauptwand sind und alle Ringe konvexe Vierecke sind. Beides gilt für jede Gehrung (auch schief oder als Stumpfstoß). Daher wird nur die Winkelregel entfernt; die Prüfungen „T-Kontakt berührt den Eckbereich“ und „T-Nebenwand berührt oder überlappt den Eckpartner“ bleiben unverändert.
+- **Nachweis:** `src/application/walls/oblique-corner-t.test.ts` – Eckwinkel 45°/60°/120°/135°, T auf beiden Seiten der Hauptwand: einfache Ringe, Wandkörper, IFC; Gegenproben: ein T nahe einem spitzen Eckpartner und ein T an der Gehrung werden abgelehnt. Bestehende Erwartungen (schräger Eckpartner abgelehnt) auf „erlaubt“ umgestellt. Alle bisherigen Modelle unverändert gegen main 053988b. 1282 Tests, Typen, Architektur-Check, Lint.
