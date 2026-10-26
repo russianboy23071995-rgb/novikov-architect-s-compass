@@ -32,8 +32,27 @@ export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimens
   return { width, height, sillHeight };
 }
 
-/** Nearest visible wall whose body contains the point; shared by every wall opening. */
-export function findOpeningHost(project: Project, visibility: LayerVisibilityPolicy, point: Point) {
+/** Screen distance around a wall body that still picks the wall for an opening (user decision
+ * 26.10.2026, docs/OPENING_HIT_TOLERANCE.md); below the snap radius so both do not compete.
+ */
+export const OPENING_HOST_RADIUS_PX = 8;
+/** The host tolerance in metres at the current view scale; 0 without a usable scale. */
+export function openingHostTolerance(pixelsPerMetre: number): number {
+  return Number.isFinite(pixelsPerMetre) && pixelsPerMetre > 0
+    ? OPENING_HOST_RADIUS_PX / pixelsPerMetre
+    : 0;
+}
+
+/** Nearest visible wall for an opening; shared by every wall opening. A wall whose body
+ * contains the point wins; otherwise the nearest body face within `tolerance` metres.
+ * Tolerance 0 keeps the strict body test.
+ */
+export function findOpeningHost(
+  project: Project,
+  visibility: LayerVisibilityPolicy,
+  point: Point,
+  tolerance = 0,
+) {
   const hosts = storeyOf(project)
     .walls.filter((w) => isLayerVisible(project, visibility, w.id))
     .flatMap((wall) => {
@@ -45,17 +64,22 @@ export function findOpeningHost(project: Project, visibility: LayerVisibilityPol
         ((projected.x - body.start.x) * direction.x + (projected.y - body.start.y) * direction.y) /
         (length * length);
       const distance = Math.hypot(point.x - projected.x, point.y - projected.y);
-      return distance <= wall.thickness / 2 + 1e-9
+      const outside = Math.max(0, distance - wall.thickness / 2 - 1e-9);
+      return outside <= Math.max(0, tolerance)
         ? [
             {
               wall,
               position,
+              outside,
               distance: Math.hypot(distance, Math.max(0, -position, position - 1) * length),
             },
           ]
         : [];
     })
-    .sort((a, b) => a.distance - b.distance || a.wall.id.localeCompare(b.wall.id));
+    .sort(
+      (a, b) =>
+        a.outside - b.outside || a.distance - b.distance || a.wall.id.localeCompare(b.wall.id),
+    );
   return hosts[0];
 }
 
@@ -63,8 +87,9 @@ export function windowPlacementHost(
   project: Project,
   visibility: LayerVisibilityPolicy,
   point: Point,
+  tolerance = 0,
 ): string {
-  const host = findOpeningHost(project, visibility, point);
+  const host = findOpeningHost(project, visibility, point, tolerance);
   if (!host) throw new Error("Eine sichtbare Wand anklicken.");
   return host.wall.id;
 }
@@ -171,7 +196,9 @@ export function openingPlacementInteraction(
           : null,
       sources: (refs) => [...refs],
       resolve: (cursor, context) => {
-        const host = wall ? { wall } : findOpeningHost(base, visibility, cursor);
+        const host = wall
+          ? { wall }
+          : findOpeningHost(base, visibility, cursor, openingHostTolerance(context.pixelsPerMetre));
         if (!host) return querySnap(cursor, context);
         const body = wallBody(host.wall);
         return querySnap(cursor, {
