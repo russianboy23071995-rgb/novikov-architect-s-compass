@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createProject } from "../projects/create.ts";
 import { addWall, updateWall } from "../walls/actions.ts";
-import { createHistory, commitProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject } from "../history/project-history.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { addDoor } from "../doors/actions.ts";
 import { projectSnapPrimitives } from "./project-references.ts";

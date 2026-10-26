@@ -7,7 +7,8 @@ import { createProject } from "../../../application/projects/create.ts";
 import { addWindow } from "../../../application/windows/actions.ts";
 import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { validateProject } from "../../project/schema.ts";
-import { buildSolid, buildBuildingSolid } from "../../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../../rendering/viewport/building-solid.ts";
+import { buildSolid } from "../../../lib/bim/geometry.ts";
 import { storeyOf } from "../../storeys/access.ts";
 import {
   addStorey,
@@ -245,7 +246,7 @@ import {
   commitProject,
   undoProject,
   redoProject,
-} from "../../../lib/bim/history.ts";
+} from "../../../application/history/project-history.ts";
 import { prepareZTranslation } from "../../../application/selection/z-translation.ts";
 import {
   createAssetPreparation,

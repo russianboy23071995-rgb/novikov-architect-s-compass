@@ -21,7 +21,12 @@ import { beginSelectionMove, previewSelectionMove, selectionMoveInteraction } fr
 import { selectionIndex } from "./state.ts";
 import { previewTConnection } from "../walls/t-connections.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
@@ -1096,7 +1101,7 @@ test("failed multi-storey preview and cancellation never publish a partial floor
   assert.equal(command.result.storeys.find((s) => s.id === "og")!.walls[0]!.start.x, 2);
 });
 
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

@@ -3,8 +3,13 @@ import assert from "node:assert/strict";
 import { boundHeightFixture, fullHeightFixture } from "./bound-height-fixture.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { serializeProject, deserializeProject } from "../src/lib/bim/model.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { exportIfc } from "../src/lib/bim/ifc.ts";
 import { resolveStoreyLevels } from "../src/domain/storeys/heights.ts";
 

@@ -11,8 +11,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history";
+} from "../src/application/history/project-history";
+import { readProjectFile } from "../src/lib/bim/history";
 import { defaultLineAppearance } from "../src/lib/bim/lines";
 import { importImage } from "../src/interop/images/import";
 import { previewCreateReference } from "../src/application/references/actions";

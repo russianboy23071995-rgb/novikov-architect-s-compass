@@ -1,0 +1,122 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-25T14:31:14.331Z",
+  "commits": 50,
+  "notes": "heapUsed after gc, difference between before and after 50 wall-length commands through the workspace command path; images not included (shared by identity).",
+  "results": {
+    "s": {
+      "modelOnly": {
+        "retainedMiB": 1.2,
+        "perCommitMiB": 0.02
+      },
+      "selectionIndex": {
+        "retainedMiB": 1.18,
+        "perCommitMiB": 0.02
+      },
+      "localSnapSources": {
+        "retainedMiB": 3.84,
+        "perCommitMiB": 0.08
+      },
+      "snapReferences": {
+        "retainedMiB": -1.47,
+        "perCommitMiB": -0.03
+      },
+      "buildingSolid": {
+        "retainedMiB": -3.19,
+        "perCommitMiB": -0.06
+      },
+      "wallFootSources": {
+        "retainedMiB": -2.86,
+        "perCommitMiB": -0.06
+      },
+      "wallSolids": {
+        "retainedMiB": -3.35,
+        "perCommitMiB": -0.07
+      },
+      "allCaches": {
+        "retainedMiB": -0.62,
+        "perCommitMiB": -0.01
+      },
+      "allCachesNoHistory": {
+        "retainedMiB": -3.3,
+        "perCommitMiB": -0.07
+      }
+    },
+    "l": {
+      "modelOnly": {
+        "retainedMiB": -3.07,
+        "perCommitMiB": -0.06
+      },
+      "selectionIndex": {
+        "retainedMiB": 1.49,
+        "perCommitMiB": 0.03
+      },
+      "localSnapSources": {
+        "retainedMiB": 5.86,
+        "perCommitMiB": 0.12
+      },
+      "snapReferences": {
+        "retainedMiB": 2.4,
+        "perCommitMiB": 0.05
+      },
+      "buildingSolid": {
+        "retainedMiB": -2.88,
+        "perCommitMiB": -0.06
+      },
+      "wallFootSources": {
+        "retainedMiB": -1.12,
+        "perCommitMiB": -0.02
+      },
+      "wallSolids": {
+        "retainedMiB": -3.13,
+        "perCommitMiB": -0.06
+      },
+      "allCaches": {
+        "retainedMiB": 5.72,
+        "perCommitMiB": 0.11
+      },
+      "allCachesNoHistory": {
+        "retainedMiB": -3.02,
+        "perCommitMiB": -0.06
+      }
+    },
+    "x": {
+      "modelOnly": {
+        "retainedMiB": -2.37,
+        "perCommitMiB": -0.05
+      },
+      "selectionIndex": {
+        "retainedMiB": -2.43,
+        "perCommitMiB": -0.05
+      },
+      "localSnapSources": {
+        "retainedMiB": 103.54,
+        "perCommitMiB": 2.07
+      },
+      "snapReferences": {
+        "retainedMiB": 82.92,
+        "perCommitMiB": 1.66
+      },
+      "buildingSolid": {
+        "retainedMiB": -2.32,
+        "perCommitMiB": -0.05
+      },
+      "wallFootSources": {
+        "retainedMiB": -0.25,
+        "perCommitMiB": -0.01
+      },
+      "wallSolids": {
+        "retainedMiB": -2.47,
+        "perCommitMiB": -0.05
+      },
+      "allCaches": {
+        "retainedMiB": 100.75,
+        "perCommitMiB": 2.01
+      },
+      "allCachesNoHistory": {
+        "retainedMiB": 4.06,
+        "perCommitMiB": 0.08
+      }
+    }
+  }
+}

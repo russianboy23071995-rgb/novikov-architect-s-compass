@@ -1,6 +1,7 @@
 // @ts-expect-error Diagnostic virtual module resolves to archived TypeScript via Vite.
 import { buildBuildingSolid as candidate } from "./archived-wall-resource";
-import { buildBuildingSolid as production, type Solid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid as production } from "../src/rendering/viewport/building-solid.ts";
+import type { Solid } from "../src/lib/bim/geometry.ts";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { updateWindow } from "../src/application/windows/actions.ts";

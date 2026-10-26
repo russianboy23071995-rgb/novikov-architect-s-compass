@@ -5,7 +5,7 @@ import {
 } from "./prepared-model.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "./building-solid.ts";
 import { visibleSurfaces } from "./layer-display.ts";
 import { classifyAnchorVisibility } from "./anchor-visibility.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";

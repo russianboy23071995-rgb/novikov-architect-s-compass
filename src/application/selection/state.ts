@@ -2,9 +2,10 @@ import { elementKinds, storeyElements } from "../../domain/elements/registry.ts"
 import type { ElementTarget } from "./target.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { isLayerVisible, type LayerVisibilityPolicy } from "../layers/visibility.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 export type SelectionSet = readonly ElementTarget[];
 export const targetKey = (target: ElementTarget) => `${target.kind}:${target.id}`;
-const indexes = new WeakMap<Project, ReadonlyMap<string, ElementTarget>>();
+const indexes = createDerivedCache<Project, ReadonlyMap<string, ElementTarget>>();
 /** Model index reused by eligibility and Navigator; no per-tool kind discovery. */
 export function selectionIndex(project: Project): ReadonlyMap<string, ElementTarget> {
   const cached = indexes.get(project);

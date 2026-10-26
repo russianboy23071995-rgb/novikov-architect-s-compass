@@ -75,6 +75,8 @@ type TopToolbarProps = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  /** Older undo steps were dropped to stay within the history memory budget. */
+  historyTrimmed?: boolean;
   onLayers: () => void;
   canUndoVisibility: boolean;
   canRedoVisibility: boolean;
@@ -88,8 +90,11 @@ function IconControl({
   onClick,
   active,
   disabled,
+  hint,
 }: {
   label: string;
+  /** Second tooltip line, e.g. why a control behaves differently. */
+  hint?: string;
   children: React.ReactNode;
   onClick?: () => void;
   active?: boolean;
@@ -113,7 +118,10 @@ function IconControl({
           {children}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        {label}
+        {hint && <div className="text-[10px] opacity-80">{hint}</div>}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -244,7 +252,12 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Messen" onClick={props.onMeasure} active={props.measuring}>
             <Ruler className="size-4" />
           </IconControl>
-          <IconControl label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
+          <IconControl
+            label="Undo"
+            onClick={props.onUndo}
+            disabled={!props.canUndo}
+            {...(props.historyTrimmed ? { hint: "Verlauf gekürzt (Speichergrenze)" } : {})}
+          >
             <Undo2 />
           </IconControl>
           <IconControl label="Redo" onClick={props.onRedo} disabled={!props.canRedo}>

@@ -12,8 +12,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { previewHatch } from "./actions.ts";
 import { pickupToolDefaults } from "../tools/pickup.ts";

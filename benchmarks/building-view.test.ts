@@ -5,7 +5,8 @@ import {
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildingViewFixture } from "./building-view-fixture.ts";
-import { buildBuildingSolid, buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
 import { workingStoreyElevation } from "../src/domain/storeys/elevation.ts";
 import { validateProject } from "../src/domain/project/schema.ts";

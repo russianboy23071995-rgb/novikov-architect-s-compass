@@ -6,7 +6,12 @@ import { prepareChainMove } from "./prepared-chain-move.ts";
 import { fullSelectionMove as oracle } from "./selection-move-oracle.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { connectedWallSolids } from "../src/domain/elements/wall/connections.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 // The legacy oracle explicitly inserts optional lines:undefined; normalize file-equivalent shape.
 const fullSelectionMove: typeof oracle = (...args) => JSON.parse(JSON.stringify(oracle(...args)));
 

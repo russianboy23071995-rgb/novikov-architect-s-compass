@@ -181,8 +181,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { projectDirection } from "../../geometry/projections/direction.ts";
 import { advanceHoverReference, emptyHoverReference } from "../inference/hover-reference.ts";

@@ -6,8 +6,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history";
+} from "../src/application/history/project-history";
+import { readProjectFile } from "../src/lib/bim/history";
 import { serializeProject } from "../src/lib/bim/model";
 import { updateLine } from "../src/application/lines/actions.ts";
 import { validateProject } from "../src/domain/project/schema.ts";

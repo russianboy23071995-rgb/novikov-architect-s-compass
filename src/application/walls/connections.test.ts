@@ -9,7 +9,12 @@ import { createProject } from "../projects/create.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "./actions.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";

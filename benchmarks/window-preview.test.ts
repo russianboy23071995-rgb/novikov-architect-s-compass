@@ -19,7 +19,7 @@ import {
   createEditingState,
   editingReducer,
 } from "../src/application/direct-edit/controller.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

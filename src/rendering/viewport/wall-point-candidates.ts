@@ -6,7 +6,7 @@ import { visibleSurfaces } from "./layer-display.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
 import type { LayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "./building-solid.ts";
 import { getLocalSnapSources } from "../../application/snapping/local-sources.ts";
 import { collectSnapCandidates } from "../../constraints/snapping/candidates.ts";
 import { compareSnapCandidates } from "../../constraints/snapping/ranking.ts";

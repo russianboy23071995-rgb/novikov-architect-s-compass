@@ -2,7 +2,7 @@ import { buildingDoorFixture, buildingViewFixture } from "./building-view-fixtur
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { fullSelectionMove } from "./selection-move-oracle.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";

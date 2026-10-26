@@ -11,8 +11,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { changeLayerVisibility, emptyVisibilityHistory } from "../layers/visibility-actions.ts";
 import { visibleLayerTarget, isLayerVisible } from "../layers/visibility.ts";
 import { createVisibleToolSourceQuery } from "../tools/snapping.ts";

@@ -6,13 +6,9 @@ import { serializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "../walls/actions.ts";
-import {
-  readProjectFile,
-  createHistory,
-  commitProject,
-  undoProject,
-} from "../../lib/bim/history.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { ELEMENT_KINDS, storeyElements } from "../../domain/elements/registry.ts";
 import { addDoor, updateDoor } from "./actions.ts";

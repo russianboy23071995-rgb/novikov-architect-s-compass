@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { createDrawing } from "../drawing/actions.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import { pickupToolDefaults } from "./pickup.ts";
 import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
 import { rectangleContour, prepareHatchBoundaries } from "../hatches/construction.ts";

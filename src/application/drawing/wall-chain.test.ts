@@ -4,7 +4,12 @@ import assert from "node:assert/strict";
 import { beginWallChain, appendWallChain, finishWallChain } from "./wall-chain.ts";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { drawingInteraction } from "../tools/adapters.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";

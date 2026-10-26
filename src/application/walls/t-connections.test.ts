@@ -22,7 +22,12 @@ import { validateProject } from "../../domain/project/schema.ts";
 import { addWall, updateWall } from "./actions.ts";
 import { previewTConnection, commitTConnection } from "./t-connections.ts";
 import { moveElement, moveWindowAlongWall } from "../direct-edit/transforms.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import {
   connectedWallContours,
   connectedWallSolids,

@@ -1,3 +1,4 @@
+import { releasedDerivedCount } from "../src/domain/project/derived-cache.ts";
 import { createRoot } from "react-dom/client";
 import { CadWorkspace } from "../src/components/cad/CadWorkspace";
 import { serializeProject } from "../src/lib/bim/model";
@@ -485,13 +486,16 @@ async function phaseOne() {
 
   // Long session: 50 alternating wall edits, heap sampled each round.
   const session: number[] = [],
-    sessionHeap: (number | null)[] = [];
+    sessionHeap: (number | null)[] = [],
+    sessionReleased: number[] = [];
   for (let i = 0; i < 50; i++) {
     await select("wall", targets.wall);
     const r0 = results.length;
+    const released = releasedDerivedCount();
     await command(`Dauerlauf ${i + 1}`, `Wandlänge auf ${targets.lengths[(i + 1) % 2]}`);
     session.push(results.slice(r0).reduce((n, r) => n + r.ms, 0));
     sessionHeap.push(heapMB());
+    sessionReleased.push(releasedDerivedCount() - released);
     results.splice(r0 - 1);
   }
 
@@ -513,6 +517,8 @@ async function phaseOne() {
     redo: stats(redo),
     session: stats(session),
     sessionHeap,
+    // Derived entries the history dropped per edit (one per cache built for the former present).
+    sessionReleased,
     heapAfterIdle,
     errors: [...errors],
   };
@@ -580,3 +586,5 @@ async function phaseTwo() {
 });
 if (sessionStorage.getItem(`${RESULT_KEY}-reload`)) void phaseTwo();
 else if (params.get("run") === "1") void phaseOne();
+// Diagnostic: entries the undo history dropped so far (docs/performance/HISTORY_MEMORY.md).
+(window as unknown as { derivedReleased: () => number }).derivedReleased = releasedDerivedCount;

@@ -1,6 +1,6 @@
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { createSolidBufferCache } from "../src/rendering/viewport/solid-buffer.ts";

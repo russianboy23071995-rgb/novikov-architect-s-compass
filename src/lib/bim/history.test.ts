@@ -7,10 +7,9 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
   HISTORY_LIMIT,
-  PROJECT_FILE_LIMIT,
-} from "./history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile, PROJECT_FILE_LIMIT } from "./history.ts";
 import { serializeProject } from "./model.ts";
 import { addWindow } from "../../application/windows/actions.ts";
 import { createProject } from "../../application/projects/create.ts";

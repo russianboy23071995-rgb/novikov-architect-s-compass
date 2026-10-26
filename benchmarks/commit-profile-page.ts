@@ -8,7 +8,7 @@ import {
   commitProject,
   HISTORY_LIMIT,
   type ProjectHistory,
-} from "../src/lib/bim/history";
+} from "../src/application/history/project-history";
 import { assertProjectFileSize } from "../src/interop/project-file/size";
 import type { Project } from "../src/domain/project/schema.ts";
 // Retained pre-K05b JSON baseline; checked against the public function on every sample.

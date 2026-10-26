@@ -6,14 +6,15 @@ import { fullSelectionMove } from "./selection-move-oracle.ts";
 import { createProject } from "../src/application/projects/create.ts";
 import { addWindow } from "../src/application/windows/actions.ts";
 import { addWall, updateWall } from "../src/application/walls/actions.ts";
-import { createHistory, undoProject } from "../src/lib/bim/history.ts";
+import { createHistory, undoProject } from "../src/application/history/project-history.ts";
 import { previewTConnection } from "../src/application/walls/t-connections.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";
 import { addDoor } from "../src/application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../src/domain/elements/door/model.ts";
 import { sameProjectContent } from "../src/domain/project/model-equality.ts";
-import { buildBuildingSolid, buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

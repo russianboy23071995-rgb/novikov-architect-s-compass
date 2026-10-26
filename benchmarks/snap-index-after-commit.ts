@@ -5,7 +5,7 @@ import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { legacySnapPrimitives } from "./legacy-snap-primitives.ts";
 import { createLocalSnapSources } from "../src/application/snapping/local-sources.ts";
 import { createPrimitiveSourceIndex } from "../src/constraints/snapping/local-source-index.ts";
-import { createHistory, commitProject } from "../src/lib/bim/history.ts";
+import { createHistory, commitProject } from "../src/application/history/project-history.ts";
 import { updateLine } from "../src/application/lines/actions.ts";
 import { type Project } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";

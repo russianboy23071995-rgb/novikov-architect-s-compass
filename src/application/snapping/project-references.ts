@@ -8,10 +8,12 @@ import type { Point2 } from "../../geometry/primitives/point.ts";
 import { segmentMidpoint } from "../../geometry/primitives/segment.ts";
 import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 
-// Project snapshots are immutable. Weak keys do not retain discarded projects/history.
+// Project snapshots are immutable. Weak keys release discarded projects; the undo history
+// drops the entries of the steps it keeps (domain/project/derived-cache.ts).
 // Keep tool filtering and temporary construction origins out of this model-only cache.
-const referenceCache = new WeakMap<Project, readonly SnapReference[]>();
+const referenceCache = createDerivedCache<Project, readonly SnapReference[]>();
 /** Interpret only the wall endpoint features emitted below; midpoints are not editable grips. */
 export function wallEndpointIndex(feature: string): 0 | 1 | null {
   if (["axis-start", "corner-0--1", "corner-0-1"].includes(feature)) return 0;
