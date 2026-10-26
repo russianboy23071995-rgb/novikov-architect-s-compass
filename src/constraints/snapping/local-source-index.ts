@@ -8,7 +8,7 @@ type LocalPrimitives = {
 
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { SnapReference } from "./engine.ts";
-import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
+import { createBoxIndex, type Box2 } from "../../geometry/spatial/box-index.ts";
 import { segmentMayMeetBox } from "../../geometry/intersections/segment-box.ts";
 import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
 import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
@@ -61,7 +61,24 @@ export function createPrimitiveSourceIndex(
       })),
     ),
   );
+  // Extent of every point and segment, so a combined index can skip this part entirely.
+  const bounds = measure("bounds", () => {
+    const box = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+    const add = (p: Point2) => {
+      box.minX = Math.min(box.minX, p.x);
+      box.maxX = Math.max(box.maxX, p.x);
+      box.minY = Math.min(box.minY, p.y);
+      box.maxY = Math.max(box.maxY, p.y);
+    };
+    for (const r of references) add(r.point);
+    for (const s of segments) {
+      add(s.start);
+      add(s.end);
+    }
+    return references.length || segments.length ? Object.freeze(box) : null;
+  });
   return Object.freeze({
+    bounds: bounds as Readonly<Box2> | null,
     query(
       cursor: Point2,
       scale: number | ScreenMetric,
@@ -117,6 +134,67 @@ export function createPrimitiveSourceIndex(
     },
   });
 }
+type SourceIndex = ReturnType<typeof createPrimitiveSourceIndex>;
+const overlaps = (a: Readonly<Box2>, b: Readonly<Box2>) =>
+  a.minX <= b.maxX && b.minX <= a.maxX && a.minY <= b.maxY && b.minY <= a.maxY;
+
+/** One index over consecutive parts, each indexed on its own (docs/performance/EDIT_CYCLE.md,
+ * Teil B). An edit rebuilds only the parts it changed; queries return the same references and
+ * segments in the same order as one index over the concatenated input, and a lookup of a key
+ * present more than once returns its last occurrence, as one Map would.
+ */
+export function combineSourceIndexes(parts: readonly SourceIndex[]) {
+  const allSegments = Object.freeze(parts.flatMap((p) => p.allSegments));
+  return Object.freeze({
+    query(
+      cursor: Point2,
+      scale: number | ScreenMetric,
+      radius: number,
+      allowed: (source: SnapReference) => boolean = () => true,
+    ) {
+      return completeLocalQuery(this.queryPrimitives(cursor, scale, radius, allowed));
+    },
+    allSegments,
+    sourceCount: parts.reduce((n, p) => n + p.sourceCount, 0),
+    segmentCount: allSegments.length,
+    lookup(key: string) {
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const found = parts[i]!.lookup(key);
+        if (found) return found;
+      }
+      return undefined;
+    },
+    queryPrimitives(
+      cursor: Point2,
+      pixelsPerMetre: number | ScreenMetric,
+      radiusPx: number,
+      allowed: (source: SnapReference) => boolean = () => true,
+    ): LocalPrimitives {
+      if (![cursor.x, cursor.y, radiusPx].every(Number.isFinite) || radiusPx < 0)
+        throw new Error("Invalid local snap query");
+      const metric =
+        typeof pixelsPerMetre === "number"
+          ? createIsotropicScreenMetric(pixelsPerMetre)
+          : pixelsPerMetre;
+      const box = metric.queryBounds(cursor, radiusPx, MAX_MODEL_TOLERANCE_METRES);
+      const references: SnapReference[] = [],
+        segments: SnapSegment[] = [];
+      for (const part of parts) {
+        if (!part.bounds || !overlaps(part.bounds, box)) continue;
+        const local = part.queryPrimitives(cursor, metric, radiusPx, allowed);
+        references.push(...local.references);
+        segments.push(...local.segments);
+      }
+      return {
+        references,
+        near: (r: SnapReference) => metric.distance(r.point, cursor) <= radiusPx,
+        segments,
+        segmentPairs: (segments.length * Math.max(0, segments.length - 1)) / 2,
+      };
+    },
+  });
+}
+
 export function completeLocalQuery(local: LocalPrimitives, paused = false) {
   return {
     references: [
