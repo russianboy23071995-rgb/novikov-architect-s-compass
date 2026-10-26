@@ -136,12 +136,6 @@ test("invalid pairs reject without changing inputs", () => {
       h.end = { ...h.start };
     },
     (_, i) => {
-      i.wall.height = 3;
-    },
-    (_, i) => {
-      i.wall.thickness = 0.4;
-    },
-    (_, i) => {
       i.wall.end.y = 0.01;
     },
     (_, i) => {

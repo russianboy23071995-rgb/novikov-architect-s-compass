@@ -17,7 +17,8 @@ test("basement signed offsets and mixed join conflicts remain atomic through fil
   const base = fullHeightFixture();
   const change = (p: typeof base, storeyId: string, height: number) =>
     setStoreyHeight(p, p, { projectId: p.id, storeyId, height });
-  assert.throws(() => change(base, "og", 4), /Eckanschluss/);
+  // Joined walls may differ in height since 26.10.2026 (butt corner, docs/WALL_JUNCTIONS.md).
+  assert.doesNotThrow(() => change(base, "og", 4));
   assert.throws(() => change(base, "eg", 2), /Window/);
   const eg = change(base, "eg", 4);
   const next = change(eg, "kg", 3.5);
