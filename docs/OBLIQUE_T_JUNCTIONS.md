@@ -62,4 +62,12 @@ Folgeauftrag mit Nutzerfreigabe („go und freigabe“): Die Regel „Ecke und T
 ## Grenzen
 
 - Eine Zeichenkette endet an einem automatischen T wie an einem T-Fang („Wandkette am T-Anschluss abschließen“).
-- Browserabnahme des Zeichnens steht aus.
+- In der Praxis greift nahe einer Achse meist der T-Fang (Cursor-Fußpunkt) vor Wandmitte und Raster; der automatische Weg wirkt vor allem bei eingetippten Endpunkten und beim Ziehen.
+
+## Browserabnahme (26.10.2026, Dev-Server, Hauptwand 10 m, Standardwand 36 cm Außen)
+
+- 15°: Start auf der Achse nahe Wandmitte, Winkel 15° und Länge 4 m eingetippt → T (Wandanfang), Ecke mit einseitigem Wandkörper wird bis zur Hauptwandfläche verlängert.
+- 5°: Start auf der Achse, 355° und 10 m eingetippt → T auf der Unterseite. Gegenproben in der Vorschau: 5° nach links über den 15°-Kontakt → „T-Anschlüsse auf derselben Wandseite dürfen sich nicht überschneiden“; 5° mit 6 m → „Ankommende Wand für den T-Anschluss zu kurz“ (die Wand wäre fast ganz in der Hauptwand).
+- Eingetippt ohne T-Fang: Start (2|3), 270° und 3 m → Ende genau (2|0) auf der Achse → automatischer T (Wandende).
+- Ziehen: freies Wandende (3,5|1,5) über „Punkt frei bewegen“ auf die Achse → Vorschau bündig an der Hauptwandfläche, nach Klick T; ein Rückgängig-Schritt entfernt Verschiebung und T.
+- Nachweis jeweils über den gespeicherten Stand (wallTJunctions) im Browserspeicher.
