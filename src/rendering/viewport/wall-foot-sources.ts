@@ -1,5 +1,5 @@
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { workingStoreySolid } from "./building-solid.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createPrimitiveSourceIndex } from "../../constraints/snapping/local-source-index.ts";
@@ -15,7 +15,7 @@ const cache = createDerivedCache<Project, ReturnType<typeof createPrimitiveSourc
 export function getWallFootSources(project: Project) {
   const cached = cache.get(project);
   if (cached) return cached;
-  const solid = buildSolid(project);
+  const solid = workingStoreySolid(project);
   const elevation = workingStoreyElevation(project);
   const grouped = new Map<string, typeof solid.faces>();
   for (const face of solid.faces) {

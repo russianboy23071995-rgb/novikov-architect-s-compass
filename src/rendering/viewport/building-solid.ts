@@ -4,6 +4,7 @@ import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { buildPreviewSolid, type Solid, type Vec3 } from "../../lib/bim/geometry.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
 
 // Moved from lib/bim/geometry.ts (25.10.2026); the per-storey extrusion stays there for now.
 type BuildingEntry = { project: Project; result: Solid };
@@ -49,6 +50,15 @@ function storeyPart(project: Project, storey: Project["storeys"][number], owned:
   if (storeyParts.size >= STOREY_PART_LIMIT) storeyParts.clear();
   storeyParts.set(storey.id, { storey, elevation, assets: project.assets, solid });
   return solid;
+}
+
+/** The working storey solid; for owned snapshots the same part as in the building scene, so
+ * tools deriving from it do not extrude the storey a second time (docs/performance/RECOVERY_STATUS.md).
+ */
+export function workingStoreySolid(input: Project): Solid {
+  const owned = isOwnedProjectSnapshot(input);
+  const project = owned ? input : validateProject(input);
+  return storeyPart(project, storeyOf(project), owned);
 }
 
 /** One derived building scene. Storeys remain authoritative; working selection is not a filter. */

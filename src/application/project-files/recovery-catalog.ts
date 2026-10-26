@@ -15,6 +15,7 @@ import {
   type Snapshot,
   type RecordData,
 } from "./recovery.ts";
+import { ownRecoveryCommit } from "./own-commits.ts";
 
 export type RecoverySummary = { projectId: string; savedAt: string };
 /** Counts the loaded recovery candidate, independent of active storey and visibility.
@@ -101,9 +102,25 @@ export async function listRecoveryProjects(catalog: RecoveryCatalog) {
   if (migrationWarning) result.warnings.push(migrationWarning);
   return result;
 }
-export async function readProjectRecovery(catalog: RecoveryCatalog, id: string) {
+/** `trustOwnCommit`: the status display only; a record this session wrote itself (same
+ * revision) is confirmed without decoding and hashing its images. Restores never pass it.
+ */
+export async function readProjectRecovery(
+  catalog: RecoveryCatalog,
+  id: string,
+  options: { trustOwnCommit?: boolean } = {},
+) {
   if (catalog.v2) {
     const source = await catalog.v2.project(id).read();
+    const own = options.trustOwnCommit ? ownRecoveryCommit(id, source.record) : undefined;
+    if (own)
+      return {
+        project: own.project,
+        savedAt: own.savedAt,
+        fallback: false,
+        revision: own.revision,
+        name: "Lokaler Wiederherstellungsstand",
+      };
     if (source.record !== null)
       return {
         ...(await restoreRecoveryV2(source.record, id, catalog.v2.codec)),

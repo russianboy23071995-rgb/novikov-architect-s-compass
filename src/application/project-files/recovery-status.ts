@@ -95,7 +95,8 @@ export function createRecoveryStatusTracker(
     failure = undefined;
     publish();
     try {
-      const result = await readProjectRecovery(catalog, id);
+      // Confirm an own save by its revision; anything else is read back and verified in full.
+      const result = await readProjectRecovery(catalog, id, { trustOwnCommit: true });
       if (disposed || request !== generation) return;
       baseline = result;
       compare = result ? createRecoveryContentComparator(result.project) : undefined;
