@@ -277,7 +277,12 @@ test("T start validates both sides, rejects oblique and stale targets without mu
     storeyOf(appendWallChain(chain, base, "upper", { x: 2.4, y: 2 }).preview).wallTJunctions.length,
     1,
   );
-  assert.throws(() => appendWallChain(chain, base, "oblique", { x: 4, y: 2 }));
+  // An oblique start T is allowed (about 51°); one flatter than 15° is rejected.
+  assert.equal(
+    storeyOf(appendWallChain(chain, base, "oblique", { x: 4, y: 2 }).preview).wallTJunctions.length,
+    1,
+  );
+  assert.throws(() => appendWallChain(chain, base, "flat", { x: 14, y: 2 }), /15°/);
   assert.equal(chain.preview, base);
   assert.throws(() => beginWallChain(base, { x: 1, y: 1 }, snap.candidate));
   assert.throws(() =>
@@ -337,7 +342,9 @@ test("start T preview validates numeric directions and preserves the accepted se
   const chain = beginWallChain(base, snap.point, snap.candidate);
   const preview = previewWallChain(chain, base, { x: 2, y: 2 });
   assert.equal(storeyOf(preview).wallTJunctions[0]!.incoming.endpoint, 0);
-  assert.throws(() => previewWallChain(chain, base, { x: 3, y: 2 }));
+  // About 63° is an oblique T now; about 10° stays rejected.
+  assert.equal(storeyOf(previewWallChain(chain, base, { x: 3, y: 2 })).wallTJunctions.length, 1);
+  assert.throws(() => previewWallChain(chain, base, { x: 13.34, y: 2 }), /15°/);
   assert.equal(chain.preview, base);
   const accepted = appendWallChain(chain, base, "new", { x: 2, y: 2 });
   // The T-started wall may continue into a corner (26.10.2026).
