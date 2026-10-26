@@ -2,6 +2,7 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength, type Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { updateWall } from "./actions.ts";
+import { commandFailure } from "../commands/failure.ts";
 
 const units = { m: 1, cm: 100, mm: 1000 } as const;
 const labels = { wandlänge: "Wandlänge", wandhöhe: "Wandhöhe", wandstärke: "Wandstärke" } as const;
@@ -49,10 +50,8 @@ export function previewWallCommand(
           ? { height: value }
           : { thickness: value };
     result = updateWall(project, wall.id, changes);
-  } catch {
-    throw new Error(
-      "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen.",
-    );
+  } catch (error) {
+    throw commandFailure(error);
   }
   const format = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 6 });
   return {
