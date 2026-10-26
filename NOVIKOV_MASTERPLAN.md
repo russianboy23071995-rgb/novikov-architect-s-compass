@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 26.10.2026, main `4ad7396` nach PR467. In main integriert: PR447–PR467 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466) und 3D/Autosicherung nach einer Bearbeitung (PR467). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 26.10.2026, main `2c77fdf` nach PR468. In main integriert: PR447–PR468 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466), 3D/Autosicherung nach einer Bearbeitung (PR467) und schräge T-Anschlüsse (PR468). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-26.10.2026: Branch feat/oblique-t-junctions (von main 78eb5b3). Schräge T-Anschlüsse: Mindestwinkel 15° statt rechter Winkel; der Fang an der Wandachse bietet beim Zeichnen den schrägen Fußpunkt an, nahe dem Lot gewinnt weiter der rechte Winkel. Tests 90°–15° mit Gegenproben; alle bisherigen Modelle unverändert gegen main; 1277 Tests. Schräge Ecke an einer T-Hauptwand offen. Nachweis docs/OBLIQUE_T_JUNCTIONS.md.
+26.10.2026: Branch feat/oblique-t-junctions (von main 78eb5b3; mit PR468 am 26.10.2026 in main 2c77fdf integriert). Schräge T-Anschlüsse: Mindestwinkel 15° statt rechter Winkel; der Fang an der Wandachse bietet beim Zeichnen den schrägen Fußpunkt an, nahe dem Lot gewinnt weiter der rechte Winkel. Tests 90°–15° mit Gegenproben; alle bisherigen Modelle unverändert gegen main; 1277 Tests. Schräge Ecke an einer T-Hauptwand offen. Nachweis docs/OBLIQUE_T_JUNCTIONS.md.
 
 26.10.2026: Branch perf/recovery-status-after-save (von main 97bfcd1; mit PR467 am 26.10.2026 in main 4ad7396 integriert). 3D und Autosicherung nach einer Bearbeitung: Statusanzeige bestätigt eine eigene Sicherung über ihre Revision statt alle Bilder zurückzulesen und zu hashen (Node, l mit 21 MB Bildern: 327 → ≈ 0 ms je Sicherung); Wandfuß-Fangquellen nutzen den Geschossteil der 3D-Szene statt zweiter Prüfung und Extrusion. Türziehen in 3D gemessen: ≈ 17 ms je Mausbewegung, keine Korrektur nötig. Picking-Index je Geschoss offen; Browser-Vergleich ausstehend (Fenster verdeckt). 1270 Tests. Nachweis docs/performance/RECOVERY_STATUS.md.
 

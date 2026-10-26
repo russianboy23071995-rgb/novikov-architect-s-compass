@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 26.10.2026, main `4ad7396` nach PR467. PR447–PR467 (mit PR453; PR462 über PR463) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich 3D/Autosicherung nach einer Bearbeitung sind damit integriert. PR318 geschlossen (überholt durch PR371). Keine offenen PRs; einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 26.10.2026, main `2c77fdf` nach PR468. PR447–PR468 (mit PR453; PR462 über PR463) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich schräge T-Anschlüsse sind damit integriert. PR318 geschlossen (überholt durch PR371). Keine offenen PRs; einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
