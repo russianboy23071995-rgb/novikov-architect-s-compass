@@ -24,7 +24,7 @@ export const recoveryChecks: {
   start: number;
   ms: number;
   ok: boolean;
-  stack?: string;
+  stack?: string | undefined;
 }[] = [];
 (globalThis as { recoveryChecks?: typeof recoveryChecks }).recoveryChecks = recoveryChecks;
 export async function recoveryCheck<T>(caller: string, action: () => Promise<T>): Promise<T> {
