@@ -7,6 +7,8 @@ import {
   type RecoverySnapshotV2,
   type RecoveryRecordV2,
 } from "./recovery-v2.ts";
+import { rememberOwnRecoveryCommit } from "./own-commits.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 
 /** One session owns its expected revision. Only a completed commit advances it. */
 export async function prepareRecoveryV2Writer(
@@ -60,6 +62,12 @@ export async function prepareRecoveryV2Writer(
         revision = next.revision;
         previous = next.current;
         project = candidate;
+        // An owned input keeps its identity, so the status display compares without re-validating.
+        rememberOwnRecoveryCommit(projectId, {
+          revision: next.revision,
+          savedAt,
+          project: isOwnedProjectSnapshot(input) ? input : candidate,
+        });
         return { savedAt, revision };
       } finally {
         busy = false;
