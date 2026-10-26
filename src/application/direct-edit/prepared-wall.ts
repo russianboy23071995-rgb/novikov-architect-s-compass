@@ -2,7 +2,7 @@ import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { editAtPointerSnapshot, type EditSession } from "../../lib/bim/direct-edit.ts";
-import { connectSnappedT } from "../walls/t-axis-snap.ts";
+import { automaticTHost, connectSnappedT, tAxisEndpoint } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
@@ -57,15 +57,23 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
     },
     evaluate(current, selection, point, candidate) {
       assertContext(current, selection);
-      // New snapped relations may reach beyond the prepared dependency component.
-      if (candidate?.sourceFeature === "t-axis") {
+      // New snapped or automatic (exact axis contact) relations may reach beyond the prepared
+      // dependency component.
+      const snapped = candidate?.sourceFeature === "t-axis" ? candidate : null;
+      const host = snapped
+        ? (snapped.sourceEntityId ?? null)
+        : tAxisEndpoint(session)
+          ? automaticTHost(s.walls, wall.id, point, session.index === 0 ? wall.end : wall.start)
+          : null;
+      if (snapped || host) {
+        const snap = snapped?.worldPoint ?? point;
         if (
           lastT &&
-          lastT.host === candidate.sourceEntityId &&
+          lastT.host === host &&
           lastT.x === point.x &&
           lastT.y === point.y &&
-          lastT.snapX === candidate.worldPoint.x &&
-          lastT.snapY === candidate.worldPoint.y
+          lastT.snapX === snap.x &&
+          lastT.snapY === snap.y
         )
           return lastT.patch;
         // A failed/changed target must not retain an older successful result.
@@ -76,11 +84,11 @@ export function prepareWallEndpointPreview(session: EditSession): PreparedDirect
         // result or freeze their own project to acquire validation provenance.
         const patch = wallTransitionPatch(base, createProjectSnapshot(next), wall.id);
         lastT = {
-          host: candidate.sourceEntityId,
+          host,
           x: point.x,
           y: point.y,
-          snapX: candidate.worldPoint.x,
-          snapY: candidate.worldPoint.y,
+          snapX: snap.x,
+          snapY: snap.y,
           patch,
         };
         return patch;

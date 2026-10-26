@@ -183,12 +183,13 @@ test("drawing T snap creates a persisted relation with one atomic undo and IFC",
   assert.deepEqual(redoProject(undoProject(history)).present, p);
 });
 
-test("drawing numeric coordinates alone do not create a T; stale intent is rejected atomically", () => {
+test("numeric coordinates exactly on the axis create a T automatically; stale intent is rejected atomically", () => {
   const { base, chain, adapter, context } = tDrawing();
   const snap = adapter.snapping.resolve({ x: 3, y: 0 }, context);
+  // Like corners, an exact axis contact connects without the T snap (26.10.2026).
   assert.equal(
     storeyOf(appendWallChain(chain, base, "plain", snap.point).preview).wallTJunctions.length,
-    0,
+    1,
   );
   assert.throws(
     () => appendWallChain(chain, base, "bad", { x: 3, y: 1 }, snap.candidate),
@@ -277,12 +278,15 @@ test("T start validates both sides, rejects oblique and stale targets without mu
     storeyOf(appendWallChain(chain, base, "upper", { x: 2.4, y: 2 }).preview).wallTJunctions.length,
     1,
   );
-  // An oblique start T is allowed (about 51°); one flatter than 15° is rejected.
+  // An oblique start T is allowed (about 51°), a very acute one as well (26.10.2026).
   assert.equal(
     storeyOf(appendWallChain(chain, base, "oblique", { x: 4, y: 2 }).preview).wallTJunctions.length,
     1,
   );
-  assert.throws(() => appendWallChain(chain, base, "flat", { x: 14, y: 2 }), /15°/);
+  assert.equal(
+    storeyOf(appendWallChain(chain, base, "flat", { x: 14, y: 2 }).preview).wallTJunctions.length,
+    1,
+  );
   assert.equal(chain.preview, base);
   assert.throws(() => beginWallChain(base, { x: 1, y: 1 }, snap.candidate));
   assert.throws(() =>
@@ -292,7 +296,7 @@ test("T start validates both sides, rejects oblique and stale targets without mu
     storeyOf(
       appendWallChain(beginWallChain(base, snap.point), base, "plain", { x: 2.4, y: 2 }).preview,
     ).wallTJunctions.length,
-    0,
+    1,
   );
 });
 
@@ -333,7 +337,7 @@ test("wall body preview and placement produce identical T geometry without chang
   assert.equal(chain.wallIds.length, 0);
   assert.throws(() => adapter.previewProject!({ x: 4, y: 1 }, snap.candidate));
   assert.throws(() => adapter.validate({ x: 4, y: 1 }, snap.candidate));
-  assert.equal(storeyOf(adapter.previewProject!(snap.point, null)).wallTJunctions.length, 0);
+  assert.equal(storeyOf(adapter.previewProject!(snap.point, null)).wallTJunctions.length, 1);
 });
 
 test("start T preview validates numeric directions and preserves the accepted segment on rejection", () => {
@@ -342,9 +346,12 @@ test("start T preview validates numeric directions and preserves the accepted se
   const chain = beginWallChain(base, snap.point, snap.candidate);
   const preview = previewWallChain(chain, base, { x: 2, y: 2 });
   assert.equal(storeyOf(preview).wallTJunctions[0]!.incoming.endpoint, 0);
-  // About 63° is an oblique T now; about 10° stays rejected.
+  // About 63° and about 10° are oblique Ts (26.10.2026).
   assert.equal(storeyOf(previewWallChain(chain, base, { x: 3, y: 2 })).wallTJunctions.length, 1);
-  assert.throws(() => previewWallChain(chain, base, { x: 13.34, y: 2 }), /15°/);
+  assert.equal(
+    storeyOf(previewWallChain(chain, base, { x: 13.34, y: 2 })).wallTJunctions.length,
+    1,
+  );
   assert.equal(chain.preview, base);
   const accepted = appendWallChain(chain, base, "new", { x: 2, y: 2 });
   // The T-started wall may continue into a corner (26.10.2026).

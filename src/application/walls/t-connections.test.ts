@@ -406,12 +406,12 @@ test("ambiguous local hosts never choose by list order; reference selection disa
   assert.equal(result.candidate?.sourceFeature, "t-axis");
 });
 
-test("plain numeric target never discovers a T; invalid or stale snapped commit leaves model unchanged", () => {
+test("plain numeric target exactly on the axis connects automatically; invalid or stale snapped commit leaves model unchanged", () => {
   const a = aiming();
   const result = resolveToolSnap(a.adapter.snapping, { x: 3, y: 0 }, a.context, snapOptions);
   assert.equal(
     storeyOf(previewEdit(a.session, a.session.base, a.target, result.point)).wallTJunctions.length,
-    0,
+    1,
   );
   const changed = updateWall(a.session.base, "host", { height: 3 });
   assert.throws(() => previewEdit(a.session, changed, a.target, result.point, result.candidate));

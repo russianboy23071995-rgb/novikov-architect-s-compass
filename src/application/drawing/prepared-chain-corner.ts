@@ -2,6 +2,7 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 /** Owned prepared scope for the second free right-angle segment. */
 import { validateProject, type Point } from "../../domain/project/schema.ts";
 import { appendWallChain, type WallChain } from "./wall-chain-actions.ts";
+import { automaticTHost } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 function freeze<T>(v: T): T {
@@ -78,7 +79,8 @@ export function prepareChainCorner(source: WallChain, id: string) {
         !right ||
         candidate ||
         ids.has(id.trim()) ||
-        foreign.some((p) => pointsCompatible(p, b!) || pointsCompatible(p, point))
+        foreign.some((p) => pointsCompatible(p, b!) || pointsCompatible(p, point)) ||
+        automaticTHost(s.walls, id, point, b!)
       )
         return { path: "full" as const, project: full(point, candidate) };
       const next = appendWallChain(localChain, local, id, point).preview;

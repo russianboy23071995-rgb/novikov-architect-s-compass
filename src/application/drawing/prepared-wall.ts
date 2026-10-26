@@ -3,7 +3,7 @@ import type { WallDefaults } from "../tools/pickup.ts";
 /** Owned prepared scope for the first free wall segment only. */
 import { validateProject, type Project, type Point } from "../../domain/project/schema.ts";
 import { createDrawing, defaultDrawingWall } from "./actions.ts";
-import { connectWallAtTAxis } from "../walls/t-axis-snap.ts";
+import { automaticTHost, connectWallAtTAxis } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 function freeze<T>(v: T): T {
@@ -66,7 +66,10 @@ export function prepareWallDrawing(
       if (
         candidate ||
         ids.has(id.trim()) ||
-        endpoints.some((p) => pointsCompatible(p, start) || pointsCompatible(p, point))
+        endpoints.some((p) => pointsCompatible(p, start) || pointsCompatible(p, point)) ||
+        // An end exactly on another wall's axis becomes an automatic T.
+        automaticTHost(s.walls, id, start, point) ||
+        automaticTHost(s.walls, id, point, start)
       )
         return { project: full(point, candidate), path: "full" };
       const added = storeyOf(

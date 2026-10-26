@@ -138,10 +138,7 @@ test("invalid pairs reject without changing inputs", () => {
     (_, i) => {
       i.wall.end.y = 0.01;
     },
-    // Oblique is allowed (26.10.2026) but not flatter than 15°: here about 10°.
-    (_, i) => {
-      i.wall.start.x = 3 - 3 / Math.tan((10 * Math.PI) / 180);
-    },
+    // Every oblique angle is allowed (26.10.2026); only parallel axes (next case) are rejected.
     (_, i) => {
       i.wall.start = { x: 1, y: 0 };
     },
