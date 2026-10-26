@@ -18,5 +18,5 @@ Im Schullauf l (dreiflügeliger Bau im Bild, etwa 8 Bildpunkte je Meter) traf �
 
 ## Grenzen
 
-- Browser-Schullauf l mit „Tür setzen“: siehe PR – der Browserbereich war beim Umsetzen ausgeblendet.
+- Browser-Schullauf l (nach dem Merge nachgeholt, 26.10.2026): alle 34 Schritte fehlerfrei, „Tür setzen“ trifft die 24-cm-Trennwand in 283 ms (vorher Zeitüberschreitung).
 - Auswahl, Löschen und andere Werkzeuge nutzen eigene Trefferwege und sind nicht Teil dieser Änderung.

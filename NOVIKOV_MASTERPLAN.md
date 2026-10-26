@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-26.10.2026: Branch fix/opening-hit-tolerance (von main e01e17f; mit PR466 am 26.10.2026 in main fba664d integriert; Browser-Schullauf l ausstehend, Browserbereich war ausgeblendet). Treffertoleranz beim Setzen von Türen und Fenstern: 8 Bildpunkte am aktuellen Maßstab, Vorrang für die Wand, deren Körper den Punkt enthält; Toleranz 0 unverändert. Tests mit Gegenprobe; 1266 Tests. Nachweis docs/OPENING_HIT_TOLERANCE.md.
+26.10.2026: Branch fix/opening-hit-tolerance (von main e01e17f; mit PR466 am 26.10.2026 in main fba664d integriert; Browser-Schullauf l danach 34/34 fehlerfrei, „Tür setzen“ 283 ms). Treffertoleranz beim Setzen von Türen und Fenstern: 8 Bildpunkte am aktuellen Maßstab, Vorrang für die Wand, deren Körper den Punkt enthält; Toleranz 0 unverändert. Tests mit Gegenprobe; 1266 Tests. Nachweis docs/OPENING_HIT_TOLERANCE.md.
 
 26.10.2026: Branch feat/wall-junctions (vom Stand PR464; mit PR465 am 26.10.2026 in main e9dcf7a integriert). Wandanschlüsse nach Änderungskarte: Wand-/Fensterbefehl nennen die echte Ursache; T und Ecke mit unterschiedlicher Wandstärke/Höhe (Ecke unterschiedlicher Höhe als Stumpfstoß, höhere Wand läuft durch); mehrere Anschlüsse je Wand (T an beiden Enden, T plus Ecke, Haupt- und Nebenwand zugleich; ein Anschluss je Wandende, keine gegenseitigen T). Gleichheit: alle bisher gültigen Modelle behalten Konturen und Wandkörper exakt; Schulmodell mit 24-cm-Trennwänden und 24 T-Anschlüssen je Geschoss, IFC 80 Wände/180 Öffnungen, Browserlauf s fehlerfrei; 1261 Tests. Schräge T-Anschlüsse, Mehrfachknoten und IFC-Anschlussbeziehungen offen. Nachweis docs/WALL_JUNCTIONS.md.
 

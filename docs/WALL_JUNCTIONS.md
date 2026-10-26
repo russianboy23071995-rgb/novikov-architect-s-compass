@@ -37,7 +37,7 @@ Die strenge rechtwinklige Ecke für die Einzel-/IFC-Abnahme (`deriveRightAngleCo
 
 ## Grenzen
 
-- **Befund Tür setzen bei kleinem Maßstab:** Im Schullauf l (ganzer dreiflügeliger Bau im Bild, etwa 0,12 m je Bildpunkt) trifft der Klick die 24-cm-Trennwand nicht; die Platzierung meldet „Zum Platzieren eine sichtbare Wand anfahren.“ Ursache: `findOpeningHost` verlangt, dass der Punkt im Wandkörper liegt (halbe Wandstärke), ohne Bildschirmtoleranz – eine 24-cm-Wand ist hier knapp 2 Bildpunkte breit. Mit 30 cm traf der Lauf vorher, bei s (größerer Maßstab) trifft er weiterhin. Keine Folge der Anschlussänderung, sondern eine bestehende Bedienlücke, die dünne Wände sichtbar machen (eigener kleiner Auftrag: Treffertoleranz in Bildpunkten).
+- **Befund Tür setzen bei kleinem Maßstab:** Im Schullauf l (ganzer dreiflügeliger Bau im Bild, etwa 0,12 m je Bildpunkt) trifft der Klick die 24-cm-Trennwand nicht; die Platzierung meldet „Zum Platzieren eine sichtbare Wand anfahren.“ Ursache: `findOpeningHost` verlangt, dass der Punkt im Wandkörper liegt (halbe Wandstärke), ohne Bildschirmtoleranz – eine 24-cm-Wand ist hier knapp 2 Bildpunkte breit. Mit 30 cm traf der Lauf vorher, bei s (größerer Maßstab) trifft er weiterhin. Keine Folge der Anschlussänderung, sondern eine bestehende Bedienlücke, die dünne Wände sichtbar machen (eigener kleiner Auftrag: Treffertoleranz in Bildpunkten – mit PR466 behoben, Schullauf l danach 34/34).
 
 - Schräge T-Anschlüsse, Mehrfachknoten und gemeinsames Ändern von Wandgruppen bleiben eigene Aufträge.
 - Der IFC-Export schreibt weiterhin keine Anschlussbeziehungen (IfcRelConnectsPathElements); die Wandkörper tragen die zugeschnittenen Konturen. Archicad-Abnahme der T-Anschlüsse steht weiterhin aus.
