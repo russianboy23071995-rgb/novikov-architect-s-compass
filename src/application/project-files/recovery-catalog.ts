@@ -1,5 +1,6 @@
 import {
   migrateRecoveryV1,
+  parseRecoveryV2,
   restoreRecoveryV2,
   type RecoveryV2Codec,
   type RecoveryV2Storage,
@@ -15,7 +16,7 @@ import {
   type Snapshot,
   type RecordData,
 } from "./recovery.ts";
-import { ownRecoveryCommit } from "./own-commits.ts";
+import { ownRecoveryCommit, rememberOwnRecoveryCommit } from "./own-commits.ts";
 
 export type RecoverySummary = { projectId: string; savedAt: string };
 /** Counts the loaded recovery candidate, independent of active storey and visibility.
@@ -117,15 +118,21 @@ export async function readProjectRecovery(
       return {
         project: own.project,
         savedAt: own.savedAt,
-        fallback: false,
+        fallback: own.fallback ?? false,
         revision: own.revision,
         name: "Lokaler Wiederherstellungsstand",
       };
-    if (source.record !== null)
-      return {
-        ...(await restoreRecoveryV2(source.record, id, catalog.v2.codec)),
-        name: "Lokaler Wiederherstellungsstand",
-      };
+    if (source.record !== null) {
+      const result = await restoreRecoveryV2(source.record, id, catalog.v2.codec);
+      // A revision verified in full once in this session counts as checked for the status
+      // display and the autosave writer (docs/performance/RECOVERY_CHECKS.md).
+      const record = parseRecoveryV2(source.record);
+      rememberOwnRecoveryCommit(id, {
+        ...result,
+        current: result.fallback ? record.previous! : record.current,
+      });
+      return { ...result, name: "Lokaler Wiederherstellungsstand" };
+    }
   }
   const storage = catalog.project(id);
   const raw = await storage.read();
