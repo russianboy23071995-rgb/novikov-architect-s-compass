@@ -115,7 +115,10 @@ test("mixed connections resize at fixed T anchor and detach only affected relati
   assert.equal(storeyOf(host).wallJoins.length, 0);
   assert.equal(storeyOf(host).wallTJunctions.length, 0);
   const snapshot = serializeProject(p);
-  assert.throws(() => updateWall(p, "E", { end: { x: 11, y: -17 } }));
+  // An oblique corner partner keeps both the corner and the T (26.10.2026).
+  const tilted = updateWall(p, "E", { end: { x: 11, y: -17 } });
+  assert.equal(storeyOf(tilted).wallJoins.length, 1);
+  assert.equal(storeyOf(tilted).wallTJunctions.length, 1);
   assert.equal(serializeProject(p), snapshot);
 });
 
@@ -167,7 +170,8 @@ test("T near inner miter and touching corner partner fail atomically; incoming c
   assert.deepEqual([ring[1], ring[2]], [tOnly[1], tOnly[2]]);
   assert.deepEqual([ring[0], ring[3]], [cornerOnly[0], cornerOnly[3]]);
   const oblique = updateWall(before, "E", { end: { x: 11, y: -17 } });
-  assert.throws(() => previewTConnection(oblique, oblique, request), /rechtwinklige Ecke/);
+  // A T on a host with an oblique corner is allowed (26.10.2026).
+  assert.equal(storeyOf(previewTConnection(oblique, oblique, request)).wallTJunctions.length, 1);
 });
 
 test("mixed plan outlines hide both contact seams, hidden partners restore host outline", () => {
