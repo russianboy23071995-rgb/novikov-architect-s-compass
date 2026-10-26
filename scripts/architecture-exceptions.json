@@ -132,8 +132,7 @@
       "edges": [
         "src/rendering/viewport/building-solid.ts -> src/lib/bim/geometry.ts",
         "src/rendering/viewport/layer-display.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/selection-move-preview.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/wall-foot-sources.ts -> src/lib/bim/geometry.ts"
+        "src/rendering/viewport/selection-move-preview.ts -> src/lib/bim/geometry.ts"
       ]
     },
     {
