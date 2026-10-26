@@ -30,6 +30,13 @@ function freezeBuilding(result: Solid): Solid {
 // changed (docs/performance/EDIT_CYCLE.md, Teil B). One entry per storey ID keeps it bounded;
 // steps held by the undo history do not keep their parts.
 const STOREY_PART_LIMIT = 64;
+// Faces of a reused part keep their identity; the picking index reuses its sub-tree per part
+// (docs/performance/PICKING_PER_STOREY.md). Weak: parts and faces leave with their scenes.
+const partOfFace = new WeakMap<object, Solid>();
+/** The storey part a building face belongs to, if it comes from an owned (reusable) part. */
+export function buildingFacePart(face: object): object | undefined {
+  return partOfFace.get(face);
+}
 const storeyParts = new Map<
   string,
   { storey: object; elevation: number; assets: object; solid: Solid }
@@ -46,6 +53,7 @@ function storeyPart(project: Project, storey: Project["storeys"][number], owned:
     Object.freeze(face.vertices);
     Object.freeze(face.normal);
     Object.freeze(face);
+    partOfFace.set(face, solid);
   }
   if (storeyParts.size >= STOREY_PART_LIMIT) storeyParts.clear();
   storeyParts.set(storey.id, { storey, elevation, assets: project.assets, solid });
