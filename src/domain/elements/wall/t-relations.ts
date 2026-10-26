@@ -6,6 +6,7 @@ import { validateCornerTContact } from "./corner-t-contact.ts";
 import type { Point, Project } from "../../project/schema.ts";
 import { inspectTPair } from "./t-pair.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
+import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 
 export type TJunction = Project["storeys"][number]["wallTJunctions"][number];
 
@@ -15,11 +16,17 @@ export function tConnectionContours(
   cornerContours: ReadonlyMap<string, Point[]>,
 ) {
   const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
-  const cornerWalls = new Set(
-    storeyOf(project).wallJoins.flatMap((j) => [j.first.wallId, j.second.wallId]),
+  // Each axis end takes at most one join: a corner or one T. A wall may carry Ts at both ends,
+  // a T and a corner, and be host and incoming at once (user decision 26.10.2026,
+  // docs/WALL_JUNCTIONS.md); every junction trims only its own end of the ring.
+  const end = (wallId: string, endpoint: number) => `${wallId}:${endpoint}`;
+  const occupied = new Set(
+    storeyOf(project).wallJoins.flatMap((j) => [
+      end(j.first.wallId, j.first.endpoint),
+      end(j.second.wallId, j.second.endpoint),
+    ]),
   );
-  const incomingIds = new Set<string>();
-  const hostIds = new Set(storeyOf(project).wallTJunctions.map((r) => r.hostWallId));
+  const pairs = new Set<string>();
   const contacts = new Map<string, { side: number; min: number; max: number }[]>();
   const contours = new Map<string, { x: number; y: number }[]>();
   for (const relation of storeyOf(project).wallTJunctions) {
@@ -27,14 +34,14 @@ export function tConnectionContours(
       incoming = walls.get(relation.incoming.wallId);
     if (!host || !incoming || host.id === incoming.id)
       throw new Error("Ungültige T-Verbindung: Wände fehlen oder sind identisch.");
-    if (cornerWalls.has(incoming.id))
-      throw new Error("Die T-Nebenwand darf vorerst keinen eigenen Eckanschluss besitzen.");
-    if (incomingIds.has(incoming.id) || hostIds.has(incoming.id))
-      throw new Error(
-        "Eine Nebenwand darf vorerst nur einen T-Anschluss haben und nicht zugleich Hauptwand sein.",
-      );
+    const incomingEnd = end(incoming.id, relation.incoming.endpoint);
+    if (occupied.has(incomingEnd))
+      throw new Error("Ein Wandende darf nur einen Anschluss haben (Ecke oder T-Anschluss).");
+    if (pairs.has(`${incoming.id}>${host.id}`))
+      throw new Error("Zwei Wände dürfen nicht gegenseitig T-angeschlossen sein.");
     assertSameWallBase(host, incoming);
-    incomingIds.add(incoming.id);
+    occupied.add(incomingEnd);
+    pairs.add(`${host.id}>${incoming.id}`);
     const result = inspectTPair(
       host,
       { wall: incoming, endpoint: relation.incoming.endpoint },
@@ -67,8 +74,21 @@ export function tConnectionContours(
       throw new Error("T-Anschlüsse auf derselben Wandseite dürfen sich nicht überschneiden.");
     previous.push(contact);
     contacts.set(host.id, previous);
-    contours.set(host.id, cornerContours.get(host.id) ?? result.geometry.host.points);
-    contours.set(incoming.id, result.geometry.incoming.points);
+    // A host keeps its ring (its own trims stay); the incoming wall takes this trim at one end.
+    if (!contours.has(host.id))
+      contours.set(host.id, cornerContours.get(host.id) ?? result.geometry.host.points);
+    const base = contours.get(incoming.id) ?? cornerContours.get(incoming.id);
+    const trimmed = result.geometry.incoming.points;
+    if (!base) contours.set(incoming.id, trimmed);
+    else {
+      const ring = base.map((p) => ({ ...p }));
+      for (const index of relation.incoming.endpoint === 0 ? [0, 3] : [1, 2])
+        ring[index] = trimmed[index]!;
+      const checked = validateSimplePolygon(ring);
+      if (!checked.valid || checked.signedArea <= 0)
+        throw new Error("Ungültige Anschlusskontur der Nebenwand.");
+      contours.set(incoming.id, ring);
+    }
   }
   return contours;
 }

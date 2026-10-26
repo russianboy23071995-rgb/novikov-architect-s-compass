@@ -263,7 +263,10 @@ test("T start snaps locally without pinning a fake origin and commits with one u
   assert.equal(history.past.length, 1);
   assert.deepEqual(undoProject(history).present, base);
   assert.deepEqual(redoProject(undoProject(history)).present, p);
-  assert.throws(() => appendWallChain(draft, base, "corner", { x: 4, y: -2 }), /T-Anschluss/);
+  // A wall with a T at its start continues into a corner (26.10.2026, docs/WALL_JUNCTIONS.md).
+  const cornered = finishWallChain(appendWallChain(draft, base, "corner", { x: 4, y: -2 }), base);
+  assert.equal(storeyOf(cornered).wallJoins.length, 1);
+  assert.deepEqual(storeyOf(cornered).wallTJunctions, storeyOf(p).wallTJunctions);
 });
 
 test("T start validates both sides, rejects oblique and stale targets without mutation", () => {
@@ -337,7 +340,10 @@ test("start T preview validates numeric directions and preserves the accepted se
   assert.throws(() => previewWallChain(chain, base, { x: 3, y: 2 }));
   assert.equal(chain.preview, base);
   const accepted = appendWallChain(chain, base, "new", { x: 2, y: 2 });
-  assert.throws(() => previewWallChain(accepted, base, { x: 4, y: 2 }));
+  // The T-started wall may continue into a corner (26.10.2026).
+  const next = previewWallChain(accepted, base, { x: 4, y: 2 });
+  assert.equal(storeyOf(next).walls.length, 3);
+  assert.equal(storeyOf(next).wallJoins.length, 1);
   assert.equal(storeyOf(accepted.preview).walls.length, 2);
   assert.throws(() =>
     previewWallChain(chain, deserializeProject(serializeProject(base)), { x: 2, y: 2 }),

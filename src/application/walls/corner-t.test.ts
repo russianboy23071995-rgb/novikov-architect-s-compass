@@ -119,7 +119,7 @@ test("mixed connections resize at fixed T anchor and detach only affected relati
   assert.equal(serializeProject(p), snapshot);
 });
 
-test("T near inner miter, touching corner partner, and excluded topologies fail atomically", () => {
+test("T near inner miter and touching corner partner fail atomically; incoming corner is allowed", () => {
   let base = addWall(createProject("p", "s"), {
     id: "H",
     start: { x: 0, y: 0 },
@@ -154,7 +154,18 @@ test("T near inner miter, touching corner partner, and excluded topologies fail 
     end: { x: 15, y: -23 },
     ...dimensions,
   });
-  assert.throws(() => previewTConnection(incomingCorner, incomingCorner, request), /Nebenwand/);
+  // An incoming wall may keep its own corner at the other end (26.10.2026): each junction
+  // trims only its end of the ring.
+  const both = previewTConnection(incomingCorner, incomingCorner, request);
+  assert.equal(storeyOf(both).wallTJunctions.length, 1);
+  assert.equal(storeyOf(both).wallJoins.length, storeyOf(incomingCorner).wallJoins.length);
+  // The T end (endpoint 1: ring indices 1, 2) equals the T-only ring, the corner end (0, 3)
+  // equals the corner-only ring.
+  const ring = connectedWallContours(both).get("N")!;
+  const tOnly = connectedWallContours(previewTConnection(before, before, request)).get("N")!;
+  const cornerOnly = connectedWallContours(incomingCorner).get("N")!;
+  assert.deepEqual([ring[1], ring[2]], [tOnly[1], tOnly[2]]);
+  assert.deepEqual([ring[0], ring[3]], [cornerOnly[0], cornerOnly[3]]);
   const oblique = updateWall(before, "E", { end: { x: 11, y: -17 } });
   assert.throws(() => previewTConnection(oblique, oblique, request), /rechtwinklige Ecke/);
 });
