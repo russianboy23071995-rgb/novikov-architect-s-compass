@@ -54,3 +54,56 @@ Browser-Schullauf, abwechselnd vorher/nachher auf demselben Rechner (`benchmarks
 - 3D-Tür ziehen bei l bleibt ≈ 2,1 s (Kandidat Teil B).
 - Fachregel: T- und Eckanschlüsse verlangen gleiche Wandstärke und Höhe; die Fehlermeldung des Wandbefehls nennt dann fälschlich das Fenster („… das Fenster vollständig in die Wand passen“).
 - Der Extrusions-Cache hält höchstens einen lokalen Körper je Wand (bei x etwa so viel wie die Wandkörper des aktuellen Stands) und wird nicht beim Projektwechsel, sondern erst an der Obergrenze geleert.
+
+# Wartezeit, Teil B (26.10.2026)
+
+Änderungskarte „Wartezeit, Teil B“ mit den Empfehlungen freigegeben: Fang-Index in Blöcken zu 512 Teilen je Bauteilart mit Fangpunkten je Wand (B1/B1b), Prüfung je Bauteil im geänderten Geschoss unter Schutzregeln (B2), 3D nach Bearbeitung zuerst messen (B3).
+
+## Änderungen
+
+- **B1** `application/snapping/local-sources.ts`, `constraints/snapping/local-source-index.ts`: Der Arbeitsindex besteht aus Blöcken von bis zu 512 Teilen je Bauteilart (Wände, Türen, Schraffuren, Linien), jeder mit Hüllrahmen, eigenem Punkt-/Linienindex und Nachschlagetabelle. Ein Block, dessen Teile dieselben Objekte sind, behält seinen Index. Abfragen liefern dieselben Ergebnisse in derselben Reihenfolge wie ein Gesamtindex.
+- **B1b** `application/snapping/project-references.ts`, `domain/elements/wall/connections.ts`: Fangpunkte je Wand, wiederverwendet solange Wand und Kontur gleich sind; `connectedWallContours` je Stand einmal (gemeinsam für Fang, Auswahlformen, Grundriss-Umriss und Wandkörper).
+- **B2** `domain/project/schema.ts`, `domain/project/owned-snapshot.ts`: Fenster, Türen, Linien, Schraffuren und Abbilder eines geänderten Geschosses, die eingefrorene Bauteile eines eigenen geprüften Stands sind, überspringen die Schema-Prüfung und werden an ihrer Stelle wieder eingesetzt. Alle Prüfungen über das ganze Geschoss (IDs, Ebenen, Anschlüsse, Öffnungen, Türen) laufen auf den vollständigen Listen. Wände bleiben ausgenommen (gebundene Höhen hängen von Geschosshöhen ab). Daten aus Datei, Wiederherstellung oder veränderliche Objekte werden nie wiederverwendet.
+- **B3** `rendering/viewport/building-solid.ts`: Messung mit JS-Self-Profiling (Diagnosemodus `js-profile` im Messbuild). Nach einer Bearbeitung kostete der 3D-Neuaufbau bei l vor allem das Gebäude aller Geschosse (≈ 28 % der belegten Zeit), den Picking-Index im Hintergrund (≈ 21 %) und die Bildprüfung der Autosicherung (≈ 13 %). Umgesetzt: Gebäudeteil je Geschoss wiederverwendet (ein Eintrag je Geschoss-ID, nicht an Verlaufsschritte gebunden). Messseite trennt „3D – Szene fertig“ vom Türziehen.
+
+## Nachweis
+
+- Fang-Index (`benchmarks/snap-index-equality.ts`): 10 668 Abfragen in 5 Zuständen identisch (Referenzen, Segmente, Paare, Nachschlagen), Gegenprobe greift.
+- Prüfung je Bauteil (`src/domain/project/element-reuse.test.ts`): gleiches Ergebnis wie volle Prüfung; ungültiges neues Bauteil, doppelte ID und veränderte Kopie werden abgelehnt; öffentliche Prüfung verwendet nie wieder.
+- Schulmodell (`benchmarks/edit-cycle-equality.ts`): 13/13 Befehle – Modell gleich dem erneuten Ausführen und einer vollen Prüfung derselben Daten, Wandkörper gleich der ungecachten Ableitung, Gebäude gleich dem Neuaufbau aus einer veränderlichen Kopie.
+- 1252 Tests, Typen, Architektur-Check, Lint.
+
+## Messung
+
+Node, Median je Bearbeitung „Wandlänge“ (`benchmarks/edit-cycle-part-b-results.json`):
+
+| ms                           | s main → neu   | l                | x                 |
+| ---------------------------- | -------------- | ---------------- | ----------------- |
+| Vorschau                     | 14 → 5         | 37 → 15          | 100 → 69          |
+| Fang-Index                   | 18 → 0,6       | 59 → 1,7         | 111 → 13          |
+| Summe                        | 36 → 9 (−76 %) | 106 → 27 (−75 %) | 310 → 178 (−43 %) |
+| Gebäude nach Bearbeitung (l) |                | 50–80 → 9–17     |                   |
+
+Browser-Schullauf l, gleiche Sitzung, Reihenfolge main, neu, vor Teil A, neu:
+
+| Median ms                 | vor Teil A | main (Teil A) | neu (Lauf 1 / 2) |
+| ------------------------- | ---------- | ------------- | ---------------- |
+| Bearbeitungszyklus        | 296        | 264           | 186 / 156        |
+| Undo                      | 14         | 14            | 14 / 14          |
+| Redo                      | 211        | 197           | 208 / 153        |
+| Löschen                   | 467        | 460           | 327 / 280        |
+| 2D→3D + Szene + Türziehen | 2193       | 2678          | 2953 / 2738      |
+
+## Abnahme
+
+- **l ≥ 40 % schneller als vor Teil A:** Lauf 1 −37 %, Lauf 2 −47 %, Mittel 171 ms = −42 % – im Mittel erfüllt, ein Einzellauf darunter (die Läufe streuen am selben Rechner um ±15 %).
+- Undo/Redo nicht langsamer – erfüllt.
+- Ergebnisse identisch – erfüllt.
+- **3D nach Bearbeitung:** nicht verbessert. Das Gebäude wird zwar in Node 4–6× schneller neu aufgebaut, im Browser bleibt die Summe aus Umschalten, Szenenaufbau und Türziehen bei 2,2–3,0 s (große Streuung). Rest: Picking-Index, Bildprüfung der Autosicherung, Vorschau je Mausbewegung beim Türziehen. Eigener Auftrag.
+- **s und x im Browser: nicht gemessen.** Nach den l-Läufen war das App-Fenster verdeckt bzw. minimiert; der Browserbereich lieferte nur etwa ein Bild pro Sekunde, die Messseite wartete auf Bilder (kein Rechenaufwand, Profil zu 70 % untätig). Diese Läufe sind verworfen und stehen aus.
+
+## Grenzen
+
+- Ein Rechner, nur Chromium, l zweimal, s und x im Browser ausstehend.
+- Der Picking-Index für 3D und die Bildprüfung der Autosicherung werden nach jeder Bearbeitung vollständig neu berechnet.
+- Größenberechnung des geänderten Geschosses bleibt vollständig (≈ 5 ms bei l).
