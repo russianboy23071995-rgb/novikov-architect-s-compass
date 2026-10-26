@@ -6,10 +6,11 @@ import { intersectLines } from "../../../geometry/intersections/lines.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
 
-/** Smallest angle between the axes of a T junction (user decision 26.10.2026,
- * docs/OBLIQUE_T_JUNCTIONS.md); below it the contact on the host becomes a long sliver.
+/** Only parallel axes cannot form a T; every other angle is allowed (user decision 26.10.2026,
+ * docs/OBLIQUE_T_JUNCTIONS.md). A very acute angle gives a long contact on the host face, which
+ * the contact checks below still bound by the host ends.
  */
-export const MIN_T_ANGLE_DEGREES = 15;
+export const PARALLEL_T_MESSAGE = "Parallele Wände können keinen T-Anschluss bilden.";
 
 /** Gross geometry for an explicit, isolated T pair, perpendicular or oblique.
  * No project lookup, opening validation, other joins, persistence or mutation.
@@ -56,13 +57,7 @@ export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
   const away = { x: (far.x - node.x) / length, y: (far.y - node.y) / length };
   // The incoming wall may meet the host obliquely: its near corners are cut along its own axis
   // on the host face, so the end becomes a slanted cap.
-  if (
-    Math.abs(u.x * away.x + u.y * away.y) >
-    Math.cos((MIN_T_ANGLE_DEGREES * Math.PI) / 180) + 1e-12
-  )
-    throw new Error(
-      `Der T-Anschluss benötigt mindestens ${MIN_T_ANGLE_DEGREES}° zwischen den Wandachsen.`,
-    );
+  if (Math.abs(u.x * away.y - u.y * away.x) <= 1e-9) throw new Error(PARALLEL_T_MESSAGE);
   const along = (p: Point2) => p.x * u.x + p.y * u.y;
   const position = along(node);
   const projected = world({ x: u.x * position, y: u.y * position });
@@ -86,13 +81,10 @@ export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
     const p = intersectLines(contour[index]!, away, sideStart, u);
     if (!p || !interior(along(p)))
       throw new Error("Kontaktbreite berührt oder überschreitet das Hauptwandende.");
+    // A negative trim extends the edge back to the host face: at an oblique angle a body offset
+    // can put the near corner in front of the face (26.10.2026).
     const trim = (p.x - node.x) * away.x + (p.y - node.y) * away.y;
-    if (
-      !Number.isFinite(trim) ||
-      (trim < 0 && !coordinatesCompatible(trim, 0)) ||
-      trim >= length ||
-      coordinatesCompatible(trim, length)
-    )
+    if (!Number.isFinite(trim) || trim >= length || coordinatesCompatible(trim, length))
       throw new Error("Ankommende Wand für den T-Anschluss zu kurz.");
     contour[index] = p;
     return world(p);

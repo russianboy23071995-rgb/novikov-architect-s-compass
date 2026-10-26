@@ -9,7 +9,7 @@ import {
   connectedWallContours,
   connectedWallSolids,
 } from "../../domain/elements/wall/connections.ts";
-import { MIN_T_ANGLE_DEGREES } from "../../domain/elements/wall/t-junction.ts";
+import { PARALLEL_T_MESSAGE } from "../../domain/elements/wall/t-junction.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
 import { beginWallChain, appendWallChain, finishWallChain } from "../drawing/wall-chain.ts";
@@ -19,11 +19,12 @@ import type { SnapContext } from "../../constraints/snapping/engine.ts";
 
 // Oblique T junctions (user decision 26.10.2026, docs/OBLIQUE_T_JUNCTIONS.md).
 const host = { id: "H", start: { x: 0, y: 0 }, end: { x: 10, y: 0 }, thickness: 0.3, height: 3 };
+// Very acute angles need a long host and incoming wall for their long contact (t / sin).
 function oblique(degrees: number): Project {
   const r = (degrees * Math.PI) / 180;
-  const p = addWall(addWall(createProject("p", "s0"), host), {
+  const p = addWall(addWall(createProject("p", "s0"), { ...host, end: { x: 30, y: 0 } }), {
     id: "N",
-    start: { x: 5 + 4 * Math.cos(r), y: 4 * Math.sin(r) },
+    start: { x: 5 + 20 * Math.cos(r), y: 20 * Math.sin(r) },
     end: { x: 5, y: 0 },
     thickness: 0.24,
     height: 3,
@@ -35,7 +36,7 @@ function oblique(degrees: number): Project {
   });
 }
 
-for (const degrees of [90, 60, 45, 30, 15]) {
+for (const degrees of [90, 60, 45, 30, 15, 10, 5, 2, 1]) {
   test(`an oblique T at ${degrees}° ends on the host face with the contact width t / sin`, async () => {
     const p = oblique(degrees);
     const ring = connectedWallContours(p).get("N")!;
@@ -59,9 +60,26 @@ for (const degrees of [90, 60, 45, 30, 15]) {
   });
 }
 
-test(`flatter than ${MIN_T_ANGLE_DEGREES}° and parallel walls are rejected (counter-check)`, () => {
-  assert.throws(() => oblique(14), /15°/);
-  assert.throws(() => oblique(5), /15°/);
+test("parallel walls and a contact beyond the host end are rejected (counter-check)", () => {
+  assert.throws(() => oblique(0), new RegExp(PARALLEL_T_MESSAGE));
+  assert.throws(() => oblique(180), new RegExp(PARALLEL_T_MESSAGE));
+  // At 2° the contact (6.9 m) no longer fits on a 10 m host beside x = 5.
+  const short = addWall(addWall(createProject("p", "s0"), host), {
+    id: "N",
+    start: { x: 5 + 20 * Math.cos(Math.PI / 90), y: 20 * Math.sin(Math.PI / 90) },
+    end: { x: 5, y: 0 },
+    thickness: 0.24,
+    height: 3,
+  });
+  assert.throws(
+    () =>
+      previewTConnection(short, short, {
+        projectId: "p",
+        kind: "connect",
+        relation: { hostWallId: "H", incoming: { wallId: "N", endpoint: 1 } },
+      }),
+    /Hauptwandende/,
+  );
   // Two oblique Ts on the same host side may still not overlap.
   const p = oblique(30);
   const crowded = addWall(p, {
@@ -125,19 +143,25 @@ test("drawing snaps an oblique end onto the host axis as a T; a right angle stil
   const square = adapter.snapping.resolve({ x: 1.54, y: -0.03 }, context);
   assert.equal(square.candidate?.sourceFeature, "t-axis");
   assert.deepEqual(square.point, { x: 1.5, y: 0 });
-  // A cursor foot flatter than the minimum offers no T.
-  const flatChain = beginWallChain(base, { x: -20, y: -3 });
-  const flatAdapter = drawingInteraction(
-    base,
-    base,
-    { x: -20, y: -3 },
-    () => {},
-    () => {},
-    flatChain.points,
-    flatChain,
-  );
-  assert.notEqual(
-    flatAdapter.snapping.resolve({ x: 4.04, y: -0.03 }, context).candidate?.sourceFeature,
-    "t-axis",
-  );
+  // A flat approach (about 7°) is a T as well (26.10.2026); only a parallel one offers none.
+  for (const [origin, expected] of [
+    [{ x: -20, y: -3 }, true],
+    [{ x: -20, y: 0 }, false],
+  ] as const) {
+    const flatChain = beginWallChain(base, origin);
+    const flatAdapter = drawingInteraction(
+      base,
+      base,
+      origin,
+      () => {},
+      () => {},
+      flatChain.points,
+      flatChain,
+    );
+    assert.equal(
+      flatAdapter.snapping.resolve({ x: 4.04, y: -0.03 }, context).candidate?.sourceFeature ===
+        "t-axis",
+      expected,
+    );
+  }
 });

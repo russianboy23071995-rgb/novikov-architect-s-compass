@@ -22,7 +22,8 @@ test("free first segment equals full path and preserves neighbours/windows/histo
   ]) {
     const full = appendWallChain(beginWallChain(p, origin), p, "new", point).preview;
     const r = pilot.evaluate(point);
-    assert.equal(r.path, "local");
+    // An end exactly on the host axis becomes an automatic T and takes the full path (26.10.2026).
+    assert.equal(r.path, point.y === 0 ? "full" : "local");
     assert.deepEqual(r.project, full);
     assert.deepEqual(validateProject(r.project), full);
     const h = commitProject(createHistory(p), pilot.confirm(point));
