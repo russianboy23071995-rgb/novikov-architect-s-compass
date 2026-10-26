@@ -10,6 +10,7 @@ import { previewWallCommand } from "../walls/command.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { previewOverlapHint } from "../openings/overlap-hint.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { eligibleSelection, singleTarget, type SelectionSet } from "../selection/state.ts";
 import { beginSelectionMove, previewSelectionMove, sameTargets } from "../selection/move.ts";
 import { resolvePolarInput } from "../../constraints/input/polar.ts";
@@ -106,7 +107,7 @@ export function previewSelectionCommand(
   }
   const hint = previewOverlapHint(project, result);
   if (hint) summary = `${summary} · ${hint}`;
-  return {
+  const preview = {
     calibration,
     base: project,
     targets: targets.map((t) => ({ ...t })),
@@ -115,7 +116,11 @@ export function previewSelectionCommand(
     result,
     summary,
   };
+  issued.set(preview, { text, result });
+  return preview;
 }
+// Previews this module produced, with the text and result it produced them for.
+const issued = new WeakMap<SelectionCommandPreview, { text: string; result: Project }>();
 export function selectionCommandIsCurrent(
   project: Project,
   targets: SelectionSet,
@@ -131,7 +136,10 @@ export function selectionCommandIsCurrent(
     sameTargets(targets, eligibleSelection(project, visibility, targets))
   );
 }
-/** Re-run the validated action; a presentation preview is never trusted as an editable model. */
+/** A preview is never trusted as an editable model, except the factory-owned, fully validated
+ * result this module produced for exactly this text, base, selection, visibility and
+ * calibration; anything else re-runs the validated action (docs/performance/EDIT_CYCLE.md).
+ */
 export function applySelectionCommand(
   project: Project,
   targets: SelectionSet,
@@ -141,5 +149,13 @@ export function applySelectionCommand(
 ): Project {
   if (!selectionCommandIsCurrent(project, targets, visibility, preview, calibration))
     throw new Error("Modell, Auswahl oder Sichtbarkeit geändert. Bitte Befehl erneut prüfen.");
+  const own = issued.get(preview);
+  if (
+    own &&
+    own.text === preview.text &&
+    own.result === preview.result &&
+    isOwnedProjectSnapshot(own.result)
+  )
+    return own.result;
   return previewSelectionCommand(project, targets, visibility, preview.text, calibration).result;
 }

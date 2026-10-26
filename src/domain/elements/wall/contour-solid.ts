@@ -80,6 +80,33 @@ function deriveWallContourSolid(
   };
 }
 
+// The local extrusion depends on its arguments only (profile, height, openings, clipping): an
+// equal key yields an equal solid for any project or snapshot that asks. Validation of a
+// preview, of its commit and the plan display then extrude only walls whose inputs changed.
+// One entry per wall and clipping mode; past the limit the cache starts over
+// (docs/performance/EDIT_CYCLE.md).
+const EXTRUSION_LIMIT = 65536;
+const extrusions = new Map<
+  string,
+  { key: string; solid: ReturnType<typeof extrudeProfileWithOpenings> }
+>();
+let extruded = 0;
+/** Diagnostic count of extrusions actually computed, for tests and measurements. */
+export const wallExtrusionCount = () => extruded;
+function sharedExtrusion(wallId: string): typeof extrudeProfileWithOpenings {
+  return (...args) => {
+    const slot = `${wallId}|${args[3] ? 1 : 0}`,
+      key = JSON.stringify(args);
+    const previous = extrusions.get(slot);
+    if (previous?.key === key) return previous.solid;
+    if (extrusions.size >= EXTRUSION_LIMIT) extrusions.clear();
+    const solid = extrudeProfileWithOpenings(...args);
+    extruded++;
+    extrusions.set(slot, { key, solid });
+    return solid;
+  };
+}
+
 /** Public derivation remains independent of any prepared session. */
 export function wallContourSolid(
   wall: Wall,
@@ -87,7 +114,13 @@ export function wallContourSolid(
   windows: readonly WallOpening[],
   clipOpeningsToProfile = false,
 ) {
-  return deriveWallContourSolid(wall, points, windows, clipOpeningsToProfile);
+  return deriveWallContourSolid(
+    wall,
+    points,
+    windows,
+    clipOpeningsToProfile,
+    sharedExtrusion(wall.id),
+  );
 }
 
 /** One private entry per pinned wall; exact local inputs only, never ID-only reuse. */

@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-26",
+  "before": "feat/history-memory 7093972",
+  "after": "feat/edit-cycle-speed 6e7ac66",
+  "notes": "Browser: school acceptance page, production build, same machine, alternating before/after the same session. s before from the history-memory acceptance (103.1 / 104.5 ms). Node: benchmarks/edit-cycle-profile.ts, median of 12 edits, ms.",
+  "node": {
+    "before": {
+      "s": {
+        "preview": 16,
+        "apply": 16.2,
+        "commit": 1.5,
+        "wallSolids": 6.5,
+        "localSnapSources": 16.2,
+        "total": 56.4
+      },
+      "l": {
+        "preview": 48.9,
+        "apply": 44,
+        "commit": 4.8,
+        "wallSolids": 18.7,
+        "localSnapSources": 60.2,
+        "total": 176.6
+      },
+      "x": {
+        "preview": 182.1,
+        "apply": 173.1,
+        "commit": 4.6,
+        "wallSolids": 175.7,
+        "localSnapSources": 87.6,
+        "total": 623.1
+      }
+    },
+    "after": {
+      "s": {
+        "preview": 10.9,
+        "apply": 0,
+        "commit": 1.6,
+        "wallSolids": 1.7,
+        "localSnapSources": 17.9,
+        "total": 32.1
+      },
+      "l": {
+        "preview": 32.4,
+        "apply": 0,
+        "commit": 4.8,
+        "wallSolids": 4.2,
+        "localSnapSources": 56.5,
+        "total": 97.9
+      },
+      "x": {
+        "preview": 78.6,
+        "apply": 0,
+        "commit": 4.7,
+        "wallSolids": 76,
+        "localSnapSources": 82.3,
+        "total": 241.6
+      }
+    }
+  },
+  "browser": {
+    "before": {
+      "l": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 290.5, "p95": 428.1 },
+        "undo": { "median": 13.9, "p95": 346.9 },
+        "redo": { "median": 194.2, "p95": 656.7 },
+        "snap": { "median": 13.9, "p95": 19.9 },
+        "commitWallLength": 393,
+        "deleteLine": 408.7,
+        "toggle3D": 279.9,
+        "drag3D": 2356.9,
+        "loadToRestoredMs": 1490
+      },
+      "x": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 955.5, "p95": 1094.9 },
+        "undo": { "median": 13.9, "p95": 771.5 },
+        "redo": { "median": 542.9, "p95": 1605 },
+        "snap": { "median": 21.4, "p95": 507.2 },
+        "commitWallLength": 879.8,
+        "deleteLine": 1923.2,
+        "toggle3D": 1579.6,
+        "drag3D": 11.4,
+        "loadToRestoredMs": 3100
+      }
+    },
+    "after": {
+      "s": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 79.8, "p95": 198.1 },
+        "undo": { "median": 33.7, "p95": 147.3 },
+        "redo": { "median": 84.1, "p95": 273.4 },
+        "snap": { "median": 13.9, "p95": 14.1 },
+        "commitWallLength": 129.9,
+        "deleteLine": 111.2,
+        "toggle3D": 117.8,
+        "drag3D": 687.1,
+        "loadToRestoredMs": 895
+      },
+      "s2": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 77.7, "p95": 132 },
+        "undo": { "median": 14, "p95": 196.9 },
+        "redo": { "median": 77.2, "p95": 167.8 },
+        "snap": { "median": 13.9, "p95": 14.3 },
+        "commitWallLength": 144.9,
+        "deleteLine": 126.7,
+        "toggle3D": 111.8,
+        "drag3D": 659.9,
+        "loadToRestoredMs": 894
+      },
+      "l": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 213.3, "p95": 238.1 },
+        "undo": { "median": 14, "p95": 396.1 },
+        "redo": { "median": 147.2, "p95": 440.2 },
+        "snap": { "median": 13.9, "p95": 20.1 },
+        "commitWallLength": 251.1,
+        "deleteLine": 333.3,
+        "toggle3D": 218.7,
+        "drag3D": 2133.2,
+        "loadToRestoredMs": 1320
+      },
+      "x": {
+        "ok": true,
+        "errors": 0,
+        "session": { "median": 495.5, "p95": 722.5 },
+        "undo": { "median": 13.9, "p95": 470.8 },
+        "redo": { "median": 302.2, "p95": 975.7 },
+        "snap": { "median": 19.4, "p95": 27.8 },
+        "commitWallLength": 507.5,
+        "deleteLine": 722.5,
+        "toggle3D": 963.4,
+        "drag3D": 24.4,
+        "loadToRestoredMs": 2261
+      }
+    }
+  }
+}
