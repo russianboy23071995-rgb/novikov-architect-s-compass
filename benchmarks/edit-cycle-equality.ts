@@ -23,6 +23,7 @@ import {
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
 import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import type { ElementTarget } from "../src/application/selection/target.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 
 type Case = { target: ElementTarget | ElementTarget[]; text: string; storey?: string };
 const wall = (id: string) => ({ kind: "wall" as const, id });
@@ -91,6 +92,12 @@ for (const c of cases) {
   history = commitProject(history, applied);
   const solids = connectedWallSolids(history.present);
   deepStrictEqual(solids, uncachedSolids(history.present), `wall solids differ: ${c.text}`);
+  // Teil B: the building with reused storey parts equals one built from a mutable copy.
+  deepStrictEqual(
+    buildBuildingSolid(history.present),
+    buildBuildingSolid(structuredClone(history.present)),
+    `building differs: ${c.text}`,
+  );
   results.push({ text: c.text, model: true, solids: solids.length });
 }
 

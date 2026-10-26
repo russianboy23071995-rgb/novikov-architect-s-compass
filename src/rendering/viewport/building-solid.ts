@@ -12,6 +12,8 @@ const buildings = createDerivedCache<Project, BuildingEntry>();
 let recentBuilding: WeakRef<BuildingEntry> | null = null;
 function freezeBuilding(result: Solid): Solid {
   for (const face of result.faces) {
+    // Faces of a reused storey part are frozen already.
+    if (Object.isFrozen(face)) continue;
     for (const point of face.vertices) Object.freeze(point);
     Object.freeze(face.vertices);
     Object.freeze(face.normal);
@@ -22,6 +24,33 @@ function freezeBuilding(result: Solid): Solid {
   Object.freeze(result.max);
   return Object.freeze(result);
 }
+// The building part of one storey, reused while the storey object of an owned snapshot (deeply
+// frozen), its elevation and the asset list stay the same: an edit rebuilds only the storeys it
+// changed (docs/performance/EDIT_CYCLE.md, Teil B). One entry per storey ID keeps it bounded;
+// steps held by the undo history do not keep their parts.
+const STOREY_PART_LIMIT = 64;
+const storeyParts = new Map<
+  string,
+  { storey: object; elevation: number; assets: object; solid: Solid }
+>();
+function storeyPart(project: Project, storey: Project["storeys"][number], owned: boolean): Solid {
+  const elevation = workingStoreyElevation({ ...project, workingStoreyId: storey.id });
+  const known = owned ? storeyParts.get(storey.id) : undefined;
+  if (known?.storey === storey && known.elevation === elevation && known.assets === project.assets)
+    return known.solid;
+  const solid = buildPreviewSolid({ storey, assets: project.assets }, elevation);
+  if (!owned) return solid;
+  for (const face of solid.faces) {
+    for (const point of face.vertices) Object.freeze(point);
+    Object.freeze(face.vertices);
+    Object.freeze(face.normal);
+    Object.freeze(face);
+  }
+  if (storeyParts.size >= STOREY_PART_LIMIT) storeyParts.clear();
+  storeyParts.set(storey.id, { storey, elevation, assets: project.assets, solid });
+  return solid;
+}
+
 /** One derived building scene. Storeys remain authoritative; working selection is not a filter. */
 export function buildBuildingSolid(input: Project): Solid {
   const cached = buildings.get(input);
@@ -39,12 +68,7 @@ export function buildBuildingSolid(input: Project): Solid {
   }
   const parts = project.storeys
     .filter((s) => s.walls.length > 0)
-    .map((s) =>
-      buildPreviewSolid(
-        { storey: s, assets: project.assets },
-        workingStoreyElevation({ ...project, workingStoreyId: s.id }),
-      ),
-    );
+    .map((s) => storeyPart(project, s, immutable));
   const result: Solid = {
     faces: parts.flatMap((p) => p.faces),
     volume: parts.reduce((sum, p) => sum + p.volume, 0),
