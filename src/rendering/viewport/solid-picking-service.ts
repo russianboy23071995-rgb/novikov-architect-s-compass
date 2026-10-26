@@ -1,4 +1,5 @@
 import { buildWorldPicking } from "./world-picking.ts";
+import { buildingFacePart } from "./building-solid.ts";
 import { pickSolidElement } from "./window-selection.ts";
 import type { WindowSelectionSurface } from "./window-selection.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";
@@ -16,8 +17,14 @@ export function createSolidPickingService(
   solid: DisplaySurfaces,
   windows: readonly WindowSelectionSurface[],
   clock: PickingScheduler = scheduler,
+  // Unchanged storeys keep their sub-tree (docs/performance/PICKING_PER_STOREY.md).
+  groupOf: (face: DisplaySurfaces["faces"][number]) => object | undefined = buildingFacePart,
 ) {
-  let builder: ReturnType<typeof buildWorldPicking> | null = buildWorldPicking(solid, windows),
+  let builder: ReturnType<typeof buildWorldPicking> | null = buildWorldPicking(
+      solid,
+      windows,
+      groupOf,
+    ),
     index: ReturnType<typeof import("./world-picking.ts").prepareWorldPicking> | null = null,
     disposed = false,
     cancel = () => {};
