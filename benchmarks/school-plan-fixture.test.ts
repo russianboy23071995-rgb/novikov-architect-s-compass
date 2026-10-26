@@ -19,7 +19,8 @@ test("school plan sizes validate, round-trip and carry the intended composition"
   const s0 = small.storeys[0]!;
   assert.equal(small.storeys.length, 5);
   assert.equal(s0.wallJoins.length, 4);
-  assert.equal(s0.wallTJunctions.length, 10);
+  // Corridor walls T into both gables, partitions T into facade and corridor (26.10.2026).
+  assert.equal(s0.wallTJunctions.length, 24);
   assert.equal(s0.walls.filter((w) => w.topBinding).length, 16);
   assert.equal(small.storeys[4]!.walls.filter((w) => w.topBinding).length, 0);
   assert.equal(s0.doors![0]!.mark, "T-EG-01");
