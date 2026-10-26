@@ -2,6 +2,7 @@ import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { closedContour } from "../direct-edit/contour.ts";
 import { previewMovementInput } from "../direct-edit/numeric.ts";
+import { validateLike } from "../../domain/project/owned-snapshot.ts";
 
 /** Strict local text adapter; geometry, cap and validation stay in Direct Edit. */
 export function previewOffsetCommand(
@@ -33,7 +34,9 @@ export function previewOffsetCommand(
   );
   const format = (n: number) => n.toLocaleString("de-DE", { maximumSignificantDigits: 10 });
   return {
-    result: result.project,
+    // An owned input yields an owned, validated result: applying the preview reuses it
+    // instead of running the offset again (docs/performance/OFFSET_COMMAND.md).
+    result: validateLike(project, result.project),
     summary: `${selection.id} · Offset ${format(result.metres)} m${result.notice ? ` (begrenzt; angefordert ${format(metres)} m)` : ""}`,
   };
 }

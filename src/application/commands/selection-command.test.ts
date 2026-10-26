@@ -10,7 +10,7 @@ import { serializeProject } from "../../lib/bim/model.ts";
 import { addWall } from "../walls/actions.ts";
 import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "../drawing/offset-command.ts";
 import { previewWallCommand } from "../walls/command.ts";
 import {
   createHistory,
@@ -165,7 +165,7 @@ test("integrated offset command preserves selection context and commits one undo
   const preview = previewSelectionCommand(p, targets, visibility, "Offset um 1 cm");
   assert.equal(
     serializeProject(preview.result),
-    serializeProject(previewCommand(p, target, "Offset um 1 cm").result),
+    serializeProject(previewOffsetCommand(p, target, "Offset um 1 cm")!.result),
   );
   const result = applySelectionCommand(p, targets, visibility, preview);
   const history = commitProject(createHistory(p), result);

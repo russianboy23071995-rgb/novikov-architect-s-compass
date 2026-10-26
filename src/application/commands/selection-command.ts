@@ -3,7 +3,7 @@ import {
   parseCalibrationLength,
   type CalibrationContext,
 } from "../references/calibration.ts";
-import { previewCommand } from "../../lib/bim/commands.ts";
+import { previewOffsetCommand } from "../drawing/offset-command.ts";
 import { previewDoorCommand } from "../doors/command.ts";
 import { previewWindowCommand } from "../windows/command.ts";
 import { previewWallCommand } from "../walls/command.ts";
@@ -101,9 +101,13 @@ export function previewSelectionCommand(
       previewDoorCommand(project, target, text) ??
       previewWindowCommand(project, target, text) ??
       previewWallCommand(project, target, text);
-    const legacy = element ?? previewCommand(project, target, text);
-    result = legacy.result;
-    summary = legacy.summary;
+    // The offset command runs here directly; it no longer serializes the project for a
+    // comparison text (docs/performance/OFFSET_COMMAND.md).
+    const command = element ?? previewOffsetCommand(project, target, text);
+    if (!command)
+      throw new Error("Unbekannter Befehl. Beispiel: Wandlänge auf 6 m oder Fenster zentrieren.");
+    result = command.result;
+    summary = command.summary;
   }
   const hint = previewOverlapHint(project, result);
   if (hint) summary = `${summary} · ${hint}`;
