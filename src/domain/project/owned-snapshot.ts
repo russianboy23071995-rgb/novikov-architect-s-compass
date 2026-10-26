@@ -1,4 +1,9 @@
-import { storeyValidationKeys, validateProject, type Project } from "./schema.ts";
+import {
+  REUSABLE_ELEMENT_LISTS,
+  storeyValidationKeys,
+  validateProject,
+  type Project,
+} from "./schema.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import type { WallSolidReuse } from "../elements/wall/connections.ts";
 
@@ -20,6 +25,11 @@ const validStoreys = new WeakMap<object, { key: readonly unknown[]; used: readon
 const sameKey = (a: readonly unknown[], b: readonly unknown[]) =>
   a.length === b.length && a.every((value, i) => Object.is(value, b[i]));
 let reusedStoreys = 0;
+// Elements of owned snapshots: deeply frozen output of a full validation.
+const validElements = new WeakSet<object>();
+let reusedElements = 0;
+/** Diagnostic count of elements that skipped parsing, for tests and measurements. */
+export const elementValidationReuseCount = () => reusedElements;
 /** Diagnostic count of skipped storey scope validations, for tests and measurements. */
 export const storeyValidationReuseCount = () => reusedStoreys;
 
@@ -78,15 +88,26 @@ export function createProjectSnapshot(
       return entry.used;
     },
     record: (index, patterns) => (used[index] = patterns),
+    knownElement: (element) => {
+      const known = !!element && typeof element === "object" && validElements.has(element);
+      if (known) reusedElements++;
+      return known;
+    },
   });
   const snapshot = freeze(
     base && owned.has(base) ? (share(validated, base) as Project) : validated,
   );
   owned.add(snapshot);
   const keys = storeyValidationKeys(snapshot);
-  snapshot.storeys.forEach((storey, i) =>
-    validStoreys.set(storey, { key: keys[i]!, used: used[i]! }),
-  );
+  snapshot.storeys.forEach((storey, i) => {
+    const registered = validStoreys.has(storey);
+    validStoreys.set(storey, { key: keys[i]!, used: used[i]! });
+    // A storey object seen before already registered its (frozen, unchanged) elements.
+    if (!registered)
+      for (const name of REUSABLE_ELEMENT_LISTS)
+        for (const element of (storey[name] as readonly object[] | undefined) ?? [])
+          validElements.add(element);
+  });
   return snapshot;
 }
 

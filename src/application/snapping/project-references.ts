@@ -59,10 +59,11 @@ export function projectSnapReferences(project: Project): SnapReference[] {
 }
 
 type Part = { references: SnapReference[]; segments: SnapSegment[] };
+export type SnapPart = Readonly<Part>;
 // Parts derived from deeply frozen elements of owned snapshots. Identity fixes their content,
 // so an unchanged line, hatch or wall set keeps its derived references across commits.
 const elementParts = new WeakMap<object, Part>();
-const wallParts = new WeakMap<object, { inputs: readonly object[]; part: Part }>();
+const wallParts = new WeakMap<object, { key: string; part: Part }>();
 
 /** Collects one element's references and the midpoint segments that point at them. */
 function part(build: (midpoint: typeof midpointReference) => SnapReference[]): Part {
@@ -82,16 +83,23 @@ function remembered<T extends object>(owned: boolean, element: T, build: (e: T) 
   return cached;
 }
 
-/** No intersection enumeration; shared primitive adapter for old and local query paths. */
-export function projectSnapPrimitives(project: Project) {
+/** Snap parts per element kind, in query order (walls, doors, hatches, lines). Parts of unchanged elements of
+ * owned snapshots are the same objects across commits.
+ */
+export function projectSnapParts(project: Project): readonly (readonly SnapPart[])[] {
   const owned = isOwnedProjectSnapshot(project);
   const storey = storeyOf(project);
-  const parts = [
+  return [
     wallsPart(project, owned),
-    ...doorsPart(storey, owned),
-    ...storey.hatches.map((hatch) => remembered(owned, hatch, hatchPart)),
-    ...(storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
+    doorsPart(storey, owned),
+    storey.hatches.map((hatch) => remembered(owned, hatch, hatchPart)),
+    (storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
   ];
+}
+
+/** No intersection enumeration; shared primitive adapter for old and local query paths. */
+export function projectSnapPrimitives(project: Project) {
+  const parts = projectSnapParts(project).flat();
   return {
     references: parts.flatMap((p) => p.references),
     segments: parts.flatMap((p) => p.segments),
@@ -138,18 +146,19 @@ function doorsPart(storey: Project["storeys"][number], owned: boolean): Part[] {
   });
 }
 
-/** Wall references depend on joined contours: reuse only for the same walls, joins, T-joins
- * and windows (contour checks read them); any other change derives all walls again.
+/** Wall references depend on the wall and its joined contour. Each wall keeps its own part
+ * while both are unchanged, so an edit derives only the walls whose contour changed
+ * (docs/performance/EDIT_CYCLE.md, Teil B).
  */
-function wallsPart(project: Project, owned: boolean): Part {
-  const storey = storeyOf(project);
-  const inputs = [storey.walls, storey.wallJoins, storey.wallTJunctions, storey.windows];
-  const cached = owned ? wallParts.get(storey.walls) : undefined;
-  if (cached && cached.inputs.every((input, i) => input === inputs[i])) return cached.part;
+function wallsPart(project: Project, owned: boolean): Part[] {
   // Snapping needs only the joined 2D contours, not the extruded solids.
   const joined = connectedWallContours(project);
-  const result = part((midpoint) =>
-    storey.walls.flatMap((wall) => {
+  return storeyOf(project).walls.map((wall) => {
+    const ring = joined.get(wall.id);
+    const key = ring ? JSON.stringify(ring) : "";
+    const cached = owned ? wallParts.get(wall) : undefined;
+    if (cached?.key === key) return cached.part;
+    const result = part((midpoint) => {
       const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
       const body = wallBody(wall);
       return [
@@ -161,22 +170,21 @@ function wallsPart(project: Project, owned: boolean): Part {
             directions: [d],
           },
           ...[-1, 1].map((side) => ({
-            point:
-              joined.get(wall.id)?.[index === 0 ? (side === -1 ? 0 : 3) : side === -1 ? 1 : 2] ??
-              body.corner(index, side),
+            // A copy: the snap index freezes its references, the contour stays shared.
+            point: ((corner) => (corner ? { ...corner } : body.corner(index, side)))(
+              ring?.[index === 0 ? (side === -1 ? 0 : 3) : side === -1 ? 1 : 2],
+            ),
             entityId: wall.id,
-            feature: joined.has(wall.id)
-              ? `join-corner-${index}-${side}`
-              : `corner-${index}-${side}`,
+            feature: ring ? `join-corner-${index}-${side}` : `corner-${index}-${side}`,
             directions: [d],
           })),
         ]),
         ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
-    }),
-  );
-  if (owned) wallParts.set(storey.walls, { inputs, part: result });
-  return result;
+    });
+    if (owned) wallParts.set(wall, { key, part: result });
+    return result;
+  });
 }
 
 function hatchPart(hatch: Project["storeys"][number]["hatches"][number]): Part {

@@ -2,6 +2,7 @@
 // Equality proof for docs/performance/EDIT_CYCLE.md on the school model (s): every command is
 // applied through the new path (trusted own preview, shared wall extrusions) and through the
 // former path (re-run of the action, uncached extrusion); models and wall solids must match.
+// Teil B: each result also equals a full validation (no element reuse) of the same data.
 // A counter-check proves the comparison detects a changed wall solid.
 import { writeFileSync } from "node:fs";
 import { deepStrictEqual } from "node:assert/strict";
@@ -20,8 +21,9 @@ import {
   createWallSolidReuse,
 } from "../src/domain/elements/wall/connections.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
-import type { Project } from "../src/domain/project/schema.ts";
+import { validateProject, type Project } from "../src/domain/project/schema.ts";
 import type { ElementTarget } from "../src/application/selection/target.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 
 type Case = { target: ElementTarget | ElementTarget[]; text: string; storey?: string };
 const wall = (id: string) => ({ kind: "wall" as const, id });
@@ -81,9 +83,21 @@ for (const c of cases) {
   // Former path: re-run the action instead of trusting the preview.
   const rerun = previewSelectionCommand(p, targets, visibility, c.text).result;
   deepStrictEqual(modelOf(applied), modelOf(rerun), `model differs: ${c.text}`);
+  // Element reuse (Teil B): the owned result equals a full validation of the same data.
+  deepStrictEqual(
+    modelOf(applied),
+    modelOf(validateProject(modelOf(applied))),
+    `full validation differs: ${c.text}`,
+  );
   history = commitProject(history, applied);
   const solids = connectedWallSolids(history.present);
   deepStrictEqual(solids, uncachedSolids(history.present), `wall solids differ: ${c.text}`);
+  // Teil B: the building with reused storey parts equals one built from a mutable copy.
+  deepStrictEqual(
+    buildBuildingSolid(history.present),
+    buildBuildingSolid(structuredClone(history.present)),
+    `building differs: ${c.text}`,
+  );
   results.push({ text: c.text, model: true, solids: solids.length });
 }
 

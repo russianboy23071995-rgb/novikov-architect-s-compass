@@ -10,6 +10,7 @@ import { wallContourSolid, createWallContourSolidDeriver } from "./contour-solid
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
 import { createDerivedCache } from "../../project/derived-cache.ts";
+import type { Point2 } from "../../../geometry/primitives/point.ts";
 
 export type WallEnd = { wallId: string; endpoint: 0 | 1 };
 export type WallJoin = { first: WallEnd; second: WallEnd };
@@ -70,8 +71,18 @@ export function reconcileWallJoins(
   return { ...replaceStorey(project, { ...storeyOf(project), wallJoins: joins }) };
 }
 
+// Contours of one snapshot or scope, shared by snapping, selection shapes, plan outline and
+// wall solids (docs/performance/EDIT_CYCLE.md, Teil B). Callers only read them.
+const contourCache = createDerivedCache<WallGeometry, ReadonlyMap<string, Point2[]>>();
+
 /** Authoritative disposable contours from persisted endpoint relationships. No schema recursion. */
-export function connectedWallContours(project: WallGeometry) {
+export function connectedWallContours(project: WallGeometry): ReadonlyMap<string, Point2[]> {
+  let contours = contourCache.get(project);
+  if (!contours) contourCache.set(project, (contours = deriveConnectedWallContours(project)));
+  return contours;
+}
+
+function deriveConnectedWallContours(project: WallGeometry) {
   const walls = new Map(storeyOf(project).walls.map((w) => [w.id, w]));
   const counts = new Map<string, number>();
   for (const wall of walls.values())

@@ -494,7 +494,66 @@ export type StoreyValidationMemo = {
   /** Pattern IDs used by an identical, previously validated storey under the same key. */
   lookup(storey: unknown, key: readonly unknown[]): readonly string[] | undefined;
   record(index: number, used: readonly string[]): void;
+  /** True only for an element object an earlier validation produced and nobody can change. */
+  knownElement?(element: unknown): boolean;
 };
+
+// Element lists whose entries parse independently of each other and of the storey context, so
+// a known element of a changed storey may skip parsing (docs/performance/EDIT_CYCLE.md, Teil B).
+// Walls stay out: their bound heights depend on the storey levels and are resolved after
+// parsing. Every check over the whole storey still runs on the reassembled lists.
+export const REUSABLE_ELEMENT_LISTS = [
+  "windows",
+  "doors",
+  "lines",
+  "hatches",
+  "references",
+] as const;
+
+/** The changed storeys with known elements taken out of their lists, and where they were. */
+function withoutKnownElements(
+  input: Record<string, unknown> & { storeys: unknown[] },
+  memo: StoreyValidationMemo,
+  skip: readonly (readonly string[] | undefined)[] | undefined,
+) {
+  const removed = new Map<number, Map<string, Map<number, unknown>>>();
+  const storeys = input.storeys.map((storey, index) => {
+    if (skip?.[index] || !storey || typeof storey !== "object") return storey;
+    const lists = new Map<string, Map<number, unknown>>();
+    const copy: Record<string, unknown> = { ...(storey as Record<string, unknown>) };
+    for (const name of REUSABLE_ELEMENT_LISTS) {
+      const list = copy[name];
+      if (!Array.isArray(list)) continue;
+      const known = new Map<number, unknown>();
+      list.forEach((element, i) => {
+        if (memo.knownElement!(element)) known.set(i, element);
+      });
+      if (!known.size) continue;
+      lists.set(name, known);
+      copy[name] = list.filter((_, i) => !known.has(i));
+    }
+    if (!lists.size) return storey;
+    removed.set(index, lists);
+    return copy;
+  });
+  return removed.size ? { value: { ...input, storeys }, removed } : undefined;
+}
+
+/** Put known elements back at their original positions in the parsed lists. */
+function restoreKnownElements(
+  storeys: Record<string, unknown>[],
+  removed: ReadonlyMap<number, ReadonlyMap<string, ReadonlyMap<number, unknown>>>,
+) {
+  for (const [index, lists] of removed) {
+    const storey = storeys[index]!;
+    for (const [name, known] of lists) {
+      const parsed = [...(storey[name] as unknown[])];
+      for (const [position, element] of [...known].sort((a, b) => a[0] - b[0]))
+        parsed.splice(position, 0, element);
+      storey[name] = parsed;
+    }
+  }
+}
 
 /** Everything a storey's scope validation reads besides the storey itself: its own and the next
  * storey's resolved levels (bound wall heights) and every other project value by identity.
@@ -576,7 +635,13 @@ export function validateProject(
   // Identities come from the caller's value; parsing copies them.
   const input = memo ? (value as Record<string, unknown> & { storeys: unknown[] }) : undefined;
   const early = input && reusableStoreys(input, memo!);
-  const parsed = projectSchema.parse(early ? withoutReusedContent(input!, early.known) : value);
+  const reduced = early ? withoutReusedContent(input!, early.known) : value;
+  const elements =
+    input && memo!.knownElement
+      ? withoutKnownElements(reduced as typeof input, memo!, early?.known)
+      : undefined;
+  const parsed = projectSchema.parse(elements ? elements.value : reduced);
+  if (elements) restoreKnownElements(parsed.storeys as Record<string, unknown>[], elements.removed);
   // A reused storey is the validated output of an identical earlier parse; put it back.
   if (early)
     parsed.storeys = parsed.storeys.map((storey, i) =>

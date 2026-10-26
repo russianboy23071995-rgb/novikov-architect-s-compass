@@ -22,6 +22,8 @@ export default defineConfig(({ mode }) => ({
   resolve: { alias: { "@": fileURLToPath(new URL("../src", import.meta.url)) } },
   build: {
     outDir: "dist-production-workspace",
+    // js-profile: readable stacks for the JS Self-Profiling API (docs/performance/EDIT_CYCLE.md).
+    ...(mode === "js-profile" ? { minify: false } : {}),
     rollupOptions: {
       input: [
         "benchmarks/production-workspace.html",
@@ -30,5 +32,10 @@ export default defineConfig(({ mode }) => ({
       ],
     },
   },
-  preview: { host: "127.0.0.1", port: 8085, strictPort: true },
+  preview: {
+    host: "127.0.0.1",
+    port: 8085,
+    strictPort: true,
+    ...(mode === "js-profile" ? { headers: { "Document-Policy": "js-profiling" } } : {}),
+  },
 }));

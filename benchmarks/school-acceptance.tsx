@@ -40,10 +40,14 @@ addEventListener("error", (e) => errors.push({ at: currentStep, text: "uncaught 
 addEventListener("unhandledrejection", (e) =>
   errors.push({ at: currentStep, text: "rejection " + String(e.reason).slice(0, 300) }),
 );
-let longTaskMs = 0;
+let longTaskMs = 0,
+  lastLongTaskEnd = 0;
 if (PerformanceObserver.supportedEntryTypes.includes("longtask"))
   new PerformanceObserver((list) => {
-    for (const entry of list.getEntries()) longTaskMs += entry.duration;
+    for (const entry of list.getEntries()) {
+      longTaskMs += entry.duration;
+      lastLongTaskEnd = Math.max(lastLongTaskEnd, entry.startTime + entry.duration);
+    }
   }).observe({ entryTypes: ["longtask"] });
 const heapMB = () => {
   const memory = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
@@ -437,6 +441,16 @@ async function phaseOne() {
     "2D → 3D",
     () => click(button("3D")!),
     () => !!document.querySelector("canvas"),
+  );
+  // The 3D view keeps deriving after its canvas appears; count that apart from the drag.
+  await step(
+    "3D – Szene fertig",
+    async () => {
+      const quietSince = () => performance.now() - lastLongTaskEnd;
+      const t0 = performance.now();
+      while (quietSince() < 500 && performance.now() - t0 < 15000) await frame();
+    },
+    () => true,
   );
   await step(
     "3D: Tür entlang Wand ziehen",
