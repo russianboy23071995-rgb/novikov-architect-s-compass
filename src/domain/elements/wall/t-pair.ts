@@ -1,6 +1,6 @@
 import type { Wall } from "../../project/schema.ts";
 import type { WallOpening } from "./openings.ts";
-import { deriveRightAngleTJunction } from "./t-junction.ts";
+import { deriveTJunction } from "./t-junction.ts";
 import { wallBody } from "./body.ts";
 import { wallContourSolid } from "./contour-solid.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
@@ -15,7 +15,7 @@ export type TPairEnd = { wall: Wall; endpoint: 0 | 1 };
 export function inspectTPair(host: Wall, incoming: TPairEnd, windows: readonly WallOpening[]) {
   const wall = incoming.wall;
   const ids = new Set([host.id, wall.id]);
-  const geometry = deriveRightAngleTJunction(host, { wall, endpoint: incoming.endpoint });
+  const geometry = deriveTJunction(host, { wall, endpoint: incoming.endpoint });
   const hostLength = Math.hypot(host.end.x - host.start.x, host.end.y - host.start.y);
   const contact = geometry.contact
     .map(

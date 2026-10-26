@@ -12,6 +12,7 @@ import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { createIsotropicScreenMetric } from "../../geometry/projections/screen-metric.ts";
 import { segmentKey } from "../snapping/reference-selection.ts";
 import { previewTConnection } from "./t-connections.ts";
+import { MIN_T_ANGLE_DEGREES } from "../../domain/elements/wall/t-junction.ts";
 
 export function tAxisEndpoint(session: EditSession) {
   if (
@@ -44,6 +45,17 @@ export function tAxisReference(
   );
 }
 
+/** At least the T minimum angle between the new wall (fixed end to foot) and the host axis. */
+function obliqueEnough(fixed: Point, foot: Point, axis: Point) {
+  const wall = { x: foot.x - fixed.x, y: foot.y - fixed.y };
+  const lengths = Math.hypot(wall.x, wall.y) * Math.hypot(axis.x, axis.y);
+  return (
+    lengths > 0 &&
+    Math.abs(wall.x * axis.x + wall.y * axis.y) / lengths <=
+      Math.cos((MIN_T_ANGLE_DEGREES * Math.PI) / 180)
+  );
+}
+
 export function findTAxisReference(
   fixed: Point,
   excludedId: string | null,
@@ -73,8 +85,20 @@ export function findTAxisReference(
     )
       continue;
     const { start, end } = source.segment;
-    const point = projectDirection(fixed, start, { x: end.x - start.x, y: end.y - start.y });
-    if (!point || metric.distance(cursor, point) > context.endpointRadiusPx) continue;
+    const axis = { x: end.x - start.x, y: end.y - start.y };
+    // The perpendicular foot of the fixed end wins near the cursor; otherwise the cursor foot on
+    // the axis gives an oblique T, if the angle is not flatter than the T minimum (26.10.2026).
+    const square = projectDirection(fixed, start, axis);
+    const foot = projectDirection(cursor, start, axis);
+    const point =
+      square && metric.distance(cursor, square) <= context.endpointRadiusPx
+        ? square
+        : foot &&
+            metric.distance(cursor, foot) <= context.endpointRadiusPx &&
+            obliqueEnough(fixed, foot, axis)
+          ? foot
+          : null;
+    if (!point) continue;
     const t =
       ((point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y)) /
       ((end.x - start.x) ** 2 + (end.y - start.y) ** 2);

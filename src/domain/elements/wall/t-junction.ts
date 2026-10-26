@@ -6,11 +6,16 @@ import { intersectLines } from "../../../geometry/intersections/lines.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { coordinatesCompatible, pointsCompatible } from "../../../geometry/tolerances/model.ts";
 
-/** Gross geometry for an explicit, isolated perpendicular T pair only.
+/** Smallest angle between the axes of a T junction (user decision 26.10.2026,
+ * docs/OBLIQUE_T_JUNCTIONS.md); below it the contact on the host becomes a long sliver.
+ */
+export const MIN_T_ANGLE_DEGREES = 15;
+
+/** Gross geometry for an explicit, isolated T pair, perpendicular or oblique.
  * No project lookup, opening validation, other joins, persistence or mutation.
  * Callers must verify those project-level preconditions before using this result.
  */
-export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
+export function deriveTJunction(host: CornerEnd["wall"], incoming: CornerEnd) {
   assertSameWallBase(host, incoming.wall);
   if (!host.id.trim() || !incoming.wall.id.trim() || host.id === incoming.wall.id)
     throw new Error("Zwei unterschiedliche Wand-IDs erforderlich.");
@@ -49,8 +54,15 @@ export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: Cor
   const far = incoming.endpoint === 0 ? w.end : w.start;
   const length = Math.hypot(far.x - node.x, far.y - node.y);
   const away = { x: (far.x - node.x) / length, y: (far.y - node.y) / length };
-  if (Math.abs(u.x * away.x + u.y * away.y) > 1e-10)
-    throw new Error("Der T-Anschluss benötigt einen rechten Winkel.");
+  // The incoming wall may meet the host obliquely: its near corners are cut along its own axis
+  // on the host face, so the end becomes a slanted cap.
+  if (
+    Math.abs(u.x * away.x + u.y * away.y) >
+    Math.cos((MIN_T_ANGLE_DEGREES * Math.PI) / 180) + 1e-12
+  )
+    throw new Error(
+      `Der T-Anschluss benötigt mindestens ${MIN_T_ANGLE_DEGREES}° zwischen den Wandachsen.`,
+    );
   const along = (p: Point2) => p.x * u.x + p.y * u.y;
   const position = along(node);
   const projected = world({ x: u.x * position, y: u.y * position });

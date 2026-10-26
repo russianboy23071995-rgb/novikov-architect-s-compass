@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { deriveRightAngleTJunction } from "./t-junction.ts";
+import { deriveTJunction } from "./t-junction.ts";
 import type { CornerEnd } from "./corner.ts";
 import { wallBody } from "./body.ts";
 import { wallContourSolid } from "./contour-solid.ts";
@@ -36,7 +36,7 @@ const same = (a: { x: number; y: number }[], b: { x: number; y: number }[]) => {
 test("T preserves host and axes, returns exact contact and independently expected solid volume", () => {
   const [host, incoming] = pair();
   const before = structuredClone([host, incoming]);
-  const r = deriveRightAngleTJunction(host, incoming);
+  const r = deriveTJunction(host, incoming);
   assert.deepEqual(r.host.points, wallBody(host).corners);
   same(r.contact, [
     { x: 2.82, y: -0.18 },
@@ -66,7 +66,7 @@ test("both sides and all axis offsets produce touching, non-overlapping bodies",
         host.bodyOffset = ho;
         incoming.wall.bodyOffset = wo;
         incoming.wall.start.y = sign * 3;
-        const r = deriveRightAngleTJunction(host, incoming);
+        const r = deriveTJunction(host, incoming);
         const contactY = ho + sign * 0.18;
         for (const p of r.contact) close(p.y, contactY);
         assert.ok(r.incoming.points.every((p) => sign * (p.y - contactY) >= -1e-12));
@@ -83,7 +83,7 @@ test("T geometry is invariant under endpoint reversal, rotation, reflection and 
         const [host, incoming] = pair();
         host.bodyOffset = 0.18;
         incoming.wall.bodyOffset = -0.18;
-        const expected = deriveRightAngleTJunction(host, incoming);
+        const expected = deriveTJunction(host, incoming);
         const transform = (p: { x: number; y: number }) => ({
           x: 10000 + Math.cos(angle) * p.x - Math.sin(angle) * p.y * mirror,
           y: -20000 + Math.sin(angle) * p.x + Math.cos(angle) * p.y * mirror,
@@ -94,7 +94,7 @@ test("T geometry is invariant under endpoint reversal, rotation, reflection and 
           end: transform(reverse ? w.start : w.end),
           bodyOffset: w.bodyOffset * mirror * (reverse ? -1 : 1),
         });
-        const actual = deriveRightAngleTJunction(map(host, !!(mask & 1)), {
+        const actual = deriveTJunction(map(host, !!(mask & 1)), {
           wall: map(incoming.wall, !!(mask & 2)),
           endpoint: mask & 2 ? 0 : 1,
         });
@@ -138,8 +138,9 @@ test("invalid pairs reject without changing inputs", () => {
     (_, i) => {
       i.wall.end.y = 0.01;
     },
+    // Oblique is allowed (26.10.2026) but not flatter than 15°: here about 10°.
     (_, i) => {
-      i.wall.start.x = 2;
+      i.wall.start.x = 3 - 3 / Math.tan((10 * Math.PI) / 180);
     },
     (_, i) => {
       i.wall.start = { x: 1, y: 0 };
@@ -167,12 +168,12 @@ test("invalid pairs reject without changing inputs", () => {
     const [h, i] = pair();
     change(h, i);
     const before = structuredClone([h, i]);
-    assert.throws(() => deriveRightAngleTJunction(h, i));
+    assert.throws(() => deriveTJunction(h, i));
     assert.deepEqual([h, i], before);
   }
   for (const x of [0.18001, 5.81999]) {
     const [h, i] = pair();
     i.wall.start.x = i.wall.end.x = x;
-    assert.doesNotThrow(() => deriveRightAngleTJunction(h, i));
+    assert.doesNotThrow(() => deriveTJunction(h, i));
   }
 });
