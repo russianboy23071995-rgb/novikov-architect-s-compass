@@ -18,7 +18,12 @@ import {
   connectedWallSolids,
 } from "../../domain/elements/wall/connections.ts";
 import { moveElement } from "../direct-edit/transforms.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { buildSolid } from "../../lib/bim/geometry.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";

@@ -11,7 +11,7 @@ import { addWindow } from "../../application/windows/actions.ts";
 import { addStorey, setStoreyHeight, setGroundDatum } from "../../application/storeys/actions.ts";
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
 import { prepareZTranslation } from "../../application/selection/z-translation.ts";
-import { createHistory, undoProject } from "./history.ts";
+import { createHistory, undoProject } from "../../application/history/project-history.ts";
 import type { Project } from "../../domain/project/schema.ts";
 
 const date = new Date("2026-09-30T12:00:00Z");

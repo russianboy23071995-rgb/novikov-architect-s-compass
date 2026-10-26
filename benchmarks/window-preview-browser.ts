@@ -1,7 +1,8 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
 import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
-import { buildBuildingSolid, initialCamera } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { initialCamera } from "../src/lib/bim/geometry.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

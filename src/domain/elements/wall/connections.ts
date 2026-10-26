@@ -9,6 +9,7 @@ import { wallBody } from "./body.ts";
 import { wallContourSolid, createWallContourSolidDeriver } from "./contour-solid.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { measureHalfPlane } from "../../../geometry/projections/half-plane.ts";
+import { createDerivedCache } from "../../project/derived-cache.ts";
 
 export type WallEnd = { wallId: string; endpoint: 0 | 1 };
 export type WallJoin = { first: WallEnd; second: WallEnd };
@@ -145,7 +146,7 @@ export function connectedWallContours(project: WallGeometry) {
   return contours;
 }
 
-const solidCache = new WeakMap<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
+const solidCache = createDerivedCache<WallGeometry, ReturnType<typeof wallContourSolid>[]>();
 function deriveConnectedWallSolids(project: WallGeometry, deriveSolid: typeof wallContourSolid) {
   const cached = solidCache.get(project);
   if (cached) return cached;

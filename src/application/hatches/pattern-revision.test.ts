@@ -13,7 +13,7 @@ import { validatePatternRevisions } from "../../domain/elements/hatch/revision.t
 import { serializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
 import { createDrawing } from "../drawing/actions.ts";
-import { createHistory, commitProject, undoProject } from "../../lib/bim/history.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 const pattern = {
   id: "p",
   name: "Original",

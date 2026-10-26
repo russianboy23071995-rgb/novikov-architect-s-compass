@@ -7,7 +7,8 @@ import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { updateWindow } from "../src/application/windows/actions.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
-import { buildBuildingSolid, type Solid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { type Solid } from "../src/lib/bim/geometry.ts";
 
 // Diagnostics only: exact anchors, exclusive sibling, cleanup even on failed oracle.
 const generated = new URL("../src/lib/bim/geometry.rebuild-probe.ts", import.meta.url);

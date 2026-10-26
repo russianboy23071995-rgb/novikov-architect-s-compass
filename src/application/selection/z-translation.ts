@@ -11,7 +11,7 @@ import {
   resolveWallHeightRule,
 } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
-import { commitProject, type ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject, type ProjectHistory } from "../history/project-history.ts";
 import { type SelectionSet } from "./state.ts";
 import { sameTargets, assertMovableSelection } from "./move.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";

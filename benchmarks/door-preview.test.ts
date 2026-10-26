@@ -18,7 +18,7 @@ import {
   moveWindowAlongWall,
 } from "../src/application/direct-edit/transforms.ts";
 import { boundedWindowPosition } from "../src/domain/elements/wall/window-range.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

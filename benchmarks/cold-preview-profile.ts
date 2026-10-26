@@ -3,7 +3,7 @@ import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { prepareViewportModel } from "../src/rendering/viewport/prepared-model.ts";
 import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";

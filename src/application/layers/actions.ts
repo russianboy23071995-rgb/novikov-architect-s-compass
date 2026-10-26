@@ -2,8 +2,8 @@ import { allStoreyElements, ELEMENT_KINDS, elementKinds } from "../../domain/ele
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { validateLike, validatedInput } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { commitProject } from "../../lib/bim/history.ts";
-import type { ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject } from "../history/project-history.ts";
+import type { ProjectHistory } from "../history/project-history.ts";
 import { isStandardLayerId } from "../../domain/layers/model.ts";
 
 /** IDs, not display names/list positions. Adapters pin the immutable base snapshot. */

@@ -5,7 +5,12 @@ import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import {
   connectedWallSolids,
   createWallSolidReuse,

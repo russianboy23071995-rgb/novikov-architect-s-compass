@@ -132,7 +132,7 @@ test("confirmed open is acknowledged only after validation and can be undone", a
 test("24 MiB multi-asset project supports commit, file roundtrip, undo and recovery", async () => {
   const { createImageAssetHandle } = await import("../../domain/elements/reference/model.ts");
   const { createHistory, commitProject, undoProject, redoProject } =
-    await import("../../lib/bim/history.ts");
+    await import("../history/project-history.ts");
   const { saveRecovery, readRecovery } = await import("./recovery.ts");
   const { ensureDocumentFolder } = await import("../views/documents.ts");
   const original = ensureDocumentFolder(createExampleProject());

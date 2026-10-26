@@ -143,7 +143,7 @@ test("visibility is annotated without filtering hidden or outside footpoints", (
 });
 
 import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
-import { buildBuildingSolid } from "../../lib/bim/geometry.ts";
+import { buildBuildingSolid } from "./building-solid.ts";
 import { createWallPreviewContext } from "./wall-preview-context.ts";
 import { beginSelectionMove } from "../../application/selection/move.ts";
 test("3D movement origin acquires real upper corners, respects pixel radius and visibility", () => {

@@ -4,7 +4,7 @@ import { createSolidBufferCache, packSolidFaces } from "../src/rendering/viewpor
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { recordingCanvas, resourceFixture, resourceProjection } from "./solid-resource-fixture.ts";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import {

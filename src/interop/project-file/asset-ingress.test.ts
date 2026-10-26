@@ -17,8 +17,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 function fixture() {
   const p = addLine(
     addWall(createProject("p", "s"), {

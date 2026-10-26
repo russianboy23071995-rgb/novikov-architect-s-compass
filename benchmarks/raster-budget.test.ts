@@ -17,7 +17,12 @@ import {
   prepareProjectOpen,
   requestProjectDownload,
 } from "../src/application/project-files/operations.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import { createEditingState, editingReducer } from "../src/application/direct-edit/controller.ts";
 import { previewCreateReference } from "../src/application/references/actions.ts";
 import { prepareRecoveryV2Writer } from "../src/application/project-files/recovery-v2-writer.ts";

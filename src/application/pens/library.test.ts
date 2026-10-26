@@ -8,7 +8,12 @@ import { defaultPenSet, penSetSchema } from "../../domain/pens/model.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { addLine, updateLine } from "../lines/actions.ts";
 import { createProject } from "../projects/create.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 const memory = () => {
   let raw: string | null = null;

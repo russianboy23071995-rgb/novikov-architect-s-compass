@@ -2,7 +2,7 @@ import type { LayerVisibilityScope } from "./visibility.ts";
 import { drawingDocument } from "../views/documents.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { HISTORY_LIMIT } from "../../lib/bim/history.ts";
+import { HISTORY_LIMIT } from "../history/project-history.ts";
 
 export type VisibilityHistory = { past: string[][]; future: string[][] };
 export type VisibilityAction =

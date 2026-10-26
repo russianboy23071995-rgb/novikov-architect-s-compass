@@ -2,8 +2,8 @@ import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { TJunction } from "../../domain/elements/wall/t-relations.ts";
-import { commitProject } from "../../lib/bim/history.ts";
-import type { ProjectHistory } from "../../lib/bim/history.ts";
+import { commitProject } from "../history/project-history.ts";
+import type { ProjectHistory } from "../history/project-history.ts";
 import {
   createProjectSnapshot,
   isOwnedProjectSnapshot,

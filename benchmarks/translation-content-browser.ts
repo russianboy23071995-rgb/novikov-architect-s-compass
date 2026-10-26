@@ -1,7 +1,12 @@
 import { translationFixture } from "./translation-content-fixture.ts";
 import { prepareSelectionTranslation } from "../src/application/selection/storey-translation.ts";
 import { prepareZTranslation } from "../src/application/selection/z-translation.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../src/lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history.ts";
 import { sameProjectContent } from "../src/domain/project/model-equality.ts";
 const output = document.querySelector("#result")!;
 document.querySelector("#run")!.addEventListener("click", () => {

@@ -9,7 +9,7 @@ import {
   classifyAnchorVisibility,
 } from "../src/rendering/viewport/anchor-visibility.ts";
 import { originFixture } from "./local-origin-fixture.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { movementCorners } from "../src/rendering/viewport/movement-origin.ts";
 import type { Vector3 } from "../src/geometry/projections/orthographic.ts";
 const identity = (p: Vector3) => p;

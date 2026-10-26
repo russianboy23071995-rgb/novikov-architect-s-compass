@@ -12,7 +12,12 @@ import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
 import { previewWallCommand } from "../walls/command.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 function fixture() {
   let p = createExampleProject();
   p = addWall(p, {

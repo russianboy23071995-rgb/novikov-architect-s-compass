@@ -23,12 +23,12 @@ import {
 } from "../layers/visibility-actions.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import {
-  readProjectFile,
   commitProject,
   createHistory,
   undoProject,
   redoProject,
-} from "../../lib/bim/history.ts";
+} from "../history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
 import { updateWall } from "../walls/actions.ts";

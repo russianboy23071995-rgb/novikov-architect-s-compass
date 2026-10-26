@@ -3,7 +3,7 @@ import { readFile, writeFile, unlink } from "node:fs/promises";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 
 // Temporary sibling preserves the real imports/algorithm. Never patch product source.
 // Fail closed if an instrumentation anchor changes; exclusive creation + finally cleanup.

@@ -6,7 +6,12 @@ import assert from "node:assert/strict";
 import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { createProject } from "../projects/create.ts";
 import { validateProject } from "../../domain/project/schema.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { createDrawing } from "../drawing/actions.ts";
 import { previewHatch } from "./actions.ts";
 import { moveElement, moveElementPoint } from "../direct-edit/transforms.ts";

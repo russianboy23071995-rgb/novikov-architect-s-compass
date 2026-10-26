@@ -1,5 +1,5 @@
 import { CameraAxes } from "./CameraAxes";
-import { buildBuildingSolid } from "@/lib/bim/geometry";
+import { buildBuildingSolid } from "@/rendering/viewport/building-solid";
 import { createProjectionFrame } from "@/geometry/projections/orthographic";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DocumentFraming } from "@/domain/views/documents";

@@ -5,7 +5,12 @@ import { fullSelectionMove } from "./selection-move-oracle";
 import { capacityFixture, tick } from "./capacity";
 import { prepareChainMove } from "./prepared-chain-move";
 import { validateProject } from "../src/domain/project/schema.ts";
-import { commitProject, createHistory, undoProject, redoProject } from "../src/lib/bim/history";
+import {
+  commitProject,
+  createHistory,
+  undoProject,
+  redoProject,
+} from "../src/application/history/project-history";
 const button = document.querySelector<HTMLButtonElement>("#run")!,
   output = document.querySelector<HTMLPreElement>("#report")!;
 button.onclick = async () => {

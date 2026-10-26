@@ -4,8 +4,9 @@ import type { Project } from "../../domain/project/schema.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createPrimitiveSourceIndex } from "../../constraints/snapping/local-source-index.ts";
 import { selectionEdges } from "./selection-outline.ts";
+import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 
-const cache = new WeakMap<Project, ReturnType<typeof createPrimitiveSourceIndex>>();
+const cache = createDerivedCache<Project, ReturnType<typeof createPrimitiveSourceIndex>>();
 
 /** Real material edges at the active storey elevation, including gaps from openings reaching the floor.
  * Uses the same conforming mesh boundary extraction as selection outlines.

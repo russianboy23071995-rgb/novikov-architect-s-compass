@@ -19,8 +19,8 @@ import {
   createHistory,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../../lib/bim/history.ts";
+} from "../../application/history/project-history.ts";
+import { readProjectFile } from "../../lib/bim/history.ts";
 import { querySnap } from "./engine.ts";
 import type { SnapContext } from "./engine.ts";
 import {

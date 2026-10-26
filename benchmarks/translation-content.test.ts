@@ -12,8 +12,8 @@ import {
   commitProject,
   undoProject,
   redoProject,
-  readProjectFile,
-} from "../src/lib/bim/history.ts";
+} from "../src/application/history/project-history.ts";
+import { readProjectFile } from "../src/lib/bim/history.ts";
 import { serializeProject } from "../src/lib/bim/model.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { createProjectRecoveryCodec } from "../src/interop/project-file/recovery-codec.ts";

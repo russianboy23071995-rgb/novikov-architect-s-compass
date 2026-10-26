@@ -123,7 +123,12 @@ import { serializeProject, deserializeProject } from "../../lib/bim/model.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { updateLine } from "../lines/actions.ts";
 import { updateWall } from "../walls/actions.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "../../lib/bim/history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../history/project-history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { addWindow } from "../windows/actions.ts";
 import { addLine } from "../lines/actions.ts";
@@ -357,9 +362,16 @@ test("model revision, undo/redo and loaded same-ID projects use matching referen
   assert.notEqual(after, before);
   assert.deepEqual(after, projectSnapReferences(next.present));
   assert.deepEqual(before, projectSnapReferences(original));
+  // Kept history steps hold no derived data: undo/redo rebuild equal references once and then
+  // reuse them while the step stays present (docs/performance/HISTORY_MEMORY.md).
   const undone = undoProject(next);
-  assert.equal(getProjectSnapReferences(undone.present), before);
-  assert.equal(getProjectSnapReferences(redoProject(undone).present), after);
+  const restored = getProjectSnapReferences(undone.present);
+  assert.notEqual(restored, before);
+  assert.deepEqual(restored, before);
+  assert.equal(getProjectSnapReferences(undone.present), restored);
+  const redone = getProjectSnapReferences(redoProject(undone).present);
+  assert.notEqual(redone, after);
+  assert.deepEqual(redone, after);
   const loaded = deserializeProject(serializeProject(changed));
   assert.notEqual(getProjectSnapReferences(loaded), after);
   assert.deepEqual(getProjectSnapReferences(loaded), projectSnapReferences(loaded));

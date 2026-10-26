@@ -6,7 +6,12 @@ import { serializeProject, deserializeProject } from "./model.ts";
 import { addLine } from "../../application/lines/actions.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "./lines.ts";
-import { createHistory, commitProject, undoProject, redoProject } from "./history.ts";
+import {
+  createHistory,
+  commitProject,
+  undoProject,
+  redoProject,
+} from "../../application/history/project-history.ts";
 import { buildSolid } from "./geometry.ts";
 import {
   editablePoints,

@@ -3,7 +3,8 @@ import { readFile, writeFile, unlink } from "node:fs/promises";
 import { cpus } from "node:os";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { buildBuildingSolid, buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
+import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
 import { buildingViewFixture } from "./building-view-fixture.ts";
 
 const generated = new URL("../src/lib/bim/geometry.face-pilot.ts", import.meta.url);

@@ -1,6 +1,6 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
-import { buildBuildingSolid } from "../src/lib/bim/geometry.ts";
+import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 const mutable = buildingViewFixture(100);
 const start = performance.now();
 const owned = createProjectSnapshot(mutable);

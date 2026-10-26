@@ -4,7 +4,7 @@ import tailwind from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 const targets: Record<string, string[]> = {
   "/src/application/direct-edit/controller.ts": ["editingReducer"],
-  "/src/lib/bim/history.ts": ["commitProject"],
+  "/src/application/history/project-history.ts": ["commitProject"],
   "/src/domain/project/schema.ts": ["validateProject"],
   "/src/rendering/viewport/plan-scene.ts": ["derivePlanScene"],
   "/src/interop/images/import.ts": ["checkedImageUrl", "checkImageUrl", "imageHeader"],
