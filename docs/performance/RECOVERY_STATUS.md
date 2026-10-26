@@ -30,5 +30,5 @@ Türziehen in 3D (l): Start 227 ms, danach median ≈ 17 ms je Mausbewegung (an 
 ## Grenzen
 
 - Browser-Vergleich main/neu im Schullauf steht aus: Das App-Fenster war während der Messung verdeckt (etwa 1 Bild pro Sekunde, Messung verworfen).
-- Die Statusanzeige vertraut einer eigenen, abgeschlossenen Schreibtransaktion; eine spätere Beschädigung des Browserspeichers bei gleicher Revision fällt erst beim Wiederherstellen oder nach Fokuswechsel/Neustart auf (dann wird vollständig gelesen, sobald die Sitzung neu beginnt).
+- Die Statusanzeige vertraut einer eigenen, abgeschlossenen Schreibtransaktion. Eine spätere Beschädigung des Browserspeichers bei gleicher Revision zeigt sie nicht an; sie fällt beim Wiederherstellen auf (immer vollständig geprüft) und nach einem Neustart der Seite, weil eine neue Sitzung keine eigenen Sicherungen kennt.
 - Picking-Index je Geschoss offen.
