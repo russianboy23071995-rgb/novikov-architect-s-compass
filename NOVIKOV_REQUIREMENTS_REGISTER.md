@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentrales Anforderungsregister
 
-Geprüfte Code-Basis: 26.10.2026, main `a727611` nach PR460/PR461. PR447–PR461 (mit PR453) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich Abnahmelauf Schulmodell und Speicher und Verlauf sind damit integriert. Wartezeit Teil A (feat/edit-cycle-speed, PR462) liegt noch nicht in main (in feat/history-memory gemergt, Nachtrags-PR). Offen: PR318. Einziger Folgeauftrag Masterplan §9.
+Geprüfte Code-Basis: 26.10.2026, main `61715bc` nach PR463. PR447–PR461 (mit PR453) und über PR463 Wartezeit Teil A (PR462) in main integriert; die unten als „noch nicht gemergt“ geführten Einträge bis einschließlich Wartezeit Teil A sind damit integriert. PR318 geschlossen (überholt durch PR371). Keine offenen PRs; einziger Folgeauftrag Masterplan §9.
 
 Dieses Register gehört zum NOVIKOV_MASTERPLAN.md. Es erhält alte Kennungen und detaillierte Inhalte. Aktuelle Statuszeilen oben und der Masterplan sind maßgeblich. Die gekennzeichneten Quellenkapseln weiter unten bewahren Detailanforderungen und historische Nachweise; dort genannte alte „nächste Aufgaben“, Schemaversionen und offene Entscheidungen sind niemals allein ein neuer Auftrag. Der aktuelle Code-/PR-Abgleich im Masterplan hat Vorrang. Unbekannt ist nicht implementiert.
 
