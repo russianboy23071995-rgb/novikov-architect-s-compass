@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 26.10.2026, main `e9dcf7a` nach PR465. In main integriert: PR447–PR465 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464) und Wandanschlüsse (PR465). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 26.10.2026, main `fba664d` nach PR466. In main integriert: PR447–PR466 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465) und Treffertoleranz beim Setzen von Türen/Fenstern (PR466). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-26.10.2026: Branch fix/opening-hit-tolerance (von main e01e17f). Treffertoleranz beim Setzen von Türen und Fenstern: 8 Bildpunkte am aktuellen Maßstab, Vorrang für die Wand, deren Körper den Punkt enthält; Toleranz 0 unverändert. Tests mit Gegenprobe; 1266 Tests. Nachweis docs/OPENING_HIT_TOLERANCE.md.
+26.10.2026: Branch fix/opening-hit-tolerance (von main e01e17f; mit PR466 am 26.10.2026 in main fba664d integriert; Browser-Schullauf l ausstehend, Browserbereich war ausgeblendet). Treffertoleranz beim Setzen von Türen und Fenstern: 8 Bildpunkte am aktuellen Maßstab, Vorrang für die Wand, deren Körper den Punkt enthält; Toleranz 0 unverändert. Tests mit Gegenprobe; 1266 Tests. Nachweis docs/OPENING_HIT_TOLERANCE.md.
 
 26.10.2026: Branch feat/wall-junctions (vom Stand PR464; mit PR465 am 26.10.2026 in main e9dcf7a integriert). Wandanschlüsse nach Änderungskarte: Wand-/Fensterbefehl nennen die echte Ursache; T und Ecke mit unterschiedlicher Wandstärke/Höhe (Ecke unterschiedlicher Höhe als Stumpfstoß, höhere Wand läuft durch); mehrere Anschlüsse je Wand (T an beiden Enden, T plus Ecke, Haupt- und Nebenwand zugleich; ein Anschluss je Wandende, keine gegenseitigen T). Gleichheit: alle bisher gültigen Modelle behalten Konturen und Wandkörper exakt; Schulmodell mit 24-cm-Trennwänden und 24 T-Anschlüssen je Geschoss, IFC 80 Wände/180 Öffnungen, Browserlauf s fehlerfrei; 1261 Tests. Schräge T-Anschlüsse, Mehrfachknoten und IFC-Anschlussbeziehungen offen. Nachweis docs/WALL_JUNCTIONS.md.
 
