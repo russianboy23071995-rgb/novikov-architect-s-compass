@@ -53,12 +53,12 @@ export function schoolPlanFixture(options: { wings?: number; desksPerRoom?: numb
     for (let w = 0; w < wings; w++) {
       const ox = w * (length + 10);
       const id = (name: string) => `s${s}-w${w}-${name}`;
-      const wall = (name: string, start: Point, end: Point) =>
+      const wall = (name: string, start: Point, end: Point, width = thickness) =>
         storey.walls.push({
           id: id(name),
           start: { x: ox + start.x, y: start.y },
           end: { x: ox + end.x, y: end.y },
-          thickness,
+          thickness: width,
           bodyOffset: 0,
           height: storeyHeight - slab,
           layerId: p.defaultLayerIds.wall,
@@ -88,19 +88,25 @@ export function schoolPlanFixture(options: { wings?: number; desksPerRoom?: numb
           first: { wallId: id(a), endpoint: 1 },
           second: { wallId: id(b), endpoint: 0 },
         });
-      // Domain limit (found 25.10.2026): an incoming wall may have only one T and must not be
-      // a host. Corridor walls are hosts only and end butt-jointed at the gable walls'
-      // inner faces; partitions T into the corridor and end butt-jointed at the facade.
-      const face = thickness / 2;
-      wall("cor-s", { x: face, y: south }, { x: length - face, y: south });
-      wall("cor-n", { x: face, y: north }, { x: length - face, y: north });
+      // Realistic junctions (user decision 26.10.2026, docs/WALL_JUNCTIONS.md): corridor walls
+      // T into both gable walls; 24 cm partitions T into the facade and the corridor wall.
+      const partition = 0.24;
+      wall("cor-s", { x: 0, y: south }, { x: length, y: south });
+      wall("cor-n", { x: 0, y: north }, { x: length, y: north });
+      for (const corridorWall of ["cor-s", "cor-n"])
+        storey.wallTJunctions.push(
+          { hostWallId: id("ext-w"), incoming: { wallId: id(corridorWall), endpoint: 0 } },
+          { hostWallId: id("ext-e"), incoming: { wallId: id(corridorWall), endpoint: 1 } },
+        );
       for (let k = 1; k < rooms; k++) {
         const x = k * roomWidth;
-        wall(`par-s${k}`, { x, y: face }, { x, y: south });
-        wall(`par-n${k}`, { x, y: north }, { x, y: depth - face });
+        wall(`par-s${k}`, { x, y: 0 }, { x, y: south }, partition);
+        wall(`par-n${k}`, { x, y: north }, { x, y: depth }, partition);
         storey.wallTJunctions.push(
+          { hostWallId: id("ext-s"), incoming: { wallId: id(`par-s${k}`), endpoint: 0 } },
           { hostWallId: id("cor-s"), incoming: { wallId: id(`par-s${k}`), endpoint: 1 } },
           { hostWallId: id("cor-n"), incoming: { wallId: id(`par-n${k}`), endpoint: 0 } },
+          { hostWallId: id("ext-n"), incoming: { wallId: id(`par-n${k}`), endpoint: 1 } },
         );
       }
       for (let r = 0; r < rooms; r++) {

@@ -3,6 +3,7 @@ import type { Project } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import { openingLabel } from "../../domain/elements/wall/opening-marks.ts";
 import { updateWindow } from "./actions.ts";
+import { commandFailure } from "../commands/failure.ts";
 
 const units = { m: 1, cm: 100, mm: 1000 } as const;
 const measures = {
@@ -41,10 +42,8 @@ export function previewWindowCommand(
   try {
     if (!opening) throw new Error("Missing target");
     result = updateWindow(project, opening.id, { [field.key]: value });
-  } catch {
-    throw new Error(
-      "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen.",
-    );
+  } catch (error) {
+    throw commandFailure(error);
   }
   const format = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 6 });
   return {

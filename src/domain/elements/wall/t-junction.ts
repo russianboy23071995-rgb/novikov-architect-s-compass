@@ -34,8 +34,8 @@ export function deriveRightAngleTJunction(host: CornerEnd["wall"], incoming: Cor
     )
       throw new Error("Ungültige Wandmaße für den T-Anschluss.");
   }
-  if (host.thickness !== incoming.wall.thickness || host.height !== incoming.wall.height)
-    throw new Error("Der T-Anschluss benötigt gleiche Wandstärken und Höhen.");
+  // Thickness and height may differ (user decision 26.10.2026): the incoming wall ends at the
+  // host side face and each wall keeps its own height (docs/WALL_JUNCTIONS.md).
 
   const local = (p: Point2) => ({ x: p.x - host.start.x, y: p.y - host.start.y });
   const world = (p: Point2) => ({ x: p.x + host.start.x, y: p.y + host.start.y });

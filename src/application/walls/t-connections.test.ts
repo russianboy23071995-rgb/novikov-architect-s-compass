@@ -228,8 +228,10 @@ test("invalid persisted identities, duplicate incoming relations fail atomically
     ).wallTJunctions.length,
     2,
   );
-  for (const changes of [{ thickness: 0.4 }, { height: 3 }, { bodyOffset: 0.5 }])
-    assert.throws(() => updateWall(p, "host", changes));
+  // Thickness and height may differ (26.10.2026); a body offset beyond the axis still fails.
+  for (const changes of [{ thickness: 0.4 }, { height: 3 }])
+    assert.equal(storeyOf(updateWall(p, "host", changes)).wallTJunctions.length, 1);
+  assert.throws(() => updateWall(p, "host", { bodyOffset: 0.5 }));
   assert.equal(serializeProject(p), before);
 });
 
@@ -413,7 +415,7 @@ test("plain numeric target never discovers a T; invalid or stale snapped commit 
   );
   const changed = updateWall(a.session.base, "host", { height: 3 });
   assert.throws(() => previewEdit(a.session, changed, a.target, result.point, result.candidate));
-  const invalid = aiming(updateWall(pair(), "host", { height: 3 }));
+  const invalid = aiming(updateWall(pair(), "host", { baseOffset: 0.2 }));
   const snap = resolveToolSnap(
     invalid.adapter.snapping,
     { x: 3, y: 0 },

@@ -55,12 +55,16 @@ export function appendWallChain(
   candidate?: SnapCandidate | null,
 ): WallChain {
   assertDrawingContext(chain.base, current);
+  // The chain continues from the end of its last wall; once that end is a T it is taken (one
+  // join per wall end). A T at the start of the first wall no longer ends the chain (26.10.2026).
   if (
     chain.wallIds.length &&
-    storeyOf(chain.preview).wallTJunctions.some((r) => r.incoming.wallId === chain.wallIds.at(-1))
+    storeyOf(chain.preview).wallTJunctions.some(
+      (r) => r.incoming.wallId === chain.wallIds.at(-1) && r.incoming.endpoint === 1,
+    )
   )
     throw new Error(
-      "Wandkette am T-Anschluss abschlie\u00dfen. Eine T-Nebenwand darf noch keinen eigenen Eckanschluss haben.",
+      "Wandkette am T-Anschluss abschlie\u00dfen: Dieses Wandende ist bereits angeschlossen.",
     );
   const created = createDrawing(chain.preview, chain.preview, id, {
     kind: "wall",

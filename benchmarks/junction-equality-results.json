@@ -1,0 +1,34 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-26T11:57:14.324Z",
+  "models": 5,
+  "identical": 5,
+  "counterCheckDetected": true,
+  "results": [
+    {
+      "model": "example",
+      "storeys": 1,
+      "walls": 0
+    },
+    {
+      "model": "school-s",
+      "storeys": 5,
+      "walls": 80
+    },
+    {
+      "model": "school-l",
+      "storeys": 5,
+      "walls": 240
+    },
+    {
+      "model": "school-x",
+      "storeys": 5,
+      "walls": 4000
+    },
+    {
+      "model": "bound-height",
+      "storeys": 3,
+      "walls": 4
+    }
+  ]
+}

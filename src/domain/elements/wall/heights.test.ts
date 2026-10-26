@@ -353,7 +353,7 @@ test("bound recovery and rigid Z preview preserve rule and full-path geometry", 
   assert.deepEqual(storeyOf(preview.geometry).walls, moved.storeys[0]!.walls);
 });
 
-test("connected bound walls resize together; mixed invalid heights reject the entire storey change", () => {
+test("connected bound walls resize together; mixed heights keep their join as a butt corner", () => {
   let p = heightFixture();
   p = addWall(p, {
     id: "b",
@@ -364,7 +364,10 @@ test("connected bound walls resize together; mixed invalid heights reject the en
   });
   assert.equal(storeyOf(p).wallJoins.length, 1);
   const mixed = bind(p);
-  assert.throws(() => setStoreyHeight(mixed, mixed, { projectId: "p", storeyId: "eg", height: 4 }));
+  // Mixed heights at a corner are a butt joint since 26.10.2026 (docs/WALL_JUNCTIONS.md).
+  assert.doesNotThrow(() =>
+    setStoreyHeight(mixed, mixed, { projectId: "p", storeyId: "eg", height: 4 }),
+  );
   assert.equal(storeyOf(mixed).walls[0]!.height, 2.8);
   const bound = setWallHeightRule(p, p, {
     projectId: "p",

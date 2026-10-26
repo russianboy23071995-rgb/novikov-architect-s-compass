@@ -4,7 +4,8 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { windowCentre } from "../windows/actions.ts";
 import { previewCommand } from "../../lib/bim/commands.ts";
-import { updateWall } from "./actions.ts";
+import { addWall, updateWall } from "./actions.ts";
+import { createProject } from "../projects/create.ts";
 import { previewWallCommand } from "./command.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -85,4 +86,28 @@ test("summary in door style; the legacy grammar keeps only the offset command", 
   assert.equal(wallCommand(p, wall, "Wandlänge auf 6 m").summary, "wall-1 · Wandlänge: 3 → 6 m");
   assert.equal(previewWallCommand(p, wall, "Fenster zentrieren"), null);
   assert.throws(() => previewCommand(p, wall, "Wandlänge auf 6 m"), /Unbekannter Befehl/);
+});
+
+test("a rejected wall command names the actual rule, not a generic window guess", () => {
+  const w = (id: string, start: [number, number], end: [number, number]) => ({
+    id,
+    start: { x: start[0], y: start[1] },
+    end: { x: end[0], y: end[1] },
+    thickness: 0.3,
+    height: 3,
+  });
+  let p = createProject("p", "s0");
+  for (const wall of [w("A", [0, 0], [4, 0]), w("B", [4, 0], [4, 4]), w("C", [10, 0], [6, 0])])
+    p = addWall(p, wall);
+  // Lengthening C ends it on the joined corner of A and B: a third axis at one point.
+  assert.throws(
+    () => wallCommand(p, { kind: "wall", id: "C" }, "Wandlänge auf 6 m"),
+    (error: Error) =>
+      /^Änderung nicht möglich: Mehrere Wandachsen/.test(error.message) &&
+      !/Fenster/.test(error.message),
+  );
+  assert.throws(
+    () => wallCommand(p, { kind: "wall", id: "missing" }, "Wandlänge auf 6 m"),
+    /Bauteil muss vorhanden sein/,
+  );
 });
