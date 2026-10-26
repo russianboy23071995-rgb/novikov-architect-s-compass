@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 26.10.2026, main `fba664d` nach PR466. In main integriert: PR447–PR466 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465) und Treffertoleranz beim Setzen von Türen/Fenstern (PR466). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 26.10.2026, main `4ad7396` nach PR467. In main integriert: PR447–PR467 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466) und 3D/Autosicherung nach einer Bearbeitung (PR467). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-26.10.2026: Branch perf/recovery-status-after-save (von main 97bfcd1). 3D und Autosicherung nach einer Bearbeitung: Statusanzeige bestätigt eine eigene Sicherung über ihre Revision statt alle Bilder zurückzulesen und zu hashen (Node, l mit 21 MB Bildern: 327 → ≈ 0 ms je Sicherung); Wandfuß-Fangquellen nutzen den Geschossteil der 3D-Szene statt zweiter Prüfung und Extrusion. Türziehen in 3D gemessen: ≈ 17 ms je Mausbewegung, keine Korrektur nötig. Picking-Index je Geschoss offen; Browser-Vergleich ausstehend (Fenster verdeckt). 1270 Tests. Nachweis docs/performance/RECOVERY_STATUS.md.
+26.10.2026: Branch perf/recovery-status-after-save (von main 97bfcd1; mit PR467 am 26.10.2026 in main 4ad7396 integriert). 3D und Autosicherung nach einer Bearbeitung: Statusanzeige bestätigt eine eigene Sicherung über ihre Revision statt alle Bilder zurückzulesen und zu hashen (Node, l mit 21 MB Bildern: 327 → ≈ 0 ms je Sicherung); Wandfuß-Fangquellen nutzen den Geschossteil der 3D-Szene statt zweiter Prüfung und Extrusion. Türziehen in 3D gemessen: ≈ 17 ms je Mausbewegung, keine Korrektur nötig. Picking-Index je Geschoss offen; Browser-Vergleich ausstehend (Fenster verdeckt). 1270 Tests. Nachweis docs/performance/RECOVERY_STATUS.md.
 
 26.10.2026: Branch fix/opening-hit-tolerance (von main e01e17f; mit PR466 am 26.10.2026 in main fba664d integriert; Browser-Schullauf l danach 34/34 fehlerfrei, „Tür setzen“ 283 ms). Treffertoleranz beim Setzen von Türen und Fenstern: 8 Bildpunkte am aktuellen Maßstab, Vorrang für die Wand, deren Körper den Punkt enthält; Toleranz 0 unverändert. Tests mit Gegenprobe; 1266 Tests. Nachweis docs/OPENING_HIT_TOLERANCE.md.
 
