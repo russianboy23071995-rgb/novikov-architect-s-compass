@@ -1,6 +1,6 @@
 # NOVIKOV CAD – zentraler Masterplan
 
-Geprüfte Code-Basis: 26.10.2026, main `2c77fdf` nach PR468. In main integriert: PR447–PR468 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466), 3D/Autosicherung nach einer Bearbeitung (PR467) und schräge T-Anschlüsse (PR468). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
+Geprüfte Code-Basis: 26.10.2026, main `3a365bc` nach PR469. In main integriert: PR447–PR469 (mit PR453; PR462 über PR463) – zuletzt Wartezeit Teil B (PR464), Wandanschlüsse (PR465), Treffertoleranz (PR466), 3D/Autosicherung (PR467), schräge T-Anschlüsse (PR468) und schräge Ecke an einer T-Hauptwand (PR469). PR318 als überholt durch PR371 geschlossen. Keine offenen PRs. Einziger aktiver Folgeauftrag §9.
 
 ## 1. So wird dieser Plan benutzt
 
@@ -159,7 +159,7 @@ Pro Auftrag Eigentümer, Modellquelle, Action/Query, Geometrieservice, Kontext, 
 
 ## 4. Bestätigter Entwicklungsstand
 
-26.10.2026: Branch feat/oblique-corner-t (von main 053988b). Schräge Ecke an einer T-Hauptwand erlaubt (Winkelregel in corner-t-contact.ts entfällt; Eckbereichs- und Partnerprüfung unverändert). Tests 45°–135° mit Gegenproben; alle bisherigen Modelle unverändert; 1282 Tests. Nachweis docs/OBLIQUE_T_JUNCTIONS.md.
+26.10.2026: Branch feat/oblique-corner-t (von main 053988b; mit PR469 am 26.10.2026 in main 3a365bc integriert). Schräge Ecke an einer T-Hauptwand erlaubt (Winkelregel in corner-t-contact.ts entfällt; Eckbereichs- und Partnerprüfung unverändert). Tests 45°–135° mit Gegenproben; alle bisherigen Modelle unverändert; 1282 Tests. Nachweis docs/OBLIQUE_T_JUNCTIONS.md.
 
 26.10.2026: Branch feat/oblique-t-junctions (von main 78eb5b3; mit PR468 am 26.10.2026 in main 2c77fdf integriert). Schräge T-Anschlüsse: Mindestwinkel 15° statt rechter Winkel; der Fang an der Wandachse bietet beim Zeichnen den schrägen Fußpunkt an, nahe dem Lot gewinnt weiter der rechte Winkel. Tests 90°–15° mit Gegenproben; alle bisherigen Modelle unverändert gegen main; 1277 Tests. Schräge Ecke an einer T-Hauptwand offen. Nachweis docs/OBLIQUE_T_JUNCTIONS.md.
 
