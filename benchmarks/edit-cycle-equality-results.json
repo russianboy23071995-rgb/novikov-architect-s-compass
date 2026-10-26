@@ -1,0 +1,92 @@
+{
+  "runtime": "node v24.22.1 win32 x64",
+  "date": "2026-10-26T06:27:28.670Z",
+  "cases": 13,
+  "identical": 13,
+  "counterCheckDetected": true,
+  "results": [
+    {
+      "text": "Wandlänge auf 8,2 m",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Wandlänge auf 8 m",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Fensterbreite auf 1,2 m",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Brüstungshöhe auf 80 cm",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Fenster zentrieren",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Tür DIN rechts",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Türbreite auf 1,135 m",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Tür zentrieren",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Offset um 10 cm",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Auswahl um 30 cm bei 90 Grad verschieben",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Auswahl löschen",
+      "model": true,
+      "solids": 16
+    },
+    {
+      "text": "Wandlänge auf 8,4 m",
+      "model": true,
+      "solids": 15
+    },
+    {
+      "text": "Auswahl löschen",
+      "model": true,
+      "solids": 14
+    }
+  ],
+  "rejected": [
+    {
+      "text": "Wandstärke auf 24 cm",
+      "reason": "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen."
+    },
+    {
+      "text": "Wandstärke auf 20 cm",
+      "reason": "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen."
+    },
+    {
+      "text": "Wandhöhe auf 3 m",
+      "reason": "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen."
+    },
+    {
+      "text": "Wandhöhe auf 3,4 m",
+      "reason": "Änderung nicht möglich: Bauteil muss vorhanden sein und das Fenster vollständig in die Wand passen."
+    }
+  ]
+}
