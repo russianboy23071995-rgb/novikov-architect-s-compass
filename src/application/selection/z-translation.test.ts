@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { prepareZTranslation } from "./z-translation.ts";
+import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
+import { fullConfirmationCount } from "../../domain/project/prepared-snapshot.ts";
 import { createProject } from "../projects/create.ts";
 import { addWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
@@ -149,4 +151,47 @@ test("Z action moves across storeys without changing ownership or floor heights"
       .sort(),
   );
   for (const s of next.storeys) assert.equal(s.walls[0]!.baseOffset, -0.4);
+});
+
+// Confirming a move on an owned project without a whole-project validation (user decision
+// 27.10.2026, docs/performance/OWNED_MOVE_CONFIRMATION.md).
+test("owned projects confirm Z and XY moves without a full check and with identical results", () => {
+  const owned = createHistory(fixture()).present;
+  const mutable = validateProject(owned);
+  const targets = [{ kind: "wall", id: "a" }] as const;
+  const before = fullConfirmationCount();
+  const z = prepareZTranslation(owned, [...targets]).materialize(owned, [...targets], 0.5);
+  const xy = prepareTranslation(owned, ["a"]).materialize(owned, { x: 0.25, y: 0 });
+  assert.equal(fullConfirmationCount(), before);
+  // A mutable caller copy still takes the full check and yields the same models.
+  const zMutable = prepareZTranslation(mutable, [...targets]).materialize(
+    mutable,
+    [...targets],
+    0.5,
+  );
+  const xyMutable = prepareTranslation(mutable, ["a"]).materialize(mutable, { x: 0.25, y: 0 });
+  assert.equal(fullConfirmationCount(), before + 2);
+  assert.equal(JSON.stringify(z), JSON.stringify(zMutable));
+  assert.equal(JSON.stringify(xy), JSON.stringify(xyMutable));
+});
+
+test("changed models are still rejected on confirmation (counter-checks)", () => {
+  const owned = createHistory(fixture()).present;
+  const targets = [{ kind: "wall", id: "a" }] as const;
+  // Another project object, even with the same content, ends the move.
+  const z = prepareZTranslation(owned, [...targets]);
+  assert.throws(() => z.materialize(validateProject(owned), [...targets], 0.5), /geändert/);
+  assert.throws(
+    () =>
+      prepareTranslation(owned, ["a"]).materialize(createHistory(fixture()).present, {
+        x: 1,
+        y: 0,
+      }),
+    /geändert/,
+  );
+  // A mutable input changed in place after preparation is detected by the full check.
+  const mutable = validateProject(owned);
+  const xy = prepareTranslation(mutable, ["a"]);
+  storeyOf(mutable).walls[0]!.thickness = 0.3;
+  assert.throws(() => xy.materialize(mutable, { x: 1, y: 0 }), /geändert/);
 });
