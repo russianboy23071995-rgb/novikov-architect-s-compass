@@ -32,6 +32,24 @@ Ursache: Ein neues Geschossobjekt erzeugt neue Flächenobjekte für **alle** Wä
 - Wandkörper: Domäne (`domain/elements/wall/connections.ts`, `contour-solid.ts`); Zusammenbau des Geschossteils: künftig `rendering/viewport/` (Umzug aus `lib/bim/geometry.ts`, siehe B0).
 - Schlüssel für „Wand unverändert“: das eingefrorene Wandobjekt (Identität bei eigenen Ständen) **und** alle Eingaben ihres Körpers: Konturring (aus `connectedWallContours`, hängt von Nachbarn ab), die ihr zugeordneten Öffnungen (Identität), T-Kennzeichen, Höhe/Fuß, Geschosshöhe. Nur wenn alles gleich ist, wird die frühere Fläche übernommen.
 
+## 2a. Zukunftsfähigkeit: geschossübergreifende Einflüsse (Nutzerentscheidung 27.10.2026)
+
+Nutzervision: Wände über mehrere Geschosse (z. B. EG bis 3. OG, 9 m, für Fensterfronten), gestapelte Wände, die am Geschossübergang optisch eine Wand bilden, Decken dazwischen, Dachtrimmung von Wänden (ein Giebel kann zwei Geschosse umfassen) und Anzeige solcher Wände als „Gast“ im Grundriss anderer Geschosse (Grundriss = horizontaler Schnitt ≈ 1 m über dem Geschossboden).
+
+Heutige Annahme aller Geschoss-Zwischenspeicher (Stufe A, Picking je Geschoss PR472, Bewegungsecken je Geschoss PR482, Wandfuß-Fangquellen, geplant B1/B2): Der 3D-Körper einer Wand hängt nur von ihrem eigenen Geschoss ab (plus Geschosshöhe und Bildern). Für gebundene Wandhöhen ist das bereits sauber gelöst: Die Höhe aus dem oberen Geschoss wird bei der Prüfung in die Wand eingetragen (`resolveBoundWallHeights`), sodass eine Änderung oben ein neues Wandobjekt unten erzeugt.
+
+**Verbindliche Regel:** Geschossübergreifende Einflüsse auf einen Wandkörper – Dachtrimmung, Stoß zur Wand darüber oder darunter, Deckenanschluss – werden als ausdrückliche Eingaben der Wand aufgelöst und sind Teil ihres Wiederverwendungsschlüssels, wie heute die gebundene Höhe. Kein Zwischenspeicher darf annehmen, dass ein Geschoss nur von sich selbst abhängt.
+
+| Vision                                                                 | Folge                                                                                                                                                                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wand über mehrere Geschosse (Gehört einem Geschoss, ragt durch andere) | 3D unkritisch; Körper im Teil des Besitzergeschosses                                                                                                                                        |
+| „Gast“-Wand im Grundriss anderer Geschosse                             | Eigene, geschossübergreifende Grundriss-/Fang-/Auswahlabfrage nach Höhenbereich; heute nicht vorhanden; kein Widerspruch zu Stufe B                                                         |
+| Gestapelte Wände als eine Wand                                         | Untere Wand hängt von oberer ab → Einfluss als Wandeingabe auflösen (Regel)                                                                                                                 |
+| Dachtrimmung, Giebel über zwei Geschosse                               | Wandkörper hängt von Dachfläche ab → Trimmung als Wandeingabe auflösen (Regel); offene Produktentscheidung „Dachtrimmen einmalig oder abhängig“ (Masterplan §8) vor dem Dach-Auftrag klären |
+| Decke dazwischen                                                       | Je nach Fachregel gleiche Behandlung                                                                                                                                                        |
+
+Folgen für diese Karte: B1-Schlüssel enthält ausdrücklich alle Eingaben eines Wandkörpers einschließlich künftiger geschossübergreifender Eingaben; sobald der erste solche Einfluss existiert, kommt die Gegenprobe „Einfluss aus einem anderen Geschoss erzwingt Neubau“ in den Differenztest. B0 ist von dieser Regel nicht betroffen (reiner Umzug) und schafft die zentrale Stelle, an der solche Eingaben später ausgewertet werden.
+
 ## 3. Gemeinsamer Weg
 
 Kein neuer Bedienweg: Maus, Eigenschaften, Text, Sprache und Undo laufen über dieselben Aktionen wie heute. Die Wiederverwendung sitzt ausschließlich in der Ableitung (`storeyPart` und abgeleitete Zwischenspeicher). Vorbereitete Vorschauen (`selection-move-preview.ts`, `buildPreviewSolid` für Patches) bleiben unverändert oder nutzen denselben Baustein.
@@ -63,6 +81,7 @@ Im Browser: Bearbeitung/Dauerlauf bei x sichtbar kürzer (heute Median ≈ 410�
 - **Gleichheit (Kern):** Differenztest mit mehreren hundert zufälligen Bearbeitungen (Länge, Endpunkt, Dicke, Höhe, Z, Fenster/Tür setzen/ändern/löschen, Anschluss verbinden/lösen, Geschosswechsel, Undo/Redo) auf Schulmodell s/l: Flächen des wandweise gebauten Geschossteils **byte-gleich** (JSON, Reihenfolge) zum vollständigen Neuaufbau; ebenso Wandfuß-Quellen (alle Merkmale), Bewegungsecken, Auswahlumrisse, Picking-Treffer an Punktraster, IFC-Export und Projektdatei.
 - **Gegenproben:** Nachbarwand einer geänderten Wand (Kontur ändert sich) wird neu gebaut; Öffnung an unveränderter Wand ändern → Wand neu; ein manipulierter Schlüssel (anderes Konturpunkt-Bit) erzwingt Neubau; nicht eigene (veränderbare) Stände nutzen keine Wiederverwendung.
 - **Leistung:** Node-Profil vorher/nachher (s/l/x); Browser-Schullauf l/x (Wandlänge übernehmen, Dauerlauf, Z übernehmen/Undo/Redo, Tür ziehen) je zwei Läufe.
+- **Zukunftsfähigkeit (Abschnitt 2a):** Der Schlüssel ist als Liste aller Körpereingaben dokumentiert; ein Test belegt, dass jede bisherige Eingabe (Kontur, Öffnungen, T-Kennzeichen, Höhe, Fuß, Geschosshöhe) einzeln einen Neubau erzwingt.
 - **Bestehende Tests** und Architekturprüfung grün; keine neue Architektur-Ausnahme.
 
 ## 7. Risiken und Gegenmaßnahmen

@@ -218,6 +218,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 - **Zuständigkeit:** M → domain/height-binding
 - **Altzuordnung:** Gespräch Geschosse/Höhen
 - **Abnahme/Abhängigkeiten:** N21, fester vs gebundener Modus, atomare Prüfung abhängiger Öffnungen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
+- **Erweiterung (Nutzervision 27.10.2026, geplant):** Wände über mehrere Geschosse (z. B. EG bis 3. OG, 9 m, Fensterfronten über Geschosse), gestapelte Wände als optisch eine Wand, Decken dazwischen, Dachtrimmung auch über zwei Geschosse, Gast-Anzeige im Grundriss anderer Geschosse (Schnitt ≈ 1 m über Geschossboden). Architekturregel: geschossübergreifende Einflüsse als ausdrückliche Bauteileingaben auflösen (Masterplan A08, docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md Abschnitt 2a).
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
 

@@ -133,6 +133,8 @@ Gemeinsame Eligibility-Policy für Anzeige, Auswahl und Fang. Fensteranzeige ver
 
 Feste Höhen und an Geschosse gebundene Unter-/Oberbezüge mit Offsets unterscheiden. Altdateien mit festen Wandhöhen erhalten nicht heimlich eine Geschossbindung. Höhe wird aus ihrer Quelle abgeleitet, nicht redundant editierbar gespeichert. Änderung von Geschoss-/Host-/Dachregeln prüft alle abhängigen Öffnungen und Bauteile atomar. Fachliches Dachtrimmen und bloße Schnittdarstellung getrennt behandeln.
 
+**Geschossübergreifende Einflüsse (Nutzerentscheidung 27.10.2026):** Wände können über mehrere Geschosse reichen (z. B. EG bis 3. OG für Fensterfronten), gestapelte Wände bilden am Übergang optisch eine Wand, Decken liegen dazwischen, Wände werden an Dachflächen getrimmt (ein Giebel kann zwei Geschosse umfassen), und der Grundriss eines Geschosses (horizontaler Schnitt ≈ 1 m über Geschossboden) zeigt Wände anderer Geschosse, die die Schnittebene durchdringen, als „Gast“. Verbindlich für alle abgeleiteten Daten und Zwischenspeicher: Geschossübergreifende Einflüsse auf einen Bauteilkörper (Dachtrimmung, Stoß zur Wand darüber/darunter, Deckenanschluss) werden als ausdrückliche Eingaben des Bauteils aufgelöst und sind Teil jedes Wiederverwendungsschlüssels – wie heute die gebundene Wandhöhe (`resolveBoundWallHeights`). Kein Zwischenspeicher darf annehmen, dass ein Geschoss nur von sich selbst abhängt (betrifft Geschossteile, Picking je Geschoss, Bewegungsecken, Fangquellen, wandweisen Neuaufbau; docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md Abschnitt 2a). Gast-Anzeige ist eine eigene geschossübergreifende Grundriss-/Fang-/Auswahlabfrage nach Höhenbereich, heute nicht umgesetzt.
+
 ### A09 – Bibliotheken, Assets und Portabilität
 
 Linienarten und Schraffurmuster bleiben getrennte Bibliotheken. Schraffurdefinition und Anwendung getrennt: wiederholte Linien sind abgeleitete Anzeige, keine einzelnen gespeicherten Modelllinien. Globale Schraffur-ID/Revision, portable eingebettete Definition einmal pro Projekt; neuere Bibliothek aktualisiert Anwendungen, fehlende/ältere bewahrt Darstellung, gleicher Revisionsstand mit anderem Inhalt zeigt Konflikt. Bibliotheks-Undo publiziert neue Revision; Projekt-Undo dreht globale Aktualisierung nicht zurück. Geschlossene Dateien werden nicht heimlich geändert. Mehrtab-Benachrichtigung ist kein Nachweis atomarer konkurrierender Schreibtransaktionen.
@@ -617,7 +619,7 @@ Homepage soll Produkt, Beta, Unterstützungsumfang, Support/Sicherheit, Rechtehi
 | Konten/Lizenzen/Geräte/Offlinefrist und kommerzielle Konditionen | Lizenzimplementation/Public-Beta-Bedingungen |
 | D vs. Ctrl+D; zulässiges Kopieren/Spiegeln, 3D-Reihenfolge | Jeweiliger Action-/Shortcut-Pilot |
 | Allgemeine Perspektive/Kameraparameter, freie 3D-Arbeitsebene | Jeweiliger Navigations-/3D-Pilot |
-| Ungleiche Wandquerschnitte, Dachtrimmen einmalig oder abhängig | Anschluss-/Trim-Fachregel |
+| Ungleiche Wandquerschnitte, Dachtrimmen einmalig oder abhängig | Anschluss-/Trim-Fachregel; spätestens vor dem Dach-Auftrag – bestimmt, ob die Trimmung in die Wand geschrieben oder als geschossübergreifende Eingabe aufgelöst wird (A08, 27.10.2026) |
 | Raumkennungen, virtuelle Grenzen, WoFlV-Profil/Rundung und Berichtsvorlage | Raum-/Wohnflächenauftrag |
 | PAT/Schraffurimportformat/Rechte, andere Austauschprofile/3D-Format | Jeweiliger Import/Export |
 | Settings-Besitzer: Benutzer/Projekt/Ansicht/Werkzeug, Pane-Persistenz | Einstellungsübersicht |
