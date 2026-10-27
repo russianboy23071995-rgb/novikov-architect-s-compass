@@ -10,7 +10,7 @@ import { addWindow } from "../windows/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { windowSelectionSurfaces } from "../../rendering/viewport/window-selection.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { changeDrawingDocument } from "../views/documents.ts";

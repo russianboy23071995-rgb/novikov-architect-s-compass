@@ -6,7 +6,7 @@ import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { serializeProject, deserializeProject } from "./model.ts";
 import { addLine } from "../../application/lines/actions.ts";
 import { updateWall } from "../../application/walls/actions.ts";
-import { buildSolid } from "./geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import {
   createEditingState,
   editingReducer,

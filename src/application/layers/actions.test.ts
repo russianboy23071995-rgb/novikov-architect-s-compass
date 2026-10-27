@@ -10,7 +10,7 @@ import { addLine } from "../lines/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 
 const fixture = () =>

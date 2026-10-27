@@ -6,7 +6,7 @@ import { serializeProject } from "../../lib/bim/model.ts";
 import { addLine } from "../../application/lines/actions.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { createLayerVisibilityPolicy } from "../../application/layers/visibility.ts";
 import { createLayerDisplay } from "./layer-display.ts";

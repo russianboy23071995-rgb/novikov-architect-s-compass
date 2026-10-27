@@ -25,7 +25,7 @@ import {
   redoProject,
 } from "../history/project-history.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { wallPlanOutlines } from "../../rendering/viewport/wall-plan-outline.ts";
 
 const dimensions = { thickness: 0.36, height: 2.8, bodyOffset: 0.18 };

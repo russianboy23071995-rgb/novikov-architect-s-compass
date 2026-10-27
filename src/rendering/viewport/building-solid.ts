@@ -2,11 +2,11 @@ import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
-import { buildPreviewSolid, type Solid, type Vec3 } from "../../lib/bim/geometry.ts";
+import { buildPreviewSolid, type Solid, type Vec3 } from "./storey-solid.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 
-// Moved from lib/bim/geometry.ts (25.10.2026); the per-storey extrusion stays there for now.
+// Moved from lib/bim/geometry.ts (25.10.2026); the per-storey extrusion followed to storey-solid.ts (27.10.2026).
 type BuildingEntry = { project: Project; result: Solid };
 const buildings = createDerivedCache<Project, BuildingEntry>();
 // Only one weak recent candidate: no project-ID registry or retained scene history.

@@ -9,7 +9,8 @@ import {
 } from "../../application/layers/visibility.ts";
 import { createVisibleToolSourceQuery } from "../../application/tools/snapping.ts";
 import { createEditingState, editingReducer } from "../../application/direct-edit/controller.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createProjectionState } from "./projection-state.ts";

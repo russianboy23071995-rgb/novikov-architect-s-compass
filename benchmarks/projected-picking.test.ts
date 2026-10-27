@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { preparePicking } from "./projected-picking.ts";
 import { connectedFixture } from "./connected-fixture.ts";
-import { buildSolid } from "../src/lib/bim/geometry.ts";
+import { buildSolid } from "../src/rendering/viewport/storey-solid.ts";
 import { createProjectionFrame } from "../src/geometry/projections/orthographic.ts";
 import { createProjectionState } from "../src/rendering/viewport/projection-state.ts";
 import {

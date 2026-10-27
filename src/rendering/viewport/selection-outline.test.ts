@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { selectionEdges, outlineTriangles } from "./selection-outline.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { updateWall, addWall } from "../../application/walls/actions.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";

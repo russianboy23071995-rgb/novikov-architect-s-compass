@@ -5,7 +5,8 @@ import { selectedWallAxis } from "./wall-axis.ts";
 import { createProjectionState } from "./projection-state.ts";
 import { createProjectionFrame } from "../../geometry/projections/orthographic.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import {
   createEditingState,

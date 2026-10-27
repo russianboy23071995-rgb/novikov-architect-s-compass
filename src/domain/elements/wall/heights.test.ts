@@ -8,7 +8,7 @@ import { addWindow } from "../../../application/windows/actions.ts";
 import { addWall, updateWall } from "../../../application/walls/actions.ts";
 import { validateProject } from "../../project/schema.ts";
 import { buildBuildingSolid } from "../../../rendering/viewport/building-solid.ts";
-import { buildSolid } from "../../../lib/bim/geometry.ts";
+import { buildSolid } from "../../../rendering/viewport/storey-solid.ts";
 import { storeyOf } from "../../storeys/access.ts";
 import {
   addStorey,

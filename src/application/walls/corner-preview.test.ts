@@ -5,7 +5,7 @@ import { cornerPreviewReducer, currentCornerPreview } from "./corner-preview.ts"
 import { createProject } from "../projects/create.ts";
 import { addWindow } from "../windows/actions.ts";
 import { addWall } from "./actions.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { cornerPreviewSurfaces } from "../../rendering/viewport/corner-preview.ts";
 import { faceTriangles } from "../../geometry/solids/face-triangles.ts";
 import { nearestWallSurface } from "../../rendering/viewport/wall-depth.ts";

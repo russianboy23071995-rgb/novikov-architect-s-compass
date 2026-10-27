@@ -11,7 +11,7 @@ import { schoolPlanFixture } from "../../../benchmarks/school-plan-fixture.ts";
 import { updateWall } from "../../application/walls/actions.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { validateProject } from "../../domain/project/schema.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { buildBuildingSolid, workingStoreySolid } from "./building-solid.ts";
 import { getWallFootSources } from "./wall-foot-sources.ts";
 

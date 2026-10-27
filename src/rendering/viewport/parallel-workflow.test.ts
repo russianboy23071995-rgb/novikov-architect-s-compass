@@ -5,7 +5,8 @@ import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
-import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
+import { initialCamera } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import {
   createEditingState,

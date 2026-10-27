@@ -12,7 +12,7 @@ import {
   undoProject,
   redoProject,
 } from "../../application/history/project-history.ts";
-import { buildSolid } from "./geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import {
   editablePoints,
   moveElement,

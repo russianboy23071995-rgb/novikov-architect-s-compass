@@ -5,9 +5,7 @@
       "owner": "src/application/commands",
       "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
       "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/application/commands/selection-voice.ts -> src/lib/bim/voice.ts"
-      ]
+      "edges": ["src/application/commands/selection-voice.ts -> src/lib/bim/voice.ts"]
     },
     {
       "owner": "src/application/direct-edit",
@@ -120,16 +118,6 @@
         "src/lib/bim/picking.ts -> src/rendering/viewport/layer-display.ts",
         "src/lib/bim/picking.ts -> src/rendering/viewport/wall-depth.ts",
         "src/lib/bim/transforms.ts -> src/application/direct-edit/transforms.ts"
-      ]
-    },
-    {
-      "owner": "src/rendering/viewport",
-      "reason": "Existing transitional dependency verified in the production import inventory; not an approved target architecture.",
-      "removal": "Replace legacy type/facade imports with their domain or Application owner during the affected workflow migration; no new legacy consumers.",
-      "edges": [
-        "src/rendering/viewport/building-solid.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/layer-display.ts -> src/lib/bim/geometry.ts",
-        "src/rendering/viewport/selection-move-preview.ts -> src/lib/bim/geometry.ts"
       ]
     },
     {

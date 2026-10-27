@@ -101,3 +101,9 @@ Im Browser: Bearbeitung/Dauerlauf bei x sichtbar kürzer (heute Median ≈ 410�
 1. **Reihenfolge:** B0 als eigener PR vorab (empfohlen), dann B1+B2 gemeinsam – oder alles in einem PR?
 2. **Umfang Konturen:** Konturen weiter für das ganze Geschoss berechnen (empfohlen für diese Stufe) oder gleich anschlussgruppenweise (mehr Gewinn, mehr Risiko)?
 3. **Abnahmeschwelle:** Reicht der Differenztest mit mehreren hundert Bearbeitungen plus Browserlauf, oder zusätzlich eine Archicad-Prüfung der IFC nach einer Bearbeitungsserie?
+
+## 9. Ergebnis B0 (27.10.2026, umgesetzt)
+
+- `src/rendering/viewport/storey-solid.ts` enthält `Vec3/Face/Solid`, `buildSolid` und `buildPreviewSolid` wortgleich zu `lib/bim/geometry.ts` auf main (Textvergleich der verschobenen Zeilen: identisch). `lib/bim/geometry.ts` behält nur `Camera`, `initialCamera`, `projectPoint` (Parameter jetzt `ProjectionBounds` statt `Solid`, gleiche Rechnung).
+- **Abweichung von der Karte:** kein Re-Export aus `lib/bim/geometry.ts`, weil die Architekturregel `legacy → rendering` (auch Typimporte) verbietet. Stattdessen alle Importe umgestellt (3 Produktionsdateien, Tests, Benchmarks, `scripts/generate-ifc-fixtures.mjs`); die drei Ausnahmen `rendering/viewport/{building-solid,layer-display,selection-move-preview}.ts → lib/bim/geometry.ts` entfallen, keine neue Ausnahme. Historische Probe-Benchmarks, die den Quelltext kopieren, lesen jetzt `storey-solid.ts` (nicht erneut ausgeführt).
+- Nachweis: `benchmarks/storey-solid-hash.ts` (buildSolid/buildPreviewSolid je Geschoss, Gebäudekörper und IFC-Export von 14 Modellen: Beispiel, Schule s/l/x, T-Abnahme mit Varianten) auf main und Branch gleich `09528ac4…7823253`. 1331 Tests grün, Typprüfung (App, Benchmarks), Lint (nur bestehende Warnungen in `components/ui`), Architekturprüfung, Build.

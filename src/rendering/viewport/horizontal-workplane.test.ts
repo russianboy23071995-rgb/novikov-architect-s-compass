@@ -14,7 +14,7 @@ import {
   MAX_INVERSE_ERROR_METRES,
 } from "./horizontal-workplane.ts";
 import { projectPoint } from "../../lib/bim/geometry.ts";
-import type { Solid } from "../../lib/bim/geometry.ts";
+import type { Solid } from "./storey-solid.ts";
 const bounds: ProjectionBounds = { min: [-4, -8, 0], max: [6, 3, 2.8] };
 const camera: OrthographicCamera = { yaw: -0.45, pitch: 0.3, zoom: 1, panX: 0, panY: 0 };
 const viewport = { left: 137, top: 61, width: 800, height: 600 };

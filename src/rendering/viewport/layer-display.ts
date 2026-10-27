@@ -6,8 +6,8 @@ import type {
   createLayerVisibilityPolicy,
   LayerVisibilityContext,
 } from "../../application/layers/visibility.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
-import type { Solid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "./storey-solid.ts";
+import type { Solid } from "./storey-solid.ts";
 
 /** Display surfaces deliberately have no volume: quantities belong to the complete model. */
 export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {

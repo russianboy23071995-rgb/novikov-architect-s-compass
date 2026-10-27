@@ -12,7 +12,7 @@ import {
 } from "../history/project-history.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { drawingInteraction } from "../tools/adapters.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 
 test("closed triangular wall chain composes two oblique ends per wall and undoes as a whole", () => {
   const base = createProject("triangle", "s");
