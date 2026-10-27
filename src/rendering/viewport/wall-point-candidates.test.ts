@@ -1,5 +1,15 @@
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import test from "node:test";
+import { schoolPlanFixture } from "../../../benchmarks/school-plan-fixture.ts";
+import {
+  commitProject,
+  createHistory,
+  undoProject,
+} from "../../application/history/project-history.ts";
+import { selectionEdges } from "./selection-outline.ts";
+import { visibleSurfaces } from "./layer-display.ts";
+import { prepareAnchorVisibility } from "./anchor-visibility.ts";
+import { createBoxIndex } from "../../geometry/spatial/box-index.ts";
 import assert from "node:assert/strict";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
 import { buildSolid, initialCamera } from "../../lib/bim/geometry.ts";
@@ -192,4 +202,127 @@ test("3D movement origin acquires real upper corners, respects pixel radius and 
   );
   assert.equal(context.context.pinnedReferences?.length, 1);
   assert.ok(context.context.acceptReference!(session.snapping.origin));
+});
+
+// Start of the 3D group move: corners per storey part, point grid, visibility on demand
+// (user decision 27.10.2026, docs/performance/MOVE_START_ORIGIN.md). Oracle = previous code.
+function oracleCorners(project: Parameters<typeof buildBuildingSolid>[0]) {
+  const solid = buildBuildingSolid(project);
+  const grouped = new Map<string, typeof solid.faces>();
+  for (const f of solid.faces) grouped.set(f.wallId, [...(grouped.get(f.wallId) ?? []), f]);
+  const corners: { id: string; point: readonly [number, number, number] }[] = [];
+  for (const [id, faces] of grouped) {
+    const points = new Map<string, readonly [number, number, number]>();
+    for (const edge of selectionEdges(faces))
+      for (const point of edge) points.set(JSON.stringify(point), point);
+    for (const point of points.values()) corners.push({ id, point });
+  }
+  return corners;
+}
+function oracleQuery(
+  project: Parameters<typeof buildBuildingSolid>[0],
+  projection: NonNullable<ReturnType<typeof createProjectionState>>,
+  allows: (id: string) => boolean,
+) {
+  const solid = visibleSurfaces(buildBuildingSolid(project), allows);
+  const visibility = prepareAnchorVisibility(solid, projection);
+  const projected = oracleCorners(project)
+    .filter((c) => allows(c.id))
+    .map((c) => {
+      const p = projection.project(c.point);
+      return {
+        ...c,
+        screen: {
+          x: projection.viewport.left + ((p[0] + 1) * projection.viewport.width) / 2,
+          y: projection.viewport.top + ((1 - p[1]) * projection.viewport.height) / 2,
+        },
+      };
+    });
+  const index = createBoxIndex(
+    projected.flatMap((c, order) =>
+      Number.isFinite(c.screen.x) && Number.isFinite(c.screen.y)
+        ? [
+            {
+              box: { minX: c.screen.x, maxX: c.screen.x, minY: c.screen.y, maxY: c.screen.y },
+              value: order,
+            },
+          ]
+        : [],
+    ),
+  );
+  return (client: { x: number; y: number }, radius = 10, height?: number) =>
+    index
+      .query({
+        minX: client.x - radius,
+        maxX: client.x + radius,
+        minY: client.y - radius,
+        maxY: client.y + radius,
+      })
+      .sort((a, b) => a - b)
+      .map((i) => projected[i]!)
+      .map((c) => ({ ...c, distance: Math.hypot(c.screen.x - client.x, c.screen.y - client.y) }))
+      .filter(
+        (c) =>
+          c.distance <= radius && (height === undefined || Math.abs(c.point[2] - height) < 1e-8),
+      )
+      .sort((a, b) => a.distance - b.distance)
+      .find((c) => visibility(c.point) === "visible") ?? null;
+}
+
+test("movement corners per storey part equal the previous derivation, also after an edit", () => {
+  let history = createHistory(schoolPlanFixture());
+  const first = movementCorners(history.present);
+  assert.deepEqual(first, oracleCorners(history.present));
+  const wall = storeyOf(history.present).walls[3]!;
+  history = commitProject(
+    history,
+    updateWall(history.present, wall.id, { end: { x: wall.end.x + 0.4, y: wall.end.y } }),
+  );
+  const edited = movementCorners(history.present);
+  assert.deepEqual(edited, oracleCorners(history.present));
+  // Unchanged storeys keep their corner objects; the edited wall's corners are new.
+  const before = new Set(first);
+  assert.ok(edited.filter((c) => before.has(c)).length > edited.length / 2);
+  assert.ok(edited.filter((c) => c.id === wall.id).every((c) => !before.has(c)));
+  assert.deepEqual(movementCorners(undoProject(history).present), first);
+});
+
+test("the origin query with point grid and lazy visibility answers exactly like before", () => {
+  const project = createHistory(schoolPlanFixture()).present;
+  const hidden = new Set(
+    storeyOf(project)
+      .walls.slice(0, 15)
+      .map((w) => w.id),
+  );
+  let hits = 0;
+  for (const [yaw, zoom] of [
+    [0.8, 1.4],
+    [2.6, 0.9],
+  ] as const) {
+    const projection = createProjectionState(
+      createProjectionFrame(buildBuildingSolid(project)),
+      { yaw, pitch: 0.55, zoom, panX: 0, panY: 0 },
+      { left: 10, top: 20, width: 900, height: 600 },
+      { width: 900, height: 600 },
+    )!;
+    for (const allows of [() => true, (id: string) => !hidden.has(id)]) {
+      const query = createMovementOriginQuery(project, projection, allows);
+      const oracle = oracleQuery(project, projection, allows);
+      for (let gx = 0; gx < 15; gx++)
+        for (let gy = 0; gy < 10; gy++)
+          for (const [radius, height] of [
+            [4, undefined],
+            [10, undefined],
+            [10, 0],
+            [25, undefined],
+            [2000, undefined],
+          ] as const) {
+            const client = { x: 10 + gx * 60 + 3, y: 20 + gy * 60 + 7 };
+            const actual = query(client, radius, height);
+            assert.deepEqual(actual, oracle(client, radius, height));
+            if (actual) hits++;
+          }
+    }
+  }
+  assert.ok(hits > 150, `${hits} hits`);
 });
