@@ -37,3 +37,19 @@ export function renderGpu(canvas: HTMLCanvasElement) {
   gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
   renderEvents.push({ name: "gpu", start, ms: performance.now() - start });
 }
+export function renderTimed<A extends unknown[], R>(
+  name: string,
+  action: (...args: A) => R,
+  ...args: A
+): R {
+  const start = performance.now();
+  const result = action(...args);
+  const value = Array.isArray(result) ? result.length : undefined;
+  renderEvents.push({
+    name,
+    start,
+    ms: performance.now() - start,
+    ...(value === undefined ? {} : { value }),
+  });
+  return result;
+}
