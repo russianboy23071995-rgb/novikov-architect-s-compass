@@ -108,6 +108,8 @@ Die Prüfung in Node ersetzt den Import nicht.
 
 Der normale Export schreibt in den Dateikopf `FILE_DESCRIPTION('NOVIKOV CAD corner acceptance test - explicit temporary pair')`, sobald verbundene Wände Profile liefern – also bei jedem Projekt mit Wandanschlüssen. Text aus der früheren Eck-Testausgabe; ohne Einfluss auf die Geometrie. Bewusst nicht geändert (Export soll in diesem Auftrag unverändert bleiben); eigener kleiner Auftrag.
 
+Behoben am 27.10.2026 (Branch fix/ifc-file-description): Der Aufrufer bestimmt die Beschreibung; der normale Export schreibt wieder „NOVIKOV CAD parametric BIM export“, nur die isolierten Eck- und T-Testausgaben behalten ihren Text. Gegen main ändert sich im normalen Export mit Wandanschlüssen genau diese Kopfzeile; Datenzeilen, Testausgaben und Export ohne Anschlüsse sind byte-gleich. Test in `src/interop/ifc/corner.test.ts`.
+
 ### Grenzen
 
 - Keine IFC-Anschlussbeziehungen (`IfcRelConnectsPathElements`); Wände sind Profil-Extrusionen.

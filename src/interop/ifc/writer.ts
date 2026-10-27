@@ -59,6 +59,12 @@ export function stepReal(value: number): string {
   );
 }
 
+/** File description of the regular export. Explicit acceptance exports pass their own. */
+export const IFC_EXPORT_DESCRIPTION = "NOVIKOV CAD parametric BIM export";
+/** File description of the isolated corner and T acceptance exports (interop/ifc). */
+export const IFC_ACCEPTANCE_DESCRIPTION =
+  "NOVIKOV CAD corner acceptance test - explicit temporary pair";
+
 /** IFC4 STEP export; validates and copies the snapshot before any asynchronous work.
  * Windows and doors remain semantic elements without invented frame/glass/leaf geometry.
  * Openings are separate swept solids linked with IfcRelVoidsElement / IfcRelFillsElement.
@@ -67,6 +73,9 @@ export async function writeIfc(
   input: Project,
   timestamp = new Date(),
   wallProfiles: ReadonlyMap<string, readonly Point2[]> = new Map(),
+  // Chosen by the caller, not by the presence of wall profiles: the regular export passes the
+  // profiles of every connected wall (docs/T_IFC_ACCEPTANCE.md, finding 27.10.2026).
+  description = IFC_EXPORT_DESCRIPTION,
 ): Promise<string> {
   const project = validateProject(input);
   const profiles = new Map(
@@ -272,9 +281,7 @@ export async function writeIfc(
   return [
     "ISO-10303-21;",
     "HEADER;",
-    profiles.size
-      ? "FILE_DESCRIPTION(('NOVIKOV CAD corner acceptance test - explicit temporary pair'),'2;1');"
-      : "FILE_DESCRIPTION(('NOVIKOV CAD parametric BIM export'),'2;1');",
+    `FILE_DESCRIPTION((${text(description)}),'2;1');`,
     `FILE_NAME('novikov-project.ifc',${text(exportedAt)},(''),(''),'NOVIKOV CAD','NOVIKOV CAD','');`,
     "FILE_SCHEMA(('IFC4'));",
     "ENDSEC;",
