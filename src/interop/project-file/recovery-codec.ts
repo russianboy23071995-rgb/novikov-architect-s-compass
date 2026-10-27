@@ -67,6 +67,8 @@ export async function payloadKey(p: Payload, probe: ReadProbe = {}) {
 }
 export type ReadControl = ReadProbe & {
   signal?: AbortSignal;
+  /** Save path only: link payloads this session prepared by identity (see preparedPayloads). */
+  prepared?: boolean;
   schedule?: () => Promise<void>;
 };
 /** A real task boundary, not just a resolved promise. No transaction spans this wait. */
@@ -75,6 +77,12 @@ export async function readCheckpoint(control: ReadControl) {
   await (control.schedule?.() ?? new Promise<void>((resolve) => setTimeout(resolve, 0)));
   control.signal?.throwIfAborted();
 }
+/** Payloads this session prepared itself for a save: frozen, schema and header checked and
+ * hashed once. When a save checks its own snapshot again, such a payload is linked by identity
+ * instead of being decoded and hashed again (docs/performance/AUTOSAVE_IMAGE_CHECKS.md).
+ * Only the save path asks for this; restores and snapshots read from storage always take the
+ * full check. */
+const preparedPayloads = new WeakMap<object, { key: string; handle?: ImageAsset }>();
 /** Owned DB snapshot only. Reuse existing handle capability, never trust persisted flags. */
 export async function restoreCheckedSnapshot(
   doc: Document,
@@ -91,8 +99,14 @@ export async function restoreCheckedSnapshot(
   for (const [key, links] of groups) {
     const raw = doc.blobs[key];
     if (!raw) throw new Error("Missing asset");
-    const payload = verifyPayloadImage(raw, probe, true);
-    if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
+    const prepared = probe.prepared ? preparedPayloads.get(raw) : undefined;
+    let payload: ImageAsset;
+    if (prepared?.key === key)
+      payload = prepared.handle ??= createImageAssetHandle({ id: "payload", ...raw });
+    else {
+      payload = verifyPayloadImage(raw, probe, true);
+      if ((await payloadKey(payload, probe)) !== key) throw new Error("Asset integrity mismatch");
+    }
     for (const link of links) {
       const handleStart = performance.now();
       assets[link.index] = reidentifyImageAssetHandle(payload, link.id);
@@ -138,6 +152,7 @@ export function createAssetPreparation({
           entry = { key: await payloadKey(payload), payload };
           hashes++;
           cache.set(asset, entry);
+          preparedPayloads.set(entry.payload, { key: entry.key });
         }
         blobs[entry.key] = entry.payload;
         assets.push({ id: asset.id, key: entry.key });

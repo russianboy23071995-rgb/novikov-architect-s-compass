@@ -2,6 +2,7 @@ import { validateProject, type Project } from "../../domain/project/schema.ts";
 import {
   parseRecoveryV2,
   restoreRecoveryV2,
+  sealRecoverySnapshot,
   type RecoveryV2Storage,
   type RecoveryV2Codec,
   type RecoverySnapshotV2,
@@ -68,7 +69,8 @@ export async function prepareRecoveryV2Writer(
           version: 2,
           projectId,
           revision: crypto.randomUUID(),
-          current: { savedAt, document },
+          // Sealed here, so the next save recognises it as its checked predecessor.
+          current: sealRecoverySnapshot({ savedAt, document }),
           ...(previous ? { previous } : {}),
         };
         await storage.publish({ legacy: source.legacy, revision }, next, abort, isCurrent);

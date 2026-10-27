@@ -1,5 +1,5 @@
 import type { Project } from "../../domain/project/schema.ts";
-import type { RecoverySnapshotV2 } from "./recovery-v2.ts";
+import { isRecoverySnapshotSealed, type RecoverySnapshotV2 } from "./recovery-v2.ts";
 
 /** A recovery record this session committed itself or already restored in full: the revision,
  * the validated project it encodes and a private copy of its valid snapshot (`fallback`: the
@@ -18,6 +18,8 @@ const commits = new Map<string, OwnCommit>();
 
 /** Containers copied, strings (image data) shared: storage-side changes cannot reach it. */
 export function plainCopy<T>(value: T): T {
+  // A sealed snapshot is already a deeply frozen private copy.
+  if (isRecoverySnapshotSealed(value)) return value;
   if (Array.isArray(value)) return value.map(plainCopy) as T;
   if (value && typeof value === "object")
     return Object.fromEntries(

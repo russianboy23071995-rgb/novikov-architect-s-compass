@@ -7,7 +7,8 @@ export function recoveryReadInstrumentation(): Plugin {
     apply: "build",
     transform(source, id) {
       const path = id.split("?")[0]!.replaceAll("\\", "/");
-      let edits: [string, string][] = [];
+      // A third entry marks an edit that only one code version contains (before/after builds).
+      let edits: [string, string, "optional"?][] = [];
       if (path.endsWith("/src/application/project-files/recovery-catalog.ts")) {
         edits = [
           [
@@ -20,8 +21,52 @@ export function recoveryReadInstrumentation(): Plugin {
             'const result = await recoveryCheck(options.trustOwnCommit ? "status" : "read", () => restoreRecoveryV2(source.record!, id, catalog.v2!.codec));',
           ],
         ];
+      } else if (path.endsWith("/src/interop/project-file/recovery-v2-storage.ts")) {
+        // Save path: copy, full check of current and previous, transaction (autosave image checks).
+        edits = [
+          [
+            "const next = structuredClone(input);",
+            'const next = recoverySync("publish-clone", () => structuredClone(input));',
+            "optional",
+          ],
+          [
+            "const { current, previous, ...record } = input;",
+            "const cloneStart = performance.now(); const { current, previous, ...record } = input;",
+            "optional",
+          ],
+          [
+            "...(previous ? { previous: sealRecoverySnapshot(previous) } : {}),\n      };",
+            '...(previous ? { previous: sealRecoverySnapshot(previous) } : {}),\n      }; recoveryMeasure("publish-clone", performance.now() - cloneStart);',
+            "optional",
+          ],
+          [
+            "await validate(next.current);",
+            'await recoveryAsync("publish-validate-current", () => validate(next.current));',
+          ],
+          [
+            "if (next.previous) await validate(next.previous);",
+            'if (next.previous) await recoveryAsync("publish-validate-previous", () => validate(next.previous!)); const transactionStart = performance.now();',
+          ],
+          [
+            "        oldHead.onsuccess = check;\n      });\n",
+            '        oldHead.onsuccess = check;\n      });\n      recoveryMeasure("publish-transaction", performance.now() - transactionStart);\n',
+          ],
+        ];
       } else if (path.endsWith("/src/application/project-files/recovery-v2-writer.ts")) {
         edits = [
+          [
+            "const candidate = validateProject(input);",
+            'const candidate = recoverySync("save-validate", () => validateProject(input));',
+          ],
+          [
+            "const document = await codec.prepare(candidate);",
+            'const document = await recoveryAsync("save-prepare", () => codec.prepare(candidate));',
+          ],
+          [
+            "current: sealRecoverySnapshot({ savedAt, document }),",
+            'current: recoverySync("save-seal", () => sealRecoverySnapshot({ savedAt, document })),',
+            "optional",
+          ],
           [
             "await restoreRecoveryV2(source.record, projectId, codec, signal);",
             'await recoveryCheck("writer-prepare", () => restoreRecoveryV2(source.record, projectId, codec, signal));',
@@ -77,8 +122,11 @@ export function recoveryReadInstrumentation(): Plugin {
           ],
         ];
       } else return;
-      for (const [from, to] of edits) {
-        if (!source.includes(from)) throw new Error(`Recovery profiler no longer matches ${from}`);
+      for (const [from, to, optional] of edits) {
+        if (!source.includes(from)) {
+          if (optional) continue;
+          throw new Error(`Recovery profiler no longer matches ${from}`);
+        }
         source = source.replaceAll(from, to);
       }
       return {

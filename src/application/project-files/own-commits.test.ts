@@ -4,7 +4,10 @@ import { createProject } from "../projects/create.ts";
 import { addWall } from "../walls/actions.ts";
 import { createHistory } from "../history/project-history.ts";
 import { createImageAssetHandle } from "../../domain/elements/reference/model.ts";
-import { createBoundedRecoveryCodec } from "../../interop/project-file/recovery-codec.ts";
+import {
+  createAssetPreparation,
+  createBoundedRecoveryCodec,
+} from "../../interop/project-file/recovery-codec.ts";
 import {
   readProjectRecovery,
   saveProjectRecovery,
@@ -12,7 +15,16 @@ import {
 } from "./recovery-catalog.ts";
 import { sameRecoveryContent } from "./recovery-status.ts";
 import { prepareRecoveryV2Writer } from "./recovery-v2-writer.ts";
-import type { RecoveryRecordV2 } from "./recovery-v2.ts";
+import {
+  isRecoverySnapshotChecked,
+  markRecoverySnapshotChecked,
+  restoreRecoveryV2,
+  sealRecoverySnapshot,
+  type RecoveryDocument,
+  type RecoveryRecordV2,
+  type RecoverySnapshotV2,
+} from "./recovery-v2.ts";
+import { plainCopy } from "./own-commits.ts";
 import type { Project } from "../../domain/project/schema.ts";
 
 // Status confirmation of own recovery saves (docs/performance/RECOVERY_STATUS.md).
@@ -190,7 +202,8 @@ test("a verified fallback keeps the valid predecessor for status and writer", as
   const blobs = (record.current.document as unknown as { blobs: Record<string, { data: string }> })
     .blobs;
   const [key] = Object.keys(blobs);
-  blobs[key!]!.data = png.replace("AAAA", "AAAB");
+  // Current and previous share one frozen payload (sealed snapshots); damage only current's link.
+  blobs[key!] = { ...blobs[key!]!, data: png.replace("AAAA", "AAAB") };
   records.set(project.id, { ...record, revision: "damaged-current" });
   const full = await readProjectRecovery(catalog, project.id, { trustOwnCommit: true });
   assert.equal(full!.fallback, true);
@@ -208,4 +221,140 @@ test("a verified fallback keeps the valid predecessor for status and writer", as
   assert.equal(JSON.stringify(next.previous), JSON.stringify(record.previous));
   const restored = await readProjectRecovery(catalog, project.id);
   assert.equal(restored!.fallback, false);
+});
+
+// Autosave checks only images it has not prepared itself (user decision 27.10.2026,
+// docs/performance/AUTOSAVE_IMAGE_CHECKS.md).
+function pngOf(width: number, seed: number) {
+  const header = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
+  const size = Buffer.alloc(8);
+  size.writeUInt32BE(width, 0);
+  size.writeUInt32BE(1, 4);
+  const rest = Buffer.from("0806000000", "hex");
+  return Buffer.concat([header, size, rest, Buffer.alloc(4), Buffer.alloc(64, seed)]).toString(
+    "base64",
+  );
+}
+const image = (id: string, width: number, seed: number) =>
+  createImageAssetHandle({
+    id,
+    mimeType: "image/png",
+    pixelWidth: width,
+    pixelHeight: 1,
+    data: pngOf(width, seed),
+  });
+function imageProject(assets = [image("a", 2, 1), image("b", 3, 2)]): Project {
+  const p = addWall(createProject("p", "s0"), {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 4, y: 0 },
+    thickness: 0.3,
+    height: 3,
+  });
+  return createHistory({ ...p, assets }).present;
+}
+const imageCodec = () =>
+  createBoundedRecoveryCodec({ modelBytes: 1 << 20, payloadBytes: 1 << 20, pixels: 1000 });
+function counted() {
+  const phases: string[] = [];
+  return { phases, measure: (phase: string) => phases.push(phase) };
+}
+const decodes = (phases: string[]) => phases.filter((p) => p === "decode").length;
+
+test("the save check links prepared images and equals the full check", async () => {
+  const c = imageCodec();
+  const doc = await c.prepare(imageProject());
+  const fast = counted(),
+    full = counted();
+  const linked = await c.restore(doc, { prepared: true, ...fast });
+  const checked = await c.restore(doc, full);
+  assert.equal(decodes(fast.phases), 0);
+  assert.equal(decodes(full.phases), 2);
+  assert.equal(JSON.stringify(linked), JSON.stringify(checked));
+});
+
+test("a changed image is hashed and checked; unchanged ones are not", async () => {
+  const preparation = createAssetPreparation({ maxBytes: 1 << 20, maxPixels: 1000 });
+  const assets = [image("a", 2, 1), image("b", 3, 2)];
+  await preparation.prepare(imageProject(assets));
+  const before = preparation.hashes;
+  const doc = await preparation.prepare(imageProject([assets[0]!, image("b", 3, 9)]));
+  assert.equal(preparation.hashes - before, 1);
+  const c = imageCodec();
+  // The save check links both: the new image was prepared (and hashed) in this session too.
+  const save = counted();
+  await c.restore(doc, { prepared: true, ...save });
+  assert.equal(decodes(save.phases), 0);
+  // Restores never link: both images are decoded and hashed again.
+  const restore = counted();
+  await c.restore(doc, restore);
+  assert.equal(decodes(restore.phases), 2);
+});
+
+test("payloads not prepared in this session take the full check (counter-checks)", async () => {
+  const c = imageCodec();
+  const doc = await c.prepare(imageProject());
+  const [key] = Object.keys(doc.blobs);
+  // Same content, but a copy as storage would return it: decoded and hashed.
+  const copy: RecoveryDocument = {
+    ...doc,
+    blobs: { ...doc.blobs, [key!]: { ...doc.blobs[key!]! } },
+  };
+  const probe = counted();
+  await c.restore(copy, { prepared: true, ...probe });
+  assert.equal(decodes(probe.phases), 1);
+  // A damaged copy under the old key is rejected even on the save path.
+  const damaged: RecoveryDocument = {
+    ...doc,
+    blobs: { ...doc.blobs, [key!]: { ...doc.blobs[key!]!, data: pngOf(2, 7) } },
+  };
+  await assert.rejects(c.restore(damaged, { prepared: true }), /integrity/);
+  // A prepared payload linked under a different key is checked, not trusted.
+  const keys = Object.keys(doc.blobs);
+  const swapped: RecoveryDocument = {
+    ...doc,
+    blobs: { [keys[0]!]: doc.blobs[keys[1]!]!, [keys[1]!]: doc.blobs[keys[0]!]! },
+  };
+  await assert.rejects(c.restore(swapped, { prepared: true }));
+});
+
+test("sealed snapshots share frozen images, copy everything else and stay unchanged", async () => {
+  const doc = await imageCodec().prepare(imageProject());
+  const snapshot: RecoverySnapshotV2 = { savedAt: "2026-10-27T10:00:00.000Z", document: doc };
+  const sealed = sealRecoverySnapshot(snapshot);
+  assert.equal(JSON.stringify(sealed), JSON.stringify(snapshot));
+  for (const key of Object.keys(doc.blobs))
+    assert.equal(sealed.document.blobs[key], doc.blobs[key]);
+  assert.notEqual(sealed.document.model, doc.model);
+  assert.ok(Object.isFrozen(sealed.document.model.assets));
+  // Later changes of the caller's snapshot do not reach the sealed copy.
+  doc.model.assets[0]!.id = "changed";
+  assert.notEqual(sealed.document.model.assets[0]!.id, "changed");
+  // Sealing again and copying an own commit keep the same object; unfrozen images are copied.
+  assert.equal(sealRecoverySnapshot(sealed), sealed);
+  assert.equal(plainCopy(sealed), sealed);
+  const [key] = Object.keys(doc.blobs);
+  const loose = { ...snapshot, document: { ...doc, blobs: { [key!]: { ...doc.blobs[key!]! } } } };
+  assert.notEqual(sealRecoverySnapshot(loose).document.blobs[key!], loose.document.blobs[key!]);
+});
+
+test("only sealed snapshots can be marked as checked", async () => {
+  const doc = await imageCodec().prepare(imageProject());
+  const snapshot: RecoverySnapshotV2 = { savedAt: "2026-10-27T10:00:00.000Z", document: doc };
+  markRecoverySnapshotChecked(snapshot);
+  assert.equal(isRecoverySnapshotChecked(snapshot), false);
+  const sealed = sealRecoverySnapshot(snapshot);
+  assert.equal(isRecoverySnapshotChecked(sealed), false);
+  markRecoverySnapshotChecked(sealed);
+  assert.equal(isRecoverySnapshotChecked(sealed), true);
+  // A restore of a sealed record is still a full check of every image.
+  const c = imageCodec();
+  const probe = counted();
+  const restored = await restoreRecoveryV2(
+    { version: 2, projectId: "p", revision: "r", current: sealed },
+    "p",
+    { prepare: c.prepare, restore: (d, control) => c.restore(d, { ...control, ...probe }) },
+  );
+  assert.equal(restored.fallback, false);
+  assert.equal(decodes(probe.phases), 2);
 });

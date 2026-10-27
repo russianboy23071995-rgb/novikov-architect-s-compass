@@ -1,4 +1,6 @@
 import { workspacePhases, profileReducer } from "./workspace-load-trace";
+// Phases of every recovery read and save, for the browser console (diagnostic builds only).
+(globalThis as { recoveryPhases?: object[] }).recoveryPhases = workspacePhases;
 export function recoveryMeasure(phase: string, duration: number) {
   workspacePhases.push({
     kind: "application",
