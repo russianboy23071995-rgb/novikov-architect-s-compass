@@ -27,9 +27,11 @@ function freezeBuilding(result: Solid): Solid {
 }
 // The building part of one storey, reused while the storey object of an owned snapshot (deeply
 // frozen), its elevation and the asset list stay the same: an edit rebuilds only the storeys it
-// changed (docs/performance/EDIT_CYCLE.md, Teil B). One entry per storey ID keeps it bounded;
-// steps held by the undo history do not keep their parts.
+// changed (docs/performance/EDIT_CYCLE.md, Teil B). The latest few versions per storey ID are
+// kept, so undo and redo find their part again (docs/performance/UNDO_STOREY_REUSE.md); older
+// history steps rebuild theirs. Bounded per storey and in total.
 const STOREY_PART_LIMIT = 64;
+const VERSIONS_PER_STOREY = 4;
 // Faces of a reused part keep their identity; the picking index reuses its sub-tree per part
 // (docs/performance/PICKING_PER_STOREY.md). Weak: parts and faces leave with their scenes.
 const partOfFace = new WeakMap<object, Solid>();
@@ -39,13 +41,15 @@ export function buildingFacePart(face: object): object | undefined {
 }
 const storeyParts = new Map<
   string,
-  { storey: object; elevation: number; assets: object; solid: Solid }
+  { storey: object; elevation: number; assets: object; solid: Solid }[]
 >();
 function storeyPart(project: Project, storey: Project["storeys"][number], owned: boolean): Solid {
   const elevation = workingStoreyElevation({ ...project, workingStoreyId: storey.id });
-  const known = owned ? storeyParts.get(storey.id) : undefined;
-  if (known?.storey === storey && known.elevation === elevation && known.assets === project.assets)
-    return known.solid;
+  const versions = owned ? (storeyParts.get(storey.id) ?? []) : [];
+  const known = versions.find(
+    (v) => v.storey === storey && v.elevation === elevation && v.assets === project.assets,
+  );
+  if (known) return known.solid;
   const solid = buildPreviewSolid({ storey, assets: project.assets }, elevation);
   if (!owned) return solid;
   for (const face of solid.faces) {
@@ -56,7 +60,13 @@ function storeyPart(project: Project, storey: Project["storeys"][number], owned:
     partOfFace.set(face, solid);
   }
   if (storeyParts.size >= STOREY_PART_LIMIT) storeyParts.clear();
-  storeyParts.set(storey.id, { storey, elevation, assets: project.assets, solid });
+  storeyParts.set(
+    storey.id,
+    [{ storey, elevation, assets: project.assets, solid }, ...versions].slice(
+      0,
+      VERSIONS_PER_STOREY,
+    ),
+  );
   return solid;
 }
 
