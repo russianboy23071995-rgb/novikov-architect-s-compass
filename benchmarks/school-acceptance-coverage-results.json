@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-27",
+  "state": "main 58f0ec1 + Messprogramm test/school-run-coverage, Produktionsbuild, Fenster sichtbar",
+  "notes": "school-acceptance.html?images=1&run=1&fresh=1&repeat=N. Lauf 1 kalt, weitere warm (gleicher Tab). Werte in ms; 'warm' = Werte der Wiederholungen. Alle Schritte ok, keine Fehler, Inhalt (Projektdatei/IFC) nach Wiederherstellung gleich in jedem Lauf.",
+  "runs": {
+    "s": [
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 69,
+        "undo": 14,
+        "redo": 42,
+        "snap": 14
+      },
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 69,
+        "undo": 14,
+        "redo": 42,
+        "snap": 14
+      },
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 80,
+        "undo": 14,
+        "redo": 49,
+        "snap": 14
+      }
+    ],
+    "l": [
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 204,
+        "sessionP95": 218,
+        "undo": 14,
+        "redo": 145,
+        "snap": 17
+      },
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 203,
+        "sessionP95": 229,
+        "undo": 14,
+        "redo": 147,
+        "snap": 16
+      },
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 212,
+        "sessionP95": 236,
+        "undo": 14,
+        "redo": 144,
+        "snap": 16
+      }
+    ],
+    "x": [
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 500,
+        "sessionP95": 599,
+        "undo": 14,
+        "redo": 346,
+        "snap": 16
+      },
+      {
+        "ok": true,
+        "errors": 0,
+        "content": [true, true],
+        "session": 500,
+        "sessionP95": 541,
+        "undo": 14,
+        "redo": 343,
+        "snap": 16
+      }
+    ]
+  },
+  "coldWarm": {
+    "s": [
+      ["Öffnen – Projekt laden", 281, [298, 338]],
+      ["Geschoss Erdgeschoss", 69, [62, 80]],
+      ["Wandlänge – Übernehmen", 74, [73, 82]],
+      ["Tür setzen", 133, [134, 146]],
+      ["2D → 3D", 90, [92, 119]],
+      ["3D – Szene fertig", 630, [588, 616]],
+      ["3D: Tür entlang Wand ziehen", 642, [654, 745]],
+      ["Z: Übernehmen", 118, [124, 145]],
+      ["Z: Undo", 71, [82, 98]],
+      ["Z: Redo", 66, [70, 91]],
+      ["Speichern (Datei erzeugen)", 181, [180, 230]],
+      ["IFC exportieren", 138, [139, 152]],
+      ["Neu öffnen – Projekt laden", 122, [116, 142]],
+      ["Wiederherstellung – Stand prüfen", 422, [450, 450]],
+      ["Wiederherstellung – Projekt laden", 262, [256, 319]]
+    ],
+    "l": [
+      ["Öffnen – Projekt laden", 679, [678, 730]],
+      ["Geschoss Erdgeschoss", 133, [138, 136]],
+      ["Wandlänge – Übernehmen", 194, [212, 188]],
+      ["Tür setzen", 348, [347, 336]],
+      ["2D → 3D", 323, [215, 227]],
+      ["3D – Szene fertig", 465, [501, 478]],
+      ["3D: Tür entlang Wand ziehen", 767, [733, 712]],
+      ["Z: Übernehmen", 351, [332, 330]],
+      ["Z: Undo", 199, [205, 198]],
+      ["Z: Redo", 188, [206, 193]],
+      ["Speichern (Datei erzeugen)", 384, [402, 379]],
+      ["IFC exportieren", 397, [366, 410]],
+      ["Neu öffnen – Projekt laden", 355, [373, 371]],
+      ["Wiederherstellung – Stand prüfen", 715, [693, 667]],
+      ["Wiederherstellung – Projekt laden", 664, [689, 677]]
+    ],
+    "x": [
+      ["Öffnen – Projekt laden", 1136, [1082]],
+      ["Geschoss Geschoss 2", 281, [284]],
+      ["Wandlänge – Übernehmen", 566, [448]],
+      ["2D → 3D", 943, [1048]],
+      ["3D – Szene fertig", 453, [467]],
+      ["Z: Übernehmen", 1090, [1035]],
+      ["Z: Undo", 732, [657]],
+      ["Z: Redo", 678, [850]],
+      ["Speichern (Datei erzeugen)", 450, [472]],
+      ["IFC exportieren", 1347, [1416]],
+      ["Neu öffnen – Projekt laden", 658, [659]],
+      ["Wiederherstellung – Stand prüfen", 1409, [1484]],
+      ["Wiederherstellung – Projekt laden", 1155, [1236]]
+    ]
+  }
+}

@@ -143,6 +143,46 @@ function setInput(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 const openCount = () => document.querySelectorAll('[aria-label^="Select "]').length;
+// Z axis of the shared movement controls (3D group move); enabled once the origin is picked.
+const zButton = () =>
+  [...document.querySelectorAll<HTMLButtonElement>('[aria-label="Bewegungsachsen"] button')].find(
+    (b) => b.title.startsWith("Z-Versatz") && !b.disabled,
+  );
+async function sha256(text: string) {
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(hash), (n) => n.toString(16).padStart(2, "0")).join("");
+}
+// IFC content without the header line that carries the export time.
+const ifcBody = (text: string) =>
+  text
+    .split("\n")
+    .filter((line) => !line.startsWith("FILE_NAME("))
+    .join("\n");
+const ifcCount = (text: string, entity: string) => text.split(`=${entity}(`).length - 1;
+type SavedProject = {
+  storeys: {
+    walls: { id: string; baseOffset?: number }[];
+    windows: unknown[];
+    doors?: unknown[];
+  }[];
+};
+/** Save and IFC export through the toolbar, captured in memory (no download to disk). */
+async function captureFiles(name: string) {
+  const files: { project?: string | undefined; ifc?: string | undefined } = {};
+  for (const [key, control] of [
+    ["project", "Save project"],
+    ["ifc", "Export IFC"],
+  ] as const) {
+    captured = null;
+    await step(
+      `${name} – ${key === "project" ? "Datei" : "IFC"}`,
+      () => click(label(control)!),
+      () => !!captured,
+    );
+    files[key] = (captured as { text: string } | null)?.text;
+  }
+  return files;
+}
 
 // --- model ---------------------------------------------------------------------------------
 async function noiseImage(seed: number) {
@@ -490,6 +530,65 @@ async function phaseOne() {
     () => !!element("wall", targets.wall),
   );
 
+  // Z: the wall moves up by a typed +0,5 m through the shared 3D group move (prepared Z preview),
+  // then one Undo/Redo; the saved file below must hold the raised wall (AUD14-07).
+  const zBefore =
+    project.storeys.flatMap((s) => s.walls).find((w) => w.id === targets.wall)?.baseOffset ?? 0;
+  await select("wall", targets.wall);
+  await step(
+    "Z: 2D → 3D",
+    () => click(button("3D")!),
+    () => !!document.querySelector("canvas"),
+  );
+  await step(
+    "Z: Bewegung starten, Ursprung wählen",
+    async () => {
+      click(label("Demand menu")!);
+      await until(() => !!button("Element frei bewegen"), 5000);
+      click(button("Element frei bewegen")!);
+      await until(() => bodyText().includes("Ursprung frei anklicken"), 5000);
+      const canvas = document.querySelector("canvas")!;
+      const c = centre(canvas);
+      pointer(canvas, "pointermove", c.x, c.y);
+      await paint();
+      click(canvas, c);
+    },
+    () => !!zButton(),
+    10000,
+  );
+  await step(
+    "Z: Achse und Vorschau +0,5 m",
+    async () => {
+      click(zButton()!);
+      await until(() => !!label("Bewegungslänge (m)"), 5000);
+      setInput(label("Bewegungslänge (m)") as HTMLInputElement, "0,5");
+    },
+    () =>
+      !!(label("Hilfseingabefenster") as HTMLFormElement | null)?.querySelector(
+        'button[type="submit"]:not(:disabled)',
+      ),
+  );
+  await step(
+    "Z: Übernehmen",
+    () => (label("Hilfseingabefenster") as HTMLFormElement).requestSubmit(),
+    () => !label("Hilfseingabefenster"),
+  );
+  await step(
+    "Z: Undo",
+    () => key("z", true),
+    () => true,
+  );
+  await step(
+    "Z: Redo",
+    () => key("y", true),
+    () => true,
+  );
+  await step(
+    "Z: 3D → 2D",
+    () => click(button("2D")!),
+    () => !!element("wall", targets.wall),
+  );
+
   const undo: number[] = [],
     redo: number[] = [];
   for (const [list, ctrlKey, name] of [
@@ -511,6 +610,44 @@ async function phaseOne() {
     () => !!captured,
   );
   const saved = captured as { text: string } | null;
+  const savedModel = saved
+    ? (JSON.parse(saved.text) as { project?: SavedProject } & SavedProject)
+    : null;
+  const savedProject = savedModel?.project ?? savedModel;
+  await step(
+    "Z: im gespeicherten Stand",
+    () => {
+      const wall = savedProject?.storeys.flatMap((s) => s.walls).find((w) => w.id === targets.wall);
+      const actual = wall?.baseOffset ?? 0;
+      if (Math.abs(actual - (zBefore + 0.5)) > 1e-9)
+        throw new Error(`Z-Versatz ${actual} statt ${zBefore + 0.5}`);
+    },
+    () => true,
+  );
+  // IFC export of the same state: every wall, window and door of the model is written.
+  captured = null;
+  await step(
+    "IFC exportieren",
+    () => click(label("Export IFC")!),
+    () => !!captured,
+    120000,
+  );
+  const ifc = (captured as { text: string } | null)?.text ?? "";
+  await step(
+    "IFC: Bauteile vollständig",
+    () => {
+      const storeys = savedProject?.storeys ?? [];
+      const expected = {
+        IFCWALL: storeys.reduce((n, s) => n + s.walls.length, 0),
+        IFCWINDOW: storeys.reduce((n, s) => n + s.windows.length, 0),
+        IFCDOOR: storeys.reduce((n, s) => n + (s.doors?.length ?? 0), 0),
+      };
+      for (const [entity, count] of Object.entries(expected))
+        if (ifcCount(ifc, entity) !== count)
+          throw new Error(`${entity}: ${ifcCount(ifc, entity)} statt ${count}`);
+    },
+    () => true,
+  );
   if (saved) await openFile("Neu öffnen", saved.text);
 
   // Long session: 50 alternating wall edits, heap sampled each round.
@@ -538,7 +675,14 @@ async function phaseOne() {
     () => bodyText().includes("Lokaler Snapshot aktuell"),
     120000,
   );
+  // Content before the reload: project file and IFC, compared after the restore (phase two).
+  const before = await captureFiles("Inhalt vor Neuladen");
+  const content = {
+    projectHash: before.project ? await sha256(before.project) : null,
+    ifcHash: before.ifc ? await sha256(ifcBody(before.ifc)) : null,
+  };
   const report = {
+    content,
     model: summary(project, imageBytes, fileBytes),
     steps: results,
     snap: stats(snap),
@@ -789,12 +933,56 @@ async function phaseTwo() {
     () => !button("Projekt laden") && !!element("wall", targets.wall),
     120000,
   );
+  report.loadToRestoredMs = Math.round(performance.now());
+  // The restored project must equal the state before the reload: same project file, same IFC.
+  const after = await captureFiles("Inhalt nach Wiederherstellung");
+  const projectHash = after.project ? await sha256(after.project) : null;
+  const ifcHash = after.ifc ? await sha256(ifcBody(after.ifc)) : null;
+  report.content = {
+    ...report.content,
+    projectEqual: !!projectHash && projectHash === report.content?.projectHash,
+    ifcEqual: !!ifcHash && ifcHash === report.content?.ifcHash,
+  };
+  await step(
+    "Inhalt gleich (Datei und IFC)",
+    () => {
+      if (!report.content.projectEqual)
+        throw new Error("Projektdatei nach Wiederherstellung anders");
+      if (!report.content.ifcEqual) throw new Error("IFC nach Wiederherstellung anders");
+    },
+    () => true,
+  );
   report.steps.push(...results);
   report.errors.push(...errors);
-  report.loadToRestoredMs = Math.round(performance.now());
   report.heapAfterRestoreIdle = await idle(5000);
   sessionStorage.setItem(RESULT_KEY, JSON.stringify(report));
-  (window as unknown as { schoolRun: unknown }).schoolRun = report;
+  // repeat=N: the whole run N times in this tab; run 1 is cold (page load, emptied storage with
+  // fresh=1), the repetitions are warm (HTTP/code cache, same browser process).
+  const runs = [...JSON.parse(sessionStorage.getItem(`${RESULT_KEY}-runs`) ?? "[]"), report];
+  if (runs.length < Number(params.get("repeat") ?? 1)) {
+    sessionStorage.setItem(`${RESULT_KEY}-runs`, JSON.stringify(runs));
+    sessionStorage.removeItem(RESULT_KEY);
+    location.reload();
+    return;
+  }
+  sessionStorage.removeItem(`${RESULT_KEY}-runs`);
+  (window as unknown as { schoolRun: unknown }).schoolRun =
+    runs.length > 1 ? { ...report, runs, coldWarm: coldWarm(runs) } : report;
+}
+
+/** Cold (first run) against the median of the warm repetitions, per step name. */
+function coldWarm(runs: { steps: StepResult[] }[]) {
+  const median = (values: number[]) =>
+    values.length ? [...values].sort((a, b) => a - b)[values.length >> 1]! : null;
+  const names = [...new Set(runs[0]!.steps.map((s) => s.step))];
+  const msOf = (run: { steps: StepResult[] }, name: string) =>
+    run.steps.filter((s) => s.step === name).reduce((n, s) => n + s.ms, 0);
+  return names.map((name) => ({
+    step: name,
+    coldMs: Math.round(msOf(runs[0]!, name)),
+    warmMedianMs: median(runs.slice(1).map((run) => Math.round(msOf(run, name)))),
+    warmMs: runs.slice(1).map((run) => Math.round(msOf(run, name))),
+  }));
 }
 
 (window as unknown as { schoolRunState: () => unknown }).schoolRunState = () => ({

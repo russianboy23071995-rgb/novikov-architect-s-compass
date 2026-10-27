@@ -64,3 +64,37 @@ Alle Schritte in allen drei Läufen erfolgreich. **Keine Konsolenfehler, kein Er
 - Fangwerte sind frame-gebunden (Untergrenze ≈ 14–17 ms).
 - Geometrie synthetisch (regelmäßiges Raster, keine Treppen, keine Decken als Bauteil); x ohne Türen, daher dort kein 3D-Türziehen.
 - Wandendpunkt-Ziehen nicht automatisiert; Tür- und Fangbewegung über Zeigerereignisse.
+
+## Ergänzung 27.10.2026: Z-Bewegung, IFC-Export, Inhaltsvergleich, Kalt/Warm
+
+Änderungskarte „Schullauf ergänzen“ (AUD14-07) mit den Empfehlungen freigegeben. Nur das Messprogramm `benchmarks/school-acceptance.tsx` geändert, kein Produktcode. Stand main `58f0ec1`, Produktionsbuild, Fenster sichtbar. Rohdaten `benchmarks/school-acceptance-coverage-results.json`.
+
+**Neue Schritte im Ablauf:**
+
+- **Z-Bewegung** (nach 3D → 2D): Wand auswählen, 2D → 3D, „Element frei bewegen“, Ursprung im 3D-Fenster anklicken, Z-Achse wählen, „0,5“ eingeben, übernehmen, je ein Undo und Redo, 3D → 2D. Gemeinsame Gruppenbewegung mit vorbereiteter Z-Vorschau. Prüfung: Im danach gespeicherten Stand liegt der Wandfuß genau 0,5 m höher.
+- **IFC-Export** (nach dem Speichern): „Export IFC“ im Speicher abgefangen; Prüfung: Anzahl `IFCWALL`/`IFCWINDOW`/`IFCDOOR` gleich den Wänden/Fenstern/Türen des gespeicherten Stands.
+- **Inhaltsvergleich:** Direkt vor dem Neuladen und nach der Wiederherstellung Projektdatei und IFC erzeugen; SHA-256 der Projektdatei und der IFC (ohne die Kopfzeile `FILE_NAME` mit dem Exportzeitpunkt) müssen gleich sein.
+- **Kalt/Warm** (`repeat=N`): der ganze Lauf N-mal im selben Tab. Lauf 1 = kalt (erster Lauf nach dem Öffnen der Seite, Speicher der Messseite mit `fresh=1` geleert), weitere = warm (HTTP-/Code-Cache, derselbe Browserprozess). Mit `fresh=1` beginnt jeder Lauf mit leerem Speicher der Messseite, damit sich nur der Cache-Zustand unterscheidet.
+
+**Ergebnis** (s und l je 3 Läufe, x 2 Läufe): alle Schritte in allen Läufen erfolgreich, keine Konsolenfehler; Z-Prüfung, IFC-Vollständigkeit und Inhaltsgleichheit (Projektdatei und IFC) in jedem Lauf bestanden.
+
+| ms (kalt / warm)                 | s                       | l                           | x                       |
+| -------------------------------- | ----------------------- | --------------------------- | ----------------------- |
+| Öffnen – Projekt laden           | 281 / 298, 338          | 679 / 678, 730              | 1136 / 1082             |
+| 2D → 3D                          | 90 / 92, 119            | 323 / 215, 227              | 943 / 1048              |
+| 3D: Tür entlang Wand ziehen      | 642 / 654, 745          | 767 / 733, 712              | – (ohne Tür)            |
+| Z: Übernehmen                    | 118 / 124, 145          | 351 / 332, 330              | 1090 / 1035             |
+| Z: Undo / Redo                   | 71, 66 / 82–98          | 199, 188 / 198–206          | 732, 678 / 657, 850     |
+| Speichern (Datei erzeugen)       | 181 / 180, 230          | 384 / 402, 379              | 450 / 472               |
+| IFC exportieren                  | 138 / 139, 152          | 397 / 366, 410              | 1347 / 1416             |
+| Wiederherstellung prüfen / laden | 422, 262 / 450, 256–319 | 715, 664 / 667–693, 677–689 | 1409, 1155 / 1484, 1236 |
+| Dauerlauf Median je Lauf         | 69, 69, 80              | 204, 203, 212               | 500, 500                |
+| Redo Median je Lauf              | 42, 42, 49              | 145, 147, 144               | 346, 343                |
+
+**Bewertung:**
+
+1. Kalt und warm unterscheiden sich kaum (meist innerhalb der Streuung); nur „2D → 3D“ ist bei l im kalten Lauf deutlich langsamer (323 gegenüber 215–227 ms). Der kalte Lauf ist nicht wirklich kalt: Browserprozess, Betriebssystem-Cache und Grafiktreiber waren vorher schon benutzt.
+2. Die Z-Bewegung skaliert wie die übrigen Bearbeitungen mit dem Gesamtmodell: Übernehmen 0,12 s (s) → 0,34 s (l) → 1,1 s (x), Undo/Redo bei x 0,7–0,85 s. Bei x ist das ein spürbarer Wartewert und ein Kandidat für AUD14-04.
+3. Wiederherstellung und Neu-Öffnen liefern exakt denselben Inhalt wie vor dem Neuladen (Projektdatei und IFC byte-gleich bis auf den Exportzeitpunkt).
+
+**Grenzen:** wie oben; zusätzlich kein Browserprozess-Neustart zwischen den Läufen, Ursprung der Z-Bewegung per Klick in die Mitte des 3D-Fensters (kein gezielter Eckfang), IFC nur auf Vollständigkeit der Bauteile geprüft (kein Archicad-Import, keine Schemaprüfung).
