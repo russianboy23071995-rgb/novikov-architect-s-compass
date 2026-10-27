@@ -349,6 +349,7 @@ async function phaseOne() {
   if (button("Weiterarbeiten")) click(button("Weiterarbeiten")!);
   await openFile("Öffnen", text);
   if (params.get("drag") === "1") return dragRun(summary(project, imageBytes, fileBytes));
+  if (params.get("saves")) return savesRun(summary(project, imageBytes, fileBytes));
 
   for (const name of targets.storeys)
     await step(
@@ -571,6 +572,47 @@ if (PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"))
   ).observe({ type: "long-animation-frame", buffered: true });
 const sum = (values: number[]) => values.reduce((n, v) => n + v, 0);
 const round = (v: number) => Math.round(v * 10) / 10;
+
+// --- saves=1: consecutive autosaves after single edits (docs/performance/AUTOSAVE_IMAGE_CHECKS.md)
+async function savesRun(model: ReturnType<typeof summary>) {
+  const phases = () =>
+    (
+      (globalThis as { recoveryPhases?: { kind: string; event?: string; duration?: number }[] })
+        .recoveryPhases ?? []
+    ).filter((e) => e.kind === "application" && /^recovery:(publish|save)/.test(e.event ?? ""));
+  const saves: Record<string, number>[] = [];
+  await step(
+    "Erste Sicherung",
+    () => undefined,
+    () => bodyText().includes("Lokaler Snapshot aktuell"),
+    120000,
+  );
+  for (let i = 0; i < Number(params.get("saves") ?? 4); i++) {
+    await select("wall", targets.wall);
+    const before = phases().length;
+    await command(`Sicherung ${i + 1}`, `Wandlänge auf ${targets.lengths[i % 2]}`);
+    await step(
+      `Sicherung ${i + 1} – geschrieben`,
+      async () => {
+        await until(() => !bodyText().includes("Lokaler Snapshot aktuell"), 5000).catch(() => {});
+      },
+      () => bodyText().includes("Lokaler Snapshot aktuell"),
+      120000,
+    );
+    const save: Record<string, number> = {};
+    for (const e of phases().slice(before)) {
+      const name = e.event!.slice("recovery:".length);
+      save[name] = Math.round(((save[name] ?? 0) + e.duration!) * 10) / 10;
+    }
+    saves.push(save);
+  }
+  (window as unknown as { schoolRun: unknown }).schoolRun = {
+    model,
+    steps: results,
+    saves,
+    errors: [...errors],
+  };
+}
 
 async function dragRun(model: ReturnType<typeof summary>) {
   const events = () =>

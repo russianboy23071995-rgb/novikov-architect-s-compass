@@ -39,7 +39,48 @@ export interface RecoveryV2Storage {
  */
 export interface RecoveryV2Codec {
   prepare(project: Project): Promise<RecoveryDocument>;
-  restore(document: RecoveryDocument, control: { signal?: AbortSignal }): Promise<Project>;
+  /** `prepared`: the save path re-checks its own snapshot; payloads this session prepared may
+   * be linked by identity. Restores never set it. */
+  restore(
+    document: RecoveryDocument,
+    control: { signal?: AbortSignal; prepared?: boolean },
+  ): Promise<Project>;
+}
+/** Snapshots owned by this module: deeply frozen copies. Frozen payloads are shared, not copied
+ * (immutable; their strings are the image data). A save owns its candidate through this instead
+ * of copying every image (docs/performance/AUTOSAVE_IMAGE_CHECKS.md). */
+const sealed = new WeakSet<object>();
+/** Sealed snapshots that passed the full codec check in this session. */
+const checked = new WeakSet<object>();
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const entry of Object.values(value)) deepFreeze(entry);
+    Object.freeze(value);
+  }
+  return value;
+}
+export function sealRecoverySnapshot(snapshot: RecoverySnapshotV2): RecoverySnapshotV2 {
+  if (sealed.has(snapshot)) return snapshot;
+  const { document, ...rest } = object(snapshot);
+  const { blobs, ...model } = object(document);
+  const payloads: Record<string, unknown> = Object.create(null);
+  for (const [key, payload] of Object.entries(object(blobs)))
+    payloads[key] = Object.isFrozen(payload) ? payload : structuredClone(payload);
+  const result = deepFreeze({
+    ...structuredClone(rest),
+    document: { ...structuredClone(model), blobs: payloads },
+  }) as unknown as RecoverySnapshotV2;
+  sealed.add(result);
+  return result;
+}
+export function isRecoverySnapshotSealed(snapshot: unknown): boolean {
+  return typeof snapshot === "object" && snapshot !== null && sealed.has(snapshot);
+}
+export function markRecoverySnapshotChecked(snapshot: RecoverySnapshotV2): void {
+  if (sealed.has(snapshot)) checked.add(snapshot);
+}
+export function isRecoverySnapshotChecked(snapshot: unknown): boolean {
+  return typeof snapshot === "object" && snapshot !== null && checked.has(snapshot);
 }
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -64,6 +105,7 @@ async function restoreSnapshot(
   id: string,
   codec: RecoveryV2Codec,
   signal?: AbortSignal,
+  prepared = false,
 ) {
   signal?.throwIfAborted();
   const s = object(snapshot);
@@ -83,7 +125,10 @@ async function restoreSnapshot(
     )
       throw new Error("Invalid asset link");
   }
-  const project = await codec.restore(s["document"] as RecoveryDocument, signal ? { signal } : {});
+  const project = await codec.restore(s["document"] as RecoveryDocument, {
+    ...(signal ? { signal } : {}),
+    ...(prepared ? { prepared } : {}),
+  });
   signal?.throwIfAborted();
   if (project.id !== id) throw new Error("Recovery project mismatch");
   return { project, savedAt: s["savedAt"] };
@@ -93,13 +138,14 @@ export async function restoreRecoveryV2(
   projectId: string,
   codec: RecoveryV2Codec,
   signal?: AbortSignal,
+  prepared = false,
 ) {
   signal?.throwIfAborted();
   const record = parseRecoveryV2(raw);
   if (record.projectId !== projectId) throw new Error("Recovery project mismatch");
   try {
     return {
-      ...(await restoreSnapshot(record.current, projectId, codec, signal)),
+      ...(await restoreSnapshot(record.current, projectId, codec, signal, prepared)),
       fallback: false,
       revision: record.revision,
     };
@@ -107,7 +153,7 @@ export async function restoreRecoveryV2(
     signal?.throwIfAborted();
     if (!record.previous) throw error;
     return {
-      ...(await restoreSnapshot(record.previous, projectId, codec, signal)),
+      ...(await restoreSnapshot(record.previous, projectId, codec, signal, prepared)),
       fallback: true,
       revision: record.revision,
     };

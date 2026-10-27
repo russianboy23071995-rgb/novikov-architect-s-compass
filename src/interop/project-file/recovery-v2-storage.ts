@@ -1,6 +1,9 @@
 import {
+  isRecoverySnapshotChecked,
+  markRecoverySnapshotChecked,
   parseRecoveryV2,
   restoreRecoveryV2,
+  sealRecoverySnapshot,
   type RecoveryV2Storage,
   type RecoveryV2Codec,
   type RecoveryRecordV2,
@@ -116,18 +119,30 @@ export function createRecoveryV2Storage(
       signal?.throwIfAborted();
       if (!isCurrent()) throw new Error("Recovery context changed");
       // Own the candidate before any async validation; caller mutation cannot alter the commit.
-      const next = structuredClone(input);
+      // Snapshots are sealed: frozen copies that share frozen image payloads instead of copying
+      // every image on each save (docs/performance/AUTOSAVE_IMAGE_CHECKS.md).
+      const { current, previous, ...record } = input;
+      const next: RecoveryRecordV2 = {
+        ...structuredClone(record),
+        current: sealRecoverySnapshot(current),
+        ...(previous ? { previous: sealRecoverySnapshot(previous) } : {}),
+      };
       const tokens = { ...expected };
       if (next.projectId !== projectId || next.revision === tokens.revision)
         throw new Error("Recovery context/revision conflict");
       // Validate both individually: an invalid new current must not hide behind previous.
+      // A sealed snapshot that already passed this check in this session (the previous save's
+      // current) is not checked again.
       const validate = async (current: RecoverySnapshotV2) => {
+        if (isRecoverySnapshotChecked(current)) return;
         await restoreRecoveryV2(
           { version: next.version, projectId, revision: next.revision, current },
           projectId,
           codec,
           signal,
+          true,
         );
+        markRecoverySnapshotChecked(current);
       };
       await validate(next.current);
       if (next.previous) await validate(next.previous);
@@ -220,13 +235,13 @@ export function createRecoveryV2Storage(
               if (--remaining === 0) finish();
             };
             if (!remaining) finish();
+            // Keys are SHA-256 content keys of checked payloads: an existing key holds this
+            // image. Only its presence is read; the stored image is not loaded and compared.
             for (const [key, payload] of payloads) {
-              const request = tx.objectStore(layout.assets).get(key);
+              const request = tx.objectStore(layout.assets).getKey(key);
               request.onsuccess = () => {
                 if (request.result === undefined)
                   tx.objectStore(layout.assets).add(payload, key).onsuccess = ready;
-                else if (!samePayload(request.result, payload))
-                  fail(new Error("Stored payload mismatch"));
                 else ready();
               };
             }
