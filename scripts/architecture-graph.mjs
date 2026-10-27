@@ -31,6 +31,10 @@ function specifiers(text, file, issues) {
   return [...result].filter(Boolean);
 }
 
+// UTF-8 text read as Latin-1/Windows-1252 and saved again: capital A with tilde followed by a
+// continuation character (umlauts, sharp s), or a-circumflex + euro sign (dashes, quotes, ellipsis).
+const MOJIBAKE = /\u00C3[\u0080-\u00BF\u0152\u0153\u0160\u0178\u2013\u2014\u201E]|\u00E2\u20AC/;
+
 /** Read-only graph: never execute production modules or load user project data. */
 export function buildGraph(root) {
   root = path.resolve(root);
@@ -49,6 +53,10 @@ export function buildGraph(root) {
   for (const file of files) {
     const absolute = path.join(root, file);
     const text = fs.readFileSync(absolute, "utf8");
+    // Broken UTF-8 in production texts (AUD14-07, docs/AUD14_ABGLEICH.md); tests may hold probes.
+    text.split("\n").forEach((line, i) => {
+      if (MOJIBAKE.test(line)) issues.add(`${file}:${i + 1}: broken UTF-8 text (mojibake)`);
+    });
     // Emitted JS respects TS type elision (also mixed imports) rather than guessing
     // that every source-level import creates a runtime dependency.
     const emitted = ts.transpileModule(text, {
