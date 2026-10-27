@@ -27,6 +27,16 @@ export function prepareAnchorVisibility(
   const query = prepareNearestWallSurface(solid, projection.project);
   return (anchor: Vector3) => classify(projection, anchor, query);
 }
+
+/** As prepareAnchorVisibility, but the index is built on the first query only: snap contexts
+ * are created per model/camera snapshot and most of them never classify a candidate. */
+export function lazyAnchorVisibility(
+  solid: Pick<DisplaySurfaces, "faces">,
+  projection: ProjectionState,
+) {
+  let prepared: ReturnType<typeof prepareAnchorVisibility> | null = null;
+  return (anchor: Vector3) => (prepared ??= prepareAnchorVisibility(solid, projection))(anchor);
+}
 function classify(
   projection: ProjectionState | null,
   anchor: Vector3,

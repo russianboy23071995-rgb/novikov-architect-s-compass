@@ -7,7 +7,7 @@ import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { createMovementOriginQuery, movementCorners } from "./movement-origin.ts";
 import { buildBuildingSolid } from "./building-solid.ts";
 import { visibleSurfaces } from "./layer-display.ts";
-import { classifyAnchorVisibility } from "./anchor-visibility.ts";
+import { lazyAnchorVisibility } from "./anchor-visibility.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { isLayerVisible } from "../../application/layers/visibility.ts";
@@ -60,8 +60,9 @@ export function createWallPreviewContext(
       !!policy?.origin && referenceKey(r) === referenceKey(policy.origin);
     const valid = (r: SnapReference): boolean =>
       isOrigin(r) || (!!lookup.has(referenceKey(r)) && (!policy || policy.sources([r]).length > 0));
-    const visible = (p: Point) =>
-      classifyAnchorVisibility(solid, projection, [p.x, p.y, elevation]) === "visible";
+    // Indexed on first use; identical answers to the full scan over all faces.
+    const anchorVisibility = projection ? lazyAnchorVisibility(solid, projection) : null;
+    const visible = (p: Point) => anchorVisibility?.([p.x, p.y, elevation]) === "visible";
     const context: HoverContext = {
       enabled,
       sessionKey: policy ?? project,

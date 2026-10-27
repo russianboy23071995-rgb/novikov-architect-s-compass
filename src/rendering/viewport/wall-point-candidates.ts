@@ -12,7 +12,7 @@ import { collectSnapCandidates } from "../../constraints/snapping/candidates.ts"
 import { compareSnapCandidates } from "../../constraints/snapping/ranking.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
 import type { ProjectionState } from "./projection-state.ts";
-import { classifyAnchorVisibility } from "./anchor-visibility.ts";
+import { lazyAnchorVisibility } from "./anchor-visibility.ts";
 import { wallEndpointIndex } from "../../application/snapping/project-references.ts";
 
 /** Read-only adapter for existing wall axis/corner/midpoint sources on the active storey plane.
@@ -43,9 +43,10 @@ export function createWallPointCandidates(
   );
   const elevation = workingStoreyElevation(model);
   const plane = projection.workplane(elevation);
+  // Indexed on first use; identical answers to the full scan over all faces.
+  const anchorVisibility = lazyAnchorVisibility(solid, projection);
   return Object.freeze({
-    visibilityAt: (point: Point2) =>
-      classifyAnchorVisibility(solid, projection, [point.x, point.y, elevation]),
+    visibilityAt: (point: Point2) => anchorVisibility([point.x, point.y, elevation]),
     query(
       currentProject: Project,
       currentProjection: ProjectionState,
@@ -90,11 +91,7 @@ export function createWallPointCandidates(
           sourceId: JSON.stringify([candidate.sourceEntityId, candidate.sourceFeature]),
           pointIndex: wallEndpointIndex(candidate.sourceFeature ?? ""),
           modelPoint: [candidate.worldPoint.x, candidate.worldPoint.y, elevation] as const,
-          visibility: classifyAnchorVisibility(solid, projection, [
-            candidate.worldPoint.x,
-            candidate.worldPoint.y,
-            elevation,
-          ]),
+          visibility: anchorVisibility([candidate.worldPoint.x, candidate.worldPoint.y, elevation]),
         })),
       };
     },
