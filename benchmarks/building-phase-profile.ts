@@ -7,8 +7,8 @@ import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts"
 
 // Temporary sibling preserves the real imports/algorithm. Never patch product source.
 // Fail closed if an instrumentation anchor changes; exclusive creation + finally cleanup.
-const original = new URL("../src/lib/bim/geometry.ts", import.meta.url);
-const generated = new URL("../src/lib/bim/geometry.phase-probe.ts", import.meta.url);
+const original = new URL("../src/rendering/viewport/storey-solid.ts", import.meta.url);
+const generated = new URL("../src/rendering/viewport/storey-solid.phase-probe.ts", import.meta.url);
 let source = (await readFile(original, "utf8")).replaceAll("\r\n", "\n");
 const replace = (anchor: string, replacement: string) => {
   assert.equal(source.split(anchor).length, 2, `Unique instrumentation anchor: ${anchor}`);

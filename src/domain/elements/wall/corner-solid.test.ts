@@ -8,7 +8,7 @@ import { deriveRightAngleCorner } from "./corner.ts";
 import { createProject } from "../../../application/projects/create.ts";
 import { addWindow } from "../../../application/windows/actions.ts";
 import { addWall } from "../../../application/walls/actions.ts";
-import { buildSolid } from "../../../lib/bim/geometry.ts";
+import { buildSolid } from "../../../rendering/viewport/storey-solid.ts";
 import {
   extrudeProfileWithOpenings,
   type ProfileFace,

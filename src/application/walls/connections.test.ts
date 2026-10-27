@@ -16,7 +16,7 @@ import {
   redoProject,
 } from "../history/project-history.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";

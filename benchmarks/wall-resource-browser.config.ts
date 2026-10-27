@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 const candidate = fileURLToPath(
-  new URL("../src/lib/bim/geometry.browser-resource.ts", import.meta.url),
+  new URL("../src/rendering/viewport/storey-solid.browser-resource.ts", import.meta.url),
 );
 export default defineConfig({
   plugins: [

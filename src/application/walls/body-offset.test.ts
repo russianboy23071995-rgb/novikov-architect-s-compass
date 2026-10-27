@@ -11,7 +11,7 @@ import { windowCentre } from "../windows/actions.ts";
 import { validateProject } from "../../domain/project/schema.ts";
 import { updateWall } from "./actions.ts";
 import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";
 import { editAtPointer, editAnchor } from "../../lib/bim/direct-edit.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";

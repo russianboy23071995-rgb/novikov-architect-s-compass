@@ -5,9 +5,12 @@ import { boundHeightFixture } from "./bound-height-fixture.ts";
 import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 
-const generated = new URL("../src/lib/bim/geometry.host-baseline.ts", import.meta.url);
+const generated = new URL(
+  "../src/rendering/viewport/storey-solid.host-baseline.ts",
+  import.meta.url,
+);
 let source = (
-  await readFile(new URL("../src/lib/bim/geometry.ts", import.meta.url), "utf8")
+  await readFile(new URL("../src/rendering/viewport/storey-solid.ts", import.meta.url), "utf8")
 ).replaceAll("\r\n", "\n");
 // Restore exactly the old global scan; all remaining production code is shared.
 const index =

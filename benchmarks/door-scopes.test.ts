@@ -14,7 +14,7 @@ import { addDoor } from "../src/application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../src/domain/elements/door/model.ts";
 import { sameProjectContent } from "../src/domain/project/model-equality.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
-import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildPreviewSolid } from "../src/rendering/viewport/storey-solid.ts";
 import {
   selectionMoveSurfaces,
   selectionMoveWindows,

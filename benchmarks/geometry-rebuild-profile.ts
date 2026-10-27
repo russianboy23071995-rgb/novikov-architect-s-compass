@@ -8,12 +8,15 @@ import { updateWindow } from "../src/application/windows/actions.ts";
 import { updateWall } from "../src/application/walls/actions.ts";
 import { setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
-import { type Solid } from "../src/lib/bim/geometry.ts";
+import { type Solid } from "../src/rendering/viewport/storey-solid.ts";
 
 // Diagnostics only: exact anchors, exclusive sibling, cleanup even on failed oracle.
-const generated = new URL("../src/lib/bim/geometry.rebuild-probe.ts", import.meta.url);
+const generated = new URL(
+  "../src/rendering/viewport/storey-solid.rebuild-probe.ts",
+  import.meta.url,
+);
 let source = (
-  await readFile(new URL("../src/lib/bim/geometry.ts", import.meta.url), "utf8")
+  await readFile(new URL("../src/rendering/viewport/storey-solid.ts", import.meta.url), "utf8")
 ).replaceAll("\r\n", "\n");
 function replace(anchor: string, replacement: string) {
   assert.equal(source.split(anchor).length, 2, `Unique anchor: ${anchor}`);

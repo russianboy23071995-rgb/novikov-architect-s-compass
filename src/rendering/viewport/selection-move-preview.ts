@@ -1,7 +1,7 @@
 import { windowPreviewSurfaces, type WindowSelectionSurface } from "./window-selection.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
-import { buildPreviewSolid } from "../../lib/bim/geometry.ts";
+import { buildPreviewSolid } from "./storey-solid.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { DisplaySurfaces } from "./layer-display.ts";

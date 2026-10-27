@@ -7,7 +7,7 @@ import { createProject } from "../projects/create.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 test("shared drawing creates exact wall dimensions with one history step and matching JSON/solid", () => {
   const base = createProject("p", "s"),

@@ -29,7 +29,7 @@ import {
 } from "../history/project-history.ts";
 import { confirmInteraction } from "../tools/interaction.ts";
 import { connectedWallContours } from "../../domain/elements/wall/connections.ts";
-import { buildSolid } from "../../lib/bim/geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 const origin = { x: 0, y: 0 },
   target = { x: 2, y: -1 };

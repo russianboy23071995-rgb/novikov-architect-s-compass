@@ -9,7 +9,7 @@ import {
   updateWall,
   updateWindow,
 } from "../src/lib/bim/model.ts";
-import { buildSolid } from "../src/lib/bim/geometry.ts";
+import { buildSolid } from "../src/rendering/viewport/storey-solid.ts";
 
 const directory = process.argv[2];
 if (!directory)

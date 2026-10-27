@@ -1,8 +1,9 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildSolid, initialCamera, projectPoint } from "./geometry.ts";
-import type { Solid, Vec3 } from "./geometry.ts";
+import { initialCamera, projectPoint } from "./geometry.ts";
+import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
+import type { Solid, Vec3 } from "../../rendering/viewport/storey-solid.ts";
 import { addWindow, updateWindow } from "../../application/windows/actions.ts";
 import { createProject } from "../../application/projects/create.ts";
 import { addWall, updateWall } from "../../application/walls/actions.ts";

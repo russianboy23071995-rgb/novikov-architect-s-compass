@@ -15,7 +15,7 @@ import {
   connectedWallSolids,
   createWallSolidReuse,
 } from "../src/domain/elements/wall/connections.ts";
-import { buildPreviewSolid } from "../src/lib/bim/geometry.ts";
+import { buildPreviewSolid } from "../src/rendering/viewport/storey-solid.ts";
 import { connectionGroupFixture } from "./connection-group-fixture.ts";
 
 test("prepared extrusion reuse invalidates exact geometry inputs and still validates openings", () => {
