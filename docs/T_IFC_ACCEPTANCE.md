@@ -114,6 +114,8 @@ Der normale Export schreibt in den Dateikopf `FILE_DESCRIPTION('NOVIKOV CAD corn
 - Keine IfcOpenShell-Prüfung in diesem Auftrag.
 - Automatisch beim Zeichnen erzeugte T-Anschlüsse speichern dieselbe Verbindung wie „T verbinden“; sie sind daher nicht eigens enthalten.
 
-### Nutzerabnahme Archicad
+### Nutzerabnahme Archicad — 27.10.2026
 
-Ausstehend.
+Der Nutzer bestätigt den Import von `NOVIKOV-T-Anschluss-Test.ifc` als erfolgreich: alle Wandanschlüsse korrekt gebildet; Wände werden als Wände erkannt, Höhen und Materialien sind in Archicad änderbar; Fensterbrüstungen erkennbar und steuerbar, Fenster verschiebbar. Damit ist die praktische Abnahme der T-Anschlüsse (schräg bis 5°, Wandmitte, beidseitig, an einer Hauptwand mit 120°-Ecke) abgeschlossen. Dies ist die Nutzerabnahme, kein von Claude ausgeführter Archicad-Test.
+
+Abweichung bei den Fenstern: Der Fensterstempel zeigt „RB: 0,00 x 0,00“, Breite und Höhe sind in Archicad nicht änderbar. Ursache im Export: `IfcWindow` wird bewusst ohne eigene Geometrie und ohne Fenstertyp geschrieben (Representation `$`, nur OverallWidth/OverallHeight und die verknüpfte Öffnung, siehe Eck-Abnahme: „Rahmen und Glas werden nicht erfunden“). Archicad übernimmt daraus kein parametrisches Fenster mit Maßen. Die Öffnungen selbst sind korrekt. Kein Fehler der T-Anschlüsse; eigener Kandidat für einen späteren Auftrag (Fenster im IFC mit Geometrie bzw. Typangaben, damit Archicad die Maße erkennt).
