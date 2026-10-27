@@ -11520,7 +11520,7 @@ Auftrag: gemeinsame sichere Snapshot-/Revisions-/Ownership-Grenze und vorhandene
 Abnahme: Einzelwand sowie 2/5 Geschosse, große Bilder mit unveränderter Auswahlgröße, Vorbereitung/Pointer/Commit getrennt; stale/mutierte Basis, No-op, externe/interne Anschlüsse, Fenster einmal mitnehmen, ein Undo/Redo und Datei-/Recoverygleichheit. Messung und Instrumentierung belegen entfernte Payloadserialisierung; Integrität bleibt erhalten.
 
 ### AUD14-03 – 3D-Ressourcen lokal aktualisieren
-Status 27.10.2026 (Abgleich, docs/AUD14_ABGLEICH.md): teilweise – Ressourcen- und Patch-Reuse belegt (PR385/386, PR403–410); offen: Native-/GPU-/Dauerframe-Gate, Kaltaufbau/Partitionswechsel, Vollupload bei Topologiewechsel, Kontextverlust nicht in CI.
+Status 27.10.2026 (Abgleich, docs/AUD14_ABGLEICH.md): teilweise – Ressourcen- und Patch-Reuse belegt (PR385/386, PR404–411); offen: Native-/GPU-/Dauerframe-Gate, Kaltaufbau/Partitionswechsel, Vollupload bei Topologiewechsel, Kontextverlust nicht in CI.
 Früherer Status 21.10.2026: stabile Ressourcen, Patchuploads und Fensterbasis bis PR406 integriert; kalte Vorbereitung separat vermessen (Nachweis unten). Pufferpackung im Folgebranch perf/direct-solid-packing ohne neue Cache-Schicht reduziert und bytegleich geprüft; Gebäudeaufbau und erste/gewechselte Partition bleiben Kostenblöcke; Native-/Frame-Gates offen, P1. Bezug: A02/A04/A05.
 Code: rendering/viewport/selection-move-preview.ts, rendering/viewport/solid-renderer.ts, components/cad/BimSolidView.tsx.
 Befund: vorbereitete Geometriepatches werden wieder zu Gesamtflächen komponiert. Neue Solididentität oder andere Wandauswahl führt im Renderer zu vollständiger Ressourcenentsorgung/-erstellung, Shaderkompilierung, Dreieckspackung und GPU-Upload. Reine Kamerabewegung verwendet Ressourcen bereits weiter.
@@ -11536,7 +11536,7 @@ Auftrag: zunächst Aufruf-/Kopier-/Geometriearbeit nachweisen; gemeinsam begrenz
 Abnahme: Geschosswechsel ohne unnötige Gebäudeableitung; Fensterbewegung/Punkt-/Achsenaktion in großem Mehrgeschossprojekt; Aufrufzahlen, kalte/warme Läufe, Commit/Undo, veraltete Aktionen, ungültige Daten und alle bestehenden Fachregeln. Property- und Text-/Sprachpfade verwenden dieselben Aktionen.
 
 ### AUD14-05 – Lokaler räumlicher Fang und sichere Abhängigkeitsmenge
-Status 27.10.2026 (Abgleich, docs/AUD14_ABGLEICH.md): teilweise – lokale Ursprungs-/Tiefen-/Fremdendpunktsuche indiziert (PR343–345, PR474), Abhängigkeitsmenge belegt (door-scopes, PR391–400); offen: Restkosten großer Gruppen neu messen, Kamerawechsel-Vorbereitung, Einzelbelege Radiusrand/große Koordinaten/Keller/Höhenversatz.
+Status 27.10.2026 (Abgleich, docs/AUD14_ABGLEICH.md): teilweise – lokale Ursprungs-/Tiefen-/Fremdendpunktsuche indiziert (PR344–346, PR474), Abhängigkeitsmenge belegt (door-scopes, PR391–400); offen: Restkosten großer Gruppen neu messen, Kamerawechsel-Vorbereitung, Einzelbelege Radiusrand/große Koordinaten/Keller/Höhenversatz.
 Früherer Status: offen, P1. Bezug: A04/A05, Fang-/Dichteanforderungen.
 Code: rendering/viewport/movement-origin.ts, rendering/viewport/wall-preview-context.ts, domain/project/prepared-translation.ts, application/selection/z-translation.ts.
 Befund: createMovementOriginQuery berechnet pro Cursorabfrage Entfernung zu allen vorbereiteten projizierten Gebäudeecken; Radiusfilter folgt danach. Keine globalen Paarvergleiche, aber globale lineare Quellensuche. Konservative Anschluss-Closure kann eine große verbundene Gruppe umfassen.

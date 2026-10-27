@@ -1162,7 +1162,7 @@ export function CadWorkspace({
                 </label>
                 <span>
                   {imageTool.busy
-                    ? "Bild wird geprüftâ€¦"
+                    ? "Bild wird geprüft…"
                     : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
                 </span>
                 <Button size="sm" onClick={imageTool.cancel}>

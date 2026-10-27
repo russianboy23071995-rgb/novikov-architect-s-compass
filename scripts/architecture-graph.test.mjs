@@ -162,3 +162,28 @@ test("exceptions require metadata, exact edges, stale removal and no cycle widen
   );
   assert.match(audit(g, { cycles: [{ edges: cyclicEdges(g) }] }).join(), /metadata/);
 });
+
+test("broken UTF-8 in production texts fails closed; tests and correct umlauts pass", () => {
+  // Built from code points so this file itself stays plain ASCII.
+  const broken = "Projekt wurde ge" + String.fromCharCode(0xc3, 0xa4) + "ndert";
+  const ellipsis =
+    "Bild wird gepr" + String.fromCharCode(0xfc) + "ft" + String.fromCharCode(0xe2, 0x20ac, 0xa6);
+  const correct =
+    "Projekt wurde ge" + String.fromCharCode(0xe4) + "ndert " + String.fromCharCode(0x2026);
+  fixture(
+    {
+      "src/domain/a.ts": `export const a = ${JSON.stringify(broken)};`,
+      "src/components/b.tsx": `export const b = ${JSON.stringify(ellipsis)};`,
+      "src/domain/c.ts": `export const c = ${JSON.stringify(correct)};`,
+      "src/domain/a.test.ts": `export const probe = ${JSON.stringify(broken)};`,
+    },
+    (g) =>
+      assert.deepEqual(
+        audit(g, none).filter((p) => p.includes("mojibake")),
+        [
+          "src/components/b.tsx:1: broken UTF-8 text (mojibake)",
+          "src/domain/a.ts:1: broken UTF-8 text (mojibake)",
+        ],
+      ),
+  );
+});
