@@ -16,6 +16,19 @@ import { beginWallChain, appendWallChain, finishWallChain } from "../drawing/wal
 import { drawingInteraction } from "../tools/adapters.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { SnapContext } from "../../constraints/snapping/engine.ts";
+import {
+  T_ACCEPTANCE_HEIGHT,
+  T_ACCEPTANCE_WINDOW,
+  boundaryDistance,
+  isConvex,
+  overlapArea,
+  polygonArea,
+  readIfcWalls,
+  tAcceptanceProject,
+  tAcceptanceVariants,
+  tVariantProject,
+  type IfcWall,
+} from "../../../benchmarks/t-ifc-acceptance.ts";
 
 // Oblique T junctions (user decision 26.10.2026, docs/OBLIQUE_T_JUNCTIONS.md).
 const host = { id: "H", start: { x: 0, y: 0 }, end: { x: 10, y: 0 }, thickness: 0.3, height: 3 };
@@ -164,4 +177,80 @@ test("drawing snaps an oblique end onto the host axis as a T; a right angle stil
       expected,
     );
   }
+});
+
+// Archicad acceptance of T junctions: the regular IFC export read back (user decision
+// 27.10.2026, docs/T_IFC_ACCEPTANCE.md).
+const near = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
+function checkVariantIfc(
+  variant: ReturnType<typeof tAcceptanceVariants>[number],
+  walls: IfcWall[],
+  prefix = "",
+) {
+  const byName = new Map(walls.map((w) => [w.name, w]));
+  for (const [id, expected] of Object.entries(variant.expected)) {
+    const wall = byName.get(prefix + id)!;
+    assert.ok(wall, `${variant.name}: ${id} exported`);
+    assert.equal(wall.depth, T_ACCEPTANCE_HEIGHT);
+    // Plan area from axis length and thickness only, not from the wall derivation.
+    assert.ok(near(polygonArea(wall.profile), expected.area), `${variant.name} ${id} area`);
+    assert.equal(wall.openings.length, expected.windows, `${variant.name} ${id} openings`);
+    for (const o of wall.openings) {
+      assert.deepEqual(
+        [o.width, o.height],
+        [T_ACCEPTANCE_WINDOW.width, T_ACCEPTANCE_WINDOW.height],
+      );
+      assert.ok(near(o.thickness, expected.thickness));
+      assert.ok(o.x >= 0);
+    }
+  }
+  for (const [incoming, host] of variant.contacts) {
+    const a = byName.get(prefix + incoming)!.profile,
+      b = byName.get(prefix + host)!.profile;
+    assert.ok(isConvex(b), `${variant.name}: ${host} profile convex`);
+    // Touching without volume overlap and without a gap: an edge lies on the host boundary.
+    assert.ok(overlapArea(a, b) < 1e-9, `${variant.name}: ${incoming} overlaps ${host}`);
+    const touching = a.filter((p) => boundaryDistance(p, b) < 1e-9).length;
+    assert.ok(touching >= 2, `${variant.name}: ${incoming} touches ${host} along an edge`);
+  }
+}
+
+for (const variant of tAcceptanceVariants())
+  test(`IFC acceptance ${variant.label}: profiles equal the plan, touch without overlap`, async () => {
+    const p = tVariantProject(variant);
+    const walls = readIfcWalls(await exportIfc(p, new Date("2026-10-27T12:00:00Z")));
+    checkVariantIfc(variant, walls);
+    // The written profiles are the plan contours of the program, point for point.
+    const contours = connectedWallContours(p);
+    for (const wall of walls) {
+      const ring = contours.get(wall.name)!;
+      assert.equal(wall.profile.length, ring.length);
+      for (const point of wall.profile)
+        assert.ok(ring.some((q) => Math.hypot(q.x - point.x, q.y - point.y) < 1e-9));
+    }
+  });
+
+test("the combined IFC acceptance file holds every variant side by side", async () => {
+  const walls = readIfcWalls(
+    await exportIfc(tAcceptanceProject(), new Date("2026-10-27T12:00:00Z")),
+  );
+  const variants = tAcceptanceVariants();
+  assert.equal(
+    walls.length,
+    variants.reduce((n, v) => n + Object.keys(v.expected).length, 0),
+  );
+  for (const variant of variants) checkVariantIfc(variant, walls, `${variant.name}-`);
+});
+
+test("the IFC acceptance checks detect overlap, gaps and wrong areas (counter-checks)", async () => {
+  const variant = tAcceptanceVariants().find((v) => v.name === "t-30")!;
+  const walls = readIfcWalls(await exportIfc(tVariantProject(variant)));
+  const host = walls.find((w) => w.name === "H")!.profile;
+  const incoming = walls.find((w) => w.name === "N")!.profile;
+  const shifted = (dy: number) => incoming.map((p) => ({ x: p.x, y: p.y + dy }));
+  // 5 cm into the host: overlap; 5 cm away: no edge on the host boundary.
+  assert.ok(overlapArea(shifted(-0.05), host) > 1e-4);
+  assert.equal(shifted(0.05).filter((p) => boundaryDistance(p, host) < 1e-9).length, 0);
+  // The naive expectation (axis length × thickness, host ignored) does not match.
+  assert.ok(!near(polygonArea(incoming), 8 * 0.24));
 });
