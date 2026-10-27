@@ -59,8 +59,9 @@ export async function prepareRecoveryV2Writer(
           if (!isCurrent()) throw new Error("Recovery context changed");
         };
         check();
-        // Domain validation owns a stable model snapshot and preserves checked asset handles.
-        const candidate = validateProject(input);
+        // Domain validation owns a stable model snapshot and preserves checked asset handles; an
+        // owned snapshot already is one (docs/performance/AUTOSAVE_MODEL_CHECKS.md).
+        const candidate = isOwnedProjectSnapshot(input) ? input : validateProject(input);
         if (candidate.id !== projectId) throw new Error("Recovery project mismatch");
         const savedAt = now.toISOString();
         const document = await codec.prepare(candidate);
