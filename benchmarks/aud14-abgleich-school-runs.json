@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-27",
+  "state": "main 07f88e1 (nach PR478), regulärer Produktions-Build benchmarks/production-workspace.config.ts",
+  "notes": "benchmarks/school-acceptance.html?images=1&run=1 (Öffnen, Geschosswechsel, Bearbeiten per Befehl, Tür setzen/ziehen, Löschen, 2D/3D, 100 Fangabfragen, 20 Undo/Redo, Speichern, Neu öffnen, 50 Dauerlauf-Bearbeitungen, Autosicherung, Neuladen, Wiederherstellung). Dev-Rechner, Chrome 152, Fenster sichtbar. selectedSteps: ausgewählte Schritte in ms (alle Schritte ok). Heap = usedJSHeapSize nach 5 s Leerlauf (enthält nicht eingesammelten Müll).",
+  "runs": {
+    "l-1": {
+      "counts": {
+        "walls": 240,
+        "windows": 360,
+        "doors": 180,
+        "lines": 9000,
+        "hatches": 195,
+        "references": 5
+      },
+      "fileMB": 30.73,
+      "allStepsOk": true,
+      "errors": 0,
+      "snap": { "median": 18.6, "p95": 38.2 },
+      "undo": { "median": 14.3, "p95": 226.2 },
+      "redo": { "median": 134.8, "p95": 346.5 },
+      "session": { "median": 178.3, "p95": 220.6, "max": 393.5 },
+      "heapMB": {
+        "sessionStart": 561.8,
+        "sessionEnd": 1344.4,
+        "afterIdle": 1346,
+        "afterRestoreIdle": 612.1
+      },
+      "selectedSteps": {
+        "Öffnen – Projekt laden": 590,
+        "2D → 3D": 409,
+        "3D – Szene fertig": 637,
+        "3D: Tür entlang Wand ziehen": 746,
+        "Speichern (Datei erzeugen)": 288,
+        "Wiederherstellung – Stand prüfen": 783,
+        "Wiederherstellung – Projekt laden": 674
+      }
+    },
+    "l-2": {
+      "allStepsOk": true,
+      "errors": 0,
+      "snap": { "median": 18.4, "p95": 26.1 },
+      "undo": { "median": 14.0, "p95": 226.5 },
+      "redo": { "median": 118.4, "p95": 260.9 },
+      "session": { "median": 170.2, "p95": 193.0, "max": 266.9 },
+      "heapMB": {
+        "sessionStart": 585.2,
+        "sessionEnd": 516.5,
+        "afterIdle": 518.2,
+        "afterRestoreIdle": 942.1
+      },
+      "selectedSteps": {
+        "Öffnen – Projekt laden": 531,
+        "2D → 3D": 212,
+        "3D – Szene fertig": 927,
+        "3D: Tür entlang Wand ziehen": 612,
+        "Speichern (Datei erzeugen)": 247,
+        "Wiederherstellung – Stand prüfen": 641,
+        "Wiederherstellung – Projekt laden": 562
+      }
+    },
+    "s": {
+      "counts": {
+        "walls": 80,
+        "windows": 120,
+        "doors": 60,
+        "lines": 2640,
+        "hatches": 65,
+        "references": 5
+      },
+      "fileMB": 28.82,
+      "allStepsOk": true,
+      "errors": 0,
+      "snap": { "median": 17.5, "p95": 20.4 },
+      "undo": { "median": 14.0, "p95": 61.0 },
+      "redo": { "median": 46.2, "p95": 162.5 },
+      "session": { "median": 68.4, "p95": 74.1, "max": 170 },
+      "heapMB": { "afterIdle": 933, "afterRestoreIdle": 512.9 },
+      "selectedSteps": {
+        "Öffnen – Projekt laden": 302,
+        "2D → 3D": 98,
+        "3D – Szene fertig": 1325,
+        "3D: Tür entlang Wand ziehen": 433,
+        "Wiederherstellung – Stand prüfen": 433,
+        "Wiederherstellung – Projekt laden": 299
+      }
+    },
+    "x": {
+      "model": "schoolFixture(20000), ohne Türen",
+      "fileMB": 31.06,
+      "allStepsOk": true,
+      "errors": 0,
+      "snap": { "median": 18.6, "p95": 43.9, "max": 321.7 },
+      "undo": { "median": 13.9, "p95": 492.3 },
+      "redo": { "median": 305.6, "p95": 556.5 },
+      "session": { "median": 491.8, "p95": 548.1, "max": 769.4 },
+      "heapMB": { "afterIdle": 1298.9, "afterRestoreIdle": 408.1 },
+      "selectedSteps": {
+        "Öffnen – Projekt laden": 1123,
+        "Wandlänge – Übernehmen": 490,
+        "Löschen (Entf)": 749,
+        "2D → 3D": 1021,
+        "Speichern (Datei erzeugen)": 448,
+        "Wiederherstellung – Stand prüfen": 1471,
+        "Wiederherstellung – Projekt laden": 1124
+      }
+    }
+  },
+  "heapNote": "l-1 zeigte nach dem Dauerlauf 1344 MB, l-2 unter gleichen Bedingungen 517 MB: der hohe Wert ist nicht eingesammelter Speicher, kein belegtes Wachstum. Peak-/Prozess-/GPU-Speicher nicht messbar (kein nativer Profiler)."
+}
