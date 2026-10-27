@@ -25,7 +25,7 @@ import {
   type RecoverySnapshotV2,
 } from "./recovery-v2.ts";
 import { plainCopy } from "./own-commits.ts";
-import type { Project } from "../../domain/project/schema.ts";
+import { validateProject, type Project } from "../../domain/project/schema.ts";
 
 // Status confirmation of own recovery saves (docs/performance/RECOVERY_STATUS.md).
 const png =
@@ -325,11 +325,21 @@ test("sealed snapshots share frozen images, copy everything else and stay unchan
   assert.equal(JSON.stringify(sealed), JSON.stringify(snapshot));
   for (const key of Object.keys(doc.blobs))
     assert.equal(sealed.document.blobs[key], doc.blobs[key]);
-  assert.notEqual(sealed.document.model, doc.model);
-  assert.ok(Object.isFrozen(sealed.document.model.assets));
-  // Later changes of the caller's snapshot do not reach the sealed copy.
-  doc.model.assets[0]!.id = "changed";
-  assert.notEqual(sealed.document.model.assets[0]!.id, "changed");
+  // The prepared manifest is deeply frozen by the codec and shared (AUTOSAVE_MODEL_CHECKS.md).
+  assert.equal(sealed.document.model, doc.model);
+  assert.ok(Object.isFrozen(sealed.document.model.assets[0]));
+  // A loose manifest (as read from storage) is copied: later changes do not reach the seal.
+  const plain = structuredClone(doc.model);
+  const own = sealRecoverySnapshot({ ...snapshot, document: { ...doc, model: plain } });
+  assert.notEqual(own.document.model, plain);
+  plain.assets[0]!.id = "changed";
+  assert.notEqual(own.document.model.assets[0]!.id, "changed");
+  // Caller freezing grants no sharing: a shallow-frozen manifest is still copied.
+  const shallow = Object.freeze(structuredClone(doc.model));
+  assert.notEqual(
+    sealRecoverySnapshot({ ...snapshot, document: { ...doc, model: shallow } }).document.model,
+    shallow,
+  );
   // Sealing again and copying an own commit keep the same object; unfrozen images are copied.
   assert.equal(sealRecoverySnapshot(sealed), sealed);
   assert.equal(plainCopy(sealed), sealed);
@@ -357,4 +367,61 @@ test("only sealed snapshots can be marked as checked", async () => {
   );
   assert.equal(restored.fallback, false);
   assert.equal(decodes(probe.phases), 2);
+});
+
+// Autosave model checks without repetition (user decision 27.10.2026,
+// docs/performance/AUTOSAVE_MODEL_CHECKS.md).
+test("an owned project is prepared without a new validation and encodes the same document", async () => {
+  const owned = imageProject();
+  const mutable = validateProject(owned);
+  const c = imageCodec();
+  const fromOwned = await c.prepare(owned);
+  const fromMutable = await c.prepare(mutable);
+  assert.equal(JSON.stringify(fromOwned), JSON.stringify(fromMutable));
+  // Counter-check: invalid mutable input is still rejected.
+  const broken = { ...mutable, storeys: [{ ...mutable.storeys[0]!, walls: [{ id: 1 }] }] };
+  await assert.rejects(c.prepare(broken as never));
+});
+
+test("the save check returns the prepared project; any other manifest is checked in full", async () => {
+  const owned = imageProject();
+  const c = imageCodec();
+  const doc = await c.prepare(owned);
+  assert.equal(await c.restore(doc, { prepared: true }), owned);
+  const full = await c.restore(doc);
+  assert.notEqual(full, owned);
+  assert.equal(JSON.stringify(full), JSON.stringify(owned));
+  // A copy of the manifest (as from storage) is migrated and validated again.
+  const copy: RecoveryDocument = { ...doc, model: structuredClone(doc.model) };
+  const checked = await c.restore(copy, { prepared: true });
+  assert.notEqual(checked, owned);
+  assert.equal(JSON.stringify(checked), JSON.stringify(owned));
+  // An image that was not prepared in this session takes the full path, too.
+  const [key] = Object.keys(doc.blobs);
+  const foreign: RecoveryDocument = {
+    ...doc,
+    blobs: { ...doc.blobs, [key!]: { ...doc.blobs[key!]! } },
+  };
+  assert.notEqual(await c.restore(foreign, { prepared: true }), owned);
+  // A broken copy of the manifest is rejected on the save path.
+  const broken: RecoveryDocument = {
+    ...doc,
+    model: { ...structuredClone(doc.model), schemaVersion: 999 } as never,
+  };
+  await assert.rejects(c.restore(broken, { prepared: true }));
+});
+
+test("budgets still apply to every save", async () => {
+  const tight = createBoundedRecoveryCodec({
+    modelBytes: 100,
+    payloadBytes: 1 << 20,
+    pixels: 1000,
+  });
+  await assert.rejects(tight.prepare(imageProject()), /Model budget/);
+  const pixels = createBoundedRecoveryCodec({
+    modelBytes: 1 << 20,
+    payloadBytes: 1 << 20,
+    pixels: 4,
+  });
+  await assert.rejects(pixels.prepare(imageProject()), /budget/);
 });

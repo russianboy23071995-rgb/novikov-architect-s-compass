@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-27",
+  "states": {
+    "vorher": "main 113d33e (nach PR475)",
+    "nachher": "Branch perf/autosave-model-checks"
+  },
+  "node": {
+    "notes": "benchmarks/autosave-model-profile.ts: echter Sicherungsschreiber und Produkt-Codec, Speicher im Arbeitsspeicher mit denselben Prüfungen wie publish (ohne IndexedDB). Eine Wandänderung je Sicherung, Median aus 7 nach Aufwärmen. Vorher über einen Worktree von main (repoRoot), im Wechsel.",
+    "l": {
+      "vorher": [
+        { "saveMs": 807.4, "prepare": 251.4, "check": 369.5 },
+        { "saveMs": 842.8, "prepare": 275.1, "check": 377.8 },
+        { "saveMs": 826.2, "prepare": 277.4, "check": 373.4 }
+      ],
+      "nachher": [
+        { "saveMs": 49.1, "prepare": 48.9, "check": 0 },
+        { "saveMs": 49.4, "prepare": 49.3, "check": 0 },
+        { "saveMs": 48.8, "prepare": 48.6, "check": 0 }
+      ]
+    },
+    "s": {
+      "vorher": [
+        { "saveMs": 272.4, "prepare": 73.1, "check": 150.1 },
+        { "saveMs": 278.7, "prepare": 75.9, "check": 150.8 }
+      ],
+      "nachher": [
+        { "saveMs": 14.4, "prepare": 14.2, "check": 0 },
+        { "saveMs": 13.1, "prepare": 12.9, "check": 0 }
+      ]
+    }
+  },
+  "browser": {
+    "notes": "Diagnose-Build recovery-profile beider Stände, school-acceptance.html?size=l&images=1&run=1&saves=4, je zwei Läufe à vier Sicherungen. Werte je Sicherung in ms: save-validate, save-prepare, save-seal, publish-validate-current, publish-transaction, Summe; lange Aufgaben je Sicherungsschritt.",
+    "vorher": {
+      "sum": [716, 736, 694, 699, 728, 723, 758, 864],
+      "validate": [84.3, 84.6, 78.7, 83.9, 81.7, 84.1, 75.6, 78.6],
+      "prepare": [191.8, 186.5, 197.0, 183.5, 193.8, 190.4, 228.6, 201.5],
+      "seal": [52.5, 61.8, 50.8, 55.1, 54.7, 54.5, 57.0, 53.8],
+      "checkCurrent": [223.8, 241.2, 211.2, 221.7, 223.6, 222.0, 233.7, 343.0],
+      "transaction": [163.7, 161.6, 155.9, 154.9, 173.9, 171.8, 163.0, 186.7],
+      "longTaskMs": [651, 651, 635, 632, 703, 703, 696, 767]
+    },
+    "nachher": {
+      "sum": [187, 147, 145, 214, 179, 140, 138, 147],
+      "validate": [0, 0.1, 0, 0, 0.1, 0, 0, 0],
+      "prepare": [56.7, 49.4, 49.5, 50.5, 48.6, 42.6, 46.9, 50.3],
+      "seal": [0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0, 0.2],
+      "checkCurrent": [0, 0.2, 0, 0, 0, 0.1, 0, 0],
+      "transaction": [130.2, 96.8, 95.7, 162.9, 130.4, 96.8, 90.9, 96.2],
+      "longTaskMs": [123, 0, 0, 51, 65, 0, 0, 50]
+    },
+    "fullRunL": {
+      "vorher": {
+        "session": { "median": 197.3, "p95": 259.9, "max": 361.2 },
+        "notOk": 0,
+        "errors": 0
+      },
+      "nachher": {
+        "session": { "median": 192.1, "p95": 206.1, "max": 511.8 },
+        "notOk": 0,
+        "errors": 0
+      },
+      "note": "Je ein Lauf, gleiche Bedingungen; Neuladen und Wiederherstellen in beiden ok."
+    }
+  }
+}

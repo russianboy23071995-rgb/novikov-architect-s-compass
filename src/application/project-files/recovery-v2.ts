@@ -2,6 +2,7 @@ import type { StoredProject } from "../../domain/project/storage-data.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { ImageAsset } from "../../domain/elements/reference/model.ts";
 import { parseRecoveryRecord, prepareRecoverySnapshot } from "./recovery.ts";
+import { isFrozenDeeply } from "../../domain/project/frozen-data.ts";
 
 export type RecoveryPayload = Omit<ImageAsset, "id">;
 export type RecoveryManifest = Omit<StoredProject, "assets"> & {
@@ -62,13 +63,16 @@ function deepFreeze<T>(value: T): T {
 export function sealRecoverySnapshot(snapshot: RecoverySnapshotV2): RecoverySnapshotV2 {
   if (sealed.has(snapshot)) return snapshot;
   const { document, ...rest } = object(snapshot);
-  const { blobs, ...model } = object(document);
+  const { blobs, model, ...other } = object(document);
   const payloads: Record<string, unknown> = Object.create(null);
   for (const [key, payload] of Object.entries(object(blobs)))
     payloads[key] = Object.isFrozen(payload) ? payload : structuredClone(payload);
+  // A manifest the codec froze after preparing it is shared, not copied
+  // (docs/performance/AUTOSAVE_MODEL_CHECKS.md).
+  const manifest = isFrozenDeeply(model) ? model : structuredClone(model);
   const result = deepFreeze({
     ...structuredClone(rest),
-    document: { ...structuredClone(model), blobs: payloads },
+    document: { ...structuredClone(other), model: manifest, blobs: payloads },
   }) as unknown as RecoverySnapshotV2;
   sealed.add(result);
   return result;

@@ -57,6 +57,12 @@ export function recoveryReadInstrumentation(): Plugin {
           [
             "const candidate = validateProject(input);",
             'const candidate = recoverySync("save-validate", () => validateProject(input));',
+            "optional",
+          ],
+          [
+            "const candidate = isOwnedProjectSnapshot(input) ? input : validateProject(input);",
+            'const candidate = recoverySync("save-validate", () => isOwnedProjectSnapshot(input) ? input : validateProject(input));',
+            "optional",
           ],
           [
             "const document = await codec.prepare(candidate);",
@@ -110,6 +116,12 @@ export function recoveryReadInstrumentation(): Plugin {
           [
             "return restoreCheckedSnapshot(doc, control);",
             "return restoreCheckedSnapshot(doc, { ...control, measure: (phase, ms) => { recoveryMeasure(phase, ms); control.measure?.(phase, ms); } });",
+            "optional",
+          ],
+          [
+            "return (control.prepared && preparedProject(doc)) || restoreCheckedSnapshot(doc, control);",
+            "return (control.prepared && preparedProject(doc)) || restoreCheckedSnapshot(doc, { ...control, measure: (phase, ms) => { recoveryMeasure(phase, ms); control.measure?.(phase, ms); } });",
+            "optional",
           ],
           ["check(doc);", 'recoverySync("budget", () => check(doc));'],
           [

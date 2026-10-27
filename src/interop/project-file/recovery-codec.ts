@@ -9,6 +9,8 @@ import { payloadHashInput } from "./payload-hash-input.ts";
 /** Shared checked asset codec. Limits are supplied by the caller, not product defaults. */
 import { z } from "zod";
 import { validateProject, type Project } from "../../domain/project/schema.ts";
+import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
+import { freezeDeeply } from "../../domain/project/frozen-data.ts";
 import {
   imageAssetSchema,
   createImageAssetHandle,
@@ -83,6 +85,21 @@ export async function readCheckpoint(control: ReadControl) {
  * Only the save path asks for this; restores and snapshots read from storage always take the
  * full check. */
 const preparedPayloads = new WeakMap<object, { key: string; handle?: ImageAsset }>();
+/** Manifests prepared in this session, frozen, with the validated project they encode. The save
+ * check returns that project for this exact manifest instead of migrating and validating it
+ * again (docs/performance/AUTOSAVE_MODEL_CHECKS.md); restores never ask for it. */
+const preparedManifests = new WeakMap<object, Project>();
+/** An owned snapshot is validated and deeply frozen; any other input is validated as before. */
+const checkedInput = (input: Project) =>
+  isOwnedProjectSnapshot(input) ? input : validateProject(input);
+/** The prepared project, when every link of this document is a prepared payload of its key. */
+function preparedProject(doc: Document): Project | undefined {
+  const project = preparedManifests.get(doc.model);
+  if (!project) return undefined;
+  for (const link of doc.model.assets)
+    if (preparedPayloads.get(doc.blobs[link.key] as object)?.key !== link.key) return undefined;
+  return project;
+}
 /** Owned DB snapshot only. Reuse existing handle capability, never trust persisted flags. */
 export async function restoreCheckedSnapshot(
   doc: Document,
@@ -136,7 +153,7 @@ export function createAssetPreparation({
       return hashes;
     },
     async prepare(input: Project): Promise<Document> {
-      const project = validateProject(input);
+      const project = checkedInput(input);
       const blobs: Record<string, Payload> = Object.create(null);
       const assets = [];
       let size = 0,
@@ -157,7 +174,9 @@ export function createAssetPreparation({
         blobs[entry.key] = entry.payload;
         assets.push({ id: asset.id, key: entry.key });
       }
-      return { model: { ...projectStorageData(project), assets }, blobs };
+      const model = freezeDeeply({ ...projectStorageData(project), assets });
+      preparedManifests.set(model, project);
+      return { model, blobs };
     },
   };
 }
@@ -175,9 +194,17 @@ export function createBoundedRecoveryCodec(limits: {
     maxBytes: budget.payloadBytes,
     maxPixels: budget.pixels,
   });
+  // Model bytes once per frozen manifest: prepare and the save check share the same object.
+  const modelBytes = new WeakMap<object, number>();
+  const bytesOf = (model: Document["model"]) => {
+    const known = modelBytes.get(model);
+    if (known !== undefined) return known;
+    const bytes = new TextEncoder().encode(JSON.stringify(model)).length;
+    if (Object.isFrozen(model) && preparedManifests.has(model)) modelBytes.set(model, bytes);
+    return bytes;
+  };
   const check = (doc: Document) => {
-    if (new TextEncoder().encode(JSON.stringify(doc.model)).length > budget.modelBytes)
-      throw new Error("Model budget exceeded");
+    if (bytesOf(doc.model) > budget.modelBytes) throw new Error("Model budget exceeded");
     const linked = doc.model.assets.map((a) => {
       const payload = doc.blobs[a.key];
       if (!payload) throw new Error("Missing asset");
@@ -218,7 +245,7 @@ export function createBoundedRecoveryCodec(limits: {
     async restore(doc: Document, control: ReadControl = {}) {
       control.signal?.throwIfAborted();
       check(doc);
-      return restoreCheckedSnapshot(doc, control);
+      return (control.prepared && preparedProject(doc)) || restoreCheckedSnapshot(doc, control);
     },
   };
 }
@@ -232,12 +259,15 @@ export function createProjectRecoveryCodec() {
   });
   return {
     async prepare(input: Project) {
-      const project = validateProject(input);
+      const project = checkedInput(input);
       assertValidatedProjectSize(project);
       assertProjectRasterBudget(project);
       return bounded.prepare(project);
     },
     async restore(...args: Parameters<typeof bounded.restore>) {
+      // A prepared manifest was validated and size-checked when it was prepared.
+      const [doc, control] = args;
+      if (control?.prepared && preparedProject(doc)) return bounded.restore(...args);
       const project = await bounded.restore(...args);
       // Preserve the full validation previously performed by serializeProject.
       assertValidatedProjectSize(validateProject(project));
