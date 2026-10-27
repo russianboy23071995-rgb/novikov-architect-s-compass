@@ -1,5 +1,5 @@
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
-import { workingStoreySolid } from "./building-solid.ts";
+import { buildingFacePart, workingStoreySolid } from "./building-solid.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { SnapReference } from "../../constraints/snapping/engine.ts";
 import { createPrimitiveSourceIndex } from "../../constraints/snapping/local-source-index.ts";
@@ -7,6 +7,9 @@ import { selectionEdges } from "./selection-outline.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
 
 const cache = createDerivedCache<Project, ReturnType<typeof createPrimitiveSourceIndex>>();
+// Per working-storey part of the building scene (same storey object, elevation and assets):
+// undo, redo and edits on other storeys find the sources again (docs/performance/UNDO_STOREY_REUSE.md).
+const byPart = new WeakMap<object, ReturnType<typeof createPrimitiveSourceIndex>>();
 
 /** Real material edges at the active storey elevation, including gaps from openings reaching the floor.
  * Uses the same conforming mesh boundary extraction as selection outlines.
@@ -16,6 +19,11 @@ export function getWallFootSources(project: Project) {
   const cached = cache.get(project);
   if (cached) return cached;
   const solid = workingStoreySolid(project);
+  const known = buildingFacePart(solid.faces[0] ?? {}) === solid ? byPart.get(solid) : undefined;
+  if (known) {
+    cache.set(project, known);
+    return known;
+  }
   const elevation = workingStoreyElevation(project);
   const grouped = new Map<string, typeof solid.faces>();
   for (const face of solid.faces) {
@@ -44,5 +52,7 @@ export function getWallFootSources(project: Project) {
     segments: references.map((source) => ({ ...source.segment!, source })),
   });
   cache.set(project, index);
+  // Only reusable (owned) parts are keys; their faces map back to them.
+  if (buildingFacePart(solid.faces[0] ?? {}) === solid) byPart.set(solid, index);
   return index;
 }
