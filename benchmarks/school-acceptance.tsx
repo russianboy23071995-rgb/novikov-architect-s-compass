@@ -66,7 +66,20 @@ HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
   nativeClick.call(this);
 };
 
-createRoot(document.getElementById("root")!).render(<CadWorkspace />);
+// fresh=1: start without records of earlier runs, so no background recovery check overlaps.
+async function clearStorage() {
+  for (const db of await indexedDB.databases())
+    await new Promise((r) => {
+      const request = indexedDB.deleteDatabase(db.name!);
+      request.onsuccess = request.onerror = request.onblocked = r;
+    });
+  localStorage.clear();
+}
+void (
+  params.get("fresh") === "1" && !sessionStorage.getItem(`${RESULT_KEY}-reload`)
+    ? clearStorage()
+    : Promise.resolve()
+).then(() => createRoot(document.getElementById("root")!).render(<CadWorkspace />));
 
 // --- helpers -----------------------------------------------------------------------------
 const frame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
@@ -335,6 +348,7 @@ async function phaseOne() {
   // A recovery offer from an earlier run would pause autosave; continue explicitly.
   if (button("Weiterarbeiten")) click(button("Weiterarbeiten")!);
   await openFile("Öffnen", text);
+  if (params.get("drag") === "1") return dragRun(summary(project, imageBytes, fileBytes));
 
   for (const name of targets.storeys)
     await step(
@@ -539,6 +553,154 @@ async function phaseOne() {
   sessionStorage.setItem(RESULT_KEY, JSON.stringify(report));
   sessionStorage.setItem(`${RESULT_KEY}-reload`, String(Date.now()));
   location.reload();
+}
+
+// --- drag=1: only the 3D door drag, per pointer move (docs/performance/DRAG_RENDERING_3D.md) ----
+type Frame = {
+  startTime: number;
+  duration: number;
+  renderStart: number;
+  styleAndLayoutStart: number;
+  blockingDuration: number;
+  scripts: { duration: number }[];
+};
+const animationFrames: Frame[] = [];
+if (PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"))
+  new PerformanceObserver((list) =>
+    animationFrames.push(...(list.getEntries() as unknown as Frame[])),
+  ).observe({ type: "long-animation-frame", buffered: true });
+const sum = (values: number[]) => values.reduce((n, v) => n + v, 0);
+const round = (v: number) => Math.round(v * 10) / 10;
+
+async function dragRun(model: ReturnType<typeof summary>) {
+  const events = () =>
+    (globalThis as { renderEvents?: { name: string; start: number; ms: number; value?: number }[] })
+      .renderEvents ?? [];
+  const quiet = async () => {
+    const t0 = performance.now();
+    while (performance.now() - lastLongTaskEnd < 500 && performance.now() - t0 < 15000)
+      await frame();
+  };
+  await select("door", targets.door!);
+  await step(
+    "2D → 3D",
+    () => click(button("3D")!),
+    () => !!document.querySelector("canvas"),
+  );
+  await step("3D – Szene fertig", quiet, () => true);
+  const moves: Record<string, number | null>[] = [];
+  const drags: { ms: number; longTaskMs: number; frames: Frame[] }[] = [];
+  const repeats = Number(params.get("repeats") ?? 5);
+  for (let r = 0; r < repeats; r++) {
+    await quiet();
+    click(label("Demand menu")!);
+    await until(() => !!button("Tür entlang Wand"), 5000);
+    click(button("Tür entlang Wand")!);
+    await paint();
+    const canvas = document.querySelector("canvas")!;
+    const c = centre(canvas);
+    const lt = longTaskMs,
+      t0 = performance.now(),
+      times: { dispatch: number; handled: number; frame: number }[] = [];
+    for (let i = 0; i < 30; i++) {
+      const dispatch = performance.now();
+      pointer(canvas, "pointermove", c.x + (i - 15) * 6, c.y + Math.sin(i) * 20);
+      const handled = performance.now();
+      await frame();
+      times.push({ dispatch, handled, frame: performance.now() });
+    }
+    await paint();
+    const end = performance.now();
+    drags.push({
+      ms: round(end - t0),
+      longTaskMs: Math.round(longTaskMs - lt),
+      frames: animationFrames.filter((f) => f.startTime + f.duration > t0 && f.startTime < end),
+    });
+    key("Escape");
+    for (const [i, t] of times.entries()) {
+      const next = times[i + 1]?.dispatch ?? end;
+      const inMove = events().filter((e) => e.start >= t.dispatch && e.start < next);
+      const of = (name: string) => inMove.filter((e) => e.name === name);
+      const draws = of("draw");
+      const lastDraw = draws[draws.length - 1];
+      moves.push({
+        repeat: r,
+        move: i,
+        moveMs: round(next - t.dispatch),
+        frameMs: round(t.frame - t.dispatch),
+        handlerMs: round(t.handled - t.dispatch),
+        resolveMs: round(sum(of("resolve").map((e) => e.ms))),
+        aimMs: round(sum(of("aim").map((e) => e.ms))),
+        renders: of("render").length,
+        draws: draws.length,
+        toDrawMs: draws[0] ? round(draws[0].start - t.dispatch) : null,
+        evaluateMs: round(sum(of("evaluate").map((e) => e.ms))),
+        updateMs: round(sum(of("update").map((e) => e.ms))),
+        drawMs: round(sum(draws.map((e) => e.ms))),
+        gpuMs: round(sum(of("gpu").map((e) => e.ms))),
+        uploadBytes: sum([...of("upload-patch"), ...of("upload-full")].map((e) => e.value ?? 0)),
+        fullUploads: of("upload-full").length,
+        triangles: of("triangles")[0]?.value ?? null,
+        afterDrawMs: lastDraw ? round(next - (lastDraw.start + lastDraw.ms)) : null,
+      });
+    }
+  }
+  const median = (key: string) => {
+    const values = moves.map((m) => m[key]).filter((v): v is number => typeof v === "number");
+    return values.length ? stats(values).median : null;
+  };
+  const frames = drags.flatMap((d) => d.frames);
+  const report = {
+    mode: { gpu: params.get("gpu") === "1", fresh: params.get("fresh") === "1" },
+    model,
+    steps: results,
+    drag: stats(drags.map((d) => d.ms)),
+    dragLongTaskMs: drags.map((d) => d.longTaskMs),
+    perMoveMedian: Object.fromEntries(
+      [
+        "moveMs",
+        "frameMs",
+        "handlerMs",
+        "resolveMs",
+        "aimMs",
+        "renders",
+        "draws",
+        "toDrawMs",
+        "evaluateMs",
+        "updateMs",
+        "drawMs",
+        "gpuMs",
+        "uploadBytes",
+        "afterDrawMs",
+      ].map((k) => [k, median(k)]),
+    ),
+    perMoveSum: {
+      moves: moves.length,
+      withoutDraw: moves.filter((m) => !m["draws"]).length,
+      fullUploads: sum(moves.map((m) => m["fullUploads"] ?? 0)),
+      triangles: moves.find((m) => m["triangles"])?.["triangles"] ?? null,
+    },
+    // Chrome long animation frames (> 50 ms) during the drags.
+    longFrames: {
+      count: frames.length,
+      durationMs: round(sum(frames.map((f) => f.duration))),
+      scriptMs: round(sum(frames.flatMap((f) => f.scripts.map((s) => s.duration)))),
+      renderMs: round(
+        sum(frames.map((f) => (f.renderStart ? f.startTime + f.duration - f.renderStart : 0))),
+      ),
+      styleLayoutMs: round(
+        sum(
+          frames.map((f) =>
+            f.styleAndLayoutStart ? f.startTime + f.duration - f.styleAndLayoutStart : 0,
+          ),
+        ),
+      ),
+      blockingMs: round(sum(frames.map((f) => f.blockingDuration))),
+    },
+    moves,
+    errors: [...errors],
+  };
+  (window as unknown as { schoolRun: unknown }).schoolRun = report;
 }
 
 async function phaseTwo() {
