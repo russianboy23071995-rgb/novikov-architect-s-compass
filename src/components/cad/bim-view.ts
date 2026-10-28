@@ -60,6 +60,7 @@ export function planBounds(project: Project, visibility?: LayerVisibilityPolicy)
     : storeyOf(project);
   if (
     !storey.walls.length &&
+    !storey.slabs?.length &&
     !storey.lines?.length &&
     !storey.hatches.length &&
     !storey.references.length
@@ -80,6 +81,7 @@ export function planBounds(project: Project, visibility?: LayerVisibilityPolicy)
     for (const point of [body.start, body.end, wall.start, wall.end])
       include(point, wall.thickness / 2);
   }
+  for (const slab of storey.slabs ?? []) for (const point of slab.points) include(point);
   for (const line of storey.lines ?? []) for (const point of line.points) include(point);
   for (const hatch of storey.hatches) for (const point of hatch.points) include(point);
   for (const reference of storey.references)

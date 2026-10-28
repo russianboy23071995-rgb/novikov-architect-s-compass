@@ -6,6 +6,7 @@ import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
+import { slabLevels } from "../../domain/elements/slab/model.ts";
 
 /** IFC4 IfcDoorTypeOperationEnum for a single swing leaf. Facing the swing side (door +Y),
  * the wall start lies left when the leaf opens to the left of the wall direction.
@@ -170,7 +171,8 @@ export async function writeIfc(
   await properties(projectRef, "project", project.id, [["SchemaVersion", "IFCINTEGER(1)"]]);
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
   for (const floor of project.storeys) {
-    const elevation = levels.find((l) => l.storeyId === floor.id)!.elevation;
+    const level = levels.find((l) => l.storeyId === floor.id)!;
+    const elevation = level.elevation;
     if (elevation === null)
       throw new Error("Vor dem IFC-Export müssen die Geschosshöhen festgelegt werden.");
     const storeyPlacement = placement(buildingPlacement, 0, 0, elevation);
@@ -270,6 +272,24 @@ export async function writeIfc(
           ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
         ]);
       }
+    }
+    // Ceiling slabs (docs/SLAB_ELEMENT.md, Teil B2): IfcSlab FLOOR in the storey that owns
+    // them, outline extruded upward from the underside. Without a known storey height there is
+    // no level and no slab, as in 3D.
+    for (const slab of floor.slabs ?? []) {
+      const slabLevel = slabLevels(slab, level.upperElevation);
+      if (!slabLevel) continue;
+      const ring = validateSimplePolygon(slab.points);
+      const points = ring.valid && ring.signedArea < 0 ? [...slab.points].reverse() : slab.points;
+      const slabRef = add(
+        "IFCSLAB",
+        `${await guid("slab", slab.id)},$,${label(slab.id)},$,$,${placement(storeyPlacement, 0, 0, slabLevel.bottom - elevation)},${body(0, 0, slab.thickness, points)},${label(slab.id)},.FLOOR.`,
+      );
+      elements.push(slabRef);
+      await properties(slabRef, "slab", slab.id, [
+        ["Thickness", `IFCLENGTHMEASURE(${real(slab.thickness)})`],
+        ["TopOffset", `IFCLENGTHMEASURE(${real(slab.topOffset)})`],
+      ]);
     }
     // IFC requires a non-empty set; empty projects still retain their spatial hierarchy.
     if (elements.length)
