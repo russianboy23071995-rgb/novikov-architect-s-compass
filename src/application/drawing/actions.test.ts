@@ -528,10 +528,11 @@ test("the plan draws slabs first and hides them with their layer; delete works, 
   );
 });
 
-test("Teil A leaves 3D and IFC unchanged: no slab body or IfcSlab yet", async () => {
+test("a storey with only a ceiling slab has a 3D body and an IfcSlab (Teil B)", async () => {
   const base = slabBase();
   const p = addSlab(base, { id: "s", points: lShape, ...SLAB_DEFAULTS });
-  assert.deepEqual(buildBuildingSolid(p).faces, buildBuildingSolid(base).faces);
+  assert.equal(buildBuildingSolid(base).faces.length, 0);
+  assert.equal(buildBuildingSolid(p).faces.length, 14);
   const date = new Date(0);
-  assert.ok(!(await exportIfc(p, date)).includes("IFCSLAB"));
+  assert.ok((await exportIfc(p, date)).includes("IFCSLAB"));
 });

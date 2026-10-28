@@ -131,3 +131,20 @@ test("fit bounds retain mixed walls, lines, hatch and rotated reference extents"
   const validated = validateProject(project);
   assert.equal(planBounds(validated), "-9.5 -10.5 22 17");
 });
+
+// A plan with only a ceiling slab fits the slab (docs/SLAB_ELEMENT.md).
+import { addSlab as addPlanSlab } from "../../application/slabs/actions.ts";
+import { createProject as emptyPlanProject } from "../../application/projects/create.ts";
+test("plan bounds include ceiling slabs", () => {
+  const p = addPlanSlab(emptyPlanProject("p", "eg"), {
+    id: "s",
+    points: [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 4 },
+    ],
+    thickness: 0.2,
+    topOffset: 0,
+  });
+  assert.equal(planBounds(p), "-1.5 -5.5 13 7");
+});
