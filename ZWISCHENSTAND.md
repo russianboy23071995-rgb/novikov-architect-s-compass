@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 28.10.2026 · main nach PR486 · 1337 automatische Tests grün
+**Stand:** 28.10.2026 · main nach PR489 · 1342 automatische Tests grün
 
 ## Gerade aktiv
 
-- Nichts – nächster Auftrag nach deiner Wahl (siehe „Was offen ist“).
+- Wartet auf dich: Archicad-Test der Datei NOVIKOV-Decken-Test.ifc (DesktopClaude_Ablage_CodeNOVIKOV-Decken-Abnahme-2026-10-28).
 
 ## Was wir gemacht haben (24.–28.10.2026)
 
@@ -23,7 +23,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Hinweis bei überlappenden Öffnungen (PR451), Löschen für alle Bauteile (PR452), Positionsnummern (PR456), Menü weicht der Befehlszeile aus (PR455).
 - Wandanschlüsse inklusive schräger T-Anschlüsse in jedem Winkel und Ecke an einer T-Hauptwand (PR465, 468–470); bessere Treffer an Öffnungen (PR466).
 
-- Decke als Bauteil, Teil A: zeichnen (Polygon, Rechteck, Kontur), Stärke/Versatz, Grundriss, Löschen; OK = Rohfußboden darüber, Stärke wächst nach unten (PR486).
+- Decke als Bauteil: zeichnen (Polygon, Rechteck, Kontur), Stärke/Versatz, Grundriss, 3D-Körper mit Auswahl, IFC als IfcSlab, Verschieben (auch mit Wänden), Befehle „Deckenstärke 25 cm“, Fangpunkte an Deckenecken; OK = Rohfußboden darüber, Stärke wächst nach unten (PR486–489).
 
 **IFC / Archicad**
 
@@ -39,7 +39,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 **Mögliche nächste Aufträge (deine Wahl)**
 
-- Decken Teil B: 3D-Körper, IfcSlab für Archicad, Befehle, Verschieben und Umriss bearbeiten.
+- Decken: einzelne Eckpunkte/Kanten bearbeiten (vorher Bearbeitungstyp aus lib/bim lösen).
 - Decken Teil C: Wandhöhen auf Geschosshöhen ausrichten (deine Entscheidung 28.10.).
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
@@ -62,6 +62,8 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Echter voller Speicher (Quota), mehrere Tabs gleichzeitig, Dauerlauf ≥ 2 Stunden, Grafikkarten- und Prozessspeicher.
 
 **Bekannte kleine Punkte**
+
+- Datei- und Wiederherstellungsübersicht zählt nur Wände, Fenster, Linien, Schraffuren, Bilder – Türen und Decken fehlen dort.
 
 - `CadWorkspace.tsx` (≈ 1850 Zeilen) und `BimSolidView.tsx` sind groß; wird nur bei passenden Fachänderungen verkleinert.
 - Sechs bekannte Lint-Warnungen in `components/ui`.
