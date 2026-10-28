@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan.
 
-**Stand:** 28.10.2026 · main nach PR484 · 1331 automatische Tests grün
+**Stand:** 28.10.2026 · main nach PR485 · 1331 automatische Tests grün
 
 ## Gerade aktiv
 
-- Kleine Korrektur: Meldung „Bewegung nicht m…glich“ (kaputter Umlaut) reparieren und die Kodierungsprüfung so erweitern, dass sie diese Art Fehler findet. Änderungskarte vorgelegt, wartet auf Freigabe.
+- Nichts – nächster Auftrag nach deiner Wahl (siehe „Was offen ist“).
 
 ## Was wir gemacht haben (24.–28.10.2026)
 
@@ -30,7 +30,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 **Aufräumen und Qualität**
 
 - Aktionen aus dem Altbereich `lib/bim` in die neue Struktur verlegt (PR457–459), Geschosskörper verschoben (PR484).
-- AUD14-Abgleich aller Prüfpunkte (docs/AUD14_ABGLEICH.md); Umlaute repariert und automatisch geprüft (PR479).
+- AUD14-Abgleich aller Prüfpunkte (docs/AUD14_ABGLEICH.md); Umlaute repariert und automatisch geprüft (PR479); Meldung „Bewegung nicht möglich“ repariert, Prüfung findet jetzt auch kaputte Ersatzzeichen (PR485).
 - Architekturregel für mehrgeschossige Wände festgehalten (Gast-Wände, Dachtrimmung über Geschosse; Masterplan A08).
 
 ## Was offen ist
