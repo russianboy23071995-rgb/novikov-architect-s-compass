@@ -15,6 +15,7 @@ import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
 import { LineInspector } from "./LineControls";
 import { DoorProperties } from "./DoorProperties";
+import { SlabProperties } from "./SlabProperties";
 import { OverlapHint } from "./OverlapHint";
 import { MarkField } from "./MarkField";
 import { newOpeningMark, setOpeningMark } from "@/application/openings/marks";
@@ -47,6 +48,14 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
     return (
       <DoorProperties project={project} door={door} selection={selection} onChange={onChange} />
     );
+  const slab =
+    selection?.kind === "slab"
+      ? storeyOf(project).slabs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (slab)
+    return (
+      <SlabProperties project={project} slab={slab} selection={selection} onChange={onChange} />
+    );
   const wall =
     selection?.kind === "wall"
       ? storeyOf(project).walls.find((item) => item.id === selection.id)
@@ -69,7 +78,8 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster, Tür, Linie oder Schraffur auswählen, um die Eigenschaften hier zu bearbeiten.
+        Wand, Fenster, Tür, Decke, Linie oder Schraffur auswählen, um die Eigenschaften hier zu
+        bearbeiten.
       </p>
     );
   const fields = wall

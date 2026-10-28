@@ -397,3 +397,141 @@ test("window tool in connected plan preserves preview, edits, history, reload an
     assert.ok(ifc.includes("IFCLENGTHMEASURE(0.8)"));
   }
 });
+
+// Decken, Teil A (docs/SLAB_ELEMENT.md): model, drawing, levels, file and plan.
+import { addSlab, updateSlab } from "../slabs/actions.ts";
+import { SLAB_DEFAULTS, storeySlabLevels, slabArea } from "../../domain/elements/slab/model.ts";
+import { ELEMENT_KINDS as SLAB_KINDS, storeyElements } from "../../domain/elements/registry.ts";
+import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
+import { setStoreyHeight } from "../storeys/actions.ts";
+import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { previewDeleteSelection } from "../elements/delete.ts";
+import { beginSelectionMove } from "../selection/move.ts";
+import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
+import { exportIfc } from "../../lib/bim/ifc.ts";
+import type { Project } from "../../domain/project/schema.ts";
+
+const slabBase = (): Project => {
+  const p = createProject("p", "eg");
+  return setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3 });
+};
+const lShape = [
+  { x: 0, y: 0 },
+  { x: 6, y: 0 },
+  { x: 6, y: 3 },
+  { x: 3, y: 3 },
+  { x: 3, y: 5 },
+  { x: 0, y: 5 },
+];
+
+test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips", () => {
+  const base = slabBase();
+  const p = createDrawing(base, base, "slab-1", {
+    kind: "slab",
+    points: [...lShape, { x: 0, y: 0 }],
+    ...SLAB_DEFAULTS,
+  });
+  const slab = storeyOf(p).slabs![0]!;
+  // The explicit return to the first point closes the ring implicitly.
+  assert.equal(slab.points.length, 6);
+  assert.equal(slab.layerId, "layer:slab");
+  assert.equal(slab.thickness, 0.2);
+  assert.equal(SLAB_KINDS.slab.label, "Decke");
+  assert.deepEqual(storeyElements(storeyOf(p), "slab"), [slab]);
+  assert.equal(slabArea(slab), 24);
+  // Top on the raw floor of the storey above (EG 3,00 m), thickness downward.
+  assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 3, bottom: 2.8 });
+  const reopened = readProjectFile(serializeProject(p));
+  assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
+  assert.equal(PROJECT_SCHEMA_VERSION, 29);
+  assert.deepEqual(reopened, p);
+});
+
+test("thickness keeps the slab top and moves the underside; the top follows the storey height", () => {
+  const p = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const thicker = updateSlab(p, "s", { thickness: 0.3 });
+  assert.deepEqual(storeySlabLevels(thicker, "eg", storeyOf(thicker).slabs![0]!), {
+    top: 3,
+    bottom: 2.7,
+  });
+  const offset = updateSlab(p, "s", { topOffset: -0.05 });
+  assert.deepEqual(storeySlabLevels(offset, "eg", storeyOf(offset).slabs![0]!), {
+    top: 2.95,
+    bottom: 2.75,
+  });
+  // Nothing is stored: a new storey height moves the slab with it.
+  const higher = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.2 });
+  assert.equal(storeySlabLevels(higher, "eg", storeyOf(higher).slabs![0]!)!.top, 3.2);
+  // Unknown storey height: no invented level.
+  const unknown = addSlab(createProject("q", "eg"), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  assert.equal(storeySlabLevels(unknown, "eg", storeyOf(unknown).slabs![0]!), null);
+});
+
+test("invalid slabs are rejected without changing the model; one undo per change", () => {
+  const p = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const bowTie = [
+    { x: 0, y: 0 },
+    { x: 2, y: 2 },
+    { x: 2, y: 0 },
+    { x: 0, y: 2 },
+  ];
+  assert.throws(() => addSlab(p, { id: "x", points: bowTie, ...SLAB_DEFAULTS }));
+  assert.throws(() => updateSlab(p, "s", { thickness: 0 }));
+  assert.throws(() => updateSlab(p, "s", { thickness: Number.NaN }));
+  assert.throws(() => addSlab(p, { id: "s", points: lShape, ...SLAB_DEFAULTS }), /Duplicate ID/);
+  assert.throws(() => updateSlab(p, "missing", { thickness: 0.3 }), /Unbekannte Decke/);
+  assert.equal(storeyOf(p).slabs!.length, 1);
+  const h0 = createHistory(p);
+  const h1 = commitProject(h0, updateSlab(h0.present, "s", { thickness: 0.25 }));
+  assert.equal(storeyOf(h1.present).slabs![0]!.thickness, 0.25);
+  assert.equal(undoProject(h1).present, h0.present);
+});
+
+test("schema 28 files migrate without slabs and cannot smuggle slabs in", () => {
+  const raw = JSON.parse(serializeProject(slabBase()));
+  raw.schemaVersion = 28;
+  const migrated = readProjectFile(JSON.stringify(raw));
+  assert.equal(migrated.schemaVersion, 29);
+  assert.equal(migrated.storeys[0]!.slabs, undefined);
+  raw.storeys[0].slabs = [{ id: "s", layerId: "layer:slab", points: lShape, ...SLAB_DEFAULTS }];
+  assert.throws(() => readProjectFile(JSON.stringify(raw)));
+  raw.schemaVersion = 27;
+  assert.throws(() => readProjectFile(JSON.stringify(raw)));
+  delete raw.storeys[0].slabs;
+  assert.equal(readProjectFile(JSON.stringify(raw)).schemaVersion, 29);
+});
+
+test("the plan draws slabs first and hides them with their layer; delete works, moving not yet", () => {
+  const hatchBase = slabBase();
+  const withHatch = createDrawing(hatchBase, hatchBase, "h", {
+    kind: "hatch",
+    points: [
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ],
+    fill: { color: "#94a3b8", opacity: 0.35 },
+  });
+  const p = addSlab(withHatch, { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const scene = derivePlanScene(p, () => true);
+  assert.deepEqual(
+    planSceneRuns(scene, []).map((r) => r.kind),
+    ["slab", "hatch"],
+  );
+  assert.equal(derivePlanScene(p, (id) => id !== "s").slabs.size, 0);
+  const deleted = previewDeleteSelection(p, [{ kind: "slab", id: "s" }], undefined).result;
+  assert.equal(storeyOf(deleted).slabs!.length, 0);
+  assert.throws(
+    () => beginSelectionMove(p, [{ kind: "slab", id: "s" }], { x: 0, y: 0 }),
+    /Decken lassen sich noch nicht verschieben/,
+  );
+});
+
+test("Teil A leaves 3D and IFC unchanged: no slab body or IfcSlab yet", async () => {
+  const base = slabBase();
+  const p = addSlab(base, { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  assert.deepEqual(buildBuildingSolid(p).faces, buildBuildingSolid(base).faces);
+  const date = new Date(0);
+  assert.ok(!(await exportIfc(p, date)).includes("IFCSLAB"));
+});

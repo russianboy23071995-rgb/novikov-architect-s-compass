@@ -31,6 +31,7 @@ import {
   projectV25Schema,
   projectV26Schema,
   projectV27Schema,
+  projectV28Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -56,7 +57,7 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 28. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 29. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -144,9 +145,12 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData({ ...projectV26Schema.parse(value), schemaVersion: 27 });
   // Existing windows and doors receive position numbers in stored order (user decision 25.10.2026).
   if (value.schemaVersion === 27)
-    return validateProject(
+    return migrateProjectData(
       withOpeningMarks({ ...projectV27Schema.parse(value), schemaVersion: 28 }),
     );
+  // Schema 28 files carry no slabs; the strict v28 schema rejects smuggled slab lists.
+  if (value.schemaVersion === 28)
+    return validateProject({ ...projectV28Schema.parse(value), schemaVersion: 29 });
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

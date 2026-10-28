@@ -1,6 +1,7 @@
 import { PROJECT_SCHEMA_VERSION } from "./format.ts";
 import { wallBase, wallHeights } from "../elements/wall/heights.ts";
 import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
+import { slabSchema } from "../elements/slab/model.ts";
 import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
@@ -288,7 +289,20 @@ export const projectV27Schema = projectV26Schema.extend({
     .min(1),
 });
 /** Schema 28 adds optional position numbers to windows and doors (user decision 25.10.2026). */
-const projectSchema = projectV27Schema.extend({
+export const projectV28Schema = projectV27Schema.extend({
+  schemaVersion: z.literal(28),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 29 adds floor slabs per storey (user decision 28.10.2026). */
+const projectSchema = projectV28Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
@@ -296,6 +310,7 @@ const projectSchema = projectV27Schema.extend({
         walls: z.array(boundWallSchema),
         windows: z.array(markedWindowSchema),
         doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
       }),
     )
     .min(1),
@@ -505,6 +520,7 @@ export type StoreyValidationMemo = {
 export const REUSABLE_ELEMENT_LISTS = [
   "windows",
   "doors",
+  "slabs",
   "lines",
   "hatches",
   "references",
@@ -676,6 +692,7 @@ export function validateProject(
       ...s.walls,
       ...s.windows,
       ...(s.doors ?? []),
+      ...(s.slabs ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -715,6 +732,7 @@ export function validateProject(
     };
     const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
     validateStoreyDoors(storey, project.layers);
+    validateStoreySlabs(storey, project.layers);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
     memo?.record(
       index,
@@ -741,6 +759,14 @@ function validateStoreyDoors(storey: Project["storeys"][number], layers: { id: s
     if (bottom < 0 || bottom + door.height > wall.height)
       throw new Error(`Tür ${door.id} muss in die Wandhöhe passen.`);
   }
+}
+
+/** Slabs reference an existing layer; their outline and values are checked by the schema. */
+function validateStoreySlabs(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.slabs?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const slab of storey.slabs)
+    if (!layerIds.has(slab.layerId)) throw new Error("Unknown layer: " + slab.layerId);
 }
 
 function validateStoreyScope(

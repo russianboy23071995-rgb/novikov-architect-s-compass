@@ -53,6 +53,9 @@ export function assertMovableSelection(
 ) {
   if (!targets.length || !sameTargets(targets, eligibleSelection(project, visibility, targets)))
     throw new Error("Auswahl ist nicht mehr sichtbar oder aktuell. Erneut auswählen.");
+  // Teil A of the slab element: slabs are not moved yet (docs/SLAB_ELEMENT.md).
+  if (targets.some((t) => t.kind === "slab"))
+    throw new Error("Decken lassen sich noch nicht verschieben. Decke aus der Auswahl nehmen.");
   const walls = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (
     targets.some(
