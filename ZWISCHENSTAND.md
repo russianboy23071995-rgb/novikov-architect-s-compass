@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 28.10.2026 · main nach PR485 · 1331 automatische Tests grün
+**Stand:** 28.10.2026 · main nach PR486 · 1337 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -23,6 +23,8 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Hinweis bei überlappenden Öffnungen (PR451), Löschen für alle Bauteile (PR452), Positionsnummern (PR456), Menü weicht der Befehlszeile aus (PR455).
 - Wandanschlüsse inklusive schräger T-Anschlüsse in jedem Winkel und Ecke an einer T-Hauptwand (PR465, 468–470); bessere Treffer an Öffnungen (PR466).
 
+- Decke als Bauteil, Teil A: zeichnen (Polygon, Rechteck, Kontur), Stärke/Versatz, Grundriss, Löschen; OK = Rohfußboden darüber, Stärke wächst nach unten (PR486).
+
 **IFC / Archicad**
 
 - T-Anschlüsse: von dir in Archicad abgenommen, Wände korrekt (PR477). Reguläre Dateibeschreibung im normalen Export (PR478).
@@ -37,6 +39,8 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 **Mögliche nächste Aufträge (deine Wahl)**
 
+- Decken Teil B: 3D-Körper, IfcSlab für Archicad, Befehle, Verschieben und Umriss bearbeiten.
+- Decken Teil C: Wandhöhen auf Geschosshöhen ausrichten (deine Entscheidung 28.10.).
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
 - Bewegungsstart beim Stressmodell x noch ≈ 1,5 s.
