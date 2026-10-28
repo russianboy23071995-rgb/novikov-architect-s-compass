@@ -4,7 +4,7 @@
 
 - **Phase:** Skalierbarkeit und Leistung für das Schulmodell (Nutzerentscheidung 24.10.2026, §9) innerhalb §6 Abschnitt 1–2; je Schritt Änderungskarte → Freigabe → Nachweis.
 - **Letzter Meilenstein:** Geschosskörper aus `lib/bim` nach `rendering/viewport/storey-solid.ts` verschoben, Ergebnis unverändert (PR484, Stufe B0; [Nachweis](docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md)); davor Undo/Redo ohne Neuaufbau des Geschosses (PR483).
-- **Aktiver Einzelauftrag:** Fenstermaße im IFC für Archicad (Nutzerwahl 28.10.2026) – Änderungskarte vorgelegt, wartet auf Freigabe.
+- **Aktiver Einzelauftrag:** keiner – Fenstermaße im IFC auf Nutzerwunsch gestoppt (28.10.2026, Beschriftung/Maße in Archicad nicht vorrangig); nächste Wahl aus §9.
 - **Nächster Produktmeilenstein:** AUD14-Reste nach Nutzerentscheidung bearbeiten oder als bekannte Grenzen führen ([Kandidaten](docs/AUD14_ABGLEICH.md)), danach das nächste Fachbauteil aus §6 Abschnitt 2.
 - **Blocker 1:** Release-Gates ohne Testumgebung: echte Quota, echte Mehr-Tab-Fälle, Lauf ≥ 2 h, Native-/GPU-/Prozessspeicher (AUD14-03/06/07; [Nachweis](docs/AUD14_ABGLEICH.md)).
 - **Blocker 2:** IFC-Fenster ohne Maße in Archicad (RB 0,00 x 0,00, nicht änderbar) – für den Austausch wichtig, vorgemerkt ([Nachweis](docs/T_IFC_ACCEPTANCE.md)).
