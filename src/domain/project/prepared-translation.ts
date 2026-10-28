@@ -13,6 +13,7 @@ import {
 } from "../elements/wall/connections.ts";
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
+import { slabSchema } from "../elements/slab/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
 
 /** Freeze owned plain data, never caller-owned model objects. */
@@ -30,7 +31,14 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
   const ids = new Set(selectedIds);
   const s = storeyOf(base);
   const available = new Set(
-    [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
+    [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ].map((e) => e.id),
   );
   if (!ids.size || ids.size !== selectedIds.length || selectedIds.some((id) => !available.has(id)))
     throw new Error("Ungültige Bewegungsauswahl.");
@@ -46,6 +54,8 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       s.references.some((r) => ids.has(r.id) && r.assetId === a.id),
     ),
     storey: {
+      // The storey height places moving ceiling slabs in the 3D preview.
+      height: s.height,
       walls: s.walls.filter((w) => walls.has(w.id)),
       windows: s.windows.filter((w) => walls.has(w.wallId)),
       // Doors stay hosted by relative position; they follow their walls like windows.
@@ -55,6 +65,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       lines: (s.lines ?? []).filter((l) => ids.has(l.id)),
       hatches: s.hatches.filter((h) => ids.has(h.id)),
       references: s.references.filter((r) => ids.has(r.id)),
+      ...(s.slabs ? { slabs: s.slabs.filter((slab) => ids.has(slab.id)) } : {}),
     },
   };
   freeze(affected);
@@ -87,6 +98,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...storeyOf(affected).walls,
       ...storeyOf(affected).windows,
       ...(storeyOf(affected).doors ?? []),
+      ...(storeyOf(affected).slabs ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -167,6 +179,14 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
           ...r,
           origin: translate(r.origin),
         })),
+        ...(storeyOf(affected).slabs
+          ? {
+              slabs: storeyOf(affected).slabs!.map((slab) => ({
+                ...slab,
+                points: slab.points.map(translate),
+              })),
+            }
+          : {}),
         wallJoins: localJoins,
         wallTJunctions: localTees,
       },
@@ -182,6 +202,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       if (!detachedEnd || wall.id === movingId) wallBody(wall);
     for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
     for (const hatch of storeyOf(geometry).hatches) hatchSchema.parse(hatch);
+    for (const slab of storeyOf(geometry).slabs ?? []) slabSchema.parse(slab);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
@@ -210,6 +231,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.lines ? { lines: replace(s.lines, storeyOf(patch.geometry).lines!) } : {}),
       hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
       references: replace(s.references, storeyOf(patch.geometry).references),
+      ...(s.slabs ? { slabs: replace(s.slabs, storeyOf(patch.geometry).slabs ?? []) } : {}),
       wallJoins: retainedJoins,
       wallTJunctions: retainedTees,
     };
@@ -225,7 +247,14 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
   const base = snapshot.base;
   const selected = new Set(selectedIds);
   const parts = base.storeys.flatMap((s) => {
-    const ids = [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references]
+    const ids = [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ]
       .filter((e) => selected.has(e.id))
       .map((e) => e.id);
     return ids.length
@@ -281,7 +310,14 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
 export function prepareTranslation(source: Project, selectedIds: readonly string[]) {
   const s = storeyOf(source);
   const available = new Set(
-    [...s.walls, ...s.windows, ...(s.lines ?? []), ...s.hatches, ...s.references].map((e) => e.id),
+    [
+      ...s.walls,
+      ...s.windows,
+      ...(s.slabs ?? []),
+      ...(s.lines ?? []),
+      ...s.hatches,
+      ...s.references,
+    ].map((e) => e.id),
   );
   if (selectedIds.some((id) => !available.has(id))) throw new Error("Ungültige Bewegungsauswahl.");
   return prepareStoreysTranslation(source, selectedIds);

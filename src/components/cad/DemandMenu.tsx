@@ -163,7 +163,7 @@ export function DemandMenu({
         )}
         {selection && selection.kind !== "reference" && summary && (
           <>
-            {/* Teil A: slabs are edited through their properties only (docs/SLAB_ELEMENT.md). */}
+            {/* Slabs move as a whole; outline editing follows later (docs/SLAB_ELEMENT.md). */}
             {selection.kind !== "slab" && (
               <>
                 {closedContour(project, selection) && (
@@ -211,46 +211,46 @@ export function DemandMenu({
                     </button>
                   </>
                 )}
-                {!opening && (
-                  <button
-                    type="button"
-                    className="rounded border p-1 text-left hover:bg-muted"
-                    onClick={() => onAction("move")}
-                  >
-                    Element frei bewegen
-                  </button>
-                )}
-                {edgeIndex == null && (
-                  <button
-                    type="button"
-                    className="rounded border p-1 text-left hover:bg-muted"
-                    onClick={() => onAction("axis")}
-                  >
-                    {selection.kind === "window"
-                      ? "Fenster entlang Wand"
-                      : selection.kind === "door"
-                        ? "Tür entlang Wand"
-                        : "Element entlang Achse"}
-                  </button>
-                )}
-                {!opening && (
-                  <>
-                    <button
-                      type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
-                      onClick={() => onAction("x")}
-                    >
-                      Element auf X-Achse
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
-                      onClick={() => onAction("y")}
-                    >
-                      Element auf Y-Achse
-                    </button>
-                  </>
-                )}
+              </>
+            )}
+            {!opening && (
+              <button
+                type="button"
+                className="rounded border p-1 text-left hover:bg-muted"
+                onClick={() => onAction("move")}
+              >
+                Element frei bewegen
+              </button>
+            )}
+            {edgeIndex == null && selection.kind !== "slab" && (
+              <button
+                type="button"
+                className="rounded border p-1 text-left hover:bg-muted"
+                onClick={() => onAction("axis")}
+              >
+                {selection.kind === "window"
+                  ? "Fenster entlang Wand"
+                  : selection.kind === "door"
+                    ? "Tür entlang Wand"
+                    : "Element entlang Achse"}
+              </button>
+            )}
+            {!opening && (
+              <>
+                <button
+                  type="button"
+                  className="rounded border p-1 text-left hover:bg-muted"
+                  onClick={() => onAction("x")}
+                >
+                  Element auf X-Achse
+                </button>
+                <button
+                  type="button"
+                  className="rounded border p-1 text-left hover:bg-muted"
+                  onClick={() => onAction("y")}
+                >
+                  Element auf Y-Achse
+                </button>
               </>
             )}
             <button

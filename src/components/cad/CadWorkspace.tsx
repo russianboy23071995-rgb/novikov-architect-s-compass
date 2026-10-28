@@ -524,25 +524,27 @@ export function CadWorkspace({
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
-    // Teil A: slabs change through their properties; moving and outline editing follow later.
-    if (selection.kind === "slab") {
-      showNotice("Decken werden vorerst über die Eigenschaften bearbeitet.");
-      return;
-    }
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
-      inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
+      inSolid &&
+      selection.kind !== "slab" &&
+      supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
-      (action === "move" && selection.kind === "wall") ||
+      (action === "move" && (selection.kind === "wall" || selection.kind === "slab")) ||
+      (!inSolid && selection.kind === "slab" && (action === "x" || action === "y")) ||
       (!inSolid &&
         (selection.kind === "line" || selection.kind === "hatch") &&
         (action === "move" || action === "x" || action === "y" || action === "axis"))
     ) {
-      const origin = pickedPoint.anchor ?? editAnchor(project, selection);
+      const origin =
+        pickedPoint.anchor ??
+        (selection.kind === "slab"
+          ? storeyOf(project).slabs!.find((slab) => slab.id === selection.id)!.points[0]!
+          : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
-          action === "axis"
+          action === "axis" && selection.kind !== "slab"
             ? editMovementAxis({
                 base: project,
                 target: selection,
@@ -564,6 +566,11 @@ export function CadWorkspace({
       return;
     }
 
+    // Slabs move as a whole (docs/SLAB_ELEMENT.md, B3); outline editing follows later.
+    if (selection.kind === "slab") {
+      showNotice("Decken: Element frei bewegen oder auf X-/Y-Achse; Umriss bearbeiten folgt.");
+      return;
+    }
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;

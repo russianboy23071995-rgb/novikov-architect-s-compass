@@ -407,7 +407,10 @@ import { setStoreyHeight } from "../storeys/actions.ts";
 import { createHistory, commitProject, undoProject } from "../history/project-history.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
-import { beginSelectionMove } from "../selection/move.ts";
+import { beginSelectionMove, previewSelectionMove } from "../selection/move.ts";
+import { previewSlabCommand } from "../slabs/command.ts";
+import { projectSnapPrimitives } from "../snapping/project-references.ts";
+import { addWall } from "../walls/actions.ts";
 import { buildBuildingSolid } from "../../rendering/viewport/building-solid.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -502,7 +505,7 @@ test("schema 28 files migrate without slabs and cannot smuggle slabs in", () => 
   assert.equal(readProjectFile(JSON.stringify(raw)).schemaVersion, 29);
 });
 
-test("the plan draws slabs first and hides them with their layer; delete works, moving not yet", () => {
+test("the plan draws slabs first and hides them with their layer; delete, move, commands, snaps", () => {
   const hatchBase = slabBase();
   const withHatch = createDrawing(hatchBase, hatchBase, "h", {
     kind: "hatch",
@@ -522,10 +525,52 @@ test("the plan draws slabs first and hides them with their layer; delete works, 
   assert.equal(derivePlanScene(p, (id) => id !== "s").slabs.size, 0);
   const deleted = previewDeleteSelection(p, [{ kind: "slab", id: "s" }], undefined).result;
   assert.equal(storeyOf(deleted).slabs!.length, 0);
-  assert.throws(
-    () => beginSelectionMove(p, [{ kind: "slab", id: "s" }], { x: 0, y: 0 }),
-    /Decken lassen sich noch nicht verschieben/,
+  // Teil B3: a slab moves as a whole, alone or with a wall; one undo step.
+  const session = beginSelectionMove(p, [{ kind: "slab", id: "s" }], { x: 0, y: 0 });
+  const moved = previewSelectionMove(session, p, [{ kind: "slab", id: "s" }], { x: 2, y: 1 });
+  assert.deepEqual(storeyOf(moved).slabs![0]!.points[0], { x: 2, y: 1 });
+  assert.deepEqual(storeyOf(moved).hatches, storeyOf(p).hatches);
+  const h0 = createHistory(p);
+  const h1 = commitProject(h0, moved);
+  assert.equal(h1.past.length, 1);
+  assert.equal(undoProject(h1).present, h0.present);
+  const withWall = addWall(p, {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 6, y: 0 },
+    thickness: 0.24,
+    height: 2.8,
+  });
+  const both = [
+    { kind: "wall" as const, id: "w" },
+    { kind: "slab" as const, id: "s" },
+  ];
+  const group = previewSelectionMove(
+    beginSelectionMove(withWall, both, { x: 0, y: 0 }),
+    withWall,
+    both,
+    { x: 0, y: 3 },
   );
+  assert.deepEqual(storeyOf(group).walls[0]!.start, { x: 0, y: 3 });
+  assert.deepEqual(storeyOf(group).slabs![0]!.points[0], { x: 0, y: 3 });
+  // Text and voice: thickness and offset of the selected slab, units, errors.
+  const command = (text: string, target = { kind: "slab" as const, id: "s" }) =>
+    previewSlabCommand(p, target, text);
+  assert.equal(storeyOf(command("Deckenstärke 25 cm")!.result).slabs![0]!.thickness, 0.25);
+  assert.equal(storeyOf(command("deckenversatz auf -5 cm")!.result).slabs![0]!.topOffset, -0.05);
+  assert.match(command("Deckenstärke 25 cm")!.summary, /0,2 → 0,25 m/);
+  assert.equal(command("Wandlänge auf 6 m"), null);
+  assert.throws(() => command("Deckenstärke 0 m"), /größer als null/);
+  assert.throws(
+    () => command("Deckenstärke 25 cm", { kind: "hatch", id: "h" } as never),
+    /Decke auswählen/,
+  );
+  // Snap points at the slab corners and edge midpoints, like a hatch outline.
+  const features = projectSnapPrimitives(p)
+    .references.filter((r) => r.entityId === "s")
+    .map((r) => r.feature);
+  assert.deepEqual(features.filter((f) => f.startsWith("vertex-")).length, 6);
+  assert.equal(features.filter((f) => f.startsWith("segment-")).length, 6);
 });
 
 test("a storey with only a ceiling slab has a 3D body and an IfcSlab (Teil B)", async () => {
