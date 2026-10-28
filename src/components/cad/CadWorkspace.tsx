@@ -537,7 +537,7 @@ export function CadWorkspace({
         if (layout === "single" && !inSolid) setMode("2D");
         setModelError("");
       } catch (error) {
-        setModelError(error instanceof Error ? error.message : "Bewegung nicht mï¿½glich.");
+        setModelError(error instanceof Error ? error.message : "Bewegung nicht möglich.");
       }
       return;
     }
