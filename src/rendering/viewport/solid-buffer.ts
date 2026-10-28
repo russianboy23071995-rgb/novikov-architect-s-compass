@@ -25,9 +25,10 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
   for (const face of faces) {
     const light =
       0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
-    const r = (selected ? 0.38 : 0.72) * light;
-    const g = (selected ? 0.65 : 0.75) * light;
-    const b = (selected ? 0.78 : 0.79) * light;
+    // Ceiling slabs a little lighter than walls (user decision 28.10.2026).
+    const r = (selected ? 0.38 : face.slab ? 0.84 : 0.72) * light;
+    const g = (selected ? 0.65 : face.slab ? 0.85 : 0.75) * light;
+    const b = (selected ? 0.78 : face.slab ? 0.87 : 0.79) * light;
     for (const triangle of faceTriangles(face.vertices.length))
       for (const index of triangle) {
         const point = face.vertices[index]!;

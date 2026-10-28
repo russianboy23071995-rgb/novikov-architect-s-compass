@@ -105,3 +105,92 @@ test("only a few versions per storey are kept (bounded)", () => {
   assert.notEqual(rebuilt, first);
   assert.equal(JSON.stringify(rebuilt.faces), JSON.stringify(first.faces));
 });
+
+// Ceiling slabs in 3D, Teil B1 (docs/SLAB_ELEMENT.md).
+import { addSlab, updateSlab } from "../../application/slabs/actions.ts";
+import { SLAB_DEFAULTS } from "../../domain/elements/slab/model.ts";
+import { setStoreyHeight } from "../../application/storeys/actions.ts";
+import { addWall } from "../../application/walls/actions.ts";
+import { createProject } from "../../application/projects/create.ts";
+import { movementCorners } from "./movement-origin.ts";
+import { pickSolidElement } from "./window-selection.ts";
+import { createProjectionFrame as slabFrame } from "../../geometry/projections/orthographic.ts";
+import { createProjectionState as slabProjection } from "./projection-state.ts";
+
+const slabProject = () => {
+  const p = addWall(createProject("p", "eg"), {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 6, y: 0 },
+    thickness: 0.24,
+    height: 2.8,
+  });
+  return setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3 });
+};
+const slabOutline = [
+  { x: 0, y: 0 },
+  { x: 6, y: 0 },
+  { x: 6, y: 3 },
+  { x: 3, y: 3 },
+  { x: 3, y: 5 },
+  { x: 0, y: 5 },
+];
+
+test("a ceiling slab is a closed body under the next raw floor, marked as slab", () => {
+  const base = slabProject();
+  const p = addSlab(base, { id: "s", points: slabOutline, ...SLAB_DEFAULTS });
+  const before = buildBuildingSolid(base);
+  const solid = buildBuildingSolid(p);
+  const slabFaces = solid.faces.filter((f) => f.slab);
+  // Walls unchanged; 4 top + 4 bottom triangles and 6 sides.
+  assert.deepEqual(
+    solid.faces.filter((f) => !f.slab),
+    before.faces,
+  );
+  assert.equal(slabFaces.length, 14);
+  assert.ok(slabFaces.every((f) => f.wallId === "s"));
+  const zs = slabFaces.flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.equal(Math.max(...zs), 3);
+  assert.ok(Math.abs(Math.min(...zs) - 2.8) < 1e-12);
+  assert.ok(Math.abs(buildSolid(p).volume - buildSolid(base).volume - 24 * 0.2) < 1e-9);
+  // Thickness keeps the top; the storey height moves the slab.
+  const thicker = buildBuildingSolid(updateSlab(p, "s", { thickness: 0.3 }));
+  const tz = thicker.faces.filter((f) => f.slab).flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.equal(Math.max(...tz), 3);
+  assert.ok(Math.abs(Math.min(...tz) - 2.7) < 1e-12);
+  const higher = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.2 });
+  assert.equal(
+    Math.max(...buildBuildingSolid(higher).faces.flatMap((f) => f.vertices.map((v) => v[2]))),
+    3.2,
+  );
+  // Unknown storey height: no body.
+  const unknown = addSlab(createProject("q", "eg"), {
+    id: "s",
+    points: slabOutline,
+    ...SLAB_DEFAULTS,
+  });
+  assert.equal(buildBuildingSolid(unknown).faces.length, 0);
+});
+
+test("slab faces stay out of wall feet and wall corners; picking names the slab", () => {
+  const base = slabProject();
+  const p = addSlab(base, { id: "s", points: slabOutline, ...SLAB_DEFAULTS });
+  assert.deepEqual(getWallFootSources(p).bounds, getWallFootSources(base).bounds);
+  assert.deepEqual(
+    movementCorners(p).map((c) => [c.id, ...c.point]),
+    movementCorners(base).map((c) => [c.id, ...c.point]),
+  );
+  const solid = buildBuildingSolid(p);
+  const projection = slabProjection(
+    slabFrame(solid),
+    { yaw: 0.3, pitch: 1.2, zoom: 1, panX: 0, panY: 0 },
+    { left: 0, top: 0, width: 400, height: 400 },
+    { width: 400, height: 400 },
+  )!;
+  // Seen from above, the centre of the slab's wide part is slab.
+  const [x, y] = projection.project([1.5, 2.5, 3]);
+  assert.deepEqual(pickSolidElement(solid, [], projection.project, x, y), {
+    kind: "slab",
+    id: "s",
+  });
+});

@@ -45,7 +45,10 @@ function* triangles(
   };
   for (const f of faces)
     for (const [a, b, c] of faceTriangles(f.vertices.length)) {
-      add([f.vertices[a]!, f.vertices[b]!, f.vertices[c]!], { kind: "wall", id: f.wallId });
+      add([f.vertices[a]!, f.vertices[b]!, f.vertices[c]!], {
+        kind: f.slab ? "slab" : "wall",
+        id: f.wallId,
+      });
       yield;
     }
   for (const w of windows)

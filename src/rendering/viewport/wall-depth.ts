@@ -10,15 +10,15 @@ export function nearestWallSurface(
   project: (point: Vector3) => Vector3,
   x: number,
   y: number,
-): { wallId: string; depth: number } | null {
+): { wallId: string; depth: number; slab?: true } | null {
   if (![x, y].every(Number.isFinite) || Math.abs(x) > 1 || Math.abs(y) > 1) return null;
-  let nearest: { wallId: string; depth: number } | null = null;
+  let nearest: { wallId: string; depth: number; slab?: true } | null = null;
   for (const face of solid.faces) {
     const points = face.vertices.map(project);
     for (const [a, b, c] of faceTriangles(points.length)) {
       const depth = triangleDepth(points[a!]!, points[b!]!, points[c!]!, x, y);
       if (depth !== null && (!nearest || depth < nearest.depth))
-        nearest = { wallId: face.wallId, depth };
+        nearest = { wallId: face.wallId, depth, ...(face.slab ? { slab: true as const } : {}) };
     }
   }
   return nearest;
@@ -31,6 +31,7 @@ export function prepareNearestWallSurface(
 ) {
   const faces = solid.faces.map((face) => ({
     wallId: face.wallId,
+    slab: face.slab,
     points: face.vertices.map((point) => [...project(point)] as Vector3),
   }));
   const fallback: number[] = [];
@@ -71,7 +72,7 @@ export function prepareNearestWallSurface(
       for (const [a, b, c] of faceTriangles(face.points.length)) {
         const depth = triangleDepth(face.points[a!]!, face.points[b!]!, face.points[c!]!, x, y);
         if (depth !== null && (!nearest || depth < nearest.depth))
-          nearest = { wallId: face.wallId, depth };
+          nearest = { wallId: face.wallId, depth, ...(face.slab ? { slab: true as const } : {}) };
       }
     }
     return nearest;
