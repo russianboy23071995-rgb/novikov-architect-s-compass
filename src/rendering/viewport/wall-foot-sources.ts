@@ -27,6 +27,8 @@ export function getWallFootSources(project: Project) {
   const elevation = workingStoreyElevation(project);
   const grouped = new Map<string, typeof solid.faces>();
   for (const face of solid.faces) {
+    // Wall feet only: ceiling slab faces are no wall (docs/SLAB_ELEMENT.md, Teil B).
+    if (face.slab) continue;
     const faces = grouped.get(face.wallId) ?? [];
     faces.push(face);
     grouped.set(face.wallId, faces);

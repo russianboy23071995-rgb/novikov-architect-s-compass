@@ -17,6 +17,8 @@ type Faces = ReturnType<typeof buildBuildingSolid>["faces"];
 function cornersOf(faces: Faces): MovementCorner[] {
   const grouped = new Map<string, Faces>();
   for (const f of faces) {
+    // Wall corners only; slab corners follow with their snap points (B3).
+    if (f.slab) continue;
     const list = grouped.get(f.wallId) ?? [];
     list.push(f);
     grouped.set(f.wallId, list);

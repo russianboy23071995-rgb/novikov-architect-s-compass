@@ -11,9 +11,11 @@ import { storeyOpenings, type WallOpening } from "../../domain/elements/wall/ope
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { slabBody } from "./slab-solid.ts";
 
 export type Vec3 = [number, number, number];
-export type Face = { wallId: string; vertices: Vec3[]; normal: Vec3 };
+/** wallId names the element; slab faces carry `slab` (docs/SLAB_ELEMENT.md, Teil B). */
+export type Face = { wallId: string; vertices: Vec3[]; normal: Vec3; slab?: true };
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 
 /** Partition the wall plane at opening edges, then extrude only occupied cells.
@@ -183,6 +185,32 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
         solid.min[2] = Math.min(solid.min[2], p[2]);
         solid.max[2] = Math.max(solid.max[2], p[2]);
       }
+  }
+  // Ceiling slabs of this storey: top on the next raw floor (elevation + storey height).
+  // Both come from this storey and its elevation, which every storey cache already keys on.
+  const storey = storeyOf(project);
+  // Disposable scopes may omit the height; their slabs then stay out, like an unknown height.
+  const height = "height" in storey && typeof storey.height === "number" ? storey.height : null;
+  const bodies = (storey.slabs ?? []).flatMap((slab) => {
+    const body = slabBody(slab, height === null ? null : elevation + height);
+    return body ? [body] : [];
+  });
+  if (bodies.length) {
+    if (!solid.faces.length) {
+      solid.min = [Infinity, Infinity, Infinity];
+      solid.max = [-Infinity, -Infinity, -Infinity];
+    }
+    for (const body of bodies) {
+      solid.volume += body.volume;
+      for (const face of body.faces) {
+        solid.faces.push(face);
+        for (const p of face.vertices)
+          for (const axis of [0, 1, 2] as const) {
+            solid.min[axis] = Math.min(solid.min[axis], p[axis]);
+            solid.max[axis] = Math.max(solid.max[axis], p[axis]);
+          }
+      }
+    }
   }
   return solid;
 }

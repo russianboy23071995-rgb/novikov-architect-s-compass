@@ -96,7 +96,9 @@ export function pickSolidElement(
   if (![x, y].every(Number.isFinite) || Math.abs(x) > 1 || Math.abs(y) > 1) return null;
   const wall = nearestWallSurface(solid, project, x, y);
   let depth = wall?.depth ?? Infinity;
-  let target: ElementTarget | null = wall ? { kind: "wall", id: wall.wallId } : null;
+  let target: ElementTarget | null = wall
+    ? { kind: wall.slab ? "slab" : "wall", id: wall.wallId }
+    : null;
   for (const window of windows) {
     const points = window.vertices.map(project);
     for (const [a, b, c] of [

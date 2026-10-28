@@ -15,6 +15,8 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     wallId: string;
     vertices: [number, number, number][];
     normal: [number, number, number];
+    /** Ceiling slab face; absent on walls (docs/SLAB_ELEMENT.md, Teil B). */
+    slab?: true;
   }[];
 };
 
