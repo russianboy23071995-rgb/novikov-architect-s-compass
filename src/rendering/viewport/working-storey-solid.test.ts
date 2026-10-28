@@ -172,14 +172,17 @@ test("a ceiling slab is a closed body under the next raw floor, marked as slab",
   assert.equal(buildBuildingSolid(unknown).faces.length, 0);
 });
 
-test("slab faces stay out of wall feet and wall corners; picking names the slab", () => {
+test("slab faces stay out of wall feet; slab corners are movement origins; picking names the slab", () => {
   const base = slabProject();
   const p = addSlab(base, { id: "s", points: slabOutline, ...SLAB_DEFAULTS });
   assert.deepEqual(getWallFootSources(p).bounds, getWallFootSources(base).bounds);
+  // Movement corners: walls unchanged, plus the slab's outline corners at top and underside (B3).
+  const corners = movementCorners(p);
   assert.deepEqual(
-    movementCorners(p).map((c) => [c.id, ...c.point]),
+    corners.filter((c) => c.id !== "s").map((c) => [c.id, ...c.point]),
     movementCorners(base).map((c) => [c.id, ...c.point]),
   );
+  assert.equal(corners.filter((c) => c.id === "s").length, 12);
   const solid = buildBuildingSolid(p);
   const projection = slabProjection(
     slabFrame(solid),

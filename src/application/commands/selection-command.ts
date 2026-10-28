@@ -5,6 +5,7 @@ import {
 } from "../references/calibration.ts";
 import { previewOffsetCommand } from "../drawing/offset-command.ts";
 import { previewDoorCommand } from "../doors/command.ts";
+import { previewSlabCommand } from "../slabs/command.ts";
 import { previewWindowCommand } from "../windows/command.ts";
 import { previewWallCommand } from "../walls/command.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
@@ -99,6 +100,7 @@ export function previewSelectionCommand(
       );
     const element =
       previewDoorCommand(project, target, text) ??
+      previewSlabCommand(project, target, text) ??
       previewWindowCommand(project, target, text) ??
       previewWallCommand(project, target, text);
     // The offset command runs here directly; it no longer serializes the project for a

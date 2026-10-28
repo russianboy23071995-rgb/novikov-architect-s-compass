@@ -83,7 +83,7 @@ function remembered<T extends object>(owned: boolean, element: T, build: (e: T) 
   return cached;
 }
 
-/** Snap parts per element kind, in query order (walls, doors, hatches, lines). Parts of unchanged elements of
+/** Snap parts per element kind, in query order (walls, doors, hatches, lines, slabs). Parts of unchanged elements of
  * owned snapshots are the same objects across commits.
  */
 export function projectSnapParts(project: Project): readonly (readonly SnapPart[])[] {
@@ -94,6 +94,8 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     doorsPart(storey, owned),
     storey.hatches.map((hatch) => remembered(owned, hatch, hatchPart)),
     (storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
+    // Ceiling slab corners and edge midpoints, like a hatch outline (docs/SLAB_ELEMENT.md, B3).
+    (storey.slabs ?? []).map((slab) => remembered(owned, slab, hatchPart)),
   ];
 }
 
@@ -187,7 +189,7 @@ function wallsPart(project: Project, owned: boolean): Part[] {
   });
 }
 
-function hatchPart(hatch: Project["storeys"][number]["hatches"][number]): Part {
+function hatchPart(hatch: { id: string; points: readonly { x: number; y: number }[] }): Part {
   return part((midpoint) =>
     hatch.points.flatMap((point, index) => {
       const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;
