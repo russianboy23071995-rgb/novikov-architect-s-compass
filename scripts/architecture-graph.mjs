@@ -33,7 +33,8 @@ function specifiers(text, file, issues) {
 
 // UTF-8 text read as Latin-1/Windows-1252 and saved again: capital A with tilde followed by a
 // continuation character (umlauts, sharp s), or a-circumflex + euro sign (dashes, quotes, ellipsis).
-const MOJIBAKE = /\u00C3[\u0080-\u00BF\u0152\u0153\u0160\u0178\u2013\u2014\u201E]|\u00E2\u20AC/;
+const MOJIBAKE =
+  /\u00C3[\u0080-\u00BF\u0152\u0153\u0160\u0178\u2013\u2014\u201E]|\u00E2\u20AC|\u00EF\u00BF\u00BD|\uFFFD/;
 
 /** Read-only graph: never execute production modules or load user project data. */
 export function buildGraph(root) {
