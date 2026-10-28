@@ -53,6 +53,10 @@ function MarkLabel({
   );
 }
 
+/** Plan colours of ceiling slabs (outline dashed, fill faint). */
+const SLAB_STROKE = "#64748b";
+const SLAB_FILL = "#94a3b8";
+
 /** Hint colour for overlapping openings (allowed, not an error). */
 const OVERLAP_COLOR = "#d97706";
 
@@ -91,6 +95,7 @@ export function PlanSceneContent({
 }: Props) {
   const plan = {
     references: kind === "reference" ? ids.map((id) => scene.references.get(id)!) : [],
+    slabs: kind === "slab" ? ids.map((id) => scene.slabs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -129,6 +134,37 @@ export function PlanSceneContent({
                 fill="none"
                 stroke="#38bdf8"
                 strokeWidth={1.5}
+                vectorEffect="non-scaling-stroke"
+                pointerEvents="none"
+              />
+            )}
+          </g>
+        );
+      })}
+      {plan.slabs.map((slab) => {
+        const points = slab.points.map((p) => `${p.x},${-p.y}`).join(" ");
+        return (
+          <g key={slab.id}>
+            {/* Thin dashed outline with a light fill: selectable, never mistaken for a cut wall. */}
+            <polygon
+              {...selectProps("slab", slab.id)}
+              aria-label={`Decke ${slab.id}`}
+              points={points}
+              fill={SLAB_FILL}
+              fillOpacity={0.12}
+              stroke={SLAB_STROKE}
+              strokeWidth={1}
+              strokeDasharray="6 4"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+            />
+            {selectedIds.has(slab.id) && (
+              <polygon
+                points={points}
+                fill="none"
+                stroke="#cbd5e1"
+                strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
                 pointerEvents="none"
               />

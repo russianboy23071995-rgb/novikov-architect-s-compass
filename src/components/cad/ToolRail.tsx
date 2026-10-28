@@ -20,7 +20,7 @@ const tools: CadTool[] = [
   { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
-  { id: "slab", label: "Slab", shortcut: "S", icon: Pentagon },
+  { id: "slab", label: "Decke", shortcut: "S", icon: Pentagon },
   { id: "line", label: "Line", shortcut: "L", icon: PenLine },
 ];
 

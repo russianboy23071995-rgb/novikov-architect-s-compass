@@ -4,6 +4,7 @@ import type { Point, Project } from "../../domain/project/schema.ts";
 import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";
+import { slabArea } from "../../domain/elements/slab/model.ts";
 
 export type MenuObstacle = { left: number; top: number; right: number; bottom: number };
 
@@ -83,6 +84,15 @@ export function selectionSummary(project: Project, selection: Selection) {
       ? {
           title: door.mark ? `Tür ${door.mark}` : "Tür",
           details: `Breite ${metres(door.width)} · Höhe ${metres(door.height)} · Z-Versatz ${metres(door.zOffset)} · DIN ${doorDinHand(door)}`,
+        }
+      : null;
+  }
+  if (selection.kind === "slab") {
+    const slab = storeyOf(project).slabs?.find((item) => item.id === selection.id);
+    return slab
+      ? {
+          title: "Decke",
+          details: `Stärke ${metres(slab.thickness)} · Fläche ${slabArea(slab).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²`,
         }
       : null;
   }

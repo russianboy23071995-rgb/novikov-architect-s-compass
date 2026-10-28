@@ -5,6 +5,7 @@ import type { Hatch } from "../../domain/elements/hatch/model.ts";
 import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { addLine } from "../lines/actions.ts";
 import { addWall } from "../walls/actions.ts";
+import { addSlab } from "../slabs/actions.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
 import { precisionTarget } from "../input/precision.ts";
@@ -47,7 +48,8 @@ export type DrawingRequest =
       lineKind: "line" | "polyline";
       appearance: LineAppearance;
       layerId?: string;
-    };
+    }
+  | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string };
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -98,6 +100,14 @@ export function createDrawing(
         ...(request.contour ? { contour: request.contour } : {}),
         ...(request.layerId ? { layerId: request.layerId } : {}),
       },
+    });
+  if (request.kind === "slab")
+    return addSlab(current, {
+      id,
+      points: closedDrawingContour(request.points),
+      thickness: request.thickness,
+      topOffset: request.topOffset,
+      ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   return request.kind === "wall"
     ? addWall(current, {

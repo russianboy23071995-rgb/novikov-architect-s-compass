@@ -33,6 +33,7 @@ import { useImageImport } from "./useImageImport";
 import { WindowPlacementFields } from "./WindowPlacementFields";
 import { useWindowPlacement } from "./useWindowPlacement";
 import { useDoorPlacement } from "./useDoorPlacement";
+import { SlabToolFields } from "./SlabToolFields";
 import { DoorPlacementFields } from "./DoorPlacementFields";
 import { useSelectionMove } from "./useSelectionMove";
 import { useElementSelection } from "./useElementSelection";
@@ -209,14 +210,16 @@ export function CadWorkspace({
   const [pathPoints, setPathPoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
-  const pathDrawing = tool === "line" || tool === "hatch";
+  // Hatch and slab share the outline construction (polygon, rectangle, closed contour).
+  const areaTool = tool === "hatch" || tool === "slab";
+  const pathDrawing = tool === "line" || areaTool;
   const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
   const findHatchBoundary = useMemo(
     () =>
-      tool === "hatch" && hatchConstruction === "boundary"
+      areaTool && hatchConstruction === "boundary"
         ? prepareHatchBoundaries(project, visibility)
         : null,
-    [tool, hatchConstruction, project, visibility],
+    [areaTool, hatchConstruction, project, visibility],
   );
   const toolDefaults = useToolDefaults(project);
   const hatchFill = toolDefaults.hatch.fill;
@@ -329,7 +332,13 @@ export function CadWorkspace({
       if (next) {
         cancelInteraction();
         setTool(next);
-        if (next === "window" || next === "door" || next === "line" || next === "hatch")
+        if (
+          next === "window" ||
+          next === "door" ||
+          next === "line" ||
+          next === "hatch" ||
+          next === "slab"
+        )
           setSelection(null);
         setModelError("");
         if (
@@ -337,7 +346,8 @@ export function CadWorkspace({
           next === "door" ||
           next === "wall" ||
           next === "line" ||
-          next === "hatch"
+          next === "hatch" ||
+          next === "slab"
         )
           setMode("2D");
       }
@@ -382,7 +392,13 @@ export function CadWorkspace({
     cancelInteraction();
     setTool(next);
     if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
-    if (next === "window" || next === "door" || next === "line" || next === "hatch")
+    if (
+      next === "window" ||
+      next === "door" ||
+      next === "line" ||
+      next === "hatch" ||
+      next === "slab"
+    )
       setSelection(null);
     setModelError("");
     if (
@@ -391,7 +407,8 @@ export function CadWorkspace({
       next === "door" ||
       next === "wall" ||
       next === "line" ||
-      next === "hatch"
+      next === "hatch" ||
+      next === "slab"
     )
       setMode("2D");
   };
@@ -507,6 +524,11 @@ export function CadWorkspace({
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
     if (!selection || selection.kind === "reference") return;
+    // Teil A: slabs change through their properties; moving and outline editing follow later.
+    if (selection.kind === "slab") {
+      showNotice("Decken werden vorerst über die Eigenschaften bearbeitet.");
+      return;
+    }
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
@@ -631,7 +653,8 @@ export function CadWorkspace({
 
   const finishPath = (points = pathPoints, base = drawingBase) => {
     try {
-      const id = `${tool === "hatch" ? "hatch" : "line"}-${crypto.randomUUID()}`;
+      const kind = tool === "hatch" ? "hatch" : tool === "slab" ? "slab" : "line";
+      const id = `${kind}-${crypto.randomUUID()}`;
       changeProject(
         createDrawing(
           base!,
@@ -639,32 +662,33 @@ export function CadWorkspace({
           id,
           tool === "hatch"
             ? { kind: "hatch", points, ...toolDefaults.hatch }
-            : {
-                kind: "line",
-                lineKind,
-                points,
-                appearance: lineAppearance,
-                layerId: toolDefaults.line.layerId,
-              },
+            : tool === "slab"
+              ? { kind: "slab", points, ...toolDefaults.slab }
+              : {
+                  kind: "line",
+                  lineKind,
+                  points,
+                  appearance: lineAppearance,
+                  layerId: toolDefaults.line.layerId,
+                },
           viewContext.binding,
         ),
-        {
-          kind: tool === "hatch" ? "hatch" : "line",
-          id,
-        },
+        { kind, id },
       );
     } catch {
       setModelError(
-        tool === "hatch"
-          ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
-          : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+        tool === "slab"
+          ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
+          : tool === "hatch"
+            ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
+            : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
     }
   };
 
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
-    if (tool === "hatch" && hatchConstruction === "boundary") {
+    if (areaTool && hatchConstruction === "boundary") {
       const points = findHatchBoundary?.(point) ?? [];
       if (points.length) finishPath(points, project);
       else
@@ -688,7 +712,7 @@ export function CadWorkspace({
       }
       const next = [...pathPoints, point];
       if (
-        tool === "hatch" &&
+        areaTool &&
         hatchConstruction !== "polygon" &&
         next.length === (hatchConstruction === "diagonal" ? 2 : 3)
       ) {
@@ -1225,6 +1249,16 @@ export function CadWorkspace({
                 onPrecision={doorTool.setPrecision}
                 pickingHost={doorTool.pickingHost}
               />
+            ) : tool === "slab" && mode === "2D" ? (
+              <SlabToolFields
+                construction={hatchConstruction}
+                onConstruction={(construction) => {
+                  cancelInteraction();
+                  setHatchConstruction(construction);
+                }}
+                value={toolDefaults.slab}
+                onChange={toolDefaults.setSlab}
+              />
             ) : tool === "hatch" && mode === "2D" ? (
               <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
                 <label className="text-xs">
@@ -1557,7 +1591,7 @@ export function CadWorkspace({
                       draftPatternRotation={toolDefaults.hatch.patternRotation}
                       draftPatternSize={toolDefaults.hatch.patternSize}
                       draftContour={
-                        tool === "hatch" && hatchConstruction !== "polygon"
+                        areaTool && hatchConstruction !== "polygon"
                           ? (point) =>
                               hatchConstruction === "boundary"
                                 ? (findHatchBoundary?.(point) ?? [])
@@ -1570,7 +1604,12 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (target.kind === "reference" || target.kind === "door") return;
+                        if (
+                          target.kind === "reference" ||
+                          target.kind === "door" ||
+                          target.kind === "slab"
+                        )
+                          return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(
@@ -1612,7 +1651,7 @@ export function CadWorkspace({
                       }
                       {...(tool === "wall" ||
                       (tool === "line" && lineKind === "polyline") ||
-                      (tool === "hatch" && hatchConstruction === "polygon")
+                      (areaTool && hatchConstruction === "polygon")
                         ? {
                             onFinish: () => {
                               if (!referenceSelection.selecting) {

@@ -163,89 +163,94 @@ export function DemandMenu({
         )}
         {selection && selection.kind !== "reference" && summary && (
           <>
-            {closedContour(project, selection) && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
-                onClick={() => onAction("offset")}
-              >
-                Kontur versetzen (Offset)
-              </button>
-            )}
-            {edgeIndex != null && (
+            {/* Teil A: slabs are edited through their properties only (docs/SLAB_ELEMENT.md). */}
+            {selection.kind !== "slab" && (
               <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("insert")}
-                >
-                  Knicken
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("edge")}
-                >
-                  Seite strecken
-                </button>
-              </>
-            )}
-            {!opening && pointIndex !== null && (
-              <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("point")}
-                >
-                  Punkt frei bewegen
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("stretch")}
-                >
-                  Punkt in Flucht strecken
-                </button>
-              </>
-            )}
-            {!opening && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
-                onClick={() => onAction("move")}
-              >
-                Element frei bewegen
-              </button>
-            )}
-            {edgeIndex == null && (
-              <button
-                type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
-                onClick={() => onAction("axis")}
-              >
-                {selection.kind === "window"
-                  ? "Fenster entlang Wand"
-                  : selection.kind === "door"
-                    ? "Tür entlang Wand"
-                    : "Element entlang Achse"}
-              </button>
-            )}
-            {!opening && (
-              <>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("x")}
-                >
-                  Element auf X-Achse
-                </button>
-                <button
-                  type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
-                  onClick={() => onAction("y")}
-                >
-                  Element auf Y-Achse
-                </button>
+                {closedContour(project, selection) && (
+                  <button
+                    type="button"
+                    className="rounded border p-1 text-left hover:bg-muted"
+                    onClick={() => onAction("offset")}
+                  >
+                    Kontur versetzen (Offset)
+                  </button>
+                )}
+                {edgeIndex != null && (
+                  <>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("insert")}
+                    >
+                      Knicken
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("edge")}
+                    >
+                      Seite strecken
+                    </button>
+                  </>
+                )}
+                {!opening && pointIndex !== null && (
+                  <>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("point")}
+                    >
+                      Punkt frei bewegen
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("stretch")}
+                    >
+                      Punkt in Flucht strecken
+                    </button>
+                  </>
+                )}
+                {!opening && (
+                  <button
+                    type="button"
+                    className="rounded border p-1 text-left hover:bg-muted"
+                    onClick={() => onAction("move")}
+                  >
+                    Element frei bewegen
+                  </button>
+                )}
+                {edgeIndex == null && (
+                  <button
+                    type="button"
+                    className="rounded border p-1 text-left hover:bg-muted"
+                    onClick={() => onAction("axis")}
+                  >
+                    {selection.kind === "window"
+                      ? "Fenster entlang Wand"
+                      : selection.kind === "door"
+                        ? "Tür entlang Wand"
+                        : "Element entlang Achse"}
+                  </button>
+                )}
+                {!opening && (
+                  <>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("x")}
+                    >
+                      Element auf X-Achse
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded border p-1 text-left hover:bg-muted"
+                      onClick={() => onAction("y")}
+                    >
+                      Element auf Y-Achse
+                    </button>
+                  </>
+                )}
               </>
             )}
             <button

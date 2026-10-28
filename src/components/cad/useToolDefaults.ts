@@ -1,5 +1,7 @@
 import { defaultDoorDraft, type DoorSettingsDraft } from "@/application/drawing/door-placement";
 import { defaultDoorLayerId } from "@/application/doors/actions";
+import { defaultSlabLayerId } from "@/application/slabs/actions";
+import { SLAB_DEFAULTS } from "@/domain/elements/slab/model";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -16,6 +18,9 @@ import type {
 } from "@/application/tools/pickup";
 import { defaultHatchFill } from "@/application/drawing/actions";
 import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
+
+/** Slab tool values in metres; the session draft never enters model history. */
+export type SlabDefaults = { thickness: number; topOffset: number; layerId: string };
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
@@ -81,6 +86,19 @@ export function useToolDefaults(project: Project) {
           : defaultDoorLayerId(project),
     };
   }, [project, doorState]);
+  const [slabState, setSlabState] = useState<{ projectId: string; values: SlabDefaults } | null>(
+    null,
+  );
+  const slabValues =
+    slabState?.projectId === project.id
+      ? slabState.values
+      : { ...SLAB_DEFAULTS, layerId: defaultSlabLayerId(project) };
+  const slabDefaults = {
+    ...slabValues,
+    layerId: project.layers.some((l) => l.id === slabValues.layerId)
+      ? slabValues.layerId
+      : defaultSlabLayerId(project),
+  };
   const [state, setState] = useState<{ projectId: string; hatch: HatchDefaults } | null>(null);
   const hatch =
     state?.projectId === project.id
@@ -116,6 +134,10 @@ export function useToolDefaults(project: Project) {
     },
     window: windowDefaults,
     door: doorDefaults,
+    slab: slabDefaults,
+    setSlab(values: SlabDefaults) {
+      setSlabState({ projectId: project.id, values });
+    },
     setDoor(values: DoorSettingsDraft) {
       setDoorState({ projectId: project.id, values });
     },

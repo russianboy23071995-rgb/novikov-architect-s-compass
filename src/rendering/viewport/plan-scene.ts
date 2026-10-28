@@ -35,6 +35,7 @@ export function derivePlanScene(
     solids: new Map(connectedWallSolids(geometry).map((s) => [s.wallId, s])),
     outlines: wallPlanOutlines(geometry, new Set(plan.walls.map((w) => w.id))),
     walls: new Map(plan.walls.map((w) => [w.id, w])),
+    slabs: new Map(plan.slabs.map((s) => [s.id, s])),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),
     lines: new Map(plan.lines.map((l) => [l.id, l])),
     references: new Map(plan.references.map((r) => [r.id, r])),
@@ -42,7 +43,7 @@ export function derivePlanScene(
 }
 export type PlanScene = ReturnType<typeof derivePlanScene>;
 export type PlanRun = {
-  kind: "reference" | "hatch" | "wall" | "line";
+  kind: "reference" | "slab" | "hatch" | "wall" | "line";
   ids: string[];
   affected: boolean;
 };
@@ -52,6 +53,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     runs: PlanRun[] = [];
   for (const [kind, elements] of [
     ["reference", scene.plan.references],
+    // The storey's ceiling slab lies outside the cut plane: drawn first, beneath 2D content.
+    ["slab", scene.plan.slabs],
     ["hatch", scene.plan.hatches],
     ["wall", scene.plan.walls],
     ["line", scene.plan.lines],
