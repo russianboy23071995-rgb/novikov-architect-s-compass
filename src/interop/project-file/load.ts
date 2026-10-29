@@ -34,6 +34,7 @@ import {
   projectV28Schema,
   projectV29Schema,
   projectV30Schema,
+  projectV31Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -75,7 +76,7 @@ function withoutBoundHeights<
   };
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 31. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 32. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -185,8 +186,13 @@ export function migrateProjectData(value: unknown): Project {
     });
   // Schema 30 files carry no roofs; the strict v30 schema rejects smuggled roof lists.
   if (value.schemaVersion === 30)
-    return validateProject(
+    return migrateProjectData(
       withoutBoundHeights({ ...projectV30Schema.parse(value), schemaVersion: 31 }),
+    );
+  // Schema 31 files carry no rooms; the strict v31 schema rejects smuggled room lists.
+  if (value.schemaVersion === 31)
+    return validateProject(
+      withoutBoundHeights({ ...projectV31Schema.parse(value), schemaVersion: 32 }),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {

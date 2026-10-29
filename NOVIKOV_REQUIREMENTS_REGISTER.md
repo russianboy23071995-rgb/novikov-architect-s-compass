@@ -296,7 +296,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N31 – Räume in geschlossenen oder teiloffenen Wandbereichen
 
-- **Stand:** Geplant: Raummodell, virtuelle Grenzen und Zuordnung; Live-Flächenmessung ersetzt es nicht.
+- **Stand:** Teilweise (R1, 29.10.2026): Raummodell Schema 32 (Umriss, Name, Nummer, optionaler Fußbodenaufbau), Aktionen, Ebene Raum; Werkzeug inkl. Klick zwischen Wänden folgt in R2, virtuelle Grenzen zunächst per Polygon (docs/ROOM_ELEMENT.md). Live-Flächenmessung ersetzt es nicht.
 - **Zuständigkeit:** Ziel domain/room, geometry/polygon, application
 - **Altzuordnung:** Guide-F18
 - **Abnahme/Abhängigkeiten:** N16/N39, manuelle geschlossene/virtuelle Grenzen; später N44 für Ableitung. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -305,7 +305,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N32 – Raumname, Kennung ab R-001 und Fläche
 
-- **Stand:** Geplant: Raumname/Nummer R-001/Fläche; stabile interne ID getrennt von Nutzernummer.
+- **Stand:** Teilweise (R1, 29.10.2026): Name, Nummer R-001… projektweit fortlaufend und eindeutig, Grundfläche; stabile interne ID getrennt. Raumstempel folgt in R2.
 - **Zuständigkeit:** Ziel domain/room, application/area
 - **Altzuordnung:** Guide-F19
 - **Abnahme/Abhängigkeiten:** N31; stabile interne ID getrennt von R-001, Nummerierungsbereich festlegen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
@@ -359,7 +359,7 @@ Gemeinsame Abnahme jedes persistenten Teilauftrags: stabile IDs, zulässiger Sco
 
 ### N38 – Räume standardmäßig auf Ebene Raum
 
-- **Stand:** Geplant: Standard-Raumebene passend zur ersten Raumimplementation; vorhandene Ebenen nicht ersetzen.
+- **Stand:** Umgesetzt (R1, 29.10.2026): neue Räume auf der vorhandenen Standardebene Raum.
 - **Zuständigkeit:** Ziel domain/layers, room defaults
 - **Altzuordnung:** Guide-F25/F26 erweitert
 - **Abnahme/Abhängigkeiten:** N16/N31; bisherige zwölf Guide-Ebenen nicht ersetzen. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.

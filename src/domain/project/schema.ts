@@ -3,6 +3,7 @@ import { wallBase, wallHeights } from "../elements/wall/heights.ts";
 import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
 import { roofSchema } from "../elements/roof/model.ts";
+import { roomNumberKey, roomSchema } from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
   resolveBoundWallHeights,
@@ -337,7 +338,22 @@ export const projectV30Schema = projectV29Schema.extend({
     .min(1),
 });
 /** Schema 31 adds single inclined roof surfaces per storey (docs/ROOF_ELEMENT.md, 29.10.2026). */
-const projectSchema = projectV30Schema.extend({
+export const projectV31Schema = projectV30Schema.extend({
+  schemaVersion: z.literal(31),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 32 adds rooms per storey (docs/ROOM_ELEMENT.md, 29.10.2026). */
+const projectSchema = projectV31Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
@@ -347,6 +363,7 @@ const projectSchema = projectV30Schema.extend({
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
       }),
     )
     .min(1),
@@ -558,6 +575,7 @@ export const REUSABLE_ELEMENT_LISTS = [
   "doors",
   "slabs",
   "roofs",
+  "rooms",
   "lines",
   "hatches",
   "references",
@@ -731,6 +749,7 @@ export function validateProject(
       ...(s.doors ?? []),
       ...(s.slabs ?? []),
       ...(s.roofs ?? []),
+      ...(s.rooms ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -742,6 +761,7 @@ export function validateProject(
   }
   const used = new Set<string>();
   const { storeys, groundStoreyId: _ground, ...shared } = project;
+  validateRoomNumbers(storeys);
   const localLevels = new Map(
     resolveStoreyLevels(storeys, project.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
   );
@@ -772,6 +792,7 @@ export function validateProject(
     validateStoreyDoors(storey, project.layers);
     validateStoreySlabs(storey, project.layers);
     validateStoreyRoofs(storey, project.layers);
+    validateStoreyRooms(storey, project.layers);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
     memo?.record(
       index,
@@ -806,6 +827,26 @@ function validateStoreySlabs(storey: Project["storeys"][number], layers: { id: s
   const layerIds = new Set(layers.map((l) => l.id));
   for (const slab of storey.slabs)
     if (!layerIds.has(slab.layerId)) throw new Error("Unknown layer: " + slab.layerId);
+}
+
+/** Rooms reference an existing layer; their numbers are unique in the whole project (N32). */
+function validateStoreyRooms(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.rooms?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const room of storey.rooms)
+    if (!layerIds.has(room.layerId)) throw new Error("Unknown layer: " + room.layerId);
+}
+
+/** Room numbers across all storeys, also reused ones: a cheap text comparison per room. */
+function validateRoomNumbers(storeys: readonly Project["storeys"][number][]): void {
+  const numbers = new Set<string>();
+  for (const storey of storeys)
+    for (const room of storey.rooms ?? []) {
+      const key = roomNumberKey(room.number);
+      if (numbers.has(key))
+        throw new Error(`Raumnummer ${room.number.trim()} ist bereits vergeben.`);
+      numbers.add(key);
+    }
 }
 
 /** Roofs reference an existing layer; outline, values and end cuts are checked by the schema. */
