@@ -95,8 +95,8 @@ export function buildBuildingSolid(input: Project): Solid {
     return recent.result;
   }
   const parts = project.storeys
-    // Storeys with solid elements: walls or ceiling slabs (docs/SLAB_ELEMENT.md).
-    .filter((s) => s.walls.length > 0 || (s.slabs?.length ?? 0) > 0)
+    // Storeys with solid elements: walls, ceiling slabs or roofs (SLAB_/ROOF_ELEMENT.md).
+    .filter((s) => s.walls.length > 0 || (s.slabs?.length ?? 0) > 0 || (s.roofs?.length ?? 0) > 0)
     .map((s) => storeyPart(project, s, immutable));
   const result: Solid = {
     faces: parts.flatMap((p) => p.faces),

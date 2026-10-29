@@ -14,6 +14,12 @@ import { validateProject } from "../../domain/project/schema.ts";
 import { buildSolid } from "./storey-solid.ts";
 import { buildBuildingSolid, workingStoreySolid } from "./building-solid.ts";
 import { getWallFootSources } from "./wall-foot-sources.ts";
+import { roofBody } from "./roof-solid.ts";
+import { packSolidFaces, SLAB_DISPLAY_PRIORITY } from "./solid-buffer.ts";
+import { createStandardProject } from "../../application/projects/create.ts";
+import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
+import { addRoof } from "../../application/roofs/actions.ts";
+import { assertMovableSelection } from "../../application/selection/move.ts";
 
 // Wall foot sources reuse the storey part of the building scene (docs/performance/RECOVERY_STATUS.md).
 test("the working storey solid equals the former derivation and shares the building part", () => {
@@ -196,4 +202,116 @@ test("slab faces stay out of wall feet; slab corners are movement origins; picki
     kind: "slab",
     id: "s",
   });
+});
+
+// Dach D2 (docs/ROOF_ELEMENT.md): closed roof body in the storey part, picking and colours.
+const ROOF_SQUARE = {
+  id: "dach",
+  points: [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 4 },
+    { x: 0, y: 4 },
+  ],
+  referenceLine: { start: { x: 0, y: 0 }, end: { x: 4, y: 0 } },
+  rise: "left" as const,
+  referenceHeight: 0,
+  pitch: 45,
+  thickness: 0.2,
+  eaveCut: "vertical" as const,
+  topCut: "vertical" as const,
+};
+/** Every directed edge is matched by exactly one reverse edge: a closed, consistently oriented surface. */
+function assertClosed(faces: readonly { vertices: number[][] }[]) {
+  const key = (a: number[], b: number[]) => `${a.join(",")}>${b.join(",")}`;
+  const edges = new Map<string, number>();
+  for (const face of faces)
+    for (let i = 0; i < face.vertices.length; i++) {
+      const k = key(face.vertices[i]!, face.vertices[(i + 1) % face.vertices.length]!);
+      edges.set(k, (edges.get(k) ?? 0) + 1);
+    }
+  for (const [k, count] of edges) {
+    const [a, b] = k.split(">");
+    assert.equal(count, 1, `edge ${k} used twice in one direction`);
+    assert.equal(edges.get(`${b}>${a}`), 1, `edge ${k} has no partner`);
+  }
+}
+
+test("a roof is a closed inclined body in its storey; volume and heights match the definition", () => {
+  const near = (a: number, b: number, label: string) =>
+    assert.ok(Math.abs(a - b) < 1e-9, `${label}: ${a} != ${b}`);
+  const base = createStandardProject("p", "eg", "og");
+  const og = selectWorkingStorey(base, base, "og");
+  const project = addRoof(og, ROOF_SQUARE);
+  const roofFaces = buildBuildingSolid(project).faces.filter((f) => f.roof);
+  assert.ok(roofFaces.length > 0 && roofFaces.every((f) => f.wallId === "dach" && !f.slab));
+  assertClosed(roofFaces);
+  const z = roofFaces.flatMap((f) => f.vertices.map((v) => v[2]));
+  // OG floor at 3,00 m: underside from 3,00 (eave) to 7,00 (top edge), top 0,283 m higher.
+  near(Math.min(...z), 3, "lowest point");
+  near(Math.max(...z), 7 + 0.2 * Math.SQRT2, "highest point");
+  // Vertical cuts: 4 m wide plan × 4 m × vertical thickness d/cos.
+  near(roofBody(storeyOf(project).roofs![0]!, 3).volume, 16 * 0.2 * Math.SQRT2, "volume");
+  // Perpendicular cuts at both ends: a d-thick band, (4 - d·sin)/cos long along the slope.
+  const cut = {
+    ...storeyOf(project).roofs![0]!,
+    eaveCut: "perpendicular",
+    topCut: "perpendicular",
+  } as const;
+  const cutBody = roofBody(cut, 3);
+  assertClosed(cutBody.faces);
+  near(cutBody.volume, 4 * 0.2 * ((4 - 0.2 * Math.SQRT1_2) / Math.SQRT1_2), "perpendicular volume");
+  // Horizontal eave: the soffit face is horizontal and faces down.
+  const soffit = roofBody({ ...cut, eaveCut: "horizontal" }, 3).faces.find(
+    (f) => f.vertices.length === 4 && f.normal[2] < -0.999,
+  );
+  assert.ok(soffit);
+  assert.ok(soffit.vertices.every((v) => Math.abs(v[2] - soffit.vertices[0]![2]) < 1e-9));
+  // L-shaped roof stays closed.
+  const lRoof = {
+    ...ROOF_SQUARE,
+    id: "l",
+    layerId: "layer:roof",
+    points: [
+      { x: 0, y: 0 },
+      { x: 6, y: 0 },
+      { x: 6, y: 3 },
+      { x: 3, y: 3 },
+      { x: 3, y: 5 },
+      { x: 0, y: 5 },
+    ],
+    eaveCut: "horizontal" as const,
+    topCut: "perpendicular" as const,
+  };
+  assertClosed(roofBody(lRoof, 0).faces);
+  // Changing the EG height moves the roof with its storey; the OG's own height does not.
+  const egHigher = setStoreyHeight(project, project, {
+    projectId: "p",
+    storeyId: "eg",
+    height: 3.5,
+  });
+  const lifted = buildBuildingSolid(egHigher).faces.filter((f) => f.roof);
+  near(Math.min(...lifted.flatMap((f) => f.vertices.map((v) => v[2]))), 3.5, "after EG change");
+  const ogHigher = setStoreyHeight(project, project, { projectId: "p", storeyId: "og", height: 4 });
+  assert.deepEqual(
+    buildBuildingSolid(ogHigher).faces.filter((f) => f.roof),
+    roofFaces,
+  );
+  // Roof faces are drawn with the slab display priority and a colour of their own.
+  const packed = packSolidFaces(roofFaces.slice(0, 1), [0, 0, 0], false);
+  assert.equal(packed[6], SLAB_DISPLAY_PRIORITY);
+  const { roof: _roof, ...asWall } = roofFaces[0]!;
+  const wallPacked = packSolidFaces([asWall], [0, 0, 0], false);
+  assert.notDeepEqual([...packed.slice(3, 6)], [...wallPacked.slice(3, 6)]);
+  // Picking from above at the roof centre selects the roof itself, not a wall.
+  const topDown = (p: readonly number[]) =>
+    [p[0]! / 10, p[1]! / 10, -p[2]! / 100] as [number, number, number];
+  assert.deepEqual(pickSolidElement(buildBuildingSolid(project), [], topDown, 0.2, 0.2), {
+    kind: "roof",
+    id: "dach",
+  });
+  assert.throws(
+    () => assertMovableSelection(project, [{ kind: "roof", id: "dach" }]),
+    /Dächer lassen sich noch nicht verschieben/,
+  );
 });

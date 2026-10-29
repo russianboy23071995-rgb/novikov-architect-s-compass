@@ -96,6 +96,15 @@ export function selectionSummary(project: Project, selection: Selection) {
         }
       : null;
   }
+  if (selection.kind === "roof") {
+    const roof = storeyOf(project).roofs?.find((item) => item.id === selection.id);
+    return roof
+      ? {
+          title: "Dach",
+          details: `Neigung ${roof.pitch.toLocaleString("de-DE", { maximumFractionDigits: 2 })}° · Stärke ${metres(roof.thickness)}`,
+        }
+      : null;
+  }
   if (selection.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === selection.id);
     return hatch

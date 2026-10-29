@@ -17,6 +17,8 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     normal: [number, number, number];
     /** Ceiling slab face; absent on walls (docs/SLAB_ELEMENT.md, Teil B). */
     slab?: true;
+    /** Roof face; absent on walls (docs/ROOF_ELEMENT.md, D2). */
+    roof?: true;
   }[];
 };
 
