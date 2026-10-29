@@ -274,10 +274,11 @@ export function BimSolidView({
     () =>
       new Set(
         (selections ?? (selection ? [selection] : []))
-          // Solid elements with own surfaces: walls and ceiling slabs (docs/SLAB_ELEMENT.md).
+          // Solid elements with own surfaces: walls, ceiling slabs and roofs.
           .filter(
             (t) =>
-              (t.kind === "wall" || t.kind === "slab") && isLayerVisible(project, visibility, t.id),
+              (t.kind === "wall" || t.kind === "slab" || t.kind === "roof") &&
+              isLayerVisible(project, visibility, t.id),
           )
           .map((t) => t.id),
       ),

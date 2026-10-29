@@ -5,7 +5,7 @@ Einflächiges Steildach. Kein Walmdach, keine Dachlandschaft, kein automatisches
 | PR  | Inhalt                                                                                                                    | Stand    |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | -------- |
 | D1  | Modell, Flächen- und Ringgeometrie, Prüfung, Aktionen, Schema 31 mit Migration                                            | erledigt |
-| D2  | geschlossener 3D-Körper, Auswahl/Fang in 3D, Mitwandern bei Geschosshöhe                                                  | offen    |
+| D2  | geschlossener 3D-Körper, Auswahl/Fang in 3D, Mitwandern bei Geschosshöhe                                                  | erledigt |
 | D3  | Werkzeug (Polygon, Diagonale, Seite + dritter Punkt, Kontur), Leiste und Doppelklick-Fenster, Eigenschaften, Umriss, Undo | offen    |
 | D4  | Grundriss im eigenen Geschoss: Schnitt bei 1 m kräftig, darunter dünn, darüber gestrichelt (Untersicht)                   | offen    |
 | D5  | Datei/Recovery, IFC mit Archicad-Testdatei, Browser-Abnahme, Leistung im Schulmodell                                      | offen    |
@@ -48,3 +48,13 @@ Umsetzung:
 Nachweis: Tests in `src/domain/storeys/heights.test.ts` (Prüffall 45°, Steigseite und Linienrichtung, alle Abschlüsse gegen von Hand gerechnete Werte inkl. Länge und Rechtwinkligkeit der Abschlussfläche, L-Form, Umlaufsinn, zu schmal, ungültige Eingaben, Aktionen, Ebene, Geschosshöhe EG/OG) und `src/interop/project-file/load.test.ts` (Migration 30 → 31 inkl. gebundener Wände ohne gespeicherte Höhe, untergeschobene Dächer, Speichern/Laden mit Dach). IFC-Export der Decken-Testdatei byteweise unverändert. 1358 Tests grün.
 
 Befund beim Nachweis: Der Migrationsschritt 30 → 31 musste die abgeleiteten Höhen gebundener Wände wie die Schritte 26–28 vor der Endprüfung entfernen (`withoutBoundHeights`); ohne diesen Schritt hätten echte 30er Dateien mit gebundenen Wänden nicht geladen.
+
+## Teil D2: 3D-Körper
+
+- `src/rendering/viewport/roof-solid.ts` (`roofBody`): geschlossener Körper aus den Ringen von D1. Ober- und Unterseite liegen auf ihren geneigten Ebenen (Ohrenschneiden für nicht konvexe Umrisse), je Umrisskante eine ebene Viereckfläche (Ortgang senkrecht, Traufe und obere Kante nach Abschluss). Volumen über den Gaußschen Satz aus der geschlossenen Hülle.
+- Im Geschossteil nach den Decken (`storey-solid.ts`); Höhen nur aus Geschosskote und eigenen Dachwerten, also gilt jeder bisherige Geschoss-Zwischenspeicher weiter (A08). Geschosse nur mit Dach erhalten einen Körper.
+- Dachflächen tragen `roof`: eigene warmgraue Farbe, Darstellungsvorrang wie die Decke (C3 Variante A), nicht im Wandfuß-Fang; Auswahl per Klick in 3D wählt das Dach, Hervorhebung wie bei Wand und Decke. Dachecken sind wie Deckenecken 3D-Bewegungsecken.
+- Bis D3: Kontextmenü zeigt beim Dach nur „Löschen“ (Löschen läuft generisch über die Registry, Undo inklusive). Verschieben einer Auswahl mit Dach meldet „Dächer lassen sich noch nicht verschieben …“ statt das Dach still zu übergehen; Z-Bewegung nimmt ohnehin nur Wände/Fenster.
+- Grundriss-Fangpunkte an Dachecken kommen mit D4, wenn der Grundriss das Dach zeichnet.
+
+Nachweis: Test in `src/rendering/viewport/working-storey-solid.test.ts` (Hülle geschlossen und gleichsinnig orientiert für Rechteck, rechtwinklige Abschlüsse und L-Form; Volumen gegen 16 · d/cos bzw. 4 · d · (4 − d·sin)/cos; tiefster/höchster Punkt im OG; horizontale Traufe als nach unten weisende waagerechte Fläche; EG-Höhe hebt das Dach, eigene Geschosshöhe nicht; Vorrang und Farbe; Auswahl von oben trifft das Dach; Verschieben gesperrt). Gleichheits-Hash der 14 Modelle (Geschossteile, Gebäudekörper, IFC) unverändert `09528ac4…7823253`. 1359 Tests grün. Browser: Projektdatei mit Pultdach (20°, Traufe horizontal, obere Kante rechtwinklig) über den normalen Ladedialog geöffnet; Dach in 3D auf OK Rohfußboden OG, Klick wählt und hebt es hervor, Menü „Dach · Löschen“, Löschen und Undo; keine Konsolenfehler. Aufgefallen: Der Ladedialog zählt Dächer noch nicht (D5).
