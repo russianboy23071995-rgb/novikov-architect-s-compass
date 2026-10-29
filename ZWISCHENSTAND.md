@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR500 · 1352 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR501 · 1353 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -57,7 +57,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 **Bewusst zurückgestellt**
 
 - Wandweiser 3D-Neuaufbau (Stufe B1/B2): erst wenn reale Projekte stocken oder zusammen mit den mehrgeschossigen Wänden.
-- Fenstermaße im IFC für Archicad („RB 0,00 x 0,00“): am 28.10. gestoppt, nicht vorrangig.
+- Fenstermaße im IFC für Archicad („RB 0,00 x 0,00“): drei Testdateien erzeugt (PR501, Ordner NOVIKOV-Fenster-Abnahme-2026-10-29); wartet auf deinen Archicad-Import.
 - Wandbewegung x/y/Achse abgleichen (seit 24.10.).
 
 **Wartet auf deine Entscheidung**

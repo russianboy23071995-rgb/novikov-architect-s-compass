@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 29.10.2026 · main nach PR500
+**Stand:** 29.10.2026 · main nach PR501
 
 ## Deine Wünsche
 
@@ -61,11 +61,11 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 ## Austausch (IFC, PDF, DXF)
 
-| ID  | Aufgabe                                                            | Prio | Status                            | Bezug               |
-| --- | ------------------------------------------------------------------ | ---- | --------------------------------- | ------------------- |
-| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | gestoppt 28.10. (nicht vorrangig) | T_IFC_ACCEPTANCE.md |
-| L22 | IFC-Import bzw. IFC als Referenz                                   |      | offen                             | §6 Abschnitt 7      |
-| L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | offen                             | §6 Abschnitt 7      |
+| ID  | Aufgabe                                                            | Prio | Status                                               | Bezug               |
+| --- | ------------------------------------------------------------------ | ---- | ---------------------------------------------------- | ------------------- |
+| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | 3 Testvarianten erzeugt (PR501), Archicad-Test offen | T_IFC_ACCEPTANCE.md |
+| L22 | IFC-Import bzw. IFC als Referenz                                   |      | offen                                                | §6 Abschnitt 7      |
+| L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | offen                                                | §6 Abschnitt 7      |
 
 ## Bedienung
 
