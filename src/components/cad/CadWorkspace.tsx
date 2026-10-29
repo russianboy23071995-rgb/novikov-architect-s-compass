@@ -1486,11 +1486,6 @@ export function CadWorkspace({
                 <div className="absolute left-3 top-12 z-40 max-w-lg">
                   <RasterBudgetNotice project={project} />
                 </div>
-                <RecoveryStartupNotice
-                  offer={autosave.startupOffer}
-                  onContinue={autosave.continueStartup}
-                  onOpen={() => setRecoveryOpen(true)}
-                />
                 {layerActivation && (
                   <DocumentLayerNotice
                     key={layerActivation.layerIds.join(":")}
@@ -1507,6 +1502,15 @@ export function CadWorkspace({
                 ) : (
                   <>
                     <ViewportManager
+                      startupNotice={
+                        autosave.startupOffer && autosave.startupOffer.kind !== "empty" ? (
+                          <RecoveryStartupNotice
+                            offer={autosave.startupOffer}
+                            onContinue={autosave.continueStartup}
+                            onOpen={() => setRecoveryOpen(true)}
+                          />
+                        ) : undefined
+                      }
                       key={
                         mode === "3D" ? "building-3d" : (activeDocumentId ?? storeyOf(project).id)
                       }
