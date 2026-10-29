@@ -81,7 +81,8 @@ Nutzerentscheidung 29.10.2026 (Zielbild): Jede Wand und jede Decke erhält spät
 - Umsetzung: Jeder Eckpunkt im 3D-Puffer trägt einen Darstellungsvorrang (`SOLID_VERTEX_FLOATS = 7`, Decke `SLAB_DISPLAY_PRIORITY = 1`, sonst 0). Der Shader rückt Flächen mit höherem Vorrang um 1e-5 des Tiefenbereichs nach vorn (etwa 0,5 mm bei 100 m Szenentiefe): In derselben Ebene ist immer die Decke zu sehen, eine Wand davor verdeckt sie weiterhin. Geometrie, Picking und IFC unverändert.
 - Mengen: Das Programm gibt heute keine Mengen aus; die Vorrangregel gilt später auch dort.
 - Archicad-Prüfdatei: `NOVIKOV-Wand-Decke-Ueberschneidung.ifc` (`slabOverlapAcceptanceProject`, Skript `scripts/generate-slab-acceptance-ifc.mjs`): Abnahmehaus mit allen Wänden an ihr Geschoss gebunden, Zusatzhöhe 0 (EG-Wände 3,00 m, OG-Wände 2,80 m), Decken bündig mit den Außenflächen – Wand und Decke überschneiden sich um die Deckenstärke.
-- Nachweis: Test in `benchmarks/solid-resource.test.ts` (gemeinsame Oberkante 3,00/5,80 m, Vorrang 1 an jeder Deckenecke, 0 an jeder Wandecke, auch bei Auswahl); eingefrorener Packvergleich um den siebten Wert erweitert, Bytegrößen aus der Konstante abgeleitet. 1352 Tests grün.
+- Nachweis: Test in `benchmarks/solid-resource.test.ts` (gemeinsame Oberkante 3,00/5,80 m, Vorrang 1 an jeder Deckenecke, 0 an jeder Wandecke, auch bei Auswahl); eingefrorener Packvergleich um den siebten Wert erweitert, Bytegrößen aus der Konstante abgeleitet. 1352 Tests grün. Browser: Beispielwand an Geschoss gebunden (3,00 m), Decke darüber; ohne Vorrang (Faktor 0, nur zum Vergleich) zeigt die Deckenoberseite einen dunklen Keil der Wandoberkante, mit Vorrang in gleicher Ansicht sauber; keine Konsolenfehler.
+- Offen: Archicad-Prüfung der Überschneidungsdatei durch den Nutzer; Varianten B/C erst mit Materialvorrang.
 
 ## Nachtrag: Übersichten zählen Türen und Decken (29.10.2026)
 

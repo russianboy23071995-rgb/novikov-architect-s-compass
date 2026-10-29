@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR498 · 1351 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR499 · 1352 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -40,13 +40,14 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Polygone schließen per Klick auf den ersten Punkt (Schraffur, Decke, Polylinie und künftige Werkzeuge gleicher Art); der Startpunkt hat beim Fangen Vorrang (PR496).
 - Ecke anklicken bewegt sie sofort; Ecke auf eine andere Ecke ziehen löscht sie (Schraffur, Decke, Linie; Rechtsklick auf die Ecke öffnet das Punktmenü) (PR497).
 - Polygon-Regeln A–D (deine Vorgabe vom 29.10., docs/POLYGON_REGELN.md) abgeschlossen; zuletzt heißen Fangpunkte nach Element und Nummer, z. B. „Decke · Ecke 3“, „Wand · Anfang“ (PR498).
+- Wand und Decke flimmern in 3D nicht mehr, wenn sie sich überschneiden (Decke wird bei gleichem Vorrang vorn gezeigt); später entscheidet das Material (PR499).
 - Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
 
 **Mögliche nächste Aufträge (deine Wahl)**
 
-- Decken C3: Überschneidung von Wand und Decke (Wand mit Zusatzhöhe 0 ragt in die Decke) für 3D, Mengen und IFC klären.
+- Decken C3: Archicad-Prüfung der Datei NOVIKOV-Wand-Decke-Ueberschneidung.ifc (Ordner NOVIKOV-Wand-Decke-Abnahme-2026-10-29); Vorrang per Material (0–100) später.
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
 - Bewegungsstart beim Stressmodell x noch ≈ 1,5 s.
