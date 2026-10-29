@@ -77,3 +77,12 @@ Nutzerentscheidung 29.10.2026: Die Bindung ist eine Einstellung der Wand. Gebund
 
 - `projectElementCounts` (Dialog „Projektdatei laden?“) und `recoveryContentSummary` (Wiederherstellung) zählen zusätzlich Türen und Decken über alle Geschosse; die in Teil B genannte Lücke ist geschlossen.
 - Nachweis: Test in `recovery-catalog.test.ts` (Abnahmehaus mit zwei Decken und einer Tür im OG, Arbeitsgeschoss EG); 1344 Tests grün. Browser: Wiederherstellung zeigt „… 1 Fenster · 0 Türen · 1 Decken“. Der Ladedialog wurde nicht im Browser geöffnet (Dateiauswahl), er nutzt dieselbe geprüfte Zählung.
+
+## E0/E1: Deckenumriss bearbeiten (29.10.2026)
+
+- **E0 (PR493):** `lib/bim/direct-edit.ts` unverändert nach `application/direct-edit/session.ts` verlegt (nur zwei Importe verkürzt), Weiterleiter `lib/bim/transforms.ts` entfernt, 19 Architektur-Ausnahmen entfallen. 1344 Tests unverändert grün.
+- **E1:** Decken nutzen den gemeinsamen Bearbeitungsweg der Schraffur, ohne eigenen Sonderweg: `EditTarget`/`TransformTarget` kennen `slab`; Punkte, Kontur (`closedContour`), Seite strecken, Knicken und Kontur versetzen schreiben über `updateSlab` (volle Prüfung, einfacher Umriss). Die vorbereitete Vorschau (`prepared-hatch.ts`) dient jetzt Schraffur und Decke; der Deckenausschnitt trägt die Geschosshöhe, damit die 3D-Vorschau die Decke auf ihrer Höhe zeigt.
+- Oberfläche: Eckgriffe „Deckenecke n“ und Seitenpfeile im Grundriss; Kontextmenü mit Punkt frei bewegen, Punkt in Flucht strecken, Knicken, Seite strecken, Kontur versetzen. In 3D bleibt die Decke als Ganzes beweglich; Umrissaktionen sind dort ausgeblendet (Hinweis „Deckenumriss im Grundriss bearbeiten“).
+- Grenzen wie bei Schraffuren: Kontur versetzen nur für konvexe Umrisse; ein sich selbst schneidender Umriss wird nicht übernommen; Punkte löschen gibt es noch nicht.
+- Nachweis: drei Tests in `drawing/actions.test.ts` (Punkt, Strecken, Seite, Knicken an einer L-Decke: Vorschau = Übernahme in 2D und 3D-Gebäudekörper, Stärke/Versatz bleiben; Offset am Rechteck, Ablehnung am L; Kreuzung abgelehnt, Modell unverändert, ein Undo-Schritt über den Controller). Hatch-Gleichheitstests unverändert grün. 14-Modell-Hash `09528ac4…7823253` unverändert. 1347 Tests grün.
+- Browser: Decke aus der Wiederherstellung geladen (Ladedialog zeigt „0 Türen · 1 Decken“), Ecke verschoben (6,00 → 4,655 m²), Knick eingefügt (→ 4,055 m²), weitere Ecke verschoben; kreuzende Position nicht übernommen; drei Undo-Schritte zurück zum Rechteck; keine Konsolenfehler.

@@ -6,6 +6,7 @@ import type { Project } from "../../domain/project/schema.ts";
 import { updateLine } from "../lines/actions.ts";
 import type { EditSession } from "./session.ts";
 import { previewHatch } from "../hatches/actions.ts";
+import { updateSlab } from "../slabs/actions.ts";
 import { editContourEdge, prepareContourEdgeEdit } from "../../geometry/polygons/edit-edge.ts";
 export function previewContourEdge(
   session: EditSession,
@@ -28,6 +29,8 @@ export function previewContourEdge(
       id: session.target.id,
       changes: { points },
     });
+  if (session.target.kind === "slab")
+    return updateSlab(session.base, session.target.id, { points });
   return updateLine(session.base, session.target.id, { points: [...points, { ...points[0]! }] });
 }
 

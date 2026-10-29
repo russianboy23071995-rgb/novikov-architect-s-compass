@@ -5,12 +5,13 @@ import { updateLine } from "../lines/actions.ts";
 import { closedContour } from "./contour-source.ts";
 import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
 import { previewHatch } from "../hatches/actions.ts";
+import { updateSlab } from "../slabs/actions.ts";
 
 const preparations = new WeakMap<EditSession, ReturnType<typeof prepareConvexOffset>>();
 function prepared(session: EditSession) {
   let result = preparations.get(session);
   if (!result) {
-    // Explicit capability boundary: BIM cannot be offset even in a plan view.
+    // Explicit capability boundary: closed 2D contours and slab outlines only; walls never.
     const ring = closedContour(session.base, session.target);
     if (!ring) throw new Error("Offset ist nur für geschlossene 2D-Konturen verfügbar.");
     result = prepareConvexOffset(ring);
@@ -34,6 +35,8 @@ export function offsetContourPoints(session: EditSession, pointer: Point) {
 
 export function previewContourOffset(session: EditSession, pointer: Point) {
   const points = offsetContourPoints(session, pointer);
+  if (session.target.kind === "slab")
+    return updateSlab(session.base, session.target.id, { points });
   return session.target.kind === "hatch"
     ? previewHatch(session.base, session.base, {
         projectId: session.base.id,

@@ -23,7 +23,10 @@ import {
 } from "./transforms.ts";
 export type EditAction =
   "point" | "stretch" | "move" | "axis" | "x" | "y" | "insert" | "edge" | "offset";
-export type EditTarget = { kind: "wall" | "line" | "window" | "door" | "hatch"; id: string };
+export type EditTarget = {
+  kind: "wall" | "line" | "window" | "door" | "hatch" | "slab";
+  id: string;
+};
 export type EditSession = {
   base: Project;
   target: EditTarget;

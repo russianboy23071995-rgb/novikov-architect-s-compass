@@ -566,9 +566,13 @@ export function CadWorkspace({
       return;
     }
 
-    // Slabs move as a whole (docs/SLAB_ELEMENT.md, B3); outline editing follows later.
-    if (selection.kind === "slab") {
-      showNotice("Decken: Element frei bewegen oder auf X-/Y-Achse; Umriss bearbeiten folgt.");
+    // Slab outlines are edited in the plan (docs/SLAB_ELEMENT.md, E1); in 3D the slab moves whole.
+    if (selection.kind === "slab" && (inSolid || action === "axis")) {
+      showNotice(
+        inSolid
+          ? "Deckenumriss im Grundriss bearbeiten; in 3D wird die Decke als Ganzes bewegt."
+          : "Decken: Element frei bewegen oder auf X-/Y-Achse.",
+      );
       return;
     }
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
@@ -1089,6 +1093,7 @@ export function CadWorkspace({
                 ) : undefined
               }
               project={project}
+              solid={mode === "3D" && activeViewport === 0}
               selectionCount={selections.length}
               onMoveSelection={
                 selections.length > 1 || selection?.kind === "reference"
@@ -1613,12 +1618,7 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (
-                          target.kind === "reference" ||
-                          target.kind === "door" ||
-                          target.kind === "slab"
-                        )
-                          return;
+                        if (target.kind === "reference" || target.kind === "door") return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(

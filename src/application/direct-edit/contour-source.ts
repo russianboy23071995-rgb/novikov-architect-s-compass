@@ -6,6 +6,8 @@ import type { ElementTarget } from "../selection/target.ts";
 export function closedContour(project: Project, target: ElementTarget) {
   if (target.kind === "hatch")
     return storeyOf(project).hatches.find((h) => h.id === target.id)?.points ?? null;
+  if (target.kind === "slab")
+    return storeyOf(project).slabs?.find((s) => s.id === target.id)?.points ?? null;
   if (target.kind !== "line") return null;
   const line = storeyOf(project).lines?.find((l) => l.id === target.id);
   if (!line || line.kind !== "polyline" || line.points.length < 4) return null;
