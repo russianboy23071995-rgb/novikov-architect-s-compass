@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR505 · 1361 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR506 · 1362 automatische Tests grün
 
 ## Gerade aktiv
 
-- Dachwerkzeug (L04/N61): D1–D4 erledigt (PR502–505: Modell, 3D, Werkzeug, Grundriss mit 1-m-Schnitt); als Nächstes D5 Datei/IFC/Abnahme (docs/ROOF_ELEMENT.md).
+- Dachwerkzeug (L04/N61): fertig (PR502–506). Wartet auf dich: Archicad-Import von NOVIKOV-Dach-Test.ifc (Ordner NOVIKOV-Dach-Abnahme-2026-10-29).
 
 ## Was wir gemacht haben (24.–29.10.2026)
 
@@ -44,6 +44,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Polygon-Regeln A–D (deine Vorgabe vom 29.10., docs/POLYGON_REGELN.md) abgeschlossen; zuletzt heißen Fangpunkte nach Element und Nummer, z. B. „Decke · Ecke 3“, „Wand · Anfang“ (PR498).
 - Wand und Decke flimmern in 3D nicht mehr, wenn sie sich überschneiden (Decke wird bei gleichem Vorrang vorn gezeigt); später entscheidet das Material (PR499).
 - Der Hinweis auf Wiederherstellungsstände sitzt jetzt klein unten links statt als Fenster oben rechts (PR500).
+- Dach (einflächiges Steildach): zeichnen über Bezugslinie, Steigseite und Umriss, Eigenschaften, Bearbeitung, 3D, Grundriss mit Schnitt bei 1 m, IFC (PR502–506, docs/ROOF_ELEMENT.md).
 - Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
