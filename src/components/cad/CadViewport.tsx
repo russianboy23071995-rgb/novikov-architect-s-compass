@@ -26,6 +26,8 @@ type CadViewportProps = BimPlanProps & {
   onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale?: (denominator: number) => void;
   zoomSlot?: HTMLElement | null;
+  /** Shown bottom left of the first view instead of its indicator while set. */
+  startupNotice?: React.ReactNode;
   index: number;
   mode: ViewMode;
   grid: boolean;
@@ -72,6 +74,7 @@ export function CadViewport({
   onPlanCapture,
   onScale,
   zoomSlot,
+  startupNotice,
   index,
   mode,
   grid,
@@ -328,58 +331,62 @@ export function CadViewport({
           </div>,
           zoomSlot,
         )}
-      <div
-        className={cn(
-          "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
-          is3D ? "items-center" : "flex-col items-start",
-        )}
-      >
-        {is3D && (
-          <>
-            <Crosshair className="size-3 text-primary" />
-            <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
-          </>
-        )}
-        {is3D ? (
-          <span className="font-mono">Fit · m</span>
-        ) : (
-          <>
-            <label className="flex items-center gap-1">
-              Ansicht
-              <select
-                aria-label="2D Ansichtsmaßstab"
-                value={String(plan.pixelsPerMetre)}
-                className="rounded border bg-popover px-1"
-                onChange={(event) =>
-                  setPlanCamera({ ...plan, pixelsPerMetre: Number(event.target.value) })
-                }
-              >
-                <option value={String(plan.pixelsPerMetre)}>
-                  {plan.pixelsPerMetre.toFixed(1)} px/m
-                </option>
-                {[25, 50, 100, 200, 500]
-                  .filter((value) => value !== plan.pixelsPerMetre)
-                  .map((value) => (
-                    <option key={value} value={String(value)}>
-                      {value} px/m
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <span
-              aria-label="Grafischer Maßstab"
-              className="inline-flex flex-col items-center font-mono"
-              title="Bildschirmmaßstab in CSS-Pixeln; kein Druckmaßstab"
-            >
-              {Number(bar.metres.toPrecision(6))} m
+      {startupNotice && index === 0 ? (
+        <div className="absolute bottom-2 left-3 z-10 max-w-[calc(100%-4rem)]">{startupNotice}</div>
+      ) : (
+        <div
+          className={cn(
+            "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
+            is3D ? "items-center" : "flex-col items-start",
+          )}
+        >
+          {is3D && (
+            <>
+              <Crosshair className="size-3 text-primary" />
+              <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
+            </>
+          )}
+          {is3D ? (
+            <span className="font-mono">Fit · m</span>
+          ) : (
+            <>
+              <label className="flex items-center gap-1">
+                Ansicht
+                <select
+                  aria-label="2D Ansichtsmaßstab"
+                  value={String(plan.pixelsPerMetre)}
+                  className="rounded border bg-popover px-1"
+                  onChange={(event) =>
+                    setPlanCamera({ ...plan, pixelsPerMetre: Number(event.target.value) })
+                  }
+                >
+                  <option value={String(plan.pixelsPerMetre)}>
+                    {plan.pixelsPerMetre.toFixed(1)} px/m
+                  </option>
+                  {[25, 50, 100, 200, 500]
+                    .filter((value) => value !== plan.pixelsPerMetre)
+                    .map((value) => (
+                      <option key={value} value={String(value)}>
+                        {value} px/m
+                      </option>
+                    ))}
+                </select>
+              </label>
               <span
-                style={{ width: bar.pixels }}
-                className="h-1 border-x border-b border-current"
-              />
-            </span>
-          </>
-        )}
-      </div>
+                aria-label="Grafischer Maßstab"
+                className="inline-flex flex-col items-center font-mono"
+                title="Bildschirmmaßstab in CSS-Pixeln; kein Druckmaßstab"
+              >
+                {Number(bar.metres.toPrecision(6))} m
+                <span
+                  style={{ width: bar.pixels }}
+                  className="h-1 border-x border-b border-current"
+                />
+              </span>
+            </>
+          )}
+        </div>
+      )}
       <Button
         variant="ghost"
         size="icon"
@@ -418,8 +425,10 @@ export function ViewportManager({
   onFullscreen,
   onScale,
   onPlanCapture,
+  startupNotice,
   ...model
 }: BimPlanProps & {
+  startupNotice?: React.ReactNode;
   documentFraming?: DocumentFraming | undefined;
   onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale: (denominator: number) => void;
@@ -446,6 +455,7 @@ export function ViewportManager({
           key={`${layout}-${index}`}
           onScale={onScale}
           onPlanCapture={onPlanCapture}
+          startupNotice={startupNotice}
           documentFraming={documentFraming}
           {...model}
           index={index}
