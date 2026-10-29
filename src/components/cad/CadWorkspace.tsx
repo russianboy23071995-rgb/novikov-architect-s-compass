@@ -1,3 +1,4 @@
+import { resolvePathClick, type PathClosure } from "@/application/drawing/path-closure";
 import { previewDeleteSelection } from "@/application/elements/delete";
 import { RasterBudgetNotice } from "./RasterBudgetNotice";
 import { MovementAxisControls } from "./MovementAxisControls";
@@ -223,6 +224,14 @@ export function CadWorkspace({
   );
   const toolDefaults = useToolDefaults(project);
   const hatchFill = toolDefaults.hatch.fill;
+  // Regel 3 (docs/POLYGON_REGELN.md): each click-by-click tool declares how it closes.
+  const pathClosure: PathClosure = areaTool
+    ? hatchConstruction === "polygon"
+      ? "polygon"
+      : "none"
+    : tool === "line" && lineKind === "polyline"
+      ? "polyline"
+      : "none";
   const pathOrigin = pathDrawing ? (pathPoints.at(-1) ?? null) : null;
   const drawingOrigin = tool === "wall" ? wallStart : pathOrigin;
   const [activeViewport, setActiveViewport] = useState(0);
@@ -721,7 +730,12 @@ export function CadWorkspace({
         setModelError("Nächsten Punkt an einer anderen Position wählen.");
         return;
       }
-      const next = [...pathPoints, point];
+      const click = resolvePathClick(pathPoints, point, pathClosure);
+      if (click.kind === "finish") {
+        finishPath(click.points);
+        return;
+      }
+      const next = click.points;
       if (
         areaTool &&
         hatchConstruction !== "polygon" &&
@@ -1598,6 +1612,7 @@ export function CadWorkspace({
                       hoverDwellMs={hoverDwellMs}
                       start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                       draftPoints={pathDrawing ? pathPoints : []}
+                      closeAtStart={pathClosure !== "none"}
                       draftFill={tool === "hatch" ? hatchFill : undefined}
                       draftPattern={
                         tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined

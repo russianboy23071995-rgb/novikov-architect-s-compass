@@ -9,6 +9,7 @@ import { createEditingState, editingReducer } from "../direct-edit/controller.ts
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { capturedStart, closesAtStart, resolvePathClick } from "./path-closure.ts";
 test("shared drawing creates exact wall dimensions with one history step and matching JSON/solid", () => {
   const base = createProject("p", "s"),
     start = { x: 0, y: 0 };
@@ -684,4 +685,62 @@ test("slab outline edits reject crossings, keep the model and commit as one undo
   assert.deepEqual(storeyOf(state.history.present).slabs![0]!.points[3], { x: 4, y: 4 });
   assert.equal(state.history.past.length, 1);
   assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, base);
+});
+
+test("a click on the start point closes every click-by-click tool by its declared closure", () => {
+  const drawn = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 2 },
+    { x: 2, y: 2 },
+    { x: 2, y: 4 },
+  ];
+  const start = { x: 0, y: 0 };
+  // Polygon tools (hatch, slab): the L-outline closes as drawn, no repeated start point.
+  const polygon = resolvePathClick(drawn, start, "polygon");
+  assert.deepEqual(polygon, { kind: "finish", points: drawn });
+  // Polyline: the start point is repeated, which makes the line closed.
+  const polyline = resolvePathClick(drawn, { ...start }, "polyline");
+  assert.deepEqual(polyline, { kind: "finish", points: [...drawn, start] });
+  // Tools without click closure, near misses and too few points keep drawing.
+  assert.equal(resolvePathClick(drawn, start, "none").kind, "append");
+  assert.deepEqual(resolvePathClick(drawn, { x: 0.001, y: 0 }, "polygon"), {
+    kind: "append",
+    points: [...drawn, { x: 0.001, y: 0 }],
+  });
+  assert.equal(resolvePathClick(drawn.slice(0, 2), start, "polygon").kind, "append");
+  assert.equal(closesAtStart(drawn.slice(0, 3), start, "polygon"), true);
+  assert.equal(closesAtStart([], start, "polygon"), false);
+  // Near the start (10 px on screen) the start wins over guides and angle snaps.
+  assert.deepEqual(capturedStart(drawn, { x: 0.03, y: -0.03 }, 200, "polygon"), start);
+  assert.equal(capturedStart(drawn, { x: 0.06, y: 0 }, 200, "polygon"), null);
+  assert.equal(capturedStart(drawn, { x: 0.06, y: 0 }, 100, "polyline")?.x, 0);
+  assert.equal(capturedStart(drawn, start, 200, "none"), null);
+  assert.equal(capturedStart(drawn.slice(0, 2), start, 200, "polygon"), null);
+  const captured = capturedStart(drawn, { x: 0.01, y: 0.01 }, 200, "polygon")!;
+  assert.equal(resolvePathClick(drawn, captured, "polygon").kind, "finish");
+  // The finished points are accepted unchanged by the shared creation path of each tool.
+  const base = slabBase();
+  const ring = [...drawn, { x: 0, y: 4 }];
+  const closed = resolvePathClick(ring, start, "polygon").points;
+  const withSlab = createDrawing(base, base, "s-new", {
+    kind: "slab",
+    points: closed,
+    ...SLAB_DEFAULTS,
+  });
+  assert.deepEqual(storeyOf(withSlab).slabs!.at(-1)!.points, ring);
+  const withHatch = createDrawing(base, base, "h-new", {
+    kind: "hatch",
+    points: closed,
+    fill: { color: "#94a3b8", opacity: 0.35 },
+  });
+  assert.deepEqual(storeyOf(withHatch).hatches.at(-1)!.points, ring);
+  const line = createDrawing(base, base, "l-new", {
+    kind: "line",
+    lineKind: "polyline",
+    points: resolvePathClick(ring, start, "polyline").points,
+    appearance: defaultLineAppearance,
+  });
+  const points = storeyOf(line).lines!.at(-1)!.points;
+  assert.deepEqual(points, [...ring, start]);
 });

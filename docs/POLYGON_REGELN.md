@@ -6,7 +6,7 @@ Werkzeuge derselben Zeichenart). Umsetzung in vier PRs nach freigegebener Änder
 | PR  | Inhalt                                                 | Regeln  | Stand    |
 | --- | ------------------------------------------------------ | ------- | -------- |
 | A   | Standardgeschosse, Decke als Konturlinie, Decke in 3D  | 7, 5, 4 | erledigt |
-| B   | Polygon schließen per Klick auf den Startpunkt         | 3       | offen    |
+| B   | Polygon schließen per Klick auf den Startpunkt         | 3       | erledigt |
 | C   | Ecke anklicken = bewegen, Ecke auf Ecke = Ecke löschen | 1, 2    | offen    |
 | D   | Nummerierte Fangpunkte statt „Endpunkt“                | 6       | offen    |
 
@@ -39,3 +39,33 @@ Nachweis: 1348 Tests grün (neu: Startprojekt mit zwei Geschossen, Höhen 0/3/6 
 3D-Körper mit OK 3,00 / UK 2,80 m). Browser: Navigator zeigt beide Geschosse, gezeichnete
 Decke ohne Füllung mit durchgezogener Linie, Klick ins Innere wählt sie, 3D zeigt sie auf
 der Wand; keine Konsolenfehler nach Neuladen.
+
+## Teil B
+
+**Regel 3 – Schließen am Startpunkt.** Gemeinsamer Baustein
+`src/application/drawing/path-closure.ts`; jedes Werkzeug, das Punkte per Klick setzt,
+erklärt nur seine Schließart:
+
+| Schließart | Werkzeuge heute                            | Klick auf den Startpunkt                         |
+| ---------- | ------------------------------------------ | ------------------------------------------------ |
+| polygon    | Schraffur, Decke (Erstellung „Polygon“)    | übernimmt die Fläche wie gezeichnet              |
+| polyline   | Linie im Modus Polylinie                   | wiederholt den Start am Ende: geschlossene Linie |
+| none       | Rechteck-Konstruktionen, Einzellinie, Wand | kein Schließen per Klick                         |
+
+- Ab drei gezeichneten Punkten (`MIN_CLOSING_POINTS`); vorher wird der Klick ein normaler
+  Punkt. Doppelklick und Enter schließen weiterhin ab.
+- Der Startpunkt hat Vorrang vor jedem anderen Fang (Hilfslinien, Winkel, Raster): Liegt der
+  Mauszeiger höchstens 10 px davon entfernt (wie der Eckenfang), zielen Vorschau und Klick
+  exakt auf den Start (`capturedStart`). Grund: Ohne diesen Vorrang gewann im Browser ein
+  30°-Winkelfang, und der Klick setzte einen Punkt 5 cm neben den Start.
+- Der Startpunkt ist beim Zeichnen als Kreis markiert und wird gefüllt, sobald ein Klick
+  schließen würde.
+- Neues Werkzeug derselben Art: Schließart im Arbeitsbereich angeben (`pathClosure` in
+  `CadWorkspace.tsx`), sonst nichts.
+
+Nachweis: 1349 Tests grün (neu: Schließarten, Nahbereich, Mindestpunktzahl, übernommene
+Punkte für Decke, Schraffur und geschlossene Polylinie). Browser: Decke mit 4 Ecken per Klick
+auf den Start geschlossen (Start nicht doppelt), Polylinie mit schnellem Klick ~4 px neben dem
+Start geschlossen (6 Punkte inkl. wiederholtem Start), Klick ~13 px daneben setzt korrekt einen
+normalen Punkt; keine Konsolenfehler. Schraffur nutzt denselben Weg wie die Decke und ist im
+Browser nicht eigens geprüft.
