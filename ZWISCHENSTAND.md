@@ -2,13 +2,13 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 28.10.2026 · main nach PR489 · 1342 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR490 · 1343 automatische Tests grün
 
 ## Gerade aktiv
 
 - Wartet auf dich: Archicad-Test der Datei NOVIKOV-Decken-Test.ifc (DesktopClaude_Ablage_CodeNOVIKOV-Decken-Abnahme-2026-10-28).
 
-## Was wir gemacht haben (24.–28.10.2026)
+## Was wir gemacht haben (24.–29.10.2026)
 
 **Schulmodell schneller machen (Nutzerentscheidung 24.10.)**
 
@@ -24,6 +24,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Wandanschlüsse inklusive schräger T-Anschlüsse in jedem Winkel und Ecke an einer T-Hauptwand (PR465, 468–470); bessere Treffer an Öffnungen (PR466).
 
 - Decke als Bauteil: zeichnen (Polygon, Rechteck, Kontur), Stärke/Versatz, Grundriss, 3D-Körper mit Auswahl, IFC als IfcSlab, Verschieben (auch mit Wänden), Befehle „Deckenstärke 25 cm“, Fangpunkte an Deckenecken; OK = Rohfußboden darüber, Stärke wächst nach unten (PR486–489).
+- Wandhöhe an Geschoss binden: Oberkante = OK Rohfußboden darüber + Zusatzhöhe (z. B. Attika +0,50 m), auch im obersten Geschoss; eine eingegebene Höhe löst die Bindung; alte Dateien behalten ihre Wandhöhen (PR490). Mit behoben: ältere Dateien (Schema 26/27) mit gebundenen Wänden ließen sich nicht öffnen.
 
 **IFC / Archicad**
 
@@ -40,7 +41,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 **Mögliche nächste Aufträge (deine Wahl)**
 
 - Decken: einzelne Eckpunkte/Kanten bearbeiten (vorher Bearbeitungstyp aus lib/bim lösen).
-- Decken Teil C: Wandhöhen auf Geschosshöhen ausrichten (deine Entscheidung 28.10.).
+- Decken C3: Überschneidung von Wand und Decke (Wand mit Zusatzhöhe 0 ragt in die Decke) für 3D, Mengen und IFC klären.
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
 - Bewegungsstart beim Stressmodell x noch ≈ 1,5 s.
@@ -55,7 +56,6 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 **Wartet auf deine Entscheidung**
 
 - Speicher-/Lade-Brücke in `lib/bim/model.ts`: wo die Grenze zum Dateiformat liegen soll.
-- Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen: zurzeit gesperrt, braucht eine Fachentscheidung.
 
 **Vor einer Veröffentlichung noch zu prüfen (fehlende Testumgebung)**
 
