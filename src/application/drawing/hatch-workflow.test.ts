@@ -125,8 +125,8 @@ test("hatch selection supports layer assignment and plan extents without becomin
   assert.equal(previewOffsetCommand(p, target, "Wandlänge auf 6 m"), null);
 });
 
-import { editAtPointer } from "../../lib/bim/direct-edit.ts";
-import type { EditAction } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer } from "../direct-edit/session.ts";
+import type { EditAction } from "../direct-edit/session.ts";
 import { editInteraction } from "../tools/adapters.ts";
 import { editDirection } from "../direct-edit/snapping.ts";
 

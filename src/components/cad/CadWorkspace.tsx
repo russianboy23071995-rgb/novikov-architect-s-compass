@@ -25,7 +25,7 @@ import { rectangleContour, prepareHatchBoundaries } from "@/application/hatches/
 import type { HatchConstruction } from "@/application/hatches/construction";
 import { useMeasurement } from "./useMeasurement";
 import type { MeasurementMode } from "./useMeasurement";
-import { editAnchor } from "@/lib/bim/direct-edit";
+import { editAnchor } from "@/application/direct-edit/session";
 import { propertyFormKey } from "./property-form-key";
 import { ReferenceCalibrationControls } from "./ReferenceCalibrationControls";
 import { useReferenceCalibration } from "./useReferenceCalibration";
@@ -73,7 +73,7 @@ import { DemandMenu } from "./DemandMenu";
 import { BimInspector } from "./BimInspector";
 import { supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
-import type { EditAction } from "@/lib/bim/direct-edit";
+import type { EditAction } from "@/application/direct-edit/session";
 import { ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";

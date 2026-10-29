@@ -15,7 +15,7 @@ import {
 import { previewSelectionCommand } from "../../../application/commands/selection-command.ts";
 import { createLayerVisibilityPolicy } from "../../../application/layers/visibility.ts";
 import { prepareDirectEditPreview } from "../../../application/direct-edit/prepared-preview.ts";
-import { editAnchor } from "../../../lib/bim/direct-edit.ts";
+import { editAnchor } from "../../../application/direct-edit/session.ts";
 import { derivePlanScene } from "../../../rendering/viewport/plan-scene.ts";
 import type { Project } from "../../project/schema.ts";
 

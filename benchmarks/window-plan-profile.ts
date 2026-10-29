@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
 import { previewEdit } from "../src/application/direct-edit/controller.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 const profiles = [];

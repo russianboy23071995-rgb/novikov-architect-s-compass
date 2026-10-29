@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { connectionGroupFixture } from "./connection-group-fixture.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { buildPreviewSolid } from "../src/rendering/viewport/storey-solid.ts";
 import { workingStoreyElevation } from "../src/domain/storeys/elevation.ts";
 const summary = (xs: number[]) => {

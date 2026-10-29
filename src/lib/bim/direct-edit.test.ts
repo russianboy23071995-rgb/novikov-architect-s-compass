@@ -14,8 +14,8 @@ import {
 } from "../../application/direct-edit/controller.ts";
 import { previewMovementInput } from "../../application/direct-edit/numeric.ts";
 import { defaultLineAppearance } from "./lines.ts";
-import { editAtPointer, editAnchor } from "./direct-edit.ts";
-import type { EditSession } from "./direct-edit.ts";
+import { editAtPointer, editAnchor } from "../../application/direct-edit/session.ts";
+import type { EditSession } from "../../application/direct-edit/session.ts";
 import {
   createHistory,
   commitProject,

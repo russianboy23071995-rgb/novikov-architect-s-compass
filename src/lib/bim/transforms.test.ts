@@ -20,7 +20,7 @@ import {
   stretchEndpoint,
   moveWindowAlongWall,
   parseMetres,
-} from "./transforms.ts";
+} from "../../application/direct-edit/transforms.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 const lineTarget = { kind: "line" as const, id: "poly-1" };
 const poly = () =>

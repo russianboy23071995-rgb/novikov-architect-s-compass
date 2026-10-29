@@ -4,7 +4,7 @@ import { createCompatiblePointIndex } from "../src/geometry/spatial/compatible-p
 import { pointsCompatible } from "../src/geometry/tolerances/model.ts";
 import { connectionGroupFixture } from "./connection-group-fixture.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 test("point index matches full scan at tolerance boundaries and coordinate scales", () => {
   for (const coordinate of [0, 1e3, 1e8, 1e10, Number.MAX_VALUE, -Number.MAX_VALUE]) {

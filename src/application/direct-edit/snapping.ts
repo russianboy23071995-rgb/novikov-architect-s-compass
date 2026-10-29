@@ -3,7 +3,7 @@ import { tAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import { offsetDirection } from "./offset.ts";
 import { closedContour, boundedEdgeTarget } from "./contour.ts";
 import { contourEdge } from "../../geometry/polygons/edit-edge.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "./session.ts";
 import { editablePoints, hostedOpening } from "./transforms.ts";
 import type { SnapContext, SnapReference } from "../../constraints/snapping/engine.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";

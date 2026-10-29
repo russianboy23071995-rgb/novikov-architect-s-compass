@@ -7,7 +7,7 @@ import {
   editAtPointer,
   editAtPointerSnapshot,
   type EditSession,
-} from "../src/lib/bim/direct-edit.ts";
+} from "../src/application/direct-edit/session.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { wallTransitionPatch } from "../src/application/direct-edit/wall-transition-patch.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";

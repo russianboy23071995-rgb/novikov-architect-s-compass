@@ -1,7 +1,7 @@
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { wallDependencyClosure } from "../../domain/elements/wall/dependency-closure.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import { editAtPointer, type EditSession } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "./session.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import type { ElementTarget } from "../selection/target.ts";

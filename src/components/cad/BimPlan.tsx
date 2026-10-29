@@ -60,7 +60,7 @@ import { panPlan, planScaleBar, planViewBox, zoomPlan } from "@/rendering/viewpo
 import type { PlanCamera, ViewSize } from "@/rendering/viewport/plan-camera";
 import { previewEdit } from "@/application/direct-edit/controller";
 import { previewOverlapHint } from "@/application/openings/overlap-hint";
-import type { EditSession } from "@/lib/bim/direct-edit";
+import type { EditSession } from "@/application/direct-edit/session";
 import type { Point, Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
 import { linePath } from "@/lib/bim/lines";

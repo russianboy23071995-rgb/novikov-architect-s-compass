@@ -4,7 +4,7 @@ export { closedContour } from "./contour-source.ts";
 import { boundedOffsetTarget } from "./offset.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { updateLine } from "../lines/actions.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "./session.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { editContourEdge, prepareContourEdgeEdit } from "../../geometry/polygons/edit-edge.ts";
 export function previewContourEdge(

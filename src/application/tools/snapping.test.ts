@@ -700,7 +700,7 @@ test("shared grid settings affect drawing and movement without disabling feature
 
 test("grid targets survive contour/wall preview, history and zoom metrics", async () => {
   const { createDrawing, defaultHatchFill } = await import("../drawing/actions.ts");
-  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  const { editAtPointer } = await import("../direct-edit/session.ts");
   const ring = [
     { x: -3, y: 2 },
     { x: -1, y: 2 },

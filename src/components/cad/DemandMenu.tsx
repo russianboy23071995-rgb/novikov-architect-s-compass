@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { Selection } from "./bim-view.ts";
 import { clampMenuPosition, selectionSummary } from "./demand-menu.ts";
-import type { EditAction } from "@/lib/bim/direct-edit";
+import type { EditAction } from "@/application/direct-edit/session";
 
 export function DemandMenu({
   calibrationControls,

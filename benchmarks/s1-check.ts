@@ -13,7 +13,7 @@ import { fullSelectionMove } from "./selection-move-oracle.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
-import { editAtPointer } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer } from "../src/application/direct-edit/session.ts";
 import { createProjectRecoveryCodec } from "../src/interop/project-file/recovery-codec.ts";
 import { exportIfc } from "../src/lib/bim/ifc.ts";
 export function equal(a: unknown, b: unknown, label: string) {

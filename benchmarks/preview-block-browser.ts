@@ -5,7 +5,7 @@ import { wallPatchFixture } from "./wall-patch-fixture.ts";
 import { selectedWallAxis } from "../src/rendering/viewport/wall-axis.ts";
 import { selectionEdges } from "../src/rendering/viewport/selection-outline.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { initialCamera } from "../src/lib/bim/geometry.ts";
 import {

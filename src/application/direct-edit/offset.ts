@@ -1,5 +1,5 @@
 import { validateSimplePolygon } from "../../geometry/polygons/simple-polygon.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "./session.ts";
 import type { Point } from "../../domain/project/schema.ts";
 import { updateLine } from "../lines/actions.ts";
 import { closedContour } from "./contour-source.ts";

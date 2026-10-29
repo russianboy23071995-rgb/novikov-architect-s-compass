@@ -3,7 +3,7 @@ import { prepareHatchContourPreview } from "./prepared-hatch.ts";
 import { prepareWallEndpointPreview } from "./prepared-wall.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import { prepareOpeningAxisPreview } from "./prepared-opening.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "./session.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { GeometryPreview } from "../../domain/project/geometry-scope.ts";
 import type { ElementTarget } from "../selection/target.ts";

@@ -8,7 +8,7 @@ import { replacePathVertex, translatePoint } from "../../geometry/primitives/poi
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { validateLineGeometry } from "../../domain/project/geometry-validation.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "./session.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";

@@ -14,7 +14,7 @@ import {
 } from "../../application/history/project-history.ts";
 import { readProjectFile } from "./history.ts";
 import { exportIfc } from "./ifc.ts";
-import { editAtPointer } from "./direct-edit.ts";
+import { editAtPointer } from "../../application/direct-edit/session.ts";
 import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 
 test("complete wall-window workflow retains dimensions, host and IDs through undo, file reload and IFC", async () => {

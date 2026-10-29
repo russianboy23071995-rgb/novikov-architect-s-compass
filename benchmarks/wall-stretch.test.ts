@@ -6,7 +6,7 @@ import { wallPatchFixture } from "./wall-patch-fixture.ts";
 import { tPairFixture } from "./t-pair-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
 import { prepareEndpoint } from "../src/application/direct-edit/prepared-endpoint.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { addWall } from "../src/application/walls/actions.ts";
