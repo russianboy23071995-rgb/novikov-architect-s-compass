@@ -1,3 +1,4 @@
+import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
 import {
   capturedStart,
@@ -412,7 +413,13 @@ export function BimPlan({
     parallel: "Parallel",
     endpoint: resolvedHover?.candidate?.sourceReferences?.[0]?.dependencies
       ? "Hilfspunkt"
-      : "Endpunkt",
+      : ((resolvedHover?.candidate &&
+          snapPointLabel(
+            project,
+            resolvedHover.candidate.sourceEntityId,
+            resolvedHover.candidate.sourceFeature,
+          )) ??
+        "Endpunkt"),
     grid: "Raster",
     horizontal: "Horizontal",
     vertical: "Vertikal",
