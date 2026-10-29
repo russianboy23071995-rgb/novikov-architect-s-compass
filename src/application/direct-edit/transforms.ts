@@ -1,4 +1,6 @@
 import { replacePathVertex, translatePoint } from "../../geometry/primitives/point.ts";
+import { moveVertex, type VertexShape } from "../../geometry/polygons/vertex-merge.ts";
+import { START_CAPTURE_PX } from "../drawing/path-closure.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { boundedWindowPosition } from "../../domain/elements/wall/window-range.ts";
 import { previewHatch } from "../hatches/actions.ts";
@@ -82,6 +84,20 @@ export function moveElement(project: Project, target: TransformTarget, offset: P
   );
 }
 
+/** Vertex list kind of point-edited elements; walls keep their two fixed end points. */
+export function vertexShape(target: TransformTarget): VertexShape | null {
+  return target.kind === "wall" ? null : target.kind === "line" ? "path" : "ring";
+}
+
+/** Targets with an editable vertex list (corner click moves, corner on corner deletes). */
+export function isVertexTarget(target: { kind: string }): target is TransformTarget {
+  return (
+    (target.kind === "line" || target.kind === "hatch" || target.kind === "slab") &&
+    vertexShape(target as TransformTarget) !== null
+  );
+}
+
+/** A vertex moved onto another vertex of the same element deletes it (POLYGON_REGELN Regel 2). */
 export function moveElementPoint(
   project: Project,
   target: TransformTarget,
@@ -93,7 +109,13 @@ export function moveElementPoint(
   return applyPoints(
     project,
     target,
-    replacePathVertex(editablePoints(project, target), index, position),
+    (() => {
+      const points = editablePoints(project, target),
+        shape = vertexShape(target);
+      return shape
+        ? moveVertex(points, index, position, shape)
+        : replacePathVertex(points, index, position);
+    })(),
     null,
     reuse,
     resultMode,
@@ -178,3 +200,37 @@ export function moveWindowAlongWall(project: Project, id: string, distance: numb
 }
 
 export { parseMetres } from "../../core/units/metres.ts";
+
+/**
+ * While a corner moves, every other corner of the same element wins over all other snaps
+ * within `radiusPx` on screen (POLYGON_REGELN Regel 2): preview and click then land exactly
+ * on it, which deletes the moved corner. Null for other edits or farther cursors.
+ */
+export function capturedVertex(
+  session: {
+    base: Project;
+    target: { kind: string; id: string };
+    action: string;
+    index: number | null;
+  },
+  cursor: Point,
+  pixelsPerMetre: number,
+  radiusPx = START_CAPTURE_PX,
+): Point | null {
+  const { target, index } = session;
+  if (session.action !== "point" || index === null || !isVertexTarget(target)) return null;
+  const points = editablePoints(session.base, target);
+  const moved = points[index];
+  if (!moved) return null;
+  let best: Point | null = null,
+    bestDistance = radiusPx;
+  for (const point of points) {
+    if (point.x === moved.x && point.y === moved.y) continue;
+    const distance = Math.hypot(point.x - cursor.x, point.y - cursor.y) * pixelsPerMetre;
+    if (distance <= bestDistance) {
+      best = point;
+      bestDistance = distance;
+    }
+  }
+  return best ? { ...best } : null;
+}

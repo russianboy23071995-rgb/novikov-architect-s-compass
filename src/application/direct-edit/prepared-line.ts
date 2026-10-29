@@ -4,7 +4,8 @@ import { MAX_LINE_POINTS } from "../../domain/project/schema.ts";
 import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { closedContour, prepareSessionContourEdge } from "./contour.ts";
-import { replacePathVertex, translatePoint } from "../../geometry/primitives/point.ts";
+import { translatePoint } from "../../geometry/primitives/point.ts";
+import { moveVertex } from "../../geometry/polygons/vertex-merge.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { validateLineGeometry } from "../../domain/project/geometry-validation.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
@@ -62,10 +63,11 @@ export function prepareLinePreview(session: EditSession): PreparedDirectEditPrev
         : { x: point.x - anchor.x, y: point.y - anchor.y };
       if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
         throw Error("Ungültige Zielposition.");
-      points = replacePathVertex(
+      points = moveVertex(
         line!.points,
         index!,
         translatePoint(line!.points[index!]!, delta),
+        "path",
       );
     }
     const changed = { ...line!, points };

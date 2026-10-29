@@ -1,3 +1,4 @@
+import { isVertexTarget } from "@/application/direct-edit/transforms";
 import { resolvePathClick, type PathClosure } from "@/application/drawing/path-closure";
 import { previewDeleteSelection } from "@/application/elements/delete";
 import { RasterBudgetNotice } from "./RasterBudgetNotice";
@@ -1649,6 +1650,25 @@ export function CadWorkspace({
                         setDemandOpen(false);
                         setModelError("");
                         dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
+                      }}
+                      onCornerPick={(target, index, anchor) => {
+                        if (
+                          !isVertexTarget(target) ||
+                          referenceSelection.selecting ||
+                          !visibleLayerTarget(
+                            visibilityNow.current.project,
+                            visibilityNow.current.visibility,
+                            target,
+                          )
+                        )
+                          return false;
+                        cancelInteraction();
+                        setPickedPoint({ index, anchor, edgeIndex: null });
+                        setTool("select");
+                        setDemandOpen(false);
+                        setModelError("");
+                        dispatchEditing({ type: "begin", target, action: "point", index, anchor });
+                        return true;
                       }}
                       onEditCancel={() =>
                         measurement.adapter
