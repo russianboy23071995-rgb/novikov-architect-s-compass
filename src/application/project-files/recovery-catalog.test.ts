@@ -49,7 +49,13 @@ const date = new Date("2026-10-10T12:00:00Z");
 
 test("loaded recovery summary counts all storeys even when the active storey is empty", async () => {
   let project = createProject("multi-floor-recovery", "eg");
-  assert.deepEqual(recoveryContentSummary(project), { storeys: 1, walls: 0, windows: 0 });
+  assert.deepEqual(recoveryContentSummary(project), {
+    storeys: 1,
+    walls: 0,
+    windows: 0,
+    doors: 0,
+    slabs: 0,
+  });
   project = setStoreyHeight(project, project, { projectId: project.id, storeyId: "eg", height: 3 });
   project = addStorey(project, project, {
     projectId: project.id,
@@ -90,10 +96,16 @@ test("loaded recovery summary counts all storeys even when the active storey is 
   assert.ok(candidate);
   const before = serializeProject(candidate.project);
   const stored = records.get(project.id);
-  assert.deepEqual(recoveryContentSummary(candidate.project), { storeys: 3, walls: 2, windows: 2 });
+  assert.deepEqual(recoveryContentSummary(candidate.project), {
+    storeys: 3,
+    walls: 2,
+    windows: 2,
+    doors: 0,
+    slabs: 0,
+  });
   assert.deepEqual(
     recoveryContentSummary(selectWorkingStorey(candidate.project, candidate.project, "kg")),
-    { storeys: 3, walls: 2, windows: 2 },
+    { storeys: 3, walls: 2, windows: 2, doors: 0, slabs: 0 },
   );
   assert.equal(serializeProject(candidate.project), before);
   assert.equal(records.get(project.id), stored);
@@ -212,4 +224,30 @@ test("migration quota failure still permits listing and preparing legacy project
   assert.equal((await readProjectRecovery(catalog, "A"))?.project.id, "A");
   assert.equal((await readProjectRecovery(catalog, "B"))?.project.id, "B");
   assert.equal(records.get("legacy"), original);
+});
+
+test("file and recovery summaries count doors and slabs of every storey", async () => {
+  const { slabAcceptanceProject } = await import("../../../benchmarks/slab-ifc-acceptance.ts");
+  const { addDoor } = await import("../doors/actions.ts");
+  const { DOOR_DEFAULTS } = await import("../../domain/elements/door/model.ts");
+  const { projectElementCounts } = await import("../storeys/context.ts");
+  let p = slabAcceptanceProject();
+  p = addDoor(p, { id: "og-t1", wallId: "og-w3", position: 0.5, ...DOOR_DEFAULTS });
+  p = selectWorkingStorey(p, p, "eg");
+  assert.deepEqual(recoveryContentSummary(p), {
+    storeys: 2,
+    walls: 8,
+    windows: 2,
+    doors: 1,
+    slabs: 2,
+  });
+  assert.deepEqual(projectElementCounts(p), {
+    walls: 8,
+    windows: 2,
+    doors: 1,
+    slabs: 2,
+    lines: 0,
+    hatches: 0,
+    references: 0,
+  });
 });

@@ -72,3 +72,8 @@ Nutzerentscheidung 29.10.2026: Die Bindung ist eine Einstellung der Wand. Gebund
 - Nachweis: Gleichheits-Hash 14 Modelle unverändert `09528ac4…7823253`. Drei Modelle mit 4, 6 und 64 gebundenen Wänden: Wandhöhen, Gebäudekörper und IFC nach Laden der auf main gespeicherten Schema-29-Dateien und nach Neuaufbau identisch zu main. Z- und XY-Verschieben in drei Modellen (192, 64 und 4 gebundene Wände): Ergebnis von main (migriert) gleich Ergebnis des Branches. Neue Tests in `heights.test.ts` (Regel, Attika im obersten Geschoss, Einfügen eines Geschosses, Lösen per Höheneingabe, Migration aus Schema 26–29, Ablehnung vermischter Formate). 1343 Tests grün.
 - Browser: Geschosshöhe 3,00 m, Wand gebunden → 3,00 m; Zusatzhöhe 0,5 → 3,50 m (oberstes Geschoss); Wandhöhe 2,6 eingegeben → frei 2,60 m; erneut gebunden, Undo/Redo; Geschosshöhe 3,20 m → Wand 3,20 m. Keine Konsolenfehler nach Neuladen.
 - Offen (C3, eigene Karte): Mit Zusatzhöhe 0 ragt die Wand in die Decke; Vorrang/Verschneidung für 3D, Mengen und IFC. C2 (Decke als optionaler Bezug) zurückgestellt.
+
+## Nachtrag: Übersichten zählen Türen und Decken (29.10.2026)
+
+- `projectElementCounts` (Dialog „Projektdatei laden?“) und `recoveryContentSummary` (Wiederherstellung) zählen zusätzlich Türen und Decken über alle Geschosse; die in Teil B genannte Lücke ist geschlossen.
+- Nachweis: Test in `recovery-catalog.test.ts` (Abnahmehaus mit zwei Decken und einer Tür im OG, Arbeitsgeschoss EG); 1344 Tests grün. Browser: Wiederherstellung zeigt „… 1 Fenster · 0 Türen · 1 Decken“. Der Ladedialog wurde nicht im Browser geöffnet (Dateiauswahl), er nutzt dieselbe geprüfte Zählung.
