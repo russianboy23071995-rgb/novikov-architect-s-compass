@@ -53,10 +53,6 @@ function MarkLabel({
   );
 }
 
-/** Plan colours of ceiling slabs (outline dashed, fill faint). */
-const SLAB_STROKE = "#64748b";
-const SLAB_FILL = "#94a3b8";
-
 /** Hint colour for overlapping openings (allowed, not an error). */
 const OVERLAP_COLOR = "#d97706";
 
@@ -145,30 +141,18 @@ export function PlanSceneContent({
         const points = slab.points.map((p) => `${p.x},${-p.y}`).join(" ");
         return (
           <g key={slab.id}>
-            {/* Thin dashed outline with a light fill: selectable, never mistaken for a cut wall. */}
+            {/* Contour only, no fill (user decision 29.10.2026): solid line in the wall contour
+                colour and width; the interior stays selectable. */}
             <polygon
               {...selectProps("slab", slab.id)}
               aria-label={`Decke ${slab.id}`}
               points={points}
-              fill={SLAB_FILL}
-              fillOpacity={0.12}
-              stroke={SLAB_STROKE}
-              strokeWidth={1}
-              strokeDasharray="6 4"
-              vectorEffect="non-scaling-stroke"
+              fill="none"
+              stroke={selectedIds.has(slab.id) ? "#94a3b8" : "var(--primary)"}
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none focus-visible:stroke-sky-300"
             />
-            {selectedIds.has(slab.id) && (
-              <polygon
-                points={points}
-                fill="none"
-                stroke="#cbd5e1"
-                strokeWidth={2}
-                vectorEffect="non-scaling-stroke"
-                pointerEvents="none"
-              />
-            )}
           </g>
         );
       })}

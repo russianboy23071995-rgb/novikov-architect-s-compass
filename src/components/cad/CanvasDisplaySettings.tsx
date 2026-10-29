@@ -22,7 +22,7 @@ export function CanvasDisplaySettings({
       <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
         <p className="text-xs text-muted-foreground">Bildschirmdarstellung des Grundrisses</p>
         <fieldset className="space-y-3">
-          <legend className="font-medium">Wand</legend>
+          <legend className="font-medium">Konturlinien (Wand, Decke)</legend>
           <label className="flex items-center justify-between gap-4 text-sm">
             Konturstärke
             <select
@@ -39,8 +39,8 @@ export function CanvasDisplaySettings({
             </select>
           </label>
           <p className="text-xs text-muted-foreground">
-            Bleibt beim Zoomen gleich stark. Die Steuerungsachse bleibt türkis hervorgehoben. Gilt
-            für alle Grundrissfenster und wird in diesem Browser gespeichert.
+            Durchgezogen; bleibt beim Zoomen gleich stark. Die Steuerungsachse bleibt türkis
+            hervorgehoben. Gilt für alle Grundrissfenster und wird in diesem Browser gespeichert.
           </p>
         </fieldset>
       </div>

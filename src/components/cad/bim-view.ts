@@ -4,7 +4,7 @@ import type { LayerVisibilityPolicy } from "../../application/layers/visibility.
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { addWindow } from "../../application/windows/actions.ts";
-import { createProject } from "../../application/projects/create.ts";
+import { createProject, createStandardProject } from "../../application/projects/create.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import { addWall } from "../../application/walls/actions.ts";
 import type { Point, Project, Wall } from "../../domain/project/schema.ts";
@@ -14,6 +14,20 @@ export type Selection = import("../../application/selection/target.ts").ElementT
 export function createExampleProject(): Project {
   return addWindow(
     addWall(createProject("project-1", "storey-1"), {
+      id: "wall-1",
+      start: { x: 0, y: 0 },
+      end: { x: 3, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+    }),
+    { id: "window-1", wallId: "wall-1", width: 1.2, height: 1.35, sillHeight: 0.9, position: 0.5 },
+  );
+}
+
+/** Project shown when the app starts without a file: the standard EG + 1. OG structure. */
+export function createStartProject(): Project {
+  return addWindow(
+    addWall(createStandardProject("project-1", "storey-1", "storey-2"), {
       id: "wall-1",
       start: { x: 0, y: 0 },
       end: { x: 3, y: 0 },
