@@ -10,10 +10,7 @@ export function boundHeightFixture() {
   p = setStoreyHeight(p, p, { projectId: p.id, storeyId: "eg", height: 3 });
   p = addStorey(p, p, { projectId: p.id, storeyId: "eg", side: "above", id: "og", height: 3 });
   p = addStorey(p, p, { projectId: p.id, storeyId: "og", side: "above", id: "dg", height: 3 });
-  for (const [floor, upper] of [
-    ["eg", "og"],
-    ["og", "dg"],
-  ] as const) {
+  for (const floor of ["eg", "og"] as const) {
     p = selectWorkingStorey(p, p, floor);
     p = addWall(p, {
       id: floor + "-a",
@@ -41,7 +38,8 @@ export function boundHeightFixture() {
       projectId: p.id,
       storeyId: floor,
       wallIds: [floor + "-a", floor + "-b"],
-      rule: { kind: "slab-underside", storeyId: upper, topOffset: 0 },
+      // Former binding to an assumed 0,20 m raw slab, kept numerically (schema 30).
+      rule: { kind: "storey", topOffset: 0 - 0.2 },
     });
   }
   return selectWorkingStorey(p, p, "eg");
@@ -70,7 +68,7 @@ export function fullHeightFixture() {
     projectId: p.id,
     storeyId: "kg",
     wallIds: ["kg-a", "kg-b"],
-    rule: { kind: "slab-underside", storeyId: "eg", topOffset: -0.1 },
+    rule: { kind: "storey", topOffset: -0.1 - 0.2 },
   });
   p = selectWorkingStorey(p, p, "og");
   // A mixed fixed/bound connected pair is valid initially, but rejects a later
@@ -96,6 +94,6 @@ export function fullHeightFixture() {
     projectId: p.id,
     storeyId: "eg",
     wallIds: ["eg-offset"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0.2 },
+    rule: { kind: "storey", topOffset: 0.2 - 0.2 },
   });
 }

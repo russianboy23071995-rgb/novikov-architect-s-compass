@@ -5,7 +5,18 @@ import { resolveStoreyLevels } from "@/domain/storeys/heights";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
 
-/** Presentation adapter only; every edit uses the shared validated height action. */
+const metres = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 3 });
+const parse = (form: HTMLFormElement, name: string) => {
+  const raw = String(new FormData(form).get(name) ?? "")
+    .trim()
+    .replace(",", ".");
+  return raw === "" ? NaN : Number(raw);
+};
+
+/** Presentation adapter only; every edit uses the shared validated height action.
+ * Bound walls end at OK raw floor above their own storey plus an extra height; a typed
+ * wall height releases the binding (user decision 29.10.2026).
+ */
 export function WallHeightProperties({
   project,
   wall,
@@ -16,16 +27,15 @@ export function WallHeightProperties({
   onChange: (project: Project) => void;
 }) {
   const [error, setError] = useState("");
-  const { storey, upper, canBind } = useMemo(() => {
+  const { storey, upperElevation } = useMemo(() => {
     const index = project.storeys.findIndex((s) => s.walls.some((w) => w.id === wall.id));
-    const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
-    const upper = project.storeys[index + 1];
+    const level = resolveStoreyLevels(project.storeys, project.groundStoreyId)[index];
     return {
       storey: project.storeys[index]!,
-      upper,
-      canBind: !!upper && levels[index]?.elevation != null && levels[index + 1]?.elevation != null,
+      upperElevation: level?.elevation != null ? level.upperElevation : null,
     };
   }, [project, wall.id]);
+  const canBind = upperElevation != null;
   const binding = wall.topBinding;
   const apply = (rule: Parameters<typeof setWallHeightRule>[2]["rule"]) => {
     try {
@@ -41,7 +51,7 @@ export function WallHeightProperties({
       setError(
         failure instanceof Error && failure.name !== "ZodError"
           ? failure.message.includes("must fit within its wall height")
-            ? "Die Wand wäre zu niedrig für ein vorhandenes Fenster. Bitte Höhe oder Versatz anpassen."
+            ? "Die Wand wäre zu niedrig für ein vorhandenes Fenster. Bitte Höhe oder Zusatzhöhe anpassen."
             : failure.message
           : "Bitte gültige Maße eingeben. Fenster und Wandanschlüsse müssen weiterhin passen.",
       );
@@ -57,68 +67,84 @@ export function WallHeightProperties({
           className="mt-1 block h-8 rounded border bg-background px-2 text-xs"
           onChange={(e) => {
             if (e.target.value === "fixed") apply({ kind: "fixed", height: wall.height });
-            else if (canBind && upper)
-              apply({ kind: "slab-underside", storeyId: upper.id, topOffset: 0 });
+            else if (canBind) apply({ kind: "storey", topOffset: 0 });
           }}
         >
           <option value="fixed">Feste Höhe</option>
           <option value="bound" disabled={!canBind}>
-            UK Rohdecke
+            An Geschoss gebunden
           </option>
         </select>
       </label>
+      {binding && (
+        <PropertyForm
+          className="flex items-end gap-2"
+          aria-label="Zusatzhöhe bearbeiten"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const value = parse(e.currentTarget, "topOffset");
+            if (!Number.isFinite(value)) {
+              setError("Bitte eine endliche Zusatzhöhe eingeben.");
+              return;
+            }
+            if (value === binding.topOffset) return setError("");
+            apply({ kind: "storey", topOffset: value });
+          }}
+        >
+          <label className="text-xs">
+            Zusatzhöhe (m)
+            <Input
+              key={binding.topOffset}
+              name="topOffset"
+              aria-label="Zusatzhöhe über OK Geschoss (m)"
+              inputMode="decimal"
+              required
+              defaultValue={Number(binding.topOffset.toPrecision(12))}
+              className="mt-1 h-8 w-24"
+            />
+          </label>
+        </PropertyForm>
+      )}
       <PropertyForm
         className="flex items-end gap-2"
         aria-label="Wandhöhe bearbeiten"
         onSubmit={(e) => {
           e.preventDefault();
-          const raw = String(new FormData(e.currentTarget).get("heightValue") ?? "")
-            .trim()
-            .replace(",", ".");
-          const value = raw === "" ? NaN : Number(raw);
-          if (!Number.isFinite(value) || (!binding && value <= 0)) {
-            setError(
-              binding
-                ? "Bitte einen endlichen Höhenversatz eingeben."
-                : "Die Wandhöhe muss größer als null sein.",
-            );
+          const value = parse(e.currentTarget, "heightValue");
+          if (!Number.isFinite(value) || value <= 0) {
+            setError("Die Wandhöhe muss größer als null sein.");
             return;
           }
-          if (value === (binding?.topOffset ?? wall.height)) {
-            setError("");
-            return;
-          }
-          apply(binding ? { ...binding, topOffset: value } : { kind: "fixed", height: value });
+          if (value === wall.height) return setError("");
+          apply({ kind: "fixed", height: value });
         }}
       >
         <label className="text-xs">
-          {binding ? "Versatz zur UK (m)" : "Wandhöhe (m)"}
+          Wandhöhe (m)
           <Input
+            key={wall.height}
             name="heightValue"
-            aria-label={binding ? "Versatz zur UK Rohdecke (m)" : "Wandhöhe (m)"}
+            aria-label="Wandhöhe (m)"
             inputMode="decimal"
             required
-            defaultValue={Number((binding?.topOffset ?? wall.height).toPrecision(12))}
+            defaultValue={Number(wall.height.toPrecision(12))}
             className="mt-1 h-8 w-24"
           />
         </label>
       </PropertyForm>
       {binding ? (
         <p className="text-[11px] text-muted-foreground">
-          Bezug: {upper?.name} · Rohdecke {binding.slabThickness.toLocaleString("de-DE")} m
-          (Annahme)
+          Bezug: {storey.name} · OK Rohfußboden darüber{" "}
+          {upperElevation != null && `${metres(upperElevation)} m`}
           <br />
-          Berechnete Höhe:{" "}
-          <output aria-label="Berechnete Wandhöhe">
-            {wall.height.toLocaleString("de-DE", { maximumFractionDigits: 3 })} m
-          </output>
+          Berechnete Höhe: <output aria-label="Berechnete Wandhöhe">{metres(wall.height)} m</output>
+          <br />
+          Eine eingegebene Wandhöhe löst die Bindung.
         </p>
       ) : (
         !canBind && (
           <p className="max-w-48 text-[11px] text-muted-foreground">
-            {upper
-              ? "Für die Bindung zuerst die Geschosshöhen festlegen."
-              : "Für die Bindung ein Geschoss darüber anlegen."}
+            Für die Bindung zuerst die Geschosshöhe festlegen.
           </p>
         )
       )}

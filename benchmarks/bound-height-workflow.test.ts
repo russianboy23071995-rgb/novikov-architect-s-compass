@@ -26,10 +26,11 @@ test("basement signed offsets and mixed join conflicts remain atomic through fil
     p.storeys.flatMap((s) => s.walls).find((w) => w.id === id)!;
   assert.equal(wall(next, "kg-a").height, 3.3);
   assert.equal(wall(next, "kg-a").baseOffset, -0.1);
-  assert.equal(wall(next, "kg-a").topBinding!.topOffset, -0.1);
+  // Former UK Rohdecke 0,20 m is part of the extra height since schema 30.
+  assert.equal(wall(next, "kg-a").topBinding!.topOffset, -0.1 - 0.2);
   assert.equal(wall(next, "eg-offset").height, 3.9);
   assert.equal(wall(next, "eg-offset").baseOffset, 0.1);
-  assert.equal(wall(next, "eg-offset").topBinding!.topOffset, 0.2);
+  assert.equal(wall(next, "eg-offset").topBinding!.topOffset, 0.2 - 0.2);
   assert.equal(wall(next, "og-b").topBinding, undefined);
   assert.equal(wall(next, "og-b").height, 2.8);
   assert.deepEqual(

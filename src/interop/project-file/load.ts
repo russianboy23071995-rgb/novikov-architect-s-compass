@@ -32,8 +32,10 @@ import {
   projectV26Schema,
   projectV27Schema,
   projectV28Schema,
+  projectV29Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
+import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
 
@@ -57,7 +59,22 @@ export function loadProjectData(value: unknown): Project {
   return migrateProjectData(value);
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 29. */
+/** Parsing resolves a bound wall height to a placeholder 0; a chained step parses again, so the
+ * disposable height is dropped as in stored files (gap found 29.10.2026 for schema 26/27).
+ */
+function withoutBoundHeights<
+  T extends { storeys: { walls: { height: number; topBinding?: unknown }[] }[] },
+>(project: T) {
+  return {
+    ...project,
+    storeys: project.storeys.map((s) => ({
+      ...s,
+      walls: s.walls.map(({ height, ...w }) => (w.topBinding ? w : { ...w, height })),
+    })),
+  };
+}
+
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 30. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -142,15 +159,26 @@ export function migrateProjectData(value: unknown): Project {
   if (value.schemaVersion === 25)
     return migrateProjectData({ ...projectV25Schema.parse(value), schemaVersion: 26 });
   if (value.schemaVersion === 26)
-    return migrateProjectData({ ...projectV26Schema.parse(value), schemaVersion: 27 });
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV26Schema.parse(value), schemaVersion: 27 }),
+    );
   // Existing windows and doors receive position numbers in stored order (user decision 25.10.2026).
   if (value.schemaVersion === 27)
     return migrateProjectData(
-      withOpeningMarks({ ...projectV27Schema.parse(value), schemaVersion: 28 }),
+      withoutBoundHeights(
+        withOpeningMarks({ ...projectV27Schema.parse(value), schemaVersion: 28 }),
+      ),
     );
   // Schema 28 files carry no slabs; the strict v28 schema rejects smuggled slab lists.
   if (value.schemaVersion === 28)
-    return validateProject({ ...projectV28Schema.parse(value), schemaVersion: 29 });
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV28Schema.parse(value), schemaVersion: 29 }),
+    );
+  // Walls bound to an assumed raw slab keep their top as storey binding (29.10.2026).
+  if (value.schemaVersion === 29)
+    return validateProject(
+      withStoreyBindings({ ...projectV29Schema.parse(value), schemaVersion: 30 }),
+    );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

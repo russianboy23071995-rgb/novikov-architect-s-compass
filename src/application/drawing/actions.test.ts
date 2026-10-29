@@ -447,7 +447,7 @@ test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips
   assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 3, bottom: 2.8 });
   const reopened = readProjectFile(serializeProject(p));
   assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.equal(PROJECT_SCHEMA_VERSION, 29);
+  assert.equal(PROJECT_SCHEMA_VERSION, 30);
   assert.deepEqual(reopened, p);
 });
 
@@ -495,14 +495,14 @@ test("schema 28 files migrate without slabs and cannot smuggle slabs in", () => 
   const raw = JSON.parse(serializeProject(slabBase()));
   raw.schemaVersion = 28;
   const migrated = readProjectFile(JSON.stringify(raw));
-  assert.equal(migrated.schemaVersion, 29);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(migrated.storeys[0]!.slabs, undefined);
   raw.storeys[0].slabs = [{ id: "s", layerId: "layer:slab", points: lShape, ...SLAB_DEFAULTS }];
   assert.throws(() => readProjectFile(JSON.stringify(raw)));
   raw.schemaVersion = 27;
   assert.throws(() => readProjectFile(JSON.stringify(raw)));
   delete raw.storeys[0].slabs;
-  assert.equal(readProjectFile(JSON.stringify(raw)).schemaVersion, 29);
+  assert.equal(readProjectFile(JSON.stringify(raw)).schemaVersion, PROJECT_SCHEMA_VERSION);
 });
 
 test("the plan draws slabs first and hides them with their layer; delete, move, commands, snaps", () => {

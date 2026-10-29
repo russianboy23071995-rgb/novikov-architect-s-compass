@@ -28,7 +28,7 @@ p = setWallHeightRule(p, p, {
   projectId: "p",
   storeyId: "eg",
   wallIds: ["a", "b"],
-  rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+  rule: { kind: "storey", topOffset: 0 - 0.2 },
 });
 const targets = [
   { kind: "wall", id: "a" },

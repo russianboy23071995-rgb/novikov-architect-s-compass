@@ -2,7 +2,11 @@ import { PROJECT_SCHEMA_VERSION } from "./format.ts";
 import { wallBase, wallHeights } from "../elements/wall/heights.ts";
 import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
-import { wallTopBindingSchema, resolveBoundWallHeights } from "../elements/wall/height-binding.ts";
+import {
+  legacyWallTopBindingSchema,
+  resolveBoundWallHeights,
+  wallTopBindingSchema,
+} from "../elements/wall/height-binding.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -263,17 +267,19 @@ export const projectV25Schema = projectV24Schema.extend({
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(raisedWallSchema) }))
     .min(1),
 });
-const boundWallSchema = raisedWallSchema
-  .extend({
-    height: positive.optional(),
-    topBinding: wallTopBindingSchema.optional(),
-  })
-  .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
-  .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
+const boundWall = <B extends z.ZodTypeAny>(binding: B) =>
+  raisedWallSchema
+    .extend({ height: positive.optional(), topBinding: binding.optional() })
+    .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
+    .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
+/** Schema 26–29: walls bound to the underside of an assumed raw slab. */
+const legacyBoundWallSchema = boundWall(legacyWallTopBindingSchema);
+/** Schema 30: walls bound to their own storey height plus extra height (29.10.2026). */
+const boundWallSchema = boundWall(wallTopBindingSchema);
 export const projectV26Schema = projectV25Schema.extend({
   schemaVersion: z.literal(26),
   storeys: z
-    .array(projectV22Schema.shape.storey.extend({ walls: z.array(boundWallSchema) }))
+    .array(projectV22Schema.shape.storey.extend({ walls: z.array(legacyBoundWallSchema) }))
     .min(1),
 });
 /** Schema 27 adds hosted single-leaf doors per storey (user decision 24.10.2026). */
@@ -282,7 +288,7 @@ export const projectV27Schema = projectV26Schema.extend({
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
-        walls: z.array(boundWallSchema),
+        walls: z.array(legacyBoundWallSchema),
         doors: z.array(doorV27Schema).optional(),
       }),
     )
@@ -294,7 +300,7 @@ export const projectV28Schema = projectV27Schema.extend({
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
-        walls: z.array(boundWallSchema),
+        walls: z.array(legacyBoundWallSchema),
         windows: z.array(markedWindowSchema),
         doors: z.array(doorSchema).optional(),
       }),
@@ -302,7 +308,21 @@ export const projectV28Schema = projectV27Schema.extend({
     .min(1),
 });
 /** Schema 29 adds floor slabs per storey (user decision 28.10.2026). */
-const projectSchema = projectV28Schema.extend({
+export const projectV29Schema = projectV28Schema.extend({
+  schemaVersion: z.literal(29),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(legacyBoundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 30 binds wall tops to the storey height instead of an assumed slab (29.10.2026). */
+const projectSchema = projectV29Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
