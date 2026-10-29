@@ -5,7 +5,11 @@ import { updateWall } from "../../application/walls/actions.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { addDoor } from "../../application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
-import { doorOperationType, ifcGuid } from "./writer.ts";
+import { doorOperationType, FILLING_PLACEHOLDER_DEPTH, ifcGuid } from "./writer.ts";
+import {
+  exportFillingVariant,
+  fillingAcceptanceProject,
+} from "../../../benchmarks/filling-ifc-acceptance.ts";
 import type { Project } from "../../domain/project/schema.ts";
 
 const date = new Date("2026-10-24T12:00:00Z");
@@ -136,4 +140,55 @@ test("each ceiling slab exports as IfcSlab FLOOR from its underside, contained i
     topOffset: 0,
   });
   assert.equal(rows(await exportIfc(unknown, date), "IFCSLAB").length, 0);
+});
+
+test("filling variants for Archicad: placeholder body or type and quantities; default unchanged", async () => {
+  // docs/T_IFC_ACCEPTANCE.md, 29.10.2026. The regular export keeps no body and no type.
+  const project = fillingAcceptanceProject();
+  const regular = await exportIfc(project, date);
+  assert.ok(rows(regular, "IFCWINDOW").every((line) => /,#\d+,\$,'/.test(line)));
+  assert.equal(rows(regular, "IFCWINDOWTYPE").length, 0);
+  assert.equal(regular.includes("PlaceholderBody"), false);
+  assert.equal(await exportFillingVariant(project, {}, date), regular);
+
+  const entity = (ifc: string, ref: string) =>
+    ifc.split("\n").find((line) => line.startsWith(`${ref}=`))!;
+  const depth = (ifc: string, line: string) => {
+    // Filling -> product shape -> representation -> extruded solid -> rectangle profile.
+    const shape = /,#\d+,(#\d+),'/.exec(line)![1]!;
+    const representation = /\(\$,\$,\((#\d+)\)\)/.exec(entity(ifc, shape))![1]!;
+    const solid = /\((#\d+)\)\);$/.exec(entity(ifc, representation))![1]!;
+    const profile = /\((#\d+),/.exec(entity(ifc, solid))![1]!;
+    const [, length, thickness] = /,#\d+,([\d.E-]+),([\d.E-]+)\);$/.exec(entity(ifc, profile))!;
+    const height = /,([\d.E-]+)\);$/.exec(entity(ifc, solid))![1]!;
+    return [Number(length), Number(thickness), Number(height)];
+  };
+  for (const [body, thickness] of [
+    ["thin", FILLING_PLACEHOLDER_DEPTH],
+    ["full", 0.3],
+  ] as const) {
+    const ifc = await exportFillingVariant(project, { fillingBody: body }, date);
+    const windows = rows(ifc, "IFCWINDOW");
+    assert.deepEqual(depth(ifc, windows[0]!), [1.2, thickness, 1.35], body);
+    assert.deepEqual(depth(ifc, windows[1]!), [0.8, thickness, 1], body);
+    assert.deepEqual(depth(ifc, rows(ifc, "IFCDOOR")[0]!), [1.01, thickness, 2.135], body);
+    assert.equal(ifc.split("PlaceholderBody").length - 1, 3, body);
+    assert.equal(rows(ifc, "IFCWINDOWTYPE").length, 0, body);
+  }
+  const typed = await exportFillingVariant(project, { fillingTypes: true }, date);
+  assert.equal(rows(typed, "IFCWINDOWTYPE").length, 2);
+  assert.match(
+    rows(typed, "IFCDOORTYPE")[0]!,
+    /,\.DOOR\.,\.SINGLE_SWING_(LEFT|RIGHT)\.,\.F\.,\$\);$/,
+  );
+  assert.equal(rows(typed, "IFCRELDEFINESBYTYPE").length, 3);
+  assert.equal(rows(typed, "IFCRELDECLARES").length, 1);
+  assert.ok(typed.includes("'Width',$,$,1.2,$"));
+  assert.ok(typed.includes("'Area',$,$,0.8,$"));
+  assert.ok(rows(typed, "IFCWINDOW").every((line) => /,#\d+,\$,'/.test(line)));
+  // Every reference points to an existing entity.
+  for (const ifc of [regular, typed]) {
+    const ids = new Set([...ifc.matchAll(/^#(\d+)=/gm)].map((m) => m[1]));
+    assert.ok([...ifc.matchAll(/#(\d+)/g)].every((m) => ids.has(m[1])));
+  }
 });

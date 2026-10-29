@@ -66,6 +66,21 @@ export const IFC_EXPORT_DESCRIPTION = "NOVIKOV CAD parametric BIM export";
 export const IFC_ACCEPTANCE_DESCRIPTION =
   "NOVIKOV CAD corner acceptance test - explicit temporary pair";
 
+/**
+ * Archicad trial of window/door sizes (docs/T_IFC_ACCEPTANCE.md, 29.10.2026): Archicad shows
+ * „RB 0,00 x 0,00“ for fillings without a body. Variants for the user import; the regular
+ * export keeps the defaults (no body, no type) until one variant is confirmed.
+ * - fillingBody "thin": neutral placeholder box in opening size, FILLING_PLACEHOLDER_DEPTH
+ *   deep, centred in the wall; "full": the same box through the wall thickness.
+ * - fillingTypes: IfcWindowType/IfcDoorType per element plus base quantities.
+ * No frame, glass or leaf is invented; a body is marked as placeholder in NOVIKOV_BIM.
+ */
+export type IfcFillingOptions = {
+  fillingBody?: "none" | "thin" | "full";
+  fillingTypes?: boolean;
+};
+export const FILLING_PLACEHOLDER_DEPTH = 0.07;
+
 /** IFC4 STEP export; validates and copies the snapshot before any asynchronous work.
  * Windows and doors remain semantic elements without invented frame/glass/leaf geometry.
  * Openings are separate swept solids linked with IfcRelVoidsElement / IfcRelFillsElement.
@@ -77,6 +92,7 @@ export async function writeIfc(
   // Chosen by the caller, not by the presence of wall profiles: the regular export passes the
   // profiles of every connected wall (docs/T_IFC_ACCEPTANCE.md, finding 27.10.2026).
   description = IFC_EXPORT_DESCRIPTION,
+  filling: IfcFillingOptions = {},
 ): Promise<string> {
   const project = validateProject(input);
   const profiles = new Map(
@@ -168,6 +184,60 @@ export async function writeIfc(
       `${await guid("property-relation", JSON.stringify([kind, id]))},$,$,$,(${target}),${pset}`,
     );
   };
+  const fillingBody = filling.fillingBody ?? "none";
+  const fillingShape = (width: number, wallThickness: number, height: number) =>
+    fillingBody === "none"
+      ? "$"
+      : body(
+          width,
+          fillingBody === "full"
+            ? wallThickness
+            : Math.min(FILLING_PLACEHOLDER_DEPTH, wallThickness),
+          height,
+        );
+  const placeholder: [string, string][] =
+    fillingBody === "none" ? [] : [["PlaceholderBody", "IFCBOOLEAN(.T.)"]];
+  const types: string[] = [];
+  const fillingType = async (
+    kind: "window" | "door",
+    target: string,
+    id: string,
+    width: number,
+    height: number,
+    operation: string,
+  ) => {
+    if (!filling.fillingTypes) return;
+    const name = label(id + " Typ");
+    const type =
+      kind === "window"
+        ? add(
+            "IFCWINDOWTYPE",
+            `${await guid("window-type", id)},$,${name},$,$,$,$,$,$,.WINDOW.,.SINGLE_PANEL.,.F.,$`,
+          )
+        : add(
+            "IFCDOORTYPE",
+            `${await guid("door-type", id)},$,${name},$,$,$,$,$,$,.DOOR.,.${operation}.,.F.,$`,
+          );
+    types.push(type);
+    add(
+      "IFCRELDEFINESBYTYPE",
+      `${await guid(kind + "-type-relation", id)},$,$,$,(${target}),${type}`,
+    );
+    const quantities = [
+      add("IFCQUANTITYLENGTH", `'Width',$,$,${real(width)},$`),
+      add("IFCQUANTITYLENGTH", `'Height',$,$,${real(height)},$`),
+      add("IFCQUANTITYAREA", `'Area',$,$,${real(width * height)},$`),
+    ];
+    const qtoName = kind === "window" ? "Qto_WindowBaseQuantities" : "Qto_DoorBaseQuantities";
+    const qto = add(
+      "IFCELEMENTQUANTITY",
+      `${await guid(kind + "-quantities", id)},$,${text(qtoName)},$,$,(${quantities.join(",")})`,
+    );
+    add(
+      "IFCRELDEFINESBYPROPERTIES",
+      `${await guid(kind + "-quantity-relation", id)},$,$,$,(${target}),${qto}`,
+    );
+  };
   await properties(projectRef, "project", project.id, [["SchemaVersion", "IFCINTEGER(1)"]]);
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
   for (const floor of project.storeys) {
@@ -222,7 +292,7 @@ export async function writeIfc(
         add("IFCRELVOIDSELEMENT", `${await guid("void", window.id)},$,$,$,${wallRef},${opening}`);
         const windowRef = add(
           "IFCWINDOW",
-          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},$,${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
+          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},${fillingShape(window.width, wall.thickness, window.height)},${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
         );
         add("IFCRELFILLSELEMENT", `${await guid("fill", window.id)},$,$,$,${opening},${windowRef}`);
         elements.push(windowRef);
@@ -230,7 +300,9 @@ export async function writeIfc(
           ["WallId", `IFCTEXT(${text(window.wallId)})`],
           ["SillHeight", `IFCLENGTHMEASURE(${real(window.sillHeight)})`],
           ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
+          ...placeholder,
         ]);
+        await fillingType("window", windowRef, window.id, window.width, window.height, "");
       }
       for (const door of (floor.doors ?? []).filter((item) => item.wallId === wall.id)) {
         const opening = doorOpening(door, wall);
@@ -258,7 +330,7 @@ export async function writeIfc(
         );
         const doorRef = add(
           "IFCDOOR",
-          `${await guid("door", door.id)},$,${label(door.id)},$,$,${doorPlacement},$,${label(door.id)},${real(door.height)},${real(door.width)},.DOOR.,.${doorOperationType(door)}.,$`,
+          `${await guid("door", door.id)},$,${label(door.id)},$,$,${doorPlacement},${fillingShape(door.width, wall.thickness, door.height)},${label(door.id)},${real(door.height)},${real(door.width)},.DOOR.,.${doorOperationType(door)}.,$`,
         );
         add("IFCRELFILLSELEMENT", `${await guid("fill", door.id)},$,$,$,${openingRef},${doorRef}`);
         elements.push(doorRef);
@@ -270,7 +342,16 @@ export async function writeIfc(
           ["OpensTo", `IFCLABEL(${text(door.opensTo)})`],
           // DIN 107 is seen from the swing side; IFC's operation type from the opposite side.
           ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
+          ...placeholder,
         ]);
+        await fillingType(
+          "door",
+          doorRef,
+          door.id,
+          door.width,
+          door.height,
+          doorOperationType(door),
+        );
       }
     }
     // Ceiling slabs (docs/SLAB_ELEMENT.md, Teil B2): IfcSlab FLOOR in the storey that owns
@@ -298,6 +379,12 @@ export async function writeIfc(
         `${await guid("containment", floor.id)},$,$,$,(${elements.join(",")}),${storey}`,
       );
   }
+  // IFC4: element types are declared in the project context.
+  if (types.length)
+    add(
+      "IFCRELDECLARES",
+      `${await guid("declares", "filling-types")},$,$,$,${projectRef},(${types.join(",")})`,
+    );
   return [
     "ISO-10303-21;",
     "HEADER;",
