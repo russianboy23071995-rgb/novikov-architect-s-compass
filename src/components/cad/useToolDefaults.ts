@@ -4,6 +4,7 @@ import { defaultSlabLayerId } from "@/application/slabs/actions";
 import { SLAB_DEFAULTS } from "@/domain/elements/slab/model";
 import { defaultRoofLayerId } from "@/application/roofs/actions";
 import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
+import { defaultRoomLayerId } from "@/application/rooms/actions";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -29,6 +30,14 @@ export type RoofDefaults = Pick<
   Roof,
   "pitch" | "thickness" | "referenceHeight" | "eaveCut" | "topCut" | "layerId"
 >;
+
+/** Room tool values (docs/ROOM_ELEMENT.md, R2); the floor build-up is optional. */
+export type RoomDefaults = {
+  name: string;
+  floorBuildUpEnabled: boolean;
+  floorBuildUp: number;
+  layerId: string;
+};
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
@@ -127,6 +136,24 @@ export function useToolDefaults(project: Project) {
       ? roofValues.layerId
       : defaultRoofLayerId(project),
   };
+  const [roomState, setRoomState] = useState<{ projectId: string; values: RoomDefaults } | null>(
+    null,
+  );
+  const roomValues: RoomDefaults =
+    roomState?.projectId === project.id
+      ? roomState.values
+      : {
+          name: "",
+          floorBuildUpEnabled: false,
+          floorBuildUp: 0.12,
+          layerId: defaultRoomLayerId(project),
+        };
+  const roomDefaults = {
+    ...roomValues,
+    layerId: project.layers.some((l) => l.id === roomValues.layerId)
+      ? roomValues.layerId
+      : defaultRoomLayerId(project),
+  };
   const [state, setState] = useState<{ projectId: string; hatch: HatchDefaults } | null>(null);
   const hatch =
     state?.projectId === project.id
@@ -165,6 +192,10 @@ export function useToolDefaults(project: Project) {
     slab: slabDefaults,
     setSlab(values: SlabDefaults) {
       setSlabState({ projectId: project.id, values });
+    },
+    room: roomDefaults,
+    setRoom(values: RoomDefaults) {
+      setRoomState({ projectId: project.id, values });
     },
     roof: roofDefaults,
     setRoof(values: RoofDefaults) {

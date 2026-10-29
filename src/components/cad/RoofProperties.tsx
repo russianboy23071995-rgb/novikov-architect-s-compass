@@ -15,7 +15,7 @@ const metres = (value: number) =>
   value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
 
 /** The readable German message of a refused change, also from a schema (Zod) issue list. */
-function refusal(error: unknown): string {
+export function refusal(error: unknown): string {
   const fallback = "Nicht übernommen: Werte prüfen.";
   if (!(error instanceof Error)) return fallback;
   if (!error.message.startsWith("[")) return error.message;

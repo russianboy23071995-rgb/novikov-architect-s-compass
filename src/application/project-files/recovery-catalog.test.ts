@@ -56,6 +56,7 @@ test("loaded recovery summary counts all storeys even when the active storey is 
     doors: 0,
     slabs: 0,
     roofs: 0,
+    rooms: 0,
   });
   project = setStoreyHeight(project, project, { projectId: project.id, storeyId: "eg", height: 3 });
   project = addStorey(project, project, {
@@ -104,10 +105,11 @@ test("loaded recovery summary counts all storeys even when the active storey is 
     doors: 0,
     slabs: 0,
     roofs: 0,
+    rooms: 0,
   });
   assert.deepEqual(
     recoveryContentSummary(selectWorkingStorey(candidate.project, candidate.project, "kg")),
-    { storeys: 3, walls: 2, windows: 2, doors: 0, slabs: 0, roofs: 0 },
+    { storeys: 3, walls: 2, windows: 2, doors: 0, slabs: 0, roofs: 0, rooms: 0 },
   );
   assert.equal(serializeProject(candidate.project), before);
   assert.equal(records.get(project.id), stored);
@@ -238,6 +240,15 @@ test("file and recovery summaries count doors, slabs and roofs of every storey",
   const { roofAcceptanceRoof } = await import("../../../benchmarks/roof-ifc-acceptance.ts");
   const { addRoof } = await import("../roofs/actions.ts");
   p = addRoof(p, roofAcceptanceRoof());
+  const { addRoom } = await import("../rooms/actions.ts");
+  p = addRoom(p, {
+    id: "og-r1",
+    points: [
+      { x: 1, y: 1 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+    ],
+  });
   p = selectWorkingStorey(p, p, "eg");
   assert.deepEqual(recoveryContentSummary(p), {
     storeys: 2,
@@ -246,6 +257,7 @@ test("file and recovery summaries count doors, slabs and roofs of every storey",
     doors: 1,
     slabs: 2,
     roofs: 1,
+    rooms: 1,
   });
   assert.deepEqual(projectElementCounts(p), {
     walls: 8,
@@ -253,6 +265,7 @@ test("file and recovery summaries count doors, slabs and roofs of every storey",
     doors: 1,
     slabs: 2,
     roofs: 1,
+    rooms: 1,
     lines: 0,
     hatches: 0,
     references: 0,

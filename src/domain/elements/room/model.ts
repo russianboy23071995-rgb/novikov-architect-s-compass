@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
+import { triangulateSimplePolygon } from "../../../geometry/polygons/triangulate.ts";
+import { contains } from "../../../geometry/polygons/contains.ts";
 
 export const MAX_ROOM_POINTS = 10000;
 /** Room numbers R-001, R-002 … (N32); the stable internal id stays separate. */
@@ -56,4 +58,36 @@ export function nextRoomNumber(rooms: Iterable<Pick<Room, "number">>): string {
     if (match) highest = Math.max(highest, Number(match[1]));
   }
   return `R-${String(highest + 1).padStart(3, "0")}`;
+}
+
+/** Point for the room stamp: the area centroid, or for outlines whose centroid lies outside
+ * (L and U shapes) the centroid of the largest ear triangle. */
+export function roomLabelPoint(points: readonly { x: number; y: number }[]): {
+  x: number;
+  y: number;
+} {
+  let a = 0,
+    cx = 0,
+    cy = 0;
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]!,
+      q = points[(i + 1) % points.length]!;
+    const cross = p.x * q.y - q.x * p.y;
+    a += cross;
+    cx += (p.x + q.x) * cross;
+    cy += (p.y + q.y) * cross;
+  }
+  const centroid = { x: cx / (3 * a), y: cy / (3 * a) };
+  if (a !== 0 && contains(points, centroid)) return centroid;
+  let best = { x: points[0]!.x, y: points[0]!.y },
+    bestArea = -1;
+  for (const [i, j, k] of triangulateSimplePolygon(points)) {
+    const [p, q, r] = [points[i]!, points[j]!, points[k]!];
+    const area = Math.abs((q.x - p.x) * (r.y - p.y) - (r.x - p.x) * (q.y - p.y));
+    if (area > bestArea) {
+      bestArea = area;
+      best = { x: (p.x + q.x + r.x) / 3, y: (p.y + q.y + r.y) / 3 };
+    }
+  }
+  return best;
 }
