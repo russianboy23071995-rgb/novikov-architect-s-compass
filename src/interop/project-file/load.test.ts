@@ -13,6 +13,9 @@ import { addWall } from "../../application/walls/actions.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { createDrawing } from "../../application/drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
+import { createStandardProject } from "../../application/projects/create.ts";
+import { addRoof } from "../../application/roofs/actions.ts";
+import { boundHeightFixture } from "../../../benchmarks/bound-height-fixture.ts";
 
 function legacy(withLines = true) {
   return {
@@ -217,4 +220,47 @@ test("both file entry points preserve UTF-8 budget precedence and normal invalid
   }
   assert.throws(() => readProjectFile("{"), /Ungültige Projektdatei/);
   assert.throws(() => readProjectFile("{}"), /Ungültige Projektdatei/);
+});
+
+test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused, roofs round-trip", () => {
+  // docs/ROOF_ELEMENT.md, D1.
+  assert.equal(PROJECT_SCHEMA_VERSION, 31);
+  const current = createStandardProject("p", "eg", "og");
+  const v30 = { ...JSON.parse(serializeProject(current)), schemaVersion: 30 };
+  const migrated = loadProjectData(v30);
+  assert.equal(migrated.schemaVersion, 31);
+  assert.deepEqual({ ...migrated, schemaVersion: 30 }, { ...current, schemaVersion: 30 });
+  const roof = {
+    id: "dach",
+    points: [
+      { x: 0, y: 0 },
+      { x: 6, y: 0 },
+      { x: 6, y: 4 },
+      { x: 0, y: 4 },
+    ],
+    referenceLine: { start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    rise: "left" as const,
+    referenceHeight: 0.5,
+    pitch: 35,
+    thickness: 0.24,
+    eaveCut: "horizontal" as const,
+    topCut: "perpendicular" as const,
+  };
+  const withRoof = addRoof(current, roof);
+  const smuggled = { ...JSON.parse(serializeProject(withRoof)), schemaVersion: 30 };
+  assert.throws(() => loadProjectData(smuggled));
+  // Walls bound to their storey store no height in the file; they load unchanged too.
+  const bound = boundHeightFixture();
+  assert.ok(bound.storeys.some((s) => s.walls.some((w) => w.topBinding)));
+  const boundV30 = { ...JSON.parse(serializeProject(bound)), schemaVersion: 30 };
+  assert.deepEqual(
+    { ...loadProjectData(boundV30), schemaVersion: 30 },
+    { ...bound, schemaVersion: 30 },
+  );
+  const reread = readProjectFile(serializeProject(withRoof));
+  assert.deepEqual(reread, withRoof);
+  assert.deepEqual(storeyOf(reread).roofs![0], {
+    ...roof,
+    layerId: storeyOf(withRoof).roofs![0]!.layerId,
+  });
 });

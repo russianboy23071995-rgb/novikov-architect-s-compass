@@ -533,7 +533,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Roofs get their edit actions with the roof tool (docs/ROOF_ELEMENT.md, D3).
+    if (!selection || selection.kind === "reference" || selection.kind === "roof") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     const solidMove =
       inSolid &&
@@ -1638,7 +1639,12 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (target.kind === "reference" || target.kind === "door") return;
+                        if (
+                          target.kind === "reference" ||
+                          target.kind === "door" ||
+                          target.kind === "roof"
+                        )
+                          return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(

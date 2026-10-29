@@ -577,6 +577,22 @@ Canvas-Hinweis PR241 – korrigierte Nutzerregel (10.10.2026): Neue Ebenen bleib
 - **Abnahme/Abhängigkeiten:** N56–N59; aktives Fenster, Kamera pro Pane, gemeinsame Auswahl, keine Projektkopie. Ältere Schema-/Statusannahmen daraus gelten nur historisch; Masterplan und aktueller Code prüfen.
 - **Quelle:** FUNKTIONEN-Transkript 08.10., Funktionsarchitektur/Abgleich 03.10.; neuere Präzisierungen im Masterplan.
 
+### N61 – Dach als einflächiges Steildach
+
+- **Stand:** Teilweise (D1, 29.10.2026): Dachmodell Schema 31 je Geschoss (Umriss = äußerer Dachrand von oben, Bezugslinie mit Steigseite, Bezugshöhe der Unterseite relativ zum Geschoss, Neigung 1–80°, Stärke senkrecht zur Fläche, Abschluss Traufe/obere Kante vertikal/rechtwinklig/horizontal, Ortgang vertikal), Flächen- und Ringgeometrie mit Prüfung, Aktionen anlegen/ändern, Migration 30 → 31. Offen: 3D-Körper (D2), Werkzeug/Eigenschaften (D3), Grundriss mit Schnitt bei 1 m, darunter dünn, darüber gestrichelt (D4), Datei/IFC/Abnahme (D5). Nachweis docs/ROOF_ELEMENT.md.
+- **Zuständigkeit:** domain/elements/roof, application/roofs; Darstellung rendering, Bedienung components
+- **Altzuordnung:** Funktionswunsch „Dachfunktion“ (Absatz 62), AUFGABENLISTE L04
+- **Abnahme/Abhängigkeiten:** N21/N22 (Geschosse, Höhen), A08; Trimmen von Wänden ist V09/N26/N27 (Nutzerentscheidung 29.10.2026: Wand hält einen Trimmverweis auf das Dach, Schnitt abgeleitet, „Trimmung aufheben“). Dachflächen als Höhenquelle für Räume: N33/N34.
+- **Quelle:** Nutzerauftrag Dachwerkzeug 29.10.2026 (geprüfte Fassung in docs/ROOF_ELEMENT.md).
+
+### N62 – Dacherweiterungen: Walmdach, Dachlandschaft, Gauben, Löcher, Gast-Anzeige
+
+- **Stand:** Geplant; ausdrücklich nicht Teil von N61. Walmdach und zusammengesetzte Dachlandschaften, Gauben, Löcher im Dachumriss, Darstellung von Dächern anderer Geschosse (Gast-Anzeige, A08/L02), Materialschichten und Dachmengen.
+- **Zuständigkeit:** wie N61
+- **Altzuordnung:** Funktionswunsch „Walmdach“, „Gaubenfunktion“ (Absatz 62)
+- **Abnahme/Abhängigkeiten:** N61, N26/N27, N42/N47 (Schichten), L02.
+- **Quelle:** Nutzerauftrag Dachwerkzeug 29.10.2026.
+
 
 ## 2. Guide-F01–F29 – Kennungen erhalten
 

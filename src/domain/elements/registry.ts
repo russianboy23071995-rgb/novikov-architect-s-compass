@@ -11,6 +11,7 @@ export const ELEMENT_KINDS = {
   window: { list: "windows", label: "Fenster" },
   door: { list: "doors", label: "Tür" },
   slab: { list: "slabs", label: "Decke" },
+  roof: { list: "roofs", label: "Dach" },
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },

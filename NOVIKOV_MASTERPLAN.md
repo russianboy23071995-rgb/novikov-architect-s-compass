@@ -651,11 +651,13 @@ Homepage soll Produkt, Beta, Unterstützungsumfang, Support/Sicherheit, Rechtehi
 | Konten/Lizenzen/Geräte/Offlinefrist und kommerzielle Konditionen | Lizenzimplementation/Public-Beta-Bedingungen |
 | D vs. Ctrl+D; zulässiges Kopieren/Spiegeln, 3D-Reihenfolge | Jeweiliger Action-/Shortcut-Pilot |
 | Allgemeine Perspektive/Kameraparameter, freie 3D-Arbeitsebene | Jeweiliger Navigations-/3D-Pilot |
-| Ungleiche Wandquerschnitte, Dachtrimmen einmalig oder abhängig | Anschluss-/Trim-Fachregel; spätestens vor dem Dach-Auftrag – bestimmt, ob die Trimmung in die Wand geschrieben oder als geschossübergreifende Eingabe aufgelöst wird (A08, 27.10.2026) |
+| Ungleiche Wandquerschnitte | Anschluss-Fachregel |
 | Raumkennungen, virtuelle Grenzen, WoFlV-Profil/Rundung und Berichtsvorlage | Raum-/Wohnflächenauftrag |
 | PAT/Schraffurimportformat/Rechte, andere Austauschprofile/3D-Format | Jeweiliger Import/Export |
 | Settings-Besitzer: Benutzer/Projekt/Ansicht/Werkzeug, Pane-Persistenz | Einstellungsübersicht |
 | AI-Anbieter/Datenfreigabe/Autonomieumfang/Fachregelprofil | Erster entsprechender AI-Pilot |
+
+Entschieden 29.10.2026 (Nutzer, Dach-Auftrag N61): Dachtrimmen wird als geschossübergreifende Eingabe aufgelöst – die Wand hält einen Trimmverweis auf das Dach, der Schnitt wird jeweils aus dem aktuellen Dach abgeleitet (A08), „Trimmung aufheben“ entfernt den Verweis. Das erste Dach (N61) trimmt nicht; Umsetzung im eigenen Trimm-Auftrag (V09).
 
 Entschiedene Punkte nicht erneut als offen behandeln: 2D-only Pickup einschließlich Ebene, Modell-/Papiermaß mit internen Metern, unabhängige Abbildfilter, BIM-Skalierverbot, fixe Zeichenachse bei Wandkörperoffset, Wandkette ein Undo, keine gesonderte gemeinsame Eckbewegung.
 
