@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR504 · 1360 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR505 · 1361 automatische Tests grün
 
 ## Gerade aktiv
 
-- Dachwerkzeug (L04/N61): D1 Modell, D2 3D-Körper, D3 Werkzeug erledigt (PR502–504); als Nächstes D4 Grundriss mit 1-m-Schnitt (docs/ROOF_ELEMENT.md).
+- Dachwerkzeug (L04/N61): D1–D4 erledigt (PR502–505: Modell, 3D, Werkzeug, Grundriss mit 1-m-Schnitt); als Nächstes D5 Datei/IFC/Abnahme (docs/ROOF_ELEMENT.md).
 
 ## Was wir gemacht haben (24.–29.10.2026)
 
