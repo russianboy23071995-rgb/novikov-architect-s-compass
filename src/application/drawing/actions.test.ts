@@ -581,3 +581,107 @@ test("a storey with only a ceiling slab has a 3D body and an IfcSlab (Teil B)", 
   const date = new Date(0);
   assert.ok((await exportIfc(p, date)).includes("IFCSLAB"));
 });
+
+// Decken E1 (docs/SLAB_ELEMENT.md): outline editing through the shared hatch edit path.
+import { prepareDirectEditPreview } from "../direct-edit/prepared-preview.ts";
+import { editAtPointer, type EditSession } from "../direct-edit/session.ts";
+import { closedContour } from "../direct-edit/contour.ts";
+
+test("slab corners, sides and offset edit through the shared path; preview equals commit", () => {
+  const base = addSlab(slabBase(), {
+    id: "s",
+    points: lShape,
+    thickness: 0.25,
+    topOffset: -0.05,
+  });
+  assert.deepEqual(closedContour(base, { kind: "slab", id: "s" }), lShape);
+  const cases: [
+    EditSession["action"],
+    number,
+    { x: number; y: number },
+    { x: number; y: number },
+  ][] = [
+    ["point", 1, { x: 6, y: 0 }, { x: 7, y: -0.5 }],
+    ["stretch", 2, { x: 6, y: 3 }, { x: 6.5, y: 3.5 }],
+    ["edge", 1, { x: 6, y: 1.5 }, { x: 7, y: 1.5 }],
+    ["insert", 0, { x: 3, y: 0 }, { x: 3, y: -1 }],
+  ];
+  for (const [action, index, anchor, pointer] of cases) {
+    const session: EditSession = { base, target: { kind: "slab", id: "s" }, action, index, anchor };
+    const full = editAtPointer(session, base, pointer);
+    const slab = storeyOf(full).slabs![0]!;
+    assert.notDeepEqual(slab.points, lShape, action);
+    assert.equal(slab.thickness, 0.25);
+    assert.equal(slab.topOffset, -0.05);
+    if (action === "insert") assert.equal(slab.points.length, 7);
+    const prepared = prepareDirectEditPreview(session)!;
+    const selection = { kind: "slab", id: "s" } as const;
+    const view = prepared.materialize!(base, selection, pointer);
+    assert.deepEqual(storeyOf(view).slabs, storeyOf(full).slabs, action);
+    const patch = prepared.evaluate(base, selection, pointer);
+    assert.deepEqual(storeyOf(patch.geometry).slabs, [slab], action);
+    assert.equal(storeyOf(patch.geometry).height, 3);
+    assert.deepEqual(buildBuildingSolid(view).faces, buildBuildingSolid(full).faces, action);
+  }
+});
+
+test("slab offset moves a convex outline side; non-convex outlines are refused like hatches", () => {
+  const rectangle = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 4 },
+    { x: 0, y: 4 },
+  ];
+  const base = addSlab(slabBase(), { id: "s", points: rectangle, ...SLAB_DEFAULTS });
+  const session: EditSession = {
+    base,
+    target: { kind: "slab", id: "s" },
+    action: "offset",
+    index: 0,
+    anchor: { x: 3, y: 0 },
+  };
+  const full = editAtPointer(session, base, { x: 3, y: -0.3 });
+  assert.ok(Math.abs(slabArea(storeyOf(full).slabs![0]!) - 6.6 * 4.6) < 1e-9);
+  const view = prepareDirectEditPreview(session)!.materialize!(
+    base,
+    { kind: "slab", id: "s" },
+    { x: 3, y: -0.3 },
+  );
+  assert.deepEqual(storeyOf(view).slabs, storeyOf(full).slabs);
+  const l = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  assert.throws(() => editAtPointer({ ...session, base: l }, l, { x: 3, y: -0.3 }), /konvexe/);
+});
+
+test("slab outline edits reject crossings, keep the model and commit as one undo step", () => {
+  const base = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const session: EditSession = {
+    base,
+    target: { kind: "slab", id: "s" },
+    action: "point",
+    index: 3,
+    anchor: { x: 3, y: 3 },
+  };
+  // Dragging the inner corner beyond the left side makes the outline cross itself.
+  assert.throws(() => editAtPointer(session, base, { x: -1, y: 4 }));
+  assert.throws(() =>
+    prepareDirectEditPreview(session)!.evaluate(base, session.target, { x: -1, y: 4 }),
+  );
+  assert.deepEqual(storeyOf(base).slabs![0]!.points, lShape);
+  let state = createEditingState(base);
+  state = editingReducer(state, {
+    type: "begin",
+    target: { kind: "slab", id: "s" },
+    action: "point",
+    index: 3,
+    anchor: { x: 3, y: 3 },
+  });
+  state = editingReducer(state, {
+    type: "confirm",
+    session: state.session!,
+    selection: { kind: "slab", id: "s" },
+    point: { x: 4, y: 4 },
+  });
+  assert.deepEqual(storeyOf(state.history.present).slabs![0]!.points[3], { x: 4, y: 4 });
+  assert.equal(state.history.past.length, 1);
+  assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, base);
+});

@@ -2,6 +2,7 @@ import { stretchOffset } from "../../geometry/projections/direction.ts";
 import { editDirection } from "./snapping.ts";
 import { prepareContourInsertion } from "../../geometry/polygons/edit-edge.ts";
 import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
+import { MAX_SLAB_POINTS } from "../../domain/elements/slab/model.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
 import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
@@ -10,31 +11,46 @@ import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
 import type { EditSession } from "./session.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
+import type { Hatch } from "../../domain/elements/hatch/model.ts";
+import type { Slab } from "../../domain/elements/slab/model.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";
 
 /** An owned validated snapshot fixes all non-contour fields. Point/edge previews
  * use changed-edge checks; offset and insertion retain full target contour validation.
+ * Shared by hatches and ceiling slab outlines (docs/SLAB_ELEMENT.md, E1); the slab patch
+ * carries the storey height so the 3D preview places the slab at its level.
  */
 export function prepareHatchContourPreview(session: EditSession): PreparedDirectEditPreview {
+  const kind = session.target.kind;
   if (
-    session.target.kind !== "hatch" ||
+    (kind !== "hatch" && kind !== "slab") ||
     !["point", "stretch", "edge", "offset", "insert"].includes(session.action)
   )
-    throw Error("Unsupported hatch preview");
+    throw Error("Unsupported contour preview");
   const source = session.base,
     base = createProjectSnapshot(source),
     level = storeyOf(base);
-  const hatch = level.hatches.find((h) => h.id === session.target.id);
+  const items: readonly { id: string; points: readonly Point[] }[] =
+    kind === "slab" ? (level.slabs ?? []) : level.hatches;
+  const hatch = items.find((h) => h.id === session.target.id);
   const index = session.index ?? (session.action === "offset" ? 0 : null);
   if (!hatch || index === null || !Number.isInteger(index) || !hatch.points[index])
-    throw Error("Invalid hatch grip");
-  if (session.action === "insert" && hatch.points.length >= MAX_HATCH_POINTS)
-    throw Error("Maximale Anzahl der Schraffurpunkte erreicht.");
-  const insert = session.action === "insert" ? prepareContourInsertion(hatch.points, index) : null;
-  const edge = session.action === "edge" ? prepareSessionContourEdge(session, hatch.points) : null;
+    throw Error("Invalid contour grip");
+  if (
+    session.action === "insert" &&
+    hatch.points.length >= (kind === "slab" ? MAX_SLAB_POINTS : MAX_HATCH_POINTS)
+  )
+    throw Error(
+      kind === "slab"
+        ? "Maximale Anzahl der Deckenpunkte erreicht."
+        : "Maximale Anzahl der Schraffurpunkte erreicht.",
+    );
+  const ring = hatch.points as Point[];
+  const insert = session.action === "insert" ? prepareContourInsertion(ring, index) : null;
+  const edge = session.action === "edge" ? prepareSessionContourEdge(session, ring) : null;
   const contour = ["point", "stretch"].includes(session.action)
-    ? preparePolygonVertexEdit(hatch.points, [index])
+    ? preparePolygonVertexEdit(ring, [index])
     : null;
   const target = Object.freeze({ ...session.target });
   const anchor = Object.freeze({ ...session.anchor });
@@ -67,25 +83,39 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
       );
       const result = contour!.validate(points);
       if (!result.valid)
-        throw Error(`Invalid hatch contour: ${result.reason} (${result.indices.join(", ")})`);
+        throw Error(`Invalid contour: ${result.reason} (${result.indices.join(", ")})`);
     }
     Object.freeze(points);
-    return Object.freeze({ ...hatch!, points });
+    return Object.freeze({ ...hatch!, points }) as typeof hatch & { id: string };
   }
   return Object.freeze({
     evaluate(current, selection, point) {
       const changed = resolve(current, selection, point);
       const geometry = {
-        storey: {
-          ...level,
-          walls: [],
-          windows: [],
-          lines: [],
-          wallJoins: [],
-          wallTJunctions: [],
-          references: [],
-          hatches: [changed],
-        },
+        storey:
+          kind === "slab"
+            ? {
+                ...level,
+                walls: [],
+                windows: [],
+                doors: [],
+                lines: [],
+                wallJoins: [],
+                wallTJunctions: [],
+                references: [],
+                hatches: [],
+                slabs: [changed as Slab],
+              }
+            : {
+                ...level,
+                walls: [],
+                windows: [],
+                lines: [],
+                wallJoins: [],
+                wallTJunctions: [],
+                references: [],
+                hatches: [changed as Hatch],
+              },
         assets: [],
       };
       return {
@@ -98,10 +128,18 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
       const changed = resolve(current, selection, point);
       // Legacy 2D consumer still needs a Project-shaped derived view. Reuse every
       // unaffected entity; validation/publication remains exclusively at fullEdit.
-      return replaceStorey(base, {
-        ...level,
-        hatches: level.hatches.map((h) => (h.id === changed.id ? changed : h)),
-      });
+      return replaceStorey(
+        base,
+        kind === "slab"
+          ? {
+              ...level,
+              slabs: (level.slabs ?? []).map((s) => (s.id === changed.id ? (changed as Slab) : s)),
+            }
+          : {
+              ...level,
+              hatches: level.hatches.map((h) => (h.id === changed.id ? (changed as Hatch) : h)),
+            },
+      );
     },
   } satisfies PreparedDirectEditPreview);
 }

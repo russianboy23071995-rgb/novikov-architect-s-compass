@@ -8,11 +8,12 @@ import { updateLine } from "../lines/actions.ts";
 import { updateWindow } from "../windows/actions.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import { updateWall } from "../walls/actions.ts";
+import { updateSlab } from "../slabs/actions.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import type { ProjectResultMode } from "../../domain/project/owned-snapshot.ts";
 
-export type TransformTarget = { kind: "wall" | "line" | "hatch"; id: string };
+export type TransformTarget = { kind: "wall" | "line" | "hatch" | "slab"; id: string };
 
 export function editablePoints(project: Project, target: TransformTarget): Point[] {
   if (target.kind === "wall") {
@@ -21,6 +22,9 @@ export function editablePoints(project: Project, target: TransformTarget): Point
   } else if (target.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((item) => item.id === target.id);
     if (hatch) return hatch.points.map((point) => ({ ...point }));
+  } else if (target.kind === "slab") {
+    const slab = storeyOf(project).slabs?.find((item) => item.id === target.id);
+    if (slab) return slab.points.map((point) => ({ ...point }));
   } else {
     const line = storeyOf(project).lines?.find((item) => item.id === target.id);
     if (line) return line.points.map((point) => ({ ...point }));
@@ -52,6 +56,8 @@ function applyPoints(
       changes: { points, ...(pattern ? { pattern } : {}) },
     });
   }
+  // Outline edits of a ceiling slab use the shared slab action (docs/SLAB_ELEMENT.md, E1).
+  if (target.kind === "slab") return updateSlab(project, target.id, { points });
   return target.kind === "wall"
     ? updateWall(
         project,
@@ -102,8 +108,8 @@ export function stretchEndpoint(
   length: number,
 ): Project {
   if (!Number.isFinite(length) || length <= 0) throw new Error("Länge muss größer als null sein.");
-  if (target.kind === "hatch")
-    throw new Error("Geschlossene Schraffuren haben keine freien Endpunkte.");
+  if (target.kind === "hatch" || target.kind === "slab")
+    throw new Error("Geschlossene Umrisse haben keine freien Endpunkte.");
   const points = editablePoints(project, target);
   const last = points.length - 1;
   if (points.length > 2 && points[0]!.x === points[last]!.x && points[0]!.y === points[last]!.y)

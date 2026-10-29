@@ -548,6 +548,12 @@ export function BimPlan({
       ?.points.forEach((point, index) =>
         handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
       );
+  } else if (selection?.kind === "slab") {
+    storeyOf(project)
+      .slabs?.find((s) => s.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Deckenecke ${index + 1}` }),
+      );
   } else if (selection?.kind === "line") {
     const line = storeyOf(project).lines?.find((item) => item.id === selection.id);
     line?.points.forEach((point, index) => {

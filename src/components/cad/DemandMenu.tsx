@@ -19,7 +19,10 @@ export function DemandMenu({
   onMoveSelection,
   onDeleteSelection,
   selectionCount = 0,
+  solid = false,
 }: {
+  /** Opened from the 3D view: slab outlines are edited in the plan only. */
+  solid?: boolean;
   calibrationControls?: import("react").ReactNode;
   onMoveSelection?: (() => void) | undefined;
   /** Shared delete operation for the current selection (single or multiple elements). */
@@ -163,8 +166,8 @@ export function DemandMenu({
         )}
         {selection && selection.kind !== "reference" && summary && (
           <>
-            {/* Slabs move as a whole; outline editing follows later (docs/SLAB_ELEMENT.md). */}
-            {selection.kind !== "slab" && (
+            {/* Slab outlines are edited in the plan only (docs/SLAB_ELEMENT.md, E1). */}
+            {(selection.kind !== "slab" || !solid) && (
               <>
                 {closedContour(project, selection) && (
                   <button
