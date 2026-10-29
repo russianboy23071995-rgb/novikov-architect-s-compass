@@ -121,3 +121,20 @@ Behoben am 27.10.2026 (Branch fix/ifc-file-description): Der Aufrufer bestimmt d
 Der Nutzer bestätigt den Import von `NOVIKOV-T-Anschluss-Test.ifc` als erfolgreich: alle Wandanschlüsse korrekt gebildet; Wände werden als Wände erkannt, Höhen und Materialien sind in Archicad änderbar; Fensterbrüstungen erkennbar und steuerbar, Fenster verschiebbar. Damit ist die praktische Abnahme der T-Anschlüsse (schräg bis 5°, Wandmitte, beidseitig, an einer Hauptwand mit 120°-Ecke) abgeschlossen. Dies ist die Nutzerabnahme, kein von Claude ausgeführter Archicad-Test.
 
 Abweichung bei den Fenstern: Der Fensterstempel zeigt „RB: 0,00 x 0,00“, Breite und Höhe sind in Archicad nicht änderbar. Ursache im Export: `IfcWindow` wird bewusst ohne eigene Geometrie und ohne Fenstertyp geschrieben (Representation `$`, nur OverallWidth/OverallHeight und die verknüpfte Öffnung, siehe Eck-Abnahme: „Rahmen und Glas werden nicht erfunden“). Archicad übernimmt daraus kein parametrisches Fenster mit Maßen. Die Öffnungen selbst sind korrekt. Kein Fehler der T-Anschlüsse; eigener Kandidat für einen späteren Auftrag (Fenster im IFC mit Geometrie bzw. Typangaben, damit Archicad die Maße erkennt).
+
+## Fenster- und Türmaße für Archicad: drei Testvarianten (29.10.2026)
+
+Ziel: Archicad soll Breite und Höhe von Fenstern und Türen erkennen (bisher „RB 0,00 x 0,00“, nicht änderbar). Vermutete Ursache: `IfcWindow`/`IfcDoor` ohne eigenen Körper. Archicad lässt sich hier nicht ausführen; die Wahl der Variante entscheidet der Import des Nutzers.
+
+Exportoption `IfcFillingOptions` in `src/interop/ifc/writer.ts` (Standard unverändert: kein Körper, kein Typ):
+
+| Datei                                            | Option                | Inhalt                                                                                                                |
+| ------------------------------------------------ | --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `NOVIKOV-Fenster-V1-Platzhalter-schlank.ifc`     | `fillingBody: "thin"` | Quader in Öffnungsgröße, 0,07 m tief, in Wandmitte                                                                    |
+| `NOVIKOV-Fenster-V2-Platzhalter-Wandstaerke.ifc` | `fillingBody: "full"` | Quader in Öffnungsgröße durch die ganze Wandstärke                                                                    |
+| `NOVIKOV-Fenster-V3-Typ-und-Mengen.ifc`          | `fillingTypes: true`  | ohne Körper; `IfcWindowType`/`IfcDoorType` je Element, `Qto_…BaseQuantities` (Breite, Höhe, Fläche), `IfcRelDeclares` |
+
+- Kein Rahmen, kein Glas, kein Türblatt: Der Körper in V1/V2 ist ein neutraler Platzhalter und im Satz `NOVIKOV_BIM` als `PlaceholderBody = TRUE` gekennzeichnet.
+- Testhaus `benchmarks/filling-ifc-acceptance.ts`: ein Geschoss 3,00 m, Raum 6 × 4 m (Achsen), Wände 0,30 m dick und 2,80 m hoch, Fenster 1,20 × 1,35 m (Brüstung 0,90 m) und 0,80 × 1,00 m (Brüstung 1,10 m), Tür 1,01 × 2,135 m. Skript `scripts/generate-filling-ifc-variants.mjs` mit denselben Wandprofilen wie der normale Export.
+- Nachweis: Standardexport der Decken-Testdatei byteweise gleich der Datei vom 28.10.2026; Test in `src/interop/ifc/door.test.ts` (Standard ohne Körper/Typ, Körpermaße V1/V2 je Fenster und Tür, Typen/Mengen V3, alle Verweise vorhanden). 1353 Tests grün. In allen drei Dateien zeigt jeder Verweis auf eine vorhandene Zeile.
+- Offen: Archicad-Import der drei Dateien durch den Nutzer; danach wird die bestätigte Variante Standard des normalen Exports (Schritt 2).
