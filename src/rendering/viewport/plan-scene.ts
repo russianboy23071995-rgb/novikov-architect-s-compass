@@ -6,6 +6,7 @@ import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
 import { openingOverlaps } from "../../domain/elements/wall/opening-overlaps.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
+import { roomHeightField, storeyCeilingSources } from "../../domain/elements/room/heights.ts";
 
 export function derivePlanScene(
   geometry: ModelGeometry,
@@ -25,6 +26,7 @@ export function derivePlanScene(
   }
   // Overlaps stay allowed; the plan marks every involved window or door as a hint.
   const storey = "storeys" in geometry ? storeyOf(geometry) : geometry.storey;
+  const ceilings = plan.rooms.length ? storeyCeilingSources(storey) : [];
   const overlapping = new Set(openingOverlaps(storey).flatMap((o) => [o.first, o.second]));
   return {
     plan,
@@ -39,6 +41,8 @@ export function derivePlanScene(
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),
+    // Clear heights from the storey's slabs and roofs, whatever their display (R3).
+    roomHeights: new Map(plan.rooms.map((r) => [r.id, roomHeightField(r, ceilings)] as const)),
     // Cut at 1 m, outline below and above it (docs/ROOF_ELEMENT.md, D4).
     roofViews: new Map(plan.roofs.map((r) => [r.id, roofPlanView(r)])),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),

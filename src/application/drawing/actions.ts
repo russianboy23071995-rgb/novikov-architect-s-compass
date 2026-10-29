@@ -54,7 +54,14 @@ export type DrawingRequest =
     }
   | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
   | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">)
-  | { kind: "room"; points: Point[]; name?: string; floorBuildUp?: number; layerId?: string };
+  | {
+      kind: "room";
+      points: Point[];
+      name?: string;
+      floorBuildUp?: number;
+      heightLines?: number[];
+      layerId?: string;
+    };
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -120,6 +127,7 @@ export function createDrawing(
       points: closedDrawingContour(request.points),
       ...(request.name ? { name: request.name } : {}),
       ...(request.floorBuildUp !== undefined ? { floorBuildUp: request.floorBuildUp } : {}),
+      ...(request.heightLines ? { heightLines: request.heightLines } : {}),
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   if (request.kind === "roof") {

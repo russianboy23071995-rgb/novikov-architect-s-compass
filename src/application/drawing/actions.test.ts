@@ -451,7 +451,7 @@ test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips
   assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 3, bottom: 2.8 });
   const reopened = readProjectFile(serializeProject(p));
   assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.equal(PROJECT_SCHEMA_VERSION, 32);
+  assert.equal(PROJECT_SCHEMA_VERSION, 33);
   assert.deepEqual(reopened, p);
 });
 
@@ -1114,3 +1114,109 @@ test("room tool: click between walls takes the inner faces; drawing, editing and
   const deleted = previewDeleteSelection(drawn, one, undefined).result;
   assert.equal(storeyOf(deleted).rooms!.length, 0);
 });
+
+import { workingRoomHeights } from "../rooms/actions.ts";
+import { parseHeightLines, formatHeightLines } from "../rooms/height-lines.ts";
+import { addRoof as addRoofAction } from "../roofs/actions.ts";
+
+test("room heights: clear height field under roof and slab, zones, open part, height lines", () => {
+  // Raum R3 (docs/ROOM_ELEMENT.md): storey 3,00 m; a mono-pitch roof (underside 0,50 m at y = 0,
+  // 30°) covers y ≤ 5, a slab (0,20 m, underside 2,80 m) covers 5 ≤ y ≤ 5,5; y > 5,5 is open.
+  let p = slabBase();
+  p = addRoofAction(p, {
+    id: "d",
+    points: [
+      { x: -1, y: -1 },
+      { x: 9, y: -1 },
+      { x: 9, y: 5 },
+      { x: -1, y: 5 },
+    ],
+    referenceLine: { start: { x: 0, y: 0 }, end: { x: 8, y: 0 } },
+    rise: "left",
+    referenceHeight: 0.5,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+  p = addSlab(p, {
+    id: "s",
+    points: [
+      { x: -1, y: 5 },
+      { x: 9, y: 5 },
+      { x: 9, y: 5.5 },
+      { x: -1, y: 5.5 },
+    ],
+    ...SLAB_DEFAULTS,
+  });
+  const room = { points: [...ring8x6] };
+  p = createDrawing(p, p, "r", { kind: "room", points: room.points });
+  const stored = storeyOf(p).rooms![0]!;
+  const field = workingRoomHeights(p, stored);
+  const t = Math.tan(Math.PI / 6);
+  const y1 = 0.5 / t, // clear height 1,00
+    y2 = 1.5 / t; // clear height 2,00
+  const near = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+  assert.ok(near(field.min!, 0.5) && near(field.max!, 0.5 + 5 * t));
+  assert.ok(near(field.zones[0]!.area, 8 * y1));
+  assert.ok(near(field.zones[1]!.area, 8 * (y2 - y1)));
+  assert.ok(near(field.zones[2]!.area, 8 * (5 - y2) + 4));
+  assert.ok(near(field.openArea, 4));
+  assert.deepEqual(
+    field.lines.map((l) => l.levels),
+    [[2], [1]],
+  );
+  for (const [line, y] of [
+    [field.lines[0]!, y2],
+    [field.lines[1]!, y1],
+  ] as const) {
+    assert.ok(near(Math.abs(line.end.x - line.start.x), 8));
+    assert.ok(near(line.start.y, y) && near(line.end.y, y));
+  }
+
+  // A floor build-up lifts the floor: lines move uphill by build-up / tan(pitch).
+  const raised = workingRoomHeights(p, { ...stored, floorBuildUp: 0.12 });
+  assert.ok(near(raised.lines.find((l) => l.levels[0] === 1)!.start.y, 0.62 / t));
+  assert.ok(near(raised.min!, 0.38));
+  // Own height lines; none at all; a level only crossed by the slab step is one line.
+  const own = workingRoomHeights(p, { ...stored, heightLines: [1.5] });
+  assert.equal(own.zones.length, 2);
+  assert.equal(own.lines.length, 1);
+  assert.equal(workingRoomHeights(p, { ...stored, heightLines: [] }).lines.length, 0);
+  const high = workingRoomHeights(p, { ...stored, heightLines: [2.5, 3] });
+  assert.ok(high.lines.some((l) => l.levels.join() === "2.5"));
+  // Without slab and roof everything is open and visibly named, never guessed.
+  const empty = slabBase();
+  const bare = createDrawing(empty, empty, "r", { kind: "room", points: room.points });
+  const open = workingRoomHeights(bare, storeyOf(bare).rooms![0]!);
+  assert.equal(open.min, null);
+  assert.ok(near(open.openArea, 48));
+  // Plan scene and menu use the same field.
+  const scene = derivePlanScene(p, () => true);
+  assert.equal(scene.roomHeights.get("r")!.lines.length, 2);
+  const details = selectionSummary(p, { kind: "room", id: "r" })!.details;
+  assert.match(details, /lichte Höhe 0,50–3,39 m/);
+  assert.match(details, /unter 1,00 m: 6,93 m²/);
+  assert.match(details, /Höhe offen: 4,00 m²/);
+  // Text input of height lines.
+  assert.deepEqual(parseHeightLines("2,2; 1"), [1, 2.2]);
+  assert.deepEqual(parseHeightLines(" "), []);
+  assert.equal(typeof parseHeightLines("1; x"), "string");
+  assert.equal(typeof parseHeightLines("1; 1,0"), "string");
+  assert.equal(formatHeightLines([1, 2.25]), "1,00; 2,25");
+  // Undo: one height line change is one step.
+  let state = createEditingState(p);
+  state = editingReducer(state, {
+    type: "project",
+    project: updateRoom(p, "r", { heightLines: [1.5] }),
+  });
+  assert.equal(state.history.past.length, 1);
+  assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, p);
+});
+
+const ring8x6 = [
+  { x: 0, y: 0 },
+  { x: 8, y: 0 },
+  { x: 8, y: 6 },
+  { x: 0, y: 6 },
+];

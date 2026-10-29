@@ -3,6 +3,11 @@ import { standardLayerId } from "../../domain/layers/model.ts";
 import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { nextRoomNumber, type Room } from "../../domain/elements/room/model.ts";
+import {
+  roomHeightField,
+  storeyCeilingSources,
+  type RoomHeightField,
+} from "../../domain/elements/room/heights.ts";
 
 type RoomCreation = Omit<Room, "layerId" | "number" | "name"> & {
   layerId?: string;
@@ -58,8 +63,15 @@ export function updateRoom(
         // Absent means no build-up; an explicit undefined removes it.
         if ("floorBuildUp" in changes && changes.floorBuildUp === undefined)
           delete next.floorBuildUp;
+        // Absent height lines mean the defaults 1,00/2,00 m; explicit undefined restores them.
+        if ("heightLines" in changes && changes.heightLines === undefined) delete next.heightLines;
         return next;
       }),
     }),
   });
+}
+
+/** Clear height field of a room in the working storey: its slabs and roofs only (R3, A08). */
+export function workingRoomHeights(project: Project, room: Room): RoomHeightField {
+  return roomHeightField(room, storeyCeilingSources(storeyOf(project)));
 }
