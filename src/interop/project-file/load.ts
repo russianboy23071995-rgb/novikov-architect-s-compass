@@ -35,6 +35,7 @@ import {
   projectV29Schema,
   projectV30Schema,
   projectV31Schema,
+  projectV32Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -76,7 +77,7 @@ function withoutBoundHeights<
   };
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 32. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 33. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -190,9 +191,21 @@ export function migrateProjectData(value: unknown): Project {
       withoutBoundHeights({ ...projectV30Schema.parse(value), schemaVersion: 31 }),
     );
   // Schema 31 files carry no rooms; the strict v31 schema rejects smuggled room lists.
+  // Straight to the current format: rooms (32) and their height lines (33) are both absent.
   if (value.schemaVersion === 31)
     return validateProject(
-      withoutBoundHeights({ ...projectV31Schema.parse(value), schemaVersion: 32 }),
+      withoutBoundHeights({
+        ...projectV31Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 32 rooms carry no height lines; they keep the defaults (absent field).
+  if (value.schemaVersion === 32)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV32Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {

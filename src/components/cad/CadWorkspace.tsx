@@ -1,6 +1,7 @@
 import { RoomSettingsPanel, RoomToolFields } from "./RoomToolFields";
 import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
+import { isDefaultHeightLines } from "@/application/rooms/height-lines";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -743,6 +744,9 @@ export function CadWorkspace({
                     ...(toolDefaults.room.floorBuildUpEnabled
                       ? { floorBuildUp: toolDefaults.room.floorBuildUp }
                       : {}),
+                    ...(isDefaultHeightLines(toolDefaults.room.heightLines)
+                      ? {}
+                      : { heightLines: toolDefaults.room.heightLines }),
                     layerId: toolDefaults.room.layerId,
                   }
                 : tool === "roof"

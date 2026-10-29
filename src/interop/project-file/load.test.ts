@@ -270,7 +270,7 @@ test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused
 
 test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique numbers, migration", () => {
   // docs/ROOM_ELEMENT.md, R1.
-  assert.equal(PROJECT_SCHEMA_VERSION, 32);
+  assert.equal(PROJECT_SCHEMA_VERSION, 33);
   const base = createStandardProject("p", "eg", "og");
   const square = [
     { x: 0, y: 0 },
@@ -329,4 +329,33 @@ test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique nu
       { ...bound, schemaVersion: 0 },
       `bound walls from schema ${version}`,
     );
+});
+
+test("schema 33 adds room height lines: defaults absent, checked lists, v32 files load", () => {
+  // docs/ROOM_ELEMENT.md, R3.
+  const square = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+  ];
+  const base = addRoom(createStandardProject("p", "eg", "og"), { id: "r1", points: square });
+  assert.equal("heightLines" in storeyOf(base).rooms![0]!, false);
+  const set = updateRoom(base, "r1", { heightLines: [1.2, 2.3] });
+  assert.deepEqual(storeyOf(set).rooms![0]!.heightLines, [1.2, 2.3]);
+  assert.deepEqual(readProjectFile(serializeProject(set)), set);
+  assert.equal(
+    "heightLines" in storeyOf(updateRoom(set, "r1", { heightLines: undefined })).rooms![0]!,
+    false,
+  );
+  assert.deepEqual(
+    storeyOf(updateRoom(base, "r1", { heightLines: [] })).rooms![0]!.heightLines,
+    [],
+  );
+  for (const bad of [[2, 1], [1, 1], [0.05], [11], [1, 2, 3, 4, 5, 6]])
+    assert.throws(() => updateRoom(base, "r1", { heightLines: bad }), String(bad));
+  // A schema 32 file with rooms loads with the defaults; height lines in it are refused.
+  const v32 = { ...JSON.parse(serializeProject(base)), schemaVersion: 32 };
+  assert.deepEqual(loadProjectData(v32), base);
+  const smuggled = { ...JSON.parse(serializeProject(set)), schemaVersion: 32 };
+  assert.throws(() => loadProjectData(smuggled));
 });

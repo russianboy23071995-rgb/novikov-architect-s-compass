@@ -144,6 +144,7 @@ export function PlanSceneContent({
         const points = room.points.map((p) => `${p.x},${-p.y}`).join(" ");
         const selected = selectedIds.has(room.id);
         const label = roomLabelPoint(room.points);
+        const heights = scene.roomHeights.get(room.id);
         const size = 11 / pixelsPerMetre;
         const area = roomArea(room).toLocaleString("de-DE", {
           minimumFractionDigits: 2,
@@ -165,6 +166,55 @@ export function PlanSceneContent({
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none focus-visible:stroke-sky-300"
             />
+            {heights && heights.openPieces.length > 0 && (
+              <path
+                aria-label={`Raum ohne Höhenquelle ${room.number}`}
+                d={heights.openPieces
+                  .map((piece) => "M" + piece.map((p) => `${p.x},${-p.y}`).join(" L") + " Z")
+                  .join(" ")}
+                fill="#f59e0b"
+                fillOpacity={0.14}
+                pointerEvents="none"
+              />
+            )}
+            {heights?.lines.map((line, i) => {
+              const mid = {
+                x: (line.start.x + line.end.x) / 2,
+                y: (line.start.y + line.end.y) / 2,
+              };
+              let angle =
+                (-Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x) * 180) / Math.PI;
+              if (angle > 90) angle -= 180;
+              if (angle <= -90) angle += 180;
+              const text = line.levels
+                .map((h) => h.toLocaleString("de-DE", { minimumFractionDigits: 2 }))
+                .join(" / ");
+              return (
+                <g key={i} aria-label={`Höhenlinie ${text} ${room.number}`} pointerEvents="none">
+                  <line
+                    x1={line.start.x}
+                    y1={-line.start.y}
+                    x2={line.end.x}
+                    y2={-line.end.y}
+                    stroke="#0369a1"
+                    strokeWidth={1}
+                    strokeDasharray="6 4"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <text
+                    x={mid.x}
+                    y={-mid.y}
+                    transform={`rotate(${angle} ${mid.x} ${-mid.y})`}
+                    dy={-3 / pixelsPerMetre}
+                    fontSize={10 / pixelsPerMetre}
+                    textAnchor="middle"
+                    fill="#0369a1"
+                  >
+                    {text}
+                  </text>
+                </g>
+              );
+            })}
             <text
               aria-label={`Raumstempel ${room.number}`}
               x={label.x}

@@ -21,6 +21,7 @@ import type {
 } from "@/application/tools/pickup";
 import { defaultHatchFill } from "@/application/drawing/actions";
 import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
+import { ROOM_HEIGHT_LINES } from "@/domain/elements/room/heights";
 
 /** Slab tool values in metres; the session draft never enters model history. */
 export type SlabDefaults = { thickness: number; topOffset: number; layerId: string };
@@ -36,6 +37,8 @@ export type RoomDefaults = {
   name: string;
   floorBuildUpEnabled: boolean;
   floorBuildUp: number;
+  /** Height lines new rooms get (R3); the defaults 1,00/2,00 m are not stored in the room. */
+  heightLines: number[];
   layerId: string;
 };
 
@@ -146,6 +149,7 @@ export function useToolDefaults(project: Project) {
           name: "",
           floorBuildUpEnabled: false,
           floorBuildUp: 0.12,
+          heightLines: [...ROOM_HEIGHT_LINES],
           layerId: defaultRoomLayerId(project),
         };
   const roomDefaults = {

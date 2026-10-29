@@ -5,7 +5,26 @@ import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";
 import { slabArea } from "../../domain/elements/slab/model.ts";
-import { roomArea } from "../../domain/elements/room/model.ts";
+import { roomArea, type Room } from "../../domain/elements/room/model.ts";
+import { workingRoomHeights } from "../../application/rooms/actions.ts";
+
+/** Clear height range and zone areas for the menu (R3); open parts are named, not hidden. */
+function roomHeightText(project: Project, room: Room) {
+  const field = workingRoomHeights(project, room);
+  const n = (v: number) =>
+    v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const parts: string[] = [];
+  if (field.min !== null) {
+    parts.push(`lichte Höhe ${n(field.min)}–${n(field.max!)} m`);
+    for (const z of field.zones)
+      if (z.area > 1e-6)
+        parts.push(
+          `${z.from === null ? `unter ${n(z.to!)}` : z.to === null ? `ab ${n(z.from)}` : `${n(z.from)}–${n(z.to)}`} m: ${n(z.area)} m²`,
+        );
+  }
+  if (field.openArea > 1e-6) parts.push(`Höhe offen: ${n(field.openArea)} m²`);
+  return parts.map((p) => ` · ${p}`).join("");
+}
 
 export type MenuObstacle = { left: number; top: number; right: number; bottom: number };
 
@@ -111,7 +130,7 @@ export function selectionSummary(project: Project, selection: Selection) {
     return room
       ? {
           title: room.name ? `Raum ${room.number} · ${room.name}` : `Raum ${room.number}`,
-          details: `Grundfläche ${roomArea(room).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²${room.floorBuildUp === undefined ? "" : ` · Fußbodenaufbau ${metres(room.floorBuildUp)}`}`,
+          details: `Grundfläche ${roomArea(room).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²${room.floorBuildUp === undefined ? "" : ` · Fußbodenaufbau ${metres(room.floorBuildUp)}`}${roomHeightText(project, room)}`,
         }
       : null;
   }
