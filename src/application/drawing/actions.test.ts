@@ -12,6 +12,7 @@ import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { capturedStart, closesAtStart, resolvePathClick } from "./path-closure.ts";
 import { mergeOntoVertex, moveVertex } from "../../geometry/polygons/vertex-merge.ts";
 import { capturedVertex } from "../direct-edit/transforms.ts";
+import { updateRoof } from "../roofs/actions.ts";
 test("shared drawing creates exact wall dimensions with one history step and matching JSON/solid", () => {
   const base = createProject("p", "s"),
     start = { x: 0, y: 0 };
@@ -889,4 +890,85 @@ test("a corner moved onto another corner is deleted for every vertex element; pr
     { x: 4, y: 0 },
   );
   assert.deepEqual(storeyOf(lineView).lines, storeyOf(lineFull).lines);
+});
+
+test("roof tool: drawing creates one roof; outline edits keep the reference line, one undo step", () => {
+  // Dach D3 (docs/ROOF_ELEMENT.md).
+  const base = slabBase();
+  const outline = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 4 },
+    { x: 0, y: 4 },
+    { x: 0, y: 0 }, // a drawing may return to its start; the ring closes implicitly
+  ];
+  const request = {
+    kind: "roof" as const,
+    points: outline,
+    referenceLine: { start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    rise: "left" as const,
+    referenceHeight: 0,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "perpendicular" as const,
+    topCut: "vertical" as const,
+  };
+  const drawn = createDrawing(base, base, "r", request);
+  const roof = storeyOf(drawn).roofs![0]!;
+  assert.equal(roof.points.length, 4);
+  assert.equal(drawn.layers.find((l) => l.id === roof.layerId)!.name, "Dach");
+  // Too shallow for the chosen cuts: readable refusal, no roof.
+  assert.throws(
+    () =>
+      createDrawing(base, base, "r2", {
+        ...request,
+        points: outline.map((p) => ({ x: p.x, y: p.y / 40 })),
+        eaveCut: "horizontal",
+        topCut: "horizontal",
+      }),
+    /zu schmal/,
+  );
+  const target = { kind: "roof", id: "r" } as const;
+  const cases: [
+    EditSession["action"],
+    number,
+    { x: number; y: number },
+    { x: number; y: number },
+  ][] = [
+    ["point", 2, { x: 6, y: 4 }, { x: 7, y: 5 }],
+    ["edge", 1, { x: 6, y: 2 }, { x: 7, y: 2 }],
+    ["insert", 2, { x: 3, y: 4 }, { x: 3, y: 5 }],
+    ["offset", 1, { x: 6, y: 2 }, { x: 6.5, y: 2 }],
+  ];
+  for (const [action, index, anchor, pointer] of cases) {
+    const session: EditSession = { base: drawn, target, action, index, anchor };
+    const edited = storeyOf(editAtPointer(session, drawn, pointer)).roofs![0]!;
+    assert.notDeepEqual(edited.points, roof.points, action);
+    assert.deepEqual(edited.referenceLine, roof.referenceLine, action);
+    assert.equal(edited.pitch, 30, action);
+  }
+  let state = createEditingState(drawn);
+  state = editingReducer(state, {
+    type: "begin",
+    target,
+    action: "point",
+    index: 2,
+    anchor: { x: 6, y: 4 },
+  });
+  state = editingReducer(state, {
+    type: "confirm",
+    session: state.session!,
+    selection: target,
+    point: { x: 7, y: 5 },
+  });
+  assert.deepEqual(storeyOf(state.history.present).roofs![0]!.points[2], { x: 7, y: 5 });
+  assert.equal(state.history.past.length, 1);
+  assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, drawn);
+  // A property change is one checked update, one history step.
+  state = editingReducer(createEditingState(drawn), {
+    type: "project",
+    project: updateRoof(drawn, "r", { pitch: 40, rise: "right" }),
+  });
+  assert.equal(state.history.past.length, 1);
+  assert.equal(storeyOf(state.history.present).roofs![0]!.rise, "right");
 });

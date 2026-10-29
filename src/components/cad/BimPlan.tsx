@@ -109,6 +109,8 @@ export type BimPlanProps = {
   draftPoints?: Point[];
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
   closeAtStart?: boolean;
+  /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
+  roofGuide?: { start: Point; end: Point; rise: "left" | "right" | null } | null;
   draftFill?: Hatch["fill"] | undefined;
   draftPattern?: HatchPatternDefinition | null | undefined;
   draftPatternRotation?: number | undefined;
@@ -163,6 +165,7 @@ export function BimPlan({
   start,
   draftPoints = [],
   closeAtStart = false,
+  roofGuide = null,
   draftFill,
   draftPattern,
   draftPatternRotation,
@@ -577,6 +580,12 @@ export function BimPlan({
       .hatches.find((h) => h.id === selection.id)
       ?.points.forEach((point, index) =>
         handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
+      );
+  } else if (selection?.kind === "roof") {
+    storeyOf(project)
+      .roofs?.find((r) => r.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Dachecke ${index + 1}` }),
       );
   } else if (selection?.kind === "slab") {
     storeyOf(project)
@@ -1280,6 +1289,58 @@ export function BimPlan({
             pointerEvents="none"
           />
         )}
+        {drawing &&
+          roofGuide &&
+          (() => {
+            const { start, end } = roofGuide;
+            const length = Math.hypot(end.x - start.x, end.y - start.y);
+            const left = { x: -(end.y - start.y) / length, y: (end.x - start.x) / length };
+            const aim = resolvedHover?.point;
+            const side =
+              roofGuide.rise ??
+              (aim &&
+              (end.x - start.x) * (aim.y - start.y) - (end.y - start.y) * (aim.x - start.x) < 0
+                ? "right"
+                : "left");
+            const rise = side === "left" ? left : { x: -left.x, y: -left.y };
+            const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+            const tip = {
+              x: mid.x + (rise.x * 48) / camera.pixelsPerMetre,
+              y: mid.y + (rise.y * 48) / camera.pixelsPerMetre,
+            };
+            return (
+              <g pointerEvents="none" aria-label="Bezugslinie und Steigrichtung">
+                <line
+                  x1={start.x}
+                  y1={-start.y}
+                  x2={end.x}
+                  y2={-end.y}
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  strokeDasharray="8 3 2 3"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <line
+                  x1={mid.x}
+                  y1={-mid.y}
+                  x2={tip.x}
+                  y2={-tip.y}
+                  stroke="#0284c7"
+                  strokeWidth={2}
+                  vectorEffect="non-scaling-stroke"
+                />
+                <circle cx={tip.x} cy={-tip.y} r={4 / camera.pixelsPerMetre} fill="#0284c7" />
+                <text
+                  x={tip.x}
+                  y={-tip.y - 8 / camera.pixelsPerMetre}
+                  fontSize={11 / camera.pixelsPerMetre}
+                  fill="#0284c7"
+                >
+                  {roofGuide.rise ? "steigt" : "Klick: steigt hierhin"}
+                </text>
+              </g>
+            );
+          })()}
         {drawing && closeAtStart && draftPoints.length >= MIN_CLOSING_POINTS && (
           <circle
             role="img"

@@ -14,6 +14,7 @@ import {
 import { wallBody } from "../elements/wall/body.ts";
 import { hatchSchema } from "../elements/hatch/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
+import { roofSchema } from "../elements/roof/model.ts";
 import { validateReferenceExtent } from "../elements/reference/model.ts";
 
 /** Freeze owned plain data, never caller-owned model objects. */
@@ -35,6 +36,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -66,6 +68,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       hatches: s.hatches.filter((h) => ids.has(h.id)),
       references: s.references.filter((r) => ids.has(r.id)),
       ...(s.slabs ? { slabs: s.slabs.filter((slab) => ids.has(slab.id)) } : {}),
+      ...(s.roofs ? { roofs: s.roofs.filter((roof) => ids.has(roof.id)) } : {}),
     },
   };
   freeze(affected);
@@ -99,6 +102,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...storeyOf(affected).windows,
       ...(storeyOf(affected).doors ?? []),
       ...(storeyOf(affected).slabs ?? []),
+      ...(storeyOf(affected).roofs ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -187,6 +191,19 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        // A roof moves with its reference line (docs/ROOF_ELEMENT.md, D3).
+        ...(storeyOf(affected).roofs
+          ? {
+              roofs: storeyOf(affected).roofs!.map((roof) => ({
+                ...roof,
+                points: roof.points.map(translate),
+                referenceLine: {
+                  start: translate(roof.referenceLine.start),
+                  end: translate(roof.referenceLine.end),
+                },
+              })),
+            }
+          : {}),
         wallJoins: localJoins,
         wallTJunctions: localTees,
       },
@@ -203,6 +220,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const line of storeyOf(geometry).lines!) validateLineGeometry(line);
     for (const hatch of storeyOf(geometry).hatches) hatchSchema.parse(hatch);
     for (const slab of storeyOf(geometry).slabs ?? []) slabSchema.parse(slab);
+    for (const roof of storeyOf(geometry).roofs ?? []) roofSchema.parse(roof);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
@@ -232,6 +250,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       hatches: replace(s.hatches, storeyOf(patch.geometry).hatches),
       references: replace(s.references, storeyOf(patch.geometry).references),
       ...(s.slabs ? { slabs: replace(s.slabs, storeyOf(patch.geometry).slabs ?? []) } : {}),
+      ...(s.roofs ? { roofs: replace(s.roofs, storeyOf(patch.geometry).roofs ?? []) } : {}),
       wallJoins: retainedJoins,
       wallTJunctions: retainedTees,
     };
@@ -251,6 +270,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -314,6 +334,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...s.walls,
       ...s.windows,
       ...(s.slabs ?? []),
+      ...(s.roofs ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,

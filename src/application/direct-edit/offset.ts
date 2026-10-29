@@ -6,6 +6,7 @@ import { closedContour } from "./contour-source.ts";
 import { prepareConvexOffset } from "../../geometry/polygons/offset.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { updateSlab } from "../slabs/actions.ts";
+import { updateRoof } from "../roofs/actions.ts";
 
 const preparations = new WeakMap<EditSession, ReturnType<typeof prepareConvexOffset>>();
 function prepared(session: EditSession) {
@@ -37,6 +38,8 @@ export function previewContourOffset(session: EditSession, pointer: Point) {
   const points = offsetContourPoints(session, pointer);
   if (session.target.kind === "slab")
     return updateSlab(session.base, session.target.id, { points });
+  if (session.target.kind === "roof")
+    return updateRoof(session.base, session.target.id, { points });
   return session.target.kind === "hatch"
     ? previewHatch(session.base, session.base, {
         projectId: session.base.id,

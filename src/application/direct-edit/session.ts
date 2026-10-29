@@ -24,7 +24,7 @@ import {
 export type EditAction =
   "point" | "stretch" | "move" | "axis" | "x" | "y" | "insert" | "edge" | "offset";
 export type EditTarget = {
-  kind: "wall" | "line" | "window" | "door" | "hatch" | "slab";
+  kind: "wall" | "line" | "window" | "door" | "hatch" | "slab" | "roof";
   id: string;
 };
 export type EditSession = {

@@ -6,7 +6,7 @@ Einflächiges Steildach. Kein Walmdach, keine Dachlandschaft, kein automatisches
 | --- | ------------------------------------------------------------------------------------------------------------------------- | -------- |
 | D1  | Modell, Flächen- und Ringgeometrie, Prüfung, Aktionen, Schema 31 mit Migration                                            | erledigt |
 | D2  | geschlossener 3D-Körper, Auswahl/Fang in 3D, Mitwandern bei Geschosshöhe                                                  | erledigt |
-| D3  | Werkzeug (Polygon, Diagonale, Seite + dritter Punkt, Kontur), Leiste und Doppelklick-Fenster, Eigenschaften, Umriss, Undo | offen    |
+| D3  | Werkzeug (Polygon, Diagonale, Seite + dritter Punkt, Kontur), Leiste und Doppelklick-Fenster, Eigenschaften, Umriss, Undo | erledigt |
 | D4  | Grundriss im eigenen Geschoss: Schnitt bei 1 m kräftig, darunter dünn, darüber gestrichelt (Untersicht)                   | offen    |
 | D5  | Datei/Recovery, IFC mit Archicad-Testdatei, Browser-Abnahme, Leistung im Schulmodell                                      | offen    |
 
@@ -58,3 +58,27 @@ Befund beim Nachweis: Der Migrationsschritt 30 → 31 musste die abgeleiteten H�
 - Grundriss-Fangpunkte an Dachecken kommen mit D4, wenn der Grundriss das Dach zeichnet.
 
 Nachweis: Test in `src/rendering/viewport/working-storey-solid.test.ts` (Hülle geschlossen und gleichsinnig orientiert für Rechteck, rechtwinklige Abschlüsse und L-Form; Volumen gegen 16 · d/cos bzw. 4 · d · (4 − d·sin)/cos; tiefster/höchster Punkt im OG; horizontale Traufe als nach unten weisende waagerechte Fläche; EG-Höhe hebt das Dach, eigene Geschosshöhe nicht; Vorrang und Farbe; Auswahl von oben trifft das Dach; Verschieben gesperrt). Gleichheits-Hash der 14 Modelle (Geschossteile, Gebäudekörper, IFC) unverändert `09528ac4…7823253`. 1359 Tests grün. Browser: Projektdatei mit Pultdach (20°, Traufe horizontal, obere Kante rechtwinklig) über den normalen Ladedialog geöffnet; Dach in 3D auf OK Rohfußboden OG, Klick wählt und hebt es hervor, Menü „Dach · Löschen“, Löschen und Undo; keine Konsolenfehler. Aufgefallen: Der Ladedialog zählt Dächer noch nicht (D5).
+
+## Teil D3: Werkzeug, Eigenschaften, Bearbeitung
+
+**Werkzeug „Dach“** (eigener Knopf; noch ohne Buchstaben, da D/Strg+D laut Masterplan §8 für Drehen offen sind):
+
+1. Bezugslinie: zwei Punkte (gemeinsamer Zeichenweg mit Fang und Zahleneingabe).
+2. Steigseite: Klick auf die Seite der Bezugslinie, zu der das Dach ansteigt; ein Pfeil folgt der Maus.
+3. Umriss (äußerer Dachrand) mit den gemeinsamen Zeichenarten: Polygon per Klick (Schließen am Startpunkt, Doppelklick, Enter), Rechteck über die Diagonale, **gedrehtes Rechteck über Seite + dritten Punkt** (die drei Punkte bestimmen keine drei Dachhöhen; so auch in Leiste und Fenster beschriftet), geschlossene Kontur übernehmen.
+
+Esc oder Werkzeugwechsel bricht ab und verwirft Bezugslinie und Steigseite. Ein abgelehntes Dach (z. B. zu schmal für die Abschlüsse) zeigt die deutsche Meldung der Prüfung; nichts wird angelegt. Kein zweiter Polygon- oder Fangweg.
+
+**Werkzeugvorgaben:** Neigung, Stärke, Bezugshöhe (Unterseite), Abschluss Traufe und obere Kante, Ebene (`useToolDefaults`, nicht im Projekt und nicht im Undo-Verlauf). Werkzeugleiste und das Fenster „Dach-Einstellungen“ (Doppelklick auf den Knopf, `FloatingPanel` + `SettingsSections`, Bereiche Form, Abschlüsse, Erstellung) bearbeiten denselben Entwurf; ein Feld folgt Änderungen aus dem anderen. Ein Einfachklick wählt weiterhin nur das Werkzeug. Doppelklick-Fenster für andere Werkzeuge ist ein eigener späterer Schritt.
+
+**Eigenschaften eines gewählten Dachs** (`RoofProperties`): Neigung, Stärke, Bezugshöhe (gemeinsam übernommen), Abschluss Traufe/obere Kante, Ebene, „Steigseite umkehren“ und Anzeige der Unterseitenhöhe an der Bezugslinie. Jede Änderung ein `updateRoof`, ein Undo-Schritt; abgelehnte Werte zeigen die Meldung und ändern nichts.
+
+**Grundriss (vorläufig, D4 ersetzt die Darstellung):** Umriss gestrichelt in Wandkonturstärke (Untersicht, über der späteren Schnittebene), Inneres anklickbar wie bei der Decke, in der Zeichenreihenfolge nach der Decke. Bei Auswahl Bezugslinie (Strichpunkt) und Steigpfeil. Eckgriffe „Dachecke n“, Fangpunkte „Dach · Ecke n“ und Kantenmitten.
+
+**Bearbeitung wie bei der Decke:** Ecke anklicken = Punkt frei bewegen, Ecke auf Ecke = Ecke löschen, Rechtsklick = Punktmenü, Seite strecken, Knicken, Kontur versetzen (konvex), Element frei bewegen, auf X-/Y-Achse; in 3D nur als Ganzes. Umrissänderungen behalten die Bezugslinie; Verschieben nimmt sie mit. Die Vorschau des Dachs nutzt den vollständigen Prüfweg (kein vorbereiteter Teilweg wie bei Schraffur/Decke).
+
+Befund beim Nachweis: Die Gruppenbewegung über mehrere Geschosse sammelte ihre Elemente und schrieb das bewegte Geschoss jeweils ohne Dächer zurück. „Element frei bewegen“ wäre mit „Ungültige Bewegungsauswahl“ gescheitert bzw. hätte nur die Vorschau bewegt. Beides ist ergänzt und im Test abgedeckt.
+
+Nachweis: Tests in `src/application/drawing/actions.test.ts` (Zeichnen über `createDrawing` inkl. Rücksprung zum Start, Ebene Dach, Ablehnung „zu schmal“; Ecke, Seite, Knicken, Versatz behalten die Bezugslinie; ein Undo-Schritt für Bearbeitung und Eigenschaft) und `src/rendering/viewport/working-storey-solid.test.ts` (Gruppenbewegung Vorschau = Übernahme mit Bezugslinie, Einzelbewegung gleich, Eckbearbeitung behält Bezugslinie), `layer-display.test.ts` (Planliste `roofs`). Gleichheits-Hash der 14 Modelle unverändert `09528ac4…7823253`. 1360 Tests grün.
+
+Browser: Werkzeug Dach gewählt (Leiste zeigt Phase 1 und alle Vorgaben), Bezugslinie mit zwei Punkten, Phase 2 mit Pfeil zur Maus („Klick: steigt hierhin“), Klick oberhalb der Linie, Umriss als Polygon per Klick auf den Startpunkt geschlossen; Dach gewählt mit Eigenschaften, gestricheltem Umriss, Bezugslinie, Steigpfeil, Eck- und Kantengriffen, Menü mit Versetzen/Bewegen/X/Y/Löschen. Neigung 35 → 45 in den Eigenschaften übernommen; 3D zeigt das geneigte Dach, Menü in 3D nur Bewegen/X/Y/Löschen. Doppelklick auf den Knopf öffnet „Dach-Einstellungen“; Neigung 40 im Fenster erscheint sofort in der Leiste. Ecke 3 per Klick bewegt, Bezugslinie unverändert. Drei Undo-Schritte (Ecke, Neigung, Dach), danach Rückgängig gesperrt – die Werkzeugvorgabe ist nicht im Verlauf. Keine Konsolenfehler.

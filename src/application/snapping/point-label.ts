@@ -5,6 +5,7 @@ import type { Project } from "../../domain/project/schema.ts";
 const ELEMENT_NAMES = [
   ["walls", "Wand"],
   ["slabs", "Decke"],
+  ["roofs", "Dach"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],

@@ -6,6 +6,7 @@ import {
   MousePointer2,
   PenLine,
   Pentagon,
+  Triangle,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -21,6 +22,8 @@ const tools: CadTool[] = [
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
   { id: "slab", label: "Decke", shortcut: "S", icon: Pentagon },
+  // No letter yet: D and Ctrl+D are reserved for rotating (Masterplan §8).
+  { id: "roof", label: "Dach", shortcut: "Doppelklick: Einstellungen", icon: Triangle },
   { id: "line", label: "Line", shortcut: "L", icon: PenLine },
 ];
 
@@ -29,9 +32,11 @@ type ToolRailProps = {
   collapsed: boolean;
   onSelect: (tool: ToolId) => void;
   onToggle: () => void;
+  /** Double click opens detailed tool settings; a single click still selects the tool. */
+  onSettings?: (tool: ToolId) => void;
 };
 
-export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRailProps) {
+export function ToolRail({ activeTool, collapsed, onSelect, onToggle, onSettings }: ToolRailProps) {
   return (
     <aside
       className={cn(
@@ -53,6 +58,7 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle }: ToolRail
                   aria-label={`${tool.label} tool`}
                   aria-pressed={active}
                   onClick={() => onSelect(tool.id)}
+                  onDoubleClick={tool.id === "roof" ? () => onSettings?.(tool.id) : undefined}
                   className={cn(
                     "relative h-11 w-11 rounded-md border border-transparent text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-foreground",
                     active &&

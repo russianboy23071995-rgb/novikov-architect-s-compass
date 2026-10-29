@@ -11,11 +11,12 @@ import { updateWindow } from "../windows/actions.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import { updateWall } from "../walls/actions.ts";
 import { updateSlab } from "../slabs/actions.ts";
+import { updateRoof } from "../roofs/actions.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import type { ProjectResultMode } from "../../domain/project/owned-snapshot.ts";
 
-export type TransformTarget = { kind: "wall" | "line" | "hatch" | "slab"; id: string };
+export type TransformTarget = { kind: "wall" | "line" | "hatch" | "slab" | "roof"; id: string };
 
 export function editablePoints(project: Project, target: TransformTarget): Point[] {
   if (target.kind === "wall") {
@@ -27,6 +28,9 @@ export function editablePoints(project: Project, target: TransformTarget): Point
   } else if (target.kind === "slab") {
     const slab = storeyOf(project).slabs?.find((item) => item.id === target.id);
     if (slab) return slab.points.map((point) => ({ ...point }));
+  } else if (target.kind === "roof") {
+    const roof = storeyOf(project).roofs?.find((item) => item.id === target.id);
+    if (roof) return roof.points.map((point) => ({ ...point }));
   } else {
     const line = storeyOf(project).lines?.find((item) => item.id === target.id);
     if (line) return line.points.map((point) => ({ ...point }));
@@ -60,6 +64,21 @@ function applyPoints(
   }
   // Outline edits of a ceiling slab use the shared slab action (docs/SLAB_ELEMENT.md, E1).
   if (target.kind === "slab") return updateSlab(project, target.id, { points });
+  // A moved roof takes its reference line along; an outline edit keeps it (ROOF_ELEMENT.md, D3).
+  if (target.kind === "roof") {
+    const roof = storeyOf(project).roofs!.find((r) => r.id === target.id)!;
+    return updateRoof(project, target.id, {
+      points,
+      ...(offset
+        ? {
+            referenceLine: {
+              start: translatePoint(roof.referenceLine.start, offset),
+              end: translatePoint(roof.referenceLine.end, offset),
+            },
+          }
+        : {}),
+    });
+  }
   return target.kind === "wall"
     ? updateWall(
         project,
@@ -92,7 +111,10 @@ export function vertexShape(target: TransformTarget): VertexShape | null {
 /** Targets with an editable vertex list (corner click moves, corner on corner deletes). */
 export function isVertexTarget(target: { kind: string }): target is TransformTarget {
   return (
-    (target.kind === "line" || target.kind === "hatch" || target.kind === "slab") &&
+    (target.kind === "line" ||
+      target.kind === "hatch" ||
+      target.kind === "slab" ||
+      target.kind === "roof") &&
     vertexShape(target as TransformTarget) !== null
   );
 }
@@ -130,7 +152,7 @@ export function stretchEndpoint(
   length: number,
 ): Project {
   if (!Number.isFinite(length) || length <= 0) throw new Error("Länge muss größer als null sein.");
-  if (target.kind === "hatch" || target.kind === "slab")
+  if (target.kind === "hatch" || target.kind === "slab" || target.kind === "roof")
     throw new Error("Geschlossene Umrisse haben keine freien Endpunkte.");
   const points = editablePoints(project, target);
   const last = points.length - 1;

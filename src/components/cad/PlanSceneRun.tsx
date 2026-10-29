@@ -92,6 +92,7 @@ export function PlanSceneContent({
   const plan = {
     references: kind === "reference" ? ids.map((id) => scene.references.get(id)!) : [],
     slabs: kind === "slab" ? ids.map((id) => scene.slabs.get(id)!) : [],
+    roofs: kind === "roof" ? ids.map((id) => scene.roofs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -133,6 +134,69 @@ export function PlanSceneContent({
                 vectorEffect="non-scaling-stroke"
                 pointerEvents="none"
               />
+            )}
+          </g>
+        );
+      })}
+      {plan.roofs.map((roof) => {
+        const points = roof.points.map((p) => `${p.x},${-p.y}`).join(" ");
+        const selected = selectedIds.has(roof.id);
+        const { start, end } = roof.referenceLine;
+        const length = Math.hypot(end.x - start.x, end.y - start.y);
+        const left = { x: -(end.y - start.y) / length, y: (end.x - start.x) / length };
+        const rise = roof.rise === "left" ? left : { x: -left.x, y: -left.y };
+        const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+        const arrow = 36 / pixelsPerMetre,
+          head = 8 / pixelsPerMetre;
+        const tip = { x: mid.x + rise.x * arrow, y: mid.y + rise.y * arrow };
+        const back = { x: tip.x - rise.x * head, y: tip.y - rise.y * head };
+        return (
+          <g key={roof.id}>
+            {/* Outline seen from below, dashed like content above the cut plane (D4 adds the
+                cut at 1 m). The interior stays selectable, like a slab. */}
+            <polygon
+              {...selectProps("roof", roof.id)}
+              aria-label={`Dach ${roof.id}`}
+              points={points}
+              fill="none"
+              stroke={selected ? "#94a3b8" : "var(--primary)"}
+              strokeWidth={wallOutlineWidth / pixelsPerMetre}
+              strokeDasharray={`${6 / pixelsPerMetre} ${4 / pixelsPerMetre}`}
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+            />
+            {selected && (
+              <g pointerEvents="none" aria-label="Bezugslinie und Steigrichtung">
+                <line
+                  x1={start.x}
+                  y1={-start.y}
+                  x2={end.x}
+                  y2={-end.y}
+                  stroke="#0284c7"
+                  strokeWidth={1.5}
+                  strokeDasharray="8 3 2 3"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <line
+                  x1={mid.x}
+                  y1={-mid.y}
+                  x2={tip.x}
+                  y2={-tip.y}
+                  stroke="#0284c7"
+                  strokeWidth={1.5}
+                  vectorEffect="non-scaling-stroke"
+                />
+                <polygon
+                  points={[
+                    tip,
+                    { x: back.x + rise.y * head * 0.6, y: back.y - rise.x * head * 0.6 },
+                    { x: back.x - rise.y * head * 0.6, y: back.y + rise.x * head * 0.6 },
+                  ]
+                    .map((p) => `${p.x},${-p.y}`)
+                    .join(" ")}
+                  fill="#0284c7"
+                />
+              </g>
             )}
           </g>
         );

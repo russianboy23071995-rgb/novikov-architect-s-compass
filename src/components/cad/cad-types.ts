@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
-export type ToolId = "measure" | "window" | "door" | "select" | "wall" | "slab" | "line" | "hatch";
+export type ToolId =
+  "measure" | "window" | "door" | "select" | "wall" | "slab" | "roof" | "line" | "hatch";
 export type ViewMode = "2D" | "3D";
 export type ViewportLayout = "single" | "horizontal" | "vertical" | "three" | "four";
 export type AiState = "idle" | "listening" | "preview";

@@ -36,6 +36,7 @@ export function derivePlanScene(
     outlines: wallPlanOutlines(geometry, new Set(plan.walls.map((w) => w.id))),
     walls: new Map(plan.walls.map((w) => [w.id, w])),
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
+    roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),
     lines: new Map(plan.lines.map((l) => [l.id, l])),
     references: new Map(plan.references.map((r) => [r.id, r])),
@@ -43,7 +44,7 @@ export function derivePlanScene(
 }
 export type PlanScene = ReturnType<typeof derivePlanScene>;
 export type PlanRun = {
-  kind: "reference" | "slab" | "hatch" | "wall" | "line";
+  kind: "reference" | "slab" | "roof" | "hatch" | "wall" | "line";
   ids: string[];
   affected: boolean;
 };
@@ -55,6 +56,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["reference", scene.plan.references],
     // The storey's ceiling slab lies outside the cut plane: drawn first, beneath 2D content.
     ["slab", scene.plan.slabs],
+    // Roof outline as seen from below the roof (docs/ROOF_ELEMENT.md, D3; cut view in D4).
+    ["roof", scene.plan.roofs],
     ["hatch", scene.plan.hatches],
     ["wall", scene.plan.walls],
     ["line", scene.plan.lines],
