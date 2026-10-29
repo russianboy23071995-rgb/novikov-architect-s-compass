@@ -15,11 +15,20 @@ const sameFaces = (a: Face[], b: Face[]) =>
         face.vertices.every((p, j) => p.every((v, k) => v === other.vertices[j]![k])))
     );
   });
+/** Floats per vertex: XYZ, RGB and the display priority below. */
+export const SOLID_VERTEX_FLOATS = 7;
+/**
+ * Display priority on coincident faces (docs/SLAB_ELEMENT.md, C3 Variante A): with equal
+ * construction priority a ceiling slab is drawn over a wall face lying in the same plane,
+ * so the shared surfaces never flicker. Later a material priority (0–100) decides cutting.
+ */
+export const SLAB_DISPLAY_PRIORITY = 1;
 export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected: boolean) {
-  // Convex fan: n-2 triangles, three vertices, XYZ + RGB. Round to Float32
+  // Convex fan: n-2 triangles, three vertices, XYZ + RGB + priority. Round to Float32
   // only at the final write, exactly as the previous array conversion did.
   let length = 0;
-  for (const face of faces) length += Math.max(0, face.vertices.length - 2) * 18;
+  for (const face of faces)
+    length += Math.max(0, face.vertices.length - 2) * 3 * SOLID_VERTEX_FLOATS;
   const data = new Float32Array(length);
   let offset = 0;
   for (const face of faces) {
@@ -29,6 +38,7 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
     const r = (selected ? 0.38 : face.slab ? 0.84 : 0.72) * light;
     const g = (selected ? 0.65 : face.slab ? 0.85 : 0.75) * light;
     const b = (selected ? 0.78 : face.slab ? 0.87 : 0.79) * light;
+    const priority = face.slab ? SLAB_DISPLAY_PRIORITY : 0;
     for (const triangle of faceTriangles(face.vertices.length))
       for (const index of triangle) {
         const point = face.vertices[index]!;
@@ -38,6 +48,7 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
         data[offset++] = r;
         data[offset++] = g;
         data[offset++] = b;
+        data[offset++] = priority;
       }
   }
   return data;
@@ -140,8 +151,8 @@ export function createSolidBufferCache() {
       origin = [...nextOrigin];
       previous = solid;
       previousSelected = new Set(selected);
-      vertexCount = length / 6;
-      return { full, patches: full ? [] : patches, vertexCount: length / 6 };
+      vertexCount = length / SOLID_VERTEX_FLOATS;
+      return { full, patches: full ? [] : patches, vertexCount };
     },
   };
 }

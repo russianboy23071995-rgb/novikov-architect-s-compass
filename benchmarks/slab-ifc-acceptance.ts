@@ -7,6 +7,7 @@ import { addWindow } from "../src/application/windows/actions.ts";
 import { addSlab } from "../src/application/slabs/actions.ts";
 import { addStorey, renameStorey, setStoreyHeight } from "../src/application/storeys/actions.ts";
 import { selectWorkingStorey } from "../src/application/storeys/working-storey.ts";
+import { setWallHeightRule } from "../src/application/walls/height-binding.ts";
 import type { Project } from "../src/domain/project/schema.ts";
 
 export const SLAB_ACCEPTANCE = {
@@ -82,5 +83,23 @@ export function slabAcceptanceProject(): Project {
     thickness: og.slab,
     topOffset: 0,
   });
+  return p;
+}
+
+/**
+ * Same house for the Archicad check of wall/slab overlap (docs/SLAB_ELEMENT.md, C3 Variante A):
+ * every wall bound to its storey with extra height 0, so it reaches the raw floor above and
+ * runs through the ceiling slab, whose outline is flush with the outer wall faces.
+ */
+export function slabOverlapAcceptanceProject(): Project {
+  let p = slabAcceptanceProject();
+  for (const storeyId of ["eg", "og"]) {
+    p = setWallHeightRule(p, p, {
+      projectId: p.id,
+      storeyId,
+      wallIds: [1, 2, 3, 4].map((i) => `${storeyId}-w${i}`),
+      rule: { kind: "storey", topOffset: 0 },
+    });
+  }
   return p;
 }
