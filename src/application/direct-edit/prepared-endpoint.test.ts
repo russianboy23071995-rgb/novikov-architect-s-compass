@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { tPairFixture } from "../../../benchmarks/t-pair-fixture.ts";
 import { createEditingState, editingReducer, previewEdit } from "./controller.ts";
-import { editAtPointer } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer } from "./session.ts";
 const target = { kind: "wall" as const, id: "wall-1" };
 function begin() {
   const state = createEditingState(tPairFixture());

@@ -3,7 +3,7 @@ import { findTAxisReference, queryTAxisSnap } from "../walls/t-axis-snap.ts";
 import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { AnchoredToolInteraction } from "./interaction.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../direct-edit/session.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import { numericMoveAxis, previewMovementInput } from "../direct-edit/numeric.ts";
 import { previewEdit } from "../direct-edit/controller.ts";

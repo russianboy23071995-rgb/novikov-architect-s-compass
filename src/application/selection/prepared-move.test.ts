@@ -280,7 +280,7 @@ test("detached chain end retains full renderer geometry, zero state and stale-co
 
 test("single wall shared move preserves picked origins and legacy move geometry", async () => {
   const { connectedFixture } = await import("../../../benchmarks/connected-fixture.ts");
-  const { editAtPointer } = await import("../../lib/bim/direct-edit.ts");
+  const { editAtPointer } = await import("../direct-edit/session.ts");
   for (const kind of ["chain", "tees"] as const) {
     const base = connectedFixture(kind, 5),
       target = { kind: "wall" as const, id: "wall-0" },

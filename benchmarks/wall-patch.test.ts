@@ -10,7 +10,7 @@ import {
   editAtPointer,
   editAtPointerSnapshot,
   type EditSession,
-} from "../src/lib/bim/direct-edit.ts";
+} from "../src/application/direct-edit/session.ts";
 import {
   createProjectSnapshot,
   isOwnedProjectSnapshot,

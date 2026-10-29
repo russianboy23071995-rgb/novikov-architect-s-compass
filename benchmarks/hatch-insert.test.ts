@@ -8,7 +8,7 @@ import {
   createEditingState,
   editingReducer,
 } from "../src/application/direct-edit/controller.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 import { MAX_HATCH_POINTS } from "../src/domain/elements/hatch/model.ts";

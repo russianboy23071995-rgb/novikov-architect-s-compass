@@ -2,7 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
 import { createProject } from "../src/application/projects/create.ts";
 import { addWindow, updateWindow } from "../src/application/windows/actions.ts";
 import { addWall } from "../src/application/walls/actions.ts";

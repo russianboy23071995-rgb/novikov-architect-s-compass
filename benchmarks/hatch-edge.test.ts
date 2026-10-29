@@ -9,7 +9,7 @@ import {
   editingReducer,
 } from "../src/application/direct-edit/controller.ts";
 import { boundedEdgeTarget } from "../src/application/direct-edit/contour.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 import { contourEdge, prepareContourEdge } from "../src/geometry/polygons/edit-edge.ts";
 import { derivePlanScene } from "../src/rendering/viewport/plan-scene.ts";

@@ -26,8 +26,8 @@ import {
   documentVisibilityKey,
 } from "../layers/visibility-actions.ts";
 import type { VisibilityHistory, VisibilityAction } from "../layers/visibility-actions.ts";
-import { editAnchor, editAtPointer } from "../../lib/bim/direct-edit.ts";
-import type { EditAction, EditSession, EditTarget } from "../../lib/bim/direct-edit.ts";
+import { editAnchor, editAtPointer } from "./session.ts";
+import type { EditAction, EditSession, EditTarget } from "./session.ts";
 import {
   commitProject,
   createHistory,

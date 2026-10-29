@@ -1,6 +1,10 @@
 import { buildingViewFixture } from "./building-view-fixture.ts";
 import { prepareOpeningAxisPreview } from "../src/application/direct-edit/prepared-opening.ts";
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
 import { buildBuildingSolid } from "../src/rendering/viewport/building-solid.ts";
 import { selectionMoveSurfaces } from "../src/rendering/viewport/selection-move-preview.ts";
 const p = buildingViewFixture(100),

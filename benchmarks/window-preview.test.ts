@@ -9,7 +9,11 @@ function prepareWindowAxisPreview(session: EditSession) {
   assert.ok(prepared, "window-axis capability must be registered in the common entry");
   return prepared;
 }
-import { editAnchor, editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import {
+  editAnchor,
+  editAtPointer,
+  type EditSession,
+} from "../src/application/direct-edit/session.ts";
 import { createProject } from "../src/application/projects/create.ts";
 import { addWindow } from "../src/application/windows/actions.ts";
 import { addWall } from "../src/application/walls/actions.ts";

@@ -13,7 +13,7 @@ import { updateWall } from "./actions.ts";
 import { createHistory, undoProject, redoProject } from "../history/project-history.ts";
 import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { projectSnapPrimitives } from "../snapping/project-references.ts";
-import { editAtPointer, editAnchor } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer, editAnchor } from "../direct-edit/session.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { createEditingState, editingReducer } from "../direct-edit/controller.ts";

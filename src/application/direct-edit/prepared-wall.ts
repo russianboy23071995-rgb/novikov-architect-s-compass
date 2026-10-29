@@ -1,7 +1,7 @@
 import { prepareEndpoint } from "./prepared-endpoint.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
-import { editAtPointerSnapshot, type EditSession } from "../../lib/bim/direct-edit.ts";
+import { editAtPointerSnapshot, type EditSession } from "./session.ts";
 import { automaticTHost, connectSnappedT, tAxisEndpoint } from "../walls/t-axis-snap.ts";
 import type { ElementTarget } from "../selection/target.ts";
 import type { PreparedDirectEditPreview } from "./prepared-preview.ts";

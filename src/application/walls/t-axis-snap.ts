@@ -1,6 +1,6 @@
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
-import type { EditSession } from "../../lib/bim/direct-edit.ts";
+import type { EditSession } from "../direct-edit/session.ts";
 import type { Point, Project, Wall } from "../../domain/project/schema.ts";
 import type {
   SnapCandidate,

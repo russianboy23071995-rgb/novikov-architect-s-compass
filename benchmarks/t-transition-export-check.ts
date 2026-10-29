@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { tTransitionFixture } from "./t-transition-fixture.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { connectSnappedT } from "../src/application/walls/t-axis-snap.ts";
 import { validateProject } from "../src/domain/project/schema.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";

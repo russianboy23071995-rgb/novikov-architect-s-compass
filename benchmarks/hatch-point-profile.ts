@@ -2,7 +2,7 @@ import { createProjectSnapshot } from "../src/domain/project/owned-snapshot.ts";
 import assert from "node:assert/strict";
 import { hatchPointFixture } from "./hatch-point-fixture.ts";
 import { prepareDirectEditPreview } from "../src/application/direct-edit/prepared-preview.ts";
-import { editAtPointer, type EditSession } from "../src/lib/bim/direct-edit.ts";
+import { editAtPointer, type EditSession } from "../src/application/direct-edit/session.ts";
 import { storeyOf } from "../src/domain/storeys/access.ts";
 const profiles = [];
 for (const [count, vertices] of [

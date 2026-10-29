@@ -3,7 +3,7 @@ import { createPointPreview } from "../tools/point-preview.ts";
 import { previewCreateReference } from "../references/actions.ts";
 import { previewSelectionCommand, applySelectionCommand } from "../commands/selection-command.ts";
 import { imageReferenceCorners } from "../../rendering/viewport/image-reference.ts";
-import { editAtPointer } from "../../lib/bim/direct-edit.ts";
+import { editAtPointer } from "../direct-edit/session.ts";
 import { resolveToolSnap } from "../tools/snapping.ts";
 import { resolveEditSnap, editDirection } from "../direct-edit/snapping.ts";
 import { moveElement } from "../direct-edit/transforms.ts";

@@ -6,9 +6,9 @@ import {
 } from "../../domain/project/owned-snapshot.ts";
 import type { WallSolidReuse } from "../../domain/elements/wall/connections.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { previewContourOffset } from "../../application/direct-edit/offset.ts";
+import { previewContourOffset } from "./offset.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
-import { previewContourEdge } from "../../application/direct-edit/contour.ts";
+import { previewContourEdge } from "./contour.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import { endpointAtOffsetTarget } from "../../geometry/primitives/offset-endpoint.ts";
