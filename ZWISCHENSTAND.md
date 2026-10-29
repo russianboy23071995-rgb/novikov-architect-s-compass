@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR496 · 1349 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR497 · 1350 automatische Tests grün
 
 ## Gerade aktiv
 
-- Polygon-Regeln (deine Vorgabe vom 29.10.): Teile A und B erledigt; als Nächstes C Ecken bewegen/löschen, dann D nummerierte Fangpunkte (docs/POLYGON_REGELN.md).
+- Polygon-Regeln (deine Vorgabe vom 29.10.): Teile A, B und C erledigt; offen D nummerierte Fangpunkte (docs/POLYGON_REGELN.md).
 - Wartet auf dich: Archicad-Test der Datei NOVIKOV-Decken-Test.ifc (DesktopClaude_Ablage_CodeNOVIKOV-Decken-Abnahme-2026-10-28).
 
 ## Was wir gemacht haben (24.–29.10.2026)
@@ -40,6 +40,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Deckenumriss im Grundriss bearbeiten wie bei Schraffuren: Ecke verschieben, strecken, Knicken, Seite strecken, Kontur versetzen (PR494); dafür die Bearbeitungssitzung aus `lib/bim` verlegt (PR493).
 - Neue Projekte starten mit Erdgeschoss und 1. Obergeschoss (je 3,00 m); Decken im Grundriss nur als durchgezogene Konturlinie und damit sofort in 3D (PR495).
 - Polygone schließen per Klick auf den ersten Punkt (Schraffur, Decke, Polylinie und künftige Werkzeuge gleicher Art); der Startpunkt hat beim Fangen Vorrang (PR496).
+- Ecke anklicken bewegt sie sofort; Ecke auf eine andere Ecke ziehen löscht sie (Schraffur, Decke, Linie; Rechtsklick auf die Ecke öffnet das Punktmenü) (PR497).
 - Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
