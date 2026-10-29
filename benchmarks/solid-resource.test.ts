@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSolidBufferCache, packSolidFaces } from "../src/rendering/viewport/solid-buffer.ts";
+import {
+  createSolidBufferCache,
+  packSolidFaces,
+  SLAB_DISPLAY_PRIORITY,
+  SOLID_VERTEX_FLOATS,
+} from "../src/rendering/viewport/solid-buffer.ts";
+import { slabOverlapAcceptanceProject } from "./slab-ifc-acceptance.ts";
+// One quad: two triangles, six vertices of SOLID_VERTEX_FLOATS Float32 values.
+const ONE_QUAD_BYTES = 6 * SOLID_VERTEX_FLOATS * 4;
 import { createSolidRenderer } from "../src/rendering/viewport/solid-renderer.ts";
 import { recordingCanvas, resourceFixture, resourceProjection } from "./solid-resource-fixture.ts";
 import { boundHeightFixture } from "./bound-height-fixture.ts";
@@ -17,6 +25,8 @@ import { visibleSurfaces } from "../src/rendering/viewport/layer-display.ts";
 
 // Frozen pre-optimization oracle: retain the previous double arithmetic and
 // final conversion; do not use the new packer to generate its own expectation.
+// 29.10.2026 (C3 Variante A): every vertex additionally carries its display priority
+// (slab faces 1, all others 0) as a seventh float.
 function previousPack(
   faces: Parameters<typeof packSolidFaces>[0],
   origin: Parameters<typeof packSolidFaces>[1],
@@ -32,6 +42,7 @@ function previousPack(
         data.push(
           ...face.vertices[index]!.map((v, k) => v - origin[k]!),
           ...tint.map((v) => v * light),
+          "slab" in face && face.slab ? 1 : 0,
         );
   }
   return new Float32Array(data);
@@ -254,7 +265,7 @@ test("warm patch composition and packing do not traverse stationary faces", () =
     assert.equal(update.full, null);
     assert.equal(
       update.patches.reduce((n, p) => n + p.data.byteLength, 0),
-      144,
+      ONE_QUAD_BYTES,
     );
   }
 });
@@ -328,7 +339,7 @@ test("selection and small movement retain program/buffers with bounded uploads a
     renderer.draw(solid, projection, new Set(), [], []);
     const full = stats.fullBytes;
     renderer.draw(solid, projection, new Set(["w0"]), [], []);
-    assert.equal(stats.partialBytes, 144);
+    assert.equal(stats.partialBytes, ONE_QUAD_BYTES);
     renderer.draw(
       {
         ...solid,
@@ -345,7 +356,7 @@ test("selection and small movement retain program/buffers with bounded uploads a
       [],
       [],
     );
-    assert.equal(stats.partialBytes, 288);
+    assert.equal(stats.partialBytes, 2 * ONE_QUAD_BYTES);
     assert.equal(stats.fullBytes, full);
     assert.equal(stats.programs, 1);
     assert.equal(stats.buffers, 2);
@@ -418,4 +429,34 @@ test("topology, visibility and local-origin changes rebuild layout without stale
     faces: solid.faces.map((f) => ({ ...f, vertices: f.vertices.slice(0, 3) })),
   };
   assert.ok(cache.update(triangle, [1e9, 0, 0], selected).full);
+});
+
+test("C3 Variante A: bound walls reach the slab top; slab faces win coincident surfaces", () => {
+  const project = slabOverlapAcceptanceProject();
+  const solid = buildBuildingSolid(project);
+  const slabFaces = solid.faces.filter((f) => "slab" in f && f.slab);
+  const wallFaces = solid.faces.filter((f) => !("slab" in f && f.slab));
+  const top = (faces: typeof solid.faces) =>
+    Math.max(...faces.flatMap((f) => f.vertices.map((v) => v[2])));
+  // Walls and slabs share their top surface (EG 3,00 m, OG 5,80 m): coincident planes.
+  const egWalls = wallFaces.filter((f) => f.wallId.startsWith("eg-"));
+  const egSlab = slabFaces.filter((f) => f.wallId === "eg-decke");
+  assert.equal(top(egWalls), 3);
+  assert.equal(top(egSlab), 3);
+  assert.equal(top(slabFaces), 5.8);
+  // Packed priority: 1 on every slab vertex, 0 on every wall vertex.
+  const priorities = (faces: typeof solid.faces) => {
+    const data = packSolidFaces(faces, [0, 0, 0], false);
+    return new Set(
+      Array.from(
+        { length: data.length / SOLID_VERTEX_FLOATS },
+        (_, i) => data[i * SOLID_VERTEX_FLOATS + 6],
+      ),
+    );
+  };
+  assert.deepEqual(priorities(slabFaces), new Set([SLAB_DISPLAY_PRIORITY]));
+  assert.deepEqual(priorities(wallFaces), new Set([0]));
+  // Selection keeps the priority; only the colour changes.
+  const selected = packSolidFaces(egSlab, [0, 0, 0], true);
+  assert.equal(selected[6], SLAB_DISPLAY_PRIORITY);
 });

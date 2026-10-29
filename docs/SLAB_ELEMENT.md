@@ -73,6 +73,16 @@ Nutzerentscheidung 29.10.2026: Die Bindung ist eine Einstellung der Wand. Gebund
 - Browser: Geschosshöhe 3,00 m, Wand gebunden → 3,00 m; Zusatzhöhe 0,5 → 3,50 m (oberstes Geschoss); Wandhöhe 2,6 eingegeben → frei 2,60 m; erneut gebunden, Undo/Redo; Geschosshöhe 3,20 m → Wand 3,20 m. Keine Konsolenfehler nach Neuladen.
 - Offen (C3, eigene Karte): Mit Zusatzhöhe 0 ragt die Wand in die Decke; Vorrang/Verschneidung für 3D, Mengen und IFC. C2 (Decke als optionaler Bezug) zurückgestellt.
 
+## Teil C3, Variante A: Wand und Decke ohne Flimmern (29.10.2026)
+
+Nutzerentscheidung 29.10.2026 (Zielbild): Jede Wand und jede Decke erhält später ein wählbares Material. Jedes Material hat einen Vorrang zwischen 0 und 100; er entscheidet, ob die Decke die Wand schneidet oder umgekehrt. Haben beide denselben Vorrang – heute immer, da alles als Standardbauteil gezeichnet wird –, gilt Variante A: beide Körper bleiben vollständig, die Darstellung ist sauber und flimmert nicht.
+
+- Befund: Eine gebundene Wand mit Zusatzhöhe 0 reicht bis OK Rohfußboden darüber und damit durch die Decke. Oberkanten und (bei bündigem Deckenrand) Außenflächen liegen in einer Ebene; alle Flächen wurden in einem Durchgang gezeichnet, je Pixel gewann mal die Wand, mal die Decke.
+- Umsetzung: Jeder Eckpunkt im 3D-Puffer trägt einen Darstellungsvorrang (`SOLID_VERTEX_FLOATS = 7`, Decke `SLAB_DISPLAY_PRIORITY = 1`, sonst 0). Der Shader rückt Flächen mit höherem Vorrang um 1e-5 des Tiefenbereichs nach vorn (etwa 0,5 mm bei 100 m Szenentiefe): In derselben Ebene ist immer die Decke zu sehen, eine Wand davor verdeckt sie weiterhin. Geometrie, Picking und IFC unverändert.
+- Mengen: Das Programm gibt heute keine Mengen aus; die Vorrangregel gilt später auch dort.
+- Archicad-Prüfdatei: `NOVIKOV-Wand-Decke-Ueberschneidung.ifc` (`slabOverlapAcceptanceProject`, Skript `scripts/generate-slab-acceptance-ifc.mjs`): Abnahmehaus mit allen Wänden an ihr Geschoss gebunden, Zusatzhöhe 0 (EG-Wände 3,00 m, OG-Wände 2,80 m), Decken bündig mit den Außenflächen – Wand und Decke überschneiden sich um die Deckenstärke.
+- Nachweis: Test in `benchmarks/solid-resource.test.ts` (gemeinsame Oberkante 3,00/5,80 m, Vorrang 1 an jeder Deckenecke, 0 an jeder Wandecke, auch bei Auswahl); eingefrorener Packvergleich um den siebten Wert erweitert, Bytegrößen aus der Konstante abgeleitet. 1352 Tests grün.
+
 ## Nachtrag: Übersichten zählen Türen und Decken (29.10.2026)
 
 - `projectElementCounts` (Dialog „Projektdatei laden?“) und `recoveryContentSummary` (Wiederherstellung) zählen zusätzlich Türen und Decken über alle Geschosse; die in Teil B genannte Lücke ist geschlossen.
