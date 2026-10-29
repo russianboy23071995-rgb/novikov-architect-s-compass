@@ -53,9 +53,6 @@ export function assertMovableSelection(
 ) {
   if (!targets.length || !sameTargets(targets, eligibleSelection(project, visibility, targets)))
     throw new Error("Auswahl ist nicht mehr sichtbar oder aktuell. Erneut auswählen.");
-  // Roofs move with the roof tool (docs/ROOF_ELEMENT.md, D3); never skipped silently.
-  if (targets.some((t) => t.kind === "roof"))
-    throw new Error("Dächer lassen sich noch nicht verschieben. Dach aus der Auswahl nehmen.");
   const walls = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (
     targets.some(

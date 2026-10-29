@@ -19,7 +19,8 @@ import { packSolidFaces, SLAB_DISPLAY_PRIORITY } from "./solid-buffer.ts";
 import { createStandardProject } from "../../application/projects/create.ts";
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
 import { addRoof } from "../../application/roofs/actions.ts";
-import { assertMovableSelection } from "../../application/selection/move.ts";
+import { beginSelectionMove, previewSelectionMove } from "../../application/selection/move.ts";
+import { moveElement, moveElementPoint } from "../../application/direct-edit/transforms.ts";
 
 // Wall foot sources reuse the storey part of the building scene (docs/performance/RECOVERY_STATUS.md).
 test("the working storey solid equals the former derivation and shares the building part", () => {
@@ -310,8 +311,17 @@ test("a roof is a closed inclined body in its storey; volume and heights match t
     kind: "roof",
     id: "dach",
   });
-  assert.throws(
-    () => assertMovableSelection(project, [{ kind: "roof", id: "dach" }]),
-    /Dächer lassen sich noch nicht verschieben/,
-  );
+  // D3: a roof moves with its reference line, in the group move and as a single element.
+  const targets = [{ kind: "roof", id: "dach" }] as const;
+  const session = beginSelectionMove(project, [...targets], { x: 0, y: 0 });
+  const moved = storeyOf(previewSelectionMove(session, project, [...targets], { x: 1, y: 2 }))
+    .roofs![0]!;
+  assert.deepEqual(moved.points[0], { x: 1, y: 2 });
+  assert.deepEqual(moved.referenceLine, { start: { x: 1, y: 2 }, end: { x: 5, y: 2 } });
+  const single = storeyOf(moveElement(project, targets[0], { x: 1, y: 2 })).roofs![0]!;
+  assert.deepEqual(single, moved);
+  // Outline edits keep the reference line.
+  const corner = storeyOf(moveElementPoint(project, targets[0], 2, { x: 5, y: 4 })).roofs![0]!;
+  assert.deepEqual(corner.referenceLine, ROOF_SQUARE.referenceLine);
+  assert.deepEqual(corner.points[2], { x: 5, y: 4 });
 });

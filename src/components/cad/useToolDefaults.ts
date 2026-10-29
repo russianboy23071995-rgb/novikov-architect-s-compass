@@ -2,6 +2,8 @@ import { defaultDoorDraft, type DoorSettingsDraft } from "@/application/drawing/
 import { defaultDoorLayerId } from "@/application/doors/actions";
 import { defaultSlabLayerId } from "@/application/slabs/actions";
 import { SLAB_DEFAULTS } from "@/domain/elements/slab/model";
+import { defaultRoofLayerId } from "@/application/roofs/actions";
+import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -21,6 +23,12 @@ import { defaultHatchAppearance } from "@/domain/elements/hatch/model";
 
 /** Slab tool values in metres; the session draft never enters model history. */
 export type SlabDefaults = { thickness: number; topOffset: number; layerId: string };
+
+/** Roof tool values; the rise side is chosen per roof by click (docs/ROOF_ELEMENT.md, D3). */
+export type RoofDefaults = Pick<
+  Roof,
+  "pitch" | "thickness" | "referenceHeight" | "eaveCut" | "topCut" | "layerId"
+>;
 
 /** Session defaults are not model state and never enter model history. */
 export function useToolDefaults(project: Project) {
@@ -99,6 +107,26 @@ export function useToolDefaults(project: Project) {
       ? slabValues.layerId
       : defaultSlabLayerId(project),
   };
+  const [roofState, setRoofState] = useState<{ projectId: string; values: RoofDefaults } | null>(
+    null,
+  );
+  const roofValues: RoofDefaults =
+    roofState?.projectId === project.id
+      ? roofState.values
+      : {
+          pitch: ROOF_DEFAULTS.pitch,
+          thickness: ROOF_DEFAULTS.thickness,
+          referenceHeight: ROOF_DEFAULTS.referenceHeight,
+          eaveCut: ROOF_DEFAULTS.eaveCut,
+          topCut: ROOF_DEFAULTS.topCut,
+          layerId: defaultRoofLayerId(project),
+        };
+  const roofDefaults = {
+    ...roofValues,
+    layerId: project.layers.some((l) => l.id === roofValues.layerId)
+      ? roofValues.layerId
+      : defaultRoofLayerId(project),
+  };
   const [state, setState] = useState<{ projectId: string; hatch: HatchDefaults } | null>(null);
   const hatch =
     state?.projectId === project.id
@@ -137,6 +165,10 @@ export function useToolDefaults(project: Project) {
     slab: slabDefaults,
     setSlab(values: SlabDefaults) {
       setSlabState({ projectId: project.id, values });
+    },
+    roof: roofDefaults,
+    setRoof(values: RoofDefaults) {
+      setRoofState({ projectId: project.id, values });
     },
     setDoor(values: DoorSettingsDraft) {
       setDoorState({ projectId: project.id, values });

@@ -164,11 +164,11 @@ export function DemandMenu({
             Referenzen auswählen
           </button>
         )}
-        {/* Roofs offer only deletion until the roof tool brings its actions (ROOF_ELEMENT.md, D3). */}
-        {selection && selection.kind !== "reference" && selection.kind !== "roof" && summary && (
+        {selection && selection.kind !== "reference" && summary && (
           <>
             {/* Slab outlines are edited in the plan only (docs/SLAB_ELEMENT.md, E1). */}
-            {(selection.kind !== "slab" || !solid) && (
+            {/* Roof outlines likewise (docs/ROOF_ELEMENT.md, D3). */}
+            {((selection.kind !== "slab" && selection.kind !== "roof") || !solid) && (
               <>
                 {closedContour(project, selection) && (
                   <button
@@ -226,7 +226,7 @@ export function DemandMenu({
                 Element frei bewegen
               </button>
             )}
-            {edgeIndex == null && selection.kind !== "slab" && (
+            {edgeIndex == null && selection.kind !== "slab" && selection.kind !== "roof" && (
               <button
                 type="button"
                 className="rounded border p-1 text-left hover:bg-muted"

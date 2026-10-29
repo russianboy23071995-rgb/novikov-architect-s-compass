@@ -1,3 +1,4 @@
+import { RoofProperties } from "./RoofProperties";
 import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import { WallHeightProperties } from "./WallHeightProperties";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -55,6 +56,14 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   if (slab)
     return (
       <SlabProperties project={project} slab={slab} selection={selection} onChange={onChange} />
+    );
+  const roof =
+    selection?.kind === "roof"
+      ? storeyOf(project).roofs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (roof)
+    return (
+      <RoofProperties project={project} roof={roof} selection={selection} onChange={onChange} />
     );
   const wall =
     selection?.kind === "wall"

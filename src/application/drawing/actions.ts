@@ -6,6 +6,8 @@ import { pointsCompatible } from "../../geometry/tolerances/model.ts";
 import { addLine } from "../lines/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { addSlab } from "../slabs/actions.ts";
+import { addRoof } from "../roofs/actions.ts";
+import type { Roof } from "../../domain/elements/roof/model.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
 import { precisionTarget } from "../input/precision.ts";
@@ -49,7 +51,8 @@ export type DrawingRequest =
       appearance: LineAppearance;
       layerId?: string;
     }
-  | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string };
+  | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
+  | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">);
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -109,6 +112,15 @@ export function createDrawing(
       topOffset: request.topOffset,
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
+  if (request.kind === "roof") {
+    const { kind: _kind, points, layerId, ...values } = request;
+    return addRoof(current, {
+      id,
+      points: closedDrawingContour(points),
+      ...values,
+      ...(layerId ? { layerId } : {}),
+    });
+  }
   return request.kind === "wall"
     ? addWall(current, {
         id,

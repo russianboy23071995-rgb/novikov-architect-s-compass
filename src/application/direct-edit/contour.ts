@@ -7,6 +7,7 @@ import { updateLine } from "../lines/actions.ts";
 import type { EditSession } from "./session.ts";
 import { previewHatch } from "../hatches/actions.ts";
 import { updateSlab } from "../slabs/actions.ts";
+import { updateRoof } from "../roofs/actions.ts";
 import { editContourEdge, prepareContourEdgeEdit } from "../../geometry/polygons/edit-edge.ts";
 export function previewContourEdge(
   session: EditSession,
@@ -31,6 +32,9 @@ export function previewContourEdge(
     });
   if (session.target.kind === "slab")
     return updateSlab(session.base, session.target.id, { points });
+  // Roof outlines keep their reference line; the roof schema re-checks the end cuts.
+  if (session.target.kind === "roof")
+    return updateRoof(session.base, session.target.id, { points });
   return updateLine(session.base, session.target.id, { points: [...points, { ...points[0]! }] });
 }
 

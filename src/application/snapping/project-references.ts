@@ -96,6 +96,8 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     (storey.lines ?? []).map((line) => remembered(owned, line, linePart)),
     // Ceiling slab corners and edge midpoints, like a hatch outline (docs/SLAB_ELEMENT.md, B3).
     (storey.slabs ?? []).map((slab) => remembered(owned, slab, hatchPart)),
+    // Roof outline corners and edge midpoints (docs/ROOF_ELEMENT.md, D3).
+    (storey.roofs ?? []).map((roof) => remembered(owned, roof, hatchPart)),
   ];
 }
 

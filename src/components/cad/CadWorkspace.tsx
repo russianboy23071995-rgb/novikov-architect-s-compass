@@ -1,3 +1,5 @@
+import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
+import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
 import { resolvePathClick, type PathClosure } from "@/application/drawing/path-closure";
 import { previewDeleteSelection } from "@/application/elements/delete";
@@ -212,9 +214,15 @@ export function CadWorkspace({
   const [pathPoints, setPathPoints] = useState<Point[]>([]);
   const [lineKind, setLineKind] = useState<"line" | "polyline">("line");
   const [drawingBase, setDrawingBase] = useState<Project | null>(null);
-  // Hatch and slab share the outline construction (polygon, rectangle, closed contour).
-  const areaTool = tool === "hatch" || tool === "slab";
-  const pathDrawing = tool === "line" || areaTool;
+  // Roof tool (docs/ROOF_ELEMENT.md, D3): reference line, rise side by click, then the outline.
+  const [roofLine, setRoofLine] = useState<{ start: Point; end: Point } | null>(null);
+  const [roofRise, setRoofRise] = useState<"left" | "right" | null>(null);
+  const [roofSettingsOpen, setRoofSettingsOpen] = useState(false);
+  const roofPhase: RoofPhase | null =
+    tool === "roof" ? (!roofLine ? "line" : !roofRise ? "side" : "outline") : null;
+  // Hatch, slab and roof share the outline construction (polygon, rectangle, closed contour).
+  const areaTool = tool === "hatch" || tool === "slab" || roofPhase === "outline";
+  const pathDrawing = tool === "line" || areaTool || roofPhase === "line";
   const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
   const findHatchBoundary = useMemo(
     () =>
@@ -291,6 +299,8 @@ export function CadWorkspace({
     dispatchEditing({ type: "cancel" });
     setWallChain(null);
     setPathPoints([]);
+    setRoofLine(null);
+    setRoofRise(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -347,7 +357,8 @@ export function CadWorkspace({
           next === "door" ||
           next === "line" ||
           next === "hatch" ||
-          next === "slab"
+          next === "slab" ||
+          next === "roof"
         )
           setSelection(null);
         setModelError("");
@@ -357,7 +368,8 @@ export function CadWorkspace({
           next === "wall" ||
           next === "line" ||
           next === "hatch" ||
-          next === "slab"
+          next === "slab" ||
+          next === "roof"
         )
           setMode("2D");
       }
@@ -407,7 +419,8 @@ export function CadWorkspace({
       next === "door" ||
       next === "line" ||
       next === "hatch" ||
-      next === "slab"
+      next === "slab" ||
+      next === "roof"
     )
       setSelection(null);
     setModelError("");
@@ -418,7 +431,8 @@ export function CadWorkspace({
       next === "wall" ||
       next === "line" ||
       next === "hatch" ||
-      next === "slab"
+      next === "slab" ||
+      next === "roof"
     )
       setMode("2D");
   };
@@ -533,16 +547,15 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Roofs get their edit actions with the roof tool (docs/ROOF_ELEMENT.md, D3).
-    if (!selection || selection.kind === "reference" || selection.kind === "roof") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
+    // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
+    const area = selection.kind === "slab" || selection.kind === "roof";
     const solidMove =
-      inSolid &&
-      selection.kind !== "slab" &&
-      supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
+      inSolid && !area && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
-      (action === "move" && (selection.kind === "wall" || selection.kind === "slab")) ||
-      (!inSolid && selection.kind === "slab" && (action === "x" || action === "y")) ||
+      (action === "move" && (selection.kind === "wall" || area)) ||
+      (!inSolid && area && (action === "x" || action === "y")) ||
       (!inSolid &&
         (selection.kind === "line" || selection.kind === "hatch") &&
         (action === "move" || action === "x" || action === "y" || action === "axis"))
@@ -551,11 +564,13 @@ export function CadWorkspace({
         pickedPoint.anchor ??
         (selection.kind === "slab"
           ? storeyOf(project).slabs!.find((slab) => slab.id === selection.id)!.points[0]!
-          : editAnchor(project, selection));
+          : selection.kind === "roof"
+            ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
+            : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
-          action === "axis" && selection.kind !== "slab"
+          action === "axis" && !area
             ? editMovementAxis({
                 base: project,
                 target: selection,
@@ -578,11 +593,12 @@ export function CadWorkspace({
     }
 
     // Slab outlines are edited in the plan (docs/SLAB_ELEMENT.md, E1); in 3D the slab moves whole.
-    if (selection.kind === "slab" && (inSolid || action === "axis")) {
+    if (area && (inSolid || action === "axis")) {
+      const name = selection.kind === "roof" ? "Dach" : "Decke";
       showNotice(
         inSolid
-          ? "Deckenumriss im Grundriss bearbeiten; in 3D wird die Decke als Ganzes bewegt."
-          : "Decken: Element frei bewegen oder auf X-/Y-Achse.",
+          ? `${name}umriss im Grundriss bearbeiten; in 3D wird ${selection.kind === "roof" ? "das Dach" : "die Decke"} als Ganzes bewegt.`
+          : `${selection.kind === "roof" ? "Dächer" : "Decken"}: Element frei bewegen oder auf X-/Y-Achse.`,
       );
       return;
     }
@@ -675,7 +691,8 @@ export function CadWorkspace({
 
   const finishPath = (points = pathPoints, base = drawingBase) => {
     try {
-      const kind = tool === "hatch" ? "hatch" : tool === "slab" ? "slab" : "line";
+      const kind =
+        tool === "hatch" ? "hatch" : tool === "slab" ? "slab" : tool === "roof" ? "roof" : "line";
       const id = `${kind}-${crypto.randomUUID()}`;
       changeProject(
         createDrawing(
@@ -686,30 +703,64 @@ export function CadWorkspace({
             ? { kind: "hatch", points, ...toolDefaults.hatch }
             : tool === "slab"
               ? { kind: "slab", points, ...toolDefaults.slab }
-              : {
-                  kind: "line",
-                  lineKind,
-                  points,
-                  appearance: lineAppearance,
-                  layerId: toolDefaults.line.layerId,
-                },
+              : tool === "roof"
+                ? {
+                    kind: "roof",
+                    points,
+                    referenceLine: roofLine!,
+                    rise: roofRise!,
+                    ...toolDefaults.roof,
+                  }
+                : {
+                    kind: "line",
+                    lineKind,
+                    points,
+                    appearance: lineAppearance,
+                    layerId: toolDefaults.line.layerId,
+                  },
           viewContext.binding,
         ),
         { kind, id },
       );
-    } catch {
+      setRoofLine(null);
+      setRoofRise(null);
+    } catch (error) {
       setModelError(
-        tool === "slab"
-          ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
-          : tool === "hatch"
-            ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
-            : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
+        tool === "roof"
+          ? roofErrorMessage(error)
+          : tool === "slab"
+            ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
+            : tool === "hatch"
+              ? "Schraffur prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Deckkraft 0–100 %. Nach Modelländerung erneut beginnen."
+              : "Linie benötigt unterschiedliche Punkte und eine Strichstärke von 0,05 bis 2 mm.",
       );
+    }
+  };
+
+  /** The readable German message of a refused roof, also from a schema (Zod) issue list. */
+  const roofErrorMessage = (error: unknown) => {
+    const fallback =
+      "Dach prüfen: Umriss ohne Kreuzungen, passende Abschlüsse. Nach Modelländerung erneut beginnen.";
+    if (!(error instanceof Error)) return fallback;
+    if (!error.message.startsWith("[")) return error.message;
+    try {
+      return (JSON.parse(error.message) as { message?: string }[])[0]?.message ?? fallback;
+    } catch {
+      return fallback;
     }
   };
 
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
+    // Roof phase 2: the click side of the reference line is the side the roof rises to.
+    if (roofPhase === "side" && roofLine) {
+      const { start, end } = roofLine;
+      const side =
+        (end.x - start.x) * (point.y - start.y) - (end.y - start.y) * (point.x - start.x);
+      if (side === 0) setModelError("Neben die Bezugslinie klicken, auf die Seite des Anstiegs.");
+      else setRoofRise(side > 0 ? "left" : "right");
+      return;
+    }
     if (areaTool && hatchConstruction === "boundary") {
       const points = findHatchBoundary?.(point) ?? [];
       if (points.length) finishPath(points, project);
@@ -749,7 +800,10 @@ export function CadWorkspace({
           setModelError(e instanceof Error ? e.message : "Ungültiges Rechteck.");
         }
       } else if (tool === "line" && lineKind === "line" && next.length === 2) finishPath(next);
-      else setPathPoints(next);
+      else if (roofPhase === "line" && next.length === 2) {
+        setRoofLine({ start: next[0]!, end: next[1]! });
+        setPathPoints([]);
+      } else setPathPoints(next);
       return;
     }
     try {
@@ -918,6 +972,18 @@ export function CadWorkspace({
         onOpenChange={setDisplaySettingsOpen}
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
+      />
+      <RoofSettingsPanel
+        open={roofSettingsOpen}
+        onOpenChange={setRoofSettingsOpen}
+        construction={hatchConstruction}
+        onConstruction={(construction) => {
+          setPathPoints([]);
+          setHatchConstruction(construction);
+        }}
+        value={toolDefaults.roof}
+        onChange={toolDefaults.setRoof}
+        layers={project.layers}
       />
       <main
         onPointerDownCapture={(event) => {
@@ -1279,6 +1345,18 @@ export function CadWorkspace({
                 onPrecision={doorTool.setPrecision}
                 pickingHost={doorTool.pickingHost}
               />
+            ) : tool === "roof" && mode === "2D" ? (
+              <RoofToolFields
+                construction={hatchConstruction}
+                onConstruction={(construction) => {
+                  setPathPoints([]);
+                  setHatchConstruction(construction);
+                }}
+                value={toolDefaults.roof}
+                onChange={toolDefaults.setRoof}
+                layers={project.layers}
+                phase={roofPhase ?? "line"}
+              />
             ) : tool === "slab" && mode === "2D" ? (
               <SlabToolFields
                 construction={hatchConstruction}
@@ -1475,6 +1553,9 @@ export function CadWorkspace({
               collapsed={railCollapsed}
               onSelect={selectTool}
               onToggle={() => setRailCollapsed((value) => !value)}
+              onSettings={(next) => {
+                if (next === "roof") setRoofSettingsOpen(true);
+              }}
             />
           )}
           <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
@@ -1606,9 +1687,10 @@ export function CadWorkspace({
                         interaction.adapter?.snapping ??
                         (tool === "wall" ? wallStartSnapPolicy : null)
                       }
-                      drawing={(tool === "wall" || pathDrawing) && mode === "2D"}
+                      drawing={(tool === "wall" || pathDrawing || tool === "roof") && mode === "2D"}
                       endpointSnap={
                         pathDrawing ||
+                        tool === "roof" ||
                         tool === "measure" ||
                         tool === "select" ||
                         tool === "wall" ||
@@ -1619,6 +1701,7 @@ export function CadWorkspace({
                       start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                       draftPoints={pathDrawing ? pathPoints : []}
                       closeAtStart={pathClosure !== "none"}
+                      roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
                       draftFill={tool === "hatch" ? hatchFill : undefined}
                       draftPattern={
                         tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
@@ -1639,12 +1722,7 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (
-                          target.kind === "reference" ||
-                          target.kind === "door" ||
-                          target.kind === "roof"
-                        )
-                          return;
+                        if (target.kind === "reference" || target.kind === "door") return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(
