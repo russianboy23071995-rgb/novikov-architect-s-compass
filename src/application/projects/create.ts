@@ -29,3 +29,29 @@ export function createProject(projectId: string, storeyId: string): Project {
     ],
   });
 }
+
+/** Default storey height of a new project (user decision 29.10.2026). */
+export const STANDARD_STOREY_HEIGHT = 3;
+
+/**
+ * Start structure of a new project: Erdgeschoss and 1. Obergeschoss, each 3,00 m high, so
+ * every storey has a known height and slabs appear in 3D from the start.
+ */
+export function createStandardProject(
+  projectId: string,
+  groundStoreyId: string,
+  upperStoreyId: string,
+): Project {
+  const base = createProject(projectId, groundStoreyId);
+  const ground = {
+    ...base.storeys[0]!,
+    name: "Erdgeschoss",
+    height: STANDARD_STOREY_HEIGHT,
+  };
+  const upper = {
+    ...ground,
+    id: upperStoreyId,
+    name: "1. Obergeschoss",
+  };
+  return validateProject({ ...base, storeys: [ground, upper] });
+}

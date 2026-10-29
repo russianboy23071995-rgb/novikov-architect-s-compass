@@ -88,7 +88,7 @@ import { FloatingPanel } from "./FloatingPanel";
 import { exportIfc } from "@/lib/bim/ifc";
 import { applySelectionCommand } from "@/application/commands/selection-command";
 import type { Point, Project } from "@/domain/project/schema";
-import { createExampleProject } from "./bim-view";
+import { createStartProject } from "./bim-view";
 import type { Selection } from "./bim-view";
 import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
 import { LineStyleFields } from "./LineControls";
@@ -146,7 +146,7 @@ export function CadWorkspace({
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
   const [editing, dispatchEditing] = useProjectEditing(
-    () => ensureDocumentFolder(initialProject ?? createExampleProject()),
+    () => ensureDocumentFolder(initialProject ?? createStartProject()),
     activeDocumentId,
   );
   const { history, session: pendingSession } = editing;
