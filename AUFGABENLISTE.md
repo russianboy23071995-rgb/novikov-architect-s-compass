@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 29.10.2026 · main nach PR502
+**Stand:** 29.10.2026 · main nach PR503
 
 ## Deine Wünsche
 
@@ -26,7 +26,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L01 | Mehrgeschossige Wände (z. B. EG bis 3. OG, Fensterfronten über Geschosse), gestapelte Wände wirken als eine Wand |      | offen                                                                                                                  | Vision 27.10., A08 |
 | L02 | Gast-Anzeige: Wände anderer Geschosse im Grundriss zeigen, wenn sie die Schnittebene (≈ 1 m) durchdringen        |      | offen                                                                                                                  | Vision 27.10., A08 |
 | L03 | Decken als echtes Bauteil (heute nur angenommene Rohdecke 0,20 m)                                                |      | A+B+C1+Umriss erledigt (PR486–494), Archicad abgenommen 29.10.; C3 Variante A erledigt (PR499), Materialvorrang später | §6 Abschnitt 2     |
-| L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | in Arbeit: D1 Modell erledigt (PR502), D2–D5 offen                                                                     | §6, §8 Dachtrimmen |
+| L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | in Arbeit: D1+D2 erledigt (PR502/503), D3–D5 offen                                                                     | §6, §8 Dachtrimmen |
 | L05 | Stützen                                                                                                          |      | offen                                                                                                                  | §6 Abschnitt 2     |
 | L06 | Treppen                                                                                                          |      | offen                                                                                                                  | §6 Abschnitt 2     |
 | L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                                                                                  | §6 Abschnitt 2     |
