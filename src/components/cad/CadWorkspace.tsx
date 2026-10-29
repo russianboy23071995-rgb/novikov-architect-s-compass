@@ -939,6 +939,8 @@ export function CadWorkspace({
             <p className="text-xs text-muted-foreground">
               {pendingFile?.name} · {projectElementCounts(pendingFile?.project).walls} Wände ·{" "}
               {projectElementCounts(pendingFile?.project).windows} Fenster ·{" "}
+              {projectElementCounts(pendingFile?.project).doors} Türen ·{" "}
+              {projectElementCounts(pendingFile?.project).slabs} Decken ·{" "}
               {projectElementCounts(pendingFile?.project).lines ?? 0} Linien ·{" "}
               {projectElementCounts(pendingFile?.project).hatches ?? 0} Schraffuren ·{" "}
               {projectElementCounts(pendingFile?.project).references ?? 0} Bildreferenzen. Ersetzt

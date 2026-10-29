@@ -40,7 +40,15 @@ export function resolveViewStorey(project: Project, binding: ViewIdentity) {
 
 /** File summaries describe the complete document, independent of the active view. */
 export function projectElementCounts(project: Project | undefined) {
-  const result = { walls: 0, windows: 0, lines: 0, hatches: 0, references: 0 };
+  const result = {
+    walls: 0,
+    windows: 0,
+    doors: 0,
+    slabs: 0,
+    lines: 0,
+    hatches: 0,
+    references: 0,
+  };
   for (const storey of project?.storeys ?? [])
     for (const kind of Object.keys(result) as (keyof typeof result)[])
       result[kind] += storey[kind]?.length ?? 0;
