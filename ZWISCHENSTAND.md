@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR499 · 1352 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR500 · 1352 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -41,6 +41,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Ecke anklicken bewegt sie sofort; Ecke auf eine andere Ecke ziehen löscht sie (Schraffur, Decke, Linie; Rechtsklick auf die Ecke öffnet das Punktmenü) (PR497).
 - Polygon-Regeln A–D (deine Vorgabe vom 29.10., docs/POLYGON_REGELN.md) abgeschlossen; zuletzt heißen Fangpunkte nach Element und Nummer, z. B. „Decke · Ecke 3“, „Wand · Anfang“ (PR498).
 - Wand und Decke flimmern in 3D nicht mehr, wenn sie sich überschneiden (Decke wird bei gleichem Vorrang vorn gezeigt); später entscheidet das Material (PR499).
+- Der Hinweis auf Wiederherstellungsstände sitzt jetzt klein unten links statt als Fenster oben rechts (PR500).
 - Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
