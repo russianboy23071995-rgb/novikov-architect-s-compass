@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR492 · 1344 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR494 · 1347 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -36,13 +36,13 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - AUD14-Abgleich aller Prüfpunkte (docs/AUD14_ABGLEICH.md); Umlaute repariert und automatisch geprüft (PR479); Meldung „Bewegung nicht möglich“ repariert, Prüfung findet jetzt auch kaputte Ersatzzeichen (PR485).
 - Architekturregel für mehrgeschossige Wände festgehalten (Gast-Wände, Dachtrimmung über Geschosse; Masterplan A08).
 - Lade- und Wiederherstellungsübersicht nennen jetzt auch Türen und Decken (PR491).
+- Deckenumriss im Grundriss bearbeiten wie bei Schraffuren: Ecke verschieben, strecken, Knicken, Seite strecken, Kontur versetzen (PR494); dafür die Bearbeitungssitzung aus `lib/bim` verlegt (PR493).
 - Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
 
 **Mögliche nächste Aufträge (deine Wahl)**
 
-- Decken: einzelne Eckpunkte/Kanten bearbeiten (vorher Bearbeitungstyp aus lib/bim lösen).
 - Decken C3: Überschneidung von Wand und Decke (Wand mit Zusatzhöhe 0 ragt in die Decke) für 3D, Mengen und IFC klären.
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
