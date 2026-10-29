@@ -96,8 +96,8 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
   if (!wall && !opening)
     return (
       <p className="p-3 text-xs text-muted-foreground">
-        Wand, Fenster, Tür, Decke, Linie oder Schraffur auswählen, um die Eigenschaften hier zu
-        bearbeiten.
+        Wand, Fenster, Tür, Decke, Dach, Raum, Linie oder Schraffur auswählen, um die Eigenschaften
+        hier zu bearbeiten.
       </p>
     );
   const fields = wall
