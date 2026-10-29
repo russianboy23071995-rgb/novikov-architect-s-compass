@@ -6,8 +6,6 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 ## Gerade aktiv
 
-- Wartet auf dich: Archicad-Test der Datei NOVIKOV-Decken-Test.ifc (DesktopClaude_Ablage_CodeNOVIKOV-Decken-Abnahme-2026-10-28).
-
 ## Was wir gemacht haben (24.–29.10.2026)
 
 **Schulmodell schneller machen (Nutzerentscheidung 24.10.)**
@@ -28,6 +26,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 **IFC / Archicad**
 
+- Decken: von dir in Archicad abgenommen (29.10.), Import erfolgreich, Decken auf richtigen Höhen; Fenster weiterhin 0,00 x 0,00.
 - T-Anschlüsse: von dir in Archicad abgenommen, Wände korrekt (PR477). Reguläre Dateibeschreibung im normalen Export (PR478).
 
 **Aufräumen und Qualität**

@@ -50,7 +50,7 @@ Basis: main `58b9dae`, Branch `feat/slab-element`. Bezug: N47 (Decken mit Stärk
 - Abnahmemodell `benchmarks/slab-ifc-acceptance.ts` über die normalen Aktionen: Erdgeschoss 3,00 m mit Rechteckdecke 0,20 m (8,30 × 6,30 m über die Außenkanten), 1. Obergeschoss 2,80 m mit L-förmiger Decke 0,25 m; Wände je bis Deckenunterkante, je ein Fenster. Datei: `node --experimental-strip-types scripts/generate-slab-acceptance-ifc.mjs <Ordner>` → `NOVIKOV-Decken-Test.ifc`.
 - Nachweis: Test in `src/interop/ifc/door.test.ts` liest die Datei zurück (zwei `IfcSlab` FLOOR, Unterkante EG 2,80 / OG 2,55 über Geschoss, Extrusion = Stärke, 4 bzw. 6 Umrisspunkte, Enthaltensein im richtigen Geschoss, Eigenschaft Thickness; ohne Geschosshöhe kein `IfcSlab`). Gleichheits-Hash 14 Modelle ohne Decke unverändert.
 - Befund bei der Umsetzung (Fehler aus B1/Teil A, mit behoben): Ein Geschoss nur mit Decke und ohne Wände bekam keinen 3D-Körper (Gebäudeaufbau übersprang Geschosse ohne Wände), und „Alles anzeigen“ im Grundriss ignorierte Decken. Beide Stellen zählen Decken jetzt mit; Tests in actions.test.ts und bim-view.test.ts.
-- Offen: Archicad-Import durch den Nutzer (Datei übergeben). Kein Schichtaufbau/Material im IFC.
+- Archicad-Import vom Nutzer am 29.10.2026 bestätigt (Datei NOVIKOV-Decken-Test.ifc, am 29.10. mit main nach PR498 neu erzeugt, inhaltlich gleich der Datei vom 28.10.): Import erfolgreich, Decken auf den richtigen Höhen. Fenster weiterhin RB 0,00 x 0,00 (bekannter Blocker, docs/T_IFC_ACCEPTANCE.md). Kein Schichtaufbau/Material im IFC.
 
 ## Teil B3: Bearbeiten (28.10.2026)
 

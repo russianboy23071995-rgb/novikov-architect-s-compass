@@ -21,18 +21,18 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 ## Bauteile und Fachmodell
 
-| ID  | Aufgabe                                                                                                          | Prio | Status                                                      | Bezug              |
-| --- | ---------------------------------------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------- | ------------------ |
-| L01 | Mehrgeschossige Wände (z. B. EG bis 3. OG, Fensterfronten über Geschosse), gestapelte Wände wirken als eine Wand |      | offen                                                       | Vision 27.10., A08 |
-| L02 | Gast-Anzeige: Wände anderer Geschosse im Grundriss zeigen, wenn sie die Schnittebene (≈ 1 m) durchdringen        |      | offen                                                       | Vision 27.10., A08 |
-| L03 | Decken als echtes Bauteil (heute nur angenommene Rohdecke 0,20 m)                                                |      | A+B+C1+Umriss erledigt (PR486–494); Archicad-Test, C3 offen | §6 Abschnitt 2     |
-| L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | offen                                                       | §6, §8 Dachtrimmen |
-| L05 | Stützen                                                                                                          |      | offen                                                       | §6 Abschnitt 2     |
-| L06 | Treppen                                                                                                          |      | offen                                                       | §6 Abschnitt 2     |
-| L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                       | §6 Abschnitt 2     |
-| L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | offen                                                       | §6 Abschnitt 2/4   |
-| L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | offen                                                       | §6, §8             |
-| L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)          | §9                 |
+| ID  | Aufgabe                                                                                                          | Prio | Status                                                                   | Bezug              |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------ | ------------------ |
+| L01 | Mehrgeschossige Wände (z. B. EG bis 3. OG, Fensterfronten über Geschosse), gestapelte Wände wirken als eine Wand |      | offen                                                                    | Vision 27.10., A08 |
+| L02 | Gast-Anzeige: Wände anderer Geschosse im Grundriss zeigen, wenn sie die Schnittebene (≈ 1 m) durchdringen        |      | offen                                                                    | Vision 27.10., A08 |
+| L03 | Decken als echtes Bauteil (heute nur angenommene Rohdecke 0,20 m)                                                |      | A+B+C1+Umriss erledigt (PR486–494), Archicad abgenommen 29.10.; C3 offen | §6 Abschnitt 2     |
+| L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | offen                                                                    | §6, §8 Dachtrimmen |
+| L05 | Stützen                                                                                                          |      | offen                                                                    | §6 Abschnitt 2     |
+| L06 | Treppen                                                                                                          |      | offen                                                                    | §6 Abschnitt 2     |
+| L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                                    | §6 Abschnitt 2     |
+| L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | offen                                                                    | §6 Abschnitt 2/4   |
+| L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | offen                                                                    | §6, §8             |
+| L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                       | §9                 |
 
 ## Pläne und Dokumentation
 
