@@ -187,31 +187,21 @@ test("prepared XY move ignores coincident join nodes at different heights", () =
   assert.deepEqual(preview.faces, buildBuildingSolid(action.materialize(p, delta)).faces);
 });
 
-import { DEFAULT_RAW_SLAB_THICKNESS, resolveWallHeightRule } from "./heights.ts";
+import { resolveWallHeightRule } from "./heights.ts";
 
-test("underside binding subtracts slab thickness, includes both offsets and follows storeys", () => {
-  const rule = { kind: "slab-underside", topOffset: -0.1 } as const;
+test("storey binding ends at the own storey top plus extra height and follows storeys", () => {
+  const rule = { kind: "storey", topOffset: -0.3 } as const;
   for (const floor of [-3, 0, 3]) {
-    const result = resolveWallHeightRule({ baseOffset: 0.1 }, floor, rule, {
-      topElevation: floor + 3,
-      thickness: DEFAULT_RAW_SLAB_THICKNESS,
-    });
+    const result = resolveWallHeightRule({ baseOffset: 0.1 }, floor, rule, floor + 3);
     assert.ok(Math.abs(result.height - 2.6) < 1e-12);
     assert.ok(Math.abs(result.top - (floor + 2.7)) < 1e-12);
   }
-  const taller = resolveWallHeightRule(
-    {},
-    0,
-    { kind: "slab-underside", topOffset: 0 },
-    {
-      topElevation: 4,
-      thickness: 0.3,
-    },
-  );
-  assert.equal(taller.height, 3.7);
+  // Parapet: 0,50 m above OK raw floor of the storey above (user decision 29.10.2026).
+  assert.equal(resolveWallHeightRule({}, 0, { kind: "storey", topOffset: 0.5 }, 3).height, 3.5);
+  assert.equal(resolveWallHeightRule({}, 0, { kind: "storey", topOffset: 0 }, 4).height, 4);
 });
 
-test("fixed rule preserves legacy height regardless of upper slab", () => {
+test("fixed rule preserves legacy height regardless of storey levels", () => {
   assert.deepEqual(resolveWallHeightRule({ baseOffset: 0.5 }, 3, { kind: "fixed", height: 2.8 }), {
     bottom: 3.5,
     top: 6.3,
@@ -219,25 +209,13 @@ test("fixed rule preserves legacy height regardless of upper slab", () => {
   });
 });
 
-test("underside rule rejects missing, invalid or collapsed references instead of guessing", () => {
-  const rule = { kind: "slab-underside", topOffset: 0 } as const;
+test("storey rule rejects missing, invalid or collapsed references instead of guessing", () => {
+  const rule = { kind: "storey", topOffset: 0 } as const;
   assert.throws(() => resolveWallHeightRule({}, 0, rule));
-  for (const thickness of [0, -0.2, NaN, Infinity])
-    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation: 3, thickness }));
-  for (const topElevation of [0.2, -1, NaN, Infinity, Number.MAX_VALUE])
-    assert.throws(() => resolveWallHeightRule({}, 0, rule, { topElevation, thickness: 0.2 }));
+  for (const upper of [0, -1, NaN, Infinity])
+    assert.throws(() => resolveWallHeightRule({}, 0, rule, upper));
   for (const topOffset of [NaN, Infinity, -3])
-    assert.throws(() =>
-      resolveWallHeightRule(
-        {},
-        0,
-        { ...rule, topOffset },
-        {
-          topElevation: 3,
-          thickness: 0.2,
-        },
-      ),
-    );
+    assert.throws(() => resolveWallHeightRule({}, 0, { ...rule, topOffset }, 3));
 });
 
 import { setWallHeightRule } from "../../../application/walls/height-binding.ts";
@@ -262,7 +240,7 @@ function bind(p: ReturnType<typeof heightFixture>) {
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
 }
 test("bound heights follow storeys atomically, serialize only source rule, undo and IFC agree", async () => {
@@ -294,13 +272,25 @@ test("V25 remains fixed; bound rule cannot be smuggled into old format; stale he
   const restored = deserializeProject(JSON.stringify(raw));
   const taller = setStoreyHeight(restored, restored, { projectId: "p", storeyId: "eg", height: 4 });
   assert.equal(taller.storeys[0]!.walls[0]!.height, 2.8);
-  raw.storeys[0].walls[0].topBinding = bind(p).storeys[0]!.walls[0]!.topBinding;
+  raw.storeys[0].walls[0].topBinding = {
+    kind: "slab-underside",
+    storeyId: "og",
+    slabThickness: 0.2,
+    topOffset: 0,
+  };
   assert.throws(() => deserializeProject(JSON.stringify(raw)));
   raw.schemaVersion = 26;
   raw.storeys[0].walls[0].height = 90;
   assert.equal(deserializeProject(JSON.stringify(raw)).storeys[0]!.walls[0]!.height, 2.8);
   const bound = bind(p);
-  assert.throws(() => updateWall(bound, "w", { height: 4 }), /Höhenaktion/);
+  // A typed height releases the binding (user decision 29.10.2026).
+  const released = updateWall(bound, "w", { height: 2.6 });
+  assert.equal(released.storeys[0]!.walls[0]!.topBinding, undefined);
+  assert.equal(released.storeys[0]!.walls[0]!.height, 2.6);
+  assert.equal(
+    updateWall(bound, "w", { height: 2.8 }).storeys[0]!.walls[0]!.topBinding?.kind,
+    "storey",
+  );
   const fixed = setWallHeightRule(bound, bound, {
     projectId: "p",
     storeyId: "eg",
@@ -310,13 +300,35 @@ test("V25 remains fixed; bound rule cannot be smuggled into old format; stale he
   assert.equal(fixed.storeys[0]!.walls[0]!.topBinding, undefined);
   assert.equal(fixed.storeys[0]!.walls[0]!.height, 2.7);
 });
-test("binding validates explicit context, upper target and insertion without silently rebinding", () => {
+test("binding validates explicit context, needs a known storey height and survives insertion", () => {
   const p = bind(heightFixture());
-  assert.throws(() => bind(fixture()), /Rohdeckenbezug/);
-  assert.throws(
-    () => addStorey(p, p, { projectId: "p", storeyId: "eg", side: "above", id: "mid", height: 3 }),
-    /Bindung/,
-  );
+  assert.throws(() => bind(fixture()), /Geschosshöhe/);
+  // Only the own storey height is read (A08): a storey inserted above changes nothing.
+  const inserted = addStorey(p, p, {
+    projectId: "p",
+    storeyId: "eg",
+    side: "above",
+    id: "mid",
+    height: 3,
+  });
+  assert.equal(inserted.storeys[0]!.walls[0]!.height, 2.8);
+  // The top storey can be bound too, e.g. a parapet 0,50 m above its storey top.
+  let og = selectWorkingStorey(p, p, "og");
+  og = addWall(og, {
+    id: "attika",
+    start: { x: 0, y: 5 },
+    end: { x: 3, y: 5 },
+    thickness: 0.24,
+    height: 1,
+  });
+  const parapet = setWallHeightRule(og, og, {
+    projectId: "p",
+    storeyId: "og",
+    wallIds: ["attika"],
+    rule: { kind: "storey", topOffset: 0.5 },
+  });
+  assert.equal(parapet.storeys[1]!.walls[0]!.height, 3.5);
+  assert.equal(buildBuildingSolid(parapet).max[2], 6.5);
   assert.throws(
     () =>
       setWallHeightRule(p, heightFixture(), {
@@ -348,7 +360,7 @@ test("bound recovery and rigid Z preview preserve rule and full-path geometry", 
   const action = prepareZTranslation(p, targets);
   const preview = action.evaluate(p, targets, 0.5);
   const moved = action.materialize(p, targets, 0.5);
-  assert.equal(moved.storeys[0]!.walls[0]!.topBinding!.topOffset, 0.5);
+  assert.equal(moved.storeys[0]!.walls[0]!.topBinding!.topOffset, -0.2 + 0.5);
   assert.equal(moved.storeys[0]!.walls[0]!.height, 2.8);
   assert.deepEqual(storeyOf(preview.geometry).walls, moved.storeys[0]!.walls);
 });
@@ -373,7 +385,7 @@ test("connected bound walls resize together; mixed heights keep their join as a 
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w", "b"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
   const taller = setStoreyHeight(bound, bound, { projectId: "p", storeyId: "eg", height: 4 });
   assert.equal(storeyOf(taller).wallJoins.length, 1);
@@ -409,7 +421,7 @@ test("bound T junctions and prepared XY movement agree with committed geometry",
     projectId: "p",
     storeyId: "eg",
     wallIds: ["w", "b"],
-    rule: { kind: "slab-underside", storeyId: "og", topOffset: 0 },
+    rule: { kind: "storey", topOffset: -0.2 },
   });
   p = setStoreyHeight(p, p, { projectId: "p", storeyId: "eg", height: 3.5 });
   const action = prepareSelectionTranslation(p, ["w", "b"]);
@@ -459,4 +471,34 @@ test("bound snapshots retain canonical content order through validation, file an
   );
   const history = createHistory(p);
   assert.equal(commitProject(history, deserializeProject(serializeProject(p))), history);
+});
+
+test("schema 29 slab bindings load as storey bindings with unchanged heights", () => {
+  const p = bind(heightFixture());
+  const raw = JSON.parse(serializeProject(p));
+  const legacy = (topOffset: number, storeyId = "og") => ({
+    kind: "slab-underside",
+    storeyId,
+    slabThickness: 0.25,
+    topOffset,
+  });
+  for (const version of [26, 27, 28, 29]) {
+    raw.schemaVersion = version;
+    raw.storeys[0].walls[0].topBinding = legacy(-0.1);
+    if (version < 29) for (const s of raw.storeys) delete s.slabs;
+    if (version < 28) for (const s of raw.storeys) for (const w of s.windows) delete w.mark;
+    const loaded = deserializeProject(JSON.stringify(raw));
+    const wall = loaded.storeys[0]!.walls[0]!;
+    assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
+    assert.deepEqual(wall.topBinding, { kind: "storey", topOffset: -0.1 - 0.25 });
+    assert.equal(wall.height, 3 - 0.25 + -0.1);
+  }
+  raw.schemaVersion = 29;
+  raw.storeys[0].walls[0].topBinding = legacy(0, "eg");
+  assert.throws(() => deserializeProject(JSON.stringify(raw)), /darüberliegende Geschoss/);
+  raw.storeys[0].walls[0].topBinding = { kind: "storey", topOffset: 0 };
+  assert.throws(() => deserializeProject(JSON.stringify(raw)));
+  raw.schemaVersion = PROJECT_SCHEMA_VERSION;
+  raw.storeys[0].walls[0].topBinding = legacy(0);
+  assert.throws(() => deserializeProject(JSON.stringify(raw)));
 });

@@ -14,7 +14,7 @@ type Point = { x: number; y: number };
  * each side. Exterior walls joined at the corners, corridor walls and partitions T-connected,
  * one door per classroom on the corridor, two windows per classroom on the facade, one
  * hatch per room and the corridor, desks as closed polylines. Walls below the top storey are
- * bound to the slab underside of the storey above. Position numbers as after placement.
+ * bound to their storey height, 0,20 m below OK raw floor above (as the former slab binding). Position numbers as after placement.
  * Still synthetic (regular grid, no stairs, no slabs); `wings` repeats the building along x.
  */
 export function schoolPlanFixture(options: { wings?: number; desksPerRoom?: number } = {}) {
@@ -64,12 +64,7 @@ export function schoolPlanFixture(options: { wings?: number; desksPerRoom?: numb
           layerId: p.defaultLayerIds.wall,
           ...(bound
             ? {
-                topBinding: {
-                  kind: "slab-underside" as const,
-                  storeyId: `s${s + 1}`,
-                  slabThickness: slab,
-                  topOffset: 0,
-                },
+                topBinding: { kind: "storey" as const, topOffset: 0 - slab },
               }
             : {}),
         });

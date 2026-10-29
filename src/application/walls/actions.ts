@@ -37,6 +37,10 @@ export function addWall(
   );
 }
 
+function unbound({ topBinding: _released, ...wall }: Wall): Wall {
+  return wall;
+}
+
 export function updateWall(
   project: Project,
   wallId: string,
@@ -49,8 +53,9 @@ export function updateWall(
   if (!previous) throw new Error(`Unknown wall: ${wallId}`);
   if ("topBinding" in changes)
     throw new Error("Höhenbindung über die gemeinsame Höhenaktion ändern.");
-  if (previous.topBinding && changes.height !== undefined && changes.height !== previous.height)
-    throw new Error("Gebundene Wandhöhe über die gemeinsame Höhenaktion ändern.");
+  // A typed height releases the storey binding (user decision 29.10.2026).
+  const release =
+    !!previous.topBinding && changes.height !== undefined && changes.height !== previous.height;
   const bodyOffset =
     changes.bodyOffset ??
     (changes.thickness !== undefined && changes.thickness !== previous.thickness
@@ -64,7 +69,9 @@ export function updateWall(
     ...replaceStorey(project, {
       ...storeyOf(project),
       walls: storeyOf(project).walls.map((wall) =>
-        wall.id === wallId ? { ...wall, ...changes, bodyOffset, id: wall.id } : wall,
+        wall.id === wallId
+          ? { ...(release ? unbound(wall) : wall), ...changes, bodyOffset, id: wall.id }
+          : wall,
       ),
     }),
   };

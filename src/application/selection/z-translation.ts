@@ -43,12 +43,12 @@ export function prepareZTranslation(
   const moving = new Set(targets.filter((t) => t.kind === "wall").map((t) => t.id));
   if (!moving.size) throw new Error("Mindestens eine Wand auswählen.");
   const levels = new Map(
-    resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s.elevation]),
+    resolveStoreyLevels(base.storeys, base.groundStoreyId).map((s) => [s.storeyId, s]),
   );
   const parts = base.storeys
     .filter((s) => s.walls.some((w) => moving.has(w.id)))
     .map((s) => {
-      const elevation = levels.get(s.id);
+      const { elevation, upperElevation } = levels.get(s.id)!;
       if (elevation == null) throw new Error("Geschosshöhe nicht aufgelöst.");
       const neighbours = new Map<string, Set<string>>();
       for (const [a, b] of [
@@ -79,6 +79,7 @@ export function prepareZTranslation(
         s,
         closure,
         elevation,
+        upperElevation,
         walls,
         windows,
         doors,
@@ -101,6 +102,7 @@ export function prepareZTranslation(
     wall: Project["storeys"][number]["walls"][number],
     delta: number,
     elevation: number,
+    upperElevation: number | null,
   ) => {
     if (!moving.has(wall.id) || delta === 0) return wall;
     // A rigid translation moves both ends, retaining the reference and changing its offset.
@@ -113,12 +115,8 @@ export function prepareZTranslation(
         : {}),
     };
     if (next.topBinding) {
-      const upper = levels.get(next.topBinding.storeyId);
-      if (upper == null) throw new Error("Der Rohdeckenbezug fehlt.");
-      next.height = resolveWallHeightRule(next, elevation, next.topBinding, {
-        topElevation: upper,
-        thickness: next.topBinding.slabThickness,
-      }).height;
+      if (upperElevation == null) throw new Error("Der Geschossbezug fehlt.");
+      next.height = resolveWallHeightRule(next, elevation, next.topBinding, upperElevation).height;
     }
     wallHeights(next, elevation);
     if (wallBase(next) === wallBase(wall))
@@ -133,7 +131,7 @@ export function prepareZTranslation(
     assertContext(current, currentTargets);
     if (!Number.isFinite(delta)) throw new Error("Endlicher Z-Versatz erforderlich.");
     const patches = parts.map((p) => {
-      const walls = p.walls.map((w) => shifted(w, delta, p.elevation));
+      const walls = p.walls.map((w) => shifted(w, delta, p.elevation, p.upperElevation));
       const before = new Map(p.walls.map((w) => [w.id, w]));
       const after = new Map(walls.map((w) => [w.id, w]));
       const doors = p.doors.map((d) => {
