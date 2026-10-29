@@ -10,6 +10,8 @@ import { readProjectFile } from "../../lib/bim/history.ts";
 import { buildSolid } from "../../rendering/viewport/storey-solid.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { capturedStart, closesAtStart, resolvePathClick } from "./path-closure.ts";
+import { mergeOntoVertex, moveVertex } from "../../geometry/polygons/vertex-merge.ts";
+import { capturedVertex } from "../direct-edit/transforms.ts";
 test("shared drawing creates exact wall dimensions with one history step and matching JSON/solid", () => {
   const base = createProject("p", "s"),
     start = { x: 0, y: 0 };
@@ -743,4 +745,148 @@ test("a click on the start point closes every click-by-click tool by its declare
   });
   const points = storeyOf(line).lines!.at(-1)!.points;
   assert.deepEqual(points, [...ring, start]);
+});
+
+test("a corner moved onto another corner is deleted for every vertex element; preview equals commit", () => {
+  // Shared geometry rule (docs/POLYGON_REGELN.md, Regel 2).
+  const square = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 4 },
+    { x: 0, y: 4 },
+  ];
+  assert.deepEqual(mergeOntoVertex(square, 1, { x: 4, y: 4 }, "ring"), [
+    { x: 0, y: 0 },
+    { x: 4, y: 4 },
+    { x: 0, y: 4 },
+  ]);
+  assert.equal(mergeOntoVertex(square, 1, { x: 5, y: 0 }, "ring"), null);
+  assert.throws(() => mergeOntoVertex(square.slice(0, 3), 0, { x: 4, y: 0 }, "ring"), /drei/);
+  const open = [...square];
+  assert.deepEqual(mergeOntoVertex(open, 1, { x: 4, y: 4 }, "path"), [
+    { x: 0, y: 0 },
+    { x: 4, y: 4 },
+    { x: 0, y: 4 },
+  ]);
+  // An open path's end placed on its other end closes it (normal move), never deletes.
+  assert.equal(mergeOntoVertex(open, 3, { x: 0, y: 0 }, "path"), null);
+  assert.deepEqual(moveVertex(open, 3, { x: 0, y: 0 }, "path"), [
+    ...square.slice(0, 3),
+    { x: 0, y: 0 },
+  ]);
+  assert.equal(mergeOntoVertex(open.slice(0, 2), 0, { x: 4, y: 0 }, "path"), null);
+  // A closed path treats its repeated start as one corner, whichever end is moved.
+  const closed = [...square, { x: 0, y: 0 }];
+  const withoutStart = [
+    { x: 4, y: 0 },
+    { x: 4, y: 4 },
+    { x: 0, y: 4 },
+    { x: 4, y: 0 },
+  ];
+  assert.deepEqual(mergeOntoVertex(closed, 0, { x: 4, y: 0 }, "path"), withoutStart);
+  assert.deepEqual(mergeOntoVertex(closed, 4, { x: 4, y: 0 }, "path"), withoutStart);
+
+  // Slab and hatch: commit, prepared preview and patch agree; one undo step restores.
+  const reduced = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 3 },
+    { x: 3, y: 5 },
+    { x: 0, y: 5 },
+  ];
+  const slabProject = addSlab(slabBase(), { id: "s", points: lShape, ...SLAB_DEFAULTS });
+  const hatchBase = slabBase();
+  const hatchProject = createDrawing(hatchBase, hatchBase, "h", {
+    kind: "hatch",
+    points: lShape,
+    fill: { color: "#94a3b8", opacity: 0.35 },
+  });
+  for (const [base, target] of [
+    [slabProject, { kind: "slab", id: "s" }],
+    [hatchProject, { kind: "hatch", id: "h" }],
+  ] as const) {
+    const session: EditSession = {
+      base,
+      target,
+      action: "point",
+      index: 3,
+      anchor: { x: 3, y: 3 },
+    };
+    const pointer = { x: 6, y: 3 };
+    const full = editAtPointer(session, base, pointer);
+    const points = (s: Project) =>
+      target.kind === "slab" ? storeyOf(s).slabs![0]!.points : storeyOf(s).hatches.at(-1)!.points;
+    assert.deepEqual(points(full), reduced, target.kind);
+    const prepared = prepareDirectEditPreview(session)!;
+    assert.deepEqual(points(prepared.materialize!(base, target, pointer)), reduced);
+    assert.deepEqual(points(prepared.evaluate(base, target, pointer).geometry as Project), reduced);
+    let state = createEditingState(base);
+    state = editingReducer(state, {
+      type: "begin",
+      target,
+      action: "point",
+      index: 3,
+      anchor: { x: 3, y: 3 },
+    });
+    state = editingReducer(state, {
+      type: "confirm",
+      session: state.session!,
+      selection: target,
+      point: pointer,
+    });
+    assert.deepEqual(points(state.history.present), reduced);
+    assert.equal(state.history.past.length, 1);
+    assert.deepEqual(editingReducer(state, { type: "undo" }).history.present, base);
+  }
+  // Near another corner (10 px) the corner wins over all snaps; never the moved one itself.
+  const near: EditSession = {
+    base: slabProject,
+    target: { kind: "slab", id: "s" },
+    action: "point",
+    index: 3,
+    anchor: { x: 3, y: 3 },
+  };
+  assert.deepEqual(capturedVertex(near, { x: 5.97, y: 3.02 }, 200), { x: 6, y: 3 });
+  assert.equal(capturedVertex(near, { x: 5.9, y: 3 }, 200), null);
+  assert.equal(capturedVertex(near, { x: 3, y: 3 }, 200), null);
+  assert.equal(capturedVertex({ ...near, action: "stretch" }, { x: 6, y: 3 }, 200), null);
+  assert.equal(capturedVertex({ ...near, index: null }, { x: 6, y: 3 }, 200), null);
+  // A triangle keeps all three corners in commit and preview.
+  const triangle = addSlab(slabBase(), { id: "t", points: square.slice(0, 3), ...SLAB_DEFAULTS });
+  const small: EditSession = {
+    base: triangle,
+    target: { kind: "slab", id: "t" },
+    action: "point",
+    index: 0,
+    anchor: { x: 0, y: 0 },
+  };
+  assert.throws(() => editAtPointer(small, triangle, { x: 4, y: 0 }), /drei/);
+  assert.throws(
+    () => prepareDirectEditPreview(small)!.evaluate(triangle, small.target, { x: 4, y: 0 }),
+    /drei/,
+  );
+
+  // Polyline: same rule through the line preview.
+  const lineBase = slabBase();
+  const withLine = createDrawing(lineBase, lineBase, "l", {
+    kind: "line",
+    lineKind: "polyline",
+    points: closed,
+    appearance: defaultLineAppearance,
+  });
+  const lineSession: EditSession = {
+    base: withLine,
+    target: { kind: "line", id: "l" },
+    action: "point",
+    index: 0,
+    anchor: { x: 0, y: 0 },
+  };
+  const lineFull = editAtPointer(lineSession, withLine, { x: 4, y: 0 });
+  assert.deepEqual(storeyOf(lineFull).lines!.at(-1)!.points, withoutStart);
+  const lineView = prepareDirectEditPreview(lineSession)!.materialize!(
+    withLine,
+    lineSession.target,
+    { x: 4, y: 0 },
+  );
+  assert.deepEqual(storeyOf(lineView).lines, storeyOf(lineFull).lines);
 });

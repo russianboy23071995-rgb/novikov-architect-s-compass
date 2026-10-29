@@ -1,3 +1,4 @@
+import { capturedVertex } from "@/application/direct-edit/transforms";
 import {
   capturedStart,
   closesAtStart,
@@ -131,6 +132,8 @@ export type BimPlanProps = {
   onEditDirection?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onEditCommit?: (session: EditSession, point: Point, candidate?: SnapCandidate | null) => void;
   onContourStretch?: (selection: NonNullable<Selection>, index: number, anchor: Point) => void;
+  /** Click on a corner grip: true when the workspace started moving that corner (Regel 1). */
+  onCornerPick?: (selection: NonNullable<Selection>, index: number, anchor: Point) => boolean;
   onEditCancel?: () => void;
   onPoint: (point: Point, candidate?: SnapCandidate | null) => void;
   onFinish?: () => void;
@@ -173,6 +176,7 @@ export function BimPlan({
   editSession: requestedEditSession,
   onEditCommit,
   onContourStretch,
+  onCornerPick,
   onEditCancel,
   numericTarget,
   drawingTarget,
@@ -444,13 +448,18 @@ export function BimPlan({
     () => (selectedRing ? validateSimplePolygon(selectedRing) : null),
     [selectedRing],
   );
+  // Regel 2: near another corner of the edited element the corner itself wins over all snaps.
+  const resolveEditPointer = (point: Point, shift = shiftHeld) => {
+    const corner = editSession ? capturedVertex(editSession, point, camera.pixelsPerMetre) : null;
+    return corner ? { point: corner, candidate: null } : resolvePointer(point, shift);
+  };
   const resolvedEdit =
     numericTarget !== undefined
       ? numericTarget
         ? { point: numericTarget, candidate: null }
         : null
       : editSession && editPointer?.session === editSession
-        ? resolvePointer(editPointer.point)
+        ? resolveEditPointer(editPointer.point)
         : null;
   let preview: Project | null = null;
   let editError = "";
@@ -780,7 +789,7 @@ export function BimPlan({
             event.currentTarget.releasePointerCapture(event.pointerId);
           if (result?.moved && editSession) {
             try {
-              const snapped = resolvePointer(result.point, event.shiftKey);
+              const snapped = resolveEditPointer(result.point, event.shiftKey);
               onEditCommit?.(editSession, snapped.point, snapped.candidate);
             } catch {
               /* Keep the shared edit session available for correction. */
@@ -877,7 +886,7 @@ export function BimPlan({
           const point = drawingPoint;
           if (point) {
             setEditPointer({ session: editSession, point });
-            onEditAim?.(editSession, resolvePointer(point, event.shiftKey).point);
+            onEditAim?.(editSession, resolveEditPointer(point, event.shiftKey).point);
           }
         }
       }}
@@ -895,7 +904,7 @@ export function BimPlan({
           if (point) {
             setEditPointer({ session: editSession, point });
             try {
-              const snapped = resolvePointer(point, event.shiftKey);
+              const snapped = resolveEditPointer(point, event.shiftKey);
               const target = snapped.point;
               if (onEditDirection) onEditDirection(editSession, target, snapped.candidate);
               else onEditCommit?.(editSession, target, snapped.candidate);
@@ -1140,6 +1149,13 @@ export function BimPlan({
               aria-label={label}
               className="cursor-pointer outline-none focus:stroke-foreground"
               onClick={(event) => {
+                event.stopPropagation();
+                // Regel 1: a click moves the corner at once; right click keeps every point action.
+                if (!axis && onCornerPick?.(selection, index, point)) return;
+                onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
+              }}
+              onContextMenu={(event) => {
+                event.preventDefault();
                 event.stopPropagation();
                 onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
               }}

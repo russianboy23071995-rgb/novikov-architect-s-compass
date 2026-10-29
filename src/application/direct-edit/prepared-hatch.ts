@@ -5,7 +5,11 @@ import { MAX_HATCH_POINTS } from "../../domain/elements/hatch/model.ts";
 import { MAX_SLAB_POINTS } from "../../domain/elements/slab/model.ts";
 import { offsetContourPoints, offsetDirection } from "./offset.ts";
 import { prepareSessionContourEdge } from "./contour.ts";
-import { preparePolygonVertexEdit } from "../../geometry/polygons/simple-polygon.ts";
+import {
+  preparePolygonVertexEdit,
+  validateSimplePolygon,
+} from "../../geometry/polygons/simple-polygon.ts";
+import { mergeOntoVertex } from "../../geometry/polygons/vertex-merge.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { createProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { storeyOf, replaceStorey } from "../../domain/storeys/access.ts";
@@ -78,10 +82,13 @@ export function prepareHatchContourPreview(session: EditSession): PreparedDirect
         : { x: point.x - anchor.x, y: point.y - anchor.y };
       if (!Number.isFinite(delta.x) || !Number.isFinite(delta.y))
         throw Error("Ungueltige Zielposition.");
-      points = hatch!.points.map((p, i) =>
-        i === index ? Object.freeze(translatePoint(p, delta)) : p,
-      );
-      const result = contour!.validate(points);
+      const moved = translatePoint(hatch!.points[index!]!, delta);
+      // A corner placed on another corner is deleted (POLYGON_REGELN Regel 2); the shorter
+      // ring then needs the full check instead of the prepared changed-edge check.
+      const merged = mergeOntoVertex(hatch!.points, index!, moved, "ring");
+      if (merged) merged.forEach(Object.freeze);
+      points = merged ?? hatch!.points.map((p, i) => (i === index ? Object.freeze(moved) : p));
+      const result = merged ? validateSimplePolygon(points) : contour!.validate(points);
       if (!result.valid)
         throw Error(`Invalid contour: ${result.reason} (${result.indices.join(", ")})`);
     }

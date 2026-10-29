@@ -7,7 +7,7 @@ Werkzeuge derselben Zeichenart). Umsetzung in vier PRs nach freigegebener Änder
 | --- | ------------------------------------------------------ | ------- | -------- |
 | A   | Standardgeschosse, Decke als Konturlinie, Decke in 3D  | 7, 5, 4 | erledigt |
 | B   | Polygon schließen per Klick auf den Startpunkt         | 3       | erledigt |
-| C   | Ecke anklicken = bewegen, Ecke auf Ecke = Ecke löschen | 1, 2    | offen    |
+| C   | Ecke anklicken = bewegen, Ecke auf Ecke = Ecke löschen | 1, 2    | erledigt |
 | D   | Nummerierte Fangpunkte statt „Endpunkt“                | 6       | offen    |
 
 Vorgaben für B und C: als gemeinsamer Baustein für alle Polygon-Werkzeuge, nicht pro
@@ -69,3 +69,43 @@ auf den Start geschlossen (Start nicht doppelt), Polylinie mit schnellem Klick ~
 Start geschlossen (6 Punkte inkl. wiederholtem Start), Klick ~13 px daneben setzt korrekt einen
 normalen Punkt; keine Konsolenfehler. Schraffur nutzt denselben Weg wie die Decke und ist im
 Browser nicht eigens geprüft.
+
+## Teil C
+
+Gemeinsame Bausteine für jedes Element mit Eckenliste (heute Schraffur, Decke, Linie/Polylinie;
+Wände ausgenommen, ihre Endpunkte haben eigene Anschlussregeln):
+
+- `isVertexTarget` / `vertexShape` (`src/application/direct-edit/transforms.ts`): welches
+  Element eine Eckenliste hat und ob sie ein Ring (Fläche) oder ein Pfad (Linie) ist. Ein neues
+  Element dieser Art wird dort ergänzt und erhält beide Regeln.
+- `mergeOntoVertex` / `moveVertex` (`src/geometry/polygons/vertex-merge.ts`): reine
+  Geometrieregel, genutzt vom Übernehmen (`moveElementPoint`) und von beiden vorbereiteten
+  Vorschauen (Fläche, Linie) – Vorschau = Übernahme.
+
+**Regel 1 – Ecke anklicken = bewegen.** Linksklick auf eine Ecke des gewählten Elements startet
+sofort „Punkt frei bewegen“; der nächste Klick setzt die Ecke (Fang, Zahleneingabe, ein
+Undo-Schritt wie gewohnt). Rechtsklick auf die Ecke öffnet wie bisher das Menü mit allen
+Punktaktionen (z. B. „Punkt in Flucht strecken“). Abweichung von der Änderungskarte: Das Menü
+bleibt während der Bewegung nicht offen, weil es bei laufender Bearbeitung grundsätzlich
+ausgeblendet ist. Enter auf einem Eckgriff öffnet weiterhin das Menü.
+
+**Regel 2 – Ecke auf Ecke = Ecke löschen.** Landet die bewegte Ecke auf einer anderen Ecke
+desselben Elements, verschwindet die bewegte Ecke.
+
+- Gilt für jede andere Ecke, nicht nur die Nachbarecke.
+- Flächen und geschlossene Polylinien behalten mindestens 3 Ecken; sonst Ablehnung mit
+  „Mindestens drei Ecken müssen bleiben …“, das Modell bleibt unverändert.
+- Ausnahme offene Polylinie: Endpunkt auf den anderen Endpunkt schließt die Linie (wie bisher).
+- Die anderen Ecken des Elements haben beim Bewegen im Umkreis von 10 px Vorrang vor allen
+  anderen Fängen (`capturedVertex`). Grund: Im Browser gewann sonst „Lotrecht“ knapp neben der
+  Ecke, und die Kontur wurde als kollabiert abgelehnt statt die Ecke zu löschen.
+- Früher galt eine Ecke auf der Nachbarecke als ungültige Kontur; zwei ältere Tests wurden auf
+  die neue Regel umgestellt (Schraffur-Arbeitsablauf, Polylinie in `transforms.test.ts`).
+
+Nachweis: 1350 Tests grün (neu: Geometrieregel für Ring, offenen und geschlossenen Pfad;
+Decke und Schraffur mit Übernahme = vorbereiteter Vorschau = Patch und einem Undo-Schritt;
+Dreieck abgelehnt in Übernahme und Vorschau; Polylinie; Eckenvorrang). Browser: Klick auf
+Deckenecke startet die Bewegung ohne Menü, Ecke auf Nachbarecke löscht sie (1,98 → 0,99 m²),
+Klick 11 px daneben verschiebt nur, Rechtsklick öffnet das Punktmenü, Dreieck lehnt das Löschen
+mit Meldung ab, Undo stellt her; keine Konsolenfehler. Schraffur und Polylinie laufen über
+dieselben Bausteine und sind im Browser nicht eigens geprüft.

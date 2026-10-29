@@ -126,7 +126,11 @@ test("polyline stretch changes only terminal segment, preserving intermediate ve
 test("degenerate geometry and too-short host walls are rejected atomically", () => {
   const p = poly(),
     before = serializeProject(p);
-  assert.throws(() => moveElementPoint(p, lineTarget, 1, { x: 0, y: 0 }));
+  // A polyline point placed on its neighbour is deleted (docs/POLYGON_REGELN.md, Regel 2).
+  assert.deepEqual(storeyOf(moveElementPoint(p, lineTarget, 1, { x: 0, y: 0 })).lines![0]!.points, [
+    { x: 0, y: 0 },
+    { x: 6, y: 4 },
+  ]);
   assert.throws(() => moveElementPoint(p, target, 1, { x: 0, y: 0 }));
   assert.throws(() => stretchEndpoint(p, target, "end", 1));
   for (const value of [0, -1, NaN, Infinity])

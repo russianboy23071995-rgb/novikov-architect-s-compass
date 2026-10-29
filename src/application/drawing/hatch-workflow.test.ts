@@ -198,7 +198,16 @@ test("hatch corner rejects crossed or collapsed contours, stale context and inva
     index: 1,
     anchor: points[1]!,
   });
-  for (const point of [{ x: -1, y: 1 }, points[0]!, { x: NaN, y: 0 }]) {
+  // A corner on its neighbour no longer collapses the contour: it deletes the corner
+  // (docs/POLYGON_REGELN.md, Regel 2); a triangle keeps its three corners.
+  assert.deepEqual(
+    storeyOf(editAtPointer(state.session!, state.session!.base, points[0]!)).hatches[0]!.points,
+    [points[0], points[2], points[3]],
+  );
+  for (const point of [
+    { x: -1, y: 1 },
+    { x: NaN, y: 0 },
+  ]) {
     assert.throws(() => editAtPointer(state.session!, state.session!.base, point));
     const rejected = editingReducer(state, {
       type: "confirm",
