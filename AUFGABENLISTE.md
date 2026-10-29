@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 29.10.2026 · main nach PR507
+**Stand:** 29.10.2026 · main nach PR508
 
 ## Deine Wünsche
 
@@ -30,7 +30,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L05 | Stützen                                                                                                          |      | offen                                                                                                                              | §6 Abschnitt 2     |
 | L06 | Treppen                                                                                                          |      | offen                                                                                                                              | §6 Abschnitt 2     |
 | L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                                                                                              | §6 Abschnitt 2     |
-| L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | in Arbeit: R1 Modell erledigt (PR507), R2–R4 offen                                                                                 | §6 Abschnitt 2/4   |
+| L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | in Arbeit: R1 Modell (PR507) und R2 Werkzeug (PR508) erledigt, R3–R4 offen                                                        | §6 Abschnitt 2/4   |
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | offen                                                                                                                              | §6, §8             |
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                 | §9                 |
 

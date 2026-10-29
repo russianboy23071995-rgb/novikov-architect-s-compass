@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR507 · 1363 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR508 · 1364 automatische Tests grün
 
 ## Gerade aktiv
 
-- Raumwerkzeug (L08): R1 Modell erledigt (PR507); als Nächstes R2 Werkzeug mit Leiste und Einstellungsfenster (docs/ROOM_ELEMENT.md).
+- Raumwerkzeug (L08): R1 Modell (PR507) und R2 Werkzeug (PR508: Klick zwischen Wänden, Raumstempel, Eigenschaften) erledigt; als Nächstes R3 lichte Höhe und Höhenlinien 1,00/2,00 m (docs/ROOM_ELEMENT.md).
 
 ## Was wir gemacht haben (24.–29.10.2026)
 
