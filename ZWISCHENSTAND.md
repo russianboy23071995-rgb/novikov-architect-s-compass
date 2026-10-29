@@ -48,7 +48,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 **Mögliche nächste Aufträge (deine Wahl)**
 
-- Decken C3: Archicad-Prüfung der Datei NOVIKOV-Wand-Decke-Ueberschneidung.ifc (Ordner NOVIKOV-Wand-Decke-Abnahme-2026-10-29); Vorrang per Material (0–100) später.
+- Decken C3: Überschneidung in Archicad von dir bestätigt (29.10.); Vorrang per Material (0–100) später.
 - Nächstes Fachbauteil aus Masterplan §6.
 - Mehrgeschossige Wände, Gast-Anzeige im Grundriss, Dachtrimmung (deine Vision vom 27.10., noch nicht umgesetzt).
 - Bewegungsstart beim Stressmodell x noch ≈ 1,5 s.
