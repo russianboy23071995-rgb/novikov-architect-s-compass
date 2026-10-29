@@ -8,7 +8,7 @@ Einflächiges Steildach. Kein Walmdach, keine Dachlandschaft, kein automatisches
 | D2  | geschlossener 3D-Körper, Auswahl/Fang in 3D, Mitwandern bei Geschosshöhe                                                  | erledigt |
 | D3  | Werkzeug (Polygon, Diagonale, Seite + dritter Punkt, Kontur), Leiste und Doppelklick-Fenster, Eigenschaften, Umriss, Undo | erledigt |
 | D4  | Grundriss im eigenen Geschoss: Schnitt bei 1 m kräftig, darunter dünn, darüber gestrichelt (Untersicht)                   | erledigt |
-| D5  | Datei/Recovery, IFC mit Archicad-Testdatei, Browser-Abnahme, Leistung im Schulmodell                                      | offen    |
+| D5  | Datei/Recovery, IFC mit Archicad-Testdatei, Browser-Abnahme, Leistung im Schulmodell                                      | erledigt |
 
 ## Nutzerentscheidungen (29.10.2026)
 
@@ -95,3 +95,14 @@ Darstellung im eigenen Geschoss (`src/rendering/viewport/roof-plan.ts`, in der P
 - Noch nicht: innere Kanten nicht senkrechter Abschlüsse als eigene Linie, weitere Schnitthöhen oder Höhenlinien (Raumwerkzeug), Ansichtseinstellung für Untersicht/Überkopfkonturen.
 
 Nachweis: Test in `src/rendering/viewport/working-storey-solid.test.ts` gegen von Hand gerechnete Lagen (45°: Schnitt y = 1 − 0,2·√2 … 1; 30°; Stärke 0,40 m; Bezugshöhe −3 m mit Schnitt an der oberen Kante; Bezugshöhe 1,50 m ganz darüber; L-Form nur im oberen Flügel; Längen der Teile darunter/darüber; Geschosshöhe ändert das eigene Bild nicht; anderes Geschoss ohne Dach). Gleichheits-Hash der 14 Modelle unverändert. 1361 Tests grün. Browser: Dach im EG mit 35°, 0,24 m, Bezugshöhe 0 gezeichnet; dünne Linien zur Traufe, grauer Schnittstreifen 0,418 m tief (= 0,24 / cos 35° / tan 35°), gestrichelte Untersicht; Undo; keine Konsolenfehler.
+
+## Teil D5: Datei, Wiederherstellung, IFC, Leistung, Schlussabnahme
+
+- **Übersichten:** Ladedialog („Projektdatei laden?“) und Wiederherstellung zählen Dächer (`projectElementCounts`, `recoveryContentSummary`).
+- **Datei und Wiederherstellung:** Ein Projekt mit Dach übersteht Speichern/Laden und den Wiederherstellungs-Codec unverändert (Test).
+- **IFC:** je Dach ein `IfcRoof` (`.SHED_ROOF.`, im Geschoss enthalten), das eine `IfcSlab` `.ROOF.` aggregiert. Deren Körper ist der geschlossene Dachkörper als `IfcFacetedBrep` (dieselben Flächen wie in 3D, gemeinsame Punkte, Koordinaten relativ zur Geschossplatzierung). Satz `NOVIKOV_BIM`: PitchDegrees, Thickness, ReferenceHeight, Rise, EaveCut, TopCut. Die Körperberechnung liegt dafür jetzt in der Domain (`domain/elements/roof/body.ts`); 3D nutzt sie unverändert. Projekte ohne Dach exportieren byteweise gleich (Decken-Testdatei vom 28.10.).
+- **Archicad-Prüfdatei:** `NOVIKOV-Dach-Test.ifc` (`scripts/generate-roof-acceptance-ifc.mjs`, `benchmarks/roof-ifc-acceptance.ts`): Decken-Abnahmehaus, im OG statt der Decke ein Pultdach auf den OG-Wänden (Unterseite 2,55 m an der Außenfläche), 0,50 m Überstand, 15°, 0,24 m, Traufe horizontal, obere Kante rechtwinklig. Ein unabhängiger Viewer ist hier nur über den Archicad-Import des Nutzers möglich; bis dahin gilt der IFC-Weg als technisch geprüft, nicht als in Archicad bestätigt.
+- **Leistung** (`benchmarks/roof-performance.ts`, Schulmodell mit 3 Flügeln, 240 Wände, 20 Dächer à 34 × 5 m im obersten Geschoss, Median kalt): Gebäudekörper 151 → 152 ms, Grundriss OG 49 → 50 ms, IFC 389 → 381 ms. Dächer verursachen keinen messbaren Mehraufwand.
+- **Grenzen des ersten Dachs:** kein Walmdach, keine Dachlandschaft, keine Gauben oder Löcher (N62); kein Trimmen von Wänden (V09, Entscheidung in Masterplan §8); Dach nur im eigenen Geschoss sichtbar (Gast-Anzeige N62/L02); keine Materialschichten oder Dachmengen.
+
+Nachweis: Tests in `recovery-catalog.test.ts` (Übersichten, Datei- und Wiederherstellungsrundlauf mit Dach) und `src/interop/ifc/door.test.ts` (IfcRoof/IfcSlab ROOF/Aggregation/Enthaltensein, geschlossene Hülle mit jeder Kante genau einmal je Richtung, Höhen gleich dem Dachkörper, Eigenschaften, alle Verweise vorhanden). 14-Modell-Hash unverändert. 1362 Tests grün. Browser: Abnahmehaus über den Ladedialog geöffnet („… 1 Decken · 1 Dächer …“), OG-Grundriss zeigt das Dach ganz über der Schnittebene gestrichelt, 3D zeigt das Pultdach auf den OG-Wänden; Laden per Undo zurückgenommen; keine Konsolenfehler.

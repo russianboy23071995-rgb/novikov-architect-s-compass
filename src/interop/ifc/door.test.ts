@@ -6,6 +6,9 @@ import { exportIfc } from "../../lib/bim/ifc.ts";
 import { addDoor } from "../../application/doors/actions.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { doorOperationType, FILLING_PLACEHOLDER_DEPTH, ifcGuid } from "./writer.ts";
+import { roofAcceptanceProject } from "../../../benchmarks/roof-ifc-acceptance.ts";
+import { roofBody } from "../../domain/elements/roof/body.ts";
+import { storeyOf } from "../../domain/storeys/access.ts";
 import {
   exportFillingVariant,
   fillingAcceptanceProject,
@@ -191,4 +194,59 @@ test("filling variants for Archicad: placeholder body or type and quantities; de
     const ids = new Set([...ifc.matchAll(/^#(\d+)=/gm)].map((m) => m[1]));
     assert.ok([...ifc.matchAll(/#(\d+)/g)].every((m) => ids.has(m[1])));
   }
+});
+
+test("a roof exports as IfcRoof aggregating one IfcSlab ROOF with a closed faceted B-rep", async () => {
+  // Dach D5 (docs/ROOF_ELEMENT.md).
+  const project = roofAcceptanceProject();
+  const ifc = await exportIfc(project, date);
+  const entity = (ref: string) => ifc.split("\n").find((line) => line.startsWith(`${ref}=`))!;
+  const refOf = (line: string) => line.slice(0, line.indexOf("="));
+  const [roof] = rows(ifc, "IFCROOF");
+  assert.ok(roof?.includes(`'${await ifcGuid(project.id, "roof", "og-dach")}'`));
+  assert.match(roof!, /,\.SHED_ROOF\.\);$/);
+  const surfaces = rows(ifc, "IFCSLAB").filter((line) => line.endsWith(",.ROOF.);"));
+  assert.equal(surfaces.length, 1);
+  const aggregate = rows(ifc, "IFCRELAGGREGATES").find((line) =>
+    line.includes(`,${refOf(roof!)},(${refOf(surfaces[0]!)})`),
+  );
+  assert.ok(aggregate, "roof aggregates its surface");
+  // The roof (not its surface) is contained in the OG.
+  const contained = rows(ifc, "IFCRELCONTAINEDINSPATIALSTRUCTURE").join("\n");
+  assert.ok(contained.includes(refOf(roof!)));
+  assert.ok(
+    !contained.includes(`${refOf(surfaces[0]!)},`) &&
+      !contained.includes(`${refOf(surfaces[0]!)})`),
+  );
+  // Closed shell: every edge of every face loop is used exactly once in each direction.
+  const shell = rows(ifc, "IFCCLOSEDSHELL");
+  assert.equal(shell.length, 1);
+  const faceRefs = /\(\((.*)\)\);$/.exec(shell[0]!)![1]!.split(",");
+  const body = roofBody(storeyOf(project).roofs![0]!, 0);
+  assert.equal(faceRefs.length, body.faces.length);
+  const edges = new Map<string, number>();
+  const zs: number[] = [];
+  for (const face of faceRefs) {
+    const bound = /\((#\d+)\)\);$/.exec(entity(face))![1]!;
+    const loop = /\((#\d+),/.exec(entity(bound))![1]!;
+    const pts = /\(\((.*)\)\);$/.exec(entity(loop))![1]!.split(",");
+    pts.forEach((p, i) => {
+      const k = `${p}>${pts[(i + 1) % pts.length]}`;
+      edges.set(k, (edges.get(k) ?? 0) + 1);
+      zs.push(Number(/\(([^,]+),([^,]+),([^)]+)\)\);$/.exec(entity(p))![3]));
+    });
+  }
+  for (const [k, count] of edges) {
+    const [a, b] = k.split(">");
+    assert.equal(count, 1, k);
+    assert.equal(edges.get(`${b}>${a}`), 1, `${k} has its partner`);
+  }
+  // Heights relative to the OG placement match the shared roof body.
+  const bodyZ = body.faces.flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.ok(Math.abs(Math.min(...zs) - Math.min(...bodyZ)) < 1e-9);
+  assert.ok(Math.abs(Math.max(...zs) - Math.max(...bodyZ)) < 1e-9);
+  assert.ok(ifc.includes("'PitchDegrees',$,IFCREAL(15.)"));
+  assert.ok(ifc.includes("'EaveCut',$,IFCLABEL('horizontal')"));
+  const ids = new Set([...ifc.matchAll(/^#(\d+)=/gm)].map((m) => m[1]));
+  assert.ok([...ifc.matchAll(/#(\d+)/g)].every((m) => ids.has(m[1])));
 });

@@ -7,6 +7,7 @@ import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
 import { slabLevels } from "../../domain/elements/slab/model.ts";
+import { roofBody } from "../../domain/elements/roof/body.ts";
 
 /** IFC4 IfcDoorTypeOperationEnum for a single swing leaf. Facing the swing side (door +Y),
  * the wall start lies left when the leaf opens to the left of the wall direction.
@@ -370,6 +371,47 @@ export async function writeIfc(
       await properties(slabRef, "slab", slab.id, [
         ["Thickness", `IFCLENGTHMEASURE(${real(slab.thickness)})`],
         ["TopOffset", `IFCLENGTHMEASURE(${real(slab.topOffset)})`],
+      ]);
+    }
+    // Single inclined roofs (docs/ROOF_ELEMENT.md, D5): IfcRoof SHED_ROOF in the storey,
+    // aggregating one IfcSlab ROOF whose body is the closed roof surface as a faceted B-rep
+    // (the same faces as in 3D, coordinates relative to the storey placement).
+    for (const roof of floor.roofs ?? []) {
+      const body = roofBody(roof, 0);
+      const points = new Map<string, string>();
+      const vertex = (v: readonly number[]) => {
+        const k = v.join(",");
+        let ref = points.get(k);
+        if (!ref) points.set(k, (ref = point([...v])));
+        return ref;
+      };
+      const faces = body.faces.map((face) => {
+        const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
+        return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
+      });
+      const brep = add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${faces.join(",")})`));
+      const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Brep',(${brep})`);
+      const roofPlacement = placement(storeyPlacement);
+      const roofRef = add(
+        "IFCROOF",
+        `${await guid("roof", roof.id)},$,${label(roof.id)},$,$,${roofPlacement},$,${label(roof.id)},.SHED_ROOF.`,
+      );
+      const surface = add(
+        "IFCSLAB",
+        `${await guid("roof-slab", roof.id)},$,${label(roof.id + " Dachfläche")},$,$,${placement(roofPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(roof.id)},.ROOF.`,
+      );
+      add(
+        "IFCRELAGGREGATES",
+        `${await guid("roof-aggregate", roof.id)},$,$,$,${roofRef},(${surface})`,
+      );
+      elements.push(roofRef);
+      await properties(roofRef, "roof", roof.id, [
+        ["PitchDegrees", `IFCREAL(${real(roof.pitch)})`],
+        ["Thickness", `IFCLENGTHMEASURE(${real(roof.thickness)})`],
+        ["ReferenceHeight", `IFCLENGTHMEASURE(${real(roof.referenceHeight)})`],
+        ["Rise", `IFCLABEL(${text(roof.rise)})`],
+        ["EaveCut", `IFCLABEL(${text(roof.eaveCut)})`],
+        ["TopCut", `IFCLABEL(${text(roof.topCut)})`],
       ]);
     }
     // IFC requires a non-empty set; empty projects still retain their spatial hierarchy.
