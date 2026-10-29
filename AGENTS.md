@@ -46,10 +46,24 @@
 
 - CAD windows use the shared FloatingPanel shell, modeled on Ebenen: draggable, non-modal, no background dimming, Glass Flow styling. Keep window-specific validation/actions separate; do not duplicate drag or overlay implementations.
 
-
 - Presentation-only tasks (symbols, pictograms, spacing, look-and-feel) change presentation code and nothing else: keep event handlers, state management, application/domain interfaces, model and snapping logic, and existing data untouched — introduce no substitute data and no new model logic. Why: UI work and model work happen in parallel from separate tools, and this boundary is what keeps both branches mergeable and the validated model logic intact.
 
 - User decision 2026-10-15: a validated performance fix is the mandatory baseline for future tools, not a tool-specific exception. Follow the A04 admission gate in NOVIKOV_MASTERPLAN.md for every new/extended 2D or 3D movement, including roofs, slabs and stairs. Reuse the shared inference, prepared snapshot, Application preview capability and geometry patch composition. Do not add element-type preview dispatch to renderers. Existing legacy fallbacks are migration debt, not examples for new tools. Require full-path geometry/commit equivalence and measured pointer-work evidence; document any remaining global work explicitly before claiming completion.
 
 - User alignment order (current): NOVIKOV_MASTERPLAN.md §9 is the sole executable priority and active-task source; historical appended next-task paragraphs do not schedule work. Check merged and open PRs before acting; do not reimplement an open pilot. Preserve shared actions/previews, verified snapshot ownership, file/recovery integrity and one model. Do not promote an unproven image-resource pilot, count microbenchmarks as frame/native evidence, or claim all AUD14 complete. Continue independent authorized work if one profiler/native/release check is unavailable; report that precise blocker and keep its gate open.
 - Documentation quality gate: after each relevant change reconcile the Masterplan header, §4 and §9, the affected live register entries, and the README if a top-level product claim changes. Distinguish implemented, verified and planned; cite commit/PR and test limits. Correct false live status before appending new logs. Reduce duplicate historical instructions by labeling/archiving and indexing with provenance; do not delete unique requirements, mass-merge every Markdown file, or create a second active roadmap. Release/data-loss gates always preempt cosmetic documentation work.
+
+## Arbeitsweise mit dem Nutzer (vereinbart bis 29.10.2026)
+
+- Sprache: Deutsch. Der Nutzer arbeitet oft per Fernsteuerung; Ergebnisse knapp, ehrlich und ohne Fachjargon berichten.
+- Ablauf je Auftrag: Änderungskarte mit Aufwandsanteilen (%) und Empfehlungen vorlegen → auf Freigabe warten → eigener Branch von main → Umsetzung mit Nachweis (Tests, Gleichheits-Hashes gegen main, Messung, Browserprüfung) → Doku in `docs/` → PR → bei grüner CI selbst mergen (Merge-Commit) → auf main nachziehen: Masterplan (Kopf, „Status auf einen Blick“, §4-Eintrag, §9), Register, `ZWISCHENSTAND.md`, `AUFGABENLISTE.md`.
+- Genau ein aktiver Auftrag. Kein neuer Code in `src/lib/bim`. Keine Downloads und kein IfcOpenShell ohne Zustimmung. Grenzen und nicht Geprüftes offen benennen; Befunde aus früheren Schritten beim Umsetzen mit beheben und ausdrücklich nennen.
+- `AUFGABENLISTE.md` ist die vom Nutzer bearbeitbare Liste (Wünsche W.., Aufgaben L..): vor jedem Vorschlag lesen, nach jedem Merge abhaken. `ZWISCHENSTAND.md` ist seine Kurzübersicht: nach jedem Merge aktualisieren.
+- Commits: `GIT_AUTHOR_NAME`/`GIT_COMMITTER_NAME=russianboy23071995-rgb`, `GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_EMAIL=russianboy23071995@gmail.com`; Attribution-Zeilen gemäß Sitzungsvorgabe.
+- Windows-Eigenheiten:
+  - Die Befehlszeile von `npm test` ist nahe an der Längengrenze: keine neuen Testdateien anlegen, Tests an bestehende aufgeführte Dateien anhängen.
+  - Volle Suite mit `timeout 400 npm test`; Typprüfung mit `node_modules/.bin/tsc.exe --noEmit -p .` und `-p benchmarks/tsconfig.json` (`npx tsc` funktioniert hier nicht).
+  - Prettier je Verzeichnis oder Dateiliste aufrufen, nicht mit sehr langen Globs.
+  - Vergleich mit main über `git worktree add` in `%TEMP%` mit Junction auf `node_modules`; vor `git worktree remove` die Junction mit `(Get-Item …).Delete()` entfernen.
+- Browser: `.claude/launch.json`, Konfiguration „dev“ (Vite auf Port 8094, ohne feste Pfade). Abnahme im Browser gehört zu jeder bedienbaren Änderung.
+- Wiederaufnahme nach Neuinstallation: `docs/WIEDERAUFNAHME.md`.
