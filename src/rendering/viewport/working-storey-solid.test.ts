@@ -15,6 +15,8 @@ import { buildSolid } from "./storey-solid.ts";
 import { buildBuildingSolid, workingStoreySolid } from "./building-solid.ts";
 import { getWallFootSources } from "./wall-foot-sources.ts";
 import { roofBody } from "./roof-solid.ts";
+import { roofPlanView } from "./roof-plan.ts";
+import { derivePlanScene } from "./plan-scene.ts";
 import { packSolidFaces, SLAB_DISPLAY_PRIORITY } from "./solid-buffer.ts";
 import { createStandardProject } from "../../application/projects/create.ts";
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
@@ -324,4 +326,79 @@ test("a roof is a closed inclined body in its storey; volume and heights match t
   const corner = storeyOf(moveElementPoint(project, targets[0], 2, { x: 5, y: 4 })).roofs![0]!;
   assert.deepEqual(corner.referenceLine, ROOF_SQUARE.referenceLine);
   assert.deepEqual(corner.points[2], { x: 5, y: 4 });
+});
+
+test("roof plan view: cut at 1 m like a wall, thin below, dashed above; follows the roof values", () => {
+  // Dach D4 (docs/ROOF_ELEMENT.md). Expected values by hand: the top reaches 1 m where
+  // h + t·tan + d/cos = 1, the underside where h + t·tan = 1.
+  const near = (a: number, b: number, label: string) =>
+    assert.ok(Math.abs(a - b) < 1e-9, `${label}: ${a} != ${b}`);
+  const roof = { ...ROOF_SQUARE, layerId: "layer:roof" };
+  const box = (loop: { x: number; y: number }[]) => [
+    Math.min(...loop.map((p) => p.x)),
+    Math.min(...loop.map((p) => p.y)),
+    Math.max(...loop.map((p) => p.x)),
+    Math.max(...loop.map((p) => p.y)),
+  ];
+  const strip = (r: typeof roof, y0: number, y1: number, label: string) => {
+    const view = roofPlanView(r);
+    assert.equal(view.cut.length, 1, label);
+    const [x0, ya, x1, yb] = box(view.cut[0]!);
+    near(x0!, 0, label + " x0");
+    near(x1!, 4, label + " x1");
+    near(ya!, y0, label + " y0");
+    near(yb!, y1, label + " y1");
+    assert.equal(view.cut[0]!.length, 4, label + " no collinear points");
+    return view;
+  };
+  // 45°, d = 0,20 m: top reaches 1 m at y = 1 − 0,2·√2, underside at y = 1.
+  const view = strip(roof, 1 - 0.2 * Math.SQRT2, 1, "45°");
+  const length = (list: readonly (readonly { x: number; y: number }[])[]) =>
+    list.reduce((sum, [a, b]) => sum + Math.hypot(b!.x - a!.x, b!.y - a!.y), 0);
+  near(length(view.below), 4 + 2 * (1 - 0.2 * Math.SQRT2), "below: eave and lower verges");
+  near(length(view.above), 4 + 2 * 3, "above: top edge and upper verges");
+  // Pitch 30°: underside at 1/tan 30°, top d/cos 30° earlier.
+  const tan30 = Math.tan(Math.PI / 6),
+    cos30 = Math.cos(Math.PI / 6);
+  strip({ ...roof, pitch: 30 }, (1 - 0.2 / cos30) / tan30, 1 / tan30, "30°");
+  // Thicker roof: the cut widens downhill.
+  strip({ ...roof, thickness: 0.4 }, 1 - 0.4 * Math.SQRT2, 1, "thickness");
+  // Reference height −3 m: the cut lies at the top edge.
+  strip({ ...roof, referenceHeight: -3 }, 4 - 0.2 * Math.SQRT2, 4, "low reference");
+  // Reference height 1,5 m: everything above the cut, nothing cut or below.
+  const high = roofPlanView({ ...roof, referenceHeight: 1.5 });
+  assert.deepEqual([high.cut.length, high.below.length, high.above.length], [0, 0, 4]);
+  // Non-convex L: a cut in the upper wing only covers that wing (x 0…3).
+  const l = roofPlanView({
+    ...roof,
+    points: [
+      { x: 0, y: 0 },
+      { x: 6, y: 0 },
+      { x: 6, y: 3 },
+      { x: 3, y: 3 },
+      { x: 3, y: 5 },
+      { x: 0, y: 5 },
+    ],
+    referenceHeight: -3,
+  });
+  assert.equal(l.cut.length, 1);
+  const [lx0, ly0, lx1, ly1] = box(l.cut[0]!);
+  near(lx0!, 0, "L x0");
+  near(lx1!, 3, "L x1");
+  near(ly0!, 4 - 0.2 * Math.SQRT2, "L y0");
+  near(ly1!, 4, "L y1");
+  // In the project: own storey only; the storey height of the storey below moves the roof but
+  // not its own plan view; the other storey shows no roof (guest display is N62).
+  const base = createStandardProject("p", "eg", "og");
+  const project = addRoof(selectWorkingStorey(base, base, "og"), roof);
+  const ogView = derivePlanScene(project, () => true).roofViews.get("dach");
+  assert.deepEqual(ogView, roofPlanView(storeyOf(project).roofs![0]!));
+  const egHigher = setStoreyHeight(project, project, {
+    projectId: "p",
+    storeyId: "eg",
+    height: 3.5,
+  });
+  assert.deepEqual(derivePlanScene(egHigher, () => true).roofViews.get("dach"), ogView);
+  const eg = selectWorkingStorey(project, project, "eg");
+  assert.equal(derivePlanScene(eg, () => true).roofViews.size, 0);
 });

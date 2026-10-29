@@ -1,3 +1,4 @@
+import { roofPlanView } from "./roof-plan.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -37,6 +38,8 @@ export function derivePlanScene(
     walls: new Map(plan.walls.map((w) => [w.id, w])),
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
+    // Cut at 1 m, outline below and above it (docs/ROOF_ELEMENT.md, D4).
+    roofViews: new Map(plan.roofs.map((r) => [r.id, roofPlanView(r)])),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),
     lines: new Map(plan.lines.map((l) => [l.id, l])),
     references: new Map(plan.references.map((r) => [r.id, r])),
