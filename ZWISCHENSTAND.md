@@ -57,7 +57,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 **Bewusst zurückgestellt**
 
 - Wandweiser 3D-Neuaufbau (Stufe B1/B2): erst wenn reale Projekte stocken oder zusammen mit den mehrgeschossigen Wänden.
-- Fenstermaße im IFC für Archicad („RB 0,00 x 0,00“): drei Testdateien erzeugt (PR501, Ordner NOVIKOV-Fenster-Abnahme-2026-10-29); wartet auf deinen Archicad-Import.
+- Fenstermaße im IFC für Archicad („RB 0,00 x 0,00“): drei Testvarianten von dir geprüft, keine hilft (29.10.). Entschieden: Export bleibt bei Öffnungen; Maße kommen mit echten Fenster-/Türbauteilen.
 - Wandbewegung x/y/Achse abgleichen (seit 24.10.).
 
 **Wartet auf deine Entscheidung**
