@@ -6,6 +6,10 @@ import { createHistory, commitProject } from "../history/project-history.ts";
 import { DOOR_DEFAULTS } from "../../domain/elements/door/model.ts";
 import { addDoor } from "../doors/actions.ts";
 import { projectSnapPrimitives } from "./project-references.ts";
+import { snapPointLabel } from "./point-label.ts";
+import { addSlab } from "../slabs/actions.ts";
+import { createDrawing, defaultHatchFill } from "../drawing/actions.ts";
+import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 
 function project() {
   const walled = addWall(createProject("p", "eg"), {
@@ -42,4 +46,61 @@ test("jamb parts are reused for an unchanged door and wall, and follow a changed
   const moved = jambs(thicker.present);
   assert.notEqual(moved[0], first[0]);
   assert.equal(+moved[0]!.point.y.toFixed(9), -0.15);
+});
+
+test("snapped element points are named „Element · Ecke n“ instead of „Endpunkt“", () => {
+  const base = project();
+  const withSlab = addSlab(base, {
+    id: "s",
+    points: [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 4, y: 3 },
+    ],
+    thickness: 0.2,
+    topOffset: 0,
+  });
+  const withHatch = createDrawing(withSlab, withSlab, "h", {
+    kind: "hatch",
+    points: [
+      { x: 0, y: 1 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ],
+    fill: defaultHatchFill,
+  });
+  const p = createDrawing(withHatch, withHatch, "l", {
+    kind: "line",
+    lineKind: "polyline",
+    points: [
+      { x: 0, y: 5 },
+      { x: 2, y: 5 },
+      { x: 2, y: 6 },
+      { x: 0, y: 5 },
+    ],
+    appearance: defaultLineAppearance,
+  });
+  const cases: [string | null, string, string | null][] = [
+    ["s", "vertex-2", "Decke · Ecke 3"],
+    ["h", "vertex-0", "Schraffur · Ecke 1"],
+    ["l", "vertex-1", "Linie · Punkt 2"],
+    // The repeated end of a closed polyline is its first point.
+    ["l", "vertex-3", "Linie · Punkt 1"],
+    ["w", "axis-start", "Wand · Anfang"],
+    ["w", "axis-end", "Wand · Ende"],
+    ["w", "corner-1--1", "Wand · Ecke Ende"],
+    ["w", "join-corner-0-1", "Wand · Ecke Anfang"],
+    ["d", "jamb-start-1", "Tür · Laibung"],
+    ["@drawing-start", "first", "Startpunkt"],
+    ["@drawing-origin", "start", "Letzter Punkt"],
+    ["unknown", "vertex-0", null],
+    [null, "grid", null],
+  ];
+  for (const [id, feature, label] of cases)
+    assert.equal(snapPointLabel(p, id, feature), label, `${id} ${feature}`);
+  // Every element corner the snap engine offers gets a name.
+  for (const ref of projectSnapPrimitives(p).references.filter((r) =>
+    r.feature.startsWith("vertex-"),
+  ))
+    assert.match(snapPointLabel(p, ref.entityId, ref.feature)!, /· (Ecke|Punkt) \d+$/);
 });

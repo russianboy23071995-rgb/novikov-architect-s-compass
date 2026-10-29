@@ -8,7 +8,7 @@ Werkzeuge derselben Zeichenart). Umsetzung in vier PRs nach freigegebener Änder
 | A   | Standardgeschosse, Decke als Konturlinie, Decke in 3D  | 7, 5, 4 | erledigt |
 | B   | Polygon schließen per Klick auf den Startpunkt         | 3       | erledigt |
 | C   | Ecke anklicken = bewegen, Ecke auf Ecke = Ecke löschen | 1, 2    | erledigt |
-| D   | Nummerierte Fangpunkte statt „Endpunkt“                | 6       | offen    |
+| D   | Nummerierte Fangpunkte statt „Endpunkt“                | 6       | erledigt |
 
 Vorgaben für B und C: als gemeinsamer Baustein für alle Polygon-Werkzeuge, nicht pro
 Werkzeug. Ein künftiges Werkzeug, das Punkte per Klick setzt bzw. einen geschlossenen Umriss
@@ -109,3 +109,26 @@ Deckenecke startet die Bewegung ohne Menü, Ecke auf Nachbarecke löscht sie (1,
 Klick 11 px daneben verschiebt nur, Rechtsklick öffnet das Punktmenü, Dreieck lehnt das Löschen
 mit Meldung ab, Undo stellt her; keine Konsolenfehler. Schraffur und Polylinie laufen über
 dieselben Bausteine und sind im Browser nicht eigens geprüft.
+
+## Teil D
+
+**Regel 6 – Fangpunkte benennen.** Nutzerentscheidung 29.10.2026: Muster „Element · Ecke n“.
+Gemeinsamer Baustein `snapPointLabel` (`src/application/snapping/point-label.ts`) liest
+Element-ID und Merkmal des Fangpunkts; Zählung ab 1 wie bei den Eckgriffen.
+
+| Fangpunkt                    | Anzeige                                                  |
+| ---------------------------- | -------------------------------------------------------- |
+| Ecke einer Decke / Schraffur | Decke · Ecke 3, Schraffur · Ecke 1                       |
+| Punkt einer Linie/Polylinie  | Linie · Punkt 2 (geschlossene Linie: Endpunkt = Punkt 1) |
+| Wandachse                    | Wand · Anfang, Wand · Ende                               |
+| Wandecke (Körper)            | Wand · Ecke Anfang, Wand · Ecke Ende                     |
+| Tür-/Fensterlaibung          | Tür · Laibung                                            |
+| beim Zeichnen                | Startpunkt, Letzter Punkt                                |
+| Hilfspunkt aus Hilfslinien   | Hilfspunkt (unverändert)                                 |
+| sonst                        | Endpunkt (unverändert)                                   |
+
+Ein neues Element erhält Namen über einen Eintrag in `ELEMENT_NAMES`.
+
+Nachweis: 1351 Tests grün (neu: Benennung aller Fälle, jede vom Fang angebotene Ecke erhält
+einen Namen). Browser: „Decke · Ecke 3“ an der Deckenecke, „Wand · Ecke Anfang“ an der
+Wandecke; keine Konsolenfehler.
