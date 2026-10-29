@@ -581,6 +581,12 @@ export function BimPlan({
       ?.points.forEach((point, index) =>
         handles.push({ point, index, label: `Schraffurecke ${index + 1}` }),
       );
+  } else if (selection?.kind === "room") {
+    storeyOf(project)
+      .rooms?.find((r) => r.id === selection.id)
+      ?.points.forEach((point, index) =>
+        handles.push({ point, index, label: `Raumecke ${index + 1}` }),
+      );
   } else if (selection?.kind === "roof") {
     storeyOf(project)
       .roofs?.find((r) => r.id === selection.id)

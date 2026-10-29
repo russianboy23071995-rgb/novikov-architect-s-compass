@@ -10,6 +10,8 @@ export function closedContour(project: Project, target: ElementTarget) {
     return storeyOf(project).slabs?.find((s) => s.id === target.id)?.points ?? null;
   if (target.kind === "roof")
     return storeyOf(project).roofs?.find((r) => r.id === target.id)?.points ?? null;
+  if (target.kind === "room")
+    return storeyOf(project).rooms?.find((r) => r.id === target.id)?.points ?? null;
   if (target.kind !== "line") return null;
   const line = storeyOf(project).lines?.find((l) => l.id === target.id);
   if (!line || line.kind !== "polyline" || line.points.length < 4) return null;

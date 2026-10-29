@@ -10,6 +10,7 @@ import type { CornerPreview } from "@/application/walls/corner-preview";
 import { checkedImageUrl } from "@/interop/images/import";
 import { wallLength } from "@/domain/project/schema";
 import { wallBody } from "@/domain/elements/wall/body";
+import { roomArea, roomLabelPoint } from "@/domain/elements/room/model";
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
@@ -91,6 +92,7 @@ export function PlanSceneContent({
 }: Props) {
   const plan = {
     references: kind === "reference" ? ids.map((id) => scene.references.get(id)!) : [],
+    rooms: kind === "room" ? ids.map((id) => scene.rooms.get(id)!) : [],
     slabs: kind === "slab" ? ids.map((id) => scene.slabs.get(id)!) : [],
     roofs: kind === "roof" ? ids.map((id) => scene.roofs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
@@ -135,6 +137,55 @@ export function PlanSceneContent({
                 pointerEvents="none"
               />
             )}
+          </g>
+        );
+      })}
+      {plan.rooms.map((room) => {
+        const points = room.points.map((p) => `${p.x},${-p.y}`).join(" ");
+        const selected = selectedIds.has(room.id);
+        const label = roomLabelPoint(room.points);
+        const size = 11 / pixelsPerMetre;
+        const area = roomArea(room).toLocaleString("de-DE", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        return (
+          <g key={room.id}>
+            {/* Light fill, selectable interior; the stamp shows name, number and area (R2). */}
+            <polygon
+              {...selectProps("room", room.id)}
+              aria-label={`Raum ${room.number}`}
+              points={points}
+              fill="#38bdf8"
+              fillOpacity={selected ? 0.16 : 0.07}
+              stroke={selected ? "#0284c7" : "none"}
+              strokeWidth={1.5}
+              strokeDasharray={selected ? "6 3" : undefined}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+            />
+            <text
+              aria-label={`Raumstempel ${room.number}`}
+              x={label.x}
+              y={-label.y}
+              fontSize={size}
+              textAnchor="middle"
+              fill="var(--foreground)"
+              pointerEvents="none"
+            >
+              {room.name && (
+                <tspan x={label.x} dy={-size * 0.6} fontWeight={600}>
+                  {room.name}
+                </tspan>
+              )}
+              <tspan x={label.x} dy={room.name ? size * 1.2 : 0}>
+                {room.number}
+              </tspan>
+              <tspan x={label.x} dy={size * 1.2}>
+                {area} m²
+              </tspan>
+            </text>
           </g>
         );
       })}

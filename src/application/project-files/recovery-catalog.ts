@@ -28,14 +28,16 @@ export function recoveryContentSummary(project: Project) {
   let doors = 0;
   let slabs = 0;
   let roofs = 0;
+  let rooms = 0;
   for (const storey of project.storeys) {
     walls += storey.walls.length;
     windows += storey.windows.length;
     doors += storey.doors?.length ?? 0;
     slabs += storey.slabs?.length ?? 0;
     roofs += storey.roofs?.length ?? 0;
+    rooms += storey.rooms?.length ?? 0;
   }
-  return { storeys: project.storeys.length, walls, windows, doors, slabs, roofs };
+  return { storeys: project.storeys.length, walls, windows, doors, slabs, roofs, rooms };
 }
 
 export interface RecoveryCatalog {

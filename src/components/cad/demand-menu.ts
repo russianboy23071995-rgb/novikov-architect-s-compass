@@ -5,6 +5,7 @@ import { lineLength } from "../../lib/bim/lines.ts";
 import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";
 import { slabArea } from "../../domain/elements/slab/model.ts";
+import { roomArea } from "../../domain/elements/room/model.ts";
 
 export type MenuObstacle = { left: number; top: number; right: number; bottom: number };
 
@@ -102,6 +103,15 @@ export function selectionSummary(project: Project, selection: Selection) {
       ? {
           title: "Dach",
           details: `Neigung ${roof.pitch.toLocaleString("de-DE", { maximumFractionDigits: 2 })}° · Stärke ${metres(roof.thickness)}`,
+        }
+      : null;
+  }
+  if (selection.kind === "room") {
+    const room = storeyOf(project).rooms?.find((item) => item.id === selection.id);
+    return room
+      ? {
+          title: room.name ? `Raum ${room.number} · ${room.name}` : `Raum ${room.number}`,
+          details: `Grundfläche ${roomArea(room).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²${room.floorBuildUp === undefined ? "" : ` · Fußbodenaufbau ${metres(room.floorBuildUp)}`}`,
         }
       : null;
   }

@@ -6,6 +6,7 @@ const ELEMENT_NAMES = [
   ["walls", "Wand"],
   ["slabs", "Decke"],
   ["roofs", "Dach"],
+  ["rooms", "Raum"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],

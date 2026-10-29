@@ -1,3 +1,6 @@
+import { RoomSettingsPanel, RoomToolFields } from "./RoomToolFields";
+import { enclosedRoomOutline } from "@/application/rooms/enclosure";
+import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -220,22 +223,30 @@ export function CadWorkspace({
   const [roofSettingsOpen, setRoofSettingsOpen] = useState(false);
   const roofPhase: RoofPhase | null =
     tool === "roof" ? (!roofLine ? "line" : !roofRise ? "side" : "outline") : null;
-  // Hatch, slab and roof share the outline construction (polygon, rectangle, closed contour).
-  const areaTool = tool === "hatch" || tool === "slab" || roofPhase === "outline";
+  // Room tool (docs/ROOM_ELEMENT.md, R2): own construction, by default a click between walls.
+  const [roomConstruction, setRoomConstruction] = useState<HatchConstruction | "walls">("walls");
+  const [roomSettingsOpen, setRoomSettingsOpen] = useState(false);
+  const roomByWalls = tool === "room" && roomConstruction === "walls";
+  // Hatch, slab, roof and room share the outline construction (polygon, rectangle, contour).
+  const areaTool =
+    tool === "hatch" ||
+    tool === "slab" ||
+    roofPhase === "outline" ||
+    (tool === "room" && !roomByWalls);
   const pathDrawing = tool === "line" || areaTool || roofPhase === "line";
   const [hatchConstruction, setHatchConstruction] = useState<HatchConstruction>("polygon");
+  const construction: HatchConstruction =
+    tool === "room" && roomConstruction !== "walls" ? roomConstruction : hatchConstruction;
   const findHatchBoundary = useMemo(
     () =>
-      areaTool && hatchConstruction === "boundary"
-        ? prepareHatchBoundaries(project, visibility)
-        : null,
-    [areaTool, hatchConstruction, project, visibility],
+      areaTool && construction === "boundary" ? prepareHatchBoundaries(project, visibility) : null,
+    [areaTool, construction, project, visibility],
   );
   const toolDefaults = useToolDefaults(project);
   const hatchFill = toolDefaults.hatch.fill;
   // Regel 3 (docs/POLYGON_REGELN.md): each click-by-click tool declares how it closes.
   const pathClosure: PathClosure = areaTool
-    ? hatchConstruction === "polygon"
+    ? construction === "polygon"
       ? "polygon"
       : "none"
     : tool === "line" && lineKind === "polyline"
@@ -358,7 +369,8 @@ export function CadWorkspace({
           next === "line" ||
           next === "hatch" ||
           next === "slab" ||
-          next === "roof"
+          next === "roof" ||
+          next === "room"
         )
           setSelection(null);
         setModelError("");
@@ -369,7 +381,8 @@ export function CadWorkspace({
           next === "line" ||
           next === "hatch" ||
           next === "slab" ||
-          next === "roof"
+          next === "roof" ||
+          next === "room"
         )
           setMode("2D");
       }
@@ -420,7 +433,8 @@ export function CadWorkspace({
       next === "line" ||
       next === "hatch" ||
       next === "slab" ||
-      next === "roof"
+      next === "roof" ||
+      next === "room"
     )
       setSelection(null);
     setModelError("");
@@ -432,7 +446,8 @@ export function CadWorkspace({
       next === "line" ||
       next === "hatch" ||
       next === "slab" ||
-      next === "roof"
+      next === "roof" ||
+      next === "room"
     )
       setMode("2D");
   };
@@ -547,11 +562,11 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Rooms get their edit actions with the room tool (docs/ROOM_ELEMENT.md, R2).
-    if (!selection || selection.kind === "reference" || selection.kind === "room") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
-    const area = selection.kind === "slab" || selection.kind === "roof";
+    const area =
+      selection.kind === "slab" || selection.kind === "roof" || selection.kind === "room";
     const solidMove =
       inSolid && !area && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
@@ -567,7 +582,9 @@ export function CadWorkspace({
           ? storeyOf(project).slabs!.find((slab) => slab.id === selection.id)!.points[0]!
           : selection.kind === "roof"
             ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
-            : editAnchor(project, selection));
+            : selection.kind === "room"
+              ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
+              : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -595,11 +612,15 @@ export function CadWorkspace({
 
     // Slab outlines are edited in the plan (docs/SLAB_ELEMENT.md, E1); in 3D the slab moves whole.
     if (area && (inSolid || action === "axis")) {
-      const name = selection.kind === "roof" ? "Dach" : "Decke";
+      const words = {
+        slab: ["Decke", "die Decke", "Decken"],
+        roof: ["Dach", "das Dach", "Dächer"],
+        room: ["Raum", "der Raum", "Räume"],
+      }[selection.kind as "slab" | "roof" | "room"];
       showNotice(
         inSolid
-          ? `${name}umriss im Grundriss bearbeiten; in 3D wird ${selection.kind === "roof" ? "das Dach" : "die Decke"} als Ganzes bewegt.`
-          : `${selection.kind === "roof" ? "Dächer" : "Decken"}: Element frei bewegen oder auf X-/Y-Achse.`,
+          ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
+          : `${words[2]}: Element frei bewegen oder auf X-/Y-Achse.`,
       );
       return;
     }
@@ -693,7 +714,15 @@ export function CadWorkspace({
   const finishPath = (points = pathPoints, base = drawingBase) => {
     try {
       const kind =
-        tool === "hatch" ? "hatch" : tool === "slab" ? "slab" : tool === "roof" ? "roof" : "line";
+        tool === "hatch"
+          ? "hatch"
+          : tool === "slab"
+            ? "slab"
+            : tool === "roof"
+              ? "roof"
+              : tool === "room"
+                ? "room"
+                : "line";
       const id = `${kind}-${crypto.randomUUID()}`;
       changeProject(
         createDrawing(
@@ -704,21 +733,33 @@ export function CadWorkspace({
             ? { kind: "hatch", points, ...toolDefaults.hatch }
             : tool === "slab"
               ? { kind: "slab", points, ...toolDefaults.slab }
-              : tool === "roof"
+              : tool === "room"
                 ? {
-                    kind: "roof",
+                    kind: "room",
                     points,
-                    referenceLine: roofLine!,
-                    rise: roofRise!,
-                    ...toolDefaults.roof,
+                    ...(toolDefaults.room.name.trim()
+                      ? { name: toolDefaults.room.name.trim() }
+                      : {}),
+                    ...(toolDefaults.room.floorBuildUpEnabled
+                      ? { floorBuildUp: toolDefaults.room.floorBuildUp }
+                      : {}),
+                    layerId: toolDefaults.room.layerId,
                   }
-                : {
-                    kind: "line",
-                    lineKind,
-                    points,
-                    appearance: lineAppearance,
-                    layerId: toolDefaults.line.layerId,
-                  },
+                : tool === "roof"
+                  ? {
+                      kind: "roof",
+                      points,
+                      referenceLine: roofLine!,
+                      rise: roofRise!,
+                      ...toolDefaults.roof,
+                    }
+                  : {
+                      kind: "line",
+                      lineKind,
+                      points,
+                      appearance: lineAppearance,
+                      layerId: toolDefaults.line.layerId,
+                    },
           viewContext.binding,
         ),
         { kind, id },
@@ -727,7 +768,7 @@ export function CadWorkspace({
       setRoofRise(null);
     } catch (error) {
       setModelError(
-        tool === "roof"
+        tool === "roof" || tool === "room"
           ? roofErrorMessage(error)
           : tool === "slab"
             ? "Decke prüfen: mindestens drei verschiedene Eckpunkte ohne Kreuzungen oder Überlappung; Stärke größer als null. Nach Modelländerung erneut beginnen."
@@ -753,6 +794,16 @@ export function CadWorkspace({
 
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
+    // Room by a click between walls (docs/ROOM_ELEMENT.md, R2).
+    if (roomByWalls) {
+      try {
+        setDrawingBase(project);
+        finishPath(enclosedRoomOutline(project, point), project);
+      } catch (error) {
+        setModelError(roofErrorMessage(error));
+      }
+      return;
+    }
     // Roof phase 2: the click side of the reference line is the side the roof rises to.
     if (roofPhase === "side" && roofLine) {
       const { start, end } = roofLine;
@@ -762,7 +813,7 @@ export function CadWorkspace({
       else setRoofRise(side > 0 ? "left" : "right");
       return;
     }
-    if (areaTool && hatchConstruction === "boundary") {
+    if (areaTool && construction === "boundary") {
       const points = findHatchBoundary?.(point) ?? [];
       if (points.length) finishPath(points, project);
       else
@@ -792,11 +843,11 @@ export function CadWorkspace({
       const next = click.points;
       if (
         areaTool &&
-        hatchConstruction !== "polygon" &&
-        next.length === (hatchConstruction === "diagonal" ? 2 : 3)
+        construction !== "polygon" &&
+        next.length === (construction === "diagonal" ? 2 : 3)
       ) {
         try {
-          finishPath(rectangleContour(hatchConstruction as "diagonal" | "side-height", next));
+          finishPath(rectangleContour(construction as "diagonal" | "side-height", next));
         } catch (e) {
           setModelError(e instanceof Error ? e.message : "Ungültiges Rechteck.");
         }
@@ -974,6 +1025,18 @@ export function CadWorkspace({
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
       />
+      <RoomSettingsPanel
+        open={roomSettingsOpen}
+        onOpenChange={setRoomSettingsOpen}
+        construction={roomConstruction}
+        onConstruction={(next) => {
+          setPathPoints([]);
+          setRoomConstruction(next);
+        }}
+        value={toolDefaults.room}
+        onChange={toolDefaults.setRoom}
+        layers={project.layers}
+      />
       <RoofSettingsPanel
         open={roofSettingsOpen}
         onOpenChange={setRoofSettingsOpen}
@@ -1029,6 +1092,7 @@ export function CadWorkspace({
               {projectElementCounts(pendingFile?.project).doors} Türen ·{" "}
               {projectElementCounts(pendingFile?.project).slabs} Decken ·{" "}
               {projectElementCounts(pendingFile?.project).roofs} Dächer ·{" "}
+              {projectElementCounts(pendingFile?.project).rooms} Räume ·{" "}
               {projectElementCounts(pendingFile?.project).lines ?? 0} Linien ·{" "}
               {projectElementCounts(pendingFile?.project).hatches ?? 0} Schraffuren ·{" "}
               {projectElementCounts(pendingFile?.project).references ?? 0} Bildreferenzen. Ersetzt
@@ -1347,6 +1411,18 @@ export function CadWorkspace({
                 onPrecision={doorTool.setPrecision}
                 pickingHost={doorTool.pickingHost}
               />
+            ) : tool === "room" && mode === "2D" ? (
+              <RoomToolFields
+                construction={roomConstruction}
+                onConstruction={(next) => {
+                  setPathPoints([]);
+                  setRoomConstruction(next);
+                }}
+                value={toolDefaults.room}
+                onChange={toolDefaults.setRoom}
+                layers={project.layers}
+                nextNumber={nextProjectRoomNumber(project)}
+              />
             ) : tool === "roof" && mode === "2D" ? (
               <RoofToolFields
                 construction={hatchConstruction}
@@ -1557,6 +1633,7 @@ export function CadWorkspace({
               onToggle={() => setRailCollapsed((value) => !value)}
               onSettings={(next) => {
                 if (next === "roof") setRoofSettingsOpen(true);
+                if (next === "room") setRoomSettingsOpen(true);
               }}
             />
           )}
@@ -1689,7 +1766,10 @@ export function CadWorkspace({
                         interaction.adapter?.snapping ??
                         (tool === "wall" ? wallStartSnapPolicy : null)
                       }
-                      drawing={(tool === "wall" || pathDrawing || tool === "roof") && mode === "2D"}
+                      drawing={
+                        (tool === "wall" || pathDrawing || tool === "roof" || tool === "room") &&
+                        mode === "2D"
+                      }
                       endpointSnap={
                         pathDrawing ||
                         tool === "roof" ||
@@ -1711,11 +1791,11 @@ export function CadWorkspace({
                       draftPatternRotation={toolDefaults.hatch.patternRotation}
                       draftPatternSize={toolDefaults.hatch.patternSize}
                       draftContour={
-                        areaTool && hatchConstruction !== "polygon"
+                        areaTool && construction !== "polygon"
                           ? (point) =>
-                              hatchConstruction === "boundary"
+                              construction === "boundary"
                                 ? (findHatchBoundary?.(point) ?? [])
-                                : rectangleContour(hatchConstruction, [...pathPoints, point])
+                                : rectangleContour(construction, [...pathPoints, point])
                           : undefined
                       }
                       wallOutlineWidth={wallWidth}
@@ -1724,12 +1804,7 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (
-                          target.kind === "reference" ||
-                          target.kind === "door" ||
-                          target.kind === "room"
-                        )
-                          return;
+                        if (target.kind === "reference" || target.kind === "door") return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(
@@ -1790,7 +1865,7 @@ export function CadWorkspace({
                       }
                       {...(tool === "wall" ||
                       (tool === "line" && lineKind === "polyline") ||
-                      (areaTool && hatchConstruction === "polygon")
+                      (areaTool && construction === "polygon")
                         ? {
                             onFinish: () => {
                               if (!referenceSelection.selecting) {

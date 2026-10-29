@@ -46,6 +46,7 @@ export function projectElementCounts(project: Project | undefined) {
     doors: 0,
     slabs: 0,
     roofs: 0,
+    rooms: 0,
     lines: 0,
     hatches: 0,
     references: 0,

@@ -972,3 +972,145 @@ test("roof tool: drawing creates one roof; outline edits keep the reference line
   assert.equal(state.history.past.length, 1);
   assert.equal(storeyOf(state.history.present).roofs![0]!.rise, "right");
 });
+
+import { enclosedRoomOutline } from "../rooms/enclosure.ts";
+import { addWindow } from "../windows/actions.ts";
+import { updateRoom } from "../rooms/actions.ts";
+import { roomArea, roomLabelPoint } from "../../domain/elements/room/model.ts";
+import { contains } from "../../geometry/polygons/contains.ts";
+import { selectionSummary } from "../../components/cad/demand-menu.ts";
+
+test("room tool: click between walls takes the inner faces; drawing, editing and moving like a slab", () => {
+  // Raum R2 (docs/ROOM_ELEMENT.md).
+  let walled = slabBase();
+  const ring = [
+    { x: 0, y: 0 },
+    { x: 8, y: 0 },
+    { x: 8, y: 6 },
+    { x: 0, y: 6 },
+  ];
+  ring.forEach((start, i) => {
+    walled = addWall(walled, {
+      id: `w${i}`,
+      start,
+      end: ring[(i + 1) % 4]!,
+      thickness: 0.24,
+      height: 2.8,
+    });
+  });
+  const whole = enclosedRoomOutline(walled, { x: 2, y: 2 });
+  assert.ok(Math.abs(roomArea({ points: whole }) - 7.76 * 5.76) < 1e-6);
+  // A window does not open the boundary.
+  const withWindow = addWindow(walled, {
+    id: "f",
+    wallId: "w0",
+    width: 1.2,
+    height: 1.2,
+    sillHeight: 0.9,
+    position: 0.5,
+  });
+  assert.ok(
+    Math.abs(roomArea({ points: enclosedRoomOutline(withWindow, { x: 2, y: 2 }) }) - 7.76 * 5.76) <
+      1e-6,
+  );
+  // A partition splits it; clicking into a wall or outside is refused readably.
+  const split = addWall(walled, {
+    id: "w4",
+    start: { x: 4, y: 0 },
+    end: { x: 4, y: 6 },
+    thickness: 0.24,
+    height: 2.8,
+  });
+  const left = enclosedRoomOutline(split, { x: 2, y: 2 });
+  assert.ok(Math.abs(roomArea({ points: left }) - 3.76 * 5.76) < 1e-6);
+  assert.throws(() => enclosedRoomOutline(split, { x: 4, y: 2 }), /kein von Wänden umschlossener/);
+  assert.throws(() => enclosedRoomOutline(split, { x: 20, y: 2 }), /kein von Wänden umschlossener/);
+  // The outline becomes a room with the next number, name and optional floor build-up.
+  const drawn = createDrawing(split, split, "r", {
+    kind: "room",
+    points: left,
+    name: "Wohnen",
+    floorBuildUp: 0.12,
+  });
+  const room = storeyOf(drawn).rooms![0]!;
+  assert.deepEqual([room.number, room.name, room.floorBuildUp], ["R-001", "Wohnen", 0.12]);
+  assert.equal(drawn.layers.find((l) => l.id === room.layerId)!.name, "Raum");
+  const second = createDrawing(drawn, drawn, "r2", {
+    kind: "room",
+    points: enclosedRoomOutline(split, { x: 6, y: 2 }),
+  });
+  const other = storeyOf(second).rooms![1]!;
+  assert.deepEqual([other.number, other.name, other.floorBuildUp], ["R-002", "", undefined]);
+  // Plan: own paint run; menu summary names number, name and area.
+  assert.ok(
+    planSceneRuns(
+      derivePlanScene(second, () => true),
+      [],
+    ).some((r) => r.kind === "room"),
+  );
+  assert.match(selectionSummary(second, { kind: "room", id: "r" })!.title, /R-001 · Wohnen/);
+  assert.match(selectionSummary(second, { kind: "room", id: "r" })!.details, /21,66 m²/);
+  // The stamp sits inside even for an L-shaped outline.
+  assert.ok(contains(lShape, roomLabelPoint(lShape)));
+  const u = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 4 },
+    { x: 5, y: 4 },
+    { x: 5, y: 1 },
+    { x: 1, y: 1 },
+    { x: 1, y: 4 },
+    { x: 0, y: 4 },
+  ];
+  assert.ok(contains(u, roomLabelPoint(u)));
+  // Outline edits work like a slab's and keep number and name; one undo step.
+  const target = { kind: "room", id: "r" } as const;
+  const corner = room.points[1]!;
+  const session: EditSession = {
+    base: drawn,
+    target,
+    action: "point",
+    index: 1,
+    anchor: corner,
+  };
+  const edited = storeyOf(editAtPointer(session, drawn, { x: corner.x + 0.5, y: corner.y }))
+    .rooms![0]!;
+  assert.notDeepEqual(edited.points, room.points);
+  assert.deepEqual([edited.number, edited.name], ["R-001", "Wohnen"]);
+  const offset = storeyOf(
+    editAtPointer(
+      { base: drawn, target, action: "offset", index: 0, anchor: room.points[0]! },
+      drawn,
+      { x: room.points[0]!.x, y: room.points[0]!.y - 0.5 },
+    ),
+  ).rooms![0]!;
+  assert.notDeepEqual(offset.points, room.points);
+  // Properties: duplicate numbers refused, floor build-up removable.
+  assert.throws(() => updateRoom(second, "r2", { number: "r-001" }));
+  assert.equal(
+    storeyOf(updateRoom(drawn, "r", { floorBuildUp: undefined })).rooms![0]!.floorBuildUp,
+    undefined,
+  );
+  // Moving: alone, and together with the walls.
+  const one = [{ kind: "room" as const, id: "r" }];
+  const moved = previewSelectionMove(beginSelectionMove(drawn, one, { x: 0, y: 0 }), drawn, one, {
+    x: 1,
+    y: 2,
+  });
+  assert.deepEqual(storeyOf(moved).rooms![0]!.points[0], {
+    x: room.points[0]!.x + 1,
+    y: room.points[0]!.y + 2,
+  });
+  const all = [...one, { kind: "wall" as const, id: "w0" }];
+  const group = previewSelectionMove(beginSelectionMove(drawn, all, { x: 0, y: 0 }), drawn, all, {
+    x: 0,
+    y: 3,
+  });
+  assert.deepEqual(storeyOf(group).rooms![0]!.points[0], {
+    x: room.points[0]!.x,
+    y: room.points[0]!.y + 3,
+  });
+  assert.deepEqual(storeyOf(group).walls[0]!.start, { x: 0, y: 3 });
+  const deleted = previewDeleteSelection(drawn, one, undefined).result;
+  assert.equal(storeyOf(deleted).rooms!.length, 0);
+});

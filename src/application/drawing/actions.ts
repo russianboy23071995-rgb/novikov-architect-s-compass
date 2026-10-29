@@ -7,6 +7,7 @@ import { addLine } from "../lines/actions.ts";
 import { addWall } from "../walls/actions.ts";
 import { addSlab } from "../slabs/actions.ts";
 import { addRoof } from "../roofs/actions.ts";
+import { addRoom } from "../rooms/actions.ts";
 import type { Roof } from "../../domain/elements/roof/model.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
@@ -52,7 +53,8 @@ export type DrawingRequest =
       layerId?: string;
     }
   | { kind: "slab"; points: Point[]; thickness: number; topOffset: number; layerId?: string }
-  | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">);
+  | ({ kind: "roof"; points: Point[]; layerId?: string } & Omit<Roof, "id" | "points" | "layerId">)
+  | { kind: "room"; points: Point[]; name?: string; floorBuildUp?: number; layerId?: string };
 export function assertDrawingContext(base: Project, current: Project) {
   if (base !== current) throw new Error("Das Modell wurde geändert. Zeichnen erneut beginnen.");
 }
@@ -110,6 +112,14 @@ export function createDrawing(
       points: closedDrawingContour(request.points),
       thickness: request.thickness,
       topOffset: request.topOffset,
+      ...(request.layerId ? { layerId: request.layerId } : {}),
+    });
+  if (request.kind === "room")
+    return addRoom(current, {
+      id,
+      points: closedDrawingContour(request.points),
+      ...(request.name ? { name: request.name } : {}),
+      ...(request.floorBuildUp !== undefined ? { floorBuildUp: request.floorBuildUp } : {}),
       ...(request.layerId ? { layerId: request.layerId } : {}),
     });
   if (request.kind === "roof") {
