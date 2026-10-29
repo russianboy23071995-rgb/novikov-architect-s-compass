@@ -141,6 +141,11 @@ export function PlanSceneContent({
       {plan.roofs.map((roof) => {
         const points = roof.points.map((p) => `${p.x},${-p.y}`).join(" ");
         const selected = selectedIds.has(roof.id);
+        const view = scene.roofViews.get(roof.id);
+        const line = selected ? "#94a3b8" : "var(--primary)";
+        const thin = Math.max(0.5, wallOutlineWidth * 0.6);
+        const segments = (list: readonly (readonly [Point, Point])[]) =>
+          list.map(([a, b]) => `M${a.x},${-a.y} L${b.x},${-b.y}`).join(" ");
         const { start, end } = roof.referenceLine;
         const length = Math.hypot(end.x - start.x, end.y - start.y);
         const left = { x: -(end.y - start.y) / length, y: (end.x - start.x) / length };
@@ -152,19 +157,53 @@ export function PlanSceneContent({
         const back = { x: tip.x - rise.x * head, y: tip.y - rise.y * head };
         return (
           <g key={roof.id}>
-            {/* Outline seen from below, dashed like content above the cut plane (D4 adds the
-                cut at 1 m). The interior stays selectable, like a slab. */}
+            {/* Selectable area without stroke; the drawing follows the plan view (D4). */}
             <polygon
               {...selectProps("roof", roof.id)}
               aria-label={`Dach ${roof.id}`}
               points={points}
               fill="none"
-              stroke={selected ? "#94a3b8" : "var(--primary)"}
-              strokeWidth={wallOutlineWidth / pixelsPerMetre}
-              strokeDasharray={`${6 / pixelsPerMetre} ${4 / pixelsPerMetre}`}
+              stroke="none"
               pointerEvents={placement ? "none" : "all"}
-              className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+              className="cursor-pointer outline-none"
             />
+            {/* Cut at 1 m like a cut wall; below it thin (seen from above); above it dashed
+                (underside seen from below). docs/ROOF_ELEMENT.md, D4. */}
+            {view && view.cut.length > 0 && (
+              <path
+                aria-label={`Dachschnitt ${roof.id}`}
+                d={view.cut
+                  .map((loop) => "M" + loop.map((p) => `${p.x},${-p.y}`).join(" L") + " Z")
+                  .join(" ")}
+                fillRule="evenodd"
+                fill="var(--muted-foreground)"
+                fillOpacity={0.55}
+                stroke={line}
+                strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                pointerEvents="none"
+              />
+            )}
+            {view && (
+              <path
+                aria-label={`Dach unter dem Schnitt ${roof.id}`}
+                d={segments(view.below)}
+                fill="none"
+                stroke={line}
+                strokeWidth={thin / pixelsPerMetre}
+                pointerEvents="none"
+              />
+            )}
+            {view && (
+              <path
+                aria-label={`Dach über dem Schnitt ${roof.id}`}
+                d={segments(view.above)}
+                fill="none"
+                stroke={line}
+                strokeWidth={thin / pixelsPerMetre}
+                strokeDasharray={`${6 / pixelsPerMetre} ${4 / pixelsPerMetre}`}
+                pointerEvents="none"
+              />
+            )}
             {selected && (
               <g pointerEvents="none" aria-label="Bezugslinie und Steigrichtung">
                 <line

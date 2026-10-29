@@ -7,7 +7,7 @@ Einflächiges Steildach. Kein Walmdach, keine Dachlandschaft, kein automatisches
 | D1  | Modell, Flächen- und Ringgeometrie, Prüfung, Aktionen, Schema 31 mit Migration                                            | erledigt |
 | D2  | geschlossener 3D-Körper, Auswahl/Fang in 3D, Mitwandern bei Geschosshöhe                                                  | erledigt |
 | D3  | Werkzeug (Polygon, Diagonale, Seite + dritter Punkt, Kontur), Leiste und Doppelklick-Fenster, Eigenschaften, Umriss, Undo | erledigt |
-| D4  | Grundriss im eigenen Geschoss: Schnitt bei 1 m kräftig, darunter dünn, darüber gestrichelt (Untersicht)                   | offen    |
+| D4  | Grundriss im eigenen Geschoss: Schnitt bei 1 m kräftig, darunter dünn, darüber gestrichelt (Untersicht)                   | erledigt |
 | D5  | Datei/Recovery, IFC mit Archicad-Testdatei, Browser-Abnahme, Leistung im Schulmodell                                      | offen    |
 
 ## Nutzerentscheidungen (29.10.2026)
@@ -82,3 +82,16 @@ Befund beim Nachweis: Die Gruppenbewegung über mehrere Geschosse sammelte ihre 
 Nachweis: Tests in `src/application/drawing/actions.test.ts` (Zeichnen über `createDrawing` inkl. Rücksprung zum Start, Ebene Dach, Ablehnung „zu schmal“; Ecke, Seite, Knicken, Versatz behalten die Bezugslinie; ein Undo-Schritt für Bearbeitung und Eigenschaft) und `src/rendering/viewport/working-storey-solid.test.ts` (Gruppenbewegung Vorschau = Übernahme mit Bezugslinie, Einzelbewegung gleich, Eckbearbeitung behält Bezugslinie), `layer-display.test.ts` (Planliste `roofs`). Gleichheits-Hash der 14 Modelle unverändert `09528ac4…7823253`. 1360 Tests grün.
 
 Browser: Werkzeug Dach gewählt (Leiste zeigt Phase 1 und alle Vorgaben), Bezugslinie mit zwei Punkten, Phase 2 mit Pfeil zur Maus („Klick: steigt hierhin“), Klick oberhalb der Linie, Umriss als Polygon per Klick auf den Startpunkt geschlossen; Dach gewählt mit Eigenschaften, gestricheltem Umriss, Bezugslinie, Steigpfeil, Eck- und Kantengriffen, Menü mit Versetzen/Bewegen/X/Y/Löschen. Neigung 35 → 45 in den Eigenschaften übernommen; 3D zeigt das geneigte Dach, Menü in 3D nur Bewegen/X/Y/Löschen. Doppelklick auf den Knopf öffnet „Dach-Einstellungen“; Neigung 40 im Fenster erscheint sofort in der Leiste. Ecke 3 per Klick bewegt, Bezugslinie unverändert. Drei Undo-Schritte (Ecke, Neigung, Dach), danach Rückgängig gesperrt – die Werkzeugvorgabe ist nicht im Verlauf. Keine Konsolenfehler.
+
+## Teil D4: Grundriss mit Schnitt bei 1,00 m
+
+Darstellung im eigenen Geschoss (`src/rendering/viewport/roof-plan.ts`, in der Planszene je Dach einmal abgeleitet):
+
+- **Schnitt:** Die waagerechte Ebene 1,00 m über dem Geschossboden (`PLAN_CUT_HEIGHT`) schneidet den echten geschlossenen Dachkörper aus D2 (`sectionLoops`: Schnittpunkte der Körperkanten, zu geschlossenen Konturen verkettet, Zwischenpunkte auf geraden Kanten entfernt). So stimmen auch rechtwinklige/waagerechte Abschlüsse und L-Formen. Dargestellt wie eine geschnittene Wand: Füllung `var(--muted-foreground)` 55 %, Kontur in Wandkonturstärke.
+- **Darunter** (Teil des Umrisses, dessen Oberseite unter 1,00 m liegt; von oben gesehen): dünne durchgezogene Linie.
+- **Darüber** (Teil des Umrisses, dessen Unterseite über 1,00 m liegt; Untersicht): dünn gestrichelt.
+- Das Innere bleibt ohne sichtbare Kontur anklickbar; Griffe, Fangpunkte, Bezugslinie und Steigpfeil wie in D3.
+- Höhen relativ zum Geschossboden: Eine geänderte Geschosshöhe darunter hebt das Dach in 3D, das Grundrissbild im eigenen Geschoss bleibt gleich. Andere Geschosse zeigen das Dach nicht (Gast-Anzeige N62/L02). Wände bleiben unverändert dargestellt (der Grundriss ist kein echter Schnitt).
+- Noch nicht: innere Kanten nicht senkrechter Abschlüsse als eigene Linie, weitere Schnitthöhen oder Höhenlinien (Raumwerkzeug), Ansichtseinstellung für Untersicht/Überkopfkonturen.
+
+Nachweis: Test in `src/rendering/viewport/working-storey-solid.test.ts` gegen von Hand gerechnete Lagen (45°: Schnitt y = 1 − 0,2·√2 … 1; 30°; Stärke 0,40 m; Bezugshöhe −3 m mit Schnitt an der oberen Kante; Bezugshöhe 1,50 m ganz darüber; L-Form nur im oberen Flügel; Längen der Teile darunter/darüber; Geschosshöhe ändert das eigene Bild nicht; anderes Geschoss ohne Dach). Gleichheits-Hash der 14 Modelle unverändert. 1361 Tests grün. Browser: Dach im EG mit 35°, 0,24 m, Bezugshöhe 0 gezeichnet; dünne Linien zur Traufe, grauer Schnittstreifen 0,418 m tief (= 0,24 / cos 35° / tan 35°), gestrichelte Untersicht; Undo; keine Konsolenfehler.
