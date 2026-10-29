@@ -33,6 +33,7 @@ import {
   projectV27Schema,
   projectV28Schema,
   projectV29Schema,
+  projectV30Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -74,7 +75,7 @@ function withoutBoundHeights<
   };
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 30. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 31. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -175,9 +176,17 @@ export function migrateProjectData(value: unknown): Project {
       withoutBoundHeights({ ...projectV28Schema.parse(value), schemaVersion: 29 }),
     );
   // Walls bound to an assumed raw slab keep their top as storey binding (29.10.2026).
+  // Goes straight to the current format: bound walls carry no stored height here, and schema
+  // 29 files have no roofs, so the v30 step (roofs added in 31) has nothing to add.
   if (value.schemaVersion === 29)
+    return validateProject({
+      ...withStoreyBindings({ ...projectV29Schema.parse(value), schemaVersion: 30 }),
+      schemaVersion: PROJECT_SCHEMA_VERSION,
+    });
+  // Schema 30 files carry no roofs; the strict v30 schema rejects smuggled roof lists.
+  if (value.schemaVersion === 30)
     return validateProject(
-      withStoreyBindings({ ...projectV29Schema.parse(value), schemaVersion: 30 }),
+      withoutBoundHeights({ ...projectV30Schema.parse(value), schemaVersion: 31 }),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
