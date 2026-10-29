@@ -2,7 +2,7 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR490 · 1343 automatische Tests grün
+**Stand:** 29.10.2026 · main nach PR492 · 1344 automatische Tests grün
 
 ## Gerade aktiv
 
@@ -35,6 +35,8 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Aktionen aus dem Altbereich `lib/bim` in die neue Struktur verlegt (PR457–459), Geschosskörper verschoben (PR484).
 - AUD14-Abgleich aller Prüfpunkte (docs/AUD14_ABGLEICH.md); Umlaute repariert und automatisch geprüft (PR479); Meldung „Bewegung nicht möglich“ repariert, Prüfung findet jetzt auch kaputte Ersatzzeichen (PR485).
 - Architekturregel für mehrgeschossige Wände festgehalten (Gast-Wände, Dachtrimmung über Geschosse; Masterplan A08).
+- Lade- und Wiederherstellungsübersicht nennen jetzt auch Türen und Decken (PR491).
+- Abgesichert für eine Windows-Neuinstallation: Arbeitsweise in AGENTS.md, Browser-Start im Repository, Anleitung docs/WIEDERAUFNAHME.md (PR492).
 
 ## Was offen ist
 
@@ -62,8 +64,6 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 - Echter voller Speicher (Quota), mehrere Tabs gleichzeitig, Dauerlauf ≥ 2 Stunden, Grafikkarten- und Prozessspeicher.
 
 **Bekannte kleine Punkte**
-
-- Datei- und Wiederherstellungsübersicht zählt nur Wände, Fenster, Linien, Schraffuren, Bilder – Türen und Decken fehlen dort.
 
 - `CadWorkspace.tsx` (≈ 1850 Zeilen) und `BimSolidView.tsx` sind groß; wird nur bei passenden Fachänderungen verkleinert.
 - Sechs bekannte Lint-Warnungen in `components/ui`.

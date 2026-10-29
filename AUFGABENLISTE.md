@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 29.10.2026 · main nach PR490
+**Stand:** 29.10.2026 · main nach PR492
 
 ## Deine Wünsche
 
@@ -97,8 +97,8 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 ## Wartbarkeit
 
-| ID  | Aufgabe                                                                                                                                                                                                                          | Prio   | Status            | Bezug                       |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------- | --------------------------- |
-| L37 | `CadWorkspace.tsx` (≈ 1850 Zeilen) und `BimSolidView.tsx` schrittweise entlasten                                                                                                                                                 | später | offen             | §9 P2                       |
-| L38 | Sechs Lint-Warnungen in `components/ui`                                                                                                                                                                                          |        | offen             | §9 P2                       |
-| L39 | Arbeitsweise (Commit-Identität, Selbst-Merge bei grüner CI, Windows-Hinweise) in AGENTS.md festhalten und .claude/launch.json ins Repository aufnehmen – damit nach Windows-Neuinstallation nahtlos weitergearbeitet werden kann |        | vorgemerkt 28.10. | Nutzerfrage Neuinstallation |
+| ID  | Aufgabe                                                                                                                                                                                                                          | Prio   | Status           | Bezug                       |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------- | --------------------------- |
+| L37 | `CadWorkspace.tsx` (≈ 1850 Zeilen) und `BimSolidView.tsx` schrittweise entlasten                                                                                                                                                 | später | offen            | §9 P2                       |
+| L38 | Sechs Lint-Warnungen in `components/ui`                                                                                                                                                                                          |        | offen            | §9 P2                       |
+| L39 | Arbeitsweise (Commit-Identität, Selbst-Merge bei grüner CI, Windows-Hinweise) in AGENTS.md festhalten und .claude/launch.json ins Repository aufnehmen – damit nach Windows-Neuinstallation nahtlos weitergearbeitet werden kann |        | erledigt (PR492) | Nutzerfrage Neuinstallation |
