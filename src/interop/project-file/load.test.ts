@@ -15,6 +15,9 @@ import { createDrawing } from "../../application/drawing/actions.ts";
 import { defaultLineAppearance } from "../../lib/bim/lines.ts";
 import { createStandardProject } from "../../application/projects/create.ts";
 import { addRoof } from "../../application/roofs/actions.ts";
+import { addRoom, nextProjectRoomNumber, updateRoom } from "../../application/rooms/actions.ts";
+import { nextRoomNumber, roomArea } from "../../domain/elements/room/model.ts";
+import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
 import { boundHeightFixture } from "../../../benchmarks/bound-height-fixture.ts";
 
 function legacy(withLines = true) {
@@ -224,11 +227,11 @@ test("both file entry points preserve UTF-8 budget precedence and normal invalid
 
 test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused, roofs round-trip", () => {
   // docs/ROOF_ELEMENT.md, D1.
-  assert.equal(PROJECT_SCHEMA_VERSION, 31);
+  assert.ok(PROJECT_SCHEMA_VERSION >= 31);
   const current = createStandardProject("p", "eg", "og");
   const v30 = { ...JSON.parse(serializeProject(current)), schemaVersion: 30 };
   const migrated = loadProjectData(v30);
-  assert.equal(migrated.schemaVersion, 31);
+  assert.equal(migrated.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.deepEqual({ ...migrated, schemaVersion: 30 }, { ...current, schemaVersion: 30 });
   const roof = {
     id: "dach",
@@ -263,4 +266,67 @@ test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused
     ...roof,
     layerId: storeyOf(withRoof).roofs![0]!.layerId,
   });
+});
+
+test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique numbers, migration", () => {
+  // docs/ROOM_ELEMENT.md, R1.
+  assert.equal(PROJECT_SCHEMA_VERSION, 32);
+  const base = createStandardProject("p", "eg", "og");
+  const square = [
+    { x: 0, y: 0 },
+    { x: 4, y: 0 },
+    { x: 4, y: 3 },
+    { x: 0, y: 3 },
+  ];
+  // Numbers: the first room is R-001, the next one continues after the highest R-number.
+  let p = addRoom(base, { id: "r1", points: square });
+  let room = storeyOf(p).rooms![0]!;
+  assert.deepEqual([room.number, room.name, "floorBuildUp" in room], ["R-001", "", false]);
+  assert.equal(p.layers.find((l) => l.id === room.layerId)!.name, "Raum");
+  assert.equal(roomArea(room), 12);
+  p = addRoom(p, { id: "r2", points: square, name: "Bad", floorBuildUp: 0.12 });
+  assert.equal(storeyOf(p).rooms![1]!.number, "R-002");
+  assert.equal(storeyOf(p).rooms![1]!.floorBuildUp, 0.12);
+  p = addRoom(p, { id: "r3", points: square, number: "R-010" });
+  assert.equal(nextProjectRoomNumber(p), "R-011");
+  assert.equal(nextRoomNumber([{ number: "Küche" }, { number: "r-007" }]), "R-008");
+  // Numbers are unique in the whole project, also across storeys and in any letter case.
+  const og = selectWorkingStorey(p, p, "og");
+  assert.throws(
+    () => addRoom(og, { id: "r4", points: square, number: " r-001 " }),
+    /bereits vergeben/,
+  );
+  const ogRoom = addRoom(og, { id: "r4", points: square });
+  assert.equal(storeyOf(ogRoom).rooms![0]!.number, "R-011");
+  // The floor build-up is optional: it can be set and removed again.
+  p = updateRoom(p, "r1", { floorBuildUp: 0.1, name: "Wohnen" });
+  room = storeyOf(p).rooms![0]!;
+  assert.deepEqual([room.floorBuildUp, room.name], [0.1, "Wohnen"]);
+  p = updateRoom(p, "r1", { floorBuildUp: undefined });
+  assert.equal("floorBuildUp" in storeyOf(p).rooms![0]!, false);
+  for (const bad of [
+    { floorBuildUp: -0.1 },
+    { number: "" },
+    { number: "R-002" },
+    { points: [square[0]!, square[2]!, square[1]!, square[3]!] },
+  ])
+    assert.throws(() => updateRoom(p, "r1", bad));
+  assert.throws(() => updateRoom(p, "unbekannt", { name: "x" }), /Unbekannter Raum/);
+  // File: rooms round-trip; schema 31 files load unchanged, smuggled rooms are refused.
+  assert.deepEqual(readProjectFile(serializeProject(ogRoom)), ogRoom);
+  const v31 = { ...JSON.parse(serializeProject(base)), schemaVersion: 31 };
+  assert.deepEqual({ ...loadProjectData(v31), schemaVersion: 31 }, { ...base, schemaVersion: 31 });
+  assert.throws(() =>
+    loadProjectData({ ...JSON.parse(serializeProject(ogRoom)), schemaVersion: 31 }),
+  );
+  const bound = boundHeightFixture();
+  for (const version of [30, 31])
+    assert.deepEqual(
+      {
+        ...loadProjectData({ ...JSON.parse(serializeProject(bound)), schemaVersion: version }),
+        schemaVersion: 0,
+      },
+      { ...bound, schemaVersion: 0 },
+      `bound walls from schema ${version}`,
+    );
 });

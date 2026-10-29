@@ -547,7 +547,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Rooms get their edit actions with the room tool (docs/ROOM_ELEMENT.md, R2).
+    if (!selection || selection.kind === "reference" || selection.kind === "room") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     const area = selection.kind === "slab" || selection.kind === "roof";
@@ -1723,7 +1724,12 @@ export function CadWorkspace({
                       ortho={ortho}
                       onSelect={selectElement}
                       onContourStretch={(target, index, anchor) => {
-                        if (target.kind === "reference" || target.kind === "door") return;
+                        if (
+                          target.kind === "reference" ||
+                          target.kind === "door" ||
+                          target.kind === "room"
+                        )
+                          return;
                         if (
                           referenceSelection.selecting ||
                           !visibleLayerTarget(

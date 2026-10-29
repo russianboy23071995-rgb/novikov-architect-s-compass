@@ -65,5 +65,6 @@
   - Volle Suite mit `timeout 400 npm test`; Typprüfung mit `node_modules/.bin/tsc.exe --noEmit -p .` und `-p benchmarks/tsconfig.json` (`npx tsc` funktioniert hier nicht).
   - Prettier je Verzeichnis oder Dateiliste aufrufen, nicht mit sehr langen Globs.
   - Vergleich mit main über `git worktree add` in `%TEMP%` mit Junction auf `node_modules`; vor `git worktree remove` die Junction mit `(Get-Item …).Delete()` entfernen.
-- Browser: `.claude/launch.json`, Konfiguration „dev“ (Vite auf Port 8094, ohne feste Pfade). Abnahme im Browser gehört zu jeder bedienbaren Änderung.
+- Browser: `.claude/launch.json`, Konfiguration „dev“ (Vite auf Port 8094, ohne feste Pfade). Abnahme im Browser gehört zu jeder bedienbaren Änderung. Arbeitet der Nutzer gerade selbst im Browserfenster (Klicks seit dem letzten Schritt), vor dem Testen fragen.
+- Werkzeuge (Nutzervorgabe 29.10.2026): Jedes Werkzeug hat seine Werkzeugeinstellungen in der Leiste und ein passendes Einstellungsfenster (Doppelklick auf den Werkzeugknopf, `FloatingPanel` + `SettingsSections`, derselbe Entwurf aus `useToolDefaults`, nicht im Undo-Verlauf). Bei neuen Werkzeugen von Anfang an, bei bestehenden Werkzeugen, sobald sie bearbeitet werden; optionale Werte (z. B. Fußbodenaufbau beim Raum) dort abwählbar.
 - Wiederaufnahme nach Neuinstallation: `docs/WIEDERAUFNAHME.md`.
