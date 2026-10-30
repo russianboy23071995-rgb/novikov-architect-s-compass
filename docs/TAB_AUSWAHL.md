@@ -7,7 +7,7 @@ Nutzervorgabe (30.10.2026): Liegen unter dem Cursor mehrere Elemente übereinand
 - Nur im Auswahlzustand: nicht beim Zeichnen, Platzieren, Bearbeiten, Verschieben der Ansicht oder bei der Referenzauswahl. Beim Zeichnen bleibt Tab der Wechsel Länge ↔ Winkel; in Eingabefeldern bleibt Tab unverändert.
 - Zwei Zustände (Nutzerentscheidung 30.10.2026 nach erster Sichtung): **Zustand 1** ab zwei Elementen unter dem Cursor: nur ein knapper Hinweis „3 Elemente · Tab“. **Zustand 2** nach dem ersten Tab: Liste aller Elemente (oberstes zuerst, Bezeichnung „Raum R-001 Wohnen“, „Fenster F7“, „Decke“) mit einem schmalen, abgerundeten türkisen Stab vor der Vorauswahl; das oberste ist vorgewählt.
 - In Zustand 2: Tab nächstes Element, Shift+Tab vorheriges, einmal reihum. Das vorgewählte Element bekommt eine dünne türkise Umrandung (Wandachsen-Türkis `CAD_TURQUOISE`, 2 px, ohne Füllung) in seiner tatsächlichen Form.
-- Linksklick in Zustand 2 auf ein Element im Grundriss wählt die Vorauswahl; in Zustand 1 wirkt der Klick wie bisher auf das oberste Element (auch mit Strg/Cmd zum Hinzufügen). Klicks auf Griffe der Bearbeitung bleiben unberührt.
+- Linksklick in Zustand 2 auf ein Element im Grundriss wählt die Vorauswahl (auch mit Strg/Cmd zum Hinzufügen); in Zustand 1 wirkt der Klick wie bisher auf das oberste Element. Klicks auf Griffe der Bearbeitung bleiben unberührt.
 - Bewegt sich die Maus auf eine Stelle mit anderer Elementmenge, beginnt es wieder in Zustand 1; unter einem Element oder beim Verlassen des Grundrisses verschwindet der Hinweis; Esc blendet ihn aus.
 - Ausgeblendete Ebenen zählen nicht (gleiche Formen wie die Rahmenauswahl).
 
