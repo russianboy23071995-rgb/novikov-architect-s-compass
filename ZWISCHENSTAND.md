@@ -6,7 +6,7 @@ Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem
 
 ## Gerade aktiv
 
-- Trimmen von Wänden an Dächern (L04b) in drei Schritten: K1 Rechtsklickmenü, Modify-Menü und Kopieren/Einfügen (PR513) und K2 Darstellungsreihenfolge (PR514) erledigt; als Nächstes das Trimmen selbst mit Bestätigung.
+- Trimmen von Wänden an Dächern (L04b) in drei Schritten: K1 Rechtsklickmenü, Modify-Menü und Kopieren/Einfügen (PR513) und K2 Darstellungsreihenfolge (PR514) erledigt; als Nächstes das Trimmen selbst mit Bestätigung (freigegebene Karte: docs/TRIMMEN_L04B.md).
 - Raumwerkzeug (L08): R1 Modell (PR507) R2 Werkzeug (PR508: Klick zwischen Wänden, Raumstempel, Eigenschaften) R3 Höhen (PR509) und R3b Höhenlinien (PR510: Höhe, Farbe, Linienart, Unter- und Oberkante, Fläche ab Linie, z. B. 2,30 m bis Dachhaut) erledigt. Neu: Tab-Auswahl (PR511) – liegen mehrere Elemente unter dem Cursor, erscheint ein kleiner Hinweis, Tab schaltet durch, Klick wählt; damit ist auch ein Raum unter Dach/Decke auswählbar. R4 (PR512): Raumliste unter Organisation mit Summen und CSV, Räume im IFC als IfcSpace. Raumwerkzeug damit abgeschlossen; Archicad-Import bestätigt (Flächen und Bezeichnungen stimmen); Wohnfläche nach WoFlV später (docs/ROOM_ELEMENT.md).
 
 ## Was wir gemacht haben (24.–29.10.2026)

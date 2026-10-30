@@ -1,6 +1,6 @@
 # Wiederaufnahme nach einer Windows-Neuinstallation
 
-Stand 29.10.2026. Kurzanleitung, damit du nach einem neu aufgesetzten Windows genau hier weiterarbeiten kannst.
+Stand 30.10.2026 (main nach PR514). Kurzanleitung, damit du nach einem neu aufgesetzten Windows genau hier weiterarbeiten kannst.
 
 ## Was sicher ist (liegt auf GitHub)
 
@@ -22,4 +22,11 @@ Stand 29.10.2026. Kurzanleitung, damit du nach einem neu aufgesetzten Windows ge
 3. Repository holen: in `Desktop\Claude_Ablage_Code` den Befehl `git clone https://github.com/russianboy23071995-rgb/novikov-architect-s-compass.git` ausführen.
 4. Abhängigkeiten installieren: im Repository-Ordner `bun install`.
 5. Kurz prüfen: `npm test` muss grün sein.
-6. In der Claude-App eine Sitzung mit dem Repository-Ordner öffnen und sagen: „Lies AGENTS.md, ZWISCHENSTAND.md und AUFGABENLISTE.md und mach weiter.“ Den Browser startet Claude über `.claude/launch.json`.
+6. In der Claude-App eine Sitzung mit dem Repository-Ordner öffnen und sagen: „Lies AGENTS.md, ZWISCHENSTAND.md, AUFGABENLISTE.md und docs/TRIMMEN_L04B.md und mach mit L04b weiter.“ Den Browser startet Claude über `.claude/launch.json`.
+
+## Aktueller Stand (30.10.2026)
+
+- Zuletzt erledigt: Raumwerkzeug R1–R4 (PR507–512, in Archicad bestätigt), Tab-Auswahl (PR511), K1 Rechtsklickmenü/Modify-Menü/Zwischenablage (PR513), K2 Darstellungsreihenfolge (PR514).
+- **Nächster freigegebener Auftrag: L04b – Wände an Dachflächen trimmen.** Karte mit allen Entscheidungen (Q–U) und dem Bedienablauf (Wände + Dach wählen, „Trimmen…“, Bestätigung) in `docs/TRIMMEN_L04B.md`.
+- Arbeitsweise und alle Regeln (Änderungskarte → Freigabe → Branch → Nachweis → Doku → PR → Merge → Status; Browser nur nach Rückfrage, wenn du dort klickst; Werkzeugleiste = häufige Einstellungen, Fenster = alle) stehen in `AGENTS.md`.
+- Vollsicherung vom 30.10.2026 (Projektordner, Chatverlauf, Claude-Gedächtnis, App-Daten) auf `D:NOVIKOV-Sicherung-2026-10-30` mit eigener Anleitung „So geht es weiter.md“.
