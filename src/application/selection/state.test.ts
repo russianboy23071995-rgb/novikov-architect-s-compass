@@ -247,6 +247,10 @@ test("Tab cycling: every element under a plan point, topmost first, captions, cy
   // Cycle: Tab forward once around, Shift+Tab back; same set keeps, new set restarts.
   const targets = shapesAt(shapes, { x: 2, y: 2 }, 0.05).map((s) => s.target);
   let cycle = hoverCycle(null, targets)!;
+  // State 1: only the short hint; the first Tab opens the list with the topmost pre-selected.
+  assert.equal(cycle.expanded, false);
+  cycle = stepCycle(cycle);
+  assert.equal(cycle.expanded, true);
   assert.equal(cycleTarget(cycle).id, "roof");
   cycle = stepCycle(cycle);
   assert.equal(cycleTarget(cycle).id, "slab-b");
@@ -256,6 +260,7 @@ test("Tab cycling: every element under a plan point, topmost first, captions, cy
   assert.equal(cycleTarget(stepCycle(cycle, true)).id, "room");
   assert.equal(hoverCycle(cycle, targets.slice(0, 1)), null);
   assert.equal(cycleTarget(hoverCycle(cycle, targets.slice(1))!).id, "slab-b");
+  assert.equal(hoverCycle(cycle, targets.slice(1))!.expanded, false);
   // Every registered element kind supplies a footprint and a caption (new kinds included).
   for (const kind of Object.keys(ELEMENT_KINDS) as ElementKind[])
     assert.equal(typeof planElementCaption(p, { kind, id: "missing" } as never), "string");

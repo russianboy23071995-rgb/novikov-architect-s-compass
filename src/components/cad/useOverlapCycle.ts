@@ -62,7 +62,7 @@ export function useOverlapCycle(
   return {
     /** Current pre-selection with the cursor point, or null (hint hidden). */
     state: active,
-    preselected: active ? cycleTarget(active.cycle) : null,
+    preselected: active?.cycle.expanded ? cycleTarget(active.cycle) : null,
     shapeOf,
     move(point: Point | null) {
       if (!enabled || !point) return setState((s) => (s ? null : s));

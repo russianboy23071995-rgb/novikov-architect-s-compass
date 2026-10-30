@@ -14,7 +14,7 @@ import type { HatchPatternDefinition } from "@/domain/elements/hatch/pattern";
 import { createDoubleSecondaryClick } from "@/application/input/double-secondary";
 import { AngleMeasurementOverlay } from "./AngleMeasurementOverlay";
 import type { AngleMeasurement } from "@/application/measurement/angle";
-import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
+import { CAD_SHIMMER, CAD_TURQUOISE } from "@/rendering/viewport/highlight";
 import { AreaMeasurementOverlay } from "./AreaMeasurementOverlay";
 import type { AreaMeasurement } from "@/application/measurement/area";
 import { DistanceOverlay } from "./DistanceOverlay";
@@ -26,8 +26,6 @@ import { useSelectionMarquee } from "./useSelectionMarquee";
 import { planElementCaption, planSelectionShapes } from "@/rendering/viewport/selection-shapes";
 import { useOverlapCycle } from "./useOverlapCycle";
 
-/** Highlight of the Tab pre-selection among overlapping elements (turquoise, user decision). */
-const OVERLAP_TURQUOISE = "#0d9488";
 import type { SelectionSet } from "@/application/selection/state";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
@@ -1569,81 +1567,71 @@ export function BimPlan({
         {overlap.state && (
           <g pointerEvents="none" aria-label="Übereinanderliegende Elemente">
             {(() => {
-              // Turquoise outline of the pre-selected element in its real shape (user decision).
+              // Thin turquoise outline of the pre-selected element in its real shape, no fill.
               const shape = overlap.preselected && overlap.shapeOf(overlap.preselected);
               if (!shape) return null;
               const points = shape.points.map((p) => `${p.x},${-p.y}`).join(" ");
-              return shape.closed === false ? (
-                <polyline
+              const Outline = shape.closed === false ? "polyline" : "polygon";
+              return (
+                <Outline
                   aria-label="Vorauswahl"
                   points={points}
                   fill="none"
-                  stroke={OVERLAP_TURQUOISE}
-                  strokeWidth={4}
-                  vectorEffect="non-scaling-stroke"
-                />
-              ) : (
-                <polygon
-                  aria-label="Vorauswahl"
-                  points={points}
-                  fill={OVERLAP_TURQUOISE}
-                  fillOpacity={0.08}
-                  stroke={OVERLAP_TURQUOISE}
-                  strokeWidth={3}
+                  stroke={CAD_TURQUOISE}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
                   vectorEffect="non-scaling-stroke"
                 />
               );
             })()}
             {(() => {
+              // Collapsed: one short line. Expanded (after Tab): the elements with a small bar
+              // in front of the pre-selection. Screen-constant size like the snap label.
               const s = 1 / camera.pixelsPerMetre;
               const { cycle, point } = overlap.state;
-              const rows = [
-                ...cycle.targets.map((t) => planElementCaption(project, t)),
-                "Tab: wechseln · Klick: auswählen",
-              ];
-              const x = point.x + 14 * s,
-                y = -point.y + 14 * s;
-              const width = Math.max(...rows.map((r) => r.length)) * 6.4 * s + 26 * s;
+              const rows = cycle.expanded
+                ? cycle.targets.map((t) => planElementCaption(project, t))
+                : [`${cycle.targets.length} Elemente · Tab`];
+              const x = point.x + 12 * s,
+                y = -point.y + 12 * s,
+                line = 13,
+                left = cycle.expanded ? 12 : 6;
+              const width = (Math.max(...rows.map((r) => r.length)) * 5.6 + left + 8) * s;
               return (
-                <g aria-label="Hinweis Tab-Auswahl">
+                <g aria-label={cycle.expanded ? "Tab-Auswahl" : "Hinweis mehrere Elemente"}>
                   <rect
                     x={x}
                     y={y}
                     width={width}
-                    height={(rows.length * 15 + 8) * s}
+                    height={(rows.length * line + 6) * s}
                     rx={4 * s}
                     fill="var(--background)"
                     fillOpacity={0.94}
-                    stroke={OVERLAP_TURQUOISE}
+                    stroke={CAD_TURQUOISE}
                     strokeWidth={1}
                     vectorEffect="non-scaling-stroke"
                   />
                   {rows.map((row, i) => {
-                    const chosen = i === cycle.index;
-                    const hint = i === cycle.targets.length;
+                    const chosen = cycle.expanded && i === cycle.index;
                     return (
                       <g key={i}>
                         {chosen && (
                           <rect
-                            x={x + 7 * s}
-                            y={y + (i * 15 + 7) * s}
-                            width={8 * s}
-                            height={8 * s}
-                            fill={OVERLAP_TURQUOISE}
+                            aria-label="Vorauswahl-Markierung"
+                            x={x + 5 * s}
+                            y={y + (i * line + 4.5) * s}
+                            width={3 * s}
+                            height={10 * s}
+                            rx={1.5 * s}
+                            fill={CAD_TURQUOISE}
                           />
                         )}
                         <text
-                          x={x + 20 * s}
-                          y={y + (i * 15 + 15) * s}
-                          fontSize={11 * s}
+                          x={x + left * s}
+                          y={y + (i * line + 13) * s}
+                          fontSize={10 * s}
                           fontWeight={chosen ? 600 : 400}
-                          fill={
-                            hint
-                              ? "var(--muted-foreground)"
-                              : chosen
-                                ? OVERLAP_TURQUOISE
-                                : "var(--foreground)"
-                          }
+                          fill="var(--foreground)"
                         >
                           {row}
                         </text>
