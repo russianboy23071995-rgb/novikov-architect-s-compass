@@ -298,3 +298,39 @@ test("clipboard: copy walls with openings, room and slab; paste in place into an
   assert.equal(mixed.skippedHosted, 1);
   assert.match(clipboardSummary(mixed, "kopiert"), /1 Fenster\/Türen ohne ihre Wand/);
 });
+
+import { changeDisplayOrder, canChangeDisplayOrder } from "./order.ts";
+import { addRoom as addRoomForOrder } from "../rooms/actions.ts";
+
+test("display order: front, forward, backward, back within the own kind", () => {
+  // docs/DARSTELLUNGSREIHENFOLGE.md (K2): later in the stored list = drawn on top.
+  let p = roomAcceptanceProject();
+  p = selectWorkingStorey(p, p, "eg");
+  const square = (x: number) => [
+    { x, y: 1 },
+    { x: x + 2, y: 1 },
+    { x: x + 2, y: 3 },
+  ];
+  for (const id of ["a", "b", "c"]) p = addRoomForOrder(p, { id, points: square(1) });
+  const ids = (q: typeof p) => storeyOfClip(q).rooms!.map((r) => r.id);
+  assert.deepEqual(ids(p), ["eg-wohnen", "a", "b", "c"]);
+  const a = [{ kind: "room" as const, id: "a" }];
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "front")), ["eg-wohnen", "b", "c", "a"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "forward")), ["eg-wohnen", "b", "a", "c"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "backward")), ["a", "eg-wohnen", "b", "c"]);
+  assert.deepEqual(ids(changeDisplayOrder(p, a, "back")), ["a", "eg-wohnen", "b", "c"]);
+  // A block keeps its inner order; only the own kind moves, other lists stay as they are.
+  const ab = [
+    { kind: "room" as const, id: "a" },
+    { kind: "room" as const, id: "b" },
+  ];
+  assert.deepEqual(ids(changeDisplayOrder(p, ab, "forward")), ["eg-wohnen", "c", "a", "b"]);
+  const front = changeDisplayOrder(p, ab, "front");
+  assert.equal(storeyOfClip(front).walls, storeyOfClip(p).walls);
+  // Nothing to move returns the same snapshot; the menu check says so cheaply.
+  const c = [{ kind: "room" as const, id: "c" }];
+  assert.equal(changeDisplayOrder(p, c, "front"), p);
+  assert.equal(canChangeDisplayOrder(p, c, "front"), false);
+  assert.equal(canChangeDisplayOrder(p, c, "back"), true);
+  assert.equal(canChangeDisplayOrder(p, [], "back"), false);
+});

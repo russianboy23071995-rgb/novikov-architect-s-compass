@@ -10,7 +10,9 @@ export type ContextMenuEntry =
       danger?: boolean;
       run: () => void;
     }
-  | "separator";
+  | "separator"
+  /** Group heading (not clickable), e.g. "Darstellungsreihenfolge". */
+  | { heading: string };
 
 /**
  * Right-click menu of the canvas, 2D and 3D (docs/KONTEXTMENUE.md): opens at the pointer, stays
@@ -73,6 +75,10 @@ export function CanvasContextMenu({
       {entries.map((entry, i) =>
         entry === "separator" ? (
           <div key={`sep-${i}`} role="separator" className="my-1 border-t" />
+        ) : "heading" in entry ? (
+          <p key={`head-${i}`} className="px-2 pt-1 text-[11px] text-muted-foreground">
+            {entry.heading}
+          </p>
         ) : (
           <button
             key={entry.id}
