@@ -57,6 +57,7 @@ const viewportOf = (canvas: HTMLCanvasElement) => {
 };
 
 export function BimSolidView({
+  onContextMenu,
   cornerPreview,
   placement,
   project,
@@ -100,6 +101,7 @@ export function BimSolidView({
   | "onEditCommit"
   | "interactive"
   | "cornerPreview"
+  | "onContextMenu"
 >) {
   const editSession =
     requestedEditSession && isLayerVisible(project, visibility, requestedEditSession.target.id)
@@ -540,6 +542,18 @@ export function BimSolidView({
         </svg>
       )}
       <canvas
+        onContextMenu={(event) => {
+          // Right-click menu on the picked element or on empty space (docs/KONTEXTMENUE.md).
+          event.preventDefault();
+          const current = displayed.current;
+          if (!onContextMenu || !interactive || placement || editSession || !current) return;
+          const point = current.projection.toNdc({ x: event.clientX, y: event.clientY });
+          onContextMenu(
+            pickDisplayed(current.projection, point.x, point.y),
+            event.clientX,
+            event.clientY,
+          );
+        }}
         ref={canvasRef}
         aria-label="3D walls with window openings"
         role="img"

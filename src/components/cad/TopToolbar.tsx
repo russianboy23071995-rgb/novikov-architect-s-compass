@@ -79,6 +79,9 @@ type TopToolbarProps = {
   historyTrimmed?: boolean;
   onLayers: () => void;
   onRoomList: () => void;
+  /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
+  onPipette: () => void;
+  canPipette: boolean;
   canUndoVisibility: boolean;
   canRedoVisibility: boolean;
   selectedLayer: { id: string; name: string } | null;
@@ -193,6 +196,30 @@ export function TopToolbar(props: TopToolbarProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={props.onHatchLibrary}>
                     Schraffurenverwaltung…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : item === "Modify" ? (
+              <DropdownMenu key={item}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[12px] font-normal text-muted-foreground"
+                  >
+                    Modify
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem disabled={!props.canPipette} onSelect={props.onPipette}>
+                    Parameter übernehmen (Pipette)
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem disabled title="Kommt mit dem Trimmen (L04b).">
+                    Trimmen…
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled title="Kommt mit dem Trimmen (L04b).">
+                    Trimmung aufheben
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
