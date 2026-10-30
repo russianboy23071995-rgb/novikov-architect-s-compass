@@ -1,6 +1,7 @@
 import { snapshotWithWorkingStorey } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
+import { ELEMENT_KINDS, storeyElements, type ElementKind } from "../../domain/elements/registry.ts";
 /** View setting, outside model Undo. Snapshot identity invalidates old editing sessions. */
 export function selectWorkingStorey(base: Project, current: Project, storeyId: string): Project {
   if (base !== current) throw new Error("Der Geschosskontext wurde geändert.");
@@ -19,15 +20,11 @@ export function workingStoreyForTarget(
   project: Project,
   target: { kind: string; id: string },
 ): string | null {
+  // Every registered element kind (rooms and future kinds included), not a fixed list.
+  if (!(target.kind in ELEMENT_KINDS)) return null;
+  const kind = target.kind as ElementKind;
   return (
-    project.storeys.find((s) =>
-      target.kind === "wall"
-        ? s.walls.some((w) => w.id === target.id)
-        : target.kind === "window"
-          ? s.windows.some((w) => w.id === target.id)
-          : target.kind === "door"
-            ? (s.doors ?? []).some((d) => d.id === target.id)
-            : false,
-    )?.id ?? null
+    project.storeys.find((s) => [...storeyElements(s, kind)].some((e) => e.id === target.id))?.id ??
+    null
   );
 }

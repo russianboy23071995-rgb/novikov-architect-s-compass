@@ -8,6 +8,17 @@ import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
 import { slabLevels } from "../../domain/elements/slab/model.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
+import {
+  roomClearHeights,
+  roomHeightLineResults,
+  storeyCeilingSources,
+} from "../../domain/elements/room/heights.ts";
+import type { HeightLine } from "../../domain/elements/room/height-line.ts";
+
+/** ASCII property name part of a height line: "2.30 m OuterSkin FinishedFloor". */
+function heightLineName(line: Pick<HeightLine, "height" | "lower" | "upper">) {
+  return `${line.height.toFixed(2)} m ${line.upper === "outerSkin" ? "OuterSkin" : "Underside"} ${line.lower === "rawFloor" ? "RawFloor" : "FinishedFloor"}`;
+}
 
 /** IFC4 IfcDoorTypeOperationEnum for a single swing leaf. Facing the swing side (door +Y),
  * the wall start lies left when the leaf opens to the left of the wall direction.
@@ -414,6 +425,72 @@ export async function writeIfc(
         ["TopCut", `IFCLABEL(${text(roof.topCut)})`],
       ]);
     }
+    // Rooms as IfcSpace (docs/ROOM_ELEMENT.md, R4, decision M): outline extruded from the raw
+    // floor to the storey height, Name = number, LongName = name, aggregated by the storey
+    // (spaces are decomposition, not containment). Clear heights and height line areas from the
+    // storey's own slabs and roofs go along as quantities and NOVIKOV properties.
+    const spaces: string[] = [];
+    const ceilings = floor.rooms?.length ? storeyCeilingSources(floor) : [];
+    for (const room of floor.rooms ?? []) {
+      const ring = validateSimplePolygon(room.points);
+      const points = ring.valid && ring.signedArea < 0 ? [...room.points].reverse() : room.points;
+      const height = floor.height;
+      const shape = typeof height === "number" ? body(0, 0, height, points) : "$";
+      const spaceRef = add(
+        "IFCSPACE",
+        `${await guid("space", room.id)},$,${label(room.number)},$,$,${placement(storeyPlacement)},${shape},${room.name ? label(room.name) : "$"},.ELEMENT.,.INTERNAL.,${room.floorBuildUp === undefined ? "$" : real(room.floorBuildUp)}`,
+      );
+      spaces.push(spaceRef);
+      const area = Math.abs(ring.valid ? ring.signedArea : 0);
+      const clear = roomClearHeights(room, ceilings);
+      const quantities = [
+        add("IFCQUANTITYAREA", `'NetFloorArea',$,$,${real(area)},$`),
+        add("IFCQUANTITYAREA", `'GrossFloorArea',$,$,${real(area)},$`),
+        ...(typeof height === "number"
+          ? [add("IFCQUANTITYLENGTH", `'Height',$,$,${real(height)},$`)]
+          : []),
+        ...(clear.max === null
+          ? []
+          : [add("IFCQUANTITYLENGTH", `'FinishCeilingHeight',$,$,${real(clear.max)},$`)]),
+      ];
+      const qto = add(
+        "IFCELEMENTQUANTITY",
+        `${await guid("space-quantities", room.id)},$,'Qto_SpaceBaseQuantities',$,$,(${quantities.join(",")})`,
+      );
+      add(
+        "IFCRELDEFINESBYPROPERTIES",
+        `${await guid("space-quantity-relation", room.id)},$,$,$,(${spaceRef}),${qto}`,
+      );
+      await properties(spaceRef, "room", room.id, [
+        ["Number", `IFCLABEL(${label(room.number)})`],
+        ["RoomName", `IFCLABEL(${label(room.name)})`],
+        ...(room.floorBuildUp === undefined
+          ? []
+          : ([["FloorBuildUp", `IFCLENGTHMEASURE(${real(room.floorBuildUp)})`]] as [
+              string,
+              string,
+            ][])),
+        ...(clear.min === null
+          ? []
+          : ([
+              ["ClearHeightMin", `IFCLENGTHMEASURE(${real(clear.min)})`],
+              ["ClearHeightMax", `IFCLENGTHMEASURE(${real(clear.max!)})`],
+            ] as [string, string][])),
+        ["AreaWithoutHeightSource", `IFCAREAMEASURE(${real(clear.openArea)})`],
+        ...roomHeightLineResults(room, ceilings).flatMap(
+          (r) =>
+            [
+              [`AreaFrom ${heightLineName(r.line)}`, `IFCAREAMEASURE(${real(r.areaAbove)})`],
+              [`ShareFrom ${heightLineName(r.line)}`, `IFCRATIOMEASURE(${real(r.share)})`],
+            ] as [string, string][],
+        ),
+      ]);
+    }
+    if (spaces.length)
+      add(
+        "IFCRELAGGREGATES",
+        `${await guid("space-aggregate", floor.id)},$,$,$,${storey},(${spaces.join(",")})`,
+      );
     // IFC requires a non-empty set; empty projects still retain their spatial hierarchy.
     if (elements.length)
       add(

@@ -8,7 +8,7 @@ Ziel des Nutzers: ein „hochintelligentes“ Raumwerkzeug, das Höhenlinien ein
 | R2  | Werkzeug „Raum“ (Polygon, Rechteck, Kontur, Klick zwischen Wänden), Leiste und Einstellungsfenster, Raumstempel, Eigenschaften, Bearbeitung | erledigt |
 | R3  | Höhenfeld (lichte Höhe), Höhenlinien (Standard 1,00/2,00 m), Grundfläche je Höhenzone                                                       | erledigt |
 | R3b | Höhenlinien als eigene Einträge: Höhe, Farbe, Linienart, Unter- und Oberkante; Fläche ab Linie und Anteil                                    | erledigt |
-| R4  | Raumliste als Abfrage, IfcSpace                                                                                                             | offen    |
+| R4  | Raumliste als Abfrage, IfcSpace                                                                                                             | erledigt |
 
 ## Nutzerentscheidungen (29.10.2026)
 
@@ -75,3 +75,18 @@ Grenzen: keine Bewertung nach Landesbauordnung (Vollgeschoss/Dachgeschoss) – n
 Nachweis: Tests in `src/application/drawing/actions.test.ts` (lichte Höhe/offene Fläche; Standardlinien mit Fläche, Anteil, Lage; 2,30 m bis Dachhaut mit Dachstärke 0,20/cos 30° und Deckenoberkante; Fußbodenaufbau verschiebt nur Linien „OK Fußboden“; Linie nur an der Deckenkante; Hinzufügen, Grenze 10, Standarderkennung; feste Farbe und doppelte IDs abgelehnt; Planszene und Kontextmenü; ein Undo-Schritt; Standard wiederherstellen) und `src/interop/project-file/load.test.ts` (Schema 34, Prüfregeln, Migration 33 → 34, 32er/33er Dateien, untergeschobene Einträge). 1367 Tests grün, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (30.10.2026, Testdatei aus R3 als Schema 33 geladen): Leiste zeigt „Höhenlinien: 1,00 · 2,00 …“, Knopf öffnet „Raum-Einstellungen“ im Abschnitt Höhenlinien; „Höhenlinie hinzufügen“ ergibt 2,50, geändert auf 2,30, Oberkante Außenkante Dachhaut, durchgezogen, rot; Leiste „1,00 · 2,00 · 2,30 Dachhaut“. Klick in den Raum: Linie rot durchgezogen, 1,00/2,00 blau gestrichelt; Eigenschaften „ab 1,00 m: 33,63 m² (75,2 %) · ab 2,00 m: 20,19 m² (45,2 %) · ab 2,30 m (bis Dachhaut): 19,26 m² (43,1 %)“ – von Hand nachgerechnet (Linie bei y = 2,718 m; 1,782 · 7,76 + 0,70 · 7,76 = 19,26 m²). Fenster „Höhenlinien R-001“: Unterkante auf Rohfußboden ändert die Linie, ein Undo stellt sie wieder her. Keine Konsolenfehler.
+
+## Teil R4: Raumliste und IfcSpace (30.10.2026)
+
+Entscheidungen M–P wie empfohlen. Wohnflächenberechnung mit Abzügen/Zuschlägen (Fenster-/Türnischen, Schornstein u. a.) folgt später als eigener Schritt (N35).
+
+- Abfrage `roomSchedule` (`src/application/rooms/schedule.ts`): je Geschoss alle Räume (nach Nummer sortiert) mit Nummer, Name, Grundfläche, Fußbodenaufbau, lichter Höhe von–bis, je Höhenlinie Fläche ab Linie und Anteil, Fläche „Höhe offen“; Summen je Geschoss und Projekt. Eine Spalte je vorkommender Linie (gleiche Höhe mit gleicher Unter-/Oberkante); fehlt einem Raum eine Linie, bleibt das Feld leer. Gedacht auch für spätere Text-/KI-Abfragen.
+- `roomScheduleCsv`: Semikolon, Dezimalkomma, UTF-8 mit BOM (Excel öffnet Umlaute richtig), Summenzeilen je Geschoss und Projekt.
+- Fenster „Raumliste“ über Menü *Organisation → Raumliste*: Tabelle nach Geschoss gruppiert mit Summen, Klick oder Enter auf eine Zeile wechselt ins Geschoss und wählt den Raum; „Als CSV speichern“. Die Liste ändert das Modell nie.
+- Geschosszuordnung eines gewählten Elements (`workingStoreyForTarget`) läuft jetzt über das Element-Register statt über eine feste Liste (Wand, Fenster, Tür): Räume und künftige Objektarten anderer Geschosse werden gefunden; Decken, Dächer, Linien usw. anderer Geschosse wechseln bei Auswahl damit ebenfalls ins richtige Geschoss.
+- IFC: je Raum ein **IfcSpace** (Name = Nummer, LongName = Name, `.ELEMENT.`, `.INTERNAL.`, ElevationWithFlooring = Fußbodenaufbau), Körper = Umriss vom Rohfußboden bis zur Geschosshöhe (Entscheidung M; ohne Geschosshöhe kein Körper), über `IfcRelAggregates` dem Geschoss zugeordnet. `Qto_SpaceBaseQuantities`: NetFloorArea, GrossFloorArea (beide Grundfläche), Height (Geschosshöhe), FinishCeilingHeight (größte lichte Höhe). NOVIKOV-Eigenschaften: Number, RoomName, FloorBuildUp, ClearHeightMin/Max, AreaWithoutHeightSource, je Höhenlinie `AreaFrom …` und `ShareFrom …` (z. B. „AreaFrom 2.30 m OuterSkin FinishedFloor“).
+- Archicad-Prüfdatei: `benchmarks/room-ifc-acceptance.ts`, `scripts/generate-room-acceptance-ifc.mjs` → `NOVIKOV-Raum-Test.ifc` (Dach-Abnahmehaus; EG „Wohnen“ R-001 mit Aufbau 0,12 m, lichte Höhe 2,68 m; OG „Dachraum“ R-002 unter dem Pultdach mit zusätzlicher Linie 2,30 m bis Dachhaut).
+
+Grenzen: Raumkörper im IFC ist ein Quader bis Geschosshöhe (unter der Dachschräge abgeschnittener Körper später); kein 3D-Raumkörper in der Ansicht; keine WoFlV/Landesbauordnung. Archicad-Import durch den Nutzer steht aus.
+
+Nachweis: Test in `src/lib/bim/ifc.test.ts` (Abfrage mit Räumen, Spalten, lichten Höhen 2,68 m, Summen; Geschosszuordnung über das Register; CSV mit BOM, Dezimalkomma, leeren Feldern und Summen; IfcSpace mit Nummer/Name/Aufbau, Zuordnung zum Geschoss, Mengen und Höhenwerten; ohne Räume kein IfcSpace). 1369 Tests grün, 14-Modell-Hash unverändert.

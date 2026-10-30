@@ -2,6 +2,7 @@ import { RoomSettingsPanel, RoomToolFields } from "./RoomToolFields";
 import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
+import { RoomListPanel } from "./RoomListPanel";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -138,6 +139,7 @@ export function CadWorkspace({
   const [lineCreatorOpen, setLineCreatorOpen] = useState(false);
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
+  const [roomListOpen, setRoomListOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
@@ -1030,6 +1032,12 @@ export function CadWorkspace({
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
       />
+      <RoomListPanel
+        open={roomListOpen}
+        onOpenChange={setRoomListOpen}
+        project={project}
+        onSelectRoom={(id) => selectElement({ kind: "room", id })}
+      />
       <RoomSettingsPanel
         open={roomSettingsOpen}
         section={roomSettingsSection}
@@ -1161,6 +1169,12 @@ export function CadWorkspace({
               setDemandOpen(false);
               setModelError("");
               setLayersOpen(true);
+            }}
+            onRoomList={() => {
+              cancelInteraction();
+              setDemandOpen(false);
+              setModelError("");
+              setRoomListOpen(true);
             }}
             mode={mode}
             layout={layout}

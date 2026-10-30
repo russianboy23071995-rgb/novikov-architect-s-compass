@@ -261,3 +261,71 @@ test("adding unrelated walls does not change existing IDs; window placement is e
   assert.ok(after.includes("IFCRATIOMEASURE(0.6)"));
   assert.ok(after.includes("IFCLENGTHMEASURE(1.)"));
 });
+
+import { roomAcceptanceProject } from "../../../benchmarks/room-ifc-acceptance.ts";
+import { roomSchedule, roomScheduleCsv } from "../../application/rooms/schedule.ts";
+import { workingStoreyForTarget } from "../../application/storeys/working-storey.ts";
+
+test("rooms R4: room list query, CSV and IfcSpace per storey", async () => {
+  // docs/ROOM_ELEMENT.md, R4: EG "Wohnen" (floor build-up 0,12) under the EG ceiling, OG
+  // "Dachraum" under the pitched roof with an extra line 2,30 m to the outer roof skin.
+  const p = roomAcceptanceProject();
+  const schedule = roomSchedule(p);
+  assert.deepEqual(
+    schedule.storeys.map((s) => [s.storeyId, s.rooms.map((r) => [r.number, r.name])]),
+    [
+      ["eg", [["R-001", "Wohnen"]]],
+      ["og", [["R-002", "Dachraum"]]],
+    ],
+  );
+  assert.deepEqual(
+    schedule.columns.map((c) => c.label),
+    ["ab 1,00 m", "ab 2,00 m", "ab 2,30 m (bis Dachhaut)"],
+  );
+  const [wohnen] = schedule.storeys[0]!.rooms;
+  const [dach] = schedule.storeys[1]!.rooms;
+  // EG: 3,00 storey − 0,20 ceiling − 0,12 build-up = 2,68 clear everywhere.
+  assert.ok(Math.abs(wohnen!.clearMin! - 2.68) < 1e-9 && Math.abs(wohnen!.clearMax! - 2.68) < 1e-9);
+  assert.equal(wohnen!.floorBuildUp, 0.12);
+  assert.equal(Object.keys(wohnen!.lines).length, 2);
+  assert.ok(dach!.clearMin! > 2 && dach!.clearMax! > dach!.clearMin!);
+  assert.equal(Object.keys(dach!.lines).length, 3);
+  assert.ok(Math.abs(schedule.area - wohnen!.area - dach!.area) < 1e-9);
+  // Row selection reaches rooms of any storey (registry-based storey lookup).
+  assert.equal(workingStoreyForTarget(p, { kind: "room", id: "og-dachraum" }), "og");
+  assert.equal(workingStoreyForTarget(p, { kind: "room", id: "eg-wohnen" }), "eg");
+  assert.equal(workingStoreyForTarget(p, { kind: "unknown", id: "eg-wohnen" }), null);
+  // CSV for Excel: BOM, semicolons, decimal comma, empty cells for lines a room does not have.
+  const csv = roomScheduleCsv(schedule);
+  assert.ok(csv.startsWith("﻿Geschoss;Nr.;Name;Grundfläche m²;"));
+  const lines = csv.trim().split("\r\n");
+  assert.equal(lines.length, 1 + 2 + 2 + 1);
+  const eg = lines[1]!.split(";");
+  assert.deepEqual(eg.slice(1, 3), ["R-001", "Wohnen"]);
+  assert.equal(eg[4], "0,12");
+  assert.equal(eg[5], "2,68");
+  assert.deepEqual(eg.slice(11, 13), ["", ""]);
+  assert.ok(lines.at(-1)!.startsWith("Summe Projekt;;;"));
+  // IFC: one IfcSpace per room, Name = number, LongName = name, ElevationWithFlooring = build-up,
+  // aggregated by its storey, with Qto_SpaceBaseQuantities and the NOVIKOV height values.
+  const ifc = await exportIfc(p, new Date("2026-10-30T12:00:00Z"));
+  const spaces = [
+    ...ifc.matchAll(
+      /^#(\d+)=IFCSPACE\('[^']+',\$,'([^']*)',\$,\$,#\d+,#\d+,'([^']*)',\.ELEMENT\.,\.INTERNAL\.,([^)]*)\);$/gm,
+    ),
+  ];
+  assert.deepEqual(
+    spaces.map((m) => [m[2], m[3], m[4]]),
+    [
+      ["R-001", "Wohnen", "0.12"],
+      ["R-002", "Dachraum", "$"],
+    ],
+  );
+  for (const space of spaces)
+    assert.match(ifc, new RegExp(`IFCRELAGGREGATES\\([^;]*,#\\d+,\\(#${space[1]}\\)\\);`));
+  assert.equal([...ifc.matchAll(/'Qto_SpaceBaseQuantities'/g)].length, 2);
+  assert.match(ifc, /'AreaFrom 2\.30 m OuterSkin FinishedFloor',\$,IFCAREAMEASURE\(/);
+  assert.match(ifc, /'ClearHeightMin',\$,IFCLENGTHMEASURE\(2\.6(8|79)/);
+  // Without rooms nothing changes in the export.
+  assert.doesNotMatch(await exportIfc(createProject("leer", "eg")), /IFCSPACE/);
+});

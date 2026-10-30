@@ -78,6 +78,7 @@ type TopToolbarProps = {
   /** Older undo steps were dropped to stay within the history memory budget. */
   historyTrimmed?: boolean;
   onLayers: () => void;
+  onRoomList: () => void;
   canUndoVisibility: boolean;
   canRedoVisibility: boolean;
   selectedLayer: { id: string; name: string } | null;
@@ -246,6 +247,7 @@ export function TopToolbar(props: TopToolbarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
