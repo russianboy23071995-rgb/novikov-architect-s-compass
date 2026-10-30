@@ -11,6 +11,11 @@ import {
   type ClipboardContent,
 } from "@/application/clipboard/clipboard";
 import { planElementCaption } from "@/rendering/viewport/selection-shapes";
+import {
+  canChangeDisplayOrder,
+  changeDisplayOrder,
+  DISPLAY_ORDER_LABELS,
+} from "@/application/elements/order";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -795,12 +800,26 @@ export function CadWorkspace({
         disabled: later("dem Trimmen (L04b)"),
         run: () => {},
       },
-      {
-        id: "order",
-        label: "Darstellungsreihenfolge",
-        disabled: later("der Darstellungsreihenfolge (K2)"),
-        run: () => {},
-      },
+      { heading: "Darstellungsreihenfolge" },
+      ...(["front", "forward", "backward", "back"] as const).map((step) => ({
+        id: `order-${step}`,
+        label: DISPLAY_ORDER_LABELS[step],
+        disabled:
+          none ||
+          (!canEditSelection && "Gerade nicht möglich.") ||
+          (!canChangeDisplayOrder(project, selections, step) && "Liegt schon so."),
+        run: () => {
+          try {
+            const next = changeDisplayOrder(project, selections, step);
+            if (next === project) return;
+            dispatchEditing({ type: "project", project: next });
+            showNotice(DISPLAY_ORDER_LABELS[step]);
+            setModelError("");
+          } catch (error) {
+            setModelError(error instanceof Error ? error.message : "Reihenfolge nicht änderbar.");
+          }
+        },
+      })),
     ];
   };
   const openContextMenu = (target: NonNullable<Selection> | null, x: number, y: number) => {
