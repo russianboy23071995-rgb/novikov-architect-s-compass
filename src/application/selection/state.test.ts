@@ -157,3 +157,106 @@ test("frame works for thin segments and arbitrary future straight-edge shape ada
   assert.equal(enclosedTargets(shapes, { x: 1, y: 1 }, { x: 1, y: 3 }).length, 1);
   assert.equal(enclosedTargets(shapes, { x: 0, y: 0 }, { x: 2, y: 2 }).length, 0);
 });
+
+import { shapesAt, planElementCaption } from "../../rendering/viewport/selection-shapes.ts";
+import { hoverCycle, stepCycle, cycleTarget } from "./cycle.ts";
+import { addSlab } from "../slabs/actions.ts";
+import { addRoof } from "../roofs/actions.ts";
+import { addRoom } from "../rooms/actions.ts";
+import { setStoreyHeight } from "../storeys/actions.ts";
+import { SLAB_DEFAULTS } from "../../domain/elements/slab/model.ts";
+import { ELEMENT_KINDS, type ElementKind } from "../../domain/elements/registry.ts";
+
+test("Tab cycling: every element under a plan point, topmost first, captions, cycle", () => {
+  // docs/TAB_AUSWAHL.md: room under slab under roof, wall with window, line over hatch.
+  let p = createProject("tab", "eg");
+  p = setStoreyHeight(p, p, { projectId: "tab", storeyId: "eg", height: 3 });
+  const square = [
+    { x: 0, y: 0 },
+    { x: 6, y: 0 },
+    { x: 6, y: 4 },
+    { x: 0, y: 4 },
+  ];
+  p = addRoom(p, { id: "room", points: square, name: "Wohnen" });
+  p = addSlab(p, { id: "slab-a", points: square, ...SLAB_DEFAULTS });
+  p = addSlab(p, { id: "slab-b", points: square, ...SLAB_DEFAULTS });
+  p = addRoof(p, {
+    id: "roof",
+    points: square,
+    referenceLine: { start: { x: 0, y: 0 }, end: { x: 6, y: 0 } },
+    rise: "left",
+    referenceHeight: 1,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+  p = addWall(p, {
+    id: "w",
+    start: { x: 0, y: 6 },
+    end: { x: 6, y: 6 },
+    thickness: 0.3,
+    height: 2.5,
+  });
+  p = addWindow(p, {
+    id: "f",
+    wallId: "w",
+    width: 1,
+    height: 1,
+    sillHeight: 1,
+    position: 0.5,
+    mark: "F7",
+  });
+  p = createDrawing(p, p, "h", {
+    kind: "hatch",
+    points: [
+      { x: 8, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 2 },
+    ],
+    fill: defaultHatchFill,
+  });
+  p = createDrawing(p, p, "l", {
+    kind: "line",
+    points: [
+      { x: 8, y: 0.5 },
+      { x: 10, y: 0.5 },
+    ],
+    lineKind: "line",
+    appearance: defaultLineAppearance,
+  });
+  const shapes = planSelectionShapes(p);
+  // Slabs, roofs and rooms now take part in box selection as well.
+  for (const kind of ["slab", "roof", "room"] as const)
+    assert.ok(shapes.some((s) => s.target.kind === kind));
+  const ids = (point: { x: number; y: number }) =>
+    shapesAt(shapes, point, 0.05).map((s) => s.target.id);
+  assert.deepEqual(ids({ x: 2, y: 2 }), ["roof", "slab-b", "slab-a", "room"]);
+  assert.deepEqual(ids({ x: 3, y: 6 }), ["f", "w"]);
+  assert.deepEqual(ids({ x: 1, y: 6 }), ["w"]);
+  assert.deepEqual(ids({ x: 9.5, y: 0.52 }), ["l", "h"]);
+  assert.deepEqual(ids({ x: 20, y: 20 }), []);
+  assert.deepEqual(ids({ x: NaN, y: 0 }), []);
+  // Outline tolerance: just outside the room still counts within the pick distance.
+  assert.ok(ids({ x: 6.03, y: 2 }).includes("room"));
+  assert.ok(!ids({ x: 6.2, y: 2 }).includes("room"));
+  // Captions: kind plus number or mark.
+  assert.equal(planElementCaption(p, { kind: "room", id: "room" }), "Raum R-001 Wohnen");
+  assert.equal(planElementCaption(p, { kind: "window", id: "f" }), "Fenster F7");
+  assert.equal(planElementCaption(p, { kind: "slab", id: "slab-a" }), "Decke");
+  // Cycle: Tab forward once around, Shift+Tab back; same set keeps, new set restarts.
+  const targets = shapesAt(shapes, { x: 2, y: 2 }, 0.05).map((s) => s.target);
+  let cycle = hoverCycle(null, targets)!;
+  assert.equal(cycleTarget(cycle).id, "roof");
+  cycle = stepCycle(cycle);
+  assert.equal(cycleTarget(cycle).id, "slab-b");
+  assert.equal(hoverCycle(cycle, [...targets]), cycle);
+  for (let i = 0; i < 3; i++) cycle = stepCycle(cycle);
+  assert.equal(cycleTarget(cycle).id, "roof");
+  assert.equal(cycleTarget(stepCycle(cycle, true)).id, "room");
+  assert.equal(hoverCycle(cycle, targets.slice(0, 1)), null);
+  assert.equal(cycleTarget(hoverCycle(cycle, targets.slice(1))!).id, "slab-b");
+  // Every registered element kind supplies a footprint and a caption (new kinds included).
+  for (const kind of Object.keys(ELEMENT_KINDS) as ElementKind[])
+    assert.equal(typeof planElementCaption(p, { kind, id: "missing" } as never), "string");
+});

@@ -23,7 +23,11 @@ import { PlanSceneRun } from "./PlanSceneRun";
 import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
 import type { GeometryPreview } from "@/domain/project/geometry-scope";
 import { useSelectionMarquee } from "./useSelectionMarquee";
-import { planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import { planElementCaption, planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import { useOverlapCycle } from "./useOverlapCycle";
+
+/** Highlight of the Tab pre-selection among overlapping elements (turquoise, user decision). */
+const OVERLAP_TURQUOISE = "#0d9488";
 import type { SelectionSet } from "@/application/selection/state";
 import type { ToolInteraction } from "@/application/tools/interaction";
 import { drawingWallVisibility } from "@/rendering/viewport/layer-display";
@@ -744,6 +748,18 @@ export function BimPlan({
       planSelectionShapes(project).filter((s) => isLayerVisible(project, visibility, s.target.id)),
     [project, visibility],
   );
+  // Tab cycling through overlapping elements (docs/TAB_AUSWAHL.md); select tool only.
+  const overlap = useOverlapCycle(
+    interactive &&
+      !placement &&
+      !drawing &&
+      !editSession &&
+      !selecting &&
+      !pan &&
+      !referenceSelection?.selecting,
+    shapes,
+    camera.pixelsPerMetre,
+  );
   const marquee = useSelectionMarquee(
     interactive && !placement && !drawing && !editSession && !selecting && !pan,
     visibility ?? project,
@@ -851,6 +867,15 @@ export function BimPlan({
           return;
         }
         if ((event.target as Element).closest("[data-reference-panel]")) return;
+        // Overlapping elements: the click selects the Tab pre-selection, not the topmost one.
+        const chosen = overlap.preselected;
+        if (chosen && (event.target as Element).closest("[data-plan-pick]")) {
+          event.preventDefault();
+          event.stopPropagation();
+          overlap.clear();
+          latestSelect.current(chosen.kind, chosen.id).onClick(event);
+          return;
+        }
         if (selecting && referenceSelection && !navigationClick.current && !pan) {
           event.preventDefault();
           event.stopPropagation();
@@ -892,7 +917,8 @@ export function BimPlan({
           );
           return;
         }
-        if (pan || selecting) return;
+        if (pan || selecting) return overlap.clear();
+        overlap.move(gripDrag.current ? null : rawPoint(event));
         if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
         const drawingPoint = draggedPoint(event)?.point ?? rawPoint(event);
         if (endpointSnap || editSession) setHover(drawingPoint);
@@ -913,6 +939,7 @@ export function BimPlan({
         }
       }}
       onPointerLeave={() => {
+        overlap.clear();
         if (selecting) return;
         setHover(null);
         setEditPointer(null);
@@ -1539,6 +1566,95 @@ export function BimPlan({
               </text>
             </g>
           )}
+        {overlap.state && (
+          <g pointerEvents="none" aria-label="Übereinanderliegende Elemente">
+            {(() => {
+              // Turquoise outline of the pre-selected element in its real shape (user decision).
+              const shape = overlap.preselected && overlap.shapeOf(overlap.preselected);
+              if (!shape) return null;
+              const points = shape.points.map((p) => `${p.x},${-p.y}`).join(" ");
+              return shape.closed === false ? (
+                <polyline
+                  aria-label="Vorauswahl"
+                  points={points}
+                  fill="none"
+                  stroke={OVERLAP_TURQUOISE}
+                  strokeWidth={4}
+                  vectorEffect="non-scaling-stroke"
+                />
+              ) : (
+                <polygon
+                  aria-label="Vorauswahl"
+                  points={points}
+                  fill={OVERLAP_TURQUOISE}
+                  fillOpacity={0.08}
+                  stroke={OVERLAP_TURQUOISE}
+                  strokeWidth={3}
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })()}
+            {(() => {
+              const s = 1 / camera.pixelsPerMetre;
+              const { cycle, point } = overlap.state;
+              const rows = [
+                ...cycle.targets.map((t) => planElementCaption(project, t)),
+                "Tab: wechseln · Klick: auswählen",
+              ];
+              const x = point.x + 14 * s,
+                y = -point.y + 14 * s;
+              const width = Math.max(...rows.map((r) => r.length)) * 6.4 * s + 26 * s;
+              return (
+                <g aria-label="Hinweis Tab-Auswahl">
+                  <rect
+                    x={x}
+                    y={y}
+                    width={width}
+                    height={(rows.length * 15 + 8) * s}
+                    rx={4 * s}
+                    fill="var(--background)"
+                    fillOpacity={0.94}
+                    stroke={OVERLAP_TURQUOISE}
+                    strokeWidth={1}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  {rows.map((row, i) => {
+                    const chosen = i === cycle.index;
+                    const hint = i === cycle.targets.length;
+                    return (
+                      <g key={i}>
+                        {chosen && (
+                          <rect
+                            x={x + 7 * s}
+                            y={y + (i * 15 + 7) * s}
+                            width={8 * s}
+                            height={8 * s}
+                            fill={OVERLAP_TURQUOISE}
+                          />
+                        )}
+                        <text
+                          x={x + 20 * s}
+                          y={y + (i * 15 + 15) * s}
+                          fontSize={11 * s}
+                          fontWeight={chosen ? 600 : 400}
+                          fill={
+                            hint
+                              ? "var(--muted-foreground)"
+                              : chosen
+                                ? OVERLAP_TURQUOISE
+                                : "var(--foreground)"
+                          }
+                        >
+                          {row}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              );
+            })()}
+          </g>
+        )}
         {selecting && (
           <g pointerEvents="none">
             <rect

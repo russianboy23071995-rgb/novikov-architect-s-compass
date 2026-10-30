@@ -108,6 +108,7 @@ export function PlanSceneContent({
   const outlines = scene.outlines;
   const selectProps = (kind: ElementTarget["kind"], id: string) => ({
     role: "button",
+    "data-plan-pick": "",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
     "aria-pressed": selectedIds.has(id),
