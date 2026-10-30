@@ -82,6 +82,10 @@ type TopToolbarProps = {
   /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
   onPipette: () => void;
   canPipette: boolean;
+  onTrim: () => void;
+  canTrim: boolean;
+  onUntrim: () => void;
+  canUntrim: boolean;
   canUndoVisibility: boolean;
   canRedoVisibility: boolean;
   selectedLayer: { id: string; name: string } | null;
@@ -215,10 +219,14 @@ export function TopToolbar(props: TopToolbarProps) {
                     Parameter übernehmen (Pipette)
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem disabled title="Kommt mit dem Trimmen (L04b).">
+                  <DropdownMenuItem
+                    disabled={!props.canTrim}
+                    title={props.canTrim ? undefined : "Wände und genau ein Dach auswählen."}
+                    onSelect={props.onTrim}
+                  >
                     Trimmen…
                   </DropdownMenuItem>
-                  <DropdownMenuItem disabled title="Kommt mit dem Trimmen (L04b).">
+                  <DropdownMenuItem disabled={!props.canUntrim} onSelect={props.onUntrim}>
                     Trimmung aufheben
                   </DropdownMenuItem>
                 </DropdownMenuContent>

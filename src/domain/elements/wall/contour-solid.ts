@@ -8,6 +8,7 @@ import {
 } from "../../../geometry/solids/profile-openings.ts";
 import { coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
 import { trimExtrusionBelowPlane } from "../../../geometry/solids/plane-trim.ts";
+import { localTrimPlane } from "./roof-trim.ts";
 
 function deriveWallContourSolid(
   wall: Wall,
@@ -57,11 +58,7 @@ function deriveWallContourSolid(
     }));
   // Roof trim (L04b): the plane in local coordinates; the body is raised to the highest plane
   // point over the profile and cut there (decision R: the wall reaches up to the roof).
-  const trim = wall.trimPlane && {
-    a: wall.trimPlane.a + wall.trimPlane.b * body.start.x + wall.trimPlane.c * body.start.y,
-    b: wall.trimPlane.b * ux + wall.trimPlane.c * uy,
-    c: -wall.trimPlane.b * uy + wall.trimPlane.c * ux,
-  };
+  const trim = wall.trimPlane && localTrimPlane(wall.trimPlane, body.start, ux, uy);
   const height = trim
     ? Math.max(...profile.map((p) => trim.a + trim.b * p.x + trim.c * p.y))
     : wall.height;

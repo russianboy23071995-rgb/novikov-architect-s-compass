@@ -45,3 +45,14 @@ Technische Ansatzpunkte: Wandkörper `src/domain/elements/wall/contour-solid.ts`
 Nachweis: Tests in `src/domain/elements/wall/heights.test.ts` (freistehende Wand unter 30°-Dach: Ebene, Volumen exakt 0,2 · 6 · (2 + 3·tan 30°), Oberkante 2 + 6·tan 30°; Fenster über gespeicherter Höhe erlaubt, über Dach abgelehnt; Dach verschieben geprüft und neu berechnet; Dach unter Wandfuß und unbekanntes Dach abgelehnt; Speichern nur mit Verweis, Laden identisch; Schema-34-Dateien; Aufheben; Dach löschen; EG-Giebel am OG-Dach mit 3,50 m Ebenenhöhe). 1373 Tests grün, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (31.10.2026): Dach-Prüfhaus, alle OG-Wände an „og-dach“ getrimmt (über die Aktion, da die Bedienung erst in Teil 2 kommt): Traufwand 2,55–2,63 m, Giebel schräg 2,59–4,20 m, Rückwand auf 4,16–4,24 m hochgezogen; in 3D reicht der Giebel lückenlos bis unter die Dachfläche. Keine Konsolenfehler.
+
+## Teil 2 umgesetzt (31.10.2026): Bedienung, IFC, Archicad-Datei
+
+- „Trimmen…“ im Rechtsklick- und Modify-Menü, aktiv bei Wänden und genau einem Dach (sonst ausgegraut mit Grund). Bestätigungsfenster „n Wände an Dach ‚…' trimmen?“ [Trimmen]/[Abbrechen]; danach Hinweis „n Wände getrimmt“, ein Undo-Schritt.
+- „Trimmung aufheben“ im Rechtsklick- und Modify-Menü (aktiv bei ausgewählten getrimmten Wänden) und in den Wand-Eigenschaften („Getrimmt an: Dach … · Oberkante von–bis m“ mit Knopf).
+- IFC: getrimmte Wände als `IFCFACETEDBREP` im Wandkoordinatensystem, derselbe Schnitt wie in 3D (`localTrimPlane`, `trimExtrusionBelowPlane`); Öffnungen weiterhin als `IfcOpeningElement`; Eigenschaften `TrimmedAtRoof`, `TrimmedTopMin/Max`. Ungetrimmte Wände bleiben Extrusionen.
+- Archicad-Prüfdatei: `benchmarks/trim-ifc-acceptance.ts`, `scripts/generate-trim-acceptance-ifc.mjs` → `NOVIKOV-Trimm-Test.ifc` (Dach-Prüfhaus, alle OG-Wände an „og-dach“ getrimmt).
+
+Nachweis: Test in `src/lib/bim/ifc.test.ts` (alle Eckpunkte jeder getrimmten, verbundenen Wand unter ihrer Ebene, Körper reicht bis an die Ebene, Volumen > 0; IFC: B-rep je getrimmter Wand plus Dach, Trimmangaben, EG-Wand weiter SweptSolid). 1374 Tests grün, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (31.10.2026): Dach-Prüfhaus im OG. Giebelwand og-w2, Strg+Klick og-w4 und Dach: Rechtsklick „3 Elemente“, „Trimmen…“ aktiv, „Trimmung aufheben“ ausgegraut. „Trimmen…“ öffnet „2 Wände an Dach ‚og-dach' trimmen?“, [Trimmen] → „2 Wände getrimmt“; Wand-Eigenschaften „Getrimmt an: Dach og-dach · Oberkante 2,59–4,198 m“; in 3D reichen die Giebel bis unter das Dach. Modify-Menü bei getrimmter Wand: „Trimmen…“ ausgegraut, „Trimmung aufheben“ aktiv → „Trimmung aufgehoben“. Keine Konsolenfehler. Archicad-Import durch den Nutzer steht aus.
