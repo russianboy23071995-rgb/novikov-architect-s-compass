@@ -9,6 +9,7 @@ import {
   resolveBoundWallHeights,
   wallTopBindingSchema,
 } from "../elements/wall/height-binding.ts";
+import { resolveRoofTrims } from "../elements/wall/roof-trim.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -269,15 +270,28 @@ export const projectV25Schema = projectV24Schema.extend({
     .array(projectV22Schema.shape.storey.extend({ walls: z.array(raisedWallSchema) }))
     .min(1),
 });
-const boundWall = <B extends z.ZodTypeAny>(binding: B) =>
+const boundWall = <B extends z.ZodTypeAny, E extends z.ZodRawShape = Record<never, never>>(
+  binding: B,
+  extra?: E,
+) =>
   raisedWallSchema
-    .extend({ height: positive.optional(), topBinding: binding.optional() })
+    .extend({ height: positive.optional(), topBinding: binding.optional(), ...(extra as E) })
     .refine((w) => w.topBinding !== undefined || w.height !== undefined, "Feste Wandhöhe fehlt.")
     .transform(({ height, ...w }) => ({ ...w, height: height ?? 0 }));
 /** Schema 26–29: walls bound to the underside of an assumed raw slab. */
 const legacyBoundWallSchema = boundWall(legacyWallTopBindingSchema);
 /** Schema 30: walls bound to their own storey height plus extra height (29.10.2026). */
 const boundWallSchema = boundWall(wallTopBindingSchema);
+const finite = z.number().finite();
+/** Schema 35: optional trim reference to a roof (docs/TRIMMEN_L04B.md, L04b). `trimPlane` is
+ * the derived cut (resolveRoofTrims), recomputed on every validation and never stored. */
+const trimmableWallSchema = boundWall(wallTopBindingSchema, {
+  roofTrim: z.object({ roofId: id }).strict().optional(),
+  trimPlane: z
+    .object({ a: finite, b: finite, c: finite, top: finite, bottom: finite })
+    .strict()
+    .optional(),
+});
 export const projectV26Schema = projectV25Schema.extend({
   schemaVersion: z.literal(26),
   storeys: z
@@ -385,12 +399,28 @@ export const projectV33Schema = projectV32Schema.extend({
     .min(1),
 });
 /** Schema 34: height lines with colour, line style and references (R3b). */
-const projectSchema = projectV33Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV34Schema = projectV33Schema.extend({
+  schemaVersion: z.literal(34),
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
         walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 35: walls may be trimmed at a roof (docs/TRIMMEN_L04B.md, L04b). */
+const projectSchema = projectV34Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(trimmableWallSchema),
         windows: z.array(markedWindowSchema),
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
@@ -579,7 +609,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof boundWallSchema>;
+export type Wall = z.infer<typeof trimmableWallSchema>;
 export type BimWindow = z.infer<typeof markedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
@@ -750,7 +780,7 @@ export function validateProject(
     parsed.storeys = parsed.storeys.map((storey, i) =>
       early.known[i] ? (input!.storeys[i] as typeof storey) : storey,
     );
-  const project = resolveBoundWallHeights(parsed);
+  const project = resolveRoofTrims(resolveBoundWallHeights(parsed));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId, project.groundDatum);
   if (
     project.workingStoreyId &&

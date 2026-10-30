@@ -7,6 +7,7 @@ import {
   type Vertex3,
 } from "../../../geometry/solids/profile-openings.ts";
 import { coordinatesCompatible } from "../../../geometry/tolerances/model.ts";
+import { trimExtrusionBelowPlane } from "../../../geometry/solids/plane-trim.ts";
 
 function deriveWallContourSolid(
   wall: Wall,
@@ -54,7 +55,18 @@ function deriveWallContourSolid(
       bottom: w.sillHeight,
       top: w.sillHeight + w.height,
     }));
-  const solid = extrude(profile, wall.height, openings, clipOpeningsToProfile);
+  // Roof trim (L04b): the plane in local coordinates; the body is raised to the highest plane
+  // point over the profile and cut there (decision R: the wall reaches up to the roof).
+  const trim = wall.trimPlane && {
+    a: wall.trimPlane.a + wall.trimPlane.b * body.start.x + wall.trimPlane.c * body.start.y,
+    b: wall.trimPlane.b * ux + wall.trimPlane.c * uy,
+    c: -wall.trimPlane.b * uy + wall.trimPlane.c * ux,
+  };
+  const height = trim
+    ? Math.max(...profile.map((p) => trim.a + trim.b * p.x + trim.c * p.y))
+    : wall.height;
+  const extruded = extrude(profile, height, openings, clipOpeningsToProfile);
+  const solid = trim ? trimExtrusionBelowPlane(extruded, profile, trim) : extruded;
   const world = ([x, y, z]: Vertex3): Vertex3 => [
     body.start.x + ux * x - uy * y,
     body.start.y + uy * x + ux * y,

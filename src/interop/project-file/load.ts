@@ -37,6 +37,7 @@ import {
   projectV31Schema,
   projectV32Schema,
   projectV33Schema,
+  projectV34Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -234,6 +235,14 @@ export function migrateProjectData(value: unknown): Project {
       }),
     );
   }
+  // Schema 34 walls carry no roof trims; the strict v34 schema rejects smuggled ones.
+  if (value.schemaVersion === 34)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV34Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);
