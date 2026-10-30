@@ -3,6 +3,14 @@ import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
+import { CanvasContextMenu, type ContextMenuEntry } from "./CanvasContextMenu";
+import {
+  clipboardSummary,
+  copySelection,
+  pasteClipboard,
+  type ClipboardContent,
+} from "@/application/clipboard/clipboard";
+import { planElementCaption } from "@/rendering/viewport/selection-shapes";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -352,6 +360,8 @@ export function CadWorkspace({
         if (key === "z" || key === "y") {
           event.preventDefault();
           if (!event.repeat) navigateHistory(key === "y" || event.shiftKey ? "redo" : "undo");
+        } else if ((key === "c" || key === "x" || key === "v") && !event.repeat) {
+          if (clipboardShortcut.current?.(key)) event.preventDefault();
         }
         return;
       }
@@ -676,6 +686,142 @@ export function CadWorkspace({
     tool === "select" && !editSession && !groupMove.active && selections.length
       ? deleteSelection
       : null;
+
+  // Canvas commands shared by the right-click menu, the Modify menu and the shortcuts
+  // (docs/KONTEXTMENUE.md). The clipboard lives in the app only (decision X).
+  const clipboard = useRef<ClipboardContent | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    target: NonNullable<Selection> | null;
+  } | null>(null);
+  const canEditSelection = tool === "select" && !editSession && !groupMove.active;
+  const copySelected = (cut = false) => {
+    try {
+      const content = copySelection(project, selections);
+      clipboard.current = content;
+      if (cut) deleteSelection();
+      showNotice(clipboardSummary(content, cut ? "ausgeschnitten" : "kopiert"));
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Kopieren nicht möglich.");
+    }
+  };
+  const pasteFromClipboard = () => {
+    const content = clipboard.current;
+    if (!content) return;
+    try {
+      const pasted = pasteClipboard(project, content, (kind) => `${kind}-${crypto.randomUUID()}`);
+      dispatchEditing({ type: "project", project: pasted.project });
+      selectMany(pasted.targets);
+      showNotice(clipboardSummary(content, "eingefügt"));
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Einfügen nicht möglich.");
+    }
+  };
+  const pickupFrom = (target: NonNullable<Selection>) => {
+    const defaults = pickupToolDefaults(project, visibility, target);
+    if (!defaults) return setModelError("Für dieses Element gibt es keine übernehmbaren Werte.");
+    toolDefaults.apply(defaults);
+    selectTool(defaults.tool);
+    setDemandOpen(false);
+    showNotice("Parameter übernommen");
+  };
+  /** Tool settings of an element kind (or the active tool): its window where one exists. */
+  const openToolSettings = (kind: NonNullable<Selection>["kind"] | null) => {
+    const owner: ToolId | null =
+      kind === null ? tool : kind === "reference" ? null : (kind as ToolId);
+    if (!owner) return setModelError("Bildreferenzen haben kein Werkzeug.");
+    if (owner !== tool) selectTool(owner);
+    if (owner === "roof") setRoofSettingsOpen(true);
+    else if (owner === "room") setRoomSettingsOpen(true);
+    else {
+      setFullscreen(false);
+      propertiesRef.current?.focus();
+    }
+  };
+  const later = (what: string) => `Kommt mit ${what}.`;
+  const contextEntries = (target: NonNullable<Selection> | null): ContextMenuEntry[] => {
+    const none = selections.length === 0 ? "Keine Auswahl." : false;
+    const single = target ?? (selections.length === 1 ? selections[0]! : null);
+    return [
+      {
+        id: "cut",
+        label: "Ausschneiden",
+        shortcut: "Strg+X",
+        disabled: none || (!canEditSelection && "Gerade nicht möglich."),
+        run: () => copySelected(true),
+      },
+      {
+        id: "copy",
+        label: "Kopieren",
+        shortcut: "Strg+C",
+        disabled: none,
+        run: () => copySelected(),
+      },
+      {
+        id: "paste",
+        label: "Einfügen",
+        shortcut: "Strg+V",
+        disabled: clipboard.current ? false : "Zwischenablage ist leer.",
+        run: pasteFromClipboard,
+      },
+      {
+        id: "delete",
+        label: selections.length > 1 ? "Auswahl löschen" : "Löschen",
+        shortcut: "Entf",
+        danger: true,
+        disabled: none || (!canEditSelection && "Gerade nicht möglich."),
+        run: deleteSelection,
+      },
+      "separator",
+      {
+        id: "pickup",
+        label: "Parameter übernehmen (Pipette)",
+        disabled: single ? false : "Ein Element auswählen.",
+        run: () => single && pickupFrom(single),
+      },
+      {
+        id: "tool-settings",
+        label: "Werkzeugeinstellungen…",
+        run: () => openToolSettings(target?.kind ?? null),
+      },
+      "separator",
+      { id: "trim", label: "Trimmen…", disabled: later("dem Trimmen (L04b)"), run: () => {} },
+      {
+        id: "untrim",
+        label: "Trimmung aufheben",
+        disabled: later("dem Trimmen (L04b)"),
+        run: () => {},
+      },
+      {
+        id: "order",
+        label: "Darstellungsreihenfolge",
+        disabled: later("der Darstellungsreihenfolge (K2)"),
+        run: () => {},
+      },
+    ];
+  };
+  const openContextMenu = (target: NonNullable<Selection> | null, x: number, y: number) => {
+    // A right click on an unselected element selects it first, like a left click.
+    if (target && !selections.some((s) => s.kind === target.kind && s.id === target.id))
+      selectElement(target, { x, y });
+    setDemandOpen(false);
+    setContextMenu({ x, y, target });
+  };
+  const clipboardShortcut = useRef<((key: string) => boolean) | null>(null);
+  clipboardShortcut.current = (key) => {
+    if (key === "v" && clipboard.current && !editSession && !groupMove.active) {
+      pasteFromClipboard();
+      return true;
+    }
+    if (!canEditSelection || !selections.length) return false;
+    if (key === "c") copySelected();
+    else if (key === "x") copySelected(true);
+    else return false;
+    return true;
+  };
 
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
@@ -1032,6 +1178,20 @@ export function CadWorkspace({
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
       />
+      {contextMenu && (
+        <CanvasContextMenu
+          position={contextMenu}
+          title={
+            contextMenu.target
+              ? selections.length > 1
+                ? `${selections.length} Elemente`
+                : planElementCaption(project, contextMenu.target)
+              : "Zeichenfläche"
+          }
+          entries={contextEntries(contextMenu.target)}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
       <RoomListPanel
         open={roomListOpen}
         onOpenChange={setRoomListOpen}
@@ -1170,6 +1330,8 @@ export function CadWorkspace({
               setModelError("");
               setLayersOpen(true);
             }}
+            onPipette={() => selections.length === 1 && pickupFrom(selections[0]!)}
+            canPipette={selections.length === 1}
             onRoomList={() => {
               cancelInteraction();
               setDemandOpen(false);
@@ -1723,13 +1885,8 @@ export function CadWorkspace({
                             })
                       }
                       pickupScope={measurementContext}
-                      onPickup={(target) => {
-                        const defaults = pickupToolDefaults(project, visibility, target);
-                        if (!defaults) return;
-                        toolDefaults.apply(defaults);
-                        selectTool(defaults.tool);
-                        setDemandOpen(false);
-                      }}
+                      onPickup={pickupFrom}
+                      onContextMenu={openContextMenu}
                       zoomSlot={zoomSlot}
                       placement={
                         windowPlacement

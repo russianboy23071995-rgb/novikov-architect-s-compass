@@ -76,6 +76,9 @@ import { linePath } from "@/lib/bim/lines";
 
 export type BimPlanProps = {
   pickupScope?: object;
+  /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
+   * set it replaces the former double right-click pickup, which moves into the menu. */
+  onContextMenu?: (target: NonNullable<Selection> | null, x: number, y: number) => void;
   onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
@@ -147,6 +150,7 @@ export type BimPlanProps = {
 export function BimPlan({
   pickupScope,
   onPickup,
+  onContextMenu,
   draftContour,
   placement,
   drawingPreview,
@@ -645,12 +649,27 @@ export function BimPlan({
       pickupScope,
     ],
   );
+  const contextMenuReady = () =>
+    !!onContextMenu &&
+    interactive &&
+    !editSession &&
+    !selecting &&
+    !pan &&
+    !placement &&
+    !drawing &&
+    !referenceSelection?.selecting;
   const selectProps = (kind: ElementKind, id: string) => ({
     role: "button",
     tabIndex: drawing ? -1 : 0,
     "aria-label": `Select ${kind} ${id}`,
     "aria-pressed": selectedIds.has(id),
     onContextMenu: (event: React.MouseEvent) => {
+      if (contextMenuReady()) {
+        event.preventDefault();
+        event.stopPropagation();
+        onContextMenu!({ kind, id }, event.clientX, event.clientY);
+        return;
+      }
       if (
         !onPickup ||
         !interactive ||
@@ -793,7 +812,12 @@ export function BimPlan({
         if (event.button !== 2) secondary.current.reset();
         marquee.down(event);
       }}
-      onContextMenu={() => secondary.current.reset()}
+      onContextMenu={(event) => {
+        secondary.current.reset();
+        if (!contextMenuReady()) return;
+        event.preventDefault();
+        onContextMenu!(null, event.clientX, event.clientY);
+      }}
       onKeyDownCapture={() => secondary.current.reset()}
       onPointerMoveCapture={marquee.move}
       onPointerUpCapture={marquee.up}

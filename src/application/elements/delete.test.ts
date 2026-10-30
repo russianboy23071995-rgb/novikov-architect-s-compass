@@ -214,3 +214,87 @@ test("text and voice use the same delete operation", () => {
     /Auswahl löschen/,
   );
 });
+
+import { roomAcceptanceProject } from "../../../benchmarks/room-ifc-acceptance.ts";
+import { copySelection, pasteClipboard, clipboardSummary } from "../clipboard/clipboard.ts";
+import { selectWorkingStorey } from "../storeys/working-storey.ts";
+import { storeyOf as storeyOfClip } from "../../domain/storeys/access.ts";
+
+test("clipboard: copy walls with openings, room and slab; paste in place into another storey", () => {
+  // docs/KONTEXTMENUE.md (K1): app-internal clipboard, paste at the same position (decision W).
+  const base = roomAcceptanceProject();
+  const eg = selectWorkingStorey(base, base, "eg");
+  const egStorey = storeyOfClip(eg);
+  const targets = [
+    ...egStorey.walls.map((w) => ({ kind: "wall" as const, id: w.id })),
+    { kind: "room" as const, id: "eg-wohnen" },
+    ...(egStorey.slabs ?? []).map((s) => ({ kind: "slab" as const, id: s.id })),
+  ];
+  const content = copySelection(eg, targets);
+  // Windows come along with their walls; corner connections only between copied walls.
+  assert.equal(content.items.filter((i) => i.kind === "window").length, egStorey.windows.length);
+  assert.equal(content.wallJoins.length, egStorey.wallJoins.length);
+  assert.equal(clipboardSummary(content, "kopiert"), `${content.items.length} Elemente kopiert`);
+  let counter = 0;
+  // In place over identical walls is refused readably (same storey).
+  assert.throws(
+    () => pasteClipboard(eg, content, (kind) => `${kind}-same-${++counter}`),
+    /Einfügen an derselben Stelle nicht möglich/,
+  );
+  // Into the OG after removing its walls (no coinciding wall corners).
+  const ogFull = selectWorkingStorey(eg, eg, "og");
+  const og = previewDeleteSelection(
+    ogFull,
+    storeyOfClip(ogFull).walls.map((w) => ({ kind: "wall" as const, id: w.id })),
+    undefined,
+  ).result;
+  const before = storeyOfClip(og);
+  const pasted = pasteClipboard(og, content, (kind) => `${kind}-copy-${++counter}`);
+  const after = storeyOfClip(pasted.project);
+  assert.equal(after.walls.length, before.walls.length + egStorey.walls.length);
+  assert.equal(after.windows.length, before.windows.length + egStorey.windows.length);
+  assert.equal(pasted.targets.length, content.items.length);
+  // New ids everywhere, windows on their new walls, joins remapped, same positions.
+  const newWalls = after.walls.filter((w) => w.id.startsWith("wall-copy-"));
+  assert.equal(newWalls.length, egStorey.walls.length);
+  assert.deepEqual(
+    newWalls.map((w) => [w.start, w.end]),
+    egStorey.walls.map((w) => [w.start, w.end]),
+  );
+  const newIds = new Set(newWalls.map((w) => w.id));
+  for (const win of after.windows.filter((w) => w.id.startsWith("window-copy-")))
+    assert.ok(newIds.has(win.wallId));
+  const newJoins = after.wallJoins.filter((j) => newIds.has(j.first.wallId));
+  assert.equal(newJoins.length, egStorey.wallJoins.length);
+  assert.ok(newJoins.every((j) => newIds.has(j.second.wallId)));
+  // The pasted room gets the next free number; pasting twice gives distinct numbers.
+  const room = after.rooms!.find((r) => r.id.startsWith("room-copy-"))!;
+  assert.equal(room.number, "R-003");
+  assert.equal(room.name, "Wohnen");
+  const roomOnly = copySelection(eg, [{ kind: "room", id: "eg-wohnen" }]);
+  const twice = pasteClipboard(pasted.project, roomOnly, (kind) => `${kind}-copy-${++counter}`);
+  assert.deepEqual(
+    storeyOfClip(twice.project)
+      .rooms!.map((r) => r.number)
+      .sort(),
+    ["R-002", "R-003", "R-004"],
+  );
+  // The source storey is untouched; the clipboard keeps its own copy.
+  assert.deepEqual(
+    storeyOfClip(selectWorkingStorey(pasted.project, pasted.project, "eg")),
+    egStorey,
+  );
+  // A window alone is not copied (it would duplicate in place); nothing selected is refused.
+  const window = egStorey.windows[0]!;
+  assert.throws(
+    () => copySelection(eg, [{ kind: "window", id: window.id }]),
+    /nur zusammen mit ihrer Wand/,
+  );
+  assert.throws(() => copySelection(eg, []), /zuerst Elemente auswählen/);
+  const mixed = copySelection(eg, [
+    { kind: "window", id: window.id },
+    { kind: "room", id: "eg-wohnen" },
+  ]);
+  assert.equal(mixed.skippedHosted, 1);
+  assert.match(clipboardSummary(mixed, "kopiert"), /1 Fenster\/Türen ohne ihre Wand/);
+});
