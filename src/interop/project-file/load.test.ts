@@ -17,6 +17,7 @@ import { createStandardProject } from "../../application/projects/create.ts";
 import { addRoof } from "../../application/roofs/actions.ts";
 import { addRoom, nextProjectRoomNumber, updateRoom } from "../../application/rooms/actions.ts";
 import { nextRoomNumber, roomArea } from "../../domain/elements/room/model.ts";
+import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
 import { boundHeightFixture } from "../../../benchmarks/bound-height-fixture.ts";
 
@@ -270,7 +271,7 @@ test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused
 
 test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique numbers, migration", () => {
   // docs/ROOM_ELEMENT.md, R1.
-  assert.equal(PROJECT_SCHEMA_VERSION, 33);
+  assert.equal(PROJECT_SCHEMA_VERSION, 34);
   const base = createStandardProject("p", "eg", "og");
   const square = [
     { x: 0, y: 0 },
@@ -331,8 +332,8 @@ test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique nu
     );
 });
 
-test("schema 33 adds room height lines: defaults absent, checked lists, v32 files load", () => {
-  // docs/ROOM_ELEMENT.md, R3.
+test("schema 34 height lines: objects with style and references; 32/33 files load", () => {
+  // docs/ROOM_ELEMENT.md, R3/R3b.
   const square = [
     { x: 0, y: 0 },
     { x: 4, y: 0 },
@@ -340,22 +341,35 @@ test("schema 33 adds room height lines: defaults absent, checked lists, v32 file
   ];
   const base = addRoom(createStandardProject("p", "eg", "og"), { id: "r1", points: square });
   assert.equal("heightLines" in storeyOf(base).rooms![0]!, false);
-  const set = updateRoom(base, "r1", { heightLines: [1.2, 2.3] });
-  assert.deepEqual(storeyOf(set).rooms![0]!.heightLines, [1.2, 2.3]);
+  const proof = { ...clearHeightLine("h1", 2.3), upper: "outerSkin" as const, color: "#dc2626" };
+  const set = updateRoom(base, "r1", { heightLines: [proof] });
+  assert.deepEqual(storeyOf(set).rooms![0]!.heightLines, [proof]);
   assert.deepEqual(readProjectFile(serializeProject(set)), set);
-  assert.equal(
-    "heightLines" in storeyOf(updateRoom(set, "r1", { heightLines: undefined })).rooms![0]!,
-    false,
-  );
   assert.deepEqual(
     storeyOf(updateRoom(base, "r1", { heightLines: [] })).rooms![0]!.heightLines,
     [],
   );
-  for (const bad of [[2, 1], [1, 1], [0.05], [11], [1, 2, 3, 4, 5, 6]])
-    assert.throws(() => updateRoom(base, "r1", { heightLines: bad }), String(bad));
-  // A schema 32 file with rooms loads with the defaults; height lines in it are refused.
-  const v32 = { ...JSON.parse(serializeProject(base)), schemaVersion: 32 };
-  assert.deepEqual(loadProjectData(v32), base);
-  const smuggled = { ...JSON.parse(serializeProject(set)), schemaVersion: 32 };
-  assert.throws(() => loadProjectData(smuggled));
+  for (const bad of [
+    { ...proof, height: 0.05 },
+    { ...proof, height: 11 },
+    { ...proof, color: "rot" },
+    { ...proof, upper: "dach" },
+    { ...proof, style: { ...proof.style, period: -1 } },
+  ])
+    assert.throws(() => updateRoom(base, "r1", { heightLines: [bad as typeof proof] }));
+  // Schema 33 stored clear heights as numbers: they become clear-height lines (default look).
+  const v33 = JSON.parse(serializeProject(base));
+  v33.schemaVersion = 33;
+  v33.storeys[0].rooms[0].heightLines = [1.2, 2.3];
+  assert.deepEqual(storeyOf(loadProjectData(v33)).rooms![0]!.heightLines, [
+    clearHeightLine("h1", 1.2),
+    clearHeightLine("h2", 2.3),
+  ]);
+  // Rooms without lines and schema 32 files keep the defaults; objects in older files are refused.
+  const plain = JSON.parse(serializeProject(base));
+  assert.deepEqual(loadProjectData({ ...plain, schemaVersion: 33 }), base);
+  assert.deepEqual(loadProjectData({ ...plain, schemaVersion: 32 }), base);
+  const withObjects = JSON.parse(serializeProject(set));
+  assert.throws(() => loadProjectData({ ...withObjects, schemaVersion: 33 }));
+  assert.throws(() => loadProjectData({ ...withObjects, schemaVersion: 32 }));
 });

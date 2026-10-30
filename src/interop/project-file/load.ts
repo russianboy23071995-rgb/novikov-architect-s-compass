@@ -36,11 +36,13 @@ import {
   projectV30Schema,
   projectV31Schema,
   projectV32Schema,
+  projectV33Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { createStandardLayers } from "../../domain/layers/model.ts";
+import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
 
 /** Own and fully storage-validate incoming assets once, before versioned project validation.
  * File inputs acquire handles here; recovery supplies its independently checked handles.
@@ -77,7 +79,7 @@ function withoutBoundHeights<
   };
 }
 
-/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 33. */
+/** Fully validating version migration for file/recovery boundaries; runtime edits stay schema 34. */
 export function migrateProjectData(value: unknown): Project {
   if (typeof value !== "object" || value === null || !("schemaVersion" in value))
     throw new Error("Missing project version");
@@ -207,6 +209,31 @@ export function migrateProjectData(value: unknown): Project {
         schemaVersion: PROJECT_SCHEMA_VERSION,
       }),
     );
+  // Schema 33 height lines were clear heights only; they keep that meaning with the default look.
+  if (value.schemaVersion === 33) {
+    const old = projectV33Schema.parse(value);
+    return validateProject(
+      withoutBoundHeights({
+        ...old,
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+        storeys: old.storeys.map((storey) => ({
+          ...storey,
+          ...(storey.rooms
+            ? {
+                rooms: storey.rooms.map(({ heightLines, ...room }) =>
+                  heightLines
+                    ? {
+                        ...room,
+                        heightLines: heightLines.map((h, i) => clearHeightLine(`h${i + 1}`, h)),
+                      }
+                    : room,
+                ),
+              }
+            : {}),
+        })),
+      }),
+    );
+  }
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
     const old = validateProjectV8(value);

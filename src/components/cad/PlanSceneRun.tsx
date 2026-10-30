@@ -11,6 +11,12 @@ import { checkedImageUrl } from "@/interop/images/import";
 import { wallLength } from "@/domain/project/schema";
 import { wallBody } from "@/domain/elements/wall/body";
 import { roomArea, roomLabelPoint } from "@/domain/elements/room/model";
+import { heightLineLabel } from "@/application/rooms/height-lines";
+
+/** Pattern repeat of height lines in model metres (0,50 m ≙ 5 mm at 1:100). */
+const HEIGHT_LINE_REPEAT = 0.5;
+/** Positions of height line labels along their line, clear of the stamp in the middle. */
+const LABEL_POSITIONS = [0.15, 0.85, 0.3, 0.7];
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
@@ -166,10 +172,10 @@ export function PlanSceneContent({
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none focus-visible:stroke-sky-300"
             />
-            {heights && heights.openPieces.length > 0 && (
+            {heights && heights.clear.openPieces.length > 0 && (
               <path
                 aria-label={`Raum ohne Höhenquelle ${room.number}`}
-                d={heights.openPieces
+                d={heights.clear.openPieces
                   .map((piece) => "M" + piece.map((p) => `${p.x},${-p.y}`).join(" L") + " Z")
                   .join(" ")}
                 fill="#f59e0b"
@@ -177,44 +183,54 @@ export function PlanSceneContent({
                 pointerEvents="none"
               />
             )}
-            {heights?.lines.map((line, i) => {
-              const mid = {
-                x: (line.start.x + line.end.x) / 2,
-                y: (line.start.y + line.end.y) / 2,
-              };
-              let angle =
-                (-Math.atan2(line.end.y - line.start.y, line.end.x - line.start.x) * 180) / Math.PI;
-              if (angle > 90) angle -= 180;
-              if (angle <= -90) angle += 180;
-              const text = line.levels
-                .map((h) => h.toLocaleString("de-DE", { minimumFractionDigits: 2 }))
-                .join(" / ");
-              return (
-                <g key={i} aria-label={`Höhenlinie ${text} ${room.number}`} pointerEvents="none">
-                  <line
-                    x1={line.start.x}
-                    y1={-line.start.y}
-                    x2={line.end.x}
-                    y2={-line.end.y}
-                    stroke="#0369a1"
-                    strokeWidth={1}
-                    strokeDasharray="6 4"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <text
-                    x={mid.x}
-                    y={-mid.y}
-                    transform={`rotate(${angle} ${mid.x} ${-mid.y})`}
-                    dy={-3 / pixelsPerMetre}
-                    fontSize={10 / pixelsPerMetre}
-                    textAnchor="middle"
-                    fill="#0369a1"
+            {heights?.lines.flatMap((result, lineIndex) =>
+              result.segments.map((segment, i) => {
+                const { line } = result;
+                // Labels staggered along the line, away from the stamp in the middle.
+                const at = LABEL_POSITIONS[lineIndex % LABEL_POSITIONS.length]!;
+                const mid = {
+                  x: segment.start.x + (segment.end.x - segment.start.x) * at,
+                  y: segment.start.y + (segment.end.y - segment.start.y) * at,
+                };
+                let angle =
+                  (-Math.atan2(segment.end.y - segment.start.y, segment.end.x - segment.start.x) *
+                    180) /
+                  Math.PI;
+                if (angle > 90) angle -= 180;
+                if (angle <= -90) angle += 180;
+                const text = heightLineLabel(line);
+                return (
+                  <g
+                    key={`${line.id}-${i}`}
+                    aria-label={`Höhenlinie ${text} ${room.number}`}
+                    pointerEvents="none"
                   >
-                    {text}
-                  </text>
-                </g>
-              );
-            })}
+                    {/* Colour and line style of the height line (R3b), pattern in model metres. */}
+                    <LinePattern
+                      line={{
+                        points: [segment.start, segment.end],
+                        pattern: line.style,
+                        repeatLength: HEIGHT_LINE_REPEAT,
+                        penWidth: 0.25,
+                        color: line.color,
+                      }}
+                      pixelsPerMetre={pixelsPerMetre}
+                    />
+                    <text
+                      x={mid.x}
+                      y={-mid.y}
+                      transform={`rotate(${angle} ${mid.x} ${-mid.y})`}
+                      dy={-3 / pixelsPerMetre}
+                      fontSize={10 / pixelsPerMetre}
+                      textAnchor="middle"
+                      fill={line.color}
+                    >
+                      {text}
+                    </text>
+                  </g>
+                );
+              }),
+            )}
             <text
               aria-label={`Raumstempel ${room.number}`}
               x={label.x}

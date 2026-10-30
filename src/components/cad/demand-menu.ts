@@ -6,23 +6,26 @@ import type { Selection } from "./bim-view.ts";
 import { doorDinHand } from "../../domain/elements/door/model.ts";
 import { slabArea } from "../../domain/elements/slab/model.ts";
 import { roomArea, type Room } from "../../domain/elements/room/model.ts";
-import { workingRoomHeights } from "../../application/rooms/actions.ts";
+import {
+  workingRoomClearHeights,
+  workingRoomHeightLines,
+} from "../../application/rooms/actions.ts";
+import { heightLineText } from "../../application/rooms/height-lines.ts";
 
-/** Clear height range and zone areas for the menu (R3); open parts are named, not hidden. */
+/** Clear height range and, per height line, the area reaching it for the menu (R3b); open parts are named, not hidden. */
 function roomHeightText(project: Project, room: Room) {
-  const field = workingRoomHeights(project, room);
+  const clear = workingRoomClearHeights(project, room);
   const n = (v: number) =>
     v.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const parts: string[] = [];
-  if (field.min !== null) {
-    parts.push(`lichte Höhe ${n(field.min)}–${n(field.max!)} m`);
-    for (const z of field.zones)
-      if (z.area > 1e-6)
-        parts.push(
-          `${z.from === null ? `unter ${n(z.to!)}` : z.to === null ? `ab ${n(z.from)}` : `${n(z.from)}–${n(z.to)}`} m: ${n(z.area)} m²`,
-        );
+  if (clear.min !== null) {
+    parts.push(`lichte Höhe ${n(clear.min)}–${n(clear.max!)} m`);
+    for (const r of workingRoomHeightLines(project, room))
+      parts.push(
+        `ab ${heightLineText(r.line)}: ${n(r.areaAbove)} m² (${(r.share * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`,
+      );
   }
-  if (field.openArea > 1e-6) parts.push(`Höhe offen: ${n(field.openArea)} m²`);
+  if (clear.openArea > 1e-6) parts.push(`Höhe offen: ${n(clear.openArea)} m²`);
   return parts.map((p) => ` · ${p}`).join("");
 }
 

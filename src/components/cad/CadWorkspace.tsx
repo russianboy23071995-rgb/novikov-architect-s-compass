@@ -1,7 +1,7 @@
 import { RoomSettingsPanel, RoomToolFields } from "./RoomToolFields";
 import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
-import { isDefaultHeightLines } from "@/application/rooms/height-lines";
+import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoofSettingsPanel, RoofToolFields } from "./RoofToolFields";
 import type { RoofPhase } from "./roof-labels";
 import { isVertexTarget } from "@/application/direct-edit/transforms";
@@ -227,6 +227,7 @@ export function CadWorkspace({
   // Room tool (docs/ROOM_ELEMENT.md, R2): own construction, by default a click between walls.
   const [roomConstruction, setRoomConstruction] = useState<HatchConstruction | "walls">("walls");
   const [roomSettingsOpen, setRoomSettingsOpen] = useState(false);
+  const [roomSettingsSection, setRoomSettingsSection] = useState<string | undefined>();
   const roomByWalls = tool === "room" && roomConstruction === "walls";
   // Hatch, slab, roof and room share the outline construction (polygon, rectangle, contour).
   const areaTool =
@@ -744,7 +745,7 @@ export function CadWorkspace({
                     ...(toolDefaults.room.floorBuildUpEnabled
                       ? { floorBuildUp: toolDefaults.room.floorBuildUp }
                       : {}),
-                    ...(isDefaultHeightLines(toolDefaults.room.heightLines)
+                    ...(isDefaultHeightLineList(toolDefaults.room.heightLines)
                       ? {}
                       : { heightLines: toolDefaults.room.heightLines }),
                     layerId: toolDefaults.room.layerId,
@@ -1031,7 +1032,11 @@ export function CadWorkspace({
       />
       <RoomSettingsPanel
         open={roomSettingsOpen}
-        onOpenChange={setRoomSettingsOpen}
+        section={roomSettingsSection}
+        onOpenChange={(open) => {
+          setRoomSettingsOpen(open);
+          if (!open) setRoomSettingsSection(undefined);
+        }}
         construction={roomConstruction}
         onConstruction={(next) => {
           setPathPoints([]);
@@ -1426,6 +1431,10 @@ export function CadWorkspace({
                 onChange={toolDefaults.setRoom}
                 layers={project.layers}
                 nextNumber={nextProjectRoomNumber(project)}
+                onOpenSettings={() => {
+                  setRoomSettingsSection("height-lines");
+                  setRoomSettingsOpen(true);
+                }}
               />
             ) : tool === "roof" && mode === "2D" ? (
               <RoofToolFields

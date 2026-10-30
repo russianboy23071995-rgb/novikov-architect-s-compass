@@ -4,9 +4,11 @@ import { validateLike } from "../../domain/project/owned-snapshot.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { nextRoomNumber, type Room } from "../../domain/elements/room/model.ts";
 import {
-  roomHeightField,
+  roomClearHeights,
+  roomHeightLineResults,
   storeyCeilingSources,
   type RoomHeightField,
+  type RoomHeightLineResult,
 } from "../../domain/elements/room/heights.ts";
 
 type RoomCreation = Omit<Room, "layerId" | "number" | "name"> & {
@@ -71,7 +73,12 @@ export function updateRoom(
   });
 }
 
-/** Clear height field of a room in the working storey: its slabs and roofs only (R3, A08). */
-export function workingRoomHeights(project: Project, room: Room): RoomHeightField {
-  return roomHeightField(room, storeyCeilingSources(storeyOf(project)));
+/** Clear heights of a room in the working storey: its slabs and roofs only (R3, A08). */
+export function workingRoomClearHeights(project: Project, room: Room): RoomHeightField {
+  return roomClearHeights(room, storeyCeilingSources(storeyOf(project)));
+}
+
+/** Every height line of a room in the working storey with its area above (R3b). */
+export function workingRoomHeightLines(project: Project, room: Room): RoomHeightLineResult[] {
+  return roomHeightLineResults(room, storeyCeilingSources(storeyOf(project)));
 }

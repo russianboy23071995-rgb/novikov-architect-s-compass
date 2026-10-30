@@ -3,7 +3,7 @@ import { wallBase, wallHeights } from "../elements/wall/heights.ts";
 import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
 import { roofSchema } from "../elements/roof/model.ts";
-import { roomNumberKey, roomSchema, roomV32Schema } from "../elements/room/model.ts";
+import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
   resolveBoundWallHeights,
@@ -369,7 +369,23 @@ export const projectV32Schema = projectV31Schema.extend({
     .min(1),
 });
 /** Schema 33 adds optional height lines per room (docs/ROOM_ELEMENT.md, R3). */
-const projectSchema = projectV32Schema.extend({
+export const projectV33Schema = projectV32Schema.extend({
+  schemaVersion: z.literal(33),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(boundWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomV33Schema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 34: height lines with colour, line style and references (R3b). */
+const projectSchema = projectV33Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(

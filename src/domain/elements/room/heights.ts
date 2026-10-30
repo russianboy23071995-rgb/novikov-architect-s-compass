@@ -2,27 +2,23 @@ import type { Point2 } from "../../../geometry/primitives/point.ts";
 import { contains } from "../../../geometry/polygons/contains.ts";
 import { triangulateSimplePolygon } from "../../../geometry/polygons/triangulate.ts";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
-import { roofFrame, roofUndersideAt, type RoofGeometryInput } from "../roof/geometry.ts";
+import { roofFrame, roofTopAt, roofUndersideAt, type RoofGeometryInput } from "../roof/geometry.ts";
 import type { Slab } from "../slab/model.ts";
+import { roomHeightLines, type HeightLine, type HeightLineUpper } from "./height-line.ts";
 
-/** Default height lines of a room in metres above its floor (user decision 29.10.2026). */
-export const ROOM_HEIGHT_LINES = [1, 2] as const;
-export const MAX_ROOM_HEIGHT_LINES = 5;
-export const MIN_ROOM_HEIGHT_LINE = 0.1;
-export const MAX_ROOM_HEIGHT_LINE = 10;
-
-/** Upper boundary of a room above the storey floor: flat (slab underside) or a roof plane. */
+/** Upper boundary of a room above the storey floor: a slab or a roof plane. */
 export type CeilingSource = {
   id: string;
   points: readonly Point2[];
-  /** Underside height above the storey floor at a plan point. */
-  at: (p: Point2) => number;
-  /** Line in plan where the underside reaches `z`, as point and direction; none when flat. */
-  levelLine?: (z: number) => { point: Point2; direction: Point2 };
+  /** Underside or outer face height above the storey floor at a plan point. */
+  at: (p: Point2, upper: HeightLineUpper) => number;
+  /** Line in plan where that face reaches `z`, as point and direction; none when flat. */
+  levelLine?: (z: number, upper: HeightLineUpper) => { point: Point2; direction: Point2 };
 };
 
-/** Ceiling sources of one storey (docs/ROOM_ELEMENT.md, R3): its slabs (underside, needs the
- * storey height) and its roofs (underside plane). Only the own storey is read (A08). */
+/** Ceiling sources of one storey (docs/ROOM_ELEMENT.md, R3/R3b): its slabs (underside or top,
+ * needs the storey height) and its roofs (underside or outer skin plane). Only the own storey
+ * is read (A08). */
 export function storeyCeilingSources(storey: {
   height?: number | null | undefined;
   slabs?: readonly Pick<Slab, "id" | "points" | "thickness" | "topOffset">[] | undefined;
@@ -32,17 +28,22 @@ export function storeyCeilingSources(storey: {
   const height = storey.height;
   if (typeof height === "number")
     for (const slab of storey.slabs ?? []) {
-      const z = height + slab.topOffset - slab.thickness;
-      sources.push({ id: slab.id, points: slab.points, at: () => z });
+      const top = height + slab.topOffset;
+      sources.push({
+        id: slab.id,
+        points: slab.points,
+        at: (_p, upper) => (upper === "outerSkin" ? top : top - slab.thickness),
+      });
     }
   for (const roof of storey.roofs ?? []) {
     const frame = roofFrame(roof);
+    const skin = roof.thickness / frame.cos;
     sources.push({
       id: roof.id,
       points: roof.points,
-      at: (p) => roofUndersideAt(roof, p),
-      levelLine: (z) => {
-        const run = (z - roof.referenceHeight) / frame.tan;
+      at: (p, upper) => (upper === "outerSkin" ? roofTopAt(roof, p) : roofUndersideAt(roof, p)),
+      levelLine: (z, upper) => {
+        const run = (z - (upper === "outerSkin" ? skin : 0) - roof.referenceHeight) / frame.tan;
         return {
           point: { x: frame.origin.x + frame.rise.x * run, y: frame.origin.y + frame.rise.y * run },
           direction: frame.along,
@@ -53,20 +54,15 @@ export function storeyCeilingSources(storey: {
   return sources;
 }
 
-export type RoomHeightZone = {
-  /** Clear height range [from, to) in metres; to = null for the open top zone. */
-  from: number | null;
-  to: number | null;
-  area: number;
-};
 export type RoomHeightLine = { start: Point2; end: Point2; levels: number[] };
+export type RoomHeightZone = { from: number | null; to: number | null; area: number };
 export type RoomHeightField = {
-  /** Floor above the storey floor: the optional floor build-up, else 0 (raw floor). */
+  /** Floor above the storey floor that the heights are measured from. */
   floor: number;
-  /** Smallest and largest clear height over the covered part; null when nothing is covered. */
+  /** Smallest and largest height over the covered part; null when nothing is covered. */
   min: number | null;
   max: number | null;
-  /** Areas between the height lines, lowest first (below the first line … above the last). */
+  /** Areas between the levels, lowest first (below the first level … above the last). */
   zones: RoomHeightZone[];
   /** Part of the room without slab or roof above it: no height source (N34). */
   openArea: number;
@@ -144,24 +140,21 @@ function boxOverlaps(points: readonly Point2[], box: readonly number[]) {
 }
 
 /**
- * Clear height field of a room (docs/ROOM_ELEMENT.md, R3). The ceiling at a point is the lowest
- * underside of all sources above it; the clear height is that minus the floor. The room is
- * triangulated and every triangle is split by all source edges and all lines where a roof
- * underside reaches a height line, so every convex piece lies in one zone and under one fixed
- * set of sources: areas are exact and the height lines are the piece edges between zones.
+ * Height field of a room outline (docs/ROOM_ELEMENT.md, R3). The ceiling at a point is the
+ * lowest face (underside or outer skin) of all sources above it; the height is that minus the
+ * floor. The outline is triangulated and every triangle is split by all source edges and all
+ * lines where a roof face reaches a level, so every convex piece lies in one zone and under one
+ * fixed set of sources: areas are exact and the level lines are the piece edges between zones.
  */
 export function roomHeightField(
-  room: {
-    points: readonly Point2[];
-    floorBuildUp?: number | undefined;
-    heightLines?: readonly number[] | undefined;
-  },
+  points: readonly Point2[],
   sources: readonly CeilingSource[],
+  options: { floor: number; upper: HeightLineUpper; levels: readonly number[] },
 ): RoomHeightField {
-  const floor = room.floorBuildUp ?? 0;
-  const levels = [...(room.heightLines ?? ROOM_HEIGHT_LINES)].sort((a, b) => a - b);
-  const valid = validateSimplePolygon(room.points);
-  const outline = valid.valid && valid.signedArea < 0 ? [...room.points].reverse() : room.points;
+  const { floor, upper } = options;
+  const levels = [...options.levels].sort((a, b) => a - b);
+  const valid = validateSimplePolygon(points);
+  const outline = valid.valid && valid.signedArea < 0 ? [...points].reverse() : points;
   const box = [Infinity, Infinity, -Infinity, -Infinity];
   for (const p of outline) {
     box[0] = Math.min(box[0]!, p.x);
@@ -178,7 +171,7 @@ export function roomHeightField(
     });
     if (source.levelLine)
       for (const h of levels) {
-        const { point, direction } = source.levelLine(floor + h);
+        const { point, direction } = source.levelLine(floor + h, upper);
         lines.push({ point, normal: { x: -direction.y, y: direction.x } });
       }
   }
@@ -189,14 +182,13 @@ export function roomHeightField(
   for (const line of lines) pieces = pieces.flatMap((piece) => split(piece, line));
 
   const covering = (p: Point2) => relevant.filter((s) => contains(s.points, p));
-  const clearAt = (p: Point2, over: readonly CeilingSource[]) =>
-    Math.min(...over.map((s) => s.at(p))) - floor;
+  const heightAt = (p: Point2, over: readonly CeilingSource[]) =>
+    Math.min(...over.map((s) => s.at(p, upper))) - floor;
   /** Zone index 0 … levels.length, or -1 without source. */
-  const zoneOf = (clear: number | null) =>
-    clear === null ? -1 : levels.filter((h) => clear >= h - EPS).length;
+  const zoneOf = (h: number) => levels.filter((level) => h >= level - EPS).length;
   const zoneAt = (p: Point2) => {
     const over = covering(p);
-    return over.length ? zoneOf(clearAt(p, over)) : -1;
+    return over.length ? zoneOf(heightAt(p, over)) : -1;
   };
 
   const zones: RoomHeightZone[] = Array.from({ length: levels.length + 1 }, (_, i) => ({
@@ -218,14 +210,14 @@ export function roomHeightField(
       openPieces.push(piece);
       continue;
     }
-    const zone = zoneOf(clearAt(c, over));
+    const zone = zoneOf(heightAt(c, over));
     zones[zone]!.area += a;
     for (const p of piece) {
-      const clear = clearAt(p, over);
-      min = min === null ? clear : Math.min(min, clear);
-      max = max === null ? clear : Math.max(max, clear);
+      const h = heightAt(p, over);
+      min = min === null ? h : Math.min(min, h);
+      max = max === null ? h : Math.max(max, h);
     }
-    // Height lines: edges towards a higher zone inside the room, seen from the lower side.
+    // Level lines: edges towards a higher zone inside the room, seen from the lower side.
     piece.forEach((p, i) => {
       const q = piece[(i + 1) % piece.length]!;
       const length = Math.hypot(q.x - p.x, q.y - p.y);
@@ -240,6 +232,55 @@ export function roomHeightField(
     });
   }
   return { floor, min, max, zones, openArea, openPieces, lines: mergeCollinear(segments) };
+}
+
+type RoomHeightInput = {
+  points: readonly Point2[];
+  floorBuildUp?: number | undefined;
+  heightLines?: readonly HeightLine[] | undefined;
+};
+
+/** Clear heights of a room: finished floor to the underside of slabs and roofs (R3). */
+export function roomClearHeights(room: RoomHeightInput, sources: readonly CeilingSource[]) {
+  return roomHeightField(room.points, sources, {
+    floor: room.floorBuildUp ?? 0,
+    upper: "underside",
+    levels: [],
+  });
+}
+
+export type RoomHeightLineResult = {
+  line: HeightLine;
+  /** Area where the height reaches the line (≥) and where it stays below, in m². */
+  areaAbove: number;
+  areaBelow: number;
+  /** areaAbove as a share of the room's plan area (0–1). */
+  share: number;
+  segments: RoomHeightLine[];
+};
+
+/** Every height line of a room with its own lower and upper reference (R3b): where it runs in
+ * plan and how much of the room reaches it. Parts without a height source count in neither. */
+export function roomHeightLineResults(
+  room: RoomHeightInput,
+  sources: readonly CeilingSource[],
+): RoomHeightLineResult[] {
+  const total = Math.abs(area(room.points));
+  return roomHeightLines(room).map((line) => {
+    const field = roomHeightField(room.points, sources, {
+      floor: line.lower === "rawFloor" ? 0 : (room.floorBuildUp ?? 0),
+      upper: line.upper,
+      levels: [line.height],
+    });
+    const areaAbove = field.zones[1]!.area;
+    return {
+      line,
+      areaAbove,
+      areaBelow: field.zones[0]!.area,
+      share: total > 0 ? areaAbove / total : 0,
+      segments: field.lines,
+    };
+  });
 }
 
 /** Joins touching collinear segments with the same levels, so dashes and labels run through. */

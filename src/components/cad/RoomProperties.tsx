@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { ELEMENT_KINDS } from "@/domain/elements/registry";
 import { roomArea, type Room } from "@/domain/elements/room/model";
-import { updateRoom, workingRoomHeights } from "@/application/rooms/actions";
-import { isDefaultHeightLines } from "@/application/rooms/height-lines";
-import { ROOM_HEIGHT_LINES } from "@/domain/elements/room/heights";
-import { HeightLinesField } from "./RoomToolFields";
+import {
+  updateRoom,
+  workingRoomClearHeights,
+  workingRoomHeightLines,
+} from "@/application/rooms/actions";
+import { heightLineText } from "@/application/rooms/height-lines";
+import { isDefaultHeightLineList, roomHeightLines } from "@/domain/elements/room/height-line";
+import { HeightLineEditor } from "./HeightLineEditor";
+import { FloatingPanel } from "./FloatingPanel";
 import type { Project } from "@/domain/project/schema";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
@@ -14,34 +19,32 @@ import type { Selection } from "./bim-view";
 const squareMetres = (value: number) =>
   value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** Clear heights from the slabs and roofs of the room's storey (R3): range, area per height
- * zone and the part without any height source, which stays visibly open (N34). */
+/** Heights from the slabs and roofs of the room's storey (R3/R3b): clear height range, for
+ * every height line the area reaching it and its share of the plan area, and the part without
+ * any height source, which stays visibly open (N34). */
 function RoomHeightSummary({ project, room }: { project: Project; room: Room }) {
-  const field = workingRoomHeights(project, room);
-  const zone = (from: number | null, to: number | null) =>
-    from === null
-      ? `unter ${squareMetres(to!)}`
-      : to === null
-        ? `ab ${squareMetres(from)}`
-        : `${squareMetres(from)}–${squareMetres(to)}`;
+  const clear = workingRoomClearHeights(project, room);
+  const lines = workingRoomHeightLines(project, room);
   return (
     <div className="text-xs text-muted-foreground" aria-label="Lichte Höhen">
       <p>
-        {field.min === null
+        {clear.min === null
           ? "Lichte Höhe offen: keine Decke und kein Dach über dem Raum"
-          : `Lichte Höhe ${squareMetres(field.min)}–${squareMetres(field.max!)} m über ${room.floorBuildUp === undefined ? "Rohfußboden" : "Fußbodenaufbau"}`}
+          : `Lichte Höhe ${squareMetres(clear.min)}–${squareMetres(clear.max!)} m über ${room.floorBuildUp === undefined ? "Rohfußboden" : "Fußbodenaufbau"}`}
       </p>
-      {field.min !== null && (
+      {clear.min !== null && lines.length > 0 && (
         <p>
-          {field.zones
-            .filter((z) => z.area > 1e-6)
-            .map((z) => `${zone(z.from, z.to)} m: ${squareMetres(z.area)} m²`)
+          {lines
+            .map(
+              (r) =>
+                `ab ${heightLineText(r.line)}: ${squareMetres(r.areaAbove)} m² (${(r.share * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`,
+            )
             .join(" · ")}
         </p>
       )}
-      {field.openArea > 1e-6 && (
+      {clear.openArea > 1e-6 && (
         <p className="text-amber-700 dark:text-amber-400">
-          Ohne Decke/Dach (Höhe offen): {squareMetres(field.openArea)} m²
+          Ohne Decke/Dach (Höhe offen): {squareMetres(clear.openArea)} m²
         </p>
       )}
     </div>
@@ -64,6 +67,7 @@ export function RoomProperties({
   onChange: (project: Project, selection: Selection) => void;
 }) {
   const [error, setError] = useState("");
+  const [linesOpen, setLinesOpen] = useState(false);
   const apply = (changes: Partial<Omit<Room, "id" | "points">>) => {
     try {
       onChange(updateRoom(project, room.id, changes), selection);
@@ -158,10 +162,30 @@ export function RoomProperties({
           ))}
         </select>
       </label>
-      <HeightLinesField
-        value={room.heightLines ?? ROOM_HEIGHT_LINES}
-        onValue={(lines) => apply({ heightLines: isDefaultHeightLines(lines) ? undefined : lines })}
-      />
+      <button
+        type="button"
+        onClick={() => setLinesOpen(true)}
+        className="h-8 self-end rounded border px-2 text-xs hover:bg-muted"
+      >
+        Höhenlinien bearbeiten…
+      </button>
+      <FloatingPanel
+        open={linesOpen}
+        title={`Höhenlinien ${room.number}`}
+        onClose={() => setLinesOpen(false)}
+        width={720}
+        height={360}
+      >
+        <div className="overflow-auto p-4">
+          <HeightLineEditor
+            lines={roomHeightLines(room)}
+            onChange={(lines) =>
+              apply({ heightLines: isDefaultHeightLineList(lines) ? undefined : lines })
+            }
+          />
+          {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+        </div>
+      </FloatingPanel>
       <RoomHeightSummary project={project} room={room} />
       {error && <p className="text-xs text-destructive">{error}</p>}
     </section>
