@@ -2,14 +2,17 @@ import { z } from "zod";
 import { validateSimplePolygon } from "../../../geometry/polygons/simple-polygon.ts";
 import { triangulateSimplePolygon } from "../../../geometry/polygons/triangulate.ts";
 import { contains } from "../../../geometry/polygons/contains.ts";
-import { MAX_ROOM_HEIGHT_LINE, MAX_ROOM_HEIGHT_LINES, MIN_ROOM_HEIGHT_LINE } from "./heights.ts";
+import { heightLineListSchema } from "./height-line.ts";
+
+/** Schema 33 limits of the former numeric height lines (migration only). */
+const V33_MAX_LINES = 5;
 
 export const MAX_ROOM_POINTS = 10000;
 /** Room numbers R-001, R-002 … (N32); the stable internal id stays separate. */
 export const ROOM_NUMBER = /^R-(\d{3,})$/;
 
 /**
- * Room of a storey (schema 32, height lines 33; docs/ROOM_ELEMENT.md, user decisions 29.10.2026).
+ * Room of a storey (schema 32, height lines 33/34; docs/ROOM_ELEMENT.md, user decisions 29.10.2026).
  * points: simple outline in model metres, any winding, no holes yet.
  * name: free text, may be empty. number: user-facing number, unique in the project
  * (trimmed, case-insensitive); new rooms get the next R-### automatically.
@@ -38,19 +41,24 @@ function refineOutline(room: { points: { x: number; y: number }[] }, ctx: z.Refi
 }
 /** Room of schema 32 (without height lines); only for reading older files. */
 export const roomV32Schema = z.object(roomShape).strict().superRefine(refineOutline);
-/** heightLines (schema 33, R3): clear heights in metres for the plan lines and zone areas,
- * strictly increasing; absent = the defaults 1,00 and 2,00 m, empty = no lines. */
-export const roomSchema = z
+/** Room of schema 33: heightLines as clear heights in metres (R3); only for reading. */
+export const roomV33Schema = z
   .object({
     ...roomShape,
     heightLines: z
-      .array(z.number().finite().min(MIN_ROOM_HEIGHT_LINE).max(MAX_ROOM_HEIGHT_LINE))
-      .max(MAX_ROOM_HEIGHT_LINES)
+      .array(z.number().finite().min(0.1).max(10))
+      .max(V33_MAX_LINES)
       .refine((lines) => lines.every((h, i) => i === 0 || h > lines[i - 1]!), {
         message: "Höhenlinien müssen aufsteigend und verschieden sein.",
       })
       .optional(),
   })
+  .strict()
+  .superRefine(refineOutline);
+/** heightLines (schema 34, R3b): each line with height, colour, line style and its lower and
+ * upper reference; absent = the defaults 1,00/2,00 m clear height, empty = no lines. */
+export const roomSchema = z
+  .object({ ...roomShape, heightLines: heightLineListSchema.optional() })
   .strict()
   .superRefine(refineOutline);
 export type Room = z.infer<typeof roomSchema>;

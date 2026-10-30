@@ -6,7 +6,11 @@ import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
 import { openingOverlaps } from "../../domain/elements/wall/opening-overlaps.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
-import { roomHeightField, storeyCeilingSources } from "../../domain/elements/room/heights.ts";
+import {
+  roomClearHeights,
+  roomHeightLineResults,
+  storeyCeilingSources,
+} from "../../domain/elements/room/heights.ts";
 
 export function derivePlanScene(
   geometry: ModelGeometry,
@@ -42,7 +46,18 @@ export function derivePlanScene(
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),
     // Clear heights from the storey's slabs and roofs, whatever their display (R3).
-    roomHeights: new Map(plan.rooms.map((r) => [r.id, roomHeightField(r, ceilings)] as const)),
+    roomHeights: new Map(
+      plan.rooms.map(
+        (r) =>
+          [
+            r.id,
+            {
+              clear: roomClearHeights(r, ceilings),
+              lines: roomHeightLineResults(r, ceilings),
+            },
+          ] as const,
+      ),
+    ),
     // Cut at 1 m, outline below and above it (docs/ROOF_ELEMENT.md, D4).
     roofViews: new Map(plan.roofs.map((r) => [r.id, roofPlanView(r)])),
     hatches: new Map(plan.hatches.map((h) => [h.id, h])),

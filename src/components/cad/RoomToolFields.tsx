@@ -4,7 +4,8 @@ import type { Layer } from "@/domain/layers/model";
 import { FloatingPanel } from "./FloatingPanel";
 import { SettingsSections } from "./SettingsSections";
 import type { RoomDefaults } from "./useToolDefaults";
-import { formatHeightLines, parseHeightLines } from "@/application/rooms/height-lines";
+import { heightLineLabel } from "@/application/rooms/height-lines";
+import { HeightLineEditor } from "./HeightLineEditor";
 
 export type RoomConstruction = HatchConstruction | "walls";
 
@@ -30,53 +31,6 @@ function ConstructionSelect({
         <option value="side-height">Gedrehtes Rechteck: Seite + dritter Punkt</option>
         <option value="boundary">Geschlossene Kontur übernehmen</option>
       </select>
-    </label>
-  );
-}
-
-/** Height lines as text ("1,00; 2,00"); commits on Enter or leaving the field (R3). */
-export function HeightLinesField({
-  value,
-  onValue,
-  label = "Höhenlinien (m)",
-}: {
-  value: readonly number[];
-  onValue: (lines: number[]) => void;
-  label?: string;
-}) {
-  const [raw, setRaw] = useState(formatHeightLines(value));
-  const [error, setError] = useState("");
-  const shown = formatHeightLines(value);
-  // Another editor (bar, window, undo) changed the value: follow it.
-  useEffect(() => {
-    setRaw(shown);
-    setError("");
-  }, [shown]);
-  const commit = () => {
-    const parsed = parseHeightLines(raw);
-    if (typeof parsed === "string") return setError(parsed);
-    setError("");
-    if (formatHeightLines(parsed) !== shown) onValue(parsed);
-    else setRaw(shown);
-  };
-  return (
-    <label className="text-xs">
-      {label}
-      <input
-        aria-label="Höhenlinien"
-        value={raw}
-        placeholder="keine"
-        onChange={(e) => setRaw(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          }
-        }}
-        className="block w-28 rounded border bg-background p-1"
-      />
-      {error && <span className="block max-w-48 text-destructive">{error}</span>}
     </label>
   );
 }
@@ -134,10 +88,6 @@ function RoomDefaultFields({
           className="block w-20 rounded border bg-background p-1 disabled:opacity-50"
         />
       </label>
-      <HeightLinesField
-        value={value.heightLines}
-        onValue={(heightLines) => onChange({ ...value, heightLines })}
-      />
       <label className="text-xs">
         Ebene
         <select
@@ -165,6 +115,7 @@ export function RoomToolFields({
   onChange,
   layers,
   nextNumber,
+  onOpenSettings,
 }: {
   construction: RoomConstruction;
   onConstruction: (construction: RoomConstruction) => void;
@@ -172,11 +123,22 @@ export function RoomToolFields({
   onChange: (value: RoomDefaults) => void;
   layers: readonly Layer[];
   nextNumber: string;
+  onOpenSettings: () => void;
 }) {
   return (
     <section aria-label="Raumwerkzeug" className="flex flex-wrap items-end gap-3">
       <ConstructionSelect value={construction} onValue={onConstruction} />
       <RoomDefaultFields value={value} onChange={onChange} layers={layers} />
+      {/* The bar only shows the height lines; all their settings live in the window (R3b). */}
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        title="Höhenlinien in den Raum-Einstellungen bearbeiten"
+        className="self-end rounded border px-2 py-1 text-xs hover:bg-muted"
+      >
+        Höhenlinien:{" "}
+        {value.heightLines.length ? value.heightLines.map(heightLineLabel).join(" · ") : "keine"} …
+      </button>
       <p role="status" className="text-xs text-muted-foreground">
         Nächste Nummer {nextNumber} ·{" "}
         {construction === "walls"
@@ -197,9 +159,11 @@ export function RoomSettingsPanel({
   value,
   onChange,
   layers,
+  section,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  section?: string | undefined;
   construction: RoomConstruction;
   onConstruction: (construction: RoomConstruction) => void;
   value: RoomDefaults;
@@ -211,10 +175,11 @@ export function RoomSettingsPanel({
       open={open}
       title="Raum-Einstellungen"
       onClose={() => onOpenChange(false)}
-      width={560}
-      height={420}
+      width={760}
+      height={460}
     >
       <SettingsSections
+        initial={section}
         sections={[
           {
             id: "room",
@@ -227,9 +192,27 @@ export function RoomSettingsPanel({
                 <p className="text-muted-foreground">
                   Nummern werden fortlaufend vergeben (R-001, R-002 …) und sind im Projekt
                   eindeutig. Der Fußbodenaufbau ist optional: abgewählt zählt die Oberkante
-                  Rohfußboden als Boden des Raumes. Höhenlinien (lichte Höhe über dem Boden) werden
-                  im Grundriss gezeichnet und gliedern die Fläche in Höhenzonen; leer = keine
-                  Linien.
+                  Rohfußboden als Boden des Raumes.
+                </p>
+              </>
+            ),
+          },
+          {
+            id: "height-lines",
+            label: "Höhenlinien",
+            content: (
+              <>
+                <HeightLineEditor
+                  lines={value.heightLines}
+                  onChange={(heightLines) => onChange({ ...value, heightLines })}
+                />
+                <p className="text-muted-foreground">
+                  Neue Räume übernehmen diese Linien. Jede Linie hat ihre eigene Höhe, Farbe und
+                  Linienart (aus den Linienarten der Einstellungen) sowie Unter- und Oberkante: z.
+                  B. 2,30 m von OK Fußboden bis Außenkante Dachhaut für einen Geschossnachweis. Je
+                  Linie werden die Fläche ab dieser Höhe und ihr Anteil an der Grundfläche ermittelt
+                  (Außenkante Dachhaut gilt bei Decken als deren Oberkante); die rechtliche
+                  Bewertung nach Landesbauordnung erfolgt hier nicht.
                 </p>
               </>
             ),

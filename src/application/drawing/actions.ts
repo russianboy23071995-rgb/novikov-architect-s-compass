@@ -8,6 +8,7 @@ import { addWall } from "../walls/actions.ts";
 import { addSlab } from "../slabs/actions.ts";
 import { addRoof } from "../roofs/actions.ts";
 import { addRoom } from "../rooms/actions.ts";
+import type { HeightLine } from "../../domain/elements/room/height-line.ts";
 import type { Roof } from "../../domain/elements/roof/model.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
 import type { LineAppearance } from "../../lib/bim/lines.ts";
@@ -59,7 +60,7 @@ export type DrawingRequest =
       points: Point[];
       name?: string;
       floorBuildUp?: number;
-      heightLines?: number[];
+      heightLines?: HeightLine[];
       layerId?: string;
     };
 export function assertDrawingContext(base: Project, current: Project) {
