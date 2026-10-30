@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 30.10.2026 · main nach PR512
+**Stand:** 30.10.2026 · main nach PR513
 
 ## Deine Wünsche
 
@@ -74,7 +74,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L24 | First-Person-Ansicht (durchs Gebäude gehen)                              |      | offen                      | Register     |
 | L25 | Live-Schnitt in 3D                                                       |      | offen                      | Register     |
 | L26 | Perspektivische Kamera                                                   |      | offen                      | §8           |
-| L27 | Kontextaktionen und Tastenkürzel (u. a. D vs. Strg+D, Kopieren/Spiegeln) |      | offen                      | §8, Register |
+| L27 | Kontextaktionen und Tastenkürzel (u. a. D vs. Strg+D, Kopieren/Spiegeln) |      | teilweise: K1 (PR513)      | §8, Register |
 | L28 | Einstellungsübersicht (was gilt für Benutzer/Projekt/Ansicht)            |      | offen                      | §8           |
 | L29 | Wandbewegung x/y/Achse abgleichen                                        |      | zurückgestellt seit 24.10. | §9           |
 
