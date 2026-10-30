@@ -502,3 +502,161 @@ test("schema 29 slab bindings load as storey bindings with unchanged heights", (
   raw.storeys[0].walls[0].topBinding = legacy(0);
   assert.throws(() => deserializeProject(JSON.stringify(raw)));
 });
+
+import { createProject as createTrimProject } from "../../../application/projects/create.ts";
+import { setStoreyHeight as setTrimStoreyHeight } from "../../../application/storeys/actions.ts";
+import { addWall as addTrimWall } from "../../../application/walls/actions.ts";
+import { addWindow as addTrimWindow } from "../../../application/windows/actions.ts";
+import {
+  addRoof as addTrimRoof,
+  updateRoof as updateTrimRoof,
+} from "../../../application/roofs/actions.ts";
+import { trimWallsToRoof, untrimWalls } from "../../../application/walls/roof-trim.ts";
+import { previewDeleteSelection as deleteForTrim } from "../../../application/elements/delete.ts";
+import { wallContourSolid } from "./contour-solid.ts";
+import { wallBody as trimWallBody } from "./body.ts";
+import { serializeProject as serializeTrim } from "../../../lib/bim/model.ts";
+import { loadProjectData as loadTrim } from "../../../interop/project-file/load.ts";
+import { addStorey as addTrimStorey } from "../../../application/storeys/actions.ts";
+import { selectWorkingStorey as selectTrimStorey } from "../../../application/storeys/working-storey.ts";
+
+/** Storey 3,00 m, free wall x = 0 from y = 0 to 6 (0,20 m thick, stored height 2,00 m) under a
+ * 30° roof whose underside is 2,00 m above the floor at y = 0 and rises towards +y. */
+function trimFixture() {
+  let p = createTrimProject("trim", "eg");
+  p = setTrimStoreyHeight(p, p, { projectId: "trim", storeyId: "eg", height: 3 });
+  p = addTrimWall(p, {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 6 },
+    thickness: 0.2,
+    height: 2,
+  });
+  return addTrimRoof(p, {
+    id: "d",
+    points: [
+      { x: -1, y: -1 },
+      { x: 1, y: -1 },
+      { x: 1, y: 7 },
+      { x: -1, y: 7 },
+    ],
+    referenceLine: { start: { x: -1, y: 0 }, end: { x: 1, y: 0 } },
+    rise: "left",
+    referenceHeight: 2,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+}
+const tan30 = Math.tan(Math.PI / 6);
+const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+const wallSolid = (p: ReturnType<typeof trimFixture>) => {
+  const w = p.storeys[0]!.walls[0]!;
+  return wallContourSolid(w, trimWallBody(w).corners, []);
+};
+
+test("roof trim: wall reaches up to the roof underside, derived plane, checks, undo data", () => {
+  // docs/TRIMMEN_L04B.md (L04b): decisions Q (underside), R (up to the roof), S, T.
+  const base = trimFixture();
+  const p = trimWallsToRoof(base, ["w"], "d");
+  const wall = p.storeys[0]!.walls[0]!;
+  assert.deepEqual(wall.roofTrim, { roofId: "d" });
+  assert.ok(close(wall.trimPlane!.bottom, 2) && close(wall.trimPlane!.top, 2 + 6 * tan30));
+  assert.equal(wall.height, 2); // the stored height stays for "Trimmung aufheben"
+  // Body: raised above the stored 2,00 m and cut along the roof; exact volume, closed.
+  const solid = wallSolid(p);
+  assert.ok(close(solid.volume, 0.2 * 6 * (2 + 3 * tan30)));
+  const zs = solid.faces.flatMap((f) => f.vertices.map((v) => v[2]));
+  assert.ok(close(Math.max(...zs), 2 + 6 * tan30) && close(Math.min(...zs), 0));
+  // A window above the stored height but under the roof is fine; one above the roof is refused.
+  const fits = addTrimWindow(p, {
+    id: "f1",
+    wallId: "w",
+    width: 1,
+    height: 1,
+    sillHeight: 2.2,
+    position: 0.75,
+  });
+  assert.equal(fits.storeys[0]!.windows.length, 1);
+  assert.throws(
+    () =>
+      addTrimWindow(p, {
+        id: "f2",
+        wallId: "w",
+        width: 1,
+        height: 1.5,
+        sillHeight: 1,
+        position: 0.1,
+        mark: "F2",
+      }),
+    /Fenster F2 ragt über die Dachfläche/,
+  );
+  // Moving the roof is checked against the windows too (S) and recomputes the plane.
+  assert.throws(
+    () => updateTrimRoof(fits, "d", { referenceHeight: 0.5 }),
+    /ragt über die Dachfläche/,
+  );
+  const higher = updateTrimRoof(p, "d", { referenceHeight: 2.5 });
+  assert.ok(close(higher.storeys[0]!.walls[0]!.trimPlane!.bottom, 2.5));
+  // A roof below the wall foot cannot trim; an unknown roof is refused.
+  assert.throws(() => updateTrimRoof(p, "d", { referenceHeight: 0.05 }), /unter dem Fuß der Wand/);
+  assert.throws(() => trimWallsToRoof(base, ["w"], "nope"), /genau ein Dach/);
+  // Stored: the reference only, never the derived plane; loads back identically.
+  const file = JSON.parse(serializeTrim(p));
+  assert.deepEqual(file.storeys[0].walls[0].roofTrim, { roofId: "d" });
+  assert.equal("trimPlane" in file.storeys[0].walls[0], false);
+  assert.deepEqual(loadTrim(file), p);
+  // A schema 34 file carries no trims: plain walls load, smuggled trims are refused.
+  assert.deepEqual(loadTrim({ ...JSON.parse(serializeTrim(base)), schemaVersion: 34 }), base);
+  assert.throws(() => loadTrim({ ...file, schemaVersion: 34 }));
+  // Untrim and roof deletion give the stored height back.
+  const untrimmed = untrimWalls(p, ["w"]);
+  assert.equal("roofTrim" in untrimmed.storeys[0]!.walls[0]!, false);
+  assert.equal("trimPlane" in untrimmed.storeys[0]!.walls[0]!, false);
+  assert.throws(() => untrimWalls(base, ["w"]), /nicht getrimmt/);
+  const deleted = deleteForTrim(p, [{ kind: "roof", id: "d" }], undefined);
+  assert.equal("roofTrim" in deleted.result.storeys[0]!.walls[0]!, false);
+  assert.match(deleted.summary, /1 Wandtrimmung wird aufgehoben/);
+});
+
+test("roof trim across storeys: an EG gable trimmed by the roof of the OG", () => {
+  // Masterplan §8 / A08: the trim is a cross-storey input; the plane includes the storey step.
+  let p = createTrimProject("trim2", "eg");
+  p = setTrimStoreyHeight(p, p, { projectId: "trim2", storeyId: "eg", height: 3 });
+  p = addTrimWall(p, {
+    id: "g",
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 6 },
+    thickness: 0.2,
+    height: 2.8,
+  });
+  p = addTrimStorey(p, p, {
+    projectId: "trim2",
+    id: "og",
+    storeyId: "eg",
+    side: "above",
+    height: 3,
+  });
+  p = selectTrimStorey(p, p, "og");
+  p = addTrimRoof(p, {
+    id: "dach",
+    points: [
+      { x: -1, y: -1 },
+      { x: 1, y: -1 },
+      { x: 1, y: 7 },
+      { x: -1, y: 7 },
+    ],
+    referenceLine: { start: { x: -1, y: 0 }, end: { x: 1, y: 0 } },
+    rise: "left",
+    referenceHeight: 0.5,
+    pitch: 30,
+    thickness: 0.2,
+    eaveCut: "vertical",
+    topCut: "vertical",
+  });
+  const trimmed = trimWallsToRoof(p, ["g"], "dach");
+  const gable = trimmed.storeys.find((s) => s.id === "eg")!.walls[0]!;
+  // OG floor at 3,00 m + 0,50 m → 3,50 m above the EG wall foot at y = 0.
+  assert.ok(close(gable.trimPlane!.bottom, 3.5) && close(gable.trimPlane!.top, 3.5 + 6 * tan30));
+});

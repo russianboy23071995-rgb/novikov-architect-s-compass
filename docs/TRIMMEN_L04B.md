@@ -1,4 +1,4 @@
-# L04b – Wände an Dachflächen trimmen (freigegebene Karte, noch nicht umgesetzt)
+# L04b – Wände an Dachflächen trimmen
 
 Stand 30.10.2026. Vom Nutzer freigegeben („Du kannst mit L04b starten“), vorher K1 (PR513) und K2 (PR514) erledigt. Grundlage: Masterplan §8 (Entscheidung 29.10.2026: Die Wand hält einen Trimmverweis auf das Dach, der Schnitt wird jeweils aus dem aktuellen Dach abgeleitet, „Trimmung aufheben“ entfernt den Verweis; geschossübergreifend erlaubt, A08).
 
@@ -33,3 +33,15 @@ Vorschlag: zwei PRs – (1) Modell, Geometrie, 3D; (2) Bedienung, IFC, Archicad-
 Nicht enthalten: Kniestock-Schnittdarstellung im Grundriss (Wand weiter bei 1 m geschnitten), Gast-Anzeige (L02), automatisches Trimmen ohne Auswahl.
 
 Technische Ansatzpunkte: Wandkörper `src/domain/elements/wall/contour-solid.ts` (`extrudeProfileWithOpenings`), Höhenbindung `src/domain/elements/wall/height-binding.ts`, Dachebene `roofUndersideAt`/`roofFrame` in `src/domain/elements/roof/geometry.ts`, IFC-Wand in `src/interop/ifc/writer.ts` (heute Extrusion; Dach als `IFCFACETEDBREP` als Vorbild), Menüeinträge in `src/components/cad/CadWorkspace.tsx` (`contextEntries`, `later(...)`) und `TopToolbar.tsx` (Modify).
+
+## Teil 1 umgesetzt (31.10.2026): Modell, Geometrie, 3D
+
+- Schema 35 (`src/domain/project/schema.ts`): Wand mit optionalem `roofTrim: { roofId }`. Der Schnitt `trimPlane` (Ebene a + b·x + c·y über dem Wandfuß, höchster/niedrigster Wert über den Wandkörperecken) wird bei jeder Modellprüfung neu aus dem aktuellen Dach berechnet (`resolveRoofTrims`, `src/domain/elements/wall/roof-trim.ts`), auch geschossübergreifend, und nie gespeichert (`storage-data.ts` entfernt ihn). Dateien aus Schema 34 laden unverändert; ein untergeschobener Trimmverweis in einer 34er Datei wird abgelehnt.
+- Prüfungen: Dach muss existieren; die Dachfläche muss über der ganzen Wand mindestens 0,10 m über dem Wandfuß liegen; kein Fenster und keine Tür darf über die Dachfläche ragen (Entscheidung S, auch wenn später das Dach verschoben wird). Ein Fenster oberhalb der gespeicherten, aber unter der getrimmten Wandhöhe ist erlaubt (`effectiveWallHeight`).
+- Geometrie (`src/geometry/solids/plane-trim.ts`, `trimExtrusionBelowPlane`): Der Wandkörper wird bis zum höchsten Punkt der Dachebene über seinem Umriss hochgezogen (Entscheidung R) und an der Ebene gekappt; jede Fläche wird geschnitten, oben schließt der auf die Ebene gehobene Umriss den Körper. Verbundene und freistehende Wände nutzen denselben Weg; ungetrimmte Wände bleiben unverändert (14-Modell-Hash gleich).
+- Aktionen (`src/application/walls/roof-trim.ts`): `trimWallsToRoof`, `untrimWalls` (je ein Undo-Schritt). Dach löschen hebt seine Trimmungen im selben Schritt auf („1 Wandtrimmung wird aufgehoben“).
+- Noch nicht: Bedienung (Menü, Bestätigung, Eigenschaften), IFC-Export der schrägen Wand (bis Teil 2 exportiert IFC getrimmte Wände noch als Quader mit gespeicherter Höhe), Archicad-Prüfdatei.
+
+Nachweis: Tests in `src/domain/elements/wall/heights.test.ts` (freistehende Wand unter 30°-Dach: Ebene, Volumen exakt 0,2 · 6 · (2 + 3·tan 30°), Oberkante 2 + 6·tan 30°; Fenster über gespeicherter Höhe erlaubt, über Dach abgelehnt; Dach verschieben geprüft und neu berechnet; Dach unter Wandfuß und unbekanntes Dach abgelehnt; Speichern nur mit Verweis, Laden identisch; Schema-34-Dateien; Aufheben; Dach löschen; EG-Giebel am OG-Dach mit 3,50 m Ebenenhöhe). 1373 Tests grün, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (31.10.2026): Dach-Prüfhaus, alle OG-Wände an „og-dach“ getrimmt (über die Aktion, da die Bedienung erst in Teil 2 kommt): Traufwand 2,55–2,63 m, Giebel schräg 2,59–4,20 m, Rückwand auf 4,16–4,24 m hochgezogen; in 3D reicht der Giebel lückenlos bis unter die Dachfläche. Keine Konsolenfehler.

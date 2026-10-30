@@ -48,8 +48,23 @@ export function previewDeleteSelection(
   const tees = storey.wallTJunctions.filter(
     (j) => !walls.has(j.hostWallId) && !walls.has(j.incoming.wallId),
   );
+  // Walls trimmed at a deleted roof keep their stored height again (L04b), in any storey.
+  const roofs = new Set((storey.roofs ?? []).filter((r) => removed.has(r.id)).map((r) => r.id));
+  let untrimmed = 0;
+  const untrim = (s: Storey): Storey => {
+    if (!roofs.size || !s.walls.some((w) => w.roofTrim && roofs.has(w.roofTrim.roofId))) return s;
+    return {
+      ...s,
+      walls: s.walls.map((w) => {
+        if (!w.roofTrim || !roofs.has(w.roofTrim.roofId)) return w;
+        untrimmed++;
+        const { roofTrim: _trim, trimPlane: _plane, ...rest } = w;
+        return rest;
+      }),
+    };
+  };
   const storeys = project.storeys.map((s) =>
-    s === storey ? ({ ...next, wallJoins: joins, wallTJunctions: tees } as Storey) : s,
+    untrim(s === storey ? ({ ...next, wallJoins: joins, wallTJunctions: tees } as Storey) : s),
   );
   const used = new Set(storeys.flatMap((s) => s.references.map((r) => r.assetId)));
   const result = validateLike(project, {
@@ -65,6 +80,12 @@ export function previewDeleteSelection(
       followers.length === 1
         ? "1 Fenster/Tür der Wand wird mitgelöscht"
         : `${followers.length} Fenster/Türen der Wände werden mitgelöscht`,
+    );
+  if (untrimmed)
+    parts.push(
+      untrimmed === 1
+        ? "1 Wandtrimmung wird aufgehoben"
+        : `${untrimmed} Wandtrimmungen werden aufgehoben`,
     );
   if (connections)
     parts.push(`${connections} Wandanschl${connections === 1 ? "uss wird" : "üsse werden"} gelöst`);

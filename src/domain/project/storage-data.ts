@@ -5,8 +5,10 @@ export function storeyStorageData(storey: Project["storeys"][number]) {
   return {
     ...storey,
     walls: storey.walls.map((w) => {
-      if (!w.topBinding) return w;
-      const { height: _derived, ...stored } = w;
+      // The roof trim plane is derived on every validation (L04b) and never stored.
+      const { trimPlane: _plane, ...wall } = w;
+      if (!wall.topBinding) return wall;
+      const { height: _derived, ...stored } = wall;
       return stored;
     }),
   };

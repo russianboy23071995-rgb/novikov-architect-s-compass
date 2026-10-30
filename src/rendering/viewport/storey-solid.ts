@@ -7,6 +7,7 @@ import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { workingStoreyElevation } from "../../domain/storeys/elevation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
+import { wallContourSolid } from "../../domain/elements/wall/contour-solid.ts";
 import { storeyOpenings, type WallOpening } from "../../domain/elements/wall/openings.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { validateProject, wallLength } from "../../domain/project/schema.ts";
@@ -47,7 +48,12 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     else windowsByHost.set(window.wallId, [window]);
   }
   for (const wall of storeyOf(project).walls) {
-    const connection = joined.get(wall.id);
+    // A free wall trimmed at a roof (L04b) uses the contour body with its plane cut.
+    const connection =
+      joined.get(wall.id) ??
+      (wall.trimPlane
+        ? wallContourSolid(wall, wallBody(wall).corners, storeyOpenings(storeyOf(project)))
+        : undefined);
     if (connection) {
       solid.faces.push(...connection.faces);
       solid.volume += connection.volume;
