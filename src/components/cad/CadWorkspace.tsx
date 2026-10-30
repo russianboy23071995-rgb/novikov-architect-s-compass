@@ -3,6 +3,17 @@ import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
+import { trimWallsToRoof, untrimWalls } from "@/application/walls/roof-trim";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CanvasContextMenu, type ContextMenuEntry } from "./CanvasContextMenu";
 import {
   clipboardSummary,
@@ -746,7 +757,59 @@ export function CadWorkspace({
       propertiesRef.current?.focus();
     }
   };
-  const later = (what: string) => `Kommt mit ${what}.`;
+  // Trimming walls at a roof (docs/TRIMMEN_L04B.md, L04b): walls and exactly one roof selected,
+  // then confirm. Shared by the right-click menu and the Modify menu.
+  const [trimConfirm, setTrimConfirm] = useState<{ wallIds: string[]; roofId: string } | null>(
+    null,
+  );
+  const trimRequest = (): { wallIds: string[]; roofId: string } | string => {
+    const walls = selections.filter((s) => s.kind === "wall");
+    const roofs = selections.filter((s) => s.kind === "roof");
+    if (!walls.length || roofs.length !== 1) return "Wände und genau ein Dach auswählen.";
+    if (walls.length + roofs.length !== selections.length)
+      return "Nur Wände und ein Dach auswählen.";
+    if (!canEditSelection) return "Gerade nicht möglich.";
+    return { wallIds: walls.map((w) => w.id), roofId: roofs[0]!.id };
+  };
+  const trimmedSelection = () => {
+    const ids = new Set(selections.filter((s) => s.kind === "wall").map((s) => s.id));
+    return project.storeys.flatMap((s) =>
+      s.walls.filter((w) => ids.has(w.id) && w.roofTrim).map((w) => w.id),
+    );
+  };
+  const askTrim = () => {
+    const request = trimRequest();
+    if (typeof request === "string") return setModelError(request);
+    setTrimConfirm(request);
+  };
+  const confirmTrim = () => {
+    const request = trimConfirm;
+    setTrimConfirm(null);
+    if (!request) return;
+    try {
+      dispatchEditing({
+        type: "project",
+        project: trimWallsToRoof(project, request.wallIds, request.roofId),
+      });
+      showNotice(
+        `${request.wallIds.length} ${request.wallIds.length === 1 ? "Wand" : "Wände"} getrimmt`,
+      );
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Trimmen nicht möglich.");
+    }
+  };
+  const untrimSelected = () => {
+    const ids = trimmedSelection();
+    if (!ids.length) return setModelError("Keine getrimmte Wand ausgewählt.");
+    try {
+      dispatchEditing({ type: "project", project: untrimWalls(project, ids) });
+      showNotice("Trimmung aufgehoben");
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Aufheben nicht möglich.");
+    }
+  };
   const contextEntries = (target: NonNullable<Selection> | null): ContextMenuEntry[] => {
     const none = selections.length === 0 ? "Keine Auswahl." : false;
     const single = target ?? (selections.length === 1 ? selections[0]! : null);
@@ -793,12 +856,20 @@ export function CadWorkspace({
         run: () => openToolSettings(target?.kind ?? null),
       },
       "separator",
-      { id: "trim", label: "Trimmen…", disabled: later("dem Trimmen (L04b)"), run: () => {} },
+      (() => {
+        const request = trimRequest();
+        return {
+          id: "trim",
+          label: "Trimmen…",
+          disabled: typeof request === "string" ? request : false,
+          run: askTrim,
+        };
+      })(),
       {
         id: "untrim",
         label: "Trimmung aufheben",
-        disabled: later("dem Trimmen (L04b)"),
-        run: () => {},
+        disabled: trimmedSelection().length ? false : "Keine getrimmte Wand ausgewählt.",
+        run: untrimSelected,
       },
       { heading: "Darstellungsreihenfolge" },
       ...(["front", "forward", "backward", "back"] as const).map((step) => ({
@@ -1197,6 +1268,21 @@ export function CadWorkspace({
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
       />
+      <AlertDialog open={!!trimConfirm} onOpenChange={(open) => !open && setTrimConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Wände trimmen</AlertDialogTitle>
+            <AlertDialogDescription>
+              {trimConfirm &&
+                `${trimConfirm.wallIds.length} ${trimConfirm.wallIds.length === 1 ? "Wand" : "Wände"} an Dach „${trimConfirm.roofId}“ trimmen? Die Wände reichen dann bis zur Dachunterseite; die gespeicherte Höhe bleibt für „Trimmung aufheben“ erhalten.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmTrim}>Trimmen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {contextMenu && (
         <CanvasContextMenu
           position={contextMenu}
@@ -1351,6 +1437,10 @@ export function CadWorkspace({
             }}
             onPipette={() => selections.length === 1 && pickupFrom(selections[0]!)}
             canPipette={selections.length === 1}
+            onTrim={askTrim}
+            canTrim={typeof trimRequest() !== "string"}
+            onUntrim={untrimSelected}
+            canUntrim={trimmedSelection().length > 0}
             onRoomList={() => {
               cancelInteraction();
               setDemandOpen(false);

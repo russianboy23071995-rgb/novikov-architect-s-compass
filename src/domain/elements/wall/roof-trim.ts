@@ -170,3 +170,18 @@ function checkOpenings(
       );
   }
 }
+
+/** The trim plane in a wall's local frame (origin `origin`, x along (ux, uy), y to its left),
+ * as used by the 3D body and the IFC export, so both cut the same shape. */
+export function localTrimPlane(
+  plane: Pick<WallTrimPlane, "a" | "b" | "c">,
+  origin: Point2,
+  ux: number,
+  uy: number,
+) {
+  return {
+    a: plane.a + plane.b * origin.x + plane.c * origin.y,
+    b: plane.b * ux + plane.c * uy,
+    c: -plane.b * uy + plane.c * ux,
+  };
+}

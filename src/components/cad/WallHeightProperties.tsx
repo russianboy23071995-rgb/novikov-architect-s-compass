@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Project, Wall } from "@/domain/project/schema";
 import { setWallHeightRule } from "@/application/walls/height-binding";
+import { untrimWalls } from "@/application/walls/roof-trim";
 import { resolveStoreyLevels } from "@/domain/storeys/heights";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
@@ -59,6 +60,30 @@ export function WallHeightProperties({
   };
   return (
     <div className="flex flex-wrap items-end gap-2" aria-label="Wandhöhenbindung">
+      {wall.roofTrim && (
+        // Trimmed at a roof (docs/TRIMMEN_L04B.md): the stored height below returns on untrim.
+        <div className="flex items-end gap-2" aria-label="Dachtrimmung">
+          <p className="text-[11px]">
+            Getrimmt an: Dach {wall.roofTrim.roofId}
+            {wall.trimPlane &&
+              ` · Oberkante ${metres(wall.trimPlane.bottom)}–${metres(wall.trimPlane.top)} m`}
+          </p>
+          <button
+            type="button"
+            className="h-8 rounded border px-2 text-xs hover:bg-muted"
+            onClick={() => {
+              try {
+                onChange(untrimWalls(project, [wall.id]));
+                setError("");
+              } catch (failure) {
+                setError(failure instanceof Error ? failure.message : "Aufheben nicht möglich.");
+              }
+            }}
+          >
+            Trimmung aufheben
+          </button>
+        </div>
+      )}
       <label className="text-xs">
         Höhenmodus
         <select

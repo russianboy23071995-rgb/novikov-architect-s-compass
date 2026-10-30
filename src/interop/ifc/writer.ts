@@ -8,6 +8,9 @@ import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
 import { slabLevels } from "../../domain/elements/slab/model.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
+import { localTrimPlane } from "../../domain/elements/wall/roof-trim.ts";
+import { trimExtrusionBelowPlane } from "../../geometry/solids/plane-trim.ts";
+import { extrudeProfileWithOpenings } from "../../geometry/solids/profile-openings.ts";
 import {
   roomClearHeights,
   roomHeightLineResults,
@@ -178,6 +181,32 @@ export async function writeIfc(
     const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','SweptSolid',(${solid})`);
     return add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`);
   };
+  /** Closed faceted body of a trimmed wall in its own frame (same cut as in 3D). */
+  const trimmedWallBrep = (
+    profile: readonly Point2[],
+    plane: { a: number; b: number; c: number },
+  ) => {
+    const top = Math.max(...profile.map((p) => plane.a + plane.b * p.x + plane.c * p.y));
+    const solid = trimExtrusionBelowPlane(
+      extrudeProfileWithOpenings(profile, top, []),
+      profile,
+      plane,
+    );
+    const refs = new Map<string, string>();
+    const vertex = (v: readonly number[]) => {
+      const k = v.join(",");
+      let ref = refs.get(k);
+      if (!ref) refs.set(k, (ref = point([...v])));
+      return ref;
+    };
+    const faces = solid.faces.map((face) => {
+      const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
+      return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
+    });
+    const brep = add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${faces.join(",")})`));
+    const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Brep',(${brep})`);
+    return add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`);
+  };
   const properties = async (
     target: string,
     kind: string,
@@ -279,9 +308,27 @@ export async function writeIfc(
         (wall.end.x - wall.start.x) / length,
         (wall.end.y - wall.start.y) / length,
       );
+      // A wall trimmed at a roof (docs/TRIMMEN_L04B.md) goes out with its real inclined top as
+      // a faceted B-rep in the wall frame; openings stay IfcOpeningElement voids as usual.
+      const wallShape = wall.trimPlane
+        ? trimmedWallBrep(
+            profiles.get(wall.id) ?? [
+              { x: 0, y: -wall.thickness / 2 },
+              { x: length, y: -wall.thickness / 2 },
+              { x: length, y: wall.thickness / 2 },
+              { x: 0, y: wall.thickness / 2 },
+            ],
+            localTrimPlane(
+              wall.trimPlane,
+              bodyPosition.start,
+              (wall.end.x - wall.start.x) / length,
+              (wall.end.y - wall.start.y) / length,
+            ),
+          )
+        : body(length, wall.thickness, wall.height, profiles.get(wall.id));
       const wallRef = add(
         "IFCWALL",
-        `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${body(length, wall.thickness, wall.height, profiles.get(wall.id))},${label(wall.id)},.NOTDEFINED.`,
+        `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${wallShape},${label(wall.id)},.NOTDEFINED.`,
       );
       elements.push(wallRef);
       await properties(wallRef, "wall", wall.id, [
@@ -289,6 +336,13 @@ export async function writeIfc(
         ["Thickness", `IFCLENGTHMEASURE(${real(wall.thickness)})`],
         ["Height", `IFCLENGTHMEASURE(${real(wall.height)})`],
         ["BodyOffset", `IFCLENGTHMEASURE(${real(wall.bodyOffset)})`],
+        ...(wall.roofTrim && wall.trimPlane
+          ? ([
+              ["TrimmedAtRoof", `IFCTEXT(${text(wall.roofTrim.roofId)})`],
+              ["TrimmedTopMin", `IFCLENGTHMEASURE(${real(wall.trimPlane.bottom)})`],
+              ["TrimmedTopMax", `IFCLENGTHMEASURE(${real(wall.trimPlane.top)})`],
+            ] as [string, string][])
+          : []),
       ]);
       for (const window of floor.windows.filter((item) => item.wallId === wall.id)) {
         const openingPlacement = placement(

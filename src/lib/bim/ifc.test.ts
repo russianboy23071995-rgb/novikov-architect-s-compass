@@ -329,3 +329,54 @@ test("rooms R4: room list query, CSV and IfcSpace per storey", async () => {
   // Without rooms nothing changes in the export.
   assert.doesNotMatch(await exportIfc(createProject("leer", "eg")), /IFCSPACE/);
 });
+
+import { trimAcceptanceProject } from "../../../benchmarks/trim-ifc-acceptance.ts";
+import { connectedWallSolids as trimSolids } from "../../domain/elements/wall/connections.ts";
+import { trimHeightAt } from "../../domain/elements/wall/roof-trim.ts";
+
+test("L04b part 2: trimmed walls of the roof house in 3D and as IFC B-rep", async () => {
+  // docs/TRIMMEN_L04B.md: all OG walls trimmed at og-dach (eave, two gables, raised back wall).
+  const p = trimAcceptanceProject();
+  const og = selectWorkingStorey(p, p, "og");
+  const walls = storeyOf(og).walls;
+  assert.ok(walls.every((w) => w.roofTrim?.roofId === "og-dach" && w.trimPlane));
+  // 3D: every vertex of every joined, trimmed body lies on or below its roof plane, and the
+  // body reaches the plane (highest point = highest plane point over its own outline).
+  for (const solid of trimSolids(og)) {
+    const wall = walls.find((w) => w.id === solid.wallId)!;
+    const plane = wall.trimPlane!;
+    const vertices = solid.faces.flatMap((f) => f.vertices);
+    assert.ok(vertices.every(([x, y, z]) => z <= trimHeightAt(plane, { x, y }) + 1e-9));
+    const reach = Math.max(...solid.contour.map((q) => trimHeightAt(plane, q)));
+    assert.ok(Math.abs(Math.max(...vertices.map((v) => v[2])) - reach) < 1e-9);
+    assert.ok(solid.volume > 0);
+  }
+  // IFC: trimmed walls go out as faceted B-rep with their trim data; untrimmed EG walls stay
+  // extrusions; the roof stays one B-rep.
+  const ifc = await exportIfc(p, new Date("2026-10-31T12:00:00Z"));
+  assert.equal([...ifc.matchAll(/IFCFACETEDBREP\(/g)].length, walls.length + 1);
+  assert.equal([...ifc.matchAll(/'TrimmedAtRoof',\$,IFCTEXT\('og-dach'\)/g)].length, walls.length);
+  for (const w of walls) {
+    const wallLine = ifc.match(
+      new RegExp(`^#\\d+=IFCWALL\\('[^']+',\\$,'${w.id}',\\$,\\$,#\\d+,#(\\d+),`, "m"),
+    )!;
+    const shape = ifc.match(
+      new RegExp(`^#${wallLine[1]}=IFCPRODUCTDEFINITIONSHAPE\\(\\$,\\$,\\(#(\\d+)\\)\\);`, "m"),
+    )!;
+    assert.match(
+      ifc,
+      new RegExp(`^#${shape[1]}=IFCSHAPEREPRESENTATION\\(#\\d+,'Body','Brep',`, "m"),
+    );
+  }
+  const egWall = storeyOf(selectWorkingStorey(p, p, "eg")).walls[0]!;
+  const egLine = ifc.match(
+    new RegExp(`^#\\d+=IFCWALL\\('[^']+',\\$,'${egWall.id}',\\$,\\$,#\\d+,#(\\d+),`, "m"),
+  )!;
+  const egShape = ifc.match(
+    new RegExp(`^#${egLine[1]}=IFCPRODUCTDEFINITIONSHAPE\\(\\$,\\$,\\(#(\\d+)\\)\\);`, "m"),
+  )!;
+  assert.match(
+    ifc,
+    new RegExp(`^#${egShape[1]}=IFCSHAPEREPRESENTATION\\(#\\d+,'Body','SweptSolid',`, "m"),
+  );
+});
