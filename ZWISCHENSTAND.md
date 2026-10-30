@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 29.10.2026 · main nach PR509 · 1366 automatische Tests grün
+**Stand:** 30.10.2026 · main nach PR510 · 1367 automatische Tests grün
 
 ## Gerade aktiv
 
-- Raumwerkzeug (L08): R1 Modell (PR507) R2 Werkzeug (PR508: Klick zwischen Wänden, Raumstempel, Eigenschaften) und R3 Höhen (PR509: lichte Höhe, Höhenlinien, Fläche je Höhenzone) erledigt. Offen: Entscheidung, wie ein Raum unter Dach/Decke per Klick auswählbar wird; danach R4 Raumliste und IfcSpace (docs/ROOM_ELEMENT.md).
+- Raumwerkzeug (L08): R1 Modell (PR507) R2 Werkzeug (PR508: Klick zwischen Wänden, Raumstempel, Eigenschaften) R3 Höhen (PR509) und R3b Höhenlinien (PR510: Höhe, Farbe, Linienart, Unter- und Oberkante, Fläche ab Linie, z. B. 2,30 m bis Dachhaut) erledigt. Offen: Entscheidung, wie ein Raum unter Dach/Decke per Klick auswählbar wird; danach R4 Raumliste und IfcSpace (docs/ROOM_ELEMENT.md).
 
 ## Was wir gemacht haben (24.–29.10.2026)
 
