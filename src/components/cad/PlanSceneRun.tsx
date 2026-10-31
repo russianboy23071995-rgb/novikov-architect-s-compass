@@ -1,4 +1,4 @@
-import { cutPaint, type CutFill } from "./cut-fill";
+import { cutPaint, wallCutPaint, type CutFill } from "./cut-fill";
 import type { ScaleContext } from "@/domain/views/scale";
 import { HatchPattern } from "./HatchPattern";
 import { LinePattern } from "./LinePattern";
@@ -73,6 +73,7 @@ type Props = PlanRun & {
   pixelsPerMetre: number;
   wallOutlineWidth: number;
   cutFill: CutFill;
+  showRenovation: boolean;
   cornerGeometry: CornerPreview["geometry"] | undefined;
   allowsShown: (id: string) => boolean;
   canPick: (id: string) => boolean;
@@ -94,6 +95,7 @@ export function PlanSceneContent({
   pixelsPerMetre,
   wallOutlineWidth,
   cutFill,
+  showRenovation,
   cornerGeometry,
   allowsShown,
   canPick,
@@ -457,7 +459,7 @@ export function PlanSceneContent({
               )
                 .map((p) => `${p.x},${-p.y}`)
                 .join(" ")}
-              {...cutPaint(cutFill)}
+              {...wallCutPaint(cutFill, showRenovation, wall.renovation)}
               stroke={cornerGeometry ? "var(--primary)" : "none"}
               strokeWidth={wallOutlineWidth / pixelsPerMetre}
               className="outline-none focus-visible:stroke-sky-300"

@@ -38,6 +38,7 @@ import {
   projectV32Schema,
   projectV33Schema,
   projectV34Schema,
+  projectV35Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -240,6 +241,14 @@ export function migrateProjectData(value: unknown): Project {
     return validateProject(
       withoutBoundHeights({
         ...projectV34Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
+  // Schema 35 walls carry no renovation status (= Bestand); the strict v35 schema rejects one.
+  if (value.schemaVersion === 35)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV35Schema.parse(value),
         schemaVersion: PROJECT_SCHEMA_VERSION,
       }),
     );

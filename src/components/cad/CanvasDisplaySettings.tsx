@@ -8,6 +8,8 @@ export function CanvasDisplaySettings({
   onWallWidth,
   cutFill,
   onCutFill,
+  showRenovation,
+  onShowRenovation,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -15,6 +17,8 @@ export function CanvasDisplaySettings({
   onWallWidth: (width: number) => void;
   cutFill: CutFill;
   onCutFill: (fill: CutFill) => void;
+  showRenovation: boolean;
+  onShowRenovation: (show: boolean) => void;
 }) {
   const sample = cutPaint(cutFill);
   return (
@@ -23,7 +27,7 @@ export function CanvasDisplaySettings({
       title="Darstellung"
       onClose={() => onOpenChange(false)}
       width={420}
-      height={540}
+      height={640}
     >
       <div className="min-h-0 flex-1 overflow-auto space-y-4 p-4">
         <p className="text-xs text-muted-foreground">Bildschirmdarstellung des Grundrisses</p>
@@ -90,6 +94,22 @@ export function CanvasDisplaySettings({
           <p className="text-xs text-muted-foreground">
             Füllung der Wände und Dachschnitte in Schnitthöhe (1 m); Weiß zeigt nur die Kontur. Wird
             in diesem Browser gespeichert.
+          </p>
+        </fieldset>
+        <fieldset className="space-y-2">
+          <legend className="font-medium">Bauzustand</legend>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              aria-label="Bauzustand farbig anzeigen"
+              checked={showRenovation}
+              onChange={(e) => onShowRenovation(e.target.checked)}
+            />
+            Bauzustand farbig anzeigen
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Neubau rot, Abbruch gelb, Bestand in der Schnittfarbe. Den Bauzustand einer Wand legst
+            du im Wandfenster unter „Bauzustand“ fest.
           </p>
         </fieldset>
       </div>

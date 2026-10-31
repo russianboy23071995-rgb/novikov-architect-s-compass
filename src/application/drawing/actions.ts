@@ -1,3 +1,4 @@
+import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import type { ViewIdentity } from "../../domain/views/scale.ts";
 import { previewHatch } from "../hatches/actions.ts";
@@ -45,6 +46,7 @@ export type DrawingRequest =
       height: number;
       bodyOffset?: number;
       layerId?: string;
+      renovation?: WallRenovation | undefined;
     }
   | {
       kind: "line";
@@ -148,6 +150,7 @@ export function createDrawing(
         thickness: request.thickness,
         bodyOffset: request.bodyOffset ?? request.thickness / 2,
         ...(request.layerId ? { layerId: request.layerId } : {}),
+        ...(request.renovation ? { renovation: request.renovation } : {}),
         height: request.height,
       })
     : addLine(current, {

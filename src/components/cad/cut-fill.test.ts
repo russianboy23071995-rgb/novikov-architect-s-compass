@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cutPaint, defaultCutFill, parseCutFill } from "./cut-fill.ts";
+import { cutPaint, defaultCutFill, parseCutFill, wallCutPaint } from "./cut-fill.ts";
 
 test("grey keeps the earlier plan look", () => {
   assert.deepEqual(cutPaint(defaultCutFill), {
@@ -36,4 +36,13 @@ test("stored values are checked", () => {
   assert.deepEqual(parseCutFill({ mode: "purple" }), defaultCutFill);
   assert.deepEqual(parseCutFill(null), defaultCutFill);
   assert.deepEqual(parseCutFill("grey"), defaultCutFill);
+});
+
+test("renovation colours only when the display is on; Bestand keeps the cut fill", () => {
+  const black = { mode: "black" as const, color: "#000000" };
+  assert.deepEqual(wallCutPaint(black, true, "new"), { fill: "#dc2626", fillOpacity: 1 });
+  assert.deepEqual(wallCutPaint(black, true, "demolish"), { fill: "#facc15", fillOpacity: 1 });
+  assert.deepEqual(wallCutPaint(black, true, "existing"), cutPaint(black));
+  assert.deepEqual(wallCutPaint(black, true, undefined), cutPaint(black));
+  assert.deepEqual(wallCutPaint(black, false, "new"), cutPaint(black));
 });
