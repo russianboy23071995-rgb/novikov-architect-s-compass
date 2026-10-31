@@ -4,9 +4,11 @@ import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
+import { useRememberedPosition } from "./useRememberedPosition";
 
-/** Browser storage key of the remembered on-demand menu position. */
+/** Browser storage keys of the remembered helper positions (docs/HILFSFENSTER.md). */
 const DEMAND_MENU_KEY = "novikov.demand-menu.position";
+const PRECISION_INPUT_KEY = "novikov.precision-input.position";
 import { ELEMENT_KINDS, storeyElements } from "@/domain/elements/registry";
 import { trimWallsToRoof, untrimWalls } from "@/application/walls/roof-trim";
 import {
@@ -1141,35 +1143,18 @@ export function CadWorkspace({
     return true;
   };
 
-  // The on-demand menu remembers where the user moved it, also after a reload (decision P1);
-  // until then it opens beside the cursor. Browser storage only: a missing or failing store
-  // just means following the cursor.
-  const [pinnedDemand, setPinnedDemand] = useState<Point | null>(() => {
-    try {
-      const value = JSON.parse(window.localStorage.getItem(DEMAND_MENU_KEY) ?? "null");
-      return value && Number.isFinite(value.x) && Number.isFinite(value.y)
-        ? { x: value.x, y: value.y }
-        : null;
-    } catch {
-      return null;
-    }
-  });
-  const pinDemand = (point: Point) => {
-    setPinnedDemand(point);
-    try {
-      window.localStorage.setItem(DEMAND_MENU_KEY, JSON.stringify(point));
-    } catch {
-      // The position then lasts only for this session.
-    }
-  };
-  const unpinDemand = () => {
-    setPinnedDemand(null);
-    try {
-      window.localStorage.removeItem(DEMAND_MENU_KEY);
-    } catch {
-      // Nothing stored.
-    }
-  };
+  // On-demand menu and length/angle input remember where the user moved them, also after a
+  // reload (decision P1); until then they open beside the cursor.
+  const {
+    pinned: pinnedDemand,
+    pin: pinDemand,
+    unpin: unpinDemand,
+  } = useRememberedPosition(DEMAND_MENU_KEY);
+  const {
+    pinned: pinnedInput,
+    pin: pinInput,
+    unpin: unpinInput,
+  } = useRememberedPosition(PRECISION_INPUT_KEY);
 
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
@@ -2363,8 +2348,9 @@ export function CadWorkspace({
                     )}
                     <InteractionInput
                       interaction={interaction}
-                      position={demandPosition}
-                      onPosition={setDemandPosition}
+                      position={pinnedInput ?? demandPosition}
+                      onPosition={pinInput}
+                      onResetPosition={unpinInput}
                     />
                   </>
                 )}
