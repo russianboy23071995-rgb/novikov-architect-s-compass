@@ -11,12 +11,13 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 31.10.2026 · main nach PR516
+**Stand:** 31.10.2026 · main nach PR517
 
 ## Deine Wünsche
 
 | ID  | Wunsch                                                                                                                    | Prio | Status               | Notiz                  |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | ---- | -------------------- | ---------------------- |
+| W02 | Jedes Werkzeug mit eigenem Einstellungsfenster; Doppelklick auf Werkzeug oder Element öffnet es                   |      | E1 erledigt (PR517), E2 offen | docs/EINSTELLUNGSFENSTER.md |
 | W01 | Polygon-Regeln 1–7 (Ecken bewegen/löschen, Schließen am Startpunkt, Decke als Kontur, Fangpunkt-Namen, Standardgeschosse) |      | erledigt (PR495–498) | docs/POLYGON_REGELN.md |
 
 ## Bauteile und Fachmodell
