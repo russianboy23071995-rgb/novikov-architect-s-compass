@@ -59,6 +59,9 @@ import { defaultPenSet } from "@/domain/pens/model";
 import { assignPenSet } from "@/application/pens/library";
 import { WallDrawingFields } from "./WallDrawingFields";
 import { WallRenovationFields } from "./WallRenovationFields";
+import { ColumnFields } from "./ColumnFields";
+import { addColumn, updateColumn } from "@/application/columns/actions";
+import { columnValues } from "@/application/columns/defaults";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
 import { setWallRenovation } from "@/application/walls/renovation";
 import { useProjectEditing } from "./useProjectEditing";
@@ -483,7 +486,8 @@ export function CadWorkspace({
       next === "hatch" ||
       next === "slab" ||
       next === "roof" ||
-      next === "room"
+      next === "room" ||
+      next === "column"
     )
       setSelection(null);
     setModelError("");
@@ -496,7 +500,8 @@ export function CadWorkspace({
       next === "hatch" ||
       next === "slab" ||
       next === "roof" ||
-      next === "room"
+      next === "room" ||
+      next === "column"
     )
       setMode("2D");
   };
@@ -780,6 +785,7 @@ export function CadWorkspace({
   /** Tools whose defaults live in the shared settings window (E1); roof and room keep theirs. */
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
+    column: "Stütze",
     window: "Fenster",
     door: "Tür",
     slab: "Decke",
@@ -814,6 +820,12 @@ export function CadWorkspace({
           cancelInteraction();
           toolDefaults.setWall(values);
         }}
+      />
+    ) : owner === "column" ? (
+      <ColumnFields
+        value={toolDefaults.column}
+        onChange={toolDefaults.setColumn}
+        layers={project.layers}
       />
     ) : owner === "window" ? (
       <WindowPlacementFields
@@ -1301,6 +1313,23 @@ export function CadWorkspace({
 
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
+    // Column tool: each click sets a column, centre on the point (docs/STUETZEN.md, P2).
+    if (tool === "column") {
+      try {
+        dispatchEditing({
+          type: "project",
+          project: addColumn(project, {
+            id: `column-${crypto.randomUUID()}`,
+            position: { x: point.x, y: point.y },
+            ...columnValues(toolDefaults.column),
+          }),
+        });
+        showNotice("Stütze gesetzt");
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Stütze nicht möglich.");
+      }
+      return;
+    }
     // Room by a click between walls (docs/ROOM_ELEMENT.md, R2).
     if (roomByWalls) {
       try {
@@ -1569,17 +1598,23 @@ export function CadWorkspace({
                     label: name,
                     content: toolFields(settingsWindow.tool, "window"),
                   },
-                  ...(settingsWindow.tool === "wall"
+                  ...(settingsWindow.tool === "wall" || settingsWindow.tool === "column"
                     ? [
                         {
                           id: "renovation",
                           label: "Bauzustand",
                           content: (
                             <WallRenovationFields
-                              value={toolDefaults.wall.renovation ?? "existing"}
+                              value={
+                                settingsWindow.tool === "column"
+                                  ? toolDefaults.column.renovation
+                                  : (toolDefaults.wall.renovation ?? "existing")
+                              }
                               onChange={(renovation) => {
                                 cancelInteraction();
-                                toolDefaults.setWall({ ...toolDefaults.wall, renovation });
+                                if (settingsWindow.tool === "column")
+                                  toolDefaults.setColumn({ ...toolDefaults.column, renovation });
+                                else toolDefaults.setWall({ ...toolDefaults.wall, renovation });
                               }}
                               hint="Vorgabe für neue Wände."
                               showColors={showRenovation}
@@ -1627,7 +1662,7 @@ export function CadWorkspace({
                     />
                   ),
                 },
-                ...(target.kind === "wall"
+                ...(target.kind === "wall" || target.kind === "column"
                   ? [
                       {
                         id: "renovation",
@@ -1635,20 +1670,30 @@ export function CadWorkspace({
                         content: (
                           <WallRenovationFields
                             value={wallRenovation(
-                              project.storeys
-                                .flatMap((s) => s.walls)
-                                .find((w) => w.id === target.id) ?? {},
+                              (target.kind === "wall"
+                                ? project.storeys.flatMap((s) => s.walls)
+                                : project.storeys.flatMap((s) => s.columns ?? [])
+                              ).find((e) => e.id === target.id) ?? {},
                             )}
                             onChange={(renovation) => {
-                              // All selected walls follow, the double-clicked one included.
+                              // All selected elements of this kind follow, the double-clicked
+                              // one included.
                               const ids = new Set([
                                 target.id,
-                                ...selections.filter((s) => s.kind === "wall").map((s) => s.id),
+                                ...selections
+                                  .filter((s) => s.kind === target.kind)
+                                  .map((s) => s.id),
                               ]);
                               try {
                                 dispatchEditing({
                                   type: "project",
-                                  project: setWallRenovation(project, [...ids], renovation),
+                                  project:
+                                    target.kind === "wall"
+                                      ? setWallRenovation(project, [...ids], renovation)
+                                      : [...ids].reduce(
+                                          (p, id) => updateColumn(p, id, { renovation }),
+                                          project,
+                                        ),
                                 });
                                 setModelError("");
                               } catch (error) {
@@ -1658,8 +1703,8 @@ export function CadWorkspace({
                               }
                             }}
                             hint={
-                              selections.filter((s) => s.kind === "wall").length > 1
-                                ? "Gilt für alle gewählten Wände; ein Rückgängig-Schritt."
+                              selections.filter((s) => s.kind === target.kind).length > 1
+                                ? "Gilt für alle gewählten Elemente dieser Art; ein Rückgängig-Schritt."
                                 : "Ein Rückgängig-Schritt."
                             }
                             showColors={showRenovation}
@@ -2142,7 +2187,11 @@ export function CadWorkspace({
                         (tool === "wall" ? wallStartSnapPolicy : null)
                       }
                       drawing={
-                        (tool === "wall" || pathDrawing || tool === "roof" || tool === "room") &&
+                        (tool === "wall" ||
+                          tool === "column" ||
+                          pathDrawing ||
+                          tool === "roof" ||
+                          tool === "room") &&
                         mode === "2D"
                       }
                       endpointSnap={
@@ -2472,7 +2521,7 @@ export function CadWorkspace({
                   </Button>
                   {measurement.error && <span role="alert">{measurement.error}</span>}
                 </div>
-              ) : tool === "wall" || tool === "window" || tool === "door" ? (
+              ) : tool === "wall" || tool === "column" || tool === "window" || tool === "door" ? (
                 toolFields(tool)
               ) : tool === "room" && mode === "2D" ? (
                 <RoomToolFields

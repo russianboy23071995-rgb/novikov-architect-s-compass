@@ -17,6 +17,8 @@ import { exportIfc } from "../../lib/bim/ifc.ts";
 import { previewDeleteSelection } from "../elements/delete.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
+import { columnSettings, columnToolDefaults, columnValues } from "./defaults.ts";
+import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
 
 // docs/STUETZEN.md, L05 Teil 1.
 const column = (p: Project, id: string) => (storeyOf(p).columns ?? []).find((c) => c.id === id)!;
@@ -138,4 +140,48 @@ test("IFC: IfcColumn with rectangle and circle profile, status and height", asyn
   assert.ok(ifc.includes("'Status',$,IFCLABEL('NEW')"));
   assert.ok(ifc.includes("'Status',$,IFCLABEL('EXISTING')"));
   assert.ok(ifc.includes("'Height',$,IFCLENGTHMEASURE(2.5)"));
+});
+
+// docs/STUETZEN.md, P2: tool settings and plan cut.
+test("tool settings make a column and read one back; both section sizes are kept", () => {
+  const p = createStandardProject("p", "eg", "og");
+  const defaults = columnToolDefaults(defaultColumnLayerId(p));
+  assert.deepEqual(columnValues(defaults), {
+    layerId: defaultColumnLayerId(p),
+    shape: { kind: "rectangle", width: 0.3, depth: 0.3 },
+    rotation: 0,
+    baseOffset: 0,
+    topBinding: { kind: "storey", topOffset: 0 },
+    renovation: "new",
+  });
+  const round = {
+    ...defaults,
+    kind: "circle" as const,
+    diameter: 0.5,
+    heightMode: "fixed" as const,
+    height: 2.2,
+  };
+  const placed = addColumn(p, { id: "c", position: { x: 1, y: 1 }, ...columnValues(round) });
+  const back = columnSettings(column(placed, "c"));
+  assert.equal(back.kind, "circle");
+  assert.equal(back.diameter, 0.5);
+  assert.equal(back.heightMode, "fixed");
+  assert.equal(back.height, 2.2);
+  assert.deepEqual(columnValues(back), columnValues(round));
+});
+
+test("plan: a column through the 1 m cut is filled, one above it only outlined", () => {
+  let p = withColumns();
+  p = addColumn(p, {
+    id: "high",
+    position: { x: 4, y: 4 },
+    shape: COLUMN_DEFAULTS.rectangle,
+    baseOffset: 1.5,
+    height: 1,
+  });
+  const scene = derivePlanScene(p, () => true);
+  assert.equal(scene.columnViews.get("s1")!.cut, true);
+  assert.equal(scene.columnViews.get("high")!.cut, false);
+  assert.equal(scene.columnViews.get("s2")!.outline.length, 32);
+  assert.ok(planSceneRuns(scene, []).some((r) => r.kind === "column" && r.ids.length === 3));
 });

@@ -5,7 +5,7 @@ Nutzerauftrag 31.10.2026: Stützen als neues Bauteil. Umsetzung in drei PRs nach
 | PR | Inhalt | Stand |
 | --- | --- | --- |
 | P1 | Modell, Dateiformat 37, Standardebene Stütze, Aktionen, 3D-Körper, IFC IfcColumn | erledigt |
-| P2 | Werkzeug „Stütze“, Leiste und Einstellungsfenster (Reiter Stütze, Bauzustand), Grundriss geschnitten in der Schnittfarbe, Eigenschaften, Doppelklick | offen |
+| P2 | Werkzeug „Stütze“, Leiste und Einstellungsfenster (Reiter Stütze, Bauzustand), Grundriss geschnitten in der Schnittfarbe, Eigenschaften, Doppelklick | erledigt |
 | P3 | Verschieben, Drehen, Kopieren, Fangpunkte, Rechtsklickmenü, Pipette, Archicad-Prüfdatei | offen |
 
 Vorgaben (vom Nutzer nicht anders bestimmt): rechteckig 30 × 30 cm, rund Ø 30 cm, Höhe an das Geschoss gebunden, Bezugspunkt in der Mitte. Wand und Stütze durchdringen sich vorerst ohne Bereinigung.
@@ -20,3 +20,13 @@ Vorgaben (vom Nutzer nicht anders bestimmt): rechteckig 30 × 30 cm, rund Ø 30 
 - Im Grundriss sind Stützen in P1 noch nicht gezeichnet und nicht bearbeitbar (kommt mit P2/P3).
 
 Nachweis P1: 1390 Tests grün (5 neu in `src/application/columns/actions.test.ts`), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert (`089f79e4…97017b3`). Browser: Testprojekt mit gedrehter Rechteck- und runder Stütze in 3D sichtbar, geschossgebunden höher als eine 2,80-m-Wand.
+
+## Teil P2: Werkzeug, Grundriss, Eigenschaften
+
+- Werkzeug „Stütze“ in der Werkzeugleiste direkt nach „Wand“. Jeder Klick setzt eine Stütze mit der Mitte auf dem (gefangenen) Punkt; das Werkzeug bleibt aktiv. Vorgaben (`application/columns/defaults.ts`, nicht im Undo): Form rechteckig/rund, Breite, Tiefe, Drehung bzw. Durchmesser, Höhe „Bis Geschoss darüber“ mit Versatz Oberkante oder „Feste Höhe“, Fuß über OK Rohfußboden, Ebene, Bauzustand (Vorgabe Neubau wie bei Wänden). Beide Querschnittsmaße bleiben beim Umschalten erhalten.
+- Dieselben Felder (`ColumnFields`) in der Leiste, im Einstellungsfenster (Doppelklick auf das Werkzeug; Reiter „Stütze“ und „Bauzustand“) und bei einer gewählten Stütze. Bei einer Stütze wird eine Änderung beim Verlassen des Feldes, mit Enter oder bei einer Auswahl übernommen: ein Rückgängig-Schritt je Änderung.
+- Grundriss: eigene Zeichenschicht über den Wänden. Eine Stütze, die die Schnitthöhe 1 m durchdringt, ist gefüllt wie eine geschnittene Wand (Schnittfarbe, bei eingeschalteter Anzeige Neubau rot, Abbruch gelb); liegt sie ganz darüber oder darunter, nur gestrichelter Umriss. Auswahl per Klick, Rechteckauswahl, Tab-Auswahl.
+- Doppelklick auf eine Stütze öffnet ihr Fenster mit den Reitern Stütze, Bauzustand (gilt für alle gewählten Stützen) und Ebene.
+- Noch nicht: Verschieben, Drehen, Kopieren, Fangpunkte an Stützen, Pipette (P3).
+
+Nachweis P2: 1392 Tests grün (2 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: drei Stützen gesetzt (zwei rechteckig, eine rund), rot als Neubau; Leiste und Werkzeugfenster mit Reitern; Doppelklick auf eine Stütze öffnet ihr Fenster; Breite 0,5 m und Bauzustand Bestand übernommen (schwarz in der Schnittfarbe), je ein Rückgängig-Schritt; Teststützen danach zurückgenommen.
