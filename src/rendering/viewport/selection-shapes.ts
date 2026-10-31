@@ -1,3 +1,4 @@
+import { columnOutline } from "../../domain/elements/column/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { imageReferenceCorners } from "./image-reference.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
@@ -68,6 +69,7 @@ const PLAN_SHAPES: {
   slab: (s) => ({ points: s.points, closed: true }),
   roof: (r) => ({ points: r.points, closed: true }),
   room: (r) => ({ points: r.points, closed: true }),
+  column: (c) => ({ points: columnOutline(c), closed: true }),
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -81,6 +83,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   slab: () => undefined,
   roof: () => undefined,
   room: (r) => (r.name ? `${r.number} ${r.name}` : r.number),
+  column: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -94,6 +97,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "slab",
   "roof",
   "room",
+  "column",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -103,6 +107,7 @@ const PICK_RANK: Record<ElementKind, number> = {
   window: 1,
   door: 1,
   wall: 2,
+  column: 2,
   hatch: 3,
   roof: 4,
   slab: 5,

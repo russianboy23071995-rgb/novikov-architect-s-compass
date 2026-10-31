@@ -13,6 +13,7 @@ export const ELEMENT_KINDS = {
   slab: { list: "slabs", label: "Decke" },
   roof: { list: "roofs", label: "Dach" },
   room: { list: "rooms", label: "Raum" },
+  column: { list: "columns", label: "Stütze" },
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },

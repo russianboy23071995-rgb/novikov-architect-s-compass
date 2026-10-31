@@ -46,7 +46,7 @@ function* triangles(
   for (const f of faces)
     for (const [a, b, c] of faceTriangles(f.vertices.length)) {
       add([f.vertices[a]!, f.vertices[b]!, f.vertices[c]!], {
-        kind: f.slab ? "slab" : f.roof ? "roof" : "wall",
+        kind: f.slab ? "slab" : f.roof ? "roof" : f.column ? "column" : "wall",
         id: f.wallId,
       });
       yield;

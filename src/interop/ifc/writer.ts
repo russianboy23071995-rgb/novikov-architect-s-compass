@@ -1,3 +1,4 @@
+import { columnLevels } from "../../domain/elements/column/model.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
@@ -450,6 +451,53 @@ export async function writeIfc(
       await properties(slabRef, "slab", slab.id, [
         ["Thickness", `IFCLENGTHMEASURE(${real(slab.thickness)})`],
         ["TopOffset", `IFCLENGTHMEASURE(${real(slab.topOffset)})`],
+      ]);
+    }
+    // Columns (docs/STUETZEN.md): IfcColumn with a parametric swept profile (rectangle or
+    // circle) from the foot to the top, so receiving tools can treat it as a real column.
+    for (const column of floor.columns ?? []) {
+      const levels = columnLevels(column, floor.height);
+      if (!levels) continue;
+      const angle = (column.rotation * Math.PI) / 180;
+      const columnPlacement = placement(
+        storeyPlacement,
+        column.position.x,
+        column.position.y,
+        levels.bottom,
+        Math.cos(angle),
+        Math.sin(angle),
+      );
+      const centre = add("IFCAXIS2PLACEMENT2D", `${point([0, 0])},$`);
+      const profile =
+        column.shape.kind === "circle"
+          ? add("IFCCIRCLEPROFILEDEF", `.AREA.,$,${centre},${real(column.shape.diameter / 2)}`)
+          : add(
+              "IFCRECTANGLEPROFILEDEF",
+              `.AREA.,$,${centre},${real(column.shape.width)},${real(column.shape.depth)}`,
+            );
+      const solid = add(
+        "IFCEXTRUDEDAREASOLID",
+        `${profile},${origin},${up},${real(levels.top - levels.bottom)}`,
+      );
+      const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','SweptSolid',(${solid})`);
+      const columnRef = add(
+        "IFCCOLUMN",
+        `${await guid("column", column.id)},$,${label(column.id)},$,$,${columnPlacement},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(column.id)},.COLUMN.`,
+      );
+      elements.push(columnRef);
+      await properties(
+        columnRef,
+        "column",
+        column.id,
+        [["Status", `IFCLABEL(${text(IFC_RENOVATION_STATUS[wallRenovation(column)])})`]],
+        "Pset_ColumnCommon",
+      );
+      await properties(columnRef, "column", column.id, [
+        ["Shape", `IFCLABEL(${text(column.shape.kind)})`],
+        ["Rotation", `IFCREAL(${real(column.rotation)})`],
+        ["BaseOffset", `IFCLENGTHMEASURE(${real(column.baseOffset)})`],
+        ["Height", `IFCLENGTHMEASURE(${real(levels.top - levels.bottom)})`],
+        ["Renovation", `IFCLABEL(${text(wallRenovation(column))})`],
       ]);
     }
     // Single inclined roofs (docs/ROOF_ELEMENT.md, D5): IfcRoof SHED_ROOF in the storey,

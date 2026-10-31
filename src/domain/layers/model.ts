@@ -10,6 +10,7 @@ const standards = [
   ["interior-wall", "Innenwand"],
   ["roof", "Dach"],
   ["slab", "Decke"],
+  ["column", "Stütze"],
   ["window", "Fenster"],
   ["door", "Tür"],
   ["furniture", "Möblierung"],
@@ -41,6 +42,17 @@ export function standardLayerId(
       l.id === `layer:${key}` ||
       (l.id.startsWith(`layer:${key}:`) && /^[1-9]d*$/.test(l.id.slice(`layer:${key}:`.length))),
   )?.id;
+}
+
+/** Schema 36 → 37: projects get the standard Stütze layer, with a collision suffix like the
+ * other standard layers (docs/STUETZEN.md). Unchanged when it exists. */
+export function withColumnLayer<T extends { layers: Layer[] }>(project: T): T {
+  if (standardLayerId(project.layers, "column")) return project;
+  const occupied = new Set(project.layers.map((l) => l.id));
+  let id = "layer:column",
+    suffix = 1;
+  while (occupied.has(id)) id = `layer:column:${suffix++}`;
+  return { ...project, layers: [...project.layers, { id, name: "Stütze" }] };
 }
 
 /** Shared by new projects and migration. Never infer defaults from editable names. */

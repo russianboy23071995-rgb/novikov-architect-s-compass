@@ -14,11 +14,20 @@ import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { slabBody } from "./slab-solid.ts";
 import { roofBody } from "./roof-solid.ts";
+import { columnBody } from "./column-solid.ts";
 
 export type Vec3 = [number, number, number];
 /** wallId names the element; slab faces carry `slab` (docs/SLAB_ELEMENT.md, Teil B),
  * roof faces `roof` (docs/ROOF_ELEMENT.md, D2). */
-export type Face = { wallId: string; vertices: Vec3[]; normal: Vec3; slab?: true; roof?: true };
+export type Face = {
+  wallId: string;
+  vertices: Vec3[];
+  normal: Vec3;
+  slab?: true;
+  roof?: true;
+  /** Column face (docs/STUETZEN.md). */
+  column?: true;
+};
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 
 /** Partition the wall plane at opening edges, then extrude only occupied cells.
@@ -206,6 +215,11 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Roofs of this storey: relative to the storey floor only (docs/ROOF_ELEMENT.md, D2).
   for (const roof of "roofs" in storey ? (storey.roofs ?? []) : [])
     bodies.push(roofBody(roof, elevation));
+  // Columns of this storey from foot to top (docs/STUETZEN.md); a bound top needs the height.
+  for (const column of "columns" in storey ? (storey.columns ?? []) : []) {
+    const body = columnBody(column, elevation, height);
+    if (body) bodies.push(body);
+  }
   if (bodies.length) {
     if (!solid.faces.length) {
       solid.min = [Infinity, Infinity, Infinity];
