@@ -256,9 +256,7 @@ export function TopToolbar(props: TopToolbarProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>
-                    Canvas-Darstellung…
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={props.onCanvasDisplay}>Darstellung…</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

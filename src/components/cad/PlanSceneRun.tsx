@@ -1,3 +1,4 @@
+import { cutPaint, type CutFill } from "./cut-fill";
 import type { ScaleContext } from "@/domain/views/scale";
 import { HatchPattern } from "./HatchPattern";
 import { LinePattern } from "./LinePattern";
@@ -71,6 +72,7 @@ type Props = PlanRun & {
   placement: boolean;
   pixelsPerMetre: number;
   wallOutlineWidth: number;
+  cutFill: CutFill;
   cornerGeometry: CornerPreview["geometry"] | undefined;
   allowsShown: (id: string) => boolean;
   canPick: (id: string) => boolean;
@@ -91,6 +93,7 @@ export function PlanSceneContent({
   placement,
   pixelsPerMetre,
   wallOutlineWidth,
+  cutFill,
   cornerGeometry,
   allowsShown,
   canPick,
@@ -296,8 +299,7 @@ export function PlanSceneContent({
                   .map((loop) => "M" + loop.map((p) => `${p.x},${-p.y}`).join(" L") + " Z")
                   .join(" ")}
                 fillRule="evenodd"
-                fill="var(--muted-foreground)"
-                fillOpacity={0.55}
+                {...cutPaint(cutFill)}
                 stroke={line}
                 strokeWidth={wallOutlineWidth / pixelsPerMetre}
                 pointerEvents="none"
@@ -455,8 +457,7 @@ export function PlanSceneContent({
               )
                 .map((p) => `${p.x},${-p.y}`)
                 .join(" ")}
-              fill="var(--muted-foreground)"
-              fillOpacity={0.55}
+              {...cutPaint(cutFill)}
               stroke={cornerGeometry ? "var(--primary)" : "none"}
               strokeWidth={wallOutlineWidth / pixelsPerMetre}
               className="outline-none focus-visible:stroke-sky-300"

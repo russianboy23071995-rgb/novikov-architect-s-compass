@@ -1,3 +1,4 @@
+import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
 import {
@@ -128,6 +129,8 @@ export type BimPlanProps = {
   draftPatternSize?: HatchPatternSize | undefined;
   gridSettings?: GridSettings;
   wallOutlineWidth?: number;
+  /** Fill of cut walls and roof cuts (docs/SCHNITTDARSTELLUNG.md). */
+  cutFill?: CutFill;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -186,6 +189,7 @@ export function BimPlan({
   snap,
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
+  cutFill = defaultCutFill,
   ortho,
   onSelect,
   onPoint,
@@ -761,6 +765,7 @@ export function BimPlan({
       placement={!!placement}
       pixelsPerMetre={camera.pixelsPerMetre}
       wallOutlineWidth={wallOutlineWidth}
+      cutFill={cutFill}
       cornerGeometry={cornerPreview?.base === shown ? cornerPreview.geometry : undefined}
       allowsShown={allowsShown}
       canPick={canPick}
