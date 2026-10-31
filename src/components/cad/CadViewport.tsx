@@ -8,7 +8,12 @@ import { createPortal } from "react-dom";
 import { ViewScaleControl } from "./ViewScaleControl";
 import { assertWorkingViewCurrent } from "@/application/views/working-context";
 import { useEffect, useRef, useState } from "react";
-import { fitPlan, planScaleBar, zoomPlan } from "@/rendering/viewport/plan-camera";
+import {
+  fitPlanInset,
+  planScaleBar,
+  zoomPlan,
+  type ScreenInsets,
+} from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
 import { planBounds } from "./bim-view";
 import { BimSolidView } from "./BimSolidView";
@@ -28,6 +33,8 @@ type CadViewportProps = BimPlanProps & {
   zoomSlot?: HTMLElement | null;
   /** Shown bottom left of the first view instead of its indicator while set. */
   startupNotice?: React.ReactNode;
+  /** Stage parts covered by floating palettes (docs/GLAS_PALETTEN.md); single view only. */
+  safe?: ScreenInsets | undefined;
   index: number;
   mode: ViewMode;
   grid: boolean;
@@ -69,12 +76,17 @@ function MiniControl({
   );
 }
 
+const NO_INSETS: ScreenInsets = { left: 0, top: 0, right: 0, bottom: 0 };
+/** Room around a fitted plan for the view header above and scale/command bar below. */
+const PLAN_MARGINS: ScreenInsets = { left: 16, top: 64, right: 16, bottom: 96 };
+
 export function CadViewport({
   documentFraming,
   onPlanCapture,
   onScale,
   zoomSlot,
   startupNotice,
+  safe,
   index,
   mode,
   grid,
@@ -86,6 +98,20 @@ export function CadViewport({
   assertWorkingViewCurrent(model.viewContext, model.project);
   const scaleContext = model.viewContext.scale;
   const is3D = mode === "3D" && index === 0;
+  // The 2D surface runs under the palettes; drawings are fitted into the free part, and every
+  // view control sits there too (docs/GLAS_PALETTEN.md). 3D keeps its surface in the free part.
+  const insets = safe ?? NO_INSETS;
+  const fullBleed = !!safe && !is3D;
+  const margined = {
+    left: insets.left + PLAN_MARGINS.left,
+    top: insets.top + PLAN_MARGINS.top,
+    right: insets.right + PLAN_MARGINS.right,
+    bottom: insets.bottom + PLAN_MARGINS.bottom,
+  };
+  const fitInsets = useRef<ScreenInsets>(NO_INSETS);
+  fitInsets.current = fullBleed ? margined : NO_INSETS;
+  const fitPlan = (bounds: string, view: { width: number; height: number }) =>
+    fitPlanInset(bounds, view, fitInsets.current);
   const [camera, setCamera] = useState(initialCamera);
   const [solidFrame, setSolidFrame] = useState<ReturnType<typeof createProjectionFrame> | null>(
     null,
@@ -208,7 +234,7 @@ export function CadViewport({
       aria-label={`${label} viewport`}
     >
       <div className={cn("absolute inset-0", grid && is3D && "cad-grid")} />
-      <div ref={surface} className="absolute inset-x-4 bottom-24 top-16">
+      <div ref={surface} className="absolute" style={fullBleed ? { inset: 0 } : margined}>
         {is3D ? (
           <BimSolidView
             {...model}
@@ -236,181 +262,188 @@ export function CadViewport({
           />
         ) : null}
       </div>
-      <p className="pointer-events-none absolute left-3 top-12 text-[11px] text-muted-foreground">
-        {model.drawing
-          ? model.start
-            ? "Click end point · Esc cancels"
-            : model.snap
-              ? "Click start point · SNAP an"
-              : "Click start point · Snap off"
-          : mode === "3D" && index === 0
-            ? model.editSession
-              ? pan
-                ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
-                : model.editSession.action === "point"
-                  ? "Wandecke auf der Geschossebene bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
-                  : model.editSession.action === "move"
-                    ? "Wand auf der Geschossebene bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
-                    : "Feste Achse auf der Geschossebene · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
-              : pan
-                ? "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Pan"
-                : "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Orbit"
-            : planPan
-              ? "Ziehen verschiebt die Ansicht · Mausrad zoomt · Esc beendet Pan"
-              : "Mausrad: Zoom · Mittlere Maustaste: Ansicht verschieben · Maße in Metern"}
-      </p>
-      <div className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 px-2 py-1 text-[9px] text-muted-foreground shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
-        <span
-          className={cn("size-1.5 rounded-full", active ? "bg-primary" : "bg-muted-foreground")}
-        />
-        {mode === "3D" && index === 0 ? "3D" : "2D"} · {label}
-      </div>
-      <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
-        <MiniControl
-          label="Pan"
-          pressed={is3D ? pan : planPan}
-          onClick={() => (is3D ? setPan((value) => !value) : setPlanPan((value) => !value))}
-        >
-          <Hand />
-        </MiniControl>
-        <MiniControl
-          label="Orbit"
-          disabled={!is3D || !!model.editSession}
-          onClick={() => setPan(false)}
-        >
-          <Orbit />
-        </MiniControl>
-        <MiniControl label="Zoom in" onClick={() => zoom(1.2)}>
-          <Plus />
-        </MiniControl>
-        <MiniControl label="Zoom out" onClick={() => zoom(1 / 1.2)}>
-          <Minus />
-        </MiniControl>
-        <MiniControl label="Fit view" onClick={fit}>
-          <Focus />
-        </MiniControl>
-        <MiniControl label="Fullscreen" onClick={onFullscreen}>
-          <Expand />
-        </MiniControl>
-      </div>
       <div
-        className={cn(
-          "view-cube absolute bottom-[74px] right-5 hidden size-14 items-center justify-center text-[8px] font-semibold text-foreground sm:flex",
-          mode === "3D" && index === 0 && "is-3d",
-        )}
+        className="pointer-events-none absolute [&>*:not(.pointer-events-none)]:pointer-events-auto"
+        style={insets}
       >
-        <span>TOP</span>
-        <i>FRONT</i>
-        <b>RIGHT</b>
-      </div>
-      {is3D ? (
-        <CameraAxes camera={camera} />
-      ) : (
-        <div className="absolute bottom-[75px] left-4 flex items-end gap-0.5 font-mono text-[8px]">
-          <span className="block h-7 w-px bg-axis-z" />
-          <span className="block h-px w-7 bg-axis-x" />
-          <span className="text-axis-x">X</span>
-          <span className="-ml-10 -translate-y-5 text-axis-z">Y</span>
+        <p className="pointer-events-none absolute left-3 top-12 text-[11px] text-muted-foreground">
+          {model.drawing
+            ? model.start
+              ? "Click end point · Esc cancels"
+              : model.snap
+                ? "Click start point · SNAP an"
+                : "Click start point · Snap off"
+            : mode === "3D" && index === 0
+              ? model.editSession
+                ? pan
+                  ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
+                  : model.editSession.action === "point"
+                    ? "Wandecke auf der Geschossebene bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
+                    : model.editSession.action === "move"
+                      ? "Wand auf der Geschossebene bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
+                      : "Feste Achse auf der Geschossebene · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
+                : pan
+                  ? "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Pan"
+                  : "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Orbit"
+              : planPan
+                ? "Ziehen verschiebt die Ansicht · Mausrad zoomt · Esc beendet Pan"
+                : "Mausrad: Zoom · Mittlere Maustaste: Ansicht verschieben · Maße in Metern"}
+        </p>
+        <div className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 px-2 py-1 text-[9px] text-muted-foreground shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
+          <span
+            className={cn("size-1.5 rounded-full", active ? "bg-primary" : "bg-muted-foreground")}
+          />
+          {mode === "3D" && index === 0 ? "3D" : "2D"} · {label}
         </div>
-      )}
-      {active &&
-        zoomSlot &&
-        createPortal(
-          <div className="flex items-center gap-2">
-            {zoomControl}
-            <MiniControl label="Alles anzeigen" onClick={fit}>
-              <Focus size={14} />
-            </MiniControl>
-            {!is3D && scaleContext && onScale && (
-              <ViewScaleControl
-                key={JSON.stringify(scaleContext)}
-                context={scaleContext}
-                onChange={onScale}
-              />
-            )}
-          </div>,
-          zoomSlot,
-        )}
-      {startupNotice && index === 0 ? (
-        <div className="absolute bottom-2 left-3 z-10 max-w-[calc(100%-4rem)]">{startupNotice}</div>
-      ) : (
+        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
+          <MiniControl
+            label="Pan"
+            pressed={is3D ? pan : planPan}
+            onClick={() => (is3D ? setPan((value) => !value) : setPlanPan((value) => !value))}
+          >
+            <Hand />
+          </MiniControl>
+          <MiniControl
+            label="Orbit"
+            disabled={!is3D || !!model.editSession}
+            onClick={() => setPan(false)}
+          >
+            <Orbit />
+          </MiniControl>
+          <MiniControl label="Zoom in" onClick={() => zoom(1.2)}>
+            <Plus />
+          </MiniControl>
+          <MiniControl label="Zoom out" onClick={() => zoom(1 / 1.2)}>
+            <Minus />
+          </MiniControl>
+          <MiniControl label="Fit view" onClick={fit}>
+            <Focus />
+          </MiniControl>
+          <MiniControl label="Fullscreen" onClick={onFullscreen}>
+            <Expand />
+          </MiniControl>
+        </div>
         <div
           className={cn(
-            "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
-            is3D ? "items-center" : "flex-col items-start",
+            "view-cube absolute bottom-[74px] right-5 hidden size-14 items-center justify-center text-[8px] font-semibold text-foreground sm:flex",
+            mode === "3D" && index === 0 && "is-3d",
           )}
         >
-          {is3D && (
-            <>
-              <Crosshair className="size-3 text-primary" />
-              <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
-            </>
-          )}
-          {is3D ? (
-            <span className="font-mono">Fit · m</span>
-          ) : (
-            <>
-              <label className="flex items-center gap-1">
-                Ansicht
-                <select
-                  aria-label="2D Ansichtsmaßstab"
-                  value={String(plan.pixelsPerMetre)}
-                  className="rounded border bg-popover px-1"
-                  onChange={(event) =>
-                    setPlanCamera({ ...plan, pixelsPerMetre: Number(event.target.value) })
-                  }
-                >
-                  <option value={String(plan.pixelsPerMetre)}>
-                    {plan.pixelsPerMetre.toFixed(1)} px/m
-                  </option>
-                  {[25, 50, 100, 200, 500]
-                    .filter((value) => value !== plan.pixelsPerMetre)
-                    .map((value) => (
-                      <option key={value} value={String(value)}>
-                        {value} px/m
-                      </option>
-                    ))}
-                </select>
-              </label>
-              <span
-                aria-label="Grafischer Maßstab"
-                className="inline-flex flex-col items-center font-mono"
-                title="Bildschirmmaßstab in CSS-Pixeln; kein Druckmaßstab"
-              >
-                {Number(bar.metres.toPrecision(6))} m
-                <span
-                  style={{ width: bar.pixels }}
-                  className="h-1 border-x border-b border-current"
-                />
-              </span>
-            </>
-          )}
+          <span>TOP</span>
+          <i>FRONT</i>
+          <b>RIGHT</b>
         </div>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute bottom-2 right-3 size-7 bg-popover/65 text-muted-foreground"
-        aria-label="Reset view"
-        onClick={() => {
-          if (is3D) {
-            setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
-            setCamera(initialCamera);
-          } else
-            setPlanCamera(
-              savedFraming.current
-                ? {
-                    center: { ...savedFraming.current.center },
-                    pixelsPerMetre: savedFraming.current.pixelsPerMetre,
-                  }
-                : fitPlan(planBounds(model.project, model.viewContext.visibility), size),
-            );
-          setPan(false);
-          setPlanPan(false);
-        }}
-      >
-        <RotateCcw />
-      </Button>
+        {is3D ? (
+          <CameraAxes camera={camera} />
+        ) : (
+          <div className="absolute bottom-[75px] left-4 flex items-end gap-0.5 font-mono text-[8px]">
+            <span className="block h-7 w-px bg-axis-z" />
+            <span className="block h-px w-7 bg-axis-x" />
+            <span className="text-axis-x">X</span>
+            <span className="-ml-10 -translate-y-5 text-axis-z">Y</span>
+          </div>
+        )}
+        {active &&
+          zoomSlot &&
+          createPortal(
+            <div className="flex items-center gap-2">
+              {zoomControl}
+              <MiniControl label="Alles anzeigen" onClick={fit}>
+                <Focus size={14} />
+              </MiniControl>
+              {!is3D && scaleContext && onScale && (
+                <ViewScaleControl
+                  key={JSON.stringify(scaleContext)}
+                  context={scaleContext}
+                  onChange={onScale}
+                />
+              )}
+            </div>,
+            zoomSlot,
+          )}
+        {startupNotice && index === 0 ? (
+          <div className="absolute bottom-2 left-3 z-10 max-w-[calc(100%-4rem)]">
+            {startupNotice}
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
+              is3D ? "items-center" : "flex-col items-start",
+            )}
+          >
+            {is3D && (
+              <>
+                <Crosshair className="size-3 text-primary" />
+                <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
+              </>
+            )}
+            {is3D ? (
+              <span className="font-mono">Fit · m</span>
+            ) : (
+              <>
+                <label className="flex items-center gap-1">
+                  Ansicht
+                  <select
+                    aria-label="2D Ansichtsmaßstab"
+                    value={String(plan.pixelsPerMetre)}
+                    className="rounded border bg-popover px-1"
+                    onChange={(event) =>
+                      setPlanCamera({ ...plan, pixelsPerMetre: Number(event.target.value) })
+                    }
+                  >
+                    <option value={String(plan.pixelsPerMetre)}>
+                      {plan.pixelsPerMetre.toFixed(1)} px/m
+                    </option>
+                    {[25, 50, 100, 200, 500]
+                      .filter((value) => value !== plan.pixelsPerMetre)
+                      .map((value) => (
+                        <option key={value} value={String(value)}>
+                          {value} px/m
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <span
+                  aria-label="Grafischer Maßstab"
+                  className="inline-flex flex-col items-center font-mono"
+                  title="Bildschirmmaßstab in CSS-Pixeln; kein Druckmaßstab"
+                >
+                  {Number(bar.metres.toPrecision(6))} m
+                  <span
+                    style={{ width: bar.pixels }}
+                    className="h-1 border-x border-b border-current"
+                  />
+                </span>
+              </>
+            )}
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-2 right-3 size-7 bg-popover/65 text-muted-foreground"
+          aria-label="Reset view"
+          onClick={() => {
+            if (is3D) {
+              setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
+              setCamera(initialCamera);
+            } else
+              setPlanCamera(
+                savedFraming.current
+                  ? {
+                      center: { ...savedFraming.current.center },
+                      pixelsPerMetre: savedFraming.current.pixelsPerMetre,
+                    }
+                  : fitPlan(planBounds(model.project, model.viewContext.visibility), size),
+              );
+            setPan(false);
+            setPlanPan(false);
+          }}
+        >
+          <RotateCcw />
+        </Button>
+      </div>
     </section>
   );
 }
@@ -426,9 +459,11 @@ export function ViewportManager({
   onScale,
   onPlanCapture,
   startupNotice,
+  safe,
   ...model
 }: BimPlanProps & {
   startupNotice?: React.ReactNode;
+  safe?: ScreenInsets | undefined;
   documentFraming?: DocumentFraming | undefined;
   onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
   onScale: (denominator: number) => void;
@@ -456,6 +491,7 @@ export function ViewportManager({
           onScale={onScale}
           onPlanCapture={onPlanCapture}
           startupNotice={startupNotice}
+          safe={layout === "single" ? safe : undefined}
           documentFraming={documentFraming}
           {...model}
           index={index}

@@ -61,7 +61,7 @@
 - `AUFGABENLISTE.md` ist die vom Nutzer bearbeitbare Liste (Wünsche W.., Aufgaben L..): vor jedem Vorschlag lesen, nach jedem Merge abhaken. `ZWISCHENSTAND.md` ist seine Kurzübersicht: nach jedem Merge aktualisieren.
 - Commits: `GIT_AUTHOR_NAME`/`GIT_COMMITTER_NAME=russianboy23071995-rgb`, `GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_EMAIL=russianboy23071995@gmail.com`; Attribution-Zeilen gemäß Sitzungsvorgabe.
 - Windows-Eigenheiten:
-  - Die Befehlszeile von `npm test` ist nahe an der Längengrenze: keine neuen Testdateien anlegen, Tests an bestehende aufgeführte Dateien anhängen.
+  - `npm test` startet `scripts/run-tests.mjs`; die Testdateien stehen in `package.json` unter `testFiles` (keine Längengrenze der Windows-Befehlszeile mehr, seit 31.10.2026). Neue Testdateien dort eintragen.
   - Volle Suite mit `timeout 400 npm test`; Typprüfung mit `node_modules/.bin/tsc.exe --noEmit -p .` und `-p benchmarks/tsconfig.json` (`npx tsc` funktioniert hier nicht).
   - Prettier je Verzeichnis oder Dateiliste aufrufen, nicht mit sehr langen Globs.
   - Vergleich mit main über `git worktree add` in `%TEMP%` mit Junction auf `node_modules`; vor `git worktree remove` die Junction mit `(Get-Item …).Delete()` entfernen.

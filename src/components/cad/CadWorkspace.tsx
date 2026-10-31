@@ -102,7 +102,8 @@ import { DEFAULT_HOVER_DWELL_MS } from "@/constraints/inference/hover-reference"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { PALETTE_GAP, PROPERTIES_HEIGHT, paletteInsets } from "./palette-layout";
+import { useNavigatorWidth } from "./useNavigatorWidth";
 import { AiCommandBar } from "./AiCommandBar";
 import { InteractionInput } from "./InteractionInput";
 import { useToolInteraction } from "./useToolInteraction";
@@ -324,6 +325,16 @@ export function CadWorkspace({
 
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
+  const railShown = !fullscreen || !!activeDocumentId;
+  const navigatorShown = navigatorOpen && !fullscreen;
+  const insets = paletteInsets({
+    rail: railShown,
+    railCollapsed,
+    navigator: navigatorShown,
+    navigatorWidth,
+  });
   const [demandOpen, setDemandOpen] = useState(false);
   const [pickedPoint, setPickedPoint] = useState<{
     index: number | null;
@@ -1988,189 +1999,48 @@ export function CadWorkspace({
             onClose={() => setCornerWall(null)}
           />
         )}
-        <section
-          ref={propertiesRef}
-          tabIndex={-1}
-          aria-label="Werkzeugeigenschaften"
-          className="glass-panel-strong h-[130px] shrink-0 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        {/* One drawing surface over the whole stage; tool properties, tool rail and navigator
+            float above it as glass palettes (docs/GLAS_PALETTEN.md). */}
+        <div
+          ref={stageRef}
+          className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]"
         >
-          <>
-            <div className="mb-1 flex items-center gap-3">
-              <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
-              {tool === "select" && selection?.kind === "wall" && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={referenceSelection.selecting}
-                  onClick={() => {
-                    cancelInteraction();
-                    setDemandOpen(false);
-                    setCornerWall(selection.id);
-                  }}
-                >
-                  Wandanschluss vorschauen
-                </Button>
-              )}
-              {tool === "select" && (
-                <LayerProperties
-                  key={`layer:${propertyFormKey(project, selection)}`}
+          {/* The free part between the palettes: notices and view controls live here. */}
+          <div className="absolute" style={insets}>
+            <div>
+              <div className="absolute left-3 top-12 z-40 max-w-lg">
+                <RasterBudgetNotice project={project} />
+              </div>
+              {layerActivation && (
+                <DocumentLayerNotice
+                  key={layerActivation.layerIds.join(":")}
                   project={project}
-                  selection={selection}
-                  disabled={referenceSelection.selecting}
-                  onAssign={(base, target, layerId) => {
-                    if (referenceSelection.selecting) return;
-                    dispatchEditing({
-                      type: "assign-layer",
-                      base,
-                      target,
-                      selection: currentSelection.current,
-                      layerId,
-                    });
-                    setDemandOpen(false);
-                    setModelError("");
-                  }}
+                  activeDocumentId={activeDocumentId}
+                  activation={layerActivation}
                 />
               )}
-            </div>
-            {imageTool.active || imageTool.busy || imageTool.error ? (
-              <div className="flex items-center gap-3 text-xs">
-                <label>
-                  Bildbreite (m)
-                  <input
-                    aria-label="Bildbreite (m)"
-                    className="ml-2 w-24 rounded border bg-background p-1"
-                    value={imageTool.width}
-                    onChange={(e) => imageTool.setWidth(e.target.value)}
-                  />
-                </label>
-                <span>
-                  {imageTool.busy
-                    ? "Bild wird geprüft…"
-                    : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
-                </span>
-                <Button size="sm" onClick={imageTool.cancel}>
-                  Bildimport abbrechen
-                </Button>
-              </div>
-            ) : tool === "measure" ? (
-              <div className="flex items-center gap-3 text-xs">
-                <label>
-                  Messart{" "}
-                  <select
-                    aria-label="Messart"
-                    value={measurementMode}
-                    onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
-                    className="rounded border bg-background p-1"
+              {activeDocumentId && !activeDocument ? (
+                <p role="alert" className="p-4">
+                  Das Abbild ist nicht vorhanden. Mit Projekt-Undo wiederherstellen oder
+                  Arbeitsmodell öffnen.
+                </p>
+              ) : (
+                <>
+                  <div
+                    className="absolute isolate"
+                    style={
+                      layout === "single"
+                        ? {
+                            left: -insets.left,
+                            top: -insets.top,
+                            right: -insets.right,
+                            bottom: -insets.bottom,
+                          }
+                        : { inset: 0 }
+                    }
                   >
-                    <option value="distance">Strecke</option>
-                    <option value="area">Fläche</option>
-                    <option value="angle">Winkel</option>
-                  </select>
-                </label>
-                <span role="status">
-                  {measurementMode === "angle"
-                    ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
-                    : measurementMode === "area"
-                      ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
-                      : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
-                </span>
-                <Button size="sm" variant="ghost" onClick={measurement.reset}>
-                  Neue Messung
-                </Button>
-                {measurement.error && <span role="alert">{measurement.error}</span>}
-              </div>
-            ) : tool === "wall" || tool === "window" || tool === "door" ? (
-              toolFields(tool)
-            ) : tool === "room" && mode === "2D" ? (
-              <RoomToolFields
-                construction={roomConstruction}
-                onConstruction={(next) => {
-                  setPathPoints([]);
-                  setRoomConstruction(next);
-                }}
-                value={toolDefaults.room}
-                onChange={toolDefaults.setRoom}
-                layers={project.layers}
-                nextNumber={nextProjectRoomNumber(project)}
-                onOpenSettings={() => {
-                  setSettingsWindow({ mode: "tool", tool: "room", section: "height-lines" });
-                }}
-              />
-            ) : tool === "roof" && mode === "2D" ? (
-              <RoofToolFields
-                construction={hatchConstruction}
-                onConstruction={(construction) => {
-                  setPathPoints([]);
-                  setHatchConstruction(construction);
-                }}
-                value={toolDefaults.roof}
-                onChange={toolDefaults.setRoof}
-                layers={project.layers}
-                phase={roofPhase ?? "line"}
-              />
-            ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
-              toolFields(tool)
-            ) : selections.length > 1 ? (
-              <p className="p-3 text-xs text-muted-foreground" role="status">
-                {selections.length} Elemente ausgewählt.{" "}
-                {mode === "3D"
-                  ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
-                  : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
-              </p>
-            ) : (
-              <BimInspector
-                key={propertyFormKey(project, selection)}
-                project={project}
-                selection={selection}
-                onChange={changeProject}
-                onWallOffset={(base, wallId, offset) =>
-                  dispatchEditing({
-                    type: "wall-offset",
-                    base,
-                    selection,
-                    request: { projectId: base.id, wallId, offset },
-                  })
-                }
-              />
-            )}
-          </>
-        </section>
-        <div className="relative flex min-h-0 flex-1 gap-2">
-          {(!fullscreen || !!activeDocumentId) && (
-            <ToolRail
-              activeTool={tool}
-              collapsed={railCollapsed}
-              onSelect={selectTool}
-              onToggle={() => setRailCollapsed((value) => !value)}
-              onSettings={openToolDefaults}
-            />
-          )}
-          <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
-            <ResizablePanel
-              id="workspace"
-              minSize="55%"
-              defaultSize={navigatorOpen && !fullscreen ? "79%" : "100%"}
-            >
-              <div className="relative h-full min-w-0 overflow-hidden rounded-lg border border-border bg-workspace shadow-[0_20px_60px_var(--glass-deep)]">
-                <div className="absolute left-3 top-12 z-40 max-w-lg">
-                  <RasterBudgetNotice project={project} />
-                </div>
-                {layerActivation && (
-                  <DocumentLayerNotice
-                    key={layerActivation.layerIds.join(":")}
-                    project={project}
-                    activeDocumentId={activeDocumentId}
-                    activation={layerActivation}
-                  />
-                )}
-                {activeDocumentId && !activeDocument ? (
-                  <p role="alert" className="p-4">
-                    Das Abbild ist nicht vorhanden. Mit Projekt-Undo wiederherstellen oder
-                    Arbeitsmodell öffnen.
-                  </p>
-                ) : (
-                  <>
                     <ViewportManager
+                      safe={insets}
                       startupNotice={
                         autosave.startupOffer && autosave.startupOffer.kind !== "empty" ? (
                           <RecoveryStartupNotice
@@ -2393,200 +2263,369 @@ export function CadWorkspace({
                       onActive={setActiveViewport}
                       onFullscreen={() => setFullscreen((value) => !value)}
                     />
-                    {(groupMove.adapter ||
-                      (editSession && ["move", "point"].includes(editSession.action))) &&
-                      mode === "3D" && (
-                        <MovementAxisControls
-                          project={project}
-                          targets={selections}
-                          vertical={groupMove.axis === "z"}
-                          onVertical={groupMove.canUseZ ? () => groupMove.setAxis("z") : undefined}
-                          onDirection={(angle) => {
-                            groupMove.setAxis("xy", angle);
-                            interaction.draft.change(angle, interaction.draft.length);
-                          }}
-                        />
-                      )}
-                    {groupMove.active && (
-                      <p
-                        role="status"
-                        className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
-                      >
-                        {groupMove.pickingOrigin
-                          ? mode === "3D"
-                            ? "Ursprung frei anklicken · sichtbare Wandecken aller Geschosse rasten ein"
-                            : "Bewegungsursprung im Grundriss anklicken"
-                          : groupMove.axis === "z"
-                            ? "Z: Maus oder signierten Versatz eingeben · Klick platziert · Esc verwirft"
-                            : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
-                      </p>
+                  </div>
+                  {(groupMove.adapter ||
+                    (editSession && ["move", "point"].includes(editSession.action))) &&
+                    mode === "3D" && (
+                      <MovementAxisControls
+                        project={project}
+                        targets={selections}
+                        vertical={groupMove.axis === "z"}
+                        onVertical={groupMove.canUseZ ? () => groupMove.setAxis("z") : undefined}
+                        onDirection={(angle) => {
+                          groupMove.setAxis("xy", angle);
+                          interaction.draft.change(angle, interaction.draft.length);
+                        }}
+                      />
                     )}
-                    {tool === "wall" && (
-                      <p
-                        role="status"
-                        className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
-                      >
-                        Wandkette: Klick setzt Abschnitt · Doppelklick/Enter beendet · Esc verwirft
-                      </p>
-                    )}
-                    <InteractionInput
-                      interaction={interaction}
-                      position={pinnedInput ?? demandPosition}
-                      onPosition={pinInput}
-                      onResetPosition={unpinInput}
-                    />
-                  </>
-                )}
-                {(modelError || editing.error) && (
-                  <p
-                    role="alert"
-                    className="absolute left-3 top-20 z-30 max-w-sm rounded bg-popover p-2 text-xs text-destructive"
-                  >
-                    {modelError || editing.error}
-                  </p>
-                )}
-                {exportMessage && (
-                  <p
-                    role="status"
-                    className="pointer-events-none absolute left-3 top-14 z-40 max-w-sm rounded border border-border bg-popover/95 px-3 py-2 text-xs text-foreground shadow-lg"
-                  >
-                    {exportMessage}
-                  </p>
-                )}
-                {!referenceSelection.selecting && (
-                  <AiCommandBar
-                    calibration={calibration.commandContext}
-                    onFocus={() => setDemandOpen(false)}
-                    targets={selections}
-                    visibility={visibility}
-                    project={project}
-                    onExecute={(preview) => {
-                      const next = applySelectionCommand(
-                        project,
-                        selections,
-                        visibility,
-                        preview,
-                        calibration.commandContext,
-                      );
+                  {groupMove.active && (
+                    <p
+                      role="status"
+                      className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                    >
+                      {groupMove.pickingOrigin
+                        ? mode === "3D"
+                          ? "Ursprung frei anklicken · sichtbare Wandecken aller Geschosse rasten ein"
+                          : "Bewegungsursprung im Grundriss anklicken"
+                        : groupMove.axis === "z"
+                          ? "Z: Maus oder signierten Versatz eingeben · Klick platziert · Esc verwirft"
+                          : "Klick platziert die Auswahl · Tab: Länge/Winkel · Esc verwirft"}
+                    </p>
+                  )}
+                  {tool === "wall" && (
+                    <p
+                      role="status"
+                      className="pointer-events-none absolute bottom-12 left-3 rounded bg-popover px-2 py-1 text-xs"
+                    >
+                      Wandkette: Klick setzt Abschnitt · Doppelklick/Enter beendet · Esc verwirft
+                    </p>
+                  )}
+                  <InteractionInput
+                    interaction={interaction}
+                    position={pinnedInput ?? demandPosition}
+                    onPosition={pinInput}
+                    onResetPosition={unpinInput}
+                  />
+                </>
+              )}
+              {(modelError || editing.error) && (
+                <p
+                  role="alert"
+                  className="absolute left-3 top-20 z-30 max-w-sm rounded bg-popover p-2 text-xs text-destructive"
+                >
+                  {modelError || editing.error}
+                </p>
+              )}
+              {exportMessage && (
+                <p
+                  role="status"
+                  className="pointer-events-none absolute left-3 top-14 z-40 max-w-sm rounded border border-border bg-popover/95 px-3 py-2 text-xs text-foreground shadow-lg"
+                >
+                  {exportMessage}
+                </p>
+              )}
+              {!referenceSelection.selecting && (
+                <AiCommandBar
+                  calibration={calibration.commandContext}
+                  onFocus={() => setDemandOpen(false)}
+                  targets={selections}
+                  visibility={visibility}
+                  project={project}
+                  onExecute={(preview) => {
+                    const next = applySelectionCommand(
+                      project,
+                      selections,
+                      visibility,
+                      preview,
+                      calibration.commandContext,
+                    );
+                    cancelInteraction();
+                    setDemandOpen(false);
+                    dispatchEditing({ type: "project", project: next });
+                  }}
+                />
+              )}
+              <div
+                className="pointer-events-none absolute left-3 top-12 z-30 rounded border border-border bg-popover/70 px-2 py-1 font-mono text-[9px] text-muted-foreground opacity-0 backdrop-blur transition-opacity data-[visible=true]:opacity-100"
+                data-visible={notice !== "Ready"}
+              >
+                {notice}
+              </div>
+              {fullscreen && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute right-3 top-12 z-40 h-7 bg-popover/80 text-[10px]"
+                  onClick={() => setFullscreen(false)}
+                >
+                  Exit fullscreen
+                </Button>
+              )}
+              {!navigatorOpen && !fullscreen && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-3 top-12 z-30 size-8 bg-popover/75"
+                  onClick={() => setNavigatorOpen(true)}
+                  aria-label="Open project navigator"
+                >
+                  <PanelRightOpen />
+                </Button>
+              )}
+            </div>
+          </div>
+          <section
+            ref={propertiesRef}
+            tabIndex={-1}
+            aria-label="Werkzeugeigenschaften"
+            className="glass-panel-strong absolute left-2 top-2 z-20 overflow-auto rounded-lg px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            style={{ height: PROPERTIES_HEIGHT, right: insets.right || PALETTE_GAP }}
+          >
+            <>
+              <div className="mb-1 flex items-center gap-3">
+                <h2 className="text-xs font-semibold">Werkzeugeigenschaften</h2>
+                {tool === "select" && selection?.kind === "wall" && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={referenceSelection.selecting}
+                    onClick={() => {
                       cancelInteraction();
                       setDemandOpen(false);
-                      dispatchEditing({ type: "project", project: next });
+                      setCornerWall(selection.id);
+                    }}
+                  >
+                    Wandanschluss vorschauen
+                  </Button>
+                )}
+                {tool === "select" && (
+                  <LayerProperties
+                    key={`layer:${propertyFormKey(project, selection)}`}
+                    project={project}
+                    selection={selection}
+                    disabled={referenceSelection.selecting}
+                    onAssign={(base, target, layerId) => {
+                      if (referenceSelection.selecting) return;
+                      dispatchEditing({
+                        type: "assign-layer",
+                        base,
+                        target,
+                        selection: currentSelection.current,
+                        layerId,
+                      });
+                      setDemandOpen(false);
+                      setModelError("");
                     }}
                   />
                 )}
-                <div
-                  className="pointer-events-none absolute left-3 top-12 z-30 rounded border border-border bg-popover/70 px-2 py-1 font-mono text-[9px] text-muted-foreground opacity-0 backdrop-blur transition-opacity data-[visible=true]:opacity-100"
-                  data-visible={notice !== "Ready"}
-                >
-                  {notice}
-                </div>
-                {fullscreen && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute right-3 top-3 z-40 h-7 bg-popover/80 text-[10px]"
-                    onClick={() => setFullscreen(false)}
-                  >
-                    Exit fullscreen
-                  </Button>
-                )}
-                {!navigatorOpen && !fullscreen && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="absolute right-3 top-3 z-30 size-8 bg-popover/75"
-                    onClick={() => setNavigatorOpen(true)}
-                    aria-label="Open project navigator"
-                  >
-                    <PanelRightOpen />
-                  </Button>
-                )}
               </div>
-            </ResizablePanel>
-            {navigatorOpen && !fullscreen && (
+              {imageTool.active || imageTool.busy || imageTool.error ? (
+                <div className="flex items-center gap-3 text-xs">
+                  <label>
+                    Bildbreite (m)
+                    <input
+                      aria-label="Bildbreite (m)"
+                      className="ml-2 w-24 rounded border bg-background p-1"
+                      value={imageTool.width}
+                      onChange={(e) => imageTool.setWidth(e.target.value)}
+                    />
+                  </label>
+                  <span>
+                    {imageTool.busy
+                      ? "Bild wird geprüft…"
+                      : imageTool.error || "Obere linke Ecke anklicken · Esc: Abbruch"}
+                  </span>
+                  <Button size="sm" onClick={imageTool.cancel}>
+                    Bildimport abbrechen
+                  </Button>
+                </div>
+              ) : tool === "measure" ? (
+                <div className="flex items-center gap-3 text-xs">
+                  <label>
+                    Messart{" "}
+                    <select
+                      aria-label="Messart"
+                      value={measurementMode}
+                      onChange={(e) => setMeasurementMode(e.target.value as MeasurementMode)}
+                      className="rounded border bg-background p-1"
+                    >
+                      <option value="distance">Strecke</option>
+                      <option value="area">Fläche</option>
+                      <option value="angle">Winkel</option>
+                    </select>
+                  </label>
+                  <span role="status">
+                    {measurementMode === "angle"
+                      ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
+                      : measurementMode === "area"
+                        ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
+                        : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
+                  </span>
+                  <Button size="sm" variant="ghost" onClick={measurement.reset}>
+                    Neue Messung
+                  </Button>
+                  {measurement.error && <span role="alert">{measurement.error}</span>}
+                </div>
+              ) : tool === "wall" || tool === "window" || tool === "door" ? (
+                toolFields(tool)
+              ) : tool === "room" && mode === "2D" ? (
+                <RoomToolFields
+                  construction={roomConstruction}
+                  onConstruction={(next) => {
+                    setPathPoints([]);
+                    setRoomConstruction(next);
+                  }}
+                  value={toolDefaults.room}
+                  onChange={toolDefaults.setRoom}
+                  layers={project.layers}
+                  nextNumber={nextProjectRoomNumber(project)}
+                  onOpenSettings={() => {
+                    setSettingsWindow({ mode: "tool", tool: "room", section: "height-lines" });
+                  }}
+                />
+              ) : tool === "roof" && mode === "2D" ? (
+                <RoofToolFields
+                  construction={hatchConstruction}
+                  onConstruction={(construction) => {
+                    setPathPoints([]);
+                    setHatchConstruction(construction);
+                  }}
+                  value={toolDefaults.roof}
+                  onChange={toolDefaults.setRoof}
+                  layers={project.layers}
+                  phase={roofPhase ?? "line"}
+                />
+              ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
+                toolFields(tool)
+              ) : selections.length > 1 ? (
+                <p className="p-3 text-xs text-muted-foreground" role="status">
+                  {selections.length} Elemente ausgewählt.{" "}
+                  {mode === "3D"
+                    ? "Gemeinsam bewegen: im Grundriss, direkt in 3D oder per Modellbefehl."
+                    : "Im Elementmenü „Auswahl frei bewegen“ wählen, dann Ursprung und Ziel anklicken."}
+                </p>
+              ) : (
+                <BimInspector
+                  key={propertyFormKey(project, selection)}
+                  project={project}
+                  selection={selection}
+                  onChange={changeProject}
+                  onWallOffset={(base, wallId, offset) =>
+                    dispatchEditing({
+                      type: "wall-offset",
+                      base,
+                      selection,
+                      request: { projectId: base.id, wallId, offset },
+                    })
+                  }
+                />
+              )}
+            </>
+          </section>
+          {railShown && (
+            <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
+              <ToolRail
+                activeTool={tool}
+                collapsed={railCollapsed}
+                onSelect={selectTool}
+                onToggle={() => setRailCollapsed((value) => !value)}
+                onSettings={openToolDefaults}
+              />
+            </div>
+          )}
+          {navigatorShown && (
+            <div className="absolute bottom-2 right-2 top-2 z-20" style={{ width: navigatorWidth }}>
+              <div
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Navigatorbreite ziehen"
+                title="Ziehen: Breite des Navigators"
+                className="absolute -left-2 bottom-0 top-0 w-2 cursor-col-resize rounded hover:bg-primary/30"
+                onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
+                onPointerMove={(event) => {
+                  if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+                  const stage = stageRef.current?.getBoundingClientRect();
+                  if (stage) setNavigatorWidth(stage.right - PALETTE_GAP - event.clientX);
+                }}
+              />
               <>
-                <ResizableHandle withHandle className="mx-1 bg-transparent hover:bg-primary/30" />
-                <ResizablePanel id="navigator" defaultSize="21%" minSize="16%" maxSize="32%">
-                  <ProjectNavigator
-                    onBuildingChange={(base, change) =>
-                      dispatchEditing({ type: "building", base, change })
-                    }
-                    onRenameStorey={(base, name) =>
-                      dispatchEditing({
-                        type: "rename-storey",
-                        base,
-                        request: { projectId: base.id, storeyId: storeyOf(base).id, name },
-                      })
-                    }
-                    getPlanCapture={getPlanCapture}
-                    activeDocumentId={activeDocumentId}
-                    onOpenDocument={(id) => {
-                      cancelInteraction();
-                      setSelection(null);
-                      setDemandOpen(false);
-                      setTool("select");
-                      setMode("2D");
-                      const doc = project.drawingDocuments?.find((d) => d.id === id);
-                      const source = project.modelViews?.find((v) => v.id === doc?.modelViewId);
-                      if (!source) return;
-                      try {
-                        selectWorkingStorey(project, project, source.storeyId);
-                      } catch {
-                        dispatchEditing({
-                          type: "working-storey",
-                          base: project,
-                          storeyId: source.storeyId,
-                        });
-                        return;
-                      }
+                <ProjectNavigator
+                  onBuildingChange={(base, change) =>
+                    dispatchEditing({ type: "building", base, change })
+                  }
+                  onRenameStorey={(base, name) =>
+                    dispatchEditing({
+                      type: "rename-storey",
+                      base,
+                      request: { projectId: base.id, storeyId: storeyOf(base).id, name },
+                    })
+                  }
+                  getPlanCapture={getPlanCapture}
+                  activeDocumentId={activeDocumentId}
+                  onOpenDocument={(id) => {
+                    cancelInteraction();
+                    setSelection(null);
+                    setDemandOpen(false);
+                    setTool("select");
+                    setMode("2D");
+                    const doc = project.drawingDocuments?.find((d) => d.id === id);
+                    const source = project.modelViews?.find((v) => v.id === doc?.modelViewId);
+                    if (!source) return;
+                    try {
+                      selectWorkingStorey(project, project, source.storeyId);
+                    } catch {
                       dispatchEditing({
                         type: "working-storey",
                         base: project,
                         storeyId: source.storeyId,
                       });
-                      setActiveDocumentId(id);
-                    }}
-                    onDocumentVisibility={(base, documentId, layerId, visible) =>
-                      dispatchEditing({
-                        type: "visibility",
-                        base,
-                        action: { kind: "set", layerId, visible },
-                        scope: { kind: "drawing-document", documentId },
-                      })
+                      return;
                     }
-                    onDocumentAction={(base, action) =>
-                      dispatchEditing({ type: "document", base, action })
+                    dispatchEditing({
+                      type: "working-storey",
+                      base: project,
+                      storeyId: source.storeyId,
+                    });
+                    setActiveDocumentId(id);
+                  }}
+                  onDocumentVisibility={(base, documentId, layerId, visible) =>
+                    dispatchEditing({
+                      type: "visibility",
+                      base,
+                      action: { kind: "set", layerId, visible },
+                      scope: { kind: "drawing-document", documentId },
+                    })
+                  }
+                  onDocumentAction={(base, action) =>
+                    dispatchEditing({ type: "document", base, action })
+                  }
+                  project={project}
+                  active={selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]}
+                  onClose={() => setNavigatorOpen(false)}
+                  onSelect={(id, _label, toggle) => {
+                    if (project.storeys.some((s) => s.id === id)) {
+                      cancelInteraction();
+                      setSelection(null);
+                      setDemandOpen(false);
+                      setTool("select");
+                      setActiveDocumentId(null);
+                      dispatchEditing({ type: "working-storey", base: project, storeyId: id });
+                      return;
                     }
-                    project={project}
-                    active={
-                      selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]
-                    }
-                    onClose={() => setNavigatorOpen(false)}
-                    onSelect={(id, _label, toggle) => {
-                      if (project.storeys.some((s) => s.id === id)) {
-                        cancelInteraction();
-                        setSelection(null);
-                        setDemandOpen(false);
-                        setTool("select");
-                        setActiveDocumentId(null);
-                        dispatchEditing({ type: "working-storey", base: project, storeyId: id });
-                        return;
-                      }
-                      if (activeDocumentId) return;
-                      selectElement(
-                        selectionIndex(project).get(id) ?? null,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        toggle,
-                      );
-                    }}
-                  />
-                </ResizablePanel>
+                    if (activeDocumentId) return;
+                    selectElement(
+                      selectionIndex(project).get(id) ?? null,
+                      undefined,
+                      undefined,
+                      undefined,
+                      undefined,
+                      toggle,
+                    );
+                  }}
+                />
               </>
-            )}
-          </ResizablePanelGroup>
+            </div>
+          )}
         </div>
         {!fullscreen && (
           <StatusBar
