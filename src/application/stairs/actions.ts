@@ -34,7 +34,8 @@ export function addStair(project: Project, stair: StairCreation): Project {
 }
 
 /** One checked change. A fixed height releases the storey binding and vice versa; an explicit
- * `riserCount: undefined` or `tread: undefined` returns that value to the calculation. */
+ * `undefined` for an optional value (riser count, tread, turn, first flight, landing depth,
+ * stair well) removes it, so the calculation or default takes over again. */
 export function updateStair(
   project: Project,
   stairId: string,
@@ -50,7 +51,14 @@ export function updateStair(
         const next: Stair = { ...stair, ...changes, id: stair.id };
         if (changes.height !== undefined) delete next.topBinding;
         if (changes.topBinding !== undefined) delete next.height;
-        for (const key of ["riserCount", "tread"] as const)
+        for (const key of [
+          "riserCount",
+          "tread",
+          "turn",
+          "firstRisers",
+          "landingDepth",
+          "eye",
+        ] as const)
           if (key in changes && changes[key] === undefined) delete next[key];
         return next;
       }),

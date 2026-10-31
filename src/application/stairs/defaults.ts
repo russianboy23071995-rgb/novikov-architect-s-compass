@@ -1,4 +1,9 @@
-import { STAIR_DEFAULTS, type Stair, type StairAxis } from "../../domain/elements/stair/model.ts";
+import {
+  STAIR_DEFAULTS,
+  type Stair,
+  type StairAxis,
+  type StairShape,
+} from "../../domain/elements/stair/model.ts";
 import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
 
 /**
@@ -7,6 +12,14 @@ import type { WallRenovation } from "../../domain/elements/wall/renovation.ts";
  * are either computed (`auto`) or fixed.
  */
 export type StairDefaults = {
+  shape: StairShape;
+  /** L and U (docs/TREPPE.md, TR3): the third click chooses the side; this is the default. */
+  turn: "left" | "right";
+  firstRisersMode: "auto" | "fixed";
+  firstRisers: number;
+  landingMode: "auto" | "fixed";
+  landingDepth: number;
+  eye: number;
   axis: StairAxis;
   width: number;
   riserTarget: number;
@@ -26,6 +39,13 @@ export type StairDefaults = {
 
 export function stairToolDefaults(layerId: string): StairDefaults {
   return {
+    shape: "straight",
+    turn: "left",
+    firstRisersMode: "auto",
+    firstRisers: 8,
+    landingMode: "auto",
+    landingDepth: STAIR_DEFAULTS.width,
+    eye: STAIR_DEFAULTS.eye,
     axis: "center",
     width: STAIR_DEFAULTS.width,
     riserTarget: STAIR_DEFAULTS.riserTarget,
@@ -44,9 +64,16 @@ export function stairToolDefaults(layerId: string): StairDefaults {
   };
 }
 
-/** Stored stair values of the settings (everything except start, direction and id). */
-export function stairValues(d: StairDefaults): Omit<Stair, "id" | "start" | "direction" | "shape"> {
+/** Stored stair values of the settings (everything except start, direction and id). Shape
+ * values of L and U are stored only for those shapes. */
+export function stairValues(d: StairDefaults): Omit<Stair, "id" | "start" | "direction"> {
+  const turning = d.shape !== "straight";
   return {
+    shape: d.shape,
+    ...(turning ? { turn: d.turn } : {}),
+    ...(turning && d.firstRisersMode === "fixed" ? { firstRisers: Math.round(d.firstRisers) } : {}),
+    ...(turning && d.landingMode === "fixed" ? { landingDepth: d.landingDepth } : {}),
+    ...(d.shape === "u" ? { eye: d.eye } : {}),
     layerId: d.layerId,
     axis: d.axis,
     width: d.width,
@@ -66,6 +93,13 @@ export function stairValues(d: StairDefaults): Omit<Stair, "id" | "start" | "dir
 /** Settings view of an existing stair; unset fixed values keep sensible field contents. */
 export function stairSettings(stair: Stair): StairDefaults {
   return {
+    shape: stair.shape,
+    turn: stair.turn ?? "left",
+    firstRisersMode: stair.firstRisers === undefined ? "auto" : "fixed",
+    firstRisers: stair.firstRisers ?? 8,
+    landingMode: stair.landingDepth === undefined ? "auto" : "fixed",
+    landingDepth: stair.landingDepth ?? stair.width,
+    eye: stair.eye ?? STAIR_DEFAULTS.eye,
     axis: stair.axis ?? "center",
     width: stair.width,
     riserTarget: stair.riserTarget,

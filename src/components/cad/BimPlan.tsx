@@ -3,7 +3,13 @@ import { TextGraphic } from "./TextGraphic";
 import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
-import { stairGeometry, stairPlan, type Stair } from "@/domain/elements/stair/model";
+import {
+  stairDirectionTo,
+  stairGeometry,
+  stairPlan,
+  stairTurnTo,
+  type Stair,
+} from "@/domain/elements/stair/model";
 import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
@@ -130,12 +136,14 @@ export type BimPlanProps = {
   draftFinishable?: boolean;
   /** Text being typed (docs/TEXT.md): drawn live at its insertion point. */
   textPreview?: Omit<PlanText, "id" | "layerId"> | undefined;
-  /** Stair being drawn (docs/TREPPE.md, TR2): start on the drawing axis; the pointer gives the
-   * run direction, the full flight follows live. */
+  /** Stair being drawn (docs/TREPPE.md, TR2/TR3): start on the drawing axis; the pointer gives
+   * the run direction, then for L and U the side of the turn; the full stair follows live. */
   stairDraft?:
     | {
         start: Point;
-        values: Omit<Stair, "id" | "start" | "direction" | "shape">;
+        /** Set by the second click of an L or U: the pointer now chooses the turn. */
+        direction: number | null;
+        values: Omit<Stair, "id" | "start" | "direction">;
         storeyHeight: number | null;
       }
     | undefined;
@@ -1422,13 +1430,14 @@ export function BimPlan({
           (() => {
             const aim = resolvedHover?.point;
             const direction =
-              aim && Math.hypot(aim.x - stairDraft.start.x, aim.y - stairDraft.start.y) > 1e-6
-                ? (Math.atan2(aim.y - stairDraft.start.y, aim.x - stairDraft.start.x) * 180) /
-                  Math.PI
-                : 0;
+              stairDraft.direction ?? (aim ? stairDirectionTo(stairDraft.start, aim) : null) ?? 0;
+            const turn =
+              stairDraft.direction !== null && aim
+                ? stairTurnTo(stairDraft.start, direction, aim)
+                : stairDraft.values.turn;
             const g = stairGeometry(stairDraft.values, stairDraft.storeyHeight);
             if (!g) return null;
-            const stair = { ...stairDraft.values, start: stairDraft.start, direction };
+            const stair = { ...stairDraft.values, turn, start: stairDraft.start, direction };
             return (
               <g aria-label="Treppe in Arbeit" opacity={0.85}>
                 <StairPlanGraphic

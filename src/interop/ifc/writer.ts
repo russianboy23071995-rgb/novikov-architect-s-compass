@@ -502,8 +502,9 @@ export async function writeIfc(
         ["Renovation", `IFCLABEL(${text(wallRenovation(column))})`],
       ]);
     }
-    // Stairs (docs/TREPPE.md, TR1): IfcStair STRAIGHT_RUN_STAIR aggregating one IfcStairFlight
-    // whose body is the same closed solid as in 3D (faceted B-rep, storey coordinates).
+    // Stairs (docs/TREPPE.md, TR1/TR3): IfcStair (straight, quarter or half turn) aggregating
+    // one IfcStairFlight per flight and, for L and U, the landing as IfcSlab LANDING; every part
+    // is the same closed solid as in 3D (faceted B-rep, storey coordinates).
     for (const stair of floor.stairs ?? []) {
       const geometry = stairGeometry(stair, floor.height);
       const body = stairBody(stair, 0, floor.height);
@@ -515,24 +516,52 @@ export async function writeIfc(
         if (!ref) points.set(k, (ref = point([...v])));
         return ref;
       };
-      const faces = body.faces.map((face) => {
-        const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
-        return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
-      });
-      const brep = add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${faces.join(",")})`));
-      const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Brep',(${brep})`);
+      const shapeOf = (part: (typeof body.parts)[number]) => {
+        const faces = part.faces.map((face) => {
+          const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
+          return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
+        });
+        const brep = add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${faces.join(",")})`));
+        const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Brep',(${brep})`);
+        return add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`);
+      };
       const stairPlacement = placement(storeyPlacement);
+      const stairType =
+        stair.shape === "l" && geometry.landing !== null
+          ? "QUARTER_TURN_STAIR"
+          : stair.shape === "u" && geometry.landing !== null
+            ? "HALF_TURN_STAIR"
+            : "STRAIGHT_RUN_STAIR";
       const stairRef = add(
         "IFCSTAIR",
-        `${await guid("stair", stair.id)},$,${label(stair.id)},$,$,${stairPlacement},$,${label(stair.id)},.STRAIGHT_RUN_STAIR.`,
+        `${await guid("stair", stair.id)},$,${label(stair.id)},$,$,${stairPlacement},$,${label(stair.id)},.${stairType}.`,
       );
-      const flight = add(
-        "IFCSTAIRFLIGHT",
-        `${await guid("stair-flight", stair.id)},$,${label(stair.id + " Lauf")},$,$,${placement(stairPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(stair.id)},${geometry.riserCount},${geometry.treadCount},${real(geometry.riser)},${real(geometry.tread)},.STRAIGHT.`,
-      );
+      const parts: string[] = [];
+      let flightIndex = 0;
+      for (const part of body.parts) {
+        if (part.kind === "landing") {
+          parts.push(
+            add(
+              "IFCSLAB",
+              `${await guid("stair-landing", stair.id)},$,${label(stair.id + " Podest")},$,$,${placement(stairPlacement)},${shapeOf(part)},${label(stair.id)},.LANDING.`,
+            ),
+          );
+          continue;
+        }
+        const risers = geometry.flights[flightIndex]!;
+        // The first flight keeps the GUID of TR1 files; further flights get their own.
+        const key = flightIndex === 0 ? stair.id : `${stair.id}:${flightIndex + 1}`;
+        parts.push(
+          add(
+            "IFCSTAIRFLIGHT",
+            `${await guid("stair-flight", key)},$,${label(`${stair.id} Lauf${geometry.flights.length > 1 ? ` ${flightIndex + 1}` : ""}`)},$,$,${placement(stairPlacement)},${shapeOf(part)},${label(stair.id)},${risers},${risers - 1},${real(geometry.riser)},${real(geometry.tread)},.STRAIGHT.`,
+          ),
+        );
+        flightIndex++;
+      }
       add(
         "IFCRELAGGREGATES",
-        `${await guid("aggregate", "stair:" + stair.id)},$,$,$,${stairRef},(${flight})`,
+        `${await guid("aggregate", "stair:" + stair.id)},$,$,$,${stairRef},(${parts.join(",")})`,
       );
       elements.push(stairRef);
       const counts: [string, string][] = [
@@ -552,6 +581,14 @@ export async function writeIfc(
         ["Width", `IFCLENGTHMEASURE(${real(stair.width)})`],
         ["Rise", `IFCLENGTHMEASURE(${real(geometry.rise)})`],
         ["Run", `IFCLENGTHMEASURE(${real(geometry.run)})`],
+        ["Shape", `IFCLABEL(${text(stair.shape)})`],
+        ...(geometry.landing !== null
+          ? ([
+              ["Turn", `IFCLABEL(${text(stair.turn ?? "left")})`],
+              ["LandingDepth", `IFCLENGTHMEASURE(${real(geometry.landing)})`],
+              ["FlightRisers", `IFCLABEL(${text(geometry.flights.join(" + "))})`],
+            ] as [string, string][])
+          : []),
         ["StepRule", `IFCLENGTHMEASURE(${real(geometry.stepRule)})`],
         ["RuleSet", `IFCLABEL(${text(stair.ruleSet)})`],
         ["Check", `IFCTEXT(${text(geometry.issues.join("; ") || "DIN 18065 eingehalten")})`],

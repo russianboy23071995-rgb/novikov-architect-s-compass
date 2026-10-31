@@ -176,11 +176,12 @@ export function selectionSummary(project: Project, selection: Selection) {
     const stair = storeyOf(project).stairs?.find((item) => item.id === selection.id);
     if (!stair) return null;
     const g = stairGeometry(stair, storeyOf(project).height ?? null);
+    const shape = { straight: "Gerade", l: "L-Treppe", u: "U-Treppe" }[stair.shape];
     return {
       title: "Treppe",
       details: g
-        ? `Gerade · ${g.riserCount} Steigungen à ${metres(g.riser)} · Lauflänge ${metres(g.run)}${g.issues.length ? " · DIN-Hinweis" : ""}`
-        : `Gerade · Breite ${metres(stair.width)}`,
+        ? `${shape} · ${g.flights.length > 1 ? `${g.flights.join(" + ")} = ` : ""}${g.riserCount} Steigungen à ${metres(g.riser)} · Lauflänge ${metres(g.run)}${g.issues.length ? " · DIN-Hinweis" : ""}`
+        : `${shape} · Breite ${metres(stair.width)}`,
     };
   }
   if (selection.kind === "hatch") {

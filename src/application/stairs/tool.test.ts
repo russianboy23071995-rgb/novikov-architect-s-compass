@@ -32,8 +32,14 @@ test("the drawing axis is the centre, left or right edge looking up the flight",
 });
 
 test("the plan has one line per riser, a walking line and the 1 m cut", () => {
-  const stair = { start: { x: 0, y: 0 }, direction: 90, width: 1, axis: "center" as const };
-  const g = { riserCount: 16, riser: 0.175, tread: 0.28, run: 15 * 0.28 };
+  const stair = {
+    start: { x: 0, y: 0 },
+    direction: 90,
+    width: 1,
+    axis: "center" as const,
+    shape: "straight" as const,
+  };
+  const g = { riserCount: 16, riser: 0.175, tread: 0.28, flights: [16], landing: null };
   const plan = stairPlan(stair, g);
   assert.equal(plan.risers.length, 16);
   // Step 5 tops at 0.875 m, step 6 at 1.05 m: the cut lies within step 5's tread.
@@ -41,10 +47,16 @@ test("the plan has one line per riser, a walking line and the 1 m cut", () => {
   assert.equal(cut, 5);
   assert.ok(plan.cut);
   assert.ok(plan.walk.above);
-  close(plan.walk.below.start, { x: 0, y: 0.14 });
-  close(plan.walk.above!.end, { x: 0, y: 4.2 });
+  close(plan.walk.below[0]!, { x: 0, y: 0.14 });
+  close(plan.walk.above!.at(-1)!, { x: 0, y: 4.2 });
   // A flight lower than the cut is drawn fully below it.
-  const low = stairPlan(stair, { riserCount: 4, riser: 0.175, tread: 0.28, run: 0.84 });
+  const low = stairPlan(stair, {
+    riserCount: 4,
+    riser: 0.175,
+    tread: 0.28,
+    flights: [4],
+    landing: null,
+  });
   assert.equal(low.cut, null);
   assert.equal(low.walk.above, null);
   assert.ok(low.risers.every((r) => !r.above));
