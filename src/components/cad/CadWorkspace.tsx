@@ -4,6 +4,9 @@ import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
+
+/** Browser storage key of the remembered on-demand menu position. */
+const DEMAND_MENU_KEY = "novikov.demand-menu.position";
 import { ELEMENT_KINDS, storeyElements } from "@/domain/elements/registry";
 import { trimWallsToRoof, untrimWalls } from "@/application/walls/roof-trim";
 import {
@@ -1138,6 +1141,36 @@ export function CadWorkspace({
     return true;
   };
 
+  // The on-demand menu remembers where the user moved it, also after a reload (decision P1);
+  // until then it opens beside the cursor. Browser storage only: a missing or failing store
+  // just means following the cursor.
+  const [pinnedDemand, setPinnedDemand] = useState<Point | null>(() => {
+    try {
+      const value = JSON.parse(window.localStorage.getItem(DEMAND_MENU_KEY) ?? "null");
+      return value && Number.isFinite(value.x) && Number.isFinite(value.y)
+        ? { x: value.x, y: value.y }
+        : null;
+    } catch {
+      return null;
+    }
+  });
+  const pinDemand = (point: Point) => {
+    setPinnedDemand(point);
+    try {
+      window.localStorage.setItem(DEMAND_MENU_KEY, JSON.stringify(point));
+    } catch {
+      // The position then lasts only for this session.
+    }
+  };
+  const unpinDemand = () => {
+    setPinnedDemand(null);
+    try {
+      window.localStorage.removeItem(DEMAND_MENU_KEY);
+    } catch {
+      // Nothing stored.
+    }
+  };
+
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
     dispatchEditing({ type: "project", project: next });
@@ -1865,8 +1898,9 @@ export function CadWorkspace({
                 tool === "select" && !editSession && selections.length ? deleteSelection : undefined
               }
               selection={tool === "select" && !editSession ? selection : null}
-              position={demandPosition}
-              onPosition={setDemandPosition}
+              position={pinnedDemand ?? demandPosition}
+              onPosition={pinDemand}
+              onResetPosition={unpinDemand}
               pointIndex={pickedPoint.index}
               edgeIndex={pickedPoint.edgeIndex ?? null}
               onReferences={

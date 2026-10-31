@@ -11,6 +11,7 @@ export function DemandMenu({
   selection,
   position,
   onPosition,
+  onResetPosition,
   onInfo,
   pointIndex,
   edgeIndex,
@@ -32,6 +33,8 @@ export function DemandMenu({
   selection: Selection;
   position: Point;
   onPosition: (point: Point) => void;
+  /** Forget the remembered position, so the menu follows the cursor again. */
+  onResetPosition?: (() => void) | undefined;
   onInfo: () => void;
   pointIndex: number | null;
   edgeIndex?: number | null;
@@ -85,14 +88,15 @@ export function DemandMenu({
       role="region"
       aria-label="Elementmenü"
       data-testid="demand-menu"
-      className="glass-panel-strong fixed z-50 w-44 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-2 text-xs shadow-lg"
+      className="glass-panel-strong fixed z-50 w-36 max-w-[calc(100vw-16px)] overflow-auto rounded-lg border p-1 text-[11px] leading-tight shadow-lg"
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)" }}
     >
       <button
         type="button"
         aria-label="Menü verschieben"
-        title="Ziehen oder mit Pfeiltasten verschieben"
-        className="mb-2 w-full touch-none cursor-move rounded bg-muted px-2 py-1 text-left font-semibold"
+        title="Ziehen oder Pfeiltasten: Position merken · Doppelklick: wieder am Mauszeiger"
+        onDoubleClick={() => onResetPosition?.()}
+        className="mb-1 w-full touch-none cursor-move truncate rounded bg-muted px-1.5 py-0.5 text-left text-[10px] font-semibold"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -144,12 +148,13 @@ export function DemandMenu({
         {summary && pointIndex !== null ? ` · Punkt ${pointIndex + 1}` : ""}
       </button>
 
-      <div className="grid gap-1">
+      <div className="grid gap-px">
         {calibrationControls}
         {onMoveSelection && (
           <button
             type="button"
-            className="rounded border p-1 text-left hover:bg-muted"
+            className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+            data-command="move-selection"
             onClick={onMoveSelection}
           >
             {selectionCount === 1 ? "Element frei bewegen" : "Auswahl frei bewegen"}
@@ -158,7 +163,8 @@ export function DemandMenu({
         {onReferences && (
           <button
             type="button"
-            className="rounded border p-1 text-left hover:bg-muted"
+            className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+            data-command="references"
             onClick={onReferences}
           >
             Referenzen auswählen
@@ -173,7 +179,8 @@ export function DemandMenu({
                 {closedContour(project, selection) && (
                   <button
                     type="button"
-                    className="rounded border p-1 text-left hover:bg-muted"
+                    className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                    data-command="offset"
                     onClick={() => onAction("offset")}
                   >
                     Kontur versetzen (Offset)
@@ -183,14 +190,16 @@ export function DemandMenu({
                   <>
                     <button
                       type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
+                      className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                      data-command="insert"
                       onClick={() => onAction("insert")}
                     >
                       Knicken
                     </button>
                     <button
                       type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
+                      className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                      data-command="edge"
                       onClick={() => onAction("edge")}
                     >
                       Seite strecken
@@ -201,14 +210,16 @@ export function DemandMenu({
                   <>
                     <button
                       type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
+                      className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                      data-command="point"
                       onClick={() => onAction("point")}
                     >
                       Punkt frei bewegen
                     </button>
                     <button
                       type="button"
-                      className="rounded border p-1 text-left hover:bg-muted"
+                      className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                      data-command="stretch"
                       onClick={() => onAction("stretch")}
                     >
                       Punkt in Flucht strecken
@@ -220,7 +231,8 @@ export function DemandMenu({
             {!opening && (
               <button
                 type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
+                className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                data-command="move"
                 onClick={() => onAction("move")}
               >
                 Element frei bewegen
@@ -229,7 +241,8 @@ export function DemandMenu({
             {edgeIndex == null && selection.kind !== "slab" && selection.kind !== "roof" && (
               <button
                 type="button"
-                className="rounded border p-1 text-left hover:bg-muted"
+                className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                data-command="axis"
                 onClick={() => onAction("axis")}
               >
                 {selection.kind === "window"
@@ -243,14 +256,16 @@ export function DemandMenu({
               <>
                 <button
                   type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
+                  className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                  data-command="x"
                   onClick={() => onAction("x")}
                 >
                   Element auf X-Achse
                 </button>
                 <button
                   type="button"
-                  className="rounded border p-1 text-left hover:bg-muted"
+                  className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                  data-command="y"
                   onClick={() => onAction("y")}
                 >
                   Element auf Y-Achse
@@ -259,8 +274,9 @@ export function DemandMenu({
             )}
             <button
               type="button"
+              data-command="tool-settings"
               onClick={onInfo}
-              className="rounded border p-1 text-left hover:bg-muted"
+              className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
             >
               Werkzeugeigenschaften
             </button>
@@ -269,7 +285,8 @@ export function DemandMenu({
         {onDeleteSelection && (
           <button
             type="button"
-            className="rounded border p-1 text-left text-destructive hover:bg-muted"
+            data-command="delete"
+            className="rounded px-1.5 py-0.5 text-left text-destructive hover:bg-muted"
             onClick={onDeleteSelection}
           >
             {selectionCount > 1 ? "Auswahl löschen" : "Löschen"} (Entf)
