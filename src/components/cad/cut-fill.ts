@@ -1,3 +1,7 @@
+import {
+  WALL_RENOVATION_COLORS,
+  type WallRenovation,
+} from "../../domain/elements/wall/renovation.ts";
 /**
  * Fill of cut elements in plan (walls, roof cuts at the 1 m cut plane): grey as before, black,
  * white or an own colour (user decision 31.10.2026, docs/SCHNITTDARSTELLUNG.md). Presentation
@@ -26,6 +30,18 @@ export function parseCutFill(value: unknown): CutFill {
     mode: mode as CutFillMode,
     color: typeof color === "string" && HEX.test(color) ? color : defaultCutFill.color,
   };
+}
+
+/** Cut paint of a wall: Neubau red and Abbruch yellow when the renovation display is on, Bestand
+ * and everything else in the cut fill (docs/BAUZUSTAND.md). */
+export function wallCutPaint(
+  fill: CutFill,
+  showRenovation: boolean,
+  renovation: WallRenovation | undefined,
+): { fill: string; fillOpacity: number } {
+  if (showRenovation && renovation && renovation !== "existing")
+    return { fill: WALL_RENOVATION_COLORS[renovation], fillOpacity: 1 };
+  return cutPaint(fill);
 }
 
 /** SVG paint of a cut: grey keeps the earlier theme-aware look, white keeps the contour alone. */

@@ -51,7 +51,14 @@ export function useToolDefaults(project: Project) {
   const wall =
     wallState?.projectId === project.id
       ? wallState.values
-      : { thickness: 0.36, height: 2.8, bodyOffset: 0.18, layerId: project.defaultLayerIds.wall };
+      : {
+          thickness: 0.36,
+          height: 2.8,
+          bodyOffset: 0.18,
+          layerId: project.defaultLayerIds.wall,
+          // New walls are Neubau by default (user decision 31.10.2026, docs/BAUZUSTAND.md).
+          renovation: "new" as const,
+        };
   const wallDefaults = {
     ...wall,
     layerId: project.layers.some((l) => l.id === wall.layerId)

@@ -131,6 +131,8 @@ export type BimPlanProps = {
   wallOutlineWidth?: number;
   /** Fill of cut walls and roof cuts (docs/SCHNITTDARSTELLUNG.md). */
   cutFill?: CutFill;
+  /** Neubau red, Abbruch yellow (docs/BAUZUSTAND.md). */
+  showRenovation?: boolean;
   snap: boolean;
   ortho: boolean;
   onSelect: (
@@ -190,6 +192,7 @@ export function BimPlan({
   gridSettings = defaultGridSettings,
   wallOutlineWidth = 1,
   cutFill = defaultCutFill,
+  showRenovation = false,
   ortho,
   onSelect,
   onPoint,
@@ -766,6 +769,7 @@ export function BimPlan({
       pixelsPerMetre={camera.pixelsPerMetre}
       wallOutlineWidth={wallOutlineWidth}
       cutFill={cutFill}
+      showRenovation={showRenovation}
       cornerGeometry={cornerPreview?.base === shown ? cornerPreview.geometry : undefined}
       allowsShown={allowsShown}
       canPick={canPick}

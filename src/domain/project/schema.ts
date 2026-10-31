@@ -10,6 +10,7 @@ import {
   wallTopBindingSchema,
 } from "../elements/wall/height-binding.ts";
 import { resolveRoofTrims } from "../elements/wall/roof-trim.ts";
+import { WALL_RENOVATIONS } from "../elements/wall/renovation.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -285,12 +286,18 @@ const boundWallSchema = boundWall(wallTopBindingSchema);
 const finite = z.number().finite();
 /** Schema 35: optional trim reference to a roof (docs/TRIMMEN_L04B.md, L04b). `trimPlane` is
  * the derived cut (resolveRoofTrims), recomputed on every validation and never stored. */
-const trimmableWallSchema = boundWall(wallTopBindingSchema, {
+const trimShape = {
   roofTrim: z.object({ roofId: id }).strict().optional(),
   trimPlane: z
     .object({ a: finite, b: finite, c: finite, top: finite, bottom: finite })
     .strict()
     .optional(),
+};
+const trimmableWallSchema = boundWall(wallTopBindingSchema, trimShape);
+/** Schema 36: renovation status Bestand/Neubau/Abbruch (docs/BAUZUSTAND.md); absent = Bestand. */
+const renovatedWallSchema = boundWall(wallTopBindingSchema, {
+  ...trimShape,
+  renovation: z.enum(WALL_RENOVATIONS).optional(),
 });
 export const projectV26Schema = projectV25Schema.extend({
   schemaVersion: z.literal(26),
@@ -415,12 +422,28 @@ export const projectV34Schema = projectV33Schema.extend({
     .min(1),
 });
 /** Schema 35: walls may be trimmed at a roof (docs/TRIMMEN_L04B.md, L04b). */
-const projectSchema = projectV34Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV35Schema = projectV34Schema.extend({
+  schemaVersion: z.literal(35),
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
         walls: z.array(trimmableWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 36: walls carry a renovation status (docs/BAUZUSTAND.md, S2). */
+const projectSchema = projectV35Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
         windows: z.array(markedWindowSchema),
         doors: z.array(doorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
@@ -609,7 +632,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof trimmableWallSchema>;
+export type Wall = z.infer<typeof renovatedWallSchema>;
 export type BimWindow = z.infer<typeof markedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;

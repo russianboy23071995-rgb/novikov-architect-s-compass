@@ -1,3 +1,4 @@
+import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import type { Point2 } from "../../geometry/primitives/point.ts";
@@ -212,17 +213,21 @@ export async function writeIfc(
     kind: string,
     id: string,
     values: [string, string][],
+    set = "NOVIKOV_BIM",
   ) => {
-    const props = [["SourceId", `IFCTEXT(${text(id)})`], ...values].map(([name, value]) =>
-      add("IFCPROPERTYSINGLEVALUE", `${text(name!)},$,${value},$`),
-    );
+    // The own set keeps its historical GUID seed; further sets add their name to it.
+    const key = JSON.stringify(set === "NOVIKOV_BIM" ? [kind, id] : [kind, id, set]);
+    const props = [
+      ...(set === "NOVIKOV_BIM" ? [["SourceId", `IFCTEXT(${text(id)})`]] : []),
+      ...values,
+    ].map(([name, value]) => add("IFCPROPERTYSINGLEVALUE", `${text(name!)},$,${value},$`));
     const pset = add(
       "IFCPROPERTYSET",
-      `${await guid("properties", JSON.stringify([kind, id]))},$,'NOVIKOV_BIM',$,(${props.join(",")})`,
+      `${await guid("properties", key)},$,${text(set)},$,(${props.join(",")})`,
     );
     add(
       "IFCRELDEFINESBYPROPERTIES",
-      `${await guid("property-relation", JSON.stringify([kind, id]))},$,$,$,(${target}),${pset}`,
+      `${await guid("property-relation", key)},$,$,$,(${target}),${pset}`,
     );
   };
   const fillingBody = filling.fillingBody ?? "none";
@@ -331,11 +336,20 @@ export async function writeIfc(
         `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${wallShape},${label(wall.id)},.NOTDEFINED.`,
       );
       elements.push(wallRef);
+      // IFC renovation status (docs/BAUZUSTAND.md): NEW / EXISTING / DEMOLISH.
+      await properties(
+        wallRef,
+        "wall",
+        wall.id,
+        [["Status", `IFCLABEL(${text(IFC_RENOVATION_STATUS[wallRenovation(wall)])})`]],
+        "Pset_WallCommon",
+      );
       await properties(wallRef, "wall", wall.id, [
         ["Length", `IFCLENGTHMEASURE(${real(length)})`],
         ["Thickness", `IFCLENGTHMEASURE(${real(wall.thickness)})`],
         ["Height", `IFCLENGTHMEASURE(${real(wall.height)})`],
         ["BodyOffset", `IFCLENGTHMEASURE(${real(wall.bodyOffset)})`],
+        ["Renovation", `IFCLABEL(${text(wallRenovation(wall))})`],
         ...(wall.roofTrim && wall.trimPlane
           ? ([
               ["TrimmedAtRoof", `IFCTEXT(${text(wall.roofTrim.roofId)})`],

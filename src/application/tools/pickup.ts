@@ -21,7 +21,7 @@ export type LineDefaults = Pick<
 >;
 export type WallDefaults = Pick<
   Project["storeys"][number]["walls"][number],
-  "thickness" | "height" | "bodyOffset" | "layerId"
+  "thickness" | "height" | "bodyOffset" | "layerId" | "renovation"
 >;
 export type ToolDefaults =
   | { tool: "hatch"; values: HatchDefaults }
@@ -46,6 +46,7 @@ export function pickupToolDefaults(
         height: source.height,
         bodyOffset: source.bodyOffset,
         layerId: source.layerId,
+        renovation: source.renovation ?? "existing",
       },
     };
   }

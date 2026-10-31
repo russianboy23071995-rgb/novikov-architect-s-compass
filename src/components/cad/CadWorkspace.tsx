@@ -58,6 +58,9 @@ import { PenSetManager } from "./PenSetManager";
 import { defaultPenSet } from "@/domain/pens/model";
 import { assignPenSet } from "@/application/pens/library";
 import { WallDrawingFields } from "./WallDrawingFields";
+import { WallRenovationFields } from "./WallRenovationFields";
+import { wallRenovation } from "@/domain/elements/wall/renovation";
+import { setWallRenovation } from "@/application/walls/renovation";
 import { useProjectEditing } from "./useProjectEditing";
 import { useToolDefaults } from "./useToolDefaults";
 import { pickupToolDefaults } from "@/application/tools/pickup";
@@ -179,7 +182,8 @@ export function CadWorkspace({
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
-  const { wallWidth, setWallWidth, cutFill, setCutFill } = useCanvasDisplaySettings();
+  const { wallWidth, setWallWidth, cutFill, setCutFill, showRenovation, setShowRenovation } =
+    useCanvasDisplaySettings();
   const [gridSettings, setGridSettings] = useState(defaultGridSettings);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
@@ -1512,6 +1516,8 @@ export function CadWorkspace({
         onWallWidth={setWallWidth}
         cutFill={cutFill}
         onCutFill={setCutFill}
+        showRenovation={showRenovation}
+        onShowRenovation={setShowRenovation}
       />
       <AlertDialog open={!!trimConfirm} onOpenChange={(open) => !open && setTrimConfirm(null)}>
         <AlertDialogContent>
@@ -1546,6 +1552,24 @@ export function CadWorkspace({
                     label: name,
                     content: toolFields(settingsWindow.tool, "window"),
                   },
+                  ...(settingsWindow.tool === "wall"
+                    ? [
+                        {
+                          id: "renovation",
+                          label: "Bauzustand",
+                          content: (
+                            <WallRenovationFields
+                              value={toolDefaults.wall.renovation ?? "existing"}
+                              onChange={(renovation) => {
+                                cancelInteraction();
+                                toolDefaults.setWall({ ...toolDefaults.wall, renovation });
+                              }}
+                              hint="Vorgabe für neue Wände. Die farbige Anzeige schaltest du unter View → Darstellung… ein."
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                 ]}
                 onClose={() => setSettingsWindow(null)}
               />
@@ -1583,6 +1607,46 @@ export function CadWorkspace({
                     />
                   ),
                 },
+                ...(target.kind === "wall"
+                  ? [
+                      {
+                        id: "renovation",
+                        label: "Bauzustand",
+                        content: (
+                          <WallRenovationFields
+                            value={wallRenovation(
+                              project.storeys
+                                .flatMap((s) => s.walls)
+                                .find((w) => w.id === target.id) ?? {},
+                            )}
+                            onChange={(renovation) => {
+                              // All selected walls follow, the double-clicked one included.
+                              const ids = new Set([
+                                target.id,
+                                ...selections.filter((s) => s.kind === "wall").map((s) => s.id),
+                              ]);
+                              try {
+                                dispatchEditing({
+                                  type: "project",
+                                  project: setWallRenovation(project, [...ids], renovation),
+                                });
+                                setModelError("");
+                              } catch (error) {
+                                setModelError(
+                                  error instanceof Error ? error.message : "Nicht möglich.",
+                                );
+                              }
+                            }}
+                            hint={
+                              selections.filter((s) => s.kind === "wall").length > 1
+                                ? "Gilt für alle gewählten Wände; ein Rückgängig-Schritt."
+                                : "Ein Rückgängig-Schritt. Farbige Anzeige unter View → Darstellung…"
+                            }
+                          />
+                        ),
+                      },
+                    ]
+                  : []),
                 {
                   id: "layer",
                   label: "Ebene",
@@ -2230,6 +2294,7 @@ export function CadWorkspace({
                       }
                       wallOutlineWidth={wallWidth}
                       cutFill={cutFill}
+                      showRenovation={showRenovation}
                       gridSettings={gridSettings}
                       snap={snap}
                       ortho={ortho}

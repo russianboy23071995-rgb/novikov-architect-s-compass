@@ -295,7 +295,7 @@ test("wall pickup pins owned defaults through prepared preview and whole-chain h
   if (preset.tool !== "wall") throw new Error("Expected wall");
   assert.deepEqual(
     Object.keys(preset.values).sort(),
-    ["thickness", "height", "bodyOffset", "layerId"].sort(),
+    ["thickness", "height", "bodyOffset", "layerId", "renovation"].sort(),
   );
   let chain = beginWallChain(p, { x: 10, y: 10 }, null, preset.values);
   preset.values.height = 8;
