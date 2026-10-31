@@ -1,4 +1,5 @@
 import { FloatingPanel } from "./FloatingPanel";
+import { SETTINGS_WINDOW } from "./settings-window-size";
 import { SettingsSections, type SettingsSection } from "./SettingsSections";
 
 /**
@@ -19,7 +20,13 @@ export function ToolSettingsWindow({
   onClose: () => void;
 }) {
   return (
-    <FloatingPanel open title={title} onClose={onClose} width={760} height={460}>
+    <FloatingPanel
+      open
+      title={title}
+      onClose={onClose}
+      width={SETTINGS_WINDOW.width}
+      height={SETTINGS_WINDOW.height}
+    >
       <p className="border-b px-4 py-2 text-xs text-muted-foreground" aria-label="Bearbeitet">
         {subtitle}
       </p>

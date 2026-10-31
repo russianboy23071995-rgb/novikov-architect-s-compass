@@ -757,6 +757,9 @@ export function CadWorkspace({
     wall: "Wand",
     window: "Fenster",
     door: "Tür",
+    slab: "Decke",
+    hatch: "Schraffur",
+    line: "Linie",
   };
   const openToolDefaults = (owner: ToolId) => {
     if (owner === "roof") return setRoofSettingsOpen(true);
@@ -773,7 +776,7 @@ export function CadWorkspace({
     setSettingsWindow({ mode: "element", target });
   };
   /** Defaults fields of wall, window and door: the same set in the bar and in the window. */
-  const toolFields = (owner: ToolId) =>
+  const toolFields = (owner: ToolId, place: "bar" | "window" = "bar") =>
     owner === "wall" ? (
       <WallDrawingFields
         project={project}
@@ -803,6 +806,172 @@ export function CadWorkspace({
         onPrecision={doorTool.setPrecision}
         pickingHost={doorTool.pickingHost}
       />
+    ) : owner === "slab" ? (
+      <SlabToolFields
+        construction={hatchConstruction}
+        onConstruction={(construction) => {
+          cancelInteraction();
+          setHatchConstruction(construction);
+        }}
+        value={toolDefaults.slab}
+        onChange={toolDefaults.setSlab}
+      />
+    ) : owner === "hatch" ? (
+      <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
+        <label className="text-xs">
+          Erstellung
+          <select
+            aria-label="Schraffur-Erstellung"
+            value={hatchConstruction}
+            onChange={(e) => {
+              cancelInteraction();
+              setHatchConstruction(e.target.value as HatchConstruction);
+            }}
+            className="block rounded border bg-background p-1"
+          >
+            <option value="polygon">Polygon per Klick</option>
+            <option value="diagonal">Rechteck: Diagonale</option>
+            <option value="side-height">Rechteck: Seite und Höhe</option>
+            <option value="boundary">Geschlossene Kontur übernehmen</option>
+          </select>
+        </label>
+        <HatchRotationField
+          enabled={!!toolDefaults.hatch.patternDefinition}
+          value={toolDefaults.hatch.patternRotation ?? 0}
+          onChange={(patternRotation) =>
+            toolDefaults.setHatch({ ...toolDefaults.hatch, patternRotation })
+          }
+        />
+        <HatchPatternFields
+          project={project}
+          value={toolDefaults.hatch.patternDefinition}
+          onChange={(patternDefinition) =>
+            toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
+          }
+        />
+        <HatchSizeFields
+          definition={toolDefaults.hatch.patternDefinition}
+          value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
+          context={viewContext.scale}
+          onChange={(patternSize) => toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })}
+        />
+        <HatchFillFields
+          value={hatchFill}
+          onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
+        />
+        <HatchPaintFields
+          label="Hintergrund"
+          value={toolDefaults.hatch.background}
+          onChange={(background) => toolDefaults.setHatch({ ...toolDefaults.hatch, background })}
+        />
+        <HatchPaintFields
+          label="Kontur"
+          value={toolDefaults.hatch.contour}
+          onChange={(contour) => toolDefaults.setHatch({ ...toolDefaults.hatch, contour })}
+        />
+        <label className="text-xs">
+          Ebene
+          <select
+            aria-label="Schraffur-Zielebene"
+            className="block h-8 rounded border bg-background"
+            value={toolDefaults.hatch.layerId}
+            onChange={(e) =>
+              toolDefaults.setHatch({ ...toolDefaults.hatch, layerId: e.target.value })
+            }
+          >
+            {project.layers.map((layer) => (
+              <option key={layer.id} value={layer.id}>
+                {layer.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {place === "bar" && (
+          <>
+            <span className="text-xs">
+              {hatchConstruction === "polygon"
+                ? `${pathPoints.length} Punkte · Doppelklick schließt`
+                : hatchConstruction === "boundary"
+                  ? "In ein geschlossenes Polygon klicken"
+                  : hatchConstruction === "diagonal"
+                    ? "Zwei gegenüberliegende Ecken anklicken"
+                    : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
+              · Esc verwirft
+            </span>
+            <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+              Zeichnen abbrechen
+            </Button>
+          </>
+        )}
+      </section>
+    ) : owner === "line" ? (
+      <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
+        <label className="text-xs">
+          Zeichenmodus
+          <select
+            aria-label="Zeichenmodus"
+            className="block rounded border bg-background p-1"
+            value={lineKind}
+            onChange={(e) => {
+              setLineKind(e.target.value as "line" | "polyline");
+              setPathPoints([]);
+              setModelError("");
+            }}
+          >
+            <option value="line">Linie</option>
+            <option value="polyline">Polylinie</option>
+          </select>
+        </label>
+        <LineStyleFields
+          value={lineAppearance}
+          onChange={(appearance) => toolDefaults.setLine({ ...toolDefaults.line, ...appearance })}
+        />
+        <label className="text-xs">
+          Ebene
+          <select
+            aria-label="Linien-Zielebene"
+            className="block h-8 rounded border bg-background"
+            value={toolDefaults.line.layerId}
+            onChange={(e) =>
+              toolDefaults.setLine({ ...toolDefaults.line, layerId: e.target.value })
+            }
+          >
+            {project.layers.map((layer) => (
+              <option key={layer.id} value={layer.id}>
+                {layer.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs">
+          Hover-Referenz
+          <select
+            aria-label="Hover-Verweildauer"
+            className="block rounded border bg-background p-1"
+            value={hoverDwellMs}
+            onChange={(e) => setHoverDwellMs(Number(e.target.value))}
+          >
+            <option value={200}>0,2 Sekunden</option>
+            <option value={400}>0,4 Sekunden</option>
+            <option value={600}>0,6 Sekunden</option>
+            <option value={1000}>1 Sekunde</option>
+          </select>
+        </label>
+        {place === "bar" && (
+          <>
+            <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
+            {lineKind === "polyline" && (
+              <span className="text-xs">
+                Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im Grundriss:
+                Abschluss
+              </span>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
+              Zeichnen abbrechen
+            </Button>
+          </>
+        )}
+      </section>
     ) : null;
   /** Right click "Werkzeugeinstellungen…": on an element its own window, else the window of
    * the active tool. */
@@ -1350,7 +1519,7 @@ export function CadWorkspace({
                   {
                     id: "defaults",
                     label: name,
-                    content: toolFields(settingsWindow.tool),
+                    content: toolFields(settingsWindow.tool, "window"),
                   },
                 ]}
                 onClose={() => setSettingsWindow(null)}
@@ -1799,7 +1968,7 @@ export function CadWorkspace({
                 </label>
                 <span role="status">
                   {measurementMode === "angle"
-                    ? "Schenkelpunkt â†’ Scheitel â†’ Schenkelpunkt · Esc: Beenden"
+                    ? "Schenkelpunkt → Scheitel → Schenkelpunkt · Esc: Beenden"
                     : measurementMode === "area"
                       ? "Punkte setzen · Doppelklick schließt · Danach Klick für neue Messung · Esc: Beenden"
                       : "Zwei Punkte anklicken · Danach Klick für neue Messung · Esc: Beenden"}
@@ -1839,170 +2008,8 @@ export function CadWorkspace({
                 layers={project.layers}
                 phase={roofPhase ?? "line"}
               />
-            ) : tool === "slab" && mode === "2D" ? (
-              <SlabToolFields
-                construction={hatchConstruction}
-                onConstruction={(construction) => {
-                  cancelInteraction();
-                  setHatchConstruction(construction);
-                }}
-                value={toolDefaults.slab}
-                onChange={toolDefaults.setSlab}
-              />
-            ) : tool === "hatch" && mode === "2D" ? (
-              <section aria-label="Schraffurwerkzeug" className="flex flex-wrap items-end gap-3">
-                <label className="text-xs">
-                  Erstellung
-                  <select
-                    aria-label="Schraffur-Erstellung"
-                    value={hatchConstruction}
-                    onChange={(e) => {
-                      cancelInteraction();
-                      setHatchConstruction(e.target.value as HatchConstruction);
-                    }}
-                    className="block rounded border bg-background p-1"
-                  >
-                    <option value="polygon">Polygon per Klick</option>
-                    <option value="diagonal">Rechteck: Diagonale</option>
-                    <option value="side-height">Rechteck: Seite und Höhe</option>
-                    <option value="boundary">Geschlossene Kontur übernehmen</option>
-                  </select>
-                </label>
-                <HatchRotationField
-                  enabled={!!toolDefaults.hatch.patternDefinition}
-                  value={toolDefaults.hatch.patternRotation ?? 0}
-                  onChange={(patternRotation) =>
-                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternRotation })
-                  }
-                />
-                <HatchPatternFields
-                  project={project}
-                  value={toolDefaults.hatch.patternDefinition}
-                  onChange={(patternDefinition) =>
-                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternDefinition })
-                  }
-                />
-                <HatchSizeFields
-                  definition={toolDefaults.hatch.patternDefinition}
-                  value={toolDefaults.hatch.patternSize ?? { mode: "model" }}
-                  context={viewContext.scale}
-                  onChange={(patternSize) =>
-                    toolDefaults.setHatch({ ...toolDefaults.hatch, patternSize })
-                  }
-                />
-                <HatchFillFields
-                  value={hatchFill}
-                  onChange={(fill) => toolDefaults.setHatch({ ...toolDefaults.hatch, fill })}
-                />
-                <HatchPaintFields
-                  label="Hintergrund"
-                  value={toolDefaults.hatch.background}
-                  onChange={(background) =>
-                    toolDefaults.setHatch({ ...toolDefaults.hatch, background })
-                  }
-                />
-                <HatchPaintFields
-                  label="Kontur"
-                  value={toolDefaults.hatch.contour}
-                  onChange={(contour) => toolDefaults.setHatch({ ...toolDefaults.hatch, contour })}
-                />
-                <label className="text-xs">
-                  Ebene
-                  <select
-                    aria-label="Schraffur-Zielebene"
-                    className="block h-8 rounded border bg-background"
-                    value={toolDefaults.hatch.layerId}
-                    onChange={(e) =>
-                      toolDefaults.setHatch({ ...toolDefaults.hatch, layerId: e.target.value })
-                    }
-                  >
-                    {project.layers.map((layer) => (
-                      <option key={layer.id} value={layer.id}>
-                        {layer.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <span className="text-xs">
-                  {hatchConstruction === "polygon"
-                    ? `${pathPoints.length} Punkte · Doppelklick schließt`
-                    : hatchConstruction === "boundary"
-                      ? "In ein geschlossenes Polygon klicken"
-                      : hatchConstruction === "diagonal"
-                        ? "Zwei gegenüberliegende Ecken anklicken"
-                        : "Zwei Seitenpunkte, danach Höhe anklicken"}{" "}
-                  · Esc verwirft
-                </span>
-                <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
-                  Zeichnen abbrechen
-                </Button>
-              </section>
-            ) : tool === "line" && mode === "2D" ? (
-              <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
-                <label className="text-xs">
-                  Zeichenmodus
-                  <select
-                    aria-label="Zeichenmodus"
-                    className="block rounded border bg-background p-1"
-                    value={lineKind}
-                    onChange={(e) => {
-                      setLineKind(e.target.value as "line" | "polyline");
-                      setPathPoints([]);
-                      setModelError("");
-                    }}
-                  >
-                    <option value="line">Linie</option>
-                    <option value="polyline">Polylinie</option>
-                  </select>
-                </label>
-                <LineStyleFields
-                  value={lineAppearance}
-                  onChange={(appearance) =>
-                    toolDefaults.setLine({ ...toolDefaults.line, ...appearance })
-                  }
-                />
-                <label className="text-xs">
-                  Ebene
-                  <select
-                    aria-label="Linien-Zielebene"
-                    className="block h-8 rounded border bg-background"
-                    value={toolDefaults.line.layerId}
-                    onChange={(e) =>
-                      toolDefaults.setLine({ ...toolDefaults.line, layerId: e.target.value })
-                    }
-                  >
-                    {project.layers.map((layer) => (
-                      <option key={layer.id} value={layer.id}>
-                        {layer.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-xs">
-                  Hover-Referenz
-                  <select
-                    aria-label="Hover-Verweildauer"
-                    className="block rounded border bg-background p-1"
-                    value={hoverDwellMs}
-                    onChange={(e) => setHoverDwellMs(Number(e.target.value))}
-                  >
-                    <option value={200}>0,2 Sekunden</option>
-                    <option value={400}>0,4 Sekunden</option>
-                    <option value={600}>0,6 Sekunden</option>
-                    <option value={1000}>1 Sekunde</option>
-                  </select>
-                </label>
-                <span className="text-xs">{pathPoints.length} Punkte · Esc verwirft</span>
-                {lineKind === "polyline" && (
-                  <span className="text-xs">
-                    Doppelklick zum Abschließen · Enter im Feld: nächster Punkt · Enter im
-                    Grundriss: Abschluss
-                  </span>
-                )}
-                <Button size="sm" variant="ghost" onClick={() => selectTool("select")}>
-                  Zeichnen abbrechen
-                </Button>
-              </section>
+            ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
+              toolFields(tool)
             ) : selections.length > 1 ? (
               <p className="p-3 text-xs text-muted-foreground" role="status">
                 {selections.length} Elemente ausgewählt.{" "}

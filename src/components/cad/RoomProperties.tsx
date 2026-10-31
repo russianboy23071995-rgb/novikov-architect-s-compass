@@ -10,6 +10,7 @@ import { heightLineText } from "@/application/rooms/height-lines";
 import { isDefaultHeightLineList, roomHeightLines } from "@/domain/elements/room/height-line";
 import { HeightLineEditor } from "./HeightLineEditor";
 import { FloatingPanel } from "./FloatingPanel";
+import { SETTINGS_WINDOW } from "./settings-window-size";
 import type { Project } from "@/domain/project/schema";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
@@ -173,8 +174,8 @@ export function RoomProperties({
         open={linesOpen}
         title={`Höhenlinien ${room.number}`}
         onClose={() => setLinesOpen(false)}
-        width={720}
-        height={360}
+        width={SETTINGS_WINDOW.width}
+        height={SETTINGS_WINDOW.height}
       >
         <div className="overflow-auto p-4">
           <HeightLineEditor

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { HatchConstruction } from "@/application/hatches/construction";
 import type { Layer } from "@/domain/layers/model";
 import { FloatingPanel } from "./FloatingPanel";
+import { SETTINGS_WINDOW } from "./settings-window-size";
 import { SettingsSections } from "./SettingsSections";
 import type { RoomDefaults } from "./useToolDefaults";
 import { heightLineLabel } from "@/application/rooms/height-lines";
@@ -175,8 +176,8 @@ export function RoomSettingsPanel({
       open={open}
       title="Raum-Einstellungen"
       onClose={() => onOpenChange(false)}
-      width={760}
-      height={460}
+      width={SETTINGS_WINDOW.width}
+      height={SETTINGS_WINDOW.height}
     >
       <SettingsSections
         initial={section}
