@@ -1,4 +1,5 @@
 import { TextGraphic } from "./TextGraphic";
+import { StairPlanGraphic } from "./StairPlanGraphic";
 import { measuredTextWidth } from "./text-measure";
 import { textBlock, textHeight } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
@@ -114,6 +115,7 @@ export function PlanSceneContent({
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
+    stairs: kind === "stair" ? ids.map((id) => scene.stairs.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
@@ -596,6 +598,29 @@ export function PlanSceneContent({
             pointerEvents={placement ? "none" : "all"}
             className="cursor-pointer outline-none focus-visible:stroke-sky-300"
           />
+        );
+      })}
+      {plan.stairs.map((stair) => {
+        const view = scene.stairViews.get(stair.id)!;
+        return (
+          <g key={stair.id}>
+            {/* Transparent pick area over the whole flight. */}
+            <polygon
+              {...selectProps("stair", stair.id)}
+              points={view.outline.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="var(--background)"
+              fillOpacity={0.01}
+              stroke="none"
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none"
+            />
+            <StairPlanGraphic
+              plan={view}
+              pixelsPerMetre={pixelsPerMetre}
+              color={selectedIds.has(stair.id) ? "#0284c7" : "var(--primary)"}
+              width={wallOutlineWidth}
+            />
+          </g>
         );
       })}
       {plan.dimensions.map((dimension) => {

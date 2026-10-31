@@ -69,6 +69,9 @@ import { addDimension, updateDimension } from "@/application/dimensions/actions"
 import { dimensionPointAt } from "@/domain/elements/dimension/model";
 import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
+import { addStair, updateStair } from "@/application/stairs/actions";
+import { stairValues } from "@/application/stairs/defaults";
+import { StairFields } from "./StairFields";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
 import { setWallRenovation } from "@/application/walls/renovation";
 import { useProjectEditing } from "./useProjectEditing";
@@ -354,6 +357,8 @@ export function CadWorkspace({
       count: number;
     };
   } | null>(null);
+  // Stair tool (docs/TREPPE.md, TR2): first click on the drawing axis; session state only.
+  const [stairStart, setStairStart] = useState<Point | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
   const railShown = !fullscreen || !!activeDocumentId;
@@ -390,6 +395,7 @@ export function CadWorkspace({
     setRoofRise(null);
     setDimensionDraft(null);
     setTextDraft(null);
+    setStairStart(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -516,6 +522,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "stair" ||
       next === "dimension" ||
       next === "text"
     )
@@ -532,6 +539,7 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
+      next === "stair" ||
       next === "dimension" ||
       next === "text"
     )
@@ -648,8 +656,7 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Stairs get their edit actions with the stair tool (docs/TREPPE.md, TR2).
-    if (!selection || selection.kind === "reference" || selection.kind === "stair") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns move as a whole too (docs/STUETZEN.md, P3).
@@ -658,6 +665,7 @@ export function CadWorkspace({
       selection.kind === "roof" ||
       selection.kind === "room" ||
       selection.kind === "column" ||
+      selection.kind === "stair" ||
       selection.kind === "dimension" ||
       selection.kind === "text";
     const solidMove =
@@ -679,11 +687,13 @@ export function CadWorkspace({
               ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
               : selection.kind === "column"
                 ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
-                : selection.kind === "dimension"
-                  ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
-                  : selection.kind === "text"
-                    ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
-                    : editAnchor(project, selection));
+                : selection.kind === "stair"
+                  ? storeyOf(project).stairs!.find((s) => s.id === selection.id)!.start
+                  : selection.kind === "dimension"
+                    ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
+                    : selection.kind === "text"
+                      ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
+                      : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -716,9 +726,10 @@ export function CadWorkspace({
         roof: ["Dach", "das Dach", "Dächer"],
         room: ["Raum", "der Raum", "Räume"],
         column: ["Stützen", "die Stütze", "Stützen"],
+        stair: ["Treppen", "die Treppe", "Treppen"],
         dimension: ["Maßketten", "die Maßkette", "Maßketten"],
         text: ["Texte", "der Text", "Texte"],
-      }[selection.kind as "slab" | "roof" | "room" | "column" | "dimension" | "text"];
+      }[selection.kind as "slab" | "roof" | "room" | "column" | "stair" | "dimension" | "text"];
       showNotice(
         inSolid
           ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
@@ -727,7 +738,12 @@ export function CadWorkspace({
       return;
     }
     // A column has no outline or point edits; it only moves as a whole (handled above).
-    if (selection.kind === "column" || selection.kind === "dimension" || selection.kind === "text")
+    if (
+      selection.kind === "column" ||
+      selection.kind === "stair" ||
+      selection.kind === "dimension" ||
+      selection.kind === "text"
+    )
       return;
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
@@ -836,6 +852,7 @@ export function CadWorkspace({
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
     column: "Stütze",
+    stair: "Treppe",
     dimension: "Maßkette",
     text: "Text",
     window: "Fenster",
@@ -889,6 +906,13 @@ export function CadWorkspace({
         }}
         layers={project.layers}
         step={place === "bar" && dimensionDraft?.line ? "points" : "line"}
+      />
+    ) : owner === "stair" ? (
+      <StairFields
+        value={toolDefaults.stair}
+        onChange={toolDefaults.setStair}
+        layers={project.layers}
+        storeyHeight={storeyOf(project).height ?? null}
       />
     ) : owner === "column" ? (
       <ColumnFields
@@ -1543,6 +1567,36 @@ export function CadWorkspace({
       );
       return;
     }
+    // Stair tool (docs/TREPPE.md, TR2): click 1 on the drawing axis, click 2 sets the run
+    // direction; the length follows from the calculation.
+    if (tool === "stair") {
+      if (!stairStart) {
+        setStairStart({ x: point.x, y: point.y });
+        return;
+      }
+      const dx = point.x - stairStart.x;
+      const dy = point.y - stairStart.y;
+      if (Math.hypot(dx, dy) < 1e-6) {
+        setModelError("Zweiter Klick: Laufrichtung zeigen, nicht auf den Antritt.");
+        return;
+      }
+      try {
+        dispatchEditing({
+          type: "project",
+          project: addStair(project, {
+            id: `stair-${crypto.randomUUID()}`,
+            start: stairStart,
+            direction: Math.round(((Math.atan2(dy, dx) * 180) / Math.PI) * 1e6) / 1e6,
+            ...stairValues(toolDefaults.stair),
+          }),
+        });
+        setStairStart(null);
+        showNotice("Treppe gesetzt");
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Treppe nicht möglich.");
+      }
+      return;
+    }
     // Column tool: each click sets a column, centre on the point (docs/STUETZEN.md, P2).
     if (tool === "column") {
       try {
@@ -1828,7 +1882,9 @@ export function CadWorkspace({
                     label: name,
                     content: toolFields(settingsWindow.tool, "window"),
                   },
-                  ...(settingsWindow.tool === "wall" || settingsWindow.tool === "column"
+                  ...(settingsWindow.tool === "wall" ||
+                  settingsWindow.tool === "column" ||
+                  settingsWindow.tool === "stair"
                     ? [
                         {
                           id: "renovation",
@@ -1838,12 +1894,16 @@ export function CadWorkspace({
                               value={
                                 settingsWindow.tool === "column"
                                   ? toolDefaults.column.renovation
-                                  : (toolDefaults.wall.renovation ?? "existing")
+                                  : settingsWindow.tool === "stair"
+                                    ? toolDefaults.stair.renovation
+                                    : (toolDefaults.wall.renovation ?? "existing")
                               }
                               onChange={(renovation) => {
                                 cancelInteraction();
                                 if (settingsWindow.tool === "column")
                                   toolDefaults.setColumn({ ...toolDefaults.column, renovation });
+                                else if (settingsWindow.tool === "stair")
+                                  toolDefaults.setStair({ ...toolDefaults.stair, renovation });
                                 else toolDefaults.setWall({ ...toolDefaults.wall, renovation });
                               }}
                               hint="Vorgabe für neue Wände."
@@ -1892,7 +1952,7 @@ export function CadWorkspace({
                     />
                   ),
                 },
-                ...(target.kind === "wall" || target.kind === "column"
+                ...(target.kind === "wall" || target.kind === "column" || target.kind === "stair"
                   ? [
                       {
                         id: "renovation",
@@ -1902,7 +1962,9 @@ export function CadWorkspace({
                             value={wallRenovation(
                               (target.kind === "wall"
                                 ? project.storeys.flatMap((s) => s.walls)
-                                : project.storeys.flatMap((s) => s.columns ?? [])
+                                : target.kind === "stair"
+                                  ? project.storeys.flatMap((s) => s.stairs ?? [])
+                                  : project.storeys.flatMap((s) => s.columns ?? [])
                               ).find((e) => e.id === target.id) ?? {},
                             )}
                             onChange={(renovation) => {
@@ -1921,7 +1983,10 @@ export function CadWorkspace({
                                     target.kind === "wall"
                                       ? setWallRenovation(project, [...ids], renovation)
                                       : [...ids].reduce(
-                                          (p, id) => updateColumn(p, id, { renovation }),
+                                          (p, id) =>
+                                            target.kind === "stair"
+                                              ? updateStair(p, id, { renovation })
+                                              : updateColumn(p, id, { renovation }),
                                           project,
                                         ),
                                 });
@@ -2433,6 +2498,7 @@ export function CadWorkspace({
                       drawing={
                         (tool === "wall" ||
                           tool === "column" ||
+                          tool === "stair" ||
                           tool === "dimension" ||
                           tool === "text" ||
                           pathDrawing ||
@@ -2447,13 +2513,20 @@ export function CadWorkspace({
                         tool === "select" ||
                         tool === "wall" ||
                         tool === "column" ||
+                        tool === "stair" ||
                         tool === "dimension" ||
                         tool === "text" ||
                         tool === "window" ||
                         tool === "door"
                       }
                       hoverDwellMs={hoverDwellMs}
-                      start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
+                      start={
+                        pathDrawing
+                          ? (pathPoints.at(-1) ?? null)
+                          : tool === "stair"
+                            ? stairStart
+                            : wallStart
+                      }
                       draftPoints={pathDrawing ? pathPoints : []}
                       draftFinishable={
                         tool === "dimension"
@@ -2560,6 +2633,15 @@ export function CadWorkspace({
                               ...toolDefaults.text,
                               position: textDraft.position,
                               content: textDraft.content,
+                            }
+                          : undefined
+                      }
+                      stairDraft={
+                        tool === "stair" && stairStart
+                          ? {
+                              start: stairStart,
+                              values: stairValues(toolDefaults.stair),
+                              storeyHeight: storeyOf(project).height ?? null,
                             }
                           : undefined
                       }
@@ -2804,6 +2886,7 @@ export function CadWorkspace({
                 </div>
               ) : tool === "wall" ||
                 tool === "column" ||
+                tool === "stair" ||
                 tool === "dimension" ||
                 tool === "text" ||
                 tool === "window" ||

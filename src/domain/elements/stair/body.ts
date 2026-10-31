@@ -1,5 +1,5 @@
 import { triangulateSimplePolygon } from "../../../geometry/polygons/triangulate.ts";
-import { stairGeometry, stairProfile, type Stair } from "./model.ts";
+import { stairFrame, stairGeometry, stairProfile, type Stair } from "./model.ts";
 
 type Vec3 = [number, number, number];
 /** A stair face in the storey solid; `stair` keeps it out of every wall-only path. */
@@ -18,14 +18,12 @@ export function stairBody(
   const g = stairGeometry(stair, storeyHeight);
   if (!g) return null;
   const profile = stairProfile(g, stair.waist);
-  const a = (stair.direction * Math.PI) / 180;
-  const d = { x: Math.cos(a), y: Math.sin(a) };
-  const n = { x: -d.y, y: d.x };
+  const { origin, d, n } = stairFrame(stair);
   const w = stair.width / 2;
   const z0 = elevation + stair.baseOffset;
   const at = (s: number, z: number, t: number): Vec3 => [
-    stair.start.x + d.x * s + n.x * t,
-    stair.start.y + d.y * s + n.y * t,
+    origin.x + d.x * s + n.x * t,
+    origin.y + d.y * s + n.y * t,
     z0 + z,
   ];
   const faces: StairFace[] = [];

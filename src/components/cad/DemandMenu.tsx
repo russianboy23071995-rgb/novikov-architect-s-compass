@@ -285,6 +285,7 @@ export function DemandMenu({
                 selection.kind !== "slab" &&
                 selection.kind !== "roof" &&
                 selection.kind !== "column" &&
+                selection.kind !== "stair" &&
                 selection.kind !== "text" && (
                   <button
                     type="button"

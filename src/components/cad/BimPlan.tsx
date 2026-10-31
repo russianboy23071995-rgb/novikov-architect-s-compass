@@ -2,6 +2,8 @@ import type { DimensionStyle } from "./DimensionStyleFields";
 import { TextGraphic } from "./TextGraphic";
 import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
+import { StairPlanGraphic } from "./StairPlanGraphic";
+import { stairGeometry, stairPlan, type Stair } from "@/domain/elements/stair/model";
 import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
@@ -128,6 +130,15 @@ export type BimPlanProps = {
   draftFinishable?: boolean;
   /** Text being typed (docs/TEXT.md): drawn live at its insertion point. */
   textPreview?: Omit<PlanText, "id" | "layerId"> | undefined;
+  /** Stair being drawn (docs/TREPPE.md, TR2): start on the drawing axis; the pointer gives the
+   * run direction, the full flight follows live. */
+  stairDraft?:
+    | {
+        start: Point;
+        values: Omit<Stair, "id" | "start" | "direction" | "shape">;
+        storeyHeight: number | null;
+      }
+    | undefined;
   /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
   dimensionDraft?:
     | {
@@ -206,6 +217,7 @@ export function BimPlan({
   draftPoints = [],
   draftFinishable = true,
   dimensionDraft,
+  stairDraft,
   textPreview,
   closeAtStart = false,
   roofGuide = null,
@@ -1405,6 +1417,29 @@ export function BimPlan({
             />
           </g>
         )}
+        {drawing &&
+          stairDraft &&
+          (() => {
+            const aim = resolvedHover?.point;
+            const direction =
+              aim && Math.hypot(aim.x - stairDraft.start.x, aim.y - stairDraft.start.y) > 1e-6
+                ? (Math.atan2(aim.y - stairDraft.start.y, aim.x - stairDraft.start.x) * 180) /
+                  Math.PI
+                : 0;
+            const g = stairGeometry(stairDraft.values, stairDraft.storeyHeight);
+            if (!g) return null;
+            const stair = { ...stairDraft.values, start: stairDraft.start, direction };
+            return (
+              <g aria-label="Treppe in Arbeit" opacity={0.85}>
+                <StairPlanGraphic
+                  plan={stairPlan(stair, g, 1 - stairDraft.values.baseOffset)}
+                  pixelsPerMetre={camera.pixelsPerMetre}
+                  color="#0284c7"
+                  width={1.5}
+                />
+              </g>
+            );
+          })()}
         {drawing && dimensionDraft && (
           <g pointerEvents="none" aria-label="Maßkette in Arbeit">
             {dimensionDraft.line && (

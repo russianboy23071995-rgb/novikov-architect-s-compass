@@ -12,6 +12,8 @@ import { TEXT_DEFAULTS } from "@/domain/elements/text/model";
 import type { TextDefaults } from "./TextFields";
 import type { DimensionDefaults } from "./DimensionToolFields";
 import { columnToolDefaults, type ColumnDefaults } from "@/application/columns/defaults";
+import { stairToolDefaults, type StairDefaults } from "@/application/stairs/defaults";
+import { defaultStairLayerId } from "@/application/stairs/actions";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -147,6 +149,20 @@ export function useToolDefaults(project: Project) {
       ? columnValues.layerId
       : defaultColumnLayerId(project),
   };
+  const [stairState, setStairState] = useState<{
+    projectId: string;
+    values: StairDefaults;
+  } | null>(null);
+  const stairValues =
+    stairState?.projectId === project.id
+      ? stairState.values
+      : stairToolDefaults(defaultStairLayerId(project));
+  const stairDefaults = {
+    ...stairValues,
+    layerId: project.layers.some((l) => l.id === stairValues.layerId)
+      ? stairValues.layerId
+      : defaultStairLayerId(project),
+  };
   const [dimensionState, setDimensionState] = useState<{
     projectId: string;
     values: DimensionDefaults;
@@ -264,6 +280,10 @@ export function useToolDefaults(project: Project) {
     setColumn(values: ColumnDefaults) {
       setColumnState({ projectId: project.id, values });
     },
+    stair: stairDefaults,
+    setStair(values: StairDefaults) {
+      setStairState({ projectId: project.id, values });
+    },
     room: roomDefaults,
     setRoom(values: RoomDefaults) {
       setRoomState({ projectId: project.id, values });
@@ -289,6 +309,8 @@ export function useToolDefaults(project: Project) {
         setLineState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "column")
         setColumnState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "stair")
+        setStairState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "text")
         setTextState({ projectId: project.id, values: defaults.values });
       else
