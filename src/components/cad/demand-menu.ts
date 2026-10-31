@@ -1,4 +1,5 @@
 import { dimensionValues, formatDimension } from "../../domain/elements/dimension/model.ts";
+import { stairGeometry } from "../../domain/elements/stair/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -169,6 +170,17 @@ export function selectionSummary(project: Project, selection: Selection) {
     return {
       title: "Stütze",
       details: `${section} · ${column.topBinding ? "bis Geschoss darüber" : `Höhe ${metres(column.height!)}`}`,
+    };
+  }
+  if (selection.kind === "stair") {
+    const stair = storeyOf(project).stairs?.find((item) => item.id === selection.id);
+    if (!stair) return null;
+    const g = stairGeometry(stair, storeyOf(project).height ?? null);
+    return {
+      title: "Treppe",
+      details: g
+        ? `Gerade · ${g.riserCount} Steigungen à ${metres(g.riser)} · Lauflänge ${metres(g.run)}${g.issues.length ? " · DIN-Hinweis" : ""}`
+        : `Gerade · Breite ${metres(stair.width)}`,
     };
   }
   if (selection.kind === "hatch") {

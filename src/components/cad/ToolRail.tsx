@@ -1,6 +1,7 @@
 import {
   BoxSelect,
   Cylinder,
+  Footprints,
   DoorOpen,
   PanelsTopLeft,
   PaintBucket,
@@ -25,6 +26,8 @@ const tools: CadTool[] = [
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
   { id: "column", label: "Stütze", shortcut: "", icon: Cylinder },
+  // Stair after column: both are storey-high building parts (docs/TREPPE.md, TR2).
+  { id: "stair", label: "Treppe", shortcut: "", icon: Footprints },
   { id: "window", label: "Fenster", shortcut: "", icon: PanelsTopLeft },
   { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
   { id: "slab", label: "Decke", shortcut: "S", icon: Pentagon },

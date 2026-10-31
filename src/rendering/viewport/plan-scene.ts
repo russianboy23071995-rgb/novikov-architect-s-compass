@@ -1,5 +1,6 @@
 import { PLAN_CUT_HEIGHT, roofPlanView } from "./roof-plan.ts";
 import { columnLevels, columnOutline } from "../../domain/elements/column/model.ts";
+import { stairGeometry, stairPlan } from "../../domain/elements/stair/model.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -47,6 +48,22 @@ export function derivePlanScene(
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),
     columns: new Map(plan.columns.map((c) => [c.id, c])),
+    stairs: new Map(plan.stairs.map((s) => [s.id, s])),
+    // Stairs: steps, walking line and the 1 m cut (docs/TREPPE.md, TR2). Unknown height: outline
+    // from the width only, so the stair stays visible and pickable.
+    stairViews: new Map(
+      plan.stairs.map((s) => {
+        const g = stairGeometry(s, "height" in storey ? (storey.height ?? null) : null);
+        return [
+          s.id,
+          stairPlan(
+            s,
+            g ?? { riserCount: 1, riser: 1, tread: s.width, run: s.width },
+            PLAN_CUT_HEIGHT - s.baseOffset,
+          ),
+        ] as const;
+      }),
+    ),
     dimensions: new Map(plan.dimensions.map((d) => [d.id, d])),
     texts: new Map(plan.texts.map((t) => [t.id, t])),
     // Columns: outline in plan; filled like a cut wall where the 1 m cut plane meets them
@@ -88,6 +105,7 @@ export type PlanRun = {
     | "hatch"
     | "wall"
     | "column"
+    | "stair"
     | "line"
     | "dimension"
     | "text";
@@ -109,6 +127,7 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["hatch", scene.plan.hatches],
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],
+    ["stair", scene.plan.stairs],
     ["line", scene.plan.lines],
     // Dimension chains annotate everything below them (docs/MASSKETTE.md).
     ["dimension", scene.plan.dimensions],

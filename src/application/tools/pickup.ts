@@ -1,5 +1,6 @@
 import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
+import { stairSettings, type StairDefaults } from "../stairs/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -31,6 +32,7 @@ export type ToolDefaults =
   | { tool: "line"; values: LineDefaults }
   | { tool: "wall"; values: WallDefaults }
   | { tool: "column"; values: ColumnDefaults }
+  | { tool: "stair"; values: StairDefaults }
   | { tool: "text"; values: Omit<PlanText, "id" | "position" | "content"> };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
@@ -87,6 +89,11 @@ export function pickupToolDefaults(
   if (target.kind === "column") {
     const source = storeyOf(project).columns?.find((item) => item.id === target.id);
     return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Stairs hand over every setting, axis and height rule included (docs/TREPPE.md, TR2).
+  if (target.kind === "stair") {
+    const source = storeyOf(project).stairs?.find((item) => item.id === target.id);
+    return source ? { tool: "stair", values: stairSettings(source) } : null;
   }
   // Texts hand over every setting except position and content (docs/TEXT.md).
   if (target.kind === "text") {

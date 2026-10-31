@@ -5,6 +5,14 @@ import { wallTopBindingSchema } from "../wall/height-binding.ts";
 const finite = z.number().finite();
 const point = z.object({ x: finite, y: finite }).strict();
 
+export const STAIR_AXES = ["center", "left", "right"] as const;
+export type StairAxis = (typeof STAIR_AXES)[number];
+export const STAIR_AXIS_LABELS: Record<StairAxis, string> = {
+  center: "Mitte",
+  left: "Links",
+  right: "Rechts",
+};
+
 /** Rule sets of DIN 18065 (Gebäudetreppen) used for the check. */
 export const STAIR_RULE_SETS = ["residential", "other"] as const;
 export type StairRuleSet = (typeof STAIR_RULE_SETS)[number];
@@ -43,6 +51,9 @@ export const stairSchema = z
     start: point,
     direction: finite,
     width: finite.positive().max(10),
+    /** Drawing axis like a wall's: the clicked line is the centre, left or right edge
+     * (looking up the flight). Absent = centre (docs/TREPPE.md, TR2). */
+    axis: z.enum(STAIR_AXES).optional(),
     riserTarget: finite.min(0.1).max(0.25),
     riserCount: z.number().int().min(2).max(200).optional(),
     tread: finite.min(0.15).max(0.6).optional(),
@@ -137,20 +148,81 @@ export function stairGeometry(
   return { rise, riserCount, riser, treadCount, tread, run: treadCount * tread, stepRule, issues };
 }
 
-/** Plan outline of the flight (counterclockwise): start edge, run along the direction. */
-export function stairOutline(
-  stair: Pick<Stair, "start" | "direction" | "width">,
-  run: number,
-): { x: number; y: number }[] {
+type Frame = {
+  origin: { x: number; y: number };
+  d: { x: number; y: number };
+  n: { x: number; y: number };
+};
+/** Flight frame: origin on the centre line of the first riser, d up the run, n to the left. */
+export function stairFrame(stair: Pick<Stair, "start" | "direction" | "width" | "axis">): Frame {
   const a = (stair.direction * Math.PI) / 180;
   const d = { x: Math.cos(a), y: Math.sin(a) };
   const n = { x: -d.y, y: d.x };
+  // The drawing axis is the clicked line: the flight lies to its right (left axis) or left.
+  const shift =
+    stair.axis === "left" ? -stair.width / 2 : stair.axis === "right" ? stair.width / 2 : 0;
+  return { origin: { x: stair.start.x + n.x * shift, y: stair.start.y + n.y * shift }, d, n };
+}
+
+function frameAt(f: Frame, s: number, t: number) {
+  return { x: f.origin.x + f.d.x * s + f.n.x * t, y: f.origin.y + f.d.y * s + f.n.y * t };
+}
+
+/** Plan outline of the flight (counterclockwise): start edge, run along the direction. */
+export function stairOutline(
+  stair: Pick<Stair, "start" | "direction" | "width" | "axis">,
+  run: number,
+): { x: number; y: number }[] {
+  const f = stairFrame(stair);
   const w = stair.width / 2;
-  const at = (s: number, t: number) => ({
-    x: stair.start.x + d.x * s + n.x * t,
-    y: stair.start.y + d.y * s + n.y * t,
-  });
-  return [at(0, -w), at(run, -w), at(run, w), at(0, w)];
+  return [frameAt(f, 0, -w), frameAt(f, run, -w), frameAt(f, run, w), frameAt(f, 0, w)];
+}
+
+type Segment = { start: { x: number; y: number }; end: { x: number; y: number } };
+/**
+ * Plan view after building drawing practice (docs/TREPPE.md, TR2): outline, one line per riser,
+ * the walking line (Lauflinie) along the centre from a circle at the first step to an arrow at
+ * the last, and the cut at `cutHeight` (1 m) as a break line across the flight. Parts above
+ * the cut are drawn dashed by the renderer (`above`).
+ */
+export function stairPlan(
+  stair: Pick<Stair, "start" | "direction" | "width" | "axis">,
+  g: Pick<StairGeometry, "riserCount" | "riser" | "tread" | "run">,
+  cutHeight = 1,
+): {
+  outline: { x: number; y: number }[];
+  risers: (Segment & { above: boolean })[];
+  walk: { below: Segment; above: Segment | null };
+  cut: Segment | null;
+} {
+  const f = stairFrame(stair);
+  const w = stair.width / 2;
+  // Step k (1-based) lies on riser k: its top is k·h; risers at s = (k − 1)·a.
+  const cutStep = Math.floor(cutHeight / g.riser);
+  const cutS = cutStep >= g.riserCount ? null : Math.max(cutStep - 0.5, 0) * g.tread;
+  const risers = Array.from({ length: g.riserCount }, (_, k) => ({
+    start: frameAt(f, k * g.tread, -w),
+    end: frameAt(f, k * g.tread, w),
+    above: cutS !== null && k * g.tread > cutS,
+  }));
+  const walkStart = frameAt(f, g.tread * 0.5, 0);
+  const walkEnd = frameAt(f, g.run, 0);
+  const mid = cutS === null ? null : frameAt(f, cutS, 0);
+  return {
+    outline: stairOutline(stair, g.run),
+    risers,
+    walk: mid
+      ? { below: { start: walkStart, end: mid }, above: { start: mid, end: walkEnd } }
+      : { below: { start: walkStart, end: walkEnd }, above: null },
+    // Break line: a diagonal across the flight around the cut position.
+    cut:
+      cutS === null
+        ? null
+        : {
+            start: frameAt(f, cutS - g.tread * 0.6, -w),
+            end: frameAt(f, cutS + g.tread * 0.6, w),
+          },
+  };
 }
 
 /**

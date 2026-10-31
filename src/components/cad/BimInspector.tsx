@@ -1,6 +1,7 @@
 import { RoofProperties } from "./RoofProperties";
 import { RoomProperties } from "./RoomProperties";
 import { ColumnProperties } from "./ColumnProperties";
+import { StairProperties } from "./StairProperties";
 import { DimensionProperties } from "./DimensionProperties";
 import { TextProperties } from "./TextProperties";
 import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
@@ -117,6 +118,14 @@ export function BimInspector({
         selection={selection}
         onChange={onChange}
       />
+    );
+  const stair =
+    selection?.kind === "stair"
+      ? storeyOf(project).stairs?.find((item) => item.id === selection.id)
+      : undefined;
+  if (stair)
+    return (
+      <StairProperties project={project} stair={stair} selection={selection} onChange={onChange} />
     );
   const room =
     selection?.kind === "room"
