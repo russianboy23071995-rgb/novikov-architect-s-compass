@@ -63,6 +63,31 @@ export function legacySnapPrimitives(project: Project) {
         ...midpoint(wall.id, "axis-midpoint", wall.start, wall.end),
       ];
     }),
+    // Jamb corners of windows and doors (docs/MASSKETTE.md, M1), in the order of the live path.
+    ...[...storeyOf(project).windows, ...(storeyOf(project).doors ?? [])].flatMap((opening) => {
+      const wall = storeyOf(project).walls.find((w) => w.id === opening.wallId);
+      if (!wall) return [];
+      const length = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+      const body = wallBody(wall);
+      const d = { x: wall.end.x - wall.start.x, y: wall.end.y - wall.start.y };
+      const left = opening.position * length - opening.width / 2;
+      return (
+        [
+          ["start", left],
+          ["end", left + opening.width],
+        ] as const
+      ).flatMap(([edge, along]) =>
+        ([-1, 1] as const).map((side) => ({
+          point: {
+            x: body.start.x + (d.x / length) * along + (body.normal.x * side * wall.thickness) / 2,
+            y: body.start.y + (d.y / length) * along + (body.normal.y * side * wall.thickness) / 2,
+          },
+          entityId: opening.id,
+          feature: `jamb-${edge}-${side}`,
+          directions: [d],
+        })),
+      );
+    }),
     ...storeyOf(project).hatches.flatMap((hatch) =>
       hatch.points.flatMap((point, index) => {
         const before = hatch.points[(index + hatch.points.length - 1) % hatch.points.length]!;

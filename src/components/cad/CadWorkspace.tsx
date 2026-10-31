@@ -61,7 +61,8 @@ import { WallDrawingFields } from "./WallDrawingFields";
 import { WallRenovationFields } from "./WallRenovationFields";
 import { ColumnFields } from "./ColumnFields";
 import { DimensionToolFields } from "./DimensionToolFields";
-import { addDimension } from "@/application/dimensions/actions";
+import { addDimension, updateDimension } from "@/application/dimensions/actions";
+import { dimensionPointAt } from "@/domain/elements/dimension/model";
 import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
@@ -335,6 +336,13 @@ export function CadWorkspace({
     line: Point | null;
     points: Point[];
     lastAt: number;
+    /** Editing an existing chain (docs/MASSKETTE.md, M2–M4) instead of drawing a new one. */
+    edit?: {
+      id: string;
+      mode: "add" | "remove" | "line";
+      orientation: "horizontal" | "vertical";
+      count: number;
+    };
   } | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
@@ -1345,14 +1353,70 @@ export function CadWorkspace({
     }
   };
 
+  /** Chain edits from the demand menu: the dimension tool runs on the existing chain. */
+  const startChainEdit = (mode: "add" | "remove" | "line") => {
+    const chain =
+      selection?.kind === "dimension"
+        ? storeyOf(project).dimensions?.find((d) => d.id === selection.id)
+        : undefined;
+    if (!chain) return;
+    cancelInteraction();
+    setDemandOpen(false);
+    setTool("dimension");
+    setMode("2D");
+    const line =
+      chain.orientation === "horizontal"
+        ? { x: chain.points[0]!.x, y: chain.offset }
+        : { x: chain.offset, y: chain.points[0]!.y };
+    setDimensionDraft({
+      line,
+      points: chain.points.map((p) => ({ ...p })),
+      lastAt: 0,
+      edit: { id: chain.id, mode, orientation: chain.orientation, count: chain.points.length },
+    });
+    showNotice(
+      mode === "add"
+        ? "Neue Punkte anklicken · Doppelklick ins Leere oder Enter: übernehmen · Esc: abbrechen"
+        : mode === "remove"
+          ? "Den zu entfernenden Messpunkt anklicken · Esc: abbrechen"
+          : "Neue Lage der Maßlinie anklicken · Esc: abbrechen",
+    );
+  };
+  /** Back to selecting with the edited chain selected. */
+  const endChainEdit = (next: Project, id: string, notice: string) => {
+    dispatchEditing({ type: "project", project: next });
+    setDimensionDraft(null);
+    setTool("select");
+    selectCommitted(next, { kind: "dimension", id });
+    setModelError("");
+    showNotice(notice);
+  };
   /** Ends a running chain: the first click of the finishing double click is no point. */
   const finishDimension = () => {
     const draft = dimensionDraft;
     if (!draft?.line || referenceSelection.selecting) return;
     const points =
-      draft.points.length && Date.now() - draft.lastAt < 600
+      draft.points.length > (draft.edit?.count ?? 0) && Date.now() - draft.lastAt < 600
         ? draft.points.slice(0, -1)
         : draft.points;
+    if (draft.edit) {
+      if (draft.edit.mode !== "add") return;
+      if (points.length === draft.edit.count) {
+        setDimensionDraft(null);
+        setTool("select");
+        return;
+      }
+      try {
+        endChainEdit(
+          updateDimension(project, draft.edit.id, { points }),
+          draft.edit.id,
+          `${points.length - draft.edit.count} Punkt(e) hinzugefügt`,
+        );
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Punkte nicht möglich.");
+      }
+      return;
+    }
     if (points.length < 2) {
       setModelError("Mindestens zwei Punkte für die Maßkette anklicken.");
       return;
@@ -1380,6 +1444,40 @@ export function CadWorkspace({
     setModelError("");
     // Dimension chain (docs/MASSKETTE.md): the first click places the dimension line, every
     // further click adds a measured point; a double click or Enter finishes.
+    if (tool === "dimension" && dimensionDraft?.edit && dimensionDraft.edit.mode !== "add") {
+      const { id, mode, orientation } = dimensionDraft.edit;
+      const chain = storeyOf(project).dimensions?.find((d) => d.id === id);
+      if (!chain) return setDimensionDraft(null);
+      try {
+        if (mode === "line") {
+          endChainEdit(
+            updateDimension(project, id, {
+              offset: orientation === "horizontal" ? point.y : point.x,
+            }),
+            id,
+            "Maßlinie verschoben",
+          );
+          return;
+        }
+        const index = dimensionPointAt(chain, point, 0.3);
+        if (index === null) {
+          setModelError(
+            "Keinen Messpunkt getroffen: auf einen Punkt oder sein Linienende klicken.",
+          );
+          return;
+        }
+        endChainEdit(
+          updateDimension(project, id, { points: chain.points.filter((_, i) => i !== index) }),
+          id,
+          "Punkt entfernt",
+        );
+      } catch {
+        setModelError(
+          "Eine Maßkette braucht mindestens zwei verschiedene Punkte. Zum Entfernen die ganze Kette löschen.",
+        );
+      }
+      return;
+    }
     if (tool === "dimension") {
       setDimensionDraft((draft) =>
         draft?.line
@@ -2096,6 +2194,7 @@ export function CadWorkspace({
               onResetPosition={unpinDemand}
               pointIndex={pickedPoint.index}
               edgeIndex={pickedPoint.edgeIndex ?? null}
+              onChainAction={startChainEdit}
               onReferences={
                 mode === "2D"
                   ? () => {
@@ -2383,7 +2482,14 @@ export function CadWorkspace({
                       {...(tool === "dimension" ? { onFinish: finishDimension } : {})}
                       dimensionDraft={
                         tool === "dimension" && dimensionDraft
-                          ? { orientation: toolDefaults.dimension.orientation, ...dimensionDraft }
+                          ? {
+                              orientation:
+                                dimensionDraft.edit?.orientation ??
+                                toolDefaults.dimension.orientation,
+                              line: dimensionDraft.line,
+                              points: dimensionDraft.points,
+                              mode: dimensionDraft.edit?.mode,
+                            }
                           : undefined
                       }
                       {...(tool === "wall" ||

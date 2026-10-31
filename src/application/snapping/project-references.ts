@@ -143,13 +143,15 @@ export function projectSnapPrimitives(project: Project) {
   };
 }
 
-// Door jambs depend on the door and its host wall; reuse only while both are the same objects.
+// Opening jambs depend on the opening and its host wall; reuse only while both are the same
+// objects.
 const doorParts = new WeakMap<object, { wall: object; part: Part }>();
 
-/** The four jamb corners of each door (both wall faces at both opening edges). */
+/** The four jamb corners of each window and door (both wall faces at both opening edges);
+ * windows since docs/MASSKETTE.md (M1), so chains and other tools snap to window edges. */
 function doorsPart(storey: Project["storeys"][number], owned: boolean): Part[] {
   const walls = new Map(storey.walls.map((w) => [w.id, w]));
-  return (storey.doors ?? []).flatMap((door) => {
+  return [...storey.windows, ...(storey.doors ?? [])].flatMap((door) => {
     const wall = walls.get(door.wallId);
     if (!wall) return [];
     const cached = owned ? doorParts.get(door) : undefined;

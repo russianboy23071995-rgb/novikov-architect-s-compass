@@ -6,8 +6,12 @@ import { storeyOf } from "../../domain/storeys/access.ts";
 import {
   dimensionLayout,
   dimensionValues,
+  dimensionPointAt,
   formatDimension,
 } from "../../domain/elements/dimension/model.ts";
+import { createExampleProject } from "../../components/cad/bim-view.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
 import { readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
@@ -97,4 +101,35 @@ test("move, delete, menu summary; schema 37 files load, smuggled chains are refu
   assert.equal(loadProjectData({ ...plain, schemaVersion: 37 }).schemaVersion, 38);
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 37 }));
+});
+
+// docs/MASSKETTE.md, M1–M3.
+test("windows offer their four jamb corners as snap points, like doors", () => {
+  const p = createExampleProject();
+  const window = storeyOf(p).windows[0]!;
+  const jambs = projectSnapReferences(p).filter((r) => r.entityId === window.id);
+  assert.deepEqual(jambs.map((r) => r.feature).sort(), [
+    "jamb-end--1",
+    "jamb-end-1",
+    "jamb-start--1",
+    "jamb-start-1",
+  ]);
+  assert.equal(snapPointLabel(p, window.id, "jamb-start-1"), "Fenster · Laibung");
+});
+
+test("a click removes the nearest measured point, at the point or its line end", () => {
+  const chain = storeyOf(withChain()).dimensions![0]!;
+  // At the point itself (2,365 | 0,3) and at its extension end on the line (2,365 | −1,5).
+  assert.equal(dimensionPointAt(chain, { x: 2.37, y: 0.31 }, 0.3), 2);
+  assert.equal(dimensionPointAt(chain, { x: 2.36, y: -1.45 }, 0.3), 2);
+  assert.equal(dimensionPointAt(chain, { x: 5.5, y: 3 }, 0.3), null);
+  const p = withChain();
+  const fewer = updateDimension(p, "m1", {
+    points: chain.points.filter((_, i) => i !== 2),
+  });
+  assert.equal(dimensionValues(storeyOf(fewer).dimensions![0]!).length, 2);
+  const added = updateDimension(p, "m1", { points: [...chain.points, { x: 6, y: 0 }] });
+  assert.equal(dimensionValues(storeyOf(added).dimensions![0]!).length, 4);
+  // Below two distinct stations the chain is refused; the user deletes the chain instead.
+  assert.throws(() => updateDimension(p, "m1", { points: [chain.points[0]!] }));
 });

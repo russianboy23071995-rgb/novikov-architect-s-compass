@@ -20,4 +20,16 @@ Nutzervorgabe 31.10.2026: Bemaßung ist ein eigenes 2D-Werkzeug für den letzten
 
 Nachweis: 1400 Tests grün (4 neu in `src/application/dimensions/actions.test.ts`), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: waagerechte Kette an einer 3-m-Wand mit Fenster – 90 · 1,20 · 90, eingerastet an Wand- und Fensterecken, Doppelklick ins Leere erstellt die Kette mit genau drei Maßen; senkrechte Kette über die Wandstärke – 36 (vor der Fang-Korrektur 40 durch den 10-cm-Raster); Auswahl, Leiste und Menü geprüft; Testketten danach zurückgenommen.
 
-Offen (spätere Schritte): Darstellung (Kreuze/Punkte, Schrift, hochgestellte 5), Punkte nachträglich ergänzen/entfernen, Maßlinie verschieben, schräge Ketten, automatische Ketten nach Bemaßungsregeln (AI), Texte.
+Offen (spätere Schritte): Darstellung (Kreuze/Punkte, Schrift, hochgestellte 5), schräge Ketten, automatische Ketten nach Bemaßungsregeln (AI), Texte.
+
+## Nacharbeit M1–M4 (31.10.2026)
+
+Nutzerrückmeldung: Fensterecken rasten bei der Bemaßung nicht ein; nachträglich Punkte ergänzen und löschen über das On-Demand-Menü; das Menü der Maßkette auf sinnvolle Einträge prüfen.
+
+- **M1 Fensterfang:** Ursache war nicht die Rasterengine – Fenster hatten keine Fangpunkte, nur Türen (Laibungsecken). Fenster bekommen jetzt dieselben vier Laibungsecken („Fenster · Laibung“), für alle Werkzeuge. Beim Bearbeiten einer Wand sind die Laibungspunkte ihrer eigenen Öffnungen kein Fangziel (sie bewegen sich mit).
+- **M2 Punkt hinzufügen:** Menüeintrag startet das Maßkettenwerkzeug auf der gewählten Kette; neue Punkte anklicken (Fang, Vorschau der geänderten Kette), Doppelklick ins Leere oder Enter übernimmt alle als einen Rückgängig-Schritt, Esc bricht ab.
+- **M3 Punkt entfernen:** Menüeintrag zeigt die Messpunkte rot; ein Klick auf einen Punkt oder sein Hilfslinienende (bis 0,30 m) entfernt ihn (`dimensionPointAt`). Bleiben weniger als zwei verschiedene Stationen, wird abgelehnt mit dem Hinweis, die Kette zu löschen.
+- **M4 Menü:** Für eine Maßkette nur noch Punkt hinzufügen, Punkt entfernen, **Maßlinie verschieben** (ein Klick setzt die neue Lage; nur der Abstand, die Punkte bleiben), Ganze Kette verschieben, Werkzeugeigenschaften, Löschen. Entfallen: Element auf X-/Y-Achse, Referenzen auswählen.
+- Nach jeder Bearbeitung zurück im Auswahlwerkzeug mit der Kette gewählt.
+
+Nachweis M1–M4: 1402 Tests grün (2 neu; Vergleichsableitung der Fangpunkte und zwei Tests auf Fensterpunkte angepasst), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Kette 3,00 an der Wand; Punkt hinzufügen an beiden Fensterlaibungen → 90 · 1,20 · 90; Punkt entfernen an der rechten Laibung → 90 · 2,10; Maßlinie verschoben; Menü mit genau den sechs Einträgen; jeder Schritt einzeln rückgängig, Testkette danach entfernt.

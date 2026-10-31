@@ -24,9 +24,20 @@ export function editSnapReferences(
       : kind === "door"
         ? storeyOf(session.base).doors?.find((d) => d.id === id)?.wallId
         : null;
+  // Openings of an edited wall move with it: their jamb points are no targets either.
+  const hosted = new Set(
+    kind === "wall"
+      ? [...storeyOf(session.base).windows, ...(storeyOf(session.base).doors ?? [])]
+          .filter((o) => o.wallId === id)
+          .map((o) => o.id)
+      : [],
+  );
   return references.filter((r) =>
     [r, ...(r.dependencies ?? [])].every(
-      (source) => source.entityId !== session.target.id && source.entityId !== host,
+      (source) =>
+        source.entityId !== session.target.id &&
+        source.entityId !== host &&
+        !hosted.has(source.entityId),
     ),
   );
 }
