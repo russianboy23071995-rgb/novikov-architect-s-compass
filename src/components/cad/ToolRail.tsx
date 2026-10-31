@@ -60,11 +60,7 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle, onSettings
                   aria-label={`${tool.label} tool`}
                   aria-pressed={active}
                   onClick={() => onSelect(tool.id)}
-                  onDoubleClick={
-                    tool.id === "roof" || tool.id === "room"
-                      ? () => onSettings?.(tool.id)
-                      : undefined
-                  }
+                  onDoubleClick={() => onSettings?.(tool.id)}
                   className={cn(
                     "relative h-11 w-11 rounded-md border border-transparent text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-foreground",
                     active &&

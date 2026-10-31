@@ -23,7 +23,11 @@ import { PlanSceneRun } from "./PlanSceneRun";
 import { derivePlanScene, planSceneRuns, type PlanRun } from "@/rendering/viewport/plan-scene";
 import type { GeometryPreview } from "@/domain/project/geometry-scope";
 import { useSelectionMarquee } from "./useSelectionMarquee";
-import { planElementCaption, planSelectionShapes } from "@/rendering/viewport/selection-shapes";
+import {
+  planElementCaption,
+  planSelectionShapes,
+  shapesAt,
+} from "@/rendering/viewport/selection-shapes";
 import { useOverlapCycle } from "./useOverlapCycle";
 
 import type { SelectionSet } from "@/application/selection/state";
@@ -79,6 +83,8 @@ export type BimPlanProps = {
   /** Right-click menu (docs/KONTEXTMENUE.md): on an element or on empty canvas (null). When
    * set it replaces the former double right-click pickup, which moves into the menu. */
   onContextMenu?: (target: NonNullable<Selection> | null, x: number, y: number) => void;
+  /** Double click on an element while selecting: its settings window (docs/EINSTELLUNGSFENSTER.md). */
+  onElementSettings?: (target: NonNullable<Selection>) => void;
   onPickup?: (target: NonNullable<Selection>) => void;
   draftContour?: ((point: Point) => Point[]) | undefined;
   placement?:
@@ -151,6 +157,7 @@ export function BimPlan({
   pickupScope,
   onPickup,
   onContextMenu,
+  onElementSettings,
   draftContour,
   placement,
   drawingPreview,
@@ -1007,7 +1014,24 @@ export function BimPlan({
         if (drawing && onFinish) {
           event.preventDefault();
           onFinish();
+          return;
         }
+        // Selecting: the element under the cursor (or the Tab pre-selection) opens its window.
+        if (!onElementSettings || drawing || placement || editSession || !interactive) return;
+        // Overlays of a selected element (axis, grips) lie on top, so the element is found
+        // geometrically under the cursor, like the Tab cycling; the DOM target is the fallback.
+        const node = (event.target as Element).closest("[data-plan-pick]");
+        const kind = node?.getAttribute("data-kind"),
+          id = node?.getAttribute("data-id");
+        const point = rawPoint(event);
+        const hit = point ? shapesAt(shapes, point, 6 / camera.pixelsPerMetre)[0] : undefined;
+        const picked =
+          overlap.preselected ??
+          hit?.target ??
+          (kind && id ? ({ kind, id } as NonNullable<Selection>) : null);
+        if (!picked) return;
+        event.preventDefault();
+        onElementSettings(picked);
       }}
       onKeyDown={(event) => {
         if (selecting) return;

@@ -3,6 +3,8 @@ import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
+import { ToolSettingsWindow } from "./ToolSettingsWindow";
+import { ELEMENT_KINDS, storeyElements } from "@/domain/elements/registry";
 import { trimWallsToRoof, untrimWalls } from "@/application/walls/roof-trim";
 import {
   AlertDialog,
@@ -745,17 +747,68 @@ export function CadWorkspace({
     showNotice("Parameter übernommen");
   };
   /** Tool settings of an element kind (or the active tool): its window where one exists. */
-  const openToolSettings = (kind: NonNullable<Selection>["kind"] | null) => {
-    const owner: ToolId | null =
-      kind === null ? tool : kind === "reference" ? null : (kind as ToolId);
-    if (!owner) return setModelError("Bildreferenzen haben kein Werkzeug.");
-    if (owner !== tool) selectTool(owner);
-    if (owner === "roof") setRoofSettingsOpen(true);
-    else if (owner === "room") setRoomSettingsOpen(true);
-    else {
-      setFullscreen(false);
-      propertiesRef.current?.focus();
-    }
+  // Settings window of every tool (docs/EINSTELLUNGSFENSTER.md): tool defaults from a double
+  // click on the tool button, or exactly one element from a double click on it.
+  const [settingsWindow, setSettingsWindow] = useState<
+    { mode: "tool"; tool: ToolId } | { mode: "element"; target: NonNullable<Selection> } | null
+  >(null);
+  /** Tools whose defaults live in the shared settings window (E1); roof and room keep theirs. */
+  const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
+    wall: "Wand",
+    window: "Fenster",
+    door: "Tür",
+  };
+  const openToolDefaults = (owner: ToolId) => {
+    if (owner === "roof") return setRoofSettingsOpen(true);
+    if (owner === "room") return setRoomSettingsOpen(true);
+    if (SETTINGS_TOOLS[owner]) return setSettingsWindow({ mode: "tool", tool: owner });
+    setFullscreen(false);
+    propertiesRef.current?.focus();
+  };
+  const openElementSettings = (target: NonNullable<Selection>) => {
+    if (!selections.some((s) => s.kind === target.kind && s.id === target.id))
+      selectElement(target);
+    setDemandOpen(false);
+    setContextMenu(null);
+    setSettingsWindow({ mode: "element", target });
+  };
+  /** Defaults fields of wall, window and door: the same set in the bar and in the window. */
+  const toolFields = (owner: ToolId) =>
+    owner === "wall" ? (
+      <WallDrawingFields
+        project={project}
+        value={toolDefaults.wall}
+        onChange={(values) => {
+          cancelInteraction();
+          toolDefaults.setWall(values);
+        }}
+      />
+    ) : owner === "window" ? (
+      <WindowPlacementFields
+        layers={project.layers}
+        value={windowTool.dimensions}
+        onChange={windowTool.setDimensions}
+        error={windowTool.error}
+        precision={windowTool.precision}
+        onPrecision={windowTool.setPrecision}
+        pickingHost={windowTool.pickingHost}
+      />
+    ) : owner === "door" ? (
+      <DoorPlacementFields
+        layers={project.layers}
+        value={doorTool.dimensions}
+        onChange={doorTool.setDimensions}
+        error={doorTool.error}
+        precision={doorTool.precision}
+        onPrecision={doorTool.setPrecision}
+        pickingHost={doorTool.pickingHost}
+      />
+    ) : null;
+  /** Right click "Werkzeugeinstellungen…": on an element its own window, else the window of
+   * the active tool. */
+  const openToolSettings = (target: NonNullable<Selection> | null) => {
+    if (target) return openElementSettings(target);
+    openToolDefaults(tool);
   };
   // Trimming walls at a roof (docs/TRIMMEN_L04B.md, L04b): walls and exactly one roof selected,
   // then confirm. Shared by the right-click menu and the Modify menu.
@@ -853,7 +906,7 @@ export function CadWorkspace({
       {
         id: "tool-settings",
         label: "Werkzeugeinstellungen…",
-        run: () => openToolSettings(target?.kind ?? null),
+        run: () => openToolSettings(target),
       },
       "separator",
       (() => {
@@ -1283,6 +1336,86 @@ export function CadWorkspace({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {settingsWindow &&
+        (() => {
+          if (settingsWindow.mode === "tool") {
+            const name = SETTINGS_TOOLS[settingsWindow.tool] ?? settingsWindow.tool;
+            return (
+              <ToolSettingsWindow
+                // A new key per tool or element: sections start fresh on every switch.
+                key={`tool:${settingsWindow.tool}`}
+                title={`${name} – Einstellungen`}
+                subtitle={`Werkzeug ${name}: Vorgaben für neue Elemente. Doppelklick auf ein vorhandenes Element öffnet dieses Fenster für genau dieses Element.`}
+                sections={[
+                  {
+                    id: "defaults",
+                    label: name,
+                    content: toolFields(settingsWindow.tool),
+                  },
+                ]}
+                onClose={() => setSettingsWindow(null)}
+              />
+            );
+          }
+          const target = settingsWindow.target;
+          const exists = project.storeys.some((s) =>
+            [...storeyElements(s, target.kind)].some((e) => e.id === target.id),
+          );
+          if (!exists) return null;
+          const caption = planElementCaption(project, target);
+          return (
+            <ToolSettingsWindow
+              key={`element:${target.kind}:${target.id}`}
+              title={`${caption} – Einstellungen`}
+              subtitle={`Element ${caption} (${target.id}): Jede Änderung wirkt sofort und ist ein Rückgängig-Schritt.`}
+              sections={[
+                {
+                  id: "element",
+                  label: ELEMENT_KINDS[target.kind].label,
+                  content: (
+                    <BimInspector
+                      key={propertyFormKey(project, target)}
+                      project={project}
+                      selection={target}
+                      onChange={changeProject}
+                      onWallOffset={(base, wallId, offset) =>
+                        dispatchEditing({
+                          type: "wall-offset",
+                          base,
+                          selection: target,
+                          request: { projectId: base.id, wallId, offset },
+                        })
+                      }
+                    />
+                  ),
+                },
+                {
+                  id: "layer",
+                  label: "Ebene",
+                  content: (
+                    <LayerProperties
+                      key={`layer:${propertyFormKey(project, target)}`}
+                      project={project}
+                      selection={target}
+                      disabled={referenceSelection.selecting}
+                      onAssign={(base, assigned, layerId) => {
+                        dispatchEditing({
+                          type: "assign-layer",
+                          base,
+                          target: assigned,
+                          selection: currentSelection.current,
+                          layerId,
+                        });
+                        setModelError("");
+                      }}
+                    />
+                  ),
+                },
+              ]}
+              onClose={() => setSettingsWindow(null)}
+            />
+          );
+        })()}
       {contextMenu && (
         <CanvasContextMenu
           position={contextMenu}
@@ -1676,35 +1809,8 @@ export function CadWorkspace({
                 </Button>
                 {measurement.error && <span role="alert">{measurement.error}</span>}
               </div>
-            ) : tool === "wall" ? (
-              <WallDrawingFields
-                project={project}
-                value={toolDefaults.wall}
-                onChange={(values) => {
-                  cancelInteraction();
-                  toolDefaults.setWall(values);
-                }}
-              />
-            ) : tool === "window" ? (
-              <WindowPlacementFields
-                layers={project.layers}
-                value={windowTool.dimensions}
-                onChange={windowTool.setDimensions}
-                error={windowTool.error}
-                precision={windowTool.precision}
-                onPrecision={windowTool.setPrecision}
-                pickingHost={windowTool.pickingHost}
-              />
-            ) : tool === "door" ? (
-              <DoorPlacementFields
-                layers={project.layers}
-                value={doorTool.dimensions}
-                onChange={doorTool.setDimensions}
-                error={doorTool.error}
-                precision={doorTool.precision}
-                onPrecision={doorTool.setPrecision}
-                pickingHost={doorTool.pickingHost}
-              />
+            ) : tool === "wall" || tool === "window" || tool === "door" ? (
+              toolFields(tool)
             ) : tool === "room" && mode === "2D" ? (
               <RoomToolFields
                 construction={roomConstruction}
@@ -1929,10 +2035,7 @@ export function CadWorkspace({
               collapsed={railCollapsed}
               onSelect={selectTool}
               onToggle={() => setRailCollapsed((value) => !value)}
-              onSettings={(next) => {
-                if (next === "roof") setRoofSettingsOpen(true);
-                if (next === "room") setRoomSettingsOpen(true);
-              }}
+              onSettings={openToolDefaults}
             />
           )}
           <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
@@ -1996,6 +2099,7 @@ export function CadWorkspace({
                       pickupScope={measurementContext}
                       onPickup={pickupFrom}
                       onContextMenu={openContextMenu}
+                      onElementSettings={openElementSettings}
                       zoomSlot={zoomSlot}
                       placement={
                         windowPlacement
