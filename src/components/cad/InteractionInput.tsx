@@ -5,10 +5,12 @@ export function InteractionInput({
   interaction,
   position,
   onPosition,
+  onResetPosition,
 }: {
   interaction: ReturnType<typeof useToolInteraction>;
   position: Point2;
   onPosition: (point: Point2) => void;
+  onResetPosition?: (() => void) | undefined;
 }) {
   const { adapter, draft, preview } = interaction;
   if (!adapter || interaction.suspended) return null;
@@ -29,6 +31,7 @@ export function InteractionInput({
       focusLengthToken={draft.focus}
       position={position}
       onPosition={onPosition}
+      onResetPosition={onResetPosition}
       angle={draft.angle}
       length={draft.length}
       angleHint={degrees === undefined ? "Maus" : String(Number(degrees.toFixed(2)))}

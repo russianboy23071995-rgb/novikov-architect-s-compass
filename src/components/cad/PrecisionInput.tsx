@@ -7,6 +7,7 @@ export function PrecisionInput({
   focusLengthToken,
   position,
   onPosition,
+  onResetPosition,
   angle,
   length,
   angleHint,
@@ -24,6 +25,8 @@ export function PrecisionInput({
   focusLengthToken: Point2 | null;
   position: Point2;
   onPosition: (p: Point2) => void;
+  /** Forget the remembered position, so the input follows the cursor again. */
+  onResetPosition?: (() => void) | undefined;
   angle: string;
   length: string;
   angleHint: string;
@@ -76,7 +79,7 @@ export function PrecisionInput({
   const [bounds, setBounds] = useState({
     width: 1024,
     height: 768,
-    menuWidth: 230,
+    menuWidth: 170,
     menuHeight: 150,
   });
   useEffect(() => {
@@ -85,7 +88,7 @@ export function PrecisionInput({
       setBounds({
         width: window.innerWidth,
         height: window.innerHeight,
-        menuWidth: r?.width ?? 230,
+        menuWidth: r?.width ?? 170,
         menuHeight: r?.height ?? 150,
       });
     };
@@ -99,12 +102,18 @@ export function PrecisionInput({
     };
   }, []);
   const visible = clampMenuPosition(position, bounds);
-  const field = "w-full min-w-0 rounded border bg-background px-2 py-1 text-xs";
+  const field = "w-full min-w-0 rounded border bg-background px-1.5 py-0.5 text-[11px]";
+  // Hints live in the title tooltip (user decision 31.10.2026): the window keeps only the fields.
+  const hint = [
+    axisLabel ?? (angle.trim() ? "Winkel fixiert · leeren löst" : mouseHint),
+    "Enter: übernehmen · Esc: abbrechen",
+    "Ziehen: Position merken · Doppelklick: wieder am Mauszeiger",
+  ].join("\n");
   return (
     <form
       ref={panel}
       aria-label="Hilfseingabefenster"
-      className="glass-panel-strong fixed z-40 w-[230px] max-w-[calc(100vw-16px)] rounded-lg border p-2 text-[11px] shadow-lg"
+      className="glass-panel-strong fixed z-40 w-[170px] max-w-[calc(100vw-16px)] rounded-lg border p-1 text-[11px] leading-tight shadow-lg"
       style={{ left: visible.x, top: visible.y, maxHeight: "calc(100vh - 16px)", overflow: "auto" }}
       onSubmit={(e) => {
         e.preventDefault();
@@ -116,12 +125,19 @@ export function PrecisionInput({
           e.stopPropagation();
           onCancel();
         }
+        // Enter confirms (there is no button any more; Enter, Tab and Esc replace them).
+        if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
+          e.preventDefault();
+          if (canConfirm) onConfirm();
+        }
       }}
     >
       <button
         type="button"
         aria-label="Hilfseingabe verschieben"
-        className="mb-1 w-full touch-none cursor-move rounded bg-muted px-1 py-1 text-left"
+        title={hint}
+        onDoubleClick={() => onResetPosition?.()}
+        className="mb-1 w-full touch-none cursor-move truncate rounded bg-muted px-1.5 py-0.5 text-left text-[10px]"
         onPointerDown={(e) => {
           if (e.button !== 0) return;
           e.currentTarget.setPointerCapture(e.pointerId);
@@ -169,9 +185,9 @@ export function PrecisionInput({
           }
         }}
       >
-        ⠿ Hilfseingabe · Rasterengine
+        ⠿ Eingabe
       </button>
-      <div className={scalar ? "grid gap-2" : "grid grid-cols-2 gap-2"}>
+      <div className={scalar ? "grid gap-1" : "grid grid-cols-2 gap-1"}>
         {!scalar && (
           <label>
             Winkel °
@@ -201,29 +217,11 @@ export function PrecisionInput({
           />
         </label>
       </div>
-      <p className="my-1 text-muted-foreground">
-        {axisLabel ?? (angle.trim() ? "Winkel fixiert · leeren löst" : mouseHint)}
-      </p>
       {error && (
-        <p role="alert" className="mb-1 text-destructive">
+        <p role="alert" className="mt-1 text-destructive">
           {error}
         </p>
       )}
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={!canConfirm}
-          className="rounded border px-2 py-1 disabled:opacity-40"
-        >
-          Übernehmen
-        </button>
-        <button type="button" onClick={() => onChange("", "")}>
-          Maus
-        </button>
-        <button type="button" onClick={onCancel}>
-          Abbrechen
-        </button>
-      </div>
     </form>
   );
 }

@@ -4,6 +4,11 @@ import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
+import { useRememberedPosition } from "./useRememberedPosition";
+
+/** Browser storage keys of the remembered helper positions (docs/HILFSFENSTER.md). */
+const DEMAND_MENU_KEY = "novikov.demand-menu.position";
+const PRECISION_INPUT_KEY = "novikov.precision-input.position";
 import { ELEMENT_KINDS, storeyElements } from "@/domain/elements/registry";
 import { trimWallsToRoof, untrimWalls } from "@/application/walls/roof-trim";
 import {
@@ -1138,6 +1143,19 @@ export function CadWorkspace({
     return true;
   };
 
+  // On-demand menu and length/angle input remember where the user moved them, also after a
+  // reload (decision P1); until then they open beside the cursor.
+  const {
+    pinned: pinnedDemand,
+    pin: pinDemand,
+    unpin: unpinDemand,
+  } = useRememberedPosition(DEMAND_MENU_KEY);
+  const {
+    pinned: pinnedInput,
+    pin: pinInput,
+    unpin: unpinInput,
+  } = useRememberedPosition(PRECISION_INPUT_KEY);
+
   const changeProject = (next: Project, selected: Selection) => {
     if (referenceSelection.selecting) return;
     dispatchEditing({ type: "project", project: next });
@@ -1865,8 +1883,9 @@ export function CadWorkspace({
                 tool === "select" && !editSession && selections.length ? deleteSelection : undefined
               }
               selection={tool === "select" && !editSession ? selection : null}
-              position={demandPosition}
-              onPosition={setDemandPosition}
+              position={pinnedDemand ?? demandPosition}
+              onPosition={pinDemand}
+              onResetPosition={unpinDemand}
               pointIndex={pickedPoint.index}
               edgeIndex={pickedPoint.edgeIndex ?? null}
               onReferences={
@@ -2329,8 +2348,9 @@ export function CadWorkspace({
                     )}
                     <InteractionInput
                       interaction={interaction}
-                      position={demandPosition}
-                      onPosition={setDemandPosition}
+                      position={pinnedInput ?? demandPosition}
+                      onPosition={pinInput}
+                      onResetPosition={unpinInput}
                     />
                   </>
                 )}
