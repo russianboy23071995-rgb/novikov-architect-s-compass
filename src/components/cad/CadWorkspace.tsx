@@ -249,13 +249,10 @@ export function CadWorkspace({
   // Roof tool (docs/ROOF_ELEMENT.md, D3): reference line, rise side by click, then the outline.
   const [roofLine, setRoofLine] = useState<{ start: Point; end: Point } | null>(null);
   const [roofRise, setRoofRise] = useState<"left" | "right" | null>(null);
-  const [roofSettingsOpen, setRoofSettingsOpen] = useState(false);
   const roofPhase: RoofPhase | null =
     tool === "roof" ? (!roofLine ? "line" : !roofRise ? "side" : "outline") : null;
   // Room tool (docs/ROOM_ELEMENT.md, R2): own construction, by default a click between walls.
   const [roomConstruction, setRoomConstruction] = useState<HatchConstruction | "walls">("walls");
-  const [roomSettingsOpen, setRoomSettingsOpen] = useState(false);
-  const [roomSettingsSection, setRoomSettingsSection] = useState<string | undefined>();
   const roomByWalls = tool === "room" && roomConstruction === "walls";
   // Hatch, slab, roof and room share the outline construction (polygon, rectangle, contour).
   const areaTool =
@@ -749,9 +746,16 @@ export function CadWorkspace({
   /** Tool settings of an element kind (or the active tool): its window where one exists. */
   // Settings window of every tool (docs/EINSTELLUNGSFENSTER.md): tool defaults from a double
   // click on the tool button, or exactly one element from a double click on it.
+  // Exactly one settings window at a time (user decision 31.10.2026): every tool, also roof and
+  // room, opens through this state, so a new window replaces the previous one.
   const [settingsWindow, setSettingsWindow] = useState<
-    { mode: "tool"; tool: ToolId } | { mode: "element"; target: NonNullable<Selection> } | null
+    | { mode: "tool"; tool: ToolId; section?: string | undefined }
+    | { mode: "element"; target: NonNullable<Selection> }
+    | null
   >(null);
+  const roofSettingsOpen = settingsWindow?.mode === "tool" && settingsWindow.tool === "roof";
+  const roomSettingsOpen = settingsWindow?.mode === "tool" && settingsWindow.tool === "room";
+  const roomSettingsSection = settingsWindow?.mode === "tool" ? settingsWindow.section : undefined;
   /** Tools whose defaults live in the shared settings window (E1); roof and room keep theirs. */
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
@@ -762,9 +766,8 @@ export function CadWorkspace({
     line: "Linie",
   };
   const openToolDefaults = (owner: ToolId) => {
-    if (owner === "roof") return setRoofSettingsOpen(true);
-    if (owner === "room") return setRoomSettingsOpen(true);
-    if (SETTINGS_TOOLS[owner]) return setSettingsWindow({ mode: "tool", tool: owner });
+    if (owner === "roof" || owner === "room" || SETTINGS_TOOLS[owner])
+      return setSettingsWindow({ mode: "tool", tool: owner });
     setFullscreen(false);
     propertiesRef.current?.focus();
   };
@@ -1508,6 +1511,8 @@ export function CadWorkspace({
       {settingsWindow &&
         (() => {
           if (settingsWindow.mode === "tool") {
+            // Roof and room render their own windows below, in the same single slot.
+            if (settingsWindow.tool === "roof" || settingsWindow.tool === "room") return null;
             const name = SETTINGS_TOOLS[settingsWindow.tool] ?? settingsWindow.tool;
             return (
               <ToolSettingsWindow
@@ -1605,34 +1610,35 @@ export function CadWorkspace({
         project={project}
         onSelectRoom={(id) => selectElement({ kind: "room", id })}
       />
-      <RoomSettingsPanel
-        open={roomSettingsOpen}
-        section={roomSettingsSection}
-        onOpenChange={(open) => {
-          setRoomSettingsOpen(open);
-          if (!open) setRoomSettingsSection(undefined);
-        }}
-        construction={roomConstruction}
-        onConstruction={(next) => {
-          setPathPoints([]);
-          setRoomConstruction(next);
-        }}
-        value={toolDefaults.room}
-        onChange={toolDefaults.setRoom}
-        layers={project.layers}
-      />
-      <RoofSettingsPanel
-        open={roofSettingsOpen}
-        onOpenChange={setRoofSettingsOpen}
-        construction={hatchConstruction}
-        onConstruction={(construction) => {
-          setPathPoints([]);
-          setHatchConstruction(construction);
-        }}
-        value={toolDefaults.roof}
-        onChange={toolDefaults.setRoof}
-        layers={project.layers}
-      />
+      {roomSettingsOpen && (
+        <RoomSettingsPanel
+          open={roomSettingsOpen}
+          section={roomSettingsSection}
+          onOpenChange={(open) => !open && setSettingsWindow(null)}
+          construction={roomConstruction}
+          onConstruction={(next) => {
+            setPathPoints([]);
+            setRoomConstruction(next);
+          }}
+          value={toolDefaults.room}
+          onChange={toolDefaults.setRoom}
+          layers={project.layers}
+        />
+      )}
+      {roofSettingsOpen && (
+        <RoofSettingsPanel
+          open={roofSettingsOpen}
+          onOpenChange={(open) => !open && setSettingsWindow(null)}
+          construction={hatchConstruction}
+          onConstruction={(construction) => {
+            setPathPoints([]);
+            setHatchConstruction(construction);
+          }}
+          value={toolDefaults.roof}
+          onChange={toolDefaults.setRoof}
+          layers={project.layers}
+        />
+      )}
       <main
         onPointerDownCapture={(event) => {
           lastPointer.current = { x: event.clientX, y: event.clientY };
@@ -1992,8 +1998,7 @@ export function CadWorkspace({
                 layers={project.layers}
                 nextNumber={nextProjectRoomNumber(project)}
                 onOpenSettings={() => {
-                  setRoomSettingsSection("height-lines");
-                  setRoomSettingsOpen(true);
+                  setSettingsWindow({ mode: "tool", tool: "room", section: "height-lines" });
                 }}
               />
             ) : tool === "roof" && mode === "2D" ? (

@@ -174,7 +174,7 @@ export function RoomSettingsPanel({
   return (
     <FloatingPanel
       open={open}
-      title="Raum-Einstellungen"
+      title="Raum – Einstellungen"
       onClose={() => onOpenChange(false)}
       width={SETTINGS_WINDOW.width}
       height={SETTINGS_WINDOW.height}

@@ -233,7 +233,7 @@ export function RoofSettingsPanel({
   return (
     <FloatingPanel
       open={open}
-      title="Dach-Einstellungen"
+      title="Dach – Einstellungen"
       onClose={() => onOpenChange(false)}
       width={SETTINGS_WINDOW.width}
       height={SETTINGS_WINDOW.height}
