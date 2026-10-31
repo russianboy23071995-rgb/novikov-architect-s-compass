@@ -8,6 +8,7 @@ import {
 } from "@/domain/elements/dimension/model";
 import type { Project } from "@/domain/project/schema";
 import type { Selection } from "./bim-view";
+import { DimensionStyleFields } from "./DimensionStyleFields";
 
 /** Properties of one dimension chain (docs/MASSKETTE.md): direction and the measured values. */
 export function DimensionProperties({
@@ -50,9 +51,23 @@ export function DimensionProperties({
           <option value="vertical">Senkrecht</option>
         </select>
       </label>
+      <DimensionStyleFields
+        value={dimension}
+        onChange={(style) => {
+          try {
+            onChange(updateDimension(project, dimension.id, style), selection);
+            setError("");
+          } catch (failure) {
+            setError(failure instanceof Error ? failure.message : "Nicht möglich.");
+          }
+        }}
+      />
       <p className="text-xs text-muted-foreground">
-        {values.map(formatDimension).join(" · ")} · gesamt{" "}
-        {formatDimension(values.reduce((a, b) => a + b, 0))}
+        {values.map((v) => formatDimension(v, dimension.units)).join(" · ")} · gesamt{" "}
+        {formatDimension(
+          values.reduce((a, b) => a + b, 0),
+          dimension.units,
+        )}
       </p>
       {error && (
         <p role="alert" className="text-xs text-destructive">

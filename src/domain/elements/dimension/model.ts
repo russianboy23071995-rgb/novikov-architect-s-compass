@@ -2,6 +2,31 @@ import { z } from "zod";
 
 const finite = z.number().finite();
 const point = z.object({ x: finite, y: finite }).strict();
+
+/** Dimension line terminators of building drawings; the oblique stroke is the usual one. */
+export const DIMENSION_TERMINATORS = ["slash", "dot", "circle", "arrow", "cross"] as const;
+export type DimensionTerminator = (typeof DIMENSION_TERMINATORS)[number];
+export const DIMENSION_TERMINATOR_LABELS: Record<DimensionTerminator, string> = {
+  slash: "Schrägstrich",
+  dot: "Punkt",
+  circle: "Kreis",
+  arrow: "Pfeil",
+  cross: "Kreuz",
+};
+/** Figures: below 1 m in cm, from 1 m in m, half cm as superscript 5 (building practice);
+ * or all in m, or all in cm. */
+export const DIMENSION_UNITS = ["m-cm", "m", "cm"] as const;
+export type DimensionUnits = (typeof DIMENSION_UNITS)[number];
+export const DIMENSION_UNIT_LABELS: Record<DimensionUnits, string> = {
+  "m-cm": "m / cm (hochgestellte 5)",
+  m: "Meter",
+  cm: "Zentimeter",
+};
+export const DIMENSION_STYLE_DEFAULTS = {
+  terminator: "slash",
+  units: "m-cm",
+  textSize: 2.5,
+} as const satisfies { terminator: DimensionTerminator; units: DimensionUnits; textSize: number };
 type Point = { x: number; y: number };
 export type DimensionOrientation = "horizontal" | "vertical";
 type Chain = { orientation: DimensionOrientation; points: readonly Point[] };
@@ -20,6 +45,11 @@ export const dimensionSchema = z
     orientation: z.enum(["horizontal", "vertical"]),
     offset: finite,
     points: z.array(point).min(2).max(1000),
+    // Display (docs/MASSKETTE.md, Darstellung): optional, absent = building drawing defaults.
+    terminator: z.enum(DIMENSION_TERMINATORS).optional(),
+    units: z.enum(DIMENSION_UNITS).optional(),
+    /** Figure height in paper millimetres. */
+    textSize: finite.min(1).max(10).optional(),
   })
   .strict()
   .refine(
@@ -66,18 +96,32 @@ export function dimensionLayout(d: Chain & { offset: number }) {
 }
 
 /**
- * Value text after German building drawing practice: below 1 m in centimetres, from 1 m in
- * metres with two decimals; half centimetres keep one decimal (36,5 · 3,515 → 3,51⁵ comes with
- * the later display work).
+ * Dimension figure split into main part and superscript (building drawing practice): with
+ * "m-cm" below 1 m in centimetres (36⁵ = 36,5 cm), from 1 m in metres with two decimals
+ * (2,01⁵ = 2,015 m); values are rounded to half centimetres. "m" gives metres with three
+ * decimals where needed, "cm" centimetres with the superscript 5.
  */
-export function formatDimension(metres: number): string {
+export function dimensionFigure(
+  metres: number,
+  units: DimensionUnits = "m-cm",
+): { main: string; sup: string } {
   const de = (value: number, digits: number) =>
     value.toLocaleString("de-DE", { minimumFractionDigits: digits, maximumFractionDigits: digits });
-  if (metres < 1) {
-    const cm = Math.round(metres * 200) / 2;
-    return Number.isInteger(cm) ? de(cm, 0) : de(cm, 1);
+  if (units === "m") {
+    const mm = Math.round(metres * 1000);
+    return { main: de(mm / 1000, mm % 10 === 0 ? 2 : 3), sup: "" };
   }
-  return de(Math.round(metres * 100) / 100, 2);
+  const halfCm = Math.round(metres * 200);
+  const half = halfCm % 2 === 1 ? "5" : "";
+  const cm = Math.floor(halfCm / 2);
+  if (units === "cm" || metres < 1) return { main: de(cm, 0), sup: half };
+  return { main: de(cm / 100, 2), sup: half };
+}
+
+/** Plain text of a figure (menus, lists): superscript 5 as the character ⁵. */
+export function formatDimension(metres: number, units: DimensionUnits = "m-cm"): string {
+  const { main, sup } = dimensionFigure(metres, units);
+  return main + (sup ? "⁵" : "");
 }
 
 /**

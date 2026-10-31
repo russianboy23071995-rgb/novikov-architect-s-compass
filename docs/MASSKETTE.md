@@ -33,3 +33,13 @@ Nutzerrückmeldung: Fensterecken rasten bei der Bemaßung nicht ein; nachträgli
 - Nach jeder Bearbeitung zurück im Auswahlwerkzeug mit der Kette gewählt.
 
 Nachweis M1–M4: 1402 Tests grün (2 neu; Vergleichsableitung der Fangpunkte und zwei Tests auf Fensterpunkte angepasst), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Kette 3,00 an der Wand; Punkt hinzufügen an beiden Fensterlaibungen → 90 · 1,20 · 90; Punkt entfernen an der rechten Laibung → 90 · 2,10; Maßlinie verschoben; Menü mit genau den sechs Einträgen; jeder Schritt einzeln rückgängig, Testkette danach entfernt.
+
+## Darstellung nach Bauzeichnungs-Praxis (31.10.2026)
+
+Nutzervorgabe: Standard recherchieren und übernehmen. Recherche: Eine Bemaßung besteht aus Maßzahl, Maßlinie, Maßhilfslinie und Maßbegrenzung; übliche Begrenzungen in Bauzeichnungen sind 45°-Schrägstrich, Punkt, Kreis, Pfeil (vorzugsweise für Rundungen) und Kreuz (Bauzeichnungs-Grundregeln nach DIN 1356-1, die laut DIN derzeit überarbeitet wird – Entwurf E DIN 1356-1:2026-09; teils wird auf DIN EN ISO 7519 verwiesen). Praxis in deutschen Bauplänen: Maße unter 1 m in cm, ab 1 m in m mit zwei Nachkommastellen, halber Zentimeter als hochgestellte 5 (36⁵, 2,01⁵).
+
+- Je Maßkette (optional, Schema bleibt 39): **Begrenzung** Schrägstrich (Vorgabe) / Punkt / Kreis / Pfeil / Kreuz; **Maßzahl** m/cm mit hochgestellter 5 (Vorgabe) / Meter (bis mm) / Zentimeter; **Schrift** 1,8 / 2,5 (Vorgabe) / 3,5 / 5 mm Papier.
+- In Leiste und Einstellungsfenster des Werkzeugs als Vorgabe, bei einer gewählten Kette in Leiste und Fenster (sofort, ein Rückgängig-Schritt).
+- Darstellung (`DimensionGraphic`): Maßzahl über der Maßlinie, lesbar von unten bzw. rechts; hochgestellte 5 kleiner und angehoben; Hilfslinien 1,5 mm über die Maßlinie hinaus; Striche 2 mm; Pfeile zeigen auf die Hilfslinien (an Zwischenstationen beidseitig). Werte auf halbe Zentimeter gerundet (`dimensionFigure`).
+
+Nachweis: 1409 Tests grün (Format-Test auf Bauzeichnungs-Praxis umgestellt), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Kette 90 · 1,20 · 90 mit Schrägstrichen und Überstand; Umschalten auf Punkt und Pfeil an der gewählten Kette; Testkette zurückgenommen.

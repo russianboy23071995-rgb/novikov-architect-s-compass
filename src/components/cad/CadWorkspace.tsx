@@ -1469,7 +1469,7 @@ export function CadWorkspace({
       setModelError("Mindestens zwei Punkte für die Maßkette anklicken.");
       return;
     }
-    const { orientation, layerId } = toolDefaults.dimension;
+    const { orientation, layerId, terminator, units, textSize } = toolDefaults.dimension;
     try {
       dispatchEditing({
         type: "project",
@@ -1479,6 +1479,9 @@ export function CadWorkspace({
           offset: orientation === "horizontal" ? draft.line.y : draft.line.x,
           points,
           layerId,
+          ...(terminator ? { terminator } : {}),
+          ...(units ? { units } : {}),
+          ...(textSize ? { textSize } : {}),
         }),
       });
       setDimensionDraft(null);
@@ -2567,6 +2570,11 @@ export function CadWorkspace({
                               line: dimensionDraft.line,
                               points: dimensionDraft.points,
                               mode: dimensionDraft.edit?.mode,
+                              style: dimensionDraft.edit
+                                ? (storeyOf(project).dimensions?.find(
+                                    (d) => d.id === dimensionDraft.edit!.id,
+                                  ) ?? {})
+                                : toolDefaults.dimension,
                             }
                           : undefined
                       }

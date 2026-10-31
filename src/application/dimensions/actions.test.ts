@@ -7,6 +7,7 @@ import {
   dimensionLayout,
   dimensionValues,
   dimensionPointAt,
+  dimensionFigure,
   formatDimension,
 } from "../../domain/elements/dimension/model.ts";
 import { createExampleProject } from "../../components/cad/bim-view.ts";
@@ -77,11 +78,16 @@ test("vertical chains measure in y; a chain without two distinct stations is ref
 });
 
 test("value text after German building drawings: cm below 1 m, m with two decimals above", () => {
-  assert.equal(formatDimension(0.365), "36,5");
+  // Below 1 m in cm, from 1 m in m; half centimetres as superscript 5 (docs/MASSKETTE.md).
+  assert.equal(formatDimension(0.365), "36⁵");
   assert.equal(formatDimension(0.24), "24");
   assert.equal(formatDimension(1), "1,00");
-  assert.equal(formatDimension(2.365), "2,37");
+  assert.equal(formatDimension(2.365), "2,36⁵");
   assert.equal(formatDimension(12.5), "12,50");
+  assert.deepEqual(dimensionFigure(2.015), { main: "2,01", sup: "5" });
+  assert.deepEqual(dimensionFigure(2.015, "m"), { main: "2,015", sup: "" });
+  assert.deepEqual(dimensionFigure(1.2, "m"), { main: "1,20", sup: "" });
+  assert.deepEqual(dimensionFigure(2.365, "cm"), { main: "236", sup: "5" });
 });
 
 test("move, delete, menu summary; schema 37 files load, smuggled chains are refused", () => {

@@ -153,7 +153,10 @@ export function selectionSummary(project: Project, selection: Selection) {
     const values = dimensionValues(chain);
     return {
       title: "Maßkette",
-      details: `${chain.orientation === "horizontal" ? "Waagerecht" : "Senkrecht"} · ${values.length} ${values.length === 1 ? "Maß" : "Maße"} · gesamt ${formatDimension(values.reduce((a, b) => a + b, 0))}`,
+      details: `${chain.orientation === "horizontal" ? "Waagerecht" : "Senkrecht"} · ${values.length} ${values.length === 1 ? "Maß" : "Maße"} · gesamt ${formatDimension(
+        values.reduce((a, b) => a + b, 0),
+        chain.units,
+      )}`,
     };
   }
   if (selection.kind === "column") {

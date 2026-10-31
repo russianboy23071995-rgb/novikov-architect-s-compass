@@ -1,3 +1,4 @@
+import type { DimensionStyle } from "./DimensionStyleFields";
 import { TextGraphic } from "./TextGraphic";
 import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
@@ -136,6 +137,8 @@ export type BimPlanProps = {
         /** Editing an existing chain: "line" moves its dimension line with the pointer,
          * "remove" shows its points to click; adding behaves like drawing. */
         mode?: "add" | "remove" | "line" | undefined;
+        /** Terminator, figures and height of the chain being drawn or edited. */
+        style?: DimensionStyle | undefined;
       }
     | undefined;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
@@ -1422,6 +1425,9 @@ export function BimPlan({
                 denominator={scaleContext.denominator}
                 pixelsPerMetre={camera.pixelsPerMetre}
                 color="#0284c7"
+                terminator={dimensionDraft.style?.terminator}
+                units={dimensionDraft.style?.units}
+                textSize={dimensionDraft.style?.textSize}
               />
             )}
             {(() => {
