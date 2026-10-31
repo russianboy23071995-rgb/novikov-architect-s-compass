@@ -6,7 +6,8 @@ Nutzerauftrag 31.10.2026: Treppen als Bauteil, in drei Teilen. Nutzervorgabe: **
 | --- | --- | --- |
 | TR1 | Gerade Treppe: Modell, Rechnung und Prüfung nach DIN 18065, Schema 40, Standardebene Treppe, 3D-Körper, IFC | erledigt |
 | TR2 | Werkzeug „Treppe“, Leiste und Einstellungsfenster mit allen Angaben, Grundriss (Stufen, Lauflinie mit Pfeil, Schnittlinie), Eigenschaften, Bearbeiten | erledigt |
-| TR3 | L- und U-Treppe mit Zwischenpodest; später gewendelte Stufen und Wendeltreppe | offen |
+| TR3 | L- und U-Treppe mit Zwischenpodest | erledigt |
+| später | Gewendelte Stufen, Wendeltreppe | offen |
 
 ## Regeln (DIN 18065, Gebäudetreppen)
 
@@ -40,3 +41,16 @@ Nutzervorgabe 31.10.2026: „Die Treppe wird voll gezeichnet. Ähnlich wie bei e
 - **Bearbeiten**: Auswahl, Doppelklick öffnet das Elementfenster mit allen Werten (jede Änderung ein Rückgängig-Schritt; „berechnet“ gibt feste Werte an die Rechnung zurück); On-Demand-Menü mit Zusammenfassung, frei bewegen und auf X-/Y-Achse (Antritt bewegt sich mit); Pipette übernimmt alle Einstellungen ins Werkzeug.
 
 Nachweis TR2: 1417 Tests grün, Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert; 4 neue Tests in `src/application/stairs/tool.test.ts` (Zeichenachse, Grundriss mit Schnitt, Vorgaben-Rundreise und Rückgabe an die Rechnung, Szene/Pipette/Verschieben). Browser: Werkzeug gewählt, Antritt und Richtung geklickt – Vorschau mit allen Stufen, Treppe gesetzt; Grundriss mit Stufen, Lauflinie, Kreis, Pfeil, Schnittlinie und gestricheltem Teil oberhalb; Elementfenster mit allen Werten und Live-Prüfung; Achse auf „Links“ verschiebt die Treppe auf die rechte Seite der Klicklinie; 3D-Treppe bis zum Geschoss darüber.
+
+## Teil TR3
+
+Nutzerentscheidung 31.10.2026: Variante B – bei L und U wählt ein **dritter Klick** die Seite der Wendung.
+
+- **Formen** (`shape`: Gerade / L-Treppe (Viertelwendung) / U-Treppe (Halbwendung)). Neue optionale Werte, Schema bleibt 40: `turn` (links/rechts, in Laufrichtung des 1. Laufs), `firstRisers` (feste Steigungen im 1. Lauf, sonst die Hälfte), `landingDepth` (feste Podesttiefe, sonst Laufbreite), `eye` (Treppenauge der U-Treppe, Vorgabe 15 cm). Werte für L/U werden nur bei L/U gespeichert; zurück auf „Gerade“ entfernt sie.
+- **Rechnung** (`stairGeometry`): Steigungen wie bisher, Aufteilung auf zwei Läufe (`flights`), das Podest ersetzt den letzten Auftritt des 1. Laufs (Auftritte = Steigungen − 2), `run` = Summe der Lauflängen ohne Podest. Prüfung zusätzlich: Podesttiefe ≥ Laufbreite, je Lauf mindestens 3 Steigungen, **höchstens 18 Steigungen je Lauf** (sonst Hinweis „Zwischenpodest“ – gilt auch für gerade Treppen), Begrenzung des festen 1. Laufs.
+- **Lage** (`stairLayout`): 1. Lauf ab der Zeichenachse; Podest am oberen Ende. L: 2. Lauf rechtwinklig zur gewählten Seite, bündig mit der hinteren Podestkante. U: 2. Lauf parallel zurück, um Laufbreite + Treppenauge versetzt. Liefert Läufe (Bezugsrahmen, Steigungen, erste Steigung), Podestfläche und Gesamtumriss (Auswahl, Grundriss).
+- **Grundriss**: Gesamtumriss, Steigungslinien beider Läufe, Lauflinie als Linienzug über die Podestmitte (Kreis am Antritt, Pfeil am Austritt), Schnittlinie im Lauf, den die 1-m-Ebene trifft; alles darüber gestrichelt.
+- **3D und IFC**: Körper aus zwei Läufen (je eigene Höhe ab ihrer ersten Steigung) und der Podestplatte (Dicke = Laufplatte). IFC: `IfcStair` .QUARTER_TURN_STAIR. bzw. .HALF_TURN_STAIR. mit zwei `IfcStairFlight` (je Steigungen/Auftritte) und dem Podest als `IfcSlab` .LANDING.; eigene Werte Form, Wendung, Podesttiefe, Aufteilung. Der 1. Lauf behält seine GUID aus TR1/TR2.
+- **Werkzeug**: Klick 1 Antritt, Klick 2 Laufrichtung, bei L/U Klick 3 auf der Seite der Wendung – die Vorschau zeigt nach Klick 2 die ganze Treppe und klappt mit dem Zeiger auf die jeweilige Seite. Felder Form, Wendung (Vorgabe), 1. Lauf Hälfte/fest, Podest Tiefe = Laufbreite/fest, Treppenauge; Ergebnis zeigt die Aufteilung („8 + 8 = 16 Steigungen … + Podest 1 m“).
+
+Nachweis TR3: 1423 Tests grün, Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert; 6 neue Tests in `src/application/stairs/turn.test.ts` (Aufteilung und Prüfung, L links/rechts, U mit Treppenauge und Lauflinie, Körper mit Podest, Klickrichtung/-seite, Speichern/IFC/zurück auf gerade). Browser: L-Treppe mit drei Klicks (Vorschau klappt mit dem Zeiger nach links/rechts), Grundriss mit Lauflinie über das Podest, Umstellen auf U im Element, 3D mit zwei Läufen und Podestplatte.

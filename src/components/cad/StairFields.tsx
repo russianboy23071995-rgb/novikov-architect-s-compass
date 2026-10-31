@@ -2,6 +2,10 @@ import { useState } from "react";
 import type { StairDefaults } from "@/application/stairs/defaults";
 import { stairValues } from "@/application/stairs/defaults";
 import {
+  STAIR_SHAPES,
+  STAIR_SHAPE_LABELS,
+  STAIR_TURNS,
+  STAIR_TURN_LABELS,
   STAIR_AXES,
   STAIR_AXIS_LABELS,
   STAIR_RULE_LABELS,
@@ -18,7 +22,10 @@ type NumberField =
   | "waist"
   | "baseOffset"
   | "height"
-  | "topOffset";
+  | "topOffset"
+  | "firstRisers"
+  | "landingDepth"
+  | "eye";
 /** Lengths are typed in centimetres where builders think in centimetres. */
 const FIELDS: Record<NumberField, { label: string; cm: boolean; positive: boolean }> = {
   width: { label: "Laufbreite (m)", cm: false, positive: true },
@@ -29,6 +36,9 @@ const FIELDS: Record<NumberField, { label: string; cm: boolean; positive: boolea
   baseOffset: { label: "Fuß über OK RFB (m)", cm: false, positive: false },
   height: { label: "Höhe (m)", cm: false, positive: true },
   topOffset: { label: "Versatz Oberkante (m)", cm: false, positive: false },
+  firstRisers: { label: "Steigungen 1. Lauf", cm: false, positive: true },
+  landingDepth: { label: "Podesttiefe (m)", cm: false, positive: true },
+  eye: { label: "Treppenauge (cm)", cm: true, positive: false },
 };
 
 /**
@@ -85,7 +95,18 @@ export function StairFields({
       />
     </label>
   );
-  const select = <K extends "axis" | "ruleSet" | "riserCountMode" | "treadMode" | "heightMode">(
+  const select = <
+    K extends
+      | "shape"
+      | "turn"
+      | "firstRisersMode"
+      | "landingMode"
+      | "axis"
+      | "ruleSet"
+      | "riserCountMode"
+      | "treadMode"
+      | "heightMode",
+  >(
     field: K,
     label: string,
     options: readonly (readonly [StairDefaults[K], string])[],
@@ -110,6 +131,31 @@ export function StairFields({
   const cm = (m: number) => (m * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 });
   return (
     <section aria-label="Treppeneinstellungen" className="flex flex-wrap items-end gap-3">
+      {select(
+        "shape",
+        "Form",
+        STAIR_SHAPES.map((s) => [s, STAIR_SHAPE_LABELS[s]] as const),
+      )}
+      {value.shape !== "straight" && (
+        <>
+          {select(
+            "turn",
+            "Wendung",
+            STAIR_TURNS.map((t) => [t, STAIR_TURN_LABELS[t]] as const),
+          )}
+          {select("firstRisersMode", "1. Lauf", [
+            ["auto", "Hälfte"],
+            ["fixed", "Fest"],
+          ])}
+          {value.firstRisersMode === "fixed" && number("firstRisers")}
+          {select("landingMode", "Podest", [
+            ["auto", "Tiefe = Laufbreite"],
+            ["fixed", "Feste Tiefe"],
+          ])}
+          {value.landingMode === "fixed" && number("landingDepth")}
+          {value.shape === "u" && number("eye")}
+        </>
+      )}
       {select(
         "axis",
         "Zeichenachse",
@@ -159,7 +205,7 @@ export function StairFields({
         className={`basis-full text-xs ${g?.issues.length ? "text-destructive" : "text-muted-foreground"}`}
       >
         {g
-          ? `${g.riserCount} Steigungen à ${cm(g.riser)} cm · ${g.treadCount} Auftritte à ${cm(g.tread)} cm · Lauflänge ${g.run.toLocaleString("de-DE", { maximumFractionDigits: 2 })} m · 2h + a = ${cm(g.stepRule)} cm · ${g.issues.length ? g.issues.join(" · ") : "DIN 18065 eingehalten"}`
+          ? `${g.flights.length > 1 ? `${g.flights.join(" + ")} = ` : ""}${g.riserCount} Steigungen à ${cm(g.riser)} cm · ${g.treadCount} Auftritte à ${cm(g.tread)} cm · Lauflänge ${g.run.toLocaleString("de-DE", { maximumFractionDigits: 2 })} m${g.landing !== null ? ` + Podest ${g.landing.toLocaleString("de-DE", { maximumFractionDigits: 2 })} m` : ""} · 2h + a = ${cm(g.stepRule)} cm · ${g.issues.length ? g.issues.join(" · ") : "DIN 18065 eingehalten"}`
           : "Höhe unbekannt: Geschosshöhe festlegen oder feste Höhe wählen."}
       </p>
     </section>

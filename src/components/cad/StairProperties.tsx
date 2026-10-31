@@ -29,7 +29,15 @@ export function StairProperties({
     try {
       // Auto values are absent in `changes`: an explicit undefined hands them back to the rule.
       onChange(
-        updateStair(project, stair.id, { riserCount: undefined, tread: undefined, ...changes }),
+        updateStair(project, stair.id, {
+          riserCount: undefined,
+          tread: undefined,
+          turn: undefined,
+          firstRisers: undefined,
+          landingDepth: undefined,
+          eye: undefined,
+          ...changes,
+        }),
         selection,
       );
       setError("");

@@ -71,6 +71,7 @@ import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
 import { addStair, updateStair } from "@/application/stairs/actions";
 import { stairValues } from "@/application/stairs/defaults";
+import { stairDirectionTo, stairTurnTo } from "@/domain/elements/stair/model";
 import { StairFields } from "./StairFields";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
 import { setWallRenovation } from "@/application/walls/renovation";
@@ -359,6 +360,8 @@ export function CadWorkspace({
   } | null>(null);
   // Stair tool (docs/TREPPE.md, TR2): first click on the drawing axis; session state only.
   const [stairStart, setStairStart] = useState<Point | null>(null);
+  // L and U: run direction fixed by click 2; click 3 chooses the side of the turn (TR3).
+  const [stairDirection, setStairDirection] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
   const railShown = !fullscreen || !!activeDocumentId;
@@ -396,6 +399,7 @@ export function CadWorkspace({
     setDimensionDraft(null);
     setTextDraft(null);
     setStairStart(null);
+    setStairDirection(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -1567,17 +1571,21 @@ export function CadWorkspace({
       );
       return;
     }
-    // Stair tool (docs/TREPPE.md, TR2): click 1 on the drawing axis, click 2 sets the run
-    // direction; the length follows from the calculation.
+    // Stair tool (docs/TREPPE.md, TR2/TR3): click 1 on the drawing axis, click 2 sets the run
+    // direction, for L and U click 3 the side of the turn; lengths follow from the calculation.
     if (tool === "stair") {
       if (!stairStart) {
         setStairStart({ x: point.x, y: point.y });
         return;
       }
-      const dx = point.x - stairStart.x;
-      const dy = point.y - stairStart.y;
-      if (Math.hypot(dx, dy) < 1e-6) {
+      const values = stairValues(toolDefaults.stair);
+      const direction = stairDirection ?? stairDirectionTo(stairStart, point);
+      if (direction === null) {
         setModelError("Zweiter Klick: Laufrichtung zeigen, nicht auf den Antritt.");
+        return;
+      }
+      if (values.shape !== "straight" && stairDirection === null) {
+        setStairDirection(direction);
         return;
       }
       try {
@@ -1586,11 +1594,15 @@ export function CadWorkspace({
           project: addStair(project, {
             id: `stair-${crypto.randomUUID()}`,
             start: stairStart,
-            direction: Math.round(((Math.atan2(dy, dx) * 180) / Math.PI) * 1e6) / 1e6,
-            ...stairValues(toolDefaults.stair),
+            direction,
+            ...values,
+            ...(values.shape !== "straight"
+              ? { turn: stairTurnTo(stairStart, direction, point) }
+              : {}),
           }),
         });
         setStairStart(null);
+        setStairDirection(null);
         showNotice("Treppe gesetzt");
       } catch (error) {
         setModelError(error instanceof Error ? error.message : "Treppe nicht möglich.");
@@ -2524,7 +2536,10 @@ export function CadWorkspace({
                         pathDrawing
                           ? (pathPoints.at(-1) ?? null)
                           : tool === "stair"
-                            ? stairStart
+                            ? // After the run direction only the side of the turn is chosen.
+                              stairDirection === null
+                              ? stairStart
+                              : null
                             : wallStart
                       }
                       draftPoints={pathDrawing ? pathPoints : []}
@@ -2640,6 +2655,7 @@ export function CadWorkspace({
                         tool === "stair" && stairStart
                           ? {
                               start: stairStart,
+                              direction: stairDirection,
                               values: stairValues(toolDefaults.stair),
                               storeyHeight: storeyOf(project).height ?? null,
                             }

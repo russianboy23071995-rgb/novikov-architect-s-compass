@@ -56,11 +56,12 @@ export function derivePlanScene(
         const g = stairGeometry(s, "height" in storey ? (storey.height ?? null) : null);
         return [
           s.id,
-          stairPlan(
-            s,
-            g ?? { riserCount: 1, riser: 1, tread: s.width, run: s.width },
-            PLAN_CUT_HEIGHT - s.baseOffset,
-          ),
+          g
+            ? stairPlan(s, g, PLAN_CUT_HEIGHT - s.baseOffset)
+            : stairPlan(
+                { ...s, shape: "straight" },
+                { riserCount: 2, riser: 0.01, tread: s.width, flights: [2], landing: null },
+              ),
         ] as const;
       }),
     ),

@@ -1,4 +1,4 @@
-import { stairGeometry, stairOutline } from "../../domain/elements/stair/model.ts";
+import { stairGeometry, stairLayout, stairOutline } from "../../domain/elements/stair/model.ts";
 import { textBox } from "../../domain/elements/text/model.ts";
 import { planDenominator } from "../../domain/views/scale.ts";
 import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
@@ -82,7 +82,10 @@ const PLAN_SHAPES: {
   // Paper sized texts at the storey's output scale (docs/TEXT.md).
   text: (t, { project }) => ({ points: textBox(t, planDenominator(project)), closed: true }),
   stair: (s, { project }) => ({
-    points: stairOutline(s, stairGeometry(s, storeyOf(project).height ?? null)?.run ?? s.width),
+    // Footprint of all flights and the landing; unknown height: width square (docs/TREPPE.md).
+    points: ((g) => (g ? stairLayout(s, g).footprint : stairOutline(s, s.width)))(
+      stairGeometry(s, storeyOf(project).height ?? null),
+    ),
     closed: true,
   }),
 };

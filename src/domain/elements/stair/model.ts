@@ -7,6 +7,22 @@ const point = z.object({ x: finite, y: finite }).strict();
 
 export const STAIR_AXES = ["center", "left", "right"] as const;
 export type StairAxis = (typeof STAIR_AXES)[number];
+/** Plan shapes (docs/TREPPE.md, TR3): straight, L (quarter turn) and U (half turn) with a
+ * landing between two flights. */
+export const STAIR_SHAPES = ["straight", "l", "u"] as const;
+export type StairShape = (typeof STAIR_SHAPES)[number];
+export const STAIR_SHAPE_LABELS: Record<StairShape, string> = {
+  straight: "Gerade",
+  l: "L-Treppe (Viertelwendung)",
+  u: "U-Treppe (Halbwendung)",
+};
+export const STAIR_TURNS = ["left", "right"] as const;
+export const STAIR_TURN_LABELS: Record<(typeof STAIR_TURNS)[number], string> = {
+  left: "Links",
+  right: "Rechts",
+};
+/** Longest flight without a landing (DIN 18065: after at most 18 risers a landing). */
+export const STAIR_MAX_FLIGHT = 18;
 export const STAIR_AXIS_LABELS: Record<StairAxis, string> = {
   center: "Mitte",
   left: "Links",
@@ -47,7 +63,15 @@ export const stairSchema = z
   .object({
     id: z.string().trim().min(1),
     layerId: z.string().trim().min(1),
-    shape: z.literal("straight"),
+    shape: z.enum(STAIR_SHAPES),
+    /** L and U: side the stair turns to, looking up the first flight (absent = left). */
+    turn: z.enum(STAIR_TURNS).optional(),
+    /** L and U: fixed riser count of the first flight; otherwise half of all risers. */
+    firstRisers: z.number().int().min(1).max(199).optional(),
+    /** L and U: fixed landing depth along the first flight; otherwise the flight width. */
+    landingDepth: finite.positive().max(10).optional(),
+    /** U: stair well between the flights (Treppenauge); absent = STAIR_DEFAULTS.eye. */
+    eye: finite.min(0).max(5).optional(),
     start: point,
     direction: finite,
     width: finite.positive().max(10),
@@ -79,6 +103,7 @@ export const STAIR_DEFAULTS = {
   waist: 0.16,
   ruleSet: "residential",
   baseOffset: 0,
+  eye: 0.15,
 } as const;
 
 /** Height the stair climbs; null while a bound top meets an unknown storey height. */
@@ -99,8 +124,12 @@ export type StairGeometry = {
   riser: number;
   treadCount: number;
   tread: number;
-  /** Horizontal run of the flight (Lauflänge). */
+  /** Horizontal run of all flights together (Lauflänge, landing excluded). */
   run: number;
+  /** Riser count per flight: one for a straight stair, two for L and U (docs/TREPPE.md, TR3). */
+  flights: number[];
+  /** Landing depth along the first flight; null without a landing. */
+  landing: number | null;
   stepRule: number;
   /** Findings of the DIN 18065 check, empty when everything fits. */
   issues: string[];
@@ -118,7 +147,8 @@ export function stairGeometry(
     | "baseOffset"
     | "height"
     | "topBinding"
-  >,
+  > &
+    Partial<Pick<Stair, "shape" | "firstRisers" | "landingDepth">>,
   storeyHeight: number | null,
 ): StairGeometry | null {
   const rise = stairRise(stair, storeyHeight);
@@ -128,7 +158,14 @@ export function stairGeometry(
   const tread =
     stair.tread ??
     Math.round(Math.min(0.37, Math.max(0.2, STAIR_STEP_RULE.ideal - 2 * riser)) * 1000) / 1000;
-  const treadCount = riserCount - 1;
+  // L and U: two flights; the landing replaces the last tread of the first one.
+  const turning = !!stair.shape && stair.shape !== "straight" && riserCount >= 4;
+  const n1 = turning
+    ? Math.min(Math.max(stair.firstRisers ?? Math.round(riserCount / 2), 2), riserCount - 2)
+    : riserCount;
+  const flights = turning ? [n1, riserCount - n1] : [riserCount];
+  const landing = turning ? (stair.landingDepth ?? stair.width) : null;
+  const treadCount = riserCount - flights.length;
   const stepRule = 2 * riser + tread;
   const rules = STAIR_RULES[stair.ruleSet];
   const cm = (m: number) => (m * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 });
@@ -145,16 +182,38 @@ export function stairGeometry(
     issues.push(`Laufbreite ${cm(stair.width)} cm unter ${cm(rules.width)} cm`);
   if (stepRule < STAIR_STEP_RULE.min - 1e-9 || stepRule > STAIR_STEP_RULE.max + 1e-9)
     issues.push(`Schrittmaß 2h + a = ${cm(stepRule)} cm außerhalb 59–65 cm`);
-  return { rise, riserCount, riser, treadCount, tread, run: treadCount * tread, stepRule, issues };
+  if (stair.shape && stair.shape !== "straight" && !turning)
+    issues.push("Zu wenige Steigungen für zwei Läufe mit Podest");
+  if (turning && stair.firstRisers !== undefined && stair.firstRisers !== n1)
+    issues.push(`Steigungen im 1. Lauf auf ${n1} begrenzt`);
+  flights.forEach((count, i) => {
+    const name = flights.length > 1 ? `${i + 1}. Lauf` : "Lauf";
+    if (count > STAIR_MAX_FLIGHT)
+      issues.push(`${name} mit ${count} Steigungen: nach höchstens 18 ein Zwischenpodest`);
+    if (flights.length > 1 && count < 3) issues.push(`${name} mit weniger als 3 Steigungen`);
+  });
+  if (landing !== null && landing < stair.width - 1e-9)
+    issues.push(`Podesttiefe ${cm(landing)} cm unter Laufbreite ${cm(stair.width)} cm`);
+  return {
+    rise,
+    riserCount,
+    riser,
+    treadCount,
+    tread,
+    run: flights.reduce((sum, n) => sum + (n - 1) * tread, 0),
+    flights,
+    landing,
+    stepRule,
+    issues,
+  };
 }
 
-type Frame = {
-  origin: { x: number; y: number };
-  d: { x: number; y: number };
-  n: { x: number; y: number };
-};
+type P2 = { x: number; y: number };
+export type StairFrame = { origin: P2; d: P2; n: P2 };
 /** Flight frame: origin on the centre line of the first riser, d up the run, n to the left. */
-export function stairFrame(stair: Pick<Stair, "start" | "direction" | "width" | "axis">): Frame {
+export function stairFrame(
+  stair: Pick<Stair, "start" | "direction" | "width" | "axis">,
+): StairFrame {
   const a = (stair.direction * Math.PI) / 180;
   const d = { x: Math.cos(a), y: Math.sin(a) };
   const n = { x: -d.y, y: d.x };
@@ -164,65 +223,218 @@ export function stairFrame(stair: Pick<Stair, "start" | "direction" | "width" | 
   return { origin: { x: stair.start.x + n.x * shift, y: stair.start.y + n.y * shift }, d, n };
 }
 
-function frameAt(f: Frame, s: number, t: number) {
+export function frameAt(f: StairFrame, s: number, t: number): P2 {
   return { x: f.origin.x + f.d.x * s + f.n.x * t, y: f.origin.y + f.d.y * s + f.n.y * t };
 }
 
-/** Plan outline of the flight (counterclockwise): start edge, run along the direction. */
+/** Run direction in degrees from the start towards a point; null on the start itself. */
+export function stairDirectionTo(start: P2, point: P2): number | null {
+  const dx = point.x - start.x;
+  const dy = point.y - start.y;
+  if (Math.hypot(dx, dy) < 1e-6) return null;
+  return Math.round(((Math.atan2(dy, dx) * 180) / Math.PI) * 1e6) / 1e6;
+}
+
+/** Side of the run line a point lies on (docs/TREPPE.md, TR3: the third click turns L and U). */
+export function stairTurnTo(start: P2, direction: number, point: P2): "left" | "right" {
+  const a = (direction * Math.PI) / 180;
+  const cross = Math.cos(a) * (point.y - start.y) - Math.sin(a) * (point.x - start.x);
+  return cross < 0 ? "right" : "left";
+}
+
+type ShapeFields = "start" | "direction" | "width" | "axis" | "shape" | "turn" | "eye";
+type LayoutGeometry = Pick<StairGeometry, "riser" | "tread" | "flights" | "landing">;
+/** One flight in plan: its frame, riser count and index of its first riser in the stair. */
+export type StairFlight = {
+  frame: StairFrame;
+  count: number;
+  first: number;
+  run: number;
+  /** Walking line points on the landing before this flight. */
+  via: P2[];
+};
+
+/**
+ * Flights and landing in plan (docs/TREPPE.md, TR3). The first flight starts on the drawing
+ * axis; an L turns by 90° to the side `turn`, a U returns parallel beside the first flight with
+ * the stair well (`eye`) between them. The landing lies at the top of the first flight; an L
+ * flight leaves it at its far edge.
+ */
+export function stairLayout(
+  stair: Pick<Stair, ShapeFields>,
+  g: LayoutGeometry,
+): { flights: StairFlight[]; landing: P2[] | null; footprint: P2[] } {
+  const f = stairFrame(stair);
+  const w = stair.width;
+  const [n1 = 2, n2 = 0] = g.flights;
+  const run1 = (n1 - 1) * g.tread;
+  const first: StairFlight = { frame: f, count: n1, first: 0, run: run1, via: [] };
+  const rect = (s0: number, s1: number, t0: number, t1: number) => [
+    frameAt(f, s0, t0),
+    frameAt(f, s1, t0),
+    frameAt(f, s1, t1),
+    frameAt(f, s0, t1),
+  ];
+  if (stair.shape === "straight" || g.landing === null || !n2)
+    return { flights: [first], landing: null, footprint: rect(0, run1, -w / 2, w / 2) };
+  // σ mirrors the side: +1 turns left (towards n), −1 right.
+  const σ = stair.turn === "right" ? -1 : 1;
+  const depth = g.landing;
+  const run2 = (n2 - 1) * g.tread;
+  const at = (s: number, t: number) => frameAt(f, s, σ * t);
+  const polygon = (points: [number, number][]) => {
+    const mapped = points.map(([s, t]) => at(s, t));
+    // Mirrored outlines turn clockwise: keep every outline counterclockwise.
+    return σ === 1 ? mapped : mapped.reverse();
+  };
+  const left = { x: f.n.x * σ, y: f.n.y * σ };
+  if (stair.shape === "l") {
+    const centre = run1 + depth - w / 2;
+    const second: StairFlight = {
+      frame: { origin: at(centre, w / 2), d: left, n: { x: -f.d.x * σ, y: -f.d.y * σ } },
+      count: n2,
+      first: n1,
+      run: run2,
+      via: [at(centre, 0)],
+    };
+    return {
+      flights: [first, second],
+      landing: polygon([
+        [run1, -w / 2],
+        [run1 + depth, -w / 2],
+        [run1 + depth, w / 2],
+        [run1, w / 2],
+      ]),
+      footprint: polygon([
+        [0, -w / 2],
+        [run1 + depth, -w / 2],
+        [run1 + depth, w / 2 + run2],
+        [run1 + depth - w, w / 2 + run2],
+        [run1 + depth - w, w / 2],
+        [0, w / 2],
+      ]),
+    };
+  }
+  const eye = stair.eye ?? STAIR_DEFAULTS.eye;
+  const back = w + eye;
+  const second: StairFlight = {
+    frame: {
+      origin: at(run1, back),
+      d: { x: -f.d.x, y: -f.d.y },
+      n: { x: -left.x, y: -left.y },
+    },
+    count: n2,
+    first: n1,
+    run: run2,
+    via: [at(run1 + depth / 2, 0), at(run1 + depth / 2, back)],
+  };
+  return {
+    flights: [first, second],
+    landing: polygon([
+      [run1, -w / 2],
+      [run1 + depth, -w / 2],
+      [run1 + depth, back + w / 2],
+      [run1, back + w / 2],
+    ]),
+    footprint: polygon([
+      [0, -w / 2],
+      [run1 + depth, -w / 2],
+      [run1 + depth, back + w / 2],
+      [run1 - run2, back + w / 2],
+      [run1 - run2, back - w / 2],
+      [run1, back - w / 2],
+      [run1, w / 2],
+      [0, w / 2],
+    ]),
+  };
+}
+
+/** Plan outline of a straight flight (counterclockwise): start edge, run along the direction. */
 export function stairOutline(
   stair: Pick<Stair, "start" | "direction" | "width" | "axis">,
   run: number,
-): { x: number; y: number }[] {
+): P2[] {
   const f = stairFrame(stair);
   const w = stair.width / 2;
   return [frameAt(f, 0, -w), frameAt(f, run, -w), frameAt(f, run, w), frameAt(f, 0, w)];
 }
 
-type Segment = { start: { x: number; y: number }; end: { x: number; y: number } };
+type Segment = { start: P2; end: P2 };
 /**
- * Plan view after building drawing practice (docs/TREPPE.md, TR2): outline, one line per riser,
- * the walking line (Lauflinie) along the centre from a circle at the first step to an arrow at
- * the last, and the cut at `cutHeight` (1 m) as a break line across the flight. Parts above
- * the cut are drawn dashed by the renderer (`above`).
+ * Plan view after building drawing practice (docs/TREPPE.md, TR2/TR3): footprint, one line per
+ * riser, the walking line (Lauflinie) in the middle of the flights and across the landing from
+ * a circle at the first step to an arrow at the last, and the cut at `cutHeight` (1 m) as a
+ * break line across the flight it meets. Parts above the cut are drawn dashed (`above`).
  */
 export function stairPlan(
-  stair: Pick<Stair, "start" | "direction" | "width" | "axis">,
-  g: Pick<StairGeometry, "riserCount" | "riser" | "tread" | "run">,
+  stair: Pick<Stair, ShapeFields>,
+  g: LayoutGeometry & Pick<StairGeometry, "riserCount">,
   cutHeight = 1,
 ): {
-  outline: { x: number; y: number }[];
+  outline: P2[];
+  landing: P2[] | null;
   risers: (Segment & { above: boolean })[];
-  walk: { below: Segment; above: Segment | null };
+  walk: { below: P2[]; above: P2[] | null };
   cut: Segment | null;
 } {
-  const f = stairFrame(stair);
+  const layout = stairLayout(stair, g);
   const w = stair.width / 2;
-  // Step k (1-based) lies on riser k: its top is k·h; risers at s = (k − 1)·a.
+  // Step k (1-based) lies on riser k: its top is k·h. Risers from the cut step on lie above.
   const cutStep = Math.floor(cutHeight / g.riser);
-  const cutS = cutStep >= g.riserCount ? null : Math.max(cutStep - 0.5, 0) * g.tread;
-  const risers = Array.from({ length: g.riserCount }, (_, k) => ({
-    start: frameAt(f, k * g.tread, -w),
-    end: frameAt(f, k * g.tread, w),
-    above: cutS !== null && k * g.tread > cutS,
+  const cut = cutStep >= g.riserCount ? null : cutStep;
+  const risers = layout.flights.flatMap((flight) =>
+    Array.from({ length: flight.count }, (_, k) => ({
+      start: frameAt(flight.frame, k * g.tread, -w),
+      end: frameAt(flight.frame, k * g.tread, w),
+      above: cut !== null && flight.first + k >= cut,
+    })),
+  );
+  // Walking line: centre of every flight, joined through the landing.
+  const pieces = layout.flights.map((flight, i) => ({
+    flight,
+    from: i === 0 ? g.tread * 0.5 : 0,
   }));
-  const walkStart = frameAt(f, g.tread * 0.5, 0);
-  const walkEnd = frameAt(f, g.run, 0);
-  const mid = cutS === null ? null : frameAt(f, cutS, 0);
+  const path = (until?: { index: number; s: number }) =>
+    pieces.flatMap(({ flight, from }, i) => {
+      if (until && i > until.index) return [];
+      const end = until && i === until.index ? until.s : flight.run;
+      return [
+        ...flight.via,
+        frameAt(flight.frame, from, 0),
+        frameAt(flight.frame, Math.max(end, from), 0),
+      ];
+    });
+  const full = path();
+  if (cut === null) return { ...base(), walk: { below: full, above: null }, cut: null };
+  let index = 0;
+  layout.flights.forEach((flight, i) => {
+    if (flight.first <= cut) index = i;
+  });
+  const flight = layout.flights[index]!;
+  const s = Math.max(cut - flight.first - 0.5, index === 0 ? 0 : 0.25) * g.tread;
+  const below = path({ index, s });
+  const mid = below.at(-1)!;
+  const above = [
+    mid,
+    ...pieces
+      .slice(index)
+      .flatMap(({ flight: f, from }, i) => [
+        ...(i === 0 ? [] : [...f.via, frameAt(f.frame, from, 0)]),
+        frameAt(f.frame, f.run, 0),
+      ]),
+  ];
   return {
-    outline: stairOutline(stair, g.run),
-    risers,
-    walk: mid
-      ? { below: { start: walkStart, end: mid }, above: { start: mid, end: walkEnd } }
-      : { below: { start: walkStart, end: walkEnd }, above: null },
+    ...base(),
+    walk: { below, above },
     // Break line: a diagonal across the flight around the cut position.
-    cut:
-      cutS === null
-        ? null
-        : {
-            start: frameAt(f, cutS - g.tread * 0.6, -w),
-            end: frameAt(f, cutS + g.tread * 0.6, w),
-          },
+    cut: {
+      start: frameAt(flight.frame, s - g.tread * 0.6, -w),
+      end: frameAt(flight.frame, s + g.tread * 0.6, w),
+    },
   };
+  function base() {
+    return { outline: layout.footprint, landing: layout.landing, risers };
+  }
 }
 
 /**
@@ -232,8 +444,8 @@ export function stairPlan(
 export function stairProfile(
   g: Pick<StairGeometry, "riserCount" | "riser" | "tread" | "run" | "rise">,
   waist: number,
-): { x: number; y: number }[] {
-  const points: { x: number; y: number }[] = [{ x: 0, y: 0 }];
+): P2[] {
+  const points: P2[] = [{ x: 0, y: 0 }];
   for (let k = 0; k < g.riserCount; k++) {
     const s = k * g.tread;
     points.push({ x: s, y: (k + 1) * g.riser });
