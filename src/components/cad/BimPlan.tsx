@@ -129,6 +129,9 @@ export type BimPlanProps = {
         orientation: "horizontal" | "vertical";
         line: Point | null;
         points: readonly Point[];
+        /** Editing an existing chain: "line" moves its dimension line with the pointer,
+         * "remove" shows its points to click; adding behaves like drawing. */
+        mode?: "add" | "remove" | "line" | undefined;
       }
     | undefined;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
@@ -1390,12 +1393,18 @@ export function BimPlan({
             {dimensionDraft.line && (
               <DimensionGraphic
                 orientation={dimensionDraft.orientation}
-                offset={
-                  dimensionDraft.orientation === "horizontal"
-                    ? dimensionDraft.line.y
-                    : dimensionDraft.line.x
-                }
-                points={[...dimensionDraft.points, ...(resolvedHover ? [resolvedHover.point] : [])]}
+                offset={(() => {
+                  const line =
+                    dimensionDraft.mode === "line" && resolvedHover
+                      ? resolvedHover.point
+                      : dimensionDraft.line;
+                  return dimensionDraft.orientation === "horizontal" ? line.y : line.x;
+                })()}
+                points={[
+                  ...dimensionDraft.points,
+                  ...(resolvedHover && !dimensionDraft.mode ? [resolvedHover.point] : []),
+                  ...(resolvedHover && dimensionDraft.mode === "add" ? [resolvedHover.point] : []),
+                ]}
                 denominator={scaleContext.denominator}
                 pixelsPerMetre={camera.pixelsPerMetre}
                 color="#0284c7"
@@ -1403,7 +1412,10 @@ export function BimPlan({
             )}
             {(() => {
               // The dimension line position: a dashed guide through the first click.
-              const p = dimensionDraft.line ?? resolvedHover?.point;
+              const p =
+                dimensionDraft.mode === "line"
+                  ? (resolvedHover?.point ?? dimensionDraft.line)
+                  : (dimensionDraft.line ?? resolvedHover?.point);
               if (!p) return null;
               const far = 1e4;
               return dimensionDraft.orientation === "horizontal" ? (
@@ -1431,7 +1443,13 @@ export function BimPlan({
               );
             })()}
             {dimensionDraft.points.map((p, i) => (
-              <circle key={i} cx={p.x} cy={-p.y} r={3 / camera.pixelsPerMetre} fill="#0284c7" />
+              <circle
+                key={i}
+                cx={p.x}
+                cy={-p.y}
+                r={(dimensionDraft.mode === "remove" ? 5 : 3) / camera.pixelsPerMetre}
+                fill={dimensionDraft.mode === "remove" ? "#dc2626" : "#0284c7"}
+              />
             ))}
           </g>
         )}

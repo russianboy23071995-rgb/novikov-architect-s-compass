@@ -233,7 +233,11 @@ test("3D picking maps axis ends and all physical corners to their stable wall en
     assert.equal(plane.status, "ok");
     if (plane.status !== "ok") throw Error("plane");
     const adapter = createWallPointCandidates(rotated, view);
-    for (const ref of projectSnapPrimitives(rotated).references) {
+    // Wall points only; window jambs (docs/MASSKETTE.md, M1) are no wall endpoints.
+    const wallIds = new Set(storeyOf(rotated).walls.map((w) => w.id));
+    for (const ref of projectSnapPrimitives(rotated).references.filter((r) =>
+      wallIds.has(r.entityId),
+    )) {
       const screen = plane.value.toScreen(ref.point);
       if (screen.status !== "ok") throw Error("screen");
       const found = adapter.query(rotated, view, screen.value, 10);

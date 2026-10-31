@@ -79,3 +79,25 @@ export function formatDimension(metres: number): string {
   }
   return de(Math.round(metres * 100) / 100, 2);
 }
+
+/**
+ * Index of the measured point a click means (docs/MASSKETTE.md, M3): nearest to the click, at
+ * the point itself or at the end of its extension line on the dimension line. Null when none
+ * lies within `tolerance` metres.
+ */
+export function dimensionPointAt(
+  d: Chain & { offset: number },
+  click: Point,
+  tolerance: number,
+): number | null {
+  let best: { index: number; distance: number } | null = null;
+  d.points.forEach((p, index) => {
+    const foot = d.orientation === "horizontal" ? { x: p.x, y: d.offset } : { x: d.offset, y: p.y };
+    const distance = Math.min(
+      Math.hypot(click.x - p.x, click.y - p.y),
+      Math.hypot(click.x - foot.x, click.y - foot.y),
+    );
+    if (distance <= tolerance && (!best || distance < best.distance)) best = { index, distance };
+  });
+  return best === null ? null : (best as { index: number }).index;
+}
