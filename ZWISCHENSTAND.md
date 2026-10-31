@@ -2,11 +2,11 @@
 
 Kurze Übersicht für dich: Was ist erledigt, was ist offen? Sie wird nach jedem abgeschlossenen Auftrag mit aktualisiert. Verbindlich bleiben der Masterplan (`NOVIKOV_MASTERPLAN.md`, Abschnitt „Status auf einen Blick“ und §9) und das Register. Widerspricht diese Datei dem Masterplan, gilt der Masterplan. Deine bearbeitbare Liste mit offenen Aufgaben und Wünschen: AUFGABENLISTE.md.
 
-**Stand:** 31.10.2026 · main nach PR517 · 1374 automatische Tests grün
+**Stand:** 31.10.2026 · main nach PR518 · 1374 automatische Tests grün
 
 ## Gerade aktiv
 
-- Einstellungsfenster für jedes Werkzeug (deine Vorgabe vom 31.10.): E1 erledigt (PR517: Doppelklick auf Werkzeugknopf = Vorgaben, Doppelklick auf Element = dessen Fenster, auch in 3D); als Nächstes E2 (Decke, Linie, Schraffur, Feinschliff Dach/Raum).
+- Einstellungsfenster für jedes Werkzeug (deine Vorgabe vom 31.10.): E1 und E2 erledigt (PR517–518): jedes Werkzeug mit Fenster per Doppelklick, Element per Doppelklick, immer nur ein Fenster an derselben Stelle, neue Werkzeugreihenfolge.
 - Trimmen von Wänden an Dächern (L04b) in drei Schritten: K1 Rechtsklickmenü, Modify-Menü und Kopieren/Einfügen (PR513) und K2 Darstellungsreihenfolge (PR514) erledigt; Trimmen vollständig (PR515–516: Wände + Dach wählen, „Trimmen…“ mit Bestätigung, Wand bis unters Dach, Trimmung aufheben, IFC als schräger Körper). In Archicad bestätigt.
 - Raumwerkzeug (L08): R1 Modell (PR507) R2 Werkzeug (PR508: Klick zwischen Wänden, Raumstempel, Eigenschaften) R3 Höhen (PR509) und R3b Höhenlinien (PR510: Höhe, Farbe, Linienart, Unter- und Oberkante, Fläche ab Linie, z. B. 2,30 m bis Dachhaut) erledigt. Neu: Tab-Auswahl (PR511) – liegen mehrere Elemente unter dem Cursor, erscheint ein kleiner Hinweis, Tab schaltet durch, Klick wählt; damit ist auch ein Raum unter Dach/Decke auswählbar. R4 (PR512): Raumliste unter Organisation mit Summen und CSV, Räume im IFC als IfcSpace. Raumwerkzeug damit abgeschlossen; Archicad-Import bestätigt (Flächen und Bezeichnungen stimmen); Wohnfläche nach WoFlV später (docs/ROOM_ELEMENT.md).
 
