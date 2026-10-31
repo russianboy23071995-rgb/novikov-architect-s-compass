@@ -179,7 +179,7 @@ export function CadWorkspace({
   const [grid, setGrid] = useState(true);
   const [snap, setSnap] = useState(true);
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
-  const { wallWidth, setWallWidth } = useCanvasDisplaySettings();
+  const { wallWidth, setWallWidth, cutFill, setCutFill } = useCanvasDisplaySettings();
   const [gridSettings, setGridSettings] = useState(defaultGridSettings);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
@@ -1510,6 +1510,8 @@ export function CadWorkspace({
         onOpenChange={setDisplaySettingsOpen}
         wallWidth={wallWidth}
         onWallWidth={setWallWidth}
+        cutFill={cutFill}
+        onCutFill={setCutFill}
       />
       <AlertDialog open={!!trimConfirm} onOpenChange={(open) => !open && setTrimConfirm(null)}>
         <AlertDialogContent>
@@ -2227,6 +2229,7 @@ export function CadWorkspace({
                           : undefined
                       }
                       wallOutlineWidth={wallWidth}
+                      cutFill={cutFill}
                       gridSettings={gridSettings}
                       snap={snap}
                       ortho={ortho}
