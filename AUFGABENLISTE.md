@@ -11,12 +11,13 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 31.10.2026 · main nach PR519
+**Stand:** 31.10.2026 · main nach PR520
 
 ## Deine Wünsche
 
 | ID  | Wunsch                                                                                                                    | Prio | Status               | Notiz                  |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | ---- | -------------------- | ---------------------- |
+| W04 | Wanddarstellung: Schnittfarbe wählbar (grau/schwarz/weiß/eigene) unter View; Bauzustand Bestand/Neubau/Abbruch |      | S1 erledigt (PR520), S2 offen | docs/SCHNITTDARSTELLUNG.md |
 | W03 | On-Demand-Menü und Eingabefenster kleiner, Position merken; Eingabe ohne Knöpfe; Piktogramme folgen |      | erledigt (PR519), Piktogramme offen | docs/HILFSFENSTER.md |
 | W02 | Jedes Werkzeug mit eigenem Einstellungsfenster; Doppelklick auf Werkzeug oder Element öffnet es                   |      | erledigt (PR517–518)          | docs/EINSTELLUNGSFENSTER.md |
 | W01 | Polygon-Regeln 1–7 (Ecken bewegen/löschen, Schließen am Startpunkt, Decke als Kontur, Fangpunkt-Namen, Standardgeschosse) |      | erledigt (PR495–498) | docs/POLYGON_REGELN.md |
