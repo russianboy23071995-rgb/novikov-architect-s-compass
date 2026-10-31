@@ -781,6 +781,11 @@ export function CadWorkspace({
     propertiesRef.current?.focus();
   };
   const openElementSettings = (target: NonNullable<Selection>) => {
+    // From a drawing tool: drop the point the double click just set and switch to selecting.
+    if (tool !== "select") {
+      cancelInteraction();
+      setTool("select");
+    }
     if (!selections.some((s) => s.kind === target.kind && s.id === target.id))
       selectElement(target);
     setDemandOpen(false);
@@ -1564,7 +1569,9 @@ export function CadWorkspace({
                                 cancelInteraction();
                                 toolDefaults.setWall({ ...toolDefaults.wall, renovation });
                               }}
-                              hint="Vorgabe für neue Wände. Die farbige Anzeige schaltest du unter View → Darstellung… ein."
+                              hint="Vorgabe für neue Wände."
+                              showColors={showRenovation}
+                              onShowColors={setShowRenovation}
                             />
                           ),
                         },
@@ -1592,6 +1599,7 @@ export function CadWorkspace({
                   label: ELEMENT_KINDS[target.kind].label,
                   content: (
                     <BimInspector
+                      renovationField={false}
                       key={propertyFormKey(project, target)}
                       project={project}
                       selection={target}
@@ -1640,8 +1648,10 @@ export function CadWorkspace({
                             hint={
                               selections.filter((s) => s.kind === "wall").length > 1
                                 ? "Gilt für alle gewählten Wände; ein Rückgängig-Schritt."
-                                : "Ein Rückgängig-Schritt. Farbige Anzeige unter View → Darstellung…"
+                                : "Ein Rückgängig-Schritt."
                             }
+                            showColors={showRenovation}
+                            onShowColors={setShowRenovation}
                           />
                         ),
                       },
@@ -2276,6 +2286,11 @@ export function CadWorkspace({
                       hoverDwellMs={hoverDwellMs}
                       start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                       draftPoints={pathDrawing ? pathPoints : []}
+                      draftFinishable={
+                        tool === "wall"
+                          ? (activeChain?.wallIds.length ?? 0) > 0
+                          : pathPoints.length >= 2
+                      }
                       closeAtStart={pathClosure !== "none"}
                       roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
                       draftFill={tool === "hatch" ? hatchFill : undefined}

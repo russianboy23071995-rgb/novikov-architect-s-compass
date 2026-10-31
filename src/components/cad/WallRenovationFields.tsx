@@ -10,10 +10,15 @@ export function WallRenovationFields({
   value,
   onChange,
   hint,
+  showColors,
+  onShowColors,
 }: {
   value: WallRenovation;
   onChange: (value: WallRenovation) => void;
   hint: string;
+  /** Same switch as View → Darstellung… (one browser preference). */
+  showColors: boolean;
+  onShowColors: (show: boolean) => void;
 }) {
   return (
     <section aria-label="Bauzustand" className="space-y-3 text-sm">
@@ -43,6 +48,15 @@ export function WallRenovationFields({
         ))}
       </div>
       <p className="text-xs text-muted-foreground">{hint}</p>
+      <label className="flex items-center gap-2 border-t pt-3">
+        <input
+          type="checkbox"
+          aria-label="Bauzustand farbig anzeigen"
+          checked={showColors}
+          onChange={(e) => onShowColors(e.target.checked)}
+        />
+        Farbig anzeigen (Neubau rot, Abbruch gelb) – auch unter View → Darstellung…
+      </label>
     </section>
   );
 }

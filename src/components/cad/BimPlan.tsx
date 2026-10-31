@@ -119,6 +119,9 @@ export type BimPlanProps = {
   hoverDwellMs?: number;
   start: Point | null;
   draftPoints?: Point[];
+  /** False while the draft holds no segment yet (only the click of this double click): a double
+   * click then opens the element under the cursor instead of finishing (docs/BAUZUSTAND.md). */
+  draftFinishable?: boolean;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
   closeAtStart?: boolean;
   /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
@@ -182,6 +185,7 @@ export function BimPlan({
   hoverDwellMs = DEFAULT_HOVER_DWELL_MS,
   start,
   draftPoints = [],
+  draftFinishable = true,
   closeAtStart = false,
   roofGuide = null,
   draftFill,
@@ -1020,13 +1024,16 @@ export function BimPlan({
           placement.finish();
           return;
         }
-        if (drawing && onFinish) {
+        if (drawing && onFinish && draftFinishable) {
           event.preventDefault();
           onFinish();
           return;
         }
-        // Selecting: the element under the cursor (or the Tab pre-selection) opens its window.
-        if (!onElementSettings || drawing || placement || editSession || !interactive) return;
+        // Selecting, or a drawing tool without a started draft: the element under the cursor (or
+        // the Tab pre-selection) opens its window.
+        const idleDrawing = drawing && !!onFinish && !draftFinishable;
+        if (!onElementSettings || (drawing && !idleDrawing) || placement || editSession) return;
+        if (!interactive) return;
         // Overlays of a selected element (axis, grips) lie on top, so the element is found
         // geometrically under the cursor, like the Tab cycling; the DOM target is the fallback.
         const node = (event.target as Element).closest("[data-plan-pick]");

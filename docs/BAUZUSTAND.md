@@ -10,3 +10,14 @@ Nutzervorgabe: Wände werden als Bestand, Neubau oder Abbruch gekennzeichnet; Ne
 - Andere Erzeugungswege (z. B. Sprachbefehle) legen Wände ohne Eintrag an, also als Bestand.
 
 Nachweis: 1382 Tests grün (5 neu), Typprüfung/Lint/Architektur sauber. 14-Modell-Hash neu `089f79e4…97017b3`, weil der IFC-Export je Wand den Status-Eigenschaftssatz bekommt; Körper und Gebäudeflächen der 14 Modelle sind ohne IFC-Anteil bitgleich mit main (`15ce55f3…dea57ba` vorher und nachher). Browser-Abnahme: Reiter im Werkzeug- und Elementfenster, neue Wand rot, Bestand → Abbruch gelb, Rückgängig, Anzeige aus/an.
+
+## Nacharbeit nach Nutzerrückmeldung (31.10.2026)
+
+Rückmeldung: Nach dem Zeichnen ließ sich der Bauzustand nicht ändern. Ursachen: (1) Im Wand-, Linien- und Flächenwerkzeug beendete ein Doppelklick immer das Zeichnen, auch ohne laufende Zeichnung, und öffnete daher kein Elementfenster; (2) die farbige Anzeige war aus, eine Änderung blieb unsichtbar.
+
+- **K1**: Doppelklick auf ein Element öffnet sein Fenster auch im Zeichenwerkzeug, solange noch kein Abschnitt gezeichnet ist (der Punkt des Doppelklicks wird verworfen, das Programm wechselt zur Auswahl). Während einer laufenden Wandkette oder Linie beendet der Doppelklick wie bisher (`draftFinishable` in `BimPlan`).
+- **K2**: Eigenschaftsleiste der gewählten Wand mit Auswahl „Bauzustand“ – nach dem Zeichnen ist die Wand gewählt, der Zustand ist dort sofort änderbar (ein Rückgängig-Schritt). Im Elementfenster bleibt dafür der eigene Reiter.
+- **K3**: Im Reiter „Bauzustand“ (Werkzeug- und Elementfenster) der Schalter „Farbig anzeigen“, verbunden mit View → Darstellung….
+- **K4**: Zeichenfläche weiß (2D und 3D) statt hellgrauem Verlauf; Raster unverändert.
+
+Nachweis: 1382 Tests grün, Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert (`089f79e4…97017b3`). Browser-Abnahme: weiße Fläche, Bauzustand in der Leiste nach dem Zeichnen geändert, Doppelklick im Wandwerkzeug öffnet das Wandfenster ohne Zusatzwand, Farbschalter im Reiter, Doppelklick beendet eine laufende Wandkette weiterhin.
