@@ -1,3 +1,5 @@
+import { DimensionGraphic } from "./DimensionGraphic";
+import { dimensionLayout } from "@/domain/elements/dimension/model";
 import { cutPaint, wallCutPaint, type CutFill } from "./cut-fill";
 import type { ScaleContext } from "@/domain/views/scale";
 import { HatchPattern } from "./HatchPattern";
@@ -109,6 +111,7 @@ export function PlanSceneContent({
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
+    dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
   };
   const outlines = scene.outlines;
@@ -589,6 +592,34 @@ export function PlanSceneContent({
             pointerEvents={placement ? "none" : "all"}
             className="cursor-pointer outline-none focus-visible:stroke-sky-300"
           />
+        );
+      })}
+      {plan.dimensions.map((dimension) => {
+        const { line } = dimensionLayout(dimension);
+        const selected = selectedIds.has(dimension.id);
+        return (
+          <g key={dimension.id}>
+            {/* Wide transparent hit band along the dimension line. */}
+            <line
+              {...selectProps("dimension", dimension.id)}
+              x1={line.start.x}
+              y1={-line.start.y}
+              x2={line.end.x}
+              y2={-line.end.y}
+              stroke="transparent"
+              strokeWidth={10 / pixelsPerMetre}
+              pointerEvents={placement ? "none" : "stroke"}
+              className="cursor-pointer outline-none"
+            />
+            <DimensionGraphic
+              orientation={dimension.orientation}
+              offset={dimension.offset}
+              points={dimension.points}
+              denominator={scaleContext.denominator}
+              pixelsPerMetre={pixelsPerMetre}
+              color={selected ? "#0284c7" : "var(--foreground)"}
+            />
+          </g>
         );
       })}
       {plan.lines.map((line) => (

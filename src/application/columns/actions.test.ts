@@ -122,11 +122,11 @@ test("outline and 3D body: rotated rectangle, round prism, volume", () => {
 });
 
 test("schema 36 files get the Stütze layer; smuggled columns are refused; delete works", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 37);
+  assert.equal(PROJECT_SCHEMA_VERSION, 38);
   const stored = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
   stored.layers = stored.layers.filter((l: { name: string }) => l.name !== "Stütze");
   const loaded = loadProjectData({ ...stored, schemaVersion: 36 });
-  assert.equal(loaded.schemaVersion, 37);
+  assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.ok(loaded.layers.some((l) => l.id === "layer:column" && l.name === "Stütze"));
   const smuggled = JSON.parse(serializeProject(withColumns()));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 36 }));

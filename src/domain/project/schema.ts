@@ -4,6 +4,7 @@ import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/m
 import { slabSchema } from "../elements/slab/model.ts";
 import { roofSchema } from "../elements/roof/model.ts";
 import { columnLevels, columnSchema } from "../elements/column/model.ts";
+import { dimensionSchema } from "../elements/dimension/model.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
@@ -455,7 +456,24 @@ export const projectV36Schema = projectV35Schema.extend({
     .min(1),
 });
 /** Schema 37: columns per storey (docs/STUETZEN.md, L05). */
-const projectSchema = projectV36Schema.extend({
+export const projectV37Schema = projectV36Schema.extend({
+  schemaVersion: z.literal(37),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 38: dimension chains per storey (docs/MASSKETTE.md, L12). */
+const projectSchema = projectV37Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
@@ -467,6 +485,7 @@ const projectSchema = projectV36Schema.extend({
         roofs: z.array(roofSchema).optional(),
         rooms: z.array(roomSchema).optional(),
         columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
       }),
     )
     .min(1),
@@ -854,6 +873,7 @@ export function validateProject(
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
+      ...(s.dimensions ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -898,6 +918,9 @@ export function validateProject(
     validateStoreyRoofs(storey, project.layers);
     validateStoreyRooms(storey, project.layers);
     validateStoreyColumns(storey, project.layers);
+    for (const dimension of storey.dimensions ?? [])
+      if (!project.layers.some((l) => l.id === dimension.layerId))
+        throw new Error("Unknown layer: " + dimension.layerId);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
     memo?.record(
       index,

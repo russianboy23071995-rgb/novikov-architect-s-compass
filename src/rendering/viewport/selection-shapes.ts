@@ -1,3 +1,4 @@
+import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { imageReferenceCorners } from "./image-reference.ts";
@@ -70,6 +71,11 @@ const PLAN_SHAPES: {
   roof: (r) => ({ points: r.points, closed: true }),
   room: (r) => ({ points: r.points, closed: true }),
   column: (c) => ({ points: columnOutline(c), closed: true }),
+  // A chain is picked along its dimension line (docs/MASSKETTE.md).
+  dimension: (d) => {
+    const { line } = dimensionLayout(d);
+    return { points: [line.start, line.end], closed: false };
+  },
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -84,6 +90,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   roof: () => undefined,
   room: (r) => (r.name ? `${r.number} ${r.name}` : r.number),
   column: () => undefined,
+  dimension: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -98,12 +105,14 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "roof",
   "room",
   "column",
+  "dimension",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
  * roofs, slabs, rooms and reference images; plan-scene runs). Every kind needs a rank. */
 const PICK_RANK: Record<ElementKind, number> = {
   line: 0,
+  dimension: 0,
   window: 1,
   door: 1,
   wall: 2,

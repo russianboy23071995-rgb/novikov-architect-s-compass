@@ -241,7 +241,8 @@ export function DemandMenu({
             {edgeIndex == null &&
               selection.kind !== "slab" &&
               selection.kind !== "roof" &&
-              selection.kind !== "column" && (
+              selection.kind !== "column" &&
+              selection.kind !== "dimension" && (
                 <button
                   type="button"
                   className="rounded px-1.5 py-0.5 text-left hover:bg-muted"

@@ -1,3 +1,4 @@
+import { dimensionValues, formatDimension } from "../../domain/elements/dimension/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { wallLength } from "../../domain/project/schema.ts";
 import type { Point, Project } from "../../domain/project/schema.ts";
@@ -136,6 +137,15 @@ export function selectionSummary(project: Project, selection: Selection) {
           details: `Grundfläche ${roomArea(room).toLocaleString("de-DE", { maximumFractionDigits: 2 })} m²${room.floorBuildUp === undefined ? "" : ` · Fußbodenaufbau ${metres(room.floorBuildUp)}`}${roomHeightText(project, room)}`,
         }
       : null;
+  }
+  if (selection.kind === "dimension") {
+    const chain = storeyOf(project).dimensions?.find((item) => item.id === selection.id);
+    if (!chain) return null;
+    const values = dimensionValues(chain);
+    return {
+      title: "Maßkette",
+      details: `${chain.orientation === "horizontal" ? "Waagerecht" : "Senkrecht"} · ${values.length} ${values.length === 1 ? "Maß" : "Maße"} · gesamt ${formatDimension(values.reduce((a, b) => a + b, 0))}`,
+    };
   }
   if (selection.kind === "column") {
     const column = storeyOf(project).columns?.find((item) => item.id === selection.id);

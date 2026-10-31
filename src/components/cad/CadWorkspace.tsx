@@ -60,6 +60,8 @@ import { assignPenSet } from "@/application/pens/library";
 import { WallDrawingFields } from "./WallDrawingFields";
 import { WallRenovationFields } from "./WallRenovationFields";
 import { ColumnFields } from "./ColumnFields";
+import { DimensionToolFields } from "./DimensionToolFields";
+import { addDimension } from "@/application/dimensions/actions";
 import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
@@ -328,6 +330,12 @@ export function CadWorkspace({
 
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
+  // Running dimension chain (docs/MASSKETTE.md); session state, never model history.
+  const [dimensionDraft, setDimensionDraft] = useState<{
+    line: Point | null;
+    points: Point[];
+    lastAt: number;
+  } | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
   const railShown = !fullscreen || !!activeDocumentId;
@@ -362,6 +370,7 @@ export function CadWorkspace({
     setPathPoints([]);
     setRoofLine(null);
     setRoofRise(null);
+    setDimensionDraft(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -487,7 +496,8 @@ export function CadWorkspace({
       next === "slab" ||
       next === "roof" ||
       next === "room" ||
-      next === "column"
+      next === "column" ||
+      next === "dimension"
     )
       setSelection(null);
     setModelError("");
@@ -501,7 +511,8 @@ export function CadWorkspace({
       next === "slab" ||
       next === "roof" ||
       next === "room" ||
-      next === "column"
+      next === "column" ||
+      next === "dimension"
     )
       setMode("2D");
   };
@@ -624,7 +635,8 @@ export function CadWorkspace({
       selection.kind === "slab" ||
       selection.kind === "roof" ||
       selection.kind === "room" ||
-      selection.kind === "column";
+      selection.kind === "column" ||
+      selection.kind === "dimension";
     const solidMove =
       inSolid && !area && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
@@ -644,7 +656,9 @@ export function CadWorkspace({
               ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
               : selection.kind === "column"
                 ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
-                : editAnchor(project, selection));
+                : selection.kind === "dimension"
+                  ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
+                  : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -677,7 +691,8 @@ export function CadWorkspace({
         roof: ["Dach", "das Dach", "Dächer"],
         room: ["Raum", "der Raum", "Räume"],
         column: ["Stützen", "die Stütze", "Stützen"],
-      }[selection.kind as "slab" | "roof" | "room" | "column"];
+        dimension: ["Maßketten", "die Maßkette", "Maßketten"],
+      }[selection.kind as "slab" | "roof" | "room" | "column" | "dimension"];
       showNotice(
         inSolid
           ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
@@ -686,7 +701,7 @@ export function CadWorkspace({
       return;
     }
     // A column has no outline or point edits; it only moves as a whole (handled above).
-    if (selection.kind === "column") return;
+    if (selection.kind === "column" || selection.kind === "dimension") return;
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
@@ -794,6 +809,7 @@ export function CadWorkspace({
   const SETTINGS_TOOLS: Partial<Record<ToolId, string>> = {
     wall: "Wand",
     column: "Stütze",
+    dimension: "Maßkette",
     window: "Fenster",
     door: "Tür",
     slab: "Decke",
@@ -828,6 +844,16 @@ export function CadWorkspace({
           cancelInteraction();
           toolDefaults.setWall(values);
         }}
+      />
+    ) : owner === "dimension" ? (
+      <DimensionToolFields
+        value={toolDefaults.dimension}
+        onChange={(values) => {
+          setDimensionDraft(null);
+          toolDefaults.setDimension(values);
+        }}
+        layers={project.layers}
+        step={place === "bar" && dimensionDraft?.line ? "points" : "line"}
       />
     ) : owner === "column" ? (
       <ColumnFields
@@ -1319,8 +1345,49 @@ export function CadWorkspace({
     }
   };
 
+  /** Ends a running chain: the first click of the finishing double click is no point. */
+  const finishDimension = () => {
+    const draft = dimensionDraft;
+    if (!draft?.line || referenceSelection.selecting) return;
+    const points =
+      draft.points.length && Date.now() - draft.lastAt < 600
+        ? draft.points.slice(0, -1)
+        : draft.points;
+    if (points.length < 2) {
+      setModelError("Mindestens zwei Punkte für die Maßkette anklicken.");
+      return;
+    }
+    const { orientation, layerId } = toolDefaults.dimension;
+    try {
+      dispatchEditing({
+        type: "project",
+        project: addDimension(project, {
+          id: `dimension-${crypto.randomUUID()}`,
+          orientation,
+          offset: orientation === "horizontal" ? draft.line.y : draft.line.x,
+          points,
+          layerId,
+        }),
+      });
+      setDimensionDraft(null);
+      setModelError("");
+      showNotice("Maßkette erstellt");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Maßkette nicht möglich.");
+    }
+  };
   const drawPoint = (point: Point, candidate?: SnapCandidate | null) => {
     setModelError("");
+    // Dimension chain (docs/MASSKETTE.md): the first click places the dimension line, every
+    // further click adds a measured point; a double click or Enter finishes.
+    if (tool === "dimension") {
+      setDimensionDraft((draft) =>
+        draft?.line
+          ? { ...draft, points: [...draft.points, { ...point }], lastAt: Date.now() }
+          : { line: { ...point }, points: [], lastAt: 0 },
+      );
+      return;
+    }
     // Column tool: each click sets a column, centre on the point (docs/STUETZEN.md, P2).
     if (tool === "column") {
       try {
@@ -2197,6 +2264,7 @@ export function CadWorkspace({
                       drawing={
                         (tool === "wall" ||
                           tool === "column" ||
+                          tool === "dimension" ||
                           pathDrawing ||
                           tool === "roof" ||
                           tool === "room") &&
@@ -2208,6 +2276,8 @@ export function CadWorkspace({
                         tool === "measure" ||
                         tool === "select" ||
                         tool === "wall" ||
+                        tool === "column" ||
+                        tool === "dimension" ||
                         tool === "window" ||
                         tool === "door"
                       }
@@ -2215,9 +2285,11 @@ export function CadWorkspace({
                       start={pathDrawing ? (pathPoints.at(-1) ?? null) : wallStart}
                       draftPoints={pathDrawing ? pathPoints : []}
                       draftFinishable={
-                        tool === "wall"
-                          ? (activeChain?.wallIds.length ?? 0) > 0
-                          : pathPoints.length >= 2
+                        tool === "dimension"
+                          ? (dimensionDraft?.points.length ?? 0) >= 2
+                          : tool === "wall"
+                            ? (activeChain?.wallIds.length ?? 0) > 0
+                            : pathPoints.length >= 2
                       }
                       closeAtStart={pathClosure !== "none"}
                       roofGuide={roofLine ? { ...roofLine, rise: roofRise } : null}
@@ -2246,7 +2318,8 @@ export function CadWorkspace({
                         if (
                           target.kind === "reference" ||
                           target.kind === "door" ||
-                          target.kind === "column"
+                          target.kind === "column" ||
+                          target.kind === "dimension"
                         )
                           return;
                         if (
@@ -2306,6 +2379,12 @@ export function CadWorkspace({
                       }
                       onEditCommit={(_session, point, candidate) =>
                         interaction.pick(point, candidate)
+                      }
+                      {...(tool === "dimension" ? { onFinish: finishDimension } : {})}
+                      dimensionDraft={
+                        tool === "dimension" && dimensionDraft
+                          ? { orientation: toolDefaults.dimension.orientation, ...dimensionDraft }
+                          : undefined
                       }
                       {...(tool === "wall" ||
                       (tool === "line" && lineKind === "polyline") ||
@@ -2529,7 +2608,11 @@ export function CadWorkspace({
                   </Button>
                   {measurement.error && <span role="alert">{measurement.error}</span>}
                 </div>
-              ) : tool === "wall" || tool === "column" || tool === "window" || tool === "door" ? (
+              ) : tool === "wall" ||
+                tool === "column" ||
+                tool === "dimension" ||
+                tool === "window" ||
+                tool === "door" ? (
                 toolFields(tool)
               ) : tool === "room" && mode === "2D" ? (
                 <RoomToolFields

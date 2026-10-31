@@ -11,6 +11,7 @@ import {
   Grid2x2,
   PanelLeftClose,
   PanelLeftOpen,
+  RulerDimensionLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,6 +32,8 @@ const tools: CadTool[] = [
   { id: "room", label: "Raum", shortcut: "", icon: Grid2x2 },
   { id: "line", label: "Line", shortcut: "L", icon: PenLine },
   { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
+  // 2D tool for the last step of a plan (docs/MASSKETTE.md).
+  { id: "dimension", label: "Maßkette", shortcut: "", icon: RulerDimensionLine },
 ];
 
 type ToolRailProps = {
