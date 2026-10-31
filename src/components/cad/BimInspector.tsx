@@ -1,5 +1,6 @@
 import { RoofProperties } from "./RoofProperties";
 import { RoomProperties } from "./RoomProperties";
+import { ColumnProperties } from "./ColumnProperties";
 import { openingOverlapHintFor } from "@/application/openings/overlap-hint";
 import { WallHeightProperties } from "./WallHeightProperties";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -80,6 +81,19 @@ export function BimInspector({
   if (roof)
     return (
       <RoofProperties project={project} roof={roof} selection={selection} onChange={onChange} />
+    );
+  const column =
+    selection?.kind === "column"
+      ? storeyOf(project).columns?.find((item) => item.id === selection.id)
+      : undefined;
+  if (column)
+    return (
+      <ColumnProperties
+        project={project}
+        column={column}
+        selection={selection}
+        onChange={onChange}
+      />
     );
   const room =
     selection?.kind === "room"

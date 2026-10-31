@@ -5,6 +5,8 @@ import { SLAB_DEFAULTS } from "@/domain/elements/slab/model";
 import { defaultRoofLayerId } from "@/application/roofs/actions";
 import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultRoomLayerId } from "@/application/rooms/actions";
+import { defaultColumnLayerId } from "@/application/columns/actions";
+import { columnToolDefaults, type ColumnDefaults } from "@/application/columns/defaults";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
 import {
@@ -126,6 +128,20 @@ export function useToolDefaults(project: Project) {
       ? slabValues.layerId
       : defaultSlabLayerId(project),
   };
+  const [columnState, setColumnState] = useState<{
+    projectId: string;
+    values: ColumnDefaults;
+  } | null>(null);
+  const columnValues =
+    columnState?.projectId === project.id
+      ? columnState.values
+      : columnToolDefaults(defaultColumnLayerId(project));
+  const columnDefaults = {
+    ...columnValues,
+    layerId: project.layers.some((l) => l.id === columnValues.layerId)
+      ? columnValues.layerId
+      : defaultColumnLayerId(project),
+  };
   const [roofState, setRoofState] = useState<{ projectId: string; values: RoofDefaults } | null>(
     null,
   );
@@ -203,6 +219,10 @@ export function useToolDefaults(project: Project) {
     slab: slabDefaults,
     setSlab(values: SlabDefaults) {
       setSlabState({ projectId: project.id, values });
+    },
+    column: columnDefaults,
+    setColumn(values: ColumnDefaults) {
+      setColumnState({ projectId: project.id, values });
     },
     room: roomDefaults,
     setRoom(values: RoomDefaults) {

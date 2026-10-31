@@ -1,5 +1,6 @@
 import {
   BoxSelect,
+  Cylinder,
   DoorOpen,
   PanelsTopLeft,
   PaintBucket,
@@ -17,10 +18,11 @@ import { cn } from "@/lib/utils";
 import type { CadTool, ToolId } from "./cad-types";
 
 // Order (user decision 31.10.2026): select, wall, window, door, slab, roof, room, line; hatch
-// last. A double click on any tool opens its settings window (docs/EINSTELLUNGSFENSTER.md).
+// last. The column follows the wall (docs/STUETZEN.md, P2). A double click on any tool opens its settings window (docs/EINSTELLUNGSFENSTER.md).
 const tools: CadTool[] = [
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
+  { id: "column", label: "Stütze", shortcut: "", icon: Cylinder },
   { id: "window", label: "Fenster", shortcut: "", icon: PanelsTopLeft },
   { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
   { id: "slab", label: "Decke", shortcut: "S", icon: Pentagon },

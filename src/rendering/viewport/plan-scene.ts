@@ -1,4 +1,5 @@
-import { roofPlanView } from "./roof-plan.ts";
+import { PLAN_CUT_HEIGHT, roofPlanView } from "./roof-plan.ts";
+import { columnLevels, columnOutline } from "../../domain/elements/column/model.ts";
 import type { HatchPatternDefinition } from "../../domain/elements/hatch/pattern.ts";
 import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
@@ -45,6 +46,16 @@ export function derivePlanScene(
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),
+    columns: new Map(plan.columns.map((c) => [c.id, c])),
+    // Columns: outline in plan; filled like a cut wall where the 1 m cut plane meets them
+    // (docs/STUETZEN.md, P2). Unknown storey height keeps a bound column uncut.
+    columnViews: new Map(
+      plan.columns.map((c) => {
+        const levels = columnLevels(c, "height" in storey ? (storey.height ?? null) : null);
+        const cut = !!levels && levels.bottom <= PLAN_CUT_HEIGHT && levels.top >= PLAN_CUT_HEIGHT;
+        return [c.id, { outline: columnOutline(c), cut }] as const;
+      }),
+    ),
     // Clear heights from the storey's slabs and roofs, whatever their display (R3).
     roomHeights: new Map(
       plan.rooms.map(
@@ -67,7 +78,7 @@ export function derivePlanScene(
 }
 export type PlanScene = ReturnType<typeof derivePlanScene>;
 export type PlanRun = {
-  kind: "reference" | "room" | "slab" | "roof" | "hatch" | "wall" | "line";
+  kind: "reference" | "room" | "slab" | "roof" | "hatch" | "wall" | "column" | "line";
   ids: string[];
   affected: boolean;
 };
@@ -85,6 +96,7 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["roof", scene.plan.roofs],
     ["hatch", scene.plan.hatches],
     ["wall", scene.plan.walls],
+    ["column", scene.plan.columns],
     ["line", scene.plan.lines],
   ] as const) {
     let run: PlanRun | undefined;

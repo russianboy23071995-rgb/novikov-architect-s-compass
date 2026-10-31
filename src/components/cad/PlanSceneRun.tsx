@@ -108,6 +108,7 @@ export function PlanSceneContent({
     roofs: kind === "roof" ? ids.map((id) => scene.roofs.get(id)!) : [],
     hatches: kind === "hatch" ? ids.map((id) => scene.hatches.get(id)!) : [],
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
+    columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
   };
   const outlines = scene.outlines;
@@ -568,6 +569,26 @@ export function PlanSceneContent({
               );
             })}
           </g>
+        );
+      })}
+      {plan.columns.map((column) => {
+        const view = scene.columnViews.get(column.id)!;
+        const selected = selectedIds.has(column.id);
+        return (
+          <polygon
+            key={column.id}
+            {...selectProps("column", column.id)}
+            points={view.outline.map((p) => `${p.x},${-p.y}`).join(" ")}
+            // Cut at 1 m like a wall (cut fill, renovation colours); otherwise outline only.
+            {...(view.cut
+              ? wallCutPaint(cutFill, showRenovation, column.renovation)
+              : { fill: "var(--background)", fillOpacity: 0.01 })}
+            stroke={selected ? "#94a3b8" : "var(--primary)"}
+            strokeWidth={wallOutlineWidth / pixelsPerMetre}
+            strokeDasharray={view.cut ? undefined : `${6 / pixelsPerMetre} ${4 / pixelsPerMetre}`}
+            pointerEvents={placement ? "none" : "all"}
+            className="cursor-pointer outline-none focus-visible:stroke-sky-300"
+          />
         );
       })}
       {plan.lines.map((line) => (
