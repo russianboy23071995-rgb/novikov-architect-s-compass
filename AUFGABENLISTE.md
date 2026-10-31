@@ -11,12 +11,13 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 31.10.2026 · main nach PR523
+**Stand:** 31.10.2026 · main nach PR524
 
 ## Deine Wünsche
 
 | ID  | Wunsch                                                                                                                    | Prio | Status               | Notiz                  |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | ---- | -------------------- | ---------------------- |
+| W05 | Navigator, Werkzeugeigenschaften, Werkzeugkasten gläsern über durchgehender Zeichenfläche |      | erledigt (PR524) | docs/GLAS_PALETTEN.md |
 | W04 | Wanddarstellung: Schnittfarbe wählbar (grau/schwarz/weiß/eigene) unter View; Bauzustand Bestand/Neubau/Abbruch |      | erledigt (PR520–521), Archicad-Prüfung IFC-Status offen | docs/SCHNITTDARSTELLUNG.md, docs/BAUZUSTAND.md |
 | W03 | On-Demand-Menü und Eingabefenster kleiner, Position merken; Eingabe ohne Knöpfe; Piktogramme folgen |      | erledigt (PR519), Piktogramme offen | docs/HILFSFENSTER.md |
 | W02 | Jedes Werkzeug mit eigenem Einstellungsfenster; Doppelklick auf Werkzeug oder Element öffnet es                   |      | erledigt (PR517–518)          | docs/EINSTELLUNGSFENSTER.md |
