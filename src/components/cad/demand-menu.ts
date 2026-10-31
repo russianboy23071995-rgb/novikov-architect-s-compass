@@ -137,6 +137,18 @@ export function selectionSummary(project: Project, selection: Selection) {
         }
       : null;
   }
+  if (selection.kind === "column") {
+    const column = storeyOf(project).columns?.find((item) => item.id === selection.id);
+    if (!column) return null;
+    const section =
+      column.shape.kind === "circle"
+        ? `Rund Ø ${metres(column.shape.diameter)}`
+        : `Rechteckig ${metres(column.shape.width)} × ${metres(column.shape.depth)}`;
+    return {
+      title: "Stütze",
+      details: `${section} · ${column.topBinding ? "bis Geschoss darüber" : `Höhe ${metres(column.height!)}`}`,
+    };
+  }
   if (selection.kind === "hatch") {
     const hatch = storeyOf(project).hatches.find((h) => h.id === selection.id);
     return hatch

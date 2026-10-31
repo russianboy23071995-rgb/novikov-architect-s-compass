@@ -9,6 +9,7 @@ import { segmentMidpoint } from "../../geometry/primitives/segment.ts";
 import { segmentIntersectionReferences } from "../../constraints/snapping/segment-references.ts";
 import type { SnapSegment } from "../../constraints/snapping/segment-references.ts";
 import { createDerivedCache } from "../../domain/project/derived-cache.ts";
+import { columnOutline } from "../../domain/elements/column/model.ts";
 
 // Project snapshots are immutable. Weak keys release discarded projects; the undo history
 // drops the entries of the steps it keeps (domain/project/derived-cache.ts).
@@ -100,7 +101,37 @@ export function projectSnapParts(project: Project): readonly (readonly SnapPart[
     (storey.roofs ?? []).map((roof) => remembered(owned, roof, hatchPart)),
     // Room outline corners and edge midpoints (docs/ROOM_ELEMENT.md, R2).
     (storey.rooms ?? []).map((room) => remembered(owned, room, hatchPart)),
+    // Column centre; corners and edge midpoints of a rectangle, four rim points of a circle
+    // (docs/STUETZEN.md, P3).
+    (storey.columns ?? []).map((column) => remembered(owned, column, columnPart)),
   ];
+}
+
+function columnPart(column: NonNullable<Project["storeys"][number]["columns"]>[number]): Part {
+  const centre: SnapReference = {
+    point: { ...column.position },
+    entityId: column.id,
+    feature: "centre",
+    directions: [],
+  };
+  if (column.shape.kind === "rectangle") {
+    const outline = hatchPart({ id: column.id, points: columnOutline(column) });
+    return { references: [centre, ...outline.references], segments: outline.segments };
+  }
+  const outline = columnOutline(column);
+  const step = outline.length / 4;
+  return {
+    references: [
+      centre,
+      ...[0, 1, 2, 3].map((k) => ({
+        point: { ...outline[k * step]! },
+        entityId: column.id,
+        feature: `quadrant-${k}`,
+        directions: [],
+      })),
+    ],
+    segments: [],
+  };
 }
 
 /** No intersection enumeration; shared primitive adapter for old and local query paths. */

@@ -238,20 +238,23 @@ export function DemandMenu({
                 Element frei bewegen
               </button>
             )}
-            {edgeIndex == null && selection.kind !== "slab" && selection.kind !== "roof" && (
-              <button
-                type="button"
-                className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
-                data-command="axis"
-                onClick={() => onAction("axis")}
-              >
-                {selection.kind === "window"
-                  ? "Fenster entlang Wand"
-                  : selection.kind === "door"
-                    ? "Tür entlang Wand"
-                    : "Element entlang Achse"}
-              </button>
-            )}
+            {edgeIndex == null &&
+              selection.kind !== "slab" &&
+              selection.kind !== "roof" &&
+              selection.kind !== "column" && (
+                <button
+                  type="button"
+                  className="rounded px-1.5 py-0.5 text-left hover:bg-muted"
+                  data-command="axis"
+                  onClick={() => onAction("axis")}
+                >
+                  {selection.kind === "window"
+                    ? "Fenster entlang Wand"
+                    : selection.kind === "door"
+                      ? "Tür entlang Wand"
+                      : "Element entlang Achse"}
+                </button>
+              )}
             {!opening && (
               <>
                 <button

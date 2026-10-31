@@ -247,6 +247,8 @@ export function useToolDefaults(project: Project) {
         setWallState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "line")
         setLineState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "column")
+        setColumnState({ projectId: project.id, values: defaults.values });
       else
         setWindowState({
           projectId: project.id,

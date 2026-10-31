@@ -6,7 +6,7 @@ Nutzerauftrag 31.10.2026: Stützen als neues Bauteil. Umsetzung in drei PRs nach
 | --- | --- | --- |
 | P1 | Modell, Dateiformat 37, Standardebene Stütze, Aktionen, 3D-Körper, IFC IfcColumn | erledigt |
 | P2 | Werkzeug „Stütze“, Leiste und Einstellungsfenster (Reiter Stütze, Bauzustand), Grundriss geschnitten in der Schnittfarbe, Eigenschaften, Doppelklick | erledigt |
-| P3 | Verschieben, Drehen, Kopieren, Fangpunkte, Rechtsklickmenü, Pipette, Archicad-Prüfdatei | offen |
+| P3 | Verschieben, Drehen, Kopieren, Fangpunkte, Rechtsklickmenü, Pipette, Archicad-Prüfdatei | erledigt |
 
 Vorgaben (vom Nutzer nicht anders bestimmt): rechteckig 30 × 30 cm, rund Ø 30 cm, Höhe an das Geschoss gebunden, Bezugspunkt in der Mitte. Wand und Stütze durchdringen sich vorerst ohne Bereinigung.
 
@@ -30,3 +30,15 @@ Nachweis P1: 1390 Tests grün (5 neu in `src/application/columns/actions.test.ts
 - Noch nicht: Verschieben, Drehen, Kopieren, Fangpunkte an Stützen, Pipette (P3).
 
 Nachweis P2: 1392 Tests grün (2 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: drei Stützen gesetzt (zwei rechteckig, eine rund), rot als Neubau; Leiste und Werkzeugfenster mit Reitern; Doppelklick auf eine Stütze öffnet ihr Fenster; Breite 0,5 m und Bauzustand Bestand übernommen (schwarz in der Schnittfarbe), je ein Rückgängig-Schritt; Teststützen danach zurückgenommen.
+
+## Teil P3: Bearbeitung, Fangpunkte, Pipette, Archicad-Prüfdatei
+
+- Verschieben: Eine Stütze bewegt sich als Ganzes mit ihrer Mitte – „Element frei bewegen“, „Element auf X-Achse“, „Element auf Y-Achse“ im On-Demand-Menü, auch zusammen mit anderen gewählten Elementen (vorbereiteter Verschiebepfad `prepared-translation.ts`). Bezugspunkt ist die Mitte oder der angeklickte Punkt. Keine Kontur- oder Punktbearbeitung; „Entlang Achse“ wird für Stützen nicht angeboten.
+- On-Demand-Menü: Titel „Stütze“ mit Querschnitt und Höhenregel (z. B. „Rund Ø 0,30 m · Höhe 2,50 m“).
+- Drehen: über das Feld „Drehung (°)“ in Leiste und Fenster (aus P2); ein eigener Drehbefehl mit der Maus kommt mit dem allgemeinen Drehen (Masterplan §8, Tasten D/Strg+D reserviert).
+- Kopieren, Ausschneiden, Einfügen über das gemeinsame Bauteilregister (Rechtsklickmenü und Tastatur); die Kopie bekommt eine neue Kennung.
+- Fangpunkte: Mitte jeder Stütze („Stütze · Mitte“), bei rechteckigen Stützen die vier Ecken und Kantenmitten („Stütze · Ecke n“), bei runden vier Randpunkte („Stütze · Rand“).
+- Pipette (Rechtsklick „Parameter übernehmen“): übernimmt alle Einstellungen einer Stütze ins Stützenwerkzeug und aktiviert es.
+- Archicad-Prüfdatei: `node --experimental-strip-types scripts/generate-column-acceptance-ifc.mjs <Ordner>` → `NOVIKOV-Stuetzen-Test.ifc` (`benchmarks/column-ifc-acceptance.ts`): Erdgeschoss 3,00 m, Wandring 8 × 6 m (0,30 m, 2,80 m), vier Stützen: 30 × 30 cm geschossgebunden (Neubau), 24 × 50 cm um 30° gedreht (Bestand), Ø 40 cm geschossgebunden (Neubau), Ø 25 cm mit fester Höhe 2,00 m (Abbruch). Ob Archicad sie als bearbeitbare Stützen übernimmt, prüft der Nutzer.
+
+Nachweis P3: 1396 Tests grün (4 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Stütze gesetzt, über das On-Demand-Menü frei bewegt, kopiert und eingefügt, Pipette aktiviert das Stützenwerkzeug mit ihren Werten; Teststützen danach zurückgenommen.

@@ -1,3 +1,4 @@
+import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
 import type { Project } from "../../domain/project/schema.ts";
@@ -27,7 +28,8 @@ export type ToolDefaults =
   | { tool: "hatch"; values: HatchDefaults }
   | { tool: "window"; values: WindowDefaults }
   | { tool: "line"; values: LineDefaults }
-  | { tool: "wall"; values: WallDefaults };
+  | { tool: "wall"; values: WallDefaults }
+  | { tool: "column"; values: ColumnDefaults };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
 export function pickupToolDefaults(
@@ -78,6 +80,11 @@ export function pickupToolDefaults(
         layerId: source.layerId,
       },
     };
+  }
+  // Columns hand over every setting, size and height rule included (docs/STUETZEN.md, P3).
+  if (target.kind === "column") {
+    const source = storeyOf(project).columns?.find((item) => item.id === target.id);
+    return source ? { tool: "column", values: columnSettings(source) } : null;
   }
   if (target.kind !== "hatch") return null;
   const source = storeyOf(project).hatches.find((item) => item.id === target.id);
