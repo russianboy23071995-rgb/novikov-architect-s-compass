@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 31.10.2026 · main nach PR534
+**Stand:** 31.10.2026 · main nach PR535
 
 ## Deine Wünsche
 
@@ -32,7 +32,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L03 | Decken als echtes Bauteil (heute nur angenommene Rohdecke 0,20 m)                                                |      | A+B+C1+Umriss erledigt (PR486–494), Archicad abgenommen 29.10.; C3 Variante A erledigt (PR499), Materialvorrang später             | §6 Abschnitt 2     |
 | L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | einflächiges Dach erledigt (PR502–506); Trimmen erledigt (PR515–516, Archicad bestätigt); Archicad: sauber, aber als Objekt nicht bearbeitbar; Walm/Trimmen/Gauben später (N62, V09) | §6, §8 Dachtrimmen |
 | L05 | Stützen                                                                                                          |      | erledigt (PR525–527), Archicad-Prüfung offen                                                                                                                              | §6 Abschnitt 2     |
-| L06 | Treppen                                                                                                          |      | TR1 erledigt (PR534), TR2/TR3 offen                                                                                                                              | §6 Abschnitt 2     |
+| L06 | Treppen                                                                                                          |      | TR1 (PR534), TR2 (PR535) erledigt, TR3 offen                                                                                                                              | §6 Abschnitt 2     |
 | L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                                                                                              | §6 Abschnitt 2     |
 | L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | erledigt: R1–R4 (PR507–512) inkl. Tab-Auswahl; Archicad bestätigt; offen: WoFlV (N35)                                              | §6 Abschnitt 2/4   |
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | offen                                                                                                                              | §6, §8             |
