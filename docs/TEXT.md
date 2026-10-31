@@ -34,3 +34,9 @@ Nachweis T1: 1407 Tests grün (5 neu in `src/application/texts/actions.test.ts`)
 - `textBlock` (`domain/elements/text/model.ts`): Textblock mit gemessener Breite und Rand, Unterlängen der letzten Zeile berücksichtigt.
 
 Nachweis T2: 1409 Tests grün (2 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Text „AW 36“ auf der schwarzen Wand – fett mit weißer Hinterlegung und schwarzem Rahmen passgenau zur Textbreite; Hinterlegung aus, Freistellung an: weißer Rand um die Buchstaben; alle Schritte einzeln rückgängig, Testtext entfernt.
+
+## Eingabefeld mit allen Einstellungen (31.10.2026)
+
+Nutzervorgabe: Das Feld, das beim Klick auf die Zeichenfläche aufgeht, soll alles enthalten, was den Text steuert – kompakt. Das Eingabefeld (`TextEditorOverlay`) enthält jetzt unter dem Text dieselben Felder wie Leiste und Fenster: Schrift, Größe mit Papier-/Modellmaß, Ausrichtung, Bezug, Drehung, Farbe, Ebene, F/K/U, Hinterlegung, Umrandung, Freistellung jeweils mit Farbe. Der Text erscheint beim Tippen als Vorschau im Plan mit allen Einstellungen. Klicks auf die Einstellungen schließen das Feld nicht; erst Strg+Enter oder ein Klick außerhalb setzt den Text, Esc bricht ab. Hier geänderte Einstellungen bleiben Vorgabe für den nächsten Text.
+
+Nachweis: 1409 Tests grün, Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert. Browser: Feld mit allen Einstellungen, Fett und Hinterlegung im Feld eingeschaltet ohne zu schließen, Vorschau live, Strg+Enter setzt; Klick daneben setzt den Text und öffnet am neuen Punkt das nächste Feld; Testtexte zurückgenommen.

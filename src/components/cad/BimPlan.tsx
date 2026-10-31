@@ -1,3 +1,5 @@
+import { TextGraphic } from "./TextGraphic";
+import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
@@ -123,6 +125,8 @@ export type BimPlanProps = {
   /** False while the draft holds no segment yet (only the click of this double click): a double
    * click then opens the element under the cursor instead of finishing (docs/BAUZUSTAND.md). */
   draftFinishable?: boolean;
+  /** Text being typed (docs/TEXT.md): drawn live at its insertion point. */
+  textPreview?: Omit<PlanText, "id" | "layerId"> | undefined;
   /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
   dimensionDraft?:
     | {
@@ -199,6 +203,7 @@ export function BimPlan({
   draftPoints = [],
   draftFinishable = true,
   dimensionDraft,
+  textPreview,
   closeAtStart = false,
   roofGuide = null,
   draftFill,
@@ -1388,6 +1393,15 @@ export function BimPlan({
               </g>
             );
           })()}
+        {drawing && textPreview && (
+          <g aria-label="Text in Arbeit" opacity={0.85}>
+            <TextGraphic
+              text={textPreview}
+              denominator={scaleContext.denominator}
+              pixelsPerMetre={camera.pixelsPerMetre}
+            />
+          </g>
+        )}
         {drawing && dimensionDraft && (
           <g pointerEvents="none" aria-label="Maßkette in Arbeit">
             {dimensionDraft.line && (

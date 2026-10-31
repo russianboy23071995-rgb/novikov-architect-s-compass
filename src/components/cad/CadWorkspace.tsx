@@ -336,7 +336,11 @@ export function CadWorkspace({
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
   // Text being typed at its insertion point (docs/TEXT.md); session state only.
-  const [textDraft, setTextDraft] = useState<{ position: Point; screen: Point } | null>(null);
+  const [textDraft, setTextDraft] = useState<{
+    position: Point;
+    screen: Point;
+    content: string;
+  } | null>(null);
   // Running dimension chain (docs/MASSKETTE.md); session state, never model history.
   const [dimensionDraft, setDimensionDraft] = useState<{
     line: Point | null;
@@ -1376,10 +1380,11 @@ export function CadWorkspace({
   };
 
   /** Places the typed text; empty content just closes the editor. */
-  const commitText = (content: string) => {
+  const commitText = () => {
     const draft = textDraft;
     setTextDraft(null);
-    if (!draft || !content.trim()) return;
+    if (!draft || !draft.content.trim()) return;
+    const { content } = draft;
     try {
       dispatchEditing({
         type: "project",
@@ -1489,7 +1494,7 @@ export function CadWorkspace({
     // further click adds a measured point; a double click or Enter finishes.
     // Text tool (docs/TEXT.md): the click sets the insertion point; the editor opens there.
     if (tool === "text") {
-      setTextDraft({ position: { ...point }, screen: { ...lastPointer.current } });
+      setTextDraft({ position: { ...point }, screen: { ...lastPointer.current }, content: "" });
       return;
     }
     if (tool === "dimension" && dimensionDraft?.edit && dimensionDraft.edit.mode !== "add") {
@@ -1965,6 +1970,12 @@ export function CadWorkspace({
       {textDraft && tool === "text" && (
         <TextEditorOverlay
           position={textDraft.screen}
+          content={textDraft.content}
+          onContent={(content) => setTextDraft((d) => (d ? { ...d, content } : d))}
+          settings={toolDefaults.text}
+          onSettings={toolDefaults.setText}
+          layers={project.layers}
+          denominator={planDenominator(project)}
           onCommit={commitText}
           onCancel={() => setTextDraft(null)}
         />
@@ -2538,6 +2549,15 @@ export function CadWorkspace({
                         interaction.pick(point, candidate)
                       }
                       {...(tool === "dimension" ? { onFinish: finishDimension } : {})}
+                      textPreview={
+                        tool === "text" && textDraft?.content.trim()
+                          ? {
+                              ...toolDefaults.text,
+                              position: textDraft.position,
+                              content: textDraft.content,
+                            }
+                          : undefined
+                      }
                       dimensionDraft={
                         tool === "dimension" && dimensionDraft
                           ? {
