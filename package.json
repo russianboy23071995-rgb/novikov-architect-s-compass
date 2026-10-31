@@ -288,6 +288,7 @@
     "src/application/columns/actions.test.ts",
     "src/application/dimensions/actions.test.ts",
     "src/application/texts/actions.test.ts",
+    "src/application/stairs/actions.test.ts",
     "src/constraints/inference/hover-reference.test.ts",
     "benchmarks/school-plan-fixture.test.ts"
   ]

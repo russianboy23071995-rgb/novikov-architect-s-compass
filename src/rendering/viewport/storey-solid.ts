@@ -1,5 +1,6 @@
 // Moved from lib/bim/geometry.ts without behaviour change (27.10.2026, Stage B0 of
 // docs/plans/WALLWISE_REBUILD_CHANGE_MAP.md); camera helpers stay there.
+import { stairBody } from "../../domain/elements/stair/body.ts";
 import { isOwnedProjectSnapshot } from "../../domain/project/owned-snapshot.ts";
 import { sameProjectModel } from "../../domain/project/model-equality.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
@@ -27,6 +28,8 @@ export type Face = {
   roof?: true;
   /** Column face (docs/STUETZEN.md). */
   column?: true;
+  /** Stair face (docs/TREPPE.md). */
+  stair?: true;
 };
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 
@@ -215,6 +218,11 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
   // Roofs of this storey: relative to the storey floor only (docs/ROOF_ELEMENT.md, D2).
   for (const roof of "roofs" in storey ? (storey.roofs ?? []) : [])
     bodies.push(roofBody(roof, elevation));
+  // Stairs of this storey (docs/TREPPE.md); a bound top needs the storey height.
+  for (const stair of "stairs" in storey ? (storey.stairs ?? []) : []) {
+    const body = stairBody(stair, elevation, height);
+    if (body) bodies.push(body);
+  }
   // Columns of this storey from foot to top (docs/STUETZEN.md); a bound top needs the height.
   for (const column of "columns" in storey ? (storey.columns ?? []) : []) {
     const body = columnBody(column, elevation, height);

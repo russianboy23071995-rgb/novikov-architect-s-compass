@@ -1,3 +1,5 @@
+import { stairGeometry } from "../../domain/elements/stair/model.ts";
+import { stairBody } from "../../domain/elements/stair/body.ts";
 import { columnLevels } from "../../domain/elements/column/model.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
 import { wallBase } from "../../domain/elements/wall/heights.ts";
@@ -498,6 +500,61 @@ export async function writeIfc(
         ["BaseOffset", `IFCLENGTHMEASURE(${real(column.baseOffset)})`],
         ["Height", `IFCLENGTHMEASURE(${real(levels.top - levels.bottom)})`],
         ["Renovation", `IFCLABEL(${text(wallRenovation(column))})`],
+      ]);
+    }
+    // Stairs (docs/TREPPE.md, TR1): IfcStair STRAIGHT_RUN_STAIR aggregating one IfcStairFlight
+    // whose body is the same closed solid as in 3D (faceted B-rep, storey coordinates).
+    for (const stair of floor.stairs ?? []) {
+      const geometry = stairGeometry(stair, floor.height);
+      const body = stairBody(stair, 0, floor.height);
+      if (!geometry || !body) continue;
+      const points = new Map<string, string>();
+      const vertex = (v: readonly number[]) => {
+        const k = v.join(",");
+        let ref = points.get(k);
+        if (!ref) points.set(k, (ref = point([...v])));
+        return ref;
+      };
+      const faces = body.faces.map((face) => {
+        const loop = add("IFCPOLYLOOP", `(${face.vertices.map(vertex).join(",")})`);
+        return add("IFCFACE", `(${add("IFCFACEOUTERBOUND", `${loop},.T.`)})`);
+      });
+      const brep = add("IFCFACETEDBREP", add("IFCCLOSEDSHELL", `(${faces.join(",")})`));
+      const shape = add("IFCSHAPEREPRESENTATION", `${context},'Body','Brep',(${brep})`);
+      const stairPlacement = placement(storeyPlacement);
+      const stairRef = add(
+        "IFCSTAIR",
+        `${await guid("stair", stair.id)},$,${label(stair.id)},$,$,${stairPlacement},$,${label(stair.id)},.STRAIGHT_RUN_STAIR.`,
+      );
+      const flight = add(
+        "IFCSTAIRFLIGHT",
+        `${await guid("stair-flight", stair.id)},$,${label(stair.id + " Lauf")},$,$,${placement(stairPlacement)},${add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`)},${label(stair.id)},${geometry.riserCount},${geometry.treadCount},${real(geometry.riser)},${real(geometry.tread)},.STRAIGHT.`,
+      );
+      add(
+        "IFCRELAGGREGATES",
+        `${await guid("aggregate", "stair:" + stair.id)},$,$,$,${stairRef},(${flight})`,
+      );
+      elements.push(stairRef);
+      const counts: [string, string][] = [
+        ["NumberOfRiser", `IFCCOUNTMEASURE(${geometry.riserCount})`],
+        ["NumberOfTreads", `IFCCOUNTMEASURE(${geometry.treadCount})`],
+        ["RiserHeight", `IFCPOSITIVELENGTHMEASURE(${real(geometry.riser)})`],
+        ["TreadLength", `IFCPOSITIVELENGTHMEASURE(${real(geometry.tread)})`],
+      ];
+      await properties(
+        stairRef,
+        "stair",
+        stair.id,
+        [...counts, ["Status", `IFCLABEL(${text(IFC_RENOVATION_STATUS[wallRenovation(stair)])})`]],
+        "Pset_StairCommon",
+      );
+      await properties(stairRef, "stair", stair.id, [
+        ["Width", `IFCLENGTHMEASURE(${real(stair.width)})`],
+        ["Rise", `IFCLENGTHMEASURE(${real(geometry.rise)})`],
+        ["Run", `IFCLENGTHMEASURE(${real(geometry.run)})`],
+        ["StepRule", `IFCLENGTHMEASURE(${real(geometry.stepRule)})`],
+        ["RuleSet", `IFCLABEL(${text(stair.ruleSet)})`],
+        ["Check", `IFCTEXT(${text(geometry.issues.join("; ") || "DIN 18065 eingehalten")})`],
       ]);
     }
     // Single inclined roofs (docs/ROOF_ELEMENT.md, D5): IfcRoof SHED_ROOF in the storey,

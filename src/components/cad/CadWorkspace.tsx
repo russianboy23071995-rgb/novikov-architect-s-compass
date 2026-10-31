@@ -648,7 +648,8 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    if (!selection || selection.kind === "reference") return;
+    // Stairs get their edit actions with the stair tool (docs/TREPPE.md, TR2).
+    if (!selection || selection.kind === "reference" || selection.kind === "stair") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
     // Columns move as a whole too (docs/STUETZEN.md, P3).
@@ -2490,7 +2491,8 @@ export function CadWorkspace({
                           target.kind === "door" ||
                           target.kind === "column" ||
                           target.kind === "dimension" ||
-                          target.kind === "text"
+                          target.kind === "text" ||
+                          target.kind === "stair"
                         )
                           return;
                         if (

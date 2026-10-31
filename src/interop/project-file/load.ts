@@ -42,11 +42,16 @@ import {
   projectV36Schema,
   projectV37Schema,
   projectV38Schema,
+  projectV39Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { createStandardLayers, withColumnLayer } from "../../domain/layers/model.ts";
+import {
+  createStandardLayers,
+  withColumnLayer,
+  withStandardLayer,
+} from "../../domain/layers/model.ts";
 import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
 
 /** Own and fully storage-validate incoming assets once, before versioned project validation.
@@ -257,13 +262,21 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
     );
+  // Schema 39 files carry no stairs; they get the standard Treppe layer (docs/TREPPE.md).
+  if (value.schemaVersion === 39)
+    return validateProject(
+      withStandardLayer(
+        withoutBoundHeights({
+          ...projectV39Schema.parse(value),
+          schemaVersion: PROJECT_SCHEMA_VERSION,
+        }),
+        "stair",
+      ),
+    );
   // Schema 38 files carry no texts; the strict v38 schema rejects smuggled ones.
   if (value.schemaVersion === 38)
-    return validateProject(
-      withoutBoundHeights({
-        ...projectV38Schema.parse(value),
-        schemaVersion: PROJECT_SCHEMA_VERSION,
-      }),
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV38Schema.parse(value), schemaVersion: 39 }),
     );
   // Schema 37 files carry no dimension chains; the strict v37 schema rejects smuggled ones.
   if (value.schemaVersion === 37)
