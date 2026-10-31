@@ -1,7 +1,11 @@
 import type { Layer } from "@/domain/layers/model";
 import type { DimensionOrientation } from "@/domain/elements/dimension/model";
+import { DimensionStyleFields, type DimensionStyle } from "./DimensionStyleFields";
 
-export type DimensionDefaults = { orientation: DimensionOrientation; layerId: string };
+export type DimensionDefaults = {
+  orientation: DimensionOrientation;
+  layerId: string;
+} & DimensionStyle;
 
 /** Dimension chain tool (docs/MASSKETTE.md): direction and layer; the same set in the bar and
  * the settings window. The hint tells the click order. */
@@ -48,6 +52,7 @@ export function DimensionToolFields({
           ))}
         </select>
       </label>
+      <DimensionStyleFields value={value} onChange={(style) => onChange({ ...value, ...style })} />
       <p className="text-xs text-muted-foreground">
         {step === "points"
           ? "Punkte nacheinander anklicken (rastet ein) · Doppelklick ins Leere oder Enter: Maßkette erstellen · Esc: abbrechen"

@@ -622,6 +622,9 @@ export function PlanSceneContent({
               denominator={scaleContext.denominator}
               pixelsPerMetre={pixelsPerMetre}
               color={selected ? "#0284c7" : "var(--foreground)"}
+              terminator={dimension.terminator}
+              units={dimension.units}
+              textSize={dimension.textSize}
             />
           </g>
         );
