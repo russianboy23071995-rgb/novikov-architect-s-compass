@@ -96,9 +96,9 @@ test("move, delete, menu summary; schema 37 files load, smuggled chains are refu
   });
   const removed = previewDeleteSelection(p, [{ kind: "dimension", id: "m1" }], undefined).result;
   assert.equal(storeyOf(removed).dimensions!.length, 0);
-  assert.equal(PROJECT_SCHEMA_VERSION, 38);
+  assert.equal(PROJECT_SCHEMA_VERSION, 39);
   const plain = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...plain, schemaVersion: 37 }).schemaVersion, 38);
+  assert.equal(loadProjectData({ ...plain, schemaVersion: 37 }).schemaVersion, 39);
   const smuggled = JSON.parse(serializeProject(p));
   assert.throws(() => loadProjectData({ ...smuggled, schemaVersion: 37 }));
 });

@@ -61,6 +61,10 @@ import { WallDrawingFields } from "./WallDrawingFields";
 import { WallRenovationFields } from "./WallRenovationFields";
 import { ColumnFields } from "./ColumnFields";
 import { DimensionToolFields } from "./DimensionToolFields";
+import { TextFields } from "./TextFields";
+import { TextEditorOverlay } from "./TextEditorOverlay";
+import { addText } from "@/application/texts/actions";
+import { planDenominator } from "@/domain/views/scale";
 import { addDimension, updateDimension } from "@/application/dimensions/actions";
 import { dimensionPointAt } from "@/domain/elements/dimension/model";
 import { addColumn, updateColumn } from "@/application/columns/actions";
@@ -331,6 +335,8 @@ export function CadWorkspace({
 
   const [notice, setNotice] = useState("Ready");
   const [fullscreen, setFullscreen] = useState(false);
+  // Text being typed at its insertion point (docs/TEXT.md); session state only.
+  const [textDraft, setTextDraft] = useState<{ position: Point; screen: Point } | null>(null);
   // Running dimension chain (docs/MASSKETTE.md); session state, never model history.
   const [dimensionDraft, setDimensionDraft] = useState<{
     line: Point | null;
@@ -379,6 +385,7 @@ export function CadWorkspace({
     setRoofLine(null);
     setRoofRise(null);
     setDimensionDraft(null);
+    setTextDraft(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -505,7 +512,8 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
-      next === "dimension"
+      next === "dimension" ||
+      next === "text"
     )
       setSelection(null);
     setModelError("");
@@ -520,7 +528,8 @@ export function CadWorkspace({
       next === "roof" ||
       next === "room" ||
       next === "column" ||
-      next === "dimension"
+      next === "dimension" ||
+      next === "text"
     )
       setMode("2D");
   };
@@ -644,7 +653,8 @@ export function CadWorkspace({
       selection.kind === "roof" ||
       selection.kind === "room" ||
       selection.kind === "column" ||
-      selection.kind === "dimension";
+      selection.kind === "dimension" ||
+      selection.kind === "text";
     const solidMove =
       inSolid && !area && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
@@ -666,7 +676,9 @@ export function CadWorkspace({
                 ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
                 : selection.kind === "dimension"
                   ? storeyOf(project).dimensions!.find((d) => d.id === selection.id)!.points[0]!
-                  : editAnchor(project, selection));
+                  : selection.kind === "text"
+                    ? storeyOf(project).texts!.find((t) => t.id === selection.id)!.position
+                    : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -700,7 +712,8 @@ export function CadWorkspace({
         room: ["Raum", "der Raum", "Räume"],
         column: ["Stützen", "die Stütze", "Stützen"],
         dimension: ["Maßketten", "die Maßkette", "Maßketten"],
-      }[selection.kind as "slab" | "roof" | "room" | "column" | "dimension"];
+        text: ["Texte", "der Text", "Texte"],
+      }[selection.kind as "slab" | "roof" | "room" | "column" | "dimension" | "text"];
       showNotice(
         inSolid
           ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
@@ -709,7 +722,8 @@ export function CadWorkspace({
       return;
     }
     // A column has no outline or point edits; it only moves as a whole (handled above).
-    if (selection.kind === "column" || selection.kind === "dimension") return;
+    if (selection.kind === "column" || selection.kind === "dimension" || selection.kind === "text")
+      return;
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;
@@ -818,6 +832,7 @@ export function CadWorkspace({
     wall: "Wand",
     column: "Stütze",
     dimension: "Maßkette",
+    text: "Text",
     window: "Fenster",
     door: "Tür",
     slab: "Decke",
@@ -852,6 +867,13 @@ export function CadWorkspace({
           cancelInteraction();
           toolDefaults.setWall(values);
         }}
+      />
+    ) : owner === "text" ? (
+      <TextFields
+        value={toolDefaults.text}
+        onChange={toolDefaults.setText}
+        layers={project.layers}
+        denominator={planDenominator(project)}
       />
     ) : owner === "dimension" ? (
       <DimensionToolFields
@@ -1353,6 +1375,27 @@ export function CadWorkspace({
     }
   };
 
+  /** Places the typed text; empty content just closes the editor. */
+  const commitText = (content: string) => {
+    const draft = textDraft;
+    setTextDraft(null);
+    if (!draft || !content.trim()) return;
+    try {
+      dispatchEditing({
+        type: "project",
+        project: addText(project, {
+          id: `text-${crypto.randomUUID()}`,
+          position: draft.position,
+          content,
+          ...toolDefaults.text,
+        }),
+      });
+      setModelError("");
+      showNotice("Text gesetzt");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Text nicht möglich.");
+    }
+  };
   /** Chain edits from the demand menu: the dimension tool runs on the existing chain. */
   const startChainEdit = (mode: "add" | "remove" | "line") => {
     const chain =
@@ -1444,6 +1487,11 @@ export function CadWorkspace({
     setModelError("");
     // Dimension chain (docs/MASSKETTE.md): the first click places the dimension line, every
     // further click adds a measured point; a double click or Enter finishes.
+    // Text tool (docs/TEXT.md): the click sets the insertion point; the editor opens there.
+    if (tool === "text") {
+      setTextDraft({ position: { ...point }, screen: { ...lastPointer.current } });
+      return;
+    }
     if (tool === "dimension" && dimensionDraft?.edit && dimensionDraft.edit.mode !== "add") {
       const { id, mode, orientation } = dimensionDraft.edit;
       const chain = storeyOf(project).dimensions?.find((d) => d.id === id);
@@ -1914,6 +1962,13 @@ export function CadWorkspace({
             />
           );
         })()}
+      {textDraft && tool === "text" && (
+        <TextEditorOverlay
+          position={textDraft.screen}
+          onCommit={commitText}
+          onCancel={() => setTextDraft(null)}
+        />
+      )}
       {contextMenu && (
         <CanvasContextMenu
           position={contextMenu}
@@ -2364,6 +2419,7 @@ export function CadWorkspace({
                         (tool === "wall" ||
                           tool === "column" ||
                           tool === "dimension" ||
+                          tool === "text" ||
                           pathDrawing ||
                           tool === "roof" ||
                           tool === "room") &&
@@ -2377,6 +2433,7 @@ export function CadWorkspace({
                         tool === "wall" ||
                         tool === "column" ||
                         tool === "dimension" ||
+                        tool === "text" ||
                         tool === "window" ||
                         tool === "door"
                       }
@@ -2418,7 +2475,8 @@ export function CadWorkspace({
                           target.kind === "reference" ||
                           target.kind === "door" ||
                           target.kind === "column" ||
-                          target.kind === "dimension"
+                          target.kind === "dimension" ||
+                          target.kind === "text"
                         )
                           return;
                         if (
@@ -2717,6 +2775,7 @@ export function CadWorkspace({
               ) : tool === "wall" ||
                 tool === "column" ||
                 tool === "dimension" ||
+                tool === "text" ||
                 tool === "window" ||
                 tool === "door" ? (
                 toolFields(tool)

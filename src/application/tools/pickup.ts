@@ -1,3 +1,4 @@
+import type { PlanText } from "../../domain/elements/text/model.ts";
 import { columnSettings, type ColumnDefaults } from "../columns/defaults.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { patternSize } from "../hatches/pattern-size.ts";
@@ -29,7 +30,8 @@ export type ToolDefaults =
   | { tool: "window"; values: WindowDefaults }
   | { tool: "line"; values: LineDefaults }
   | { tool: "wall"; values: WallDefaults }
-  | { tool: "column"; values: ColumnDefaults };
+  | { tool: "column"; values: ColumnDefaults }
+  | { tool: "text"; values: Omit<PlanText, "id" | "position" | "content"> };
 
 /** Read-only capability boundary. Add supported element adapters here, not gesture copies. */
 export function pickupToolDefaults(
@@ -85,6 +87,13 @@ export function pickupToolDefaults(
   if (target.kind === "column") {
     const source = storeyOf(project).columns?.find((item) => item.id === target.id);
     return source ? { tool: "column", values: columnSettings(source) } : null;
+  }
+  // Texts hand over every setting except position and content (docs/TEXT.md).
+  if (target.kind === "text") {
+    const source = storeyOf(project).texts?.find((item) => item.id === target.id);
+    if (!source) return null;
+    const { id: _id, position: _position, content: _content, ...values } = source;
+    return { tool: "text", values: structuredClone(values) };
   }
   if (target.kind !== "hatch") return null;
   const source = storeyOf(project).hatches.find((item) => item.id === target.id);

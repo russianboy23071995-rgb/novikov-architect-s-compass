@@ -1,3 +1,5 @@
+import { TextGraphic } from "./TextGraphic";
+import { textBox } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { dimensionLayout } from "@/domain/elements/dimension/model";
 import { cutPaint, wallCutPaint, type CutFill } from "./cut-fill";
@@ -112,6 +114,7 @@ export function PlanSceneContent({
     walls: kind === "wall" ? ids.map((id) => scene.walls.get(id)!) : [],
     columns: kind === "column" ? ids.map((id) => scene.columns.get(id)!) : [],
     dimensions: kind === "dimension" ? ids.map((id) => scene.dimensions.get(id)!) : [],
+    texts: kind === "text" ? ids.map((id) => scene.texts.get(id)!) : [],
     lines: kind === "line" ? ids.map((id) => scene.lines.get(id)!) : [],
   };
   const outlines = scene.outlines;
@@ -619,6 +622,25 @@ export function PlanSceneContent({
               pixelsPerMetre={pixelsPerMetre}
               color={selected ? "#0284c7" : "var(--foreground)"}
             />
+          </g>
+        );
+      })}
+      {plan.texts.map((text) => {
+        const box = textBox(text, scaleContext.denominator);
+        const selected = selectedIds.has(text.id);
+        return (
+          <g key={text.id}>
+            <polygon
+              {...selectProps("text", text.id)}
+              points={box.map((p) => `${p.x},${-p.y}`).join(" ")}
+              fill="transparent"
+              stroke={selected ? "#0284c7" : "none"}
+              strokeWidth={1 / pixelsPerMetre}
+              strokeDasharray={`${4 / pixelsPerMetre} ${3 / pixelsPerMetre}`}
+              pointerEvents={placement ? "none" : "all"}
+              className="cursor-pointer outline-none"
+            />
+            <TextGraphic text={text} denominator={scaleContext.denominator} />
           </g>
         );
       })}

@@ -1,3 +1,4 @@
+import { textSchema } from "../elements/text/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
 import { columnSchema } from "../elements/column/model.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
@@ -43,6 +44,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -78,6 +80,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.rooms ? { rooms: s.rooms.filter((room) => ids.has(room.id)) } : {}),
       ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
       ...(s.dimensions ? { dimensions: s.dimensions.filter((d) => ids.has(d.id)) } : {}),
+      ...(s.texts ? { texts: s.texts.filter((t) => ids.has(t.id)) } : {}),
     },
   };
   freeze(affected);
@@ -115,6 +118,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(storeyOf(affected).rooms ?? []),
       ...(storeyOf(affected).columns ?? []),
       ...(storeyOf(affected).dimensions ?? []),
+      ...(storeyOf(affected).texts ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -233,6 +237,14 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        ...(storeyOf(affected).texts
+          ? {
+              texts: storeyOf(affected).texts!.map((t) => ({
+                ...t,
+                position: translate(t.position),
+              })),
+            }
+          : {}),
         ...(storeyOf(affected).dimensions
           ? {
               dimensions: storeyOf(affected).dimensions!.map((d) => {
@@ -267,6 +279,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const room of storeyOf(geometry).rooms ?? []) roomSchema.parse(room);
     for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
     for (const d of storeyOf(geometry).dimensions ?? []) dimensionSchema.parse(d);
+    for (const t of storeyOf(geometry).texts ?? []) textSchema.parse(t);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
@@ -299,6 +312,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.roofs ? { roofs: replace(s.roofs, storeyOf(patch.geometry).roofs ?? []) } : {}),
       ...(s.rooms ? { rooms: replace(s.rooms, storeyOf(patch.geometry).rooms ?? []) } : {}),
       ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
+      ...(s.texts ? { texts: replace(s.texts, storeyOf(patch.geometry).texts ?? []) } : {}),
       ...(s.dimensions
         ? { dimensions: replace(s.dimensions, storeyOf(patch.geometry).dimensions ?? []) }
         : {}),
@@ -325,6 +339,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -392,6 +407,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...(s.rooms ?? []),
       ...(s.columns ?? []),
       ...(s.dimensions ?? []),
+      ...(s.texts ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,

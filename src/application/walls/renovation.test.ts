@@ -42,7 +42,7 @@ test("drawn walls take the status of the tool defaults", () => {
 });
 
 test("schema 35 files load as Bestand; a smuggled status in a v35 file is refused", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 38);
+  assert.equal(PROJECT_SCHEMA_VERSION, 39);
   const stored = JSON.parse(serializeProject(createExampleProject()));
   const v35 = { ...stored, schemaVersion: 35 };
   const loaded = loadProjectData(v35);

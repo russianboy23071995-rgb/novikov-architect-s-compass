@@ -1,3 +1,5 @@
+import { textBox } from "../../domain/elements/text/model.ts";
+import { planDenominator } from "../../domain/views/scale.ts";
 import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
@@ -76,6 +78,8 @@ const PLAN_SHAPES: {
     const { line } = dimensionLayout(d);
     return { points: [line.start, line.end], closed: false };
   },
+  // Paper sized texts at the storey's output scale (docs/TEXT.md).
+  text: (t, { project }) => ({ points: textBox(t, planDenominator(project)), closed: true }),
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -91,6 +95,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   room: (r) => (r.name ? `${r.number} ${r.name}` : r.number),
   column: () => undefined,
   dimension: () => undefined,
+  text: (t) => t.content.split("\n")[0]!.slice(0, 24),
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -106,6 +111,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "room",
   "column",
   "dimension",
+  "text",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -113,6 +119,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
 const PICK_RANK: Record<ElementKind, number> = {
   line: 0,
   dimension: 0,
+  text: 0,
   window: 1,
   door: 1,
   wall: 2,
