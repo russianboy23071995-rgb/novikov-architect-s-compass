@@ -12,6 +12,13 @@ import { Input } from "@/components/ui/input";
 import { addWindow, updateWindow } from "@/application/windows/actions";
 import { wallLength } from "@/domain/project/schema";
 import { updateWall } from "@/application/walls/actions";
+import { setWallRenovation } from "@/application/walls/renovation";
+import {
+  WALL_RENOVATIONS,
+  WALL_RENOVATION_LABELS,
+  wallRenovation,
+  type WallRenovation,
+} from "@/domain/elements/wall/renovation";
 import type { Project } from "@/domain/project/schema";
 import { endAtLength } from "./bim-view";
 import type { Selection } from "./bim-view";
@@ -28,9 +35,17 @@ type Props = {
   selection: Selection;
   onChange: (project: Project, selection: Selection) => void;
   onWallOffset: (base: Project, wallId: string, offset: number) => void;
+  /** The bar shows the renovation status; the element window has its own tab for it. */
+  renovationField?: boolean;
 };
 
-export function BimInspector({ project, selection, onChange, onWallOffset }: Props) {
+export function BimInspector({
+  project,
+  selection,
+  onChange,
+  onWallOffset,
+  renovationField = true,
+}: Props) {
   const [error, setError] = useState("");
   const hatch =
     selection?.kind === "hatch"
@@ -190,6 +205,30 @@ export function BimInspector({ project, selection, onChange, onWallOffset }: Pro
           </label>
         ))}
       </PropertyForm>
+      {wall && renovationField && (
+        <label className="block text-xs">
+          Bauzustand
+          <select
+            aria-label="Bauzustand"
+            className="mt-1 block h-8 rounded border bg-background px-1"
+            value={wallRenovation(wall)}
+            onChange={(e) =>
+              run(() =>
+                onChange(
+                  setWallRenovation(project, [wall.id], e.target.value as WallRenovation),
+                  selection,
+                ),
+              )
+            }
+          >
+            {WALL_RENOVATIONS.map((status) => (
+              <option key={status} value={status}>
+                {WALL_RENOVATION_LABELS[status]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {wall && (
         <WallHeightProperties
           project={project}

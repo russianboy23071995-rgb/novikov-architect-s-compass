@@ -158,12 +158,9 @@ input {
   border: 1px solid var(--primary-foreground);
   transform: rotate(45deg);
 }
+/* White drawing surface (user decision 31.10.2026). */
 .cad-viewport {
-  background: radial-gradient(
-    ellipse 70% 62% at 50% 46%,
-    oklch(0.99 0.003 245),
-    var(--workspace) 74%
-  );
+  background: #ffffff;
 }
 .cad-grid {
   background-image:
