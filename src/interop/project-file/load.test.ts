@@ -272,7 +272,7 @@ test("schema 31 adds roofs: v30 files load unchanged, smuggled roofs are refused
 
 test("schema 32 adds rooms: numbers R-001…, optional floor build-up, unique numbers, migration", () => {
   // docs/ROOM_ELEMENT.md, R1.
-  assert.equal(PROJECT_SCHEMA_VERSION, 38);
+  assert.equal(PROJECT_SCHEMA_VERSION, 39);
   const base = createStandardProject("p", "eg", "og");
   const square = [
     { x: 0, y: 0 },

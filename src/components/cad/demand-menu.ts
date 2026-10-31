@@ -138,6 +138,15 @@ export function selectionSummary(project: Project, selection: Selection) {
         }
       : null;
   }
+  if (selection.kind === "text") {
+    const text = storeyOf(project).texts?.find((item) => item.id === selection.id);
+    if (!text) return null;
+    const first = text.content.split("\n")[0]!;
+    return {
+      title: "Text",
+      details: `${first.length > 28 ? first.slice(0, 27) + "…" : first} · ${text.size.value.toLocaleString("de-DE")} ${text.size.unit === "paper" ? "mm Papier" : "m Modell"}`,
+    };
+  }
   if (selection.kind === "dimension") {
     const chain = storeyOf(project).dimensions?.find((item) => item.id === selection.id);
     if (!chain) return null;

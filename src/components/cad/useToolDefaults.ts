@@ -7,6 +7,9 @@ import { ROOF_DEFAULTS, type Roof } from "@/domain/elements/roof/model";
 import { defaultRoomLayerId } from "@/application/rooms/actions";
 import { defaultColumnLayerId } from "@/application/columns/actions";
 import { defaultDimensionLayerId } from "@/application/dimensions/actions";
+import { defaultTextLayerId } from "@/application/texts/actions";
+import { TEXT_DEFAULTS } from "@/domain/elements/text/model";
+import type { TextDefaults } from "./TextFields";
 import type { DimensionDefaults } from "./DimensionToolFields";
 import { columnToolDefaults, type ColumnDefaults } from "@/application/columns/defaults";
 import { defaultLineAppearance } from "@/lib/bim/lines";
@@ -158,6 +161,19 @@ export function useToolDefaults(project: Project) {
       ? dimensionValues.layerId
       : defaultDimensionLayerId(project),
   };
+  const [textState, setTextState] = useState<{ projectId: string; values: TextDefaults } | null>(
+    null,
+  );
+  const textValues: TextDefaults =
+    textState?.projectId === project.id
+      ? textState.values
+      : { ...TEXT_DEFAULTS, size: { ...TEXT_DEFAULTS.size }, layerId: defaultTextLayerId(project) };
+  const textDefaults = {
+    ...textValues,
+    layerId: project.layers.some((l) => l.id === textValues.layerId)
+      ? textValues.layerId
+      : defaultTextLayerId(project),
+  };
   const [roofState, setRoofState] = useState<{ projectId: string; values: RoofDefaults } | null>(
     null,
   );
@@ -236,6 +252,10 @@ export function useToolDefaults(project: Project) {
     setSlab(values: SlabDefaults) {
       setSlabState({ projectId: project.id, values });
     },
+    text: textDefaults,
+    setText(values: TextDefaults) {
+      setTextState({ projectId: project.id, values });
+    },
     dimension: dimensionDefaults,
     setDimension(values: DimensionDefaults) {
       setDimensionState({ projectId: project.id, values });
@@ -269,6 +289,8 @@ export function useToolDefaults(project: Project) {
         setLineState({ projectId: project.id, values: defaults.values });
       else if (defaults.tool === "column")
         setColumnState({ projectId: project.id, values: defaults.values });
+      else if (defaults.tool === "text")
+        setTextState({ projectId: project.id, values: defaults.values });
       else
         setWindowState({
           projectId: project.id,

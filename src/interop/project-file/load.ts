@@ -41,6 +41,7 @@ import {
   projectV35Schema,
   projectV36Schema,
   projectV37Schema,
+  projectV38Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -256,13 +257,18 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
     );
-  // Schema 37 files carry no dimension chains; the strict v37 schema rejects smuggled ones.
-  if (value.schemaVersion === 37)
+  // Schema 38 files carry no texts; the strict v38 schema rejects smuggled ones.
+  if (value.schemaVersion === 38)
     return validateProject(
       withoutBoundHeights({
-        ...projectV37Schema.parse(value),
+        ...projectV38Schema.parse(value),
         schemaVersion: PROJECT_SCHEMA_VERSION,
       }),
+    );
+  // Schema 37 files carry no dimension chains; the strict v37 schema rejects smuggled ones.
+  if (value.schemaVersion === 37)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV37Schema.parse(value), schemaVersion: 38 }),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
