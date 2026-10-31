@@ -1,3 +1,4 @@
+import { stairGeometry, stairOutline } from "../../domain/elements/stair/model.ts";
 import { textBox } from "../../domain/elements/text/model.ts";
 import { planDenominator } from "../../domain/views/scale.ts";
 import { dimensionLayout } from "../../domain/elements/dimension/model.ts";
@@ -80,6 +81,10 @@ const PLAN_SHAPES: {
   },
   // Paper sized texts at the storey's output scale (docs/TEXT.md).
   text: (t, { project }) => ({ points: textBox(t, planDenominator(project)), closed: true }),
+  stair: (s, { project }) => ({
+    points: stairOutline(s, stairGeometry(s, storeyOf(project).height ?? null)?.run ?? s.width),
+    closed: true,
+  }),
 };
 
 /** Short caption per kind for hints: the user-facing number or mark where one exists. */
@@ -96,6 +101,7 @@ const PLAN_CAPTIONS: { [K in ElementKind]: (element: ElementOf<K>) => string | u
   column: () => undefined,
   dimension: () => undefined,
   text: (t) => t.content.split("\n")[0]!.slice(0, 24),
+  stair: () => undefined,
 };
 
 /** Shape order of the box selection (kept stable for existing callers). */
@@ -112,6 +118,7 @@ const SHAPE_ORDER: readonly ElementKind[] = [
   "column",
   "dimension",
   "text",
+  "stair",
 ];
 
 /** Plan paint order, topmost first (lines over walls with their openings over hatches over
@@ -120,6 +127,7 @@ const PICK_RANK: Record<ElementKind, number> = {
   line: 0,
   dimension: 0,
   text: 0,
+  stair: 2,
   window: 1,
   door: 1,
   wall: 2,

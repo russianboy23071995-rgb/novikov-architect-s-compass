@@ -16,6 +16,7 @@ export const ELEMENT_KINDS = {
   column: { list: "columns", label: "Stütze" },
   dimension: { list: "dimensions", label: "Maßkette" },
   text: { list: "texts", label: "Text" },
+  stair: { list: "stairs", label: "Treppe" },
   line: { list: "lines", label: "Linie" },
   hatch: { list: "hatches", label: "Schraffur" },
   reference: { list: "references", label: "Referenzbild" },

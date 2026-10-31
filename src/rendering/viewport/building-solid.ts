@@ -101,7 +101,8 @@ export function buildBuildingSolid(input: Project): Solid {
         s.walls.length > 0 ||
         (s.slabs?.length ?? 0) > 0 ||
         (s.roofs?.length ?? 0) > 0 ||
-        (s.columns?.length ?? 0) > 0,
+        (s.columns?.length ?? 0) > 0 ||
+        (s.stairs?.length ?? 0) > 0,
     )
     .map((s) => storeyPart(project, s, immutable));
   const result: Solid = {

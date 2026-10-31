@@ -11,6 +11,7 @@ const standards = [
   ["roof", "Dach"],
   ["slab", "Decke"],
   ["column", "Stütze"],
+  ["stair", "Treppe"],
   ["window", "Fenster"],
   ["door", "Tür"],
   ["furniture", "Möblierung"],
@@ -44,15 +45,24 @@ export function standardLayerId(
   )?.id;
 }
 
-/** Schema 36 → 37: projects get the standard Stütze layer, with a collision suffix like the
- * other standard layers (docs/STUETZEN.md). Unchanged when it exists. */
-export function withColumnLayer<T extends { layers: Layer[] }>(project: T): T {
-  if (standardLayerId(project.layers, "column")) return project;
+/** A standard layer added to an older project, with a collision suffix like the other
+ * standard layers; unchanged when it exists (Stütze 36 → 37, Treppe 39 → 40). */
+export function withStandardLayer<T extends { layers: Layer[] }>(
+  project: T,
+  key: "column" | "stair",
+): T {
+  if (standardLayerId(project.layers, key)) return project;
   const occupied = new Set(project.layers.map((l) => l.id));
-  let id = "layer:column",
+  let id = `layer:${key}`,
     suffix = 1;
-  while (occupied.has(id)) id = `layer:column:${suffix++}`;
-  return { ...project, layers: [...project.layers, { id, name: "Stütze" }] };
+  while (occupied.has(id)) id = `layer:${key}:${suffix++}`;
+  const name = standards.find(([k]) => k === key)![1];
+  return { ...project, layers: [...project.layers, { id, name }] };
+}
+
+/** Schema 36 → 37 (docs/STUETZEN.md). */
+export function withColumnLayer<T extends { layers: Layer[] }>(project: T): T {
+  return withStandardLayer(project, "column");
 }
 
 /** Shared by new projects and migration. Never infer defaults from editable names. */

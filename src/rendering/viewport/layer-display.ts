@@ -21,6 +21,8 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     roof?: true;
     /** Column face; absent on walls (docs/STUETZEN.md). */
     column?: true;
+    /** Stair face; absent on walls (docs/TREPPE.md). */
+    stair?: true;
   }[];
 };
 
