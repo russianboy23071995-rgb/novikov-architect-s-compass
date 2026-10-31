@@ -16,17 +16,19 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import type { CadTool, ToolId } from "./cad-types";
 
+// Order (user decision 31.10.2026): select, wall, window, door, slab, roof, room, line; hatch
+// last. A double click on any tool opens its settings window (docs/EINSTELLUNGSFENSTER.md).
 const tools: CadTool[] = [
-  { id: "window", label: "Fenster", shortcut: "", icon: PanelsTopLeft },
-  { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
-  { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
   { id: "select", label: "Select", shortcut: "V", icon: MousePointer2 },
   { id: "wall", label: "Wall", shortcut: "W", icon: BoxSelect },
+  { id: "window", label: "Fenster", shortcut: "", icon: PanelsTopLeft },
+  { id: "door", label: "Tür", shortcut: "T", icon: DoorOpen },
   { id: "slab", label: "Decke", shortcut: "S", icon: Pentagon },
   // No letter yet: D and Ctrl+D are reserved for rotating (Masterplan §8).
-  { id: "roof", label: "Dach", shortcut: "Doppelklick: Einstellungen", icon: Triangle },
-  { id: "room", label: "Raum", shortcut: "Doppelklick: Einstellungen", icon: Grid2x2 },
+  { id: "roof", label: "Dach", shortcut: "", icon: Triangle },
+  { id: "room", label: "Raum", shortcut: "", icon: Grid2x2 },
   { id: "line", label: "Line", shortcut: "L", icon: PenLine },
+  { id: "hatch", label: "Schraffur", shortcut: "H", icon: PaintBucket },
 ];
 
 type ToolRailProps = {
@@ -81,6 +83,9 @@ export function ToolRail({ activeTool, collapsed, onSelect, onToggle, onSettings
                 className="border border-border bg-popover text-popover-foreground"
               >
                 {tool.label} <span className="ml-2 text-muted-foreground">{tool.shortcut}</span>
+                {tool.id !== "select" && (
+                  <span className="ml-2 text-muted-foreground">Doppelklick: Einstellungen</span>
+                )}
               </TooltipContent>
             </Tooltip>
           );

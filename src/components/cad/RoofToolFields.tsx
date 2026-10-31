@@ -4,6 +4,7 @@ import { MAX_ROOF_PITCH, MIN_ROOF_PITCH } from "@/domain/elements/roof/model";
 import type { RoofCut } from "@/domain/elements/roof/geometry";
 import type { Layer } from "@/domain/layers/model";
 import { FloatingPanel } from "./FloatingPanel";
+import { SETTINGS_WINDOW } from "./settings-window-size";
 import { SettingsSections } from "./SettingsSections";
 import type { RoofDefaults } from "./useToolDefaults";
 import { ROOF_CUT_LABELS, type RoofPhase } from "./roof-labels";
@@ -232,10 +233,10 @@ export function RoofSettingsPanel({
   return (
     <FloatingPanel
       open={open}
-      title="Dach-Einstellungen"
+      title="Dach – Einstellungen"
       onClose={() => onOpenChange(false)}
-      width={560}
-      height={380}
+      width={SETTINGS_WINDOW.width}
+      height={SETTINGS_WINDOW.height}
     >
       <SettingsSections
         sections={[
