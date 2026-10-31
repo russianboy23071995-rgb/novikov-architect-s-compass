@@ -40,6 +40,7 @@ import {
   projectV34Schema,
   projectV35Schema,
   projectV36Schema,
+  projectV37Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -252,13 +253,16 @@ export function migrateProjectData(value: unknown): Project {
     );
   // Schema 36 files carry no columns; they get the standard Stütze layer (docs/STUETZEN.md).
   if (value.schemaVersion === 36)
+    return migrateProjectData(
+      withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
+    );
+  // Schema 37 files carry no dimension chains; the strict v37 schema rejects smuggled ones.
+  if (value.schemaVersion === 37)
     return validateProject(
-      withColumnLayer(
-        withoutBoundHeights({
-          ...projectV36Schema.parse(value),
-          schemaVersion: PROJECT_SCHEMA_VERSION,
-        }),
-      ),
+      withoutBoundHeights({
+        ...projectV37Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {

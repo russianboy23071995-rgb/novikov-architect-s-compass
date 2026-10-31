@@ -11,7 +11,8 @@ export type ToolId =
   | "roof"
   | "room"
   | "line"
-  | "hatch";
+  | "hatch"
+  | "dimension";
 export type ViewMode = "2D" | "3D";
 export type ViewportLayout = "single" | "horizontal" | "vertical" | "three" | "four";
 export type AiState = "idle" | "listening" | "preview";

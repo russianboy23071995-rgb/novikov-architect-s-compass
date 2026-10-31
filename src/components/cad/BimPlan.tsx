@@ -1,3 +1,4 @@
+import { DimensionGraphic } from "./DimensionGraphic";
 import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
@@ -122,6 +123,14 @@ export type BimPlanProps = {
   /** False while the draft holds no segment yet (only the click of this double click): a double
    * click then opens the element under the cursor instead of finishing (docs/BAUZUSTAND.md). */
   draftFinishable?: boolean;
+  /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
+  dimensionDraft?:
+    | {
+        orientation: "horizontal" | "vertical";
+        line: Point | null;
+        points: readonly Point[];
+      }
+    | undefined;
   /** The drawing tool closes by a click on its start point (docs/POLYGON_REGELN.md, Regel 3). */
   closeAtStart?: boolean;
   /** Roof tool guide: reference line and rise side; null rise follows the cursor (ROOF D3). */
@@ -186,6 +195,7 @@ export function BimPlan({
   start,
   draftPoints = [],
   draftFinishable = true,
+  dimensionDraft,
   closeAtStart = false,
   roofGuide = null,
   draftFill,
@@ -1375,6 +1385,56 @@ export function BimPlan({
               </g>
             );
           })()}
+        {drawing && dimensionDraft && (
+          <g pointerEvents="none" aria-label="Maßkette in Arbeit">
+            {dimensionDraft.line && (
+              <DimensionGraphic
+                orientation={dimensionDraft.orientation}
+                offset={
+                  dimensionDraft.orientation === "horizontal"
+                    ? dimensionDraft.line.y
+                    : dimensionDraft.line.x
+                }
+                points={[...dimensionDraft.points, ...(resolvedHover ? [resolvedHover.point] : [])]}
+                denominator={scaleContext.denominator}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                color="#0284c7"
+              />
+            )}
+            {(() => {
+              // The dimension line position: a dashed guide through the first click.
+              const p = dimensionDraft.line ?? resolvedHover?.point;
+              if (!p) return null;
+              const far = 1e4;
+              return dimensionDraft.orientation === "horizontal" ? (
+                <line
+                  x1={p.x - far}
+                  y1={-p.y}
+                  x2={p.x + far}
+                  y2={-p.y}
+                  stroke="#0284c7"
+                  strokeOpacity={0.5}
+                  strokeWidth={1 / camera.pixelsPerMetre}
+                  strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
+                />
+              ) : (
+                <line
+                  x1={p.x}
+                  y1={-p.y - far}
+                  x2={p.x}
+                  y2={-p.y + far}
+                  stroke="#0284c7"
+                  strokeOpacity={0.5}
+                  strokeWidth={1 / camera.pixelsPerMetre}
+                  strokeDasharray={`${6 / camera.pixelsPerMetre} ${4 / camera.pixelsPerMetre}`}
+                />
+              );
+            })()}
+            {dimensionDraft.points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={-p.y} r={3 / camera.pixelsPerMetre} fill="#0284c7" />
+            ))}
+          </g>
+        )}
         {drawing && draftPoints.length > 0 && (
           <polyline
             points={draftPoints.map((p) => `${p.x},${-p.y}`).join(" ")}

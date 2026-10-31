@@ -47,6 +47,7 @@ export function derivePlanScene(
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),
     columns: new Map(plan.columns.map((c) => [c.id, c])),
+    dimensions: new Map(plan.dimensions.map((d) => [d.id, d])),
     // Columns: outline in plan; filled like a cut wall where the 1 m cut plane meets them
     // (docs/STUETZEN.md, P2). Unknown storey height keeps a bound column uncut.
     columnViews: new Map(
@@ -78,7 +79,7 @@ export function derivePlanScene(
 }
 export type PlanScene = ReturnType<typeof derivePlanScene>;
 export type PlanRun = {
-  kind: "reference" | "room" | "slab" | "roof" | "hatch" | "wall" | "column" | "line";
+  kind: "reference" | "room" | "slab" | "roof" | "hatch" | "wall" | "column" | "line" | "dimension";
   ids: string[];
   affected: boolean;
 };
@@ -98,6 +99,8 @@ export function planSceneRuns(scene: PlanScene, replacedIds: readonly string[]):
     ["wall", scene.plan.walls],
     ["column", scene.plan.columns],
     ["line", scene.plan.lines],
+    // Dimension chains annotate everything below them (docs/MASSKETTE.md).
+    ["dimension", scene.plan.dimensions],
   ] as const) {
     let run: PlanRun | undefined;
     for (const element of elements) {
