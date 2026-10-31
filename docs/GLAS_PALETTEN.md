@@ -1,0 +1,12 @@
+# Glas-Paletten über einer durchgehenden Zeichenfläche (G1–G4, 31.10.2026)
+
+Nutzervorgabe: Navigator, Werkzeugeigenschaften und Werkzeugkasten sollen den milchig-gläsernen, leicht transparenten Stil der Einstellungsfenster haben; die Zeichenfläche läuft überall durch, die Paletten liegen darüber.
+
+- **G1 Durchgehende Fläche** (`CadWorkspace.tsx`): Unter der Menüleiste füllt eine Bühne den ganzen Bereich bis zur Statusleiste. Die Ansicht (2D, eine Ansicht) reicht über die ganze Bühne; Werkzeugeigenschaften (oben, 130 px), Werkzeugkasten (links) und Navigator (rechts) schweben darüber. Menüleiste und Statusleiste bleiben fest.
+- **G2 Glas**: Alle drei Paletten nutzen `glass-panel-strong` wie die Einstellungsfenster (82 → 64 % Weiß, 40 px Weichzeichnung). Linien und Wände darunter schimmern milchig durch; feine Rasterlinien verschwinden in der Weichzeichnung.
+- **G3 Bedienung**: Navigator per Griff am linken Rand in der Breite ziehbar (240–560 px, Vorgabe 320 px, im Browser gemerkt: `novikov.navigator.width`), schließen/öffnen wie bisher; Werkzeugkasten ein-/ausklappbar; Vollbild unverändert (nur die Werkzeugeigenschaften bleiben). Geteilte Ansichten (2–4) liegen im freien Bereich zwischen den Paletten, nicht darunter; 3D ebenfalls im freien Bereich, nur der Hintergrund läuft durch.
+- **G4 Freier Bereich** (`palette-layout.ts`, `fitPlanInset` in `plan-camera.ts`): Die Paletten-Ränder werden als Einrückung berechnet. „Einpassen“, „Ansicht zurücksetzen“ und das erste Laden setzen die Zeichnung mittig in den freien Bereich; Ansichtskopf, Zoom-Knöpfe, Maßstab, Achsen, Hinweise und die Befehlszeile liegen dort. Die Knöpfe „Navigator öffnen“ und „Exit fullscreen“ sitzen eine Zeile unter den Ansichtsknöpfen (vorher überdeckten sie den Vollbild-Knopf).
+- Hilfsfenster (On-Demand-Menü, Eingabe) erscheinen weiter am Mauszeiger oder an ihrer gemerkten Stelle und können über einer Palette liegen.
+- Testlauf: Die Testliste stand in der Befehlszeile von `npm test` und überschritt mit den neuen Tests die Windows-Grenze von 8191 Zeichen. Sie steht jetzt in `package.json` unter `testFiles`, `npm test` startet `scripts/run-tests.mjs` (AGENTS.md angepasst).
+
+Nachweis: 1385 Tests grün (3 neu), Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert (`089f79e4…97017b3`). Browser-Abnahme: Wand unter dem Navigator schimmert durch, Einpassen mittig im freien Bereich, Navigatorbreite ziehen und merken, Werkzeugkasten einklappen, Navigator schließen/öffnen, Vollbild, 3D, zwei Ansichten.
