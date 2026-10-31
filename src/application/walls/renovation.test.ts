@@ -42,11 +42,11 @@ test("drawn walls take the status of the tool defaults", () => {
 });
 
 test("schema 35 files load as Bestand; a smuggled status in a v35 file is refused", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 36);
+  assert.equal(PROJECT_SCHEMA_VERSION, 37);
   const stored = JSON.parse(serializeProject(createExampleProject()));
   const v35 = { ...stored, schemaVersion: 35 };
   const loaded = loadProjectData(v35);
-  assert.equal(loaded.schemaVersion, 36);
+  assert.equal(loaded.schemaVersion, PROJECT_SCHEMA_VERSION);
   assert.equal(wall(loaded).renovation, undefined);
   const smuggled = structuredClone(v35);
   smuggled.storeys[0].walls[0].renovation = "new";

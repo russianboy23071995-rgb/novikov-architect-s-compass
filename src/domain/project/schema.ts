@@ -3,6 +3,7 @@ import { wallBase, wallHeights } from "../elements/wall/heights.ts";
 import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
 import { slabSchema } from "../elements/slab/model.ts";
 import { roofSchema } from "../elements/roof/model.ts";
+import { columnLevels, columnSchema } from "../elements/column/model.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
@@ -438,7 +439,23 @@ export const projectV35Schema = projectV34Schema.extend({
     .min(1),
 });
 /** Schema 36: walls carry a renovation status (docs/BAUZUSTAND.md, S2). */
-const projectSchema = projectV35Schema.extend({
+export const projectV36Schema = projectV35Schema.extend({
+  schemaVersion: z.literal(36),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(markedWindowSchema),
+        doors: z.array(doorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 37: columns per storey (docs/STUETZEN.md, L05). */
+const projectSchema = projectV36Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   storeys: z
     .array(
@@ -449,6 +466,7 @@ const projectSchema = projectV35Schema.extend({
         slabs: z.array(slabSchema).optional(),
         roofs: z.array(roofSchema).optional(),
         rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
       }),
     )
     .min(1),
@@ -835,6 +853,7 @@ export function validateProject(
       ...(s.slabs ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
+      ...(s.columns ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -878,6 +897,7 @@ export function validateProject(
     validateStoreySlabs(storey, project.layers);
     validateStoreyRoofs(storey, project.layers);
     validateStoreyRooms(storey, project.layers);
+    validateStoreyColumns(storey, project.layers);
     scope.hatchPatterns.forEach((p) => used.add(p.id));
     memo?.record(
       index,
@@ -932,6 +952,20 @@ function validateRoomNumbers(storeys: readonly Project["storeys"][number][]): vo
         throw new Error(`Raumnummer ${room.number.trim()} ist bereits vergeben.`);
       numbers.add(key);
     }
+}
+
+/** Columns reference an existing layer and keep a positive height; a bound top needs the storey
+ * height (docs/STUETZEN.md). */
+function validateStoreyColumns(storey: Project["storeys"][number], layers: { id: string }[]): void {
+  if (!storey.columns?.length) return;
+  const layerIds = new Set(layers.map((l) => l.id));
+  for (const column of storey.columns) {
+    if (!layerIds.has(column.layerId)) throw new Error("Unknown layer: " + column.layerId);
+    const levels = columnLevels(column, storey.height);
+    if (!levels) throw new Error(`Stütze ${column.id}: Geschossbindung braucht eine Geschosshöhe.`);
+    if (levels.top - levels.bottom <= 1e-9)
+      throw new Error(`Stütze ${column.id}: Oberkante muss über dem Fuß liegen.`);
+  }
 }
 
 /** Roofs reference an existing layer; outline, values and end cuts are checked by the schema. */

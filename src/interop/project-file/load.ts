@@ -39,11 +39,12 @@ import {
   projectV33Schema,
   projectV34Schema,
   projectV35Schema,
+  projectV36Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
 import type { Project } from "../../domain/project/schema.ts";
-import { createStandardLayers } from "../../domain/layers/model.ts";
+import { createStandardLayers, withColumnLayer } from "../../domain/layers/model.ts";
 import { clearHeightLine } from "../../domain/elements/room/height-line.ts";
 
 /** Own and fully storage-validate incoming assets once, before versioned project validation.
@@ -246,11 +247,18 @@ export function migrateProjectData(value: unknown): Project {
     );
   // Schema 35 walls carry no renovation status (= Bestand); the strict v35 schema rejects one.
   if (value.schemaVersion === 35)
+    return migrateProjectData(
+      withoutBoundHeights({ ...projectV35Schema.parse(value), schemaVersion: 36 }),
+    );
+  // Schema 36 files carry no columns; they get the standard Stütze layer (docs/STUETZEN.md).
+  if (value.schemaVersion === 36)
     return validateProject(
-      withoutBoundHeights({
-        ...projectV35Schema.parse(value),
-        schemaVersion: PROJECT_SCHEMA_VERSION,
-      }),
+      withColumnLayer(
+        withoutBoundHeights({
+          ...projectV36Schema.parse(value),
+          schemaVersion: PROJECT_SCHEMA_VERSION,
+        }),
+      ),
     );
   if (value.schemaVersion === PROJECT_SCHEMA_VERSION) return validateProject(value);
   if (value.schemaVersion === 8) {
