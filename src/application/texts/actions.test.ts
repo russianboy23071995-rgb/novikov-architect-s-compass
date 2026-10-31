@@ -4,8 +4,10 @@ import { createStandardProject } from "../projects/create.ts";
 import { addText, defaultTextLayerId, updateText } from "./actions.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import {
+  TEXT_DECORATION_DEFAULTS,
   TEXT_DEFAULTS,
   convertTextSize,
+  textBlock,
   textBox,
   textHeight,
 } from "../../domain/elements/text/model.ts";
@@ -97,4 +99,39 @@ test("switching paper and model size keeps the visible height at the output scal
     title: "Text",
     details: "Wohnen · 2,5 mm Papier",
   });
+});
+
+// docs/TEXT.md, T2.
+test("type style and decorations are stored, removable and checked", () => {
+  const p = updateText(withText(), "t1", {
+    bold: true,
+    italic: true,
+    underline: true,
+    background: { ...TEXT_DECORATION_DEFAULTS.background },
+    frame: { color: "#ff0000", width: 0.35 },
+    halo: { ...TEXT_DECORATION_DEFAULTS.halo },
+  });
+  assert.deepEqual(text(p).frame, { color: "#ff0000", width: 0.35 });
+  assert.equal(text(p).bold, true);
+  assert.deepEqual(readProjectFile(serializeProject(p)), p);
+  const plain = updateText(p, "t1", { background: undefined, bold: undefined });
+  assert.equal(JSON.parse(serializeProject(plain)).storeys[0].texts[0].background, undefined);
+  assert.throws(() => updateText(p, "t1", { frame: { color: "red", width: 0.35 } }));
+  assert.throws(() => updateText(p, "t1", { halo: { color: "#ffffff", width: 0 } }));
+});
+
+test("the drawn block grows by the background padding on every side", () => {
+  const base = {
+    position: { x: 0, y: 0 },
+    content: "AB",
+    size: { unit: "model" as const, value: 1 },
+    align: "left" as const,
+    anchor: "bottom" as const,
+    rotation: 0,
+  };
+  const tight = textBlock(base, 100, 2);
+  const padded = textBlock(base, 100, 2, 0.3);
+  assert.deepEqual(tight[0], { x: 0, y: -0.25 });
+  assert.deepEqual(tight[2], { x: 2, y: 1 });
+  assert.ok(Math.abs(padded[0]!.x + 0.3) < 1e-12 && Math.abs(padded[2]!.y - 1.3) < 1e-12);
 });

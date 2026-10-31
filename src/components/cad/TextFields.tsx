@@ -6,6 +6,7 @@ import {
   type PlanText,
 } from "@/domain/elements/text/model";
 import type { Layer } from "@/domain/layers/model";
+import { TextDecorationFields } from "./TextDecorationFields";
 
 /** Text settings without position and content: tool defaults and element properties. */
 export type TextDefaults = Omit<PlanText, "id" | "position" | "content">;
@@ -148,6 +149,7 @@ export function TextFields({
           ))}
         </select>
       </label>
+      <TextDecorationFields value={value} onChoose={choose} />
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import { TextGraphic } from "./TextGraphic";
-import { textBox } from "@/domain/elements/text/model";
+import { measuredTextWidth } from "./text-measure";
+import { textBlock, textHeight } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { dimensionLayout } from "@/domain/elements/dimension/model";
 import { cutPaint, wallCutPaint, type CutFill } from "./cut-fill";
@@ -626,7 +627,14 @@ export function PlanSceneContent({
         );
       })}
       {plan.texts.map((text) => {
-        const box = textBox(text, scaleContext.denominator);
+        // Selection follows the drawn block: measured width, background padding included.
+        const h = textHeight(text, scaleContext.denominator);
+        const box = textBlock(
+          text,
+          scaleContext.denominator,
+          measuredTextWidth(text) * h,
+          (text.background?.padding ?? 0) * h,
+        );
         const selected = selectedIds.has(text.id);
         return (
           <g key={text.id}>
@@ -640,7 +648,11 @@ export function PlanSceneContent({
               pointerEvents={placement ? "none" : "all"}
               className="cursor-pointer outline-none"
             />
-            <TextGraphic text={text} denominator={scaleContext.denominator} />
+            <TextGraphic
+              text={text}
+              denominator={scaleContext.denominator}
+              pixelsPerMetre={pixelsPerMetre}
+            />
           </g>
         );
       })}
