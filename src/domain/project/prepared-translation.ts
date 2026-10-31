@@ -1,3 +1,4 @@
+import { columnSchema } from "../elements/column/model.ts";
 import { translatePoint } from "../../geometry/primitives/point.ts";
 import { wallDependencyClosure } from "../elements/wall/dependency-closure.ts";
 import { prepareProjectSnapshot } from "./prepared-snapshot.ts";
@@ -39,6 +40,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.slabs ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
+      ...(s.columns ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -72,6 +74,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.slabs ? { slabs: s.slabs.filter((slab) => ids.has(slab.id)) } : {}),
       ...(s.roofs ? { roofs: s.roofs.filter((roof) => ids.has(roof.id)) } : {}),
       ...(s.rooms ? { rooms: s.rooms.filter((room) => ids.has(room.id)) } : {}),
+      ...(s.columns ? { columns: s.columns.filter((column) => ids.has(column.id)) } : {}),
     },
   };
   freeze(affected);
@@ -107,6 +110,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(storeyOf(affected).slabs ?? []),
       ...(storeyOf(affected).roofs ?? []),
       ...(storeyOf(affected).rooms ?? []),
+      ...(storeyOf(affected).columns ?? []),
       ...storeyOf(affected).lines!,
       ...storeyOf(affected).hatches,
       ...storeyOf(affected).references,
@@ -216,6 +220,15 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
               })),
             }
           : {}),
+        // A column moves with its centre (docs/STUETZEN.md, P3).
+        ...(storeyOf(affected).columns
+          ? {
+              columns: storeyOf(affected).columns!.map((column) => ({
+                ...column,
+                position: translate(column.position),
+              })),
+            }
+          : {}),
         wallJoins: localJoins,
         wallTJunctions: localTees,
       },
@@ -234,6 +247,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
     for (const slab of storeyOf(geometry).slabs ?? []) slabSchema.parse(slab);
     for (const roof of storeyOf(geometry).roofs ?? []) roofSchema.parse(roof);
     for (const room of storeyOf(geometry).rooms ?? []) roomSchema.parse(room);
+    for (const column of storeyOf(geometry).columns ?? []) columnSchema.parse(column);
     for (const opening of storeyOf(geometry).windows)
       if (!detachedEnd || opening.wallId === movingId)
         validateWindowGeometry(opening, localWalls.get(opening.wallId)!);
@@ -265,6 +279,7 @@ function prepareStoreyTranslation(base: Project, selectedIds: readonly string[])
       ...(s.slabs ? { slabs: replace(s.slabs, storeyOf(patch.geometry).slabs ?? []) } : {}),
       ...(s.roofs ? { roofs: replace(s.roofs, storeyOf(patch.geometry).roofs ?? []) } : {}),
       ...(s.rooms ? { rooms: replace(s.rooms, storeyOf(patch.geometry).rooms ?? []) } : {}),
+      ...(s.columns ? { columns: replace(s.columns, storeyOf(patch.geometry).columns ?? []) } : {}),
       wallJoins: retainedJoins,
       wallTJunctions: retainedTees,
     };
@@ -286,6 +301,7 @@ export function prepareStoreysTranslation(source: Project, selectedIds: readonly
       ...(s.slabs ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
+      ...(s.columns ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,
@@ -351,6 +367,7 @@ export function prepareTranslation(source: Project, selectedIds: readonly string
       ...(s.slabs ?? []),
       ...(s.roofs ?? []),
       ...(s.rooms ?? []),
+      ...(s.columns ?? []),
       ...(s.lines ?? []),
       ...s.hatches,
       ...s.references,

@@ -7,6 +7,7 @@ const ELEMENT_NAMES = [
   ["slabs", "Decke"],
   ["roofs", "Dach"],
   ["rooms", "Raum"],
+  ["columns", "Stütze"],
   ["hatches", "Schraffur"],
   ["lines", "Linie"],
   ["windows", "Fenster"],
@@ -51,6 +52,8 @@ export function snapPointLabel(
     }
     return `${name} · Ecke ${index + 1}`;
   }
+  if (feature === "centre") return `${name} · Mitte`;
+  if (feature.startsWith("quadrant-")) return `${name} · Rand`;
   if (feature === "axis-start") return `${name} · Anfang`;
   if (feature === "axis-end") return `${name} · Ende`;
   const corner = /^(?:join-)?corner-([01])-/.exec(feature);

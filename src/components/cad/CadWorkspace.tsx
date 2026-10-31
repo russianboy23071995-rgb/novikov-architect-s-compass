@@ -616,12 +616,15 @@ export function CadWorkspace({
   };
   const startEdit = (action: EditAction) => {
     setDemandOpen(false);
-    // Columns get their edit actions in L05 Teil 3 (docs/STUETZEN.md).
-    if (!selection || selection.kind === "reference" || selection.kind === "column") return;
+    if (!selection || selection.kind === "reference") return;
     const inSolid = mode === "3D" && activeViewport === 0;
     // Slabs and roofs: outline edited in the plan, moved as a whole (SLAB_/ROOF_ELEMENT.md).
+    // Columns move as a whole too (docs/STUETZEN.md, P3).
     const area =
-      selection.kind === "slab" || selection.kind === "roof" || selection.kind === "room";
+      selection.kind === "slab" ||
+      selection.kind === "roof" ||
+      selection.kind === "room" ||
+      selection.kind === "column";
     const solidMove =
       inSolid && !area && supportsHorizontalWorkplaneEdit(selection, action, pickedPoint.index);
     if (
@@ -639,7 +642,9 @@ export function CadWorkspace({
             ? storeyOf(project).roofs!.find((roof) => roof.id === selection.id)!.points[0]!
             : selection.kind === "room"
               ? storeyOf(project).rooms!.find((room) => room.id === selection.id)!.points[0]!
-              : editAnchor(project, selection));
+              : selection.kind === "column"
+                ? storeyOf(project).columns!.find((c) => c.id === selection.id)!.position
+                : editAnchor(project, selection));
       cancelInteraction();
       try {
         const axis =
@@ -671,7 +676,8 @@ export function CadWorkspace({
         slab: ["Decke", "die Decke", "Decken"],
         roof: ["Dach", "das Dach", "Dächer"],
         room: ["Raum", "der Raum", "Räume"],
-      }[selection.kind as "slab" | "roof" | "room"];
+        column: ["Stützen", "die Stütze", "Stützen"],
+      }[selection.kind as "slab" | "roof" | "room" | "column"];
       showNotice(
         inSolid
           ? `${words[0]}umriss im Grundriss bearbeiten; in 3D wird ${words[1]} als Ganzes bewegt.`
@@ -679,6 +685,8 @@ export function CadWorkspace({
       );
       return;
     }
+    // A column has no outline or point edits; it only moves as a whole (handled above).
+    if (selection.kind === "column") return;
     if (solidMove && selection.kind === "wall" && !pickedPoint.anchor) {
       showNotice("Zuerst einen sichtbaren Wandfußpunkt anklicken, dann die Bearbeitung wählen.");
       return;

@@ -19,6 +19,13 @@ import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { columnSettings, columnToolDefaults, columnValues } from "./defaults.ts";
 import { derivePlanScene, planSceneRuns } from "../../rendering/viewport/plan-scene.ts";
+import { prepareTranslation } from "../../domain/project/prepared-translation.ts";
+import { projectSnapReferences } from "../snapping/project-references.ts";
+import { snapPointLabel } from "../snapping/point-label.ts";
+import { pickupToolDefaults } from "../tools/pickup.ts";
+import { createLayerVisibilityPolicy, ALL_LAYERS_VISIBLE } from "../layers/visibility.ts";
+import { selectionSummary } from "../../components/cad/demand-menu.ts";
+import { columnAcceptanceProject } from "../../../benchmarks/column-ifc-acceptance.ts";
 
 // docs/STUETZEN.md, L05 Teil 1.
 const column = (p: Project, id: string) => (storeyOf(p).columns ?? []).find((c) => c.id === id)!;
@@ -184,4 +191,48 @@ test("plan: a column through the 1 m cut is filled, one above it only outlined",
   assert.equal(scene.columnViews.get("high")!.cut, false);
   assert.equal(scene.columnViews.get("s2")!.outline.length, 32);
   assert.ok(planSceneRuns(scene, []).some((r) => r.kind === "column" && r.ids.length === 3));
+});
+
+// docs/STUETZEN.md, P3: move, snap points, pipette, menu summary, Archicad file.
+test("a column moves with its centre; others stay; one checked change", () => {
+  const p = withColumns();
+  const moved = prepareTranslation(p, ["s1"]).materialize(p, { x: 1.5, y: -0.5 });
+  assert.deepEqual(column(moved, "s1").position, { x: 3.5, y: 2.5 });
+  assert.deepEqual(column(moved, "s2").position, column(p, "s2").position);
+  assert.deepEqual(column(moved, "s1").shape, column(p, "s1").shape);
+});
+
+test("snap points: centre, rectangle corners and rim points of a round column", () => {
+  const p = withColumns();
+  const refs = projectSnapReferences(p);
+  const of = (id: string) => refs.filter((r) => r.entityId === id);
+  assert.deepEqual(of("s1").find((r) => r.feature === "centre")!.point, { x: 2, y: 3 });
+  assert.equal(of("s1").filter((r) => r.feature.startsWith("vertex-")).length, 4);
+  assert.equal(of("s2").filter((r) => r.feature.startsWith("quadrant-")).length, 4);
+  assert.equal(snapPointLabel(p, "s1", "centre"), "Stütze · Mitte");
+  assert.equal(snapPointLabel(p, "s1", "vertex-2"), "Stütze · Ecke 3");
+  assert.equal(snapPointLabel(p, "s2", "quadrant-1"), "Stütze · Rand");
+});
+
+test("pipette hands every column setting to the tool; the menu names the column", () => {
+  const p = withColumns();
+  const picked = pickupToolDefaults(p, createLayerVisibilityPolicy(p, ALL_LAYERS_VISIBLE), {
+    kind: "column",
+    id: "s2",
+  });
+  assert.equal(picked?.tool, "column");
+  if (picked?.tool !== "column") throw new Error("Expected column");
+  assert.deepEqual(columnValues(picked.values), columnValues(columnSettings(column(p, "s2"))));
+  assert.deepEqual(selectionSummary(p, { kind: "column", id: "s2" }), {
+    title: "Stütze",
+    details: "Rund Ø 0,30 m · Höhe 2,50 m",
+  });
+});
+
+test("Archicad acceptance file: four columns, ring of walls, valid IFC", async () => {
+  const p = columnAcceptanceProject();
+  assert.equal(storeyOf(p).columns!.length, 4);
+  const ifc = await exportIfc(p, new Date("2026-10-31T12:00:00Z"));
+  assert.equal(ifc.split("\n").filter((l) => l.includes("=IFCCOLUMN(")).length, 4);
+  assert.ok(ifc.includes("'Status',$,IFCLABEL('DEMOLISH')"));
 });
