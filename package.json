@@ -279,6 +279,7 @@
     "src/application/openings/inserts.test.ts",
     "src/rendering/viewport/door-symbol.test.ts",
     "src/interop/ifc/door.test.ts",
+    "src/interop/ifc/insert.test.ts",
     "src/application/doors/command.test.ts",
     "src/rendering/viewport/door-picking.test.ts",
     "src/rendering/viewport/door-leaf.test.ts",

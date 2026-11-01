@@ -7,7 +7,7 @@ Nutzervorgabe (01.11.2026): Fenster und Tür bestehen aus einer Öffnung und ein
 | FT1 | Datenmodell (Schema 42), Werkzeugvorgaben, Elementfenster | erledigt |
 | FT2 | Rahmen, Glas, Türblatt als Körper in 3D und Schnitt | erledigt |
 | FT3 | Grundrisssymbol nach Element | erledigt |
-| FT4 | IFC mit Geometrie und Laibungsangaben, Prüfung in Archicad | offen |
+| FT4 | IFC mit Geometrie und Laibungsangaben, Prüfung in Archicad | erledigt, Archicad-Prüfung offen |
 
 ## FT1 – Datenmodell und Einstellungen
 
@@ -55,3 +55,15 @@ Grenzen: Fensterbank als Rechteck ohne Gefälle; keine Flügel- und Öffnungssym
 Nachweis: `src/rendering/viewport/opening-plan-symbol.test.ts` (2 Tests: Fensterpfosten, Glas und Fensterbänke an den richtigen Stellen, SVG-Spiegelung, reine Öffnung ohne Symbol; Zarge und lichte Breite der Tür). 1448 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): neue Wand gezeichnet, Tür und Fenster mit den Werkzeugen gesetzt (beide mit Element nach Vorgabe). Grundriss: Tür mit Zargenpfosten und Blatt in der lichten Breite, Fenster mit Pfosten, Glaslinie und Fensterbänken über die Wandseiten; das alte Fenster ohne Element zeigt weiter die reine Öffnung. Bildschirmfoto an den Nutzer.
+
+## FT4 – IFC
+
+- **Körper:** Ein Fenster bzw. eine Tür mit Element bekommt im regulären Export einen echten `Body` (`SweptSolid`): je Teil ein `IfcExtrudedAreaSolid` aus `IfcRectangleProfileDef` (Profilname = Teil: `jamb`, `rail`, `glass`, `sill`, `leaf`), im Koordinatensystem der Platzierung des Fensters bzw. der Tür (Ursprung linke untere Ecke der Öffnung; bei Türen, die nach rechts aufgehen, gedreht wie bisher). Dieselben Teile wie in 3D, Schnitt und Grundriss (`src/domain/elements/window/insert-geometry.ts`, aus `rendering` in die Fachschicht verschoben, damit IFC sie nutzen darf). Koordinaten auf 1 nm gerundet.
+- **Laibung:** Je Element ein `IfcWindowType` bzw. `IfcDoorType` mit `IfcWindowLiningProperties` (LiningDepth = Rahmentiefe, LiningThickness = Rahmenbreite) bzw. `IfcDoorLiningProperties` (Zargentiefe bzw. Wanddicke, Zargenbreite) in `HasPropertySets`, verbunden mit `IfcRelDefinesByType`, dazu die Basismengen (Breite, Höhe, Fläche) wie in Variante V3. Der Typ entsteht für Elemente auch ohne die Option `fillingTypes`.
+- **Eigenschaften:** NOVIKOV_BIM erhält FrameWidth, FrameDepth, FrameLocation, FrameOffset, ExteriorSide, Division und die Überstände der Fensterbänke bzw. FrameWidth, FrameDepth, LeafThickness. `PlaceholderBody` entfällt bei Elementen.
+- **Reine Öffnungen:** unverändert (ohne Körper oder nach gewählter Variante V1–V3).
+- **Abnahmedatei:** `benchmarks/insert-ifc-acceptance.ts <datei.ifc>` – der Raum der Fensterprobe (6 × 4 m, Wände 30 cm), beide Fenster und die Tür mit Element in den Vorgabewerten, das große Fenster außen mit 2 cm Abstand. Erzeugt am 01.11.2026 als `Claude_Ablage_Code/ifc-abnahme/FT4-Fenster-Tueren.ifc` (395 Zeilen, 25 Extrusionskörper, drei Laibungsangaben).
+
+Grenzen: Keine Fensterflügel, Beschläge oder Öffnungssymbole im IFC; Materialien/Farben der Teile werden nicht geschrieben; der Typ gilt je Element (kein gemeinsamer Typ für gleiche Fenster); `LiningOffset` und die Paneelversätze bleiben leer; keine unabhängige Schemaprüfung (IfcOpenShell nicht installiert, Download nur mit Zustimmung). Ob Archicad Breite/Höhe, Körper und Laibung übernimmt (L21), prüft der Nutzer.
+
+Nachweis: `src/interop/ifc/insert.test.ts` (2 Tests: Fensterkörper mit sieben Teilen und Glasmaß, reines Fenster ohne Körper, Laibung am Fenstertyp, Eigenschaften, kein Platzhalter; Türkörper im gedrehten Türkoordinatensystem mit Blatt auf der Aufschlagseite, Laibung mit 17 Attributen). 1450 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Im Browser nicht geprüft (Export ist ein Dateidownload); die Abnahmedatei kommt aus derselben Exportfunktion.

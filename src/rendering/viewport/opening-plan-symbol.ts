@@ -1,6 +1,10 @@
 import type { BimWindow, Wall } from "../../domain/project/schema.ts";
 import type { Door } from "../../domain/elements/door/model.ts";
-import { doorInsertBoxes, windowInsertBoxes, type InsertBox } from "./opening-insert-solid.ts";
+import {
+  doorInsertBoxes,
+  windowInsertBoxes,
+  type InsertBox,
+} from "../../domain/elements/window/insert-geometry.ts";
 
 /** A rectangle in wall-local plan coordinates: x along the wall, y left of its direction. */
 export type PlanRect = { x: [number, number]; y: [number, number] };
