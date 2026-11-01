@@ -75,7 +75,8 @@ test("a window element exports its frame, glass and boards as the IfcWindow body
   // Lining on the window type: depth 8 cm, thickness 7 cm; no placeholder flag.
   const [lining] = rows(ifc, "IFCWINDOWLININGPROPERTIES");
   assert.match(lining!, /,\$,\$,\$,0\.08,0\.07,\$/);
-  const type = rows(ifc, "IFCWINDOWTYPE").find((r) => r.includes(`(${lining!.split("=")[0]})`));
+  // Its property sets start with the lining, the panel follows (FL4).
+  const type = rows(ifc, "IFCWINDOWTYPE").find((r) => r.includes(`(${lining!.split("=")[0]},`));
   assert.ok(type);
   assert.ok(ifc.includes("'FrameWidth',$,IFCLENGTHMEASURE(0.07)"));
   assert.ok(ifc.includes("'FrameLocation',$,IFCLABEL('centre')"));
@@ -126,4 +127,56 @@ test("element parts carry surface styles: glass 70 % transparent, frames white, 
   const solid = refs.get(glassSolids[0]!.match(/IFCSTYLEDITEM\((#\d+),/)![1]!)!;
   const profile = refs.get(solid.match(/\((#\d+),/)![1]!)!;
   assert.match(profile, /'glass'/);
+});
+
+test("sashes in IFC: partitioning, one panel per sash with its operation, values in NOVIKOV_BIM", async () => {
+  // docs/FENSTER_TUEREN.md, FL4.
+  const { withDivision } = await import("../../domain/elements/window/insert.ts");
+  const { panelOperation, windowPanels, windowPartitioning } = await import("./writer.ts");
+  assert.equal(panelOperation({ operation: "turn", hinge: "left" }), "SIDEHUNGLEFTHAND");
+  assert.equal(panelOperation({ operation: "turn-tilt", hinge: "right" }), "TILTANDTURNRIGHTHAND");
+  assert.equal(panelOperation({ operation: "tilt", hinge: "left" }), "BOTTOMHUNG");
+  const double = withDivision(WINDOW_INSERT_DEFAULTS, "double");
+  assert.equal(windowPartitioning(double), "DOUBLE_PANEL_VERTICAL");
+  assert.deepEqual(windowPanels(double), [
+    { operation: "SIDEHUNGLEFTHAND", position: "LEFT" },
+    { operation: "TILTANDTURNRIGHTHAND", position: "RIGHT" },
+  ]);
+  const transom = withDivision(WINDOW_INSERT_DEFAULTS, "transom");
+  assert.equal(windowPartitioning(transom), "DOUBLE_PANEL_HORIZONTAL");
+  assert.deepEqual(windowPanels(transom), [
+    { operation: "FIXEDCASEMENT", position: "TOP" },
+    { operation: "TILTANDTURNLEFTHAND", position: "BOTTOM" },
+  ]);
+  assert.deepEqual(windowPanels(WINDOW_INSERT_DEFAULTS), [
+    { operation: "FIXEDCASEMENT", position: "MIDDLE" },
+  ]);
+  // Export: the window, its type and two panels with the sash frame (8 cm deep, 6 cm wide).
+  const p = addWindow(updateWall(createExampleProject(), "wall-1", { end: { x: 8, y: 0 } }), {
+    id: "window-2",
+    wallId: "wall-1",
+    width: 1.2,
+    height: 1.35,
+    sillHeight: 0.9,
+    position: 0.55,
+    insert: double,
+  });
+  const ifc = await exportIfc(p, date);
+  const window = rows(ifc, "IFCWINDOW").find((r) => r.includes("'window-2'"))!;
+  assert.match(window, /,\.WINDOW\.,\.DOUBLE_PANEL_VERTICAL\.,\$\);$/);
+  const panels = rows(ifc, "IFCWINDOWPANELPROPERTIES");
+  assert.equal(panels.length, 2);
+  assert.match(panels[0]!, /,\$,\$,\$,\.SIDEHUNGLEFTHAND\.,\.LEFT\.,0\.08,0\.06,\$\);$/);
+  assert.match(panels[1]!, /\.TILTANDTURNRIGHTHAND\.,\.RIGHT\./);
+  assert.equal(panels[0]!.split(",").length, 9);
+  const type = rows(ifc, "IFCWINDOWTYPE")[0]!;
+  assert.match(type, /\.WINDOW\.,\.DOUBLE_PANEL_VERTICAL\.,\.F\.,\$\);$/);
+  for (const panel of panels) assert.ok(type.includes(panel.split("=")[0]!));
+  assert.ok(ifc.includes("'Sashes',$,IFCLABEL('turn/left; turn-tilt/right')"));
+  assert.ok(ifc.includes("'MullionWidth',$,IFCLENGTHMEASURE(0.08)"));
+  // The body carries the sash parts: 2 jambs, 2 rails, mullion, 8 sash members, 2 panes, 2 boards.
+  assert.equal(
+    rows(ifc, "IFCRECTANGLEPROFILEDEF").filter((r) => /'(sash|mullion)'/.test(r)).length,
+    9,
+  );
 });

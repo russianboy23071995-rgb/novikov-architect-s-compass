@@ -103,7 +103,7 @@ Nutzerwahl (01.11.2026): als nächstes Thema die Fensterflügel, in vier Schritt
 | FL1 | Teilungen und Öffnungsarten im Modell, Werkzeug- und Elementfenster | erledigt |
 | FL2 | Flügelrahmen, Pfosten, Kämpfer in 3D und Schnitt | erledigt |
 | FL3 | Flügel im Grundriss (mit FL2), Öffnungsdreiecke in Ansicht und Schnitt | erledigt |
-| FL4 | IFC: PartitioningType, Paneel-Angaben, Flügelkörper | offen |
+| FL4 | IFC: PartitioningType, Paneel-Angaben, Flügelkörper | erledigt, Archicad-Prüfung offen |
 
 ### FL1 – Teilungen und Öffnungsarten
 
@@ -140,3 +140,15 @@ Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (T
 Grenzen: Kein Symbol in 3D; ein teilweise von der Ebene abgeschnittener Flügel zeigt seine Linien nur ohne Schnitt durch die Scheibe; Flügel nach außen öffnend gibt es nicht.
 
 Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (2-flüglig: innen durchgezogen 2 + 4 Linien, Spitze des Drehflügels an seiner linken Kante auf halber Höhe, Kipplinien treffen sich unten; außen gestrichelt; Festverglasung ohne Symbol). 1457 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster 2-flüglig, „Vier Ansichten erzeugen“, Südansicht (außen): links Dreh-Kipp mit Spitze links und Kipp-Spitze unten, rechts Dreh mit Spitze rechts, gestrichelt. Bildschirmfoto an den Nutzer.
+
+### FL4 – Flügel im IFC
+
+- **Teilung:** `IfcWindow.PartitioningType` und `IfcWindowType.PartitioningType`: Festverglasung und 1-flüglig `SINGLE_PANEL`, 2-flüglig `DOUBLE_PANEL_VERTICAL`, Oberlicht `DOUBLE_PANEL_HORIZONTAL`. Reine Öffnungen bleiben `NOTDEFINED`.
+- **Paneele:** je Paneel ein `IfcWindowPanelProperties` am Typ (nach der Laibung in `HasPropertySets`), in IFC-Reihenfolge (links → rechts, oben → unten): Öffnungsart Dreh `SIDEHUNG…HAND`, Dreh-Kipp `TILTANDTURN…HAND`, Kipp `BOTTOMHUNG`, festes Oberlicht/Festverglasung `FIXEDCASEMENT`; Lage `MIDDLE`, `LEFT`/`RIGHT` bzw. `TOP`/`BOTTOM`; FrameDepth = Rahmentiefe, FrameThickness = Flügelrahmenbreite (bei festen Paneelen leer). **Annahme:** LEFTHAND/RIGHTHAND = Bandseite von innen gesehen, wie im Fensterfenster; in Archicad zu prüfen.
+- **Körper:** Flügelhölzer, Pfosten/Kämpfer und Scheiben gehen seit FL2 als eigene Teile (Profilnamen `sash`, `mullion`, `glass`) mit Oberflächenstilen hinaus.
+- **NOVIKOV_BIM:** zusätzlich SashWidth, MullionWidth (2-flüglig, Oberlicht), TransomHeight (Oberlicht) und Sashes (z. B. „turn/left; turn-tilt/right“).
+- **Abnahmedatei:** `benchmarks/insert-ifc-acceptance.ts <datei> --sashes` – großes Fenster 2-flüglig (außen, 2 cm Abstand), kleines Fenster mit Oberlicht, Tür; erzeugt als `Claude_Ablage_Code/ifc-abnahme/FL4-Fensterfluegel.ifc` (561 Zeilen, vier Paneelangaben).
+
+Grenzen: Händigkeit der Paneele angenommen (s. o.); keine Paneel-Darstellungsformen (`ShapeAspectStyle`) und keine Beschläge; Beschriftung „0,00 x 0,00“ in Archicad weiter offen (G2).
+
+Nachweis: neuer Test in `src/interop/ifc/insert.test.ts` (Abbildung der Öffnungsarten, Teilungen und Paneele je Teilung, Export mit DOUBLE_PANEL_VERTICAL an Fenster und Typ, zwei Paneele mit 9 Attributen und Flügelrahmen 8 × 6 cm, Typ verweist auf beide, NOVIKOV_BIM-Werte, neun Flügel-/Pfostenkörper); Laibungstest an die erweiterten Typ-Eigenschaften und ein älterer Platzierungstest an SINGLE_PANEL angepasst. 1458 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Archicad-Prüfung durch den Nutzer offen.
