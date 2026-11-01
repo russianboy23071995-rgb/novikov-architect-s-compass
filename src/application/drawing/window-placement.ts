@@ -12,12 +12,14 @@ import { isLayerVisible } from "../layers/visibility.ts";
 import type { ToolInteraction } from "../tools/interaction.ts";
 import { querySnap } from "../../constraints/snapping/engine.ts";
 import { newOpeningMark } from "../openings/marks.ts";
+import { WINDOW_INSERT_DEFAULTS, type WindowInsert } from "../../domain/elements/window/insert.ts";
 
 export const defaultDrawingWindow = { width: 1.2, height: 1.35, sillHeight: 0.9 } as const;
 
 export type WindowDimensions = { width: number; height: number; sillHeight: number };
+/** `insert`: the window element new windows get (FT1); null: opening only; absent: defaults. */
 export type WindowDimensionDraft = Readonly<
-  Record<keyof WindowDimensions, string> & { layerId?: string }
+  Record<keyof WindowDimensions, string> & { layerId?: string; insert?: WindowInsert | null }
 >;
 export function parseWindowDimensions(draft: WindowDimensionDraft): WindowDimensions {
   const width = parseMetres(draft.width),
@@ -132,6 +134,7 @@ export function placeWindow(
   dimensions: WindowDimensions = defaultDrawingWindow,
   hostId?: string,
   layerId: string = current.defaultLayerIds.window,
+  insert: WindowInsert | null = WINDOW_INSERT_DEFAULTS,
 ): Project {
   if (base !== current || !visibility.isCurrent(current, visibility.context))
     throw new Error("Fensterplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
@@ -148,6 +151,7 @@ export function placeWindow(
     position: boundedWindowPosition(current, host.wall, dimensions.width, host.position),
     ...dimensions,
     mark: newOpeningMark(current, "window"),
+    ...(insert ? { insert } : {}),
   });
 }
 
@@ -255,6 +259,7 @@ export function windowPlacementInteraction(
         dimensions,
         hostId,
         settings?.draft.layerId,
+        settings?.draft.insert === undefined ? WINDOW_INSERT_DEFAULTS : settings.draft.insert,
       );
     },
     commit,

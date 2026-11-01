@@ -1,4 +1,5 @@
 import { RoofProperties } from "./RoofProperties";
+import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
 import { RoomProperties } from "./RoomProperties";
 import { ColumnProperties } from "./ColumnProperties";
 import { StairProperties } from "./StairProperties";
@@ -404,6 +405,7 @@ export function BimInspector({
                   ...defaultDrawingWindow,
                   position: 0.5,
                   mark: newOpeningMark(project, "window"),
+                  insert: WINDOW_INSERT_DEFAULTS,
                 }),
                 { kind: "window", id },
               );

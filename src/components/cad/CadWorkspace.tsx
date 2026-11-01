@@ -4,6 +4,14 @@ import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
+import { OpeningInsertFields } from "./OpeningInsertFields";
+import { setOpeningInsert } from "@/application/openings/inserts";
+import {
+  checkedDoorInsert,
+  checkedWindowInsert,
+  DOOR_INSERT_DEFAULTS,
+  WINDOW_INSERT_DEFAULTS,
+} from "@/domain/elements/window/insert";
 import { useRememberedPosition } from "./useRememberedPosition";
 
 /** Browser storage keys of the remembered helper positions (docs/HILFSFENSTER.md). */
@@ -2042,6 +2050,54 @@ export function CadWorkspace({
                     label: name,
                     content: toolFields(settingsWindow.tool, "window"),
                   },
+                  // Element set into new openings (docs/FENSTER_TUEREN.md, FT1).
+                  ...(settingsWindow.tool === "window"
+                    ? [
+                        {
+                          id: "insert",
+                          label: "Fensterelement",
+                          content: (
+                            <OpeningInsertFields
+                              kind="window"
+                              value={
+                                toolDefaults.window.insert === undefined
+                                  ? WINDOW_INSERT_DEFAULTS
+                                  : toolDefaults.window.insert
+                              }
+                              onChange={(insert) => {
+                                const checked = insert && checkedWindowInsert(insert);
+                                cancelInteraction();
+                                toolDefaults.setWindow({ ...toolDefaults.window, insert: checked });
+                              }}
+                              hint="Vorgabe für neue Fenster. Ob es in eine Wand passt, wird beim Platzieren geprüft."
+                            />
+                          ),
+                        },
+                      ]
+                    : settingsWindow.tool === "door"
+                      ? [
+                          {
+                            id: "insert",
+                            label: "Türelement",
+                            content: (
+                              <OpeningInsertFields
+                                kind="door"
+                                value={
+                                  toolDefaults.door.insert === undefined
+                                    ? DOOR_INSERT_DEFAULTS
+                                    : toolDefaults.door.insert
+                                }
+                                onChange={(insert) => {
+                                  const checked = insert && checkedDoorInsert(insert);
+                                  cancelInteraction();
+                                  toolDefaults.setDoor({ ...toolDefaults.door, insert: checked });
+                                }}
+                                hint="Vorgabe für neue Türen. Ob sie in eine Wand passt, wird beim Platzieren geprüft."
+                              />
+                            ),
+                          },
+                        ]
+                      : []),
                   ...(settingsWindow.tool === "wall" ||
                   settingsWindow.tool === "column" ||
                   settingsWindow.tool === "stair"
@@ -2112,6 +2168,56 @@ export function CadWorkspace({
                     />
                   ),
                 },
+                ...(target.kind === "window" || target.kind === "door"
+                  ? [
+                      {
+                        id: "insert",
+                        label: target.kind === "window" ? "Fensterelement" : "Türelement",
+                        content: (() => {
+                          const storey = storeyOf(project);
+                          const hint = "Gilt für dieses Element; ein Rückgängig-Schritt.";
+                          if (target.kind === "window") {
+                            const opening = storey.windows.find((w) => w.id === target.id);
+                            return (
+                              <OpeningInsertFields
+                                kind="window"
+                                value={opening?.insert ?? null}
+                                onChange={(insert) =>
+                                  changeProject(
+                                    setOpeningInsert(project, {
+                                      kind: "window",
+                                      id: target.id,
+                                      insert: insert && checkedWindowInsert(insert),
+                                    }),
+                                    target,
+                                  )
+                                }
+                                hint={hint}
+                              />
+                            );
+                          }
+                          const door = (storey.doors ?? []).find((d) => d.id === target.id);
+                          return (
+                            <OpeningInsertFields
+                              kind="door"
+                              value={door?.insert ?? null}
+                              onChange={(insert) =>
+                                changeProject(
+                                  setOpeningInsert(project, {
+                                    kind: "door",
+                                    id: target.id,
+                                    insert: insert && checkedDoorInsert(insert),
+                                  }),
+                                  target,
+                                )
+                              }
+                              hint={hint}
+                            />
+                          );
+                        })(),
+                      },
+                    ]
+                  : []),
                 ...(target.kind === "wall" || target.kind === "column" || target.kind === "stair"
                   ? [
                       {
