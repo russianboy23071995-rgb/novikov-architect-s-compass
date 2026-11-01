@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 
 export type ToolId =
   | "measure"
@@ -24,7 +24,8 @@ export type CadTool = {
   id: ToolId;
   label: string;
   shortcut: string;
-  icon: LucideIcon;
+  /** Lucide icon or an own pictogram (tool-icons.tsx). */
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 };
 
 export type TreeNode = {
