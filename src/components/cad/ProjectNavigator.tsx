@@ -75,7 +75,13 @@ function TreeItem({
           className="h-7 min-w-0 flex-1 justify-start gap-1.5 rounded-sm px-0 text-[13px] font-normal hover:bg-transparent"
           aria-pressed={active.includes(node.id)}
           onDoubleClick={() => onRename(node.id)}
-          title={depth === 1 ? "Doppelklick zum Umbenennen" : undefined}
+          title={
+            node.kind === "item"
+              ? "Klick öffnet den Schnitt als Tab · Doppelklick öffnet sein Fenster"
+              : depth === 1
+                ? "Doppelklick zum Umbenennen"
+                : undefined
+          }
           onClick={(event) => onSelect(node.id, node.label, event.ctrlKey || event.metaKey)}
         >
           <Icon className="size-3.5 shrink-0 opacity-70" />
@@ -104,6 +110,8 @@ type ProjectNavigatorProps = DocumentNavigation & {
 
   active: readonly string[];
   onSelect: (id: string, label: string, toggle?: boolean) => void;
+  /** Double click on a section entry opens its window (docs/SCHNITT.md, SC2). */
+  onSectionSettings: (id: string) => void;
   onClose: () => void;
 };
 
@@ -114,6 +122,7 @@ function NavigatorContent({
   project,
   onRenameStorey,
   onBuildingChange,
+  onSectionSettings,
   ...documents
 }: ProjectNavigatorProps) {
   const [settings, setSettings] = useState(false);
@@ -132,9 +141,18 @@ function NavigatorContent({
             .reverse()
             .map((s) => ({ id: s.id, label: s.name, kind: "group" })),
         },
-        { id: SECTIONS_FOLDER_ID, label: "Schnitte", kind: "group", children: [] },
+        {
+          id: SECTIONS_FOLDER_ID,
+          label: "Schnitte",
+          kind: "group",
+          children: (project.sections ?? []).map((s) => ({
+            id: s.id,
+            label: `${s.mark} · ${s.name}`,
+            kind: "item",
+          })),
+        },
       ] satisfies TreeNode[],
-    [project.id, project.storeys],
+    [project.id, project.storeys, project.sections],
   );
   return (
     <aside
@@ -193,6 +211,7 @@ function NavigatorContent({
               active={active}
               onSelect={onSelect}
               onRename={(id) => {
+                if (project.sections?.some((s) => s.id === id)) return onSectionSettings(id);
                 if (id === project.id) setSettings(true);
                 if (project.storeys.some((s) => s.id === id) && id !== project.groundStoreyId)
                   setSettings(true);
@@ -270,6 +289,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
   )
     active.current = props.active;
   const onClose = useCallback(() => latest.current.onClose(), []);
+  const onSectionSettings = useCallback((id: string) => latest.current.onSectionSettings(id), []);
   const onSelect = useCallback<ProjectNavigatorProps["onSelect"]>(
     (...args) => latest.current.onSelect(...args),
     [],
@@ -302,6 +322,7 @@ export function ProjectNavigator(props: ProjectNavigatorProps) {
       project={props.project}
       active={active.current}
       onSelect={onSelect}
+      onSectionSettings={onSectionSettings}
       onClose={onClose}
     />
   );

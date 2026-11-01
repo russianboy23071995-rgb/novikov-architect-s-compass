@@ -43,6 +43,7 @@ import {
   projectV37Schema,
   projectV38Schema,
   projectV39Schema,
+  projectV40Schema,
 } from "../../domain/project/schema.ts";
 import { withOpeningMarks } from "../../domain/elements/wall/opening-marks.ts";
 import { withStoreyBindings } from "../../domain/elements/wall/height-binding.ts";
@@ -262,14 +263,19 @@ export function migrateProjectData(value: unknown): Project {
     return migrateProjectData(
       withColumnLayer(withoutBoundHeights({ ...projectV36Schema.parse(value), schemaVersion: 37 })),
     );
+  // Schema 40 files carry no sections; the strict v40 schema rejects smuggled ones.
+  if (value.schemaVersion === 40)
+    return validateProject(
+      withoutBoundHeights({
+        ...projectV40Schema.parse(value),
+        schemaVersion: PROJECT_SCHEMA_VERSION,
+      }),
+    );
   // Schema 39 files carry no stairs; they get the standard Treppe layer (docs/TREPPE.md).
   if (value.schemaVersion === 39)
-    return validateProject(
+    return migrateProjectData(
       withStandardLayer(
-        withoutBoundHeights({
-          ...projectV39Schema.parse(value),
-          schemaVersion: PROJECT_SCHEMA_VERSION,
-        }),
+        withoutBoundHeights({ ...projectV39Schema.parse(value), schemaVersion: 40 }),
         "stair",
       ),
     );

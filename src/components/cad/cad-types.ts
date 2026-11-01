@@ -8,6 +8,7 @@ export type ToolId =
   | "wall"
   | "column"
   | "stair"
+  | "section"
   | "slab"
   | "roof"
   | "room"

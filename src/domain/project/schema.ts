@@ -7,6 +7,7 @@ import { columnLevels, columnSchema } from "../elements/column/model.ts";
 import { dimensionSchema } from "../elements/dimension/model.ts";
 import { textSchema } from "../elements/text/model.ts";
 import { stairGeometry, stairSchema } from "../elements/stair/model.ts";
+import { sectionSchema } from "../views/sections.ts";
 import { roomNumberKey, roomSchema, roomV32Schema, roomV33Schema } from "../elements/room/model.ts";
 import {
   legacyWallTopBindingSchema,
@@ -512,8 +513,8 @@ export const projectV39Schema = projectV38Schema.extend({
     .min(1),
 });
 /** Schema 40: stairs per storey (docs/TREPPE.md, L06). */
-const projectSchema = projectV39Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV40Schema = projectV39Schema.extend({
+  schemaVersion: z.literal(40),
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
@@ -530,6 +531,11 @@ const projectSchema = projectV39Schema.extend({
       }),
     )
     .min(1),
+});
+/** Schema 41: sections of the building (docs/SCHNITT.md, SC2). */
+const projectSchema = projectV40Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  sections: z.array(sectionSchema).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -905,6 +911,7 @@ export function validateProject(
     ...(project.modelViews ?? []),
     ...(project.drawingDocuments ?? []),
     ...(project.documentFolders ?? []),
+    ...(project.sections ?? []),
     ...project.storeys.flatMap((s) => [
       s,
       ...s.walls,

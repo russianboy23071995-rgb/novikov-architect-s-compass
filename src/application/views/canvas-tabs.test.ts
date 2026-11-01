@@ -5,6 +5,9 @@ import {
   canvasTabLabel,
   canvasViewOf,
   closeCanvasTab,
+  existingCanvasTabs,
+  sectionTab,
+  tabSectionId,
   withCanvasTab,
 } from "./canvas-tabs.ts";
 
@@ -26,4 +29,17 @@ test("closing activates the neighbour, the last tab stays", () => {
     active: "plan",
   });
   assert.deepEqual(closeCanvasTab(["plan"], "plan", "plan"), { tabs: ["plan"], active: "plan" });
+});
+
+test("sections open as tabs named after the section; removed sections lose their tab", () => {
+  const tabs = withCanvasTab(["plan"], sectionTab("s1"));
+  assert.deepEqual(tabs, ["plan", "section:s1"]);
+  assert.equal(tabSectionId("section:s1"), "s1");
+  assert.equal(tabSectionId("plan"), null);
+  assert.equal(
+    canvasTabLabel("section:s1", "EG", [{ id: "s1", name: "Schnitt A-A" }]),
+    "Schnitt A-A",
+  );
+  assert.deepEqual(existingCanvasTabs(tabs, new Set()), ["plan"]);
+  assert.deepEqual(existingCanvasTabs(tabs, new Set(["s1"])), tabs);
 });

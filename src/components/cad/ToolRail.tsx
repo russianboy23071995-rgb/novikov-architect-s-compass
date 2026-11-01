@@ -13,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   RulerDimensionLine,
+  SquareSplitHorizontal,
   Type,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,8 @@ const tools: CadTool[] = [
   // 2D tool for the last step of a plan (docs/MASSKETTE.md).
   { id: "dimension", label: "Maßkette", shortcut: "", icon: RulerDimensionLine },
   { id: "text", label: "Text", shortcut: "", icon: Type },
+  // 2D tool that derives a drawing; the section is the building's (docs/SCHNITT.md, SC2).
+  { id: "section", label: "Schnitt", shortcut: "", icon: SquareSplitHorizontal },
 ];
 
 type ToolRailProps = {
