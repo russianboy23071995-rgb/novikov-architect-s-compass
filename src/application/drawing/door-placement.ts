@@ -2,6 +2,7 @@ import { boundedWindowPosition } from "../../domain/elements/wall/window-range.t
 import { parseMetres } from "../../core/units/metres.ts";
 import type { Project, Point } from "../../domain/project/schema.ts";
 import { DOOR_DEFAULTS, type Door } from "../../domain/elements/door/model.ts";
+import { DOOR_INSERT_DEFAULTS, type DoorInsert } from "../../domain/elements/window/insert.ts";
 import { addDoor, defaultDoorLayerId } from "../doors/actions.ts";
 import { newOpeningMark } from "../openings/marks.ts";
 import type { LayerVisibilityPolicy } from "../layers/visibility.ts";
@@ -11,7 +12,11 @@ import { openingPlacementInteraction, resolveOpeningHost } from "./window-placem
 export type DoorSettings = Pick<Door, "width" | "height" | "zOffset" | "hinge" | "opensTo">;
 export type DoorSettingsDraft = Readonly<
   Record<"width" | "height" | "zOffset", string> &
-    Pick<Door, "hinge" | "opensTo"> & { layerId?: string }
+    Pick<Door, "hinge" | "opensTo"> & {
+      layerId?: string;
+      /** The door element new doors get (FT1); null: opening only; absent: defaults. */
+      insert?: DoorInsert | null;
+    }
 >;
 
 export const defaultDoorDraft: DoorSettingsDraft = {
@@ -44,6 +49,7 @@ export function placeDoor(
   settings: DoorSettings = DOOR_DEFAULTS,
   hostId?: string,
   layerId: string = defaultDoorLayerId(current),
+  insert: DoorInsert | null = DOOR_INSERT_DEFAULTS,
 ): Project {
   if (base !== current || !visibility.isCurrent(current, visibility.context))
     throw new Error("Türplatzierung nicht mehr aktuell. Werkzeug erneut starten.");
@@ -60,6 +66,7 @@ export function placeDoor(
     position: boundedWindowPosition(current, host.wall, settings.width, host.position, "Tür"),
     ...settings,
     mark: newOpeningMark(current, "door"),
+    ...(insert ? { insert } : {}),
   });
 }
 
@@ -90,6 +97,7 @@ export function doorPlacementInteraction(
         parseDoorSettings(settings.draft),
         hostId,
         settings.draft.layerId ?? defaultDoorLayerId(project),
+        settings.draft.insert === undefined ? DOOR_INSERT_DEFAULTS : settings.draft.insert,
       );
     },
     commit,

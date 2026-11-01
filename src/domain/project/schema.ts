@@ -1,6 +1,16 @@
 import { PROJECT_SCHEMA_VERSION } from "./format.ts";
 import { wallBase, wallHeights } from "../elements/wall/heights.ts";
-import { doorSchema, doorV27Schema, openingMarkSchema } from "../elements/door/model.ts";
+import {
+  doorSchema,
+  doorV27Schema,
+  insertedDoorSchema,
+  openingMarkSchema,
+} from "../elements/door/model.ts";
+import {
+  doorInsertProblem,
+  windowInsertProblem,
+  windowInsertSchema,
+} from "../elements/window/insert.ts";
 import { slabSchema } from "../elements/slab/model.ts";
 import { roofSchema } from "../elements/roof/model.ts";
 import { columnLevels, columnSchema } from "../elements/column/model.ts";
@@ -104,6 +114,8 @@ const legacyProjectSchema = z
 const currentWallSchema = wallSchema.extend({ layerId: id });
 const currentWindowSchema = windowSchema.extend({ layerId: id });
 const markedWindowSchema = currentWindowSchema.extend({ mark: openingMarkSchema.optional() });
+/** Schema 42: optionally a window element in the opening (docs/FENSTER_TUEREN.md, FT1). */
+const insertedWindowSchema = markedWindowSchema.extend({ insert: windowInsertSchema.optional() });
 const legacyCurrentLineSchema = lineSchema.extend({ layerId: id });
 const currentLineSchema = legacyCurrentLineSchema.extend({
   style: z.enum(["solid", "dashed", "break", "custom"]),
@@ -533,9 +545,29 @@ export const projectV40Schema = projectV39Schema.extend({
     .min(1),
 });
 /** Schema 41: sections of the building (docs/SCHNITT.md, SC2). */
-const projectSchema = projectV40Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV41Schema = projectV40Schema.extend({
+  schemaVersion: z.literal(41),
   sections: z.array(sectionSchema).optional(),
+});
+/** Schema 42: window and door elements in their openings (docs/FENSTER_TUEREN.md, FT1). */
+const projectSchema = projectV41Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(renovatedWallSchema),
+        windows: z.array(insertedWindowSchema),
+        doors: z.array(insertedDoorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+        stairs: z.array(stairSchema).optional(),
+      }),
+    )
+    .min(1),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -717,7 +749,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
 export type Wall = z.infer<typeof renovatedWallSchema>;
-export type BimWindow = z.infer<typeof markedWindowSchema>;
+export type BimWindow = z.infer<typeof insertedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
 export type DrawingLine = z.infer<typeof currentLineSchema>;
@@ -964,6 +996,7 @@ export function validateProject(
     };
     const scope = validateStoreyScope(scopeInput, scopeInput, reuse);
     validateStoreyDoors(storey, project.layers);
+    validateStoreyInserts(storey);
     validateStoreySlabs(storey, project.layers);
     validateStoreyRoofs(storey, project.layers);
     validateStoreyRooms(storey, project.layers);
@@ -1003,6 +1036,23 @@ function validateStoreyDoors(storey: Project["storeys"][number], layers: { id: s
     const bottom = door.zOffset - wallBase(wall);
     if (bottom < 0 || bottom + door.height > wall.height)
       throw new Error(`Tür ${door.id} muss in die Wandhöhe passen.`);
+  }
+}
+
+/** Window and door elements fit their opening and the wall thickness (FT1). */
+function validateStoreyInserts(storey: Project["storeys"][number]): void {
+  const walls = new Map(storey.walls.map((w) => [w.id, w]));
+  for (const window of storey.windows) {
+    const wall = walls.get(window.wallId);
+    const problem =
+      window.insert && wall ? windowInsertProblem(window.insert, window, wall.thickness) : null;
+    if (problem) throw new Error(`Fenster ${window.mark ?? window.id}: ${problem}`);
+  }
+  for (const door of storey.doors ?? []) {
+    const wall = walls.get(door.wallId);
+    const problem =
+      door.insert && wall ? doorInsertProblem(door.insert, door, wall.thickness) : null;
+    if (problem) throw new Error(`Tür ${door.mark ?? door.id}: ${problem}`);
   }
 }
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { wallBase } from "../wall/heights.ts";
+import { doorInsertSchema } from "../window/insert.ts";
 
 const id = z.string().trim().min(1);
 const positive = z.number().finite().positive();
@@ -30,7 +31,9 @@ export const doorSchema = z
   .strict();
 /** Schema 27 doors carried no position number. */
 export const doorV27Schema = doorSchema.omit({ mark: true });
-export type Door = z.infer<typeof doorSchema>;
+/** Schema 42: optionally a door element in the opening (docs/FENSTER_TUEREN.md, FT1). */
+export const insertedDoorSchema = doorSchema.extend({ insert: doorInsertSchema.optional() });
+export type Door = z.infer<typeof insertedDoorSchema>;
 
 /** Baurichtmaß nach DIN 18100 as the default structural opening (user decision 24.10.2026). */
 export const DOOR_DEFAULTS = {
