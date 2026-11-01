@@ -35,6 +35,7 @@ import {
 } from "@/application/drawing/path-closure";
 import type { ElementKind } from "../../application/selection/target.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
+import { columnOutline } from "../../domain/elements/column/model.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
 import type { HatchPatternSize } from "@/domain/elements/hatch/model";
 import { HatchPattern } from "./HatchPattern";
@@ -768,6 +769,23 @@ export function BimPlan({
         return;
       handles.push({ point, index, label: `Linienpunkt ${index + 1}` });
     });
+  } else if (selection?.kind === "column") {
+    // E1: corners of a rectangular column, the centre of a round one; a click moves the column
+    // with that point as its handle.
+    const column = storeyOf(project).columns?.find((c) => c.id === selection.id);
+    if (column)
+      (column.shape.kind === "circle" ? [column.position] : columnOutline(column)).forEach(
+        (point, index) => handles.push({ point, index, label: `Stützenecke ${index + 1}` }),
+      );
+  } else if (selection?.kind === "stair") {
+    // E1: corners of the stair outline; a click moves the stair with that corner as its handle.
+    const stair = storeyOf(project).stairs?.find((s) => s.id === selection.id);
+    if (stair) {
+      const g = stairGeometry(stair, storeyOf(project).height ?? null);
+      (g ? stairPlan(stair, g).outline : [stair.start]).forEach((point, index) =>
+        handles.push({ point, index, label: `Treppenecke ${index + 1}` }),
+      );
+    }
   }
   const pointFromEvent = (event: React.MouseEvent<SVGSVGElement>) => {
     const matrix = event.currentTarget.getScreenCTM();
@@ -1463,8 +1481,9 @@ export function BimPlan({
               className="cursor-pointer outline-none focus:stroke-foreground"
               onClick={(event) => {
                 event.stopPropagation();
-                // Regel 1: a click moves the corner at once; right click keeps every point action.
-                if (!axis && onCornerPick?.(selection, index, point)) return;
+                // Regel 1: a click moves the corner at once, also wall ends and corners and the
+                // corners of columns and stairs (E1); right click keeps every point action.
+                if (onCornerPick?.(selection, index, point)) return;
                 onSelect(selection, { x: event.clientX, y: event.clientY }, index, point);
               }}
               onContextMenu={(event) => {
