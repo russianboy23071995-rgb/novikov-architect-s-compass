@@ -99,15 +99,15 @@ test("schema 40 files load without sections; smuggled sections are refused", () 
 });
 
 test("symbol size: letter height in paper mm or model m, fixed to the model, not the screen", () => {
-  // docs/SCHNITT.md, SC4: default 5 mm on paper, at 1:100 that is 0,50 m in the model.
-  assert.deepEqual(SECTION_SYMBOL_SIZE, { unit: "paper", value: 5 });
-  assert.equal(sectionSymbolHeight(undefined, 100), 0.5);
-  assert.equal(sectionSymbolHeight(undefined, 50), 0.25);
+  // docs/SCHNITT.md, SC4 and S2: default 2,5 mm on paper, at 1:100 that is 0,25 m in the model.
+  assert.deepEqual(SECTION_SYMBOL_SIZE, { unit: "paper", value: 2.5 });
+  assert.equal(sectionSymbolHeight(undefined, 100), 0.25);
+  assert.equal(sectionSymbolHeight(undefined, 50), 0.125);
   assert.equal(sectionSymbolHeight({ unit: "model", value: 0.4 }, 50), 0.4);
   // Switching the unit keeps the visible size at the output scale.
   assert.deepEqual(convertSectionSymbolSize(SECTION_SYMBOL_SIZE, "model", 100), {
     unit: "model",
-    value: 0.5,
+    value: 0.25,
   });
   assert.deepEqual(convertSectionSymbolSize({ unit: "model", value: 0.5 }, "paper", 50), {
     unit: "paper",

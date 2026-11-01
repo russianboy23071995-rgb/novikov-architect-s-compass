@@ -19,7 +19,8 @@ export const sectionSymbolSizeSchema = z
   .object({ unit: z.enum(["paper", "model"]), value: z.number().finite().positive().max(1000) })
   .strict();
 export type SectionSymbolSize = z.infer<typeof sectionSymbolSizeSchema>;
-export const SECTION_SYMBOL_SIZE: SectionSymbolSize = { unit: "paper", value: 5 };
+/** Default 2,5 mm on paper (user decision 01.11.2026, S2; before 5 mm). */
+export const SECTION_SYMBOL_SIZE: SectionSymbolSize = { unit: "paper", value: 2.5 };
 
 /** Letter height of the mark in model metres at 1:denominator. */
 export function sectionSymbolHeight(
