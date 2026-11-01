@@ -7,6 +7,7 @@ import {
 import type { Project } from "@/domain/project/schema";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import { useOpeningPlacement, type OpeningPlacementKind } from "./useOpeningPlacement";
+import { WINDOW_INSERT_DEFAULTS } from "@/domain/elements/window/insert";
 
 const windowKind: OpeningPlacementKind<WindowDimensionDraft> = {
   idPrefix: "window",
@@ -14,6 +15,14 @@ const windowKind: OpeningPlacementKind<WindowDimensionDraft> = {
   parse: parseWindowDimensions,
   host: windowPlacementHost,
   interaction: windowPlacementInteraction,
+  // R1: a window element takes its outside from the second click; a plain opening has none.
+  side: {
+    applies: (draft) => draft.insert !== null,
+    with: (draft, exterior) => ({
+      ...draft,
+      insert: { ...(draft.insert ?? WINDOW_INSERT_DEFAULTS), exterior },
+    }),
+  },
 };
 
 /** Lifecycle owner only; geometry, snapping, validation and history stay shared. */

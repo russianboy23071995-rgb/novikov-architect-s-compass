@@ -62,6 +62,8 @@ export function OpeningInsertFields(
         value: WindowInsert | null;
         onChange: (value: WindowInsert | null) => void;
         hint: string;
+        /** Tool defaults: the outside comes from the second click (R1), so no field. */
+        clickedExterior?: boolean;
       }
     | {
         kind: "door";
@@ -97,7 +99,11 @@ export function OpeningInsertFields(
         {noun} einsetzen (aus: nur Öffnung)
       </label>
       {props.kind === "window" && props.value && (
-        <WindowInsertFields value={props.value} onChange={(v) => run(() => props.onChange(v))} />
+        <WindowInsertFields
+          value={props.value}
+          onChange={(v) => run(() => props.onChange(v))}
+          clickedExterior={props.clickedExterior ?? false}
+        />
       )}
       {props.kind === "door" && props.value && (
         <DoorInsertFields value={props.value} onChange={(v) => run(() => props.onChange(v))} />
@@ -115,9 +121,11 @@ export function OpeningInsertFields(
 function WindowInsertFields({
   value,
   onChange,
+  clickedExterior,
 }: {
   value: WindowInsert;
   onChange: (value: WindowInsert) => void;
+  clickedExterior: boolean;
 }) {
   const sill = (key: "sillInside" | "sillOutside", label: string) => (
     <div className="flex items-end gap-2">
@@ -198,20 +206,24 @@ function WindowInsertFields({
           disabled={value.location === "centre"}
           onCommit={(offset) => onChange({ ...value, offset })}
         />
-        <label className="text-xs">
-          Außenseite
-          <select
-            value={value.exterior}
-            onChange={(event) =>
-              onChange({ ...value, exterior: event.target.value as WindowInsert["exterior"] })
-            }
-            className={select}
-            title="Wände kennen ihre Außenseite noch nicht; deshalb wird sie je Fenster gewählt, gesehen vom Wandanfang zum Wandende."
-          >
-            <option value="right">rechts der Wandrichtung</option>
-            <option value="left">links der Wandrichtung</option>
-          </select>
-        </label>
+        {clickedExterior ? (
+          <p className="pb-1 text-muted-foreground">Außenseite: per Klick beim Platzieren</p>
+        ) : (
+          <label className="text-xs">
+            Außenseite
+            <select
+              value={value.exterior}
+              onChange={(event) =>
+                onChange({ ...value, exterior: event.target.value as WindowInsert["exterior"] })
+              }
+              className={select}
+              title="Wände kennen ihre Außenseite noch nicht; deshalb wird sie je Fenster gewählt, gesehen vom Wandanfang zum Wandende."
+            >
+              <option value="right">rechts der Wandrichtung</option>
+              <option value="left">links der Wandrichtung</option>
+            </select>
+          </label>
+        )}
       </div>
       <div className="flex flex-wrap items-end gap-4">
         {sill("sillInside", "Fensterbank innen")}

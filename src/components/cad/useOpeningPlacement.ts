@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project } from "@/domain/project/schema";
 import type { LayerVisibilityPolicy } from "@/application/layers/visibility";
 import type { ToolInteraction } from "@/application/tools/interaction";
+import { openingSideInteraction } from "@/application/drawing/window-placement";
+import { storeyOf } from "@/domain/storeys/access";
 
 type Point = Parameters<ToolInteraction["validate"]>[0];
 type Current = () => { project: Project; visibility: LayerVisibilityPolicy };
@@ -25,6 +27,14 @@ export type OpeningPlacementKind<D> = {
     settings: { draft: D; currentDraft: () => D },
     hostId?: string,
   ) => ToolInteraction;
+  /**
+   * Second click for the side of the wall (docs/FENSTER_TUEREN.md, R1): whether the draft needs
+   * it (a plain window opening has no side) and the draft for a chosen side.
+   */
+  side?: {
+    applies: (draft: D) => boolean;
+    with: (draft: D, side: "left" | "right") => D;
+  };
 };
 
 export function useOpeningPlacement<D>(
@@ -45,6 +55,25 @@ export function useOpeningPlacement<D>(
   } | null>(null);
   const activeHost =
     active && host?.project === project && host.visibility === visibility ? host : null;
+  // Position of the first click while the side is chosen; void when the context moves on.
+  const [anchor, setAnchor] = useState<{
+    point: Point;
+    hostId: string;
+    id: string;
+    project: Project;
+    visibility: LayerVisibilityPolicy;
+    dimensions: D;
+  } | null>(null);
+  const activeAnchor =
+    active &&
+    anchor?.project === project &&
+    anchor.visibility === visibility &&
+    anchor.dimensions === dimensions
+      ? anchor
+      : null;
+  useEffect(() => {
+    if (anchor && !activeAnchor) setAnchor(null);
+  }, [anchor, activeAnchor]);
   useEffect(() => {
     if (host && !activeHost) setHost(null);
   }, [host, activeHost]);
@@ -82,10 +111,43 @@ export function useOpeningPlacement<D>(
         throw new Error(kind.inactive);
       return now;
     };
+    if (activeAnchor && kind.side) {
+      const side = kind.side;
+      const wall = storeyOf(project).walls.find((w) => w.id === activeAnchor.hostId);
+      if (wall)
+        return openingSideInteraction(
+          activeAnchor.id,
+          wall,
+          activeAnchor.point,
+          (chosen) => {
+            const draft = side.with(dimensions, chosen);
+            const placed = kind.interaction(
+              project,
+              visibility,
+              activeAnchor.id,
+              current,
+              () => undefined,
+              () => undefined,
+              { draft, currentDraft: () => draft },
+              activeAnchor.hostId,
+            ).previewProject!(activeAnchor.point);
+            return placed;
+          },
+          (next, id) => {
+            setAnchor(null);
+            latest.current.commit(next, id);
+          },
+          () => {
+            setAnchor(null);
+            latest.current.cancel();
+          },
+        );
+    }
+    const id = `${kind.idPrefix}-${crypto.randomUUID()}`;
     const tool = kind.interaction(
       project,
       visibility,
-      `${kind.idPrefix}-${crypto.randomUUID()}`,
+      id,
       current,
       (next, id) => latest.current.commit(next, id),
       () => latest.current.cancel(),
@@ -112,8 +174,24 @@ export function useOpeningPlacement<D>(
         commit: (point: Point) => setHost({ id: pickHost(point), project, visibility }),
       };
     }
+    // First click with a side to choose: keep the position, the second click places.
+    if (kind.side?.applies(dimensions))
+      return {
+        ...tool,
+        commit: (point: Point) => {
+          tool.validate(point);
+          setAnchor({
+            point,
+            hostId: activeHost?.id ?? kind.host(project, visibility, point),
+            id,
+            project,
+            visibility,
+            dimensions,
+          });
+        },
+      };
     return tool;
-  }, [kind, active, project, visibility, dimensions, precision, activeHost]);
+  }, [kind, active, project, visibility, dimensions, precision, activeHost, activeAnchor]);
   return {
     adapter,
     dimensions,
@@ -121,6 +199,8 @@ export function useOpeningPlacement<D>(
     error,
     precision,
     pickingHost: precision && !activeHost,
+    /** The position is set; the pointer now chooses the side. */
+    choosingSide: !!activeAnchor,
     setPrecision: (value: boolean) => {
       setHost(null);
       setPrecision(value);

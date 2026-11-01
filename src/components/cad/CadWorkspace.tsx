@@ -1000,6 +1000,7 @@ export function CadWorkspace({
         precision={windowTool.precision}
         onPrecision={windowTool.setPrecision}
         pickingHost={windowTool.pickingHost}
+        choosingSide={windowTool.choosingSide}
       />
     ) : owner === "door" ? (
       <DoorPlacementFields
@@ -1010,6 +1011,7 @@ export function CadWorkspace({
         precision={doorTool.precision}
         onPrecision={doorTool.setPrecision}
         pickingHost={doorTool.pickingHost}
+        choosingSide={doorTool.choosingSide}
       />
     ) : owner === "slab" ? (
       <SlabToolFields
@@ -2059,6 +2061,7 @@ export function CadWorkspace({
                           content: (
                             <OpeningInsertFields
                               kind="window"
+                              clickedExterior
                               value={
                                 toolDefaults.window.insert === undefined
                                   ? WINDOW_INSERT_DEFAULTS
