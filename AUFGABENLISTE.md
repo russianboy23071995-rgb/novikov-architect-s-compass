@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 01.11.2026 · main nach PR566
+**Stand:** 01.11.2026 · main nach PR567
 
 ## Deine Wünsche
 
@@ -33,7 +33,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L04 | Dächer, inklusive Wände an Dachflächen trimmen (auch über zwei Geschosse)                                        |      | einflächiges Dach erledigt (PR502–506); Trimmen erledigt (PR515–516, Archicad bestätigt); Archicad: sauber, aber als Objekt nicht bearbeitbar; Walm/Trimmen/Gauben später (N62, V09) | §6, §8 Dachtrimmen |
 | L05 | Stützen                                                                                                          |      | erledigt (PR525–527), Archicad-Prüfung offen                                                                                                                              | §6 Abschnitt 2     |
 | L06 | Treppen                                                                                                          |      | TR1 (PR534), TR2 (PR535), TR3 (PR536) erledigt; Wendeltreppe später                                                                                                                              | §6 Abschnitt 2     |
-| L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | offen                                                                                                                              | §6 Abschnitt 2     |
+| L07 | Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz …)                                                            |      | in Arbeit: SA1 Datenmodell/Bibliothek erledigt (PR567); SA2–SA4 Grundriss, Schnitt, IFC folgen | §6 Abschnitt 2     |
 | L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | erledigt: R1–R4 (PR507–512) inkl. Tab-Auswahl; Archicad bestätigt; offen: WoFlV (N35)                                              | §6 Abschnitt 2/4   |
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | offen                                                                                                                              | §6, §8             |
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                 | §9                 |
