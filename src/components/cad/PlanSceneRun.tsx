@@ -27,6 +27,11 @@ const LABEL_POSITIONS = [0.15, 0.85, 0.3, 0.7];
 import { WALL_AXIS_COLOR } from "@/rendering/viewport/wall-axis";
 import { linePath } from "@/lib/bim/lines";
 import { doorPlanPath, doorPlanSymbol } from "@/rendering/viewport/door-symbol";
+import {
+  doorPlanFrame,
+  planRectPath,
+  windowPlanSymbol,
+} from "@/rendering/viewport/opening-plan-symbol";
 
 /** Position number beside an opening, on the side away from a door's swing; kept readable
  * (never upside down) whatever the wall direction. Screen-constant size like other plan text.
@@ -493,55 +498,87 @@ export function PlanSceneContent({
                 pointerEvents="none"
               />
             )}
-            {(scene.openings.get(wall.id) ?? []).map((opening) => (
-              <g key={opening.id}>
-                <rect
-                  {...(canPick(opening.id) ? selectProps("window", opening.id) : {})}
-                  x={opening.position * length - opening.width / 2}
-                  y={-wall.thickness / 2}
-                  width={opening.width}
-                  height={wall.thickness}
-                  fill="var(--background)"
-                  stroke={
-                    !allowsShown(opening.id)
-                      ? "none"
-                      : selectedIds.has(opening.id)
-                        ? WALL_AXIS_COLOR
-                        : scene.overlapping.has(opening.id)
-                          ? OVERLAP_COLOR
-                          : "var(--primary)"
-                  }
-                  strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                  className="outline-none"
-                  style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
-                />
-                <line
-                  visibility={allowsShown(opening.id) ? "visible" : "hidden"}
-                  x1={opening.position * length - opening.width / 2}
-                  x2={opening.position * length + opening.width / 2}
-                  y1={0}
-                  y2={0}
-                  stroke={selectedIds.has(opening.id) ? WALL_AXIS_COLOR : "var(--primary)"}
-                  style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
-                  strokeWidth={wallOutlineWidth / pixelsPerMetre}
-                  pointerEvents="none"
-                />
-                <MarkLabel
-                  text={opening.mark}
-                  x={opening.position * length}
-                  side={1}
-                  thickness={wall.thickness}
-                  angle={angle}
-                  pixelsPerMetre={pixelsPerMetre}
-                  visible={allowsShown(opening.id)}
-                />
-              </g>
-            ))}
+            {(scene.openings.get(wall.id) ?? []).map((opening) => {
+              // Window element (FT3): jambs cut, glass pane, boards seen below the cut.
+              const symbol = windowPlanSymbol(opening, wall);
+              const line = selectedIds.has(opening.id) ? WALL_AXIS_COLOR : "var(--primary)";
+              return (
+                <g key={opening.id}>
+                  <rect
+                    {...(canPick(opening.id) ? selectProps("window", opening.id) : {})}
+                    x={opening.position * length - opening.width / 2}
+                    y={-wall.thickness / 2}
+                    width={opening.width}
+                    height={wall.thickness}
+                    fill="var(--background)"
+                    stroke={
+                      !allowsShown(opening.id)
+                        ? "none"
+                        : selectedIds.has(opening.id)
+                          ? WALL_AXIS_COLOR
+                          : scene.overlapping.has(opening.id)
+                            ? OVERLAP_COLOR
+                            : "var(--primary)"
+                    }
+                    strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                    className="outline-none"
+                    style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+                  />
+                  {symbol ? (
+                    <g
+                      aria-label={`Fensterelement ${opening.mark ?? opening.id}`}
+                      visibility={allowsShown(opening.id) ? "visible" : "hidden"}
+                      fill="none"
+                      stroke={line}
+                      style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+                      pointerEvents="none"
+                    >
+                      <path
+                        d={planRectPath(symbol.sills)}
+                        strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
+                      />
+                      <path
+                        d={planRectPath(symbol.jambs)}
+                        fill="var(--background)"
+                        strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                      />
+                      <path
+                        d={planRectPath([symbol.glass])}
+                        strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
+                      />
+                    </g>
+                  ) : (
+                    <line
+                      visibility={allowsShown(opening.id) ? "visible" : "hidden"}
+                      x1={opening.position * length - opening.width / 2}
+                      x2={opening.position * length + opening.width / 2}
+                      y1={0}
+                      y2={0}
+                      stroke={line}
+                      style={selectedIds.has(opening.id) ? CAD_SHIMMER : undefined}
+                      strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                      pointerEvents="none"
+                    />
+                  )}
+                  <MarkLabel
+                    text={opening.mark}
+                    x={opening.position * length}
+                    side={1}
+                    thickness={wall.thickness}
+                    angle={angle}
+                    pixelsPerMetre={pixelsPerMetre}
+                    visible={allowsShown(opening.id)}
+                  />
+                </g>
+              );
+            })}
             {(scene.doors.get(wall.id) ?? []).map((door) => {
               const shown = allowsShown(door.id),
                 selected = selectedIds.has(door.id);
               const stroke = selected ? WALL_AXIS_COLOR : "var(--primary)";
               const outline = !selected && scene.overlapping.has(door.id) ? OVERLAP_COLOR : stroke;
+              // Door element (FT3): frame jambs cut; the leaf swings in the clear width.
+              const frame = doorPlanFrame(door, wall);
               return (
                 <g key={door.id} aria-label={`Tür ${door.id}`}>
                   <rect
@@ -558,13 +595,30 @@ export function PlanSceneContent({
                   />
                   <path
                     visibility={shown ? "visible" : "hidden"}
-                    d={doorPlanPath(doorPlanSymbol(door, { length, thickness: wall.thickness }))}
+                    d={doorPlanPath(
+                      doorPlanSymbol(frame ? { ...door, width: frame.leafWidth } : door, {
+                        length,
+                        thickness: wall.thickness,
+                      }),
+                    )}
                     fill="none"
                     stroke={stroke}
                     style={selected ? CAD_SHIMMER : undefined}
                     strokeWidth={wallOutlineWidth / pixelsPerMetre}
                     pointerEvents="none"
                   />
+                  {frame && (
+                    <path
+                      aria-label={`Türzarge ${door.mark ?? door.id}`}
+                      visibility={shown ? "visible" : "hidden"}
+                      d={planRectPath(frame.jambs)}
+                      fill="var(--background)"
+                      stroke={stroke}
+                      style={selected ? CAD_SHIMMER : undefined}
+                      strokeWidth={wallOutlineWidth / pixelsPerMetre}
+                      pointerEvents="none"
+                    />
+                  )}
                   <MarkLabel
                     text={door.mark}
                     x={door.position * length}

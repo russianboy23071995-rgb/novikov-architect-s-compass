@@ -11,7 +11,15 @@ export const GLASS_THICKNESS = 0.024;
 /** Thickness of the window boards inside and outside. */
 export const SILL_THICKNESS = { inside: 0.025, outside: 0.03 } as const;
 
-type Box = { x: [number, number]; y: [number, number]; z: [number, number]; glass?: true };
+/** Parts of an element: jambs and rails of the frame, glass, window boards, door leaf. */
+export type InsertPart = "jamb" | "rail" | "glass" | "sill" | "leaf";
+/** Wall-local box: x along the wall, y across (left positive), z from the wall base. */
+export type InsertBox = {
+  part: InsertPart;
+  x: [number, number];
+  y: [number, number];
+  z: [number, number];
+};
 
 /**
  * Bodies of the elements set into openings (docs/FENSTER_TUEREN.md, FT2), derived only:
@@ -33,12 +41,12 @@ export function openingInsertBodies(
   for (const window of storey.windows) {
     const wall = walls.get(window.wallId);
     if (!window.insert || !wall) continue;
-    bodies.push(place(wall, elevation, window.id, "window", windowBoxes(window, wall)));
+    bodies.push(place(wall, elevation, window.id, "window", windowInsertBoxes(window, wall)));
   }
   for (const door of storey.doors ?? []) {
     const wall = walls.get(door.wallId);
     if (!door.insert || !wall) continue;
-    bodies.push(place(wall, elevation, door.id, "door", doorBoxes(door, wall)));
+    bodies.push(place(wall, elevation, door.id, "door", doorInsertBoxes(door, wall)));
   }
   return bodies;
 }
@@ -51,7 +59,7 @@ function span(opening: { position: number; width: number }, wall: Wall) {
   };
 }
 
-function windowBoxes(window: BimWindow, wall: Wall): Box[] {
+export function windowInsertBoxes(window: BimWindow, wall: Wall): InsertBox[] {
   const insert = window.insert!;
   const { l, r } = span(window, wall);
   const b = window.sillHeight,
@@ -70,28 +78,30 @@ function windowBoxes(window: BimWindow, wall: Wall): Box[] {
   const across = (a: number, c: number): [number, number] => (out < 0 ? [a, c] : [-c, -a]);
   const frame = across(from, from + d);
   const w = insert.frameWidth;
-  const boxes: Box[] = [
-    { x: [l, l + w], y: frame, z: [b, t] },
-    { x: [r - w, r], y: frame, z: [b, t] },
-    { x: [l + w, r - w], y: frame, z: [b, b + w] },
-    { x: [l + w, r - w], y: frame, z: [t - w, t] },
+  const boxes: InsertBox[] = [
+    { part: "jamb", x: [l, l + w], y: frame, z: [b, t] },
+    { part: "jamb", x: [r - w, r], y: frame, z: [b, t] },
+    { part: "rail", x: [l + w, r - w], y: frame, z: [b, b + w] },
+    { part: "rail", x: [l + w, r - w], y: frame, z: [t - w, t] },
   ];
   const mid = from + d / 2;
   boxes.push({
+    part: "glass",
     x: [l + w, r - w],
     y: across(mid - GLASS_THICKNESS / 2, mid + GLASS_THICKNESS / 2),
     z: [b + w, t - w],
-    glass: true,
   });
   // Window boards: from the frame to the wall face plus the projection, on the opening floor.
   if (insert.sillOutside)
     boxes.push({
+      part: "sill",
       x: [l, r],
       y: across(-half - insert.sillOutside.projection, from),
       z: [b, b + SILL_THICKNESS.outside],
     });
   if (insert.sillInside)
     boxes.push({
+      part: "sill",
       x: [l, r],
       y: across(from + d, half + insert.sillInside.projection),
       z: [b, b + SILL_THICKNESS.inside],
@@ -99,7 +109,7 @@ function windowBoxes(window: BimWindow, wall: Wall): Box[] {
   return boxes;
 }
 
-function doorBoxes(door: Door, wall: Wall): Box[] {
+export function doorInsertBoxes(door: Door, wall: Wall): InsertBox[] {
   const insert = door.insert!;
   const opening = doorOpening(door, wall);
   const { l, r } = span(opening, wall);
@@ -117,10 +127,10 @@ function doorBoxes(door: Door, wall: Wall): Box[] {
   const frame = across(0, depth);
   const w = insert.frameWidth;
   return [
-    { x: [l, l + w], y: frame, z: [b, t] },
-    { x: [r - w, r], y: frame, z: [b, t] },
-    { x: [l + w, r - w], y: frame, z: [t - w, t] },
-    { x: [l + w, r - w], y: across(0, insert.leafThickness), z: [b, t - w] },
+    { part: "jamb", x: [l, l + w], y: frame, z: [b, t] },
+    { part: "jamb", x: [r - w, r], y: frame, z: [b, t] },
+    { part: "rail", x: [l + w, r - w], y: frame, z: [t - w, t] },
+    { part: "leaf", x: [l + w, r - w], y: across(0, insert.leafThickness), z: [b, t - w] },
   ];
 }
 
@@ -129,7 +139,7 @@ function place(
   elevation: number,
   id: string,
   kind: "window" | "door",
-  boxes: readonly Box[],
+  boxes: readonly InsertBox[],
 ): { faces: Face[]; volume: number } {
   const length = wallLength(wall);
   const body = wallBody(wall);
@@ -154,7 +164,7 @@ function place(
       faces.push({
         wallId: id,
         opening: kind,
-        ...(box.glass ? { glass: true as const } : {}),
+        ...(box.part === "glass" ? { glass: true as const } : {}),
         vertices: points.map(world),
         normal: turn(normal),
       });

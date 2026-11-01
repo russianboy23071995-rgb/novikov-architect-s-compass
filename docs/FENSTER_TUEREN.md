@@ -6,7 +6,7 @@ Nutzervorgabe (01.11.2026): Fenster und Tür bestehen aus einer Öffnung und ein
 | --- | --- | --- |
 | FT1 | Datenmodell (Schema 42), Werkzeugvorgaben, Elementfenster | erledigt |
 | FT2 | Rahmen, Glas, Türblatt als Körper in 3D und Schnitt | erledigt |
-| FT3 | Grundrisssymbol nach Element | offen |
+| FT3 | Grundrisssymbol nach Element | erledigt |
 | FT4 | IFC mit Geometrie und Laibungsangaben, Prüfung in Archicad | offen |
 
 ## FT1 – Datenmodell und Einstellungen
@@ -40,3 +40,18 @@ Grenzen: Glas deckend statt durchscheinend; keine Flügel, Beschläge, Anschläg
 Nachweis: `src/rendering/viewport/opening-insert-solid.test.ts` (3 Tests: Fenster mit Rahmen, Glas in der Mitte, Fensterbänke über die Wandseiten, Tür bündig zur Aufschlagseite; Lage Außen mit Abstand und gedrehte Außenseite verschieben den Rahmen, reine Öffnungen ohne Körper; Elemente im Gebäudekörper mit größerem Volumen, Schnitt durch das Fenster mit Wand als Bauteil, Rahmen/Fensterbänke als vier Umrisse und Glas als eigener Umriss). 1446 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Fensterelement im Elementfenster eingesetzt; 3D-Ansicht zeigt weißen Rahmen, blaue Scheibe und Fensterbank in der Öffnung. Schnitt quer durch das Fenster: Wand oben und unten in der Schnittfarbe, dazwischen Rahmen oben und unten, Glas als schmale Doppellinie, Fensterbänke innen und außen. Bildschirmfotos an den Nutzer. Tür nur durch Tests geprüft; die Auswahl per Klick auf Rahmen oder Glas in 3D ist umgesetzt, aber weder im Browser noch durch einen Test geprüft.
+
+## FT3 – Grundrisssymbol
+
+Aus denselben Teilen wie der 3D-Körper (`windowInsertBoxes`, `doorInsertBoxes` mit Teilebezeichnung Pfosten/Riegel/Glas/Fensterbank/Blatt), damit Grundriss, 3D und Schnitt übereinstimmen (`src/rendering/viewport/opening-plan-symbol.ts`):
+
+- **Fenster mit Element:** beide Rahmenpfosten als geschnittene Profile (Wandlinienstärke, Hintergrundfüllung), die Glasscheibe zwischen den Pfosten als schmales Rechteck (halbe Linienstärke) und die Fensterbänke innen und außen bis über die Wandseiten (halbe Linienstärke, unter der Schnitthöhe gesehen). Die bisherige Mittellinie der Öffnung entfällt.
+- **Tür mit Element:** beide Zargenpfosten als geschnittene Profile; Türblatt und Aufschlagbogen in der lichten Breite (Öffnungsbreite minus zweimal Zargenbreite), Drehpunkt am Zargenpfosten.
+- **Reine Öffnung:** unverändert (Fenster mit Mittellinie, Tür mit Blatt über die ganze Öffnungsbreite).
+- Auswahl, Hervorhebung, Ebenensichtbarkeit und Nummer wie bisher.
+
+Grenzen: Fensterbank als Rechteck ohne Gefälle; keine Flügel- und Öffnungssymbole am Fenster (es gibt nur Festverglasung); kein Anschlag/Falz an der Zarge.
+
+Nachweis: `src/rendering/viewport/opening-plan-symbol.test.ts` (2 Tests: Fensterpfosten, Glas und Fensterbänke an den richtigen Stellen, SVG-Spiegelung, reine Öffnung ohne Symbol; Zarge und lichte Breite der Tür). 1448 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): neue Wand gezeichnet, Tür und Fenster mit den Werkzeugen gesetzt (beide mit Element nach Vorgabe). Grundriss: Tür mit Zargenpfosten und Blatt in der lichten Breite, Fenster mit Pfosten, Glaslinie und Fensterbänken über die Wandseiten; das alte Fenster ohne Element zeigt weiter die reine Öffnung. Bildschirmfoto an den Nutzer.
