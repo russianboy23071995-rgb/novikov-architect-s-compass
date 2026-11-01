@@ -35,6 +35,8 @@ export type Face = {
   opening?: "window" | "door";
   /** Glass pane of a window element. */
   glass?: true;
+  /** Opening symbol of a sash on this pane face (FL3): lines in world coordinates. */
+  marks?: { segments: [Vec3, Vec3][]; dashed: boolean };
 };
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 

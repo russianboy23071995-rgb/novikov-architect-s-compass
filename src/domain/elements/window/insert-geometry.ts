@@ -2,7 +2,7 @@ import type { BimWindow, Wall } from "../../project/schema.ts";
 import type { Door } from "../door/model.ts";
 import { doorOpening } from "../door/model.ts";
 import { wallLength } from "../../project/schema.ts";
-import { SASH_DEFAULTS } from "./insert.ts";
+import { SASH_DEFAULTS, type SashOperation } from "./insert.ts";
 
 // Parts of window and door elements as wall-local boxes (docs/FENSTER_TUEREN.md, FT2–FT4):
 // the one source for 3D, section, plan symbol and IFC.
@@ -23,6 +23,11 @@ export type InsertBox = {
   x: [number, number];
   y: [number, number];
   z: [number, number];
+  /**
+   * Pane of a sash (FL3): how it opens and on which end of x it is hinged, for the opening
+   * symbol in views. `outside`: -1 or 1, the y side of the wall that is outside.
+   */
+  opening?: { operation: SashOperation; hingeAtMaxX: boolean; outside: -1 | 1 };
 };
 
 function span(opening: { position: number; width: number }, wall: Wall) {
@@ -89,17 +94,34 @@ export function windowInsertBoxes(window: BimWindow, wall: Wall): InsertBox[] {
       sashes.push({ x: [x0, x1], z: [z0, top - bar] });
     } else sashes.push({ x: [x0, x1], z: [z0, z1] });
     const s = insert.sashWidth ?? SASH_DEFAULTS.sashWidth;
-    for (const {
-      x: [sx0, sx1],
-      z: [sz0, sz1],
-    } of sashes)
+    // Sashes are numbered left to right seen from inside. With the outside to the right of the
+    // wall direction the inside looks towards -y, so its left is +x: the order runs down in x.
+    const leftIsMaxX = out < 0;
+    const ordered = leftIsMaxX ? [...sashes].reverse() : sashes;
+    ordered.forEach(({ x: [sx0, sx1], z: [sz0, sz1] }, index) => {
+      const sash = insert.sashes?.[index];
       boxes.push(
         { part: "sash", x: [sx0, sx0 + s], y: frame, z: [sz0, sz1] },
         { part: "sash", x: [sx1 - s, sx1], y: frame, z: [sz0, sz1] },
         { part: "sash", x: [sx0 + s, sx1 - s], y: frame, z: [sz0, sz0 + s] },
         { part: "sash", x: [sx0 + s, sx1 - s], y: frame, z: [sz1 - s, sz1] },
-        { part: "glass", x: [sx0 + s, sx1 - s], y: pane, z: [sz0 + s, sz1 - s] },
+        {
+          part: "glass",
+          x: [sx0 + s, sx1 - s],
+          y: pane,
+          z: [sz0 + s, sz1 - s],
+          ...(sash
+            ? {
+                opening: {
+                  operation: sash.operation,
+                  hingeAtMaxX: (sash.hinge === "left") === leftIsMaxX,
+                  outside: out,
+                },
+              }
+            : {}),
+        },
       );
+    });
   }
   // Window boards: from the frame to the wall face plus the projection, on the opening floor.
   if (insert.sillOutside)
