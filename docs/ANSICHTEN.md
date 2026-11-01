@@ -22,3 +22,12 @@ Umsetzung: `src/domain/views/sections.ts` (`kind`, `isElevation`, `elevationName
 Nachweis: neuer Test in `src/application/sections/actions.test.ts` (Kennung und Name je Art, „Vier Ansichten“ mit Lage 2 m vor dem Umriss, kein zweites Mal, ohne Bauteile abgelehnt; Südansicht ohne Schnitt mit Ansichtsflächen, Ansichtslinie durch das Gebäude schneidet nicht), `tool-layout.test.ts` angepasst. 1454 Tests grün, Typprüfung beider Projekte, Architektur, Lint (nur die bekannte Warnung in RoofProperties.tsx) und Prettier sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Werkzeug „Ansicht“ in der Leiste (DOK), Felder mit „Nächster: Ansicht 1“ und Knopf; „Vier Ansichten erzeugen“ legt N/O/S/W mit Blickpfeilen zur Wand, Navigator „Ansichten“ mit vier Einträgen; Klick auf „S · Südansicht“ öffnet den Tab: Wandfläche mit Fensteröffnung, keine Schnittflächen, Geschosslinien ±0,00/+3,00. Eine von Hand gezeichnete Ansicht und Griffe an Ansichten nur durch den gemeinsamen Code mit dem Schnitt abgedeckt, nicht eigens im Browser geprüft.
+
+## S2 – Ansichtssymbol und Symbolgröße
+
+Nutzervorgabe (01.11.2026): Ansichten im Grundriss als einfache Linie mit Pfeil, ohne rechtwinklige Striche an den Enden; Schnitt und Ansicht standardmäßig mit Größe 2,5 statt 5.
+
+- Ansichtssymbol: dünne Linie, in der Mitte das gefüllte Blickdreieck mit der Kennung dahinter; die Endstriche entfallen.
+- Vorgabe der Symbolgröße (`SECTION_SYMBOL_SIZE`) 2,5 mm Papier statt 5 mm – für neue Schnitte und Ansichten und für alle ohne eigene Größe. Ausdrücklich gesetzte Größen bleiben.
+
+Nachweis: Test der Symbolgröße auf 2,5 mm angepasst (0,25 m bei 1:100). 1459 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber. Browser-Abnahme: „Vier Ansichten erzeugen“ – Linien mit Blickpfeil, ohne Endstriche, halbe Größe.

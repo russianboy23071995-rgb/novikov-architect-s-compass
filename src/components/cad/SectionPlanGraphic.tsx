@@ -73,8 +73,8 @@ export function SectionPlanGraphic({
       <line x1={from.x} y1={-from.y} x2={to.x} y2={-to.y} stroke={color} strokeWidth={px(3)} />
     );
   };
-  // Elevation (docs/ANSICHTEN.md, A1): a thin solid line with short end ticks and, in the
-  // middle, a filled arrow towards the viewing side with the mark behind the line.
+  // Elevation (docs/ANSICHTEN.md, A1/S2): a thin solid line and, in the middle, a filled arrow
+  // towards the viewing side with the mark behind the line; no end ticks.
   const elevation = section.kind === "elevation";
   const middle = {
     x: (section.start.x + section.end.x) / 2,
@@ -102,11 +102,6 @@ export function SectionPlanGraphic({
       </>
     );
   };
-  const tick = (p: P) => {
-    const a = at(p, 0, -0.4 * h),
-      b = at(p, 0, 0.4 * h);
-    return <line x1={a.x} y1={-a.y} x2={b.x} y2={-b.y} stroke={color} strokeWidth={px(1.5)} />;
-  };
   return (
     <g pointerEvents="none">
       <line
@@ -119,11 +114,7 @@ export function SectionPlanGraphic({
         strokeDasharray={elevation ? undefined : `${px(12)} ${px(3)} ${px(2)} ${px(3)}`}
       />
       {elevation ? (
-        <>
-          {tick(section.start)}
-          {tick(section.end)}
-          {elevationMark()}
-        </>
+        <>{elevationMark()}</>
       ) : (
         <>
           {stroke(section.start, end)}
