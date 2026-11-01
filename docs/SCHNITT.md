@@ -7,7 +7,7 @@ Schritte:
 | Schritt | Inhalt | Stand |
 | --- | --- | --- |
 | SC1 | Canvas-Tabs, Ordner „Schnitte“ im Navigator | erledigt |
-| SC2 | Werkzeug „Schnitt“: Schnittlinie, Name, Kennung, Blickrichtung, Einträge im Ordner, Schnitt als Tab | offen |
+| SC2 | Werkzeug „Schnitt“: Schnittlinie, Name, Kennung, Blickrichtung, Einträge im Ordner, Schnitt als Tab | erledigt |
 | SC3 | Schnittzeichnung aus dem Modell erzeugen und im Schnitt-Tab zeigen | offen |
 
 ## SC1 – Canvas-Tabs und Ordner „Schnitte“
@@ -30,3 +30,20 @@ Umsetzung:
 Nachweis: Test `src/application/views/canvas-tabs.test.ts` (2 Tests). 1425 Tests grün, Typprüfung beider Projekte, Architektur und Lint sauber, 14-Modell-Hash unverändert (`089f79e4…97017b3`).
 
 Browser-Abnahme (01.11.2026, Port 8094): Start mit einem Tab „Grundriss Erdgeschoss“, Ordner „Schnitte“ im Navigator. „+“ → „3D-Ansicht“ öffnet den zweiten Tab und zeigt 3D. Klick auf den Grundriss-Tab schaltet zurück, Klick auf 3D wieder nach 3D. × am aktiven 3D-Tab schließt ihn und aktiviert den Grundriss. Der 3D-Schalter der Werkzeugleiste öffnet den 3D-Tab. Keine neuen Konsolenfehler mit der aktuell geladenen Modulversion.
+
+## SC2 – Werkzeug „Schnitt“
+
+- Modell: `project.sections` (Schema 41, Migration 40 → 41 ohne Änderung; ein Schema-40-Projekt mit untergeschobenen Schnitten wird abgelehnt). Ein Schnitt gehört zum Gebäude, nicht zu einem Geschoss: `id`, `name`, `mark` (Kennung), `start`, `end`, `look` (Blickseite links/rechts, von Anfang zu Ende gesehen). Die IDs zählen zur projektweiten Eindeutigkeitsprüfung.
+- Werkzeug „Schnitt“ am Ende der Werkzeugleiste (2D): **Klick 1** Anfang, **Klick 2** Ende, **Klick 3** Blickseite (Seite des Zeigers). Ab Klick 1 zeigt die Vorschau die Schnittlinie mit der nächsten Kennung, nach Klick 2 klappen die Pfeile mit dem Zeiger. Fang wie bei den anderen Zeichenwerkzeugen. Esc bricht ab. Gezeichnet wird in jedem Grundriss; der Schnitt erscheint in allen Geschossen.
+- Vorgaben (Leiste und Einstellungsfenster per Doppelklick auf das Werkzeug): Kennung als Buchstaben (A, B, … Z, AA, …) oder Zahlen (1, 2, …), Namensvorlage (Vorgabe „Schnitt“ → „Schnitt A-A“). Vergeben wird die erste freie Kennung. Die Vorgaben sind Sitzungszustand.
+- Grundriss: dünne Strich-Punkt-Linie, kräftige Enden, an beiden Enden Pfeil zur Blickseite und die Kennung; Größen in Bildschirmpixeln.
+- Elementfenster (Doppelklick auf die Schnittlinie oder auf den Eintrag im Navigator): Name, Kennung (eine doppelte Kennung wird gemeldet, nicht verhindert), Länge und Blickseite, „Blickrichtung umkehren“, „Als Tab öffnen“, „Schnitt löschen“. Jede Änderung ist ein Rückgängig-Schritt.
+- Navigator: Ordner „Schnitte“ listet „A · Schnitt A-A“. Klick öffnet den Schnitt als Tab, Doppelklick sein Fenster.
+- Schnitt-Tab: trägt den Namen des Schnitts; bis SC3 steht dort ein Hinweis mit Name, Kennung und „Schnitt-Fenster öffnen“. Ein gelöschter (oder rückgängig gemachter) Schnitt verliert seinen Tab. Werkzeugwahl, Ansichtswechsel und Geschosswahl kehren zum Modell zurück.
+- Nicht dabei: Auswahl, Verschieben und Punktbearbeiten der Schnittlinie im Grundriss; IFC (Schnitte sind Zeichnungsableitungen, keine Bauteile).
+
+Umsetzung: `src/domain/views/sections.ts` (Schema, Kennungen, Blickseite), `src/application/sections/actions.ts` (anlegen, ändern, löschen, Vorgaben), `src/application/views/canvas-tabs.ts` (Schnitt-Tabs), `src/components/cad/SectionPlanGraphic.tsx`, `SectionFields.tsx`, `SectionProperties.tsx`, `BimPlan.tsx` (Darstellung, Vorschau, Doppelklick), `CadWorkspace.tsx` (Klickfolge, Tabs, Fenster), `ProjectNavigator.tsx`, `ToolRail.tsx`.
+
+Nachweis: `src/application/sections/actions.test.ts` (4 Tests: Kennungsfolge, Blickseite, Anlegen/Ändern/doppelte Kennung/Löschen/Speichern, Migration und Ablehnung) und ein neuer Tab-Test. 1430 Tests grün, Typprüfung beider Projekte, Architektur und Lint sauber, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (01.11.2026, Port 8094): Werkzeug „Schnitt“, Leiste zeigt „Nächster: Schnitt A-A“; drei Klicks quer über eine Wand im Erdgeschoss, Vorschau mit Kennung A und Pfeilen zur Zeigerseite; danach „A · Schnitt A-A“ im Navigator, Leiste zeigt B-B. Klick auf den Eintrag öffnet den Tab „Schnitt A-A“ mit Hinweis; im Fenster umbenannt in „Längsschnitt“ (Tab und Navigator folgen), Blickrichtung umgekehrt. Im 1. Obergeschoss ist der Schnitt sichtbar, Doppelklick auf die Linie öffnet das Fenster; „Schnitt löschen“ entfernt Linie und Tab, Undo stellt ihn wieder her. Keine Konsolenfehler der aktuell geladenen Modulversion (ältere Fehler stammen aus dem Hot-Reload mit dem Schema-Wechsel vor dem Neuladen).

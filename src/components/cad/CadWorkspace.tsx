@@ -157,9 +157,22 @@ import {
   canvasModeOf,
   canvasViewOf,
   closeCanvasTab,
+  existingCanvasTabs,
+  sectionTab,
+  tabSectionId,
   withCanvasTab,
   type CanvasView,
 } from "@/application/views/canvas-tabs";
+import {
+  SECTION_TOOL_DEFAULTS,
+  addSection,
+  nextSectionLabel,
+  removeSection,
+  updateSection,
+} from "@/application/sections/actions";
+import { sectionLookTo } from "@/domain/views/sections";
+import { SectionFields } from "./SectionFields";
+import { SectionProperties } from "./SectionProperties";
 
 export function CadWorkspace({
   layerVisibility,
@@ -203,8 +216,13 @@ export function CadWorkspace({
   // Canvas tabs (docs/SCHNITT.md, SC1): the active tab is the current mode; a mode without a
   // tab opens one, wherever the mode is switched.
   const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
-  const activeView = canvasViewOf(mode);
-  if (!canvasTabs.includes(activeView)) setCanvasTabs(withCanvasTab(canvasTabs, activeView));
+  // A section tab over the model views (docs/SCHNITT.md, SC2); null: the mode's view.
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  // Section tool: start, then end; click 3 chooses the viewing side. Session state only.
+  const [sectionStart, setSectionStart] = useState<Point | null>(null);
+  const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
+  const [sectionDefaults, setSectionDefaults] = useState(SECTION_TOOL_DEFAULTS);
+  const [sectionWindow, setSectionWindow] = useState<string | null>(null);
   const [layout, setLayout] = useState<ViewportLayout>("single");
   const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
@@ -413,6 +431,8 @@ export function CadWorkspace({
     setTextDraft(null);
     setStairStart(null);
     setStairDirection(null);
+    setSectionStart(null);
+    setSectionEnd(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -528,6 +548,7 @@ export function CadWorkspace({
 
   const selectTool = (next: ToolId) => {
     cancelInteraction();
+    setActiveSectionId(null);
     setTool(next);
     if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
     if (
@@ -540,6 +561,7 @@ export function CadWorkspace({
       next === "room" ||
       next === "column" ||
       next === "stair" ||
+      next === "section" ||
       next === "dimension" ||
       next === "text"
     )
@@ -557,6 +579,7 @@ export function CadWorkspace({
       next === "room" ||
       next === "column" ||
       next === "stair" ||
+      next === "section" ||
       next === "dimension" ||
       next === "text"
     )
@@ -870,6 +893,7 @@ export function CadWorkspace({
     wall: "Wand",
     column: "Stütze",
     stair: "Treppe",
+    section: "Schnitt",
     dimension: "Maßkette",
     text: "Text",
     window: "Fenster",
@@ -923,6 +947,12 @@ export function CadWorkspace({
         }}
         layers={project.layers}
         step={place === "bar" && dimensionDraft?.line ? "points" : "line"}
+      />
+    ) : owner === "section" ? (
+      <SectionFields
+        value={sectionDefaults}
+        onChange={setSectionDefaults}
+        next={nextSectionLabel(project, sectionDefaults)}
       />
     ) : owner === "stair" ? (
       <StairFields
@@ -1584,6 +1614,44 @@ export function CadWorkspace({
       );
       return;
     }
+    // Section tool (docs/SCHNITT.md, SC2): click 1 start, click 2 end, click 3 the viewing side;
+    // in any storey, the section belongs to the building.
+    if (tool === "section") {
+      if (!sectionStart) {
+        setSectionStart({ x: point.x, y: point.y });
+        return;
+      }
+      if (!sectionEnd) {
+        if (Math.hypot(point.x - sectionStart.x, point.y - sectionStart.y) < 1e-6) {
+          setModelError("Zweiter Klick: Ende der Schnittlinie, nicht auf den Anfang.");
+          return;
+        }
+        setSectionEnd({ x: point.x, y: point.y });
+        return;
+      }
+      try {
+        const { name } = nextSectionLabel(project, sectionDefaults);
+        dispatchEditing({
+          type: "project",
+          project: addSection(
+            project,
+            {
+              id: `section-${crypto.randomUUID()}`,
+              start: sectionStart,
+              end: sectionEnd,
+              look: sectionLookTo(sectionStart, sectionEnd, point),
+            },
+            sectionDefaults,
+          ),
+        });
+        setSectionStart(null);
+        setSectionEnd(null);
+        showNotice(`${name} gesetzt`);
+      } catch (error) {
+        setModelError(error instanceof Error ? error.message : "Schnitt nicht möglich.");
+      }
+      return;
+    }
     // Stair tool (docs/TREPPE.md, TR2/TR3): click 1 on the drawing axis, click 2 sets the run
     // direction, for L and U click 3 the side of the turn; lengths follow from the calculation.
     if (tool === "stair") {
@@ -1862,7 +1930,28 @@ export function CadWorkspace({
     }
   };
 
+  // Canvas tabs (docs/SCHNITT.md): a view without a tab opens one; tabs of removed sections go.
+  const sections = project.sections;
+  const sectionIds = new Set((sections ?? []).map((s) => s.id));
+  const activeSection = activeSectionId && sectionIds.has(activeSectionId) ? activeSectionId : null;
+  if (activeSectionId && !activeSection) setActiveSectionId(null);
+  const activeView = activeSection ? sectionTab(activeSection) : canvasViewOf(mode);
+  const shownTabs = existingCanvasTabs(withCanvasTab(canvasTabs, activeView), sectionIds);
+  if (shownTabs.join("|") !== canvasTabs.join("|")) setCanvasTabs(shownTabs);
+  function selectCanvasTab(view: CanvasView) {
+    const sectionId = tabSectionId(view);
+    setCanvasTabs((tabs) => withCanvasTab(tabs, view));
+    if (sectionId === null) return changeMode(canvasModeOf(view as "plan" | "3d"));
+    cancelInteraction();
+    setActiveSectionId(sectionId);
+  }
+  const openSectionWindow = (id: string) => {
+    cancelInteraction();
+    setModelError("");
+    setSectionWindow(id);
+  };
   function changeMode(next: ViewMode) {
+    setActiveSectionId(null);
     if (activeDocumentId && next === "3D") {
       showNotice("Dieses Abbild ist ein 2D-Grundriss.");
       return;
@@ -2373,6 +2462,47 @@ export function CadWorkspace({
               }}
             />
           )}
+        {sectionWindow &&
+          (() => {
+            const section = sections?.find((s) => s.id === sectionWindow);
+            if (!section) return null;
+            return (
+              <FloatingPanel
+                open
+                title={`${section.name} – Schnitt`}
+                width={380}
+                height={300}
+                onClose={() => setSectionWindow(null)}
+              >
+                <SectionProperties
+                  key={`${section.id}:${section.name}:${section.mark}`}
+                  section={section}
+                  sections={sections ?? []}
+                  onChange={(changes) => {
+                    try {
+                      dispatchEditing({
+                        type: "project",
+                        project: updateSection(project, section.id, changes),
+                      });
+                    } catch (error) {
+                      setModelError(
+                        error instanceof Error ? error.message : "Änderung nicht möglich.",
+                      );
+                    }
+                  }}
+                  onDelete={() => {
+                    setSectionWindow(null);
+                    dispatchEditing({
+                      type: "project",
+                      project: removeSection(project, section.id),
+                    });
+                    showNotice(`${section.name} gelöscht`);
+                  }}
+                  onOpen={() => selectCanvasTab(sectionTab(section.id))}
+                />
+              </FloatingPanel>
+            );
+          })()}
         {cornerWall && (
           <CornerPreviewDialog
             viewContext={viewContext}
@@ -2396,20 +2526,46 @@ export function CadWorkspace({
               </div>
               <div className="absolute left-1/2 top-3 z-40 max-w-[50%] -translate-x-1/2">
                 <CanvasTabs
-                  tabs={canvasTabs}
+                  tabs={shownTabs}
                   active={activeView}
                   storeyName={storeyOf(project).name}
-                  onSelect={(view) => {
-                    setCanvasTabs((tabs) => withCanvasTab(tabs, view));
-                    changeMode(canvasModeOf(view));
-                  }}
+                  sections={sections ?? []}
+                  onSelect={selectCanvasTab}
                   onClose={(view) => {
-                    const next = closeCanvasTab(canvasTabs, view, activeView);
-                    if (next.active !== activeView) changeMode(canvasModeOf(next.active));
+                    const next = closeCanvasTab(shownTabs, view, activeView);
                     setCanvasTabs(next.tabs);
+                    if (next.active !== activeView) selectCanvasTab(next.active);
                   }}
                 />
               </div>
+              {activeSection &&
+                (() => {
+                  const section = sections!.find((s) => s.id === activeSection)!;
+                  return (
+                    <div
+                      role="tabpanel"
+                      aria-label={section.name}
+                      className="absolute inset-0 z-30 grid place-items-center bg-workspace"
+                    >
+                      <div className="max-w-sm space-y-2 text-center text-sm text-muted-foreground">
+                        <p className="font-medium text-foreground">
+                          {section.name} · Kennung {section.mark}
+                        </p>
+                        <p>
+                          Die Schnittzeichnung wird im nächsten Schritt aus dem Modell erzeugt und
+                          hier gezeigt.
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openSectionWindow(section.id)}
+                        >
+                          Schnitt-Fenster öffnen
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               {layerActivation && (
                 <DocumentLayerNotice
                   key={layerActivation.layerIds.join(":")}
@@ -2543,6 +2699,7 @@ export function CadWorkspace({
                         (tool === "wall" ||
                           tool === "column" ||
                           tool === "stair" ||
+                          tool === "section" ||
                           tool === "dimension" ||
                           tool === "text" ||
                           pathDrawing ||
@@ -2558,6 +2715,7 @@ export function CadWorkspace({
                         tool === "wall" ||
                         tool === "column" ||
                         tool === "stair" ||
+                        tool === "section" ||
                         tool === "dimension" ||
                         tool === "text" ||
                         tool === "window" ||
@@ -2567,12 +2725,16 @@ export function CadWorkspace({
                       start={
                         pathDrawing
                           ? (pathPoints.at(-1) ?? null)
-                          : tool === "stair"
-                            ? // After the run direction only the side of the turn is chosen.
-                              stairDirection === null
-                              ? stairStart
-                              : null
-                            : wallStart
+                          : tool === "section"
+                            ? sectionEnd
+                              ? null
+                              : sectionStart
+                            : tool === "stair"
+                              ? // After the run direction only the side of the turn is chosen.
+                                stairDirection === null
+                                ? stairStart
+                                : null
+                              : wallStart
                       }
                       draftPoints={pathDrawing ? pathPoints : []}
                       draftFinishable={
@@ -2680,6 +2842,17 @@ export function CadWorkspace({
                               ...toolDefaults.text,
                               position: textDraft.position,
                               content: textDraft.content,
+                            }
+                          : undefined
+                      }
+                      sections={sections}
+                      onSectionSettings={openSectionWindow}
+                      sectionDraft={
+                        tool === "section" && sectionStart
+                          ? {
+                              start: sectionStart,
+                              end: sectionEnd,
+                              mark: nextSectionLabel(project, sectionDefaults).mark,
                             }
                           : undefined
                       }
@@ -2935,6 +3108,7 @@ export function CadWorkspace({
               ) : tool === "wall" ||
                 tool === "column" ||
                 tool === "stair" ||
+                tool === "section" ||
                 tool === "dimension" ||
                 tool === "text" ||
                 tool === "window" ||
@@ -3074,9 +3248,12 @@ export function CadWorkspace({
                   project={project}
                   active={selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]}
                   onClose={() => setNavigatorOpen(false)}
+                  onSectionSettings={openSectionWindow}
                   onSelect={(id, _label, toggle) => {
                     if (id === SECTIONS_FOLDER_ID) return;
+                    if (sectionIds.has(id)) return selectCanvasTab(sectionTab(id));
                     if (project.storeys.some((s) => s.id === id)) {
+                      setActiveSectionId(null);
                       cancelInteraction();
                       setSelection(null);
                       setDemandOpen(false);

@@ -3,6 +3,8 @@ import { TextGraphic } from "./TextGraphic";
 import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
+import { SectionPlanGraphic } from "./SectionPlanGraphic";
+import { sectionLookTo, type Section } from "@/domain/views/sections";
 import {
   stairDirectionTo,
   stairGeometry,
@@ -147,6 +149,12 @@ export type BimPlanProps = {
         storeyHeight: number | null;
       }
     | undefined;
+  /** Sections of the building, shown in every storey's plan (docs/SCHNITT.md, SC2). */
+  sections?: readonly Section[] | undefined;
+  /** Double click on a section line opens its window. */
+  onSectionSettings?: ((id: string) => void) | undefined;
+  /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
+  sectionDraft?: { start: Point; end: Point | null; mark: string } | undefined;
   /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
   dimensionDraft?:
     | {
@@ -226,6 +234,9 @@ export function BimPlan({
   draftFinishable = true,
   dimensionDraft,
   stairDraft,
+  sections,
+  onSectionSettings,
+  sectionDraft,
   textPreview,
   closeAtStart = false,
   roofGuide = null,
@@ -1070,6 +1081,15 @@ export function BimPlan({
           onFinish();
           return;
         }
+        // A section line belongs to no storey and is not an element: it opens its own window.
+        const sectionId = (event.target as Element)
+          .closest("[data-section-id]")
+          ?.getAttribute("data-section-id");
+        if (sectionId && onSectionSettings && !editSession && (!drawing || !draftFinishable)) {
+          event.preventDefault();
+          onSectionSettings(sectionId);
+          return;
+        }
         // Selecting, or a drawing tool without a started draft: the element under the cursor (or
         // the Tab pre-selection) opens its window.
         const idleDrawing = drawing && !!onFinish && !draftFinishable;
@@ -1413,6 +1433,40 @@ export function BimPlan({
                     pixelsPerMetre={camera.pixelsPerMetre}
                   />
                 )}
+              </g>
+            );
+          })()}
+        {sections?.map((section) => (
+          <g key={section.id} aria-label={`Schnitt ${section.mark}-${section.mark}`}>
+            <SectionPlanGraphic
+              section={section}
+              pixelsPerMetre={camera.pixelsPerMetre}
+              color="var(--foreground)"
+              pick={!!onSectionSettings}
+            />
+          </g>
+        ))}
+        {drawing &&
+          sectionDraft &&
+          (() => {
+            const aim = resolvedHover?.point;
+            const end = sectionDraft.end ?? aim;
+            if (
+              !end ||
+              Math.hypot(end.x - sectionDraft.start.x, end.y - sectionDraft.start.y) < 1e-6
+            )
+              return null;
+            const look =
+              sectionDraft.end && aim
+                ? sectionLookTo(sectionDraft.start, sectionDraft.end, aim)
+                : "left";
+            return (
+              <g aria-label="Schnitt in Arbeit" opacity={0.85}>
+                <SectionPlanGraphic
+                  section={{ start: sectionDraft.start, end, look, mark: sectionDraft.mark }}
+                  pixelsPerMetre={camera.pixelsPerMetre}
+                  color="#0284c7"
+                />
               </g>
             );
           })()}
