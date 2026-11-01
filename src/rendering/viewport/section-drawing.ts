@@ -7,7 +7,12 @@ import type { Face, Vec3 } from "./storey-solid.ts";
 /** A point of the section drawing: x to the viewer's right along the line, y = height. */
 export type SectionPoint = { x: number; y: number };
 /** Building part seen beyond the cut: polygon and its visible edges, farthest first. */
-export type SectionView = { points: SectionPoint[]; edges: [SectionPoint, SectionPoint][] };
+export type SectionView = {
+  points: SectionPoint[];
+  edges: [SectionPoint, SectionPoint][];
+  /** Opening symbol of a sash pane (FL3), dashed when the sash opens away from the viewer. */
+  marks?: { segments: [SectionPoint, SectionPoint][]; dashed: boolean };
+};
 /**
  * Cut part of one element: closed outlines (filled) and open pieces (stroked only). `kind`:
  * building parts get the cut fill; frames of window and door elements and their glass are drawn
@@ -150,7 +155,28 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
       if (a.edge && visibleEdge(a.edge))
         edges.push([out(a.p), out(part[(i + 1) % part.length]!.p)]);
     });
-    views.push({ depth, view: { points: part.map((q) => out(q.p)), edges } });
+    // Opening symbol lines lie in the pane; kept behind the plane and limited to the line.
+    const symbol = (face.marks?.segments ?? []).flatMap(
+      ([a, b]): [SectionPoint, SectionPoint][] => {
+        let [p, q] = [local(a), local(b)];
+        if (p.w < -EPS || q.w < -EPS) return [];
+        if (p.u > q.u) [p, q] = [q, p];
+        if (q.u < 0 || p.u > length) return [];
+        const at = (u: number): Local => {
+          const t = (u - p.u) / (q.u - p.u);
+          return { u, z: p.z + (q.z - p.z) * t, w: p.w + (q.w - p.w) * t };
+        };
+        return [[out(p.u < 0 ? at(0) : p), out(q.u > length ? at(length) : q)]];
+      },
+    );
+    views.push({
+      depth,
+      view: {
+        points: part.map((q) => out(q.p)),
+        edges,
+        ...(symbol.length ? { marks: { segments: symbol, dashed: face.marks!.dashed } } : {}),
+      },
+    });
   }
   views.sort((a, b) => b.depth - a.depth);
 

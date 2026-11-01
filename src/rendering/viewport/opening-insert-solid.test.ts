@@ -184,3 +184,68 @@ test("sashes: frame rings, mullion, transom and a pane per sash; cut in the sect
   assert.equal(drawing.cuts.find((c) => c.kind === "frame")!.loops.length, 7);
   assert.equal(drawing.cuts.find((c) => c.kind === "glass")!.loops.length, 2);
 });
+
+test("opening symbols: lines meet on the hinge side or at the bottom, dashed seen from outside", async () => {
+  // docs/FENSTER_TUEREN.md, FL3. Outside right of the wall direction (y < 0), inside y > 0.
+  const { withDivision } = await import("../../domain/elements/window/insert.ts");
+  const p = project();
+  const doubled = {
+    ...p,
+    storeys: p.storeys.map((st) => ({
+      ...st,
+      windows: st.windows.map((w) => ({
+        ...w,
+        // Left from inside: turn, hinged left; right: turn-tilt, hinged right (outer jambs).
+        insert: withDivision(WINDOW_INSERT_DEFAULTS, "double"),
+      })),
+      doors: [],
+    })),
+  };
+  const view = (start: { x: number; y: number }, end: { x: number; y: number }) =>
+    sectionDrawing(doubled, {
+      id: "e",
+      name: "E",
+      mark: "1",
+      start,
+      end,
+      look: "left",
+      kind: "elevation",
+    }).views.filter((v) => v.marks);
+  // From inside (line at y = 2 running to −x, looking at −y): turn 2 lines, turn-tilt 4.
+  const inside = view({ x: 6, y: 2 }, { x: 0, y: 2 });
+  assert.deepEqual(inside.map((v) => v.marks!.segments.length).sort(), [2, 4]);
+  assert.ok(inside.every((v) => !v.marks!.dashed));
+  // The turn sash is the left one seen from inside: its lines meet on its left edge.
+  const turn = inside.find((v) => v.marks!.segments.length === 2)!;
+  const left = Math.min(...turn.points.map((q) => q.x));
+  // Segment ends come sorted along the line, so the apex may be either end.
+  for (const segment of turn.marks!.segments)
+    assert.ok(
+      segment.some((p) => Math.abs(p.x - left) < 1e-9 && Math.abs(p.y - (0.97 + 2.18) / 2) < 1e-9),
+    );
+  // The tilt lines of the turn-tilt sash meet at the bottom middle.
+  const tilt = inside.find((v) => v.marks!.segments.length === 4)!;
+  const bottom = Math.min(...tilt.points.map((q) => q.y));
+  assert.ok(
+    tilt
+      .marks!.segments.slice(2)
+      .every((segment) => segment.some((p) => Math.abs(p.y - bottom) < 1e-9)),
+  );
+  // From outside the same symbols are dashed: the sashes open away from the viewer.
+  const outside = view({ x: 0, y: -2 }, { x: 6, y: -2 });
+  assert.deepEqual(outside.map((v) => v.marks!.segments.length).sort(), [2, 4]);
+  assert.ok(outside.every((v) => v.marks!.dashed));
+  // A fixed light has no symbol.
+  assert.equal(
+    sectionDrawing(project(), {
+      id: "e",
+      name: "E",
+      mark: "1",
+      start: { x: 0, y: -2 },
+      end: { x: 6, y: -2 },
+      look: "left",
+      kind: "elevation",
+    }).views.filter((v) => v.marks).length,
+    0,
+  );
+});

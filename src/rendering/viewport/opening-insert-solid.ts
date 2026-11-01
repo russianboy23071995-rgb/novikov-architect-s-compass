@@ -68,11 +68,52 @@ function place(
       [z0, z1] = box.z;
     if (x1 - x0 <= 1e-9 || y1 - y0 <= 1e-9 || z1 - z0 <= 1e-9) continue;
     volume += (x1 - x0) * (y1 - y0) * (z1 - z0);
+    // Opening symbol of a sash pane (FL3, DIN 1356): lines meet on the hinge side (turn) or at
+    // the bottom (tilt). On the pane faces only; dashed where the face looks outside, because
+    // the sash opens away from a viewer there.
+    const marks = (normal: Vec3) => {
+      const opening = box.opening;
+      if (!opening || normal[1] === 0) return {};
+      const y = normal[1] < 0 ? y0 : y1;
+      const [hinge, free] = opening.hingeAtMaxX ? [x1, x0] : [x0, x1];
+      const zm = (z0 + z1) / 2,
+        xm = (x0 + x1) / 2;
+      const local: [Vec3, Vec3][] = [];
+      if (opening.operation !== "tilt")
+        local.push(
+          [
+            [free, y, z0],
+            [hinge, y, zm],
+          ],
+          [
+            [free, y, z1],
+            [hinge, y, zm],
+          ],
+        );
+      if (opening.operation !== "turn")
+        local.push(
+          [
+            [x0, y, z1],
+            [xm, y, z0],
+          ],
+          [
+            [x1, y, z1],
+            [xm, y, z0],
+          ],
+        );
+      return {
+        marks: {
+          segments: local.map(([a, b]): [Vec3, Vec3] => [world(a), world(b)]),
+          dashed: Math.sign(normal[1]) === opening.outside,
+        },
+      };
+    };
     const quad = (points: Vec3[], normal: Vec3) =>
       faces.push({
         wallId: id,
         opening: kind,
         ...(box.part === "glass" ? { glass: true as const } : {}),
+        ...marks(normal),
         vertices: points.map(world),
         normal: turn(normal),
       });

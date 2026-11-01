@@ -102,7 +102,7 @@ Nutzerwahl (01.11.2026): als nächstes Thema die Fensterflügel, in vier Schritt
 | --- | --- | --- |
 | FL1 | Teilungen und Öffnungsarten im Modell, Werkzeug- und Elementfenster | erledigt |
 | FL2 | Flügelrahmen, Pfosten, Kämpfer in 3D und Schnitt | erledigt |
-| FL3 | Flügel im Grundriss, Öffnungsdreiecke in der Ansicht | offen |
+| FL3 | Flügel im Grundriss (mit FL2), Öffnungsdreiecke in Ansicht und Schnitt | erledigt |
 | FL4 | IFC: PartitioningType, Paneel-Angaben, Flügelkörper | offen |
 
 ### FL1 – Teilungen und Öffnungsarten
@@ -128,3 +128,15 @@ Nachweis: neuer Test in `src/application/openings/inserts.test.ts` (Vorgaben, Fl
 Grenzen: Flügel liegen bündig in der Rahmentiefe, ohne Falz, Überschlag oder Versatz zum Blendrahmen; Öffnungsart und Anschlag sind noch nirgends sichtbar (FL3); Flügel immer geschlossen.
 
 Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (Teilezahl 2-flüglig und Oberlicht, Pfostenlage, Scheibenbreite 0,37 m, Kämpfer- und Oberlichthöhe, Grundriss mit sieben Hölzern und zwei Scheiben, Schnitt durch das Oberlichtfenster mit sieben Rahmen- und zwei Glasumrissen); Grundrisstest auf mehrere Scheiben umgestellt. 1456 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster mit Element „1-flüglig mit Oberlicht“ – 3D zeigt Oberlicht, Kämpfer, Flügelrahmen und Scheiben; Schnitt A-A zeigt Kopfrahmen, Oberlichtglas, Kämpfer mit Flügelholz, Flügelglas und Fensterbänke. Bildschirmfotos an den Nutzer.
+
+### FL3 – Öffnungssymbole
+
+- In Ansicht und Schnitt bekommt jede Flügelscheibe das Öffnungssymbol nach DIN 1356: **Dreh** – zwei Linien von den Ecken der Griffseite zur Mitte der Bandseite; **Kipp** – von den oberen Ecken zur Mitte unten; **Dreh-Kipp** – beides. Festverglasung und Oberlicht ohne Symbol.
+- Die Bandseite folgt dem Anschlag „von innen“: In der Innenansicht liegt ein links angeschlagener Flügel links, in der Außenansicht rechts. Flügel werden von innen gesehen von links nach rechts gezählt.
+- **Gestrichelt**, wenn die Scheibe zum Außenbereich blickt (die Flügel gehen nach innen auf, also vom Betrachter weg), **durchgezogen** von innen.
+- Umsetzung: Die Flügelscheiben tragen Öffnungsart, Bandseite und Außenseite (`insert-geometry.ts`), ihre beiden Glasflächen die Symbollinien in Weltkoordinaten (`opening-insert-solid.ts`, `Face.marks`); `section-drawing.ts` übernimmt sie für Glasflächen hinter der Ebene (auf die Linienlänge beschnitten) in `SectionView.marks`, `SectionDrawingView.tsx` zeichnet sie dünn über der Fläche – in Malerreihenfolge, also von näheren Bauteilen verdeckt.
+- Grundriss: die Flügel als geschnittene Hölzer kamen mit FL2; eigene Öffnungssymbole im Grundriss gibt es nicht (in deutschen Grundrissen üblich).
+
+Grenzen: Kein Symbol in 3D; ein teilweise von der Ebene abgeschnittener Flügel zeigt seine Linien nur ohne Schnitt durch die Scheibe; Flügel nach außen öffnend gibt es nicht.
+
+Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (2-flüglig: innen durchgezogen 2 + 4 Linien, Spitze des Drehflügels an seiner linken Kante auf halber Höhe, Kipplinien treffen sich unten; außen gestrichelt; Festverglasung ohne Symbol). 1457 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster 2-flüglig, „Vier Ansichten erzeugen“, Südansicht (außen): links Dreh-Kipp mit Spitze links und Kipp-Spitze unten, rechts Dreh mit Spitze rechts, gestrichelt. Bildschirmfoto an den Nutzer.

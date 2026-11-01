@@ -125,6 +125,19 @@ export function SectionDrawingView({
                     vectorEffect="non-scaling-stroke"
                   />
                 ))}
+                {v.marks?.segments.map(([a, b], j) => (
+                  <line
+                    key={`m${j}`}
+                    x1={a.x}
+                    y1={-a.y}
+                    x2={b.x}
+                    y2={-b.y}
+                    stroke="var(--foreground)"
+                    strokeWidth={0.6}
+                    strokeDasharray={v.marks!.dashed ? "6 4" : undefined}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
               </g>
             ))}
           </g>
