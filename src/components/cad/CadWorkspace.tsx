@@ -3000,8 +3000,25 @@ export function CadWorkspace({
                         dispatchEditing({ type: "begin", target, action: "edge", index, anchor });
                       }}
                       onCornerPick={(target, index, anchor) => {
+                        // E1: columns and stairs move whole, with the clicked corner as handle.
+                        if (target.kind === "column" || target.kind === "stair") {
+                          if (
+                            referenceSelection.selecting ||
+                            !visibleLayerTarget(
+                              visibilityNow.current.project,
+                              visibilityNow.current.visibility,
+                              target,
+                            )
+                          )
+                            return false;
+                          cancelInteraction();
+                          setDemandOpen(false);
+                          setModelError("");
+                          groupMove.begin(anchor);
+                          return true;
+                        }
                         if (
-                          !isVertexTarget(target) ||
+                          !(target.kind === "wall" || isVertexTarget(target)) ||
                           referenceSelection.selecting ||
                           !visibleLayerTarget(
                             visibilityNow.current.project,
