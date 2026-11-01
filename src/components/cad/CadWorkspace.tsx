@@ -954,6 +954,7 @@ export function CadWorkspace({
         value={sectionDefaults}
         onChange={setSectionDefaults}
         next={nextSectionLabel(project, sectionDefaults)}
+        denominator={planDenominator(project)}
       />
     ) : owner === "stair" ? (
       <StairFields
@@ -2472,13 +2473,14 @@ export function CadWorkspace({
                 open
                 title={`${section.name} – Schnitt`}
                 width={380}
-                height={300}
+                height={370}
                 onClose={() => setSectionWindow(null)}
               >
                 <SectionProperties
-                  key={`${section.id}:${section.name}:${section.mark}`}
+                  key={`${section.id}:${section.name}:${section.mark}:${JSON.stringify(section.symbolSize)}`}
                   section={section}
                   sections={sections ?? []}
+                  denominator={planDenominator(project)}
                   onChange={(changes) => {
                     try {
                       dispatchEditing({
@@ -2845,6 +2847,7 @@ export function CadWorkspace({
                               start: sectionStart,
                               end: sectionEnd,
                               mark: nextSectionLabel(project, sectionDefaults).mark,
+                              symbolSize: sectionDefaults.symbolSize,
                             }
                           : undefined
                       }

@@ -1,20 +1,29 @@
 import { useState } from "react";
-import { repeatedSectionMarks, sectionFrame, type Section } from "@/domain/views/sections";
+import {
+  repeatedSectionMarks,
+  sectionFrame,
+  SECTION_SYMBOL_SIZE,
+  type Section,
+} from "@/domain/views/sections";
 import { Button } from "@/components/ui/button";
+import { SectionSizeField } from "./SectionSizeField";
 
-/** Element window of a section (docs/SCHNITT.md, SC2): name, mark, viewing side, delete. */
+/** Element window of a section (docs/SCHNITT.md, SC2/SC4): name, mark, size, viewing side, delete. */
 export function SectionProperties({
   section,
   sections,
   onChange,
   onDelete,
   onOpen,
+  denominator,
 }: {
   section: Section;
   sections: readonly Section[];
   onChange: (changes: Partial<Omit<Section, "id">>) => void;
   onDelete: () => void;
   onOpen: () => void;
+  /** Output scale 1:denominator. */
+  denominator: number;
 }) {
   const [name, setName] = useState(section.name);
   const [mark, setMark] = useState(section.mark);
@@ -61,6 +70,11 @@ export function SectionProperties({
           Kennung {mark.trim()} wird schon von einem anderen Schnitt verwendet.
         </p>
       )}
+      <SectionSizeField
+        value={section.symbolSize ?? SECTION_SYMBOL_SIZE}
+        onChange={(symbolSize) => onChange({ symbolSize })}
+        denominator={denominator}
+      />
       <p className="text-muted-foreground">
         Länge {sectionFrame(section).length.toFixed(2)} m · Blick nach{" "}
         {section.look === "left" ? "links" : "rechts"} (von Anfang zu Ende gesehen)

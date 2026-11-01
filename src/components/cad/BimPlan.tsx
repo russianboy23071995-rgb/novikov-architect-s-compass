@@ -4,7 +4,12 @@ import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
 import { SectionPlanGraphic } from "./SectionPlanGraphic";
-import { sectionLookTo, type Section } from "@/domain/views/sections";
+import {
+  sectionLookTo,
+  sectionSymbolHeight,
+  type Section,
+  type SectionSymbolSize,
+} from "@/domain/views/sections";
 import {
   stairDirectionTo,
   stairGeometry,
@@ -154,7 +159,8 @@ export type BimPlanProps = {
   /** Double click on a section line opens its window. */
   onSectionSettings?: ((id: string) => void) | undefined;
   /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
-  sectionDraft?: { start: Point; end: Point | null; mark: string } | undefined;
+  sectionDraft?:
+    { start: Point; end: Point | null; mark: string; symbolSize: SectionSymbolSize } | undefined;
   /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
   dimensionDraft?:
     | {
@@ -1441,6 +1447,7 @@ export function BimPlan({
             <SectionPlanGraphic
               section={section}
               pixelsPerMetre={camera.pixelsPerMetre}
+              height={sectionSymbolHeight(section.symbolSize, scaleContext.denominator)}
               color="var(--foreground)"
               pick={!!onSectionSettings}
             />
@@ -1465,6 +1472,7 @@ export function BimPlan({
                 <SectionPlanGraphic
                   section={{ start: sectionDraft.start, end, look, mark: sectionDraft.mark }}
                   pixelsPerMetre={camera.pixelsPerMetre}
+                  height={sectionSymbolHeight(sectionDraft.symbolSize, scaleContext.denominator)}
                   color="#0284c7"
                 />
               </g>

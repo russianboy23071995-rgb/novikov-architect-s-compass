@@ -3,15 +3,22 @@ import type { Project } from "../../domain/project/schema.ts";
 import {
   nextSectionMark,
   sectionName,
+  SECTION_SYMBOL_SIZE,
+  type SectionSymbolSize,
   type Section,
   type SectionMarkKind,
 } from "../../domain/views/sections.ts";
 
-/** Tool defaults of the section tool (docs/SCHNITT.md, SC2). */
-export type SectionDefaults = { markKind: SectionMarkKind; namePrefix: string };
+/** Tool defaults of the section tool (docs/SCHNITT.md, SC2; symbol size SC4). */
+export type SectionDefaults = {
+  markKind: SectionMarkKind;
+  namePrefix: string;
+  symbolSize: SectionSymbolSize;
+};
 export const SECTION_TOOL_DEFAULTS: SectionDefaults = {
   markKind: "letters",
   namePrefix: "Schnitt",
+  symbolSize: SECTION_SYMBOL_SIZE,
 };
 
 /** Mark and name the next section gets with these defaults. */
@@ -28,7 +35,10 @@ export function addSection(
 ): Project {
   return validateLike(project, {
     ...project,
-    sections: [...(project.sections ?? []), { ...nextSectionLabel(project, defaults), ...section }],
+    sections: [
+      ...(project.sections ?? []),
+      { ...nextSectionLabel(project, defaults), symbolSize: defaults.symbolSize, ...section },
+    ],
   });
 }
 

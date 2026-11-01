@@ -11,6 +11,36 @@ export type SectionLook = (typeof SECTION_LOOKS)[number];
 
 const point = z.object({ x: z.number().finite(), y: z.number().finite() }).strict();
 
+/**
+ * Size of the section symbol in plan (SC4): letter height of the mark in paper mm (follows the
+ * output scale) or model m; arrows and end strokes follow it. Never a screen size.
+ */
+export const sectionSymbolSizeSchema = z
+  .object({ unit: z.enum(["paper", "model"]), value: z.number().finite().positive().max(1000) })
+  .strict();
+export type SectionSymbolSize = z.infer<typeof sectionSymbolSizeSchema>;
+export const SECTION_SYMBOL_SIZE: SectionSymbolSize = { unit: "paper", value: 5 };
+
+/** Letter height of the mark in model metres at 1:denominator. */
+export function sectionSymbolHeight(
+  size: SectionSymbolSize = SECTION_SYMBOL_SIZE,
+  denominator: number,
+): number {
+  return size.unit === "paper" ? (size.value / 1000) * denominator : size.value;
+}
+
+/** The same visible size in the other unit at 1:denominator (paper mm ↔ model m). */
+export function convertSectionSymbolSize(
+  size: SectionSymbolSize,
+  unit: SectionSymbolSize["unit"],
+  denominator: number,
+): SectionSymbolSize {
+  if (size.unit === unit) return size;
+  const metres = sectionSymbolHeight(size, denominator);
+  const value = unit === "paper" ? (metres * 1000) / denominator : metres;
+  return { unit, value: Math.round(value * 10000) / 10000 };
+}
+
 export const sectionSchema = z
   .object({
     id: z.string().min(1),
@@ -19,6 +49,7 @@ export const sectionSchema = z
     start: point,
     end: point,
     look: z.enum(SECTION_LOOKS),
+    symbolSize: sectionSymbolSizeSchema.optional(),
   })
   .strict()
   .refine((s) => Math.hypot(s.end.x - s.start.x, s.end.y - s.start.y) > 1e-6, {

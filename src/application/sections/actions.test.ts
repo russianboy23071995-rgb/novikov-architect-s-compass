@@ -1,12 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createStandardProject } from "../projects/create.ts";
-import { addSection, nextSectionLabel, removeSection, updateSection } from "./actions.ts";
+import {
+  addSection,
+  nextSectionLabel,
+  removeSection,
+  SECTION_TOOL_DEFAULTS,
+  updateSection,
+} from "./actions.ts";
 import {
   nextSectionMark,
   repeatedSectionMarks,
   sectionFrame,
   sectionLookTo,
+  sectionSymbolHeight,
+  convertSectionSymbolSize,
+  SECTION_SYMBOL_SIZE,
   type Section,
 } from "../../domain/views/sections.ts";
 import { serializeProject } from "../../lib/bim/model.ts";
@@ -14,7 +23,7 @@ import { readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 
-// docs/SCHNITT.md, SC2.
+// docs/SCHNITT.md, SC2 and SC4.
 const line = { start: { x: 0, y: 0 }, end: { x: 4, y: 0 }, look: "left" as const };
 const marked = (mark: string) => ({ id: mark, name: mark, mark, ...line }) satisfies Section;
 
@@ -38,8 +47,10 @@ test("viewing side from the third click; the frame looks to that side", () => {
 test("sections belong to the building: add, rename, repeat a mark, turn, delete, round trip", () => {
   const p = createStandardProject("p", "eg", "og");
   const a = addSection(p, { id: "s1", ...line });
-  assert.deepEqual(a.sections, [{ id: "s1", name: "Schnitt A-A", mark: "A", ...line }]);
-  assert.deepEqual(nextSectionLabel(a, { markKind: "letters", namePrefix: "Längsschnitt" }), {
+  assert.deepEqual(a.sections, [
+    { id: "s1", name: "Schnitt A-A", mark: "A", symbolSize: SECTION_SYMBOL_SIZE, ...line },
+  ]);
+  assert.deepEqual(nextSectionLabel(a, { ...SECTION_TOOL_DEFAULTS, namePrefix: "Längsschnitt" }), {
     mark: "B",
     name: "Längsschnitt B-B",
   });
@@ -49,9 +60,11 @@ test("sections belong to the building: add, rename, repeat a mark, turn, delete,
     {
       markKind: "numbers",
       namePrefix: "Querschnitt",
+      symbolSize: { unit: "model", value: 0.4 },
     },
   );
   assert.equal(b.sections![1]!.name, "Querschnitt 1-1");
+  assert.deepEqual(b.sections![1]!.symbolSize, { unit: "model", value: 0.4 });
   // The storeys are untouched: a section is drawn in any plan and shown in all of them.
   assert.deepEqual(b.storeys, p.storeys);
   const renamed = updateSection(b, "s2", { name: "Treppenschnitt", mark: "A", look: "left" });
@@ -80,4 +93,35 @@ test("schema 40 files load without sections; smuggled sections are refused", () 
   );
   assert.equal(loadProjectData(withSection).sections!.length, 1);
   assert.throws(() => loadProjectData({ ...withSection, schemaVersion: 40 }));
+});
+
+test("symbol size: letter height in paper mm or model m, fixed to the model, not the screen", () => {
+  // docs/SCHNITT.md, SC4: default 5 mm on paper, at 1:100 that is 0,50 m in the model.
+  assert.deepEqual(SECTION_SYMBOL_SIZE, { unit: "paper", value: 5 });
+  assert.equal(sectionSymbolHeight(undefined, 100), 0.5);
+  assert.equal(sectionSymbolHeight(undefined, 50), 0.25);
+  assert.equal(sectionSymbolHeight({ unit: "model", value: 0.4 }, 50), 0.4);
+  // Switching the unit keeps the visible size at the output scale.
+  assert.deepEqual(convertSectionSymbolSize(SECTION_SYMBOL_SIZE, "model", 100), {
+    unit: "model",
+    value: 0.5,
+  });
+  assert.deepEqual(convertSectionSymbolSize({ unit: "model", value: 0.5 }, "paper", 50), {
+    unit: "paper",
+    value: 10,
+  });
+  // Older sections without a size keep loading; a size is saved and refused when invalid.
+  const p = createStandardProject("p", "eg", "og");
+  const plain = { ...addSection(p, { id: "s1", ...line }) };
+  plain.sections = plain.sections!.map(({ symbolSize: _, ...s }) => s);
+  assert.equal(
+    loadProjectData(JSON.parse(serializeProject(plain))).sections![0]!.symbolSize,
+    undefined,
+  );
+  const sized = updateSection(plain, "s1", { symbolSize: { unit: "paper", value: 3.5 } });
+  assert.deepEqual(loadProjectData(JSON.parse(serializeProject(sized))).sections![0]!.symbolSize, {
+    unit: "paper",
+    value: 3.5,
+  });
+  assert.throws(() => updateSection(plain, "s1", { symbolSize: { unit: "paper", value: 0 } }));
 });
