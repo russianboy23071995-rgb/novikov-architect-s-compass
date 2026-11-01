@@ -396,7 +396,8 @@ test("window tool in connected plan preserves preview, edits, history, reload an
     assert.equal((ifc.match(/=IFCWINDOW\(/g) || []).length, 1);
     assert.equal((ifc.match(/=IFCRELVOIDSELEMENT\(/g) || []).length, 1);
     assert.equal((ifc.match(/=IFCRELFILLSELEMENT\(/g) || []).length, 1);
-    assert.match(ifc, /1\.1,1\.,\.WINDOW\.,\.NOTDEFINED\./);
+    // The tool places a window element: one fixed panel (FL4).
+    assert.match(ifc, /1\.1,1\.,\.WINDOW\.,\.SINGLE_PANEL\./);
     assert.ok(ifc.includes("IFCRATIOMEASURE(0.75)"));
     assert.ok(ifc.includes("IFCLENGTHMEASURE(0.8)"));
   }

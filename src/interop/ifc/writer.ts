@@ -16,7 +16,12 @@ import {
   windowInsertBoxes,
   type InsertBox,
 } from "../../domain/elements/window/insert-geometry.ts";
-import type { DoorInsert, WindowInsert } from "../../domain/elements/window/insert.ts";
+import {
+  SASH_DEFAULTS,
+  type DoorInsert,
+  type Sash,
+  type WindowInsert,
+} from "../../domain/elements/window/insert.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
 import { localTrimPlane } from "../../domain/elements/wall/roof-trim.ts";
 import { trimExtrusionBelowPlane } from "../../geometry/solids/plane-trim.ts";
@@ -135,9 +140,64 @@ function insertProperties(
     length("FrameOffset", insert.offset),
     ["ExteriorSide", `IFCLABEL(${stepString(insert.exterior)})`],
     ["Division", `IFCLABEL(${stepString(insert.division)})`],
+    ...(insert.division === "fixed"
+      ? []
+      : ([
+          length("SashWidth", insert.sashWidth ?? SASH_DEFAULTS.sashWidth),
+          ...(insert.division === "single"
+            ? []
+            : [length("MullionWidth", insert.mullionWidth ?? SASH_DEFAULTS.mullionWidth)]),
+          ...(insert.division === "transom"
+            ? [length("TransomHeight", insert.transomHeight ?? SASH_DEFAULTS.transomHeight)]
+            : []),
+          [
+            "Sashes",
+            `IFCLABEL(${stepString((insert.sashes ?? []).map((x) => `${x.operation}/${x.hinge}`).join("; "))})`,
+          ],
+        ] as [string, string][])),
     ...(insert.sillInside ? [length("SillInsideProjection", insert.sillInside.projection)] : []),
     ...(insert.sillOutside ? [length("SillOutsideProjection", insert.sillOutside.projection)] : []),
   ];
+}
+
+/** IFC4 partitioning of a window element (FL4): one panel, two side by side or one above the other. */
+export function windowPartitioning(insert: WindowInsert): string {
+  return insert.division === "double"
+    ? "DOUBLE_PANEL_VERTICAL"
+    : insert.division === "transom"
+      ? "DOUBLE_PANEL_HORIZONTAL"
+      : "SINGLE_PANEL";
+}
+
+/**
+ * IFC4 panel operation of a sash. Assumption to be checked in Archicad: the hand is the hinge
+ * side seen from inside, as the sash setting; turn-tilt is TILTANDTURN…, tilt BOTTOMHUNG.
+ */
+export function panelOperation(sash: Sash): string {
+  const hand = sash.hinge === "left" ? "LEFTHAND" : "RIGHTHAND";
+  return sash.operation === "tilt"
+    ? "BOTTOMHUNG"
+    : sash.operation === "turn"
+      ? `SIDEHUNG${hand}`
+      : `TILTANDTURN${hand}`;
+}
+
+/** Panels of a window element in IFC order (left to right, top to bottom) with their operation. */
+export function windowPanels(insert: WindowInsert): { operation: string; position: string }[] {
+  const sashes = insert.sashes ?? [];
+  if (insert.division === "double")
+    return sashes.map((sash, i) => ({
+      operation: panelOperation(sash),
+      position: i === 0 ? "LEFT" : "RIGHT",
+    }));
+  if (insert.division === "transom")
+    return [
+      { operation: "FIXEDCASEMENT", position: "TOP" },
+      ...sashes.map((sash) => ({ operation: panelOperation(sash), position: "BOTTOM" })),
+    ];
+  if (insert.division === "single")
+    return sashes.map((sash) => ({ operation: panelOperation(sash), position: "MIDDLE" }));
+  return [{ operation: "FIXEDCASEMENT", position: "MIDDLE" }];
 }
 
 /** IFC4 STEP export; validates and copies the snapshot before any asynchronous work.
@@ -354,6 +414,21 @@ export async function writeIfc(
           "IFCDOORLININGPROPERTIES",
           `${await guid("door-lining", id)},$,$,$,${real(depth)},${real(thickness)},$,$,$,$,$,$,$,$,$,$,$`,
         );
+  /** IfcWindowPanelProperties per panel (FL4): operation, position, sash frame depth and width. */
+  const panels = async (id: string, insert: WindowInsert) => {
+    const sash = insert.sashWidth ?? SASH_DEFAULTS.sashWidth;
+    const refs: string[] = [];
+    for (const [i, panel] of windowPanels(insert).entries()) {
+      const casement = panel.operation !== "FIXEDCASEMENT";
+      refs.push(
+        add(
+          "IFCWINDOWPANELPROPERTIES",
+          `${await guid("window-panel", `${id}:${i}`)},$,$,$,.${panel.operation}.,.${panel.position}.,${casement ? real(insert.frameDepth) : "$"},${casement ? real(sash) : "$"},$`,
+        ),
+      );
+    }
+    return refs;
+  };
   const placeholder: [string, string][] =
     fillingBody === "none" ? [] : [["PlaceholderBody", "IFCBOOLEAN(.T.)"]];
   const types: string[] = [];
@@ -364,17 +439,17 @@ export async function writeIfc(
     width: number,
     height: number,
     operation: string,
-    /** Lining of an inserted element: the type is written for it even without fillingTypes. */
-    liningRef?: string,
+    /** Lining and panels of an inserted element: the type is written even without fillingTypes. */
+    typeSets?: string[],
   ) => {
-    if (!filling.fillingTypes && !liningRef) return;
-    const sets = liningRef ? `(${liningRef})` : "$";
+    if (!filling.fillingTypes && !typeSets?.length) return;
+    const sets = typeSets?.length ? `(${typeSets.join(",")})` : "$";
     const name = label(id + " Typ");
     const type =
       kind === "window"
         ? add(
             "IFCWINDOWTYPE",
-            `${await guid("window-type", id)},$,${name},$,$,${sets},$,$,$,.WINDOW.,.SINGLE_PANEL.,.F.,$`,
+            `${await guid("window-type", id)},$,${name},$,$,${sets},$,$,$,.WINDOW.,.${operation || "SINGLE_PANEL"}.,.F.,$`,
           )
         : add(
             "IFCDOORTYPE",
@@ -497,7 +572,7 @@ export async function writeIfc(
           : fillingShape(window.width, wall.thickness, window.height);
         const windowRef = add(
           "IFCWINDOW",
-          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},${windowShape},${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
+          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},${windowShape},${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.${window.insert ? windowPartitioning(window.insert) : "NOTDEFINED"}.,$`,
         );
         add("IFCRELFILLSELEMENT", `${await guid("fill", window.id)},$,$,$,${opening},${windowRef}`);
         elements.push(windowRef);
@@ -513,9 +588,11 @@ export async function writeIfc(
           window.id,
           window.width,
           window.height,
-          "",
-          window.insert &&
-            (await lining("window", window.id, window.insert.frameDepth, window.insert.frameWidth)),
+          window.insert ? windowPartitioning(window.insert) : "",
+          window.insert && [
+            await lining("window", window.id, window.insert.frameDepth, window.insert.frameWidth),
+            ...(await panels(window.id, window.insert)),
+          ],
         );
       }
       for (const door of (floor.doors ?? []).filter((item) => item.wallId === wall.id)) {
@@ -574,13 +651,14 @@ export async function writeIfc(
           door.width,
           door.height,
           doorOperationType(door),
-          door.insert &&
-            (await lining(
+          door.insert && [
+            await lining(
               "door",
               door.id,
               door.insert.frameDepth ?? wall.thickness,
               door.insert.frameWidth,
-            )),
+            ),
+          ],
         );
       }
     }
