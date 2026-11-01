@@ -398,7 +398,6 @@ export function CadWorkspace({
   const [exportMessage, setExportMessage] = useState("");
 
   const [notice, setNotice] = useState("Ready");
-  const [fullscreen, setFullscreen] = useState(false);
   // Text being typed at its insertion point (docs/TEXT.md); session state only.
   const [textDraft, setTextDraft] = useState<{
     position: Point;
@@ -424,10 +423,9 @@ export function CadWorkspace({
   const [stairDirection, setStairDirection] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
-  const railShown = !fullscreen || !!activeDocumentId;
-  const navigatorShown = navigatorOpen && !fullscreen;
+  const navigatorShown = navigatorOpen;
   const insets = paletteInsets({
-    rail: railShown,
+    rail: true,
     railCollapsed: true,
     navigator: navigatorShown,
     navigatorWidth,
@@ -549,13 +547,11 @@ export function CadWorkspace({
         setDemandOpen(false);
         setTool("select");
         setModelError("");
-        if (fullscreen) setFullscreen(false);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [
-    fullscreen,
     cancelInteraction,
     referenceSelection.selecting,
     navigateHistory,
@@ -973,7 +969,6 @@ export function CadWorkspace({
   const openToolDefaults = (owner: ToolId) => {
     if (owner === "roof" || owner === "room" || SETTINGS_TOOLS[owner])
       return setSettingsWindow({ mode: "tool", tool: owner });
-    setFullscreen(false);
     propertiesRef.current?.focus();
   };
   const openElementSettings = (target: NonNullable<Selection>) => {
@@ -2517,75 +2512,73 @@ export function CadWorkspace({
         )}
         {lineCreatorOpen && <LineStyleCreator onClose={() => setLineCreatorOpen(false)} />}
         <HatchPatternCreator open={hatchLibraryOpen} onOpenChange={setHatchLibraryOpen} />
-        {!fullscreen && (
-          <TopToolbar
-            storeyName={storeyOf(project).name}
-            onPenSets={() => setPenSetsOpen(true)}
-            onLineCreator={() => setLineCreatorOpen(true)}
-            onHatchLibrary={() => setHatchLibraryOpen(true)}
-            onMeasure={() => selectTool("measure")}
-            measuring={tool === "measure"}
-            onImportImage={() => {
-              if (activeDocumentId) {
-                showNotice("Zum Importieren Arbeitsmodell öffnen.");
-                return;
-              }
-              selectTool("select");
-              setSelection(null);
-              setMode("2D");
-              imageInput.current?.click();
-            }}
-            onCanvasDisplay={() => setDisplaySettingsOpen(true)}
-            onLayers={() => {
-              cancelInteraction();
-              setDemandOpen(false);
-              setModelError("");
-              setLayersOpen(true);
-            }}
-            onPipette={() => selections.length === 1 && pickupFrom(selections[0]!)}
-            canPipette={selections.length === 1}
-            onTrim={askTrim}
-            canTrim={typeof trimRequest() !== "string"}
-            onUntrim={untrimSelected}
-            canUntrim={trimmedSelection().length > 0}
-            onRoomList={() => {
-              cancelInteraction();
-              setDemandOpen(false);
-              setModelError("");
-              setRoomListOpen(true);
-            }}
-            layout={layout}
-            navigatorOpen={navigatorOpen}
-            demandOpen={demandOpen}
-            onLayout={(next) => {
-              groupMove.cancel();
-              dispatchEditing({ type: "cancel" });
-              setLayout(next);
-              setActiveViewport(0);
-            }}
-            onNavigator={() => setNavigatorOpen((value) => !value)}
-            onDemand={() => setDemandOpen((value) => !value)}
-            onAction={showNotice}
-            onExportIfc={downloadIfc}
-            exportingIfc={exportingIfc}
-            onSave={saveProject}
-            onRecovery={() => setRecoveryOpen(true)}
-            onOpen={() => {
-              if (!readingFile) fileInput.current?.click();
-            }}
-            onUndo={() => navigateHistory("undo")}
-            onRedo={() => navigateHistory("redo")}
-            selectedLayer={project.layers.find((l) => l.id === selectedLayerId) ?? null}
-            onLayerVisibility={(action) =>
-              dispatchEditing({ type: "visibility", base: project, action, scope: visibilityScope })
+        <TopToolbar
+          storeyName={storeyOf(project).name}
+          onPenSets={() => setPenSetsOpen(true)}
+          onLineCreator={() => setLineCreatorOpen(true)}
+          onHatchLibrary={() => setHatchLibraryOpen(true)}
+          onMeasure={() => selectTool("measure")}
+          measuring={tool === "measure"}
+          onImportImage={() => {
+            if (activeDocumentId) {
+              showNotice("Zum Importieren Arbeitsmodell öffnen.");
+              return;
             }
-            canUndoVisibility={Boolean(visibilityHistory?.past.length)}
-            canRedoVisibility={Boolean(visibilityHistory?.future.length)}
-            canUndo={history.past.length > 0}
-            canRedo={history.future.length > 0}
-            historyTrimmed={Boolean(history.trimmed)}
-          />
-        )}
+            selectTool("select");
+            setSelection(null);
+            setMode("2D");
+            imageInput.current?.click();
+          }}
+          onCanvasDisplay={() => setDisplaySettingsOpen(true)}
+          onLayers={() => {
+            cancelInteraction();
+            setDemandOpen(false);
+            setModelError("");
+            setLayersOpen(true);
+          }}
+          onPipette={() => selections.length === 1 && pickupFrom(selections[0]!)}
+          canPipette={selections.length === 1}
+          onTrim={askTrim}
+          canTrim={typeof trimRequest() !== "string"}
+          onUntrim={untrimSelected}
+          canUntrim={trimmedSelection().length > 0}
+          onRoomList={() => {
+            cancelInteraction();
+            setDemandOpen(false);
+            setModelError("");
+            setRoomListOpen(true);
+          }}
+          layout={layout}
+          navigatorOpen={navigatorOpen}
+          demandOpen={demandOpen}
+          onLayout={(next) => {
+            groupMove.cancel();
+            dispatchEditing({ type: "cancel" });
+            setLayout(next);
+            setActiveViewport(0);
+          }}
+          onNavigator={() => setNavigatorOpen((value) => !value)}
+          onDemand={() => setDemandOpen((value) => !value)}
+          onAction={showNotice}
+          onExportIfc={downloadIfc}
+          exportingIfc={exportingIfc}
+          onSave={saveProject}
+          onRecovery={() => setRecoveryOpen(true)}
+          onOpen={() => {
+            if (!readingFile) fileInput.current?.click();
+          }}
+          onUndo={() => navigateHistory("undo")}
+          onRedo={() => navigateHistory("redo")}
+          selectedLayer={project.layers.find((l) => l.id === selectedLayerId) ?? null}
+          onLayerVisibility={(action) =>
+            dispatchEditing({ type: "visibility", base: project, action, scope: visibilityScope })
+          }
+          canUndoVisibility={Boolean(visibilityHistory?.past.length)}
+          canRedoVisibility={Boolean(visibilityHistory?.future.length)}
+          canUndo={history.past.length > 0}
+          canRedo={history.future.length > 0}
+          historyTrimmed={Boolean(history.trimmed)}
+        />
         <input
           ref={imageInput}
           type="file"
@@ -2663,7 +2656,6 @@ export function CadWorkspace({
               }
               onAction={startEdit}
               onInfo={() => {
-                setFullscreen(false);
                 propertiesRef.current?.focus();
               }}
             />
@@ -3151,7 +3143,6 @@ export function CadWorkspace({
                       grid={grid}
                       active={activeViewport}
                       onActive={setActiveViewport}
-                      onFullscreen={() => setFullscreen((value) => !value)}
                     />
                   </div>
                   {(groupMove.adapter ||
@@ -3241,17 +3232,7 @@ export function CadWorkspace({
               >
                 {notice}
               </div>
-              {fullscreen && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute right-3 top-12 z-40 h-7 bg-popover/80 text-[10px]"
-                  onClick={() => setFullscreen(false)}
-                >
-                  Exit fullscreen
-                </Button>
-              )}
-              {!navigatorOpen && !fullscreen && (
+              {!navigatorOpen && (
                 <Button
                   variant="outline"
                   size="icon"
@@ -3420,17 +3401,15 @@ export function CadWorkspace({
               )}
             </>
           </section>
-          {railShown && (
-            <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
-              <ToolRail
-                activeTool={tool}
-                layout={toolLayout}
-                onSelect={selectTool}
-                onSettings={openToolDefaults}
-                onCustomize={() => setRailCustomizing(true)}
-              />
-            </div>
-          )}
+          <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
+            <ToolRail
+              activeTool={tool}
+              layout={toolLayout}
+              onSelect={selectTool}
+              onSettings={openToolDefaults}
+              onCustomize={() => setRailCustomizing(true)}
+            />
+          </div>
           {railCustomizing && (
             <FloatingPanel
               open
@@ -3550,29 +3529,27 @@ export function CadWorkspace({
             </div>
           )}
         </div>
-        {!fullscreen && (
-          <StatusBar
-            storeyName={storeyOf(project).name}
-            recoveryStatus={
-              <LocalRecoveryStatus
-                autosave={autosave.state}
-                project={project}
-                context={editing.projectLoad ?? project.id}
-                onOpen={() => setRecoveryOpen(true)}
-              />
-            }
-            zoomSlot={setZoomSlot}
-            gridSettings={gridSettings}
-            onGridSettings={setGridSettings}
-            grid={grid}
-            snap={snap}
-            ortho={ortho}
-            selection={selections.length}
-            onGrid={() => setGrid((value) => !value)}
-            onSnap={() => setSnap((value) => !value)}
-            onOrtho={() => setOrtho((value) => !value)}
-          />
-        )}
+        <StatusBar
+          storeyName={storeyOf(project).name}
+          recoveryStatus={
+            <LocalRecoveryStatus
+              autosave={autosave.state}
+              project={project}
+              context={editing.projectLoad ?? project.id}
+              onOpen={() => setRecoveryOpen(true)}
+            />
+          }
+          zoomSlot={setZoomSlot}
+          gridSettings={gridSettings}
+          onGridSettings={setGridSettings}
+          grid={grid}
+          snap={snap}
+          ortho={ortho}
+          selection={selections.length}
+          onGrid={() => setGrid((value) => !value)}
+          onSnap={() => setSnap((value) => !value)}
+          onOrtho={() => setOrtho((value) => !value)}
+        />
       </main>
     </CadAppearanceProvider>
   );

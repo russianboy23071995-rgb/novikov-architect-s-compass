@@ -161,7 +161,6 @@ export function CornerPreviewDialog({
                   grid={false}
                   active
                   onActivate={() => {}}
-                  onFullscreen={() => {}}
                   project={project}
                   viewContext={viewContext}
                   cornerPreview={preview}
