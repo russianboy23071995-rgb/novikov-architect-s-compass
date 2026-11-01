@@ -5,16 +5,21 @@ type P = { x: number; y: number };
 /**
  * Section line in plan (docs/SCHNITT.md, SC2): thin dash-dot line, heavy end strokes, at each
  * end an arrow towards the viewing side and the mark. Model coordinates, y flipped like the
- * plan; sizes in screen pixels. `pick` adds a wide transparent stroke for the double click.
+ * plan. Arrows, end strokes and mark follow the letter height `height` in model metres (SC4:
+ * paper or model size, never a screen size); line weights stay in screen pixels. `pick` adds a
+ * wide transparent stroke for the double click.
  */
 export function SectionPlanGraphic({
   section,
   pixelsPerMetre,
+  height,
   color,
   pick = false,
 }: {
   section: Pick<Section, "start" | "end" | "look" | "mark"> & { id?: string };
   pixelsPerMetre: number;
+  /** Letter height of the mark in model metres. */
+  height: number;
   color: string;
   pick?: boolean;
 }) {
@@ -24,11 +29,12 @@ export function SectionPlanGraphic({
     x: p.x + d.x * s + view.x * t,
     y: p.y + d.y * s + view.y * t,
   });
-  const end = Math.min(px(14), length / 3);
+  const h = height;
+  const end = Math.min(1.1 * h, length / 3);
   const arrow = (p: P) => {
-    const tip = at(p, 0, px(16));
-    const back = at(p, 0, px(8));
-    const side = { x: d.x * px(4), y: d.y * px(4) };
+    const tip = at(p, 0, 1.25 * h);
+    const back = at(p, 0, 0.6 * h);
+    const side = { x: d.x * 0.3 * h, y: d.y * 0.3 * h };
     return (
       <>
         <line x1={p.x} y1={-p.y} x2={back.x} y2={-back.y} stroke={color} strokeWidth={px(1.5)} />
@@ -46,13 +52,13 @@ export function SectionPlanGraphic({
     );
   };
   const label = (p: P, outward: number) => {
-    const q = at(p, outward * px(14), 0);
+    const q = at(p, outward * 1.1 * h, 0);
     return (
       <text
         x={q.x}
         y={-q.y}
         fill={color}
-        fontSize={px(13)}
+        fontSize={h}
         fontWeight={600}
         textAnchor="middle"
         dominantBaseline="central"

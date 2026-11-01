@@ -9,6 +9,7 @@ Schritte:
 | SC1 | Canvas-Tabs, Ordner „Schnitte“ im Navigator | erledigt |
 | SC2 | Werkzeug „Schnitt“: Schnittlinie, Name, Kennung, Blickrichtung, Einträge im Ordner, Schnitt als Tab | erledigt |
 | SC3 | Schnittzeichnung aus dem Modell erzeugen und im Schnitt-Tab zeigen | erledigt |
+| SC4 | Größe des Schnittsymbols (mm Papier / m Modell), geschnittene Bauteile am Linienende geschlossen | erledigt |
 
 ## SC1 – Canvas-Tabs und Ordner „Schnitte“
 
@@ -64,3 +65,16 @@ Umsetzung: `src/rendering/viewport/section-drawing.ts` (Ebene, Schnittkanten ver
 Nachweis: `src/rendering/viewport/section-drawing.test.ts` (2 Tests: geschnittene Wand als geschlossener Umriss 0,24 × 2,80 m an der richtigen Stelle, Wand dahinter als Ansicht 4 × 2,80 m auf die Linienlänge beschnitten, Geschosskote; Gegenrichtung gespiegelt ohne die Wand davor; Linie neben dem Gebäude trifft nichts). 1432 Tests grün, Typprüfung beider Projekte, Architektur und Lint sauber, 14-Modell-Hash unverändert. Messung am Schulmodell (2000 Elemente, 5 Geschosse, 9200 Flächen): rund 100 ms je Schnitt, alle Schnittumrisse geschlossen.
 
 Browser-Abnahme (01.11.2026, Port 8094): Startprojekt (Wand mit Fenster), Schnitt quer durch das Fenster; Tab „Schnitt A-A“ zeigt die geschnittene Wand oben und unten in der Schnittfarbe, dazwischen die Fensteröffnung mit der Laibung dahinter, Geschosslinien „±0,00 Erdgeschoss“ und „+3,00 1. Obergeschoss“. Mausrad zoomt, „Einpassen“ stellt die Ansicht wieder her.
+
+## SC4 – Größe des Schnittsymbols, Korrektur geschnittener Bauteile am Linienende
+
+- **Symbolgröße:** Kennung, Pfeile und Endstriche der Schnittlinie im Grundriss haben eine feste Größe, die mit dem Modell zoomt, statt einer festen Bildschirmgröße. Einstellbar wie beim Text: Buchstabenhöhe in „mm Papier“ (folgt dem Ausgabemaßstab) oder „m Modell“. Vorgabe 5 mm Papier, bei 1:100 also 0,50 m. Pfeil und Endstriche wachsen anteilig mit (Pfeilspitze 1,25 h vor der Linie, Kennung 1,1 h hinter dem Ende); Strichstärken und die Doppelklick-Fangzone bleiben in Bildschirmpixeln.
+- Eingabe im Werkzeugfenster (Doppelklick auf „Schnitt“, gilt für neue Schnitte) und im Schnitt-Fenster (je Schnitt, ein Undo-Schritt). Beim Wechsel der Einheit wird so umgerechnet, dass die sichtbare Größe beim aktuellen Maßstab gleich bleibt.
+- Datenmodell: `section.symbolSize { unit: "paper" | "model", value }` optional; Schnitte ohne Angabe (aus SC2/SC3) zeigen die Vorgabe. Schema bleibt 41.
+- **Korrektur Schnittzeichnung:** Beginnt oder endet die Schnittlinie in einem Bauteil, blieb sein Schnitt bisher offen und damit ungefüllt (sichtbar bei Decke und Wand im Obergeschoss, wenn die Linie in der Wand ansetzt). Jetzt werden die Schnittumrisse erst vollständig gebildet und dann als Fläche auf die Linienlänge beschnitten; sie bleiben geschlossen und erhalten die Schnittfarbe. Das gilt für alle Geschosse und Bauteilarten.
+
+Umsetzung: `src/domain/views/sections.ts` (Symbolgröße, Umrechnung), `src/application/sections/actions.ts` (Vorgabe), `src/components/cad/SectionSizeField.tsx` (Feld Größe und Maß), `SectionFields.tsx`, `SectionProperties.tsx`, `SectionPlanGraphic.tsx`, `BimPlan.tsx`, `CadWorkspace.tsx`; `src/rendering/viewport/section-drawing.ts` (Umrisse erst schließen, dann beschneiden).
+
+Nachweis: neuer Test in `src/application/sections/actions.test.ts` (Vorgabe, Höhe bei 1:100 und 1:50, Umrechnung Papier ↔ Modell, Laden ohne und mit Größe, Ablehnung von 0) und in `section-drawing.test.ts` (Linie beginnt in Wand und Decke, darüber Wand im Obergeschoss: alle drei geschlossen mit den erwarteten Flächen). 1434 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Die Laufzeit am Schulmodell wurde nicht neu gemessen; zusätzlich gesammelt werden nur die Schnittkanten außerhalb der Linienlänge, die danach weggeschnitten werden.
+
+Browser-Abnahme (01.11.2026, Port 8094): Im Fenster des Nutzers war ein Schnitt mit Linienbeginn in der Wand zu sehen; Decke und Obergeschosswand erschienen nur als offene Linien (vor der Korrektur, im DOM nachgewiesen). Nach der Korrektur im Startprojekt: Schnitt mit Beginn in der Wand, Wandschnitt gefüllt. Symbol 5 mm Papier bei 1:100 zoomt mit dem Modell (Kennung im Verhältnis zur Wand gleich bei 220 % und 121 %); im Schnitt-Fenster 2,5 eingegeben → Symbol halb so groß; Einheit auf Modellmaß → 0,25 m, Größe unverändert.

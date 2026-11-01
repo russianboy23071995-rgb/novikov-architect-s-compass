@@ -1,16 +1,20 @@
 import type { SectionDefaults } from "@/application/sections/actions";
 import { SECTION_MARK_KINDS, SECTION_MARK_KIND_LABELS } from "@/domain/views/sections";
+import { SectionSizeField } from "./SectionSizeField";
 
-/** Defaults of the section tool (docs/SCHNITT.md, SC2): mark sequence and name prefix. */
+/** Defaults of the section tool (docs/SCHNITT.md, SC2/SC4): mark sequence, name prefix, size. */
 export function SectionFields({
   value,
   onChange,
   next,
+  denominator,
 }: {
   value: SectionDefaults;
   onChange: (value: SectionDefaults) => void;
   /** Mark and name of the next section. */
   next: { mark: string; name: string };
+  /** Output scale 1:denominator. */
+  denominator: number;
 }) {
   return (
     <section aria-label="Schnitteinstellungen" className="flex flex-wrap items-end gap-3">
@@ -39,6 +43,11 @@ export function SectionFields({
           className="block w-28 rounded border bg-background p-1"
         />
       </label>
+      <SectionSizeField
+        value={value.symbolSize}
+        onChange={(symbolSize) => onChange({ ...value, symbolSize })}
+        denominator={denominator}
+      />
       <p className="text-xs text-muted-foreground">
         Nächster: {next.name} · Klick Anfang, Klick Ende, Klick Blickrichtung
       </p>
