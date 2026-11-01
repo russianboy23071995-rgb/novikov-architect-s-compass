@@ -135,6 +135,8 @@ import type { EditAction } from "@/application/direct-edit/session";
 import { SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
+import { ToolRailCustomizer } from "./ToolRailCustomizer";
+import { useToolLayout } from "./useToolLayout";
 import { LineStyleCreator } from "./LineStyleCreator";
 import { HatchPatternCreator } from "./HatchPatternCreator";
 import { TopToolbar } from "./TopToolbar";
@@ -236,7 +238,9 @@ export function CadWorkspace({
   const [gridSettings, setGridSettings] = useState(defaultGridSettings);
   const [ortho, setOrtho] = useState(false);
   const [hoverDwellMs, setHoverDwellMs] = useState(DEFAULT_HOVER_DWELL_MS);
-  const [railCollapsed, setRailCollapsed] = useState(false);
+  // Compact rail only (WL1); the arrangement is remembered in this browser.
+  const { toolLayout, setToolLayout } = useToolLayout();
+  const [railCustomizing, setRailCustomizing] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(true);
   const [cornerWall, setCornerWall] = useState<string | null>(null);
   const [editing, dispatchEditing] = useProjectEditing(
@@ -402,7 +406,7 @@ export function CadWorkspace({
   const navigatorShown = navigatorOpen && !fullscreen;
   const insets = paletteInsets({
     rail: railShown,
-    railCollapsed,
+    railCollapsed: true,
     navigator: navigatorShown,
     navigatorWidth,
   });
@@ -541,7 +545,6 @@ export function CadWorkspace({
     const media = window.matchMedia("(max-width: 760px)");
     if (media.matches) {
       setNavigatorOpen(false);
-      setRailCollapsed(true);
     }
   }, []);
 
@@ -3197,12 +3200,23 @@ export function CadWorkspace({
             <div className="absolute bottom-2 left-2 z-20" style={{ top: insets.top }}>
               <ToolRail
                 activeTool={tool}
-                collapsed={railCollapsed}
+                layout={toolLayout}
                 onSelect={selectTool}
-                onToggle={() => setRailCollapsed((value) => !value)}
                 onSettings={openToolDefaults}
+                onCustomize={() => setRailCustomizing(true)}
               />
             </div>
+          )}
+          {railCustomizing && (
+            <FloatingPanel
+              open
+              title="Werkzeugleiste anpassen"
+              width={560}
+              height={520}
+              onClose={() => setRailCustomizing(false)}
+            >
+              <ToolRailCustomizer layout={toolLayout} onChange={setToolLayout} />
+            </FloatingPanel>
           )}
           {navigatorShown && (
             <div className="absolute bottom-2 right-2 top-2 z-20" style={{ width: navigatorWidth }}>
