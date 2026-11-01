@@ -2751,6 +2751,7 @@ export function CadWorkspace({
                         project={project}
                         section={section}
                         cutFill={cutFill}
+                        denominator={planDenominator(project)}
                         onSettings={() => openSectionWindow(section.id)}
                       />
                     </div>

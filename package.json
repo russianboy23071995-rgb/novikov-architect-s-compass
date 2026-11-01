@@ -278,6 +278,7 @@
     "src/application/doors/actions.test.ts",
     "src/application/lines/length.test.ts",
     "src/application/views/tracing.test.ts",
+    "src/domain/views/height-mark.test.ts",
     "src/application/openings/inserts.test.ts",
     "src/rendering/viewport/door-symbol.test.ts",
     "src/interop/ifc/door.test.ts",

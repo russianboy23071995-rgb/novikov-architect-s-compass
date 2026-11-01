@@ -93,3 +93,14 @@ Umsetzung: `src/application/sections/actions.ts` (`sectionGripPoint`, `dragSecti
 Nachweis: neuer Test in `src/application/sections/actions.test.ts` (Ende verlängern, Anfang drehen, verschieben, Shift nur Länge an beiden Enden, kein Punkt und kein Umkippen, Länge aus dem Fenster, Kennung bleibt). 1435 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Schnitt gezeichnet, mit dem Pfeil-Werkzeug angeklickt – blau mit drei Griffen, Navigatoreintrag markiert. Ende mit der Maus gezogen (Linie gedreht und verlängert), mittleren Griff gezogen (ganze Linie verschoben, am Raster gefangen); Strg+Z stellt jeweils den vorigen Stand her. Entf löscht den gewählten Schnitt, Strg+Z holt ihn zurück. Im Fenster Länge 3 eingegeben – die Linie verlängert sich vom Anfang aus. Shift beim Ziehen nur im Test geprüft, nicht im Browser.
+
+## BS1: Rand und Geschosshöhen (01.11.2026)
+
+Nutzervorgabe: In Schnitt und Ansicht reichen die Höhenpunkte der Geschosse an den Rändern der Zeichnung. Den Rand bildet die Länge der Schnitt- bzw. Ansichtslinie; außerhalb stehen die Höhenkoten der Geschosse. Entscheidung: Geschosshöhen als Rohbaukote (gefülltes Dreieck).
+
+- **Rand:** senkrechte Linie an Anfang und Ende der Linie (x = 0 und x = Linienlänge), so hoch wie die Zeichnung. Die Zeichnung liegt ohnehin innerhalb dieser Länge.
+- **Geschosse:** gestrichelte Linie nur zwischen den Rändern; links und rechts außerhalb je eine Höhenkote nach DIN 1356-1 – Dreieck auf der Spitze, Höhe mit Vorzeichen (±0,00, +3,00), darunter der Geschossname; die Kotenlinie reicht bis an den Rand.
+- **Größe:** Dreieck 2,5 mm auf Papier im Planmaßstab (wie das Schnittsymbol), Abstand zum Rand das 1,5-Fache.
+- Gemeinsame Geometrie für BS2: `src/domain/views/height-mark.ts` (`formatHeight`, `heightMarkGeometry`, Rohbau gefüllt / Fertig offen), Darstellung `src/components/cad/HeightMark.tsx`.
+
+Nachweis: 1467 Tests grün (2 neu in `height-mark.test.ts`), Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser: Schnitt A-A durch die Testwand – Rand an beiden Enden, ±0,00 Erdgeschoss und +3,00 1. Obergeschoss links und rechts außerhalb, gestrichelte Geschosslinien nur dazwischen. Ansichten nutzen dieselbe Zeichnung; eine Ansicht wurde im Browser nicht eigens geöffnet.
