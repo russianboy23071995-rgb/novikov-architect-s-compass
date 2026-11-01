@@ -79,7 +79,7 @@ import { addColumn, updateColumn } from "@/application/columns/actions";
 import { columnValues } from "@/application/columns/defaults";
 import { addStair, updateStair } from "@/application/stairs/actions";
 import { stairValues } from "@/application/stairs/defaults";
-import { stairDirectionTo, stairTurnTo } from "@/domain/elements/stair/model";
+import { stairDirectionTo, stairTreadForLength, stairTurnTo } from "@/domain/elements/stair/model";
 import { StairFields } from "./StairFields";
 import { wallRenovation } from "@/domain/elements/wall/renovation";
 import { setWallRenovation } from "@/application/walls/renovation";
@@ -426,6 +426,8 @@ export function CadWorkspace({
   const [stairStart, setStairStart] = useState<Point | null>(null);
   // L and U: run direction fixed by click 2; click 3 chooses the side of the turn (TR3).
   const [stairDirection, setStairDirection] = useState<number | null>(null);
+  // TR4: the tread the second click drew (run length by mouse); null: the calculated one.
+  const [stairTread, setStairTread] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { navigatorWidth, setNavigatorWidth } = useNavigatorWidth();
   const navigatorShown = navigatorOpen;
@@ -463,6 +465,7 @@ export function CadWorkspace({
     setTextDraft(null);
     setStairStart(null);
     setStairDirection(null);
+    setStairTread(null);
     setSectionStart(null);
     setSectionEnd(null);
     setSelectedSectionId(null);
@@ -1758,7 +1761,8 @@ export function CadWorkspace({
       return;
     }
     // Stair tool (docs/TREPPE.md, TR2/TR3): click 1 on the drawing axis, click 2 sets the run
-    // direction, for L and U click 3 the side of the turn; lengths follow from the calculation.
+    // direction and, by its distance, the length of the run (TR4: the tread follows, the riser
+    // count stays with the height); for L and U click 3 the side of the turn.
     if (tool === "stair") {
       if (!stairStart) {
         setStairStart({ x: point.x, y: point.y });
@@ -1770,8 +1774,17 @@ export function CadWorkspace({
         setModelError("Zweiter Klick: Laufrichtung zeigen, nicht auf den Antritt.");
         return;
       }
+      const drawn =
+        stairDirection === null
+          ? stairTreadForLength(
+              values,
+              storeyOf(project).height ?? null,
+              Math.hypot(point.x - stairStart.x, point.y - stairStart.y),
+            )
+          : stairTread;
       if (values.shape !== "straight" && stairDirection === null) {
         setStairDirection(direction);
+        setStairTread(drawn);
         return;
       }
       try {
@@ -1782,6 +1795,7 @@ export function CadWorkspace({
             start: stairStart,
             direction,
             ...values,
+            ...(drawn !== null ? { tread: drawn } : {}),
             ...(values.shape !== "straight"
               ? { turn: stairTurnTo(stairStart, direction, point) }
               : {}),
@@ -1789,6 +1803,7 @@ export function CadWorkspace({
         });
         setStairStart(null);
         setStairDirection(null);
+        setStairTread(null);
         showNotice("Treppe gesetzt");
       } catch (error) {
         setModelError(error instanceof Error ? error.message : "Treppe nicht möglich.");
@@ -3151,7 +3166,10 @@ export function CadWorkspace({
                           ? {
                               start: stairStart,
                               direction: stairDirection,
-                              values: stairValues(toolDefaults.stair),
+                              values:
+                                stairTread !== null
+                                  ? { ...stairValues(toolDefaults.stair), tread: stairTread }
+                                  : stairValues(toolDefaults.stair),
                               storeyHeight: storeyOf(project).height ?? null,
                             }
                           : undefined

@@ -122,3 +122,28 @@ test("a stair is drawn in the plan, picked up as tool settings and moved with it
   const moved = prepareTranslation(p, ["t"]).materialize(p, { x: 1, y: -1 });
   close(storeyOf(moved).stairs![0]!.start, { x: 3, y: 2 });
 });
+
+test("a run drawn to a length fixes the tread; the riser count stays with the height (TR4)", async () => {
+  const { stairTreadForLength } = await import("../../domain/elements/stair/model.ts");
+  const values = stairValues(stairToolDefaults("treppe"));
+  const straight = stairGeometry(values, 3)!;
+  // Straight: the drawn length spans riserCount − 1 treads.
+  const tread = stairTreadForLength(values, 3, 4)!;
+  assert.equal(tread, Math.round((4 / (straight.riserCount - 1)) * 1000) / 1000);
+  const drawn = stairGeometry({ ...values, tread }, 3)!;
+  assert.equal(drawn.riserCount, straight.riserCount);
+  assert.ok(Math.abs(drawn.run - 4) < 0.01);
+  // A fixed tread in the settings does not change what the drawn length gives.
+  assert.equal(stairTreadForLength({ ...values, tread: 0.3 }, 3, 4), tread);
+  // L: the length is the first flight, up to the landing.
+  const l = { ...values, shape: "l" as const };
+  const lTread = stairTreadForLength(l, 3, 2)!;
+  const lg = stairGeometry({ ...l, tread: lTread }, 3)!;
+  assert.ok(Math.abs((lg.flights[0]! - 1) * lTread - 2) < 0.01);
+  // Too short or no height: the calculation keeps its tread.
+  assert.equal(stairTreadForLength(values, 3, 0.1), null);
+  assert.equal(
+    stairTreadForLength({ ...values, topBinding: undefined, height: undefined }, null, 4),
+    null,
+  );
+});

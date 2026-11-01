@@ -54,3 +54,15 @@ Nutzerentscheidung 31.10.2026: Variante B – bei L und U wählt ein **dritter K
 - **Werkzeug**: Klick 1 Antritt, Klick 2 Laufrichtung, bei L/U Klick 3 auf der Seite der Wendung – die Vorschau zeigt nach Klick 2 die ganze Treppe und klappt mit dem Zeiger auf die jeweilige Seite. Felder Form, Wendung (Vorgabe), 1. Lauf Hälfte/fest, Podest Tiefe = Laufbreite/fest, Treppenauge; Ergebnis zeigt die Aufteilung („8 + 8 = 16 Steigungen … + Podest 1 m“).
 
 Nachweis TR3: 1423 Tests grün, Typprüfung/Lint/Architektur sauber, 14-Modell-Hash unverändert; 6 neue Tests in `src/application/stairs/turn.test.ts` (Aufteilung und Prüfung, L links/rechts, U mit Treppenauge und Lauflinie, Körper mit Podest, Klickrichtung/-seite, Speichern/IFC/zurück auf gerade). Browser: L-Treppe mit drei Klicks (Vorschau klappt mit dem Zeiger nach links/rechts), Grundriss mit Lauflinie über das Podest, Umstellen auf U im Element, 3D mit zwei Läufen und Podestplatte.
+
+## Teil TR4: Lauflänge mit der Maus (01.11.2026)
+
+Nutzervorgabe: Das Treppenwerkzeug soll mit Vorschau flexibel zeichnen statt starr vorgegeben; Wahl: **Länge mit der Maus ziehen**.
+
+- **Bedienung:** Klick 1 setzt den Antritt; danach bestimmt der Mauszeiger Richtung **und Länge** des Laufs. Klick 2 übernimmt beides (gerade Treppe: fertig; L/U: danach Klick 3 für die Seite der Wendung wie bisher).
+- **Rechnung** (`stairTreadForLength` in `src/domain/elements/stair/model.ts`): Die Steigungsanzahl bleibt bei der Höhe (Ziel-Steigung), der gezogene Abstand verteilt sich auf die Auftritte des gezeichneten Laufs – bei der geraden Treppe Steigungen − 1, bei L/U der 1. Lauf bis zum Podest. Auf Millimeter gerundet; unter 5 cm je Auftritt oder ohne bekannte Höhe bleibt der berechnete Auftritt.
+- **Vorschau:** Die ganze Treppe folgt live mit allen Stufen; unter dem Zeiger stehen Steigungen, Steigungshöhe, Auftritt und Lauflänge („17 × 17,6 / 28,1 cm · Lauf 4,50 m“), rot mit „DIN-Abweichung“, sobald die Prüfung nach DIN 18065 etwas meldet. Gesetzt wird trotzdem (Planungsstand, wie bisher).
+- **Speichern:** Der gezogene Auftritt wird als **fester Auftritt** gespeichert; im Elementfenster gibt „Aus 2h + a = 63“ ihn an die Rechnung zurück.
+- Längeneingabe per Tastatur ist nicht Teil von TR4.
+
+Nachweis: 1471 Tests grün (1 neu in `src/application/stairs/tool.test.ts`: gerade und L, gleiche Steigungsanzahl, fester Auftritt in den Einstellungen ändert nichts, zu kurz/ohne Höhe), Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert gegenüber G2 (`e42aa36e…`). Browser: gerade Treppe – kurz gezogen 13,1 cm Auftritt rot mit DIN-Abweichung, lang gezogen 28,1 cm bei 4,50 m Lauf, gesetzt mit festem Auftritt 28,1 cm; L-Treppe – 1. Lauf endet an der gezogenen Stelle (2,10 m), Podest und 2. Lauf folgen der Seite; Testtreppen zurückgenommen bzw. abgebrochen.

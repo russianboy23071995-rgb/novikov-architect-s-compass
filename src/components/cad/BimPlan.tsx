@@ -17,6 +17,7 @@ import {
 import {
   stairDirectionTo,
   stairGeometry,
+  stairTreadForLength,
   stairPlan,
   stairTurnTo,
   type Stair,
@@ -1755,11 +1756,41 @@ export function BimPlan({
               stairDraft.direction !== null && aim
                 ? stairTurnTo(stairDraft.start, direction, aim)
                 : stairDraft.values.turn;
-            const g = stairGeometry(stairDraft.values, stairDraft.storeyHeight);
+            // TR4: before the direction is fixed the pointer distance is the run length.
+            const drawn =
+              stairDraft.direction === null && aim
+                ? stairTreadForLength(
+                    stairDraft.values,
+                    stairDraft.storeyHeight,
+                    Math.hypot(aim.x - stairDraft.start.x, aim.y - stairDraft.start.y),
+                  )
+                : null;
+            const values =
+              drawn !== null ? { ...stairDraft.values, tread: drawn } : stairDraft.values;
+            const g = stairGeometry(values, stairDraft.storeyHeight);
             if (!g) return null;
-            const stair = { ...stairDraft.values, turn, start: stairDraft.start, direction };
+            const stair = { ...values, turn, start: stairDraft.start, direction };
+            const cm = (m: number) =>
+              (m * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 });
             return (
               <g aria-label="Treppe in Arbeit" opacity={0.85}>
+                {aim && (
+                  <text
+                    aria-label="Treppenwerte"
+                    x={aim.x + 14 / camera.pixelsPerMetre}
+                    y={-aim.y + 26 / camera.pixelsPerMetre}
+                    fontSize={12 / camera.pixelsPerMetre}
+                    fill={g.issues.length ? "#dc2626" : "#0284c7"}
+                    pointerEvents="none"
+                  >
+                    {`${g.riserCount} × ${cm(g.riser)} / ${cm(g.tread)} cm · Lauf ${(
+                      (g.flights[0]! - 1) *
+                      g.tread
+                    )
+                      .toFixed(2)
+                      .replace(".", ",")} m${g.issues.length ? " · DIN-Abweichung" : ""}`}
+                  </text>
+                )}
                 <StairPlanGraphic
                   plan={stairPlan(stair, g, 1 - stairDraft.values.baseOffset)}
                   pixelsPerMetre={camera.pixelsPerMetre}
