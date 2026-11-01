@@ -247,7 +247,14 @@ export function BimInspector({
               step="any"
               required
               defaultValue={value}
-              className="mt-1 h-8 w-28"
+              // With a build-up the thickness is the sum of its layers (docs/WANDAUFBAU.md).
+              readOnly={name === "thickness" && !!wall?.assemblyId}
+              title={
+                name === "thickness" && wall?.assemblyId
+                  ? "Aus dem Wandaufbau (Reiter Wandaufbau)"
+                  : undefined
+              }
+              className="mt-1 h-8 w-28 read-only:opacity-60"
             />
           </label>
         ))}

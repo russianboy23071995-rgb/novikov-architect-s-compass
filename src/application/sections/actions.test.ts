@@ -87,10 +87,10 @@ test("sections belong to the building: add, rename, repeat a mark, turn, delete,
 });
 
 test("schema 40 files load without sections; smuggled sections are refused", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 42);
+  assert.equal(PROJECT_SCHEMA_VERSION, 43);
   const stored = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
-  assert.equal(loadProjectData({ ...stored, schemaVersion: 40 }).schemaVersion, 42);
-  assert.equal(loadProjectData({ ...stored, schemaVersion: 39 }).schemaVersion, 42);
+  assert.equal(loadProjectData({ ...stored, schemaVersion: 40 }).schemaVersion, 43);
+  assert.equal(loadProjectData({ ...stored, schemaVersion: 39 }).schemaVersion, 43);
   const withSection = JSON.parse(
     serializeProject(addSection(createStandardProject("p", "eg", "og"), { id: "s1", ...line })),
   );
