@@ -21,3 +21,14 @@ Nutzerauftrag 01.11.2026: Schichtaufbau von Wänden (Mauerwerk, Dämmung, Putz �
 Nachweis SA1: 1477 Tests grün (6 neu in `src/application/walls/assembly.test.ts`), Typprüfung beider Projekte, Architektur, Lint und Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`). Browser: Aufbau einer Wand zugewiesen (0,36 m, Feld gesperrt), Dämmschicht auf 20 cm geändert → Wand 0,40 m, gespiegelt; Wandwerkzeug mit „Trockenbau 10“ gezeichnet → neue Wand 0,10 m mit Aufbau.
 
 Grenze SA1: Grundriss, Schnitt und IFC zeigen die Schichten noch nicht (SA2–SA4).
+
+## SA2: Grundriss
+
+- Wände mit Aufbau zeigen im Grundriss jede Schicht in der Farbe ihres Materials, darüber die Schraffur: schräg (Mauerwerk), Kreuz (Beton), Punkte (Putz) als Muster mit fester Bildschirmweite (7 px), Dämmung als Zickzack über die ganze Schichtdicke (ein Zahn je Schichtdicke, DIN 1356-1). Dünne Linien trennen die Schichten; Außenkontur und Auswahl wie bisher.
+- Die Schichten werden im Wandkörper gezeichnet und an seiner Kontur abgeschnitten. An Ecken aus Wänden mit gleichem Aufbau und gleicher Außenseite treffen die Schichten sich auf der Gehrung (Browser geprüft mit „Zweischalig Klinker + KS 17,5“).
+- Wände ohne Aufbau behalten die Schnittfarbe (View → Darstellung…). Ist „Bauzustand farbig anzeigen“ an, behalten Neubau (rot) und Abbruch (gelb) ihre Farbe; die Schichten erscheinen bei Bestand und bei ausgeschalteter Bauzustandsfarbe.
+- Code: `src/rendering/viewport/wall-layers.ts` (Schichtbänder quer zur Wand, Dämm-Zickzack), `wallLayers` in `plan-scene.ts`, `src/components/cad/WallLayerGraphic.tsx`, Einbindung in `PlanSceneRun.tsx`. Die Bibliothek kommt aus dem Projekt, auch für Vorschauen beim Bearbeiten.
+
+Nachweis SA2: 1480 Tests grün (3 neu in `src/rendering/viewport/wall-layers.test.ts`), Typprüfung, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Einzelwand und L-Ecke mit zweischaligem Aufbau.
+
+Grenzen SA2: Bei T-Stößen und an Ecken mit unterschiedlichen Aufbauten enden die Schichten an der Kontur, ohne Verschneidung nach Vorrang. Die Schraffur hat Bildschirm-, keine Papiergröße (für den Planexport L14 nachzuziehen).

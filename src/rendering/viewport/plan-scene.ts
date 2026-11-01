@@ -6,6 +6,7 @@ import type { ModelGeometry } from "../../domain/project/geometry-scope.ts";
 import { connectedWallSolids } from "../../domain/elements/wall/connections.ts";
 import { visiblePlanGeometry } from "./layer-display.ts";
 import { wallPlanOutlines } from "./wall-plan-outline.ts";
+import { assemblyLibraryOf, wallLayerBands, type AssemblyLibrary } from "./wall-layers.ts";
 import { openingOverlaps } from "../../domain/elements/wall/opening-overlaps.ts";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import {
@@ -18,6 +19,8 @@ export function derivePlanScene(
   geometry: ModelGeometry,
   allows: (id: string) => boolean,
   patterns: readonly HatchPatternDefinition[] = [],
+  /** Wall build-ups (docs/WANDAUFBAU.md); a storey preview passes its project's library. */
+  library: AssemblyLibrary = assemblyLibraryOf("storeys" in geometry ? geometry : {}),
 ) {
   const plan = visiblePlanGeometry(geometry, allows);
   const openings = new Map<string, typeof plan.openings>();
@@ -44,6 +47,13 @@ export function derivePlanScene(
     solids: new Map(connectedWallSolids(geometry).map((s) => [s.wallId, s])),
     outlines: wallPlanOutlines(geometry, new Set(plan.walls.map((w) => w.id))),
     walls: new Map(plan.walls.map((w) => [w.id, w])),
+    // Layers of walls with a build-up, across the thickness (docs/WANDAUFBAU.md, SA2).
+    wallLayers: new Map(
+      plan.walls.flatMap((w) => {
+        const bands = wallLayerBands(w, library);
+        return bands ? [[w.id, bands] as const] : [];
+      }),
+    ),
     slabs: new Map(plan.slabs.map((s) => [s.id, s])),
     roofs: new Map(plan.roofs.map((r) => [r.id, r])),
     rooms: new Map(plan.rooms.map((r) => [r.id, r])),

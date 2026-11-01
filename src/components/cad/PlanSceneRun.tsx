@@ -7,6 +7,7 @@ import { dimensionLayout } from "@/domain/elements/dimension/model";
 import { cutPaint, wallCutPaint, type CutFill } from "./cut-fill";
 import type { ScaleContext } from "@/domain/views/scale";
 import { HatchPattern } from "./HatchPattern";
+import { WallLayerGraphic } from "./WallLayerGraphic";
 import { LinePattern } from "./LinePattern";
 import { CAD_SHIMMER } from "@/rendering/viewport/highlight";
 import { memo } from "react";
@@ -455,26 +456,38 @@ export function PlanSceneContent({
         const body = wallBody(wall);
         const angle =
           (-Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x) * 180) / Math.PI;
+        const profile = (!!cornerGeometry &&
+          cornerGeometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
+          scene.solids.get(wall.id)?.localProfile || [
+            { x: 0, y: -wall.thickness / 2 },
+            { x: length, y: -wall.thickness / 2 },
+            { x: length, y: wall.thickness / 2 },
+            { x: 0, y: wall.thickness / 2 },
+          ];
+        // Layers of the build-up (docs/WANDAUFBAU.md, SA2); a shown Neubau/Abbruch colour wins.
+        const bands =
+          showRenovation && wall.renovation && wall.renovation !== "existing"
+            ? undefined
+            : scene.wallLayers.get(wall.id);
         return (
           <g
             key={wall.id}
             transform={`translate(${body.start.x} ${-body.start.y}) rotate(${angle})`}
           >
+            {bands && (
+              <WallLayerGraphic
+                profile={profile}
+                bands={bands}
+                pixelsPerMetre={pixelsPerMetre}
+                lineWidth={wallOutlineWidth}
+              />
+            )}
             <polygon
               {...selectProps("wall", wall.id)}
-              points={(
-                (!!cornerGeometry &&
-                  cornerGeometry.walls.find((w) => w.wallId === wall.id)?.localProfile) ||
-                scene.solids.get(wall.id)?.localProfile || [
-                  { x: 0, y: -wall.thickness / 2 },
-                  { x: length, y: -wall.thickness / 2 },
-                  { x: length, y: wall.thickness / 2 },
-                  { x: 0, y: wall.thickness / 2 },
-                ]
-              )
-                .map((p) => `${p.x},${-p.y}`)
-                .join(" ")}
-              {...wallCutPaint(cutFill, showRenovation, wall.renovation)}
+              points={profile.map((p) => `${p.x},${-p.y}`).join(" ")}
+              {...(bands
+                ? { fill: "var(--background)", fillOpacity: 0 }
+                : wallCutPaint(cutFill, showRenovation, wall.renovation))}
               stroke={cornerGeometry ? "var(--primary)" : "none"}
               strokeWidth={wallOutlineWidth / pixelsPerMetre}
               className="outline-none focus-visible:stroke-sky-300"
