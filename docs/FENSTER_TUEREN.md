@@ -161,3 +161,13 @@ Nutzervorgabe (01.11.2026, Nebenschritte): Hintergrundraster im 3D entfernen; Fe
 - Ursache der fehlenden Auswahl: Der schnelle 3D-Auswahlindex (`world-picking.ts`) meldete Flächen von Fenster- und Türelementen als „Wand“ mit der Fenster-/Tür-ID – eine Auswahl, die es nicht gibt, also blieb sie leer (die langsamere Ersatzauswahl war seit FT2 richtig). Jetzt wählt ein Klick auf Rahmen, Flügel, Pfosten, Glas, Fensterbank, Zarge oder Türblatt das Fenster bzw. die Tür.
 
 Nachweis: neuer Test in `src/rendering/viewport/door-picking.test.ts` (Glas und Rahmen wählen das Fenster, das Türblatt die Tür, die Wand daneben die Wand – über Ersatzauswahl und Index; ohne die Korrektur schlägt er fehl). 1459 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster mit Element, 3D – Klick auf die Scheibe wählt das Fenster („Window properties“, „1 selected“); Hintergrund ohne Raster. Tür im Browser nur durch den Test abgedeckt.
+
+## G2: Bezeichnung in Archicad (01.11.2026)
+
+Befund (Nutzer, Archicad 26): Fenster und Türen werden als solche mit richtigen Maßen erkannt, die Beschriftung zeigt aber „0,00 x 0,00“. Eine eindeutige Quelle, aus welchem IFC-Wert Archicad diese Nennmaße liest, war nicht zu finden; die naheliegenden Kandidaten sind die Mengen der Öffnung (Archicad kann die Größe aus Wandöffnung, Laibung oder Element bestimmen) und die Mengen des Elements.
+
+- Jede Wandöffnung (`IfcOpeningElement`) bekommt `Qto_OpeningElementBaseQuantities` mit Width, Height und Depth (Wanddicke).
+- Jedes Fenster und jede Tür bekommt `Qto_WindowBaseQuantities` bzw. `Qto_DoorBaseQuantities` (Width, Height, Area) – jetzt immer, vorher nur, wenn ein Typ geschrieben wurde. Die GUIDs der Mengen bleiben dieselben.
+- `OverallWidth`/`OverallHeight` standen schon am `IfcWindow`/`IfcDoor`.
+
+Nachweis: 1470 Tests grün (1 neu in `src/interop/ifc/door.test.ts`: Mengen an jedem Fenster, jeder Tür und Öffnung, auch ohne Typ), Typprüfung beider Projekte, Architektur, Lint und Prettier sauber. 14-Modell-Hash ändert sich erwartungsgemäß nur im IFC-Teil (neu `e42aa36e…`, vorher `089f79e4…`); der Hash nur über die Körper ist gleich (`15ce55f3…`). Prüfdatei für Archicad: `Claude_Ablage_Code/ifc-abnahme/G2-Fenster-Bezeichnung.ifc` (Fenster mit Flügeln, Türen). **Offen:** Prüfung in Archicad durch den Nutzer – zeigt die Beschriftung weiter 0,00 x 0,00, ist die Einstellung des Fensterstempels in Archicad der nächste Anhaltspunkt.

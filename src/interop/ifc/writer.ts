@@ -460,6 +460,19 @@ export async function writeIfc(
       "IFCRELDEFINESBYTYPE",
       `${await guid(kind + "-type-relation", id)},$,$,$,(${target}),${type}`,
     );
+  };
+  /**
+   * Base quantities of every window and door and of its opening (G2): Archicad labels imported
+   * windows with nominal sizes; without them its marker read 0,00 x 0,00. Written for every
+   * element, with or without a type.
+   */
+  const fillingQuantities = async (
+    kind: "window" | "door",
+    target: string,
+    id: string,
+    width: number,
+    height: number,
+  ) => {
     const quantities = [
       add("IFCQUANTITYLENGTH", `'Width',$,$,${real(width)},$`),
       add("IFCQUANTITYLENGTH", `'Height',$,$,${real(height)},$`),
@@ -473,6 +486,27 @@ export async function writeIfc(
     add(
       "IFCRELDEFINESBYPROPERTIES",
       `${await guid(kind + "-quantity-relation", id)},$,$,$,(${target}),${qto}`,
+    );
+  };
+  const openingQuantities = async (
+    opening: string,
+    id: string,
+    width: number,
+    height: number,
+    depth: number,
+  ) => {
+    const quantities = [
+      add("IFCQUANTITYLENGTH", `'Width',$,$,${real(width)},$`),
+      add("IFCQUANTITYLENGTH", `'Height',$,$,${real(height)},$`),
+      add("IFCQUANTITYLENGTH", `'Depth',$,$,${real(depth)},$`),
+    ];
+    const qto = add(
+      "IFCELEMENTQUANTITY",
+      `${await guid("opening-quantities", id)},$,${text("Qto_OpeningElementBaseQuantities")},$,$,(${quantities.join(",")})`,
+    );
+    add(
+      "IFCRELDEFINESBYPROPERTIES",
+      `${await guid("opening-quantity-relation", id)},$,$,$,(${opening}),${qto}`,
     );
   };
   await properties(projectRef, "project", project.id, [["SchemaVersion", "IFCINTEGER(1)"]]);
@@ -561,6 +595,7 @@ export async function writeIfc(
           `${await guid("opening", window.id)},$,${label("Opening " + window.id)},$,$,${openingPlacement},${body(window.width, wall.thickness, window.height)},$,.OPENING.`,
         );
         add("IFCRELVOIDSELEMENT", `${await guid("void", window.id)},$,$,$,${wallRef},${opening}`);
+        await openingQuantities(opening, window.id, window.width, window.height, wall.thickness);
         // A window element gets its real body; a plain opening keeps the chosen variant.
         const left = window.position * length - window.width / 2;
         const windowShape = window.insert
@@ -582,6 +617,7 @@ export async function writeIfc(
           ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
           ...(window.insert ? insertProperties(window.insert) : placeholder),
         ]);
+        await fillingQuantities("window", windowRef, window.id, window.width, window.height);
         await fillingType(
           "window",
           windowRef,
@@ -608,6 +644,7 @@ export async function writeIfc(
           `${await guid("opening", door.id)},$,${label("Opening " + door.id)},$,$,${openingPlacement},${body(door.width, wall.thickness, door.height)},$,.OPENING.`,
         );
         add("IFCRELVOIDSELEMENT", `${await guid("void", door.id)},$,$,$,${wallRef},${openingRef}`);
+        await openingQuantities(openingRef, door.id, door.width, door.height, wall.thickness);
         // IFC4: the leaf opens toward +Y of the door placement; hinge side is seen along +Y.
         // Opening to the right of the wall direction turns that placement by 180 degrees.
         const turned = door.opensTo === "right";
@@ -644,6 +681,7 @@ export async function writeIfc(
           ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
           ...(door.insert ? insertProperties(door.insert, wall.thickness) : placeholder),
         ]);
+        await fillingQuantities("door", doorRef, door.id, door.width, door.height);
         await fillingType(
           "door",
           doorRef,
