@@ -21,6 +21,9 @@ import { cn } from "@/lib/utils";
 import type { TreeNode } from "./cad-types";
 import type { Project } from "@/domain/project/schema";
 
+/** Navigator folder for the sections (docs/SCHNITT.md, SC1); its entries follow in SC2. */
+export const SECTIONS_FOLDER_ID = "sections";
+
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;
   if (id === "site") return Map;
@@ -129,6 +132,7 @@ function NavigatorContent({
             .reverse()
             .map((s) => ({ id: s.id, label: s.name, kind: "group" })),
         },
+        { id: SECTIONS_FOLDER_ID, label: "Schnitte", kind: "group", children: [] },
       ] satisfies TreeNode[],
     [project.id, project.storeys],
   );

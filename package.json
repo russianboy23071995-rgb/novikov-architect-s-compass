@@ -142,6 +142,7 @@
     "src/application/project-files/recovery.test.ts",
     "src/application/project-files/operations.test.ts",
     "src/application/views/documents.test.ts",
+    "src/application/views/canvas-tabs.test.ts",
     "src/application/views/working-context.test.ts",
     "src/application/hatches/pattern-size.test.ts",
     "src/application/views/project-scale.test.ts",

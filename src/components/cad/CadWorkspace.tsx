@@ -132,7 +132,7 @@ import { BimInspector } from "./BimInspector";
 import { supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/application/direct-edit/session";
-import { ProjectNavigator } from "./ProjectNavigator";
+import { SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { LineStyleCreator } from "./LineStyleCreator";
@@ -152,6 +152,14 @@ import type { ToolId, ViewMode, ViewportLayout } from "./cad-types";
 import { LineStyleFields } from "./LineControls";
 import { LayerProperties } from "./LayerProperties";
 import { LayerManager } from "./LayerManager";
+import { CanvasTabs } from "./CanvasTabs";
+import {
+  canvasModeOf,
+  canvasViewOf,
+  closeCanvasTab,
+  withCanvasTab,
+  type CanvasView,
+} from "@/application/views/canvas-tabs";
 
 export function CadWorkspace({
   layerVisibility,
@@ -192,6 +200,11 @@ export function CadWorkspace({
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
+  // Canvas tabs (docs/SCHNITT.md, SC1): the active tab is the current mode; a mode without a
+  // tab opens one, wherever the mode is switched.
+  const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
+  const activeView = canvasViewOf(mode);
+  if (!canvasTabs.includes(activeView)) setCanvasTabs(withCanvasTab(canvasTabs, activeView));
   const [layout, setLayout] = useState<ViewportLayout>("single");
   const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
@@ -1849,6 +1862,20 @@ export function CadWorkspace({
     }
   };
 
+  function changeMode(next: ViewMode) {
+    if (activeDocumentId && next === "3D") {
+      showNotice("Dieses Abbild ist ein 2D-Grundriss.");
+      return;
+    }
+    if (next === mode) return;
+    groupMove.cancel();
+    dispatchEditing({ type: "cancel" });
+    setMode(next);
+    setWallChain(null);
+    setPathPoints([]);
+    if (next === "3D") setTool("select");
+  }
+
   return (
     <CadAppearanceProvider projectId={project.id} penSet={project.penSet ?? defaultPenSet}>
       <CanvasDisplaySettings
@@ -2232,18 +2259,7 @@ export function CadWorkspace({
             snap={snap}
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
-            onMode={(next) => {
-              if (activeDocumentId) {
-                showNotice("Dieses Abbild ist ein 2D-Grundriss.");
-                return;
-              }
-              groupMove.cancel();
-              dispatchEditing({ type: "cancel" });
-              setMode(next);
-              setWallChain(null);
-              setPathPoints([]);
-              if (next === "3D") setTool("select");
-            }}
+            onMode={changeMode}
             onLayout={(next) => {
               groupMove.cancel();
               dispatchEditing({ type: "cancel" });
@@ -2377,6 +2393,22 @@ export function CadWorkspace({
             <div>
               <div className="absolute left-3 top-12 z-40 max-w-lg">
                 <RasterBudgetNotice project={project} />
+              </div>
+              <div className="absolute left-1/2 top-3 z-40 max-w-[50%] -translate-x-1/2">
+                <CanvasTabs
+                  tabs={canvasTabs}
+                  active={activeView}
+                  storeyName={storeyOf(project).name}
+                  onSelect={(view) => {
+                    setCanvasTabs((tabs) => withCanvasTab(tabs, view));
+                    changeMode(canvasModeOf(view));
+                  }}
+                  onClose={(view) => {
+                    const next = closeCanvasTab(canvasTabs, view, activeView);
+                    if (next.active !== activeView) changeMode(canvasModeOf(next.active));
+                    setCanvasTabs(next.tabs);
+                  }}
+                />
               </div>
               {layerActivation && (
                 <DocumentLayerNotice
@@ -3043,6 +3075,7 @@ export function CadWorkspace({
                   active={selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]}
                   onClose={() => setNavigatorOpen(false)}
                   onSelect={(id, _label, toggle) => {
+                    if (id === SECTIONS_FOLDER_ID) return;
                     if (project.storeys.some((s) => s.id === id)) {
                       cancelInteraction();
                       setSelection(null);
