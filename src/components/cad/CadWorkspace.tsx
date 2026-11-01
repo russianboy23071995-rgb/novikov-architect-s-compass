@@ -2554,21 +2554,15 @@ export function CadWorkspace({
               setModelError("");
               setRoomListOpen(true);
             }}
-            mode={mode}
             layout={layout}
-            grid={grid}
-            snap={snap}
             navigatorOpen={navigatorOpen}
             demandOpen={demandOpen}
-            onMode={changeMode}
             onLayout={(next) => {
               groupMove.cancel();
               dispatchEditing({ type: "cancel" });
               setLayout(next);
               setActiveViewport(0);
             }}
-            onGrid={() => setGrid((value) => !value)}
-            onSnap={() => setSnap((value) => !value)}
             onNavigator={() => setNavigatorOpen((value) => !value)}
             onDemand={() => setDemandOpen((value) => !value)}
             onAction={showNotice}

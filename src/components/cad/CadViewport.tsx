@@ -266,35 +266,6 @@ export function CadViewport({
         className="pointer-events-none absolute [&>*:not(.pointer-events-none)]:pointer-events-auto"
         style={insets}
       >
-        <p className="pointer-events-none absolute left-3 top-12 text-[11px] text-muted-foreground">
-          {model.drawing
-            ? model.start
-              ? "Click end point · Esc cancels"
-              : model.snap
-                ? "Click start point · SNAP an"
-                : "Click start point · Snap off"
-            : mode === "3D" && index === 0
-              ? model.editSession
-                ? pan
-                  ? "Navigation: Ziehen verschiebt die Ansicht · Pan erneut: Bearbeitung"
-                  : model.editSession.action === "point"
-                    ? "Wandecke auf der Geschossebene bewegen · Klick übernimmt Ziel · Tab: Maße · Esc: Abbruch"
-                    : model.editSession.action === "move"
-                      ? "Wand auf der Geschossebene bewegen · Klick fixiert Richtung · Tab: Maße · Esc: Abbruch"
-                      : "Feste Achse auf der Geschossebene · Klick übernimmt Ziel · Tab: Strecke · Esc: Abbruch"
-                : pan
-                  ? "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Pan"
-                  : "Klick: Wand/Fenster wählen · Strg/Cmd-Klick: Mehrfachauswahl · Ziehen: Orbit"
-              : planPan
-                ? "Ziehen verschiebt die Ansicht · Mausrad zoomt · Esc beendet Pan"
-                : "Mausrad: Zoom · Mittlere Maustaste: Ansicht verschieben · Maße in Metern"}
-        </p>
-        <div className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 px-2 py-1 text-[9px] text-muted-foreground shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
-          <span
-            className={cn("size-1.5 rounded-full", active ? "bg-primary" : "bg-muted-foreground")}
-          />
-          {mode === "3D" && index === 0 ? "3D" : "2D"} · {label}
-        </div>
         <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
           <MiniControl
             label="Pan"
@@ -322,16 +293,6 @@ export function CadViewport({
           <MiniControl label="Fullscreen" onClick={onFullscreen}>
             <Expand />
           </MiniControl>
-        </div>
-        <div
-          className={cn(
-            "view-cube absolute bottom-[74px] right-5 hidden size-14 items-center justify-center text-[8px] font-semibold text-foreground sm:flex",
-            mode === "3D" && index === 0 && "is-3d",
-          )}
-        >
-          <span>TOP</span>
-          <i>FRONT</i>
-          <b>RIGHT</b>
         </div>
         {is3D ? (
           <CameraAxes camera={camera} />
