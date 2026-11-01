@@ -208,6 +208,24 @@ export function stairGeometry(
   };
 }
 
+/**
+ * Tread of a run drawn to a length with the mouse (docs/TREPPE.md, TR4): the drawn flight – the
+ * only one, or the first of an L or U – spans the length from its first to its last riser; the
+ * riser count stays with the height. Rounded to millimetres; null without a height or when the
+ * length gives less than 5 cm per tread (then the calculation keeps its tread).
+ */
+export function stairTreadForLength(
+  stair: Parameters<typeof stairGeometry>[0],
+  storeyHeight: number | null,
+  length: number,
+): number | null {
+  const g = stairGeometry({ ...stair, tread: undefined }, storeyHeight);
+  const treads = g ? g.flights[0]! - 1 : 0;
+  if (treads < 1) return null;
+  const tread = Math.round((length / treads) * 1000) / 1000;
+  return tread >= 0.05 ? tread : null;
+}
+
 type P2 = { x: number; y: number };
 export type StairFrame = { origin: P2; d: P2; n: P2 };
 /** Flight frame: origin on the centre line of the first riser, d up the run, n to the left. */
