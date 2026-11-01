@@ -8,7 +8,7 @@ Schritte:
 | --- | --- | --- |
 | SC1 | Canvas-Tabs, Ordner „Schnitte“ im Navigator | erledigt |
 | SC2 | Werkzeug „Schnitt“: Schnittlinie, Name, Kennung, Blickrichtung, Einträge im Ordner, Schnitt als Tab | erledigt |
-| SC3 | Schnittzeichnung aus dem Modell erzeugen und im Schnitt-Tab zeigen | offen |
+| SC3 | Schnittzeichnung aus dem Modell erzeugen und im Schnitt-Tab zeigen | erledigt |
 
 ## SC1 – Canvas-Tabs und Ordner „Schnitte“
 
@@ -39,7 +39,7 @@ Browser-Abnahme (01.11.2026, Port 8094): Start mit einem Tab „Grundriss Erdges
 - Grundriss: dünne Strich-Punkt-Linie, kräftige Enden, an beiden Enden Pfeil zur Blickseite und die Kennung; Größen in Bildschirmpixeln.
 - Elementfenster (Doppelklick auf die Schnittlinie oder auf den Eintrag im Navigator): Name, Kennung (eine doppelte Kennung wird gemeldet, nicht verhindert), Länge und Blickseite, „Blickrichtung umkehren“, „Als Tab öffnen“, „Schnitt löschen“. Jede Änderung ist ein Rückgängig-Schritt.
 - Navigator: Ordner „Schnitte“ listet „A · Schnitt A-A“. Klick öffnet den Schnitt als Tab, Doppelklick sein Fenster.
-- Schnitt-Tab: trägt den Namen des Schnitts; bis SC3 steht dort ein Hinweis mit Name, Kennung und „Schnitt-Fenster öffnen“. Ein gelöschter (oder rückgängig gemachter) Schnitt verliert seinen Tab. Werkzeugwahl, Ansichtswechsel und Geschosswahl kehren zum Modell zurück.
+- Schnitt-Tab: trägt den Namen des Schnitts und zeigt seit SC3 die Schnittzeichnung. Ein gelöschter (oder rückgängig gemachter) Schnitt verliert seinen Tab. Werkzeugwahl, Ansichtswechsel und Geschosswahl kehren zum Modell zurück.
 - Nicht dabei: Auswahl, Verschieben und Punktbearbeiten der Schnittlinie im Grundriss; IFC (Schnitte sind Zeichnungsableitungen, keine Bauteile).
 
 Umsetzung: `src/domain/views/sections.ts` (Schema, Kennungen, Blickseite), `src/application/sections/actions.ts` (anlegen, ändern, löschen, Vorgaben), `src/application/views/canvas-tabs.ts` (Schnitt-Tabs), `src/components/cad/SectionPlanGraphic.tsx`, `SectionFields.tsx`, `SectionProperties.tsx`, `BimPlan.tsx` (Darstellung, Vorschau, Doppelklick), `CadWorkspace.tsx` (Klickfolge, Tabs, Fenster), `ProjectNavigator.tsx`, `ToolRail.tsx`.
@@ -47,3 +47,20 @@ Umsetzung: `src/domain/views/sections.ts` (Schema, Kennungen, Blickseite), `src/
 Nachweis: `src/application/sections/actions.test.ts` (4 Tests: Kennungsfolge, Blickseite, Anlegen/Ändern/doppelte Kennung/Löschen/Speichern, Migration und Ablehnung) und ein neuer Tab-Test. 1430 Tests grün, Typprüfung beider Projekte, Architektur und Lint sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094): Werkzeug „Schnitt“, Leiste zeigt „Nächster: Schnitt A-A“; drei Klicks quer über eine Wand im Erdgeschoss, Vorschau mit Kennung A und Pfeilen zur Zeigerseite; danach „A · Schnitt A-A“ im Navigator, Leiste zeigt B-B. Klick auf den Eintrag öffnet den Tab „Schnitt A-A“ mit Hinweis; im Fenster umbenannt in „Längsschnitt“ (Tab und Navigator folgen), Blickrichtung umgekehrt. Im 1. Obergeschoss ist der Schnitt sichtbar, Doppelklick auf die Linie öffnet das Fenster; „Schnitt löschen“ entfernt Linie und Tab, Undo stellt ihn wieder her. Keine Konsolenfehler der aktuell geladenen Modulversion (ältere Fehler stammen aus dem Hot-Reload mit dem Schema-Wechsel vor dem Neuladen).
+
+## SC3 – Schnittzeichnung
+
+- Erzeugt aus dem 3D-Körper des ganzen Gebäudes (`buildBuildingSolid`: Wände mit Öffnungen, Decken, Dächer, Stützen, Treppen), bei jeder Modelländerung neu, solange der Schnitt-Tab offen ist. Nichts davon wird gespeichert.
+- Schnittebene: senkrecht auf der Schnittlinie. Waagerechte Ausdehnung = Länge der Schnittlinie; Blick zur gewählten Seite, rechts in der Zeichnung ist rechts für den Betrachter (bei „Blick rechts“ gespiegelt).
+- **Geschnittene Bauteile:** Schnittkanten je Bauteil zu geschlossenen Umrissen verbunden, gefüllt mit der Schnittfarbe aus „Darstellung“ (Grau, Schwarz, Weiß, eigene Farbe), kräftige Kontur. Nicht schließende Stücke werden nur als Linie gezeichnet.
+- **Ansicht dahinter:** Flächen hinter der Ebene, die zum Betrachter zeigen, von hinten nach vorne gemalt (Maleralgorithmus) mit Hintergrundfüllung; gezeichnet werden nur ihre sichtbaren Kanten (Kanten zwischen Flächen derselben Ebene entfallen). Was vor der Ebene liegt, fehlt. Durch Öffnungen sieht man die Laibungen dahinter.
+- **Geschosse:** gestrichelte Höhenlinien je Geschoss mit Kote (±0,00 / +3,00) und Namen, bezogen auf OK RFB Erdgeschoss.
+- Bedienung im Tab: Mausrad zoomt um den Zeiger, Ziehen verschiebt, „Einpassen“ zeigt alles, „Schnitt-Fenster“ öffnet das Elementfenster. Trifft die Linie nichts, steht dort ein Hinweis.
+
+Grenzen: keine Fenster- und Türkörper (Öffnungen bleiben leer, es gibt im 3D-Körper keine Rahmen/Gläser); keine Tiefenbegrenzung; der Maleralgorithmus kann bei sich durchdringenden schrägen Flächen (Dächer) einzelne Kanten falsch überdecken; Kanten, die nur teilweise an einer gleich ausgerichteten Nachbarfläche liegen, können als Linie erscheinen; keine Bemaßung, Beschriftung oder Ablage als Abbild/Layout.
+
+Umsetzung: `src/rendering/viewport/section-drawing.ts` (Ebene, Schnittkanten verketten, Abschneiden mit Kantenherkunft, sichtbare Kanten, Geschosse), `src/components/cad/SectionDrawingView.tsx` (SVG mit Zoom/Pan), `CadWorkspace.tsx` (Schnitt-Tab).
+
+Nachweis: `src/rendering/viewport/section-drawing.test.ts` (2 Tests: geschnittene Wand als geschlossener Umriss 0,24 × 2,80 m an der richtigen Stelle, Wand dahinter als Ansicht 4 × 2,80 m auf die Linienlänge beschnitten, Geschosskote; Gegenrichtung gespiegelt ohne die Wand davor; Linie neben dem Gebäude trifft nichts). 1432 Tests grün, Typprüfung beider Projekte, Architektur und Lint sauber, 14-Modell-Hash unverändert. Messung am Schulmodell (2000 Elemente, 5 Geschosse, 9200 Flächen): rund 100 ms je Schnitt, alle Schnittumrisse geschlossen.
+
+Browser-Abnahme (01.11.2026, Port 8094): Startprojekt (Wand mit Fenster), Schnitt quer durch das Fenster; Tab „Schnitt A-A“ zeigt die geschnittene Wand oben und unten in der Schnittfarbe, dazwischen die Fensteröffnung mit der Laibung dahinter, Geschosslinien „±0,00 Erdgeschoss“ und „+3,00 1. Obergeschoss“. Mausrad zoomt, „Einpassen“ stellt die Ansicht wieder her.

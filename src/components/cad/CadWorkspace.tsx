@@ -173,6 +173,7 @@ import {
 import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
+import { SectionDrawingView } from "./SectionDrawingView";
 
 export function CadWorkspace({
   layerVisibility,
@@ -2545,24 +2546,15 @@ export function CadWorkspace({
                     <div
                       role="tabpanel"
                       aria-label={section.name}
-                      className="absolute inset-0 z-30 grid place-items-center bg-workspace"
+                      className="absolute inset-0 z-30"
                     >
-                      <div className="max-w-sm space-y-2 text-center text-sm text-muted-foreground">
-                        <p className="font-medium text-foreground">
-                          {section.name} · Kennung {section.mark}
-                        </p>
-                        <p>
-                          Die Schnittzeichnung wird im nächsten Schritt aus dem Modell erzeugt und
-                          hier gezeigt.
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openSectionWindow(section.id)}
-                        >
-                          Schnitt-Fenster öffnen
-                        </Button>
-                      </div>
+                      <SectionDrawingView
+                        key={section.id}
+                        project={project}
+                        section={section}
+                        cutFill={cutFill}
+                        onSettings={() => openSectionWindow(section.id)}
+                      />
                     </div>
                   );
                 })()}
