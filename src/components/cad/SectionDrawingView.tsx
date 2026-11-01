@@ -11,6 +11,7 @@ import { sectionDrawing, type SectionPoint } from "@/rendering/viewport/section-
 import { Button } from "@/components/ui/button";
 import { cutPaint, type CutFill } from "./cut-fill";
 import { HeightMark } from "./HeightMark";
+import { SectionLayerGraphic } from "./SectionLayerGraphic";
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -22,6 +23,8 @@ const loopPath = (loops: readonly SectionPoint[][]) =>
 const stroke = { part: 1.75, frame: 1.1, glass: 0.6 } as const;
 /** Storey marks outside the border (BS1): triangle 2,5 mm on paper like the section symbol. */
 const MARK_PAPER = 0.0025;
+/** Hatch spacing of cut layers: 1,5 mm on paper. */
+const HATCH_PAPER = 0.0015;
 
 /**
  * Section drawing in its canvas tab (docs/SCHNITT.md, SC3): derived from the model on every
@@ -326,13 +329,25 @@ export function SectionDrawingView({
           <g aria-label="Geschnittene Bauteile">
             {drawing.cuts.map((cut) => (
               <g key={cut.id}>
+                {cut.layers && cut.loops.length > 0 && (
+                  <SectionLayerGraphic
+                    clip={loopPath(cut.loops)}
+                    layers={cut.layers}
+                    bottom={Math.min(...cut.loops.flat().map((p) => p.y))}
+                    top={Math.max(...cut.loops.flat().map((p) => p.y))}
+                    hatch={HATCH_PAPER * denominator}
+                  />
+                )}
                 {cut.loops.length > 0 && (
                   <path
                     d={loopPath(cut.loops)}
                     fillRule="evenodd"
                     // Building parts in the cut fill; window and door frames and glass are
                     // outlines over the background (docs/FENSTER_TUEREN.md, FT2).
-                    fill={cut.kind === "part" ? paint.fill : "var(--background)"}
+                    // Walls with a build-up show their layers below (docs/WANDAUFBAU.md, SA3).
+                    fill={
+                      cut.layers ? "none" : cut.kind === "part" ? paint.fill : "var(--background)"
+                    }
                     fillOpacity={cut.kind === "part" ? paint.fillOpacity : 1}
                     stroke="var(--foreground)"
                     strokeWidth={stroke[cut.kind]}

@@ -3,6 +3,9 @@ import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
 import { isElevation, sectionFrame, type Section } from "../../domain/views/sections.ts";
 import { buildBuildingSolid } from "./building-solid.ts";
 import type { Face, Vec3 } from "./storey-solid.ts";
+import { wallBody } from "../../domain/elements/wall/body.ts";
+import type { Material } from "../../domain/elements/wall/assembly.ts";
+import { assemblyLibraryOf, wallLayerBands } from "./wall-layers.ts";
 
 /** A point of the section drawing: x to the viewer's right along the line, y = height. */
 export type SectionPoint = { x: number; y: number };
@@ -23,7 +26,14 @@ export type SectionCut = {
   kind: "part" | "frame" | "glass";
   loops: SectionPoint[][];
   open: SectionPoint[][];
+  /**
+   * Layers of a cut wall with a build-up (docs/WANDAUFBAU.md, SA3): vertical strips from x to
+   * x, left to right, each to be clipped by the loops. The layer faces are vertical planes, so in
+   * any section they are vertical lines.
+   */
+  layers?: SectionLayerStrip[];
 };
+export type SectionLayerStrip = { from: number; to: number; material: Material };
 export type SectionLevel = { storeyId: string; name: string; elevation: number };
 export type SectionDrawing = {
   cuts: SectionCut[];
@@ -186,6 +196,7 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     : [...segments.values()]
         .map(({ id, kind, list }) => ({ ...chain(id, list, length, out), kind }))
         .filter((c) => c.loops.length > 0 || c.open.length > 0);
+  const layered = withWallLayers(project, section, cuts, { d, length, mirror });
   const names = new Map(project.storeys.map((s) => [s.id, s.name]));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId)
     .filter((l) => l.elevation !== null)
@@ -195,7 +206,7 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     ...views.flatMap((v) => v.view.points),
   ];
   return {
-    cuts,
+    cuts: layered,
     views: views.map((v) => v.view),
     levels,
     width: length,
@@ -208,6 +219,55 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
         }
       : null,
   };
+}
+
+/**
+ * Cut walls with a build-up get their layers as strips (docs/WANDAUFBAU.md, SA3). Across the
+ * drawing x the distance from the wall's body centre plane grows linearly; each layer face is
+ * where it reaches the face's offset. A line parallel to the wall stays in one layer.
+ */
+function withWallLayers(
+  project: Project,
+  section: Section,
+  cuts: SectionCut[],
+  frame: { d: { x: number; y: number }; length: number; mirror: boolean },
+): SectionCut[] {
+  const library = assemblyLibraryOf(project);
+  const walls = new Map(project.storeys.flatMap((s) => s.walls).map((w) => [w.id, w]));
+  return cuts.map((cut) => {
+    const wall = cut.kind === "part" ? walls.get(cut.id) : undefined;
+    const bands = wall && wallLayerBands(wall, library);
+    if (!wall || !bands) return cut;
+    const body = wallBody(wall);
+    // Lateral offset at drawing x: a + b·x.
+    const at = (x: number) => {
+      const u = frame.mirror ? frame.length - x : x;
+      const p = { x: section.start.x + frame.d.x * u, y: section.start.y + frame.d.y * u };
+      return (p.x - body.start.x) * body.normal.x + (p.y - body.start.y) * body.normal.y;
+    };
+    const a = at(0),
+      b = at(1) - a;
+    const xs = cut.loops.flat().map((p) => p.x);
+    const minX = Math.min(...xs),
+      maxX = Math.max(...xs);
+    if (Math.abs(b) < 1e-9) {
+      const band = bands.find((l) => a >= l.from - 1e-9 && a <= l.to + 1e-9) ?? bands[0]!;
+      return { ...cut, layers: [{ from: minX, to: maxX, material: band.material }] };
+    }
+    const layers = bands
+      .map((band) => {
+        const x1 = (band.from - a) / b,
+          x2 = (band.to - a) / b;
+        return {
+          from: Math.max(minX, Math.min(x1, x2)),
+          to: Math.min(maxX, Math.max(x1, x2)),
+          material: band.material,
+        };
+      })
+      .filter((l) => l.to - l.from > 1e-9)
+      .sort((l, m) => l.from - m.from);
+    return { ...cut, layers };
+  });
 }
 
 /**
