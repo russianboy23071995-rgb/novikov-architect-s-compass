@@ -16,6 +16,8 @@ import { stairToolDefaults, type StairDefaults } from "@/application/stairs/defa
 import { defaultStairLayerId } from "@/application/stairs/actions";
 import { defaultLineAppearance } from "@/lib/bim/lines";
 import { useHatchPatterns } from "./useHatchPatterns";
+import { assemblyThickness, projectWallAssemblies } from "@/domain/elements/wall/assembly";
+import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import {
   defaultDrawingWindow,
   type WindowDimensionDraft,
@@ -68,8 +70,24 @@ export function useToolDefaults(project: Project) {
           // New walls are Neubau by default (user decision 31.10.2026, docs/BAUZUSTAND.md).
           renovation: "new" as const,
         };
+  // A chosen build-up follows the library: its thickness, or none once it is deleted.
+  const wallAssembly = wall.assemblyId
+    ? projectWallAssemblies(project).find((a) => a.id === wall.assemblyId)
+    : undefined;
+  const { assemblyId: _assembly, ...wallOwn } = wall;
+  const wallThickness = wallAssembly ? assemblyThickness(wallAssembly) : wall.thickness;
   const wallDefaults = {
-    ...wall,
+    ...wallOwn,
+    ...(wallAssembly
+      ? {
+          assemblyId: wallAssembly.id,
+          thickness: wallThickness,
+          bodyOffset:
+            wallThickness === wall.thickness
+              ? wall.bodyOffset
+              : offsetAtThickness(wall, wallThickness),
+        }
+      : {}),
     layerId: project.layers.some((l) => l.id === wall.layerId)
       ? wall.layerId
       : project.defaultLayerIds.wall,

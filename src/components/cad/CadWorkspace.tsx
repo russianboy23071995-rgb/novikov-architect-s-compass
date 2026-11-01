@@ -67,6 +67,14 @@ import { defaultPenSet } from "@/domain/pens/model";
 import { assignPenSet } from "@/application/pens/library";
 import { WallDrawingFields } from "./WallDrawingFields";
 import { WallRenovationFields } from "./WallRenovationFields";
+import { WallAssemblyFields } from "./WallAssemblyFields";
+import {
+  flipWallAssembly,
+  saveAssemblyLibrary,
+  setWallAssembly,
+} from "@/application/walls/assembly";
+import { assemblyThickness, projectWallAssemblies } from "@/domain/elements/wall/assembly";
+import { offsetAtThickness } from "@/domain/elements/wall/axis-position";
 import { ColumnFields } from "./ColumnFields";
 import { DimensionToolFields } from "./DimensionToolFields";
 import { TextFields } from "./TextFields";
@@ -2089,6 +2097,15 @@ export function CadWorkspace({
       setModelError(error instanceof Error ? error.message : "Höhenkoten nicht möglich.");
     }
   };
+  /** Wall build-up library (docs/WANDAUFBAU.md): one undo step, walls follow their assembly. */
+  const changeAssemblyLibrary = (library: Parameters<typeof saveAssemblyLibrary>[1]) => {
+    try {
+      dispatchEditing({ type: "project", project: saveAssemblyLibrary(project, library) });
+      setModelError("");
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Änderung nicht möglich.");
+    }
+  };
   const moveSectionLine = (id: string, line: { start: Point; end: Point }) => {
     try {
       dispatchEditing({ type: "project", project: updateSection(project, id, line) });
@@ -2237,6 +2254,38 @@ export function CadWorkspace({
                         },
                       ]
                     : []),
+                  ...(settingsWindow.tool === "wall"
+                    ? [
+                        {
+                          id: "assembly",
+                          label: "Wandaufbau",
+                          content: (
+                            <WallAssemblyFields
+                              project={project}
+                              value={toolDefaults.wall.assemblyId ?? null}
+                              onChange={(assemblyId) => {
+                                cancelInteraction();
+                                const { assemblyId: _old, ...wall } = toolDefaults.wall;
+                                const assembly = projectWallAssemblies(project).find(
+                                  (a) => a.id === assemblyId,
+                                );
+                                const thickness = assembly
+                                  ? assemblyThickness(assembly)
+                                  : wall.thickness;
+                                toolDefaults.setWall({
+                                  ...wall,
+                                  ...(assembly ? { assemblyId: assembly.id } : {}),
+                                  thickness,
+                                  bodyOffset: offsetAtThickness(wall, thickness),
+                                });
+                              }}
+                              onLibrary={changeAssemblyLibrary}
+                              hint="Vorgabe für neue Wände. Mit Aufbau ergibt sich die Wandstärke aus den Schichten (außen = Achsseite bei Achslage Außen, rechts in Zeichenrichtung)."
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                 ]}
                 onClose={() => setSettingsWindow(null)}
               />
@@ -2379,6 +2428,65 @@ export function CadWorkspace({
                             onShowColors={setShowRenovation}
                           />
                         ),
+                      },
+                    ]
+                  : []),
+                ...(target.kind === "wall"
+                  ? [
+                      {
+                        id: "assembly",
+                        label: "Wandaufbau",
+                        content: (() => {
+                          const wall = project.storeys
+                            .flatMap((s) => s.walls)
+                            .find((w) => w.id === target.id);
+                          // All selected walls follow, the double-clicked one included.
+                          const ids = [
+                            ...new Set([
+                              target.id,
+                              ...selections.filter((s) => s.kind === "wall").map((s) => s.id),
+                            ]),
+                          ];
+                          const apply = (change: () => Project) => {
+                            try {
+                              dispatchEditing({ type: "project", project: change() });
+                              setModelError("");
+                            } catch (error) {
+                              setModelError(
+                                error instanceof Error ? error.message : "Nicht möglich.",
+                              );
+                            }
+                          };
+                          return (
+                            <WallAssemblyFields
+                              project={project}
+                              value={wall?.assemblyId ?? null}
+                              flipped={wall?.assemblyFlipped}
+                              onChange={(assemblyId) =>
+                                apply(() => setWallAssembly(project, ids, assemblyId))
+                              }
+                              onFlip={() =>
+                                apply(() =>
+                                  flipWallAssembly(
+                                    project,
+                                    ids.filter(
+                                      (id) =>
+                                        project.storeys
+                                          .flatMap((s) => s.walls)
+                                          .find((w) => w.id === id)?.assemblyId,
+                                    ),
+                                  ),
+                                )
+                              }
+                              onLibrary={changeAssemblyLibrary}
+                              hint={
+                                ids.length > 1
+                                  ? "Gilt für alle gewählten Wände; ein Rückgängig-Schritt. Die Wandstärke ergibt sich aus den Schichten."
+                                  : "Ein Rückgängig-Schritt. Die Wandstärke ergibt sich aus den Schichten; die Achse bleibt an ihrer Stelle."
+                              }
+                            />
+                          );
+                        })(),
                       },
                     ]
                   : []),

@@ -26,6 +26,14 @@ import {
 } from "../elements/wall/height-binding.ts";
 import { resolveRoofTrims } from "../elements/wall/roof-trim.ts";
 import { WALL_RENOVATIONS } from "../elements/wall/renovation.ts";
+import {
+  assemblyLibraryProblem,
+  assemblyThickness,
+  materialsSchema,
+  projectMaterials,
+  projectWallAssemblies,
+  wallAssembliesSchema,
+} from "../elements/wall/assembly.ts";
 import { resolveStoreyLevels } from "../storeys/heights.ts";
 import {
   modelViewSchema,
@@ -316,6 +324,13 @@ const renovatedWallSchema = boundWall(wallTopBindingSchema, {
   ...trimShape,
   renovation: z.enum(WALL_RENOVATIONS).optional(),
 });
+/** Schema 43: optional wall build-up reference (docs/WANDAUFBAU.md, SA1). */
+const assembledWallSchema = boundWall(wallTopBindingSchema, {
+  ...trimShape,
+  renovation: z.enum(WALL_RENOVATIONS).optional(),
+  assemblyId: id.optional(),
+  assemblyFlipped: z.boolean().optional(),
+});
 export const projectV26Schema = projectV25Schema.extend({
   schemaVersion: z.literal(26),
   storeys: z
@@ -550,12 +565,34 @@ export const projectV41Schema = projectV40Schema.extend({
   sections: z.array(sectionSchema).optional(),
 });
 /** Schema 42: window and door elements in their openings (docs/FENSTER_TUEREN.md, FT1). */
-const projectSchema = projectV41Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV42Schema = projectV41Schema.extend({
+  schemaVersion: z.literal(42),
   storeys: z
     .array(
       projectV22Schema.shape.storey.extend({
         walls: z.array(renovatedWallSchema),
+        windows: z.array(insertedWindowSchema),
+        doors: z.array(insertedDoorSchema).optional(),
+        slabs: z.array(slabSchema).optional(),
+        roofs: z.array(roofSchema).optional(),
+        rooms: z.array(roomSchema).optional(),
+        columns: z.array(columnSchema).optional(),
+        dimensions: z.array(dimensionSchema).optional(),
+        texts: z.array(textSchema).optional(),
+        stairs: z.array(stairSchema).optional(),
+      }),
+    )
+    .min(1),
+});
+/** Schema 43: materials, wall assemblies and walls referencing them (docs/WANDAUFBAU.md). */
+const projectSchema = projectV42Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  materials: materialsSchema.optional(),
+  wallAssemblies: wallAssembliesSchema.optional(),
+  storeys: z
+    .array(
+      projectV22Schema.shape.storey.extend({
+        walls: z.array(assembledWallSchema),
         windows: z.array(insertedWindowSchema),
         doors: z.array(insertedDoorSchema).optional(),
         slabs: z.array(slabSchema).optional(),
@@ -748,7 +785,7 @@ export function validateLegacyProject(value: unknown): LegacyProject {
 }
 
 /** All lengths and coordinates are in metres; position is dimensionless. */
-export type Wall = z.infer<typeof renovatedWallSchema>;
+export type Wall = z.infer<typeof assembledWallSchema>;
 export type BimWindow = z.infer<typeof insertedWindowSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Point = z.infer<typeof pointSchema>;
@@ -1017,7 +1054,29 @@ export function validateProject(
       scope.hatchPatterns.map((p) => p.id),
     );
   }
+  validateWallAssemblies(project);
   return { ...project, hatchPatterns: project.hatchPatterns.filter((p) => used.has(p.id)) };
+}
+
+/** Library rules; a wall with a build-up has its thickness (docs/WANDAUFBAU.md, SA1). */
+function validateWallAssemblies(project: Project): void {
+  const assemblies = projectWallAssemblies(project);
+  const problem = assemblyLibraryProblem(projectMaterials(project), assemblies);
+  if (problem) throw new Error(problem);
+  const byId = new Map(assemblies.map((a) => [a.id, a]));
+  for (const wall of project.storeys.flatMap((s) => s.walls)) {
+    if (wall.assemblyId === undefined) {
+      if (wall.assemblyFlipped !== undefined)
+        throw new Error(`Wand ${wall.id}: gespiegelt ohne Wandaufbau.`);
+      continue;
+    }
+    const assembly = byId.get(wall.assemblyId);
+    if (!assembly) throw new Error(`Wand ${wall.id}: unbekannter Wandaufbau ${wall.assemblyId}.`);
+    if (Math.abs(assemblyThickness(assembly) - wall.thickness) > 1e-6)
+      throw new Error(
+        `Wand ${wall.id}: Wandstärke ${wall.thickness} m passt nicht zum Aufbau ${assembly.name} (${assemblyThickness(assembly)} m).`,
+      );
+  }
 }
 
 /** Doors fit their host wall in length and height; underside is relative to the storey level. */

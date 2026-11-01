@@ -47,6 +47,8 @@ export type DrawingRequest =
       bodyOffset?: number;
       layerId?: string;
       renovation?: WallRenovation | undefined;
+      /** Wall build-up (docs/WANDAUFBAU.md); thickness must be its sum. */
+      assemblyId?: string | undefined;
     }
   | {
       kind: "line";
@@ -151,6 +153,7 @@ export function createDrawing(
         bodyOffset: request.bodyOffset ?? request.thickness / 2,
         ...(request.layerId ? { layerId: request.layerId } : {}),
         ...(request.renovation ? { renovation: request.renovation } : {}),
+        ...(request.assemblyId ? { assemblyId: request.assemblyId } : {}),
         height: request.height,
       })
     : addLine(current, {

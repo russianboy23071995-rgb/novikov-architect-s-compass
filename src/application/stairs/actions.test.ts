@@ -79,7 +79,7 @@ test("profile, outline and solid: closed flight with the stair slab below", () =
 });
 
 test("schema 39 files get the Treppe layer, smuggled stairs are refused; IFC and delete", async () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 42);
+  assert.equal(PROJECT_SCHEMA_VERSION, 43);
   const stored = JSON.parse(serializeProject(createStandardProject("p", "eg", "og")));
   stored.layers = stored.layers.filter((l: { name: string }) => l.name !== "Treppe");
   const loaded = loadProjectData({ ...stored, schemaVersion: 39 });

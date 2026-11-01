@@ -452,7 +452,7 @@ test("a slab drawn in a storey is its ceiling on the Decke layer and round-trips
   assert.deepEqual(storeySlabLevels(p, "eg", slab), { top: 3, bottom: 2.8 });
   const reopened = readProjectFile(serializeProject(p));
   assert.equal(reopened.schemaVersion, PROJECT_SCHEMA_VERSION);
-  assert.equal(PROJECT_SCHEMA_VERSION, 42);
+  assert.equal(PROJECT_SCHEMA_VERSION, 43);
   assert.deepEqual(reopened, p);
 });
 

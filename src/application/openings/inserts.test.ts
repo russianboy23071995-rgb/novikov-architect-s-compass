@@ -36,7 +36,7 @@ const opening = { id: "f", wallId: "w", width: 1.2, height: 1.35, sillHeight: 0.
 const door = { id: "d", wallId: "w", position: 0.75, ...DOOR_DEFAULTS };
 
 test("defaults: fixed light 7 × 8 cm in the middle of the wall with sills; door frame 6 cm, leaf 4 cm", () => {
-  assert.equal(PROJECT_SCHEMA_VERSION, 42);
+  assert.equal(PROJECT_SCHEMA_VERSION, 43);
   assert.deepEqual(WINDOW_INSERT_DEFAULTS, {
     frameWidth: 0.07,
     frameDepth: 0.08,
@@ -99,7 +99,7 @@ test("schema 41 files keep plain openings; smuggled elements in a v41 file are r
   const p = addWindow(wall(), opening);
   const stored = JSON.parse(serializeProject(p));
   const loaded = loadProjectData({ ...stored, schemaVersion: 41 });
-  assert.equal(loaded.schemaVersion, 42);
+  assert.equal(loaded.schemaVersion, 43);
   assert.equal(storeyOf(loaded).windows[0]!.insert, undefined);
   const filled = JSON.parse(
     serializeProject(

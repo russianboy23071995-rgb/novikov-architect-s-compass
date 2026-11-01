@@ -297,6 +297,7 @@
     "src/application/windows/command.test.ts",
     "src/application/walls/command.test.ts",
     "src/application/walls/renovation.test.ts",
+    "src/application/walls/assembly.test.ts",
     "src/application/columns/actions.test.ts",
     "src/application/dimensions/actions.test.ts",
     "src/application/texts/actions.test.ts",
