@@ -200,3 +200,52 @@ test("second click: the pointer side of the wall gives the outside of a window, 
   assert.equal(storeyOf(door.previewProject!({ x: 2.5, y: 3 })).doors![0]!.opensTo, "left");
   assert.equal(storeyOf(door.previewProject!({ x: 2.5, y: -3 })).doors![0]!.opensTo, "right");
 });
+
+test("sashes: divisions bring their sashes, must fit, and are saved and loaded", async () => {
+  // docs/FENSTER_TUEREN.md, FL1.
+  const { withDivision, divisionSashes, SASH_DEFAULTS } =
+    await import("../../domain/elements/window/insert.ts");
+  assert.deepEqual(SASH_DEFAULTS, { sashWidth: 0.06, mullionWidth: 0.08, transomHeight: 0.4 });
+  assert.deepEqual(divisionSashes("single"), [{ operation: "turn-tilt", hinge: "left" }]);
+  assert.deepEqual(divisionSashes("double"), [
+    { operation: "turn", hinge: "left" },
+    { operation: "turn-tilt", hinge: "right" },
+  ]);
+  const single = withDivision(WINDOW_INSERT_DEFAULTS, "single");
+  assert.equal(single.division, "single");
+  assert.equal(single.sashes!.length, 1);
+  assert.equal(single.frameWidth, 0.07);
+  assert.equal("sashes" in withDivision(single, "fixed"), false);
+  // Fit: the 1,2 × 1,35 m opening takes one, two sashes and a top light.
+  for (const division of ["single", "double", "transom"] as const)
+    assert.equal(
+      windowInsertProblem(withDivision(WINDOW_INSERT_DEFAULTS, division), opening, 0.24),
+      null,
+    );
+  assert.match(
+    windowInsertProblem({ ...single, sashes: [] }, opening, 0.24)!,
+    /1-flüglig braucht einen Flügel/,
+  );
+  assert.match(
+    windowInsertProblem(
+      { ...withDivision(single, "double"), sashWidth: 0.2 },
+      { ...opening, width: 0.9 },
+      0.24,
+    )!,
+    /Flügelrahmen/,
+  );
+  // A top light of 1,10 m leaves no sash below it in a 1,35 m opening.
+  assert.match(
+    windowInsertProblem({ ...withDivision(single, "transom"), transomHeight: 1.1 }, opening, 0.24)!,
+    /Flügelrahmen/,
+  );
+  // Saved and loaded with the project; a tilt sash keeps its hinge value.
+  const tilt = { ...withDivision(WINDOW_INSERT_DEFAULTS, "double"), sashWidth: 0.07 };
+  tilt.sashes = [{ operation: "tilt", hinge: "left" }, tilt.sashes![1]!];
+  const p = setOpeningInsert(addWindow(wall(), opening), { kind: "window", id: "f", insert: tilt });
+  assert.deepEqual(
+    storeyOf(loadProjectData(JSON.parse(serializeProject(p)))).windows[0]!.insert,
+    tilt,
+  );
+  assert.throws(() => checkedWindowInsert({ ...tilt, sashWidth: 0.5 }), /Flügelrahmen 2–20 cm/);
+});

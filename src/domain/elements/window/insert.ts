@@ -16,11 +16,42 @@ export const WINDOW_LOCATION_LABELS: Record<WindowLocation, string> = {
   centre: "Mitte",
   outside: "Außen",
 };
-/** Divisions of the window; FT1 offers the fixed light, sashes follow later. */
-export const WINDOW_DIVISIONS = ["fixed"] as const;
-export const WINDOW_DIVISION_LABELS: Record<(typeof WINDOW_DIVISIONS)[number], string> = {
+/**
+ * Divisions of the window (docs/FENSTER_TUEREN.md, FL1): fixed light; one sash; two sashes
+ * side by side with a mullion; one sash below a fixed top light (transom).
+ */
+export const WINDOW_DIVISIONS = ["fixed", "single", "double", "transom"] as const;
+export type WindowDivision = (typeof WINDOW_DIVISIONS)[number];
+export const WINDOW_DIVISION_LABELS: Record<WindowDivision, string> = {
   fixed: "Festverglasung",
+  single: "1-flüglig",
+  double: "2-flüglig mit Pfosten",
+  transom: "1-flüglig mit Oberlicht",
 };
+/** How a sash opens: turn (side hinged), turn and tilt, tilt only (bottom hinged). */
+export const SASH_OPERATIONS = ["turn", "turn-tilt", "tilt"] as const;
+export type SashOperation = (typeof SASH_OPERATIONS)[number];
+export const SASH_OPERATION_LABELS: Record<SashOperation, string> = {
+  turn: "Dreh",
+  "turn-tilt": "Dreh-Kipp",
+  tilt: "Kipp",
+};
+/** Sashes per division, left to right seen from inside. */
+export const DIVISION_SASHES: Record<WindowDivision, number> = {
+  fixed: 0,
+  single: 1,
+  double: 2,
+  transom: 1,
+};
+
+const sashSchema = z
+  .object({
+    operation: z.enum(SASH_OPERATIONS),
+    /** Hinge side seen from inside; a tilt-only sash keeps it but hinges at the bottom. */
+    hinge: z.enum(["left", "right"]),
+  })
+  .strict();
+export type Sash = z.infer<typeof sashSchema>;
 
 const sillSchema = z.object({ projection: metres.min(0).max(0.5) }).strict();
 
@@ -38,6 +69,14 @@ export const windowInsertSchema = z
      */
     exterior: z.enum(["left", "right"]),
     division: z.enum(WINDOW_DIVISIONS),
+    /** Sashes left to right seen from inside, as many as the division has (FL1). */
+    sashes: z.array(sashSchema).max(2).optional(),
+    /** Visible width of the sash frame. Absent: SASH_DEFAULTS. */
+    sashWidth: metres.min(0.02).max(0.2).optional(),
+    /** Width of mullion (two sashes) or transom (top light). */
+    mullionWidth: metres.min(0.02).max(0.3).optional(),
+    /** Clear height of the top light above the transom. */
+    transomHeight: metres.min(0.1).max(2).optional(),
     /** Window boards; the projection is measured beyond the wall face. Absent: none. */
     sillInside: sillSchema.optional(),
     sillOutside: sillSchema.optional(),
@@ -55,6 +94,28 @@ export const WINDOW_INSERT_DEFAULTS: WindowInsert = {
   sillInside: { projection: 0.02 },
   sillOutside: { projection: 0.04 },
 };
+
+/** Values a window with sashes uses when they are not set. */
+export const SASH_DEFAULTS = { sashWidth: 0.06, mullionWidth: 0.08, transomHeight: 0.4 } as const;
+
+/** The usual sashes of a division: turn-tilt; two sashes meet with the turn-tilt one on the right. */
+export function divisionSashes(division: WindowDivision): Sash[] {
+  if (division === "fixed") return [];
+  if (division === "double")
+    return [
+      { operation: "turn", hinge: "left" },
+      { operation: "turn-tilt", hinge: "right" },
+    ];
+  return [{ operation: "turn-tilt", hinge: "left" }];
+}
+
+/** A window element switched to another division: matching sashes, other values kept. */
+export function withDivision(insert: WindowInsert, division: WindowDivision): WindowInsert {
+  const { sashes: _, ...rest } = insert;
+  return division === "fixed"
+    ? { ...rest, division }
+    : { ...rest, division, sashes: divisionSashes(division) };
+}
 
 export const doorInsertSchema = z
   .object({
@@ -79,6 +140,22 @@ export function windowInsertProblem(
 ): string | null {
   if (2 * insert.frameWidth >= Math.min(opening.width, opening.height))
     return `Der Rahmen (${cm(insert.frameWidth)}) lässt in der Öffnung kein Glas übrig.`;
+  // Sashes (FL1): as many as the division has, and room for glass inside every sash.
+  const count = DIVISION_SASHES[insert.division];
+  if ((insert.sashes?.length ?? 0) !== count)
+    return `${WINDOW_DIVISION_LABELS[insert.division]} braucht ${count === 1 ? "einen Flügel" : `${count} Flügel`}.`;
+  if (count) {
+    const sash = insert.sashWidth ?? SASH_DEFAULTS.sashWidth;
+    const bar = insert.mullionWidth ?? SASH_DEFAULTS.mullionWidth;
+    const top =
+      insert.division === "transom"
+        ? (insert.transomHeight ?? SASH_DEFAULTS.transomHeight) + bar
+        : 0;
+    const width = (opening.width - 2 * insert.frameWidth - (count === 2 ? bar : 0)) / count;
+    const height = opening.height - 2 * insert.frameWidth - top;
+    if (2 * sash >= Math.min(width, height))
+      return `Der Flügelrahmen (${cm(sash)}) lässt im Flügel kein Glas übrig.`;
+  }
   if (insert.frameDepth > wallThickness + 1e-9)
     return `Die Rahmentiefe (${cm(insert.frameDepth)}) ist größer als die Wanddicke.`;
   if (insert.location !== "centre" && insert.offset + insert.frameDepth > wallThickness + 1e-9)
@@ -106,7 +183,7 @@ export function checkedWindowInsert(insert: WindowInsert): WindowInsert {
   const parsed = windowInsertSchema.safeParse(insert);
   if (!parsed.success)
     throw new Error(
-      "Außerhalb des zulässigen Bereichs: Rahmenbreite 2–30 cm, Rahmentiefe 2–50 cm, Abstand und Überstand 0–50 cm.",
+      "Außerhalb des zulässigen Bereichs: Rahmenbreite 2–30 cm, Rahmentiefe 2–50 cm, Abstand und Überstand 0–50 cm, Flügelrahmen 2–20 cm, Pfosten/Kämpfer 2–30 cm, Oberlicht 10–200 cm.",
     );
   return parsed.data;
 }

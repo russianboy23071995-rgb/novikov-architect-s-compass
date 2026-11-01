@@ -1,6 +1,10 @@
 import { useState } from "react";
 import {
   DOOR_INSERT_DEFAULTS,
+  SASH_DEFAULTS,
+  SASH_OPERATION_LABELS,
+  SASH_OPERATIONS,
+  withDivision,
   WINDOW_DIVISION_LABELS,
   WINDOW_DIVISIONS,
   WINDOW_INSERT_DEFAULTS,
@@ -161,7 +165,7 @@ function WindowInsertFields({
           <select
             value={value.division}
             onChange={(event) =>
-              onChange({ ...value, division: event.target.value as WindowInsert["division"] })
+              onChange(withDivision(value, event.target.value as WindowInsert["division"]))
             }
             className={select}
           >
@@ -225,6 +229,72 @@ function WindowInsertFields({
           </label>
         )}
       </div>
+      {value.division !== "fixed" && (
+        <div className="flex flex-wrap items-end gap-3">
+          <CentimetreField
+            label="Flügelrahmen (cm)"
+            value={value.sashWidth ?? SASH_DEFAULTS.sashWidth}
+            onCommit={(sashWidth) => onChange({ ...value, sashWidth })}
+          />
+          {(value.division === "double" || value.division === "transom") && (
+            <CentimetreField
+              label={value.division === "double" ? "Pfosten (cm)" : "Kämpfer (cm)"}
+              value={value.mullionWidth ?? SASH_DEFAULTS.mullionWidth}
+              onCommit={(mullionWidth) => onChange({ ...value, mullionWidth })}
+            />
+          )}
+          {value.division === "transom" && (
+            <CentimetreField
+              label="Oberlicht lichte Höhe (cm)"
+              value={value.transomHeight ?? SASH_DEFAULTS.transomHeight}
+              onCommit={(transomHeight) => onChange({ ...value, transomHeight })}
+            />
+          )}
+        </div>
+      )}
+      {(value.sashes ?? []).map((sash, index, all) => {
+        const set = (changes: Partial<typeof sash>) =>
+          onChange({
+            ...value,
+            sashes: all.map((s, i) => (i === index ? { ...s, ...changes } : s)),
+          });
+        return (
+          <div key={index} className="flex flex-wrap items-end gap-3">
+            <p className="pb-1 font-medium">
+              {all.length === 2 ? (index === 0 ? "Flügel links" : "Flügel rechts") : "Flügel"}
+            </p>
+            <label className="text-xs">
+              Öffnungsart
+              <select
+                value={sash.operation}
+                onChange={(event) =>
+                  set({ operation: event.target.value as typeof sash.operation })
+                }
+                className={select}
+              >
+                {SASH_OPERATIONS.map((o) => (
+                  <option key={o} value={o}>
+                    {SASH_OPERATION_LABELS[o]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs">
+              Anschlag (von innen)
+              <select
+                value={sash.hinge}
+                disabled={sash.operation === "tilt"}
+                onChange={(event) => set({ hinge: event.target.value as typeof sash.hinge })}
+                className={`${select} disabled:opacity-50`}
+                title="Bandseite, von innen gesehen; ein Kippflügel ist unten angeschlagen."
+              >
+                <option value="left">links</option>
+                <option value="right">rechts</option>
+              </select>
+            </label>
+          </div>
+        );
+      })}
       <div className="flex flex-wrap items-end gap-4">
         {sill("sillInside", "Fensterbank innen")}
         {sill("sillOutside", "Fensterbank außen")}

@@ -93,3 +93,28 @@ Nutzervorgabe (01.11.2026): Die Fensterrichtung wird beim Platzieren per Klick i
 Umsetzung: `src/application/drawing/window-placement.ts` (`wallSideOf`, `openingSideInteraction`), `src/components/cad/useOpeningPlacement.ts` (zweite Phase mit festgehaltener Position und Wand), `useWindowPlacement.ts`/`useDoorPlacement.ts` (welcher Entwurf eine Seite braucht und wie sie gesetzt wird), `DoorPlacementFields.tsx`, `WindowPlacementFields.tsx`, `OpeningInsertFields.tsx`, `CadWorkspace.tsx`.
 
 Nachweis: neuer Test in `src/application/openings/inserts.test.ts` (Seite links/rechts, Vorschau folgt dem Zeiger ohne zu übernehmen, Klick übernimmt, Abbruch; Tür ebenso). 1453 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Tür – Zeiger oberhalb der Wand zeigt den Aufschlag nach oben, Klick unterhalb setzt die Tür nach unten aufgehend; Fenster – die Fensterbank außen wechselt mit der Zeigerseite (im Grundrisspfad nachgeprüft), Klick 2 setzt, Strg+Z nimmt es in einem Schritt zurück; Esc nach Klick 1 setzt nichts und wechselt zum Auswahlwerkzeug.
+
+## Fensterflügel (FL1–FL4)
+
+Nutzerwahl (01.11.2026): als nächstes Thema die Fensterflügel, in vier Schritten wie FT1–FT4.
+
+| Schritt | Inhalt | Stand |
+| --- | --- | --- |
+| FL1 | Teilungen und Öffnungsarten im Modell, Werkzeug- und Elementfenster | erledigt |
+| FL2 | Flügelrahmen, Pfosten, Kämpfer in 3D und Schnitt | offen |
+| FL3 | Flügel im Grundriss, Öffnungsdreiecke in der Ansicht | offen |
+| FL4 | IFC: PartitioningType, Paneel-Angaben, Flügelkörper | offen |
+
+### FL1 – Teilungen und Öffnungsarten
+
+- **Teilung** (Feld des Fensterelements, Schema bleibt 42): Festverglasung, **1-flüglig**, **2-flüglig mit Pfosten**, **1-flüglig mit Oberlicht** (Kämpfer, darüber fest).
+- **Flügel** (`sashes`, von innen gesehen links nach rechts, so viele wie die Teilung hat): Öffnungsart Dreh, Dreh-Kipp oder Kipp; Anschlag links/rechts von innen (bei Kipp gesperrt, der Flügel ist unten angeschlagen).
+- **Maße** (optional, sonst Vorgabe): Flügelrahmen 6 cm (2–20 cm), Pfosten bzw. Kämpfer 8 cm (2–30 cm), lichte Oberlichthöhe 40 cm (10–200 cm).
+- Wechsel der Teilung setzt die üblichen Flügel: 1-flüglig und Oberlicht Dreh-Kipp links; 2-flüglig links Dreh, rechts Dreh-Kipp (Stulpflügel rechts). Die übrigen Werte bleiben.
+- **Passt es?** Die Teilung braucht genau ihre Flügel („1-flüglig braucht einen Flügel“); in jedem Flügel muss nach Rahmen, Pfosten bzw. Kämpfer und Flügelrahmen Glas bleiben, sonst „Der Flügelrahmen (… cm) lässt im Flügel kein Glas übrig“.
+- Felder im Werkzeug- und Elementfenster (Rubrik „Fensterelement“): Teilung, Flügelrahmen, Pfosten/Kämpfer, Oberlichthöhe, je Flügel Öffnungsart und Anschlag.
+- Noch nicht sichtbar: 3D, Schnitt, Grundriss und IFC zeigen weiter eine Festverglasung (FL2–FL4).
+
+Umsetzung: `src/domain/elements/window/insert.ts` (Teilungen, Öffnungsarten, `SASH_DEFAULTS`, `divisionSashes`, `withDivision`, Passprüfung), `src/components/cad/OpeningInsertFields.tsx`.
+
+Nachweis: neuer Test in `src/application/openings/inserts.test.ts` (Vorgaben, Flügel je Teilung, Wechsel behält Werte, drei Teilungen passen in 1,20 × 1,35 m, fehlender Flügel, zu breiter Flügelrahmen, zu hohes Oberlicht, Speichern/Laden mit Kippflügel, Bereichsprüfung). 1455 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Fensterelement im Startprojekt, Teilung 2-flüglig → Flügelrahmen, Pfosten, „Flügel links Dreh links“, „Flügel rechts Dreh-Kipp rechts“; linker Flügel auf Kipp → Anschlag gesperrt; Teilung Oberlicht → Kämpfer und Oberlichthöhe, ein Flügel, kein Fehler.
