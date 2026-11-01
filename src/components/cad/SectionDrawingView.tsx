@@ -70,7 +70,9 @@ export function SectionDrawingView({
       </div>
       {drawing.cuts.length === 0 && drawing.views.length === 0 ? (
         <p role="status" className="m-auto text-sm text-muted-foreground">
-          Die Schnittlinie trifft keine Bauteile. Linie im Grundriss über das Gebäude legen.
+          {section.kind === "elevation"
+            ? "Diese Ansicht sieht keine Bauteile. Linie vor das Gebäude legen und zum Gebäude blicken."
+            : "Die Schnittlinie trifft keine Bauteile. Linie im Grundriss über das Gebäude legen."}
         </p>
       ) : (
         <svg

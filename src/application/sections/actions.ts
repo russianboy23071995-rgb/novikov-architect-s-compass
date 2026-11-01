@@ -3,6 +3,8 @@ import type { Project } from "../../domain/project/schema.ts";
 import {
   nextSectionMark,
   sectionName,
+  elevationName,
+  isElevation,
   SECTION_SYMBOL_SIZE,
   type SectionSymbolSize,
   type Section,
@@ -21,23 +23,45 @@ export const SECTION_TOOL_DEFAULTS: SectionDefaults = {
   symbolSize: SECTION_SYMBOL_SIZE,
 };
 
-/** Mark and name the next section gets with these defaults. */
-export function nextSectionLabel(project: Project, defaults: SectionDefaults) {
-  const mark = nextSectionMark(project.sections ?? [], defaults.markKind);
-  return { mark, name: sectionName(defaults.namePrefix.trim() || "Schnitt", mark) };
+/** Tool defaults of the elevation tool (docs/ANSICHTEN.md, A1). */
+export const ELEVATION_TOOL_DEFAULTS: SectionDefaults = {
+  markKind: "numbers",
+  namePrefix: "Ansicht",
+  symbolSize: SECTION_SYMBOL_SIZE,
+};
+
+type SectionKind = "section" | "elevation";
+
+/** Mark and name the next section or elevation gets; marks run per kind. */
+export function nextSectionLabel(
+  project: Project,
+  defaults: SectionDefaults,
+  kind: SectionKind = "section",
+) {
+  const same = (project.sections ?? []).filter((s) => isElevation(s) === (kind === "elevation"));
+  const mark = nextSectionMark(same, defaults.markKind);
+  return kind === "elevation"
+    ? { mark, name: elevationName(defaults.namePrefix.trim() || "Ansicht", mark) }
+    : { mark, name: sectionName(defaults.namePrefix.trim() || "Schnitt", mark) };
 }
 
 /** A new section with the next free mark; works in any storey (the section is the building's). */
 export function addSection(
   project: Project,
-  section: Pick<Section, "id" | "start" | "end" | "look">,
+  section: Pick<Section, "id" | "start" | "end" | "look"> & { kind?: SectionKind },
   defaults: SectionDefaults = SECTION_TOOL_DEFAULTS,
 ): Project {
+  const { kind = "section", ...line } = section;
   return validateLike(project, {
     ...project,
     sections: [
       ...(project.sections ?? []),
-      { ...nextSectionLabel(project, defaults), symbolSize: defaults.symbolSize, ...section },
+      {
+        ...nextSectionLabel(project, defaults, kind),
+        symbolSize: defaults.symbolSize,
+        ...line,
+        ...(kind === "elevation" ? { kind } : {}),
+      },
     ],
   });
 }
@@ -131,4 +155,52 @@ export function withSectionLength(section: Line, length: number): Line {
       y: section.start.y + (dy / current) * length,
     },
   };
+}
+
+/** The four elevations around the building, 2 m from its outline, each looking at it. */
+const FOUR = [
+  { mark: "N", name: "Nordansicht" },
+  { mark: "O", name: "Ostansicht" },
+  { mark: "S", name: "Südansicht" },
+  { mark: "W", name: "Westansicht" },
+] as const;
+
+/**
+ * Quick start of the elevation tool (A1): north, east, south and west elevation around the
+ * outline of all walls and slabs of all storeys, 2 m away, 1 m longer than the building at both
+ * ends. Marks N, O, S, W; one that an elevation already uses is skipped.
+ */
+export function addFourElevations(
+  project: Project,
+  ids: () => string,
+  defaults: SectionDefaults = ELEVATION_TOOL_DEFAULTS,
+): Project {
+  const points = project.storeys.flatMap((storey) => [
+    ...storey.walls.flatMap((w) => [w.start, w.end].map((p) => ({ p, r: w.thickness }))),
+    ...(storey.slabs ?? []).flatMap((s) => s.points.map((p) => ({ p, r: 0 }))),
+  ]);
+  if (!points.length) throw new Error("Für Ansichten braucht das Modell Wände oder Decken.");
+  const minX = Math.min(...points.map(({ p, r }) => p.x - r)) - 2,
+    maxX = Math.max(...points.map(({ p, r }) => p.x + r)) + 2,
+    minY = Math.min(...points.map(({ p, r }) => p.y - r)) - 2,
+    maxY = Math.max(...points.map(({ p, r }) => p.y + r)) + 2;
+  // Each line runs so that the building lies to its left (look "left").
+  const lines = {
+    N: { start: { x: maxX - 1, y: maxY }, end: { x: minX + 1, y: maxY } },
+    O: { start: { x: maxX, y: minY + 1 }, end: { x: maxX, y: maxY - 1 } },
+    S: { start: { x: minX + 1, y: minY }, end: { x: maxX - 1, y: minY } },
+    W: { start: { x: minX, y: maxY - 1 }, end: { x: minX, y: minY + 1 } },
+  };
+  const used = new Set((project.sections ?? []).filter(isElevation).map((s) => s.mark));
+  const added = FOUR.filter((e) => !used.has(e.mark)).map((e) => ({
+    id: ids(),
+    name: e.name,
+    mark: e.mark,
+    ...lines[e.mark],
+    look: "left" as const,
+    symbolSize: defaults.symbolSize,
+    kind: "elevation" as const,
+  }));
+  if (!added.length) throw new Error("Die vier Ansichten N, O, S, W gibt es schon.");
+  return validateLike(project, { ...project, sections: [...(project.sections ?? []), ...added] });
 }

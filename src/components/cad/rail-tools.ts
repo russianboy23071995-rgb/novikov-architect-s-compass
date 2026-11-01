@@ -12,6 +12,7 @@ import {
   ColumnIcon,
   RoofIcon,
   SectionIcon,
+  ElevationIcon,
   SlabIcon,
   StairIcon,
   WallIcon,
@@ -43,4 +44,6 @@ export const RAIL_TOOLS: Partial<Record<ToolId, CadTool>> = {
   dimension: { id: "dimension", label: "Maßkette", shortcut: "", icon: RulerDimensionLine },
   text: { id: "text", label: "Text", shortcut: "", icon: Type },
   section: { id: "section", label: "Schnitt", shortcut: "", icon: SectionIcon },
+  // Elevation: the section line object seen from outside (docs/ANSICHTEN.md, A1).
+  elevation: { id: "elevation", label: "Ansicht", shortcut: "", icon: ElevationIcon },
 };

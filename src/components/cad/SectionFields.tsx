@@ -8,6 +8,7 @@ export function SectionFields({
   onChange,
   next,
   denominator,
+  onFourElevations,
 }: {
   value: SectionDefaults;
   onChange: (value: SectionDefaults) => void;
@@ -15,6 +16,8 @@ export function SectionFields({
   next: { mark: string; name: string };
   /** Output scale 1:denominator. */
   denominator: number;
+  /** Elevation tool (A1): north, east, south and west elevation at once. */
+  onFourElevations?: () => void;
 }) {
   return (
     <section aria-label="Schnitteinstellungen" className="flex flex-wrap items-end gap-3">
@@ -51,6 +54,15 @@ export function SectionFields({
       <p className="text-xs text-muted-foreground">
         Nächster: {next.name} · Klick Anfang, Klick Ende, Klick Blickrichtung
       </p>
+      {onFourElevations && (
+        <button
+          type="button"
+          onClick={onFourElevations}
+          className="rounded border bg-background px-2 py-1 text-xs hover:bg-accent"
+        >
+          Vier Ansichten erzeugen
+        </button>
+      )}
     </section>
   );
 }

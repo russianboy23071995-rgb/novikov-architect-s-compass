@@ -23,6 +23,8 @@ import type { Project } from "@/domain/project/schema";
 
 /** Navigator folder for the sections (docs/SCHNITT.md, SC1); its entries follow in SC2. */
 export const SECTIONS_FOLDER_ID = "sections";
+/** Navigator folder for the elevations (docs/ANSICHTEN.md, A1). */
+export const ELEVATIONS_FOLDER_ID = "elevations";
 
 const iconFor = (id: string, isGroup: boolean) => {
   if (id.includes("level")) return Layers3;
@@ -145,11 +147,17 @@ function NavigatorContent({
           id: SECTIONS_FOLDER_ID,
           label: "Schnitte",
           kind: "group",
-          children: (project.sections ?? []).map((s) => ({
-            id: s.id,
-            label: `${s.mark} · ${s.name}`,
-            kind: "item",
-          })),
+          children: (project.sections ?? [])
+            .filter((s) => s.kind !== "elevation")
+            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
+        },
+        {
+          id: ELEVATIONS_FOLDER_ID,
+          label: "Ansichten",
+          kind: "group",
+          children: (project.sections ?? [])
+            .filter((s) => s.kind === "elevation")
+            .map((s) => ({ id: s.id, label: `${s.mark} · ${s.name}`, kind: "item" })),
         },
       ] satisfies TreeNode[],
     [project.id, project.storeys, project.sections],
