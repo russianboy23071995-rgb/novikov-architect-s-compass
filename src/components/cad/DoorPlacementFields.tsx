@@ -1,14 +1,16 @@
 import type { Project } from "@/domain/project/schema";
 import type { DoorSettingsDraft } from "@/application/drawing/door-placement";
 import { Input } from "@/components/ui/input";
-import { doorDinHand, doorHingeForDinHand, type DinHand } from "@/domain/elements/door/model";
 
 const fields = [
   ["width", "Türbreite (m)"],
   ["height", "Türhöhe (m)"],
   ["zOffset", "Z-Versatz zum Geschoss (m)"],
 ] as const;
-/** Geometric wording: hinge jamb toward wall start/end; swing side seen along the wall. */
+/**
+ * Geometric wording: hinge jamb toward wall start/end. The side the door opens to comes from
+ * the second click (docs/FENSTER_TUEREN.md, R1); DIN follows from both, shown in the door window.
+ */
 export function DoorPlacementFields({
   layers,
   value,
@@ -17,6 +19,7 @@ export function DoorPlacementFields({
   precision,
   onPrecision,
   pickingHost,
+  choosingSide,
 }: {
   layers: Project["layers"];
   value: DoorSettingsDraft;
@@ -24,6 +27,8 @@ export function DoorPlacementFields({
   error: string;
   precision: boolean;
   pickingHost: boolean;
+  /** Position set: the pointer chooses the swing side. */
+  choosingSide: boolean;
   onPrecision: (value: boolean) => void;
 }) {
   return (
@@ -54,34 +59,6 @@ export function DoorPlacementFields({
         </select>
       </label>
       <label className="text-xs">
-        Aufschlag
-        <select
-          aria-label="Türaufschlag"
-          className="block h-8 rounded border bg-background"
-          value={value.opensTo}
-          onChange={(event) =>
-            onChange({ ...value, opensTo: event.target.value as DoorSettingsDraft["opensTo"] })
-          }
-        >
-          <option value="left">links der Wandrichtung</option>
-          <option value="right">rechts der Wandrichtung</option>
-        </select>
-      </label>
-      <label className="text-xs">
-        DIN
-        <select
-          aria-label="Tür DIN links/rechts"
-          className="block h-8 rounded border bg-background"
-          value={doorDinHand(value)}
-          onChange={(event) =>
-            onChange({ ...value, hinge: doorHingeForDinHand(value, event.target.value as DinHand) })
-          }
-        >
-          <option value="links">DIN links</option>
-          <option value="rechts">DIN rechts</option>
-        </select>
-      </label>
-      <label className="text-xs">
         Ebene
         <select
           aria-label="Tür-Zielebene"
@@ -105,11 +82,13 @@ export function DoorPlacementFields({
         Position per Maß
       </label>
       <p className="text-xs text-muted-foreground">
-        {precision
-          ? pickingHost
-            ? "Zuerst die Wand anklicken. Danach Tab: Abstand der Türmitte."
-            : "Wand fixiert · Tab: Abstand der Türmitte ab Wandanfang · Enter/Klick setzt Tür."
-          : "Wand anfahren · Klick setzt Tür · Esc bricht ab. Nur neue Türen."}
+        {choosingSide
+          ? "Klick auf die Seite, zu der die Tür aufgeht · Esc bricht ab."
+          : precision
+            ? pickingHost
+              ? "Zuerst die Wand anklicken. Danach Tab: Abstand der Türmitte."
+              : "Wand fixiert · Tab: Abstand der Türmitte ab Wandanfang · Enter/Klick setzt die Position."
+            : "Wand anfahren · Klick 1 Position, Klick 2 Seite, zu der die Tür aufgeht · Esc bricht ab."}
       </p>
       {error && (
         <p role="alert" className="text-xs text-destructive">

@@ -144,3 +144,59 @@ test("the tools place opening and element together; „nur Öffnung“ leaves th
     /Rahmentiefe/,
   );
 });
+
+test("second click: the pointer side of the wall gives the outside of a window, the swing of a door", async () => {
+  // docs/FENSTER_TUEREN.md, R1. Wall along +x: left is y > 0, right is y < 0.
+  const { wallSideOf, openingSideInteraction, placeWindow } =
+    await import("../drawing/window-placement.ts");
+  const w = { start: { x: 0, y: 0 }, end: { x: 4, y: 0 } };
+  assert.equal(wallSideOf(w, { x: 1, y: 0 }, { x: 3, y: 2 }), "left");
+  assert.equal(wallSideOf(w, { x: 1, y: 0 }, { x: -5, y: -0.1 }), "right");
+  const base = wall();
+  const visibility = createLayerVisibilityPolicy(base, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  const anchor = { x: 1.2, y: 0 };
+  let committed: ReturnType<typeof placeWindow> | null = null;
+  let cancelled = false;
+  const tool = openingSideInteraction(
+    "f1",
+    storeyOf(base).walls[0]!,
+    anchor,
+    (exterior) =>
+      placeWindow(base, base, visibility, "f1", anchor, undefined, "w", undefined, {
+        ...WINDOW_INSERT_DEFAULTS,
+        exterior,
+      }),
+    (next) => {
+      committed = next;
+    },
+    () => {
+      cancelled = true;
+    },
+  );
+  // The preview follows the pointer; nothing is committed before the click.
+  assert.equal(storeyOf(tool.previewProject!({ x: 2, y: 1 })).windows[0]!.insert!.exterior, "left");
+  assert.equal(
+    storeyOf(tool.previewProject!({ x: 0, y: -1 })).windows[0]!.insert!.exterior,
+    "right",
+  );
+  assert.equal(committed, null);
+  tool.commit({ x: 3, y: -0.5 });
+  assert.equal(storeyOf(committed!).windows[0]!.insert!.exterior, "right");
+  tool.cancel();
+  assert.equal(cancelled, true);
+  // A door takes the side it opens to the same way.
+  const door = openingSideInteraction(
+    "d1",
+    storeyOf(base).walls[0]!,
+    { x: 2.5, y: 0 },
+    (opensTo) =>
+      placeDoor(base, base, visibility, "d1", { x: 2.5, y: 0 }, { ...DOOR_DEFAULTS, opensTo }, "w"),
+    () => undefined,
+    () => undefined,
+  );
+  assert.equal(storeyOf(door.previewProject!({ x: 2.5, y: 3 })).doors![0]!.opensTo, "left");
+  assert.equal(storeyOf(door.previewProject!({ x: 2.5, y: -3 })).doors![0]!.opensTo, "right");
+});

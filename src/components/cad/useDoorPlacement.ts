@@ -14,6 +14,8 @@ const doorKind: OpeningPlacementKind<DoorSettingsDraft> = {
   parse: parseDoorSettings,
   host: windowPlacementHost,
   interaction: doorPlacementInteraction,
+  // R1: the second click chooses the side the door opens to.
+  side: { applies: () => true, with: (draft, opensTo) => ({ ...draft, opensTo }) },
 };
 
 /** Same lifecycle as the window tool; only the door action and settings differ. */

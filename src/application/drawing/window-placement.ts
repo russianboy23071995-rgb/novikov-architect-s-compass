@@ -231,6 +231,56 @@ export function openingPlacementInteraction(
   };
 }
 
+/** Side of a wall a point lies on, seen along the wall from its start to its end. */
+export function wallSideOf(
+  wall: { start: Point; end: Point },
+  anchor: Point,
+  point: Point,
+): "left" | "right" {
+  const cross =
+    (wall.end.x - wall.start.x) * (point.y - anchor.y) -
+    (wall.end.y - wall.start.y) * (point.x - anchor.x);
+  return cross >= 0 ? "left" : "right";
+}
+
+/**
+ * Second click of a window or door (docs/FENSTER_TUEREN.md, R1): the position is fixed, the
+ * pointer chooses the side of the wall – the outside of a window, the side a door opens to.
+ * Free snapping (no wall axis), so the pointer can leave the wall; `place` builds the model for
+ * a side and validates it.
+ */
+export function openingSideInteraction(
+  id: string,
+  wall: { start: Point; end: Point },
+  anchor: Point,
+  place: (side: "left" | "right") => Project,
+  commit: (next: Project, id: string) => void,
+  cancel: () => void,
+): ToolInteraction {
+  const preview = (point: Point) => place(wallSideOf(wall, anchor, point));
+  return {
+    identity: {},
+    origin: anchor,
+    input: null,
+    click: "confirm",
+    snapping: {
+      origin: null,
+      sources: (refs) => [...refs],
+      resolve: (cursor, context) =>
+        querySnap(cursor, { ...context, orthoOrigin: null, angleOrigin: null }),
+    },
+    preview: () => {
+      throw new Error("Seite per Maus wählen.");
+    },
+    previewProject: preview,
+    validate: (point) => {
+      preview(point);
+    },
+    commit: (point) => commit(preview(point), id),
+    cancel,
+  };
+}
+
 export function windowPlacementInteraction(
   base: Project,
   visibility: LayerVisibilityPolicy,
