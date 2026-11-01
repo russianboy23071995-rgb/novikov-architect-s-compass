@@ -543,7 +543,7 @@ export function PlanSceneContent({
                         strokeWidth={wallOutlineWidth / pixelsPerMetre}
                       />
                       <path
-                        d={planRectPath([symbol.glass])}
+                        d={planRectPath(symbol.glasses)}
                         strokeWidth={(0.5 * wallOutlineWidth) / pixelsPerMetre}
                       />
                     </g>

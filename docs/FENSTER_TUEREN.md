@@ -101,7 +101,7 @@ Nutzerwahl (01.11.2026): als nächstes Thema die Fensterflügel, in vier Schritt
 | Schritt | Inhalt | Stand |
 | --- | --- | --- |
 | FL1 | Teilungen und Öffnungsarten im Modell, Werkzeug- und Elementfenster | erledigt |
-| FL2 | Flügelrahmen, Pfosten, Kämpfer in 3D und Schnitt | offen |
+| FL2 | Flügelrahmen, Pfosten, Kämpfer in 3D und Schnitt | erledigt |
 | FL3 | Flügel im Grundriss, Öffnungsdreiecke in der Ansicht | offen |
 | FL4 | IFC: PartitioningType, Paneel-Angaben, Flügelkörper | offen |
 
@@ -118,3 +118,13 @@ Nutzerwahl (01.11.2026): als nächstes Thema die Fensterflügel, in vier Schritt
 Umsetzung: `src/domain/elements/window/insert.ts` (Teilungen, Öffnungsarten, `SASH_DEFAULTS`, `divisionSashes`, `withDivision`, Passprüfung), `src/components/cad/OpeningInsertFields.tsx`.
 
 Nachweis: neuer Test in `src/application/openings/inserts.test.ts` (Vorgaben, Flügel je Teilung, Wechsel behält Werte, drei Teilungen passen in 1,20 × 1,35 m, fehlender Flügel, zu breiter Flügelrahmen, zu hohes Oberlicht, Speichern/Laden mit Kippflügel, Bereichsprüfung). 1455 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Fensterelement im Startprojekt, Teilung 2-flüglig → Flügelrahmen, Pfosten, „Flügel links Dreh links“, „Flügel rechts Dreh-Kipp rechts“; linker Flügel auf Kipp → Anschlag gesperrt; Teilung Oberlicht → Kämpfer und Oberlichthöhe, ein Flügel, kein Fehler.
+
+### FL2 – Flügelkörper in 3D und Schnitt
+
+- Innerhalb des Blendrahmens entstehen je nach Teilung (`insert-geometry.ts`, Teile `mullion` und `sash`): **1-flüglig** – ein Flügelrahmen (Flügelrahmenbreite, vier Hölzer) mit eigener Scheibe; **2-flüglig** – Pfosten in der Mitte (Pfostenbreite), links und rechts je ein Flügel; **Oberlicht** – oben die feste Scheibe mit lichter Oberlichthöhe, darunter der Kämpfer (Kämpferbreite), darunter der Flügel. Flügel und Pfosten/Kämpfer haben die Rahmentiefe, Scheiben 2,4 cm in deren Mitte. Festverglasung unverändert.
+- 3D, Schnitt und IFC nutzen dieselben Teile: Flügel und Pfosten weiß, Scheiben durchscheinend; im Schnitt Flügelhölzer und Kämpfer als Rahmenumrisse, Scheiben als Glasumrisse.
+- Grundriss vorgezogen: alle Scheiben und die senkrechten Hölzer (Blendrahmen, Pfosten, Flügel) als geschnittene Profile – sonst zeigte ein 2-flügliges Fenster nur eine Scheibe. Öffnungssymbole folgen in FL3.
+
+Grenzen: Flügel liegen bündig in der Rahmentiefe, ohne Falz, Überschlag oder Versatz zum Blendrahmen; Öffnungsart und Anschlag sind noch nirgends sichtbar (FL3); Flügel immer geschlossen.
+
+Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (Teilezahl 2-flüglig und Oberlicht, Pfostenlage, Scheibenbreite 0,37 m, Kämpfer- und Oberlichthöhe, Grundriss mit sieben Hölzern und zwei Scheiben, Schnitt durch das Oberlichtfenster mit sieben Rahmen- und zwei Glasumrissen); Grundrisstest auf mehrere Scheiben umgestellt. 1456 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster mit Element „1-flüglig mit Oberlicht“ – 3D zeigt Oberlicht, Kämpfer, Flügelrahmen und Scheiben; Schnitt A-A zeigt Kopfrahmen, Oberlichtglas, Kämpfer mit Flügelholz, Flügelglas und Fensterbänke. Bildschirmfotos an den Nutzer.

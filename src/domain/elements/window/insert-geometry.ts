@@ -2,6 +2,7 @@ import type { BimWindow, Wall } from "../../project/schema.ts";
 import type { Door } from "../door/model.ts";
 import { doorOpening } from "../door/model.ts";
 import { wallLength } from "../../project/schema.ts";
+import { SASH_DEFAULTS } from "./insert.ts";
 
 // Parts of window and door elements as wall-local boxes (docs/FENSTER_TUEREN.md, FT2–FT4):
 // the one source for 3D, section, plan symbol and IFC.
@@ -11,8 +12,11 @@ export const GLASS_THICKNESS = 0.024;
 /** Thickness of the window boards inside and outside. */
 export const SILL_THICKNESS = { inside: 0.025, outside: 0.03 } as const;
 
-/** Parts of an element: jambs and rails of the frame, glass, window boards, door leaf. */
-export type InsertPart = "jamb" | "rail" | "glass" | "sill" | "leaf";
+/**
+ * Parts of an element: jambs and rails of the frame, glass, window boards, door leaf; mullion
+ * or transom between sashes and the sash frames (FL2).
+ */
+export type InsertPart = "jamb" | "rail" | "glass" | "sill" | "leaf" | "mullion" | "sash";
 /** Wall-local box: x along the wall, y across (left positive), z from the wall base. */
 export type InsertBox = {
   part: InsertPart;
@@ -55,12 +59,48 @@ export function windowInsertBoxes(window: BimWindow, wall: Wall): InsertBox[] {
     { part: "rail", x: [l + w, r - w], y: frame, z: [t - w, t] },
   ];
   const mid = from + d / 2;
-  boxes.push({
-    part: "glass",
-    x: [l + w, r - w],
-    y: across(mid - GLASS_THICKNESS / 2, mid + GLASS_THICKNESS / 2),
-    z: [b + w, t - w],
-  });
+  const pane = across(mid - GLASS_THICKNESS / 2, mid + GLASS_THICKNESS / 2);
+  // Inside the frame: a fixed light, or sashes with mullion or transom (FL2). Sashes sit in the
+  // frame depth with their own frame ring; each carries its pane.
+  const x0 = l + w,
+    x1 = r - w,
+    z0 = b + w,
+    z1 = t - w;
+  const sashes: { x: [number, number]; z: [number, number] }[] = [];
+  if (insert.division === "fixed") boxes.push({ part: "glass", x: [x0, x1], y: pane, z: [z0, z1] });
+  else {
+    const bar = insert.mullionWidth ?? SASH_DEFAULTS.mullionWidth;
+    if (insert.division === "double") {
+      const centre = (x0 + x1) / 2;
+      boxes.push({
+        part: "mullion",
+        x: [centre - bar / 2, centre + bar / 2],
+        y: frame,
+        z: [z0, z1],
+      });
+      sashes.push(
+        { x: [x0, centre - bar / 2], z: [z0, z1] },
+        { x: [centre + bar / 2, x1], z: [z0, z1] },
+      );
+    } else if (insert.division === "transom") {
+      const top = z1 - (insert.transomHeight ?? SASH_DEFAULTS.transomHeight);
+      boxes.push({ part: "mullion", x: [x0, x1], y: frame, z: [top - bar, top] });
+      boxes.push({ part: "glass", x: [x0, x1], y: pane, z: [top, z1] });
+      sashes.push({ x: [x0, x1], z: [z0, top - bar] });
+    } else sashes.push({ x: [x0, x1], z: [z0, z1] });
+    const s = insert.sashWidth ?? SASH_DEFAULTS.sashWidth;
+    for (const {
+      x: [sx0, sx1],
+      z: [sz0, sz1],
+    } of sashes)
+      boxes.push(
+        { part: "sash", x: [sx0, sx0 + s], y: frame, z: [sz0, sz1] },
+        { part: "sash", x: [sx1 - s, sx1], y: frame, z: [sz0, sz1] },
+        { part: "sash", x: [sx0 + s, sx1 - s], y: frame, z: [sz0, sz0 + s] },
+        { part: "sash", x: [sx0 + s, sx1 - s], y: frame, z: [sz1 - s, sz1] },
+        { part: "glass", x: [sx0 + s, sx1 - s], y: pane, z: [sz0 + s, sz1 - s] },
+      );
+  }
   // Window boards: from the frame to the wall face plus the projection, on the opening floor.
   if (insert.sillOutside)
     boxes.push({
