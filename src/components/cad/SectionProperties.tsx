@@ -5,6 +5,7 @@ import {
   SECTION_SYMBOL_SIZE,
   type Section,
 } from "@/domain/views/sections";
+import { withSectionLength } from "@/application/sections/actions";
 import { Button } from "@/components/ui/button";
 import { SectionSizeField } from "./SectionSizeField";
 
@@ -27,6 +28,15 @@ export function SectionProperties({
 }) {
   const [name, setName] = useState(section.name);
   const [mark, setMark] = useState(section.mark);
+  const length = sectionFrame(section).length;
+  const [lengthDraft, setLengthDraft] = useState<string | null>(null);
+  const commitLength = () => {
+    if (lengthDraft === null) return;
+    const parsed = Number(lengthDraft.replace(",", "."));
+    setLengthDraft(null);
+    if (Number.isFinite(parsed) && parsed > 0.001 && Math.abs(parsed - length) > 1e-6)
+      onChange(withSectionLength(section, parsed));
+  };
   const repeated = repeatedSectionMarks(
     sections.map((s) => (s.id === section.id ? { ...s, mark: mark.trim() } : s)),
   ).has(mark.trim());
@@ -75,8 +85,20 @@ export function SectionProperties({
         onChange={(symbolSize) => onChange({ symbolSize })}
         denominator={denominator}
       />
+      <label>
+        Länge (m, vom Anfang aus)
+        <input
+          inputMode="decimal"
+          value={lengthDraft ?? length.toFixed(2).replace(".", ",")}
+          onChange={(event) => setLengthDraft(event.target.value)}
+          onBlur={commitLength}
+          onKeyDown={(event) => event.key === "Enter" && commitLength()}
+          className={field}
+        />
+      </label>
       <p className="text-muted-foreground">
-        Länge {sectionFrame(section).length.toFixed(2)} m · Blick nach{" "}
+        Im Grundriss: Klick wählt die Linie, Griffe an den Enden verlängern oder kürzen (Shift:
+        Richtung bleibt), der mittlere Griff verschiebt. Blick nach{" "}
         {section.look === "left" ? "links" : "rechts"} (von Anfang zu Ende gesehen)
       </p>
       <div className="flex flex-wrap gap-2">

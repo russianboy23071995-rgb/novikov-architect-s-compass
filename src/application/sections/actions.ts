@@ -65,3 +65,70 @@ export function removeSection(project: Project, sectionId: string): Project {
     sections: sections.filter((s) => s.id !== sectionId),
   });
 }
+
+/** Grips of a selected section line in plan (docs/SCHNITT.md, SC5). */
+export type SectionGrip = "start" | "end" | "move";
+type Line = Pick<Section, "start" | "end">;
+type Point = Section["start"];
+
+/** Where a grip sits on the line. */
+export function sectionGripPoint(section: Line, grip: SectionGrip): Point {
+  if (grip !== "move") return section[grip];
+  return {
+    x: (section.start.x + section.end.x) / 2,
+    y: (section.start.y + section.end.y) / 2,
+  };
+}
+
+/**
+ * The line after dragging a grip to `to`: an end goes there (longer, shorter, turned), the
+ * middle grip moves the whole line. `keepDirection` (Shift) keeps the direction, so an end only
+ * lengthens or shortens the line. Null when the line would shrink to a point or flip over.
+ */
+export function dragSectionGrip(
+  section: Line,
+  grip: SectionGrip,
+  to: Point,
+  keepDirection = false,
+): Line | null {
+  if (grip === "move") {
+    const from = sectionGripPoint(section, "move");
+    const dx = to.x - from.x,
+      dy = to.y - from.y;
+    return {
+      start: { x: section.start.x + dx, y: section.start.y + dy },
+      end: { x: section.end.x + dx, y: section.end.y + dy },
+    };
+  }
+  const fixed = grip === "start" ? section.end : section.start;
+  let point = to;
+  if (keepDirection) {
+    const moving = section[grip];
+    const length = Math.hypot(moving.x - fixed.x, moving.y - fixed.y);
+    const ux = (moving.x - fixed.x) / length,
+      uy = (moving.y - fixed.y) / length;
+    const t = (to.x - fixed.x) * ux + (to.y - fixed.y) * uy;
+    if (t < 1e-3) return null;
+    point = { x: fixed.x + ux * t, y: fixed.y + uy * t };
+  }
+  if (Math.hypot(point.x - fixed.x, point.y - fixed.y) < 1e-3) return null;
+  return grip === "start"
+    ? { start: point, end: section.end }
+    : { start: section.start, end: point };
+}
+
+/** The line with a new length, measured from its start in the same direction. */
+export function withSectionLength(section: Line, length: number): Line {
+  if (!(length > 1e-3) || !Number.isFinite(length))
+    throw new Error("Die Schnittlinie braucht eine Länge größer als 0.");
+  const dx = section.end.x - section.start.x,
+    dy = section.end.y - section.start.y;
+  const current = Math.hypot(dx, dy);
+  return {
+    start: section.start,
+    end: {
+      x: section.start.x + (dx / current) * length,
+      y: section.start.y + (dy / current) * length,
+    },
+  };
+}

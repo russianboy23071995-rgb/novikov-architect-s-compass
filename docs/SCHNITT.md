@@ -41,7 +41,7 @@ Browser-Abnahme (01.11.2026, Port 8094): Start mit einem Tab „Grundriss Erdges
 - Elementfenster (Doppelklick auf die Schnittlinie oder auf den Eintrag im Navigator): Name, Kennung (eine doppelte Kennung wird gemeldet, nicht verhindert), Länge und Blickseite, „Blickrichtung umkehren“, „Als Tab öffnen“, „Schnitt löschen“. Jede Änderung ist ein Rückgängig-Schritt.
 - Navigator: Ordner „Schnitte“ listet „A · Schnitt A-A“. Klick öffnet den Schnitt als Tab, Doppelklick sein Fenster.
 - Schnitt-Tab: trägt den Namen des Schnitts und zeigt seit SC3 die Schnittzeichnung. Ein gelöschter (oder rückgängig gemachter) Schnitt verliert seinen Tab. Werkzeugwahl, Ansichtswechsel und Geschosswahl kehren zum Modell zurück.
-- Nicht dabei: Auswahl, Verschieben und Punktbearbeiten der Schnittlinie im Grundriss; IFC (Schnitte sind Zeichnungsableitungen, keine Bauteile).
+- Nicht dabei: Auswahl, Verschieben und Punktbearbeiten der Schnittlinie im Grundriss (seit SC5 möglich); IFC (Schnitte sind Zeichnungsableitungen, keine Bauteile).
 
 Umsetzung: `src/domain/views/sections.ts` (Schema, Kennungen, Blickseite), `src/application/sections/actions.ts` (anlegen, ändern, löschen, Vorgaben), `src/application/views/canvas-tabs.ts` (Schnitt-Tabs), `src/components/cad/SectionPlanGraphic.tsx`, `SectionFields.tsx`, `SectionProperties.tsx`, `BimPlan.tsx` (Darstellung, Vorschau, Doppelklick), `CadWorkspace.tsx` (Klickfolge, Tabs, Fenster), `ProjectNavigator.tsx`, `ToolRail.tsx`.
 
@@ -78,3 +78,18 @@ Umsetzung: `src/domain/views/sections.ts` (Symbolgröße, Umrechnung), `src/appl
 Nachweis: neuer Test in `src/application/sections/actions.test.ts` (Vorgabe, Höhe bei 1:100 und 1:50, Umrechnung Papier ↔ Modell, Laden ohne und mit Größe, Ablehnung von 0) und in `section-drawing.test.ts` (Linie beginnt in Wand und Decke, darüber Wand im Obergeschoss: alle drei geschlossen mit den erwarteten Flächen). 1434 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Die Laufzeit am Schulmodell wurde nicht neu gemessen; zusätzlich gesammelt werden nur die Schnittkanten außerhalb der Linienlänge, die danach weggeschnitten werden.
 
 Browser-Abnahme (01.11.2026, Port 8094): Im Fenster des Nutzers war ein Schnitt mit Linienbeginn in der Wand zu sehen; Decke und Obergeschosswand erschienen nur als offene Linien (vor der Korrektur, im DOM nachgewiesen). Nach der Korrektur im Startprojekt: Schnitt mit Beginn in der Wand, Wandschnitt gefüllt. Symbol 5 mm Papier bei 1:100 zoomt mit dem Modell (Kennung im Verhältnis zur Wand gleich bei 220 % und 121 %); im Schnitt-Fenster 2,5 eingegeben → Symbol halb so groß; Einheit auf Modellmaß → 0,25 m, Größe unverändert.
+
+## SC5 – Schnittlinie im Grundriss bearbeiten
+
+Nutzervorgabe (01.11.2026): Die gezeichnete Schnittlinie muss anklickbar bleiben und sich im Grundriss bewegen, verlängern und kürzen lassen. Fenster- und Türkörper im Schnitt werden ausdrücklich nicht erfunden: Solange es nur Öffnungen gibt, zeigt der Schnitt die Öffnung.
+
+- **Auswählen:** Mit dem Pfeil-Werkzeug wählt ein Klick auf die Linie den Schnitt aus, in jedem Geschoss. Er wird blau hervorgehoben, ebenso der Eintrag im Navigator. Ein Klick ins Leere, Esc, ein Werkzeugwechsel, Undo oder die Auswahl eines Bauteils heben die Auswahl auf. Entf löscht den gewählten Schnitt (ein Undo-Schritt). Ein Doppelklick öffnet weiterhin das Fenster und wählt den Schnitt dabei aus.
+- **Griffe:** Anfang und Ende verlängern, kürzen oder drehen die Linie; der mittlere Griff verschiebt sie als Ganzes. Gefangen wird wie beim Zeichnen (Punkte, Wände, Raster). Mit Shift bleibt beim Ziehen eines Endes die Richtung erhalten, es ändert sich nur die Länge; die Linie schrumpft nie auf einen Punkt und kippt nicht um. Während des Ziehens folgt die Vorschau (Linie, Pfeile, Kennung); beim Loslassen entsteht ein Undo-Schritt, die Schnittzeichnung im Tab folgt.
+- **Fenster:** „Länge (m, vom Anfang aus)“ setzt die Länge als Zahl; das Ende wandert in gleicher Richtung.
+- Schema unverändert (41); geändert werden nur `start` und `end` des Schnitts.
+
+Umsetzung: `src/application/sections/actions.ts` (`sectionGripPoint`, `dragSectionGrip`, `withSectionLength`), `src/components/cad/BimPlan.tsx` (Auswahlklick, Griffe, Ziehen mit Fang und Vorschau), `CadWorkspace.tsx` (Auswahlzustand, Entf, Navigator, Übernahme), `SectionProperties.tsx` (Längenfeld).
+
+Nachweis: neuer Test in `src/application/sections/actions.test.ts` (Ende verlängern, Anfang drehen, verschieben, Shift nur Länge an beiden Enden, kein Punkt und kein Umkippen, Länge aus dem Fenster, Kennung bleibt). 1435 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Schnitt gezeichnet, mit dem Pfeil-Werkzeug angeklickt – blau mit drei Griffen, Navigatoreintrag markiert. Ende mit der Maus gezogen (Linie gedreht und verlängert), mittleren Griff gezogen (ganze Linie verschoben, am Raster gefangen); Strg+Z stellt jeweils den vorigen Stand her. Entf löscht den gewählten Schnitt, Strg+Z holt ihn zurück. Im Fenster Länge 3 eingegeben – die Linie verlängert sich vom Anfang aus. Shift beim Ziehen nur im Test geprüft, nicht im Browser.

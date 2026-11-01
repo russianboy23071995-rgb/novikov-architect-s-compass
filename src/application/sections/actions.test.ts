@@ -3,10 +3,13 @@ import assert from "node:assert/strict";
 import { createStandardProject } from "../projects/create.ts";
 import {
   addSection,
+  dragSectionGrip,
   nextSectionLabel,
   removeSection,
   SECTION_TOOL_DEFAULTS,
+  sectionGripPoint,
   updateSection,
+  withSectionLength,
 } from "./actions.ts";
 import {
   nextSectionMark,
@@ -23,7 +26,7 @@ import { readProjectFile } from "../../lib/bim/history.ts";
 import { loadProjectData } from "../../interop/project-file/load.ts";
 import { PROJECT_SCHEMA_VERSION } from "../../domain/project/format.ts";
 
-// docs/SCHNITT.md, SC2 and SC4.
+// docs/SCHNITT.md, SC2, SC4 and SC5.
 const line = { start: { x: 0, y: 0 }, end: { x: 4, y: 0 }, look: "left" as const };
 const marked = (mark: string) => ({ id: mark, name: mark, mark, ...line }) satisfies Section;
 
@@ -124,4 +127,45 @@ test("symbol size: letter height in paper mm or model m, fixed to the model, not
     value: 3.5,
   });
   assert.throws(() => updateSection(plain, "s1", { symbolSize: { unit: "paper", value: 0 } }));
+});
+
+test("grips: ends lengthen, shorten or turn the line, the middle moves it, Shift keeps the direction", () => {
+  // docs/SCHNITT.md, SC5.
+  const s = { start: { x: 0, y: 0 }, end: { x: 4, y: 0 } };
+  assert.deepEqual(sectionGripPoint(s, "move"), { x: 2, y: 0 });
+  assert.deepEqual(dragSectionGrip(s, "end", { x: 6, y: 0 }), {
+    start: { x: 0, y: 0 },
+    end: { x: 6, y: 0 },
+  });
+  assert.deepEqual(dragSectionGrip(s, "start", { x: 1, y: 2 }), {
+    start: { x: 1, y: 2 },
+    end: { x: 4, y: 0 },
+  });
+  assert.deepEqual(dragSectionGrip(s, "move", { x: 3, y: 5 }), {
+    start: { x: 1, y: 5 },
+    end: { x: 5, y: 5 },
+  });
+  // Shift: only the length changes, the pointer is projected onto the line.
+  assert.deepEqual(dragSectionGrip(s, "end", { x: 2.5, y: 3 }, true), {
+    start: { x: 0, y: 0 },
+    end: { x: 2.5, y: 0 },
+  });
+  assert.deepEqual(dragSectionGrip(s, "start", { x: -1, y: -2 }, true), {
+    start: { x: -1, y: 0 },
+    end: { x: 4, y: 0 },
+  });
+  // Never a point, never flipped over with Shift.
+  assert.equal(dragSectionGrip(s, "end", { x: 0, y: 0 }), null);
+  assert.equal(dragSectionGrip(s, "end", { x: -1, y: 0 }, true), null);
+  // Length typed in the window: from the start, same direction.
+  assert.deepEqual(withSectionLength({ start: { x: 1, y: 1 }, end: { x: 1, y: 3 } }, 5), {
+    start: { x: 1, y: 1 },
+    end: { x: 1, y: 6 },
+  });
+  assert.throws(() => withSectionLength(s, 0));
+  // The model keeps the section, its id, name and mark; the drawing follows the new points.
+  const p = addSection(createStandardProject("p", "eg", "og"), { id: "s1", ...line });
+  const moved = updateSection(p, "s1", dragSectionGrip(p.sections![0]!, "move", { x: 2, y: 3 })!);
+  assert.deepEqual(moved.sections![0]!.start, { x: 0, y: 3 });
+  assert.equal(moved.sections![0]!.mark, "A");
 });

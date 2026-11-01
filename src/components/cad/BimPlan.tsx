@@ -21,6 +21,11 @@ import { defaultCutFill, type CutFill } from "./cut-fill";
 import { snapPointLabel } from "@/application/snapping/point-label";
 import { capturedVertex } from "@/application/direct-edit/transforms";
 import {
+  dragSectionGrip,
+  sectionGripPoint,
+  type SectionGrip,
+} from "@/application/sections/actions";
+import {
   capturedStart,
   closesAtStart,
   MIN_CLOSING_POINTS,
@@ -158,6 +163,12 @@ export type BimPlanProps = {
   sections?: readonly Section[] | undefined;
   /** Double click on a section line opens its window. */
   onSectionSettings?: ((id: string) => void) | undefined;
+  /** Selected section line (SC5): highlighted with grips at both ends and in the middle. */
+  selectedSectionId?: string | null | undefined;
+  /** Click on a section line selects it; null when the click selects nothing. */
+  onSectionSelect?: ((id: string | null) => void) | undefined;
+  /** A grip was dragged: the new line of the section (one undo step). */
+  onSectionLine?: ((id: string, line: { start: Point; end: Point }) => void) | undefined;
   /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
   sectionDraft?:
     { start: Point; end: Point | null; mark: string; symbolSize: SectionSymbolSize } | undefined;
@@ -242,6 +253,9 @@ export function BimPlan({
   stairDraft,
   sections,
   onSectionSettings,
+  selectedSectionId,
+  onSectionSelect,
+  onSectionLine,
   sectionDraft,
   textPreview,
   closeAtStart = false,
@@ -305,6 +319,18 @@ export function BimPlan({
     index: number;
   } | null>(null);
   const gripClick = useRef(false);
+  // Dragging a grip of the selected section line (SC5); the preview replaces the stored line.
+  const sectionDrag = useRef<{
+    id: string;
+    grip: SectionGrip;
+    pointerId: number;
+    line: { start: Point; end: Point };
+  } | null>(null);
+  const [sectionPreview, setSectionPreview] = useState<{
+    id: string;
+    start: Point;
+    end: Point;
+  } | null>(null);
   const matchingGrip = useCallback(() => {
     const drag = gripDrag.current;
     return (
@@ -917,6 +943,24 @@ export function BimPlan({
         editDown.current = editSession ?? null;
       }}
       onPointerUp={(event) => {
+        const dragged = sectionDrag.current;
+        if (dragged?.pointerId === event.pointerId) {
+          sectionDrag.current = null;
+          gripClick.current = true;
+          if (event.currentTarget.hasPointerCapture(event.pointerId))
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          const line = sectionPreview?.id === dragged.id ? sectionPreview : null;
+          setSectionPreview(null);
+          if (
+            line &&
+            (line.start.x !== dragged.line.start.x ||
+              line.start.y !== dragged.line.start.y ||
+              line.end.x !== dragged.line.end.x ||
+              line.end.y !== dragged.line.end.y)
+          )
+            onSectionLine?.(dragged.id, { start: line.start, end: line.end });
+          return;
+        }
         const drag = gripDrag.current;
         if (drag?.gesture.pointerId === event.pointerId) {
           const result = draggedPoint(event);
@@ -942,6 +986,10 @@ export function BimPlan({
       }}
       onLostPointerCapture={() => {
         marquee.cancel();
+        if (sectionDrag.current) {
+          sectionDrag.current = null;
+          setSectionPreview(null);
+        }
         navigation.current = null;
         if (gripDrag.current) {
           gripDrag.current = null;
@@ -950,6 +998,10 @@ export function BimPlan({
       }}
       onPointerCancel={() => {
         marquee.cancel();
+        if (sectionDrag.current) {
+          sectionDrag.current = null;
+          setSectionPreview(null);
+        }
         navigation.current = null;
         editDown.current = null;
         if (gripDrag.current) {
@@ -1017,6 +1069,16 @@ export function BimPlan({
           );
           return;
         }
+        const sectionGrip = sectionDrag.current;
+        if (sectionGrip?.pointerId === event.pointerId) {
+          const raw = rawPoint(event);
+          if (!raw) return;
+          // Snaps like drawing; Shift keeps the direction of the line, so ends only change length.
+          const to = resolvePointer(raw, false).point;
+          const line = dragSectionGrip(sectionGrip.line, sectionGrip.grip, to, event.shiftKey);
+          if (line) setSectionPreview({ id: sectionGrip.id, ...line });
+          return;
+        }
         if (pan || selecting) return overlap.clear();
         overlap.move(gripDrag.current ? null : rawPoint(event));
         if (gripDrag.current && gripDrag.current.gesture.pointerId !== event.pointerId) return;
@@ -1073,7 +1135,16 @@ export function BimPlan({
             : null;
           const point = start ?? (drawingTarget !== undefined ? drawingTarget : snap?.point);
           if (point) onPoint(point, start || drawingTarget !== undefined ? null : snap?.candidate);
-        } else if (event.target === event.currentTarget) onSelect(null);
+        } else if ((event.target as Element).closest("[data-section-id]") && onSectionSelect) {
+          // A section line belongs to no storey: it has its own selection (SC5).
+          event.currentTarget.focus();
+          onSectionSelect(
+            (event.target as Element).closest("[data-section-id]")!.getAttribute("data-section-id"),
+          );
+        } else if (event.target === event.currentTarget) {
+          onSelect(null);
+          onSectionSelect?.(null);
+        }
       }}
       onDoubleClick={(event) => {
         if (selecting || pan || navigationClick.current) return;
@@ -1442,17 +1513,72 @@ export function BimPlan({
               </g>
             );
           })()}
-        {sections?.map((section) => (
-          <g key={section.id} aria-label={`Schnitt ${section.mark}-${section.mark}`}>
-            <SectionPlanGraphic
-              section={section}
-              pixelsPerMetre={camera.pixelsPerMetre}
-              height={sectionSymbolHeight(section.symbolSize, scaleContext.denominator)}
-              color="var(--foreground)"
-              pick={!!onSectionSettings}
-            />
-          </g>
-        ))}
+        {sections?.map((stored) => {
+          const section =
+            sectionPreview?.id === stored.id ? { ...stored, ...sectionPreview } : stored;
+          const chosen = selectedSectionId === section.id && !drawing && !editSession;
+          return (
+            <g key={section.id} aria-label={`Schnitt ${section.mark}-${section.mark}`}>
+              <SectionPlanGraphic
+                section={section}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                height={sectionSymbolHeight(section.symbolSize, scaleContext.denominator)}
+                color={chosen ? "#0284c7" : "var(--foreground)"}
+                pick={!!onSectionSettings}
+              />
+              {chosen &&
+                (["start", "end", "move"] as const).map((grip) => {
+                  const point = sectionGripPoint(section, grip);
+                  return (
+                    <circle
+                      key={grip}
+                      data-section-grip={grip}
+                      cx={point.x}
+                      cy={-point.y}
+                      r={5 / camera.pixelsPerMetre}
+                      fill="white"
+                      stroke="#0284c7"
+                      strokeWidth={2}
+                      vectorEffect="non-scaling-stroke"
+                      role="button"
+                      aria-label={
+                        grip === "move"
+                          ? `Schnitt ${section.mark}-${section.mark} verschieben`
+                          : `Schnitt ${section.mark}-${section.mark} ${grip === "start" ? "Anfang" : "Ende"} ziehen`
+                      }
+                      className={grip === "move" ? "cursor-move" : "cursor-pointer"}
+                      onPointerDown={(event) => {
+                        if (event.button !== 0 || pan || !interactive || !onSectionLine) return;
+                        if (!svg.current) return;
+                        event.preventDefault();
+                        event.stopPropagation();
+                        svg.current.focus();
+                        gripClick.current = false;
+                        navigationClick.current = false;
+                        sectionDrag.current = {
+                          id: stored.id,
+                          grip,
+                          pointerId: event.pointerId,
+                          line: { start: stored.start, end: stored.end },
+                        };
+                        svg.current.setPointerCapture(event.pointerId);
+                      }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      <title>
+                        {grip === "move"
+                          ? "Ziehen verschiebt die Schnittlinie"
+                          : "Ziehen verlängert, kürzt oder dreht die Linie · Shift: nur Länge"}
+                      </title>
+                    </circle>
+                  );
+                })}
+            </g>
+          );
+        })}
         {drawing &&
           sectionDraft &&
           (() => {
