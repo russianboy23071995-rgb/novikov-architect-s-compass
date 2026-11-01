@@ -16,6 +16,7 @@ import type { Project } from "../../domain/project/schema.ts";
 import { slabBody } from "./slab-solid.ts";
 import { roofBody } from "./roof-solid.ts";
 import { columnBody } from "./column-solid.ts";
+import { openingInsertBodies } from "./opening-insert-solid.ts";
 
 export type Vec3 = [number, number, number];
 /** wallId names the element; slab faces carry `slab` (docs/SLAB_ELEMENT.md, Teil B),
@@ -30,6 +31,10 @@ export type Face = {
   column?: true;
   /** Stair face (docs/TREPPE.md). */
   stair?: true;
+  /** Face of a window or door element in an opening (docs/FENSTER_TUEREN.md, FT2). */
+  opening?: "window" | "door";
+  /** Glass pane of a window element. */
+  glass?: true;
 };
 export type Solid = { faces: Face[]; volume: number; min: Vec3; max: Vec3 };
 
@@ -228,6 +233,8 @@ export function buildPreviewSolid(project: ModelGeometry, elevation: number): So
     const body = columnBody(column, elevation, height);
     if (body) bodies.push(body);
   }
+  // Window and door elements in their openings (docs/FENSTER_TUEREN.md, FT2).
+  if ("walls" in storey) bodies.push(...openingInsertBodies(storey, elevation));
   if (bodies.length) {
     if (!solid.faces.length) {
       solid.min = [Infinity, Infinity, Infinity];

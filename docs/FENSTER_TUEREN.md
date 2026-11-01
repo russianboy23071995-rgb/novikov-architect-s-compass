@@ -5,7 +5,7 @@ Nutzervorgabe (01.11.2026): Fenster und Tür bestehen aus einer Öffnung und ein
 | Schritt | Inhalt | Stand |
 | --- | --- | --- |
 | FT1 | Datenmodell (Schema 42), Werkzeugvorgaben, Elementfenster | erledigt |
-| FT2 | Rahmen, Glas, Türblatt als Körper in 3D und Schnitt | offen |
+| FT2 | Rahmen, Glas, Türblatt als Körper in 3D und Schnitt | erledigt |
 | FT3 | Grundrisssymbol nach Element | offen |
 | FT4 | IFC mit Geometrie und Laibungsangaben, Prüfung in Archicad | offen |
 
@@ -24,3 +24,19 @@ Umsetzung: `src/domain/elements/window/insert.ts` (Schemas, Vorgaben, Passprüfu
 Nachweis: `src/application/openings/inserts.test.ts` (5 Tests: Vorgaben; Passprüfung mit Begründungen und Bereichsprüfung; einsetzen, ändern, entfernen, Ablehnung; Migration 41 → 42 mit Ablehnung untergeschobener Elemente; Werkzeuge setzen Element, „nur Öffnung“, Ablehnung in zu dünner Wand); Versionsprüfungen der älteren Migrationstests auf 42 angehoben. 1443 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
 
 Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Doppelklick auf das Fenster → Rubrik „Fensterelement“, Schalter aus (reine Öffnung); eingeschaltet → Vorgabewerte. Rahmenbreite 70 → „Außerhalb des zulässigen Bereichs …“; 9 → übernommen; Rahmentiefe 40 in 36-cm-Wand → „Die Rahmentiefe (40 cm) ist größer als die Wanddicke.“ Strg+Z stellt 7 cm wieder her. Werkzeugfenster Fenster → Rubrik „Fensterelement“ eingeschaltet; auf „nur Öffnung“ gestellt, Fenster platziert → dessen Rubrik zeigt „aus“. Tür im Browser nicht geprüft (durch Tests abgedeckt).
+
+## FT2 – Körper in 3D und Schnitt
+
+Aus den FT1-Werten abgeleitet (`src/rendering/viewport/opening-insert-solid.ts`), nicht gespeichert; reine Öffnungen bleiben leer:
+
+- **Fenster:** Blendrahmen auf allen vier Seiten (Rahmenbreite × Rahmentiefe), Lage in der Wand nach Einstellung (Mitte, Innen/Außen mit Abstand, Außenseite links/rechts der Wandrichtung); Glasscheibe 2,4 cm in der Mitte der Rahmentiefe; Fensterbank außen 3 cm und innen 2,5 cm dick, vom Rahmen bis über die Wandseite (Überstand), auf der Brüstung der Öffnung.
+- **Tür:** Zarge an beiden Leibungen und oben (keine Schwelle), bündig mit der Wandseite, zu der die Tür aufgeht; Tiefe nach Einstellung oder Wanddicke; Türblatt geschlossen, Blattdicke, ebenfalls bündig auf dieser Seite.
+- **3D:** Die Körper gehören zum Gebäudekörper des Geschosses (`buildPreviewSolid`), Flächen tragen die Fenster- bzw. Tür-ID und `opening`, die Scheibe `glass`. Farben: Rahmen weiß, Glas hellblau (deckend, noch keine Transparenz), Türblatt und Zarge hell holzfarben. Ein Klick auf Rahmen oder Glas wählt das Fenster bzw. die Tür (`pickSolidElement`). Wandfüße im Grundriss ignorieren die Elementflächen.
+- **Schnitt:** Elementflächen werden wie Bauteile geschnitten und dahinter angesehen, aber getrennt verkettet (Rahmen und Glas eines Fensters je für sich). Darstellung: Bauteile weiter in der Schnittfarbe mit kräftiger Kontur (1,75 px), Rahmen und Fensterbänke als Umriss mit mittlerer Linie (1,1 px) über Hintergrund, Glas als dünner Umriss (0,6 px) – die Scheibe erscheint dadurch als schmale Doppellinie.
+- 14-Modell-Prüfsumme unverändert: Die Vergleichsmodelle haben keine Elemente.
+
+Grenzen: Glas deckend statt durchscheinend; keine Flügel, Beschläge, Anschläge oder Laibungsdämmung; die Fensterbank ist ein waagerechtes Brett ohne Gefälle und Tropfkante; Türblatt immer geschlossen; das Türblatt hat keinen Falz, es liegt bündig auf der Zarge.
+
+Nachweis: `src/rendering/viewport/opening-insert-solid.test.ts` (3 Tests: Fenster mit Rahmen, Glas in der Mitte, Fensterbänke über die Wandseiten, Tür bündig zur Aufschlagseite; Lage Außen mit Abstand und gedrehte Außenseite verschieben den Rahmen, reine Öffnungen ohne Körper; Elemente im Gebäudekörper mit größerem Volumen, Schnitt durch das Fenster mit Wand als Bauteil, Rahmen/Fensterbänke als vier Umrisse und Glas als eigener Umriss). 1446 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert.
+
+Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): Fensterelement im Elementfenster eingesetzt; 3D-Ansicht zeigt weißen Rahmen, blaue Scheibe und Fensterbank in der Öffnung. Schnitt quer durch das Fenster: Wand oben und unten in der Schnittfarbe, dazwischen Rahmen oben und unten, Glas als schmale Doppellinie, Fensterbänke innen und außen. Bildschirmfotos an den Nutzer. Tür sowie die Auswahl per Klick in 3D nur durch Tests geprüft.

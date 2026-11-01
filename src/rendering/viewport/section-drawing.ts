@@ -8,8 +8,17 @@ import type { Face, Vec3 } from "./storey-solid.ts";
 export type SectionPoint = { x: number; y: number };
 /** Building part seen beyond the cut: polygon and its visible edges, farthest first. */
 export type SectionView = { points: SectionPoint[]; edges: [SectionPoint, SectionPoint][] };
-/** Cut part of one element: closed outlines (filled) and open pieces (stroked only). */
-export type SectionCut = { id: string; loops: SectionPoint[][]; open: SectionPoint[][] };
+/**
+ * Cut part of one element: closed outlines (filled) and open pieces (stroked only). `kind`:
+ * building parts get the cut fill; frames of window and door elements and their glass are drawn
+ * as outlines only (docs/FENSTER_TUEREN.md, FT2).
+ */
+export type SectionCut = {
+  id: string;
+  kind: "part" | "frame" | "glass";
+  loops: SectionPoint[][];
+  open: SectionPoint[][];
+};
 export type SectionLevel = { storeyId: string; name: string; elevation: number };
 export type SectionDrawing = {
   cuts: SectionCut[];
@@ -90,7 +99,11 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
     return normals.some((m) => n![0] * m[0] + n![1] * m[1] + n![2] * m[2] < 1 - 1e-6);
   };
 
-  const segments = new Map<string, [Local, Local][]>();
+  // Per element and kind: frame and glass of one window are chained apart.
+  const segments = new Map<
+    string,
+    { id: string; kind: SectionCut["kind"]; list: [Local, Local][] }
+  >();
   const views: { depth: number; view: SectionView }[] = [];
   const within = (p: Tagged[]) =>
     clip(
@@ -119,9 +132,11 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
       // Whole outlines first, limited to the line afterwards, so parts the line starts or ends
       // in stay closed along the end of the line.
       for (let i = 0; i + 1 < crossings.length; i += 2) {
-        const list = segments.get(face.wallId) ?? [];
-        list.push([crossings[i]!, crossings[i + 1]!]);
-        segments.set(face.wallId, list);
+        const kind = face.glass ? "glass" : face.opening ? "frame" : "part";
+        const k = `${face.wallId}#${kind}`;
+        const entry = segments.get(k) ?? { id: face.wallId, kind, list: [] };
+        entry.list.push([crossings[i]!, crossings[i + 1]!]);
+        segments.set(k, entry);
       }
     }
     // View: faces turned to the viewer, behind the plane.
@@ -139,8 +154,8 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
   }
   views.sort((a, b) => b.depth - a.depth);
 
-  const cuts: SectionCut[] = [...segments]
-    .map(([id, list]) => chain(id, list, length, out))
+  const cuts: SectionCut[] = [...segments.values()]
+    .map(({ id, kind, list }) => ({ ...chain(id, list, length, out), kind }))
     .filter((c) => c.loops.length > 0 || c.open.length > 0);
   const names = new Map(project.storeys.map((s) => [s.id, s.name]));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId)
@@ -175,7 +190,7 @@ function chain(
   list: [Local, Local][],
   length: number,
   out: (p: Local) => SectionPoint,
-): SectionCut {
+): Omit<SectionCut, "kind"> {
   const k = (p: Local) => key([p.u, p.z]);
   const rest = list.filter(([a, b]) => k(a) !== k(b));
   const loops: SectionPoint[][] = [];
