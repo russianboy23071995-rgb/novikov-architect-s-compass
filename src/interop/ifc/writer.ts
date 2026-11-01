@@ -11,6 +11,12 @@ import { validateProject, wallLength } from "../../domain/project/schema.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import { doorDinHand, doorOpening, type Door } from "../../domain/elements/door/model.ts";
 import { slabLevels } from "../../domain/elements/slab/model.ts";
+import {
+  doorInsertBoxes,
+  windowInsertBoxes,
+  type InsertBox,
+} from "../../domain/elements/window/insert-geometry.ts";
+import type { DoorInsert, WindowInsert } from "../../domain/elements/window/insert.ts";
 import { roofBody } from "../../domain/elements/roof/body.ts";
 import { localTrimPlane } from "../../domain/elements/wall/roof-trim.ts";
 import { trimExtrusionBelowPlane } from "../../geometry/solids/plane-trim.ts";
@@ -99,6 +105,33 @@ export type IfcFillingOptions = {
   fillingTypes?: boolean;
 };
 export const FILLING_PLACEHOLDER_DEPTH = 0.07;
+
+/** NOVIKOV_BIM values of a window or door element (FT4), so a reimport keeps every setting. */
+function insertProperties(
+  insert: WindowInsert | DoorInsert,
+  wallThickness = 0,
+): [string, string][] {
+  const length = (name: string, value: number): [string, string] => [
+    name,
+    `IFCLENGTHMEASURE(${stepReal(value)})`,
+  ];
+  if ("leafThickness" in insert)
+    return [
+      length("FrameWidth", insert.frameWidth),
+      length("FrameDepth", insert.frameDepth ?? wallThickness),
+      length("LeafThickness", insert.leafThickness),
+    ];
+  return [
+    length("FrameWidth", insert.frameWidth),
+    length("FrameDepth", insert.frameDepth),
+    ["FrameLocation", `IFCLABEL(${stepString(insert.location)})`],
+    length("FrameOffset", insert.offset),
+    ["ExteriorSide", `IFCLABEL(${stepString(insert.exterior)})`],
+    ["Division", `IFCLABEL(${stepString(insert.division)})`],
+    ...(insert.sillInside ? [length("SillInsideProjection", insert.sillInside.projection)] : []),
+    ...(insert.sillOutside ? [length("SillOutsideProjection", insert.sillOutside.projection)] : []),
+  ];
+}
 
 /** IFC4 STEP export; validates and copies the snapshot before any asynchronous work.
  * Windows and doors remain semantic elements without invented frame/glass/leaf geometry.
@@ -244,6 +277,50 @@ export async function writeIfc(
             : Math.min(FILLING_PLACEHOLDER_DEPTH, wallThickness),
           height,
         );
+  /**
+   * Body of a window or door element (docs/FENSTER_TUEREN.md, FT4): one swept box per part
+   * (frame, glass, boards, leaf) in the frame of the filling's placement; `local` maps the
+   * wall-local box corners into that frame.
+   */
+  const insertShape = (
+    boxes: readonly InsertBox[],
+    local: (x: number, y: number, z: number) => [number, number, number],
+  ) => {
+    const solids = boxes.map((box) => {
+      // Rounded to a nanometre: the parts are sums of settings, not measured coordinates.
+      const nm = (v: number) => Math.round(v * 1e9) / 1e9;
+      const [ax, ay, az] = local(box.x[0], box.y[0], box.z[0]),
+        [bx, by, bz] = local(box.x[1], box.y[1], box.z[1]);
+      const [x0, x1] = [nm(Math.min(ax, bx)), nm(Math.max(ax, bx))];
+      const [y0, y1] = [nm(Math.min(ay, by)), nm(Math.max(ay, by))];
+      const [z0, z1] = [nm(Math.min(az, bz)), nm(Math.max(az, bz))];
+      const centre = add(
+        "IFCAXIS2PLACEMENT2D",
+        `${point([nm((x0 + x1) / 2), nm((y0 + y1) / 2)])},$`,
+      );
+      const profile = add(
+        "IFCRECTANGLEPROFILEDEF",
+        `.AREA.,${text(box.part)},${centre},${real(nm(x1 - x0))},${real(nm(y1 - y0))}`,
+      );
+      return add("IFCEXTRUDEDAREASOLID", `${profile},${axis(0, 0, z0)},${up},${real(nm(z1 - z0))}`);
+    });
+    const shape = add(
+      "IFCSHAPEREPRESENTATION",
+      `${context},'Body','SweptSolid',(${solids.join(",")})`,
+    );
+    return add("IFCPRODUCTDEFINITIONSHAPE", `$,$,(${shape})`);
+  };
+  /** Lining of an element on its type (IFC4 IfcWindowLiningProperties / IfcDoorLiningProperties). */
+  const lining = async (kind: "window" | "door", id: string, depth: number, thickness: number) =>
+    kind === "window"
+      ? add(
+          "IFCWINDOWLININGPROPERTIES",
+          `${await guid("window-lining", id)},$,$,$,${real(depth)},${real(thickness)},$,$,$,$,$,$,$,$,$,$`,
+        )
+      : add(
+          "IFCDOORLININGPROPERTIES",
+          `${await guid("door-lining", id)},$,$,$,${real(depth)},${real(thickness)},$,$,$,$,$,$,$,$,$,$,$`,
+        );
   const placeholder: [string, string][] =
     fillingBody === "none" ? [] : [["PlaceholderBody", "IFCBOOLEAN(.T.)"]];
   const types: string[] = [];
@@ -254,18 +331,21 @@ export async function writeIfc(
     width: number,
     height: number,
     operation: string,
+    /** Lining of an inserted element: the type is written for it even without fillingTypes. */
+    liningRef?: string,
   ) => {
-    if (!filling.fillingTypes) return;
+    if (!filling.fillingTypes && !liningRef) return;
+    const sets = liningRef ? `(${liningRef})` : "$";
     const name = label(id + " Typ");
     const type =
       kind === "window"
         ? add(
             "IFCWINDOWTYPE",
-            `${await guid("window-type", id)},$,${name},$,$,$,$,$,$,.WINDOW.,.SINGLE_PANEL.,.F.,$`,
+            `${await guid("window-type", id)},$,${name},$,$,${sets},$,$,$,.WINDOW.,.SINGLE_PANEL.,.F.,$`,
           )
         : add(
             "IFCDOORTYPE",
-            `${await guid("door-type", id)},$,${name},$,$,$,$,$,$,.DOOR.,.${operation}.,.F.,$`,
+            `${await guid("door-type", id)},$,${name},$,$,${sets},$,$,$,.DOOR.,.${operation}.,.F.,$`,
           );
     types.push(type);
     add(
@@ -373,9 +453,18 @@ export async function writeIfc(
           `${await guid("opening", window.id)},$,${label("Opening " + window.id)},$,$,${openingPlacement},${body(window.width, wall.thickness, window.height)},$,.OPENING.`,
         );
         add("IFCRELVOIDSELEMENT", `${await guid("void", window.id)},$,$,$,${wallRef},${opening}`);
+        // A window element gets its real body; a plain opening keeps the chosen variant.
+        const left = window.position * length - window.width / 2;
+        const windowShape = window.insert
+          ? insertShape(windowInsertBoxes(window, wall), (x, y, z) => [
+              x - left,
+              y,
+              z - window.sillHeight,
+            ])
+          : fillingShape(window.width, wall.thickness, window.height);
         const windowRef = add(
           "IFCWINDOW",
-          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},${fillingShape(window.width, wall.thickness, window.height)},${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
+          `${await guid("window", window.id)},$,${label(window.id)},$,$,${placement(openingPlacement)},${windowShape},${label(window.id)},${real(window.height)},${real(window.width)},.WINDOW.,.NOTDEFINED.,$`,
         );
         add("IFCRELFILLSELEMENT", `${await guid("fill", window.id)},$,$,$,${opening},${windowRef}`);
         elements.push(windowRef);
@@ -383,9 +472,18 @@ export async function writeIfc(
           ["WallId", `IFCTEXT(${text(window.wallId)})`],
           ["SillHeight", `IFCLENGTHMEASURE(${real(window.sillHeight)})`],
           ["RelativePosition", `IFCRATIOMEASURE(${real(window.position)})`],
-          ...placeholder,
+          ...(window.insert ? insertProperties(window.insert) : placeholder),
         ]);
-        await fillingType("window", windowRef, window.id, window.width, window.height, "");
+        await fillingType(
+          "window",
+          windowRef,
+          window.id,
+          window.width,
+          window.height,
+          "",
+          window.insert &&
+            (await lining("window", window.id, window.insert.frameDepth, window.insert.frameWidth)),
+        );
       }
       for (const door of (floor.doors ?? []).filter((item) => item.wallId === wall.id)) {
         const opening = doorOpening(door, wall);
@@ -411,9 +509,18 @@ export async function writeIfc(
           turned ? -1 : 1,
           0,
         );
+        // In the door frame x runs from the placement origin; a turned door mirrors x and y.
+        const doorLeft = door.position * length - door.width / 2;
+        const doorShape = door.insert
+          ? insertShape(doorInsertBoxes(door, wall), (x, y, z) => [
+              turned ? door.width - (x - doorLeft) : x - doorLeft,
+              turned ? -y : y,
+              z - opening.sillHeight,
+            ])
+          : fillingShape(door.width, wall.thickness, door.height);
         const doorRef = add(
           "IFCDOOR",
-          `${await guid("door", door.id)},$,${label(door.id)},$,$,${doorPlacement},${fillingShape(door.width, wall.thickness, door.height)},${label(door.id)},${real(door.height)},${real(door.width)},.DOOR.,.${doorOperationType(door)}.,$`,
+          `${await guid("door", door.id)},$,${label(door.id)},$,$,${doorPlacement},${doorShape},${label(door.id)},${real(door.height)},${real(door.width)},.DOOR.,.${doorOperationType(door)}.,$`,
         );
         add("IFCRELFILLSELEMENT", `${await guid("fill", door.id)},$,$,$,${openingRef},${doorRef}`);
         elements.push(doorRef);
@@ -425,7 +532,7 @@ export async function writeIfc(
           ["OpensTo", `IFCLABEL(${text(door.opensTo)})`],
           // DIN 107 is seen from the swing side; IFC's operation type from the opposite side.
           ["Handing", `IFCLABEL(${text(`DIN ${doorDinHand(door)}`)})`],
-          ...placeholder,
+          ...(door.insert ? insertProperties(door.insert, wall.thickness) : placeholder),
         ]);
         await fillingType(
           "door",
@@ -434,6 +541,13 @@ export async function writeIfc(
           door.width,
           door.height,
           doorOperationType(door),
+          door.insert &&
+            (await lining(
+              "door",
+              door.id,
+              door.insert.frameDepth ?? wall.thickness,
+              door.insert.frameWidth,
+            )),
         );
       }
     }

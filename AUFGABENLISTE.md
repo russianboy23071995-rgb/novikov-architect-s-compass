@@ -67,7 +67,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 | ID  | Aufgabe                                                            | Prio | Status                                                                                 | Bezug               |
 | --- | ------------------------------------------------------------------ | ---- | -------------------------------------------------------------------------------------- | ------------------- |
-| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | zurückgestellt: Varianten (PR501) helfen nicht; kommt mit echten Fenster-/Türbauteilen | T_IFC_ACCEPTANCE.md |
+| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | Fenster-/Türelemente mit Körper und Laibung im IFC (FT4, PR547); Archicad-Prüfung mit ifc-abnahme/FT4-Fenster-Tueren.ifc offen | T_IFC_ACCEPTANCE.md |
 | L22 | IFC-Import bzw. IFC als Referenz                                   |      | offen                                                                                  | §6 Abschnitt 7      |
 | L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | offen                                                                                  | §6 Abschnitt 7      |
 
