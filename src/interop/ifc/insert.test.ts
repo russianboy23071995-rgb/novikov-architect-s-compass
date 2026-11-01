@@ -10,7 +10,7 @@ import {
   WINDOW_INSERT_DEFAULTS,
 } from "../../domain/elements/window/insert.ts";
 import { exportIfc } from "../../lib/bim/ifc.ts";
-import { ifcGuid } from "./writer.ts";
+import { ifcGuid, stepString } from "./writer.ts";
 
 // docs/FENSTER_TUEREN.md, FT4. Example wall 0,36 m thick, made 8 m long.
 const date = new Date("2026-11-01T12:00:00Z");
@@ -102,4 +102,28 @@ test("a door element exports frame and leaf in the turned door frame with its li
   assert.match(lining!, /,\$,\$,\$,0\.36,0\.06,\$/);
   assert.equal(lining!.split(",").length, 17);
   assert.ok(ifc.includes("'LeafThickness',$,IFCLENGTHMEASURE(0.04)"));
+});
+
+test("element parts carry surface styles: glass 70 % transparent, frames white, door wooden", async () => {
+  // docs/FENSTER_TUEREN.md, G1: Archicad showed unstyled glass as opaque grey.
+  const ifc = await exportIfc(project(), date);
+  const refs = byRef(ifc);
+  const styles = rows(ifc, "IFCSURFACESTYLE");
+  // Names as STEP strings (the ü is encoded).
+  assert.deepEqual(
+    styles.map((s) => s.match(/IFCSURFACESTYLE\(('[^']+')/)![1]).sort(),
+    [stepString("Fensterrahmen"), stepString("Glas"), stepString("Tür")].sort(),
+  );
+  const glass = styles.find((s) => s.includes("'Glas'"))!;
+  const rendering = refs.get(glass.match(/\((#\d+)\)\);$/)![1]!)!;
+  assert.match(rendering, /IFCSURFACESTYLERENDERING\(#\d+,0\.7,\$,\$,\$,\$,\$,\$,\.NOTDEFINED\.\)/);
+  // Every element part is styled: 7 window parts and 4 door parts.
+  const styled = rows(ifc, "IFCSTYLEDITEM");
+  assert.equal(styled.length, 11);
+  const glassRef = glass.split("=")[0]!;
+  const glassSolids = styled.filter((s) => s.includes(`(${glassRef})`));
+  assert.equal(glassSolids.length, 1);
+  const solid = refs.get(glassSolids[0]!.match(/IFCSTYLEDITEM\((#\d+),/)![1]!)!;
+  const profile = refs.get(solid.match(/\((#\d+),/)![1]!)!;
+  assert.match(profile, /'glass'/);
 });

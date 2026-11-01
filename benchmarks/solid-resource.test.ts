@@ -43,6 +43,8 @@ function previousPack(
           ...face.vertices[index]!.map((v, k) => v - origin[k]!),
           ...tint.map((v) => v * light),
           "slab" in face && face.slab ? 1 : 0,
+          // Opacity (G1): these fixtures have no glass, so every vertex is opaque.
+          1,
         );
   }
   return new Float32Array(data);

@@ -106,6 +106,13 @@ export type IfcFillingOptions = {
 };
 export const FILLING_PLACEHOLDER_DEPTH = 0.07;
 
+/** Looks of element parts in IFC, matching the 3D view (solid-buffer.ts, G1). */
+export const INSERT_LOOKS = {
+  frame: { name: "Fensterrahmen", rgb: [0.95, 0.95, 0.95], transparency: 0 },
+  glass: { name: "Glas", rgb: [0.6, 0.76, 0.88], transparency: 0.7 },
+  door: { name: "Tür", rgb: [0.88, 0.82, 0.72], transparency: 0 },
+} as const;
+
 /** NOVIKOV_BIM values of a window or door element (FT4), so a reimport keeps every setting. */
 function insertProperties(
   insert: WindowInsert | DoorInsert,
@@ -282,7 +289,27 @@ export async function writeIfc(
    * (frame, glass, boards, leaf) in the frame of the filling's placement; `local` maps the
    * wall-local box corners into that frame.
    */
+  /**
+   * Surface styles of the element parts (G1): Archicad shows unstyled bodies as opaque grey.
+   * Same colours as the 3D view; glass 70 % transparent. One style per look, shared.
+   */
+  const styles = new Map<string, string>();
+  const surfaceStyle = (look: keyof typeof INSERT_LOOKS) => {
+    let style = styles.get(look);
+    if (!style) {
+      const { name, rgb, transparency } = INSERT_LOOKS[look];
+      const colour = add("IFCCOLOURRGB", `$,${rgb.map(real).join(",")}`);
+      const rendering = add(
+        "IFCSURFACESTYLERENDERING",
+        `${colour},${real(transparency)},$,$,$,$,$,$,.NOTDEFINED.`,
+      );
+      style = add("IFCSURFACESTYLE", `${text(name)},.BOTH.,(${rendering})`);
+      styles.set(look, style);
+    }
+    return style;
+  };
   const insertShape = (
+    kind: "window" | "door",
     boxes: readonly InsertBox[],
     local: (x: number, y: number, z: number) => [number, number, number],
   ) => {
@@ -302,7 +329,13 @@ export async function writeIfc(
         "IFCRECTANGLEPROFILEDEF",
         `.AREA.,${text(box.part)},${centre},${real(nm(x1 - x0))},${real(nm(y1 - y0))}`,
       );
-      return add("IFCEXTRUDEDAREASOLID", `${profile},${axis(0, 0, z0)},${up},${real(nm(z1 - z0))}`);
+      const solid = add(
+        "IFCEXTRUDEDAREASOLID",
+        `${profile},${axis(0, 0, z0)},${up},${real(nm(z1 - z0))}`,
+      );
+      const look = box.part === "glass" ? "glass" : kind === "door" ? "door" : "frame";
+      add("IFCSTYLEDITEM", `${solid},(${surfaceStyle(look)}),$`);
+      return solid;
     });
     const shape = add(
       "IFCSHAPEREPRESENTATION",
@@ -456,7 +489,7 @@ export async function writeIfc(
         // A window element gets its real body; a plain opening keeps the chosen variant.
         const left = window.position * length - window.width / 2;
         const windowShape = window.insert
-          ? insertShape(windowInsertBoxes(window, wall), (x, y, z) => [
+          ? insertShape("window", windowInsertBoxes(window, wall), (x, y, z) => [
               x - left,
               y,
               z - window.sillHeight,
@@ -512,7 +545,7 @@ export async function writeIfc(
         // In the door frame x runs from the placement origin; a turned door mirrors x and y.
         const doorLeft = door.position * length - door.width / 2;
         const doorShape = door.insert
-          ? insertShape(doorInsertBoxes(door, wall), (x, y, z) => [
+          ? insertShape("door", doorInsertBoxes(door, wall), (x, y, z) => [
               turned ? door.width - (x - doorLeft) : x - doorLeft,
               turned ? -y : y,
               z - opening.sillHeight,

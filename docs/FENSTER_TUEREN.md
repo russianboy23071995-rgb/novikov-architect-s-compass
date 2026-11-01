@@ -67,3 +67,16 @@ Browser-Abnahme (01.11.2026, Port 8094, Startprojekt): neue Wand gezeichnet, Tü
 Grenzen: Keine Fensterflügel, Beschläge oder Öffnungssymbole im IFC; Materialien/Farben der Teile werden nicht geschrieben; der Typ gilt je Element (kein gemeinsamer Typ für gleiche Fenster); `LiningOffset` und die Paneelversätze bleiben leer; keine unabhängige Schemaprüfung (IfcOpenShell nicht installiert, Download nur mit Zustimmung). Ob Archicad Breite/Höhe, Körper und Laibung übernimmt (L21), prüft der Nutzer.
 
 Nachweis: `src/interop/ifc/insert.test.ts` (2 Tests: Fensterkörper mit sieben Teilen und Glasmaß, reines Fenster ohne Körper, Laibung am Fenstertyp, Eigenschaften, kein Platzhalter; Türkörper im gedrehten Türkoordinatensystem mit Blatt auf der Aufschlagseite, Laibung mit 17 Attributen). 1450 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Im Browser nicht geprüft (Export ist ein Dateidownload); die Abnahmedatei kommt aus derselben Exportfunktion.
+
+## Archicad-Rückmeldung zu FT4 (01.11.2026) und G1 – Farben und durchsichtiges Glas
+
+Rückmeldung des Nutzers: Fenster- und Türelemente werden in Archicad richtig dargestellt. Die Gläser sind aber graue, undurchsichtige Flächen, und die Beschriftung zeigt weiterhin „0,00 m x 0,00 m“.
+
+**G1 (erledigt):**
+- **IFC:** Jedes Elementteil trägt einen Oberflächenstil (`IfcStyledItem` → `IfcSurfaceStyle` .BOTH. → `IfcSurfaceStyleRendering`): „Fensterrahmen“ weiß (0,95), „Glas“ hellblau (0,60/0,76/0,88) mit Transparenz 0,7, „Tür“ hell holzfarben (0,88/0,82/0,72). Ein Stil je Aussehen, gemeinsam genutzt (`INSERT_LOOKS` in `writer.ts`). Vorher hatten die Teile keinen Stil, Archicad zeigte sie deshalb grau.
+- **3D-Ansicht:** Glas ist durchscheinend (Deckkraft 0,35). Der Vertexpuffer trägt dazu ein achtes Feld (Deckkraft); gezeichnet wird in zwei Durchgängen: erst alles Undurchsichtige mit Tiefenschreiben, dann das Glas gemischt ohne Tiefenschreiben. Ausgewähltes Glas erscheint deckend in der Auswahlfarbe.
+- Neue Abnahmedatei: `Claude_Ablage_Code/ifc-abnahme/G1-Fenster-Tueren-Glas.ifc` (gleicher Raum wie FT4, 422 Zeilen, 18 gestylte Teile).
+
+**Beschriftung „0,00 x 0,00“ (G2, offen):** Breite und Höhe stehen am IfcWindow/IfcDoor (OverallWidth/OverallHeight), in den Basismengen am Typ und jetzt im echten Körper. Vermutung: Archicad liest die Beschriftung aus Parametern seines eigenen Fensterobjekts, die ein importiertes IFC-Fenster nicht hat. Nicht belegt; Rückfragen an den Nutzer (Fenster oder Objekt nach dem Import? Maße in den Einstellungen? Archicad-Version und Übersetzer?) stehen aus.
+
+Nachweis G1: `src/interop/ifc/insert.test.ts` (neuer Test: drei Stile, Glas mit 0,7 Transparenz, alle 11 Teile gestylt, Glasstil nur an der Scheibe), `src/rendering/viewport/opening-insert-solid.test.ts` (neuer Test: Deckkraft Glas 0,35, Rahmen und Tür 1, ausgewähltes Glas 1); Referenzpacker in `benchmarks/solid-resource.test.ts` um das Deckkraftfeld ergänzt. 1452 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startprojekt mit zweiter Wand dahinter, Fensterelement eingesetzt – in 3D sieht man durch die Scheibe die Wand dahinter und das Raster.
