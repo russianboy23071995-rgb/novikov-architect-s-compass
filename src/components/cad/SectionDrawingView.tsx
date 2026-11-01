@@ -4,6 +4,7 @@ import type { Section } from "@/domain/views/sections";
 import { sectionDrawing, type SectionPoint } from "@/rendering/viewport/section-drawing";
 import { Button } from "@/components/ui/button";
 import { cutPaint, type CutFill } from "./cut-fill";
+import { HeightMark } from "./HeightMark";
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -13,35 +14,40 @@ const loopPath = (loops: readonly SectionPoint[][]) =>
   loops.map((loop) => `M${svgPoints(loop).replaceAll(" ", " L")} Z`).join(" ");
 /** Line weights of cut outlines: building parts heavy, frames medium, glass thin. */
 const stroke = { part: 1.75, frame: 1.1, glass: 0.6 } as const;
-const elevationText = (z: number) =>
-  Math.abs(z) < 0.005 ? "±0,00" : `${z > 0 ? "+" : "−"}${Math.abs(z).toFixed(2).replace(".", ",")}`;
+/** Storey marks outside the border (BS1): triangle 2,5 mm on paper like the section symbol. */
+const MARK_PAPER = 0.0025;
 
 /**
  * Section drawing in its canvas tab (docs/SCHNITT.md, SC3): derived from the model on every
  * change; cut parts in the cut fill of the display settings, parts beyond as a view, storey
- * levels with heights. Wheel zooms, dragging pans, „Einpassen“ fits the drawing.
+ * levels with heights. A border at both ends of the line bounds the drawing; the storey heights
+ * stand outside it as height marks (BS1). Wheel zooms, dragging pans, „Einpassen“ fits it.
  */
 export function SectionDrawingView({
   project,
   section,
   cutFill,
+  denominator,
   onSettings,
 }: {
   project: Project;
   section: Section;
   cutFill: CutFill;
+  /** Plan scale; sizes the height marks like the other paper sizes. */
+  denominator: number;
   onSettings: () => void;
 }) {
   const drawing = useMemo(() => sectionDrawing(project, section), [project, section]);
   const fit = useMemo((): Box => {
     const b = drawing.bounds ?? { minX: 0, maxX: drawing.width, minY: 0, maxY: 3 };
-    const minX = Math.min(b.minX, 0) - 1.5,
-      maxX = Math.max(b.maxX, drawing.width) + 1;
+    const margin = MARK_PAPER * denominator * 8;
+    const minX = Math.min(b.minX, 0) - margin,
+      maxX = Math.max(b.maxX, drawing.width) + margin;
     const levels = drawing.levels.map((l) => l.elevation);
     const minY = Math.min(b.minY, ...levels) - 1,
       maxY = Math.max(b.maxY, ...levels) + 1;
     return { x: minX, y: -maxY, w: maxX - minX, h: maxY - minY };
-  }, [drawing]);
+  }, [drawing, denominator]);
   const [box, setBox] = useState<Box | null>(null);
   const view = box ?? fit;
   const svg = useRef<SVGSVGElement>(null);
@@ -53,8 +59,8 @@ export function SectionDrawingView({
     return { x: p.x, y: p.y };
   };
   const paint = cutPaint(cutFill);
-  const left = Math.min(fit.x + 0.2, -1.3);
-  const right = fit.x + fit.w - 0.2;
+  const mark = MARK_PAPER * denominator;
+  const markGap = mark * 1.5;
   return (
     <div className="absolute inset-0 flex flex-col bg-workspace">
       <div className="flex items-center gap-2 px-3 pb-1 pt-12 text-xs text-muted-foreground">
@@ -141,22 +147,37 @@ export function SectionDrawingView({
               </g>
             ))}
           </g>
-          <g aria-label="Geschosse" fill="var(--muted-foreground)">
+          <g aria-label="Geschosse">
             {drawing.levels.map((level) => (
               <g key={level.storeyId}>
                 <line
-                  x1={left}
+                  x1={0}
                   y1={-level.elevation}
-                  x2={right}
+                  x2={drawing.width}
                   y2={-level.elevation}
                   stroke="var(--muted-foreground)"
                   strokeWidth={0.75}
                   strokeDasharray="8 4"
                   vectorEffect="non-scaling-stroke"
                 />
-                <text x={left} y={-level.elevation - 0.08} fontSize={0.22}>
-                  {elevationText(level.elevation)} {level.name}
-                </text>
+                <HeightMark
+                  x={-markGap}
+                  z={level.elevation}
+                  side="left"
+                  kind="shell"
+                  size={mark}
+                  name={level.name}
+                  reach={0}
+                />
+                <HeightMark
+                  x={drawing.width + markGap}
+                  z={level.elevation}
+                  side="right"
+                  kind="shell"
+                  size={mark}
+                  name={level.name}
+                  reach={drawing.width}
+                />
               </g>
             ))}
           </g>
@@ -187,6 +208,20 @@ export function SectionDrawingView({
                   />
                 ))}
               </g>
+            ))}
+          </g>
+          <g aria-label="Rand">
+            {[0, drawing.width].map((x) => (
+              <line
+                key={x}
+                x1={x}
+                y1={fit.y + 0.5}
+                x2={x}
+                y2={fit.y + fit.h - 0.5}
+                stroke="var(--foreground)"
+                strokeWidth={0.75}
+                vectorEffect="non-scaling-stroke"
+              />
             ))}
           </g>
         </svg>
