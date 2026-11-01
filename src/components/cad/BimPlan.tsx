@@ -5,6 +5,7 @@ import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
 import { SectionPlanGraphic } from "./SectionPlanGraphic";
 import { LineLengthHelper } from "./LineLengthHelper";
+import type { LocalSnapSources } from "@/application/snapping/local-sources";
 import type { LengthDirection } from "@/application/lines/actions";
 import {
   sectionLookTo,
@@ -91,6 +92,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   createToolSourceQuery,
   createVisibleToolSourceQuery,
+  createTracedToolSourceQuery,
   toolPinnedReferences,
 } from "@/application/tools/snapping";
 import type { ToolSnapPolicy } from "@/application/tools/snapping";
@@ -165,6 +167,17 @@ export type BimPlanProps = {
   sections?: readonly Section[] | undefined;
   /** Double click on a section line opens its window. */
   onSectionSettings?: ((id: string) => void) | undefined;
+  /** Transparency trace (S4): outlines of another storey under the plan, optional snapping. */
+  tracing?:
+    | {
+        walls: Point[][];
+        columns: Point[][];
+        color: string;
+        opacity: number;
+        snap: { sources: LocalSnapSources; ids: ReadonlySet<string> } | null;
+      }
+    | null
+    | undefined;
   /** Model point of the click that selected the element; picks the segment of a line (S3). */
   selectionAnchor?: Point | null | undefined;
   /** Length helper of a selected line: new length of a segment (docs/LINIEN.md, S3). */
@@ -273,6 +286,7 @@ export function BimPlan({
   onSectionLine,
   selectionAnchor,
   onLineLength,
+  tracing,
   sectionDraft,
   textPreview,
   closeAtStart = false,
@@ -426,12 +440,15 @@ export function BimPlan({
   useEffect(() => setHover(null), [endpointSnap, camera, editSession]);
   const pinnedReferences = useMemo(() => toolPinnedReferences(snapping), [snapping]);
   const modelSources = useMemo(() => getLocalSnapSources(project), [project]);
+  const traceSnap = tracing?.snap ?? null;
   const sourceQuery = useMemo(
     () =>
-      visibility
-        ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
-        : createToolSourceQuery(modelSources, snapping),
-    [modelSources, snapping, project, visibility],
+      visibility && traceSnap
+        ? createTracedToolSourceQuery(project, visibility, visibility.context, snapping, traceSnap)
+        : visibility
+          ? createVisibleToolSourceQuery(project, visibility, visibility.context, snapping)
+          : createToolSourceQuery(modelSources, snapping),
+    [modelSources, snapping, project, visibility, traceSnap],
   );
   const density = useSnapDensity(
     sourceQuery,
@@ -485,8 +502,10 @@ export function BimPlan({
   } = useHoverReference(hover, trackingContext, hoverDwellMs);
   const activeReference = activeReferences.at(-1) ?? null;
   const resolveLockedSnap = useShiftSnapLock(visibilitySession, referenceReset);
-  const resolvePointer = (point: Point, shift = shiftHeld) =>
-    resolveLockedSnap(
+  // A point caught on the transparency trace (S4) is a plain point: it belongs to another
+  // storey, so it must never become a join or host target of the working storey.
+  const resolvePointer = (point: Point, shift = shiftHeld) => {
+    const result = resolveLockedSnap(
       snapping,
       point,
       {
@@ -505,6 +524,19 @@ export function BimPlan({
       },
       { ortho, shift, featureSnap: endpointSnap },
     );
+    // Keep the snapped point and its marker, drop only what ties it to the other storey.
+    return result.candidate?.sourceEntityId && traceSnap?.ids.has(result.candidate.sourceEntityId)
+      ? {
+          ...result,
+          candidate: {
+            ...result.candidate,
+            sourceEntityId: null,
+            sourceFeature: "trace",
+            sourceReferences: [],
+          },
+        }
+      : result;
+  };
   const pointerSnap = hover ? resolvePointer(hover) : null;
   // Regel 3: near its start a closable drawing aims exactly at the start (preview = click).
   const startTarget =
@@ -1239,6 +1271,21 @@ export function BimPlan({
               height={viewSize.height / camera.pixelsPerMetre}
               fill={`url(#${gridId})`}
             />
+          </g>
+        )}
+        {tracing && (
+          <g aria-label="Transparenzpause" pointerEvents="none" opacity={tracing.opacity}>
+            {[...tracing.walls, ...tracing.columns].map((outline, i) => (
+              <polygon
+                key={i}
+                points={outline.map((p) => `${p.x},${-p.y}`).join(" ")}
+                fill={tracing.color}
+                fillOpacity={0.35}
+                stroke={tracing.color}
+                strokeWidth={1.5}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
           </g>
         )}
         {marquee.box && (
