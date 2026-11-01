@@ -1,6 +1,6 @@
 import type { Project } from "../../domain/project/schema.ts";
 import { resolveStoreyLevels } from "../../domain/storeys/heights.ts";
-import { sectionFrame, type Section } from "../../domain/views/sections.ts";
+import { isElevation, sectionFrame, type Section } from "../../domain/views/sections.ts";
 import { buildBuildingSolid } from "./building-solid.ts";
 import type { Face, Vec3 } from "./storey-solid.ts";
 
@@ -154,9 +154,12 @@ export function sectionDrawing(project: Project, section: Section): SectionDrawi
   }
   views.sort((a, b) => b.depth - a.depth);
 
-  const cuts: SectionCut[] = [...segments.values()]
-    .map(({ id, kind, list }) => ({ ...chain(id, list, length, out), kind }))
-    .filter((c) => c.loops.length > 0 || c.open.length > 0);
+  // An elevation (A1) cuts nothing: only what lies beyond the line in the viewing direction.
+  const cuts: SectionCut[] = isElevation(section)
+    ? []
+    : [...segments.values()]
+        .map(({ id, kind, list }) => ({ ...chain(id, list, length, out), kind }))
+        .filter((c) => c.loops.length > 0 || c.open.length > 0);
   const names = new Map(project.storeys.map((s) => [s.id, s.name]));
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId)
     .filter((l) => l.elevation !== null)

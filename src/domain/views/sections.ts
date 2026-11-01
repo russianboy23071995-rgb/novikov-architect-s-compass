@@ -50,6 +50,8 @@ export const sectionSchema = z
     end: point,
     look: z.enum(SECTION_LOOKS),
     symbolSize: sectionSymbolSizeSchema.optional(),
+    /** Absent: a section; "elevation": a view from outside without cut parts (A1). */
+    kind: z.enum(["section", "elevation"]).optional(),
   })
   .strict()
   .refine((s) => Math.hypot(s.end.x - s.start.x, s.end.y - s.start.y) > 1e-6, {
@@ -83,6 +85,14 @@ export function nextSectionMark(sections: readonly Section[], kind: SectionMarkK
 
 /** Default name of a section with this mark. */
 export const sectionName = (prefix: string, mark: string) => `${prefix} ${mark}-${mark}`;
+
+/**
+ * Elevation (docs/ANSICHTEN.md, A1): the same line object as a section, seen from outside; the
+ * drawing shows what lies beyond in the viewing direction, nothing is cut.
+ */
+export const isElevation = (section: Pick<Section, "kind">) => section.kind === "elevation";
+/** Default name of an elevation with this mark, e.g. „Ansicht 1“. */
+export const elevationName = (prefix: string, mark: string) => `${prefix} ${mark}`;
 
 /** Marks used by more than one section (reported in the element window). */
 export function repeatedSectionMarks(sections: readonly Section[]): Set<string> {

@@ -97,3 +97,14 @@ export const SectionIcon = icon(
     <path d="M1.8 10.2L4 6l2.2 4.2zM17.8 10.2L20 6l2.2 4.2z" fill="currentColor" />
   </>,
 );
+
+/** An elevation: a facade with a window and the viewing arrow below pointing at it. */
+export const ElevationIcon = icon(
+  "ElevationIcon",
+  <>
+    <path d="M5 3h14v11H5z" />
+    <path d="M9 7h6v4H9z" strokeWidth={1} />
+    <path d="M3 18h18" strokeWidth={1.2} />
+    <path d="M9.5 22L12 18l2.5 4z" fill="currentColor" />
+  </>,
+);

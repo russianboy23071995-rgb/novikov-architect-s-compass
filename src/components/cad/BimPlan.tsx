@@ -171,7 +171,14 @@ export type BimPlanProps = {
   onSectionLine?: ((id: string, line: { start: Point; end: Point }) => void) | undefined;
   /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
   sectionDraft?:
-    { start: Point; end: Point | null; mark: string; symbolSize: SectionSymbolSize } | undefined;
+    | {
+        start: Point;
+        end: Point | null;
+        mark: string;
+        symbolSize: SectionSymbolSize;
+        kind?: "elevation";
+      }
+    | undefined;
   /** Running dimension chain (docs/MASSKETTE.md): line position, points so far, direction. */
   dimensionDraft?:
     | {
@@ -1596,7 +1603,13 @@ export function BimPlan({
             return (
               <g aria-label="Schnitt in Arbeit" opacity={0.85}>
                 <SectionPlanGraphic
-                  section={{ start: sectionDraft.start, end, look, mark: sectionDraft.mark }}
+                  section={{
+                    start: sectionDraft.start,
+                    end,
+                    look,
+                    mark: sectionDraft.mark,
+                    ...(sectionDraft.kind ? { kind: sectionDraft.kind } : {}),
+                  }}
                   pixelsPerMetre={camera.pixelsPerMetre}
                   height={sectionSymbolHeight(sectionDraft.symbolSize, scaleContext.denominator)}
                   color="#0284c7"

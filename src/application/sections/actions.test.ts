@@ -169,3 +169,55 @@ test("grips: ends lengthen, shorten or turn the line, the middle moves it, Shift
   assert.deepEqual(moved.sections![0]!.start, { x: 0, y: 3 });
   assert.equal(moved.sections![0]!.mark, "A");
 });
+
+test("elevations: own marks and names, four around the building, nothing cut in the drawing", async () => {
+  // docs/ANSICHTEN.md, A1.
+  const { addFourElevations, ELEVATION_TOOL_DEFAULTS } = await import("./actions.ts");
+  const { addWall } = await import("../walls/actions.ts");
+  const { createProject } = await import("../projects/create.ts");
+  const { sectionDrawing } = await import("../../rendering/viewport/section-drawing.ts");
+  let p = addWall(createProject("p", "eg"), {
+    id: "w",
+    start: { x: 0, y: 0 },
+    end: { x: 6, y: 0 },
+    thickness: 0.3,
+    height: 2.8,
+  });
+  p = addSection(p, { id: "s1", ...line });
+  // Marks run per kind: the first elevation is „Ansicht 1“ next to section A.
+  assert.deepEqual(nextSectionLabel(p, ELEVATION_TOOL_DEFAULTS, "elevation"), {
+    mark: "1",
+    name: "Ansicht 1",
+  });
+  p = addSection(p, { id: "e1", ...line, kind: "elevation" }, ELEVATION_TOOL_DEFAULTS);
+  assert.equal(p.sections![1]!.kind, "elevation");
+  assert.equal(p.sections![1]!.name, "Ansicht 1");
+  assert.equal(p.sections![0]!.kind, undefined);
+  let n = 0;
+  const four = addFourElevations(p, () => `e-${++n}`);
+  const added = four.sections!.slice(2);
+  assert.deepEqual(
+    added.map((s) => [s.mark, s.name]),
+    [
+      ["N", "Nordansicht"],
+      ["O", "Ostansicht"],
+      ["S", "Südansicht"],
+      ["W", "Westansicht"],
+    ],
+  );
+  // 2 m beyond the outline (walls with their thickness): north at y = 0,3 + 2.
+  assert.ok(Math.abs(added[0]!.start.y - 2.3) < 1e-9);
+  assert.throws(() => addFourElevations(four, () => "x"), /gibt es schon/);
+  // The south elevation sees the wall face, nothing is cut; a section through it would cut.
+  const south = sectionDrawing(four, added[2]!);
+  assert.equal(south.cuts.length, 0);
+  assert.ok(south.views.length > 0);
+  const through = sectionDrawing(four, {
+    ...added[2]!,
+    kind: "elevation",
+    start: { x: 3, y: -1 },
+    end: { x: 3, y: 1 },
+  });
+  assert.equal(through.cuts.length, 0);
+  assert.throws(() => addFourElevations(createStandardProject("q", "eg", "og"), () => "x"));
+});

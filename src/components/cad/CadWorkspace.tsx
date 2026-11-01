@@ -140,7 +140,7 @@ import { BimInspector } from "./BimInspector";
 import { supportsHorizontalWorkplaneEdit } from "@/application/direct-edit/controller";
 import { createDrawing } from "@/application/drawing/actions";
 import type { EditAction } from "@/application/direct-edit/session";
-import { SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
+import { ELEVATIONS_FOLDER_ID, SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
 import { ToolRailCustomizer } from "./ToolRailCustomizer";
@@ -175,6 +175,8 @@ import {
 } from "@/application/views/canvas-tabs";
 import {
   SECTION_TOOL_DEFAULTS,
+  ELEVATION_TOOL_DEFAULTS,
+  addFourElevations,
   addSection,
   nextSectionLabel,
   removeSection,
@@ -233,6 +235,8 @@ export function CadWorkspace({
   const [sectionStart, setSectionStart] = useState<Point | null>(null);
   const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
   const [sectionDefaults, setSectionDefaults] = useState(SECTION_TOOL_DEFAULTS);
+  // Elevation tool (docs/ANSICHTEN.md, A1): same click flow and state, own defaults.
+  const [elevationDefaults, setElevationDefaults] = useState(ELEVATION_TOOL_DEFAULTS);
   const [sectionWindow, setSectionWindow] = useState<string | null>(null);
   // Selected section line in plan (SC5): grips to move it, lengthen or shorten it.
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -577,6 +581,7 @@ export function CadWorkspace({
       next === "column" ||
       next === "stair" ||
       next === "section" ||
+      next === "elevation" ||
       next === "dimension" ||
       next === "text"
     )
@@ -595,6 +600,7 @@ export function CadWorkspace({
       next === "column" ||
       next === "stair" ||
       next === "section" ||
+      next === "elevation" ||
       next === "dimension" ||
       next === "text"
     )
@@ -917,6 +923,7 @@ export function CadWorkspace({
     column: "Stütze",
     stair: "Treppe",
     section: "Schnitt",
+    elevation: "Ansicht",
     dimension: "Maßkette",
     text: "Text",
     window: "Fenster",
@@ -977,6 +984,29 @@ export function CadWorkspace({
         onChange={setSectionDefaults}
         next={nextSectionLabel(project, sectionDefaults)}
         denominator={planDenominator(project)}
+      />
+    ) : owner === "elevation" ? (
+      <SectionFields
+        value={elevationDefaults}
+        onChange={setElevationDefaults}
+        next={nextSectionLabel(project, elevationDefaults, "elevation")}
+        denominator={planDenominator(project)}
+        onFourElevations={() => {
+          try {
+            dispatchEditing({
+              type: "project",
+              project: addFourElevations(
+                project,
+                () => `section-${crypto.randomUUID()}`,
+                elevationDefaults,
+              ),
+            });
+            setModelError("");
+            showNotice("Vier Ansichten erzeugt");
+          } catch (error) {
+            setModelError(error instanceof Error ? error.message : "Ansichten nicht möglich.");
+          }
+        }}
       />
     ) : owner === "stair" ? (
       <StairFields
@@ -1642,7 +1672,9 @@ export function CadWorkspace({
     }
     // Section tool (docs/SCHNITT.md, SC2): click 1 start, click 2 end, click 3 the viewing side;
     // in any storey, the section belongs to the building.
-    if (tool === "section") {
+    if (tool === "section" || tool === "elevation") {
+      const elevation = tool === "elevation";
+      const defaults = elevation ? elevationDefaults : sectionDefaults;
       if (!sectionStart) {
         setSectionStart({ x: point.x, y: point.y });
         return;
@@ -1656,7 +1688,7 @@ export function CadWorkspace({
         return;
       }
       try {
-        const { name } = nextSectionLabel(project, sectionDefaults);
+        const { name } = nextSectionLabel(project, defaults, elevation ? "elevation" : "section");
         dispatchEditing({
           type: "project",
           project: addSection(
@@ -1666,8 +1698,9 @@ export function CadWorkspace({
               start: sectionStart,
               end: sectionEnd,
               look: sectionLookTo(sectionStart, sectionEnd, point),
+              ...(elevation ? { kind: "elevation" as const } : {}),
             },
-            sectionDefaults,
+            defaults,
           ),
         });
         setSectionStart(null);
@@ -2610,7 +2643,7 @@ export function CadWorkspace({
             return (
               <FloatingPanel
                 open
-                title={`${section.name} – Schnitt`}
+                title={`${section.name} – ${section.kind === "elevation" ? "Ansicht" : "Schnitt"}`}
                 width={380}
                 height={470}
                 onClose={() => setSectionWindow(null)}
@@ -2833,6 +2866,7 @@ export function CadWorkspace({
                           tool === "column" ||
                           tool === "stair" ||
                           tool === "section" ||
+                          tool === "elevation" ||
                           tool === "dimension" ||
                           tool === "text" ||
                           pathDrawing ||
@@ -2849,6 +2883,7 @@ export function CadWorkspace({
                         tool === "column" ||
                         tool === "stair" ||
                         tool === "section" ||
+                        tool === "elevation" ||
                         tool === "dimension" ||
                         tool === "text" ||
                         tool === "window" ||
@@ -2858,7 +2893,7 @@ export function CadWorkspace({
                       start={
                         pathDrawing
                           ? (pathPoints.at(-1) ?? null)
-                          : tool === "section"
+                          : tool === "section" || tool === "elevation"
                             ? sectionEnd
                               ? null
                               : sectionStart
@@ -2991,7 +3026,16 @@ export function CadWorkspace({
                               mark: nextSectionLabel(project, sectionDefaults).mark,
                               symbolSize: sectionDefaults.symbolSize,
                             }
-                          : undefined
+                          : tool === "elevation" && sectionStart
+                            ? {
+                                start: sectionStart,
+                                end: sectionEnd,
+                                mark: nextSectionLabel(project, elevationDefaults, "elevation")
+                                  .mark,
+                                symbolSize: elevationDefaults.symbolSize,
+                                kind: "elevation" as const,
+                              }
+                            : undefined
                       }
                       stairDraft={
                         tool === "stair" && stairStart
@@ -3246,6 +3290,7 @@ export function CadWorkspace({
                 tool === "column" ||
                 tool === "stair" ||
                 tool === "section" ||
+                tool === "elevation" ||
                 tool === "dimension" ||
                 tool === "text" ||
                 tool === "window" ||
@@ -3404,7 +3449,7 @@ export function CadWorkspace({
                   onClose={() => setNavigatorOpen(false)}
                   onSectionSettings={openSectionWindow}
                   onSelect={(id, _label, toggle) => {
-                    if (id === SECTIONS_FOLDER_ID) return;
+                    if (id === SECTIONS_FOLDER_ID || id === ELEVATIONS_FOLDER_ID) return;
                     if (sectionIds.has(id)) return selectCanvasTab(sectionTab(id));
                     if (project.storeys.some((s) => s.id === id)) {
                       setActiveSectionId(null);
