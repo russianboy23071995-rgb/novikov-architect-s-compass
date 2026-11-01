@@ -15,8 +15,10 @@ const sameFaces = (a: Face[], b: Face[]) =>
         face.vertices.every((p, j) => p.every((v, k) => v === other.vertices[j]![k])))
     );
   });
-/** Floats per vertex: XYZ, RGB and the display priority below. */
-export const SOLID_VERTEX_FLOATS = 7;
+/** Floats per vertex: XYZ, RGB, the display priority below and the opacity. */
+export const SOLID_VERTEX_FLOATS = 8;
+/** Opacity of window glass (docs/FENSTER_TUEREN.md, G1); everything else is opaque. */
+export const GLASS_OPACITY = 0.35;
 /**
  * Display priority on coincident faces (docs/SLAB_ELEMENT.md, C3 Variante A): with equal
  * construction priority a ceiling slab is drawn over a wall face lying in the same plane,
@@ -24,7 +26,7 @@ export const SOLID_VERTEX_FLOATS = 7;
  */
 export const SLAB_DISPLAY_PRIORITY = 1;
 export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected: boolean) {
-  // Convex fan: n-2 triangles, three vertices, XYZ + RGB + priority. Round to Float32
+  // Convex fan: n-2 triangles, three vertices, XYZ + RGB + priority + opacity. Round to Float32
   // only at the final write, exactly as the previous array conversion did.
   let length = 0;
   for (const face of faces)
@@ -53,6 +55,7 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
                   : [0.72, 0.75, 0.79]
     ).map((c) => c * light) as [number, number, number];
     const priority = face.slab || face.roof ? SLAB_DISPLAY_PRIORITY : 0;
+    const opacity = face.glass && !selected ? GLASS_OPACITY : 1;
     for (const triangle of faceTriangles(face.vertices.length))
       for (const index of triangle) {
         const point = face.vertices[index]!;
@@ -63,6 +66,7 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
         data[offset++] = g;
         data[offset++] = b;
         data[offset++] = priority;
+        data[offset++] = opacity;
       }
   }
   return data;

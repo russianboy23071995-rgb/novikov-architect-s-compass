@@ -117,3 +117,21 @@ test("the elements are part of the building in 3D and appear in the section as o
   // The frame cut: bottom and top frame and both boards as closed outlines.
   assert.equal(drawing.cuts.find((c) => c.kind === "frame")!.loops.length, 4);
 });
+
+test("in 3D the glass is see-through, frames and doors stay opaque; selected glass is solid", async () => {
+  // docs/FENSTER_TUEREN.md, G1.
+  const { packSolidFaces, GLASS_OPACITY, SOLID_VERTEX_FLOATS } = await import("./solid-buffer.ts");
+  const faces = openingInsertBodies(storeyOf(project()), 0).flatMap((b) => b.faces);
+  const opacity = (face: (typeof faces)[number], selected = false) =>
+    packSolidFaces([face], [0, 0, 0], selected)[SOLID_VERTEX_FLOATS - 1];
+  assert.equal(opacity(faces.find((f) => f.glass)!), Math.fround(GLASS_OPACITY));
+  assert.equal(opacity(faces.find((f) => f.opening === "window" && !f.glass)!), 1);
+  assert.equal(opacity(faces.find((f) => f.opening === "door")!), 1);
+  assert.equal(
+    opacity(
+      faces.find((f) => f.glass)!,
+      true,
+    ),
+    1,
+  );
+});
