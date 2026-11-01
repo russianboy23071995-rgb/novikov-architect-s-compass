@@ -152,3 +152,12 @@ Nachweis: neuer Test in `src/rendering/viewport/opening-insert-solid.test.ts` (2
 Grenzen: Händigkeit der Paneele angenommen (s. o.); keine Paneel-Darstellungsformen (`ShapeAspectStyle`) und keine Beschläge; Beschriftung „0,00 x 0,00“ in Archicad weiter offen (G2).
 
 Nachweis: neuer Test in `src/interop/ifc/insert.test.ts` (Abbildung der Öffnungsarten, Teilungen und Paneele je Teilung, Export mit DOUBLE_PANEL_VERTICAL an Fenster und Typ, zwei Paneele mit 9 Attributen und Flügelrahmen 8 × 6 cm, Typ verweist auf beide, NOVIKOV_BIM-Werte, neun Flügel-/Pfostenkörper); Laibungstest an die erweiterten Typ-Eigenschaften und ein älterer Platzierungstest an SINGLE_PANEL angepasst. 1458 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Archicad-Prüfung durch den Nutzer offen.
+
+## S1 – 3D ohne Raster, Fenster und Türen anwählbar
+
+Nutzervorgabe (01.11.2026, Nebenschritte): Hintergrundraster im 3D entfernen; Fenster und Türen müssen in 3D anwählbar sein.
+
+- Die 3D-Ansicht zeigt kein Hintergrundraster mehr (`CadViewport.tsx`, CSS-Klasse `cad-grid` entfernt); der Raster-Schalter wirkt nur noch im Grundriss. Die hellgraue Geschossebene bleibt.
+- Ursache der fehlenden Auswahl: Der schnelle 3D-Auswahlindex (`world-picking.ts`) meldete Flächen von Fenster- und Türelementen als „Wand“ mit der Fenster-/Tür-ID – eine Auswahl, die es nicht gibt, also blieb sie leer (die langsamere Ersatzauswahl war seit FT2 richtig). Jetzt wählt ein Klick auf Rahmen, Flügel, Pfosten, Glas, Fensterbank, Zarge oder Türblatt das Fenster bzw. die Tür.
+
+Nachweis: neuer Test in `src/rendering/viewport/door-picking.test.ts` (Glas und Rahmen wählen das Fenster, das Türblatt die Tür, die Wand daneben die Wand – über Ersatzauswahl und Index; ohne die Korrektur schlägt er fehl). 1459 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser-Abnahme: Startfenster mit Element, 3D – Klick auf die Scheibe wählt das Fenster („Window properties“, „1 selected“); Hintergrund ohne Raster. Tür im Browser nur durch den Test abgedeckt.
