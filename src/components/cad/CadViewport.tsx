@@ -233,7 +233,7 @@ export function CadViewport({
       }}
       aria-label={`${label} viewport`}
     >
-      <div className={cn("absolute inset-0", grid && is3D && "cad-grid")} />
+      {/* No background grid behind the 3D view (user decision 01.11.2026); the plan keeps its grid. */}
       <div ref={surface} className="absolute" style={fullBleed ? { inset: 0 } : margined}>
         {is3D ? (
           <BimSolidView
