@@ -246,6 +246,7 @@
     "src/components/cad/demand-menu.test.ts",
     "src/components/cad/cut-fill.test.ts",
     "src/components/cad/palette-layout.test.ts",
+    "src/components/cad/tool-layout.test.ts",
     "src/application/drawing/line-input.test.ts",
     "src/constraints/inference/segment-hover.test.ts",
     "src/application/drawing/actions.test.ts",
