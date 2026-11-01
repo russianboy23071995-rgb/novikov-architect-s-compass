@@ -143,6 +143,7 @@ import type { EditAction } from "@/application/direct-edit/session";
 import { ELEVATIONS_FOLDER_ID, SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
+import { setLineSegmentLength } from "@/application/lines/actions";
 import { ToolRailCustomizer } from "./ToolRailCustomizer";
 import { useToolLayout } from "./useToolLayout";
 import { LineStyleCreator } from "./LineStyleCreator";
@@ -3018,6 +3019,26 @@ export function CadWorkspace({
                       selectedSectionId={tool === "select" ? selectedSectionId : null}
                       onSectionSelect={tool === "select" ? selectSection : undefined}
                       onSectionLine={moveSectionLine}
+                      selectionAnchor={pickedPoint.anchor}
+                      onLineLength={(lineId, segment, length, direction) => {
+                        try {
+                          dispatchEditing({
+                            type: "project",
+                            project: setLineSegmentLength(
+                              project,
+                              lineId,
+                              segment,
+                              length,
+                              direction,
+                            ),
+                          });
+                          setModelError("");
+                        } catch (error) {
+                          setModelError(
+                            error instanceof Error ? error.message : "Länge nicht möglich.",
+                          );
+                        }
+                      }}
                       sectionDraft={
                         tool === "section" && sectionStart
                           ? {

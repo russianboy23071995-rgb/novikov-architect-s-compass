@@ -4,6 +4,8 @@ import type { PlanText } from "@/domain/elements/text/model";
 import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
 import { SectionPlanGraphic } from "./SectionPlanGraphic";
+import { LineLengthHelper } from "./LineLengthHelper";
+import type { LengthDirection } from "@/application/lines/actions";
 import {
   sectionLookTo,
   sectionSymbolHeight,
@@ -163,6 +165,12 @@ export type BimPlanProps = {
   sections?: readonly Section[] | undefined;
   /** Double click on a section line opens its window. */
   onSectionSettings?: ((id: string) => void) | undefined;
+  /** Model point of the click that selected the element; picks the segment of a line (S3). */
+  selectionAnchor?: Point | null | undefined;
+  /** Length helper of a selected line: new length of a segment (docs/LINIEN.md, S3). */
+  onLineLength?:
+    | ((lineId: string, segment: number, length: number, direction: LengthDirection) => void)
+    | undefined;
   /** Selected section line (SC5): highlighted with grips at both ends and in the middle. */
   selectedSectionId?: string | null | undefined;
   /** Click on a section line selects it; null when the click selects nothing. */
@@ -263,6 +271,8 @@ export function BimPlan({
   selectedSectionId,
   onSectionSelect,
   onSectionLine,
+  selectionAnchor,
+  onLineLength,
   sectionDraft,
   textPreview,
   closeAtStart = false,
@@ -1518,6 +1528,47 @@ export function BimPlan({
                   />
                 )}
               </g>
+            );
+          })()}
+        {selection?.kind === "line" &&
+          onLineLength &&
+          !drawing &&
+          !editSession &&
+          (() => {
+            const line = (storeyOf(project).lines ?? []).find((l) => l.id === selection.id);
+            if (!line) return null;
+            // The segment nearest to the click that selected the line; the first without one.
+            const distance = (a: Point, b: Point, p: Point) => {
+              const dx = b.x - a.x,
+                dy = b.y - a.y;
+              const t = Math.max(
+                0,
+                Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)),
+              );
+              return Math.hypot(p.x - a.x - dx * t, p.y - a.y - dy * t);
+            };
+            let segment = 0;
+            if (selectionAnchor)
+              line.points.slice(1).forEach((b, i) => {
+                const a = line.points[i]!;
+                const best = line.points[segment + 1]!;
+                if (
+                  distance(a, b, selectionAnchor) <
+                  distance(line.points[segment]!, best, selectionAnchor)
+                )
+                  segment = i;
+              });
+            const a = line.points[segment]!,
+              b = line.points[segment + 1]!;
+            if (Math.hypot(b.x - a.x, b.y - a.y) < 1e-9) return null;
+            return (
+              <LineLengthHelper
+                key={`${line.id}:${segment}`}
+                start={a}
+                end={b}
+                pixelsPerMetre={camera.pixelsPerMetre}
+                onLength={(length, direction) => onLineLength(line.id, segment, length, direction)}
+              />
             );
           })()}
         {sections?.map((stored) => {
