@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 01.11.2026 · main nach PR572
+**Stand:** 01.11.2026 · main nach PR573
 
 ## Deine Wünsche
 
@@ -49,10 +49,10 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 ## Auswertung
 
-| ID  | Aufgabe                                                        | Prio | Status                                                             | Bezug          |
-| --- | -------------------------------------------------------------- | ---- | ------------------------------------------------------------------ | -------------- |
-| L15 | Wohnflächenberechnung nach WoFlV mit nachvollziehbarem Bericht |      | offen                                                              | §6 Abschnitt 4 |
-| L16 | Mengen- und Bauteillisten                                      |      | ML1 Mengenabfrage erledigt (PR572); Bauteilliste ML2/ML3 in Arbeit | §6 Abschnitt 4 |
+| ID  | Aufgabe                                                        | Prio | Status                                                                                                                             | Bezug          |
+| --- | -------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| L15 | Wohnflächenberechnung nach WoFlV mit nachvollziehbarem Bericht |      | offen                                                                                                                              | §6 Abschnitt 4 |
+| L16 | Mengen- und Bauteillisten                                      |      | erledigt: ML1–ML3 (PR572–573), docs/MENGEN.md; Wandmengen über die Achse, Abrechnungsregeln (VOB/DIN 277) und Mengen im IFC später | §6 Abschnitt 4 |
 
 ## AI (Hauptziel)
 
