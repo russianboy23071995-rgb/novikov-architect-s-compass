@@ -71,6 +71,8 @@ type TopToolbarProps = {
   historyTrimmed?: boolean;
   onLayers: () => void;
   onRoomList: () => void;
+  /** Element list with quantities (docs/MENGEN.md, ML2). */
+  onElementList: () => void;
   /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
   onPipette: () => void;
   canPipette: boolean;
@@ -273,6 +275,7 @@ export function TopToolbar(props: TopToolbarProps) {
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={props.onLayers}>Ebenen</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onElementList}>Bauteilliste</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">
