@@ -224,6 +224,8 @@ export function CadWorkspace({
   const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
   const [sectionDefaults, setSectionDefaults] = useState(SECTION_TOOL_DEFAULTS);
   const [sectionWindow, setSectionWindow] = useState<string | null>(null);
+  // Selected section line in plan (SC5): grips to move it, lengthen or shorten it.
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [layout, setLayout] = useState<ViewportLayout>("single");
   const [zoomSlot, setZoomSlot] = useState<HTMLDivElement | null>(null);
   const [grid, setGrid] = useState(true);
@@ -434,6 +436,7 @@ export function CadWorkspace({
     setStairDirection(null);
     setSectionStart(null);
     setSectionEnd(null);
+    setSelectedSectionId(null);
   }, [dispatchEditing]);
 
   const navigateHistory = useCallback(
@@ -830,10 +833,18 @@ export function CadWorkspace({
     }
   };
   const deleteShortcut = useRef<(() => void) | null>(null);
+  const selectedSection = (project.sections ?? []).find((s) => s.id === selectedSectionId);
   deleteShortcut.current =
-    tool === "select" && !editSession && !groupMove.active && selections.length
-      ? deleteSelection
-      : null;
+    tool === "select" && !editSession && !groupMove.active && selectedSection
+      ? () => {
+          setSelectedSectionId(null);
+          setSectionWindow(null);
+          dispatchEditing({ type: "project", project: removeSection(project, selectedSection.id) });
+          showNotice(`${selectedSection.name} gelöscht`);
+        }
+      : tool === "select" && !editSession && !groupMove.active && selections.length
+        ? deleteSelection
+        : null;
 
   // Canvas commands shared by the right-click menu, the Modify menu and the shortcuts
   // (docs/KONTEXTMENUE.md). The clipboard lives in the app only (decision X).
@@ -1951,6 +1962,22 @@ export function CadWorkspace({
     cancelInteraction();
     setModelError("");
     setSectionWindow(id);
+    setSelectedSectionId(id);
+  };
+  const selectSection = (id: string | null) => {
+    if (id === null) return setSelectedSectionId(null);
+    cancelInteraction();
+    setSelection(null);
+    setDemandOpen(false);
+    setModelError("");
+    setSelectedSectionId(id);
+  };
+  const moveSectionLine = (id: string, line: { start: Point; end: Point }) => {
+    try {
+      dispatchEditing({ type: "project", project: updateSection(project, id, line) });
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Änderung nicht möglich.");
+    }
   };
   function changeMode(next: ViewMode) {
     setActiveSectionId(null);
@@ -2473,7 +2500,7 @@ export function CadWorkspace({
                 open
                 title={`${section.name} – Schnitt`}
                 width={380}
-                height={370}
+                height={470}
                 onClose={() => setSectionWindow(null)}
               >
                 <SectionProperties
@@ -2841,6 +2868,9 @@ export function CadWorkspace({
                       }
                       sections={sections}
                       onSectionSettings={openSectionWindow}
+                      selectedSectionId={tool === "select" ? selectedSectionId : null}
+                      onSectionSelect={tool === "select" ? selectSection : undefined}
+                      onSectionLine={moveSectionLine}
                       sectionDraft={
                         tool === "section" && sectionStart
                           ? {
@@ -3241,7 +3271,13 @@ export function CadWorkspace({
                     dispatchEditing({ type: "document", base, action })
                   }
                   project={project}
-                  active={selections.length ? selections.map((t) => t.id) : [storeyOf(project).id]}
+                  active={
+                    selectedSection
+                      ? [selectedSection.id]
+                      : selections.length
+                        ? selections.map((t) => t.id)
+                        : [storeyOf(project).id]
+                  }
                   onClose={() => setNavigatorOpen(false)}
                   onSectionSettings={openSectionWindow}
                   onSelect={(id, _label, toggle) => {
