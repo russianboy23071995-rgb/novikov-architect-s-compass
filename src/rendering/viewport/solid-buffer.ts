@@ -36,9 +36,22 @@ export function packSolidFaces(faces: readonly Face[], origin: Vector3, selected
       0.5 + 0.5 * Math.max(0, face.normal[0] * 0.3 - face.normal[1] * 0.4 + face.normal[2] * 0.866);
     // Ceiling slabs a little lighter than walls (user decision 28.10.2026).
     // Roofs a warm grey, so they read apart from walls and slabs (docs/ROOF_ELEMENT.md, D2).
-    const r = (selected ? 0.38 : face.slab ? 0.84 : face.roof ? 0.8 : 0.72) * light;
-    const g = (selected ? 0.65 : face.slab ? 0.85 : face.roof ? 0.72 : 0.75) * light;
-    const b = (selected ? 0.78 : face.slab ? 0.87 : face.roof ? 0.68 : 0.79) * light;
+    // Window and door elements (FT2): white frames, a bluish pane, a light wooden door leaf.
+    const [r, g, b] = (
+      selected
+        ? [0.38, 0.65, 0.78]
+        : face.glass
+          ? [0.6, 0.76, 0.88]
+          : face.opening === "window"
+            ? [0.95, 0.95, 0.95]
+            : face.opening === "door"
+              ? [0.88, 0.82, 0.72]
+              : face.slab
+                ? [0.84, 0.85, 0.87]
+                : face.roof
+                  ? [0.8, 0.72, 0.68]
+                  : [0.72, 0.75, 0.79]
+    ).map((c) => c * light) as [number, number, number];
     const priority = face.slab || face.roof ? SLAB_DISPLAY_PRIORITY : 0;
     for (const triangle of faceTriangles(face.vertices.length))
       for (const index of triangle) {

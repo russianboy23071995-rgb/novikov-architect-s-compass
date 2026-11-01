@@ -11,6 +11,8 @@ const svgPoints = (points: readonly SectionPoint[]) =>
   points.map((p) => `${p.x},${-p.y}`).join(" ");
 const loopPath = (loops: readonly SectionPoint[][]) =>
   loops.map((loop) => `M${svgPoints(loop).replaceAll(" ", " L")} Z`).join(" ");
+/** Line weights of cut outlines: building parts heavy, frames medium, glass thin. */
+const stroke = { part: 1.75, frame: 1.1, glass: 0.6 } as const;
 const elevationText = (z: number) =>
   Math.abs(z) < 0.005 ? "±0,00" : `${z > 0 ? "+" : "−"}${Math.abs(z).toFixed(2).replace(".", ",")}`;
 
@@ -150,10 +152,12 @@ export function SectionDrawingView({
                   <path
                     d={loopPath(cut.loops)}
                     fillRule="evenodd"
-                    fill={paint.fill}
-                    fillOpacity={paint.fillOpacity}
+                    // Building parts in the cut fill; window and door frames and glass are
+                    // outlines over the background (docs/FENSTER_TUEREN.md, FT2).
+                    fill={cut.kind === "part" ? paint.fill : "var(--background)"}
+                    fillOpacity={cut.kind === "part" ? paint.fillOpacity : 1}
                     stroke="var(--foreground)"
-                    strokeWidth={1.75}
+                    strokeWidth={stroke[cut.kind]}
                     vectorEffect="non-scaling-stroke"
                   />
                 )}
@@ -163,7 +167,7 @@ export function SectionDrawingView({
                     points={svgPoints(piece)}
                     fill="none"
                     stroke="var(--foreground)"
-                    strokeWidth={1.75}
+                    strokeWidth={stroke[cut.kind]}
                     vectorEffect="non-scaling-stroke"
                   />
                 ))}

@@ -23,6 +23,9 @@ export type DisplaySurfaces = Pick<Solid, "min" | "max"> & {
     column?: true;
     /** Stair face; absent on walls (docs/TREPPE.md). */
     stair?: true;
+    /** Window or door element face (docs/FENSTER_TUEREN.md, FT2); glass marks the pane. */
+    opening?: "window" | "door";
+    glass?: true;
   }[];
 };
 

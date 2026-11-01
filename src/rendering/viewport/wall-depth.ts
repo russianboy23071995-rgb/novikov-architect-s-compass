@@ -17,6 +17,7 @@ export function nearestWallSurface(
   roof?: true;
   column?: true;
   stair?: true;
+  opening?: "window" | "door";
 } | null {
   if (![x, y].every(Number.isFinite) || Math.abs(x) > 1 || Math.abs(y) > 1) return null;
   let nearest: {
@@ -26,6 +27,7 @@ export function nearestWallSurface(
     roof?: true;
     column?: true;
     stair?: true;
+    opening?: "window" | "door";
   } | null = null;
   for (const face of solid.faces) {
     const points = face.vertices.map(project);
@@ -39,6 +41,7 @@ export function nearestWallSurface(
           ...(face.roof ? { roof: true as const } : {}),
           ...(face.column ? { column: true as const } : {}),
           ...(face.stair ? { stair: true as const } : {}),
+          ...(face.opening ? { opening: face.opening } : {}),
         };
     }
   }
@@ -56,6 +59,7 @@ export function prepareNearestWallSurface(
     roof: face.roof,
     column: face.column,
     stair: face.stair,
+    opening: face.opening,
     points: face.vertices.map((point) => [...project(point)] as Vector3),
   }));
   const fallback: number[] = [];
@@ -103,6 +107,7 @@ export function prepareNearestWallSurface(
             ...(face.roof ? { roof: true as const } : {}),
             ...(face.column ? { column: true as const } : {}),
             ...(face.stair ? { stair: true as const } : {}),
+            ...(face.opening ? { opening: face.opening } : {}),
           };
       }
     }
