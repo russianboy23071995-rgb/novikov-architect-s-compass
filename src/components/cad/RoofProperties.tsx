@@ -9,22 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
 import { ROOF_CUT_LABELS } from "./roof-labels";
+import { refusal } from "./refusal";
 import type { Selection } from "./bim-view";
 
 const metres = (value: number) =>
   value.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
-
-/** The readable German message of a refused change, also from a schema (Zod) issue list. */
-export function refusal(error: unknown): string {
-  const fallback = "Nicht übernommen: Werte prüfen.";
-  if (!(error instanceof Error)) return fallback;
-  if (!error.message.startsWith("[")) return error.message;
-  try {
-    return (JSON.parse(error.message) as { message?: string }[])[0]?.message ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 /** Roof fields in the shared properties bar; every change runs updateRoof once (one undo). */
 export function RoofProperties({

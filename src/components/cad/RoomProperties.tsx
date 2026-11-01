@@ -14,7 +14,7 @@ import { SETTINGS_WINDOW } from "./settings-window-size";
 import type { Project } from "@/domain/project/schema";
 import { Input } from "@/components/ui/input";
 import { PropertyForm } from "./PropertyForm";
-import { refusal } from "./RoofProperties";
+import { refusal } from "./refusal";
 import type { Selection } from "./bim-view";
 
 const squareMetres = (value: number) =>
