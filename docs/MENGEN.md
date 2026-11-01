@@ -34,3 +34,16 @@ Ist die Geschosshöhe unbekannt, bleiben die Höhen gebundener Stützen und Trep
 - Die Mengen stehen nicht im IFC-Export (eigener Folgeschritt).
 
 Nachweis ML1: 4 Tests in `src/application/quantities/schedule.test.ts`, Werte von Hand nachgerechnet: Wand 3 × 2,8 m mit Fenster 1,2 × 1,35 → netto 6,78 m², Tür und Fenster in einer zweiten Wand, Rechteck- und Rundstütze, Decke 4 × 5 m, Materialauszug für „KS 17,5 + WDVS 16“ (Putz zweimal), CSV-Zeilen. 1487 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert (`e42aa36e…`). Im Browser ist ML1 noch nicht sichtbar, die Abnahme dort folgt mit ML2.
+
+## ML2 + ML3 – Fenster „Bauteilliste“ und Materialauszug
+
+Menü **Organisation → Bauteilliste** öffnet ein schwebendes Fenster (`src/components/cad/ElementListPanel.tsx`) mit einem Reiter je Liste: Wände, Fenster, Türen, Stützen, Decken, Dächer, Treppen (jeweils mit Anzahl) und Materialien. Über der Liste steht der Rechenweg. Die Geschosslisten haben eine laufende Nummer, eine Gruppenzeile je Geschoss, Summen je Geschoss und eine Summe für das Projekt; summiert werden nur Spalten, bei denen eine Summe sinnvoll ist (Längen, Flächen, Volumen, Stück). Ein Klick oder Enter auf eine Zeile wählt das Bauteil aus und wechselt dafür ins richtige Geschoss. Der Materialauszug (ML3) hat keine Geschossgruppen und keine Auswahl. „Als CSV speichern“ speichert die Liste des offenen Reiters (`novikov-waende.csv`, `novikov-materialien.csv` …). Die Liste ändert nie das Modell; sie rechnet nur, solange das Fenster offen ist, und folgt jeder Änderung sofort.
+
+Rundung: kaufmännisch, mit einem winzigen Zuschlag gegen binäre Gleitkommafehler (6,78 × 0,025 = 0,1695 → 0,170 statt 0,169).
+
+Nachweis ML2/ML3 im Browser (Startprojekt, Wand 3 × 2,8 m, 36 cm, Fenster 1,2 × 1,35 m):
+
+- Reiter Wände: 3,00 m · 2,80 m · brutto 8,40 m² · Öffnungen 1,62 m² · netto 6,78 m² · 2,441 m³, Summenzeilen Erdgeschoss und Projekt.
+- Reiter Fenster: 1,200 × 1,350 m, Brüstung 0,900 m, 1,62 m², Wand „36 cm“, Stück 1. Ein Klick auf die Zeile wählt das Fenster aus.
+- Nach Zuweisung von „KS 17,5 + WDVS 16“ (offenes Fenster aktualisiert sich sofort): Wände zeigt den Aufbau; Materialien zeigt Putz 13,56 m² / 0,170 m³, Kalksandstein 6,78 m² / 1,187 m³, Wärmedämmung 6,78 m² / 1,085 m³. Danach mit Rückgängig zurückgesetzt.
+- Nicht im Browser geprüft: Speichern der CSV-Datei (ein Download, ohne Freigabe nicht ausgelöst). Den Dateiinhalt prüfen die Tests von ML1.

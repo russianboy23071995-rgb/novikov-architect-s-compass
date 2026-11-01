@@ -3,6 +3,7 @@ import { enclosedRoomOutline } from "@/application/rooms/enclosure";
 import { nextProjectRoomNumber } from "@/application/rooms/actions";
 import { isDefaultHeightLineList } from "@/domain/elements/room/height-line";
 import { RoomListPanel } from "./RoomListPanel";
+import { ElementListPanel } from "./ElementListPanel";
 import { ToolSettingsWindow } from "./ToolSettingsWindow";
 import { OpeningInsertFields } from "./OpeningInsertFields";
 import { setOpeningInsert } from "@/application/openings/inserts";
@@ -244,6 +245,7 @@ export function CadWorkspace({
   const [hatchLibraryOpen, setHatchLibraryOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [roomListOpen, setRoomListOpen] = useState(false);
+  const [elementListOpen, setElementListOpen] = useState(false);
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>("distance");
   const [tool, setTool] = useState<ToolId>("select");
   const [mode, setMode] = useState<ViewMode>("2D");
@@ -2550,6 +2552,12 @@ export function CadWorkspace({
         project={project}
         onSelectRoom={(id) => selectElement({ kind: "room", id })}
       />
+      <ElementListPanel
+        open={elementListOpen}
+        onOpenChange={setElementListOpen}
+        project={project}
+        onSelect={(target) => selectElement(target)}
+      />
       {roomSettingsOpen && (
         <RoomSettingsPanel
           open={roomSettingsOpen}
@@ -2693,6 +2701,12 @@ export function CadWorkspace({
             setDemandOpen(false);
             setModelError("");
             setRoomListOpen(true);
+          }}
+          onElementList={() => {
+            cancelInteraction();
+            setDemandOpen(false);
+            setModelError("");
+            setElementListOpen(true);
           }}
           layout={layout}
           navigatorOpen={navigatorOpen}
