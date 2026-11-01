@@ -13,18 +13,25 @@ const rect = (box: InsertBox): PlanRect => ({ x: box.x, y: box.y });
 
 /**
  * Plan symbol of a window element (docs/FENSTER_TUEREN.md, FT3), from the same boxes as the
- * 3D body: both jambs as cut frame profiles, the glass pane between them, the window boards
+ * 3D body: the upright members as cut profiles, the glass panes, the window boards
  * below the cut as seen outlines. Null for a plain opening.
  */
 export function windowPlanSymbol(
   window: BimWindow,
   wall: Wall,
-): { jambs: PlanRect[]; glass: PlanRect; sills: PlanRect[] } | null {
+): { jambs: PlanRect[]; glasses: PlanRect[]; sills: PlanRect[] } | null {
   if (!window.insert) return null;
   const boxes = windowInsertBoxes(window, wall);
   return {
-    jambs: boxes.filter((b) => b.part === "jamb").map(rect),
-    glass: rect(boxes.find((b) => b.part === "glass")!),
+    // Upright members are cut: frame jambs, a mullion, the stiles of the sashes (FL2).
+    jambs: boxes
+      .filter(
+        (b) =>
+          (b.part === "jamb" || b.part === "mullion" || b.part === "sash") &&
+          b.x[1] - b.x[0] < b.z[1] - b.z[0],
+      )
+      .map(rect),
+    glasses: boxes.filter((b) => b.part === "glass").map(rect),
     sills: boxes.filter((b) => b.part === "sill").map(rect),
   };
 }

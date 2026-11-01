@@ -135,3 +135,52 @@ test("in 3D the glass is see-through, frames and doors stay opaque; selected gla
     1,
   );
 });
+
+test("sashes: frame rings, mullion, transom and a pane per sash; cut in the section as outlines", async () => {
+  // docs/FENSTER_TUEREN.md, FL2. Opening 1,2 × 1,35 m from x 0,9, sill 0,9; frame 7 cm.
+  const { windowInsertBoxes } = await import("../../domain/elements/window/insert-geometry.ts");
+  const { withDivision } = await import("../../domain/elements/window/insert.ts");
+  const { windowPlanSymbol } = await import("./opening-plan-symbol.ts");
+  const s = storeyOf(project());
+  const wall = s.walls[0]!;
+  const window = (division: "double" | "transom") => ({
+    ...s.windows[0]!,
+    insert: withDivision(WINDOW_INSERT_DEFAULTS, division),
+  });
+  const parts = (boxes: { part: string }[]) =>
+    boxes.reduce<Record<string, number>>((n, b) => ({ ...n, [b.part]: (n[b.part] ?? 0) + 1 }), {});
+  const double = windowInsertBoxes(window("double"), wall);
+  assert.deepEqual(parts(double), { jamb: 2, rail: 2, mullion: 1, sash: 8, glass: 2, sill: 2 });
+  const mullion = double.find((b) => b.part === "mullion")!;
+  assert.ok(near(mullion.x, [1.46, 1.54]));
+  // Each pane: (1,06 − 0,08) / 2 = 0,49 m sash width, less two 6 cm sash stiles.
+  for (const glass of double.filter((b) => b.part === "glass"))
+    assert.ok(Math.abs(glass.x[1] - glass.x[0] - 0.37) < 1e-9);
+  const transom = windowInsertBoxes(window("transom"), wall);
+  assert.deepEqual(parts(transom), { jamb: 2, rail: 2, mullion: 1, sash: 4, glass: 2, sill: 2 });
+  // Top light 40 cm clear below the head rail (2,18), transom 8 cm below it.
+  assert.ok(near(transom.find((b) => b.part === "mullion")!.z, [1.7, 1.78]));
+  assert.ok(transom.some((b) => b.part === "glass" && near(b.z, [1.78, 2.18])));
+  assert.ok(transom.some((b) => b.part === "sash" && near(b.z, [0.97, 1.7])));
+  // Plan: cut uprights are the frame jambs, the mullion and the sash stiles; both panes shown.
+  const plan = windowPlanSymbol(window("double"), wall)!;
+  assert.equal(plan.jambs.length, 7);
+  assert.equal(plan.glasses.length, 2);
+  // Section through the transom window: sill rail, sash rails, transom, head rail and both
+  // boards are frame outlines, top light and sash pane glass outlines.
+  const p = project();
+  const withTransom = {
+    ...p,
+    storeys: p.storeys.map((st) => ({ ...st, windows: [window("transom")] })),
+  };
+  const drawing = sectionDrawing(withTransom, {
+    id: "s",
+    name: "S",
+    mark: "A",
+    start: { x: 1.5, y: -1 },
+    end: { x: 1.5, y: 1 },
+    look: "left",
+  });
+  assert.equal(drawing.cuts.find((c) => c.kind === "frame")!.loops.length, 7);
+  assert.equal(drawing.cuts.find((c) => c.kind === "glass")!.loops.length, 2);
+});

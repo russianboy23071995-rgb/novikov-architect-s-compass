@@ -52,8 +52,9 @@ test("window in plan: jambs of the frame, the pane between them, boards beyond t
   assert.ok(close(symbol.jambs[0]!.x, [0.9, 0.97]));
   assert.ok(close(symbol.jambs[1]!.x, [2.03, 2.1]));
   assert.ok(close(symbol.jambs[0]!.y, [-0.04, 0.04]));
-  assert.ok(close(symbol.glass.x, [0.97, 2.03]));
-  assert.ok(close(symbol.glass.y, [-0.012, 0.012]));
+  assert.equal(symbol.glasses.length, 1);
+  assert.ok(close(symbol.glasses[0]!.x, [0.97, 2.03]));
+  assert.ok(close(symbol.glasses[0]!.y, [-0.012, 0.012]));
   // Outside (right of the wall direction, y < 0) 4 cm beyond the face, inside 2 cm.
   assert.ok(close(symbol.sills[0]!.y, [-0.16, -0.04]));
   assert.ok(close(symbol.sills[1]!.y, [0.04, 0.14]));
