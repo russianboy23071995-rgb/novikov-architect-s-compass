@@ -5,6 +5,7 @@ import { DimensionGraphic } from "./DimensionGraphic";
 import { StairPlanGraphic } from "./StairPlanGraphic";
 import { SectionPlanGraphic } from "./SectionPlanGraphic";
 import { LineLengthHelper } from "./LineLengthHelper";
+import { acceptsTraceCandidate } from "@/application/views/tracing";
 import type { LocalSnapSources } from "@/application/snapping/local-sources";
 import type { LengthDirection } from "@/application/lines/actions";
 import {
@@ -522,6 +523,7 @@ export function BimPlan({
         activeReference,
         activeReferences,
         guideDirections,
+        ...(traceSnap ? { acceptCandidate: acceptsTraceCandidate(traceSnap.ids) } : {}),
       },
       { ortho, shift, featureSnap: endpointSnap },
     );

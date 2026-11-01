@@ -2,6 +2,7 @@ import type { Point, Project } from "../../domain/project/schema.ts";
 import { wallBody } from "../../domain/elements/wall/body.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
 import { getLocalSnapSources } from "../snapping/local-sources.ts";
+import type { SnapCandidate } from "../../constraints/snapping/engine.ts";
 
 /**
  * Transparency trace (Transparenzpause, docs/TRANSPARENZPAUSE.md, S4): one other storey shown
@@ -86,4 +87,18 @@ export function tracingSnap(project: Project, storeyId: string) {
     sources: getLocalSnapSources(traced),
     ids: new Set([...storey.walls.map((w) => w.id), ...(storey.columns ?? []).map((c) => c.id)]),
   };
+}
+
+/**
+ * Candidate filter while the trace snaps: a wall of the trace is never a T-join host. Its axis
+ * would otherwise offer the perpendicular foot of the cursor, which wins just before the wall end
+ * and leaves a new wall a millimetre short (2,9988 m instead of 3 m).
+ */
+export function acceptsTraceCandidate(ids: ReadonlySet<string>) {
+  return (candidate: SnapCandidate) =>
+    !(
+      candidate.sourceFeature === "t-axis" &&
+      candidate.sourceEntityId !== null &&
+      ids.has(candidate.sourceEntityId)
+    );
 }
