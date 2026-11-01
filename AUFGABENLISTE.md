@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 01.11.2026 · main nach PR547
+**Stand:** 01.11.2026 · main nach PR548
 
 ## Deine Wünsche
 
@@ -67,7 +67,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 | ID  | Aufgabe                                                            | Prio | Status                                                                                 | Bezug               |
 | --- | ------------------------------------------------------------------ | ---- | -------------------------------------------------------------------------------------- | ------------------- |
-| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | Fenster-/Türelemente mit Körper und Laibung im IFC (FT4, PR547); Archicad-Prüfung mit ifc-abnahme/FT4-Fenster-Tueren.ifc offen | T_IFC_ACCEPTANCE.md |
+| L21 | Fenster/Türen im IFC mit Maßen, damit Archicad Breite/Höhe erkennt |      | Fenster-/Türelemente mit Körper und Laibung im IFC (FT4, PR547), in Archicad dargestellt; Glas durchsichtig (G1, PR548); Beschriftung Breite/Höhe zeigt in Archicad weiter 0,00 (G2 offen) | T_IFC_ACCEPTANCE.md |
 | L22 | IFC-Import bzw. IFC als Referenz                                   |      | offen                                                                                  | §6 Abschnitt 7      |
 | L23 | PDF- und Bild-Unterlagen als Referenz, DXF/DWG                     |      | offen                                                                                  | §6 Abschnitt 7      |
 
