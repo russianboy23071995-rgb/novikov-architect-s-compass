@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 01.11.2026 · main nach PR539
+**Stand:** 01.11.2026 · main nach PR540
 
 ## Deine Wünsche
 
@@ -42,7 +42,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 
 | ID  | Aufgabe                               | Prio | Status | Bezug          |
 | --- | ------------------------------------- | ---- | ------ | -------------- |
-| L11 | Schnitte und Ansichten aus dem Modell |      | Schnitt SC1–SC3 erledigt (PR537–539: Tabs, Werkzeug, Schnittzeichnung); Ansichten, Bemaßung im Schnitt, Abbild offen  | §6 Abschnitt 3 |
+| L11 | Schnitte und Ansichten aus dem Modell |      | Schnitt SC1–SC4 erledigt (PR537–540: Tabs, Werkzeug, Schnittzeichnung, Symbolgröße); Ansichten, Bemaßung im Schnitt, Abbild offen  | §6 Abschnitt 3 |
 | L12 | Texte und assoziative Bemaßung        |      | Maßkette mit Bearbeiten und Darstellung (PR528–529, 533), Text T1–T2 mit Eingabefeld (PR530–532) erledigt; freie Schriften, AI-Ketten offen | §6 Abschnitt 3 |
 | L13 | Planlayout mit Plankopf, Papiergrößen |      | offen  | §6 Abschnitt 3 |
 | L14 | Maßhaltiger PDF-Export und Druck      |      | offen  | §6 Abschnitt 3 |
