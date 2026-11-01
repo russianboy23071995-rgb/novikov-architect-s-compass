@@ -143,6 +143,13 @@ import type { EditAction } from "@/application/direct-edit/session";
 import { ELEVATIONS_FOLDER_ID, SECTIONS_FOLDER_ID, ProjectNavigator } from "./ProjectNavigator";
 import { StatusBar } from "./StatusBar";
 import { ToolRail } from "./ToolRail";
+import { TracingPanel } from "./TracingPanel";
+import {
+  tracingDefaults,
+  tracingOutlines,
+  tracingSnap,
+  type Tracing,
+} from "@/application/views/tracing";
 import { setLineSegmentLength } from "@/application/lines/actions";
 import { ToolRailCustomizer } from "./ToolRailCustomizer";
 import { useToolLayout } from "./useToolLayout";
@@ -239,6 +246,8 @@ export function CadWorkspace({
   // Elevation tool (docs/ANSICHTEN.md, A1): same click flow and state, own defaults.
   const [elevationDefaults, setElevationDefaults] = useState(ELEVATION_TOOL_DEFAULTS);
   const [sectionWindow, setSectionWindow] = useState<string | null>(null);
+  // Transparency trace (S4): session state only; the storey falls back to the default.
+  const [tracingState, setTracing] = useState<Tracing | null>(null);
   // Selected section line in plan (SC5): grips to move it, lengthen or shorten it.
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [layout, setLayout] = useState<ViewportLayout>("single");
@@ -850,6 +859,34 @@ export function CadWorkspace({
       setModelError(error instanceof Error ? error.message : "Löschen nicht möglich.");
     }
   };
+  // Transparency trace (S4): a storey that no longer exists or is now the working storey falls
+  // back to the default; outlines and snap sources follow the model.
+  const tracing = (() => {
+    const base = tracingState ?? tracingDefaults(project);
+    const working = project.workingStoreyId ?? project.groundStoreyId;
+    const valid =
+      base.storeyId &&
+      base.storeyId !== working &&
+      project.storeys.some((s) => s.id === base.storeyId);
+    return valid ? base : { ...base, storeyId: tracingDefaults(project).storeyId };
+  })();
+  const tracingView = useMemo(() => {
+    if (!tracing.enabled || !tracing.storeyId || mode !== "2D") return null;
+    return {
+      ...tracingOutlines(project, tracing.storeyId),
+      color: tracing.color,
+      opacity: tracing.opacity,
+      snap: tracing.snap ? tracingSnap(project, tracing.storeyId) : null,
+    };
+  }, [
+    project,
+    tracing.enabled,
+    tracing.storeyId,
+    tracing.color,
+    tracing.opacity,
+    tracing.snap,
+    mode,
+  ]);
   const deleteShortcut = useRef<(() => void) | null>(null);
   const selectedSection = (project.sections ?? []).find((s) => s.id === selectedSectionId);
   deleteShortcut.current =
@@ -3020,6 +3057,7 @@ export function CadWorkspace({
                       onSectionSelect={tool === "select" ? selectSection : undefined}
                       onSectionLine={moveSectionLine}
                       selectionAnchor={pickedPoint.anchor}
+                      tracing={tracingView}
                       onLineLength={(lineId, segment, length, direction) => {
                         try {
                           dispatchEditing({
@@ -3394,7 +3432,10 @@ export function CadWorkspace({
             </FloatingPanel>
           )}
           {navigatorShown && (
-            <div className="absolute bottom-2 right-2 top-2 z-20" style={{ width: navigatorWidth }}>
+            <div
+              className="absolute bottom-2 right-2 top-2 z-20 flex flex-col gap-2"
+              style={{ width: navigatorWidth }}
+            >
               <div
                 role="separator"
                 aria-orientation="vertical"
@@ -3408,7 +3449,7 @@ export function CadWorkspace({
                   if (stage) setNavigatorWidth(stage.right - PALETTE_GAP - event.clientX);
                 }}
               />
-              <>
+              <div className="min-h-0 flex-1">
                 <ProjectNavigator
                   onBuildingChange={(base, change) =>
                     dispatchEditing({ type: "building", base, change })
@@ -3493,7 +3534,8 @@ export function CadWorkspace({
                     );
                   }}
                 />
-              </>
+              </div>
+              <TracingPanel project={project} value={tracing} onChange={setTracing} />
             </div>
           )}
         </div>

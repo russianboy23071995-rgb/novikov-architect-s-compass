@@ -145,7 +145,18 @@ const overlaps = (a: Readonly<Box2>, b: Readonly<Box2>) =>
  */
 export function combineSourceIndexes(parts: readonly SourceIndex[]) {
   const allSegments = Object.freeze(parts.flatMap((p) => p.allSegments));
+  // Union of the part extents, so a combined index can itself be combined (trace, S4).
+  const boxes = parts.flatMap((p) => (p.bounds ? [p.bounds] : []));
+  const bounds: Readonly<Box2> | null = boxes.length
+    ? Object.freeze({
+        minX: Math.min(...boxes.map((b) => b.minX)),
+        maxX: Math.max(...boxes.map((b) => b.maxX)),
+        minY: Math.min(...boxes.map((b) => b.minY)),
+        maxY: Math.max(...boxes.map((b) => b.maxY)),
+      })
+    : null;
   return Object.freeze({
+    bounds,
     query(
       cursor: Point2,
       scale: number | ScreenMetric,

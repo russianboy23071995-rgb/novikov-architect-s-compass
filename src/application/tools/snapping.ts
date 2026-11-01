@@ -11,6 +11,7 @@ import type { ScreenMetric } from "../../geometry/projections/screen-metric.ts";
 import type { Project } from "../../domain/project/schema.ts";
 import type { LayerVisibilityContext, createLayerVisibilityPolicy } from "../layers/visibility.ts";
 import { getLocalSnapSources } from "../snapping/local-sources.ts";
+import { combineSourceIndexes } from "../../constraints/snapping/local-source-index.ts";
 
 type SourceEligibility = {
   isCurrent: () => boolean;
@@ -191,3 +192,26 @@ export function drawingSnapPolicy(origin: Point2, path?: readonly Point2[]): Anc
 }
 // Draft points are immutable interaction identities, just like pinned edit sessions.
 const drawingPolicies = new WeakMap<object, AnchoredSnapPolicy>();
+
+/**
+ * Snap query of the working storey plus a transparency trace (docs/TRANSPARENZPAUSE.md, S4):
+ * the trace's walls and columns join the sources; their ids are allowed although they belong
+ * to another storey than the visibility policy checks.
+ */
+export function createTracedToolSourceQuery(
+  project: Project,
+  visibility: ReturnType<typeof createLayerVisibilityPolicy>,
+  context: LayerVisibilityContext,
+  policy: ToolSnapPolicy | null,
+  trace: { sources: LocalSnapSources; ids: ReadonlySet<string> },
+) {
+  return createToolSourceQuery(
+    combineSourceIndexes([getLocalSnapSources(project), trace.sources]),
+    policy,
+    DENSE_SEGMENT_LIMIT,
+    {
+      isCurrent: () => visibility.isCurrent(project, context),
+      allowsEntity: (id) => trace.ids.has(id) || visibility.evaluate(project, context, id).eligible,
+    },
+  );
+}

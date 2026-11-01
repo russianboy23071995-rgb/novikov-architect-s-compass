@@ -277,6 +277,7 @@
     "benchmarks/snap-parts-reuse.test.ts",
     "src/application/doors/actions.test.ts",
     "src/application/lines/length.test.ts",
+    "src/application/views/tracing.test.ts",
     "src/application/openings/inserts.test.ts",
     "src/rendering/viewport/door-symbol.test.ts",
     "src/interop/ifc/door.test.ts",
