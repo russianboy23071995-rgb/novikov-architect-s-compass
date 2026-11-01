@@ -194,6 +194,11 @@ import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
 import { SectionDrawingView } from "./SectionDrawingView";
+import {
+  addHeightMarks,
+  removeHeightMarks,
+  updateHeightMarks,
+} from "@/application/sections/height-marks";
 
 export function CadWorkspace({
   layerVisibility,
@@ -573,7 +578,8 @@ export function CadWorkspace({
 
   const selectTool = (next: ToolId) => {
     cancelInteraction();
-    setActiveSectionId(null);
+    // Selecting and the dimension tool (height marks, BS2) also work in a section tab.
+    if (next !== "select" && next !== "dimension") setActiveSectionId(null);
     setTool(next);
     if (next === "window" || next === "door" || next === "measure") setDemandOpen(false);
     if (
@@ -1631,6 +1637,7 @@ export function CadWorkspace({
       return;
     }
     const { orientation, layerId, terminator, units, textSize } = toolDefaults.dimension;
+    if (orientation === "height") return;
     try {
       dispatchEditing({
         type: "project",
@@ -1693,6 +1700,12 @@ export function CadWorkspace({
           "Eine Maßkette braucht mindestens zwei verschiedene Punkte. Zum Entfernen die ganze Kette löschen.",
         );
       }
+      return;
+    }
+    if (tool === "dimension" && toolDefaults.dimension.orientation === "height") {
+      setModelError(
+        "Höhenkoten im Schnitt- oder Ansichts-Tab setzen (Tab über den Navigator öffnen).",
+      );
       return;
     }
     if (tool === "dimension") {
@@ -2050,6 +2063,16 @@ export function CadWorkspace({
     setDemandOpen(false);
     setModelError("");
     setSelectedSectionId(id);
+  };
+  // Height marks in a section or elevation tab (docs/SCHNITT.md, BS2): each change one undo step.
+  const changeHeightMarks = (change: () => Project, notice: string) => {
+    try {
+      dispatchEditing({ type: "project", project: change() });
+      setModelError("");
+      showNotice(notice);
+    } catch (error) {
+      setModelError(error instanceof Error ? error.message : "Höhenkoten nicht möglich.");
+    }
   };
   const moveSectionLine = (id: string, line: { start: Point; end: Point }) => {
     try {
@@ -2753,6 +2776,29 @@ export function CadWorkspace({
                         cutFill={cutFill}
                         denominator={planDenominator(project)}
                         onSettings={() => openSectionWindow(section.id)}
+                        heightTool={
+                          tool === "dimension" && toolDefaults.dimension.orientation === "height"
+                            ? { kind: toolDefaults.dimension.heightKind ?? "shell" }
+                            : null
+                        }
+                        onAddHeightMarks={(marks) =>
+                          changeHeightMarks(
+                            () => addHeightMarks(project, section.id, marks),
+                            `${marks.points.length} Höhenkote(n) erstellt`,
+                          )
+                        }
+                        onUpdateHeightMarks={(id, changes) =>
+                          changeHeightMarks(
+                            () => updateHeightMarks(project, section.id, id, changes),
+                            changes.kind ? "Kotenart geändert" : "Höhenkoten verschoben",
+                          )
+                        }
+                        onRemoveHeightMarks={(id) =>
+                          changeHeightMarks(
+                            () => removeHeightMarks(project, section.id, id),
+                            "Höhenkoten gelöscht",
+                          )
+                        }
                       />
                     </div>
                   );
@@ -3111,11 +3157,15 @@ export function CadWorkspace({
                           : undefined
                       }
                       dimensionDraft={
-                        tool === "dimension" && dimensionDraft
+                        tool === "dimension" &&
+                        dimensionDraft &&
+                        (dimensionDraft.edit || toolDefaults.dimension.orientation !== "height")
                           ? {
                               orientation:
                                 dimensionDraft.edit?.orientation ??
-                                toolDefaults.dimension.orientation,
+                                (toolDefaults.dimension.orientation === "height"
+                                  ? "horizontal"
+                                  : toolDefaults.dimension.orientation),
                               line: dimensionDraft.line,
                               points: dimensionDraft.points,
                               mode: dimensionDraft.edit?.mode,

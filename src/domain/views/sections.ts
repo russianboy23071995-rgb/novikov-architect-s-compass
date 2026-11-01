@@ -42,6 +42,25 @@ export function convertSectionSymbolSize(
   return { unit, value: Math.round(value * 10000) / 10000 };
 }
 
+/**
+ * Height marks set in a section or elevation drawing (docs/SCHNITT.md, BS2): one column of marks
+ * at x along the line, one per measured point (x along the line, z height above ±0,00). Shell
+ * marks are filled, finish marks open (DIN 1356-1). They belong to the drawing and do not follow
+ * later model changes, like dimension chains in plan.
+ */
+export const sectionHeightMarksSchema = z
+  .object({
+    id: z.string().min(1),
+    x: z.number().finite(),
+    points: z
+      .array(z.object({ x: z.number().finite(), z: z.number().finite() }).strict())
+      .min(1)
+      .max(200),
+    kind: z.enum(["shell", "finish"]),
+  })
+  .strict();
+export type SectionHeightMarks = z.infer<typeof sectionHeightMarksSchema>;
+
 export const sectionSchema = z
   .object({
     id: z.string().min(1),
@@ -53,6 +72,8 @@ export const sectionSchema = z
     symbolSize: sectionSymbolSizeSchema.optional(),
     /** Absent: a section; "elevation": a view from outside without cut parts (A1). */
     kind: z.enum(["section", "elevation"]).optional(),
+    /** Height marks of the drawing (BS2); absent: none. */
+    heightMarks: z.array(sectionHeightMarksSchema).max(500).optional(),
   })
   .strict()
   .refine((s) => Math.hypot(s.end.x - s.start.x, s.end.y - s.start.y) > 1e-6, {
