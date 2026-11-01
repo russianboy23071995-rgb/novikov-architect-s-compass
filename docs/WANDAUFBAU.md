@@ -41,3 +41,23 @@ Grenzen SA2: Bei T-Stößen und an Ecken mit unterschiedlichen Aufbauten enden d
 - Code: `withWallLayers` in `src/rendering/viewport/section-drawing.ts` (Feld `layers` an `SectionCut`), `src/components/cad/SectionLayerGraphic.tsx`, Einbindung in `SectionDrawingView.tsx`.
 
 Nachweis SA3: 1481 Tests grün, Typprüfung, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Neuer Test in `src/rendering/viewport/section-drawing.test.ts` (Reihenfolge, Lage der Grenzen auf 1e-9 m, Spiegelung, Schnitt längs der Wand, ohne Aufbau unverändert). Browser: Schnitt A-A quer durch die zweischalige Wand zeigt Innenputz, KS, Dämmung, Luftschicht, Klinker.
+
+## SA4: IFC
+
+- Für jede Wand mit Aufbau schreibt der IFC-Export (IFC4) den Schichtaufbau nach Standard:
+  - `IfcMaterial` je benutztem Material (einmal je Datei), `IfcMaterialLayer` je Schicht mit Dicke und Kategorie (`Insulation` bei Dämm-Schraffur, sonst `LoadBearing` bei „tragend“), `IfcMaterialLayerSet` je Aufbau mit dessen Namen.
+  - `IfcMaterialLayerSetUsage` entlang der y-Achse der Wand (`.AXIS2.`): erste Schicht (außen) an der rechten Wandseite, also `.POSITIVE.` ab −Stärke/2; gespiegelte Wände `.NEGATIVE.` ab +Stärke/2. Wände mit gleichem Aufbau und gleicher Seite teilen sich eine Nutzung.
+  - `IfcRelAssociatesMaterial` verbindet die Wände mit ihrer Nutzung (GUID stabil aus Aufbau und Seite).
+- Geometrie, Öffnungen und Eigenschaften der Wand bleiben unverändert; Wände ohne Aufbau bekommen kein Material.
+- Archicad-Testdatei: `Claude_Ablage_Code/ifc-abnahme/SA4-Wandaufbau.ifc` (erzeugt mit `benchmarks/assembly-ifc-acceptance.ts`): Raum 6 × 4 m aus der Fensterabnahme mit Fenstern und Tür, Außenwände „KS 17,5 + WDVS 16“ (36 cm, Putz außen), freistehende Innenwand „Trockenbau 10“.
+
+Nachweis SA4: 1483 Tests grün (2 neu in `src/interop/ifc/assembly.test.ts`: Materialien einmal, Schichtdicken und Kategorien, Nutzung normal und gespiegelt, Zuordnung der Wände, stabile Datei, ohne Aufbau kein Material), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (die Modelle haben keinen Aufbau). Kein Browsertest für SA4: Der Export ist durch Tests und die Testdatei belegt, ein Download aus dem Browser hätte nichts zusätzlich gezeigt.
+
+Offen: Archicad-Prüfung der Testdatei durch den Nutzer (wird die Wand als Mehrschicht-Bauteil mit den richtigen Schichten erkannt, liegt Putz/WDVS außen?). Nach Quellen liest Archicad `IfcMaterialLayerSetUsage` als Mehrschicht-Bauteil; belegt ist das erst mit dem Test.
+
+## Grenzen von L07 insgesamt
+
+- Keine Verschneidung der Schichten nach Vorrang an T-Stößen und an Ecken mit ungleichen Aufbauten.
+- 3D zeigt die Wand weiter als einen Körper in einer Farbe.
+- Decken und Dächer haben noch keinen Aufbau.
+- Schraffur im Grundriss in Bildschirmgröße (Papiergröße mit dem Planexport L14).

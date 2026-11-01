@@ -1,4 +1,9 @@
 import { stairGeometry } from "../../domain/elements/stair/model.ts";
+import {
+  assemblyThickness,
+  projectMaterials,
+  projectWallAssemblies,
+} from "../../domain/elements/wall/assembly.ts";
 import { stairBody } from "../../domain/elements/stair/body.ts";
 import { columnLevels } from "../../domain/elements/column/model.ts";
 import { IFC_RENOVATION_STATUS, wallRenovation } from "../../domain/elements/wall/renovation.ts";
@@ -511,6 +516,63 @@ export async function writeIfc(
   };
   await properties(projectRef, "project", project.id, [["SchemaVersion", "IFCINTEGER(1)"]]);
   const levels = resolveStoreyLevels(project.storeys, project.groundStoreyId);
+  // Wall build-ups (docs/WANDAUFBAU.md, SA4): one IfcMaterial per material and one
+  // IfcMaterialLayerSet per assembly, written on first use; each wall gets a layer set usage
+  // along its y axis (the body's left normal), the first layer on its right face, or on its left
+  // face when flipped. Walls sharing assembly and side share one usage.
+  const library = {
+    materials: projectMaterials(project),
+    assemblies: projectWallAssemblies(project),
+  };
+  const ifcMaterials = new Map<string, string>();
+  const layerSets = new Map<string, string>();
+  const usages = new Map<string, { usage: string; walls: string[] }>();
+  const materialRef = (id: string) => {
+    let ref = ifcMaterials.get(id);
+    if (!ref) {
+      const m = library.materials.find((x) => x.id === id)!;
+      ref = add("IFCMATERIAL", `${label(m.name)},$,$`);
+      ifcMaterials.set(id, ref);
+    }
+    return ref;
+  };
+  const wallMaterial = (wall: (typeof project.storeys)[number]["walls"][number], ref: string) => {
+    const assembly = wall.assemblyId
+      ? library.assemblies.find((a) => a.id === wall.assemblyId)
+      : undefined;
+    if (!assembly) return;
+    let set = layerSets.get(assembly.id);
+    if (!set) {
+      const layers = assembly.layers.map((l) => {
+        const m = library.materials.find((x) => x.id === l.materialId)!;
+        // Insulation stays insulation even as the core of a dry wall.
+        const category =
+          m.pattern === "insulation" ? "'Insulation'" : l.core ? "'LoadBearing'" : "$";
+        return add(
+          "IFCMATERIALLAYER",
+          `${materialRef(l.materialId)},${real(l.thickness)},.U.,${label(m.name)},$,${category},$`,
+        );
+      });
+      set = add("IFCMATERIALLAYERSET", `(${layers.join(",")}),${label(assembly.name)},$`);
+      layerSets.set(assembly.id, set);
+    }
+    const key = `${assembly.id}|${wall.assemblyFlipped ? "flipped" : "plain"}`;
+    let entry = usages.get(key);
+    if (!entry) {
+      const half = assemblyThickness(assembly) / 2;
+      entry = {
+        usage: add(
+          "IFCMATERIALLAYERSETUSAGE",
+          wall.assemblyFlipped
+            ? `${set},.AXIS2.,.NEGATIVE.,${real(half)},$`
+            : `${set},.AXIS2.,.POSITIVE.,${real(-half)},$`,
+        ),
+        walls: [],
+      };
+      usages.set(key, entry);
+    }
+    entry.walls.push(ref);
+  };
   for (const floor of project.storeys) {
     const level = levels.find((l) => l.storeyId === floor.id)!;
     const elevation = level.elevation;
@@ -561,6 +623,7 @@ export async function writeIfc(
         `${await guid("wall", wall.id)},$,${label(wall.id)},$,$,${wallPlacement},${wallShape},${label(wall.id)},.NOTDEFINED.`,
       );
       elements.push(wallRef);
+      wallMaterial(wall, wallRef);
       // IFC renovation status (docs/BAUZUSTAND.md): NEW / EXISTING / DEMOLISH.
       await properties(
         wallRef,
@@ -971,6 +1034,11 @@ export async function writeIfc(
         `${await guid("containment", floor.id)},$,$,$,(${elements.join(",")}),${storey}`,
       );
   }
+  for (const [key, { usage, walls }] of usages)
+    add(
+      "IFCRELASSOCIATESMATERIAL",
+      `${await guid("material-usage", key)},$,$,$,(${walls.join(",")}),${usage}`,
+    );
   // IFC4: element types are declared in the project context.
   if (types.length)
     add(
