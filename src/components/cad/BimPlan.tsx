@@ -78,6 +78,7 @@ import { validateSimplePolygon } from "@/geometry/polygons/simple-polygon";
 import { closedContour } from "@/application/direct-edit/contour";
 import { pointsCompatible } from "@/geometry/tolerances/model";
 import type { Hatch } from "@/domain/elements/hatch/model";
+import { assemblyLibraryOf } from "@/rendering/viewport/wall-layers";
 import { isLayerVisible } from "@/application/layers/visibility";
 import type { ReferenceSelectionBinding } from "./useReferenceSelection";
 import { ReferenceSelectionPanel } from "./ReferenceSelectionPanel";
@@ -704,16 +705,22 @@ export function BimPlan({
     () => drawingWallVisibility(project, shown, visibility),
     [project, shown, visibility],
   );
+  // Library identity changes only when the project's library does (docs/WANDAUFBAU.md).
+  const library = useMemo(
+    () => assemblyLibraryOf(project),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [project.materials, project.wallAssemblies],
+  );
   const scene = useMemo(
-    () => derivePlanScene(shown, allowsShown, project.hatchPatterns),
-    [shown, allowsShown, project.hatchPatterns],
+    () => derivePlanScene(shown, allowsShown, project.hatchPatterns, library),
+    [shown, allowsShown, project.hatchPatterns, library],
   );
   const previewScene = useMemo(
     () =>
       geometryPreview
-        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns)
+        ? derivePlanScene(geometryPreview.geometry, allowsShown, project.hatchPatterns, library)
         : null,
-    [geometryPreview, allowsShown, project.hatchPatterns],
+    [geometryPreview, allowsShown, project.hatchPatterns, library],
   );
   const sceneRuns = useMemo(
     () => planSceneRuns(scene, placement?.geometryPreview?.replacedIds ?? []),
