@@ -8,17 +8,12 @@ import { createPortal } from "react-dom";
 import { ViewScaleControl } from "./ViewScaleControl";
 import { assertWorkingViewCurrent } from "@/application/views/working-context";
 import { useEffect, useRef, useState } from "react";
-import {
-  fitPlanInset,
-  planScaleBar,
-  zoomPlan,
-  type ScreenInsets,
-} from "@/rendering/viewport/plan-camera";
+import { fitPlanInset, zoomPlan, type ScreenInsets } from "@/rendering/viewport/plan-camera";
 import type { PlanCamera } from "@/rendering/viewport/plan-camera";
 import { planBounds } from "./bim-view";
 import { BimSolidView } from "./BimSolidView";
 import { initialCamera } from "@/lib/bim/geometry";
-import { Box, Crosshair, Expand, Focus, Hand, Minus, Orbit, Plus, RotateCcw } from "lucide-react";
+import { Focus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -40,7 +35,6 @@ type CadViewportProps = BimPlanProps & {
   grid: boolean;
   active: boolean;
   onActivate: () => void;
-  onFullscreen: () => void;
 };
 
 function MiniControl({
@@ -92,7 +86,6 @@ export function CadViewport({
   grid,
   active,
   onActivate,
-  onFullscreen,
   ...model
 }: CadViewportProps) {
   assertWorkingViewCurrent(model.viewContext, model.project);
@@ -120,18 +113,11 @@ export function CadViewport({
     if (is3D && !solidFrame)
       setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
   }, [is3D, solidFrame, model.project]);
-  const [pan, setPan] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
   const initialBounds = useRef(planBounds(model.project, model.viewContext.visibility));
   const savedFraming = useRef(documentFraming);
   const [size, setSize] = useState({ width: 800, height: 400 });
   const [planCamera, setPlanCamera] = useState<PlanCamera | null>(null);
-  const [planPan, setPlanPan] = useState(false);
-  const placing = Boolean(model.placement);
-  useEffect(() => {
-    setPlanPan(false);
-    setPan(false);
-  }, [model.drawing, model.editSession, placing]);
   useEffect(() => {
     const element = surface.current;
     if (!element) return;
@@ -166,7 +152,6 @@ export function CadViewport({
     if (active && (is3D || planCamera))
       onPlanCapture?.(is3D ? null : capturePlanFraming(plan, size));
   }, [active, is3D, onPlanCapture, plan, planCamera, size]);
-  const bar = planScaleBar(plan.pixelsPerMetre);
   const fit = () => {
     if (is3D) {
       setSolidFrame(createProjectionFrame(buildBuildingSolid(model.project)));
@@ -228,9 +213,6 @@ export function CadViewport({
           event.stopPropagation();
         }
       }}
-      onKeyDownCapture={(event) => {
-        if (event.key === "Escape") setPlanPan(false);
-      }}
       aria-label={`${label} viewport`}
     >
       {/* No background grid behind the 3D view (user decision 01.11.2026); the plan keeps its grid. */}
@@ -245,7 +227,7 @@ export function CadViewport({
             {...(solidFrame ? { projectionFrame: solidFrame } : {})}
             onCamera={setCamera}
             snap={model.snap}
-            pan={pan}
+            pan={false}
             onSelect={model.onSelect}
           />
         ) : planCamera ? (
@@ -257,7 +239,7 @@ export function CadViewport({
             camera={plan}
             viewSize={size}
             onCamera={setPlanCamera}
-            pan={planPan}
+            pan={false}
             grid={grid}
           />
         ) : null}
@@ -266,44 +248,7 @@ export function CadViewport({
         className="pointer-events-none absolute [&>*:not(.pointer-events-none)]:pointer-events-auto"
         style={insets}
       >
-        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-popover/60 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-2xl">
-          <MiniControl
-            label="Pan"
-            pressed={is3D ? pan : planPan}
-            onClick={() => (is3D ? setPan((value) => !value) : setPlanPan((value) => !value))}
-          >
-            <Hand />
-          </MiniControl>
-          <MiniControl
-            label="Orbit"
-            disabled={!is3D || !!model.editSession}
-            onClick={() => setPan(false)}
-          >
-            <Orbit />
-          </MiniControl>
-          <MiniControl label="Zoom in" onClick={() => zoom(1.2)}>
-            <Plus />
-          </MiniControl>
-          <MiniControl label="Zoom out" onClick={() => zoom(1 / 1.2)}>
-            <Minus />
-          </MiniControl>
-          <MiniControl label="Fit view" onClick={fit}>
-            <Focus />
-          </MiniControl>
-          <MiniControl label="Fullscreen" onClick={onFullscreen}>
-            <Expand />
-          </MiniControl>
-        </div>
-        {is3D ? (
-          <CameraAxes camera={camera} />
-        ) : (
-          <div className="absolute bottom-[75px] left-4 flex items-end gap-0.5 font-mono text-[8px]">
-            <span className="block h-7 w-px bg-axis-z" />
-            <span className="block h-px w-7 bg-axis-x" />
-            <span className="text-axis-x">X</span>
-            <span className="-ml-10 -translate-y-5 text-axis-z">Y</span>
-          </div>
-        )}
+        {is3D && <CameraAxes camera={camera} />}
         {active &&
           zoomSlot &&
           createPortal(
@@ -322,62 +267,9 @@ export function CadViewport({
             </div>,
             zoomSlot,
           )}
-        {startupNotice && index === 0 ? (
+        {startupNotice && index === 0 && (
           <div className="absolute bottom-2 left-3 z-10 max-w-[calc(100%-4rem)]">
             {startupNotice}
-          </div>
-        ) : (
-          <div
-            className={cn(
-              "absolute bottom-2 left-3 flex gap-2 rounded border border-border bg-popover/65 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-md",
-              is3D ? "items-center" : "flex-col items-start",
-            )}
-          >
-            {is3D && (
-              <>
-                <Crosshair className="size-3 text-primary" />
-                <span>Gesamtgebäude · Arbeitsgeschoss: {storeyOf(model.project).name} ·</span>
-              </>
-            )}
-            {is3D ? (
-              <span className="font-mono">Fit · m</span>
-            ) : (
-              <>
-                <label className="flex items-center gap-1">
-                  Ansicht
-                  <select
-                    aria-label="2D Ansichtsmaßstab"
-                    value={String(plan.pixelsPerMetre)}
-                    className="rounded border bg-popover px-1"
-                    onChange={(event) =>
-                      setPlanCamera({ ...plan, pixelsPerMetre: Number(event.target.value) })
-                    }
-                  >
-                    <option value={String(plan.pixelsPerMetre)}>
-                      {plan.pixelsPerMetre.toFixed(1)} px/m
-                    </option>
-                    {[25, 50, 100, 200, 500]
-                      .filter((value) => value !== plan.pixelsPerMetre)
-                      .map((value) => (
-                        <option key={value} value={String(value)}>
-                          {value} px/m
-                        </option>
-                      ))}
-                  </select>
-                </label>
-                <span
-                  aria-label="Grafischer Maßstab"
-                  className="inline-flex flex-col items-center font-mono"
-                  title="Bildschirmmaßstab in CSS-Pixeln; kein Druckmaßstab"
-                >
-                  {Number(bar.metres.toPrecision(6))} m
-                  <span
-                    style={{ width: bar.pixels }}
-                    className="h-1 border-x border-b border-current"
-                  />
-                </span>
-              </>
-            )}
           </div>
         )}
         <Button
@@ -398,8 +290,6 @@ export function CadViewport({
                     }
                   : fitPlan(planBounds(model.project, model.viewContext.visibility), size),
               );
-            setPan(false);
-            setPlanPan(false);
           }}
         >
           <RotateCcw />
@@ -416,7 +306,6 @@ export function ViewportManager({
   grid,
   active,
   onActive,
-  onFullscreen,
   onScale,
   onPlanCapture,
   startupNotice,
@@ -434,7 +323,6 @@ export function ViewportManager({
   grid: boolean;
   active: number;
   onActive: (index: number) => void;
-  onFullscreen: () => void;
 }) {
   const count =
     layout === "single"
@@ -460,7 +348,6 @@ export function ViewportManager({
           grid={grid}
           active={active === index}
           onActivate={() => onActive(index)}
-          onFullscreen={onFullscreen}
         />
       ))}
     </div>

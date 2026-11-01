@@ -16,3 +16,13 @@ Nutzervorgabe (01.11.2026): Doppelte und überflüssige Anzeigen entfernen.
 ## Nachweis
 
 1464 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert (`089f79e4…`). Browser-Abnahme im Grundriss: Kopfleiste ohne 2D/3D, Grid und SNAP; Statusleiste unten mit Grid und SNAP; Canvas ohne Plakette, Infotext und Würfel; KI-Leiste nur Eingabe mit zwei Knöpfen; das „+“-Menü bietet „3D-Ansicht“. Die 3D-Ansicht selbst wurde im Browser nicht geöffnet (der Nutzer arbeitete gleichzeitig im Fenster); der Würfel ist dort durch dasselbe entfernte Element weg.
+
+## U2: Canvas aufgeräumt (01.11.2026)
+
+Nutzervorgabe: XYZ-Pfeile nur in 3D, kein Kästchen mit der Ansicht in px/m, keine Knopfleiste oben rechts im Canvas – navigiert wird mit der Maus.
+
+- **Entfernt:** die Knopfleiste oben rechts (Pan, Orbit, Zoom +/−, Einpassen, Vollbild) samt Vollbildmodus und „Exit fullscreen“; das Kästchen unten links (2D: „Ansicht … px/m“ und grafischer Maßstab, 3D: „Gesamtgebäude · Arbeitsgeschoss … Fit · m“); die X/Y-Pfeile im Grundriss.
+- **Bleibt:** die XYZ-Achsen in 3D, der Hinweis zur Wiederherstellung beim Start, „Alles anzeigen“ und Zoom in der Statusleiste, der Knopf „Ansicht zurücksetzen“ unten rechts.
+- **Navigation mit der Maus:** Mausrad zoomt; mittlere Maustaste verschiebt; in 3D dreht die linke Maustaste (auch Strg + mittlere Taste).
+
+Nachweis: 1465 Tests grün, Typprüfung beider Projekte, Architektur, Lint und Prettier sauber, 14-Modell-Hash unverändert. Browser: Grundriss ohne Leiste, Pfeile und Kästchen; 3D-Ansicht über „+“ geöffnet – ohne Leiste und Würfel, mit XYZ-Achsen.
