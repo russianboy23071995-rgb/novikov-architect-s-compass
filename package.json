@@ -146,6 +146,7 @@
     "src/application/sections/actions.test.ts",
     "src/rendering/viewport/section-drawing.test.ts",
     "src/rendering/viewport/opening-insert-solid.test.ts",
+    "src/rendering/viewport/opening-plan-symbol.test.ts",
     "src/application/views/working-context.test.ts",
     "src/application/hatches/pattern-size.test.ts",
     "src/application/views/project-scale.test.ts",
