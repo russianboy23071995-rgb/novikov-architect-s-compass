@@ -6,9 +6,7 @@ import {
   Layers2,
   Contrast,
   Bot,
-  Box,
   Check,
-  Grid3X3,
   LayoutGrid,
   Menu,
   Mic,
@@ -34,7 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ViewMode, ViewportLayout } from "./cad-types";
+import type { ViewportLayout } from "./cad-types";
 
 const layouts: { id: ViewportLayout; label: string; cells: string }[] = [
   { id: "single", label: "Single View", cells: "▣" },
@@ -53,16 +51,10 @@ type TopToolbarProps = {
   measuring: boolean;
   onImportImage: () => void;
   onCanvasDisplay: () => void;
-  mode: ViewMode;
   layout: ViewportLayout;
-  grid: boolean;
-  snap: boolean;
   navigatorOpen: boolean;
   demandOpen: boolean;
-  onMode: (mode: ViewMode) => void;
   onLayout: (layout: ViewportLayout) => void;
-  onGrid: () => void;
-  onSnap: () => void;
   onNavigator: () => void;
   onDemand: () => void;
   onAction: (text: string) => void;
@@ -379,24 +371,6 @@ export function TopToolbar(props: TopToolbarProps) {
           </IconControl>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-0.5">
-          <div className="flex h-8 items-center rounded-md border border-border bg-background/30 p-0.5 shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-xl">
-            {(["2D", "3D"] as ViewMode[]).map((mode) => (
-              <Button
-                key={mode}
-                variant="ghost"
-                size="sm"
-                onClick={() => props.onMode(mode)}
-                className={cn(
-                  "h-6 rounded-sm px-2 text-[11px]",
-                  props.mode === mode &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
-                )}
-              >
-                {mode === "2D" ? <Grid3X3 /> : <Box />}
-                {mode}
-              </Button>
-            ))}
-          </div>
           <DropdownMenu>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
@@ -432,20 +406,6 @@ export function TopToolbar(props: TopToolbarProps) {
           <IconControl label="Orbit view" onClick={() => props.onAction("Orbit mode")}>
             <Rotate3D />
           </IconControl>
-          <IconControl label="Grid" active={props.grid} onClick={props.onGrid}>
-            <Grid3X3 />
-          </IconControl>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "h-8 px-2 text-[11px] text-muted-foreground",
-              props.snap && "bg-primary/15 text-primary",
-            )}
-            onClick={props.onSnap}
-          >
-            SNAP
-          </Button>
           <div className="mx-1 h-5 w-px bg-border" />
           <IconControl
             label="NOVIKOV AI"
