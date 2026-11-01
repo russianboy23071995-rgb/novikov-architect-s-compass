@@ -250,3 +250,21 @@ test("a roof exports as IfcRoof aggregating one IfcSlab ROOF with a closed facet
   const ids = new Set([...ifc.matchAll(/^#(\d+)=/gm)].map((m) => m[1]));
   assert.ok([...ifc.matchAll(/#(\d+)/g)].every((m) => ids.has(m[1])));
 });
+
+test("every window, door and opening carries base quantities, also without a type (G2)", async () => {
+  const project = withDoor();
+  const ifc = await exportIfc(project, date);
+  const windows = rows(ifc, "IFCWINDOW").length;
+  const doors = rows(ifc, "IFCDOOR").length;
+  assert.ok(windows > 0 && doors === 1);
+  const sets = (name: string) =>
+    rows(ifc, "IFCELEMENTQUANTITY").filter((line) => line.includes(`'${name}'`)).length;
+  assert.equal(sets("Qto_WindowBaseQuantities"), windows);
+  assert.equal(sets("Qto_DoorBaseQuantities"), doors);
+  assert.equal(sets("Qto_OpeningElementBaseQuantities"), rows(ifc, "IFCOPENINGELEMENT").length);
+  const door = storeyOf(project).doors![0]!;
+  assert.ok(
+    ifc.includes(`'Width',$,$,${door.width}`) || ifc.includes(`'Width',$,$,${door.width}.`),
+  );
+  assert.ok(ifc.includes("'Depth',$,$,"));
+});
