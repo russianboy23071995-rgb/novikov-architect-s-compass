@@ -67,3 +67,42 @@ test("with the trace the tool snap query offers the lower wall; without it, it d
   );
   assert.ok(traced.inspect(near, 100, 10).references.some((r) => r.entityId === "w1"));
 });
+
+test("a wall start near the end of a traced wall snaps exactly to the end, not to its axis", async () => {
+  const { createTracedToolSourceQuery } = await import("../tools/snapping.ts");
+  const { createLayerVisibilityPolicy } = await import("../layers/visibility.ts");
+  const { wallStartSnapPolicy } = await import("../tools/adapters.ts");
+  const { acceptsTraceCandidate } = await import("./tracing.ts");
+  const { p, eg } = twoStoreys();
+  const visibility = createLayerVisibilityPolicy(p, {
+    scope: { kind: "bim-project" },
+    hiddenLayerIds: [],
+  });
+  const trace = tracingSnap(p, eg)!;
+  const sourceQuery = createTracedToolSourceQuery(
+    p,
+    visibility,
+    visibility.context,
+    wallStartSnapPolicy,
+    trace,
+  );
+  const context = {
+    references: [],
+    sourceQuery,
+    pixelsPerMetre: 100,
+    enabled: true,
+    endpointRadiusPx: 10,
+    includeInteractionTargets: true,
+    gridSpacing: null,
+    orthoOrigin: null,
+  };
+  const cursor = { x: 3.97, y: 0.02 };
+  // Without the filter the axis foot of the traced wall wins just before its end.
+  const plain = wallStartSnapPolicy.resolve!(cursor, context);
+  assert.equal(plain.candidate?.sourceFeature, "t-axis");
+  const filtered = wallStartSnapPolicy.resolve!(cursor, {
+    ...context,
+    acceptCandidate: acceptsTraceCandidate(trace.ids),
+  });
+  assert.deepEqual(filtered.point, { x: 4, y: 0 });
+});
