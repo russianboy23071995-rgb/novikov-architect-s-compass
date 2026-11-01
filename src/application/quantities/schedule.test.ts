@@ -168,4 +168,6 @@ test("CSV for Excel: note, header with units, decimal comma, storey and project 
   assert.match(lines[4]!, /^Summe .*;;;;7,00;;18,40;/);
   assert.match(lines[5]!, /^Summe Projekt;/);
   assert.equal(quantityText({ key: "x", label: "x", digits: 1 }, null), "");
+  // 6,78 × 0,025 = 0,1695 is 0,16949… in binary and still rounds up.
+  assert.equal(quantityText({ key: "x", label: "x", digits: 3 }, 6.78 * 0.025), "0,170");
 });

@@ -437,8 +437,10 @@ export function quantitySchedule(project: Project): QuantitySchedule {
   };
 }
 
+/** Rounded half away from zero; the tiny nudge keeps products like 6,78 × 0,025 = 0,1695 from
+ * rounding down because of binary floating point. */
 const decimal = (value: number, digits: number) =>
-  value.toLocaleString("de-DE", {
+  (value + Math.sign(value) * 1e-9).toLocaleString("de-DE", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
     useGrouping: false,
