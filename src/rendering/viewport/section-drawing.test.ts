@@ -7,6 +7,7 @@ import { addStorey, setStoreyHeight } from "../../application/storeys/actions.ts
 import { selectWorkingStorey } from "../../application/storeys/working-storey.ts";
 import { sectionDrawing } from "./section-drawing.ts";
 import type { Section } from "../../domain/views/sections.ts";
+import { setWallAssembly } from "../../application/walls/assembly.ts";
 
 // docs/SCHNITT.md, SC3.
 const area = (points: readonly { x: number; y: number }[]) =>
@@ -110,4 +111,44 @@ test("parts the line starts in stay closed: slab and the wall of the storey abov
   assert.ok(Math.abs(area(cuts.get("w1")!.loops[0]!) - 0.17 * 2.8) < 1e-6);
   assert.ok(Math.abs(area(cuts.get("d1")!.loops[0]!) - 1.05 * 0.2) < 1e-6);
   assert.ok(Math.abs(area(cuts.get("w3")!.loops[0]!) - 0.17 * 2.8) < 1e-6);
+});
+
+test("a cut wall with a build-up is parted into its layers, outside first (WANDAUFBAU SA3)", () => {
+  const p = setWallAssembly(
+    addWall(createProject("p", "eg"), {
+      id: "w1",
+      start: { x: 0, y: 0 },
+      end: { x: 4, y: 0 },
+      thickness: 0.36,
+      height: 2.8,
+    }),
+    ["w1"],
+    "assembly-ks175-wdvs160",
+  );
+  const [cut] = sectionDrawing(p, section).cuts;
+  const layers = cut!.layers!;
+  assert.deepEqual(
+    layers.map((l) => l.material.id),
+    ["material-putz", "material-daemmung", "material-kalksandstein", "material-putz"],
+  );
+  // The right face (outside) lies at y = −0,18, 1,82 m along the line.
+  const near = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+  assert.ok(near(layers[0]!.from, 1.82) && near(layers[1]!.from, 1.83));
+  assert.ok(near(layers[2]!.from, 1.99) && near(layers.at(-1)!.to, 2.18));
+  // Looking the other way mirrors the order.
+  const [back] = sectionDrawing(p, { ...section, look: "right" }).cuts;
+  assert.equal(back!.layers![0]!.material.id, "material-putz");
+  assert.equal(back!.layers![1]!.material.id, "material-kalksandstein");
+  // A line along the wall stays in one layer.
+  const along = sectionDrawing(p, {
+    ...section,
+    start: { x: -1, y: 0.1 },
+    end: { x: 5, y: 0.1 },
+  }).cuts.find((c) => c.id === "w1")!;
+  assert.deepEqual(
+    along.layers!.map((l) => l.material.id),
+    ["material-kalksandstein"],
+  );
+  // Without a build-up nothing changes.
+  assert.equal(sectionDrawing(project(), section).cuts[0]!.layers, undefined);
 });

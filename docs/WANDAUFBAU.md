@@ -32,3 +32,12 @@ Grenze SA1: Grundriss, Schnitt und IFC zeigen die Schichten noch nicht (SA2–SA
 Nachweis SA2: 1480 Tests grün (3 neu in `src/rendering/viewport/wall-layers.test.ts`), Typprüfung, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Einzelwand und L-Ecke mit zweischaligem Aufbau.
 
 Grenzen SA2: Bei T-Stößen und an Ecken mit unterschiedlichen Aufbauten enden die Schichten an der Kontur, ohne Verschneidung nach Vorrang. Die Schraffur hat Bildschirm-, keine Papiergröße (für den Planexport L14 nachzuziehen).
+
+## SA3: Schnitt
+
+- Geschnittene Wände mit Aufbau zeigen im Schnitt ihre Schichten als senkrechte Streifen in Materialfarbe und Schraffur (Abstand 1,5 mm auf Papier, Maßstab aus dem Projekt; Dämmung als Zickzack, ein Zahn je Schichtdicke). Dünne Linien trennen die Schichten, die Kontur bleibt kräftig.
+- Die Schichtgrenzen sind senkrechte Ebenen der Wand, im Schnitt also immer senkrechte Linien. Ihre Lage ergibt sich aus dem Abstand zur Wandmitte entlang der Schnittlinie; schräge Schnitte werden entsprechend breiter. Eine Schnittlinie parallel zur Wand liegt ganz in einer Schicht. Blickrichtung „rechts“ spiegelt die Reihenfolge.
+- Wände ohne Aufbau, Decken, Dächer und andere Bauteile behalten die Schnittfarbe. Ansichten schneiden nichts und bleiben unverändert.
+- Code: `withWallLayers` in `src/rendering/viewport/section-drawing.ts` (Feld `layers` an `SectionCut`), `src/components/cad/SectionLayerGraphic.tsx`, Einbindung in `SectionDrawingView.tsx`.
+
+Nachweis SA3: 1481 Tests grün, Typprüfung, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Neuer Test in `src/rendering/viewport/section-drawing.test.ts` (Reihenfolge, Lage der Grenzen auf 1e-9 m, Spiegelung, Schnitt längs der Wand, ohne Aufbau unverändert). Browser: Schnitt A-A quer durch die zweischalige Wand zeigt Innenputz, KS, Dämmung, Luftschicht, Klinker.
