@@ -101,3 +101,15 @@ Offen (LZ2): Die Zeichnung des Masterlayouts erscheint noch nicht in den Layouts
 - Umsetzung: `backdrop` in `BimPlan.tsx` zeichnet die Szene des Masterlayout-Blatts (über `spaceLens`) mit denselben Bausteinen wie die eigene Zeichnung, aber ohne Klickfläche (`pointer-events: none`, keine Auswahlformen); Anbindung in `CadWorkspace.tsx`.
 
 Nachweis LZ2: 1507 Tests grün, Typprüfung beider Projekte, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: im Masterlayout „Standard A3 quer“ eine 0,20-m-Linie gezeichnet; neues Layout angelegt (folgt dem Master, öffnet sofort): die Linie erscheint in der Gruppe „Masterlayout-Zeichnung“ ohne Klickfläche, ein Klick darauf wählt nichts aus.
+
+## Papiermaßstab und feiner Fang (02.11.2026)
+
+Rückmeldung: Beim Verschieben von Text im Layout musste Snap aus, weil der Fang zu grob war; bei „100 %“ war das A3-Blatt winzig, das Layout wirkte nicht maßstäblich. Entscheidungen (Empfehlungen übernommen): nur Layouts und Plankopf, Rasterfang-Vorgabe 1 mm.
+
+- **Maßstab des Blatts:** Layouts, Masterlayouts und Planköpfe werden in echten Millimetern gespeichert (1:1); ein A3-Layout ist 420 × 297 mm, ein Export gibt es unabhängig vom Zoom in A3 aus.
+- **Zoom = Papiergröße:** In Layout, Masterlayout und Plankopfplaner bedeutet **100 % Originalgröße** (1 mm Papier = 1 mm am Bildschirm, bezogen auf die Referenzauflösung 96 dpi des Browsers). Auswahl und Mausrad rechnen in Papiergröße. Je nach Monitor und Windows-Skalierung kann die Bildschirmgröße einige Prozent abweichen; der Export ist davon nicht betroffen. Im Grundriss bleibt die bisherige Zoomanzeige.
+- **Eigener Rasterfang:** Im Layout und im Plankopfplaner gilt ein eigener Rasterfang (Vorgabe 1 mm, an), unten in der Statusleiste änderbar; der Grundriss behält seinen eigenen (0,1 m). Ausrichtungsfang (z. B. waagerecht zum ersten Punkt) hat wie im Grundriss Vorrang vor dem Raster.
+- **Anzeige:** Statt der Maßstabsauswahl steht „Papier 1:1“.
+- Code: `CadViewport.tsx` (Papier-Zoom, Anzeige), `CadWorkspace.tsx` (getrennte Raster-Einstellungen).
+
+Nachweis: 1507 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Masterlayout A3 quer öffnet eingepasst mit 65 %, „Papier 1:1“, Raster 0,001 m; bei 100 % misst das Papier 1587 × 1123 Bildschirmpunkte = 420 × 297 mm bei 96 dpi; Linienanfang rastet auf Millimeter ein (0,142 / −0,176 m).

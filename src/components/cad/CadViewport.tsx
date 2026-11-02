@@ -21,6 +21,9 @@ import type { ViewMode, ViewportLayout } from "./cad-types";
 import { BimPlan } from "./BimPlan";
 import type { BimPlanProps } from "./BimPlan";
 
+/** CSS pixels per metre of paper at the browser's reference 96 dpi. */
+const PAPER_PIXELS_PER_METRE = 96 / 0.0254;
+
 type CadViewportProps = BimPlanProps & {
   documentFraming?: DocumentFraming | undefined;
   onPlanCapture?: ((frame: DocumentFraming | null) => void) | undefined;
@@ -184,14 +187,22 @@ export function CadViewport({
     is3D
       ? setCamera((value) => ({ ...value, zoom: Math.max(0.2, Math.min(5, value.zoom * factor)) }))
       : setPlanCamera(zoomPlan(plan, size, factor));
-  const zoomPercent = is3D ? camera.zoom * 100 : plan.pixelsPerMetre;
+  // On paper (layout, Plankopf at 1:1) 100 % is the original size (docs/LAYOUTS.md).
+  const paper = !is3D && !!model.underlay;
+  const zoomPercent = is3D
+    ? camera.zoom * 100
+    : paper
+      ? (plan.pixelsPerMetre / PAPER_PIXELS_PER_METRE) * 100
+      : plan.pixelsPerMetre;
   const zoomControl = (
     <select
       aria-label="Ansichtszoom"
       title={
         is3D
           ? "3D: 100 % entspricht der Standardansicht"
-          : "2D: 100 % = 100 CSS-Pixel pro Meter; kein Druckmaßstab"
+          : paper
+            ? "Papier: 100 % = Originalgröße, 1 mm Papier = 1 mm am Bildschirm (96 dpi)"
+            : "2D: 100 % = 100 CSS-Pixel pro Meter; kein Druckmaßstab"
       }
       value={String(zoomPercent)}
       className="h-6 rounded border border-border bg-popover px-1 text-[11px] text-foreground"
@@ -271,7 +282,15 @@ export function CadViewport({
               <MiniControl label="Alles anzeigen" onClick={fit}>
                 <Focus size={14} />
               </MiniControl>
-              {!is3D && scaleContext && onScale && (
+              {paper && (
+                <span
+                  className="text-[11px] text-muted-foreground"
+                  title="Layouts und Planköpfe werden in echter Papiergröße gezeichnet und ausgegeben."
+                >
+                  Papier 1:1
+                </span>
+              )}
+              {!is3D && !paper && scaleContext && onScale && (
                 <ViewScaleControl
                   key={JSON.stringify(scaleContext)}
                   context={scaleContext}
