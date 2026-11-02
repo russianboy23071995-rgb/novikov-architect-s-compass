@@ -7,6 +7,7 @@ import { validateProject, type Project } from "../../domain/project/schema.ts";
 import {
   DEFAULT_MASTER_ID,
   LAYOUT_COLLECTION_ID,
+  layoutFolderTree,
   layoutSheet,
   projectLayoutFolders,
   projectLayouts,
@@ -65,6 +66,14 @@ test("folders nest below the collection, move without loops and are deleted only
       () => run(p, { kind, id: LAYOUT_COLLECTION_ID, name: "X" } as LayoutAction),
       /Layoutsammlung/,
     );
+  assert.deepEqual(
+    layoutFolderTree(p).map(({ folder, depth }) => [folder.name, depth]),
+    [
+      ["Layoutsammlung", 0],
+      ["Entwurf", 1],
+      ["Grundrisse", 2],
+    ],
+  );
   p = run(p, { kind: "move-layout", id: "l1", folderId: LAYOUT_COLLECTION_ID });
   p = run(p, { kind: "move-folder", id: "f2", parentId: LAYOUT_COLLECTION_ID });
   assert.equal(p.layoutFolders!.find((f) => f.id === "f2")!.parentId, undefined);

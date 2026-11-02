@@ -187,6 +187,8 @@ import {
   existingCanvasTabs,
   sectionTab,
   tabSectionId,
+  layoutTab,
+  tabLayoutId,
   withCanvasTab,
   type CanvasView,
 } from "@/application/views/canvas-tabs";
@@ -203,6 +205,10 @@ import { sectionLookTo } from "@/domain/views/sections";
 import { SectionFields } from "./SectionFields";
 import { SectionProperties } from "./SectionProperties";
 import { SectionDrawingView } from "./SectionDrawingView";
+import { LayoutSheetView } from "./LayoutSheetView";
+import { LayoutSettingsWindow, type LayoutDraftTarget } from "./LayoutSettingsWindow";
+import { layoutFolderTree, projectLayouts, projectMasterLayouts } from "@/domain/views/layouts";
+import { changeLayouts } from "@/application/views/layouts";
 import {
   addHeightMarks,
   removeHeightMarks,
@@ -254,6 +260,9 @@ export function CadWorkspace({
   const [canvasTabs, setCanvasTabs] = useState<CanvasView[]>(["plan"]);
   // A section tab over the model views (docs/SCHNITT.md, SC2); null: the mode's view.
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  // A layout or master layout open as a canvas tab (docs/LAYOUTS.md, LA4).
+  const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
+  const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   // Section tool: start, then end; click 3 chooses the viewing side. Session state only.
   const [sectionStart, setSectionStart] = useState<Point | null>(null);
   const [sectionEnd, setSectionEnd] = useState<Point | null>(null);
@@ -2065,12 +2074,34 @@ export function CadWorkspace({
   const sectionIds = new Set((sections ?? []).map((s) => s.id));
   const activeSection = activeSectionId && sectionIds.has(activeSectionId) ? activeSectionId : null;
   if (activeSectionId && !activeSection) setActiveSectionId(null);
-  const activeView = activeSection ? sectionTab(activeSection) : canvasViewOf(mode);
-  const shownTabs = existingCanvasTabs(withCanvasTab(canvasTabs, activeView), sectionIds);
+  const layoutNames = [...projectMasterLayouts(project), ...projectLayouts(project)].map((l) => ({
+    id: l.id,
+    name: l.name,
+  }));
+  const layoutIds = new Set(layoutNames.map((l) => l.id));
+  const activeLayout = activeLayoutId && layoutIds.has(activeLayoutId) ? activeLayoutId : null;
+  if (activeLayoutId && !activeLayout) setActiveLayoutId(null);
+  const activeView = activeLayout
+    ? layoutTab(activeLayout)
+    : activeSection
+      ? sectionTab(activeSection)
+      : canvasViewOf(mode);
+  const shownTabs = existingCanvasTabs(
+    withCanvasTab(canvasTabs, activeView),
+    sectionIds,
+    layoutIds,
+  );
   if (shownTabs.join("|") !== canvasTabs.join("|")) setCanvasTabs(shownTabs);
   function selectCanvasTab(view: CanvasView) {
-    const sectionId = tabSectionId(view);
+    const sectionId = tabSectionId(view),
+      layoutId = tabLayoutId(view);
     setCanvasTabs((tabs) => withCanvasTab(tabs, view));
+    if (layoutId !== null) {
+      cancelInteraction();
+      setActiveSectionId(null);
+      return setActiveLayoutId(layoutId);
+    }
+    setActiveLayoutId(null);
     if (sectionId === null) return changeMode(canvasModeOf(view as "plan" | "3d"));
     cancelInteraction();
     setActiveSectionId(sectionId);
@@ -2117,6 +2148,7 @@ export function CadWorkspace({
   };
   function changeMode(next: ViewMode) {
     setActiveSectionId(null);
+    setActiveLayoutId(null);
     if (activeDocumentId && next === "3D") {
       showNotice("Dieses Abbild ist ein 2D-Grundriss.");
       return;
@@ -2889,6 +2921,7 @@ export function CadWorkspace({
                   active={activeView}
                   storeyName={storeyOf(project).name}
                   sections={sections ?? []}
+                  layouts={layoutNames}
                   onSelect={selectCanvasTab}
                   onClose={(view) => {
                     const next = closeCanvasTab(shownTabs, view, activeView);
@@ -2897,6 +2930,44 @@ export function CadWorkspace({
                   }}
                 />
               </div>
+              {activeLayout && (
+                <div role="tabpanel" aria-label="Layout" className="absolute inset-0 z-30">
+                  <LayoutSheetView
+                    key={activeLayout}
+                    project={project}
+                    layoutId={activeLayout}
+                    onSettings={() => {
+                      const layout = projectLayouts(project).find((l) => l.id === activeLayout);
+                      const master = projectMasterLayouts(project).find(
+                        (m) => m.id === activeLayout,
+                      );
+                      setLayoutWindow(
+                        layout
+                          ? {
+                              kind: "layout",
+                              id: layout.id,
+                              folderId: layout.folderId,
+                              name: layout.name,
+                            }
+                          : { kind: "master", id: master!.id, name: master!.name },
+                      );
+                    }}
+                  />
+                  {layoutWindow && (
+                    <LayoutSettingsWindow
+                      key={(layoutWindow.id ?? "new") + layoutWindow.kind}
+                      project={project}
+                      target={layoutWindow}
+                      folders={layoutFolderTree(project)}
+                      onApply={(action) => {
+                        changeLayouts(project, project, action);
+                        dispatchEditing({ type: "layout", base: project, action });
+                      }}
+                      onClose={() => setLayoutWindow(null)}
+                    />
+                  )}
+                </div>
+              )}
               {activeSection &&
                 (() => {
                   const section = sections!.find((s) => s.id === activeSection)!;
@@ -3684,6 +3755,8 @@ export function CadWorkspace({
                   onLayoutAction={(base, action) =>
                     dispatchEditing({ type: "layout", base, action })
                   }
+                  onOpenLayout={(id) => selectCanvasTab(layoutTab(id))}
+                  activeLayoutId={activeLayout}
                   project={project}
                   active={
                     selectedSection

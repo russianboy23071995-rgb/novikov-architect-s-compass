@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, File, FileStack, Folder } from "lucide-react
 import type { Project } from "@/domain/project/schema";
 import {
   LAYOUT_COLLECTION_ID,
+  layoutFolderTree,
   projectLayoutFolders,
   projectLayouts,
   projectMasterLayouts,
@@ -137,19 +138,14 @@ export function LayoutNavigator({
     if (apply(action, source.base)) setClosed((ids) => ids.filter((v) => v !== folderId));
   };
   /** Folders in tree order with their depth, for the „move to“ menus. */
-  const flatFolders: { folder: LayoutFolder; depth: number }[] = [];
+  const flatFolders = layoutFolderTree(project);
   const childrenOf = (id: string) =>
     folders.filter((f) =>
       id === LAYOUT_COLLECTION_ID
         ? f.id !== LAYOUT_COLLECTION_ID && f.parentId === undefined
         : f.parentId === id,
     );
-  const walk = (folder: LayoutFolder, depth: number) => {
-    flatFolders.push({ folder, depth });
-    for (const child of childrenOf(folder.id)) walk(child, depth + 1);
-  };
-  const collection = folders.find((f) => f.id === LAYOUT_COLLECTION_ID)!;
-  walk(collection, 0);
+  const collection = flatFolders[0]!.folder;
 
   const row = (
     id: string,
@@ -214,7 +210,7 @@ export function LayoutNavigator({
                   : "Ordner · F2 oder Rechtsklick: umbenennen · Layouts hierher ziehen"
                 : "Doppelklick: öffnen · F2: umbenennen"
             }
-            className={`${dropFolder === id ? "bg-primary/15 ring-1 ring-primary " : ""}flex h-7 items-center gap-1.5 rounded-sm pr-2 text-[13px] hover:bg-accent ${
+            className={`${dropFolder === id ? "bg-primary/15 ring-1 ring-primary " : ""}flex h-7 select-none items-center gap-1.5 rounded-sm pr-2 text-[13px] hover:bg-accent ${
               selected === id || activeLayoutId === id
                 ? "bg-primary/12 text-primary"
                 : "text-muted-foreground"

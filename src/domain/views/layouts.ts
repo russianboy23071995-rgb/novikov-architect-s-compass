@@ -168,3 +168,25 @@ export function layoutLibraryProblem(project: LayoutLibrary): string | null {
   }
   return null;
 }
+
+/** Folders in tree order with their depth below „Layoutsammlung“ (depth 0). */
+export function layoutFolderTree(
+  project: LayoutLibrary,
+): { folder: LayoutFolder; depth: number }[] {
+  const folders = projectLayoutFolders(project);
+  const out: { folder: LayoutFolder; depth: number }[] = [];
+  const walk = (folder: LayoutFolder, depth: number) => {
+    out.push({ folder, depth });
+    for (const child of folders)
+      if (
+        child.id !== LAYOUT_COLLECTION_ID &&
+        (child.parentId ?? LAYOUT_COLLECTION_ID) === folder.id
+      )
+        walk(child, depth + 1);
+  };
+  walk(
+    folders.find((f) => f.id === LAYOUT_COLLECTION_ID)!,
+    0,
+  );
+  return out;
+}
