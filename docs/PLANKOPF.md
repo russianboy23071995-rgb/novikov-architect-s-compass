@@ -94,3 +94,13 @@ Nachweis AT1: 1511 Tests grün (2 neu in `src/application/views/auto-texts.test.
 - Code: `TextEditorOverlay.tsx` (`autoTexts`), `src/components/cad/ProjectInfoWindow.tsx`, Menü in `TopToolbar.tsx`, Felder in `LayoutSettingsWindow.tsx`, Ereignis in `controller.ts`, Anbindung in `CadWorkspace.tsx`.
 
 Nachweis AT2: 1511 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Projektinformationen „Haus am See“ übernommen; im Plankopfplaner Text „Projekt: “ getippt, „Projektname“ aus der Auswahl eingefügt → „Projekt: {Projektname}“ gesetzt. Die Layoutfelder werden mit AT3 im Browser geprüft.
+
+## AT3 – Werte auf den Blättern
+
+- Auf jedem **Layout** zeigt der Plankopf (über das Masterlayout, PK4) die eingesetzten Werte dieses Layouts; fehlt ein Wert, bleibt die Stelle leer. Im **Masterlayout** bleiben fehlende Werte als Platzhaltername sichtbar (z. B. „{Plannummer}“), vorhandene Projektangaben stehen schon da. Im Plankopfplaner bleiben die Platzhalter, wie getippt.
+- Das Datum ist das heutige Datum beim Anzeigen. Änderungen an Projektinformationen, Layoutfeldern oder Abbildern (Name, Maßstab) erscheinen sofort.
+- Code: `spaceBackdrop` setzt beim Zusammenstellen von Masterzeichnung und Plankopf die Werte (`autoTextValues`, `resolveAutoText`) in die Texte ein.
+
+Nachweis AT3: 1512 Tests grün (neu: Plankopftext „{Projektname} · {Plannummer} · {Maßstab}“ ergibt im Layout „Haus am See · A-101 · 1:100“, im Masterlayout „Haus am See · {Plannummer} · {Maßstab}“, der Plankopf selbst bleibt unverändert), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Abbild „Grundriss“ (1:100) angelegt, Projektname „Haus am See“, im Plankopfplaner Text „{Projektname} {Plannummer} {Maßstab}“, Masterlayout mit Plankopf, neues Layout mit Plannummer „A-101“ und Abbild „Grundriss“ → auf dem Layout „Haus am See A-101 1:100“, im Masterlayout „Haus am See {Plannummer} {Maßstab}“.
+
+Grenzen: Platzhalter in Texten, die direkt im Layout oder Masterlayout gezeichnet sind, werden dort nicht ersetzt (nur im Plankopf). Ein Datum je Layout (festes Ausgabedatum) gibt es nicht.
