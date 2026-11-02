@@ -224,7 +224,7 @@ import { SectionDocumentWindow } from "./SectionDocumentWindow";
 import { drawingInfo } from "@/application/views/drawing-info";
 import { changeDrawingDocument } from "@/application/views/documents";
 
-const PAPER_GRID_SETTINGS: GridSettings = Object.freeze({ enabled: true, spacing: 0.001 });
+const PAPER_GRID_SETTINGS: GridSettings = Object.freeze({ enabled: false, spacing: 0.001 });
 /** Tools of a layout: the last fixes by hand, no dimensions (docs/LAYOUTS.md, LZ1). */
 const LAYOUT_TOOLS: ReadonlySet<ToolId> = new Set<ToolId>(["select", "line", "text", "hatch"]);
 /** Tools of the Plankopfplaner: drawing only, nothing of the building (PK2). */
@@ -312,7 +312,11 @@ export function CadWorkspace({
   const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
   const { wallWidth, setWallWidth, cutFill, setCutFill, showRenovation, setShowRenovation } =
     useCanvasDisplaySettings();
-  const [planGridSettings, setPlanGridSettings] = useState(defaultGridSettings);
+  // Rasterfang starts off: the Rasterengine snaps to points and lines, the grid only on demand.
+  const [planGridSettings, setPlanGridSettings] = useState<GridSettings>({
+    ...defaultGridSettings,
+    enabled: false,
+  });
   // Paper (layouts, Plankopf) snaps to its own, fine grid: 1 mm (docs/LAYOUTS.md).
   const [paperGridSettings, setPaperGridSettings] = useState(PAPER_GRID_SETTINGS);
   const [ortho, setOrtho] = useState(false);

@@ -123,3 +123,9 @@ Rückmeldung: Beim Zeichnen im Plankopf entstand nach dem ersten Klick eine sehr
 - Code: `BimPlan.tsx` (Gummiband), `src/application/snapping/sheet-frames.ts` (Blatt je Zeichenraum), `projectSnapParts` in `project-references.ts`, Beschriftung in `point-label.ts`, Zulassung in `src/application/tools/snapping.ts`, Anmeldung in `spaceLens`.
 
 Nachweis: 1508 Tests grün (neu: Ecken von Papier und Randrahmen als Fangpunkte mit Beschriftung, keine im Grundriss), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser (Plankopfplaner, A3): nach dem ersten Klick nur noch eine dünne Linie zur Maus; Fang „Randrahmen · Ecke 2“ und „Papier · Ecke 2“, Kantenmitte als „Mittelpunkt“. Dabei gefunden und behoben: Der Fang ließ nur Punkte sichtbarer Modellelemente zu und verwarf deshalb die Blattpunkte.
+
+## Rasterengine (02.11.2026)
+
+Nutzerwunsch: Der Knopf „SNAP“ heißt „**Rasterengine**“; der Rasterfang ist standardmäßig aus. Die Rasterengine bleibt der Hauptschalter für jeden Fang: Ecken, Endpunkte, Mitten, Schnittpunkte, Verlängerungen, Kanten (Tooltip am Knopf). Der Rasterfang (Sprünge im eingestellten Schritt: 0,1 m im Grundriss, 1 mm auf Papier) ist eine Zusatzoption daneben und startet jetzt aus, im Grundriss wie auf Papier. „Grid“ blendet nur die Hintergrundlinien ein und fängt nichts.
+
+Nachweis: 1508 Tests grün, Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: Statusleiste zeigt „Grid · Rasterengine · Rasterfang aus · 0.1 m · Ortho“.
