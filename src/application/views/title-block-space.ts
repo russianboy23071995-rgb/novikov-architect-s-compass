@@ -6,6 +6,7 @@ import { editingReducer, type EditingEvent, type EditingState } from "../direct-
 import { emptyTitleBlockStorey, titleBlockOf, titleBlockUnderlay } from "./title-blocks.ts";
 import { layoutUnderlay } from "./layouts.ts";
 import { setSheetFrames, type SheetFrames } from "../snapping/sheet-frames.ts";
+import { autoTextValues, resolveAutoText } from "./auto-texts.ts";
 import {
   layoutSheet,
   projectLayouts,
@@ -231,6 +232,9 @@ function buildBackdrop(real: Project, id: string): Project | null {
   });
   const none = { x: 0, y: 0 };
   type Sheet = Project["storeys"][number];
+  // Automatic texts read this sheet's values; a master keeps missing names visible (AT3).
+  const values = autoTextValues(real, id, new Date());
+  const text = (content: string) => resolveAutoText(content, values, !layout);
   const copy = (sheet: Sheet | null | undefined, d: { x: number; y: number }, tag: string) => ({
     lines: (sheet?.lines ?? []).map((l) => ({
       ...l,
@@ -241,6 +245,7 @@ function buildBackdrop(real: Project, id: string): Project | null {
       ...t,
       id: `${BACKDROP_PREFIX}${tag}${t.id}`,
       position: moved(t.position, d),
+      content: text(t.content),
     })),
     hatches: (sheet?.hatches ?? []).map((h) => ({
       ...h,

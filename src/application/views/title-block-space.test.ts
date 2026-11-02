@@ -244,3 +244,69 @@ test("a master layout's title block lies at the margin frame's lower right corne
   // Schema 47 master layouts carry no title block.
   assert.throws(() => loadProjectData({ ...JSON.parse(serializeProject(p)), schemaVersion: 47 }));
 });
+
+// docs/PLANKOPF.md, AT3: on the sheets the title block shows the values of each layout.
+test("automatic texts of the title block read each layout's values; the master keeps names", async () => {
+  const { changeLayouts } = await import("./layouts.ts");
+  const { changeDrawingDocument } = await import("./documents.ts");
+  const { setProjectInfo } = await import("./auto-texts.ts");
+  const { DEFAULT_MASTER_ID, LAYOUT_COLLECTION_ID, DEFAULT_MASTER_LAYOUTS } =
+    await import("../../domain/views/layouts.ts");
+  const { spaceBackdrop } = await import("./title-block-space.ts");
+  const { createDrawing: draw } = await import("../drawing/actions.ts");
+  let state: SpaceEditingState = setup();
+  const lens = titleBlockLens(state.history.present, "tb1");
+  const withText = draw(lens, lens, "frame", frame);
+  state = spaceEditingReducer(state, { type: "project", project: withText });
+  // A text with placeholders, stored in the title block's sheet.
+  let p = structuredClone(state.history.present);
+  p.titleBlocks![0]!.storey.texts = [
+    {
+      id: "t1",
+      layerId: p.defaultLayerIds.line,
+      position: { x: -0.1, y: 0.01 },
+      content: "{Projektname} · {Plannummer} · {Maßstab}",
+      font: "sans",
+      size: { unit: "paper", value: 2.5 },
+      align: "left",
+      anchor: "bottom",
+      rotation: 0,
+      color: "#000000",
+    } as never,
+  ];
+  p = validateProject(p);
+  p = setProjectInfo(p, p, { name: "Haus am See" });
+  p = changeDrawingDocument(p, p, {
+    kind: "create",
+    id: "d1",
+    modelViewId: "v1",
+    name: "Grundriss EG",
+    denominator: 100,
+  });
+  p = changeLayouts(p, p, {
+    kind: "master-settings",
+    id: DEFAULT_MASTER_ID,
+    name: "Standard A3 quer",
+    sheet: DEFAULT_MASTER_LAYOUTS[0]!.sheet,
+    titleBlockId: "tb1",
+  });
+  p = changeLayouts(p, p, {
+    kind: "create-layout",
+    id: "l1",
+    name: "EG",
+    folderId: LAYOUT_COLLECTION_ID,
+    masterId: DEFAULT_MASTER_ID,
+    planNumber: "A-101",
+    documentId: "d1",
+  });
+  const shown = (id: string) =>
+    storeyOf(spaceBackdrop(p, { kind: "layout", id })!).texts!.find((t) => t.id === "@bg:t:t1")!
+      .content;
+  assert.equal(shown("l1"), "Haus am See · A-101 · 1:100");
+  assert.equal(shown(DEFAULT_MASTER_ID), "Haus am See · {Plannummer} · {Maßstab}");
+  // The title block itself keeps its placeholders.
+  assert.equal(
+    p.titleBlocks![0]!.storey.texts![0]!.content,
+    "{Projektname} · {Plannummer} · {Maßstab}",
+  );
+});
