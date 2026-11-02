@@ -63,3 +63,25 @@ Entscheidungen (Empfehlungen übernommen): Ein verwendeter Plankopf ist nicht l�
 - Code: `masterLayoutV48Schema` in `src/domain/views/layouts.ts`, Prüfung und Schema 48 in `src/domain/project/schema.ts`, Migration in `load.ts`, `titleBlockId` in den Layout-Aktionen, Löschsperre in `title-blocks.ts`, `spaceBackdrop` in `src/application/views/title-block-space.ts` (Masterzeichnung und verschobener Plankopf, Ids mit „@bg:“), Fang über `sheet-frames.ts`/`project-references.ts`, Feld in `LayoutSettingsWindow.tsx`, Anbindung in `CadWorkspace.tsx`.
 
 Nachweis PK4: 1509 Tests grün (neu: Plankopflinie im Layout und im Masterlayout um (0,41 | 0,01) m verschoben bei A3 quer, fangbar, nicht im eigenen Blatt; Löschsperre; Umbenennen behält den Plankopf; Dateirundlauf; Schema 47 lehnt den Verweis ab), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Browser: im Plankopfplaner eine Linie von der Randrahmen-Ecke gezeichnet; im Masterlayout „Standard A3 quer“ als Plankopf gewählt → die Linie sitzt an der rechten unteren Ecke des Randrahmens; neues Layout → Linie ebenfalls da, „Endpunkt“ wird gefangen.
+
+## Automatische Texte
+
+Nutzerauftrag 02.11.2026, Entscheidungen (Empfehlungen übernommen): Felder wie vorgeschlagen; bis Zeichnungen platziert werden können, wählt jedes Layout sein Abbild; Datum ist das heutige Datum. Reihenfolge AT1 Datenmodell → AT2 Eingabe → AT3 Anzeige auf den Blättern.
+
+Ein Text im Plankopfplaner enthält Platzhalter in geschweiften Klammern, z. B. „M {Maßstab}“. Auf jedem Blatt stehen dort die Werte dieses Layouts.
+
+| Gruppe    | Platzhalter                                                 | Wert                                                                                  |
+| --------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Zeichnung | {Zeichnungsname}, {Maßstab}, {Zeichnungsart}                | Abbild des Layouts (über `drawingInfo`, AB1): Name, „1:50“, Grundriss/Schnitt/Ansicht |
+| Layout    | {Layoutname}, {Plannummer}, {Index}, {Blattgröße}           | Layout: Name, Plannummer, Index, „DIN A3“ bzw. „Breite × Höhe mm“                     |
+| Projekt   | {Projektname}, {Bauherr}, {Projektadresse}, {Planverfasser} | Projektinformationen                                                                  |
+| Datum     | {Datum}                                                     | heutiges Datum, „02.11.2026“                                                          |
+
+## AT1 – Datenmodell
+
+- **Projektdatei Schema 49.** Neu (optional): `projectInfo` (Projektname, Bauherr, Projektadresse, Planverfasser) und am Layout `planNumber`, `index`, `documentId` (das gezeigte Abbild). Dateien mit Schema 48 werden übernommen. Ein Layout darf nur auf ein vorhandenes Abbild zeigen; ein Abbild, das ein Layout zeigt, lässt sich nicht löschen („Das Abbild wird von Layout „…“ verwendet.“).
+- **Layoutaktionen:** Plannummer, Index, Abbild beim Anlegen und in den Einstellungen; fehlt die Angabe, bleibt der Wert, leer entfernt ihn. **Projektinformationen** (`setProjectInfo`) als ein Rückgängig-Schritt; leere Felder werden entfernt.
+- **Auflösung** (`src/application/views/auto-texts.ts`): `autoTextValues` liefert die Werte eines Layouts oder Masterlayouts, `resolveAutoText` setzt sie ein. Fehlt ein Wert, bleibt die Stelle leer; im Masterlayout bleibt der Platzhalter sichtbar. Unbekannte Klammern bleiben, wie getippt.
+- Die Zeichenräume (Plankopf, Layout) blenden Abbild- und Plankopfverweise aus und schreiben Layouts und Masterlayouts nie zurück; die ändern sich nur über Projektschritte.
+
+Nachweis AT1: 1511 Tests grün (2 neu in `src/application/views/auto-texts.test.ts`: alle Gruppen mit Werten, leere und sichtbare fehlende Werte, unbekannte Klammern, Datum; Felder behalten/ändern/leeren, Löschsperre des Abbilds, Dateirundlauf, Schema 48 → 49), Typprüfung, Architektur, Lint, Formatierung, 14-Modell-Prüfsumme unverändert. Noch keine Oberfläche (AT2, AT3).

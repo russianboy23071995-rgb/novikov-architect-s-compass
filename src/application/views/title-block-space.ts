@@ -63,6 +63,10 @@ export function spaceLens(real: Project, space: DrawingSpace): Project {
           masterLayouts: shared.masterLayouts.map(({ titleBlockId: _block, ...master }) => master),
         }
       : {}),
+    // Nor drawing documents: layouts point at none there (AT1).
+    ...(shared.layouts
+      ? { layouts: shared.layouts.map(({ documentId: _document, ...layout }) => layout) }
+      : {}),
     storeys: [sheet],
     groundStoreyId: sheet.id,
     workingViews: [{ kind: "working-plan", storeyId: sheet.id, denominator: 1 }],
@@ -90,6 +94,7 @@ export function fromSpaceLens(real: Project, space: DrawingSpace, next: Project)
     layoutDrawings: _drawings,
     // Master layouts change only by project steps; the real ones keep their title blocks.
     masterLayouts: _masters,
+    layouts: _layouts,
     hatchPatterns,
     ...shared
   } = next;

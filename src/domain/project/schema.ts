@@ -43,6 +43,8 @@ import {
   projectMasterLayouts,
   masterLayoutSchema,
   masterLayoutV48Schema,
+  layoutV49Schema,
+  projectInfoSchema,
   sheetSchema,
 } from "../views/layouts.ts";
 import {
@@ -662,13 +664,22 @@ export const projectV47Schema = projectV45Schema.extend({
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
 });
-// Built from v45 directly: one more extend level is too deep for the type checker.
 /** Schema 48: a master layout may carry a title block (docs/PLANKOPF.md, PK4). */
+export const projectV48Schema = projectV45Schema.extend({
+  schemaVersion: z.literal(48),
+  modelViews: z.array(anyModelViewSchema).optional(),
+  layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
+  masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+});
+// Built from v45 directly: one more extend level is too deep for the type checker.
+/** Schema 49: project information and layout fields for automatic texts (PLANKOPF.md, AT1). */
 const projectSchema = projectV45Schema.extend({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   modelViews: z.array(anyModelViewSchema).optional(),
   layoutDrawings: z.array(layoutDrawingSchema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutV48Schema).max(500).optional(),
+  layouts: z.array(layoutV49Schema).max(5000).optional(),
+  projectInfo: projectInfoSchema.optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -1165,6 +1176,10 @@ export function validateProject(
     );
   }
   validateWallAssemblies(project);
+  // A layout's drawing document exists (AT1).
+  for (const layout of project.layouts ?? [])
+    if (layout.documentId && !project.drawingDocuments?.some((d) => d.id === layout.documentId))
+      throw new Error(`Layout ${layout.name}: Abbild fehlt.`);
   // A master layout's title block exists (PK4).
   for (const master of project.masterLayouts ?? [])
     if (master.titleBlockId && !project.titleBlocks?.some((t) => t.id === master.titleBlockId))

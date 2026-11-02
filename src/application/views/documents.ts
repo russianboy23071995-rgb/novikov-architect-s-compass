@@ -148,6 +148,13 @@ export function changeDrawingDocument(
       }),
     });
   }
+  if (action.kind === "delete") {
+    const users = (current.layouts ?? []).filter((l) => l.documentId === target.id);
+    if (users.length)
+      throw new Error(
+        `Das Abbild wird von Layout ${users.map((l) => `„${l.name}“`).join(", ")} verwendet.`,
+      );
+  }
   if (action.kind === "delete")
     return validateLike(current, {
       ...current,
