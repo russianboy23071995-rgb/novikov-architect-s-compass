@@ -40,6 +40,7 @@ import {
   layoutLibraryProblem,
   layoutSchema,
   masterLayoutSchema,
+  sheetSchema,
 } from "../views/layouts.ts";
 import {
   modelViewSchema,
@@ -613,11 +614,29 @@ export const projectV43Schema = projectV42Schema.extend({
     .min(1),
 });
 /** Schema 44: layouts, layout folders and master layouts (docs/LAYOUTS.md, L13). */
-const projectSchema = projectV43Schema.extend({
-  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+export const projectV44Schema = projectV43Schema.extend({
+  schemaVersion: z.literal(44),
   layoutFolders: z.array(layoutFolderSchema).max(2000).optional(),
   layouts: z.array(layoutSchema).max(5000).optional(),
   masterLayouts: z.array(masterLayoutSchema).max(500).optional(),
+});
+/**
+ * Schema 45: title blocks (Planköpfe, docs/PLANKOPF.md, PK1). Each carries a storey-shaped
+ * drawing sheet at 1:1 that never belongs to the building: only lines, texts, hatches and
+ * dimensions. Its storey id is the title block id.
+ */
+const titleBlockSchema = z
+  .object({
+    id,
+    name: z.string().trim().min(1).max(120),
+    sheet: sheetSchema,
+    storey: projectV43Schema.shape.storeys.element,
+  })
+  .strict();
+export type TitleBlock = z.infer<typeof titleBlockSchema>;
+const projectSchema = projectV44Schema.extend({
+  schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
+  titleBlocks: z.array(titleBlockSchema).max(200).optional(),
 });
 type SingleProject = z.infer<typeof projectV23Schema>;
 export function validateProjectV18(value: unknown) {
@@ -997,7 +1016,7 @@ export function validateProject(
     ...(project.layoutFolders ?? []),
     ...(project.layouts ?? []),
     ...(project.masterLayouts ?? []),
-    ...project.storeys.flatMap((s) => [
+    ...[...project.storeys, ...(project.titleBlocks ?? []).map((t) => t.storey)].flatMap((s) => [
       s,
       ...s.walls,
       ...s.windows,
@@ -1069,6 +1088,41 @@ export function validateProject(
       index,
       scope.hatchPatterns.map((p) => p.id),
     );
+  }
+  for (const block of project.titleBlocks ?? []) {
+    const storey = block.storey;
+    if (storey.id !== block.id)
+      throw new Error(`Plankopf ${block.name}: Zeichenblatt passt nicht.`);
+    // Only drawing elements: nothing of the building, no image references.
+    const building = [
+      storey.walls,
+      storey.windows,
+      storey.doors,
+      storey.slabs,
+      storey.roofs,
+      storey.rooms,
+      storey.columns,
+      storey.stairs,
+      storey.references,
+      storey.wallJoins,
+      storey.wallTJunctions,
+    ];
+    if (building.some((list) => list?.length))
+      throw new Error(`Plankopf ${block.name}: nur Linien, Texte, Schraffuren und Maßketten.`);
+    const blockScope: SingleProject = {
+      ...shared,
+      schemaVersion: 23,
+      groundDatum: 0,
+      storey,
+      workingViews: [],
+      modelViews: [],
+      drawingDocuments: [],
+    };
+    const scope = validateStoreyScope(blockScope, blockScope, reuse);
+    for (const annotation of [...(storey.dimensions ?? []), ...(storey.texts ?? [])])
+      if (!project.layers.some((l) => l.id === annotation.layerId))
+        throw new Error("Unknown layer: " + annotation.layerId);
+    scope.hatchPatterns.forEach((p) => used.add(p.id));
   }
   validateWallAssemblies(project);
   const layoutProblem = layoutLibraryProblem(project);
