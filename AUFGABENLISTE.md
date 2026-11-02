@@ -11,7 +11,7 @@ So benutzt du sie:
 
 Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus dieser Liste wird beim Auftrag dort eingetragen.
 
-**Stand:** 02.11.2026 · main nach PR602
+**Stand:** 02.11.2026 · main nach PR603
 
 ## Deine Wünsche
 
@@ -37,6 +37,11 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L08 | Räume (Raumflächen, Raumstempel)                                                                                 |      | erledigt: R1–R4 (PR507–512) inkl. Tab-Auswahl; Archicad bestätigt; offen: WoFlV (N35)                                                                                                | §6 Abschnitt 2/4   |
 | L09 | Ungleiche Wandquerschnitte an Anschlüssen                                                                        |      | erledigt: U1 Fußhöhen an Ecke/T (PR574), U2 T-Stoß nach Vorrang im Grundriss (PR575); ungleiche Stärke/Höhe schon PR465/468; Vorrang in 3D/IFC und an Ecken später                                                                                                                                                                                | §6, §8             |
 | L10 | Geschoss ohne oberes Geschoss bzw. Einfügen zwischen gebundenen Geschossen (zurzeit gesperrt, Fachentscheidung)  |      | erledigt durch PR490 (Bindung ans eigene Geschoss)                                                                                                                                   | §9                 |
+| L40 | Werkzeug Deckendurchbruch (Öffnung in Decken, z. B. für Treppen und Schächte) |      | offen (Nutzerwunsch 02.11.2026) | |
+| L41 | Werkzeug Dachflächenfenster (Fenster in Dachflächen) |      | offen (Nutzerwunsch 02.11.2026) | |
+| L42 | Werkzeug Geländer |      | offen (Nutzerwunsch 02.11.2026) | |
+| L43 | Werkzeug Gelände (Geländemodell) |      | offen (Nutzerwunsch 02.11.2026) | |
+| L44 | Objektbibliothek (Möbel, Sanitär, eigene Objekte platzieren) |      | offen (Nutzerwunsch 02.11.2026) | |
 
 ## Pläne und Dokumentation
 
@@ -44,7 +49,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | --- | ------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | L11 | Schnitte und Ansichten aus dem Modell |      | Schnitt SC1–SC5 erledigt (PR537–541); Ansichten A1 erledigt (PR550: Werkzeug, vier Ansichten, Ordner); Bemaßung im Schnitt, Abbild offen    | §6 Abschnitt 3 |
 | L12 | Texte und assoziative Bemaßung        |      | Maßkette mit Bearbeiten und Darstellung (PR528–529, 533), Text T1–T2 mit Eingabefeld (PR530–532) erledigt; freie Schriften, AI-Ketten offen | §6 Abschnitt 3 |
-| L13 | Planlayout mit Plankopf, Papiergrößen |      | erster Teil erledigt: LA1–LA4 (PR576–579) leere Layouts, Masterlayouts, Ordner, Fenster, Tab; Plankopfplaner erledigt: PK1–PK3 (PR580–582), docs/PLANKOPF.md; Abbilder für Schnitte/Ansichten erledigt: AB1–AB2 (PR583–584), docs/ABBILDER.md; Layout-Zeichnen LZ1–LZ2 (PR586–587), Nacharbeiten PR585; Plankopf im Masterlayout PK4 (PR591), automatische Texte AT1–AT3 (PR592–594); Werkzeug Zeichnung erledigt: ZW1–ZW4 (PR595–596, PR600, PR602), docs/ZEICHNUNG.md; eigene Kamera je Ansicht KA1 (PR597); PDF-Export PDF1 (PR598), docs/PDF_EXPORT.md; Zoom und Leisten UI1 (PR599); Scrollbalken UI2 (PR601); docs/LAYOUTS.md                                                                                                                                       | §6 Abschnitt 3 |
+| L13 | Planlayout mit Plankopf, Papiergrößen |      | erster Teil erledigt: LA1–LA4 (PR576–579) leere Layouts, Masterlayouts, Ordner, Fenster, Tab; Plankopfplaner erledigt: PK1–PK3 (PR580–582), docs/PLANKOPF.md; Abbilder für Schnitte/Ansichten erledigt: AB1–AB2 (PR583–584), docs/ABBILDER.md; Layout-Zeichnen LZ1–LZ2 (PR586–587), Nacharbeiten PR585; Plankopf im Masterlayout PK4 (PR591), automatische Texte AT1–AT3 (PR592–594); Werkzeug Zeichnung erledigt: ZW1–ZW5 (PR595–596, PR600, PR602–603), docs/ZEICHNUNG.md; eigene Kamera je Ansicht KA1 (PR597); PDF-Export PDF1 (PR598), docs/PDF_EXPORT.md; Zoom und Leisten UI1 (PR599); Scrollbalken UI2 (PR601); docs/LAYOUTS.md                                                                                                                                       | §6 Abschnitt 3 |
 | L14 | Maßhaltiger PDF-Export und Druck      |      | offen                                                                                                                                       | §6 Abschnitt 3 |
 
 ## Auswertung
@@ -81,6 +86,7 @@ Verbindlich für die Umsetzung bleiben Masterplan und Register. Ein Wunsch aus d
 | L27 | Kontextaktionen und Tastenkürzel (u. a. D vs. Strg+D, Kopieren/Spiegeln) |      | teilweise: K1, K2 (PR513–514) | §8, Register |
 | L28 | Einstellungsübersicht (was gilt für Benutzer/Projekt/Ansicht)            |      | offen                         | §8           |
 | L29 | Wandbewegung x/y/Achse abgleichen                                        |      | zurückgestellt seit 24.10.    | §9           |
+| L45 | Funktion „Filter“ (kein Werkzeug): alles auswählen nach Eigenschaft, z. B. Farbe blau, Ebene Innenwand oder Linienart |      | offen (Nutzerwunsch 02.11.2026) | |
 
 ## Leistung
 
