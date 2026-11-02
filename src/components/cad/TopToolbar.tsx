@@ -75,6 +75,8 @@ type TopToolbarProps = {
   onElementList: () => void;
   /** Opens the Plankopfplaner (docs/PLANKOPF.md). */
   onTitleBlockPlanner: () => void;
+  /** Project information for automatic texts (docs/PLANKOPF.md, AT2). */
+  onProjectInfo: () => void;
   /** Modify menu (docs/KONTEXTMENUE.md): only Pipette and trimming, no delete or order. */
   onPipette: () => void;
   canPipette: boolean;
@@ -279,6 +281,7 @@ export function TopToolbar(props: TopToolbarProps) {
             <DropdownMenuItem onSelect={props.onRoomList}>Raumliste</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onElementList}>Bauteilliste</DropdownMenuItem>
             <DropdownMenuItem onSelect={props.onTitleBlockPlanner}>Plankopfplaner</DropdownMenuItem>
+            <DropdownMenuItem onSelect={props.onProjectInfo}>Projektinformationen</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="flex items-center gap-0.5 border-r border-border pr-2">

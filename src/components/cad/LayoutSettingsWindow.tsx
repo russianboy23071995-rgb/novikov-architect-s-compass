@@ -110,6 +110,11 @@ export function LayoutSettingsWindow({
   const [error, setError] = useState("");
   // Title block of a master layout (docs/PLANKOPF.md, PK4); "" is none.
   const [blockId, setBlockId] = useState(existingMaster?.titleBlockId ?? "");
+  // What the automatic texts read from a layout (AT2).
+  const [planNumber, setPlanNumber] = useState(existing?.planNumber ?? "");
+  const [index, setIndex] = useState(existing?.index ?? "");
+  const [documentId, setDocumentId] = useState(existing?.documentId ?? "");
+  const documents = project.drawingDocuments ?? [];
   const blocks = project.titleBlocks ?? [];
   const locked = target.kind === "layout" && follow;
   const shown = locked && master ? fieldsOf(master.sheet) : own;
@@ -143,9 +148,10 @@ export function LayoutSettingsWindow({
         const body =
           follow && master ? { masterId: master.id } : { masterId: null, sheet: sheetOf(own) };
         if (follow && !master) throw new Error("Bitte ein Masterlayout wählen.");
+        const texts = { planNumber, index, documentId: documentId || null };
         action = target.id
-          ? { kind: "layout-settings", id, name, folderId, ...body }
-          : { kind: "create-layout", id, name, folderId, ...body };
+          ? { kind: "layout-settings", id, name, folderId, ...body, ...texts }
+          : { kind: "create-layout", id, name, folderId, ...body, ...texts };
       }
       onApply(action);
       onClose();
@@ -170,7 +176,7 @@ export function LayoutSettingsWindow({
     }
   })();
   return (
-    <FloatingPanel centered open title={title} width={460} height={720} onClose={onClose}>
+    <FloatingPanel centered open title={title} width={460} height={860} onClose={onClose}>
       <form
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3 text-xs"
         onSubmit={(e) => {
@@ -227,6 +233,47 @@ export function LayoutSettingsWindow({
                 ))}
               </select>
             </label>
+            <fieldset className="space-y-2 rounded border p-2">
+              <legend className="px-1 font-semibold">Plankopf-Angaben</legend>
+              <div className="flex gap-2">
+                <label className="flex-1">
+                  Plannummer
+                  <input
+                    aria-label="Plannummer"
+                    maxLength={40}
+                    className={input}
+                    value={planNumber}
+                    onChange={(e) => setPlanNumber(e.target.value)}
+                  />
+                </label>
+                <label className="w-20">
+                  Index
+                  <input
+                    aria-label="Index"
+                    maxLength={20}
+                    className={input}
+                    value={index}
+                    onChange={(e) => setIndex(e.target.value)}
+                  />
+                </label>
+              </div>
+              <label>
+                Abbild (Zeichnungsname und Maßstab)
+                <select
+                  aria-label="Abbild"
+                  className={input}
+                  value={documentId}
+                  onChange={(e) => setDocumentId(e.target.value)}
+                >
+                  <option value="">Ohne</option>
+                  {documents.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} · 1:{d.denominator}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </fieldset>
             <fieldset className="space-y-2 rounded border p-2">
               <legend className="px-1 font-semibold">Masterlayout</legend>
               <label className="flex items-center gap-2">

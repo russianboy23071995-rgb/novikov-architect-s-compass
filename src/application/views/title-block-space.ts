@@ -131,6 +131,7 @@ const REAL_EVENTS = new Set<EditingEvent["type"]>([
   "document",
   "layout",
   "title-block",
+  "project-info",
   "working-storey",
 ]);
 

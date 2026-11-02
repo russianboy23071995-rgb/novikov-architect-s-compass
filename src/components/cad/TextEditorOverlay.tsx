@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Layer } from "@/domain/layers/model";
 import { TextFields, type TextDefaults } from "./TextFields";
+import { AUTO_TEXT_FIELDS, autoTextPlaceholder } from "@/application/views/auto-texts";
 
 /**
  * Typing field of the text tool at the clicked screen point (docs/TEXT.md): the text plus every
@@ -18,7 +19,10 @@ export function TextEditorOverlay({
   denominator,
   onCommit,
   onCancel,
+  autoTexts = false,
 }: {
+  /** On paper (Plankopf, layouts): offer the automatic texts (docs/PLANKOPF.md, AT2). */
+  autoTexts?: boolean;
   position: { x: number; y: number };
   content: string;
   onContent: (content: string) => void;
@@ -74,6 +78,38 @@ export function TextEditorOverlay({
         placeholder="Text eingeben"
         className="block w-full resize-none rounded border bg-background p-1 text-sm"
       />
+      {autoTexts && (
+        <select
+          aria-label="Automatischer Text einfügen"
+          className="h-7 w-full rounded border bg-background px-1 text-xs"
+          value=""
+          onChange={(e) => {
+            const key = e.target.value as (typeof AUTO_TEXT_FIELDS)[number]["key"];
+            if (!key) return;
+            // At the caret, or at the end; the caret then stands behind the placeholder.
+            const area = field.current;
+            const at = area ? area.selectionStart : content.length,
+              to = area ? area.selectionEnd : content.length;
+            const text = autoTextPlaceholder(key);
+            onContent(content.slice(0, at) + text + content.slice(to));
+            requestAnimationFrame(() => {
+              area?.focus();
+              area?.setSelectionRange(at + text.length, at + text.length);
+            });
+          }}
+        >
+          <option value="">Automatischer Text einfügen …</option>
+          {["Zeichnung", "Layout", "Projekt", "Datum"].map((group) => (
+            <optgroup key={group} label={group}>
+              {AUTO_TEXT_FIELDS.filter((f) => f.group === group).map((f) => (
+                <option key={f.key} value={f.key}>
+                  {f.key}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
       <div className="max-h-48 overflow-auto [&_label]:text-[11px] [&_section]:gap-2">
         <TextFields
           value={settings}

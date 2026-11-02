@@ -9,6 +9,8 @@ import { activateDrawnLayers } from "../views/drawing-layer-activation.ts";
 import { changeDrawingDocument, type DocumentAction } from "../views/documents.ts";
 import { changeLayouts, type LayoutAction } from "../views/layouts.ts";
 import { changeTitleBlocks, type TitleBlockAction } from "../views/title-blocks.ts";
+import { setProjectInfo } from "../views/auto-texts.ts";
+import type { ProjectInfo } from "../../domain/views/layouts.ts";
 import type { LayerVisibilityScope } from "../layers/visibility.ts";
 import { changeProjectScale } from "../views/project-scale.ts";
 import type { WorkingPlanIdentity } from "../../domain/views/scale.ts";
@@ -72,6 +74,7 @@ type ModelEditingEvent =
   | { type: "document"; base: Project; action: DocumentAction }
   | { type: "layout"; base: Project; action: LayoutAction }
   | { type: "title-block"; base: Project; action: TitleBlockAction }
+  | { type: "project-info"; base: Project; info: ProjectInfo }
   | { type: "view-scale"; view: WorkingPlanIdentity; denominator: number }
   | { type: "begin"; target: EditTarget; action: EditAction; index: number | null; anchor?: Point }
   | {
@@ -214,6 +217,16 @@ function reduceModelEdit(state: EditingState, event: ModelEditingEvent): Editing
           history: commitProject(
             state.history,
             changeLayouts(event.base, state.history.present, event.action),
+          ),
+          session: null,
+          error: "",
+        };
+      case "project-info":
+        return {
+          ...state,
+          history: commitProject(
+            state.history,
+            setProjectInfo(event.base, state.history.present, event.info),
           ),
           session: null,
           error: "",
