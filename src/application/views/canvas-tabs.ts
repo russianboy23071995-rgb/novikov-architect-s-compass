@@ -6,7 +6,8 @@
 export const CANVAS_VIEWS = ["plan", "3d"] as const;
 export type ModelView = (typeof CANVAS_VIEWS)[number];
 /** A layout or master layout opens as `layout:<id>` (docs/LAYOUTS.md, LA4). */
-export type CanvasView = ModelView | `section:${string}` | `layout:${string}`;
+export type CanvasView =
+  ModelView | `section:${string}` | `layout:${string}` | `titleblock:${string}`;
 
 export const CANVAS_VIEW_LABELS: Record<ModelView, string> = {
   plan: "Grundriss",
@@ -22,6 +23,10 @@ export const tabSectionId = (view: CanvasView): string | null =>
   view.startsWith("section:") ? view.slice("section:".length) : null;
 
 export const layoutTab = (id: string): CanvasView => `layout:${id}`;
+/** The Plankopfplaner of a title block (docs/PLANKOPF.md, PK2). */
+export const titleBlockTab = (id: string): CanvasView => `titleblock:${id}`;
+export const tabTitleBlockId = (view: CanvasView): string | null =>
+  view.startsWith("titleblock:") ? view.slice("titleblock:".length) : null;
 /** The layout or master layout id of a layout tab, else null. */
 export const tabLayoutId = (view: CanvasView): string | null =>
   view.startsWith("layout:") ? view.slice("layout:".length) : null;
@@ -35,6 +40,9 @@ export function canvasTabLabel(
 ): string {
   const layoutId = tabLayoutId(view);
   if (layoutId !== null) return layouts.find((l) => l.id === layoutId)?.name ?? "Layout";
+  const blockId = tabTitleBlockId(view);
+  if (blockId !== null)
+    return `Plankopfplaner – ${layouts.find((l) => l.id === blockId)?.name ?? "Plankopf"}`;
   const sectionId = tabSectionId(view);
   if (sectionId !== null) return sections.find((s) => s.id === sectionId)?.name ?? "Schnitt";
   return view === "plan" ? `${CANVAS_VIEW_LABELS.plan} ${storeyName}` : CANVAS_VIEW_LABELS["3d"];
@@ -52,7 +60,7 @@ export const existingCanvasTabs = (
 ): CanvasView[] =>
   tabs.filter((view) => {
     const id = tabSectionId(view),
-      layout = tabLayoutId(view);
+      layout = tabLayoutId(view) ?? tabTitleBlockId(view);
     return layout !== null ? layoutIds.has(layout) : id === null || sectionIds.has(id);
   });
 

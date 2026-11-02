@@ -19,3 +19,16 @@ Reihenfolge: PK1 Datenmodell → PK2 Zeichenraum mit Werkzeug-Umleitung → PK3 
 - Code: `titleBlocks` in `src/domain/project/schema.ts` (Schema und Prüfung), `src/application/views/title-blocks.ts`, Migration in `src/interop/project-file/load.ts`.
 
 Nachweis PK1: 1499 Tests grün (3 neu in `src/application/views/title-blocks.test.ts`: anlegen mit Unterlage des Masterlayouts, eindeutige Namen, umbenennen, Unterlage, löschen, Dateirundlauf; Linie im Zeichenblatt gültig und nicht im Gebäude, Wand abgelehnt, doppelte ID abgelehnt, unbekannte Ebene abgelehnt; Schema 44 → 45, geschmuggelte Planköpfe abgelehnt), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert (`e42aa36e…`). Noch keine Oberfläche (PK2, PK3).
+
+## PK2 – Zeichenraum mit Werkzeug-Umleitung
+
+- **Umleitung (Lens):** Ist der Tab „Plankopfplaner – Name“ aktiv, sieht die Zeichenfläche ein Projekt, dessen einziges Geschoss das Zeichenblatt des Plankopfs ist, im Maßstab **1:1**. Alle Zeichen- und Bearbeitungsschritte der vorhandenen Werkzeuge laufen darüber; jede Änderung wird als **ein Rückgängig-Schritt** in den Plankopf des echten Projekts zurückgeschrieben. Gemeinsame Einstellungen (Ebenen, Sichtbarkeit, Stifte, Schraffurmuster) wirken wie gewohnt. Das Gebäude, seine Geschosse und sein Maßstab bleiben unberührt.
+- Projektweite Schritte – Rückgängig/Wiederholen, Laden, Geschosse, Abbilder, Layouts – wirken immer auf das echte Projekt. Verschwindet der Plankopf (z. B. Rückgängig seines Anlegens), schließt sein Zeichenraum.
+- **Werkzeuge im Plankopfplaner:** Auswahl, Linie, Text, Schraffur, Maßkette, Messen. Wand, Tür, Fenster, Decke, Dach, Stütze, Treppe, Raum, Schnitt und Ansicht sind ausgegraut; ein Tastenkürzel dafür bringt einen Hinweis.
+- **Aufruf (vorläufig):** **Organisation → Plankopfplaner** öffnet den zuletzt bearbeiteten Plankopf, sonst den ersten, ohne Plankopf wird „Plankopf“ angelegt und geöffnet. Der Tab wechselt wie die anderen; ein anderer Tab oder ein Geschoss im Navigator verlässt den Zeichenraum.
+- Speichern, IFC-Export, Autosicherung, Navigator, Raum- und Bauteilliste arbeiten immer mit dem echten Projekt.
+- Code: `src/application/views/title-block-space.ts` (`titleBlockLens`, `fromTitleBlockLens`, `spaceEditingReducer`), `useProjectEditing.ts`, Tab-Art `titleblock:<id>` in `canvas-tabs.ts`, `CadWorkspace.tsx` (Zeichenraum, Werkzeugsperre, Menü), `ToolRail.tsx` (`allowed`), `TopToolbar.tsx`.
+
+Nachweis PK2: 1502 Tests grün (3 neu in `src/application/views/title-block-space.test.ts`: Lens nur mit dem Zeichenblatt, 1:1 und stabil; Linie landet im Plankopf, Gebäude und Maßstab unverändert, Rückgängig nimmt sie heraus, Verlassen des Raums; Rückgängig des Anlegens schließt den Raum), Typprüfung beider Projekte, Architektur, Lint, Formatierung sauber, 14-Modell-Prüfsumme unverändert. Browser: Organisation → Plankopfplaner legt „Plankopf“ an und öffnet den Tab (Maßstab 1:1, Gebäudewerkzeuge ausgegraut); Linie gezeichnet; im Tab „Grundriss Erdgeschoss“ nur die Wand, keine Linie; zurück im Plankopf ist die Linie da; Text „Bauvorhaben“ gesetzt und mit Rückgängig entfernt, der Plankopf-Tab bleibt aktiv.
+
+Grenze PK2: Die Ansicht ist noch nicht auf Papiergröße eingepasst und es gibt noch keine Unterlage (PK3).
