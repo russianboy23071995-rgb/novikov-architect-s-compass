@@ -372,6 +372,17 @@ export function CadWorkspace({
     };
   })();
   const spaceTools = space ? (space.kind === "layout" ? LAYOUT_TOOLS : TITLE_BLOCK_TOOLS) : null;
+  // Names the open view: its viewports are rebuilt on a change and keep a camera each (KA1).
+  const viewKey =
+    mode === "3D"
+      ? "building-3d"
+      : (activeDocumentId ??
+        (activeBlock
+          ? `${activeBlock.id}:${activeBlock.sheet.format}:${activeBlock.sheet.orientation}`
+          : layoutSpace
+            ? `layout:${layoutSpace.id}:${JSON.stringify(sheetSize(layoutSpace.sheet))}`
+            : // One plan camera for every storey: zoom and position stay.
+              "plan"));
   /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
   const drawingSource = (documentId: string | null | undefined) => {
     const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -3323,17 +3334,8 @@ export function CadWorkspace({
                           />
                         ) : undefined
                       }
-                      key={
-                        mode === "3D"
-                          ? "building-3d"
-                          : (activeDocumentId ??
-                            (activeBlock
-                              ? `${activeBlock.id}:${activeBlock.sheet.format}:${activeBlock.sheet.orientation}`
-                              : layoutSpace
-                                ? `layout:${layoutSpace.id}:${JSON.stringify(sheetSize(layoutSpace.sheet))}`
-                                : // One plan camera for every storey: zoom and position stay.
-                                  "plan"))
-                      }
+                      key={viewKey}
+                      cameraKey={viewKey}
                       backdrop={space ? spaceBackdrop(realProject, space) : undefined}
                       underlay={
                         activeBlock
