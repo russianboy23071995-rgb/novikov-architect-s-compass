@@ -219,7 +219,8 @@ import { changeLayouts, layoutUnderlay } from "@/application/views/layouts";
 import { spaceBackdrop, spaceLens } from "@/application/views/title-block-space";
 import { LayoutBar } from "./LayoutBar";
 import type { PlacedDrawingView } from "./BimPlan";
-import { placeDrawing } from "@/application/drawings/actions";
+import { placeDrawing, setDrawing } from "@/application/drawings/actions";
+import { DrawingElementFields, DrawingToolFields } from "./DrawingFields";
 import { documentSource } from "@/application/drawings/sources";
 import { frameMask, maskOnPaper, type PlacedDrawing } from "@/domain/elements/drawing/model";
 import { changeTitleBlocks, titleBlockUnderlay } from "@/application/views/title-blocks";
@@ -303,8 +304,6 @@ export function CadWorkspace({
   const [activeLayoutId, setActiveLayoutId] = useState<string | null>(null);
   const [layoutWindow, setLayoutWindow] = useState<LayoutDraftTarget | null>(null);
   const [projectInfoOpen, setProjectInfoOpen] = useState(false);
-  // Drawing document the tool „Zeichnung“ places (docs/ZEICHNUNG.md, ZW2).
-  const [drawingDocumentId, setDrawingDocumentId] = useState<string | null>(null);
   const [lastTitleBlockId, setLastTitleBlockId] = useState<string | null>(null);
   // A section or elevation document open in its section tab (docs/ABBILDER.md, AB2).
   const [sectionDocumentId, setSectionDocumentId] = useState<string | null>(null);
@@ -383,6 +382,26 @@ export function CadWorkspace({
             ? `layout:${layoutSpace.id}:${JSON.stringify(sheetSize(layoutSpace.sheet))}`
             : // One plan camera for every storey: zoom and position stay.
               "plan"));
+  /** Fields of one placed drawing (ZW3): bar and settings window share them. */
+  const drawingElementFields = (id: string) => {
+    const placed = storeyOf(project).drawings?.find((d) => d.id === id);
+    const source = placed && drawingSource(placed.documentId);
+    if (!placed || !source) return null;
+    const limit = frameMask(source.framing, source.document.denominator);
+    return (
+      <DrawingElementFields
+        key={`${id}:${JSON.stringify(placed.mask)}`}
+        document={`${source.document.name} · 1:${source.document.denominator}`}
+        layers={project.layers}
+        layerId={placed.layerId}
+        mask={placed.mask}
+        limit={limit}
+        onChange={(change) =>
+          dispatchEditing({ type: "project", project: setDrawing(project, id, change, limit) })
+        }
+      />
+    );
+  };
   /** A plan document with a frame, ready to place (sections and elevations follow, ZW4). */
   const drawingSource = (documentId: string | null | undefined) => {
     const document = realProject.drawingDocuments?.find((d) => d.id === documentId);
@@ -401,7 +420,8 @@ export function CadWorkspace({
         id: d.id,
         documentId: d.documentId,
         selectable,
-        corners: maskOnPaper(d),
+        mask: d.mask,
+        limit: frameMask(source.framing, source.document.denominator),
         position: d.position,
         center: source.framing.center,
         denominator: source.document.denominator,
@@ -1133,6 +1153,7 @@ export function CadWorkspace({
     slab: "Decke",
     hatch: "Schraffur",
     line: "Linie",
+    drawing: "Zeichnung",
   };
   const openToolDefaults = (owner: ToolId) => {
     if (owner === "roof" || owner === "room" || SETTINGS_TOOLS[owner])
@@ -1342,6 +1363,17 @@ export function CadWorkspace({
           </>
         )}
       </section>
+    ) : owner === "drawing" ? (
+      <DrawingToolFields
+        documents={(realProject.drawingDocuments ?? []).map((doc) => ({
+          id: doc.id,
+          label: `${doc.name} · 1:${doc.denominator}`,
+          placeable: !!drawingSource(doc.id),
+        }))}
+        layers={project.layers}
+        value={toolDefaults.drawing}
+        onChange={toolDefaults.setDrawing}
+      />
     ) : owner === "line" ? (
       <section aria-label="Linienwerkzeug" className="flex flex-wrap items-end gap-3">
         <label className="text-xs">
@@ -1832,7 +1864,7 @@ export function CadWorkspace({
     }
     // Tool „Zeichnung“ (docs/ZEICHNUNG.md, ZW2): the click sets the drawing's centre.
     if (tool === "drawing") {
-      const source = drawingSource(drawingDocumentId);
+      const source = drawingSource(toolDefaults.drawing.documentId);
       if (!source) return showNotice("Zuerst im Werkzeug ein Abbild wählen.");
       try {
         // The first drawing gives the title block its drawing name and scale (decision 3).
@@ -1857,6 +1889,7 @@ export function CadWorkspace({
             position: { ...point },
             frame: source.framing,
             denominator: source.document.denominator,
+            layerId: toolDefaults.drawing.layerId,
           }),
         });
         showNotice(`Zeichnung „${source.document.name}“ platziert`);
@@ -2560,23 +2593,26 @@ export function CadWorkspace({
                 {
                   id: "element",
                   label: ELEMENT_KINDS[target.kind].label,
-                  content: (
-                    <BimInspector
-                      renovationField={false}
-                      key={propertyFormKey(project, target)}
-                      project={project}
-                      selection={target}
-                      onChange={changeProject}
-                      onWallOffset={(base, wallId, offset) =>
-                        dispatchEditing({
-                          type: "wall-offset",
-                          base,
-                          selection: target,
-                          request: { projectId: base.id, wallId, offset },
-                        })
-                      }
-                    />
-                  ),
+                  content:
+                    target.kind === "drawing" ? (
+                      drawingElementFields(target.id)
+                    ) : (
+                      <BimInspector
+                        renovationField={false}
+                        key={propertyFormKey(project, target)}
+                        project={project}
+                        selection={target}
+                        onChange={changeProject}
+                        onWallOffset={(base, wallId, offset) =>
+                          dispatchEditing({
+                            type: "wall-offset",
+                            base,
+                            selection: target,
+                            request: { projectId: base.id, wallId, offset },
+                          })
+                        }
+                      />
+                    ),
                 },
                 ...(target.kind === "window" || target.kind === "door"
                   ? [
@@ -3494,15 +3530,30 @@ export function CadWorkspace({
                             : undefined
                       }
                       placedDrawings={placedDrawingViews}
+                      onDrawingMask={(id, mask) => {
+                        const view = placedDrawingViews?.find((v) => v.id === id);
+                        if (!view) return;
+                        try {
+                          dispatchEditing({
+                            type: "project",
+                            project: setDrawing(project, id, { mask }, view.limit),
+                          });
+                          setModelError("");
+                        } catch (error) {
+                          setModelError(
+                            error instanceof Error ? error.message : "Maske nicht möglich.",
+                          );
+                        }
+                      }}
                       draftPattern={
                         tool === "hatch" ? toolDefaults.hatch.patternDefinition : undefined
                       }
                       draftPatternRotation={toolDefaults.hatch.patternRotation}
                       draftPatternSize={toolDefaults.hatch.patternSize}
                       draftContour={
-                        tool === "drawing" && drawingSource(drawingDocumentId)
+                        tool === "drawing" && drawingSource(toolDefaults.drawing.documentId)
                           ? (point) => {
-                              const source = drawingSource(drawingDocumentId)!;
+                              const source = drawingSource(toolDefaults.drawing.documentId)!;
                               return maskOnPaper({
                                 position: point,
                                 mask: frameMask(source.framing, source.document.denominator),
@@ -3910,30 +3961,7 @@ export function CadWorkspace({
                   {measurement.error && <span role="alert">{measurement.error}</span>}
                 </div>
               ) : tool === "drawing" ? (
-                <label className="flex items-center gap-2 text-xs">
-                  Abbild
-                  <select
-                    aria-label="Abbild für die Zeichnung"
-                    className="h-8 rounded border bg-background px-2"
-                    value={drawingDocumentId ?? ""}
-                    onChange={(e) => setDrawingDocumentId(e.target.value || null)}
-                  >
-                    <option value="">Abbild wählen …</option>
-                    {(realProject.drawingDocuments ?? []).map((d) => {
-                      const placeable = !!drawingSource(d.id);
-                      return (
-                        <option key={d.id} value={d.id} disabled={!placeable}>
-                          {d.name} · 1:{d.denominator}
-                          {placeable ? "" : " (folgt)"}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <span className="text-muted-foreground">
-                    Klick setzt die Mitte des Ausschnitts aufs Papier; die Größe folgt aus dem
-                    Maßstab.
-                  </span>
-                </label>
+                toolFields("drawing")
               ) : tool === "wall" ||
                 tool === "column" ||
                 tool === "stair" ||
@@ -3973,6 +4001,8 @@ export function CadWorkspace({
                 />
               ) : (tool === "slab" || tool === "hatch" || tool === "line") && mode === "2D" ? (
                 toolFields(tool)
+              ) : selection?.kind === "drawing" && selections.length === 1 ? (
+                drawingElementFields(selection.id)
               ) : selections.length > 1 ? (
                 <p className="p-3 text-xs text-muted-foreground" role="status">
                   {selections.length} Elemente ausgewählt.{" "}

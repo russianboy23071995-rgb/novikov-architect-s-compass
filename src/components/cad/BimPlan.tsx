@@ -37,6 +37,14 @@ import {
 } from "@/application/drawing/path-closure";
 import type { ElementKind } from "../../application/selection/target.ts";
 import { allStoreyElements } from "@/domain/elements/registry";
+import {
+  dragMaskEdge,
+  MASK_EDGES,
+  maskEdgeGrip,
+  maskOnPaper,
+  type DrawingMask,
+  type MaskEdge,
+} from "@/domain/elements/drawing/model";
 import { storeyOf } from "../../domain/storeys/access.ts";
 import { columnOutline } from "../../domain/elements/column/model.ts";
 import type { WorkingViewContext } from "@/application/views/working-context";
@@ -116,13 +124,15 @@ type PlanRect = { x0: number; y0: number; x1: number; y1: number };
 /**
  * A placed drawing as the plan draws it: the document's plan (`source`, its storey as the
  * working storey) scaled by 1/denominator, its frame centre on `position`, cropped to the
- * mask `corners` on the paper. Only the layout's own drawings are `selectable`.
+ * `mask` (relative to `position`). Only the layout's own drawings are `selectable`; their mask
+ * edges drag within `limit`, the document's whole frame (ZW3).
  */
 export type PlacedDrawingView = {
   id: string;
   documentId: string;
   selectable: boolean;
-  corners: readonly Point[];
+  mask: DrawingMask;
+  limit: DrawingMask;
   position: Point;
   center: Point;
   denominator: number;
@@ -244,6 +254,8 @@ export type BimPlanProps = {
   selectedSectionId?: string | null | undefined;
   /** Click on a section line selects it; null when the click selects nothing. */
   onSectionSelect?: ((id: string | null) => void) | undefined;
+  /** A mask edge grip of a placed drawing was dragged: its new mask (ZW3, one undo step). */
+  onDrawingMask?: ((id: string, mask: DrawingMask) => void) | undefined;
   /** A grip was dragged: the new line of the section (one undo step). */
   onSectionLine?: ((id: string, line: { start: Point; end: Point }) => void) | undefined;
   /** Section being drawn: start, then end; the pointer gives the end, then the viewing side. */
@@ -343,6 +355,7 @@ export function BimPlan({
   selectedSectionId,
   onSectionSelect,
   onSectionLine,
+  onDrawingMask,
   selectionAnchor,
   onLineLength,
   tracing,
@@ -416,6 +429,23 @@ export function BimPlan({
     pointerId: number;
     line: { start: Point; end: Point };
   } | null>(null);
+  // Dragging a mask edge of a placed drawing (ZW3); the preview replaces the stored mask.
+  const maskDrag = useRef<{
+    id: string;
+    edge: MaskEdge;
+    pointerId: number;
+    position: Point;
+    mask: DrawingMask;
+    limit: DrawingMask;
+  } | null>(null);
+  const [maskPreview, setMaskPreview] = useState<{ id: string; mask: DrawingMask } | null>(null);
+  const endMaskDrag = () => {
+    const drag = maskDrag.current;
+    maskDrag.current = null;
+    setMaskPreview(null);
+    if (drag && svg.current?.hasPointerCapture(drag.pointerId))
+      svg.current.releasePointerCapture(drag.pointerId);
+  };
   const [sectionPreview, setSectionPreview] = useState<{
     id: string;
     start: Point;
@@ -1084,6 +1114,21 @@ export function BimPlan({
         editDown.current = editSession ?? null;
       }}
       onPointerUp={(event) => {
+        const masked = maskDrag.current;
+        if (masked?.pointerId === event.pointerId) {
+          const next = maskPreview?.id === masked.id ? maskPreview.mask : null;
+          gripClick.current = true;
+          endMaskDrag();
+          if (
+            next &&
+            (next.x0 !== masked.mask.x0 ||
+              next.x1 !== masked.mask.x1 ||
+              next.y0 !== masked.mask.y0 ||
+              next.y1 !== masked.mask.y1)
+          )
+            onDrawingMask?.(masked.id, next);
+          return;
+        }
         const dragged = sectionDrag.current;
         if (dragged?.pointerId === event.pointerId) {
           sectionDrag.current = null;
@@ -1127,6 +1172,10 @@ export function BimPlan({
       }}
       onLostPointerCapture={() => {
         marquee.cancel();
+        if (maskDrag.current) {
+          maskDrag.current = null;
+          setMaskPreview(null);
+        }
         if (sectionDrag.current) {
           sectionDrag.current = null;
           setSectionPreview(null);
@@ -1139,6 +1188,7 @@ export function BimPlan({
       }}
       onPointerCancel={() => {
         marquee.cancel();
+        if (maskDrag.current) endMaskDrag();
         if (sectionDrag.current) {
           sectionDrag.current = null;
           setSectionPreview(null);
@@ -1208,6 +1258,22 @@ export function BimPlan({
           onCamera(
             panPlan(active.camera, { x: event.clientX - active.x, y: event.clientY - active.y }),
           );
+          return;
+        }
+        const maskGrip = maskDrag.current;
+        if (maskGrip?.pointerId === event.pointerId) {
+          const raw = rawPoint(event);
+          if (!raw) return;
+          // Snaps like drawing; the edge moves only along its normal.
+          const to = resolvePointer(raw, false).point;
+          const value =
+            maskGrip.edge === "left" || maskGrip.edge === "right"
+              ? to.x - maskGrip.position.x
+              : to.y - maskGrip.position.y;
+          setMaskPreview({
+            id: maskGrip.id,
+            mask: dragMaskEdge(maskGrip.mask, maskGrip.edge, value, maskGrip.limit),
+          });
           return;
         }
         const sectionGrip = sectionDrag.current;
@@ -1332,6 +1398,8 @@ export function BimPlan({
         if (selecting) return;
         if (event.key === "Escape") {
           marquee.cancel();
+          // Escape drops a mask drag; the stored mask stays (ZW3).
+          if (maskDrag.current) endMaskDrag();
           navigation.current = null;
           setHover(null);
         }
@@ -1425,7 +1493,11 @@ export function BimPlan({
         {placedDrawings?.map((view) => {
           const scene = placedScene(view);
           const clipId = `${gridId}-zw-${view.id.replace(/[^a-zA-Z0-9-]/g, "")}`;
-          const points = view.corners.map((p) => `${p.x},${-p.y}`).join(" ");
+          const mask = maskPreview?.id === view.id ? maskPreview.mask : view.mask;
+          const points = maskOnPaper({ position: view.position, mask })
+            .map((p) => `${p.x},${-p.y}`)
+            .join(" ");
+          const grips = view.selectable && selectedIds.has(view.id) && !!onDrawingMask;
           return (
             <g key={view.id} aria-label={`Zeichnung ${view.id}`}>
               <defs>
@@ -1476,6 +1548,59 @@ export function BimPlan({
                 strokeDasharray="4 3"
                 vectorEffect="non-scaling-stroke"
               />
+              {/* Four edge grips crop the drawing; position and size stay (ZW3). */}
+              {grips &&
+                MASK_EDGES.map((edge) => {
+                  const grip = maskEdgeGrip({ position: view.position, mask }, edge);
+                  const side = 9 / camera.pixelsPerMetre;
+                  const label = { left: "links", right: "rechts", bottom: "unten", top: "oben" }[
+                    edge
+                  ];
+                  return (
+                    <rect
+                      key={edge}
+                      data-mask-grip={edge}
+                      x={grip.x - side / 2}
+                      y={-grip.y - side / 2}
+                      width={side}
+                      height={side}
+                      fill="white"
+                      stroke="#0284c7"
+                      strokeWidth={2}
+                      vectorEffect="non-scaling-stroke"
+                      role="button"
+                      aria-label={`Maskenrand ${label} ziehen`}
+                      className={
+                        edge === "left" || edge === "right"
+                          ? "outline-none cursor-ew-resize"
+                          : "outline-none cursor-ns-resize"
+                      }
+                      onPointerDown={(event) => {
+                        if (event.button !== 0 || pan || !interactive || !svg.current) return;
+                        event.preventDefault();
+                        event.stopPropagation();
+                        svg.current.focus();
+                        gripClick.current = false;
+                        navigationClick.current = false;
+                        maskDrag.current = {
+                          id: view.id,
+                          edge,
+                          pointerId: event.pointerId,
+                          position: view.position,
+                          mask: view.mask,
+                          limit: view.limit,
+                        };
+                        svg.current.setPointerCapture(event.pointerId);
+                      }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
+                      <title>Ziehen schneidet die Zeichnung an diesem Rand zu</title>
+                    </rect>
+                  );
+                })}
             </g>
           );
         })}
